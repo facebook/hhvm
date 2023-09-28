@@ -124,7 +124,6 @@ McRouteHandleProvider<RouterInfo>::createAsynclogRoute(
   if (!proxy_.router().opts().asynclog_disable) {
     target = makeAsynclogRoute<RouterInfo>(std::move(target), asynclogName);
   }
-  asyncLogRoutes_.emplace(std::move(asynclogName), target);
   return target;
 }
 
@@ -552,8 +551,8 @@ McRouteHandleProvider<RouterInfo>::createSRRoute(
   if (auto* jNeedAsynclog = json.get_ptr("asynclog")) {
     needAsynclog = parseBool(*jNeedAsynclog, "asynclog");
   }
+  folly::StringPiece asynclogName;
   if (needAsynclog) {
-    folly::StringPiece asynclogName;
     if (auto jAsynclogName = json.get_ptr("asynclog_name")) {
       asynclogName = parseString(*jAsynclogName, "asynclog_name");
     } else if (auto jServiceName = json.get_ptr("service_name")) {
@@ -572,6 +571,10 @@ McRouteHandleProvider<RouterInfo>::createSRRoute(
         factory, json, {std::move(route)}, proxy_, *extraProvider_)[0]);
   }
   route = bucketize(std::move(route), json);
+
+  if (needAsynclog) {
+    asyncLogRoutes_.emplace(asynclogName.toString(), route);
+  }
 
   if (auto jSRRouteName = json.get_ptr("service_name")) {
     auto srRouteName = parseString(*jSRRouteName, "service_name");
@@ -710,6 +713,9 @@ McRouteHandleProvider<RouterInfo>::makePoolRoute(
         auto poolId = parseString(*jPoolId, "pool_id");
         tierRoutes_.emplace(poolId, poolRoute);
       }
+    }
+    if (needAsynclog) {
+      asyncLogRoutes_.emplace(asynclogName.toString(), route);
     }
     return route;
   } catch (const std::exception& e) {

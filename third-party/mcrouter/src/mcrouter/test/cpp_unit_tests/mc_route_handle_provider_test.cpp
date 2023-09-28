@@ -56,6 +56,33 @@ const char* const kPoolRoute =
    "hash": { "hash_func": "Crc32" }
  })";
 
+const char* const kBucketizedSRRoute =
+    R"({
+   "type": "SRRoute",
+   "service_name": "twmemcache.shadow.bucketization-test",
+   "server_timeout": 200,
+   "asynclog_name": "test.asynclog",
+   "axonlog": false,
+   "bucketize": true,
+   "total_buckets": 1000,
+   "bucketize_until": 1000,
+   "bucketization_keyspace": "tst"
+})";
+
+const char* const kBucketizedPoolRoute =
+    R"({
+   "type": "PoolRoute",
+   "pool": { "name": "mock", "servers": [ ] },
+   "pool_id": "twmemcache.shadow.bucketization-test",
+   "hash": "WeightedCh3",
+   "asynclog_name": "test.asynclog",
+   "axonlog": false,
+   "bucketize": true,
+   "total_buckets": 1000,
+   "bucketize_until": 1000,
+   "bucketization_keyspace": "tst"
+})";
+
 struct TestSetup {
  public:
   TestSetup()
@@ -85,6 +112,7 @@ struct TestSetup {
 
   static McrouterOptions getOpts() {
     auto opts = defaultTestOptions();
+    opts.enable_service_router = true;
     opts.config = std::string("file:") + kMemcacheConfig;
     return opts;
   }
@@ -121,4 +149,32 @@ TEST(McRouteHandleProvider, pool_route) {
   auto asynclogRoutes = setup.provider().releaseAsyncLogRoutes();
   EXPECT_EQ(1, asynclogRoutes.size());
   EXPECT_EQ("asynclog:mock", asynclogRoutes["mock"]->routeName());
+}
+
+TEST(McRouteHandleProvider, bucketized_sr_route_and_mcreplay_asynclogRoutes) {
+  TestSetup setup;
+  auto rh = setup.getRoute(kBucketizedSRRoute);
+  EXPECT_TRUE(rh != nullptr);
+  EXPECT_EQ(
+      "bucketize|total_buckets=1000|bucketize_until=1000|salt=|bucketization_keyspace=tst",
+      rh->routeName());
+  auto asynclogRoutes = setup.provider().releaseAsyncLogRoutes();
+  EXPECT_EQ(1, asynclogRoutes.size());
+  EXPECT_EQ(
+      "bucketize|total_buckets=1000|bucketize_until=1000|salt=|bucketization_keyspace=tst",
+      asynclogRoutes["test.asynclog"]->routeName());
+}
+
+TEST(McRouteHandleProvider, bucketized_pool_route_and_mcreplay_asynclogRoutes) {
+  TestSetup setup;
+  auto rh = setup.getRoute(kBucketizedPoolRoute);
+  EXPECT_TRUE(rh != nullptr);
+  EXPECT_EQ(
+      "bucketize|total_buckets=1000|bucketize_until=1000|salt=|bucketization_keyspace=tst",
+      rh->routeName());
+  auto asynclogRoutes = setup.provider().releaseAsyncLogRoutes();
+  EXPECT_EQ(1, asynclogRoutes.size());
+  EXPECT_EQ(
+      "bucketize|total_buckets=1000|bucketize_until=1000|salt=|bucketization_keyspace=tst",
+      asynclogRoutes["test.asynclog"]->routeName());
 }

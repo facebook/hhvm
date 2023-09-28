@@ -172,6 +172,11 @@ assemble_imm_for_enum!(
     ]
 );
 
+assemble_imm_for_enum!(
+    hhbc::ContCheckOp,
+    [ContCheckOp::IgnoreStarted, ContCheckOp::CheckStarted,]
+);
+
 pub(crate) trait AssembleImm<'arena, T> {
     fn assemble_imm(&mut self, alloc: &'arena Bump, decl_map: &DeclMap<'arena>) -> Result<T>;
 }
@@ -215,12 +220,6 @@ impl<'arena> AssembleImm<'arena, hhbc::ConstName<'arena>> for Lexer<'_> {
         Ok(hhbc::ConstName::new(
             assemble::assemble_unescaped_unquoted_str(alloc, self)?,
         ))
-    }
-}
-
-impl AssembleImm<'_, hhbc::ContCheckOp> for Lexer<'_> {
-    fn assemble_imm(&mut self, _: &'_ Bump, _: &DeclMap<'_>) -> Result<hhbc::ContCheckOp> {
-        todo!();
     }
 }
 

@@ -223,16 +223,10 @@ SSATmp* genCalleeFP(IRGS& env, const Func* callee) {
 void beginInlining(IRGS& env,
                    SrcKey entry,
                    SSATmp* ctx,
-                   Offset callBcOffset,
                    InlineReturnTarget returnTarget,
                    int cost,
                    SSATmp* calleeFP) {
   assertx(entry.funcEntry());
-  assertx(callBcOffset >= 0 && "callBcOffset before beginning of caller");
-  // curFunc is null when called from conjureBeginInlining
-  assertx((!curFunc(env) ||
-          callBcOffset < curFunc(env)->bclen()) &&
-         "callBcOffset past end of caller");
   auto const callee = entry.func();
 
   FTRACE(1, "[[[ begin inlining: {}\n", callee->fullName()->data());
@@ -313,14 +307,6 @@ void beginInlining(IRGS& env,
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  // Inline return stub doesn't support async eager return.
-  StFrameMetaData meta;
-  meta.callBCOff = callBcOffset;
-  meta.isInlined = true;
-  meta.asyncEagerReturn = false;
-
-  gen(env, StFrameMeta, meta, calleeFP);
-  gen(env, StFrameFunc, FuncData { callee }, calleeFP);
   if (!(ctx->type() <= TNullptr)) gen(env, StFrameCtx, fp(env), ctx);
 
   for (auto i = 0; i < numTotalInputs; ++i) {
@@ -370,7 +356,7 @@ void conjureBeginInlining(IRGS& env,
     ? conjure(Type::ExactObj(callee->implCls()))
     : conjure(thisType);
 
-  beginInlining(env, entry, ctx, 0 /* callBcOffset */, returnTarget,
+  beginInlining(env, entry, ctx, returnTarget,
                 9 /* cost */, genCalleeFP(env, callee));
 }
 
@@ -658,9 +644,20 @@ bool spillInlinedFrames(IRGS& env) {
   bool spilled = false;
   for (size_t depth = 0; depth < env.irb->fs().inlineDepth(); depth++) {
     auto const parentFP = env.irb->fs()[depth].fp();
-    auto const fp = env.irb->fs()[depth + 1].fp();
     if (parentFP == fixupFP) spilled = true;
     if (spilled) {
+      auto const fp = env.irb->fs()[depth + 1].fp();
+
+      // Inline return stub doesn't support async eager return.
+      StFrameMetaData meta;
+      meta.callBCOff = fp->inst()->marker().sk().offset();
+      meta.isInlined = true;
+      meta.asyncEagerReturn = false;
+      gen(env, StFrameMeta, meta, fp);
+
+      auto const func = env.irb->fs()[depth + 1].curFunc;
+      gen(env, StFrameFunc, FuncData { func }, fp);
+
       gen(env, InlineCall, fp, parentFP);
       updateMarker(env);
     }

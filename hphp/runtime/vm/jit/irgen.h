@@ -222,7 +222,6 @@ uint16_t inlineDepth(const IRGS& env);
 void beginInlining(IRGS& env,
                    SrcKey entry,
                    SSATmp* ctx,
-                   Offset callBcOffset,
                    InlineReturnTarget returnTarget,
                    int cost,
                    SSATmp* calleeFP);

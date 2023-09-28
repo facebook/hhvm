@@ -183,6 +183,7 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
     // copying local variables and iterators. We don't support tracing when
     // we do the tail-call optimization, so we push the suspend hook here.
     auto const createNewAFWH = [&]{
+      if (isInlining(env)) gen(env, StFrameFunc, FuncData { func }, fp(env));
       auto const wh = gen(env, CreateAFWH, fp(env),
                           cns(env, func->numSlotsInFrame()),
                           resumeAddr(), suspendOff, child);

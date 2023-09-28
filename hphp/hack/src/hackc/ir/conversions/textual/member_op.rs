@@ -5,6 +5,7 @@
 
 use anyhow::bail;
 use anyhow::Error;
+use ascii::AsciiString;
 use ir::instr::BaseOp;
 use ir::instr::FinalOp;
 use ir::instr::MemberKey;
@@ -19,6 +20,7 @@ use textual::Ty;
 
 use crate::func::FuncState;
 use crate::hack;
+use crate::mangle::FieldName;
 use crate::textual;
 use crate::textual::Sid;
 
@@ -78,8 +80,17 @@ enum PropOp {
     NullSafe,
 }
 
+enum PropKey {
+    Expr(Expr),
+    Name(FieldName),
+}
+
 enum Base {
-    Field { base: Sid, prop: Expr, op: PropOp },
+    Field {
+        base: Sid,
+        prop: PropKey,
+        op: PropOp,
+    },
     Local(LocalId),
     Superglobal(Expr),
     Value(Expr),
@@ -91,10 +102,29 @@ impl Base {
         match *self {
             Base::Field {
                 base,
-                prop: Expr::Const(Const::String(ref key)),
+                prop: PropKey::Name(ref key),
                 op: PropOp::NullThrows,
             } => state.load_mixed(Expr::field(base, Ty::unknown(), key.clone())),
-            Base::Field { base, ref prop, op } => {
+            Base::Field {
+                base,
+                prop: PropKey::Name(ref key),
+                op: PropOp::NullSafe,
+            } => {
+                let key = key.display(&state.strings).to_string();
+                let prop = Expr::Const(Const::String(
+                    AsciiString::from_ascii(key.as_bytes()).unwrap(),
+                ));
+                let null_safe = Const::True;
+                state.call_builtin(
+                    hack::Builtin::HackPropGet,
+                    (base, prop, Expr::Const(null_safe)),
+                )
+            }
+            Base::Field {
+                base,
+                prop: PropKey::Expr(ref prop),
+                op,
+            } => {
                 let null_safe = match op {
                     PropOp::NullThrows => Const::False,
                     PropOp::NullSafe => Const::True,
@@ -117,10 +147,29 @@ impl Base {
         match *self {
             Base::Field {
                 base,
-                prop: Expr::Const(Const::String(ref key)),
+                prop: PropKey::Name(ref key),
                 op: PropOp::NullThrows,
             } => state.store_mixed(Expr::field(base, Ty::unknown(), key.clone()), value)?,
-            Base::Field { base, ref prop, op } => {
+            Base::Field {
+                base,
+                prop: PropKey::Name(ref key),
+                op: PropOp::NullSafe,
+            } => {
+                let key = key.display(&state.strings).to_string();
+                let prop = Expr::Const(Const::String(
+                    AsciiString::from_ascii(key.as_bytes()).unwrap(),
+                ));
+                let null_safe = Const::True;
+                state.call_builtin(
+                    hack::Builtin::HackPropSet,
+                    (base, prop, Expr::Const(null_safe), value),
+                )?;
+            }
+            Base::Field {
+                base,
+                prop: PropKey::Expr(ref prop),
+                op,
+            } => {
                 let null_safe = match op {
                     PropOp::NullThrows => Const::False,
                     PropOp::NullSafe => Const::True,
@@ -271,7 +320,7 @@ where
                 let prop = self.next_operand();
                 let base = self.next_operand();
                 self.pending = Pending::Base(Base::Value(base));
-                self.push_prop_dim(prop, PropOp::NullThrows)?;
+                self.push_prop_dim(PropKey::Expr(prop), PropOp::NullThrows)?;
             }
             BaseOp::BaseST {
                 mode: _,
@@ -282,12 +331,9 @@ where
                 // Get base from static property with known key: $x::$y[k]
                 // We treat C::$x the same as `get_static(C)->x`.
                 let base = self.next_operand();
-                let key = {
-                    let key = self.state.strings.lookup_bytes(prop.id);
-                    crate::util::escaped_string(&key)
-                };
+                let key = PropKey::Name(FieldName::prop(prop));
                 self.pending = Pending::Base(Base::Value(base));
-                self.push_prop_dim(key.into(), PropOp::NullThrows)?;
+                self.push_prop_dim(key, PropOp::NullThrows)?;
             }
         }
         Ok(())
@@ -323,29 +369,21 @@ where
             MemberKey::PC => {
                 // $a->{foo()}
                 let key = self.next_operand();
-                self.push_prop_dim(key, PropOp::NullThrows)?;
+                self.push_prop_dim(PropKey::Expr(key), PropOp::NullThrows)?;
             }
             MemberKey::PL => {
                 // $a->{$b}
                 let key = self.next_local();
                 let key = self.state.load_mixed(Expr::deref(key))?;
-                self.push_prop_dim(key.into(), PropOp::NullThrows)?;
+                self.push_prop_dim(PropKey::Expr(key.into()), PropOp::NullThrows)?;
             }
             MemberKey::PT(prop) => {
                 // $a->hello
-                let key = {
-                    let key = self.state.strings.lookup_bytes(prop.id);
-                    crate::util::escaped_string(&key)
-                };
-                self.push_prop_dim(key.into(), PropOp::NullThrows)?;
+                self.push_prop_dim(PropKey::Name(FieldName::prop(prop)), PropOp::NullThrows)?;
             }
             MemberKey::QT(prop) => {
                 // $a?->hello
-                let key = {
-                    let key = self.state.strings.lookup_bytes(prop.id);
-                    crate::util::escaped_string(&key)
-                };
-                self.push_prop_dim(key.into(), PropOp::NullSafe)?;
+                self.push_prop_dim(PropKey::Name(FieldName::prop(prop)), PropOp::NullSafe)?;
             }
             MemberKey::W => {
                 // $a[]
@@ -467,7 +505,7 @@ where
         Ok(())
     }
 
-    fn push_prop_dim(&mut self, key: Expr, op: PropOp) -> Result {
+    fn push_prop_dim(&mut self, key: PropKey, op: PropOp) -> Result {
         let pending = std::mem::replace(&mut self.pending, Pending::None);
         let (base, prop, op) = match pending {
             Pending::None => unreachable!(),

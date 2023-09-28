@@ -38,10 +38,12 @@ use crate::class;
 use crate::class::IsStatic;
 use crate::hack;
 use crate::lower;
+use crate::mangle::FieldName;
 use crate::mangle::FunctionName;
 use crate::mangle::GlobalName;
 use crate::mangle::Intrinsic;
 use crate::mangle::TypeName;
+use crate::mangle::VarName;
 use crate::member_op;
 use crate::state::UnitState;
 use crate::textual;
@@ -517,9 +519,9 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
                 (None, Some(f)) => {
                     // $x::foo
                     let obj = state.lookup_vid(class);
-                    let field = util::escaped_string(&state.strings.lookup_bstr(f));
+                    let field = ir::PropId::new(f);
                     state.store_mixed(
-                        Expr::field(obj, textual::Ty::unknown(), field),
+                        Expr::field(obj, textual::Ty::unknown(), FieldName::prop(field)),
                         value.clone(),
                     )?;
                 }
@@ -623,7 +625,7 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
                 false => GlobalName::Global(id),
                 true => GlobalName::GlobalConst(id),
             };
-            let var = textual::Var::global(name);
+            let var = VarName::global(name);
             let expr = state.load_mixed(textual::Expr::deref(var))?;
             state.set_iid(iid, expr);
         }

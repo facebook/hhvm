@@ -215,7 +215,7 @@ class C {
   // CHECK:   n3 = null
   // CHECK:   store n0.?.prop5 <- n3: *HackMixed
   // CHECK:   n4 = $builtins.hack_int(2)
-  // CHECK:   store n0.?.type <- n4: *HackMixed
+  // CHECK:   store n0.?.type_ <- n4: *HackMixed
   // CHECK:   n5 = __sil_lazy_class_initialize(<D>)
   // CHECK:   n6 = $builtins.hack_field_get(n5, "C")
   // CHECK:   store n0.?.prop5 <- n6: *HackMixed

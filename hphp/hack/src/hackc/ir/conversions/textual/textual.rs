@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 // Copyright (c) Facebook, Inc. and its affiliates.
 //
 // This source code is licensed under the MIT license found in the
@@ -25,10 +24,12 @@ use itertools::Itertools;
 use newtype::newtype_int;
 use strum::EnumProperty;
 
+use crate::mangle::FieldName;
 use crate::mangle::FunctionName;
 use crate::mangle::GlobalName;
 use crate::mangle::Intrinsic;
 use crate::mangle::TypeName;
+use crate::mangle::VarName;
 
 pub(crate) const INDENT: &str = "  ";
 pub(crate) const VARIADIC: &str = ".variadic";
@@ -182,7 +183,7 @@ impl<'a> TextualFile<'a> {
                 write!(
                     self.w,
                     "{sep}{name}: {ty}",
-                    name = FmtLid(&self.strings, *lid),
+                    name = VarName::Local(*lid).display(&self.strings),
                     ty = ty.display(&self.strings)
                 )?;
                 sep = ", ";
@@ -261,7 +262,7 @@ impl<'a> TextualFile<'a> {
             write!(
                 self.w,
                 "{sep}{INDENT}{name}: {vis} ",
-                name = f.name,
+                name = f.name.display(&self.strings),
                 vis = f.visibility.decl()
             )?;
 
@@ -362,7 +363,7 @@ impl<'a> TextualFile<'a> {
                 unreachable!();
             };
             fields.push(Field {
-                name: "this".into(),
+                name: FieldName::raw("this"),
                 ty: Ty::named_type_ptr(captured_this_ty.clone()).into(),
                 visibility: Visibility::Private,
                 attributes: Default::default(),
@@ -372,7 +373,7 @@ impl<'a> TextualFile<'a> {
 
         for (idx, ty) in curry.arg_tys.iter().enumerate() {
             fields.push(Field {
-                name: format!("arg{idx}").into(),
+                name: FieldName::raw(format!("arg{idx}")),
                 ty: ty.into(),
                 visibility: Visibility::Private,
                 attributes: Default::default(),
@@ -429,7 +430,8 @@ impl<'a> TextualFile<'a> {
             let mut args = Vec::new();
 
             for (idx, ty) in curry.arg_tys.iter().enumerate() {
-                let arg = fb.load(ty, Expr::field(this, this_ty.clone(), format!("arg{idx}")))?;
+                let field = FieldName::raw(format!("arg{idx}"));
+                let arg = fb.load(ty, Expr::field(this, this_ty.clone(), field))?;
                 args.push(arg);
             }
 
@@ -447,7 +449,7 @@ impl<'a> TextualFile<'a> {
                 };
                 let captured_this = fb.load(
                     &Ty::named_type_ptr(captured_this_ty.clone()),
-                    Expr::field(this, this_ty.clone(), "this"),
+                    Expr::field(this, this_ty.clone(), FieldName::raw("this")),
                 )?;
                 fb.call_virtual(&curry.name, captured_this.into(), args)?
             } else {
@@ -506,22 +508,6 @@ struct FmtBid(BlockId);
 impl fmt::Display for FmtBid {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "b{}", self.0.as_usize())
-    }
-}
-
-struct FmtLid<'a>(&'a StringInterner, LocalId);
-
-impl fmt::Display for FmtLid<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let FmtLid(strings, lid) = *self;
-        match lid {
-            LocalId::Named(id) => {
-                write!(f, "{}", strings.lookup_bstr(id))
-            }
-            LocalId::Unnamed(id) => {
-                write!(f, "${}", id.as_usize())
-            }
-        }
     }
 }
 
@@ -663,36 +649,6 @@ impl fmt::Display for FmtTy<'_> {
 }
 
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
-pub(crate) enum Var {
-    Global(GlobalName),
-    Local(LocalId),
-}
-
-impl Var {
-    pub(crate) fn global(s: GlobalName) -> Self {
-        Var::Global(s)
-    }
-}
-
-impl From<LocalId> for Var {
-    fn from(lid: LocalId) -> Var {
-        Var::Local(lid)
-    }
-}
-
-struct FmtVar<'a>(&'a StringInterner, &'a Var);
-
-impl fmt::Display for FmtVar<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let FmtVar(strings, var) = *self;
-        match *var {
-            Var::Global(ref s) => s.display(strings).fmt(f),
-            Var::Local(lid) => FmtLid(strings, lid).fmt(f),
-        }
-    }
-}
-
-#[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub(crate) enum Const {
     False,
     Float(FloatBits),
@@ -766,13 +722,13 @@ pub(crate) enum Expr {
     /// *Variable
     Deref(Box<Expr>),
     /// a.b
-    Field(Box<Expr>, Ty, String),
+    Field(Box<Expr>, Ty, FieldName),
     /// a[b]
     Index(Box<Expr>, Box<Expr>),
     /// __sil_instanceof(expr, \<ty\>)
     InstanceOf(Box<Expr>, Ty),
     Sid(Sid),
-    Var(Var),
+    Var(VarName),
 }
 
 impl Expr {
@@ -784,9 +740,8 @@ impl Expr {
         Expr::Deref(Box::new(v.into()))
     }
 
-    pub(crate) fn field(base: impl Into<Expr>, base_ty: Ty, name: impl Into<String>) -> Expr {
+    pub(crate) fn field(base: impl Into<Expr>, base_ty: Ty, name: FieldName) -> Expr {
         let base = base.into();
-        let name = name.into();
         Expr::Field(Box::new(base), base_ty, name)
     }
 
@@ -822,8 +777,8 @@ impl From<Sid> for Expr {
     }
 }
 
-impl From<Var> for Expr {
-    fn from(var: Var) -> Self {
+impl From<VarName> for Expr {
+    fn from(var: VarName) -> Self {
         Expr::Var(var)
     }
 }
@@ -1025,7 +980,12 @@ impl FuncBuilder<'_, '_> {
             }
             Expr::Field(ref base, ref ty, ref name) => {
                 self.write_expr(base)?;
-                write!(self.txf.w, ".{}.{name}", ty.display(&self.txf.strings))?;
+                write!(
+                    self.txf.w,
+                    ".{}.{}",
+                    ty.display(&self.txf.strings),
+                    name.display(&self.txf.strings)
+                )?;
             }
             Expr::Index(ref base, ref offset) => {
                 self.write_expr(base)?;
@@ -1041,14 +1001,14 @@ impl FuncBuilder<'_, '_> {
             Expr::Sid(sid) => write!(self.txf.w, "{}", FmtSid(sid))?,
             Expr::Var(ref var) => {
                 match var {
-                    Var::Global(s) => {
+                    VarName::Global(s) => {
                         if !self.txf.referenced_globals.contains(s) {
                             self.txf.referenced_globals.insert(s.to_owned());
                         }
                     }
-                    Var::Local(_) => {}
+                    VarName::Local(_) => {}
                 }
-                write!(self.txf.w, "{}", FmtVar(&self.txf.strings, var))?
+                write!(self.txf.w, "{}", var.display(&self.txf.strings))?
             }
         }
         Ok(())
@@ -1137,7 +1097,7 @@ impl FuncBuilder<'_, '_> {
                 unreachable!();
             };
             self.store(
-                Expr::Field(Box::new(obj.into()), ty.clone(), "this".to_string()),
+                Expr::Field(Box::new(obj.into()), ty.clone(), FieldName::raw("this")),
                 this,
                 &Ty::named_type_ptr(captured_this_ty.clone()),
             )?;
@@ -1145,11 +1105,8 @@ impl FuncBuilder<'_, '_> {
 
         for (idx, arg) in args.into_iter().enumerate() {
             let field_ty = arg.ty();
-            self.store(
-                Expr::field(obj, ty.clone(), format!("arg{idx}")),
-                arg,
-                &field_ty,
-            )?;
+            let field_name = FieldName::raw(format!("arg{idx}"));
+            self.store(Expr::field(obj, ty.clone(), field_name), arg, &field_ty)?;
         }
 
         Ok(obj)
@@ -1337,7 +1294,7 @@ impl FuncBuilder<'_, '_> {
 
 #[derive(Default, Debug)]
 struct VarCache {
-    cache: HashMap<Var, Sid>,
+    cache: HashMap<VarName, Sid>,
 }
 
 impl VarCache {
@@ -1458,7 +1415,7 @@ impl FieldAttribute {
 }
 
 pub(crate) struct Field<'a> {
-    pub name: Cow<'a, str>,
+    pub name: FieldName,
     pub ty: Cow<'a, Ty>,
     pub visibility: Visibility,
     pub attributes: Vec<FieldAttribute>,

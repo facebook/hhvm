@@ -53,7 +53,7 @@ impl Mangle for [u8] {
                 }
                 for &ch in self {
                     match ch {
-                        b'_' | b'$' => res.push(ch as char),
+                        b'_' | b'$' | b':' => res.push(ch as char),
                         b'\\' => {
                             res.push(':');
                             res.push(':');
@@ -98,6 +98,39 @@ impl Intrinsic {
             | Intrinsic::PropInit(_)
             | Intrinsic::StaticInit(_) => false,
             Intrinsic::Invoke(name) => *name == TypeName::Unknown,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Hash, Eq, PartialEq)]
+pub(crate) enum FieldName {
+    Prop(ir::PropId),
+    Raw(String),
+}
+
+impl FieldName {
+    pub(crate) fn prop(pid: ir::PropId) -> Self {
+        Self::Prop(pid)
+    }
+
+    pub(crate) fn raw<'a>(name: impl Into<std::borrow::Cow<'a, str>>) -> Self {
+        let name = name.into();
+        FieldName::Raw(name.into_owned())
+    }
+
+    pub(crate) fn display<'r>(&'r self, strings: &'r StringInterner) -> impl fmt::Display + 'r {
+        FmtFieldName(strings, self)
+    }
+}
+
+struct FmtFieldName<'a>(&'a StringInterner, &'a FieldName);
+
+impl fmt::Display for FmtFieldName<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let FmtFieldName(strings, name) = *self;
+        match name {
+            FieldName::Prop(pid) => f.write_str(&pid.as_bytes(strings).mangle(strings)),
+            FieldName::Raw(s) => f.write_str(s),
         }
     }
 }
@@ -281,6 +314,57 @@ impl fmt::Display for FmtTypeName<'_> {
                 f.write_str("$static")
             }
             TypeName::UnmangledRef(s) => s.fmt(f),
+        }
+    }
+}
+
+#[derive(Clone, Debug, Hash, Eq, PartialEq)]
+pub(crate) enum VarName {
+    Global(GlobalName),
+    Local(ir::LocalId),
+}
+
+impl VarName {
+    pub(crate) fn global(s: GlobalName) -> Self {
+        Self::Global(s)
+    }
+
+    pub(crate) fn display<'r>(&'r self, strings: &'r StringInterner) -> impl fmt::Display + 'r {
+        FmtVarName(strings, self)
+    }
+}
+
+impl From<ir::LocalId> for VarName {
+    fn from(lid: ir::LocalId) -> Self {
+        Self::Local(lid)
+    }
+}
+
+struct FmtVarName<'a>(&'a StringInterner, &'a VarName);
+
+impl fmt::Display for FmtVarName<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let FmtVarName(strings, var) = *self;
+        match *var {
+            VarName::Global(ref s) => s.display(strings).fmt(f),
+            VarName::Local(lid) => FmtLid(strings, lid).fmt(f),
+        }
+    }
+}
+
+struct FmtLid<'a>(pub &'a StringInterner, pub ir::LocalId);
+
+impl fmt::Display for FmtLid<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let FmtLid(strings, lid) = *self;
+        match lid {
+            ir::LocalId::Named(id) => {
+                let name = strings.lookup_bstr(id).mangle(strings);
+                f.write_str(&name)
+            }
+            ir::LocalId::Unnamed(id) => {
+                write!(f, "${}", id.as_usize())
+            }
         }
     }
 }

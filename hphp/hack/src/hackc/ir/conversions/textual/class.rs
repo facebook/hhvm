@@ -23,9 +23,9 @@ use super::func;
 use super::textual;
 use crate::func::FuncInfo;
 use crate::func::MethodInfo;
+use crate::mangle::FieldName;
 use crate::mangle::FunctionName;
 use crate::mangle::Intrinsic;
-use crate::mangle::Mangle;
 use crate::mangle::TypeName;
 use crate::state::UnitState;
 use crate::textual::FieldAttribute;
@@ -186,7 +186,7 @@ impl ClassState<'_, '_, '_> {
 
         flags.clear(ir::Attr::AttrStatic);
 
-        let name = name.mangle(&self.unit_state.strings);
+        let name = FieldName::Prop(name);
 
         let visibility = if flags.is_private() {
             textual::Visibility::Private

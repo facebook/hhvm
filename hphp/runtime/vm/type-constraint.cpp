@@ -22,6 +22,7 @@
 #include <folly/MapUtil.h>
 
 #include <hphp/runtime/base/datatype.h>
+#include "hphp/util/match.h"
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/base/autoload-handler.h"
@@ -775,6 +776,11 @@ const TypeAlias* getTypeAliasWithAutoload(const NamedType* ne,
   return def;
 }
 
+struct FoundTypeAlias { const TypeAlias* value; };
+struct FoundClass { const Class* value; };
+struct NotFound {};
+using NamedTypeValue = boost::variant<FoundTypeAlias, FoundClass, NotFound>;
+
 /*
  * Look up a TypeAlias or a Class for the supplied NamedType
  * (which must be the NamedType for `name'), invoking autoload if
@@ -784,65 +790,68 @@ const TypeAlias* getTypeAliasWithAutoload(const NamedType* ne,
  * type alias or an enum class; enum classes are strange in that it
  * *is* possible to have an instance of them even if they are not defined.
  */
-boost::variant<const TypeAlias*, Class*>
+NamedTypeValue
 getNamedTypeWithAutoload(const NamedType* ne,
                          const StringData* name) {
 
   if (auto def = ne->getCachedTypeAlias()) {
-    return def;
+    return FoundTypeAlias{def};
   }
-  Class *klass = nullptr;
-  klass = Class::lookup(ne);
+  if (auto klass = Class::lookup(ne)) return FoundClass{klass};
+
   // We don't have the class or the typedef, so autoload.
-  if (!klass) {
-    String nameStr(const_cast<StringData*>(name));
-    if (AutoloadHandler::s_instance->autoloadTypeOrTypeAlias(nameStr)) {
-      // Autoload succeeded, try to grab a typedef or a class.
-      if (auto def = ne->getCachedTypeAlias()) {
-        return def;
-      }
-      klass = Class::lookup(ne);
-    }
+  String nameStr(const_cast<StringData*>(name));
+  if (AutoloadHandler::s_instance->autoloadTypeOrTypeAlias(nameStr)) {
+    // Autoload succeeded, try to grab a typedef or a class.
+    if (auto def = ne->getCachedTypeAlias()) return FoundTypeAlias{def};
+    if (auto klass = Class::lookup(ne)) return FoundClass{klass};
   }
-  return klass;
+
+  return NotFound{};
 }
 
 } // namespace
 
 TypeConstraint TypeConstraint::resolvedWithAutoload() const {
-  auto copy = *this;
-
   // Nothing to do if we are not unresolved.
-  if (!isUnresolved()) return copy;
+  if (!isUnresolved()) return *this;
 
   auto const p = getNamedTypeWithAutoload(typeNamedType(), typeName());
+  auto result = match<Optional<TypeConstraint>>(
+    p,
+    // Type alias.
+    [this](FoundTypeAlias td) -> Optional<TypeConstraint> {
+      std::vector<TypeConstraint> parts;
+      for (auto const& [type, klass] : td.value->typeAndClassUnion()) {
+        auto copy = *this;
+        auto const typeName = klass ? klass->name() : nullptr;
+        copy.resolveType(type, td.value->nullable, typeName);
+        parts.push_back(copy);
+      }
+      return makeUnion(typeName(), parts);
+    },
+    // Enum.
+    [this](FoundClass cls) -> Optional<TypeConstraint> {
+      if (isEnum(cls.value)) {
+        auto const type = cls.value->enumBaseTy()
+          ? enumDataTypeToAnnotType(*cls.value->enumBaseTy())
+          : AnnotType::ArrayKey;
+        auto copy = *this;
+        copy.resolveType(type, false, nullptr);
+        return copy;
+      }
+      return std::nullopt;
+    },
+    [&](NotFound) -> Optional<TypeConstraint> {
+      return std::nullopt;
+    });
 
-  // Type alias.
-  if (auto const ptd = boost::get<const TypeAlias*>(&p)) {
-    auto const td = *ptd;
-    std::vector<TypeConstraint> result;
-    for (auto const& [type, klass] : td->typeAndClassUnion()) {
-      auto copy = *this;
-      auto const typeName = klass ? klass->name() : nullptr;
-      copy.resolveType(type, td->nullable, typeName);
-      result.push_back(copy);
-    }
-    return makeUnion(typeName(), result);
-  }
-
-  // Enum.
-  if (auto const pcls = boost::get<Class*>(&p)) {
-    auto const cls = *pcls;
-    if (cls && isEnum(cls)) {
-      auto const type = cls->enumBaseTy()
-        ? enumDataTypeToAnnotType(*cls->enumBaseTy())
-        : AnnotType::ArrayKey;
-      copy.resolveType(type, false, nullptr);
-      return copy;
-    }
+  if (result) {
+    return *result;
   }
 
   // Existing or non-existing class.
+  auto copy = *this;
   copy.resolveType(AnnotType::Object, false, typeName());
   return copy;
 }
@@ -967,86 +976,86 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
   assertx(val.type() != KindOfObject);
   assertx(isUnresolved());
 
-  auto const p = [&]() ->
-    boost::variant<const TypeAlias*, Class*> {
+  auto const p = [&]() -> NamedTypeValue {
     if (!Assert) {
       return getNamedTypeWithAutoload(typeNamedType(), typeName());
     }
     if (auto const def = typeNamedType()->getCachedTypeAlias()) {
-      return def;
+      return FoundTypeAlias{def};
     }
-    return Class::lookup(typeNamedType());
+    if (auto cls = Class::lookup(typeNamedType())) return FoundClass{cls};
+    return NotFound{};
   }();
-  auto ptd = boost::get<const TypeAlias*>(&p);
-  auto td = ptd ? *ptd : nullptr;
-  auto pc = boost::get<Class*>(&p);
-  auto c = pc ? *pc : nullptr;
+  return match<bool>(
+    p,
+    [&](FoundTypeAlias td) {
+      // Common case is that we actually find the alias:
+      if (td.value->nullable && val.type() == KindOfNull) return true;
+      std::optional<AnnotAction> fallback;
+      for (auto const& [type, klass] : td.value->typeAndClassUnion()) {
+        auto result = annotCompat(val.type(), type, klass ? klass->name() : nullptr);
+        switch (result) {
+          case AnnotAction::Pass: return true;
+          case AnnotAction::Fail: continue;
+          case AnnotAction::CallableCheck:
+            if (!ForProp && (Assert || is_callable(tvAsCVarRef(*val)))) return true;
+            continue;
+          case AnnotAction::WarnClass:
+          case AnnotAction::ConvertClass:
+          case AnnotAction::WarnLazyClass:
+          case AnnotAction::ConvertLazyClass:
+            // Defer the action to see if there's a more appropriate action later.
+            fallback = fallback ? std::min(*fallback, result) : result;
+            continue;
+          case AnnotAction::WarnClassname:
+            assertx(isClassType(val.type()) || isLazyClassType(val.type()));
+            assertx(RuntimeOption::EvalClassPassesClassname);
+            assertx(RuntimeOption::EvalClassnameNotices);
+            if (Assert) return true;
+            fallback = fallback ? std::min(*fallback, result) : result;
+            continue;
+          case AnnotAction::ObjectCheck:
+          case AnnotAction::Fallback:
+          case AnnotAction::FallbackCoerce:
+            not_reached();
+        }
+      }
 
-  if (Assert && !td && !c) return true;
-
-  // Common case is that we actually find the alias:
-  if (td) {
-    if (td->nullable && val.type() == KindOfNull) return true;
-    std::optional<AnnotAction> fallback;
-    for (auto const& [type, klass] : td->typeAndClassUnion()) {
-      auto result = annotCompat(val.type(), type, klass ? klass->name() : nullptr);
-      switch (result) {
-        case AnnotAction::Pass: return true;
-        case AnnotAction::Fail: continue;
-        case AnnotAction::CallableCheck:
-          if (!ForProp && (Assert || is_callable(tvAsCVarRef(*val)))) return true;
-          continue;
+      switch (fallback.value_or(AnnotAction::Fail)) {
         case AnnotAction::WarnClass:
         case AnnotAction::ConvertClass:
         case AnnotAction::WarnLazyClass:
         case AnnotAction::ConvertLazyClass:
-          // Defer the action to see if there's a more appropriate action later.
-          fallback = fallback ? std::min(*fallback, result) : result;
-          continue;
+          // verifyFail will deal with the conversion/warning
+          return false;
         case AnnotAction::WarnClassname:
-          assertx(isClassType(val.type()) || isLazyClassType(val.type()));
-          assertx(RuntimeOption::EvalClassPassesClassname);
-          assertx(RuntimeOption::EvalClassnameNotices);
-          if (Assert) return true;
-          fallback = fallback ? std::min(*fallback, result) : result;
-          continue;
-        case AnnotAction::ObjectCheck:
-        case AnnotAction::Fallback:
-        case AnnotAction::FallbackCoerce:
-          not_reached();
+          raise_notice(Strings::CLASS_TO_CLASSNAME);
+          return true;
+        default:
+          return false;
       }
+    },
+    [&](FoundClass c) {
+      // Otherwise, this isn't a proper type alias, but it *might* be a
+      // first-class enum. Check if the type is an enum and check the
+      // constraint if it is. We only need to do this when the underlying
+      // type is not an object, since only int and string can be enums.
+      if (isEnum(c.value)) {
+        auto dt = c.value->enumBaseTy();
+        // For an enum, if the underlying type is mixed, we still require
+        // it is either an int or a string!
+        if (dt) {
+          return equivDataTypes(*dt, val.type());
+        } else {
+          return isIntType(val.type()) || isStringType(val.type());
+        }
+      }
+      return false;
+    },
+    [&](NotFound) {
+      return Assert;
     }
-
-    switch (fallback.value_or(AnnotAction::Fail)) {
-      case AnnotAction::WarnClass:
-      case AnnotAction::ConvertClass:
-      case AnnotAction::WarnLazyClass:
-      case AnnotAction::ConvertLazyClass:
-        // verifyFail will deal with the conversion/warning
-        return false;
-      case AnnotAction::WarnClassname:
-        raise_notice(Strings::CLASS_TO_CLASSNAME);
-        return true;
-      default:
-        return false;
-    }
-  }
-
-  // Otherwise, this isn't a proper type alias, but it *might* be a
-  // first-class enum. Check if the type is an enum and check the
-  // constraint if it is. We only need to do this when the underlying
-  // type is not an object, since only int and string can be enums.
-  if (c && isEnum(c)) {
-    auto dt = c->enumBaseTy();
-    // For an enum, if the underlying type is mixed, we still require
-    // it is either an int or a string!
-    if (dt) {
-      return equivDataTypes(*dt, val.type());
-    } else {
-      return isIntType(val.type()) || isStringType(val.type());
-    }
-  }
-  return false;
+  );
 }
 
 template <bool Assert>
@@ -1486,27 +1495,29 @@ bool TypeConstraint::checkStringCompatible() const {
   }
   if (!isUnresolved()) return false;
   auto p = getNamedTypeWithAutoload(typeNamedType(), typeName());
-  if (auto ptd = boost::get<const TypeAlias*>(&p)) {
-    auto td = *ptd;
-    for (auto const& [type, klass] : td->typeAndClassUnion()) {
-      if (type == AnnotType::String ||
-          type == AnnotType::ArrayKey ||
-          (type == AnnotType::Object &&
-            interface_supports_string(klass->name()))) {
-        return true;
+  return match<bool>(
+    p,
+    [&](FoundTypeAlias td) {
+      for (auto const& [type, klass] : td.value->typeAndClassUnion()) {
+        if (type == AnnotType::String ||
+            type == AnnotType::ArrayKey ||
+            (type == AnnotType::Object &&
+             interface_supports_string(klass->name()))) {
+          return true;
+        }
       }
-    }
-    return false;
-  }
-  if (auto pc = boost::get<Class*>(&p)) {
-    auto c = *pc;
-    if (isEnum(c)) {
-      auto dt = c->enumBaseTy();
-      return !dt || isStringType(dt);
-    }
-  }
-
-  return false;
+      return false;
+    },
+    [&](FoundClass c) {
+      if (isEnum(c.value)) {
+        auto dt = c.value->enumBaseTy();
+        return !dt || isStringType(dt);
+      }
+      return false;
+    },
+    [&](NotFound) {
+      return false;
+    });
 }
 
 template <typename F>

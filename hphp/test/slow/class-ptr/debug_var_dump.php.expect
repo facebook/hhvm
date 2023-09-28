@@ -1,0 +1,3 @@
+Lazy class: lazyclass(C)
+Class: class(C)
+String: string(1) "C"

@@ -376,6 +376,21 @@ bool HHVM_FUNCTION(is_lazy_class, TypedValue val) {
   return tvIsLazyClass(val);
 }
 
+void HHVM_FUNCTION(debug_var_dump_lazy_class, TypedValue val) {
+  switch (val.m_type) {
+    case KindOfLazyClass:
+      g_context->write(folly::sformat("lazyclass({})", val.m_data.plazyclass.name()));
+      break;
+    case KindOfClass:
+      g_context->write(folly::sformat("class({})", val.m_data.pclass->name()));
+      break;
+    default:
+      VariableSerializer vs(VariableSerializer::Type::VarDump, 0, 2);
+      
+      vs.serialize(Variant::attach(val), false);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 bool HHVM_FUNCTION(is_unit_loaded, StringArg path) {
@@ -501,6 +516,8 @@ static struct IntrinsicsExtension final : Extension {
     HHVM_FALIAS(__hhvm_intrinsics\\create_clsmeth_pointer,
                 create_clsmeth_pointer);
     HHVM_FALIAS(__hhvm_intrinsics\\is_lazy_class, is_lazy_class);
+    HHVM_FALIAS(__hhvm_intrinsics\\debug_var_dump_lazy_class,
+		debug_var_dump_lazy_class);
 
     HHVM_FALIAS(__hhvm_intrinsics\\is_unit_loaded, is_unit_loaded);
     HHVM_FALIAS(__hhvm_intrinsics\\drain_unit_prefetcher, drain_unit_prefetcher);

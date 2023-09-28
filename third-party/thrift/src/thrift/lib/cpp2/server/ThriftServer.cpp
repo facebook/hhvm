@@ -1606,8 +1606,10 @@ void ThriftServer::stopCPUWorkers() {
     threadManager_->join();
   }
 #if FOLLY_HAS_COROUTINES
-  // Wait for tasks running on AsyncScope to join
-  folly::coro::blockingWait(asyncScope_->joinAsync());
+  if (asyncScope_) {
+    // Wait for tasks running on AsyncScope to join
+    folly::coro::blockingWait(asyncScope_->joinAsync());
+  }
   cachedServiceHealth_.store(ServiceHealth{}, std::memory_order_relaxed);
 #endif
 

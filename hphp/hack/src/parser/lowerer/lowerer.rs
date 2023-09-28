@@ -82,19 +82,7 @@ fn unescape_nowdoc(s: &str) -> Result<BString, escaper::InvalidString> {
     Ok(escaper::unescape_nowdoc(s)?.into())
 }
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
-pub enum LiftedAwaitKind {
-    LiftedFromStatement,
-    LiftedFromConcurrent,
-}
-
 type LiftedAwaitExprs = Vec<(ast::Lid, ast::Expr)>;
-
-#[derive(Debug, Clone)]
-pub struct LiftedAwaits {
-    pub awaits: LiftedAwaitExprs,
-    lift_kind: LiftedAwaitKind,
-}
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum ExprLocation {
@@ -197,7 +185,7 @@ pub struct Env<'a> {
     pub empty_ns_env: Arc<NamespaceEnv>,
 
     pub saw_yield: bool, /* Information flowing back up */
-    pub lifted_awaits: Option<LiftedAwaits>,
+    pub lifted_awaits: Option<LiftedAwaitExprs>,
     pub tmp_var_counter: isize,
 
     pub indexed_source_text: &'a IndexedSourceText<'a>,
@@ -2733,18 +2721,15 @@ fn p_stmt_list_<'a>(
             Some(n) => match &n.children {
                 UsingStatementFunctionScoped(c) => {
                     let body = p_stmt_list_(pos, nodes, env)?;
-                    let f = |e: &mut Env<'a>| {
-                        Ok(ast::Stmt::new(
-                            pos.clone(),
-                            ast::Stmt_::mk_using(ast::UsingStmt {
-                                is_block_scoped: false,
-                                has_await: !c.await_keyword.is_missing(),
-                                exprs: p_exprs_with_loc(&c.expression, e)?,
-                                block: ast::Block(body),
-                            }),
-                        ))
-                    };
-                    let using = lift_awaits_in_statement_(Either::Right(pos), env, f)?;
+                    let using = ast::Stmt::new(
+                        pos.clone(),
+                        ast::Stmt_::mk_using(ast::UsingStmt {
+                            is_block_scoped: false,
+                            has_await: !c.await_keyword.is_missing(),
+                            exprs: p_exprs_with_loc(&c.expression, env)?,
+                            block: ast::Block(body),
+                        }),
+                    );
                     r.push(using);
                     break Ok(r);
                 }
@@ -2771,27 +2756,6 @@ fn handle_loop_body<'a>(pos: Pos, node: S<'a>, env: &mut Env<'a>) -> Result<ast:
     Ok(ast::Stmt::new(pos, ast::Stmt_::mk_block(None, body)))
 }
 
-fn is_simple_assignment_await_expression<'a>(node: S<'a>) -> bool {
-    match &node.children {
-        ParenthesizedExpression(c) => is_simple_assignment_await_expression(&c.expression),
-        BracedExpression(c) => is_simple_assignment_await_expression(&c.expression),
-        BinaryExpression(c) => {
-            token_kind(&c.operator) == Some(TK::Equal)
-                && is_simple_await_expression(&c.right_operand)
-        }
-        _ => false,
-    }
-}
-
-fn is_simple_await_expression<'a>(node: S<'a>) -> bool {
-    match &node.children {
-        ParenthesizedExpression(c) => is_simple_await_expression(&c.expression),
-        BracedExpression(c) => is_simple_await_expression(&c.expression),
-        PrefixUnaryExpression(c) => token_kind(&c.operator) == Some(TK::Await),
-        _ => false,
-    }
-}
-
 fn with_new_nonconcurrent_scope<'a, F, R>(env: &mut Env<'a>, f: F) -> R
 where
     F: FnOnce(&mut Env<'a>) -> R,
@@ -2809,10 +2773,7 @@ fn with_new_concurrent_scope<'a, F, R>(env: &mut Env<'a>, f: F) -> Result<(Lifte
 where
     F: FnOnce(&mut Env<'a>) -> Result<R>,
 {
-    let saved_lifted_awaits = env.lifted_awaits.replace(LiftedAwaits {
-        awaits: vec![],
-        lift_kind: LiftedAwaitKind::LiftedFromConcurrent,
-    });
+    let saved_lifted_awaits = env.lifted_awaits.replace(vec![]);
     let old_lift_awaits = env.lift_awaits;
     env.lift_awaits = true;
     let result = f(env);
@@ -2827,89 +2788,16 @@ where
 }
 
 fn process_lifted_awaits<'a>(
-    mut awaits: LiftedAwaits,
+    mut awaits: LiftedAwaitExprs,
     env: &mut Env<'a>,
 ) -> Result<LiftedAwaitExprs> {
-    for await_ in awaits.awaits.iter() {
+    for await_ in awaits.iter() {
         if (await_.1).1.is_none() {
             return parsing_error("none pos in lifted awaits", env.mk_none_pos());
         }
     }
-    awaits
-        .awaits
-        .sort_unstable_by(|a1, a2| Pos::cmp(&(a1.1).1, &(a2.1).1));
-    Ok(awaits.awaits)
-}
-
-fn clear_statement_scope<'a, F, R>(env: &mut Env<'a>, f: F) -> R
-where
-    F: FnOnce(&mut Env<'a>) -> R,
-{
-    use LiftedAwaitKind::*;
-    match &env.lifted_awaits {
-        Some(LiftedAwaits { lift_kind, .. }) if *lift_kind == LiftedFromStatement => {
-            let saved_lifted_awaits = env.lifted_awaits.take();
-            let result = f(env);
-            env.lifted_awaits = saved_lifted_awaits;
-            result
-        }
-        _ => f(env),
-    }
-}
-
-fn lift_awaits_in_statement<'a, F>(node: S<'a>, env: &mut Env<'a>, f: F) -> Result<ast::Stmt>
-where
-    F: FnOnce(&mut Env<'a>) -> Result<ast::Stmt>,
-{
-    lift_awaits_in_statement_(Either::Left(node), env, f)
-}
-
-fn strip_parens<'a>(node: S<'a>) -> S<'a> {
-    match node.children {
-        ParenthesizedExpression(c) => strip_parens(&c.expression),
-        BracedExpression(c) => strip_parens(&c.expression),
-        _ => node,
-    }
-}
-
-fn lift_awaits_in_statement_<'a, F>(
-    pos: Either<S<'a>, &Pos>,
-    env: &mut Env<'a>,
-    f: F,
-) -> Result<ast::Stmt>
-where
-    F: FnOnce(&mut Env<'a>) -> Result<ast::Stmt>,
-{
-    use LiftedAwaitKind::*;
-    let (lifted_awaits, result) = match env.lifted_awaits {
-        Some(LiftedAwaits { lift_kind, .. }) if lift_kind == LiftedFromConcurrent => {
-            (None, f(env)?)
-        }
-        _ => {
-            let saved = env.lifted_awaits.replace(LiftedAwaits {
-                awaits: vec![],
-                lift_kind: LiftedFromStatement,
-            });
-            let result = f(env);
-            let lifted_awaits = mem::replace(&mut env.lifted_awaits, saved);
-            let result = result?;
-            (lifted_awaits, result)
-        }
-    };
-    if let Some(lifted_awaits) = lifted_awaits {
-        if !lifted_awaits.awaits.is_empty() {
-            let awaits = process_lifted_awaits(lifted_awaits, env)?;
-            let pos = match pos {
-                Either::Left(n) => p_pos(strip_parens(n), env),
-                Either::Right(p) => p.clone(),
-            };
-            return Ok(ast::Stmt::new(
-                pos,
-                ast::Stmt_::mk_awaitall(awaits, ast::Block(vec![result])),
-            ));
-        }
-    }
-    Ok(result)
+    awaits.sort_unstable_by(|a1, a2| Pos::cmp(&(a1.1).1, &(a2.1).1));
+    Ok(awaits)
 }
 
 fn lift_await<'a>(
@@ -2934,7 +2822,7 @@ fn lift_await<'a>(
             let await_lid = ast::Lid::new(expr.1.clone(), name);
             let await_ = (await_lid, expr);
             if let Some(aw) = env.lifted_awaits.as_mut() {
-                aw.awaits.push(await_)
+                aw.push(await_)
             }
             if location != AsStatement {
                 Expr_::mk_lvar(lid)
@@ -2946,13 +2834,11 @@ fn lift_await<'a>(
 }
 
 fn p_stmt<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
-    clear_statement_scope(env, |e| {
-        let docblock = extract_docblock(node, e);
-        e.push_docblock(docblock);
-        let result = p_stmt_(node, e);
-        e.pop_docblock();
-        result
-    })
+    let docblock = extract_docblock(node, env);
+    env.push_docblock(docblock);
+    let result = p_stmt_(node, env);
+    env.pop_docblock();
+    result
 }
 
 fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
@@ -3015,14 +2901,12 @@ fn p_throw_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a ThrowStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    node: S<'a>,
+    _node: S<'a>,
 ) -> Result<ast::Stmt> {
     use ast::Stmt;
     use ast::Stmt_ as S_;
     let new = Stmt::new;
-    lift_awaits_in_statement(node, env, |e| {
-        Ok(new(pos, S_::mk_throw(p_expr(&c.expression, e)?)))
-    })
+    Ok(new(pos, S_::mk_throw(p_expr(&c.expression, env)?)))
 }
 
 fn p_try_stmt<'a>(
@@ -3225,193 +3109,168 @@ fn p_unset_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a UnsetStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    node: S<'a>,
+    _node: S<'a>,
 ) -> Result<ast::Stmt> {
     use ast::Stmt;
     use ast::Stmt_ as S_;
     let new = Stmt::new;
 
-    let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
-        let args = could_map(&c.variables, e, p_expr_for_normal_argument)?;
-        let unset = match &c.keyword.children {
-            QualifiedName(_) | SimpleTypeSpecifier(_) | Token(_) => {
-                let name = pos_name(&c.keyword, e)?;
-                ast::Expr::new((), name.0.clone(), Expr_::mk_id(name))
-            }
-            _ => missing_syntax("id", &c.keyword, e)?,
-        };
-        Ok(new(
-            pos.clone(),
-            S_::mk_expr(ast::Expr::new(
-                (),
-                pos,
-                Expr_::mk_call(ast::CallExpr {
-                    func: unset,
-                    targs: vec![],
-                    args,
-                    unpacked_arg: None,
-                }),
-            )),
-        ))
+    let args = could_map(&c.variables, env, p_expr_for_normal_argument)?;
+    let unset = match &c.keyword.children {
+        QualifiedName(_) | SimpleTypeSpecifier(_) | Token(_) => {
+            let name = pos_name(&c.keyword, env)?;
+            ast::Expr::new((), name.0.clone(), Expr_::mk_id(name))
+        }
+        _ => missing_syntax("id", &c.keyword, env)?,
     };
-    lift_awaits_in_statement(node, env, f)
+    Ok(new(
+        pos.clone(),
+        S_::mk_expr(ast::Expr::new(
+            (),
+            pos,
+            Expr_::mk_call(ast::CallExpr {
+                func: unset,
+                targs: vec![],
+                args,
+                unpacked_arg: None,
+            }),
+        )),
+    ))
 }
 
 fn p_echo_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a EchoStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    node: S<'a>,
+    _node: S<'a>,
 ) -> Result<ast::Stmt> {
     use ast::Stmt;
     use ast::Stmt_ as S_;
     let new = Stmt::new;
 
-    let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
-        let echo = match &c.keyword.children {
-            QualifiedName(_) | SimpleTypeSpecifier(_) | Token(_) => {
-                let name = pos_name(&c.keyword, e)?;
-                ast::Expr::new((), name.0.clone(), Expr_::mk_id(name))
-            }
-            _ => missing_syntax("id", &c.keyword, e)?,
-        };
-        let args = could_map(&c.expressions, e, p_expr_for_normal_argument)?;
-        Ok(new(
-            pos.clone(),
-            S_::mk_expr(ast::Expr::new(
-                (),
-                pos,
-                Expr_::mk_call(ast::CallExpr {
-                    func: echo,
-                    targs: vec![],
-                    args,
-                    unpacked_arg: None,
-                }),
-            )),
-        ))
+    let echo = match &c.keyword.children {
+        QualifiedName(_) | SimpleTypeSpecifier(_) | Token(_) => {
+            let name = pos_name(&c.keyword, env)?;
+            ast::Expr::new((), name.0.clone(), Expr_::mk_id(name))
+        }
+        _ => missing_syntax("id", &c.keyword, env)?,
     };
-    lift_awaits_in_statement(node, env, f)
+    let args = could_map(&c.expressions, env, p_expr_for_normal_argument)?;
+    Ok(new(
+        pos.clone(),
+        S_::mk_expr(ast::Expr::new(
+            (),
+            pos,
+            Expr_::mk_call(ast::CallExpr {
+                func: echo,
+                targs: vec![],
+                args,
+                unpacked_arg: None,
+            }),
+        )),
+    ))
 }
 
 fn p_return_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a ReturnStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    node: S<'a>,
+    _node: S<'a>,
 ) -> Result<ast::Stmt> {
-    let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
-        let expr = match &c.expression.children {
-            Missing => None,
-            _ => Some(p_expr_with_loc(
-                ExprLocation::RightOfReturn,
-                &c.expression,
-                e,
-                None,
-            )?),
-        };
-        Ok(ast::Stmt::new(pos, ast::Stmt_::mk_return(expr)))
+    let expr = match &c.expression.children {
+        Missing => None,
+        _ => Some(p_expr_with_loc(
+            ExprLocation::RightOfReturn,
+            &c.expression,
+            env,
+            None,
+        )?),
     };
-    if is_simple_await_expression(&c.expression) {
-        f(env)
-    } else {
-        lift_awaits_in_statement(node, env, f)
-    }
+    Ok(ast::Stmt::new(pos, ast::Stmt_::mk_return(expr)))
 }
 
 fn p_foreach_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a ForeachStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    node: S<'a>,
+    _node: S<'a>,
 ) -> Result<ast::Stmt> {
     use ast::Stmt;
     use ast::Stmt_ as S_;
     let new = Stmt::new;
 
-    let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
-        let col = p_expr(&c.collection, e)?;
-        let akw = match token_kind(&c.await_keyword) {
-            Some(TK::Await) => Some(p_pos(&c.await_keyword, e)),
-            _ => None,
-        };
-        let value = p_expr(&c.value, e)?;
-        let akv = match (akw, &c.key.children) {
-            (Some(p), Missing) => ast::AsExpr::AwaitAsV(p, value),
-            (None, Missing) => ast::AsExpr::AsV(value),
-            (Some(p), _) => ast::AsExpr::AwaitAsKv(p, p_expr(&c.key, e)?, value),
-            (None, _) => ast::AsExpr::AsKv(p_expr(&c.key, e)?, value),
-        };
-        let blk = p_block(true, &c.body, e)?;
-        Ok(new(pos, S_::mk_foreach(col, akv, blk)))
+    let col = p_expr(&c.collection, env)?;
+    let akw = match token_kind(&c.await_keyword) {
+        Some(TK::Await) => Some(p_pos(&c.await_keyword, env)),
+        _ => None,
     };
-    lift_awaits_in_statement(node, env, f)
+    let value = p_expr(&c.value, env)?;
+    let akv = match (akw, &c.key.children) {
+        (Some(p), Missing) => ast::AsExpr::AwaitAsV(p, value),
+        (None, Missing) => ast::AsExpr::AsV(value),
+        (Some(p), _) => ast::AsExpr::AwaitAsKv(p, p_expr(&c.key, env)?, value),
+        (None, _) => ast::AsExpr::AsKv(p_expr(&c.key, env)?, value),
+    };
+    let blk = p_block(true, &c.body, env)?;
+    Ok(new(pos, S_::mk_foreach(col, akv, blk)))
 }
 
 fn p_for_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a ForStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    node: S<'a>,
+    _node: S<'a>,
 ) -> Result<ast::Stmt> {
     use ast::Stmt;
     use ast::Stmt_ as S_;
 
-    let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
-        let ini = could_map(&c.initializer, e, p_expr)?;
-        let ctr = map_optional(&c.control, e, p_expr)?;
-        let eol = could_map(&c.end_of_loop, e, p_expr)?;
-        let blk = p_block(true, &c.body, e)?;
-        Ok(Stmt::new(pos, S_::mk_for(ini, ctr, eol, blk)))
-    };
-    lift_awaits_in_statement(node, env, f)
+    let ini = could_map(&c.initializer, env, p_expr)?;
+    let ctr = map_optional(&c.control, env, p_expr)?;
+    let eol = could_map(&c.end_of_loop, env, p_expr)?;
+    let blk = p_block(true, &c.body, env)?;
+    Ok(Stmt::new(pos, S_::mk_for(ini, ctr, eol, blk)))
 }
 
 fn p_using_statement_function_scoped_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a UsingStatementFunctionScopedChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    node: S<'a>,
+    _node: S<'a>,
 ) -> Result<ast::Stmt> {
     use ast::Stmt;
     use ast::Stmt_ as S_;
     let new = Stmt::new;
 
-    let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
-        Ok(new(
-            pos,
-            S_::mk_using(ast::UsingStmt {
-                is_block_scoped: false,
-                has_await: !&c.await_keyword.is_missing(),
-                exprs: p_exprs_with_loc(&c.expression, e)?,
-                block: ast::Block(vec![mk_noop(e)]),
-            }),
-        ))
-    };
-    lift_awaits_in_statement(node, env, f)
+    Ok(new(
+        pos,
+        S_::mk_using(ast::UsingStmt {
+            is_block_scoped: false,
+            has_await: !&c.await_keyword.is_missing(),
+            exprs: p_exprs_with_loc(&c.expression, env)?,
+            block: ast::Block(vec![mk_noop(env)]),
+        }),
+    ))
 }
 
 fn p_using_statement_block_scoped_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a UsingStatementBlockScopedChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    node: S<'a>,
+    _node: S<'a>,
 ) -> Result<ast::Stmt> {
     use ast::Stmt;
     use ast::Stmt_ as S_;
     let new = Stmt::new;
 
-    let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
-        Ok(new(
-            pos,
-            S_::mk_using(ast::UsingStmt {
-                is_block_scoped: true,
-                has_await: !&c.await_keyword.is_missing(),
-                exprs: p_exprs_with_loc(&c.expressions, e)?,
-                block: p_block(false, &c.body, e)?,
-            }),
-        ))
-    };
-    lift_awaits_in_statement(node, env, f)
+    Ok(new(
+        pos,
+        S_::mk_using(ast::UsingStmt {
+            is_block_scoped: true,
+            has_await: !&c.await_keyword.is_missing(),
+            exprs: p_exprs_with_loc(&c.expressions, env)?,
+            block: p_block(false, &c.body, env)?,
+        }),
+    ))
 }
 
 fn p_do_stmt<'a>(
@@ -3437,27 +3296,20 @@ fn p_expression_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a ExpressionStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    node: S<'a>,
+    _node: S<'a>,
 ) -> Result<ast::Stmt> {
     use ast::Stmt;
     use ast::Stmt_ as S_;
     let new = Stmt::new;
 
     let expr = &c.expression;
-    let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
-        if expr.is_missing() {
-            Ok(new(pos, S_::Noop))
-        } else {
-            Ok(new(
-                pos,
-                S_::mk_expr(p_expr_with_loc(ExprLocation::AsStatement, expr, e, None)?),
-            ))
-        }
-    };
-    if is_simple_assignment_await_expression(expr) || is_simple_await_expression(expr) {
-        f(env)
+    if expr.is_missing() {
+        Ok(new(pos, S_::Noop))
     } else {
-        lift_awaits_in_statement(node, env, f)
+        Ok(new(
+            pos,
+            S_::mk_expr(p_expr_with_loc(ExprLocation::AsStatement, expr, env, None)?),
+        ))
     }
 }
 
@@ -3465,30 +3317,27 @@ fn p_if_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a IfStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    node: S<'a>,
+    _node: S<'a>,
 ) -> Result<ast::Stmt> {
     use ast::Stmt;
     use ast::Stmt_ as S_;
     let new = Stmt::new;
 
-    let f = |env: &mut Env<'a>| -> Result<ast::Stmt> {
-        let condition = p_expr(&c.condition, env)?;
-        let statement = p_block(true /* remove noop */, &c.statement, env)?;
-        let else_ = match &c.else_clause.children {
-            ElseClause(c) => p_block(true, &c.statement, env)?,
-            Missing => ast::Block(vec![mk_noop(env)]),
-            _ => missing_syntax("else clause", &c.else_clause, env)?,
-        };
-        Ok(new(pos, S_::mk_if(condition, statement, else_)))
+    let condition = p_expr(&c.condition, env)?;
+    let statement = p_block(true /* remove noop */, &c.statement, env)?;
+    let else_ = match &c.else_clause.children {
+        ElseClause(c) => p_block(true, &c.statement, env)?,
+        Missing => ast::Block(vec![mk_noop(env)]),
+        _ => missing_syntax("else clause", &c.else_clause, env)?,
     };
-    lift_awaits_in_statement(node, env, f)
+    Ok(new(pos, S_::mk_if(condition, statement, else_)))
 }
 
 fn p_switch_stmt_<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a SwitchStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    node: S<'a>,
+    _node: S<'a>,
 ) -> Result<ast::Stmt> {
     use ast::Stmt;
     use ast::Stmt_ as S_;
@@ -3526,59 +3375,53 @@ fn p_switch_stmt_<'a>(
         }
     };
 
-    let f = |env: &mut Env<'a>| -> Result<ast::Stmt> {
-        let cases = itertools::concat(could_map(&c.sections, env, p_section)?);
+    let cases = itertools::concat(could_map(&c.sections, env, p_section)?);
 
-        let last_is_default = matches!(cases.last(), Some(aast::GenCase::Default(_)));
+    let last_is_default = matches!(cases.last(), Some(aast::GenCase::Default(_)));
 
-        let (cases, mut defaults): (Vec<ast::Case>, Vec<ast::DefaultCase>) =
-            cases.into_iter().partition_map(|case| match case {
-                aast::GenCase::Case(x @ aast::Case(..)) => Either::Left(x),
-                aast::GenCase::Default(x @ aast::DefaultCase(..)) => Either::Right(x),
-            });
+    let (cases, mut defaults): (Vec<ast::Case>, Vec<ast::DefaultCase>) =
+        cases.into_iter().partition_map(|case| match case {
+            aast::GenCase::Case(x @ aast::Case(..)) => Either::Left(x),
+            aast::GenCase::Default(x @ aast::DefaultCase(..)) => Either::Right(x),
+        });
 
-        if defaults.len() > 1 {
-            let aast::DefaultCase(pos, _) = &defaults[1];
-            raise_parsing_error_pos(pos, env, &syntax_error::multiple_defaults_in_switch);
+    if defaults.len() > 1 {
+        let aast::DefaultCase(pos, _) = &defaults[1];
+        raise_parsing_error_pos(pos, env, &syntax_error::multiple_defaults_in_switch);
+    }
+
+    let default = match defaults.pop() {
+        Some(default @ aast::DefaultCase(..)) => {
+            if last_is_default {
+                Some(default)
+            } else {
+                let aast::DefaultCase(pos, _) = default;
+                raise_parsing_error_pos(&pos, env, &syntax_error::default_switch_case_not_last);
+                None
+            }
         }
 
-        let default = match defaults.pop() {
-            Some(default @ aast::DefaultCase(..)) => {
-                if last_is_default {
-                    Some(default)
-                } else {
-                    let aast::DefaultCase(pos, _) = default;
-                    raise_parsing_error_pos(&pos, env, &syntax_error::default_switch_case_not_last);
-                    None
-                }
-            }
-
-            None => None,
-        };
-
-        Ok(new(
-            pos,
-            S_::mk_switch(p_expr(&c.expression, env)?, cases, default),
-        ))
+        None => None,
     };
-    lift_awaits_in_statement(node, env, f)
+
+    Ok(new(
+        pos,
+        S_::mk_switch(p_expr(&c.expression, env)?, cases, default),
+    ))
 }
 
 fn p_match_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a MatchStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    node: S<'a>,
+    _node: S<'a>,
 ) -> Result<ast::Stmt> {
-    let f = |env: &mut Env<'a>| -> Result<ast::Stmt> {
-        let expr = p_expr(&c.expression, env)?;
-        let arms = could_map(&c.arms, env, p_match_stmt_arm)?;
-        Ok(ast::Stmt::new(
-            pos,
-            ast::Stmt_::Match(Box::new(ast::StmtMatch { expr, arms })),
-        ))
-    };
-    lift_awaits_in_statement(node, env, f)
+    let expr = p_expr(&c.expression, env)?;
+    let arms = could_map(&c.arms, env, p_match_stmt_arm)?;
+    Ok(ast::Stmt::new(
+        pos,
+        ast::Stmt_::Match(Box::new(ast::StmtMatch { expr, arms })),
+    ))
 }
 
 fn p_match_stmt_arm<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::StmtMatchArm> {
@@ -4559,18 +4402,11 @@ fn p_function_body<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Block> {
                 }
             }
             _ => {
-                let f = |e: &mut Env<'a>| {
-                    let expr = p_expr(node, e)?;
-                    Ok(ast::Stmt::new(
-                        expr.1.clone(),
-                        ast::Stmt_::mk_return(Some(expr)),
-                    ))
-                };
-                if is_simple_await_expression(node) {
-                    Ok(ast::Block(vec![f(e)?]))
-                } else {
-                    Ok(ast::Block(vec![lift_awaits_in_statement(node, e, f)?]))
-                }
+                let expr = p_expr(node, e)?;
+                Ok(ast::Block(vec![ast::Stmt::new(
+                    expr.1.clone(),
+                    ast::Stmt_::mk_return(Some(expr)),
+                )]))
             }
         }
     };

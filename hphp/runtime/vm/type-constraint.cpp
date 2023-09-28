@@ -117,8 +117,11 @@ TypeConstraint TypeConstraint::makeUnion(LowStringPtr typeName, folly::Range<con
 
   TypeConstraintFlags flags = Union;
   UnionTypeMask preciseTypeMask = 0;
+  std::optional<bool> resolved;
   std::vector<ClassConstraint> classesVec;
-  for (auto& tc : tcs) {
+  bool containsNonnull = false;
+
+  auto recordConstraint = [&](const TypeConstraint& tc) -> folly::Optional<TypeConstraint> {
     if (!tc.isCheckable()) {
       // Canonicalization: If we contain a non-checkable member then we're not
       // checkable so just return mixed.
@@ -126,7 +129,15 @@ TypeConstraint TypeConstraint::makeUnion(LowStringPtr typeName, folly::Range<con
     }
 
     // Copy over common flags.
-    flags |= (TypeConstraintFlags)(tc.m_flags & (Nullable | ExtendedHint | TypeVar | Soft | TypeConstant | DisplayNullable | UpperBound | Resolved));
+    flags |= static_cast<TypeConstraintFlags>(
+      tc.m_flags & (
+        Nullable
+        | ExtendedHint
+        | TypeVar
+        | Soft
+        | TypeConstant
+        | DisplayNullable
+        | UpperBound));
 
     switch (tc.type()) {
       case AnnotType::Mixed: {
@@ -134,14 +145,8 @@ TypeConstraint TypeConstraint::makeUnion(LowStringPtr typeName, folly::Range<con
         return TypeConstraint{ AnnotType::Mixed, ExtendedHint | Resolved, ClassConstraint { typeName } };
       }
       case AnnotType::Nonnull: {
-        // Canonicalization: If we have a nonnull then we're just nonnull -
-        // unless we also have a nullable in which case we're mixed.
-        bool hasNull = std::any_of(tcs.begin(), tcs.end(), [](auto& tc) { return tc.isNullable(); });
-        if (hasNull) {
-          return TypeConstraint{ AnnotType::Mixed, ExtendedHint | Resolved, ClassConstraint { typeName } };
-        } else {
-          return TypeConstraint{ AnnotType::Nonnull, ExtendedHint | Resolved, ClassConstraint { typeName } };
-        }
+        containsNonnull = true;
+        break;
       }
       case AnnotType::Null: {
         // Canonicalization: If we expect a null then just apply nullable. Note
@@ -227,22 +232,53 @@ TypeConstraint TypeConstraint::makeUnion(LowStringPtr typeName, folly::Range<con
         assertx(tc.typeName());
         classesVec.emplace_back(tc.m_u.single.class_);
         preciseTypeMask |= kUnionTypeClass;
-        assertx(flags & TypeConstraintFlags::Resolved);
+        // We should never get both resolved and unresolved objects in a single union.
+        assertx(resolved.value_or(true));
+        resolved = true;
         break;
       }
       case AnnotType::Unresolved: {
         assertx(tc.typeName());
         classesVec.emplace_back(tc.m_u.single.class_);
         preciseTypeMask |= kUnionTypeClass;
-        assertx(!(flags & TypeConstraintFlags::Resolved));
+        // We should never get both resolved and unresolved objects in a single union.
+        assertx(!resolved.value_or(false));
+        resolved = false;
         break;
       }
+    }
+
+    return folly::none;
+  };
+
+  for (auto& tc : tcs) {
+    // We only need to do this one level because a union cannot contain a
+    // sub-union.
+    for (auto& sub : eachTypeConstraintInUnion(tc)) {
+      auto result = recordConstraint(sub);
+      if (result) return *result;
+    }
+  }
+
+  if (containsNonnull) {
+    // Canonicalization: If we have a nonnull then we're just nonnull -
+    // unless we also have a nullable in which case we're mixed.
+    if (flags & TypeConstraintFlags::Nullable) {
+      return TypeConstraint{ AnnotType::Mixed, ExtendedHint | Resolved, ClassConstraint { typeName } };
+    } else {
+      return TypeConstraint{ AnnotType::Nonnull, ExtendedHint | Resolved, ClassConstraint { typeName } };
     }
   }
 
   LowPtr<const UnionClassList> classes = nullptr;
   if (!classesVec.empty()) {
       classes = UnionConstraint::allocObjects(std::move(classesVec));
+  }
+
+  // If we haven't seen any objects or unresolved then we're just simple
+  // primitives - which are resolved.
+  if (resolved.value_or(true)) {
+    flags |= Resolved;
   }
 
   return TypeConstraint{ flags, preciseTypeMask, typeName, classes };
@@ -1874,7 +1910,15 @@ void applyFlagsToUB(TypeConstraint& ub, const TypeConstraint& tc) {
 void TcUnionPieceIterator::buildUnionTypeConstraint() {
   using CC = ClassConstraint;
 
-  auto flags = (TypeConstraintFlags)(m_flags & (Nullable | ExtendedHint | TypeVar | Soft | TypeConstant | DisplayNullable | UpperBound | Resolved));
+  auto flags = static_cast<TypeConstraintFlags>(
+    m_flags & (Nullable
+               | ExtendedHint
+               | TypeVar
+               | Soft
+               | TypeConstant
+               | DisplayNullable
+               | UpperBound
+               | Resolved));
 
   // isolate the low bit
   switch (m_mask & -m_mask) {
@@ -1991,12 +2035,18 @@ TcUnionPieceIterator TcUnionPieceView::begin() const {
     switch (m_kind) {
       case Kind::All:
         break;
-      case Kind::ClassesOnly:
-        if (m_tc.m_u.single.type != AnnotType::Object) {
-          // nothing to do
-          it.m_mask = 0;
+      case Kind::ClassesOnly: {
+        switch (m_tc.m_u.single.type) {
+          case AnnotType::Object:
+          case AnnotType::Unresolved:
+            break;
+          default:
+            // nothing to do
+            it.m_mask = 0;
+            break;
         }
         break;
+      }
     }
   }
   return it;

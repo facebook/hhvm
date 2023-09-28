@@ -604,6 +604,26 @@ void suspendFromInlined(IRGS& env, SSATmp* waitHandle) {
   gen(env, Jmp, env.inlineState.returnTarget.back().suspendTarget, waitHandle);
 }
 
+void sideExitFromInlined(IRGS& env, SrcKey target) {
+  assertx(isInlining(env));
+
+  spillInlinedFrames(env);
+
+  auto const irSP = spOffBCFromIRSP(env);
+  auto const invSP = spOffBCFromStackBase(env);
+  // FIXME: we can't assert !target.funcEntry() yet, as func entries may contain
+  // guards that might fail. Ideally we would CallFuncEntry in these situations,
+  // but CallFuncEntry accepts arguments on the stack and we already converted
+  // them to the locals.
+  gen(
+    env,
+    ReqBindJmp,
+    ReqBindJmpData { target, invSP, irSP, target.funcEntry() },
+    sp(env),
+    fp(env)
+  );
+}
+
 bool endCatchFromInlined(IRGS& env) {
   assertx(isInlining(env));
 

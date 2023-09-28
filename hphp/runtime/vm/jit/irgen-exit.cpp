@@ -51,6 +51,11 @@ bool branchesToItself(SrcKey sk) {
  * In all other cases, a ReqBindJmp is generated.
  */
 void exitRequest(IRGS& env, SrcKey target) {
+  if (isInlining(env)) {
+    sideExitFromInlined(env, target);
+    return;
+  }
+
   auto const irSP = spOffBCFromIRSP(env);
   auto const invSP = spOffBCFromStackBase(env);
   if (env.firstBcInst && target == curSrcKey(env)) {
@@ -90,7 +95,6 @@ Block* implMakeExit(IRGS& env, SrcKey targetSk) {
 
   auto const exit = defBlock(env, Block::Hint::Unlikely);
   BlockPusher bp(*env.irb, makeMarker(env, curSrcKey(env)), exit);
-  spillInlinedFrames(env);
   exitRequest(env, targetSk);
   return exit;
 }
@@ -122,7 +126,6 @@ Block* makeExitSlow(IRGS& env) {
 Block* makeExitSurprise(IRGS& env, SrcKey targetSk) {
   auto const exit = defBlock(env, Block::Hint::Unlikely);
   BlockPusher bp(*env.irb, makeMarker(env, curSrcKey(env)), exit);
-  spillInlinedFrames(env);
   gen(env, HandleRequestSurprise);
   exitRequest(env, targetSk);
   return exit;
@@ -132,7 +135,6 @@ Block* makeExitOpt(IRGS& env) {
   always_assert(!isInlining(env));
   auto const exit = defBlock(env, Block::Hint::Unlikely);
   BlockPusher bp(*env.irb, makeMarker(env, curSrcKey(env)), exit);
-  spillInlinedFrames(env);
   auto const data = IRSPRelOffsetData{spOffBCFromIRSP(env)};
   gen(env, ReqRetranslateOpt, data, sp(env), fp(env));
   return exit;

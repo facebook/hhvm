@@ -284,15 +284,20 @@ void endRegion(IRGS& env) {
 
 void endRegion(IRGS& env, SrcKey nextSk) {
   FTRACE(1, "------------------- endRegion ---------------------------\n");
+  assertx(!nextSk.funcEntry());
+
   if (env.irb->inUnreachableState()) {
     // This location is unreachable.  There's no reason to generate code to
     // try to go to the next part of it.
     return;
   }
 
-  spillInlinedFrames(env);
 
-  assertx(!nextSk.funcEntry());
+  if (isInlining(env)) {
+    sideExitFromInlined(env, nextSk);
+    return;
+  }
+
   auto const data = ReqBindJmpData {
     nextSk,
     spOffBCFromStackBase(env),

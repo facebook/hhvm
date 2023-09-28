@@ -15,6 +15,8 @@
 */
 #pragma once
 
+#include "hphp/runtime/vm/srckey.h"
+
 namespace HPHP {
 
 struct Func;
@@ -39,6 +41,11 @@ void retFromInlined(IRGS&);
  * its contents must now reside in waithandle.
  */
 void suspendFromInlined(IRGS&, SSATmp* waithandle);
+
+/*
+ * Side exit the translation from an inlined frame to the specified target.
+ */
+void sideExitFromInlined(IRGS&, SrcKey target);
 
 /*
  * Emit an EndCatch equivalent from an inlined function.

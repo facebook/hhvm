@@ -870,6 +870,25 @@ Block* create_catch_block(
   gen(env, BeginCatch);
   body();
 
+  // Stublogues lack proper frames and need special configuration.
+  if (env.irb->fs().stublogue()) {
+    assertx(!isInlining(env));
+    assertx(mode == EndCatchData::CatchMode::UnwindOnly);
+    auto const data = EndCatchData {
+      spOffBCFromIRSP(env),
+      EndCatchData::CatchMode::UnwindOnly,
+      EndCatchData::FrameMode::Stublogue,
+      EndCatchData::Teardown::NA,
+      EndCatchData::VMSPSyncMode::NA
+    };
+    gen(env, EndCatch, data, fp(env), sp(env));
+    return catchBlock;
+  }
+
+  // Teardown::None can't be used without an empty stack.
+  assertx(IMPLIES(mode == EndCatchData::CatchMode::LocalsDecRefd,
+                  spOffBCFromStackBase(env) == spOffEmpty(env)));
+
   // If we are unwinding from an inlined function, try a special logic that
   // may eliminate the need to spill the current frame.
   if (isInlining(env) && mode == EndCatchData::CatchMode::UnwindOnly) {
@@ -882,20 +901,15 @@ Block* create_catch_block(
     gen(env, StVMReturnAddr, cns(env, 0));
   }
 
-  auto const stublogue = env.irb->fs().stublogue();
-  auto const teardown = stublogue
-    ? EndCatchData::Teardown::NA
+  auto const teardown = mode == EndCatchData::CatchMode::LocalsDecRefd
+    ? EndCatchData::Teardown::None
     : EndCatchData::Teardown::Full;
-  auto const syncVMSP = teardown == EndCatchData::Teardown::NA
-    ? EndCatchData::VMSPSyncMode::NA
-    : EndCatchData::VMSPSyncMode::DonotSync;
   auto const data = EndCatchData {
     spOffBCFromIRSP(env),
     mode,
-    stublogue ?
-      EndCatchData::FrameMode::Stublogue : EndCatchData::FrameMode::Phplogue,
+    EndCatchData::FrameMode::Phplogue,
     teardown,
-    syncVMSP
+    EndCatchData::VMSPSyncMode::DonotSync
   };
   gen(env, EndCatch, data, fp(env), sp(env));
   return catchBlock;

@@ -30,7 +30,7 @@ HTTPSessionAcceptor::HTTPSessionAcceptor(
     std::shared_ptr<HTTPCodecFactory> codecFactory)
     : HTTPAcceptor(accConfig),
       codecFactory_(codecFactory),
-      simpleController_(std::make_shared<SimpleController>(this)) {
+      simpleController_(this) {
   if (!codecFactory_) {
     codecFactory_ =
         std::make_shared<HTTPDefaultSessionCodecFactory>(accConfig_);
@@ -98,7 +98,7 @@ void HTTPSessionAcceptor::onNewConnection(folly::AsyncTransport::UniquePtr sock,
                                 std::move(sock),
                                 localAddress,
                                 *peerAddress,
-                                controller.get(),
+                                controller,
                                 std::move(codec),
                                 tinfo,
                                 sessionInfoCb);

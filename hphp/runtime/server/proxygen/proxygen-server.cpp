@@ -50,8 +50,7 @@ HPHPSessionAcceptor::HPHPSessionAcceptor(
     HPHPWorkerThread *worker)
       : HTTPSessionAcceptor(config),
         m_server(server),
-        m_worker(worker),
-        m_controllerPtr(new proxygen::SimpleController(this)) {
+        m_worker(worker) {
 }
 
 bool HPHPSessionAcceptor::canAccept(const SocketAddress& /*address*/) {

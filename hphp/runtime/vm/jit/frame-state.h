@@ -298,17 +298,11 @@ struct FrameStateMgr final {
 
   /*
    * Finish tracking state for `b' and save the current state to b->next()
-   * (b->taken() is handled in update()).  Also save the out-state if
-   * setSaveOutState() was called on `b'.
+   * (b->taken() is handled in update()).
    *
    * Returns true iff the in-state for the next block has changed.
    */
   bool finishBlock(Block* b);
-
-  /*
-   * Mark that `b' should save its out-state when finishBlock() is called.
-   */
-  void setSaveOutState(Block* b);
 
   /*
    * Save current state of a block so we can resume processing it after working
@@ -324,12 +318,6 @@ struct FrameStateMgr final {
    * Resume processing a block that was stopped by pauseBlock.
    */
   void unpauseBlock(Block*);
-
-  /*
-   * Reset the saved state associated with the given block `b' to match the out
-   * state of the given predecessor `pred', which must have been saved a priori.
-   */
-  void resetBlock(Block* b, Block* pred);
 
   /*
    * Return the post-conditions associated with `exitBlock'.
@@ -376,9 +364,18 @@ struct FrameStateMgr final {
    * frame.
    */
   void resetStackModified()             { cur().stackModified = false; }
-  void setBCSPOff(SBInvOffset o)        { cur().bcSPOff = o; }
-  void incBCSPDepth(int32_t n = 1)      { cur().bcSPOff += n; }
-  void decBCSPDepth(int32_t n = 1)      { cur().bcSPOff -= n; }
+  void setBCSPOff(SBInvOffset o) {
+    assertx(o.offset >= 0);
+    cur().bcSPOff = o;
+  }
+  void incBCSPDepth(int32_t n = 1) {
+    assertx(n >= 0);
+    cur().bcSPOff += n;
+  }
+  void decBCSPDepth(int32_t n = 1) {
+    assertx(bcSPOff().offset >= n);
+    cur().bcSPOff -= n;
+  }
 
   /*
    * Return the LocationState for local `id' or stack element at `off' in the
@@ -507,7 +504,7 @@ private:
   /*
    * Per-block state helpers.
    */
-  bool save(Block* b, Block* pred = nullptr);
+  bool save(Block* b);
   PostConditions collectPostConds();
 
   /*

@@ -202,12 +202,6 @@ struct IRBuilder {
   void setBlock(SrcKey sk, Block* block);
 
   /*
-   * Clear the instructions in `block' and reset its start to the out state of
-   * `pred', which must have been saved.
-   */
-  void resetBlock(Block* block, Block* pred);
-
-  /*
    * Append `block' to the unit.
    *
    * This method is used to implement IR-level control-flow helpers. When doing

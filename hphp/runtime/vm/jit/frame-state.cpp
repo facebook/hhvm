@@ -341,6 +341,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
       }
       // We consider popping an ActRec and args to be synced to memory.
       assertx(cur().bcSPOff == inst->marker().bcSPOff());
+      assertx(cur().bcSPOff.offset >= numCells);
       cur().bcSPOff -= numCells;
     }
     break;
@@ -361,6 +362,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
       }
       // We consider popping an ActRec and args to be synced to memory.
       assertx(cur().bcSPOff == inst->marker().bcSPOff());
+      assertx(cur().bcSPOff.offset >= numCells);
       cur().bcSPOff -= numCells;
     }
     break;
@@ -578,6 +580,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
 
     cur().bcSPOff += extra.cellsPushed;
     cur().bcSPOff -= extra.cellsPopped;
+    assertx(cur().bcSPOff.offset >= 0);
 
     // Be conservative and drop minstr state
     clearMInstr();
@@ -874,7 +877,7 @@ void FrameStateMgr::startBlock(Block* block, bool hasUnprocessedPred) {
     );
   } else if (debug) {
     // NOTE: Highly suspect; different debug vs. non-debug behavior.
-    save(block, nullptr);
+    save(block);
   }
   assertx(!m_stack.empty());
 
@@ -905,20 +908,10 @@ bool FrameStateMgr::finishBlock(Block* block) {
   }
 
   assertx(hasStateFor(block));
-  if (m_states[block].out) {
-    assertx(m_states[block].out->empty());
-    m_states[block].out = m_stack;
-  }
 
   auto changed = false;
   if (!block->back().isTerminal()) changed |= save(block->next());
   return changed;
-}
-
-void FrameStateMgr::setSaveOutState(Block* block) {
-  assertx(hasStateFor(block));
-  assertx(!m_states[block].out || m_states[block].out->empty());
-  m_states[block].out.emplace();
 }
 
 void FrameStateMgr::pauseBlock(Block* block) {
@@ -930,11 +923,6 @@ void FrameStateMgr::pauseBlock(Block* block) {
 void FrameStateMgr::unpauseBlock(Block* block) {
   assertx(hasStateFor(block));
   m_stack = *m_states[block].paused;
-}
-
-void FrameStateMgr::resetBlock(Block* block, Block* pred) {
-  assertx(m_states[pred].out && !m_states[pred].out->empty());
-  m_states[block].in = *m_states[pred].out;
 }
 
 const PostConditions& FrameStateMgr::postConds(Block* exitBlock) const {
@@ -961,7 +949,7 @@ const PostConditions& FrameStateMgr::postConds(Block* exitBlock) const {
  * using either the current state or the out-state of `pred' if we are given
  * one.  Otherwise merge the current state into the existing snapshot.
  */
-bool FrameStateMgr::save(Block* block, Block* pred) {
+bool FrameStateMgr::save(Block* block) {
   ITRACE(4, "Saving current state to B{}:\n{}\n", block->id(), show());
 
   // If the destination block is unreachable, there's no need to merge in the
@@ -975,16 +963,8 @@ bool FrameStateMgr::save(Block* block, Block* pred) {
     changed = merge_into(it->second.in, m_stack);
     ITRACE(4, "Merged state:\n{}\n", show());
   } else {
-    if (pred) {
-      assertx(hasStateFor(pred));
-      assertx(m_states[pred].out);
-      assertx(!m_states[pred].out->empty());
-
-      m_states[block].in = *m_states[pred].out;
-    } else {
-      assertx(!m_stack.empty());
-      m_states[block].in = m_stack;
-    }
+    assertx(!m_stack.empty());
+    m_states[block].in = m_stack;
   }
 
   return changed;
@@ -1014,6 +994,7 @@ void FrameStateMgr::clearForUnprocessedPred() {
 
 void FrameStateMgr::initStack(SSATmp* sp, SBInvOffset irSPOff,
                               SBInvOffset bcSPOff) {
+  assertx(bcSPOff.offset >= 0);
   cur().spValue = sp;
   cur().irSPOff = irSPOff;
   cur().bcSPOff = bcSPOff;
@@ -1040,6 +1021,7 @@ void FrameStateMgr::trackEnterInlineFrame(const IRInstruction* inst) {
   for (auto i = uint32_t{0}; i < kNumActRecCells; ++i) {
     setValue(stk(spOffset + i), nullptr);
   }
+  assertx(cur().bcSPOff.offset >= kNumActRecCells);
   cur().bcSPOff -= kNumActRecCells;
 
   if (callee->isCPPBuiltin()) {

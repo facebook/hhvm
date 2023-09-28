@@ -178,6 +178,21 @@ template<> struct BranchPairImpl<SSATmp*> {
   }
 };
 
+inline void jmp(IRGS& env, Block* target) {
+  // Nothing to do.
+  if (env.irb->inUnreachableState()) return;
+
+  // If the last instruction ends the block, avoid new Jmp-only block.
+  auto const cur = env.irb->curBlock();
+  if (!cur->empty() && cur->back().isBlockEnd()) {
+    assertx(!cur->back().isTerminal());
+    cur->back().setNext(target);
+    return;
+  }
+
+  gen(env, Jmp, target);
+}
+
 /*
  * cond() generates if-then-else blocks within a trace.  The caller supplies
  * lambdas to create the branch, next-body, and taken-body.  The next and
@@ -199,13 +214,16 @@ SSATmp* cond(IRGS& env, Branch branch, Next next, Taken taken) {
   // should union into the phi at the start of the done block, or nullptr,
   // if the block constructor didn't return a tmp.
   auto const jmp_to_done = [&](SSATmp* tmp) -> SSATmp* {
-    if (tmp && env.irb->inUnreachableState()) {
-      return cns(env, TBottom);
-    } else if (tmp) {
-      gen(env, Jmp, done_block, tmp);
-    } else {
-      gen(env, Jmp, done_block);
+    if (!tmp) {
+      jmp(env, done_block);
+      return nullptr;
     }
+
+    if (env.irb->inUnreachableState()) {
+      return cns(env, TBottom);
+    }
+
+    gen(env, Jmp, done_block, tmp);
     return tmp;
   };
 
@@ -213,11 +231,14 @@ SSATmp* cond(IRGS& env, Branch branch, Next next, Taken taken) {
   auto const v1 = jmp_to_done(BranchImpl<T>::go(branch, taken_block, next));
 
   env.irb->appendBlock(taken_block);
-  auto const v2 = jmp_to_done(taken());
+  auto const v2 = !env.irb->inUnreachableState()
+    ? jmp_to_done(taken())
+    : (v1 != nullptr ? cns(env, TBottom) : nullptr);
   assertx(!v1 == !v2);
 
   env.irb->appendBlock(done_block);
   if (v1) {
+    if (env.irb->inUnreachableState()) return cns(env, TBottom);
     auto const bcctx = env.irb->nextBCContext();
     auto const label = env.unit.defLabel(1, done_block, bcctx);
     auto const result = label->dst(0);
@@ -270,88 +291,25 @@ std::pair<SSATmp*, SSATmp*> condPair(IRGS& env,
  *
  * Code emitted in the {next,taken} lambda will be executed iff the branch
  * emitted in the branch lambda is {not,} taken.
- *
- * TODO(#11019533): Fix undefined behavior if any of the blocks ends up
- * unreachable as a result of simplification (or funky irgen).
  */
 template<class Branch, class Next, class Taken>
 void ifThenElse(IRGS& env, Branch branch, Next next, Taken taken) {
-  auto const next_block  = defBlock(env);
   auto const taken_block = defBlock(env);
-  auto const done_block  = defBlock(env);
-
-  branch(taken_block);
-  auto const branch_block = env.irb->curBlock();
-
-  if (branch_block->empty() || !branch_block->back().isBlockEnd()) {
-    gen(env, Jmp, next_block);
-  } else if (!branch_block->back().isTerminal()) {
-    branch_block->back().setNext(next_block);
-  }
-  // The above logic ensures that `branch_block' always ends with an
-  // isBlockEnd() instruction, so its out state is meaningful.
-  env.irb->fs().setSaveOutState(branch_block);
-  env.irb->appendBlock(next_block);
-  next();
-
-  // Patch the last block added by the Next lambda to jump to the done block.
-  // Note that last might not be taken_block.
-  auto const cur = env.irb->curBlock();
-  if (cur->empty() || !cur->back().isBlockEnd()) {
-    gen(env, Jmp, done_block);
-  } else if (!cur->back().isTerminal()) {
-    cur->back().setNext(done_block);
-  }
-  env.irb->appendBlock(taken_block);
-  taken();
-
-  // Patch the last block added by the Taken lambda to jump to the done block.
-  // Note that last might not be taken_block.
-  auto const last = env.irb->curBlock();
-  if (last->empty() || !last->back().isBlockEnd()) {
-    gen(env, Jmp, done_block);
-  } else if (!last->back().isTerminal()) {
-    last->back().setNext(done_block);
-  }
-  env.irb->appendBlock(done_block);
-}
-
-/*
- * Implementation for ifThen() and ifElse().
- *
- * TODO(#11019533): Fix undefined behavior if any of the blocks ends up
- * unreachable as a result of simplification (or funky irgen).
- */
-template<bool on_true, class Branch, class Succ>
-void ifBranch(IRGS& env, Branch branch, Succ succ) {
-  auto const succ_block = defBlock(env);
   auto const done_block = defBlock(env);
 
-  auto const cond_block    = on_true ? succ_block : done_block;
-  auto const default_block = on_true ? done_block : succ_block;
+  branch(taken_block);
 
-  branch(cond_block);
-  auto const branch_block = env.irb->curBlock();
-
-  if (branch_block->empty() || !branch_block->back().isBlockEnd()) {
-    gen(env, Jmp, default_block);
-  } else if (!branch_block->back().isTerminal()) {
-    branch_block->back().setNext(default_block);
+  if (!env.irb->inUnreachableState()) {
+    next();
+    jmp(env, done_block);
   }
-  // The above logic ensures that `branch_block' always ends with an
-  // isBlockEnd() instruction, so its out state is meaningful.
-  env.irb->fs().setSaveOutState(branch_block);
-  env.irb->appendBlock(succ_block);
-  succ();
 
-  // Patch the last block added by `succ' to jump to the done block.  Note that
-  // `last' might not be `succ_block'.
-  auto const last = env.irb->curBlock();
-  if (last->empty() || !last->back().isBlockEnd()) {
-    gen(env, Jmp, done_block);
-  } else if (!last->back().isTerminal()) {
-    last->back().setNext(done_block);
+  env.irb->appendBlock(taken_block);
+  if (!env.irb->inUnreachableState()) {
+    taken();
+    jmp(env, done_block);
   }
+
   env.irb->appendBlock(done_block);
 }
 
@@ -363,7 +321,7 @@ void ifBranch(IRGS& env, Branch branch, Succ succ) {
  */
 template<class Branch, class Taken>
 void ifThen(IRGS& env, Branch branch, Taken taken) {
-  ifBranch<true>(env, branch, taken);
+  ifThenElse(env, branch, []{}, taken);
 }
 
 /*
@@ -374,7 +332,16 @@ void ifThen(IRGS& env, Branch branch, Taken taken) {
  */
 template<class Branch, class Next>
 void ifElse(IRGS& env, Branch branch, Next next) {
-  ifBranch<false>(env, branch, next);
+  auto const done_block = defBlock(env);
+
+  branch(done_block);
+
+  if (!env.irb->inUnreachableState()) {
+    next();
+    jmp(env, done_block);
+  }
+
+  env.irb->appendBlock(done_block);
 }
 
 /*

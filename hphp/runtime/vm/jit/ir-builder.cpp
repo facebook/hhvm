@@ -1178,11 +1178,6 @@ void IRBuilder::appendBlock(Block* block) {
   }
 }
 
-void IRBuilder::resetBlock(Block* block, Block* pred) {
-  block->instrs().clear();
-  m_state.resetBlock(block, pred);
-}
-
 void IRBuilder::resetOffsetMapping() {
   m_skToBlockMap.clear();
 }

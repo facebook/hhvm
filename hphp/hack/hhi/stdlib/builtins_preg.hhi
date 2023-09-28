@@ -174,6 +174,10 @@ function preg_split_with_error(
   int $flags = 0,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
+function preg_get_error_message_if_invalid(
+  string $pattern,
+)[]: ?string;
+<<__PHPStdLib>>
 function preg_quote(
   string $str,
   HH\FIXME\MISSING_PARAM_TYPE $delimiter = null,

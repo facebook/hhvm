@@ -31,6 +31,9 @@ class codegen_data {
   // the import path for the supporting library
   std::string thrift_lib_import =
       "github.com/facebook/fbthrift/thrift/lib/go/thrift";
+  // the import path for the supporting metadata library
+  std::string thrift_metadata_import =
+      "github.com/facebook/fbthrift/thrift/lib/thrift/metadata";
   // package name override (otherwise inferred from thrift file by default)
   std::string package_override;
 
@@ -43,6 +46,8 @@ class codegen_data {
   // whether to generate "legacy" setters which do not properly support optional
   // fields (to make the migration easier)
   bool compat_setters = true;
+  // whether to generate Thrift metadata
+  bool gen_metadata = true;
 
   // Records field names for every struct in the program.
   // This is needed to resolve some edge case name collisions.
@@ -59,6 +64,8 @@ class codegen_data {
   void compute_go_package_aliases();
   void compute_struct_to_field_names();
   void compute_service_to_req_resp_structs();
+
+  bool is_current_program(const t_program* program);
 
   std::string get_go_package_alias(const t_program* program);
   std::string go_package_alias_prefix(const t_program* program);
@@ -78,6 +85,7 @@ class codegen_data {
       {"fmt", 0},
       {"strings", 0},
       {"sync", 0},
+      {"metadata", 0},
   };
 };
 

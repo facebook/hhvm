@@ -16,9 +16,9 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background
 var _ = fmt.Printf
-var _ = thrift.ZERO
 var _ = strings.Split
 var _ = sync.Mutex{}
+var _ = thrift.ZERO
 
 
 
@@ -330,6 +330,18 @@ type MyServiceProcessor struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorContext = &MyServiceProcessor{}
 
+func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {
+    p := &MyServiceProcessor{
+        handler:            handler,
+        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
+        functionServiceMap: make(map[string]string),
+    }
+    p.AddToProcessorMap("foo", &procFuncMyServiceFoo{handler: handler})
+    p.AddToFunctionServiceMap("foo", "MyService")
+
+    return p
+}
+
 func (p *MyServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
     p.processorMap[key] = processor
 }
@@ -351,18 +363,6 @@ func (p *MyServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionC
 
 func (p *MyServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
-}
-
-func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {
-    p := &MyServiceProcessor{
-        handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
-        functionServiceMap: make(map[string]string),
-    }
-    p.AddToProcessorMap("foo", &procFuncMyServiceFoo{handler: handler})
-    p.AddToFunctionServiceMap("foo", "MyService")
-
-    return p
 }
 
 

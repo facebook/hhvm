@@ -16,9 +16,9 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background
 var _ = fmt.Printf
-var _ = thrift.ZERO
 var _ = strings.Split
 var _ = sync.Mutex{}
+var _ = thrift.ZERO
 
 
 
@@ -1669,6 +1669,24 @@ type RaiserProcessor struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorContext = &RaiserProcessor{}
 
+func NewRaiserProcessor(handler Raiser) *RaiserProcessor {
+    p := &RaiserProcessor{
+        handler:            handler,
+        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
+        functionServiceMap: make(map[string]string),
+    }
+    p.AddToProcessorMap("doBland", &procFuncRaiserDoBland{handler: handler})
+    p.AddToProcessorMap("doRaise", &procFuncRaiserDoRaise{handler: handler})
+    p.AddToProcessorMap("get200", &procFuncRaiserGet200{handler: handler})
+    p.AddToProcessorMap("get500", &procFuncRaiserGet500{handler: handler})
+    p.AddToFunctionServiceMap("doBland", "Raiser")
+    p.AddToFunctionServiceMap("doRaise", "Raiser")
+    p.AddToFunctionServiceMap("get200", "Raiser")
+    p.AddToFunctionServiceMap("get500", "Raiser")
+
+    return p
+}
+
 func (p *RaiserProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
     p.processorMap[key] = processor
 }
@@ -1690,24 +1708,6 @@ func (p *RaiserProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionCont
 
 func (p *RaiserProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
-}
-
-func NewRaiserProcessor(handler Raiser) *RaiserProcessor {
-    p := &RaiserProcessor{
-        handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
-        functionServiceMap: make(map[string]string),
-    }
-    p.AddToProcessorMap("doBland", &procFuncRaiserDoBland{handler: handler})
-    p.AddToProcessorMap("doRaise", &procFuncRaiserDoRaise{handler: handler})
-    p.AddToProcessorMap("get200", &procFuncRaiserGet200{handler: handler})
-    p.AddToProcessorMap("get500", &procFuncRaiserGet500{handler: handler})
-    p.AddToFunctionServiceMap("doBland", "Raiser")
-    p.AddToFunctionServiceMap("doRaise", "Raiser")
-    p.AddToFunctionServiceMap("get200", "Raiser")
-    p.AddToFunctionServiceMap("get500", "Raiser")
-
-    return p
 }
 
 

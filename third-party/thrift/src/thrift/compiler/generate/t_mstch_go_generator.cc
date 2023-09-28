@@ -693,8 +693,14 @@ void t_mstch_go_generator::generate_program() {
   if (auto thrift_lib_import = get_option("thrift_import")) {
     data_.thrift_lib_import = *thrift_lib_import;
   }
+  if (auto thrift_metadata_import = get_option("thrift_metadata_import")) {
+    data_.thrift_metadata_import = *thrift_metadata_import;
+  }
   if (auto package_override = get_option("package")) {
     data_.package_override = *package_override;
+  }
+  if (auto gen_metadata = get_option("gen_metadata")) {
+    data_.gen_metadata = (gen_metadata.value() == "true");
   }
 
   const auto& prog = cached_program(program);

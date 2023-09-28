@@ -154,8 +154,12 @@ void codegen_data::compute_service_to_req_resp_structs() {
   }
 }
 
+bool codegen_data::is_current_program(const t_program* program) {
+  return (program == current_program_);
+}
+
 std::string codegen_data::get_go_package_alias(const t_program* program) {
-  if (program == current_program_) {
+  if (is_current_program(program)) {
     return "";
   }
 

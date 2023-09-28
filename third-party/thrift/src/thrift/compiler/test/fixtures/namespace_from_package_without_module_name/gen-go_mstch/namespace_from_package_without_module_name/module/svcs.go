@@ -16,9 +16,9 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background
 var _ = fmt.Printf
-var _ = thrift.ZERO
 var _ = strings.Split
 var _ = sync.Mutex{}
+var _ = thrift.ZERO
 
 
 
@@ -473,6 +473,18 @@ type TestServiceProcessor struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorContext = &TestServiceProcessor{}
 
+func NewTestServiceProcessor(handler TestService) *TestServiceProcessor {
+    p := &TestServiceProcessor{
+        handler:            handler,
+        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
+        functionServiceMap: make(map[string]string),
+    }
+    p.AddToProcessorMap("init", &procFuncTestServiceInit{handler: handler})
+    p.AddToFunctionServiceMap("init", "TestService")
+
+    return p
+}
+
 func (p *TestServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
     p.processorMap[key] = processor
 }
@@ -494,18 +506,6 @@ func (p *TestServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunctio
 
 func (p *TestServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
-}
-
-func NewTestServiceProcessor(handler TestService) *TestServiceProcessor {
-    p := &TestServiceProcessor{
-        handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
-        functionServiceMap: make(map[string]string),
-    }
-    p.AddToProcessorMap("init", &procFuncTestServiceInit{handler: handler})
-    p.AddToFunctionServiceMap("init", "TestService")
-
-    return p
 }
 
 

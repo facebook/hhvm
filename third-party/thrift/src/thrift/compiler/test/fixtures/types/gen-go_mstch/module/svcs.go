@@ -18,9 +18,9 @@ var _ = included.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background
 var _ = fmt.Printf
-var _ = thrift.ZERO
 var _ = strings.Split
 var _ = sync.Mutex{}
+var _ = thrift.ZERO
 
 
 
@@ -929,6 +929,20 @@ type SomeServiceProcessor struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorContext = &SomeServiceProcessor{}
 
+func NewSomeServiceProcessor(handler SomeService) *SomeServiceProcessor {
+    p := &SomeServiceProcessor{
+        handler:            handler,
+        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
+        functionServiceMap: make(map[string]string),
+    }
+    p.AddToProcessorMap("bounce_map", &procFuncSomeServiceBounceMap{handler: handler})
+    p.AddToProcessorMap("binary_keyed_map", &procFuncSomeServiceBinaryKeyedMap{handler: handler})
+    p.AddToFunctionServiceMap("bounce_map", "SomeService")
+    p.AddToFunctionServiceMap("binary_keyed_map", "SomeService")
+
+    return p
+}
+
 func (p *SomeServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
     p.processorMap[key] = processor
 }
@@ -950,20 +964,6 @@ func (p *SomeServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunctio
 
 func (p *SomeServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
-}
-
-func NewSomeServiceProcessor(handler SomeService) *SomeServiceProcessor {
-    p := &SomeServiceProcessor{
-        handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
-        functionServiceMap: make(map[string]string),
-    }
-    p.AddToProcessorMap("bounce_map", &procFuncSomeServiceBounceMap{handler: handler})
-    p.AddToProcessorMap("binary_keyed_map", &procFuncSomeServiceBinaryKeyedMap{handler: handler})
-    p.AddToFunctionServiceMap("bounce_map", "SomeService")
-    p.AddToFunctionServiceMap("binary_keyed_map", "SomeService")
-
-    return p
 }
 
 

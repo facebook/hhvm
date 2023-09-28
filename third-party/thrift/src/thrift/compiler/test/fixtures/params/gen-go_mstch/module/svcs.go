@@ -16,9 +16,9 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background
 var _ = fmt.Printf
-var _ = thrift.ZERO
 var _ = strings.Split
 var _ = sync.Mutex{}
+var _ = thrift.ZERO
 
 
 
@@ -1996,6 +1996,26 @@ type NestedContainersProcessor struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorContext = &NestedContainersProcessor{}
 
+func NewNestedContainersProcessor(handler NestedContainers) *NestedContainersProcessor {
+    p := &NestedContainersProcessor{
+        handler:            handler,
+        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
+        functionServiceMap: make(map[string]string),
+    }
+    p.AddToProcessorMap("mapList", &procFuncNestedContainersMapList{handler: handler})
+    p.AddToProcessorMap("mapSet", &procFuncNestedContainersMapSet{handler: handler})
+    p.AddToProcessorMap("listMap", &procFuncNestedContainersListMap{handler: handler})
+    p.AddToProcessorMap("listSet", &procFuncNestedContainersListSet{handler: handler})
+    p.AddToProcessorMap("turtles", &procFuncNestedContainersTurtles{handler: handler})
+    p.AddToFunctionServiceMap("mapList", "NestedContainers")
+    p.AddToFunctionServiceMap("mapSet", "NestedContainers")
+    p.AddToFunctionServiceMap("listMap", "NestedContainers")
+    p.AddToFunctionServiceMap("listSet", "NestedContainers")
+    p.AddToFunctionServiceMap("turtles", "NestedContainers")
+
+    return p
+}
+
 func (p *NestedContainersProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
     p.processorMap[key] = processor
 }
@@ -2017,26 +2037,6 @@ func (p *NestedContainersProcessor) ProcessorMap() map[string]thrift.ProcessorFu
 
 func (p *NestedContainersProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
-}
-
-func NewNestedContainersProcessor(handler NestedContainers) *NestedContainersProcessor {
-    p := &NestedContainersProcessor{
-        handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
-        functionServiceMap: make(map[string]string),
-    }
-    p.AddToProcessorMap("mapList", &procFuncNestedContainersMapList{handler: handler})
-    p.AddToProcessorMap("mapSet", &procFuncNestedContainersMapSet{handler: handler})
-    p.AddToProcessorMap("listMap", &procFuncNestedContainersListMap{handler: handler})
-    p.AddToProcessorMap("listSet", &procFuncNestedContainersListSet{handler: handler})
-    p.AddToProcessorMap("turtles", &procFuncNestedContainersTurtles{handler: handler})
-    p.AddToFunctionServiceMap("mapList", "NestedContainers")
-    p.AddToFunctionServiceMap("mapSet", "NestedContainers")
-    p.AddToFunctionServiceMap("listMap", "NestedContainers")
-    p.AddToFunctionServiceMap("listSet", "NestedContainers")
-    p.AddToFunctionServiceMap("turtles", "NestedContainers")
-
-    return p
 }
 
 

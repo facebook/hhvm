@@ -16,9 +16,9 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background
 var _ = fmt.Printf
-var _ = thrift.ZERO
 var _ = strings.Split
 var _ = sync.Mutex{}
+var _ = thrift.ZERO
 
 
 
@@ -954,6 +954,20 @@ type CProcessor struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorContext = &CProcessor{}
 
+func NewCProcessor(handler C) *CProcessor {
+    p := &CProcessor{
+        handler:            handler,
+        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
+        functionServiceMap: make(map[string]string),
+    }
+    p.AddToProcessorMap("f", &procFuncCF{handler: handler})
+    p.AddToProcessorMap("thing", &procFuncCThing{handler: handler})
+    p.AddToFunctionServiceMap("f", "C")
+    p.AddToFunctionServiceMap("thing", "C")
+
+    return p
+}
+
 func (p *CProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
     p.processorMap[key] = processor
 }
@@ -975,20 +989,6 @@ func (p *CProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
 
 func (p *CProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
-}
-
-func NewCProcessor(handler C) *CProcessor {
-    p := &CProcessor{
-        handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
-        functionServiceMap: make(map[string]string),
-    }
-    p.AddToProcessorMap("f", &procFuncCF{handler: handler})
-    p.AddToProcessorMap("thing", &procFuncCThing{handler: handler})
-    p.AddToFunctionServiceMap("f", "C")
-    p.AddToFunctionServiceMap("thing", "C")
-
-    return p
 }
 
 

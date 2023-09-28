@@ -36,32 +36,6 @@ type {{service:go_name}}Processor struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorContext = &{{service:go_name}}Processor{}
 
-{{^service:extends?}}
-func (p *{{service:go_name}}Processor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
-    p.processorMap[key] = processor
-}
-
-func (p *{{service:go_name}}Processor) AddToFunctionServiceMap(key, service string) {
-    p.functionServiceMap[key] = service
-}
-
-func (p *{{service:go_name}}Processor) GetProcessorFunctionContext{{!
-  }}(key string) (processor thrift.ProcessorFunctionContext, err error) {
-    if processor, ok := p.processorMap[key]; ok {
-        return processor, nil
-    }
-    return nil, nil
-}
-
-func (p *{{service:go_name}}Processor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
-    return p.processorMap
-}
-
-func (p *{{service:go_name}}Processor) FunctionServiceMap() map[string]string {
-    return p.functionServiceMap
-}
-{{/service:extends?}}
-
 func New{{service:go_name}}Processor(handler {{service:go_name}}) *{{service:go_name}}Processor {
     p := &{{service:go_name}}Processor{
     {{#service:extends?}}
@@ -88,6 +62,32 @@ func New{{service:go_name}}Processor(handler {{service:go_name}}) *{{service:go_
 
     return p
 }
+{{^service:extends?}}
+
+func (p *{{service:go_name}}Processor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
+    p.processorMap[key] = processor
+}
+
+func (p *{{service:go_name}}Processor) AddToFunctionServiceMap(key, service string) {
+    p.functionServiceMap[key] = service
+}
+
+func (p *{{service:go_name}}Processor) GetProcessorFunctionContext{{!
+  }}(key string) (processor thrift.ProcessorFunctionContext, err error) {
+    if processor, ok := p.processorMap[key]; ok {
+        return processor, nil
+    }
+    return nil, nil
+}
+
+func (p *{{service:go_name}}Processor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
+    return p.processorMap
+}
+
+func (p *{{service:go_name}}Processor) FunctionServiceMap() map[string]string {
+    return p.functionServiceMap
+}
+{{/service:extends?}}
 
 {{#service:functions}}
 {{#function:go_supported?}}

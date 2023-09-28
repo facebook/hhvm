@@ -16,9 +16,9 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background
 var _ = fmt.Printf
-var _ = thrift.ZERO
 var _ = strings.Split
 var _ = sync.Mutex{}
+var _ = thrift.ZERO
 
 
 
@@ -330,6 +330,18 @@ type MyRootProcessor struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorContext = &MyRootProcessor{}
 
+func NewMyRootProcessor(handler MyRoot) *MyRootProcessor {
+    p := &MyRootProcessor{
+        handler:            handler,
+        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
+        functionServiceMap: make(map[string]string),
+    }
+    p.AddToProcessorMap("do_root", &procFuncMyRootDoRoot{handler: handler})
+    p.AddToFunctionServiceMap("do_root", "MyRoot")
+
+    return p
+}
+
 func (p *MyRootProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
     p.processorMap[key] = processor
 }
@@ -351,18 +363,6 @@ func (p *MyRootProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionCont
 
 func (p *MyRootProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
-}
-
-func NewMyRootProcessor(handler MyRoot) *MyRootProcessor {
-    p := &MyRootProcessor{
-        handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
-        functionServiceMap: make(map[string]string),
-    }
-    p.AddToProcessorMap("do_root", &procFuncMyRootDoRoot{handler: handler})
-    p.AddToFunctionServiceMap("do_root", "MyRoot")
-
-    return p
 }
 
 
@@ -733,7 +733,6 @@ type MyNodeProcessor struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorContext = &MyNodeProcessor{}
-
 
 func NewMyNodeProcessor(handler MyNode) *MyNodeProcessor {
     p := &MyNodeProcessor{
@@ -1113,7 +1112,6 @@ type MyLeafProcessor struct {
 }
 // Compile time interface enforcer
 var _ thrift.ProcessorContext = &MyLeafProcessor{}
-
 
 func NewMyLeafProcessor(handler MyLeaf) *MyLeafProcessor {
     p := &MyLeafProcessor{

@@ -14,8 +14,8 @@ import (
 var _ = includes.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
-var _ = thrift.ZERO
 var _ = strings.Split
+var _ = thrift.ZERO
 
 
 type MyStruct struct {

@@ -16,9 +16,9 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background
 var _ = fmt.Printf
-var _ = thrift.ZERO
 var _ = strings.Split
 var _ = sync.Mutex{}
+var _ = thrift.ZERO
 
 
 
@@ -4902,29 +4902,6 @@ type GetEntityProcessor struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorContext = &GetEntityProcessor{}
 
-func (p *GetEntityProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
-    p.processorMap[key] = processor
-}
-
-func (p *GetEntityProcessor) AddToFunctionServiceMap(key, service string) {
-    p.functionServiceMap[key] = service
-}
-
-func (p *GetEntityProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext, err error) {
-    if processor, ok := p.processorMap[key]; ok {
-        return processor, nil
-    }
-    return nil, nil
-}
-
-func (p *GetEntityProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
-    return p.processorMap
-}
-
-func (p *GetEntityProcessor) FunctionServiceMap() map[string]string {
-    return p.functionServiceMap
-}
-
 func NewGetEntityProcessor(handler GetEntity) *GetEntityProcessor {
     p := &GetEntityProcessor{
         handler:            handler,
@@ -4963,6 +4940,29 @@ func NewGetEntityProcessor(handler GetEntity) *GetEntityProcessor {
     p.AddToFunctionServiceMap("getCtx1Collision", "GetEntity")
 
     return p
+}
+
+func (p *GetEntityProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
+    p.processorMap[key] = processor
+}
+
+func (p *GetEntityProcessor) AddToFunctionServiceMap(key, service string) {
+    p.functionServiceMap[key] = service
+}
+
+func (p *GetEntityProcessor) GetProcessorFunctionContext(key string) (processor thrift.ProcessorFunctionContext, err error) {
+    if processor, ok := p.processorMap[key]; ok {
+        return processor, nil
+    }
+    return nil, nil
+}
+
+func (p *GetEntityProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionContext {
+    return p.processorMap
+}
+
+func (p *GetEntityProcessor) FunctionServiceMap() map[string]string {
+    return p.functionServiceMap
 }
 
 

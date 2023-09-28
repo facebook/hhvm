@@ -16,9 +16,9 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background
 var _ = fmt.Printf
-var _ = thrift.ZERO
 var _ = strings.Split
 var _ = sync.Mutex{}
+var _ = thrift.ZERO
 
 
 
@@ -643,6 +643,18 @@ type ServiceProcessor struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorContext = &ServiceProcessor{}
 
+func NewServiceProcessor(handler Service) *ServiceProcessor {
+    p := &ServiceProcessor{
+        handler:            handler,
+        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
+        functionServiceMap: make(map[string]string),
+    }
+    p.AddToProcessorMap("func", &procFuncServiceFunc{handler: handler})
+    p.AddToFunctionServiceMap("func", "Service")
+
+    return p
+}
+
 func (p *ServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
     p.processorMap[key] = processor
 }
@@ -664,18 +676,6 @@ func (p *ServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionCon
 
 func (p *ServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
-}
-
-func NewServiceProcessor(handler Service) *ServiceProcessor {
-    p := &ServiceProcessor{
-        handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
-        functionServiceMap: make(map[string]string),
-    }
-    p.AddToProcessorMap("func", &procFuncServiceFunc{handler: handler})
-    p.AddToFunctionServiceMap("func", "Service")
-
-    return p
 }
 
 
@@ -1528,6 +1528,20 @@ type AdapterServiceProcessor struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorContext = &AdapterServiceProcessor{}
 
+func NewAdapterServiceProcessor(handler AdapterService) *AdapterServiceProcessor {
+    p := &AdapterServiceProcessor{
+        handler:            handler,
+        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
+        functionServiceMap: make(map[string]string),
+    }
+    p.AddToProcessorMap("count", &procFuncAdapterServiceCount{handler: handler})
+    p.AddToProcessorMap("adaptedTypes", &procFuncAdapterServiceAdaptedTypes{handler: handler})
+    p.AddToFunctionServiceMap("count", "AdapterService")
+    p.AddToFunctionServiceMap("adaptedTypes", "AdapterService")
+
+    return p
+}
+
 func (p *AdapterServiceProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
     p.processorMap[key] = processor
 }
@@ -1549,20 +1563,6 @@ func (p *AdapterServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunc
 
 func (p *AdapterServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
-}
-
-func NewAdapterServiceProcessor(handler AdapterService) *AdapterServiceProcessor {
-    p := &AdapterServiceProcessor{
-        handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
-        functionServiceMap: make(map[string]string),
-    }
-    p.AddToProcessorMap("count", &procFuncAdapterServiceCount{handler: handler})
-    p.AddToProcessorMap("adaptedTypes", &procFuncAdapterServiceAdaptedTypes{handler: handler})
-    p.AddToFunctionServiceMap("count", "AdapterService")
-    p.AddToFunctionServiceMap("adaptedTypes", "AdapterService")
-
-    return p
 }
 
 

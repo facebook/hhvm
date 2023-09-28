@@ -18,9 +18,9 @@ var _ = module0.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background
 var _ = fmt.Printf
-var _ = thrift.ZERO
 var _ = strings.Split
 var _ = sync.Mutex{}
+var _ = thrift.ZERO
 
 
 
@@ -1215,6 +1215,22 @@ type FinderProcessor struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorContext = &FinderProcessor{}
 
+func NewFinderProcessor(handler Finder) *FinderProcessor {
+    p := &FinderProcessor{
+        handler:            handler,
+        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
+        functionServiceMap: make(map[string]string),
+    }
+    p.AddToProcessorMap("byPlate", &procFuncFinderByPlate{handler: handler})
+    p.AddToProcessorMap("aliasByPlate", &procFuncFinderAliasByPlate{handler: handler})
+    p.AddToProcessorMap("previousPlate", &procFuncFinderPreviousPlate{handler: handler})
+    p.AddToFunctionServiceMap("byPlate", "Finder")
+    p.AddToFunctionServiceMap("aliasByPlate", "Finder")
+    p.AddToFunctionServiceMap("previousPlate", "Finder")
+
+    return p
+}
+
 func (p *FinderProcessor) AddToProcessorMap(key string, processor thrift.ProcessorFunctionContext) {
     p.processorMap[key] = processor
 }
@@ -1236,22 +1252,6 @@ func (p *FinderProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionCont
 
 func (p *FinderProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
-}
-
-func NewFinderProcessor(handler Finder) *FinderProcessor {
-    p := &FinderProcessor{
-        handler:            handler,
-        processorMap:       make(map[string]thrift.ProcessorFunctionContext),
-        functionServiceMap: make(map[string]string),
-    }
-    p.AddToProcessorMap("byPlate", &procFuncFinderByPlate{handler: handler})
-    p.AddToProcessorMap("aliasByPlate", &procFuncFinderAliasByPlate{handler: handler})
-    p.AddToProcessorMap("previousPlate", &procFuncFinderPreviousPlate{handler: handler})
-    p.AddToFunctionServiceMap("byPlate", "Finder")
-    p.AddToFunctionServiceMap("aliasByPlate", "Finder")
-    p.AddToFunctionServiceMap("previousPlate", "Finder")
-
-    return p
 }
 
 

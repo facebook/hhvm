@@ -62,14 +62,18 @@ class MapTests(unittest.TestCase):
         self.assertEqual(x["test"], "value")
         self.assertEqual(x[MyStringEnum.test], "value")
         with self.assertRaises(KeyError):
+            # pyre-fixme[6]: For 1st argument expected `str` but got `int`.
             x[5]
         with self.assertRaises(KeyError):
+            # pyre-fixme[6]: For 1st argument expected `str` but got `Dict[str, str]`.
             x[x]
 
     def test_get(self) -> None:
         x = StrStrMap({"test": "value"})
         self.assertEqual(x.get("test"), "value")
+        # pyre-fixme[6]: For 1st argument expected `str` but got `int`.
         self.assertIs(x.get(5), None)
+        # pyre-fixme[6]: For 1st argument expected `str` but got `Dict[str, str]`.
         self.assertIs(x.get(x), None)
 
     def test_contains(self) -> None:

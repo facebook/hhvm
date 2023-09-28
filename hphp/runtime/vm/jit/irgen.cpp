@@ -118,18 +118,25 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
      */
     check_catch_stack_state(env, inst);
     auto const offsetToAdjustSPForCall = [&]() -> int32_t {
-      if (inst->is(Call)) {
-        auto const extra = inst->extra<Call>();
-        return extra->numInputs() + kNumActRecCells + extra->numOut;
+      switch (inst->op()) {
+        case Call: {
+          auto const extra = inst->extra<Call>();
+          return extra->numInputs() + kNumActRecCells + extra->numOut;
+        }
+        case CallFuncEntry: {
+          auto const callee = inst->extra<CallFuncEntry>()->target.func();
+          return
+            callee->numFuncEntryInputs() +
+            kNumActRecCells +
+            callee->numInOutParams();
+        }
+        case InlineSideExit: {
+          auto const callee = inst->extra<InlineSideExit>()->callee;
+          return callee->numInOutParams();
+        }
+        default:
+          return 0;
       }
-      if (inst->is(CallFuncEntry)) {
-        auto const callee = inst->extra<CallFuncEntry>()->target.func();
-        return
-          callee->numFuncEntryInputs() +
-          kNumActRecCells +
-          callee->numInOutParams();
-      }
-      return 0;
     }();
     auto const catchMode = [&]() {
       if (inst->is(ReturnHook,
@@ -163,7 +170,7 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
     inst->maySyncVMRegsWithSources() &&
     !inst->marker().prologue() &&
     !inst->marker().sk().funcEntry() &&
-    !inst->is(Call, CallFuncEntry, ContEnter) &&
+    !inst->is(Call, CallFuncEntry, ContEnter, InlineSideExit) &&
     (env.unit.numInsts() % 3 == 0);
 
   if (shouldStressEagerSync) {

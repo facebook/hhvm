@@ -1598,6 +1598,31 @@ To string conversions:
   The caller frame pointer is passed as S1. This is used to keep track of the
   call chain of inlined functions for simplification and dead code elimination.
 
+| InlineSideExitSyncStack<offset>, ND, S(StkPtr), NF
+
+This instruction does nothing, but has memory effects that force the stack
+(determined by `offset') to be materialized. It leaves the stack in an "empty"
+state, as required by the InlineSideExit instruction, so that it could be shared
+between all side exits.
+
+| InlineSideExit<callee,callBCOff>,
+|   DCall,
+|   S(StkPtr) S(FramePtr) S(FramePtr) S(TCA),
+|   PRc
+
+Ends inlining of the current function and side exits to address S3, which is
+a translation that will continue execution of the current function. Makes sure
+all fields in callee's ActRec S1 are properly populated and the ActRec is linked
+to the caller's ActRec S2 before transfering the control. The instruction
+returns the return value of the function.
+
+This is achieved by calling the inlineSideExit stub and using registers to pass
+all relevant ActRec fields. The stub finishes initialization of the ActRec and
+jumps to S3.
+
+It could be viewed as performing a work similar to a combination of EndInlining,
+ReqBindJmp and CallFuncEntry.
+
 | EnterFrame, D(FramePtr), S(FramePtr) S(FramePtr) S(Int) S(Int), NF
 
   Initializes native portion of the callee's frame at S0, links it to the

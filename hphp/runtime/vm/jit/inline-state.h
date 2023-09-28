@@ -41,6 +41,12 @@ struct InlineReturnTarget {
   Block* suspendTarget;
 
   /*
+   * Block that will side exit from the inlined frame, assuming the preparation
+   * for side exit has commenced.
+   */
+  Block* sideExitTarget;
+
+  /*
    * Block that will finish the catch block, assuming the evaluation stack
    * of the callee is empty.
    */

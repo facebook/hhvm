@@ -211,6 +211,7 @@ void getEffects(const Abi& abi, const Vinstr& i,
     case Vinstr::callphpr:
     case Vinstr::callphps:
     case Vinstr::contenter:
+    case Vinstr::inlinesideexit:
       defs = abi.all() - (rvmfp() | rvmtl() | rsp());
       break;
 

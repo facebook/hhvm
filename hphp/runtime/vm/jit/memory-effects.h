@@ -130,6 +130,7 @@ struct PureInlineCall { AliasClass base; SSATmp* fp; AliasClass actrec; };
  * Caller can treat these locations as killed.
  *
  * The `inputs' set contains stack locations the call will read as arguments.
+ * In case of InlineSideExit, this is the complete frame.
  *
  * The `actrec' set contains stack locations the call will write ActRec to.
  *

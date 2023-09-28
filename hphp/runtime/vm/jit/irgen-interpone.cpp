@@ -278,6 +278,7 @@ void interpOne(IRGS& env) {
   idata.changedLocals = locals.data();
 
   interpOne(env, stackType, popped, pushed, idata);
+  if (env.irb->inUnreachableState()) return;
   if (checkTypeType) {
     auto const out = getInstrInfo(sk.op()).out;
     auto const checkIdx = BCSPRelOffset{

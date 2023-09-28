@@ -316,6 +316,12 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   case EnterInlineFrame: trackEnterInlineFrame(inst); break;
   case EndInlining:      trackEndInlining(); break;
   case InlineCall:       trackInlineCall(inst); break;
+  case InlineSideExit:   trackInlineSideExit(inst); break;
+  case InlineSideExitSyncStack:
+    assertx(cur().bcSPOff ==
+            inst->extra<StackRange>()->start.to<SBInvOffset>(irSPOff()));
+    cur().bcSPOff = SBInvOffset{0};
+    break;
   case StFrameCtx:
     setFrameCtx(inst->src(0), inst->src(1));
     break;
@@ -1076,6 +1082,20 @@ void FrameStateMgr::trackEndInlining() {
 void FrameStateMgr::trackInlineCall(const IRInstruction* inst) {
   assertx(cur().fixupFPValue == inst->src(1));
   cur().fixupFPValue = inst->src(0);
+}
+
+void FrameStateMgr::trackInlineSideExit(const IRInstruction* inst) {
+  auto const callee = inst->extra<InlineSideExit>()->callee;
+  auto const arOffset = inst->src(1)->inst()->extra<BeginInlining>()->spOffset;
+
+  // The callee frame was already popped from the frame state. The only thing
+  // left is to set the type of out parameter locations.
+  auto const base = arOffset + kNumActRecCells;
+  for (auto i = uint32_t{0}; i < callee->numInOutParams(); ++i) {
+    setType(stk(base + i), irgen::callOutType(callee, i));
+  }
+
+  assertx(cur().bcSPOff == base.to<SBInvOffset>(irSPOff()));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -448,6 +448,8 @@ bool canDCE(const IRInstruction& inst) {
   case NewBespokeStructDict:
   case Clone:
   case InlineCall:
+  case InlineSideExit:
+  case InlineSideExitSyncStack:
   case Call:
   case CallFuncEntry:
   case NativeImpl:

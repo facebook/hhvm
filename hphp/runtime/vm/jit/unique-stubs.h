@@ -166,6 +166,20 @@ struct UniqueStubs {
 
 
   /////////////////////////////////////////////////////////////////////////////
+  // Inlining.
+
+  /*
+   * Handle side exit from an inlined frame to a translation given by rarg(0).
+   * Initializes the native frame portion of the ActRec, sets m_funcId to
+   * rarg(1), m_callOffAndFlags to rarg(2), then jumps to rarg(0).
+   *
+   * @reached:  inlinesideexit from TC
+   * @context:  func body
+   */
+  TCA inlineSideExit;
+
+
+  /////////////////////////////////////////////////////////////////////////////
   // Function return.
 
   /*

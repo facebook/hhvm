@@ -324,6 +324,7 @@ bool opcodeMayRaise(Opcode opc) {
   case InitProps:
   case InitSProps:
   case InitSubClsCns:
+  case InlineSideExit:
   case InterpOne:
   case IssetElem:
   case IssetProp:
@@ -673,6 +674,7 @@ bool opcodeMayRaise(Opcode opc) {
   case InitVecElem:
   case InitVecElemLoop:
   case InlineCall:
+  case InlineSideExitSyncStack:
   case InstanceOf:
   case InstanceOfBitmask:
   case InstanceOfIface:

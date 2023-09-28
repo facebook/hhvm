@@ -137,6 +137,7 @@ struct Vunit;
   O(callphpr, Inone, U(target) U(args), Dn)\
   O(callphps, I(target), U(args), Dn)\
   O(contenter, Inone, U(fp) U(target) U(args), Dn)\
+  O(inlinesideexit, Inone, U(args), Dn)\
   /* vm entry intrinsics */\
   O(resumetc, Inone, U(target) U(args), Dn)\
   O(inittc, Inone, Un, Dn)\
@@ -898,6 +899,13 @@ struct callphpfe { SrcKey target; RegSet args; };
  * function.
  */
 struct contenter { Vreg64 fp, target; RegSet args; Vlabel targets[2]; };
+
+/*
+ * Side exit from an inlined frame.
+ *
+ * A simple call to inlineSideExit stub with callphp-like register effects.
+ */
+struct inlinesideexit { RegSet args; };
 
 ///////////////////////////////////////////////////////////////////////////////
 // VM entry ABI.

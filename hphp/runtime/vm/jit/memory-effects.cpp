@@ -77,6 +77,16 @@ AliasClass livefp(const IRInstruction& inst) {
   return livefp(inst.marker().fixupFP());
 }
 
+AliasClass frame_locals(const Func* func, SSATmp* fp) {
+  auto const numLocals = func->numLocals();
+  return numLocals ? ALocal { fp, AliasIdSet::IdRange(0, numLocals) } : AEmpty;
+}
+
+AliasClass frame_iterators(const Func* func, SSATmp* fp) {
+  auto const numIterators = func->numIterators();
+  return numIterators ? aiter_range(fp, 0, numIterators) : AEmpty;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 // Determine an AliasClass representing any locals in the instruction's frame
@@ -245,6 +255,14 @@ GeneralEffects may_load_store_move(AliasClass loads,
                                    AliasClass move) {
   assertx(move <= loads);
   return GeneralEffects { loads, stores, move, AEmpty, AEmpty, {} };
+}
+
+GeneralEffects may_load_store_move_kill(AliasClass loads,
+                                        AliasClass stores,
+                                        AliasClass move,
+                                        AliasClass kill) {
+  assertx(move <= loads);
+  return GeneralEffects { loads, stores, move, kill, AEmpty, {} };
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -546,6 +564,41 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AliasClass(AFFunc { inst.src(0) }) | AFMeta { inst.src(0) } | AFBasePtr
     };
 
+  case InlineSideExit: {
+    auto const callee = inst.extra<InlineSideExit>()->callee;
+    auto const arOffset = inst.src(1)->inst()->extra<BeginInlining>()->spOffset;
+    return CallEffects {
+      // Kills. Stack was already handled by InlineSideExitSyncStack.
+      AVMRegAny,
+      // No uninits to kill.
+      AEmpty,
+      // Input state.
+      frame_locals(callee, inst.src(1)) | frame_iterators(callee, inst.src(1)) |
+        AActRec { inst.src(1) } | AMIStateAny,
+      // No empty ActRec space to kill.
+      AEmpty,
+      // Inout outputs.
+      callee->numInOutParams() == 0 ? AEmpty : AStack::range(
+        arOffset + kNumActRecCells,
+        arOffset + kNumActRecCells + callee->numInOutParams()
+      ),
+      // Backtrace locals.
+      backtrace_locals(inst)
+    };
+  }
+
+  case InlineSideExitSyncStack: {
+    auto const extra = inst.extra<InlineSideExitSyncStack>();
+    auto const start = extra->start;
+    auto const count = extra->count;
+    return may_load_store_move_kill(
+      count == 0 ? AEmpty : AStack::range(start, start + count),
+      AEmpty,
+      count == 0 ? AEmpty : AStack::range(start, start + count),
+      AStack::below(start)
+    );
+  }
+
   case InterpOne:
     return interp_one_effects(inst);
   case InterpOneCF: {
@@ -705,14 +758,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       if (fpInst->is(DefFP, EnterFrame)) return ALocalAny | AIterAny;
       assertx(fpInst->is(BeginInlining));
       auto const func = fpInst->extra<BeginInlining>()->func;
-      auto const nlocals = fpInst->extra<BeginInlining>()->func->numLocals();
-      auto acls = nlocals
-        ? ALocal { fp, AliasIdSet::IdRange(0, nlocals)}
-        : AEmpty;
-      for (auto i = 0; i < func->numIterators(); ++i) {
-        acls |= aiter_all(fp, i);
-      }
-      return acls;
+      return frame_locals(func, fp) | frame_iterators(func, fp);
     }();
     return may_load_store_move(
       frame | AActRec { fp },

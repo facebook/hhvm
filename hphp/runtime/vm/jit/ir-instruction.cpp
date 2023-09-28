@@ -515,7 +515,7 @@ Type builtinReturn(const IRInstruction* inst) {
 }
 
 Type callReturn(const IRInstruction* inst) {
-  assertx(inst->is(Call, CallFuncEntry));
+  assertx(inst->is(Call, CallFuncEntry, InlineSideExit));
 
   // Async eager return needs to load TVAux.
   //
@@ -526,19 +526,27 @@ Type callReturn(const IRInstruction* inst) {
   // for the return value, erroneously preventing the region from breaking
   // on unknown type.
 
-  if (inst->is(Call)) {
-    auto const extra = inst->extra<Call>();
-    if (extra->asyncEagerReturn) return TInitCell;
-    if (extra->formingRegion) return TInitCell;
-    return inst->src(2)->hasConstVal(TFunc)
-      ? irgen::callReturnType(inst->src(2)->funcVal()) : TInitCell;
+  switch (inst->op()) {
+    case Call: {
+      auto const extra = inst->extra<Call>();
+      if (extra->asyncEagerReturn) return TInitCell;
+      if (extra->formingRegion) return TInitCell;
+      return inst->src(2)->hasConstVal(TFunc)
+        ? irgen::callReturnType(inst->src(2)->funcVal()) : TInitCell;
+    }
+    case CallFuncEntry: {
+      auto const extra = inst->extra<CallFuncEntry>();
+      if (extra->asyncEagerReturn()) return TInitCell;
+      if (extra->formingRegion) return TInitCell;
+      return irgen::callReturnType(extra->target.func());
+    }
+    case InlineSideExit: {
+      auto const extra = inst->extra<InlineSideExit>();
+      return irgen::callReturnType(extra->callee);
+    }
+    default:
+      not_reached();
   }
-
-  assertx(inst->is(CallFuncEntry));
-  auto const extra = inst->extra<CallFuncEntry>();
-  if (extra->asyncEagerReturn()) return TInitCell;
-  if (extra->formingRegion) return TInitCell;
-  return irgen::callReturnType(extra->target.func());
 }
 
 Type genIterReturn(const IRInstruction* inst) {

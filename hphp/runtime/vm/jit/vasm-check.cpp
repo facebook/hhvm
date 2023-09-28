@@ -130,6 +130,7 @@ checkCalls(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
         case Vinstr::callphps:
         case Vinstr::callstub:
         case Vinstr::contenter:
+        case Vinstr::inlinesideexit:
           sync_valid = unwind_valid = nothrow_valid = true;
           break;
         case Vinstr::syncpoint:

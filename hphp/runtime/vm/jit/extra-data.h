@@ -870,6 +870,24 @@ struct DefStackData : IRExtraData {
 /*
  * Stack offset.
  */
+struct SBInvOffsetData : IRExtraData {
+  explicit SBInvOffsetData(SBInvOffset offset) : offset(offset) {}
+
+  std::string show() const {
+    return folly::to<std::string>("SBInvOff ", offset.offset);
+  }
+
+  bool equals(SBInvOffsetData o) const { return offset == o.offset; }
+  size_t hash() const { return std::hash<int32_t>()(offset.offset); }
+
+  size_t stableHash() const { return std::hash<int32_t>()(offset.offset); }
+
+  SBInvOffset offset;
+};
+
+/*
+ * Stack offset.
+ */
 struct IRSPRelOffsetData : IRExtraData {
   explicit IRSPRelOffsetData(IRSPRelOffset offset) : offset(offset) {}
 
@@ -912,7 +930,9 @@ struct LdBindAddrData : IRExtraData {
     , bcSPOff(bcSPOff)
   {}
 
-  std::string show() const { return showShort(sk); }
+  std::string show() const {
+    return folly::sformat("{}, SBInv {}", showShort(sk), bcSPOff.offset);
+  }
 
   size_t stableHash() const {
     return folly::hash::hash_combine(
@@ -1300,6 +1320,34 @@ struct CallFuncEntryData : IRExtraData {
   uint32_t numInitArgs;
   uint32_t arFlags;
   bool formingRegion;
+};
+
+struct InlineSideExitData : IRExtraData {
+  explicit InlineSideExitData(const Func* callee, Offset callBCOff)
+    : callee(callee), callBCOff(callBCOff)
+  {}
+
+  std::string show() const {
+    return folly::sformat(
+      "{}, callBCOff {}",
+      callee->fullName()->data(),
+      callBCOff
+    );
+  }
+
+  size_t stableHash() const {
+    return folly::hash::hash_combine(
+      callee->stableHash(),
+      std::hash<Offset>()(callBCOff)
+    );
+  }
+
+  bool equals(const InlineSideExitData& o) const {
+    return callee == o.callee && callBCOff == o.callBCOff;
+  }
+
+  const Func* callee;
+  Offset callBCOff;
 };
 
 struct RetCtrlData : IRExtraData {
@@ -2948,6 +2996,8 @@ X(BespokeGet,                   BespokeGetData);
 X(Call,                         CallData);
 X(CallBuiltin,                  CallBuiltinData);
 X(CallFuncEntry,                CallFuncEntryData);
+X(InlineSideExit,               InlineSideExitData);
+X(InlineSideExitSyncStack,      StackRange);
 X(RetCtrl,                      RetCtrlData);
 X(AsyncFuncRet,                 IRSPRelOffsetData);
 X(AsyncFuncRetSlow,             IRSPRelOffsetData);

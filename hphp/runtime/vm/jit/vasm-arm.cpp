@@ -272,6 +272,9 @@ struct Vgen {
     emit(callr{i.target, i.args});
     setCallFuncId(env, a->frontier());
   }
+  void emit(const inlinesideexit& i) {
+    emit(call{tc::ustubs().inlineSideExit, i.args});
+  }
   void emit(const contenter& i);
   void emit(const phpret& i);
 

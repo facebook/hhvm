@@ -104,6 +104,52 @@ void cgEndInlining(IRLS& env, const IRInstruction* inst) {
   v << inlineend{};
 }
 
+void cgInlineSideExit(IRLS& env, const IRInstruction* inst) {
+  auto const calleeFP = srcLoc(env, inst, 1).reg();
+  auto const target = srcLoc(env, inst, 3).reg();
+  auto const extra = inst->extra<InlineSideExit>();
+  auto const callee = extra->callee;
+
+  auto& v = vmain(env);
+  v << inlineend{};
+
+  auto const coaf = ActRec::encodeCallOffsetAndFlags(
+    extra->callBCOff,
+    1 << ActRec::IsInlined
+  );
+
+  v << copy{target, rarg(0)};
+  v << copy{v.cns(callee->getFuncId().toInt()), rarg(1)};
+  v << copy{v.cns(coaf), rarg(2)};
+  v << syncvmsp{calleeFP};
+
+  auto const done = v.makeBlock();
+  v << inlinesideexit{vm_regs_with_sp() | arg_regs(3)};
+
+  // The callee is responsible for unwinding the whole frame, which was already
+  // popped from the marker. However, this needs to be adjusted for the empty
+  // space reserved for inouts, as we optimize away the uninits.
+  auto const marker = inst->marker();
+  auto const fixupBcOff = marker.fixupBcOff();
+  auto const fixupSpOff = marker.fixupBcSPOff() - callee->numInOutParams();
+  v << syncpoint{Fixup::direct(fixupBcOff, fixupSpOff)};
+  v << unwind{done, label(env, inst->taken())};
+  v = done;
+
+  auto const dst = dstLoc(env, inst, 0);
+  auto const type = inst->dst()->type();
+  if (!type.admitsSingleVal()) {
+    v << defvmretdata{dst.reg(0)};
+  }
+  if (type.needsReg()) {
+    v << defvmrettype{dst.reg(1)};
+  }
+}
+
+void cgInlineSideExitSyncStack(IRLS&, const IRInstruction*) {
+  // Nothing to do here.
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgConjure(IRLS& env, const IRInstruction* inst) {

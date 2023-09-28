@@ -116,8 +116,11 @@ Block* makeExitSlow(IRGS& env) {
   auto const exit = defBlock(env, Block::Hint::Unlikely);
   BlockPusher bp(*env.irb, makeMarker(env, curSrcKey(env)), exit);
   interpOne(env);
-  // If it changes the PC, InterpOneCF will get us to the new location.
-  if (!opcodeChangesPC(curSrcKey(env).op())) {
+  // There are two reasons we might already be in an unreachable state:
+  // - interpreting control flow using InterpOneCF, which will get us
+  //   to the new location
+  // - forced side exit due to incompatibility of interpOne with inlining
+  if (!env.irb->inUnreachableState()) {
     gen(env, Jmp, makeExit(env, nextSrcKey(env)));
   }
   return exit;

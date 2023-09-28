@@ -627,6 +627,24 @@ TCA emitFunctionSurprisedOrStackOverflow(CodeBlock& main,
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TCA emitInlineSideExit(CodeBlock& cb, DataBlock& data, const char* name) {
+  alignCacheLine(cb);
+
+  auto const start = vwrap(cb, data, [] (Vout& v) {
+    v << store{rvmfp(), Vreg(rvmsp()) + AROFF(m_sfp)};
+    v << copy{rvmsp(), rvmfp()};
+    v << phplogue{rvmfp()};
+
+    v << storel{rarg(1), Vreg(rvmfp()) + AROFF(m_funcId)};
+    v << storel{rarg(2), Vreg(rvmfp()) + AROFF(m_callOffAndFlags)};
+
+    v << jmpr{rarg(0), vm_regs_no_sp()};
+  }, name);
+  return start;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 template<bool async>
 void loadGenFrame(Vout& v, Vreg d) {
   auto const arOff = BaseGenerator::arOff() -
@@ -1337,6 +1355,8 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(functionSurprisedOrStackOverflow,
       hotView(),
       emitFunctionSurprisedOrStackOverflow, hot(), cold, data, *this);
+
+  ADD(inlineSideExit, hotView(), emitInlineSideExit, hot(), data);
 
   ADD(retHelper, hotView(), emitInterpRet, hot(), data);
   ADD(genRetHelper, view, emitInterpGenRet<false>, cold, data);

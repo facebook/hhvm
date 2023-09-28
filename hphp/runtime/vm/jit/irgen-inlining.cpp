@@ -386,6 +386,7 @@ InlineFrame popInlineFrame(IRGS& env) {
   env.bcState = env.inlineState.bcStateStack.back();
   env.inlineState.bcStateStack.pop_back();
   updateMarker(env);
+  env.irb->exceptionStackBoundary();
 
   return inlineFrame;
 }
@@ -400,6 +401,7 @@ void pushInlineFrame(IRGS& env, const InlineFrame& inlineFrame) {
   env.inlineState.stackDepth += inlineFrame.bcState.func()->maxStackCells();
   env.bcState = inlineFrame.bcState;
   updateMarker(env);
+  env.irb->exceptionStackBoundary();
 }
 
 InlineFrame implInlineReturn(IRGS& env) {
@@ -515,7 +517,7 @@ bool implSuspendBlock(IRGS& env, bool exitOnAwait) {
   if (exitOnAwait) hint(env, Block::Hint::Unlikely);
 
   assertx(curFunc(env)->isAsyncFunction());
-  auto block = rt.suspendTarget;
+  auto const block = rt.suspendTarget;
   auto const label = env.unit.defLabel(1, block, env.irb->nextBCContext());
   auto const wh = label->dst(0);
   retypeDests(label, &env.unit);
@@ -532,6 +534,33 @@ bool implSuspendBlock(IRGS& env, bool exitOnAwait) {
     }
   }
   return true;
+}
+
+void implSideExitBlock(IRGS& env) {
+  auto const rt = env.inlineState.returnTarget.back();
+  auto const didStart = env.irb->startBlock(rt.sideExitTarget, false);
+  if (!didStart) return;
+
+  hint(env, Block::Hint::Unlikely);
+  auto const calleeFP = fp(env);
+
+  auto const block = rt.sideExitTarget;
+  auto const label = env.unit.defLabel(1, block, env.irb->nextBCContext());
+  auto const targetAddr = label->dst(0);
+  retypeDests(label, &env.unit);
+
+  env.irb->fs().endInliningForSideExit();
+  auto const inlineFrame = popInlineFrame(env);
+  SCOPE_EXIT { pushInlineFrame(env, inlineFrame); };
+
+  auto const iseData = InlineSideExitData {
+    inlineFrame.bcState.func(),
+    isInlining(env) ? env.inlineState.bcStateStack[0].offset() : bcOff(env)
+  };
+  auto const retVal =
+    gen(env, InlineSideExit, iseData, sp(env), calleeFP, fp(env), targetAddr);
+  push(env, retVal);
+  gen(env, Jmp, makeExit(env, nextSrcKey(env)));
 }
 
 void implEndCatchBlock(IRGS& env, const RegionDesc& calleeRegion) {
@@ -574,6 +603,8 @@ void implEndCatchBlock(IRGS& env, const RegionDesc& calleeRegion) {
 bool endInlining(IRGS& env, const RegionDesc& calleeRegion) {
   auto const rt = env.inlineState.returnTarget.back();
 
+  implSideExitBlock(env);
+
   implEndCatchBlock(env, calleeRegion);
 
   if (env.irb->canStartBlock(rt.callerTarget)) {
@@ -607,21 +638,36 @@ void suspendFromInlined(IRGS& env, SSATmp* waitHandle) {
 void sideExitFromInlined(IRGS& env, SrcKey target) {
   assertx(isInlining(env));
 
-  spillInlinedFrames(env);
+  if (target.funcEntry()) {
+    // FIXME: Func entries may contain guards that might fail. Ideally we would
+    // CallFuncEntry in these situations, but CallFuncEntry accepts arguments on
+    // the stack and we already converted them to the locals.
+    spillInlinedFrames(env);
 
-  auto const irSP = spOffBCFromIRSP(env);
+    auto const invSP = spOffBCFromStackBase(env);
+    auto const irSP = spOffBCFromIRSP(env);
+    gen(
+      env,
+      ReqBindJmp,
+      ReqBindJmpData { target, invSP, irSP, target.funcEntry() },
+      sp(env),
+      fp(env)
+    );
+    return;
+  }
+
   auto const invSP = spOffBCFromStackBase(env);
-  // FIXME: we can't assert !target.funcEntry() yet, as func entries may contain
-  // guards that might fail. Ideally we would CallFuncEntry in these situations,
-  // but CallFuncEntry accepts arguments on the stack and we already converted
-  // them to the locals.
-  gen(
-    env,
-    ReqBindJmp,
-    ReqBindJmpData { target, invSP, irSP, target.funcEntry() },
-    sp(env),
-    fp(env)
-  );
+  auto const sr = StackRange {
+    spOffBCFromIRSP(env),
+    safe_cast<uint32_t>(invSP - spOffEmpty(env))
+  };
+  gen(env, InlineSideExitSyncStack, sr, sp(env));
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
+
+  auto const bindData = LdBindAddrData { target, invSP };
+  auto const targetAddr = gen(env, LdBindAddr, bindData);
+  gen(env, Jmp, env.inlineState.returnTarget.back().sideExitTarget, targetAddr);
 }
 
 bool endCatchFromInlined(IRGS& env) {

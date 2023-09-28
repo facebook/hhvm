@@ -85,6 +85,7 @@ bool sets_flags(const Vunit& unit, const Vinstr& inst) {
   case Vinstr::callphpr:
   case Vinstr::callphps:
   case Vinstr::contenter:
+  case Vinstr::inlinesideexit:
     return true;
   default:
     break;

@@ -12,7 +12,8 @@ open Hh_prelude
 let strip_ns id =
   id |> Utils.strip_ns |> Hh_autoimport.strip_HH_namespace_if_autoimport
 
-type pos_id = Pos_or_decl.t * Ast_defs.id_ [@@deriving eq, hash, ord, show]
+type pos_id = (Pos_or_decl.t[@hash.ignore]) * Ast_defs.id_
+[@@deriving eq, hash, ord, show]
 
 type arg_position =
   | Aonly
@@ -62,13 +63,13 @@ let _hash_fold_phase hsv _ = hsv
 type _ t_ =
   | Rnone : 'phase t_
   | Rwitness : Pos.t -> locl_phase t_
-  | Rwitness_from_decl : Pos_or_decl.t -> 'phase t_
+  | Rwitness_from_decl : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
   | Ridx : Pos.t * locl_phase t_ -> locl_phase t_
       (** Used as an index into a vector-like
           array or string. Position of indexing,
           reason for the indexed type *)
   | Ridx_vector : Pos.t -> locl_phase t_
-  | Ridx_vector_from_decl : Pos_or_decl.t -> 'phase t_
+  | Ridx_vector_from_decl : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
       (** Used as an index, in the Vector case *)
   | Rforeach : Pos.t -> locl_phase t_
       (** Because it is iterated in a foreach loop *)
@@ -92,8 +93,10 @@ type _ t_ =
   | Rno_return : Pos.t -> locl_phase t_
   | Rno_return_async : Pos.t -> locl_phase t_
   | Rret_fun_kind : Pos.t * Ast_defs.fun_kind -> locl_phase t_
-  | Rret_fun_kind_from_decl : Pos_or_decl.t * Ast_defs.fun_kind -> 'phase t_
-  | Rhint : Pos_or_decl.t -> 'phase t_
+  | Rret_fun_kind_from_decl :
+      (Pos_or_decl.t[@hash.ignore]) * Ast_defs.fun_kind
+      -> 'phase t_
+  | Rhint : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
   | Rthrow : Pos.t -> locl_phase t_
   | Rplaceholder : Pos.t -> locl_phase t_
   | Rret_div : Pos.t -> locl_phase t_
@@ -103,22 +106,25 @@ type _ t_ =
   | Ryield_send : Pos.t -> locl_phase t_
   | Rlost_info : string * locl_phase t_ * blame -> locl_phase t_
   | Rformat : Pos.t * string * locl_phase t_ -> locl_phase t_
-  | Rclass_class : Pos_or_decl.t * string -> 'phase t_
+  | Rclass_class : (Pos_or_decl.t[@hash.ignore]) * string -> 'phase t_
   | Runknown_class : Pos.t -> locl_phase t_
   | Rvar_param : Pos.t -> locl_phase t_
-  | Rvar_param_from_decl : Pos_or_decl.t -> 'phase t_
-  | Runpack_param : Pos.t * Pos_or_decl.t * int -> locl_phase t_
+  | Rvar_param_from_decl : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
+  | Runpack_param : Pos.t * (Pos_or_decl.t[@hash.ignore]) * int -> locl_phase t_
       (** splat pos, fun def pos, number of args before splat *)
-  | Rinout_param : Pos_or_decl.t -> 'phase t_
+  | Rinout_param : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
   | Rinstantiate : 'phase t_ * string * 'phase t_ -> 'phase t_
   | Rtypeconst :
-      'phase t_ * (Pos_or_decl.t * string) * string Lazy.t * 'phase t_
+      'phase t_
+      * ((Pos_or_decl.t[@hash.ignore]) * string)
+      * string Lazy.t
+      * 'phase t_
       -> 'phase t_
   | Rtype_access :
       locl_phase t_ * (locl_phase t_ * string Lazy.t) list
       -> locl_phase t_
   | Rexpr_dep_type :
-      'phase t_ * Pos_or_decl.t * expr_dep_type_reason
+      'phase t_ * (Pos_or_decl.t[@hash.ignore]) * expr_dep_type_reason
       -> 'phase t_
   | Rnullsafe_op : Pos.t -> locl_phase t_  (** ?-> operator is used *)
   | Rtconst_no_cstr : pos_id -> 'phase t_
@@ -126,52 +132,54 @@ type _ t_ =
   | Ris : Pos.t -> locl_phase t_
   | Ras : Pos.t -> locl_phase t_
   | Requal : Pos.t -> locl_phase t_
-  | Rvarray_or_darray_key : Pos_or_decl.t -> 'phase t_
-  | Rvec_or_dict_key : Pos_or_decl.t -> 'phase t_
+  | Rvarray_or_darray_key : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
+  | Rvec_or_dict_key : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
   | Rusing : Pos.t -> locl_phase t_
   | Rdynamic_prop : Pos.t -> locl_phase t_
   | Rdynamic_call : Pos.t -> locl_phase t_
   | Rdynamic_construct : Pos.t -> locl_phase t_
   | Ridx_dict : Pos.t -> locl_phase t_
   | Rset_element : Pos.t -> locl_phase t_
-  | Rmissing_optional_field : Pos_or_decl.t * string -> 'phase t_
+  | Rmissing_optional_field :
+      (Pos_or_decl.t[@hash.ignore]) * string
+      -> 'phase t_
   | Runset_field : Pos.t * string -> locl_phase t_
   | Rcontravariant_generic : locl_phase t_ * string -> locl_phase t_
   | Rinvariant_generic : locl_phase t_ * string -> locl_phase t_
   | Rregex : Pos.t -> locl_phase t_
-  | Rimplicit_upper_bound : Pos_or_decl.t * string -> 'phase t_
+  | Rimplicit_upper_bound : (Pos_or_decl.t[@hash.ignore]) * string -> 'phase t_
   | Rtype_variable : Pos.t -> locl_phase t_
   | Rtype_variable_generics : Pos.t * string * string -> locl_phase t_
   | Rtype_variable_error : Pos.t -> locl_phase t_
   | Rglobal_type_variable_generics :
-      Pos_or_decl.t * string * string
+      (Pos_or_decl.t[@hash.ignore]) * string * string
       -> 'phase t_
-  | Rsolve_fail : Pos_or_decl.t -> 'phase t_
-  | Rcstr_on_generics : Pos_or_decl.t * pos_id -> 'phase t_
+  | Rsolve_fail : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
+  | Rcstr_on_generics : (Pos_or_decl.t[@hash.ignore]) * pos_id -> 'phase t_
   | Rlambda_param : Pos.t * locl_phase t_ -> locl_phase t_
   | Rshape : Pos.t * string -> locl_phase t_
   | Rshape_literal : Pos.t -> locl_phase t_
-  | Renforceable : Pos_or_decl.t -> 'phase t_
+  | Renforceable : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
   | Rdestructure : Pos.t -> locl_phase t_
   | Rkey_value_collection_key : Pos.t -> locl_phase t_
-  | Rglobal_class_prop : Pos_or_decl.t -> 'phase t_
-  | Rglobal_fun_param : Pos_or_decl.t -> 'phase t_
-  | Rglobal_fun_ret : Pos_or_decl.t -> 'phase t_
+  | Rglobal_class_prop : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
+  | Rglobal_fun_param : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
+  | Rglobal_fun_ret : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
   | Rsplice : Pos.t -> locl_phase t_
   | Ret_boolean : Pos.t -> locl_phase t_
-  | Rdefault_capability : Pos_or_decl.t -> 'phase t_
+  | Rdefault_capability : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
   | Rconcat_operand : Pos.t -> locl_phase t_
   | Rinterp_operand : Pos.t -> locl_phase t_
   | Rdynamic_coercion of locl_phase t_
-  | Rsupport_dynamic_type : Pos_or_decl.t -> 'phase t_
+  | Rsupport_dynamic_type : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
   | Rdynamic_partial_enforcement :
-      Pos_or_decl.t * string * locl_phase t_
+      (Pos_or_decl.t[@hash.ignore]) * string * locl_phase t_
       -> locl_phase t_
   | Rrigid_tvar_escape :
       Pos.t * string * string * locl_phase t_
       -> locl_phase t_
   | Ropaque_type_from_module :
-      Pos_or_decl.t * string * locl_phase t_
+      (Pos_or_decl.t[@hash.ignore]) * string * locl_phase t_
       -> locl_phase t_
   | Rmissing_class : Pos.t -> locl_phase t_
   | Rinvalid : 'phase t_

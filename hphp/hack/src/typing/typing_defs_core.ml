@@ -67,12 +67,13 @@ type type_origin =
   | From_alias of string
 [@@deriving eq, hash, ord, show]
 
-type pos_string = Pos_or_decl.t * string [@@deriving eq, hash, ord, show]
+type pos_string = (Pos_or_decl.t[@hash.ignore]) * string
+[@@deriving eq, hash, ord, show]
 
 (* Trick the Rust generators to use a BStr, the same way it does for Ast_defs.shape_field_name. *)
 type t_byte_string = string [@@deriving eq, hash, ord, show]
 
-type pos_byte_string = Pos_or_decl.t * t_byte_string
+type pos_byte_string = (Pos_or_decl.t[@hash.ignore]) * t_byte_string
 [@@deriving eq, hash, ord, show]
 
 type tshape_field_name =
@@ -208,7 +209,7 @@ type enforcement =
 [@@deriving eq, hash, show, ord]
 
 type 'ty capability =
-  | CapDefaults of Pos_or_decl.t
+  | CapDefaults of (Pos_or_decl.t[@hash.ignore])
   | CapTy of 'ty
 [@@deriving eq, hash]
 
@@ -225,7 +226,7 @@ type 'ty possibly_enforced_ty = {
 [@@deriving eq, hash]
 
 type 'ty fun_param = {
-  fp_pos: Pos_or_decl.t; [@equal (fun _ _ -> true)]
+  fp_pos: Pos_or_decl.t; [@hash.ignore] [@equal (fun _ _ -> true)]
   fp_name: string option;
   fp_type: 'ty possibly_enforced_ty;
   fp_flags: Typing_defs_flags.fun_param_flags;

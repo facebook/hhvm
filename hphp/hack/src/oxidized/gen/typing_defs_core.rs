@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<85701bfef7f70f9f8dd315ff995575bc>>
+// @generated SignedSource<<86573c49e780053c9324241e4d3da9d9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -516,6 +516,7 @@ pub struct PossiblyEnforcedTy {
 #[rust_to_ocaml(prefix = "fp_")]
 #[repr(C)]
 pub struct FunParam {
+    #[rust_to_ocaml(attr = "hash.ignore")]
     #[rust_to_ocaml(attr = "equal fun _ -> fun _ -> true")]
     pub pos: pos_or_decl::PosOrDecl,
     pub name: Option<String>,

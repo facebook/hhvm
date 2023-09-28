@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e5d1ce3982857de2468f665c9516befc>>
+// @generated SignedSource<<eaf05db40fddaeebd2bc3d67c9d84470>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -448,6 +448,7 @@ arena_deserializer::impl_deserialize_in_arena!(PossiblyEnforcedTy<'arena>);
 #[repr(C)]
 pub struct FunParam<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(attr = "hash.ignore")]
     #[rust_to_ocaml(attr = "equal fun _ -> fun _ -> true")]
     pub pos: &'a pos_or_decl::PosOrDecl<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

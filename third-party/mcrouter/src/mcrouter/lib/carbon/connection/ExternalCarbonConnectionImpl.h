@@ -28,6 +28,7 @@ struct ExternalCarbonConnectionImplOptions {
   size_t maxOutstanding{0};
   bool maxOutstandingError{false};
   uint16_t portOverride{0};
+  uint16_t thriftPortOverride{0};
   bool enableLogging{false};
   uint32_t hourlyLogRate{3600};
   uint32_t maxLogBurstSize{500};

@@ -1,0 +1,75 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+  This template defines the mapping from an AST type to Thrift metadata type.
+
+}}
+{{program:metadata_qualifier}}NewThriftType().
+    {{> metadata/thrift_type_setter}}(
+      {{#type:typedef?}}{{!
+        }}{{#type:typedef}}
+        {{program:metadata_qualifier}}NewThriftTypedefType().
+            SetName("{{typedef:program_name}}.{{typedef:name}}").
+            SetUnderlyingType(
+              {{#type:typedef_type}}
+              {{> metadata/metadata_type}}
+              {{/type:typedef_type}}
+            ),
+        {{/type:typedef}}{{!
+      }}{{/type:typedef?}}{{!
+      }}{{^type:typedef?}}{{!
+      }}{{#type:metadata_primitive?}}
+        {{program:metadata_qualifier}}{{> metadata/thrift_primitive_type}}.Ptr(),
+      {{/type:metadata_primitive?}}{{!
+      }}{{#type:enum?}}{{!
+        }}{{#type:enum}}
+        {{program:metadata_qualifier}}NewThriftEnumType().
+            SetName("{{enum:program_name}}.{{enum:name}}"),
+        {{/type:enum}}{{!
+      }}{{/type:enum?}}{{!
+      }}{{#type:struct?}}{{!
+        }}{{#type:struct}}{{!
+        }}{{#struct:union?}}
+        {{program:metadata_qualifier}}NewThriftUnionType().
+            SetName("{{struct:program_name}}.{{struct:name}}"),
+        {{/struct:union?}}{{!
+        }}{{^struct:union?}}
+        {{program:metadata_qualifier}}NewThriftStructType().
+            SetName("{{struct:program_name}}.{{struct:name}}"),
+        {{/struct:union?}}{{!
+        }}{{/type:struct}}{{!
+      }}{{/type:struct?}}{{!
+      }}{{#type:list?}}{{!
+        }}{{#type:list_elem_type}}
+        {{program:metadata_qualifier}}NewThriftListType().
+            SetValueType({{> metadata/metadata_type}}),
+        {{/type:list_elem_type}}{{!
+      }}{{/type:list?}}{{!
+      }}{{#type:map?}}
+        {{program:metadata_qualifier}}NewThriftMapType().
+            SetKeyType({{#type:key_type}}{{> metadata/metadata_type}}{{/type:key_type}}).
+            SetValueType({{#type:value_type}}{{> metadata/metadata_type}}{{/type:value_type}}),
+      {{/type:map?}}{{!
+      }}{{#type:set?}}{{!
+        }}{{#type:set_elem_type}}
+        {{program:metadata_qualifier}}NewThriftSetType().
+            SetValueType({{> metadata/metadata_type}}),
+        {{/type:set_elem_type}}{{!
+      }}{{/type:set?}}{{!
+      }}{{/type:typedef?}}
+    )

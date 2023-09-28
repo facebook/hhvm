@@ -1,0 +1,50 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+  This template defines the mapping from an AST type to Thrift metadata type setter function name.
+
+}}{{#type:typedef?}}{{!
+  }}SetTTypedef{{!
+}}{{/type:typedef?}}{{!
+}}{{^type:typedef?}}{{!
+  }}{{#type:metadata_primitive?}}{{!
+    }}SetTPrimitive{{!
+  }}{{/type:metadata_primitive?}}{{!
+  }}{{#type:enum?}}{{!
+    }}SetTEnum{{!
+  }}{{/type:enum?}}{{!
+  }}{{#type:struct?}}{{!
+    }}{{#type:struct}}{{!
+      }}{{#struct:union?}}{{!
+        }}SetTUnion{{!
+      }}{{/struct:union?}}{{!
+      }}{{^struct:union?}}{{!
+        }}SetTStruct{{!
+      }}{{/struct:union?}}{{!
+    }}{{/type:struct}}{{!
+  }}{{/type:struct?}}{{!
+  }}{{#type:list?}}{{!
+    }}SetTList{{!
+  }}{{/type:list?}}{{!
+  }}{{#type:map?}}{{!
+    }}SetTMap{{!
+  }}{{/type:map?}}{{!
+  }}{{#type:set?}}{{!
+    }}SetTSet{{!
+  }}{{/type:set?}}{{!
+}}{{/type:typedef?}}

@@ -1,0 +1,194 @@
+{{!
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+    NOTE:
+    Unfortunately map literals cannot be used to store metadata, due to a bug
+    in the Go compiler: https://github.com/golang/go/issues/33437
+    The bug results in a "NewBulk too big" compilation error for some very large schemas.
+    The workaround is to create slice literals (one with keys, one with values),
+    create an empty map during runtime and populate that map from the two slices.
+
+}}{{> common/header}}
+
+import (
+    {{#program:thrift_imports}}
+    {{program:go_package_alias}} "{{program:go_import_path}}"
+    {{/program:thrift_imports}}
+    thrift "{{program:thrift_lib_import}}"
+    {{#program:import_metadata_package?}}
+    metadata "{{program:thrift_metadata_import}}"
+    {{/program:import_metadata_package?}}
+)
+
+{{> common/unused_imports_protection}}
+// (needed to ensure safety because of naive import list construction)
+var _ = thrift.ZERO
+{{#program:import_metadata_package?}}
+var _ = metadata.GoUnusedProtection__
+{{/program:import_metadata_package?}}
+
+var structNames = []string{
+    {{#program:structs}}
+    {{^struct:exception?}}
+    "{{program:name}}.{{struct:name}}",
+    {{/struct:exception?}}
+    {{/program:structs}}
+}
+
+var structMetadatas = []*{{program:metadata_qualifier}}ThriftStruct{
+    {{#program:structs}}
+    {{^struct:exception?}}
+    {{> metadata/struct_metadata}},
+    {{/struct:exception?}}
+    {{/program:structs}}
+}
+
+var exceptionNames = []string{
+    {{#program:structs}}
+    {{#struct:exception?}}
+    "{{program:name}}.{{struct:name}}",
+    {{/struct:exception?}}
+    {{/program:structs}}
+}
+
+var exceptionMetadatas = []*{{program:metadata_qualifier}}ThriftException{
+    {{#program:structs}}
+    {{#struct:exception?}}
+    {{> metadata/exception_metadata}},
+    {{/struct:exception?}}
+    {{/program:structs}}
+}
+
+var enumNames = []string{
+    {{#program:enums}}
+    "{{program:name}}.{{enum:name}}",
+    {{/program:enums}}
+}
+
+var enumMetadatas = []*{{program:metadata_qualifier}}ThriftEnum{
+    {{#program:enums}}
+    {{> metadata/enum_metadata}},
+    {{/program:enums}}
+}
+
+var serviceNames = []string{
+    {{#program:services}}
+    "{{program:name}}.{{service:name}}",
+    {{/program:services}}
+}
+
+var serviceMetadatas = []*{{program:metadata_qualifier}}ThriftService{
+    {{#program:services}}
+    {{> metadata/service_metadata}},
+    {{/program:services}}
+}
+
+// GetThriftMetadata returns complete Thrift metadata for current and imported packages.
+func GetThriftMetadata() *{{program:metadata_qualifier}}ThriftMetadata {
+    includedEnumsMetadatas := []map[string]*{{program:metadata_qualifier}}ThriftEnum{
+        GetEnumsMetadata(),
+        {{#program:thrift_imports}}
+        {{program:go_package_alias}}.GetEnumsMetadata(),
+        {{/program:thrift_imports}}
+    }
+    includedStructsMetadatas := []map[string]*{{program:metadata_qualifier}}ThriftStruct{
+        GetStructsMetadata(),
+        {{#program:thrift_imports}}
+        {{program:go_package_alias}}.GetStructsMetadata(),
+        {{/program:thrift_imports}}
+    }
+    includedExceptionsMetadatas := []map[string]*{{program:metadata_qualifier}}ThriftException{
+        GetExceptionsMetadata(),
+        {{#program:thrift_imports}}
+        {{program:go_package_alias}}.GetExceptionsMetadata(),
+        {{/program:thrift_imports}}
+    }
+    includedServicesMetadatas := []map[string]*{{program:metadata_qualifier}}ThriftService{
+        GetServicesMetadata(),
+        {{#program:thrift_imports}}
+        {{program:go_package_alias}}.GetServicesMetadata(),
+        {{/program:thrift_imports}}
+    }
+
+	allEnums := make(map[string]*metadata.ThriftEnum)
+	allStructs := make(map[string]*metadata.ThriftStruct)
+	allExceptions := make(map[string]*metadata.ThriftException)
+    allServices := make(map[string]*metadata.ThriftService)
+
+    for _, includedEnumsMetadata := range includedEnumsMetadatas {
+        for enumName, thriftEnum := range includedEnumsMetadata {
+            allEnums[enumName] = thriftEnum
+        }
+    }
+    for _, includedStructsMetadata := range includedStructsMetadatas {
+        for structName, thriftStruct := range includedStructsMetadata {
+            allStructs[structName] = thriftStruct
+        }
+    }
+    for _, includedExceptionsMetadata := range includedExceptionsMetadatas {
+        for exceptionName, thriftException := range includedExceptionsMetadata {
+            allExceptions[exceptionName] = thriftException
+        }
+    }
+    for _, includedServicesMetadata := range includedServicesMetadatas {
+        for serviceName, thriftService := range includedServicesMetadata {
+            allServices[serviceName] = thriftService
+        }
+    }
+
+    return {{program:metadata_qualifier}}NewThriftMetadata().
+        SetEnums(allEnums).
+        SetStructs(allStructs).
+        SetExceptions(allExceptions).
+        SetServices(allServices)
+}
+
+// GetStructsMetadata returns Thrift metadata for enums in the current package.
+func GetEnumsMetadata() map[string]*{{program:metadata_qualifier}}ThriftEnum {
+    result := make(map[string]*{{program:metadata_qualifier}}ThriftEnum)
+    for i, enumName := range enumNames {
+        result[enumName] = enumMetadatas[i]
+    }
+    return result
+}
+
+// GetStructsMetadata returns Thrift metadata for structs in the current package.
+func GetStructsMetadata() map[string]*{{program:metadata_qualifier}}ThriftStruct {
+    result := make(map[string]*{{program:metadata_qualifier}}ThriftStruct)
+    for i, structName := range structNames {
+        result[structName] = structMetadatas[i]
+    }
+    return result
+}
+
+// GetStructsMetadata returns Thrift metadata for exceptions in the current package.
+func GetExceptionsMetadata() map[string]*{{program:metadata_qualifier}}ThriftException {
+    result := make(map[string]*{{program:metadata_qualifier}}ThriftException)
+    for i, exceptionName := range exceptionNames {
+        result[exceptionName] = exceptionMetadatas[i]
+    }
+    return result
+}
+
+// GetStructsMetadata returns Thrift metadata for services in the current package.
+func GetServicesMetadata() map[string]*{{program:metadata_qualifier}}ThriftService {
+    result := make(map[string]*{{program:metadata_qualifier}}ThriftService)
+    for i, serviceName := range serviceNames {
+        result[serviceName] = serviceMetadatas[i]
+    }
+    return result
+}

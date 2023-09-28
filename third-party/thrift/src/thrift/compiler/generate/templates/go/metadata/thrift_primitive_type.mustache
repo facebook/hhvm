@@ -1,0 +1,30 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+  This template defines the mapping from an AST type to Thrift metadata primitive type.
+
+}}{{#type:string?}}ThriftPrimitiveType_THRIFT_STRING_TYPE{{/type:string?}}{{!
+}}{{#type:binary?}}ThriftPrimitiveType_THRIFT_BINARY_TYPE{{/type:binary?}}{{!
+}}{{#type:bool?}}ThriftPrimitiveType_THRIFT_BOOL_TYPE{{/type:bool?}}{{!
+}}{{#type:byte?}}ThriftPrimitiveType_THRIFT_BYTE_TYPE{{/type:byte?}}{{!
+}}{{#type:i16?}}ThriftPrimitiveType_THRIFT_I16_TYPE{{/type:i16?}}{{!
+}}{{#type:i32?}}ThriftPrimitiveType_THRIFT_I32_TYPE{{/type:i32?}}{{!
+}}{{#type:i64?}}ThriftPrimitiveType_THRIFT_I64_TYPE{{/type:i64?}}{{!
+}}{{#type:double?}}ThriftPrimitiveType_THRIFT_DOUBLE_TYPE{{/type:double?}}{{!
+}}{{#type:float?}}ThriftPrimitiveType_THRIFT_FLOAT_TYPE{{/type:float?}}{{!
+}}{{#type:void?}}ThriftPrimitiveType_THRIFT_VOID_TYPE{{/type:void?}}

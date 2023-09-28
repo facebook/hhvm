@@ -82,7 +82,14 @@ class mstch_go_program : public mstch_program {
             {"program:has_thrift_imports",
              &mstch_go_program::has_thrift_imports},
             {"program:thrift_lib_import", &mstch_go_program::thrift_lib_import},
+            {"program:thrift_metadata_import",
+             &mstch_go_program::thrift_metadata_import},
             {"program:go_package_alias", &mstch_go_program::go_package_alias},
+            {"program:gen_metadata?", &mstch_go_program::should_gen_metadata},
+            {"program:import_metadata_package?",
+             &mstch_go_program::should_import_metadata_package},
+            {"program:metadata_qualifier",
+             &mstch_go_program::metadata_qualifier},
         });
   }
   mstch::node go_pkg_name() {
@@ -110,16 +117,37 @@ class mstch_go_program : public mstch_program {
   mstch::node has_thrift_imports() {
     return !program_->get_includes_for_codegen().empty();
   }
-  mstch::node go_import_path() {
-    return go::get_go_package_dir(program_, data_.package_override);
-  }
+  mstch::node go_import_path() { return get_go_import_path_(); }
   mstch::node thrift_lib_import() { return data_.thrift_lib_import; }
+  mstch::node thrift_metadata_import() { return data_.thrift_metadata_import; }
   mstch::node go_package_alias() {
     return data_.get_go_package_alias(program_);
+  }
+  mstch::node should_gen_metadata() { return data_.gen_metadata; }
+  mstch::node should_import_metadata_package() {
+    // We don't need to import the metadata package if we are
+    // generating metadata inside the metadata package itself. Duh.
+    return !is_metadata_package_();
+  }
+  mstch::node metadata_qualifier() {
+    // We don't need to use "metadata." qualifier when generating
+    // metadata inside the metadata package itself.
+    if (!is_metadata_package_()) {
+      return std::string("metadata.");
+    } else {
+      return std::string("");
+    }
   }
 
  private:
   go::codegen_data& data_;
+
+  std::string get_go_import_path_() {
+    return go::get_go_package_dir(program_, data_.package_override);
+  }
+  bool is_metadata_package_() {
+    return get_go_import_path_() == data_.thrift_metadata_import;
+  }
 };
 
 class mstch_go_enum : public mstch_enum {
@@ -135,6 +163,7 @@ class mstch_go_enum : public mstch_enum {
         {
             {"enum:go_name", &mstch_go_enum::go_name},
             {"enum:go_qualified_name", &mstch_go_enum::go_qualified_name},
+            {"enum:program_name", &mstch_go_enum::program_name},
         });
   }
 
@@ -144,6 +173,7 @@ class mstch_go_enum : public mstch_enum {
     auto name = go::munge_ident(enum_->name());
     return prefix + name;
   }
+  mstch::node program_name() { return enum_->program()->name(); }
 
  private:
   go::codegen_data& data_;
@@ -424,6 +454,7 @@ class mstch_go_struct : public mstch_struct {
             {"struct:resp?", &mstch_go_struct::is_resp_struct},
             {"struct:req?", &mstch_go_struct::is_req_struct},
             {"struct:fields_sorted", &mstch_go_struct::fields_sorted},
+            {"struct:program_name", &mstch_go_struct::program_name},
         });
   }
 
@@ -460,6 +491,7 @@ class mstch_go_struct : public mstch_struct {
   mstch::node fields_sorted() {
     return make_mstch_fields(struct_->get_sorted_members());
   }
+  mstch::node program_name() { return struct_->program()->name(); }
 
  private:
   go::codegen_data& data_;
@@ -508,6 +540,7 @@ class mstch_go_service : public mstch_service {
             {"service:go_package_alias_prefix",
              &mstch_go_service::go_package_alias_prefix_},
             {"service:req_resp_structs", &mstch_go_service::req_resp_structs},
+            {"service:program_name", &mstch_go_service::program_name},
         });
   }
 
@@ -520,6 +553,7 @@ class mstch_go_service : public mstch_service {
   mstch::node go_package_alias_prefix_() {
     return data_.go_package_alias_prefix(service_->program());
   }
+  mstch::node program_name() { return service_->program()->name(); }
 
   mstch::node req_resp_structs() {
     auto req_resp_structs =
@@ -599,10 +633,21 @@ class mstch_go_type : public mstch_type {
         this,
         {
             {"type:go_comparable?", &mstch_go_type::is_go_comparable},
+            {"type:metadata_primitive?", &mstch_go_type::is_metadata_primitive},
         });
   }
 
   mstch::node is_go_comparable() { return go::is_type_go_comparable(type_); }
+  mstch::node is_metadata_primitive() {
+    // Whether this type is primitive from metadata.thrift perspective.
+    // i.e. see ThriftPrimitiveType enum in metadata.thrift
+    auto real_type = type_->get_true_type();
+    return real_type->is_bool() || real_type->is_byte() ||
+        real_type->is_i16() || real_type->is_i32() || real_type->is_i64() ||
+        real_type->is_float() || real_type->is_double() ||
+        real_type->is_binary() || real_type->is_string() ||
+        real_type->is_void();
+  }
 
  private:
   go::codegen_data& data_;
@@ -629,6 +674,7 @@ class mstch_go_typedef : public mstch_typedef {
             {"typedef:go_qualified_read_func",
              &mstch_go_typedef::go_qualified_read_func},
             {"typedef:placeholder?", &mstch_go_typedef::is_placeholder},
+            {"typedef:program_name", &mstch_go_typedef::program_name},
         });
   }
   mstch::node go_name() { return go_name_(); }
@@ -666,6 +712,7 @@ class mstch_go_typedef : public mstch_typedef {
     // "actual" types if order to generate code properly.
     return typedef_->typedef_kind() != t_typedef::kind::defined;
   }
+  mstch::node program_name() { return typedef_->program()->name(); }
 
  private:
   go::codegen_data& data_;
@@ -710,6 +757,9 @@ void t_mstch_go_generator::generate_program() {
   render_to_file(prog, "const.go", package_dir / "const.go");
   render_to_file(prog, "types.go", package_dir / "types.go");
   render_to_file(prog, "svcs.go", package_dir / "svcs.go");
+  if (data_.gen_metadata) {
+    render_to_file(prog, "metadata.go", package_dir / "metadata.go");
+  }
   if (program->has_doc()) {
     render_to_file(prog, "doc.go", package_dir / "doc.go");
   }

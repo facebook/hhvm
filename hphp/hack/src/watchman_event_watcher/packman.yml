@@ -4,10 +4,8 @@ packages:
     build_architectures: [x86_64, aarch64]
     summary: Watches a repo for Watchman state change events. Reports to clients the state of the repo
     rules:
-      buck:hphp/hack/src/watchman_event_watcher:watcher_bin:
-        # Packman looks for the targets in buck-out/gen
-        # binaries are placed in buck-out/bin
-        ../bin/hphp/hack/src/watchman_event_watcher/watcher_bin/watcher_bin.opt:
+      buck2:hphp/hack/src/watchman_event_watcher:watcher_bin:
+        hphp/hack/src/watchman_event_watcher/watcher_bin/watcher_bin.opt:
           owner: 'root'
           group: 'root'
           mode: '0755'

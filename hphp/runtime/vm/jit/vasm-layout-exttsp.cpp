@@ -815,7 +815,7 @@ struct ExtTSPImpl {
 
     // Attach (a part of) ChainPred after the last block of ChainSucc
     for (Jump* jump : chainSucc->blocks.back()->outJumps) {
-      const Block* dstBlock = jump->source;
+      const Block* dstBlock = jump->target;
       if (dstBlock->curChain != chainPred) continue;
       size_t offset = dstBlock->curIndex;
       tryChainMerging(offset, {MergeTypeTy::X1_Y_X2, MergeTypeTy::Y_X2_X1});
@@ -1014,7 +1014,9 @@ void Clusterizer::clusterizeExtTSP() {
   assert(!blocks.empty());
   assert(blocks[0] == m_unit.entry);
 
-  DEBUG_ONLY auto orgScore = tspScore(m_unit, m_scale, blocks);
+  DEBUG_ONLY auto const orgScore = (debug || Trace::enabled)
+                                   ? tspScore(m_unit, m_scale, blocks)
+                                   : std::make_pair(uint64_t(0), uint64_t(0));
   FTRACE(1, "[vasm-layout] Orig TSP score = {:,} ({:.2f}% of all counts)\n",
             orgScore.first,
             100.0 * orgScore.first / std::max(orgScore.second, uint64_t(1)));
@@ -1032,7 +1034,9 @@ void Clusterizer::clusterizeExtTSP() {
   }
   always_assert(newOrder.size() == blocks.size());
 
-  DEBUG_ONLY auto newScore = tspScore(m_unit, m_scale, newOrder);
+  DEBUG_ONLY auto const newScore = (debug || Trace::enabled)
+                                   ? tspScore(m_unit, m_scale, newOrder)
+                                   : std::make_pair(uint64_t(0), uint64_t(0));
   assert(orgScore.second == newScore.second && "incorrect tsp score");
   FTRACE(1, "[vasm-layout] New  TSP score = {:,} ({:.2f}% of all counts)\n",
             newScore.first,

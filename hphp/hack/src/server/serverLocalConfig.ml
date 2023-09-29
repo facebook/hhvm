@@ -341,7 +341,7 @@ let default =
     override_load_state_natively = false;
     use_server_revision_tracker_v2 = false;
     use_hh_distc_instead_of_hulk = true;
-    use_compressed_dep_graph = false;
+    use_compressed_dep_graph = true;
     use_old_decls_from_cas = false;
     (* Cutoff derived from https://fburl.com/scuba/hh_server_events/jvja9qns *)
     hh_distc_fanout_threshold = 500_000;

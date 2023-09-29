@@ -26,12 +26,6 @@ namespace {
 
 using namespace test::patch;
 
-template <class>
-constexpr bool kIsStructPatch = false;
-
-template <class T>
-constexpr bool kIsStructPatch<op::detail::StructPatch<T>> = true;
-
 // A callback to add a PatchOp to a Patch
 template <class Patch>
 using AddOp = std::function<void(Patch&)>;
@@ -58,25 +52,8 @@ void testMergePatchOps(
     //   p3.apply(v1)
     patch.apply(v1);
 
-    if (!kIsStructPatch<Patch>) {
-      // Due to discrepancy between Static and Dynamic Patch for StructPatch,
-      // We need to disable such test case. One example:
-      //
-      //   struct Foo { 1: i32 field; }
-      //
-      // If we create the following Patch
-      //
-      //   FooPatch patch;
-      //   patch.clear();
-      //   patch.patch<ident::field>().add(1);
-      //
-      // When applying this patch to any `foo`
-      // * For static patch, it will set `field` to 1.
-      // * For dynamic patch, `clear` op will remove `field`. Since we can not
-      //   apply patch to removed field, `add(1)` will be no-op.
-      protocol::applyPatch(patch.toObject(), dv1);
-      EXPECT_EQ(protocol::asValueStruct<Tag>(v1), dv1);
-    }
+    protocol::applyPatch(patch.toObject(), dv1);
+    EXPECT_TRUE(op::equal<Tag>(v1, protocol::fromValueStruct<Tag>(dv1)));
 
     {
       // 1. Test whether applying mergedPatch patch is equivalent to applying
@@ -98,11 +75,9 @@ void testMergePatchOps(
       mergedPatch.apply(v2);
       EXPECT_TRUE(op::equal<Tag>(v1, v2));
 
-      if (!kIsStructPatch<Patch>) {
-        auto dv2 = protocol::asValueStruct<Tag>(value);
-        protocol::applyPatch(mergedPatch.toObject(), dv2);
-        EXPECT_EQ(protocol::asValueStruct<Tag>(v2), dv2);
-      }
+      auto dv2 = protocol::asValueStruct<Tag>(value);
+      protocol::applyPatch(mergedPatch.toObject(), dv2);
+      EXPECT_TRUE(op::equal<Tag>(v2, protocol::fromValueStruct<Tag>(dv2)));
     }
 
     {
@@ -127,11 +102,9 @@ void testMergePatchOps(
       patchWithMultipleOps.apply(v2);
       EXPECT_TRUE(op::equal<Tag>(v1, v2));
 
-      if (!kIsStructPatch<Patch>) {
-        auto dv2 = protocol::asValueStruct<Tag>(value);
-        protocol::applyPatch(patchWithMultipleOps.toObject(), dv2);
-        EXPECT_EQ(protocol::asValueStruct<Tag>(v2), dv2);
-      }
+      auto dv2 = protocol::asValueStruct<Tag>(value);
+      protocol::applyPatch(patchWithMultipleOps.toObject(), dv2);
+      EXPECT_TRUE(op::equal<Tag>(v2, protocol::fromValueStruct<Tag>(dv2)));
     }
   }
 }

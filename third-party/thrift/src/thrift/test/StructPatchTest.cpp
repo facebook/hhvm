@@ -217,8 +217,8 @@ TEST(StructPatchTest, Patch) {
 
   patch.merge(MyStructPatch::createClear());
   EXPECT_FALSE(patch.toThrift().assign().has_value());
-  EXPECT_EQ(patch.toThrift().patchPrior(), MyStructFieldPatch{});
-  EXPECT_EQ(patch.toThrift().patch(), MyStructFieldPatch{});
+  EXPECT_TRUE(patch.toThrift().patchPrior()->empty());
+  EXPECT_TRUE(patch.toThrift().patch()->empty());
   EXPECT_TRUE(*patch.toThrift().clear());
   test::expectPatch(patch, testValue(), {});
 }
@@ -816,9 +816,9 @@ TEST(StructPatchTest, NestedClear) {
 TEST(StructPatchTest, NestedEnsure) {
   MyStructPatch patch;
   patch.ensure<ident::structVal>();
-  EXPECT_TRUE(patch.modifies<ident::structVal>());
-  EXPECT_TRUE((patch.modifies<ident::structVal, ident::data1>()));
-  EXPECT_TRUE((patch.modifies<ident::structVal, ident::data2>()));
+  EXPECT_FALSE(patch.modifies<ident::structVal>());
+  EXPECT_FALSE((patch.modifies<ident::structVal, ident::data1>()));
+  EXPECT_FALSE((patch.modifies<ident::structVal, ident::data2>()));
 }
 
 TEST(StructPatchTest, NestedPatch) {
@@ -1248,11 +1248,8 @@ TEST(PatchDiscrepancy, PatchUnqualifiedField) {
   EXPECT_EQ(foo.field(), 1);
 
   // Apply patch dynamically
-  // ClearOp will set the whole struct to intrinsic default.
-  // In static patch, non-optional field still have value after ClearOp, but in
-  // dynamic patch, all fields are removed.
   protocol::applyPatch(patch.toObject(), dynFoo);
-  EXPECT_FALSE(dynFoo.as_object().contains(FieldId{1}));
+  EXPECT_EQ(dynFoo.as_object()[FieldId{1}].as_i32(), 1);
 }
 
 TEST(PatchDiscrepancy, PatchTerseField) {
@@ -1275,10 +1272,8 @@ TEST(PatchDiscrepancy, PatchTerseField) {
   EXPECT_EQ(foo.field(), 1);
 
   // Apply patch dynamically
-  // Similar to the case above, though in this case since we don't serialize
-  // terse field when it's intrinsic default, it won't exist in dynFoo.
   protocol::applyPatch(patch.toObject(), dynFoo);
-  EXPECT_FALSE(dynFoo.as_object().contains(FieldId{1}));
+  EXPECT_EQ(dynFoo.as_object()[FieldId{1}].as_i32(), 1);
 }
 
 TEST(PatchDiscrepancy, PatchOptionalField) {

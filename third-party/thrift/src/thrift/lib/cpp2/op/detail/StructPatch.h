@@ -160,10 +160,18 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
     return !isAbsent(getEnsure<Id>(data_));
   }
 
+  bool empty() const {
+    bool b = true;
+    op::for_each_ordinal<T>(
+        [&](auto id) { b = b && !modifies<decltype(id)>(); });
+    return b;
+  }
+
   /// Returns if the patch modifies the given field.
   template <typename Id>
   bool modifies() const {
-    return hasAssign() || data_.clear() == true || getEnsure<Id>(data_) ||
+    return hasAssign() || data_.clear() == true ||
+        (getEnsure<Id>(data_) && is_optional_or_union_field_v<Id>) ||
         !getRawPatch<Id>(data_.patchPrior()).empty() ||
         !getRawPatch<Id>(data_.patch()).empty();
   }
@@ -171,7 +179,8 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   template <typename Id, typename... Ids>
   std::enable_if_t<sizeof...(Ids) != 0, bool> modifies() const {
     // If hasAssign() == true, the whole struct (all fields) will be replaced.
-    if (hasAssign() || data_.clear() == true || getEnsure<Id>(data_)) {
+    if (hasAssign() || data_.clear() == true ||
+        (getEnsure<Id>(data_) && is_optional_or_union_field_v<Id>)) {
       return true;
     }
 
@@ -216,6 +225,9 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   /// Returns the proper patch object for the given field.
   template <typename Id>
   decltype(auto) patchIfSet() {
+    if (!is_optional_or_union_field_v<Id>) {
+      return patch<Id>();
+    }
     ensurePatchable();
     if constexpr (!is_thrift_union_v<T>) {
       if (Base::derived().template isRemoved<Id>()) {

@@ -42,6 +42,8 @@ class TLHTTPSessionStats : public HTTPSessionStats {
   void recordEgressContentLengthMismatches() noexcept override;
   void recordSessionPeriodicPingProbeTimeout() noexcept override;
 
+  void recordControlMsgsInInterval(int64_t quantity) noexcept override;
+
   BaseStats::TLCounter txnsOpen;
   BaseStats::TLCounter pendingBufferedReadBytes;
   BaseStats::TLCounter pendingBufferedWriteBytes;
@@ -66,6 +68,7 @@ class TLHTTPSessionStats : public HTTPSessionStats {
   BaseStats::TLTimeseries ttbtxExceedLimit;
   BaseStats::TLHistogram txnsPerSession;
   BaseStats::TLHistogram sessionIdleTime;
+  BaseStats::TLHistogram ctrlMsgsInInterval;
 };
 
 } // namespace proxygen

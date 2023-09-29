@@ -53,7 +53,16 @@ TLHTTPSessionStats::TLHTTPSessionStats(const std::string& prefix)
                       50,
                       75,
                       95,
-                      99) {
+                      99),
+      ctrlMsgsInInterval(
+          prefix + "_ctrl_msgs_in_interval",
+          1 /* bucketWidth */,
+          0 /* min */,
+          500 /* max, keep in sync with kDefaultMaxControlMsgsPerInterval */,
+          facebook::fb303::AVG,
+          50,
+          99,
+          100) {
 }
 
 void TLHTTPSessionStats::recordTransactionOpened() noexcept {
@@ -150,6 +159,11 @@ void TLHTTPSessionStats::recordPendingBufferedReadBytes(
 void TLHTTPSessionStats::recordPendingBufferedWriteBytes(
     int64_t amount) noexcept {
   pendingBufferedWriteBytes.incrementValue(amount);
+}
+
+void TLHTTPSessionStats::recordControlMsgsInInterval(
+    int64_t quantity) noexcept {
+  ctrlMsgsInInterval.add(quantity);
 }
 
 } // namespace proxygen

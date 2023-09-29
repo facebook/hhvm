@@ -11,6 +11,7 @@
 #include <folly/io/async/HHWheelTimer.h>
 #include <proxygen/lib/http/codec/HTTP2Framer.h>
 #include <proxygen/lib/http/codec/HTTPCodecFilter.h>
+#include <proxygen/lib/http/session/HTTPSessionStats.h>
 
 namespace proxygen {
 
@@ -30,8 +31,15 @@ constexpr std::chrono::milliseconds kDefaultDirectErrorHandlingDuration{100};
  */
 class ControlMessageRateLimitFilter : public PassThroughHTTPCodecFilter {
  public:
-  explicit ControlMessageRateLimitFilter(folly::HHWheelTimer* timer)
-      : timer_(timer) {
+  explicit ControlMessageRateLimitFilter(folly::HHWheelTimer* timer,
+                                         HTTPSessionStats* httpSessionStats)
+      : resetControlMessages_(numControlMsgsInCurrentInterval_,
+                              httpSessionStats),
+        timer_(timer) {
+  }
+
+  void setSessionStats(HTTPSessionStats* httpSessionStats) {
+    resetControlMessages_.httpSessionStats = httpSessionStats;
   }
 
   void setParams(
@@ -152,17 +160,22 @@ class ControlMessageRateLimitFilter : public PassThroughHTTPCodecFilter {
 
   class ResetCounterTimeout : public folly::HHWheelTimer::Callback {
    public:
-    explicit ResetCounterTimeout(uint32_t& counter) : counter_(counter) {
+    explicit ResetCounterTimeout(uint32_t& counterIn,
+                                 HTTPSessionStats* httpSessionStatsIn = nullptr)
+        : counter(counterIn), httpSessionStats(httpSessionStatsIn) {
     }
 
     void timeoutExpired() noexcept override {
-      counter_ = 0;
+      if (counter > 0 && httpSessionStats) {
+        httpSessionStats->recordControlMsgsInInterval(counter);
+      }
+      counter = 0;
     }
     void callbackCanceled() noexcept override {
     }
 
-   private:
-    uint32_t& counter_;
+    uint32_t& counter;
+    HTTPSessionStats* httpSessionStats{nullptr};
   };
 
   /**
@@ -182,7 +195,7 @@ class ControlMessageRateLimitFilter : public PassThroughHTTPCodecFilter {
   std::chrono::milliseconds directErrorHandlingIntervalDuration_{
       kDefaultDirectErrorHandlingDuration};
 
-  ResetCounterTimeout resetControlMessages_{numControlMsgsInCurrentInterval_};
+  ResetCounterTimeout resetControlMessages_;
   ResetCounterTimeout resetDirectErrors_{
       numDirectErrorHandlingInCurrentInterval_};
   folly::HHWheelTimer* timer_{nullptr};

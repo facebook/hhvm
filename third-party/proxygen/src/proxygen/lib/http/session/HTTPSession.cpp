@@ -223,8 +223,8 @@ void HTTPSession::setupCodec() {
   }
   if (codec_->supportsParallelRequests() && !controlMessageRateLimitFilter_ &&
       sock_) {
-    controlMessageRateLimitFilter_ =
-        new ControlMessageRateLimitFilter(&getEventBase()->timer());
+    controlMessageRateLimitFilter_ = new ControlMessageRateLimitFilter(
+        &getEventBase()->timer(), sessionStats_);
     codec_.addFilters(std::unique_ptr<ControlMessageRateLimitFilter>(
         controlMessageRateLimitFilter_));
   }
@@ -294,6 +294,9 @@ void HTTPSession::setSessionStats(HTTPSessionStats* stats) {
   HTTPSessionBase::setSessionStats(stats);
   if (byteEventTracker_) {
     byteEventTracker_->setTTLBAStats(stats);
+  }
+  if (controlMessageRateLimitFilter_) {
+    controlMessageRateLimitFilter_->setSessionStats(stats);
   }
 }
 

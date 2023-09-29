@@ -47,6 +47,9 @@ struct SourceInfo {
 struct IdentifierRef {
   1: schema.SourceRange range;
   2: standard.TypeUri uri;
+  // Because enum values don't have URIs, references to them have to point to their owning enum.
+  // When that happens this field identifies the particular value being referenced.
+  3: string enumValue;
 }
 
 // An instance of an include in a source file.

@@ -204,6 +204,9 @@ class t_const_value {
 
   const t_enum_value* get_enum_value() const { return tenum_val_; }
 
+  void set_ref_range(source_range rng) { ref_range_ = rng; }
+  source_range ref_range() const { return ref_range_; }
+
  private:
   // Use a vector of pairs to store the contents of the map so that we
   // preserve thrift-file ordering when generating per-language source.
@@ -222,6 +225,9 @@ class t_const_value {
   t_const_value_type valType_ = CV_BOOL;
   t_const* owner_ = nullptr;
   t_type_ref ttype_;
+  // If this value is cloned from a referenced const, contains the range of that
+  // reference.
+  source_range ref_range_;
 
   bool is_enum_ = false;
   const t_enum* tenum_ = nullptr;

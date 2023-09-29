@@ -920,6 +920,7 @@ class ast_builder : public parser_actions {
       result->set_is_enum(false);
       result->set_enum(nullptr);
       result->set_enum_value(nullptr);
+      result->set_ref_range({name.loc, name.loc + name.str.size()});
       return result;
     }
 
@@ -929,7 +930,9 @@ class ast_builder : public parser_actions {
         "The identifier '{}' is not defined yet. Constants and enums should "
         "be defined before using them as default values.",
         name.str);
-    return std::make_unique<t_const_value>(std::move(name_str));
+    auto ret = std::make_unique<t_const_value>(std::move(name_str));
+    ret->set_ref_range({name.loc, name.loc + name.str.size()});
+    return ret;
   }
 
   std::unique_ptr<t_const_value> on_integer(

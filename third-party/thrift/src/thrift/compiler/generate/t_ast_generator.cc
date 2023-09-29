@@ -330,7 +330,62 @@ void t_ast_generator::generate_program() {
     };
     return combinator(ref, combinator);
   };
-  visitor.add_field_visitor([&](const t_field& node) { span(node.type()); });
+
+  auto const_spans = [&](const t_const_value* val) {
+    auto combinator = [&](const t_const_value* val, auto recurse) -> void {
+      if (!val || !source_ranges_ || !is_root_program_) {
+        return;
+      }
+      if (auto rng = val->ref_range(); rng.begin != source_location{}) {
+        try {
+          cpp2::IdentifierRef ident;
+          ident.range() = src_range(rng, program_);
+          if (auto owner = val->get_enum()) {
+            if (const auto& uri = owner->uri(); !uri.empty()) {
+              ident.uri()->uri_ref() = uri;
+            } else {
+              ident.uri()->scopedName_ref() =
+                  owner->program()->scope_name(*owner);
+            }
+            ident.enumValue() = val->get_owner()->get_name();
+            ast.identifierSourceRanges()->push_back(std::move(ident));
+          } else if (auto owner = val->get_owner()) {
+            if (const auto& uri = owner->uri(); !uri.empty()) {
+              ident.uri()->uri_ref() = uri;
+            } else {
+              ident.uri()->scopedName_ref() =
+                  owner->program()->scope_name(*owner);
+            }
+            ast.identifierSourceRanges()->push_back(std::move(ident));
+          } else {
+            // Const used before being defined. The compiler already emitted a
+            // warning so do nothing.
+          }
+        } catch (const std::invalid_argument&) {
+          fmt::print(
+              stderr,
+              "No source range set for reference to {}\n",
+              val->get_owner() ? val->get_owner()->name()
+                               : "unnamed const val");
+        }
+      } else if (const auto& list = val->get_list(); !list.empty()) {
+        for (auto item : list) {
+          recurse(item, recurse);
+        }
+      } else if (const auto& map = val->get_map(); !map.empty()) {
+        for (auto [k, v] : map) {
+          recurse(k, recurse);
+          recurse(v, recurse);
+        }
+      }
+    };
+    combinator(val, combinator);
+  };
+
+  visitor.add_field_visitor([&](const t_field& node) {
+    span(node.type());
+    const_spans(node.default_value());
+  });
   visitor.add_function_visitor([&](const t_function& node) {
     for (const auto& ret : node.return_types()) {
       span(ret);
@@ -353,6 +408,7 @@ void t_ast_generator::generate_program() {
 
     for (const auto& param : node.params().fields()) {
       span(param.type());
+      const_spans(param.default_value());
     }
     for (const auto& exn : get_elems(node.exceptions())) {
       span(exn.type());
@@ -364,6 +420,10 @@ void t_ast_generator::generate_program() {
     if (auto extends = node.extends()) {
       span({*extends, node.extends_range()});
     }
+  });
+  visitor.add_const_visitor([&](const t_const& node) {
+    span(node.type_ref());
+    const_spans(node.value());
   });
 
   visitor(*program_);

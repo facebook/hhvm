@@ -327,6 +327,25 @@ class AstGeneratorTest(unittest.TestCase):
                         1: E e
                     );
                 }
+
+                enum Company {
+                    FACEBOOK = 0,
+                    WHATSAPP = 1,
+                    OCULUS = 2,
+                    INSTAGRAM = 3,
+                }
+                const string Title = "Software Engineer"
+                struct Internship {
+                    1: i32 weeks;
+                    2: string title;
+                    3: Company employer
+                         = FACEBOOK;
+                }
+                const Internship instagram = {
+                    "weeks": 12,
+                    "title": Title,
+                    "employer": Company.INSTAGRAM,
+                };
                 """
             ),
         )
@@ -344,12 +363,29 @@ class AstGeneratorTest(unittest.TestCase):
 
         # To simplify the test we reduce the ranges to just their start lines and have a single span per line in the test file.
         spans = {}
+        enumValue = None
         for ref in ast.identifierSourceRanges:
             spans[ref.range.beginLine] = ref.uri.scopedName.removeprefix("foo.")
+            if ref.enumValue:
+                enumValue = ref.enumValue
         self.assertDictEqual(
             spans,
-            {1: "B", 4: "A", 7: "S1", 8: "B", 9: "A", 11: "T", 13: "E"},
+            {
+                1: "B",
+                4: "A",
+                7: "S1",
+                8: "B",
+                9: "A",
+                11: "T",
+                13: "E",
+                27: "Company",
+                28: "Company",
+                30: "Internship",
+                32: "Title",
+                33: "Company",
+            },
         )
+        self.assertEqual(enumValue, "INSTAGRAM")
 
         ast = self.run_thrift("bar.thrift")
         spans = {}

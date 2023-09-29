@@ -104,6 +104,51 @@ type errors_conn =
     }  (** We are tailing this errors.bin file *)
 
 module Lost_env = struct
+  type stream_file = {
+    file: Path.t;
+    q: FindRefsWireFormat.half_open_one_based list Lwt_stream.t;
+    partial_result_token: Lsp.partial_result_token;
+  }
+
+  type shellout_standard_response = {
+    symbol: string;
+    find_refs_action: ServerCommandTypes.Find_refs.action; [@opaque]
+    ide_calculated_positions: Pos.absolute list UriMap.t; [@opaque]
+        (** These are results calculated by clientIdeDaemon from its open files, one entry for each open file *)
+    stream_file: stream_file option; [@opaque]
+        (** If we want streaming results out of a shellout, go here *)
+    hint_suffixes: string list; [@opaque]
+        (** We got this list of hints from clientIdeDaemon, and pass it on to our shellout *)
+  }
+  [@@deriving show]
+
+  type triggering_request = {
+    id: lsp_id;
+    metadata: incoming_metadata;
+    start_time_local_handle: float;
+    request: lsp_request;
+  }
+  [@@warning "-69"]
+
+  type shellable_type =
+    | FindRefs of shellout_standard_response
+    | GoToImpl of shellout_standard_response
+    | Rename of {
+        symbol_definition: Relative_path.t SymbolDefinition.t; [@opaque]
+        find_refs_action: ServerCommandTypes.Find_refs.action; [@opaque]
+        new_name: string;
+        ide_calculated_patches: ServerRenameTypes.patch list; [@opaque]
+      }
+  [@@deriving show]
+
+  type current_hh_shell = {
+    process:
+      (Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) Lwt_result.t;
+    cancellation_token: unit Lwt.u;
+    triggering_request: triggering_request;
+    shellable_type: shellable_type;
+  }
+
   type t = {
     editor_open_files: Lsp.TextDocumentItem.t UriMap.t;
     uris_with_unsaved_changes: UriSet.t;
@@ -122,49 +167,6 @@ module Lost_env = struct
         (2) the streaming-find-refs file exists; whoever turns it to None they must
         also delete the file, which they can assume exists. *)
   }
-
-  and current_hh_shell = {
-    process:
-      (Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) Lwt_result.t;
-    cancellation_token: unit Lwt.u;
-    triggering_request: triggering_request;
-    shellable_type: shellable_type;
-  }
-
-  and triggering_request = {
-    id: lsp_id;
-    metadata: incoming_metadata;
-    start_time_local_handle: float;
-    request: lsp_request;
-  }
-  [@@warning "-69"]
-
-  and stream_file = {
-    file: Path.t;
-    q: FindRefsWireFormat.half_open_one_based list Lwt_stream.t;
-    partial_result_token: Lsp.partial_result_token;
-  }
-
-  and shellout_standard_response = {
-    symbol: string;
-    find_refs_action: ServerCommandTypes.Find_refs.action;
-    ide_calculated_positions: Pos.absolute list UriMap.t;
-        (** These are results calculated by clientIdeDaemon from its open files, one entry for each open file *)
-    stream_file: stream_file option;
-        (** If we want streaming results out of a shellout, go here *)
-    hint_suffixes: string list;
-        (** We got this list of hints from clientIdeDaemon, and pass it on to our shellout *)
-  }
-
-  and shellable_type =
-    | FindRefs of shellout_standard_response
-    | GoToImpl of shellout_standard_response
-    | Rename of {
-        symbol_definition: Relative_path.t SymbolDefinition.t;
-        find_refs_action: ServerCommandTypes.Find_refs.action;
-        new_name: string;
-        ide_calculated_patches: ServerRenameTypes.patch list;
-      }
 end
 
 type state =
@@ -2547,6 +2549,27 @@ let do_findReferences_local
     in
     Lwt.return (state, result_telemetry)
 
+(** Helper for sending $/progress messages for find-refs items. *)
+let notify_refs_file_items
+    (shellout_standard_response : Lost_env.shellout_standard_response)
+    (refs : FindRefsWireFormat.half_open_one_based list) : unit =
+  match shellout_standard_response.Lost_env.stream_file with
+  | Some Lost_env.{ partial_result_token; _ } ->
+    let notification =
+      FindReferencesPartialResultNotification
+        ( partial_result_token,
+          List.map refs ~f:ide_shell_out_pos_to_lsp_location )
+    in
+    notification |> print_lsp_notification |> to_stdout;
+    ()
+  | None ->
+    log "Refs-file: notify-refs called, but no stream_file";
+    HackEventLogger.invariant_violation_bug
+      "refs-file: notify-refs called, but no stream file";
+    ()
+
+(** This is the main handler for when the main loop detects new
+items in the streaming-find-refs file. *)
 let handle_refs_file_items
     ~(state : state)
     (items : FindRefsWireFormat.half_open_one_based list option) :
@@ -2557,21 +2580,31 @@ let handle_refs_file_items
         Lost_env.
           {
             current_hh_shell =
-              Some
-                {
-                  shellable_type =
-                    FindRefs
-                      { stream_file = Some { partial_result_token; _ }; _ };
-                  _;
-                };
+              Some { shellable_type = FindRefs shellout_standard_response; _ };
             _;
           } ) ->
-    let notification =
-      FindReferencesPartialResultNotification
-        ( partial_result_token,
-          List.map refs ~f:ide_shell_out_pos_to_lsp_location )
-    in
-    notification |> print_lsp_notification |> to_stdout;
+    notify_refs_file_items shellout_standard_response refs;
+    None
+  | ( Some _,
+      Lost_server Lost_env.{ current_hh_shell = Some { shellable_type; _ }; _ }
+    ) ->
+    let data = Lost_env.show_shellable_type shellable_type in
+    log "Refs-file: wrong shellable type to send refs - %s" data;
+    HackEventLogger.invariant_violation_bug
+      ~data
+      "refs-file wrong shellale type to send refs";
+    None
+  | (Some _, Lost_server Lost_env.{ current_hh_shell = None; _ }) ->
+    log "Refs-file: got items when current_hh_shell is None";
+    HackEventLogger.invariant_violation_bug
+      "refs-file got items when current_hh_shell is None";
+    None
+  | (Some _, _) ->
+    let data = state_to_string state in
+    log "Refs-file: unexpected items in wrong state - %s" data;
+    HackEventLogger.invariant_violation_bug
+      ~data
+      "refs-file unexpected items in wrong state";
     None
   | (None, _) ->
     (* This signals that the stream has been closed. The function [watch_refs_stream_file] only closes
@@ -2581,15 +2614,13 @@ let handle_refs_file_items
     log "Refs-file: unexpected end of stream";
     HackEventLogger.invariant_violation_bug "refs-file unexpected end of stream";
     None
-  | (Some _, _) ->
-    log "Refs-file: unexpected items when stream isn't open";
-    HackEventLogger.invariant_violation_bug "refs-file unexpected items";
-    None
 
 (** This is called when a shell-out to "hh --ide-find-refs-by-symbol" completes successfully *)
-let do_findReferences2
-    ~state ~ide_calculated_positions ~hh_locations ~stream_file :
+let do_findReferences2 ~shellout_standard_response ~hh_locations :
     (Lsp.lsp_result * int) Lwt.t =
+  let Lost_env.{ ide_calculated_positions; stream_file; _ } =
+    shellout_standard_response
+  in
   (* lsp_locations return a file for each position. To support unsaved, edited files
      let's discard locations for files that we previously fetched from ClientIDEDaemon.
 
@@ -2630,13 +2661,10 @@ let do_findReferences2
   match stream_file with
   | Some { Lost_env.file; q; partial_result_token = _ } ->
     Unix.unlink (Path.to_string file);
-    (* This awaits until the stream is closed, picking up all remaining items. *)
+    (* [Lwt_stream.to_list] awaits until the stream is closed, picking up all remaining items. *)
     let%lwt items_list = Lwt_stream.to_list q in
     List.iter items_list ~f:(fun items ->
-        let (_ : result_telemetry option) =
-          handle_refs_file_items ~state (Some items)
-        in
-        ());
+        notify_refs_file_items shellout_standard_response items);
     Lwt.return (FindReferencesResult [], List.length all_locations)
   | None ->
     Lwt.return (FindReferencesResult all_locations, List.length all_locations)
@@ -3639,7 +3667,6 @@ let try_open_errors_file ~(state : state ref) : unit Lwt.t =
 (** This function handles the success/failure of a shell-out.
 It is guaranteed to produce an LSP response for [shellable_type]. *)
 let handle_shell_out_complete
-    ~(state : state)
     (result : (Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) result)
     (triggering_request : Lost_env.triggering_request)
     (shellable_type : Lost_env.shellable_type) : result_telemetry option Lwt.t =
@@ -3715,14 +3742,10 @@ let handle_shell_out_complete
         let%lwt (lsp_result, result_count) =
           let open Lost_env in
           match shellable_type with
-          | FindRefs { ide_calculated_positions; stream_file; _ } ->
+          | FindRefs shellout_standard_response ->
             let hh_locations = shellout_locations_to_lsp_locations_exn stdout in
             let%lwt (lsp_result, result_count) =
-              do_findReferences2
-                ~state
-                ~ide_calculated_positions
-                ~hh_locations
-                ~stream_file
+              do_findReferences2 ~shellout_standard_response ~hh_locations
             in
             Lwt.return (lsp_result, result_count)
           | GoToImpl { ide_calculated_positions; _ } ->
@@ -4843,11 +4866,10 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
         | Refs_file result ->
           Lwt.return (handle_refs_file_items ~state:!state result)
         | Shell_out_complete (result, triggering_request, shellable_type) ->
-          handle_shell_out_complete
-            ~state:!state
-            result
-            triggering_request
-            shellable_type
+          (* this handler doesn't change state; the state was already changed earlier
+             by [get_next_event], which removed [current_hh_shell] from [state]
+             and stored it within the arguments here to [Shell_out_complete]. *)
+          handle_shell_out_complete result triggering_request shellable_type
         | Tick -> handle_tick ~state
       in
       (* for LSP requests and notifications, we keep a log of what+when we responded.

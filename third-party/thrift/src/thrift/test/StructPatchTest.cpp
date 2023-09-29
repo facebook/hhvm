@@ -1212,11 +1212,8 @@ TEST(PatchDiscrepancy, ClearOptionalFieldInPatchPrior) {
   EXPECT_EQ(foo.field(), 1);
 
   // Apply patch dynamically
-  // In dynamic patch, patch.patchIfSet<ident::field>().clear() will set the
-  // field to intrinsic default rather than removing it. Thus `ensure` will not
-  // be applied to field that already has value.
   protocol::applyPatch(patch.toObject(), dynFoo);
-  EXPECT_EQ(dynFoo.as_object()[FieldId{1}].as_i32(), 0);
+  EXPECT_EQ(dynFoo.as_object()[FieldId{1}].as_i32(), 1);
 }
 
 TEST(PatchDiscrepancy, ClearUnionFieldInPatchPrior) {

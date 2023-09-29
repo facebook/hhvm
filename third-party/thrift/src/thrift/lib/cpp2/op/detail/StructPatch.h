@@ -192,7 +192,18 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   template <typename Id, typename U = FieldType<Id>>
   std::enable_if_t<is_optional_or_union_field_v<Id>> ensure(U&& defaultVal) {
     if (maybeEnsure<Id>()) {
-      getEnsure<Id>(data_) = std::forward<U>(defaultVal);
+      if (patchPrior<Id>().toThrift().clear().value() &&
+          !is_thrift_union_v<T>) {
+        // If the field is cleared, we need to assign the value in PatchAfter.
+        // Why? In dynamic patch, the PatchOp::Clear in PatchPrior will set the
+        // field to intrinsic default rather than removing it (unlike static
+        // patch). If we assign the value in Patch after, then the behavior
+        // would be the same between static/dynamic patch.
+        patchPrior<Id>().reset();
+        patchAfter<Id>() = std::forward<U>(defaultVal);
+      } else {
+        getEnsure<Id>(data_) = std::forward<U>(defaultVal);
+      }
     }
   }
   /// Ensures the given field is initalized, and return the associated patch

@@ -357,6 +357,11 @@ void t_ast_generator::generate_program() {
   });
   visitor.add_typedef_visitor(
       [&](const t_typedef& node) { span(node.type()); });
+  visitor.add_service_visitor([&](const t_service& node) {
+    if (auto extends = node.extends()) {
+      span({*extends, node.extends_range()});
+    }
+  });
 
   visitor(*program_);
   populate_defs(program_);

@@ -318,7 +318,7 @@ class AstGeneratorTest(unittest.TestCase):
                 typedef A T
 
                 service S1 {}
-                service S2 extends S1 { # missing
+                service S2 extends S1 {
                     B,
                     stream<A>
                      b (
@@ -339,5 +339,5 @@ class AstGeneratorTest(unittest.TestCase):
             spans[ref.range.beginLine] = ref.uri.scopedName.removeprefix("foo.")
         self.assertDictEqual(
             spans,
-            {1: "B", 4: "A", 8: "B", 9: "A", 11: "T", 13: "E"},
+            {1: "B", 4: "A", 7: "S1", 8: "B", 9: "A", 11: "T", 13: "E"},
         )

@@ -39,8 +39,13 @@ class t_service : public t_interface {
 
   const t_service* extends() const { return extends_; }
 
+  // The source range of the base service identifier if present.
+  void set_extends_range(source_range rng) { extends_range_ = rng; }
+  source_range extends_range() const { return extends_range_; }
+
  private:
   const t_service* extends_ = nullptr;
+  source_range extends_range_;
 
   // TODO(afuller): Remove everything below this comment. It is only provided
   // for backwards compatibility.

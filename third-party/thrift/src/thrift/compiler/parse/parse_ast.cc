@@ -609,6 +609,7 @@ class ast_builder : public parser_actions {
     auto service = std::make_unique<t_service>(
         &program_, fmt::to_string(name.str), find_base_service());
     set_attributes(*service, std::move(attrs), range);
+    service->set_extends_range({base.loc, base.loc + base.str.size()});
     service->set_functions(std::move(functions));
     add_definition(std::move(service));
   }

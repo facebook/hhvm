@@ -1626,7 +1626,7 @@ fn p_expr_impl<'a>(
         CollectionLiteralExpression(c) => p_collection_literal_expr(node, c, env),
         VarrayIntrinsicExpression(c) => p_varray_intrinsic_expr(node, c, env),
         DarrayIntrinsicExpression(c) => p_darray_intrinsic_expr(node, c, env),
-        ListExpression(c) => p_list_expr(node, c, env),
+        ListExpression(c) => p_list_expr(c, env),
         EvalExpression(c) => p_special_call(&c.keyword, &c.argument, env),
         IssetExpression(c) => p_special_call(&c.keyword, &c.argument_list, env),
         TupleExpression(c) => p_tuple_expr(c, env),
@@ -1803,7 +1803,6 @@ fn p_darray_intrinsic_expr<'a>(
 }
 
 fn p_list_expr<'a>(
-    _node: S<'a>,
     c: &'a ListExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
     env: &mut Env<'a>,
 ) -> Result<Expr_> {
@@ -2847,32 +2846,30 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
     use ast::Stmt_ as S_;
     let new = Stmt::new;
     match &node.children {
-        SwitchStatement(c) => p_switch_stmt_(env, pos, c, node),
-        MatchStatement(c) => p_match_stmt(env, pos, c, node),
-        IfStatement(c) => p_if_stmt(env, pos, c, node),
-        ExpressionStatement(c) => p_expression_stmt(env, pos, c, node),
+        SwitchStatement(c) => p_switch_stmt_(env, pos, c),
+        MatchStatement(c) => p_match_stmt(env, pos, c),
+        IfStatement(c) => p_if_stmt(env, pos, c),
+        ExpressionStatement(c) => p_expression_stmt(env, pos, c),
         CompoundStatement(c) => handle_loop_body(pos, &c.statements, env),
         SyntaxList(_) => handle_loop_body(pos, node, env),
-        ThrowStatement(c) => p_throw_stmt(env, pos, c, node),
-        DoStatement(c) => p_do_stmt(env, pos, c, node),
-        WhileStatement(c) => p_while_stmt(env, pos, c, node),
-        UsingStatementBlockScoped(c) => p_using_statement_block_scoped_stmt(env, pos, c, node),
-        UsingStatementFunctionScoped(c) => {
-            p_using_statement_function_scoped_stmt(env, pos, c, node)
-        }
-        ForStatement(c) => p_for_stmt(env, pos, c, node),
-        ForeachStatement(c) => p_foreach_stmt(env, pos, c, node),
-        TryStatement(c) => p_try_stmt(env, pos, c, node),
-        ReturnStatement(c) => p_return_stmt(env, pos, c, node),
+        ThrowStatement(c) => p_throw_stmt(env, pos, c),
+        DoStatement(c) => p_do_stmt(env, pos, c),
+        WhileStatement(c) => p_while_stmt(env, pos, c),
+        UsingStatementBlockScoped(c) => p_using_statement_block_scoped_stmt(env, pos, c),
+        UsingStatementFunctionScoped(c) => p_using_statement_function_scoped_stmt(env, pos, c),
+        ForStatement(c) => p_for_stmt(env, pos, c),
+        ForeachStatement(c) => p_foreach_stmt(env, pos, c),
+        TryStatement(c) => p_try_stmt(env, pos, c),
+        ReturnStatement(c) => p_return_stmt(env, pos, c),
         YieldBreakStatement(_) => {
             env.saw_yield = true;
             Ok(ast::Stmt::new(pos, ast::Stmt_::mk_yield_break()))
         }
-        EchoStatement(c) => p_echo_stmt(env, pos, c, node),
-        UnsetStatement(c) => p_unset_stmt(env, pos, c, node),
+        EchoStatement(c) => p_echo_stmt(env, pos, c),
+        UnsetStatement(c) => p_unset_stmt(env, pos, c),
         BreakStatement(_) => Ok(new(pos, S_::Break)),
         ContinueStatement(_) => Ok(new(pos, S_::Continue)),
-        ConcurrentStatement(c) => p_concurrent_stmt(env, pos, c, node),
+        ConcurrentStatement(c) => p_concurrent_stmt(env, pos, c),
         MarkupSection(_) => p_markup(node, env),
         DeclareLocalStatement(c) => p_declare_local_stmt(env, pos, c),
         _ => {
@@ -2886,7 +2883,6 @@ fn p_while_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a WhileStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    _node: S<'a>,
 ) -> Result<ast::Stmt> {
     use ast::Stmt;
     use ast::Stmt_ as S_;
@@ -2901,7 +2897,6 @@ fn p_throw_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a ThrowStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    _node: S<'a>,
 ) -> Result<ast::Stmt> {
     use ast::Stmt;
     use ast::Stmt_ as S_;
@@ -2913,7 +2908,6 @@ fn p_try_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a TryStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    _node: S<'a>,
 ) -> Result<ast::Stmt> {
     use ast::Stmt;
     use ast::Stmt_ as S_;
@@ -2943,7 +2937,6 @@ fn p_concurrent_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a ConcurrentStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    _node: S<'a>,
 ) -> Result<ast::Stmt> {
     use ast::Stmt;
     use ast::Stmt_ as S_;
@@ -3109,7 +3102,6 @@ fn p_unset_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a UnsetStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    _node: S<'a>,
 ) -> Result<ast::Stmt> {
     use ast::Stmt;
     use ast::Stmt_ as S_;
@@ -3142,7 +3134,6 @@ fn p_echo_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a EchoStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    _node: S<'a>,
 ) -> Result<ast::Stmt> {
     use ast::Stmt;
     use ast::Stmt_ as S_;
@@ -3175,7 +3166,6 @@ fn p_return_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a ReturnStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    _node: S<'a>,
 ) -> Result<ast::Stmt> {
     let expr = match &c.expression.children {
         Missing => None,
@@ -3193,7 +3183,6 @@ fn p_foreach_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a ForeachStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    _node: S<'a>,
 ) -> Result<ast::Stmt> {
     use ast::Stmt;
     use ast::Stmt_ as S_;
@@ -3219,7 +3208,6 @@ fn p_for_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a ForStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    _node: S<'a>,
 ) -> Result<ast::Stmt> {
     use ast::Stmt;
     use ast::Stmt_ as S_;
@@ -3235,7 +3223,6 @@ fn p_using_statement_function_scoped_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a UsingStatementFunctionScopedChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    _node: S<'a>,
 ) -> Result<ast::Stmt> {
     use ast::Stmt;
     use ast::Stmt_ as S_;
@@ -3256,7 +3243,6 @@ fn p_using_statement_block_scoped_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a UsingStatementBlockScopedChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    _node: S<'a>,
 ) -> Result<ast::Stmt> {
     use ast::Stmt;
     use ast::Stmt_ as S_;
@@ -3277,7 +3263,6 @@ fn p_do_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a DoStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    _node: S<'a>,
 ) -> Result<ast::Stmt> {
     use ast::Stmt;
     use ast::Stmt_ as S_;
@@ -3296,7 +3281,6 @@ fn p_expression_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a ExpressionStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    _node: S<'a>,
 ) -> Result<ast::Stmt> {
     use ast::Stmt;
     use ast::Stmt_ as S_;
@@ -3317,7 +3301,6 @@ fn p_if_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a IfStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    _node: S<'a>,
 ) -> Result<ast::Stmt> {
     use ast::Stmt;
     use ast::Stmt_ as S_;
@@ -3337,7 +3320,6 @@ fn p_switch_stmt_<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a SwitchStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    _node: S<'a>,
 ) -> Result<ast::Stmt> {
     use ast::Stmt;
     use ast::Stmt_ as S_;
@@ -3414,7 +3396,6 @@ fn p_match_stmt<'a>(
     env: &mut Env<'a>,
     pos: Pos,
     c: &'a MatchStatementChildren<'a, PositionedToken<'a>, PositionedValue<'a>>,
-    _node: S<'a>,
 ) -> Result<ast::Stmt> {
     let expr = p_expr(&c.expression, env)?;
     let arms = could_map(&c.arms, env, p_match_stmt_arm)?;

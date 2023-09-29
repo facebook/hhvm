@@ -4585,6 +4585,18 @@ class TestLsp(TestCase[LspTestDriver]):
         self.test_driver.start_hh_server()
         self.load_and_run("references_client_cancel", variables)
 
+    def test_references_client_retry_after_cancel(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("references.php"))
+        self.test_driver.start_hh_server()
+        self.load_and_run("references_client_retry_after_cancel", variables)
+
+    def test_references_client_double_cancel(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("references.php"))
+        self.test_driver.start_hh_server()
+        self.load_and_run("references_client_double_cancel", variables)
+
     def test_references_with_server(self) -> None:
         variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("references.php"))

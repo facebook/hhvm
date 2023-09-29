@@ -67,7 +67,7 @@ void raiseClsMethClsMethRelCompareWarning() {
 
 void throwInvalidClsMethToType(const char* ty) {
   SystemLib::throwInvalidOperationExceptionObject(folly::sformat(
-    "Cannot convert clsmeth to {}", ty
+    "Cannot convert class method to {}", ty
   ));
 }
 

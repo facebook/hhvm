@@ -1,7 +1,7 @@
-Caught: Cannot convert clsmeth to string
+Caught: Cannot convert class method to string
 bool(true)
-Caught: Cannot convert clsmeth to double
-Caught: Cannot convert clsmeth to int
+Caught: Cannot convert class method to float
+Caught: Cannot convert class method to int
 Caught: ClsMeth to vec conversion
 Caught: ClsMeth to dict conversion
 Caught: ClsMeth to keyset conversion

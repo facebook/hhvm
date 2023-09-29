@@ -210,7 +210,7 @@ inline StrNR Func::fullNameStr() const {
 
 inline void invalidFuncConversion(const char* type) {
   SystemLib::throwInvalidOperationExceptionObject(folly::sformat(
-    "Cannot convert func to {}", type
+    "Cannot convert function to {}", type
   ));
 }
 

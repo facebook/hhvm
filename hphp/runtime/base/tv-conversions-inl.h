@@ -91,7 +91,8 @@ inline int64_t tvToInt(TypedValue cell) {
       return cell.m_data.pobj->toInt64();
     case KindOfResource:
       return cell.m_data.pres->data()->o_toInt64();
-    case KindOfRFunc:         raise_convert_rfunc_to_type("int"); break;
+    case KindOfRFunc:
+      throw_convert_rfunc_to_type("int");
     case KindOfFunc:
       invalidFuncConversion("int");
     case KindOfClass:
@@ -100,9 +101,10 @@ inline int64_t tvToInt(TypedValue cell) {
       return lazyClassToStringHelper(cell.m_data.plazyclass)->toInt64();
     case KindOfClsMeth:
       throwInvalidClsMethToType("int");
-    case KindOfRClsMeth:      raise_convert_rcls_meth_to_type("int"); break;
+    case KindOfRClsMeth:
+      throw_convert_rcls_meth_to_type("int");
     case KindOfEnumClassLabel:
-      raise_convert_ecl_to_type("int");
+      throw_convert_ecl_to_type("int");
   }
   not_reached();
 }

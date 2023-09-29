@@ -162,9 +162,9 @@ void raise_property_typehint_unset_error(const Class* declCls,
 [[noreturn]] void raise_resolve_class_undefined(const StringData* name);
 
 [[noreturn]] void raise_convert_object_to_string(const char* cls_name);
-[[noreturn]] void raise_convert_rfunc_to_type(const char* typeName);
-[[noreturn]] void raise_convert_rcls_meth_to_type(const char* typeName);
-[[noreturn]] void raise_convert_ecl_to_type(const char* typeName);
+[[noreturn]] void throw_convert_rfunc_to_type(const char* typeName);
+[[noreturn]] void throw_convert_rcls_meth_to_type(const char* typeName);
+[[noreturn]] void throw_convert_ecl_to_type(const char* typeName);
 
 ///////////////////////////////////////////////////////////////////////////////
 /*

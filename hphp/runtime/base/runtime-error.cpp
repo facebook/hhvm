@@ -157,16 +157,22 @@ void raise_convert_object_to_string(const char* cls_name) {
   raise_error("Cannot convert object to string (got instance of %s)", cls_name);
 }
 
-void raise_convert_rfunc_to_type(const char* typeName) {
-  raise_error("Cannot convert reified function to %s", typeName);
+void throw_convert_rfunc_to_type(const char* typeName) {
+  SystemLib::throwInvalidOperationExceptionObject(
+    folly::sformat("Cannot convert reified function to {}", typeName)
+  );
 }
 
-void raise_convert_rcls_meth_to_type(const char* typeName) {
-  raise_error("Cannot convert reified class meth pointer to %s", typeName);
+void throw_convert_rcls_meth_to_type(const char* typeName) {
+  SystemLib::throwInvalidOperationExceptionObject(
+    folly::sformat("Cannot convert reified class method to {}", typeName)
+  );
 }
 
-void raise_convert_ecl_to_type(const char* typeName) {
-  raise_error("Cannot convert enum class label to %s", typeName);
+void throw_convert_ecl_to_type(const char* typeName) {
+  SystemLib::throwInvalidOperationExceptionObject(
+    folly::sformat("Cannot convert enum class label to {}", typeName)
+  );
 }
 
 void raise_use_of_specialized_array() {

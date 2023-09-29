@@ -256,7 +256,7 @@ function array_merge(mixed $array1, mixed... $arrays)[]: mixed {
       $arr1[$k] = $v;
     }
   } else if (\HH\is_class_meth($array1)) {
-    throw new InvalidOperationException("Cannot convert clsmeth to array");
+    throw new InvalidOperationException("Cannot convert class method to array");
   } else {
     trigger_error(
       "Invalid operand type was used: array_merge expects array(s) or collection(s)",

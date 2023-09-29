@@ -691,29 +691,29 @@ NULL
 Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29
 NULL
 ==== array_merge(class_meth, vec) ====
-string(31) "Cannot convert clsmeth to array"
+string(36) "Cannot convert class method to array"
 ==== array_merge(class_meth, dict) ====
-string(31) "Cannot convert clsmeth to array"
+string(36) "Cannot convert class method to array"
 ==== array_merge(class_meth, keyset) ====
-string(31) "Cannot convert clsmeth to array"
+string(36) "Cannot convert class method to array"
 ==== array_merge(class_meth, Vector) ====
-string(31) "Cannot convert clsmeth to array"
+string(36) "Cannot convert class method to array"
 ==== array_merge(class_meth, Map) ====
-string(31) "Cannot convert clsmeth to array"
+string(36) "Cannot convert class method to array"
 ==== array_merge(class_meth, Set) ====
-string(31) "Cannot convert clsmeth to array"
+string(36) "Cannot convert class method to array"
 ==== array_merge(class_meth, ImmVector) ====
-string(31) "Cannot convert clsmeth to array"
+string(36) "Cannot convert class method to array"
 ==== array_merge(class_meth, ImmMap) ====
-string(31) "Cannot convert clsmeth to array"
+string(36) "Cannot convert class method to array"
 ==== array_merge(class_meth, ImmSet) ====
-string(31) "Cannot convert clsmeth to array"
+string(36) "Cannot convert class method to array"
 ==== array_merge(class_meth, Pair) ====
-string(31) "Cannot convert clsmeth to array"
+string(36) "Cannot convert class method to array"
 ==== array_merge(class_meth, class_meth) ====
-string(31) "Cannot convert clsmeth to array"
+string(36) "Cannot convert class method to array"
 ==== array_merge(class_meth, false) ====
-string(31) "Cannot convert clsmeth to array"
+string(36) "Cannot convert class method to array"
 ==== array_merge(false, vec) ====
 
 Warning: Invalid operand type was used: array_merge expects array(s) or collection(s) in %s/test/slow/array_functions/array_merge_variations.php on line 29

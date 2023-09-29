@@ -3,8 +3,8 @@ bool(true)
 float(0)
 int(0)
 Exception: String to vec conversion
-Exception: Cannot convert func to string
+Exception: Cannot convert function to string
 bool(true)
-Exception: Cannot convert func to double
-Exception: Cannot convert func to int
+Exception: Cannot convert function to float
+Exception: Cannot convert function to int
 Exception: Func to vec conversion

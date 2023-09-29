@@ -4,9 +4,9 @@ function(test)
 function(test)
 
 * serialize result:
-Cannot convert func to string
+Cannot convert function to string
 * fb_serialize result:
-Cannot convert func to string
+Cannot convert function to string
 * json_encode result:
 string(6) ""test""
 * json_decode result:

@@ -204,10 +204,10 @@ enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
         continue;
 
       case KindOfRFunc:
-        raise_convert_rfunc_to_type("double");
+        throw_convert_rfunc_to_type("float");
 
       case KindOfFunc:
-        invalidFuncConversion("double");
+        invalidFuncConversion("float");
 
       case KindOfClass:
         d = classToStringHelper(val(tv).pclass)->toDouble();
@@ -218,13 +218,13 @@ enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
         continue;
 
       case KindOfClsMeth:
-        throwInvalidClsMethToType("double");
+        throwInvalidClsMethToType("float");
 
       case KindOfRClsMeth:
-        raise_convert_rcls_meth_to_type("double");
+        throw_convert_rcls_meth_to_type("float");
 
       case KindOfEnumClassLabel:
-        raise_convert_ecl_to_type("double");
+        throw_convert_ecl_to_type("float");
     }
     not_reached();
   } while (0);
@@ -289,7 +289,7 @@ enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
         continue;
 
       case KindOfRFunc:
-        raise_convert_rfunc_to_type("int");
+        throw_convert_rfunc_to_type("int");
 
       case KindOfFunc:
         invalidFuncConversion("int");
@@ -307,10 +307,10 @@ enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
         throwInvalidClsMethToType("int");
 
       case KindOfRClsMeth:
-        raise_convert_rcls_meth_to_type("int");
+        throw_convert_rcls_meth_to_type("int");
 
       case KindOfEnumClassLabel:
-        raise_convert_ecl_to_type("int");
+        throw_convert_ecl_to_type("int");
     }
     not_reached();
   } while (0);
@@ -359,10 +359,10 @@ double tvCastToDouble(TypedValue tv) {
       return tv.m_data.pres->data()->o_toDouble();
 
     case KindOfRFunc:
-      raise_convert_rfunc_to_type("double");
+      throw_convert_rfunc_to_type("float");
 
     case KindOfFunc:
-      invalidFuncConversion("double");
+      invalidFuncConversion("float");
 
     case KindOfClass:
       return classToStringHelper(tv.m_data.pclass)->toDouble();
@@ -371,13 +371,13 @@ double tvCastToDouble(TypedValue tv) {
       return lazyClassToStringHelper(tv.m_data.plazyclass)->toDouble();
 
     case KindOfClsMeth:
-      throwInvalidClsMethToType("double");
+      throwInvalidClsMethToType("float");
 
     case KindOfRClsMeth:
-      raise_convert_rcls_meth_to_type("double");
+      throw_convert_rcls_meth_to_type("float");
 
     case KindOfEnumClassLabel:
-      raise_convert_ecl_to_type("double");
+      throw_convert_ecl_to_type("float");
   }
   not_reached();
 }
@@ -456,7 +456,7 @@ template<typename T> enable_if_lval_t<T, void> tvCastToStringInPlace(
       return;
 
     case KindOfRFunc:
-      raise_convert_rfunc_to_type("string");
+      throw_convert_rfunc_to_type("string");
 
     case KindOfFunc: {
       invalidFuncConversion("string");
@@ -476,7 +476,7 @@ template<typename T> enable_if_lval_t<T, void> tvCastToStringInPlace(
       throwInvalidClsMethToType("string");
 
     case KindOfRClsMeth:
-      raise_convert_rcls_meth_to_type("string");
+      throw_convert_rcls_meth_to_type("string");
 
     case KindOfEnumClassLabel:
       return persistentString(s_enumClassLabel.get());
@@ -561,7 +561,7 @@ StringData* tvCastToStringData(
       return tv.m_data.pres->data()->o_toString().detach();
 
     case KindOfRFunc:
-      raise_convert_rfunc_to_type("string");
+      throw_convert_rfunc_to_type("string");
 
     case KindOfFunc: {
       invalidFuncConversion("string");
@@ -581,7 +581,7 @@ StringData* tvCastToStringData(
       throwInvalidClsMethToType("string");
 
     case KindOfRClsMeth:
-      raise_convert_rcls_meth_to_type("string");
+      throw_convert_rcls_meth_to_type("string");
 
     case KindOfEnumClassLabel:
       return s_enumClassLabel.get();
@@ -631,7 +631,7 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
       throwInvalidClsMethToType("array");
 
     case KindOfRClsMeth:
-      raise_convert_rcls_meth_to_type("array");
+      throw_convert_rcls_meth_to_type("array");
 
     case KindOfObject: {
       auto ad = tv.m_data.pobj->toArray<IC>();
@@ -641,10 +641,10 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
     }
 
     case KindOfRFunc:
-      raise_convert_rfunc_to_type("array");
+      throw_convert_rfunc_to_type("array");
 
     case KindOfEnumClassLabel:
-      raise_convert_ecl_to_type("array");
+      throw_convert_ecl_to_type("array");
   }
   not_reached();
 }
@@ -724,13 +724,13 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
         throwInvalidClsMethToType("array");
 
       case KindOfRClsMeth:
-        raise_convert_rcls_meth_to_type("array");
+        throw_convert_rcls_meth_to_type("array");
 
       case KindOfRFunc:
-        raise_convert_rfunc_to_type("array");
+        throw_convert_rfunc_to_type("array");
 
       case KindOfEnumClassLabel:
-        raise_convert_ecl_to_type("array");
+        throw_convert_ecl_to_type("array");
     }
     not_reached();
   } while (0);
@@ -801,7 +801,7 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
         continue;
 
       case KindOfRFunc:
-        raise_convert_rfunc_to_type("vec");
+        throw_convert_rfunc_to_type("vec");
 
       case KindOfFunc:
         SystemLib::throwInvalidOperationExceptionObject(
@@ -824,10 +824,10 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
         );
 
       case KindOfRClsMeth:
-        raise_convert_rcls_meth_to_type("vec");
+        throw_convert_rcls_meth_to_type("vec");
 
       case KindOfEnumClassLabel:
-        raise_convert_ecl_to_type("vec");
+        throw_convert_ecl_to_type("vec");
     }
     not_reached();
   } while (0);
@@ -898,7 +898,7 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
         continue;
 
       case KindOfRFunc:
-        raise_convert_rfunc_to_type("dict");
+        throw_convert_rfunc_to_type("dict");
 
       case KindOfFunc:
         SystemLib::throwInvalidOperationExceptionObject(
@@ -922,10 +922,10 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
       }
 
       case KindOfRClsMeth:
-        raise_convert_rcls_meth_to_type("dict");
+        throw_convert_rcls_meth_to_type("dict");
 
       case KindOfEnumClassLabel:
-        raise_convert_ecl_to_type("dict");
+        throw_convert_ecl_to_type("dict");
     }
     not_reached();
   } while (0);
@@ -996,7 +996,7 @@ enable_if_lval_t<T, void> tvCastToKeysetInPlace(T tv) {
         continue;
 
       case KindOfRFunc:
-        raise_convert_rfunc_to_type("keyset");
+        throw_convert_rfunc_to_type("keyset");
 
       case KindOfFunc:
         SystemLib::throwInvalidOperationExceptionObject(
@@ -1020,10 +1020,10 @@ enable_if_lval_t<T, void> tvCastToKeysetInPlace(T tv) {
       }
 
       case KindOfRClsMeth:
-        raise_convert_rcls_meth_to_type("keyset");
+        throw_convert_rcls_meth_to_type("keyset");
 
       case KindOfEnumClassLabel:
-        raise_convert_ecl_to_type("keyset");
+        throw_convert_ecl_to_type("keyset");
     }
     not_reached();
   } while (0);
@@ -1070,13 +1070,13 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
       throwInvalidClsMethToType("object");
 
     case KindOfRClsMeth:
-      raise_convert_rcls_meth_to_type("object");
+      throw_convert_rcls_meth_to_type("object");
 
     case KindOfRFunc:
-      raise_convert_rfunc_to_type("object");
+      throw_convert_rfunc_to_type("object");
 
     case KindOfEnumClassLabel:
-      raise_convert_ecl_to_type("object");
+      throw_convert_ecl_to_type("object");
   }
   not_reached();
 }

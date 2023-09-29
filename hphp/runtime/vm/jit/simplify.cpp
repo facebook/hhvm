@@ -2235,11 +2235,11 @@ const StaticString
     s_msgVecToStr("Vec to string conversion"),
     s_msgDictToStr("Dict to string conversion"),
     s_msgKeysetToStr("Keyset to string conversion"),
-    s_msgClsMethToStr("Cannot convert clsmeth to string"),
-    s_msgClsMethToInt("Cannot convert clsmeth to int"),
-    s_msgClsMethToIntImpl("Implicit clsmeth to int conversion"),
-    s_msgClsMethToDbl("Cannot convert clsmeth to double"),
-    s_msgClsMethToDblImpl("Implicit clsmeth to double conversion");
+    s_msgClsMethToStr("Cannot convert class method to string"),
+    s_msgClsMethToInt("Cannot convert class method to int"),
+    s_msgClsMethToIntImpl("Implicit class method to int conversion"),
+    s_msgClsMethToDbl("Cannot convert class method to float"),
+    s_msgClsMethToDblImpl("Implicit class method to double conversion");
 }
 
 SSATmp* simplifyConvTVToBool(State& env, const IRInstruction* inst) {

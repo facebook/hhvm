@@ -497,7 +497,7 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
     case KindOfObject:        return m_data.pobj->toInt64();
     case KindOfResource:      return m_data.pres->data()->o_toInt64();
     case KindOfRFunc:
-      SystemLib::throwInvalidOperationExceptionObject("RFunc to Int64 conversion");
+      throw_convert_rfunc_to_type("int");
       return 1;
     case KindOfFunc:
       invalidFuncConversion("int");
@@ -508,13 +508,9 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
     case KindOfClsMeth:
       throwInvalidClsMethToType("int");
     case KindOfRClsMeth:
-      SystemLib::throwInvalidOperationExceptionObject(
-        "RClsMeth to Int64 conversion");
-      return 1;
+      throw_convert_rcls_meth_to_type("int");
     case KindOfEnumClassLabel:
-      SystemLib::throwInvalidOperationExceptionObject(
-        "EnumClassLabel to Int64 conversion");
-      return 1;
+      throw_convert_ecl_to_type("int");
   }
   not_reached();
 }
@@ -561,8 +557,7 @@ Array Variant::toPHPArrayHelper() const {
         "RClsMeth to PHPArray conversion");
       return empty_dict_array();
     case KindOfEnumClassLabel:
-      SystemLib::throwInvalidOperationExceptionObject(
-        "EnumClassLabel to PHPArray conversion");
+      throw_convert_ecl_to_type("PHPArray");
       return empty_dict_array();
   }
   not_reached();

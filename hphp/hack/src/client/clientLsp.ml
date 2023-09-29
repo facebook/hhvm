@@ -115,9 +115,12 @@ module Lost_env = struct
         than one discovered by hh check. *)
     current_hh_shell: current_hh_shell option;
         (** If a shell-out to "hh --ide-find-refs" or similar is currently underway.
-        Invariant: if this is Some, then an LSP response will be delivered for it;
-        when it is turned to None, either the LSP response has been sent, or the
-        obligation has been handed off to a method that will assuredly respond. *)
+        Invariant: if this is Some, then...
+        (1) an LSP response will be delivered for it; when it is turned to None,
+        either the LSP response has just been sent, or the obligation has been handed
+        off to a method that will assuredly respond.
+        (2) the streaming-find-refs file exists; whoever turns it to None they must
+        also delete the file, which they can assume exists. *)
   }
 
   and current_hh_shell = {
@@ -1586,10 +1589,16 @@ let unlink_refs_stream_file_if_present
     (try Unix.unlink (Path.to_string file) with
     | exn ->
       let e = Exception.wrap exn in
+      (* The [current_hh_shell] invariant is that if and only if it is Some, then the stream-file exists:
+         whoever changes [current_hh_shell] to None should be responsible for deleting it -- by calling this
+         function -- and can thereby be sure that the file exists when they try to delete it.
+         Hence: going down this codepath via ENOENT is unexpected. Some might say it's worth logging
+         as an indication that something has gone wrong. On the other hand, the name+contract of this
+         function is to unlink the file "if present". I side with the first, which is why I'm logging. *)
       HackEventLogger.invariant_violation_bug
         ~data:(Exception.to_string e)
-        "Streaming find-refs file was already absent";
-      Hh_logger.log "Streaming find-refs file was already absent")
+        "Streaming find-refs file unlinking error";
+      Hh_logger.log "Streaming find-refs unlinking error")
   | _ -> ()
 
 (** Historical quirk: we log kind and method-name a bit idiosyncratically... *)

@@ -88,6 +88,22 @@ bool type_converts_to_number(Type ty) {
   return ty.subtypeOfAny(TDbl, TInt, TNull, TObj, TRes, TStr, TBool);
 }
 
+SSATmp* convToStr(IRGS& env, SSATmp* tmp, char c) {
+	switch (c) {
+		case 's':
+			return gen(env, ConvTVToStr, ConvNoticeData{}, tmp);
+		case 'd':
+			return gen(
+        env,
+        ConvTVToStr,
+        ConvNoticeData{},
+        gen(env, ConvTVToInt, tmp)
+			);
+		default:
+			always_assert(false && "convToStr can't handle non decimal/string format specifiers");
+	}
+}
+
 /*
  * Warning: The logic for handling the tokens %%, %s in the format string
  * in this function should mimic one in the string_printf implementation in
@@ -111,7 +127,7 @@ jit::vector<SSATmp*> tokenize(
   const int size = 256 - kStringOverhead;
   static_assert(size >= 0);
   StringBuffer buf(size);
-  jit::vector<const StringData*> tokens;
+  jit::vector<std::pair<const StringData*, const HPHP::Optional<const char>>> tokens;
   size_t numStrTokens = 0;
   for (auto it = format->slice().begin(); it != format->slice().end(); ++it) {
     char ch = *it;
@@ -127,22 +143,23 @@ jit::vector<SSATmp*> tokenize(
         continue;
       }
 
-      if (*it != 's') {
+      if (*it != 's' && *it != 'd') {
         return jit::vector<SSATmp*>();
       }
 
+			char spec = *it;
       if (!buf.empty()) {
-        tokens.push_back(makeStaticString(buf.detach()));
+        tokens.emplace_back(makeStaticString(buf.detach()), std::nullopt);
       }
       // Use a nullptr placeholder that will be replaced with the corresponding
       // token from args
       ++numStrTokens;
-      tokens.push_back(nullptr);
+      tokens.emplace_back(nullptr, spec);
     }
   }
 
   if (!buf.empty()) {
-    tokens.push_back(makeStaticString(buf.detach()));
+    tokens.emplace_back(makeStaticString(buf.detach()), std::nullopt);
   }
 
   if (rat->size() < numStrTokens) {
@@ -151,11 +168,14 @@ jit::vector<SSATmp*> tokenize(
 
   result.reserve(tokens.size());
   size_t argIdx = 0;
-  for (auto const* token : tokens) {
+  for (auto const& kvp : tokens) {
+		auto const token = kvp.first;
+		auto const& spec = kvp.second;
     if (!token) {
+			assertx(spec);
       auto index = env.unit.cns(argIdx++);
       auto elem = gen(env, LdVecElem, args, index);
-      result.push_back(gen(env, ConvTVToStr, ConvNoticeData{}, elem));
+      result.push_back(convToStr(env, elem, spec.value()));
     } else {
       result.push_back(cns(env, token));
     }

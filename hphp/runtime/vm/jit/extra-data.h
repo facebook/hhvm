@@ -2652,7 +2652,7 @@ struct EndCatchData : IRExtraData {
   };
   enum class FrameMode { Phplogue, Stublogue };
   enum class Teardown  { NA, None, Full, OnlyThis };
-  enum class VMSPSyncMode {NA, Sync, DonotSync};
+  enum class VMSPSyncMode {NA, Sync, DoNotSync};
 
   explicit EndCatchData(IRSPRelOffset offset, CatchMode mode,
                         FrameMode stublogue, Teardown teardown,
@@ -2670,8 +2670,8 @@ struct EndCatchData : IRExtraData {
         return "NA";
       case VMSPSyncMode::Sync:
         return "Sync";
-      case VMSPSyncMode::DonotSync:
-        return "DonotSync";
+      case VMSPSyncMode::DoNotSync:
+        return "DoNotSync";
       default:
         always_assert(false);
     }

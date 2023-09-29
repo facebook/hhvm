@@ -1130,7 +1130,7 @@ Block* makeCatchSet(IRGS& env, uint32_t nDiscard) {
         EndCatchData::CatchMode::SideExit,
         EndCatchData::FrameMode::Phplogue,
         EndCatchData::Teardown::Full,
-        EndCatchData::VMSPSyncMode::DonotSync
+        EndCatchData::VMSPSyncMode::DoNotSync
       };
       gen(env, EndCatch, data, fp(env), sp(env));
     }

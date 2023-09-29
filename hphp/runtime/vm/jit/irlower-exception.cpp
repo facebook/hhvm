@@ -84,10 +84,10 @@ void cgEndCatch(IRLS& env, const IRInstruction* inst) {
   auto const helper = [&]() -> TCA {
     switch (data->teardown) {
       case EndCatchData::Teardown::None:
-        assertx(data->syncVMSP == EndCatchData::VMSPSyncMode::DonotSync);
+        assertx(data->syncVMSP == EndCatchData::VMSPSyncMode::DoNotSync);
         return tc::ustubs().endCatchSkipTeardownHelper;
       case EndCatchData::Teardown::OnlyThis:
-        assertx(data->syncVMSP == EndCatchData::VMSPSyncMode::DonotSync);
+        assertx(data->syncVMSP == EndCatchData::VMSPSyncMode::DoNotSync);
         return tc::ustubs().endCatchTeardownThisHelper;
       case EndCatchData::Teardown::Full:
         return data->syncVMSP == EndCatchData::VMSPSyncMode::Sync

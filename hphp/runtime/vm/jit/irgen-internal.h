@@ -909,7 +909,7 @@ Block* create_catch_block(
     mode,
     EndCatchData::FrameMode::Phplogue,
     teardown,
-    EndCatchData::VMSPSyncMode::DonotSync
+    EndCatchData::VMSPSyncMode::DoNotSync
   };
   gen(env, EndCatch, data, fp(env), sp(env));
   return catchBlock;

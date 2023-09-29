@@ -308,6 +308,15 @@ let get_editor_open_files (state : state) :
     None
   | Lost_server lenv -> Some lenv.Lost_env.editor_open_files
 
+let ensure_cancelled (cancellation_token : unit Lwt.u) : unit =
+  try Lwt.wakeup_later cancellation_token () with
+  | Invalid_argument _ ->
+    (* [wakeup_later] throws [Invalid_argument]] if the promise wasn't pending,
+       e.g. if someone else had requested cancellation, but the cancellation token
+       is still around and now we request cancellation on it too.
+       (In other languages, this is typically a no-op rather than an exception...) *)
+    ()
+
 (** The architecture of clientLsp is a single-threaded message loop inside
 [ClientLsp.main]. The loop calls [get_next_event] to wait for the next
 event from a variety of sources, dispatches it according to what kind of event
@@ -1746,7 +1755,7 @@ let kickoff_shell_out_and_maybe_cancel
         unlink_refs_stream_file_if_present shellable_type;
         (* Send SIGTERM to the underlying process.
            We won't wait for it -- that'd make it too hard to reason about concurrency. *)
-        Lwt.wakeup_later cancellation_token ();
+        ensure_cancelled cancellation_token;
         (* We still have to respond to the LSP's prev request. We'll do so now
            without waiting for the underlying process to finish. In this way we fulfill
            the invariant that "current_hh_shell must always give rise to an LSP response".
@@ -1887,7 +1896,7 @@ let cancel_shellout_if_applicable (state : state) (id : lsp_id) : unit =
         _;
       }
     when Lsp.IdKey.compare id peek_id = 0 ->
-    Lwt.wakeup_later cancellation_token ()
+    ensure_cancelled cancellation_token
   | _ -> ()
 
 (************************************************************************)

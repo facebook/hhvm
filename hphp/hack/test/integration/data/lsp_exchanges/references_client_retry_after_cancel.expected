@@ -108,16 +108,40 @@
     "id": 12,
     "error": {
       "code": -32800,
-      "message": "Unix.WSIGNALED -7"
+      "message": "Cancelled (displaced by another request #14)"
     }
   },
   {
     "jsonrpc": "2.0",
     "id": 14,
-    "error": {
-      "code": -32001,
-      "message": "Invalid_argument(\"Lwt.wakeup_later\")"
-    }
+    "result": [
+      {
+        "uri": "file://${root_path}/references.php",
+        "range": {
+          "start": {
+            "line": 36,
+            "character": 9
+          },
+          "end": {
+            "line": 36,
+            "character": 19
+          }
+        }
+      },
+      {
+        "uri": "file://${root_path}/references2.php",
+        "range": {
+          "start": {
+            "line": 3,
+            "character": 2
+          },
+          "end": {
+            "line": 3,
+            "character": 12
+          }
+        }
+      }
+    ]
   },
   {
     "jsonrpc": "2.0",

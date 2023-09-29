@@ -262,7 +262,7 @@ std::unique_ptr<t_const_value> schematizer::gen_type(
       type_name->add_map(val("enumType"), typeUri(*resolved_type));
       break;
     }
-    case t_type::type::t_struct: {
+    case t_type::type::t_structured: {
       if (defns_schema && generator) {
         if (auto union_type = dynamic_cast<const t_union*>(resolved_type)) {
           auto union_schema = generator->gen_schema(*union_type);
@@ -359,7 +359,7 @@ void schematize_recursively(
       add_as_definition(*defns_schema, "enumDef", std::move(enum_schema));
       break;
     }
-    case t_type::type::t_struct: {
+    case t_type::type::t_structured: {
       auto schema = generator->gen_schema(
           static_cast<const t_structured&>(*resolved_type));
       std::string def_type = [&] {

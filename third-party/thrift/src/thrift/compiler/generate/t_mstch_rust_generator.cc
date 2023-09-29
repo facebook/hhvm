@@ -1003,7 +1003,7 @@ class rust_mstch_function : public mstch_function {
           return "Map";
         case t_type::type::t_enum:
           return "I32";
-        case t_type::type::t_struct:
+        case t_type::type::t_structured:
           return "Struct";
         default:
           return "";

@@ -30,9 +30,6 @@ namespace apache {
 namespace thrift {
 namespace compiler {
 
-constexpr size_t t_type::kTypeBits;
-constexpr uint64_t t_type::kTypeMask;
-
 const std::string& t_type::type_name(type t) {
   static const auto& kTypeNames =
       *new std::array<std::string, t_type::kTypeCount>(

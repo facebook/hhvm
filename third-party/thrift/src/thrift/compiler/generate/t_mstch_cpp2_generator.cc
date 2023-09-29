@@ -1546,7 +1546,7 @@ class cpp_mstch_struct : public mstch_struct {
       case t_type::type::t_set:
       case t_type::type::t_map:
         return ret = 8;
-      case t_type::type::t_struct: {
+      case t_type::type::t_structured: {
         size_t align = 1;
         const t_struct* strct =
             dynamic_cast<const t_struct*>(type->get_true_type());
@@ -1941,7 +1941,7 @@ class cpp_mstch_field : public mstch_field {
   mstch::node zero_copy_arg() {
     switch (field_->get_type()->get_type_value()) {
       case t_type::type::t_binary:
-      case t_type::type::t_struct:
+      case t_type::type::t_structured:
         return std::string("true");
       default:
         return std::string("false");

@@ -111,7 +111,7 @@ class t_type : public t_named {
 
     // Declared types
     t_enum = 8,
-    t_struct = 12,
+    t_structured = 12,
     t_service = 13,
     t_stream = 17,
     t_program = 14,

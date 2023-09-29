@@ -87,7 +87,7 @@ class t_result_struct final : public t_structured {
   // inherit from t_structured (as we are decoupling all other types from
   // t_struct).
   t_type::type get_type_value() const override {
-    return t_type::type::t_struct;
+    return t_type::type::t_structured;
   }
 
   // See get_type_value().

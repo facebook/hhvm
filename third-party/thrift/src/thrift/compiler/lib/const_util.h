@@ -220,7 +220,7 @@ inline protocol::Value const_to_value(const t_const_value& val) {
       ret.ensure_i32();
       ret.as_i32() = val.get_integer();
       break;
-    case t_type::type::t_struct:
+    case t_type::type::t_structured:
       if (val.ttype()) {
         auto& obj = ret.ensure_object();
         const auto& obj_type = *val.ttype()->get_true_type();

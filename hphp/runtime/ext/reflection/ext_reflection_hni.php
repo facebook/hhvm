@@ -1025,6 +1025,34 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
     return (string)$this->originalClass;
   }
 
+  /**
+   * Gets the "canonical" version of the method, where canonical means that
+   * the method is *actually* defined and implemented on the class that is
+   * within the returned value's ->getDeclaringClass()->getName().
+   * This is particularly relevant when the method is inherited from a trait
+   *
+   * NOTE: This wouldn't work "correctly" in repo-mode, where traits are
+   * flattened. As such, in repo-mode this throws an exception instead.
+   */
+  public function getCanonicalMethod()[]: ReflectionMethod {
+    $canonical_clsname = $this->getCanonicalClassname();
+    if ($canonical_clsname === $this->class) {
+      return $this;
+    }
+    return new ReflectionMethod($canonical_clsname, $this->name);
+  }
+
+  /**
+   * Gets the name of the "canonical" class, where canonical means that
+   * the method is *actually* defined and implemented on that class.
+   * This is particularly relevant when the method is inherited from a trait
+   *
+   * NOTE: This wouldn't work "correctly" in repo-mode, where traits are
+   * flattened. As such, in repo-mode this throws an exception instead.
+   */
+  <<__Native>>
+  public function getCanonicalClassname()[]: string;
+
   <<__Native>>
   private function getDeclaringClassname()[]: string;
 

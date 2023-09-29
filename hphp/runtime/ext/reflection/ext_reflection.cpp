@@ -386,6 +386,10 @@ static const StaticString s_invoke_non_object(
   "Non-object passed to Invoke()"
 );
 
+static const StaticString s_canonical_class_in_repo_mode(
+  "Do not attempt to get Canonical class in repo mode, it won't work as expected"
+);
+
 Variant HHVM_FUNCTION(hphp_invoke_method, const Variant& obj,
                                           const String& cls,
                                           const String& name,
@@ -1055,6 +1059,14 @@ static bool HHVM_METHOD(ReflectionMethod, isReadonly) {
 static int64_t HHVM_METHOD(ReflectionMethod, getModifiers) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
   return get_modifiers(func->attrs(), false, false);
+}
+
+static String HHVM_METHOD(ReflectionMethod, getCanonicalClassname) {
+  if (RuntimeOption::EvalAuthoritativeMode) {
+    Reflection::ThrowReflectionExceptionObject(s_canonical_class_in_repo_mode);
+  }
+  auto const func = ReflectionFuncHandle::GetFuncFor(this_);
+  return String::attach(const_cast<StringData*>(func->preClass()->name()));
 }
 
 // private helper for getPrototype
@@ -2344,6 +2356,7 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionMethod, isConstructor);
     HHVM_ME(ReflectionMethod, isReadonly);
     HHVM_ME(ReflectionMethod, getModifiers);
+    HHVM_ME(ReflectionMethod, getCanonicalClassname);
     HHVM_ME(ReflectionMethod, getPrototypeClassname);
     HHVM_ME(ReflectionMethod, getDeclaringClassname);
 

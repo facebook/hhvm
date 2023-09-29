@@ -247,6 +247,18 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
   final public function getAttributeClass<T as HH\MethodAttribute>(
     classname<T> $c,
   )[]: ?T;
+
+  /**
+   * Gets the "canonical" version of the method, where canonical means that
+   * the method is *actually* defined and implemented on the class that is
+   * within the returned value's ->getDeclaringClass()->getName().
+   * This is particularly relevant when the method is inherited from a trait
+   *
+   * NOTE: This wouldn't work "correctly" in repo-mode, where traits are
+   * flattened. As such, in repo-mode this throws an exception instead.
+   */
+  public function getCanonicalMethod()[]: ReflectionMethod;
+  public function getCanonicalClassname()[]: string;
 }
 
 class ReflectionParameter implements Reflector {

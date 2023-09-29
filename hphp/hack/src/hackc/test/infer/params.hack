@@ -87,3 +87,25 @@ function externalClassParam(bool $a, External $b): External {
 async function genericParams(string $a, InternalGeneric<string> $b): Awaitable<int> {
   return 42;
 }
+
+// TEST-CHECK-BAL: define $root.softParam
+// CHECK: define $root.softParam($this: *void, $a: *HackMixed) : *void {
+// CHECK: #b0:
+// CHECK:   n0: *HackMixed = load &$a
+// CHECK:   n1 = $builtins.hhbc_print(n0)
+// CHECK:   ret null
+// CHECK: }
+function softParam(<<__Soft>> string $a): void {
+  echo $a;
+}
+
+// TEST-CHECK-BAL: define $root.likeParam
+// CHECK: define $root.likeParam($this: *void, $a: *HackString) : *void {
+// CHECK: #b0:
+// CHECK:   n0: *HackMixed = load &$a
+// CHECK:   n1 = $builtins.hhbc_print(n0)
+// CHECK:   ret null
+// CHECK: }
+function likeParam(~string $a): void {
+  echo $a;
+}

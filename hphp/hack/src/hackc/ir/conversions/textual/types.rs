@@ -31,6 +31,11 @@ pub(crate) fn convert_ty(ty: &EnforceableType, strings: &StringInterner) -> text
         return textual::Ty::mixed_ptr();
     }
 
+    if modifiers.contains(TypeConstraintFlags::Soft) {
+        // A soft type is treated as a raw mixed.
+        return textual::Ty::mixed_ptr();
+    }
+
     if modifiers != TypeConstraintFlags::NoFlags {
         textual_todo! {
             message = ("MODIFIERS: {modifiers:?}\n{}",

@@ -16,7 +16,6 @@
 
 #include <stdlib.h>
 #include <thrift/compiler/ast/node_list.h>
-#include <thrift/compiler/ast/t_result_struct.h>
 #include <thrift/compiler/ast/t_sink.h>
 #include <thrift/compiler/ast/t_stream.h>
 
@@ -37,6 +36,7 @@
 #include <thrift/compiler/ast/t_const_value.h>
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/t_struct.h>
+#include <thrift/compiler/ast/t_structured.h>
 #include <thrift/compiler/ast/t_union.h>
 #include <thrift/compiler/generate/common.h>
 #include <thrift/compiler/generate/t_concat_generator.h>
@@ -71,6 +71,32 @@ std::string unescape(std::string s) {
   boost::replace_all(s, "\\\\", "\\");
   return s;
 }
+
+class t_result_struct final : public t_structured {
+ public:
+  t_result_struct(
+      t_program* program, std::string name, std::string result_return_type)
+      : t_structured(program, std::move(name)),
+        result_return_type{result_return_type} {}
+
+  std::string getResultReturnType() const { return result_return_type; }
+
+  // Both get_type_value() and is_struct() are implemented below for historical
+  // reasons: t_result_struct used to be a subclass of t_struct. It was moved to
+  // this anonymous namespace because it is only used in this file, and made to
+  // inherit from t_structured (as we are decoupling all other types from
+  // t_struct).
+  t_type::type get_type_value() const override {
+    return t_type::type::t_struct;
+  }
+
+  // See get_type_value().
+  bool is_struct() const override { return true; }
+
+ private:
+  std::string result_return_type;
+};
+
 } // namespace
 
 /**
@@ -260,7 +286,10 @@ class t_hack_generator : public t_concat_generator {
       const std::string& suffix,
       bool is_void);
   void generate_php_struct_definition_result_helpers(
-      t_struct* result, const t_type* ttype, const t_throws* ex, bool is_void);
+      t_structured* result,
+      const t_type* ttype,
+      const t_throws* ex,
+      bool is_void);
   void generate_php_function_args_helpers(
       const t_function* tfunction, const std::string& prefix);
   void generate_php_function_helpers(
@@ -6088,12 +6117,12 @@ void t_hack_generator::generate_php_function_result_helpers(
        suffix == "_FirstResponse" || suffix == "_SinkPayload" ||
        suffix == "_FinalResponse");
   if (!is_result_struct) {
-    t_struct result =
-        t_struct(program_, prefix + "_" + find_hack_name(tfunction) + suffix);
+    t_struct result(
+        program_, prefix + "_" + find_hack_name(tfunction) + suffix);
 
     generate_php_struct_definition_result_helpers(&result, ttype, ex, is_void);
   } else {
-    t_result_struct result_struct = t_result_struct(
+    t_result_struct result_struct(
         program_,
         prefix + "_" + find_hack_name(tfunction) + suffix,
         ttype != nullptr ? type_to_typehint(ttype) : "void");
@@ -6103,7 +6132,10 @@ void t_hack_generator::generate_php_function_result_helpers(
 }
 
 void t_hack_generator::generate_php_struct_definition_result_helpers(
-    t_struct* result, const t_type* ttype, const t_throws* ex, bool is_void) {
+    t_structured* result,
+    const t_type* ttype,
+    const t_throws* ex,
+    bool is_void) {
   if (ttype) {
     auto success = std::make_unique<t_field>(ttype, "success", 0);
     if (!is_void) {

@@ -49,7 +49,6 @@ let compute_class_diffs
       let diff =
         diff_class_in_changed_file package_info old_classes new_classes cid
       in
-      Hh_logger.log "%s" (ClassDiff.pretty ~name:cid diff);
       if ClassDiff.equal diff Unchanged then
         acc
       else
@@ -127,11 +126,15 @@ let compute_class_fanout
   Hh_logger.log "Detecting changes to classes in %d files:" file_count;
 
   let changes = compute_class_diffs ctx ~during_init ~defs in
-  let change_count = List.length changes in
-  if List.is_empty changes then
-    Hh_logger.log "No class changes detected"
-  else
-    Hh_logger.log "Computing fanout from %d changed classes" change_count;
+  begin
+    match changes with
+    | [] -> Hh_logger.log "No class changes detected"
+    | (cid, diff) :: _ ->
+      Hh_logger.log
+        "Computing fanout from %d changed classes, for instance %s"
+        (List.length changes)
+        (ClassDiff.pretty ~name:cid diff)
+  end;
 
   let fanout = Shallow_class_fanout.fanout_of_changes ~ctx changes in
   if TypecheckerOptions.optimized_member_fanout (Provider_context.get_tcopt ctx)

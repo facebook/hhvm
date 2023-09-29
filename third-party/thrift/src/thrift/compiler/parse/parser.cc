@@ -173,10 +173,11 @@ class parser {
       report_expected("string literal");
     }
     auto str = lex_string_literal(token_);
+    auto str_range = token_.range;
     consume_token();
     switch (kind) {
       case tok::kw_include:
-        actions_.on_include(range, str);
+        actions_.on_include(range, str, str_range);
         break;
       case tok::kw_cpp_include:
         actions_.on_cpp_include(range, str);

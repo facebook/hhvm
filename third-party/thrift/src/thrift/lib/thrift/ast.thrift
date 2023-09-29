@@ -49,6 +49,12 @@ struct IdentifierRef {
   2: standard.TypeUri uri;
 }
 
+// An instance of an include in a source file.
+struct IncludeRef {
+  1: schema.SourceRange range;
+  2: id.ProgramId target;
+}
+
 // A thrift schema that corresponds to one or more thrift files.
 @cpp.UseOpEncode
 struct Ast {
@@ -76,4 +82,10 @@ struct Ast {
     * The `source_ranges` option must be passed to thrift2ast to populate this map.
     */
   6: list<IdentifierRef> identifierSourceRanges;
+
+  /**
+    * The source ranges of paths included in the main program.
+    * The `source_ranges` option must be passed to thrift2ast to populate this map.
+    */
+  7: list<IncludeRef> includeSourceRanges;
 }

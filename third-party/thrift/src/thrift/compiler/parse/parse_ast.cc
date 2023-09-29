@@ -529,7 +529,10 @@ class ast_builder : public parser_actions {
     }
   }
 
-  void on_include(source_range range, std::string_view str) override {
+  void on_include(
+      source_range range,
+      std::string_view str,
+      source_range str_range) override {
     std::string include_name = fmt::to_string(str);
     auto included_program = on_include_(range, include_name, program_);
     auto last_slash = include_name.find_last_of("/\\");
@@ -538,6 +541,7 @@ class ast_builder : public parser_actions {
     }
     auto include = std::make_unique<t_include>(included_program, include_name);
     include->set_src_range(range);
+    include->set_str_range(str_range);
     program_.add_include(std::move(include));
   }
 

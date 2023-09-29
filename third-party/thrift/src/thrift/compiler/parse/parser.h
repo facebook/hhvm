@@ -85,7 +85,8 @@ class parser_actions {
       std::unique_ptr<attributes> attrs,
       std::string_view name) = 0;
 
-  virtual void on_include(source_range range, std::string_view str) = 0;
+  virtual void on_include(
+      source_range range, std::string_view str, source_range str_range) = 0;
   virtual void on_cpp_include(source_range range, std::string_view str) = 0;
   virtual void on_hs_include(source_range range, std::string_view str) = 0;
 

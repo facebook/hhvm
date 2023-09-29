@@ -330,6 +330,15 @@ class AstGeneratorTest(unittest.TestCase):
                 """
             ),
         )
+        write_file(
+            "bar.thrift",
+            textwrap.dedent(
+                """\
+            include "foo.thrift"
+            service S3 extends foo.S2 {}
+            """
+            ),
+        )
 
         ast = self.run_thrift("foo.thrift")
 
@@ -340,4 +349,20 @@ class AstGeneratorTest(unittest.TestCase):
         self.assertDictEqual(
             spans,
             {1: "B", 4: "A", 7: "S1", 8: "B", 9: "A", 11: "T", 13: "E"},
+        )
+
+        ast = self.run_thrift("bar.thrift")
+        spans = {}
+        for ref in ast.identifierSourceRanges:
+            spans[ref.range.beginLine] = ref.uri.scopedName
+        self.assertDictEqual(
+            spans,
+            {2: "foo.S2"},
+        )
+        spans = {}
+        for ref in ast.includeSourceRanges:
+            spans[ref.range.beginLine] = ast.sources[ref.target].fileName
+        self.assertDictEqual(
+            spans,
+            {1: "foo.thrift"},
         )

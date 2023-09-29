@@ -37,9 +37,13 @@ class t_include : public t_node {
 
   fmt::string_view raw_path() const { return raw_path_; }
 
+  void set_str_range(source_range rng) { range_ = rng; }
+  source_range str_range() const { return range_; }
+
  private:
   t_program* program_;
   std::string raw_path_;
+  source_range range_;
 };
 
 } // namespace compiler

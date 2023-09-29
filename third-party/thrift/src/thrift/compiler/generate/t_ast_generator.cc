@@ -114,6 +114,7 @@ class t_ast_generator : public t_generator {
   ast_protocol protocol_;
   bool include_generated_{false};
   bool source_ranges_{false};
+  bool is_root_program_{true};
 };
 
 void t_ast_generator::generate_program() {
@@ -219,12 +220,14 @@ void t_ast_generator::generate_program() {
     program_index[&program] = program_id;
     hydrate_const(programs.emplace_back(), *schema_source.gen_schema(program));
 
+    auto is_root_program = std::exchange(is_root_program_, false);
     for (auto* include : program.get_included_programs()) {
       // This could invalidate references into `programs`.
       visitor(*include);
       programs.at(pos).includes().ensure().push_back(program_index.at(include));
       populate_defs(include);
     }
+    is_root_program_ = is_root_program;
 
     // Double write to deprecated externed path. (T161963504)
     // The new path is populated in the Program struct by the schematizer.
@@ -292,7 +295,7 @@ void t_ast_generator::generate_program() {
   // Populate identifier source range map if enabled.
   auto span = [&](t_type_ref ref) {
     auto combinator = [&](t_type_ref ref, auto& recurse) -> void {
-      if (!ref || !source_ranges_) {
+      if (!ref || !source_ranges_ || !is_root_program_) {
         return;
       }
       while (ref->is_typedef() &&
@@ -365,6 +368,14 @@ void t_ast_generator::generate_program() {
 
   visitor(*program_);
   populate_defs(program_);
+  if (source_ranges_) {
+    for (auto inc : program_->includes()) {
+      cpp2::IncludeRef ident;
+      ident.range() = src_range(inc->str_range(), program_);
+      ident.target() = program_index.at(inc->get_program());
+      ast.includeSourceRanges()->push_back(std::move(ident));
+    }
+  }
 
   switch (protocol_) {
     case ast_protocol::json:

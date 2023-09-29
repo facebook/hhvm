@@ -11,6 +11,7 @@ import (
     "sync"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
+    metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
@@ -19,6 +20,7 @@ var _ = fmt.Printf
 var _ = strings.Split
 var _ = sync.Mutex{}
 var _ = thrift.ZERO
+var _ = metadata.GoUnusedProtection__
 
 
 
@@ -2322,6 +2324,10 @@ func (p *MyServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
+func (p *MyServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
+    return GetThriftMetadata()
+}
+
 
 type procFuncMyServicePing struct {
     handler MyService
@@ -3236,6 +3242,10 @@ func (p *MyServicePrioParentProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
+func (p *MyServicePrioParentProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
+    return GetThriftMetadata()
+}
+
 
 type procFuncMyServicePrioParentPing struct {
     handler MyServicePrioParent
@@ -3663,6 +3673,10 @@ func NewMyServicePrioChildProcessor(handler MyServicePrioChild) *MyServicePrioCh
     p.AddToFunctionServiceMap("pang", "MyServicePrioChild")
 
     return p
+}
+
+func (p *MyServicePrioChildProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
+    return GetThriftMetadata()
 }
 
 
@@ -4130,6 +4144,10 @@ func (p *BadServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFunction
 
 func (p *BadServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
+}
+
+func (p *BadServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
+    return GetThriftMetadata()
 }
 
 
@@ -4933,6 +4951,10 @@ func (p *FooBarBazServiceProcessor) ProcessorMap() map[string]thrift.ProcessorFu
 
 func (p *FooBarBazServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
+}
+
+func (p *FooBarBazServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
+    return GetThriftMetadata()
 }
 
 

@@ -12,6 +12,7 @@ import (
 
     module0 "module0"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
+    metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 var _ = module0.GoUnusedProtection__
@@ -21,6 +22,7 @@ var _ = fmt.Printf
 var _ = strings.Split
 var _ = sync.Mutex{}
 var _ = thrift.ZERO
+var _ = metadata.GoUnusedProtection__
 
 
 
@@ -1252,6 +1254,10 @@ func (p *FinderProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionCont
 
 func (p *FinderProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
+}
+
+func (p *FinderProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
+    return GetThriftMetadata()
 }
 
 

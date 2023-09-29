@@ -28,6 +28,11 @@ import (
     {{program:go_package_alias}} "{{program:go_import_path}}"
     {{/program:thrift_imports}}
     thrift "{{program:thrift_lib_import}}"
+    {{#program:gen_metadata?}}
+    {{#program:import_metadata_package?}}
+    metadata "{{program:thrift_metadata_import}}"
+    {{/program:import_metadata_package?}}
+    {{/program:gen_metadata?}}
 )
 
 {{> common/unused_imports_protection}}
@@ -37,6 +42,11 @@ var _ = fmt.Printf
 var _ = strings.Split
 var _ = sync.Mutex{}
 var _ = thrift.ZERO
+{{#program:gen_metadata?}}
+{{#program:import_metadata_package?}}
+var _ = metadata.GoUnusedProtection__
+{{/program:import_metadata_package?}}
+{{/program:gen_metadata?}}
 
 {{#program:services}}{{!
 

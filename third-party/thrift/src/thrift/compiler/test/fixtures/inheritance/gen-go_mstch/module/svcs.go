@@ -11,6 +11,7 @@ import (
     "sync"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
+    metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
@@ -19,6 +20,7 @@ var _ = fmt.Printf
 var _ = strings.Split
 var _ = sync.Mutex{}
 var _ = thrift.ZERO
+var _ = metadata.GoUnusedProtection__
 
 
 
@@ -363,6 +365,10 @@ func (p *MyRootProcessor) ProcessorMap() map[string]thrift.ProcessorFunctionCont
 
 func (p *MyRootProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
+}
+
+func (p *MyRootProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
+    return GetThriftMetadata()
 }
 
 
@@ -744,6 +750,10 @@ func NewMyNodeProcessor(handler MyNode) *MyNodeProcessor {
     return p
 }
 
+func (p *MyNodeProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
+    return GetThriftMetadata()
+}
+
 
 type procFuncMyNodeDoMid struct {
     handler MyNode
@@ -1121,6 +1131,10 @@ func NewMyLeafProcessor(handler MyLeaf) *MyLeafProcessor {
     p.AddToFunctionServiceMap("do_leaf", "MyLeaf")
 
     return p
+}
+
+func (p *MyLeafProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
+    return GetThriftMetadata()
 }
 
 

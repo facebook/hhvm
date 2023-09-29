@@ -124,10 +124,10 @@ func GetThriftMetadata() *{{program:metadata_qualifier}}ThriftMetadata {
         {{/program:thrift_imports}}
     }
 
-	allEnums := make(map[string]*metadata.ThriftEnum)
-	allStructs := make(map[string]*metadata.ThriftStruct)
-	allExceptions := make(map[string]*metadata.ThriftException)
-    allServices := make(map[string]*metadata.ThriftService)
+	allEnums := make(map[string]*{{program:metadata_qualifier}}ThriftEnum)
+	allStructs := make(map[string]*{{program:metadata_qualifier}}ThriftStruct)
+	allExceptions := make(map[string]*{{program:metadata_qualifier}}ThriftException)
+    allServices := make(map[string]*{{program:metadata_qualifier}}ThriftService)
 
     for _, includedEnumsMetadata := range includedEnumsMetadatas {
         for enumName, thriftEnum := range includedEnumsMetadata {

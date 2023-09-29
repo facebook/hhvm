@@ -11,6 +11,7 @@ import (
     "sync"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
+    metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // (needed to ensure safety because of naive import list construction)
@@ -19,6 +20,7 @@ var _ = fmt.Printf
 var _ = strings.Split
 var _ = sync.Mutex{}
 var _ = thrift.ZERO
+var _ = metadata.GoUnusedProtection__
 
 
 
@@ -2037,6 +2039,10 @@ func (p *NestedContainersProcessor) ProcessorMap() map[string]thrift.ProcessorFu
 
 func (p *NestedContainersProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
+}
+
+func (p *NestedContainersProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
+    return GetThriftMetadata()
 }
 
 

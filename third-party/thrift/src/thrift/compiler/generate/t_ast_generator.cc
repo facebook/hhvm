@@ -165,9 +165,6 @@ void t_ast_generator::generate_program() {
   auto set_source_range = [&](const t_named& def,
                               type::DefinitionAttrs& attrs,
                               const t_program* program = nullptr) {
-    if (def.generated()) {
-      return;
-    }
     program = program ? program : def.program();
     attrs.sourceRange() = src_range(def.src_range(), program);
     if (def.has_doc()) {
@@ -422,6 +419,9 @@ void t_ast_generator::generate_program() {
     }
   });
   visitor.add_const_visitor([&](const t_const& node) {
+    if (node.generated()) {
+      return;
+    }
     span(node.type_ref());
     const_spans(node.value());
   });

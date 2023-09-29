@@ -330,6 +330,7 @@ void generate_runtime_schema(
   auto schemaConst = std::make_unique<t_const>(
       program, schemaType, std::move(name), std::move(schema));
   schemaConst->set_generated();
+  schemaConst->set_src_range(node.src_range());
   program->add_definition(std::move(schemaConst));
 }
 

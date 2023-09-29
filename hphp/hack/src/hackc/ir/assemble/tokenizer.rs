@@ -10,6 +10,7 @@ use std::io::BufReader;
 use std::io::Read;
 use std::rc::Rc;
 use std::sync::Arc;
+use std::sync::OnceLock;
 
 use anyhow::bail;
 use anyhow::Result;
@@ -17,7 +18,6 @@ use ffi::Str;
 use hash::HashSet;
 use ir_core::StringInterner;
 use log::trace;
-use once_cell::sync::OnceCell;
 
 use crate::util::unescape;
 
@@ -162,7 +162,7 @@ impl<'a> Tokenizer<'a> {
         // xx
         // xxx
         // ^ - The set of all characters that can appear here.
-        static DOUBLE_LEAD: OnceCell<[bool; 256]> = OnceCell::new();
+        static DOUBLE_LEAD: OnceLock<[bool; 256]> = OnceLock::new();
         let double_lead = DOUBLE_LEAD.get_or_init(|| {
             let mut lead_set = [false; 256];
             for s in operators().iter() {
@@ -178,7 +178,7 @@ impl<'a> Tokenizer<'a> {
         //
         // xxx
         //  ^ - The set of all characters that can appear here.
-        static TRIPLE_LEAD: OnceCell<[bool; 256]> = OnceCell::new();
+        static TRIPLE_LEAD: OnceLock<[bool; 256]> = OnceLock::new();
         let triple_lead = TRIPLE_LEAD.get_or_init(|| {
             let mut lead_set = [false; 256];
             for s in operators().iter() {
@@ -565,7 +565,7 @@ impl fmt::Display for LineNum {
 /// Operators are only different from identifiers in which consecutive
 /// characters make up a single token vs being split into multiple tokens.
 fn operators() -> &'static HashSet<&'static str> {
-    static OPERATORS: OnceCell<HashSet<&'static str>> = OnceCell::new();
+    static OPERATORS: OnceLock<HashSet<&'static str>> = OnceLock::new();
 
     OPERATORS.get_or_init(|| {
         #[rustfmt::skip]
@@ -595,7 +595,7 @@ fn operators() -> &'static HashSet<&'static str> {
 }
 
 fn operator_lead_bytes() -> &'static [bool; 256] {
-    static LEAD: OnceCell<[bool; 256]> = OnceCell::new();
+    static LEAD: OnceLock<[bool; 256]> = OnceLock::new();
     LEAD.get_or_init(|| {
         let mut lead_set = [false; 256];
         for s in operators().iter() {

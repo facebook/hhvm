@@ -8,6 +8,7 @@ use std::alloc::Layout;
 use std::convert::TryInto;
 use std::io::Write;
 use std::ptr::NonNull;
+use std::sync::OnceLock;
 
 use ocaml_blob::HeapValue;
 use ocaml_blob::HeapValueHeader;
@@ -16,13 +17,12 @@ use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::Allocator;
 use ocamlrep::Value;
 use ocamlrep_ocamlpool::catch_unwind;
-use once_cell::sync::OnceCell;
 use shmrs::chashmap::MINIMUM_EVICTABLE_BYTES_PER_SHARD;
 use shmrs::chashmap::NUM_SHARDS;
 use shmrs::segment::ShmemTableSegment;
 use shmrs::segment::ShmemTableSegmentRef;
 
-pub static SEGMENT: OnceCell<ShmemTableSegmentRef<'static, HeapValue>> = OnceCell::new();
+pub static SEGMENT: OnceLock<ShmemTableSegmentRef<'static, HeapValue>> = OnceLock::new();
 
 pub fn with<R>(f: impl FnOnce(&ShmemTableSegmentRef<'static, HeapValue>) -> R) -> R {
     f(SEGMENT.get().unwrap())

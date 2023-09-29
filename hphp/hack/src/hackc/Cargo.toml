@@ -41,7 +41,6 @@ jwalk = "0.6"
 log = { version = "0.4.17", features = ["kv_unstable", "kv_unstable_std"] }
 multifile_rust = { version = "0.0.0", path = "../utils/multifile" }
 naming_provider = { version = "0.0.0", path = "../hackrs/naming_provider/cargo/naming_provider" }
-once_cell = "1.12"
 options = { version = "0.0.0", path = "compile/cargo/options" }
 oxidized = { version = "0.0.0", path = "../oxidized" }
 panic-message = "0.3"

@@ -271,7 +271,6 @@ dependencies = [
  "itertools 0.10.5",
  "log",
  "naming_special_names_rust",
- "once_cell",
  "parse_macro_ir",
 ]
 
@@ -436,7 +435,6 @@ dependencies = [
  "log",
  "maplit",
  "newtype",
- "once_cell",
 ]
 
 [[package]]
@@ -1433,7 +1431,6 @@ dependencies = [
  "itertools 0.10.5",
  "ocamlrep",
  "ocamlrep_custom",
- "once_cell",
  "parking_lot",
  "rpds",
  "typing_deps_hash",
@@ -2184,7 +2181,6 @@ dependencies = [
  "aast_parser",
  "macro_test_util",
  "naming_special_names_rust",
- "once_cell",
  "oxidized",
  "parser_core_types",
  "proc-macro2",
@@ -2232,7 +2228,6 @@ dependencies = [
  "log",
  "multifile_rust",
  "naming_provider",
- "once_cell",
  "options",
  "oxidized",
  "panic-message",
@@ -4862,7 +4857,6 @@ dependencies = [
  "ocaml_blob",
  "ocamlrep",
  "ocamlrep_ocamlpool",
- "once_cell",
  "shmrs",
 ]
 

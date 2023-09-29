@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::sync::OnceLock;
+
 use ffi::Maybe;
 use ffi::Str;
 use ir::BaseType;
@@ -10,7 +12,6 @@ use ir::ClassId;
 use ir::StringInterner;
 use itertools::Itertools;
 use maplit::hashmap;
-use once_cell::sync::OnceCell;
 
 use crate::convert;
 use crate::types;
@@ -27,8 +28,8 @@ pub(crate) fn convert_type<'a>(ty: &hhbc::TypeInfo<'a>, strings: &StringInterner
             .as_ref()
             .and_then(|user_type| {
                 use std::collections::HashMap;
-                static UNCONSTRAINED_BY_NAME: OnceCell<HashMap<Str<'static>, BaseType>> =
-                    OnceCell::new();
+                static UNCONSTRAINED_BY_NAME: OnceLock<HashMap<Str<'static>, BaseType>> =
+                    OnceLock::new();
                 let unconstrained_by_name = UNCONSTRAINED_BY_NAME.get_or_init(|| {
                     hashmap! {
                         ir::types::BUILTIN_NAME_VOID => BaseType::Void,
@@ -62,7 +63,7 @@ pub(crate) fn convert_maybe_type<'a>(
 
 fn cvt_constraint_type<'a>(name: Str<'a>, strings: &StringInterner) -> BaseType {
     use std::collections::HashMap;
-    static CONSTRAINT_BY_NAME: OnceCell<HashMap<Str<'static>, BaseType>> = OnceCell::new();
+    static CONSTRAINT_BY_NAME: OnceLock<HashMap<Str<'static>, BaseType>> = OnceLock::new();
     let constraint_by_name = CONSTRAINT_BY_NAME.get_or_init(|| {
         hashmap! {
             ir::types::BUILTIN_NAME_ANY_ARRAY => BaseType::AnyArray,

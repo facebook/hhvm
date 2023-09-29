@@ -16,5 +16,4 @@ libc = "0.2.139"
 ocaml_blob = { version = "0.0.0", path = "../ocaml_blob" }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_ocamlpool = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
-once_cell = "1.12"
 shmrs = { version = "0.0.0", path = "../../../shmrs" }

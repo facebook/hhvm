@@ -8,11 +8,11 @@ mod ast_writer;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::sync::Arc;
+use std::sync::OnceLock;
 
 use aast_parser::rust_aast_parser_types::Env;
 use aast_parser::Error as AastError;
 use naming_special_names_rust::modules as special_modules;
-use once_cell::sync::OnceCell;
 use oxidized::ast;
 use oxidized::ast::Def;
 use oxidized::ast::Pos;
@@ -249,7 +249,7 @@ fn prepare_hack(
     input: LitStr,
     default_pos: &TokenStream,
 ) -> Result<(String, HashMap<String, Replacement>)> {
-    static RE_VAR: OnceCell<Regex> = OnceCell::new();
+    static RE_VAR: OnceLock<Regex> = OnceLock::new();
     let re_var = RE_VAR.get_or_init(|| {
         let short = r"#(\w+)";
         let long = r"#\{([^}*]+)\}";

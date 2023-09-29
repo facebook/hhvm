@@ -6,6 +6,7 @@
 use std::collections::VecDeque;
 use std::ffi::OsString;
 use std::fs::File;
+use std::sync::OnceLock;
 
 use dep_graph_delta::DepGraphDelta;
 use dep_graph_delta::HashSetDelta;
@@ -14,7 +15,6 @@ use depgraph_reader::Dep;
 use depgraph_reader::DepGraph;
 use hash::HashSet;
 use itertools::Either;
-use once_cell::sync::OnceCell;
 use parking_lot::MappedRwLockReadGuard;
 use parking_lot::MappedRwLockWriteGuard;
 use parking_lot::RwLock;
@@ -319,11 +319,11 @@ impl DepGraphWithDelta<DepGraph> {
     }
 }
 
-pub struct LockedDepgraphWithDelta(RwLock<OnceCell<DepGraphWithDelta<DepGraph>>>);
+pub struct LockedDepgraphWithDelta(RwLock<OnceLock<DepGraphWithDelta<DepGraph>>>);
 
 impl LockedDepgraphWithDelta {
     pub const fn new() -> Self {
-        Self(RwLock::new(OnceCell::new()))
+        Self(RwLock::new(OnceLock::new()))
     }
 
     fn read_init(&self) -> MappedRwLockReadGuard<'_, DepGraphWithDelta<DepGraph>> {

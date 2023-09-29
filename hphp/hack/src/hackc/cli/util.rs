@@ -19,7 +19,7 @@ pub type SyncWrite = Mutex<Box<dyn Write + Sync + Send>>;
 #[macro_export]
 macro_rules! regex {
     ($re:literal $(,)?) => {{
-        static RE: once_cell::sync::OnceCell<Regex> = once_cell::sync::OnceCell::new();
+        static RE: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
         RE.get_or_init(|| Regex::new($re).unwrap())
     }};
 }

@@ -1283,6 +1283,8 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
 
 let run_once options config local_config =
   assert (ServerArgs.check_mode options);
+  Hh_logger.log "ServerMain.run_once starting";
+
   let (workers, env) =
     setup_server
       options
@@ -1328,6 +1330,8 @@ let daemon_main_exn ~informant_managed options monitor_pid in_fds =
   assert (not (ServerArgs.check_mode options));
   Folly.ensure_folly_init ();
   Printexc.record_backtrace true;
+
+  Hh_logger.log "ServerMain daemon starting.";
 
   let (config, local_config) = ServerConfig.load ~silent:false options in
   Option.iter local_config.ServerLocalConfig.memtrace_dir ~f:(fun dir ->

@@ -63,6 +63,7 @@ let monitor_daemon_main
   Relative_path.set_path_prefix Relative_path.Root www_root;
   let () = ServerLoadFlag.set_no_load (ServerArgs.no_load options) in
   let init_id = Random_id.short_string () in
+  Hh_logger.log "MonitorStart. Monitor init_id: %s" init_id;
   let (config, local_config) = ServerConfig.load ~silent:false options in
   if not (Sys_utils.enable_telemetry ()) then
     EventLogger.init_fake ()

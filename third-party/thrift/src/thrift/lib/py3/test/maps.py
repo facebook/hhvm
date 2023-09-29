@@ -64,9 +64,7 @@ class MapTests(unittest.TestCase):
     def test_get(self) -> None:
         x = StrStrMap({"test": "value"})
         self.assertEqual(x.get("test"), "value")
-        # pyre-fixme[6]: For 1st argument expected `str` but got `int`.
         self.assertIs(x.get(5), None)
-        # pyre-fixme[6]: For 1st argument expected `str` but got `Map__string_string`.
         self.assertIs(x.get(x), None)
 
     def test_contains(self) -> None:

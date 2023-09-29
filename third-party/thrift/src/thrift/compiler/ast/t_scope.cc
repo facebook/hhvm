@@ -70,7 +70,7 @@ t_type_ref t_scope::ref_type(
     type = find_interaction(scoped_name);
   }
   if (type != nullptr) {
-    return *type; // We found the type!
+    return {*type, range}; // We found the type!
   }
 
   /*

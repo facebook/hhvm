@@ -187,8 +187,9 @@ class t_type : public t_named {
 class t_type_ref final {
  public:
   t_type_ref() = default;
-  /* implicit */ t_type_ref(const t_type& type) : t_type_ref(&type) {}
-  /* implicit */ t_type_ref(t_type&&) = delete;
+  /* implicit */ t_type_ref(const t_type& type, source_range range = {})
+      : t_type_ref(&type, range) {}
+  /* implicit */ t_type_ref(t_type&&, source_range = {}) = delete;
 
   // Returns the type being referenced, resolving it if need be.
   //
@@ -209,13 +210,17 @@ class t_type_ref final {
   bool resolved() const noexcept;
   bool resolve();
 
+  source_range src_range() const { return range_; }
+
   // Helpers for constructing from pointers.
-  static t_type_ref from_ptr(const t_type* type) { return t_type_ref(type); }
-  static t_type_ref from_req_ptr(const t_type* type) {
+  static t_type_ref from_ptr(const t_type* type, source_range range = {}) {
+    return t_type_ref(type, range);
+  }
+  static t_type_ref from_req_ptr(const t_type* type, source_range range = {}) {
     if (type == nullptr) {
       throw std::runtime_error("type required");
     }
-    return from_ptr(type);
+    return from_ptr(type, range);
   }
 
   // Smart pointer-like operators.
@@ -228,16 +233,20 @@ class t_type_ref final {
 
  private:
   const t_type* type_ = nullptr;
+  source_range range_;
   // The placeholder we have write access to, if we need to resolve the type
   // before derefing.
   // Note: It is not thread safe to access this value if 'this' is const.s
   t_placeholder_typedef* unresolved_type_ = nullptr;
   explicit t_type_ref(
-      const t_type& type, t_placeholder_typedef& unresolved_type)
-      : type_(&type), unresolved_type_(&unresolved_type) {}
+      const t_type& type,
+      t_placeholder_typedef& unresolved_type,
+      source_range range)
+      : type_(&type), range_(range), unresolved_type_(&unresolved_type) {}
 
   // Note: Use from_ptr or from_req_ptr for public access.
-  explicit t_type_ref(const t_type* type) : type_(type) {}
+  explicit t_type_ref(const t_type* type, source_range range)
+      : type_(type), range_(range) {}
 
   const t_type& deref_or_throw() const;
 

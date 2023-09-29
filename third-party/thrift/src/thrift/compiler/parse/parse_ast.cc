@@ -383,7 +383,7 @@ class ast_builder : public parser_actions {
       std::unique_ptr<deprecated_annotations> annotations,
       const source_range& range = {}) {
     if (!annotations) {
-      return type;
+      return {type, range};
     }
 
     // Make a copy of the node to hold the annotations.
@@ -391,7 +391,7 @@ class ast_builder : public parser_actions {
       // Base types can be copy constructed.
       auto node = std::make_unique<t_base_type>(*tbase_type);
       set_annotations(node.get(), std::move(annotations));
-      t_type_ref result(*node);
+      t_type_ref result(*node, range);
       program_.add_unnamed_type(std::move(node));
       return result;
     }
@@ -402,12 +402,12 @@ class ast_builder : public parser_actions {
     // the same name. Note that this is not a safe assumption as it breaks all
     // dynamic casts and t_type::is_* calls.
     auto unnamed = t_typedef::make_unnamed(
-        const_cast<t_program*>(type.program()), type.get_name(), type);
+        const_cast<t_program*>(type.program()), type.get_name(), {type, range});
     const t_type* result = unnamed.get();
     unnamed->set_src_range(range);
     set_annotations(unnamed.get(), std::move(annotations));
     program_.add_unnamed_typedef(std::move(unnamed));
-    return *result;
+    return {*result, range};
   }
 
   // Creates a reference to a newly instantiated container type.
@@ -420,7 +420,7 @@ class ast_builder : public parser_actions {
     set_annotations(node.get(), std::move(annotations));
     node->set_src_range(range);
     program_.add_type_instantiation(std::move(node));
-    return *type;
+    return {*type, range};
   }
 
   // Creates a reference to a named type.
@@ -635,7 +635,7 @@ class ast_builder : public parser_actions {
       std::unique_ptr<t_throws> throws) override {
     auto return_name = ret.name.str;
     const t_interaction* interaction = nullptr;
-    t_type_ref return_type = t_type_ref::from_ptr(ret.type);
+    t_type_ref return_type = t_type_ref::from_ptr(ret.type, range);
     if (size_t size = return_name.size()) {
       // Handle an interaction or return type name.
       interaction = scope_->find_interaction(program_.scope_name(return_name));
@@ -825,9 +825,10 @@ class ast_builder : public parser_actions {
   }
 
   t_type_ref on_type(
+      source_range range,
       const t_base_type& type,
       std::unique_ptr<deprecated_annotations> annotations) override {
-    return new_type_ref(type, std::move(annotations));
+    return new_type_ref(type, std::move(annotations), range);
   }
 
   t_type_ref on_type(

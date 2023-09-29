@@ -739,7 +739,7 @@ class parser {
   t_type_ref parse_type() {
     auto range = track_range();
     if (const t_base_type* type = try_parse_base_type()) {
-      return actions_.on_type(*type, try_parse_deprecated_annotations());
+      return actions_.on_type(range, *type, try_parse_deprecated_annotations());
     }
     switch (token_.kind) {
       case tok::identifier: {

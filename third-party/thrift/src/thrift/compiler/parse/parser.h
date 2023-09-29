@@ -188,6 +188,7 @@ class parser_actions {
       boost::optional<comment> doc) = 0;
 
   virtual t_type_ref on_type(
+      source_range range,
       const t_base_type& type,
       std::unique_ptr<deprecated_annotations> annotations) = 0;
 

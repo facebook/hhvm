@@ -270,3 +270,25 @@ class ThriftPackage(unittest.TestCase):
                 struct foo {}
                 """,
         )
+
+    def test_empty_namespace(self):
+
+        self.write_and_test(
+            "foo.thrift",
+            """\
+                namespace hack ""
+                namespace py3  ""
+
+                struct foo {}
+
+                """,
+            """\
+                package "meta.com/foo"
+
+                namespace cpp2 "cpp2"
+                namespace hack ""
+                namespace py3  ""
+
+                struct foo {}
+                """,
+        )

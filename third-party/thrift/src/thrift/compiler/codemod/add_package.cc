@@ -55,19 +55,30 @@ class add_package {
   file_manager fm_;
   const t_program& prog_;
 
+  std::map<std::string, std::string> get_namespaces() const {
+    std::map<std::string, std::string> namespaces;
+    for (auto [lang, ns] : prog_.namespaces()) {
+      if (!ns.empty()) {
+        namespaces[lang] = ns;
+      }
+    }
+    return namespaces;
+  }
+
   std::string get_package() const {
+    auto namespaces = get_namespaces();
     // If no namespaces exist, use the file path as the package.
-    if (prog_.namespaces().empty()) {
+    if (namespaces.empty()) {
       return package_name_generator::from_file_path(prog_.path());
     }
 
-    if (prog_.namespaces().size() == 1) {
+    if (namespaces.size() == 1) {
       // If there is only a single namespace, use that to generate the package
       // name.
-      auto ns = prog_.namespaces().begin();
+      auto ns = namespaces.begin();
       return package_name_generator(ns->first, ns->second).generate();
     }
-    auto gen = package_name_generator_util::from_namespaces(prog_.namespaces());
+    auto gen = package_name_generator_util::from_namespaces(namespaces);
 
     // If there are multiple namespaces, then find the one that works with
     // most namespaces.

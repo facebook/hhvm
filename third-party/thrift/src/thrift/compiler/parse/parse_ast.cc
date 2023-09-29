@@ -634,13 +634,15 @@ class ast_builder : public parser_actions {
       t_field_list params,
       std::unique_ptr<t_throws> throws) override {
     auto return_name = ret.name.str;
-    const t_interaction* interaction = nullptr;
-    t_type_ref return_type = t_type_ref::from_ptr(ret.type, range);
+    t_type_ref interaction;
+    t_type_ref return_type = t_type_ref::from_ptr(
+        ret.type, {ret.name.loc, ret.name.loc + ret.name.str.size()});
     if (size_t size = return_name.size()) {
       // Handle an interaction or return type name.
-      interaction = scope_->find_interaction(program_.scope_name(return_name));
-      if (interaction) {
-        // Do nothing.
+      if (auto interaction_ptr =
+              scope_->find_interaction(program_.scope_name(return_name))) {
+        interaction = t_type_ref::from_ptr(
+            interaction_ptr, {ret.name.loc, ret.name.loc + size});
       } else if (ret.type) {
         diags_.error(
             ret.name.loc, "'{}' does not name an interaction", return_name);
@@ -731,7 +733,8 @@ class ast_builder : public parser_actions {
     auto ret = return_clause();
     ret.name = interaction_name;
     auto name = fmt::format("create{}", interaction_name.str);
-    auto fun = on_function(range, {}, {}, std::move(ret), {name, {}}, {}, {});
+    auto fun =
+        on_function(range, {}, {}, std::move(ret), {name, range.begin}, {}, {});
     fun->set_is_interaction_constructor();
     return fun;
   }

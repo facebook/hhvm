@@ -29,12 +29,12 @@ t_function::t_function(
     t_type_ref return_type,
     std::unique_ptr<t_node> sink_or_stream,
     std::string name,
-    const t_interaction* interaction)
+    t_type_ref interaction)
     : t_named(program, std::move(name)),
       sink_or_stream_(std::move(sink_or_stream)),
       paramlist_(std::make_unique<t_paramlist>(program)) {
   if (interaction) {
-    return_types_.push_back(t_type_ref::from_ptr(interaction));
+    return_types_.push_back(interaction);
   }
   if (return_type) {
     return_types_.push_back(return_type);

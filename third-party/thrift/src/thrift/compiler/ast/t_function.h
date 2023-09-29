@@ -66,7 +66,7 @@ class t_function final : public t_named {
       t_type_ref return_type,
       std::unique_ptr<t_node> sink_or_stream,
       std::string name,
-      const t_interaction* interaction = nullptr);
+      t_type_ref interaction = {});
 
   const t_type* return_type() const {
     return response_pos_ != -1 ? return_types_[response_pos_].get_type()

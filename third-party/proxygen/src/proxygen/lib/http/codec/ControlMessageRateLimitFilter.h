@@ -35,10 +35,12 @@ class ControlMessageRateLimitFilter : public PassThroughHTTPCodecFilter {
                                          HTTPSessionStats* httpSessionStats)
       : resetControlMessages_(numControlMsgsInCurrentInterval_,
                               httpSessionStats),
-        timer_(timer) {
+        timer_(timer),
+        httpSessionStats_(httpSessionStats) {
   }
 
   void setSessionStats(HTTPSessionStats* httpSessionStats) {
+    httpSessionStats_ = httpSessionStats;
     resetControlMessages_.httpSessionStats = httpSessionStats;
   }
 
@@ -117,6 +119,9 @@ class ControlMessageRateLimitFilter : public PassThroughHTTPCodecFilter {
     }
 
     if (++numControlMsgsInCurrentInterval_ > maxControlMsgsPerInterval_) {
+      if (httpSessionStats_) {
+        httpSessionStats_->recordControlMsgRateLimited();
+      }
       HTTPException ex(
           HTTPException::Direction::INGRESS_AND_EGRESS,
           folly::to<std::string>(
@@ -199,6 +204,7 @@ class ControlMessageRateLimitFilter : public PassThroughHTTPCodecFilter {
   ResetCounterTimeout resetDirectErrors_{
       numDirectErrorHandlingInCurrentInterval_};
   folly::HHWheelTimer* timer_{nullptr};
+  HTTPSessionStats* httpSessionStats_{nullptr};
 };
 
 } // namespace proxygen

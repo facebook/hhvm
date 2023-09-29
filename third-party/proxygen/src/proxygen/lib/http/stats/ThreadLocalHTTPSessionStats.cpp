@@ -37,6 +37,8 @@ TLHTTPSessionStats::TLHTTPSessionStats(const std::string& prefix)
       ttbtxTimeout(prefix + "_ttbtx_timeout", facebook::fb303::SUM),
       ttbtxNotFound(prefix + "_ttbtx_not_found", facebook::fb303::SUM),
       ttbtxExceedLimit(prefix + "_ttbtx_exceed_limit", facebook::fb303::SUM),
+      ctrlMsgsRateLimited(prefix + "_ctrl_msgs_rate_limited",
+                          facebook::fb303::SUM),
       txnsPerSession(prefix + "_txn_per_session",
                      1,
                      0,
@@ -164,6 +166,10 @@ void TLHTTPSessionStats::recordPendingBufferedWriteBytes(
 void TLHTTPSessionStats::recordControlMsgsInInterval(
     int64_t quantity) noexcept {
   ctrlMsgsInInterval.add(quantity);
+}
+
+void TLHTTPSessionStats::recordControlMsgRateLimited() noexcept {
+  ctrlMsgsRateLimited.add(1);
 }
 
 } // namespace proxygen

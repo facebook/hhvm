@@ -36,6 +36,8 @@ class HTTPSessionStats : public TTLBAStats {
 
   virtual void recordControlMsgsInInterval(int64_t) noexcept {
   }
+  virtual void recordControlMsgRateLimited() noexcept {
+  }
 };
 
 } // namespace proxygen

@@ -43,6 +43,7 @@ class TLHTTPSessionStats : public HTTPSessionStats {
   void recordSessionPeriodicPingProbeTimeout() noexcept override;
 
   void recordControlMsgsInInterval(int64_t quantity) noexcept override;
+  void recordControlMsgRateLimited() noexcept override;
 
   BaseStats::TLCounter txnsOpen;
   BaseStats::TLCounter pendingBufferedReadBytes;
@@ -66,6 +67,7 @@ class TLHTTPSessionStats : public HTTPSessionStats {
   BaseStats::TLTimeseries ttbtxTimeout;
   BaseStats::TLTimeseries ttbtxNotFound;
   BaseStats::TLTimeseries ttbtxExceedLimit;
+  BaseStats::TLTimeseries ctrlMsgsRateLimited;
   BaseStats::TLHistogram txnsPerSession;
   BaseStats::TLHistogram sessionIdleTime;
   BaseStats::TLHistogram ctrlMsgsInInterval;

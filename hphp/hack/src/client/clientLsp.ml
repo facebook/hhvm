@@ -74,7 +74,7 @@ Here's an overview of how errors_conn works:
    an [Errors_file of read_result] event may be produced if there were new errors (read_result) in q
   (and not other higher pri events).
 3. handling the [Errors_file] event consists in calling [handle_errors_file_item].
-4. [handle_errors_file_item] takes a [read_result] and updates the diagnostic map [Lost_env.uris_with_standalone_diagnostics],
+4. [handle_errors_file_item] takes a [read_result] and updates the diagnostic map [Run_env.uris_with_standalone_diagnostics],
    or switches the global mutable [error_conn] from [TrailingErrors] to [SeekingErrors] in case of error or end of file. *)
 type errors_conn =
   | SeekingErrors of {
@@ -103,7 +103,7 @@ type errors_conn =
       q: ServerProgress.ErrorsRead.read_result Lwt_stream.t;
     }  (** We are tailing this errors.bin file *)
 
-module Lost_env = struct
+module Run_env = struct
   type stream_file = {
     file: Path.t;
     q: FindRefsWireFormat.half_open_one_based list Lwt_stream.t;
@@ -171,16 +171,9 @@ end
 
 type state =
   | Pre_init  (** Pre_init: we haven't yet received the initialize request. *)
-  | Lost_server of Lost_env.t
-      (** Lost_server: this is the main state that we'll be in (after initialize request,
-          before shutdown request) under ide_standalone. TODO(ljw): rename it.
-          DEPRECATED: it's also used for modes other than ide_standalone, modes
-          which do want a connection to hh_server, but either we failed to
-          start hh_server up, or someone stole the persistent connection from us
-          and we might choose to grab it back.
-          We use the optional [Lost_env.params.new_hh_server_state] as a way of storing
-          within Lost_env whether it's being used for ide_standalone (None)
-          or for other deprecated modes (Some). *)
+  | Running of Run_env.t
+      (** Running : this is the main state that we'll be in (after initialize request,
+          before shutdown request) under ide_standalone. *)
   | Post_shutdown
       (** Post_shutdown: we received a shutdown request from the client, and
           therefore shut down our connection to the server. We can't handle
@@ -191,7 +184,7 @@ let is_post_shutdown (state : state) : bool =
   match state with
   | Post_shutdown -> true
   | Pre_init
-  | Lost_server _ ->
+  | Running _ ->
     false
 
 type result_handler = lsp_result -> state -> state Lwt.t
@@ -311,7 +304,7 @@ let get_editor_open_files (state : state) :
   | Pre_init
   | Post_shutdown ->
     None
-  | Lost_server lenv -> Some lenv.Lost_env.editor_open_files
+  | Running lenv -> Some lenv.Run_env.editor_open_files
 
 let ensure_cancelled (cancellation_token : unit Lwt.u) : unit =
   try Lwt.wakeup_later cancellation_token () with
@@ -352,8 +345,8 @@ type event =
       of the underlying [Lwt_stream.t]. *)
   | Shell_out_complete of
       ((Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) result
-      * Lost_env.triggering_request
-      * Lost_env.shellable_type)
+      * Run_env.triggering_request
+      * Run_env.shellable_type)
       (** Under [--config ide_standlone=true], LSP requests for rename or
       find-refs are accomplished by kicking off an asynchronous shell-out to
       "hh --refactor" or "hh --ide-find-refs". This event signals that the
@@ -519,7 +512,7 @@ let ignore_promise_but_handle_failure
 let state_to_string (state : state) : string =
   match state with
   | Pre_init -> "Pre_init"
-  | Lost_server _ -> "Lost_server"
+  | Running _ -> "Running "
   | Post_shutdown -> "Post_shutdown"
 
 (** This conversion is imprecise.  Comments indicate potential gaps *)
@@ -632,7 +625,7 @@ let terminate_if_version_changed_since_start_of_lsp () : unit Lwt.t =
 received didChange but haven't yet received didSave/didClose. *)
 let get_uris_with_unsaved_changes (state : state) : UriSet.t =
   match state with
-  | Lost_server lenv -> lenv.Lost_env.uris_with_unsaved_changes
+  | Running lenv -> lenv.Run_env.uris_with_unsaved_changes
   | Pre_init
   | Post_shutdown ->
     UriSet.empty
@@ -752,31 +745,31 @@ let get_next_event
       raise (Client_recoverable_connection_exception edata)
   in
   match !state with
-  | Lost_server ({ Lost_env.current_hh_shell = Some sh; _ } as lenv)
-    when not (Lwt.is_sleeping sh.Lost_env.process) ->
+  | Running ({ Run_env.current_hh_shell = Some sh; _ } as lenv)
+    when not (Lwt.is_sleeping sh.Run_env.process) ->
     (* Invariant is that if current_hh_shell is Some, then we will eventually
        produce an LSP response for it. We're turning it into None here;
        the obligation to return an LSP response has been transferred onto
        our Shell_out_complete result. *)
-    state := Lost_server { lenv with Lost_env.current_hh_shell = None };
-    let%lwt result = sh.Lost_env.process in
+    state := Running { lenv with Run_env.current_hh_shell = None };
+    let%lwt result = sh.Run_env.process in
     Lwt.return
       (Shell_out_complete
-         (result, sh.Lost_env.triggering_request, sh.Lost_env.shellable_type))
+         (result, sh.Run_env.triggering_request, sh.Run_env.shellable_type))
   | Pre_init
-  | Lost_server _
+  | Running _
   | Post_shutdown ->
     (* invariant used by [handle_tick_event]: Errors_file events solely arise
-       in state [Lost_server] in conjunction with [TailingErrors]. *)
+       in state [Running ] in conjunction with [TailingErrors]. *)
     let q_opt =
       match (!latest_hh_server_errors, !state) with
-      | (TailingErrors { q; _ }, Lost_server _) -> Some q
+      | (TailingErrors { q; _ }, Running _) -> Some q
       | _ -> None
     in
     let refs_q_opt =
       match !state with
-      | Lost_server
-          Lost_env.
+      | Running
+          Run_env.
             {
               current_hh_shell =
                 Some
@@ -869,8 +862,8 @@ let request_showStatusFB (params : ShowStatusFB.params) : unit =
 (** Dismiss all diagnostics. *)
 let dismiss_diagnostics (state : state) : state =
   match state with
-  | Lost_server lenv ->
-    let open Lost_env in
+  | Running lenv ->
+    let open Run_env in
     (* [uris_with_standalone_diagnostics] are the files-with-squiggles that we've reported
        to the editor; these came either from clientIdeDaemon or from tailing
        the errors.bin file in which hh_server accumulates diagnostics for the current typecheck. *)
@@ -882,7 +875,7 @@ let dismiss_diagnostics (state : state) : state =
         let notification = PublishDiagnosticsNotification params in
         notification |> print_lsp_notification |> to_stdout)
       lenv.uris_with_standalone_diagnostics;
-    Lost_server { lenv with uris_with_standalone_diagnostics = UriMap.empty }
+    Running { lenv with uris_with_standalone_diagnostics = UriMap.empty }
   | Pre_init -> Pre_init
   | Post_shutdown -> Post_shutdown
 
@@ -1584,10 +1577,10 @@ let watch_refs_stream_file
 (** If there was a streaming find-refs result file, this function will unlink it.
 We do this first just to clean up after ourselves, but second because doing this will
 terminate the [watch_refs_stream_file] background thread. *)
-let unlink_refs_stream_file_if_present
-    (shellable_type : Lost_env.shellable_type) : unit =
+let unlink_refs_stream_file_if_present (shellable_type : Run_env.shellable_type)
+    : unit =
   match shellable_type with
-  | Lost_env.(FindRefs { stream_file = Some { file; _ }; _ }) ->
+  | Run_env.(FindRefs { stream_file = Some { file; _ }; _ }) ->
     (try Unix.unlink (Path.to_string file) with
     | exn ->
       let e = Exception.wrap exn in
@@ -1642,7 +1635,7 @@ let log_response_if_necessary
     | Client_message (metadata, message) ->
       Some (metadata, unblocked_time, message)
     | Shell_out_complete (_result, triggering_request, _shellable_type) ->
-      let { Lost_env.id; metadata; start_time_local_handle; request } =
+      let { Run_env.id; metadata; start_time_local_handle; request } =
         triggering_request
       in
       Some (metadata, start_time_local_handle, RequestMessage (id, request))
@@ -1727,8 +1720,8 @@ let hack_log_error
 
 let kickoff_shell_out_and_maybe_cancel
     (state : state)
-    (shellable_type : Lost_env.shellable_type)
-    ~(triggering_request : Lost_env.triggering_request) :
+    (shellable_type : Run_env.shellable_type)
+    ~(triggering_request : Run_env.triggering_request) :
     (state * result_telemetry) Lwt.t =
   let%lwt () = terminate_if_version_changed_since_start_of_lsp () in
   let compose_shellout_cmd ~(from : string) (args : string list) : string array
@@ -1745,17 +1738,17 @@ let kickoff_shell_out_and_maybe_cancel
     |> Array.of_list
   in
   match state with
-  | Lost_server ({ Lost_env.current_hh_shell; _ } as lenv) ->
+  | Running ({ Run_env.current_hh_shell; _ } as lenv) ->
     (* Cancel any existing shell-out, if there is one. *)
     Option.iter
       current_hh_shell
       ~f:(fun
            {
-             Lost_env.cancellation_token;
+             Run_env.cancellation_token;
              shellable_type;
              triggering_request =
                {
-                 Lost_env.id = prev_id;
+                 Run_env.id = prev_id;
                  metadata = prev_metadata;
                  request = prev_request;
                  start_time_local_handle = prev_start_time_local_handle;
@@ -1775,7 +1768,7 @@ let kickoff_shell_out_and_maybe_cancel
         let message =
           Printf.sprintf
             "Cancelled (displaced by another request #%s)"
-            (Lsp_fmt.id_to_string triggering_request.Lost_env.id)
+            (Lsp_fmt.id_to_string triggering_request.Run_env.id)
         in
         let lsp_error =
           make_lsp_error ~code:Lsp.Error.RequestCancelled message
@@ -1795,7 +1788,7 @@ let kickoff_shell_out_and_maybe_cancel
     let (cancel, cancellation_token) = Lwt.wait () in
     let cmd =
       begin
-        let open Lost_env in
+        let open Run_env in
         match shellable_type with
         | FindRefs
             {
@@ -1811,7 +1804,7 @@ let kickoff_shell_out_and_maybe_cancel
                 FindRefsWireFormat.CliArgs.symbol_name = symbol;
                 action = find_refs_action;
                 stream_file =
-                  Option.map stream_file ~f:(fun sf -> sf.Lost_env.file);
+                  Option.map stream_file ~f:(fun sf -> sf.Run_env.file);
                 hint_suffixes;
               }
           in
@@ -1871,13 +1864,13 @@ let kickoff_shell_out_and_maybe_cancel
     in
     log "kickoff_shell_out: %s" (String.concat ~sep:" " (Array.to_list cmd));
     let state =
-      Lost_server
+      Running
         {
           lenv with
-          Lost_env.current_hh_shell =
+          Run_env.current_hh_shell =
             Some
               {
-                Lost_env.process;
+                Run_env.process;
                 cancellation_token;
                 shellable_type;
                 triggering_request;
@@ -1887,7 +1880,7 @@ let kickoff_shell_out_and_maybe_cancel
     let result_telemetry = make_result_telemetry 0 ~log_immediately:false in
     Lwt.return (state, result_telemetry)
   | _ ->
-    HackEventLogger.invariant_violation_bug "kickoff when not in Lost_env";
+    HackEventLogger.invariant_violation_bug "kickoff when not in Run_env";
     Lwt.return (state, make_result_telemetry 0)
 
 (** If there's a current_hh_shell with [id], then send it a SIGTERM.
@@ -1895,13 +1888,13 @@ All we're doing is triggering the cancellation; we rely upon normal
 [handle_shell_out_complete] for once the process has terminated. *)
 let cancel_shellout_if_applicable (state : state) (id : lsp_id) : unit =
   match state with
-  | Lost_server
+  | Running
       {
-        Lost_env.current_hh_shell =
+        Run_env.current_hh_shell =
           Some
             {
-              Lost_env.cancellation_token;
-              triggering_request = { Lost_env.id = peek_id; _ };
+              Run_env.cancellation_token;
+              triggering_request = { Run_env.id = peek_id; _ };
               _;
             };
         _;
@@ -1945,8 +1938,8 @@ let state_to_rage (state : state) : string =
     match state with
     | Pre_init -> ""
     | Post_shutdown -> ""
-    | Lost_server lenv ->
-      let open Lost_env in
+    | Running lenv ->
+      let open Run_env in
       Printf.sprintf
         ("editor_open_files: %s\n"
         ^^ "uris_with_unsaved_changes: %s\n"
@@ -2517,16 +2510,16 @@ let do_findReferences_local
           in
           let file = Path.make file in
           let q = watch_refs_stream_file file ~open_file_results in
-          Lost_env.{ file; partial_result_token; q })
+          Run_env.{ file; partial_result_token; q })
     in
     (* The [open_file_results] included the SymbolOccurrence text for each ref. We won't need that... *)
     let ide_calculated_positions =
       UriMap.map (List.map ~f:snd) open_file_results
     in
     let shellable_type =
-      Lost_env.FindRefs
+      Run_env.FindRefs
         {
-          Lost_env.symbol = full_name;
+          Run_env.symbol = full_name;
           find_refs_action = action;
           stream_file;
           hint_suffixes;
@@ -2541,7 +2534,7 @@ let do_findReferences_local
         shellable_type
         ~triggering_request:
           {
-            Lost_env.id;
+            Run_env.id;
             metadata;
             start_time_local_handle;
             request = FindReferencesRequest params;
@@ -2551,10 +2544,10 @@ let do_findReferences_local
 
 (** Helper for sending $/progress messages for find-refs items. *)
 let notify_refs_file_items
-    (shellout_standard_response : Lost_env.shellout_standard_response)
+    (shellout_standard_response : Run_env.shellout_standard_response)
     (refs : FindRefsWireFormat.half_open_one_based list) : unit =
-  match shellout_standard_response.Lost_env.stream_file with
-  | Some Lost_env.{ partial_result_token; _ } ->
+  match shellout_standard_response.Run_env.stream_file with
+  | Some Run_env.{ partial_result_token; _ } ->
     let notification =
       FindReferencesPartialResultNotification
         ( partial_result_token,
@@ -2576,8 +2569,8 @@ let handle_refs_file_items
     result_telemetry option =
   match (items, state) with
   | ( Some refs,
-      Lost_server
-        Lost_env.
+      Running
+        Run_env.
           {
             current_hh_shell =
               Some { shellable_type = FindRefs shellout_standard_response; _ };
@@ -2586,15 +2579,14 @@ let handle_refs_file_items
     notify_refs_file_items shellout_standard_response refs;
     None
   | ( Some _,
-      Lost_server Lost_env.{ current_hh_shell = Some { shellable_type; _ }; _ }
-    ) ->
-    let data = Lost_env.show_shellable_type shellable_type in
+      Running Run_env.{ current_hh_shell = Some { shellable_type; _ }; _ } ) ->
+    let data = Run_env.show_shellable_type shellable_type in
     log "Refs-file: wrong shellable type to send refs - %s" data;
     HackEventLogger.invariant_violation_bug
       ~data
       "refs-file wrong shellale type to send refs";
     None
-  | (Some _, Lost_server Lost_env.{ current_hh_shell = None; _ }) ->
+  | (Some _, Running Run_env.{ current_hh_shell = None; _ }) ->
     log "Refs-file: got items when current_hh_shell is None";
     HackEventLogger.invariant_violation_bug
       "refs-file got items when current_hh_shell is None";
@@ -2618,7 +2610,7 @@ let handle_refs_file_items
 (** This is called when a shell-out to "hh --ide-find-refs-by-symbol" completes successfully *)
 let do_findReferences2 ~shellout_standard_response ~hh_locations :
     (Lsp.lsp_result * int) Lwt.t =
-  let Lost_env.{ ide_calculated_positions; stream_file; _ } =
+  let Run_env.{ ide_calculated_positions; stream_file; _ } =
     shellout_standard_response
   in
   (* lsp_locations return a file for each position. To support unsaved, edited files
@@ -2659,7 +2651,7 @@ let do_findReferences2 ~shellout_standard_response ~hh_locations :
      Since the filename includes our PID, only we can create another file. But we're not
      going to create another file while we're here waiting! *)
   match stream_file with
-  | Some { Lost_env.file; q; partial_result_token = _ } ->
+  | Some { Run_env.file; q; partial_result_token = _ } ->
     Unix.unlink (Path.to_string file);
     (* [Lwt_stream.to_list] awaits until the stream is closed, picking up all remaining items. *)
     let%lwt items_list = Lwt_stream.to_list q in
@@ -2697,7 +2689,7 @@ let do_goToImplementation_local
     Lwt.return (state, result_telemetry)
   | ClientIdeMessage.Go_to_impl_success
       (symbol, find_refs_action, ide_calculated_positions) ->
-    let open Lost_env in
+    let open Run_env in
     let shellable_type =
       GoToImpl
         {
@@ -3044,7 +3036,7 @@ let do_documentRename_local
         local = ide_calculated_patches;
       } ->
     let shellable_type =
-      Lost_env.Rename
+      Run_env.Rename
         {
           symbol_definition;
           find_refs_action;
@@ -3058,7 +3050,7 @@ let do_documentRename_local
         shellable_type
         ~triggering_request:
           {
-            Lost_env.id;
+            Run_env.id;
             metadata;
             start_time_local_handle;
             request = RenameRequest params;
@@ -3189,7 +3181,7 @@ let do_typeHierarchy_local
 (** TEMPORARY VALIDATION FOR IDE_STANDALONE. TODO(ljw): delete this once ide_standalone ships T92870399 *)
 let validate_error_TEMPORARY
     (uri : documentUri)
-    (lenv : Lost_env.t)
+    (lenv : Run_env.t)
     (actual : float * errors_from)
     ~(expected : Errors.finalized_error list)
     ~(start_time : float) : (float * errors_from) * string list =
@@ -3236,13 +3228,13 @@ let validate_error_TEMPORARY
        so it might reflect something that hh_server wasn't aware of, so we can't make a useful check. *)
     (actual, [])
   | (_timestamp, Errors_from_clientIdeDaemon _)
-    when UriSet.mem uri lenv.Lost_env.uris_with_unsaved_changes ->
+    when UriSet.mem uri lenv.Run_env.uris_with_unsaved_changes ->
     (* What was most recently published for [uri] came from clientIdeDaemon, but it
        reflects unsaved changes, and hence reflects something that hh_server isn't aware of,
        so we can't make a useful check *)
     (actual, [])
   | (_timestamp, Errors_from_clientIdeDaemon _)
-    when Option.is_none (UriMap.find_opt uri lenv.Lost_env.editor_open_files) ->
+    when Option.is_none (UriMap.find_opt uri lenv.Run_env.editor_open_files) ->
     (* What was most recently published for [uri] came from clientIdeDaemon before the start of the
        typecheck, but it was closed prior to the start of the typecheck, so we don't know if hh_server
        is looking at file-changes to it after it had been closed and we can't make a useful check. *)
@@ -3277,10 +3269,10 @@ prior to the start of the typecheck? -- because for sure clientIdeDaemon and hh_
 both saw the same source text for them. Why can't we look at closed files? -- because
 they might have been modified on disk after they were closed. *)
 let validate_error_item_TEMPORARY
-    (lenv : Lost_env.t)
+    (lenv : Run_env.t)
     (ide_service : ClientIdeService.t ref)
     (expected : Errors.finalized_error list Relative_path.Map.t)
-    ~(start_time : float) : Lost_env.t =
+    ~(start_time : float) : Run_env.t =
   (* helper to do logging *)
   let log_diff uri reason ~expected diff =
     HackEventLogger.live_squiggle_diff
@@ -3300,7 +3292,7 @@ let validate_error_item_TEMPORARY
         let path = Relative_path.to_absolute path in
         let uri = path_to_lsp_uri path ~default_path:path in
         let actual_opt =
-          UriMap.find_opt uri lenv.Lost_env.uris_with_standalone_diagnostics
+          UriMap.find_opt uri lenv.Run_env.uris_with_standalone_diagnostics
         in
         let status = ClientIdeService.get_status !ide_service in
         (* We use [Option.value_exn] because this function [validate_error_item_TEMPORARY]
@@ -3316,9 +3308,9 @@ let validate_error_item_TEMPORARY
           in
           log_diff uri "item-reported" ~expected diff;
           let uris_with_standalone_diagnostics =
-            UriMap.add uri actual lenv.Lost_env.uris_with_standalone_diagnostics
+            UriMap.add uri actual lenv.Run_env.uris_with_standalone_diagnostics
           in
-          { lenv with Lost_env.uris_with_standalone_diagnostics }
+          { lenv with Run_env.uris_with_standalone_diagnostics }
         | (None, ClientIdeService.Status.Ready) ->
           (* We got a report of errors in [uri] from the errors-file, but we don't
              currently have any diagnostics published [uri]. I wonder why not? ...
@@ -3361,8 +3353,8 @@ errors from clientIdeDaemon prior to the start of the typecheck, then all of the
 have [Errors_from.validated] flag true, meaning that they have been checked against
 the errors-file by [validate_error_presence]. If a file hasn't, then it's a false
 positive reported by clientIdeStandalone. *)
-let validate_error_complete_TEMPORARY (lenv : Lost_env.t) ~(start_time : float)
-    : Lost_env.t =
+let validate_error_complete_TEMPORARY (lenv : Run_env.t) ~(start_time : float) :
+    Run_env.t =
   let uris_with_standalone_diagnostics =
     UriMap.mapi
       (fun uri actual ->
@@ -3380,9 +3372,9 @@ let validate_error_complete_TEMPORARY (lenv : Lost_env.t) ~(start_time : float)
             (string_of_uri uri)
             (String.concat ~sep:"\n" diff);
         actual)
-      lenv.Lost_env.uris_with_standalone_diagnostics
+      lenv.Run_env.uris_with_standalone_diagnostics
   in
-  { lenv with Lost_env.uris_with_standalone_diagnostics }
+  { lenv with Run_env.uris_with_standalone_diagnostics }
 
 (** Used to publish clientIdeDaemon errors in [ide_standalone] mode. *)
 let publish_errors_if_standalone
@@ -3391,10 +3383,10 @@ let publish_errors_if_standalone
   match state with
   | Pre_init -> failwith "how we got errors before initialize?"
   | Post_shutdown -> state (* no-op *)
-  | Lost_server lenv ->
+  | Running lenv ->
     let file_path = Path.to_string file_path in
     let uri = path_to_lsp_uri file_path ~default_path:file_path in
-    let uris = lenv.Lost_env.uris_with_standalone_diagnostics in
+    let uris = lenv.Run_env.uris_with_standalone_diagnostics in
     let uris_with_standalone_diagnostics =
       if List.is_empty errors then
         UriMap.remove uri uris
@@ -3409,7 +3401,7 @@ let publish_errors_if_standalone
     let notification = PublishDiagnosticsNotification params in
     notify_jsonrpc ~powered_by:Serverless_ide notification;
     let new_state =
-      Lost_server { lenv with Lost_env.uris_with_standalone_diagnostics }
+      Running { lenv with Run_env.uris_with_standalone_diagnostics }
     in
     new_state
 
@@ -3436,7 +3428,7 @@ let handle_errors_file_item
      See code in [get_next_event]. *)
   let (lenv, fd, start_time) =
     match (!state, !latest_hh_server_errors) with
-    | (Lost_server lenv, TailingErrors { fd; start_time; _ }) ->
+    | (Running lenv, TailingErrors { fd; start_time; _ }) ->
       (lenv, fd, start_time)
     | _ -> failwith "unexpected state when processing handle_errors_file_item"
   in
@@ -3493,10 +3485,10 @@ let handle_errors_file_item
            Why only from closed-files? ... because diagnostics for open files are produced live by clientIdeDaemon,
            and our information from errors-file is necessarily more stale than that from clientIdeDaemon. *)
         let uris_with_standalone_diagnostics =
-          lenv.Lost_env.uris_with_standalone_diagnostics
+          lenv.Run_env.uris_with_standalone_diagnostics
           |> UriMap.filter_map (fun uri (existing_time, errors_from) ->
                  if
-                   UriMap.mem uri lenv.Lost_env.editor_open_files
+                   UriMap.mem uri lenv.Run_env.editor_open_files
                    || Float.(existing_time > start_time)
                  then begin
                    Some (existing_time, errors_from)
@@ -3505,8 +3497,7 @@ let handle_errors_file_item
                    None
                  end)
         in
-        state :=
-          Lost_server { lenv with Lost_env.uris_with_standalone_diagnostics };
+        state := Running { lenv with Run_env.uris_with_standalone_diagnostics };
         ()
     end;
     Lwt.return_none
@@ -3541,11 +3532,11 @@ let handle_errors_file_item
     let uris_with_standalone_diagnostics =
       Relative_path.Map.fold
         errors
-        ~init:lenv.Lost_env.uris_with_standalone_diagnostics
+        ~init:lenv.Run_env.uris_with_standalone_diagnostics
         ~f:(fun path file_errors acc ->
           let path = Relative_path.to_absolute path in
           let uri = path_to_lsp_uri path ~default_path:path in
-          if UriMap.mem uri lenv.Lost_env.editor_open_files then
+          if UriMap.mem uri lenv.Run_env.editor_open_files then
             acc
           else
             match UriMap.find_opt uri acc with
@@ -3556,7 +3547,7 @@ let handle_errors_file_item
               publish (hack_errors_to_lsp_diagnostic path file_errors);
               UriMap.add uri (timestamp, Errors_from_errors_file) acc)
     in
-    state := Lost_server { lenv with Lost_env.uris_with_standalone_diagnostics };
+    state := Running { lenv with Run_env.uris_with_standalone_diagnostics };
     Lwt.return_none
 
 (** If we're in [errors_conn = SeekingErrors], then this function will try to open the
@@ -3668,13 +3659,13 @@ let try_open_errors_file ~(state : state ref) : unit Lwt.t =
 It is guaranteed to produce an LSP response for [shellable_type]. *)
 let handle_shell_out_complete
     (result : (Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) result)
-    (triggering_request : Lost_env.triggering_request)
-    (shellable_type : Lost_env.shellable_type) : result_telemetry option Lwt.t =
+    (triggering_request : Run_env.triggering_request)
+    (shellable_type : Run_env.shellable_type) : result_telemetry option Lwt.t =
   let start_postprocess_time = Unix.gettimeofday () in
   let make_duration_telemetry ~start_time ~end_time =
     let end_postprocess_time = Unix.gettimeofday () in
     let start_time_local_handle =
-      triggering_request.Lost_env.start_time_local_handle
+      triggering_request.Run_env.start_time_local_handle
     in
     Telemetry.create ()
     |> Telemetry.duration
@@ -3740,7 +3731,7 @@ let handle_shell_out_complete
         |> String_utils.truncate 80);
       try
         let%lwt (lsp_result, result_count) =
-          let open Lost_env in
+          let open Run_env in
           match shellable_type with
           | FindRefs shellout_standard_response ->
             let hh_locations = shellout_locations_to_lsp_locations_exn stdout in
@@ -3777,7 +3768,7 @@ let handle_shell_out_complete
         Lwt.return (ErrorResult lsp_error, 0, None)
     end
   in
-  let { Lost_env.id; metadata; start_time_local_handle; request } =
+  let { Run_env.id; metadata; start_time_local_handle; request } =
     triggering_request
   in
   (* The normal error-response-and-logging flow isn't easy for us to fit into,
@@ -3909,7 +3900,7 @@ let track_open_and_recent_files (state : state) (event : event) : state =
     | _ -> prev_opened_files
   in
   match state with
-  | Lost_server lenv -> Lost_server { lenv with Lost_env.editor_open_files }
+  | Running lenv -> Running { lenv with Run_env.editor_open_files }
   | Pre_init
   | Post_shutdown ->
     state
@@ -3934,8 +3925,7 @@ let track_edits_if_necessary (state : state) (event : event) : state =
     | _ -> previous
   in
   match state with
-  | Lost_server lenv ->
-    Lost_server { lenv with Lost_env.uris_with_unsaved_changes }
+  | Running lenv -> Running { lenv with Run_env.uris_with_unsaved_changes }
   | Pre_init
   | Post_shutdown ->
     state
@@ -4300,9 +4290,9 @@ let handle_client_message
       let%lwt version_and_switch = read_hhconfig_version_and_switch () in
       hhconfig_version_and_switch := version_and_switch;
       state :=
-        Lost_server
+        Running
           {
-            Lost_env.editor_open_files = UriMap.empty;
+            Run_env.editor_open_files = UriMap.empty;
             uris_with_unsaved_changes = UriSet.empty;
             uris_with_standalone_diagnostics = UriMap.empty;
             current_hh_shell = None;
@@ -4705,7 +4695,7 @@ let handle_client_message
       in
       Lwt.return_some (make_result_telemetry result_count)
     (* unhandled *)
-    | (Lost_server _, _) ->
+    | (Running _, _) ->
       raise
         (Error.LspException
            {

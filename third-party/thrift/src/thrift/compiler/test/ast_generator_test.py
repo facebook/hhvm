@@ -49,7 +49,7 @@ class AstGeneratorTest(unittest.TestCase):
         argsx = [
             thrift2ast,
             "--gen",
-            "ast:protocol=compact",
+            "ast:protocol=compact,source_ranges",
             "-o",
             self.tmp,
             "-I",
@@ -305,4 +305,39 @@ class AstGeneratorTest(unittest.TestCase):
         self.assertEqual(
             annot.objectValue.members[1].objectValue.members[3].stringValue,
             b"foo.Annot",
+        )
+
+    def test_source_range_map(self):
+        write_file(
+            "foo.thrift",
+            textwrap.dedent(
+                """\
+                struct A {1: B b;}
+                struct B {}
+                exception E {}
+                typedef A T
+
+                service S1 {}
+                service S2 extends S1 { # missing
+                    B,
+                    stream<A>
+                     b (
+                        1: T a
+                    ) throws (
+                        1: E e
+                    );
+                }
+                """
+            ),
+        )
+
+        ast = self.run_thrift("foo.thrift")
+
+        # To simplify the test we reduce the ranges to just their start lines and have a single span per line in the test file.
+        spans = {}
+        for ref in ast.identifierSourceRanges:
+            spans[ref.range.beginLine] = ref.uri.scopedName.removeprefix("foo.")
+        self.assertDictEqual(
+            spans,
+            {1: "B", 4: "A", 8: "B", 9: "A", 11: "T", 13: "E"},
         )

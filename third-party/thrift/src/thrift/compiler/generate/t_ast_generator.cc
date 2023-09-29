@@ -15,6 +15,7 @@
  */
 
 #include <fstream>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -83,6 +84,8 @@ class t_ast_generator : public t_generator {
         }
       } else if (pair.first == "include_generated") {
         include_generated_ = true;
+      } else if (pair.first == "source_ranges") {
+        source_ranges_ = true;
       } else if (pair.first == "ast") {
       } else {
         throw std::runtime_error(
@@ -110,6 +113,7 @@ class t_ast_generator : public t_generator {
   std::ofstream f_out_;
   ast_protocol protocol_;
   bool include_generated_{false};
+  bool source_ranges_{false};
 };
 
 void t_ast_generator::generate_program() {
@@ -145,33 +149,31 @@ void t_ast_generator::generate_program() {
     }
   };
 
+  auto src_range = [&](source_range in, const t_program* program) {
+    resolved_location begin(in.begin, source_mgr_);
+    resolved_location end(in.end, source_mgr_);
+    type::SourceRange range;
+    range.programId() = program_index.at(program);
+    range.beginLine() = begin.line();
+    range.beginColumn() = begin.column();
+    range.endLine() = end.line();
+    range.endColumn() = end.column();
+    return range;
+  };
+
   auto set_source_range = [&](const t_named& def,
                               type::DefinitionAttrs& attrs,
                               const t_program* program = nullptr) {
-    program = program ? program : def.program();
-
-    {
-      resolved_location begin(def.src_range().begin, source_mgr_);
-      resolved_location end(def.src_range().end, source_mgr_);
-      type::SourceRange& range = *attrs.sourceRange();
-      range.programId() = program_index.at(program);
-      range.beginLine() = begin.line();
-      range.beginColumn() = begin.column();
-      range.endLine() = end.line();
-      range.endColumn() = end.column();
+    if (def.generated()) {
+      return;
     }
-
+    program = program ? program : def.program();
+    attrs.sourceRange() = src_range(def.src_range(), program);
     if (def.has_doc()) {
-      resolved_location begin(def.doc_range().begin, source_mgr_);
-      resolved_location end(def.doc_range().end, source_mgr_);
-      type::SourceRange& range = *attrs.docs()->sourceRange();
-      range.programId() = program_index.at(program);
-      range.beginLine() = begin.line();
-      range.beginColumn() = begin.column();
-      range.endLine() = end.line();
-      range.endColumn() = end.column();
+      attrs.docs()->sourceRange() = src_range(def.doc_range(), program);
     }
   };
+
   auto set_child_source_ranges = [&](const auto& node, auto& parent_def) {
     using Node = std::decay_t<decltype(node)>;
     if constexpr (std::is_base_of_v<t_structured, Node>) {
@@ -286,6 +288,76 @@ void t_ast_generator::generate_program() {
     set_source_range(node, *def.attrs());
     set_child_source_ranges(node, def);
   });
+
+  // Populate identifier source range map if enabled.
+  auto span = [&](t_type_ref ref) {
+    auto combinator = [&](t_type_ref ref, auto& recurse) -> void {
+      if (!ref || !source_ranges_) {
+        return;
+      }
+      while (ref->is_typedef() &&
+             static_cast<const t_typedef&>(*ref).typedef_kind() !=
+                 t_typedef::kind::defined) {
+        ref = static_cast<const t_typedef&>(*ref).type();
+      }
+
+      if (auto type = dynamic_cast<const t_list*>(ref.get_type())) {
+        recurse(type->elem_type(), recurse);
+      } else if (auto type = dynamic_cast<const t_set*>(ref.get_type())) {
+        recurse(type->elem_type(), recurse);
+      } else if (auto type = dynamic_cast<const t_map*>(ref.get_type())) {
+        recurse(type->key_type(), recurse);
+        recurse(type->val_type(), recurse);
+      } else if (ref->is_base_type()) {
+      } else {
+        try {
+          cpp2::IdentifierRef ident;
+          ident.range() = src_range(ref.src_range(), program_);
+          if (const auto& uri = ref->uri(); !uri.empty()) {
+            ident.uri()->uri_ref() = uri;
+          } else {
+            ident.uri()->scopedName_ref() = ref->get_scoped_name();
+          }
+          ast.identifierSourceRanges()->push_back(std::move(ident));
+        } catch (const std::invalid_argument&) {
+          fmt::print(
+              stderr, "No source range set for reference to {}\n", ref->name());
+        }
+      }
+    };
+    return combinator(ref, combinator);
+  };
+  visitor.add_field_visitor([&](const t_field& node) { span(node.type()); });
+  visitor.add_function_visitor([&](const t_function& node) {
+    for (const auto& ret : node.return_types()) {
+      span(ret);
+    }
+    if (auto type = node.stream()) {
+      span(type->elem_type());
+      for (const auto& exn : get_elems(type->exceptions())) {
+        span(exn.type());
+      }
+    } else if (auto type = node.sink()) {
+      span(type->elem_type());
+      for (const auto& exn : get_elems(type->sink_exceptions())) {
+        span(exn.type());
+      }
+      span(type->final_response_type());
+      for (const auto& exn : get_elems(type->final_response_exceptions())) {
+        span(exn.type());
+      }
+    }
+
+    for (const auto& param : node.params().fields()) {
+      span(param.type());
+    }
+    for (const auto& exn : get_elems(node.exceptions())) {
+      span(exn.type());
+    }
+  });
+  visitor.add_typedef_visitor(
+      [&](const t_typedef& node) { span(node.type()); });
+
   visitor(*program_);
   populate_defs(program_);
 
@@ -306,7 +378,10 @@ void t_ast_generator::generate_program() {
 THRIFT_REGISTER_GENERATOR(
     ast,
     "AST",
-    "    protocol:        Which of [json|debug|compact] protocols to use for serialization.\n");
+    "    protocol:          Which of [json|debug|compact] protocols to use for serialization.\n"
+    "    include_generated: Enables schematization of generated (patch) types.\n"
+    "    source_ranges:     Enables population of the identifier source range map.\n"
+    "");
 
 } // namespace compiler
 } // namespace thrift

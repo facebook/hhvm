@@ -15,6 +15,7 @@
  */
 
 include "thrift/lib/thrift/schema.thrift"
+include "thrift/lib/thrift/standard.thrift"
 include "thrift/lib/thrift/protocol.thrift"
 include "thrift/lib/thrift/id.thrift"
 
@@ -42,6 +43,12 @@ struct SourceInfo {
   3: map<string, id.ValueId> namespaces;
 }
 
+// An instance of an identifier in a source file.
+struct IdentifierRef {
+  1: schema.SourceRange range;
+  2: standard.TypeUri uri;
+}
+
 // A thrift schema that corresponds to one or more thrift files.
 @cpp.UseOpEncode
 struct Ast {
@@ -63,4 +70,10 @@ struct Ast {
    * Information about the files holding the thrift definitions.
    */
   5: map<id.ProgramId, SourceInfo> sources;
+
+  /**
+    * The source ranges of all references to named entities in the main program.
+    * The `source_ranges` option must be passed to thrift2ast to populate this map.
+    */
+  6: list<IdentifierRef> identifierSourceRanges;
 }

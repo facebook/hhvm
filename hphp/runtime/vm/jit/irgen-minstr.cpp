@@ -2246,8 +2246,8 @@ void logArrayAccessProfile(IRGS& env, SSATmp* arr, SSATmp* key,
 
   std::vector<std::string> inline_state_string;
   std::vector<folly::StringPiece> inline_state;
-  for (auto const& state : env.inlineState.bcStateStack) {
-    inline_state_string.push_back(show(state));
+  for (auto const& frame : env.inlineState.frames) {
+    inline_state_string.push_back(show(frame.callerSk));
     inline_state.push_back(inline_state_string.back());
   }
 
@@ -2258,7 +2258,7 @@ void logArrayAccessProfile(IRGS& env, SSATmp* arr, SSATmp* key,
   entry.setStr("source_file", func->filename()->data());
   entry.setInt("source_line", marker.sk().lineNumber());
   entry.setInt("prof_count", curProfCount(env));
-  entry.setInt("inline_depth", env.inlineState.depth);
+  entry.setInt("inline_depth", inlineDepth(env));
   entry.setVec("inline_state", inline_state);
   entry.setStr("arr_type", arr->type().toString());
   entry.setStr("key_type", key->type().toString());

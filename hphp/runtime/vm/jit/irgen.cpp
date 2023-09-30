@@ -356,7 +356,7 @@ void prepareForNextHHBC(IRGS& env, SrcKey newSk) {
     "Inlining while still at the first region instruction."
   );
 
-  always_assert(env.inlineState.bcStateStack.size() == inlineDepth(env));
+  always_assert(env.inlineState.frames.size() == inlineDepth(env));
   always_assert_flog(curFunc(env) == newSk.func(),
                      "Tried to update current SrcKey with a different func");
 

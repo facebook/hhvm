@@ -29,11 +29,16 @@ namespace jit {
 
 struct Block;
 
-struct InlineReturnTarget {
+struct InlineFrame {
+  /*
+   * Saved caller's SrcKey at which we entered inlining.
+   */
+  SrcKey callerSk;
+
   /*
    * Block that will serve as a branch target for returning to the caller.
    */
-  Block* callerTarget;
+  Block* returnTarget;
 
   /*
    * Block that will suspend the inlined frame.
@@ -56,14 +61,14 @@ struct InlineReturnTarget {
    * Offset from FCall to return control to if the callee finished eagerly.
    */
   Offset asyncEagerOffset;
+
+  /*
+   * Saved cost.
+   */
+  int savedCost;
 };
 
 struct InlineState {
-  /*
-   * The current depth of inlining.  0 means we're not inlining.
-   */
-  uint16_t depth{0};
-
   /*
    * Translating a unit just to compute the cost of inlining.
    */
@@ -76,21 +81,9 @@ struct InlineState {
   int stackDepth{0};
 
   /*
-   * A stack of saved costs.
+   * Inline state for each inlined frame. The last one is for the current frame.
    */
-  std::vector<int> costStack;
-
-  /*
-   * Return-to-caller block targets for inlined functions.  The last target is
-   * for the current inlining frame.
-   */
-  std::vector<InlineReturnTarget> returnTarget;
-
-  /*
-   * A stack of saved bytecode offsets at which we entered inlining.
-   */
-  std::vector<SrcKey> bcStateStack;
-
+  std::vector<InlineFrame> frames;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

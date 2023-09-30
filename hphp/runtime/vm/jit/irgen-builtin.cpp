@@ -320,8 +320,8 @@ SSATmp* opt_hphp_debug_caller_info(IRGS& env, const ParamPrep& params) {
   auto skipped = false;
   auto found = false;
 
-  for (auto i = env.inlineState.depth; i > 0; i--) {
-    auto const sk = env.inlineState.bcStateStack[i - 1];
+  for (auto i = inlineDepth(env); i > 0; i--) {
+    auto const sk = env.inlineState.frames[i - 1].callerSk;
     found = hphp_debug_caller_info_impl(
         result, skipped, sk.func(), sk.offset());
     if (found) break;
@@ -341,8 +341,8 @@ SSATmp* opt_hphp_debug_caller_identifier(IRGS& env, const ParamPrep& params) {
   auto skipped = false;
   auto found = false;
 
-  for (auto i = env.inlineState.depth; i > 0; i--) {
-    auto const sk = env.inlineState.bcStateStack[i - 1];
+  for (auto i = inlineDepth(env); i > 0; i--) {
+    auto const sk = env.inlineState.frames[i - 1].callerSk;
     found = hphp_debug_caller_identifier_impl(result, skipped, sk.func());
     if (found) break;
   }

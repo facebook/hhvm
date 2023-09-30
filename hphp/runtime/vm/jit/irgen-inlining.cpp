@@ -196,11 +196,11 @@ Outer:                                 | Inner:
 namespace HPHP::jit::irgen {
 
 bool isInlining(const IRGS& env) {
-  return env.inlineState.depth > 0;
+  return !env.inlineState.frames.empty();
 }
 
 uint16_t inlineDepth(const IRGS& env) {
-  return env.inlineState.depth;
+  return env.inlineState.frames.size();
 }
 
 SSATmp* genCalleeFP(IRGS& env, const Func* callee) {
@@ -210,7 +210,7 @@ SSATmp* genCalleeFP(IRGS& env, const Func* callee) {
     BeginInliningData{
       {}, // calleeAROff
       callee,
-      static_cast<uint32_t>(env.inlineState.depth + 1),
+      static_cast<uint32_t>(inlineDepth(env) + 1),
       nextSrcKey(env),
       {}, // calleeSBOff
       {}, // returnSPOff
@@ -223,11 +223,20 @@ SSATmp* genCalleeFP(IRGS& env, const Func* callee) {
 void beginInlining(IRGS& env,
                    SrcKey entry,
                    SSATmp* ctx,
-                   InlineReturnTarget returnTarget,
+                   Offset asyncEagerOffset,
                    int cost,
                    SSATmp* calleeFP) {
   assertx(entry.funcEntry());
   auto const callee = entry.func();
+  auto frame = InlineFrame {
+    env.bcState,
+    irgen::defBlock(env),  // returnTarget
+    irgen::defBlock(env),  // suspendTarget
+    irgen::defBlock(env, Block::Hint::Unused),  // sideExitTarget
+    irgen::defBlock(env, Block::Hint::Unused),  // endCatchTarget
+    asyncEagerOffset,
+    env.inlineState.cost
+  };
 
   FTRACE(1, "[[[ begin inlining: {}\n", callee->fullName()->data());
 
@@ -295,10 +304,7 @@ void beginInlining(IRGS& env,
   // killed).
   gen(env, EnterInlineFrame, calleeFP);
 
-  env.inlineState.depth++;
-  env.inlineState.costStack.emplace_back(env.inlineState.cost);
-  env.inlineState.returnTarget.emplace_back(returnTarget);
-  env.inlineState.bcStateStack.emplace_back(env.bcState);
+  env.inlineState.frames.emplace_back(frame);
   env.inlineState.cost += cost;
   env.inlineState.stackDepth += callee->maxStackCells();
   env.bcState = entry;
@@ -326,10 +332,10 @@ void beginInlining(IRGS& env,
 void conjureBeginInlining(IRGS& env,
                           SrcKey entry,
                           Type thisType,
-                          const std::vector<Type>& inputs,
-                          InlineReturnTarget returnTarget) {
+                          const std::vector<Type>& inputs) {
   assertx(entry.funcEntry());
   auto const callee = entry.func();
+  auto const profCount = curProfCount(env);
 
   auto conjure = [&](Type t) {
     return t.admitsSingleVal() ? cns(env, t) : gen(env, Conjure, t);
@@ -356,55 +362,51 @@ void conjureBeginInlining(IRGS& env,
     ? conjure(Type::ExactObj(callee->implCls()))
     : conjure(thisType);
 
-  beginInlining(env, entry, ctx, returnTarget,
+  beginInlining(env, entry, ctx, kInvalidOffset /* asyncEagerOffset */,
                 9 /* cost */, genCalleeFP(env, callee));
+  // Set the prof count on the return block.
+  // FIXME: Why is this needed? Should it be set for other blocks as well, e.g.
+  // suspendRetBlock? Is something similar needed for real translations?
+  env.inlineState.frames.back().returnTarget->setProfCount(profCount);
 }
 
 namespace {
-struct InlineFrame {
+struct InlineFrameSave {
   SrcKey bcState;
-  InlineReturnTarget target;
+  InlineFrame frame;
 };
 
-InlineFrame popInlineFrame(IRGS& env) {
-  always_assert(env.inlineState.depth > 0);
-  always_assert(env.inlineState.returnTarget.size() > 0);
-  always_assert(env.inlineState.bcStateStack.size() > 0);
+InlineFrameSave popInlineFrame(IRGS& env) {
+  always_assert(env.inlineState.frames.size() > 0);
 
-  InlineFrame inlineFrame {
-    env.bcState,
-    env.inlineState.returnTarget.back()
-  };
+  InlineFrameSave save { env.bcState, env.inlineState.frames.back() };
+  env.inlineState.frames.pop_back();
 
   // Pop the inlined frame in our IRGS.  Be careful between here and the
   // updateMarker() below, where the caller state isn't entirely set up.
-  env.inlineState.depth--;
-  env.inlineState.cost = env.inlineState.costStack.back();
-  env.inlineState.costStack.pop_back();
-  env.inlineState.stackDepth -= inlineFrame.bcState.func()->maxStackCells();
-  env.inlineState.returnTarget.pop_back();
-  env.bcState = env.inlineState.bcStateStack.back();
-  env.inlineState.bcStateStack.pop_back();
+  env.inlineState.cost = save.frame.savedCost;
+  env.inlineState.stackDepth -= save.bcState.func()->maxStackCells();
+  env.bcState = save.frame.callerSk;
+
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  return inlineFrame;
+  return save;
 }
 
-void pushInlineFrame(IRGS& env, const InlineFrame& inlineFrame) {
-  // No need to preserve and update cost, as we are not going to recursively
-  // inline anything during a single Jmp opcode we are restoring the state for.
-  env.inlineState.depth++;
-  env.inlineState.costStack.emplace_back(env.inlineState.cost);
-  env.inlineState.returnTarget.emplace_back(inlineFrame.target);
-  env.inlineState.bcStateStack.emplace_back(env.bcState);
-  env.inlineState.stackDepth += inlineFrame.bcState.func()->maxStackCells();
-  env.bcState = inlineFrame.bcState;
+void pushInlineFrame(IRGS& env, const InlineFrameSave& save) {
+  // No need to update cost, as we are not going to recursively inline anything
+  // during a single Jmp opcode we are restoring the state for.
+  env.inlineState.stackDepth += save.bcState.func()->maxStackCells();
+  env.bcState = save.bcState;
+
+  env.inlineState.frames.emplace_back(save.frame);
+
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 }
 
-InlineFrame implInlineReturn(IRGS& env) {
+InlineFrameSave implInlineReturn(IRGS& env) {
   assertx(resumeMode(env) == ResumeMode::None);
 
   // Return to the caller function.
@@ -451,8 +453,8 @@ void freeInlinedFrameLocals(IRGS& env, const RegionDesc& calleeRegion) {
 }
 
 void implReturnBlock(IRGS& env, const RegionDesc& calleeRegion) {
-  auto const rt = env.inlineState.returnTarget.back();
-  auto const didStart = env.irb->startBlock(rt.callerTarget, false);
+  auto const frame = env.inlineState.frames.back();
+  auto const didStart = env.irb->startBlock(frame.returnTarget, false);
   always_assert(didStart);
 
   freeInlinedFrameLocals(env, calleeRegion);
@@ -495,7 +497,7 @@ void implReturnBlock(IRGS& env, const RegionDesc& calleeRegion) {
   assertx(nret == 1);
   auto const retVal =
     gen(env, AssertType, awaitedCallReturnType(callee), retVals.back());
-  if (rt.asyncEagerOffset == kInvalidOffset) {
+  if (frame.asyncEagerOffset == kInvalidOffset) {
     // Async eager return was not requested. Box the returned value and
     // continue execution at the next opcode.
     push(env, gen(env, CreateSSWH, retVal));
@@ -503,21 +505,21 @@ void implReturnBlock(IRGS& env, const RegionDesc& calleeRegion) {
     // Async eager return was requested. Continue execution at the async eager
     // offset with the returned value.
     push(env, retVal);
-    jmpImpl(env, bcOff(env) + rt.asyncEagerOffset);
+    jmpImpl(env, bcOff(env) + frame.asyncEagerOffset);
   }
 }
 
 bool implSuspendBlock(IRGS& env, bool exitOnAwait) {
-  auto const rt = env.inlineState.returnTarget.back();
+  auto const frame = env.inlineState.frames.back();
   // Start a new IR block to hold the remainder of this block.
-  auto const didStart = env.irb->startBlock(rt.suspendTarget, false);
+  auto const didStart = env.irb->startBlock(frame.suspendTarget, false);
   if (!didStart) return false;
 
   // We strive to inline regions which will mostly eagerly terminate.
   if (exitOnAwait) hint(env, Block::Hint::Unlikely);
 
   assertx(curFunc(env)->isAsyncFunction());
-  auto const block = rt.suspendTarget;
+  auto const block = frame.suspendTarget;
   auto const label = env.unit.defLabel(1, block, env.irb->nextBCContext());
   auto const wh = label->dst(0);
   retypeDests(label, &env.unit);
@@ -527,7 +529,7 @@ bool implSuspendBlock(IRGS& env, bool exitOnAwait) {
 
   push(env, wh);
   if (exitOnAwait) {
-    if (rt.asyncEagerOffset == kInvalidOffset) {
+    if (frame.asyncEagerOffset == kInvalidOffset) {
       gen(env, Jmp, makeExit(env, nextSrcKey(env)));
     } else {
       jmpImpl(env, nextSrcKey(env));
@@ -537,14 +539,14 @@ bool implSuspendBlock(IRGS& env, bool exitOnAwait) {
 }
 
 void implSideExitBlock(IRGS& env) {
-  auto const rt = env.inlineState.returnTarget.back();
-  auto const didStart = env.irb->startBlock(rt.sideExitTarget, false);
+  auto const frame = env.inlineState.frames.back();
+  auto const didStart = env.irb->startBlock(frame.sideExitTarget, false);
   if (!didStart) return;
 
   hint(env, Block::Hint::Unlikely);
   auto const calleeFP = fp(env);
 
-  auto const block = rt.sideExitTarget;
+  auto const block = frame.sideExitTarget;
   auto const label = env.unit.defLabel(1, block, env.irb->nextBCContext());
   auto const targetAddr = label->dst(0);
   retypeDests(label, &env.unit);
@@ -555,7 +557,7 @@ void implSideExitBlock(IRGS& env) {
 
   auto const iseData = InlineSideExitData {
     inlineFrame.bcState.func(),
-    isInlining(env) ? env.inlineState.bcStateStack[0].offset() : bcOff(env)
+    isInlining(env) ? env.inlineState.frames[0].callerSk.offset() : bcOff(env)
   };
   auto const retVal =
     gen(env, InlineSideExit, iseData, sp(env), calleeFP, fp(env), targetAddr);
@@ -564,8 +566,8 @@ void implSideExitBlock(IRGS& env) {
 }
 
 void implEndCatchBlock(IRGS& env, const RegionDesc& calleeRegion) {
-  auto const rt = env.inlineState.returnTarget.back();
-  auto const didStart = env.irb->startBlock(rt.endCatchTarget, false);
+  auto const frame = env.inlineState.frames.back();
+  auto const didStart = env.irb->startBlock(frame.endCatchTarget, false);
   if (!didStart) return;
 
   hint(env, Block::Hint::Unused);
@@ -601,13 +603,13 @@ void implEndCatchBlock(IRGS& env, const RegionDesc& calleeRegion) {
 }
 
 bool endInlining(IRGS& env, const RegionDesc& calleeRegion) {
-  auto const rt = env.inlineState.returnTarget.back();
+  auto const frame = env.inlineState.frames.back();
 
   implSideExitBlock(env);
 
   implEndCatchBlock(env, calleeRegion);
 
-  if (env.irb->canStartBlock(rt.callerTarget)) {
+  if (env.irb->canStartBlock(frame.returnTarget)) {
     implSuspendBlock(env, true);
   } else {
     return implSuspendBlock(env, false);
@@ -628,11 +630,11 @@ bool conjureEndInlining(IRGS& env, const RegionDesc& calleeRegion,
 }
 
 void retFromInlined(IRGS& env) {
-  gen(env, Jmp, env.inlineState.returnTarget.back().callerTarget);
+  gen(env, Jmp, env.inlineState.frames.back().returnTarget);
 }
 
 void suspendFromInlined(IRGS& env, SSATmp* waitHandle) {
-  gen(env, Jmp, env.inlineState.returnTarget.back().suspendTarget, waitHandle);
+  gen(env, Jmp, env.inlineState.frames.back().suspendTarget, waitHandle);
 }
 
 void sideExitFromInlined(IRGS& env, SrcKey target) {
@@ -667,7 +669,7 @@ void sideExitFromInlined(IRGS& env, SrcKey target) {
 
   auto const bindData = LdBindAddrData { target, invSP };
   auto const targetAddr = gen(env, LdBindAddr, bindData);
-  gen(env, Jmp, env.inlineState.returnTarget.back().sideExitTarget, targetAddr);
+  gen(env, Jmp, env.inlineState.frames.back().sideExitTarget, targetAddr);
 }
 
 bool endCatchFromInlined(IRGS& env) {
@@ -685,7 +687,7 @@ bool endCatchFromInlined(IRGS& env) {
   }
 
   if (curFunc(env)->isAsync() &&
-      env.inlineState.returnTarget.back().asyncEagerOffset == kInvalidOffset) {
+      env.inlineState.frames.back().asyncEagerOffset == kInvalidOffset) {
     // This async function was called without associated await, the exception
     // needs to be wrapped into an Awaitable.
     return false;
@@ -696,7 +698,7 @@ bool endCatchFromInlined(IRGS& env) {
   while (spOffBCFromStackBase(env) > spOffEmpty(env)) {
     popDecRef(env, static_cast<DecRefProfileId>(locId++));
   }
-  gen(env, Jmp, env.inlineState.returnTarget.back().endCatchTarget);
+  gen(env, Jmp, env.inlineState.frames.back().endCatchTarget);
   return true;
 }
 

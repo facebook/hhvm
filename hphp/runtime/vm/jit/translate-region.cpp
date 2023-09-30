@@ -756,15 +756,8 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, SrcKey entry, SSATmp* ctx,
          entry.numEntryArgs(),
          show(irgs));
 
-  auto const returnBlock = irgen::defBlock(irgs);
-  auto const suspendRetBlock = irgen::defBlock(irgs);
-  auto const sideExitBlock = irgen::defBlock(irgs, Block::Hint::Unused);
-  auto const endCatchBlock = irgen::defBlock(irgs, Block::Hint::Unused);
-  auto const returnTarget = InlineReturnTarget {
-    returnBlock, suspendRetBlock, sideExitBlock, endCatchBlock, asyncEagerOffset
-  };
-
-  irgen::beginInlining(irgs, entry, ctx, returnTarget, calleeCost, calleeFP);
+  irgen::beginInlining(irgs, entry, ctx, asyncEagerOffset, calleeCost,
+                       calleeFP);
 
   SCOPE_ASSERT_DETAIL("Inlined-RegionDesc")
     { return show(*calleeRegion); };
@@ -836,22 +829,12 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
 
     auto const func = region.entry()->func();
 
-    auto const returnBlock = irgen::defBlock(irgs);
-    auto const suspendRetBlock = irgen::defBlock(irgs);
-    auto const sideExitBlock = irgen::defBlock(irgs, Block::Hint::Unused);
-    auto const endCatchBlock = irgen::defBlock(irgs, Block::Hint::Unused);
-    auto const returnTarget = InlineReturnTarget {
-      returnBlock, suspendRetBlock, sideExitBlock, endCatchBlock, kInvalidOffset
-    };
-
-    // Set the profCount of the entry and return blocks we just created.
+    // Set the profCount of the entry block we just created.
     unit->entry()->setProfCount(curProfCount(irgs));
-    returnBlock->setProfCount(curProfCount(irgs));
 
     SCOPE_ASSERT_DETAIL("Inline-IRUnit") { return show(*unit); };
     irgs.irb->startBlock(unit->entry(), false /* hasUnprocPred */);
-    irgen::conjureBeginInlining(irgs, region.start(), ctxType, inputTypes,
-                                returnTarget);
+    irgen::conjureBeginInlining(irgs, region.start(), ctxType, inputTypes);
 
     try {
       auto const result = irGenRegionImpl(irgs, region, 1 /* profFactor */,

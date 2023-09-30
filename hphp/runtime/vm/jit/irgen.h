@@ -222,7 +222,7 @@ uint16_t inlineDepth(const IRGS& env);
 void beginInlining(IRGS& env,
                    SrcKey entry,
                    SSATmp* ctx,
-                   InlineReturnTarget returnTarget,
+                   Offset asyncEagerOffset,
                    int cost,
                    SSATmp* calleeFP);
 
@@ -245,8 +245,7 @@ bool endInlining(IRGS& env, const RegionDesc& calleeRegion);
 void conjureBeginInlining(IRGS& env,
                           SrcKey entry,
                           Type thisType,
-                          const std::vector<Type>& inputs,
-                          InlineReturnTarget returnTarget);
+                          const std::vector<Type>& inputs);
 
 /*
  * Close an inlined function inserted using conjureBeginInlining; returns false

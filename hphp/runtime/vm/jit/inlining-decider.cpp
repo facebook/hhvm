@@ -483,9 +483,9 @@ bool shouldInline(const irgen::IRGS& irgs,
     }
 
     UNUSED auto const topFunc = [&] {
-      return irgs.inlineState.bcStateStack.empty()
+      return irgs.inlineState.frames.empty()
         ? irgs.bcState.func()
-        : irgs.inlineState.bcStateStack[0].func();
+        : irgs.inlineState.frames[0].callerSk.func();
     };
 
     FTRACE(2, "Inlining decider: inlining {}() <- {}()\t<reason: {}>\n",

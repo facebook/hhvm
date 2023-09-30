@@ -110,7 +110,7 @@ struct StaticMethodCache {
   static const Func* lookup(rds::Handle chand,
                             const NamedType* ne, const StringData* cls,
                             const StringData* meth, const Class* ctx,
-                            const Func* callerFunc, const PackageInfo& packageInfo);
+                            const Func* callerFunc);
 };
 
 struct StaticMethodFCache {
@@ -122,7 +122,7 @@ struct StaticMethodFCache {
                       const StringData* ctxName);
   static const Func* lookup(rds::Handle chand, const Class* cls,
                             const StringData* meth, const Class* ctx,
-                            const Func* callerFunc, const PackageInfo& packageInfo);
+                            const Func* callerFunc);
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -90,7 +90,6 @@ const Func* lookupIfaceMethod(const Class* cls, const StringData* methodName) {
 const Func* lookupMethodCtx(const Class* cls,
                             const StringData* methodName,
                             const MemberLookupContext& callCtx,
-                            const PackageInfo& packageInfo,
                             CallType callType,
                             MethodLookupErrorOptions raise) {
   auto const ctx = callCtx.cls();
@@ -119,14 +118,6 @@ const Func* lookupMethodCtx(const Class* cls,
       will_symbol_raise_module_boundary_violation(method, &callCtx)) {
     if (!shouldRaise(raise)) return nullptr;
     raiseModuleBoundaryViolation(cls, method, callCtx.moduleName());
-  }
-
-  // Check deployment boundary
-  if (RO::EvalEnforceDeployment &&
-      raise != MethodLookupErrorOptions::NoErrorOnModule &&
-      packageInfo.outsideActiveDeployment(*cls) &&
-      !shouldRaise(raise)) {
-    return nullptr;
   }
 
   // If we found a protected or private method, we need to do some
@@ -219,9 +210,8 @@ LookupResult lookupObjMethod(const Func*& f,
                              const Class* cls,
                              const StringData* methodName,
                              const MemberLookupContext& callCtx,
-                             const PackageInfo& packageInfo,
                              MethodLookupErrorOptions raise) {
-  f = lookupMethodCtx(cls, methodName, callCtx, packageInfo,
+  f = lookupMethodCtx(cls, methodName, callCtx,
                       CallType::ObjMethod, raise);
   if (!f) return LookupResult::MethodNotFound;
   if (f->isStaticInPrologue()) {
@@ -234,7 +224,6 @@ ImmutableObjMethodLookup
 lookupImmutableObjMethod(const Class* cls,
                          const StringData* name,
                          const MemberLookupContext& callCtx,
-                         const PackageInfo& packageInfo,
                          bool exactClass) {
   auto constexpr notFound = ImmutableObjMethodLookup {
     ImmutableObjMethodLookup::Type::NotFound,
@@ -251,7 +240,7 @@ lookupImmutableObjMethod(const Class* cls,
   }
 
   const Func* func;
-  LookupResult res = lookupObjMethod(func, cls, name, callCtx, packageInfo,
+  LookupResult res = lookupObjMethod(func, cls, name, callCtx,
                                      MethodLookupErrorOptions::None);
   if (res == LookupResult::MethodNotFound) {
     if (exactClass) return notFound;
@@ -278,9 +267,8 @@ LookupResult lookupClsMethod(const Func*& f,
                              const StringData* methodName,
                              ObjectData* obj,
                              const MemberLookupContext& callCtx,
-                             const PackageInfo& packageInfo,
                              MethodLookupErrorOptions raise) {
-  f = lookupMethodCtx(cls, methodName, callCtx, packageInfo, CallType::ClsMethod, raise);
+  f = lookupMethodCtx(cls, methodName, callCtx, CallType::ClsMethod, raise);
   if (!f) {
     assertx(!shouldRaise(raise));
     return LookupResult::MethodNotFound;
@@ -294,12 +282,11 @@ LookupResult lookupClsMethod(const Func*& f,
 const Func* lookupImmutableClsMethod(const Class* cls,
                                      const StringData* name,
                                      const MemberLookupContext& callCtx,
-                                     const PackageInfo& packageInfo,
                                      bool exactClass) {
   if (!cls) return nullptr;
   if (cls->attrs() & AttrInterface) return nullptr;
   const Func* func;
-  LookupResult res = lookupClsMethod(func, cls, name, nullptr, callCtx, packageInfo,
+  LookupResult res = lookupClsMethod(func, cls, name, nullptr, callCtx,
                                      MethodLookupErrorOptions::None);
   if (res == LookupResult::MethodNotFound) return nullptr;
   if (func->isAbstract() && exactClass) return nullptr;
@@ -312,11 +299,10 @@ const Func* lookupImmutableClsMethod(const Class* cls,
 LookupResult lookupCtorMethod(const Func*& f,
                               const Class* cls,
                               const MemberLookupContext& callCtx,
-                              const PackageInfo& packageInfo,
                               MethodLookupErrorOptions raise) {
   f = cls->getCtor();
   if (!(f->attrs() & AttrPublic)) {
-    f = lookupMethodCtx(cls, nullptr, callCtx, packageInfo,
+    f = lookupMethodCtx(cls, nullptr, callCtx,
                         CallType::CtorMethod, raise);
     if (!f) {
       // If raise was true than lookupMethodCtx should have thrown,

@@ -3852,8 +3852,7 @@ JitResumeAddr fcallObjMethodImpl(bool retToJit, PC origpc, PC& pc,
   }();
   auto const callCtx = MemberLookupContext(ctx, vmfp()->func());
   // if lookup throws, obj will be decref'd via stack
-  res = lookupObjMethod(func, cls, methName, callCtx, g_context->getPackageInfo(),
-                        MethodLookupErrorOptions::RaiseOnNotFound);
+  res = lookupObjMethod(func, cls, methName, callCtx, MethodLookupErrorOptions::RaiseOnNotFound);
   assertx(func);
   decRefStr(methName);
   if (res == LookupResult::MethodFoundNoThis) {
@@ -3994,7 +3993,7 @@ const Func* resolveClsMethodFunc(Class* cls, const StringData* methName) {
   auto const ctx = arGetContextClass(vmfp());
   auto const callCtx = MemberLookupContext(ctx, vmfp()->func());
   auto const res = lookupClsMethod(func, cls, methName, nullptr,
-                                   callCtx, g_context->getPackageInfo(),
+                                   callCtx,
                                    MethodLookupErrorOptions::NoErrorOnModule);
   if (res == LookupResult::MethodNotFound) {
     raise_error("Failure to resolve method name \'%s::%s\'",
@@ -4113,7 +4112,7 @@ JitResumeAddr fcallClsMethodImpl(bool retToJit, PC origpc, PC& pc,
   auto obj = liveClass() && vmfp()->hasThis() ? vmfp()->getThis() : nullptr;
   const Func* func;
   auto const callCtx = MemberLookupContext(ctx, vmfp()->func());
-  auto const res = lookupClsMethod(func, cls, methName, obj, callCtx, g_context->getPackageInfo(),
+  auto const res = lookupClsMethod(func, cls, methName, obj, callCtx,
                                    MethodLookupErrorOptions::RaiseOnNotFound);
   assertx(func);
   decRefStr(methName);
@@ -4304,7 +4303,6 @@ OPTBLD_INLINE JitResumeAddr iopFCallCtor(bool retToJit, PC origpc, PC& pc,
   auto const ctx = arGetContextClass(vmfp());
   auto const callCtx = MemberLookupContext(ctx, vmfp()->func());
   auto const res UNUSED = lookupCtorMethod(func, obj->getVMClass(), callCtx,
-                            g_context->getPackageInfo(),
                             MethodLookupErrorOptions::RaiseOnNotFound);
   assertx(res == LookupResult::MethodFoundWithThis);
 

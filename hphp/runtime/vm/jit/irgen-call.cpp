@@ -1097,7 +1097,7 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
         auto const callCtx =
           MemberLookupContext(callContext(env, fca, cls), curFunc(env));
         return lookupImmutableObjMethod(cls, methodName->strVal(),
-                                        callCtx, env.unit.packageInfo(), true);
+                                        callCtx, true);
       }
     }
 
@@ -1112,7 +1112,7 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
         auto const callCtx =
           MemberLookupContext(callContext(env, fca, cls), curFunc(env));
         return lookupImmutableObjMethod(cls, methodName->strVal(),
-                                        callCtx, env.unit.packageInfo(), exactClass);
+                                        callCtx, exactClass);
       }
     }
 
@@ -1415,8 +1415,7 @@ void emitResolveMethCaller(IRGS& env, const StringData* name) {
     auto const cls = lookupUniqueClass(env, className);
     if (cls && !isTrait(cls)) {
       auto const callCtx = MemberLookupContext(curClass(env), curFunc(env));
-      auto const res = lookupImmutableObjMethod(cls, methodName, callCtx,
-                                                env.unit.packageInfo(), false);
+      auto const res = lookupImmutableObjMethod(cls, methodName, callCtx, false);
       return res.func && checkMethCallerTarget(res.func, curClass(env), false);
     }
     return false;
@@ -1678,8 +1677,7 @@ void emitFCallClsMethodD(IRGS& env,
   if (cls) {
     auto const callCtx =
       MemberLookupContext(callContext(env, fca, cls), curFunc(env));
-    auto const& packageInfo = env.unit.packageInfo();
-    auto const func = lookupImmutableClsMethod(cls, methodName, callCtx, packageInfo, true);
+    auto const func = lookupImmutableClsMethod(cls, methodName, callCtx, true);
     if (func) {
       if (!classIsPersistentOrCtxParent(env, cls)) {
         gen(env, LdClsCached, cns(env, className));
@@ -1737,9 +1735,8 @@ SSATmp* lookupClsMethodKnown(IRGS& env,
                              SSATmp*& calleeCtx,
                              const Class* ctx) {
   auto const callCtx = MemberLookupContext(ctx, curFunc(env));
-  auto const& packageInfo = env.unit.packageInfo();
   auto const func = lookupImmutableClsMethod(
-    baseClass, methodName, callCtx, packageInfo, exact);
+    baseClass, methodName, callCtx, exact);
   if (!func) return nullptr;
 
   auto funcTmp = exact || func->isImmutableFrom(baseClass)
@@ -1816,6 +1813,7 @@ resolveClsMethodDSlow(IRGS& env, const StringData* className,
   auto const func = loadClsMethodUnknown(env, data, slowExit);
   gen(env, CheckClsMethFunc, func);
   auto const cls = gen(env, LdClsCached, cns(env, className));
+  emitDeploymentBoundaryCheck(env, cls);
   return std::pair(cls, func);
 }
 
@@ -1832,11 +1830,12 @@ void emitResolveClsMethodD(IRGS& env, const StringData* className,
   auto const cls = lookupUniqueClass(env, className, false /* trustUnit */);
   if (cls) {
     auto const callCtx = MemberLookupContext(curClass(env), curFunc(env));
-    auto const& packageInfo = env.unit.packageInfo();
-    auto const func = lookupImmutableClsMethod(cls, methodName, callCtx, packageInfo, true);
+    auto const func = lookupImmutableClsMethod(cls, methodName, callCtx, true);
+    // Confirm the class is resolvable
+    // Elided at simplify step since class is trusted
+    emitDeploymentBoundaryCheck(env, cns(env, cls));
     if (func) {
       checkClsMethodAndLdCtx(env, cls, func, className);
-
       // For clsmeth, we want to return the class user gave,
       // not the class where func is associated with.
       push(env, gen(env, NewClsMeth, cns(env, cls), cns(env, func)));
@@ -1877,8 +1876,8 @@ void emitResolveRClsMethodD(IRGS& env, const StringData* className,
   auto const cls = lookupUniqueClass(env, className, false /* trustUnit */);
   if (cls) {
     auto const callCtx = MemberLookupContext(curClass(env), curFunc(env));
-    auto const& packageInfo = env.unit.packageInfo();
-    auto const func = lookupImmutableClsMethod(cls, methodName, callCtx, packageInfo, true);
+    auto const func = lookupImmutableClsMethod(cls, methodName, callCtx, true);
+    emitDeploymentBoundaryCheck(env, cns(env, cls));
     if (func) {
       checkClsMethodAndLdCtx(env, cls, func, className);
 

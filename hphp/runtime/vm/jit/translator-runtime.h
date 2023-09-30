@@ -160,11 +160,6 @@ const Func* lookupClsMethodHelper(const Class* cls, const StringData* methName,
 TypedValue lookupClsCns(const Class* cls, const StringData* cnsName);
 int lookupClsCtxCns(const Class* cls, const StringData* cnsName);
 
-const Func* lookupClsMethodCacheHelper(rds::Handle handle, const NamedType *ne,
-                                       const StringData* clsName,
-                                       const StringData* methName, const Class* ctx,
-                                       const Func* callerFunc);
-
 // These shuffle* functions are the JIT's version of bytecode.cpp's
 // shuffleExtraStackArgs
 void trimExtraArgs(ActRec* ar);

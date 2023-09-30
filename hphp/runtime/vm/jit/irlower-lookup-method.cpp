@@ -191,8 +191,7 @@ void cgLookupClsMethodCache(IRLS& env, const IRInstruction* inst) {
       extra->clsName,
       extra->methodName,
       extra->context,
-      extra->callerFunc,
-      g_context->getPackageInfo()
+      extra->callerFunc
     );
   }
 
@@ -205,7 +204,7 @@ void cgLookupClsMethodCache(IRLS& env, const IRInstruction* inst) {
     .immPtr(extra->callerFunc);
 
   // May raise an error if the class is undefined.
-  cgCallHelper(v, env, CallSpec::direct(lookupClsMethodCacheHelper),
+  cgCallHelper(v, env, CallSpec::direct(StaticMethodCache::lookup),
                callDest(dst), SyncOptions::Sync, args);
 }
 
@@ -261,8 +260,7 @@ void cgLookupClsMethodFCache(IRLS& env, const IRInstruction* inst) {
   assertx(rds::isNormalHandle(ch));
 
   const Func* (*lookup)(rds::Handle, const Class*,
-                        const StringData*, const Class*, const Func*,
-                        const PackageInfo&) =
+                        const StringData*, const Class*, const Func*) =
     StaticMethodFCache::lookup;
 
   auto const args = argGroup(env, inst)

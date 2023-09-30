@@ -331,7 +331,9 @@ struct RefineTmps {
           auto const from = canonicalize(inst.src(0));
           // Ignore constants. They're perfect as they are.
           if (!from->inst()->is(DefConst)) {
-            auto const to = inst.dst();
+            auto const to = inst.dst()->type().admitsSingleVal()
+              ? unit.cns(inst.dst()->type())
+              : inst.dst();
             ITRACE(
               2, "{} now maps to {} (via {})\n",
               *from, *to, inst.toString()

@@ -136,7 +136,7 @@ impl UnstableFeatures {
             UnstableFeatures::NewtypeSuperBounds => Unstable,
             UnstableFeatures::ExpressionTreeBlocks => OngoingRelease,
             UnstableFeatures::Package => Unstable,
-            UnstableFeatures::CaseTypes => Unstable,
+            UnstableFeatures::CaseTypes => Preview,
             UnstableFeatures::ModuleLevelTraits => Preview,
             UnstableFeatures::TypedLocalVariables => Unstable,
             UnstableFeatures::PipeAwait => Unstable,

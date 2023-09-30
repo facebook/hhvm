@@ -49,7 +49,7 @@ class ShutdownPipe : public folly::EventHandler {
   ShutdownPipe(AsyncMcServer& server, folly::EventBase& evb)
       : folly::EventHandler(&evb), evb_(evb), server_(server) {
     fd_ = eventfd(0, 0);
-    if (UNLIKELY(fd_ == -1)) {
+    if (FOLLY_UNLIKELY(fd_ == -1)) {
       throw std::runtime_error(
           "Unexpected file descriptor (-1) in ShutdownPipe");
     }
@@ -60,7 +60,7 @@ class ShutdownPipe : public folly::EventHandler {
   void shutdownFromSignalHandler() {
     uint64_t val = 1;
     auto res = write(fd_, &val, 8);
-    if (UNLIKELY(res != 8)) {
+    if (FOLLY_UNLIKELY(res != 8)) {
       throw std::system_error(
           errno,
           std::system_category(),

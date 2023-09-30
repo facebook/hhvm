@@ -69,7 +69,7 @@ class CarbonRequestHandler : public facebook::memcache::CarbonMessageDispatcher<
       const facebook::memcache::CaretMessageInfo* headerInfo,
       const folly::IOBuf* reqBuf,
       std::true_type) {
-    if (UNLIKELY(
+    if (FOLLY_UNLIKELY(
             !req.traceContext().empty() &&
             facebook::mcrouter::traceCheckRateLimit())) {
       onRequestImplWithTracingEnabled(

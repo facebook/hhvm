@@ -63,7 +63,7 @@ class RateLimitRoute {
 
   template <class Request>
   ReplyT<Request> route(const Request& req) {
-    if (LIKELY(rl_.canPassThrough<Request>())) {
+    if (FOLLY_LIKELY(rl_.canPassThrough<Request>())) {
       return target_->route(req);
     }
     if (fallback_) {

@@ -47,7 +47,7 @@ std::pair<void*, size_t> ClientMcParser<Callback>::getReadBuffer() {
 template <class Callback>
 bool ClientMcParser<Callback>::readDataAvailable(size_t len) {
   if (shouldReadToAsciiBuffer()) {
-    if (UNLIKELY(debugFifo_ && debugFifo_->isConnected())) {
+    if (FOLLY_UNLIKELY(debugFifo_ && debugFifo_->isConnected())) {
       auto buf = asciiParser_.getReadBuffer();
       debugFifo_->writeData(buf.first, len);
     }
@@ -66,7 +66,7 @@ ClientMcParser<Callback>::expectNext() {
     asciiParser_.initializeReplyParser<Request>();
     asciiReplyForwarder_ =
         &ClientMcParser<Callback>::forwardAsciiReply<Request>;
-    if (UNLIKELY(debugFifo_ && debugFifo_->isConnected())) {
+    if (FOLLY_UNLIKELY(debugFifo_ && debugFifo_->isConnected())) {
       debugFifo_->startMessage(
           MessageDirection::Received, ReplyT<Request>::typeId);
     }
@@ -150,7 +150,7 @@ template <class Callback>
 bool ClientMcParser<Callback>::caretMessageReady(
     const CaretMessageInfo& headerInfo,
     const folly::IOBuf& buffer) {
-  if (UNLIKELY(parser_.protocol() != mc_caret_protocol)) {
+  if (FOLLY_UNLIKELY(parser_.protocol() != mc_caret_protocol)) {
     const auto reason = folly::sformat(
         "Expected {} protocol, but received Caret!",
         mc_protocol_to_string(parser_.protocol()));
@@ -160,7 +160,7 @@ bool ClientMcParser<Callback>::caretMessageReady(
 
   try {
     const size_t reqId = headerInfo.reqId;
-    if (UNLIKELY(reqId == kCaretConnectionControlReqId)) {
+    if (FOLLY_UNLIKELY(reqId == kCaretConnectionControlReqId)) {
       callback_.handleConnectionControlMessage(headerInfo);
     } else if (callback_.nextReplyAvailable(reqId)) {
       (this->*caretForwarder_)(headerInfo, buffer, reqId);
@@ -176,7 +176,7 @@ bool ClientMcParser<Callback>::caretMessageReady(
 
 template <class Callback>
 void ClientMcParser<Callback>::handleAscii(folly::IOBuf& readBuffer) {
-  if (UNLIKELY(parser_.protocol() != mc_ascii_protocol)) {
+  if (FOLLY_UNLIKELY(parser_.protocol() != mc_ascii_protocol)) {
     std::string reason(folly::sformat(
         "Expected {} protocol, but received ASCII!",
         mc_protocol_to_string(parser_.protocol())));
@@ -202,7 +202,7 @@ void ClientMcParser<Callback>::handleAscii(folly::IOBuf& readBuffer) {
 
     auto bufferBeforeConsume = readBuffer.data();
     auto result = asciiParser_.consume(readBuffer);
-    if (UNLIKELY(debugFifo_ && debugFifo_->isConnected())) {
+    if (FOLLY_UNLIKELY(debugFifo_ && debugFifo_->isConnected())) {
       auto len = readBuffer.data() - bufferBeforeConsume;
       debugFifo_->writeData(bufferBeforeConsume, len);
     }

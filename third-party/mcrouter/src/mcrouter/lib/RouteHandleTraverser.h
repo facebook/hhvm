@@ -78,11 +78,11 @@ class RouteHandleTraverser {
 
   template <class Request>
   bool operator()(const RouteHandleIf& r, const Request& req) const {
-    if (UNLIKELY(start_ != nullptr)) {
+    if (FOLLY_UNLIKELY(start_ != nullptr)) {
       start_(r);
     }
     auto stopTraversal = r.traverse(req, *this);
-    if (UNLIKELY(end_ != nullptr)) {
+    if (FOLLY_UNLIKELY(end_ != nullptr)) {
       end_();
     }
     return stopTraversal;

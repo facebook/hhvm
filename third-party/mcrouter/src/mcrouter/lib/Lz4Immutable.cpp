@@ -118,7 +118,7 @@ void safeCopy(uint8_t* dest, IovecCursor& source, size_t count) {
   uint64_t src;
   do {
     size_t toWrite = std::min((int64_t)8, left);
-    if (LIKELY(toWrite == sizeof(uint64_t))) {
+    if (FOLLY_LIKELY(toWrite == sizeof(uint64_t))) {
       src = source.peek<uint64_t>();
     } else {
       source.peekInto(reinterpret_cast<uint8_t*>(&src), toWrite);
@@ -192,7 +192,7 @@ size_t
 calculateMatchLength(IovecCursor& source, IovecCursor& match, size_t limit) {
   const size_t start = source.tell();
 
-  while (LIKELY(source.tell() < limit - kStepSize - 1)) {
+  while (FOLLY_LIKELY(source.tell() < limit - kStepSize - 1)) {
     uint64_t diff = match.peek<uint64_t>() ^ source.peek<uint64_t>();
     if (!diff) {
       source.advance(kStepSize);
@@ -241,7 +241,7 @@ std::unique_ptr<folly::IOBuf> Lz4Immutable::compress(
 std::unique_ptr<folly::IOBuf> Lz4Immutable::compress(
     const struct iovec* iov,
     size_t iovcnt) const {
-  if (UNLIKELY(iovcnt == 0)) {
+  if (FOLLY_UNLIKELY(iovcnt == 0)) {
     return folly::IOBuf::create(0);
   }
 
@@ -262,14 +262,14 @@ size_t Lz4Immutable::compressInto(
     size_t iovcnt,
     void* dest,
     size_t destSize) const {
-  if (UNLIKELY(iovcnt == 0)) {
+  if (FOLLY_UNLIKELY(iovcnt == 0)) {
     return 0;
   }
 
   IovecCursor source(iov, iovcnt);
   checkInputSize(source.totalLength());
 
-  if (UNLIKELY(destSize < compressBound(source.totalLength()))) {
+  if (FOLLY_UNLIKELY(destSize < compressBound(source.totalLength()))) {
     throw std::invalid_argument(folly::sformat(
         "Destination too small. Size: {}. Required: {}",
         destSize,
@@ -348,8 +348,8 @@ size_t Lz4Immutable::compressCommon(
 
         // Verify if the current position in the source buffer
         // can still be compressed.
-        if (UNLIKELY(source.tell() + step > matchFindLimit) ||
-            UNLIKELY(source.tell() > kMaxDictionarySize)) {
+        if (FOLLY_UNLIKELY(source.tell() + step > matchFindLimit) ||
+            FOLLY_UNLIKELY(source.tell() > kMaxDictionarySize)) {
           running = false;
           break;
         }
@@ -368,7 +368,7 @@ size_t Lz4Immutable::compressCommon(
     while (source.tell() > anchorCursor.tell() && match.tell() > 0) {
       source.retreat(1);
       match.retreat(1);
-      if (LIKELY(source.peek<uint8_t>() != match.peek<uint8_t>())) {
+      if (FOLLY_LIKELY(source.peek<uint8_t>() != match.peek<uint8_t>())) {
         source.advance(1);
         match.advance(1);
         break;
@@ -485,7 +485,7 @@ std::unique_ptr<folly::IOBuf> Lz4Immutable::decompress(
     const struct iovec* iov,
     size_t iovcnt,
     size_t uncompressedSize) const noexcept {
-  if (UNLIKELY(uncompressedSize == 0)) {
+  if (FOLLY_UNLIKELY(uncompressedSize == 0)) {
     return folly::IOBuf::create(0);
   }
 
@@ -518,7 +518,7 @@ std::unique_ptr<folly::IOBuf> Lz4Immutable::decompress(
       do {
         s = source.read<uint8_t>();
         literalLength += s;
-      } while (LIKELY(s == 255));
+      } while (FOLLY_LIKELY(s == 255));
     }
 
     // Copy literals

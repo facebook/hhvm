@@ -613,7 +613,7 @@ void AsciiSerializedReply::prepareUpdateLike(
     return;
   }
 
-  if (UNLIKELY(result == carbon::Result::OK)) {
+  if (FOLLY_UNLIKELY(result == carbon::Result::OK)) {
     addString("STORED\r\n");
     return;
   }

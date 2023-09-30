@@ -151,11 +151,11 @@ inline void McAsciiParserBase::appendKeyPiece(
     const char* posStart,
     const char* posEnd) {
   // No need to process empty piece.
-  if (UNLIKELY(posEnd == posStart)) {
+  if (FOLLY_UNLIKELY(posEnd == posStart)) {
     return;
   }
 
-  if (LIKELY(to.length() == 0)) {
+  if (FOLLY_LIKELY(to.length() == 0)) {
     from.cloneOneInto(to);
     trimIOBufToRange(to, posStart, posEnd);
   } else {

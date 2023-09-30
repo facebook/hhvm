@@ -10,6 +10,7 @@
 #include <cstring>
 #include <type_traits>
 
+#include <folly/Likely.h>
 #include <folly/lang/Bits.h>
 
 namespace facebook {
@@ -19,7 +20,7 @@ template <class T>
 T IovecCursor::peek() const {
   static_assert(std::is_integral<T>::value, "Read requires an integral type");
 
-  if (LIKELY(curBufLen_ >= sizeof(T))) {
+  if (FOLLY_LIKELY(curBufLen_ >= sizeof(T))) {
     return folly::loadUnaligned<T>(
         reinterpret_cast<uint8_t*>(iov_[iovIndex_].iov_base) + curBufPos_);
   }

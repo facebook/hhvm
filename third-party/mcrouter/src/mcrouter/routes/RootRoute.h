@@ -51,7 +51,7 @@ class RootRoute {
       const RouteHandleTraverser<RouteHandleIf>& t) const {
     const auto* rhPtr = rhMap_.getTargetsForKeyFast(
         req.key_ref()->routingPrefix(), req.key_ref()->routingKey());
-    if (LIKELY(rhPtr != nullptr)) {
+    if (FOLLY_LIKELY(rhPtr != nullptr)) {
       for (const auto& rh : *rhPtr) {
         if (t(*rh, req)) {
           return true;
@@ -79,7 +79,7 @@ class RootRoute {
     const auto* rhPtr = rhMap_.getTargetsForKeyFast(
         req.key_ref()->routingPrefix(), req.key_ref()->routingKey());
 
-    auto reply = UNLIKELY(rhPtr == nullptr)
+    auto reply = FOLLY_UNLIKELY(rhPtr == nullptr)
         ? routeImpl(
               rhMap_.getTargetsForKeySlow(
                   req.key_ref()->routingPrefix(), req.key_ref()->routingKey()),
@@ -104,7 +104,7 @@ class RootRoute {
       const Request& req,
       carbon::GetLikeT<Request> = 0) const {
     auto reply = doRoute(rh, req);
-    if (UNLIKELY(
+    if (FOLLY_UNLIKELY(
             isErrorResult(*reply.result_ref()) && opts_.miss_on_get_errors &&
             !rh.empty())) {
       /* rh.empty() case: for backwards compatibility,

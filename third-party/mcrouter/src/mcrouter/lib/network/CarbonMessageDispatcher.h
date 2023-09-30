@@ -43,7 +43,7 @@ void serializeCarbonRequest(
     carbon::CarbonQueueAppenderStorage& storage) {
   if (!req.isBufferDirty()) {
     const auto& buf = *req.serializedBuffer();
-    if (LIKELY(storage.setFullBuffer(buf))) {
+    if (FOLLY_LIKELY(storage.setFullBuffer(buf))) {
       return;
     }
   }

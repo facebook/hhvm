@@ -44,21 +44,21 @@ class RateLimiter {
 
   template <class Request>
   bool canPassThrough(carbon::GetLikeT<Request> = 0) {
-    return LIKELY(
+    return FOLLY_LIKELY(
         !getsTb_ ||
         getsTb_->consume(1.0, folly::TokenBucket::defaultClockNow()));
   }
 
   template <class Request>
   bool canPassThrough(carbon::UpdateLikeT<Request> = 0) {
-    return LIKELY(
+    return FOLLY_LIKELY(
         !setsTb_ ||
         setsTb_->consume(1.0, folly::TokenBucket::defaultClockNow()));
   }
 
   template <class Request>
   bool canPassThrough(carbon::DeleteLikeT<Request> = 0) {
-    return LIKELY(
+    return FOLLY_LIKELY(
         !deletesTb_ ||
         deletesTb_->consume(1.0, folly::TokenBucket::defaultClockNow()));
   }

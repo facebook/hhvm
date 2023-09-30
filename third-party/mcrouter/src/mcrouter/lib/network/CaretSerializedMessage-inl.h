@@ -135,7 +135,7 @@ inline bool CaretSerializedMessage::maybeCompress(
     return false;
   }
 
-  if (UNLIKELY(uncompressedSize > std::numeric_limits<uint32_t>::max()) ||
+  if (FOLLY_UNLIKELY(uncompressedSize > std::numeric_limits<uint32_t>::max()) ||
       uncompressedSize < codec->filteringOptions().minCompressionThreshold) {
     return false;
   }

@@ -160,7 +160,7 @@ class AsyncTlsToPlaintextSocket final : public folly::AsyncTransportWrapper {
       folly::AsyncTransportWrapper::WriteCallback* callback,
       std::unique_ptr<folly::IOBuf>&& buf,
       folly::WriteFlags flags = folly::WriteFlags::NONE) override {
-    if (UNLIKELY(state_ == State::CONNECTING)) {
+    if (FOLLY_UNLIKELY(state_ == State::CONNECTING)) {
       bufferedWrites_.push_back(BufferedWrite{callback, std::move(buf)});
     } else {
       impl_->writeChain(callback, std::move(buf), flags);

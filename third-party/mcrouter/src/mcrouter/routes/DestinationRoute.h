@@ -105,7 +105,7 @@ class DestinationRoute {
     auto& axonCtx = fiber_local<RouterInfo>::getAxonCtx();
     auto bucketId = fiber_local<RouterInfo>::getBucketId();
     // Axon invalidation only enabled when request is bucketized
-    if (UNLIKELY(bucketId && axonCtx && axonCtx->allDelete)) {
+    if (FOLLY_UNLIKELY(bucketId && axonCtx && axonCtx->allDelete)) {
       auto finalReq = addDeleteRequestSource(
           req, memcache::McDeleteRequestSource::FAILED_INVALIDATION);
       // Make sure bucket id is set in request
@@ -353,11 +353,11 @@ class DestinationRoute {
           std::optional<Request>& newReq,
           const Request& originalReq) const {
     auto bucketIdOptional = bucketIdOpt();
-    if (LIKELY(!bucketIdOptional.has_value())) {
+    if (FOLLY_LIKELY(!bucketIdOptional.has_value())) {
       return;
     }
     auto bucketId = *bucketIdOptional;
-    if (UNLIKELY(!newReq.has_value())) {
+    if (FOLLY_UNLIKELY(!newReq.has_value())) {
       newReq.emplace(originalReq);
     }
     newReq->bucketId_ref() = bucketId;

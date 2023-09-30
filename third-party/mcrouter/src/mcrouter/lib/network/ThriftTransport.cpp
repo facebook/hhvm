@@ -236,7 +236,7 @@ void ThriftTransportBase::channelClosed() {
 void ThriftTransportUtil::traceRequest(
     const carbon::MessageCommon& request,
     apache::thrift::RpcOptions& rpcOptions) {
-  if (UNLIKELY(!request.traceContext().empty())) {
+  if (FOLLY_UNLIKELY(!request.traceContext().empty())) {
     folly::fibers::runInMainContext(
         [&]() { traceRequestImpl(request, rpcOptions); });
   }

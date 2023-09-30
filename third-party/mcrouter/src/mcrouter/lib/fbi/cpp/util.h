@@ -34,7 +34,7 @@ namespace memcache {
  */
 template <typename... Args>
 void checkLogic(bool condition, folly::StringPiece fmt, Args&&... args) {
-  if (UNLIKELY(!condition)) {
+  if (FOLLY_UNLIKELY(!condition)) {
     throw std::logic_error(folly::sformat(fmt, std::forward<Args>(args)...));
   }
 }
@@ -54,7 +54,7 @@ template <typename... Args>
  */
 template <typename... Args>
 void checkRuntime(bool condition, folly::StringPiece fmt, Args&&... args) {
-  if (UNLIKELY(!condition)) {
+  if (FOLLY_UNLIKELY(!condition)) {
     throw std::runtime_error(folly::sformat(fmt, std::forward<Args>(args)...));
   }
 }

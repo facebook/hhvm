@@ -41,10 +41,10 @@ folly::Try<apache::thrift::RpcResponseComplete<McAddReply>> sendSyncHelper(
     apache::thrift::RpcOptions& rpcOptions,
     RpcStatsContext* rpcStatsContext = nullptr) {
   bool needServerLoad = mcrouter::fiber_local<MemcacheRouterInfo>::getThriftServerLoadEnabled();
-  if (UNLIKELY(needServerLoad)) {
+  if (FOLLY_UNLIKELY(needServerLoad)) {
     rpcOptions.setWriteHeader(kLoadHeader, kDefaultLoadCounter);
   }
-  if (UNLIKELY(request.getCryptoAuthToken().has_value())) {
+  if (FOLLY_UNLIKELY(request.getCryptoAuthToken().has_value())) {
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kCryptoAuthTokenHeader}, request.getCryptoAuthToken().value());
   }
@@ -60,7 +60,7 @@ folly::Try<apache::thrift::RpcResponseComplete<McAddReply>> sendSyncHelper(
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;
-      if (UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
+      if (FOLLY_UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
         rpcStatsContext->serverLoad = ServerLoad(
             static_cast<int32_t>(*reply->responseContext.serverLoad));
       }
@@ -77,10 +77,10 @@ folly::Try<apache::thrift::RpcResponseComplete<McAppendReply>> sendSyncHelper(
     apache::thrift::RpcOptions& rpcOptions,
     RpcStatsContext* rpcStatsContext = nullptr) {
   bool needServerLoad = mcrouter::fiber_local<MemcacheRouterInfo>::getThriftServerLoadEnabled();
-  if (UNLIKELY(needServerLoad)) {
+  if (FOLLY_UNLIKELY(needServerLoad)) {
     rpcOptions.setWriteHeader(kLoadHeader, kDefaultLoadCounter);
   }
-  if (UNLIKELY(request.getCryptoAuthToken().has_value())) {
+  if (FOLLY_UNLIKELY(request.getCryptoAuthToken().has_value())) {
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kCryptoAuthTokenHeader}, request.getCryptoAuthToken().value());
   }
@@ -96,7 +96,7 @@ folly::Try<apache::thrift::RpcResponseComplete<McAppendReply>> sendSyncHelper(
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;
-      if (UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
+      if (FOLLY_UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
         rpcStatsContext->serverLoad = ServerLoad(
             static_cast<int32_t>(*reply->responseContext.serverLoad));
       }
@@ -113,10 +113,10 @@ folly::Try<apache::thrift::RpcResponseComplete<McCasReply>> sendSyncHelper(
     apache::thrift::RpcOptions& rpcOptions,
     RpcStatsContext* rpcStatsContext = nullptr) {
   bool needServerLoad = mcrouter::fiber_local<MemcacheRouterInfo>::getThriftServerLoadEnabled();
-  if (UNLIKELY(needServerLoad)) {
+  if (FOLLY_UNLIKELY(needServerLoad)) {
     rpcOptions.setWriteHeader(kLoadHeader, kDefaultLoadCounter);
   }
-  if (UNLIKELY(request.getCryptoAuthToken().has_value())) {
+  if (FOLLY_UNLIKELY(request.getCryptoAuthToken().has_value())) {
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kCryptoAuthTokenHeader}, request.getCryptoAuthToken().value());
   }
@@ -132,7 +132,7 @@ folly::Try<apache::thrift::RpcResponseComplete<McCasReply>> sendSyncHelper(
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;
-      if (UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
+      if (FOLLY_UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
         rpcStatsContext->serverLoad = ServerLoad(
             static_cast<int32_t>(*reply->responseContext.serverLoad));
       }
@@ -149,10 +149,10 @@ folly::Try<apache::thrift::RpcResponseComplete<McDecrReply>> sendSyncHelper(
     apache::thrift::RpcOptions& rpcOptions,
     RpcStatsContext* rpcStatsContext = nullptr) {
   bool needServerLoad = mcrouter::fiber_local<MemcacheRouterInfo>::getThriftServerLoadEnabled();
-  if (UNLIKELY(needServerLoad)) {
+  if (FOLLY_UNLIKELY(needServerLoad)) {
     rpcOptions.setWriteHeader(kLoadHeader, kDefaultLoadCounter);
   }
-  if (UNLIKELY(request.getCryptoAuthToken().has_value())) {
+  if (FOLLY_UNLIKELY(request.getCryptoAuthToken().has_value())) {
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kCryptoAuthTokenHeader}, request.getCryptoAuthToken().value());
   }
@@ -168,7 +168,7 @@ folly::Try<apache::thrift::RpcResponseComplete<McDecrReply>> sendSyncHelper(
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;
-      if (UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
+      if (FOLLY_UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
         rpcStatsContext->serverLoad = ServerLoad(
             static_cast<int32_t>(*reply->responseContext.serverLoad));
       }
@@ -185,10 +185,10 @@ folly::Try<apache::thrift::RpcResponseComplete<McDeleteReply>> sendSyncHelper(
     apache::thrift::RpcOptions& rpcOptions,
     RpcStatsContext* rpcStatsContext = nullptr) {
   bool needServerLoad = mcrouter::fiber_local<MemcacheRouterInfo>::getThriftServerLoadEnabled();
-  if (UNLIKELY(needServerLoad)) {
+  if (FOLLY_UNLIKELY(needServerLoad)) {
     rpcOptions.setWriteHeader(kLoadHeader, kDefaultLoadCounter);
   }
-  if (UNLIKELY(request.getCryptoAuthToken().has_value())) {
+  if (FOLLY_UNLIKELY(request.getCryptoAuthToken().has_value())) {
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kCryptoAuthTokenHeader}, request.getCryptoAuthToken().value());
   }
@@ -204,7 +204,7 @@ folly::Try<apache::thrift::RpcResponseComplete<McDeleteReply>> sendSyncHelper(
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;
-      if (UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
+      if (FOLLY_UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
         rpcStatsContext->serverLoad = ServerLoad(
             static_cast<int32_t>(*reply->responseContext.serverLoad));
       }
@@ -221,10 +221,10 @@ folly::Try<apache::thrift::RpcResponseComplete<McFlushAllReply>> sendSyncHelper(
     apache::thrift::RpcOptions& rpcOptions,
     RpcStatsContext* rpcStatsContext = nullptr) {
   bool needServerLoad = mcrouter::fiber_local<MemcacheRouterInfo>::getThriftServerLoadEnabled();
-  if (UNLIKELY(needServerLoad)) {
+  if (FOLLY_UNLIKELY(needServerLoad)) {
     rpcOptions.setWriteHeader(kLoadHeader, kDefaultLoadCounter);
   }
-  if (UNLIKELY(request.getCryptoAuthToken().has_value())) {
+  if (FOLLY_UNLIKELY(request.getCryptoAuthToken().has_value())) {
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kCryptoAuthTokenHeader}, request.getCryptoAuthToken().value());
   }
@@ -240,7 +240,7 @@ folly::Try<apache::thrift::RpcResponseComplete<McFlushAllReply>> sendSyncHelper(
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;
-      if (UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
+      if (FOLLY_UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
         rpcStatsContext->serverLoad = ServerLoad(
             static_cast<int32_t>(*reply->responseContext.serverLoad));
       }
@@ -257,10 +257,10 @@ folly::Try<apache::thrift::RpcResponseComplete<McFlushReReply>> sendSyncHelper(
     apache::thrift::RpcOptions& rpcOptions,
     RpcStatsContext* rpcStatsContext = nullptr) {
   bool needServerLoad = mcrouter::fiber_local<MemcacheRouterInfo>::getThriftServerLoadEnabled();
-  if (UNLIKELY(needServerLoad)) {
+  if (FOLLY_UNLIKELY(needServerLoad)) {
     rpcOptions.setWriteHeader(kLoadHeader, kDefaultLoadCounter);
   }
-  if (UNLIKELY(request.getCryptoAuthToken().has_value())) {
+  if (FOLLY_UNLIKELY(request.getCryptoAuthToken().has_value())) {
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kCryptoAuthTokenHeader}, request.getCryptoAuthToken().value());
   }
@@ -276,7 +276,7 @@ folly::Try<apache::thrift::RpcResponseComplete<McFlushReReply>> sendSyncHelper(
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;
-      if (UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
+      if (FOLLY_UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
         rpcStatsContext->serverLoad = ServerLoad(
             static_cast<int32_t>(*reply->responseContext.serverLoad));
       }
@@ -293,10 +293,10 @@ folly::Try<apache::thrift::RpcResponseComplete<McGatReply>> sendSyncHelper(
     apache::thrift::RpcOptions& rpcOptions,
     RpcStatsContext* rpcStatsContext = nullptr) {
   bool needServerLoad = mcrouter::fiber_local<MemcacheRouterInfo>::getThriftServerLoadEnabled();
-  if (UNLIKELY(needServerLoad)) {
+  if (FOLLY_UNLIKELY(needServerLoad)) {
     rpcOptions.setWriteHeader(kLoadHeader, kDefaultLoadCounter);
   }
-  if (UNLIKELY(request.getCryptoAuthToken().has_value())) {
+  if (FOLLY_UNLIKELY(request.getCryptoAuthToken().has_value())) {
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kCryptoAuthTokenHeader}, request.getCryptoAuthToken().value());
   }
@@ -312,7 +312,7 @@ folly::Try<apache::thrift::RpcResponseComplete<McGatReply>> sendSyncHelper(
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;
-      if (UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
+      if (FOLLY_UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
         rpcStatsContext->serverLoad = ServerLoad(
             static_cast<int32_t>(*reply->responseContext.serverLoad));
       }
@@ -329,10 +329,10 @@ folly::Try<apache::thrift::RpcResponseComplete<McGatsReply>> sendSyncHelper(
     apache::thrift::RpcOptions& rpcOptions,
     RpcStatsContext* rpcStatsContext = nullptr) {
   bool needServerLoad = mcrouter::fiber_local<MemcacheRouterInfo>::getThriftServerLoadEnabled();
-  if (UNLIKELY(needServerLoad)) {
+  if (FOLLY_UNLIKELY(needServerLoad)) {
     rpcOptions.setWriteHeader(kLoadHeader, kDefaultLoadCounter);
   }
-  if (UNLIKELY(request.getCryptoAuthToken().has_value())) {
+  if (FOLLY_UNLIKELY(request.getCryptoAuthToken().has_value())) {
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kCryptoAuthTokenHeader}, request.getCryptoAuthToken().value());
   }
@@ -348,7 +348,7 @@ folly::Try<apache::thrift::RpcResponseComplete<McGatsReply>> sendSyncHelper(
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;
-      if (UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
+      if (FOLLY_UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
         rpcStatsContext->serverLoad = ServerLoad(
             static_cast<int32_t>(*reply->responseContext.serverLoad));
       }
@@ -365,10 +365,10 @@ folly::Try<apache::thrift::RpcResponseComplete<McGetReply>> sendSyncHelper(
     apache::thrift::RpcOptions& rpcOptions,
     RpcStatsContext* rpcStatsContext = nullptr) {
   bool needServerLoad = mcrouter::fiber_local<MemcacheRouterInfo>::getThriftServerLoadEnabled();
-  if (UNLIKELY(needServerLoad)) {
+  if (FOLLY_UNLIKELY(needServerLoad)) {
     rpcOptions.setWriteHeader(kLoadHeader, kDefaultLoadCounter);
   }
-  if (UNLIKELY(request.getCryptoAuthToken().has_value())) {
+  if (FOLLY_UNLIKELY(request.getCryptoAuthToken().has_value())) {
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kCryptoAuthTokenHeader}, request.getCryptoAuthToken().value());
   }
@@ -384,7 +384,7 @@ folly::Try<apache::thrift::RpcResponseComplete<McGetReply>> sendSyncHelper(
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;
-      if (UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
+      if (FOLLY_UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
         rpcStatsContext->serverLoad = ServerLoad(
             static_cast<int32_t>(*reply->responseContext.serverLoad));
       }
@@ -401,10 +401,10 @@ folly::Try<apache::thrift::RpcResponseComplete<McGetsReply>> sendSyncHelper(
     apache::thrift::RpcOptions& rpcOptions,
     RpcStatsContext* rpcStatsContext = nullptr) {
   bool needServerLoad = mcrouter::fiber_local<MemcacheRouterInfo>::getThriftServerLoadEnabled();
-  if (UNLIKELY(needServerLoad)) {
+  if (FOLLY_UNLIKELY(needServerLoad)) {
     rpcOptions.setWriteHeader(kLoadHeader, kDefaultLoadCounter);
   }
-  if (UNLIKELY(request.getCryptoAuthToken().has_value())) {
+  if (FOLLY_UNLIKELY(request.getCryptoAuthToken().has_value())) {
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kCryptoAuthTokenHeader}, request.getCryptoAuthToken().value());
   }
@@ -420,7 +420,7 @@ folly::Try<apache::thrift::RpcResponseComplete<McGetsReply>> sendSyncHelper(
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;
-      if (UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
+      if (FOLLY_UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
         rpcStatsContext->serverLoad = ServerLoad(
             static_cast<int32_t>(*reply->responseContext.serverLoad));
       }
@@ -437,10 +437,10 @@ folly::Try<apache::thrift::RpcResponseComplete<McIncrReply>> sendSyncHelper(
     apache::thrift::RpcOptions& rpcOptions,
     RpcStatsContext* rpcStatsContext = nullptr) {
   bool needServerLoad = mcrouter::fiber_local<MemcacheRouterInfo>::getThriftServerLoadEnabled();
-  if (UNLIKELY(needServerLoad)) {
+  if (FOLLY_UNLIKELY(needServerLoad)) {
     rpcOptions.setWriteHeader(kLoadHeader, kDefaultLoadCounter);
   }
-  if (UNLIKELY(request.getCryptoAuthToken().has_value())) {
+  if (FOLLY_UNLIKELY(request.getCryptoAuthToken().has_value())) {
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kCryptoAuthTokenHeader}, request.getCryptoAuthToken().value());
   }
@@ -456,7 +456,7 @@ folly::Try<apache::thrift::RpcResponseComplete<McIncrReply>> sendSyncHelper(
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;
-      if (UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
+      if (FOLLY_UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
         rpcStatsContext->serverLoad = ServerLoad(
             static_cast<int32_t>(*reply->responseContext.serverLoad));
       }
@@ -473,10 +473,10 @@ folly::Try<apache::thrift::RpcResponseComplete<McLeaseGetReply>> sendSyncHelper(
     apache::thrift::RpcOptions& rpcOptions,
     RpcStatsContext* rpcStatsContext = nullptr) {
   bool needServerLoad = mcrouter::fiber_local<MemcacheRouterInfo>::getThriftServerLoadEnabled();
-  if (UNLIKELY(needServerLoad)) {
+  if (FOLLY_UNLIKELY(needServerLoad)) {
     rpcOptions.setWriteHeader(kLoadHeader, kDefaultLoadCounter);
   }
-  if (UNLIKELY(request.getCryptoAuthToken().has_value())) {
+  if (FOLLY_UNLIKELY(request.getCryptoAuthToken().has_value())) {
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kCryptoAuthTokenHeader}, request.getCryptoAuthToken().value());
   }
@@ -492,7 +492,7 @@ folly::Try<apache::thrift::RpcResponseComplete<McLeaseGetReply>> sendSyncHelper(
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;
-      if (UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
+      if (FOLLY_UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
         rpcStatsContext->serverLoad = ServerLoad(
             static_cast<int32_t>(*reply->responseContext.serverLoad));
       }
@@ -509,10 +509,10 @@ folly::Try<apache::thrift::RpcResponseComplete<McLeaseSetReply>> sendSyncHelper(
     apache::thrift::RpcOptions& rpcOptions,
     RpcStatsContext* rpcStatsContext = nullptr) {
   bool needServerLoad = mcrouter::fiber_local<MemcacheRouterInfo>::getThriftServerLoadEnabled();
-  if (UNLIKELY(needServerLoad)) {
+  if (FOLLY_UNLIKELY(needServerLoad)) {
     rpcOptions.setWriteHeader(kLoadHeader, kDefaultLoadCounter);
   }
-  if (UNLIKELY(request.getCryptoAuthToken().has_value())) {
+  if (FOLLY_UNLIKELY(request.getCryptoAuthToken().has_value())) {
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kCryptoAuthTokenHeader}, request.getCryptoAuthToken().value());
   }
@@ -528,7 +528,7 @@ folly::Try<apache::thrift::RpcResponseComplete<McLeaseSetReply>> sendSyncHelper(
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;
-      if (UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
+      if (FOLLY_UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
         rpcStatsContext->serverLoad = ServerLoad(
             static_cast<int32_t>(*reply->responseContext.serverLoad));
       }
@@ -545,10 +545,10 @@ folly::Try<apache::thrift::RpcResponseComplete<McMetagetReply>> sendSyncHelper(
     apache::thrift::RpcOptions& rpcOptions,
     RpcStatsContext* rpcStatsContext = nullptr) {
   bool needServerLoad = mcrouter::fiber_local<MemcacheRouterInfo>::getThriftServerLoadEnabled();
-  if (UNLIKELY(needServerLoad)) {
+  if (FOLLY_UNLIKELY(needServerLoad)) {
     rpcOptions.setWriteHeader(kLoadHeader, kDefaultLoadCounter);
   }
-  if (UNLIKELY(request.getCryptoAuthToken().has_value())) {
+  if (FOLLY_UNLIKELY(request.getCryptoAuthToken().has_value())) {
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kCryptoAuthTokenHeader}, request.getCryptoAuthToken().value());
   }
@@ -564,7 +564,7 @@ folly::Try<apache::thrift::RpcResponseComplete<McMetagetReply>> sendSyncHelper(
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;
-      if (UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
+      if (FOLLY_UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
         rpcStatsContext->serverLoad = ServerLoad(
             static_cast<int32_t>(*reply->responseContext.serverLoad));
       }
@@ -581,10 +581,10 @@ folly::Try<apache::thrift::RpcResponseComplete<McPrependReply>> sendSyncHelper(
     apache::thrift::RpcOptions& rpcOptions,
     RpcStatsContext* rpcStatsContext = nullptr) {
   bool needServerLoad = mcrouter::fiber_local<MemcacheRouterInfo>::getThriftServerLoadEnabled();
-  if (UNLIKELY(needServerLoad)) {
+  if (FOLLY_UNLIKELY(needServerLoad)) {
     rpcOptions.setWriteHeader(kLoadHeader, kDefaultLoadCounter);
   }
-  if (UNLIKELY(request.getCryptoAuthToken().has_value())) {
+  if (FOLLY_UNLIKELY(request.getCryptoAuthToken().has_value())) {
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kCryptoAuthTokenHeader}, request.getCryptoAuthToken().value());
   }
@@ -600,7 +600,7 @@ folly::Try<apache::thrift::RpcResponseComplete<McPrependReply>> sendSyncHelper(
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;
-      if (UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
+      if (FOLLY_UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
         rpcStatsContext->serverLoad = ServerLoad(
             static_cast<int32_t>(*reply->responseContext.serverLoad));
       }
@@ -617,10 +617,10 @@ folly::Try<apache::thrift::RpcResponseComplete<McReplaceReply>> sendSyncHelper(
     apache::thrift::RpcOptions& rpcOptions,
     RpcStatsContext* rpcStatsContext = nullptr) {
   bool needServerLoad = mcrouter::fiber_local<MemcacheRouterInfo>::getThriftServerLoadEnabled();
-  if (UNLIKELY(needServerLoad)) {
+  if (FOLLY_UNLIKELY(needServerLoad)) {
     rpcOptions.setWriteHeader(kLoadHeader, kDefaultLoadCounter);
   }
-  if (UNLIKELY(request.getCryptoAuthToken().has_value())) {
+  if (FOLLY_UNLIKELY(request.getCryptoAuthToken().has_value())) {
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kCryptoAuthTokenHeader}, request.getCryptoAuthToken().value());
   }
@@ -636,7 +636,7 @@ folly::Try<apache::thrift::RpcResponseComplete<McReplaceReply>> sendSyncHelper(
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;
-      if (UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
+      if (FOLLY_UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
         rpcStatsContext->serverLoad = ServerLoad(
             static_cast<int32_t>(*reply->responseContext.serverLoad));
       }
@@ -653,10 +653,10 @@ folly::Try<apache::thrift::RpcResponseComplete<McSetReply>> sendSyncHelper(
     apache::thrift::RpcOptions& rpcOptions,
     RpcStatsContext* rpcStatsContext = nullptr) {
   bool needServerLoad = mcrouter::fiber_local<MemcacheRouterInfo>::getThriftServerLoadEnabled();
-  if (UNLIKELY(needServerLoad)) {
+  if (FOLLY_UNLIKELY(needServerLoad)) {
     rpcOptions.setWriteHeader(kLoadHeader, kDefaultLoadCounter);
   }
-  if (UNLIKELY(request.getCryptoAuthToken().has_value())) {
+  if (FOLLY_UNLIKELY(request.getCryptoAuthToken().has_value())) {
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kCryptoAuthTokenHeader}, request.getCryptoAuthToken().value());
   }
@@ -672,7 +672,7 @@ folly::Try<apache::thrift::RpcResponseComplete<McSetReply>> sendSyncHelper(
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;
-      if (UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
+      if (FOLLY_UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
         rpcStatsContext->serverLoad = ServerLoad(
             static_cast<int32_t>(*reply->responseContext.serverLoad));
       }
@@ -689,10 +689,10 @@ folly::Try<apache::thrift::RpcResponseComplete<McTouchReply>> sendSyncHelper(
     apache::thrift::RpcOptions& rpcOptions,
     RpcStatsContext* rpcStatsContext = nullptr) {
   bool needServerLoad = mcrouter::fiber_local<MemcacheRouterInfo>::getThriftServerLoadEnabled();
-  if (UNLIKELY(needServerLoad)) {
+  if (FOLLY_UNLIKELY(needServerLoad)) {
     rpcOptions.setWriteHeader(kLoadHeader, kDefaultLoadCounter);
   }
-  if (UNLIKELY(request.getCryptoAuthToken().has_value())) {
+  if (FOLLY_UNLIKELY(request.getCryptoAuthToken().has_value())) {
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kCryptoAuthTokenHeader}, request.getCryptoAuthToken().value());
   }
@@ -708,7 +708,7 @@ folly::Try<apache::thrift::RpcResponseComplete<McTouchReply>> sendSyncHelper(
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;
-      if (UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
+      if (FOLLY_UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
         rpcStatsContext->serverLoad = ServerLoad(
             static_cast<int32_t>(*reply->responseContext.serverLoad));
       }
@@ -725,10 +725,10 @@ folly::Try<apache::thrift::RpcResponseComplete<McVersionReply>> sendSyncHelper(
     apache::thrift::RpcOptions& rpcOptions,
     RpcStatsContext* rpcStatsContext = nullptr) {
   bool needServerLoad = mcrouter::fiber_local<MemcacheRouterInfo>::getThriftServerLoadEnabled();
-  if (UNLIKELY(needServerLoad)) {
+  if (FOLLY_UNLIKELY(needServerLoad)) {
     rpcOptions.setWriteHeader(kLoadHeader, kDefaultLoadCounter);
   }
-  if (UNLIKELY(request.getCryptoAuthToken().has_value())) {
+  if (FOLLY_UNLIKELY(request.getCryptoAuthToken().has_value())) {
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kCryptoAuthTokenHeader}, request.getCryptoAuthToken().value());
   }
@@ -744,7 +744,7 @@ folly::Try<apache::thrift::RpcResponseComplete<McVersionReply>> sendSyncHelper(
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;
-      if (UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
+      if (FOLLY_UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
         rpcStatsContext->serverLoad = ServerLoad(
             static_cast<int32_t>(*reply->responseContext.serverLoad));
       }
@@ -787,7 +787,7 @@ class ThriftTransport<MemcacheRouterInfo> : public ThriftTransportMethods<Memcac
 
     return sendSyncImpl([this, &request, timeout, rpcStatsContext] {
       auto* thriftClient = getThriftClient();
-      if (LIKELY(thriftClient != nullptr)) {
+      if (FOLLY_LIKELY(thriftClient != nullptr)) {
         auto rpcOptions = getRpcOptions(timeout);
         return sendSyncHelper(thriftClient, request, rpcOptions, rpcStatsContext);
       } else {
@@ -806,7 +806,7 @@ class ThriftTransport<MemcacheRouterInfo> : public ThriftTransportMethods<Memcac
 
     return sendSyncImpl([this, &request, timeout, rpcStatsContext] {
       auto* thriftClient = getThriftClient();
-      if (LIKELY(thriftClient != nullptr)) {
+      if (FOLLY_LIKELY(thriftClient != nullptr)) {
         auto rpcOptions = getRpcOptions(timeout);
         return sendSyncHelper(thriftClient, request, rpcOptions, rpcStatsContext);
       } else {
@@ -825,7 +825,7 @@ class ThriftTransport<MemcacheRouterInfo> : public ThriftTransportMethods<Memcac
 
     return sendSyncImpl([this, &request, timeout, rpcStatsContext] {
       auto* thriftClient = getThriftClient();
-      if (LIKELY(thriftClient != nullptr)) {
+      if (FOLLY_LIKELY(thriftClient != nullptr)) {
         auto rpcOptions = getRpcOptions(timeout);
         return sendSyncHelper(thriftClient, request, rpcOptions, rpcStatsContext);
       } else {
@@ -844,7 +844,7 @@ class ThriftTransport<MemcacheRouterInfo> : public ThriftTransportMethods<Memcac
 
     return sendSyncImpl([this, &request, timeout, rpcStatsContext] {
       auto* thriftClient = getThriftClient();
-      if (LIKELY(thriftClient != nullptr)) {
+      if (FOLLY_LIKELY(thriftClient != nullptr)) {
         auto rpcOptions = getRpcOptions(timeout);
         return sendSyncHelper(thriftClient, request, rpcOptions, rpcStatsContext);
       } else {
@@ -863,7 +863,7 @@ class ThriftTransport<MemcacheRouterInfo> : public ThriftTransportMethods<Memcac
 
     return sendSyncImpl([this, &request, timeout, rpcStatsContext] {
       auto* thriftClient = getThriftClient();
-      if (LIKELY(thriftClient != nullptr)) {
+      if (FOLLY_LIKELY(thriftClient != nullptr)) {
         auto rpcOptions = getRpcOptions(timeout);
         return sendSyncHelper(thriftClient, request, rpcOptions, rpcStatsContext);
       } else {
@@ -882,7 +882,7 @@ class ThriftTransport<MemcacheRouterInfo> : public ThriftTransportMethods<Memcac
 
     return sendSyncImpl([this, &request, timeout, rpcStatsContext] {
       auto* thriftClient = getThriftClient();
-      if (LIKELY(thriftClient != nullptr)) {
+      if (FOLLY_LIKELY(thriftClient != nullptr)) {
         auto rpcOptions = getRpcOptions(timeout);
         return sendSyncHelper(thriftClient, request, rpcOptions, rpcStatsContext);
       } else {
@@ -901,7 +901,7 @@ class ThriftTransport<MemcacheRouterInfo> : public ThriftTransportMethods<Memcac
 
     return sendSyncImpl([this, &request, timeout, rpcStatsContext] {
       auto* thriftClient = getThriftClient();
-      if (LIKELY(thriftClient != nullptr)) {
+      if (FOLLY_LIKELY(thriftClient != nullptr)) {
         auto rpcOptions = getRpcOptions(timeout);
         return sendSyncHelper(thriftClient, request, rpcOptions, rpcStatsContext);
       } else {
@@ -920,7 +920,7 @@ class ThriftTransport<MemcacheRouterInfo> : public ThriftTransportMethods<Memcac
 
     return sendSyncImpl([this, &request, timeout, rpcStatsContext] {
       auto* thriftClient = getThriftClient();
-      if (LIKELY(thriftClient != nullptr)) {
+      if (FOLLY_LIKELY(thriftClient != nullptr)) {
         auto rpcOptions = getRpcOptions(timeout);
         return sendSyncHelper(thriftClient, request, rpcOptions, rpcStatsContext);
       } else {
@@ -939,7 +939,7 @@ class ThriftTransport<MemcacheRouterInfo> : public ThriftTransportMethods<Memcac
 
     return sendSyncImpl([this, &request, timeout, rpcStatsContext] {
       auto* thriftClient = getThriftClient();
-      if (LIKELY(thriftClient != nullptr)) {
+      if (FOLLY_LIKELY(thriftClient != nullptr)) {
         auto rpcOptions = getRpcOptions(timeout);
         return sendSyncHelper(thriftClient, request, rpcOptions, rpcStatsContext);
       } else {
@@ -958,7 +958,7 @@ class ThriftTransport<MemcacheRouterInfo> : public ThriftTransportMethods<Memcac
 
     return sendSyncImpl([this, &request, timeout, rpcStatsContext] {
       auto* thriftClient = getThriftClient();
-      if (LIKELY(thriftClient != nullptr)) {
+      if (FOLLY_LIKELY(thriftClient != nullptr)) {
         auto rpcOptions = getRpcOptions(timeout);
         return sendSyncHelper(thriftClient, request, rpcOptions, rpcStatsContext);
       } else {
@@ -977,7 +977,7 @@ class ThriftTransport<MemcacheRouterInfo> : public ThriftTransportMethods<Memcac
 
     return sendSyncImpl([this, &request, timeout, rpcStatsContext] {
       auto* thriftClient = getThriftClient();
-      if (LIKELY(thriftClient != nullptr)) {
+      if (FOLLY_LIKELY(thriftClient != nullptr)) {
         auto rpcOptions = getRpcOptions(timeout);
         return sendSyncHelper(thriftClient, request, rpcOptions, rpcStatsContext);
       } else {
@@ -996,7 +996,7 @@ class ThriftTransport<MemcacheRouterInfo> : public ThriftTransportMethods<Memcac
 
     return sendSyncImpl([this, &request, timeout, rpcStatsContext] {
       auto* thriftClient = getThriftClient();
-      if (LIKELY(thriftClient != nullptr)) {
+      if (FOLLY_LIKELY(thriftClient != nullptr)) {
         auto rpcOptions = getRpcOptions(timeout);
         return sendSyncHelper(thriftClient, request, rpcOptions, rpcStatsContext);
       } else {
@@ -1015,7 +1015,7 @@ class ThriftTransport<MemcacheRouterInfo> : public ThriftTransportMethods<Memcac
 
     return sendSyncImpl([this, &request, timeout, rpcStatsContext] {
       auto* thriftClient = getThriftClient();
-      if (LIKELY(thriftClient != nullptr)) {
+      if (FOLLY_LIKELY(thriftClient != nullptr)) {
         auto rpcOptions = getRpcOptions(timeout);
         return sendSyncHelper(thriftClient, request, rpcOptions, rpcStatsContext);
       } else {
@@ -1034,7 +1034,7 @@ class ThriftTransport<MemcacheRouterInfo> : public ThriftTransportMethods<Memcac
 
     return sendSyncImpl([this, &request, timeout, rpcStatsContext] {
       auto* thriftClient = getThriftClient();
-      if (LIKELY(thriftClient != nullptr)) {
+      if (FOLLY_LIKELY(thriftClient != nullptr)) {
         auto rpcOptions = getRpcOptions(timeout);
         return sendSyncHelper(thriftClient, request, rpcOptions, rpcStatsContext);
       } else {
@@ -1053,7 +1053,7 @@ class ThriftTransport<MemcacheRouterInfo> : public ThriftTransportMethods<Memcac
 
     return sendSyncImpl([this, &request, timeout, rpcStatsContext] {
       auto* thriftClient = getThriftClient();
-      if (LIKELY(thriftClient != nullptr)) {
+      if (FOLLY_LIKELY(thriftClient != nullptr)) {
         auto rpcOptions = getRpcOptions(timeout);
         return sendSyncHelper(thriftClient, request, rpcOptions, rpcStatsContext);
       } else {
@@ -1072,7 +1072,7 @@ class ThriftTransport<MemcacheRouterInfo> : public ThriftTransportMethods<Memcac
 
     return sendSyncImpl([this, &request, timeout, rpcStatsContext] {
       auto* thriftClient = getThriftClient();
-      if (LIKELY(thriftClient != nullptr)) {
+      if (FOLLY_LIKELY(thriftClient != nullptr)) {
         auto rpcOptions = getRpcOptions(timeout);
         return sendSyncHelper(thriftClient, request, rpcOptions, rpcStatsContext);
       } else {
@@ -1091,7 +1091,7 @@ class ThriftTransport<MemcacheRouterInfo> : public ThriftTransportMethods<Memcac
 
     return sendSyncImpl([this, &request, timeout, rpcStatsContext] {
       auto* thriftClient = getThriftClient();
-      if (LIKELY(thriftClient != nullptr)) {
+      if (FOLLY_LIKELY(thriftClient != nullptr)) {
         auto rpcOptions = getRpcOptions(timeout);
         return sendSyncHelper(thriftClient, request, rpcOptions, rpcStatsContext);
       } else {
@@ -1110,7 +1110,7 @@ class ThriftTransport<MemcacheRouterInfo> : public ThriftTransportMethods<Memcac
 
     return sendSyncImpl([this, &request, timeout, rpcStatsContext] {
       auto* thriftClient = getThriftClient();
-      if (LIKELY(thriftClient != nullptr)) {
+      if (FOLLY_LIKELY(thriftClient != nullptr)) {
         auto rpcOptions = getRpcOptions(timeout);
         return sendSyncHelper(thriftClient, request, rpcOptions, rpcStatsContext);
       } else {
@@ -1129,7 +1129,7 @@ class ThriftTransport<MemcacheRouterInfo> : public ThriftTransportMethods<Memcac
 
     return sendSyncImpl([this, &request, timeout, rpcStatsContext] {
       auto* thriftClient = getThriftClient();
-      if (LIKELY(thriftClient != nullptr)) {
+      if (FOLLY_LIKELY(thriftClient != nullptr)) {
         auto rpcOptions = getRpcOptions(timeout);
         return sendSyncHelper(thriftClient, request, rpcOptions, rpcStatsContext);
       } else {
@@ -1148,7 +1148,7 @@ class ThriftTransport<MemcacheRouterInfo> : public ThriftTransportMethods<Memcac
 
     return sendSyncImpl([this, &request, timeout, rpcStatsContext] {
       auto* thriftClient = getThriftClient();
-      if (LIKELY(thriftClient != nullptr)) {
+      if (FOLLY_LIKELY(thriftClient != nullptr)) {
         auto rpcOptions = getRpcOptions(timeout);
         return sendSyncHelper(thriftClient, request, rpcOptions, rpcStatsContext);
       } else {
@@ -1164,7 +1164,7 @@ class ThriftTransport<MemcacheRouterInfo> : public ThriftTransportMethods<Memcac
   FlushList* flushList_{nullptr};
 
   apache::thrift::Client<facebook::memcache::thrift::Memcache>* getThriftClient() {
-    if (UNLIKELY(!thriftClient_)) {
+    if (FOLLY_UNLIKELY(!thriftClient_)) {
       thriftClient_ = createThriftClient<apache::thrift::Client<facebook::memcache::thrift::Memcache>>();
       if (flushList_) {
         auto* channel = static_cast<apache::thrift::RocketClientChannel*>(
@@ -1172,7 +1172,7 @@ class ThriftTransport<MemcacheRouterInfo> : public ThriftTransportMethods<Memcac
         channel->setFlushList(flushList_);
       }
     }
-    if (LIKELY(thriftClient_.has_value())) {
+    if (FOLLY_LIKELY(thriftClient_.has_value())) {
       return &thriftClient_.value();
     }
     return nullptr;

@@ -156,7 +156,7 @@ class ProxyRequestContext {
    * Run preprocess function.
    */
   void runPreprocessFunction() const {
-    if (UNLIKELY(mcrouterPreprocess_ != nullptr)) {
+    if (FOLLY_UNLIKELY(mcrouterPreprocess_ != nullptr)) {
       mcrouterPreprocess_();
     }
   }

@@ -74,9 +74,9 @@ void McServerRequestContext::replyImpl2(
     void* toDestruct,
     bool flush) {
 #ifndef LIBMC_FBTRACE_DISABLE
-  if (UNLIKELY(ctx.isTraced_)) {
+  if (FOLLY_UNLIKELY(ctx.isTraced_)) {
     auto tracer = facebook::mcrouter::getCurrentTracer();
-    if (LIKELY(tracer != nullptr)) {
+    if (FOLLY_LIKELY(tracer != nullptr)) {
       reply.setTraceContext(tracer->sendResponse());
     }
   }
@@ -111,7 +111,7 @@ void McServerRequestContext::replyImpl2(
     return;
   }
   session->reply(std::move(wb), reqid);
-  if (UNLIKELY(flush)) {
+  if (FOLLY_UNLIKELY(flush)) {
     session->flushWrites();
   }
 }

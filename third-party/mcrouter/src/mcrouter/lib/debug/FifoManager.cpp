@@ -75,7 +75,7 @@ std::shared_ptr<Fifo> FifoManager::fetch(const std::string& fifoPath) {
 
 std::shared_ptr<Fifo> FifoManager::fetchThreadLocal(
     const std::string& fifoBasePath) {
-  if (UNLIKELY(fifoBasePath.empty())) {
+  if (FOLLY_UNLIKELY(fifoBasePath.empty())) {
     LOG(ERROR) << "Cannot create a debug fifo with empty path.";
     return nullptr;
   }

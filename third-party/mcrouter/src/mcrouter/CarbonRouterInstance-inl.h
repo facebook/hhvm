@@ -572,7 +572,7 @@ bool CarbonRouterInstance<RouterInfo>::reconfigurePartially() {
         auto newAp =
             std::const_pointer_cast<const AccessPoint>(createAccessPoint(
                 update.newApString, update.newFailureDomain, *this, *apAttr));
-        if (UNLIKELY(oldAp->getProtocol() != newAp->getProtocol())) {
+        if (FOLLY_UNLIKELY(oldAp->getProtocol() != newAp->getProtocol())) {
           return false;
         }
         auto replacedAp = getProxy(i)->replaceAP(*oldAp, newAp);

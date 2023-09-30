@@ -41,10 +41,10 @@ folly::Try<apache::thrift::RpcResponseComplete<carbon::test::B::TestBReply>> sen
     apache::thrift::RpcOptions& rpcOptions,
     RpcStatsContext* rpcStatsContext = nullptr) {
   bool needServerLoad = mcrouter::fiber_local<carbon::test::B::BRouterInfo>::getThriftServerLoadEnabled();
-  if (UNLIKELY(needServerLoad)) {
+  if (FOLLY_UNLIKELY(needServerLoad)) {
     rpcOptions.setWriteHeader(kLoadHeader, kDefaultLoadCounter);
   }
-  if (UNLIKELY(request.getCryptoAuthToken().has_value())) {
+  if (FOLLY_UNLIKELY(request.getCryptoAuthToken().has_value())) {
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kCryptoAuthTokenHeader}, request.getCryptoAuthToken().value());
   }
@@ -60,7 +60,7 @@ folly::Try<apache::thrift::RpcResponseComplete<carbon::test::B::TestBReply>> sen
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;
-      if (UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
+      if (FOLLY_UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
         rpcStatsContext->serverLoad = ServerLoad(
             static_cast<int32_t>(*reply->responseContext.serverLoad));
       }
@@ -77,10 +77,10 @@ folly::Try<apache::thrift::RpcResponseComplete<McVersionReply>> sendSyncHelper(
     apache::thrift::RpcOptions& rpcOptions,
     RpcStatsContext* rpcStatsContext = nullptr) {
   bool needServerLoad = mcrouter::fiber_local<carbon::test::B::BRouterInfo>::getThriftServerLoadEnabled();
-  if (UNLIKELY(needServerLoad)) {
+  if (FOLLY_UNLIKELY(needServerLoad)) {
     rpcOptions.setWriteHeader(kLoadHeader, kDefaultLoadCounter);
   }
-  if (UNLIKELY(request.getCryptoAuthToken().has_value())) {
+  if (FOLLY_UNLIKELY(request.getCryptoAuthToken().has_value())) {
     rpcOptions.setWriteHeader(
         std::string{carbon::MessageCommon::kCryptoAuthTokenHeader}, request.getCryptoAuthToken().value());
   }
@@ -96,7 +96,7 @@ folly::Try<apache::thrift::RpcResponseComplete<McVersionReply>> sendSyncHelper(
       rpcStatsContext->requestBodySize = stats.requestSerializedSizeBytes;
       rpcStatsContext->replySizeBeforeCompression = stats.responseSerializedSizeBytes;
       rpcStatsContext->replySizeAfterCompression = stats.responseWireSizeBytes;
-      if (UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
+      if (FOLLY_UNLIKELY(needServerLoad && reply->responseContext.serverLoad)) {
         rpcStatsContext->serverLoad = ServerLoad(
             static_cast<int32_t>(*reply->responseContext.serverLoad));
       }
@@ -139,7 +139,7 @@ class ThriftTransport<carbon::test::B::BRouterInfo> : public ThriftTransportMeth
 
     return sendSyncImpl([this, &request, timeout, rpcStatsContext] {
       auto* thriftClient = getThriftClient();
-      if (LIKELY(thriftClient != nullptr)) {
+      if (FOLLY_LIKELY(thriftClient != nullptr)) {
         auto rpcOptions = getRpcOptions(timeout);
         return sendSyncHelper(thriftClient, request, rpcOptions, rpcStatsContext);
       } else {
@@ -158,7 +158,7 @@ class ThriftTransport<carbon::test::B::BRouterInfo> : public ThriftTransportMeth
 
     return sendSyncImpl([this, &request, timeout, rpcStatsContext] {
       auto* thriftClient = getThriftClient();
-      if (LIKELY(thriftClient != nullptr)) {
+      if (FOLLY_LIKELY(thriftClient != nullptr)) {
         auto rpcOptions = getRpcOptions(timeout);
         return sendSyncHelper(thriftClient, request, rpcOptions, rpcStatsContext);
       } else {
@@ -174,7 +174,7 @@ class ThriftTransport<carbon::test::B::BRouterInfo> : public ThriftTransportMeth
   FlushList* flushList_{nullptr};
 
   apache::thrift::Client<carbon::test::B::thrift::B>* getThriftClient() {
-    if (UNLIKELY(!thriftClient_)) {
+    if (FOLLY_UNLIKELY(!thriftClient_)) {
       thriftClient_ = createThriftClient<apache::thrift::Client<carbon::test::B::thrift::B>>();
       if (flushList_) {
         auto* channel = static_cast<apache::thrift::RocketClientChannel*>(
@@ -182,7 +182,7 @@ class ThriftTransport<carbon::test::B::BRouterInfo> : public ThriftTransportMeth
         channel->setFlushList(flushList_);
       }
     }
-    if (LIKELY(thriftClient_.has_value())) {
+    if (FOLLY_LIKELY(thriftClient_.has_value())) {
       return &thriftClient_.value();
     }
     return nullptr;

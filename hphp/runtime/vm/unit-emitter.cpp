@@ -610,7 +610,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
   tracing::BlockNoTrace _{"unit-create"};
 
   static const bool kVerify = debug || RuntimeOption::EvalVerify ||
-    RuntimeOption::EvalVerifyOnly || RuntimeOption::EvalFatalOnVerifyError;
+    RuntimeOption::EvalVerifyOnly;
   static const bool kVerifyVerboseSystem =
     getenv("HHVM_VERIFY_VERBOSE_SYSTEM");
   static const bool kVerifyVerbose =

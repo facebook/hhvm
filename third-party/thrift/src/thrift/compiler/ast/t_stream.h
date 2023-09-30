@@ -78,8 +78,6 @@ class t_stream_response : public t_type {
     return first_response_type().get_type();
   }
   bool has_first_response() const { return !first_response_type_.empty(); }
-  t_throws* get_throws_struct() const { return exceptions_.get(); }
-  bool has_throws_struct() const { return exceptions_ == nullptr; }
 
   bool is_streamresponse() const override { return true; }
   type get_type_value() const override { return type::t_stream; }

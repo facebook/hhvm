@@ -569,7 +569,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
       auto stream_schema = mapval();
       stream_schema->add_map(
           val("payload"), gen_type(*stream->elem_type(), node.program()));
-      if (auto throws = stream->get_throws_struct()) {
+      if (auto throws = stream->exceptions()) {
         add_fields(
             this,
             node.program(),

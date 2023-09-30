@@ -2135,6 +2135,186 @@ TEST_P(HQUpstreamSessionTestDatagram, TestReceiveEarlyDatagramsMultiStream) {
   flushAndLoop();
 }
 
+class HQUpstreamSessionTestWebTransport : public HQUpstreamSessionTest {
+ public:
+  void SetUp() override {
+    HQUpstreamSessionTest::SetUp();
+    // Set up WT session
+    handler_ = openTransaction();
+    sessionId_ = handler_->txn_->getID();
+    handler_->txn_->sendHeaders(getWTConnectRequest());
+    handler_->expectHeaders();
+    sendResponse(sessionId_, getWTResponse(), nullptr, false);
+    flushAndLoopN(3);
+    wt_ = handler_->txn_->getWebTransport();
+    EXPECT_NE(wt_, nullptr);
+  }
+
+  void closeWTSession() {
+    // should this close INGRESS?
+    wt_->closeSession();
+    handler_->expectEOM();
+    handler_->expectDetachTransaction();
+    socketDriver_->addReadEOF(sessionId_, std::chrono::milliseconds(0));
+    hqSession_->closeWhenIdle();
+    flushAndLoop();
+  }
+
+  static HTTPMessage getWTConnectRequest() {
+    HTTPMessage req;
+    req.setHTTPVersion(1, 1);
+    req.setUpgradeProtocol("webtransport");
+    req.setMethod(HTTPMethod::CONNECT);
+    req.setURL("/webtransport");
+    req.getHeaders().set(HTTP_HEADER_HOST, "www.facebook.com");
+    return req;
+  }
+
+  static HTTPMessage getWTResponse() {
+    HTTPMessage resp;
+    resp.setHTTPVersion(1, 1);
+    resp.setStatusCode(200);
+    return resp;
+  }
+
+ protected:
+  std::unique_ptr<StrictMock<MockHTTPHandler>> handler_;
+  uint64_t sessionId_;
+  WebTransport* wt_{nullptr};
+};
+
+TEST_P(HQUpstreamSessionTestWebTransport, BidirectionalStream) {
+  InSequence enforceOrder;
+  // Create a bidi WT stream
+  auto stream = wt_->createBidiStream().value();
+  auto id = stream.readHandle->getID();
+  // small write
+  stream.writeHandle->writeStreamData(makeBuf(10), false);
+  eventBase_.loopOnce();
+
+  // shrink the fcw to force it to block
+  socketDriver_->setStreamFlowControlWindow(id, 100);
+  bool writeComplete = false;
+  stream.writeHandle->writeStreamData(makeBuf(65536), false)
+      .value()
+      .via(&eventBase_)
+      .then([&](auto) {
+        VLOG(4) << "big write complete";
+        // after it completes, write FIN
+        stream.writeHandle->writeStreamData(nullptr, true)
+            .value()
+            .via(&eventBase_)
+            .then([&](auto) {
+              VLOG(4) << "fin write complete";
+              writeComplete = true;
+            });
+      });
+  eventBase_.loopOnce();
+  // grow the fcw which will complete the big write
+  socketDriver_->setStreamFlowControlWindow(id, 100000);
+  socketDriver_->setConnectionFlowControlWindow(100000);
+  eventBase_.loopOnce();
+  eventBase_.loopOnce();
+  eventBase_.loopOnce();
+  EXPECT_TRUE(writeComplete);
+
+  // Wait for a read
+  stream.readHandle->awaitNextRead(&eventBase_, [&](auto, auto) {
+    // Now add a big buf, which will pause ingress
+    socketDriver_->addReadEvent(
+        id, makeBuf(70000), std::chrono::milliseconds(0));
+  });
+  // add a small read to trigger the above handler
+  socketDriver_->addReadEvent(id, makeBuf(10), std::chrono::milliseconds(0));
+  flushAndLoopN(3);
+  EXPECT_TRUE(socketDriver_->isStreamPaused(id));
+
+  // Read again
+  stream.readHandle->awaitNextRead(&eventBase_, [&](auto, auto streamData) {
+    EXPECT_EQ(streamData->data->computeChainDataLength(), 70000);
+    // Add EOF and wait for it
+    socketDriver_->addReadEOF(id, std::chrono::milliseconds(0));
+    stream.readHandle->awaitNextRead(&eventBase_, [&](auto, auto streamData) {
+      EXPECT_TRUE(streamData->fin);
+    });
+  });
+  flushAndLoopN(2);
+  closeWTSession();
+}
+
+TEST_P(HQUpstreamSessionTestWebTransport, RejectBidirectionalStream) {
+  WebTransport::BidiStreamHandle stream;
+  EXPECT_CALL(*handler_, onWebTransportBidiStream(_, _))
+      .WillOnce(SaveArg<1>(&stream));
+  folly::IOBufQueue buf(folly::IOBufQueue::cacheChainLength());
+  hq::writeWTStreamPreface(buf, hq::WebTransportStreamType::BIDI, sessionId_);
+  socketDriver_->addReadEvent(1, buf.move(), std::chrono::milliseconds(0));
+  eventBase_.loopOnce();
+
+  auto id = stream.writeHandle->getID();
+  EXPECT_EQ(id, 1);
+
+  // reset write handle
+  stream.writeHandle->resetStream(19);
+  EXPECT_EQ(
+      WebTransport::toApplicationErrorCode(*socketDriver_->streams_[id].error)
+          .value(),
+      19);
+
+  // stop sending read handle
+  stream.readHandle->stopSending(77);
+  EXPECT_EQ(
+      WebTransport::toApplicationErrorCode(*socketDriver_->streams_[id].error)
+          .value(),
+      77);
+
+  // add read error (peer reset)
+  socketDriver_->addReadError(id, 78, std::chrono::milliseconds(0));
+  eventBase_.loopOnce();
+
+  closeWTSession();
+}
+
+TEST_P(HQUpstreamSessionTestWebTransport, PairOfUnisReset) {
+  socketDriver_->setMaxUniStreams(10);
+  auto writeHandle = wt_->createUniStream().value();
+  auto writeId = writeHandle->getID();
+  WebTransport::StreamReadHandle* readHandle{nullptr};
+  EXPECT_CALL(*handler_, onWebTransportUniStream(_, _))
+      .WillOnce(SaveArg<1>(&readHandle));
+  folly::IOBufQueue buf(folly::IOBufQueue::cacheChainLength());
+  hq::writeWTStreamPreface(buf, hq::WebTransportStreamType::UNI, sessionId_);
+  socketDriver_->addReadEvent(15, buf.move(), std::chrono::milliseconds(0));
+  eventBase_.loopOnce();
+  eventBase_.loopOnce();
+
+  auto readId = readHandle->getID();
+  EXPECT_EQ(readId, 15);
+
+  // Peer reset
+  folly::CancellationCallback writeCancel(
+      writeHandle->getCancelToken(), [&] { writeHandle->resetStream(77); });
+  socketDriver_->addStopSending(writeId, WebTransport::toHTTPErrorCode(19));
+  socketDriver_->addReadError(
+      readId, WebTransport::toHTTPErrorCode(77), std::chrono::milliseconds(0));
+  flushAndLoopN(2);
+  // cancel handler ran, reset stream with err=77
+  EXPECT_EQ(WebTransport::toApplicationErrorCode(
+                *socketDriver_->streams_[writeId].error)
+                .value(),
+            77);
+  // readHandle holds the reset error
+  readHandle->readStreamData()
+      .via(&eventBase_)
+      .thenValue([](auto) {})
+      .thenError(folly::tag_t<const WebTransport::Exception&>{},
+                 [](auto const& ex) { EXPECT_EQ(ex.error, 77); });
+
+  eventBase_.loopOnce();
+
+  closeWTSession();
+}
+
 /**
  * Instantiate the Parametrized test cases
  */
@@ -2184,6 +2364,17 @@ INSTANTIATE_TEST_SUITE_P(HQUpstreamSessionTest,
                            TestParams tp;
                            tp.alpn_ = "h3";
                            tp.datagrams_ = true;
+                           return tp;
+                         }()),
+                         paramsToTestName);
+
+// Instantiate h3 webtransport tests
+INSTANTIATE_TEST_SUITE_P(HQUpstreamSessionTest,
+                         HQUpstreamSessionTestWebTransport,
+                         Values([] {
+                           TestParams tp;
+                           tp.alpn_ = "h3";
+                           tp.webTransport_ = true;
                            return tp;
                          }()),
                          paramsToTestName);

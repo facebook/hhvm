@@ -146,6 +146,23 @@ TEST_F(HQFramerTest, TestWriteGreaseFrame) {
   EXPECT_EQ(length->first, 0);
 }
 
+TEST_F(HQFramerTest, TestWriteWebTransportStreamPreface) {
+  auto streamType = hq::WebTransportStreamType::UNI;
+  auto wtSessionId = 1977;
+  auto res = writeWTStreamPreface(queue_, streamType, wtSessionId);
+  EXPECT_FALSE(res.hasError());
+
+  Cursor cursor(queue_.front());
+  auto type = quic::decodeQuicInteger(cursor);
+  EXPECT_TRUE(type.hasValue());
+  EXPECT_EQ(type->first,
+            folly::to_underlying(hq::UnidirectionalStreamType::WEBTRANSPORT));
+
+  auto sessionId = quic::decodeQuicInteger(cursor);
+  EXPECT_TRUE(sessionId.hasValue());
+  EXPECT_EQ(sessionId->first, wtSessionId);
+}
+
 struct FrameHeaderLengthParams {
   uint8_t headerLength;
   ParseResult error;

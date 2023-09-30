@@ -144,6 +144,9 @@ class HQUniStreamDispatcher : public HQStreamDispatcherBase {
     virtual void dispatchPushStream(quic::StreamId /* streamId */,
                                     hq::PushId /* pushId */,
                                     size_t /* to consume */) = 0;
+    virtual void dispatchUniWTStream(quic::StreamId /* streamId */,
+                                     quic::StreamId /* sessionId */,
+                                     size_t /* to consume */) = 0;
   };
 
   HQUniStreamDispatcher(Callback& callback,
@@ -170,6 +173,10 @@ class HQBidiStreamDispatcher : public HQStreamDispatcherBase {
         uint64_t preface) = 0;
 
     virtual void dispatchRequestStream(quic::StreamId /* streamId */) = 0;
+
+    virtual void dispatchBidiWTStream(quic::StreamId /* streamId */,
+                                      quic::StreamId /* sessionId */,
+                                      size_t /* to consume */) = 0;
   };
 
   HQBidiStreamDispatcher(Callback& callback,

@@ -75,6 +75,11 @@ void HQDownstreamSession::detachThreadLocals(bool) {
   LOG(FATAL) << __func__ << " is an upstream interface";
 }
 
+bool HQDownstreamSession::pushAllowedByGoaway(hq::PushId pushId) {
+  // TODO: This is always true since we ignore client sent GOAWAY right now
+  return pushId < peerMinUnseenId_;
+}
+
 HQDownstreamSession::HQEgressPushStream* FOLLY_NULLABLE
 HQDownstreamSession::createEgressPushStream(hq::PushId pushId,
                                             quic::StreamId streamId,
@@ -85,7 +90,7 @@ HQDownstreamSession::createEgressPushStream(hq::PushId pushId,
           << " parentStreamId=" << parentStreamId;
 
   // Use version utils to ensure that the session is not in draining state
-  if (!checkNewStream(streamId)) {
+  if (!pushAllowedByGoaway(pushId)) {
     VLOG(3) << __func__ << " Not creating - session is draining"
             << " sess=" << *this << " pushId=" << pushId
             << " isClosing()=" << isClosing() << " streamId=" << streamId

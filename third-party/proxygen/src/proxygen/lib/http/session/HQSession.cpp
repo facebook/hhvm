@@ -85,6 +85,26 @@ quic::QuicErrorCode quicControlStreamError(quic::QuicErrorCode error) {
 quic::Priority toQuicPriority(const proxygen::HTTPPriority& pri) {
   return quic::Priority(pri.urgency, pri.incremental, pri.orderId);
 }
+
+bool writeWTStreamPrefaceToSock(
+    quic::QuicSocket& sock,
+    quic::StreamId wtStreamId,
+    quic::StreamId wtSessionId,
+    proxygen::hq::WebTransportStreamType streamType) {
+  folly::IOBufQueue writeBuf{folly::IOBufQueue::cacheChainLength()};
+  auto res =
+      proxygen::hq::writeWTStreamPreface(writeBuf, streamType, wtSessionId);
+  if (!res) {
+    LOG(ERROR) << "Failed to write WT stream preface";
+    return false;
+  }
+  auto writeRes = sock.writeChain(wtStreamId, writeBuf.move(), false);
+  if (writeRes.hasError()) {
+    LOG(ERROR) << "Failed to write stream preface to socket";
+    return false;
+  }
+  return true;
+}
 } // namespace
 
 using namespace proxygen::hq;
@@ -118,19 +138,47 @@ void HQSession::onNewBidirectionalStream(quic::StreamId id) noexcept {
   VLOG(4) << __func__ << " sess=" << *this << ": new streamID=" << id;
   // The transport should never call onNewBidirectionalStream before
   // onTransportReady
-  if (!checkNewStream(id)) {
+
+  // Reject all bidirectional, server-initiated streams, unless WT is supported
+  if (id == kMaxClientBidiStreamId ||
+      (direction_ == TransportDirection::UPSTREAM && !supportsWebTransport())) {
+    abortStream(HTTPException::Direction::INGRESS_AND_EGRESS,
+                id,
+                HTTP3::ErrorCode::HTTP_STREAM_CREATION_ERROR);
     return;
   }
   auto hqStream = findNonDetachedStream(id);
   DCHECK(!hqStream);
-  hqStream = createStreamTransport(id);
+  if (supportsWebTransport()) {
+    bidirectionalReadDispatcher_.takeTemporaryOwnership(id);
+    sock_->setPeekCallback(id, &bidirectionalReadDispatcher_);
+  } else {
+    dispatchRequestStreamImpl(id);
+  }
+}
+
+void HQSession::dispatchRequestStream(quic::StreamId id) {
+  if (!sock_->good()) {
+    LOG(ERROR) << "Bad socket sess=" << *this;
+    return;
+  }
+  sock_->setPeekCallback(id, nullptr);
+  dispatchRequestStreamImpl(id);
+}
+
+void HQSession::dispatchRequestStreamImpl(quic::StreamId id) {
+  if (maybeRejectRequestAfterGoaway(id)) {
+    return;
+  }
+  // id < kMaxClientBidiStreamId, so id + 4 will not wrap
+  minUnseenIncomingStreamId_ = std::max(minUnseenIncomingStreamId_, id + 4);
+  auto hqStream = createStreamTransport(id);
   DCHECK(hqStream);
   sock_->setReadCallback(id, this);
   if (ingressLimitExceeded()) {
     sock_->pauseRead(id);
   }
-
-  if (minUnseenIncomingStreamId_ == 0 && version_ == HQVersion::HQ) {
+  if (id == 0 && version_ == HQVersion::HQ) {
     // generate grease frame
     auto writeGreaseFrameResult = hq::writeGreaseFrame(hqStream->writeBuf_);
     if (writeGreaseFrameResult.hasError()) {
@@ -138,9 +186,6 @@ void HQSession::onNewBidirectionalStream(quic::StreamId id) noexcept {
               << ". Error = " << writeGreaseFrameResult.error();
     }
   }
-
-  // checkNewStream will reject kMaxClientBidiStreamId, so id + 4 will not wrap
-  minUnseenIncomingStreamId_ = std::max(minUnseenIncomingStreamId_, id + 4);
 }
 
 void HQSession::onBidirectionalStreamsAvailable(
@@ -161,10 +206,6 @@ void HQSession::onNewUnidirectionalStream(quic::StreamId id) noexcept {
   VLOG(4) << __func__ << " sess=" << *this << ": new streamID=" << id;
   // The transport should never call onNewUnidirectionalStream
   // before onTransportReady
-  if (!checkNewStream(id)) {
-    return;
-  }
-
   // The new stream should not exist yet.
   auto existingStream = findStream(id);
   DCHECK(!existingStream) << "duplicate " << __func__ << " for streamID=" << id;
@@ -183,6 +224,25 @@ void HQSession::onStopSending(quic::StreamId id,
   auto stream = findStream(id);
   if (stream) {
     handleWriteError(stream, error);
+  } else if (supportsWebTransport() &&
+             // TODO: is it valid to STOP_SENDING WebTransport streams with
+             // error codes outside this range (eg: REJECTED)?
+             WebTransport::isEncodedApplicationErrorCode(error)) {
+    // might be a WT stream, but there's no mapping HERE to find the session ID
+    // just tell all sessions to stop sending
+    auto appErrorCode = WebTransport::toApplicationErrorCode(errorCode);
+    if (!appErrorCode) {
+      return;
+    }
+
+    for (auto& streamIt : streams_) {
+      if (!streamIt.second.detached_ &&
+          streamIt.second.txn_.isWebTransportConnectStream()) {
+        if (streamIt.second.txn_.onWebTransportStopSending(id, *appErrorCode)) {
+          break;
+        }
+      }
+    }
   }
 }
 
@@ -196,15 +256,7 @@ void HQSession::onKnob(uint64_t knobSpace,
                          knobBlob->length());
 }
 
-bool HQSession::checkNewStream(quic::StreamId id) {
-  // Reject all bidirectional, server-initiated streams
-  if (id == kMaxClientBidiStreamId ||
-      (sock_->isBidirectionalStream(id) && sock_->isServerStream(id))) {
-    abortStream(HTTPException::Direction::INGRESS_AND_EGRESS,
-                id,
-                HTTP3::ErrorCode::HTTP_STREAM_CREATION_ERROR);
-    return false;
-  }
+bool HQSession::maybeRejectRequestAfterGoaway(quic::StreamId id) {
   // Cancel any stream that is out of the range allowed by GOAWAY
   if (drainState_ != DrainState::NONE) {
     // You can't check upstream here, because upstream GOAWAY sends PUSH IDs.
@@ -214,11 +266,11 @@ bool HQSession::checkNewStream(quic::StreamId id) {
       abortStream(HTTPException::Direction::INGRESS_AND_EGRESS,
                   id,
                   HTTP3::ErrorCode::HTTP_REQUEST_REJECTED);
-      return false;
+      return true;
     }
   }
 
-  return true;
+  return false;
 }
 
 bool HQSession::onTransportReadyCommon() noexcept {
@@ -696,8 +748,14 @@ size_t HQSession::sendSettings() {
         case hq::SettingId::H3_DATAGRAM:
         case hq::SettingId::H3_DATAGRAM_DRAFT_8:
         case hq::SettingId::H3_DATAGRAM_RFC:
-        case hq::SettingId::ENABLE_WEBTRANSPORT:
         case hq::SettingId::WEBTRANSPORT_MAX_SESSIONS:
+          break;
+        case hq::SettingId::ENABLE_WEBTRANSPORT:
+          if (setting.value) {
+            VLOG(4) << "enable_webtransport sess=" << *this;
+            supportsWebTransport_.set(
+                folly::to_underlying(SettingEnabled::SELF));
+          }
           break;
       }
     }
@@ -1162,7 +1220,13 @@ folly::Optional<UnidirectionalStreamType> HQSession::parseUniStreamPreface(
     uint64_t preface) {
   hq::UnidirectionalTypeF parse = [](hq::UnidirectionalStreamType type)
       -> folly::Optional<UnidirectionalStreamType> { return type; };
-  return hq::withType(preface, parse);
+  auto res = hq::withType(preface, parse);
+  if (res && *res == hq::UnidirectionalStreamType::WEBTRANSPORT &&
+      !supportsWebTransport()) {
+    LOG(ERROR) << "WT stream when it is unsupported sess=" << *this;
+    return folly::none;
+  }
+  return res;
 }
 
 void HQSession::readControlStream(HQControlStream* ctrlStream) {
@@ -1411,6 +1475,7 @@ void HQSession::applySettings(const SettingsList& settings) {
   uint32_t tableSize = kDefaultIngressHeaderTableSize;
   uint32_t blocked = kDefaultIngressQpackBlockedStream;
   bool datagram = false;
+  bool hasWT = false;
   FOLLY_MAYBE_UNUSED uint32_t numPlaceholders = kDefaultIngressNumPlaceHolders;
   for (auto& setting : settings) {
     auto id = httpToHqSettingsId(setting.id);
@@ -1435,6 +1500,10 @@ void HQSession::applySettings(const SettingsList& settings) {
           datagram = static_cast<bool>(setting.value);
           break;
         case hq::SettingId::ENABLE_WEBTRANSPORT:
+          hasWT = setting.value;
+          LOG(INFO) << "Peer sent ENABLE_WEBTRANSPORT: " << uint32_t(hasWT);
+          supportsWebTransport_.set(folly::to_underlying(SettingEnabled::PEER));
+          break;
         case hq::SettingId::WEBTRANSPORT_MAX_SESSIONS:
           break;
       }
@@ -1470,14 +1539,14 @@ void HQSession::onGoaway(uint64_t minUnseenId,
     return;
   }
   VLOG(3) << "Got GOAWAY minUnseenId=" << minUnseenId << " sess=" << *this;
-  if (minUnseenId > minPeerUnseenId_) {
+  if (minUnseenId > peerMinUnseenId_) {
     LOG(ERROR) << "Goaway id increased=" << minUnseenId << " sess=" << *this;
     dropConnectionAsync(
         quic::QuicError(HTTP3::ErrorCode::HTTP_ID_ERROR, "GOAWAY id increased"),
         kErrorMalformedInput);
     return;
   }
-  minPeerUnseenId_ = minUnseenId;
+  peerMinUnseenId_ = minUnseenId;
   setCloseReason(ConnectionCloseReason::GOAWAY);
   // drains existing streams and prevents new streams to be created
   drainImpl();
@@ -1487,7 +1556,7 @@ void HQSession::onGoaway(uint64_t minUnseenId,
     stream->txn_.onGoaway(code);
     // Abort transactions which have been initiated locally but not created
     // successfully at the remote end
-    if (stream->getStreamId() >= minPeerUnseenId_) {
+    if (stream->getStreamId() >= peerMinUnseenId_) {
       stream->errorOnTransaction(kErrorStreamUnacknowledged, "");
     }
   });
@@ -2437,6 +2506,7 @@ void HQSession::HQStreamTransportBase::onHeadersComplete(
   }
 
   hasHeaders_ = true;
+
   //  setupOnHeadersComplete is only implemented
   //  in the HQDownstreamSession, which does not
   //  receive push promises. Will only be called once
@@ -2595,6 +2665,7 @@ void HQSession::HQStreamTransportBase::transactionTimeout(
 void HQSession::abortStream(HTTPException::Direction dir,
                             quic::StreamId id,
                             HTTP3::ErrorCode err) {
+  VLOG(4) << __func__ << "sess=" << *this << " id=" << id << " err=" << err;
   CHECK(sock_);
   if (direction_ == TransportDirection::UPSTREAM &&
       err == HTTP3::ErrorCode::HTTP_REQUEST_REJECTED) {
@@ -3412,6 +3483,67 @@ void HQSession::HQStreamTransportBase::onPushMessageBegin(
   ingressPushId_ = static_cast<hq::PushId>(pushID);
 }
 
+HQSession::HQStreamTransportBase* HQSession::findWTSessionOrAbort(
+    quic::StreamId sessionID, quic::StreamId streamID) {
+  CHECK(supportsWebTransport());
+  auto wtSession = findNonDetachedStream(sessionID);
+  if (!wtSession || !wtSession->txn_.isWebTransportConnectStream()) {
+    LOG(ERROR) << "Missing or invalid webtransport connect stream id="
+               << sessionID << " for peer initiated stream id=" << streamID;
+    // need to error stopSending/reset this stream
+    abortStream(HTTPException::Direction::INGRESS_AND_EGRESS,
+                streamID,
+                HTTP3::ErrorCode::HTTP_GENERAL_PROTOCOL_ERROR);
+    return nullptr;
+  }
+  return wtSession;
+}
+
+// Peer initiated Uni WT streams
+void HQSession::dispatchUniWTStream(quic::StreamId streamID,
+                                    quic::StreamId sessionID,
+                                    size_t toConsume) {
+  sock_->setPeekCallback(streamID, nullptr);
+  auto consumeRes = sock_->consume(streamID, toConsume);
+  CHECK(!consumeRes.hasError()) << "Unexpected error consuming bytes";
+  VLOG(6) << __func__ << " sess=" << *this << " id=" << streamID
+          << " wt-sess-id=" << sessionID;
+
+  // Notify the read callback
+  if (infoCallback_) {
+    infoCallback_->onRead(
+        *this, toConsume, static_cast<HTTPCodec::StreamID>(streamID));
+  }
+
+  auto parent = findWTSessionOrAbort(sessionID, streamID);
+  if (!parent) {
+    return;
+  }
+  auto streamTransport = static_cast<HQStreamTransport*>(parent);
+  sock_->setReadCallback(streamID, streamTransport->getWTReadCallback());
+  parent->txn_.onWebTransportUniStream(streamID);
+}
+
+// Peer initiated Bidi WT streams
+void HQSession::dispatchBidiWTStream(HTTPCodec::StreamID streamID,
+                                     HTTPCodec::StreamID sessionID,
+                                     size_t toConsume) {
+  sock_->setPeekCallback(streamID, nullptr);
+  auto consumeRes = sock_->consume(streamID, toConsume);
+  CHECK(!consumeRes.hasError()) << "Unexpected error consuming bytes";
+  VLOG(6) << __func__ << " sess=" << *this << " id=" << streamID
+          << " wt-sess-id=" << sessionID;
+
+  auto parent = findWTSessionOrAbort(sessionID, streamID);
+  if (!parent) {
+    return;
+  }
+
+  auto streamTransport = static_cast<HQStreamTransport*>(parent);
+  sock_->setReadCallback(streamID, streamTransport->getWTReadCallback());
+  parent->txn_.onWebTransportBidiStream(streamID);
+}
+
 // Methods specific to StreamTransport subclasses
 //
 //
@@ -3624,6 +3756,144 @@ bool HQSession::HQStreamTransport::sendDatagram(
     return false;
   }
   return true;
+}
+
+folly::Expected<HTTPCodec::StreamID, WebTransport::ErrorCode>
+HQSession::HQStreamTransport::newWebTransportBidiStream() {
+  auto id = session_.sock_->createBidirectionalStream();
+  if (!id) {
+    LOG(ERROR) << "Failed to create new bidirectional stream";
+    return folly::makeUnexpected(
+        WebTransport::ErrorCode::STREAM_CREATION_ERROR);
+  }
+  if (!writeWTStreamPrefaceToSock(*session_.sock_,
+                                  *id,
+                                  getEgressStreamId(),
+                                  hq::WebTransportStreamType::BIDI)) {
+    LOG(ERROR) << "Failed to write bidirectional stream preface";
+    // TODO: resetStream/stopSending?
+    return folly::makeUnexpected(
+        WebTransport::ErrorCode::STREAM_CREATION_ERROR);
+  }
+  session_.sock_->setReadCallback(*id, getWTReadCallback());
+  return *id;
+}
+
+folly::Expected<HTTPCodec::StreamID, WebTransport::ErrorCode>
+HQSession::HQStreamTransport::newWebTransportUniStream() {
+  auto id = session_.sock_->createUnidirectionalStream();
+  if (!id) {
+    LOG(ERROR) << "Failed to create unidirectional stream. error='"
+               << id.error() << "'";
+    return folly::makeUnexpected(
+        WebTransport::ErrorCode::STREAM_CREATION_ERROR);
+  }
+  if (!writeWTStreamPrefaceToSock(*session_.sock_,
+                                  *id,
+                                  getEgressStreamId(),
+                                  hq::WebTransportStreamType::UNI)) {
+    LOG(ERROR) << "Failed to write unidirectional stream preface";
+    return folly::makeUnexpected(
+        WebTransport::ErrorCode::STREAM_CREATION_ERROR);
+  }
+  return *id;
+}
+
+folly::Expected<HTTPTransaction::Transport::FCState, WebTransport::ErrorCode>
+HQSession::HQStreamTransport::sendWebTransportStreamData(
+    HTTPCodec::StreamID id, std::unique_ptr<folly::IOBuf> data, bool eof) {
+  auto res = session_.sock_->writeChain(id, std::move(data), eof);
+  if (res.hasError()) {
+    LOG(ERROR) << "Failed to write WT stream data";
+    return folly::makeUnexpected(WebTransport::ErrorCode::SEND_ERROR);
+  }
+  auto flowControl = session_.sock_->getStreamFlowControl(id);
+  if (!flowControl) {
+    LOG(ERROR) << "Failed to get flow control";
+    return folly::makeUnexpected(WebTransport::ErrorCode::SEND_ERROR);
+  }
+  if (!eof && flowControl->sendWindowAvailable == 0) {
+    session_.sock_->notifyPendingWriteOnStream(id, getWTWriteCallback());
+    VLOG(4) << "Closing fc window";
+    return HTTPTransaction::Transport::FCState::BLOCKED;
+  } else {
+    return HTTPTransaction::Transport::FCState::UNBLOCKED;
+  }
+}
+
+folly::Expected<folly::Unit, WebTransport::ErrorCode>
+HQSession::HQStreamTransport::resetWebTransportEgress(HTTPCodec::StreamID id,
+                                                      uint32_t errorCode) {
+  auto res = session_.sock_->resetStream(
+      id, quic::ApplicationErrorCode(WebTransport::toHTTPErrorCode(errorCode)));
+  if (res.hasError()) {
+    return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
+  }
+  return folly::unit;
+}
+
+folly::Expected<folly::Unit, WebTransport::ErrorCode>
+HQSession::HQStreamTransport::pauseWebTransportIngress(HTTPCodec::StreamID id) {
+  auto res = session_.sock_->pauseRead(id);
+  if (res.hasError()) {
+    return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
+  }
+  return folly::unit;
+}
+
+folly::Expected<folly::Unit, WebTransport::ErrorCode>
+HQSession::HQStreamTransport::resumeWebTransportIngress(
+    HTTPCodec::StreamID id) {
+  auto res = session_.sock_->resumeRead(id);
+  if (res.hasError()) {
+    return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
+  }
+  return folly::unit;
+}
+
+folly::Expected<folly::Unit, WebTransport::ErrorCode>
+HQSession::HQStreamTransport::stopReadingWebTransportIngress(
+    HTTPCodec::StreamID id, uint32_t errorCode) {
+  auto res = session_.sock_->setReadCallback(
+      id,
+      nullptr,
+      quic::ApplicationErrorCode(WebTransport::toHTTPErrorCode(errorCode)));
+  if (res.hasError()) {
+    return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
+  }
+  return folly::unit;
+}
+
+void HQSession::HQStreamTransport::WTReadCallback::readAvailable(
+    quic::StreamId id) noexcept {
+  auto readRes = session_.sock_->read(id, 65535);
+  if (readRes.hasError()) {
+    LOG(ERROR) << "Got synchronous read error=" << readRes.error();
+    readError(id, quic::QuicError(readRes.error(), "sync read error"));
+    return;
+  }
+  quic::Buf data = std::move(readRes.value().first);
+  bool eof = readRes.value().second;
+  if (eof) {
+    session_.sock_->setReadCallback(id, nullptr);
+  }
+  txn_.onWebTransportStreamIngress(id, std::move(data), eof);
+}
+
+void HQSession::HQStreamTransport::WTReadCallback::readError(
+    quic::StreamId id, quic::QuicError error) noexcept {
+  auto quicAppErrorCode = error.code.asApplicationErrorCode();
+  if (quicAppErrorCode) {
+    auto appErrorCode = WebTransport::toApplicationErrorCode(*quicAppErrorCode);
+    if (appErrorCode) {
+      txn_.onWebTransportStreamError(id, *appErrorCode);
+      return;
+    }
+  }
+  // any other error
+  txn_.onWebTransportStreamError(id, WebTransport::kInternalError);
+
+  session_.sock_->setReadCallback(id, nullptr);
 }
 
 std::ostream& operator<<(std::ostream& os, const HQSession& session) {

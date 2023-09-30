@@ -68,6 +68,8 @@ void HQStreamDispatcherBase::onDataAvailable(
   }
 
   // Look for a stream preface in the first read buffer
+  VLOG(4) << "Attempting peek dispatch stream=" << id
+          << " len=" << dataBuf->computeChainDataLength();
   folly::io::Cursor cursor(dataBuf);
   auto preface = quic::decodeQuicInteger(cursor);
   if (!preface) {
@@ -124,6 +126,21 @@ HQStreamDispatcherBase::HandleStreamResult HQUniStreamDispatcher::handleStream(
         return HandleStreamResult::PENDING;
       }
     }
+    case hq::UnidirectionalStreamType::WEBTRANSPORT: {
+      // Try to read the session id from the stream
+      auto sessionID = quic::decodeQuicInteger(cursor);
+      // If successfully read the session id, call sink
+      // which will reassign the peek callback
+      // Otherwise, continue using this callback
+      if (sessionID) {
+        consumed += sessionID->second;
+        callback_.dispatchUniWTStream(
+            releaseOwnership(id), sessionID->first, consumed);
+        return HandleStreamResult::DISPATCHED;
+      } else {
+        return HandleStreamResult::PENDING;
+      }
+    }
     case hq::UnidirectionalStreamType::GREASE:
       VLOG(4) << "Hey, a grease stream id=" << id;
       break;
@@ -135,9 +152,9 @@ HQStreamDispatcherBase::HandleStreamResult HQUniStreamDispatcher::handleStream(
 
 HQStreamDispatcherBase::HandleStreamResult HQBidiStreamDispatcher::handleStream(
     quic::StreamId id,
-    folly::io::Cursor& /*cursor*/,
+    folly::io::Cursor& cursor,
     uint64_t preface,
-    size_t /*consumed*/) {
+    size_t consumed) {
   auto type = callback_.parseBidiStreamPreface(preface);
 
   if (!type) {
@@ -149,6 +166,21 @@ HQStreamDispatcherBase::HandleStreamResult HQBidiStreamDispatcher::handleStream(
     case hq::BidirectionalStreamType::REQUEST:
       callback_.dispatchRequestStream(releaseOwnership(id));
       return HandleStreamResult::DISPATCHED;
+    case hq::BidirectionalStreamType::WEBTRANSPORT: {
+      // Try to read the session id from the stream
+      auto sessionID = quic::decodeQuicInteger(cursor);
+      // If successfully read the session id, call sink
+      // which will reassign the peek callback
+      // Otherwise, continue using this callback
+      if (sessionID) {
+        consumed += sessionID->second;
+        callback_.dispatchBidiWTStream(
+            releaseOwnership(id), sessionID->first, consumed);
+        return HandleStreamResult::DISPATCHED;
+      } else {
+        return HandleStreamResult::PENDING;
+      }
+    }
     default: {
       LOG(ERROR) << "Unrecognized type=" << static_cast<uint64_t>(type.value());
     }

@@ -202,6 +202,8 @@ class HQDownstreamSession : public HQSession {
   // This is the current method of creating new push IDs.
   hq::PushId createNewPushId();
 
+  bool pushAllowedByGoaway(hq::PushId pushId);
+
   // Value of the next pushId, used for outgoing push transactions
   hq::PushId nextAvailablePushId_{0};
 

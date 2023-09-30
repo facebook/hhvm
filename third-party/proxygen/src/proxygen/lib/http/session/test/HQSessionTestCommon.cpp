@@ -70,18 +70,21 @@ std::string paramsToTestName(const testing::TestParamInfo<TestParams>& info) {
   std::vector<std::string> paramsV;
   folly::split('-', info.param.alpn_, paramsV);
   if (info.param.numBytesOnPushStream < kUnlimited) {
-    paramsV.push_back("_" +
-                      folly::to<std::string>(info.param.numBytesOnPushStream));
+    paramsV.emplace_back(
+        "_" + folly::to<std::string>(info.param.numBytesOnPushStream));
   }
   if (info.param.unidirectionalStreamsCredit != kDefaultUnidirStreamCredit) {
-    paramsV.push_back(
+    paramsV.emplace_back(
         "_" + folly::to<std::string>(info.param.unidirectionalStreamsCredit));
   }
   if (!info.param.createQPACKStreams_) {
-    paramsV.push_back("_noqpack");
+    paramsV.emplace_back("_noqpack");
   }
   if (info.param.datagrams_) {
-    paramsV.push_back("_datagrams");
+    paramsV.emplace_back("_datagrams");
+  }
+  if (info.param.webTransport_) {
+    paramsV.emplace_back("_webtransport");
   }
   return folly::join("", paramsV);
 }
@@ -98,6 +101,7 @@ folly::Optional<std::pair<UnidirectionalStreamType, size_t>> parseStreamPreface(
     case UnidirectionalStreamType::PUSH:
     case UnidirectionalStreamType::QPACK_ENCODER:
     case UnidirectionalStreamType::QPACK_DECODER:
+    case UnidirectionalStreamType::WEBTRANSPORT:
       if (ALPN_HQ) {
         return std::make_pair(prefaceEnum, res->second);
       } else {

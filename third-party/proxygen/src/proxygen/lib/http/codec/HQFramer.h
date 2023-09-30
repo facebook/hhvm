@@ -45,10 +45,12 @@ enum class UnidirectionalStreamType : uint64_t {
   QPACK_ENCODER = 0x02,
   QPACK_DECODER = 0x03,
   GREASE = 0x21,
+  WEBTRANSPORT = 0x54,
 };
 
 enum class BidirectionalStreamType : uint64_t {
   REQUEST = 0x00, // Can be any reserved frame type valid on a bidi stream
+  WEBTRANSPORT = 0x41,
 };
 
 enum class FrameType : uint64_t {
@@ -344,6 +346,10 @@ WriteResult writePushPriorityUpdate(folly::IOBufQueue& writeBuf,
 WriteResult writeStreamPreface(folly::IOBufQueue& writeBuf,
                                uint64_t streamPreface) noexcept;
 
+enum class WebTransportStreamType : uint8_t { UNI = 0, BIDI = 1 };
+WriteResult writeWTStreamPreface(folly::IOBufQueue& writeBuf,
+                                 WebTransportStreamType streamType,
+                                 uint64_t wtSessionId);
 /**
  * Generate a grease frame, including the common frame header.
  *

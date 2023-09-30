@@ -37,6 +37,7 @@ folly::Optional<Ret> withType(uint64_t typeval,
     case UnidirectionalStreamType::PUSH:
     case UnidirectionalStreamType::QPACK_ENCODER:
     case UnidirectionalStreamType::QPACK_DECODER:
+    case UnidirectionalStreamType::WEBTRANSPORT:
       return functor(casted);
     default:
       if (isGreaseId(typeval)) {

@@ -44,6 +44,7 @@ struct TestParams {
   std::size_t numBytesOnPushStream{kUnlimited};
   bool expectOnTransportReady{true};
   bool datagrams_{false};
+  bool webTransport_{false};
   bool checkUniridStreamCallbacks{true};
 };
 
@@ -121,6 +122,12 @@ class HQSessionTest
 
     if (GetParam().datagrams_) {
       egressSettings_.setSetting(proxygen::SettingsId::_HQ_DATAGRAM, 1);
+    }
+    if (GetParam().webTransport_) {
+      egressSettings_.setSetting(proxygen::SettingsId::_HQ_DATAGRAM, 1);
+      egressSettings_.setSetting(proxygen::SettingsId::ENABLE_CONNECT_PROTOCOL,
+                                 1);
+      egressSettings_.setSetting(proxygen::SettingsId::ENABLE_WEBTRANSPORT, 1);
     }
 
     egressControlCodec_ = std::make_unique<proxygen::hq::HQControlCodec>(
@@ -264,6 +271,8 @@ class HQSessionTest
             }
           }
         }
+          return;
+        case proxygen::hq::UnidirectionalStreamType::WEBTRANSPORT:
           return;
         default:
           CHECK(false) << "Unknown stream preface=" << preface->first;

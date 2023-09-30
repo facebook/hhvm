@@ -429,4 +429,30 @@ WriteResult writeGreaseFrame(folly::IOBufQueue& writeBuf) noexcept {
   return writeFrameHeader(writeBuf, static_cast<FrameType>(uiFrameType), 0);
 }
 
+WriteResult writeWTStreamPreface(folly::IOBufQueue& writeBuf,
+                                 WebTransportStreamType streamType,
+                                 uint64_t wtSessionId) {
+  static const std::array<uint64_t, 2> streamTypes{
+      folly::to_underlying(UnidirectionalStreamType::WEBTRANSPORT),
+      folly::to_underlying(BidirectionalStreamType::WEBTRANSPORT)};
+  auto idx = folly::to_underlying(streamType);
+  CHECK_GE(idx, 0);
+  CHECK_LT(idx, streamTypes.size());
+  QueueAppender appender(&writeBuf, 64);
+  size_t prefaceSize = 0;
+  auto res = quic::encodeQuicInteger(
+      streamTypes[idx], [&appender](auto val) { appender.writeBE(val); });
+  if (!res) {
+    return res;
+  }
+  prefaceSize += res.value();
+  res = quic::encodeQuicInteger(
+      wtSessionId, [&appender](auto val) { appender.writeBE(val); });
+  if (!res) {
+    return res;
+  }
+  prefaceSize += res.value();
+  return prefaceSize;
+}
+
 }} // namespace proxygen::hq

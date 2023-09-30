@@ -329,6 +329,10 @@ class HQSession
     }
   }
 
+  [[nodiscard]] bool supportsWebTransport() const {
+    return supportsWebTransport_.all();
+  }
+
   void setMaxConcurrentIncomingStreams(uint32_t /*num*/) override {
     // need transport API
   }
@@ -612,8 +616,8 @@ class HQSession
                              hq::UnidirectionalStreamType /* type */,
                              size_t /* toConsume */) override;
 
-  void dispatchRequestStream(quic::StreamId /* streamId */) override {
-  }
+  void dispatchRequestStream(quic::StreamId /* streamId */) override;
+  void dispatchRequestStreamImpl(quic::StreamId /* streamId */);
 
   std::chrono::milliseconds getDispatchTimeout() const override {
     return transactionsTimeout_;
@@ -625,9 +629,24 @@ class HQSession
       uint64_t preface) override;
 
   folly::Optional<hq::BidirectionalStreamType> parseBidiStreamPreface(
-      uint64_t) override {
-    return hq::BidirectionalStreamType::REQUEST;
+      uint64_t preface) override {
+    if (preface ==
+        folly::to_underlying(hq::BidirectionalStreamType::WEBTRANSPORT)) {
+      if (supportsWebTransport()) {
+        return hq::BidirectionalStreamType::WEBTRANSPORT;
+      } else {
+        LOG(ERROR) << "WT stream when it is unsupported sess=" << *this;
+        return folly::none;
+      }
+    }
+    if (direction_ == TransportDirection::DOWNSTREAM) {
+      return hq::BidirectionalStreamType::REQUEST;
+    }
+    return folly::none;
   }
+
+  HQStreamTransportBase* FOLLY_NULLABLE
+  findWTSessionOrAbort(quic::StreamId sessionID, quic::StreamId streamId);
 
   /**
    * HQSession is an HTTPSessionBase that uses QUIC as the underlying transport
@@ -1731,6 +1750,14 @@ class HQSession
     folly::Optional<hq::PushId> ingressPushId_;
   }; // HQStreamTransportBase
 
+  void dispatchUniWTStream(quic::StreamId /* streamId */,
+                           quic::StreamId /* sessionId */,
+                           size_t /* to consume */) override;
+
+  void dispatchBidiWTStream(quic::StreamId /* streamId */,
+                            quic::StreamId /* sessionId */,
+                            size_t /* to consume */) override;
+
  protected:
   class HQStreamTransport
       : public detail::singlestream::SSBidir
@@ -1778,6 +1805,80 @@ class HQSession
 
     uint16_t getDatagramSizeLimit() const noexcept override;
     bool sendDatagram(std::unique_ptr<folly::IOBuf> datagram) override;
+
+    [[nodiscard]] bool supportsWebTransport() const override {
+      return session_.supportsWebTransport();
+    }
+    folly::Expected<HTTPCodec::StreamID, WebTransport::ErrorCode>
+    newWebTransportBidiStream() override;
+    folly::Expected<HTTPCodec::StreamID, WebTransport::ErrorCode>
+    newWebTransportUniStream() override;
+
+    folly::Expected<HTTPTransaction::Transport::FCState,
+                    WebTransport::ErrorCode>
+    sendWebTransportStreamData(HTTPCodec::StreamID /*id*/,
+                               std::unique_ptr<folly::IOBuf> /*data*/,
+                               bool /*eof*/) override;
+
+    folly::Expected<folly::Unit, WebTransport::ErrorCode>
+        resetWebTransportEgress(HTTPCodec::StreamID /*id*/,
+                                uint32_t /*errorCode*/) override;
+
+    folly::Expected<folly::Unit, WebTransport::ErrorCode>
+        pauseWebTransportIngress(HTTPCodec::StreamID /*id*/) override;
+
+    folly::Expected<folly::Unit, WebTransport::ErrorCode>
+        resumeWebTransportIngress(HTTPCodec::StreamID /*id*/) override;
+
+    folly::Expected<folly::Unit, WebTransport::ErrorCode>
+        stopReadingWebTransportIngress(HTTPCodec::StreamID /*id*/,
+                                       uint32_t /*errorCode*/) override;
+
+    class WTWriteCallback : public quic::QuicSocket::WriteCallback {
+     public:
+      explicit WTWriteCallback(HTTPTransaction& txn) : txn_(txn) {
+      }
+
+      void onStreamWriteReady(quic::StreamId id, uint64_t) noexcept override {
+        VLOG(4) << "onStreamWriteReady id=" << id;
+        txn_.onWebTransportEgressReady(id);
+      }
+
+     private:
+      HTTPTransaction& txn_;
+    };
+
+    class WTReadCallback : public quic::QuicSocket::ReadCallback {
+     public:
+      explicit WTReadCallback(HTTPTransaction& txn, HQSession& session)
+          : txn_(txn), session_(session) {
+      }
+
+      void readAvailable(quic::StreamId id) noexcept override;
+
+      void readError(quic::StreamId id,
+                     quic::QuicError error) noexcept override;
+
+     private:
+      HTTPTransaction& txn_;
+      HQSession& session_;
+    };
+
+    std::unique_ptr<WTWriteCallback> wtWriteCallback_;
+    std::unique_ptr<WTReadCallback> wtReadCallback_;
+
+    WTWriteCallback* getWTWriteCallback() {
+      if (!wtWriteCallback_) {
+        wtWriteCallback_ = std::make_unique<WTWriteCallback>(txn_);
+      }
+      return wtWriteCallback_.get();
+    }
+    WTReadCallback* getWTReadCallback() {
+      if (!wtReadCallback_) {
+        wtReadCallback_ = std::make_unique<WTReadCallback>(txn_, session_);
+      }
+      return wtReadCallback_.get();
+    }
   }; // HQStreamTransport
 
 #ifdef _MSC_VER
@@ -1785,7 +1886,7 @@ class HQSession
 #endif
 
   std::unique_ptr<HTTPCodec> createCodec(quic::StreamId id);
-  bool checkNewStream(quic::StreamId id);
+  bool maybeRejectRequestAfterGoaway(quic::StreamId id);
 
  private:
   void sendGoaway();
@@ -1839,10 +1940,10 @@ class HQSession
 
   // Min Stream ID we haven't seen so far
   quic::StreamId minUnseenIncomingStreamId_{0};
-  // Maximum Stream ID that we are allowed to open, according to the remote
-  quic::StreamId minPeerUnseenId_{hq::kMaxClientBidiStreamId};
   // Whether SETTINGS have been received
   bool receivedSettings_{false};
+  enum class SettingEnabled : uint8_t { SELF = 0, PEER = 1 };
+  std::bitset<2> supportsWebTransport_;
 
   /**
    * The maximum number of concurrent transactions that this session's peer
@@ -1874,6 +1975,8 @@ class HQSession
        hq::kDefaultEgressQpackBlockedStream},
   };
   HTTPSettings ingressSettings_;
+  // Maximum Stream/Push ID that we are allowed to open, from GOAWAY
+  quic::StreamId peerMinUnseenId_{hq::kMaxClientBidiStreamId};
   uint64_t minUnseenIncomingPushId_{0};
 
   ReadyGate versionUtilsReady_;

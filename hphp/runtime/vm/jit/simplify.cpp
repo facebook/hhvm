@@ -337,10 +337,17 @@ SSATmp* mergeBranchDests(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyCallViolatesModuleBoundary(State& env,
                                            const IRInstruction* inst) {
-  if (!inst->src(0)->hasConstVal(TFunc)) return nullptr;
-  auto const callee = inst->src(0)->funcVal();
-  auto const caller = inst->extra<FuncData>()->func;
-  return cns(env, will_symbol_raise_module_boundary_violation(callee, caller));
+  if (inst->src(0)->hasConstVal(TFunc)) {
+      auto const callee = inst->src(0)->funcVal();
+      auto const caller = inst->extra<FuncData>()->func;
+      return cns(env, will_symbol_raise_module_boundary_violation(callee, caller));
+  }
+  if (inst->src(0)->hasConstVal(TCls)) {
+    auto const callee = inst->src(0)->clsVal();
+    auto const caller = inst->extra<FuncData>()->func;
+    return cns(env, will_symbol_raise_module_boundary_violation(callee, caller));
+  }
+  return nullptr;
 }
 
 SSATmp* simplifyCallViolatesDeploymentBoundary(State& env,

@@ -53,9 +53,10 @@ struct InlineFrame {
 
   /*
    * Block that will finish the catch block, assuming the evaluation stack
-   * of the callee is empty.
+   * of the callee is empty. Without and with locals already decrefd.
    */
   Block* endCatchTarget;
+  Block* endCatchLocalsDecRefdTarget;
 
   /*
    * Offset from FCall to return control to if the callee finished eagerly.

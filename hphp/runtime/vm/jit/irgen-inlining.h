@@ -16,6 +16,7 @@
 #pragma once
 
 #include "hphp/runtime/vm/srckey.h"
+#include "hphp/runtime/vm/jit/extra-data.h"
 
 namespace HPHP {
 
@@ -50,7 +51,7 @@ void sideExitFromInlined(IRGS&, SrcKey target);
 /*
  * Emit an EndCatch equivalent from an inlined function.
  */
-bool endCatchFromInlined(IRGS&);
+bool endCatchFromInlined(IRGS&, EndCatchData::CatchMode mode);
 
 /*
  * Make sure all inlined frames are written on the stack and a part of the FP

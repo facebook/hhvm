@@ -234,6 +234,7 @@ void beginInlining(IRGS& env,
     irgen::defBlock(env),  // suspendTarget
     irgen::defBlock(env, Block::Hint::Unused),  // sideExitTarget
     irgen::defBlock(env, Block::Hint::Unused),  // endCatchTarget
+    irgen::defBlock(env, Block::Hint::Unused),  // endCatchLocalsDecRefdTarget
     asyncEagerOffset,
     env.inlineState.cost
   };
@@ -567,18 +568,26 @@ void implSideExitBlock(IRGS& env) {
 
 void implEndCatchBlock(IRGS& env, const RegionDesc& calleeRegion) {
   auto const frame = env.inlineState.frames.back();
+
   auto const didStart = env.irb->startBlock(frame.endCatchTarget, false);
-  if (!didStart) return;
+  if (didStart) {
+    hint(env, Block::Hint::Unused);
+    freeInlinedFrameLocals(env, calleeRegion);
+    gen(env, Jmp, frame.endCatchLocalsDecRefdTarget);
+  }
+
+  auto const didStartLocalsDecRefd =
+    env.irb->startBlock(frame.endCatchLocalsDecRefdTarget, false);
+  if (!didStartLocalsDecRefd) return;
 
   hint(env, Block::Hint::Unused);
-  freeInlinedFrameLocals(env, calleeRegion);
 
   auto const inlineFrame = implInlineReturn(env);
   SCOPE_EXIT { pushInlineFrame(env, inlineFrame); };
 
   // If the caller is inlined as well, try to use shared EndCatch of its caller.
   if (isInlining(env)) {
-    if (endCatchFromInlined(env)) return;
+    if (endCatchFromInlined(env, EndCatchData::CatchMode::UnwindOnly)) return;
 
     if (spillInlinedFrames(env)) {
       gen(env, StVMFP, fp(env));
@@ -672,8 +681,14 @@ void sideExitFromInlined(IRGS& env, SrcKey target) {
   gen(env, Jmp, env.inlineState.frames.back().sideExitTarget, targetAddr);
 }
 
-bool endCatchFromInlined(IRGS& env) {
+bool endCatchFromInlined(IRGS& env, EndCatchData::CatchMode mode) {
   assertx(isInlining(env));
+
+  if (mode != EndCatchData::CatchMode::UnwindOnly &&
+      mode != EndCatchData::CatchMode::LocalsDecRefd) {
+    // We do not support other modes (CatchMode::SideExit).
+    return false;
+  }
 
   if (findCatchHandler(curFunc(env), bcOff(env)) != kInvalidOffset) {
     // We are not exiting the frame, as the current opcode has a catch handler.
@@ -698,7 +713,10 @@ bool endCatchFromInlined(IRGS& env) {
   while (spOffBCFromStackBase(env) > spOffEmpty(env)) {
     popDecRef(env, static_cast<DecRefProfileId>(locId++));
   }
-  gen(env, Jmp, env.inlineState.frames.back().endCatchTarget);
+  auto const target = mode == EndCatchData::CatchMode::UnwindOnly
+    ? env.inlineState.frames.back().endCatchTarget
+    : env.inlineState.frames.back().endCatchLocalsDecRefdTarget;
+  gen(env, Jmp, target);
   return true;
 }
 

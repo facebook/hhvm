@@ -3020,7 +3020,8 @@ void parse_alias(AsmState& as, bool caseType) {
 
   // Merge to ensure namedentity creation, according to
   // emitTypedef in emitter.cpp
-  as.ue->mergeLitstr(makeStaticString(name));
+  auto namestr = makeStaticString(name);
+  as.ue->mergeLitstr(namestr);
 
   auto const tis = parse_type_constraint_union(as);
   assertx(!tis.empty());
@@ -3034,31 +3035,19 @@ void parse_alias(AsmState& as, bool caseType) {
     as.error(".alias must have a valid array type structure");
   }
 
-  TypeAndValueUnion typeAndValueUnion;
-  bool nullable = false;
-
-  if (RO::EvalTreatCaseTypesAsMixed && tis.size() > 1) {
-    typeAndValueUnion.emplace_back(TypeAndValue{AnnotType::Mixed, staticEmptyString()});
-  } else {
-    for (auto const& ty : tis) {
-      nullable |= ((ty.flags() & TypeConstraintFlags::Nullable) != 0);
-      auto const tname = ty.typeName();
-      if (tname && !tname->empty()) {
-        as.ue->mergeLitstr(tname);
-        typeAndValueUnion.emplace_back(TypeAndValue{ty.type(), tname});
-      } else {
-        typeAndValueUnion.emplace_back(TypeAndValue{AnnotType::Mixed, staticEmptyString()});
-      }
+  auto value = [&]() {
+    if (RO::EvalTreatCaseTypesAsMixed && tis.size() > 1) {
+      return TypeConstraint::makeMixed();
     }
-  }
+    return TypeConstraint::makeUnion(namestr, tis);
+  }();
 
   auto te = as.ue->newTypeAliasEmitter(name);
   te->init(
     line0,
     line1,
     attrs,
-    typeAndValueUnion,
-    nullable,
+    value,
     caseType,
     ArrNR{ArrayData::GetScalarArray(std::move(ts))},
     Array{}

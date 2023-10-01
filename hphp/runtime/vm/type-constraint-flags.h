@@ -91,8 +91,22 @@ operator|(TypeConstraintFlags a, TypeConstraintFlags b) {
   return TypeConstraintFlags(static_cast<int>(a) | static_cast<int>(b));
 }
 
+constexpr TypeConstraintFlags
+operator&(TypeConstraintFlags a, TypeConstraintFlags b) {
+  return TypeConstraintFlags(static_cast<int>(a) & static_cast<int>(b));
+}
+
+constexpr TypeConstraintFlags
+operator~(TypeConstraintFlags a) {
+  return TypeConstraintFlags(~static_cast<int>(a));
+}
+
 inline TypeConstraintFlags& operator|=(TypeConstraintFlags& a, const TypeConstraintFlags& b) {
 return (a = TypeConstraintFlags((int)a | (int)b));
+}
+
+inline TypeConstraintFlags& operator&=(TypeConstraintFlags& a, const TypeConstraintFlags& b) {
+return (a = TypeConstraintFlags((int)a & (int)b));
 }
 
 }

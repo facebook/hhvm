@@ -41,18 +41,15 @@ struct TypeAliasEmitter {
   TypeAliasEmitter(UnitEmitter& ue, Id id, const std::string& name);
 
   void init(int line0, int line1, Attr attrs,
-            TypeAndValueUnion,
-            bool nullable, bool caseType, Array typeStructure,
+            TypeConstraint value,
+            bool caseType, Array typeStructure,
             Array resolvedTypeStructure);
 
   UnitEmitter& ue() const { return m_ue; }
   const StringData* name() const { return m_name; }
-  const TypeAndValueUnion& typeAndValueUnion() const {
-    return m_typeAndValueUnion;
-  }
+  const TypeConstraint& value() const { return m_value; }
   Attr attrs() const { return m_attrs; }
   void setAttrs(Attr attrs) { m_attrs = attrs; }
-  bool nullable() const { return m_nullable; }
   bool caseType() const { return m_caseType; }
   UserAttributeMap userAttributes() const { return m_userAttributes; }
   void setUserAttributes(UserAttributeMap map) {
@@ -75,10 +72,9 @@ private:
   UnitEmitter& m_ue;
   LowStringPtr m_name;
   Attr m_attrs;
-  TypeAndValueUnion m_typeAndValueUnion;
+  TypeConstraint m_value;
   int m_line0;
   int m_line1;
-  bool m_nullable;  // null is allowed; for ?Foo aliases
   bool m_caseType;
   UserAttributeMap m_userAttributes;
   Array m_typeStructure{ArrayData::CreateDict()};

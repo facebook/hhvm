@@ -19,6 +19,7 @@
 #include <hphp/runtime/base/datatype.h>
 #include "hphp/runtime/base/annot-type.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/type-constraint-flags.h"
@@ -27,8 +28,10 @@
 
 #include "hphp/util/functional.h"
 #include "hphp/util/check-size.h"
+#include "hphp/util/trace.h"
 
 #include <functional>
+#include <ranges>
 #include <string>
 
 namespace HPHP {
@@ -108,9 +111,10 @@ struct TypeConstraint {
   constexpr static UnionTypeMask kUnionTypeClass = 1 << 15;
 
   struct UnionClassList {
-    std::vector<ClassConstraint> m_list;
+    TinyVector<ClassConstraint, 1> m_list;
 
-    explicit UnionClassList(std::vector<ClassConstraint> list) : m_list(std::move(list)) { }
+    UnionClassList() = default;
+    explicit UnionClassList(TinyVector<ClassConstraint, 1> list) : m_list(std::move(list)) { }
 
     size_t stableHash() const;
     bool operator==(const UnionClassList& o) const { return m_list == o.m_list; }
@@ -139,7 +143,7 @@ struct TypeConstraint {
     size_t stableHash() const;
     bool operator==(const UnionConstraint& o) const;
 
-    static LowPtr<const UnionClassList> allocObjects(std::vector<ClassConstraint> objects);
+    static LowPtr<const UnionClassList> allocObjects(UnionClassList objects);
   };
 
   static_assert(CheckSize<UnionConstraint, use_lowptr ? 12 : 24>(), "");
@@ -151,7 +155,20 @@ struct TypeConstraint {
                  TypeConstraintFlags flags,
                  const LowStringPtr typeName);
 
-  static TypeConstraint makeUnion(LowStringPtr typeName, folly::Range<const TypeConstraint*> tcs);
+  template<std::ranges::sized_range R>
+  static TypeConstraint makeUnion(LowStringPtr typeName, R&& tcs) {
+    assertx(typeName != nullptr);
+    if (tcs.empty()) {
+      return TypeConstraint{typeName, NoFlags};
+    } else if (tcs.size() == 1) {
+      return TypeConstraint{*tcs.cbegin()};
+    }
+
+    UnionBuilder builder(typeName, tcs.size());
+    if (auto result = builder.recordConstraints(tcs)) return *result;
+    return std::move(builder).finish();
+  }
+
   static TypeConstraint makeMixed();
 
   template<class SerDe> void serde(SerDe& sd);
@@ -561,6 +578,32 @@ private:
 
   friend struct TcUnionPieceIterator;
   friend struct TcUnionPieceView;
+
+  struct UnionBuilder {
+    const LowStringPtr m_typeName;
+    TypeConstraintFlags m_flags = Union;
+    UnionTypeMask m_preciseTypeMask = 0;
+    Optional<bool> m_resolved;
+    UnionClassList m_classes;
+    bool m_containsNonnull = false;
+
+    UnionBuilder(LowStringPtr typeName, size_t capacity);
+    Optional<TypeConstraint> recordConstraint(const TypeConstraint& tc);
+    TypeConstraint finish() &&;
+
+    template<std::ranges::input_range R>
+    Optional<TypeConstraint> recordConstraints(R&& range) {
+      for (const auto& tc : range) {
+        // We only need to do this one level because a union cannot contain a
+        // sub-union.
+        for (auto& sub : eachTypeConstraintInUnion(tc)) {
+          auto result = recordConstraint(sub);
+          if (result) return *result;
+        }
+      }
+      return std::nullopt;
+    }
+  };
 };
 
 static_assert(CheckSize<TypeConstraint, use_lowptr ? 16 : 32>(), "");

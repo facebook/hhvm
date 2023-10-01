@@ -26,6 +26,8 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/user-attributes.h"
 
+#include "hphp/runtime/vm/type-constraint.h"
+
 #include "hphp/util/tiny-vector.h"
 
 #include <folly/Range.h>
@@ -40,17 +42,6 @@ struct Unit;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct TypeAndValue {
-  AnnotType type;
-  LowStringPtr value;
-
-  template<class SerDe> void serde(SerDe& sd) {
-    sd(type)(value);
-  }
-};
-
-using TypeAndValueUnion = TinyVector<TypeAndValue>;
-
 /*
  * This is the runtime representation of a type alias.
  *
@@ -60,8 +51,6 @@ using TypeAndValueUnion = TinyVector<TypeAndValue>;
  * When `caseType` field is not set, these vectors are guarenteed to be of
  * size 1;
  *
- * The `typeAndValueUnion[0]' field is Object whenever the type alias is
- * basically just a name.
  * At runtime we still might resolve this name to another type alias,
  * becoming a type alias for some other type or something in that request.
  *
@@ -71,10 +60,9 @@ struct PreTypeAlias {
   Unit* unit;
   LowStringPtr name;
   Attr attrs;
-  TypeAndValueUnion typeAndValueUnion;
+  TypeConstraint value;
   int line0;
   int line1;
-  bool nullable;  // null is allowed; for ?Foo aliases
   bool caseType;
   UserAttributeMap userAttrs;
   Array typeStructure;

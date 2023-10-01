@@ -222,6 +222,9 @@ struct TinyVector {
   const_iterator begin() const { return const_iterator(this, 0); }
   const_iterator end()   const { return const_iterator(this); }
 
+  const_iterator cbegin() const { return const_iterator(this, 0); }
+  const_iterator cend()   const { return const_iterator(this); }
+
   T& operator[](size_t index) {
     assertx(index < size());
     return *location(index);
@@ -429,6 +432,8 @@ struct TinyVector<T,InternalSize,MinHeapCapacity,Allocator>::iterator
                            T,
                            boost::random_access_traversal_tag>
 {
+  iterator() : m_p(nullptr), m_idx(0) { }
+
   explicit iterator(TinyVector* p, uint32_t idx)
     : m_p(p)
     , m_idx(idx)
@@ -483,6 +488,7 @@ struct TinyVector<T,InternalSize,MinHeapCapacity,Allocator>::const_iterator
                            const T,
                            boost::random_access_traversal_tag>
 {
+  const_iterator() : m_p(nullptr), m_idx(0) { }
   explicit const_iterator(const TinyVector* p, uint32_t idx)
     : m_p(p)
     , m_idx(idx)

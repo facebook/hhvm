@@ -352,23 +352,27 @@ void translateTypedef(TranslationState& ts, const hhbc::Typedef& t) {
   auto const tis = range(t.type_info_union);
   assertx(!tis.empty());
 
-  TypeAndValueUnion typeAndValueUnion;
-  bool nullable = false;
+  auto value = [&] {
+    if (tis.size() == 1) {
+      return translateTypeInfo(tis[0]).second;
+    }
+    if (RO::EvalTreatCaseTypesAsMixed) {
+      return TypeConstraint::makeMixed();
+    }
 
-  if (RO::EvalTreatCaseTypesAsMixed && tis.size() > 1) {
-    typeAndValueUnion.emplace_back(TypeAndValue{AnnotType::Mixed, staticEmptyString()});
-  } else {
+    TinyVector<TypeConstraint, 1> parts;
+    parts.reserve(tis.size());
     for (auto const& ti : tis) {
       auto const ty = translateTypeInfo(ti).second;
-      nullable |= ((ty.flags() & TypeConstraintFlags::Nullable) != 0);
       auto const tname = ty.typeName();
       if (tname && !tname->empty()) {
-        typeAndValueUnion.emplace_back(TypeAndValue{ty.type(), tname});
+        parts.emplace_back(ty);
       } else {
-        typeAndValueUnion.emplace_back(TypeAndValue{AnnotType::Mixed, staticEmptyString()});
+        parts.emplace_back(TypeConstraint::makeMixed());
       }
     }
-  }
+    return TypeConstraint::makeUnion(name, parts);
+  }();
 
   auto tys = toTypedValue(t.type_structure);
   assertx(isArrayLikeType(tys.m_type));
@@ -379,8 +383,7 @@ void translateTypedef(TranslationState& ts, const hhbc::Typedef& t) {
     t.span.line_begin,
     t.span.line_end,
     attrs,
-    typeAndValueUnion,
-    nullable,
+    value,
     t.case_type,
     ArrNR{tys.m_data.parr},
     Array{}

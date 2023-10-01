@@ -1217,17 +1217,21 @@ void emit_typealias(UnitEmitter& ue, const php::TypeAlias& alias) {
 
   assertx(!alias.typeAndValueUnion.empty());
 
-  TypeAndValueUnion tvu;
+  TypeConstraintFlags flags = NoFlags;
+  if (alias.nullable) flags |= Nullable;
+
+  TinyVector<TypeConstraint, 1> parts;
+  parts.reserve(alias.typeAndValueUnion.size());
   for (auto const& [type, value] : alias.typeAndValueUnion) {
-    tvu.emplace_back(TypeAndValue{type, value});
+    parts.emplace_back(type, flags, TypeConstraint::ClassConstraint{ value });
   }
+  auto value = TypeConstraint::makeUnion(alias.name, parts);
 
   te->init(
       std::get<0>(alias.srcInfo.loc),
       std::get<1>(alias.srcInfo.loc),
       alias.attrs,
-      std::move(tvu),
-      alias.nullable,
+      value,
       alias.caseType,
       alias.typeStructure,
       alias.resolvedTypeStructure

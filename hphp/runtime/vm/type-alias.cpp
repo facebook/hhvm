@@ -48,7 +48,7 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
    * autoloader.
    */
   TypeAlias req(thisType);
-  req.nullable = thisType->nullable;
+  req.nullable = thisType->value.isNullable();
   req.unionSize = 0;
   std::vector<TypeAlias::TypeAndClass> tcu;
 
@@ -77,7 +77,9 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
     tcu.insert(tcu.end(), it.begin(), it.end());
   };
 
-  for (auto const& [type, typeName] : thisType->typeAndValueUnion) {
+  for (auto const& tc : eachTypeConstraintInUnion(thisType->value)) {
+    auto type = tc.type();
+    auto typeName = tc.typeName();
     if (type != AnnotType::Object && type != AnnotType::Unresolved) {
       tcu.emplace_back(type, nullptr);
       continue;
@@ -98,7 +100,7 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
 
     if (failIsFatal &&
         AutoloadHandler::s_instance->autoloadTypeOrTypeAlias(
-          StrNR(const_cast<StringData*>(typeName.get()))
+          StrNR(const_cast<StringData*>(typeName))
         )) {
       if (auto klass = Class::lookup(targetNE)) {
         typeAliasFromClass(klass);
@@ -132,19 +134,23 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
 
 bool TypeAlias::compat(const PreTypeAlias& alias) const {
   // FIXME(T116316964): can't compare type of unresolved PreTypeAlias
-  if (alias.typeAndValueUnion.size() != unionSize) {
-    return false;
-  }
-  for (size_t i = 0; i < unionSize; ++i) {
-    auto const& [type, klass] = typeAndClassUnionArr[i];
-    auto const& [ptype, value] = alias.typeAndValueUnion[i];
+
+  if (nullable != alias.value.isNullable()) return false;
+
+  auto view0 = typeAndClassUnion();
+  auto view1 = eachTypeConstraintInUnion(alias.value);
+  auto it0 = view0.begin();
+  auto it1 = view1.begin();
+
+  while (it0 != view0.end() && it1 != view1.end()) {
+    auto const& [type, klass] = *it0++;
+    auto tc1 = *it1++;
+    auto ptype = tc1.type();
+    auto value = tc1.typeName();
     auto const preType =
       ptype == AnnotType::Unresolved ? AnnotType::Object : ptype;
     if (ptype == AnnotType::Mixed && type == AnnotType::Mixed) continue;
-    if (preType == type && alias.nullable == nullable &&
-        Class::lookup(value) == klass) {
-      continue;
-    }
+    if (preType == type && Class::lookup(value) == klass) continue;
     return false;
   }
   return true;
@@ -241,9 +247,8 @@ const TypeAlias* TypeAlias::def(const PreTypeAlias* thisType, bool failIsFatal) 
     if (!failIsFatal) return nullptr;
     FrameRestore _(thisType);
     std::vector<folly::StringPiece> names;
-    for (auto const& [_, s] : thisType->typeAndValueUnion) {
-      if (!s) continue;
-      names.push_back(s->slice());
+    for (auto const& tc : eachClassTypeConstraintInUnion(thisType->value)) {
+      names.push_back(tc.typeName()->slice());
     }
     std::string combined = folly::join("|", names);
     raise_error("Unknown type or class %s", combined.c_str());

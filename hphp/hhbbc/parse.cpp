@@ -1081,10 +1081,10 @@ std::unique_ptr<php::TypeAlias> parse_type_alias(const TypeAliasEmitter& te) {
     }
   }
 
-  assertx(!te.typeAndValueUnion().empty());
-
   php::TypeAlias::TypeAndValueUnion tvu;
-  for (auto const& [type, value] : te.typeAndValueUnion()) {
+  for (auto const& tc : eachTypeConstraintInUnion(te.value())) {
+    auto type = tc.type();
+    auto value = type == AnnotType::Object ? tc.clsName() : tc.typeName();
     tvu.emplace_back(php::TypeAndValue{type, value});
   }
 
@@ -1094,7 +1094,7 @@ std::unique_ptr<php::TypeAlias> parse_type_alias(const TypeAliasEmitter& te) {
     te.name(),
     te.attrs() | AttrPersistent,
     std::move(tvu),
-    te.nullable(),
+    te.value().isNullable(),
     te.caseType(),
     te.userAttributes(),
     ts,

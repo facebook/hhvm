@@ -818,14 +818,12 @@ void print_cls(Output& out, const PreClass* cls) {
 }
 
 void print_alias(Output& out, const PreTypeAlias& alias) {
-  auto flags = TypeConstraintFlags::NoFlags;
-  if (alias.nullable) flags |= TypeConstraintFlags::Nullable;
   std::string type_constraints;
-  for (auto const& tv : alias.typeAndValueUnion) {
+  for (auto const& tv : eachTypeConstraintInUnion(alias.value)) {
     if (!type_constraints.empty()) type_constraints.append(",");
     type_constraints.append(folly::to<std::string>(
       "<",
-      type_constraint(TypeConstraint(tv.value, flags)),
+      type_constraint(tv),
       ">"));
   }
 

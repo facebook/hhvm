@@ -88,17 +88,6 @@ struct PreTypeAlias {
  * hints for a type alias at runtime.
  */
 struct TypeAlias {
-  struct TypeAndClass {
-    TypeAndClass(AnnotType type_, LowPtr<Class> klass_)
-      : type(type_)
-      , klass(klass_)
-      {}
-    TypeAndClass& operator=(const TypeAndClass&) = default;
-
-    AnnotType type;
-    LowPtr<Class> klass;
-  };
-
   /////////////////////////////////////////////////////////////////////////////
   // Comparison.
 
@@ -108,15 +97,9 @@ struct TypeAlias {
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
-  // The aliased type and Class; class is nullptr if type != Object
-  // Since this struct is stored in RDS, this member needs to have trivial
-  // ctor/dtor hence cannot use TinyVector
-  TypeAndClass* typeAndClassUnionArr;
-  size_t unionSize;
+  TypeConstraint value;
   // Overrides `type' if the alias is invalid (e.g., for a nonexistent class).
   bool invalid{false};
-  // For option types, like ?Foo.
-  bool nullable{false};
 
   explicit TypeAlias(const PreTypeAlias* preTypeAlias)
     : m_preTypeAlias(preTypeAlias)
@@ -129,9 +112,6 @@ struct TypeAlias {
   const Array& typeStructure() const { return m_preTypeAlias->typeStructure; }
   const Array& resolvedTypeStructureRaw() const {
     return m_preTypeAlias->resolvedTypeStructure;
-  }
-  folly::Range<const TypeAndClass*> typeAndClassUnion() const {
-    return folly::range(typeAndClassUnionArr, typeAndClassUnionArr + unionSize);
   }
 
   // Return the type-structure, possibly as a logging array

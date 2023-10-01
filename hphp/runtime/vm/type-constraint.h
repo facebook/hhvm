@@ -79,6 +79,7 @@ struct TypeConstraint {
     ClassConstraint(LowStringPtr clsName,
                     LowStringPtr typeName,
                     LowPtr<const NamedType> namedType);
+    explicit ClassConstraint(Class& cls);
 
     size_t stableHash() const;
     bool operator==(const ClassConstraint& o) const;
@@ -154,6 +155,7 @@ struct TypeConstraint {
   TypeConstraint(Type type,
                  TypeConstraintFlags flags,
                  const LowStringPtr typeName);
+  TypeConstraint(Type type, TypeConstraintFlags flags);
 
   template<std::ranges::sized_range R>
   static TypeConstraint makeUnion(LowStringPtr typeName, R&& tcs) {

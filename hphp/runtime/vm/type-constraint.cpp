@@ -95,6 +95,10 @@ TypeConstraint::TypeConstraint(Type type,
   : TypeConstraint(type, flags, ClassConstraint { typeName }) {
 }
 
+TypeConstraint::TypeConstraint(Type type, TypeConstraintFlags flags)
+  : TypeConstraint(type, flags, nullptr) {
+}
+
 TypeConstraint::TypeConstraint(TypeConstraintFlags flags,
                                UnionTypeMask mask,
                                LowStringPtr typeName,
@@ -351,6 +355,9 @@ ClassConstraint::ClassConstraint(LowStringPtr clsName,
 {
   assertx(!clsName || clsName->isStatic());
   assertx(!typeName || typeName->isStatic());
+}
+
+ClassConstraint::ClassConstraint(Class& cls) : ClassConstraint(cls.name(), cls.name(), nullptr) {
 }
 
 void ClassConstraint::serdeHelper(BlobDecoder& sd, bool resolved) {
@@ -837,10 +844,12 @@ TypeConstraint TypeConstraint::resolvedWithAutoload() const {
     // Type alias.
     [this](FoundTypeAlias td) -> Optional<TypeConstraint> {
       std::vector<TypeConstraint> parts;
-      for (auto const& [type, klass] : td.value->typeAndClassUnion()) {
+      for (auto const& tc : eachTypeConstraintInUnion(td.value->value)) {
+        auto type = tc.type();
+        auto klass = type == AnnotType::Object ? tc.clsNamedType()->getCachedClass() : nullptr;
         auto copy = *this;
         auto const typeName = klass ? klass->name() : nullptr;
-        copy.resolveType(type, td.value->nullable, typeName);
+        copy.resolveType(type, td.value->value.isNullable(), typeName);
         parts.push_back(copy);
       }
       return makeUnion(typeName(), parts);
@@ -898,10 +907,10 @@ bool TypeConstraint::maybeMixed() const {
   // we know it cannot be mixed.
   if (!isUnresolved()) return false;
   if (auto const def = typeNamedType()->getCachedTypeAlias()) {
-    auto const each = def->typeAndClassUnion();
+    auto const each = eachTypeConstraintInUnion(def->value);
     return std::ranges::any_of(
       each,
-      [] (auto const& tcu) { return tcu.type == AnnotType::Mixed; });
+      [] (auto const& tcu) { return tcu.type() == AnnotType::Mixed; });
   }
   // If its a known class, its definitely not mixed. Otherwise it might be.
   return !Class::lookup(typeNamedType());
@@ -1006,9 +1015,11 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
     p,
     [&](FoundTypeAlias td) {
       // Common case is that we actually find the alias:
-      if (td.value->nullable && val.type() == KindOfNull) return true;
+      if (td.value->value.isNullable() && val.type() == KindOfNull) return true;
       Optional<AnnotAction> fallback;
-      for (auto const& [type, klass] : td.value->typeAndClassUnion()) {
+      for (auto const& tc : eachTypeConstraintInUnion(td.value->value)) {
+        auto type = tc.type();
+        auto klass = type == AnnotType::Object ? tc.clsNamedType()->getCachedClass() : nullptr;
         auto result = annotCompat(val.type(), type, klass ? klass->name() : nullptr);
         switch (result) {
           case AnnotAction::Pass: return true;
@@ -1088,7 +1099,9 @@ bool TypeConstraint::checkTypeAliasImpl(const ClassConstraint& oc, const Class* 
 
   // We found the type alias, check if an object of type 'type' is
   // compatible
-  for (auto const& [type, klass] : td->typeAndClassUnion()) {
+  for (auto const& tc : eachTypeConstraintInUnion(td->value)) {
+    auto type = tc.type();
+    auto klass = type == AnnotType::Object ? tc.clsNamedType()->getCachedClass() : nullptr;
     switch (getAnnotMetaType(type)) {
       case AnnotMetaType::Precise:
         if (type == AnnotType::Object && klass && cls->classof(klass)) {
@@ -1514,7 +1527,9 @@ bool TypeConstraint::checkStringCompatible() const {
   return match<bool>(
     p,
     [&](FoundTypeAlias td) {
-      for (auto const& [type, klass] : td.value->typeAndClassUnion()) {
+      for (auto const& tc : eachTypeConstraintInUnion(td.value->value)) {
+        auto type = tc.type();
+        auto klass = type == AnnotType::Object ? tc.clsNamedType()->getCachedClass() : nullptr;
         if (type == AnnotType::String ||
             type == AnnotType::ArrayKey ||
             (type == AnnotType::Object &&
@@ -2003,7 +2018,9 @@ TcUnionPieceIterator TcUnionPieceView::begin() const {
     }
 
     it.m_classes = m_tc.m_u.union_.m_classes;
-    it.buildUnionTypeConstraint();
+    if (it.m_mask) {
+      it.buildUnionTypeConstraint();
+    }
   } else {
     it.m_outTc = m_tc;
 

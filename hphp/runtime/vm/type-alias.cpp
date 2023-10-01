@@ -48,22 +48,22 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
    * autoloader.
    */
   TypeAlias req(thisType);
-  req.nullable = thisType->value.isNullable();
-  req.unionSize = 0;
-  std::vector<TypeAlias::TypeAndClass> tcu;
+  TypeConstraintFlags flags =
+    thisType->value.flags() & (Nullable | TypeVar | Soft | TypeConstant | UpperBound);
 
+  std::vector<TypeConstraint> parts;
   auto const typeAliasFromClass = [&](Class* klass) {
     if (isEnum(klass)) {
       // If the class is an enum, pull out the actual base type.
       if (auto const enumType = klass->enumBaseTy()) {
         auto t = enumDataTypeToAnnotType(*enumType);
         assertx(t != AnnotType::Object);
-        tcu.emplace_back(t, nullptr);
+        parts.emplace_back(t, flags);
       } else {
-        tcu.emplace_back(AnnotType::ArrayKey, nullptr);
+        parts.emplace_back(AnnotType::ArrayKey, flags);
       }
     } else {
-      tcu.emplace_back(AnnotType::Object, klass);
+      parts.emplace_back(AnnotType::Object, flags, TypeConstraint::ClassConstraint{*klass});
     }
   };
 
@@ -72,16 +72,16 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
       req.invalid = true;
       return;
     }
-    req.nullable |= ta.nullable;
-    auto it = ta.typeAndClassUnion();
-    tcu.insert(tcu.end(), it.begin(), it.end());
+    TypeConstraint value = ta.value;
+    value.addFlags(flags);
+    parts.emplace_back(value);
   };
 
   for (auto const& tc : eachTypeConstraintInUnion(thisType->value)) {
     auto type = tc.type();
     auto typeName = tc.typeName();
     if (type != AnnotType::Object && type != AnnotType::Unresolved) {
-      tcu.emplace_back(type, nullptr);
+      parts.emplace_back(type, flags);
       continue;
     }
     auto targetNE = NamedType::get(typeName);
@@ -118,14 +118,7 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
     return req;
   }
 
-  req.unionSize = tcu.size();
-  size_t allocSize = tcu.size() * sizeof(TypeAlias::TypeAndClass);
-  auto const isPersistent = (thisType->attrs & AttrPersistent);
-  req.typeAndClassUnionArr = static_cast<TypeAlias::TypeAndClass*>(
-    isPersistent ? malloc(allocSize) : req::malloc_untyped(allocSize));
-  for (size_t i = 0; i < tcu.size(); ++i) {
-    req.typeAndClassUnionArr[i] = tcu[i];
-  }
+  req.value = TypeConstraint::makeUnion(req.name(), parts);
   return req;
 }
 
@@ -135,15 +128,17 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
 bool TypeAlias::compat(const PreTypeAlias& alias) const {
   // FIXME(T116316964): can't compare type of unresolved PreTypeAlias
 
-  if (nullable != alias.value.isNullable()) return false;
+  if (value.isNullable() != alias.value.isNullable()) return false;
 
-  auto view0 = typeAndClassUnion();
+  auto view0 = eachTypeConstraintInUnion(value);
   auto view1 = eachTypeConstraintInUnion(alias.value);
   auto it0 = view0.begin();
   auto it1 = view1.begin();
 
   while (it0 != view0.end() && it1 != view1.end()) {
-    auto const& [type, klass] = *it0++;
+    auto tc0 = *it0++;
+    auto type = tc0.type();
+    auto klass = type == AnnotType::Object ? tc0.clsNamedType()->getCachedClass() : nullptr;
     auto tc1 = *it1++;
     auto ptype = tc1.type();
     auto value = tc1.typeName();
@@ -257,8 +252,9 @@ const TypeAlias* TypeAlias::def(const PreTypeAlias* thisType, bool failIsFatal) 
 
   auto const isPersistent = (thisType->attrs & AttrPersistent);
   if (debug && isPersistent) {
-    for (DEBUG_ONLY auto const& [_, klass] : resolved.typeAndClassUnion()) {
-      assertx(!klass || classHasPersistentRDS(klass));
+    for (DEBUG_ONLY auto const& tc : eachClassTypeConstraintInUnion(resolved.value)) {
+      DEBUG_ONLY auto klass = tc.clsNamedType()->getCachedClass();
+      assertx(classHasPersistentRDS(klass));
     }
   }
 

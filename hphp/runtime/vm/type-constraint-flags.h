@@ -19,7 +19,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-enum TypeConstraintFlags : uint16_t {
+enum class TypeConstraintFlags : uint16_t {
   NoFlags = 0x0,
 
   /*
@@ -101,12 +101,20 @@ operator~(TypeConstraintFlags a) {
   return TypeConstraintFlags(~static_cast<int>(a));
 }
 
-inline TypeConstraintFlags& operator|=(TypeConstraintFlags& a, const TypeConstraintFlags& b) {
-return (a = TypeConstraintFlags((int)a | (int)b));
+constexpr void operator|=(TypeConstraintFlags& a, TypeConstraintFlags b) {
+  a = a | b;
 }
 
-inline TypeConstraintFlags& operator&=(TypeConstraintFlags& a, const TypeConstraintFlags& b) {
-return (a = TypeConstraintFlags((int)a & (int)b));
+constexpr void operator&=(TypeConstraintFlags& a, TypeConstraintFlags b) {
+  a = a & b;
+}
+
+constexpr bool operator!(TypeConstraintFlags a) {
+  return a == TypeConstraintFlags::NoFlags;
+}
+
+constexpr bool contains(TypeConstraintFlags a, TypeConstraintFlags b) {
+  return (a & b) != TypeConstraintFlags::NoFlags;
 }
 
 }

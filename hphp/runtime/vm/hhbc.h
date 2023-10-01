@@ -460,6 +460,7 @@ void staticStreamer(const TypedValue* tv, std::string& out);
 
 std::string instrToString(PC it, Either<const Func*, const FuncEmitter*> f);
 void staticArrayStreamer(const ArrayData*, std::string&);
+std::string staticArrayStreamer(const ArrayData* ad);
 
 /*
  * Convert subopcodes or opcodes into strings.

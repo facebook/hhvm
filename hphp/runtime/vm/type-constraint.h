@@ -161,7 +161,7 @@ struct TypeConstraint {
   static TypeConstraint makeUnion(LowStringPtr typeName, R&& tcs) {
     assertx(typeName != nullptr);
     if (tcs.empty()) {
-      return TypeConstraint{typeName, NoFlags};
+      return TypeConstraint{typeName, TypeConstraintFlags::NoFlags};
     } else if (tcs.size() == 1) {
       return TypeConstraint{*tcs.cbegin()};
     }
@@ -316,13 +316,13 @@ struct TypeConstraint {
   /*
    * Predicates for various properties of the type constraint.
    */
-  bool isNullable() const { return m_flags & Nullable; }
-  bool isSoft()     const { return m_flags & Soft; }
-  bool isExtended() const { return m_flags & ExtendedHint; }
-  bool isTypeVar()  const { return m_flags & TypeVar; }
-  bool isTypeConstant() const { return m_flags & TypeConstant; }
-  bool isUpperBound() const { return m_flags & UpperBound; }
-  bool isUnion() const { return m_flags & Union; }
+  bool isNullable() const { return contains(m_flags, TypeConstraintFlags::Nullable); }
+  bool isSoft()     const { return contains(m_flags, TypeConstraintFlags::Soft); }
+  bool isExtended() const { return contains(m_flags, TypeConstraintFlags::ExtendedHint); }
+  bool isTypeVar()  const { return contains(m_flags, TypeConstraintFlags::TypeVar); }
+  bool isTypeConstant() const { return contains(m_flags, TypeConstraintFlags::TypeConstant); }
+  bool isUpperBound() const { return contains(m_flags, TypeConstraintFlags::UpperBound); }
+  bool isUnion() const { return contains(m_flags, TypeConstraintFlags::Union); }
 
   bool isPrecise()  const { return !isUnion() && metaType() == MetaType::Precise; }
   bool isMixed()    const { return !isUnion() && m_u.single.type == Type::Mixed; }
@@ -344,7 +344,7 @@ struct TypeConstraint {
 
   bool isUnresolved() const {
     return isUnion()
-      ? ((m_flags & TypeConstraintFlags::Resolved) == 0)
+      ? !contains(m_flags, TypeConstraintFlags::Resolved)
       : (m_u.single.type == Type::Unresolved);
   }
 
@@ -588,7 +588,7 @@ private:
 
   struct UnionBuilder {
     const LowStringPtr m_typeName;
-    TypeConstraintFlags m_flags = Union;
+    TypeConstraintFlags m_flags = TypeConstraintFlags::Union;
     UnionTypeMask m_preciseTypeMask = 0;
     Optional<bool> m_resolved;
     UnionClassList m_classes;

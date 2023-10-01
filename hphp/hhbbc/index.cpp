@@ -9567,8 +9567,12 @@ private:
     if (auto const tm = index.typeMapping(name)) {
       if (tm->value.isUnion()) {
         auto flags =
-          tc.flags() & (Nullable | TypeVar | Soft | TypeConstant |
-                        DisplayNullable | UpperBound);
+          tc.flags() & (TypeConstraintFlags::Nullable
+                        | TypeConstraintFlags::TypeVar
+                        | TypeConstraintFlags::Soft
+                        | TypeConstraintFlags::TypeConstant
+                        | TypeConstraintFlags::DisplayNullable
+                        | TypeConstraintFlags::UpperBound);
         std::vector<TypeConstraint> members;
         for (auto& tv : eachTypeConstraintInUnion(tm->value)) {
           TypeConstraint copy = tv;
@@ -10101,8 +10105,12 @@ void flatten_type_mappings(IndexData& index,
     [&] (const TypeMapping* typeMapping) {
       Optional<ISStringSet> seen;
       TypeConstraintFlags flags =
-        typeMapping->value.flags() & (Nullable | TypeVar | Soft | TypeConstant |
-                                      DisplayNullable | UpperBound);
+        typeMapping->value.flags() & (TypeConstraintFlags::Nullable
+                                      | TypeConstraintFlags::TypeVar
+                                      | TypeConstraintFlags::Soft
+                                      | TypeConstraintFlags::TypeConstant
+                                      | TypeConstraintFlags::DisplayNullable
+                                      | TypeConstraintFlags::UpperBound);
       auto firstEnum = typeMapping->firstEnum;
 
       auto enumMeta = folly::get_ptr(meta.cls, typeMapping->name);
@@ -10146,7 +10154,12 @@ void flatten_type_mappings(IndexData& index,
           queue.pop();
 
           if (auto const next = folly::get_ptr(meta.typeMappings, name)) {
-            flags |= static_cast<TypeConstraintFlags>(next->value.flags() & (Nullable | TypeVar | Soft | TypeConstant | DisplayNullable | UpperBound));
+            flags |= next->value.flags() & (TypeConstraintFlags::Nullable
+                                            | TypeConstraintFlags::TypeVar
+                                            | TypeConstraintFlags::Soft
+                                            | TypeConstraintFlags::TypeConstant
+                                            | TypeConstraintFlags::DisplayNullable
+                                            | TypeConstraintFlags::UpperBound);
             if (!firstEnum) firstEnum = next->firstEnum;
 
             if (enumMeta && next->firstEnum) {

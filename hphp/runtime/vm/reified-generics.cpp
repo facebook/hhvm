@@ -51,8 +51,8 @@ ArrayData* addToTypeReifiedGenericsTable(
   assert_flog(tsList->same(generics),
               "reified ts mismatch\nname: {}\ntsList: {}\ngenerics: {}\n",
               name,
-              [&](){ std::string s; staticArrayStreamer(tsList, s); return s; }(),
-              [&](){ std::string s; staticArrayStreamer(generics, s); return s; }());
+              staticArrayStreamer(tsList),
+              staticArrayStreamer(generics));
   decRefArr(tsList);
   return generics;
 }

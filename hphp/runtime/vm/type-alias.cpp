@@ -49,7 +49,11 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
    */
   TypeAlias req(thisType);
   TypeConstraintFlags flags =
-    thisType->value.flags() & (Nullable | TypeVar | Soft | TypeConstant | UpperBound);
+    thisType->value.flags() & (TypeConstraintFlags::Nullable
+                               | TypeConstraintFlags::TypeVar
+                               | TypeConstraintFlags::Soft
+                               | TypeConstraintFlags::TypeConstant
+                               | TypeConstraintFlags::UpperBound);
 
   std::vector<TypeConstraint> parts;
   auto const typeAliasFromClass = [&](Class* klass) {

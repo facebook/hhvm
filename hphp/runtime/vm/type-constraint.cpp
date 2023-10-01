@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/type-structure-helpers.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
@@ -55,7 +56,7 @@ using UnionTypeMask = TypeConstraint::UnionTypeMask;
 const StaticString s___invoke("__invoke");
 
 TypeConstraint::TypeConstraint()
-  : m_flags(NoFlags)
+  : m_flags(TypeConstraintFlags::NoFlags)
   , m_u {
       .single={
         .type=Type::Nothing,
@@ -123,22 +124,30 @@ Optional<TypeConstraint> TypeConstraint::UnionBuilder::recordConstraint(const Ty
   if (!tc.isCheckable()) {
     // Canonicalization: If we contain a non-checkable member then we're not
     // checkable so just return mixed.
-    return TypeConstraint{ AnnotType::Mixed, ExtendedHint | Resolved, ClassConstraint { m_typeName } };
+    return TypeConstraint{
+      AnnotType::Mixed,
+      TypeConstraintFlags::ExtendedHint | TypeConstraintFlags::Resolved,
+      ClassConstraint { m_typeName }
+    };
   }
 
   // Copy over common flags.
-  m_flags |= tc.flags() & (Nullable
-                           | ExtendedHint
-                           | TypeVar
-                           | Soft
-                           | TypeConstant
-                           | DisplayNullable
-                           | UpperBound);
+  m_flags |= tc.flags() & (TypeConstraintFlags::Nullable
+                           | TypeConstraintFlags::ExtendedHint
+                           | TypeConstraintFlags::TypeVar
+                           | TypeConstraintFlags::Soft
+                           | TypeConstraintFlags::TypeConstant
+                           | TypeConstraintFlags::DisplayNullable
+                           | TypeConstraintFlags::UpperBound);
 
   switch (tc.type()) {
     case AnnotType::Mixed: {
       // Canonicalization: If we have a mixed then we're just mixed.
-      return TypeConstraint{ AnnotType::Mixed, ExtendedHint | Resolved, ClassConstraint { m_typeName } };
+      return TypeConstraint{
+        AnnotType::Mixed,
+        TypeConstraintFlags::ExtendedHint | TypeConstraintFlags::Resolved,
+        ClassConstraint { m_typeName }
+      };
     }
     case AnnotType::Nonnull: {
       m_containsNonnull = true;
@@ -148,7 +157,7 @@ Optional<TypeConstraint> TypeConstraint::UnionBuilder::recordConstraint(const Ty
       // Canonicalization: If we expect a null then just apply nullable. Note
       // that this means we might end up with a simple nullable constraint
       // (like `?int`) represented differently than `null | int`.
-      m_flags |= Nullable;
+      m_flags |= TypeConstraintFlags::Nullable;
       break;
     }
     case AnnotType::Nothing:
@@ -251,10 +260,18 @@ TypeConstraint TypeConstraint::UnionBuilder::finish() && {
   if (m_containsNonnull) {
     // Canonicalization: If we have a nonnull then we're just nonnull -
     // unless we also have a nullable in which case we're mixed.
-    if (m_flags & TypeConstraintFlags::Nullable) {
-      return TypeConstraint{ AnnotType::Mixed, ExtendedHint | Resolved, ClassConstraint { m_typeName } };
+    if (contains(m_flags, TypeConstraintFlags::Nullable)) {
+      return TypeConstraint{
+        AnnotType::Mixed,
+        TypeConstraintFlags::ExtendedHint | TypeConstraintFlags::Resolved,
+        ClassConstraint { m_typeName }
+      };
     } else {
-      return TypeConstraint{ AnnotType::Nonnull, ExtendedHint | Resolved, ClassConstraint { m_typeName } };
+      return TypeConstraint{
+        AnnotType::Nonnull,
+        TypeConstraintFlags::ExtendedHint | TypeConstraintFlags::Resolved,
+        ClassConstraint { m_typeName }
+      };
     }
   }
 
@@ -266,7 +283,7 @@ TypeConstraint TypeConstraint::UnionBuilder::finish() && {
   // If we haven't seen any objects or unresolved then we're just simple
   // primitives - which are resolved.
   if (m_resolved.value_or(true)) {
-    m_flags |= Resolved;
+    m_flags |= TypeConstraintFlags::Resolved;
   }
 
   return TypeConstraint{ m_flags, m_preciseTypeMask, m_typeName, classes };
@@ -306,7 +323,7 @@ void TypeConstraint::serdeUnion(SerDe& sd) {
     if (sz) {
       UnionClassList classes;
       classes.m_list.reserve(sz);
-      bool resolved = (m_flags & TypeConstraintFlags::Resolved) != 0;
+      bool resolved = contains(m_flags, TypeConstraintFlags::Resolved);
       for (size_t i = 0; i < sz; ++i) {
         ClassConstraint oc;
         oc.serdeHelper(sd, resolved);
@@ -320,7 +337,7 @@ void TypeConstraint::serdeUnion(SerDe& sd) {
     size_t sz = classes ? classes->m_list.size() : 0;
     sd(sz);
     if (classes) {
-      bool resolved = (m_flags & TypeConstraintFlags::Resolved) != 0;
+      bool resolved = contains(m_flags, TypeConstraintFlags::Resolved);
       for (const ClassConstraint& oc : classes->m_list) {
         oc.serdeHelper(sd, resolved);
       }
@@ -410,13 +427,14 @@ void TypeConstraint::initSingle() {
   auto const mptr = nameToAnnotType(typeName());
   if (mptr) {
     single.type = *mptr;
-    m_flags |= Resolved;
+    m_flags |= TypeConstraintFlags::Resolved;
     assertx(single.type != Type::Object);
     assertx(getAnnotDataType(single.type) != KindOfPersistentString);
     return;
   }
-  single.type = m_flags & TypeConstraintFlags::Resolved ? Type::Object : Type::Unresolved;
-  if (m_flags & TypeConstraintFlags::Resolved) {
+  bool resolved = contains(m_flags, TypeConstraintFlags::Resolved);
+  single.type = resolved ? Type::Object : Type::Unresolved;
+  if (resolved) {
     TRACE(5, "TypeConstraint: this %p pre-resolved type %s, treating as %s\n",
           this, typeName()->data(), tname(getAnnotDataType(single.type)).c_str());
   } else {
@@ -564,7 +582,7 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
   if (isSoft()) {
     name += '@';
   }
-  if ((m_flags & TypeConstraintFlags::DisplayNullable) && isExtended()) {
+  if (contains(m_flags, TypeConstraintFlags::DisplayNullable) && isExtended()) {
     name += '?';
   }
 
@@ -618,7 +636,7 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
         first = false;
       }
       name.push_back(')');
-    } else if (m_flags & TypeConstraintFlags::Resolved) {
+    } else if (contains(m_flags, TypeConstraintFlags::Resolved)) {
       str = nullptr;
       switch (m_u.single.type) {
         case AnnotType::Nothing:  str = "nothing"; break;
@@ -656,9 +674,13 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
 
 namespace {
 
+bool contains(UnionTypeMask value, UnionTypeMask bit) {
+  return (value & bit) != 0;
+}
+
 template<typename T>
 void bitName(std::string& out, T& value, T bit, const char* name, const char* sep = "|") {
-  if (value & bit) {
+  if (contains(value, bit)) {
     if (!out.empty()) out.append(sep);
     out.append(name);
     value = (T)(value & ~bit);
@@ -694,7 +716,7 @@ std::string show(TypeConstraintFlags flags) {
   bitName(res, flags, TypeConstraintFlags::DisplayNullable, "DisplayNullable");
   bitName(res, flags, TypeConstraintFlags::UpperBound, "UpperBound");
   bitName(res, flags, TypeConstraintFlags::Union, "Union");
-  assertx(flags == 0);
+  assertx(flags == TypeConstraintFlags::NoFlags);
   return res;
 }
 
@@ -1179,18 +1201,12 @@ bool TypeConstraint::checkImpl(tv_rval val,
 
     if (isUnresolved()) {
       auto vmClass = val.val().pobj->getVMClass();
-      if (isUnion()) {
-        for (auto oc : m_u.union_.m_classes->m_list) {
-          if (tryCls(oc.m_typeName, oc.m_namedType)) return true;
-          if (isPasses) continue;
-          if (checkTypeAliasImpl<isAssert>(oc, vmClass)) return true;
-        }
-        return false;
-      } else {
-        if (tryCls(typeName(), typeNamedType())) return true;
-        if (isPasses) return false;
-        return checkTypeAliasImpl<isAssert>(m_u.single.class_, vmClass);
+      for (auto const& tc : eachClassTypeConstraintInUnion(*this)) {
+        if (tryCls(tc.typeName(), tc.typeNamedType())) return true;
+        if (isPasses) continue;
+        if (checkTypeAliasImpl<isAssert>(tc.m_u.single.class_, vmClass)) return true;
       }
+      return false;
     }
 
     if (isUnion()) {
@@ -1907,14 +1923,14 @@ void applyFlagsToUB(TypeConstraint& ub, const TypeConstraint& tc) {
 void TcUnionPieceIterator::buildUnionTypeConstraint() {
   using CC = ClassConstraint;
 
-  auto flags = m_flags & (Nullable
-                          | ExtendedHint
-                          | TypeVar
-                          | Soft
-                          | TypeConstant
-                          | DisplayNullable
-                          | UpperBound
-                          | Resolved);
+  auto flags = m_flags & (TypeConstraintFlags::Nullable
+                          | TypeConstraintFlags::ExtendedHint
+                          | TypeConstraintFlags::TypeVar
+                          | TypeConstraintFlags::Soft
+                          | TypeConstraintFlags::TypeConstant
+                          | TypeConstraintFlags::DisplayNullable
+                          | TypeConstraintFlags::UpperBound
+                          | TypeConstraintFlags::Resolved);
 
   // isolate the low bit
   switch (m_mask & -m_mask) {
@@ -1964,7 +1980,7 @@ void TcUnionPieceIterator::buildUnionTypeConstraint() {
     }
 
     case TypeConstraint::kUnionTypeClass: {
-      bool resolved = (flags & TypeConstraintFlags::Resolved);
+      bool resolved = contains(flags, TypeConstraintFlags::Resolved);
       AnnotType type = resolved ? AnnotType::Object : AnnotType::Unresolved;
       m_outTc = TypeConstraint{ type, flags, m_classes->m_list[m_nextClass] };
       break;
@@ -2053,7 +2069,7 @@ TcUnionPieceIterator TcUnionPieceView::begin() const {
 TcUnionPieceIterator TcUnionPieceView::end() const {
   TcUnionPieceIterator it;
   it.m_classes = nullptr;
-  it.m_flags = NoFlags;
+  it.m_flags = TypeConstraintFlags::NoFlags;
   it.m_mask = 0;
   it.m_nextClass = 0;
   return it;

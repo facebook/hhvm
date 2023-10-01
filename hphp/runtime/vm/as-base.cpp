@@ -65,7 +65,7 @@ std::string type_flags_to_string(TypeConstraintFlags flags) {
   std::vector<std::string> vec;
 
 #define X(flag, str) \
-  if (flags & TypeConstraintFlags::flag) vec.push_back(str);
+  if (contains(flags, TypeConstraintFlags::flag)) vec.push_back(str);
   HHAS_TYPE_FLAGS
 #undef X
 

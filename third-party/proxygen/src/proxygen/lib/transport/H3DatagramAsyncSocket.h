@@ -78,11 +78,11 @@ class H3DatagramAsyncSocket
     LOG(FATAL) << __func__ << " not supported";
   }
 
-  void setCmsgs(const folly::SocketOptionMap& /*cmsgs*/) override {
+  void setCmsgs(const folly::SocketCmsgMap& /*cmsgs*/) override {
     LOG(FATAL) << __func__ << " not supported";
   }
 
-  void appendCmsgs(const folly::SocketOptionMap& /*cmsgs*/) override {
+  void appendCmsgs(const folly::SocketCmsgMap& /*cmsgs*/) override {
     LOG(FATAL) << __func__ << " not supported";
   }
 

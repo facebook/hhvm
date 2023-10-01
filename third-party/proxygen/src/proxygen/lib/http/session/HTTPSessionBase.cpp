@@ -8,6 +8,7 @@
 
 #include <proxygen/lib/http/session/HTTPSessionBase.h>
 
+#include <folly/logging/xlog.h>
 #include <proxygen/lib/http/codec/HTTP2Codec.h>
 #include <proxygen/lib/http/session/ByteEventTracker.h>
 #include <proxygen/lib/http/session/HTTPSessionController.h>
@@ -68,6 +69,35 @@ void HTTPSessionBase::setSessionStats(HTTPSessionStats* stats) {
   if (sessionStats_) {
     sessionStats_->recordPendingBufferedWriteBytes(pendingWriteSize_);
     sessionStats_->recordPendingBufferedReadBytes(pendingReadSize_);
+  }
+}
+
+void HTTPSessionBase::setControlMessageRateLimitParams(
+    uint32_t maxControlMsgsPerInterval,
+    uint32_t maxDirectErrorHandlingPerInterval,
+    std::chrono::milliseconds controlMsgIntervalDuration,
+    std::chrono::milliseconds directErrorHandlingIntervalDuration) {
+  if (maxControlMsgsPerInterval < kMaxControlMsgsPerIntervalLowerBound) {
+    XLOG_EVERY_MS(WARNING, 60000)
+        << "Invalid maxControlMsgsPerInterval: " << maxControlMsgsPerInterval;
+    maxControlMsgsPerInterval = kMaxControlMsgsPerIntervalLowerBound;
+  }
+
+  if (maxDirectErrorHandlingPerInterval <
+      kMaxDirectErrorHandlingPerIntervalLowerBound) {
+    XLOG_EVERY_MS(WARNING, 60000)
+        << "Invalid maxDirectErrorHandlingPerInterval: "
+        << maxDirectErrorHandlingPerInterval;
+    maxDirectErrorHandlingPerInterval =
+        kMaxDirectErrorHandlingPerIntervalLowerBound;
+  }
+
+  if (controlMessageRateLimitFilter_) {
+    controlMessageRateLimitFilter_->setParams(
+        maxControlMsgsPerInterval,
+        maxDirectErrorHandlingPerInterval,
+        controlMsgIntervalDuration,
+        directErrorHandlingIntervalDuration);
   }
 }
 

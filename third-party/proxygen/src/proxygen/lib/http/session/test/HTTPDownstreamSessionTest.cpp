@@ -3730,11 +3730,11 @@ TEST_F(HTTP2DownstreamSessionTest, TestPriorityFCBlocked) {
 TEST_F(HTTP2DownstreamSessionTest, TestControlMsgRateLimitExceeded) {
   auto streamid = clientCodec_->createStream();
 
-  httpSession_->setControlMessageRateLimitParams(10);
+  httpSession_->setControlMessageRateLimitParams(100);
 
-  // Send 7 PRIORITY, 1 SETTINGS, and 3 PING frames. This should exceed the
+  // Send 97 PRIORITY, 1 SETTINGS, and 3 PING frames. This should exceed the
   // limit of 10, causing us to drop the connection.
-  for (int i = 0; i < 7; i++) {
+  for (uint32_t i = 0; i < kMaxControlMsgsPerIntervalLowerBound - 3; i++) {
     clientCodec_->generatePriority(
         requests_, streamid, HTTPMessage::HTTP2Priority(0, false, 3));
   }
@@ -3756,11 +3756,11 @@ TEST_F(HTTP2DownstreamSessionTest, TestControlMsgResetRateLimitTouched) {
 
   auto streamid = clientCodec_->createStream();
 
-  httpSession_->setControlMessageRateLimitParams(10, 100, milliseconds(0));
+  httpSession_->setControlMessageRateLimitParams(100, 100, milliseconds(0));
 
-  // Send 7 PRIORITY, 1 SETTINGS, and 2 PING frames. This doesn't exceed the
+  // Send 97 PRIORITY, 1 SETTINGS, and 2 PING frames. This doesn't exceed the
   // limit of 10.
-  for (int i = 0; i < 7; i++) {
+  for (uint32_t i = 0; i < kMaxControlMsgsPerIntervalLowerBound - 3; i++) {
     clientCodec_->generatePriority(
         requests_, streamid, HTTPMessage::HTTP2Priority(0, false, 3));
   }
@@ -3797,12 +3797,12 @@ TEST_F(HTTP2DownstreamSessionTest, TestControlMsgResetRateLimitTouched) {
 }
 
 TEST_F(HTTP2DownstreamSessionTest, DirectErrorHandlingLimitTouched) {
-  httpSession_->setControlMessageRateLimitParams(100, 10, milliseconds(0));
+  httpSession_->setControlMessageRateLimitParams(100, 50, milliseconds(0));
 
-  // Send ten messages, each of which cause direct error handling. Since
+  // Send 50 messages, each of which cause direct error handling. Since
   // this doesn't exceed the limit, this should not cause the connection
   // to be dropped.
-  for (int i = 0; i < 10; i++) {
+  for (uint32_t i = 0; i < kMaxDirectErrorHandlingPerIntervalLowerBound; i++) {
     auto req = getGetRequest();
     // Invalid method, causes the error to be handled directly
     req.setMethod("11111111");
@@ -3829,11 +3829,12 @@ TEST_F(HTTP2DownstreamSessionTest, DirectErrorHandlingLimitTouched) {
 }
 
 TEST_F(HTTP2DownstreamSessionTest, DirectErrorHandlingLimitExceeded) {
-  httpSession_->setControlMessageRateLimitParams(100, 10, milliseconds(0));
+  httpSession_->setControlMessageRateLimitParams(100, 50, milliseconds(0));
 
   // Send eleven messages, each of which causes direct error handling. Since
   // this exceeds the limit, the connection should be dropped.
-  for (int i = 0; i < 11; i++) {
+  for (uint32_t i = 0; i < kMaxDirectErrorHandlingPerIntervalLowerBound + 1;
+       i++) {
     auto req = getGetRequest();
     // Invalid method, causes the error to be handled directly
     req.setMethod("11111111");

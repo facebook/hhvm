@@ -12,6 +12,7 @@
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/AsyncUDPSocket.h>
 #include <folly/io/async/SSLContext.h>
+#include <proxygen/lib/http/codec/ControlMessageRateLimitFilter.h>
 #include <proxygen/lib/http/codec/HTTPCodecFilter.h>
 #include <proxygen/lib/http/observer/HTTPSessionObserverContainer.h>
 #include <proxygen/lib/http/observer/HTTPSessionObserverInterface.h>
@@ -170,6 +171,15 @@ class HTTPSessionBase : public wangle::ManagedConnection {
   void setInfoCallback(InfoCallback* callback) {
     infoCallback_ = callback;
   }
+
+  void setControlMessageRateLimitParams(
+      uint32_t maxControlMsgsPerInterval = kDefaultMaxControlMsgsPerInterval,
+      uint32_t maxDirectErrorHandlingPerInterval =
+          kDefaultMaxDirectErrorHandlingPerInterval,
+      std::chrono::milliseconds controlMsgIntervalDuration =
+          kDefaultControlMsgDuration,
+      std::chrono::milliseconds directErrorHandlingIntervalDuration =
+          kDefaultDirectErrorHandlingDuration);
 
   InfoCallback* getInfoCallback() const {
     return infoCallback_;
@@ -752,6 +762,13 @@ class HTTPSessionBase : public wangle::ManagedConnection {
   bool setIngressTimeoutAfterEom_{false};
 
   std::unique_ptr<HTTPSessionActivityTracker> httpSessionActivityTracker_;
+
+  /**
+   * Used to rate limit:
+   * 1. Control Messages (pings, settings, priorities, resets)
+   * 2. Errors that lead to a direct response being sent to the client
+   */
+  ControlMessageRateLimitFilter* controlMessageRateLimitFilter_{nullptr};
 
  private:
   // Underlying controller_ is marked as private so that callers must utilize

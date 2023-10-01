@@ -17,9 +17,11 @@ namespace proxygen {
 
 // These constants define the rate at which we limit certain events.
 constexpr uint32_t kDefaultMaxControlMsgsPerInterval = 500;
+constexpr uint32_t kMaxControlMsgsPerIntervalLowerBound = 100;
 constexpr std::chrono::milliseconds kDefaultControlMsgDuration{100};
 
 constexpr uint32_t kDefaultMaxDirectErrorHandlingPerInterval = 100;
+constexpr uint32_t kMaxDirectErrorHandlingPerIntervalLowerBound = 50;
 constexpr std::chrono::milliseconds kDefaultDirectErrorHandlingDuration{100};
 
 /**

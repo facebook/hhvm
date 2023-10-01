@@ -1834,20 +1834,6 @@ SecondaryAuthManagerBase* HTTPSession::getSecondAuthManager() const {
   return secondAuthManager_.get();
 }
 
-void HTTPSession::setControlMessageRateLimitParams(
-    uint32_t maxControlMsgsPerInterval,
-    uint32_t maxDirectErrorHandlingPerInterval,
-    std::chrono::milliseconds controlMsgIntervalDuration,
-    std::chrono::milliseconds directErrorHandlingIntervalDuration) {
-  if (controlMessageRateLimitFilter_) {
-    controlMessageRateLimitFilter_->setParams(
-        maxControlMsgsPerInterval,
-        maxDirectErrorHandlingPerInterval,
-        controlMsgIntervalDuration,
-        directErrorHandlingIntervalDuration);
-  }
-}
-
 /**
  * Send a CERTIFICATE_REQUEST frame. If the underlying protocol doesn't
  * support secondary authentication, this is a no-op and 0 is returned.

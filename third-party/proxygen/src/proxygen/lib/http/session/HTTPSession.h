@@ -21,7 +21,6 @@
 #include <folly/io/async/HHWheelTimer.h>
 #include <proxygen/lib/http/HTTPConstants.h>
 #include <proxygen/lib/http/HTTPHeaderSize.h>
-#include <proxygen/lib/http/codec/ControlMessageRateLimitFilter.h>
 #include <proxygen/lib/http/codec/FlowControlFilter.h>
 #include <proxygen/lib/http/codec/HTTPCodec.h>
 #include <proxygen/lib/http/codec/HTTPCodecFilter.h>
@@ -275,15 +274,6 @@ class HTTPSession
    */
   void setSecondAuthManager(
       std::unique_ptr<SecondaryAuthManagerBase> secondAuthManager);
-
-  void setControlMessageRateLimitParams(
-      uint32_t maxControlMsgsPerInterval = kDefaultMaxControlMsgsPerInterval,
-      uint32_t maxDirectErrorHandlingPerInterval =
-          kDefaultMaxDirectErrorHandlingPerInterval,
-      std::chrono::milliseconds controlMsgIntervalDuration =
-          kDefaultControlMsgDuration,
-      std::chrono::milliseconds directErrorHandlingIntervalDuration =
-          kDefaultDirectErrorHandlingDuration);
 
   /**
    * Get the SecondaryAuthManager attached to this session.
@@ -776,8 +766,6 @@ class HTTPSession
   folly::AsyncTransport::UniquePtr sock_;
 
   WheelTimerInstance wheelTimer_;
-
-  ControlMessageRateLimitFilter* controlMessageRateLimitFilter_{nullptr};
 
   /**
    * Number of writes submitted to the transport for which we haven't yet

@@ -668,21 +668,11 @@ struct Module {
   template <typename SerDe> void serde(SerDe&);
 };
 
-struct TypeAndValue {
-  AnnotType type;
-  LSString value;
-
-  template <typename SerDe> void serde(SerDe&);
-};
-
 struct TypeAlias {
-  using TypeAndValueUnion = TinyVector<TypeAndValue>;
-
   SrcInfo srcInfo;
   LSString name;
   Attr attrs;
-  TypeAndValueUnion typeAndValueUnion;
-  bool nullable : 1;  // null is allowed; for ?Foo aliases
+  TypeConstraint value;
   bool caseType : 1;
   UserAttributeMap userAttrs;
   Array typeStructure{ArrayData::CreateDict()};
@@ -771,7 +761,6 @@ MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::ClassBytecode)
 MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::Constant)
 MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::TypeAlias)
 MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::Module)
-MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::TypeAndValue)
 MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::FatalInfo)
 
 //////////////////////////////////////////////////////////////////////

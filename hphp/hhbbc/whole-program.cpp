@@ -723,8 +723,7 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
         TypeMapping{
           typeAlias->name,
           nullptr,
-          typeAlias->typeAndValueUnion,
-          typeAlias->nullable,
+          typeAlias->value,
         }
       );
     }
@@ -748,19 +747,11 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
 
     Optional<TypeMapping> typeMapping;
     if (c->attrs & AttrEnum) {
-      auto const& tc = c->enumBaseTy;
+      auto tc = c->enumBaseTy;
       assertx(!tc.isNullable());
       addType(types, tc, nullptr);
-      auto type = tc.type();
-      if (type == AnnotType::Mixed) type = AnnotType::ArrayKey;
-      typeMapping.emplace(
-        TypeMapping{
-          c->name,
-          c->name,
-          {php::TypeAndValue{type, tc.typeName()}},
-          false
-        }
-      );
+      if (tc.isMixed()) tc.setType(AnnotType::ArrayKey);
+      typeMapping.emplace(TypeMapping{c->name, c->name, tc});
     }
 
     add(

@@ -1056,9 +1056,9 @@ Type typeFromTCImpl(const HPHP::TypeConstraint& tc,
     if (auto const alias = TypeAlias::lookup(tc.typeName(), &persistent)) {
       if (persistent && !alias->invalid) {
         auto ty = TBottom;
-        for (auto const& tc : eachTypeConstraintInUnion(alias->value)) {
-          auto type = tc.type();
-          auto klass = type == AnnotType::Object ? tc.clsNamedType()->getCachedClass() : nullptr;
+        for (auto const& sub : eachTypeConstraintInUnion(alias->value)) {
+          auto type = sub.type();
+          auto klass = type == AnnotType::Object ? sub.clsNamedType()->getCachedClass() : nullptr;
           if (klass) {
             if (interface_supports_non_objects(klass->name())) {
               ty |= TInitCell;

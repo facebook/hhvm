@@ -92,7 +92,11 @@ TypeConstraint::TypeConstraint(Type type, TypeConstraintFlags flags, ClassConstr
 TypeConstraint::TypeConstraint(Type type,
                                TypeConstraintFlags flags,
                                const LowStringPtr typeName)
-  : TypeConstraint(type, flags, ClassConstraint { typeName }) {
+  : TypeConstraint(type,
+                   flags,
+                   type == AnnotType::Object
+                   ? ClassConstraint { typeName, typeName, nullptr }
+                   : ClassConstraint { typeName }) {
 }
 
 TypeConstraint::TypeConstraint(Type type, TypeConstraintFlags flags)
@@ -328,11 +332,10 @@ template void TypeConstraint::serdeUnion(BlobEncoder&);
 template void TypeConstraint::serdeUnion(BlobDecoder&);
 
 template<class SerDe>
-void TypeConstraint::serdeSingle(SerDe& sd) {
+void TypeConstraint::serdeSingle(SerDe& sd)  {
   sd(m_u.single.type);
-  bool resolved = (m_flags & TypeConstraintFlags::Resolved) != 0;
   bool isObject = m_u.single.type == AnnotType::Object;
-  m_u.single.class_.serdeHelper(sd, resolved && isObject);
+  m_u.single.class_.serdeHelper(sd, isObject);
   if constexpr (SerDe::deserializing) {
     m_u.single.class_.init(m_u.single.type);
   }
@@ -360,16 +363,16 @@ ClassConstraint::ClassConstraint(LowStringPtr clsName,
 ClassConstraint::ClassConstraint(Class& cls) : ClassConstraint(cls.name(), cls.name(), nullptr) {
 }
 
-void ClassConstraint::serdeHelper(BlobDecoder& sd, bool resolved) {
+void ClassConstraint::serdeHelper(BlobDecoder& sd, bool isObject) {
   sd(m_typeName);
-  if (resolved) {
+  if (isObject) {
     sd(m_clsName);
   }
 }
 
-void ClassConstraint::serdeHelper(BlobEncoder& sd, bool resolved) const {
+void ClassConstraint::serdeHelper(BlobEncoder& sd, bool isObject) const {
   sd(m_typeName);
-  if (resolved) {
+  if (isObject) {
     sd(m_clsName);
   }
 }

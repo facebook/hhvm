@@ -1081,20 +1081,11 @@ std::unique_ptr<php::TypeAlias> parse_type_alias(const TypeAliasEmitter& te) {
     }
   }
 
-  php::TypeAlias::TypeAndValueUnion tvu;
-  for (auto const& tc : eachTypeConstraintInUnion(te.value())) {
-    auto type = tc.type();
-    auto value = type == AnnotType::Object ? tc.clsName() : tc.typeName();
-    tvu.emplace_back(php::TypeAndValue{type, value});
-  }
-
-
   return std::unique_ptr<php::TypeAlias>(new php::TypeAlias {
     php::SrcInfo { te.getLocation() },
     te.name(),
     te.attrs() | AttrPersistent,
-    std::move(tvu),
-    te.value().isNullable(),
+    te.value(),
     te.caseType(),
     te.userAttributes(),
     ts,

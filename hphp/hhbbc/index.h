@@ -777,10 +777,9 @@ struct TypeMapping {
   // If an enum, this is the same value as name. Otherwise it's the
   // first enum encountered when resolving a type-alias.
   LSString firstEnum;
-  php::TypeAlias::TypeAndValueUnion typeAndValueUnion;
-  bool nullable;
+  TypeConstraint value;
   template <typename SerDe> void serde(SerDe& sd) {
-    sd(name)(firstEnum)(typeAndValueUnion)(nullable);
+    sd(name)(firstEnum)(value);
   }
 };
 

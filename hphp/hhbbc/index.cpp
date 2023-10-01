@@ -8118,8 +8118,8 @@ private:
         auto const tm = index.typeMapping(base.typeName());
         if (!tm) return AnnotType::Unresolved;
         // enums cannot use case types
-        assertx(tm->typeAndValueUnion.size() == 1);
-        return tm->typeAndValueUnion[0].type;
+        assertx(!tm->value.isUnion());
+        return tm->value.type();
       }();
       if (!enumSupportsAnnot(baseType)) {
         ITRACE(2,
@@ -9504,33 +9504,30 @@ private:
   }
 
   static bool resolveOne(TypeConstraint& tc,
-                         const php::TypeAndValue& tv,
+                         const TypeConstraint& tv,
                          SString firstEnum,
-                         bool nullable,
                          ISStringSet* uses,
                          bool isProp,
                          bool isUnion) {
+    assertx(!tv.isUnion());
     // Whatever it's an alias of isn't valid, so leave unresolved.
-    if (tv.type == AnnotType::Unresolved) return false;
-    if (isProp && !propSupportsAnnot(tv.type)) return false;
+    if (tv.isUnresolved()) return false;
+    if (isProp && !propSupportsAnnot(tv.type())) return false;
     auto const value = [&] () -> SString {
       // Store the first enum encountered during resolution. This
       // lets us fixup the type later if needed.
       if (firstEnum) return firstEnum;
-      if (tv.type == AnnotType::Object) {
-        assertx(tv.value);
-        return tv.value;
+      if (tv.isObject()) {
+        auto clsName = tv.clsName();
+        assertx(clsName);
+        return clsName;
       }
       return nullptr;
     }();
     if (isUnion) {
       tc.unresolve();
     }
-    tc.resolveType(
-      tv.type,
-      nullable,
-      value
-    );
+    tc.resolveType(tv.type(), tv.isNullable(), value);
     assertx(IMPLIES(isProp, tc.validForProp()));
     if (uses && value) uses->emplace(value);
     return true;
@@ -9568,28 +9565,26 @@ private:
 
     // Is this name a type-alias or enum?
     if (auto const tm = index.typeMapping(name)) {
-      if (tm->typeAndValueUnion.size() > 1) {
+      if (tm->value.isUnion()) {
+        auto flags =
+          tc.flags() & (Nullable | TypeVar | Soft | TypeConstant |
+                        DisplayNullable | UpperBound);
         std::vector<TypeConstraint> members;
-        TypeConstraintFlags flags = tc.flags();
-        if (tm->nullable) {
-          flags |= TypeConstraintFlags::Nullable;
-        }
-        for (auto& tv : tm->typeAndValueUnion) {
-          TypeConstraint out = tv.type == AnnotType::Object
-            ? TypeConstraint{tv.type, flags, TypeConstraint::ClassConstraint { tv.value, tv.value, nullptr } }
-            : TypeConstraint{tv.type, flags, tv.value};
-          if (!resolveOne(out, tv, tm->firstEnum, tm->nullable, uses, isProp, true)) {
+        for (auto& tv : eachTypeConstraintInUnion(tm->value)) {
+          TypeConstraint copy = tv;
+          copy.addFlags(flags);
+          if (!resolveOne(copy, tv, tm->firstEnum, uses, isProp, true)) {
             return;
           }
-          members.emplace_back(std::move(out));
+          members.emplace_back(std::move(copy));
         }
         tc = TypeConstraint::makeUnion(name, members);
         return;
       }
 
       // This unresolved name resolves to a single type.
-      assertx(tm->typeAndValueUnion.size() == 1);
-      resolveOne(tc, tm->typeAndValueUnion[0], tm->firstEnum, tm->nullable, uses, isProp, false);
+      assertx(!tm->value.isUnion());
+      resolveOne(tc, tm->value, tm->firstEnum, uses, isProp, false);
       return;
     }
 
@@ -10105,14 +10100,18 @@ void flatten_type_mappings(IndexData& index,
     work,
     [&] (const TypeMapping* typeMapping) {
       Optional<ISStringSet> seen;
-      auto nullable = typeMapping->nullable;
+      TypeConstraintFlags flags =
+        typeMapping->value.flags() & (Nullable | TypeVar | Soft | TypeConstant |
+                                      DisplayNullable | UpperBound);
       auto firstEnum = typeMapping->firstEnum;
 
       auto enumMeta = folly::get_ptr(meta.cls, typeMapping->name);
 
-      php::TypeAlias::TypeAndValueUnion tvu;
+      std::vector<TypeConstraint> tvu;
 
-      for (auto const& [type, value] : typeMapping->typeAndValueUnion) {
+      for (auto const& tc : eachTypeConstraintInUnion(typeMapping->value)) {
+        const auto type = tc.type();
+        const auto value = tc.typeName();
         auto name = value;
 
         if (type != AnnotType::Unresolved) {
@@ -10121,7 +10120,7 @@ void flatten_type_mappings(IndexData& index,
           // validate the underlying base type.
           assertx(type != AnnotType::Object);
           if (!enumMeta) {
-            tvu.emplace_back(php::TypeAndValue{type, value});
+            tvu.emplace_back(tc);
             continue;
           }
           if (!enumSupportsAnnot(type)) {
@@ -10131,10 +10130,10 @@ void flatten_type_mappings(IndexData& index,
               typeMapping->name,
               annotName(type)
             );
-            tvu.emplace_back(php::TypeAndValue{AnnotType::Unresolved, value});
+            tvu.emplace_back(AnnotType::Unresolved, tc.flags(), value);
             continue;
           }
-          tvu.emplace_back(php::TypeAndValue{type, value});
+          tvu.emplace_back(type, tc.flags() | flags, value);
           continue;
         }
 
@@ -10147,14 +10146,16 @@ void flatten_type_mappings(IndexData& index,
           queue.pop();
 
           if (auto const next = folly::get_ptr(meta.typeMappings, name)) {
-            nullable |= next->nullable;
+            flags |= static_cast<TypeConstraintFlags>(next->value.flags() & (Nullable | TypeVar | Soft | TypeConstant | DisplayNullable | UpperBound));
             if (!firstEnum) firstEnum = next->firstEnum;
 
             if (enumMeta && next->firstEnum) {
               enumMeta->deps.emplace(next->firstEnum);
             }
 
-            for (auto const& [next_type, next_value] : next->typeAndValueUnion) {
+            for (auto const& next_tc : eachTypeConstraintInUnion(next->value)) {
+              auto next_type = next_tc.type();
+              auto next_value = next_tc.typeName();
               if (next_type == AnnotType::Unresolved) {
                 queue.push(next_value);
                 continue;
@@ -10169,10 +10170,10 @@ void flatten_type_mappings(IndexData& index,
                   firstEnum->isame(typeMapping->name)
                     ? "" : folly::sformat(" (via {})", firstEnum)
                 );
-                tvu.emplace_back(php::TypeAndValue{AnnotType::Unresolved, name});
+                tvu.emplace_back(AnnotType::Unresolved, tc.flags() | flags, name);
                 continue;
               }
-              tvu.emplace_back(php::TypeAndValue{next_type, next_value});
+              tvu.emplace_back(next_type, tc.flags() | flags, next_value);
             }
           } else if (index.classRefs.count(name)) {
             if (firstEnum) {
@@ -10185,10 +10186,11 @@ void flatten_type_mappings(IndexData& index,
               );
             }
 
-            tvu.emplace_back(php::TypeAndValue {
+            tvu.emplace_back(
               firstEnum ? AnnotType::Unresolved : AnnotType::Object,
+              tc.flags() | flags,
               name
-            });
+            );
             break;
           } else {
             FTRACE(
@@ -10199,7 +10201,7 @@ void flatten_type_mappings(IndexData& index,
               (firstEnum && !firstEnum->isame(typeMapping->name))
                 ? folly::sformat(" (via {})", firstEnum) : ""
             );
-            tvu.emplace_back(php::TypeAndValue{AnnotType::Unresolved, name});
+            tvu.emplace_back(AnnotType::Unresolved, tc.flags() | flags, name);
             break;
           }
 
@@ -10220,47 +10222,29 @@ void flatten_type_mappings(IndexData& index,
               return TypeMapping {
                 typeMapping->name,
                 firstEnum,
-                {php::TypeAndValue{AnnotType::Unresolved, name}},
-                nullable
+                TypeConstraint{AnnotType::Unresolved, flags, name},
               };
             }
           }
         }
       }
       assertx(!tvu.empty());
-      return TypeMapping {
-        typeMapping->name,
-        firstEnum,
-        std::move(tvu),
-        nullable
-      };
+      auto value = TypeConstraint::makeUnion(typeMapping->name, std::move(tvu));
+      return TypeMapping { typeMapping->name, firstEnum, value };
     }
   );
 
   for (auto& after : resolved) {
-    assertx(!after.typeAndValueUnion.empty());
     auto const name = after.name;
-    bool unresolved = std::any_of(after.typeAndValueUnion.begin(),
-                                  after.typeAndValueUnion.end(),
-                                  [](const php::TypeAndValue& tv) {
-                                    return tv.type == AnnotType::Unresolved;
-                                  });
     using namespace folly::gen;
     FTRACE(
-      4, "Type-mapping '{}' flattened to {}({}){}\n",
+      4, "Type-mapping '{}' flattened to {}{}\n",
       name,
-      from(after.typeAndValueUnion)
-        | map([&] (const php::TypeAndValue& tv) { return annotName(tv.type); })
-        | unsplit<std::string>("|"),
-      from(after.typeAndValueUnion)
-        | map([&] (const php::TypeAndValue& tv) {
-            return tv.value && !tv.value->empty() ? tv.value->toCppString() : "";
-          })
-        | unsplit<std::string>("|"),
+      after.value.debugName(),
       (after.firstEnum && !after.firstEnum->isame(name))
         ? folly::sformat(" (via {})", after.firstEnum) : ""
     );
-    if (unresolved && meta.cls.count(name)) {
+    if (after.value.isUnresolved() && meta.cls.count(name)) {
       FTRACE(4, "  Marking enum '{}' as uninstantiable\n", name);
       meta.cls.at(name).uninstantiable = true;
     }

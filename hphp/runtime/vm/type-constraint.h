@@ -84,8 +84,8 @@ struct TypeConstraint {
     size_t stableHash() const;
     bool operator==(const ClassConstraint& o) const;
 
-    void serdeHelper(BlobDecoder& sd, bool resolved);
-    void serdeHelper(BlobEncoder& sd, bool resolved) const;
+    void serdeHelper(BlobDecoder& sd, bool isObject);
+    void serdeHelper(BlobEncoder& sd, bool isObject) const;
 
     void init(AnnotType type);
   };
@@ -358,9 +358,14 @@ struct TypeConstraint {
     return m_u.union_.m_mask & kUnionTypeString;
   }
 
-  AnnotType type()  const {
+  AnnotType type() const {
     assertx(!isUnion());
     return m_u.single.type;
+  }
+
+  void setType(AnnotType ty) {
+    assertx(!isUnion());
+    m_u.single.type = ty;
   }
 
   bool validForProp() const;

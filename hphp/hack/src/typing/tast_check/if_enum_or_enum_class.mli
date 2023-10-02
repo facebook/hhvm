@@ -6,14 +6,29 @@
  *
  *)
 type kind =
-  | Enum
-  | EnumClass
-  | EnumClassLabel
+  | Enum of {
+      name: string;
+      class_decl: Decl_provider.class_decl;
+    }
+  | EnumClass of {
+      name: string;
+      interface: Typing_defs.locl_ty;
+      class_decl: Decl_provider.class_decl;
+    }
+  | EnumClassLabel of {
+      name: string;
+      interface: Typing_defs.locl_ty;
+      class_decl: Decl_provider.class_decl;
+    }
+
+val name : kind -> string
+
+val decl : kind -> Decl_provider.class_decl
 
 val apply :
   Tast_env.env ->
   default:'a ->
-  f:(kind -> Tast_env.env -> string -> 'a) ->
+  f:(kind -> 'a) ->
   Decl_provider.type_key ->
   Typing_defs.locl_phase Typing_defs.ty list ->
   'a

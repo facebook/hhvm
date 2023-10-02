@@ -48,9 +48,9 @@ let is_like_enum env ty =
 let get_constant env tc kind (seen, has_default) case =
   let (kind, is_enum_class_label) =
     match kind with
-    | If_enum_or_enum_class.Enum -> ("enum ", false)
-    | If_enum_or_enum_class.EnumClass -> ("enum class ", false)
-    | If_enum_or_enum_class.EnumClassLabel -> ("enum class ", true)
+    | If_enum_or_enum_class.Enum _ -> ("enum ", false)
+    | If_enum_or_enum_class.EnumClass _ -> ("enum class ", false)
+    | If_enum_or_enum_class.EnumClassLabel _ -> ("enum class ", true)
   in
   let check_case pos cls const =
     (* wish:T109260699 *)
@@ -103,9 +103,9 @@ let check_enum_exhaustiveness
     env pos tc kind (caselist, dfl) coming_from_unresolved =
   let str_kind =
     match kind with
-    | If_enum_or_enum_class.Enum -> "Enum"
-    | If_enum_or_enum_class.EnumClass
-    | If_enum_or_enum_class.EnumClassLabel ->
+    | If_enum_or_enum_class.Enum _ -> "Enum"
+    | If_enum_or_enum_class.EnumClass _
+    | If_enum_or_enum_class.EnumClassLabel _ ->
       "Enum class"
   in
   (* If this check comes from an enum inside a Tunion, then
@@ -184,8 +184,8 @@ let rec check_exhaustiveness_
      inside then it tells the enum exhaustiveness checker to
      not punish for extra default *)
   let (env, ty) = Env.expand_type env ty in
-  let check kind env id ~outcomes =
-    let dep = Typing_deps.Dep.AllMembers id in
+  let check env kind ~outcomes =
+    let dep = Typing_deps.Dep.AllMembers (If_enum_or_enum_class.name kind) in
     let decl_env = Env.get_decl_env env in
     Option.iter decl_env.Decl_env.droot ~f:(fun root ->
         Typing_deps.add_idep (Env.get_deps_mode env) root dep);
@@ -196,8 +196,7 @@ let rec check_exhaustiveness_
         decl_env.Decl_env.droot
         decl_env.Decl_env.droot_member
         dep;
-
-    let tc = unsafe_opt @@ Env.get_enum env id in
+    let tc = If_enum_or_enum_class.decl kind in
     check_enum_exhaustiveness
       env
       pos
@@ -219,7 +218,7 @@ let rec check_exhaustiveness_
                   If_enum_or_enum_class.apply
                     env
                     ~default:false
-                    ~f:(fun _ _ _ -> true)
+                    ~f:(fun _ -> true)
                     name
                     args
                 | _ -> false)
@@ -262,7 +261,7 @@ let rec check_exhaustiveness_
     If_enum_or_enum_class.apply
       env
       ~default:(outcomes, env)
-      ~f:(check ~outcomes)
+      ~f:(check env ~outcomes)
       name
       args
   | Tany _

@@ -41,19 +41,19 @@ module EnumInfo = struct
         ("decl_pos", Pos_or_decl.json decl_pos);
       ]
 
+  let of_decl decl ~name =
+    decl
+    |> Decl_provider.Class.consts
+    |> List.filter_map ~f:(fun (name, _) ->
+           if String.(name <> "class") then
+             Some (Utils.strip_ns name)
+           else
+             None)
+    |> EnumConstSet.of_list
+    |> fun consts -> { name; decl_pos = Decl_provider.Class.pos decl; consts }
+
   let of_env env name =
-    Tast_env.get_enum env name
-    |> Option.map ~f:(fun decl ->
-           let decl_pos = Decl_provider.Class.pos decl in
-           decl
-           |> Decl_provider.Class.consts
-           |> List.filter_map ~f:(fun (name, _) ->
-                  if String.(name <> "class") then
-                    Some (Utils.strip_ns name)
-                  else
-                    None)
-           |> EnumConstSet.of_list
-           |> fun consts -> { name; decl_pos; consts })
+    Tast_env.get_enum env name |> Option.map ~f:(of_decl ~name)
 end
 
 type literal = EnumErr.Const.t
@@ -267,20 +267,18 @@ let rec symbolic_dnf_values env ty : ValueSet.t =
   | Tneg (Neg_class _) (* a safe over-approximation *)
   | Tany _ ->
     ValueSet.universe
-  | Tnewtype (name, args, _) ->
+  | Tnewtype (newtype_name, args, _) ->
     let open If_enum_or_enum_class in
     apply
       env
-      name
+      newtype_name
       args
       ~default:(ValueSet.singleton Value.Unsupported)
-      ~f:(fun kind env _name ->
-        match kind with
-        | Enum ->
-          ValueSet.singleton
-            (Value.Enum (EnumInfo.of_env env name |> Option.value_exn))
-        | EnumClass
-        | EnumClassLabel ->
+      ~f:(function
+        | Enum { name; class_decl } ->
+          ValueSet.singleton (Value.Enum (EnumInfo.of_decl ~name class_decl))
+        | EnumClass _
+        | EnumClassLabel _ ->
           ValueSet.singleton Value.Unsupported)
   | Tdynamic
   | Ttuple _

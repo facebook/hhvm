@@ -58,13 +58,9 @@ impl<'a> TextualFile<'a> {
             curry_tys: Default::default(),
         }
     }
+}
 
-    fn register_called_function(&mut self, target: &FunctionName) {
-        if !target.contains_unknown() && !self.called_functions.contains(target) {
-            self.called_functions.insert(target.clone());
-        }
-    }
-
+impl TextualFile<'_> {
     pub(crate) fn debug_separator(&mut self) -> Result {
         writeln!(self.w)?;
         Ok(())
@@ -103,11 +99,6 @@ impl<'a> TextualFile<'a> {
 
         writeln!(self.w, "): {}", ret_ty.display(&self.strings))?;
         Ok(())
-    }
-
-    #[allow(dead_code)]
-    pub(crate) fn define_global(&mut self, name: GlobalName, ty: Ty) {
-        self.internal_globals.insert(name, ty);
     }
 
     fn declare_unknown_function(&mut self, name: &FunctionName) -> Result {
@@ -206,26 +197,9 @@ impl<'a> TextualFile<'a> {
         Ok(result)
     }
 
-    fn write_metadata<'s>(
-        &mut self,
-        metadata: impl Iterator<Item = (&'s str, &'s Const)>,
-    ) -> Result {
-        for (k, v) in metadata {
-            // Special case - for a false value just emit nothing.
-            if matches!(v, Const::False) {
-                continue;
-            }
-
-            self.w.write_all(b".")?;
-            self.w.write_all(k.as_bytes())?;
-            // Special case - for a true value just emit the key.
-            if !matches!(v, Const::True) {
-                self.w.write_all(b"=")?;
-                write!(self.w, "{}", FmtConst(v, &self.strings))?;
-            }
-            self.w.write_all(b" ")?;
-        }
-        Ok(())
+    #[allow(dead_code)]
+    pub(crate) fn define_global(&mut self, name: GlobalName, ty: Ty) {
+        self.internal_globals.insert(name, ty);
     }
 
     pub(crate) fn define_type<'s>(
@@ -280,6 +254,12 @@ impl<'a> TextualFile<'a> {
         Ok(())
     }
 
+    fn register_called_function(&mut self, target: &FunctionName) {
+        if !target.contains_unknown() && !self.called_functions.contains(target) {
+            self.called_functions.insert(target.clone());
+        }
+    }
+
     pub(crate) fn set_attribute(&mut self, attr: FileAttribute) -> Result {
         match attr {
             FileAttribute::SourceLanguage(lang) => {
@@ -292,67 +272,6 @@ impl<'a> TextualFile<'a> {
     pub(crate) fn write_comment(&mut self, msg: &str) -> Result {
         writeln!(self.w, "// {msg}")?;
         Ok(())
-    }
-
-    pub(crate) fn write_epilogue<T: Eq + std::hash::Hash + Copy>(
-        &mut self,
-        builtins: &HashMap<FunctionName, T>,
-    ) -> Result<HashSet<T>> {
-        let strings = &Arc::clone(&self.strings);
-
-        if !self.internal_globals.is_empty() {
-            self.write_comment("----- GLOBALS -----")?;
-
-            for (name, ty) in self
-                .internal_globals
-                .iter()
-                .sorted_by(|(n1, _), (n2, _)| n1.cmp(n2, strings))
-            {
-                writeln!(
-                    self.w,
-                    "global {name} : {ty}",
-                    name = name.display(strings),
-                    ty = ty.display(strings)
-                )?;
-            }
-            self.debug_separator()?;
-        }
-
-        if !self.curry_tys.is_empty() {
-            self.write_comment("----- CURRIES -----")?;
-
-            let curry_tys = std::mem::take(&mut self.curry_tys);
-            for curry in curry_tys.into_iter() {
-                self.write_curry_definition(curry)?;
-            }
-
-            self.debug_separator()?;
-        }
-
-        let (builtins, mut non_builtin_fns): (HashSet<T>, Vec<FunctionName>) =
-            (&self.called_functions - &self.internal_functions)
-                .into_iter()
-                .partition_map(|f| match builtins.get(&f as &FunctionName) {
-                    Some(b) => itertools::Either::Left(b),
-                    None => itertools::Either::Right(f),
-                });
-        non_builtin_fns.sort_by(|a, b| a.cmp(b, strings));
-
-        let referenced_globals =
-            &self.referenced_globals - &self.internal_globals.keys().cloned().collect();
-
-        if !non_builtin_fns.is_empty() || !referenced_globals.is_empty() {
-            self.write_comment("----- EXTERNALS -----")?;
-            for name in non_builtin_fns {
-                self.declare_unknown_function(&name)?;
-            }
-            for name in referenced_globals {
-                self.declare_unknown_global(&name)?;
-            }
-            self.debug_separator()?;
-        }
-
-        Ok(builtins)
     }
 
     fn write_curry_definition(&mut self, curry: CurryTy) -> Result {
@@ -463,6 +382,67 @@ impl<'a> TextualFile<'a> {
         Ok(())
     }
 
+    pub(crate) fn write_epilogue<T: Eq + std::hash::Hash + Copy>(
+        &mut self,
+        builtins: &HashMap<FunctionName, T>,
+    ) -> Result<HashSet<T>> {
+        let strings = &Arc::clone(&self.strings);
+
+        if !self.internal_globals.is_empty() {
+            self.write_comment("----- GLOBALS -----")?;
+
+            for (name, ty) in self
+                .internal_globals
+                .iter()
+                .sorted_by(|(n1, _), (n2, _)| n1.cmp(n2, strings))
+            {
+                writeln!(
+                    self.w,
+                    "global {name} : {ty}",
+                    name = name.display(strings),
+                    ty = ty.display(strings)
+                )?;
+            }
+            self.debug_separator()?;
+        }
+
+        if !self.curry_tys.is_empty() {
+            self.write_comment("----- CURRIES -----")?;
+
+            let curry_tys = std::mem::take(&mut self.curry_tys);
+            for curry in curry_tys.into_iter() {
+                self.write_curry_definition(curry)?;
+            }
+
+            self.debug_separator()?;
+        }
+
+        let (builtins, mut non_builtin_fns): (HashSet<T>, Vec<FunctionName>) =
+            (&self.called_functions - &self.internal_functions)
+                .into_iter()
+                .partition_map(|f| match builtins.get(&f as &FunctionName) {
+                    Some(b) => itertools::Either::Left(b),
+                    None => itertools::Either::Right(f),
+                });
+        non_builtin_fns.sort_by(|a, b| a.cmp(b, strings));
+
+        let referenced_globals =
+            &self.referenced_globals - &self.internal_globals.keys().cloned().collect();
+
+        if !non_builtin_fns.is_empty() || !referenced_globals.is_empty() {
+            self.write_comment("----- EXTERNALS -----")?;
+            for name in non_builtin_fns {
+                self.declare_unknown_function(&name)?;
+            }
+            for name in referenced_globals {
+                self.declare_unknown_global(&name)?;
+            }
+            self.debug_separator()?;
+        }
+
+        Ok(builtins)
+    }
+
     fn write_full_loc(&mut self, src_loc: &SrcLoc) -> Result {
         let filename = self.strings.lookup_bstr(src_loc.filename.0);
         writeln!(self.w, "// .file \"{filename}\"")?;
@@ -473,6 +453,28 @@ impl<'a> TextualFile<'a> {
 
     fn write_line_loc(&mut self, src_loc: &SrcLoc) -> Result {
         writeln!(self.w, "// .line {}", src_loc.line_begin)?;
+        Ok(())
+    }
+
+    fn write_metadata<'s>(
+        &mut self,
+        metadata: impl Iterator<Item = (&'s str, &'s Const)>,
+    ) -> Result {
+        for (k, v) in metadata {
+            // Special case - for a false value just emit nothing.
+            if matches!(v, Const::False) {
+                continue;
+            }
+
+            self.w.write_all(b".")?;
+            self.w.write_all(k.as_bytes())?;
+            // Special case - for a true value just emit the key.
+            if !matches!(v, Const::True) {
+                self.w.write_all(b"=")?;
+                write!(self.w, "{}", FmtConst(v, &self.strings))?;
+            }
+            self.w.write_all(b" ")?;
+        }
         Ok(())
     }
 }
@@ -930,6 +932,68 @@ impl FuncBuilder<'_, '_> {
 }
 
 impl FuncBuilder<'_, '_> {
+    pub(crate) fn call(&mut self, target: &FunctionName, params: impl VarArgs) -> Result<Sid> {
+        let params = params.into_exprs();
+        let dst = self.alloc_sid();
+        write!(self.txf.w, "{INDENT}{dst} = ", dst = FmtSid(dst),)?;
+        self.write_call_expr(target, &params)?;
+        writeln!(self.txf.w)?;
+        Ok(dst)
+    }
+
+    /// Call the target as a static call (without virtual dispatch).
+    pub(crate) fn call_static(
+        &mut self,
+        target: &FunctionName,
+        this: Expr,
+        params: impl VarArgs,
+    ) -> Result<Sid> {
+        self.txf.register_called_function(target);
+        let dst = self.alloc_sid();
+        write!(
+            self.txf.w,
+            "{INDENT}{dst} = {target}(",
+            dst = FmtSid(dst),
+            target = target.display(&self.txf.strings)
+        )?;
+        self.write_expr(&this)?;
+        let params = params.into_exprs();
+        for param in params {
+            self.txf.w.write_all(b", ")?;
+            self.write_expr(&param)?;
+        }
+        writeln!(self.txf.w, ")")?;
+        Ok(dst)
+    }
+
+    /// Call the target as a virtual call.
+    pub(crate) fn call_virtual(
+        &mut self,
+        target: &FunctionName,
+        this: Expr,
+        params: impl VarArgs,
+    ) -> Result<Sid> {
+        self.txf.register_called_function(target);
+        let dst = self.alloc_sid();
+        write!(self.txf.w, "{INDENT}{dst} = ", dst = FmtSid(dst),)?;
+        self.write_expr(&this)?;
+        write!(self.txf.w, ".{}(", target.display(&self.txf.strings))?;
+        let params = params.into_exprs();
+        let mut sep = "";
+        for param in params {
+            self.txf.w.write_all(sep.as_bytes())?;
+            self.write_expr(&param)?;
+            sep = ", ";
+        }
+        writeln!(self.txf.w, ")")?;
+        Ok(dst)
+    }
+
+    pub(crate) fn comment(&mut self, msg: &str) -> Result<()> {
+        writeln!(self.txf.w, "// {msg}")?;
+        Ok(())
+    }
+
     pub(crate) fn jmp(&mut self, targets: &[BlockId], params: impl VarArgs) -> Result {
         assert!(!targets.is_empty());
 
@@ -954,6 +1018,168 @@ impl FuncBuilder<'_, '_> {
         }
 
         writeln!(self.txf.w)?;
+
+        Ok(())
+    }
+
+    pub(crate) fn lazy_class_initialize(&mut self, ty: &Ty) -> Result<Sid> {
+        let dst = self.alloc_sid();
+        let strings = &self.txf.strings;
+        writeln!(
+            self.txf.w,
+            "{INDENT}{dst} = __sil_lazy_class_initialize(<{ty}>)",
+            dst = FmtSid(dst),
+            ty = ty.display(strings),
+        )?;
+        Ok(dst)
+    }
+
+    pub(crate) fn load(&mut self, ty: &Ty, src: impl Into<Expr>) -> Result<Sid> {
+        let src = src.into();
+        // Technically the load should include the type because you could have
+        // two loads of the same expression to two different types. I doubt that
+        // it matters in reality.
+        Ok(if let Some(sid) = self.cache.lookup(&src) {
+            sid
+        } else {
+            let dst = self.alloc_sid();
+            write!(
+                self.txf.w,
+                "{INDENT}{dst}: {ty} = load ",
+                dst = FmtSid(dst),
+                ty = ty.display(&self.txf.strings),
+            )?;
+            self.write_expr(&src)?;
+            writeln!(self.txf.w)?;
+            self.cache.load(&src, dst);
+            dst
+        })
+    }
+
+    // Terminate this branch if `expr` is false.
+    pub(crate) fn prune(&mut self, expr: impl Into<Expr>) -> Result {
+        let expr = expr.into();
+        write!(self.txf.w, "{INDENT}prune ")?;
+        self.write_expr(&expr)?;
+        writeln!(self.txf.w)?;
+        Ok(())
+    }
+
+    // Terminate this branch if `expr` is true.
+    pub(crate) fn prune_not(&mut self, expr: impl Into<Expr>) -> Result {
+        let expr = expr.into();
+        write!(self.txf.w, "{INDENT}prune ! ")?;
+        self.write_expr(&expr)?;
+        writeln!(self.txf.w)?;
+        Ok(())
+    }
+
+    pub(crate) fn ret(&mut self, expr: impl Into<Expr>) -> Result {
+        let expr = expr.into();
+        write!(self.txf.w, "{INDENT}ret ",)?;
+        self.write_expr(&expr)?;
+        writeln!(self.txf.w)?;
+        Ok(())
+    }
+
+    pub(crate) fn store(
+        &mut self,
+        dst: impl Into<Expr>,
+        src: impl Into<Expr>,
+        src_ty: &Ty,
+    ) -> Result {
+        let dst = dst.into();
+        let src = src.into();
+        write!(self.txf.w, "{INDENT}store ")?;
+        self.write_expr(&dst)?;
+        self.txf.w.write_all(b" <- ")?;
+        self.write_expr(&src)?;
+        writeln!(self.txf.w, ": {ty}", ty = src_ty.display(&self.txf.strings))?;
+        self.cache.store(&dst, src);
+        Ok(())
+    }
+
+    pub(crate) fn unreachable(&mut self) -> Result {
+        writeln!(self.txf.w, "{INDENT}unreachable")?;
+        Ok(())
+    }
+
+    /// A curry boxes up some parameters and returns an invokable.  This has to
+    /// be an intrinsic so we don't end up a ton of little duplicate classes.
+    ///
+    /// It's usually used for function pointers or meth_callers:
+    ///
+    ///   `foo<>` turns into `AllocCurry("<$root>", "foo", null, [])`.
+    ///   `C::foo<>` turns into `AllocCurry("<C$static>", "foo", static_this, [])`.
+    ///   `$x->foo<>` turns into `AllocCurry("<C>", "foo", $x, [])`.
+    ///
+    /// Note that it's important that when the curry is invoked it replaces the
+    /// callee's `this` with its own stored `this`.
+    ///
+    /// Curry can also be used for partial apply:
+    ///
+    ///   x = AllocCurry("<$root>", "foo", null, [1, 2])
+    ///   x(3, 4)
+    ///
+    /// would be the same as:
+    ///
+    ///   foo(1, 2, 3, 4)
+    ///
+    /// If `this` is Some(_) then the curry will be a virtual call.
+    ///
+    pub(crate) fn write_alloc_curry(
+        &mut self,
+        name: FunctionName,
+        this: Option<Expr>,
+        args: impl VarArgs,
+    ) -> Result<Sid> {
+        let args = args.into_exprs();
+
+        let curry_ty = CurryTy {
+            name: name.clone(),
+            virtual_call: this.is_some(),
+            arg_tys: args.iter().map(|expr| expr.ty()).collect(),
+        };
+        let ty = curry_ty.ty();
+        self.txf.curry_tys.insert(curry_ty);
+
+        let obj = self.write_expr_stmt(Expr::Alloc(ty.clone()))?;
+
+        if let Some(this) = this {
+            let FunctionName::Method(captured_this_ty, _) = &name else {
+                unreachable!();
+            };
+            self.store(
+                Expr::Field(Box::new(obj.into()), ty.clone(), FieldName::raw("this")),
+                this,
+                &Ty::named_type_ptr(captured_this_ty.clone()),
+            )?;
+        }
+
+        for (idx, arg) in args.into_iter().enumerate() {
+            let field_ty = arg.ty();
+            let field_name = FieldName::raw(format!("arg{idx}"));
+            self.store(Expr::field(obj, ty.clone(), field_name), arg, &field_ty)?;
+        }
+
+        Ok(obj)
+    }
+
+    fn write_call_expr(&mut self, target: &FunctionName, params: &[Expr]) -> Result {
+        self.txf.register_called_function(target);
+        write!(self.txf.w, "{}(", target.display(&self.txf.strings))?;
+        let mut sep = "";
+        for param in params.iter() {
+            self.txf.w.write_all(sep.as_bytes())?;
+            self.write_expr(param)?;
+            sep = ", ";
+        }
+        write!(self.txf.w, ")")?;
+
+        // Treat any call as if it can modify memory.
+        for param in params.iter() {
+            self.cache.clear_expr(param);
+        }
 
         Ok(())
     }
@@ -1048,230 +1274,6 @@ impl FuncBuilder<'_, '_> {
             }
             writeln!(self.txf.w, "):")?;
         }
-        Ok(())
-    }
-
-    /// A curry boxes up some parameters and returns an invokable.  This has to
-    /// be an intrinsic so we don't end up a ton of little duplicate classes.
-    ///
-    /// It's usually used for function pointers or meth_callers:
-    ///
-    ///   `foo<>` turns into `AllocCurry("<$root>", "foo", null, [])`.
-    ///   `C::foo<>` turns into `AllocCurry("<C$static>", "foo", static_this, [])`.
-    ///   `$x->foo<>` turns into `AllocCurry("<C>", "foo", $x, [])`.
-    ///
-    /// Note that it's important that when the curry is invoked it replaces the
-    /// callee's `this` with its own stored `this`.
-    ///
-    /// Curry can also be used for partial apply:
-    ///
-    ///   x = AllocCurry("<$root>", "foo", null, [1, 2])
-    ///   x(3, 4)
-    ///
-    /// would be the same as:
-    ///
-    ///   foo(1, 2, 3, 4)
-    ///
-    /// If `this` is Some(_) then the curry will be a virtual call.
-    ///
-    pub(crate) fn write_alloc_curry(
-        &mut self,
-        name: FunctionName,
-        this: Option<Expr>,
-        args: impl VarArgs,
-    ) -> Result<Sid> {
-        let args = args.into_exprs();
-
-        let curry_ty = CurryTy {
-            name: name.clone(),
-            virtual_call: this.is_some(),
-            arg_tys: args.iter().map(|expr| expr.ty()).collect(),
-        };
-        let ty = curry_ty.ty();
-        self.txf.curry_tys.insert(curry_ty);
-
-        let obj = self.write_expr_stmt(Expr::Alloc(ty.clone()))?;
-
-        if let Some(this) = this {
-            let FunctionName::Method(captured_this_ty, _) = &name else {
-                unreachable!();
-            };
-            self.store(
-                Expr::Field(Box::new(obj.into()), ty.clone(), FieldName::raw("this")),
-                this,
-                &Ty::named_type_ptr(captured_this_ty.clone()),
-            )?;
-        }
-
-        for (idx, arg) in args.into_iter().enumerate() {
-            let field_ty = arg.ty();
-            let field_name = FieldName::raw(format!("arg{idx}"));
-            self.store(Expr::field(obj, ty.clone(), field_name), arg, &field_ty)?;
-        }
-
-        Ok(obj)
-    }
-
-    /// Call the target as a static call (without virtual dispatch).
-    pub(crate) fn call_static(
-        &mut self,
-        target: &FunctionName,
-        this: Expr,
-        params: impl VarArgs,
-    ) -> Result<Sid> {
-        self.txf.register_called_function(target);
-        let dst = self.alloc_sid();
-        write!(
-            self.txf.w,
-            "{INDENT}{dst} = {target}(",
-            dst = FmtSid(dst),
-            target = target.display(&self.txf.strings)
-        )?;
-        self.write_expr(&this)?;
-        let params = params.into_exprs();
-        for param in params {
-            self.txf.w.write_all(b", ")?;
-            self.write_expr(&param)?;
-        }
-        writeln!(self.txf.w, ")")?;
-        Ok(dst)
-    }
-
-    /// Call the target as a virtual call.
-    pub(crate) fn call_virtual(
-        &mut self,
-        target: &FunctionName,
-        this: Expr,
-        params: impl VarArgs,
-    ) -> Result<Sid> {
-        self.txf.register_called_function(target);
-        let dst = self.alloc_sid();
-        write!(self.txf.w, "{INDENT}{dst} = ", dst = FmtSid(dst),)?;
-        self.write_expr(&this)?;
-        write!(self.txf.w, ".{}(", target.display(&self.txf.strings))?;
-        let params = params.into_exprs();
-        let mut sep = "";
-        for param in params {
-            self.txf.w.write_all(sep.as_bytes())?;
-            self.write_expr(&param)?;
-            sep = ", ";
-        }
-        writeln!(self.txf.w, ")")?;
-        Ok(dst)
-    }
-
-    fn write_call_expr(&mut self, target: &FunctionName, params: &[Expr]) -> Result {
-        self.txf.register_called_function(target);
-        write!(self.txf.w, "{}(", target.display(&self.txf.strings))?;
-        let mut sep = "";
-        for param in params.iter() {
-            self.txf.w.write_all(sep.as_bytes())?;
-            self.write_expr(param)?;
-            sep = ", ";
-        }
-        write!(self.txf.w, ")")?;
-
-        // Treat any call as if it can modify memory.
-        for param in params.iter() {
-            self.cache.clear_expr(param);
-        }
-
-        Ok(())
-    }
-
-    pub(crate) fn call(&mut self, target: &FunctionName, params: impl VarArgs) -> Result<Sid> {
-        let params = params.into_exprs();
-        let dst = self.alloc_sid();
-        write!(self.txf.w, "{INDENT}{dst} = ", dst = FmtSid(dst),)?;
-        self.write_call_expr(target, &params)?;
-        writeln!(self.txf.w)?;
-        Ok(dst)
-    }
-
-    pub(crate) fn comment(&mut self, msg: &str) -> Result<()> {
-        writeln!(self.txf.w, "// {msg}")?;
-        Ok(())
-    }
-
-    pub(crate) fn lazy_class_initialize(&mut self, ty: &Ty) -> Result<Sid> {
-        let dst = self.alloc_sid();
-        let strings = &self.txf.strings;
-        writeln!(
-            self.txf.w,
-            "{INDENT}{dst} = __sil_lazy_class_initialize(<{ty}>)",
-            dst = FmtSid(dst),
-            ty = ty.display(strings),
-        )?;
-        Ok(dst)
-    }
-
-    pub(crate) fn load(&mut self, ty: &Ty, src: impl Into<Expr>) -> Result<Sid> {
-        let src = src.into();
-        // Technically the load should include the type because you could have
-        // two loads of the same expression to two different types. I doubt that
-        // it matters in reality.
-        Ok(if let Some(sid) = self.cache.lookup(&src) {
-            sid
-        } else {
-            let dst = self.alloc_sid();
-            write!(
-                self.txf.w,
-                "{INDENT}{dst}: {ty} = load ",
-                dst = FmtSid(dst),
-                ty = ty.display(&self.txf.strings),
-            )?;
-            self.write_expr(&src)?;
-            writeln!(self.txf.w)?;
-            self.cache.load(&src, dst);
-            dst
-        })
-    }
-
-    // Terminate this branch if `expr` is false.
-    pub(crate) fn prune(&mut self, expr: impl Into<Expr>) -> Result {
-        let expr = expr.into();
-        write!(self.txf.w, "{INDENT}prune ")?;
-        self.write_expr(&expr)?;
-        writeln!(self.txf.w)?;
-        Ok(())
-    }
-
-    // Terminate this branch if `expr` is true.
-    pub(crate) fn prune_not(&mut self, expr: impl Into<Expr>) -> Result {
-        let expr = expr.into();
-        write!(self.txf.w, "{INDENT}prune ! ")?;
-        self.write_expr(&expr)?;
-        writeln!(self.txf.w)?;
-        Ok(())
-    }
-
-    pub(crate) fn ret(&mut self, expr: impl Into<Expr>) -> Result {
-        let expr = expr.into();
-        write!(self.txf.w, "{INDENT}ret ",)?;
-        self.write_expr(&expr)?;
-        writeln!(self.txf.w)?;
-        Ok(())
-    }
-
-    pub(crate) fn store(
-        &mut self,
-        dst: impl Into<Expr>,
-        src: impl Into<Expr>,
-        src_ty: &Ty,
-    ) -> Result {
-        let dst = dst.into();
-        let src = src.into();
-        write!(self.txf.w, "{INDENT}store ")?;
-        self.write_expr(&dst)?;
-        self.txf.w.write_all(b" <- ")?;
-        self.write_expr(&src)?;
-        writeln!(self.txf.w, ": {ty}", ty = src_ty.display(&self.txf.strings))?;
-        self.cache.store(&dst, src);
-        Ok(())
-    }
-
-    pub(crate) fn unreachable(&mut self) -> Result {
-        writeln!(self.txf.w, "{INDENT}unreachable")?;
         Ok(())
     }
 

@@ -465,7 +465,7 @@ impl TextualFile<'_> {
             // Special case - for a true value just emit the key.
             if !matches!(v, Const::True) {
                 self.w.write_all(b"=")?;
-                write!(self.w, "{}", FmtConst(v, &self.strings))?;
+                self.write_const(v)?;
             }
             self.w.write_all(b" ")?;
         }
@@ -703,26 +703,6 @@ impl From<f64> for Const {
 impl From<i64> for Const {
     fn from(i: i64) -> Self {
         Const::Int(i)
-    }
-}
-
-struct FmtConst<'a>(&'a Const, &'a StringInterner);
-
-impl fmt::Display for FmtConst<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let FmtConst(const_, strings) = *self;
-        match const_ {
-            Const::False => f.write_str("false"),
-            Const::Float(d) => write!(f, "{:?}", d.to_f64()),
-            Const::Int(i) => i.fmt(f),
-            Const::LazyClass(ref s) => write!(f, "__sil_get_lazy_class(<{}>)", s.display(strings)),
-            Const::Null => f.write_str("null"),
-            Const::String(ref s) => {
-                // String should already be escaped...
-                write!(f, "\"{s}\"")
-            }
-            Const::True => f.write_str("true"),
-        }
     }
 }
 
@@ -1290,6 +1270,29 @@ trait ExprWriter {
         Ok(())
     }
 
+    fn write_const(&mut self, value: &Const) -> Result {
+        match value {
+            Const::False => self.internal_get_writer().write_all(b"false")?,
+            Const::Float(d) => write!(self.internal_get_writer(), "{:?}", d.to_f64())?,
+            Const::Int(i) => write!(self.internal_get_writer(), "{i}")?,
+            Const::LazyClass(ref s) => {
+                let strings = self.strings();
+                write!(
+                    self.internal_get_writer(),
+                    "__sil_get_lazy_class(<{}>)",
+                    s.display(&strings)
+                )?;
+            }
+            Const::Null => self.internal_get_writer().write_all(b"null")?,
+            Const::String(ref s) => {
+                // String should already be escaped...
+                write!(self.internal_get_writer(), "\"{s}\"")?;
+            }
+            Const::True => self.internal_get_writer().write_all(b"true")?,
+        }
+        Ok(())
+    }
+
     fn write_expr(&mut self, expr: &Expr) -> Result {
         let strings = self.strings();
         match *expr {
@@ -1301,7 +1304,7 @@ trait ExprWriter {
             Expr::Call(ref target, ref params) => {
                 self.write_call_expr(target, params)?;
             }
-            Expr::Const(ref c) => write!(self.internal_get_writer(), "{}", FmtConst(c, &strings))?,
+            Expr::Const(ref c) => self.write_const(c)?,
             Expr::Deref(ref var) => {
                 self.internal_get_writer().write_all(b"&")?;
                 self.write_expr(var)?;

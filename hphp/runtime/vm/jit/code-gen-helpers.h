@@ -249,11 +249,6 @@ void emitCmpLowPtr(Vout& v, Vreg sf, Vreg reg1, Vreg reg2) {
 }
 
 /*
- * Compare `val' against the live Class::veclen_t at `mem'.
- */
-void emitCmpVecLen(Vout& v, Vreg sf, Immed val, Vptr mem);
-
-/*
  * emit an isCollection(obj) range check. The returned status
  * flags can be tested; CC_BE means true
  */

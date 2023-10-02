@@ -510,17 +510,6 @@ void cmpLowPtrImpl(Vout& v, Vreg sf, Vreg reg1, Vreg reg2, size_t size) {
   }
 }
 
-void emitCmpVecLen(Vout& v, Vreg sf, Immed val, Vptr mem) {
-  auto const size = sizeof(Class::veclen_t);
-  if (size == 2) {
-    v << cmpwim{val, mem, sf};
-  } else if (size == 4) {
-    v << cmplim{val, mem, sf};
-  } else {
-    not_implemented();
-  }
-}
-
 /*
  * Generate range check for isCollection:
  * set CC_BE if obj->m_kind - HeaderKind::Vector <= HeaderKind::ImmSet

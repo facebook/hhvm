@@ -97,17 +97,10 @@ void emitClassofNonIFace(Vout& v, Vreg lhs, Vreg rhs, Vreg dst) {
   auto const rhsTmp = v.makeReg();
   auto const rhsLen = v.makeReg();
   auto const sf = v.makeReg();
-  if (sizeof(Class::veclen_t) == 2) {
-    v << loadw{rhs[Class::classVecLenOff()], rhsTmp};
-    v << movzwq{rhsTmp, rhsLen};
-    v << cmpwm{rhsTmp, lhs[Class::classVecLenOff()], sf};
-  } else if (sizeof(Class::veclen_t) == 4) {
-    v << loadl{rhs[Class::classVecLenOff()], rhsTmp};
-    v << movzlq{rhsTmp, rhsLen};
-    v << cmplm{rhsTmp, lhs[Class::classVecLenOff()], sf};
-  } else {
-    not_implemented();
-  }
+  static_assert(sizeof(Class::classVecLen_t) == 2);
+  v << loadw{rhs[Class::classVecLenOff()], rhsTmp};
+  v << movzwq{rhsTmp, rhsLen};
+  v << cmpwm{rhsTmp, lhs[Class::classVecLenOff()], sf};
   check_subcls(v, sf, dst, lhs, rhs, rhsLen);
 }
 
@@ -154,8 +147,9 @@ void cgInstanceOfIfaceVtable(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   auto const sf = v.makeReg();
-  emitCmpVecLen(v, sf, static_cast<int32_t>(slot),
-                rcls[Class::vtableVecLenOff()]);
+  static_assert(sizeof(Class::vtableVecLen_t) == 2);
+  v << cmpwim{static_cast<int32_t>(slot), rcls[Class::vtableVecLenOff()], sf};
+
   cond(
     v, CC_A, sf, dst,
     [&] (Vout& v) {
@@ -199,8 +193,9 @@ void cgExtendsClass(IRLS& env, const IRInstruction* inst) {
     // Check the length of the class vectors.  If the candidate's is at least
     // as long as the potential base (`rhsCls'), it might be a subclass.
     auto const sf = v.makeReg();
-    emitCmpVecLen(v, sf, static_cast<int32_t>(rhsCls->classVecLen()),
-                  lhs[Class::classVecLenOff()]);
+    static_assert(sizeof(Class::classVecLen_t) == 2);
+    v << cmpwim{static_cast<int32_t>(rhsCls->classVecLen()),
+                lhs[Class::classVecLenOff()], sf};
     return check_subcls(v, sf, d, lhs, rhsCls, rhsCls->classVecLen());
   };
 

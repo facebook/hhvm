@@ -183,7 +183,7 @@ inline const LowPtr<Class>* Class::classVec() const {
   return m_classVec;
 }
 
-inline Class::veclen_t Class::classVecLen() const {
+inline Class::classVecLen_t Class::classVecLen() const {
   return m_classVecLen;
 }
 

@@ -453,14 +453,9 @@ struct Class : AtomicCountable {
   using ScopedClonesMap =
     hphp_hash_map<LowPtr<Class>, ClassPtr, smart_pointer_hash<LowPtr<Class>>>;
 
-  /*
-   * We store the length of vectors of methods, parent classes and interfaces.
-   *
-   * In lowptr builds, we limit all of these quantities to 2^16-1 to save
-   * memory.
-   */
-  using veclen_t = std::conditional<use_lowptr, uint16_t, uint32_t>::type;
-
+  using classVecLen_t = uint16_t;
+  using funcVecLen_t = uint16_t;
+  using vtableVecLen_t = uint16_t;
 
   /////////////////////////////////////////////////////////////////////////////
   // Creation and destruction.
@@ -591,7 +586,7 @@ public:
   /*
    * The size of the classVec.
    */
-  veclen_t classVecLen() const;
+  classVecLen_t classVecLen() const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1940,9 +1935,9 @@ private:
 
   unsigned m_attrCopy;
 
-  veclen_t m_classVecLen;
-  veclen_t m_funcVecLen;
-  veclen_t m_vtableVecLen{0};
+  classVecLen_t m_classVecLen;
+  funcVecLen_t m_funcVecLen;
+  vtableVecLen_t m_vtableVecLen{0};
 
   union Flags {
     struct {

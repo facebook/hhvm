@@ -254,8 +254,8 @@ unsigned loadUsedTraits(PreClass* preClass,
  */
 constexpr size_t sizeof_Class = Class::classVecOff();
 
-static constexpr size_t kClassSize = debug ? (use_lowptr ? 276 : 328)
-                                           : (use_lowptr ? 272 : 320);
+static constexpr size_t kClassSize = debug ? (use_lowptr ? 276 : 320)
+                                           : (use_lowptr ? 272 : 312);
 static_assert(CheckSize<sizeof_Class, kClassSize>(), "");
 
 /*
@@ -2082,14 +2082,26 @@ Class::Class(PreClass* preClass, Class* parent,
              unsigned classVecLen, unsigned funcVecLen)
   : m_releaseFunc{ObjectData::release}
   , m_preClass(PreClassPtr(preClass))
-  , m_classVecLen(always_safe_cast<decltype(m_classVecLen)>(classVecLen))
-  , m_funcVecLen(always_safe_cast<decltype(m_funcVecLen)>(funcVecLen))
   , m_instanceBitsIndex{kProfileInstanceBit}
   , m_parent(parent)
 #ifndef NDEBUG
   , m_magic{kMagic}
 #endif
 {
+  if (std::numeric_limits<decltype(m_classVecLen)>::max() < classVecLen) {
+    raise_error("Class %s has %d parents in the parent chain (maximum is %d)",
+                name()->data(), classVecLen,
+                std::numeric_limits<decltype(m_classVecLen)>::max());
+  }
+  m_classVecLen = always_safe_cast<decltype(m_classVecLen)>(classVecLen);
+
+  if (std::numeric_limits<decltype(m_funcVecLen)>::max() < funcVecLen) {
+    raise_error("Class %s has %d methods (maximum is %d)",
+                name()->data(), funcVecLen,
+                std::numeric_limits<decltype(m_funcVecLen)>::max());
+  }
+  m_funcVecLen = always_safe_cast<decltype(m_funcVecLen)>(funcVecLen);
+
   m_allFlags.m_maybeRedefsPropTy = false;
   m_allFlags.m_selfMaybeRedefsPropTy = false;
   m_allFlags.m_needsPropInitialCheck = false;
@@ -3947,6 +3959,12 @@ void Class::setInterfaceVtables() {
 
   auto const vtableVec = reinterpret_cast<VtableVecSlot*>(cursor);
   cursor += vtableVecSz;
+
+  if (std::numeric_limits<decltype(m_vtableVecLen)>::max() < nVtables) {
+    raise_error("Class %s has %zu vtable entries (maximum is %d)",
+                name()->data(), nVtables,
+                std::numeric_limits<decltype(m_vtableVecLen)>::max());
+  }
   m_vtableVecLen = always_safe_cast<decltype(m_vtableVecLen)>(nVtables);
   m_vtableVec = vtableVec;
   memset(vtableVec, 0, vtableVecSz);

@@ -1,0 +1,1 @@
+Fatal error: Class A has 65536 methods (maximum is 65535) in %s/methods-to-many.php on line 2

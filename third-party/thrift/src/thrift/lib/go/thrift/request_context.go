@@ -19,6 +19,7 @@ package thrift
 import (
 	"context"
 	"net"
+	"sync"
 	"time"
 )
 
@@ -113,11 +114,15 @@ const (
 )
 
 type contextHeaders struct {
-	writeHeaders map[string]string
-	readHeaders  map[string]string
+	writeHeaders    map[string]string
+	readHeaders     map[string]string
+	writeHeaderLock sync.Mutex
+	readHeaderLock  sync.Mutex
 }
 
 func (c *contextHeaders) ReadHeaders() map[string]string {
+	c.readHeaderLock.Lock()
+	defer c.readHeaderLock.Unlock()
 	res := map[string]string{}
 	for k, v := range c.readHeaders {
 		res[k] = v
@@ -126,6 +131,8 @@ func (c *contextHeaders) ReadHeaders() map[string]string {
 }
 
 func (c *contextHeaders) WriteHeaders() map[string]string {
+	c.writeHeaderLock.Lock()
+	defer c.writeHeaderLock.Unlock()
 	res := map[string]string{}
 	for k, v := range c.writeHeaders {
 		res[k] = v
@@ -134,6 +141,8 @@ func (c *contextHeaders) WriteHeaders() map[string]string {
 }
 
 func (c *contextHeaders) SetWriteHeader(k, v string) {
+	c.writeHeaderLock.Lock()
+	defer c.writeHeaderLock.Unlock()
 	if c.writeHeaders == nil {
 		c.writeHeaders = map[string]string{}
 	}
@@ -141,6 +150,8 @@ func (c *contextHeaders) SetWriteHeader(k, v string) {
 }
 
 func (c *contextHeaders) SetReadHeader(k, v string) {
+	c.readHeaderLock.Lock()
+	defer c.readHeaderLock.Unlock()
 	if c.readHeaders == nil {
 		c.readHeaders = map[string]string{}
 	}
@@ -148,19 +159,27 @@ func (c *contextHeaders) SetReadHeader(k, v string) {
 }
 
 func (c *contextHeaders) SetWriteHeaders(headers map[string]string) {
+	c.writeHeaderLock.Lock()
+	defer c.writeHeaderLock.Unlock()
 	c.writeHeaders = headers
 }
 
 func (c *contextHeaders) SetReadHeaders(headers map[string]string) {
+	c.readHeaderLock.Lock()
+	defer c.readHeaderLock.Unlock()
 	c.readHeaders = headers
 }
 
 func (c *contextHeaders) GetWriteHeader(k string) (string, bool) {
+	c.writeHeaderLock.Lock()
+	defer c.writeHeaderLock.Unlock()
 	v, ok := c.writeHeaders[k]
 	return v, ok
 }
 
 func (c *contextHeaders) GetReadHeader(k string) (string, bool) {
+	c.readHeaderLock.Lock()
+	defer c.readHeaderLock.Unlock()
 	v, ok := c.readHeaders[k]
 	return v, ok
 }

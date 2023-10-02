@@ -1,5 +1,5 @@
 File "int_string_arraykey.php", line 56, characters 11-12:
-`switch` statement nonexhaustive; at least the following cases are missing: `default` (Typing[4019])
+`switch` statement nonexhaustive; at least the following cases are missing: `default`, `int`, `string` (Typing[4019])
   File "int_string_arraykey.php", line 56, characters 11-12:
   only unions and intersections of bool, null and enums can be switched on without a default
 File "int_string_arraykey.php", line 103, characters 10-12:

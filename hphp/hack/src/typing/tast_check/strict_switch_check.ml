@@ -10,6 +10,51 @@ open Hh_prelude
 open Aast
 open Typing_defs
 module EnumErr = Typing_error.Primary.Enum
+module EnumConstSet = Set.Make (String)
+
+module EnumInfo = struct
+  type t = {
+    name: string;
+    decl_pos: (Pos_or_decl.t[@sexp.opaque]);
+        [@compare (fun _ _ -> 0)] [@hash.ignore]
+    consts: EnumConstSet.t; [@compare (fun _ _ -> 0)] [@hash.ignore]
+  }
+  [@@deriving ord, sexp, hash]
+
+  let to_json { name; consts; decl_pos } =
+    let rec take n = function
+      | [] -> []
+      | x :: xs ->
+        if n <= 0 then
+          ["..."]
+        else
+          x :: take (n - 1) xs
+    in
+    Hh_json.JSON_Object
+      [
+        ("enum", Hh_json.string_ @@ Utils.strip_ns name);
+        ( "values",
+          consts
+          |> EnumConstSet.to_list
+          |> take 10
+          |> Hh_json.array_ Hh_json.string_ );
+        ("decl_pos", Pos_or_decl.json decl_pos);
+      ]
+
+  let of_env env name =
+    Tast_env.get_enum env name
+    |> Option.map ~f:(fun decl ->
+           let decl_pos = Decl_provider.Class.pos decl in
+           decl
+           |> Decl_provider.Class.consts
+           |> List.filter_map ~f:(fun (name, _) ->
+                  if String.(name <> "class") then
+                    Some (Utils.strip_ns name)
+                  else
+                    None)
+           |> EnumConstSet.of_list
+           |> fun consts -> { name; decl_pos; consts })
+end
 
 type literal = EnumErr.Const.t
 
@@ -24,35 +69,41 @@ module Value = struct
     | Bool of bool
     | Int
     | String
+    | AllEnums
+    | Enum of EnumInfo.t
   [@@deriving ord, sexp, hash]
 
   let bools = [Bool true; Bool false]
 
-  let universe = Unsupported :: Null :: Int :: String :: bools
+  let universe = Unsupported :: Null :: Int :: String :: AllEnums :: bools
 
   let finite_or_dynamic = function
     | Unsupported
     | Int
-    | String ->
+    | String
+    | AllEnums ->
       false
     | Null
-    | Bool _ ->
+    | Bool _
+    | Enum _ ->
       true
 
   let to_json = function
-    | Unsupported -> Hh_json.string_ "Unsupported"
+    | Unsupported -> Hh_json.string_ "unsupported"
     | Null -> Hh_json.string_ "null"
     | Bool bool -> bool |> Bool.to_string |> Hh_json.string_
     | Int -> Hh_json.string_ "int"
     | String -> Hh_json.string_ "string"
+    | AllEnums -> Hh_json.string_ "enum"
+    | Enum info -> EnumInfo.to_json info
 
-  let to_literal : t -> literal option =
-    let open EnumErr.Const in
-    function
-    | Null -> Some Null
-    | Bool b -> Some (Bool b)
-    | Int -> Some (Int None)
-    | String -> Some (String None)
+  let if_missing : t -> _ option = function
+    | Null -> Some `Null
+    | Bool b -> Some (`Bool b)
+    | Int -> Some `Int
+    | String -> Some `String
+    | Enum EnumInfo.{ name; consts = _; decl_pos = _ } -> Some (`Enum name)
+    | AllEnums -> Some `AnyEnum
     | Unsupported -> None
 
   type value = t
@@ -73,25 +124,62 @@ module Value = struct
       ([Int], Some (Int (Some literal)))
     | String literal -> ([String], Some (String (Some literal)))
     | Class_const ((_, _, CI (_, class_)), (_, const)) ->
-      let is_sub env ty mk_ty =
-        Typing_subtype.is_sub_type env ty (mk_ty Reason.Rnone)
+      let rnone = Reason.Rnone in
+      let (int, string, arraykey) =
+        Typing_make_type.(int rnone, string rnone, arraykey rnone)
+      in
+      let is_sub ty1 ty2 =
+        Typing_subtype.is_sub_type (Tast_env.tast_env_as_typing_env env) ty1 ty2
       in
 
-      let values : value list =
-        (* necessary to check this to partition class constants correctly
-           according to type *)
-        if is_sub env ty Typing_make_type.int then
-          [Int]
-        else if is_sub env ty Typing_make_type.string then
-          [String]
-        else if is_sub env ty Typing_make_type.arraykey then
-          [Int; String]
+      let list_if b (x : value list) =
+        if b then
+          x
         else
-          [Unsupported]
+          []
       in
 
+      let values =
+        (* only class constants which are subtypes of arraykeys are currently supported;
+           ideally this would be restricted to only enums but this depends on how often
+           class constants are used as case expressions *)
+        if not @@ is_sub ty arraykey then
+          [Unsupported]
+        else if is_sub arraykey ty then
+          (* ty <: arraykey && arraykey <: ty *)
+          [Int; String; AllEnums]
+        else
+          (* ty <: arraykey && ! (arraykey <: ty) *)
+          list_if (is_sub ty int) [Int]
+          @ list_if (is_sub ty string) [String]
+          @ Option.value_map
+              (EnumInfo.of_env env class_)
+              ~default:[]
+              ~f:(fun info -> [Enum info; AllEnums])
+      in
       (values, Some (Label { class_; const }))
     | _ -> ([Unsupported], None)
+
+  let is_countable_enum = function
+    | Enum _ -> true
+    | Unsupported
+    | Null
+    | Bool _
+    | Int
+    | String
+    | AllEnums ->
+      false
+
+  (* NOTE: this relies on intersections between transparent enum and int/string
+     being handled by type simplification prior to the value computation. *)
+  (* NOTE: this under-approximates intersection between two enums by selecting the left *)
+  let inter v1 v2 =
+    match (v1, v2) with
+    | ((Enum _ as e), AllEnums)
+    | (AllEnums, (Enum _ as e)) ->
+      Some e
+    | (Enum info, Enum _) -> Some (Enum info)
+    | _ -> None
 end
 
 module ValueSet = struct
@@ -101,18 +189,39 @@ module ValueSet = struct
 
   let bools = of_list Value.bools
 
-  let intersection_list value_sets =
-    List.fold_right ~init:universe ~f:inter value_sets
+  let symbolic_union_list set_list =
+    (* so big_union [ { AllEnums } , { Enum i1 } , { Enum i2 } ] = { AllEnums } *)
+    let res = union_list set_list in
+    if mem res Value.AllEnums then
+      filter res ~f:(fun v -> not @@ Value.is_countable_enum v)
+    else
+      res
+
+  (* Though this is O(n^2 log (n)) where n is the mean size of the argument sets,
+     the type simplification should mean that types are disjunctive-normal form,
+     and so both sets should usually just be singletons. *)
+  let symbolic_inter value_set1 value_set2 =
+    fold_right value_set1 ~init:empty ~f:(fun v1 acc ->
+        fold_right value_set2 ~init:acc ~f:(fun v2 acc ->
+            Option.value_map (Value.inter v1 v2) ~default:acc ~f:(add acc)))
+
+  let symbolic_inter_list value_sets =
+    List.fold_right ~init:universe ~f:symbolic_inter value_sets
 
   let non_symbolic_diff = diff
 
   let symbolic_diff value_set1 value_set2 =
-    let non_sym_diff = non_symbolic_diff value_set1 value_set2 in
-    (* so { Unsupported } - { Unsupported }  is safely over-approximated to { Unsupported } *)
-    if mem value_set1 Value.Unsupported then
-      add non_sym_diff Value.Unsupported
-    else
-      non_sym_diff
+    let add_if_mem1 res ~elem =
+      if mem value_set1 elem then
+        add res elem
+      else
+        res
+    in
+    non_symbolic_diff value_set1 value_set2
+    (* so { Unsupported } - { Unsupported }  is safely over-approximated to { Other } *)
+    |> add_if_mem1 ~elem:Value.Unsupported
+    (* so { AllEnums } - { AllEnums }  is safely over-approximated to { AllEnums } *)
+    |> add_if_mem1 ~elem:Value.AllEnums
 end
 
 let prim_to_values = function
@@ -123,10 +232,10 @@ let prim_to_values = function
   | Tbool -> ValueSet.bools
   | Tint -> ValueSet.singleton Value.Int
   | Tnum -> ValueSet.of_list Value.[Int; Unsupported]
-  | Tstring -> ValueSet.singleton Value.String
-  (* arraykey is the supertype of strings, ints, and all enums,
-     so this overapproximates "all enums" with Value.Unsupported for now *)
-  | Tarraykey -> ValueSet.of_list Value.[Int; String; Unsupported]
+  | Tstring ->
+    ValueSet.singleton Value.String
+    (* arraykey is the supertype of strings, ints, and all enums *)
+  | Tarraykey -> ValueSet.of_list Value.[Int; String; AllEnums]
   | Tfloat
   | Tresource ->
     ValueSet.singleton Value.Unsupported
@@ -137,9 +246,9 @@ let prim_to_values = function
 let rec symbolic_dnf_values env ty : ValueSet.t =
   match Typing_defs.get_node ty with
   | Tunion tyl ->
-    tyl |> List.map ~f:(symbolic_dnf_values env) |> ValueSet.union_list
+    tyl |> List.map ~f:(symbolic_dnf_values env) |> ValueSet.symbolic_union_list
   | Tintersection tyl ->
-    tyl |> List.map ~f:(symbolic_dnf_values env) |> ValueSet.intersection_list
+    tyl |> List.map ~f:(symbolic_dnf_values env) |> ValueSet.symbolic_inter_list
   | Tprim prim -> prim_to_values prim
   | Tnonnull -> ValueSet.(symbolic_diff universe (singleton Value.Null))
   | Toption ty -> begin
@@ -158,7 +267,21 @@ let rec symbolic_dnf_values env ty : ValueSet.t =
   | Tneg (Neg_class _) (* a safe over-approximation *)
   | Tany _ ->
     ValueSet.universe
-  | Tnewtype (_, _, _)
+  | Tnewtype (name, args, _) ->
+    let open If_enum_or_enum_class in
+    apply
+      env
+      name
+      args
+      ~default:(ValueSet.singleton Value.Unsupported)
+      ~f:(fun kind env _name ->
+        match kind with
+        | Enum ->
+          ValueSet.singleton
+            (Value.Enum (EnumInfo.of_env env name |> Option.value_exn))
+        | EnumClass
+        | EnumClassLabel ->
+          ValueSet.singleton Value.Unsupported)
   | Tdynamic
   | Ttuple _
   | Tshape _
@@ -175,11 +298,11 @@ let rec symbolic_dnf_values env ty : ValueSet.t =
 
 (* Partition cases based on the kind of literal expression (and later, type) *)
 let partition_cases env (cases : (ast_case * _) list) values =
-  let partitions : (Value.t, literal * case list) Hashtbl.t =
+  let partitions : (Value.t, _ * case list) Hashtbl.t =
     let tbl = Hashtbl.create (module Value) in
 
     ValueSet.iter values ~f:(fun key ->
-        Option.iter (Value.to_literal key) ~f:(fun if_missing ->
+        Option.iter (Value.if_missing key) ~f:(fun if_missing ->
             Hashtbl.add_exn tbl ~key ~data:(if_missing, [])));
     tbl
   in
@@ -200,11 +323,14 @@ let partition_cases env (cases : (ast_case * _) list) values =
         match lit with
         | None -> (ty, pos, None) :: unused
         | Some lit ->
-          List.fold_left keys ~init:unused ~f:(fun unused key ->
-              if key_present_data_consed partitions ~key ~data:(pos, lit) then
-                unused
-              else
-                (ty, pos, Some lit) :: unused))
+          let added =
+            List.map keys ~f:(fun key ->
+                key_present_data_consed partitions ~key ~data:(pos, lit))
+          in
+          if List.exists added ~f:(fun x -> x) then
+            unused
+          else
+            (ty, pos, Some lit) :: unused)
   in
   (partitions, unused_cases)
 
@@ -212,45 +338,73 @@ let add_err env err =
   Typing_error_utils.add_typing_error ~env @@ Typing_error.enum err
 
 let get_missing_cases env partitions =
-  let opt_missing env missing = function
-    | [] -> Some missing
-    | _ :: _ as cases ->
-      (* construct a map from literals to case positions... *)
-      Hashtbl.group
-        (module EnumErr.Const)
-        cases
-        ~get_key:snd
-        ~get_data:(fun (pos, _) -> [pos])
-        ~combine:( @ )
-      (* ...to perform a redundant case check. This relies on the
-         `Strict_switch_int_literal_check` to ensure that all integer literals
-         are in the same format (hex, bin, oct, dec). Otherwise int literals
-         could represent the same value (e.g. "0b10" and "2") but not be caught
-         as redundant. *)
-      |> Hashtbl.iteri ~f:(fun ~key:const_name ~data:positions ->
-             match positions with
-             | [] ->
-               (* ~get_data never produces an empty list;
-                  ~combine preserves non-emptiness *)
-               assert false
-             | [_] -> ()
-             | redundant_pos :: (_ :: _ as tl) ->
-               let first_pos = List.last_exn tl in
-               add_err env
-               @@ EnumErr.Enum_switch_redundant
-                    { const_name; first_pos; pos = redundant_pos });
-      None
+  let check_enum_coverage EnumInfo.{ name; consts; decl_pos } cases =
+    let given_cases =
+      EnumConstSet.of_list
+      @@ List.map cases ~f:(fun (_, const) ->
+             match const with
+             | EnumErr.Const.Label { class_; const } ->
+               (* check_enum_coverage is called on a (Enum info, cases)
+                  key-value pair from the table created by partition_cases. Both
+                  the key (Enum info) and the literal for an ast_case
+                  are determined by Value.and_literal_of_ast_case; this is what
+                  ensures that all `Enum info` only point to (a) Labels and (b)
+                  Labels where name = class_. Enforcing this invariant in the
+                  type system would require heterogenous maps *)
+               assert (String.(name = class_));
+               const
+             | _ -> assert false)
+    in
+    match EnumConstSet.(diff consts given_cases |> to_list) with
+    | [] -> None
+    | _ :: _ as missing ->
+      Some
+        (`Labels (decl_pos, List.map missing ~f:(fun const -> (name, const))))
   in
 
-  let opt_cons opt ~tl:default =
-    Option.value_map opt ~f:(fun x -> x :: default) ~default
+  let check_redundant env cases =
+    Hashtbl.group
+      (module EnumErr.Const)
+      cases
+      ~get_key:snd
+      ~get_data:(fun (pos, _) -> [pos])
+      ~combine:( @ )
+    (* ...to perform a redundant case check. This relies on the
+       `Strict_switch_int_literal_check` to ensure that all integer literals
+       are in the same format (hex, bin, oct, dec). Otherwise int literals
+       could represent the same value (e.g. "0b10" and "2") but not be caught
+       as redundant. *)
+    |> Hashtbl.iteri ~f:(fun ~key:const_name ~data:positions ->
+           match positions with
+           | [] ->
+             (* ~get_data never produces an empty list;
+                ~combine preserves non-emptiness *)
+             assert false
+           | [_] -> ()
+           | redundant_pos :: (_ :: _ as tl) ->
+             let first_pos = List.last_exn tl in
+             add_err env
+             @@ EnumErr.Enum_switch_redundant
+                  { const_name; first_pos; pos = redundant_pos })
   in
 
-  Hashtbl.fold
-    partitions
-    ~init:[]
-    ~f:(fun ~key:_ ~data:(if_missing, cases) acc ->
-      opt_cons (opt_missing env if_missing cases) ~tl:acc)
+  let get_missing env key missing cases =
+    let missing_enum =
+      match key with
+      | Value.Enum enum_info -> Some (check_enum_coverage enum_info cases)
+      | _ -> None
+    in
+    match cases with
+    (* `Some None` is a valid result for missing_enum - even when there are no
+       cases, e.g. an enum with no members *)
+    | [] -> Option.value missing_enum ~default:(Some missing)
+    | _ :: _ ->
+      check_redundant env cases;
+      Option.value missing_enum ~default:None
+  in
+
+  Hashtbl.fold partitions ~init:[] ~f:(fun ~key ~data:(if_missing, cases) acc ->
+      (get_missing env key if_missing cases |> Option.to_list) @ acc)
 
 let error_unused_cases env expected_ty unused_cases =
   List.iter unused_cases ~f:(fun (ty, pos, lit) ->
@@ -271,7 +425,11 @@ let error_unused_cases env expected_ty unused_cases =
 type ast_default = (Tast.ty, Tast.saved_env) Aast.default_case
 
 let check_default
-    env pos (opt_default_case : ast_default option) needs_default missing =
+    env
+    pos
+    (opt_default_case : ast_default option)
+    needs_default
+    types_and_labels =
   match (opt_default_case, needs_default) with
   | (None, false)
   | (Some _, true) ->
@@ -285,9 +443,37 @@ let check_default
            decl_pos = Pos_or_decl.of_raw_pos default_pos;
          }
   | (None, true) ->
-    add_err env
-    @@ EnumErr.Enum_switch_nonexhaustive
-         { pos; kind = None; decl_pos = Pos_or_decl.of_raw_pos pos; missing }
+    let type_or_label = function
+      | None -> Either.First None
+      | Some `Null -> Either.First (Some EnumErr.Const.Null)
+      | Some (`Bool b) -> Either.First (Some (EnumErr.Const.Bool b))
+      | Some `Int -> Either.First (Some (EnumErr.Const.Int None))
+      | Some `String -> Either.First (Some (EnumErr.Const.String None))
+      | Some (`Enum class_) ->
+        Either.First (Some EnumErr.Const.(Label { class_; const = class_ }))
+      | Some `AnyEnum ->
+        Either.First
+          (Some EnumErr.Const.(Label { class_ = "enum"; const = "enum" }))
+      | Some (`Labels (decl_pos, labels)) ->
+        Either.Second
+          ( decl_pos,
+            List.map labels ~f:(fun (class_, const) ->
+                Some (EnumErr.Const.Label { class_; const })) )
+    in
+    (* `labels` is for missing enum labels, it has `decl_pos` for the error;
+       `types` is for missing types *)
+    let (types, labels) =
+      List.partition_map ~f:type_or_label types_and_labels
+    in
+    (if not @@ List.is_empty types then
+      let decl_pos = Pos_or_decl.of_raw_pos pos in
+      add_err env
+      @@ EnumErr.Enum_switch_nonexhaustive
+           { pos; kind = None; decl_pos; missing = types });
+    List.iter labels ~f:(fun (decl_pos, missing) ->
+        add_err env
+        @@ EnumErr.Enum_switch_nonexhaustive
+             { pos; kind = Some "enum"; decl_pos; missing })
 
 let add_default_if_needed values missing_cases =
   (* write `exists ~f:(fun x -> not @@ finite_or_dynamic x)` instead of
@@ -310,7 +496,7 @@ let add_default_if_needed values missing_cases =
    4. Otherwise a default is redundant. *)
 let check_cases_against_values env pos expected values cases opt_default_case =
   let typing_env = Tast_env.tast_env_as_typing_env env in
-  let (partitions, unused_cases) = partition_cases typing_env cases values in
+  let (partitions, unused_cases) = partition_cases env cases values in
   error_unused_cases typing_env expected unused_cases;
   let missing_cases =
     get_missing_cases typing_env partitions |> add_default_if_needed values

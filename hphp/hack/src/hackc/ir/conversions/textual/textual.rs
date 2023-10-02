@@ -254,12 +254,6 @@ impl TextualFile<'_> {
         Ok(())
     }
 
-    fn register_called_function(&mut self, target: &FunctionName) {
-        if !target.contains_unknown() && !self.called_functions.contains(target) {
-            self.called_functions.insert(target.clone());
-        }
-    }
-
     pub(crate) fn set_attribute(&mut self, attr: FileAttribute) -> Result {
         match attr {
             FileAttribute::SourceLanguage(lang) => {
@@ -476,6 +470,25 @@ impl TextualFile<'_> {
             self.w.write_all(b" ")?;
         }
         Ok(())
+    }
+}
+
+impl ExprWriter for TextualFile<'_> {
+    fn register_called_function(&mut self, target: &FunctionName) {
+        if !target.contains_unknown() && !self.called_functions.contains(target) {
+            self.called_functions.insert(target.clone());
+        }
+    }
+
+    fn register_used_param(&mut self, _param: &Expr) {}
+    fn register_used_global(&mut self, _global: &GlobalName) {}
+
+    fn internal_get_writer(&mut self) -> &mut dyn std::io::Write {
+        self.w
+    }
+
+    fn strings(&self) -> Arc<StringInterner> {
+        Arc::clone(&self.strings)
     }
 }
 
@@ -1165,78 +1178,8 @@ impl FuncBuilder<'_, '_> {
         Ok(obj)
     }
 
-    fn write_call_expr(&mut self, target: &FunctionName, params: &[Expr]) -> Result {
-        self.txf.register_called_function(target);
-        write!(self.txf.w, "{}(", target.display(&self.txf.strings))?;
-        let mut sep = "";
-        for param in params.iter() {
-            self.txf.w.write_all(sep.as_bytes())?;
-            self.write_expr(param)?;
-            sep = ", ";
-        }
-        write!(self.txf.w, ")")?;
-
-        // Treat any call as if it can modify memory.
-        for param in params.iter() {
-            self.cache.clear_expr(param);
-        }
-
-        Ok(())
-    }
-
     pub(crate) fn write_exception_handler(&mut self, target: BlockId) -> Result {
         writeln!(self.txf.w, "{INDENT}.handlers {}", FmtBid(target))?;
-        Ok(())
-    }
-
-    fn write_expr(&mut self, expr: &Expr) -> Result {
-        match *expr {
-            Expr::Alloc(ref ty) => write!(
-                self.txf.w,
-                "__sil_allocate(<{}>)",
-                ty.display(&self.txf.strings)
-            )?,
-            Expr::Call(ref target, ref params) => {
-                self.write_call_expr(target, params)?;
-            }
-            Expr::Const(ref c) => write!(self.txf.w, "{}", FmtConst(c, &self.txf.strings))?,
-            Expr::Deref(ref var) => {
-                self.txf.w.write_all(b"&")?;
-                self.write_expr(var)?;
-            }
-            Expr::Field(ref base, ref ty, ref name) => {
-                self.write_expr(base)?;
-                write!(
-                    self.txf.w,
-                    ".{}.{}",
-                    ty.display(&self.txf.strings),
-                    name.display(&self.txf.strings)
-                )?;
-            }
-            Expr::Index(ref base, ref offset) => {
-                self.write_expr(base)?;
-                self.txf.w.write_all(b"[")?;
-                self.write_expr(offset)?;
-                self.txf.w.write_all(b"]")?;
-            }
-            Expr::InstanceOf(ref expr, ref ty) => {
-                write!(self.txf.w, "__sil_instanceof(")?;
-                self.write_expr(expr)?;
-                write!(self.txf.w, ", <{}>)", ty.display(&self.txf.strings))?;
-            }
-            Expr::Sid(sid) => write!(self.txf.w, "{}", FmtSid(sid))?,
-            Expr::Var(ref var) => {
-                match var {
-                    VarName::Global(s) => {
-                        if !self.txf.referenced_globals.contains(s) {
-                            self.txf.referenced_globals.insert(s.to_owned());
-                        }
-                    }
-                    VarName::Local(_) => {}
-                }
-                write!(self.txf.w, "{}", var.display(&self.txf.strings))?
-            }
-        }
         Ok(())
     }
 
@@ -1289,6 +1232,110 @@ impl FuncBuilder<'_, '_> {
         } else {
             self.txf.write_full_loc(src_loc)?;
             self.cur_loc = Some(src_loc.clone());
+        }
+        Ok(())
+    }
+}
+
+impl ExprWriter for FuncBuilder<'_, '_> {
+    fn register_called_function(&mut self, target: &FunctionName) {
+        self.txf.register_called_function(target);
+    }
+
+    fn register_used_param(&mut self, param: &Expr) {
+        // Treat any call as if it can modify memory.
+        self.cache.clear_expr(param);
+    }
+
+    fn register_used_global(&mut self, global: &GlobalName) {
+        if !self.txf.referenced_globals.contains(global) {
+            self.txf.referenced_globals.insert(global.to_owned());
+        }
+    }
+
+    fn internal_get_writer(&mut self) -> &mut dyn std::io::Write {
+        self.txf.internal_get_writer()
+    }
+    fn strings(&self) -> Arc<StringInterner> {
+        self.txf.strings()
+    }
+}
+
+trait ExprWriter {
+    fn register_called_function(&mut self, target: &FunctionName);
+    fn register_used_param(&mut self, param: &Expr);
+    fn register_used_global(&mut self, global: &GlobalName);
+
+    fn internal_get_writer(&mut self) -> &mut dyn std::io::Write;
+    fn strings(&self) -> Arc<StringInterner>;
+
+    fn write_call_expr(&mut self, target: &FunctionName, params: &[Expr]) -> Result {
+        self.register_called_function(target);
+        let strings = self.strings();
+        write!(self.internal_get_writer(), "{}(", target.display(&strings))?;
+
+        let mut sep = "";
+        for param in params.iter() {
+            self.internal_get_writer().write_all(sep.as_bytes())?;
+            self.write_expr(param)?;
+            sep = ", ";
+        }
+
+        write!(self.internal_get_writer(), ")")?;
+
+        for param in params.iter() {
+            self.register_used_param(param);
+        }
+
+        Ok(())
+    }
+
+    fn write_expr(&mut self, expr: &Expr) -> Result {
+        let strings = self.strings();
+        match *expr {
+            Expr::Alloc(ref ty) => write!(
+                self.internal_get_writer(),
+                "__sil_allocate(<{}>)",
+                ty.display(&strings)
+            )?,
+            Expr::Call(ref target, ref params) => {
+                self.write_call_expr(target, params)?;
+            }
+            Expr::Const(ref c) => write!(self.internal_get_writer(), "{}", FmtConst(c, &strings))?,
+            Expr::Deref(ref var) => {
+                self.internal_get_writer().write_all(b"&")?;
+                self.write_expr(var)?;
+            }
+            Expr::Field(ref base, ref ty, ref name) => {
+                self.write_expr(base)?;
+                write!(
+                    self.internal_get_writer(),
+                    ".{}.{}",
+                    ty.display(&strings),
+                    name.display(&strings)
+                )?;
+            }
+            Expr::Index(ref base, ref offset) => {
+                self.write_expr(base)?;
+                self.internal_get_writer().write_all(b"[")?;
+                self.write_expr(offset)?;
+                self.internal_get_writer().write_all(b"]")?;
+            }
+            Expr::InstanceOf(ref expr, ref ty) => {
+                write!(self.internal_get_writer(), "__sil_instanceof(")?;
+                self.write_expr(expr)?;
+                write!(self.internal_get_writer(), ", <{}>)", ty.display(&strings))?;
+            }
+            Expr::Sid(sid) => write!(self.internal_get_writer(), "{}", FmtSid(sid))?,
+            Expr::Var(ref var) => {
+                match var {
+                    VarName::Global(s) => {
+                        self.register_used_global(s);
+                    }
+                    VarName::Local(_) => {}
+                }
+                write!(self.internal_get_writer(), "{}", var.display(&strings))?
+            }
         }
         Ok(())
     }

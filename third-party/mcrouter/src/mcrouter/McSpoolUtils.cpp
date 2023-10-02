@@ -6,6 +6,7 @@
  */
 
 #include "mcrouter/McSpoolUtils.h"
+#include <optional>
 
 namespace facebook {
 namespace memcache {
@@ -24,26 +25,26 @@ FOLLY_NOINLINE bool spoolAxonProxy(
     const ProxyBase& proxy,
     const memcache::McDeleteRequest& req,
     const std::shared_ptr<AxonContext>& axonCtx,
-    uint64_t bucketId) {
+    uint64_t bucketId,
+    std::optional<std::string> targetRegion) {
   std::optional<std::string> region;
-  if (!axonCtx->defaultRegionFilter.empty()) {
+  // if targetRegion has value, it's either x-region broadcast or directed
+  // delete. For broadcast it will be an empty string, for x-region directed -
+  // name of the region:
+  if (targetRegion.has_value()) {
+    region = targetRegion.value().empty() ? std::nullopt
+                                          : std::optional(targetRegion.value());
+    // otherwise if defaultRegionFilter property is set - use it for failed
+    // invalidations:
+  } else if (!axonCtx->defaultRegionFilter.empty()) {
     region.emplace(axonCtx->defaultRegionFilter);
+    // otherwise it's a misconfig:
   } else {
-    try {
-      if (!req.key_ref()->routingPrefix().empty()) {
-        auto routingPrefix = RoutingPrefix(req.key_ref()->routingPrefix());
-        if (!routingPrefix.getRegion().empty()) {
-          region.emplace(routingPrefix.getRegion());
-        }
-      }
-    } catch (const std::exception& e) {
-      MC_LOG_FAILURE(
-          proxy.router().opts(),
-          memcache::failure::Category::kBrokenLogic,
-          "Could not write to Axon proxy due to malformatted key prefix: {}",
-          e.what());
-      return false;
-    }
+    MC_LOG_FAILURE(
+        proxy.router().opts(),
+        memcache::failure::Category::kBrokenLogic,
+        "Could not write to Axon proxy as no to destination region info provided");
+    return false;
   }
   std::optional<std::string> pool;
   if (!axonCtx->poolFilter.empty()) {

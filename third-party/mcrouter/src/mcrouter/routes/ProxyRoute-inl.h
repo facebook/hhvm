@@ -42,12 +42,14 @@ template <class RouterInfo>
 ProxyRoute<RouterInfo>::ProxyRoute(
     Proxy<RouterInfo>& proxy,
     const RouteSelectorMap<typename RouterInfo::RouteHandleIf>& routeSelectors,
-    bool disableBroadcastDeleteRpc)
+    bool enableDeleteDistribution,
+    bool enableCrossRegionDeleteRpc)
     : proxy_(proxy),
-      root_(makeRouteHandle<typename RouterInfo::RouteHandleIf, RootRoute>(
+      root_(makeRouteHandleWithInfo<RouterInfo, RootRoute>(
           proxy_,
           routeSelectors,
-          disableBroadcastDeleteRpc)) {
+          enableDeleteDistribution,
+          enableCrossRegionDeleteRpc)) {
   if (proxy_.getRouterOptions().big_value_split_threshold != 0) {
     root_ = detail::wrapWithBigValueRoute<RouterInfo>(
         std::move(root_), proxy_.getRouterOptions());

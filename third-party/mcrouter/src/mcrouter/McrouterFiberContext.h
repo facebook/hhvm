@@ -82,15 +82,16 @@ class fiber_local {
     std::bitset<NUM_FLAGS> featureFlags;
     int32_t selectedIndex{-1};
     uint32_t failoverCount{0};
-    int64_t accumulatedBeforeReqInjectedLatencyUs{0};
-    int64_t accumulatedAfterReqInjectedLatencyUs{0};
     std::optional<uint64_t> bucketId;
+    std::optional<std::string> distributionTargetRegion;
     RequestClass requestClass;
     folly::StringPiece asynclogName;
     int64_t networkTransportTimeUs{0};
     ServerLoad load{0};
     std::vector<ExtraDataCallbackT> extraDataCallbacks;
     std::shared_ptr<AxonContext> axonCtx{nullptr};
+    int64_t accumulatedBeforeReqInjectedLatencyUs{0};
+    int64_t accumulatedAfterReqInjectedLatencyUs{0};
   };
 
   static auto makeGuardHelperBase(McrouterFiberContext&& tmp) {
@@ -366,6 +367,16 @@ class fiber_local {
 
   static std::optional<uint64_t> getBucketId() {
     return folly::fibers::local<McrouterFiberContext>().bucketId;
+  }
+
+  static void setDistributionTargetRegion(std::string region) {
+    folly::fibers::local<McrouterFiberContext>().distributionTargetRegion =
+        region;
+  }
+
+  static std::optional<std::string> getDistributionTargetRegion() {
+    return folly::fibers::local<McrouterFiberContext>()
+        .distributionTargetRegion;
   }
 };
 

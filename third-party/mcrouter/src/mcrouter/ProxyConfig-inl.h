@@ -107,15 +107,28 @@ ProxyConfig<RouterInfo>::ProxyConfig(
     partialConfigs_ = provider.releasePartialConfigs();
   }
   accessPoints_ = provider.releaseAccessPoints();
-  bool disableBroadcastDeleteRpc = false;
-  if (auto* jDisableBroadcastDeleteRpc =
-          json.get_ptr("disable_broadcast_delete_rpc")) {
-    disableBroadcastDeleteRpc =
-        parseBool(*jDisableBroadcastDeleteRpc, "disable_broadcast_delete_rpc");
+  bool enableCrossRegionDeleteRpc = true;
+  if (auto* jEnableCrossRegionDeleteRpc =
+          json.get_ptr("enable_cross_region_delete_rpc")) {
+    enableCrossRegionDeleteRpc = parseBool(
+        *jEnableCrossRegionDeleteRpc, "enable_cross_region_delete_rpc");
   }
 
+  bool enableDeleteDistribution = false;
+  if (auto* jEnableDeleteDistribution =
+          json.get_ptr("enable_delete_distribution")) {
+    enableDeleteDistribution =
+        parseBool(*jEnableDeleteDistribution, "enable_delete_distribution");
+  }
+  checkLogic(
+      enableDeleteDistribution || enableCrossRegionDeleteRpc,
+      "ProxyConfig: cannot disable cross-region delete rpc if distribution is disabled");
+
   proxyRoute_ = std::make_shared<ProxyRoute<RouterInfo>>(
-      proxy, routeSelectors, disableBroadcastDeleteRpc);
+      proxy,
+      routeSelectors,
+      enableDeleteDistribution,
+      enableCrossRegionDeleteRpc);
   serviceInfo_ = std::make_shared<ServiceInfo<RouterInfo>>(proxy, *this);
 }
 

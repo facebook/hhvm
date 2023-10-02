@@ -26,7 +26,7 @@ namespace facebook {
 namespace memcache {
 namespace mcrouter {
 
-template <class RouteHandleIf>
+template <class RouterInfo>
 class RootRoute {
  public:
   static std::string routeName() {
@@ -35,20 +35,24 @@ class RootRoute {
 
   RootRoute(
       ProxyBase& proxy,
-      const RouteSelectorMap<RouteHandleIf>& routeSelectors,
-      bool disableBroadcastDeleteRpc = false)
+      const RouteSelectorMap<typename RouterInfo::RouteHandleIf>&
+          routeSelectors,
+      bool enableDeleteDistribution = false,
+      bool enableCrossRegionDeleteRpc = true)
       : opts_(proxy.getRouterOptions()),
         rhMap_(
             routeSelectors,
             opts_.default_route,
             opts_.send_invalid_route_to_default,
             opts_.enable_route_policy_v2),
-        disableBroadcastDeleteRpc_(disableBroadcastDeleteRpc) {}
+        defaultRoute_(opts_.default_route),
+        enableDeleteDistribution_(enableDeleteDistribution),
+        enableCrossRegionDeleteRpc_(enableCrossRegionDeleteRpc) {}
 
   template <class Request>
   bool traverse(
       const Request& req,
-      const RouteHandleTraverser<RouteHandleIf>& t) const {
+      const RouteHandleTraverser<typename RouterInfo::RouteHandleIf>& t) const {
     const auto* rhPtr = rhMap_.getTargetsForKeyFast(
         req.key_ref()->routingPrefix(), req.key_ref()->routingKey());
     if (FOLLY_LIKELY(rhPtr != nullptr)) {
@@ -76,16 +80,7 @@ class RootRoute {
        run in the background.
 
        This is a good default for /star/star/ requests. */
-    const auto* rhPtr = rhMap_.getTargetsForKeyFast(
-        req.key_ref()->routingPrefix(), req.key_ref()->routingKey());
-
-    auto reply = FOLLY_UNLIKELY(rhPtr == nullptr)
-        ? routeImpl(
-              rhMap_.getTargetsForKeySlow(
-                  req.key_ref()->routingPrefix(), req.key_ref()->routingKey()),
-              req)
-        : routeImpl(*rhPtr, req);
-
+    auto reply = getTargetsAndRoute(req.key_ref()->routingPrefix(), req);
     if (isErrorResult(*reply.result_ref()) && opts_.group_remote_errors) {
       reply = ReplyT<Request>(carbon::Result::REMOTE_ERROR);
     }
@@ -93,14 +88,63 @@ class RootRoute {
     return reply;
   }
 
+  McDeleteReply route(const McDeleteRequest& req) const {
+    // If distribution is enabled, route deletes to the default route where
+    // DistributionRoute will route cross region.
+    //
+    // NOTE: if enableCrossRegionDeleteRpc flag is not set it defaults to true,
+    // the distribution step will be followed by a duplicating RPC step, and the
+    // return value will be the reply returned by the RPC step.
+    McDeleteReply reply;
+    if (enableDeleteDistribution_ && !req.key_ref()->routingPrefix().empty()) {
+      auto routingPrefix = RoutingPrefix(req.key_ref()->routingPrefix());
+      if (routingPrefix.str() != defaultRoute_.str() &&
+          req.key_ref()->routingPrefix() != kBroadcastPrefix) {
+        reply = fiber_local<RouterInfo>::runWithLocals(
+            [this, &req, &routingPrefix]() {
+              fiber_local<RouterInfo>::setDistributionTargetRegion(
+                  routingPrefix.getRegion().str());
+              return getTargetsAndRoute(defaultRoute_, req);
+            });
+
+        if (!enableCrossRegionDeleteRpc_) {
+          return reply;
+        }
+      }
+    }
+    reply = getTargetsAndRoute(req.key_ref()->routingPrefix(), req);
+    if (isErrorResult(*reply.result_ref()) && opts_.group_remote_errors) {
+      reply = McDeleteReply(carbon::Result::REMOTE_ERROR);
+    }
+    return reply;
+  }
+
  private:
   const McrouterOptions& opts_;
-  RouteHandleMap<RouteHandleIf> rhMap_;
-  bool disableBroadcastDeleteRpc_;
+  RouteHandleMap<typename RouterInfo::RouteHandleIf> rhMap_;
+  RoutingPrefix defaultRoute_;
+  bool enableDeleteDistribution_;
+  bool enableCrossRegionDeleteRpc_;
+
+  template <class Request>
+  FOLLY_ALWAYS_INLINE ReplyT<Request> getTargetsAndRoute(
+      folly::StringPiece routingPrefix,
+      const Request& req) const {
+    const auto* rhPtr =
+        rhMap_.getTargetsForKeyFast(routingPrefix, req.key_ref()->routingKey());
+
+    return UNLIKELY(rhPtr == nullptr)
+        ? routeImpl(
+              rhMap_.getTargetsForKeySlow(
+                  routingPrefix, req.key_ref()->routingKey()),
+              req)
+        : routeImpl(*rhPtr, req);
+  }
 
   template <class Request>
   ReplyT<Request> routeImpl(
-      const std::vector<std::shared_ptr<RouteHandleIf>>& rh,
+      const std::vector<std::shared_ptr<typename RouterInfo::RouteHandleIf>>&
+          rh,
       const Request& req,
       carbon::GetLikeT<Request> = 0) const {
     auto reply = doRoute(rh, req);
@@ -123,7 +167,8 @@ class RootRoute {
 
   template <class Request>
   ReplyT<Request> routeImpl(
-      const std::vector<std::shared_ptr<RouteHandleIf>>& rh,
+      const std::vector<std::shared_ptr<typename RouterInfo::RouteHandleIf>>&
+          rh,
       const Request& req,
       carbon::ArithmeticLikeT<Request> = 0) const {
     auto reply = opts_.allow_only_gets ? createReply(DefaultReply, req)
@@ -137,7 +182,8 @@ class RootRoute {
 
   template <class Request>
   ReplyT<Request> routeImpl(
-      const std::vector<std::shared_ptr<RouteHandleIf>>& rh,
+      const std::vector<std::shared_ptr<typename RouterInfo::RouteHandleIf>>&
+          rh,
       const Request& req,
       carbon::OtherThanT<Request, carbon::GetLike<>, carbon::ArithmeticLike<>> =
           0) const {
@@ -150,29 +196,53 @@ class RootRoute {
 
   template <class Request>
   ReplyT<Request> doRoute(
-      const std::vector<std::shared_ptr<RouteHandleIf>>& rh,
+      const std::vector<std::shared_ptr<typename RouterInfo::RouteHandleIf>>&
+          rh,
       const Request& req) const {
     if (FOLLY_LIKELY(rh.size() == 1)) {
       return rh[0]->route(req);
     }
     if (!rh.empty()) {
-      // Broadcast delete via Distribution, route only
-      // to the first (local) route handle
-      if constexpr (folly::IsOneOf<Request, McDeleteRequest>::value) {
-        if (disableBroadcastDeleteRpc_ &&
-            req.key_ref()->routingPrefix() == kBroadcastPrefix) {
-          return rh[0]->route(req);
-        }
-      }
+      return routeToAll(rh, req);
+    }
+    return createReply<Request>(ErrorReply);
+  }
 
-      auto reqCopy = std::make_shared<const Request>(req);
+  template <class Request>
+  ReplyT<Request> routeToAll(
+      const std::vector<std::shared_ptr<typename RouterInfo::RouteHandleIf>>&
+          rh,
+      const Request& req) const {
+    auto reqCopy = std::make_shared<const Request>(req);
+    for (size_t i = 1, e = rh.size(); i < e; ++i) {
+      auto r = rh[i];
+      folly::fibers::addTask([r, reqCopy]() { r->route(*reqCopy); });
+    }
+    return rh[0]->route(req);
+  }
+
+  McDeleteReply routeToAll(
+      const std::vector<std::shared_ptr<typename RouterInfo::RouteHandleIf>>&
+          rh,
+      const McDeleteRequest& req) const {
+    if (enableCrossRegionDeleteRpc_) {
+      auto reqCopy = std::make_shared<const McDeleteRequest>(req);
       for (size_t i = 1, e = rh.size(); i < e; ++i) {
         auto r = rh[i];
         folly::fibers::addTask([r, reqCopy]() { r->route(*reqCopy); });
       }
+    }
+    if (enableDeleteDistribution_ &&
+        req.key_ref()->routingPrefix() == kBroadcastPrefix) {
+      return fiber_local<RouterInfo>::runWithLocals([&req, &rh]() {
+        // DistributionRoute will read empty string as "broadcast", i.e.
+        // distribute to all regions:
+        fiber_local<RouterInfo>::setDistributionTargetRegion("");
+        return rh[0]->route(req);
+      });
+    } else {
       return rh[0]->route(req);
     }
-    return createReply<Request>(ErrorReply);
   }
 };
 } // namespace mcrouter

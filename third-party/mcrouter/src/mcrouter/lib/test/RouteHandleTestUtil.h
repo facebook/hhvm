@@ -155,6 +155,8 @@ struct TestHandleImpl {
 
   std::vector<uint64_t> sawQueryTags;
 
+  std::vector<std::string> distributionRegionInFiber;
+
   bool isTko;
 
   bool isPaused;
@@ -303,6 +305,17 @@ struct RecordingRoute {
       const Request&) const {}
 
   template <class Request>
+  void recordDistributionTargetRegion(const Request&) const {
+    if (mcrouter::fiber_local<MemcacheRouterInfo>::getDistributionTargetRegion()
+            .has_value()) {
+      h_->distributionRegionInFiber.push_back(
+          mcrouter::fiber_local<
+              MemcacheRouterInfo>::getDistributionTargetRegion()
+              .value());
+    }
+  }
+
+  template <class Request>
   bool traverse(const Request& req, const RouteHandleTraverser<RouteHandleIf>&)
       const {
     recordBucketId(req);
@@ -351,6 +364,7 @@ struct RecordingRoute {
     h_->sawFlags.push_back(getFlagsIfExist(req));
     h_->sawQueryTags.push_back(getQueryTagsIfExists(req));
     recordBucketId(req);
+    recordDistributionTargetRegion(req);
     if (carbon::GetLike<Request>::value) {
       reply.result_ref() = h_->resultGenerator_.hasValue()
           ? (*h_->resultGenerator_)(req.key_ref()->fullKey().str())

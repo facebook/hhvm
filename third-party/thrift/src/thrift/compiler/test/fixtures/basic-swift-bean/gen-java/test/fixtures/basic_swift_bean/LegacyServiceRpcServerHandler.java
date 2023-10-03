@@ -144,6 +144,9 @@ oprot.writeListBegin(new TList(TType.I32, _iter1.getValue().size()));
                     com.facebook.thrift.util.RpcPayloadUtil.fromTApplicationException(_tApplicationException, _payload.getRequestRpcMetadata(),  _chain);
 
                 return reactor.core.publisher.Mono.just(_serverResponsePayload);
+            })
+            .doFinally(__ -> {
+              _chain.done();
             });
 
           return _internalResponse;

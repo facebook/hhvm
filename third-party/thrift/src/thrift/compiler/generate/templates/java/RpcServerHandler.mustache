@@ -328,6 +328,9 @@ public class {{service:javaCapitalName}}RpcServerHandler {{#service:extends}} ex
                 {{#function:exceptions?}}
                 }
                 {{/function:exceptions?}}
+            })
+            .doFinally(__ -> {
+              _chain.done();
             });
 
           return _internalResponse;

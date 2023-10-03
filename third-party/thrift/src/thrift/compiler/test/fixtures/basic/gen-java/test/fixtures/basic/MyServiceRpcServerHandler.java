@@ -151,6 +151,9 @@ public class MyServiceRpcServerHandler
                     com.facebook.thrift.util.RpcPayloadUtil.fromTApplicationException(_tApplicationException, _payload.getRequestRpcMetadata(),  _chain);
 
                 return reactor.core.publisher.Mono.just(_serverResponsePayload);
+            })
+            .doFinally(__ -> {
+              _chain.done();
             });
 
           return _internalResponse;
@@ -236,6 +239,9 @@ oprot.writeString(_iter0);
                     com.facebook.thrift.util.RpcPayloadUtil.fromTApplicationException(_tApplicationException, _payload.getRequestRpcMetadata(),  _chain);
 
                 return reactor.core.publisher.Mono.just(_serverResponsePayload);
+            })
+            .doFinally(__ -> {
+              _chain.done();
             });
 
           return _internalResponse;
@@ -321,6 +327,9 @@ oprot.writeString(_iter0);
                     com.facebook.thrift.util.RpcPayloadUtil.fromTApplicationException(_tApplicationException, _payload.getRequestRpcMetadata(),  _chain);
 
                 return reactor.core.publisher.Mono.just(_serverResponsePayload);
+            })
+            .doFinally(__ -> {
+              _chain.done();
             });
 
           return _internalResponse;
@@ -409,6 +418,9 @@ oprot.writeString(_iter0);
                     com.facebook.thrift.util.RpcPayloadUtil.fromTApplicationException(_tApplicationException, _payload.getRequestRpcMetadata(),  _chain);
 
                 return reactor.core.publisher.Mono.just(_serverResponsePayload);
+            })
+            .doFinally(__ -> {
+              _chain.done();
             });
 
           return _internalResponse;
@@ -497,6 +509,9 @@ oprot.writeBool(_iter0);
                     com.facebook.thrift.util.RpcPayloadUtil.fromTApplicationException(_tApplicationException, _payload.getRequestRpcMetadata(),  _chain);
 
                 return reactor.core.publisher.Mono.just(_serverResponsePayload);
+            })
+            .doFinally(__ -> {
+              _chain.done();
             });
 
           return _internalResponse;
@@ -585,6 +600,9 @@ oprot.writeString(_iter0);
                     com.facebook.thrift.util.RpcPayloadUtil.fromTApplicationException(_tApplicationException, _payload.getRequestRpcMetadata(),  _chain);
 
                 return reactor.core.publisher.Mono.just(_serverResponsePayload);
+            })
+            .doFinally(__ -> {
+              _chain.done();
             });
 
           return _internalResponse;
@@ -670,6 +688,9 @@ oprot.writeString(_iter0);
                     com.facebook.thrift.util.RpcPayloadUtil.fromTApplicationException(_tApplicationException, _payload.getRequestRpcMetadata(),  _chain);
 
                 return reactor.core.publisher.Mono.just(_serverResponsePayload);
+            })
+            .doFinally(__ -> {
+              _chain.done();
             });
 
           return _internalResponse;
@@ -759,6 +780,9 @@ oprot.writeString(_iter0);
                     com.facebook.thrift.util.RpcPayloadUtil.fromTApplicationException(_tApplicationException, _payload.getRequestRpcMetadata(),  _chain);
 
                 return reactor.core.publisher.Mono.just(_serverResponsePayload);
+            })
+            .doFinally(__ -> {
+              _chain.done();
             });
 
           return _internalResponse;
@@ -841,6 +865,9 @@ oprot.writeString(_iter0);
                     com.facebook.thrift.util.RpcPayloadUtil.fromTApplicationException(_tApplicationException, _payload.getRequestRpcMetadata(),  _chain);
 
                 return reactor.core.publisher.Mono.just(_serverResponsePayload);
+            })
+            .doFinally(__ -> {
+              _chain.done();
             });
 
           return _internalResponse;

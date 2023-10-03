@@ -2486,10 +2486,6 @@ func (x *MyStruct) writeField_10(p thrift.Protocol) error {  // EnumVal
 }
 
 func (x *MyStruct) writeField_9(p thrift.Protocol) error {  // BinaryVal
-    if !x.IsSetBinaryVal() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("binaryVal", thrift.STRING, -9); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }

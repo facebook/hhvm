@@ -341,11 +341,9 @@ class mstch_go_field : public mstch_field {
     //  * Fields inside a union must be set (that's the point of a union)
     //  * Optional fields must be set ("unset" optional fields must not be
     //  serailized as per Thrift-spec)
-    //  * Binary type fields must be set (thrift/lib/go/thrift can't handle nil
-    //  byte values - to be fixed soon)
     auto real_type = field_->type()->get_true_type();
     return go::is_type_go_struct(real_type) || is_inside_union_() ||
-        is_optional_() || real_type->is_binary();
+        is_optional_();
   }
   mstch::node is_non_struct_pointer() {
     // Whether this field is a non-struct pointer.

@@ -2680,10 +2680,6 @@ func (x *respGetEntityGetBinary) IsSetSuccess() bool {
 }
 
 func (x *respGetEntityGetBinary) writeField0(p thrift.Protocol) error {  // Success
-    if !x.IsSetSuccess() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }

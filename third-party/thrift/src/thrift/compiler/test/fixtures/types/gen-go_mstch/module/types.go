@@ -4689,10 +4689,6 @@ func (x *AnnotatedTypes) IsSetListField() bool {
 }
 
 func (x *AnnotatedTypes) writeField1(p thrift.Protocol) error {  // BinaryField
-    if !x.IsSetBinaryField() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("binary_field", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }

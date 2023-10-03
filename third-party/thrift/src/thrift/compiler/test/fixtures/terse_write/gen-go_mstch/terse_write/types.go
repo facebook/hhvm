@@ -2292,10 +2292,6 @@ func (x *StructLevelTerseStruct) writeField8(p thrift.Protocol) error {  // Stri
 }
 
 func (x *StructLevelTerseStruct) writeField9(p thrift.Protocol) error {  // BinaryField
-    if !x.IsSetBinaryField() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("binary_field", thrift.STRING, 9); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3983,10 +3979,6 @@ func (x *FieldLevelTerseStruct) writeField8(p thrift.Protocol) error {  // Terse
 }
 
 func (x *FieldLevelTerseStruct) writeField9(p thrift.Protocol) error {  // TerseBinaryField
-    if !x.IsSetTerseBinaryField() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("terse_binary_field", thrift.STRING, 9); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4255,10 +4247,6 @@ func (x *FieldLevelTerseStruct) writeField22(p thrift.Protocol) error {  // Stri
 }
 
 func (x *FieldLevelTerseStruct) writeField23(p thrift.Protocol) error {  // BinaryField
-    if !x.IsSetBinaryField() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("binary_field", thrift.STRING, 23); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -6225,10 +6213,6 @@ func (x *TerseStructWithCustomDefault) writeField8(p thrift.Protocol) error {  /
 }
 
 func (x *TerseStructWithCustomDefault) writeField9(p thrift.Protocol) error {  // BinaryField
-    if !x.IsSetBinaryField() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("binary_field", thrift.STRING, 9); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }

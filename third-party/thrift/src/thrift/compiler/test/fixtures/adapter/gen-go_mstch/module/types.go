@@ -1689,10 +1689,6 @@ if err := p.WriteMapEnd(); err != nil {
 }
 
 func (x *Foo) writeField8(p thrift.Protocol) error {  // BinaryField
-    if !x.IsSetBinaryField() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("binaryField", thrift.STRING, 8); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -5627,10 +5623,6 @@ if err != nil {
 }
 
 func (x *AdaptTestStruct) writeField2(p thrift.Protocol) error {  // Custom
-    if !x.IsSetCustom() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("custom", thrift.STRING, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -5763,10 +5755,6 @@ if err != nil {
 }
 
 func (x *AdaptTestStruct) writeField10(p thrift.Protocol) error {  // BinaryData
-    if !x.IsSetBinaryData() {
-        return nil
-    }
-
     if err := p.WriteFieldBegin("binary_data", thrift.STRING, 10); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }

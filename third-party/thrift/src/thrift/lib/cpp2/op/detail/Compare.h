@@ -333,7 +333,7 @@ FOLLY_MAYBE_UNUSED bool sortAndLexicographicalCompare(
   for (auto i = rhs.begin(); i != rhs.end(); ++i) {
     r.push_back(i);
   }
-  auto less = [&](const auto& lhsIter, const auto& rhsIter) {
+  auto less = [&](auto lhsIter, auto rhsIter) {
     return comp(*lhsIter, *rhsIter);
   };
   std::sort(l.begin(), l.end(), less);

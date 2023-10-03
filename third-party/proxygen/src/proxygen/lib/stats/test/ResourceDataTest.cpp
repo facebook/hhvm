@@ -9,7 +9,6 @@
 #include "proxygen/lib/stats/ResourceData.h"
 #include <folly/portability/GTest.h>
 
-using namespace ::testing;
 using namespace proxygen;
 
 class ResourceDataTest : public ::testing::Test {};

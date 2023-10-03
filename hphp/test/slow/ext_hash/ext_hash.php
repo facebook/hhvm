@@ -47,6 +47,7 @@ function brown_fox() :mixed{
   var_dump(hash("haval256,5", $data));
   var_dump(hash("adler32",    $data));
   var_dump(hash("crc32b",     $data));
+  var_dump(hash("crc32c",     $data));
 
   if (is_facebook()) {
     var_dump(

@@ -25,8 +25,8 @@ typedef struct {
   unsigned int state;
 } PHP_CRC32_CTX;
 
-hash_crc32::hash_crc32(bool b)
-  : HashEngine(4, 4, sizeof(PHP_CRC32_CTX)), m_b(b) {
+hash_crc32::hash_crc32(Crc32Variant variant)
+  : HashEngine(4, 4, sizeof(PHP_CRC32_CTX)), m_variant(variant) {
 }
 
 void hash_crc32::hash_init(void *context_) {
@@ -38,16 +38,25 @@ void hash_crc32::hash_update(void *context_, const unsigned char *input,
                              unsigned int len) {
   PHP_CRC32_CTX *context = (PHP_CRC32_CTX*)context_;
   size_t i;
-  if (m_b) {
+  switch (m_variant) {
+    case Crc32Variant::Crc32B:
     for (i = 0; i < len; ++i) {
       context->state = (context->state >> 8) ^
         crc32b_table[(context->state ^ input[i]) & 0xff];
     }
-  } else {
+    break;
+    case Crc32Variant::Crc32:
     for (i = 0; i < len; ++i) {
       context->state = (context->state << 8) ^
         crc32_table[(context->state >> 24) ^ (input[i] & 0xff)];
     }
+    break;
+    case Crc32Variant::Crc32C:
+    for (i = 0; i < len; ++i) {
+      context->state = (context->state >> 8) ^
+        crc32c_table[(context->state ^ input[i]) & 0xff];
+    }
+    break;
   }
 }
 
@@ -55,18 +64,18 @@ void hash_crc32::hash_final(unsigned char *digest, void *context_) {
   PHP_CRC32_CTX *context = (PHP_CRC32_CTX*)context_;
   context->state=~context->state;
 
-  // This was a bug in PHP, see PHP bug #45028
-  // We currently rely on the old behaviour
+  if (m_variant == Crc32Variant::Crc32C
 #if defined(HPHP_OSS)
-  if (m_b) {
+    // This was a bug in PHP, see PHP bug #45028
+    // We currently rely on the old behaviour
+    || m_variant == Crc32Variant::Crc32B
+#endif
+  ) {
     digest[0] = (unsigned char) ((context->state >> 24) & 0xff);
     digest[1] = (unsigned char) ((context->state >> 16) & 0xff);
     digest[2] = (unsigned char) ((context->state >> 8) & 0xff);
     digest[3] = (unsigned char) (context->state & 0xff);
-  }
-  else
-#endif
-  {
+  } else {
     digest[3] = (unsigned char) ((context->state >> 24) & 0xff);
     digest[2] = (unsigned char) ((context->state >> 16) & 0xff);
     digest[1] = (unsigned char) ((context->state >> 8) & 0xff);

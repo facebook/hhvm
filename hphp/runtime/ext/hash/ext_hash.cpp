@@ -96,8 +96,9 @@ struct HashEngineMapInitializer {
     HashEngines["adler32-fb"] = HashEnginePtr(new hash_adler32(true));
 #endif
     HashEngines["adler32"]    = HashEnginePtr(new hash_adler32(false));
-    HashEngines["crc32"]      = HashEnginePtr(new hash_crc32(false));
-    HashEngines["crc32b"]     = HashEnginePtr(new hash_crc32(true));
+    HashEngines["crc32"]      = HashEnginePtr(new hash_crc32(Crc32Variant::Crc32));
+    HashEngines["crc32b"]     = HashEnginePtr(new hash_crc32(Crc32Variant::Crc32B));
+    HashEngines["crc32c"]     = HashEnginePtr(new hash_crc32(Crc32Variant::Crc32C));
     HashEngines["haval128,3"] = HashEnginePtr(new hash_haval(3,128));
     HashEngines["haval160,3"] = HashEnginePtr(new hash_haval(3,160));
     HashEngines["haval192,3"] = HashEnginePtr(new hash_haval(3,192));

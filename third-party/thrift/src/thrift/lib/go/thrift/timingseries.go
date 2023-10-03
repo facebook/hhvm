@@ -204,7 +204,7 @@ func (ts *TimingSeries) record(duration time.Duration, status *bool) {
 	}
 }
 
-// Summary describes the duration events that occured over an
+// Summary describes the duration events that occurred over an
 // interval provided to the .Summarize() method of TimingSeries
 type Summary struct {
 	// the number of events

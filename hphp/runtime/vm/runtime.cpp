@@ -179,8 +179,12 @@ void raiseWarning(const StringData* sd) {
   raise_warning("%s", sd->data());
 }
 
-void raiseNotice(const StringData* sd) {
-  raise_notice("%s", sd->data());
+void raiseNotice(uint32_t sampleRate, const StringData* sd) {
+  if (sampleRate > 0) {
+    if (sampleRate == 1 || folly::Random::rand32(sampleRate) == 0) {
+      raise_notice("%s", sd->data());
+    }
+  }
 }
 
 void throwArrayIndexException(const ArrayData* ad, const int64_t index) {

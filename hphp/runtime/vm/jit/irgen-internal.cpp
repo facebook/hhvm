@@ -144,7 +144,7 @@ void handleConvNoticeLevel(
     gen(env, ThrowInvalidOperation, cns(env, str));
   }
   if (notice_data.level == ConvNoticeLevel::Log) {
-    gen(env, RaiseNotice, cns(env, str));
+    gen(env, RaiseNotice, SampleRateData {}, cns(env, str));
   }
 }
 

@@ -2914,6 +2914,19 @@ struct CheckHandleSurpriseEnterData : IRExtraData {
   bool checkStackOverflow;
 };
 
+struct SampleRateData : IRExtraData {
+  explicit SampleRateData(uint32_t sampleRate = 1) : sampleRate(sampleRate) {}
+
+  std::string show() const { return folly::sformat("{}", sampleRate); }
+  size_t hash() const { return std::hash<uint32_t>()(sampleRate); }
+  size_t stableHash() const { return std::hash<uint32_t>()(sampleRate); }
+
+  bool equals(const SampleRateData& o) const {
+    return sampleRate == o.sampleRate;
+  }
+
+  uint32_t sampleRate;
+};
 
 //////////////////////////////////////////////////////////////////////
 
@@ -3174,6 +3187,7 @@ X(ThrowMustBeMutableException,  ClassData);
 X(ThrowMustBeReadonlyException, ClassData);
 X(ThrowMustBeValueTypeException,ClassData);
 X(LdCoeffectFunParamNaive,      ParamData);
+X(RaiseNotice,                  SampleRateData);
 
 #undef X
 

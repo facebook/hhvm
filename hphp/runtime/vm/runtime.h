@@ -53,7 +53,7 @@ void print_int(int64_t i);
 void print_boolean(bool val);
 
 void raiseWarning(const StringData* sd);
-void raiseNotice(const StringData* sd);
+void raiseNotice(uint32_t sampleRate, const StringData* sd);
 [[noreturn]] void throwArrayIndexException(const ArrayData *ad, int64_t index);
 [[noreturn]] void throwArrayKeyException(const ArrayData *ad, const StringData* key);
 std::string formatParamInOutMismatch(const char* fname, uint32_t index,

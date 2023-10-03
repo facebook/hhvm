@@ -260,7 +260,12 @@ void verifyTypeImpl(IRGS& env,
           std::string msg;
           string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT,
             getTcInfo().c_str());
-          gen(env, RaiseNotice, cns(env, makeStaticString(msg)));
+          gen(
+            env,
+            RaiseNotice,
+            SampleRateData { RO::EvalClassStringHintNoticesSampleRate },
+            cns(env, makeStaticString(msg))
+          );
         }
         return;
 
@@ -272,13 +277,19 @@ void verifyTypeImpl(IRGS& env,
           std::string msg;
           string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT,
             getTcInfo().c_str());
-          gen(env, RaiseNotice, cns(env, makeStaticString(msg)));
+          gen(
+            env,
+            RaiseNotice,
+            SampleRateData { RO::EvalClassStringHintNoticesSampleRate },
+            cns(env, makeStaticString(msg))
+          );
         }
         return;
 
       case AnnotAction::WarnClassname:
         assertx(val->type() <= TCls || val->type() <= TLazyCls);
-        gen(env, RaiseNotice, cns(env, s_CLASS_TO_CLASSNAME.get()));
+        gen(env, RaiseNotice, SampleRateData {},
+            cns(env, s_CLASS_TO_CLASSNAME.get()));
         return;
     }
     assertx(result == AnnotAction::ObjectCheck);
@@ -586,14 +597,16 @@ SSATmp* isStrImpl(IRGS& env, SSATmp* src) {
 
   mc.ifTypeThen(src, TLazyCls, [&](SSATmp*) {
     if (RuntimeOption::EvalClassIsStringNotices) {
-      gen(env, RaiseNotice, cns(env, s_CLASS_IS_STRING.get()));
+      gen(env, RaiseNotice, SampleRateData {},
+          cns(env, s_CLASS_IS_STRING.get()));
     }
     return cns(env, true);
   });
 
   mc.ifTypeThen(src, TCls, [&](SSATmp*) {
     if (RuntimeOption::EvalClassIsStringNotices) {
-      gen(env, RaiseNotice, cns(env, s_CLASS_IS_STRING.get()));
+      gen(env, RaiseNotice, SampleRateData {},
+          cns(env, s_CLASS_IS_STRING.get()));
     }
     return cns(env, true);
   });
@@ -683,6 +696,7 @@ SSATmp* implInstanceOfD(IRGS& env, SSATmp* src, const StringData* className) {
         gen(
           env,
           RaiseNotice,
+          SampleRateData {},
           cns(env, s_CLASS_IS_STRING.get())
         );
       }
@@ -752,7 +766,8 @@ void emitInstanceOf(IRGS& env) {
           gen(env, JmpZero, taken, gen(env, InterfaceSupportsStr, t1));
         },
         [&] {
-          gen(env, RaiseNotice, cns(env, s_CLASS_CONVERSION.get()));
+          gen(env, RaiseNotice, SampleRateData {},
+              cns(env, s_CLASS_CONVERSION.get()));
           return cns(env, true);
         },
         [&] { return cns(env, false); }
@@ -1009,7 +1024,8 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
             gen(env, CheckType, TLazyCls, taken, t);
           },
           [&] {
-            gen(env, RaiseNotice, cns(env, s_CLASS_IS_STRING.get()));
+            gen(env, RaiseNotice, SampleRateData {},
+                cns(env, s_CLASS_IS_STRING.get()));
           }
         );
       }
@@ -1020,7 +1036,8 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
             gen(env, CheckType, TCls, taken, t);
           },
           [&] {
-            gen(env, RaiseNotice, cns(env, s_CLASS_IS_STRING.get()));
+            gen(env, RaiseNotice, SampleRateData {},
+                cns(env, s_CLASS_IS_STRING.get()));
           }
         );
       }
@@ -1039,7 +1056,8 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
             gen(env, CheckType, TLazyCls, taken, t);
           },
           [&] {
-            gen(env, RaiseNotice, cns(env, s_CLASS_IS_STRING.get()));
+            gen(env, RaiseNotice, SampleRateData {},
+                cns(env, s_CLASS_IS_STRING.get()));
           }
         );
       }
@@ -1050,7 +1068,8 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
             gen(env, CheckType, TCls, taken, t);
           },
           [&] {
-            gen(env, RaiseNotice, cns(env, s_CLASS_IS_STRING.get()));
+            gen(env, RaiseNotice, SampleRateData {},
+                cns(env, s_CLASS_IS_STRING.get()));
           }
         );
       }
@@ -1340,12 +1359,12 @@ void raiseClsmethCompatTypeHint(
   IRGS& env, int32_t id, const Func* func, const TypeConstraint& tc) {
   auto name = tc.displayName(func->cls());
   if (id == TypeConstraint::ReturnId) {
-    gen(env, RaiseNotice, cns(env, makeStaticString(
+    gen(env, RaiseNotice, SampleRateData {}, cns(env, makeStaticString(
       folly::sformat("class_meth Compat: Value returned from function {}() "
       "must be of type {}, clsmeth given",
         func->fullName(), name))));
   } else {
-    gen(env, RaiseNotice, cns(env, makeStaticString(
+    gen(env, RaiseNotice, SampleRateData {}, cns(env, makeStaticString(
       folly::sformat("class_meth Compat: Argument {} passed to {}() "
       "must be of type {}, clsmeth given",
         id + 1, func->fullName(), name))));

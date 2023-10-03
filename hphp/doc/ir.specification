@@ -2210,7 +2210,8 @@ ReqBindJmp and CallFuncEntry.
 
 | RaiseNotice, ND, S(Str), NF
 
-  Raises a notice with the text in S0 as its message.
+  Raises a notice with the text in S0 as its message. Takes extra data
+  specifying sample rate of 1/data for `StructuredLog::coinflip()`.
 
 | ThrowHasThisNeedStatic, ND, S(Func), T
 

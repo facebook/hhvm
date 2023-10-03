@@ -1123,7 +1123,7 @@ SSATmp* meth_caller_get_name(IRGS& env, SSATmp *value) {
           env.irb->exceptionStackBoundary();
           auto const msg = cns(env, isCls ?
             s_MCHELPER_ON_GET_CLS.get() : s_MCHELPER_ON_GET_METH.get());
-          gen(env, RaiseNotice, msg);
+          gen(env, RaiseNotice, SampleRateData {}, msg);
         }
         return loadProp(mcCls, isCls, value);
       }
@@ -1594,7 +1594,7 @@ SSATmp* maybeCoerceValue(
     if (!val->type().maybe(TLazyCls | TCls)) return bail();
 
     auto castW = [&] (SSATmp* val){
-      if (StructuredLog::coinflip(RO::EvalClassStringHintNoticesSampleRate)) {
+      if (RO::EvalClassStringHintNoticesSampleRate > 0) {
         auto tcInfo = folly::sformat(
           "argument {} passed to {}()", id + 1, func->fullName());
         std::string msg;
@@ -1602,6 +1602,7 @@ SSATmp* maybeCoerceValue(
         gen(
           env,
           RaiseNotice,
+          SampleRateData { RO::EvalClassStringHintNoticesSampleRate },
           cns(env, makeStaticString(msg))
         );
       }
@@ -1803,7 +1804,7 @@ const StaticString s_isObjectMethCaller("is_object() called on MethCaller");
 
 SSATmp* optimizedCallIsObject(IRGS& env, SSATmp* src) {
   auto notice = [&] (StringData* sd) {
-    gen(env, RaiseNotice, cns(env, sd));
+    gen(env, RaiseNotice, SampleRateData {}, cns(env, sd));
   };
   if (src->isA(TObj) && src->type().clsSpec()) {
     auto const cls = src->type().clsSpec().cls();

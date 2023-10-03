@@ -265,7 +265,7 @@ void emitCalleeDynamicCallChecks(IRGS& env, const Func* callee,
         ? Strings::FUNCTION_CALLED_DYNAMICALLY_WITH_ATTRIBUTE
         : Strings::FUNCTION_CALLED_DYNAMICALLY_WITHOUT_ATTRIBUTE;
       string_printf(errMsg, fmtString, callee->fullName()->data());
-      gen(env, RaiseNotice, cns(env, makeStaticString(errMsg)));
+      gen(env, RaiseNotice, SampleRateData {}, cns(env, makeStaticString(errMsg)));
     }
   );
 }

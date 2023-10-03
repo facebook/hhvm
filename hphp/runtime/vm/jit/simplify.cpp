@@ -2306,7 +2306,7 @@ bool handleConvNoticeLevel(
       gen(env, ThrowInvalidOperation, trace, str);
       return true;
     case ConvNoticeLevel::Log:
-      gen(env, RaiseNotice, trace, str);
+      gen(env, RaiseNotice, SampleRateData {}, trace, str);
     [[fallthrough]];
     case ConvNoticeLevel::None:
       return false;

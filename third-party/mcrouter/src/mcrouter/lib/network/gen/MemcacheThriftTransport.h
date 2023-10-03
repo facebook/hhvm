@@ -1166,7 +1166,7 @@ class ThriftTransport<MemcacheRouterInfo> : public ThriftTransportMethods<Memcac
   apache::thrift::Client<facebook::memcache::thrift::Memcache>* getThriftClient() {
     if (FOLLY_UNLIKELY(!thriftClient_)) {
       thriftClient_ = createThriftClient<apache::thrift::Client<facebook::memcache::thrift::Memcache>>();
-      if (flushList_) {
+      if (thriftClient_.has_value() && flushList_) {
         auto* channel = static_cast<apache::thrift::RocketClientChannel*>(
             thriftClient_->getChannel());
         channel->setFlushList(flushList_);

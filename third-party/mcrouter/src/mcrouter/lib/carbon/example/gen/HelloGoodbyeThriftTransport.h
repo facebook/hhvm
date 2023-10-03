@@ -257,7 +257,7 @@ class ThriftTransport<hellogoodbye::HelloGoodbyeRouterInfo> : public ThriftTrans
   apache::thrift::Client<hellogoodbye::thrift::HelloGoodbye>* getThriftClient() {
     if (FOLLY_UNLIKELY(!thriftClient_)) {
       thriftClient_ = createThriftClient<apache::thrift::Client<hellogoodbye::thrift::HelloGoodbye>>();
-      if (flushList_) {
+      if (thriftClient_.has_value() && flushList_) {
         auto* channel = static_cast<apache::thrift::RocketClientChannel*>(
             thriftClient_->getChannel());
         channel->setFlushList(flushList_);

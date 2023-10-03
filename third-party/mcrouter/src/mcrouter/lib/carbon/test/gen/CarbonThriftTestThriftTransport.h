@@ -286,7 +286,7 @@ class ThriftTransport<carbon::test::CarbonThriftTestRouterInfo> : public ThriftT
   apache::thrift::Client<carbon::test::thrift::CarbonThriftTest>* getThriftClient() {
     if (FOLLY_UNLIKELY(!thriftClient_)) {
       thriftClient_ = createThriftClient<apache::thrift::Client<carbon::test::thrift::CarbonThriftTest>>();
-      if (flushList_) {
+      if (thriftClient_.has_value() && flushList_) {
         auto* channel = static_cast<apache::thrift::RocketClientChannel*>(
             thriftClient_->getChannel());
         channel->setFlushList(flushList_);

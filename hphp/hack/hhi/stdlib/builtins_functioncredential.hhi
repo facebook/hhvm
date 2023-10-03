@@ -9,7 +9,7 @@
  */
 
 /**
- * Object of this type is returned by __FUNCTION_CREDENTIAL__
+ * Object of this type is returned by `__FUNCTION_CREDENTIAL__`
  * but you almost certainly should NOT be attempting to construct this object
  */
 final class FunctionCredential {

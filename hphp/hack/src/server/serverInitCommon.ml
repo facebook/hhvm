@@ -176,6 +176,7 @@ let defer_or_do_type_check
        and so we will override whatever was set before and disable it now. *)
     Hh_logger.log "Streaming errors disabled for eager init";
     ServerProgress.enable_error_production false;
+    ServerProgress.write "typechecking";
 
     let count = List.length files_to_check in
     let logstring =

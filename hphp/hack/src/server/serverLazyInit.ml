@@ -663,7 +663,7 @@ let calculate_fanout_and_defer_or_do_type_check
     ~(dirty_local_files_changed_decls : Relative_path.Set.t)
     (t : float)
     (cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
-  let start_t = Unix.gettimeofday () in
+  let start_t : seconds = Unix.gettimeofday () in
   let dirty_files_unchanged_decls =
     Relative_path.Set.union
       dirty_master_files_unchanged_decls
@@ -1172,6 +1172,7 @@ let post_saved_state_initialization
        into [old_naming_table] (which represents the sqlite file), and store the result
        back in [env.naming_table]. At this point the naming-table, forward and reverse,
        is complete. *)
+  ServerProgress.write "updating file-to-symbol table";
   let t = Unix.gettimeofday () in
   let naming_files =
     List.fold
@@ -1262,6 +1263,7 @@ let post_saved_state_initialization
       combined into [env.needs_recheck], as a way of deferring the check until
       the first iteration of ServerTypeCheck.
     *)
+    ServerProgress.write "figuring out files to recheck";
     let partition_unchanged_hash dirty_files =
       Relative_path.Set.partition
         (fun f ->

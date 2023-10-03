@@ -36,7 +36,7 @@ let () =
   let args = Args.parse () in
   let current_hg_rev = Hg.current_working_copy_hg_rev @@ Args.root args in
   let (current_hg_rev, _) = Future.get_exn current_hg_rev in
-  Printf.eprintf "Current HG rev: %s\n" current_hg_rev;
+  Printf.eprintf "Current HG rev: %s\n" (Hg.Rev.to_string current_hg_rev);
   let ancestor =
     Hg.get_closest_global_ancestor current_hg_rev @@ Args.root args
   in

@@ -12,9 +12,9 @@
 module Hg_actual = struct
   include Hg_sig.Types
 
-  let rev_string rev =
+  let rev_string rev : string =
     match rev with
-    | Hg_rev hash -> hash
+    | Hg_rev hash -> Rev.to_string hash
     | Global_rev rev -> Printf.sprintf "r%d" rev
 
   let exec_hg args =
@@ -252,7 +252,8 @@ module Hg_mock = struct
 
     let current_working_copy_base_rev = ref @@ Future.of_value 0
 
-    let current_mergebase_hg_rev = ref @@ Future.of_value ""
+    let current_mergebase_hg_rev : Rev.t Future.t ref =
+      ref @@ Future.of_value ""
 
     let get_hg_revision_time _ _ = Future.of_value 123
 
@@ -294,7 +295,8 @@ module Hg_mock = struct
       Hashtbl.reset files_changed_since_rev_to_rev
   end
 
-  let current_mergebase_hg_rev _ = !Mocking.current_mergebase_hg_rev
+  let current_mergebase_hg_rev _ : Rev.t Future.t =
+    !Mocking.current_mergebase_hg_rev
 
   let current_working_copy_hg_rev _ = !Mocking.current_working_copy_hg_rev
 

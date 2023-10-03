@@ -279,7 +279,7 @@ and init_env = {
   init_id: string;
   init_start_t: float;
   init_type: string;
-  mergebase: string option;
+  mergebase: Hg.Rev.t option;
   why_needed_full_check: Init_telemetry.t option; [@opaque]
       (** This is about the first full check (if any) which was deferred after init.
       It gets reset after that first full check is completed.

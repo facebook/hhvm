@@ -20,7 +20,7 @@ type native_load_result = {
   naming_table_path: string;
   corresponding_rev: Hg.rev;
   mergebase_rev: Hg.global_rev option;
-  mergebase: Hg.hg_rev option Future.t;
+  mergebase: Hg.Rev.t option Future.t;
   is_cached: bool;
   state_distance: int;
   deptable_fn: string;

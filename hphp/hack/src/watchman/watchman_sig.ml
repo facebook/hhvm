@@ -60,7 +60,7 @@ module Types = struct
      *)
     | State_enter of string * Hh_json.json option
     | State_leave of string * Hh_json.json option
-    | Changed_merge_base of string * SSet.t * clock
+    | Changed_merge_base of Hg.Rev.t * SSet.t * clock
     | Files_changed of SSet.t
   [@@deriving show]
 
@@ -150,7 +150,7 @@ module type S = sig
   val get_changes_since_mergebase :
     ?timeout:timeout -> env -> string list result
 
-  val get_mergebase : ?timeout:timeout -> env -> string result
+  val get_mergebase : ?timeout:timeout -> env -> Hg.Rev.t result
 
   val get_changes :
     ?deadline:float -> watchman_instance -> (watchman_instance * changes) result

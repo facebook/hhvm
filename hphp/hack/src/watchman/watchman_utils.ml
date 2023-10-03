@@ -1,6 +1,6 @@
 (** State_enter and State_leave events contains a JSON blob specifying
  * the revision we are moving to. This gets it. *)
-let rev_in_state_change json =
+let rev_in_state_change json : Hg.Rev.t option =
   Hh_json.Access.(
     return json >>= get_string "rev" |> function
     | Error _ ->
@@ -10,7 +10,7 @@ let rev_in_state_change json =
           (Hh_json.json_to_string json)
       in
       None
-    | Ok (v, _) -> Some v)
+    | Ok (v, _) -> Some (Hg.Rev.of_string v))
 
 let merge_in_state_change json =
   Hh_json.Access.(

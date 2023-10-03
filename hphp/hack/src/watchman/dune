@@ -5,6 +5,7 @@
  (libraries
   buffered_line_reader
   core_kernel
+  hg
   hh_json
   logging_common
   sys_utils

@@ -22,8 +22,8 @@ type env = {
 type 'additional_info replay_info = {
   manifold_path: string;
   changed_files: Saved_state_loader.changed_files;
-  corresponding_rev: Hg.hg_rev;
-  mergebase_rev: Hg.hg_rev;
+  corresponding_rev: Hg.Rev.t;
+  mergebase_rev: Hg.Rev.t;
   is_cached: bool;
   additional_info: 'additional_info;
 }
@@ -90,8 +90,12 @@ let replay_info_of_json
     Jget.string_array_exn json "changed_files"
     |> List.map ~f:(fun suffix -> Relative_path.from_root ~suffix)
   in
-  let corresponding_rev = Jget.string_exn json "corresponding_rev" in
-  let mergebase_rev = Jget.string_exn json "mergebase_rev" in
+  let corresponding_rev =
+    Jget.string_exn json "corresponding_rev" |> Hg.Rev.of_string
+  in
+  let mergebase_rev =
+    Jget.string_exn json "mergebase_rev" |> Hg.Rev.of_string
+  in
   let is_cached = Jget.bool_exn json "is_cached" in
   let additional_info =
     additional_info_of_json
@@ -166,8 +170,8 @@ let make_replay_token_json
        (main_artifacts * additional_info) Saved_state_loader.saved_state_type)
     ~(manifold_path : string)
     ~(changed_files : Saved_state_loader.changed_files)
-    ~(corresponding_rev : Hg.hg_rev)
-    ~(mergebase_rev : Hg.hg_rev)
+    ~(corresponding_rev : Hg.Rev.t)
+    ~(mergebase_rev : Hg.Rev.t)
     ~(is_cached : bool)
     ~(additional_info : additional_info) : Hh_json.json =
   let open Hh_json in
@@ -175,8 +179,8 @@ let make_replay_token_json
     [
       ("manifold_path", JSON_String manifold_path);
       ("changed_files", changed_files_to_relative_paths_json changed_files);
-      ("corresponding_rev", JSON_String corresponding_rev);
-      ("mergebase_rev", JSON_String mergebase_rev);
+      ("corresponding_rev", JSON_String (Hg.Rev.to_string corresponding_rev));
+      ("mergebase_rev", JSON_String (Hg.Rev.to_string mergebase_rev));
       ("is_cached", JSON_Bool is_cached);
       ( "additional_info",
         make_replay_token_of_additional_info ~saved_state_type ~additional_info
@@ -190,8 +194,8 @@ let make_replay_token
        (main_artifacts * additional_info) Saved_state_loader.saved_state_type)
     ~(manifold_path : string)
     ~(changed_files : Saved_state_loader.changed_files)
-    ~(corresponding_rev : Hg.hg_rev)
-    ~(mergebase_rev : Hg.hg_rev)
+    ~(corresponding_rev : Hg.Rev.t)
+    ~(mergebase_rev : Hg.Rev.t)
     ~(is_cached : bool)
     ~(additional_info : additional_info) : string option Lwt.t =
   match (env.should_save_replay, env.replay_token) with

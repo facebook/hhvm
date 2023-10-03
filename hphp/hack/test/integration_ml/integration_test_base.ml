@@ -478,7 +478,7 @@ let load_state
         ServerArgs.naming_table_path;
         (* in Precomputed scenario, base revision should only be used in logging,
          * which is irrelevant in tests *)
-        corresponding_base_revision = "-1";
+        corresponding_base_revision = Hg.Rev.of_string "-1";
         deptable_fn;
         compressed_deptable_fn = None;
         naming_changes = [];

@@ -175,7 +175,8 @@ let push_errors_outside_files_to_errors_file
   ServerProgress.ErrorsWrite.report typing_errors_not_in_files_to_check;
   ()
 
-let indexing genv env to_check cgroup_steps =
+let indexing genv env to_check cgroup_steps :
+    env * FileInfo.t Relative_path.Map.t =
   File_provider.remove_batch to_check;
   Ast_provider.remove_batch to_check;
   Fixme_provider.remove_batch to_check;

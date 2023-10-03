@@ -54,9 +54,9 @@ type tracker_state = {
        * followed by a big local change, but that seems unlikely to happen often compared to
        * the hours we waste processing incremental rebases.
        *)
-  pending_queries: Hg.hg_rev Queue.t;
+  pending_queries: Hg.Rev.t Queue.t;
       (** Keys from mergebase_queries that contain futures that were not resolved yet *)
-  mergebase_queries: (Hg.hg_rev, Hg.global_rev Future.t) Caml.Hashtbl.t;
+  mergebase_queries: (Hg.Rev.t, Hg.global_rev Future.t) Caml.Hashtbl.t;
 }
 
 type state_handler = {
@@ -93,11 +93,13 @@ let initialize mergebase =
   tracker_state.is_enabled <- true;
   tracker_state.current_mergebase <- Some mergebase
 
-let add_query ~hg_rev root =
+let add_query ~(hg_rev : Hg.Rev.t) root =
   if Caml.Hashtbl.mem tracker_state.mergebase_queries hg_rev then
     ()
   else (
-    Hh_logger.log "ServerRevisionTracker: Seen new HG revision: %s" hg_rev;
+    Hh_logger.log
+      "ServerRevisionTracker: Seen new HG revision: %s"
+      (Hg.Rev.to_string hg_rev);
     let future = Hg.get_closest_global_ancestor hg_rev (Path.to_string root) in
     Caml.Hashtbl.add tracker_state.mergebase_queries hg_rev future;
     Queue.enqueue tracker_state.pending_queries hg_rev
@@ -128,7 +130,7 @@ let v1_handler_fn () : state_handler =
             | Some true ->
               Hh_logger.log
                 "ServerRevisionTracker: Ignoring merge rev %s"
-                hg_rev
+                (Hg.Rev.to_string hg_rev)
             | _ -> add_query ~hg_rev root))
     | "hg.transaction" ->
       if not state.is_in_hg_transaction_state then
@@ -236,7 +238,7 @@ let v2_handler_fn () =
             | Some true ->
               Hh_logger.log
                 "ServerRevisionTracker: Ignoring merge rev %s"
-                hg_rev
+                (Hg.Rev.to_string hg_rev)
             | _ -> add_query ~hg_rev root))
     | "hg.transaction" ->
       state.outstanding_events <- transition state.outstanding_events event
@@ -328,7 +330,7 @@ let rec check_non_blocking ~is_full_check_done =
     let hg_rev = Queue.peek_exn tracker_state.pending_queries in
     let future = Caml.Hashtbl.find tracker_state.mergebase_queries hg_rev in
     if Future.is_ready future then (
-      let (_ : Hg.hg_rev) = Queue.dequeue_exn tracker_state.pending_queries in
+      let (_ : Hg.Rev.t) = Queue.dequeue_exn tracker_state.pending_queries in
       check_query future ~timeout:30 ~current_t:(Unix.gettimeofday ());
       check_non_blocking ~is_full_check_done
     )

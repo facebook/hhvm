@@ -101,7 +101,12 @@
  (modules cli_args cli_args_sig)
  (preprocess
   (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
- (libraries collections hh_json relative_path sys_utils utils_core))
+ (libraries
+  collections
+  hg
+  hh_json
+  relative_path
+  sys_utils utils_core))
 
 (library
  (name decl_reference)

@@ -107,7 +107,7 @@ type loaded_info = {
   naming_table_fallback_fn: string option;
   corresponding_rev: Hg.rev;
   mergebase_rev: Hg.global_rev option;
-  mergebase: Hg.hg_rev option;
+  mergebase: Hg.Rev.t option;
   (* Files changed between the loaded naming table saved state and current revision. *)
   dirty_naming_files: Relative_path.Set.t; [@printer Relative_path.Set.pp_large]
   (* Files changed between saved state revision and current public merge base *)

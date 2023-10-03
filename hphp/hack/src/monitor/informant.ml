@@ -48,7 +48,7 @@ module Revision_map = struct
    * given HG Revision.
    *)
   type t = {
-    global_rev_queries: (Hg.hg_rev, Hg.global_rev Future.t) Caml.Hashtbl.t;
+    global_rev_queries: (Hg.Rev.t, Hg.global_rev Future.t) Caml.Hashtbl.t;
   }
 
   let create () = { global_rev_queries = Caml.Hashtbl.create 200 }
@@ -126,10 +126,10 @@ module Revision_tracker = struct
   type timestamp = float
 
   type repo_transition =
-    | State_enter of Hg.hg_rev
-    | State_leave of Hg.hg_rev
+    | State_enter of Hg.Rev.t
+    | State_leave of Hg.Rev.t
     | Changed_merge_base of
-        Hg.hg_rev * (SSet.t[@printer SSet.pp_large]) * Watchman.clock
+        Hg.Rev.t * (SSet.t[@printer SSet.pp_large]) * Watchman.clock
   [@@deriving show]
 
   let _ = show_repo_transition (* allow unused show *)
@@ -364,21 +364,21 @@ module Revision_tracker = struct
       None
     | Watchman.Watchman_pushed (Watchman.Changed_merge_base (rev, files, clock))
       ->
-      let () = Hh_logger.log "Changed_merge_base: %s" rev in
+      let () = Hh_logger.log "Changed_merge_base: %s" (Hg.Rev.to_string rev) in
       Some (Changed_merge_base (rev, files, clock))
     | Watchman.Watchman_pushed (Watchman.State_enter (state, json))
       when String.equal state "hg.update" ->
       env.is_in_hg_update_state := true;
       Option.(
         json >>= Watchman_utils.rev_in_state_change >>= fun hg_rev ->
-        Hh_logger.log "State_enter: %s" hg_rev;
+        Hh_logger.log "State_enter: %s" (Hg.Rev.to_string hg_rev);
         Some (State_enter hg_rev))
     | Watchman.Watchman_pushed (Watchman.State_leave (state, json))
       when String.equal state "hg.update" ->
       env.is_in_hg_update_state := false;
       Option.(
         json >>= Watchman_utils.rev_in_state_change >>= fun hg_rev ->
-        Hh_logger.log "State_leave: %s" hg_rev;
+        Hh_logger.log "State_leave: %s" (Hg.Rev.to_string hg_rev);
         Some (State_leave hg_rev))
     | Watchman.Watchman_pushed (Watchman.State_enter (state, _))
       when String.equal state "hg.transaction" ->

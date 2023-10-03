@@ -155,7 +155,7 @@ let process_changes changes env =
       Hh_logger.log "Watchman unavailable. Exiting";
       exit 1
     | Watchman_pushed (Changed_merge_base (mergebase, changes, _)) ->
-      Hh_logger.log "changed mergebase: %s" mergebase;
+      Hh_logger.log "changed mergebase: %s" (Hg.Rev.to_string mergebase);
       let changes = String.concat ~sep:"\n" (SSet.elements changes) in
       Hh_logger.log "changes: %s" changes;
       let env = { env with update_state = Left } in
@@ -168,7 +168,7 @@ let process_changes changes env =
       let ( >>| ) = Option.( >>| ) in
       ignore
         ( json >>= Watchman_utils.rev_in_state_change >>| fun hg_rev ->
-          Hh_logger.log "Revision: %s" hg_rev );
+          Hh_logger.log "Revision: %s" (Hg.Rev.to_string hg_rev) );
       { env with update_state = Entering }
     | Watchman_pushed (State_enter (name, _json))
       when String.equal name "hg.transaction" ->
@@ -183,7 +183,7 @@ let process_changes changes env =
       let ( >>| ) = Option.( >>| ) in
       ignore
         ( json >>= Watchman_utils.rev_in_state_change >>| fun hg_rev ->
-          Hh_logger.log "Revision: %s" hg_rev );
+          Hh_logger.log "Revision: %s" (Hg.Rev.to_string hg_rev) );
       let env = { env with update_state = Left } in
       let () = notify_waiting_clients env in
       env

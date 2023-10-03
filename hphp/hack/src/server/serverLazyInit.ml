@@ -283,8 +283,8 @@ let download_and_load_state_exn
   run_saved_state_future genv ctx dependency_table_saved_state_future
 
 let calculate_state_distance_and_age_from_hg
-    (root : Path.t) (corresponding_base_revision : string) :
-    Hg.hg_rev option * Hg.global_rev option * ServerEnv.saved_state_delta option
+    (root : Path.t) (corresponding_base_revision : Hg.Rev.t) :
+    Hg.Rev.t option * Hg.global_rev option * ServerEnv.saved_state_delta option
     =
   let root = Path.to_string root in
   let future =

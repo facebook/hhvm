@@ -216,7 +216,7 @@ let parse_saved_state_json (json, _keytrace) =
     return
       {
         naming_table_path = state;
-        corresponding_base_revision = for_base_rev;
+        corresponding_base_revision = Hg.Rev.of_string for_base_rev;
         deptable_fn = deptable;
         compressed_deptable_fn = compressed_deptable;
         prechecked_changes;

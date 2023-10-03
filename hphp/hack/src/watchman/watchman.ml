@@ -985,7 +985,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
   Edge cases: (1) when we send the first subscribe request, we get back an answer that
   lacks the since property entirely, (2) the next thing we hear has an empty since.mergebase,
   (3) the next thing we hear has a full since.mergebase. *)
-  let extract_mergebase data =
+  let extract_mergebase data : (Hg.Rev.t * Hg.Rev.t option) option =
     let open Hh_json.Access in
     let accessor = return data in
     let ret =
@@ -998,7 +998,9 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
         >>= get_string "mergebase"
         |> to_option
       in
-      return (mergebase, since_mergebase)
+      return
+        ( Hg.Rev.of_string mergebase,
+          since_mergebase |> Option.map ~f:Hg.Rev.of_string )
     in
     to_option ret
 
@@ -1022,7 +1024,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
       env.clockspec <- clock;
       (match extract_mergebase data with
       | Some (mergebase, Some since_mergebase)
-        when not (String.equal mergebase since_mergebase) ->
+        when not (Hg.Rev.equal mergebase since_mergebase) ->
         let files = set_of_list @@ extract_file_names env data in
         (env, Changed_merge_base (mergebase, files, clock))
       | _ ->
@@ -1088,7 +1090,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
       (get_changes_since_mergebase_query env)
     >|= extract_file_names env
 
-  let get_mergebase ?timeout env =
+  let get_mergebase ?timeout env : Hg.Rev.t result =
     Watchman_process.request
       ?timeout
       ~debug_logging:env.settings.debug_logging
@@ -1304,7 +1306,7 @@ module Watchman_mock = struct
 
   let get_changes_since_mergebase ?timeout:_ _ = []
 
-  let get_mergebase ?timeout:_ _ = "mergebase"
+  let get_mergebase ?timeout:_ _ : Hg.Rev.t = Hg.Rev.of_string "mergebase"
 
   let close _ = ()
 

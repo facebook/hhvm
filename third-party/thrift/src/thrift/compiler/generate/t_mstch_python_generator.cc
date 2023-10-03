@@ -528,19 +528,15 @@ class python_mstch_function : public mstch_function {
   }
 
   mstch::node created_interaction() {
-    const auto* interaction = function_->returned_interaction().get_type();
-    if (interaction != nullptr) {
-      return interaction->get_name();
-    }
-    return "";
+    const auto& interaction = function_->interaction();
+    return interaction ? interaction->get_name() : "";
   }
 
   mstch::node returns_tuple() {
     // TOOD add in sinks, etc
     const t_stream_response* stream = function_->stream();
     return (stream && !stream->first_response_type().empty()) ||
-        (!function_->returned_interaction().empty() &&
-         !function_->return_type()->is_void());
+        (function_->interaction() && !function_->return_type()->is_void());
   }
 
   mstch::node early_client_return() {
@@ -572,8 +568,7 @@ class python_mstch_function : public mstch_function {
   mstch::node async_only() {
     return function_->sink_or_stream() ||
         function_->return_type()->is_service() ||
-        function_->is_interaction_member() ||
-        !function_->returned_interaction().empty();
+        function_->is_interaction_member() || function_->interaction();
   }
 };
 

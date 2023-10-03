@@ -837,8 +837,7 @@ class cpp_mstch_function : public mstch_function {
         });
   }
   mstch::node coroutine() {
-    if (!function_->returned_interaction().empty() ||
-        function_->is_interaction_member()) {
+    if (function_->interaction() || function_->is_interaction_member()) {
       // Interaction codegen always has coroutine methods
       return true;
     }
@@ -865,11 +864,11 @@ class cpp_mstch_function : public mstch_function {
     return cpp2::is_stack_arguments(context_.options, *function_);
   }
   mstch::node created_interaction() {
-    return cpp2::get_name(function_->returned_interaction().get_type());
+    return cpp2::get_name(function_->interaction().get_type());
   }
   mstch::node sync_returns_by_outparam() {
     return is_complex_return(function_->return_type()->get_true_type()) &&
-        !function_->returned_interaction();
+        !function_->interaction();
   }
 
  private:
@@ -2538,8 +2537,7 @@ void t_mstch_cpp2_generator::generate_inline_services(
        any_service_has_any_function(std::mem_fn(&t_function::stream))},
       {"any_interactions?",
        any_service_has_any_function([](const t_function& func) {
-         return func.is_interaction_constructor() ||
-             !func.returned_interaction().empty();
+         return func.is_interaction_constructor() || func.interaction();
        })},
       {"services", std::move(mstch_services)},
   };

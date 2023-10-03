@@ -527,9 +527,9 @@ class mstch_service : public mstch_base {
       if (function->return_type()->is_service()) {
         interactions_.insert(
             dynamic_cast<const t_interaction*>(function->return_type()));
-      } else if (auto interaction = function->returned_interaction()) {
+      } else if (const auto& interaction = function->interaction()) {
         interactions_.insert(
-            dynamic_cast<const t_interaction*>(interaction->get_true_type()));
+            dynamic_cast<const t_interaction*>(interaction.get_type()));
       }
     }
     assert(interactions_.count(nullptr) == 0);
@@ -703,15 +703,14 @@ class mstch_function : public mstch_base {
   }
 
   mstch::node creates_interaction() {
-    return !function_->returned_interaction().empty();
+    return !function_->interaction().empty();
   }
   mstch::node in_or_creates_interaction() {
-    return !function_->returned_interaction().empty() ||
-        function_->is_interaction_member();
+    return function_->interaction() || function_->is_interaction_member();
   }
   mstch::node is_void() {
-    return function_->return_type()->is_void() &&
-        !function_->returned_interaction() && !function_->sink_or_stream();
+    return function_->return_type()->is_void() && !function_->interaction() &&
+        !function_->sink_or_stream();
   }
 
   mstch::node has_sink() { return function_->sink() != nullptr; }

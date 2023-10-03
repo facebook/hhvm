@@ -849,7 +849,7 @@ void validate_exception_php_annotations(
 void validate_interaction_nesting(
     diagnostic_context& ctx, const t_interaction& node) {
   for (auto* func : node.get_functions()) {
-    if (func->returned_interaction()) {
+    if (func->interaction()) {
       ctx.error(*func, "Nested interactions are forbidden: {}", func->name());
     }
   }

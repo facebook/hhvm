@@ -68,10 +68,7 @@ class t_function final : public t_named {
       std::string name,
       t_type_ref interaction = {});
 
-  const t_type* return_type() const {
-    return response_pos_ != -1 ? return_types_[response_pos_].get_type()
-                               : &t_base_type::t_void();
-  }
+  const t_type* return_type() const;
   void set_return_type(t_type_ref ret) {
     response_pos_ = return_types_.size();
     return_types_.push_back(ret);
@@ -113,15 +110,8 @@ class t_function final : public t_named {
   bool is_interaction_member() const { return is_interaction_member_; }
   void set_is_interaction_member() { is_interaction_member_ = true; }
 
-  // new syntax only
-  const t_type_ref& returned_interaction() const {
-    return returned_interaction_pos_ != -1
-        ? return_types_[returned_interaction_pos_]
-        : t_type_ref::none();
-  }
-  void set_returned_interaction_pos(uint8_t pos) {
-    returned_interaction_pos_ = pos;
-  }
+  // Returns an interaction created by this function or null if there is none.
+  const t_type_ref& interaction() const { return interaction_; }
   void set_response_pos(uint8_t pos) { response_pos_ = pos; }
 
   std::vector<t_type_ref>& return_types() { return return_types_; }
@@ -130,10 +120,10 @@ class t_function final : public t_named {
  private:
   std::vector<t_type_ref> return_types_;
   std::unique_ptr<t_node> sink_or_stream_;
+  t_type_ref interaction_;
   std::unique_ptr<t_paramlist> paramlist_;
   std::unique_ptr<t_throws> exceptions_;
   t_function_qualifier qualifier_ = t_function_qualifier::none;
-  int8_t returned_interaction_pos_ = -1;
   int8_t response_pos_ = -1;
   bool is_interaction_constructor_ = false;
   bool is_interaction_member_ = false;

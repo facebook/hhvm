@@ -1026,10 +1026,9 @@ class rust_mstch_function : public mstch_function {
   mstch::node rust_has_doc() { return function_->has_doc(); }
   mstch::node rust_doc() { return quoted_rust_doc(function_); }
   mstch::node rust_interaction_name() {
-    if (!function_->returned_interaction().empty()) {
-      return function_->returned_interaction()->get_name();
-    }
-    return function_->return_type()->get_name();
+    const auto& interaction = function_->interaction();
+    return interaction ? interaction->get_name()
+                       : function_->return_type()->get_name();
   }
   mstch::node rust_void_excluding_interaction() {
     return function_->return_type()->is_void() && !function_->sink_or_stream();

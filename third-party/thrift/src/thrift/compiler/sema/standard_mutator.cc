@@ -253,37 +253,17 @@ void normalize_return_type(
     return;
   }
 
-  size_t response_pos = 0;
-  t_node* sink_or_stream = node.sink_or_stream();
-  if (auto* interaction = dynamic_cast<const t_interaction*>(&*types.front())) {
-    // Old syntax treats a returned interaction as a response.
-    if (node.is_interaction_constructor()) {
-      assert(types.size() == 1 && !sink_or_stream);
-      node.set_response_pos(0);
-      return;
-    }
-    node.set_returned_interaction_pos(0);
-    if (types.size() == 1) {
-      if (!sink_or_stream) {
-        node.set_return_type(t_base_type::t_void());
-      }
-      return;
-    }
-    response_pos = 1;
-  } else if (types.size() > 1) {
-    ctx.error("Too many return types");
-  }
-
   // Check the (first) response type.
-  auto type = types[response_pos];
+  auto type = types[0];
   const t_type* true_type = type->get_true_type();
   if (dynamic_cast<const t_service*>(true_type) ||
       dynamic_cast<const t_exception*>(true_type)) {
     ctx.error("Invalid first response type: {}", type->get_full_name());
   }
 
+  t_node* sink_or_stream = node.sink_or_stream();
   if (!sink_or_stream) {
-    node.set_response_pos(response_pos);
+    node.set_response_pos(0);
   } else if (auto* sink = dynamic_cast<t_sink*>(sink_or_stream)) {
     // TODO: move first response out of t_sink.
     sink->set_first_response_type(type);

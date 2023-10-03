@@ -541,13 +541,14 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
       return 0; // Default
     }());
 
+    if (const auto& interaction = func.interaction()) {
+      auto ref = mapval();
+      ref->add_map(val("uri"), typeUri(*interaction));
+      func_schema->add_map(val("interactionType"), std::move(ref));
+    }
     for (const auto& ret : func.return_types()) {
       auto type = ret.get_type();
-      if (auto interaction = dynamic_cast<const t_interaction*>(type)) {
-        auto ref = mapval();
-        ref->add_map(val("uri"), typeUri(*interaction));
-        func_schema->add_map(val("interactionType"), std::move(ref));
-      } else if (auto stream = dynamic_cast<const t_stream_response*>(type)) {
+      if (auto stream = dynamic_cast<const t_stream_response*>(type)) {
         assert(false); // handled below
       } else if (auto sink = dynamic_cast<const t_sink*>(type)) {
         assert(false); // handled below

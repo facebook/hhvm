@@ -32,10 +32,8 @@ t_function::t_function(
     t_type_ref interaction)
     : t_named(program, std::move(name)),
       sink_or_stream_(std::move(sink_or_stream)),
+      interaction_(interaction),
       paramlist_(std::make_unique<t_paramlist>(program)) {
-  if (interaction) {
-    return_types_.push_back(interaction);
-  }
   if (return_type) {
     return_types_.push_back(return_type);
   }
@@ -54,6 +52,14 @@ t_function::t_function(
   set_return_type(return_type);
 }
 
+const t_type* t_function::return_type() const {
+  if (is_interaction_constructor_) {
+    // The old syntax (performs) treats an interaction as a response.
+    return interaction_.get_type();
+  }
+  return response_pos_ != -1 ? return_types_[response_pos_].get_type()
+                             : &t_base_type::t_void();
+}
 } // namespace compiler
 } // namespace thrift
 } // namespace apache

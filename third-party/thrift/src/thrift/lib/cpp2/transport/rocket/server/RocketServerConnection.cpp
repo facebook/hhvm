@@ -105,7 +105,7 @@ RocketServerConnection::RocketServerConnection(
               "Could not apply SocketOption(level={}, optname={}, value={}) to socket {}",
               option.level,
               option.optname,
-              value,
+              value.toString(),
               address.describe());
         }
       }

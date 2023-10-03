@@ -861,7 +861,6 @@ struct FactsStoreImpl final
     // finish after this call to update().
     if (!m_queryingWatchman) {
       m_queryingWatchman = true;
-      auto start = std::chrono::steady_clock::now();
       *updateFuture = folly::splitFuture(
           updateFuture->getFuture()
               .via(m_updateExec.get())
@@ -870,30 +869,7 @@ struct FactsStoreImpl final
                 m_lastWatchmanQueryStart = std::chrono::steady_clock::now();
                 return m_watcher->getChanges(getClock());
               })
-              .thenTry([this, start](folly::Try<Watcher::Results>&& results) {
-                auto const dur =
-                    std::chrono::duration_cast<std::chrono::milliseconds>(
-                        std::chrono::steady_clock::now() - start)
-                        .count();
-                auto const rate = RO::EvalNFLogSlowWatchmanSampleRate;
-                if (RO::EvalNFLogSlowWatchmanMsec &&
-                    RO::EvalNFLogSlowWatchmanMsec < dur &&
-                    StructuredLog::coinflip(rate)) {
-                  StructuredLogEntry ent;
-                  ent.setInt("sample_rate", rate);
-                  ent.setInt("duration_ms", dur);
-                  ent.setInt(
-                      "is_eden",
-                      std::filesystem::exists(m_root / ".eden" / "root"));
-                  if (!results.hasException()) {
-                    auto& v = results.value();
-                    ent.setInt("fresh", v.m_fresh);
-                    ent.setInt("num_files", v.m_files.size());
-                  } else {
-                    ent.setStr("exn_message", results.exception().what());
-                  }
-                  StructuredLog::log("hhvm_slow_nf_watchman", ent);
-                }
+              .thenTry([this](folly::Try<Watcher::Results>&& results) {
                 if (results.hasException()) {
                   auto msg = folly::sformat(
                       "Exception while querying watcher: {}",

@@ -1490,8 +1490,6 @@ struct RuntimeOption {
   F(bool, DiamondTraitMethods, false)                                   \
   F(bool, TreatCaseTypesAsMixed, false)                                 \
   F(uint32_t, HHIRSpecializedDestructorThreshold, 80)                   \
-  F(uint32_t, NFLogSlowWatchmanMsec, 500)                               \
-  F(uint32_t, NFLogSlowWatchmanSampleRate, 1)                           \
   F(uint32_t, LogSlowWatchmanQueriesMsec, 500)                          \
   F(uint32_t, LogSlowWatchmanQueriesRate, 1)                            \
   F(uint32_t, StartOptionLogRate, 0)                                    \

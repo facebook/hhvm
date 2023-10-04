@@ -100,8 +100,8 @@ class ThriftServerRequestResponse final : public RocketThriftRequest {
   const int32_t version_;
 };
 
-// Object corresponding to rsocket REQUEST_FNF request (one-way request) handled
-// by Thrift server
+// Object corresponding to rsocket REQUEST_FNF request (one-way request)
+// handled by Thrift server
 class ThriftServerRequestFnf final : public RocketThriftRequest {
  public:
   ThriftServerRequestFnf(

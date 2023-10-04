@@ -49,7 +49,7 @@ namespace thrift {
 namespace rocket {
 
 namespace {
-RocketException makeResponseRpcError(
+ResponseRpcError makeResponseRpcError(
     ResponseRpcErrorCode errorCode,
     folly::StringPiece message,
     const ResponseRpcMetadata& metadata) {
@@ -84,7 +84,15 @@ RocketException makeResponseRpcError(
     responseRpcError.load_ref() = *loadRef;
   }
 
+  return responseRpcError;
+}
+
+RocketException makeRocketException(const ResponseRpcError& responseRpcError) {
   auto rocketCategory = [&] {
+    auto category = ResponseRpcErrorCategory::INTERNAL_ERROR;
+    if (auto errorCategory = responseRpcError.category()) {
+      category = *errorCategory;
+    }
     switch (category) {
       case ResponseRpcErrorCategory::INVALID_REQUEST:
         return rocket::ErrorCode::INVALID;
@@ -100,7 +108,7 @@ RocketException makeResponseRpcError(
 }
 
 template <typename Serializer>
-FOLLY_NODISCARD folly::exception_wrapper processFirstResponseHelper(
+FOLLY_NODISCARD std::optional<ResponseRpcError> processFirstResponseHelper(
     ResponseRpcMetadata& metadata,
     std::unique_ptr<folly::IOBuf>& payload,
     int32_t version) noexcept {
@@ -336,7 +344,7 @@ FOLLY_NODISCARD folly::exception_wrapper processFirstResponseHelper(
   return {};
 }
 
-FOLLY_NODISCARD folly::exception_wrapper processFirstResponse(
+FOLLY_NODISCARD std::optional<ResponseRpcError> processFirstResponse(
     ResponseRpcMetadata& metadata,
     std::unique_ptr<folly::IOBuf>& payload,
     apache::thrift::protocol::PROTOCOL_TYPES protType,
@@ -385,17 +393,9 @@ FOLLY_NODISCARD folly::exception_wrapper processFirstResponse(
   }
 }
 
-template <typename Error, typename Callback, typename ResponseChannel>
-void handleStreamError(
-    Error&& error, Callback& callback, ResponseChannel* channel) {
-  error.handle(
-      [&](RocketException& ex) {
-        std::exchange(callback, nullptr)->onFirstResponseError(std::move(ex));
-      },
-      [&](...) {
-        channel->sendErrorWrapped(
-            std::forward<Error>(error), kUnknownErrorCode);
-      });
+template <typename Callback>
+void handleStreamError(RocketException ex, Callback& callback) {
+  std::exchange(callback, nullptr)->onFirstResponseError(std::move(ex));
 }
 
 } // namespace
@@ -459,19 +459,17 @@ void ThriftServerRequestResponse::sendThriftResponse(
     ResponseRpcMetadata&& metadata,
     std::unique_ptr<folly::IOBuf> data,
     apache::thrift::MessageChannel::SendCallbackPtr cb) noexcept {
-  auto error = processFirstResponse(
+  auto responseRpcError = processFirstResponse(
       metadata, data, getProtoId(), version_, getCompressionConfig());
   // When creating request logging callback, we need to access payload metadata
   // which is populated in the processFirstResponse, so
   // createRequestLoggingCallback must happen after processFirstResponse.
   cb = createRequestLoggingCallback(
       std::move(cb), metadata, serverConfigs_.getObserver());
-  if (error) {
-    error.handle(
-        [&](RocketException& ex) {
-          context_.sendError(std::move(ex), std::move(cb));
-        },
-        [&](...) { sendErrorWrapped(std::move(error), kUnknownErrorCode); });
+
+  if (responseRpcError) {
+    auto ex = makeRocketException(*responseRpcError);
+    context_.sendError(std::move(ex), std::move(cb));
     return;
   }
   auto payload = packWithFds(
@@ -616,9 +614,10 @@ bool ThriftServerRequestStream::sendStreamThriftResponse(
     sendSerializedError(std::move(metadata), std::move(data));
     return false;
   }
-  if (auto error = processFirstResponse(
+  if (auto responseRpcError = processFirstResponse(
           metadata, data, getProtoId(), version_, getCompressionConfig())) {
-    handleStreamError(std::move(error), clientCallback_, this);
+    auto ex = makeRocketException(*responseRpcError);
+    handleStreamError(std::move(ex), clientCallback_);
     return false;
   }
   context_.unsetMarkRequestComplete();
@@ -639,9 +638,10 @@ void ThriftServerRequestStream::sendStreamThriftResponse(
     sendSerializedError(std::move(metadata), std::move(data));
     return;
   }
-  if (auto error = processFirstResponse(
+  if (auto responseRpcError = processFirstResponse(
           metadata, data, getProtoId(), version_, getCompressionConfig())) {
-    handleStreamError(std::move(error), clientCallback_, this);
+    auto ex = makeRocketException(*responseRpcError);
+    handleStreamError(std::move(ex), clientCallback_);
     return;
   }
   context_.unsetMarkRequestComplete();
@@ -656,9 +656,10 @@ void ThriftServerRequestStream::sendStreamThriftResponse(
 void ThriftServerRequestStream::sendSerializedError(
     ResponseRpcMetadata&& metadata,
     std::unique_ptr<folly::IOBuf> exbuf) noexcept {
-  if (auto error = processFirstResponse(
+  if (auto responseRpcError = processFirstResponse(
           metadata, exbuf, getProtoId(), version_, getCompressionConfig())) {
-    handleStreamError(std::move(error), clientCallback_, this);
+    auto ex = makeRocketException(*responseRpcError);
+    handleStreamError(std::move(ex), clientCallback_);
     return;
   }
   std::exchange(clientCallback_, nullptr)
@@ -725,9 +726,10 @@ void ThriftServerRequestSink::sendThriftException(
 void ThriftServerRequestSink::sendSerializedError(
     ResponseRpcMetadata&& metadata,
     std::unique_ptr<folly::IOBuf> exbuf) noexcept {
-  if (auto error = processFirstResponse(
+  if (auto responseRpcError = processFirstResponse(
           metadata, exbuf, getProtoId(), version_, getCompressionConfig())) {
-    handleStreamError(std::move(error), clientCallback_, this);
+    auto ex = makeRocketException(*responseRpcError);
+    handleStreamError(std::move(ex), clientCallback_);
     return;
   }
   std::exchange(clientCallback_, nullptr)
@@ -745,9 +747,10 @@ void ThriftServerRequestSink::sendSinkThriftResponse(
     sendSerializedError(std::move(metadata), std::move(data));
     return;
   }
-  if (auto error = processFirstResponse(
+  if (auto responseRpcError = processFirstResponse(
           metadata, data, getProtoId(), version_, getCompressionConfig())) {
-    handleStreamError(std::move(error), clientCallback_, this);
+    auto ex = makeRocketException(*responseRpcError);
+    handleStreamError(std::move(ex), clientCallback_);
     return;
   }
   context_.unsetMarkRequestComplete();
@@ -777,9 +780,10 @@ bool ThriftServerRequestSink::sendSinkThriftResponse(
     sendSerializedError(std::move(metadata), std::move(data));
     return false;
   }
-  if (auto error = processFirstResponse(
+  if (auto responseRpcError = processFirstResponse(
           metadata, data, getProtoId(), version_, getCompressionConfig())) {
-    handleStreamError(std::move(error), clientCallback_, this);
+    auto ex = makeRocketException(*responseRpcError);
+    handleStreamError(std::move(ex), clientCallback_);
     return false;
   }
   context_.unsetMarkRequestComplete();

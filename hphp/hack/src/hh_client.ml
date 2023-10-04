@@ -26,6 +26,22 @@ open Hh_prelude
 
 let () = Random.self_init ()
 
+let init_event_logger root command ~init_id config local_config : unit =
+  HackEventLogger.client_init
+    ~init_id
+    ~custom_columns:(ClientCommand.get_custom_telemetry_data command)
+    ~always_add_sandcastle_info:
+      (Option.exists local_config ~f:(fun c ->
+           c.ServerLocalConfig.log_events_with_sandcastle_info))
+    (Option.value root ~default:Path.dummy_path);
+  Option.iter config ~f:(fun config ->
+      HackEventLogger.set_hhconfig_version
+        (ServerConfig.version config |> Config_file.version_to_string_opt));
+  Option.iter local_config ~f:(fun local_config ->
+      HackEventLogger.set_rollout_flags
+        (ServerLocalConfig.to_rollout_flags local_config));
+  ()
+
 let () =
   (* no-op, needed at entry-point for Daemon hookup *)
   Daemon.check_entry_point ();
@@ -88,14 +104,10 @@ let () =
     "[hh_client] %s"
     (String.concat ~sep:" " (Array.to_list Sys.argv));
 
-  HackEventLogger.client_init
-    ~init_id
-    ~custom_columns:(ClientCommand.get_custom_telemetry_data command)
-    (Option.value root ~default:Path.dummy_path);
   (* we also have to patch up HackEventLogger with stuff we learn from root, if available... *)
-  let local_config =
+  let (local_config, config) =
     match root with
-    | None -> None
+    | None -> (None, None)
     | Some root ->
       ServerProgress.set_root root;
       (* The code to load hh.conf (ServerLocalConfig) is a bit weirdly factored.
@@ -114,12 +126,9 @@ let () =
       let (config, local_config) =
         ServerConfig.load ~silent:true fake_server_args
       in
-      HackEventLogger.set_hhconfig_version
-        (ServerConfig.version config |> Config_file.version_to_string_opt);
-      HackEventLogger.set_rollout_flags
-        (ServerLocalConfig.to_rollout_flags local_config);
-      Some local_config
+      (Some local_config, Some config)
   in
+  init_event_logger root command ~init_id config local_config;
 
   try
     let exit_status =

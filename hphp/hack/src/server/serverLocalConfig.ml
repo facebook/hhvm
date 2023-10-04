@@ -257,6 +257,8 @@ type t = {
       (** POC: @bobren, use new fancy compressed dep graph that is 25% the size of the old one *)
   use_old_decls_from_cas: bool;
       (** POC: @bobren, use old decls from CAS instead of memcache/manifold *)
+  log_events_with_sandcastle_info: bool;
+      (** POC: @catg, add sandcastle info to Scuba samples. *)
 }
 
 let default =
@@ -348,6 +350,7 @@ let default =
     ide_load_naming_table_on_disk = true;
     ide_naming_table_update_threshold = 1000;
     dump_tast_hashes = false;
+    log_events_with_sandcastle_info = false;
   }
 
 let system_config_path =
@@ -1058,6 +1061,12 @@ let load_
   let dump_tast_hashes =
     bool_ "dump_tast_hashes" ~default:default.dump_tast_hashes config
   in
+  let log_events_with_sandcastle_info =
+    bool_
+      "log_events_with_sandcastle_info"
+      ~default:default.log_events_with_sandcastle_info
+      config
+  in
   {
     saved_state =
       {
@@ -1165,6 +1174,7 @@ let load_
     ide_load_naming_table_on_disk;
     ide_naming_table_update_threshold;
     dump_tast_hashes;
+    log_events_with_sandcastle_info;
   }
 
 (** Loads the config from [path]. Uses JustKnobs and ExperimentsConfig to override.

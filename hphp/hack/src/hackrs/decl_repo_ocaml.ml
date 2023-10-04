@@ -43,6 +43,8 @@ let make_workers
       HackEventLogger.init_worker
         ~root
         ~custom_columns:[]
+        ~always_add_sandcastle_info:
+          server_local_config.ServerLocalConfig.log_events_with_sandcastle_info
         ~rollout_flags:(ServerLocalConfig.to_rollout_flags server_local_config)
         ~rollout_group:server_local_config.ServerLocalConfig.rollout_group
         ~hhconfig_version

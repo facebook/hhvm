@@ -71,6 +71,8 @@ let monitor_daemon_main
     HackEventLogger.init_monitor
       ~from:(ServerArgs.from options)
       ~custom_columns:(ServerArgs.custom_telemetry_data options)
+      ~always_add_sandcastle_info:
+        local_config.ServerLocalConfig.log_events_with_sandcastle_info
       ~hhconfig_version:
         (ServerConfig.version config |> Config_file.version_to_string_opt)
       ~rollout_flags:(ServerLocalConfig.to_rollout_flags local_config)

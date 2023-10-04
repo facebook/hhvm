@@ -168,6 +168,9 @@ void Debugger::setClientConnected(
   bool synchronous /* = false */,
   ClientInfo* clientInfo /* = nullptr */
 ) {
+  always_assert_flog(
+    !connected || !m_clientConnected.load(std::memory_order_acquire),
+    "Trying to connect a client when another client is alreay connected");
   DebuggerSession* sessionToDelete = nullptr;
   SCOPE_EXIT {
     if (sessionToDelete != nullptr) {
@@ -464,10 +467,10 @@ void Debugger::executeForEachAttachedRequest(
 
 
   RequestInfo::ExecutePerRequest([&] (RequestInfo* ti) {
-    auto it = m_requests.find(ti);
-    if (it != m_requests.end() && it->second != dummyRequestInfo) {
-      it->second->m_flags.alive = true;
-      callback(it->first, it->second);
+    auto ri = ti->m_reqInjectionData.getDebuggerRequestInfo();
+    if (ri && ri != dummyRequestInfo) {
+      ri->m_flags.alive = true;
+      callback(ti, ri);
     }
   });
 
@@ -479,6 +482,7 @@ void Debugger::executeForEachAttachedRequest(
       it++;
       continue;
     }
+    it->first->m_reqInjectionData.setDebuggerRequestInfo(nullptr);
     it = m_requests.erase(it);
   }
 
@@ -909,6 +913,9 @@ DebuggerRequestInfo* Debugger::attachToRequest(RequestInfo* ti) {
 
   } else {
     requestInfo = it->second;
+    always_assert(
+      requestInfo == ti->m_reqInjectionData.getDebuggerRequestInfo()
+    );
     auto idIt = m_requestInfoMap.find(ti);
     assertx(idIt != m_requestInfoMap.end());
     threadId = idIt->second;
@@ -967,6 +974,9 @@ DebuggerRequestInfo* Debugger::attachToRequest(RequestInfo* ti) {
   }
 
   updateUnresolvedBpFlag(requestInfo);
+  // This must be set last because request threads can access their own
+  // DebuggerRequestInfo without grabbing a lock.
+  ti->m_reqInjectionData.setDebuggerRequestInfo(requestInfo);
   return requestInfo;
 }
 
@@ -995,6 +1005,7 @@ void Debugger::requestShutdown() {
 
     requestInfo = it->second;
     m_requests.erase(it);
+    threadInfo->m_reqInjectionData.setDebuggerRequestInfo(nullptr);
 
     auto infoItr = m_requestInfoMap.find(threadInfo);
     assertx(infoItr != m_requestInfoMap.end());
@@ -1026,11 +1037,11 @@ DebuggerRequestInfo* Debugger::getDummyRequestInfo() {
 }
 
 DebuggerRequestInfo* Debugger::getRequestInfo(request_id_t threadId /* = -1 */) {
-  Lock lock(m_lock);
 
-  if (threadId != -1) {
+  if (threadId != -1 || isDummyRequest()) {
+    Lock lock(m_lock);
     // Find the info for the requested thread ID.
-    if (threadId == kDummyTheadId) {
+    if (threadId == kDummyTheadId || isDummyRequest()) {
       return getDummyRequestInfo();
     }
 
@@ -1043,14 +1054,7 @@ DebuggerRequestInfo* Debugger::getRequestInfo(request_id_t threadId /* = -1 */) 
     }
   } else {
     // Find the request info for the current request thread.
-    if (isDummyRequest()) {
-      return getDummyRequestInfo();
-    }
-
-    auto it = m_requests.find(&RI());
-    if (it != m_requests.end()) {
-      return it->second;
-    }
+    return RID().getDebuggerRequestInfo();
   }
 
   return nullptr;
@@ -1512,8 +1516,7 @@ void Debugger::startDummyRequest(
 }
 
 void Debugger::setDummyThreadId(int64_t threadId) {
-  Lock lock(m_lock);
-  m_dummyThreadId = threadId;
+  m_dummyThreadId.store(threadId, std::memory_order_release);
 }
 
 void Debugger::onBreakpointAdded(int bpId) {

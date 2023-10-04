@@ -455,7 +455,8 @@ struct Debugger final {
   // Returns true if the current thread is the dummy request thread, false
   // otherwise.
   bool isDummyRequest() {
-    return (int64_t)Process::GetThreadId() == m_dummyThreadId;
+    return (int64_t)Process::GetThreadId() ==
+      m_dummyThreadId.load(std::memory_order_acquire);
   }
 
   // Populates the specified folly::dynamic array with a list of thread IDs.
@@ -684,7 +685,7 @@ private:
   std::atomic<uint64_t> m_totalRequestCount {0};
 
   // Tracks the thread ID of the dummy request.
-  int64_t m_dummyThreadId {-1};
+  std::atomic<int64_t> m_dummyThreadId {-1};
 
   // Support for waiting for a client connection to arrive.
   std::mutex m_connectionNotifyLock;

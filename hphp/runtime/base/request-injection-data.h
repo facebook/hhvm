@@ -38,6 +38,10 @@ namespace HPHP {
 
 struct RequestInjectionData;
 
+namespace VSDEBUG {
+struct DebuggerRequestInfo;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 struct RequestTimer {
@@ -263,6 +267,13 @@ struct RequestInjectionData {
   StepOutState getDebuggerStepOut() const;
   void setDebuggerStepOut(StepOutState);
 
+  VSDEBUG::DebuggerRequestInfo* getDebuggerRequestInfo() const {
+    return m_debuggerRI.load(std::memory_order_acquire);
+  }
+  void setDebuggerRequestInfo(VSDEBUG::DebuggerRequestInfo* debuggerRI) {
+    m_debuggerRI.store(debuggerRI, std::memory_order_release);
+  }
+
   /*
    * The stack depth registered by the debugger's most recent flow command.
    * (e.g. step, next, etc.)
@@ -350,6 +361,8 @@ private:
   bool m_debuggerStepIn{false};
   bool m_debuggerNext{false};
   StepOutState m_debuggerStepOut{StepOutState::None};
+
+  std::atomic<VSDEBUG::DebuggerRequestInfo*> m_debuggerRI{nullptr};
 
 public:
   PCFilter m_breakPointFilter;

@@ -12,6 +12,8 @@
 
 namespace quic::samples {
 
-void startServer(const HQToolServerParams& params);
+void startServer(const HQToolServerParams& params,
+                 std::unique_ptr<quic::QuicTransportStatsCallbackFactory>&&
+                     statsFactory = nullptr);
 
 } // namespace quic::samples

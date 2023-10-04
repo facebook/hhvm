@@ -35,7 +35,9 @@ void sendKnobFrame(HQSession* session, const folly::StringPiece str) {
 
 namespace quic::samples {
 
-void startServer(const HQToolServerParams& params) {
+void startServer(
+    const HQToolServerParams& params,
+    std::unique_ptr<quic::QuicTransportStatsCallbackFactory>&& statsFactory) {
   // Run H2 server in a separate thread
   Dispatcher dispatcher(HandlerParams(
       params.protocol, params.port, params.httpVersion.canonical));
@@ -51,6 +53,9 @@ void startServer(const HQToolServerParams& params) {
     };
   }
   HQServer server(params, dispatchFn, std::move(onTransportReadyFn));
+  if (statsFactory) {
+    server.setStatsFactory(std::move(statsFactory));
+  }
 
   server.start();
   // Wait until the quic server initializes

@@ -44,9 +44,15 @@ class HQServer {
   // Sets/unsets "reject connections" flag on the QUIC server
   void rejectNewConnections(bool reject);
 
+  void setStatsFactory(
+      std::unique_ptr<quic::QuicTransportStatsCallbackFactory>&& statsFactory) {
+    statsFactory_ = std::move(statsFactory);
+  }
+
  private:
   HQServerParams params_;
   std::shared_ptr<quic::QuicServer> server_;
+  std::unique_ptr<quic::QuicTransportStatsCallbackFactory> statsFactory_;
 };
 
 class ScopedHQServer {

@@ -1,5 +1,5 @@
 C: (Minor_change
-      { props = { "x" -> Private_change };
-        sprops = { "$y" -> Private_change };
-        methods = { "f" -> Private_change };
-        smethods = { "g" -> Private_change } })
+      { props = { "x" -> Private_change_not_in_trait };
+        sprops = { "$y" -> Private_change_not_in_trait };
+        methods = { "f" -> Private_change_not_in_trait };
+        smethods = { "g" -> Private_change_not_in_trait } })

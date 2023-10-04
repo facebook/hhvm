@@ -86,7 +86,7 @@ let untag_removed_members_in_depgraph
             | ClassDiff.Added
             | ClassDiff.Modified
             | ClassDiff.Changed_inheritance
-            | ClassDiff.Private_change ->
+            | ClassDiff.Private_change_not_in_trait ->
               deps_acc
             | ClassDiff.Removed ->
               let member_dep =

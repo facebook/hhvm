@@ -12,12 +12,12 @@ type member_change =
   | Removed
   | Changed_inheritance (* Modified in a way that affects inheritance *)
   | Modified (* Modified in a way that does not affect inheritance *)
-  | Private_change (* Added/removed a private member *)
+  | Private_change_not_in_trait (* Added/removed a private member *)
 [@@deriving eq, show { with_path = false }]
 
 (** Order member_change values by corresponding fanout size. *)
 let ord_member_change = function
-  | Private_change -> 0
+  | Private_change_not_in_trait -> 0
   | Modified -> 1
   | Changed_inheritance -> 2
   | Added -> 3
@@ -68,7 +68,7 @@ let method_or_property_change_affects_descendants member_change =
   | Changed_inheritance ->
     true
   | Modified
-  | Private_change ->
+  | Private_change_not_in_trait ->
     false
 
 type constructor_change = member_change option [@@deriving eq, ord]
@@ -107,7 +107,8 @@ module MembersChangeCategory = struct
              | Changed_inheritance ->
                { acc with some_changed_inheritance = true }
              | Modified -> { acc with some_modified = true }
-             | Private_change -> { acc with some_private_change = true })
+             | Private_change_not_in_trait ->
+               { acc with some_private_change = true })
            changes
            no_change)
 

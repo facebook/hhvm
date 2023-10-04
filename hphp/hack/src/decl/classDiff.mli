@@ -12,7 +12,7 @@ type member_change =
   | Removed
   | Changed_inheritance (* Modified in a way that affects inheritance *)
   | Modified (* Modified in a way that does not affect inheritance *)
-  | Private_change (* Added/removed a private member *)
+  | Private_change_not_in_trait (* Added/removed a private member *)
 [@@deriving eq, show]
 
 type constructor_change = member_change option [@@deriving eq]

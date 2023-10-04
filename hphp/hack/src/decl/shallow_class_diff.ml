@@ -140,7 +140,8 @@ let diff_members
       | (None, Some member)
         when (not Ast_defs.(is_c_trait classish_kind))
              && Member.is_private member ->
-        (SMap.add diff ~key:name ~data:Private_change, constructor_change)
+        ( SMap.add diff ~key:name ~data:Private_change_not_in_trait,
+          constructor_change )
       | (Some _, None) ->
         (SMap.add diff ~key:name ~data:Removed, constructor_change)
       | (None, Some m) ->
@@ -157,7 +158,7 @@ let diff_members
         let member_changes =
           Member.diff old_member new_member
           |> check_module_change_internal old_member new_member
-          |> Option.value_map ~default:diff ~f:(fun ch ->
+          |> Option.fold ~init:diff ~f:(fun diff ch ->
                  SMap.add diff ~key:name ~data:ch)
         in
         let constructor_change =

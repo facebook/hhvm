@@ -1,0 +1,6 @@
+File "private_override_in_trait.php", line 16, characters 19-19:
+The method `f` is not compatible with the overridden method (Typing[4341])
+  File "private_override_in_trait.php", line 16, characters 19-19:
+  Too many mandatory arguments (expected 0 but got 1)
+  File "private_override_in_trait.php", line 4, characters 20-20:
+  Because of this definition

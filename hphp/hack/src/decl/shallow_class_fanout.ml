@@ -33,16 +33,22 @@ let get_minor_change_fanout
   let { consts; typeconsts; props; sprops; methods; smethods; constructor } =
     member_diff
   in
-  let acc_fanout member fanout_acc =
-    Typing_deps.get_member_fanout
-      (Provider_context.get_deps_mode ctx)
-      ~class_dep
-      member
-      fanout_acc
+  let acc_fanout member change fanout_acc =
+    match change with
+    | Private_change_not_in_trait -> fanout_acc
+    | Added
+    | Removed
+    | Changed_inheritance
+    | Modified ->
+      Typing_deps.get_member_fanout
+        (Provider_context.get_deps_mode ctx)
+        ~class_dep
+        member
+        fanout_acc
   in
   let acc_fanouts make_member changes fanout_acc =
-    SMap.fold changes ~init:fanout_acc ~f:(fun name _change fanout_acc ->
-        acc_fanout (make_member name) fanout_acc)
+    SMap.fold changes ~init:fanout_acc ~f:(fun name change fanout_acc ->
+        acc_fanout (make_member name) change fanout_acc)
   in
   let fanout_acc =
     DepSet.singleton class_dep
@@ -54,15 +60,15 @@ let get_minor_change_fanout
     |> acc_fanouts Dep.Member.smethod smethods
   in
   let fanout_acc =
-    Option.fold constructor ~init:fanout_acc ~f:(fun fanout_acc _change ->
-        acc_fanout Dep.Member.constructor fanout_acc)
+    Option.fold constructor ~init:fanout_acc ~f:(fun fanout_acc change ->
+        acc_fanout Dep.Member.constructor change fanout_acc)
   in
   let fanout_acc =
     if
       SMap.exists consts ~f:(fun _name change ->
           method_or_property_change_affects_descendants change)
     then
-      acc_fanout Dep.Member.all fanout_acc
+      acc_fanout Dep.Member.all Modified fanout_acc
     else
       fanout_acc
   in
@@ -230,8 +236,9 @@ end = struct
 end
 
 let add_fanout
-    ~ctx ((fanout_acc, max_class_fanout_cardinal) : DepSet.t * int) diff :
-    DepSet.t * int =
+    ~ctx
+    ((fanout_acc, max_class_fanout_cardinal) : DepSet.t * int)
+    (diff : string * ClassDiff.t) : DepSet.t * int =
   let fanout = get_fanout ~ctx diff in
   Log.log_class_fanout ctx diff fanout;
   let fanout_acc = DepSet.union fanout_acc fanout in

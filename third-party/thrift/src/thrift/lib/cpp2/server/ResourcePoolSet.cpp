@@ -105,6 +105,12 @@ size_t ResourcePoolSet::numQueued() const {
     if (auto rp = pool->requestPile()) {
       sum += rp.value().get().requestCount();
     }
+    if (pool->executor()) {
+      if (auto* tm = dynamic_cast<concurrency::ThreadManager*>(
+              &pool->executor()->get())) {
+        sum += tm->pendingUpstreamTaskCount();
+      }
+    }
   }
   return sum;
 }

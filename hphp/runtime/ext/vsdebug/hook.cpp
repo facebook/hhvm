@@ -219,10 +219,6 @@ void VSDebugHook::onFileLoad(Unit* efile) {
     requestInfo,
     efile
   );
-
-  if (requestInfo->m_flags.unresolvedBps) {
-    debugger->tryInstallBreakpoints(requestInfo);
-  }
 }
 
 void VSDebugHook::onDefClass(const Class* cls) {
@@ -252,7 +248,6 @@ void VSDebugHook::onDefClass(const Class* cls) {
         functionName
       );
     }
-    debugger->tryInstallBreakpoints(requestInfo);
   }
 }
 
@@ -296,7 +291,6 @@ void VSDebugHook::onDefFunc(const Func* func) {
       funcName
     );
   }
-  debugger->tryInstallBreakpoints(requestInfo);
 }
 
 void VSDebugHook::tryEnterDebugger(

@@ -3813,8 +3813,6 @@ SSATmp* simplifyGetMemoKey(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
 
   if (auto ret = simplifyGetMemoKeyScalar(env, inst)) return ret;
-  // We dont support memoization of enum class labels, so they will throw
-  if (src->isA(TEnumClassLabel)) return nullptr;
   if (src->isA(TUncounted|TStr) &&
       !RuntimeOption::EvalClassMemoNotices) {
     return gen(env, GetMemoKeyScalar, src);

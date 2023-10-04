@@ -200,7 +200,10 @@ const StringData* lazyClassToMemoKeyHelper(const LazyClassData& lclass) {
  * 10 (CONTAINER): any PHP array, collection, or hack array; data is the
  *                 keys and values of the container in insertion order,
  *                 serialized as above, followed by the STOP code
- * 16 (STOP): terminates a CONTAINER encoding
+ * 16 (ECL): KindOfEnumClassLabel; enum class labels are backed up by strings,
+             so the encoding is the same of strings: an int followed by that
+             many bytes of string data
+ * 17 (STOP): terminates a CONTAINER encoding
  */
 
 enum SerializeMemoizeCode {
@@ -220,7 +223,8 @@ enum SerializeMemoizeCode {
   SER_MC_CLSMETH   = 13,
   SER_MC_RFUNC     = 14,
   SER_MC_RCLSMETH  = 15,
-  SER_MC_STOP      = 16,
+  SER_MC_ECL       = 16,
+  SER_MC_STOP      = 17,
 };
 
 const uint64_t kCodeMask DEBUG_ONLY = 0x1f;
@@ -437,6 +441,10 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
       break;
 
     case KindOfEnumClassLabel:
+      serialize_memoize_code(sb, SER_MC_ECL);
+      serialize_memoize_string_data(sb, tv.m_data.pstr);
+      break;
+
     case KindOfResource: {
       auto msg = folly::format(
         "Cannot Serialize unexpected type {}",

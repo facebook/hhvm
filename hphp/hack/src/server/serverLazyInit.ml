@@ -634,24 +634,24 @@ let get_files_to_recheck
   log_fanout_information to_recheck files_to_recheck;
   files_to_recheck
 
-(* We start off with a list of files that have changed since the state was
- * saved (dirty_files), the naming table from the saved state (old_naming_table)
- * and a map of the current class / function declarations per file (new_defs_per_file).
- * We grab the declarations from both, to account for both the declarations
- * that were deleted and those that are newly created.
- * Then we use the deptable to figure out the files that
- * referred to them. Finally we recheck the lot.
- *
- * Args:
- *
- * genv, env : environments
- * old_naming_table: naming table at the time of the saved state
- * new_naming_table: naming table after changes
- * dirty_master_files and dirty_local_files: we need to typecheck these and,
- *    since their decl have changed, also all of their dependencies
- * similar_files: we only need to typecheck these,
- *    not their dependencies since their decl are unchanged
- * *)
+(** We start off with a list of files that have changed since the state was
+    saved ([dirty_files]), the naming table from the saved state ([old_naming_table])
+    and a map of the current class / function declarations per file ([new_defs_per_file]).
+    We grab the declarations from both, to account for both the declarations
+    that were deleted and those that are newly created.
+    Then we use the deptable to figure out the files that
+    referred to them. Finally we recheck the lot.
+
+    Args:
+
+    genv, env : environments
+    old_naming_table: naming table at the time of the saved state
+    new_naming_table: naming table after changes
+    dirty_master_files and dirty_local_files: we need to typecheck these and,
+       since their decl have changed, also all of their dependencies
+    similar_files: we only need to typecheck these,
+       not their dependencies since their decl are unchanged
+    *)
 let calculate_fanout_and_defer_or_do_type_check
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
@@ -1041,6 +1041,7 @@ let parse_only_init
     env
     cgroup_steps
 
+(** Among other things, updates the naming table and compute fanout. *)
 let post_saved_state_initialization
     ~(do_indexing : bool)
     ~(genv : ServerEnv.genv)

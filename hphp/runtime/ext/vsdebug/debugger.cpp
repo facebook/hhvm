@@ -1626,6 +1626,9 @@ void Debugger::tryInstallBreakpoints(DebuggerRequestInfo* ri) {
     }
     if (!resolved || bp->isRelativeBp()) {
       ri->m_breakpointInfo->m_unresolvedBreakpoints.emplace(breakpointId);
+      if (bp->m_type == BreakpointType::Function) {
+        ri->m_breakpointInfo->m_hasFuncBp = true;
+      }
     }
   }
 

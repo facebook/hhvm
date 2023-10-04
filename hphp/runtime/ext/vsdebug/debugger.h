@@ -66,6 +66,10 @@ struct RequestBreakpointInfo {
 
   // Map of loaded compilation units for this request by normalized file path.
   std::map<std::string, const HPHP::Unit*> m_loadedUnits;
+
+  // Function breakpoints are rare. If there are no function breakpoint set on
+  // a request, no breakpoints need to be resolved on class/function loads.
+  bool m_hasFuncBp {false};
 };
 
 struct StepNextFilterInfo {

@@ -232,6 +232,9 @@ void VSDebugHook::onDefClass(const Class* cls) {
     return;
   }
 
+  if (!requestInfo->m_breakpointInfo->m_hasFuncBp) {
+    return;
+  }
 
   // Resolve any breakpoints that are set on functions in this class.
   // Acquire semantics around reading requestInfo->m_flags lock-free.
@@ -275,6 +278,10 @@ void VSDebugHook::onDefFunc(const Func* func) {
 
   DebuggerRequestInfo* requestInfo = debugger->getRequestInfo();
   if (requestInfo == nullptr) {
+    return;
+  }
+
+  if (!requestInfo->m_breakpointInfo->m_hasFuncBp) {
     return;
   }
 

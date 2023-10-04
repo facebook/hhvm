@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <chrono>
 #include <memory>
 
 #include <folly/experimental/coro/BlockingWait.h>
@@ -25,7 +26,7 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
-#include <thrift/lib/cpp2/server/BaseThriftServer.h>
+#include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/Calculator.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/Streamer.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
@@ -100,6 +101,74 @@ struct SemiCalculatorHandler : apache::thrift::ServiceHandler<Calculator> {
     cb->result({std::make_unique<FastAdditionHandler>()});
   }
 };
+
+TEST(InteractionTest, PrioritizedInteractionRequest) {
+  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
+
+  struct BlockingCalculatorHandler : public SemiCalculatorHandler {
+    folly::Baton<> blockInteraction, blockNormal, startedInteraction;
+
+    TileAndResponse<AdditionIf, int> initializedAddition(int x) override {
+      startedInteraction.post();
+      EXPECT_TRUE(blockInteraction.try_wait_for(std::chrono::seconds(5)));
+      return SemiCalculatorHandler::initializedAddition(x);
+    }
+
+    folly::SemiFuture<int32_t> semifuture_addPrimitive(
+        int32_t a, int32_t b) override {
+      EXPECT_TRUE(blockNormal.try_wait_for(std::chrono::seconds(5)));
+      blockNormal.reset();
+      return a + b;
+    }
+  };
+
+  auto handler = std::make_shared<BlockingCalculatorHandler>();
+  ScopedServerInterfaceThread runner{
+      handler, [](ThriftServer& server) { server.setNumCPUWorkerThreads(1); }};
+
+  if (runner.getThriftServer().resourcePoolSet().empty()) {
+    return; // not supported by this test
+  }
+  auto client = runner.newClient<CalculatorAsyncClient>(
+      nullptr, RocketClientChannel::newChannel);
+
+  RpcOptions opts;
+  auto [adder, sf1] = client->eager_semifuture_initializedAddition(opts, 42);
+  auto sf2 = adder.semifuture_getPrimitive();
+
+  // Wait for the interaction requests to reach the server
+  handler->startedInteraction.wait();
+
+  auto normal1 = client->semifuture_addPrimitive(1, 2);
+  auto normal2 = client->semifuture_addPrimitive(3, 4);
+
+  // Wait for the 2 requests to reach the server
+  auto start = std::chrono::steady_clock::now();
+  while (runner.getThriftServer().resourcePoolSet().numQueued() != 2) {
+    /* sleep override */
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    if (std::chrono::steady_clock::now() - start > std::chrono::seconds(5)) {
+      FAIL() << "Timed out waiting for requests to be queued";
+      return;
+    }
+  }
+
+  // Unblock the interaction request and wait for it to finish
+  handler->blockInteraction.post();
+  EXPECT_EQ(std::move(sf1).get(), 42);
+
+  // Unblock the normal request and wait for it to finish
+  handler->blockNormal.post();
+  EXPECT_EQ(std::move(normal1).get(), 3);
+
+  // The continuation to the interaction should have been finished now even
+  // though it was enqueued after the second normal request
+  EXPECT_EQ(std::move(sf2).get(), 42);
+
+  // The second normal request will be dequeued last
+  handler->blockNormal.post();
+  EXPECT_EQ(std::move(normal2).get(), 7);
+}
 
 TEST(InteractionTest, TerminateUsed) {
   THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);

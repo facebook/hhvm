@@ -51,8 +51,8 @@
 #include <thrift/lib/cpp2/server/Cpp2Connection.h>
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
 #include <thrift/lib/cpp2/server/ExecutorToThreadManagerAdaptor.h>
+#include <thrift/lib/cpp2/server/InternalPriorityRequestPile.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
-#include <thrift/lib/cpp2/server/RoundRobinRequestPile.h>
 #include <thrift/lib/cpp2/server/ServerFlags.h>
 #include <thrift/lib/cpp2/server/ServerInstrumentation.h>
 #include <thrift/lib/cpp2/server/StandardConcurrencyController.h>
@@ -294,6 +294,14 @@ void ThriftServer::initializeDefaults() {
           THRIFT_SERVER_EVENT(ACC_enabled).log(*this);
         }
       });
+}
+
+std::unique_ptr<RequestPileInterface> ThriftServer::makeStandardRequestPile(
+    RoundRobinRequestPile::Options options) {
+  if (runtimeServerActions_.interactionInService) {
+    return std::make_unique<InternalPriorityRequestPile>(std::move(options));
+  }
+  return std::make_unique<RoundRobinRequestPile>(std::move(options));
 }
 
 ThriftServer::~ThriftServer() {
@@ -935,9 +943,7 @@ void ThriftServer::ensureResourcePoolsDefaultPrioritySetup(
       auto executor = std::make_shared<folly::CPUThreadPoolExecutor>(
           2, ResourcePool::kPreferredExecutorNumPriorities, std::move(factory));
       apache::thrift::RoundRobinRequestPile::Options options;
-      auto requestPile =
-          std::make_unique<apache::thrift::RoundRobinRequestPile>(
-              std::move(options));
+      auto requestPile = makeStandardRequestPile(std::move(options));
       auto concurrencyController = makeStandardConcurrencyController(
           *requestPile.get(), *executor.get());
       resourcePoolSet().addResourcePool(
@@ -1010,16 +1016,17 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
           runtimeServerActions_.noServiceRequestInfo = true;
           runtimeDisableResourcePoolsDeprecated();
         }
-        if (!THRIFT_FLAG(enable_resource_pools_for_interaction) &&
-            metadata.interactionType ==
-                AsyncProcessorFactory::MethodMetadata::InteractionType::
-                    INTERACTION_V1) {
-          // We've found an interaction in this service. Mark it is incompatible
-          // with resource pools
-          LOG(INFO) << "Resource pools disabled. Interaction on request "
-                    << methodToMetadataPtr.first;
+        if (metadata.interactionType ==
+            AsyncProcessorFactory::MethodMetadata::InteractionType::
+                INTERACTION_V1) {
           runtimeServerActions_.interactionInService = true;
-          runtimeDisableResourcePoolsDeprecated();
+          if (!THRIFT_FLAG(enable_resource_pools_for_interaction)) {
+            // We've found an interaction in this service. Mark it is
+            // incompatible with resource pools
+            LOG(INFO) << "Resource pools disabled. Interaction on request "
+                      << methodToMetadataPtr.first;
+            runtimeDisableResourcePoolsDeprecated();
+          }
         }
       }
     } else { // we can only have WildcardMethodMetadataMap here
@@ -1100,8 +1107,8 @@ void ThriftServer::ensureResourcePools() {
         return factory;
       };
 
-      auto requestPile = std::make_unique<RoundRobinRequestPile>(
-          RoundRobinRequestPile::Options());
+      auto requestPile =
+          makeStandardRequestPile(RoundRobinRequestPile::Options());
 
       auto executor = std::make_shared<folly::CPUThreadPoolExecutor>(
           getNumCPUWorkerThreads(),
@@ -1124,8 +1131,7 @@ void ThriftServer::ensureResourcePools() {
 
   if (threadManager_) {
     apache::thrift::RoundRobinRequestPile::Options options;
-    auto requestPile = std::make_unique<apache::thrift::RoundRobinRequestPile>(
-        std::move(options));
+    auto requestPile = makeStandardRequestPile(std::move(options));
     auto concurrencyController =
         std::make_unique<apache::thrift::TMConcurrencyController>(
             *requestPile, *threadManager_);
@@ -1151,9 +1157,7 @@ void ThriftServer::ensureResourcePools() {
             ResourcePool::kPreferredExecutorNumPriorities);
       }
       apache::thrift::RoundRobinRequestPile::Options options;
-      auto requestPile =
-          std::make_unique<apache::thrift::RoundRobinRequestPile>(
-              std::move(options));
+      auto requestPile = makeStandardRequestPile(std::move(options));
       auto concurrencyController = makeStandardConcurrencyController(
           *requestPile.get(), *executor.get());
       if (i == concurrency::PRIORITY::NORMAL) {
@@ -1274,9 +1278,7 @@ void ThriftServer::ensureResourcePools() {
         options.setNumPriorities(concurrency::N_PRIORITIES);
         options.setPileSelectionFunction(options.getDefaultPileSelectionFunc());
       }
-      auto requestPile =
-          std::make_unique<apache::thrift::RoundRobinRequestPile>(
-              std::move(options));
+      auto requestPile = makeStandardRequestPile(std::move(options));
       auto concurrencyController = makeStandardConcurrencyController(
           *requestPile.get(), *executor.get());
       if (pool.handle) {

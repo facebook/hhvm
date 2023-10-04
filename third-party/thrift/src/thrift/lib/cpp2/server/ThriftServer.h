@@ -58,6 +58,7 @@
 #include <thrift/lib/cpp2/server/PreprocessParams.h>
 #include <thrift/lib/cpp2/server/RequestDebugLog.h>
 #include <thrift/lib/cpp2/server/RequestsRegistry.h>
+#include <thrift/lib/cpp2/server/RoundRobinRequestPile.h>
 #include <thrift/lib/cpp2/server/ServerInstrumentation.h>
 #include <thrift/lib/cpp2/server/ServiceHealthPoller.h>
 #include <thrift/lib/cpp2/server/TransportRoutingHandler.h>
@@ -449,6 +450,9 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   // method to encapsulate the default setup needed for the construction of
   // ThriftServer. Should be called in all ctors not calling the default ctor
   void initializeDefaults();
+
+  std::unique_ptr<RequestPileInterface> makeStandardRequestPile(
+      RoundRobinRequestPile::Options options);
 
  public:
   ~ThriftServer() override;

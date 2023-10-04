@@ -113,22 +113,13 @@ bool ParallelConcurrencyControllerBase::trySchedule(bool onEnqueued) {
 }
 
 void ParallelConcurrencyController::scheduleOnExecutor() {
-  auto req = pile_.dequeue();
   if (executor_.getNumPriorities() > 1) {
-    auto priority = req
-        ? detail::ServerRequestHelper::internalPriority(req.value())
-        : folly::Executor::LO_PRI;
-    // By default we have 3 prios, external requests should go to
+    // By default we have 2 prios, external requests should go to
     // lower priority queue to yield to the internal ones
     executor_.addWithPriority(
-        [this, sr = std::move(req)]() mutable {
-          executeRequest(std::move(sr));
-        },
-        priority);
+        [this]() { executeRequest(pile_.dequeue()); }, folly::Executor::LO_PRI);
   } else {
-    executor_.add([this, sr = std::move(req)]() mutable {
-      executeRequest(std::move(sr));
-    });
+    executor_.add([this]() { executeRequest(pile_.dequeue()); });
   }
 }
 

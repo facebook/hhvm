@@ -144,10 +144,6 @@ using FuncCounterMap = tbb::concurrent_hash_map<FuncId, uint32_t,
                                                 FuncIdHashCompare>;
 static FuncCounterMap s_func_counters;
 
-using SrcKeyCounters = tbb::concurrent_hash_map<SrcKey, uint32_t,
-                                                SrcKey::TbbHashCompare>;
-
-static SrcKeyCounters s_sk_counters;
 
 static RDS_LOCAL_NO_CHECK(bool, s_jittingTimeLimitExceeded);
 
@@ -216,13 +212,6 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
   auto const isProf = kind == TransKind::Profile ||
                       kind == TransKind::ProfPrologue;
   if (isLive || isProf) {
-    uint32_t skCount = 1;
-    if (RuntimeOption::EvalJitSrcKeyThreshold > 1) {
-      SrcKeyCounters::accessor acc;
-      if (!s_sk_counters.insert(acc, SrcKeyCounters::value_type(sk, 1))) {
-        skCount = ++acc->second;
-      }
-    }
     {
       FuncCounterMap::accessor acc;
       if (!s_func_counters.insert(acc, {func->getFuncId(), 1})) ++acc->second;
@@ -231,9 +220,6 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
       if (acc->second < funcThreshold) {
         return TranslationResult::Scope::Transient;
       }
-    }
-    if (skCount < RuntimeOption::EvalJitSrcKeyThreshold) {
-      return TranslationResult::Scope::Transient;
     }
   }
 
@@ -266,7 +252,6 @@ TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind) {
   // Set a flag so we quickly bail from trying to generate new
   // translations next time.
   s_TCisFull.store(true, std::memory_order_relaxed);
-  Treadmill::enqueue([] { s_sk_counters.clear(); });
 
   if (main_under && !s_did_log.test_and_set() &&
       RuntimeOption::EvalProfBranchSampleFreq == 0) {

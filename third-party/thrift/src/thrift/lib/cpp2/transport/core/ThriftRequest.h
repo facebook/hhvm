@@ -113,6 +113,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
    public:
     LogRequestSampleCallback(
         const ResponseRpcMetadata& metadata,
+        const std::optional<ResponseRpcError>& responseRpcError,
         const server::TServerObserver::CallTimestamps& timestamps,
         server::TServerObserver* observer,
         MessageChannel::SendCallback* chainedCallback = nullptr);
@@ -352,6 +353,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
   MessageChannel::SendCallbackPtr createRequestLoggingCallback(
       MessageChannel::SendCallbackPtr&& sendCallback,
       const ResponseRpcMetadata& metadata,
+      const std::optional<ResponseRpcError>& responseRpcError,
       server::TServerObserver* observer);
 
  private:

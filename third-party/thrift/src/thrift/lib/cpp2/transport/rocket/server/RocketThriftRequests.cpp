@@ -465,7 +465,7 @@ void ThriftServerRequestResponse::sendThriftResponse(
   // which is populated in the processFirstResponse, so
   // createRequestLoggingCallback must happen after processFirstResponse.
   cb = createRequestLoggingCallback(
-      std::move(cb), metadata, serverConfigs_.getObserver());
+      std::move(cb), metadata, responseRpcError, serverConfigs_.getObserver());
 
   if (responseRpcError) {
     auto ex = makeRocketException(*responseRpcError);

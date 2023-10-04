@@ -45,9 +45,11 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
 namespace {
 RequestLoggingContext buildRequestLoggingContext(
     const ResponseRpcMetadata& metadata,
+    const std::optional<ResponseRpcError>& responseRpcError,
     const server::TServerObserver::CallTimestamps& timestamps) {
   RequestLoggingContext requestLoggingContext;
   requestLoggingContext.timestamps = timestamps;
+  requestLoggingContext.responseRpcError = responseRpcError;
   if (auto payloadMetadata = metadata.payloadMetadata()) {
     if (auto exceptionMetadata = payloadMetadata->exceptionMetadata_ref()) {
       requestLoggingContext.exceptionMetaData = *exceptionMetadata;
@@ -140,10 +142,12 @@ bool ThriftRequestCore::includeInRecentRequestsCount(
 
 ThriftRequestCore::LogRequestSampleCallback::LogRequestSampleCallback(
     const ResponseRpcMetadata& metadata,
+    const std::optional<ResponseRpcError>& responseRpcError,
     const server::TServerObserver::CallTimestamps& timestamps,
     server::TServerObserver* observer,
     MessageChannel::SendCallback* chainedCallback)
-    : requestLoggingContext_(buildRequestLoggingContext(metadata, timestamps)),
+    : requestLoggingContext_(
+          buildRequestLoggingContext(metadata, responseRpcError, timestamps)),
       observer_(observer),
       chainedCallback_(chainedCallback) {}
 
@@ -182,7 +186,8 @@ ThriftRequestCore::LogRequestSampleCallback::~LogRequestSampleCallback() {
 
   if (THRIFT_FLAG(enable_request_event_logging) &&
       samplingStatus.isEnabledByClient()) {
-    const bool error = requestLoggingContext_.exceptionMetaData.has_value();
+    const bool error = requestLoggingContext_.exceptionMetaData.has_value() ||
+        requestLoggingContext_.responseRpcError.has_value();
     if (auto samplingRatio = error
             ? samplingStatus.getClientLogErrorSampleRatio()
             : samplingStatus.getClientLogSampleRatio()) {
@@ -196,6 +201,7 @@ ThriftRequestCore::LogRequestSampleCallback::~LogRequestSampleCallback() {
 MessageChannel::SendCallbackPtr ThriftRequestCore::createRequestLoggingCallback(
     MessageChannel::SendCallbackPtr&& cb,
     const ResponseRpcMetadata& metadata,
+    const std::optional<ResponseRpcError>& responseRpcError,
     server::TServerObserver* observer) {
   auto cbPtr = std::move(cb);
   // If we are sampling this call, wrap it with a RequestTimestampSample,
@@ -207,7 +213,7 @@ MessageChannel::SendCallbackPtr ThriftRequestCore::createRequestLoggingCallback(
     auto chainedCallback = cbPtr.release();
     return MessageChannel::SendCallbackPtr(
         new ThriftRequestCore::LogRequestSampleCallback(
-            metadata, timestamps, observer, chainedCallback));
+            metadata, responseRpcError, timestamps, observer, chainedCallback));
   }
   return cbPtr;
 }

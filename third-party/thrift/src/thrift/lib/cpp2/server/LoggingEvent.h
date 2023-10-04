@@ -123,7 +123,12 @@ class ServerTrackerHandler {
 
 struct RequestLoggingContext {
   server::TServerObserver::CallTimestamps timestamps;
+  // for application exception (a.k.a user exception), e.g. user defined thrift
+  // exception
   std::optional<PayloadExceptionMetadataBase> exceptionMetaData;
+  // for thrift internal exception, e.g. OVERLOAD, QUEUE_TIMEOUT,
+  // UNKNOWN_METHOD.
+  std::optional<ResponseRpcError> responseRpcError;
 };
 
 class RequestEventHandler : public LoggingEventHandler {

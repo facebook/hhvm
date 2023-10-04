@@ -192,15 +192,12 @@ TYPED_TEST(AstVisitorTest, EmptyProgram) {}
 TYPED_TEST(AstVisitorTest, Interaction) {
   auto interaction =
       std::make_unique<t_interaction>(&this->program_, "Interaction");
-  auto func1 = std::make_unique<t_function>(
-      &t_base_type::t_void(),
-      "function1",
-      std::make_unique<t_paramlist>(&this->program_));
+  auto void_ref = t_type_ref::from_req_ptr(&t_base_type::t_void());
+  auto func1 =
+      std::make_unique<t_function>(&this->program_, void_ref, "function1");
   func1->set_exceptions(std::make_unique<t_throws>());
-  auto func2 = std::make_unique<t_function>(
-      &t_base_type::t_void(),
-      "function2",
-      std::make_unique<t_paramlist>(&this->program_));
+  auto func2 =
+      std::make_unique<t_function>(&this->program_, void_ref, "function2");
 
   EXPECT_CALL(this->mock_, visit_function(func1.get()));
   EXPECT_CALL(this->mock_, visit_throws(func1->exceptions()));
@@ -225,15 +222,12 @@ TYPED_TEST(AstVisitorTest, Interaction) {
 
 TYPED_TEST(AstVisitorTest, Service) {
   auto service = std::make_unique<t_service>(&this->program_, "Service");
-  auto func1 = std::make_unique<t_function>(
-      &t_base_type::t_void(),
-      "function1",
-      std::make_unique<t_paramlist>(&this->program_));
+  auto void_ref = t_type_ref::from_req_ptr(&t_base_type::t_void());
+  auto func1 =
+      std::make_unique<t_function>(&this->program_, void_ref, "function1");
   func1->set_exceptions(std::make_unique<t_throws>());
-  auto func2 = std::make_unique<t_function>(
-      &t_base_type::t_void(),
-      "function2",
-      std::make_unique<t_paramlist>(&this->program_));
+  auto func2 =
+      std::make_unique<t_function>(&this->program_, void_ref, "function2");
 
   EXPECT_CALL(this->mock_, visit_function(func1.get()));
   EXPECT_CALL(this->mock_, visit_throws(func1->exceptions()));
@@ -389,10 +383,10 @@ TEST(AstVisitorTest, Sink) {
   auto program = t_program("path/to/program.thrift");
   auto service = std::make_unique<t_service>(&program, "Service");
   auto ret = t_type_ref();
-  service->add_function(
-      std::make_unique<t_function>(&program, ret, std::move(sink1), "f1"));
-  service->add_function(
-      std::make_unique<t_function>(&program, ret, std::move(sink2), "f2"));
+  service->add_function(std::make_unique<t_function>(
+      &program, ret, "f1", nullptr, std::move(sink1)));
+  service->add_function(std::make_unique<t_function>(
+      &program, ret, "f2", nullptr, std::move(sink2)));
   program.add_service(std::move(service));
 
   auto visitor = ast_visitor();
@@ -421,10 +415,10 @@ TEST(AstVisitorTest, StreamResponse) {
   auto program = t_program("path/to/program.thrift");
   auto service = std::make_unique<t_service>(&program, "Service");
   auto ret = t_type_ref();
-  service->add_function(
-      std::make_unique<t_function>(&program, ret, std::move(stream1), "f1"));
-  service->add_function(
-      std::make_unique<t_function>(&program, ret, std::move(stream2), "f2"));
+  service->add_function(std::make_unique<t_function>(
+      &program, ret, "f1", nullptr, std::move(stream1)));
+  service->add_function(std::make_unique<t_function>(
+      &program, ret, "f2", nullptr, std::move(stream2)));
   program.add_service(std::move(service));
 
   auto visitor = ast_visitor();

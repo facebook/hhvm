@@ -30,7 +30,6 @@
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/t_function.h>
 #include <thrift/compiler/ast/t_interaction.h>
-#include <thrift/compiler/ast/t_paramlist.h>
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_service.h>
 #include <thrift/compiler/ast/t_struct.h>
@@ -84,46 +83,34 @@ class StandardValidatorTest : public ::testing::Test {
 };
 
 TEST_F(StandardValidatorTest, InterfaceNamesUniqueNoError) {
+  auto return_type = t_type_ref::from_req_ptr(&t_base_type::t_void());
+
   // Create interfaces with non-overlapping functions.
-  {
-    auto service = std::make_unique<t_service>(&program_, "Service");
-    service->add_function(std::make_unique<t_function>(
-        &t_base_type::t_void(),
-        "bar",
-        std::make_unique<t_paramlist>(&program_)));
-    service->add_function(std::make_unique<t_function>(
-        &t_base_type::t_void(),
-        "baz",
-        std::make_unique<t_paramlist>(&program_)));
-    program_.add_service(std::move(service));
-  }
+  auto service = std::make_unique<t_service>(&program_, "Service");
+  service->add_function(
+      std::make_unique<t_function>(&program_, return_type, "bar"));
+  service->add_function(
+      std::make_unique<t_function>(&program_, return_type, "baz"));
+  program_.add_service(std::move(service));
 
-  {
-    auto interaction =
-        std::make_unique<t_interaction>(&program_, "Interaction");
-    interaction->add_function(std::make_unique<t_function>(
-        &t_base_type::t_void(),
-        "bar",
-        std::make_unique<t_paramlist>(&program_)));
-    interaction->add_function(std::make_unique<t_function>(
-        &t_base_type::t_void(),
-        "baz",
-        std::make_unique<t_paramlist>(&program_)));
-    program_.add_interaction(std::move(interaction));
-  }
+  auto interaction = std::make_unique<t_interaction>(&program_, "Interaction");
+  interaction->add_function(
+      std::make_unique<t_function>(&program_, return_type, "bar"));
+  interaction->add_function(
+      std::make_unique<t_function>(&program_, return_type, "baz"));
+  program_.add_interaction(std::move(interaction));
 
-  // No errors will be found
+  // No errors will be found.
   EXPECT_THAT(validate(), ::testing::IsEmpty());
 }
 
 TEST_F(StandardValidatorTest, BadPriority) {
+  auto return_type = t_type_ref::from_req_ptr(&t_base_type::t_void());
+
   {
     auto service = std::make_unique<t_service>(&program_, "Service");
     service->set_annotation("priority", "bad1");
-    auto fn = std::make_unique<t_function>(
-        &t_base_type::t_void(),
-        "foo",
-        std::make_unique<t_paramlist>(&program_));
+    auto fn = std::make_unique<t_function>(&program_, return_type, "foo");
     fn->set_annotation("priority", "bad2");
     service->add_function(std::move(fn));
     program_.add_service(std::move(service));
@@ -133,10 +120,7 @@ TEST_F(StandardValidatorTest, BadPriority) {
     auto interaction =
         std::make_unique<t_interaction>(&program_, "Interaction");
     interaction->set_annotation("priority", "bad3");
-    auto fn = std::make_unique<t_function>(
-        &t_base_type::t_void(),
-        "foo",
-        std::make_unique<t_paramlist>(&program_));
+    auto fn = std::make_unique<t_function>(&program_, return_type, "foo");
     fn->set_annotation("priority", "bad4");
     interaction->add_function(std::move(fn));
     program_.add_interaction(std::move(interaction));
@@ -156,46 +140,32 @@ TEST_F(StandardValidatorTest, BadPriority) {
 }
 
 TEST_F(StandardValidatorTest, ReapeatedNamesInService) {
+  auto return_type = t_type_ref::from_req_ptr(&t_base_type::t_void());
+
   // Create interfaces with overlapping functions.
   {
     auto service = std::make_unique<t_service>(&program_, "Service");
-    auto fn1 = std::make_unique<t_function>(
-        &t_base_type::t_void(),
-        "foo",
-        std::make_unique<t_paramlist>(&program_));
+    auto fn1 = std::make_unique<t_function>(&program_, return_type, "foo");
     fn1->set_src_range({loc, loc});
-    auto fn2 = std::make_unique<t_function>(
-        &t_base_type::t_void(),
-        "foo",
-        std::make_unique<t_paramlist>(&program_));
+    auto fn2 = std::make_unique<t_function>(&program_, return_type, "foo");
     fn2->set_src_range({loc + 1, loc + 1});
     service->add_function(std::move(fn1));
     service->add_function(std::move(fn2));
-    service->add_function(std::make_unique<t_function>(
-        &t_base_type::t_void(),
-        "bar",
-        std::make_unique<t_paramlist>(&program_)));
+    service->add_function(
+        std::make_unique<t_function>(&program_, return_type, "bar"));
     program_.add_service(std::move(service));
   }
 
   {
     auto interaction =
         std::make_unique<t_interaction>(&program_, "Interaction");
-    auto fn1 = std::make_unique<t_function>(
-        &t_base_type::t_void(),
-        "bar",
-        std::make_unique<t_paramlist>(&program_));
+    auto fn1 = std::make_unique<t_function>(&program_, return_type, "bar");
     fn1->set_src_range({loc + 2, loc + 2});
-    auto fn2 = std::make_unique<t_function>(
-        &t_base_type::t_void(),
-        "bar",
-        std::make_unique<t_paramlist>(&program_));
+    auto fn2 = std::make_unique<t_function>(&program_, return_type, "bar");
     fn2->set_src_range({loc + 3, loc + 3});
 
-    interaction->add_function(std::make_unique<t_function>(
-        &t_base_type::t_void(),
-        "foo",
-        std::make_unique<t_paramlist>(&program_)));
+    interaction->add_function(
+        std::make_unique<t_function>(&program_, return_type, "foo"));
     interaction->add_function(std::move(fn1));
     interaction->add_function(std::move(fn2));
     program_.add_interaction(std::move(interaction));
@@ -209,15 +179,17 @@ TEST_F(StandardValidatorTest, ReapeatedNamesInService) {
 }
 
 TEST_F(StandardValidatorTest, RepeatedNameInExtendedService) {
-  // Create first service with non repeated functions
+  auto return_type = t_type_ref::from_req_ptr(&t_base_type::t_void());
+
+  // Create first service with non repeated functions.
   auto base = std::make_unique<t_service>(&program_, "Base");
-  base->add_function(std::make_unique<t_function>(
-      &t_base_type::t_void(), "bar", std::make_unique<t_paramlist>(&program_)));
-  base->add_function(std::make_unique<t_function>(
-      &t_base_type::t_void(), "baz", std::make_unique<t_paramlist>(&program_)));
+  base->add_function(
+      std::make_unique<t_function>(&program_, return_type, "bar"));
+  base->add_function(
+      std::make_unique<t_function>(&program_, return_type, "baz"));
   auto derived = std::make_unique<t_service>(&program_, "Derived", base.get());
-  derived->add_function(std::make_unique<t_function>(
-      &t_base_type::t_void(), "foo", std::make_unique<t_paramlist>(&program_)));
+  derived->add_function(
+      std::make_unique<t_function>(&program_, return_type, "foo"));
 
   auto derived_ptr = derived.get();
   program_.add_service(std::move(base));
@@ -226,8 +198,7 @@ TEST_F(StandardValidatorTest, RepeatedNameInExtendedService) {
   EXPECT_THAT(validate(), ::testing::IsEmpty());
 
   // Add an overlapping function in the derived service.
-  auto dupe = std::make_unique<t_function>(
-      &t_base_type::t_void(), "baz", std::make_unique<t_paramlist>(&program_));
+  auto dupe = std::make_unique<t_function>(&program_, return_type, "baz");
   dupe->set_src_range({loc, loc});
   derived_ptr->add_function(std::move(dupe));
 

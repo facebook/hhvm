@@ -20,8 +20,6 @@
 #include <string>
 #include <vector>
 
-#include <thrift/compiler/ast/node_list.h>
-#include <thrift/compiler/ast/t_base_type.h>
 #include <thrift/compiler/ast/t_named.h>
 #include <thrift/compiler/ast/t_paramlist.h>
 #include <thrift/compiler/ast/t_sink.h>
@@ -47,25 +45,12 @@ enum class t_function_qualifier {
  */
 class t_function final : public t_named {
  public:
-  /**
-   * Constructor for t_function
-   *
-   * @param program          - The program in which this function is to be
-   * defined.
-   * @param return_type      - The type(s) of the value that will be returned
-   * @param name             - The symbolic name of the function
-   */
-  t_function(t_program* program, t_type_ref return_type, std::string name)
-      : t_named(program, std::move(name)),
-        paramlist_(std::make_unique<t_paramlist>(program)) {
-    set_return_type(return_type);
-  }
-
   t_function(
       t_program* program,
       t_type_ref return_type,
-      std::unique_ptr<t_node> sink_or_stream,
       std::string name,
+      std::unique_ptr<t_paramlist> params = {},
+      std::unique_ptr<t_node> sink_or_stream = {},
       t_type_ref interaction = {});
 
   const t_type* return_type() const;
@@ -85,10 +70,10 @@ class t_function final : public t_named {
     return dynamic_cast<const t_stream_response*>(sink_or_stream_.get());
   }
 
-  t_paramlist& params() { return *paramlist_; }
-  const t_paramlist& params() const { return *paramlist_; }
+  t_paramlist& params() { return *params_; }
+  const t_paramlist& params() const { return *params_; }
 
-  // The qualifier of the function, if any.
+  // Returns the function qualifier.
   t_function_qualifier qualifier() const { return qualifier_; }
   void set_qualifier(t_function_qualifier qualifier) { qualifier_ = qualifier; }
 
@@ -121,34 +106,12 @@ class t_function final : public t_named {
   std::vector<t_type_ref> return_types_;
   std::unique_ptr<t_node> sink_or_stream_;
   t_type_ref interaction_;
-  std::unique_ptr<t_paramlist> paramlist_;
+  std::unique_ptr<t_paramlist> params_;
   std::unique_ptr<t_throws> exceptions_;
   t_function_qualifier qualifier_ = t_function_qualifier::none;
   int8_t response_pos_ = -1;
   bool is_interaction_constructor_ = false;
   bool is_interaction_member_ = false;
-
-  // TODO(afuller): Delete everything below here. It is only provided for
-  // backwards compatibility.
- public:
-  t_function(
-      const t_type* return_type,
-      std::string name,
-      std::unique_ptr<t_paramlist> paramlist,
-      std::unique_ptr<t_throws> exceptions = nullptr,
-      t_function_qualifier qualifier = {})
-      : t_function(
-            t_type_ref::from_req_ptr(return_type),
-            std::move(name),
-            std::move(paramlist),
-            qualifier) {
-    set_exceptions(std::move(exceptions));
-  }
-  t_function(
-      t_type_ref return_type,
-      std::string name,
-      std::unique_ptr<t_paramlist> paramlist,
-      t_function_qualifier qualifier = {});
 };
 
 } // namespace compiler

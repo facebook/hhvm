@@ -1816,8 +1816,9 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
     const std::string& funname = function->name();
 
     t_function send_function(
-        &t_base_type::t_void(),
-        std::string("send_") + function->name(),
+        nullptr,
+        t_type_ref::from_req_ptr(&t_base_type::t_void()),
+        "send_" + function->name(),
         t_struct::clone_DO_NOT_USE(&function->params()));
 
     std::string argsname = function->name() + "_args";
@@ -1868,12 +1869,13 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
     out << std::endl;
 
     if (function->qualifier() != t_function_qualifier::oneway) {
-      const t_throws* exceptions = function->exceptions();
       t_function recv_function(
-          function->return_type(),
-          std::string("recv_") + function->name(),
-          std::make_unique<t_paramlist>(program_),
-          exceptions ? t_struct::clone_DO_NOT_USE(exceptions) : nullptr);
+          program_,
+          t_type_ref::from_req_ptr(function->return_type()),
+          "recv_" + function->name());
+      if (const t_throws* exceptions = function->exceptions()) {
+        recv_function.set_exceptions(t_struct::clone_DO_NOT_USE(exceptions));
+      }
       // Open function
       indent(out) << "- " << function_signature(&recv_function) << std::endl;
       scope_up(out);

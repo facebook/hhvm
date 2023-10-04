@@ -226,10 +226,8 @@ TEST_F(ScopeValidatorTest, Interaction) {
 
 TEST_F(ScopeValidatorTest, Function) {
   runTest(
-      t_function{
-          t_base_type::t_i32(),
-          "my_func",
-          std::make_unique<t_paramlist>(&program)},
+      t_function(
+          &program, t_type_ref::from_req_ptr(&t_base_type::t_i32()), "my_func"),
       "Function");
 }
 

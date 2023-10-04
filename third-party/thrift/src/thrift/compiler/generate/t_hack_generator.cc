@@ -7190,9 +7190,9 @@ void t_hack_generator::_generate_service_client_children(
 
       if (function->qualifier() != t_function_qualifier::oneway) {
         t_function recv_function(
-            function->return_type(),
-            std::string("recv_") + find_hack_name(function),
-            std::make_unique<t_paramlist>(program_));
+            program_,
+            t_type_ref::from_req_ptr(function->return_type()),
+            "recv_" + find_hack_name(function));
         // Open function
         bool is_void = function->return_type()->is_void();
         std::string resultname = generate_function_helper_name(

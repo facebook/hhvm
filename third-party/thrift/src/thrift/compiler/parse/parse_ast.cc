@@ -669,8 +669,9 @@ class ast_builder : public parser_actions {
     auto function = std::make_unique<t_function>(
         &program_,
         return_type,
-        std::move(ret.sink_or_stream),
         fmt::to_string(name.str),
+        nullptr,
+        std::move(ret.sink_or_stream),
         interaction);
     function->set_qualifier(qual);
     set_fields(function->params(), std::move(params));

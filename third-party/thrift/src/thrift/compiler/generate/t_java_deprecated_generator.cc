@@ -2572,7 +2572,8 @@ void t_java_deprecated_generator::generate_service_client(
     f_service_ << endl;
 
     t_function send_function(
-        &t_base_type::t_void(),
+        nullptr,
+        t_type_ref::from_req_ptr(&t_base_type::t_void()),
         string("send_") + (*f_iter)->get_name(),
         t_struct::clone_DO_NOT_USE(&(*f_iter)->params()));
 
@@ -2618,12 +2619,14 @@ void t_java_deprecated_generator::generate_service_client(
     if ((*f_iter)->qualifier() != t_function_qualifier::oneway) {
       string resultname = (*f_iter)->get_name() + "_result";
 
-      const t_throws* exceptions = (*f_iter)->exceptions();
       t_function recv_function(
-          (*f_iter)->return_type(),
-          string("recv_") + (*f_iter)->get_name(),
-          std::make_unique<t_paramlist>(program_),
-          exceptions ? t_struct::clone_DO_NOT_USE(exceptions) : nullptr);
+          nullptr,
+          t_type_ref::from_req_ptr((*f_iter)->return_type()),
+          "recv_" + (*f_iter)->get_name(),
+          std::make_unique<t_paramlist>(program_));
+      if (const t_throws* exceptions = (*f_iter)->exceptions()) {
+        recv_function.set_exceptions(t_struct::clone_DO_NOT_USE(exceptions));
+      }
       // Open the recv function
       indent(f_service_) << "public " << function_signature(&recv_function)
                          << endl;

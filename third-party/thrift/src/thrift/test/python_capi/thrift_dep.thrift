@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/cpp.thrift"
+
 package "thrift.org/test/python_capi"
 
 enum DepEnum {
@@ -24,6 +26,12 @@ enum DepEnum {
 struct DepStruct {
   1: string s;
   2: i32 i;
+}
+
+union DepUnion {
+  1: string s;
+  @cpp.Type{name = "::std::uint64_t"}
+  2: i64 i;
 }
 
 safe exception SomeError {

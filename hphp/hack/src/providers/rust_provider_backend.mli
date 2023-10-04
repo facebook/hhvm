@@ -80,15 +80,9 @@ module File : sig
     | Disk of string
     | Ide of string
 
-  val get : t -> Relative_path.t -> file_type option
-
   val get_contents : t -> Relative_path.t -> string
 
   val provide_file_for_tests : t -> Relative_path.t -> string -> unit
-
-  val provide_file_for_ide : t -> Relative_path.t -> string -> unit
-
-  val provide_file_hint : t -> Relative_path.t -> file_type -> unit
 
   val remove_batch : t -> Relative_path.Set.t -> unit
 end

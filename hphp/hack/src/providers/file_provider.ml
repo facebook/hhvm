@@ -43,37 +43,6 @@ let read_file_contents_from_disk (fn : Relative_path.t) : string option =
   try Some (Sys_utils.cat (Relative_path.to_absolute fn)) with
   | _ -> None
 
-let get fn =
-  match Provider_backend.get () with
-  | Provider_backend.Analysis -> failwith "invalid"
-  | Provider_backend.Pessimised_shared_memory _
-  | Provider_backend.Shared_memory ->
-    FileHeap.get fn
-  | Provider_backend.Rust_provider_backend backend ->
-    Rust_provider_backend.File.get backend fn
-  | Provider_backend.Local_memory _
-  | Provider_backend.Decl_service _ ->
-    failwith "File_provider.get not supported with local/decl memory provider"
-
-let get_unsafe fn =
-  match Provider_backend.get () with
-  | Provider_backend.Analysis -> failwith "invalid"
-  | Provider_backend.Pessimised_shared_memory _
-  | Provider_backend.Shared_memory -> begin
-    match get fn with
-    | Some contents -> contents
-    | None -> failwith ("File not found: " ^ Relative_path.to_absolute fn)
-  end
-  | Provider_backend.Rust_provider_backend backend -> begin
-    match Rust_provider_backend.File.get backend fn with
-    | Some contents -> contents
-    | None -> failwith ("File not found: " ^ Relative_path.to_absolute fn)
-  end
-  | Provider_backend.Local_memory _
-  | Provider_backend.Decl_service _ ->
-    failwith
-      "File_provider.get_unsafe not supported with local/decl memory provider"
-
 let get_contents ?(force_read_disk = false) fn =
   match Provider_backend.get () with
   | Provider_backend.Analysis
@@ -99,26 +68,6 @@ let get_contents ?(force_read_disk = false) fn =
   | Provider_backend.Decl_service _ ->
     read_file_contents_from_disk fn
 
-let get_ide_contents_unsafe fn =
-  match Provider_backend.get () with
-  | Provider_backend.Analysis -> failwith "invalid"
-  | Provider_backend.Pessimised_shared_memory _
-  | Provider_backend.Shared_memory -> begin
-    match FileHeap.get fn with
-    | Some (Ide f) -> f
-    | _ -> failwith ("IDE file not found: " ^ Relative_path.to_absolute fn)
-  end
-  | Provider_backend.Rust_provider_backend backend -> begin
-    match Rust_provider_backend.File.get backend fn with
-    | Some (Ide f) -> f
-    | _ -> failwith ("IDE file not found: " ^ Relative_path.to_absolute fn)
-  end
-  | Provider_backend.Local_memory _
-  | Provider_backend.Decl_service _ ->
-    failwith
-      ("File_provider.get_ide_contents_unsafe not supported "
-      ^ "with local/decl memory provider")
-
 let provide_file_for_tests fn contents =
   match Provider_backend.get () with
   | Provider_backend.Analysis -> failwith "invalid"
@@ -131,34 +80,6 @@ let provide_file_for_tests fn contents =
   | Provider_backend.Decl_service _ ->
     failwith
       "File_provider.provide_file_for_tests not supported with local/decl memory provider"
-
-let provide_file_for_ide fn contents =
-  match Provider_backend.get () with
-  | Provider_backend.Analysis -> failwith "invalid"
-  | Provider_backend.Pessimised_shared_memory _
-  | Provider_backend.Shared_memory ->
-    FileHeap.add fn (Ide contents)
-  | Provider_backend.Rust_provider_backend backend ->
-    Rust_provider_backend.File.provide_file_for_ide backend fn contents
-  | Provider_backend.Local_memory _
-  | Provider_backend.Decl_service _ ->
-    failwith
-      "File_provider.provide_file_for_ide not supported with local/decl memory provider"
-
-let provide_file_hint fn contents =
-  match Provider_backend.get () with
-  | Provider_backend.Analysis -> failwith "invalid"
-  | Provider_backend.Pessimised_shared_memory _
-  | Provider_backend.Shared_memory ->
-    (match contents with
-    | Ide _ -> FileHeap.add fn contents
-    | Disk _ -> ())
-  | Provider_backend.Rust_provider_backend backend ->
-    Rust_provider_backend.File.provide_file_hint backend fn contents
-  | Provider_backend.Local_memory _
-  | Provider_backend.Decl_service _ ->
-    failwith
-      "File_provider.provide_file_hint not supported with local/decl memory provider"
 
 let remove_batch paths =
   match Provider_backend.get () with

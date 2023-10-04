@@ -433,22 +433,6 @@ ocaml_ffi! {
 // File_provider ////////////////////////////////////////////////////////////
 
 ocaml_ffi! {
-    fn hh_rust_provider_backend_file_provider_get(
-        backend: Backend,
-        path: RelativePath,
-    ) -> Option<FileType> {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.file_store().get(path).unwrap()
-        } else {
-            // NB: This is semantically different than the above. We'll read
-            // from disk instead of returning None for files that aren't already
-            // present in our file store (i.e., the in-memory cache). We'll
-            // return Some("") instead of None for files that aren't present on
-            // disk.
-            Some(FileType::Disk(backend.file_provider().get(path).unwrap()))
-        }
-    }
-
     fn hh_rust_provider_backend_file_provider_get_contents(
         backend: Backend,
         path: RelativePath,
@@ -465,32 +449,6 @@ ocaml_ffi! {
             backend.file_store().insert(path, FileType::Disk(contents)).unwrap();
         } else {
             unimplemented!("provide_file_for_tests: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-
-    fn hh_rust_provider_backend_file_provider_provide_file_for_ide(
-        backend: Backend,
-        path: RelativePath,
-        contents: bstr::BString,
-    ) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.file_store().insert(path, FileType::Ide(contents)).unwrap();
-        } else {
-            unimplemented!("provide_file_for_ide: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-
-    fn hh_rust_provider_backend_file_provider_provide_file_hint(
-        backend: Backend,
-        path: RelativePath,
-        file: FileType,
-    ) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            if let FileType::Ide(_) = file {
-                backend.file_store().insert(path, file).unwrap();
-            }
-        } else {
-            unimplemented!("provide_file_hint: {UNIMPLEMENTED_MESSAGE}")
         }
     }
 

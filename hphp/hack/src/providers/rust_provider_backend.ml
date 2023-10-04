@@ -419,20 +419,11 @@ module File = struct
     | Disk of string
     | Ide of string
 
-  external get : t -> Relative_path.t -> file_type option
-    = "hh_rust_provider_backend_file_provider_get"
-
   external get_contents : t -> Relative_path.t -> string
     = "hh_rust_provider_backend_file_provider_get_contents"
 
   external provide_file_for_tests : t -> Relative_path.t -> string -> unit
     = "hh_rust_provider_backend_file_provider_provide_file_for_tests"
-
-  external provide_file_for_ide : t -> Relative_path.t -> string -> unit
-    = "hh_rust_provider_backend_file_provider_provide_file_for_ide"
-
-  external provide_file_hint : t -> Relative_path.t -> file_type -> unit
-    = "hh_rust_provider_backend_file_provider_provide_file_hint"
 
   external remove_batch : t -> Relative_path.Set.t -> unit
     = "hh_rust_provider_backend_file_provider_remove_batch"

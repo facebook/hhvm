@@ -13,19 +13,9 @@ type file_type = Rust_provider_backend.File.file_type =
 
 exception File_provider_stale
 
-val get : Relative_path.t -> file_type option
-
-val get_unsafe : Relative_path.t -> file_type
-
 val get_contents : ?force_read_disk:bool -> Relative_path.t -> string option
 
-val get_ide_contents_unsafe : Relative_path.t -> string
-
 val provide_file_for_tests : Relative_path.t -> string -> unit
-
-val provide_file_for_ide : Relative_path.t -> string -> unit
-
-val provide_file_hint : Relative_path.t -> file_type -> unit
 
 val remove_batch : Relative_path.Set.t -> unit
 

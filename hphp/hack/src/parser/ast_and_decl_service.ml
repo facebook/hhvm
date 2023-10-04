@@ -34,7 +34,6 @@ let process_parse_result
       ast
   in
   let bytes = String.length content in
-  let content = File_provider.Disk content in
   if Option.is_some file_mode then (
     (* If this file was parsed from a tmp directory,
        save it to the main directory instead *)
@@ -43,7 +42,6 @@ let process_parse_result
       | Relative_path.Tmp -> Relative_path.to_root fn
       | _ -> fn
     in
-    if quick then File_provider.provide_file_hint fn content;
     let mode =
       if quick then
         Ast_provider.Decl
@@ -71,14 +69,12 @@ let process_parse_result
         (Relative_path.suffix fn)
         (FileInfo.to_string defs);
     (acc, errorl, error_files)
-  ) else (
-    File_provider.provide_file_hint fn content;
+  ) else
     (* we also now keep in the file_info regular php files
      * as we need at least their names in hack build
      *)
     let acc = Relative_path.Map.add acc ~key:fn ~data:FileInfo.empty_t in
     (acc, errorl, error_files)
-  )
 
 let parse ctx ~quick ~show_all_errors ~trace ~cache_decls popt acc fn =
   if not @@ FindUtils.path_filter fn then

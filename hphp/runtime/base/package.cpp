@@ -281,10 +281,28 @@ bool PackageInfo::moduleInASoftPackage(const StringData* module) const {
   return false;
 }
 
+namespace {
+
+hphp_fast_map<const StringData*, bool> m_moduleInActiveDeployment;
+folly::SharedMutex s_mutex;
+
+} // namespace
+
 bool PackageInfo::outsideActiveDeployment(const StringData* module) const {
   if (!RO::EvalEnforceDeployment) return false;
   if (auto const activeDeployment = getActiveDeployment()) {
-    return !moduleInDeployment(module, *activeDeployment, DeployKind::Hard);
+    if (RO::RepoAuthoritative) {
+      folly::SharedMutex::ReadHolder lock(s_mutex);
+      auto it = m_moduleInActiveDeployment.find(module);
+      if (it != m_moduleInActiveDeployment.end()) return !it->second;
+    }
+    auto const inActiveDeployment = moduleInDeployment(
+      module, *activeDeployment, DeployKind::Hard);
+    if (RO::RepoAuthoritative) {
+      folly::SharedMutex::WriteHolder lock(s_mutex);
+      m_moduleInActiveDeployment.emplace(module, inActiveDeployment);
+    }
+    return !inActiveDeployment;
   }
   return false;
 }

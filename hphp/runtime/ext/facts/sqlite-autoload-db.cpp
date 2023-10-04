@@ -668,7 +668,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
         auto exception_str = folly::sformat(
             "Couldn't {} native Facts DB.\n"
 #ifdef HHVM_FACEBOOK
-            "You may be able to fix this by running 'arc reset facts'\n"
+            "You may be able to fix this by running 'arc fix facts'\n"
 #endif
             "Key: {} Reason: {}\n",
             mode,

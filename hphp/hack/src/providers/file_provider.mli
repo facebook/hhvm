@@ -7,10 +7,6 @@
  *
  *)
 
-type file_type = Rust_provider_backend.File.file_type =
-  | Disk of string
-  | Ide of string
-
 exception File_provider_stale
 
 val get_contents : ?force_read_disk:bool -> Relative_path.t -> string option

@@ -9,7 +9,6 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use hackrs_provider_backend::Config;
-use hackrs_provider_backend::FileType;
 use hackrs_provider_backend::HhServerProviderBackend;
 use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::FromOcamlRep;
@@ -446,7 +445,7 @@ ocaml_ffi! {
         contents: bstr::BString,
     ) {
         if let Some(backend) = backend.as_hh_server_backend() {
-            backend.file_store().insert(path, FileType::Disk(contents)).unwrap();
+            backend.file_store().insert(path, contents).unwrap();
         } else {
             unimplemented!("provide_file_for_tests: {UNIMPLEMENTED_MESSAGE}")
         }

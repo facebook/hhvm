@@ -415,10 +415,6 @@ let pop_local_changes t =
   pop_local_changes_ffi t
 
 module File = struct
-  type file_type =
-    | Disk of string
-    | Ide of string
-
   external get_contents : t -> Relative_path.t -> string
     = "hh_rust_provider_backend_file_provider_get_contents"
 

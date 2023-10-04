@@ -76,10 +76,6 @@ module Decl : sig
 end
 
 module File : sig
-  type file_type =
-    | Disk of string
-    | Ide of string
-
   val get_contents : t -> Relative_path.t -> string
 
   val provide_file_for_tests : t -> Relative_path.t -> string -> unit

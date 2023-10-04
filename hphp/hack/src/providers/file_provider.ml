@@ -13,14 +13,8 @@ open Hh_prelude
     Shared memory heap containing the contents of files.
     Acts as a sort of caching facade which is filled on-demand
     as contents are needed - The "cache" is filled by loading from
-    the file system if the file isn't opened in the IDE
-    (otherwise uses the IDE contents).
-    That is, the IDE version take precedence over file system's.
+    the file system.
 *)
-
-type file_type = Rust_provider_backend.File.file_type =
-  | Disk of string
-  | Ide of string
 
 exception File_provider_stale
 
@@ -29,7 +23,7 @@ module FileHeap = struct
     SharedMem.Heap
       (SharedMem.ImmediateBackend (SharedMem.Evictable)) (Relative_path.S)
       (struct
-        type t = file_type
+        type t = string
 
         let description = "File"
       end)
@@ -55,8 +49,7 @@ let get_contents ?(force_read_disk = false) fn =
         FileHeap.get fn
     in
     (match from_cache with
-    | Some (Ide f) -> Some f
-    | Some (Disk contents) -> Some contents
+    | Some contents -> Some contents
     | None ->
       let contents =
         Option.value (read_file_contents_from_disk fn) ~default:""
@@ -73,7 +66,7 @@ let provide_file_for_tests fn contents =
   | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Shared_memory ->
-    FileHeap.replace_nonatomic fn (Disk contents)
+    FileHeap.replace_nonatomic fn contents
   | Provider_backend.Rust_provider_backend backend ->
     Rust_provider_backend.File.provide_file_for_tests backend fn contents
   | Provider_backend.Local_memory _

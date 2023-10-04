@@ -107,17 +107,22 @@ func NewMyStruct() *MyStruct {
 }
 
 
-// Deprecated: Use MyStruct.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 type MyStructBuilder struct {
     obj *MyStruct
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewMyStructBuilder() *MyStructBuilder {
     return &MyStructBuilder{
         obj: NewMyStruct(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *MyStructBuilder) Emit() *MyStruct {
     var objCopy MyStruct = *x.obj
     return &objCopy
@@ -1272,87 +1277,120 @@ func (x *MyUnion) CountSetFieldsMyUnion() int {
 }
 
 
-// Deprecated: Use MyUnion.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 type MyUnionBuilder struct {
     obj *MyUnion
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewMyUnionBuilder() *MyUnionBuilder {
     return &MyUnionBuilder{
         obj: NewMyUnion(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *MyUnionBuilder) BoolField(value *bool) *MyUnionBuilder {
     x.obj.BoolField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *MyUnionBuilder) ByteField(value *int8) *MyUnionBuilder {
     x.obj.ByteField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *MyUnionBuilder) ShortField(value *int16) *MyUnionBuilder {
     x.obj.ShortField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *MyUnionBuilder) IntField(value *int32) *MyUnionBuilder {
     x.obj.IntField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *MyUnionBuilder) LongField(value *int64) *MyUnionBuilder {
     x.obj.LongField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *MyUnionBuilder) FloatField(value *float32) *MyUnionBuilder {
     x.obj.FloatField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *MyUnionBuilder) DoubleField(value *float64) *MyUnionBuilder {
     x.obj.DoubleField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *MyUnionBuilder) StringField(value *string) *MyUnionBuilder {
     x.obj.StringField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *MyUnionBuilder) BinaryField(value []byte) *MyUnionBuilder {
     x.obj.BinaryField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *MyUnionBuilder) EnumField(value *MyEnum) *MyUnionBuilder {
     x.obj.EnumField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *MyUnionBuilder) ListField(value []int16) *MyUnionBuilder {
     x.obj.ListField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *MyUnionBuilder) SetField(value []int16) *MyUnionBuilder {
     x.obj.SetField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *MyUnionBuilder) MapField(value map[int16]int16) *MyUnionBuilder {
     x.obj.MapField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *MyUnionBuilder) StructField(value *MyStruct) *MyUnionBuilder {
     x.obj.StructField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *MyUnionBuilder) Emit() *MyUnion {
     var objCopy MyUnion = *x.obj
     return &objCopy
@@ -1707,22 +1745,29 @@ func (x *MyStructWithCustomDefault) toString1() string {  // Field1
 }
 
 
-// Deprecated: Use MyStructWithCustomDefault.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyStructWithCustomDefault().Set<FieldNameFoo>().Set<FieldNameBar>()
 type MyStructWithCustomDefaultBuilder struct {
     obj *MyStructWithCustomDefault
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyStructWithCustomDefault().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewMyStructWithCustomDefaultBuilder() *MyStructWithCustomDefaultBuilder {
     return &MyStructWithCustomDefaultBuilder{
         obj: NewMyStructWithCustomDefault(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyStructWithCustomDefault().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *MyStructWithCustomDefaultBuilder) Field1(value int64) *MyStructWithCustomDefaultBuilder {
     x.obj.Field1 = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyStructWithCustomDefault().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *MyStructWithCustomDefaultBuilder) Emit() *MyStructWithCustomDefault {
     var objCopy MyStructWithCustomDefault = *x.obj
     return &objCopy
@@ -2752,92 +2797,127 @@ func (x *StructLevelTerseStruct) DefaultGetUnionField() *MyUnion {
 }
 
 
-// Deprecated: Use StructLevelTerseStruct.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewStructLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 type StructLevelTerseStructBuilder struct {
     obj *StructLevelTerseStruct
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewStructLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewStructLevelTerseStructBuilder() *StructLevelTerseStructBuilder {
     return &StructLevelTerseStructBuilder{
         obj: NewStructLevelTerseStruct(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewStructLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *StructLevelTerseStructBuilder) BoolField(value bool) *StructLevelTerseStructBuilder {
     x.obj.BoolField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewStructLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *StructLevelTerseStructBuilder) ByteField(value int8) *StructLevelTerseStructBuilder {
     x.obj.ByteField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewStructLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *StructLevelTerseStructBuilder) ShortField(value int16) *StructLevelTerseStructBuilder {
     x.obj.ShortField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewStructLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *StructLevelTerseStructBuilder) IntField(value int32) *StructLevelTerseStructBuilder {
     x.obj.IntField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewStructLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *StructLevelTerseStructBuilder) LongField(value int64) *StructLevelTerseStructBuilder {
     x.obj.LongField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewStructLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *StructLevelTerseStructBuilder) FloatField(value float32) *StructLevelTerseStructBuilder {
     x.obj.FloatField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewStructLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *StructLevelTerseStructBuilder) DoubleField(value float64) *StructLevelTerseStructBuilder {
     x.obj.DoubleField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewStructLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *StructLevelTerseStructBuilder) StringField(value string) *StructLevelTerseStructBuilder {
     x.obj.StringField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewStructLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *StructLevelTerseStructBuilder) BinaryField(value []byte) *StructLevelTerseStructBuilder {
     x.obj.BinaryField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewStructLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *StructLevelTerseStructBuilder) EnumField(value MyEnum) *StructLevelTerseStructBuilder {
     x.obj.EnumField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewStructLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *StructLevelTerseStructBuilder) ListField(value []int16) *StructLevelTerseStructBuilder {
     x.obj.ListField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewStructLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *StructLevelTerseStructBuilder) SetField(value []int16) *StructLevelTerseStructBuilder {
     x.obj.SetField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewStructLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *StructLevelTerseStructBuilder) MapField(value map[int16]int16) *StructLevelTerseStructBuilder {
     x.obj.MapField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewStructLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *StructLevelTerseStructBuilder) StructField(value *MyStruct) *StructLevelTerseStructBuilder {
     x.obj.StructField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewStructLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *StructLevelTerseStructBuilder) UnionField(value *MyUnion) *StructLevelTerseStructBuilder {
     x.obj.UnionField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewStructLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *StructLevelTerseStructBuilder) Emit() *StructLevelTerseStruct {
     var objCopy StructLevelTerseStruct = *x.obj
     return &objCopy
@@ -5027,167 +5107,232 @@ func (x *FieldLevelTerseStruct) DefaultGetUnionField() *MyUnion {
 }
 
 
-// Deprecated: Use FieldLevelTerseStruct.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 type FieldLevelTerseStructBuilder struct {
     obj *FieldLevelTerseStruct
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewFieldLevelTerseStructBuilder() *FieldLevelTerseStructBuilder {
     return &FieldLevelTerseStructBuilder{
         obj: NewFieldLevelTerseStruct(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) TerseBoolField(value bool) *FieldLevelTerseStructBuilder {
     x.obj.TerseBoolField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) TerseByteField(value int8) *FieldLevelTerseStructBuilder {
     x.obj.TerseByteField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) TerseShortField(value int16) *FieldLevelTerseStructBuilder {
     x.obj.TerseShortField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) TerseIntField(value int32) *FieldLevelTerseStructBuilder {
     x.obj.TerseIntField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) TerseLongField(value int64) *FieldLevelTerseStructBuilder {
     x.obj.TerseLongField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) TerseFloatField(value float32) *FieldLevelTerseStructBuilder {
     x.obj.TerseFloatField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) TerseDoubleField(value float64) *FieldLevelTerseStructBuilder {
     x.obj.TerseDoubleField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) TerseStringField(value string) *FieldLevelTerseStructBuilder {
     x.obj.TerseStringField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) TerseBinaryField(value []byte) *FieldLevelTerseStructBuilder {
     x.obj.TerseBinaryField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) TerseEnumField(value MyEnum) *FieldLevelTerseStructBuilder {
     x.obj.TerseEnumField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) TerseListField(value []int16) *FieldLevelTerseStructBuilder {
     x.obj.TerseListField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) TerseSetField(value []int16) *FieldLevelTerseStructBuilder {
     x.obj.TerseSetField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) TerseMapField(value map[int16]int16) *FieldLevelTerseStructBuilder {
     x.obj.TerseMapField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) TerseStructField(value *MyStruct) *FieldLevelTerseStructBuilder {
     x.obj.TerseStructField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) BoolField(value bool) *FieldLevelTerseStructBuilder {
     x.obj.BoolField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) ByteField(value int8) *FieldLevelTerseStructBuilder {
     x.obj.ByteField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) ShortField(value int16) *FieldLevelTerseStructBuilder {
     x.obj.ShortField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) IntField(value int32) *FieldLevelTerseStructBuilder {
     x.obj.IntField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) LongField(value int64) *FieldLevelTerseStructBuilder {
     x.obj.LongField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) FloatField(value float32) *FieldLevelTerseStructBuilder {
     x.obj.FloatField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) DoubleField(value float64) *FieldLevelTerseStructBuilder {
     x.obj.DoubleField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) StringField(value string) *FieldLevelTerseStructBuilder {
     x.obj.StringField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) BinaryField(value []byte) *FieldLevelTerseStructBuilder {
     x.obj.BinaryField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) EnumField(value MyEnum) *FieldLevelTerseStructBuilder {
     x.obj.EnumField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) ListField(value []int16) *FieldLevelTerseStructBuilder {
     x.obj.ListField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) SetField(value []int16) *FieldLevelTerseStructBuilder {
     x.obj.SetField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) MapField(value map[int16]int16) *FieldLevelTerseStructBuilder {
     x.obj.MapField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) StructField(value *MyStruct) *FieldLevelTerseStructBuilder {
     x.obj.StructField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) TerseUnionField(value *MyUnion) *FieldLevelTerseStructBuilder {
     x.obj.TerseUnionField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) UnionField(value *MyUnion) *FieldLevelTerseStructBuilder {
     x.obj.UnionField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldLevelTerseStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldLevelTerseStructBuilder) Emit() *FieldLevelTerseStruct {
     var objCopy FieldLevelTerseStruct = *x.obj
     return &objCopy
@@ -6627,87 +6772,120 @@ func (x *TerseStructWithCustomDefault) DefaultGetStructField() *MyStructWithCust
 }
 
 
-// Deprecated: Use TerseStructWithCustomDefault.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTerseStructWithCustomDefault().Set<FieldNameFoo>().Set<FieldNameBar>()
 type TerseStructWithCustomDefaultBuilder struct {
     obj *TerseStructWithCustomDefault
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTerseStructWithCustomDefault().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewTerseStructWithCustomDefaultBuilder() *TerseStructWithCustomDefaultBuilder {
     return &TerseStructWithCustomDefaultBuilder{
         obj: NewTerseStructWithCustomDefault(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTerseStructWithCustomDefault().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TerseStructWithCustomDefaultBuilder) BoolField(value bool) *TerseStructWithCustomDefaultBuilder {
     x.obj.BoolField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTerseStructWithCustomDefault().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TerseStructWithCustomDefaultBuilder) ByteField(value int8) *TerseStructWithCustomDefaultBuilder {
     x.obj.ByteField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTerseStructWithCustomDefault().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TerseStructWithCustomDefaultBuilder) ShortField(value int16) *TerseStructWithCustomDefaultBuilder {
     x.obj.ShortField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTerseStructWithCustomDefault().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TerseStructWithCustomDefaultBuilder) IntField(value int32) *TerseStructWithCustomDefaultBuilder {
     x.obj.IntField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTerseStructWithCustomDefault().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TerseStructWithCustomDefaultBuilder) LongField(value int64) *TerseStructWithCustomDefaultBuilder {
     x.obj.LongField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTerseStructWithCustomDefault().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TerseStructWithCustomDefaultBuilder) FloatField(value float32) *TerseStructWithCustomDefaultBuilder {
     x.obj.FloatField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTerseStructWithCustomDefault().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TerseStructWithCustomDefaultBuilder) DoubleField(value float64) *TerseStructWithCustomDefaultBuilder {
     x.obj.DoubleField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTerseStructWithCustomDefault().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TerseStructWithCustomDefaultBuilder) StringField(value string) *TerseStructWithCustomDefaultBuilder {
     x.obj.StringField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTerseStructWithCustomDefault().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TerseStructWithCustomDefaultBuilder) BinaryField(value []byte) *TerseStructWithCustomDefaultBuilder {
     x.obj.BinaryField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTerseStructWithCustomDefault().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TerseStructWithCustomDefaultBuilder) EnumField(value MyEnum) *TerseStructWithCustomDefaultBuilder {
     x.obj.EnumField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTerseStructWithCustomDefault().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TerseStructWithCustomDefaultBuilder) ListField(value []int16) *TerseStructWithCustomDefaultBuilder {
     x.obj.ListField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTerseStructWithCustomDefault().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TerseStructWithCustomDefaultBuilder) SetField(value []int16) *TerseStructWithCustomDefaultBuilder {
     x.obj.SetField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTerseStructWithCustomDefault().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TerseStructWithCustomDefaultBuilder) MapField(value map[int16]int16) *TerseStructWithCustomDefaultBuilder {
     x.obj.MapField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTerseStructWithCustomDefault().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TerseStructWithCustomDefaultBuilder) StructField(value *MyStructWithCustomDefault) *TerseStructWithCustomDefaultBuilder {
     x.obj.StructField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTerseStructWithCustomDefault().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TerseStructWithCustomDefaultBuilder) Emit() *TerseStructWithCustomDefault {
     var objCopy TerseStructWithCustomDefault = *x.obj
     return &objCopy
@@ -7161,32 +7339,43 @@ func (x *AdaptedFields) toString3() string {  // Field3
 }
 
 
-// Deprecated: Use AdaptedFields.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewAdaptedFields().Set<FieldNameFoo>().Set<FieldNameBar>()
 type AdaptedFieldsBuilder struct {
     obj *AdaptedFields
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewAdaptedFields().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewAdaptedFieldsBuilder() *AdaptedFieldsBuilder {
     return &AdaptedFieldsBuilder{
         obj: NewAdaptedFields(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewAdaptedFields().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *AdaptedFieldsBuilder) Field1(value MyInteger) *AdaptedFieldsBuilder {
     x.obj.Field1 = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewAdaptedFields().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *AdaptedFieldsBuilder) Field2(value int32) *AdaptedFieldsBuilder {
     x.obj.Field2 = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewAdaptedFields().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *AdaptedFieldsBuilder) Field3(value MyInteger) *AdaptedFieldsBuilder {
     x.obj.Field3 = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewAdaptedFields().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *AdaptedFieldsBuilder) Emit() *AdaptedFields {
     var objCopy AdaptedFields = *x.obj
     return &objCopy
@@ -7362,22 +7551,29 @@ func (x *WrappedFields) toString1() string {  // Field1
 }
 
 
-// Deprecated: Use WrappedFields.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewWrappedFields().Set<FieldNameFoo>().Set<FieldNameBar>()
 type WrappedFieldsBuilder struct {
     obj *WrappedFields
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewWrappedFields().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewWrappedFieldsBuilder() *WrappedFieldsBuilder {
     return &WrappedFieldsBuilder{
         obj: NewWrappedFields(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewWrappedFields().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *WrappedFieldsBuilder) Field1(value int32) *WrappedFieldsBuilder {
     x.obj.Field1 = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewWrappedFields().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *WrappedFieldsBuilder) Emit() *WrappedFields {
     var objCopy WrappedFields = *x.obj
     return &objCopy
@@ -7521,22 +7717,29 @@ func (x *TerseException) toString1() string {  // Msg
 }
 
 
-// Deprecated: Use TerseException.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTerseException().Set<FieldNameFoo>().Set<FieldNameBar>()
 type TerseExceptionBuilder struct {
     obj *TerseException
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTerseException().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewTerseExceptionBuilder() *TerseExceptionBuilder {
     return &TerseExceptionBuilder{
         obj: NewTerseException(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTerseException().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TerseExceptionBuilder) Msg(value string) *TerseExceptionBuilder {
     x.obj.Msg = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTerseException().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TerseExceptionBuilder) Emit() *TerseException {
     var objCopy TerseException = *x.obj
     return &objCopy

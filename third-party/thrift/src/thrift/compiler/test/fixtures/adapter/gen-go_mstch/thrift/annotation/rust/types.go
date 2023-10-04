@@ -76,22 +76,29 @@ func (x *Adapter) toString1() string {  // Name
 }
 
 
-// Deprecated: Use Adapter.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewAdapter().Set<FieldNameFoo>().Set<FieldNameBar>()
 type AdapterBuilder struct {
     obj *Adapter
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewAdapter().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewAdapterBuilder() *AdapterBuilder {
     return &AdapterBuilder{
         obj: NewAdapter(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewAdapter().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *AdapterBuilder) Name(value string) *AdapterBuilder {
     x.obj.Name = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewAdapter().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *AdapterBuilder) Emit() *Adapter {
     var objCopy Adapter = *x.obj
     return &objCopy
@@ -272,22 +279,29 @@ func (x *Derive) toString1() string {  // Derives
 }
 
 
-// Deprecated: Use Derive.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewDerive().Set<FieldNameFoo>().Set<FieldNameBar>()
 type DeriveBuilder struct {
     obj *Derive
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewDerive().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewDeriveBuilder() *DeriveBuilder {
     return &DeriveBuilder{
         obj: NewDerive(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewDerive().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *DeriveBuilder) Derives(value []string) *DeriveBuilder {
     x.obj.Derives = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewDerive().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *DeriveBuilder) Emit() *Derive {
     var objCopy Derive = *x.obj
     return &objCopy
@@ -431,22 +445,29 @@ func (x *ServiceExn) toString1() string {  // AnyhowToApplicationExn
 }
 
 
-// Deprecated: Use ServiceExn.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewServiceExn().Set<FieldNameFoo>().Set<FieldNameBar>()
 type ServiceExnBuilder struct {
     obj *ServiceExn
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewServiceExn().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewServiceExnBuilder() *ServiceExnBuilder {
     return &ServiceExnBuilder{
         obj: NewServiceExn(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewServiceExn().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ServiceExnBuilder) AnyhowToApplicationExn(value bool) *ServiceExnBuilder {
     x.obj.AnyhowToApplicationExn = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewServiceExn().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ServiceExnBuilder) Emit() *ServiceExn {
     var objCopy ServiceExn = *x.obj
     return &objCopy

@@ -178,22 +178,29 @@ func (x *A) toString1() string {  // UselessField
 }
 
 
-// Deprecated: Use A.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewA().Set<FieldNameFoo>().Set<FieldNameBar>()
 type ABuilder struct {
     obj *A
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewA().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewABuilder() *ABuilder {
     return &ABuilder{
         obj: NewA(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewA().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ABuilder) UselessField(value int32) *ABuilder {
     x.obj.UselessField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewA().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ABuilder) Emit() *A {
     var objCopy A = *x.obj
     return &objCopy
@@ -436,27 +443,36 @@ func (x *U) CountSetFieldsU() int {
 }
 
 
-// Deprecated: Use U.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewU().Set<FieldNameFoo>().Set<FieldNameBar>()
 type UBuilder struct {
     obj *U
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewU().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewUBuilder() *UBuilder {
     return &UBuilder{
         obj: NewU(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewU().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *UBuilder) I(value *int32) *UBuilder {
     x.obj.I = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewU().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *UBuilder) S(value *string) *UBuilder {
     x.obj.S = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewU().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *UBuilder) Emit() *U {
     var objCopy U = *x.obj
     return &objCopy
@@ -619,22 +635,29 @@ func (x *Bang) toString1() string {  // Message
 }
 
 
-// Deprecated: Use Bang.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBang().Set<FieldNameFoo>().Set<FieldNameBar>()
 type BangBuilder struct {
     obj *Bang
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBang().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewBangBuilder() *BangBuilder {
     return &BangBuilder{
         obj: NewBang(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBang().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *BangBuilder) Message(value string) *BangBuilder {
     x.obj.Message = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBang().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *BangBuilder) Emit() *Bang {
     var objCopy Bang = *x.obj
     return &objCopy

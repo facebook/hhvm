@@ -312,37 +312,50 @@ func (x *Color) toString4() string {  // Alpha
 }
 
 
-// Deprecated: Use Color.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewColor().Set<FieldNameFoo>().Set<FieldNameBar>()
 type ColorBuilder struct {
     obj *Color
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewColor().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewColorBuilder() *ColorBuilder {
     return &ColorBuilder{
         obj: NewColor(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewColor().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ColorBuilder) Red(value float64) *ColorBuilder {
     x.obj.Red = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewColor().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ColorBuilder) Green(value float64) *ColorBuilder {
     x.obj.Green = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewColor().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ColorBuilder) Blue(value float64) *ColorBuilder {
     x.obj.Blue = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewColor().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ColorBuilder) Alpha(value float64) *ColorBuilder {
     x.obj.Alpha = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewColor().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ColorBuilder) Emit() *Color {
     var objCopy Color = *x.obj
     return &objCopy
@@ -827,42 +840,57 @@ var Vehicle_Name_DEFAULT = NewVehicle().GetName()
 var Vehicle_HasAC_DEFAULT = NewVehicle().GetHasAC()
 
 
-// Deprecated: Use Vehicle.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewVehicle().Set<FieldNameFoo>().Set<FieldNameBar>()
 type VehicleBuilder struct {
     obj *Vehicle
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewVehicle().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewVehicleBuilder() *VehicleBuilder {
     return &VehicleBuilder{
         obj: NewVehicle(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewVehicle().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *VehicleBuilder) Color(value *Color) *VehicleBuilder {
     x.obj.Color = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewVehicle().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *VehicleBuilder) LicensePlate(value *string) *VehicleBuilder {
     x.obj.LicensePlate = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewVehicle().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *VehicleBuilder) Description(value *string) *VehicleBuilder {
     x.obj.Description = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewVehicle().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *VehicleBuilder) Name(value *string) *VehicleBuilder {
     x.obj.Name = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewVehicle().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *VehicleBuilder) HasAC(value *bool) *VehicleBuilder {
     x.obj.HasAC = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewVehicle().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *VehicleBuilder) Emit() *Vehicle {
     var objCopy Vehicle = *x.obj
     return &objCopy
@@ -1754,67 +1782,92 @@ var Person_BestFriend_DEFAULT = NewPerson().GetBestFriend()
 var Person_AfraidOfAnimal_DEFAULT = NewPerson().GetAfraidOfAnimal()
 
 
-// Deprecated: Use Person.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewPerson().Set<FieldNameFoo>().Set<FieldNameBar>()
 type PersonBuilder struct {
     obj *Person
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewPerson().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewPersonBuilder() *PersonBuilder {
     return &PersonBuilder{
         obj: NewPerson(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewPerson().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *PersonBuilder) Id(value PersonID) *PersonBuilder {
     x.obj.Id = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewPerson().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *PersonBuilder) Name(value string) *PersonBuilder {
     x.obj.Name = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewPerson().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *PersonBuilder) Age(value *int16) *PersonBuilder {
     x.obj.Age = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewPerson().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *PersonBuilder) Address(value *string) *PersonBuilder {
     x.obj.Address = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewPerson().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *PersonBuilder) FavoriteColor(value *Color) *PersonBuilder {
     x.obj.FavoriteColor = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewPerson().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *PersonBuilder) Friends(value []PersonID) *PersonBuilder {
     x.obj.Friends = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewPerson().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *PersonBuilder) BestFriend(value *PersonID) *PersonBuilder {
     x.obj.BestFriend = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewPerson().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *PersonBuilder) PetNames(value map[Animal]string) *PersonBuilder {
     x.obj.PetNames = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewPerson().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *PersonBuilder) AfraidOfAnimal(value *Animal) *PersonBuilder {
     x.obj.AfraidOfAnimal = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewPerson().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *PersonBuilder) Vehicles(value []*Vehicle) *PersonBuilder {
     x.obj.Vehicles = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewPerson().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *PersonBuilder) Emit() *Person {
     var objCopy Person = *x.obj
     return &objCopy

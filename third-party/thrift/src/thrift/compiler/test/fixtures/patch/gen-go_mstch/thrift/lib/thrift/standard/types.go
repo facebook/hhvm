@@ -439,32 +439,43 @@ func (x *TypeUri) CountSetFieldsTypeUri() int {
 }
 
 
-// Deprecated: Use TypeUri.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTypeUri().Set<FieldNameFoo>().Set<FieldNameBar>()
 type TypeUriBuilder struct {
     obj *TypeUri
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTypeUri().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewTypeUriBuilder() *TypeUriBuilder {
     return &TypeUriBuilder{
         obj: NewTypeUri(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTypeUri().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TypeUriBuilder) Uri(value *Uri) *TypeUriBuilder {
     x.obj.Uri = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTypeUri().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TypeUriBuilder) TypeHashPrefixSha2_256(value ByteString) *TypeUriBuilder {
     x.obj.TypeHashPrefixSha2_256 = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTypeUri().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TypeUriBuilder) ScopedName(value *string) *TypeUriBuilder {
     x.obj.ScopedName = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTypeUri().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TypeUriBuilder) Emit() *TypeUri {
     var objCopy TypeUri = *x.obj
     return &objCopy
@@ -1834,102 +1845,141 @@ func (x *TypeName) CountSetFieldsTypeName() int {
 }
 
 
-// Deprecated: Use TypeName.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTypeName().Set<FieldNameFoo>().Set<FieldNameBar>()
 type TypeNameBuilder struct {
     obj *TypeName
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTypeName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewTypeNameBuilder() *TypeNameBuilder {
     return &TypeNameBuilder{
         obj: NewTypeName(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTypeName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TypeNameBuilder) BoolType(value *Void) *TypeNameBuilder {
     x.obj.BoolType = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTypeName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TypeNameBuilder) ByteType(value *Void) *TypeNameBuilder {
     x.obj.ByteType = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTypeName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TypeNameBuilder) I16Type(value *Void) *TypeNameBuilder {
     x.obj.I16Type = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTypeName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TypeNameBuilder) I32Type(value *Void) *TypeNameBuilder {
     x.obj.I32Type = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTypeName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TypeNameBuilder) I64Type(value *Void) *TypeNameBuilder {
     x.obj.I64Type = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTypeName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TypeNameBuilder) FloatType(value *Void) *TypeNameBuilder {
     x.obj.FloatType = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTypeName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TypeNameBuilder) DoubleType(value *Void) *TypeNameBuilder {
     x.obj.DoubleType = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTypeName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TypeNameBuilder) StringType(value *Void) *TypeNameBuilder {
     x.obj.StringType = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTypeName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TypeNameBuilder) BinaryType(value *Void) *TypeNameBuilder {
     x.obj.BinaryType = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTypeName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TypeNameBuilder) EnumType(value *TypeUri) *TypeNameBuilder {
     x.obj.EnumType = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTypeName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TypeNameBuilder) StructType(value *TypeUri) *TypeNameBuilder {
     x.obj.StructType = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTypeName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TypeNameBuilder) UnionType(value *TypeUri) *TypeNameBuilder {
     x.obj.UnionType = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTypeName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TypeNameBuilder) ExceptionType(value *TypeUri) *TypeNameBuilder {
     x.obj.ExceptionType = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTypeName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TypeNameBuilder) ListType(value *Void) *TypeNameBuilder {
     x.obj.ListType = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTypeName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TypeNameBuilder) SetType(value *Void) *TypeNameBuilder {
     x.obj.SetType = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTypeName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TypeNameBuilder) MapType(value *Void) *TypeNameBuilder {
     x.obj.MapType = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTypeName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TypeNameBuilder) TypedefType(value *TypeUri) *TypeNameBuilder {
     x.obj.TypedefType = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTypeName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TypeNameBuilder) Emit() *TypeName {
     var objCopy TypeName = *x.obj
     return &objCopy

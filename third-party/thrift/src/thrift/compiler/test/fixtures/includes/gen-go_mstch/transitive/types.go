@@ -76,22 +76,29 @@ func (x *Foo) toString1() string {  // A
 }
 
 
-// Deprecated: Use Foo.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFoo().Set<FieldNameFoo>().Set<FieldNameBar>()
 type FooBuilder struct {
     obj *Foo
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFoo().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewFooBuilder() *FooBuilder {
     return &FooBuilder{
         obj: NewFoo(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFoo().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FooBuilder) A(value int64) *FooBuilder {
     x.obj.A = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFoo().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FooBuilder) Emit() *Foo {
     var objCopy Foo = *x.obj
     return &objCopy

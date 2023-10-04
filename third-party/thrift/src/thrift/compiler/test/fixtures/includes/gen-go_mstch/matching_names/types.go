@@ -102,22 +102,29 @@ func (x *IncludesAlso) DefaultGetAlso() *includesAlso.Also {
 }
 
 
-// Deprecated: Use IncludesAlso.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewIncludesAlso().Set<FieldNameFoo>().Set<FieldNameBar>()
 type IncludesAlsoBuilder struct {
     obj *IncludesAlso
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewIncludesAlso().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewIncludesAlsoBuilder() *IncludesAlsoBuilder {
     return &IncludesAlsoBuilder{
         obj: NewIncludesAlso(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewIncludesAlso().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *IncludesAlsoBuilder) Also(value *includesAlso.Also) *IncludesAlsoBuilder {
     x.obj.Also = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewIncludesAlso().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *IncludesAlsoBuilder) Emit() *IncludesAlso {
     var objCopy IncludesAlso = *x.obj
     return &objCopy

@@ -151,17 +151,22 @@ func newReqMyServiceFoo() *reqMyServiceFoo {
 }
 
 
-// Deprecated: Use reqMyServiceFoo.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqMyServiceFoo().Set<FieldNameFoo>().Set<FieldNameBar>()
 type reqMyServiceFooBuilder struct {
     obj *reqMyServiceFoo
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqMyServiceFoo().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newReqMyServiceFooBuilder() *reqMyServiceFooBuilder {
     return &reqMyServiceFooBuilder{
         obj: newReqMyServiceFoo(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqMyServiceFoo().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqMyServiceFooBuilder) Emit() *reqMyServiceFoo {
     var objCopy reqMyServiceFoo = *x.obj
     return &objCopy
@@ -241,17 +246,22 @@ func newRespMyServiceFoo() *respMyServiceFoo {
 }
 
 
-// Deprecated: Use respMyServiceFoo.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespMyServiceFoo().Set<FieldNameFoo>().Set<FieldNameBar>()
 type respMyServiceFooBuilder struct {
     obj *respMyServiceFoo
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespMyServiceFoo().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newRespMyServiceFooBuilder() *respMyServiceFooBuilder {
     return &respMyServiceFooBuilder{
         obj: newRespMyServiceFoo(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespMyServiceFoo().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respMyServiceFooBuilder) Emit() *respMyServiceFoo {
     var objCopy respMyServiceFoo = *x.obj
     return &objCopy

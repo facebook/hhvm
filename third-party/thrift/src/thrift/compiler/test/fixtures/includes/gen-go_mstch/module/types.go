@@ -229,32 +229,43 @@ func (x *MyStruct) DefaultGetMyOtherIncludedField() *includes.Included {
 }
 
 
-// Deprecated: Use MyStruct.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 type MyStructBuilder struct {
     obj *MyStruct
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewMyStructBuilder() *MyStructBuilder {
     return &MyStructBuilder{
         obj: NewMyStruct(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *MyStructBuilder) MyIncludedField(value *includes.Included) *MyStructBuilder {
     x.obj.MyIncludedField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *MyStructBuilder) MyOtherIncludedField(value *includes.Included) *MyStructBuilder {
     x.obj.MyOtherIncludedField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *MyStructBuilder) MyIncludedInt(value includes.IncludedInt64) *MyStructBuilder {
     x.obj.MyIncludedInt = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *MyStructBuilder) Emit() *MyStruct {
     var objCopy MyStruct = *x.obj
     return &objCopy

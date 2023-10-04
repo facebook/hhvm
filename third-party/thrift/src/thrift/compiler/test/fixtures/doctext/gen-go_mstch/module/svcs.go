@@ -174,17 +174,22 @@ func newReqCF() *reqCF {
 }
 
 
-// Deprecated: Use reqCF.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqCF().Set<FieldNameFoo>().Set<FieldNameBar>()
 type reqCFBuilder struct {
     obj *reqCF
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqCF().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newReqCFBuilder() *reqCFBuilder {
     return &reqCFBuilder{
         obj: newReqCF(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqCF().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqCFBuilder) Emit() *reqCF {
     var objCopy reqCF = *x.obj
     return &objCopy
@@ -264,17 +269,22 @@ func newRespCF() *respCF {
 }
 
 
-// Deprecated: Use respCF.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespCF().Set<FieldNameFoo>().Set<FieldNameBar>()
 type respCFBuilder struct {
     obj *respCF
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespCF().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newRespCFBuilder() *respCFBuilder {
     return &respCFBuilder{
         obj: newRespCF(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespCF().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respCFBuilder) Emit() *respCF {
     var objCopy respCF = *x.obj
     return &objCopy
@@ -544,32 +554,43 @@ func (x *reqCThing) toString3() string {  // C
 }
 
 
-// Deprecated: Use reqCThing.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqCThing().Set<FieldNameFoo>().Set<FieldNameBar>()
 type reqCThingBuilder struct {
     obj *reqCThing
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqCThing().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newReqCThingBuilder() *reqCThingBuilder {
     return &reqCThingBuilder{
         obj: newReqCThing(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqCThing().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqCThingBuilder) A(value int32) *reqCThingBuilder {
     x.obj.A = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqCThing().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqCThingBuilder) B(value string) *reqCThingBuilder {
     x.obj.B = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqCThing().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqCThingBuilder) C(value []int32) *reqCThingBuilder {
     x.obj.C = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqCThing().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqCThingBuilder) Emit() *reqCThing {
     var objCopy reqCThing = *x.obj
     return &objCopy
@@ -820,27 +841,36 @@ func (x *respCThing) DefaultGetBang() *Bang {
 }
 
 
-// Deprecated: Use respCThing.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespCThing().Set<FieldNameFoo>().Set<FieldNameBar>()
 type respCThingBuilder struct {
     obj *respCThing
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespCThing().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newRespCThingBuilder() *respCThingBuilder {
     return &respCThingBuilder{
         obj: newRespCThing(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespCThing().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respCThingBuilder) Success(value string) *respCThingBuilder {
     x.obj.Success = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespCThing().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respCThingBuilder) Bang(value *Bang) *respCThingBuilder {
     x.obj.Bang = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespCThing().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respCThingBuilder) Emit() *respCThing {
     var objCopy respCThing = *x.obj
     return &objCopy

@@ -19,11 +19,14 @@
   This template creates a builder type for thrift structs.
 
 }}
-// Deprecated: Use {{struct:go_name}}.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g {{struct:go_qualified_new_func}}().Set<FieldNameFoo>().Set<FieldNameBar>()
 type {{struct:go_name}}Builder struct {
     obj *{{struct:go_name}}
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g {{struct:go_qualified_new_func}}().Set<FieldNameFoo>().Set<FieldNameBar>()
 func {{struct:go_qualified_new_func}}Builder() *{{struct:go_name}}Builder {
     return &{{struct:go_name}}Builder{
         obj: {{struct:go_qualified_new_func}}(),
@@ -31,12 +34,16 @@ func {{struct:go_qualified_new_func}}Builder() *{{struct:go_name}}Builder {
 }
 {{#struct:fields_sorted}}
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g {{struct:go_qualified_new_func}}().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *{{struct:go_name}}Builder) {{field:go_name}}(value {{> types/field_type}}) *{{struct:go_name}}Builder {
     x.obj.{{field:go_name}} = value
     return x
 }
 {{/struct:fields_sorted}}
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g {{struct:go_qualified_new_func}}().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *{{struct:go_name}}Builder) Emit() *{{struct:go_name}} {
     {{! Create a shallow copy of our 'obj' to let Emit() issue a new object on every call }}
     var objCopy {{struct:go_name}} = *x.obj

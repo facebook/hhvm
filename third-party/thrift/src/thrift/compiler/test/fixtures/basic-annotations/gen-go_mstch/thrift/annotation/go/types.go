@@ -76,22 +76,29 @@ func (x *Name) toString1() string {  // Name
 }
 
 
-// Deprecated: Use Name.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewName().Set<FieldNameFoo>().Set<FieldNameBar>()
 type NameBuilder struct {
     obj *Name
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewNameBuilder() *NameBuilder {
     return &NameBuilder{
         obj: NewName(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *NameBuilder) Name(value string) *NameBuilder {
     x.obj.Name = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *NameBuilder) Emit() *Name {
     var objCopy Name = *x.obj
     return &objCopy
@@ -235,22 +242,29 @@ func (x *Tag) toString1() string {  // Tag
 }
 
 
-// Deprecated: Use Tag.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTag().Set<FieldNameFoo>().Set<FieldNameBar>()
 type TagBuilder struct {
     obj *Tag
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTag().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewTagBuilder() *TagBuilder {
     return &TagBuilder{
         obj: NewTag(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTag().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TagBuilder) Tag(value string) *TagBuilder {
     x.obj.Tag = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTag().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TagBuilder) Emit() *Tag {
     var objCopy Tag = *x.obj
     return &objCopy
@@ -344,17 +358,22 @@ func NewNewType_() *NewType_ {
 }
 
 
-// Deprecated: Use NewType_.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewNewType_().Set<FieldNameFoo>().Set<FieldNameBar>()
 type NewType_Builder struct {
     obj *NewType_
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewNewType_().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewNewType_Builder() *NewType_Builder {
     return &NewType_Builder{
         obj: NewNewType_(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewNewType_().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *NewType_Builder) Emit() *NewType_ {
     var objCopy NewType_ = *x.obj
     return &objCopy

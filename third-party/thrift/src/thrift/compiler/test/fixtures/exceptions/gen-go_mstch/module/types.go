@@ -76,22 +76,29 @@ func (x *Fiery) toString1() string {  // Message
 }
 
 
-// Deprecated: Use Fiery.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFiery().Set<FieldNameFoo>().Set<FieldNameBar>()
 type FieryBuilder struct {
     obj *Fiery
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFiery().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewFieryBuilder() *FieryBuilder {
     return &FieryBuilder{
         obj: NewFiery(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFiery().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieryBuilder) Message(value string) *FieryBuilder {
     x.obj.Message = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFiery().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieryBuilder) Emit() *Fiery {
     var objCopy Fiery = *x.obj
     return &objCopy
@@ -255,22 +262,29 @@ func (x *Serious) toString1() string {  // Sonnet
 var Serious_Sonnet_DEFAULT = NewSerious().GetSonnet()
 
 
-// Deprecated: Use Serious.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewSerious().Set<FieldNameFoo>().Set<FieldNameBar>()
 type SeriousBuilder struct {
     obj *Serious
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewSerious().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewSeriousBuilder() *SeriousBuilder {
     return &SeriousBuilder{
         obj: NewSerious(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewSerious().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *SeriousBuilder) Sonnet(value *string) *SeriousBuilder {
     x.obj.Sonnet = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewSerious().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *SeriousBuilder) Emit() *Serious {
     var objCopy Serious = *x.obj
     return &objCopy
@@ -467,27 +481,36 @@ func (x *ComplexFieldNames) toString2() string {  // InternalErrorMessage
 }
 
 
-// Deprecated: Use ComplexFieldNames.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewComplexFieldNames().Set<FieldNameFoo>().Set<FieldNameBar>()
 type ComplexFieldNamesBuilder struct {
     obj *ComplexFieldNames
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewComplexFieldNames().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewComplexFieldNamesBuilder() *ComplexFieldNamesBuilder {
     return &ComplexFieldNamesBuilder{
         obj: NewComplexFieldNames(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewComplexFieldNames().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ComplexFieldNamesBuilder) ErrorMessage(value string) *ComplexFieldNamesBuilder {
     x.obj.ErrorMessage = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewComplexFieldNames().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ComplexFieldNamesBuilder) InternalErrorMessage(value string) *ComplexFieldNamesBuilder {
     x.obj.InternalErrorMessage = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewComplexFieldNames().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ComplexFieldNamesBuilder) Emit() *ComplexFieldNames {
     var objCopy ComplexFieldNames = *x.obj
     return &objCopy
@@ -700,27 +723,36 @@ func (x *CustomFieldNames) toString2() string {  // InternalErrorMessage
 }
 
 
-// Deprecated: Use CustomFieldNames.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewCustomFieldNames().Set<FieldNameFoo>().Set<FieldNameBar>()
 type CustomFieldNamesBuilder struct {
     obj *CustomFieldNames
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewCustomFieldNames().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewCustomFieldNamesBuilder() *CustomFieldNamesBuilder {
     return &CustomFieldNamesBuilder{
         obj: NewCustomFieldNames(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewCustomFieldNames().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *CustomFieldNamesBuilder) ErrorMessage(value string) *CustomFieldNamesBuilder {
     x.obj.ErrorMessage = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewCustomFieldNames().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *CustomFieldNamesBuilder) InternalErrorMessage(value string) *CustomFieldNamesBuilder {
     x.obj.InternalErrorMessage = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewCustomFieldNames().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *CustomFieldNamesBuilder) Emit() *CustomFieldNames {
     var objCopy CustomFieldNames = *x.obj
     return &objCopy
@@ -933,27 +965,36 @@ func (x *ExceptionWithPrimitiveField) toString2() string {  // ErrorCode
 }
 
 
-// Deprecated: Use ExceptionWithPrimitiveField.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewExceptionWithPrimitiveField().Set<FieldNameFoo>().Set<FieldNameBar>()
 type ExceptionWithPrimitiveFieldBuilder struct {
     obj *ExceptionWithPrimitiveField
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewExceptionWithPrimitiveField().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewExceptionWithPrimitiveFieldBuilder() *ExceptionWithPrimitiveFieldBuilder {
     return &ExceptionWithPrimitiveFieldBuilder{
         obj: NewExceptionWithPrimitiveField(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewExceptionWithPrimitiveField().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ExceptionWithPrimitiveFieldBuilder) Message(value string) *ExceptionWithPrimitiveFieldBuilder {
     x.obj.Message = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewExceptionWithPrimitiveField().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ExceptionWithPrimitiveFieldBuilder) ErrorCode(value int32) *ExceptionWithPrimitiveFieldBuilder {
     x.obj.ErrorCode = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewExceptionWithPrimitiveField().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ExceptionWithPrimitiveFieldBuilder) Emit() *ExceptionWithPrimitiveField {
     var objCopy ExceptionWithPrimitiveField = *x.obj
     return &objCopy
@@ -1166,27 +1207,36 @@ func (x *ExceptionWithStructuredAnnotation) toString2() string {  // ErrorCode
 }
 
 
-// Deprecated: Use ExceptionWithStructuredAnnotation.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewExceptionWithStructuredAnnotation().Set<FieldNameFoo>().Set<FieldNameBar>()
 type ExceptionWithStructuredAnnotationBuilder struct {
     obj *ExceptionWithStructuredAnnotation
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewExceptionWithStructuredAnnotation().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewExceptionWithStructuredAnnotationBuilder() *ExceptionWithStructuredAnnotationBuilder {
     return &ExceptionWithStructuredAnnotationBuilder{
         obj: NewExceptionWithStructuredAnnotation(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewExceptionWithStructuredAnnotation().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ExceptionWithStructuredAnnotationBuilder) MessageField(value string) *ExceptionWithStructuredAnnotationBuilder {
     x.obj.MessageField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewExceptionWithStructuredAnnotation().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ExceptionWithStructuredAnnotationBuilder) ErrorCode(value int32) *ExceptionWithStructuredAnnotationBuilder {
     x.obj.ErrorCode = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewExceptionWithStructuredAnnotation().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ExceptionWithStructuredAnnotationBuilder) Emit() *ExceptionWithStructuredAnnotation {
     var objCopy ExceptionWithStructuredAnnotation = *x.obj
     return &objCopy
@@ -1299,17 +1349,22 @@ func NewBanal() *Banal {
 }
 
 
-// Deprecated: Use Banal.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBanal().Set<FieldNameFoo>().Set<FieldNameBar>()
 type BanalBuilder struct {
     obj *Banal
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBanal().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewBanalBuilder() *BanalBuilder {
     return &BanalBuilder{
         obj: NewBanal(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBanal().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *BanalBuilder) Emit() *Banal {
     var objCopy Banal = *x.obj
     return &objCopy

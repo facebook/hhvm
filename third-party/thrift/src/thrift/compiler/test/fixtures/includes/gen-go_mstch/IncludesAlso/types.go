@@ -26,17 +26,22 @@ func NewAlso() *Also {
 }
 
 
-// Deprecated: Use Also.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewAlso().Set<FieldNameFoo>().Set<FieldNameBar>()
 type AlsoBuilder struct {
     obj *Also
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewAlso().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewAlsoBuilder() *AlsoBuilder {
     return &AlsoBuilder{
         obj: NewAlso(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewAlso().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *AlsoBuilder) Emit() *Also {
     var objCopy Also = *x.obj
     return &objCopy

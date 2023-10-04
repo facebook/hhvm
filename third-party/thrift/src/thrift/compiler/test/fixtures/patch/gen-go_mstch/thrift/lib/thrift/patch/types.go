@@ -207,17 +207,22 @@ func NewGeneratePatch() *GeneratePatch {
 }
 
 
-// Deprecated: Use GeneratePatch.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewGeneratePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 type GeneratePatchBuilder struct {
     obj *GeneratePatch
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewGeneratePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewGeneratePatchBuilder() *GeneratePatchBuilder {
     return &GeneratePatchBuilder{
         obj: NewGeneratePatch(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewGeneratePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *GeneratePatchBuilder) Emit() *GeneratePatch {
     var objCopy GeneratePatch = *x.obj
     return &objCopy
@@ -295,17 +300,22 @@ func NewAssignOnlyPatch() *AssignOnlyPatch {
 }
 
 
-// Deprecated: Use AssignOnlyPatch.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewAssignOnlyPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 type AssignOnlyPatchBuilder struct {
     obj *AssignOnlyPatch
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewAssignOnlyPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewAssignOnlyPatchBuilder() *AssignOnlyPatchBuilder {
     return &AssignOnlyPatchBuilder{
         obj: NewAssignOnlyPatch(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewAssignOnlyPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *AssignOnlyPatchBuilder) Emit() *AssignOnlyPatch {
     var objCopy AssignOnlyPatch = *x.obj
     return &objCopy
@@ -550,32 +560,43 @@ func (x *BoolPatch) toString9() string {  // Invert
 var BoolPatch_Assign_DEFAULT = NewBoolPatch().GetAssign()
 
 
-// Deprecated: Use BoolPatch.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBoolPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 type BoolPatchBuilder struct {
     obj *BoolPatch
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBoolPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewBoolPatchBuilder() *BoolPatchBuilder {
     return &BoolPatchBuilder{
         obj: NewBoolPatch(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBoolPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *BoolPatchBuilder) Assign(value *bool) *BoolPatchBuilder {
     x.obj.Assign = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBoolPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *BoolPatchBuilder) Clear(value bool) *BoolPatchBuilder {
     x.obj.Clear = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBoolPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *BoolPatchBuilder) Invert(value bool) *BoolPatchBuilder {
     x.obj.Invert = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBoolPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *BoolPatchBuilder) Emit() *BoolPatch {
     var objCopy BoolPatch = *x.obj
     return &objCopy
@@ -870,32 +891,43 @@ func (x *BytePatch) toString8() string {  // Add
 var BytePatch_Assign_DEFAULT = NewBytePatch().GetAssign()
 
 
-// Deprecated: Use BytePatch.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBytePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 type BytePatchBuilder struct {
     obj *BytePatch
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBytePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewBytePatchBuilder() *BytePatchBuilder {
     return &BytePatchBuilder{
         obj: NewBytePatch(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBytePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *BytePatchBuilder) Assign(value *int8) *BytePatchBuilder {
     x.obj.Assign = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBytePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *BytePatchBuilder) Clear(value bool) *BytePatchBuilder {
     x.obj.Clear = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBytePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *BytePatchBuilder) Add(value int8) *BytePatchBuilder {
     x.obj.Add = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBytePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *BytePatchBuilder) Emit() *BytePatch {
     var objCopy BytePatch = *x.obj
     return &objCopy
@@ -1188,32 +1220,43 @@ func (x *I16Patch) toString8() string {  // Add
 var I16Patch_Assign_DEFAULT = NewI16Patch().GetAssign()
 
 
-// Deprecated: Use I16Patch.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewI16Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
 type I16PatchBuilder struct {
     obj *I16Patch
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewI16Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewI16PatchBuilder() *I16PatchBuilder {
     return &I16PatchBuilder{
         obj: NewI16Patch(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewI16Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *I16PatchBuilder) Assign(value *int16) *I16PatchBuilder {
     x.obj.Assign = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewI16Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *I16PatchBuilder) Clear(value bool) *I16PatchBuilder {
     x.obj.Clear = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewI16Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *I16PatchBuilder) Add(value int16) *I16PatchBuilder {
     x.obj.Add = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewI16Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *I16PatchBuilder) Emit() *I16Patch {
     var objCopy I16Patch = *x.obj
     return &objCopy
@@ -1506,32 +1549,43 @@ func (x *I32Patch) toString8() string {  // Add
 var I32Patch_Assign_DEFAULT = NewI32Patch().GetAssign()
 
 
-// Deprecated: Use I32Patch.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewI32Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
 type I32PatchBuilder struct {
     obj *I32Patch
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewI32Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewI32PatchBuilder() *I32PatchBuilder {
     return &I32PatchBuilder{
         obj: NewI32Patch(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewI32Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *I32PatchBuilder) Assign(value *int32) *I32PatchBuilder {
     x.obj.Assign = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewI32Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *I32PatchBuilder) Clear(value bool) *I32PatchBuilder {
     x.obj.Clear = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewI32Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *I32PatchBuilder) Add(value int32) *I32PatchBuilder {
     x.obj.Add = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewI32Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *I32PatchBuilder) Emit() *I32Patch {
     var objCopy I32Patch = *x.obj
     return &objCopy
@@ -1824,32 +1878,43 @@ func (x *I64Patch) toString8() string {  // Add
 var I64Patch_Assign_DEFAULT = NewI64Patch().GetAssign()
 
 
-// Deprecated: Use I64Patch.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewI64Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
 type I64PatchBuilder struct {
     obj *I64Patch
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewI64Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewI64PatchBuilder() *I64PatchBuilder {
     return &I64PatchBuilder{
         obj: NewI64Patch(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewI64Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *I64PatchBuilder) Assign(value *int64) *I64PatchBuilder {
     x.obj.Assign = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewI64Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *I64PatchBuilder) Clear(value bool) *I64PatchBuilder {
     x.obj.Clear = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewI64Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *I64PatchBuilder) Add(value int64) *I64PatchBuilder {
     x.obj.Add = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewI64Patch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *I64PatchBuilder) Emit() *I64Patch {
     var objCopy I64Patch = *x.obj
     return &objCopy
@@ -2142,32 +2207,43 @@ func (x *FloatPatch) toString8() string {  // Add
 var FloatPatch_Assign_DEFAULT = NewFloatPatch().GetAssign()
 
 
-// Deprecated: Use FloatPatch.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFloatPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 type FloatPatchBuilder struct {
     obj *FloatPatch
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFloatPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewFloatPatchBuilder() *FloatPatchBuilder {
     return &FloatPatchBuilder{
         obj: NewFloatPatch(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFloatPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FloatPatchBuilder) Assign(value *float32) *FloatPatchBuilder {
     x.obj.Assign = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFloatPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FloatPatchBuilder) Clear(value bool) *FloatPatchBuilder {
     x.obj.Clear = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFloatPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FloatPatchBuilder) Add(value float32) *FloatPatchBuilder {
     x.obj.Add = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFloatPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FloatPatchBuilder) Emit() *FloatPatch {
     var objCopy FloatPatch = *x.obj
     return &objCopy
@@ -2460,32 +2536,43 @@ func (x *DoublePatch) toString8() string {  // Add
 var DoublePatch_Assign_DEFAULT = NewDoublePatch().GetAssign()
 
 
-// Deprecated: Use DoublePatch.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewDoublePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 type DoublePatchBuilder struct {
     obj *DoublePatch
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewDoublePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewDoublePatchBuilder() *DoublePatchBuilder {
     return &DoublePatchBuilder{
         obj: NewDoublePatch(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewDoublePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *DoublePatchBuilder) Assign(value *float64) *DoublePatchBuilder {
     x.obj.Assign = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewDoublePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *DoublePatchBuilder) Clear(value bool) *DoublePatchBuilder {
     x.obj.Clear = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewDoublePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *DoublePatchBuilder) Add(value float64) *DoublePatchBuilder {
     x.obj.Add = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewDoublePatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *DoublePatchBuilder) Emit() *DoublePatch {
     var objCopy DoublePatch = *x.obj
     return &objCopy
@@ -2828,37 +2915,50 @@ func (x *StringPatch) toString9() string {  // Append
 var StringPatch_Assign_DEFAULT = NewStringPatch().GetAssign()
 
 
-// Deprecated: Use StringPatch.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewStringPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 type StringPatchBuilder struct {
     obj *StringPatch
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewStringPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewStringPatchBuilder() *StringPatchBuilder {
     return &StringPatchBuilder{
         obj: NewStringPatch(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewStringPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *StringPatchBuilder) Assign(value *string) *StringPatchBuilder {
     x.obj.Assign = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewStringPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *StringPatchBuilder) Clear(value bool) *StringPatchBuilder {
     x.obj.Clear = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewStringPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *StringPatchBuilder) Prepend(value string) *StringPatchBuilder {
     x.obj.Prepend = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewStringPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *StringPatchBuilder) Append(value string) *StringPatchBuilder {
     x.obj.Append = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewStringPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *StringPatchBuilder) Emit() *StringPatch {
     var objCopy StringPatch = *x.obj
     return &objCopy
@@ -3230,37 +3330,50 @@ func (x *BinaryPatch) toString9() string {  // Append
 }
 
 
-// Deprecated: Use BinaryPatch.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBinaryPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 type BinaryPatchBuilder struct {
     obj *BinaryPatch
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBinaryPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewBinaryPatchBuilder() *BinaryPatchBuilder {
     return &BinaryPatchBuilder{
         obj: NewBinaryPatch(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBinaryPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *BinaryPatchBuilder) Assign(value standard.ByteBuffer) *BinaryPatchBuilder {
     x.obj.Assign = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBinaryPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *BinaryPatchBuilder) Clear(value bool) *BinaryPatchBuilder {
     x.obj.Clear = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBinaryPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *BinaryPatchBuilder) Prepend(value standard.ByteBuffer) *BinaryPatchBuilder {
     x.obj.Prepend = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBinaryPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *BinaryPatchBuilder) Append(value standard.ByteBuffer) *BinaryPatchBuilder {
     x.obj.Append = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBinaryPatch().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *BinaryPatchBuilder) Emit() *BinaryPatch {
     var objCopy BinaryPatch = *x.obj
     return &objCopy

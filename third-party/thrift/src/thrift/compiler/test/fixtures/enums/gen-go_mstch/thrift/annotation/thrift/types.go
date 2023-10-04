@@ -26,17 +26,22 @@ func NewExperimental() *Experimental {
 }
 
 
-// Deprecated: Use Experimental.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewExperimental().Set<FieldNameFoo>().Set<FieldNameBar>()
 type ExperimentalBuilder struct {
     obj *Experimental
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewExperimental().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewExperimentalBuilder() *ExperimentalBuilder {
     return &ExperimentalBuilder{
         obj: NewExperimental(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewExperimental().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ExperimentalBuilder) Emit() *Experimental {
     var objCopy Experimental = *x.obj
     return &objCopy
@@ -305,27 +310,36 @@ func (x *ReserveIds) toString2() string {  // IdRanges
 }
 
 
-// Deprecated: Use ReserveIds.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewReserveIds().Set<FieldNameFoo>().Set<FieldNameBar>()
 type ReserveIdsBuilder struct {
     obj *ReserveIds
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewReserveIds().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewReserveIdsBuilder() *ReserveIdsBuilder {
     return &ReserveIdsBuilder{
         obj: NewReserveIds(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewReserveIds().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ReserveIdsBuilder) Ids(value []int32) *ReserveIdsBuilder {
     x.obj.Ids = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewReserveIds().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ReserveIdsBuilder) IdRanges(value map[int32]int32) *ReserveIdsBuilder {
     x.obj.IdRanges = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewReserveIds().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ReserveIdsBuilder) Emit() *ReserveIds {
     var objCopy ReserveIds = *x.obj
     return &objCopy
@@ -485,22 +499,29 @@ func (x *RequiresBackwardCompatibility) toString1() string {  // FieldName
 }
 
 
-// Deprecated: Use RequiresBackwardCompatibility.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewRequiresBackwardCompatibility().Set<FieldNameFoo>().Set<FieldNameBar>()
 type RequiresBackwardCompatibilityBuilder struct {
     obj *RequiresBackwardCompatibility
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewRequiresBackwardCompatibility().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewRequiresBackwardCompatibilityBuilder() *RequiresBackwardCompatibilityBuilder {
     return &RequiresBackwardCompatibilityBuilder{
         obj: NewRequiresBackwardCompatibility(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewRequiresBackwardCompatibility().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *RequiresBackwardCompatibilityBuilder) FieldName(value bool) *RequiresBackwardCompatibilityBuilder {
     x.obj.FieldName = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewRequiresBackwardCompatibility().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *RequiresBackwardCompatibilityBuilder) Emit() *RequiresBackwardCompatibility {
     var objCopy RequiresBackwardCompatibility = *x.obj
     return &objCopy
@@ -594,17 +615,22 @@ func NewTerseWrite() *TerseWrite {
 }
 
 
-// Deprecated: Use TerseWrite.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTerseWrite().Set<FieldNameFoo>().Set<FieldNameBar>()
 type TerseWriteBuilder struct {
     obj *TerseWrite
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTerseWrite().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewTerseWriteBuilder() *TerseWriteBuilder {
     return &TerseWriteBuilder{
         obj: NewTerseWrite(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewTerseWrite().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *TerseWriteBuilder) Emit() *TerseWrite {
     var objCopy TerseWrite = *x.obj
     return &objCopy
@@ -682,17 +708,22 @@ func NewBox() *Box {
 }
 
 
-// Deprecated: Use Box.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBox().Set<FieldNameFoo>().Set<FieldNameBar>()
 type BoxBuilder struct {
     obj *Box
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBox().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewBoxBuilder() *BoxBuilder {
     return &BoxBuilder{
         obj: NewBox(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBox().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *BoxBuilder) Emit() *Box {
     var objCopy Box = *x.obj
     return &objCopy
@@ -770,17 +801,22 @@ func NewMixin() *Mixin {
 }
 
 
-// Deprecated: Use Mixin.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMixin().Set<FieldNameFoo>().Set<FieldNameBar>()
 type MixinBuilder struct {
     obj *Mixin
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMixin().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewMixinBuilder() *MixinBuilder {
     return &MixinBuilder{
         obj: NewMixin(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMixin().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *MixinBuilder) Emit() *Mixin {
     var objCopy Mixin = *x.obj
     return &objCopy
@@ -858,17 +894,22 @@ func NewSerializeInFieldIdOrder() *SerializeInFieldIdOrder {
 }
 
 
-// Deprecated: Use SerializeInFieldIdOrder.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewSerializeInFieldIdOrder().Set<FieldNameFoo>().Set<FieldNameBar>()
 type SerializeInFieldIdOrderBuilder struct {
     obj *SerializeInFieldIdOrder
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewSerializeInFieldIdOrder().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewSerializeInFieldIdOrderBuilder() *SerializeInFieldIdOrderBuilder {
     return &SerializeInFieldIdOrderBuilder{
         obj: NewSerializeInFieldIdOrder(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewSerializeInFieldIdOrder().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *SerializeInFieldIdOrderBuilder) Emit() *SerializeInFieldIdOrder {
     var objCopy SerializeInFieldIdOrder = *x.obj
     return &objCopy
@@ -946,17 +987,22 @@ func NewBitmaskEnum() *BitmaskEnum {
 }
 
 
-// Deprecated: Use BitmaskEnum.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBitmaskEnum().Set<FieldNameFoo>().Set<FieldNameBar>()
 type BitmaskEnumBuilder struct {
     obj *BitmaskEnum
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBitmaskEnum().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewBitmaskEnumBuilder() *BitmaskEnumBuilder {
     return &BitmaskEnumBuilder{
         obj: NewBitmaskEnum(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewBitmaskEnum().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *BitmaskEnumBuilder) Emit() *BitmaskEnum {
     var objCopy BitmaskEnum = *x.obj
     return &objCopy
@@ -1084,22 +1130,29 @@ func (x *ExceptionMessage) toString1() string {  // Field
 }
 
 
-// Deprecated: Use ExceptionMessage.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewExceptionMessage().Set<FieldNameFoo>().Set<FieldNameBar>()
 type ExceptionMessageBuilder struct {
     obj *ExceptionMessage
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewExceptionMessage().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewExceptionMessageBuilder() *ExceptionMessageBuilder {
     return &ExceptionMessageBuilder{
         obj: NewExceptionMessage(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewExceptionMessage().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ExceptionMessageBuilder) Field(value string) *ExceptionMessageBuilder {
     x.obj.Field = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewExceptionMessage().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ExceptionMessageBuilder) Emit() *ExceptionMessage {
     var objCopy ExceptionMessage = *x.obj
     return &objCopy
@@ -1243,22 +1296,29 @@ func (x *GenerateRuntimeSchema) toString1() string {  // Name
 }
 
 
-// Deprecated: Use GenerateRuntimeSchema.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewGenerateRuntimeSchema().Set<FieldNameFoo>().Set<FieldNameBar>()
 type GenerateRuntimeSchemaBuilder struct {
     obj *GenerateRuntimeSchema
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewGenerateRuntimeSchema().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewGenerateRuntimeSchemaBuilder() *GenerateRuntimeSchemaBuilder {
     return &GenerateRuntimeSchemaBuilder{
         obj: NewGenerateRuntimeSchema(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewGenerateRuntimeSchema().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *GenerateRuntimeSchemaBuilder) Name(value string) *GenerateRuntimeSchemaBuilder {
     x.obj.Name = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewGenerateRuntimeSchema().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *GenerateRuntimeSchemaBuilder) Emit() *GenerateRuntimeSchema {
     var objCopy GenerateRuntimeSchema = *x.obj
     return &objCopy
@@ -1352,17 +1412,22 @@ func NewInternBox() *InternBox {
 }
 
 
-// Deprecated: Use InternBox.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewInternBox().Set<FieldNameFoo>().Set<FieldNameBar>()
 type InternBoxBuilder struct {
     obj *InternBox
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewInternBox().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewInternBoxBuilder() *InternBoxBuilder {
     return &InternBoxBuilder{
         obj: NewInternBox(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewInternBox().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *InternBoxBuilder) Emit() *InternBox {
     var objCopy InternBox = *x.obj
     return &objCopy

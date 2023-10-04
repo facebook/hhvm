@@ -78,22 +78,29 @@ func (x *Fields) toString100() string {  // InjectedField
 }
 
 
-// Deprecated: Use Fields.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFields().Set<FieldNameFoo>().Set<FieldNameBar>()
 type FieldsBuilder struct {
     obj *Fields
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFields().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewFieldsBuilder() *FieldsBuilder {
     return &FieldsBuilder{
         obj: NewFields(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFields().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldsBuilder) InjectedField(value string) *FieldsBuilder {
     x.obj.InjectedField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFields().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldsBuilder) Emit() *Fields {
     var objCopy Fields = *x.obj
     return &objCopy
@@ -237,22 +244,29 @@ func (x *FieldsInjectedToEmptyStruct) toString_1100() string {  // InjectedField
 }
 
 
-// Deprecated: Use FieldsInjectedToEmptyStruct.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldsInjectedToEmptyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 type FieldsInjectedToEmptyStructBuilder struct {
     obj *FieldsInjectedToEmptyStruct
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldsInjectedToEmptyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewFieldsInjectedToEmptyStructBuilder() *FieldsInjectedToEmptyStructBuilder {
     return &FieldsInjectedToEmptyStructBuilder{
         obj: NewFieldsInjectedToEmptyStruct(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldsInjectedToEmptyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldsInjectedToEmptyStructBuilder) InjectedField(value string) *FieldsInjectedToEmptyStructBuilder {
     x.obj.InjectedField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldsInjectedToEmptyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldsInjectedToEmptyStructBuilder) Emit() *FieldsInjectedToEmptyStruct {
     var objCopy FieldsInjectedToEmptyStruct = *x.obj
     return &objCopy
@@ -446,27 +460,36 @@ func (x *FieldsInjectedToStruct) toString1() string {  // StringField
 }
 
 
-// Deprecated: Use FieldsInjectedToStruct.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldsInjectedToStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 type FieldsInjectedToStructBuilder struct {
     obj *FieldsInjectedToStruct
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldsInjectedToStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewFieldsInjectedToStructBuilder() *FieldsInjectedToStructBuilder {
     return &FieldsInjectedToStructBuilder{
         obj: NewFieldsInjectedToStruct(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldsInjectedToStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldsInjectedToStructBuilder) InjectedField(value string) *FieldsInjectedToStructBuilder {
     x.obj.InjectedField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldsInjectedToStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldsInjectedToStructBuilder) StringField(value string) *FieldsInjectedToStructBuilder {
     x.obj.StringField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldsInjectedToStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldsInjectedToStructBuilder) Emit() *FieldsInjectedToStruct {
     var objCopy FieldsInjectedToStruct = *x.obj
     return &objCopy
@@ -810,37 +833,50 @@ var FieldsInjectedWithIncludedStruct_InjectedUnstructuredAnnotationField_DEFAULT
 var FieldsInjectedWithIncludedStruct_InjectedStructuredAnnotationField_DEFAULT = NewFieldsInjectedWithIncludedStruct().GetInjectedStructuredAnnotationField()
 
 
-// Deprecated: Use FieldsInjectedWithIncludedStruct.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldsInjectedWithIncludedStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 type FieldsInjectedWithIncludedStructBuilder struct {
     obj *FieldsInjectedWithIncludedStruct
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldsInjectedWithIncludedStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewFieldsInjectedWithIncludedStructBuilder() *FieldsInjectedWithIncludedStructBuilder {
     return &FieldsInjectedWithIncludedStructBuilder{
         obj: NewFieldsInjectedWithIncludedStruct(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldsInjectedWithIncludedStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldsInjectedWithIncludedStructBuilder) InjectedUnstructuredAnnotationField(value *string) *FieldsInjectedWithIncludedStructBuilder {
     x.obj.InjectedUnstructuredAnnotationField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldsInjectedWithIncludedStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldsInjectedWithIncludedStructBuilder) InjectedStructuredAnnotationField(value *string) *FieldsInjectedWithIncludedStructBuilder {
     x.obj.InjectedStructuredAnnotationField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldsInjectedWithIncludedStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldsInjectedWithIncludedStructBuilder) InjectedField(value string) *FieldsInjectedWithIncludedStructBuilder {
     x.obj.InjectedField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldsInjectedWithIncludedStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldsInjectedWithIncludedStructBuilder) StringField(value string) *FieldsInjectedWithIncludedStructBuilder {
     x.obj.StringField = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFieldsInjectedWithIncludedStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FieldsInjectedWithIncludedStructBuilder) Emit() *FieldsInjectedWithIncludedStruct {
     var objCopy FieldsInjectedWithIncludedStruct = *x.obj
     return &objCopy

@@ -151,17 +151,22 @@ func newReqMyRootDoRoot() *reqMyRootDoRoot {
 }
 
 
-// Deprecated: Use reqMyRootDoRoot.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqMyRootDoRoot().Set<FieldNameFoo>().Set<FieldNameBar>()
 type reqMyRootDoRootBuilder struct {
     obj *reqMyRootDoRoot
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqMyRootDoRoot().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newReqMyRootDoRootBuilder() *reqMyRootDoRootBuilder {
     return &reqMyRootDoRootBuilder{
         obj: newReqMyRootDoRoot(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqMyRootDoRoot().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqMyRootDoRootBuilder) Emit() *reqMyRootDoRoot {
     var objCopy reqMyRootDoRoot = *x.obj
     return &objCopy
@@ -241,17 +246,22 @@ func newRespMyRootDoRoot() *respMyRootDoRoot {
 }
 
 
-// Deprecated: Use respMyRootDoRoot.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespMyRootDoRoot().Set<FieldNameFoo>().Set<FieldNameBar>()
 type respMyRootDoRootBuilder struct {
     obj *respMyRootDoRoot
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespMyRootDoRoot().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newRespMyRootDoRootBuilder() *respMyRootDoRootBuilder {
     return &respMyRootDoRootBuilder{
         obj: newRespMyRootDoRoot(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespMyRootDoRoot().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respMyRootDoRootBuilder) Emit() *respMyRootDoRoot {
     var objCopy respMyRootDoRoot = *x.obj
     return &objCopy
@@ -560,17 +570,22 @@ func newReqMyNodeDoMid() *reqMyNodeDoMid {
 }
 
 
-// Deprecated: Use reqMyNodeDoMid.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqMyNodeDoMid().Set<FieldNameFoo>().Set<FieldNameBar>()
 type reqMyNodeDoMidBuilder struct {
     obj *reqMyNodeDoMid
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqMyNodeDoMid().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newReqMyNodeDoMidBuilder() *reqMyNodeDoMidBuilder {
     return &reqMyNodeDoMidBuilder{
         obj: newReqMyNodeDoMid(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqMyNodeDoMid().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqMyNodeDoMidBuilder) Emit() *reqMyNodeDoMid {
     var objCopy reqMyNodeDoMid = *x.obj
     return &objCopy
@@ -650,17 +665,22 @@ func newRespMyNodeDoMid() *respMyNodeDoMid {
 }
 
 
-// Deprecated: Use respMyNodeDoMid.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespMyNodeDoMid().Set<FieldNameFoo>().Set<FieldNameBar>()
 type respMyNodeDoMidBuilder struct {
     obj *respMyNodeDoMid
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespMyNodeDoMid().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newRespMyNodeDoMidBuilder() *respMyNodeDoMidBuilder {
     return &respMyNodeDoMidBuilder{
         obj: newRespMyNodeDoMid(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespMyNodeDoMid().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respMyNodeDoMidBuilder) Emit() *respMyNodeDoMid {
     var objCopy respMyNodeDoMid = *x.obj
     return &objCopy
@@ -943,17 +963,22 @@ func newReqMyLeafDoLeaf() *reqMyLeafDoLeaf {
 }
 
 
-// Deprecated: Use reqMyLeafDoLeaf.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqMyLeafDoLeaf().Set<FieldNameFoo>().Set<FieldNameBar>()
 type reqMyLeafDoLeafBuilder struct {
     obj *reqMyLeafDoLeaf
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqMyLeafDoLeaf().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newReqMyLeafDoLeafBuilder() *reqMyLeafDoLeafBuilder {
     return &reqMyLeafDoLeafBuilder{
         obj: newReqMyLeafDoLeaf(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqMyLeafDoLeaf().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqMyLeafDoLeafBuilder) Emit() *reqMyLeafDoLeaf {
     var objCopy reqMyLeafDoLeaf = *x.obj
     return &objCopy
@@ -1033,17 +1058,22 @@ func newRespMyLeafDoLeaf() *respMyLeafDoLeaf {
 }
 
 
-// Deprecated: Use respMyLeafDoLeaf.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespMyLeafDoLeaf().Set<FieldNameFoo>().Set<FieldNameBar>()
 type respMyLeafDoLeafBuilder struct {
     obj *respMyLeafDoLeaf
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespMyLeafDoLeaf().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newRespMyLeafDoLeafBuilder() *respMyLeafDoLeafBuilder {
     return &respMyLeafDoLeafBuilder{
         obj: newRespMyLeafDoLeaf(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespMyLeafDoLeaf().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respMyLeafDoLeafBuilder) Emit() *respMyLeafDoLeaf {
     var objCopy respMyLeafDoLeaf = *x.obj
     return &objCopy

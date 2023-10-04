@@ -202,22 +202,29 @@ func (x *reqTestServiceInit) toString1() string {  // Int1
 }
 
 
-// Deprecated: Use reqTestServiceInit.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqTestServiceInit().Set<FieldNameFoo>().Set<FieldNameBar>()
 type reqTestServiceInitBuilder struct {
     obj *reqTestServiceInit
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqTestServiceInit().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newReqTestServiceInitBuilder() *reqTestServiceInitBuilder {
     return &reqTestServiceInitBuilder{
         obj: newReqTestServiceInit(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqTestServiceInit().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqTestServiceInitBuilder) Int1(value int64) *reqTestServiceInitBuilder {
     x.obj.Int1 = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqTestServiceInit().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqTestServiceInitBuilder) Emit() *reqTestServiceInit {
     var objCopy reqTestServiceInit = *x.obj
     return &objCopy
@@ -363,22 +370,29 @@ func (x *respTestServiceInit) toString0() string {  // Success
 }
 
 
-// Deprecated: Use respTestServiceInit.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespTestServiceInit().Set<FieldNameFoo>().Set<FieldNameBar>()
 type respTestServiceInitBuilder struct {
     obj *respTestServiceInit
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespTestServiceInit().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newRespTestServiceInitBuilder() *respTestServiceInitBuilder {
     return &respTestServiceInitBuilder{
         obj: newRespTestServiceInit(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespTestServiceInit().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respTestServiceInitBuilder) Success(value int64) *respTestServiceInitBuilder {
     x.obj.Success = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespTestServiceInit().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respTestServiceInitBuilder) Emit() *respTestServiceInit {
     var objCopy respTestServiceInit = *x.obj
     return &objCopy

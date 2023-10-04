@@ -484,22 +484,29 @@ func (x *reqGetEntityGetEntity) DefaultGetR() *GetEntityRequest {
 }
 
 
-// Deprecated: Use reqGetEntityGetEntity.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetEntity().Set<FieldNameFoo>().Set<FieldNameBar>()
 type reqGetEntityGetEntityBuilder struct {
     obj *reqGetEntityGetEntity
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetEntity().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newReqGetEntityGetEntityBuilder() *reqGetEntityGetEntityBuilder {
     return &reqGetEntityGetEntityBuilder{
         obj: newReqGetEntityGetEntity(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetEntity().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqGetEntityGetEntityBuilder) R(value *GetEntityRequest) *reqGetEntityGetEntityBuilder {
     x.obj.R = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetEntity().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqGetEntityGetEntityBuilder) Emit() *reqGetEntityGetEntity {
     var objCopy reqGetEntityGetEntity = *x.obj
     return &objCopy
@@ -669,22 +676,29 @@ func (x *respGetEntityGetEntity) DefaultGetSuccess() *GetEntityResponse {
 }
 
 
-// Deprecated: Use respGetEntityGetEntity.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetEntity().Set<FieldNameFoo>().Set<FieldNameBar>()
 type respGetEntityGetEntityBuilder struct {
     obj *respGetEntityGetEntity
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetEntity().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newRespGetEntityGetEntityBuilder() *respGetEntityGetEntityBuilder {
     return &respGetEntityGetEntityBuilder{
         obj: newRespGetEntityGetEntity(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetEntity().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetEntityBuilder) Success(value *GetEntityResponse) *respGetEntityGetEntityBuilder {
     x.obj.Success = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetEntity().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetEntityBuilder) Emit() *respGetEntityGetEntity {
     var objCopy respGetEntityGetEntity = *x.obj
     return &objCopy
@@ -783,17 +797,22 @@ func newReqGetEntityGetBool() *reqGetEntityGetBool {
 }
 
 
-// Deprecated: Use reqGetEntityGetBool.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetBool().Set<FieldNameFoo>().Set<FieldNameBar>()
 type reqGetEntityGetBoolBuilder struct {
     obj *reqGetEntityGetBool
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetBool().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newReqGetEntityGetBoolBuilder() *reqGetEntityGetBoolBuilder {
     return &reqGetEntityGetBoolBuilder{
         obj: newReqGetEntityGetBool(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetBool().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqGetEntityGetBoolBuilder) Emit() *reqGetEntityGetBool {
     var objCopy reqGetEntityGetBool = *x.obj
     return &objCopy
@@ -923,22 +942,29 @@ func (x *respGetEntityGetBool) toString0() string {  // Success
 }
 
 
-// Deprecated: Use respGetEntityGetBool.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetBool().Set<FieldNameFoo>().Set<FieldNameBar>()
 type respGetEntityGetBoolBuilder struct {
     obj *respGetEntityGetBool
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetBool().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newRespGetEntityGetBoolBuilder() *respGetEntityGetBoolBuilder {
     return &respGetEntityGetBoolBuilder{
         obj: newRespGetEntityGetBool(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetBool().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetBoolBuilder) Success(value bool) *respGetEntityGetBoolBuilder {
     x.obj.Success = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetBool().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetBoolBuilder) Emit() *respGetEntityGetBool {
     var objCopy respGetEntityGetBool = *x.obj
     return &objCopy
@@ -1037,17 +1063,22 @@ func newReqGetEntityGetByte() *reqGetEntityGetByte {
 }
 
 
-// Deprecated: Use reqGetEntityGetByte.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetByte().Set<FieldNameFoo>().Set<FieldNameBar>()
 type reqGetEntityGetByteBuilder struct {
     obj *reqGetEntityGetByte
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetByte().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newReqGetEntityGetByteBuilder() *reqGetEntityGetByteBuilder {
     return &reqGetEntityGetByteBuilder{
         obj: newReqGetEntityGetByte(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetByte().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqGetEntityGetByteBuilder) Emit() *reqGetEntityGetByte {
     var objCopy reqGetEntityGetByte = *x.obj
     return &objCopy
@@ -1178,22 +1209,29 @@ func (x *respGetEntityGetByte) toString0() string {  // Success
 }
 
 
-// Deprecated: Use respGetEntityGetByte.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetByte().Set<FieldNameFoo>().Set<FieldNameBar>()
 type respGetEntityGetByteBuilder struct {
     obj *respGetEntityGetByte
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetByte().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newRespGetEntityGetByteBuilder() *respGetEntityGetByteBuilder {
     return &respGetEntityGetByteBuilder{
         obj: newRespGetEntityGetByte(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetByte().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetByteBuilder) Success(value int8) *respGetEntityGetByteBuilder {
     x.obj.Success = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetByte().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetByteBuilder) Emit() *respGetEntityGetByte {
     var objCopy respGetEntityGetByte = *x.obj
     return &objCopy
@@ -1292,17 +1330,22 @@ func newReqGetEntityGetI16() *reqGetEntityGetI16 {
 }
 
 
-// Deprecated: Use reqGetEntityGetI16.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetI16().Set<FieldNameFoo>().Set<FieldNameBar>()
 type reqGetEntityGetI16Builder struct {
     obj *reqGetEntityGetI16
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetI16().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newReqGetEntityGetI16Builder() *reqGetEntityGetI16Builder {
     return &reqGetEntityGetI16Builder{
         obj: newReqGetEntityGetI16(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetI16().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqGetEntityGetI16Builder) Emit() *reqGetEntityGetI16 {
     var objCopy reqGetEntityGetI16 = *x.obj
     return &objCopy
@@ -1432,22 +1475,29 @@ func (x *respGetEntityGetI16) toString0() string {  // Success
 }
 
 
-// Deprecated: Use respGetEntityGetI16.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetI16().Set<FieldNameFoo>().Set<FieldNameBar>()
 type respGetEntityGetI16Builder struct {
     obj *respGetEntityGetI16
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetI16().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newRespGetEntityGetI16Builder() *respGetEntityGetI16Builder {
     return &respGetEntityGetI16Builder{
         obj: newRespGetEntityGetI16(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetI16().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetI16Builder) Success(value int16) *respGetEntityGetI16Builder {
     x.obj.Success = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetI16().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetI16Builder) Emit() *respGetEntityGetI16 {
     var objCopy respGetEntityGetI16 = *x.obj
     return &objCopy
@@ -1546,17 +1596,22 @@ func newReqGetEntityGetI32() *reqGetEntityGetI32 {
 }
 
 
-// Deprecated: Use reqGetEntityGetI32.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetI32().Set<FieldNameFoo>().Set<FieldNameBar>()
 type reqGetEntityGetI32Builder struct {
     obj *reqGetEntityGetI32
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetI32().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newReqGetEntityGetI32Builder() *reqGetEntityGetI32Builder {
     return &reqGetEntityGetI32Builder{
         obj: newReqGetEntityGetI32(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetI32().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqGetEntityGetI32Builder) Emit() *reqGetEntityGetI32 {
     var objCopy reqGetEntityGetI32 = *x.obj
     return &objCopy
@@ -1686,22 +1741,29 @@ func (x *respGetEntityGetI32) toString0() string {  // Success
 }
 
 
-// Deprecated: Use respGetEntityGetI32.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetI32().Set<FieldNameFoo>().Set<FieldNameBar>()
 type respGetEntityGetI32Builder struct {
     obj *respGetEntityGetI32
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetI32().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newRespGetEntityGetI32Builder() *respGetEntityGetI32Builder {
     return &respGetEntityGetI32Builder{
         obj: newRespGetEntityGetI32(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetI32().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetI32Builder) Success(value int32) *respGetEntityGetI32Builder {
     x.obj.Success = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetI32().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetI32Builder) Emit() *respGetEntityGetI32 {
     var objCopy respGetEntityGetI32 = *x.obj
     return &objCopy
@@ -1800,17 +1862,22 @@ func newReqGetEntityGetI64() *reqGetEntityGetI64 {
 }
 
 
-// Deprecated: Use reqGetEntityGetI64.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetI64().Set<FieldNameFoo>().Set<FieldNameBar>()
 type reqGetEntityGetI64Builder struct {
     obj *reqGetEntityGetI64
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetI64().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newReqGetEntityGetI64Builder() *reqGetEntityGetI64Builder {
     return &reqGetEntityGetI64Builder{
         obj: newReqGetEntityGetI64(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetI64().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqGetEntityGetI64Builder) Emit() *reqGetEntityGetI64 {
     var objCopy reqGetEntityGetI64 = *x.obj
     return &objCopy
@@ -1940,22 +2007,29 @@ func (x *respGetEntityGetI64) toString0() string {  // Success
 }
 
 
-// Deprecated: Use respGetEntityGetI64.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetI64().Set<FieldNameFoo>().Set<FieldNameBar>()
 type respGetEntityGetI64Builder struct {
     obj *respGetEntityGetI64
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetI64().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newRespGetEntityGetI64Builder() *respGetEntityGetI64Builder {
     return &respGetEntityGetI64Builder{
         obj: newRespGetEntityGetI64(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetI64().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetI64Builder) Success(value int64) *respGetEntityGetI64Builder {
     x.obj.Success = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetI64().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetI64Builder) Emit() *respGetEntityGetI64 {
     var objCopy respGetEntityGetI64 = *x.obj
     return &objCopy
@@ -2054,17 +2128,22 @@ func newReqGetEntityGetDouble() *reqGetEntityGetDouble {
 }
 
 
-// Deprecated: Use reqGetEntityGetDouble.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetDouble().Set<FieldNameFoo>().Set<FieldNameBar>()
 type reqGetEntityGetDoubleBuilder struct {
     obj *reqGetEntityGetDouble
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetDouble().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newReqGetEntityGetDoubleBuilder() *reqGetEntityGetDoubleBuilder {
     return &reqGetEntityGetDoubleBuilder{
         obj: newReqGetEntityGetDouble(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetDouble().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqGetEntityGetDoubleBuilder) Emit() *reqGetEntityGetDouble {
     var objCopy reqGetEntityGetDouble = *x.obj
     return &objCopy
@@ -2194,22 +2273,29 @@ func (x *respGetEntityGetDouble) toString0() string {  // Success
 }
 
 
-// Deprecated: Use respGetEntityGetDouble.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetDouble().Set<FieldNameFoo>().Set<FieldNameBar>()
 type respGetEntityGetDoubleBuilder struct {
     obj *respGetEntityGetDouble
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetDouble().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newRespGetEntityGetDoubleBuilder() *respGetEntityGetDoubleBuilder {
     return &respGetEntityGetDoubleBuilder{
         obj: newRespGetEntityGetDouble(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetDouble().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetDoubleBuilder) Success(value float64) *respGetEntityGetDoubleBuilder {
     x.obj.Success = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetDouble().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetDoubleBuilder) Emit() *respGetEntityGetDouble {
     var objCopy respGetEntityGetDouble = *x.obj
     return &objCopy
@@ -2308,17 +2394,22 @@ func newReqGetEntityGetString() *reqGetEntityGetString {
 }
 
 
-// Deprecated: Use reqGetEntityGetString.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetString().Set<FieldNameFoo>().Set<FieldNameBar>()
 type reqGetEntityGetStringBuilder struct {
     obj *reqGetEntityGetString
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetString().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newReqGetEntityGetStringBuilder() *reqGetEntityGetStringBuilder {
     return &reqGetEntityGetStringBuilder{
         obj: newReqGetEntityGetString(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetString().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqGetEntityGetStringBuilder) Emit() *reqGetEntityGetString {
     var objCopy reqGetEntityGetString = *x.obj
     return &objCopy
@@ -2448,22 +2539,29 @@ func (x *respGetEntityGetString) toString0() string {  // Success
 }
 
 
-// Deprecated: Use respGetEntityGetString.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetString().Set<FieldNameFoo>().Set<FieldNameBar>()
 type respGetEntityGetStringBuilder struct {
     obj *respGetEntityGetString
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetString().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newRespGetEntityGetStringBuilder() *respGetEntityGetStringBuilder {
     return &respGetEntityGetStringBuilder{
         obj: newRespGetEntityGetString(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetString().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetStringBuilder) Success(value string) *respGetEntityGetStringBuilder {
     x.obj.Success = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetString().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetStringBuilder) Emit() *respGetEntityGetString {
     var objCopy respGetEntityGetString = *x.obj
     return &objCopy
@@ -2562,17 +2660,22 @@ func newReqGetEntityGetBinary() *reqGetEntityGetBinary {
 }
 
 
-// Deprecated: Use reqGetEntityGetBinary.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetBinary().Set<FieldNameFoo>().Set<FieldNameBar>()
 type reqGetEntityGetBinaryBuilder struct {
     obj *reqGetEntityGetBinary
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetBinary().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newReqGetEntityGetBinaryBuilder() *reqGetEntityGetBinaryBuilder {
     return &reqGetEntityGetBinaryBuilder{
         obj: newReqGetEntityGetBinary(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetBinary().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqGetEntityGetBinaryBuilder) Emit() *reqGetEntityGetBinary {
     var objCopy reqGetEntityGetBinary = *x.obj
     return &objCopy
@@ -2710,22 +2813,29 @@ func (x *respGetEntityGetBinary) toString0() string {  // Success
 }
 
 
-// Deprecated: Use respGetEntityGetBinary.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetBinary().Set<FieldNameFoo>().Set<FieldNameBar>()
 type respGetEntityGetBinaryBuilder struct {
     obj *respGetEntityGetBinary
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetBinary().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newRespGetEntityGetBinaryBuilder() *respGetEntityGetBinaryBuilder {
     return &respGetEntityGetBinaryBuilder{
         obj: newRespGetEntityGetBinary(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetBinary().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetBinaryBuilder) Success(value []byte) *respGetEntityGetBinaryBuilder {
     x.obj.Success = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetBinary().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetBinaryBuilder) Emit() *respGetEntityGetBinary {
     var objCopy respGetEntityGetBinary = *x.obj
     return &objCopy
@@ -2824,17 +2934,22 @@ func newReqGetEntityGetMap() *reqGetEntityGetMap {
 }
 
 
-// Deprecated: Use reqGetEntityGetMap.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetMap().Set<FieldNameFoo>().Set<FieldNameBar>()
 type reqGetEntityGetMapBuilder struct {
     obj *reqGetEntityGetMap
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetMap().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newReqGetEntityGetMapBuilder() *reqGetEntityGetMapBuilder {
     return &reqGetEntityGetMapBuilder{
         obj: newReqGetEntityGetMap(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetMap().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqGetEntityGetMapBuilder) Emit() *reqGetEntityGetMap {
     var objCopy reqGetEntityGetMap = *x.obj
     return &objCopy
@@ -3018,22 +3133,29 @@ func (x *respGetEntityGetMap) toString0() string {  // Success
 }
 
 
-// Deprecated: Use respGetEntityGetMap.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetMap().Set<FieldNameFoo>().Set<FieldNameBar>()
 type respGetEntityGetMapBuilder struct {
     obj *respGetEntityGetMap
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetMap().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newRespGetEntityGetMapBuilder() *respGetEntityGetMapBuilder {
     return &respGetEntityGetMapBuilder{
         obj: newRespGetEntityGetMap(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetMap().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetMapBuilder) Success(value map[string]string) *respGetEntityGetMapBuilder {
     x.obj.Success = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetMap().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetMapBuilder) Emit() *respGetEntityGetMap {
     var objCopy respGetEntityGetMap = *x.obj
     return &objCopy
@@ -3132,17 +3254,22 @@ func newReqGetEntityGetSet() *reqGetEntityGetSet {
 }
 
 
-// Deprecated: Use reqGetEntityGetSet.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetSet().Set<FieldNameFoo>().Set<FieldNameBar>()
 type reqGetEntityGetSetBuilder struct {
     obj *reqGetEntityGetSet
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetSet().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newReqGetEntityGetSetBuilder() *reqGetEntityGetSetBuilder {
     return &reqGetEntityGetSetBuilder{
         obj: newReqGetEntityGetSet(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetSet().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqGetEntityGetSetBuilder) Emit() *reqGetEntityGetSet {
     var objCopy reqGetEntityGetSet = *x.obj
     return &objCopy
@@ -3309,22 +3436,29 @@ func (x *respGetEntityGetSet) toString0() string {  // Success
 }
 
 
-// Deprecated: Use respGetEntityGetSet.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetSet().Set<FieldNameFoo>().Set<FieldNameBar>()
 type respGetEntityGetSetBuilder struct {
     obj *respGetEntityGetSet
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetSet().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newRespGetEntityGetSetBuilder() *respGetEntityGetSetBuilder {
     return &respGetEntityGetSetBuilder{
         obj: newRespGetEntityGetSet(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetSet().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetSetBuilder) Success(value []string) *respGetEntityGetSetBuilder {
     x.obj.Success = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetSet().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetSetBuilder) Emit() *respGetEntityGetSet {
     var objCopy respGetEntityGetSet = *x.obj
     return &objCopy
@@ -3423,17 +3557,22 @@ func newReqGetEntityGetList() *reqGetEntityGetList {
 }
 
 
-// Deprecated: Use reqGetEntityGetList.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetList().Set<FieldNameFoo>().Set<FieldNameBar>()
 type reqGetEntityGetListBuilder struct {
     obj *reqGetEntityGetList
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetList().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newReqGetEntityGetListBuilder() *reqGetEntityGetListBuilder {
     return &reqGetEntityGetListBuilder{
         obj: newReqGetEntityGetList(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetList().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqGetEntityGetListBuilder) Emit() *reqGetEntityGetList {
     var objCopy reqGetEntityGetList = *x.obj
     return &objCopy
@@ -3600,22 +3739,29 @@ func (x *respGetEntityGetList) toString0() string {  // Success
 }
 
 
-// Deprecated: Use respGetEntityGetList.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetList().Set<FieldNameFoo>().Set<FieldNameBar>()
 type respGetEntityGetListBuilder struct {
     obj *respGetEntityGetList
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetList().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newRespGetEntityGetListBuilder() *respGetEntityGetListBuilder {
     return &respGetEntityGetListBuilder{
         obj: newRespGetEntityGetList(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetList().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetListBuilder) Success(value []string) *respGetEntityGetListBuilder {
     x.obj.Success = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetList().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetListBuilder) Emit() *respGetEntityGetList {
     var objCopy respGetEntityGetList = *x.obj
     return &objCopy
@@ -3864,32 +4010,43 @@ func (x *reqGetEntityGetLegacyStuff) toString1() string {  // NumPos
 }
 
 
-// Deprecated: Use reqGetEntityGetLegacyStuff.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetLegacyStuff().Set<FieldNameFoo>().Set<FieldNameBar>()
 type reqGetEntityGetLegacyStuffBuilder struct {
     obj *reqGetEntityGetLegacyStuff
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetLegacyStuff().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newReqGetEntityGetLegacyStuffBuilder() *reqGetEntityGetLegacyStuffBuilder {
     return &reqGetEntityGetLegacyStuffBuilder{
         obj: newReqGetEntityGetLegacyStuff(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetLegacyStuff().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqGetEntityGetLegacyStuffBuilder) NumNeg2(value int64) *reqGetEntityGetLegacyStuffBuilder {
     x.obj.NumNeg2 = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetLegacyStuff().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqGetEntityGetLegacyStuffBuilder) NumNeg1(value int64) *reqGetEntityGetLegacyStuffBuilder {
     x.obj.NumNeg1 = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetLegacyStuff().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqGetEntityGetLegacyStuffBuilder) NumPos(value int64) *reqGetEntityGetLegacyStuffBuilder {
     x.obj.NumPos = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetLegacyStuff().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqGetEntityGetLegacyStuffBuilder) Emit() *reqGetEntityGetLegacyStuff {
     var objCopy reqGetEntityGetLegacyStuff = *x.obj
     return &objCopy
@@ -4067,22 +4224,29 @@ func (x *respGetEntityGetLegacyStuff) toString0() string {  // Success
 }
 
 
-// Deprecated: Use respGetEntityGetLegacyStuff.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetLegacyStuff().Set<FieldNameFoo>().Set<FieldNameBar>()
 type respGetEntityGetLegacyStuffBuilder struct {
     obj *respGetEntityGetLegacyStuff
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetLegacyStuff().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newRespGetEntityGetLegacyStuffBuilder() *respGetEntityGetLegacyStuffBuilder {
     return &respGetEntityGetLegacyStuffBuilder{
         obj: newRespGetEntityGetLegacyStuff(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetLegacyStuff().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetLegacyStuffBuilder) Success(value int32) *respGetEntityGetLegacyStuffBuilder {
     x.obj.Success = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetLegacyStuff().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetLegacyStuffBuilder) Emit() *respGetEntityGetLegacyStuff {
     var objCopy respGetEntityGetLegacyStuff = *x.obj
     return &objCopy
@@ -4231,22 +4395,29 @@ func (x *reqGetEntityGetCtxCollision) toString1() string {  // Ctx
 }
 
 
-// Deprecated: Use reqGetEntityGetCtxCollision.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetCtxCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
 type reqGetEntityGetCtxCollisionBuilder struct {
     obj *reqGetEntityGetCtxCollision
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetCtxCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newReqGetEntityGetCtxCollisionBuilder() *reqGetEntityGetCtxCollisionBuilder {
     return &reqGetEntityGetCtxCollisionBuilder{
         obj: newReqGetEntityGetCtxCollision(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetCtxCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqGetEntityGetCtxCollisionBuilder) Ctx(value int64) *reqGetEntityGetCtxCollisionBuilder {
     x.obj.Ctx = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetCtxCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqGetEntityGetCtxCollisionBuilder) Emit() *reqGetEntityGetCtxCollision {
     var objCopy reqGetEntityGetCtxCollision = *x.obj
     return &objCopy
@@ -4392,22 +4563,29 @@ func (x *respGetEntityGetCtxCollision) toString0() string {  // Success
 }
 
 
-// Deprecated: Use respGetEntityGetCtxCollision.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetCtxCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
 type respGetEntityGetCtxCollisionBuilder struct {
     obj *respGetEntityGetCtxCollision
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetCtxCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newRespGetEntityGetCtxCollisionBuilder() *respGetEntityGetCtxCollisionBuilder {
     return &respGetEntityGetCtxCollisionBuilder{
         obj: newRespGetEntityGetCtxCollision(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetCtxCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetCtxCollisionBuilder) Success(value int32) *respGetEntityGetCtxCollisionBuilder {
     x.obj.Success = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetCtxCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetCtxCollisionBuilder) Emit() *respGetEntityGetCtxCollision {
     var objCopy respGetEntityGetCtxCollision = *x.obj
     return &objCopy
@@ -4606,27 +4784,36 @@ func (x *reqGetEntityGetCtx1Collision) toString2() string {  // Ctx1
 }
 
 
-// Deprecated: Use reqGetEntityGetCtx1Collision.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetCtx1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
 type reqGetEntityGetCtx1CollisionBuilder struct {
     obj *reqGetEntityGetCtx1Collision
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetCtx1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newReqGetEntityGetCtx1CollisionBuilder() *reqGetEntityGetCtx1CollisionBuilder {
     return &reqGetEntityGetCtx1CollisionBuilder{
         obj: newReqGetEntityGetCtx1Collision(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetCtx1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqGetEntityGetCtx1CollisionBuilder) Ctx(value int64) *reqGetEntityGetCtx1CollisionBuilder {
     x.obj.Ctx = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetCtx1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqGetEntityGetCtx1CollisionBuilder) Ctx1(value int64) *reqGetEntityGetCtx1CollisionBuilder {
     x.obj.Ctx1 = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqGetEntityGetCtx1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqGetEntityGetCtx1CollisionBuilder) Emit() *reqGetEntityGetCtx1Collision {
     var objCopy reqGetEntityGetCtx1Collision = *x.obj
     return &objCopy
@@ -4788,22 +4975,29 @@ func (x *respGetEntityGetCtx1Collision) toString0() string {  // Success
 }
 
 
-// Deprecated: Use respGetEntityGetCtx1Collision.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetCtx1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
 type respGetEntityGetCtx1CollisionBuilder struct {
     obj *respGetEntityGetCtx1Collision
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetCtx1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newRespGetEntityGetCtx1CollisionBuilder() *respGetEntityGetCtx1CollisionBuilder {
     return &respGetEntityGetCtx1CollisionBuilder{
         obj: newRespGetEntityGetCtx1Collision(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetCtx1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetCtx1CollisionBuilder) Success(value int32) *respGetEntityGetCtx1CollisionBuilder {
     x.obj.Success = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespGetEntityGetCtx1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respGetEntityGetCtx1CollisionBuilder) Emit() *respGetEntityGetCtx1Collision {
     var objCopy respGetEntityGetCtx1Collision = *x.obj
     return &objCopy

@@ -243,22 +243,29 @@ func (x *reqFinderByPlate) toString1() string {  // Plate
 }
 
 
-// Deprecated: Use reqFinderByPlate.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqFinderByPlate().Set<FieldNameFoo>().Set<FieldNameBar>()
 type reqFinderByPlateBuilder struct {
     obj *reqFinderByPlate
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqFinderByPlate().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newReqFinderByPlateBuilder() *reqFinderByPlateBuilder {
     return &reqFinderByPlateBuilder{
         obj: newReqFinderByPlate(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqFinderByPlate().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqFinderByPlateBuilder) Plate(value Plate) *reqFinderByPlateBuilder {
     x.obj.Plate = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqFinderByPlate().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqFinderByPlateBuilder) Emit() *reqFinderByPlate {
     var objCopy reqFinderByPlate = *x.obj
     return &objCopy
@@ -428,22 +435,29 @@ func (x *respFinderByPlate) DefaultGetSuccess() *Automobile {
 }
 
 
-// Deprecated: Use respFinderByPlate.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespFinderByPlate().Set<FieldNameFoo>().Set<FieldNameBar>()
 type respFinderByPlateBuilder struct {
     obj *respFinderByPlate
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespFinderByPlate().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newRespFinderByPlateBuilder() *respFinderByPlateBuilder {
     return &respFinderByPlateBuilder{
         obj: newRespFinderByPlate(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespFinderByPlate().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respFinderByPlateBuilder) Success(value *Automobile) *respFinderByPlateBuilder {
     x.obj.Success = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespFinderByPlate().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respFinderByPlateBuilder) Emit() *respFinderByPlate {
     var objCopy respFinderByPlate = *x.obj
     return &objCopy
@@ -593,22 +607,29 @@ func (x *reqFinderAliasByPlate) toString1() string {  // Plate
 }
 
 
-// Deprecated: Use reqFinderAliasByPlate.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqFinderAliasByPlate().Set<FieldNameFoo>().Set<FieldNameBar>()
 type reqFinderAliasByPlateBuilder struct {
     obj *reqFinderAliasByPlate
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqFinderAliasByPlate().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newReqFinderAliasByPlateBuilder() *reqFinderAliasByPlateBuilder {
     return &reqFinderAliasByPlateBuilder{
         obj: newReqFinderAliasByPlate(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqFinderAliasByPlate().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqFinderAliasByPlateBuilder) Plate(value Plate) *reqFinderAliasByPlateBuilder {
     x.obj.Plate = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqFinderAliasByPlate().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqFinderAliasByPlateBuilder) Emit() *reqFinderAliasByPlate {
     var objCopy reqFinderAliasByPlate = *x.obj
     return &objCopy
@@ -778,22 +799,29 @@ func (x *respFinderAliasByPlate) DefaultGetSuccess() *Car {
 }
 
 
-// Deprecated: Use respFinderAliasByPlate.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespFinderAliasByPlate().Set<FieldNameFoo>().Set<FieldNameBar>()
 type respFinderAliasByPlateBuilder struct {
     obj *respFinderAliasByPlate
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespFinderAliasByPlate().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newRespFinderAliasByPlateBuilder() *respFinderAliasByPlateBuilder {
     return &respFinderAliasByPlateBuilder{
         obj: newRespFinderAliasByPlate(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespFinderAliasByPlate().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respFinderAliasByPlateBuilder) Success(value *Car) *respFinderAliasByPlateBuilder {
     x.obj.Success = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespFinderAliasByPlate().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respFinderAliasByPlateBuilder) Emit() *respFinderAliasByPlate {
     var objCopy respFinderAliasByPlate = *x.obj
     return &objCopy
@@ -943,22 +971,29 @@ func (x *reqFinderPreviousPlate) toString1() string {  // Plate
 }
 
 
-// Deprecated: Use reqFinderPreviousPlate.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqFinderPreviousPlate().Set<FieldNameFoo>().Set<FieldNameBar>()
 type reqFinderPreviousPlateBuilder struct {
     obj *reqFinderPreviousPlate
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqFinderPreviousPlate().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newReqFinderPreviousPlateBuilder() *reqFinderPreviousPlateBuilder {
     return &reqFinderPreviousPlateBuilder{
         obj: newReqFinderPreviousPlate(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqFinderPreviousPlate().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqFinderPreviousPlateBuilder) Plate(value Plate) *reqFinderPreviousPlateBuilder {
     x.obj.Plate = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newReqFinderPreviousPlate().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *reqFinderPreviousPlateBuilder) Emit() *reqFinderPreviousPlate {
     var objCopy reqFinderPreviousPlate = *x.obj
     return &objCopy
@@ -1105,22 +1140,29 @@ func (x *respFinderPreviousPlate) toString0() string {  // Success
 }
 
 
-// Deprecated: Use respFinderPreviousPlate.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespFinderPreviousPlate().Set<FieldNameFoo>().Set<FieldNameBar>()
 type respFinderPreviousPlateBuilder struct {
     obj *respFinderPreviousPlate
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespFinderPreviousPlate().Set<FieldNameFoo>().Set<FieldNameBar>()
 func newRespFinderPreviousPlateBuilder() *respFinderPreviousPlateBuilder {
     return &respFinderPreviousPlateBuilder{
         obj: newRespFinderPreviousPlate(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespFinderPreviousPlate().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respFinderPreviousPlateBuilder) Success(value Plate) *respFinderPreviousPlateBuilder {
     x.obj.Success = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g newRespFinderPreviousPlate().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *respFinderPreviousPlateBuilder) Emit() *respFinderPreviousPlate {
     var objCopy respFinderPreviousPlate = *x.obj
     return &objCopy

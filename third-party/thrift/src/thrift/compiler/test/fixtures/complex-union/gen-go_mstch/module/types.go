@@ -568,47 +568,64 @@ func (x *ComplexUnion) CountSetFieldsComplexUnion() int {
 }
 
 
-// Deprecated: Use ComplexUnion.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewComplexUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 type ComplexUnionBuilder struct {
     obj *ComplexUnion
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewComplexUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewComplexUnionBuilder() *ComplexUnionBuilder {
     return &ComplexUnionBuilder{
         obj: NewComplexUnion(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewComplexUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ComplexUnionBuilder) IntValue(value *int64) *ComplexUnionBuilder {
     x.obj.IntValue = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewComplexUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ComplexUnionBuilder) IntListValue(value []int64) *ComplexUnionBuilder {
     x.obj.IntListValue = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewComplexUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ComplexUnionBuilder) StringListValue(value []string) *ComplexUnionBuilder {
     x.obj.StringListValue = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewComplexUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ComplexUnionBuilder) StringValue(value *string) *ComplexUnionBuilder {
     x.obj.StringValue = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewComplexUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ComplexUnionBuilder) TypedefValue(value ContainerTypedef) *ComplexUnionBuilder {
     x.obj.TypedefValue = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewComplexUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ComplexUnionBuilder) StringRef(value *string) *ComplexUnionBuilder {
     x.obj.StringRef = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewComplexUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ComplexUnionBuilder) Emit() *ComplexUnion {
     var objCopy ComplexUnion = *x.obj
     return &objCopy
@@ -980,27 +997,36 @@ func (x *ListUnion) CountSetFieldsListUnion() int {
 }
 
 
-// Deprecated: Use ListUnion.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewListUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 type ListUnionBuilder struct {
     obj *ListUnion
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewListUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewListUnionBuilder() *ListUnionBuilder {
     return &ListUnionBuilder{
         obj: NewListUnion(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewListUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ListUnionBuilder) IntListValue(value []int64) *ListUnionBuilder {
     x.obj.IntListValue = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewListUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ListUnionBuilder) StringListValue(value []string) *ListUnionBuilder {
     x.obj.StringListValue = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewListUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ListUnionBuilder) Emit() *ListUnion {
     var objCopy ListUnion = *x.obj
     return &objCopy
@@ -1256,27 +1282,36 @@ func (x *DataUnion) CountSetFieldsDataUnion() int {
 }
 
 
-// Deprecated: Use DataUnion.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewDataUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 type DataUnionBuilder struct {
     obj *DataUnion
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewDataUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewDataUnionBuilder() *DataUnionBuilder {
     return &DataUnionBuilder{
         obj: NewDataUnion(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewDataUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *DataUnionBuilder) BinaryData(value []byte) *DataUnionBuilder {
     x.obj.BinaryData = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewDataUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *DataUnionBuilder) StringData(value *string) *DataUnionBuilder {
     x.obj.StringData = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewDataUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *DataUnionBuilder) Emit() *DataUnion {
     var objCopy DataUnion = *x.obj
     return &objCopy
@@ -1548,32 +1583,43 @@ func (x *Val) toString9() string {  // TypedefValue
 }
 
 
-// Deprecated: Use Val.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewVal().Set<FieldNameFoo>().Set<FieldNameBar>()
 type ValBuilder struct {
     obj *Val
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewVal().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewValBuilder() *ValBuilder {
     return &ValBuilder{
         obj: NewVal(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewVal().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ValBuilder) StrVal(value string) *ValBuilder {
     x.obj.StrVal = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewVal().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ValBuilder) IntVal(value int32) *ValBuilder {
     x.obj.IntVal = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewVal().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ValBuilder) TypedefValue(value ContainerTypedef) *ValBuilder {
     x.obj.TypedefValue = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewVal().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ValBuilder) Emit() *Val {
     var objCopy Val = *x.obj
     return &objCopy
@@ -1860,27 +1906,36 @@ func (x *ValUnion) CountSetFieldsValUnion() int {
 }
 
 
-// Deprecated: Use ValUnion.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewValUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 type ValUnionBuilder struct {
     obj *ValUnion
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewValUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewValUnionBuilder() *ValUnionBuilder {
     return &ValUnionBuilder{
         obj: NewValUnion(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewValUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ValUnionBuilder) V1(value *Val) *ValUnionBuilder {
     x.obj.V1 = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewValUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ValUnionBuilder) V2(value *Val) *ValUnionBuilder {
     x.obj.V2 = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewValUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ValUnionBuilder) Emit() *ValUnion {
     var objCopy ValUnion = *x.obj
     return &objCopy
@@ -2142,27 +2197,36 @@ func (x *VirtualComplexUnion) CountSetFieldsVirtualComplexUnion() int {
 }
 
 
-// Deprecated: Use VirtualComplexUnion.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewVirtualComplexUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 type VirtualComplexUnionBuilder struct {
     obj *VirtualComplexUnion
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewVirtualComplexUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewVirtualComplexUnionBuilder() *VirtualComplexUnionBuilder {
     return &VirtualComplexUnionBuilder{
         obj: NewVirtualComplexUnion(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewVirtualComplexUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *VirtualComplexUnionBuilder) ThingOne(value *string) *VirtualComplexUnionBuilder {
     x.obj.ThingOne = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewVirtualComplexUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *VirtualComplexUnionBuilder) ThingTwo(value *string) *VirtualComplexUnionBuilder {
     x.obj.ThingTwo = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewVirtualComplexUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *VirtualComplexUnionBuilder) Emit() *VirtualComplexUnion {
     var objCopy VirtualComplexUnion = *x.obj
     return &objCopy
@@ -2325,22 +2389,29 @@ func (x *NonCopyableStruct) toString1() string {  // Num
 }
 
 
-// Deprecated: Use NonCopyableStruct.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewNonCopyableStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 type NonCopyableStructBuilder struct {
     obj *NonCopyableStruct
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewNonCopyableStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewNonCopyableStructBuilder() *NonCopyableStructBuilder {
     return &NonCopyableStructBuilder{
         obj: NewNonCopyableStruct(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewNonCopyableStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *NonCopyableStructBuilder) Num(value int64) *NonCopyableStructBuilder {
     x.obj.Num = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewNonCopyableStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *NonCopyableStructBuilder) Emit() *NonCopyableStruct {
     var objCopy NonCopyableStruct = *x.obj
     return &objCopy
@@ -2519,22 +2590,29 @@ func (x *NonCopyableUnion) CountSetFieldsNonCopyableUnion() int {
 }
 
 
-// Deprecated: Use NonCopyableUnion.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewNonCopyableUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 type NonCopyableUnionBuilder struct {
     obj *NonCopyableUnion
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewNonCopyableUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewNonCopyableUnionBuilder() *NonCopyableUnionBuilder {
     return &NonCopyableUnionBuilder{
         obj: NewNonCopyableUnion(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewNonCopyableUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *NonCopyableUnionBuilder) S(value *NonCopyableStruct) *NonCopyableUnionBuilder {
     x.obj.S = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewNonCopyableUnion().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *NonCopyableUnionBuilder) Emit() *NonCopyableUnion {
     var objCopy NonCopyableUnion = *x.obj
     return &objCopy

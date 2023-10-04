@@ -126,27 +126,36 @@ func (x *Accessory) toString2() string {  // Name
 }
 
 
-// Deprecated: Use Accessory.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewAccessory().Set<FieldNameFoo>().Set<FieldNameBar>()
 type AccessoryBuilder struct {
     obj *Accessory
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewAccessory().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewAccessoryBuilder() *AccessoryBuilder {
     return &AccessoryBuilder{
         obj: NewAccessory(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewAccessory().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *AccessoryBuilder) InventoryId(value int32) *AccessoryBuilder {
     x.obj.InventoryId = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewAccessory().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *AccessoryBuilder) Name(value string) *AccessoryBuilder {
     x.obj.Name = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewAccessory().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *AccessoryBuilder) Emit() *Accessory {
     var objCopy Accessory = *x.obj
     return &objCopy
@@ -356,27 +365,36 @@ func (x *PartName) toString2() string {  // Name
 }
 
 
-// Deprecated: Use PartName.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewPartName().Set<FieldNameFoo>().Set<FieldNameBar>()
 type PartNameBuilder struct {
     obj *PartName
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewPartName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewPartNameBuilder() *PartNameBuilder {
     return &PartNameBuilder{
         obj: NewPartName(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewPartName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *PartNameBuilder) InventoryId(value int32) *PartNameBuilder {
     x.obj.InventoryId = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewPartName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *PartNameBuilder) Name(value string) *PartNameBuilder {
     x.obj.Name = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewPartName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *PartNameBuilder) Emit() *PartName {
     var objCopy PartName = *x.obj
     return &objCopy

@@ -26,17 +26,22 @@ func NewPy3Hidden() *Py3Hidden {
 }
 
 
-// Deprecated: Use Py3Hidden.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewPy3Hidden().Set<FieldNameFoo>().Set<FieldNameBar>()
 type Py3HiddenBuilder struct {
     obj *Py3Hidden
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewPy3Hidden().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewPy3HiddenBuilder() *Py3HiddenBuilder {
     return &Py3HiddenBuilder{
         obj: NewPy3Hidden(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewPy3Hidden().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *Py3HiddenBuilder) Emit() *Py3Hidden {
     var objCopy Py3Hidden = *x.obj
     return &objCopy
@@ -114,17 +119,22 @@ func NewFlags() *Flags {
 }
 
 
-// Deprecated: Use Flags.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFlags().Set<FieldNameFoo>().Set<FieldNameBar>()
 type FlagsBuilder struct {
     obj *Flags
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFlags().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewFlagsBuilder() *FlagsBuilder {
     return &FlagsBuilder{
         obj: NewFlags(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewFlags().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *FlagsBuilder) Emit() *Flags {
     var objCopy Flags = *x.obj
     return &objCopy
@@ -252,22 +262,29 @@ func (x *Name) toString1() string {  // Name
 }
 
 
-// Deprecated: Use Name.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewName().Set<FieldNameFoo>().Set<FieldNameBar>()
 type NameBuilder struct {
     obj *Name
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewNameBuilder() *NameBuilder {
     return &NameBuilder{
         obj: NewName(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *NameBuilder) Name(value string) *NameBuilder {
     x.obj.Name = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewName().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *NameBuilder) Emit() *Name {
     var objCopy Name = *x.obj
     return &objCopy
@@ -461,27 +478,36 @@ func (x *Adapter) toString2() string {  // TypeHint
 }
 
 
-// Deprecated: Use Adapter.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewAdapter().Set<FieldNameFoo>().Set<FieldNameBar>()
 type AdapterBuilder struct {
     obj *Adapter
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewAdapter().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewAdapterBuilder() *AdapterBuilder {
     return &AdapterBuilder{
         obj: NewAdapter(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewAdapter().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *AdapterBuilder) Name(value string) *AdapterBuilder {
     x.obj.Name = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewAdapter().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *AdapterBuilder) TypeHint(value string) *AdapterBuilder {
     x.obj.TypeHint = value
     return x
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewAdapter().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *AdapterBuilder) Emit() *Adapter {
     var objCopy Adapter = *x.obj
     return &objCopy
@@ -591,17 +617,22 @@ func NewMarshalCapi() *MarshalCapi {
 }
 
 
-// Deprecated: Use MarshalCapi.Set* methods instead or set the fields directly.
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMarshalCapi().Set<FieldNameFoo>().Set<FieldNameBar>()
 type MarshalCapiBuilder struct {
     obj *MarshalCapi
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMarshalCapi().Set<FieldNameFoo>().Set<FieldNameBar>()
 func NewMarshalCapiBuilder() *MarshalCapiBuilder {
     return &MarshalCapiBuilder{
         obj: NewMarshalCapi(),
     }
 }
 
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewMarshalCapi().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *MarshalCapiBuilder) Emit() *MarshalCapi {
     var objCopy MarshalCapi = *x.obj
     return &objCopy

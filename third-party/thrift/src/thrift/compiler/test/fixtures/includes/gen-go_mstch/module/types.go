@@ -207,18 +207,12 @@ func (x *MyStruct) toString3() string {  // MyIncludedInt
 }
 
 // Deprecated: Use NewMyStruct().GetMyIncludedField() instead.
-var MyStruct_MyIncludedField_DEFAULT = NewMyStruct().GetMyIncludedField()
-
-// Deprecated: Use NewMyStruct().GetMyIncludedField() instead.
 func (x *MyStruct) DefaultGetMyIncludedField() *includes.Included {
     if !x.IsSetMyIncludedField() {
         return includes.NewIncluded()
     }
     return x.MyIncludedField
 }
-
-// Deprecated: Use NewMyStruct().GetMyOtherIncludedField() instead.
-var MyStruct_MyOtherIncludedField_DEFAULT = NewMyStruct().GetMyOtherIncludedField()
 
 // Deprecated: Use NewMyStruct().GetMyOtherIncludedField() instead.
 func (x *MyStruct) DefaultGetMyOtherIncludedField() *includes.Included {

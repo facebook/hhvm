@@ -644,14 +644,8 @@ func (x *Internship) toString5() string {  // School
     return fmt.Sprintf("%v", x.GetSchoolNonCompat())
 }
 
-// Deprecated: Use NewInternship().GetEmployer() instead.
-var Internship_Employer_DEFAULT = NewInternship().GetEmployer()
 
-// Deprecated: Use NewInternship().GetCompensation() instead.
-var Internship_Compensation_DEFAULT = NewInternship().GetCompensation()
 
-// Deprecated: Use NewInternship().GetSchool() instead.
-var Internship_School_DEFAULT = NewInternship().GetSchool()
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.
@@ -1590,9 +1584,6 @@ func (x *Struct2) toString4() string {  // D
 }
 
 // Deprecated: Use NewStruct2().GetC() instead.
-var Struct2_C_DEFAULT = NewStruct2().GetC()
-
-// Deprecated: Use NewStruct2().GetC() instead.
 func (x *Struct2) DefaultGetC() *Struct1 {
     if !x.IsSetC() {
         return NewStruct1()
@@ -1949,9 +1940,6 @@ func (x *Struct3) toString3() string {  // C
 }
 
 // Deprecated: Use NewStruct3().GetC() instead.
-var Struct3_C_DEFAULT = NewStruct3().GetC()
-
-// Deprecated: Use NewStruct3().GetC() instead.
 func (x *Struct3) DefaultGetC() *Struct2 {
     if !x.IsSetC() {
         return NewStruct2()
@@ -2300,11 +2288,7 @@ func (x *Struct4) toString3() string {  // C
     return fmt.Sprintf("%v", x.GetCNonCompat())
 }
 
-// Deprecated: Use NewStruct4().GetB() instead.
-var Struct4_B_DEFAULT = NewStruct4().GetB()
 
-// Deprecated: Use NewStruct4().GetC() instead.
-var Struct4_C_DEFAULT = NewStruct4().GetC()
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.
@@ -2596,11 +2580,7 @@ func (x *Union1) toString2() string {  // D
     return fmt.Sprintf("%v", x.GetDNonCompat())
 }
 
-// Deprecated: Use NewUnion1().GetI() instead.
-var Union1_I_DEFAULT = NewUnion1().GetI()
 
-// Deprecated: Use NewUnion1().GetD() instead.
-var Union1_D_DEFAULT = NewUnion1().GetD()
 
 func (x *Union1) countSetFields() int {
     count := int(0)
@@ -3011,14 +2991,7 @@ func (x *Union2) toString4() string {  // U
     return fmt.Sprintf("%v", x.GetUNonCompat())
 }
 
-// Deprecated: Use NewUnion2().GetI() instead.
-var Union2_I_DEFAULT = NewUnion2().GetI()
 
-// Deprecated: Use NewUnion2().GetD() instead.
-var Union2_D_DEFAULT = NewUnion2().GetD()
-
-// Deprecated: Use NewUnion2().GetS() instead.
-var Union2_S_DEFAULT = NewUnion2().GetS()
 
 // Deprecated: Use NewUnion2().GetS() instead.
 func (x *Union2) DefaultGetS() *Struct1 {
@@ -3027,9 +3000,6 @@ func (x *Union2) DefaultGetS() *Struct1 {
     }
     return x.S
 }
-
-// Deprecated: Use NewUnion2().GetU() instead.
-var Union2_U_DEFAULT = NewUnion2().GetU()
 
 // Deprecated: Use NewUnion2().GetU() instead.
 func (x *Union2) DefaultGetU() *Union1 {

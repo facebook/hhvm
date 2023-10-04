@@ -419,9 +419,6 @@ func (x *respMyServicePing) toString1() string {  // MyExcept
 }
 
 // Deprecated: Use newRespMyServicePing().GetMyExcept() instead.
-var MyServicePingResult_MyExcept_DEFAULT = newRespMyServicePing().GetMyExcept()
-
-// Deprecated: Use newRespMyServicePing().GetMyExcept() instead.
 func (x *respMyServicePing) DefaultGetMyExcept() *MyException {
     if !x.IsSetMyExcept() {
         return NewMyException()

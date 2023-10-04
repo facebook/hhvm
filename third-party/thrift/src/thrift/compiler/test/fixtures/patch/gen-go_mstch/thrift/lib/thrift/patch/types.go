@@ -556,8 +556,6 @@ func (x *BoolPatch) toString9() string {  // Invert
     return fmt.Sprintf("%v", x.GetInvertNonCompat())
 }
 
-// Deprecated: Use NewBoolPatch().GetAssign() instead.
-var BoolPatch_Assign_DEFAULT = NewBoolPatch().GetAssign()
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.
@@ -887,8 +885,6 @@ func (x *BytePatch) toString8() string {  // Add
     return fmt.Sprintf("%v", x.GetAddNonCompat())
 }
 
-// Deprecated: Use NewBytePatch().GetAssign() instead.
-var BytePatch_Assign_DEFAULT = NewBytePatch().GetAssign()
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.
@@ -1216,8 +1212,6 @@ func (x *I16Patch) toString8() string {  // Add
     return fmt.Sprintf("%v", x.GetAddNonCompat())
 }
 
-// Deprecated: Use NewI16Patch().GetAssign() instead.
-var I16Patch_Assign_DEFAULT = NewI16Patch().GetAssign()
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.
@@ -1545,8 +1539,6 @@ func (x *I32Patch) toString8() string {  // Add
     return fmt.Sprintf("%v", x.GetAddNonCompat())
 }
 
-// Deprecated: Use NewI32Patch().GetAssign() instead.
-var I32Patch_Assign_DEFAULT = NewI32Patch().GetAssign()
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.
@@ -1874,8 +1866,6 @@ func (x *I64Patch) toString8() string {  // Add
     return fmt.Sprintf("%v", x.GetAddNonCompat())
 }
 
-// Deprecated: Use NewI64Patch().GetAssign() instead.
-var I64Patch_Assign_DEFAULT = NewI64Patch().GetAssign()
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.
@@ -2203,8 +2193,6 @@ func (x *FloatPatch) toString8() string {  // Add
     return fmt.Sprintf("%v", x.GetAddNonCompat())
 }
 
-// Deprecated: Use NewFloatPatch().GetAssign() instead.
-var FloatPatch_Assign_DEFAULT = NewFloatPatch().GetAssign()
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.
@@ -2532,8 +2520,6 @@ func (x *DoublePatch) toString8() string {  // Add
     return fmt.Sprintf("%v", x.GetAddNonCompat())
 }
 
-// Deprecated: Use NewDoublePatch().GetAssign() instead.
-var DoublePatch_Assign_DEFAULT = NewDoublePatch().GetAssign()
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.
@@ -2911,8 +2897,6 @@ func (x *StringPatch) toString9() string {  // Append
     return fmt.Sprintf("%v", x.GetAppendNonCompat())
 }
 
-// Deprecated: Use NewStringPatch().GetAssign() instead.
-var StringPatch_Assign_DEFAULT = NewStringPatch().GetAssign()
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.

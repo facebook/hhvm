@@ -473,9 +473,6 @@ func (x *reqGetEntityGetEntity) toString1() string {  // R
 }
 
 // Deprecated: Use newReqGetEntityGetEntity().GetR() instead.
-var reqGetEntityGetEntity_R_DEFAULT = newReqGetEntityGetEntity().GetR()
-
-// Deprecated: Use newReqGetEntityGetEntity().GetR() instead.
 func (x *reqGetEntityGetEntity) DefaultGetR() *GetEntityRequest {
     if !x.IsSetR() {
         return NewGetEntityRequest()
@@ -663,9 +660,6 @@ if err != nil {
 func (x *respGetEntityGetEntity) toString0() string {  // Success
     return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
-
-// Deprecated: Use newRespGetEntityGetEntity().GetSuccess() instead.
-var GetEntityGetEntityResult_Success_DEFAULT = newRespGetEntityGetEntity().GetSuccess()
 
 // Deprecated: Use newRespGetEntityGetEntity().GetSuccess() instead.
 func (x *respGetEntityGetEntity) DefaultGetSuccess() *GetEntityResponse {

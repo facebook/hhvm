@@ -203,11 +203,7 @@ func (x *Fields) toString102() string {  // InjectedUnstructuredAnnotationField
     return fmt.Sprintf("%v", x.GetInjectedUnstructuredAnnotationFieldNonCompat())
 }
 
-// Deprecated: Use NewFields().GetInjectedStructuredAnnotationField() instead.
-var Fields_InjectedStructuredAnnotationField_DEFAULT = NewFields().GetInjectedStructuredAnnotationField()
 
-// Deprecated: Use NewFields().GetInjectedUnstructuredAnnotationField() instead.
-var Fields_InjectedUnstructuredAnnotationField_DEFAULT = NewFields().GetInjectedUnstructuredAnnotationField()
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.

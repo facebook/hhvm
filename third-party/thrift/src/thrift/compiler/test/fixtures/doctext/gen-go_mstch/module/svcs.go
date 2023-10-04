@@ -830,9 +830,6 @@ func (x *respCThing) toString1() string {  // Bang
 }
 
 // Deprecated: Use newRespCThing().GetBang() instead.
-var CThingResult_Bang_DEFAULT = newRespCThing().GetBang()
-
-// Deprecated: Use newRespCThing().GetBang() instead.
 func (x *respCThing) DefaultGetBang() *Bang {
     if !x.IsSetBang() {
         return NewBang()

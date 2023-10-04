@@ -691,9 +691,6 @@ func (x *respRaiserDoRaise) toString3() string {  // S
 }
 
 // Deprecated: Use newRespRaiserDoRaise().GetB() instead.
-var RaiserDoRaiseResult_B_DEFAULT = newRespRaiserDoRaise().GetB()
-
-// Deprecated: Use newRespRaiserDoRaise().GetB() instead.
 func (x *respRaiserDoRaise) DefaultGetB() *Banal {
     if !x.IsSetB() {
         return NewBanal()
@@ -702,18 +699,12 @@ func (x *respRaiserDoRaise) DefaultGetB() *Banal {
 }
 
 // Deprecated: Use newRespRaiserDoRaise().GetF() instead.
-var RaiserDoRaiseResult_F_DEFAULT = newRespRaiserDoRaise().GetF()
-
-// Deprecated: Use newRespRaiserDoRaise().GetF() instead.
 func (x *respRaiserDoRaise) DefaultGetF() *Fiery {
     if !x.IsSetF() {
         return NewFiery()
     }
     return x.F
 }
-
-// Deprecated: Use newRespRaiserDoRaise().GetS() instead.
-var RaiserDoRaiseResult_S_DEFAULT = newRespRaiserDoRaise().GetS()
 
 // Deprecated: Use newRespRaiserDoRaise().GetS() instead.
 func (x *respRaiserDoRaise) DefaultGetS() *Serious {
@@ -1497,9 +1488,6 @@ func (x *respRaiserGet500) toString3() string {  // S
 }
 
 // Deprecated: Use newRespRaiserGet500().GetF() instead.
-var RaiserGet500Result_F_DEFAULT = newRespRaiserGet500().GetF()
-
-// Deprecated: Use newRespRaiserGet500().GetF() instead.
 func (x *respRaiserGet500) DefaultGetF() *Fiery {
     if !x.IsSetF() {
         return NewFiery()
@@ -1508,18 +1496,12 @@ func (x *respRaiserGet500) DefaultGetF() *Fiery {
 }
 
 // Deprecated: Use newRespRaiserGet500().GetB() instead.
-var RaiserGet500Result_B_DEFAULT = newRespRaiserGet500().GetB()
-
-// Deprecated: Use newRespRaiserGet500().GetB() instead.
 func (x *respRaiserGet500) DefaultGetB() *Banal {
     if !x.IsSetB() {
         return NewBanal()
     }
     return x.B
 }
-
-// Deprecated: Use newRespRaiserGet500().GetS() instead.
-var RaiserGet500Result_S_DEFAULT = newRespRaiserGet500().GetS()
 
 // Deprecated: Use newRespRaiserGet500().GetS() instead.
 func (x *respRaiserGet500) DefaultGetS() *Serious {

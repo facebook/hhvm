@@ -817,9 +817,6 @@ func (x *Vehicle) toString5() string {  // HasAC
 }
 
 // Deprecated: Use NewVehicle().GetColor() instead.
-var Vehicle_Color_DEFAULT = NewVehicle().GetColor()
-
-// Deprecated: Use NewVehicle().GetColor() instead.
 func (x *Vehicle) DefaultGetColor() *Color {
     if !x.IsSetColor() {
         return NewColor()
@@ -827,17 +824,9 @@ func (x *Vehicle) DefaultGetColor() *Color {
     return x.Color
 }
 
-// Deprecated: Use NewVehicle().GetLicensePlate() instead.
-var Vehicle_LicensePlate_DEFAULT = NewVehicle().GetLicensePlate()
 
-// Deprecated: Use NewVehicle().GetDescription() instead.
-var Vehicle_Description_DEFAULT = NewVehicle().GetDescription()
 
-// Deprecated: Use NewVehicle().GetName() instead.
-var Vehicle_Name_DEFAULT = NewVehicle().GetName()
 
-// Deprecated: Use NewVehicle().GetHasAC() instead.
-var Vehicle_HasAC_DEFAULT = NewVehicle().GetHasAC()
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.
@@ -1758,14 +1747,7 @@ func (x *Person) toString10() string {  // Vehicles
     return fmt.Sprintf("%v", x.GetVehiclesNonCompat())
 }
 
-// Deprecated: Use NewPerson().GetAge() instead.
-var Person_Age_DEFAULT = NewPerson().GetAge()
 
-// Deprecated: Use NewPerson().GetAddress() instead.
-var Person_Address_DEFAULT = NewPerson().GetAddress()
-
-// Deprecated: Use NewPerson().GetFavoriteColor() instead.
-var Person_FavoriteColor_DEFAULT = NewPerson().GetFavoriteColor()
 
 // Deprecated: Use NewPerson().GetFavoriteColor() instead.
 func (x *Person) DefaultGetFavoriteColor() *Color {
@@ -1775,11 +1757,7 @@ func (x *Person) DefaultGetFavoriteColor() *Color {
     return x.FavoriteColor
 }
 
-// Deprecated: Use NewPerson().GetBestFriend() instead.
-var Person_BestFriend_DEFAULT = NewPerson().GetBestFriend()
 
-// Deprecated: Use NewPerson().GetAfraidOfAnimal() instead.
-var Person_AfraidOfAnimal_DEFAULT = NewPerson().GetAfraidOfAnimal()
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.

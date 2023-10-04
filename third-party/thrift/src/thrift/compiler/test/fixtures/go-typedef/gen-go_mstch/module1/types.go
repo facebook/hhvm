@@ -726,11 +726,7 @@ func (x *Automobile) toString7() string {  // PartNames
     return fmt.Sprintf("%v", x.GetPartNamesNonCompat())
 }
 
-// Deprecated: Use NewAutomobile().GetPreviousPlate() instead.
-var Automobile_PreviousPlate_DEFAULT = NewAutomobile().GetPreviousPlate()
 
-// Deprecated: Use NewAutomobile().GetFirstPlate() instead.
-var Automobile_FirstPlate_DEFAULT = NewAutomobile().GetFirstPlate()
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.
@@ -1573,18 +1569,12 @@ func (x *Pair) toString2() string {  // Car
 }
 
 // Deprecated: Use NewPair().GetAutomobile() instead.
-var Pair_Automobile_DEFAULT = NewPair().GetAutomobile()
-
-// Deprecated: Use NewPair().GetAutomobile() instead.
 func (x *Pair) DefaultGetAutomobile() *Automobile {
     if !x.IsSetAutomobile() {
         return NewAutomobile()
     }
     return x.Automobile
 }
-
-// Deprecated: Use NewPair().GetCar() instead.
-var Pair_Car_DEFAULT = NewPair().GetCar()
 
 // Deprecated: Use NewPair().GetCar() instead.
 func (x *Pair) DefaultGetCar() *Car {

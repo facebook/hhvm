@@ -424,9 +424,6 @@ func (x *respFinderByPlate) toString0() string {  // Success
 }
 
 // Deprecated: Use newRespFinderByPlate().GetSuccess() instead.
-var FinderByPlateResult_Success_DEFAULT = newRespFinderByPlate().GetSuccess()
-
-// Deprecated: Use newRespFinderByPlate().GetSuccess() instead.
 func (x *respFinderByPlate) DefaultGetSuccess() *Automobile {
     if !x.IsSetSuccess() {
         return NewAutomobile()
@@ -786,9 +783,6 @@ if err != nil {
 func (x *respFinderAliasByPlate) toString0() string {  // Success
     return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
-
-// Deprecated: Use newRespFinderAliasByPlate().GetSuccess() instead.
-var FinderAliasByPlateResult_Success_DEFAULT = newRespFinderAliasByPlate().GetSuccess()
 
 // Deprecated: Use newRespFinderAliasByPlate().GetSuccess() instead.
 func (x *respFinderAliasByPlate) DefaultGetSuccess() *Car {

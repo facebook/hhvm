@@ -421,11 +421,7 @@ func (x *U) toString2() string {  // S
     return fmt.Sprintf("%v", x.GetSNonCompat())
 }
 
-// Deprecated: Use NewU().GetI() instead.
-var U_I_DEFAULT = NewU().GetI()
 
-// Deprecated: Use NewU().GetS() instead.
-var U_S_DEFAULT = NewU().GetS()
 
 func (x *U) countSetFields() int {
     count := int(0)

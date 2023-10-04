@@ -91,9 +91,6 @@ func (x *IncludesAlso) toString1() string {  // Also
 }
 
 // Deprecated: Use NewIncludesAlso().GetAlso() instead.
-var IncludesAlso_Also_DEFAULT = NewIncludesAlso().GetAlso()
-
-// Deprecated: Use NewIncludesAlso().GetAlso() instead.
 func (x *IncludesAlso) DefaultGetAlso() *includesAlso.Also {
     if !x.IsSetAlso() {
         return includesAlso.NewAlso()

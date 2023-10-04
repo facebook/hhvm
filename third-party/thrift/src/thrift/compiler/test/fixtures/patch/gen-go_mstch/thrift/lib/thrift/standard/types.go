@@ -414,11 +414,7 @@ func (x *TypeUri) toString3() string {  // ScopedName
     return fmt.Sprintf("%v", x.GetScopedNameNonCompat())
 }
 
-// Deprecated: Use NewTypeUri().GetUri() instead.
-var TypeUri_Uri_DEFAULT = NewTypeUri().GetUri()
 
-// Deprecated: Use NewTypeUri().GetScopedName() instead.
-var TypeUri_ScopedName_DEFAULT = NewTypeUri().GetScopedName()
 
 func (x *TypeUri) countSetFields() int {
     count := int(0)
@@ -1693,35 +1689,14 @@ func (x *TypeName) toString17() string {  // TypedefType
     return fmt.Sprintf("%v", x.GetTypedefTypeNonCompat())
 }
 
-// Deprecated: Use NewTypeName().GetBoolType() instead.
-var TypeName_BoolType_DEFAULT = NewTypeName().GetBoolType()
 
-// Deprecated: Use NewTypeName().GetByteType() instead.
-var TypeName_ByteType_DEFAULT = NewTypeName().GetByteType()
 
-// Deprecated: Use NewTypeName().GetI16Type() instead.
-var TypeName_I16Type_DEFAULT = NewTypeName().GetI16Type()
 
-// Deprecated: Use NewTypeName().GetI32Type() instead.
-var TypeName_I32Type_DEFAULT = NewTypeName().GetI32Type()
 
-// Deprecated: Use NewTypeName().GetI64Type() instead.
-var TypeName_I64Type_DEFAULT = NewTypeName().GetI64Type()
 
-// Deprecated: Use NewTypeName().GetFloatType() instead.
-var TypeName_FloatType_DEFAULT = NewTypeName().GetFloatType()
 
-// Deprecated: Use NewTypeName().GetDoubleType() instead.
-var TypeName_DoubleType_DEFAULT = NewTypeName().GetDoubleType()
 
-// Deprecated: Use NewTypeName().GetStringType() instead.
-var TypeName_StringType_DEFAULT = NewTypeName().GetStringType()
 
-// Deprecated: Use NewTypeName().GetBinaryType() instead.
-var TypeName_BinaryType_DEFAULT = NewTypeName().GetBinaryType()
-
-// Deprecated: Use NewTypeName().GetEnumType() instead.
-var TypeName_EnumType_DEFAULT = NewTypeName().GetEnumType()
 
 // Deprecated: Use NewTypeName().GetEnumType() instead.
 func (x *TypeName) DefaultGetEnumType() *TypeUri {
@@ -1732,18 +1707,12 @@ func (x *TypeName) DefaultGetEnumType() *TypeUri {
 }
 
 // Deprecated: Use NewTypeName().GetStructType() instead.
-var TypeName_StructType_DEFAULT = NewTypeName().GetStructType()
-
-// Deprecated: Use NewTypeName().GetStructType() instead.
 func (x *TypeName) DefaultGetStructType() *TypeUri {
     if !x.IsSetStructType() {
         return NewTypeUri()
     }
     return x.StructType
 }
-
-// Deprecated: Use NewTypeName().GetUnionType() instead.
-var TypeName_UnionType_DEFAULT = NewTypeName().GetUnionType()
 
 // Deprecated: Use NewTypeName().GetUnionType() instead.
 func (x *TypeName) DefaultGetUnionType() *TypeUri {
@@ -1754,9 +1723,6 @@ func (x *TypeName) DefaultGetUnionType() *TypeUri {
 }
 
 // Deprecated: Use NewTypeName().GetExceptionType() instead.
-var TypeName_ExceptionType_DEFAULT = NewTypeName().GetExceptionType()
-
-// Deprecated: Use NewTypeName().GetExceptionType() instead.
 func (x *TypeName) DefaultGetExceptionType() *TypeUri {
     if !x.IsSetExceptionType() {
         return NewTypeUri()
@@ -1764,17 +1730,8 @@ func (x *TypeName) DefaultGetExceptionType() *TypeUri {
     return x.ExceptionType
 }
 
-// Deprecated: Use NewTypeName().GetListType() instead.
-var TypeName_ListType_DEFAULT = NewTypeName().GetListType()
 
-// Deprecated: Use NewTypeName().GetSetType() instead.
-var TypeName_SetType_DEFAULT = NewTypeName().GetSetType()
 
-// Deprecated: Use NewTypeName().GetMapType() instead.
-var TypeName_MapType_DEFAULT = NewTypeName().GetMapType()
-
-// Deprecated: Use NewTypeName().GetTypedefType() instead.
-var TypeName_TypedefType_DEFAULT = NewTypeName().GetTypedefType()
 
 // Deprecated: Use NewTypeName().GetTypedefType() instead.
 func (x *TypeName) DefaultGetTypedefType() *TypeUri {

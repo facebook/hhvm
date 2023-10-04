@@ -1008,9 +1008,6 @@ func (x *MyStruct) toString9() string {  // MyUnion
 }
 
 // Deprecated: Use NewMyStruct().GetMyUnion() instead.
-var MyStruct_MyUnion_DEFAULT = NewMyStruct().GetMyUnion()
-
-// Deprecated: Use NewMyStruct().GetMyUnion() instead.
 func (x *MyStruct) DefaultGetMyUnion() *MyUnion {
     if !x.IsSetMyUnion() {
         return NewMyUnion()

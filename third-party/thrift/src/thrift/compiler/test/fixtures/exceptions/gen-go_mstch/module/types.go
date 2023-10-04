@@ -258,8 +258,6 @@ func (x *Serious) toString1() string {  // Sonnet
     return fmt.Sprintf("%v", x.GetSonnetNonCompat())
 }
 
-// Deprecated: Use NewSerious().GetSonnet() instead.
-var Serious_Sonnet_DEFAULT = NewSerious().GetSonnet()
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.

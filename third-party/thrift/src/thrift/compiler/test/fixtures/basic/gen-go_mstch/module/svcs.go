@@ -793,9 +793,6 @@ func (x *respFB303ServiceSimpleRPC) toString0() string {  // Success
 }
 
 // Deprecated: Use newRespFB303ServiceSimpleRPC().GetSuccess() instead.
-var FB303ServiceSimpleRPCResult_Success_DEFAULT = newRespFB303ServiceSimpleRPC().GetSuccess()
-
-// Deprecated: Use newRespFB303ServiceSimpleRPC().GetSuccess() instead.
 func (x *respFB303ServiceSimpleRPC) DefaultGetSuccess() *ReservedKeyword {
     if !x.IsSetSuccess() {
         return NewReservedKeyword()

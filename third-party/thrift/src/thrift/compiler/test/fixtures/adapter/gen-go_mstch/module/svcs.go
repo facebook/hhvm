@@ -318,9 +318,6 @@ func (x *reqServiceFunc) toString3() string {  // Arg3
 }
 
 // Deprecated: Use newReqServiceFunc().GetArg3() instead.
-var reqServiceFunc_Arg3_DEFAULT = newReqServiceFunc().GetArg3()
-
-// Deprecated: Use newReqServiceFunc().GetArg3() instead.
 func (x *reqServiceFunc) DefaultGetArg3() *Foo {
     if !x.IsSetArg3() {
         return NewFoo()
@@ -1061,9 +1058,6 @@ func (x *respAdapterServiceCount) toString0() string {  // Success
 }
 
 // Deprecated: Use newRespAdapterServiceCount().GetSuccess() instead.
-var AdapterServiceCountResult_Success_DEFAULT = newRespAdapterServiceCount().GetSuccess()
-
-// Deprecated: Use newRespAdapterServiceCount().GetSuccess() instead.
 func (x *respAdapterServiceCount) DefaultGetSuccess() *CountingStruct {
     if !x.IsSetSuccess() {
         return NewCountingStruct()
@@ -1256,9 +1250,6 @@ func (x *reqAdapterServiceAdaptedTypes) toString1() string {  // Arg
 }
 
 // Deprecated: Use newReqAdapterServiceAdaptedTypes().GetArg() instead.
-var reqAdapterServiceAdaptedTypes_Arg_DEFAULT = newReqAdapterServiceAdaptedTypes().GetArg()
-
-// Deprecated: Use newReqAdapterServiceAdaptedTypes().GetArg() instead.
 func (x *reqAdapterServiceAdaptedTypes) DefaultGetArg() *HeapAllocated {
     if !x.IsSetArg() {
         return NewHeapAllocated()
@@ -1446,9 +1437,6 @@ if err != nil {
 func (x *respAdapterServiceAdaptedTypes) toString0() string {  // Success
     return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
-
-// Deprecated: Use newRespAdapterServiceAdaptedTypes().GetSuccess() instead.
-var AdapterServiceAdaptedTypesResult_Success_DEFAULT = newRespAdapterServiceAdaptedTypes().GetSuccess()
 
 // Deprecated: Use newRespAdapterServiceAdaptedTypes().GetSuccess() instead.
 func (x *respAdapterServiceAdaptedTypes) DefaultGetSuccess() *HeapAllocated {

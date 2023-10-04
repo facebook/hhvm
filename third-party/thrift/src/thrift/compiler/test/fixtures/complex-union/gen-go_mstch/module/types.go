@@ -531,14 +531,8 @@ func (x *ComplexUnion) toString14() string {  // StringRef
     return fmt.Sprintf("%v", x.GetStringRefNonCompat())
 }
 
-// Deprecated: Use NewComplexUnion().GetIntValue() instead.
-var ComplexUnion_IntValue_DEFAULT = NewComplexUnion().GetIntValue()
 
-// Deprecated: Use NewComplexUnion().GetStringValue() instead.
-var ComplexUnion_StringValue_DEFAULT = NewComplexUnion().GetStringValue()
 
-// Deprecated: Use NewComplexUnion().GetStringRef() instead.
-var ComplexUnion_StringRef_DEFAULT = NewComplexUnion().GetStringRef()
 
 func (x *ComplexUnion) countSetFields() int {
     count := int(0)
@@ -1263,8 +1257,6 @@ func (x *DataUnion) toString2() string {  // StringData
     return fmt.Sprintf("%v", x.GetStringDataNonCompat())
 }
 
-// Deprecated: Use NewDataUnion().GetStringData() instead.
-var DataUnion_StringData_DEFAULT = NewDataUnion().GetStringData()
 
 func (x *DataUnion) countSetFields() int {
     count := int(0)
@@ -1869,18 +1861,12 @@ func (x *ValUnion) toString2() string {  // V2
 }
 
 // Deprecated: Use NewValUnion().GetV1() instead.
-var ValUnion_V1_DEFAULT = NewValUnion().GetV1()
-
-// Deprecated: Use NewValUnion().GetV1() instead.
 func (x *ValUnion) DefaultGetV1() *Val {
     if !x.IsSetV1() {
         return NewVal()
     }
     return x.V1
 }
-
-// Deprecated: Use NewValUnion().GetV2() instead.
-var ValUnion_V2_DEFAULT = NewValUnion().GetV2()
 
 // Deprecated: Use NewValUnion().GetV2() instead.
 func (x *ValUnion) DefaultGetV2() *Val {
@@ -2175,11 +2161,7 @@ func (x *VirtualComplexUnion) toString2() string {  // ThingTwo
     return fmt.Sprintf("%v", x.GetThingTwoNonCompat())
 }
 
-// Deprecated: Use NewVirtualComplexUnion().GetThingOne() instead.
-var VirtualComplexUnion_ThingOne_DEFAULT = NewVirtualComplexUnion().GetThingOne()
 
-// Deprecated: Use NewVirtualComplexUnion().GetThingTwo() instead.
-var VirtualComplexUnion_ThingTwo_DEFAULT = NewVirtualComplexUnion().GetThingTwo()
 
 func (x *VirtualComplexUnion) countSetFields() int {
     count := int(0)
@@ -2565,9 +2547,6 @@ if err != nil {
 func (x *NonCopyableUnion) toString1() string {  // S
     return fmt.Sprintf("%v", x.GetSNonCompat())
 }
-
-// Deprecated: Use NewNonCopyableUnion().GetS() instead.
-var NonCopyableUnion_S_DEFAULT = NewNonCopyableUnion().GetS()
 
 // Deprecated: Use NewNonCopyableUnion().GetS() instead.
 func (x *NonCopyableUnion) DefaultGetS() *NonCopyableStruct {

@@ -196,9 +196,6 @@ func (x *Included) toString2() string {  // MyTransitiveField
 }
 
 // Deprecated: Use NewIncluded().GetMyTransitiveField() instead.
-var Included_MyTransitiveField_DEFAULT = NewIncluded().GetMyTransitiveField()
-
-// Deprecated: Use NewIncluded().GetMyTransitiveField() instead.
 func (x *Included) DefaultGetMyTransitiveField() *transitive.Foo {
     if !x.IsSetMyTransitiveField() {
         return transitive.NewFoo()

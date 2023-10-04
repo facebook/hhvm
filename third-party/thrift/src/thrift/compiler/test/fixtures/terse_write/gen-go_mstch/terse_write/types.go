@@ -1187,35 +1187,14 @@ func (x *MyUnion) toString14() string {  // StructField
     return fmt.Sprintf("%v", x.GetStructFieldNonCompat())
 }
 
-// Deprecated: Use NewMyUnion().GetBoolField() instead.
-var MyUnion_BoolField_DEFAULT = NewMyUnion().GetBoolField()
 
-// Deprecated: Use NewMyUnion().GetByteField() instead.
-var MyUnion_ByteField_DEFAULT = NewMyUnion().GetByteField()
 
-// Deprecated: Use NewMyUnion().GetShortField() instead.
-var MyUnion_ShortField_DEFAULT = NewMyUnion().GetShortField()
 
-// Deprecated: Use NewMyUnion().GetIntField() instead.
-var MyUnion_IntField_DEFAULT = NewMyUnion().GetIntField()
 
-// Deprecated: Use NewMyUnion().GetLongField() instead.
-var MyUnion_LongField_DEFAULT = NewMyUnion().GetLongField()
 
-// Deprecated: Use NewMyUnion().GetFloatField() instead.
-var MyUnion_FloatField_DEFAULT = NewMyUnion().GetFloatField()
 
-// Deprecated: Use NewMyUnion().GetDoubleField() instead.
-var MyUnion_DoubleField_DEFAULT = NewMyUnion().GetDoubleField()
 
-// Deprecated: Use NewMyUnion().GetStringField() instead.
-var MyUnion_StringField_DEFAULT = NewMyUnion().GetStringField()
 
-// Deprecated: Use NewMyUnion().GetEnumField() instead.
-var MyUnion_EnumField_DEFAULT = NewMyUnion().GetEnumField()
-
-// Deprecated: Use NewMyUnion().GetStructField() instead.
-var MyUnion_StructField_DEFAULT = NewMyUnion().GetStructField()
 
 // Deprecated: Use NewMyUnion().GetStructField() instead.
 func (x *MyUnion) DefaultGetStructField() *MyStruct {
@@ -2775,18 +2754,12 @@ func (x *StructLevelTerseStruct) toString15() string {  // UnionField
 }
 
 // Deprecated: Use NewStructLevelTerseStruct().GetStructField() instead.
-var StructLevelTerseStruct_StructField_DEFAULT = NewStructLevelTerseStruct().GetStructField()
-
-// Deprecated: Use NewStructLevelTerseStruct().GetStructField() instead.
 func (x *StructLevelTerseStruct) DefaultGetStructField() *MyStruct {
     if !x.IsSetStructField() {
         return NewMyStruct()
     }
     return x.StructField
 }
-
-// Deprecated: Use NewStructLevelTerseStruct().GetUnionField() instead.
-var StructLevelTerseStruct_UnionField_DEFAULT = NewStructLevelTerseStruct().GetUnionField()
 
 // Deprecated: Use NewStructLevelTerseStruct().GetUnionField() instead.
 func (x *StructLevelTerseStruct) DefaultGetUnionField() *MyUnion {
@@ -5063,18 +5036,12 @@ func (x *FieldLevelTerseStruct) toString30() string {  // UnionField
 }
 
 // Deprecated: Use NewFieldLevelTerseStruct().GetTerseStructField() instead.
-var FieldLevelTerseStruct_TerseStructField_DEFAULT = NewFieldLevelTerseStruct().GetTerseStructField()
-
-// Deprecated: Use NewFieldLevelTerseStruct().GetTerseStructField() instead.
 func (x *FieldLevelTerseStruct) DefaultGetTerseStructField() *MyStruct {
     if !x.IsSetTerseStructField() {
         return NewMyStruct()
     }
     return x.TerseStructField
 }
-
-// Deprecated: Use NewFieldLevelTerseStruct().GetStructField() instead.
-var FieldLevelTerseStruct_StructField_DEFAULT = NewFieldLevelTerseStruct().GetStructField()
 
 // Deprecated: Use NewFieldLevelTerseStruct().GetStructField() instead.
 func (x *FieldLevelTerseStruct) DefaultGetStructField() *MyStruct {
@@ -5085,18 +5052,12 @@ func (x *FieldLevelTerseStruct) DefaultGetStructField() *MyStruct {
 }
 
 // Deprecated: Use NewFieldLevelTerseStruct().GetTerseUnionField() instead.
-var FieldLevelTerseStruct_TerseUnionField_DEFAULT = NewFieldLevelTerseStruct().GetTerseUnionField()
-
-// Deprecated: Use NewFieldLevelTerseStruct().GetTerseUnionField() instead.
 func (x *FieldLevelTerseStruct) DefaultGetTerseUnionField() *MyUnion {
     if !x.IsSetTerseUnionField() {
         return NewMyUnion()
     }
     return x.TerseUnionField
 }
-
-// Deprecated: Use NewFieldLevelTerseStruct().GetUnionField() instead.
-var FieldLevelTerseStruct_UnionField_DEFAULT = NewFieldLevelTerseStruct().GetUnionField()
 
 // Deprecated: Use NewFieldLevelTerseStruct().GetUnionField() instead.
 func (x *FieldLevelTerseStruct) DefaultGetUnionField() *MyUnion {
@@ -6759,9 +6720,6 @@ func (x *TerseStructWithCustomDefault) toString13() string {  // MapField
 func (x *TerseStructWithCustomDefault) toString14() string {  // StructField
     return fmt.Sprintf("%v", x.GetStructFieldNonCompat())
 }
-
-// Deprecated: Use NewTerseStructWithCustomDefault().GetStructField() instead.
-var TerseStructWithCustomDefault_StructField_DEFAULT = NewTerseStructWithCustomDefault().GetStructField()
 
 // Deprecated: Use NewTerseStructWithCustomDefault().GetStructField() instead.
 func (x *TerseStructWithCustomDefault) DefaultGetStructField() *MyStructWithCustomDefault {

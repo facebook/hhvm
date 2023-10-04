@@ -1977,8 +1977,6 @@ func (x *Foo) toString11() string {  // DoubleAdaptedField
     return fmt.Sprintf("%v", x.GetDoubleAdaptedFieldNonCompat())
 }
 
-// Deprecated: Use NewFoo().GetOptionalIntField() instead.
-var Foo_OptionalIntField_DEFAULT = NewFoo().GetOptionalIntField()
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.
@@ -2686,11 +2684,7 @@ func (x *Baz) toString9() string {  // LongField
     return fmt.Sprintf("%v", x.GetLongFieldNonCompat())
 }
 
-// Deprecated: Use NewBaz().GetIntField() instead.
-var Baz_IntField_DEFAULT = NewBaz().GetIntField()
 
-// Deprecated: Use NewBaz().GetLongField() instead.
-var Baz_LongField_DEFAULT = NewBaz().GetLongField()
 
 func (x *Baz) countSetFields() int {
     count := int(0)
@@ -3420,18 +3414,12 @@ func (x *Bar) toString7() string {  // AdaptedStructField
 }
 
 // Deprecated: Use NewBar().GetStructField() instead.
-var Bar_StructField_DEFAULT = NewBar().GetStructField()
-
-// Deprecated: Use NewBar().GetStructField() instead.
 func (x *Bar) DefaultGetStructField() *Foo {
     if !x.IsSetStructField() {
         return NewFoo()
     }
     return x.StructField
 }
-
-// Deprecated: Use NewBar().GetOptionalStructField() instead.
-var Bar_OptionalStructField_DEFAULT = NewBar().GetOptionalStructField()
 
 // Deprecated: Use NewBar().GetOptionalStructField() instead.
 func (x *Bar) DefaultGetOptionalStructField() *Foo {
@@ -3442,9 +3430,6 @@ func (x *Bar) DefaultGetOptionalStructField() *Foo {
 }
 
 // Deprecated: Use NewBar().GetUnionField() instead.
-var Bar_UnionField_DEFAULT = NewBar().GetUnionField()
-
-// Deprecated: Use NewBar().GetUnionField() instead.
 func (x *Bar) DefaultGetUnionField() *Baz {
     if !x.IsSetUnionField() {
         return NewBaz()
@@ -3453,18 +3438,12 @@ func (x *Bar) DefaultGetUnionField() *Baz {
 }
 
 // Deprecated: Use NewBar().GetOptionalUnionField() instead.
-var Bar_OptionalUnionField_DEFAULT = NewBar().GetOptionalUnionField()
-
-// Deprecated: Use NewBar().GetOptionalUnionField() instead.
 func (x *Bar) DefaultGetOptionalUnionField() *Baz {
     if !x.IsSetOptionalUnionField() {
         return NewBaz()
     }
     return x.OptionalUnionField
 }
-
-// Deprecated: Use NewBar().GetAdaptedStructField() instead.
-var Bar_AdaptedStructField_DEFAULT = NewBar().GetAdaptedStructField()
 
 // Deprecated: Use NewBar().GetAdaptedStructField() instead.
 func (x *Bar) DefaultGetAdaptedStructField() *DirectlyAdapted {
@@ -4288,11 +4267,7 @@ func (x *StructWithFieldAdapter) toString4() string {  // OptBoxedField
     return fmt.Sprintf("%v", x.GetOptBoxedFieldNonCompat())
 }
 
-// Deprecated: Use NewStructWithFieldAdapter().GetOptSharedField() instead.
-var StructWithFieldAdapter_OptSharedField_DEFAULT = NewStructWithFieldAdapter().GetOptSharedField()
 
-// Deprecated: Use NewStructWithFieldAdapter().GetOptBoxedField() instead.
-var StructWithFieldAdapter_OptBoxedField_DEFAULT = NewStructWithFieldAdapter().GetOptBoxedField()
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.
@@ -4890,9 +4865,6 @@ if err != nil {
 func (x *B) toString1() string {  // A
     return fmt.Sprintf("%v", x.GetANonCompat())
 }
-
-// Deprecated: Use NewB().GetA() instead.
-var B_A_DEFAULT = NewB().GetA()
 
 // Deprecated: Use NewB().GetA() instead.
 func (x *B) DefaultGetA() *AdaptedA {
@@ -8424,9 +8396,6 @@ func (x *AdaptTemplatedNestedTestStruct) toString1() string {  // AdaptedStruct
 }
 
 // Deprecated: Use NewAdaptTemplatedNestedTestStruct().GetAdaptedStruct() instead.
-var AdaptTemplatedNestedTestStruct_AdaptedStruct_DEFAULT = NewAdaptTemplatedNestedTestStruct().GetAdaptedStruct()
-
-// Deprecated: Use NewAdaptTemplatedNestedTestStruct().GetAdaptedStruct() instead.
 func (x *AdaptTemplatedNestedTestStruct) DefaultGetAdaptedStruct() *AdaptTemplatedTestStruct {
     if !x.IsSetAdaptedStruct() {
         return NewAdaptTemplatedTestStruct()
@@ -8677,8 +8646,6 @@ func (x *AdaptTestUnion) toString2() string {  // Custom
     return fmt.Sprintf("%v", x.GetCustomNonCompat())
 }
 
-// Deprecated: Use NewAdaptTestUnion().GetDelay() instead.
-var AdaptTestUnion_Delay_DEFAULT = NewAdaptTestUnion().GetDelay()
 
 func (x *AdaptTestUnion) countSetFields() int {
     count := int(0)
@@ -9422,18 +9389,12 @@ func (x *StructFieldAdaptedStruct) toString4() string {  // TypedefOfAdapted
 }
 
 // Deprecated: Use NewStructFieldAdaptedStruct().GetAdaptedStruct() instead.
-var StructFieldAdaptedStruct_AdaptedStruct_DEFAULT = NewStructFieldAdaptedStruct().GetAdaptedStruct()
-
-// Deprecated: Use NewStructFieldAdaptedStruct().GetAdaptedStruct() instead.
 func (x *StructFieldAdaptedStruct) DefaultGetAdaptedStruct() *AdaptedStruct {
     if !x.IsSetAdaptedStruct() {
         return NewAdaptedStruct()
     }
     return x.AdaptedStruct
 }
-
-// Deprecated: Use NewStructFieldAdaptedStruct().GetAdaptedTypedef() instead.
-var StructFieldAdaptedStruct_AdaptedTypedef_DEFAULT = NewStructFieldAdaptedStruct().GetAdaptedTypedef()
 
 // Deprecated: Use NewStructFieldAdaptedStruct().GetAdaptedTypedef() instead.
 func (x *StructFieldAdaptedStruct) DefaultGetAdaptedTypedef() *AdaptedTypedef {
@@ -9444,18 +9405,12 @@ func (x *StructFieldAdaptedStruct) DefaultGetAdaptedTypedef() *AdaptedTypedef {
 }
 
 // Deprecated: Use NewStructFieldAdaptedStruct().GetDirectlyAdapted() instead.
-var StructFieldAdaptedStruct_DirectlyAdapted_DEFAULT = NewStructFieldAdaptedStruct().GetDirectlyAdapted()
-
-// Deprecated: Use NewStructFieldAdaptedStruct().GetDirectlyAdapted() instead.
 func (x *StructFieldAdaptedStruct) DefaultGetDirectlyAdapted() *DirectlyAdaptedStruct {
     if !x.IsSetDirectlyAdapted() {
         return NewDirectlyAdaptedStruct()
     }
     return x.DirectlyAdapted
 }
-
-// Deprecated: Use NewStructFieldAdaptedStruct().GetTypedefOfAdapted() instead.
-var StructFieldAdaptedStruct_TypedefOfAdapted_DEFAULT = NewStructFieldAdaptedStruct().GetTypedefOfAdapted()
 
 // Deprecated: Use NewStructFieldAdaptedStruct().GetTypedefOfAdapted() instead.
 func (x *StructFieldAdaptedStruct) DefaultGetTypedefOfAdapted() *TypedefOfDirect {
@@ -9714,9 +9669,6 @@ func (x *CircularAdaptee) toString1() string {  // Field
 }
 
 // Deprecated: Use NewCircularAdaptee().GetField() instead.
-var CircularAdaptee_Field_DEFAULT = NewCircularAdaptee().GetField()
-
-// Deprecated: Use NewCircularAdaptee().GetField() instead.
 func (x *CircularAdaptee) DefaultGetField() *CircularStruct {
     if !x.IsSetField() {
         return NewCircularStruct()
@@ -9901,9 +9853,6 @@ if err != nil {
 func (x *CircularStruct) toString1() string {  // Field
     return fmt.Sprintf("%v", x.GetFieldNonCompat())
 }
-
-// Deprecated: Use NewCircularStruct().GetField() instead.
-var CircularStruct_Field_DEFAULT = NewCircularStruct().GetField()
 
 // Deprecated: Use NewCircularStruct().GetField() instead.
 func (x *CircularStruct) DefaultGetField() *AdaptedCircularAdaptee {
@@ -10091,9 +10040,6 @@ if err != nil {
 func (x *ReorderedStruct) toString1() string {  // ReorderedDependentAdapted
     return fmt.Sprintf("%v", x.GetReorderedDependentAdaptedNonCompat())
 }
-
-// Deprecated: Use NewReorderedStruct().GetReorderedDependentAdapted() instead.
-var ReorderedStruct_ReorderedDependentAdapted_DEFAULT = NewReorderedStruct().GetReorderedDependentAdapted()
 
 // Deprecated: Use NewReorderedStruct().GetReorderedDependentAdapted() instead.
 func (x *ReorderedStruct) DefaultGetReorderedDependentAdapted() *DeclaredAfterStruct {
@@ -10801,9 +10747,6 @@ func (x *MoveOnly) toString1() string {  // Ptr
 }
 
 // Deprecated: Use NewMoveOnly().GetPtr() instead.
-var MoveOnly_Ptr_DEFAULT = NewMoveOnly().GetPtr()
-
-// Deprecated: Use NewMoveOnly().GetPtr() instead.
 func (x *MoveOnly) DefaultGetPtr() *HeapAllocated {
     if !x.IsSetPtr() {
         return NewHeapAllocated()
@@ -11472,14 +11415,8 @@ func (x *CountingStruct) toString3() string {  // RegularString
     return fmt.Sprintf("%v", x.GetRegularStringNonCompat())
 }
 
-// Deprecated: Use NewCountingStruct().GetRegularInt() instead.
-var CountingStruct_RegularInt_DEFAULT = NewCountingStruct().GetRegularInt()
 
-// Deprecated: Use NewCountingStruct().GetCountingInt() instead.
-var CountingStruct_CountingInt_DEFAULT = NewCountingStruct().GetCountingInt()
 
-// Deprecated: Use NewCountingStruct().GetRegularString() instead.
-var CountingStruct_RegularString_DEFAULT = NewCountingStruct().GetRegularString()
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.

@@ -544,25 +544,6 @@ struct Printer {
   ) const = 0;
 };
 
-/*
- * Create an index file for GDB
- */
-struct GDBIndexer {
-  // Virtual destructor since this is an abstract base class.
-  virtual ~GDBIndexer() = default;
-
-  // Factory function to obtain a pointer to the actual platform implementation
-  // of the indexer. Run the indexer on the given filename, which may be an
-  // executable or some form of object file. If the platform doesn't have a
-  // supported debug info parser, this function will return null.
-  // The number of threads controls parallelism when building up the index.
-  static std::unique_ptr<GDBIndexer> make(const std::string& filename,
-                                          int num_threads);
-
-  // Output to file
-  virtual void operator()(const std::string& output_file) const = 0;
-};
-
 const char* show(ObjectTypeName::Linkage);
 
 ////////////////////////////////////////////////////////////////////////////////

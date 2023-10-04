@@ -127,9 +127,9 @@ bool BreakpointManager::bpMatchesPath(
   // A breakpoint matches the specified path if the breakpoint
   // has an absolute path and the full file path matches exactly OR
   // the breakpoint has a relative path and the filenames match.
-  const auto bpPath = std::filesystem::path(bp->m_path);
+  const auto& bpPath = bp->m_filePath;
   if (bpPath.is_absolute()) {
-    return bp->m_path == unitPath.string();
+    return bpPath == unitPath;
   } else {
     return bpPath.filename() == unitPath.filename();
   }

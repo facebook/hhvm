@@ -70,6 +70,8 @@ struct RequestBreakpointInfo {
   // Function breakpoints are rare. If there are no function breakpoint set on
   // a request, no breakpoints need to be resolved on class/function loads.
   bool m_hasFuncBp {false};
+
+  hphp_fast_string_set m_filenamesWithBp;
 };
 
 struct StepNextFilterInfo {

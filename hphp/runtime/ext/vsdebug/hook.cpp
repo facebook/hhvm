@@ -214,6 +214,14 @@ void VSDebugHook::onFileLoad(Unit* efile) {
     return;
   }
 
+  std::filesystem::path p{efile->filepath()->toCppString()};
+  auto const& unitFilename = p.filename().string();
+  auto const& filenamesWithBp =
+    requestInfo->m_breakpointInfo->m_filenamesWithBp;
+  if (filenamesWithBp.find(unitFilename) == filenamesWithBp.end()) {
+    return;
+  }
+
   // Resolve any unresolved breakpoints that may be in this compilation unit.
   debugger->onCompilationUnitLoaded(
     requestInfo,

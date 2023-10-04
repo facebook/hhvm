@@ -1564,6 +1564,8 @@ void Debugger::tryInstallBreakpoints(DebuggerRequestInfo* ri) {
     return;
   }
 
+  auto bpInfo = ri->m_breakpointInfo;
+
   // Create a map of the normalized file paths of all compilation units that
   // have already been loaded by this request before the debugger attached to
   // it to allow for quick lookup when resolving breakpoints. Any units loaded
@@ -1572,14 +1574,14 @@ void Debugger::tryInstallBreakpoints(DebuggerRequestInfo* ri) {
     ri->m_flags.compilationUnitsMapped = true;
     for (auto const u : g_context->m_loadedUnits) {
       const std::string filePath = getFilePathForUnit(u);
-      ri->m_breakpointInfo->m_loadedUnits[filePath] = u;
+      bpInfo->m_loadedUnits[filePath] = u;
     }
   }
 
   // For any breakpoints that are pending for this request, try to resolve
   // and install them, or mark them as unresolved.
   BreakpointManager* bpMgr = m_session->getBreakpointManager();
-  auto& pendingBps = ri->m_breakpointInfo->m_pendingBreakpoints;
+  auto& pendingBps = bpInfo->m_pendingBreakpoints;
 
   for (auto it = pendingBps.begin(); it != pendingBps.end();) {
     const int breakpointId = *it;
@@ -1625,15 +1627,17 @@ void Debugger::tryInstallBreakpoints(DebuggerRequestInfo* ri) {
       );
     }
     if (!resolved || bp->isRelativeBp()) {
-      ri->m_breakpointInfo->m_unresolvedBreakpoints.emplace(breakpointId);
+      bpInfo->m_unresolvedBreakpoints.emplace(breakpointId);
       if (bp->m_type == BreakpointType::Function) {
-        ri->m_breakpointInfo->m_hasFuncBp = true;
+        bpInfo->m_hasFuncBp = true;
+      } else {
+        bpInfo->m_filenamesWithBp.emplace(bp->m_filePath.filename().string());
       }
     }
   }
 
   updateUnresolvedBpFlag(ri);
-  assertx(ri->m_breakpointInfo->m_pendingBreakpoints.empty());
+  assertx(bpInfo->m_pendingBreakpoints.empty());
 }
 
 bool Debugger::tryResolveBreakpoint(

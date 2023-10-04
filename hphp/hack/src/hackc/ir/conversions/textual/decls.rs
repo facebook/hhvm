@@ -7,6 +7,7 @@ use anyhow::Error;
 use hash::HashSet;
 
 use crate::hack::Builtin;
+use crate::hack::HackConst;
 use crate::hack::Hhbc;
 use crate::textual::TextualFile;
 
@@ -26,8 +27,17 @@ pub(crate) fn write_decls(txf: &mut TextualFile<'_>, subset: &HashSet<Builtin>) 
             _ => None,
         })
         .collect();
-
     Hhbc::write_decls(txf, &hhbc_subset)?;
+
+    let hackconst_subset = subset
+        .iter()
+        .filter_map(|builtin| match builtin {
+            Builtin::HackConst(hc) => Some(*hc),
+            _ => None,
+        })
+        .collect();
+    HackConst::write_decls(txf, &hackconst_subset)?;
+
     txf.debug_separator()?;
 
     Ok(())

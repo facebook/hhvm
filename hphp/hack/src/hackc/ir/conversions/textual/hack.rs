@@ -31,6 +31,23 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 // type HackArraykey = HackInt | HackString;
 // type HackNum = HackInt | HackFloat;
 
+/// These represent builtin constants used by Hack.
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, Ord, PartialOrd)]
+#[derive(TextualDecl, EnumIter)]
+#[derive(Default)]
+pub(crate) enum HackConst {
+    // +inf
+    #[decl(fn hack_const_inf() -> float)]
+    #[default]
+    Inf,
+    // nan
+    #[decl(fn hack_const_nan() -> float)]
+    NaN,
+    // -inf
+    #[decl(fn hack_const_neginf() -> float)]
+    NegInf,
+}
+
 /// These represent builtins for handling HHVM bytecode instructions. In general
 /// the names should match the HHBC name except when they are compound bytecodes
 /// (like Cmp with a parameter of Eq becoming CmpEq). Documentation can be found
@@ -267,6 +284,9 @@ pub(crate) enum Builtin {
     ///
     #[decl(fn hack_array_get(...) -> *HackMixed)]
     HackArrayGet,
+    /// Hack constants.
+    #[decl(skip)]
+    HackConst(HackConst),
     /// 1-ary prop "get".
     ///
     /// Dynamically fetches the value from the named key of the instance.

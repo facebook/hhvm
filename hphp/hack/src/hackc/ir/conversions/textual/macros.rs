@@ -102,6 +102,8 @@ pub fn textual_decl_derive(input: proc_macro::TokenStream) -> proc_macro::TokenS
 
                         let fn_name = if name == "Hhbc" {
                             quote!(crate::mangle::FunctionName::Builtin(Builtin::Hhbc(Hhbc::#variant_name)))
+                        } else if name == "HackConst" {
+                            quote!(crate::mangle::FunctionName::Builtin(Builtin::HackConst(HackConst::#variant_name)))
                         } else {
                             quote!(crate::mangle::FunctionName::Builtin(#name::#variant_name))
                         };

@@ -24,6 +24,7 @@ use itertools::Itertools;
 use newtype::newtype_int;
 use strum::EnumProperty;
 
+use crate::hack;
 use crate::mangle::FieldName;
 use crate::mangle::FunctionName;
 use crate::mangle::GlobalName;
@@ -348,7 +349,6 @@ impl TextualFile<'_> {
                 args.push(arg);
             }
 
-            use crate::hack;
             let varargs_id = fb.txf.strings.intern_str(VARARGS_NAME);
             let varargs = fb.load(&args_ty, Expr::deref(LocalId::Named(varargs_id)))?;
             args.push(hack::call_builtin(fb, hack::Builtin::SilSplat, [varargs])?);
@@ -1273,7 +1273,21 @@ trait ExprWriter {
     fn write_const(&mut self, value: &Const) -> Result {
         match value {
             Const::False => self.internal_get_writer().write_all(b"false")?,
-            Const::Float(d) => write!(self.internal_get_writer(), "{:?}", d.to_f64())?,
+            Const::Float(d) => {
+                let fun = match d.to_f64() {
+                    d if d.is_finite() => {
+                        write!(self.internal_get_writer(), "{:?}", d)?;
+                        return Ok(());
+                    }
+                    d if d.is_infinite() && d.is_sign_negative() => hack::HackConst::NegInf,
+                    d if d.is_infinite() && d.is_sign_positive() => hack::HackConst::Inf,
+                    d if d.is_nan() => hack::HackConst::NaN,
+                    _ => unreachable!(),
+                };
+                let fun = FunctionName::Builtin(hack::Builtin::HackConst(fun));
+                self.register_called_function(&fun);
+                self.write_call_expr(&fun, &[])?;
+            }
             Const::Int(i) => write!(self.internal_get_writer(), "{i}")?,
             Const::LazyClass(ref s) => {
                 let strings = self.strings();

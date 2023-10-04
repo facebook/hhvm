@@ -47,11 +47,15 @@ pub fn textual_writer(
     }
 
     use hack::Builtin;
-    let all_builtins: HashMap<FunctionName, hack::Builtin> = hack::Builtin::iter()
+    use hack::HackConst;
+    use hack::Hhbc;
+    let all_builtins: HashMap<FunctionName, Builtin> = Builtin::iter()
         .map(|b| (FunctionName::Builtin(b), b))
-        .chain(
-            hack::Hhbc::iter().map(|b| (FunctionName::Builtin(Builtin::Hhbc(b)), Builtin::Hhbc(b))),
-        )
+        .chain(Hhbc::iter().map(|b| (FunctionName::Builtin(Builtin::Hhbc(b)), Builtin::Hhbc(b))))
+        .chain(HackConst::iter().map(|b| {
+            let name = FunctionName::Builtin(Builtin::HackConst(b));
+            (name, Builtin::HackConst(b))
+        }))
         .collect();
 
     let builtins = txf.write_epilogue(&all_builtins)?;

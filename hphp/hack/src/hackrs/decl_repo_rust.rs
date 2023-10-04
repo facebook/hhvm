@@ -248,8 +248,8 @@ fn find_hack_files(path: impl AsRef<Path>) -> impl Iterator<Item = PathBuf> {
 
 fn print_rss() -> f64 {
     let me = procfs::process::Process::myself().unwrap();
-    let page_size = procfs::page_size().unwrap();
-    let rss = (me.stat.rss * page_size) as f64 / 1024.0 / 1024.0 / 1024.0;
+    let page_size = procfs::page_size();
+    let rss = (me.stat().unwrap().rss * page_size) as f64 / 1024.0 / 1024.0 / 1024.0;
     println!("RSS: {:.3}GiB", rss);
     rss
 }

@@ -80,6 +80,8 @@ class TokenBucketConcurrencyController : public ConcurrencyControllerBase {
       pendingDequeueOps_ -= 1;
 
       auto request = std::move(*requestOpt);
+      request.setConcurrencyControllerNotification(this);
+      request.setRequestPileNotification(&pile_);
       if (expired(request)) {
         // if we found request the expired we don't want to count it towards the
         // token bucket so we keep going will we dequeue a request that haven't
@@ -102,6 +104,8 @@ class TokenBucketConcurrencyController : public ConcurrencyControllerBase {
         while (auto requestOpt = pile_.dequeue()) {
           pendingDequeueOps_ -= 1;
           auto request = std::move(*requestOpt);
+          request.setConcurrencyControllerNotification(this);
+          request.setRequestPileNotification(&pile_);
           if (expired(request)) {
             // if we found request the expired we don't want to count it towards
             // the token bucket so we keep going will we dequeue a request that

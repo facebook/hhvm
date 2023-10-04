@@ -37,7 +37,6 @@ namespace apache::thrift {
 }
 
 void TokenBucketConcurrencyController::execute(ServerRequest&& request) {
-  request.setConcurrencyControllerNotification(this);
   request.requestData().setRequestExecutionBegin();
   AsyncProcessorHelper::executeRequest(std::move(request));
   request.requestData().setRequestExecutionEnd();

@@ -30,3 +30,5 @@ val make :
 val output : t -> unit
 
 val to_bit_array_string : t -> string
+
+val to_hh_json : t -> Hh_json.json

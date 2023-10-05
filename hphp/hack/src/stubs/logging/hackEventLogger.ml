@@ -68,6 +68,7 @@ type rollout_flags = {
   ide_naming_table_update_threshold: int;
   use_compressed_dep_graph: bool;
   use_old_decls_from_cas: bool;
+  saved_state_rollouts: Saved_state_rollouts.t;
 }
 
 let flush () = ()

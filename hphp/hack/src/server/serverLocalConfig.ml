@@ -1226,4 +1226,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       ide_load_naming_table_on_disk = options.ide_load_naming_table_on_disk;
       ide_naming_table_update_threshold =
         options.ide_naming_table_update_threshold;
+      saved_state_rollouts = options.saved_state.GlobalOptions.rollouts;
     }

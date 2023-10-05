@@ -229,3 +229,22 @@ let to_bit_array_string t : string =
   ^ s optimized_member_fanout
   ^ s optimized_private_member_fanout
   ^ s optimized_parent_fanout
+
+let to_hh_json t : Hh_json.json =
+  let {
+    dummy_one = _;
+    dummy_two = _;
+    dummy_three = _;
+    optimized_member_fanout;
+    optimized_private_member_fanout;
+    optimized_parent_fanout;
+  } =
+    t
+  in
+  Hh_json.JSON_Object
+    [
+      ("optimized_member_fanout", Hh_json.bool_ optimized_member_fanout);
+      ( "optimized_private_member_fanout",
+        Hh_json.bool_ optimized_private_member_fanout );
+      ("optimized_parent_fanout", Hh_json.bool_ optimized_parent_fanout);
+    ]

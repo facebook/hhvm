@@ -7,24 +7,18 @@
  *)
 open Hh_prelude
 
-let to_range (pos : Pos.t) : Lsp.range =
-  let (first_line, first_col) = Pos.line_column pos in
-  let (last_line, last_col) = Pos.end_line_column pos in
-  {
-    Lsp.start = { Lsp.line = first_line - 1; character = first_col };
-    end_ = { Lsp.line = last_line - 1; character = last_col };
-  }
-
 let text_edits (classish_starts : Pos.t SMap.t) (quickfix : Pos.t Quickfix.t) :
     Lsp.TextEdit.t list =
   let edits = Quickfix.get_edits ~classish_starts quickfix in
   List.map edits ~f:(fun (new_text, pos) ->
-      { Lsp.TextEdit.range = to_range pos; newText = new_text })
+      let range =
+        Lsp_helpers.hack_pos_to_lsp_range ~equal:Relative_path.equal pos
+      in
+      { Lsp.TextEdit.range; newText = new_text })
 
-let fix_action
+let convert_quickfix
     path (classish_starts : Pos.t SMap.t) (quickfix : Pos.t Quickfix.t) :
     Code_action_types.Quickfix.t =
-  let open Lsp in
   let edit =
     lazy
       (let changes =
@@ -32,11 +26,11 @@ let fix_action
            (Relative_path.to_absolute path)
            (text_edits classish_starts quickfix)
        in
-       WorkspaceEdit.{ changes })
+       Lsp.WorkspaceEdit.{ changes })
   in
   Code_action_types.Quickfix.{ title = Quickfix.get_title quickfix; edit }
 
-let actions_for_errors
+let errors_to_quickfixes
     (errors : Errors.t)
     (path : Relative_path.t)
     (classish_starts : Pos.t SMap.t)
@@ -47,10 +41,8 @@ let actions_for_errors
         let e_pos = User_error.get_pos e in
         Pos.contains selection e_pos)
   in
-  let quickfixes =
-    List.map ~f:User_error.quickfixes errors_here |> List.concat
-  in
-  List.map quickfixes ~f:(fun qf -> fix_action path classish_starts qf)
+  let quickfixes = List.bind ~f:User_error.quickfixes errors_here in
+  List.map quickfixes ~f:(convert_quickfix path classish_starts)
 
 let find ~ctx ~entry ~(range : Lsp.range) : Code_action_types.Quickfix.t list =
   let cst = Ast_provider.compute_cst ~ctx ~entry in
@@ -74,4 +66,4 @@ let find ~ctx ~entry ~(range : Lsp.range) : Code_action_types.Quickfix.t list =
     in
     Lsp_helpers.lsp_range_to_pos ~line_to_offset path range
   in
-  actions_for_errors errors path classish_starts selection
+  errors_to_quickfixes errors path classish_starts selection

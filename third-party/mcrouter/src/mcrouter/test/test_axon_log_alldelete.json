@@ -17,6 +17,7 @@
     "axonlog": true,
     "axonlog_tier": "axon.dl_memcache",
     "axonlog_keyspace": 4,
-    "axonlog_all_delete": true
+    "axonlog_all_delete": true,
+    "axonlog_default_region_filter": "georgia"
   }
 }

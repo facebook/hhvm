@@ -53,6 +53,11 @@ constexpr ::std::string const module_constants::SOME_BYTES_;
   return *instance;
 }
 
+::py3::simple::SimpleStruct const& module_constants::EMPTY() {
+  static folly::Indestructible<::py3::simple::SimpleStruct> const instance{::apache::thrift::detail::make_structured_constant<::py3::simple::SimpleStruct>()};
+  return *instance;
+}
+
 ::std::vector<::std::string> const& module_constants::WORD_LIST() {
   static folly::Indestructible<::std::vector<::std::string>> const instance{std::initializer_list<::std::string>{apache::thrift::StringTraits<std::string>::fromStringLiteral("the"),
   apache::thrift::StringTraits<std::string>::fromStringLiteral("quick"),

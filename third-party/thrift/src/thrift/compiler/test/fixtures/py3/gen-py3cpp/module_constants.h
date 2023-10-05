@@ -61,6 +61,8 @@ struct module_constants {
 
   static ::py3::simple::SimpleStruct const& A_STRUCT();
 
+  static ::py3::simple::SimpleStruct const& EMPTY();
+
   static ::std::vector<::std::string> const& WORD_LIST();
 
   static ::std::vector<::std::map<::std::int32_t, double>> const& SOME_MAP();

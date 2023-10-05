@@ -654,6 +654,8 @@ SOME_BYTES = b"bytes"
 
 A_STRUCT = SimpleStruct(is_on=True, tiny_int=5, small_int=6, nice_sized_int=7, big_int=8, real=float(9.9))
 
+EMPTY = "{}"SimpleStruct()
+
 WORD_LIST = _fbthrift_python_types.List(_fbthrift_python_types.typeinfo_string, ("the", "quick", "brown", "fox", "jumps", "over", "the", "lazy", "dog", ))
 
 SOME_MAP = _fbthrift_python_types.List(_fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_double), (_fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_double, {1: float(1.1), 2: float(2.2)}), _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_double, {3: float(3.3)}), ))

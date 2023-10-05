@@ -455,6 +455,7 @@ cdef extern from "thrift/compiler/test/fixtures/py3/src/gen-py3cpp/module_consta
     cdef const char* cA_WORD "::py3::simple::module_constants::A_WORD"()
     cdef string cSOME_BYTES "::py3::simple::module_constants::SOME_BYTES"()
     cdef cSimpleStruct cA_STRUCT "::py3::simple::module_constants::A_STRUCT"()
+    cdef cSimpleStruct cEMPTY "::py3::simple::module_constants::EMPTY"()
     cdef vector[string] cWORD_LIST "::py3::simple::module_constants::WORD_LIST"()
     cdef vector[cmap[cint32_t,double]] cSOME_MAP "::py3::simple::module_constants::SOME_MAP"()
     cdef cset[cint32_t] cDIGITS "::py3::simple::module_constants::DIGITS"()

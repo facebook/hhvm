@@ -3286,6 +3286,7 @@ A_FAKE_NUMBER = 3.0
 A_WORD = cA_WORD().decode('UTF-8')
 SOME_BYTES = <bytes> cSOME_BYTES()
 A_STRUCT = SimpleStruct._fbthrift_create(constant_shared_ptr(cA_STRUCT()))
+EMPTY = SimpleStruct._fbthrift_create(constant_shared_ptr(cEMPTY()))
 WORD_LIST = List__string._fbthrift_create(constant_shared_ptr(cWORD_LIST()))
 SOME_MAP = List__Map__i32_double._fbthrift_create(constant_shared_ptr(cSOME_MAP()))
 DIGITS = Set__i32._fbthrift_create(constant_shared_ptr(cDIGITS()))

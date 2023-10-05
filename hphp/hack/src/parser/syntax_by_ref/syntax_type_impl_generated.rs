@@ -1784,6 +1784,18 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_class_args_type_specifier(ctx: &C, keyword: Self, left_angle: Self, type_: Self, trailing_comma: Self, right_angle: Self) -> Self {
+        let syntax = SyntaxVariant::ClassArgsTypeSpecifier(ctx.get_arena().alloc(ClassArgsTypeSpecifierChildren {
+            keyword,
+            left_angle,
+            type_,
+            trailing_comma,
+            right_angle,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_field_specifier(ctx: &C, question: Self, name: Self, arrow: Self, type_: Self) -> Self {
         let syntax = SyntaxVariant::FieldSpecifier(ctx.get_arena().alloc(FieldSpecifierChildren {
             question,

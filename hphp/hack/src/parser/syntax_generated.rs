@@ -1778,6 +1778,18 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_class_args_type_specifier(_: &C, class_args_keyword: Self, class_args_left_angle: Self, class_args_type: Self, class_args_trailing_comma: Self, class_args_right_angle: Self) -> Self {
+        let syntax = SyntaxVariant::ClassArgsTypeSpecifier(Box::new(ClassArgsTypeSpecifierChildren {
+            class_args_keyword,
+            class_args_left_angle,
+            class_args_type,
+            class_args_trailing_comma,
+            class_args_right_angle,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_field_specifier(_: &C, field_question: Self, field_name: Self, field_arrow: Self, field_type: Self) -> Self {
         let syntax = SyntaxVariant::FieldSpecifier(Box::new(FieldSpecifierChildren {
             field_question,
@@ -3317,6 +3329,15 @@ where
                 let acc = f(classname_right_angle, acc);
                 acc
             },
+            SyntaxVariant::ClassArgsTypeSpecifier(x) => {
+                let ClassArgsTypeSpecifierChildren { class_args_keyword, class_args_left_angle, class_args_type, class_args_trailing_comma, class_args_right_angle } = *x;
+                let acc = f(class_args_keyword, acc);
+                let acc = f(class_args_left_angle, acc);
+                let acc = f(class_args_type, acc);
+                let acc = f(class_args_trailing_comma, acc);
+                let acc = f(class_args_right_angle, acc);
+                acc
+            },
             SyntaxVariant::FieldSpecifier(x) => {
                 let FieldSpecifierChildren { field_question, field_name, field_arrow, field_type } = *x;
                 let acc = f(field_question, acc);
@@ -3655,6 +3676,7 @@ where
             SyntaxVariant::TypeInRefinement {..} => SyntaxKind::TypeInRefinement,
             SyntaxVariant::CtxInRefinement {..} => SyntaxKind::CtxInRefinement,
             SyntaxVariant::ClassnameTypeSpecifier {..} => SyntaxKind::ClassnameTypeSpecifier,
+            SyntaxVariant::ClassArgsTypeSpecifier {..} => SyntaxKind::ClassArgsTypeSpecifier,
             SyntaxVariant::FieldSpecifier {..} => SyntaxKind::FieldSpecifier,
             SyntaxVariant::FieldInitializer {..} => SyntaxKind::FieldInitializer,
             SyntaxVariant::ShapeTypeSpecifier {..} => SyntaxKind::ShapeTypeSpecifier,
@@ -4803,6 +4825,14 @@ where
                  classname_keyword: ts.pop().unwrap(),
                  
              })),
+             (SyntaxKind::ClassArgsTypeSpecifier, 5) => SyntaxVariant::ClassArgsTypeSpecifier(Box::new(ClassArgsTypeSpecifierChildren {
+                 class_args_right_angle: ts.pop().unwrap(),
+                 class_args_trailing_comma: ts.pop().unwrap(),
+                 class_args_type: ts.pop().unwrap(),
+                 class_args_left_angle: ts.pop().unwrap(),
+                 class_args_keyword: ts.pop().unwrap(),
+                 
+             })),
              (SyntaxKind::FieldSpecifier, 4) => SyntaxVariant::FieldSpecifier(Box::new(FieldSpecifierChildren {
                  field_type: ts.pop().unwrap(),
                  field_arrow: ts.pop().unwrap(),
@@ -5117,6 +5147,7 @@ where
             SyntaxVariant::TypeInRefinement(x) => unsafe { std::slice::from_raw_parts(&x.type_in_refinement_keyword, 6) },
             SyntaxVariant::CtxInRefinement(x) => unsafe { std::slice::from_raw_parts(&x.ctx_in_refinement_keyword, 6) },
             SyntaxVariant::ClassnameTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.classname_keyword, 5) },
+            SyntaxVariant::ClassArgsTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.class_args_keyword, 5) },
             SyntaxVariant::FieldSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.field_question, 4) },
             SyntaxVariant::FieldInitializer(x) => unsafe { std::slice::from_raw_parts(&x.field_initializer_name, 3) },
             SyntaxVariant::ShapeTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.shape_type_keyword, 5) },
@@ -5308,6 +5339,7 @@ where
             SyntaxVariant::TypeInRefinement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.type_in_refinement_keyword, 6) },
             SyntaxVariant::CtxInRefinement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.ctx_in_refinement_keyword, 6) },
             SyntaxVariant::ClassnameTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.classname_keyword, 5) },
+            SyntaxVariant::ClassArgsTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.class_args_keyword, 5) },
             SyntaxVariant::FieldSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.field_question, 4) },
             SyntaxVariant::FieldInitializer(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.field_initializer_name, 3) },
             SyntaxVariant::ShapeTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.shape_type_keyword, 5) },
@@ -6773,6 +6805,16 @@ pub struct ClassnameTypeSpecifierChildren<T, V> {
 
 #[derive(Debug, Clone)]
 #[repr(C)]
+pub struct ClassArgsTypeSpecifierChildren<T, V> {
+    pub class_args_keyword: Syntax<T, V>,
+    pub class_args_left_angle: Syntax<T, V>,
+    pub class_args_type: Syntax<T, V>,
+    pub class_args_trailing_comma: Syntax<T, V>,
+    pub class_args_right_angle: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+#[repr(C)]
 pub struct FieldSpecifierChildren<T, V> {
     pub field_question: Syntax<T, V>,
     pub field_name: Syntax<T, V>,
@@ -7130,6 +7172,7 @@ pub enum SyntaxVariant<T, V> {
     TypeInRefinement(Box<TypeInRefinementChildren<T, V>>),
     CtxInRefinement(Box<CtxInRefinementChildren<T, V>>),
     ClassnameTypeSpecifier(Box<ClassnameTypeSpecifierChildren<T, V>>),
+    ClassArgsTypeSpecifier(Box<ClassArgsTypeSpecifierChildren<T, V>>),
     FieldSpecifier(Box<FieldSpecifierChildren<T, V>>),
     FieldInitializer(Box<FieldInitializerChildren<T, V>>),
     ShapeTypeSpecifier(Box<ShapeTypeSpecifierChildren<T, V>>),
@@ -8766,6 +8809,17 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     2 => Some(&x.classname_type),
                     3 => Some(&x.classname_trailing_comma),
                     4 => Some(&x.classname_right_angle),
+                        _ => None,
+                    }
+                })
+            },
+            ClassArgsTypeSpecifier(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.class_args_keyword),
+                    1 => Some(&x.class_args_left_angle),
+                    2 => Some(&x.class_args_type),
+                    3 => Some(&x.class_args_trailing_comma),
+                    4 => Some(&x.class_args_right_angle),
                         _ => None,
                     }
                 })

@@ -179,6 +179,7 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_type_in_refinement(ctx: &C, type_in_refinement_keyword: Self, type_in_refinement_name: Self, type_in_refinement_type_parameters: Self, type_in_refinement_constraints: Self, type_in_refinement_equal: Self, type_in_refinement_type: Self) -> Self;
     fn make_ctx_in_refinement(ctx: &C, ctx_in_refinement_keyword: Self, ctx_in_refinement_name: Self, ctx_in_refinement_type_parameters: Self, ctx_in_refinement_constraints: Self, ctx_in_refinement_equal: Self, ctx_in_refinement_ctx_list: Self) -> Self;
     fn make_classname_type_specifier(ctx: &C, classname_keyword: Self, classname_left_angle: Self, classname_type: Self, classname_trailing_comma: Self, classname_right_angle: Self) -> Self;
+    fn make_class_args_type_specifier(ctx: &C, class_args_keyword: Self, class_args_left_angle: Self, class_args_type: Self, class_args_trailing_comma: Self, class_args_right_angle: Self) -> Self;
     fn make_field_specifier(ctx: &C, field_question: Self, field_name: Self, field_arrow: Self, field_type: Self) -> Self;
     fn make_field_initializer(ctx: &C, field_initializer_name: Self, field_initializer_arrow: Self, field_initializer_value: Self) -> Self;
     fn make_shape_type_specifier(ctx: &C, shape_type_keyword: Self, shape_type_left_paren: Self, shape_type_fields: Self, shape_type_ellipsis: Self, shape_type_right_paren: Self) -> Self;

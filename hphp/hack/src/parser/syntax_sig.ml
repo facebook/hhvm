@@ -972,6 +972,13 @@ module type Syntax_S = sig
         classname_trailing_comma: t;
         classname_right_angle: t;
       }
+    | ClassArgsTypeSpecifier of {
+        class_args_keyword: t;
+        class_args_left_angle: t;
+        class_args_type: t;
+        class_args_trailing_comma: t;
+        class_args_right_angle: t;
+      }
     | FieldSpecifier of {
         field_question: t;
         field_name: t;
@@ -1477,6 +1484,8 @@ module type Syntax_S = sig
 
   val make_classname_type_specifier : t -> t -> t -> t -> t -> t
 
+  val make_class_args_type_specifier : t -> t -> t -> t -> t -> t
+
   val make_field_specifier : t -> t -> t -> t -> t
 
   val make_field_initializer : t -> t -> t -> t
@@ -1850,6 +1859,8 @@ module type Syntax_S = sig
   val is_ctx_in_refinement : t -> bool
 
   val is_classname_type_specifier : t -> bool
+
+  val is_class_args_type_specifier : t -> bool
 
   val is_field_specifier : t -> bool
 

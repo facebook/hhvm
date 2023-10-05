@@ -702,6 +702,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> SmartConstructors for DirectDec
         <Self as FlattenSmartConstructors>::make_classname_type_specifier(self, keyword, left_angle, type_, trailing_comma, right_angle)
     }
 
+    fn make_class_args_type_specifier(&mut self, keyword: Self::Output, left_angle: Self::Output, type_: Self::Output, trailing_comma: Self::Output, right_angle: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_class_args_type_specifier(self, keyword, left_angle, type_, trailing_comma, right_angle)
+    }
+
     fn make_field_specifier(&mut self, question: Self::Output, name: Self::Output, arrow: Self::Output, type_: Self::Output) -> Self::Output {
         <Self as FlattenSmartConstructors>::make_field_specifier(self, question, name, arrow, type_)
     }

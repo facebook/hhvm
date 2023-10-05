@@ -717,6 +717,10 @@ where
         Node(self.0.make_classname_type_specifier(keyword.0, left_angle.0, type_.0, trailing_comma.0, right_angle.0), self.1.make_classname_type_specifier(keyword.1, left_angle.1, type_.1, trailing_comma.1, right_angle.1))
     }
 
+    fn make_class_args_type_specifier(&mut self, keyword: Self::Output, left_angle: Self::Output, type_: Self::Output, trailing_comma: Self::Output, right_angle: Self::Output) -> Self::Output {
+        Node(self.0.make_class_args_type_specifier(keyword.0, left_angle.0, type_.0, trailing_comma.0, right_angle.0), self.1.make_class_args_type_specifier(keyword.1, left_angle.1, type_.1, trailing_comma.1, right_angle.1))
+    }
+
     fn make_field_specifier(&mut self, question: Self::Output, name: Self::Output, arrow: Self::Output, type_: Self::Output) -> Self::Output {
         Node(self.0.make_field_specifier(question.0, name.0, arrow.0, type_.0), self.1.make_field_specifier(question.1, name.1, arrow.1, type_.1))
     }

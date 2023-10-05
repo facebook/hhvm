@@ -1636,6 +1636,17 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
+            ClassArgsTypeSpecifier(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.keyword),
+                    1 => Some(&x.left_angle),
+                    2 => Some(&x.type_),
+                    3 => Some(&x.trailing_comma),
+                    4 => Some(&x.right_angle),
+                        _ => None,
+                    }
+                })
+            },
             FieldSpecifier(x) => {
                 get_index(4).and_then(|index| { match index {
                         0 => Some(&x.question),

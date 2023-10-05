@@ -2267,6 +2267,22 @@ let schema : schema_node list =
         ];
     };
     {
+      kind_name = "ClassArgsTypeSpecifier";
+      type_name = "class_args_type_specifier";
+      func_name = "class_args_type_specifier";
+      description = "class_args_type_specifier";
+      prefix = "class_args";
+      aggregates = [Specifier];
+      fields =
+        [
+          ("keyword", Token);
+          ("left_angle", Token);
+          ("type", Aggregate Specifier);
+          ("trailing_comma", ZeroOrOne Token);
+          ("right_angle", Token);
+        ];
+    };
+    {
       kind_name = "FieldSpecifier";
       type_name = "field_specifier";
       func_name = "field_specifier";

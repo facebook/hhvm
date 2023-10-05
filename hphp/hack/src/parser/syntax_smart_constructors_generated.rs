@@ -845,6 +845,11 @@ where
         Self::Output::make_classname_type_specifier(self.state_mut(), arg0, arg1, arg2, arg3, arg4)
     }
 
+    fn make_class_args_type_specifier(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output) -> Self::Output {
+        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4]);
+        Self::Output::make_class_args_type_specifier(self.state_mut(), arg0, arg1, arg2, arg3, arg4)
+    }
+
     fn make_field_specifier(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output) -> Self::Output {
         self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3]);
         Self::Output::make_field_specifier(self.state_mut(), arg0, arg1, arg2, arg3)

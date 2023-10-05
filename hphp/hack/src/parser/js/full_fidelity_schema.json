@@ -2032,6 +2032,17 @@
         { "field_name" : "trailing_comma" },
         { "field_name" : "right_angle" }
       ] },
+    { "kind_name" : "ClassArgsTypeSpecifier",
+      "type_name" : "class_args_type_specifier",
+      "description" : "class_args_type_specifier",
+      "prefix" : "class_args",
+      "fields" : [
+        { "field_name" : "keyword" },
+        { "field_name" : "left_angle" },
+        { "field_name" : "type" },
+        { "field_name" : "trailing_comma" },
+        { "field_name" : "right_angle" }
+      ] },
     { "kind_name" : "FieldSpecifier",
       "type_name" : "field_specifier",
       "description" : "field_specifier",

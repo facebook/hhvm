@@ -223,6 +223,7 @@ module WithToken (Token : TokenType) = struct
       | TypeInRefinement _ -> SyntaxKind.TypeInRefinement
       | CtxInRefinement _ -> SyntaxKind.CtxInRefinement
       | ClassnameTypeSpecifier _ -> SyntaxKind.ClassnameTypeSpecifier
+      | ClassArgsTypeSpecifier _ -> SyntaxKind.ClassArgsTypeSpecifier
       | FieldSpecifier _ -> SyntaxKind.FieldSpecifier
       | FieldInitializer _ -> SyntaxKind.FieldInitializer
       | ShapeTypeSpecifier _ -> SyntaxKind.ShapeTypeSpecifier
@@ -615,6 +616,9 @@ module WithToken (Token : TokenType) = struct
     let is_ctx_in_refinement = has_kind SyntaxKind.CtxInRefinement
 
     let is_classname_type_specifier = has_kind SyntaxKind.ClassnameTypeSpecifier
+
+    let is_class_args_type_specifier =
+      has_kind SyntaxKind.ClassArgsTypeSpecifier
 
     let is_field_specifier = has_kind SyntaxKind.FieldSpecifier
 
@@ -2414,6 +2418,20 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc classname_trailing_comma in
         let acc = f acc classname_right_angle in
         acc
+      | ClassArgsTypeSpecifier
+          {
+            class_args_keyword;
+            class_args_left_angle;
+            class_args_type;
+            class_args_trailing_comma;
+            class_args_right_angle;
+          } ->
+        let acc = f acc class_args_keyword in
+        let acc = f acc class_args_left_angle in
+        let acc = f acc class_args_type in
+        let acc = f acc class_args_trailing_comma in
+        let acc = f acc class_args_right_angle in
+        acc
       | FieldSpecifier { field_question; field_name; field_arrow; field_type }
         ->
         let acc = f acc field_question in
@@ -4188,6 +4206,21 @@ module WithToken (Token : TokenType) = struct
           classname_type;
           classname_trailing_comma;
           classname_right_angle;
+        ]
+      | ClassArgsTypeSpecifier
+          {
+            class_args_keyword;
+            class_args_left_angle;
+            class_args_type;
+            class_args_trailing_comma;
+            class_args_right_angle;
+          } ->
+        [
+          class_args_keyword;
+          class_args_left_angle;
+          class_args_type;
+          class_args_trailing_comma;
+          class_args_right_angle;
         ]
       | FieldSpecifier { field_question; field_name; field_arrow; field_type }
         ->
@@ -5966,6 +5999,21 @@ module WithToken (Token : TokenType) = struct
           "classname_type";
           "classname_trailing_comma";
           "classname_right_angle";
+        ]
+      | ClassArgsTypeSpecifier
+          {
+            class_args_keyword;
+            class_args_left_angle;
+            class_args_type;
+            class_args_trailing_comma;
+            class_args_right_angle;
+          } ->
+        [
+          "class_args_keyword";
+          "class_args_left_angle";
+          "class_args_type";
+          "class_args_trailing_comma";
+          "class_args_right_angle";
         ]
       | FieldSpecifier { field_question; field_name; field_arrow; field_type }
         ->
@@ -7962,6 +8010,22 @@ module WithToken (Token : TokenType) = struct
             classname_type;
             classname_trailing_comma;
             classname_right_angle;
+          }
+      | ( SyntaxKind.ClassArgsTypeSpecifier,
+          [
+            class_args_keyword;
+            class_args_left_angle;
+            class_args_type;
+            class_args_trailing_comma;
+            class_args_right_angle;
+          ] ) ->
+        ClassArgsTypeSpecifier
+          {
+            class_args_keyword;
+            class_args_left_angle;
+            class_args_type;
+            class_args_trailing_comma;
+            class_args_right_angle;
           }
       | ( SyntaxKind.FieldSpecifier,
           [field_question; field_name; field_arrow; field_type] ) ->
@@ -10473,6 +10537,25 @@ module WithToken (Token : TokenType) = struct
               classname_type;
               classname_trailing_comma;
               classname_right_angle;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_class_args_type_specifier
+          class_args_keyword
+          class_args_left_angle
+          class_args_type
+          class_args_trailing_comma
+          class_args_right_angle =
+        let syntax =
+          ClassArgsTypeSpecifier
+            {
+              class_args_keyword;
+              class_args_left_angle;
+              class_args_type;
+              class_args_trailing_comma;
+              class_args_right_angle;
             }
         in
         let value = ValueBuilder.value_from_syntax syntax in

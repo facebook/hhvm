@@ -180,6 +180,7 @@ type t =
   | TypeInRefinement
   | CtxInRefinement
   | ClassnameTypeSpecifier
+  | ClassArgsTypeSpecifier
   | FieldSpecifier
   | FieldInitializer
   | ShapeTypeSpecifier
@@ -370,6 +371,7 @@ let to_string kind =
   | TypeInRefinement -> "type_in_refinement"
   | CtxInRefinement -> "ctx_in_refinement"
   | ClassnameTypeSpecifier -> "classname_type_specifier"
+  | ClassArgsTypeSpecifier -> "class_args_type_specifier"
   | FieldSpecifier -> "field_specifier"
   | FieldInitializer -> "field_initializer"
   | ShapeTypeSpecifier -> "shape_type_specifier"

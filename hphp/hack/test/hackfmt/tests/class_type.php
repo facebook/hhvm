@@ -1,0 +1,4 @@
+<?hh
+
+function f(class< C <string
+, int> > $c): void {}

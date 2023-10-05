@@ -2342,6 +2342,14 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           when_present readonly space;
           t env cp_type;
         ]
+    | Syntax.ClassArgsTypeSpecifier
+        {
+          class_args_keyword = kw;
+          class_args_left_angle = left_a;
+          class_args_type = class_type;
+          class_args_trailing_comma = trailing_comma;
+          class_args_right_angle = right_a;
+        }
     | Syntax.ClassnameTypeSpecifier
         {
           classname_keyword = kw;

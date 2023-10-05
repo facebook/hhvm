@@ -1,0 +1,16 @@
+File "generic_enum_class.php", line 30, characters 11-12:
+`switch` statement nonexhaustive; at least the following cases are missing: `default` (Typing[4019])
+  File "generic_enum_class.php", line 30, characters 11-12:
+  only unions and intersections of bool, null and enums can be switched on without a default
+File "generic_enum_class.php", line 31, characters 10-33:
+Switching on `HH\MemberOf<DerivedEnumClass, GenericClass<T>>` but using constant from `HH\MemberOf<DerivedEnumClass, GenericClass<int>>` (Typing[4023])
+  File "generic_enum_class.php", line 29, characters 33-79:
+  expecting `HH\MemberOf<DerivedEnumClass, GenericClass<T>>` based on this
+File "generic_enum_class.php", line 32, characters 10-37:
+Switching on `HH\MemberOf<DerivedEnumClass, GenericClass<T>>` but using constant from `HH\MemberOf<DerivedEnumClass, DerivedGenClass<int>>` (Typing[4023])
+  File "generic_enum_class.php", line 29, characters 33-79:
+  expecting `HH\MemberOf<DerivedEnumClass, GenericClass<T>>` based on this
+File "generic_enum_class.php", line 33, characters 10-36:
+Switching on `HH\MemberOf<DerivedEnumClass, GenericClass<T>>` but using constant from `HH\MemberOf<DerivedEnumClass, GenericClass<string>>` (Typing[4023])
+  File "generic_enum_class.php", line 29, characters 33-79:
+  expecting `HH\MemberOf<DerivedEnumClass, GenericClass<T>>` based on this

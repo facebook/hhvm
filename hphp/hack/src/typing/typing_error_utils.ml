@@ -478,13 +478,16 @@ module Eval_primary = struct
               expected_ty_msg
               @ [
                   ( Pos_or_decl.of_raw_pos pos,
-                    Format.sprintf "But got an enum class label: `#%s`" label );
+                    Format.sprintf
+                      "But got an enum class label/member: `%s`"
+                      label );
                 ])
         | None ->
           lazy
             [
               ( Pos_or_decl.of_raw_pos pos,
-                Format.sprintf "Unexpected enum class label: `#%s`" label );
+                Format.sprintf "Unexpected enum class label/member: `%s`" label
+              );
             ]
       in
       (Error_code.UnifyError, claim, reasons, [])

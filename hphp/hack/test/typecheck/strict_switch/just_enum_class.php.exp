@@ -1,0 +1,20 @@
+File "just_enum_class.php", line 59, characters 11-12:
+`switch` statement nonexhaustive; at least the following cases are missing: `LabelString1` (Typing[4019])
+  File "just_enum_class.php", line 15, characters 12-25:
+  enum declared here
+File "just_enum_class.php", line 77, characters 11-12:
+`switch` statement nonexhaustive; at least the following cases are missing: `LabelC` (Typing[4019])
+  File "just_enum_class.php", line 15, characters 12-25:
+  enum declared here
+File "just_enum_class.php", line 27, characters 10-31:
+Switching on `MixedEnumClass` but using constant from `HH\MemberOf<MixedEnumClass, IntEnumCD>` (Typing[4023])
+  File "just_enum_class.php", line 25, characters 21-34:
+  expecting `MixedEnumClass` based on this
+File "just_enum_class.php", line 40, characters 10-34:
+Switching on `bool` but using constant from `HH\MemberOf<MixedEnumClass, bool>` (Typing[4023])
+  File "just_enum_class.php", line 38, characters 50-53:
+  expecting `bool` based on this
+File "just_enum_class.php", line 60, characters 10-33:
+Enum class label/member mismatch (Typing[4110])
+  File "just_enum_class.php", line 60, characters 10-33:
+  Unexpected enum class label/member: `LabelInt`

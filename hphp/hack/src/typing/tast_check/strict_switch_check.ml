@@ -41,11 +41,11 @@ module EnumInfo = struct
         ("decl_pos", Pos_or_decl.json decl_pos);
       ]
 
-  let of_decl decl ~name =
+  let of_decl ?(filter = (fun _ -> true)) decl ~name =
     decl
     |> Decl_provider.Class.consts
-    |> List.filter_map ~f:(fun (name, _) ->
-           if String.(name <> "class") then
+    |> List.filter_map ~f:(fun ((name, _) as elem) ->
+           if String.(name <> "class") && filter elem then
              Some (Utils.strip_ns name)
            else
              None)
@@ -140,15 +140,24 @@ module Value = struct
       in
 
       let values =
-        (* only class constants which are subtypes of arraykeys are currently supported;
-           ideally this would be restricted to only enums but this depends on how often
-           class constants are used as case expressions *)
+        (* We support constants:
+            (a) From Enums
+            (b) From Enum Classes
+            (c) Which are a subtype of arraykeys.
+           Ideally ONLY (a) & (b) would be supported, but this depends on how
+           often such class constants are used as case expressions. *)
         if not @@ is_sub ty arraykey then
-          [Unsupported]
+          (* supports (b) *)
+          Option.value_map
+            (EnumInfo.of_env env class_)
+            ~default:[Unsupported]
+            ~f:(fun info -> [Enum info; AllEnums])
         else if is_sub arraykey ty then
+          (* supports (c), arraykey class constants *)
           (* ty <: arraykey && arraykey <: ty *)
           [Int; String; AllEnums]
         else
+          (* supports (a) & (c), subtype of arraykey class constants *)
           (* ty <: arraykey && ! (arraykey <: ty) *)
           list_if (is_sub ty int) [Int]
           @ list_if (is_sub ty string) [String]
@@ -160,7 +169,7 @@ module Value = struct
       (values, Some (Label { class_; const }))
     | _ -> ([Unsupported], None)
 
-  let is_countable_enum = function
+  let is_enum = function
     | Enum _ -> true
     | Unsupported
     | Null
@@ -193,7 +202,7 @@ module ValueSet = struct
     (* so big_union [ { AllEnums } , { Enum i1 } , { Enum i2 } ] = { AllEnums } *)
     let res = union_list set_list in
     if mem res Value.AllEnums then
-      filter res ~f:(fun v -> not @@ Value.is_countable_enum v)
+      filter res ~f:(fun v -> not @@ Value.is_enum v)
     else
       res
 
@@ -277,9 +286,22 @@ let rec symbolic_dnf_values env ty : ValueSet.t =
       ~f:(function
         | Enum { name; class_decl } ->
           ValueSet.singleton (Value.Enum (EnumInfo.of_decl ~name class_decl))
-        | EnumClass _
-        | EnumClassLabel _ ->
-          ValueSet.singleton Value.Unsupported)
+        | EnumClassLabel _ -> ValueSet.singleton Value.Unsupported
+        | EnumClass { name; interface; class_decl } ->
+          let filter (_, { cc_type = decl_ty; _ }) =
+            let (_env, locl_ty) =
+              Tast_env.localize env Typing_defs.empty_expand_env decl_ty
+            in
+            Typing_subtype.is_sub_type
+              (Tast_env.tast_env_as_typing_env env)
+              locl_ty
+              interface
+          in
+          let info = EnumInfo.of_decl class_decl ~filter ~name in
+          if EnumConstSet.is_empty info.EnumInfo.consts then
+            ValueSet.singleton Value.Unsupported
+          else
+            ValueSet.singleton (Value.Enum info))
   | Tdynamic
   | Ttuple _
   | Tshape _
@@ -337,9 +359,10 @@ let add_err env err =
 
 let get_missing_cases env partitions =
   let check_enum_coverage EnumInfo.{ name; consts; decl_pos } cases =
+    let positions = Hashtbl.create (module String) in
     let given_cases =
       EnumConstSet.of_list
-      @@ List.map cases ~f:(fun (_, const) ->
+      @@ List.map cases ~f:(fun (pos, const) ->
              match const with
              | EnumErr.Const.Label { class_; const } ->
                (* check_enum_coverage is called on a (Enum info, cases)
@@ -350,9 +373,21 @@ let get_missing_cases env partitions =
                   Labels where name = class_. Enforcing this invariant in the
                   type system would require heterogenous maps *)
                assert (String.(name = class_));
+               Hashtbl.add_multi positions ~key:const ~data:pos;
                const
              | _ -> assert false)
     in
+    (* This only applies to Enum Classes *)
+    (match EnumConstSet.(diff given_cases consts |> to_list) with
+    | [] -> ()
+    | _ :: _ as redundant ->
+      List.iter redundant ~f:(fun label ->
+          let pos_list = Hashtbl.find_multi positions label in
+          List.iter pos_list ~f:(fun pos ->
+              add_err env
+              @@ EnumErr.Enum_class_label_member_mismatch
+                   { label; expected_ty_msg_opt = None; pos })));
+    (* This applies to Enum and Enum Classes *)
     match EnumConstSet.(diff consts given_cases |> to_list) with
     | [] -> None
     | _ :: _ as missing ->
@@ -360,7 +395,7 @@ let get_missing_cases env partitions =
         (`Labels (decl_pos, List.map missing ~f:(fun const -> (name, const))))
   in
 
-  let check_redundant env cases =
+  let check_repeats env cases =
     Hashtbl.group
       (module EnumErr.Const)
       cases
@@ -397,7 +432,7 @@ let get_missing_cases env partitions =
        cases, e.g. an enum with no members *)
     | [] -> Option.value missing_enum ~default:(Some missing)
     | _ :: _ ->
-      check_redundant env cases;
+      check_repeats env cases;
       Option.value missing_enum ~default:None
   in
 

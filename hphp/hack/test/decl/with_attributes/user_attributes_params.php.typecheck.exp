@@ -43,4 +43,4 @@ Was expecting a return type hint (Typing[4030])
 File "user_attributes_params.php", line 10, characters 27-33:
 Enum class label/member mismatch (Typing[4110])
   File "user_attributes_params.php", line 10, characters 27-33:
-  Unexpected enum class label: `#Label2`
+  Unexpected enum class label/member: `Label2`

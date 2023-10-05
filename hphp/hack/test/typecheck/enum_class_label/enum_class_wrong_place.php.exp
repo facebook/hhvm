@@ -3,4 +3,4 @@ Hack does not support top level statements. Use the `__EntryPoint` attribute on 
 File "enum_class_wrong_place.php", line 7, characters 8-28:
 Enum class label/member mismatch (Typing[4110])
   File "enum_class_wrong_place.php", line 7, characters 8-28:
-  Unexpected enum class label: `#label_alone_is_error`
+  Unexpected enum class label/member: `label_alone_is_error`

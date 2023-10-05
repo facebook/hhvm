@@ -116,6 +116,7 @@ end
   impact the constructor. *)
 let diff_members
     (type member)
+    ctx
     (members_left_right : (member option * member option) SMap.t)
     (module Member : Member_S with type t = member)
     (classish_kind : Ast_defs.classish_kind)
@@ -157,6 +158,17 @@ let diff_members
       | (Some old_member, Some new_member) ->
         let member_changes =
           Member.diff old_member new_member
+          |> Option.map ~f:(fun change ->
+                 if
+                   TypecheckerOptions.optimized_private_member_fanout
+                     (Provider_context.get_tcopt ctx)
+                   && (not Ast_defs.(is_c_trait classish_kind))
+                   && Member.is_private old_member
+                   && Member.is_private new_member
+                 then
+                   Private_change_not_in_trait
+                 else
+                   change)
           |> check_module_change_internal old_member new_member
           |> Option.fold ~init:diff ~f:(fun diff ch ->
                  SMap.add diff ~key:name ~data:ch)
@@ -293,7 +305,7 @@ let diff_constructor old_cls new_cls old_cstr new_cstr : member_change option =
     | (None, Some _) -> Some Added
     | (Some old_method, Some new_method) -> Method.diff old_method new_method
 
-let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
+let diff_class_members ctx (c1 : shallow_class) (c2 : shallow_class) :
     ClassDiff.member_diff =
   let diff = ClassDiff.empty_member_diff in
   let kind = c2.sc_kind in
@@ -308,6 +320,7 @@ let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
     let consts = merge_member_lists get_name c1.sc_consts c2.sc_consts in
     let (consts, constructor_change) =
       diff_members
+        ctx
         consts
         (module ClassConst : Member_S with type t = shallow_class_const)
         kind
@@ -326,6 +339,7 @@ let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
     in
     let (typeconsts, constructor_change) =
       diff_members
+        ctx
         typeconsts
         (module TypeConst : Member_S with type t = shallow_typeconst)
         kind
@@ -342,6 +356,7 @@ let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
     let props = merge_member_lists get_name c1.sc_props c2.sc_props in
     let (props, constructor_change) =
       diff_members
+        ctx
         props
         (module Prop : Member_S with type t = shallow_prop)
         kind
@@ -358,6 +373,7 @@ let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
     let sprops = merge_member_lists get_name c1.sc_sprops c2.sc_sprops in
     let (sprops, constructor_change) =
       diff_members
+        ctx
         sprops
         (module Prop : Member_S with type t = shallow_prop)
         kind
@@ -374,6 +390,7 @@ let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
     let methods = merge_member_lists get_name c1.sc_methods c2.sc_methods in
     let (methods, constructor_change) =
       diff_members
+        ctx
         methods
         (module Method : Member_S with type t = shallow_method)
         kind
@@ -392,6 +409,7 @@ let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
     in
     let (smethods, constructor_change) =
       diff_members
+        ctx
         smethods
         (module Method : Member_S with type t = shallow_method)
         kind
@@ -690,12 +708,13 @@ let same_package
   let p2 = get_package_for_module info c2.sc_module in
   Option.equal Package.equal p1 p2
 
-let diff_class (info : PackageInfo.t) (c1 : shallow_class) (c2 : shallow_class)
-    : ClassDiff.t =
+let diff_class
+    ctx (info : PackageInfo.t) (c1 : shallow_class) (c2 : shallow_class) :
+    ClassDiff.t =
   let same_package = same_package info c1 c2 in
   let class_shell1 = normalize c1 ~same_package
   and class_shell2 = normalize c2 ~same_package in
-  let member_diff = diff_class_members c1 c2 in
+  let member_diff = diff_class_members ctx c1 c2 in
   if not (equal_shallow_class class_shell1 class_shell2) then
     Major_change
       (MajorChange.Modified

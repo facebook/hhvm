@@ -1264,6 +1264,7 @@ let test_shallow_class_diff ctx filename =
           match old_and_new with
           | (Some c1, Some c2) ->
             Shallow_class_diff.diff_class
+              ctx
               (Provider_context.get_package_info ctx)
               c1
               c2

@@ -320,6 +320,7 @@
   decl_pos_utils
   decl_utils
   package_info
+  provider_context
   shallow_decl_defs
   typing_defs)
  (preprocess

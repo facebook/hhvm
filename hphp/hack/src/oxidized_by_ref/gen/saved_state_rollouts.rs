@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<16b52fc218310f080b1a065b22f468fe>>
+// @generated SignedSource<<c10093211afa5eb016d44f0acf9b8978>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -42,6 +42,7 @@ pub struct SavedStateRollouts {
     pub dummy_two: bool,
     pub dummy_three: bool,
     pub optimized_member_fanout: bool,
+    pub optimized_private_member_fanout: bool,
     pub optimized_parent_fanout: bool,
 }
 impl TrivialDrop for SavedStateRollouts {}
@@ -75,6 +76,8 @@ pub enum Flag {
     DummyThree,
     #[rust_to_ocaml(name = "Optimized_member_fanout")]
     OptimizedMemberFanout,
+    #[rust_to_ocaml(name = "Optimized_private_member_fanout")]
+    OptimizedPrivateMemberFanout,
     #[rust_to_ocaml(name = "Optimized_parent_fanout")]
     OptimizedParentFanout,
 }

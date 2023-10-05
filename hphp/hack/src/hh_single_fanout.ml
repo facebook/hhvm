@@ -24,6 +24,7 @@ let tcopt =
           {
             Saved_state_rollouts.default with
             Saved_state_rollouts.optimized_member_fanout = true;
+            optimized_private_member_fanout = true;
           };
       };
   }

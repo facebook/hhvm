@@ -1,0 +1,9 @@
+convert to 'var_dump'
+
+<?hh
+
+function foo(): void {
+  if (true) {
+var_dump($foo());
+  }
+}

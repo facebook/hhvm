@@ -1,0 +1,12 @@
+convert to 'var_dump'
+
+<?hh
+
+function foo(): void {
+  if (true) {
+var_dump(((int $y) ==> {
+      $x = $y;
+      return $x;
+    })() + 1);
+  }
+}

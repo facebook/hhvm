@@ -9,6 +9,7 @@ use std::marker::PhantomData;
 
 use parser_core_types::lexable_token::LexableToken;
 use parser_core_types::syntax_error::SyntaxError;
+use parser_core_types::syntax_error::SyntaxQuickfix;
 use parser_core_types::syntax_error::{self as Errors};
 use parser_core_types::token_factory::TokenFactory;
 use parser_core_types::token_kind::TokenKind;
@@ -313,14 +314,33 @@ where
                 let pos = self.pos();
                 self.sc_mut().make_missing(pos)
             }
-            _ => {
+            kind => {
                 self.continue_from(parser1);
                 // ERROR RECOVERY: If we're encountering anything other than a TokenKind::Name
                 // or the next expected kind, eat the offending token.
                 // TODO: Increase the coverage of PrecedenceParser.expects_next, so that
                 // we wind up eating fewer of the tokens that'll be needed by the outer
                 // statement / declaration parsers.
-                self.with_error(Errors::error1015, Vec::new());
+                let quickfixes = match (kind, token.leading_start_offset()) {
+                    (TokenKind::Equal, Some(lhs_leading_start_offset)) => {
+                        let lhs_start_offset = lhs_leading_start_offset + token.leading_width();
+                        let (lhs_end_offset, _) = self.error_offsets(false);
+                        let rhs_offset = {
+                            let mut parser = self.clone();
+                            parser.parse_expression_with_reset_precedence();
+                            parser.lexer().start()
+                        };
+                        vec![SyntaxQuickfix {
+                            title: "convert to 'var_dump'".into(),
+                            edits: vec![
+                                (lhs_start_offset, lhs_end_offset, "var_dump(".into()),
+                                (rhs_offset, rhs_offset, ")".into()),
+                            ],
+                        }]
+                    }
+                    _ => Vec::new(),
+                };
+                self.with_error(Errors::error1015, quickfixes);
                 self.sc_mut().make_token(token)
             }
         }

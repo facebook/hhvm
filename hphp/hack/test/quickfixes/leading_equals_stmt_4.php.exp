@@ -1,0 +1,7 @@
+convert to 'var_dump'
+
+<?hh
+
+function foo(): void {
+var_dump(1);
+}

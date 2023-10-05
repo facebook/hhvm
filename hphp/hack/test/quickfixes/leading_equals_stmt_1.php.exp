@@ -1,0 +1,8 @@
+convert to 'var_dump'
+
+<?hh
+
+function foo(): void {
+  foo();
+var_dump($x + 20 + 30);
+}

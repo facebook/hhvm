@@ -1,0 +1,7 @@
+convert to 'var_dump'
+
+<?hh
+
+function foo(int $x): void {
+var_dump($x);
+}

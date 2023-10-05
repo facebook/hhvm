@@ -42,16 +42,9 @@ class ParallelConcurrencyControllerBase : public ConcurrencyControllerBase {
     return executionLimit_.load();
   }
 
-  void setQpsLimit(uint64_t) override final {
-    XLOG_EVERY_MS(WARNING, 1000)
-        << "ParallelConcurrencyControllerBase does not support QPS limit";
-  }
+  void setQpsLimit(uint64_t) override final {}
 
-  uint64_t getQpsLimit() const override final {
-    XLOG_EVERY_MS(WARNING, 1000)
-        << "ParallelConcurrencyControllerBase does not support QPS limit";
-    return 0;
-  }
+  uint64_t getQpsLimit() const override final { return 0; }
 
   uint64_t requestCount() const override final {
     return counters_.load().requestInExecution;

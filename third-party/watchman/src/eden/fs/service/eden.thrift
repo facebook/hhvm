@@ -1446,6 +1446,20 @@ struct GetScmStatusResult {
   2: string version;
 }
 
+/**
+ * Sometimes additional modifiers need to be applied to the RootID that Eden
+ * receives from clients. This structure contains any such option and should
+ * only be extended with optional fields.
+ */
+struct RootIdOptions {
+  /**
+   * The ID of the filter that should be applied to the supplied RootId. The
+   * filter determines which entries in the repository should be hidden from
+   * the working copy.
+   */
+  1: optional string filterId;
+}
+
 struct GetScmStatusParams {
   /**
    * The Eden checkout to query
@@ -1472,6 +1486,8 @@ struct GetScmStatusParams {
 
   // Pass unique identifier of this request's caller.
   4: optional ClientRequestInfo cri;
+
+  5: optional RootIdOptions rootIdOptions;
 }
 
 /**
@@ -1525,6 +1541,8 @@ struct CheckOutRevisionParams {
 
   // Pass unique identifier of this request's caller.
   2: optional ClientRequestInfo cri;
+
+  3: optional RootIdOptions rootIdOptions;
 }
 
 struct ResetParentCommitsParams {
@@ -1542,6 +1560,8 @@ struct ResetParentCommitsParams {
 
   // Pass unique identifier of this request's caller.
   2: optional ClientRequestInfo cri;
+
+  3: optional RootIdOptions rootIdOptions;
 }
 
 struct RemoveRecursivelyParams {

@@ -29,7 +29,7 @@ namespace {
  *   array  If inside a function, this lists the functions arguments. If
  *   inside an included file, this lists the included file name(s).
  */
-<<__Native("NoInjection"), __EagerVMSync>>
+<<__Native("NoInjection", "NoRecording"), __EagerVMSync>>
 function debug_backtrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT,
                          int $limit = 0): vec<dict<string, mixed>>;
 
@@ -105,7 +105,7 @@ function error_log(string $message,
  * @return int - Returns the old error_reporting level or the current
  *   level if no level parameter is given.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function error_reporting(?int $level = null)[leak_safe]: int;
 
 /**
@@ -113,7 +113,7 @@ function error_reporting(?int $level = null)[leak_safe]: int;
  *
  * @return bool - This function always returns TRUE.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function restore_error_handler(): bool;
 
 /**
@@ -122,7 +122,7 @@ function restore_error_handler(): bool;
  *
  * @return bool - This function always returns TRUE.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function restore_exception_handler(): bool;
 
 /**
@@ -161,7 +161,7 @@ function restore_exception_handler(): bool;
  *   function will return an indexed array with the class and the method
  *   name.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function set_error_handler(mixed $error_handler,
                            int $error_types = E_ALL): mixed;
 
@@ -181,7 +181,7 @@ function set_error_handler(mixed $error_handler,
  *   exception handler, or NULL on error. If no previous handler was
  *   defined, NULL is also returned.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function set_exception_handler(mixed $exception_handler): ?dynamic;
 
 /**

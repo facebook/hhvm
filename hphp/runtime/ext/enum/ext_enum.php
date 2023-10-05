@@ -41,7 +41,7 @@ abstract class BuiltinEnum<+T as arraykey> {
    * Coerce to a valid value or null.
    * This is useful for typing deserialized enum values.
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function coerce(mixed $value)[]: ?T;
 
   /**
@@ -153,7 +153,7 @@ enum OpaqueValueId : int as int {
   EnumClassLabel = 0;
 }
 
-<<__Native>>
+<<__Native("NoRecording")>>
 function create_opaque_value_internal(int $id, mixed $val)[]: resource;
 
 /**
@@ -173,7 +173,7 @@ function create_opaque_value(int $id, mixed $val)[]: mixed {
  * if $res is not an opaque value resource or $id does not match the id used
  * to construct it throw an exception.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function unwrap_opaque_value(int $id, resource $res)[]: mixed;
 
 }

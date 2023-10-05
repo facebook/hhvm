@@ -16,19 +16,19 @@ abstract class Awaitable<+T> {
   /** Set callback for when the scheduler enters I/O wait
    * @param mixed $callback - A Closure to be called when I/O wait is entered
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function setOnIOWaitEnterCallback(mixed $callback): void;
 
   /** Set callback for when the scheduler exits I/O wait
    * @param mixed $callback - A Closure to be called when I/O wait is exited
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function setOnIOWaitExitCallback(mixed $callback): void;
 
   /** Set callback for when \HH\Asio\join() is called
    * @param mixed $callback - A Closure to be called on \HH\Asio\join()
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function setOnJoinCallback(mixed $callback): void;
 
   /** Check if this wait handle finished (succeeded or failed)
@@ -36,7 +36,7 @@ abstract class Awaitable<+T> {
    *
    * DEPRECATED: use HH\Asio\has_finished()
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public function isFinished()[]: bool;
 
   /** Check if this wait handle succeeded
@@ -91,28 +91,28 @@ abstract class ResumableWaitHandle<+T> extends WaitableWaitHandle<T> {
    * @param mixed $callback - A Closure to be called when a ResumableWaitHandle
    * is created
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function setOnCreateCallback(mixed $callback): void;
 
   /** Set callback to be called when an async function blockingly awaits
    * @param mixed $callback - A Closure to be called when an async function
    * blockingly await
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function setOnAwaitCallback(mixed $callback): void;
 
   /** Set callback to be called when a ResumableWaitHandle finishes successfully
    * @param mixed $callback - A Closure to be called when a ResumableWaitHandle
    * finishes
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function setOnSuccessCallback(mixed $callback): void;
 
   /** Set callback to be called when a ResumableWaitHandle fails
    * @param mixed $callback - A Closure to be called when a ResumableWaitHandle
    * fails
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function setOnFailCallback(mixed $callback): void;
 }
 
@@ -133,7 +133,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle<void> {
    * @return object - A WaitHandle that will wait for a given vec of
    * dependencies
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   public static function fromVec(
     vec<Awaitable<mixed>> $dependencies,
   )[]: Awaitable<void>;
@@ -143,7 +143,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle<void> {
    * @return object - A WaitHandle that will wait for a given dict of
    * dependencies
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   public static function fromDict(
     dict<arraykey, Awaitable<mixed>> $dependencies
   )[]: Awaitable<void>;
@@ -151,7 +151,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle<void> {
   /** Set callback for when a AwaitAllWaitHandle is created
    * @param mixed $callback - A Closure to be called on creation
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   public static function setOnCreateCallback(mixed $callback): void;
 }
 
@@ -162,7 +162,7 @@ final class ConcurrentWaitHandle extends WaitableWaitHandle<void> {
   /** Set callback for when a ConcurrentWaitHandle is created
    * @param mixed $callback - A Closure to be called on creation
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   public static function setOnCreateCallback(mixed $callback): void;
 }
 
@@ -181,7 +181,7 @@ final class ConditionWaitHandle<T> extends WaitableWaitHandle<T> {
   /** Set callback for when a ConditionWaitHandle is created
    * @param mixed $callback - A Closure to be called on creation
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   public static function setOnCreateCallback(mixed $callback): void;
 
   /** Notify the condition variable and mark the ConditionWaitHandle as succeeded
@@ -211,7 +211,7 @@ final class RescheduleWaitHandle extends WaitableWaitHandle<void> {
    * @return object - A RescheduleWaitHandle that succeeds once desired
    * scheduling priority is eligible for execution
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   public static function create(
     int $queue,
     int $priority,
@@ -234,14 +234,14 @@ final class SleepWaitHandle extends WaitableWaitHandle<void> {
    * @param mixed $callback - A Closure to be called when a SleepWaitHandle is
    * created
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function setOnCreateCallback(mixed $callback): void;
 
   /** Set callback to be called when a SleepWaitHandle finishes successfully
    * @param mixed $callback - A Closure to be called when a SleepWaitHandle
    * finishes
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function setOnSuccessCallback(mixed $callback): void;
 }
 
@@ -253,7 +253,7 @@ final class ExternalThreadEventWaitHandle extends WaitableWaitHandle<void> {
    * @param mixed $callback - A Closure to be called when an
    * ExternalThreadEventWaitHandle is created
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   public static function setOnCreateCallback(mixed $callback): void;
 
   /** Set callback to be called when an ExternalThreadEventWaitHandle finishes
@@ -261,14 +261,14 @@ final class ExternalThreadEventWaitHandle extends WaitableWaitHandle<void> {
    * @param mixed $callback - A Closure to be called when an
    * ExternalThreadEventWaitHandle finishes
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   public static function setOnSuccessCallback(mixed $callback): void;
 
   /** Set callback to be called when an ExternalThreadEventWaitHandle fails
    * @param mixed $callback - A Closure to be called when an
    * ExternalThreadEventWaitHandle fails
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   public static function setOnFailCallback(mixed $callback): void;
 }
 
@@ -303,7 +303,7 @@ async function void()[]: Awaitable<void> {}
  * Launches a new instance of scheduler to drive asynchronous execution
  * until the provided Awaitable is finished.
  */
-<<__Native("NoFCallBuiltin")>>
+<<__Native("NoFCallBuiltin", "NoRecording")>>
 function join<T>(Awaitable<T> $awaitable)[]: T;
 
 /**

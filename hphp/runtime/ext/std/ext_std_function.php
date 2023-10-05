@@ -34,7 +34,7 @@ function is_callable_with_name(mixed $callback,
  * @return mixed - Returns the return value of the callback, or FALSE on
  *   error.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function call_user_func_array(mixed $callback,
                               mixed $params): mixed;
 
@@ -49,7 +49,7 @@ function call_user_func_array(mixed $callback,
  * @return mixed - Returns the return value of the callback, or FALSE on
  *   error.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function call_user_func(mixed $callback,
                         mixed... $parameters): mixed;
 
@@ -89,7 +89,7 @@ function get_defined_functions(): shape(
  *
  * @return void
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function register_shutdown_function(mixed $callback): void;
 
 /**
@@ -97,7 +97,7 @@ function register_shutdown_function(mixed $callback): void;
  *
  * @return void
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function register_postsend_function(mixed $callback): void;
 
 }

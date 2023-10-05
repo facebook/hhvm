@@ -103,7 +103,7 @@ function fb_compact_unserialize(mixed $thing,
  * set by individual function names, will be removed.
  * @return bool - TRUE if successful, FALSE otherwise
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function fb_intercept2(string $name, mixed $handler): bool;
 
 /** Rename a function, so that a function can be called with the new name.
@@ -116,7 +116,7 @@ function fb_intercept2(string $name, mixed $handler): bool;
  * @param string $new_func_name - What is the new name.
  * @return bool - TRUE if successful, FALSE otherwise.
  */
-<<__Native("NoFCallBuiltin")>>
+<<__Native("NoFCallBuiltin", "NoRecording")>>
 function fb_rename_function(string $orig_func_name,
                             string $new_func_name): bool;
 
@@ -201,7 +201,7 @@ function fb_output_compression(bool $new_value): bool;
  * @param mixed $function - The callback to invoke. An exception object will
  * be passed to the function
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function fb_set_exit_callback(mixed $function): void;
 
 /** Get stats on flushing the last data chunk from server.

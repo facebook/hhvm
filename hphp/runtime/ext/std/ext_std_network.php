@@ -307,7 +307,7 @@ function getservbyport(int $port,
  *
  * @return bool -
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function header_register_callback(mixed $callback)[globals]: mixed;
 
 /**

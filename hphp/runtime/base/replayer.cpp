@@ -84,9 +84,9 @@ String Replayer::init(const String& path) {
   for (auto i{recording[String{"files"}].asCArrRef().begin()}; i; ++i) {
     m_files[i.first().asCStrRef().data()] = i.second().asCStrRef().data();
   }
-  std::unordered_map<std::uintptr_t, std::uintptr_t> nativeFuncRecordToReplayId;
+  std::unordered_map<std::uintptr_t, NativeFunction> nativeFuncRecordToReplayId;
   for (auto i{recording[String("nativeFuncIds")].asCArrRef().begin()}; i; ++i) {
-    const auto id{m_nativeFuncNames[i.first().asCStrRef().data()]};
+    const auto id{getNativeFuncPtr(i.first().asCStrRef().toCppString())};
     nativeFuncRecordToReplayId[i.second().asInt64Val()] = id;
   }
   for (auto i{recording[String{"nativeCalls"}].asCArrRef().begin()}; i; ++i) {
@@ -521,28 +521,12 @@ void Replayer::nativeArg(const String& recordedArg, Variant& arg) {
   arg = unserialize<Variant>(recordedArg);
 }
 
-NativeCall Replayer::popNativeCall(std::uintptr_t id) {
-  if (m_nativeCalls.empty()) {
-    for (const auto& [name, id_] : m_nativeFuncNames) {
-      if (id_ == id) {
-        always_assert_flog(!m_nativeCalls.empty(), "{}", name);
-      }
-    }
-  }
+NativeCall Replayer::popNativeCall(NativeFunction ptr) {
+  always_assert_flog(!m_nativeCalls.empty(), "{}", getNativeFuncName(ptr));
   const auto call{std::move(m_nativeCalls.front())};
   m_nativeCalls.pop_front();
-  if (call.id != id) {
-    std::string recordedName, replayedName;
-    for (const auto& [name, id_] : m_nativeFuncNames) {
-      if (id_ == id) {
-        replayedName = name;
-      }
-      if (id_ == call.id) {
-        recordedName = name;
-      }
-    }
-    always_assert_flog(call.id == id, "{} != {}", recordedName, replayedName);
-  }
+  always_assert_flog(call.ptr == ptr, "{} != {}", getNativeFuncName(call.ptr),
+    getNativeFuncName(ptr));
   for (auto i{call.stdouts.begin()}; i; ++i) {
     g_context->write(i.second().asCStrRef());
   }

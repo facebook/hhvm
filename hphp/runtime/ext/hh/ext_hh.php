@@ -97,7 +97,7 @@ function serialize_memoize_param(mixed $param): arraykey;
  *    or for all static memoized methods if $func is null
  *  - if $cls is null, clear memoization cache for $func
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function clear_static_memoization(?string $cls, ?string $func = null) : bool;
 
 <<__Native>>
@@ -119,13 +119,13 @@ function ffp_parse_string(string $program)[]: ParseTree {
  * Operates on a single class at a time. Clearing the cache for $cls::$func
  * does not clear the cache for $otherClass::$func, for any other class.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function clear_lsb_memoization(string $cls, ?string $func = null) : bool;
 
 /**
  * Clear memoization data on object instance
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function clear_instance_memoization(object $obj) : bool;
 
 /**
@@ -181,7 +181,7 @@ function dynamic_fun(string $name)[]: mixed;
  * Construct a cls_meth pointer for the method $cls::$meth. The method should be
  * a static method marked __DynamicallyCallable.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function dynamic_class_meth(string $cls, string $meth)[]: mixed;
 
 /**

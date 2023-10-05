@@ -54,7 +54,7 @@ struct Recorder {
   template<auto f>
   static auto wrapNativeFunc(const char* name) {
     using Wrapper = WrapNativeFunc<MethodToFunc<f>::value>;
-    addNativeFuncName(Wrapper::id, name);
+    addNativeFuncName(Wrapper::ptr, name);
     return Wrapper::wrapper;
   }
 
@@ -66,21 +66,22 @@ struct Recorder {
 
   template<typename R, typename... A, R(*f)(A...)>
   struct WrapNativeFunc<f> {
-    inline static const auto id{reinterpret_cast<std::uintptr_t>(f)};
+    static const NativeFunction ptr;
     static R wrapper(A... args) {
       if (const auto recorder{get()}; UNLIKELY(recorder->m_enabled)) {
-        return recorder->recordNativeCall(f, id, std::forward<A>(args)...);
-      } else {
-        return f(std::forward<A>(args)...);
+        static const auto shouldRecord{shouldRecordReplay(ptr)};
+        if (shouldRecord) {
+          return recorder->recordNativeCall(f, ptr, std::forward<A>(args)...);
+        }
       }
+      return f(std::forward<A>(args)...);
     }
   };
 
-  static void addNativeFuncName(std::uintptr_t id, const char* name);
   static Recorder* get();
   static StdoutHook* getStdoutHook();
   void onNativeCallArg(const String& arg);
-  void onNativeCallEntry(std::uintptr_t id);
+  void onNativeCallEntry(NativeFunction ptr);
   void onNativeCallExit();
   void onNativeCallReturn(const String& ret);
   void onNativeCallThrow(std::exception_ptr exc);
@@ -90,8 +91,8 @@ struct Recorder {
   Array toArray() const;
 
   template<typename R, typename... A>
-  R recordNativeCall(R(*f)(A...), std::uintptr_t id, A&&... args) {
-    onNativeCallEntry(id);
+  R recordNativeCall(R(*f)(A...), NativeFunction ptr, A&&... args) {
+    onNativeCallEntry(ptr);
     std::conditional_t<std::is_void_v<R>, std::nullptr_t, R> ret;
     std::exception_ptr exc;
     try {
@@ -135,5 +136,9 @@ struct Recorder {
   Array m_serverGlobal;
   req::hash_map<const c_ExternalThreadEventWaitHandle*, std::size_t> m_threads;
 };
+
+template<typename R, typename... A, R(*f)(A...)>
+const NativeFunction Recorder::WrapNativeFunc<f>::ptr{
+  reinterpret_cast<NativeFunction>(wrapper)};
 
 } // namespace HPHP

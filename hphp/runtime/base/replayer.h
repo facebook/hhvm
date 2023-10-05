@@ -16,9 +16,12 @@
 
 #pragma once
 
+#include <bit>
+#include <cstddef>
 #include <cstdint>
 #include <deque>
 #include <string>
+#include <type_traits>
 #include <unordered_map>
 #include <utility>
 
@@ -55,7 +58,7 @@ struct Replayer {
   template<auto f>
   static auto wrapNativeFunc(const char* name) {
     using Wrapper = WrapNativeFunc<MethodToFunc<f>::value>;
-    get().m_nativeFuncNames[name] = Wrapper::id;
+    addNativeFuncName(Wrapper::ptr, name);
     return Wrapper::wrapper;
   }
 
@@ -66,26 +69,28 @@ struct Replayer {
 
   template<typename R, typename... A, R(*f)(A...)>
   struct WrapNativeFunc<f> {
-    inline static const auto id{reinterpret_cast<std::uintptr_t>(f)};
+    static const NativeFunction ptr;
     static R wrapper(A... args) {
-      if (auto& replayer{get()}; !replayer.m_inNativeCall) {
-        replayer.m_inNativeCall = true;
-        SCOPE_EXIT { replayer.m_inNativeCall = false; };
-        return replayer.replayNativeFunc<R>(id, std::forward<A>(args)...);
-      } else {
-        return f(std::forward<A>(args)...);
+      static const auto shouldReplay{shouldRecordReplay(ptr)};
+      if (shouldReplay) {
+        if (auto& replayer{get()}; !replayer.m_inNativeCall) {
+          replayer.m_inNativeCall = true;
+          SCOPE_EXIT { replayer.m_inNativeCall = false; };
+          return replayer.replayNativeCall<R>(ptr, std::forward<A>(args)...);
+        }
       }
+      return f(std::forward<A>(args)...);
     }
   };
 
   Object makeWaitHandle(const NativeCall& call);
   template<typename T> static void nativeArg(const String& recordedArg, T arg);
-  NativeCall popNativeCall(std::uintptr_t id);
+  NativeCall popNativeCall(NativeFunction ptr);
   template<typename T> static T unserialize(const String& recordedValue);
 
   template<typename R, typename... A>
-  R replayNativeFunc(std::uintptr_t id, A&&... args) {
-    const auto call{popNativeCall(id)};
+  R replayNativeCall(NativeFunction ptr, A&&... args) {
+    const auto call{popNativeCall(ptr)};
     std::int64_t i{-1};
     (nativeArg<A>(call.args[++i].asCStrRef(), std::forward<A>(args)), ...);
     if constexpr (std::is_same_v<R, Object>) {
@@ -95,7 +100,7 @@ struct Replayer {
     }
     if (call.ret.empty()) {
       // NOLINTNEXTLINE(facebook-hte-ThrowNonStdExceptionIssue)
-      throw unserialize<Object>(call.exc);
+      throw req::root<Object>(unserialize<Object>(call.exc));
     } else {
       return unserialize<R>(call.ret);
     }
@@ -106,10 +111,13 @@ struct Replayer {
   bool m_inNativeCall;
   std::deque<NativeCall> m_nativeCalls;
   std::deque<NativeEvent> m_nativeEvents;
-  std::unordered_map<std::string, std::uintptr_t> m_nativeFuncNames;
   std::size_t m_nextThreadCreationOrder;
   Array m_serverGlobal;
   std::unordered_map<std::size_t, c_ExternalThreadEventWaitHandle*> m_threads;
 };
+
+template<typename R, typename... A, R(*f)(A...)>
+const NativeFunction Replayer::WrapNativeFunc<f>::ptr{
+  reinterpret_cast<NativeFunction>(wrapper)};
 
 } // namespace HPHP

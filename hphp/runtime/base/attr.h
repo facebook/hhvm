@@ -189,6 +189,9 @@ enum Attr {
   // Is this an "enum class" (in the sense of the "enum dependent types" feature)?
   AttrEnumClass            = (1u << 30), //    X  |          |         //
                                          //       |          |         //
+  // Is this a native function whose calls should not be included in recordings?
+  AttrNoRecording          = (1u << 30), //       |          |    X    //
+                                         //       |          |         //
   // XXX: The enum is used as a bitmask and without a value in the highest bit
   //      we get assertions in dev builds.
   AttrUnusedMaxAttr        = (1u << 31),

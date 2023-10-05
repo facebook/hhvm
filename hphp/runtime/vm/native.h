@@ -89,17 +89,15 @@ struct Extension;
  */
 
 #define REGISTER_NATIVE_FUNC(functable, name, f) do { \
-  if constexpr (shouldRecordReplay(name)) { \
-    if (RO::EvalRecordReplay) { \
-      if (RO::EvalRecordSampleRate) { \
-        const auto wrapper{Recorder::wrapNativeFunc<f>(name)}; \
-        Native::registerNativeFunc(functable, name, wrapper); \
-        break; \
-      } else if (RO::EvalReplay) { \
-        const auto wrapper{Replayer::wrapNativeFunc<f>(name)}; \
-        Native::registerNativeFunc(functable, name, wrapper); \
-        break; \
-      } \
+  if (RO::EvalRecordReplay) { \
+    if (RO::EvalRecordSampleRate) { \
+      const auto wrapper{Recorder::wrapNativeFunc<f>(name)}; \
+      Native::registerNativeFunc(functable, name, wrapper); \
+      break; \
+    } else if (RO::EvalReplay) { \
+      const auto wrapper{Replayer::wrapNativeFunc<f>(name)}; \
+      Native::registerNativeFunc(functable, name, wrapper); \
+      break; \
     } \
   } \
   Native::registerNativeFunc(functable, name, f); \

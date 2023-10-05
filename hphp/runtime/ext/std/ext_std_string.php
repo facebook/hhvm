@@ -102,7 +102,7 @@ function vsprintf(mixed $format, mixed $args)[]: mixed;
  *
  * @param string $format - See sprintf() for a description of format.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function printf(mixed $format, mixed... $args): mixed;
 
 /* Output a formatted string
@@ -113,5 +113,5 @@ function printf(mixed $format, mixed... $args): mixed;
  * Operates as printf() but accepts an array of arguments,
  * rather than a variable number of arguments.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function vprintf(mixed $format, mixed $args): mixed;

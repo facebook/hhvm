@@ -22,7 +22,6 @@
 #include <limits>
 #include <sstream>
 #include <stdexcept>
-#include <unordered_map>
 
 #include <folly/Random.h>
 
@@ -55,7 +54,6 @@ namespace HPHP {
 
 namespace {
   static std::string g_entryPoint;
-  static std::unordered_map<std::uintptr_t, std::string> g_nativeFuncNames;
 } // namespace
 
 void Recorder::onHasReceived(bool received) {
@@ -189,10 +187,6 @@ struct Recorder::StdoutHook final : public ExecutionContext::StdoutHook {
   }
 };
 
-void Recorder::addNativeFuncName(std::uintptr_t id, const char* name) {
-  g_nativeFuncNames[id] = name;
-}
-
 Recorder* Recorder::get() {
   return g_context->m_recorder ? &g_context->m_recorder.value() : nullptr;
 }
@@ -287,9 +281,9 @@ void Recorder::onNativeCallArg(const String& arg) {
   m_nativeCalls.back().args.append(arg);
 }
 
-void Recorder::onNativeCallEntry(std::uintptr_t id) {
+void Recorder::onNativeCallEntry(NativeFunction ptr) {
   static LoggerHook loggerHook;
-  m_nativeCalls.emplace_back().id = id;
+  m_nativeCalls.emplace_back().ptr = ptr;
   g_context->addStdoutHook(getStdoutHook());
   g_context->backupSession();
   g_context->clearUserErrorHandlers();
@@ -368,9 +362,10 @@ Array Recorder::toArray() const {
   VecInit nativeCalls{numNativeCall};
   DictInit nativeFuncIds{numNativeCall};
   for (std::size_t i{0}; i < numNativeCall; i++) {
-    const auto [id, stdouts, args, ret, exc, wh]{m_nativeCalls.at(i)};
+    const auto [ptr, stdouts, args, ret, exc, wh]{m_nativeCalls.at(i)};
+    const auto id{std::bit_cast<std::int64_t>(ptr)};
     nativeCalls.append(make_vec_array(id, stdouts, args, ret, exc, wh));
-    nativeFuncIds.set(String{g_nativeFuncNames[id]}, id);
+    nativeFuncIds.set(String{getNativeFuncName(ptr)}, id);
   }
   VecInit nativeEvents{m_nativeEvents.size()};
   for (const auto& [type, value] : m_nativeEvents) {

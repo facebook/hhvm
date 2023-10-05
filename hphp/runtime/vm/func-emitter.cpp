@@ -648,6 +648,7 @@ Optional<Func::BCPtr::Token> FuncEmitter::loadBc() {
  *  "NoFCallBuiltin": Prevent FCallBuiltin optimization
  *      Effectively forces functions to generate an ActRec
  *  "NoInjection": Do not include this frame in backtraces
+ *  "NoRecording": Do not include calls to this when recording
  *
  *  e.g.   <<__Native("NoFCallBuiltin")>> function foo():mixed;
  */
@@ -655,6 +656,7 @@ static const StaticString
   s_native("__Native"),
   s_nofcallbuiltin("NoFCallBuiltin"),
   s_noinjection("NoInjection"),
+  s_norecording("NoRecording"),
   s_opcodeimpl("OpCodeImpl");
 
 int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
@@ -672,6 +674,8 @@ int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
         attrs_ |= AttrNoFCallBuiltin;
       } else if (userAttrStrVal.get()->isame(s_noinjection.get())) {
         attrs_ |= AttrNoInjection;
+      } else if (userAttrStrVal.get()->isame(s_norecording.get())) {
+        attrs_ |= AttrNoRecording;
       } else if (userAttrStrVal.get()->isame(s_opcodeimpl.get())) {
         ret |= Native::AttrOpCodeImpl;
       }

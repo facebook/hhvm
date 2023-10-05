@@ -18,7 +18,7 @@ function hphp_get_extension_info(string $name)[]: darray<string, mixed>;
  * @param Traversable $params - The parameters to pass to the function.
  * @return mixed - The result of the invoked function.
  */
-<<__Native("NoInjection")>>
+<<__Native("NoInjection", "NoRecording")>>
 function hphp_invoke(string $name, mixed $params): mixed;
 
 /**
@@ -32,7 +32,7 @@ function hphp_invoke(string $name, mixed $params): mixed;
  * @param Traversable $params - The parameters to pass to the method.
  * @return mixed - The result of the invoked method.
  */
-<<__Native("NoInjection")>>
+<<__Native("NoInjection", "NoRecording")>>
 function hphp_invoke_method(?object $obj, string $cls, string $name,
                             mixed $params): mixed;
 

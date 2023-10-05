@@ -1438,7 +1438,7 @@ namespace __SystemLib {
    * If array_map() is called by other means, it dispatches to this version
    * which allows variadic array counts and deals with bad types.
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   function array_map(mixed $callback, mixed $arr1, mixed ...$argv): mixed;
 
   <<__Native, __IsFoldable>>

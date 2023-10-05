@@ -61,7 +61,7 @@ function get_class_vars(string $class_name): mixed;
  *   instance. Returns FALSE if object is not an object.   If object is
  *   omitted when inside a class, the name of that class is returned.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function get_class(readonly mixed $object = null)[]: mixed;
 
 /**

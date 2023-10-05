@@ -256,7 +256,7 @@ function preg_quote(string $str,
  *   return value is NULL   If matches are found, the new subject will be
  *   returned, otherwise subject will be returned unchanged.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function preg_replace_callback(
   mixed $pattern,
   (function(darray<arraykey, string>)[_]: string) $callback,
@@ -273,7 +273,7 @@ function preg_replace_callback(
  * Otherwise, if an error occurs, $error is set to an error code constant from
  * the list defined in builtins_preg.hhi.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function preg_replace_callback_with_error(
   mixed $pattern,
   (function(darray<arraykey, string>)[_]: string) $callback,
@@ -314,7 +314,7 @@ function preg_replace_callback_with_error(
  *   return value is NULL   If matches are found, the new subject will be
  *   returned, otherwise subject will be returned unchanged.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function preg_replace_callback_array(mixed $patterns_and_callbacks,
                                      mixed $subject,
                                      int $limit,
@@ -328,7 +328,7 @@ function preg_replace_callback_array(mixed $patterns_and_callbacks,
  * Otherwise, if an error occurs, $error is set to an error code constant from
  * the list defined in builtins_preg.hhi.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function preg_replace_callback_array_with_error(
   mixed $patterns_and_callbacks,
   mixed $subject,

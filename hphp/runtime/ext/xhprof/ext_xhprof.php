@@ -8,7 +8,7 @@
  * @param vec<string> $functions - Only receive callbacks on these functions.
  *                                 In effect only when it's not empty.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function fb_setprofile(
   mixed $callback,
   int $flags = SETPROFILE_FLAGS_DEFAULT,

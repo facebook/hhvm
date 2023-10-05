@@ -9,7 +9,7 @@ edition = "2021"
 path = "../../file_provider.rs"
 
 [dependencies]
-anyhow = "1.0.71"
+anyhow = "=1.0.72"
 bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
 pos = { version = "0.0.0", path = "../../../pos/cargo/pos" }
 tempdir = "0.3"

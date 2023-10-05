@@ -9,7 +9,7 @@ edition = "2021"
 path = "hhvm_options.rs"
 
 [dependencies]
-anyhow = "1.0.71"
+anyhow = "=1.0.72"
 clap = { version = "4.3.5", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 hdf = { version = "0.0.0", path = "../hdf" }
 hhvm_runtime_options = { version = "0.0.0", path = "hhvm_runtime_options" }

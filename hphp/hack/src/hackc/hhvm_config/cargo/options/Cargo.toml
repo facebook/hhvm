@@ -9,6 +9,6 @@ edition = "2021"
 path = "../../hhvm_config.rs"
 
 [dependencies]
-anyhow = "1.0.71"
+anyhow = "=1.0.72"
 hhvm_options = { version = "0.0.0", path = "../../../../utils/hhvm_options" }
 options = { version = "0.0.0", path = "../../../compile/cargo/options" }

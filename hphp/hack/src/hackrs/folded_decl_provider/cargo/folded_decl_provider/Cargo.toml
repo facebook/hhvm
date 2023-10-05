@@ -9,7 +9,7 @@ edition = "2021"
 path = "../../folded_decl_provider.rs"
 
 [dependencies]
-anyhow = "1.0.71"
+anyhow = "=1.0.72"
 datastore = { version = "0.0.0", path = "../../../datastore" }
 decl_enforceability = { version = "0.0.0", path = "../../../decl_enforceability" }
 eq_modulo_pos = { version = "0.0.0", path = "../../../../utils/eq_modulo_pos" }

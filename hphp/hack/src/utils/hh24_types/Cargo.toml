@@ -9,7 +9,7 @@ edition = "2021"
 path = "hh24_types.rs"
 
 [dependencies]
-anyhow = "1.0.71"
+anyhow = "=1.0.72"
 derive_more = "0.99.17"
 file_info = { version = "0.0.0", path = "../../deps/rust/file_info" }
 hh_hash = { version = "0.0.0", path = "../hh_hash" }

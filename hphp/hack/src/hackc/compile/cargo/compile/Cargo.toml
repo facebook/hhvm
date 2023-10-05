@@ -10,7 +10,7 @@ path = "../../compile.rs"
 
 [dependencies]
 aast_parser = { version = "0.0.0", path = "../../../../parser/cargo/aast_parser" }
-anyhow = "1.0.71"
+anyhow = "=1.0.72"
 bc_to_ir = { version = "0.0.0", path = "../../../ir/conversions/bc_to_ir" }
 bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
 bumpalo = { version = "3.11.1", features = ["collections"] }

@@ -10,7 +10,7 @@ path = "compiler_ffi.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-anyhow = "1.0.71"
+anyhow = "=1.0.72"
 bincode = "1.3.3"
 bumpalo = { version = "3.11.1", features = ["collections"] }
 compile = { version = "0.0.0", path = "../compile/cargo/compile" }

@@ -9,7 +9,7 @@ edition = "2021"
 path = "../find_utils.rs"
 
 [dependencies]
-anyhow = "1.0.71"
+anyhow = "=1.0.72"
 files_to_ignore = { version = "0.0.0", path = "../files_to_ignore" }
 jwalk = "0.6"
 relative_path = { version = "0.0.0", path = "../rust/relative_path" }

@@ -6,6 +6,6 @@ version = "0.0.0"
 edition = "2021"
 
 [dependencies]
-anyhow = "1.0.71"
+anyhow = "=1.0.72"
 clap = { version = "3.2.25", features = ["derive", "env", "regex", "unicode", "wrap_help"] }
 pulldown-cmark = "0.9.1"

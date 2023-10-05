@@ -10,7 +10,7 @@ name = "hhdg"
 path = "../../hhdg.rs"
 
 [dependencies]
-anyhow = "1.0.71"
+anyhow = "=1.0.72"
 clap = { version = "3.2.25", features = ["derive", "env", "regex", "unicode", "wrap_help"] }
 depgraph_reader = { version = "0.0.0", path = "../../../cargo/depgraph_reader" }
 hash = { version = "0.0.0", path = "../../../../utils/hash" }

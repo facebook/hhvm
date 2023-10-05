@@ -12,7 +12,7 @@ doctest = false
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-anyhow = "1.0.71"
+anyhow = "=1.0.72"
 naming_table_builder = { version = "0.0.0", path = "../.." }
 ocamlrep_custom = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_ocamlpool = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }

@@ -10,7 +10,7 @@ path = "../../human_readable_dep_map/human_readable_dep_map.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-anyhow = "1.0.71"
+anyhow = "=1.0.72"
 depgraph_reader = { version = "0.0.0", path = "../depgraph_reader" }
 hash = { version = "0.0.0", path = "../../../utils/hash" }
 typing_deps_hash = { version = "0.0.0", path = "../../../deps/cargo/typing_deps_hash" }

@@ -17,7 +17,7 @@ name = "fbthrift_test"
 path = "lib.rs"
 
 [dependencies]
-anyhow = "1.0.71"
+anyhow = "=1.0.72"
 async-trait = "0.1.71"
 codegen_includer_proc_macro = { path = "../../../../../common/rust/shed/codegen_includer_proc_macro" }
 const-cstr = "0.3.0"

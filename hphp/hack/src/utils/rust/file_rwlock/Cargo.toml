@@ -9,7 +9,7 @@ edition = "2021"
 path = "../file_rwlock.rs"
 
 [dependencies]
-anyhow = "1.0.71"
+anyhow = "=1.0.72"
 fs2 = "0.4"
 libc = "0.2.139"
 serde = { version = "1.0.185", features = ["derive", "rc"] }

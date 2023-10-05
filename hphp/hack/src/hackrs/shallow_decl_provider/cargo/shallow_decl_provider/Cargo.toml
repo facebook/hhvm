@@ -9,7 +9,7 @@ edition = "2021"
 path = "../../shallow_decl_provider.rs"
 
 [dependencies]
-anyhow = "1.0.71"
+anyhow = "=1.0.72"
 datastore = { version = "0.0.0", path = "../../../datastore" }
 decl_parser = { version = "0.0.0", path = "../../../decl_parser/cargo/decl_parser" }
 itertools = "0.10.3"

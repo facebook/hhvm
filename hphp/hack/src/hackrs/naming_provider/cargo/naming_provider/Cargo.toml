@@ -9,7 +9,7 @@ edition = "2021"
 path = "../../naming_provider.rs"
 
 [dependencies]
-anyhow = "1.0.71"
+anyhow = "=1.0.72"
 hh24_types = { version = "0.0.0", path = "../../../../utils/hh24_types" }
 names = { version = "0.0.0", path = "../../../../naming/names_rust" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }

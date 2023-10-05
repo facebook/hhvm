@@ -13,7 +13,7 @@ name = "hh_naming_table_builder"
 path = "hh_naming_table_builder.rs"
 
 [dependencies]
-anyhow = "1.0.71"
+anyhow = "=1.0.72"
 bumpalo = { version = "3.11.1", features = ["collections"] }
 clap = { version = "3.2.25", features = ["derive", "env", "regex", "unicode", "wrap_help"] }
 direct_decl_parser = { version = "0.0.0", path = "../parser/api/cargo/direct_decl_parser" }

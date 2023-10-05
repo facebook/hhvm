@@ -588,27 +588,45 @@ void cgCallViolatesModuleBoundary(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgCallViolatesDeploymentBoundary(IRLS& env, const IRInstruction* inst) {
-  auto const target = [&]() -> CallSpec {
+  if (RO::RepoAuthoritative) {
+    auto const dst = dstLoc(env, inst, 0).reg();
+    auto& v = vmain(env);
+
+    auto const unit = v.makeReg();
     if (inst->src(0)->isA(TFunc)) {
-      using Fn = bool(*)(const Func*);
+      auto const func = srcLoc(env, inst, 0).reg();
+      v << load{func[Func::unitOff()], unit};
+    } else {
+      assertx(inst->src(0)->isA(TCls));
+      auto const cls = srcLoc(env, inst, 0).reg();
+      auto const preclass = v.makeReg();
+      v << load{cls[Class::preClassOff()], preclass};
+      v << load{preclass[PreClass::unitOffset()], unit};
+    }
+    v << loadb{unit[Unit::isSoftDeployedRepoOnlyOff()], dst};
+  } else {
+    auto const target = [&]() -> CallSpec {
+      if (inst->src(0)->isA(TFunc)) {
+        using Fn = bool(*)(const Func*);
+        return CallSpec::direct(
+          static_cast<Fn>(callViolatesDeploymentBoundaryHelper)
+        );
+      };
+      assertx(inst->src(0)->isA(TCls));
+      using Fn = bool(*)(const Class*);
       return CallSpec::direct(
-        static_cast<Fn>(callViolatesDeploymentBoundaryHelper)
-      );
-    };
-    assertx(inst->src(0)->isA(TCls));
-    using Fn = bool(*)(const Class*);
-    return CallSpec::direct(
-        static_cast<Fn>(callViolatesDeploymentBoundaryHelper)
-      );
-  }();
-  cgCallHelper(
-    vmain(env),
-    env,
-    target,
-    callDest(env, inst),
-    SyncOptions::None,
-    argGroup(env, inst).ssa(0)
-  );
+          static_cast<Fn>(callViolatesDeploymentBoundaryHelper)
+        );
+    }();
+    cgCallHelper(
+      vmain(env),
+      env,
+      target,
+      callDest(env, inst),
+      SyncOptions::None,
+      argGroup(env, inst).ssa(0)
+    );
+  }
 }
 
 }

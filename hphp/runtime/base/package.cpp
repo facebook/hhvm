@@ -272,7 +272,7 @@ bool PackageInfo::moduleInDeployment(const StringData* module,
 }
 
 bool PackageInfo::moduleInASoftPackage(const StringData* module) const {
-  if (!module  || module->empty()) return false;
+  if (!module || module->empty()) return false;
   for (auto& [_, deployment] : deployments()) {
     if (moduleInDeployment(module, deployment, DeployKind::Soft)) {
       return true;
@@ -287,6 +287,14 @@ hphp_fast_map<const StringData*, bool> m_moduleInActiveDeployment;
 folly::SharedMutex s_mutex;
 
 } // namespace
+
+bool PackageInfo::isModuleSoftDeployed(const StringData* module) const {
+  if (!module || module->empty()) return false;
+  if (auto const activeDeployment = getActiveDeployment()) {
+    return moduleInDeployment(module, *activeDeployment, DeployKind::Soft);
+  }
+  return false;
+}
 
 bool PackageInfo::outsideActiveDeployment(const StringData* module) const {
   if (!RO::EvalEnforceDeployment) return false;

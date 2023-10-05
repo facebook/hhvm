@@ -95,6 +95,7 @@ struct PackageInfo {
                           DeployKind deployKind) const;
 
   bool moduleInASoftPackage(const StringData* module) const;
+  bool isModuleSoftDeployed(const StringData* module) const;
 
   bool outsideActiveDeployment(const StringData* module) const;
   bool outsideActiveDeployment(const Func& callee) const;

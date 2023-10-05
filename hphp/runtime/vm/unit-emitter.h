@@ -283,6 +283,7 @@ public:
   int64_t m_sn{-1};
   const StringData* m_filepath{nullptr};
 
+  bool m_softDeployedRepoOnly{false}; // is it part of a soft package?
   bool m_ICE{false}; // internal compiler error
   bool m_fatalUnit{false}; // parse/runtime error
   UserAttributeMap m_metaData;

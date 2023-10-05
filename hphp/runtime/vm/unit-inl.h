@@ -68,6 +68,11 @@ inline bool Unit::isICE() const {
   return m_ICE;
 }
 
+inline bool Unit::isSoftDeployedRepoOnly() const {
+  assertx(RuntimeOption::RepoAuthoritative);
+  return m_softDeployedRepoOnly;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // File paths.
 

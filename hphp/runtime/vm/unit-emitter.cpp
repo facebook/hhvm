@@ -703,6 +703,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
   u->m_metaData = m_metaData;
   u->m_fileAttributes = m_fileAttributes;
   u->m_moduleName = m_moduleName;
+  u->m_softDeployedRepoOnly = m_softDeployedRepoOnly;
   u->m_ICE = m_ICE;
   u->m_deps = m_deps;
 
@@ -868,6 +869,7 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
         (m_fatalUnit)
         (m_entryPointId)
         (m_deps)
+        (m_softDeployedRepoOnly)
         (m_ICE)
         (m_missingSyms)
         (m_errorSyms);

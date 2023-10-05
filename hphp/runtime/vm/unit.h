@@ -196,6 +196,13 @@ public:
    */
   bool isICE() const;
 
+  /*
+   * Was this unit soft deployed in the current package?
+   * Only available in repo mode
+   * Invariant: RO::RepoAuthorative
+   */
+  bool isSoftDeployedRepoOnly() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // File paths.
 
@@ -534,6 +541,10 @@ public:
     return offsetof(Unit, m_moduleName);
   }
 
+  static constexpr ptrdiff_t isSoftDeployedRepoOnlyOff() {
+    return offsetof(Unit, m_softDeployedRepoOnly);
+  }
+
   const std::vector<DeclDep>& deps() const { return m_deps; }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -558,6 +569,11 @@ private:
    * unitInitLock (see unit.cpp).
    */
   std::atomic<uint8_t> m_mergeState{MergeState::Unmerged};
+
+  /* was this unit soft deployed (only set in repo mode)
+   * can't be a bitfield because we need to get its offset in irlower-call
+   */
+  bool m_softDeployedRepoOnly{false};
   bool m_interpretOnly : 1;
   bool m_extended : 1;
   bool m_ICE : 1; // was this unit the result of an internal compiler error

@@ -12,11 +12,6 @@ import (
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
-var structNames = []string{
-    "module.Foo",
-    "module.Foo2",
-}
-
 var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("module.Foo").
@@ -94,19 +89,10 @@ var structMetadatas = []*metadata.ThriftStruct{
     ),
 }
 
-var exceptionNames = []string{
-}
-
 var exceptionMetadatas = []*metadata.ThriftException{
 }
 
-var enumNames = []string{
-}
-
 var enumMetadatas = []*metadata.ThriftEnum{
-}
-
-var serviceNames = []string{
 }
 
 var serviceMetadatas = []*metadata.ThriftService{
@@ -163,8 +149,8 @@ func GetThriftMetadata() *metadata.ThriftMetadata {
 // GetStructsMetadata returns Thrift metadata for enums in the current package.
 func GetEnumsMetadata() map[string]*metadata.ThriftEnum {
     result := make(map[string]*metadata.ThriftEnum)
-    for i, enumName := range enumNames {
-        result[enumName] = enumMetadatas[i]
+    for _, enumMetadata := range enumMetadatas {
+        result[enumMetadata.GetName()] = enumMetadata
     }
     return result
 }
@@ -172,8 +158,8 @@ func GetEnumsMetadata() map[string]*metadata.ThriftEnum {
 // GetStructsMetadata returns Thrift metadata for structs in the current package.
 func GetStructsMetadata() map[string]*metadata.ThriftStruct {
     result := make(map[string]*metadata.ThriftStruct)
-    for i, structName := range structNames {
-        result[structName] = structMetadatas[i]
+    for _, structMetadata := range structMetadatas {
+        result[structMetadata.GetName()] = structMetadata
     }
     return result
 }
@@ -181,8 +167,8 @@ func GetStructsMetadata() map[string]*metadata.ThriftStruct {
 // GetStructsMetadata returns Thrift metadata for exceptions in the current package.
 func GetExceptionsMetadata() map[string]*metadata.ThriftException {
     result := make(map[string]*metadata.ThriftException)
-    for i, exceptionName := range exceptionNames {
-        result[exceptionName] = exceptionMetadatas[i]
+    for _, exceptionMetadata := range exceptionMetadatas {
+        result[exceptionMetadata.GetName()] = exceptionMetadata
     }
     return result
 }
@@ -190,8 +176,8 @@ func GetExceptionsMetadata() map[string]*metadata.ThriftException {
 // GetStructsMetadata returns Thrift metadata for services in the current package.
 func GetServicesMetadata() map[string]*metadata.ThriftService {
     result := make(map[string]*metadata.ThriftService)
-    for i, serviceName := range serviceNames {
-        result[serviceName] = serviceMetadatas[i]
+    for _, serviceMetadata := range serviceMetadatas {
+        result[serviceMetadata.GetName()] = serviceMetadata
     }
     return result
 }

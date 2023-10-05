@@ -24,7 +24,7 @@
       {{#type:typedef?}}{{!
         }}{{#type:typedef}}
         {{program:metadata_qualifier}}NewThriftTypedefType().
-            SetName("{{typedef:program_name}}.{{typedef:name}}").
+            SetName("{{typedef:scoped_name}}").
             SetUnderlyingType(
               {{#type:typedef_type}}
               {{> metadata/metadata_type}}
@@ -39,18 +39,18 @@
       }}{{#type:enum?}}{{!
         }}{{#type:enum}}
         {{program:metadata_qualifier}}NewThriftEnumType().
-            SetName("{{enum:program_name}}.{{enum:name}}"),
+            SetName("{{enum:scoped_name}}"),
         {{/type:enum}}{{!
       }}{{/type:enum?}}{{!
       }}{{#type:struct?}}{{!
         }}{{#type:struct}}{{!
         }}{{#struct:union?}}
         {{program:metadata_qualifier}}NewThriftUnionType().
-            SetName("{{struct:program_name}}.{{struct:name}}"),
+            SetName("{{struct:scoped_name}}"),
         {{/struct:union?}}{{!
         }}{{^struct:union?}}
         {{program:metadata_qualifier}}NewThriftStructType().
-            SetName("{{struct:program_name}}.{{struct:name}}"),
+            SetName("{{struct:scoped_name}}"),
         {{/struct:union?}}{{!
         }}{{/type:struct}}{{!
       }}{{/type:struct?}}{{!

@@ -20,11 +20,11 @@
 
 }}
 {{program:metadata_qualifier}}NewThriftException().
-    SetName("{{struct:program_name}}.{{struct:name}}").
+    SetName("{{struct:scoped_name}}"){{#struct:fields?}}.
     SetFields(
         []*{{program:metadata_qualifier}}ThriftField{
             {{#struct:fields_sorted}}
             {{> metadata/field_metadata}},
             {{/struct:fields_sorted}}
         },
-    )
+    ){{/struct:fields?}}

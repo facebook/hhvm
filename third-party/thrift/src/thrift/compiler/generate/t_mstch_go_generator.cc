@@ -163,7 +163,7 @@ class mstch_go_enum : public mstch_enum {
         {
             {"enum:go_name", &mstch_go_enum::go_name},
             {"enum:go_qualified_name", &mstch_go_enum::go_qualified_name},
-            {"enum:program_name", &mstch_go_enum::program_name},
+            {"enum:scoped_name", &mstch_go_enum::scoped_name},
         });
   }
 
@@ -173,7 +173,7 @@ class mstch_go_enum : public mstch_enum {
     auto name = go::munge_ident(enum_->name());
     return prefix + name;
   }
-  mstch::node program_name() { return enum_->program()->name(); }
+  mstch::node scoped_name() { return enum_->get_scoped_name(); }
 
  private:
   go::codegen_data& data_;
@@ -452,7 +452,7 @@ class mstch_go_struct : public mstch_struct {
             {"struct:resp?", &mstch_go_struct::is_resp_struct},
             {"struct:req?", &mstch_go_struct::is_req_struct},
             {"struct:fields_sorted", &mstch_go_struct::fields_sorted},
-            {"struct:program_name", &mstch_go_struct::program_name},
+            {"struct:scoped_name", &mstch_go_struct::scoped_name},
         });
   }
 
@@ -489,7 +489,7 @@ class mstch_go_struct : public mstch_struct {
   mstch::node fields_sorted() {
     return make_mstch_fields(struct_->get_sorted_members());
   }
-  mstch::node program_name() { return struct_->program()->name(); }
+  mstch::node scoped_name() { return struct_->get_scoped_name(); }
 
  private:
   go::codegen_data& data_;
@@ -538,7 +538,7 @@ class mstch_go_service : public mstch_service {
             {"service:go_package_alias_prefix",
              &mstch_go_service::go_package_alias_prefix_},
             {"service:req_resp_structs", &mstch_go_service::req_resp_structs},
-            {"service:program_name", &mstch_go_service::program_name},
+            {"service:scoped_name", &mstch_go_service::scoped_name},
         });
   }
 
@@ -551,7 +551,7 @@ class mstch_go_service : public mstch_service {
   mstch::node go_package_alias_prefix_() {
     return data_.go_package_alias_prefix(service_->program());
   }
-  mstch::node program_name() { return service_->program()->name(); }
+  mstch::node scoped_name() { return service_->get_scoped_name(); }
 
   mstch::node req_resp_structs() {
     auto req_resp_structs =
@@ -672,7 +672,7 @@ class mstch_go_typedef : public mstch_typedef {
             {"typedef:go_qualified_read_func",
              &mstch_go_typedef::go_qualified_read_func},
             {"typedef:placeholder?", &mstch_go_typedef::is_placeholder},
-            {"typedef:program_name", &mstch_go_typedef::program_name},
+            {"typedef:scoped_name", &mstch_go_typedef::scoped_name},
         });
   }
   mstch::node go_name() { return go_name_(); }
@@ -710,7 +710,7 @@ class mstch_go_typedef : public mstch_typedef {
     // "actual" types if order to generate code properly.
     return typedef_->typedef_kind() != t_typedef::kind::defined;
   }
-  mstch::node program_name() { return typedef_->program()->name(); }
+  mstch::node scoped_name() { return typedef_->get_scoped_name(); }
 
  private:
   go::codegen_data& data_;

@@ -12,42 +12,6 @@ import (
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
-var structNames = []string{
-    "module.MyAnnotation",
-    "module.Foo",
-    "module.Baz",
-    "module.Bar",
-    "module.DirectlyAdapted",
-    "module.IndependentDirectlyAdapted",
-    "module.StructWithFieldAdapter",
-    "module.TerseAdaptedFields",
-    "module.B",
-    "module.A",
-    "module.Config",
-    "module.MyStruct",
-    "module.AdaptTestStruct",
-    "module.AdaptTemplatedTestStruct",
-    "module.AdaptTemplatedNestedTestStruct",
-    "module.AdaptTestUnion",
-    "module.AdaptedStruct",
-    "module.DirectlyAdaptedStruct",
-    "module.StructFieldAdaptedStruct",
-    "module.CircularAdaptee",
-    "module.CircularStruct",
-    "module.ReorderedStruct",
-    "module.DeclaredAfterStruct",
-    "module.RenamedStruct",
-    "module.SameNamespaceStruct",
-    "module.HeapAllocated",
-    "module.MoveOnly",
-    "module.AlsoMoveOnly",
-    "module.ApplyAdapter",
-    "module.TransitiveAdapted",
-    "module.CountingStruct",
-    "module.Person",
-    "module.Person2",
-}
-
 var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("module.MyAnnotation").
@@ -785,11 +749,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     ),
     metadata.NewThriftStruct().
     SetName("module.A").
-    SetIsUnion(false).
-    SetFields(
-        []*metadata.ThriftField{
-        },
-    ),
+    SetIsUnion(false),
     metadata.NewThriftStruct().
     SetName("module.Config").
     SetIsUnion(false).
@@ -1577,11 +1537,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     ),
     metadata.NewThriftStruct().
     SetName("module.DeclaredAfterStruct").
-    SetIsUnion(false).
-    SetFields(
-        []*metadata.ThriftField{
-        },
-    ),
+    SetIsUnion(false),
     metadata.NewThriftStruct().
     SetName("module.RenamedStruct").
     SetIsUnion(false).
@@ -1618,11 +1574,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     ),
     metadata.NewThriftStruct().
     SetName("module.HeapAllocated").
-    SetIsUnion(false).
-    SetFields(
-        []*metadata.ThriftField{
-        },
-    ),
+    SetIsUnion(false),
     metadata.NewThriftStruct().
     SetName("module.MoveOnly").
     SetIsUnion(false).
@@ -1660,18 +1612,10 @@ var structMetadatas = []*metadata.ThriftStruct{
     ),
     metadata.NewThriftStruct().
     SetName("module.ApplyAdapter").
-    SetIsUnion(false).
-    SetFields(
-        []*metadata.ThriftField{
-        },
-    ),
+    SetIsUnion(false),
     metadata.NewThriftStruct().
     SetName("module.TransitiveAdapted").
-    SetIsUnion(false).
-    SetFields(
-        []*metadata.ThriftField{
-        },
-    ),
+    SetIsUnion(false),
     metadata.NewThriftStruct().
     SetName("module.CountingStruct").
     SetIsUnion(false).
@@ -1751,15 +1695,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     ),
 }
 
-var exceptionNames = []string{
-}
-
 var exceptionMetadatas = []*metadata.ThriftException{
-}
-
-var enumNames = []string{
-    "module.Color",
-    "module.ThriftAdaptedEnum",
 }
 
 var enumMetadatas = []*metadata.ThriftEnum{
@@ -1781,11 +1717,6 @@ var enumMetadatas = []*metadata.ThriftEnum{
             1: "One",
         },
     ),
-}
-
-var serviceNames = []string{
-    "module.Service",
-    "module.AdapterService",
 }
 
 var serviceMetadatas = []*metadata.ThriftService{
@@ -1981,8 +1912,8 @@ func GetThriftMetadata() *metadata.ThriftMetadata {
 // GetStructsMetadata returns Thrift metadata for enums in the current package.
 func GetEnumsMetadata() map[string]*metadata.ThriftEnum {
     result := make(map[string]*metadata.ThriftEnum)
-    for i, enumName := range enumNames {
-        result[enumName] = enumMetadatas[i]
+    for _, enumMetadata := range enumMetadatas {
+        result[enumMetadata.GetName()] = enumMetadata
     }
     return result
 }
@@ -1990,8 +1921,8 @@ func GetEnumsMetadata() map[string]*metadata.ThriftEnum {
 // GetStructsMetadata returns Thrift metadata for structs in the current package.
 func GetStructsMetadata() map[string]*metadata.ThriftStruct {
     result := make(map[string]*metadata.ThriftStruct)
-    for i, structName := range structNames {
-        result[structName] = structMetadatas[i]
+    for _, structMetadata := range structMetadatas {
+        result[structMetadata.GetName()] = structMetadata
     }
     return result
 }
@@ -1999,8 +1930,8 @@ func GetStructsMetadata() map[string]*metadata.ThriftStruct {
 // GetStructsMetadata returns Thrift metadata for exceptions in the current package.
 func GetExceptionsMetadata() map[string]*metadata.ThriftException {
     result := make(map[string]*metadata.ThriftException)
-    for i, exceptionName := range exceptionNames {
-        result[exceptionName] = exceptionMetadatas[i]
+    for _, exceptionMetadata := range exceptionMetadatas {
+        result[exceptionMetadata.GetName()] = exceptionMetadata
     }
     return result
 }
@@ -2008,8 +1939,8 @@ func GetExceptionsMetadata() map[string]*metadata.ThriftException {
 // GetStructsMetadata returns Thrift metadata for services in the current package.
 func GetServicesMetadata() map[string]*metadata.ThriftService {
     result := make(map[string]*metadata.ThriftService)
-    for i, serviceName := range serviceNames {
-        result[serviceName] = serviceMetadatas[i]
+    for _, serviceMetadata := range serviceMetadatas {
+        result[serviceMetadata.GetName()] = serviceMetadata
     }
     return result
 }

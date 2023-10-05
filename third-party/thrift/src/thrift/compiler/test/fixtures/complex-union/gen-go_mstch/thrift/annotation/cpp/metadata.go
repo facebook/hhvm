@@ -12,24 +12,6 @@ import (
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
-var structNames = []string{
-    "cpp.Type",
-    "cpp.Ref",
-    "cpp.Lazy",
-    "cpp.DisableLazyChecksum",
-    "cpp.Adapter",
-    "cpp.PackIsset",
-    "cpp.MinimizePadding",
-    "cpp.TriviallyRelocatable",
-    "cpp.ScopedEnumAsUnionType",
-    "cpp.StrongType",
-    "cpp.FieldInterceptor",
-    "cpp.UseOpEncode",
-    "cpp.EnumType",
-    "cpp.Frozen2Exclude",
-    "cpp.Frozen2RequiresCompleteContainerParams",
-}
-
 var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("cpp.Type").
@@ -95,11 +77,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     ),
     metadata.NewThriftStruct().
     SetName("cpp.DisableLazyChecksum").
-    SetIsUnion(false).
-    SetFields(
-        []*metadata.ThriftField{
-        },
-    ),
+    SetIsUnion(false),
     metadata.NewThriftStruct().
     SetName("cpp.Adapter").
     SetIsUnion(false).
@@ -176,32 +154,16 @@ var structMetadatas = []*metadata.ThriftStruct{
     ),
     metadata.NewThriftStruct().
     SetName("cpp.MinimizePadding").
-    SetIsUnion(false).
-    SetFields(
-        []*metadata.ThriftField{
-        },
-    ),
+    SetIsUnion(false),
     metadata.NewThriftStruct().
     SetName("cpp.TriviallyRelocatable").
-    SetIsUnion(false).
-    SetFields(
-        []*metadata.ThriftField{
-        },
-    ),
+    SetIsUnion(false),
     metadata.NewThriftStruct().
     SetName("cpp.ScopedEnumAsUnionType").
-    SetIsUnion(false).
-    SetFields(
-        []*metadata.ThriftField{
-        },
-    ),
+    SetIsUnion(false),
     metadata.NewThriftStruct().
     SetName("cpp.StrongType").
-    SetIsUnion(false).
-    SetFields(
-        []*metadata.ThriftField{
-        },
-    ),
+    SetIsUnion(false),
     metadata.NewThriftStruct().
     SetName("cpp.FieldInterceptor").
     SetIsUnion(false).
@@ -231,11 +193,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     ),
     metadata.NewThriftStruct().
     SetName("cpp.UseOpEncode").
-    SetIsUnion(false).
-    SetFields(
-        []*metadata.ThriftField{
-        },
-    ),
+    SetIsUnion(false),
     metadata.NewThriftStruct().
     SetName("cpp.EnumType").
     SetIsUnion(false).
@@ -256,29 +214,13 @@ var structMetadatas = []*metadata.ThriftStruct{
     ),
     metadata.NewThriftStruct().
     SetName("cpp.Frozen2Exclude").
-    SetIsUnion(false).
-    SetFields(
-        []*metadata.ThriftField{
-        },
-    ),
+    SetIsUnion(false),
     metadata.NewThriftStruct().
     SetName("cpp.Frozen2RequiresCompleteContainerParams").
-    SetIsUnion(false).
-    SetFields(
-        []*metadata.ThriftField{
-        },
-    ),
-}
-
-var exceptionNames = []string{
+    SetIsUnion(false),
 }
 
 var exceptionMetadatas = []*metadata.ThriftException{
-}
-
-var enumNames = []string{
-    "cpp.RefType",
-    "cpp.EnumUnderlyingType",
 }
 
 var enumMetadatas = []*metadata.ThriftEnum{
@@ -302,9 +244,6 @@ var enumMetadatas = []*metadata.ThriftEnum{
             4: "U32",
         },
     ),
-}
-
-var serviceNames = []string{
 }
 
 var serviceMetadatas = []*metadata.ThriftService{
@@ -361,8 +300,8 @@ func GetThriftMetadata() *metadata.ThriftMetadata {
 // GetStructsMetadata returns Thrift metadata for enums in the current package.
 func GetEnumsMetadata() map[string]*metadata.ThriftEnum {
     result := make(map[string]*metadata.ThriftEnum)
-    for i, enumName := range enumNames {
-        result[enumName] = enumMetadatas[i]
+    for _, enumMetadata := range enumMetadatas {
+        result[enumMetadata.GetName()] = enumMetadata
     }
     return result
 }
@@ -370,8 +309,8 @@ func GetEnumsMetadata() map[string]*metadata.ThriftEnum {
 // GetStructsMetadata returns Thrift metadata for structs in the current package.
 func GetStructsMetadata() map[string]*metadata.ThriftStruct {
     result := make(map[string]*metadata.ThriftStruct)
-    for i, structName := range structNames {
-        result[structName] = structMetadatas[i]
+    for _, structMetadata := range structMetadatas {
+        result[structMetadata.GetName()] = structMetadata
     }
     return result
 }
@@ -379,8 +318,8 @@ func GetStructsMetadata() map[string]*metadata.ThriftStruct {
 // GetStructsMetadata returns Thrift metadata for exceptions in the current package.
 func GetExceptionsMetadata() map[string]*metadata.ThriftException {
     result := make(map[string]*metadata.ThriftException)
-    for i, exceptionName := range exceptionNames {
-        result[exceptionName] = exceptionMetadatas[i]
+    for _, exceptionMetadata := range exceptionMetadatas {
+        result[exceptionMetadata.GetName()] = exceptionMetadata
     }
     return result
 }
@@ -388,8 +327,8 @@ func GetExceptionsMetadata() map[string]*metadata.ThriftException {
 // GetStructsMetadata returns Thrift metadata for services in the current package.
 func GetServicesMetadata() map[string]*metadata.ThriftService {
     result := make(map[string]*metadata.ThriftService)
-    for i, serviceName := range serviceNames {
-        result[serviceName] = serviceMetadatas[i]
+    for _, serviceMetadata := range serviceMetadatas {
+        result[serviceMetadata.GetName()] = serviceMetadata
     }
     return result
 }

@@ -20,12 +20,12 @@
 
 }}
 {{program:metadata_qualifier}}NewThriftStruct().
-    SetName("{{struct:program_name}}.{{struct:name}}").
-    SetIsUnion({{#struct:union?}}true{{/struct:union?}}{{^struct:union?}}false{{/struct:union?}}).
+    SetName("{{struct:scoped_name}}").
+    SetIsUnion({{#struct:union?}}true{{/struct:union?}}{{^struct:union?}}false{{/struct:union?}}){{#struct:fields?}}.
     SetFields(
         []*{{program:metadata_qualifier}}ThriftField{
             {{#struct:fields_sorted}}
             {{> metadata/field_metadata}},
             {{/struct:fields_sorted}}
         },
-    )
+    ){{/struct:fields?}}

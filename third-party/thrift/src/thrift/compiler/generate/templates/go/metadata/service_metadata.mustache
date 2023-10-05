@@ -20,10 +20,10 @@
 
 }}
 {{program:metadata_qualifier}}NewThriftService().
-    SetName("{{service:program_name}}.{{service:name}}").
+    SetName("{{service:scoped_name}}").
     {{#service:extends?}}
     {{#service:extends}}
-    SetParent(thrift.StringPtr("{{service:program_name}}.{{service:name}}")).
+    SetParent(thrift.StringPtr("{{service:scoped_name}}")).
     {{/service:extends}}
     {{/service:extends?}}
     SetFunctions(

@@ -16,35 +16,13 @@ var _ = id.GoUnusedProtection__
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
-var structNames = []string{
-    "patch.GeneratePatch",
-    "patch.AssignOnlyPatch",
-    "patch.BoolPatch",
-    "patch.BytePatch",
-    "patch.I16Patch",
-    "patch.I32Patch",
-    "patch.I64Patch",
-    "patch.FloatPatch",
-    "patch.DoublePatch",
-    "patch.StringPatch",
-    "patch.BinaryPatch",
-}
-
 var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("patch.GeneratePatch").
-    SetIsUnion(false).
-    SetFields(
-        []*metadata.ThriftField{
-        },
-    ),
+    SetIsUnion(false),
     metadata.NewThriftStruct().
     SetName("patch.AssignOnlyPatch").
-    SetIsUnion(false).
-    SetFields(
-        []*metadata.ThriftField{
-        },
-    ),
+    SetIsUnion(false),
     metadata.NewThriftStruct().
     SetName("patch.BoolPatch").
     SetIsUnion(false).
@@ -418,14 +396,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     ),
 }
 
-var exceptionNames = []string{
-}
-
 var exceptionMetadatas = []*metadata.ThriftException{
-}
-
-var enumNames = []string{
-    "patch.PatchOp",
 }
 
 var enumMetadatas = []*metadata.ThriftEnum{
@@ -445,9 +416,6 @@ var enumMetadatas = []*metadata.ThriftEnum{
             9: "Put",
         },
     ),
-}
-
-var serviceNames = []string{
 }
 
 var serviceMetadatas = []*metadata.ThriftService{
@@ -512,8 +480,8 @@ func GetThriftMetadata() *metadata.ThriftMetadata {
 // GetStructsMetadata returns Thrift metadata for enums in the current package.
 func GetEnumsMetadata() map[string]*metadata.ThriftEnum {
     result := make(map[string]*metadata.ThriftEnum)
-    for i, enumName := range enumNames {
-        result[enumName] = enumMetadatas[i]
+    for _, enumMetadata := range enumMetadatas {
+        result[enumMetadata.GetName()] = enumMetadata
     }
     return result
 }
@@ -521,8 +489,8 @@ func GetEnumsMetadata() map[string]*metadata.ThriftEnum {
 // GetStructsMetadata returns Thrift metadata for structs in the current package.
 func GetStructsMetadata() map[string]*metadata.ThriftStruct {
     result := make(map[string]*metadata.ThriftStruct)
-    for i, structName := range structNames {
-        result[structName] = structMetadatas[i]
+    for _, structMetadata := range structMetadatas {
+        result[structMetadata.GetName()] = structMetadata
     }
     return result
 }
@@ -530,8 +498,8 @@ func GetStructsMetadata() map[string]*metadata.ThriftStruct {
 // GetStructsMetadata returns Thrift metadata for exceptions in the current package.
 func GetExceptionsMetadata() map[string]*metadata.ThriftException {
     result := make(map[string]*metadata.ThriftException)
-    for i, exceptionName := range exceptionNames {
-        result[exceptionName] = exceptionMetadatas[i]
+    for _, exceptionMetadata := range exceptionMetadatas {
+        result[exceptionMetadata.GetName()] = exceptionMetadata
     }
     return result
 }
@@ -539,8 +507,8 @@ func GetExceptionsMetadata() map[string]*metadata.ThriftException {
 // GetStructsMetadata returns Thrift metadata for services in the current package.
 func GetServicesMetadata() map[string]*metadata.ThriftService {
     result := make(map[string]*metadata.ThriftService)
-    for i, serviceName := range serviceNames {
-        result[serviceName] = serviceMetadatas[i]
+    for _, serviceMetadata := range serviceMetadatas {
+        result[serviceMetadata.GetName()] = serviceMetadata
     }
     return result
 }

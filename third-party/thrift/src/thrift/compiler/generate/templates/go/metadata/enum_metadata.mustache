@@ -20,7 +20,7 @@
 
 }}
 {{program:metadata_qualifier}}NewThriftEnum().
-    SetName("{{enum:program_name}}.{{enum:name}}").
+    SetName("{{enum:scoped_name}}").
     SetElements(
         map[int32]string{
             {{#enum:values}}

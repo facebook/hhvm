@@ -1,5 +1,6 @@
 Code actions available:
 ------------------------------------------
+Change to ::foo (CodeActionKind: quickfix)
 Extract into variable (CodeActionKind: refactor)
 Extract into method (CodeActionKind: refactor)
 Extract shape type (CodeActionKind: refactor) SELECTED

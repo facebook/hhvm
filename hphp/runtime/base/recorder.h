@@ -20,6 +20,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <exception>
+#include <string>
 #include <type_traits>
 #include <utility>
 
@@ -43,6 +44,9 @@ struct Recorder {
   static void onProcessSleepEvents(std::int64_t now);
   static void onReceiveSomeUntil(c_ExternalThreadEventWaitHandle* received);
   static void onTryReceiveSome(c_ExternalThreadEventWaitHandle* received);
+  static void onVisitEntitiesToInvalidate();
+  static void onVisitEntitiesToInvalidateFast();
+  static void onVisitEntity(const std::string& entity);
   void requestExit();
   void requestInit();
   static void setEntryPoint(const String& entryPoint);
@@ -123,9 +127,9 @@ struct Recorder {
     }
   }
 
-  req::vector<AsioEvent> m_asioEvents;
   bool m_enabled{false};
   req::vector<NativeCall> m_nativeCalls;
+  req::vector<NativeEvent> m_nativeEvents;
   std::size_t m_nextThreadCreationOrder;
   req::hash_map<c_Awaitable*, std::size_t> m_pendingWaitHandleToNativeCall;
   Array m_serverGlobal;

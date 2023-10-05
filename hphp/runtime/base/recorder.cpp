@@ -22,7 +22,6 @@
 #include <limits>
 #include <sstream>
 #include <stdexcept>
-#include <string>
 #include <unordered_map>
 
 #include <folly/Random.h>
@@ -61,24 +60,24 @@ namespace {
 
 void Recorder::onHasReceived(bool received) {
   if (const auto recorder{get()}; UNLIKELY(recorder && recorder->m_enabled)) {
-    auto& event{recorder->m_asioEvents.emplace_back()};
-    event.type = AsioEvent::Type::HAS_RECEIVED;
+    auto& event{recorder->m_nativeEvents.emplace_back()};
+    event.type = NativeEvent::Type::HAS_RECEIVED;
     event.value.append(received);
   }
 }
 
 void Recorder::onProcessSleepEvents(std::int64_t now) {
   if (const auto recorder{get()}; UNLIKELY(recorder && recorder->m_enabled)) {
-    auto& event{recorder->m_asioEvents.emplace_back()};
-    event.type = AsioEvent::Type::PROCESS_SLEEP_EVENTS;
+    auto& event{recorder->m_nativeEvents.emplace_back()};
+    event.type = NativeEvent::Type::PROCESS_SLEEP_EVENTS;
     event.value.append(now);
   }
 }
 
 void Recorder::onReceiveSomeUntil(c_ExternalThreadEventWaitHandle* received) {
   if (const auto recorder{get()}; UNLIKELY(recorder && recorder->m_enabled)) {
-    auto& event{recorder->m_asioEvents.emplace_back()};
-    event.type = AsioEvent::Type::RECEIVE_SOME_UNTIL;
+    auto& event{recorder->m_nativeEvents.emplace_back()};
+    event.type = NativeEvent::Type::RECEIVE_SOME_UNTIL;
     for (auto wh{received}; wh != nullptr; wh = wh->getNextToProcess()) {
       event.value.append(recorder->m_threads[wh]);
     }
@@ -87,11 +86,31 @@ void Recorder::onReceiveSomeUntil(c_ExternalThreadEventWaitHandle* received) {
 
 void Recorder::onTryReceiveSome(c_ExternalThreadEventWaitHandle* received) {
   if (const auto recorder{get()}; UNLIKELY(recorder && recorder->m_enabled)) {
-    auto& event{recorder->m_asioEvents.emplace_back()};
-    event.type = AsioEvent::Type::TRY_RECEIVE_SOME;
+    auto& event{recorder->m_nativeEvents.emplace_back()};
+    event.type = NativeEvent::Type::TRY_RECEIVE_SOME;
     for (auto wh{received}; wh != nullptr; wh = wh->getNextToProcess()) {
       event.value.append(recorder->m_threads[wh]);
     }
+  }
+}
+
+void Recorder::onVisitEntitiesToInvalidate() {
+  if (const auto recorder{get()}; UNLIKELY(recorder && recorder->m_enabled)) {
+    auto& event{recorder->m_nativeEvents.emplace_back()};
+    event.type = NativeEvent::Type::VISIT_ENTITIES_TO_INVALIDATE;
+  }
+}
+
+void Recorder::onVisitEntitiesToInvalidateFast() {
+  if (const auto recorder{get()}; UNLIKELY(recorder && recorder->m_enabled)) {
+    auto& event{recorder->m_nativeEvents.emplace_back()};
+    event.type = NativeEvent::Type::VISIT_ENTITIES_TO_INVALIDATE_FAST;
+  }
+}
+
+void Recorder::onVisitEntity(const std::string& entity) {
+  if (const auto recorder{get()}; UNLIKELY(recorder && recorder->m_enabled)) {
+    recorder->m_nativeEvents.back().value.append(String{entity});
   }
 }
 
@@ -114,9 +133,9 @@ void Recorder::requestExit() {
     } catch (...) {
       Logger::FWarning("Error while recording: {}", current_exception_name());
     }
-    m_asioEvents.clear();
     m_enabled = false;
     m_nativeCalls.clear();
+    m_nativeEvents.clear();
     m_nextThreadCreationOrder = 0;
     m_pendingWaitHandleToNativeCall.clear();
     m_serverGlobal.clear();
@@ -338,10 +357,6 @@ void Recorder::resolveWaitHandles() {
 }
 
 Array Recorder::toArray() const {
-  VecInit asioEvents{m_asioEvents.size()};
-  for (const auto& [type, value] : m_asioEvents) {
-    asioEvents.append(make_vec_array(static_cast<std::int64_t>(type), value));
-  }
   DictInit files{g_context->m_evaledFiles.size()};
   for (const auto& [k, _] : g_context->m_evaledFiles) {
     const auto path{std::filesystem::absolute(k->data())};
@@ -357,15 +372,19 @@ Array Recorder::toArray() const {
     nativeCalls.append(make_vec_array(id, stdouts, args, ret, exc, wh));
     nativeFuncIds.set(String{g_nativeFuncNames[id]}, id);
   }
+  VecInit nativeEvents{m_nativeEvents.size()};
+  for (const auto& [type, value] : m_nativeEvents) {
+    nativeEvents.append(make_vec_array(static_cast<std::int64_t>(type), value));
+  }
   return make_dict_array(
     "header", make_dict_array(
       "compilerId", compilerId(),
       "entryPoint", g_entryPoint,
       "serverGlobal", m_serverGlobal
     ),
-    "asioEvents", asioEvents.toArray(),
     "files", files.toArray(),
     "nativeCalls", nativeCalls.toArray(),
+    "nativeEvents", nativeEvents.toArray(),
     "nativeFuncIds", nativeFuncIds.toArray()
   );
 }

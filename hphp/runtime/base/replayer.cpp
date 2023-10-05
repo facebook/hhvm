@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/execution-context.h"
@@ -53,8 +54,8 @@
 namespace HPHP {
 
 Replayer::~Replayer() {
-  always_assert_flog(m_asioEvents.empty(), "{}", m_asioEvents.size());
   always_assert_flog(m_nativeCalls.empty(), "{}", m_nativeCalls.size());
+  always_assert_flog(m_nativeEvents.empty(), "{}", m_nativeEvents.size());
 }
 
 String Replayer::file(const String& path) const {
@@ -80,13 +81,6 @@ String Replayer::init(const String& path) {
   // TODO Enable compiler ID assertion after replay completes successfully.
   // always_assert_flog(compilerId == HPHP::compilerId(), "{}", compilerId);
   m_serverGlobal = header[String{"serverGlobal"}].asCArrRef();
-  for (auto i{recording[String{"asioEvents"}].asCArrRef().begin()}; i; ++i) {
-    const auto event{i.second().asCArrRef()};
-    m_asioEvents.push_back(AsioEvent{
-      static_cast<AsioEvent::Type>(event[0].asInt64Val()),
-      event[1].asCArrRef(),
-    });
-  }
   for (auto i{recording[String{"files"}].asCArrRef().begin()}; i; ++i) {
     m_files[i.first().asCStrRef().data()] = i.second().asCStrRef().data();
   }
@@ -107,32 +101,40 @@ String Replayer::init(const String& path) {
       static_cast<std::uint8_t>(call[5].asInt64Val()),
     });
   }
+  for (auto i{recording[String{"nativeEvents"}].asCArrRef().begin()}; i; ++i) {
+    const auto event{i.second().asCArrRef()};
+    always_assert_flog(event.size() == 2, "{}", event.size());
+    m_nativeEvents.push_back(NativeEvent{
+      static_cast<NativeEvent::Type>(event[0].asInt64Val()),
+      event[1].asCArrRef(),
+    });
+  }
   return header[String{"entryPoint"}].toString();
 }
 
 bool Replayer::onHasReceived() {
   auto& replayer{get()};
-  const auto event{std::move(replayer.m_asioEvents.front())};
-  replayer.m_asioEvents.pop_front();
-  always_assert(event.type == AsioEvent::Type::HAS_RECEIVED);
+  const auto event{std::move(replayer.m_nativeEvents.front())};
+  replayer.m_nativeEvents.pop_front();
+  always_assert(event.type == NativeEvent::Type::HAS_RECEIVED);
   always_assert(event.value.size() == 1);
   return event.value[0].asBooleanVal();
 }
 
 std::int64_t Replayer::onProcessSleepEvents() {
   auto& replayer{get()};
-  const auto event{std::move(replayer.m_asioEvents.front())};
-  replayer.m_asioEvents.pop_front();
-  always_assert(event.type == AsioEvent::Type::PROCESS_SLEEP_EVENTS);
+  const auto event{std::move(replayer.m_nativeEvents.front())};
+  replayer.m_nativeEvents.pop_front();
+  always_assert(event.type == NativeEvent::Type::PROCESS_SLEEP_EVENTS);
   always_assert(event.value.size() == 1);
   return event.value[0].asInt64Val();
 }
 
 c_ExternalThreadEventWaitHandle* Replayer::onReceiveSomeUntil() {
   auto& replayer{get()};
-  const auto event{std::move(replayer.m_asioEvents.front())};
-  replayer.m_asioEvents.pop_front();
-  always_assert(event.type == AsioEvent::Type::RECEIVE_SOME_UNTIL);
+  const auto event{std::move(replayer.m_nativeEvents.front())};
+  replayer.m_nativeEvents.pop_front();
+  always_assert(event.type == NativeEvent::Type::RECEIVE_SOME_UNTIL);
   c_ExternalThreadEventWaitHandle* received{nullptr};
   for (std::int64_t i{event.value.size()}; i-- > 0;) {
     const auto order{event.value[i].asInt64Val()};
@@ -146,9 +148,9 @@ c_ExternalThreadEventWaitHandle* Replayer::onReceiveSomeUntil() {
 
 c_ExternalThreadEventWaitHandle* Replayer::onTryReceiveSome() {
   auto& replayer{get()};
-  const auto event{std::move(replayer.m_asioEvents.front())};
-  replayer.m_asioEvents.pop_front();
-  always_assert(event.type == AsioEvent::Type::TRY_RECEIVE_SOME);
+  const auto event{std::move(replayer.m_nativeEvents.front())};
+  replayer.m_nativeEvents.pop_front();
+  always_assert(event.type == NativeEvent::Type::TRY_RECEIVE_SOME);
   c_ExternalThreadEventWaitHandle* received{nullptr};
   for (std::int64_t i{event.value.size()}; i-- > 0;) {
     const auto order{event.value[i].asInt64Val()};
@@ -158,6 +160,26 @@ c_ExternalThreadEventWaitHandle* Replayer::onTryReceiveSome() {
     received = wh;
   }
   return received;
+}
+
+void Replayer::onVisitEntitiesToInvalidate(const Variant& visitor) {
+  auto& replayer{get()};
+  const auto event{std::move(replayer.m_nativeEvents.front())};
+  replayer.m_nativeEvents.pop_front();
+  always_assert(event.type == NativeEvent::Type::VISIT_ENTITIES_TO_INVALIDATE);
+  for (auto i{event.value.begin()}; i; ++i) {
+    vm_call_user_func(visitor, make_vec_array(i.second().asCStrRef()));
+  }
+}
+
+void Replayer::onVisitEntitiesToInvalidateFast(const Variant& visitor) {
+  auto& replayer{get()};
+  const auto event{std::move(replayer.m_nativeEvents.front())};
+  replayer.m_nativeEvents.pop_front();
+  always_assert(event.type == NativeEvent::Type::VISIT_ENTITIES_TO_INVALIDATE_FAST);
+  for (auto i{event.value.begin()}; i; ++i) {
+    vm_call_user_func(visitor, make_vec_array(i.second().asCStrRef()));
+  }
 }
 
 void Replayer::requestInit() const {

@@ -47,6 +47,8 @@ struct Replayer {
   static std::int64_t onProcessSleepEvents();
   static c_ExternalThreadEventWaitHandle* onReceiveSomeUntil();
   static c_ExternalThreadEventWaitHandle* onTryReceiveSome();
+  static void onVisitEntitiesToInvalidate(const Variant& visitor);
+  static void onVisitEntitiesToInvalidateFast(const Variant& visitor);
   void requestInit() const;
   void setDebuggerHook(DebuggerHook* debuggerHook);
 
@@ -99,11 +101,11 @@ struct Replayer {
     }
   }
 
-  std::deque<AsioEvent> m_asioEvents;
   HPHP::DebuggerHook* m_debuggerHook;
   std::unordered_map<std::string, std::string> m_files;
   bool m_inNativeCall;
   std::deque<NativeCall> m_nativeCalls;
+  std::deque<NativeEvent> m_nativeEvents;
   std::unordered_map<std::string, std::uintptr_t> m_nativeFuncNames;
   std::size_t m_nextThreadCreationOrder;
   Array m_serverGlobal;

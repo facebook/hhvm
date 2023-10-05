@@ -52,6 +52,10 @@ constexpr bool shouldRecordReplay(std::string_view name) {
     name == "HH\\AwaitAllWaitHandle::fromVec" ||
     name == "HH\\RescheduleWaitHandle::create" ||
 
+    // Native functions for configerator which are handled separately
+    name == "ConfigeratorExtensionApi::invalidateEntitiesWithPureVistor" ||
+    name == "ConfigeratorExtensionApi::visitEntitiesToInvalidate" ||
+
     // Native functions that call back to user code
     name == "array_map" ||
     name == "call_user_func_array" ||
@@ -81,6 +85,9 @@ constexpr bool shouldRecordReplay(std::string_view name) {
     // Native functions that affect interpreter state
     name == "error_reporting" ||
     name == "fb_rename_function" ||
+    name == "HH\\clear_instance_memoization" ||
+    name == "HH\\clear_lsb_memoization" ||
+    name == "HH\\clear_static_memoization" ||
 
     // Native functions that output directly to stdout/stderr
     name == "printf" ||
@@ -135,12 +142,14 @@ struct NativeCall {
   std::uint8_t wh{0};
 };
 
-struct AsioEvent {
+struct NativeEvent {
   enum class Type {
     HAS_RECEIVED,
     PROCESS_SLEEP_EVENTS,
     RECEIVE_SOME_UNTIL,
     TRY_RECEIVE_SOME,
+    VISIT_ENTITIES_TO_INVALIDATE,
+    VISIT_ENTITIES_TO_INVALIDATE_FAST,
   };
   Type type;
   Array value{Array::CreateVec()};

@@ -157,6 +157,9 @@ enum Attr {
   // and on classes to indicate that all that class' properties are const.
   AttrIsConst              = (1u << 21), //    X  |    X     |         //
                                          //       |          |         //
+  // Set on classes where a user is allowed get a pointer to the class from a
+  // string.
+  AttrDynamicallyReferenced= (1u << 22), //    X  |          |         //
   // Set on base classes that do not have any reified classes that extend it.
   AttrNoReifiedInit        = (1u << 23), //    X  |          |         //
                                          //       |          |         //

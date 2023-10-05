@@ -688,6 +688,11 @@ public:
   bool isDynamicallyConstructible() const;
 
   /*
+   * Can a user get a pointer to this class from a string?
+   */
+  bool isDynamicallyReferenced() const;
+
+  /*
    * If the class is called dynamically should we sample the calls?
    */
   Optional<int64_t> dynConstructSampleRate() const;

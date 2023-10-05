@@ -10,6 +10,10 @@ __DynamicallyConstructible
   INSERT __DynamicallyConstructible
   built-in attribute
   Allows this class to be instantiated dynamically, based on a string of its name. HHVM will warn or error (depending on settings) on dynamic instantiations without this attribute.
+__DynamicallyReferenced
+  INSERT __DynamicallyReferenced
+  built-in attribute
+  Allows a user to get a pointer to this class from a string of its name. HHVM will warn or error (depending on settings) on dynamic references without this attribute.
 __EnableMethodTraitDiamond
   INSERT __EnableMethodTraitDiamond
   built-in attribute

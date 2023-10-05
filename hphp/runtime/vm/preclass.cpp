@@ -108,6 +108,7 @@ void PreClass::prettyPrint(std::ostream &out) const {
     out << " (no-dynamic-props)";
   }
   if (m_attrs & AttrDynamicallyConstructible) out << " (dyn_constructible)";
+  if (m_attrs & AttrDynamicallyReferenced) out << " (dyn_referenced)";
   if (m_attrs & AttrNoMock) out << " (no-mock)";
   out << std::endl;
 

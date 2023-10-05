@@ -279,6 +279,8 @@ pub mod user_attributes {
 
     pub const DYNAMICALLY_CONSTRUCTIBLE: &str = "__DynamicallyConstructible";
 
+    pub const DYNAMICALLY_REFERENCED: &str = "__DynamicallyReferenced";
+
     pub const REIFIABLE: &str = "__Reifiable";
 
     pub const NEVER_INLINE: &str = "__NEVER_INLINE";

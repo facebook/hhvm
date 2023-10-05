@@ -302,6 +302,8 @@ module UserAttributes = struct
 
   let uaDynamicallyConstructible = "__DynamicallyConstructible"
 
+  let uaDynamicallyReferenced = "__DynamicallyReferenced"
+
   let uaReifiable = "__Reifiable"
 
   let uaNeverInline = "__NEVER_INLINE"
@@ -575,6 +577,14 @@ module UserAttributes = struct
               doc =
                 "Allows this class to be instantiated dynamically, based on a string of its name."
                 ^ " HHVM will warn or error (depending on settings) on dynamic instantiations without this attribute.";
+            } );
+          ( uaDynamicallyReferenced,
+            {
+              contexts = [cls];
+              autocomplete = true;
+              doc =
+                "Allows a user to get a pointer to this class from a string of its name."
+                ^ " HHVM will warn or error (depending on settings) on dynamic references without this attribute.";
             } );
           ( uaReifiable,
             {

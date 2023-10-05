@@ -214,6 +214,7 @@ void PreClassEmitter::addUsedTrait(const StringData* traitName) {
 const StaticString
   s_NativeData("__NativeData"),
   s_DynamicallyConstructible("__DynamicallyConstructible"),
+  s_DynamicallyReferenced("__DynamicallyReferenced"),
   s_invoke("__invoke"),
   s_coeffectsProp("86coeffects");
 

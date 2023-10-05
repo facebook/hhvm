@@ -849,6 +849,10 @@ pub fn emit_class<'a, 'arena, 'decl>(
         hhbc::has_dynamically_constructible(&attributes),
     );
     flags.set(
+        Attr::AttrDynamicallyReferenced,
+        hhbc::has_dynamically_referenced(&attributes),
+    );
+    flags.set(
         Attr::AttrEnum,
         enum_type.is_some() && !hhbc::has_enum_class(&attributes),
     );

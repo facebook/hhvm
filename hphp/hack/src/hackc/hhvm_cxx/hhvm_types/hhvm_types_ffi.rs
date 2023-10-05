@@ -51,6 +51,7 @@ pub mod ffi {
         AttrDynamicallyConstructible = 0x80000,
         AttrBuiltin = 0x100000,
         AttrIsConst = 0x200000,
+        AttrDynamicallyReferenced = 0x400000,
         AttrNoReifiedInit = 0x800000,
         AttrIsMethCaller = 0x1000000,
         AttrIsClosureClass = 0x1000000,

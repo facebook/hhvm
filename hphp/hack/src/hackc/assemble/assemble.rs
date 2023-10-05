@@ -1241,6 +1241,7 @@ fn assemble_hhvm_attr(token_iter: &mut Lexer<'_>) -> Result<hhvm_types_ffi::ffi:
         b"deep_init" => Attr::AttrDeepInit,
         b"dyn_callable" => Attr::AttrDynamicallyCallable,
         b"dyn_constructible" => Attr::AttrDynamicallyConstructible,
+        b"dyn_referenced" => Attr::AttrDynamicallyReferenced,
         b"enum" => Attr::AttrEnum,
         b"enum_class" => Attr::AttrEnumClass,
         b"final" => Attr::AttrFinal,

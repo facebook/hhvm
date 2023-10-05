@@ -107,6 +107,7 @@ impl Display for FmtAttr {
                 get_bit(&mut attr, Attr::AttrBuiltin, "builtin"),
                 get_bit(&mut attr, Attr::AttrDeepInit, "deep_init"),
                 get_bit(&mut attr, Attr::AttrDynamicallyCallable, "dynamically_callable"),
+                get_bit(&mut attr, Attr::AttrDynamicallyReferenced, "dynamically_referenced"),
                 get_bit(&mut attr, Attr::AttrEnumClass, "enum_class"),
                 get_bit(&mut attr, Attr::AttrFinal, "final"),
                 get_bit(&mut attr, Attr::AttrForbidDynamicProps, "no_dynamic_props"),

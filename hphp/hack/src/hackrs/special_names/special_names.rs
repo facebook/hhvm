@@ -279,6 +279,8 @@ pub mod user_attributes {
         lazy!(sn::user_attributes::DYNAMICALLY_CALLABLE);
     pub static uaDynamicallyConstructible: Lazy<TypeName> =
         lazy!(sn::user_attributes::DYNAMICALLY_CONSTRUCTIBLE);
+    pub static uaDynamicallyReferenced: Lazy<TypeName> =
+        lazy!(sn::user_attributes::DYNAMICALLY_REFERENCED);
     pub static uaReifiable: Lazy<TypeName> = lazy!(sn::user_attributes::REIFIABLE);
     pub static uaNeverInline: Lazy<TypeName> = lazy!(sn::user_attributes::NEVER_INLINE);
     pub static uaDisableTypecheckerInternal: Lazy<TypeName> =
@@ -333,6 +335,7 @@ pub mod user_attributes {
             *uaProvenanceSkipFrame,
             *uaDynamicallyCallable,
             *uaDynamicallyConstructible,
+            *uaDynamicallyReferenced,
             *uaReifiable,
             *uaNeverInline,
             *uaDisableTypecheckerInternal,

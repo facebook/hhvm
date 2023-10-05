@@ -97,6 +97,10 @@ fn is_dynamically_constructible<'arena>(attr: &Attribute<'arena>) -> bool {
     is(ua::DYNAMICALLY_CONSTRUCTIBLE, attr)
 }
 
+fn is_dynamically_referenced<'arena>(attr: &Attribute<'arena>) -> bool {
+    is(ua::DYNAMICALLY_REFERENCED, attr)
+}
+
 fn is_sealed<'arena>(attr: &Attribute<'arena>) -> bool {
     is(ua::SEALED, attr)
 }
@@ -143,6 +147,10 @@ pub fn has_enum_class<'arena>(attrs: &[Attribute<'arena>]) -> bool {
 
 pub fn has_dynamically_constructible<'arena>(attrs: &[Attribute<'arena>]) -> bool {
     has(attrs, is_dynamically_constructible)
+}
+
+pub fn has_dynamically_referenced<'arena>(attrs: &[Attribute<'arena>]) -> bool {
+    has(attrs, is_dynamically_referenced)
 }
 
 pub fn has_foldable<'arena>(attrs: &[Attribute<'arena>]) -> bool {

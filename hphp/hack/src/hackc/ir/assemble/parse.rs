@@ -99,6 +99,7 @@ pub(crate) fn parse_attr(tokenizer: &mut Tokenizer<'_>) -> Result<Attr> {
             "const" => Attr::AttrIsConst,
             "deep_init" => Attr::AttrDeepInit,
             "dynamically_callable" => Attr::AttrDynamicallyCallable,
+            "dynamically_referenced" => Attr::AttrDynamicallyReferenced,
             "enum_class" => Attr::AttrEnumClass,
             "final" => Attr::AttrFinal,
             "initial_satisfies_tc" => Attr::AttrInitialSatisfiesTC,

@@ -291,6 +291,10 @@ inline bool Class::isDynamicallyConstructible() const {
   return attrs() & AttrDynamicallyConstructible;
 }
 
+inline bool Class::isDynamicallyReferenced() const {
+  return attrs() & AttrDynamicallyReferenced;
+}
+
 inline Optional<int64_t> Class::dynConstructSampleRate() const {
   auto const rate = preClass()->dynConstructSampleRate();
   if (rate < 0) return {};

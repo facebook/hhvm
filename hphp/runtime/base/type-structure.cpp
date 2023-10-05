@@ -785,6 +785,8 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
         };
 
         if (ts.exists(s_typevars) && arr.exists(s_generic_types)) {
+          // If the alias has typevars and the original type has typevars then
+          // we need to convert them over.
           std::vector<std::string> typevars;
           folly::split(',', ts[s_typevars].asCStrRef().data(), typevars);
           ts.remove(s_typevars);
@@ -800,10 +802,16 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
           auto generics = newarr.toArray();
           ts = resolveAlias(generics.get());
         } else {
+          // Either the alias doesn't have typevars OR the original type
+          // doesn't have typevars.
           ts = resolveAlias(nullptr);
         }
-        copyTypeModifiers(arr, ts);
+
+        // copy the alias typestruct onto the returned typestruct.
         newarr = ts;
+        // copy modifiers (nullable & soft) from the source typestruct to
+        // the result.
+        copyTypeModifiers(arr, newarr);
         break;
       }
 

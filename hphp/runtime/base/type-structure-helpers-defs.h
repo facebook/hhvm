@@ -206,6 +206,10 @@ ALWAYS_INLINE const TypeStructure::Kind get_ts_kind(const ArrayData* ts) {
   return static_cast<TypeStructure::Kind>(kind_field.val().num);
 }
 
+inline const ArrayData* get_ts_typevar_types_opt(const ArrayData* ts) {
+  return detail::get_ts_darray_opt(ts, s_typevar_types);
+}
+
 ALWAYS_INLINE bool isValidTSType(TypedValue c, bool error) {
   if (!tvIsDict(c)) {
     if (error) raise_error("Type structure must be a darray");

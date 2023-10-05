@@ -74,23 +74,9 @@ B | C2
 >>>> Very nested <<<<
 
 dict [
-  'kind' => 10,
-  'elem_types' => 
+  'kind' => 31,
+  'union_types' => 
   vec [
-    dict [
-      'kind' => 31,
-      'union_types' => 
-      vec [
-        dict [
-          'kind' => 2,
-        ],
-        dict [
-          'kind' => 15,
-          'classname' => 'A',
-        ],
-      ],
-      'case_type' => 'C2',
-    ],
     dict [
       'kind' => 10,
       'elem_types' => 
@@ -110,13 +96,9 @@ dict [
           'case_type' => 'C2',
         ],
         dict [
-          'kind' => 31,
-          'union_types' => 
+          'kind' => 10,
+          'elem_types' => 
           vec [
-            dict [
-              'kind' => 15,
-              'classname' => 'B',
-            ],
             dict [
               'kind' => 31,
               'union_types' => 
@@ -131,8 +113,32 @@ dict [
               ],
               'case_type' => 'C2',
             ],
+            dict [
+              'kind' => 31,
+              'union_types' => 
+              vec [
+                dict [
+                  'kind' => 15,
+                  'classname' => 'B',
+                ],
+                dict [
+                  'kind' => 31,
+                  'union_types' => 
+                  vec [
+                    dict [
+                      'kind' => 2,
+                    ],
+                    dict [
+                      'kind' => 15,
+                      'classname' => 'A',
+                    ],
+                  ],
+                  'case_type' => 'C2',
+                ],
+              ],
+              'case_type' => 'C3',
+            ],
           ],
-          'case_type' => 'C3',
         ],
       ],
     ],

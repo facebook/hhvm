@@ -146,6 +146,13 @@ Optional<ArrayData*> getGenericTypesOpt(const ArrayData* ts) {
   return generics_field.val().parr;
 }
 
+bool typeStructureIsType(
+  const ArrayData* input,
+  const ArrayData* type,
+  bool& warn,
+  bool strict
+);
+
 bool typeStructureIsTypeList(
   const ArrayData*,
   const ArrayData*,
@@ -153,6 +160,50 @@ bool typeStructureIsTypeList(
   bool&,
   bool
 );
+
+bool caseTypeIsType(
+  const StringData* inputCaseType,
+  const ArrayData* input,
+  const StringData* typeCaseType,
+  const ArrayData* type,
+  bool& warn,
+  bool strict
+) {
+  if (!inputCaseType) return false;
+  if (!typeCaseType) return false;
+  if (!inputCaseType->isame(typeCaseType)) {
+    return false;
+  }
+
+  bool result = true;
+
+  auto inputTypevar = get_ts_typevar_types_opt(input);
+  auto typeTypevar = get_ts_typevar_types_opt(type);
+  if (inputTypevar || typeTypevar) {
+    if (!inputTypevar) return false;
+    if (!typeTypevar) return false;
+
+    IterateKV(
+      inputTypevar,
+      [&](TypedValue inputK, TypedValue inputV) {
+        if (!tvIsString(inputK) || !tvIsArrayLike(inputV)) {
+          result = false;
+          return true;
+        }
+        auto typeV = typeTypevar->get(inputK.m_data.pstr);
+        if (!typeV.is_init()) {
+          result = false;
+        } else if (!tvIsArrayLike(typeV)) {
+          result = false;
+        } else {
+          result = typeStructureIsType(inputV.m_data.parr, typeV.m_data.parr, warn, strict);
+        }
+        return !result;
+      });
+  }
+
+  return result;
+}
 
 /*
  * Checks whether the `input` type structure is of the type denoted by the type
@@ -187,7 +238,7 @@ bool typeStructureIsType(
   auto const inputCaseType = get_ts_case_type_opt(input);
   auto const typeCaseType = get_ts_case_type_opt(type);
   if (inputCaseType || typeCaseType) {
-    return inputCaseType && typeCaseType && inputCaseType->isame(typeCaseType);
+    return caseTypeIsType(inputCaseType, input, typeCaseType, type, warn, strict);
   }
 
   auto tsKind = get_ts_kind(type);

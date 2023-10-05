@@ -15,8 +15,8 @@ use naming_special_names_rust::classes;
 use naming_special_names_rust::typehints;
 use options::Options;
 use oxidized::aast;
-use oxidized::aast_defs;
 use oxidized::aast_defs::Hint;
+use oxidized::aast_defs::Hint_;
 use oxidized::aast_defs::NastShapeInfo;
 use oxidized::aast_defs::ShapeFieldInfo;
 use oxidized::ast;
@@ -289,7 +289,6 @@ fn hint_to_type_constant_list<'arena>(
     type_refinement_in_hint: TypeRefinementInHint,
     Hint(_, hint): &Hint,
 ) -> Result<bumpalo::collections::Vec<'arena, DictEntry<'arena>>> {
-    use aast_defs::Hint_;
     Ok(match hint.as_ref() {
         Hint_::Happly(s, hints) => {
             let ast_defs::Id(_, name) = s;
@@ -511,13 +510,26 @@ pub(crate) fn typedef_to_type_structure<'a, 'arena>(
     tparams: &[&str],
     typedef: &'a ast::Typedef,
 ) -> Result<TypedValue<'arena>> {
+    let is_case_type = typedef.vis.is_case_type();
+
+    // For a case type we always want to ensure that it's wrapped in a Hunion.
+    let tmp;
+    let kind = match (is_case_type, &typedef.kind) {
+        (false, kind) => kind,
+        (true, kind @ Hint(_, box Hint_::Hunion(_))) => kind,
+        (true, hint @ Hint(pos, _)) => {
+            tmp = Hint(pos.clone(), Box::new(Hint_::Hunion(vec![hint.clone()])));
+            &tmp
+        }
+    };
+
     let mut tconsts = hint_to_type_constant_list(
         alloc,
         opts,
         tparams,
         &BTreeMap::new(),
         TypeRefinementInHint::Disallowed, // Note: only called by `emit_typedef
-        &typedef.kind,
+        kind,
     )?;
     tconsts.append(&mut get_typevars(alloc, tparams));
     if typedef.vis.is_opaque() || typedef.vis.is_opaque_module() {
@@ -525,11 +537,7 @@ pub(crate) fn typedef_to_type_structure<'a, 'arena>(
     };
     let mangled_name = hhbc_string_utils::mangle(typedef.name.1.clone());
     let name = ffi::Str::new_str(alloc, hhbc_string_utils::strip_global_ns(&mangled_name));
-    let key = if typedef.vis.is_case_type() {
-        "case_type"
-    } else {
-        "alias"
-    };
+    let key = if is_case_type { "case_type" } else { "alias" };
     tconsts.push(encode_entry(key, TypedValue::string(name)));
     Ok(TypedValue::dict(tconsts.into_bump_slice()))
 }

@@ -71,11 +71,13 @@ module Value = struct
     | String
     | AllEnums
     | Enum of EnumInfo.t
+    | Dynamic
   [@@deriving ord, sexp, hash]
 
   let bools = [Bool true; Bool false]
 
-  let universe = Unsupported :: Null :: Int :: String :: AllEnums :: bools
+  let universe =
+    Unsupported :: Null :: Int :: String :: AllEnums :: Dynamic :: bools
 
   let finite_or_dynamic = function
     | Unsupported
@@ -85,7 +87,8 @@ module Value = struct
       false
     | Null
     | Bool _
-    | Enum _ ->
+    | Enum _
+    | Dynamic ->
       true
 
   let to_json = function
@@ -96,6 +99,7 @@ module Value = struct
     | String -> Hh_json.string_ "string"
     | AllEnums -> Hh_json.string_ "enum"
     | Enum info -> EnumInfo.to_json info
+    | Dynamic -> Hh_json.string_ "dynamic"
 
   let if_missing : t -> _ option = function
     | Null -> Some `Null
@@ -104,7 +108,9 @@ module Value = struct
     | String -> Some `String
     | Enum EnumInfo.{ name; consts = _; decl_pos = _ } -> Some (`Enum name)
     | AllEnums -> Some `AnyEnum
-    | Unsupported -> None
+    | Unsupported
+    | Dynamic ->
+      None
 
   type value = t
 
@@ -162,6 +168,12 @@ module Value = struct
           list_if (is_sub ty int) [Int]
           @ list_if (is_sub ty string) [String]
           @ Option.value_map
+              (* This `Enum info` is only used to insert new data (not to create
+                 an entry in the partition map); constructing it is O(n log n)
+                 and we do this per literal (so O(n^2 log n) total). If this is
+                 becomes a bottleneck we can simply construct an empty set here
+                 because EnumInfo.consts is ignored by compare and hash and the
+                 full set is already associated with the entry key in the map *)
               (EnumInfo.of_env env class_)
               ~default:[]
               ~f:(fun info -> [Enum info; AllEnums])
@@ -176,7 +188,8 @@ module Value = struct
     | Bool _
     | Int
     | String
-    | AllEnums ->
+    | AllEnums
+    | Dynamic ->
       false
 
   (* NOTE: this relies on intersections between transparent enum and int/string
@@ -184,6 +197,9 @@ module Value = struct
   (* NOTE: this under-approximates intersection between two enums by selecting the left *)
   let inter v1 v2 =
     match (v1, v2) with
+    | (Dynamic, _)
+    | (_, Dynamic) ->
+      Some Dynamic
     | ((Enum _ as e), AllEnums)
     | (AllEnums, (Enum _ as e)) ->
       Some e
@@ -302,7 +318,7 @@ let rec symbolic_dnf_values env ty : ValueSet.t =
             ValueSet.singleton Value.Unsupported
           else
             ValueSet.singleton (Value.Enum info))
-  | Tdynamic
+  | Tdynamic -> ValueSet.singleton Value.Dynamic
   | Ttuple _
   | Tshape _
   | Tvec_or_dict _
@@ -509,9 +525,13 @@ let check_default
              { pos; kind = Some "enum"; decl_pos; missing })
 
 let add_default_if_needed values missing_cases =
+  let just_dyn = ValueSet.singleton Value.Dynamic in
   (* write `exists ~f:(fun x -> not @@ finite_or_dynamic x)` instead of
      `forall ~f:finite` to ensure set is non-empty *)
-  if ValueSet.exists ~f:(fun x -> not @@ Value.finite_or_dynamic x) values then
+  if
+    ValueSet.exists values ~f:(fun x -> not @@ Value.finite_or_dynamic x)
+    || ValueSet.equal just_dyn values
+  then
     None :: List.map ~f:Option.some missing_cases
   else
     List.map ~f:Option.some missing_cases

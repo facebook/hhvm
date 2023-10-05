@@ -1,0 +1,8 @@
+File "dynamic.php", line 15, characters 11-12:
+`switch` statement nonexhaustive; at least the following cases are missing: `default` (Typing[4019])
+  File "dynamic.php", line 15, characters 11-12:
+  only unions and intersections of bool, null and enums can be switched on without a default
+File "dynamic.php", line 16, characters 10-11:
+Switching on `dynamic` but using constant from `int` (Typing[4023])
+  File "dynamic.php", line 14, characters 34-40:
+  expecting `dynamic` based on this

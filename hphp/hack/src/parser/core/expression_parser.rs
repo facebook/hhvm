@@ -309,7 +309,7 @@ where
                 // ERROR RECOVERY: If we're encountering a token that matches a kind in
                 // the previous scope of the expected stack, don't eat it--just mark the
                 // name missing and continue parsing, starting from the offending token.
-                self.with_error(Errors::error1015);
+                self.with_error(Errors::error1015, Vec::new());
                 let pos = self.pos();
                 self.sc_mut().make_missing(pos)
             }
@@ -320,7 +320,7 @@ where
                 // TODO: Increase the coverage of PrecedenceParser.expects_next, so that
                 // we wind up eating fewer of the tokens that'll be needed by the outer
                 // statement / declaration parsers.
-                self.with_error(Errors::error1015);
+                self.with_error(Errors::error1015, Vec::new());
                 self.sc_mut().make_token(token)
             }
         }
@@ -463,13 +463,13 @@ where
     }
 
     fn parse_empty(&mut self) -> S::Output {
-        self.with_error(Errors::empty_expression_illegal);
+        self.with_error(Errors::empty_expression_illegal, Vec::new());
         let token = self.next_token_non_reserved_as_name();
         self.sc_mut().make_token(token)
     }
 
     fn parse_error1015(&mut self) -> S::Output {
-        self.with_error(Errors::error1015);
+        self.with_error(Errors::error1015, Vec::new());
         let pos = self.pos();
         self.sc_mut().make_missing(pos)
     }
@@ -491,14 +491,14 @@ where
                         self.parse_remaining_expression(result)
                     }
                     _ => {
-                        self.with_error(Errors::prefixed_invalid_string_kind);
+                        self.with_error(Errors::prefixed_invalid_string_kind, Vec::new());
                         self.parse_name_or_collection_literal_expression(qualified_name)
                     }
                 }
             }
             TokenKind::HeredocStringLiteralHead => {
                 // Treat as an attempt to prefix a non-double-quoted string
-                self.with_error(Errors::prefixed_invalid_string_kind);
+                self.with_error(Errors::prefixed_invalid_string_kind, Vec::new());
                 self.parse_name_or_collection_literal_expression(qualified_name)
             }
             TokenKind::SingleQuotedStringLiteral | TokenKind::DoubleQuotedStringLiteral => {
@@ -693,7 +693,7 @@ where
                     self.continue_from(parser1);
                     self.sc_mut().make_token(right_brace)
                 } else {
-                    self.with_error(Errors::error1006);
+                    self.with_error(Errors::error1006, Vec::new());
                     let pos = self.pos();
                     self.sc_mut().make_missing(pos)
                 };
@@ -712,7 +712,7 @@ where
                     self.continue_from(parser1);
                     self.sc_mut().make_token(right_brace)
                 } else {
-                    self.with_error(Errors::error1006);
+                    self.with_error(Errors::error1006, Vec::new());
                     let pos = self.pos();
                     self.sc_mut().make_missing(pos)
                 };
@@ -754,7 +754,7 @@ where
                     self.continue_from(parser1);
                     self.sc_mut().make_token(token)
                 } else {
-                    self.with_error(Errors::error1006);
+                    self.with_error(Errors::error1006, Vec::new());
                     let pos = self.pos();
                     self.sc_mut().make_missing(pos)
                 };
@@ -961,7 +961,7 @@ where
                     let token2 = parser.sc_mut().make_missing(pos);
                     let pos = parser.pos();
                     let token3 = parser.sc_mut().make_missing(pos);
-                    parser.with_error(Errors::expected_simple_offset_expression);
+                    parser.with_error(Errors::expected_simple_offset_expression, Vec::new());
                     parser
                         .sc_mut()
                         .make_embedded_subscript_expression(var_expr, token1, token2, token3)
@@ -1120,7 +1120,7 @@ where
             Operator::prefix_unary_from_token(package_kw.kind()),
         );
         if !package_name.is_name() {
-            self.with_error(Errors::error1004);
+            self.with_error(Errors::error1004, Vec::new());
         }
         let package_kw = self.sc_mut().make_token(package_kw);
         self.sc_mut()
@@ -1377,7 +1377,7 @@ where
                             ParseContinuation::Binary(term, assignment_prefix_kind)
                         }
                         TokenKind::Instanceof => {
-                            self.with_error(Errors::instanceof_disabled);
+                            self.with_error(Errors::instanceof_disabled, Vec::new());
                             let _ = self.assert_token(TokenKind::Instanceof);
                             ParseContinuation::Done(term)
                         }
@@ -2640,9 +2640,10 @@ where
         if !use_clause.is_missing() {
             let misplaced_colon = self.clone().optional_token(TokenKind::Colon);
             if !misplaced_colon.is_missing() {
-                self.with_error(Cow::Borrowed(
-                    "Bad signature: use(...) should occur after the type",
-                ));
+                self.with_error(
+                    Cow::Borrowed("Bad signature: use(...) should occur after the type"),
+                    Vec::new(),
+                );
             }
         }
         let body = self.parse_compound_statement();
@@ -2689,7 +2690,7 @@ where
         } else {
             // ERROR RECOVERY: Create a missing token for the expected token,
             // and continue on from the current token. Don't skip it.
-            self.with_error(Errors::error1006);
+            self.with_error(Errors::error1006, Vec::new());
             let pos = self.pos();
             self.sc_mut().make_missing(pos)
         }
@@ -2746,7 +2747,7 @@ where
         let mut parser1 = self.clone();
         let (token, _) = parser1.next_xhp_element_token(false);
         if token.kind() != TokenKind::Equal {
-            self.with_error(Errors::error1016);
+            self.with_error(Errors::error1016, Vec::new());
             self.continue_from(parser1);
             let pos = self.pos();
             let missing1 = self.sc_mut().make_missing(pos);
@@ -2780,7 +2781,7 @@ where
                     // ERROR RECOVERY: The expression is missing; assume that the "name ="
                     // belongs to the attribute and start looking for the next attribute.
                     self.continue_from(parser1);
-                    self.with_error(Errors::error1017);
+                    self.with_error(Errors::error1017, Vec::new());
                     self.continue_from(parser2);
                     let pos = self.pos();
                     let missing = self.sc_mut().make_missing(pos);
@@ -2847,7 +2848,7 @@ where
                 } else {
                     // ERROR RECOVERY:
                     self.continue_from(parser1);
-                    self.with_error(Errors::error1039);
+                    self.with_error(Errors::error1039, Vec::new());
                     let pos = self.pos();
                     let missing = self.sc_mut().make_missing(pos);
                     self.sc_mut()
@@ -2855,7 +2856,7 @@ where
                 }
             } else {
                 // ERROR RECOVERY:
-                self.with_error(Errors::error1039);
+                self.with_error(Errors::error1039, Vec::new());
                 let pos = self.pos();
                 let missing1 = self.sc_mut().make_missing(pos);
                 let pos = self.pos();
@@ -2867,7 +2868,7 @@ where
             // ERROR RECOVERY: We probably got a < without a following / or name.
             // TODO: For now we'll just bail out. We could use a more
             // sophisticated strategy here.
-            self.with_error(Errors::error1039);
+            self.with_error(Errors::error1039, Vec::new());
             let pos = self.pos();
             let missing1 = self.sc_mut().make_missing(pos);
             let pos = self.pos();
@@ -2926,7 +2927,7 @@ where
                 let pos = self.pos();
                 let missing2 = parser1.sc_mut().make_missing(pos);
                 self.continue_from(parser1);
-                self.with_error(Errors::error1013);
+                self.with_error(Errors::error1013, Vec::new());
                 self.sc_mut()
                     .make_xhp_expression(xhp_open, missing1, missing2)
             }
@@ -2965,7 +2966,7 @@ where
             } else {
                 Errors::error1015
             };
-            self.with_error(error);
+            self.with_error(error, Vec::new());
             less_than
         }
     }

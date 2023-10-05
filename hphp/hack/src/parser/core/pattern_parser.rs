@@ -143,7 +143,7 @@ where
                 // ERROR RECOVERY: when encountering an invalid token, make the
                 // whole pattern missing and continue on, starting at the
                 // unexpected token.
-                self.with_error(Errors::expected_pattern);
+                self.with_error(Errors::expected_pattern, Vec::new());
                 self.sc.make_missing(self.pos())
             }
         }

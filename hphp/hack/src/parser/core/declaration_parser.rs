@@ -249,7 +249,7 @@ where
             }
             _ => {
                 if !attr.is_missing() {
-                    self.with_error(Errors::no_attributes_on_enum_class_enumerator)
+                    self.with_error(Errors::no_attributes_on_enum_class_enumerator, Vec::new())
                 }
                 self.parse_enum_class_enumerator()
             }
@@ -363,7 +363,7 @@ where
             Some(markup_section)
         } else if self.lexer().source().length() > 0 {
             if file_path.has_extension("php") {
-                self.with_error(Errors::error1001);
+                self.with_error(Errors::error1001, Vec::new());
                 None
             } else if !markup_section.is_missing() {
                 // Anything without a `.php` or `.hackpartial` extension
@@ -402,7 +402,7 @@ where
                 // ERROR RECOVERY: return an inert namespace (one with all of its
                 // components 'missing'), and recover--without advancing the parser--
                 // back to the level that the namespace was declared in.
-                self.with_error(Errors::error1038);
+                self.with_error(Errors::error1038, Vec::new());
                 let pos = self.pos();
                 let missing1 = self.sc_mut().make_missing(pos);
                 let pos = self.pos();
@@ -579,7 +579,7 @@ where
             }
             TokenKind::Semicolon => {
                 // ERROR RECOVERY Plainly the name is missing.
-                self.with_error(Errors::error1004);
+                self.with_error(Errors::error1004, Vec::new());
                 let pos = self.pos();
                 self.sc_mut().make_missing(pos)
             }
@@ -607,7 +607,7 @@ where
 
         // Error on the XHP token unless it's been explicitly enabled
         if is_xhp_class && !self.env.enable_xhp_class_modifier {
-            self.with_error(Errors::error1057("XHP"));
+            self.with_error(Errors::error1057("XHP"), Vec::new());
         }
 
         let token = self.parse_classish_token();
@@ -709,7 +709,7 @@ where
                 self.sc_mut().make_missing(pos)
             }
             _ => {
-                self.with_error(Errors::error1035);
+                self.with_error(Errors::error1035, Vec::new());
                 let pos = self.pos();
                 self.sc_mut().make_missing(pos)
             }
@@ -725,7 +725,7 @@ where
                 // Give the error that we expected a type, not a name, even though
                 // not every type is legal here.
                 self.continue_from(parser1);
-                self.with_error(Errors::error1007);
+                self.with_error(Errors::error1007, Vec::new());
                 let comma = self.sc_mut().make_token(token);
                 let pos = self.pos();
                 let missing = self.sc_mut().make_missing(pos);
@@ -754,7 +754,7 @@ where
             _ => {
                 // ERROR RECOVERY: We are expecting a type; give an error as above.
                 // Don't eat the offending token.
-                self.with_error(Errors::error1007);
+                self.with_error(Errors::error1007, Vec::new());
                 let pos = self.pos();
                 let missing1 = self.sc_mut().make_missing(pos);
                 let pos = self.pos();
@@ -886,7 +886,7 @@ where
             }
             _ => {
                 // ERROR RECOVERY: Eat the offending token, keep going.
-                self.with_error(Errors::error1053);
+                self.with_error(Errors::error1053, Vec::new());
                 name
             }
         }
@@ -937,7 +937,7 @@ where
         //   children xhp-children-expression ;
         let children = self.assert_token(TokenKind::Children);
         if self.env.disable_xhp_children_declarations {
-            self.with_error(Errors::error1064);
+            self.with_error(Errors::error1064, Vec::new());
         }
         let token_kind = self.peek_token_kind();
         let expr = match token_kind {
@@ -959,7 +959,7 @@ where
         match token_kind {
             TokenKind::XHPCategoryName => category,
             _ => {
-                self.with_error(Errors::error1052);
+                self.with_error(Errors::error1052, Vec::new());
                 category
             }
         }
@@ -1026,7 +1026,7 @@ where
                 TokenKind::Required => self.sc_mut().make_xhp_required(at, req),
                 TokenKind::Lateinit => self.sc_mut().make_xhp_lateinit(at, req),
                 _ => {
-                    self.with_error(Errors::error1051);
+                    self.with_error(Errors::error1051, Vec::new());
                     let pos = self.pos();
                     self.sc_mut().make_missing(pos)
                 }
@@ -1155,7 +1155,7 @@ where
                 self.sc_mut().make_token(req_kind_token)
             }
             _ => {
-                self.with_error(Errors::error1045);
+                self.with_error(Errors::error1045, Vec::new());
                 let pos = self.pos();
                 self.sc_mut().make_missing(pos)
             }
@@ -1191,9 +1191,10 @@ where
             (_, TokenKind::Async) | (_, TokenKind::Function)
                 if !(next_token.has_leading_trivia_kind(TriviaKind::EndOfLine)) =>
             {
-                self.with_error_on_whole_token(Errors::error1056(
-                    self.token_text(&self.peek_token()),
-                ));
+                self.with_error_on_whole_token(
+                    Errors::error1056(self.token_text(&self.peek_token())),
+                    Vec::new(),
+                );
                 self.skip_and_log_unexpected_token(false);
                 self.parse_methodish(attribute_spec, modifiers)
             }
@@ -1941,7 +1942,7 @@ where
     // A function label is either a function name or a __construct label.
     fn parse_function_label_opt(&mut self, is_methodish: bool) -> S::Output {
         let report_error = |x: &mut Self, token: Token<S>| {
-            x.with_error(Errors::error1044);
+            x.with_error(Errors::error1044, Vec::new());
             let token = x.sc_mut().make_token(token);
             x.sc_mut().make_error(token)
         };
@@ -2010,7 +2011,7 @@ where
                 p.parse_constructor_call()
             }),
             _ => {
-                self.with_error(Errors::expected_user_attribute);
+                self.with_error(Errors::expected_user_attribute, Vec::new());
                 let pos = self.pos();
                 self.sc_mut().make_missing(pos)
             }
@@ -2112,7 +2113,7 @@ where
                 // TODO: Is this the right error recovery?
                 let pos = self.pos();
                 let token = self.next_token();
-                self.with_error(Errors::error1041);
+                self.with_error(Errors::error1041, Vec::new());
                 let token = self.sc_mut().make_token(token);
                 let error = self.sc_mut().make_error(token);
                 let missing = self.sc_mut().make_missing(pos);
@@ -2221,7 +2222,7 @@ where
                 // TODO: This is wrong; we have lost the attribute specification
                 // from the tree.
                 let token = self.next_token();
-                self.with_error(Errors::error1057(self.token_text(&token)));
+                self.with_error(Errors::error1057(self.token_text(&token)), Vec::new());
                 let token = self.sc_mut().make_token(token);
                 self.sc_mut().make_error(token)
             }
@@ -2331,7 +2332,7 @@ where
                 } else {
                     // TODO ERROR RECOVERY could be improved here.
                     let token = self.fetch_token();
-                    self.with_error(Errors::error1033);
+                    self.with_error(Errors::error1033, Vec::new());
                     self.sc_mut().make_error(token)
                     // Parser does not detect the error where non-static instance variables
                     // or methods are within abstract final classes in its first pass, but
@@ -2457,7 +2458,7 @@ where
         // Error Reporting: If the next token is a `;` that means no type-specifier was given.
         // `parse_terminated_list` won't report an error in this case, so let's handle it here
         if self.peek_token_kind() == TokenKind::Semicolon {
-            self.with_error(Errors::error1007);
+            self.with_error(Errors::error1007, Vec::new());
             let pos = self.pos();
             self.sc_mut().make_missing(pos)
         } else {
@@ -2489,7 +2490,7 @@ where
                     // If we didn't get a type specifier, report an error then consider the whole case-type-variant
                     // to be missing. This will prevent the parser from consuming too many tokens in the error case
                     if typ.is_missing() {
-                        this.with_error_on_whole_token(Errors::error1007);
+                        this.with_error_on_whole_token(Errors::error1007, Vec::new());
                         let pos = this.pos();
                         this.sc_mut().make_missing(pos)
                     } else {
@@ -2618,7 +2619,7 @@ where
                     let exports_rb = self.require_right_brace();
 
                     if !exports_block.is_missing() {
-                        self.with_error(Errors::error1066);
+                        self.with_error(Errors::error1066, Vec::new());
                     }
 
                     exports_block = self
@@ -2636,7 +2637,7 @@ where
                     let imports_rb = self.require_right_brace();
 
                     if !imports_block.is_missing() {
-                        self.with_error(Errors::error1067);
+                        self.with_error(Errors::error1067, Vec::new());
                     }
 
                     imports_block = self

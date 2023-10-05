@@ -8,6 +8,7 @@ use parser_core_types::lexable_token::LexableToken;
 use parser_core_types::lexable_trivia::LexableTrivia;
 use parser_core_types::syntax_error::Error;
 use parser_core_types::syntax_error::SyntaxError;
+use parser_core_types::syntax_error::SyntaxQuickfix;
 use parser_core_types::syntax_error::{self as Errors};
 use parser_core_types::token_factory::TokenFactory;
 use parser_core_types::token_kind::TokenKind;
@@ -184,18 +185,23 @@ where
     // the current node. However, setting on_whole_token=true will report the error
     // only on the non-trivia text of the next token parsed, which is useful
     // in cases like "flagging an entire token as an extra".
-    fn with_error_impl(&mut self, on_whole_token: bool, message: Error) {
+    fn with_error_impl(
+        &mut self,
+        on_whole_token: bool,
+        message: Error,
+        quickfixes: Vec<SyntaxQuickfix>,
+    ) {
         let (start_offset, end_offset) = self.error_offsets(on_whole_token);
-        let error = SyntaxError::make(start_offset, end_offset, message, vec![]);
+        let error = SyntaxError::make(start_offset, end_offset, message, quickfixes);
         self.add_error(error)
     }
 
-    fn with_error(&mut self, message: Error) {
-        self.with_error_impl(false, message)
+    fn with_error(&mut self, message: Error, quickfixes: Vec<SyntaxQuickfix>) {
+        self.with_error_impl(false, message, quickfixes)
     }
 
-    fn with_error_on_whole_token(&mut self, message: Error) {
-        self.with_error_impl(true, message)
+    fn with_error_on_whole_token(&mut self, message: Error, quickfixes: Vec<SyntaxQuickfix>) {
+        self.with_error_impl(true, message, quickfixes)
     }
 
     fn next_token_with_tokenizer<F>(&mut self, tokenizer: F) -> Token<S>
@@ -609,7 +615,7 @@ where
                 self.scan_qualified_name(missing, backslash)
             }
             _ => {
-                self.with_error(Errors::error1004);
+                self.with_error(Errors::error1004, Vec::new());
                 let pos = self.pos();
                 self.sc_mut().make_missing(pos)
             }
@@ -811,7 +817,7 @@ where
             _ => {
                 // ERROR RECOVERY: Create a missing token for the expected token,
                 // and continue on from the current token. Don't skip it.
-                self.with_error(error);
+                self.with_error(error, Vec::new());
                 let pos = self.pos();
                 self.sc_mut().make_missing(pos)
             }
@@ -840,7 +846,7 @@ where
         } else {
             // ERROR RECOVERY: Create a missing token for the expected token,
             // and continue on from the current token. Don't skip it.
-            self.with_error(Errors::error1004);
+            self.with_error(Errors::error1004, Vec::new());
             let pos = self.pos();
             self.sc_mut().make_missing(pos)
         }
@@ -879,7 +885,7 @@ where
             // ERROR RECOVERY: Create a missing token for the expected token,
             // and continue on from the current token. Don't skip it.
             // TODO: Different error?
-            self.with_error(Errors::error1004);
+            self.with_error(Errors::error1004, Vec::new());
             let pos = self.pos();
             self.sc_mut().make_missing(pos)
         }
@@ -955,7 +961,7 @@ where
                 // omitted and there was no error.
 
                 if kind == TokenKind::EndOfFile || list_kind != SeparatedListKind::ItemsOptional {
-                    self.with_error(error)
+                    self.with_error(error, Vec::new())
                 };
                 let pos = self.pos();
                 let missing1 = self.sc_mut().make_missing(pos);
@@ -969,7 +975,7 @@ where
                 if separator_kind == TokenKind::Empty {
                     separator_kind = kind;
                 } else if separator_kind != kind {
-                    self.with_error(Errors::error1063);
+                    self.with_error(Errors::error1063, Vec::new());
                 }
 
                 // ERROR RECOVERY: We expected an item but we got a separator.
@@ -988,7 +994,7 @@ where
 
                 let token = self.next_token();
                 if list_kind != SeparatedListKind::ItemsOptional {
-                    self.with_error(error.clone())
+                    self.with_error(error.clone(), Vec::new())
                 }
                 let pos = self.pos();
                 let item = self.sc_mut().make_missing(pos);
@@ -1013,7 +1019,7 @@ where
                     if separator_kind == TokenKind::Empty {
                         separator_kind = kind;
                     } else if separator_kind != kind {
-                        self.with_error(Errors::error1063);
+                        self.with_error(Errors::error1063, Vec::new());
                     }
                     let token = self.next_token();
 
@@ -1448,7 +1454,7 @@ where
     fn skip_and_log_unexpected_token(&mut self, generate_error: bool) {
         if generate_error {
             let extra_str = &self.current_token_text();
-            self.with_error_on_whole_token(Errors::error1057(extra_str))
+            self.with_error_on_whole_token(Errors::error1057(extra_str), Vec::new())
         };
         let token = self.next_token();
         self.add_skipped_token(token)
@@ -1507,7 +1513,7 @@ where
     fn skip_and_log_misspelled_token(&mut self, required_kind: TokenKind) {
         let received_str = &self.current_token_text();
         let required_str = required_kind.to_string();
-        self.with_error_on_whole_token(Errors::error1058(received_str, required_str));
+        self.with_error_on_whole_token(Errors::error1058(received_str, required_str), Vec::new());
         self.skip_and_log_unexpected_token(/* generate_error:*/ false)
     }
 
@@ -1540,7 +1546,7 @@ where
                         self.sc_mut().make_missing(pos)
                     }
                     None => {
-                        self.with_error(error);
+                        self.with_error(error, Vec::new());
                         let pos = self.pos();
                         self.sc_mut().make_missing(pos)
                     }
@@ -1573,7 +1579,7 @@ where
                     let pos = self.pos();
                     self.sc_mut().make_missing(pos)
                 } else {
-                    self.with_error(error);
+                    self.with_error(error, Vec::new());
                     let pos = self.pos();
                     self.sc_mut().make_missing(pos)
                 }
@@ -1601,7 +1607,7 @@ where
                     self.skip_and_log_misspelled_token(kind);
                     None
                 } else {
-                    self.with_error(error);
+                    self.with_error(error, Vec::new());
                     None
                 }
             }
@@ -1618,7 +1624,7 @@ where
         } else {
             // ERROR RECOVERY: Create a missing token for the expected token,
             // and continue on from the current token. Don't skip it.
-            self.with_error(Errors::error1004);
+            self.with_error(Errors::error1004, Vec::new());
             let pos = self.pos();
             self.sc_mut().make_missing(pos)
         }

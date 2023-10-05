@@ -237,7 +237,7 @@ where
     pub fn parse_type_specifier(&mut self, allow_var: bool, allow_attr: bool) -> S::Output {
         let result = self.parse_type_specifier_opt(allow_var, allow_attr);
         if result.is_missing() {
-            self.with_error_on_whole_token(Errors::error1007);
+            self.with_error_on_whole_token(Errors::error1007, Vec::new());
             let token = self.next_xhp_class_name_or_other_token();
             let token = self.sc_mut().make_token(token);
             self.sc_mut().make_error(token)
@@ -273,7 +273,7 @@ where
                     }
                     tk => {
                         if tk != TokenKind::RightBrace {
-                            x.with_error(Errors::expected_refinement_member);
+                            x.with_error(Errors::expected_refinement_member, Vec::new());
                         }
                         let pos = x.pos();
                         x.sc_mut().make_missing(pos)
@@ -289,7 +289,7 @@ where
             right_brace,
         );
         if self.peek_token_kind() == TokenKind::With {
-            self.with_error(Errors::cannot_chain_type_refinements);
+            self.with_error(Errors::cannot_chain_type_refinements, Vec::new());
             // ERROR RECOVERY: nest chained refinement
             return self.parse_type_refinement(refinement);
         }
@@ -319,7 +319,7 @@ where
             // ERROR RECOVERY: Assume that the thing following the ::
             // that is not a name belongs to the next thing to be
             // parsed; treat the name as missing.
-            self.with_error(Errors::error1004);
+            self.with_error(Errors::error1004, Vec::new());
             let pos = self.pos();
             let missing = self.sc_mut().make_missing(pos);
             self.sc_mut().make_type_constant(left, separator, missing)
@@ -347,7 +347,7 @@ where
         match token.kind() {
             TokenKind::ColonColon => self.parse_remaining_type_constant(name),
             _ => {
-                self.with_error(Errors::error1047);
+                self.with_error(Errors::error1047, Vec::new());
                 self.sc_mut().make_error(name)
             }
         }
@@ -660,7 +660,7 @@ where
                 // ERROR RECOVERY: Don't eat the token that is in the place of the
                 // missing > or ,.  TokenKind::Assume that it is the > that is missing and
                 // try to parse whatever is coming after the type.
-                self.with_error(Errors::error1014);
+                self.with_error(Errors::error1014, Vec::new());
                 let pos = self.pos();
                 let missing = self.sc_mut().make_missing(pos);
                 let result = self.sc_mut().make_type_arguments(open_angle, args, missing);
@@ -774,7 +774,7 @@ where
             // ERROR RECOVERY: Don't eat the token that is in the place of the
             // missing > or ,.  TokenKind::Assume that it is the > that is missing and
             // try to parse whatever is coming after the type.
-            self.with_error(Errors::error1022);
+            self.with_error(Errors::error1022, Vec::new());
             let pos = self.pos();
             let right_angle = self.sc_mut().make_missing(pos);
             self.sc_mut()
@@ -947,7 +947,7 @@ where
             // ERROR RECOVERY: Don't eat the token that is in the place of the
             // missing ) or ,.  Assume that it is the ) that is missing and
             // try to parse whatever is coming after the type.
-            self.with_error(Errors::error1022);
+            self.with_error(Errors::error1022, Vec::new());
             let pos = self.pos();
             let missing = self.sc_mut().make_missing(pos);
             self.sc_mut()

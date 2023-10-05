@@ -197,7 +197,7 @@ where
             | TokenKind::Trait
             | TokenKind::XHP
             | TokenKind::Class => {
-                self.with_error(Errors::decl_outside_global_scope);
+                self.with_error(Errors::decl_outside_global_scope, Vec::new());
                 self.with_decl_parser(|x| {
                     let pos = x.pos();
                     let missing = x.sc_mut().make_missing(pos);
@@ -245,14 +245,14 @@ where
                 let result = self.parse_case_label();
                 // TODO: This puts the error in the wrong place. We should highlight
                 // the entire label, not the trailing colon.
-                self.with_error(Errors::error2003);
+                self.with_error(Errors::error2003, Vec::new());
                 result
             }
             TokenKind::Default => {
                 let result = self.parse_default_label();
                 // TODO: This puts the error in the wrong place. We should highlight
                 // the entire label, not the trailing colon.
-                self.with_error(Errors::error2004);
+                self.with_error(Errors::error2004, Vec::new());
                 result
             }
             TokenKind::Semicolon => self.parse_expression_statement(),
@@ -342,7 +342,7 @@ where
                     x.parse_function_declaration(missing)
                 });
                 if !toplevel {
-                    self.with_error(Errors::inline_function_def)
+                    self.with_error(Errors::inline_function_def, Vec::new())
                 };
                 missing
             }
@@ -438,7 +438,7 @@ where
             }
             _ => {
                 self.continue_from(parser1);
-                self.with_error(Errors::invalid_foreach_element);
+                self.with_error(Errors::invalid_foreach_element, Vec::new());
                 let token = self.fetch_token();
                 let error = self.sc_mut().make_error(token);
                 let foreach_value = self.parse_expression();
@@ -686,7 +686,7 @@ where
             let list =
                 self.parse_terminated_list(|x| x.parse_switch_section(), TokenKind::RightBrace);
             if list.is_missing() {
-                self.with_error(Errors::empty_switch_cases);
+                self.with_error(Errors::empty_switch_cases, Vec::new());
                 let pos = self.pos();
                 self.sc_mut().make_missing(pos)
             } else {
@@ -712,7 +712,7 @@ where
 
     fn parse_possible_erroneous_fallthrough(&mut self) -> S::Output {
         if self.is_switch_fallthrough() {
-            self.with_error_on_whole_token(Errors::error1055);
+            self.with_error_on_whole_token(Errors::error1055, Vec::new());
             self.parse_switch_fallthrough()
         } else {
             self.parse_expression_statement()
@@ -771,7 +771,7 @@ where
         // See parse_switch_statement for grammar
         let labels = self.parse_list_until_none(|x| x.parse_switch_section_label());
         if labels.is_missing() {
-            self.with_error(Errors::error2008);
+            self.with_error(Errors::error2008, Vec::new());
         };
         let statements = self.parse_list_until_none(|x| x.parse_switch_section_statement());
         let fallthrough = self.parse_switch_fallthrough_opt();
@@ -827,7 +827,7 @@ where
         let match_arms =
             self.parse_terminated_list(|x| x.parse_match_statement_arm(), TokenKind::RightBrace);
         if match_arms.is_missing() {
-            self.with_error(Errors::empty_match_statement);
+            self.with_error(Errors::empty_match_statement, Vec::new());
         }
         let right_brace_token = self.require_right_brace();
         self.sc_mut().make_match_statement(
@@ -868,7 +868,7 @@ where
             let left_paren = self.require_left_paren();
             let catch_type = match self.peek_token_kind() {
                 TokenKind::Variable => {
-                    self.with_error(Errors::error1007);
+                    self.with_error(Errors::error1007, Vec::new());
                     let pos = self.pos();
                     self.sc_mut().make_missing(pos)
                 }

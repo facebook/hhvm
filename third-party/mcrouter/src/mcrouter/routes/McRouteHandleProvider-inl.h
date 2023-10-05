@@ -29,6 +29,7 @@
 #include "mcrouter/routes/AllFastestRouteFactory.h"
 #include "mcrouter/routes/AsynclogRoute.h"
 #include "mcrouter/routes/DestinationRoute.h"
+#include "mcrouter/routes/DistributionRoute.h"
 #include "mcrouter/routes/ExtraRouteHandleProviderIf.h"
 #include "mcrouter/routes/FailoverRoute.h"
 #include "mcrouter/routes/HashRouteFactory.h"
@@ -528,6 +529,16 @@ McRouteHandleProvider<RouterInfo>::createSRRoute(
   auto route = factoryFunc(factory, json, proxy_);
   // Track the SRRoute created so that we can save it to SRRoute map later
   auto srRoute = route;
+  bool distributionRouteEnabled = false;
+
+  if (auto* jDistribution = json.get_ptr("distribution_enabled")) {
+    distributionRouteEnabled =
+        parseBool(*jDistribution, "distribution_enabled");
+  }
+
+  if (distributionRouteEnabled) {
+    route = makeDistributionRoute<RouterInfo>(std::move(route), json);
+  }
 
   if (auto maxOutstandingJson = json.get_ptr("max_outstanding")) {
     auto v = parseInt(
@@ -680,9 +691,18 @@ McRouteHandleProvider<RouterInfo>::makePoolRoute(
         jhashWithWeights, std::move(destinations), factory.getThreadId());
     auto poolRoute = route;
 
+    bool distributionRouteEnabled = false;
     auto asynclogName = poolJson.name;
     bool needAsynclog = true;
     if (json.isObject()) {
+      if (auto* jDistribution = json.get_ptr("distribution_enabled")) {
+        distributionRouteEnabled =
+            parseBool(*jDistribution, "distribution_enabled");
+      }
+      if (distributionRouteEnabled) {
+        route = makeDistributionRoute<RouterInfo>(std::move(route), json);
+      }
+
       if (auto jrates = json.get_ptr("rates")) {
         route = createRateLimitRoute(std::move(route), RateLimiter(*jrates));
       }

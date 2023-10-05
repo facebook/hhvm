@@ -147,6 +147,8 @@ libmcroutercore_a_SOURCES = \
   routes/McBucketRoute-inl.h \
   routes/McBucketRoute.cpp \
   routes/McBucketRoute.h \
+  routes/DistributionRoute-inl.h \
+  routes/DistributionRoute.h \
   routes/McExtraRouteHandleProvider-inl.h \
   routes/McExtraRouteHandleProvider.h \
   routes/McImportResolver.cpp \

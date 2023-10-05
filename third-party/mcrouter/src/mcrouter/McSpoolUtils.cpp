@@ -52,12 +52,13 @@ FOLLY_NOINLINE bool spoolAxonProxy(
   }
   // Run off fiber to save fiber stack for serialization
   auto kvPairs = folly::fibers::runInMainContext([&req, &region, &pool]() {
-    const auto& finalReq =
+    auto finalReq =
         req.attributes_ref()->find(memcache::kMcDeleteReqAttrSource) ==
             req.attributes_ref()->cend()
-        ? addDeleteRequestSource(
-              req, memcache::McDeleteRequestSource::FAILED_INVALIDATION)
+        ? std::move(addDeleteRequestSource(
+              req, memcache::McDeleteRequestSource::FAILED_INVALIDATION))
         : req;
+    finalReq.key_ref()->stripRoutingPrefix();
     auto serialized = invalidation::McInvalidationKvPairs::serialize<
                           memcache::McDeleteRequest>(finalReq)
                           .template to<std::string>();

@@ -162,6 +162,15 @@ STUI(proxy_queue_full, 0, 1)
 STUI(proxy_queues_all_full, 0, 1)
 // number of request routed using McBucketRoute
 STUI(bucketized_routing, 0, 1)
+// distribution stats
+STUI(distribution_axon_write_success, 0, 1)
+STUI(distribution_axon_write_failed, 0, 1)
+STUI(distribution_async_spool_failed, 0, 1)
+STUI(distribution_replay_no_source, 0, 1)
+STUI(distribution_replay_xregion_directed, 0, 1)
+STUI(distribution_replay_xregion_directed_no_prefix_error, 0, 1)
+STUI(distribution_replay_xregion_broadcast, 0, 1)
+STUI(distribution_replay_other, 0, 1)
 STAT(client_queue_notify_period, stat_double, 0, .dbl = 0.0)
 #undef GROUP
 #define GROUP ods_stats | detailed_stats

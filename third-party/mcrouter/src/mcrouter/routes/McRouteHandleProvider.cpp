@@ -18,6 +18,7 @@
 #include "mcrouter/routes/BlackholeRoute.h"
 #include "mcrouter/routes/CarbonLookasideRoute.h"
 #include "mcrouter/routes/DevNullRoute.h"
+#include "mcrouter/routes/DistributionRoute.h"
 #include "mcrouter/routes/ErrorRoute.h"
 #include "mcrouter/routes/FailoverRoute.h"
 #include "mcrouter/routes/FailoverWithExptimeRouteFactory.h"
@@ -255,6 +256,10 @@ McRouteHandleProvider<MemcacheRouterInfo>::buildRouteMap() {
            MemcacheRouterInfo,
            MemcacheCarbonLookasideHelper>},
       {"DevNullRoute", &makeDevNullRoute<MemcacheRouterInfo>},
+      {"DistributionRoute",
+       [](McRouteHandleFactory& factory, const folly::dynamic& json) {
+         return makeDistributionRoute<MemcacheRouterInfo>(factory, json);
+       }},
       {"ErrorRoute", &makeErrorRoute<MemcacheRouterInfo>},
       {"FailoverWithExptimeRoute",
        &makeFailoverWithExptimeRoute<MemcacheRouterInfo>},

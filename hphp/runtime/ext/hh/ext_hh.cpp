@@ -1353,6 +1353,55 @@ Class* getClass(TypedValue cls) {
 
 }
 
+TypedValue HHVM_FUNCTION(classname_to_class, TypedValue cname) {
+  switch (cname.m_type) {
+    case KindOfPersistentString:
+    case KindOfString:
+    {
+      auto const name = cname.m_data.pstr;
+      auto const c = Class::load(name);
+      if (!c) {
+        SystemLib::throwInvalidArgumentExceptionObject(
+          folly::sformat("Failed to load class {} for {}.", name, __FUNCTION__+2)
+        );
+      }
+      if (folly::Random::oneIn(RO::EvalDynamicallyReferencedNoticeSampleRate) &&
+          !c->isDynamicallyReferenced()) {
+        raise_notice("Missing __DynamicallyReferenced attribute on class %s for %s", name->data(), __FUNCTION__+2);
+      }
+      return make_tv<KindOfClass>(c);
+    }
+    case KindOfClass:
+      return cname;
+    case KindOfLazyClass:
+      return make_tv<KindOfClass>(Class::load(cname.m_data.plazyclass.name()));
+    default:
+      SystemLib::throwInvalidArgumentExceptionObject(
+        folly::sformat(
+          "Invalid argument type {} passed to {}", cname.m_type, __FUNCTION__+2)
+      );
+  }
+  not_reached();
+}
+
+TypedValue HHVM_FUNCTION(class_to_classname, TypedValue cls) {
+  switch (cls.m_type) {
+    case KindOfPersistentString:
+    case KindOfString:
+      return cls;
+    case KindOfClass:
+      return make_tv<KindOfPersistentString>(cls.m_data.pclass->name());
+    case KindOfLazyClass:
+      return make_tv<KindOfPersistentString>(cls.m_data.plazyclass.name());
+    default:
+      SystemLib::throwInvalidArgumentExceptionObject(
+        folly::sformat(
+          "Invalid argument type {} passed to {}", cls.m_type, __FUNCTION__+2)
+      );
+  }
+  not_reached();
+}
+
 bool HHVM_FUNCTION(reflection_class_is_abstract, TypedValue cls) {
   auto const c = getClass(cls);
   if (!c) {
@@ -1515,6 +1564,8 @@ static struct HHExtension final : Extension {
     X(dynamic_class_meth);
     X(dynamic_class_meth_force);
     X(classname_from_string_unsafe);
+    X(classname_to_class);
+    X(class_to_classname);
     X(enable_per_file_coverage);
     X(disable_per_file_coverage);
     X(get_files_with_coverage);

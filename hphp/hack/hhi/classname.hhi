@@ -26,5 +26,16 @@ namespace HH {
   * the C::class syntax.
   */
   function classname_from_string_unsafe(string $classname)[]: classname<mixed>;
+ 
+  /**
+   * Creates a runtime KindOfClass (class pointer) from input $cn. Migration function
+   * to eliminate implicit coercions from strings e.g. `$cn::func()`
+   */
+  function classname_to_class<T>(classname<T> $cn)[]: classname<T>;
 
+  /**
+   * Creates a runtime string from input class pointer $c. Migration function
+   * to eliminate implicit coercions to strings e.g. `$mydict[$c]`
+   */
+  function class_to_classname<T>(classname<T> $c)[]: classname<T>;
 } // namespace HH

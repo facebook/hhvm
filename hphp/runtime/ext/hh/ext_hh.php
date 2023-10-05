@@ -207,6 +207,11 @@ function dynamic_class_meth_force(string $cls, string $meth)[]: mixed;
 <<__Native>>
 function classname_from_string_unsafe(string $classname)[]: mixed;
 
+<<__Native>>
+function classname_to_class(mixed $cn)[]: mixed;
+<<__Native>>
+function class_to_classname(mixed $cn)[]: mixed;
+
 /**
  * Begin collecting code coverage on all subsequent calls into files in $files
  * during this request.

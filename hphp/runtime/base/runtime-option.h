@@ -1277,6 +1277,7 @@ struct RuntimeOption {
   /* Raise a notice if a Class type is passed to function that expects a
      string */                                                          \
   F(uint32_t, ClassStringHintNoticesSampleRate, 0)                      \
+  F(uint32_t, DynamicallyReferencedNoticeSampleRate, 0)                 \
   /* Raise a notice if a Class type is used as a memo key */            \
   F(bool, ClassMemoNotices, false)                                      \
   /* When this options is on, classname type-hints accepts classes */   \

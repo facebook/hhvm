@@ -379,14 +379,13 @@ bool HHVM_FUNCTION(is_lazy_class, TypedValue val) {
 void HHVM_FUNCTION(debug_var_dump_lazy_class, TypedValue val) {
   switch (val.m_type) {
     case KindOfLazyClass:
-      g_context->write(folly::sformat("lazyclass({})", val.m_data.plazyclass.name()));
+      g_context->write(folly::sformat("lazyclass({})\n", val.m_data.plazyclass.name()));
       break;
     case KindOfClass:
-      g_context->write(folly::sformat("class({})", val.m_data.pclass->name()));
+      g_context->write(folly::sformat("class({})\n", val.m_data.pclass->name()));
       break;
     default:
       VariableSerializer vs(VariableSerializer::Type::VarDump, 0, 2);
-      
       vs.serialize(Variant::attach(val), false);
   }
 }

@@ -34,9 +34,6 @@ file.
     }}{{/value:value_for_bool?}}{{!
 }}{{/value:integer?}}{{!
 }}{{#value:double?}}float({{value:double_value}}){{/value:double?}}{{!
-}}{{#value:string?}}{{!
-    }}{{#value:py3_binary?}}b{{/value:py3_binary?}}"{{value:string_value}}"{{!
-}}{{/value:string?}}{{!
 }}{{#value:const_struct?}}{{!
     }}{{#value:const_struct_type}}{{!
     }}{{#type:need_module_path?}}{{type:module_path}}.{{/type:need_module_path?}}{{!
@@ -62,6 +59,9 @@ file.
     }}{{/value:const_struct}}){{!
 }}{{/value:const_struct?}}{{!
 }}{{^value:const_struct?}}{{!
+}}{{#value:string?}}{{!
+    }}{{#value:py3_binary?}}b{{/value:py3_binary?}}"{{value:string_value}}"{{!
+}}{{/value:string?}}{{!
 }}{{#value:map?}}_fbthrift_python_types.Map({{!
     }}{{#value:map_key_type}}{{ >types/typeinfo }}{{/value:map_key_type}}, {{!
     }}{{#value:map_val_type}}{{ >types/typeinfo }}{{/value:map_val_type}}, {{=<% %>=}}{<%={{ }}=%>{{!

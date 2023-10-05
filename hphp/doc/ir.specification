@@ -2208,10 +2208,10 @@ ReqBindJmp and CallFuncEntry.
 
   Raises a warning with the text in S0 as its message.
 
-| RaiseNotice, ND, S(Str), NF
+| RaiseNotice<sample rate>, ND, S(Str), NF
 
-  Raises a notice with the text in S0 as its message. Takes extra data
-  specifying sample rate of 1/data for `StructuredLog::coinflip()`.
+  Raises a notice with the text in S0 as its message, sampled 1 out of "sample
+  rate" times.
 
 | ThrowHasThisNeedStatic, ND, S(Func), T
 

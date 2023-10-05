@@ -180,10 +180,8 @@ void raiseWarning(const StringData* sd) {
 }
 
 void raiseNotice(uint32_t sampleRate, const StringData* sd) {
-  if (sampleRate > 0) {
-    if (sampleRate == 1 || folly::Random::rand32(sampleRate) == 0) {
-      raise_notice("%s", sd->data());
-    }
+  if (folly::Random::oneIn(sampleRate)) {
+    raise_notice("%s", sd->data());
   }
 }
 

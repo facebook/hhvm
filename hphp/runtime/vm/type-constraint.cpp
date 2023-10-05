@@ -20,6 +20,7 @@
 
 #include <folly/Format.h>
 #include <folly/MapUtil.h>
+#include <folly/Random.h>
 
 #include <hphp/runtime/base/datatype.h>
 #include "hphp/util/match.h"
@@ -1583,7 +1584,7 @@ bool TypeConstraint::tryCommonCoercions(tv_lval val, const Class* ctx,
 
   if ((isClassType(val.type()) || isLazyClassType(val.type())) &&
       checkStringCompatible()) {
-    if (StructuredLog::coinflip(RO::EvalClassStringHintNoticesSampleRate)) {
+    if (folly::Random::oneIn(RO::EvalClassStringHintNoticesSampleRate)) {
       raise_notice(Strings::CLASS_TO_STRING_IMPLICIT, tcInfo().c_str());
     }
     val.val().pstr = isClassType(val.type()) ?

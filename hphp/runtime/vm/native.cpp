@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/native.h"
 
+#include <folly/Random.h>
+
 #include "hphp/runtime/base/annot-type.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/tv-type.h"
@@ -373,7 +375,7 @@ void coerceFCallArgsImpl(int32_t numArgs, const Func* func, F args) {
         const_cast<StringData*>(val(tv).pclass->name()) :
         const_cast<StringData*>(val(tv).plazyclass.name());
       type(tv) = KindOfPersistentString;
-      if (StructuredLog::coinflip(RO::EvalClassStringHintNoticesSampleRate)) {
+      if (folly::Random::oneIn(RO::EvalClassStringHintNoticesSampleRate)) {
         auto reason = folly::sformat(
           "argument {} passed to {}()", i+1, func->fullName());
         raise_notice(Strings::CLASS_TO_STRING_IMPLICIT, reason.c_str());

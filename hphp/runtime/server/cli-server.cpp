@@ -1282,11 +1282,26 @@ Optional<std::string> CLIWrapper::getxattr(const char* path,
 
 ////////////////////////////////////////////////////////////////////////////////
 
+std::mutex s_xboxLock;
+std::atomic<size_t> s_numXboxThreads{0};
+std::condition_variable s_xboxThreadsCv;
+
+void enqueueXboxJob() {
+  std::unique_lock l{s_xboxLock};
+  s_numXboxThreads++;
+}
+
+void finishXboxJob() {
+  std::unique_lock l{s_xboxLock};
+  if (--s_numXboxThreads == 0) s_xboxThreadsCv.notify_one();
+}
+
 struct CLIXboxWorker
   : JobQueueWorker<int,void*,true,false,JobQueueDropVMStack>
 {
   void doJob(int fd) override;
   void abortJob(int fd) override {
+    finishXboxJob();
     Logger::Warning("CLI xbox-request (%i) dropped because of timeout.", fd);
     close(fd);
   }
@@ -1360,6 +1375,9 @@ Optional<int> cli_process_command_loop(int fd, bool ignore_bg, bool isclone) {
   SCOPE_EXIT {
     if (!isclone) {
       if (s_xbox_dispatcher) {
+        std::unique_lock l{s_xboxLock};
+        s_xboxThreadsCv.wait(l, [] { return s_numXboxThreads == 0; });
+
         s_xbox_dispatcher->stop();
         delete s_xbox_dispatcher;
         s_xbox_dispatcher = nullptr;
@@ -1702,6 +1720,7 @@ Optional<int> cli_process_command_loop(int fd, bool ignore_bg, bool isclone) {
              fd, socks[0], socks[1]);
 
       cli_write_fd(fd, socks[1]);
+      enqueueXboxJob();
 
       close(socks[1]);
       s_xbox_dispatcher->enqueue(socks[0]);
@@ -1723,7 +1742,10 @@ Optional<int> cli_process_command_loop(int fd, bool ignore_bg, bool isclone) {
   }
 }
 
-void CLIXboxWorker::doJob(int fd) { cli_process_command_loop(fd, true, true); }
+void CLIXboxWorker::doJob(int fd) {
+  SCOPE_EXIT { finishXboxJob(); };
+  cli_process_command_loop(fd, true, true);
+}
 
 Optional<int> run_client(const char* sock_path,
                          const std::vector<std::string>& args,

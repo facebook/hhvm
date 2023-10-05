@@ -34,12 +34,19 @@ TLConnectionStats::TLConnectionStats(const std::string& prefix)
                      95,
                      99),
       currConns_(prefix + "_conn"),
-      newConns_(prefix + "_new_conn", SUM) {
+      newConns_(prefix + "_new_conn", SUM),
+      currTcpConns_(prefix + "_tcp_conn"),
+      newTcpConns_(prefix + "_new_tcp_conn", SUM) {
 }
 
 void TLConnectionStats::recordConnectionOpen() {
   currConns_.incrementValue(1);
   newConns_.add(1);
+}
+
+void TLConnectionStats::recordTcpConnectionOpen() {
+  currTcpConns_.incrementValue(1);
+  newTcpConns_.add(1);
 }
 
 void TLConnectionStats::recordConnectionClose() {

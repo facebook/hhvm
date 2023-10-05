@@ -24,6 +24,8 @@ class ConnectionStats {
 
   virtual void recordConnectionOpen() = 0;
 
+  virtual void recordTcpConnectionOpen() = 0;
+
   virtual void recordConnectionClose() = 0;
 
   virtual void recordRequest() = 0;
@@ -51,6 +53,8 @@ class TLConnectionStats : public ConnectionStats {
   explicit TLConnectionStats(const std::string& prefix);
 
   void recordConnectionOpen() override;
+
+  void recordTcpConnectionOpen() override;
 
   void recordConnectionClose() override;
 
@@ -81,6 +85,9 @@ class TLConnectionStats : public ConnectionStats {
 
   BaseStats::TLCounter currConns_;
   BaseStats::TLTimeseries newConns_;
+
+  BaseStats::TLCounter currTcpConns_;
+  BaseStats::TLTimeseries newTcpConns_;
 };
 
 } // namespace proxygen

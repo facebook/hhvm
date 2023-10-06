@@ -1190,7 +1190,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 1:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
-          this->set_first();
+          this->first_ref().ensure();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::test::fixtures::basic-structured-annotations::annotated_inline_string>::readWithContext(*iprot, value_.first, _readState);
           
         } else {
@@ -1201,7 +1201,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 2:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I64)) {
-          this->set_second();
+          this->second_ref().ensure();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::test::fixtures::basic-structured-annotations::annotated_inline_i64>::readWithContext(*iprot, value_.second, _readState);
           
         } else {

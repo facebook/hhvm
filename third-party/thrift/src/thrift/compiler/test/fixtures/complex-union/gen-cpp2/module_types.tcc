@@ -96,7 +96,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
       case 1:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I64)) {
-          this->set_intValue();
+          this->intValue_ref().ensure();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t>::readWithContext(*iprot, value_.intValue, _readState);
           
         } else {
@@ -107,7 +107,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
       case 5:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
-          this->set_stringValue();
+          this->stringValue_ref().ensure();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, value_.stringValue, _readState);
           
         } else {
@@ -118,7 +118,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
       case 2:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_LIST)) {
-          this->set_intListValue();
+          this->intListValue_ref().ensure();
           _readState.beforeSubobject(iprot);
           value_.intListValue = ::std::vector<::std::int64_t>();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int64_t>>::readWithContext(*iprot, value_.intListValue, _readState);
@@ -132,7 +132,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
       case 3:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_LIST)) {
-          this->set_stringListValue();
+          this->stringListValue_ref().ensure();
           _readState.beforeSubobject(iprot);
           value_.stringListValue = ::std::vector<::std::string>();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::string>, ::std::vector<::std::string>>::readWithContext(*iprot, value_.stringListValue, _readState);
@@ -146,7 +146,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
       case 9:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_MAP)) {
-          this->set_typedefValue();
+          this->typedefValue_ref().ensure();
           _readState.beforeSubobject(iprot);
           value_.typedefValue = ::cpp2::containerTypedef();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::string>, ::cpp2::containerTypedef>::readWithContext(*iprot, value_.typedefValue, _readState);
@@ -160,7 +160,7 @@ void ComplexUnion::readNoXfer(Protocol_* iprot) {
       case 14:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
-          this->set_stringRef();
+          this->stringRef_ref().ensure();
           auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::string>>();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, *ptr, _readState);
           value_.stringRef = std::move(ptr);
@@ -373,7 +373,7 @@ void ListUnion::readNoXfer(Protocol_* iprot) {
       case 2:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_LIST)) {
-          this->set_intListValue();
+          this->intListValue_ref().ensure();
           _readState.beforeSubobject(iprot);
           value_.intListValue = ::std::vector<::std::int64_t>();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int64_t>>::readWithContext(*iprot, value_.intListValue, _readState);
@@ -387,7 +387,7 @@ void ListUnion::readNoXfer(Protocol_* iprot) {
       case 3:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_LIST)) {
-          this->set_stringListValue();
+          this->stringListValue_ref().ensure();
           _readState.beforeSubobject(iprot);
           value_.stringListValue = ::std::vector<::std::string>();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::string>, ::std::vector<::std::string>>::readWithContext(*iprot, value_.stringListValue, _readState);
@@ -515,7 +515,7 @@ void DataUnion::readNoXfer(Protocol_* iprot) {
       case 1:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
-          this->set_binaryData();
+          this->binaryData_ref().ensure();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::std::string>::readWithContext(*iprot, value_.binaryData, _readState);
           
         } else {
@@ -526,7 +526,7 @@ void DataUnion::readNoXfer(Protocol_* iprot) {
       case 2:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
-          this->set_stringData();
+          this->stringData_ref().ensure();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, value_.stringData, _readState);
           
         } else {
@@ -846,7 +846,7 @@ void ValUnion::readNoXfer(Protocol_* iprot) {
       case 1:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT)) {
-          this->set_v1();
+          this->v1_ref().ensure();
           _readState.beforeSubobject(iprot);
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Val>::readWithContext(*iprot, value_.v1, _readState);
           _readState.afterSubobject(iprot);
@@ -859,7 +859,7 @@ void ValUnion::readNoXfer(Protocol_* iprot) {
       case 2:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT)) {
-          this->set_v2();
+          this->v2_ref().ensure();
           _readState.beforeSubobject(iprot);
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::Val>::readWithContext(*iprot, value_.v2, _readState);
           _readState.afterSubobject(iprot);
@@ -986,7 +986,7 @@ void VirtualComplexUnion::readNoXfer(Protocol_* iprot) {
       case 1:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
-          this->set_thingOne();
+          this->thingOne_ref().ensure();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, value_.thingOne, _readState);
           
         } else {
@@ -997,7 +997,7 @@ void VirtualComplexUnion::readNoXfer(Protocol_* iprot) {
       case 2:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
-          this->set_thingTwo();
+          this->thingTwo_ref().ensure();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, value_.thingTwo, _readState);
           
         } else {
@@ -1240,7 +1240,7 @@ void NonCopyableUnion::readNoXfer(Protocol_* iprot) {
       case 1:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT)) {
-          this->set_s();
+          this->s_ref().ensure();
           _readState.beforeSubobject(iprot);
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::NonCopyableStruct>::readWithContext(*iprot, value_.s, _readState);
           _readState.afterSubobject(iprot);

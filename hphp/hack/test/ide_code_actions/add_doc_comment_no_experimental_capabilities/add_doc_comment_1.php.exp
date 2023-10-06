@@ -1,0 +1,33 @@
+Code actions available:
+------------------------------------------
+Add doc comment (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"/**\n * ${0:}\n */\n",
+          "range":{"end":{"character":0,"line":2},"start":{"character":0,"line":2}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Add doc comment"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+// TODO: There should be no snippet (`${`...) in the output
+/**
+ * ${0:}
+ */
+// because we are using `--ide-code-actions-no-experimental-capabilities`
+
+class A/*range-start*//*range-end*/ {}
+

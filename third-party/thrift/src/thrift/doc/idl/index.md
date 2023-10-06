@@ -714,12 +714,14 @@ Refer to [Interactions](/fb/features/interactions.md) for more information.
 
 ### Constants
 
+A constant definition introduces a named contant into your program and has the following form:
+
 ```grammar
 constant_definition ::=
   [annotations] "const" type identifier "=" constant [";"]
 ```
 
-A constant definition introduces a name for a value. This name can be used instead of the value after the completion of constant definition, and in other Thrift files that include this Thrift file.
+The constant name can be used instead of the value after the completion of the constant definition and in other Thrift files that include this Thrift file.
 
 ```grammar
 constant ::=
@@ -728,31 +730,28 @@ constant ::=
 | string_literal
 | bool_literal
 | maybe_qualified_id
-| ListOrSetConstant
-| MapConstant
+| list_constant
+| map_constant
 
 integer ::=  ["+" | "-"] int_literal
 float   ::=  ["+" | "-"] float_literal
 ```
 
-The constant on the right hand side of `"="` can be:
+A constant can be one of the following:
 
-* A literal
-* A name
-* A list, set, or map constant
+* A literal, with numeric literals optionally preceded with a sign
+* A name of another constant
+* A list or map constant
 
 #### Literal Constants
 
 ```thrift
-const bool flag = true
-const byte offset = -10 // byte is a 8-bit *signed* integer
-const i32 count = 200
-const i16 bits = 0241 // octal value (starts with 0)
-const i32 mask = 0xFA12EE // hex value (starts with 0x)
-const float pi = 3.1416
-const double e = 2.718281828459
-const string error = 'unknown protocol'
-const string date = "June 28, 2017"
+const bool FLAG = true;
+const byte OFFSET = -10; // byte is an 8-bit signed integer
+const i16 COUNT = 200;
+const i32 MASK = 0xFA12EE;
+const double E = 2.718281828459;
+const string DATE = "June 28, 2017";
 ```
 
 #### Name Constants
@@ -771,14 +770,11 @@ const Gender NAN = Gender.MALE
 const search_types.Gender NV = search_types.Gender.FEMALE
 ```
 
-#### List, Set, and Map Constants
+#### List and Map Constants
 
 ```
-ListOrSetConstant ::=
-  "[" ( Constant delimiter )* "]"
-
-MapConstant ::=
-  "{" ( Constant ":" Constant )* "}"
+list_constant ::=  "[" (constant delimiter)* "]"
+map_constant  ::=  "{" (constant ":" constant)* "}"
 ```
 
 Constants can also be of list, set, or map types.

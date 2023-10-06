@@ -489,6 +489,16 @@ fn print_expr(
                 ast::ClassGetExpr::CGexpr(e) => print_expr(ctx, w, env, e),
             }
         }
+        Expr_::Nameof(box cid) => {
+            w.write_all(b"nameof ")?;
+            if let Some(e1) = cid.as_ciexpr() {
+                if let Some(ast_defs::Id(_, s1)) = e1.2.as_id() {
+                    let s1 = get_class_name_from_id(ctx, env, true, false, s1);
+                    return w.write_all(s1.as_ref().as_bytes());
+                }
+            }
+            Err(Error::fail("TODO: Only expected CIexpr of Id in Nid").into())
+        }
         Expr_::ClassConst(cc) => {
             if let Some(e1) = (cc.0).2.as_ciexpr() {
                 handle_possible_colon_colon_class_expr(ctx, w, env, expr)?.map_or_else(

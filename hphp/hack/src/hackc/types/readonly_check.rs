@@ -263,7 +263,7 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         }
         // Primitive types are mutable
         Null | True | False | Omitted | Invalid(_) => Rty::Mutable,
-        Int(_) | Float(_) | String(_) | String2(_) | PrefixedString(_) => Rty::Mutable,
+        Int(_) | Float(_) | String(_) | String2(_) | PrefixedString(_) | Nameof(_) => Rty::Mutable,
         Id(_) => Rty::Mutable,
         Dollardollar(lid) => {
             let (id, dollardollar) = &lid.1;

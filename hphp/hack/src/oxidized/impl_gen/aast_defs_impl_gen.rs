@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<115b2381a563cd54fd73b8583e38148d>>
+// @generated SignedSource<<1e7e972c0e018ce16283bec34b0398d4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1171,6 +1171,9 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_package(p0: Sid) -> Self {
         Expr_::Package(Box::new(p0))
     }
+    pub fn mk_nameof(p0: ClassId<Ex, En>) -> Self {
+        Expr_::Nameof(Box::new(p0))
+    }
     pub fn is_darray(&self) -> bool {
         match self {
             Expr_::Darray(..) => true,
@@ -1489,6 +1492,12 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => false,
         }
     }
+    pub fn is_nameof(&self) -> bool {
+        match self {
+            Expr_::Nameof(..) => true,
+            _ => false,
+        }
+    }
     pub fn as_darray(
         &self,
     ) -> Option<(
@@ -1803,6 +1812,12 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn as_package(&self) -> Option<&Sid> {
         match self {
             Expr_::Package(p0) => Some(&p0),
+            _ => None,
+        }
+    }
+    pub fn as_nameof(&self) -> Option<&ClassId<Ex, En>> {
+        match self {
+            Expr_::Nameof(p0) => Some(&p0),
             _ => None,
         }
     }
@@ -2160,6 +2175,12 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
+    pub fn as_nameof_mut(&mut self) -> Option<&mut ClassId<Ex, En>> {
+        match self {
+            Expr_::Nameof(p0) => Some(p0.as_mut()),
+            _ => None,
+        }
+    }
     pub fn as_darray_into(
         self,
     ) -> Option<(
@@ -2474,6 +2495,12 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn as_package_into(self) -> Option<Sid> {
         match self {
             Expr_::Package(p0) => Some(*p0),
+            _ => None,
+        }
+    }
+    pub fn as_nameof_into(self) -> Option<ClassId<Ex, En>> {
+        match self {
+            Expr_::Nameof(p0) => Some(*p0),
             _ => None,
         }
     }

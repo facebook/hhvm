@@ -1,0 +1,10 @@
+
+Warning: Failed to eval default value of C::f()'s $s3 argument for reflection, assigning NULL instead in %s/nameof/reflection.php on line 24
+s1 => "C" = string(1) "C"
+t1 => "C" = string(1) "C"
+s2 => "C" = string(1) "C"
+t2 => \C::class = string(1) "C"
+s4 => "A" = string(1) "A"
+t4 => \A::class = string(1) "A"
+s3 => nameof static = NULL
+t3 => \static::class = string(6) "static"

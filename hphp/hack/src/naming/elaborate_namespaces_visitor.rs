@@ -451,6 +451,15 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
             Expr_::EnumClassLabel(box (Some(sid), _)) if !env.in_codegen() => {
                 env.elaborate_type_name(sid);
             }
+            Expr_::Nameof(box target) => {
+                if let Some(e) = target.2.as_ciexpr_mut() {
+                    if let Some(sid) = e.2.as_id_mut() {
+                        env.elaborate_type_name(sid);
+                    } else {
+                        e.accept(env, self.object())?;
+                    }
+                }
+            }
             _ => e.recurse(env, self.object())?,
         }
         Ok(())

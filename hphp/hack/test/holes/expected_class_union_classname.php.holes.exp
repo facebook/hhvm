@@ -46,7 +46,7 @@ Errors:
                           (((nothing | C)), [6:11-22],
                            (CIexpr
                               (((int | classname<C>)), [6:11-22],
-                               (Hole ((((int | classname<C>)), [6:11-22], (Lvar ([6:11-22], $class_name))), ((int | classname<C>)), ((classname<C> | classname<nothing>)), Typing))))),
+                               (Hole ((((int | classname<C>)), [6:11-22], (Lvar ([6:11-22], $class_name))), ((int | classname<C>)), ((classname<nothing> | classname<C>)), Typing))))),
                           [], [], None, ((function(): void)))))
                       }))))
              ]

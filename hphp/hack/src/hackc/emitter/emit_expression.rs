@@ -425,6 +425,32 @@ enum ArrayGetBase<'arena> {
     },
 }
 
+pub fn emit_nameof<'a, 'arena, 'decl>(
+    emitter: &mut Emitter<'arena, 'decl>,
+    env: &Env<'a, 'arena>,
+    class_id: &ast::ClassId,
+) -> Result<InstrSeq<'arena>> {
+    let cexpr = ClassExpr::class_id_to_class_expr(emitter, &env.scope, false, true, class_id);
+    match cexpr {
+        ClassExpr::Id(ast_defs::Id(_, cname)) => {
+            let classid =
+                hhbc::ClassName::from_ast_name_and_mangle(emitter.alloc, cname).as_ffi_str();
+
+            emit_adata::typed_value_into_instr(emitter, TypedValue::string(classid))
+        }
+        ClassExpr::Special(_) => Ok(InstrSeq::gather(vec![
+            emit_load_class_ref(emitter, env, &class_id.1, cexpr)?,
+            instr::class_name(),
+        ])),
+        ClassExpr::Reified(ast_defs::Id(pos, name)) => {
+            get_reified_var_cexpr(emitter, env, &pos, &name)
+        }
+        ClassExpr::Expr(_) => Err(Error::unrecoverable(
+            "emit_nameof: should be eliminated by elab",
+        )),
+    }
+}
+
 pub fn emit_expr<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
@@ -442,6 +468,7 @@ pub fn emit_expr<'a, 'arena, 'decl>(
             | Expr_::True => emit_lit(emitter, env, pos, expression),
             Expr_::EnumClassLabel(label) => emit_label(emitter, env, pos, label),
             Expr_::PrefixedString(e) => emit_expr(emitter, env, &e.1),
+            Expr_::Nameof(target) => emit_nameof(emitter, env, target),
             Expr_::Lvar(e) => emit_lvar(emitter, env, pos, e),
             Expr_::ClassConst(e) => emit_class_const(emitter, env, pos, &e.0, &e.1),
             Expr_::Unop(e) => emit_unop(emitter, env, pos, e),

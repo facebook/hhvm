@@ -237,6 +237,7 @@ impl LiftAwait {
         | Expr_::Invalid(box None)
         | Expr_::EnumClassLabel(_)
         | Expr_::ClassConst(_)
+        | Expr_::Nameof(_)
         | Expr_::FunctionPointer(_)
         | Expr_::ClassGet(_) // Can't contain an expression in strict mode
         | Expr_::Package(_) => {}

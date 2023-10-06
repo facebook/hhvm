@@ -1671,6 +1671,7 @@ fn p_expr_impl<'a>(
         XHPExpression(c) if c.open.is_xhp_open() => p_xhp_expr(c, env),
         EnumClassLabelExpression(c) => p_enum_class_label_expr(c, env),
         PackageExpression(p) => p_package_expr(p, env),
+        NameofExpression(p) => p_nameof(p, env),
         _ => {
             raise_missing_syntax("expression", node, env);
             Ok(Expr_::Null)
@@ -2477,6 +2478,24 @@ fn p_package_expr<'a>(
 ) -> Result<Expr_> {
     let id = pos_name(&p.name, env)?;
     Ok(Expr_::mk_package(id))
+}
+
+fn p_nameof<'a>(
+    p: &'a NameofExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+) -> Result<Expr_> {
+    let target = p_expr(&p.target, env)?;
+    match &target.2 {
+        Expr_::Id(_) => Ok(Expr_::mk_nameof(ast::ClassId(
+            (),
+            target.1.clone(),
+            ast::ClassId_::CIexpr(target),
+        ))),
+        _ => Err(Error::ParsingError {
+            message: String::from("`nameof` can only be used with a class"),
+            pos: p_pos(&p.target, env),
+        }),
+    }
 }
 
 fn mk_lid(p: Pos, s: String) -> ast::Lid {

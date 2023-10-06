@@ -741,6 +741,7 @@ let rec get_data_srcs_from_expr env ctx (tp, _, te) =
   | String _
   | String2 _
   | PrefixedString _
+  | Nameof _
   | ExpressionTree _ ->
     DataSourceSet.singleton Literal
   | This

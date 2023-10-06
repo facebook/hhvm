@@ -668,6 +668,7 @@ let check =
       | (_, _, Float _)
       | (_, _, PrefixedString _)
       | (_, _, Hole _)
+      | (_, _, Nameof _)
       | (_, _, Package _) ->
         super#on_expr env e
       (* Stop at invalid marker *)

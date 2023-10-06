@@ -556,6 +556,7 @@ and expr_ env acc p e =
   | Null
   | String _
   | String2 _
+  | Nameof _
   | PrefixedString _ ->
     acc
   | Yield e -> afield acc e

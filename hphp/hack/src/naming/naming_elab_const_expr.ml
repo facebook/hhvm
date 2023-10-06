@@ -134,7 +134,7 @@ let on_expr_top_down
         ( This | Lvar _ | Lplaceholder _ | Array_get _ | Await _ | Cast _
         | Class_get _ | Clone _ | Dollardollar _ | ET_Splice _ | Efun _
         | EnumClassLabel _ | ExpressionTree _ | Is _ | Lfun _ | List _
-        | Method_caller _ | New _ | Obj_get _ | Pair _ | Pipe _
+        | Method_caller _ | New _ | Obj_get _ | Pair _ | Pipe _ | Nameof _
         | PrefixedString _ | ReadonlyExpr _ | String2 _ | Yield _ | Xml _ )) ->
       on_error (Err.naming @@ Naming_error.Illegal_constant pos);
       (ctx, Error (Err.invalid_expr expr))
@@ -149,6 +149,7 @@ let on_expr_bottom_up on_error ((_annot, pos, expr_) as expr) ~ctx =
     (ctx, Ok expr)
   else begin
     match expr_ with
+    | Aast.(Nameof (_, _, class_id_))
     | Aast.(Class_const ((_, _, class_id_), _)) -> begin
       (* We have to handle this case bottom-up since the class identifier
          will not have been rewritten in the top-down pass *)

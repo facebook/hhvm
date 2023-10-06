@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<22dca923316e1bd97de79873f674fc04>>
+// @generated SignedSource<<3861ed72cc3693f1ca31c03f526ae658>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -657,6 +657,7 @@ impl Transform for Expr_ {
             Expr_::EnumClassLabel(ref mut __binding_0) => __binding_0.transform(env, pass),
             Expr_::Hole(ref mut __binding_0) => __binding_0.transform(env, pass),
             Expr_::Package(ref mut __binding_0) => __binding_0.transform(env, pass),
+            Expr_::Nameof(ref mut __binding_0) => __binding_0.transform(env, pass),
             _ => {}
         }
     }

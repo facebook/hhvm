@@ -462,6 +462,7 @@ and pp_expr_ ppf = function
   end
   | Aast.Invalid (Some expr) -> pp_expr ppf expr
   | Aast.Package (_, id) -> Fmt.string ppf id
+  | Aast.Nameof cid -> Fmt.(prefix (const string "nameof") pp_class_id) ppf cid
   | Aast.Invalid _
   | Aast.Efun _
   | Aast.Lfun _

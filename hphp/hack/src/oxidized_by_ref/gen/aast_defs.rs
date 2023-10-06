@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<80adbbacd1ed14196b309da45c15313e>>
+// @generated SignedSource<<a1d960e7a96683747254003016b3e2bc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1403,6 +1403,9 @@ pub enum Expr_<'a, Ex, En> {
     ///     package package-name
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Package(&'a Sid<'a>),
+    /// Get the name of a class
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Nameof(&'a ClassId<'a, Ex, En>),
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Expr_<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(Expr_<'arena, Ex, En>);

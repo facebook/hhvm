@@ -26,6 +26,7 @@ let rec can_be_captured =
   | Obj_get _
   | Class_get _
   | Class_const _
+  | Nameof _
   | Call _
   | FunctionPointer _
   | Int _

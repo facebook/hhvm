@@ -859,6 +859,7 @@ module Visitor_DEPRECATED = struct
         | ReadonlyExpr e -> this#on_readonly_expr acc e
         | Hole (e, _, _, _) -> this#on_expr acc e
         | Package id -> this#on_id acc id
+        | Nameof ci -> this#on_class_id acc ci
         | Invalid (Some e) -> this#on_expr acc e
         | Invalid _ -> acc
 

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<720516b1b79a37a8cd9c7a4e573bf78a>>
+// @generated SignedSource<<9b9073ed1062cbc2af03bdde258558f7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1137,6 +1137,8 @@ pub enum Expr_<Ex, En> {
     ///
     ///     package package-name
     Package(Box<Sid>),
+    /// Get the name of a class
+    Nameof(Box<ClassId<Ex, En>>),
 }
 
 #[derive(

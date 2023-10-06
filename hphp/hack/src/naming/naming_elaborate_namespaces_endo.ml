@@ -333,6 +333,11 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       | Class_const ((_, p1, CIexpr (ty, p2, Id x1)), pstr) ->
         let name = elaborate_type_name env x1 in
         Class_const (((), p1, CIexpr (ty, p2, Id name)), pstr)
+      | Nameof ((), p1, CIexpr (ty, p2, Id x)) ->
+        (* Identical to the previous case, prevents "static" from becoming "\\static"
+         * TODO(vmladenov) make this better *)
+        let x = elaborate_type_name env x in
+        Nameof ((), p1, CIexpr (ty, p2, Id x))
       | Class_get ((_, p1, CIexpr (ty, p2, Id x1)), cge, in_parens) ->
         let x1 = elaborate_type_name env x1 in
         Class_get

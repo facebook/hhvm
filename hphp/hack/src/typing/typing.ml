@@ -5386,6 +5386,13 @@ and expr_
       error ())
   | Package ((p, _) as id) ->
     make_result env p (Aast.Package id) (MakeType.bool (Reason.Rwitness p))
+  | Nameof cid ->
+    let (env, _tal, ce, cty) = class_expr env [] cid in
+    make_result
+      env
+      p
+      (Aast.Nameof ce)
+      (MakeType.classname (Reason.Rwitness p) [cty])
 
 and class_const ?(is_attribute_param = false) ?(incl_tc = false) env p (cid, mid)
     =

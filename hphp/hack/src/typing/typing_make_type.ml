@@ -15,8 +15,6 @@ module Nast = Aast
 let class_type r name tyl =
   mk (r, Tclass ((Reason.to_pos r, name), nonexact, tyl))
 
-let classname r tyl = class_type r SN.Classes.cClassname tyl
-
 let prim_type r t = mk (r, Tprim t)
 
 (* Make a negation type *)
@@ -81,6 +79,16 @@ let int r = prim_type r Nast.Tint
 let bool r = prim_type r Nast.Tbool
 
 let string r = prim_type r Nast.Tstring
+
+(* Mirror of the classname.hhi definition. This sucks: the type of the ::class
+ * constant is burned into decls at folding time so this supports the case when
+ * you want to wrap a locl ty e.g. from [Typing.class_expr] in a classname.
+ * TODO: eliminate the use site of this for CIexpr and make class_expr
+ * produce a class type directly *)
+let typename r tyl = mk (r, Tnewtype (SN.Classes.cTypename, tyl, string r))
+
+let classname r tyl =
+  mk (r, Tnewtype (SN.Classes.cClassname, tyl, typename r tyl))
 
 let float r = prim_type r Nast.Tfloat
 

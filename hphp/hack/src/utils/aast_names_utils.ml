@@ -87,3 +87,4 @@ let expr_name = function
   | A.Hole _ -> "Hole"
   | A.Invalid _ -> "Invalid"
   | A.Package _ -> "Package"
+  | A.Nameof _ -> "Nameof"

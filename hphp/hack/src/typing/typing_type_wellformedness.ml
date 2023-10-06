@@ -625,7 +625,8 @@ let expr tenv ((), _p, e) =
   | EnumClassLabel _
   | ET_Splice _
   | Hole _
-  | Package _ ->
+  | Package _
+  | Nameof _ ->
     []
 
 (** Check well-formedness of type hints. See .mli file for more. *)

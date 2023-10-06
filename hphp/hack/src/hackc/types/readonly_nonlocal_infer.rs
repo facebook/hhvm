@@ -299,6 +299,7 @@ impl<'decl> Infer<'decl> {
                 let (e, _ty, ctx) = self.infer_expr(e, ctx, next_where);
                 (PrefixedString(box_tup!(str.clone(), e)), Tyx::Todo, ctx)
             }
+            Nameof(_) => (exp.clone(), Tyx::Todo, ctx), // behaves like string literal
             Yield(box field) => {
                 let (field, _field_ty, ctx) = self.infer_a_field(field, ctx, next_where);
                 (Yield(Box::new(field)), Tyx::Todo, ctx)

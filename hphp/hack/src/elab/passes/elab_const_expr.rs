@@ -105,6 +105,7 @@ impl Pass for ElabConstExprPass {
                 Expr_::Invalid(..) | Expr_::Hole(..) => Continue(()),
 
                 // -- handled bottom-up ----------------------------------------
+                Expr_::Nameof(_) => Continue(()),
                 Expr_::ClassConst(_) => Continue(()),
 
                 // -- conditionally valid --------------------------------------
@@ -228,7 +229,8 @@ impl Pass for ElabConstExprPass {
             };
 
             match expr_ {
-                Expr_::ClassConst(box (ClassId(_, _, class_id_), _)) => match class_id_ {
+                Expr_::Nameof(box ClassId(_, _, class_id_))
+                | Expr_::ClassConst(box (ClassId(_, _, class_id_), _)) => match class_id_ {
                     ClassId_::CIstatic => {
                         env.emit_error(NamingError::IllegalConstant(pos.clone()));
                         invalid(expr_)

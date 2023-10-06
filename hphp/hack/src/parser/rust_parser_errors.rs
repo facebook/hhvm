@@ -110,6 +110,7 @@ pub enum UnstableFeatures {
     PipeAwait,
     MatchStatements,
     StrictSwitch,
+    NameofClass,
 }
 impl UnstableFeatures {
     // Preview features are allowed to run in prod. This function decides
@@ -142,6 +143,7 @@ impl UnstableFeatures {
             UnstableFeatures::PipeAwait => Unstable,
             UnstableFeatures::MatchStatements => Unstable,
             UnstableFeatures::StrictSwitch => Unstable,
+            UnstableFeatures::NameofClass => Preview,
         }
     }
 }
@@ -5458,6 +5460,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             }
             PackageExpression(_) => {
                 self.check_can_use_feature(node, &UnstableFeatures::Package);
+            }
+            NameofExpression(_) => {
+                self.check_can_use_feature(node, &UnstableFeatures::NameofClass);
             }
             _ => {}
         }

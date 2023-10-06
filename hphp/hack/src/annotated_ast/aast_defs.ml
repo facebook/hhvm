@@ -800,6 +800,8 @@ and ('ex, 'en) expr_ =
       (** Expression used to check whether a package exists.
        *
        *     package package-name *)
+  | Nameof of ('ex, 'en) class_id
+      (** Get the name of a class *)
 
 and hole_source =
   | Typing

@@ -244,32 +244,20 @@ void set_generated(diagnostic_context&, mutator_context&, t_named& node) {
 
 void normalize_return_type(
     diagnostic_context& ctx, mutator_context&, t_function& node) {
-  auto& types = node.return_types();
-  if (types.empty()) {
+  if (!node.has_return_type()) {
     return;
   }
-  if (!types.front().resolve()) {
+  auto& type = node.return_type();
+  if (!type.resolve()) {
     ctx.error(node, "Failed to resolve return type of `{}`.", node.name());
     return;
   }
 
   // Check the (first) response type.
-  auto type = types[0];
   const t_type* true_type = type->get_true_type();
   if (dynamic_cast<const t_service*>(true_type) ||
       dynamic_cast<const t_exception*>(true_type)) {
     ctx.error("Invalid first response type: {}", type->get_full_name());
-  }
-
-  t_node* sink_or_stream = node.sink_or_stream();
-  if (!sink_or_stream) {
-    node.set_response_pos(0);
-  } else if (auto* sink = dynamic_cast<t_sink*>(sink_or_stream)) {
-    // TODO: move first response out of t_sink.
-    sink->set_first_response_type(type);
-  } else if (auto* stream = dynamic_cast<t_stream_response*>(sink_or_stream)) {
-    // TODO: move first response out of t_stream_response.
-    stream->set_first_response_type(type);
   }
 }
 

@@ -2621,7 +2621,7 @@ void t_java_deprecated_generator::generate_service_client(
 
       t_function recv_function(
           nullptr,
-          t_type_ref::from_req_ptr((*f_iter)->return_type()),
+          (*f_iter)->return_type(),
           "recv_" + (*f_iter)->get_name(),
           std::make_unique<t_paramlist>(program_));
       if (const t_throws* exceptions = (*f_iter)->exceptions()) {
@@ -2752,7 +2752,7 @@ void t_java_deprecated_generator::generate_service_async_client(
       continue;
     }
     string funname = (*f_iter)->get_name();
-    const t_type* ret_type = (*f_iter)->return_type();
+    const t_type& ret_type = *(*f_iter)->return_type();
     const t_paramlist& arg_struct = (*f_iter)->params();
     string funclassname = funname + "_call";
     const vector<t_field*>& fields = arg_struct.get_members();
@@ -2850,7 +2850,7 @@ void t_java_deprecated_generator::generate_service_async_client(
     indent(f_service_) << "}" << endl << endl;
 
     // Return method
-    indent(f_service_) << "public " + type_name(ret_type) +
+    indent(f_service_) << "public " + type_name(&ret_type) +
             " getResult() throws ";
     for (const t_field& x : get_elems((*f_iter)->exceptions())) {
       f_service_ << type_name(x.get_type(), false, false) + ", ";
@@ -2874,7 +2874,7 @@ void t_java_deprecated_generator::generate_service_async_client(
         << endl;
     if ((*f_iter)->qualifier() != t_function_qualifier::oneway) {
       indent(f_service_);
-      if (!ret_type->is_void()) {
+      if (!ret_type.is_void()) {
         f_service_ << "return ";
       }
       f_service_ << "(new Client(prot)).recv_" + funname + "();" << endl;
@@ -3132,7 +3132,7 @@ void t_java_deprecated_generator::generate_process_function(
   // Set isset on success field
   if (tfunction->qualifier() != t_function_qualifier::oneway &&
       !tfunction->return_type()->is_void() &&
-      !type_can_be_null(tfunction->return_type())) {
+      !type_can_be_null(tfunction->return_type().get_type())) {
     f_service_ << indent() << "result.set" << get_cap_name("success")
                << get_cap_name("isSet") << "(true);" << endl;
   }
@@ -3783,8 +3783,8 @@ string t_java_deprecated_generator::declare_field(
  */
 string t_java_deprecated_generator::function_signature(
     const t_function* tfunction, string prefix) {
-  const t_type* ttype = tfunction->return_type();
-  std::string result = type_name(ttype) + " " + prefix + tfunction->get_name() +
+  const t_type* type = tfunction->return_type().get_type();
+  std::string result = type_name(type) + " " + prefix + tfunction->get_name() +
       "(" + argument_list(tfunction->params()) + ") throws ";
   for (const t_field& x : get_elems(tfunction->exceptions())) {
     result += type_name(x.get_type(), false, false) + ", ";

@@ -2561,7 +2561,7 @@ void t_py_generator::generate_service_client(const t_service* tservice) {
       } else {
         t_function recv_function(
             program_,
-            t_type_ref::from_req_ptr((*f_iter)->return_type()),
+            (*f_iter)->return_type(),
             string("recv_") + (*f_iter)->get_name());
         f_service_ << indent() << "def " << function_signature(&recv_function)
                    << ":" << endl;
@@ -2726,7 +2726,8 @@ void t_py_generator::generate_service_remote(const t_service* tservice) {
       if (fn->qualifier() == t_function_qualifier::oneway) {
         f_remote << "None, ";
       } else {
-        f_remote << "'" << thrift_type_name(fn->return_type()) << "', ";
+        f_remote << "'" << thrift_type_name(fn->return_type().get_type())
+                 << "', ";
       }
 
       f_remote << "[";

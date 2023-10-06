@@ -274,12 +274,12 @@ class pyi_mstch_program : public mstch_program {
     std::set<std::string> visited;
     for (const auto* service : mstch_program::program_->services()) {
       for (const auto* function : service->get_functions()) {
-        const auto* returnType = function->return_type();
-        std::string name = to_flat_type_name(returnType);
+        const auto* return_type = function->return_type().get_type();
+        std::string name = to_flat_type_name(return_type);
 
         if (visited.find(name) == visited.end()) {
           visited.insert(name);
-          this->return_types_.push_back(returnType);
+          this->return_types_.push_back(return_type);
         }
       }
     }
@@ -293,9 +293,7 @@ class pyi_mstch_program : public mstch_program {
         for (const auto& param : function.params().fields()) {
           this->add_containers(visited, param.get_type());
         }
-
-        auto return_type = function.return_type();
-        this->add_containers(visited, return_type);
+        this->add_containers(visited, function.return_type().get_type());
       }
     }
 

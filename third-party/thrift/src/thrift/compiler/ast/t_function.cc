@@ -31,26 +31,29 @@ t_function::t_function(
     std::unique_ptr<t_node> sink_or_stream,
     t_type_ref interaction)
     : t_named(program, std::move(name)),
+      params_(std::move(params)),
       sink_or_stream_(std::move(sink_or_stream)),
-      interaction_(interaction),
-      params_(std::move(params)) {
+      interaction_(interaction) {
   if (return_type) {
-    return_types_.push_back(return_type);
+    return_type_ = return_type;
+    has_return_type_ = true;
+    if (!sink_or_stream_) {
+      // Common case: do nothing.
+    } else if (auto* sink = dynamic_cast<t_sink*>(sink_or_stream_.get())) {
+      // TODO: move first response out of t_sink.
+      sink->set_first_response_type(return_type);
+    } else {
+      auto* stream = dynamic_cast<t_stream_response*>(sink_or_stream_.get());
+      // TODO: move first response out of t_stream_response.
+      stream->set_first_response_type(return_type);
+    }
+  } else {
+    return_type_ = t_type_ref::from_ptr(&t_base_type::t_void());
   }
   if (!params_) {
     params_ = std::make_unique<t_paramlist>(program);
   }
   assert(!sink_or_stream_ || sink() || stream());
-}
-
-const t_type* t_function::return_type() const {
-  if (is_interaction_constructor_) {
-    // The old syntax (performs) treats an interaction as a response.
-    return interaction_.get_type();
-  }
-  return !return_types_.empty() && !sink_or_stream()
-      ? return_types_.back().get_type()
-      : &t_base_type::t_void();
 }
 } // namespace compiler
 } // namespace thrift

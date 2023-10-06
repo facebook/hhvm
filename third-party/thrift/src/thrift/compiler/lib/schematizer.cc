@@ -481,12 +481,11 @@ std::unique_ptr<t_const_value> schematizer::gen_full_schema(
   add_as_definition(*dfns_schema, "serviceDef", std::move(svc_schema));
 
   for (const auto& func : node.functions()) {
-    for (const auto& ret : func.return_types()) {
-      // TODO: Handle sink, stream, interactions
-      if (!func.sink_or_stream() && !ret->is_service()) {
-        schematize_recursively(
-            this, node.program(), dfns_schema.get(), *ret->get_true_type());
-      }
+    const t_type_ref& ret = func.return_type();
+    // TODO: Handle sink, stream, interactions
+    if (!func.sink_or_stream() && !ret->is_service()) {
+      schematize_recursively(
+          this, node.program(), dfns_schema.get(), *ret->get_true_type());
     }
 
     for (const auto& field : func.params().fields()) {
@@ -546,8 +545,8 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
       ref->add_map(val("uri"), typeUri(*interaction));
       func_schema->add_map(val("interactionType"), std::move(ref));
     }
-    for (const auto& ret : func.return_types()) {
-      auto type = ret.get_type();
+    if (func.has_return_type()) {
+      const t_type* type = func.return_type().get_type();
       if (auto stream = dynamic_cast<const t_stream_response*>(type)) {
         assert(false); // handled below
       } else if (auto sink = dynamic_cast<const t_sink*>(type)) {
@@ -559,7 +558,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
         auto return_types_schema = val();
         return_types_schema->set_list();
         auto schema = mapval();
-        schema->add_map(val("thriftType"), gen_type(*ret, node.program()));
+        schema->add_map(val("thriftType"), gen_type(*type, node.program()));
         return_types_schema->add_list(std::move(schema));
         func_schema->add_map(
             val("returnTypes"), std::move(return_types_schema));

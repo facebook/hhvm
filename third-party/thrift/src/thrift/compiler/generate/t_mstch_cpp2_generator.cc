@@ -868,7 +868,7 @@ class cpp_mstch_function : public mstch_function {
   }
   mstch::node sync_returns_by_outparam() {
     return is_complex_return(function_->return_type()->get_true_type()) &&
-        !function_->interaction();
+        !function_->interaction() && !function_->sink_or_stream();
   }
 
  private:

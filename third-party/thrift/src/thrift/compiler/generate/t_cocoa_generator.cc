@@ -1870,9 +1870,7 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
 
     if (function->qualifier() != t_function_qualifier::oneway) {
       t_function recv_function(
-          program_,
-          t_type_ref::from_req_ptr(function->return_type()),
-          "recv_" + function->name());
+          program_, function->return_type(), "recv_" + function->name());
       if (const t_throws* exceptions = function->exceptions()) {
         recv_function.set_exceptions(t_struct::clone_DO_NOT_USE(exceptions));
       }
@@ -2947,8 +2945,8 @@ std::string t_cocoa_generator::declare_property(const t_field* tfield) {
  * @return String of rendered function definition
  */
 std::string t_cocoa_generator::function_signature(const t_function* tfunction) {
-  const t_type* ttype = tfunction->return_type();
-  std::string result = "(" + type_name(ttype) + ") " + tfunction->name() +
+  const t_type& type = *tfunction->return_type();
+  std::string result = "(" + type_name(&type) + ") " + tfunction->name() +
       argument_list(tfunction->params());
   return result;
 }

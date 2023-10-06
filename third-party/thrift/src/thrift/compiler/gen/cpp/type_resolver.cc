@@ -99,9 +99,9 @@ const std::string& type_resolver::get_native_type(const t_const& cnst) {
 const std::string& type_resolver::get_return_type(const t_function& fun) {
   // Most functions don't have sinks or streams so handle the common case first.
   if (!fun.sink_or_stream()) {
-    const t_type* return_type = fun.return_type();
+    const t_type& return_type = *fun.return_type();
     return detail::get_or_gen(
-        type_cache_, return_type, [=]() { return gen_type(*return_type); });
+        type_cache_, &return_type, [&]() { return gen_type(return_type); });
   }
 
   type_resolve_fn resolve_fn = &type_resolver::get_native_type;

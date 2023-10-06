@@ -127,23 +127,22 @@ class hoist_annotated_types {
   }
 
   void visit_function(const t_function& f) {
-    for (const auto& type : f.return_types()) {
-      if (needs_replacement(type)) {
-        auto range = f.src_range();
-        auto annotations_end_offset = range.begin.offset();
-        for (const auto& [k, v] : type.get_type()->annotations()) {
-          annotations_end_offset =
-              std::max(annotations_end_offset, v.src_range.end.offset());
-        }
-        auto old_content = fm_.old_content();
-        while (annotations_end_offset < old_content.size() &&
-               old_content[annotations_end_offset++] != ')') {
-        }
-        fm_.add(
-            {range.begin.offset(),
-             annotations_end_offset,
-             maybe_create_typedef(type)});
+    const auto& type = f.return_type();
+    if (needs_replacement(type)) {
+      auto range = f.src_range();
+      auto annotations_end_offset = range.begin.offset();
+      for (const auto& [k, v] : type.get_type()->annotations()) {
+        annotations_end_offset =
+            std::max(annotations_end_offset, v.src_range.end.offset());
       }
+      auto old_content = fm_.old_content();
+      while (annotations_end_offset < old_content.size() &&
+             old_content[annotations_end_offset++] != ')') {
+      }
+      fm_.add(
+          {range.begin.offset(),
+           annotations_end_offset,
+           maybe_create_typedef(type)});
     }
 
     auto fix_by_hand = [&](const t_node& n) {

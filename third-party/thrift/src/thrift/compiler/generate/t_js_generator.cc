@@ -1127,7 +1127,7 @@ void t_js_generator::generate_service_client(const t_service* tservice) {
       } else {
         t_function recv_function(
             program_,
-            t_type_ref::from_req_ptr((*f_iter)->return_type()),
+            (*f_iter)->return_type(),
             "recv_" + (*f_iter)->get_name());
         // Open function
         f_service_ << endl

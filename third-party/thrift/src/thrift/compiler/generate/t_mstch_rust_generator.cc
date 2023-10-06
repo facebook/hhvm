@@ -596,7 +596,7 @@ class rust_mstch_program : public mstch_program {
         for (const auto& param : function.params().fields()) {
           f(param.get_type());
         }
-        f(function.return_type());
+        f(function.return_type().get_type());
       }
     }
     for (auto typedf : program_->typedefs()) {
@@ -1012,9 +1012,15 @@ class rust_mstch_function : public mstch_function {
     for (const t_field& field : get_elems(function_->exceptions())) {
       add_return(field.name(), get_ttype(*field.type()), field.id());
     }
-    auto ttype =
-        function_->stream() ? "Stream" : get_ttype(*function_->return_type());
-    add_return("Success", ttype, 0);
+    auto type_name = std::string();
+    if (function_->stream()) {
+      type_name = "Stream";
+    } else if (function_->sink()) {
+      type_name = "Void";
+    } else {
+      type_name = get_ttype(*function_->return_type());
+    }
+    add_return("Success", type_name, 0);
     std::sort(returns.begin(), returns.end());
     auto array = mstch::array();
     for (const std::string& ret : returns) {

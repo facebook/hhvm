@@ -1093,19 +1093,16 @@ struct ValidateAnnotationPositions {
     }
   }
   void operator()(diagnostic_context& ctx, const t_function& node) {
-    for (const auto& type : node.return_types()) {
-      if (owns_annotations(type)) {
-        err(ctx);
-      }
+    if (owns_annotations(node.return_type())) {
+      err(ctx);
     }
-    if (const auto* s = dynamic_cast<const t_sink*>(node.sink_or_stream())) {
+    if (const auto* s = node.sink()) {
       if (owns_annotations(s->elem_type()) ||
           owns_annotations(s->final_response_type())) {
         err(ctx);
       }
     }
-    if (const auto* s =
-            dynamic_cast<const t_stream_response*>(node.sink_or_stream())) {
+    if (const auto* s = node.stream()) {
       if (owns_annotations(s->elem_type())) {
         err(ctx);
       }
@@ -1151,10 +1148,10 @@ struct ValidateAnnotationPositions {
 
 void validate_performs(diagnostic_context& ctx, const t_service& s) {
   for (auto* func : s.get_functions()) {
-    auto ret = func->return_type();
+    const t_type& ret = *func->return_type();
     if (func->is_interaction_constructor()) {
-      if (!ret->is_service() ||
-          !static_cast<const t_service*>(ret)->is_interaction()) {
+      if (!ret.is_service() ||
+          !static_cast<const t_service*>(&ret)->is_interaction()) {
         ctx.error(*func, "Only interactions can be performed.");
         continue;
       }

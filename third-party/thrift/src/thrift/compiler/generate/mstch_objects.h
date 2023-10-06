@@ -525,8 +525,8 @@ class mstch_service : public mstch_base {
     // Collect performed interactions and cache them
     for (const auto* function : get_functions()) {
       if (function->return_type()->is_service()) {
-        interactions_.insert(
-            dynamic_cast<const t_interaction*>(function->return_type()));
+        interactions_.insert(dynamic_cast<const t_interaction*>(
+            function->return_type().get_type()));
       } else if (const auto& interaction = function->interaction()) {
         interactions_.insert(
             dynamic_cast<const t_interaction*>(interaction.get_type()));
@@ -739,7 +739,7 @@ class mstch_function : public mstch_base {
   mstch::node stream_elem_type();
   mstch::node stream_has_first_response() {
     const t_stream_response* stream = function_->stream();
-    return stream && !stream->first_response_type().empty();
+    return stream && function_->has_return_type();
   }
   mstch::node stream_first_response_type();
   mstch::node has_stream_exceptions() {

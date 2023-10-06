@@ -53,12 +53,26 @@ class t_function final : public t_named {
       std::unique_ptr<t_node> sink_or_stream = {},
       t_type_ref interaction = {});
 
-  const t_type* return_type() const;
-  void set_return_type(t_type_ref ret) {
-    response_pos_ = return_types_.size();
-    return_types_.push_back(ret);
+  // Returns the function qualifier.
+  t_function_qualifier qualifier() const { return qualifier_; }
+  void set_qualifier(t_function_qualifier qualifier) { qualifier_ = qualifier; }
+
+  // Returns an interaction created by this function or null if there is none.
+  // It is represented as a type for legacy reasons.
+  const t_type_ref& interaction() const { return interaction_; }
+
+  // Returns the function's return type. The return type can be omitted if
+  // there is a stream or interaction in the return clause of a function
+  // definition. In this case return_type() returns the void type for
+  // convenience. Use has_return_type() to check if the type is present.
+  const t_type_ref& return_type() const {
+    // The old syntax (performs) treats an interaction as a response.
+    return is_interaction_constructor_ ? interaction_ : return_type_;
   }
-  bool has_return_type() const { return response_pos_ != -1; }
+  t_type_ref& return_type() {
+    return is_interaction_constructor_ ? interaction_ : return_type_;
+  }
+  bool has_return_type() const { return has_return_type_; }
 
   t_node* sink_or_stream() { return sink_or_stream_.get(); }
   const t_node* sink_or_stream() const { return sink_or_stream_.get(); }
@@ -73,16 +87,10 @@ class t_function final : public t_named {
   t_paramlist& params() { return *params_; }
   const t_paramlist& params() const { return *params_; }
 
-  // Returns the function qualifier.
-  t_function_qualifier qualifier() const { return qualifier_; }
-  void set_qualifier(t_function_qualifier qualifier) { qualifier_ = qualifier; }
-
-  // The declared exceptions that function might throw.
-  //
-  // Returns nullptr when the throws clause is absent.
+  // Returns the exceptions declared in the throws clause or or null if there
+  // is no throws clause.
   t_throws* exceptions() { return exceptions_.get(); }
   const t_throws* exceptions() const { return exceptions_.get(); }
-  // Use nullptr to indicate an absent throws clause.
   void set_exceptions(std::unique_ptr<t_throws> exceptions) {
     exceptions_ = std::move(exceptions);
   }
@@ -95,21 +103,14 @@ class t_function final : public t_named {
   bool is_interaction_member() const { return is_interaction_member_; }
   void set_is_interaction_member() { is_interaction_member_ = true; }
 
-  // Returns an interaction created by this function or null if there is none.
-  const t_type_ref& interaction() const { return interaction_; }
-  void set_response_pos(uint8_t pos) { response_pos_ = pos; }
-
-  std::vector<t_type_ref>& return_types() { return return_types_; }
-  const std::vector<t_type_ref>& return_types() const { return return_types_; }
-
  private:
-  std::vector<t_type_ref> return_types_;
-  std::unique_ptr<t_node> sink_or_stream_;
-  t_type_ref interaction_;
+  t_type_ref return_type_;
   std::unique_ptr<t_paramlist> params_;
   std::unique_ptr<t_throws> exceptions_;
   t_function_qualifier qualifier_ = t_function_qualifier::none;
-  int8_t response_pos_ = -1;
+  std::unique_ptr<t_node> sink_or_stream_;
+  t_type_ref interaction_;
+  bool has_return_type_ = false;
   bool is_interaction_constructor_ = false;
   bool is_interaction_member_ = false;
 };

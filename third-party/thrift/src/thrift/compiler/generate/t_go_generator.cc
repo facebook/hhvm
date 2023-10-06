@@ -2399,7 +2399,8 @@ void t_go_generator::generate_service_client_recv_method(
              << publicize(func->get_name()) << "() (";
 
   if (!returnsVoid) {
-    f_service_ << "value " << type_to_go_type(func->return_type()) << ", ";
+    f_service_ << "value " << type_to_go_type(func->return_type().get_type())
+               << ", ";
   }
 
   f_service_ << "err error) {" << endl;
@@ -3050,7 +3051,8 @@ void t_go_generator::generate_run_function(
   indent_down();
   indent(f_service_) << "}"; // closes err != nil
 
-  bool need_reference = type_need_reference(tfunction->return_type());
+  bool need_reference =
+      type_need_reference(tfunction->return_type().get_type());
 
   if (tfunction->qualifier() != t_function_qualifier::oneway &&
       !tfunction->return_type()->is_void()) {
@@ -3770,7 +3772,7 @@ string t_go_generator::function_signature_if(
     signature += args.length() > 0 ? ", " : "";
   }
   signature += args + ") (";
-  const t_type* ret = tfunction->return_type();
+  const t_type* ret = tfunction->return_type().get_type();
 
   if (!ret->is_void()) {
     signature += "_r " + type_to_go_type(ret) + ", ";

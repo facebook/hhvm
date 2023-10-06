@@ -316,10 +316,18 @@ bool PackageInfo::outsideActiveDeployment(const StringData* module) const {
 }
 
 bool PackageInfo::outsideActiveDeployment(const Func& callee) const {
+  if (!RO::EvalEnforceDeployment) return false;
+  if (RO::RepoAuthoritative) {
+    return callee.unit()->isSoftDeployedRepoOnly();
+  }
   return outsideActiveDeployment(callee.moduleName());
 }
 
 bool PackageInfo::outsideActiveDeployment(const Class& cls) const {
+  if (!RO::EvalEnforceDeployment) return false;
+  if (RO::RepoAuthoritative) {
+    return cls.preClass()->unit()->isSoftDeployedRepoOnly();
+  }
   return outsideActiveDeployment(cls.moduleName());
 }
 

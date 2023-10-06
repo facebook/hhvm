@@ -741,6 +741,9 @@ class ast_builder : public parser_actions {
     auto name = fmt::format("create{}", interaction_name.str);
     auto fun =
         on_function(range, {}, {}, std::move(ret), {name, range.begin}, {}, {});
+    if (!fun->interaction()) {
+      diags_.error(*fun, "expected interaction name");
+    }
     fun->set_is_interaction_constructor();
     return fun;
   }

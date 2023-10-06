@@ -562,12 +562,24 @@ TEST(CompilerTest, performs_in_interaction) {
 TEST(CompilerTest, interactions) {
   check_compile(R"(
     interaction J {}
+
     interaction I {
       J foo(); # expected-error: Nested interactions are forbidden: foo
     }
+
     service T {
       performs I;
       performs I; # expected-error: Function `createI` is already defined for `T`.
+    }
+  )");
+}
+
+TEST(CompilerTest, invalid_performs) {
+  check_compile(R"(
+    struct S {}
+
+    service T {
+      performs S; # expected-error: expected interaction name
     }
   )");
 }

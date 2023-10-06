@@ -1146,19 +1146,6 @@ struct ValidateAnnotationPositions {
   }
 };
 
-void validate_performs(diagnostic_context& ctx, const t_service& s) {
-  for (auto* func : s.get_functions()) {
-    const t_type& ret = *func->return_type();
-    if (func->is_interaction_constructor()) {
-      if (!ret.is_service() ||
-          !static_cast<const t_service*>(&ret)->is_interaction()) {
-        ctx.error(*func, "Only interactions can be performed.");
-        continue;
-      }
-    }
-  }
-}
-
 } // namespace
 
 ast_validator standard_validator() {
@@ -1167,7 +1154,6 @@ ast_validator standard_validator() {
   validator.add_interface_visitor(&validate_function_priority_annotation);
   validator.add_service_visitor(
       &validate_extends_service_function_name_uniqueness);
-  validator.add_service_visitor(&validate_performs);
   validator.add_interaction_visitor(&validate_interaction_nesting);
   validator.add_throws_visitor(&validate_throws_exceptions);
   validator.add_function_visitor(&validate_function_priority_annotation);

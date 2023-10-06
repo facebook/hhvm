@@ -214,7 +214,10 @@ void emitSSwitch(IRGS& env, const ImmVector& iv) {
 
  if (UNLIKELY(testVal->isA(TCls) || testVal->isA(TLazyCls))) {
     if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
-      gen(env, RaiseWarning, cns(env, s_clsToStringWarning.get()));
+      gen(env,
+          RaiseNotice,
+          SampleRateData { RO::EvalRaiseClassConversionNoticeSampleRate },
+          cns(env, s_clsToStringWarning.get()));
     }
     testVal = gen(env, testVal->isA(TCls) ? LdClsName : LdLazyClsName, testVal);
   }
@@ -260,7 +263,10 @@ const StaticString s_class_to_string(Strings::CLASS_TO_STRING);
 
 void emitRaiseClassStringConversionNotice(IRGS& env) {
   if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
-    gen(env, RaiseWarning, cns(env, s_class_to_string.get()));
+    gen(env,
+        RaiseNotice,
+        SampleRateData { RO::EvalRaiseClassConversionNoticeSampleRate },
+        cns(env, s_class_to_string.get()));
   }
 }
 

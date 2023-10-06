@@ -660,7 +660,8 @@ SSATmp* opt_array_key_cast(IRGS& env, const ParamPrep& params) {
 		if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
       gen(
         env,
-        RaiseWarning,
+        RaiseNotice,
+        SampleRateData { RO::EvalRaiseClassConversionNoticeSampleRate },
         cns(env, makeStaticString(Strings::CLASS_TO_STRING))
       );
     }
@@ -670,7 +671,8 @@ SSATmp* opt_array_key_cast(IRGS& env, const ParamPrep& params) {
 		if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
       gen(
         env,
-        RaiseWarning,
+        RaiseNotice,
+        SampleRateData { RO::EvalRaiseClassConversionNoticeSampleRate },
         cns(env, makeStaticString(Strings::CLASS_TO_STRING))
       );
     }

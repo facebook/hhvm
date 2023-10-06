@@ -19,6 +19,8 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/strings.h"
 
+#include <folly/Random.h>
+
 namespace HPHP {
 LazyClassData::LazyClassData(const StringData* name)
   : className(name) {
@@ -26,7 +28,7 @@ LazyClassData::LazyClassData(const StringData* name)
 }
 
 const StringData* lazyClassToStringHelper(const LazyClassData& lclass) {
-  if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+  if (folly::Random::oneIn(RO::EvalRaiseClassConversionNoticeSampleRate)) {
     raise_class_to_string_conversion_notice();
   }
   return lclass.name();

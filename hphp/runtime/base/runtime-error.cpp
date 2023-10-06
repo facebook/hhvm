@@ -593,7 +593,7 @@ void raise_clsmeth_compat_type_hint_property_notice(
 
 void raise_class_to_string_conversion_notice() {
   if (LIKELY(!RID().getSuppressClassConversionNotices())) {
-    raise_warning(Strings::CLASS_TO_STRING);
+    raise_notice(Strings::CLASS_TO_STRING);
   }
 }
 

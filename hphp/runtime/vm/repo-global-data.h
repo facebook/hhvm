@@ -128,7 +128,7 @@ struct RepoGlobalData {
    */
   bool IsVecNotices = false;
 
-  /* Whether implicit class conversions can raise a warning */
+  /* Whether implicit class conversions can raise a notice */
   bool RaiseClassConversionNoticeSampleRate = 0;
 
   /* Whether classname type-hint accepts (lazy) classes */

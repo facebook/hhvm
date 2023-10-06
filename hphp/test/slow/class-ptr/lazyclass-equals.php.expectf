@@ -1,33 +1,33 @@
 class(Foo)
 bool(true)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/lazyclass-equals.php on line 26
+Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-equals.php on line 26
 bool(true)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/lazyclass-equals.php on line 27
+Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-equals.php on line 27
 bool(true)
 class(Foo)
 bool(true)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/lazyclass-equals.php on line 9
+Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-equals.php on line 9
 bool(true)
 string(3) "Foo"
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/lazyclass-equals.php on line 16
+Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-equals.php on line 16
 bool(true)
 bool(true)
 class(Foo)
 bool(true)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/lazyclass-equals.php on line 34
+Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-equals.php on line 34
 bool(true)
 class(Foo)
 bool(true)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/lazyclass-equals.php on line 41
+Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-equals.php on line 41
 bool(true)
 string(3) "Foo"
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/lazyclass-equals.php on line 47
+Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-equals.php on line 47
 bool(true)
 bool(true)

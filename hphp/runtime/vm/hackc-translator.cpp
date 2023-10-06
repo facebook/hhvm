@@ -260,7 +260,8 @@ HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
               break;
             }
             case kind::LazyClass:{
-              if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+              if (folly::Random::oneIn(
+                    RO::EvalRaiseClassConversionNoticeSampleRate)) {
                 raise_class_to_string_conversion_notice();
               }
               auto const s = toStaticString(elt.key.LazyClass._0);

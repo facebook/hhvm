@@ -11,44 +11,44 @@ bool(false)
 bool(true)
 bool(true)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 15
+Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 15
 bool(true)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 15
+Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 15
 bool(true)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 16
+Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 16
 bool(false)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 16
+Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 16
 bool(true)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 17
+Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 17
 bool(false)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 17
+Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 17
 bool(true)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 19
+Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 19
 bool(false)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 19
+Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 19
 bool(false)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 20
+Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 20
 bool(false)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 20
+Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 20
 bool(false)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 21
+Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 21
 bool(true)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 21
+Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 21
 bool(true)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 24
+Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 24
 bool(true)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 27
+Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-cmp-warn.php on line 27
 bool(false)

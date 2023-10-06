@@ -17,6 +17,8 @@
 #include "hphp/runtime/base/type-structure-helpers.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 
+#include <folly/Random.h>
+
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -57,7 +59,7 @@ bool tvInstanceOfImpl(const TypedValue* tv, F lookupClass) {
     case KindOfLazyClass: {
       auto const cls = lookupClass();
       if (cls && interface_supports_string(cls->name())) {
-        if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+        if (folly::Random::oneIn(RO::EvalRaiseClassConversionNoticeSampleRate)) {
           raise_class_to_string_conversion_notice();
         }
         return true;

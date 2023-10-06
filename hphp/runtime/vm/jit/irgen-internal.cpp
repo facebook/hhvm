@@ -49,13 +49,19 @@ SSATmp* convertClassKey(IRGS& env, SSATmp* key) {
   assertx (key->type().isKnownDataType());
   if (key->isA(TCls)) {
     if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
-      gen(env, RaiseWarning, cns(env, s_clsToStringWarning.get()));
+      gen(env,
+          RaiseNotice,
+          SampleRateData { RO::EvalRaiseClassConversionNoticeSampleRate },
+          cns(env, s_clsToStringWarning.get()));
     }
     return gen(env, LdClsName, key);
   }
   if (key->isA(TLazyCls)) {
     if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
-      gen(env, RaiseWarning, cns(env, s_clsToStringWarning.get()));
+      gen(env,
+          RaiseNotice,
+          SampleRateData { RO::EvalRaiseClassConversionNoticeSampleRate },
+          cns(env, s_clsToStringWarning.get()));
     }
     return gen(env, LdLazyClsName, key);
   }

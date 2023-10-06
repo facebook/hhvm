@@ -32,7 +32,7 @@ string(3) "Foo"
 string(3) "Foo"
 class(Foo)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/lazyclass-suppress.php on line 21
+Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-suppress.php on line 21
 string(3) "Foo"
 object(Foo) (1) {
   ["nested"]=>
@@ -50,5 +50,5 @@ object(Foo) (1) {
 }
 class(Foo)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/lazyclass-suppress.php on line 36
+Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-suppress.php on line 36
 string(3) "Foo"

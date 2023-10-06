@@ -2082,8 +2082,9 @@ bool isNormalClass(const Class* cls);
 bool classHasPersistentRDS(const Class* cls);
 
 /*
- * Convert a class pointer where a string is needed in some context. A warning
- * will be raised when compiler option Eval.RaiseClassConversionWarning is true.
+ * Convert a class pointer where a string is needed in some context. A notice
+ * will be raised when compiler option Eval.RaiseClassConversionNoticesSampleRate
+ * is nonzero.
  */
 const StringData* classToStringHelper(const Class* cls);
 

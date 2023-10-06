@@ -294,7 +294,10 @@ SSATmp* convToStr(IRGS& env, SSATmp* in, bool should_warn) {
   if (should_warn &&
       RO::EvalRaiseClassConversionNoticeSampleRate > 0 &&
       in->type().subtypeOfAny(TCls, TLazyCls)) {
-    gen(env, RaiseWarning, cns(env, s_clsToStringWarning.get()));
+    gen(env,
+        RaiseNotice,
+        SampleRateData { RO::EvalRaiseClassConversionNoticeSampleRate },
+        cns(env, s_clsToStringWarning.get()));
   }
   if (in->isA(TCls))     return gen(env, LdClsName, in);
   if (in->isA(TLazyCls)) return gen(env, LdLazyClsName, in);

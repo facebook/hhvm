@@ -18,6 +18,8 @@
 #error "class-inl.h should only be included by class.h"
 #endif
 
+#include <folly/Random.h>
+
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/vm/named-entity.h"
@@ -741,7 +743,7 @@ inline bool classHasPersistentRDS(const Class* cls) {
 }
 
 inline const StringData* classToStringHelper(const Class* cls) {
- if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+ if (folly::Random::oneIn(RO::EvalRaiseClassConversionNoticeSampleRate)) {
    raise_class_to_string_conversion_notice();
  }
  return cls->name();

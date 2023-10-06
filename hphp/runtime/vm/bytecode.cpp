@@ -26,6 +26,7 @@
 #include <cinttypes>
 #include <filesystem>
 
+#include <folly/Random.h>
 #include <folly/String.h>
 #include <folly/portability/SysMman.h>
 
@@ -2196,7 +2197,7 @@ OPTBLD_INLINE void iopThrowNonExhaustiveSwitch() {
 }
 
 OPTBLD_INLINE void iopRaiseClassStringConversionNotice() {
-  if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+  if (folly::Random::oneIn(RO::EvalRaiseClassConversionNoticeSampleRate)) {
     raise_class_to_string_conversion_notice();
   }
 }

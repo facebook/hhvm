@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/base/tv-comparisons.h"
 
+#include <folly/Random.h>
 #include <type_traits>
 
 #include "hphp/runtime/base/comparisons.h"
@@ -172,7 +173,7 @@ struct Eq {
   bool eqStringishTypes(TypedValue lhs, const StringData* rhs) const {
     assertx(tvIsLazyClass(lhs) || tvIsString(lhs));
     if (tvIsLazyClass(lhs)) return lhs.m_data.plazyclass.name() == rhs;
-    if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+    if (folly::Random::oneIn(RO::EvalRaiseClassConversionNoticeSampleRate)) {
       raise_class_to_string_conversion_notice();
     }
     return lhs.m_data.pstr->equal(rhs);

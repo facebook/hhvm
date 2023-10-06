@@ -3208,8 +3208,8 @@ ResolveClass <litstr id>   []  ->  [C:Class] (where %1 is a class name)
 
 RaiseClassStringConversionNotice [] -> []
 
-  Raises a warning indicating an implicit class to string conversion.
-  This warning can be downgraded to a noop through a runtime option.
+  Raises a notice indicating an implicit class to string conversion.
+  This notice is emitted at a sampled rate through a runtime option.
 
 SetImplicitContextByValue [C:?Obj] -> [C:?Obj]
 

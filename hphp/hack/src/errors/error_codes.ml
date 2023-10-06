@@ -759,6 +759,7 @@ module Typing = struct
     | InvalidCrossPackageSoft [@value 4473]
     | AttributeNoAutoDynamic [@value 4474]
     | IllegalCaseTypeVariants [@value 4475]
+    | StaticCallOnTraitRequireClass [@value 4476]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

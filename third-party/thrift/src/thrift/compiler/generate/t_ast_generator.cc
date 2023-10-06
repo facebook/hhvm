@@ -384,7 +384,9 @@ void t_ast_generator::generate_program() {
     const_spans(node.default_value());
   });
   visitor.add_function_visitor([&](const t_function& node) {
-    span(node.return_type());
+    if (node.has_return_type()) {
+      span(node.return_type());
+    }
     if (auto type = node.stream()) {
       span(type->elem_type());
       for (const auto& exn : get_elems(type->exceptions())) {

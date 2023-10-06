@@ -550,7 +550,7 @@ const StaticString s_classname("classname");
 Array implTypeStructure(const Variant& cls_or_obj,
                         const Variant& cns_name,
                         bool no_throw) {
-  SuppressClassConversionWarning suppressor;
+  SuppressClassConversionNotice suppressor;
   auto const cns_sd = cns_name.getStringDataOrNull();
   if (!cns_sd) {
     auto name = cls_or_obj.toString();

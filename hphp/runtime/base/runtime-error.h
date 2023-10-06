@@ -179,23 +179,23 @@ void raise_hackarr_compat_notice(const std::string& msg);
 
 [[noreturn]] void raise_use_of_specialized_array();
 
-void raise_class_to_string_conversion_warning();
+void raise_class_to_string_conversion_notice();
 void raise_class_to_memokey_conversion_warning();
 
 /*
  * RAII mechanism to temporarily suppress lazyclass-to-string conversion notices
  * within a scope.
  */
-struct SuppressClassConversionWarning {
-  SuppressClassConversionWarning();
-  ~SuppressClassConversionWarning();
-  SuppressClassConversionWarning(const SuppressClassConversionWarning&)
+struct SuppressClassConversionNotice {
+  SuppressClassConversionNotice();
+  ~SuppressClassConversionNotice();
+  SuppressClassConversionNotice(const SuppressClassConversionNotice&)
       = delete;
-  SuppressClassConversionWarning(SuppressClassConversionWarning&&) = delete;
-  SuppressClassConversionWarning&
-      operator=(const SuppressClassConversionWarning&) = delete;
-  SuppressClassConversionWarning&
-      operator=(SuppressClassConversionWarning&&) = delete;
+  SuppressClassConversionNotice(SuppressClassConversionNotice&&) = delete;
+  SuppressClassConversionNotice&
+      operator=(const SuppressClassConversionNotice&) = delete;
+  SuppressClassConversionNotice&
+      operator=(SuppressClassConversionNotice&&) = delete;
 private:
   bool old;
 };

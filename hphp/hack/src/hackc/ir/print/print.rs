@@ -1107,8 +1107,8 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func<'_>, hhbc: &
             write!(w, "parent")?;
         }
         Hhbc::Print(vid, _) => write!(w, "print {}", FmtVid(func, vid, ctx.verbose, strings))?,
-        Hhbc::RaiseClassStringConversionWarning(_) => {
-            write!(w, "raise_class_string_conversion_warning")?
+        Hhbc::RaiseClassStringConversionNotice(_) => {
+            write!(w, "raise_class_string_conversion_notice")?
         }
         Hhbc::RecordReifiedGeneric(vid, _) => write!(
             w,

@@ -2,6 +2,6 @@
 -vRuntime.Eval.ClassPassesClassname=true
 -vRuntime.Eval.ClassnameNotices=true
 -vRuntime.Eval.ClassStringHintNoticesSampleRate=1
--vRuntime.Eval.RaiseClassConversionWarning=true
+-vRuntime.Eval.RaiseClassConversionNoticeSampleRate=1
 -vRuntime.Eval.CheckPropTypeHints=3
 --inputs=__DIR__/classname-type-hint.inc

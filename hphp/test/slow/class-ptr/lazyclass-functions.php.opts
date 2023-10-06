@@ -1,4 +1,4 @@
--vEval.RaiseClassConversionWarning=true
+-vEval.RaiseClassConversionNoticeSampleRate=1
 -vEval.ClassAsStringVarDump=false
 -vEval.ClassAsStringVarExport=false
 -vEval.ClassPassesClassname=true

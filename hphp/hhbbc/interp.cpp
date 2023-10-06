@@ -1272,7 +1272,7 @@ std::pair<Type,bool> resolveSame(ISS& env) {
 
   auto warningsEnabled =
     (RuntimeOption::EvalEmitClsMethPointers ||
-     RuntimeOption::EvalRaiseClassConversionWarning);
+     RuntimeOption::EvalRaiseClassConversionNoticeSampleRate > 0);
 
   auto const result = [&] {
     auto const v1 = tv(t1);
@@ -2151,7 +2151,7 @@ void in(ISS& env, const bc::VerifyImplicitContextState& /*op*/) {
   }
 }
 
-void in(ISS& env, const bc::RaiseClassStringConversionWarning& /*op*/) {}
+void in(ISS& env, const bc::RaiseClassStringConversionNotice& /*op*/) {}
 
 void in(ISS& env, const bc::ChainFaults&) {
   popC(env);

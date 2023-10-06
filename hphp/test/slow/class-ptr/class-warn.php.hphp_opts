@@ -1,1 +1,1 @@
--vCheckPropTypeHints=3 -vRuntime.Eval.RaiseClassConversionWarning=1 -vRuntime.Eval.ClassIsStringNotices=1 -vRuntime.Eval.ClassStringHintNoticesSampleRate=1
+-vCheckPropTypeHints=3 -vRuntime.Eval.RaiseClassConversionNoticeSampleRate=1 -vRuntime.Eval.ClassIsStringNotices=1 -vRuntime.Eval.ClassStringHintNoticesSampleRate=1

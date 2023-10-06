@@ -360,14 +360,18 @@ impl_builtin_type_structure(ISS& env, const php::Func* func,
       if (t.subtypeOf(BCls) && is_specialized_cls(t)) {
         auto const& dcls = dcls_of(t);
         if (!dcls.isExact()) return nullptr;
-        if (RO::EvalRaiseClassConversionWarning) throws = TriBool::Maybe;
+        if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+          throws = TriBool::Maybe;
+        }
         return dcls.cls().name();
       }
       if (t.subtypeOf(BStr) && is_specialized_string(t)) {
         return sval_of(t);
       }
       if (t.subtypeOf(BLazyCls) && is_specialized_lazycls(t)) {
-        if (RO::EvalRaiseClassConversionWarning) throws = TriBool::Maybe;
+        if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+          throws = TriBool::Maybe;
+        }
         return lazyclsval_of(t);
       }
       return nullptr;

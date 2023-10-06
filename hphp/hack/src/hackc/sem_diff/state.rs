@@ -1479,7 +1479,7 @@ fn is_checkpoint_instr(instr: &NodeInstr<'_>) -> bool {
             | Opcode::Pow
             | Opcode::Print
             | Opcode::QueryM(..)
-            | Opcode::RaiseClassStringConversionWarning
+            | Opcode::RaiseClassStringConversionNotice
             | Opcode::RecordReifiedGeneric
             | Opcode::Req
             | Opcode::ReqDoc
@@ -1653,7 +1653,7 @@ fn clean_opcode<'arena>(opcode: &Opcode<'arena>) -> Opcode<'arena> {
         | Opcode::PopU2
         | Opcode::Pow
         | Opcode::Print
-        | Opcode::RaiseClassStringConversionWarning
+        | Opcode::RaiseClassStringConversionNotice
         | Opcode::RecordReifiedGeneric
         | Opcode::Req
         | Opcode::ReqDoc

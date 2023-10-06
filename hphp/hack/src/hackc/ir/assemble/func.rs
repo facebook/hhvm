@@ -1393,7 +1393,7 @@ impl FunctionParser<'_, '_> {
             "pow" => I::Hhbc(H::Pow(self.vid2(tok)?, loc)),
             "print" => I::Hhbc(H::Print(self.vid(tok)?, loc)),
             "querym" => self.parse_member_op(tok, mnemonic, loc)?,
-            "raise_class_string_conversion_warning" => I::Hhbc(H::RaiseClassStringConversionWarning(loc)),
+            "raise_class_string_conversion_notice" => I::Hhbc(H::RaiseClassStringConversionNotice(loc)),
             "record_reified_generic" => I::Hhbc(H::RecordReifiedGeneric(self.vid(tok)?, loc)),
             "require" => I::Hhbc(H::IncludeEval(IncludeEval { kind: IncludeKind::Require, vid: self.vid(tok)?, loc })),
             "require_once" => I::Hhbc(H::IncludeEval(IncludeEval { kind: IncludeKind::RequireOnce, vid: self.vid(tok)?, loc })),

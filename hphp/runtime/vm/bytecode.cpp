@@ -2195,9 +2195,9 @@ OPTBLD_INLINE void iopThrowNonExhaustiveSwitch() {
   SystemLib::throwRuntimeExceptionObject(String(Strings::NONEXHAUSTIVE_SWITCH));
 }
 
-OPTBLD_INLINE void iopRaiseClassStringConversionWarning() {
-  if (RuntimeOption::EvalRaiseClassConversionWarning) {
-    raise_class_to_string_conversion_warning();
+OPTBLD_INLINE void iopRaiseClassStringConversionNotice() {
+  if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+    raise_class_to_string_conversion_notice();
   }
 }
 

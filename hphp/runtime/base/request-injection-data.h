@@ -217,8 +217,8 @@ struct RequestInjectionData {
   /*
    * Whether to suppress the emission of Class to String conversion warnings.
    */
-  bool getSuppressClassConversionWarnings() const;
-  void setSuppressClassConversionWarnings(bool);
+  bool getSuppressClassConversionNotices() const;
+  void setSuppressClassConversionNotices(bool);
 
   /*
    * Whether coverage is being collected.

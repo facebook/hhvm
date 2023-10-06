@@ -591,18 +591,18 @@ void raise_clsmeth_compat_type_hint_property_notice(
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void raise_class_to_string_conversion_warning() {
-  if (LIKELY(!RID().getSuppressClassConversionWarnings())) {
+void raise_class_to_string_conversion_notice() {
+  if (LIKELY(!RID().getSuppressClassConversionNotices())) {
     raise_warning(Strings::CLASS_TO_STRING);
   }
 }
 
-SuppressClassConversionWarning::SuppressClassConversionWarning()
-  : old(RID().getSuppressClassConversionWarnings()) {
-  RID().setSuppressClassConversionWarnings(true);
+SuppressClassConversionNotice::SuppressClassConversionNotice()
+  : old(RID().getSuppressClassConversionNotices()) {
+  RID().setSuppressClassConversionNotices(true);
 }
-SuppressClassConversionWarning::~SuppressClassConversionWarning() {
-  RID().setSuppressClassConversionWarnings(old);
+SuppressClassConversionNotice::~SuppressClassConversionNotice() {
+  RID().setSuppressClassConversionNotices(old);
 }
 
 void raise_class_to_memokey_conversion_warning() {

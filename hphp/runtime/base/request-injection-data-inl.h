@@ -56,11 +56,11 @@ inline void RequestInjectionData::setJitFolding(bool flag) {
   m_jitFolding = flag;
 }
 
-inline bool RequestInjectionData::getSuppressClassConversionWarnings() const {
+inline bool RequestInjectionData::getSuppressClassConversionNotices() const {
   return m_suppressClassConversionWarnings;
 }
 
-inline void RequestInjectionData::setSuppressClassConversionWarnings(bool flag) {
+inline void RequestInjectionData::setSuppressClassConversionNotices(bool flag) {
   m_suppressClassConversionWarnings = flag;
 }
 

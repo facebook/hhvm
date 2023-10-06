@@ -1,4 +1,4 @@
 -vRuntime.Eval.ClassPassesClassname=false
 -vRuntime.Eval.CheckPropTypeHints=3
--vRuntime.Eval.RaiseClassConversionWarning=true
+-vRuntime.Eval.RaiseClassConversionNoticeSampleRate=1
 -vRuntime.Eval.ClassStringHintNoticesSampleRate=1

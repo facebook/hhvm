@@ -26,8 +26,8 @@ LazyClassData::LazyClassData(const StringData* name)
 }
 
 const StringData* lazyClassToStringHelper(const LazyClassData& lclass) {
-  if (RuntimeOption::EvalRaiseClassConversionWarning) {
-    raise_class_to_string_conversion_warning();
+  if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+    raise_class_to_string_conversion_notice();
   }
   return lclass.name();
 }

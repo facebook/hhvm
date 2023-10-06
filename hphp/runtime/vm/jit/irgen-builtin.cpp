@@ -657,7 +657,7 @@ SSATmp* opt_array_key_cast(IRGS& env, const ParamPrep& params) {
   if (value->isA(TRes))  return gen(env, ConvResToInt, value);
   if (value->isA(TStr))  return gen(env, StrictlyIntegerConv, value);
   if (value->isA(TLazyCls))  {
-		if (RuntimeOption::EvalRaiseClassConversionWarning) {
+		if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
       gen(
         env,
         RaiseWarning,
@@ -667,7 +667,7 @@ SSATmp* opt_array_key_cast(IRGS& env, const ParamPrep& params) {
     return gen(env, LdLazyClsName, value);
   }
   if (value->isA(TCls))  {
-		if (RuntimeOption::EvalRaiseClassConversionWarning) {
+		if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
       gen(
         env,
         RaiseWarning,

@@ -1295,8 +1295,8 @@ struct RuntimeOption {
   F(bool, NoticeOnImplicitInvokeToString, false)                        \
   F(bool, FatalOnConvertObjectToString, false)                          \
   F(bool, NoticeOnBuiltinDynamicCalls, false)                           \
-  /* Raise warning when class pointers are used as strings. */          \
-  F(bool, RaiseClassConversionWarning, false)                           \
+  /* Raise notice when class pointers are used as strings. */           \
+  F(uint32_t, RaiseClassConversionNoticeSampleRate, 0)                  \
   F(bool, EmitClsMethPointers, true)                                    \
   F(bool, FoldLazyClassKeys, true)                                      \
   F(bool, EmitNativeEnumClassLabels, true)                              \

@@ -263,7 +263,7 @@ namespace HPHP {
   O(Silence,         TWO(LA,OA(SilenceOp)),                             \
                                        NOV,             NOV,        NF) \
   O(ThrowNonExhaustiveSwitch, NA,      NOV,             NOV,        NF) \
-  O(RaiseClassStringConversionWarning,                                  \
+  O(RaiseClassStringConversionNotice,                                   \
                               NA,      NOV,             NOV,        NF) \
   O(BaseGC,          TWO(IVA, OA(MOpMode)),                             \
                                        NOV,             NOV,        NF) \

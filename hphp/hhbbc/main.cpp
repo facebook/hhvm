@@ -263,8 +263,8 @@ RepoGlobalData get_global_data() {
     RuntimeOption::EvalInitialStaticStringTableSize;
   gd.EmitClsMethPointers = RuntimeOption::EvalEmitClsMethPointers;
   gd.IsVecNotices = RuntimeOption::EvalIsVecNotices;
-  gd.RaiseClassConversionWarning =
-    RuntimeOption::EvalRaiseClassConversionWarning;
+  gd.RaiseClassConversionNoticeSampleRate =
+    RuntimeOption::EvalRaiseClassConversionNoticeSampleRate;
   gd.ClassPassesClassname =
     RuntimeOption::EvalClassPassesClassname;
   gd.ClassnameNotices =

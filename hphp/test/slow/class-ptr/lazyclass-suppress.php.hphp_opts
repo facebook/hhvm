@@ -1,4 +1,4 @@
--vRuntime.Eval.RaiseClassConversionWarning=true
+-vRuntime.Eval.RaiseClassConversionNoticeSampleRate=1
 -vRuntime.Eval.ClassAsStringVarDump=false
 -vRuntime.Eval.ClassAsStringVarExport=false
 -vRuntime.Eval.ClassPassesClassname=true

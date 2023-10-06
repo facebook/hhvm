@@ -213,7 +213,7 @@ void emitSSwitch(IRGS& env, const ImmVector& iv) {
   auto const defaultOff = bcOff(env) + iv.strvec()[numCases].dest;
 
  if (UNLIKELY(testVal->isA(TCls) || testVal->isA(TLazyCls))) {
-    if (RuntimeOption::EvalRaiseClassConversionWarning) {
+    if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
       gen(env, RaiseWarning, cns(env, s_clsToStringWarning.get()));
     }
     testVal = gen(env, testVal->isA(TCls) ? LdClsName : LdLazyClsName, testVal);
@@ -258,9 +258,9 @@ void emitThrowNonExhaustiveSwitch(IRGS& env) {
 
 const StaticString s_class_to_string(Strings::CLASS_TO_STRING);
 
-void emitRaiseClassStringConversionWarning(IRGS& env) {
-  if (RuntimeOption::EvalRaiseClassConversionWarning) {
-      gen(env, RaiseWarning, cns(env, s_class_to_string.get()));
+void emitRaiseClassStringConversionNotice(IRGS& env) {
+  if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+    gen(env, RaiseWarning, cns(env, s_class_to_string.get()));
   }
 }
 

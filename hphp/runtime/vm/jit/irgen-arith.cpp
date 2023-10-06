@@ -291,7 +291,8 @@ SSATmp* implFunCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
 const StaticString s_clsToStringWarning(Strings::CLASS_TO_STRING);
 
 SSATmp* convToStr(IRGS& env, SSATmp* in, bool should_warn) {
-  if (should_warn && RuntimeOption::EvalRaiseClassConversionWarning &&
+  if (should_warn &&
+      RO::EvalRaiseClassConversionNoticeSampleRate > 0 &&
       in->type().subtypeOfAny(TCls, TLazyCls)) {
     gen(env, RaiseWarning, cns(env, s_clsToStringWarning.get()));
   }

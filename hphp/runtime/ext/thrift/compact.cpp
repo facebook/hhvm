@@ -1470,7 +1470,7 @@ void HHVM_FUNCTION(thrift_protocol_write_compact,
   CoeffectsAutoGuard _;
   // Suppress class-to-string conversion warnings that occur during
   // serialization and deserialization.
-  SuppressClassConversionWarning suppressor;
+  SuppressClassConversionNotice suppressor;
 
   PHPOutputTransport transport(transportobj);
 
@@ -1497,7 +1497,7 @@ void HHVM_FUNCTION(thrift_protocol_write_compact2,
   CoeffectsAutoGuard _;
   // Suppress class-to-string conversion warnings that occur during
   // serialization and deserialization.
-  SuppressClassConversionWarning suppressor;
+  SuppressClassConversionNotice suppressor;
 
   PHPOutputTransport transport(transportobj);
 
@@ -1520,7 +1520,7 @@ Variant HHVM_FUNCTION(thrift_protocol_read_compact,
   CoeffectsAutoGuard _;
   // Suppress class-to-string conversion warnings that occur during
   // serialization and deserialization.
-  SuppressClassConversionWarning suppressor;
+  SuppressClassConversionNotice suppressor;
 
   VMRegAnchor _2;
   CompactReader reader(transportobj, options);
@@ -1533,7 +1533,7 @@ Object HHVM_FUNCTION(thrift_protocol_read_compact_struct,
                      int64_t options) {
   // Suppress class-to-string conversion warnings that occur during
   // serialization and deserialization.
-  SuppressClassConversionWarning suppressor;
+  SuppressClassConversionNotice suppressor;
 
   VMRegAnchor _;
   CompactReader reader(transportobj, options);

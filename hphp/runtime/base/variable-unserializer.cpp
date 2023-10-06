@@ -832,8 +832,8 @@ void VariableUnserializer::unserializeVariant(
           self
         );
       } else {
-        if (RuntimeOption::EvalRaiseClassConversionWarning) {
-          raise_class_to_string_conversion_warning();
+        if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+          raise_class_to_string_conversion_notice();
         }
         tvMove(
           make_tv<KindOfPersistentString>(makeStaticString(c.get())), self

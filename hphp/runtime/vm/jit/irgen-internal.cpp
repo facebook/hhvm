@@ -48,13 +48,13 @@ SSATmp* convertClsMethToVec(IRGS& env, SSATmp* clsMeth) {
 SSATmp* convertClassKey(IRGS& env, SSATmp* key) {
   assertx (key->type().isKnownDataType());
   if (key->isA(TCls)) {
-    if (RuntimeOption::EvalRaiseClassConversionWarning) {
+    if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
       gen(env, RaiseWarning, cns(env, s_clsToStringWarning.get()));
     }
     return gen(env, LdClsName, key);
   }
   if (key->isA(TLazyCls)) {
-    if (RuntimeOption::EvalRaiseClassConversionWarning) {
+    if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
       gen(env, RaiseWarning, cns(env, s_clsToStringWarning.get()));
     }
     return gen(env, LdLazyClsName, key);

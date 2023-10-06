@@ -129,7 +129,7 @@ struct RepoGlobalData {
   bool IsVecNotices = false;
 
   /* Whether implicit class conversions can raise a warning */
-  bool RaiseClassConversionWarning = false;
+  bool RaiseClassConversionNoticeSampleRate = 0;
 
   /* Whether classname type-hint accepts (lazy) classes */
   bool ClassPassesClassname = false;
@@ -234,7 +234,7 @@ struct RepoGlobalData {
       (EnableArgsInBacktraces)
       (EmitClsMethPointers)
       (IsVecNotices)
-      (RaiseClassConversionWarning)
+      (RaiseClassConversionNoticeSampleRate)
       (ClassPassesClassname)
       (ClassnameNotices)
       (ClassStringHintNoticesSampleRate)

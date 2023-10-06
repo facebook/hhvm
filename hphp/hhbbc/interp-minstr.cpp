@@ -688,7 +688,8 @@ std::pair<Type, Effects> elemHelper(ISS& env, MOpMode mode, Type key) {
       !inOutFail &&
       mode != MOpMode::Warn &&
       key.subtypeOf(BArrKey) &&
-      (!base.couldBe(BCls | BLazyCls) || !RO::EvalRaiseClassConversionWarning);
+      (!base.couldBe(BCls | BLazyCls) ||
+       RO::EvalRaiseClassConversionNoticeSampleRate == 0);
     effects = unionEffects(
       effects,
       isNoThrow ? Effects::None : Effects::Throws

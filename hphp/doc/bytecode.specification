@@ -3206,7 +3206,7 @@ ResolveClass <litstr id>   []  ->  [C:Class] (where %1 is a class name)
   If %1 is a valid class name, resolve it to a class pointer value, then push
   the pointer onto the top of stack. When resolution fails, raise an error.
 
-RaiseClassStringConversionWarning [] -> []
+RaiseClassStringConversionNotice [] -> []
 
   Raises a warning indicating an implicit class to string conversion.
   This warning can be downgraded to a noop through a runtime option.

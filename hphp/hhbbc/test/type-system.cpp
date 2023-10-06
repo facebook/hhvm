@@ -4134,9 +4134,9 @@ TEST(Type, ArrayLikeNewElem) {
     { make_specialized_arrmap(BKeysetN, mapElem7), union_of(ival(1),TStr), make_specialized_arrmap(BKeysetN, mapElem7, TArrKey, TArrKey), false },
   };
 
-  auto old = RO::EvalRaiseClassConversionWarning;
-  RO::EvalRaiseClassConversionWarning = true;
-  SCOPE_EXIT { RO::EvalRaiseClassConversionWarning = old; };
+  auto old = RO::EvalRaiseClassConversionNoticeSampleRate;
+  RO::EvalRaiseClassConversionNoticeSampleRate = 1;
+  SCOPE_EXIT { RO::EvalRaiseClassConversionNoticeSampleRate = old; };
 
   for (auto const& t : tests) {
     auto const elem = array_like_newelem(std::get<0>(t), std::get<1>(t));

@@ -172,8 +172,8 @@ struct Eq {
   bool eqStringishTypes(TypedValue lhs, const StringData* rhs) const {
     assertx(tvIsLazyClass(lhs) || tvIsString(lhs));
     if (tvIsLazyClass(lhs)) return lhs.m_data.plazyclass.name() == rhs;
-    if (RuntimeOption::EvalRaiseClassConversionWarning) {
-      raise_class_to_string_conversion_warning();
+    if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+      raise_class_to_string_conversion_notice();
     }
     return lhs.m_data.pstr->equal(rhs);
   }

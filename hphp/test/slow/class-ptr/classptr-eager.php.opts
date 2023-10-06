@@ -1,5 +1,5 @@
 -vEval.ClassPassesClassname=false
 -vEval.CheckPropTypeHints=3
--vEval.RaiseClassConversionWarning=true
+-vEval.RaiseClassConversionNoticeSampleRate=1
 -vEval.ClassStringHintNoticesSampleRate=1
 -vEval.ClassAsStringVarDump=false

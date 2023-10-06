@@ -511,7 +511,7 @@ pub enum Hhbc {
     ParentCls(LocId),
     Pow([ValueId; 2], LocId),
     Print(ValueId, LocId),
-    RaiseClassStringConversionWarning(LocId),
+    RaiseClassStringConversionNotice(LocId),
     RecordReifiedGeneric(ValueId, LocId),
     ResolveClass(ClassId, LocId),
     ResolveClsMethod(ValueId, MethodId, LocId),

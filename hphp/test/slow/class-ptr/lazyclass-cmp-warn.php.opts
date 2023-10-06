@@ -1,1 +1,1 @@
--vEval.RaiseClassConversionWarning=true
+-vEval.RaiseClassConversionNoticeSampleRate=1

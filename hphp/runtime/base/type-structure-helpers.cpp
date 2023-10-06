@@ -57,8 +57,8 @@ bool tvInstanceOfImpl(const TypedValue* tv, F lookupClass) {
     case KindOfLazyClass: {
       auto const cls = lookupClass();
       if (cls && interface_supports_string(cls->name())) {
-        if (RuntimeOption::EvalRaiseClassConversionWarning) {
-          raise_class_to_string_conversion_warning();
+        if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+          raise_class_to_string_conversion_notice();
         }
         return true;
       }

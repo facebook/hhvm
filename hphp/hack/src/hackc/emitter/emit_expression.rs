@@ -4375,7 +4375,7 @@ fn get_elem_member_key<'a, 'arena, 'decl>(
                     .unsafe_as_str();
                 Ok((
                     MemberKey::ET(Str::from(fq_id), ReadonlyOp::Any),
-                    instr::raise_class_string_conversion_warning(),
+                    instr::raise_class_string_conversion_notice(),
                 ))
             }
             _ => {

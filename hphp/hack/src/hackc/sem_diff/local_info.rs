@@ -207,7 +207,7 @@ impl LocalInfo {
             | Opcode::Pow
             | Opcode::Print
             | Opcode::QueryM(..)
-            | Opcode::RaiseClassStringConversionWarning
+            | Opcode::RaiseClassStringConversionNotice
             | Opcode::RecordReifiedGeneric
             | Opcode::Req
             | Opcode::ReqDoc

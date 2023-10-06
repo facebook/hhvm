@@ -339,7 +339,7 @@ where
             | Opcode::Print
             | Opcode::PushL(..)
             | Opcode::QueryM(..)
-            | Opcode::RaiseClassStringConversionWarning
+            | Opcode::RaiseClassStringConversionNotice
             | Opcode::RecordReifiedGeneric
             | Opcode::ReqDoc
             | Opcode::ReqOnce

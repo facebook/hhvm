@@ -1683,7 +1683,7 @@ void dce(Env& env, const bc::ThrowAsTypeStructException& op) {
   no_dce(env, op);
 }
 void dce(Env& env, const bc::ThrowNonExhaustiveSwitch& op) { no_dce(env, op); }
-void dce(Env& env, const bc::RaiseClassStringConversionWarning& op) {
+void dce(Env& env, const bc::RaiseClassStringConversionNotice& op) {
   no_dce(env, op);
 }
 void dce(Env& env, const bc::UGetCUNop& op) { no_dce(env, op); }

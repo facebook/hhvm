@@ -6524,7 +6524,7 @@ bool inner_types_might_raise(const Type& t1, const Type& t2) {
 
 bool compare_might_raise(const Type& t1, const Type& t2) {
   if (!RuntimeOption::EvalEmitClsMethPointers &&
-      !RuntimeOption::EvalRaiseClassConversionWarning) {
+      RuntimeOption::EvalRaiseClassConversionNoticeSampleRate == 0) {
     return false;
   }
 
@@ -6548,7 +6548,7 @@ bool compare_might_raise(const Type& t1, const Type& t2) {
     }
   }
 
-  if (RuntimeOption::EvalRaiseClassConversionWarning) {
+  if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
     if (t1.couldBe(BStr) && t2.couldBe(BLazyCls)) return true;
     if (t1.couldBe(BStr) && t2.couldBe(BCls)) return true;
     if (t1.couldBe(BLazyCls) && t2.couldBe(BStr)) return true;
@@ -7511,7 +7511,7 @@ std::pair<Type, Promotion> promote_classlike_to_key(Type ty) {
   return std::make_pair(
     std::move(ty),
     promoted
-    ? (RO::EvalRaiseClassConversionWarning
+    ? (RO::EvalRaiseClassConversionNoticeSampleRate > 0
        ? Promotion::YesMightThrow
        : Promotion::Yes)
     : Promotion::No

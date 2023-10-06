@@ -741,8 +741,8 @@ inline bool classHasPersistentRDS(const Class* cls) {
 }
 
 inline const StringData* classToStringHelper(const Class* cls) {
- if (RuntimeOption::EvalRaiseClassConversionWarning) {
-   raise_class_to_string_conversion_warning();
+ if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+   raise_class_to_string_conversion_notice();
  }
  return cls->name();
 }

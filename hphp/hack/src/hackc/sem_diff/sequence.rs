@@ -439,7 +439,7 @@ fn is_cow_instr(instr: &NodeInstr<'_>) -> bool {
             | Opcode::NewVec(..)
             | Opcode::OODeclExists(..)
             | Opcode::QueryM(..)
-            | Opcode::RaiseClassStringConversionWarning
+            | Opcode::RaiseClassStringConversionNotice
             | Opcode::RecordReifiedGeneric
             | Opcode::Req
             | Opcode::ReqDoc

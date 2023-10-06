@@ -1612,7 +1612,7 @@ Variant checkSize(Variant val) {
  * caller to make sure it is a legal literal.
  */
 Variant parse_php_serialized(folly::StringPiece str) {
-  SuppressClassConversionWarning suppressor;
+  SuppressClassConversionNotice suppressor;
   VariableUnserializer vu(
     str.data(),
     str.size(),

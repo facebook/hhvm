@@ -757,7 +757,7 @@ void emitInstanceOf(IRGS& env) {
     if (t2->isA(TStr))     return gen(env, InterfaceSupportsStr, t1);
     if (t2->isA(TDbl))     return gen(env, InterfaceSupportsDbl, t1);
     if (t2->isA(TCls)) {
-      if (!RO::EvalRaiseClassConversionWarning) {
+      if (RO::EvalRaiseClassConversionNoticeSampleRate == 0) {
         return gen(env, InterfaceSupportsStr, t1);
       }
       return cond(

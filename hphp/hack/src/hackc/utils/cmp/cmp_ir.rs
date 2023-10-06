@@ -987,7 +987,7 @@ fn cmp_instr_hhbc(
         | (Hhbc::ParentCls(_), _)
         | (Hhbc::Pow(_, _), _)
         | (Hhbc::Print(_, _), _)
-        | (Hhbc::RaiseClassStringConversionWarning(_), _)
+        | (Hhbc::RaiseClassStringConversionNotice(_), _)
         | (Hhbc::RecordReifiedGeneric(_, _), _)
         | (Hhbc::SelfCls(_), _)
         | (Hhbc::SetG(_, _), _)

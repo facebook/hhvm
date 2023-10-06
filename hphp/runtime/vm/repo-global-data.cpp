@@ -37,7 +37,7 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
   RO::StrictArrayFillKeys                          = StrictArrayFillKeys;
   RO::EvalEmitClsMethPointers                      = EmitClsMethPointers;
   RO::EvalForbidDynamicCallsWithAttr               = ForbidDynamicCallsWithAttr;
-  RO::EvalRaiseClassConversionWarning              = RaiseClassConversionWarning;
+  RO::EvalRaiseClassConversionNoticeSampleRate     = RaiseClassConversionNoticeSampleRate;
   RO::EvalClassPassesClassname                     = ClassPassesClassname;
   RO::EvalClassnameNotices                         = ClassnameNotices;
   RO::EvalClassStringHintNoticesSampleRate         = ClassStringHintNoticesSampleRate;
@@ -102,7 +102,7 @@ std::string show(const RepoGlobalData& gd) {
   SHOW(Signature);
   SHOW(EmitClsMethPointers);
   SHOW(IsVecNotices);
-  SHOW(RaiseClassConversionWarning);
+  SHOW(RaiseClassConversionNoticeSampleRate);
   SHOW(ClassPassesClassname);
   SHOW(ClassnameNotices);
   SHOW(ClassStringHintNoticesSampleRate);

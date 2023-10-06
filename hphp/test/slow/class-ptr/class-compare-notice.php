@@ -1,9 +1,13 @@
 <?hh
 
 class Info { public static bool $SawError = false; }
+function starts_with($x, $y): bool {
+  $len = strlen($y);
+  return !$len || 0 === strncmp($x, $y, $len);
+}
 function handle_error($_errno, $msg, ...) :mixed{
   //if (!Info::$SawError && $msg === "Class to string conversion") {
-  if ($msg === "Class to string conversion") {
+  if (starts_with($msg, "Implicit Class to string conversion")) {
     Info::$SawError = true;
     return true;
   } else if (

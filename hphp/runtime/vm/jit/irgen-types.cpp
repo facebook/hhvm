@@ -586,7 +586,6 @@ SSATmp* isScalarImpl(IRGS& env, SSATmp* val) {
 
 const StaticString s_FUNC_CONVERSION(Strings::FUNC_TO_STRING);
 const StaticString s_FUNC_IS_STRING("Func used in is_string");
-const StaticString s_CLASS_CONVERSION(Strings::CLASS_TO_STRING);
 const StaticString s_CLASS_IS_STRING("Class used in is_string");
 const StaticString s_TYPE_STRUCT_NOT_DARR("Type-structure is not a darray");
 
@@ -766,8 +765,12 @@ void emitInstanceOf(IRGS& env) {
           gen(env, JmpZero, taken, gen(env, InterfaceSupportsStr, t1));
         },
         [&] {
-          gen(env, RaiseNotice, SampleRateData {},
-              cns(env, s_CLASS_CONVERSION.get()));
+          std::string msg;
+          string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT, "instanceof");
+          gen(env,
+            RaiseNotice,
+            SampleRateData { RO::EvalRaiseClassConversionNoticeSampleRate },
+            cns(env, makeStaticString(msg)));
           return cns(env, true);
         },
         [&] { return cns(env, false); }

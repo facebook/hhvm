@@ -262,7 +262,7 @@ HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
             case kind::LazyClass:{
               if (folly::Random::oneIn(
                     RO::EvalRaiseClassConversionNoticeSampleRate)) {
-                raise_class_to_string_conversion_notice();
+                raise_class_to_string_conversion_notice("dict key");
               }
               auto const s = toStaticString(elt.key.LazyClass._0);
               d.set(s, toTypedValue(elt.value));

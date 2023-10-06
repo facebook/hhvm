@@ -449,10 +449,12 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
     case KindOfLazyClass:
     case KindOfPersistentString:
     case KindOfString: {
+      auto const op = "serialize()";
       auto const str =
         isStringType(value.getType()) ? value.getStringData() :
-        isClassType(value.getType()) ? classToStringHelper(value.toClassVal()) :
-        lazyClassToStringHelper(value.toLazyClassVal());
+        isClassType(value.getType()) ?
+          classToStringHelper(value.toClassVal(), op) :
+          lazyClassToStringHelper(value.toLazyClassVal(), op);
       auto const size = str->size();
       if (size >= RuntimeOption::MaxSerializedStringSize) {
         throw Exception("Size of serialized string (%ld) exceeds max", size);

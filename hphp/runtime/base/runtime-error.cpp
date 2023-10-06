@@ -591,9 +591,9 @@ void raise_clsmeth_compat_type_hint_property_notice(
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void raise_class_to_string_conversion_notice() {
+void raise_class_to_string_conversion_notice(const char* source) {
   if (LIKELY(!RID().getSuppressClassConversionNotices())) {
-    raise_notice(Strings::CLASS_TO_STRING);
+    raise_notice(Strings::CLASS_TO_STRING_IMPLICIT, source);
   }
 }
 

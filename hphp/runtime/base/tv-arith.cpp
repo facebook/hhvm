@@ -277,6 +277,7 @@ template<class Op>
 void tvIncDecOp(Op op, tv_lval cell) {
   assertx(tvIsPlausible(*cell));
 
+  auto const source = "increment op";
   switch (type(cell)) {
     case KindOfUninit:
     case KindOfNull:
@@ -299,14 +300,14 @@ void tvIncDecOp(Op op, tv_lval cell) {
 
     case KindOfClass: {
       raiseIncDecInvalidType(cell);
-      auto s = classToStringHelper(val(cell).pclass);
+      auto s = classToStringHelper(val(cell).pclass, source);
       stringIncDecOp(op, cell, const_cast<StringData*>(s));
       return;
     }
 
     case KindOfLazyClass: {
       raiseIncDecInvalidType(cell);
-      auto s = lazyClassToStringHelper(val(cell).plazyclass);
+      auto s = lazyClassToStringHelper(val(cell).plazyclass, source);
       stringIncDecOp(op, cell, const_cast<StringData*>(s));
       return;
     }
@@ -509,10 +510,14 @@ void tvBitNot(TypedValue& cell) {
     case KindOfClass:
       // Fall-through
     case KindOfLazyClass:
-      cell.m_data.pstr =
-        isClassType(cell.m_type) ?
-        const_cast<StringData*>(classToStringHelper(cell.m_data.pclass)) :
-        const_cast<StringData*>(lazyClassToStringHelper(cell.m_data.plazyclass));
+      {
+        auto const o = "increment op";
+        cell.m_data.pstr =
+          isClassType(cell.m_type) ?
+          const_cast<StringData*>(classToStringHelper(cell.m_data.pclass, o)) :
+          const_cast<StringData*>(lazyClassToStringHelper(cell.m_data.plazyclass,
+                                                          o));
+      }
       cell.m_type = KindOfString;
       // Fall-through
     case KindOfString:

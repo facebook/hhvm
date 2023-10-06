@@ -407,6 +407,7 @@ bool HHVM_FUNCTION(array_key_exists,
 
   auto const cell = key.asTypedValue();
 
+  auto const op = "array_key_exists";
   switch (cell->m_type) {
     case KindOfUninit:
     case KindOfNull:
@@ -430,9 +431,10 @@ bool HHVM_FUNCTION(array_key_exists,
       throwInvalidArrayKeyException(cell, ad);
 
     case KindOfClass:
-      return ad->exists(StrNR(classToStringHelper(cell->m_data.pclass)));
+      return ad->exists(StrNR(classToStringHelper(cell->m_data.pclass, op)));
     case KindOfLazyClass:
-      return ad->exists(StrNR(lazyClassToStringHelper(cell->m_data.plazyclass)));
+      return ad->exists(StrNR(lazyClassToStringHelper(cell->m_data.plazyclass,
+                                                      op)));
 
     case KindOfPersistentString:
     case KindOfString: {
@@ -2942,6 +2944,7 @@ Array HHVM_FUNCTION(HH_darray, const Variant& input) {
 }
 
 TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
+  auto const op = "array_key_cast";
   switch (input.getType()) {
     case KindOfPersistentString:
     case KindOfString: {
@@ -2959,9 +2962,10 @@ TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
       );
 
     case KindOfClass:
-      return tvReturn(StrNR(classToStringHelper(input.toClassVal())));
+      return tvReturn(StrNR(classToStringHelper(input.toClassVal(), op)));
     case KindOfLazyClass:
-      return tvReturn(StrNR(lazyClassToStringHelper(input.toLazyClassVal())));
+      return tvReturn(StrNR(lazyClassToStringHelper(input.toLazyClassVal(),
+                                                    op)));
 
     case KindOfInt64:
     case KindOfBoolean:

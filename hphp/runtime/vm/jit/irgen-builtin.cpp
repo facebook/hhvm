@@ -650,6 +650,7 @@ SSATmp* opt_array_key_cast(IRGS& env, const ParamPrep& params) {
   if (params.size() != 1) return nullptr;
   auto const value = params[0].value;
 
+  auto const op = "array_key_cast";
   if (value->isA(TInt))  return value;
   if (value->isA(TNull)) return cns(env, staticEmptyString());
   if (value->isA(TBool)) return gen(env, ConvBoolToInt, value);
@@ -658,23 +659,25 @@ SSATmp* opt_array_key_cast(IRGS& env, const ParamPrep& params) {
   if (value->isA(TStr))  return gen(env, StrictlyIntegerConv, value);
   if (value->isA(TLazyCls))  {
 		if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
-      gen(
-        env,
+      std::string msg;
+      // TODO(vmladenov) appears untested
+      string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT, op);
+      gen(env,
         RaiseNotice,
         SampleRateData { RO::EvalRaiseClassConversionNoticeSampleRate },
-        cns(env, makeStaticString(Strings::CLASS_TO_STRING))
-      );
+        cns(env, makeStaticString(msg)));
     }
     return gen(env, LdLazyClsName, value);
   }
   if (value->isA(TCls))  {
 		if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
-      gen(
-        env,
-        RaiseNotice,
-        SampleRateData { RO::EvalRaiseClassConversionNoticeSampleRate },
-        cns(env, makeStaticString(Strings::CLASS_TO_STRING))
-      );
+      std::string msg;
+      // TODO(vmladenov) appears untested
+      string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT, op);
+      gen(env,
+          RaiseNotice,
+          SampleRateData { RO::EvalRaiseClassConversionNoticeSampleRate },
+          cns(env, makeStaticString(msg)));
     }
     return gen(env, LdClsName, value);
   }

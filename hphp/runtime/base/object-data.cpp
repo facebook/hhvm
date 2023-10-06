@@ -1744,11 +1744,12 @@ String ObjectData::invokeToString() {
   }
 
   if (tvIsString(tv)) return String::attach(val(tv).pstr);
+  auto const op = "__toString()";
   if (tvIsLazyClass(tv)) {
-    return StrNR{lazyClassToStringHelper(tv.m_data.plazyclass)};
+    return StrNR{lazyClassToStringHelper(tv.m_data.plazyclass, op)};
   }
   assertx(isClassType(type(tv)));
-  return StrNR(classToStringHelper(tv.m_data.pclass));
+  return StrNR(classToStringHelper(tv.m_data.pclass, op));
 }
 
 bool ObjectData::hasToString() {

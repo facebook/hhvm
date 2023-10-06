@@ -480,6 +480,7 @@ bool Variant::toBooleanHelper() const {
 }
 
 int64_t Variant::toInt64Helper(int base /* = 10 */) const {
+  auto const op = "int conversion";
   switch (m_type) {
     case KindOfUninit:
     case KindOfNull:
@@ -502,9 +503,9 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
     case KindOfFunc:
       invalidFuncConversion("int");
     case KindOfClass:
-      return classToStringHelper(m_data.pclass)->toInt64();
+      return classToStringHelper(m_data.pclass, op)->toInt64();
     case KindOfLazyClass:
-      return lazyClassToStringHelper(m_data.plazyclass)->toInt64();
+      return lazyClassToStringHelper(m_data.plazyclass, op)->toInt64();
     case KindOfClsMeth:
       throwInvalidClsMethToType("int");
     case KindOfRClsMeth:
@@ -516,6 +517,7 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
 }
 
 Array Variant::toPHPArrayHelper() const {
+  auto const op = "PHPArray conversion";
   switch (m_type) {
     case KindOfUninit:
     case KindOfNull:          return empty_dict_array();
@@ -542,11 +544,11 @@ Array Variant::toPHPArrayHelper() const {
     case KindOfFunc:
       invalidFuncConversion("array");
     case KindOfClass: {
-      auto const str = classToStringHelper(m_data.pclass);
+      auto const str = classToStringHelper(m_data.pclass, op);
       return make_dict_array(0, Variant{str, PersistentStrInit{}});
     }
     case KindOfLazyClass: {
-      auto const str = lazyClassToStringHelper(m_data.plazyclass);
+      auto const str = lazyClassToStringHelper(m_data.plazyclass, op);
       return make_dict_array(0, Variant{str, PersistentStrInit{}});
     }
     case KindOfClsMeth:

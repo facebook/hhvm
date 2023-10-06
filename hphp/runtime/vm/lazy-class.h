@@ -36,5 +36,6 @@ private:
   const StringData* className;
 };
 
-const StringData* lazyClassToStringHelper(const LazyClassData& lclass);
+const StringData* lazyClassToStringHelper(const LazyClassData& lclass,
+                                          const char* source);
 }

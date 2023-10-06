@@ -2086,7 +2086,8 @@ bool classHasPersistentRDS(const Class* cls);
  * will be raised when compiler option Eval.RaiseClassConversionNoticesSampleRate
  * is nonzero.
  */
-const StringData* classToStringHelper(const Class* cls);
+const StringData* classToStringHelper(const Class* cls,
+                                      const char* source);
 
 std::vector<Class*> prioritySerializeClasses();
 

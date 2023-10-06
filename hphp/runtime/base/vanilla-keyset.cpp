@@ -116,6 +116,8 @@ ArrayData* VanillaKeyset::MakeSet(uint32_t size, const TypedValue* values) {
     }
   }
   auto ad = asSet(MakeReserveSet(size));
+
+  auto const op = "keyset insertion";
   for (uint32_t i = 0; i < size; ++i) {
     auto& tv = values[size - i - 1];
     /*
@@ -129,12 +131,12 @@ ArrayData* VanillaKeyset::MakeSet(uint32_t size, const TypedValue* values) {
       decRefStr(tv.m_data.pstr); // FIXME
     } else if (isClassType(tv.m_type)) {
       auto const keyStr =
-        const_cast<StringData*>(classToStringHelper(tv.m_data.pclass));
+        const_cast<StringData*>(classToStringHelper(tv.m_data.pclass, op));
       ad->insert<false>(keyStr);
     } else {
       assertx(isLazyClassType(tv.m_type));
       auto const keyStr =
-        const_cast<StringData*>(lazyClassToStringHelper(tv.m_data.plazyclass));
+        const_cast<StringData*>(lazyClassToStringHelper(tv.m_data.plazyclass, op));
       ad->insert<false>(keyStr);
     }
   }

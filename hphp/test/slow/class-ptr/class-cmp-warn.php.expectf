@@ -1,86 +1,86 @@
 bool(true)
 bool(true)
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 8
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 8
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 8
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 8
 bool(false)
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 8
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 8
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 8
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 8
 bool(true)
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 9
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 9
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 9
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 9
 bool(false)
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 9
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 9
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 9
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 9
 bool(true)
 bool(false)
 bool(false)
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 12
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 12
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 12
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 12
 bool(false)
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 12
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 12
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 12
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 12
 bool(false)
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 13
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 13
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 13
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 13
 bool(true)
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 13
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 13
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 13
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 13
 bool(true)
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 15
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 15
 bool(true)
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 15
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 15
 bool(true)
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 16
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 16
 bool(false)
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 16
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 16
 bool(true)
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 17
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 17
 bool(false)
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 17
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 17
 bool(true)
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 19
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 19
 bool(false)
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 19
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 19
 bool(false)
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 20
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 20
 bool(false)
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 20
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 20
 bool(false)
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 21
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 21
 bool(true)
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 21
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 21
 bool(true)
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 24
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 24
 bool(true)
 
-Notice: Class to string conversion in %s/class-cmp-warn.php on line 27
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/class-cmp-warn.php on line 27
 bool(false)

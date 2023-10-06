@@ -116,7 +116,6 @@ constexpr char FUNC_TO_STRING_IMPLICIT[] =
 constexpr char FUNC_TO_STRING[] = "Func to string conversion";
 constexpr char CLASS_TO_STRING_IMPLICIT[] =
   "Implicit Class to string conversion for %s";
-constexpr char CLASS_TO_STRING[] = "Class to string conversion";
 constexpr char CLASS_TO_MEMOKEY[] = "Class to memo key conversion";
 constexpr char CLASS_TO_CLASSNAME[] = "Class passed to classname type-hint";
 constexpr char ARRAY_MARK_LEGACY_VEC[] = "array_mark_legacy() called on vec";

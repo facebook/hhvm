@@ -25,6 +25,8 @@
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
+#include "hphp/util/text-util.h"
+
 namespace HPHP::jit::irgen {
 
 bool areBinaryArithTypesSupported(Op op, Type t1, Type t2) {
@@ -288,16 +290,16 @@ SSATmp* implFunCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   PUNT(Func-cmp);
 }
 
-const StaticString s_clsToStringWarning(Strings::CLASS_TO_STRING);
-
 SSATmp* convToStr(IRGS& env, SSATmp* in, bool should_warn) {
   if (should_warn &&
       RO::EvalRaiseClassConversionNoticeSampleRate > 0 &&
       in->type().subtypeOfAny(TCls, TLazyCls)) {
+    std::string msg;
+    string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT, "comparison");
     gen(env,
         RaiseNotice,
         SampleRateData { RO::EvalRaiseClassConversionNoticeSampleRate },
-        cns(env, s_clsToStringWarning.get()));
+        cns(env, makeStaticString(msg)));
   }
   if (in->isA(TCls))     return gen(env, LdClsName, in);
   if (in->isA(TLazyCls)) return gen(env, LdLazyClsName, in);

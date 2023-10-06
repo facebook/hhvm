@@ -59,14 +59,15 @@ bool isStringOrClassish(DataType t) {
 
 const StringData* convStringishToStringData(TypedValue cell, bool warn = true) {
   assertx(isStringOrClassish(cell.type()));
+  auto const op = "comparison";
   if (tvIsClass(cell)) {
     return warn
-      ? classToStringHelper(cell.m_data.pclass)
+      ? classToStringHelper(cell.m_data.pclass, op)
       : cell.m_data.pclass->name();
   }
   if (tvIsLazyClass(cell)) {
     return warn
-      ? lazyClassToStringHelper(cell.m_data.plazyclass)
+      ? lazyClassToStringHelper(cell.m_data.plazyclass, op)
       : cell.m_data.plazyclass.name();
   }
   return cell.m_data.pstr;
@@ -174,7 +175,7 @@ struct Eq {
     assertx(tvIsLazyClass(lhs) || tvIsString(lhs));
     if (tvIsLazyClass(lhs)) return lhs.m_data.plazyclass.name() == rhs;
     if (folly::Random::oneIn(RO::EvalRaiseClassConversionNoticeSampleRate)) {
-      raise_class_to_string_conversion_notice();
+      raise_class_to_string_conversion_notice("comparison");
     }
     return lhs.m_data.pstr->equal(rhs);
   }
@@ -247,11 +248,13 @@ struct CompareBase {
     assertx(isStringOrClassish(t.type()));
     // this seems like an oversight?
     if (tvIsLazyClass(t)) return operator()(t.m_data.plazyclass.name(), u.name());
-    return operator()(convStringishToStringData(t), lazyClassToStringHelper(u));
+    return operator()(convStringishToStringData(t),
+                      lazyClassToStringHelper(u, "comparison"));
   }
   bool operator()(TypedValue t, Class* u) const {
     assertx(isStringOrClassish(t.type()));
-    return operator()(convStringishToStringData(t), classToStringHelper(u));
+    return operator()(convStringishToStringData(t),
+                      classToStringHelper(u, "comparison"));
   }
 };
 

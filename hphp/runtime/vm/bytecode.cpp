@@ -2198,7 +2198,7 @@ OPTBLD_INLINE void iopThrowNonExhaustiveSwitch() {
 
 OPTBLD_INLINE void iopRaiseClassStringConversionNotice() {
   if (folly::Random::oneIn(RO::EvalRaiseClassConversionNoticeSampleRate)) {
-    raise_class_to_string_conversion_notice();
+    raise_class_to_string_conversion_notice("bytecode");
   }
 }
 

@@ -421,6 +421,7 @@ template<MOpMode mode, KeyType keyType>
 NEVER_INLINE TypedValue ElemSlow(TypedValue base, key_type<keyType> key) {
   assertx(tvIsPlausible(base));
 
+  auto const op = "index";
   switch (base.type()) {
     case KindOfUninit:
     case KindOfNull:
@@ -437,11 +438,11 @@ NEVER_INLINE TypedValue ElemSlow(TypedValue base, key_type<keyType> key) {
       return ElemScalar();
     case KindOfClass:
       return ElemString<mode, keyType>(
-        classToStringHelper(val(base).pclass), key
+        classToStringHelper(val(base).pclass, op), key
       );
     case KindOfLazyClass:
       return ElemString<mode, keyType>(
-        lazyClassToStringHelper(val(base).plazyclass), key
+        lazyClassToStringHelper(val(base).plazyclass, op), key
       );
     case KindOfPersistentString:
     case KindOfString:
@@ -2211,6 +2212,7 @@ template <KeyType keyType>
 NEVER_INLINE bool IssetElemSlow(TypedValue base, key_type<keyType> key) {
   assertx(tvIsPlausible(base));
 
+  auto const op = "isset";
   switch (type(base)) {
     case KindOfUninit:
     case KindOfNull:
@@ -2226,12 +2228,12 @@ NEVER_INLINE bool IssetElemSlow(TypedValue base, key_type<keyType> key) {
 
     case KindOfClass:
       return IssetElemString<keyType>(
-        classToStringHelper(val(base).pclass), key
+        classToStringHelper(val(base).pclass, op), key
       );
 
     case KindOfLazyClass:
       return IssetElemString<keyType>(
-        lazyClassToStringHelper(val(base).plazyclass), key
+        lazyClassToStringHelper(val(base).plazyclass, op), key
       );
 
     case KindOfPersistentString:

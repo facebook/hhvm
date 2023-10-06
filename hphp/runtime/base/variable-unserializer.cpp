@@ -833,7 +833,7 @@ void VariableUnserializer::unserializeVariant(
         );
       } else {
         if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
-          raise_class_to_string_conversion_notice();
+          raise_class_to_string_conversion_notice("variable unserialization");
         }
         tvMove(
           make_tv<KindOfPersistentString>(makeStaticString(c.get())), self

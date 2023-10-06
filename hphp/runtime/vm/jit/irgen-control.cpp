@@ -27,6 +27,8 @@
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 
+#include "hphp/util/text-util.h"
+
 namespace HPHP::jit::irgen {
 
 void surpriseCheck(IRGS& env) {
@@ -205,8 +207,6 @@ void emitSwitch(IRGS& env, SwitchKind kind, int64_t base,
   gen(env, JmpSwitchDest, data, index, sp(env), fp(env));
 }
 
-const StaticString s_clsToStringWarning(Strings::CLASS_TO_STRING);
-
 void emitSSwitch(IRGS& env, const ImmVector& iv) {
   const int numCases = iv.size() - 1;
   auto testVal = popC(env);
@@ -214,10 +214,13 @@ void emitSSwitch(IRGS& env, const ImmVector& iv) {
 
  if (UNLIKELY(testVal->isA(TCls) || testVal->isA(TLazyCls))) {
     if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+      std::string msg;
+      // TODO(vmladenov) appears untested
+      string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT, "string switch");
       gen(env,
-          RaiseNotice,
-          SampleRateData { RO::EvalRaiseClassConversionNoticeSampleRate },
-          cns(env, s_clsToStringWarning.get()));
+        RaiseNotice,
+        SampleRateData { RO::EvalRaiseClassConversionNoticeSampleRate },
+        cns(env, makeStaticString(msg)));
     }
     testVal = gen(env, testVal->isA(TCls) ? LdClsName : LdLazyClsName, testVal);
   }
@@ -259,14 +262,14 @@ void emitThrowNonExhaustiveSwitch(IRGS& env) {
   interpOne(env);
 }
 
-const StaticString s_class_to_string(Strings::CLASS_TO_STRING);
-
 void emitRaiseClassStringConversionNotice(IRGS& env) {
   if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+    std::string msg;
+    string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT, "bytecode");
     gen(env,
         RaiseNotice,
         SampleRateData { RO::EvalRaiseClassConversionNoticeSampleRate },
-        cns(env, s_class_to_string.get()));
+        cns(env, makeStaticString(msg)));
   }
 }
 

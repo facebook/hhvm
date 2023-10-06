@@ -1,33 +1,33 @@
 class(Foo)
 bool(true)
 
-Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-equals.php on line 26
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/lazyclass-equals.php on line 26
 bool(true)
 
-Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-equals.php on line 27
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/lazyclass-equals.php on line 27
 bool(true)
 class(Foo)
 bool(true)
 
-Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-equals.php on line 9
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/lazyclass-equals.php on line 9
 bool(true)
 string(3) "Foo"
 
-Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-equals.php on line 16
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/lazyclass-equals.php on line 16
 bool(true)
 bool(true)
 class(Foo)
 bool(true)
 
-Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-equals.php on line 34
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/lazyclass-equals.php on line 34
 bool(true)
 class(Foo)
 bool(true)
 
-Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-equals.php on line 41
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/lazyclass-equals.php on line 41
 bool(true)
 string(3) "Foo"
 
-Notice: Class to string conversion in %s/test/slow/class-ptr/lazyclass-equals.php on line 47
+Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/lazyclass-equals.php on line 47
 bool(true)
 bool(true)

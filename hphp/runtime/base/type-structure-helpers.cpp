@@ -60,7 +60,8 @@ bool tvInstanceOfImpl(const TypedValue* tv, F lookupClass) {
       auto const cls = lookupClass();
       if (cls && interface_supports_string(cls->name())) {
         if (folly::Random::oneIn(RO::EvalRaiseClassConversionNoticeSampleRate)) {
-          raise_class_to_string_conversion_notice();
+          // TODO(vmladenov) appears untested
+          raise_class_to_string_conversion_notice("instanceof");
         }
         return true;
       }

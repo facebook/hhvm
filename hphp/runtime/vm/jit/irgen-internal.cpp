@@ -18,13 +18,14 @@
 
 #include "hphp/runtime/vm/jit/fixup.h"
 
+#include "hphp/util/text-util.h"
+
 namespace HPHP::jit::irgen {
 
 //////////////////////////////////////////////////////////////////////
 
 const StaticString
-  s_FATAL_NULL_THIS(Strings::FATAL_NULL_THIS),
-  s_clsToStringWarning(Strings::CLASS_TO_STRING);
+  s_FATAL_NULL_THIS(Strings::FATAL_NULL_THIS);
 
 SSATmp* checkAndLoadThis(IRGS& env) {
   if (!hasThis(env)) {
@@ -49,19 +50,25 @@ SSATmp* convertClassKey(IRGS& env, SSATmp* key) {
   assertx (key->type().isKnownDataType());
   if (key->isA(TCls)) {
     if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+      std::string msg;
+      string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT,
+                    "string key conversion");
       gen(env,
           RaiseNotice,
           SampleRateData { RO::EvalRaiseClassConversionNoticeSampleRate },
-          cns(env, s_clsToStringWarning.get()));
+          cns(env, makeStaticString(msg)));
     }
     return gen(env, LdClsName, key);
   }
   if (key->isA(TLazyCls)) {
     if (RO::EvalRaiseClassConversionNoticeSampleRate > 0) {
+      std::string msg;
+      string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT,
+                    "string key conversion");
       gen(env,
           RaiseNotice,
           SampleRateData { RO::EvalRaiseClassConversionNoticeSampleRate },
-          cns(env, s_clsToStringWarning.get()));
+          cns(env, makeStaticString(msg)));
     }
     return gen(env, LdLazyClsName, key);
   }

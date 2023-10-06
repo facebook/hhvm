@@ -742,9 +742,10 @@ inline bool classHasPersistentRDS(const Class* cls) {
   return persistent;
 }
 
-inline const StringData* classToStringHelper(const Class* cls) {
- if (folly::Random::oneIn(RO::EvalRaiseClassConversionNoticeSampleRate)) {
-   raise_class_to_string_conversion_notice();
+inline const StringData* classToStringHelper(const Class* cls,
+                                             const char* source) {
+  if (folly::Random::oneIn(RO::EvalRaiseClassConversionNoticeSampleRate)) {
+    raise_class_to_string_conversion_notice(source);
  }
  return cls->name();
 }

@@ -154,6 +154,7 @@ enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
   assertx(tvIsPlausible(*tv));
   double d;
 
+  auto const op = "float conversion";
   do {
     switch (type(tv)) {
       case KindOfUninit:
@@ -210,11 +211,11 @@ enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
         invalidFuncConversion("float");
 
       case KindOfClass:
-        d = classToStringHelper(val(tv).pclass)->toDouble();
+        d = classToStringHelper(val(tv).pclass, op)->toDouble();
         continue;
 
       case KindOfLazyClass:
-        d = lazyClassToStringHelper(val(tv).plazyclass)->toDouble();
+        d = lazyClassToStringHelper(val(tv).plazyclass, op)->toDouble();
         continue;
 
       case KindOfClsMeth:
@@ -239,6 +240,7 @@ enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
   assertx(tvIsPlausible(*tv));
   int64_t i;
 
+  auto const op = "int conversion";
   do {
     switch (type(tv)) {
       case KindOfUninit:
@@ -296,11 +298,11 @@ enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
         continue;
 
       case KindOfClass:
-        i = classToStringHelper(val(tv).pclass)->toInt64();
+        i = classToStringHelper(val(tv).pclass, op)->toInt64();
         continue;
 
       case KindOfLazyClass:
-        i = lazyClassToStringHelper(val(tv).plazyclass)->toInt64();
+        i = lazyClassToStringHelper(val(tv).plazyclass, op)->toInt64();
         continue;
 
       case KindOfClsMeth:
@@ -326,6 +328,7 @@ int64_t tvCastToInt64(TypedValue tv) {
 
 double tvCastToDouble(TypedValue tv) {
   assertx(tvIsPlausible(tv));
+  auto const op = "float conversion";
   switch (tv.m_type) {
     case KindOfUninit:
     case KindOfNull:
@@ -365,10 +368,10 @@ double tvCastToDouble(TypedValue tv) {
       invalidFuncConversion("float");
 
     case KindOfClass:
-      return classToStringHelper(tv.m_data.pclass)->toDouble();
+      return classToStringHelper(tv.m_data.pclass, op)->toDouble();
 
     case KindOfLazyClass:
-      return lazyClassToStringHelper(tv.m_data.plazyclass)->toDouble();
+      return lazyClassToStringHelper(tv.m_data.plazyclass, op)->toDouble();
 
     case KindOfClsMeth:
       throwInvalidClsMethToType("float");
@@ -401,6 +404,7 @@ template<typename T> enable_if_lval_t<T, void> tvCastToStringInPlace(
     val(tv).pstr = s;
   };
 
+  auto const op = "string conversion";
   switch (type(tv)) {
     case KindOfUninit:
     case KindOfNull:
@@ -463,12 +467,12 @@ template<typename T> enable_if_lval_t<T, void> tvCastToStringInPlace(
     }
 
     case KindOfClass: {
-      auto const s = classToStringHelper(val(tv).pclass);
+      auto const s = classToStringHelper(val(tv).pclass, op);
       return persistentString(const_cast<StringData*>(s));
     }
 
     case KindOfLazyClass: {
-      auto const s = lazyClassToStringHelper(val(tv).plazyclass);
+      auto const s = lazyClassToStringHelper(val(tv).plazyclass, op);
       return persistentString(const_cast<StringData*>(s));
     }
 
@@ -507,6 +511,7 @@ StringData* tvCastToStringData(
   const StringData* notice_reason) {
   assertx(tvIsPlausible(tv));
 
+  auto const op = "string conversion";
   switch (tv.m_type) {
     case KindOfUninit:
     case KindOfNull:
@@ -568,12 +573,12 @@ StringData* tvCastToStringData(
     }
 
     case KindOfClass: {
-      auto const s = classToStringHelper(tv.m_data.pclass);
+      auto const s = classToStringHelper(tv.m_data.pclass, op);
       return const_cast<StringData*>(s);
     }
 
     case KindOfLazyClass: {
-      auto const s = lazyClassToStringHelper(tv.m_data.plazyclass);
+      auto const s = lazyClassToStringHelper(tv.m_data.plazyclass, op);
       return const_cast<StringData*>(s);
     }
 

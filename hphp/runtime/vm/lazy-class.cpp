@@ -27,9 +27,10 @@ LazyClassData::LazyClassData(const StringData* name)
   assertx(name && name->isStatic());
 }
 
-const StringData* lazyClassToStringHelper(const LazyClassData& lclass) {
+const StringData* lazyClassToStringHelper(const LazyClassData& lclass,
+                                          const char* source) {
   if (folly::Random::oneIn(RO::EvalRaiseClassConversionNoticeSampleRate)) {
-    raise_class_to_string_conversion_notice();
+    raise_class_to_string_conversion_notice(source);
   }
   return lclass.name();
 }

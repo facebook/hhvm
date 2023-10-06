@@ -182,14 +182,15 @@ const EnumValues* EnumCache::loadEnumValues(
     // Manually perform int-like key coercion even if names is a dict for
     // backwards compatibility.
     int64_t n;
+    auto const source = "enum";
     if (tvIsString(&value) &&
         value.m_data.pstr->isStrictlyInteger(n)) {
       names.set(n, make_tv<KindOfPersistentString>(consts[i].name));
     } else if (tvIsClass(&value)) {
-      names.set(StrNR{classToStringHelper(val(value).pclass)},
+      names.set(StrNR{classToStringHelper(val(value).pclass, source)},
                 make_tv<KindOfPersistentString>(consts[i].name), true);
     } else if (tvIsLazyClass(&value)) {
-      names.set(StrNR{lazyClassToStringHelper(val(value).plazyclass)},
+      names.set(StrNR{lazyClassToStringHelper(val(value).plazyclass, source)},
                 make_tv<KindOfPersistentString>(consts[i].name), true);
     } else {
       names.set(value, make_tv<KindOfPersistentString>(consts[i].name), true);

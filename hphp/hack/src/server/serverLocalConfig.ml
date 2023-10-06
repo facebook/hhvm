@@ -259,6 +259,8 @@ type t = {
       (** POC: @bobren, use old decls from CAS instead of memcache/manifold *)
   log_events_with_sandcastle_info: bool;
       (** POC: @catg, add sandcastle info to Scuba samples. *)
+  autocomplete_cache: bool;
+      (** POC: @mckenzie, add 2 character cache for autocomplete lookup. *)
 }
 
 let default =
@@ -351,6 +353,7 @@ let default =
     ide_naming_table_update_threshold = 1000;
     dump_tast_hashes = false;
     log_events_with_sandcastle_info = false;
+    autocomplete_cache = false;
   }
 
 let system_config_path =
@@ -1067,6 +1070,9 @@ let load_
       ~default:default.log_events_with_sandcastle_info
       config
   in
+  let autocomplete_cache =
+    bool_ "autocomplete_cache" ~default:default.autocomplete_cache config
+  in
   {
     saved_state =
       {
@@ -1175,6 +1181,7 @@ let load_
     ide_naming_table_update_threshold;
     dump_tast_hashes;
     log_events_with_sandcastle_info;
+    autocomplete_cache;
   }
 
 (** Loads the config from [path]. Uses JustKnobs and ExperimentsConfig to override.
@@ -1227,4 +1234,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       ide_naming_table_update_threshold =
         options.ide_naming_table_update_threshold;
       saved_state_rollouts = options.saved_state.GlobalOptions.rollouts;
+      autocomplete_cache = options.autocomplete_cache;
     }

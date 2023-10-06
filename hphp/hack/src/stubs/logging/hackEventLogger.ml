@@ -69,6 +69,7 @@ type rollout_flags = {
   use_compressed_dep_graph: bool;
   use_old_decls_from_cas: bool;
   saved_state_rollouts: Saved_state_rollouts.t;
+  autocomplete_cache: bool;
 }
 
 let flush () = ()

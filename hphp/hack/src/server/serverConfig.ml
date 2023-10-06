@@ -494,6 +494,7 @@ let load ~silent options : t * ServerLocalConfig.t =
           (ServerArgs.enable_global_access_check options)
         ~dump_tast_hashes:local_config.dump_tast_hashes
         ~tco_custom_error_config
+        ~autocomplete_cache:local_config.autocomplete_cache
         GlobalOptions.default
     in
     load_config config local_config_opts

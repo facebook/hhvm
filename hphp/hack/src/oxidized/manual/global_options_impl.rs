@@ -161,6 +161,7 @@ impl Default for GlobalOptions {
             po_unwrap_concurrent: false,
             tco_log_exhaustivity_check: false,
             po_disallow_direct_superglobals_refs: false,
+            autocomplete_cache: false,
         }
     }
 }

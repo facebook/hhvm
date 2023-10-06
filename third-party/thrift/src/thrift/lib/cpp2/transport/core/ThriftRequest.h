@@ -115,6 +115,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
         const ResponseRpcMetadata& metadata,
         const std::optional<ResponseRpcError>& responseRpcError,
         const server::TServerObserver::CallTimestamps& timestamps,
+        const Cpp2RequestContext& reqContext,
         server::TServerObserver* observer,
         MessageChannel::SendCallback* chainedCallback = nullptr);
 

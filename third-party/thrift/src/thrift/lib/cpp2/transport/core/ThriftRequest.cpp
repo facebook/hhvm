@@ -46,7 +46,8 @@ namespace {
 RequestLoggingContext buildRequestLoggingContext(
     const ResponseRpcMetadata& metadata,
     const std::optional<ResponseRpcError>& responseRpcError,
-    const server::TServerObserver::CallTimestamps& timestamps) {
+    const server::TServerObserver::CallTimestamps& timestamps,
+    const Cpp2RequestContext& reqContext) {
   RequestLoggingContext requestLoggingContext;
   requestLoggingContext.timestamps = timestamps;
   requestLoggingContext.responseRpcError = responseRpcError;
@@ -55,6 +56,12 @@ RequestLoggingContext buildRequestLoggingContext(
       requestLoggingContext.exceptionMetaData = *exceptionMetadata;
     }
   }
+
+  if (const auto* clientId = reqContext.clientId()) {
+    requestLoggingContext.clientId = *clientId;
+  }
+  requestLoggingContext.methodName = reqContext.getMethodName();
+
   return requestLoggingContext;
 }
 } // namespace
@@ -144,10 +151,11 @@ ThriftRequestCore::LogRequestSampleCallback::LogRequestSampleCallback(
     const ResponseRpcMetadata& metadata,
     const std::optional<ResponseRpcError>& responseRpcError,
     const server::TServerObserver::CallTimestamps& timestamps,
+    const Cpp2RequestContext& reqContext,
     server::TServerObserver* observer,
     MessageChannel::SendCallback* chainedCallback)
-    : requestLoggingContext_(
-          buildRequestLoggingContext(metadata, responseRpcError, timestamps)),
+    : requestLoggingContext_(buildRequestLoggingContext(
+          metadata, responseRpcError, timestamps, reqContext)),
       observer_(observer),
       chainedCallback_(chainedCallback) {}
 
@@ -213,7 +221,12 @@ MessageChannel::SendCallbackPtr ThriftRequestCore::createRequestLoggingCallback(
     auto chainedCallback = cbPtr.release();
     return MessageChannel::SendCallbackPtr(
         new ThriftRequestCore::LogRequestSampleCallback(
-            metadata, responseRpcError, timestamps, observer, chainedCallback));
+            metadata,
+            responseRpcError,
+            timestamps,
+            reqContext_,
+            observer,
+            chainedCallback));
   }
   return cbPtr;
 }

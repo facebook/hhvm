@@ -1,2 +1,2 @@
-string(%d) "No URL set!%w"
+string(%d) "No URL set%S%w"
 int(3)

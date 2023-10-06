@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$url = uniqid()."://www.".uniqid().".".uniqid();
+$url = chr(rand(97,122)).uniqid()."://www.".uniqid().".".uniqid();
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);
 

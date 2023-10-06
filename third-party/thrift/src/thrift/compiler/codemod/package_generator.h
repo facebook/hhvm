@@ -164,26 +164,28 @@ class package_name_generator {
   }
 
   std::string to_snake_case(std::string input) {
-    // FOObar => _FOO_bar
-    re2::RE2 initials("[A-Z]{2,}");
+    static const re2::RE2 lowercase = "([a-z0-9])([A-Z])";
+    /*
+     * Match where a lowercase letter or a digit is followed
+     * by an uppercase letter.
+     *
+     * BazFOOBar => Baz_FOOBar
+     * FOO2Bar   => FOO2_Bar
+     * FooBar    => Foo_Bar
+     * BarZ      => Bar_Z
+     */
+    re2::RE2::GlobalReplace(&input, lowercase, "\\1_\\2");
 
-    re2::RE2::GlobalReplace(&input, initials, "_\\0_");
+    /*
+     * Match where an uppercase letter or a digit is followed
+     * by an uppercase letter and a lowercase letter.
+     *
+     * Baz_FOOBar => Baz_FOO_Bar
+     */
+    re2::RE2 uppercase = "([A-Z0-9])([A-Z][a-z])";
+    re2::RE2::GlobalReplace(&input, uppercase, "\\1_\\2");
 
-    // FooBar => _Foo_Bar
-    re2::RE2 pascal_case("[A-Z]([a-z0-9]+|$)");
-    re2::RE2::GlobalReplace(&input, pascal_case, "_\\0");
-
-    // _FOO_bar => FOO_bar
-    if (input.find_first_of('_') == 0) {
-      input = input.substr(1);
-    }
-
-    auto last_idx = input.length() - 1;
-    // Foo_BAR_ => Foo_BAR
-    if (input.find_last_of('_') == last_idx) {
-      input = input.substr(0, last_idx);
-    }
-    // Foo_BAR => foo_bar
+    // Convert the string to lowercase.
     std::transform(input.begin(), input.end(), input.begin(), ::tolower);
     return input;
   }

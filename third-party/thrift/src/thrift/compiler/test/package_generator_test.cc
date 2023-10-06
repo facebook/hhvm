@@ -161,4 +161,19 @@ TEST(PackageGeneratorTest, longest_package) {
   namespaces["py3"] = "facebook.abcdef.ghi";
   EXPECT_EQ(get_longest_pkg(), "facebook.com/abcdef/ghi");
 }
+
+TEST(PackageGeneratorTest, to_snake_case) {
+  std::map<std::string, std::string> input_output = {
+      {"FOOBAR", "foobar"},
+      {"FOOBar", "foo_bar"},
+      {"FOO_Bar", "foo_bar"},
+      {"FooBar", "foo_bar"},
+      {"FooV2Bar", "foo_v2_bar"},
+      {"FOO1232Bar", "foo1232_bar"},
+      {"BazFOO2Bar", "baz_foo2_bar"}};
+  for (auto const& [input, output] : input_output) {
+    codemod::package_name_generator gen("cpp2", fmt::format("test.{}", input));
+    EXPECT_EQ(gen.generate(), fmt::format("meta.com/test/{}", output));
+  }
+}
 } // namespace apache::thrift::compiler

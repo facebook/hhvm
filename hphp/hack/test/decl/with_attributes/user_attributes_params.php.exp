@@ -119,6 +119,27 @@
            [{ Typing_defs_core.ua_name = ([16:5-8], "\\Foo"); ua_params = []
               }
              ]
+           };
+         { Shallow_decl_defs.sm_name = ([20:19-29], "attrConcat");
+           sm_type =
+           (Rwitness_from_decl ([20:19-29]),
+            (Tfun
+               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
+                 ft_implicit_params =
+                 { capability = (CapDefaults [20:19-29]) };
+                 ft_ret =
+                 { et_enforced = Typing_defs_core.Unenforced;
+                   et_type = (Rwitness_from_decl ([20:19-29]), Tany) };
+                 ft_flags =
+                 (make_ft_flags FSync ~return_disposable:false
+                   ~returns_readonly:false ~support_dynamic_type:false
+                   ~readonly_this:false ~is_memoized:false ~variadic:false);
+                 ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_attributes =
+           [{ Typing_defs_core.ua_name = ([19:5-8], "\\Foo");
+              ua_params = [(Typing_defs_core.String "barBaz")] }
+             ]
            }
          ];
        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }))

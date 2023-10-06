@@ -15,4 +15,7 @@ class C {
 
   <<Foo(21 * 2)>>
   public function attrCompute() {}
+
+  <<Foo('bar'.Baz::class)>>
+  public function attrConcat() {}
 }

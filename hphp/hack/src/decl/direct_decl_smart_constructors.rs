@@ -371,6 +371,48 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             .elaborate_raw_id(ElaborateKind::Class, id)
     }
 
+    fn fold_string_concat(&self, expr: &nast::Expr<'a>, acc: &mut bump::Vec<'a, u8>) -> bool {
+        match *expr {
+            aast::Expr(
+                _,
+                _,
+                aast::Expr_::ClassConst((
+                    aast::ClassId(_, _, aast::ClassId_::CI(&Id(_, class_name))),
+                    _,
+                )),
+            ) => {
+                // Imagine the case <<MyFancyEnum('foo'.X::class)>>
+                // We would expect a user attribute parameter to concatenate
+                // and return a string of 'fooX'.
+                // Since `X::class` after elaboration returns the string '\X'
+                // we opt to strip the prefix here to successfully concatenate the string
+                // into human-readable formats.
+                // The Facts parser handles this for AttributeParam::Classname
+                // but not AttributeParam::String
+                let mut name = self.elaborate_raw_id(class_name);
+                if name.starts_with('\\') {
+                    name = &name[1..];
+                }
+                acc.extend_from_slice(name.as_bytes());
+                true
+            }
+            aast::Expr(_, _, aast::Expr_::String(val)) => {
+                acc.extend_from_slice(val);
+                true
+            }
+            aast::Expr(
+                _,
+                _,
+                aast::Expr_::Binop(&aast::Binop {
+                    bop: Bop::Dot,
+                    lhs,
+                    rhs,
+                }),
+            ) => self.fold_string_concat(lhs, acc) && self.fold_string_concat(rhs, acc),
+            _ => false,
+        }
+    }
+
     /// Fully qualify the given identifier as a constant name (with
     /// consideration to `use` statements in scope).
     fn elaborate_const_id(&self, id: Id<'a>) -> Id<'a> {
@@ -5509,29 +5551,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             Node::EnumClassLabel(label) => Some(AttributeParam::EnumClassLabel(label)),
             Node::Expr(e @ aast::Expr(_, pos, _)) => {
                 // Try to parse a sequence of string concatenations
-                fn fold_string_concat<'a>(
-                    expr: &nast::Expr<'a>,
-                    acc: &mut bump::Vec<'a, u8>,
-                ) -> bool {
-                    match *expr {
-                        aast::Expr(_, _, aast::Expr_::String(val)) => {
-                            acc.extend_from_slice(val);
-                            true
-                        }
-                        aast::Expr(
-                            _,
-                            _,
-                            aast::Expr_::Binop(&aast::Binop {
-                                bop: Bop::Dot,
-                                lhs,
-                                rhs,
-                            }),
-                        ) => fold_string_concat(lhs, acc) && fold_string_concat(rhs, acc),
-                        _ => false,
-                    }
-                }
                 let mut acc = bump::Vec::new_in(self.arena);
-                fold_string_concat(e, &mut acc)
+                self.fold_string_concat(e, &mut acc)
                     .then(|| AttributeParam::String(pos, acc.into_bump_slice().into()))
             }
             Node::StringLiteral((slit, pos)) => Some(AttributeParam::String(pos, slit)),

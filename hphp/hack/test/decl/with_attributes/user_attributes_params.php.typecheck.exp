@@ -30,6 +30,12 @@ File "user_attributes_params.php", line 16, characters 5-7:
 Unbound name: `Foo` (an object type) (Naming[2049])
 File "user_attributes_params.php", line 16, characters 5-7:
 Unrecognized user attribute: `Foo` does not have a class. Please declare a class for the attribute. (Naming[2049])
+File "user_attributes_params.php", line 19, characters 5-7:
+Unbound name: `Foo` (an object type) (Naming[2049])
+File "user_attributes_params.php", line 19, characters 5-7:
+Unrecognized user attribute: `Foo` does not have a class. Please declare a class for the attribute. (Naming[2049])
+File "user_attributes_params.php", line 19, characters 15-17:
+Unbound name: `Baz` (an object type) (Naming[2049])
 File "user_attributes_params.php", line 5, characters 19-25:
 Was expecting a return type hint (Typing[4030])
 File "user_attributes_params.php", line 8, characters 19-25:
@@ -39,6 +45,8 @@ Was expecting a return type hint (Typing[4030])
 File "user_attributes_params.php", line 14, characters 19-29:
 Was expecting a return type hint (Typing[4030])
 File "user_attributes_params.php", line 17, characters 19-29:
+Was expecting a return type hint (Typing[4030])
+File "user_attributes_params.php", line 20, characters 19-28:
 Was expecting a return type hint (Typing[4030])
 File "user_attributes_params.php", line 10, characters 27-33:
 Enum class label/member mismatch (Typing[4110])

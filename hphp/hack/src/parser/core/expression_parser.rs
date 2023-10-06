@@ -321,7 +321,7 @@ where
                 // TODO: Increase the coverage of PrecedenceParser.expects_next, so that
                 // we wind up eating fewer of the tokens that'll be needed by the outer
                 // statement / declaration parsers.
-                let quickfixes = match (kind, token.leading_start_offset()) {
+                match (kind, token.leading_start_offset()) {
                     (TokenKind::Equal, Some(lhs_leading_start_offset)) => {
                         let lhs_start_offset = lhs_leading_start_offset + token.leading_width();
                         let (lhs_end_offset, _) = self.error_offsets(false);
@@ -330,17 +330,21 @@ where
                             parser.parse_expression_with_reset_precedence();
                             parser.lexer().start()
                         };
-                        vec![SyntaxQuickfix {
-                            title: "convert to 'var_dump'".into(),
-                            edits: vec![
-                                (lhs_start_offset, lhs_end_offset, "var_dump(".into()),
-                                (rhs_offset, rhs_offset, ")".into()),
-                            ],
-                        }]
+                        self.with_error(
+                            Errors::error2078,
+                            vec![SyntaxQuickfix {
+                                title: "convert to 'var_dump'".into(),
+                                edits: vec![
+                                    (lhs_start_offset, lhs_end_offset, "var_dump(".into()),
+                                    (rhs_offset, rhs_offset, ")".into()),
+                                ],
+                            }],
+                        );
                     }
-                    _ => Vec::new(),
+                    _ => {
+                        self.with_error(Errors::error1015, Vec::new());
+                    }
                 };
-                self.with_error(Errors::error1015, quickfixes);
                 self.sc_mut().make_token(token)
             }
         }

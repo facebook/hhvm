@@ -603,6 +603,7 @@ pub fn error2074(call_modifier: &str) -> Error {
     ))
 }
 pub const error2077: Error = Cow::Borrowed("Cannot use empty list");
+pub const error2078: Error = Cow::Borrowed("An expression cannot start with `=`");
 
 pub const reassign_this: Error = Cow::Borrowed("Cannot re-assign `$this`");
 

@@ -1,4 +1,4 @@
 (4,9)-(4,9) A semicolon `;` is expected here.
 (4,20)-(4,20) A semicolon `;` is expected here.
-(4,22)-(4,22) An expression is expected here.
+(4,22)-(4,22) An expression cannot start with `=`
 (4,22)-(4,25) Encountered unexpected token `int`.

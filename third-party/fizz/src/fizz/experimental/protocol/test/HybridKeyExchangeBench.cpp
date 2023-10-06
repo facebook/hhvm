@@ -42,7 +42,6 @@ void serverSharedSecretDerivationBench(uint64_t n, NamedGroup namedGroup) {
   BENCHMARK_SUSPEND {
     auto f = std::make_unique<HybridKeyExFactory>();
     kex = f->makeKeyExchange(namedGroup, Factory::KeyExchangeMode::Server);
-    kex->generateKeyPair();
     for (uint64_t i = 0; i < n; i++) {
       auto fakeClientKex =
           f->makeKeyExchange(namedGroup, Factory::KeyExchangeMode::Client);
@@ -53,6 +52,7 @@ void serverSharedSecretDerivationBench(uint64_t n, NamedGroup namedGroup) {
   };
   std::unique_ptr<folly::IOBuf> keyShare;
   for (uint64_t i = 0; i < n; i++) {
+    kex->generateKeyPair();
     keyShare = kex->generateSharedSecret(clientKeyShare[i]);
   }
   folly::doNotOptimizeAway(keyShare);

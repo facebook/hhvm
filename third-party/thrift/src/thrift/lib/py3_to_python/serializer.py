@@ -50,3 +50,20 @@ def _(
     )
 
     return python_serialize(obj, protocol=python_Protocol[protocol.name])
+
+
+@singledispatch
+def deserialize(cls, data: bytes, protocol: Protocol = Protocol.COMPACT):
+    from thrift.py3 import deserialize as py3_deserialize, Protocol as py3_Protocol
+
+    return py3_deserialize(cls, data, py3_Protocol[protocol.name])
+
+
+@deserialize.register(thrift.python.types.StructOrUnion)
+def _(cls, data: bytes, protocol: Protocol = Protocol.COMPACT):
+    from thrift.python.serializer import (
+        deserialize as python_deserialize,
+        Protocol as python_Protocol,
+    )
+
+    return python_deserialize(cls, data, python_Protocol[protocol.name])

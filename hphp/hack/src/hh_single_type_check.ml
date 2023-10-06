@@ -45,7 +45,10 @@ type mode =
   | Lint_json
   | Dump_deps
   | Dump_dep_hashes
-  | Get_some_file_deps of int
+  | Get_some_file_deps of {
+      depth: int;
+      full_hierarchy: bool;
+    }
   | Identify_symbol of int * int
   | Ide_code_actions of {
       title_prefix: string;
@@ -321,6 +324,7 @@ let parse_options () =
   let allow_all_files_for_module_declarations = ref true in
   let loop_iteration_upper_bound = ref None in
   let substitution_mutation = ref false in
+  let get_some_file_deps_full_hierarchy = ref false in
   let options =
     [
       ( "--config",
@@ -423,8 +427,14 @@ let parse_options () =
         Arg.Unit (set_mode Dump_inheritance),
         " Print inheritance" );
       ( "--get-some-file-deps",
-        Arg.Int (fun depth -> set_mode (Get_some_file_deps depth) ()),
+        Arg.Int
+          (fun depth ->
+            set_mode (Get_some_file_deps { depth; full_hierarchy = false }) ()),
         " Print a list of files this file depends on. The provided integer is the depth of the traversal. Requires --root, --naming-table and --depth"
+      );
+      ( "--get-some-file-deps-full-hierarchy",
+        Arg.Set get_some_file_deps_full_hierarchy,
+        " Include all dependencies from class hierarchies in the list of files this file depends on regardless of their depth."
       );
       ( "--ide-code-actions",
         Arg.String
@@ -855,11 +865,14 @@ let parse_options () =
   in
 
   (match !mode with
-  | Get_some_file_deps _ ->
+  | Get_some_file_deps { depth; _ } ->
     if Option.is_none !naming_table then
       raise (Arg.Bad "--get-some-file-deps requires --naming-table");
     if Option.is_none !root then
-      raise (Arg.Bad "--get-some-file-deps requires --root")
+      raise (Arg.Bad "--get-some-file-deps requires --root");
+    mode :=
+      Get_some_file_deps
+        { depth; full_hierarchy = !get_some_file_deps_full_hierarchy }
   | _ -> ());
 
   if Option.is_some !naming_table && Option.is_none !root then
@@ -1653,71 +1666,138 @@ let handle_constraint_mode
   in
   iter_over_files process_multifile
 
-let scrape_class_names (ast : Nast.program) : SSet.t =
-  let names = ref SSet.empty in
-  let visitor =
-    object
-      (* It would look less clumsy to use Aast.reduce, but would use set union which has higher complexity. *)
-      inherit [_] Aast.iter
+module File_deps = struct
+  type dep_kind =
+    | Hierarchy  (** Dependencies that come from class hierarchies *)
+    | Regular
+        (** Dependencies that come from method signatures, expressions, etc. *)
 
-      method! on_class_name _ (_p, id) = names := SSet.add id !names
-    end
-  in
-  visitor#on_program () ast;
-  !names
+  type 'a deps = {
+    hierarchy: 'a;
+    regular: 'a;
+  }
 
-(** Scrape names in file and return the files where those names are defined. *)
-let get_some_file_dependencies ctx (file : Relative_path.t) :
-    Relative_path.Set.t =
-  let open Hh_prelude in
-  let nast = Ast_provider.get_ast ctx ~full:true file in
-  let names =
-    Errors.ignore_ (fun () -> Naming.program ctx nast) |> scrape_class_names
-    (* TODO: scape other defs too *)
-  in
-  SSet.fold
-    (fun class_name files ->
-      match Naming_provider.get_class_path ctx class_name with
-      | None -> files
-      | Some file -> Relative_path.Set.add files file)
-    names
-    Relative_path.Set.empty
+  let scrape_class_names (ast : Nast.program) : SSet.t deps =
+    (* Visitor that collects class names from AST *)
+    let name_collector () =
+      object
+        inherit [_] Aast.iter
 
-(** Recursively scrape names in files and return the
-  files where those names are defined. *)
-let traverse_file_dependencies ctx (files : Relative_path.t list) ~(depth : int)
-    : Relative_path.Set.t =
-  let rec traverse
-      (files : Relative_path.Set.t)
-      depth
-      (visited : Relative_path.Set.t)
-      (results : Relative_path.Set.t) =
-    if Int.( <= ) depth 0 then
-      Relative_path.Set.union files results
-    else
-      let (next_files, visited, results) =
-        Relative_path.Set.fold
-          files
-          ~init:(Relative_path.Set.empty, visited, results)
-          ~f:(fun file (next_files, visited, results) ->
-            if Relative_path.Set.mem visited file then
-              (next_files, visited, results)
-            else
-              let visited = Relative_path.Set.add visited file in
-              let dependencies = get_some_file_dependencies ctx file in
-              let next_files =
-                Relative_path.Set.union dependencies next_files
-              in
-              let results = Relative_path.Set.add results file in
-              (next_files, visited, results))
+        val names = HashSet.create ()
+
+        (* Note that the unit is not strictly required here, however, this way it's more in line
+           with regular OCaml. *)
+        method names () = HashSet.fold names ~init:SSet.empty ~f:SSet.add
+
+        method! on_class_name _ (_p, id) = HashSet.add names id
+      end
+    in
+    (* Visitor that invokes [name_collector] on elements of a class hierarchy
+       such as extends, implements, uses clauses *)
+    let class_hierarchy_visitor name_collector =
+      let open Aast in
+      object
+        inherit [_] Aast.iter
+
+        method! on_Class _ class_ =
+          List.iter class_.c_extends ~f:(name_collector#on_hint ());
+          List.iter class_.c_uses ~f:(name_collector#on_hint ());
+          List.iter class_.c_implements ~f:(name_collector#on_hint ());
+          List.iter class_.c_reqs ~f:(name_collector#on_class_req ());
+          List.iter
+            class_.c_where_constraints
+            ~f:(name_collector#on_where_constraint_hint ())
+      end
+    in
+    (* Downstream we need to treat class names relating to class hierarchies
+       defined in the file differently from names simply used in method signature
+       and expressions.
+
+       Below we do two passes over AST to collect all names and names coming from
+       class hierarchies. This could be done more efficiently in one pass but the
+       delta in performance is pretty small and overall it is good enough for the
+       downstream consumers as-is. *)
+    let all_names_collector = name_collector () in
+    all_names_collector#on_program () ast;
+    let hierarchy_names_collector = name_collector () in
+    (class_hierarchy_visitor hierarchy_names_collector)#on_program () ast;
+    let hierarchy_names = hierarchy_names_collector#names () in
+    let regular_names =
+      SSet.diff (all_names_collector#names ()) hierarchy_names
+    in
+    { hierarchy = hierarchy_names; regular = regular_names }
+
+  (** Collect files that the given [file] depend on based on used class names. *)
+  let collect_some_file_dependencies ctx (file : Relative_path.t) :
+      Relative_path.Set.t deps =
+    let open Hh_prelude in
+    let nast = Ast_provider.get_ast ctx ~full:true file in
+    let names =
+      Errors.ignore_ (fun () -> Naming.program ctx nast) |> scrape_class_names
+    in
+    let resolve_to_path names =
+      SSet.fold
+        (fun class_name files ->
+          match Naming_provider.get_class_path ctx class_name with
+          | None -> files
+          | Some file -> Relative_path.Set.add files file)
+        names
+        Relative_path.Set.empty
+    in
+    {
+      hierarchy = resolve_to_path names.hierarchy;
+      regular = resolve_to_path names.regular;
+    }
+
+  (** Recursively collect names in files and return the files where those names
+  are defined. *)
+  let traverse_file_dependencies
+      ctx (files : Relative_path.t list) ~(depth : int) ~(full_hierarchy : bool)
+      : Relative_path.t Seq.t =
+    let module Pathtbl = Stdlib.Hashtbl.Make (Relative_path.S) in
+    let pending = Queue.create () in
+    let visited = Pathtbl.create 17 in
+    (* The code below does BFS traversal of file dependencies. When
+       [--get-some-file-deps-full-hierarchy] flag is set we collect deps that
+       come from class hierarchies regardless of their distance from the input
+       file.
+
+       Note that in a chain [input file -> hierarhcy dep -> regular dep] regular
+       dep is considered to have distance 2 from the input file. Alternatively,
+       we could assume that hierarchy deps are always at distance 0 and then in
+       the same chain regular dep would be at distance 1. However, this leads to
+       a blow up in the number of deps we collect and is not practical. *)
+    let enqueue_file file_depth kind file =
+      let should_traverse =
+        (match kind with
+        | Hierarchy when full_hierarchy -> true
+        | _ -> Int.(file_depth < depth))
+        && not (Pathtbl.mem visited file)
       in
-      traverse next_files (depth - 1) visited results
-  in
-  traverse
-    (Relative_path.Set.of_list files)
-    depth
-    Relative_path.Set.empty
-    Relative_path.Set.empty
+      if should_traverse then Queue.enqueue pending (file_depth, file);
+      Pathtbl.replace visited file ()
+    in
+    List.iter files ~f:(fun file -> enqueue_file 0 Regular file);
+    let iteration = ref 0 in
+    while not (Queue.is_empty pending) do
+      let (file_depth, file) = Queue.dequeue_exn pending in
+      let dependencies = collect_some_file_dependencies ctx file in
+      Relative_path.Set.iter
+        dependencies.hierarchy
+        ~f:(enqueue_file (file_depth + 1) Hierarchy);
+      Relative_path.Set.iter
+        dependencies.regular
+        ~f:(enqueue_file (file_depth + 1) Regular);
+      incr iteration;
+      if Int.(!iteration mod 100 = 0) then
+        Hh_logger.log
+          "Iteration %d: visited %d, pending %d"
+          !iteration
+          (Pathtbl.length visited)
+          (Queue.length pending)
+    done;
+    Pathtbl.to_seq_keys visited
+end
 
 (** Used for testing code that generates patches. *)
 let codemod
@@ -1993,10 +2073,13 @@ let handle_mode
         let nasts = create_nasts ctx files_info in
         Relative_path.Map.iter nasts ~f:(fun _ nast ->
             Dep_hash_to_symbol.dump nast))
-  | Get_some_file_deps depth ->
-    let file_deps = traverse_file_dependencies ctx filenames ~depth in
-    Relative_path.Set.iter file_deps ~f:(fun file ->
-        Printf.printf "%s\n" (Relative_path.to_absolute file))
+  | Get_some_file_deps { depth; full_hierarchy } ->
+    let file_deps =
+      File_deps.traverse_file_dependencies ctx filenames ~depth ~full_hierarchy
+    in
+    file_deps
+    |> Seq.iter (fun file ->
+           Printf.printf "%s\n" (Relative_path.to_absolute file))
   | Dump_inheritance ->
     let open ServerCommandTypes.Method_jumps in
     let naming_table = Naming_table.create files_info in

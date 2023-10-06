@@ -111,7 +111,11 @@ let storage_of_string str =
 module S = struct
   type t = relative_path
 
-  let compare : t -> t -> int = compare
+  let compare = compare
+
+  let equal = equal
+
+  let hash = hash
 
   let to_string = storage_to_string
 end

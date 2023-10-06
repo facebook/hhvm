@@ -35,17 +35,17 @@ namespace {
 std::atomic<IFrameID> s_nextFrameKey;
 
 // Map from integral literals to their location in the TC data section.
-using LiteralMap = TreadHashMap<uint64_t,const uint64_t*,std::hash<uint64_t>>;
+using LiteralMap = TreadHashMap<uint64_t, const uint64_t*, uint64_hash>;
 LiteralMap s_literals{128};
 
 // Landingpads for TC catch traces; used by the unwinder.
-using CatchTraceMap = TreadHashMap<uint32_t, uint32_t, std::hash<uint32_t>>;
+using CatchTraceMap = TreadHashMap<uint32_t, uint32_t, uint32_hash>;
 CatchTraceMap s_catchTraceMap{128};
 
-using AbortReasonMap = TreadHashMap<uint32_t, Reason, std::hash<uint32_t>>;
+using AbortReasonMap = TreadHashMap<uint32_t, Reason, uint32_hash>;
 AbortReasonMap s_trapReasonMap{128};
 
-using InlineStackMap = TreadHashMap<uint32_t, IStack, std::hash<uint32_t>>;
+using InlineStackMap = TreadHashMap<uint32_t, IStack, uint32_hash>;
 InlineStackMap s_inlineStacks{1024};
 
 using InlineFrameVec = AtomicVector<IFrame>;

@@ -139,17 +139,18 @@ struct pairHashCompare {
   }
 };
 
-struct int64_hash {
-  size_t operator() (const int64_t v) const {
-    return hash_int64(v);
-  }
-  size_t hash(const int64_t v) const {
-    return operator()(v);
-  }
-  bool equal(const int64_t lhs, const int64_t rhs) const {
-    return lhs == rhs;
+template<typename T>
+struct int_hash {
+  static_assert(std::is_integral<T>::value);
+  size_t operator() (T v) const {
+    return hash_int64(static_cast<uint64_t>(v));
   }
 };
+
+using int64_hash = int_hash<int64_t>;
+using uint64_hash = int_hash<uint64_t>;
+using int32_hash = int_hash<int32_t>;
+using uint32_hash = int_hash<uint32_t>;
 
 template<typename T>
 struct pointer_hash {
@@ -216,4 +217,3 @@ struct string_lessi {
 //////////////////////////////////////////////////////////////////////
 
 }
-

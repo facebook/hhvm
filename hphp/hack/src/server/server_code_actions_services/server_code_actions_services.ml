@@ -34,7 +34,7 @@ let lsp_range_of_ide_range (ide_range : Ide_api_types.range) : Lsp.range =
     }
 
 (* Example: in "${0:placeholder}" extracts "placeholder" *)
-let snippet_regexp = Str.regexp {|\${[0-9]+:\([^}]+\)}|}
+let snippet_regexp = Str.regexp {|\${[0-9]+:\([^}]*\)}|}
 
 let remove_snippets Lsp.WorkspaceEdit.{ changes } =
   let un_snippet_string = Str.global_replace snippet_regexp {|\1|} in

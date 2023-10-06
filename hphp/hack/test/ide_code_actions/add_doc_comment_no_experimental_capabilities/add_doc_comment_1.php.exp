@@ -10,7 +10,7 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"/**\n * ${0:}\n */\n",
+          "newText":"/**\n * \n */\n",
           "range":{"end":{"character":0,"line":2},"start":{"character":0,"line":2}}
         }
       ]
@@ -23,9 +23,9 @@ JSON for selected code action:
 Applied edit for code action:
 ------------------------------------------
 <?hh
-// TODO: There should be no snippet (`${`...) in the output
+// There should be no snippet (`${`...) in the output
 /**
- * ${0:}
+ * 
  */
 // because we are using `--ide-code-actions-no-experimental-capabilities`
 

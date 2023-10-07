@@ -136,7 +136,7 @@ func (c *SomeServiceChannelClient) BounceMap(ctx context.Context, m included.Som
     if err != nil {
         return nil, err
     }
-    return out.Success, nil
+    return out.GetSuccess(), nil
 }
 
 func (c *SomeServiceClient) BounceMap(m included.SomeMap) (included.SomeMap, error) {
@@ -153,7 +153,7 @@ func (c *SomeServiceChannelClient) BinaryKeyedMap(ctx context.Context, r []int64
     if err != nil {
         return nil, err
     }
-    return out.Success, nil
+    return out.GetSuccess(), nil
 }
 
 func (c *SomeServiceClient) BinaryKeyedMap(r []int64) (map[*TBinary]int64, error) {
@@ -338,7 +338,7 @@ func (x *reqSomeServiceBounceMap) String() string {
     return sb.String()
 }
 type respSomeServiceBounceMap struct {
-    Success included.SomeMap `thrift:"success,0" json:"success" db:"success"`
+    Success included.SomeMap `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respSomeServiceBounceMap{}
@@ -347,8 +347,7 @@ var _ thrift.WritableResult = &respSomeServiceBounceMap{}
 type SomeServiceBounceMapResult = respSomeServiceBounceMap
 
 func newRespSomeServiceBounceMap() *respSomeServiceBounceMap {
-    return (&respSomeServiceBounceMap{}).
-        SetSuccessNonCompat(included.NewSomeMap())
+    return (&respSomeServiceBounceMap{})
 }
 
 func (x *respSomeServiceBounceMap) GetSuccessNonCompat() included.SomeMap {
@@ -378,6 +377,10 @@ func (x *respSomeServiceBounceMap) IsSetSuccess() bool {
 }
 
 func (x *respSomeServiceBounceMap) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
     if err := p.WriteFieldBegin("success", thrift.MAP, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -723,7 +726,7 @@ func (x *reqSomeServiceBinaryKeyedMap) String() string {
     return sb.String()
 }
 type respSomeServiceBinaryKeyedMap struct {
-    Success map[*TBinary]int64 `thrift:"success,0" json:"success" db:"success"`
+    Success map[*TBinary]int64 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respSomeServiceBinaryKeyedMap{}
@@ -732,8 +735,7 @@ var _ thrift.WritableResult = &respSomeServiceBinaryKeyedMap{}
 type SomeServiceBinaryKeyedMapResult = respSomeServiceBinaryKeyedMap
 
 func newRespSomeServiceBinaryKeyedMap() *respSomeServiceBinaryKeyedMap {
-    return (&respSomeServiceBinaryKeyedMap{}).
-        SetSuccessNonCompat(make(map[*TBinary]int64))
+    return (&respSomeServiceBinaryKeyedMap{})
 }
 
 func (x *respSomeServiceBinaryKeyedMap) GetSuccessNonCompat() map[*TBinary]int64 {
@@ -763,6 +765,10 @@ func (x *respSomeServiceBinaryKeyedMap) IsSetSuccess() bool {
 }
 
 func (x *respSomeServiceBinaryKeyedMap) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
     if err := p.WriteFieldBegin("success", thrift.MAP, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }

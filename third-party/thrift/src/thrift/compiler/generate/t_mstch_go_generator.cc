@@ -583,6 +583,7 @@ class mstch_go_function : public mstch_function {
             {"function:ctx_arg_name", &mstch_go_function::ctx_arg_name},
             {"function:retval_field_name",
              &mstch_go_function::retval_field_name},
+            {"function:retval_nilable?", &mstch_go_function::is_retval_nilable},
         });
   }
   mstch::node go_name() { return go::get_go_func_name(function_); }
@@ -605,6 +606,11 @@ class mstch_go_function : public mstch_function {
       ctx_name = std::string("ctx") + std::to_string(++current_num);
     }
     return ctx_name;
+  }
+
+  mstch::node is_retval_nilable() {
+    auto real_type = function_->return_type()->get_true_type();
+    return go::is_type_go_nilable(real_type);
   }
 
   mstch::node retval_field_name() {

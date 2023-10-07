@@ -160,7 +160,7 @@ func (c *GetEntityChannelClient) GetEntity(ctx context.Context, r *GetEntityRequ
     if err != nil {
         return nil, err
     }
-    return out.Success, nil
+    return out.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetEntity(r *GetEntityRequest) (*GetEntityResponse, error) {
@@ -176,7 +176,7 @@ func (c *GetEntityChannelClient) GetBool(ctx context.Context) (bool, error) {
     if err != nil {
         return false, err
     }
-    return out.Success, nil
+    return out.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetBool() (bool, error) {
@@ -192,7 +192,7 @@ func (c *GetEntityChannelClient) GetByte(ctx context.Context) (int8, error) {
     if err != nil {
         return 0, err
     }
-    return out.Success, nil
+    return out.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetByte() (int8, error) {
@@ -208,7 +208,7 @@ func (c *GetEntityChannelClient) GetI16(ctx context.Context) (int16, error) {
     if err != nil {
         return 0, err
     }
-    return out.Success, nil
+    return out.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetI16() (int16, error) {
@@ -224,7 +224,7 @@ func (c *GetEntityChannelClient) GetI32(ctx context.Context) (int32, error) {
     if err != nil {
         return 0, err
     }
-    return out.Success, nil
+    return out.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetI32() (int32, error) {
@@ -240,7 +240,7 @@ func (c *GetEntityChannelClient) GetI64(ctx context.Context) (int64, error) {
     if err != nil {
         return 0, err
     }
-    return out.Success, nil
+    return out.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetI64() (int64, error) {
@@ -256,7 +256,7 @@ func (c *GetEntityChannelClient) GetDouble(ctx context.Context) (float64, error)
     if err != nil {
         return 0.0, err
     }
-    return out.Success, nil
+    return out.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetDouble() (float64, error) {
@@ -272,7 +272,7 @@ func (c *GetEntityChannelClient) GetString(ctx context.Context) (string, error) 
     if err != nil {
         return "", err
     }
-    return out.Success, nil
+    return out.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetString() (string, error) {
@@ -288,7 +288,7 @@ func (c *GetEntityChannelClient) GetBinary(ctx context.Context) ([]byte, error) 
     if err != nil {
         return nil, err
     }
-    return out.Success, nil
+    return out.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetBinary() ([]byte, error) {
@@ -304,7 +304,7 @@ func (c *GetEntityChannelClient) GetMap(ctx context.Context) (map[string]string,
     if err != nil {
         return nil, err
     }
-    return out.Success, nil
+    return out.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetMap() (map[string]string, error) {
@@ -320,7 +320,7 @@ func (c *GetEntityChannelClient) GetSet(ctx context.Context) ([]string, error) {
     if err != nil {
         return nil, err
     }
-    return out.Success, nil
+    return out.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetSet() ([]string, error) {
@@ -336,7 +336,7 @@ func (c *GetEntityChannelClient) GetList(ctx context.Context) ([]string, error) 
     if err != nil {
         return nil, err
     }
-    return out.Success, nil
+    return out.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetList() ([]string, error) {
@@ -355,7 +355,7 @@ func (c *GetEntityChannelClient) GetLegacyStuff(ctx context.Context, numPos int6
     if err != nil {
         return 0, err
     }
-    return out.Success, nil
+    return out.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetLegacyStuff(numPos int64, numNeg1 int64, numNeg2 int64) (int32, error) {
@@ -372,7 +372,7 @@ func (c *GetEntityChannelClient) GetCtxCollision(ctx1 context.Context, ctx int64
     if err != nil {
         return 0, err
     }
-    return out.Success, nil
+    return out.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetCtxCollision(ctx int64) (int32, error) {
@@ -390,7 +390,7 @@ func (c *GetEntityChannelClient) GetCtx1Collision(ctx2 context.Context, ctx int6
     if err != nil {
         return 0, err
     }
-    return out.Success, nil
+    return out.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetCtx1Collision(ctx int64, ctx1 int64) (int32, error) {
@@ -587,7 +587,7 @@ func (x *reqGetEntityGetEntity) String() string {
     return sb.String()
 }
 type respGetEntityGetEntity struct {
-    Success *GetEntityResponse `thrift:"success,0" json:"success" db:"success"`
+    Success *GetEntityResponse `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetEntity{}
@@ -596,8 +596,7 @@ var _ thrift.WritableResult = &respGetEntityGetEntity{}
 type GetEntityGetEntityResult = respGetEntityGetEntity
 
 func newRespGetEntityGetEntity() *respGetEntityGetEntity {
-    return (&respGetEntityGetEntity{}).
-        SetSuccessNonCompat(*NewGetEntityResponse())
+    return (&respGetEntityGetEntity{})
 }
 
 func (x *respGetEntityGetEntity) GetSuccessNonCompat() *GetEntityResponse {
@@ -874,7 +873,7 @@ func (x *reqGetEntityGetBool) String() string {
     return sb.String()
 }
 type respGetEntityGetBool struct {
-    Success bool `thrift:"success,0" json:"success" db:"success"`
+    Success *bool `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetBool{}
@@ -883,34 +882,45 @@ var _ thrift.WritableResult = &respGetEntityGetBool{}
 type GetEntityGetBoolResult = respGetEntityGetBool
 
 func newRespGetEntityGetBool() *respGetEntityGetBool {
-    return (&respGetEntityGetBool{}).
-        SetSuccessNonCompat(false)
+    return (&respGetEntityGetBool{})
 }
 
-func (x *respGetEntityGetBool) GetSuccessNonCompat() bool {
+func (x *respGetEntityGetBool) GetSuccessNonCompat() *bool {
     return x.Success
 }
 
 func (x *respGetEntityGetBool) GetSuccess() bool {
-    return x.Success
+    if !x.IsSetSuccess() {
+        return false
+    }
+
+    return *x.Success
 }
 
 func (x *respGetEntityGetBool) SetSuccessNonCompat(value bool) *respGetEntityGetBool {
+    x.Success = &value
+    return x
+}
+
+func (x *respGetEntityGetBool) SetSuccess(value *bool) *respGetEntityGetBool {
     x.Success = value
     return x
 }
 
-func (x *respGetEntityGetBool) SetSuccess(value bool) *respGetEntityGetBool {
-    x.Success = value
-    return x
+func (x *respGetEntityGetBool) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
 }
 
 func (x *respGetEntityGetBool) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
     if err := p.WriteFieldBegin("success", thrift.BOOL, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSuccessNonCompat()
+    item := *x.GetSuccessNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -932,8 +942,12 @@ if err != nil {
 }
 
 func (x *respGetEntityGetBool) toString0() string {  // Success
+    if x.IsSetSuccess() {
+        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+    }
     return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
+
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.
@@ -952,7 +966,7 @@ func newRespGetEntityGetBoolBuilder() *respGetEntityGetBoolBuilder {
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g newRespGetEntityGetBool().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetBoolBuilder) Success(value bool) *respGetEntityGetBoolBuilder {
+func (x *respGetEntityGetBoolBuilder) Success(value *bool) *respGetEntityGetBoolBuilder {
     x.obj.Success = value
     return x
 }
@@ -1140,7 +1154,7 @@ func (x *reqGetEntityGetByte) String() string {
     return sb.String()
 }
 type respGetEntityGetByte struct {
-    Success int8 `thrift:"success,0" json:"success" db:"success"`
+    Success *int8 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetByte{}
@@ -1149,34 +1163,45 @@ var _ thrift.WritableResult = &respGetEntityGetByte{}
 type GetEntityGetByteResult = respGetEntityGetByte
 
 func newRespGetEntityGetByte() *respGetEntityGetByte {
-    return (&respGetEntityGetByte{}).
-        SetSuccessNonCompat(0)
+    return (&respGetEntityGetByte{})
 }
 
-func (x *respGetEntityGetByte) GetSuccessNonCompat() int8 {
+func (x *respGetEntityGetByte) GetSuccessNonCompat() *int8 {
     return x.Success
 }
 
 func (x *respGetEntityGetByte) GetSuccess() int8 {
-    return x.Success
+    if !x.IsSetSuccess() {
+        return 0
+    }
+
+    return *x.Success
 }
 
 func (x *respGetEntityGetByte) SetSuccessNonCompat(value int8) *respGetEntityGetByte {
+    x.Success = &value
+    return x
+}
+
+func (x *respGetEntityGetByte) SetSuccess(value *int8) *respGetEntityGetByte {
     x.Success = value
     return x
 }
 
-func (x *respGetEntityGetByte) SetSuccess(value int8) *respGetEntityGetByte {
-    x.Success = value
-    return x
+func (x *respGetEntityGetByte) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
 }
 
 func (x *respGetEntityGetByte) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
     if err := p.WriteFieldBegin("success", thrift.BYTE, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSuccessNonCompat()
+    item := *x.GetSuccessNonCompat()
     if err := p.WriteByte(byte(item)); err != nil {
     return err
 }
@@ -1199,8 +1224,12 @@ if err != nil {
 }
 
 func (x *respGetEntityGetByte) toString0() string {  // Success
+    if x.IsSetSuccess() {
+        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+    }
     return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
+
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.
@@ -1219,7 +1248,7 @@ func newRespGetEntityGetByteBuilder() *respGetEntityGetByteBuilder {
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g newRespGetEntityGetByte().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetByteBuilder) Success(value int8) *respGetEntityGetByteBuilder {
+func (x *respGetEntityGetByteBuilder) Success(value *int8) *respGetEntityGetByteBuilder {
     x.obj.Success = value
     return x
 }
@@ -1407,7 +1436,7 @@ func (x *reqGetEntityGetI16) String() string {
     return sb.String()
 }
 type respGetEntityGetI16 struct {
-    Success int16 `thrift:"success,0" json:"success" db:"success"`
+    Success *int16 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetI16{}
@@ -1416,34 +1445,45 @@ var _ thrift.WritableResult = &respGetEntityGetI16{}
 type GetEntityGetI16Result = respGetEntityGetI16
 
 func newRespGetEntityGetI16() *respGetEntityGetI16 {
-    return (&respGetEntityGetI16{}).
-        SetSuccessNonCompat(0)
+    return (&respGetEntityGetI16{})
 }
 
-func (x *respGetEntityGetI16) GetSuccessNonCompat() int16 {
+func (x *respGetEntityGetI16) GetSuccessNonCompat() *int16 {
     return x.Success
 }
 
 func (x *respGetEntityGetI16) GetSuccess() int16 {
-    return x.Success
+    if !x.IsSetSuccess() {
+        return 0
+    }
+
+    return *x.Success
 }
 
 func (x *respGetEntityGetI16) SetSuccessNonCompat(value int16) *respGetEntityGetI16 {
+    x.Success = &value
+    return x
+}
+
+func (x *respGetEntityGetI16) SetSuccess(value *int16) *respGetEntityGetI16 {
     x.Success = value
     return x
 }
 
-func (x *respGetEntityGetI16) SetSuccess(value int16) *respGetEntityGetI16 {
-    x.Success = value
-    return x
+func (x *respGetEntityGetI16) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
 }
 
 func (x *respGetEntityGetI16) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
     if err := p.WriteFieldBegin("success", thrift.I16, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSuccessNonCompat()
+    item := *x.GetSuccessNonCompat()
     if err := p.WriteI16(item); err != nil {
     return err
 }
@@ -1465,8 +1505,12 @@ if err != nil {
 }
 
 func (x *respGetEntityGetI16) toString0() string {  // Success
+    if x.IsSetSuccess() {
+        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+    }
     return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
+
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.
@@ -1485,7 +1529,7 @@ func newRespGetEntityGetI16Builder() *respGetEntityGetI16Builder {
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g newRespGetEntityGetI16().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetI16Builder) Success(value int16) *respGetEntityGetI16Builder {
+func (x *respGetEntityGetI16Builder) Success(value *int16) *respGetEntityGetI16Builder {
     x.obj.Success = value
     return x
 }
@@ -1673,7 +1717,7 @@ func (x *reqGetEntityGetI32) String() string {
     return sb.String()
 }
 type respGetEntityGetI32 struct {
-    Success int32 `thrift:"success,0" json:"success" db:"success"`
+    Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetI32{}
@@ -1682,34 +1726,45 @@ var _ thrift.WritableResult = &respGetEntityGetI32{}
 type GetEntityGetI32Result = respGetEntityGetI32
 
 func newRespGetEntityGetI32() *respGetEntityGetI32 {
-    return (&respGetEntityGetI32{}).
-        SetSuccessNonCompat(0)
+    return (&respGetEntityGetI32{})
 }
 
-func (x *respGetEntityGetI32) GetSuccessNonCompat() int32 {
+func (x *respGetEntityGetI32) GetSuccessNonCompat() *int32 {
     return x.Success
 }
 
 func (x *respGetEntityGetI32) GetSuccess() int32 {
-    return x.Success
+    if !x.IsSetSuccess() {
+        return 0
+    }
+
+    return *x.Success
 }
 
 func (x *respGetEntityGetI32) SetSuccessNonCompat(value int32) *respGetEntityGetI32 {
+    x.Success = &value
+    return x
+}
+
+func (x *respGetEntityGetI32) SetSuccess(value *int32) *respGetEntityGetI32 {
     x.Success = value
     return x
 }
 
-func (x *respGetEntityGetI32) SetSuccess(value int32) *respGetEntityGetI32 {
-    x.Success = value
-    return x
+func (x *respGetEntityGetI32) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
 }
 
 func (x *respGetEntityGetI32) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
     if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSuccessNonCompat()
+    item := *x.GetSuccessNonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -1731,8 +1786,12 @@ if err != nil {
 }
 
 func (x *respGetEntityGetI32) toString0() string {  // Success
+    if x.IsSetSuccess() {
+        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+    }
     return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
+
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.
@@ -1751,7 +1810,7 @@ func newRespGetEntityGetI32Builder() *respGetEntityGetI32Builder {
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g newRespGetEntityGetI32().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetI32Builder) Success(value int32) *respGetEntityGetI32Builder {
+func (x *respGetEntityGetI32Builder) Success(value *int32) *respGetEntityGetI32Builder {
     x.obj.Success = value
     return x
 }
@@ -1939,7 +1998,7 @@ func (x *reqGetEntityGetI64) String() string {
     return sb.String()
 }
 type respGetEntityGetI64 struct {
-    Success int64 `thrift:"success,0" json:"success" db:"success"`
+    Success *int64 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetI64{}
@@ -1948,34 +2007,45 @@ var _ thrift.WritableResult = &respGetEntityGetI64{}
 type GetEntityGetI64Result = respGetEntityGetI64
 
 func newRespGetEntityGetI64() *respGetEntityGetI64 {
-    return (&respGetEntityGetI64{}).
-        SetSuccessNonCompat(0)
+    return (&respGetEntityGetI64{})
 }
 
-func (x *respGetEntityGetI64) GetSuccessNonCompat() int64 {
+func (x *respGetEntityGetI64) GetSuccessNonCompat() *int64 {
     return x.Success
 }
 
 func (x *respGetEntityGetI64) GetSuccess() int64 {
-    return x.Success
+    if !x.IsSetSuccess() {
+        return 0
+    }
+
+    return *x.Success
 }
 
 func (x *respGetEntityGetI64) SetSuccessNonCompat(value int64) *respGetEntityGetI64 {
+    x.Success = &value
+    return x
+}
+
+func (x *respGetEntityGetI64) SetSuccess(value *int64) *respGetEntityGetI64 {
     x.Success = value
     return x
 }
 
-func (x *respGetEntityGetI64) SetSuccess(value int64) *respGetEntityGetI64 {
-    x.Success = value
-    return x
+func (x *respGetEntityGetI64) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
 }
 
 func (x *respGetEntityGetI64) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
     if err := p.WriteFieldBegin("success", thrift.I64, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSuccessNonCompat()
+    item := *x.GetSuccessNonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -1997,8 +2067,12 @@ if err != nil {
 }
 
 func (x *respGetEntityGetI64) toString0() string {  // Success
+    if x.IsSetSuccess() {
+        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+    }
     return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
+
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.
@@ -2017,7 +2091,7 @@ func newRespGetEntityGetI64Builder() *respGetEntityGetI64Builder {
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g newRespGetEntityGetI64().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetI64Builder) Success(value int64) *respGetEntityGetI64Builder {
+func (x *respGetEntityGetI64Builder) Success(value *int64) *respGetEntityGetI64Builder {
     x.obj.Success = value
     return x
 }
@@ -2205,7 +2279,7 @@ func (x *reqGetEntityGetDouble) String() string {
     return sb.String()
 }
 type respGetEntityGetDouble struct {
-    Success float64 `thrift:"success,0" json:"success" db:"success"`
+    Success *float64 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetDouble{}
@@ -2214,34 +2288,45 @@ var _ thrift.WritableResult = &respGetEntityGetDouble{}
 type GetEntityGetDoubleResult = respGetEntityGetDouble
 
 func newRespGetEntityGetDouble() *respGetEntityGetDouble {
-    return (&respGetEntityGetDouble{}).
-        SetSuccessNonCompat(0.0)
+    return (&respGetEntityGetDouble{})
 }
 
-func (x *respGetEntityGetDouble) GetSuccessNonCompat() float64 {
+func (x *respGetEntityGetDouble) GetSuccessNonCompat() *float64 {
     return x.Success
 }
 
 func (x *respGetEntityGetDouble) GetSuccess() float64 {
-    return x.Success
+    if !x.IsSetSuccess() {
+        return 0.0
+    }
+
+    return *x.Success
 }
 
 func (x *respGetEntityGetDouble) SetSuccessNonCompat(value float64) *respGetEntityGetDouble {
+    x.Success = &value
+    return x
+}
+
+func (x *respGetEntityGetDouble) SetSuccess(value *float64) *respGetEntityGetDouble {
     x.Success = value
     return x
 }
 
-func (x *respGetEntityGetDouble) SetSuccess(value float64) *respGetEntityGetDouble {
-    x.Success = value
-    return x
+func (x *respGetEntityGetDouble) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
 }
 
 func (x *respGetEntityGetDouble) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
     if err := p.WriteFieldBegin("success", thrift.DOUBLE, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSuccessNonCompat()
+    item := *x.GetSuccessNonCompat()
     if err := p.WriteDouble(item); err != nil {
     return err
 }
@@ -2263,8 +2348,12 @@ if err != nil {
 }
 
 func (x *respGetEntityGetDouble) toString0() string {  // Success
+    if x.IsSetSuccess() {
+        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+    }
     return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
+
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.
@@ -2283,7 +2372,7 @@ func newRespGetEntityGetDoubleBuilder() *respGetEntityGetDoubleBuilder {
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g newRespGetEntityGetDouble().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetDoubleBuilder) Success(value float64) *respGetEntityGetDoubleBuilder {
+func (x *respGetEntityGetDoubleBuilder) Success(value *float64) *respGetEntityGetDoubleBuilder {
     x.obj.Success = value
     return x
 }
@@ -2471,7 +2560,7 @@ func (x *reqGetEntityGetString) String() string {
     return sb.String()
 }
 type respGetEntityGetString struct {
-    Success string `thrift:"success,0" json:"success" db:"success"`
+    Success *string `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetString{}
@@ -2480,34 +2569,45 @@ var _ thrift.WritableResult = &respGetEntityGetString{}
 type GetEntityGetStringResult = respGetEntityGetString
 
 func newRespGetEntityGetString() *respGetEntityGetString {
-    return (&respGetEntityGetString{}).
-        SetSuccessNonCompat("")
+    return (&respGetEntityGetString{})
 }
 
-func (x *respGetEntityGetString) GetSuccessNonCompat() string {
+func (x *respGetEntityGetString) GetSuccessNonCompat() *string {
     return x.Success
 }
 
 func (x *respGetEntityGetString) GetSuccess() string {
-    return x.Success
+    if !x.IsSetSuccess() {
+        return ""
+    }
+
+    return *x.Success
 }
 
 func (x *respGetEntityGetString) SetSuccessNonCompat(value string) *respGetEntityGetString {
+    x.Success = &value
+    return x
+}
+
+func (x *respGetEntityGetString) SetSuccess(value *string) *respGetEntityGetString {
     x.Success = value
     return x
 }
 
-func (x *respGetEntityGetString) SetSuccess(value string) *respGetEntityGetString {
-    x.Success = value
-    return x
+func (x *respGetEntityGetString) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
 }
 
 func (x *respGetEntityGetString) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
     if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSuccessNonCompat()
+    item := *x.GetSuccessNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -2529,8 +2629,12 @@ if err != nil {
 }
 
 func (x *respGetEntityGetString) toString0() string {  // Success
+    if x.IsSetSuccess() {
+        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+    }
     return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
+
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.
@@ -2549,7 +2653,7 @@ func newRespGetEntityGetStringBuilder() *respGetEntityGetStringBuilder {
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g newRespGetEntityGetString().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetStringBuilder) Success(value string) *respGetEntityGetStringBuilder {
+func (x *respGetEntityGetStringBuilder) Success(value *string) *respGetEntityGetStringBuilder {
     x.obj.Success = value
     return x
 }
@@ -2737,7 +2841,7 @@ func (x *reqGetEntityGetBinary) String() string {
     return sb.String()
 }
 type respGetEntityGetBinary struct {
-    Success []byte `thrift:"success,0" json:"success" db:"success"`
+    Success []byte `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetBinary{}
@@ -2746,8 +2850,7 @@ var _ thrift.WritableResult = &respGetEntityGetBinary{}
 type GetEntityGetBinaryResult = respGetEntityGetBinary
 
 func newRespGetEntityGetBinary() *respGetEntityGetBinary {
-    return (&respGetEntityGetBinary{}).
-        SetSuccessNonCompat([]byte(""))
+    return (&respGetEntityGetBinary{})
 }
 
 func (x *respGetEntityGetBinary) GetSuccessNonCompat() []byte {
@@ -2777,6 +2880,10 @@ func (x *respGetEntityGetBinary) IsSetSuccess() bool {
 }
 
 func (x *respGetEntityGetBinary) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
     if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3011,7 +3118,7 @@ func (x *reqGetEntityGetMap) String() string {
     return sb.String()
 }
 type respGetEntityGetMap struct {
-    Success map[string]string `thrift:"success,0" json:"success" db:"success"`
+    Success map[string]string `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetMap{}
@@ -3020,8 +3127,7 @@ var _ thrift.WritableResult = &respGetEntityGetMap{}
 type GetEntityGetMapResult = respGetEntityGetMap
 
 func newRespGetEntityGetMap() *respGetEntityGetMap {
-    return (&respGetEntityGetMap{}).
-        SetSuccessNonCompat(make(map[string]string))
+    return (&respGetEntityGetMap{})
 }
 
 func (x *respGetEntityGetMap) GetSuccessNonCompat() map[string]string {
@@ -3051,6 +3157,10 @@ func (x *respGetEntityGetMap) IsSetSuccess() bool {
 }
 
 func (x *respGetEntityGetMap) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
     if err := p.WriteFieldBegin("success", thrift.MAP, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3331,7 +3441,7 @@ func (x *reqGetEntityGetSet) String() string {
     return sb.String()
 }
 type respGetEntityGetSet struct {
-    Success []string `thrift:"success,0" json:"success" db:"success"`
+    Success []string `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetSet{}
@@ -3340,8 +3450,7 @@ var _ thrift.WritableResult = &respGetEntityGetSet{}
 type GetEntityGetSetResult = respGetEntityGetSet
 
 func newRespGetEntityGetSet() *respGetEntityGetSet {
-    return (&respGetEntityGetSet{}).
-        SetSuccessNonCompat(make([]string, 0))
+    return (&respGetEntityGetSet{})
 }
 
 func (x *respGetEntityGetSet) GetSuccessNonCompat() []string {
@@ -3371,6 +3480,10 @@ func (x *respGetEntityGetSet) IsSetSuccess() bool {
 }
 
 func (x *respGetEntityGetSet) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
     if err := p.WriteFieldBegin("success", thrift.SET, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -3634,7 +3747,7 @@ func (x *reqGetEntityGetList) String() string {
     return sb.String()
 }
 type respGetEntityGetList struct {
-    Success []string `thrift:"success,0" json:"success" db:"success"`
+    Success []string `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetList{}
@@ -3643,8 +3756,7 @@ var _ thrift.WritableResult = &respGetEntityGetList{}
 type GetEntityGetListResult = respGetEntityGetList
 
 func newRespGetEntityGetList() *respGetEntityGetList {
-    return (&respGetEntityGetList{}).
-        SetSuccessNonCompat(make([]string, 0))
+    return (&respGetEntityGetList{})
 }
 
 func (x *respGetEntityGetList) GetSuccessNonCompat() []string {
@@ -3674,6 +3786,10 @@ func (x *respGetEntityGetList) IsSetSuccess() bool {
 }
 
 func (x *respGetEntityGetList) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
     if err := p.WriteFieldBegin("success", thrift.LIST, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
@@ -4156,7 +4272,7 @@ func (x *reqGetEntityGetLegacyStuff) String() string {
     return sb.String()
 }
 type respGetEntityGetLegacyStuff struct {
-    Success int32 `thrift:"success,0" json:"success" db:"success"`
+    Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetLegacyStuff{}
@@ -4165,34 +4281,45 @@ var _ thrift.WritableResult = &respGetEntityGetLegacyStuff{}
 type GetEntityGetLegacyStuffResult = respGetEntityGetLegacyStuff
 
 func newRespGetEntityGetLegacyStuff() *respGetEntityGetLegacyStuff {
-    return (&respGetEntityGetLegacyStuff{}).
-        SetSuccessNonCompat(0)
+    return (&respGetEntityGetLegacyStuff{})
 }
 
-func (x *respGetEntityGetLegacyStuff) GetSuccessNonCompat() int32 {
+func (x *respGetEntityGetLegacyStuff) GetSuccessNonCompat() *int32 {
     return x.Success
 }
 
 func (x *respGetEntityGetLegacyStuff) GetSuccess() int32 {
-    return x.Success
+    if !x.IsSetSuccess() {
+        return 0
+    }
+
+    return *x.Success
 }
 
 func (x *respGetEntityGetLegacyStuff) SetSuccessNonCompat(value int32) *respGetEntityGetLegacyStuff {
+    x.Success = &value
+    return x
+}
+
+func (x *respGetEntityGetLegacyStuff) SetSuccess(value *int32) *respGetEntityGetLegacyStuff {
     x.Success = value
     return x
 }
 
-func (x *respGetEntityGetLegacyStuff) SetSuccess(value int32) *respGetEntityGetLegacyStuff {
-    x.Success = value
-    return x
+func (x *respGetEntityGetLegacyStuff) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
 }
 
 func (x *respGetEntityGetLegacyStuff) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
     if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSuccessNonCompat()
+    item := *x.GetSuccessNonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -4214,8 +4341,12 @@ if err != nil {
 }
 
 func (x *respGetEntityGetLegacyStuff) toString0() string {  // Success
+    if x.IsSetSuccess() {
+        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+    }
     return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
+
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.
@@ -4234,7 +4365,7 @@ func newRespGetEntityGetLegacyStuffBuilder() *respGetEntityGetLegacyStuffBuilder
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g newRespGetEntityGetLegacyStuff().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetLegacyStuffBuilder) Success(value int32) *respGetEntityGetLegacyStuffBuilder {
+func (x *respGetEntityGetLegacyStuffBuilder) Success(value *int32) *respGetEntityGetLegacyStuffBuilder {
     x.obj.Success = value
     return x
 }
@@ -4495,7 +4626,7 @@ func (x *reqGetEntityGetCtxCollision) String() string {
     return sb.String()
 }
 type respGetEntityGetCtxCollision struct {
-    Success int32 `thrift:"success,0" json:"success" db:"success"`
+    Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetCtxCollision{}
@@ -4504,34 +4635,45 @@ var _ thrift.WritableResult = &respGetEntityGetCtxCollision{}
 type GetEntityGetCtxCollisionResult = respGetEntityGetCtxCollision
 
 func newRespGetEntityGetCtxCollision() *respGetEntityGetCtxCollision {
-    return (&respGetEntityGetCtxCollision{}).
-        SetSuccessNonCompat(0)
+    return (&respGetEntityGetCtxCollision{})
 }
 
-func (x *respGetEntityGetCtxCollision) GetSuccessNonCompat() int32 {
+func (x *respGetEntityGetCtxCollision) GetSuccessNonCompat() *int32 {
     return x.Success
 }
 
 func (x *respGetEntityGetCtxCollision) GetSuccess() int32 {
-    return x.Success
+    if !x.IsSetSuccess() {
+        return 0
+    }
+
+    return *x.Success
 }
 
 func (x *respGetEntityGetCtxCollision) SetSuccessNonCompat(value int32) *respGetEntityGetCtxCollision {
+    x.Success = &value
+    return x
+}
+
+func (x *respGetEntityGetCtxCollision) SetSuccess(value *int32) *respGetEntityGetCtxCollision {
     x.Success = value
     return x
 }
 
-func (x *respGetEntityGetCtxCollision) SetSuccess(value int32) *respGetEntityGetCtxCollision {
-    x.Success = value
-    return x
+func (x *respGetEntityGetCtxCollision) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
 }
 
 func (x *respGetEntityGetCtxCollision) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
     if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSuccessNonCompat()
+    item := *x.GetSuccessNonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -4553,8 +4695,12 @@ if err != nil {
 }
 
 func (x *respGetEntityGetCtxCollision) toString0() string {  // Success
+    if x.IsSetSuccess() {
+        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+    }
     return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
+
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.
@@ -4573,7 +4719,7 @@ func newRespGetEntityGetCtxCollisionBuilder() *respGetEntityGetCtxCollisionBuild
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g newRespGetEntityGetCtxCollision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetCtxCollisionBuilder) Success(value int32) *respGetEntityGetCtxCollisionBuilder {
+func (x *respGetEntityGetCtxCollisionBuilder) Success(value *int32) *respGetEntityGetCtxCollisionBuilder {
     x.obj.Success = value
     return x
 }
@@ -4907,7 +5053,7 @@ func (x *reqGetEntityGetCtx1Collision) String() string {
     return sb.String()
 }
 type respGetEntityGetCtx1Collision struct {
-    Success int32 `thrift:"success,0" json:"success" db:"success"`
+    Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetCtx1Collision{}
@@ -4916,34 +5062,45 @@ var _ thrift.WritableResult = &respGetEntityGetCtx1Collision{}
 type GetEntityGetCtx1CollisionResult = respGetEntityGetCtx1Collision
 
 func newRespGetEntityGetCtx1Collision() *respGetEntityGetCtx1Collision {
-    return (&respGetEntityGetCtx1Collision{}).
-        SetSuccessNonCompat(0)
+    return (&respGetEntityGetCtx1Collision{})
 }
 
-func (x *respGetEntityGetCtx1Collision) GetSuccessNonCompat() int32 {
+func (x *respGetEntityGetCtx1Collision) GetSuccessNonCompat() *int32 {
     return x.Success
 }
 
 func (x *respGetEntityGetCtx1Collision) GetSuccess() int32 {
-    return x.Success
+    if !x.IsSetSuccess() {
+        return 0
+    }
+
+    return *x.Success
 }
 
 func (x *respGetEntityGetCtx1Collision) SetSuccessNonCompat(value int32) *respGetEntityGetCtx1Collision {
+    x.Success = &value
+    return x
+}
+
+func (x *respGetEntityGetCtx1Collision) SetSuccess(value *int32) *respGetEntityGetCtx1Collision {
     x.Success = value
     return x
 }
 
-func (x *respGetEntityGetCtx1Collision) SetSuccess(value int32) *respGetEntityGetCtx1Collision {
-    x.Success = value
-    return x
+func (x *respGetEntityGetCtx1Collision) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
 }
 
 func (x *respGetEntityGetCtx1Collision) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
     if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSuccessNonCompat()
+    item := *x.GetSuccessNonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -4965,8 +5122,12 @@ if err != nil {
 }
 
 func (x *respGetEntityGetCtx1Collision) toString0() string {  // Success
+    if x.IsSetSuccess() {
+        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+    }
     return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
+
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.
@@ -4985,7 +5146,7 @@ func newRespGetEntityGetCtx1CollisionBuilder() *respGetEntityGetCtx1CollisionBui
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g newRespGetEntityGetCtx1Collision().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respGetEntityGetCtx1CollisionBuilder) Success(value int32) *respGetEntityGetCtx1CollisionBuilder {
+func (x *respGetEntityGetCtx1CollisionBuilder) Success(value *int32) *respGetEntityGetCtx1CollisionBuilder {
     x.obj.Success = value
     return x
 }
@@ -5254,7 +5415,7 @@ func (p *procFuncGetEntityGetBool) RunContext(ctx context.Context, reqStruct thr
         return x, x
     }
 
-    result.Success = retval
+    result.Success = &retval
     return result, nil
 }
 
@@ -5305,7 +5466,7 @@ func (p *procFuncGetEntityGetByte) RunContext(ctx context.Context, reqStruct thr
         return x, x
     }
 
-    result.Success = retval
+    result.Success = &retval
     return result, nil
 }
 
@@ -5356,7 +5517,7 @@ func (p *procFuncGetEntityGetI16) RunContext(ctx context.Context, reqStruct thri
         return x, x
     }
 
-    result.Success = retval
+    result.Success = &retval
     return result, nil
 }
 
@@ -5407,7 +5568,7 @@ func (p *procFuncGetEntityGetI32) RunContext(ctx context.Context, reqStruct thri
         return x, x
     }
 
-    result.Success = retval
+    result.Success = &retval
     return result, nil
 }
 
@@ -5458,7 +5619,7 @@ func (p *procFuncGetEntityGetI64) RunContext(ctx context.Context, reqStruct thri
         return x, x
     }
 
-    result.Success = retval
+    result.Success = &retval
     return result, nil
 }
 
@@ -5509,7 +5670,7 @@ func (p *procFuncGetEntityGetDouble) RunContext(ctx context.Context, reqStruct t
         return x, x
     }
 
-    result.Success = retval
+    result.Success = &retval
     return result, nil
 }
 
@@ -5560,7 +5721,7 @@ func (p *procFuncGetEntityGetString) RunContext(ctx context.Context, reqStruct t
         return x, x
     }
 
-    result.Success = retval
+    result.Success = &retval
     return result, nil
 }
 
@@ -5816,7 +5977,7 @@ func (p *procFuncGetEntityGetLegacyStuff) RunContext(ctx context.Context, reqStr
         return x, x
     }
 
-    result.Success = retval
+    result.Success = &retval
     return result, nil
 }
 
@@ -5868,7 +6029,7 @@ func (p *procFuncGetEntityGetCtxCollision) RunContext(ctx context.Context, reqSt
         return x, x
     }
 
-    result.Success = retval
+    result.Success = &retval
     return result, nil
 }
 
@@ -5920,7 +6081,7 @@ func (p *procFuncGetEntityGetCtx1Collision) RunContext(ctx context.Context, reqS
         return x, x
     }
 
-    result.Success = retval
+    result.Success = &retval
     return result, nil
 }
 

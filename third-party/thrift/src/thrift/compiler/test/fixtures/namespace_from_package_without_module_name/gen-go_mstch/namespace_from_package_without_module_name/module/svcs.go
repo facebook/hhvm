@@ -132,7 +132,7 @@ func (c *TestServiceChannelClient) Init(ctx context.Context, int1 int64) (int64,
     if err != nil {
         return 0, err
     }
-    return out.Success, nil
+    return out.GetSuccess(), nil
 }
 
 func (c *TestServiceClient) Init(int1 int64) (int64, error) {
@@ -308,7 +308,7 @@ func (x *reqTestServiceInit) String() string {
     return sb.String()
 }
 type respTestServiceInit struct {
-    Success int64 `thrift:"success,0" json:"success" db:"success"`
+    Success *int64 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respTestServiceInit{}
@@ -317,34 +317,45 @@ var _ thrift.WritableResult = &respTestServiceInit{}
 type TestServiceInitResult = respTestServiceInit
 
 func newRespTestServiceInit() *respTestServiceInit {
-    return (&respTestServiceInit{}).
-        SetSuccessNonCompat(0)
+    return (&respTestServiceInit{})
 }
 
-func (x *respTestServiceInit) GetSuccessNonCompat() int64 {
+func (x *respTestServiceInit) GetSuccessNonCompat() *int64 {
     return x.Success
 }
 
 func (x *respTestServiceInit) GetSuccess() int64 {
-    return x.Success
+    if !x.IsSetSuccess() {
+        return 0
+    }
+
+    return *x.Success
 }
 
 func (x *respTestServiceInit) SetSuccessNonCompat(value int64) *respTestServiceInit {
+    x.Success = &value
+    return x
+}
+
+func (x *respTestServiceInit) SetSuccess(value *int64) *respTestServiceInit {
     x.Success = value
     return x
 }
 
-func (x *respTestServiceInit) SetSuccess(value int64) *respTestServiceInit {
-    x.Success = value
-    return x
+func (x *respTestServiceInit) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
 }
 
 func (x *respTestServiceInit) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
     if err := p.WriteFieldBegin("success", thrift.I64, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSuccessNonCompat()
+    item := *x.GetSuccessNonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -366,8 +377,12 @@ if err != nil {
 }
 
 func (x *respTestServiceInit) toString0() string {  // Success
+    if x.IsSetSuccess() {
+        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+    }
     return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
+
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.
@@ -386,7 +401,7 @@ func newRespTestServiceInitBuilder() *respTestServiceInitBuilder {
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g newRespTestServiceInit().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respTestServiceInitBuilder) Success(value int64) *respTestServiceInitBuilder {
+func (x *respTestServiceInitBuilder) Success(value *int64) *respTestServiceInitBuilder {
     x.obj.Success = value
     return x
 }
@@ -576,7 +591,7 @@ func (p *procFuncTestServiceInit) RunContext(ctx context.Context, reqStruct thri
         return x, x
     }
 
-    result.Success = retval
+    result.Success = &retval
     return result, nil
 }
 

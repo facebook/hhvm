@@ -163,6 +163,7 @@ func (p *{{> svc/proc_func_name}}) RunContext(ctx context.Context, reqStruct thr
         {{#function:exceptions}}
         case *{{#field:type}}{{> common/type}}{{/field:type}}:
             result.{{field:go_name}} = v
+            return result, nil
         {{/function:exceptions}}
         default:
             x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing doRaise: " + err.Error(), err)
@@ -176,7 +177,7 @@ func (p *{{> svc/proc_func_name}}) RunContext(ctx context.Context, reqStruct thr
     }
 
     {{^function:void?}}
-    result.{{function:retval_field_name}} = retval
+    result.{{function:retval_field_name}} = {{^function:retval_nilable?}}&{{/function:retval_nilable?}}retval
     {{/function:void?}}
     {{#function:oneway?}}
     return nil, nil

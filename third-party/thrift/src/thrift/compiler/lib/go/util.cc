@@ -482,7 +482,7 @@ std::vector<t_struct*> get_service_req_resp_structs(const t_service* service) {
     if (!func->return_type()->is_void()) {
       auto resp_field = std::make_unique<t_field>(
           func->return_type(), DEFAULT_RETVAL_FIELD_NAME, 0);
-      resp_field->set_qualifier(t_field_qualifier::none);
+      resp_field->set_qualifier(t_field_qualifier::optional);
       resp_struct->append_field(std::move(resp_field));
     }
     if (func->exceptions() != nullptr) {

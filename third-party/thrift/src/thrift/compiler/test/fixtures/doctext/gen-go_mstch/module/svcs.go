@@ -154,7 +154,7 @@ func (c *CChannelClient) Thing(ctx context.Context, a int32, b string, c []int32
     } else if out.Bang != nil {
         return "", out.Bang
     }
-    return out.Success, nil
+    return out.GetSuccess(), nil
 }
 
 func (c *CClient) Thing(a int32, b string, c []int32) (string, error) {
@@ -706,7 +706,7 @@ func (x *reqCThing) String() string {
     return sb.String()
 }
 type respCThing struct {
-    Success string `thrift:"success,0" json:"success" db:"success"`
+    Success *string `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
     Bang *Bang `thrift:"bang,1,optional" json:"bang,omitempty" db:"bang"`
 }
 // Compile time interface enforcer
@@ -716,16 +716,19 @@ var _ thrift.WritableResult = &respCThing{}
 type CThingResult = respCThing
 
 func newRespCThing() *respCThing {
-    return (&respCThing{}).
-        SetSuccessNonCompat("")
+    return (&respCThing{})
 }
 
-func (x *respCThing) GetSuccessNonCompat() string {
+func (x *respCThing) GetSuccessNonCompat() *string {
     return x.Success
 }
 
 func (x *respCThing) GetSuccess() string {
-    return x.Success
+    if !x.IsSetSuccess() {
+        return ""
+    }
+
+    return *x.Success
 }
 
 func (x *respCThing) GetBangNonCompat() *Bang {
@@ -741,11 +744,11 @@ func (x *respCThing) GetBang() *Bang {
 }
 
 func (x *respCThing) SetSuccessNonCompat(value string) *respCThing {
-    x.Success = value
+    x.Success = &value
     return x
 }
 
-func (x *respCThing) SetSuccess(value string) *respCThing {
+func (x *respCThing) SetSuccess(value *string) *respCThing {
     x.Success = value
     return x
 }
@@ -760,16 +763,24 @@ func (x *respCThing) SetBang(value *Bang) *respCThing {
     return x
 }
 
+func (x *respCThing) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
 func (x *respCThing) IsSetBang() bool {
     return x != nil && x.Bang != nil
 }
 
 func (x *respCThing) writeField0(p thrift.Protocol) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
     if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSuccessNonCompat()
+    item := *x.GetSuccessNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -822,12 +833,16 @@ if err != nil {
 }
 
 func (x *respCThing) toString0() string {  // Success
+    if x.IsSetSuccess() {
+        return fmt.Sprintf("%v", *x.GetSuccessNonCompat())
+    }
     return fmt.Sprintf("%v", x.GetSuccessNonCompat())
 }
 
 func (x *respCThing) toString1() string {  // Bang
     return fmt.Sprintf("%v", x.GetBangNonCompat())
 }
+
 
 // Deprecated: Use newRespCThing().GetBang() instead.
 func (x *respCThing) DefaultGetBang() *Bang {
@@ -854,7 +869,7 @@ func newRespCThingBuilder() *respCThingBuilder {
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g newRespCThing().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *respCThingBuilder) Success(value string) *respCThingBuilder {
+func (x *respCThingBuilder) Success(value *string) *respCThingBuilder {
     x.obj.Success = value
     return x
 }
@@ -1125,13 +1140,14 @@ func (p *procFuncCThing) RunContext(ctx context.Context, reqStruct thrift.Struct
         switch v := err.(type) {
         case *Bang:
             result.Bang = v
+            return result, nil
         default:
             x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing doRaise: " + err.Error(), err)
             return x, x
         }
     }
 
-    result.Success = retval
+    result.Success = &retval
     return result, nil
 }
 

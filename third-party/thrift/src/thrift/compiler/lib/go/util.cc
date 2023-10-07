@@ -366,16 +366,26 @@ bool is_go_reserved_word(const std::string& value) {
   return go_reserved_words.count(value) > 0;
 }
 
-bool is_type_nilable(const t_type* type) {
-  // Whether the underlying Go type can be set to 'nil'.
-  return type->is_list() || type->is_map() || type->is_set() ||
-      type->is_binary();
+bool is_type_go_struct(const t_type* type) {
+  // Whether the given Thrift type is represented by a Go struct:
+  //   * Thrift struct    - represented by Go struct pointer
+  //   * Thrift union     - represented by Go struct pointer
+  //   * Thrift exception - represented by Go struct pointer
+  return type->is_struct() || type->is_union() || type->is_exception();
 }
 
-bool is_type_go_struct(const t_type* type) {
-  // Whether the given Thrift type is represented by a Go struct in generated
-  // Go code.
-  return type->is_struct() || type->is_union() || type->is_exception();
+bool is_type_go_nilable(const t_type* type) {
+  // Whether the underlying Go type can be set to 'nil':
+  //   * Thrift list      - represented by Go slice  - nilable
+  //   * Thrift set       - represented by Go slice  - nilable
+  //   * Thrift binary    - represented by Go slice  - nilable
+  //   * Thrift map       - represented by Go map    - nilable
+  // Go struct backed types (see is_type_go_struct above):
+  //   * Thrift struct    - represented by Go struct pointer - nilable
+  //   * Thrift union     - represented by Go struct pointer - nilable
+  //   * Thrift exception - represented by Go struct pointer - nilable
+  return type->is_list() || type->is_set() || type->is_map() ||
+      type->is_binary() || is_type_go_struct(type);
 }
 
 bool is_type_go_comparable(

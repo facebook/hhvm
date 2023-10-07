@@ -226,8 +226,7 @@ class mstch_go_const : public mstch_const {
   // go)
   mstch::node go_is_var() {
     auto real_type = const_->type()->get_true_type();
-    return real_type->is_list() || real_type->is_map() || real_type->is_set() ||
-        go::is_type_go_struct(real_type);
+    return go::is_type_go_nilable(real_type);
   }
   mstch::node go_qualified_name() {
     auto prefix = data_.go_package_alias_prefix(const_->program());
@@ -327,13 +326,12 @@ class mstch_go_field : public mstch_field {
   }
   mstch::node is_nilable() {
     // Whether this field can be set to 'nil' in Go:
-    //  * Struct type fields can be set to 'nil' (see 'is_pointer' above)
+    //  * Fields of nilable Go types can be set to 'nil' (map/slice/struct)
     //  * Fields inside a union can be set to 'nil' ('is_pointer' above)
     //  * Optional fields can be set to 'nil' (see 'is_pointer' above)
-    //  * Fields represented by nilable Go types can be set to 'nil' (map/slice)
     auto real_type = field_->type()->get_true_type();
-    return go::is_type_go_struct(real_type) || is_inside_union_() ||
-        is_optional_() || go::is_type_nilable(real_type);
+    return go::is_type_go_nilable(real_type) || is_inside_union_() ||
+        is_optional_();
   }
   mstch::node must_be_set_to_serialize() {
     // Whether the field must be set (non-nil) in order to serialize:
@@ -401,9 +399,9 @@ class mstch_go_field : public mstch_field {
     //  * Optional fields are pointers.
     //     * Except (!!!) when the underlying type itself is nilable (map/slice)
     auto real_type = field_->type()->get_true_type();
-    return (go::is_type_go_struct(real_type) || is_inside_union_() ||
-            is_optional_()) &&
-        !go::is_type_nilable(real_type);
+    return go::is_type_go_struct(real_type) ||
+        ((is_inside_union_() || is_optional_()) &&
+         !go::is_type_go_nilable(real_type));
   }
 
   bool is_compat_setter_pointer_() {

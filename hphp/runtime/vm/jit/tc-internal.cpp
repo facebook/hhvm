@@ -45,11 +45,12 @@
 #include "hphp/runtime/vm/jit/write-lease.h"
 
 #include "hphp/util/disasm.h"
-#include "hphp/util/hash-map.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/util/trace.h"
+
+#include <tbb/concurrent_hash_map.h>
 
 #include <atomic>
 
@@ -139,9 +140,10 @@ bool canTranslate() {
     RuntimeOption::EvalJitGlobalTranslationLimit;
 }
 
-using FuncCounterMap =
-  folly_concurrent_hash_map_simd<FuncId::Int, uint32_t, int_hash<FuncId::Int>>;
-static FuncCounterMap* s_func_counters;
+using FuncCounterMap = tbb::concurrent_hash_map<FuncId, uint32_t,
+                                                FuncIdHashCompare>;
+static FuncCounterMap s_func_counters;
+
 
 static RDS_LOCAL_NO_CHECK(bool, s_jittingTimeLimitExceeded);
 
@@ -210,24 +212,12 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
   auto const isProf = kind == TransKind::Profile ||
                       kind == TransKind::ProfPrologue;
   if (isLive || isProf) {
-    auto const funcThreshold = isLive ? RO::EvalJitLiveThreshold
-                                      : RO::EvalJitProfileThreshold;
-    if (funcThreshold > 1) {
-      auto const key = func->getFuncId().toInt();
-      auto res = s_func_counters->insert(key, 1);
-      unsigned retries = 0;
-      while (!res.second && retries++ < 3) {
-        auto const currCount = res.first->second;
-        if (s_func_counters->assign_if_equal(key, currCount, currCount + 1)) {
-          break;
-        }
-        res.first = s_func_counters->find(key);
-        if (res.first == s_func_counters->end()) {
-          if (debug) assertx(0 && "key should still be in s_func_counters");
-          break;
-        }
-      }
-      if (res.first->second < funcThreshold) {
+    {
+      FuncCounterMap::accessor acc;
+      if (!s_func_counters.insert(acc, {func->getFuncId(), 1})) ++acc->second;
+      auto const funcThreshold = isLive ? RuntimeOption::EvalJitLiveThreshold
+                                        : RuntimeOption::EvalJitProfileThreshold;
+      if (acc->second < funcThreshold) {
         return TranslationResult::Scope::Transient;
       }
     }
@@ -262,14 +252,6 @@ TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind) {
   // Set a flag so we quickly bail from trying to generate new
   // translations next time.
   s_TCisFull.store(true, std::memory_order_relaxed);
-
-  Treadmill::enqueue([] {
-    if (s_func_counters) {
-      s_func_counters->clear();
-      delete s_func_counters;
-      s_func_counters = nullptr;
-    }
-  });
 
   if (main_under && !s_did_log.test_and_set() &&
       RuntimeOption::EvalProfBranchSampleFreq == 0) {
@@ -373,10 +355,6 @@ void processInit() {
 
   g_code = new(low_malloc(sizeof(CodeCache))) CodeCache();
   g_ustubs.emitAll(*g_code, *Debug::DebugInfo::Get());
-
-  if (RO::EvalJitProfileThreshold > 1 || RO::EvalJitLiveThreshold > 1) {
-    s_func_counters = new FuncCounterMap(RO::EvalPGOFuncCountHint * 8);
-  }
 
   // Write an .eh_frame section that covers the JIT portion of the TC.
   initUnwinder(g_code->base(), g_code->tcSize(),

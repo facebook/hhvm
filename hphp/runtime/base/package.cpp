@@ -315,7 +315,7 @@ bool PackageInfo::outsideActiveDeployment(const StringData* module) const {
   return false;
 }
 
-bool PackageInfo::outsideActiveDeployment(const Func& callee) const {
+bool PackageInfo::violatesDeploymentBoundary(const Func& callee) const {
   if (!RO::EvalEnforceDeployment) return false;
   if (RO::RepoAuthoritative) {
     return callee.unit()->isSoftDeployedRepoOnly();
@@ -323,7 +323,7 @@ bool PackageInfo::outsideActiveDeployment(const Func& callee) const {
   return outsideActiveDeployment(callee.moduleName());
 }
 
-bool PackageInfo::outsideActiveDeployment(const Class& cls) const {
+bool PackageInfo::violatesDeploymentBoundary(const Class& cls) const {
   if (!RO::EvalEnforceDeployment) return false;
   if (RO::RepoAuthoritative) {
     return cls.preClass()->unit()->isSoftDeployedRepoOnly();

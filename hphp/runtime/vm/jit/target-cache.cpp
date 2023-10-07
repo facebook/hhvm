@@ -298,7 +298,7 @@ handleStaticCall(const Class* cls, const StringData* name,
         return func;
       }
       if (RO::EvalEnforceDeployment &&
-          packageInfo.outsideActiveDeployment(*func)) {
+          packageInfo.violatesDeploymentBoundary(*func)) {
         // If we raised an exception, do not cache/smash the func.
         return func;
       }
@@ -334,7 +334,7 @@ handleStaticCall(const Class* cls, const StringData* name,
       return func;
     }
     if (RO::EvalEnforceDeployment &&
-        packageInfo.outsideActiveDeployment(*cls)) {
+        packageInfo.violatesDeploymentBoundary(*cls)) {
       // If we raised an exception, do not cache the func.
       return func;
     }

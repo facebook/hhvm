@@ -97,9 +97,8 @@ struct PackageInfo {
   bool moduleInASoftPackage(const StringData* module) const;
   bool isModuleSoftDeployed(const StringData* module) const;
 
-  bool outsideActiveDeployment(const StringData* module) const;
-  bool outsideActiveDeployment(const Func& callee) const;
-  bool outsideActiveDeployment(const Class& cls) const;
+  bool violatesDeploymentBoundary(const Func& callee) const;
+  bool violatesDeploymentBoundary(const Class& cls) const;
 
   std::string mangleForCacheKey() const;
 
@@ -114,6 +113,7 @@ struct PackageInfo {
   static PackageInfo defaults();
 
 private:
+  bool outsideActiveDeployment(const StringData* module) const;
   std::string findPackageInRange(const std::string& moduleName,
                                  size_t start, size_t end) const;
 

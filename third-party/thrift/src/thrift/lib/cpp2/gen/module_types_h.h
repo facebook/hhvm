@@ -300,7 +300,8 @@ template <class T, class List>
 FOLLY_INLINE_VARIABLE constexpr type::Ordinal FindOrdinalInUniqueTypes =
     FindOrdinal<T, List>::value;
 
-#ifdef __clang__
+#if defined(__clang__) && \
+    !defined(THRIFT_DISABLE_REFLECTION_MULTIWAY_LOOKUP_OPTIMIZATION)
 // For now only enable for __clang__ due to bugs in MSVC/GCC
 
 template <int>

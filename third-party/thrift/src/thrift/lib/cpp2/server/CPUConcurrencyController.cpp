@@ -75,8 +75,12 @@ CPUConcurrencyController::~CPUConcurrencyController() {
 void CPUConcurrencyController::setEventHandler(
     std::shared_ptr<EventHandler> eventHandler) {
   eventHandler_.withWLock(
-      [newEventHandler = std::move(eventHandler)](auto& eventHandler) {
+      [newEventHandler = std::move(eventHandler),
+       currentConfig = config()](auto& eventHandler) mutable {
         eventHandler = std::move(newEventHandler);
+        if (eventHandler) {
+          eventHandler->configUpdated(std::move(currentConfig));
+        }
       });
 }
 

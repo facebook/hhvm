@@ -921,7 +921,11 @@ void ProxygenServer::onRequest(std::shared_ptr<ProxygenTransport> transport) {
     m_httpServerSocket.reset();
     m_httpsServerSocket.reset();
     if (RuntimeOption::Server503OnShutdownAbort) {
-      transport->sendString("", 503);
+      if (RuntimeOption::Server503RetryAfterSeconds >= 0) {
+        transport->addHeader("Retry-After", folly::to<std::string>(
+              RuntimeOption::Server503RetryAfterSeconds).c_str());
+      }
+      transport->sendString("Service Unavailable", 503);
       transport->onSendEnd();
     } else {
       transport->abort();
@@ -941,7 +945,11 @@ void ProxygenServer::onRequest(std::shared_ptr<ProxygenTransport> transport) {
   } else {
     // VM is shutdown
     if (RuntimeOption::Server503OnShutdownAbort) {
-      transport->sendString("", 503);
+      if (RuntimeOption::Server503RetryAfterSeconds >= 0) {
+        transport->addHeader("Retry-After", folly::to<std::string>(
+              RuntimeOption::Server503RetryAfterSeconds).c_str());
+      }
+      transport->sendString("Service Unavailable", 503);
       transport->onSendEnd();
     } else {
       transport->abort();

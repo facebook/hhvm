@@ -776,6 +776,7 @@ bool RuntimeOption::ServerHarshShutdown = true;
 bool RuntimeOption::ServerEvilShutdown = true;
 bool RuntimeOption::ServerKillOnTimeout = true;
 bool RuntimeOption::Server503OnShutdownAbort = false;
+int RuntimeOption::Server503RetryAfterSeconds = -1;
 int RuntimeOption::ServerPreShutdownWait = 0;
 int RuntimeOption::ServerShutdownListenWait = 0;
 int RuntimeOption::ServerShutdownEOMWait = 0;
@@ -2316,6 +2317,8 @@ void RuntimeOption::Load(
     Config::Bind(CacheFreeFactor, ini, config, "Server.CacheFreeFactor", 50);
     if (CacheFreeFactor > 100) CacheFreeFactor = 100;
     if (CacheFreeFactor < 0) CacheFreeFactor = 0;
+    Config::Bind(Server503OnShutdownAbort, ini, config, "Server.503OnShutdownAbort", false);
+    Config::Bind(Server503RetryAfterSeconds, ini, config, "Server.503RetryAfterSeconds", -1);
 
     Config::Bind(ServerNextProtocols, ini, config, "Server.SSLNextProtocols");
     Config::Bind(ServerEnableH2C, ini, config, "Server.EnableH2C");

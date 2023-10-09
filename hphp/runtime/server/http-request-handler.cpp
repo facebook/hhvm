@@ -267,6 +267,10 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
     const timespec& queueTime = transport->getQueueTime();
 
     if (gettime_diff_us(queueTime, now) > requestTimeoutSeconds * 1000000LL) {
+      if (RuntimeOption::Server503RetryAfterSeconds >= 0) {
+        transport->addHeader("Retry-After", folly::to<std::string>(
+              RuntimeOption::Server503RetryAfterSeconds).c_str());
+      }
       transport->sendString("Service Unavailable", 503);
       transport->onSendEnd();
       m_requestTimedOutOnQueue->addValue(1);

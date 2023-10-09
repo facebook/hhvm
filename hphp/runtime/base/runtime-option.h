@@ -443,6 +443,7 @@ struct RuntimeOption {
   static bool ServerEvilShutdown;
   static bool ServerKillOnTimeout;
   static bool Server503OnShutdownAbort;
+  static int Server503RetryAfterSeconds;
   static int ServerPreShutdownWait;
   static int ServerShutdownListenWait;
   static int ServerShutdownEOMWait;

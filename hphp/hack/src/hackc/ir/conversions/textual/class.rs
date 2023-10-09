@@ -15,6 +15,7 @@ use std::sync::Arc;
 
 use anyhow::Error;
 use hash::IndexMap;
+use ir::LocalId;
 use itertools::Itertools;
 use log::trace;
 use naming_special_names_rust::special_idents;
@@ -27,6 +28,7 @@ use crate::mangle::FieldName;
 use crate::mangle::FunctionName;
 use crate::mangle::Intrinsic;
 use crate::mangle::TypeName;
+use crate::mangle::VarName;
 use crate::state::UnitState;
 use crate::textual::FieldAttribute;
 use crate::textual::TextualFile;
@@ -252,8 +254,9 @@ impl ClassState<'_, '_, '_> {
         let static_ty = static_ty(self.class.name);
         let ty = non_static_ty(self.class.name);
 
+        let this_lid = LocalId::Named(self.unit_state.strings.intern_str(special_idents::THIS));
         let params = vec![textual::Param {
-            name: special_idents::THIS.into(),
+            name: VarName::Local(this_lid),
             attr: None,
             ty: static_ty.into(),
         }];

@@ -3,7 +3,7 @@
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
 // TEST-CHECK-BAL: define Closure$basic1232.__construct
-// CHECK: define Closure$basic1232.__construct($this: *Closure$basic1232, b: *HackMixed, 0splice0: *HackMixed) : *HackMixed {
+// CHECK: define Closure$basic1232.__construct($this: *Closure$basic1232, b: *HackMixed, _0splice0: *HackMixed) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &b
 // CHECK:   n1: *HackMixed = load &$this

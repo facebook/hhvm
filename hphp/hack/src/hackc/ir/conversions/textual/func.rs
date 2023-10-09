@@ -82,30 +82,26 @@ pub(crate) fn compute_func_params<'a, 'b>(
 ) -> Result<Vec<(textual::Param<'b>, LocalId)>> {
     let mut result = Vec::new();
 
+    let this_lid = LocalId::Named(unit_state.strings.intern_str(special_idents::THIS));
     // Prepend the 'this' parameter.
     let this_param = textual::Param {
-        name: special_idents::THIS.into(),
+        name: VarName::Local(this_lid),
         attr: None,
         ty: this_ty.into(),
     };
-    let this_lid = LocalId::Named(unit_state.strings.intern_str(special_idents::THIS));
     result.push((this_param, this_lid));
 
     for p in params {
-        let name_bytes = unit_state.strings.lookup_bytes(p.name);
-        let name = util::escaped_string(&name_bytes);
-
         let mut attr = Vec::new();
         if p.is_variadic {
             attr.push(textual::VARIADIC);
         }
-
+        let lid = LocalId::Named(p.name);
         let param = textual::Param {
-            name: name.to_string().into(),
+            name: VarName::Local(lid),
             attr: Some(attr.into_boxed_slice()),
             ty: convert_ty(&p.ty.enforced, &unit_state.strings).into(),
         };
-        let lid = LocalId::Named(p.name);
         result.push((param, lid));
     }
 
@@ -406,10 +402,12 @@ fn write_instance_stub(
                 FunctionName::method(method_info.class.name, IsStatic::Static, method_info.name);
 
             let params: Vec<Sid> = std::iter::once(Ok(static_this))
-                .chain(tx_params.iter().skip(1).map(|param| {
-                    let lid = LocalId::Named(strings.intern_str(param.name.as_ref()));
-                    fb.load(&param.ty, textual::Expr::deref(lid))
-                }))
+                .chain(
+                    tx_params
+                        .iter()
+                        .skip(1)
+                        .map(|param| fb.load(&param.ty, textual::Expr::deref(param.name.clone()))),
+                )
                 .try_collect()?;
 
             let call = fb.call(&target, params)?;

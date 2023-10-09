@@ -157,7 +157,11 @@ impl TextualFile<'_> {
 
         let mut sep = "";
         for param in params {
-            write!(self.w, "{sep}{name}: ", name = param.name,)?;
+            write!(
+                self.w,
+                "{sep}{name}: ",
+                name = param.name.display(&self.strings),
+            )?;
             if let Some(attrs) = param.attr.as_ref() {
                 for attr in attrs.iter() {
                     write!(self.w, "{attr} ")?;
@@ -313,19 +317,23 @@ impl TextualFile<'_> {
         )?;
 
         const THIS_NAME: &str = "this";
-        const VARARGS_NAME: &str = "args";
+        let this_lid = LocalId::Named(self.strings.intern_str(THIS_NAME));
         let this_ty = Ty::Type(curry_ty.clone());
         let this_ty_ptr = Ty::named_type_ptr(curry_ty.clone());
+
+        const VARARGS_NAME: &str = "args";
+        let varargs_lid = LocalId::Named(self.strings.intern_str(VARARGS_NAME));
         let args_ty = Ty::SpecialPtr(SpecialTy::Vec);
+
         let params = vec![
             // ignored 'this' parameter
             Param {
-                name: THIS_NAME.into(),
+                name: VarName::Local(this_lid),
                 attr: None,
                 ty: (&this_ty_ptr).into(),
             },
             Param {
-                name: VARARGS_NAME.into(),
+                name: VarName::Local(varargs_lid),
                 attr: Some(vec![VARIADIC].into_boxed_slice()),
                 ty: (&args_ty).into(),
             },
@@ -1490,7 +1498,7 @@ pub(crate) struct Field<'a> {
 
 #[derive(Clone)]
 pub(crate) struct Param<'a> {
-    pub name: Cow<'a, str>,
+    pub name: VarName,
     pub attr: Option<Box<[&'a str]>>,
     pub ty: Cow<'a, Ty>,
 }

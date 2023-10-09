@@ -172,7 +172,7 @@ void KeyOrder::ReleaseProfilingKeyOrders() {
 }
 
 KeyOrder collectKeyOrder(const KeyOrderMap& keyOrderMap) {
-  std::unordered_set<const StringData*> keys;
+  hphp_fast_set<const StringData*> keys;
   uint64_t weightedSizeSum = 0;
   uint64_t weight = 0;
   for (auto const& pair : keyOrderMap) {
@@ -197,6 +197,7 @@ KeyOrder collectKeyOrder(const KeyOrderMap& keyOrderMap) {
   }
 
   KeyOrderData sorted;
+  sorted.reserve(keys.size());
   for (auto const key : keys) {
     sorted.push_back(key);
   }

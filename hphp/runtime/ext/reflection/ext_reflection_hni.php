@@ -1594,6 +1594,15 @@ class ReflectionClass implements Reflector {
   }
 
   /**
+   * Gets the name of the required class for a trait.
+   *
+   * @return  Null if there are no require class requirement or the
+   *          string name of the class required by the require class statement
+   */
+  <<__Native>>
+  public function getRequiredClass()[]: ?string;
+
+  /**
    * ( excerpt from
    * http://php.net/manual/en/reflectionclass.gettraitnames.php )
    *

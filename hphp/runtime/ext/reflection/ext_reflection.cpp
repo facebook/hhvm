@@ -1435,6 +1435,37 @@ static Array HHVM_METHOD(ReflectionClass, getRequirementNames) {
   return pai.toArray();
 }
 
+static Variant HHVM_METHOD(ReflectionClass, getRequiredClass) {
+  auto const cls = ReflectionClassHandle::GetClassFor(this_);
+  if (!isTrait(cls)) {
+    // require class only applies to traits
+    return init_null_variant;
+  }
+
+  auto const& requirements = cls->allRequirements();
+  if (requirements.empty()) {
+    return init_null_variant;
+  }
+
+  auto const& requirementsRange = requirements.range();
+
+  assertx(
+    std::count_if(
+      requirementsRange.begin(),
+      requirementsRange.end(),
+      [](auto const& req) {
+        return req->kind() == PreClass::RequirementKind::RequirementClass;
+      }) <= 1
+  );
+
+  for (auto const& req: requirementsRange) {
+    if (req->kind() == PreClass::RequirementKind::RequirementClass) {
+      return String::attach(const_cast<StringData*>(req->name()));
+    }
+  }
+  return init_null_variant;
+}
+
 static Array HHVM_METHOD(ReflectionClass, getInterfaceNames) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
 
@@ -2421,6 +2452,7 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionClass, getDocComment);
     HHVM_ME(ReflectionClass, getInterfaceNames);
     HHVM_ME(ReflectionClass, getRequirementNames);
+    HHVM_ME(ReflectionClass, getRequiredClass);
     HHVM_ME(ReflectionClass, getTraitNames);
     HHVM_ME(ReflectionClass, getModule);
 

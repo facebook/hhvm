@@ -714,36 +714,34 @@ Refer to [Interactions](/fb/features/interactions.md) for more information.
 
 ### Constants
 
-A constant definition introduces a named contant into your program and has the following form:
+A constant definition introduces a named constant into your program and has the following form:
 
 ```grammar
 constant_definition ::=
-  [annotations] "const" type identifier "=" constant [";"]
-```
+  [annotations] "const" type identifier "=" initializer [";"]
 
-The constant name can be used instead of the value after the completion of the constant definition and in other Thrift files that include this Thrift file.
-
-```grammar
-constant ::=
+initializer ::=
   integer
 | float
 | string_literal
 | bool_literal
 | maybe_qualified_id
-| list_constant
-| map_constant
+| list_initializer
+| map_initializer
 
 integer ::=  ["+" | "-"] int_literal
 float   ::=  ["+" | "-"] float_literal
 ```
 
-A constant can be one of the following:
+The constant name can be used instead of the value after the completion of the constant definition and in other Thrift files that include this Thrift file.
+
+A constant can be initialized with one of the following:
 
 * A literal, with numeric literals optionally preceded with a sign
 * A name of another constant
-* A list or map constant
+* A list or map initializer
 
-#### Literal Constants
+Examples of constants initialized with literals:
 
 ```thrift
 const bool FLAG = true;
@@ -754,9 +752,14 @@ const double E = 2.718281828459;
 const string DATE = "June 28, 2017";
 ```
 
-#### Name Constants
+Most initializers don't have exact types on their own. Instead their types are inferred from context. For example, `[1, 2, 3]` can be used to initialize a constant of type `list<i16>`, `list<i32>` or other compatible type:
 
-Name constants can be one of:
+```thrift
+const list<i32> BIG = [1, 2, 3];
+const list<i16> LITTLE = [1, 2, 3];
+```
+
+A name referring to a constant can be one of:
 
 * An identifier that denotes a constant defined in the same Thrift file.
 * A qualified name of the form `filename.constname` where `filename` and `constname` are identifiers, and `constname` denotes a constant defined in the Thrift file denoted by `filename`.
@@ -770,11 +773,11 @@ const Gender NAN = Gender.MALE
 const search_types.Gender NV = search_types.Gender.FEMALE
 ```
 
-#### List and Map Constants
+#### List and Map Initializers
 
 ```
-list_constant ::=  "[" (constant delimiter)* "]"
-map_constant  ::=  "{" (constant ":" constant)* "}"
+list_initializer ::=  "[" (initializer delimiter)* "]"
+map_initializer  ::=  "{" (initializer ":" initializer)* "}"
 ```
 
 Constants can also be of list, set, or map types.
@@ -853,7 +856,7 @@ The element, key, and value types can be any Thrift type, including nested conta
 ## Default Values
 
 ```
-default_value ::=  "=" Constant
+default_value ::=  "=" initializer
 ```
 
 All fields of struct types and exception types have a default value. This is either explicitly provided via the syntax shown above, or (if not explicitly provided) is the natural default value for that type. The natural default values for listed below:

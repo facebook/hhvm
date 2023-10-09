@@ -198,6 +198,9 @@ type si_env = {
   (* CustomSearchService *)
   glean_reponame: string;
   glean_handle: Glean.handle option;
+  sie_common_prefixes:
+    (SearchTypes.si_item list * SearchTypes.si_complete) SMap.t;
+  autocomplete_cache: bool;
 }
 
 (* Default provider with no functionality *)
@@ -220,6 +223,8 @@ let default_si_env =
     (* CustomSearchService *)
     glean_reponame = "";
     glean_handle = None;
+    sie_common_prefixes = SMap.empty;
+    autocomplete_cache = false;
   }
 
 (* Default provider, but no logging *)

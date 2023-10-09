@@ -489,7 +489,8 @@ size_t calculateECHPadding(
   auto sni = getExtension<ServerNameList>(chlo.extensions);
   if (sni) {
     // Add max(0, maxLen - len(server_name))
-    size_t sniLen = sni->server_name_list[0].hostname->computeChainDataLength();
+    size_t sniLen =
+        sni->server_name_list.at(0).hostname->computeChainDataLength();
     if (sniLen < maxLen) {
       padding = maxLen - sniLen;
     }

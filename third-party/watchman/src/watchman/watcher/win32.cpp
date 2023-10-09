@@ -236,9 +236,8 @@ void WinWatcher::readChangesThread(const std::shared_ptr<Root>& root) {
         }
 
         if (err == ERROR_NOTIFY_ENUM_DIR) {
-          logf(
-              ERR,
-              "GetOverlappedResult failed with ERROR_NOTIFY_ENUM_DIR, recrawling.\n");
+          root->recrawlTriggered(
+              "GetOverlappedResult failed with ERROR_NOTIFY_ENUM_DIR");
           items.emplace_back(
               w_string{root->root_path},
               PendingFlags{W_PENDING_IS_DESYNCED | W_PENDING_RECURSIVE});
@@ -249,7 +248,7 @@ void WinWatcher::readChangesThread(const std::shared_ptr<Root>& root) {
         }
       } else {
         if (bytes == 0) {
-          logf(ERR, "ReadDirectoryChangesW overflowed, recrawling.\n");
+          root->recrawlTriggered("ReadDirectoryChangesW overflowed");
           items.emplace_back(
               w_string{root->root_path},
               PendingFlags{W_PENDING_IS_DESYNCED | W_PENDING_RECURSIVE});

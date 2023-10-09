@@ -1857,7 +1857,6 @@ dependencies = [
  "oxidized_by_ref",
  "pretty_assertions",
  "serde",
- "serde_derive",
  "serde_json",
  "sha1",
 ]

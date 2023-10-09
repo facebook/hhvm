@@ -22,10 +22,10 @@ use oxidized_by_ref::typing_defs::UserAttributeParam;
 use serde::de::SeqAccess;
 use serde::de::Visitor;
 use serde::ser::SerializeSeq;
+use serde::Deserialize;
 use serde::Deserializer;
+use serde::Serialize;
 use serde::Serializer;
-use serde_derive::Deserialize;
-use serde_derive::Serialize;
 use serde_json::json;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -577,6 +577,16 @@ fn to_facts_attributes<'a>(attributes: &'a [&'a UserAttribute<'a>]) -> Attribute
             }
         })
         .collect::<Attributes>()
+}
+
+/// A wrapper to group together a Facts object with the sha1 hash of the source
+/// file from which it was parsed.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct FactsSha1 {
+    pub facts: Facts,
+
+    /// Sha1 digest of source file from which we parsed these facts.
+    pub sha1sum: String,
 }
 
 // inline tests (so stuff can remain hidden) - compiled only when tests are run (no overhead)

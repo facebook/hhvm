@@ -126,9 +126,11 @@ fn sequentialise_stmt(
 
 impl LiftAwait {
     fn gen_tmp_local(&mut self) -> LocalId {
-        let name = special_idents::TMP_VAR_PREFIX.to_string()
-            + "lift_await"
-            + &self.tmp_var_counter.to_string();
+        let name = format!(
+            "{}lift_await{}",
+            special_idents::TMP_VAR_PREFIX,
+            self.tmp_var_counter
+        );
         self.tmp_var_counter += 1;
         (0, name)
     }
@@ -485,9 +487,11 @@ impl<'a> VisitorMut<'a> for LiftAwait {
                 sequentialise_stmt(&pos, elem, stmt_, con, seq, tmps);
                 Ok(())
             }
-            Stmt_::DeclareLocal(_) => todo!(), // elaborate typed locals before lifting awaits
-            Stmt_::Block(_)
+            Stmt_::DeclareLocal(_) => {
+                panic!("Typed local should be elaborated before await lifting")
+            } // elaborate typed locals before lifting awaits
             // await cannot appear in expression in do or while (parse error)
+            Stmt_::Block(_)
             | Stmt_::Do(_)
             | Stmt_::While(_)
             | Stmt_::Try(_)
@@ -506,10 +510,95 @@ impl<'a> VisitorMut<'a> for LiftAwait {
                 *elem = Stmt(pos, stmt_);
                 Ok(())
             }
-            // The lowerer converts concurrent statements to Awaitall when hackc
-            // is going to generate bytecode (instead of type checking/TAST
-            // generating), which is the only case we should be lifting awaits.
-            | Stmt_::Concurrent(_) => panic!("Concurrent statement in lift_await"),
+            Stmt_::Concurrent(Block(stmts)) => {
+                for stmt in stmts.iter_mut() {
+                    match stmt {
+                        Stmt(_, Stmt_::Expr(box expr)) => {
+                            expr.accept(env, self.object())?;
+                            let is_await = expr.2.is_await();
+                            self.extract_await(expr, &mut con, &mut seq, &mut tmps);
+                            if is_await {
+                                expr.2 = Expr_::Null;
+                            }
+                        }
+                        _ => panic!(
+                            "Concurrent block contains a statement that is not an expression-statement."
+                        ),
+                    }
+                }
+                let scope = con
+                    .iter()
+                    .map(|lifted_await| lifted_await.0.clone())
+                    .collect();
+                let mut tmp_vars = con.iter().map(|lifted_await| &lifted_await.0.1);
+                let mut body_stmts = vec![];
+                let mut assign_stmts = vec![];
+                for n in stmts.drain(..) {
+                    if !n.is_assign_expr() {
+                        if n.is_null_expr() {
+                            tmp_vars.next();
+                        }
+                        body_stmts.push(n.clone());
+                        continue;
+                    }
+                    if let Stmt(
+                        p1,
+                        Stmt_::Expr(box Expr(
+                            (),
+                            p2,
+                            Expr_::Binop(box Binop {
+                                bop: Bop::Eq(op),
+                                lhs: e1,
+                                rhs: e2,
+                            }),
+                        )),
+                    ) = n
+                    {
+                        let tv = match tmp_vars.next() {
+                            Some(tv) => tv,
+                            None => continue,
+                        };
+                        let tmp_n = Expr::mk_lvar(&e2.1, &(tv.1));
+                        if tmp_n.lvar_name() != e2.lvar_name() {
+                            let new_n = Stmt::new(
+                                p1.clone(),
+                                Stmt_::Expr(Box::new(Expr::new(
+                                    (),
+                                    p2.clone(),
+                                    Expr_::mk_binop(Binop {
+                                        bop: Bop::Eq(None),
+                                        lhs: tmp_n.clone(),
+                                        rhs: e2.clone(),
+                                    }),
+                                ))),
+                            );
+                            body_stmts.push(new_n);
+                        }
+                        let assign_stmt = Stmt::new(
+                            p1.clone(),
+                            Stmt_::Expr(Box::new(Expr::new(
+                                (),
+                                p2,
+                                Expr_::mk_binop(Binop {
+                                    bop: Bop::Eq(op),
+                                    lhs: e1,
+                                    rhs: tmp_n,
+                                }),
+                            ))),
+                        );
+                        assign_stmts.push(assign_stmt);
+                    }
+                }
+                body_stmts.append(&mut assign_stmts);
+                let stmt = Stmt::new(pos.clone(), Stmt_::mk_block(None, Block(body_stmts)));
+                let awaitall_stmt =
+                    Stmt::new(pos.clone(), Stmt_::mk_awaitall(con, Block(vec![stmt])));
+                *elem = Stmt::new(
+                    pos,
+                    Stmt_::mk_block(Some(scope), Block(vec![awaitall_stmt])),
+                );
+                Ok(())
+            }
         }
     }
 }

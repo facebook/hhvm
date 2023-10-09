@@ -8,7 +8,6 @@ use std::cell::Ref;
 use std::cell::RefCell;
 use std::cell::RefMut;
 use std::matches;
-use std::mem;
 use std::rc::Rc;
 use std::slice::Iter;
 use std::str::FromStr;
@@ -81,8 +80,6 @@ fn unescape_single(s: &str) -> Result<BString, escaper::InvalidString> {
 fn unescape_nowdoc(s: &str) -> Result<BString, escaper::InvalidString> {
     Ok(escaper::unescape_nowdoc(s)?.into())
 }
-
-type LiftedAwaitExprs = Vec<(ast::Lid, ast::Expr)>;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum ExprLocation {
@@ -185,16 +182,12 @@ pub struct Env<'a> {
     pub empty_ns_env: Arc<NamespaceEnv>,
 
     pub saw_yield: bool, /* Information flowing back up */
-    pub lifted_awaits: Option<LiftedAwaitExprs>,
-    pub tmp_var_counter: isize,
 
     pub indexed_source_text: &'a IndexedSourceText<'a>,
     pub parser_options: &'a GlobalOptions,
 
     pub token_factory: PositionedTokenFactory<'a>,
     pub arena: &'a Bump,
-
-    pub lift_awaits: bool,
 
     state: Rc<RefCell<State>>,
 }
@@ -218,15 +211,12 @@ impl<'a> Env<'a> {
             file_mode: mode,
             top_level_statements: true,
             saw_yield: false,
-            lifted_awaits: None,
-            tmp_var_counter: 1,
             indexed_source_text,
             parser_options,
             pos_none: Pos::NONE,
             empty_ns_env: namespace_env,
             token_factory,
             arena,
-            lift_awaits: false,
 
             state: Rc::new(RefCell::new(State {
                 cls_generics: HashMap::default(),
@@ -329,12 +319,6 @@ impl<'a> Env<'a> {
 
     fn pop_docblock(&mut self) {
         RefMut::map(self.state.borrow_mut(), |s| &mut s.doc_comments).pop();
-    }
-
-    fn make_tmp_var_name(&mut self) -> String {
-        let name = String::from(special_idents::TMP_VAR_PREFIX) + &self.tmp_var_counter.to_string();
-        self.tmp_var_counter += 1;
-        name
     }
 
     fn mk_none_pos(&self) -> Pos {
@@ -1644,7 +1628,7 @@ fn p_expr_impl<'a>(
             p_obj_get(location, &c.object, &c.operator, &c.name, env)
         }
         PrefixUnaryExpression(_) | PostfixUnaryExpression(_) | DecoratedExpression(_) => {
-            p_pre_post_unary_decorated_expr(node, env, pos, location)
+            p_pre_post_unary_decorated_expr(node, env, pos)
         }
         BinaryExpression(c) => p_binary_expr(c, env, pos, location),
         Token(t) => p_token(node, t, env, location),
@@ -1923,12 +1907,7 @@ fn p_inclusion_expr<'a>(
     ))
 }
 
-fn p_pre_post_unary_decorated_expr<'a>(
-    node: S<'a>,
-    env: &mut Env<'a>,
-    pos: Pos,
-    location: ExprLocation,
-) -> Result<Expr_> {
+fn p_pre_post_unary_decorated_expr<'a>(node: S<'a>, env: &mut Env<'a>, pos: Pos) -> Result<Expr_> {
     let (operand, op, postfix) = match &node.children {
         PrefixUnaryExpression(c) => (&c.operand, &c.operator, false),
         PostfixUnaryExpression(c) => (&c.operand, &c.operator, true),
@@ -1967,7 +1946,7 @@ fn p_pre_post_unary_decorated_expr<'a>(
             Some(TK::Tilde) => mk_unop(Utild, expr),
             Some(TK::Plus) => mk_unop(Uplus, expr),
             Some(TK::Minus) => mk_unop(Uminus, expr),
-            Some(TK::Await) => Ok(lift_await(pos, expr, env, location)),
+            Some(TK::Await) => Ok(Expr_::mk_await(expr)),
             Some(TK::Readonly) => Ok(process_readonly_expr(expr)),
             Some(TK::Clone) => Ok(Expr_::mk_clone(expr)),
             Some(TK::Print) => Ok(Expr_::mk_call(ast::CallExpr {
@@ -2774,83 +2753,6 @@ fn handle_loop_body<'a>(pos: Pos, node: S<'a>, env: &mut Env<'a>) -> Result<ast:
     Ok(ast::Stmt::new(pos, ast::Stmt_::mk_block(None, body)))
 }
 
-fn with_new_nonconcurrent_scope<'a, F, R>(env: &mut Env<'a>, f: F) -> R
-where
-    F: FnOnce(&mut Env<'a>) -> R,
-{
-    let saved_lift_awaits = env.lift_awaits;
-    env.lift_awaits = false;
-    let saved_lifted_awaits = env.lifted_awaits.take();
-    let result = f(env);
-    env.lifted_awaits = saved_lifted_awaits;
-    env.lift_awaits = saved_lift_awaits;
-    result
-}
-
-fn with_new_concurrent_scope<'a, F, R>(env: &mut Env<'a>, f: F) -> Result<(LiftedAwaitExprs, R)>
-where
-    F: FnOnce(&mut Env<'a>) -> Result<R>,
-{
-    let saved_lifted_awaits = env.lifted_awaits.replace(vec![]);
-    let old_lift_awaits = env.lift_awaits;
-    env.lift_awaits = true;
-    let result = f(env);
-    env.lift_awaits = old_lift_awaits;
-    let lifted_awaits = mem::replace(&mut env.lifted_awaits, saved_lifted_awaits);
-    let result = result?;
-    let awaits = match lifted_awaits {
-        Some(la) => process_lifted_awaits(la, env)?,
-        None => parsing_error("lifted awaits should not be None", env.mk_none_pos())?,
-    };
-    Ok((awaits, result))
-}
-
-fn process_lifted_awaits<'a>(
-    mut awaits: LiftedAwaitExprs,
-    env: &mut Env<'a>,
-) -> Result<LiftedAwaitExprs> {
-    for await_ in awaits.iter() {
-        if (await_.1).1.is_none() {
-            return parsing_error("none pos in lifted awaits", env.mk_none_pos());
-        }
-    }
-    awaits.sort_unstable_by(|a1, a2| Pos::cmp(&(a1.1).1, &(a2.1).1));
-    Ok(awaits)
-}
-
-fn lift_await<'a>(
-    parent_pos: Pos,
-    expr: ast::Expr,
-    env: &mut Env<'a>,
-    location: ExprLocation,
-) -> Expr_ {
-    use ExprLocation::AsStatement;
-    use ExprLocation::RightOfAssignmentInUsingStatement;
-    use ExprLocation::UsingStatement;
-    if !env.lift_awaits {
-        return Expr_::mk_await(expr);
-    }
-    match (&env.lifted_awaits, location) {
-        (_, UsingStatement) | (_, RightOfAssignmentInUsingStatement) | (None, _) => {
-            Expr_::mk_await(expr)
-        }
-        (Some(_), _) => {
-            let name = env.make_tmp_var_name();
-            let lid = ast::Lid::new(parent_pos, name.clone());
-            let await_lid = ast::Lid::new(expr.1.clone(), name);
-            let await_ = (await_lid, expr);
-            if let Some(aw) = env.lifted_awaits.as_mut() {
-                aw.push(await_)
-            }
-            if location != AsStatement {
-                Expr_::mk_lvar(lid)
-            } else {
-                Expr_::Null
-            }
-        }
-    }
-}
-
 fn p_stmt<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
     let docblock = extract_docblock(node, env);
     env.push_docblock(docblock);
@@ -2960,161 +2862,19 @@ fn p_concurrent_stmt<'a>(
     use ast::Stmt;
     use ast::Stmt_ as S_;
     let new = Stmt::new;
-
-    if env.codegen {
-        // If we're generating bytecode, convert Concurrent into Awaitall. If
-        // we aren't generating code (and so doing typechecking/TAST building)
-        // we'll leave Concurrent in.
-        let keyword_pos = p_pos(&c.keyword, env);
-
-        if env.parser_options.po_unwrap_concurrent {
-            return p_stmt(&c.statement, env);
-        }
-
-        let (lifted_awaits, Stmt(stmt_pos, stmt)) =
-            with_new_concurrent_scope(env, |e| p_stmt(&c.statement, e))?;
-        let scope = lifted_awaits
-            .iter()
-            .map(|lifted_await| lifted_await.0.clone())
-            .collect();
-        let stmt = match stmt {
-            S_::Block(box (_, stmts)) => {
-                use ast::Bop::Eq;
-                /* Reuse tmp vars from lifted_awaits, this is safe because there will
-                 * always be more awaits with tmp vars than statements with assignments. */
-                let mut tmp_vars = lifted_awaits.iter().map(|lifted_await| &lifted_await.0.1);
-                let mut body_stmts = vec![];
-                let mut assign_stmts = vec![];
-                for n in stmts.into_iter() {
-                    if !n.is_assign_expr() && !n.is_declare_local_stmt() {
-                        if n.is_null_expr() {
-                            tmp_vars.next();
-                        }
-                        body_stmts.push(n);
-                        continue;
-                    }
-
-                    match n {
-                        Stmt(p1, S_::Expr(expr)) => {
-                            if let Expr((), p2, Expr_::Binop(bop)) = *expr {
-                                if let Binop {
-                                    bop: Eq(op),
-                                    lhs: e1,
-                                    rhs: e2,
-                                } = *bop
-                                {
-                                    if let Some(tv) = tmp_vars.next() {
-                                        let tmp_n = Expr::mk_lvar(&e2.1, &(tv.1));
-                                        if tmp_n.lvar_name() != e2.lvar_name() {
-                                            let new_n = new(
-                                                p1.clone(),
-                                                S_::mk_expr(Expr::new(
-                                                    (),
-                                                    p2.clone(),
-                                                    Expr_::mk_binop(Binop {
-                                                        bop: Eq(None),
-                                                        lhs: tmp_n.clone(),
-                                                        rhs: e2.clone(),
-                                                    }),
-                                                )),
-                                            );
-                                            body_stmts.push(new_n);
-                                        }
-                                        let assign_stmt = new(
-                                            p1,
-                                            S_::mk_expr(Expr::new(
-                                                (),
-                                                p2,
-                                                Expr_::mk_binop(Binop {
-                                                    bop: Eq(op),
-                                                    lhs: e1,
-                                                    rhs: tmp_n,
-                                                }),
-                                            )),
-                                        );
-                                        assign_stmts.push(assign_stmt);
-                                    } else {
-                                        raise_parsing_error_pos(
-                                        &stmt_pos,
-                                        env,
-                                        &syntax_error::statement_without_await_in_concurrent_block,
-                                    );
-                                        assign_stmts.push(Stmt(
-                                            p1,
-                                            S_::Expr(Box::new(Expr(
-                                                (),
-                                                p2,
-                                                Expr_::Binop(Box::new(Binop {
-                                                    bop: Eq(op),
-                                                    lhs: e1,
-                                                    rhs: e2,
-                                                })),
-                                            ))),
-                                        ))
-                                    }
-                                }
-                            }
-                        }
-                        Stmt(p1, S_::DeclareLocal(box (id, hint, Some(e2)))) => {
-                            if let Some(tv) = tmp_vars.next() {
-                                let tmp_n = Expr::mk_lvar(&e2.1, &(tv.1));
-                                if tmp_n.lvar_name() != e2.lvar_name() {
-                                    let new_n = new(
-                                        p1.clone(),
-                                        S_::mk_expr(Expr::new(
-                                            (),
-                                            p1.clone(),
-                                            Expr_::mk_binop(Binop {
-                                                bop: Eq(None),
-                                                lhs: tmp_n.clone(),
-                                                rhs: e2.clone(),
-                                            }),
-                                        )),
-                                    );
-                                    body_stmts.push(new_n);
-                                }
-                                let assign_stmt =
-                                    Stmt(p1, S_::DeclareLocal(Box::new((id, hint, Some(tmp_n)))));
-                                assign_stmts.push(assign_stmt);
-                            } else {
-                                raise_parsing_error_pos(
-                                    &stmt_pos,
-                                    env,
-                                    &syntax_error::statement_without_await_in_concurrent_block,
-                                );
-                                assign_stmts.push(Stmt(
-                                    p1,
-                                    S_::DeclareLocal(Box::new((id, hint, Some(e2)))),
-                                ))
-                            }
-                        }
-                        Stmt(p1, S_::DeclareLocal(box (id, hint, None))) => {
-                            let assign_stmt =
-                                Stmt(p1, S_::DeclareLocal(Box::new((id, hint, None))));
-                            assign_stmts.push(assign_stmt);
-                        }
-                        _ => raise_missing_syntax("assignment statement", &c.keyword, env),
-                    }
-                }
-                body_stmts.append(&mut assign_stmts);
-                new(stmt_pos, S_::mk_block(None, ast::Block(body_stmts)))
-            }
-            _ => missing_syntax("block in concurrent", &c.keyword, env)?,
-        };
-        let awaitall_stmt = new(
-            keyword_pos.clone(),
-            S_::mk_awaitall(lifted_awaits, ast::Block(vec![stmt])),
-        );
-        Ok(new(
-            keyword_pos,
-            S_::mk_block(Some(scope), aast::Block(vec![awaitall_stmt])),
-        ))
-    } else {
-        Ok(new(
-            pos,
-            S_::mk_concurrent(p_block(true, &c.statement, env)?),
-        ))
+    if env.parser_options.po_unwrap_concurrent {
+        return p_stmt(&c.statement, env);
     }
+    Ok(new(
+        if env.codegen {
+            // Existing uses and tests have different expectations for the location depending
+            // on whether it's for codegen or not
+            p_pos(&c.keyword, env)
+        } else {
+            pos
+        },
+        S_::mk_concurrent(p_block(true, &c.statement, env)?),
+    ))
 }
 
 fn p_unset_stmt<'a>(
@@ -4377,40 +4137,37 @@ fn mk_noop(env: &Env<'_>) -> ast::Stmt {
 
 fn p_function_body<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Block> {
     let mk_noop_result = |e: &Env<'_>| Ok(ast::Block(vec![mk_noop(e)]));
-    let f = |e: &mut Env<'a>| -> Result<ast::Block> {
-        match &node.children {
-            Missing => Ok(Default::default()),
-            CompoundStatement(c) => {
-                let compound_statements = &c.statements.children;
-                let compound_right_brace = &c.right_brace.children;
-                match (compound_statements, compound_right_brace) {
-                    (Missing, Token(_)) => mk_noop_result(e),
-                    (SyntaxList(t), _) if t.len() == 1 && t[0].is_yield() => {
-                        e.saw_yield = true;
-                        mk_noop_result(e)
-                    }
-                    _ => {
-                        if !e.top_level_statements
-                            && ((e.file_mode() == file_info::Mode::Mhhi && !e.codegen())
-                                || e.quick_mode)
-                        {
-                            mk_noop_result(e)
-                        } else {
-                            p_block(false /*remove noop*/, node, e)
-                        }
+    match &node.children {
+        Missing => Ok(Default::default()),
+        CompoundStatement(c) => {
+            let compound_statements = &c.statements.children;
+            let compound_right_brace = &c.right_brace.children;
+            match (compound_statements, compound_right_brace) {
+                (Missing, Token(_)) => mk_noop_result(env),
+                (SyntaxList(t), _) if t.len() == 1 && t[0].is_yield() => {
+                    env.saw_yield = true;
+                    mk_noop_result(env)
+                }
+                _ => {
+                    if !env.top_level_statements
+                        && ((env.file_mode() == file_info::Mode::Mhhi && !env.codegen())
+                            || env.quick_mode)
+                    {
+                        mk_noop_result(env)
+                    } else {
+                        p_block(false /*remove noop*/, node, env)
                     }
                 }
             }
-            _ => {
-                let expr = p_expr(node, e)?;
-                Ok(ast::Block(vec![ast::Stmt::new(
-                    expr.1.clone(),
-                    ast::Stmt_::mk_return(Some(expr)),
-                )]))
-            }
         }
-    };
-    with_new_nonconcurrent_scope(env, f)
+        _ => {
+            let expr = p_expr(node, env)?;
+            Ok(ast::Block(vec![ast::Stmt::new(
+                expr.1.clone(),
+                ast::Stmt_::mk_return(Some(expr)),
+            )]))
+        }
+    }
 }
 
 fn mk_suspension_kind<'a>(async_keyword: S<'a>) -> SuspensionKind {

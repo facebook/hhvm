@@ -8,7 +8,6 @@
 
 #include "squangle/base/ConnectionKey.h"
 
-#include <folly/Format.h>
 #include <folly/hash/Hash.h>
 
 namespace facebook {
@@ -51,7 +50,7 @@ bool ConnectionKey::partialEqual(const ConnectionKey& rhs) const noexcept {
 
 std::string ConnectionKey::getDisplayString(bool level2) const {
   if (unixSocketPath_.empty()) {
-    return folly::sformat(
+    return fmt::format(
         "{} [{}] ({}@{}:{})",
         level2 ? "" : dbName_,
         specialTag_,
@@ -60,7 +59,7 @@ std::string ConnectionKey::getDisplayString(bool level2) const {
         port_);
   }
 
-  return folly::sformat(
+  return fmt::format(
       "{} [{}] ({}@{})",
       level2 ? "" : dbName_,
       specialTag_,

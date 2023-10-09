@@ -7,7 +7,6 @@
  */
 
 #include "squangle/mysql_client/Query.h"
-#include <folly/Format.h>
 #include <folly/String.h>
 
 #include <boost/algorithm/string.hpp>
@@ -281,10 +280,8 @@ void parseError(
     const folly::StringPiece s,
     size_t offset,
     const folly::StringPiece message) {
-  const std::string msg =
-      folly::format(
-          "Parse error at offset {}: {}, query: {}", offset, message, s)
-          .str();
+  const std::string msg = fmt::format(
+      "Parse error at offset {}: {}, query: {}", offset, message, s);
   throw std::invalid_argument(msg);
 }
 
@@ -297,7 +294,7 @@ void formatStringParseError(
   parseError(
       query_text,
       offset,
-      folly::sformat(
+      fmt::format(
           "invalid value type {} for format string %{}",
           value_type,
           format_specifier));
@@ -411,9 +408,8 @@ void Query::appendValueClauses(
     parseError(
         querySp,
         *idx,
-        folly::format(
-            "object expected for %Lx but received {}", param.typeName())
-            .str());
+        fmt::format(
+            "object expected for %Lx but received {}", param.typeName()));
   }
   // Sort these to get consistent query ordering (mainly for
   // testing, but also aesthetics of the final query).

@@ -81,32 +81,32 @@ std::string ConnectionOptions::getDisplayString() const {
   folly::small_vector<std::string, 6> parts;
 
   parts.push_back(
-      folly::sformat("conn timeout={}us", connection_timeout_.count()));
-  parts.push_back(folly::sformat("query timeout={}us", query_timeout_.count()));
-  parts.push_back(folly::sformat("total timeout={}us", total_timeout_.count()));
-  parts.push_back(folly::sformat("conn attempts={}", max_attempts_));
+      fmt::format("conn timeout={}us", connection_timeout_.count()));
+  parts.push_back(fmt::format("query timeout={}us", query_timeout_.count()));
+  parts.push_back(fmt::format("total timeout={}us", total_timeout_.count()));
+  parts.push_back(fmt::format("conn attempts={}", max_attempts_));
   if (dscp_.has_value()) {
-    parts.push_back(folly::sformat("outbound dscp={}", *dscp_));
+    parts.push_back(fmt::format("outbound dscp={}", *dscp_));
   }
   if (ssl_options_provider_ != nullptr) {
-    parts.push_back(folly::sformat(
+    parts.push_back(fmt::format(
         "SSL options provider={}", (void*)ssl_options_provider_.get()));
   }
   if (compression_lib_.has_value()) {
-    parts.push_back(folly::sformat(
+    parts.push_back(fmt::format(
         "compression library={}", (void*)compression_lib_.get_pointer()));
   }
 
   if (!attributes_.empty()) {
     std::vector<std::string> substrings;
     for (const auto& [key, value] : attributes_) {
-      substrings.push_back(folly::sformat("{}={}", key, value));
+      substrings.push_back(fmt::format("{}={}", key, value));
     }
 
-    parts.push_back(folly::sformat(
+    parts.push_back(fmt::format(
         "connection attributes=[{}]", folly::join(",", substrings)));
   }
-  return folly::sformat("({})", folly::join(", ", parts));
+  return fmt::format("({})", folly::join(", ", parts));
 }
 
 Operation::Operation(ConnectionProxy&& safe_conn)
@@ -1024,8 +1024,8 @@ void FetchOperation::specializedRunImpl() {
     mysql_options(mysql, MYSQL_OPT_QUERY_ATTR_RESET, 0);
     for (const auto& [key, value] : attributes_) {
       if (!setQueryAttribute(key, value)) {
-        setAsyncClientError(folly::sformat(
-            "Failed to set query attribute: {} = {}", key, value));
+        setAsyncClientError(
+            fmt::format("Failed to set query attribute: {} = {}", key, value));
         completeOperation(OperationResult::Failed);
         return;
       }
@@ -1593,7 +1593,7 @@ void FetchOperation::killRunningQuery() {
                           QueryResult* /* unused */,
                           QueryCallbackReason reason) {
         if (reason == QueryCallbackReason::Failure) {
-          LOG(WARNING) << folly::format(
+          LOG(WARNING) << fmt::format(
               "Failed to kill query in thread {} on {}:{}",
               thread_id,
               host,
@@ -1997,7 +1997,7 @@ folly::fbstring Operation::connectStageString(connect_stage stage) {
   try {
     return stageToStringMap.at(stage);
   } catch (const std::out_of_range& /* ex */) {
-    return folly::sformat("Unexpected connect_stage: {}", (int)stage);
+    return fmt::format("Unexpected connect_stage: {}", (int)stage);
   }
 }
 

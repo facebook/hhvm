@@ -29,7 +29,6 @@
 #include <re2/re2.h>
 
 #include <folly/Conv.h>
-#include <folly/Format.h>
 #include <folly/Range.h>
 #include <folly/dynamic.h>
 #include <folly/experimental/StringKeyedUnorderedMap.h>
@@ -193,7 +192,7 @@ class RowFields {
       return *opt;
     }
 
-    throw std::out_of_range(folly::sformat("Invalid field: {}", field_name));
+    throw std::out_of_range(fmt::format("Invalid field: {}", field_name));
   }
 
  private:
@@ -433,7 +432,7 @@ class EphemeralRowFields {
       return *opt;
     }
 
-    throw std::out_of_range(folly::sformat("Invalid field: {}", field_name));
+    throw std::out_of_range(fmt::format("Invalid field: {}", field_name));
   }
 
   enum_field_types fieldType(size_t index) const {

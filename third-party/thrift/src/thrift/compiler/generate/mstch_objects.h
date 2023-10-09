@@ -522,17 +522,13 @@ class mstch_service : public mstch_base {
             {"interaction:eb?", &mstch_service::is_event_base_interaction},
         });
 
-    // Collect performed interactions and cache them
+    // Collect performed interactions and cache them.
     for (const auto* function : get_functions()) {
-      if (function->return_type()->is_service()) {
-        interactions_.insert(dynamic_cast<const t_interaction*>(
-            function->return_type().get_type()));
-      } else if (const auto& interaction = function->interaction()) {
+      if (const auto& interaction = function->interaction()) {
         interactions_.insert(
             dynamic_cast<const t_interaction*>(interaction.get_type()));
       }
     }
-    assert(interactions_.count(nullptr) == 0);
   }
 
   virtual std::string get_service_namespace(const t_program*) { return {}; }
@@ -679,7 +675,7 @@ class mstch_function : public mstch_base {
 
   mstch::node arg_list();
   mstch::node starts_interaction() {
-    return function_->return_type()->is_service();
+    return function_->is_interaction_constructor();
   }
   mstch::node has_structured_annotations() {
     return !function_->structured_annotations().empty();

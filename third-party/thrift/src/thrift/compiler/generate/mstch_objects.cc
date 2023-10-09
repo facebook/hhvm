@@ -462,7 +462,10 @@ const std::vector<const t_field*>& mstch_struct::get_members_in_key_order() {
 mstch::node mstch_function::return_type() {
   const t_type* type = function_->return_type().get_type();
   // Override the return type for compatibility with old codegen.
-  if (const t_stream_response* stream = function_->stream()) {
+  if (function_->is_interaction_constructor()) {
+    // The old syntax (performs) treats an interaction as a response.
+    type = function_->interaction().get_type();
+  } else if (const t_stream_response* stream = function_->stream()) {
     type = stream;
   } else if (function_->sink()) {
     type = &t_base_type::t_void();

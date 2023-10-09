@@ -384,7 +384,7 @@ std::vector<const t_function*> t_go_generator::get_supported_functions(
     const t_service* tservice) {
   std::vector<const t_function*> funcs;
   for (const auto* func : tservice->get_functions()) {
-    if (!func->sink_or_stream() && !func->return_type()->is_service()) {
+    if (!func->sink_or_stream() && !func->is_interaction_constructor()) {
       funcs.push_back(func);
     }
   }

@@ -449,14 +449,14 @@ class python_mstch_service : public mstch_service {
   mstch::node supported_functions() {
     return make_mstch_functions(
         get_supported_functions([](const t_function* func) -> bool {
-          return !func->sink() && !func->return_type()->is_service();
+          return !func->sink() && !func->is_interaction_constructor();
         }));
   }
 
   mstch::node supported_service_functions() {
     return make_mstch_functions(
         get_supported_functions([](const t_function* func) -> bool {
-          return !func->sink() && !func->return_type()->is_service();
+          return !func->sink() && !func->is_interaction_constructor();
         }));
   }
 
@@ -567,7 +567,7 @@ class python_mstch_function : public mstch_function {
 
   mstch::node async_only() {
     return function_->sink_or_stream() ||
-        function_->return_type()->is_service() ||
+        function_->is_interaction_constructor() ||
         function_->is_interaction_member() || function_->interaction();
   }
 };

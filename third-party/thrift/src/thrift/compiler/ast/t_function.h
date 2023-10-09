@@ -65,13 +65,8 @@ class t_function final : public t_named {
   // there is a stream or interaction in the return clause of a function
   // definition. In this case return_type() returns the void type for
   // convenience. Use has_return_type() to check if the type is present.
-  const t_type_ref& return_type() const {
-    // The old syntax (performs) treats an interaction as a response.
-    return is_interaction_constructor_ ? interaction_ : return_type_;
-  }
-  t_type_ref& return_type() {
-    return is_interaction_constructor_ ? interaction_ : return_type_;
-  }
+  const t_type_ref& return_type() const { return return_type_; }
+  t_type_ref& return_type() { return return_type_; }
   bool has_return_type() const { return has_return_type_; }
 
   t_node* sink_or_stream() { return sink_or_stream_.get(); }

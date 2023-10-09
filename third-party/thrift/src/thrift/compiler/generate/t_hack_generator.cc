@@ -1050,7 +1050,7 @@ class t_hack_generator : public t_concat_generator {
     std::vector<const t_function*> funcs;
     for (auto func : tservice->get_functions()) {
       if (!is_client_only_function(func) &&
-          !func->return_type()->is_service()) {
+          !func->is_interaction_constructor()) {
         funcs.push_back(func);
       }
     }
@@ -1076,9 +1076,9 @@ class t_hack_generator : public t_concat_generator {
       const t_service* tservice) const {
     std::vector<const t_service*> interactions;
     for (const auto& func : tservice->get_functions()) {
-      if (const auto* interaction =
-              dynamic_cast<const t_service*>(func->return_type().get_type())) {
-        interactions.push_back(interaction);
+      if (func->is_interaction_constructor()) {
+        interactions.push_back(
+            dynamic_cast<const t_service*>(func->interaction().get_type()));
       }
     }
     return interactions;

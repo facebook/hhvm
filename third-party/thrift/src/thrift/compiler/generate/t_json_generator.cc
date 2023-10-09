@@ -726,7 +726,10 @@ void t_json_generator::generate_service(const t_service* tservice) {
     indent_up();
     indent(f_out_) << "\"return_type\" : {" << endl;
     indent_up();
-    print_type((*fn_iter)->return_type().get_type());
+    const t_function* fun = *fn_iter;
+    const auto& ret = fun->is_interaction_constructor() ? fun->interaction()
+                                                        : fun->return_type();
+    print_type(ret.get_type());
     f_out_ << endl;
     indent_down();
     indent(f_out_) << "}," << endl;

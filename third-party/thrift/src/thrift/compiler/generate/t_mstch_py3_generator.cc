@@ -119,7 +119,7 @@ bool is_hidden(const t_named& node) {
 
 bool is_func_supported(bool no_stream, const t_function* func) {
   return !is_hidden(*func) && !(no_stream && func->stream()) && !func->sink() &&
-      !func->return_type()->is_service();
+      !func->is_interaction_constructor();
 }
 
 bool is_hidden(const t_type& node) {
@@ -1198,7 +1198,7 @@ void py3_mstch_program::visit_type_single_service(const t_service* service) {
     }
 
     std::string return_type_name;
-    if (const t_stream_response* stream = function.stream()) {
+    if (stream && !function.is_interaction_constructor()) {
       return_type_name = "Stream__";
       const t_type* resp_type = stream->get_first_response_type();
       const t_type* elem_type = stream->get_elem_type();
@@ -1217,7 +1217,10 @@ void py3_mstch_program::visit_type_single_service(const t_service* service) {
         response_and_stream_functions_.push_back(&function);
       }
     } else if (!function.sink()) {
-      return_type_name = visit_type(function.return_type().get_type());
+      const auto type = function.is_interaction_constructor()
+          ? function.interaction()
+          : function.return_type();
+      return_type_name = visit_type(type.get_type());
     }
     add_function_by_unique_return_type(&function, std::move(return_type_name));
   }

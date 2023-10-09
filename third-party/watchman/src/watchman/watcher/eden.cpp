@@ -680,7 +680,7 @@ std::vector<NameAndDType> globNameAndDType(
           "Thrift exception raised from EdenFS when globbing files: {} (errno {}, type {})\n",
           ex.what(),
           ex.getErrno(),
-          ex.getType());
+          fmt::underlying(ex.getType()));
       throw;
     } catch (const std::exception& ex) {
       logf(

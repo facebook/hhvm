@@ -23,6 +23,11 @@ enum PduType : uint32_t {
   is_bser_v2
 };
 
+// Required for fmt 10
+inline uint32_t format_as(PduType type) {
+  return static_cast<uint32_t>(type);
+}
+
 /**
  * Specifies the wire encoding of a Watchman request or response.
  *

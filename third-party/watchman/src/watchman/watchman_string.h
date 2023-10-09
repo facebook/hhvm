@@ -35,6 +35,11 @@ enum w_string_type_t : uint8_t {
 // 32-bit flag next to the reference count.
 static_assert(sizeof(size_t) == 8);
 
+// Required for fmt 10
+inline uint8_t format_as(w_string_type_t type) {
+  return static_cast<uint8_t>(type);
+}
+
 namespace watchman {
 
 /**

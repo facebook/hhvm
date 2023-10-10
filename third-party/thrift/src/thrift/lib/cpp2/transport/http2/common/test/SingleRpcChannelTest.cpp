@@ -216,6 +216,9 @@ void httpHandler(
     builder.status(500, "OOM")
         .header(proxygen::HTTP_HEADER_CONTENT_TYPE, "application/x-thrift")
         .body(generateResponse("oom"));
+  } else if (message.getURL() == "app_overloaded") {
+    builder.status(503, "Service Unavailable")
+        .header(proxygen::HTTP_HEADER_RETRY_AFTER, "0");
   } else if (message.getURL() == "eof") {
     builder.status(200, "OK");
   } else {
@@ -333,6 +336,18 @@ TEST(SingleRpcChannel, ClientExceptions) {
   EXPECT_TRUE(rstate.sent);
   EXPECT_FALSE(rstate.error);
   EXPECT_TRUE(rstate.reply);
+
+  // Ensure that a HTTP 503 with Retry-After is marked as APP_OVERLOADED
+  rstate = sendRequest(evb, *channel, "app_overloaded").getVia(&evb);
+
+  EXPECT_TRUE(rstate.sent);
+  EXPECT_FALSE(rstate.error);
+  EXPECT_TRUE(rstate.reply);
+  ASSERT_FALSE(rstate.receiveState.isException());
+  auto headers = rstate.receiveState.header()->getHeaders();
+  auto iter = headers.find("ex");
+  EXPECT_TRUE(iter != headers.end());
+  EXPECT_EQ(iter->second, kAppOverloadedErrorCode);
 
   conn->closeNow();
   evb.loopOnce();

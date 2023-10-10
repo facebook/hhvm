@@ -20,6 +20,7 @@
 
 #include <glog/logging.h>
 
+#include <folly/Conv.h>
 #include <folly/ExceptionWrapper.h>
 #include <folly/base64.h>
 #include <folly/io/IOBufQueue.h>
@@ -401,7 +402,29 @@ void SingleRpcChannel::onThriftResponse() noexcept {
     return;
   }
 
-  auto statusCode = headers_->getStatusCode();
+  const auto statusCode = headers_->getStatusCode();
+  const auto& retryAfter = headers_->getHeaders().getSingleOrEmpty(
+      proxygen::HTTP_HEADER_RETRY_AFTER);
+
+  // HTTP 503 (Service Unavailable) + Retry-After
+  if (statusCode == 503 && !retryAfter.empty()) {
+    // A Retry-After header may contain a http-date or a number of seconds.
+    // We do not currently attempt to parse either of these, and assume the
+    // presence of the header implies we should try again due to overload.
+    auto evb = callback_->getEventBase();
+    ResponseRpcMetadata metadata;
+    transport::THeader::StringToStringMap headers;
+    // send this up the stack to be exposed as a proper app overloaded exception
+    headers["ex"] = kAppOverloadedErrorCode;
+    metadata.otherMetadata_ref() = std::move(headers);
+
+    evb->runInEventBaseThread([evbCallback = std::move(callback_),
+                               evbMetadata = std::move(metadata)]() mutable {
+      evbCallback->onThriftResponse(std::move(evbMetadata), nullptr);
+    });
+    return;
+  }
+
   const auto& contentType = headers_->getHeaders().getSingleOrEmpty(
       proxygen::HTTP_HEADER_CONTENT_TYPE);
   if (contentType != kThriftContentType && statusCode != 100 &&

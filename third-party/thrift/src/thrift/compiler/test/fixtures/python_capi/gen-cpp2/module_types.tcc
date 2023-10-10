@@ -3878,7 +3878,7 @@ void Shallot::readNoXfer(Protocol_* iprot) {
       case 1:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32)) {
-          this->myEnum_ref().ensure();
+          this->set_myEnum();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::python_capi::MyEnum>::readWithContext(*iprot, value_.myEnum, _readState);
           
         } else {
@@ -3889,7 +3889,7 @@ void Shallot::readNoXfer(Protocol_* iprot) {
       case 2:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT)) {
-          this->myStruct_ref().ensure();
+          this->set_myStruct();
           _readState.beforeSubobject(iprot);
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::python_capi::PrimitiveStruct>::readWithContext(*iprot, value_.myStruct, _readState);
           _readState.afterSubobject(iprot);
@@ -3902,7 +3902,7 @@ void Shallot::readNoXfer(Protocol_* iprot) {
       case 4:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
-          this->myString_ref().ensure();
+          this->set_myString();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, value_.myString, _readState);
           
         } else {
@@ -3913,7 +3913,7 @@ void Shallot::readNoXfer(Protocol_* iprot) {
       case 6:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_SET)) {
-          this->intSet_ref().ensure();
+          this->set_intSet();
           _readState.beforeSubobject(iprot);
           value_.intSet = ::std::set<::std::int64_t>();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int64_t>>::readWithContext(*iprot, value_.intSet, _readState);
@@ -3927,7 +3927,7 @@ void Shallot::readNoXfer(Protocol_* iprot) {
       case 8:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_LIST)) {
-          this->doubleList_ref().ensure();
+          this->set_doubleList();
           _readState.beforeSubobject(iprot);
           value_.doubleList = ::std::vector<double>();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>, ::std::vector<double>>::readWithContext(*iprot, value_.doubleList, _readState);
@@ -3941,7 +3941,7 @@ void Shallot::readNoXfer(Protocol_* iprot) {
       case 9:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_MAP)) {
-          this->strMap_ref().ensure();
+          this->set_strMap();
           _readState.beforeSubobject(iprot);
           value_.strMap = ::std::map<::std::string, ::std::string>();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::binary, ::apache::thrift::type_class::string>, ::std::map<::std::string, ::std::string>>::readWithContext(*iprot, value_.strMap, _readState);
@@ -3955,7 +3955,7 @@ void Shallot::readNoXfer(Protocol_* iprot) {
       case 10:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I64)) {
-          this->adaptedInt_ref().ensure();
+          this->set_adaptedInt();
           ::apache::thrift::op::decode<::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>, ::apache::thrift::type::i64_t>>(*iprot, value_.adaptedInt);
           
         } else {

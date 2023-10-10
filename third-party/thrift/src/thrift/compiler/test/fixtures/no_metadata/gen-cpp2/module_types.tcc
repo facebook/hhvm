@@ -371,7 +371,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 1:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32)) {
-          this->myEnum_ref().ensure();
+          this->set_myEnum();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::cpp2::MyEnum>::readWithContext(*iprot, value_.myEnum, _readState);
           
         } else {
@@ -382,7 +382,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 2:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT)) {
-          this->myStruct_ref().ensure();
+          this->set_myStruct();
           _readState.beforeSubobject(iprot);
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::MyStruct>::readWithContext(*iprot, value_.myStruct, _readState);
           _readState.afterSubobject(iprot);
@@ -395,7 +395,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 3:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT)) {
-          this->myDataItem_ref().ensure();
+          this->set_myDataItem();
           _readState.beforeSubobject(iprot);
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::MyDataItem>::readWithContext(*iprot, value_.myDataItem, _readState);
           _readState.afterSubobject(iprot);

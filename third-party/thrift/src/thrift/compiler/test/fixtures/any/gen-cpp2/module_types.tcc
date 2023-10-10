@@ -179,7 +179,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 1:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
-          this->myString_ref().ensure();
+          this->set_myString();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, value_.myString, _readState);
           
         } else {

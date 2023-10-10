@@ -573,7 +573,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 1:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32)) {
-          this->myEnum_ref().ensure();
+          this->set_myEnum();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::test::fixtures::basic::MyEnum>::readWithContext(*iprot, value_.myEnum, _readState);
           
         } else {
@@ -584,7 +584,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 2:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT)) {
-          this->myStruct_ref().ensure();
+          this->set_myStruct();
           _readState.beforeSubobject(iprot);
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic::MyStruct>::readWithContext(*iprot, value_.myStruct, _readState);
           _readState.afterSubobject(iprot);
@@ -597,7 +597,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 3:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT)) {
-          this->myDataItem_ref().ensure();
+          this->set_myDataItem();
           _readState.beforeSubobject(iprot);
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic::MyDataItem>::readWithContext(*iprot, value_.myDataItem, _readState);
           _readState.afterSubobject(iprot);
@@ -610,7 +610,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 4:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_SET)) {
-          this->floatSet_ref().ensure();
+          this->set_floatSet();
           _readState.beforeSubobject(iprot);
           value_.floatSet = ::std::set<float>();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::floating_point>, ::std::set<float>>::readWithContext(*iprot, value_.floatSet, _readState);
@@ -896,7 +896,7 @@ void UnionToBeRenamed::readNoXfer(Protocol_* iprot) {
       case 1:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32)) {
-          this->reserved_field_ref().ensure();
+          this->set_reserved_field();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, value_.reserved_field, _readState);
           
         } else {

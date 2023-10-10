@@ -34,7 +34,7 @@ void <%struct:cpp_underlying_name%>::readNoXfer(Protocol_* iprot) {
       case <%field:key%>:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::<% > module_types_tcc/struct_type%>)) {
-          this-><%field:cpp_name%>_ref().ensure();
+          this->set_<%field:cpp_name%>();
           <% > module_types_tcc/deserialize_field %>
 
         } else {

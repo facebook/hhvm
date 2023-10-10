@@ -641,7 +641,7 @@ void InnerUnion::readNoXfer(Protocol_* iprot) {
       case 1:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
-          this->innerOption_ref().ensure();
+          this->set_innerOption();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::std::string>::readWithContext(*iprot, value_.innerOption, _readState);
           
         } else {
@@ -746,7 +746,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 1:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
-          this->option1_ref().ensure();
+          this->set_option1();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, value_.option1, _readState);
           
         } else {
@@ -757,7 +757,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 2:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32)) {
-          this->option2_ref().ensure();
+          this->set_option2();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, value_.option2, _readState);
           
         } else {
@@ -768,7 +768,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 3:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT)) {
-          this->option3_ref().ensure();
+          this->set_option3();
           _readState.beforeSubobject(iprot);
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::test::fixtures::patch::InnerUnion>::readWithContext(*iprot, value_.option3, _readState);
           _readState.afterSubobject(iprot);

@@ -608,11 +608,11 @@ class MyUnion final  {
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::unique_ptr<::std::int32_t>& set_anInteger(::std::int32_t t = ::std::int32_t()) {
-    using T0 = ::std::int32_t;
+    using T0 = ::std::unique_ptr<::std::int32_t>;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::anInteger);
-    ::new (std::addressof(value_.anInteger)) T(t);
+    ::new (std::addressof(value_.anInteger)) T(new typename T::element_type(t));
     return value_.anInteger;
   }
 
@@ -908,11 +908,11 @@ class NonTriviallyDestructibleUnion final  {
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::shared_ptr<::std::int32_t>& set_int_field(::std::int32_t t = ::std::int32_t()) {
-    using T0 = ::std::int32_t;
+    using T0 = ::std::shared_ptr<::std::int32_t>;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::int_field);
-    ::new (std::addressof(value_.int_field)) T(t);
+    ::new (std::addressof(value_.int_field)) T(new typename T::element_type(t));
     return value_.int_field;
   }
 

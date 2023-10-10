@@ -638,4 +638,12 @@ TEST(References, NonTriviallyDestructibleUnion) {
   EXPECT_EQ(obj, objd);
 }
 
+TEST(References, NonTriviallyDestructibleUnionSetter) {
+  NonTriviallyDestructibleUnion obj;
+  obj.set_int_field(1);
+  auto objd = CompactSerializer::deserialize<NonTriviallyDestructibleUnion>(
+      CompactSerializer::serialize<std::string>(obj));
+  EXPECT_EQ(obj, objd);
+}
+
 } // namespace cpp2

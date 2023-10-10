@@ -31,11 +31,15 @@ public class BadService {
 
   public interface Iface {
 
+    public void createBadInteraction() throws TException;
+
     public int bar() throws TException;
 
   }
 
   public interface AsyncIface {
+
+    public void createBadInteraction(AsyncMethodCallback resultHandler) throws TException;
 
     public void bar(AsyncMethodCallback resultHandler) throws TException;
 
@@ -68,6 +72,47 @@ public class BadService {
     public TProtocol getOutputProtocol()
     {
       return this.oprot_;
+    }
+
+    public void createBadInteraction() throws TException
+    {
+      ContextStack ctx = getContextStack("BadService.createBadInteraction", null);
+      this.setContextStack(ctx);
+      send_createBadInteraction();
+      recv_createBadInteraction();
+    }
+
+    public void send_createBadInteraction() throws TException
+    {
+      ContextStack ctx = this.getContextStack();
+      super.preWrite(ctx, "BadService.createBadInteraction", null);
+      oprot_.writeMessageBegin(new TMessage("createBadInteraction", TMessageType.CALL, seqid_));
+      createBadInteraction_args args = new createBadInteraction_args();
+      args.write(oprot_);
+      oprot_.writeMessageEnd();
+      oprot_.getTransport().flush();
+      super.postWrite(ctx, "BadService.createBadInteraction", args);
+      return;
+    }
+
+    public void recv_createBadInteraction() throws TException
+    {
+      ContextStack ctx = super.getContextStack();
+      long bytes;
+      TMessageType mtype;
+      super.preRead(ctx, "BadService.createBadInteraction");
+      TMessage msg = iprot_.readMessageBegin();
+      if (msg.type == TMessageType.EXCEPTION) {
+        TApplicationException x = TApplicationException.read(iprot_);
+        iprot_.readMessageEnd();
+        throw x;
+      }
+      createBadInteraction_result result = new createBadInteraction_result();
+      result.read(iprot_);
+      iprot_.readMessageEnd();
+      super.postRead(ctx, "BadService.createBadInteraction", result);
+
+      return;
     }
 
     public int bar() throws TException
@@ -132,16 +177,45 @@ public class BadService {
       super(protocolFactory, clientManager, transport);
     }
 
-    public void bar(AsyncMethodCallback resultHandler68) throws TException {
+    public void createBadInteraction(AsyncMethodCallback resultHandler69) throws TException {
       checkReady();
-      bar_call method_call = new bar_call(resultHandler68, this, ___protocolFactory, ___transport);
+      createBadInteraction_call method_call = new createBadInteraction_call(resultHandler69, this, ___protocolFactory, ___transport);
+      this.___currentMethod = method_call;
+      ___manager.call(method_call);
+    }
+
+    public static class createBadInteraction_call extends TAsyncMethodCall {
+      public createBadInteraction_call(AsyncMethodCallback resultHandler70, TAsyncClient client66, TProtocolFactory protocolFactory67, TNonblockingTransport transport68) throws TException {
+        super(client66, protocolFactory67, transport68, resultHandler70, false);
+      }
+
+      public void write_args(TProtocol prot) throws TException {
+        prot.writeMessageBegin(new TMessage("createBadInteraction", TMessageType.CALL, 0));
+        createBadInteraction_args args = new createBadInteraction_args();
+        args.write(prot);
+        prot.writeMessageEnd();
+      }
+
+      public void getResult() throws TException {
+        if (getState() != State.RESPONSE_READ) {
+          throw new IllegalStateException("Method call not finished!");
+        }
+        TMemoryInputTransport memoryTransport = new TMemoryInputTransport(getFrameBuffer().array());
+        TProtocol prot = super.client.getProtocolFactory().getProtocol(memoryTransport);
+        (new Client(prot)).recv_createBadInteraction();
+      }
+    }
+
+    public void bar(AsyncMethodCallback resultHandler74) throws TException {
+      checkReady();
+      bar_call method_call = new bar_call(resultHandler74, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
     public static class bar_call extends TAsyncMethodCall {
-      public bar_call(AsyncMethodCallback resultHandler69, TAsyncClient client65, TProtocolFactory protocolFactory66, TNonblockingTransport transport67) throws TException {
-        super(client65, protocolFactory66, transport67, resultHandler69, false);
+      public bar_call(AsyncMethodCallback resultHandler75, TAsyncClient client71, TProtocolFactory protocolFactory72, TNonblockingTransport transport73) throws TException {
+        super(client71, protocolFactory72, transport73, resultHandler75, false);
       }
 
       public void write_args(TProtocol prot) throws TException {
@@ -169,6 +243,7 @@ public class BadService {
     {
       iface_ = iface;
       event_handler_ = new TProcessorEventHandler(); // Empty handler
+      processMap_.put("createBadInteraction", new createBadInteraction());
       processMap_.put("bar", new bar());
     }
 
@@ -202,6 +277,27 @@ public class BadService {
       return true;
     }
 
+    private class createBadInteraction implements ProcessFunction {
+      public void process(int seqid, TProtocol iprot, TProtocol oprot, TConnectionContext server_ctx) throws TException
+      {
+        Object handler_ctx = event_handler_.getContext("BadService.createBadInteraction", server_ctx);
+        createBadInteraction_args args = new createBadInteraction_args();
+        event_handler_.preRead(handler_ctx, "BadService.createBadInteraction");
+        args.read(iprot);
+        iprot.readMessageEnd();
+        event_handler_.postRead(handler_ctx, "BadService.createBadInteraction", args);
+        createBadInteraction_result result = new createBadInteraction_result();
+        iface_.createBadInteraction();
+        event_handler_.preWrite(handler_ctx, "BadService.createBadInteraction", result);
+        oprot.writeMessageBegin(new TMessage("createBadInteraction", TMessageType.REPLY, seqid));
+        result.write(oprot);
+        oprot.writeMessageEnd();
+        oprot.getTransport().flush();
+        event_handler_.postWrite(handler_ctx, "BadService.createBadInteraction", result);
+      }
+
+    }
+
     private class bar implements ProcessFunction {
       public void process(int seqid, TProtocol iprot, TProtocol oprot, TConnectionContext server_ctx) throws TException
       {
@@ -222,6 +318,271 @@ public class BadService {
         event_handler_.postWrite(handler_ctx, "BadService.bar", result);
       }
 
+    }
+
+  }
+
+  public static class createBadInteraction_args implements TBase, java.io.Serializable, Cloneable, Comparable<createBadInteraction_args>   {
+    private static final TStruct STRUCT_DESC = new TStruct("createBadInteraction_args");
+
+    public static final Map<Integer, FieldMetaData> metaDataMap;
+
+    static {
+      Map<Integer, FieldMetaData> tmpMetaDataMap = new HashMap<Integer, FieldMetaData>();
+      metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
+    }
+
+    static {
+      FieldMetaData.addStructMetaDataMap(createBadInteraction_args.class, metaDataMap);
+    }
+
+    public createBadInteraction_args() {
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public createBadInteraction_args(createBadInteraction_args other) {
+    }
+
+    public createBadInteraction_args deepCopy() {
+      return new createBadInteraction_args(this);
+    }
+
+    public void setFieldValue(int fieldID, Object __value) {
+      switch (fieldID) {
+      default:
+        throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
+      }
+    }
+
+    public Object getFieldValue(int fieldID) {
+      switch (fieldID) {
+      default:
+        throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
+      }
+    }
+
+    @Override
+    public boolean equals(Object _that) {
+      if (_that == null)
+        return false;
+      if (this == _that)
+        return true;
+      if (!(_that instanceof createBadInteraction_args))
+        return false;
+      createBadInteraction_args that = (createBadInteraction_args)_that;
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      return Arrays.deepHashCode(new Object[] {});
+    }
+
+    @Override
+    public int compareTo(createBadInteraction_args other) {
+      if (other == null) {
+        // See java.lang.Comparable docs
+        throw new NullPointerException();
+      }
+
+      if (other == this) {
+        return 0;
+      }
+      int lastComparison = 0;
+
+      return 0;
+    }
+
+    public void read(TProtocol iprot) throws TException {
+      TField __field;
+      iprot.readStructBegin(metaDataMap);
+      while (true)
+      {
+        __field = iprot.readFieldBegin();
+        if (__field.type == TType.STOP) {
+          break;
+        }
+        switch (__field.id)
+        {
+          default:
+            TProtocolUtil.skip(iprot, __field.type);
+            break;
+        }
+        iprot.readFieldEnd();
+      }
+      iprot.readStructEnd();
+
+
+      // check for required fields of primitive type, which can't be checked in the validate method
+      validate();
+    }
+
+    public void write(TProtocol oprot) throws TException {
+      validate();
+
+      oprot.writeStructBegin(STRUCT_DESC);
+      oprot.writeFieldStop();
+      oprot.writeStructEnd();
+    }
+
+    @Override
+    public String toString() {
+      return toString(1, true);
+    }
+
+    @Override
+    public String toString(int indent, boolean prettyPrint) {
+      String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
+      String newLine = prettyPrint ? "\n" : "";
+      String space = prettyPrint ? " " : "";
+      StringBuilder sb = new StringBuilder("createBadInteraction_args");
+      sb.append(space);
+      sb.append("(");
+      sb.append(newLine);
+      boolean first = true;
+
+      sb.append(newLine + TBaseHelper.reduceIndent(indentStr));
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws TException {
+      // check for required fields
+    }
+
+  }
+
+  public static class createBadInteraction_result implements TBase, java.io.Serializable, Cloneable, Comparable<createBadInteraction_result>   {
+    private static final TStruct STRUCT_DESC = new TStruct("createBadInteraction_result");
+
+    public static final Map<Integer, FieldMetaData> metaDataMap;
+
+    static {
+      Map<Integer, FieldMetaData> tmpMetaDataMap = new HashMap<Integer, FieldMetaData>();
+      metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
+    }
+
+    static {
+      FieldMetaData.addStructMetaDataMap(createBadInteraction_result.class, metaDataMap);
+    }
+
+    public createBadInteraction_result() {
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public createBadInteraction_result(createBadInteraction_result other) {
+    }
+
+    public createBadInteraction_result deepCopy() {
+      return new createBadInteraction_result(this);
+    }
+
+    public void setFieldValue(int fieldID, Object __value) {
+      switch (fieldID) {
+      default:
+        throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
+      }
+    }
+
+    public Object getFieldValue(int fieldID) {
+      switch (fieldID) {
+      default:
+        throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
+      }
+    }
+
+    @Override
+    public boolean equals(Object _that) {
+      if (_that == null)
+        return false;
+      if (this == _that)
+        return true;
+      if (!(_that instanceof createBadInteraction_result))
+        return false;
+      createBadInteraction_result that = (createBadInteraction_result)_that;
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      return Arrays.deepHashCode(new Object[] {});
+    }
+
+    @Override
+    public int compareTo(createBadInteraction_result other) {
+      if (other == null) {
+        // See java.lang.Comparable docs
+        throw new NullPointerException();
+      }
+
+      if (other == this) {
+        return 0;
+      }
+      int lastComparison = 0;
+
+      return 0;
+    }
+
+    public void read(TProtocol iprot) throws TException {
+      TField __field;
+      iprot.readStructBegin(metaDataMap);
+      while (true)
+      {
+        __field = iprot.readFieldBegin();
+        if (__field.type == TType.STOP) {
+          break;
+        }
+        switch (__field.id)
+        {
+          default:
+            TProtocolUtil.skip(iprot, __field.type);
+            break;
+        }
+        iprot.readFieldEnd();
+      }
+      iprot.readStructEnd();
+
+
+      // check for required fields of primitive type, which can't be checked in the validate method
+      validate();
+    }
+
+    public void write(TProtocol oprot) throws TException {
+      oprot.writeStructBegin(STRUCT_DESC);
+
+      oprot.writeFieldStop();
+      oprot.writeStructEnd();
+    }
+
+    @Override
+    public String toString() {
+      return toString(1, true);
+    }
+
+    @Override
+    public String toString(int indent, boolean prettyPrint) {
+      String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
+      String newLine = prettyPrint ? "\n" : "";
+      String space = prettyPrint ? " " : "";
+      StringBuilder sb = new StringBuilder("createBadInteraction_result");
+      sb.append(space);
+      sb.append("(");
+      sb.append(newLine);
+      boolean first = true;
+
+      sb.append(newLine + TBaseHelper.reduceIndent(indentStr));
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws TException {
+      // check for required fields
     }
 
   }

@@ -219,16 +219,16 @@ public class FooBarBazService {
       super(protocolFactory, clientManager, transport);
     }
 
-    public void foo(AsyncMethodCallback resultHandler76) throws TException {
+    public void foo(AsyncMethodCallback resultHandler82) throws TException {
       checkReady();
-      foo_call method_call = new foo_call(resultHandler76, this, ___protocolFactory, ___transport);
+      foo_call method_call = new foo_call(resultHandler82, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
     public static class foo_call extends TAsyncMethodCall {
-      public foo_call(AsyncMethodCallback resultHandler77, TAsyncClient client73, TProtocolFactory protocolFactory74, TNonblockingTransport transport75) throws TException {
-        super(client73, protocolFactory74, transport75, resultHandler77, false);
+      public foo_call(AsyncMethodCallback resultHandler83, TAsyncClient client79, TProtocolFactory protocolFactory80, TNonblockingTransport transport81) throws TException {
+        super(client79, protocolFactory80, transport81, resultHandler83, false);
       }
 
       public void write_args(TProtocol prot) throws TException {
@@ -248,16 +248,16 @@ public class FooBarBazService {
       }
     }
 
-    public void bar(AsyncMethodCallback resultHandler81) throws TException {
+    public void bar(AsyncMethodCallback resultHandler87) throws TException {
       checkReady();
-      bar_call method_call = new bar_call(resultHandler81, this, ___protocolFactory, ___transport);
+      bar_call method_call = new bar_call(resultHandler87, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
     public static class bar_call extends TAsyncMethodCall {
-      public bar_call(AsyncMethodCallback resultHandler82, TAsyncClient client78, TProtocolFactory protocolFactory79, TNonblockingTransport transport80) throws TException {
-        super(client78, protocolFactory79, transport80, resultHandler82, false);
+      public bar_call(AsyncMethodCallback resultHandler88, TAsyncClient client84, TProtocolFactory protocolFactory85, TNonblockingTransport transport86) throws TException {
+        super(client84, protocolFactory85, transport86, resultHandler88, false);
       }
 
       public void write_args(TProtocol prot) throws TException {
@@ -277,16 +277,16 @@ public class FooBarBazService {
       }
     }
 
-    public void baz(AsyncMethodCallback resultHandler86) throws TException {
+    public void baz(AsyncMethodCallback resultHandler92) throws TException {
       checkReady();
-      baz_call method_call = new baz_call(resultHandler86, this, ___protocolFactory, ___transport);
+      baz_call method_call = new baz_call(resultHandler92, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
     public static class baz_call extends TAsyncMethodCall {
-      public baz_call(AsyncMethodCallback resultHandler87, TAsyncClient client83, TProtocolFactory protocolFactory84, TNonblockingTransport transport85) throws TException {
-        super(client83, protocolFactory84, transport85, resultHandler87, false);
+      public baz_call(AsyncMethodCallback resultHandler93, TAsyncClient client89, TProtocolFactory protocolFactory90, TNonblockingTransport transport91) throws TException {
+        super(client89, protocolFactory90, transport91, resultHandler93, false);
       }
 
       public void write_args(TProtocol prot) throws TException {

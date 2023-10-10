@@ -772,8 +772,24 @@ void RocketServerConnection::startDrain(
   closeIfNeeded();
 }
 
-void RocketServerConnection::dropConnection(const std::string& /* errorMsg */) {
+void RocketServerConnection::dropConnection(const std::string& errorMsg) {
+  // Subtle: skip the socket draining process and stop new reads
   socketDrainer_.drainComplete();
+  // Subtle: flush pending writes to ensure isBusy() returns false
+  writeBatcher_.drain();
+  // Subtle: preemptively close socket to fail all outstanding writes (also
+  // needed to ensure isBusy() returns false)
+  socket_->closeNow();
+
+  if (!errorMsg.empty()) {
+    if (auto context = frameHandler_->getCpp2ConnContext()) {
+      THRIFT_CONNECTION_EVENT(drop_connection.rocket)
+          .log(*context, [&errorMsg]() {
+            return folly::dynamic::object("error", errorMsg);
+          });
+    }
+  }
+
   close(folly::make_exception_wrapper<transport::TTransportException>(
       transport::TTransportException::TTransportExceptionType::INTERRUPTED,
       "Dropping connection"));

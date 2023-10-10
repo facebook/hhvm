@@ -669,7 +669,7 @@ let type_check_core genv env start_time ~check_reason cgroup_steps =
 
   (* we use lazy here to avoid expensive string generation when logging
    * is not enabled *)
-  Hh_logger.log_lazy ~category:"fanout_information"
+  Hh_logger.log_lazy ~category:"fanout"
   @@ lazy
        Hh_json.(
          json_to_string

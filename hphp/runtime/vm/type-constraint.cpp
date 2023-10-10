@@ -276,6 +276,15 @@ TypeConstraint TypeConstraint::UnionBuilder::finish() && {
     }
   }
 
+  if (m_classes.m_list.size() > RuntimeOption::EvalMaxCaseTypeVariants) {
+    auto msg = folly::sformat(
+      "Case type '{}' exceeds allowed variants of {} ({} requested)",
+      m_typeName,
+      RuntimeOption::EvalMaxCaseTypeVariants,
+      m_classes.m_list.size());
+    raise_error(msg);
+  }
+
   LowPtr<const UnionClassList> classes = nullptr;
   if (!m_classes.m_list.empty()) {
     classes = UnionConstraint::allocObjects(std::move(m_classes));

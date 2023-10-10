@@ -122,7 +122,13 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
     return req;
   }
 
-  req.value = TypeConstraint::makeUnion(req.name(), parts);
+  req.value = [&] {
+    try {
+      return TypeConstraint::makeUnion(req.name(), parts);
+    } catch (const FatalErrorException& ex) {
+      raise_error("%s in %s on line %d\n", ex.what(), thisType->unit->origFilepath()->data(), thisType->line0);
+    }
+  }();
   return req;
 }
 

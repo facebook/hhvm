@@ -1,0 +1,3 @@
+
+Fatal error: Case type 'C1' exceeds allowed variants of 6 (8 requested)
+ in %s/max-variants1.php on line 14

@@ -184,7 +184,22 @@ struct FatalUnitError : std::runtime_error {
   Location::Range pos;
   FatalOp op;
 };
+
+Location::Range locationFromSpan(const Span& span) {
+  return Location::Range {
+    static_cast<int>(span.line_begin), -1,
+    static_cast<int>(span.line_end), -1
+  };
 }
+
+Location::Range locationFromSrcLoc(const SrcLoc& srcloc) {
+  return Location::Range {
+    srcloc.line_begin, srcloc.col_begin,
+    srcloc.line_end, srcloc.col_end
+  };
+}
+
+} // anonymous namespace
 
 ///////////////////////////////////////////////////////////////////////////////
 // hhbc::Str Helpers
@@ -372,7 +387,15 @@ void translateTypedef(TranslationState& ts, const hhbc::Typedef& t) {
         parts.emplace_back(TypeConstraint::makeMixed());
       }
     }
-    return TypeConstraint::makeUnion(name, parts);
+    try {
+      return TypeConstraint::makeUnion(name, parts);
+    } catch (FatalErrorException& ex) {
+      throw FatalUnitError(
+        ex.what(), ts.ue->m_filepath,
+        locationFromSpan(t.span),
+        FatalOp::Runtime
+      );
+    }
   }();
 
   auto tys = toTypedValue(t.type_structure);
@@ -919,13 +942,7 @@ void translateOpcodeInstruction(TranslationState& ts, const Opcode& o) {
 }
 
 void translateSrcLoc(TranslationState& ts, const SrcLoc& srcloc) {
-  auto const loc = Location::Range(
-    srcloc.line_begin,
-    srcloc.col_begin,
-    srcloc.line_end,
-    srcloc.col_end
-  );
-  ts.srcLoc = loc;
+  ts.srcLoc = locationFromSrcLoc(srcloc);
 }
 
 void translatePseudoInstruction(TranslationState& ts, const Pseudo& p) {
@@ -1216,7 +1233,7 @@ void translateFunction(TranslationState& ts, const hhbc::Function& f) {
                       userAttrs, false);
 
   std::tie(ts.fe->retUserType, ts.fe->retTypeConstraint) = retTypeInfo;
-  ts.srcLoc = Location::Range{static_cast<int>(f.span.line_begin), -1, static_cast<int>(f.span.line_end), -1};
+  ts.srcLoc = locationFromSpan(f.span);
   translateFunctionBody(ts, f.body, ubs, {}, {}, hasReifiedGenerics);
   checkNative(ts);
 }
@@ -1264,8 +1281,7 @@ void translateMethod(TranslationState& ts, const hhbc::Method& m, const UpperBou
                             ts.fe->retUpperBounds, retTypeInfo.second, userAttrs,
                             false);
 
-  ts.srcLoc = Location::Range{static_cast<int>(m.span.line_begin), -1,
-                              static_cast<int>(m.span.line_end), -1};
+  ts.srcLoc = locationFromSpan(m.span);
   std::tie(ts.fe->retUserType, ts.fe->retTypeConstraint) = retTypeInfo;
   translateFunctionBody(ts, m.body, ubs, classUbs, shadowedTParams, hasReifiedGenerics);
   checkNative(ts);
@@ -1520,11 +1536,10 @@ void translate(TranslationState& ts, const hhbc::Unit& unit) {
   translateUserAttributes(unit.file_attributes, ts.ue->m_fileAttributes);
   translateSymbolInfo(unit.missing_symbols, unit.error_symbols, *ts.ue);
   maybeThen(unit.fatal, [&](Fatal fatal) {
-    auto const loc = fatal.loc;
     auto const msg = toString(fatal.message);
     throw FatalUnitError(
       msg, ts.ue->m_filepath,
-      Location::Range(loc.line_begin, loc.col_begin, loc.line_end, loc.col_end),
+      locationFromSrcLoc(fatal.loc),
       fatal.op
     );
   });

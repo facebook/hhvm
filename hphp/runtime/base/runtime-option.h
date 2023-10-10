@@ -1490,6 +1490,9 @@ struct RuntimeOption {
   F(bool, TraitConstantInterfaceBehavior, false)                        \
   F(bool, DiamondTraitMethods, false)                                   \
   F(bool, TreatCaseTypesAsMixed, false)                                 \
+  /* The maximum number of resolved variants allowed in a single case
+     type. This value is determined after flattening. */                \
+  F(uint32_t, MaxCaseTypeVariants, 48)                                  \
   F(uint32_t, HHIRSpecializedDestructorThreshold, 80)                   \
   F(uint32_t, LogSlowWatchmanQueriesMsec, 500)                          \
   F(uint32_t, LogSlowWatchmanQueriesRate, 1)                            \

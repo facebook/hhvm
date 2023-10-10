@@ -1691,3 +1691,19 @@ class CompilerFailureTest(unittest.TestCase):
         self.assertEqual(
             err, "[ERROR:foo.thrift:1] surrogate in `\\u` escape sequence\n"
         )
+
+    def test_qualified_interaction_name(self):
+        write_file("foo.thrift", "interaction I {}")
+        write_file(
+            "bar.thrift",
+            textwrap.dedent(
+                """\
+                include "foo.thrift"
+                service S {
+                    foo.I createI();
+                }
+                """
+            ),
+        )
+        ret, out, err = self.run_thrift("bar.thrift")
+        self.assertEqual(ret, 0)

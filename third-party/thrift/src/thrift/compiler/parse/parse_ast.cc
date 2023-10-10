@@ -644,8 +644,12 @@ class ast_builder : public parser_actions {
         ret.type, {ret.name.loc, ret.name.loc + ret.name.str.size()});
     if (size_t size = return_name.size()) {
       // Handle an interaction or return type name.
-      if (auto interaction_ptr =
-              scope_->find_interaction(program_.scope_name(return_name))) {
+      std::string qualified_name;
+      if (return_name.find('.') == std::string::npos) {
+        qualified_name = program_.scope_name(return_name);
+        return_name = qualified_name;
+      }
+      if (auto interaction_ptr = scope_->find_interaction(return_name)) {
         interaction = t_type_ref::from_ptr(
             interaction_ptr, {ret.name.loc, ret.name.loc + size});
       } else if (ret.type) {

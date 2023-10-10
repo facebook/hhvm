@@ -275,6 +275,7 @@ add_library(
   transport/core/RequestStateMachine.cpp
   transport/core/RpcMetadataUtil.cpp
   transport/core/RpcMetadataPlugins.cpp
+  transport/core/SendCallbacks.cpp
   transport/core/ThriftClient.cpp
   transport/core/ThriftClientCallback.cpp
   transport/core/ThriftRequest.cpp

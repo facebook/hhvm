@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <memory>
 #include <vector>
 
@@ -121,6 +122,7 @@ class ThriftRocketServerHandler : public RocketServerHandler {
   static thread_local uint32_t sample_;
 
   int32_t version_;
+  std::chrono::milliseconds maxResponseWriteTime_;
 
   folly::once_flag setupLoggingFlag_;
 

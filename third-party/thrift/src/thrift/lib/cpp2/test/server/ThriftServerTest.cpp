@@ -1813,6 +1813,180 @@ TEST_P(HeaderOrRocket, ConnectionAgeTimeout) {
   EXPECT_THROW(client->sync_sendResponse(response, 200), TTransportException);
 }
 
+TEST_P(HeaderOrRocket, ResponseWriteTimeout) {
+  class TestInterface : public apache::thrift::ServiceHandler<TestService> {
+   public:
+    TestInterface() = delete;
+    TestInterface(
+        folly::Baton<>& requestReceivedBaton,
+        folly::Baton<>& callbackInstalledBaton)
+        : requestReceivedBaton_{requestReceivedBaton},
+          callbackInstalledBaton_{callbackInstalledBaton} {}
+
+    // only used to configure the server-side connection socket
+    int sync_echoInt(int) override {
+      shrinkSocketSendBuffer();
+      return 0;
+    }
+
+    void sync_sendResponse(std::string& _return, int64_t block) override {
+      if (block > 0) {
+        requestReceivedBaton_.post();
+        callbackInstalledBaton_.wait();
+      }
+
+      // Write a response that is
+      // a) much larger than the send buffer, and
+      // b) random to mitigate undesired effects of (possible) compression at
+      //    lower points in the networking stack
+      _return = getRandomString(bufsize_ * 100);
+    }
+
+   private:
+    void shrinkSocketSendBuffer() {
+      auto const_transport =
+          getRequestContext()->getConnectionContext()->getTransport();
+      auto transport = const_cast<folly::AsyncTransport*>(const_transport);
+      auto sock = transport->getUnderlyingTransport<folly::AsyncSocket>();
+      sock->setSendBufSize(0); // smallest possible size
+      socklen_t bufsizelen = sizeof(bufsize_);
+      if (sock->getSockOpt<int>(SOL_SOCKET, SO_SNDBUF, &bufsize_, &bufsizelen) <
+          0) {
+        FAIL() << "Unable to get server send socket buffer size";
+      }
+    }
+
+    std::string getRandomString(size_t len) {
+      auto randomChar = []() -> char { return 32 + (rand() % 95); };
+      std::string str(len, 0);
+      std::generate_n(str.begin(), len, randomChar);
+      return str;
+    }
+
+    int bufsize_{0};
+    folly::Baton<>& requestReceivedBaton_;
+    folly::Baton<>& callbackInstalledBaton_;
+  };
+
+  class SlowReadCallback : public folly::AsyncReader::ReadCallback {
+   public:
+    SlowReadCallback() = delete;
+
+    explicit SlowReadCallback(
+        folly::AsyncSocket* socket,
+        size_t maxBytesPerLoop,
+        std::chrono::milliseconds sleepMsPerLoop)
+        : socket_{socket},
+          maxBytesPerLoop_{maxBytesPerLoop},
+          sleepMsPerLoop_{sleepMsPerLoop} {}
+
+    void install() {
+      socket_->getEventBase()->runImmediatelyOrRunInEventBaseThreadAndWait(
+          [this]() {
+            wrapped_ = socket_->getReadCallback();
+            socket_->setMaxReadsPerEvent(1);
+            socket_->setRecvBufSize(0); // smallest possible size
+            socket_->setReadCB(this);
+          });
+    }
+
+    void uninstall() {
+      socket_->getEventBase()->runImmediatelyOrRunInEventBaseThreadAndWait(
+          [this]() { socket_->setReadCB(wrapped_); });
+    }
+
+    void getReadBuffer(void** bufReturn, size_t* lenReturn) override {
+      wrapped_->getReadBuffer(bufReturn, lenReturn);
+      if (*lenReturn > 0 && maxBytesPerLoop_ > 0) {
+        *lenReturn = std::min<size_t>(maxBytesPerLoop_, *lenReturn);
+      }
+    }
+    void getReadBuffers(folly::IOBufIovecBuilder::IoVecVec& iovs) override {
+      wrapped_->getReadBuffers(iovs);
+    }
+    void readDataAvailable(size_t len) noexcept override {
+      if (sleepMsPerLoop_ > std::chrono::milliseconds::zero()) {
+        std::this_thread::sleep_for(sleepMsPerLoop_);
+      }
+      wrapped_->readDataAvailable(len);
+    }
+    ZeroCopyMemStore* readZeroCopyEnabled() noexcept override {
+      return wrapped_->readZeroCopyEnabled();
+    }
+    void getZeroCopyFallbackBuffer(
+        void** bufReturn, size_t* lenReturn) noexcept override {
+      wrapped_->getZeroCopyFallbackBuffer(bufReturn, lenReturn);
+    }
+    void readZeroCopyDataAvailable(
+        std::unique_ptr<IOBuf>&& zeroCopyData,
+        size_t additionalBytes) noexcept override {
+      wrapped_->readZeroCopyDataAvailable(
+          std::move(zeroCopyData), additionalBytes);
+    }
+    bool isBufferMovable() noexcept override {
+      return wrapped_->isBufferMovable();
+    }
+    size_t maxBufferSize() const override { return wrapped_->maxBufferSize(); }
+    void readBufferAvailable(std::unique_ptr<IOBuf> readBuf) noexcept override {
+      wrapped_->readBufferAvailable(std::move(readBuf));
+    }
+    void readEOF() noexcept override { wrapped_->readEOF(); }
+    void readErr(const folly::AsyncSocketException& ex) noexcept override {
+      wrapped_->readErr(ex);
+    }
+
+   private:
+    folly::AsyncSocket* socket_;
+    folly::AsyncReader::ReadCallback* wrapped_{nullptr};
+    size_t maxBytesPerLoop_;
+    std::chrono::milliseconds sleepMsPerLoop_;
+  };
+
+  folly::Baton<> requestReceivedBaton;
+  folly::Baton<> callbackInstalledBaton;
+  ScopedServerInterfaceThread ssit(std::make_shared<TestInterface>(
+      requestReceivedBaton, callbackInstalledBaton));
+
+  // set maxResponseWriteTime to 1 second
+  auto& config =
+      apache::thrift::detail::getThriftServerConfig(ssit.getThriftServer());
+  config.setMaxResponseWriteTime(folly::observer::makeStaticObserver(
+      std::make_optional(std::chrono::milliseconds{1000})));
+
+  std::unique_ptr<SlowReadCallback> readCallback;
+
+  auto client = ssit.newStickyClient<TestServiceAsyncClient>(
+      nullptr, [&readCallback, this](auto socket) {
+        readCallback =
+            std::make_unique<SlowReadCallback>(socket.get(), 1000, 100ms);
+        return makeChannel(std::move(socket));
+      });
+
+  // Call to shrink server socket buffer
+  client->semifuture_echoInt(0).get();
+
+  // Test normal client reads (timeout should not fire)
+  auto t1 = client->semifuture_sendResponse(0).getTry();
+  EXPECT_FALSE(t1.hasException());
+
+  // Test slow client reads (timeout should fire)
+  auto fut = client->semifuture_sendResponse(1);
+
+  /* Header sets the read callback (to a new TAsyncTransportHandler) on the
+   * EventBase thread for every request. This code ensures that our
+   * SlowReadCallback wraps the active ReadCallback.
+   *
+   * This process isn't necessary for Rocket, because it uses the same
+   * ReadCallback across requests.
+   */
+  requestReceivedBaton.wait();
+  readCallback->install();
+  callbackInstalledBaton.post();
+
+  auto t2 = std::move(fut).getTry();
+  EXPECT_TRUE(t2.hasException());
+}
+
 INSTANTIATE_TEST_CASE_P(
     HeaderOrRocket,
     HeaderOrRocket,

@@ -29,6 +29,7 @@
 #include <thrift/lib/cpp2/server/LoggingEventHelper.h>
 #include <thrift/lib/cpp2/server/MonitoringMethodNames.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
+#include <thrift/lib/cpp2/transport/core/SendCallbacks.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketRoutingHandler.h>
 
 THRIFT_FLAG_DEFINE_bool(server_rocket_upgrade_enabled, true);
@@ -718,9 +719,17 @@ void Cpp2Connection::Cpp2Request::sendReply(
   if (tryCancel()) {
     connection_->setServerHeaders(*req_);
     markProcessEnd();
-    auto* observer = connection_->getWorker()->getServer()->getObserver();
-    auto maxResponseSize =
-        connection_->getWorker()->getServer()->getMaxResponseSize();
+    auto* server = connection_->getWorker()->getServer();
+    const auto& serverConfig = server->getThriftServerConfig();
+    auto maxResponseWriteTime = serverConfig.getMaxResponseWriteTime().get();
+    auto maxResponseSize = serverConfig.getMaxResponseSize().get();
+    auto* observer = server->getObserver();
+
+    if (maxResponseWriteTime > std::chrono::milliseconds{0}) {
+      sendCallback = new ResponseWriteTimeoutSendCallback(
+          *connection_, maxResponseWriteTime, sendCallback);
+    }
+
     if (maxResponseSize != 0 && response.length() > maxResponseSize) {
       req_->sendErrorWrapped(
           folly::make_exception_wrapper<TApplicationException>(

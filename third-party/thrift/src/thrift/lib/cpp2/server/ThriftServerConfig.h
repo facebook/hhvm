@@ -241,6 +241,12 @@ class ThriftServerConfig {
   const ServerAttributeDynamic<size_t>& getWriteBatchingByteSize() const;
 
   /**
+   * Get max response write time
+   */
+  const ServerAttributeDynamic<std::chrono::milliseconds>&
+  getMaxResponseWriteTime() const;
+
+  /**
    * Indicate whether it is safe to modify the server config through setters.
    * This roughly corresponds to whether the IO thread pool could be servicing
    * requests.
@@ -549,6 +555,14 @@ class ThriftServerConfig {
       folly::observer::Observer<std::optional<size_t>> batchingByteSize,
       AttributeSource source = AttributeSource::OVERRIDE);
 
+  /**
+   * Set max response write time.
+   */
+  void setMaxResponseWriteTime(
+      folly::observer::Observer<std::optional<std::chrono::milliseconds>>
+          maxResponseWriteTime,
+      AttributeSource source = AttributeSource::OVERRIDE);
+
  private:
   friend class ThriftServer;
   template <typename T>
@@ -747,6 +761,16 @@ class ThriftServerConfig {
    * == disabled)
    */
   ServerAttributeDynamic<size_t> writeBatchingByteSize_{0};
+
+  /**
+   * Caps the amount of time that can be spent writing a single response (0 ==
+   * disabled). If a response has not been fully written to the network within
+   * maxResponseWriteTime milliseconds, the connection will be closed and all
+   * resources belonging to requests owned by the connection will be returned to
+   * the server.
+   */
+  ServerAttributeDynamic<std::chrono::milliseconds> maxResponseWriteTime_{
+      std::chrono::milliseconds::zero()};
 
   ServerAttributeStatic<folly::sorted_vector_set<std::string>>
       methodsBypassMaxRequestsLimit_{{}};

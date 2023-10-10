@@ -32,6 +32,7 @@
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
+#include <thrift/lib/cpp2/transport/core/SendCallbacks.h>
 #include <thrift/lib/cpp2/transport/rocket/PayloadUtils.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Flags.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
@@ -436,14 +437,16 @@ ThriftServerRequestResponse::ThriftServerRequestResponse(
     RequestsRegistry& reqRegistry,
     rocket::Payload&& debugPayload,
     RocketServerFrameContext&& context,
-    int32_t version)
+    int32_t version,
+    std::chrono::milliseconds maxResponseWriteTime)
     : RocketThriftRequest(
           serverConfigs,
           std::move(metadata),
           connContext,
           evb,
           std::move(context)),
-      version_(version) {
+      version_(version),
+      maxResponseWriteTime_(maxResponseWriteTime) {
   new (&debugStubToInit) RequestsRegistry::DebugStub(
       reqRegistry,
       *this,
@@ -477,6 +480,12 @@ void ThriftServerRequestResponse::sendThriftResponse(
       std::move(data),
       std::move(getRequestContext()->getHeader()->fds),
       context_.connection().getRawSocket());
+
+  if (maxResponseWriteTime_ > std::chrono::milliseconds{0}) {
+    cb = apache::thrift::MessageChannel::SendCallbackPtr(
+        new ResponseWriteTimeoutSendCallback(
+            context_.connection(), maxResponseWriteTime_, cb.release()));
+  }
   context_.sendPayload(
       std::move(payload), Flags().next(true).complete(true), std::move(cb));
 }

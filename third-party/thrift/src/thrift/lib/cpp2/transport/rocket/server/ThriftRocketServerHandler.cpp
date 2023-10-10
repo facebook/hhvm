@@ -89,7 +89,11 @@ ThriftRocketServerHandler::ThriftRocketServerHandler(
           worker_.get()),
       setupFrameHandlers_(handlers),
       version_(static_cast<int32_t>(std::min(
-          kRocketServerMaxVersion, THRIFT_FLAG(rocket_server_max_version)))) {
+          kRocketServerMaxVersion, THRIFT_FLAG(rocket_server_max_version)))),
+      maxResponseWriteTime_(worker_->getServer()
+                                ->getThriftServerConfig()
+                                .getMaxResponseWriteTime()
+                                .get()) {
   connContext_.setTransportType(Cpp2ConnContext::TransportType::ROCKET);
   for (const auto& handler : worker_->getServer()->getEventHandlersUnsafe()) {
     handler->newConnection(&connContext_);
@@ -273,7 +277,8 @@ void ThriftRocketServerHandler::handleRequestResponseFrame(
         *requestsRegistry_,
         std::move(debugPayload),
         std::move(context),
-        version_);
+        version_,
+        maxResponseWriteTime_);
   };
 
   handleRequestCommon(

@@ -74,7 +74,8 @@ class ThriftServerRequestResponse final : public RocketThriftRequest {
       RequestsRegistry& reqRegistry,
       rocket::Payload&& debugPayload,
       RocketServerFrameContext&& context,
-      int32_t version);
+      int32_t version,
+      std::chrono::milliseconds maxResponseWriteTime);
 
   bool includeEnvelope() const override { return true; }
 
@@ -98,6 +99,7 @@ class ThriftServerRequestResponse final : public RocketThriftRequest {
 
  private:
   const int32_t version_;
+  std::chrono::milliseconds maxResponseWriteTime_;
 };
 
 // Object corresponding to rsocket REQUEST_FNF request (one-way request)

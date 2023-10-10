@@ -218,6 +218,11 @@ ThriftServerConfig::getWriteBatchingByteSize() const {
   return writeBatchingByteSize_;
 }
 
+const ServerAttributeDynamic<std::chrono::milliseconds>&
+ThriftServerConfig::getMaxResponseWriteTime() const {
+  return maxResponseWriteTime_;
+}
+
 const ServerAttributeDynamic<bool>& ThriftServerConfig::getEnableCodel() const {
   return enableCodel_;
 }
@@ -505,6 +510,13 @@ void ThriftServerConfig::setWriteBatchingByteSize(
     folly::observer::Observer<std::optional<size_t>> batchingByteSize,
     AttributeSource source) {
   writeBatchingByteSize_.set(batchingByteSize, source);
+}
+
+void ThriftServerConfig::setMaxResponseWriteTime(
+    folly::observer::Observer<std::optional<std::chrono::milliseconds>>
+        maxResponseWriteTime,
+    AttributeSource source) {
+  maxResponseWriteTime_.set(std::move(maxResponseWriteTime), source);
 }
 
 void ThriftServerConfig::setIngressMemoryLimit(

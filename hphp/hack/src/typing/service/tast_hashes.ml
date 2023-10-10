@@ -70,7 +70,7 @@ let is_enabled tcopt = TypecheckerOptions.dump_tast_hashes tcopt
 let map ctx path tasts _errors =
   let data =
     Timeout.with_timeout
-      ~timeout:30
+      ~timeout:10
       ~on_timeout:(fun _timings -> error_while_hashing tasts)
       ~do_:(fun _timeout ->
         let tasts = Tast.map_by_names tasts ~f:(Tast_expand.expand_def ctx) in

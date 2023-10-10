@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * xml_parser_create() creates a new XML parser and returns a resource handle

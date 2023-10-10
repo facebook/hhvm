@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * Provides string comparison capability with support for appropriate

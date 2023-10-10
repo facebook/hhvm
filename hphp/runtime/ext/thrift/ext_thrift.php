@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 <<__Native>>
 function thrift_protocol_write_binary(object $transportobj,

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 <<__NativeData>>
 class IntlCalendar {

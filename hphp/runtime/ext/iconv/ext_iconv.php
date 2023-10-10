@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 const int ICONV_MIME_DECODE_CONTINUE_ON_ERROR = 2;
 const int ICONV_MIME_DECODE_STRICT = 1;

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * ( excerpt from
  * http://php.net/manual/en/class.weakref.php )

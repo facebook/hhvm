@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * A file archive, compressed with Zip.

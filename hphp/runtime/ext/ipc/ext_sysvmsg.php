@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * The function converts the pathname of an existing accessible file and a

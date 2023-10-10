@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 namespace __hhvm_intrinsics {
 

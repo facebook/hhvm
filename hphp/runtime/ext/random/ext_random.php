@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * Generates cryptographically secure pseudo-random bytes that are suitable for

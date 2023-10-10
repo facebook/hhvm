@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * Function to extract a sequence of default grapheme clusters from a text

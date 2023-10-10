@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class _SplPriorityQueueHeap extends SplMaxHeap {
 

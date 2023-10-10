@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /* exif_imagetype() reads the first bytes of an image and checks its
  * signature.  exif_imagetype() can be used to avoid calls to other exif

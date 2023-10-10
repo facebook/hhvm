@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 const int APC_ITER_TYPE = 0x1;
 const int APC_ITER_KEY = 0x2;

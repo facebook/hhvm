@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /* Wraps a string to a given number of characters.
  * @param string $str - The input string.

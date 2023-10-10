@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 const bool GD_BUNDLED = true;
 

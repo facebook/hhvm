@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /* Constants not found in ICU library */
 const int IDNA_CONTAINS_ACE_PREFIX = 8;

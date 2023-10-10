@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 const string MCRYPT_3DES = "tripledes";
 const string MCRYPT_ARCFOUR = "arcfour";

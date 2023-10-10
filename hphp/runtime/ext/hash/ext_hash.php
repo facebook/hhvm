@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * hash() - http://php.net/function.hash

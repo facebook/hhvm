@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 const float M_PI       = 3.1415926535898;
 const float M_PI_2     = 1.5707963267949;

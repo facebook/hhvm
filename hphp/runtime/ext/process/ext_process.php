@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * Creates a timer that will send a SIGALRM signal to the process after the

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /* openssl_csr_export_to_file() takes the Certificate Signing Request
  * represented by csr and saves it as ascii-armoured text into the file named

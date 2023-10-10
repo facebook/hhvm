@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 function array_map($func, $arr, ...$extra) {
   if ($extra) {

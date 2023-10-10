@@ -1,3 +1,3 @@
-<?hh // partial
+<?hh
 
 class InvalidOperationException extends RuntimeException {}

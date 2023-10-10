@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * Objects implementing JsonSerializable can customize their JSON

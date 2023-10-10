@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 const bool MEMCACHE_HAVE_SESSION = false;
 

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class GlobIterator extends FilesystemIterator
   implements SeekableIterator, Countable {

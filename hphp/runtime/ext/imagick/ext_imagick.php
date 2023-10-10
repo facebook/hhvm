@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class ImagickException extends RuntimeException { }
 class ImagickDrawException extends RuntimeException { }

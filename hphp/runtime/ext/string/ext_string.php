@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 namespace HH {
 newtype FormatString<T> = string;

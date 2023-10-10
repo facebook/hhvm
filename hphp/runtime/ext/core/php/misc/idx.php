@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 <<file: __EnableUnstableFeatures("readonly")>>
 
 namespace HH {

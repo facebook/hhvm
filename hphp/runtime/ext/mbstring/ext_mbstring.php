@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 const int MB_OVERLOAD_MAIL = 1;
 const int MB_OVERLOAD_STRING = 2;

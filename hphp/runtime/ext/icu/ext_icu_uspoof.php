@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * Unicode Security and Spoofing Detection

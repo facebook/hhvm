@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 <<__Sealed(Error::class, Exception::class)>>
 interface Throwable {

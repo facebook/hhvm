@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 // empty class that's always available
 final class stdClass {

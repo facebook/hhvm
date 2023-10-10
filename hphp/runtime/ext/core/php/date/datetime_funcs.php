@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 function date_diff(
   DateTimeInterface $datetime,

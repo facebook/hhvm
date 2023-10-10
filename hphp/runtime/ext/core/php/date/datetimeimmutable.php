@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class DateTimeImmutable implements DateTimeInterface {
   public function __construct(

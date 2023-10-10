@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * A class that interfaces SQLite 3 databases.

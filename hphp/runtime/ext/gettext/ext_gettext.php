@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /* With bind_textdomain_codeset(), you can set in which encoding will be
  * messages from domain returned by gettext() and similar functions.

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * Check for alphanumeric character(s)

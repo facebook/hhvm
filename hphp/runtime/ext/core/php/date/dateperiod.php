@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class DatePeriod implements Iterator {
 

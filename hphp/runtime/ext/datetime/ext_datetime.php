@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * Representation of date and time.

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * Creates and returns a stream context with any options supplied in options

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 <<__Native>>
 function gmp_abs(mixed $a): mixed;
 

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 // Used to represent resources
 class __resource {

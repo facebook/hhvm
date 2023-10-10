@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 namespace __SystemLib {
   // systemlib can't have closures, so we get this...
@@ -91,7 +91,7 @@ namespace HH {
  * For example:
  *
  * ```
- * <?hh // partial
+ * <?hh
  * $v = Vector {
  *   Vector {1, 2, 3},
  *   Vector {1, 2}

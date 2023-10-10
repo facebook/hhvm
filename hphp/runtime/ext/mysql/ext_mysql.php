@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 const int MYSQL_CLIENT_COMPRESS = 32;
 const int MYSQL_CLIENT_IGNORE_SPACE = 256;

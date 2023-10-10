@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /* A Watchman (https://facebook.github.io/watchman/) API for HHVM.
  *

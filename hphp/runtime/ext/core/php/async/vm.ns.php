@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 // These are in a separate file so they can be loaded before the things that
 // use them

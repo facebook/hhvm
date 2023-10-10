@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * Establishes a connection to a LDAP server on a specified hostname and port.

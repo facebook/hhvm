@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 <<__NativeData>>
 final class Generator implements HH\KeyedIterator {

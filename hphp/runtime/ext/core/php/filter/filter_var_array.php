@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 abstract final class _FilterVarArrayFilterValidator {
   private static $ids = null;

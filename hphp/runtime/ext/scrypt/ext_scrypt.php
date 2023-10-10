@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * Derive a key using the scrypt key derivation function.

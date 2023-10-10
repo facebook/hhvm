@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /* Returns status of the circular reference collector.
  */

@@ -367,6 +367,12 @@ TEST_F(AdapterTest, UnionCodeGen_Custom) {
   EXPECT_FALSE(obj2b < obj2a);
 }
 
+TEST_F(AdapterTest, Setter) {
+  ThriftAdaptTestUnion obj1;
+  obj1.set_i32_string_field("1");
+  EXPECT_EQ(obj1.i32_string_field_ref(), "1");
+}
+
 TEST_F(AdapterTest, TemplatedTestAdapter_AdaptTemplatedTestStruct) {
   auto obj = AdaptTemplatedTestStruct();
   auto int_map = std::map<int64_t, int64_t>{{1, 1}};

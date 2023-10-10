@@ -21,6 +21,7 @@
 #include <stdexcept>
 #include <string>
 
+#include <folly/Conv.h>
 #include <folly/io/IOBuf.h>
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp/Field.h>
@@ -552,6 +553,15 @@ class Timestamp {
 
  private:
   uint64_t v_{0};
+};
+
+struct I32ToStringAdapter {
+  static std::string fromThrift(int32_t val) {
+    return folly::to<std::string>(val);
+  }
+  static int32_t toThrift(const std::string& val) {
+    return folly::to<int32_t>(val);
+  }
 };
 
 } // namespace apache::thrift::test

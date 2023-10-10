@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/req-optional.h"
@@ -110,6 +111,9 @@ bool register_intercept(const String& name, const Variant& callback) {
     StructuredLog::coinflip(RO::EvalJitInterceptFunctionLogRate)) {
     StructuredLogEntry entry;
     entry.setStr("intercepted_func", interceptedFunc->fullName()->data());
+    addBacktraceToStructLog(
+      createBacktrace(BacktraceArgs()), entry
+    );
     StructuredLog::log("hhvm_intercept_function", entry);
   }
 

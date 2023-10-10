@@ -25,7 +25,7 @@
 
   <%^type:string_or_binary?%>
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
-  <%field:cpp_deprecated_accessor_type%>& set_<%field:cpp_name%>(<%field:cpp_type%> t = <%field:cpp_type%>()) {
+  <%!deprecated%><%field:cpp_storage_type%>& set_<%field:cpp_name%>(<%field:cpp_type%> t = <%field:cpp_type%>()) {
     using T0 = <%field:cpp_storage_type%>;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
@@ -41,7 +41,7 @@
   <%/type:string_or_binary?%>
   <%#type:string_or_binary?%>
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
-  <%field:cpp_deprecated_accessor_type%>& set_<%field:cpp_name%>(<%field:cpp_type%> const &t) {
+  <%!deprecated%><%field:cpp_storage_type%>& set_<%field:cpp_name%>(<%field:cpp_type%> const &t) {
     using T0 = <%field:cpp_storage_type%>;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
@@ -56,7 +56,7 @@
   }
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
-  <%field:cpp_deprecated_accessor_type%>& set_<%field:cpp_name%>(<%field:cpp_type%>&& t) {
+  <%!deprecated%><%field:cpp_storage_type%>& set_<%field:cpp_name%>(<%field:cpp_type%>&& t) {
     using T0 = <%field:cpp_storage_type%>;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
@@ -70,7 +70,8 @@
     return value_.<%field:cpp_name%>;
   }
 
-  template<typename... T, typename = ::apache::thrift::safe_overload_t<<%field:cpp_type%>, T...>> <%field:cpp_deprecated_accessor_type%>& set_<%field:cpp_name%>(T&&... t) {
+  <%!deprecated%>
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<<%field:cpp_type%>, T...>> <%field:cpp_storage_type%>& set_<%field:cpp_name%>(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::<%field:cpp_name%>);
 <%#field:cpp_ref?%>
@@ -88,7 +89,8 @@
 
   <%^field:cpp_noncopyable?%>
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
-  <%field:cpp_deprecated_accessor_type%>& set_<%field:cpp_name%>(<%field:cpp_type%> const &t) {
+  <%!deprecated%>
+  <%field:cpp_storage_type%>& set_<%field:cpp_name%>(<%field:cpp_type%> const &t) {
     using T0 = <%field:cpp_storage_type%>;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
@@ -99,7 +101,7 @@
   <%/field:cpp_noncopyable?%>
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
-  <%field:cpp_deprecated_accessor_type%>& set_<%field:cpp_name%>(<%field:cpp_type%>&& t) {
+  <%!deprecated%><%field:cpp_storage_type%>& set_<%field:cpp_name%>(<%field:cpp_type%>&& t) {
     using T0 = <%field:cpp_storage_type%>;
     using T = folly::type_t<T0, A...>;
     __fbthrift_clear();
@@ -108,7 +110,8 @@
     return value_.<%field:cpp_name%>;
   }
 
-  template<typename... T, typename = ::apache::thrift::safe_overload_t<<%field:cpp_type%>, T...>> <%field:cpp_deprecated_accessor_type%>& set_<%field:cpp_name%>(T&&... t) {
+  <%!deprecated%>
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<<%field:cpp_type%>, T...>> <%field:cpp_storage_type%>& set_<%field:cpp_name%>(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::<%field:cpp_name%>);
     ::new (std::addressof(value_.<%field:cpp_name%>)) <%field:cpp_type%>(std::forward<T>(t)...);
@@ -116,9 +119,10 @@
   }
   <%/field:cpp_ref?%>
   <%#field:cpp_ref?%>
-  <%field:cpp_deprecated_accessor_type%>& set_<%field:cpp_name%>(<%field:cpp_type%> const &t);
-  <%field:cpp_deprecated_accessor_type%>& set_<%field:cpp_name%>(<%field:cpp_type%>&& t);
-  template<typename... T, typename = ::apache::thrift::safe_overload_t<<%field:cpp_type%>, T...>> <%field:cpp_deprecated_accessor_type%>& set_<%field:cpp_name%>(T&&... t) {
+  <%!deprecated%><%field:cpp_storage_type%>& set_<%field:cpp_name%>(<%field:cpp_type%> const &t);
+  <%!deprecated%><%field:cpp_storage_type%>& set_<%field:cpp_name%>(<%field:cpp_type%>&& t);
+  <%!deprecated%>
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<<%field:cpp_type%>, T...>> <%field:cpp_storage_type%>& set_<%field:cpp_name%>(T&&... t) {
     // defer resolution of ref_ in case ref_::element_type would here be incomplete
     using ref_ = folly::conditional_t<(sizeof...(T) < size_t(-1)), <%field:cpp_storage_type%>, void>;
     __fbthrift_clear();

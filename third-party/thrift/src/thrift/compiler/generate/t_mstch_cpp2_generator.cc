@@ -1691,8 +1691,6 @@ class cpp_mstch_field : public mstch_field {
             {"field:cpp_type", &cpp_mstch_field::cpp_type},
             {"field:cpp_storage_name", &cpp_mstch_field::cpp_storage_name},
             {"field:cpp_storage_type", &cpp_mstch_field::cpp_storage_type},
-            {"field:cpp_deprecated_accessor_type",
-             &cpp_mstch_field::cpp_deprecated_accessor_type},
             {"field:has_deprecated_accessors?",
              &cpp_mstch_field::has_deprecated_accessors},
             {"field:serialization_next_field_key",
@@ -1778,16 +1776,6 @@ class cpp_mstch_field : public mstch_field {
   }
   mstch::node eligible_for_storage_name_mangling() {
     return is_eligible_for_storage_name_mangling();
-  }
-  mstch::node cpp_deprecated_accessor_type() {
-    // The type to use for pre-field_ref backwards compatiblity functions.
-    // These leaked the internal storage type directly.
-    //
-    // TODO(afuller): Remove this once all non-field_ref based accessors have
-    // been removed.
-    assert(field_context_->strct);
-    return cpp_context_->resolver().get_storage_type(
-        *field_, *field_context_->strct);
   }
   mstch::node has_deprecated_accessors() {
     return !cpp2::is_explicit_ref(field_) && !cpp2::is_lazy(field_) &&

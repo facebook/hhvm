@@ -15,7 +15,7 @@
   limitations under the License.
 
 %><%#struct:legacy_api?%><%#struct:fields%>
-  <%field:cpp_deprecated_accessor_type%> move_<%field:cpp_name%>() {
+  <%!deprecated%><%field:cpp_storage_type%> move_<%field:cpp_name%>() {
     assert(getType() == Type::<%field:cpp_name%>);
     return std::move(value_.<%field:cpp_name%>);
   }

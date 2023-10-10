@@ -615,6 +615,14 @@ let pessimise_fun_type ~fun_kind ~this_class ~no_auto_likes ctx p ty =
       let ft =
         { ft with ft_params = List.map ft.ft_params ~f:pessimise_param_type }
       in
+      (* For the this type, although not enforced (because of generics), it's very
+       * unlikely that we will get errors if we do not pessimise it.
+       *)
+      let optimistically_do_not_pessimise =
+        match get_node ret_ty with
+        | Tthis -> true
+        | _ -> false
+      in
       (match
          ( fun_kind,
            TypecheckerOptions.(
@@ -632,24 +640,28 @@ let pessimise_fun_type ~fun_kind ~this_class ~no_auto_likes ctx p ty =
                  (make_like_type ~intersect_with:None ~return_from_async ret_ty))
           )
       | _ ->
-        (match get_enforcement ~return_from_async ~this_class ctx ret_ty with
-        | Enforced _ -> mk (get_reason ty, Tfun ft)
-        | Unenforced enf_ty_opt ->
-          (* For partially enforced type such as enums, we intersect with the
-           * base type for concrete method return types in order to avoid
-           * issues with hierarchies e.g. overriding a method that returns
-           * the base type
-           *)
-          let intersect_with =
-            match fun_kind with
-            | Concrete_method -> enf_ty_opt
-            | _ -> None
-          in
-          mk
-            ( get_reason ty,
-              Tfun
-                (update_return_ty
-                   ft
-                   (make_like_type ~intersect_with ~return_from_async ret_ty))
-            )))
+        if optimistically_do_not_pessimise then
+          mk (get_reason ty, Tfun ft)
+        else (
+          match get_enforcement ~return_from_async ~this_class ctx ret_ty with
+          | Enforced _ -> mk (get_reason ty, Tfun ft)
+          | Unenforced enf_ty_opt ->
+            (* For partially enforced type such as enums, we intersect with the
+             * base type for concrete method return types in order to avoid
+             * issues with hierarchies e.g. overriding a method that returns
+             * the base type
+             *)
+            let intersect_with =
+              match fun_kind with
+              | Concrete_method -> enf_ty_opt
+              | _ -> None
+            in
+            mk
+              ( get_reason ty,
+                Tfun
+                  (update_return_ty
+                     ft
+                     (make_like_type ~intersect_with ~return_from_async ret_ty))
+              )
+        ))
   | _ -> ty

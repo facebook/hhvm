@@ -376,12 +376,12 @@ static std::string logContext(folly::AsyncTransport& transport) {
   int socketFd = -1;
   try {
     localAddr = transport.getLocalAddress().describe();
-  } catch (folly::AsyncSocketException& ex) {
+  } catch (folly::AsyncSocketException&) {
     localAddr = "(unknown)";
   }
   try {
     remoteAddr = transport.getPeerAddress().describe();
-  } catch (folly::AsyncSocketException& ex) {
+  } catch (folly::AsyncSocketException&) {
     remoteAddr = "(unknown)";
   }
 

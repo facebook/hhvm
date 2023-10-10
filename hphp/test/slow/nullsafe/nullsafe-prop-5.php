@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function byVal($x) :mixed{
   echo 'byVal is called, $x is: ';

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 interface IBase {
   const type T = this;

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 <<__EntryPoint>> function main(): void {
 $x = 1;
 

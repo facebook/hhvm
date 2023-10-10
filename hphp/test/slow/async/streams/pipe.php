@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 <<__EntryPoint>>
 async function main() :Awaitable<mixed>{

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class :x:composable-element {
   <<__Deprecated('message')>>

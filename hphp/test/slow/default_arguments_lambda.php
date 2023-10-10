@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 async function f(
   $x = async () ==> {

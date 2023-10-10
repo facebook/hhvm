@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 type TestAutoloadedType1 = Map;
 

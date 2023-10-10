@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh
 
 async function block() :Awaitable<mixed>{
   await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT, 0);

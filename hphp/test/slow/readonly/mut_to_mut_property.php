@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 class P {
   public function __construct(public ?P $prop = null, public readonly ?P $ro_prop = null) { }

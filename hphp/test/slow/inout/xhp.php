@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class :x {
   public static function foo(inout $x) :mixed{

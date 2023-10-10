@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 type ShapeKeyEscaping = shape(
   'Whomst\'d\'ve' => int,

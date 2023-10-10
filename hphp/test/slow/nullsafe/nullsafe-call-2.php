@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 class C {
   public function foo(): D {
     return new D();

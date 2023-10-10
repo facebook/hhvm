@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 use namespace HH\Lib\{C, Str};
 use namespace HH\Lib\_Private\_Locale;

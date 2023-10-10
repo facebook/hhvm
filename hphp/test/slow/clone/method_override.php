@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class TestCloneWhatBase {
   public function clone(): this {

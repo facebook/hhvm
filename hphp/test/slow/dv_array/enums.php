@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 enum Day: int {
   SUNDAY = 1;

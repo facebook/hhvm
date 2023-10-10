@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 function test_functions_arg($k) :mixed{
   HH\global_set($k, __FILE__);

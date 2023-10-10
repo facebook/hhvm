@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class E<reify T1, reify T2> {
   public function f() :mixed{

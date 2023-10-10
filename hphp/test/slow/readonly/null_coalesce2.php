@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 class Foo {
   public ?Foo $x = null;
   public readonly function getFoo(?Foo $x): ?Foo {

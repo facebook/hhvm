@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh
 
 class Wrapper {
   public function __construct(public darray $val) { var_dump("Make wrapper"); }

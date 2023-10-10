@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh
 
 function regular($a, $b, $c) :mixed{
   echo '* ', __FUNCTION__, "\n";

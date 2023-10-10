@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class LogExn extends Exception {
   function __construct($msg) {

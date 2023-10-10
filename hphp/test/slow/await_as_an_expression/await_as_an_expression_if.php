@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 async function test(): Awaitable<void> {
   if (await async { return true; }) {

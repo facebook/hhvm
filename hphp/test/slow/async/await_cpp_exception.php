@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh
 
 function boom() :mixed{
   echo "exiting\n";

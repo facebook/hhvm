@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 type Tarraykey = arraykey;
 type Tnum = num;

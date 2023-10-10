@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class Foo {
   const bar = 'I am a constant';

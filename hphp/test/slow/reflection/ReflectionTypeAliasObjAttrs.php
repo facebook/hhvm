@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class X {}
 enum Y : int {}

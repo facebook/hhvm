@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh
 
 function waitFor(string $filename, WatchmanInstance $wminst): void {
   print("Waiting for $filename\n");

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function is_arraykey(mixed $x): void {
   if ($x is arraykey) {

@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 /**
  * The description of mailparse_uudecode_all gives the impression that it can

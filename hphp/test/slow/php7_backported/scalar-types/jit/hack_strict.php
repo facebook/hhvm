@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 <<__EntryPoint>>
 function main_hack_strict() :mixed{

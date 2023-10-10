@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh
 
 // Borrowed and stripped down from Watchman project test infrastructure.
 class WatchmanInstance {

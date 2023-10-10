@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class Base {
   const type ShapeWithOptionalField = shape(?'a' => int);

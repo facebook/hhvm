@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 interface I<T> {}
 abstract class C<T> implements I<T> {}

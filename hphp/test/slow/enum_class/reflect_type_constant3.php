@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 enum class Base : mixed {
   const type T = int;

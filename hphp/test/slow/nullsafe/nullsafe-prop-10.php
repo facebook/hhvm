@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 function something($x) :mixed{
 return NullsafeNullsafeProp10Php::$z;
 }

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class ConstArrayAssign {
   const varray<int> MyData = varray[1, 2, 3];

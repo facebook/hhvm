@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class D {
   const int F1 = 42;

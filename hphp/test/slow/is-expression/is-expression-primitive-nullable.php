@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function is_bool_(mixed $x): void {
   if ($x is ?bool) {

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 newtype MyAlias<T> = Set<T>;
 newtype MyAlias2<Tk, Tv> = (function (Tk): Map<Tk, Tv>);

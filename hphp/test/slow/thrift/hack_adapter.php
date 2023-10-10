@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class ThriftStruct {
   const SPEC = darray[

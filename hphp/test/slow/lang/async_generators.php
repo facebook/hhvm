@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh
 
 function log_construction<T>(T $obj): T {
   $class = get_class($obj);

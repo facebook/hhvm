@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 enum Foo : int as int {
   FOO = 1;

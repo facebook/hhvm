@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 async function foo1(): Awaitable<void> {
   $x = (await genx()) + (await geny());

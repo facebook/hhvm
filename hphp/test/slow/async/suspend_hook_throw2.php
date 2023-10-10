@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh
 
 function thrower($why, $what) :mixed{
   if ($why == 'exit' && $what == 'foo') {

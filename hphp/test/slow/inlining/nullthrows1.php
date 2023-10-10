@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function nullthrows<T>(?T $x, ?string $message = null, ...$sprintf_args): T {
   if ($x !== null) {

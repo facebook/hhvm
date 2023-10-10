@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh
 
 class Foo {
   static function bar(int $x, inout bool $y, inout string $z) :mixed{

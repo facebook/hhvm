@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 interface IThriftStruct {}
 
 abstract class IThriftWrapper<TThriftType> {

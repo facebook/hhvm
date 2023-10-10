@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 /*
  * SETUP FUNCTIONS AND CLASSES

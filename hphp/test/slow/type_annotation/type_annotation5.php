@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // error: abstract type const
 abstract class C {

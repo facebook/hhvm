@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 <<file:__EnableUnstableFeatures('readonly')>>
 class Bar{}
 final class :xhp_ui extends XHPTest {

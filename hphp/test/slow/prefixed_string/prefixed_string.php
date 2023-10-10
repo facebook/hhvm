@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function f(): void {
   $x = re"blah blah\n";

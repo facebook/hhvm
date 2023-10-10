@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function is_vec_(mixed $x): void {
   if ($x is vec<_>) {

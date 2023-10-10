@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class D {
   const float F1 = 3.4;

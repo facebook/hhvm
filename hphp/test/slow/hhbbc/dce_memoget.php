@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 <<__Memoize>>
 function foo(string $a, ?string $b) :mixed{

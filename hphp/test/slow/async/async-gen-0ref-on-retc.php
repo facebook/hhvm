@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh
 
 async function foo() :AsyncGenerator<mixed,mixed,void>{
   yield 42;

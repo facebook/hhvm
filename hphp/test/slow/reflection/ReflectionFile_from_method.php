@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class ExampleClass {
   public static function exampleMethod($arg) :mixed{

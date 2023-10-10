@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class C {
   const type T = ?shape('field1'=>?bool, 'field2'=>int, 'field3'=>arraykey);

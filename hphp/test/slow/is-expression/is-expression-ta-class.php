@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 interface I {}
 abstract class C implements I {}

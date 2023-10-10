@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function byRef(inout $x) :mixed{}
 

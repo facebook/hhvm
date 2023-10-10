@@ -67,7 +67,7 @@ FOLLY_ERASE void* invokeStructSet(const TypeInfo& info, void* object) {
 }
 
 template <class Protocol_>
-const FieldInfo* FOLLY_NULLABLE findFieldInfo(
+const FieldInfo* findFieldInfo(
     Protocol_* iprot,
     ProtocolReaderStructReadState<Protocol_>& readState,
     const StructInfo& structInfo) {

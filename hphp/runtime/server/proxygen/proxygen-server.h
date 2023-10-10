@@ -141,6 +141,7 @@ struct ProxygenServer : Server,
     m_dispatcher.saturateWorkers();
   }
   void start() override;
+  void start(bool beginAccepting);
   void waitForEnd() override;
   void stop() override;
   size_t getMaxThreadCount() override {
@@ -235,6 +236,8 @@ struct ProxygenServer : Server,
     return (m_https ? m_drainCount >= m_workers.size() * 2
                     : m_drainCount >= m_workers.size());
   }
+
+  void startAccepting();
 
   // These functions can only be called from the m_workers[0] thread
   void stopListening(bool hard = false);

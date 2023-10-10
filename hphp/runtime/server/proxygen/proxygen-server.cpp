@@ -334,6 +334,10 @@ std::unique_ptr<HPHPSessionAcceptor> ProxygenServer::createAcceptor(
 }
 
 void ProxygenServer::start() {
+  start(true);
+}
+
+void ProxygenServer::start(bool beginAccepting) {
   m_httpServerSocket.reset(new AsyncServerSocket(m_workers[0]->getEventBase()));
   bool needListen = true;
   auto failedToListen = [](const std::exception& ex,
@@ -486,9 +490,9 @@ void ProxygenServer::start() {
       failedToListen(ex, m_httpsConfig.bindAddress);
     }
   }
-  m_httpServerSocket->startAccepting();
-  if (m_httpsServerSocket) {
-    m_httpsServerSocket->startAccepting();
+
+  if (beginAccepting) {
+    startAccepting();
   }
 
   setStatus(RunStatus::RUNNING);
@@ -497,6 +501,13 @@ void ProxygenServer::start() {
     worker->start();
   }
   m_dispatcher.start();
+}
+
+void ProxygenServer::startAccepting() {
+  m_httpServerSocket->startAccepting();
+  if (m_httpsServerSocket) {
+    m_httpsServerSocket->startAccepting();
+  }
 }
 
 void ProxygenServer::waitForEnd() {

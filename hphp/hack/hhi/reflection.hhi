@@ -240,9 +240,9 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
     mixed $object,
     vec<mixed> $args,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getDeclaringClass()[]: HH\FIXME\MISSING_RETURN_TYPE;
+  public function getDeclaringClass()[]: ReflectionClass;
   public function getOriginalClassname()[]: string;
-  public function getPrototype()[]: HH\FIXME\MISSING_RETURN_TYPE;
+  public function getPrototype()[]: ReflectionMethod;
   <<__PHPStdLib>>
   public function setAccessible(bool $accessible)[write_props]: void;
   final public function getAttributeClass<T as HH\MethodAttribute>(

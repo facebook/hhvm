@@ -1017,7 +1017,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    * @return ReflectionClass   A ReflectionClass object of the class that the
    *                           reflected method is part of.
    */
-  public function getDeclaringClass()[] {
+  public function getDeclaringClass()[]: ReflectionClass {
     return new ReflectionClass($this->getDeclaringClassname());
   }
 

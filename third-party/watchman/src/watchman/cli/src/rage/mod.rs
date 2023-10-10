@@ -269,6 +269,31 @@ impl WatchmanRage {
             "{}",
             cmd!("launchctl", "list", "com.github.facebook.watchman").read()
         )?;
+
+        writeln!(self.stream, "launchd.log samples:")?;
+        match File::open("/var/log/com.apple.xpc.launchd/launchd.log") {
+            Ok(file) => {
+                let watchman_lines = BufReader::new(file)
+                    .lines()
+                    .filter_map(|result| {
+                        if let Ok(line) = result {
+                            if line.contains("com.github.facebook.watchman") {
+                                return Some(line);
+                            }
+                        }
+                        None
+                    })
+                    .take(40); // Limit log entries printed to avoid flooding the rage
+
+                for line in watchman_lines {
+                    writeln!(self.stream, "{}", line)?;
+                }
+            }
+            Err(e) => {
+                writeln!(self.stream, "Failed to open launchd.log: {}", e)?;
+            }
+        }
+
         Ok(())
     }
 

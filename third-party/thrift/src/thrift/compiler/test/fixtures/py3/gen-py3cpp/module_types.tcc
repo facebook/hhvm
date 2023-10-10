@@ -917,7 +917,7 @@ void AdaptedUnion::readNoXfer(Protocol_* iprot) {
       case 1:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I16)) {
-          this->set_best();
+          this->best_ref().emplace();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::readWithContext(*iprot, value_.best, _readState);
           
         } else {
@@ -1559,7 +1559,7 @@ void BinaryUnion::readNoXfer(Protocol_* iprot) {
       case 1:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
-          this->set_iobuf_val();
+          this->iobuf_val_ref().emplace();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::py3::simple::IOBuf>::readWithContext(*iprot, value_.iobuf_val, _readState);
           
         } else {

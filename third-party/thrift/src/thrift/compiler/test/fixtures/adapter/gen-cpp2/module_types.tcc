@@ -928,7 +928,7 @@ void Baz::readNoXfer(Protocol_* iprot) {
       case 1:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32)) {
-          this->set_intField();
+          this->intField_ref().emplace();
           ::apache::thrift::op::decode<::apache::thrift::op::get_field_tag<Baz, ::apache::thrift::field_id<1>>>(*iprot, value_.intField, *this);
           
         } else {
@@ -939,7 +939,7 @@ void Baz::readNoXfer(Protocol_* iprot) {
       case 4:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_SET)) {
-          this->set_setField();
+          this->setField_ref().emplace();
           _readState.beforeSubobject(iprot);
           ::apache::thrift::op::decode<::apache::thrift::type::adapted<::my::Adapter2, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>(*iprot, value_.setField);
           _readState.afterSubobject(iprot);
@@ -952,7 +952,7 @@ void Baz::readNoXfer(Protocol_* iprot) {
       case 6:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_MAP)) {
-          this->set_mapField();
+          this->mapField_ref().emplace();
           _readState.beforeSubobject(iprot);
           ::apache::thrift::op::decode<::apache::thrift::op::get_field_tag<Baz, ::apache::thrift::field_id<6>>>(*iprot, value_.mapField, *this);
           _readState.afterSubobject(iprot);
@@ -965,7 +965,7 @@ void Baz::readNoXfer(Protocol_* iprot) {
       case 8:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
-          this->set_binaryField();
+          this->binaryField_ref().emplace();
           ::apache::thrift::op::decode<::apache::thrift::op::get_field_tag<Baz, ::apache::thrift::field_id<8>>>(*iprot, value_.binaryField, *this);
           
         } else {
@@ -976,7 +976,7 @@ void Baz::readNoXfer(Protocol_* iprot) {
       case 9:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I64)) {
-          this->set_longField();
+          this->longField_ref().emplace();
           ::apache::thrift::op::decode<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i64_t>>(*iprot, value_.longField);
           
         } else {
@@ -4152,7 +4152,7 @@ void ThriftAdaptTestUnion::readNoXfer(Protocol_* iprot) {
       case 1:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I64)) {
-          this->set_delay();
+          this->delay_ref().emplace();
           ::apache::thrift::op::decode<::apache::thrift::type::adapted<::apache::thrift::test::AdaptTestMsAdapter, ::apache::thrift::type::i64_t>>(*iprot, value_.delay);
           
         } else {
@@ -4163,7 +4163,7 @@ void ThriftAdaptTestUnion::readNoXfer(Protocol_* iprot) {
       case 2:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
-          this->set_custom();
+          this->custom_ref().emplace();
           ::apache::thrift::op::decode<::apache::thrift::type::adapted<::apache::thrift::test::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>>(*iprot, value_.custom);
           
         } else {

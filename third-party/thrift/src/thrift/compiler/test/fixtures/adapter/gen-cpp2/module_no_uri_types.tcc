@@ -47,7 +47,7 @@ void RefUnion::readNoXfer(Protocol_* iprot) {
       case 1:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
-          this->set_field1();
+          this->field1_ref().emplace();
           auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::string, RefUnion>>>();
           ::apache::thrift::op::decode<::apache::thrift::op::get_field_tag<RefUnion, ::apache::thrift::field_id<1>>>(*iprot, *ptr, *this);
           value_.field1 = std::move(ptr);

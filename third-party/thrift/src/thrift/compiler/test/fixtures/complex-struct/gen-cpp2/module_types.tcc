@@ -3297,7 +3297,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 1:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32)) {
-          this->set_myEnum();
+          this->myEnum_ref().emplace();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::cpp2::MyEnum>::readWithContext(*iprot, value_.myEnum, _readState);
           
         } else {
@@ -3308,7 +3308,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 2:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT)) {
-          this->set_myStruct();
+          this->myStruct_ref().emplace();
           _readState.beforeSubobject(iprot);
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::MyStruct>::readWithContext(*iprot, value_.myStruct, _readState);
           _readState.afterSubobject(iprot);
@@ -3321,7 +3321,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 3:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT)) {
-          this->set_myDataItem();
+          this->myDataItem_ref().emplace();
           _readState.beforeSubobject(iprot);
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::MyDataItem>::readWithContext(*iprot, value_.myDataItem, _readState);
           _readState.afterSubobject(iprot);
@@ -3334,7 +3334,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 4:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT)) {
-          this->set_complexNestedStruct();
+          this->complexNestedStruct_ref().emplace();
           _readState.beforeSubobject(iprot);
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::ComplexNestedStruct>::readWithContext(*iprot, value_.complexNestedStruct, _readState);
           _readState.afterSubobject(iprot);
@@ -3347,7 +3347,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 5:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I64)) {
-          this->set_longValue();
+          this->longValue_ref().emplace();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t>::readWithContext(*iprot, value_.longValue, _readState);
           
         } else {
@@ -3358,7 +3358,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 6:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32)) {
-          this->set_intValue();
+          this->intValue_ref().emplace();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, value_.intValue, _readState);
           
         } else {
@@ -3563,7 +3563,7 @@ void MyUnionFloatFieldThrowExp::readNoXfer(Protocol_* iprot) {
       case 1:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32)) {
-          this->set_myEnum();
+          this->myEnum_ref().emplace();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::cpp2::MyEnum>::readWithContext(*iprot, value_.myEnum, _readState);
           
         } else {
@@ -3574,7 +3574,7 @@ void MyUnionFloatFieldThrowExp::readNoXfer(Protocol_* iprot) {
       case 2:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_LIST)) {
-          this->set_setFloat();
+          this->setFloat_ref().emplace();
           _readState.beforeSubobject(iprot);
           value_.setFloat = ::std::vector<::std::vector<float>>();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::floating_point>>, ::std::vector<::std::vector<float>>>::readWithContext(*iprot, value_.setFloat, _readState);
@@ -3588,7 +3588,7 @@ void MyUnionFloatFieldThrowExp::readNoXfer(Protocol_* iprot) {
       case 3:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT)) {
-          this->set_myDataItem();
+          this->myDataItem_ref().emplace();
           _readState.beforeSubobject(iprot);
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::MyDataItem>::readWithContext(*iprot, value_.myDataItem, _readState);
           _readState.afterSubobject(iprot);
@@ -3601,7 +3601,7 @@ void MyUnionFloatFieldThrowExp::readNoXfer(Protocol_* iprot) {
       case 4:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT)) {
-          this->set_complexNestedStruct();
+          this->complexNestedStruct_ref().emplace();
           _readState.beforeSubobject(iprot);
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::cpp2::ComplexNestedStruct>::readWithContext(*iprot, value_.complexNestedStruct, _readState);
           _readState.afterSubobject(iprot);

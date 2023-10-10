@@ -182,7 +182,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 1:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_BOOL)) {
-          this->set_bool_field();
+          this->bool_field_ref().emplace();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool>::readWithContext(*iprot, value_.bool_field, _readState);
           
         } else {
@@ -193,7 +193,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 2:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_BYTE)) {
-          this->set_byte_field();
+          this->byte_field_ref().emplace();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int8_t>::readWithContext(*iprot, value_.byte_field, _readState);
           
         } else {
@@ -204,7 +204,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 3:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I16)) {
-          this->set_short_field();
+          this->short_field_ref().emplace();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::readWithContext(*iprot, value_.short_field, _readState);
           
         } else {
@@ -215,7 +215,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 4:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32)) {
-          this->set_int_field();
+          this->int_field_ref().emplace();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, value_.int_field, _readState);
           
         } else {
@@ -226,7 +226,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 5:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I64)) {
-          this->set_long_field();
+          this->long_field_ref().emplace();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t>::readWithContext(*iprot, value_.long_field, _readState);
           
         } else {
@@ -237,7 +237,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 6:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_FLOAT)) {
-          this->set_float_field();
+          this->float_field_ref().emplace();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, float>::readWithContext(*iprot, value_.float_field, _readState);
           
         } else {
@@ -248,7 +248,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 7:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_DOUBLE)) {
-          this->set_double_field();
+          this->double_field_ref().emplace();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, double>::readWithContext(*iprot, value_.double_field, _readState);
           
         } else {
@@ -259,7 +259,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 8:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
-          this->set_string_field();
+          this->string_field_ref().emplace();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, value_.string_field, _readState);
           
         } else {
@@ -270,7 +270,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 9:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
-          this->set_binary_field();
+          this->binary_field_ref().emplace();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::std::string>::readWithContext(*iprot, value_.binary_field, _readState);
           
         } else {
@@ -281,7 +281,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 10:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32)) {
-          this->set_enum_field();
+          this->enum_field_ref().emplace();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::terse_write::MyEnum>::readWithContext(*iprot, value_.enum_field, _readState);
           
         } else {
@@ -292,7 +292,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 11:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_LIST)) {
-          this->set_list_field();
+          this->list_field_ref().emplace();
           _readState.beforeSubobject(iprot);
           value_.list_field = ::std::vector<::std::int16_t>();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::integral>, ::std::vector<::std::int16_t>>::readWithContext(*iprot, value_.list_field, _readState);
@@ -306,7 +306,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 12:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_SET)) {
-          this->set_set_field();
+          this->set_field_ref().emplace();
           _readState.beforeSubobject(iprot);
           value_.set_field = ::std::set<::std::int16_t>();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::set<::apache::thrift::type_class::integral>, ::std::set<::std::int16_t>>::readWithContext(*iprot, value_.set_field, _readState);
@@ -320,7 +320,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 13:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_MAP)) {
-          this->set_map_field();
+          this->map_field_ref().emplace();
           _readState.beforeSubobject(iprot);
           value_.map_field = ::std::map<::std::int16_t, ::std::int16_t>();
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::integral>, ::std::map<::std::int16_t, ::std::int16_t>>::readWithContext(*iprot, value_.map_field, _readState);
@@ -334,7 +334,7 @@ void MyUnion::readNoXfer(Protocol_* iprot) {
       case 14:
       {
         if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT)) {
-          this->set_struct_field();
+          this->struct_field_ref().emplace();
           _readState.beforeSubobject(iprot);
           ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::MyStruct>::readWithContext(*iprot, value_.struct_field, _readState);
           _readState.afterSubobject(iprot);

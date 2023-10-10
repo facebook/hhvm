@@ -1,0 +1,6 @@
+int(4)
+int(4)
+NULL
+int(42)
+
+Fatal error: fb_intercept2 was used on a non-interceptable function (HH\Shapes::idx). It appears in the NonInterceptableFunctions blocklist. in %s/slow/intercept/restrict_intercept_systemlib1.php on line %d

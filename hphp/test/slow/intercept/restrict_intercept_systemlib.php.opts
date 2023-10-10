@@ -1,0 +1,2 @@
+-vEval.NonInterceptableFunctions.*=HH\\Lib\\C\\contains
+-vEval.JitEnableRenameFunction=2

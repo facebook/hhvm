@@ -1,0 +1,2 @@
+-vEval.NonInterceptableFunctions.*=HH\\Shapes::idx
+-vEval.JitEnableRenameFunction=2

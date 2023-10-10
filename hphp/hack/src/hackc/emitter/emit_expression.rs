@@ -8,7 +8,6 @@ use std::collections::BTreeMap;
 use std::iter;
 use std::str::FromStr;
 
-use bstr::ByteSlice;
 use emit_pos::emit_pos;
 use emit_pos::emit_pos_then;
 use env::emitter::Emitter;
@@ -3347,7 +3346,7 @@ fn emit_call_expr<'a, 'arena, 'decl>(
         }
         (Expr_::Id(id), args, None)
             if (id.1 == fb::IDX || id.1 == fb::IDXREADONLY)
-                && !e.options().function_is_renamable(id.1.as_bytes().as_bstr())
+                && !e.options().function_is_renamable(&id.1)
                 && (args.len() == 2 || args.len() == 3) =>
         {
             emit_idx(e, env, pos, args)

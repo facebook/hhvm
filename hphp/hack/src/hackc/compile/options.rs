@@ -6,7 +6,6 @@
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 
-use bstr::BStr;
 use bstr::BString;
 use hhbc_string_utils as string_utils;
 pub use oxidized::parser_options::ParserOptions;
@@ -65,22 +64,34 @@ impl Options {
     pub fn log_extern_compiler_perf(&self) -> bool {
         self.hhbc.log_extern_compiler_perf
     }
-    pub fn function_is_renamable(&self, func: &BStr) -> bool {
-        let stripped_func = string_utils::strip_global_ns_bstr(func);
+    pub fn function_is_renamable(&self, func: &str) -> bool {
+        let stripped_func = string_utils::strip_global_ns(func);
         match self.hhvm.jit_enable_rename_function {
             JitEnableRenameFunction::Enable => true,
-            JitEnableRenameFunction::RestrictedEnable => {
-                self.hhvm.renamable_functions.contains(stripped_func)
-            }
+            JitEnableRenameFunction::RestrictedEnable => self
+                .hhvm
+                .renamable_functions
+                .contains(stripped_func.as_bytes()),
             JitEnableRenameFunction::Disable => false,
         }
     }
-    pub fn function_is_interceptable(&self, func: &BStr) -> bool {
-        let stripped_func = string_utils::strip_global_ns_bstr(func);
+    pub fn function_is_interceptable(&self, func: &str) -> bool {
+        let stripped_func = string_utils::strip_global_ns(func);
         !self
             .hhvm
             .non_interceptable_functions
-            .contains(stripped_func)
+            .contains(stripped_func.as_bytes())
+    }
+
+    pub fn method_is_interceptable(&self, class_name: &str, meth: &str) -> bool {
+        let stripped_meth = string_utils::strip_global_ns(meth);
+        let stripped_class_name =
+            string_utils::mangle(string_utils::strip_global_ns(class_name).into());
+        let formatted_name = format!("{}::{}", stripped_class_name, stripped_meth);
+        !self
+            .hhvm
+            .non_interceptable_functions
+            .contains(formatted_name.as_bytes())
     }
 }
 

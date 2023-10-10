@@ -6,7 +6,6 @@ use std::sync::Arc;
 
 use ast_scope::Scope;
 use ast_scope::ScopeItem;
-use bstr::ByteSlice;
 use emit_pos::emit_pos_then;
 use env::emitter::Emitter;
 use env::Env;
@@ -52,13 +51,8 @@ pub(crate) fn get_attrs_for_fun<'a, 'arena, 'decl>(
         is_systemlib || (hhbc::has_dynamically_callable(user_attrs) && !is_memoize_impl);
     let is_prov_skip_frame = hhbc::has_provenance_skip_frame(user_attrs);
     let is_meth_caller = hhbc::has_meth_caller(user_attrs);
-    let is_persistent = is_systemlib
-        && !emitter
-            .options()
-            .function_is_renamable(fd.name.1.as_bytes().as_bstr());
-    let is_interceptable = emitter
-        .options()
-        .function_is_interceptable(fd.name.1.as_bytes().as_bstr());
+    let is_persistent = is_systemlib && !emitter.options().function_is_renamable(&fd.name.1);
+    let is_interceptable = emitter.options().function_is_interceptable(&fd.name.1);
 
     let mut attrs = Attr::AttrNone;
     attrs.set(Attr::AttrInterceptable, is_interceptable);

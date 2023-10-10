@@ -50,7 +50,7 @@ trap 'rm -rf -- "$PACKAGE_WORKDIR"' EXIT
 
 mkdir -p "$PACKAGE_WORKDIR$PREFIX"
 cp -ar "$BUILT/bin" "$PACKAGE_WORKDIR$PREFIX/bin"
-cp -ar watchman/build/package/DEBIAN "$PACKAGE_WORKDIR"
+cp -ar watchman/build/package/watchman-deb/DEBIAN "$PACKAGE_WORKDIR"
 
 sed -i "s/%VERSION%/$PACKAGE_VERSION/" "$PACKAGE_WORKDIR/DEBIAN/control"
 

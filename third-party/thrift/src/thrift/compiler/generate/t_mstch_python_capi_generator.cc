@@ -284,10 +284,9 @@ class python_capi_mstch_program : public mstch_program {
              &python_capi_mstch_program::capi_module_prefix},
             {"program:cpp_namespaces",
              &python_capi_mstch_program::get_cpp2_namespace},
-            {"program:generate_capi?", &python_capi_mstch_program::has_types},
+            {"program:generate_capi?",
+             &python_capi_mstch_program::has_types_node},
             {"program:module_path", &python_capi_mstch_program::module_path},
-            {"program:marshal_capi?",
-             &python_capi_mstch_program::has_marshal_types},
         });
     has_marshal_types_ = check_has_marshal_types();
     if (has_marshal_types_) {
@@ -297,10 +296,7 @@ class python_capi_mstch_program : public mstch_program {
     visit_types_for_typedefs();
   }
 
-  mstch::node has_types() {
-    return program_->structured_definitions().size() > 0 ||
-        program_->enums().size() > 0;
-  }
+  mstch::node has_types_node() { return has_types(); }
 
   mstch::node capi_includes() {
     std::vector<const CapiInclude*> namespaces;
@@ -326,8 +322,6 @@ class python_capi_mstch_program : public mstch_program {
     return prefix;
   }
 
-  mstch::node has_marshal_types() { return has_marshal_types_; }
-
   mstch::node module_path() {
     return get_py3_namespace_with_name_and_prefix(
         program_, get_option("root_module_prefix"));
@@ -342,10 +336,13 @@ class python_capi_mstch_program : public mstch_program {
     std::string include_prefix;
   };
 
+  bool has_types() const {
+    return !program_->structured_definitions().empty() ||
+        !program_->enums().empty();
+  }
+
   bool check_has_marshal_types() {
-    if (has_option("marshal_python_capi") &&
-        (!program_->structs_and_unions().empty() ||
-         !program_->exceptions().empty())) {
+    if (has_option("marshal_python_capi") && has_types()) {
       return true;
     }
     for (const t_structured* s : program_->structured_definitions()) {

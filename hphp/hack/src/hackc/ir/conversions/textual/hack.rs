@@ -67,6 +67,12 @@ pub(crate) enum Hhbc {
     Await,
     #[decl(fn hhbc_await_all(...) -> *HackMixed)]
     AwaitAll,
+    #[decl(fn hhbc_bit_and(*HackMixed, *HackMixed) -> *HackMixed)]
+    BitAnd,
+    #[decl(fn hhbc_bit_or(*HackMixed, *HackMixed) -> *HackMixed)]
+    BitOr,
+    #[decl(fn hhbc_bit_xor(*HackMixed, *HackMixed) -> *HackMixed)]
+    BitXor,
     #[decl(fn hhbc_cast_bool(*HackMixed) -> *HackMixed)]
     CastBool,
     #[decl(fn hhbc_cast_dict(*HackMixed) -> *HackMixed)]
@@ -219,10 +225,16 @@ pub(crate) enum Hhbc {
     NewVec,
     #[decl(fn hhbc_not(*HackMixed) -> *HackMixed)]
     Not,
+    #[decl(fn hhbc_pow(*HackMixed, *HackMixed) -> *HackMixed)]
+    Pow,
     #[decl(fn hhbc_print(*HackMixed) -> *HackMixed)]
     Print,
     #[decl(fn hhbc_record_reified_generic(*HackMixed) -> *HackMixed)]
     RecordReifiedGeneric,
+    #[decl(fn hhbc_shl(*HackMixed, *HackMixed) -> *HackMixed)]
+    Shl,
+    #[decl(fn hhbc_shr(*HackMixed, *HackMixed) -> *HackMixed)]
+    Shr,
     #[decl(fn hhbc_sub(*HackMixed, *HackMixed) -> *HackMixed)]
     Sub,
     #[decl(fn hhbc_throw(*HackMixed) -> noreturn)]

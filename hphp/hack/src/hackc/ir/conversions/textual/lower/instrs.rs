@@ -39,6 +39,7 @@ use ir::MethodId;
 use ir::ObjMethodOp;
 use ir::PropId;
 use ir::ReadonlyOp;
+use ir::SetOpOp;
 use ir::SpecialClsRef;
 use ir::TypeStructResolveOp;
 use ir::UnitBytesId;
@@ -103,6 +104,9 @@ impl LowerInstrs<'_> {
             Hhbc::AddNewElemC(..) => hack::Hhbc::AddNewElemC,
             Hhbc::Await(..) => hack::Hhbc::Await,
             Hhbc::AwaitAll(..) => hack::Hhbc::AwaitAll,
+            Hhbc::BitAnd(..) => hack::Hhbc::BitAnd,
+            Hhbc::BitOr(..) => hack::Hhbc::BitOr,
+            Hhbc::BitXor(..) => hack::Hhbc::BitXor,
             Hhbc::CastBool(..) => hack::Hhbc::CastBool,
             Hhbc::CastDict(..) => hack::Hhbc::CastDict,
             Hhbc::CastDouble(..) => hack::Hhbc::CastDouble,
@@ -111,8 +115,8 @@ impl LowerInstrs<'_> {
             Hhbc::CastString(..) => hack::Hhbc::CastString,
             Hhbc::CastVec(..) => hack::Hhbc::CastVec,
             Hhbc::ChainFaults(..) => hack::Hhbc::ChainFaults,
-            Hhbc::ClassGetC(..) => hack::Hhbc::ClassGetC,
             Hhbc::CheckClsRGSoft(..) => hack::Hhbc::CheckClsRGSoft,
+            Hhbc::ClassGetC(..) => hack::Hhbc::ClassGetC,
             Hhbc::CmpOp(_, CmpOp::Eq, _) => hack::Hhbc::CmpEq,
             Hhbc::CmpOp(_, CmpOp::Gt, _) => hack::Hhbc::CmpGt,
             Hhbc::CmpOp(_, CmpOp::Gte, _) => hack::Hhbc::CmpGte,
@@ -152,8 +156,11 @@ impl LowerInstrs<'_> {
             Hhbc::NewKeysetArray(..) => hack::Hhbc::NewKeysetArray,
             Hhbc::NewVec(..) => hack::Hhbc::NewVec,
             Hhbc::Not(..) => hack::Hhbc::Not,
+            Hhbc::Pow(..) => hack::Hhbc::Pow,
             Hhbc::Print(..) => hack::Hhbc::Print,
             Hhbc::RecordReifiedGeneric(..) => hack::Hhbc::RecordReifiedGeneric,
+            Hhbc::Shl(..) => hack::Hhbc::Shl,
+            Hhbc::Shr(..) => hack::Hhbc::Shr,
             Hhbc::Sub(..) => hack::Hhbc::Sub,
             Hhbc::ThrowNonExhaustiveSwitch(..) => hack::Hhbc::ThrowNonExhaustiveSwitch,
             Hhbc::WHResult(..) => hack::Hhbc::WHResult,
@@ -724,6 +731,26 @@ impl TransformInstr for LowerInstrs<'_> {
                 let lid = builder.strings.intern_str("self");
                 let lid = LocalId::Named(lid);
                 Instr::Hhbc(Hhbc::CGetL(lid, loc))
+            }
+            Instr::Hhbc(Hhbc::SetOpL(vid, lid, op, loc)) => {
+                let src = builder.emit(Instr::Hhbc(Hhbc::CGetL(lid, loc)));
+                let op = match op {
+                    SetOpOp::AndEqual => Instr::Hhbc(Hhbc::BitAnd([src, vid], loc)),
+                    SetOpOp::ConcatEqual => Instr::Hhbc(Hhbc::Concat([src, vid], loc)),
+                    SetOpOp::DivEqual => Instr::Hhbc(Hhbc::Div([src, vid], loc)),
+                    SetOpOp::MinusEqual => Instr::Hhbc(Hhbc::Sub([src, vid], loc)),
+                    SetOpOp::ModEqual => Instr::Hhbc(Hhbc::Modulo([src, vid], loc)),
+                    SetOpOp::MulEqual => Instr::Hhbc(Hhbc::Mul([src, vid], loc)),
+                    SetOpOp::OrEqual => Instr::Hhbc(Hhbc::BitOr([src, vid], loc)),
+                    SetOpOp::PlusEqual => Instr::Hhbc(Hhbc::Add([src, vid], loc)),
+                    SetOpOp::PowEqual => Instr::Hhbc(Hhbc::Pow([src, vid], loc)),
+                    SetOpOp::SlEqual => Instr::Hhbc(Hhbc::Shl([src, vid], loc)),
+                    SetOpOp::SrEqual => Instr::Hhbc(Hhbc::Shr([src, vid], loc)),
+                    SetOpOp::XorEqual => Instr::Hhbc(Hhbc::BitXor([src, vid], loc)),
+                    _ => unreachable!(),
+                };
+                let dst = builder.emit(op);
+                Instr::Hhbc(Hhbc::SetL(dst, lid, loc))
             }
             Instr::Hhbc(Hhbc::Silence(..)) => {
                 // Silence sets hhvm error reporting level, no-op here

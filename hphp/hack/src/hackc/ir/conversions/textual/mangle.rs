@@ -28,6 +28,7 @@ impl Mangle for [u8] {
             b"false" => "false_".to_owned(),
             b"float" => "float_".to_owned(),
             b"global" => "global_".to_owned(),
+            b"handlers" => "handlers_".to_owned(),
             b"int" => "int_".to_owned(),
             b"jmp" => "jmp_".to_owned(),
             b"load" => "load_".to_owned(),

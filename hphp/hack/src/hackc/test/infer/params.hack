@@ -109,3 +109,23 @@ function softParam(<<__Soft>> string $a): void {
 function likeParam(~string $a): void {
   echo $a;
 }
+
+// TEST-CHECK-BAL: define $root.genericRet
+// CHECK: define $root.genericRet($this: *void, $a: *T) : *T {
+// CHECK: #b0:
+// CHECK:   n0: *HackMixed = load &$a
+// CHECK:   ret n0
+// CHECK: }
+function genericRet<T>(T $a): T {
+  return $a;
+}
+
+// TEST-CHECK-BAL: define .async $root.genericAsyncRet
+// CHECK: define .async $root.genericAsyncRet($this: *void, $a: *T) : *T {
+// CHECK: #b0:
+// CHECK:   n0: *HackMixed = load &$a
+// CHECK:   ret n0
+// CHECK: }
+async function genericAsyncRet<T>(T $a): Awaitable<T> {
+  return $a;
+}

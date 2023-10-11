@@ -163,6 +163,9 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
         // is a TypeConstant.
         modifiers -= TypeConstraintFlags::TypeConstant;
 
+        // TypeVars can't be 'is' texted because they're non-reified types.
+        assert!(!modifiers.contains(TypeConstraintFlags::TypeVar));
+
         if modifiers == TypeConstraintFlags::NoFlags {
             fn is_type_op(op: IsTypeOp, vid: ValueId, loc: LocId) -> Instr {
                 Instr::Hhbc(Hhbc::IsTypeC(vid, op, loc))

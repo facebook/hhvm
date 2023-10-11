@@ -228,3 +228,30 @@ function mop_basel_incdec_ei(vec<int> $a): int {
   /* HH_FIXME[1002] Assignment as expression */
   return $a[3]++;
 }
+
+// TEST-CHECK-BAL: define $root.mop_basel_unset_ei
+// CHECK: define $root.mop_basel_unset_ei($this: *void, $a: *HackDict) : *void {
+// CHECK: #b0:
+// CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(19), $builtins.hack_string("generic_types"), $builtins.hhbc_new_vec($builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(1)), $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(1))))
+// CHECK:   n1: *HackMixed = load &$a
+// CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
+// CHECK:   n3 = $builtins.hack_int(5)
+// CHECK:   n4 = $builtins.hack_array_cow_unset(n1, n3)
+// CHECK:   store &$a <- n4: *HackMixed
+// CHECK:   ret null
+// CHECK: }
+function mop_basel_unset_ei(dict<int, int> $a): void {
+  unset($a[5]);
+}
+
+// TEST-CHECK-BAL: define $root.mop_basel_unset_pt
+// CHECK: define $root.mop_basel_unset_pt($this: *void, $a: *C) : *void {
+// CHECK: #b0:
+// CHECK:   n0: *HackMixed = load &$a
+// CHECK:   store n0.?.foo <- null: *HackMixed
+// CHECK:   ret null
+// CHECK: }
+function mop_basel_unset_pt(C $a): void {
+  /* HH_FIXME[4135] Allow unset */
+  unset($a->foo);
+}

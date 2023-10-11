@@ -52,12 +52,13 @@ pub(crate) fn write(
     iid: InstrId,
     mop: &ir::instr::MemberOp,
 ) -> Result {
-    let sid = emit_mop(state, mop)?;
-    state.set_iid(iid, sid);
+    if let Some(sid) = emit_mop(state, mop)? {
+        state.set_iid(iid, sid);
+    }
     Ok(())
 }
 
-fn emit_mop(state: &mut FuncState<'_, '_, '_>, mop: &ir::instr::MemberOp) -> Result<Sid> {
+fn emit_mop(state: &mut FuncState<'_, '_, '_>, mop: &ir::instr::MemberOp) -> Result<Option<Sid>> {
     let mut locals = mop.locals.iter().copied();
     let mut operands = mop.operands.iter().copied();
 
@@ -190,6 +191,11 @@ impl Base {
         }
         Ok(())
     }
+
+    fn unset(&self, state: &mut FuncState<'_, '_, '_>) -> Result {
+        // Treat this as a store of null.
+        self.store(state, Expr::Const(textual::Const::Null))
+    }
 }
 
 enum Pending {
@@ -246,6 +252,23 @@ impl Pending {
                     .chain(std::iter::once(src.into()))
                     .collect_vec();
                 let base_value = state.call_builtin(hack::Builtin::HackArrayCowSet, params)?;
+                base.store(state, base_value.into())?;
+            }
+        }
+        Ok(())
+    }
+
+    fn unset(self, state: &mut FuncState<'_, '_, '_>) -> Result {
+        match self {
+            Pending::None => unreachable!(),
+            Pending::Base(base) => {
+                base.unset(state)?;
+            }
+            Pending::ArrayAppend { .. } => unreachable!(),
+            Pending::ArrayGet { base, dim } => {
+                let base_value = base.load(state)?;
+                let params = std::iter::once(base_value.into()).chain(dim).collect_vec();
+                let base_value = state.call_builtin(hack::Builtin::HackArrayCowUnset, params)?;
                 base.store(state, base_value.into())?;
             }
         }
@@ -393,13 +416,13 @@ where
         Ok(())
     }
 
-    fn finish(mut self, final_op: &FinalOp) -> Result<Sid> {
+    fn finish(mut self, final_op: &FinalOp) -> Result<Option<Sid>> {
         use textual::Const;
 
         let key = final_op.key().unwrap();
         self.write_entry(key)?;
 
-        let value: Sid = match *final_op {
+        let value: Option<Sid> = match *final_op {
             FinalOp::IncDecM { inc_dec_op, .. } => {
                 let pre = self.pending.read(self.state)?;
                 let op = match inc_dec_op {
@@ -413,17 +436,19 @@ where
                     .call_builtin(hack::Builtin::Hhbc(op), (pre, incr))?;
                 self.pending.write(self.state, post)?;
                 match inc_dec_op {
-                    ir::IncDecOp::PreInc | ir::IncDecOp::PreDec => post,
-                    ir::IncDecOp::PostInc | ir::IncDecOp::PostDec => pre,
+                    ir::IncDecOp::PreInc | ir::IncDecOp::PreDec => Some(post),
+                    ir::IncDecOp::PostInc | ir::IncDecOp::PostDec => Some(pre),
                     _ => unreachable!(),
                 }
             }
             FinalOp::QueryM { query_m_op, .. } => match query_m_op {
-                QueryMOp::CGet | QueryMOp::CGetQuiet => self.pending.read(self.state)?,
+                QueryMOp::CGet | QueryMOp::CGetQuiet => Some(self.pending.read(self.state)?),
                 QueryMOp::Isset => {
                     let value = self.pending.read(self.state)?;
-                    self.state
-                        .call_builtin(hack::Builtin::Hhbc(hack::Hhbc::IsTypeNull), [value])?
+                    let result = self
+                        .state
+                        .call_builtin(hack::Builtin::Hhbc(hack::Hhbc::IsTypeNull), [value])?;
+                    Some(result)
                 }
                 QueryMOp::InOut => textual_todo! {
                     todo!();
@@ -434,7 +459,7 @@ where
                 let src = self.next_operand();
                 let src = self.state.fb.write_expr_stmt(src)?;
                 self.pending.write(self.state, src)?;
-                src
+                Some(src)
             }
             FinalOp::SetRangeM { .. } => unreachable!(),
             FinalOp::SetOpM { ref key, .. } => textual_todo! {
@@ -450,22 +475,13 @@ where
                     MemberKey::W => { }
                 }
                 self.next_operand();
-                self.state.write_todo("SetOpM")?
+                Some(self.state.write_todo("SetOpM")?)
             },
-            FinalOp::UnsetM { ref key, .. } => textual_todo! {
-                match *key {
-                    MemberKey::EC => { self.next_operand(); }
-                    MemberKey::EI(_) => { }
-                    MemberKey::EL => { let _ = self.locals.next(); }
-                    MemberKey::ET(_) => { }
-                    MemberKey::PC => { }
-                    MemberKey::PL => { }
-                    MemberKey::PT(_) => { }
-                    MemberKey::QT(_) => { }
-                    MemberKey::W => { }
-                }
-                self.state.write_todo("UnsetM")?
-            },
+            FinalOp::UnsetM { ref key, .. } => {
+                let _ = key;
+                self.pending.unset(self.state)?;
+                None
+            }
         };
 
         assert!(self.locals.next().is_none());

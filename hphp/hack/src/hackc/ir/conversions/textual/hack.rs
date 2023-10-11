@@ -285,6 +285,19 @@ pub(crate) enum Builtin {
     ///
     #[decl(fn hack_array_cow_set(...) -> *HackMixed)]
     HackArrayCowSet,
+    /// n-ary array "unset".
+    ///
+    /// Performs the n-ary array "unset" operation but ensures that the arrays
+    /// along the way are unique and then updates the final value. Returns the
+    /// copied base array.
+    ///
+    /// This is equivalent to the sequence:
+    ///   a = ensure_unique(a)
+    ///   a[b] = ensure_unique(a[b])
+    ///   unset a[b][c]
+    ///
+    #[decl(fn hack_array_cow_unset(...) -> *HackMixed)]
+    HackArrayCowUnset,
     /// n-ary array "get"
     ///
     /// Performs the n-ary array "get" operation without any copies and returns

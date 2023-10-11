@@ -349,6 +349,9 @@ pub(crate) enum Builtin {
     /// Set the named superglobal.
     #[decl(fn hack_get_superglobal(name: *HackMixed, value: *HackMixed) -> void)]
     SetSuperglobal,
+    /// Note that this argument is 'readonly'.
+    #[decl(fn __sil_readonly(*HackArray) -> *HackArray)]
+    SilReadonly,
     /// Note that this argument is a 'splat' (unwrapped array args for a function).
     #[decl(fn __sil_splat(*HackArray) -> *HackArray)]
     SilSplat,

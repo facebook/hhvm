@@ -847,12 +847,11 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
         }
     }
 
-    if let Some(readonly) = readonly.as_ref() {
-        textual_todo! {
-            let params = readonly.iter().map(|idx| idx.to_string()).join(", ");
-            state.fb.comment(&format!("TODO: readonly call params: {params}"))?;
-        }
-    }
+    let readonly: HashSet<u32> = if let Some(readonly) = readonly.as_ref() {
+        readonly.iter().copied().collect()
+    } else {
+        HashSet::default()
+    };
 
     if num_rets >= 2 {
         textual_todo! {
@@ -867,7 +866,18 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
     let mut args = args
         .iter()
         .copied()
-        .map(|vid| state.lookup_vid(vid))
+        .enumerate()
+        .map(|(idx, vid)| {
+            let arg = state.lookup_vid(vid);
+            if readonly.contains(&(idx as u32)) {
+                // For readonly we'll pass the arg through a function that the
+                // model can recognize so it understands that it needs some
+                // extra analysis.
+                hack::expr_builtin(hack::Builtin::SilReadonly, [arg])
+            } else {
+                arg
+            }
+        })
         .collect_vec();
 
     // A 'splat' is a call with an expanded array:

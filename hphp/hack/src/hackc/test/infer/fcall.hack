@@ -240,8 +240,7 @@ function fcall_cls_method(classname<D> $a): void {
 // CHECK: define $root.fcall_readonly($this: *void) : *void {
 // CHECK: #b0:
 // CHECK:   n0 = $root.g(null)
-// CHECK: // TODO: readonly call params: 0
-// CHECK:   n1 = $root.readonly_param(null, n0)
+// CHECK:   n1 = $root.readonly_param(null, $builtins.__sil_readonly(n0))
 // CHECK:   ret null
 // CHECK: }
 function fcall_readonly(): void {

@@ -3,10 +3,12 @@ use std::sync::Arc;
 use ir::instr;
 use ir::Attr;
 use ir::Attribute;
+use ir::BaseType;
 use ir::Class;
 use ir::ClassId;
 use ir::Coeffects;
 use ir::Constant;
+use ir::EnforceableType;
 use ir::FuncBuilder;
 use ir::HackConstant;
 use ir::Instr;
@@ -19,6 +21,8 @@ use ir::Param;
 use ir::PropId;
 use ir::Property;
 use ir::StringInterner;
+use ir::TypeConstant;
+use ir::TypeConstraintFlags;
 use ir::TypeInfo;
 use ir::Visibility;
 use log::trace;
@@ -26,7 +30,8 @@ use log::trace;
 use crate::class::IsStatic;
 
 /// This indicates a static property that started life as a class constant.
-pub(crate) const INFER_CONSTANT: &str = "__Infer_Constant__";
+pub(crate) const INFER_CONSTANT: &str = "constant";
+pub(crate) const INFER_TYPE_CONSTANT: &str = "type_constant";
 
 pub(crate) fn lower_class<'a>(mut class: Class<'a>, strings: Arc<StringInterner>) -> Class<'a> {
     if !class.ctx_constants.is_empty() {
@@ -110,6 +115,41 @@ pub(crate) fn lower_class<'a>(mut class: Class<'a>, strings: Arc<StringInterner>
             attributes,
             visibility: Visibility::Public,
             initial_value: value,
+            type_info,
+            doc_comment: Default::default(),
+        };
+        class.properties.push(prop);
+    }
+
+    for tc in class.type_constants.drain(..) {
+        let TypeConstant {
+            name,
+            initializer,
+            is_abstract,
+        } = tc;
+        let name = PropId::from_bytes(&name, &strings);
+        // Mark the property as originally being a type constant.
+        let attributes = vec![Attribute {
+            name: ClassId::from_str(INFER_TYPE_CONSTANT, &strings),
+            arguments: Vec::new(),
+        }];
+        let mut modifiers = TypeConstraintFlags::TypeConstant;
+        if is_abstract {
+            modifiers = modifiers | TypeConstraintFlags::Nullable;
+        }
+        let type_info = TypeInfo {
+            user_type: None,
+            enforced: EnforceableType {
+                ty: BaseType::Dict,
+                modifiers,
+            },
+        };
+        let prop = Property {
+            name,
+            flags: Attr::AttrStatic,
+            attributes,
+            visibility: Visibility::Public,
+            initial_value: initializer,
             type_info,
             doc_comment: Default::default(),
         };

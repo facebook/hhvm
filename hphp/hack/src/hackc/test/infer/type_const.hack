@@ -2,6 +2,7 @@
 
 // TEST-CHECK-BAL: type C$static
 // CHECK: type C$static = .kind="class" .static {
+// CHECK:   TMyShape: .public .type_constant *HackMixed
 // CHECK: }
 
 abstract class C {
@@ -25,6 +26,7 @@ abstract class C {
 
 // TEST-CHECK-BAL: type D$static
 // CHECK: type D$static extends C$static = .kind="class" .static {
+// CHECK:   TMyShape: .public .type_constant *HackMixed
 // CHECK: }
 
 class D extends C {

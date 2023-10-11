@@ -103,7 +103,8 @@ impl ClassState<'_, '_, '_> {
         self.write_type(IsStatic::Static)?;
         self.write_type(IsStatic::NonStatic)?;
 
-        // Note: Class constants turn into static properties.
+        // Note: Class constants and type constants turn into static properties
+        // during lowering.
 
         if self.needs_factory {
             self.write_factory()?;

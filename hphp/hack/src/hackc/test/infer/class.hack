@@ -4,7 +4,7 @@
 // CHECK: type C$static = .kind="class" .static {
 // CHECK:   prop3: .public *HackFloat;
 // CHECK:   prop4: .public .SomeAttribute *HackMixed;
-// CHECK:   MY_CONSTANT: .public .__Infer_Constant__ *HackInt
+// CHECK:   MY_CONSTANT: .public .constant *HackInt
 // CHECK: }
 
 // TEST-CHECK-BAL: "type C "

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function test(keyset<int> $x): void {
   if ($x) {

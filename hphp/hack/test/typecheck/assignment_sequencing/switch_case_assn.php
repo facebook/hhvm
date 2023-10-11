@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function wut() {
   $a = 1;

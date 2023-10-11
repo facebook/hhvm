@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 $foo = varray['should_stay_on_same_line'];
 $foo = varray[
   'should_remain_on_new_line',

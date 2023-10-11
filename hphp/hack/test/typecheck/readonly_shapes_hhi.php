@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 async function foo(): Awaitable<void> {
   $x = readonly shape("foo" => 5);

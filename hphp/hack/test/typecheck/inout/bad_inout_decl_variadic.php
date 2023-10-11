@@ -1,3 +1,3 @@
-<?hh // strict
+<?hh
 
 function test(inout int ...$args): void {}

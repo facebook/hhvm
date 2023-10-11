@@ -1,3 +1,3 @@
-<?hh // strict
+<?hh
 
 function test(C $c): void {}

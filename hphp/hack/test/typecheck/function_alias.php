@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 type Predicate<T> = (function(T): bool);
 

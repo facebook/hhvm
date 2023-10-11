@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function f(): void {
   $good0 = re"/((Banana))/ux";

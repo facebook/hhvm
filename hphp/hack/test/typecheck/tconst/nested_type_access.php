@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 abstract class A {
   const type T = Container<int>;

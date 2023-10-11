@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function genx(): int { return 42; }
 async function geny(): Awaitable<int> { return 43; }

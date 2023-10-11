@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 abstract class C {
   const type T = D::T;

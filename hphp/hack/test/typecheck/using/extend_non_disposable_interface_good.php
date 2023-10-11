@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 interface Foo {}
 interface DisposableFoo extends Foo, IDisposable {}

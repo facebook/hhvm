@@ -1,3 +1,3 @@
-<?hh // strict
+<?hh
 
 type Foo<TX<TY>> = TX<bool>;

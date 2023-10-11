@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function consumeArrayOfIntToString(darray<int, string> $_): void {}
 

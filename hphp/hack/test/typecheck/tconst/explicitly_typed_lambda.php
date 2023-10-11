@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 interface IMyContainer {
   abstract const type TMyElem;

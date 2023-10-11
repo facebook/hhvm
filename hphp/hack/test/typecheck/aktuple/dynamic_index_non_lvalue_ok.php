@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 /**
  * Accessing a tuple-like array with dynamic key in non lvalue position

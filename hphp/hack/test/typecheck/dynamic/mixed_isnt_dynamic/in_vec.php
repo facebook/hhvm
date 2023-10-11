@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function foo(vec<dynamic> $x): vec<mixed> {
   return $x;

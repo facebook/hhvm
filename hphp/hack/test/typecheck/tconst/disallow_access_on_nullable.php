@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class X {
   const type A = ?X;

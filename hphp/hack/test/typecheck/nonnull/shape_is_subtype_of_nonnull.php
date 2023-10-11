@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 type Point2D = shape('x' => int, 'y' => int);
 

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 final class :m:a extends :m:xui:block {
   attribute :m:xui:div;

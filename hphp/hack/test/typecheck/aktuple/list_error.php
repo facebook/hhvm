@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 /* Tuple-like arrays can be used with list(...) statement - usage that should
  * report errors. */

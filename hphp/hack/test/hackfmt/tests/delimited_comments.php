@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 /**
  * The status associated with foo.

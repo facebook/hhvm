@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function good_math(num $a, int $b): void {
   1 + 2;

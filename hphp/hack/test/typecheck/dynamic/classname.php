@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function testClassName(classname<dynamic> $x): void {
   $y = $x::staticMeth(); // $y : dynamic

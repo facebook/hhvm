@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 function non_variadic(int $a, string $y): void {}
 

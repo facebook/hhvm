@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 /* HH_IGNORE_ERROR[4101] */
 function foo(KeyedContainer $_): void {

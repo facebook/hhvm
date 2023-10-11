@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class SomeClass {}
 type SomeTypeAlias = SomeClass;

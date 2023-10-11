@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function expect_mixed_func((function(): mixed) $func): void {}
 

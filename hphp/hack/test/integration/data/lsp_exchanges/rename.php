@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 class TestClass { // 2. Rename TestClass
   const CONSTANT = 5;

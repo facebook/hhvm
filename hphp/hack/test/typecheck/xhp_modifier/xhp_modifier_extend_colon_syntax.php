@@ -1,12 +1,12 @@
 //// xhp_modifier_extend_colon_syntax_def.php
-<?hh // strict
+<?hh
 
 namespace foo;
 
 xhp class bar {}
 
 //// xhp_modifier_extend_colon_syntax_usage.php
-<?hh // strict
+<?hh
 
 namespace user;
 

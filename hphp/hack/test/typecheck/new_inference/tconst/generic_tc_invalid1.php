@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 /* Tests accessing callsites with type constants in generics */
 abstract class Box {
   abstract const type T;

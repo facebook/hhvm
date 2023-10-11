@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function herp(inout int $x): void {
   $x += 42;

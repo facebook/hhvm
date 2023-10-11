@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function foo(): void {
   $bar = (true ? darray['a' => 5] : null);

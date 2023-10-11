@@ -1,3 +1,3 @@
-<?hh // decl
+<?hh
 
 function foo($bar) {}

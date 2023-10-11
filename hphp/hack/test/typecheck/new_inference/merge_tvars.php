@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class A<+T1, -T2 as T1> {
   public function __construct(private T2 $x) {}

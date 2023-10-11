@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function shape_idx_nullable_field_with_default_return(
   shape('x' => ?int) $s,

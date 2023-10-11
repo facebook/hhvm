@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 /*
  * It is permissible to include additional fields when passing a shape into a

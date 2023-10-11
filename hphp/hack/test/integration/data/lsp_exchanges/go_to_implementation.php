@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 abstract class Foo {
   public function test(): string {
     return "a";

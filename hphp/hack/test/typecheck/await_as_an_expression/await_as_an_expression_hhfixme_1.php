@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 async function foo(): Awaitable<int> {
   /* HH_FIXME[4110] */

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 namespace Foo {
   function f(): int {

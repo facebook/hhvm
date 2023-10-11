@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 class C123<+T> {
   private T $x;
   public function __construct(T $x) {

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class Other {
   <<__Policied("oBool")>>

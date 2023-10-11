@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 /**
  * Generic type remains generic if it was not modified.

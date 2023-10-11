@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function filter_nulls<Tv as nonnull>(Traversable<?Tv> $traversable): vec<Tv> {
   $result = vec[];

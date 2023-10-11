@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function f<T>(): void {
   3 as T;

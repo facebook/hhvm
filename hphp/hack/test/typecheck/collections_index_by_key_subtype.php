@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 enum IntSubtype: int as int {
   ZERO = 0;

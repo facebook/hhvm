@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 type Blah<T> = Vector<T>;
 

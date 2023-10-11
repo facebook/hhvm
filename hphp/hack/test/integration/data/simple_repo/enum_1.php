@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 enum FbidMapField: string as string {
   FBID = "fbid";

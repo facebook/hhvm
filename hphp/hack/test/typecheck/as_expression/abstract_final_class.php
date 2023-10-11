@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 abstract final class C {}
 

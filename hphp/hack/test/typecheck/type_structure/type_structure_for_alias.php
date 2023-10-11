@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 type MyAlias1 = shape(
   'a' => int,

@@ -1,3 +1,3 @@
-<?hh // strict
+<?hh
 
 type NonNull = nonnull;

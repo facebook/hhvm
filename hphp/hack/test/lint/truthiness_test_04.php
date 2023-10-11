@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function test(Container<int> $x): void {
   if ($x) {

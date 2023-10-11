@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class :my-xhp extends XHPTest {
   attribute this me;

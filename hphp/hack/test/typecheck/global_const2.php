@@ -1,3 +1,3 @@
-<?hh // strict
+<?hh
 
 const int X = varray[];

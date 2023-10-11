@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class B {
   public static int $static_property = 0;

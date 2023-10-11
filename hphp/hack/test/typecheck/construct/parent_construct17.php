@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 abstract class FooParent {
   protected function __construct() {}

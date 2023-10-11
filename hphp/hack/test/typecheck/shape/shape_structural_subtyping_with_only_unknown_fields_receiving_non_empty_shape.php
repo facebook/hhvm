@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // Any shape should satisfy this interface.
 type ShapeWithUnknownFields = shape(...);

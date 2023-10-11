@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 trait T1 {
   <<__LateInit>>

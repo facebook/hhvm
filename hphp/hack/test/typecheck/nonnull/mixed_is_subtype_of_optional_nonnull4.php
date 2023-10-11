@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function get_default<T as nonnull>(?T $val, T $default): T {
   return $val ?? $default;

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class Foo<TC<TX> as int> {
 

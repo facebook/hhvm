@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 /**
  * Test AKempty promotion in double-nested collection with intermediate

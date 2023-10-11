@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 namespace first {
   xhp class firstxhp extends \XHPTest implements \XHPChild {}

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function expectIntToAK((function(string, int, int): arraykey) $f): void {

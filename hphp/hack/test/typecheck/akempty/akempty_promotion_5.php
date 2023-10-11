@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 /**
  * Test if AKempty local variable is upgraded to AKdarray after [...] operation

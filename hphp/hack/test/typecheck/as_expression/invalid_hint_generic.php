@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function foo<T>(mixed $x): void {
   $x as T;

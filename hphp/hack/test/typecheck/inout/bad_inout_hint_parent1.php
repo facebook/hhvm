@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class C1 {
   public function foo((function(string, inout int): void) $f): void {}

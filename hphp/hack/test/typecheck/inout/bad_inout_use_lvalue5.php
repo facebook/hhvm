@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function f(inout varray<int> $a): void {}
 

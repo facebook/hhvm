@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // This file tests expression dependent types for locals variables
 // when integration occurs

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 class :baz {
   attribute int x @required;
 }

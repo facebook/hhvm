@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 /* HH_FIXME[4110] */
 function my_compact<T>(Vector<?T> $vector): Vector<T> {

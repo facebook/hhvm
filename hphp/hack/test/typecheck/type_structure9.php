@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class C {
   const type T = \Foo\D;

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // This is an example of a pattern I see being useful with type constants
 

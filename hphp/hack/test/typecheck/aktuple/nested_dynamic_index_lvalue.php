@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 /**
  * Setting a non-static key in nested tuple-like array downgrades it to a

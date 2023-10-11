@@ -6,7 +6,7 @@
 // a string ordinarily
 
 //// newtype.php
-<?hh// strict
+<?hh
 
 newtype OpaqueInt = int;
 
@@ -18,7 +18,7 @@ class Opaque {
 }
 
 //// useit.php
-<?hh// strict
+<?hh
 
 class Klass {
   public string $foo;

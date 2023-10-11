@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class C implements StringishObject{
   public function __toString(): string { return ''; }

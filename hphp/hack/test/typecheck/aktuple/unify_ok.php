@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 function take_num(num $_): void {}
 function take_string(string $_): void {}

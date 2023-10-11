@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // Test for interface trying to implement
 
 interface IFace<T> {

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class A<T as nonnull> {}
 

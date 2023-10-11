@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // This test that expression display ids are properly reset
 // All hh_shows should report the same output

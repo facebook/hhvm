@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // No using HH\BuiltinEnum
 function foo(mixed $foo): bool {

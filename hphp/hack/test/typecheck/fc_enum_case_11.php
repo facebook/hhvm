@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 enum MyEnum: string {
   A = 'a';

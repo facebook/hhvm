@@ -1,10 +1,10 @@
 //// file1.php
-<?hh // strict
+<?hh
 
 newtype t as ?string = string;
 
 //// file2.php
-<?hh // strict
+<?hh
 
 function f(t $x): nonnull {
   return $x;

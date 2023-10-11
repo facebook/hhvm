@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 final class User<T> {
   public function __construct(

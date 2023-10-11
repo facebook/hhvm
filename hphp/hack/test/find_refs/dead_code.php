@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 class E extends Exception {}
 
 function test_invariant(): void {

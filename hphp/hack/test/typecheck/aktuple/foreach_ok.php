@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 /**
  * It's possible to iterate over tuple-like array and it behaves as vec-like

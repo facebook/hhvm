@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
  * All rights reserved.

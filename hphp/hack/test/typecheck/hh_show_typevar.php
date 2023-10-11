@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 class Foo {}
 function test1<Ta super Tb, Tb as Foo>(Ta $x, Tb $y): void {
   hh_show($x);

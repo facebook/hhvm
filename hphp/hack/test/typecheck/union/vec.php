@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function f(bool $b, vec<int> $v, vec<string> $v2): void {
   hh_show($b ? $v : vec[]);

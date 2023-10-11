@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function expect<T as int>(?T $_): void {}
 

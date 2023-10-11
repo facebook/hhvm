@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 class MyContainer<Tv> {
   public function setPair(Pair<string, Tv> $_): void {}

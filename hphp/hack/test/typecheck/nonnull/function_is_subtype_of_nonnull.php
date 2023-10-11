@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function incr(int $x): int {
   return $x + 1;

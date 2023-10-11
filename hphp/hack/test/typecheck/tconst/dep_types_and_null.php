@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class Ref<T> {
   public function __construct(public T $value) {}

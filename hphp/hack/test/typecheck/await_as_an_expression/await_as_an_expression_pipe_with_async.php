@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 async function gen<T>(Awaitable<T> $gen): Awaitable<T> { return await $gen; }
 

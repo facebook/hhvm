@@ -28,10 +28,18 @@ namespace HPHP {
 struct NativeArgs;
 using NativeFunction = void(*)(NativeArgs*);
 
+namespace rr {
+
 void addNativeFuncName(NativeFunction ptr, std::string_view name);
 std::string_view getNativeFuncName(NativeFunction ptr);
 NativeFunction getNativeFuncPtr(std::string_view name);
 bool shouldRecordReplay(NativeFunction ptr);
+
+template<typename T>
+String serialize(T value);
+
+template<typename T>
+T unserialize(const String& recordedValue);
 
 template<auto m>
 struct MethodToFunc;
@@ -81,5 +89,7 @@ struct NativeEvent {
   Type type{Type::UNKNOWN};
   Array value{Array::CreateVec()};
 };
+
+} // namespace rr
 
 } // namespace HPHP

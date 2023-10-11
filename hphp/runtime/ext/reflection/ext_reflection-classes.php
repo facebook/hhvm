@@ -1361,13 +1361,13 @@ namespace HH {
    * @return        darray   The resolved type structure for either a type
    *                         constant or a type alias.
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   function type_structure(mixed $cls_or_obj, ?string $cns_name = null)[]: darray;
 
   /**
    * Same as type_structure but does not throw when there's an undefined symbol
    */
-  <<__Native,NoDoc>>
+  <<__Native("NoRecording"),NoDoc>>
   function type_structure_no_throw(
     mixed $cls_or_obj,
     ?string $cns_name = null
@@ -1377,7 +1377,7 @@ namespace HH {
    * Retrieves the classname on the the TypeStructure pointed by a type
    * constant or a type alias.
    */
-  <<__Native,NoDoc>>
+  <<__Native("NoRecording"),NoDoc>>
   function type_structure_classname(mixed $cls_or_obj,
                                     ?string $cns_name = null)[]: string;
 

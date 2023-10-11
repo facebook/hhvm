@@ -2154,13 +2154,9 @@ static int execute_program_impl(int argc, char** argv) {
 
     } else {
 
-      if (UNLIKELY(RO::EvalRecordReplay)) {
-        if (RO::EvalRecordSampleRate > 0) {
-          Recorder::setEntryPoint(file);
-        } else if (RO::EvalReplay) {
-          file = Replayer::get().init(file).toCppString();
-          new_argv[0] = file.data();
-        }
+      if (UNLIKELY(RO::EvalRecordReplay && RO::EvalReplay)) {
+        file = Replayer::getEntryPoint();
+        new_argv[0] = file.data();
       }
 
       tracing::Request _{

@@ -32,6 +32,8 @@
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/plain-file.h"
+#include "hphp/runtime/base/recorder.h"
+#include "hphp/runtime/base/replayer.h"
 #include "hphp/runtime/base/req-heap-sanitizer.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/static-string-table.h"
@@ -311,7 +313,7 @@ RepoOptionStats::RepoOptionStats(const std::string& configPath,
   auto const repo =
     configPath.empty() ? "" : std::filesystem::path(configPath).parent_path();
   auto const packagePath = repo / kPackagesToml;
-  if (std::filesystem::exists(packagePath)) {
+  if (std::filesystem::exists(packagePath) || RO::EvalRecordReplay) {
     struct stat package;
     if (wrapped_stat(packagePath.string().data(), &package) == 0) {
       m_packageStat = package;
@@ -409,7 +411,7 @@ const RepoOptions& RepoOptions::forFile(const std::string& path) {
 
   // Wrap filesystem accesses if needed to proxy info from cli server client.
   Stream::Wrapper* wrapper = nullptr;
-  if (is_cli_server_mode()) {
+  if (is_cli_server_mode() || RO::EvalRecordReplay) {
     wrapper = Stream::getWrapperFromURI(path);
     if (wrapper && !wrapper->isNormalFileStream()) wrapper = nullptr;
   }
@@ -615,7 +617,14 @@ AUTOLOADFLAGS();
              "d6ede7d391");
 
   filterNamespaces();
-  if (!m_path.empty()) m_repo = std::filesystem::canonical(m_path.parent_path());
+  if (!m_path.empty()) {
+    if (UNLIKELY(RO::EvalRecordReplay)) {
+      const String path{m_path.parent_path().c_str()};
+      m_repo = Stream::getWrapperFromURI(path)->realpath(path).toCppString();
+    } else {
+      m_repo = std::filesystem::canonical(m_path.parent_path());
+    }
+  }
   m_flags.m_packageInfo = PackageInfo::fromFile(m_repo / kPackagesToml);
   calcCacheKey();
   calcAutoloadDB();
@@ -2010,6 +2019,10 @@ void RuntimeOption::Load(
     EVALFLAGS()
 #undef F
 
+    if (UNLIKELY(RO::EvalRecordReplay && RO::EvalReplay)) {
+      return Replayer::onRuntimeOptionLoad(ini, config, cmd);
+    }
+
     if (EvalJitSerdesModeForceOff) EvalJitSerdesMode = JitSerdesMode::Off;
     if (!EvalEnableReusableTC) EvalReusableTCPadding = 0;
     if (numa_num_nodes <= 1) {
@@ -2979,6 +2992,10 @@ void RuntimeOption::Load(
 
   // Initialize defaults for repo-specific parser configuration options.
   RepoOptions::setDefaults(config, ini);
+
+  if (UNLIKELY(RO::EvalRecordReplay && RO::EvalRecordSampleRate)) {
+    Recorder::onRuntimeOptionLoad(ini, config, cmd);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

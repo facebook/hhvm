@@ -1389,11 +1389,11 @@ void ExecutionContext::requestInit() {
   ResourceHdr::resetMaxId();
   jit::tc::requestInit();
   if (UNLIKELY(RO::EvalRecordReplay)) {
-    if (RO::EvalRecordSampleRate > 0) {
+    if (RO::EvalRecordSampleRate) {
       m_recorder.emplace();
       m_recorder->requestInit();
     } else if (RO::EvalReplay) {
-      Replayer::get().requestInit();
+      Replayer::requestInit();
     }
   }
 
@@ -1450,9 +1450,13 @@ void ExecutionContext::requestExit() {
   autoTypecheckRequestExit();
   HHProf::Request::FinishProfiling();
 
-  if (UNLIKELY(RO::EvalRecordReplay && RO::EvalRecordSampleRate > 0)) {
-    m_recorder->requestExit();
-    m_recorder.reset();
+  if (UNLIKELY(RO::EvalRecordReplay)) {
+    if (RO::EvalRecordSampleRate) {
+      m_recorder->requestExit();
+      m_recorder.reset();
+    } else if (RO::EvalReplay) {
+      Replayer::requestExit();
+    }
   }
   manageAPCHandle();
   syncGdbState();

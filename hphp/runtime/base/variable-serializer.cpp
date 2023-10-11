@@ -87,7 +87,7 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
   , m_keepDVArrays{type != Type::Serialize}
   , m_maxCount(maxRecur)
 {
-  if (type == Type::DebuggerSerialize) {
+  if (type == Type::DebuggerSerialize && g_context) {
     m_maxLevelDebugger = g_context->debuggerSettings.printLevel;
   }
 }

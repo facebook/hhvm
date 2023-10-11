@@ -19,6 +19,9 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/recorder.h"
+#include "hphp/runtime/base/replayer.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -54,6 +57,10 @@ void FactsFactory::setInstance(FactsFactory* instance) {
 namespace {
 
 FactsStore* getFactsForRequest() {
+  if (UNLIKELY(RO::EvalRecordReplay && RO::EvalReplay)) {
+    return Replayer::onGetFactsForRequest();
+  }
+
   auto* factory = FactsFactory::getInstance();
   if (!factory) {
     return nullptr;
@@ -76,6 +83,9 @@ FactsStore* getFactsForRequest() {
   try {
     tracing::Block _{"autoload-ensure-updated"};
     map->ensureUpdated();
+    if (UNLIKELY(RO::EvalRecordReplay && RO::EvalRecordSampleRate)) {
+      Recorder::onGetFactsForRequest(map);
+    }
     return map;
   } catch (const std::exception& e) {
     auto repoRoot = repoOptions->dir();

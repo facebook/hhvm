@@ -129,6 +129,10 @@ void RegisterCoreWrappers() {
   s_glob_stream_wrapper.registerAs("glob");
 }
 
+Stream::Wrapper* getThreadLocalFileHandler() {
+  return *rl_fileHandler;
+}
+
 void setThreadLocalFileHandler(Stream::Wrapper* wrapper) {
   *rl_fileHandler = wrapper;
 }

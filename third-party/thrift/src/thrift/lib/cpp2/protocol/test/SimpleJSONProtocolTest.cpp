@@ -106,3 +106,51 @@ TEST_F(SimpleJSONProtocolTest, roundtrip_non_string_map_keys) {
   EXPECT_EQ(serialized.size(), size);
   EXPECT_EQ(orig, deserialized);
 }
+
+TEST_F(SimpleJSONProtocolTest, roundtrip_binary) {
+  StructWithBinaryField orig;
+  orig.field() = {0x00, 0x01, 0x02};
+  const auto serialized = S::serialize<string>(orig);
+  StructWithBinaryField deserialized;
+  const auto size = S::deserialize(serialized, deserialized);
+  EXPECT_EQ(serialized.size(), size);
+  EXPECT_EQ(orig, deserialized);
+}
+
+TEST_F(SimpleJSONProtocolTest, roundtrip_binary_without_padding) {
+  StructWithBinaryField orig;
+  orig.field() = "0123";
+  const std::string serialized = "{\"field\":\"MDEyMw\"}";
+  StructWithBinaryField deserialized;
+  const auto size = S::deserialize(serialized, deserialized);
+  EXPECT_EQ(serialized.size(), size);
+  EXPECT_EQ(orig, deserialized);
+}
+
+TEST_F(SimpleJSONProtocolTest, roundtrip_binary_with_padding) {
+  StructWithBinaryField orig;
+  orig.field() = "0123";
+  const std::string serialized = "{\"field\":\"MDEyMw==\"}";
+  StructWithBinaryField deserialized;
+  const auto size = S::deserialize(serialized, deserialized);
+  EXPECT_EQ(serialized.size(), size);
+  EXPECT_EQ(orig, deserialized);
+}
+
+TEST_F(SimpleJSONProtocolTest, roundtrip_binary_disallow_padding) {
+  StructWithBinaryField orig;
+  orig.field() = "0123";
+  const std::string serialized = "{\"field\":\"MDEyMw==\"}";
+
+  // Deserialize with allowBase64Padding disabled
+  StructWithBinaryField deserialized;
+  SimpleJSONProtocolReader reader;
+  folly::IOBuf buf{folly::IOBuf::WRAP_BUFFER, folly::StringPiece(serialized)};
+  reader.setInput(&buf);
+  reader.setAllowBase64Padding(false);
+  deserialized.read(&reader);
+  auto const size = reader.getCursor().getCurrentPosition();
+
+  EXPECT_EQ(serialized.size(), size);
+  EXPECT_NE(orig, deserialized);
+}

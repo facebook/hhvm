@@ -161,3 +161,7 @@ struct ListIOBuf {
   @cpp.Type{template = "folly::F14FastMap"}
   2: map<string, IOBuf> field_2;
 } (cpp.noncomparable)
+
+struct StructWithBinaryField {
+  1: binary field;
+}

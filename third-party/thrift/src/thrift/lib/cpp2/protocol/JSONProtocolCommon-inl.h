@@ -756,9 +756,18 @@ template <typename StrType>
 inline void JSONProtocolReaderCommon::readJSONBase64(StrType& str) {
   std::string tmp;
   readJSONString(tmp);
+
   uint8_t* b = (uint8_t*)tmp.c_str();
   uint32_t len = folly::to_narrow(tmp.length());
   str.clear();
+
+  // Allow optional trailing '=' as padding
+  if (allowBase64Padding_) {
+    while (len > 0 && b[len - 1] == '=') {
+      --len;
+    }
+  }
+
   while (len >= 4) {
     base64_decode(b, 4);
     str.append((const char*)b, 3);

@@ -1,4 +1,4 @@
-// RUN: %hackc compile-infer -vHack.Lang.AllowUnstableFeatures=1 %s | FileCheck %s
+// RUN: %hackc compile-infer --fail-fast -vHack.Lang.AllowUnstableFeatures=1 %s | FileCheck %s
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 

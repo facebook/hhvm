@@ -1,4 +1,4 @@
-// RUN: %hackc compile-infer %s | FileCheck %s
+// RUN: %hackc compile-infer --fail-fast %s | FileCheck %s
 
 // TEST-CHECK-BAL: define $root.basic
 // CHECK: define $root.basic($this: *void) : *void {

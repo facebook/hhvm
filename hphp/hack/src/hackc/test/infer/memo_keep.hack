@@ -1,4 +1,4 @@
-// RUN: %hackc compile-infer --keep-memo %s | FileCheck %s
+// RUN: %hackc compile-infer --fail-fast --keep-memo %s | FileCheck %s
 
 class C {
   // TEST-CHECK-1: define C$static.memometh_static$memoize_impl

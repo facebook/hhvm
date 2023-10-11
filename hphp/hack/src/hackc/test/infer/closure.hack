@@ -1,4 +1,4 @@
-// RUN: %hackc compile-infer %s | FileCheck %s
+// RUN: %hackc compile-infer --fail-fast %s | FileCheck %s
 
 // TEST-CHECK-BAL: define Closure$closure1.__invoke
 // CHECK: define Closure$closure1.__invoke($this: *Closure$closure1) : *HackMixed {

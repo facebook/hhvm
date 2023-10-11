@@ -1,4 +1,4 @@
-// RUN: %hackc compile-infer %s | FileCheck %s
+// RUN: %hackc compile-infer --fail-fast %s | FileCheck %s
 
 class D extends B {
   // TEST-CHECK-BAL: define D.inst_fcall_self

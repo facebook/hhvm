@@ -1,4 +1,4 @@
-// RUN: %hackc compile-infer %s | FileCheck %s
+// RUN: %hackc compile-infer --fail-fast %s | FileCheck %s
 
 // TEST-CHECK-IGN:
 // CHECK: .source_language = "hack"

@@ -1,4 +1,4 @@
-// RUN: %hackc compile-infer --keep-going %s | FileCheck %s
+// RUN: %hackc compile-infer --fail-fast --keep-going %s | FileCheck %s
 
 class Internal {}
 

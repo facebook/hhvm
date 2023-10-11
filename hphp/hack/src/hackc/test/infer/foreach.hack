@@ -1,4 +1,4 @@
-// RUN: %hackc compile-infer %s | FileCheck %s
+// RUN: %hackc compile-infer --fail-fast %s | FileCheck %s
 
 // TEST-CHECK-BAL: define $root.check_foreach
 // CHECK: define $root.check_foreach($this: *void, $x: *HackVec) : *void {

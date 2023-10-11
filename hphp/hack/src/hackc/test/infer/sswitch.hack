@@ -1,4 +1,4 @@
-// RUN: %hackc compile-infer %s | FileCheck %s
+// RUN: %hackc compile-infer --fail-fast %s | FileCheck %s
 
 // TEST-CHECK-BAL: define C$static._86cinit
 // CHECK: define C$static._86cinit($this: *C$static, $constName: *HackMixed) : *HackMixed {

@@ -1,4 +1,4 @@
-// RUN: %hackc compile-infer %s | FileCheck %s
+// RUN: %hackc compile-infer --fail-fast %s | FileCheck %s
 
 class C {
   // TEST-CHECK-BAL: define C.myfn2($this: *C, $a: *HackInt)

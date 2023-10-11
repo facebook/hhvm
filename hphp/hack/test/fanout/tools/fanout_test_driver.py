@@ -292,7 +292,7 @@ def _launch_hh_from_saved_state(
             "--config",
             "enable_naming_table_fallback=true",
             "--config",
-            "log_categories=fanout_information",
+            "log_categories=fanout_tests",
             "--error-format",
             "raw",
         ]

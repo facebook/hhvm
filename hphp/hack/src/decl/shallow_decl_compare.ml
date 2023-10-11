@@ -118,6 +118,30 @@ let untag_removed_members_in_depgraph
     (Provider_context.get_deps_mode ctx)
     removed_member_deps
 
+let log_changes (changes : (string * ClassDiff.t) list) : unit =
+  let change_count = List.length changes in
+  if List.is_empty changes then
+    Hh_logger.log "No class changes detected"
+  else
+    Hh_logger.log "Computing fanout from %d changed classes" change_count;
+  let max = 1000 in
+  Hh_logger.log_lazy ~category:"fanout"
+  @@ lazy
+       Hh_json.(
+         json_to_multiline
+         @@ JSON_Object
+              [
+                ( "diffs",
+                  JSON_Object
+                    (List.take changes max
+                    |> List.map
+                         ~f:
+                           (Tuple2.map_snd ~f:(fun diff ->
+                                string_ @@ ClassDiff.show diff))) );
+                ("truncated", bool_ (change_count > max));
+              ]);
+  ()
+
 let compute_class_fanout
     (ctx : Provider_context.t)
     ~during_init
@@ -127,15 +151,7 @@ let compute_class_fanout
   Hh_logger.log "Detecting changes to classes in %d files:" file_count;
 
   let changes = compute_class_diffs ctx ~during_init ~defs in
-  begin
-    match changes with
-    | [] -> Hh_logger.log "No class changes detected"
-    | (cid, diff) :: _ ->
-      Hh_logger.log
-        "Computing fanout from %d changed classes, for instance %s"
-        (List.length changes)
-        (ClassDiff.pretty ~name:cid diff)
-  end;
+  log_changes changes;
 
   let fanout = Shallow_class_fanout.fanout_of_changes ~ctx changes in
   if TypecheckerOptions.optimized_member_fanout (Provider_context.get_tcopt ctx)

@@ -669,7 +669,8 @@ let type_check_core genv env start_time ~check_reason cgroup_steps =
 
   (* we use lazy here to avoid expensive string generation when logging
    * is not enabled *)
-  Hh_logger.log_lazy ~category:"fanout_information"
+  let max = 1000 in
+  Hh_logger.log_lazy ~category:"fanout_tests"
   @@ lazy
        Hh_json.(
          json_to_string
@@ -681,12 +682,17 @@ let type_check_core genv env start_time ~check_reason cgroup_steps =
                     string_
                     Typing_deps.(
                       List.map ~f:Dep.to_hex_string
-                      @@ DepSet.elements to_recheck_deps) );
+                      @@ List.take (DepSet.elements to_recheck_deps) max) );
+                ( "hashes_was_truncated",
+                  bool_ (Typing_deps.DepSet.cardinal to_recheck_deps > max) );
                 ( "files",
                   array_
                     string_
                     Relative_path.(
-                      List.map ~f:suffix @@ Set.elements to_recheck) );
+                      List.map ~f:suffix
+                      @@ List.take (Set.elements to_recheck) max) );
+                ( "files_was_truncated",
+                  bool_ (Relative_path.Set.cardinal to_recheck > max) );
               ]);
 
   (* Here's where we update the forward-naming-table in [env] *)

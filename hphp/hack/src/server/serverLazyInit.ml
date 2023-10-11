@@ -551,7 +551,8 @@ let names_to_deps (names : FileInfo.names) : Typing_deps.DepSet.t =
 let log_fanout_information to_recheck_deps files_to_recheck =
   (* we use lazy here to avoid expensive string generation when logging
        * is not enabled *)
-  Hh_logger.log_lazy ~category:"fanout_information"
+  let max = 1000 in
+  Hh_logger.log_lazy ~category:"fanout_tests"
   @@ lazy
        Hh_json.(
          json_to_string
@@ -563,12 +564,17 @@ let log_fanout_information to_recheck_deps files_to_recheck =
                     string_
                     Typing_deps.(
                       List.map ~f:Dep.to_hex_string
-                      @@ DepSet.elements to_recheck_deps) );
+                      @@ List.take (DepSet.elements to_recheck_deps) max) );
+                ( "hashes_was_truncated",
+                  bool_ (Typing_deps.DepSet.cardinal to_recheck_deps > max) );
                 ( "files",
                   array_
                     string_
                     Relative_path.(
-                      List.map ~f:suffix @@ Set.elements files_to_recheck) );
+                      List.map ~f:suffix
+                      @@ List.take (Set.elements files_to_recheck) max) );
+                ( "files_was_truncated",
+                  bool_ (Relative_path.Set.cardinal files_to_recheck > max) );
               ])
 
 (** Compare declarations loaded from the saved state to declarations based on

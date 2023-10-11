@@ -34,11 +34,6 @@ using namespace folly::ssl;
 using namespace proxygen;
 using namespace CurlService;
 
-using folly::AsyncServerSocket;
-using folly::EventBaseManager;
-using folly::SocketAddress;
-using folly::SSLContext;
-
 namespace {
 
 const std::string kTestDir = getContainingDirectory(__FILE__).str();

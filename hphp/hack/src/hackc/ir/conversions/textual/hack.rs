@@ -67,12 +67,22 @@ pub(crate) enum Hhbc {
     Await,
     #[decl(fn hhbc_await_all(...) -> *HackMixed)]
     AwaitAll,
+    #[decl(fn hhbc_cast_bool(*HackMixed) -> *HackMixed)]
+    CastBool,
+    #[decl(fn hhbc_cast_dict(*HackMixed) -> *HackMixed)]
+    CastDict,
+    #[decl(fn hhbc_cast_double(*HackMixed) -> *HackMixed)]
+    CastDouble,
+    #[decl(fn hhbc_cast_int(*HackMixed) -> *HackMixed)]
+    CastInt,
     #[decl(fn hhbc_cast_keyset(*HackMixed) -> *HackMixed)]
     CastKeyset,
     #[decl(fn hhbc_cast_string(*HackMixed) -> *HackString)]
     CastString,
     #[decl(fn hhbc_cast_vec(*HackMixed) -> *HackMixed)]
     CastVec,
+    #[decl(fn hhbc_chain_faults(*HackMixed, *HackMixed) -> *HackMixed)]
+    ChainFaults,
     #[decl(fn hhbc_class_get_c(*HackMixed) -> void)]
     CheckClsRGSoft,
     #[decl(fn hhbc_check_this(*HackMixed) -> void)]

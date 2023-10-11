@@ -118,10 +118,12 @@ bool marshal_capi_override_annotation(const t_named& node) {
   return node.find_structured_annotation_or_null(kMarshalCapiUri) != nullptr;
 }
 
-inline std::string get_capi_include_namespace(const t_program* prog) {
+inline std::string get_capi_include(
+    const t_program* prog, const t_program* this_prog) {
+  const std::string& prefix = prog->include_prefix();
   return fmt::format(
       "{}gen-python-capi/{}/thrift_types_capi.h",
-      prog->include_prefix(),
+      prefix.empty() ? this_prog->include_prefix() : prefix,
       prog->name());
 }
 
@@ -309,7 +311,7 @@ class python_capi_mstch_program : public mstch_program {
         });
     mstch::array a;
     for (const auto& it : namespaces) {
-      a.push_back(mstch::map{{"include_prefix", it->include_prefix}});
+      a.push_back(mstch::map{{"header_include", it->include_prefix}});
     }
     return a;
   }
@@ -362,7 +364,7 @@ class python_capi_mstch_program : public mstch_program {
         continue;
       }
       capi_includes_[included_program->path()] = CapiInclude{
-          get_capi_include_namespace(included_program),
+          get_capi_include(included_program, program_),
       };
     }
   }
@@ -377,7 +379,7 @@ class python_capi_mstch_program : public mstch_program {
 
       if (has_marshal_types_) {
         capi_includes_[prog->path()] =
-            CapiInclude{get_capi_include_namespace(prog)};
+            CapiInclude{get_capi_include(prog, program_)};
       }
     }
   }

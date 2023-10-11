@@ -1,4 +1,6 @@
 [workspace]
+
+resolver="2"
 members = [
     "arena_collections",
     "arena_trait",

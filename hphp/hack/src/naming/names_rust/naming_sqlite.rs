@@ -880,7 +880,7 @@ impl Names {
         let mut conn = names.conn;
         Self::create_indices(&mut conn)?;
 
-        conn.execute("END TRANSACTION", params![])?;
+        conn.execute_batch("END TRANSACTION; VACUUM;")?;
         conn.close().map_err(|(_conn, e)| e)?;
 
         Ok(save_result)

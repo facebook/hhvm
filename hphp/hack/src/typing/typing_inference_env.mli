@@ -32,8 +32,6 @@ module Log : sig
     Hh_json.json
 end
 
-val pp : Format.formatter -> t -> unit
-
 val empty_inference_env : t
 
 val fresh_type : ?variance:Ast_defs.variance -> t -> Pos.t -> t * locl_ty

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<364cc97f7d2ad56a3fd333437ef4b47e>>
+// @generated SignedSource<<6bf0dd898077c6dfecea7453eab76a5b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -96,6 +96,7 @@ pub struct SavedEnv {
     #[rust_to_ocaml(attr = "opaque")]
     #[rust_to_ocaml(attr = "hash.ignore")]
     pub tcopt: typechecker_options::TypecheckerOptions,
+    #[rust_to_ocaml(attr = "opaque")]
     #[rust_to_ocaml(attr = "hash.ignore")]
     pub inference_env: typing_inference_env::TypingInferenceEnv,
     pub tpenv: type_parameter_env::TypeParameterEnv,

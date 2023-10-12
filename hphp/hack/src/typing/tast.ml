@@ -69,7 +69,7 @@ let is_under_dynamic_assumptions = function
 
 type saved_env = {
   tcopt: TypecheckerOptions.t; [@opaque] [@hash.ignore]
-  inference_env: Typing_inference_env.t; [@hash.ignore]
+  inference_env: Typing_inference_env.t; [@opaque] [@hash.ignore]
   tpenv: Type_parameter_env.t;
   fun_tast_info: fun_tast_info option;
   checked: check_status;

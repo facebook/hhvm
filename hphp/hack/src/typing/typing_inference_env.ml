@@ -15,12 +15,6 @@ module TL = Typing_logic
 
 exception InconsistentTypeVarState of string
 
-[@@@warning "-32"]
-
-let pp _ _ = Printf.printf "%s\n" "<inference_env>"
-
-[@@@warning "+32"]
-
 type tyvar_constraints = {
   appears_covariantly: bool;
       (** Does this type variable appear covariantly in the type of the expression? *)

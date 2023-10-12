@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class Supertype {}
 class Subtype extends Supertype {}

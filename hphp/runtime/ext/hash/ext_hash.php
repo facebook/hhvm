@@ -17,7 +17,7 @@
  */
 <<__Native>>
 function hash(string $algo, string $data,
-              bool $raw_output = false): mixed;
+              bool $raw_output = false)[]: mixed;
 
 /**
  * hash_algos() - http://php.net/function.hash-algos
@@ -232,7 +232,7 @@ function hash_update_stream(mixed $context, mixed $handle,
  * @return resource - Returns a copy of Hashing Context resource.
  */
 <<__Native>>
-function hash_copy(resource $context): mixed;
+function hash_copy(resource $context)[]: mixed;
 
 /**
  * hash_pbkdf2 - http://php.net/function.hash-pbkdf2.php

@@ -1284,7 +1284,7 @@ struct RuntimeOption {
   /* When this options is on, classname type-hints accepts classes */   \
   F(bool, ClassPassesClassname, true)                                   \
   /* Raise notice if a Class type is passed to a classname type-hint */ \
-  F(bool, ClassnameNotices, false)                                      \
+  F(uint32_t, ClassnameNoticesSampleRate, 0)                            \
   /*  Raise a notice if a ClsMeth type is passed to is_vec/is_array */  \
   F(bool, IsVecNotices, false)                                          \
   /*  Raise a notice if a ClsMeth type is passed to a function that

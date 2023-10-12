@@ -248,7 +248,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     case AnnotMetaType::Classname:
       if (isStringType(dt)) return AnnotAction::Pass;
       if (isClassType(dt) || isLazyClassType(dt)) {
-        return RO::EvalClassnameNotices ?
+        return RO::EvalClassnameNoticesSampleRate > 0 ?
           AnnotAction::WarnClassname : AnnotAction::Pass;
       }
       return AnnotAction::Fail;

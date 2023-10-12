@@ -214,8 +214,8 @@ enum class AnnotAction {
  * value with the KindOfObject DataType is compatible with the annotation.
  *
  * WarnClassname: 'at' is classname and 'dt' is either a Class or LazyClass
- * and RuntimeOption::ClassnameNotices is on. The 'dt' is compatible with 'at'
- * but raises a notice at runtime.
+ * and RuntimeOption::ClassnameNoticesSampleRate is on. The 'dt' is compatible
+ * with 'at' but raises a notice at runtime.
  *
  */
 AnnotAction

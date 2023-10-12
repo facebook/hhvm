@@ -1072,7 +1072,7 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
           case AnnotAction::WarnClassname:
             assertx(isClassType(val.type()) || isLazyClassType(val.type()));
             assertx(RuntimeOption::EvalClassPassesClassname);
-            assertx(RuntimeOption::EvalClassnameNotices);
+            assertx(RuntimeOption::EvalClassnameNoticesSampleRate > 0);
             if (Assert) return true;
             fallback = fallback ? std::min(*fallback, result) : result;
             continue;
@@ -1091,7 +1091,9 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
           // verifyFail will deal with the conversion/warning
           return false;
         case AnnotAction::WarnClassname:
-          raise_notice(Strings::CLASS_TO_CLASSNAME);
+          if (folly::Random::oneIn(RO::EvalClassnameNoticesSampleRate)) {
+            raise_notice(Strings::CLASS_TO_CLASSNAME);
+          }
           return true;
         default:
           return false;
@@ -1289,7 +1291,7 @@ bool TypeConstraint::checkImpl(tv_rval val,
         if (!isPasses) {
           assertx(isClassType(val.type()) || isLazyClassType(val.type()));
           assertx(RuntimeOption::EvalClassPassesClassname);
-          assertx(RuntimeOption::EvalClassnameNotices);
+          assertx(RuntimeOption::EvalClassnameNoticesSampleRate > 0);
           if (isAssert) return true;
           fallback = fallback ? std::min(*fallback, result) : result;
         }
@@ -1307,7 +1309,9 @@ bool TypeConstraint::checkImpl(tv_rval val,
       // verifyFail will deal with the conversion/warning
       return false;
     case AnnotAction::WarnClassname:
-      raise_notice(Strings::CLASS_TO_CLASSNAME);
+      if (folly::Random::oneIn(RO::EvalClassnameNoticesSampleRate)) {
+        raise_notice(Strings::CLASS_TO_CLASSNAME);
+      }
       return true;
     default:
       return false;

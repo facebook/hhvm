@@ -288,7 +288,9 @@ void verifyTypeImpl(IRGS& env,
 
       case AnnotAction::WarnClassname:
         assertx(val->type() <= TCls || val->type() <= TLazyCls);
-        gen(env, RaiseNotice, SampleRateData {},
+        gen(env, 
+            RaiseNotice,
+            SampleRateData { RO::EvalClassnameNoticesSampleRate },
             cns(env, s_CLASS_TO_CLASSNAME.get()));
         return;
     }

@@ -1,2 +1,2 @@
--vEval.ClassnameNotices=1
+-vEval.ClassnameNoticesSampleRate=1
 -vEval.ClassStringHintNoticesSampleRate=1

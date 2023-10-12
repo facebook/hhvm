@@ -39,7 +39,7 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
   RO::EvalForbidDynamicCallsWithAttr               = ForbidDynamicCallsWithAttr;
   RO::EvalRaiseClassConversionNoticeSampleRate     = RaiseClassConversionNoticeSampleRate;
   RO::EvalClassPassesClassname                     = ClassPassesClassname;
-  RO::EvalClassnameNotices                         = ClassnameNotices;
+  RO::EvalClassnameNoticesSampleRate               = ClassnameNoticesSampleRate;
   RO::EvalClassStringHintNoticesSampleRate         = ClassStringHintNoticesSampleRate;
   RO::EvalClassIsStringNotices                     = ClassIsStringNotices;
   RO::EvalTraitConstantInterfaceBehavior           = TraitConstantInterfaceBehavior;
@@ -104,7 +104,7 @@ std::string show(const RepoGlobalData& gd) {
   SHOW(IsVecNotices);
   SHOW(RaiseClassConversionNoticeSampleRate);
   SHOW(ClassPassesClassname);
-  SHOW(ClassnameNotices);
+  SHOW(ClassnameNoticesSampleRate);
   SHOW(ClassStringHintNoticesSampleRate);
   SHOW(ClassIsStringNotices);
   SHOW(StrictArrayFillKeys);

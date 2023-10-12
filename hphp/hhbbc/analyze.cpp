@@ -1529,7 +1529,8 @@ ConstraintType type_from_constraint_impl(const TypeConstraint& tc,
         };
       case AnnotMetaType::Classname:
         return C{
-          RO::EvalClassnameNotices ? TStr : union_of(TStr, TCls, TLazyCls),
+          RO::EvalClassnameNoticesSampleRate > 0 ? 
+            TStr : union_of(TStr, TCls, TLazyCls),
           union_of(TStr, TCls, TLazyCls)
         };
     }

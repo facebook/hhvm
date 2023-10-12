@@ -1,6 +1,6 @@
 -vRuntime.Eval.ClassAsStringVarDump=false
 -vRuntime.Eval.ClassPassesClassname=true
--vRuntime.Eval.ClassnameNotices=true
+-vRuntime.Eval.ClassnameNoticesSampleRate=1
 -vRuntime.Eval.ClassStringHintNoticesSampleRate=1
 -vRuntime.Eval.RaiseClassConversionNoticeSampleRate=1
 -vRuntime.Eval.CheckPropTypeHints=3

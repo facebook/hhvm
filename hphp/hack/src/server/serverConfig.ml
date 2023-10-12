@@ -37,6 +37,8 @@ type t = {
   warn_on_non_opt_build: bool;
   (* clientIdeDaemon will fall back to performing a full index of files to construct a naming table if it fails to load one. *)
   ide_fall_back_to_full_index: bool;
+  naming_table_compression_level: int;
+  naming_table_compression_threads: int;
 }
 [@@deriving show]
 
@@ -461,6 +463,12 @@ let load ~silent options : t * ServerLocalConfig.t =
   let ide_fall_back_to_full_index =
     bool_ "ide_fall_back_to_full_index" ~default:true config
   in
+  let naming_table_compression_level =
+    int_ "naming_table_compression_level" ~default:6 config
+  in
+  let naming_table_compression_threads =
+    int_ "naming_table_compression_threads" ~default:1 config
+  in
   let formatter_override =
     Option.map
       (Config_file.Getters.string_opt "formatter_override" config)
@@ -521,6 +529,8 @@ let load ~silent options : t * ServerLocalConfig.t =
       extra_paths;
       warn_on_non_opt_build;
       ide_fall_back_to_full_index;
+      naming_table_compression_level;
+      naming_table_compression_threads;
     },
     local_config )
 
@@ -541,6 +551,8 @@ let default_config =
     extra_paths = [];
     warn_on_non_opt_build = false;
     ide_fall_back_to_full_index = false;
+    naming_table_compression_level = 6;
+    naming_table_compression_threads = 1;
   }
 
 let set_parser_options config popt = { config with parser_options = popt }

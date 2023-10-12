@@ -53,6 +53,8 @@ pub struct HhConfig {
     pub sharedmem_heap_size: usize,
     pub ide_fall_back_to_full_index: bool,
     pub hh_distc_should_disable_trace_store: bool,
+    pub naming_table_compression_level: usize,
+    pub naming_table_compression_threads: usize,
 }
 
 impl HhConfig {
@@ -415,6 +417,12 @@ impl HhConfig {
                 }
                 "hh_distc_should_disable_trace_store" => {
                     c.hh_distc_should_disable_trace_store = parse_json(&value)?;
+                }
+                "naming_table_compression_threads" => {
+                    c.naming_table_compression_threads = parse_json(&value)?;
+                }
+                "naming_table_compression_level" => {
+                    c.naming_table_compression_level = parse_json(&value)?;
                 }
                 "log_exhaustivity_check" => {
                     go.tco_log_exhaustivity_check = parse_json(&value)?;

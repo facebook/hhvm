@@ -49,6 +49,7 @@ struct unset_unsafe_fn;
 struct alias_isset_fn;
 struct move_to_unique_ptr_fn;
 struct assign_from_unique_ptr_fn;
+struct union_value_unsafe_fn;
 
 // IntWrapper is a wrapper of integer that's always copy/move assignable
 // even if integer is atomic
@@ -1963,6 +1964,7 @@ class union_field_ref {
 
   template <typename>
   friend class union_field_ref;
+  friend struct detail::union_value_unsafe_fn;
 
   using is_cpp_ref_or_boxed = folly::bool_constant<
       detail::is_boxed_value_ptr_v<folly::remove_cvref_t<T>> ||
@@ -2222,6 +2224,16 @@ template <typename T, typename U>
 bool operator>=(const U& a, union_field_ref<T> b) {
   return b <= a;
 }
+
+namespace detail {
+struct union_value_unsafe_fn {
+  template <typename T>
+  auto&& operator()(union_field_ref<T> ref) const {
+    return static_cast<typename union_field_ref<T>::reference_type>(
+        ref.get_value());
+  }
+};
+} // namespace detail
 
 // A reference to a terse field of the possibly const-qualified type
 // std::remove_reference_t<T> in a Thrift-generated struct. Note, a terse field

@@ -723,7 +723,8 @@ struct UnionLessThan {
         [&](auto id) {
           using Id = decltype(id);
           using Tag = get_type_tag<T, Id>;
-          return LessThanImpl<Tag>{}(*get<Id>(lhs), *get<Id>(rhs));
+          ::apache::thrift::detail::union_value_unsafe_fn f;
+          return LessThanImpl<Tag>{}(f(get<Id>(lhs)), f(get<Id>(rhs)));
         },
         [] {
           return false; // union is __EMPTY__

@@ -951,6 +951,10 @@ DebuggerRequestInfo* Debugger::attachToRequest(RequestInfo* ti) {
       for (auto it = breakpoints.begin(); it != breakpoints.end(); it++) {
         requestInfo->m_breakpointInfo->m_pendingBreakpoints.emplace(*it);
       }
+      auto exceptionBpMode =
+        m_session->getBreakpointManager()->getExceptionBreakMode();
+      requestInfo->m_breakpointInfo->m_hasExceptionBreakpoint =
+        (exceptionBpMode != ExceptionBreakMode::BreakNone);
     } else {
       m_transport->enqueueOutgoingUserMessage(
         kDummyTheadId,
@@ -1519,6 +1523,23 @@ void Debugger::setDummyThreadId(int64_t threadId) {
   m_dummyThreadId.store(threadId, std::memory_order_release);
 }
 
+void Debugger::onExceptionBreakpointChanged(bool isSet) {
+  Lock lock(m_lock);
+
+  assertx(m_session != nullptr);
+  executeForEachAttachedRequest(
+    [&](RequestInfo* ti, DebuggerRequestInfo* ri) {
+      ri->m_breakpointInfo->m_hasExceptionBreakpoint = isSet;
+      updateUnresolvedBpFlag(ri);
+      if (m_state != ProgramState::Running || ti == nullptr) {
+        const auto cmd = ResolveBreakpointsCommand::createInstance(this);
+        ri->m_commandQueue.dispatchCommand(cmd);
+      }
+    },
+    true /* includeDummyRequest */
+  );
+}
+
 void Debugger::onBreakpointAdded(int bpId) {
   Lock lock(m_lock);
 
@@ -1581,6 +1602,7 @@ void Debugger::tryInstallBreakpoints(DebuggerRequestInfo* ri) {
   // For any breakpoints that are pending for this request, try to resolve
   // and install them, or mark them as unresolved.
   BreakpointManager* bpMgr = m_session->getBreakpointManager();
+  phpSetExceptionBreakpoint(bpMgr->getExceptionBreakMode());
   auto& pendingBps = bpInfo->m_pendingBreakpoints;
 
   for (auto it = pendingBps.begin(); it != pendingBps.end();) {

@@ -16,9 +16,10 @@
 
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/stat-cache.h"
-#include "hphp/runtime/ext/vsdebug/debugger.h"
-#include "hphp/runtime/ext/vsdebug/command.h"
+#include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/ext/vsdebug/breakpoint.h"
+#include "hphp/runtime/ext/vsdebug/command.h"
+#include "hphp/runtime/ext/vsdebug/debugger.h"
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -281,7 +282,14 @@ bool SetExceptionBreakpointsCommand::executeImpl(DebuggerSession* session,
   }
 
   BreakpointManager* bpMgr = session->getBreakpointManager();
+  auto oldMode = bpMgr->getExceptionBreakMode();
   bpMgr->setExceptionBreakMode(mode);
+
+  if (mode != oldMode) {
+    m_debugger->onExceptionBreakpointChanged(
+      mode != ExceptionBreakMode::BreakNone
+    );
+  }
 
   // Completion of this command does not resume the target.
   return false;

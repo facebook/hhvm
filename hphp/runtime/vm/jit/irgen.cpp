@@ -238,6 +238,22 @@ void checkDebuggerIntr(IRGS& env, SrcKey sk) {
   );
 }
 
+void checkDebuggerExceptionIntr(IRGS& env, Block* slowExit) {
+  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(RuntimeOption::EnableVSDebugger);
+  assertx(RuntimeOption::EvalEmitDebuggerIntrCheck);
+
+  auto const& link = DebuggerHook::s_exceptionBreakpointIntr;
+  assertx(link.bound());
+  ifElse(
+    env,
+    [&] (Block* next) {
+      gen(env, CheckRDSInitialized, next, RDSHandleData { link.handle() });
+    },
+    [&] { gen(env, Jmp, slowExit); }
+  );
+}
+
 void ringbufferEntry(IRGS& env, Trace::RingBufferType t, SrcKey sk, int level) {
   if (!Trace::moduleEnabled(Trace::ringbuffer, level)) return;
   gen(env, RBTraceEntry, RBEntryData(t, sk));

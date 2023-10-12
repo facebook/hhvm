@@ -64,6 +64,8 @@ struct RequestBreakpointInfo {
   // thread yet.
   std::unordered_set<int> m_pendingBreakpoints;
 
+  bool m_hasExceptionBreakpoint {false};
+
   // Map of loaded compilation units for this request by normalized file path.
   std::map<std::string, const HPHP::Unit*> m_loadedUnits;
 
@@ -357,6 +359,8 @@ struct Debugger final {
   // Called when a new breakpoint is added to sync it to all requests.
   void onBreakpointAdded(int bpId);
 
+  void onExceptionBreakpointChanged(bool isSet);
+
   // Attempts to resolve and install breakpoints for the current request thread.
   // Will either install the breakpoint or add it to the request's unresolved
   // list.
@@ -590,7 +594,8 @@ private:
   static inline void updateUnresolvedBpFlag(DebuggerRequestInfo* ri) {
     ri->m_flags.unresolvedBps =
       !ri->m_breakpointInfo->m_unresolvedBreakpoints.empty() ||
-      !ri->m_breakpointInfo->m_pendingBreakpoints.empty();
+      !ri->m_breakpointInfo->m_pendingBreakpoints.empty() ||
+      ri->m_breakpointInfo->m_hasExceptionBreakpoint;
     std::atomic_thread_fence(std::memory_order_release);
   }
 

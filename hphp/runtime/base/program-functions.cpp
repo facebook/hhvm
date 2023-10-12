@@ -2475,6 +2475,11 @@ void hphp_process_init(bool skipExtensions) {
   ImplicitContext::activeCtx
     .bind(rds::Mode::Normal, rds::LinkID{"ImplicitContext::activeCtx"});
 
+  if (RO::EnableVSDebugger && RO::EvalEmitDebuggerIntrCheck) {
+    DebuggerHook::s_exceptionBreakpointIntr
+      .bind(rds::Mode::Normal, rds::LinkID{"ExceptionBreakpointIntr"});
+  }
+
   jit::mcgen::processInit();
   jit::processInitProfData();
   if (RuntimeOption::EvalEnableDecl) {

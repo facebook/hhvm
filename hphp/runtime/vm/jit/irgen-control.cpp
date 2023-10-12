@@ -306,6 +306,11 @@ void emitThrow(IRGS& env) {
 
   if (!stackEmpty || !maybeThrowable || !(srcTy <= TObj)) return interpOne(env);
 
+  auto slowExit = makeExitSlow(env);
+  if (RO::EnableVSDebugger && RO::EvalEmitDebuggerIntrCheck) {
+    irgen::checkDebuggerExceptionIntr(env, slowExit);
+  }
+
   auto const handleThrow = [&] {
     if (offset != kInvalidOffset) return jmpImpl(env, offset);
     // There are no more catch blocks in this function, we are at the top
@@ -334,7 +339,7 @@ void emitThrow(IRGS& env) {
       auto const isError = gen(env, ExtendsClass, ecdErr, srcClass);
       gen(env, JmpNZero, taken, isError);
     },
-    [&] { gen(env, Jmp, makeExitSlow(env)); },
+    [&] { gen(env, Jmp, slowExit); },
     handleThrow
   );
 }

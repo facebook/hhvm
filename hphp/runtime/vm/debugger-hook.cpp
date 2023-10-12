@@ -72,6 +72,7 @@ void DebuggerHook::detach(RequestInfo* ti /* = nullptr */) {
 Mutex DebuggerHook::s_lock;
 int DebuggerHook::s_numAttached {0};
 DebuggerHook* DebuggerHook::s_activeHook {nullptr};
+rds::Link<bool, rds::Mode::Normal> DebuggerHook::s_exceptionBreakpointIntr;
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -464,6 +465,16 @@ void phpAddBreakPoint(const Func* f, Offset offset) {
   PC pc = f->at(offset);
   getBreakPointFilter()->addPC(pc);
   markFunctionWithDebuggerIntr(f);
+}
+
+void phpSetExceptionBreakpoint(VSDEBUG::ExceptionBreakMode mode) {
+  auto& link = DebuggerHook::s_exceptionBreakpointIntr;
+  assertx(link.bound());
+  if (mode == VSDEBUG::ExceptionBreakMode::BreakNone) {
+    link.markUninit();
+  } else {
+    link.markInit();
+  }
 }
 
 void phpAddBreakPointFuncEntry(const Func* f) {

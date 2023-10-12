@@ -26,6 +26,8 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/unit.h"  // OffsetRangeVec
 
+#include "hphp/runtime/ext/vsdebug/break_mode.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 // This is a set of functions which are primarily called from the VM to notify
 // the debugger about various events. Some of the implementations also interact
@@ -213,6 +215,7 @@ struct DebuggerHook {
   static Mutex s_lock;
   static int s_numAttached;
   static DebuggerHook* s_activeHook;
+  static rds::Link<bool, rds::Mode::Normal> s_exceptionBreakpointIntr;
 };
 
 // Returns the current hook.
@@ -275,6 +278,8 @@ void phpAddBreakPointFuncEntry(const Func* f);
 void phpAddBreakPointFuncExit(const Func* f);
 // Returns false if the line is invalid
 bool phpAddBreakPointLine(const Unit* u, int line);
+
+void phpSetExceptionBreakpoint(VSDEBUG::ExceptionBreakMode mode);
 
 // Breakpoint removal functions.
 // FIXME Note that internally there is a global PCFilter for all breakpoints.

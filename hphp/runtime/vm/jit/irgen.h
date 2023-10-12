@@ -148,6 +148,11 @@ void checkCoverage(IRGS& env);
  */
 void checkDebuggerIntr(IRGS& env, SrcKey sk);
 
+/*
+ * Exit if exception breakpoint is set by the debugger.
+ */
+void checkDebuggerExceptionIntr(IRGS& env, Block* slowExit);
+
 uint64_t curProfCount(const IRGS& env);
 uint64_t calleeProfCount(const IRGS& env, const RegionDesc& calleeRegion);
 

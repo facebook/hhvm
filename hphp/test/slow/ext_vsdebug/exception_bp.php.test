@@ -1,7 +1,10 @@
 <?hh
 <<__EntryPoint>> function main() {
 echo "hello world.\n";
+foo();
+}
 
+function foo() {
 for ($i = 0; $i < 2; $i++) {
   try {
     throw new UnexpectedValueException("Exn thrown!");

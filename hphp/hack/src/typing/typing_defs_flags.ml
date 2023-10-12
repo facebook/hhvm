@@ -288,22 +288,9 @@ end
 (* Function type flags *)
 let ft_flags_return_disposable  = 1 lsl 0
 
-let ft_flags_returns_mutable    = 1 lsl 1
-
-let ft_flags_returns_void_to_rx = 1 lsl 2
-
 let ft_flags_async              = 1 lsl 4
 
 let ft_flags_generator          = 1 lsl 5
-
-(* These flags are used for the self type on FunType and the parameter type on FunParam *)
-let mutable_flags_owned         = 1 lsl 6
-
-let mutable_flags_borrowed      = 1 lsl 7
-
-let mutable_flags_maybe         = Int.bit_or mutable_flags_owned mutable_flags_borrowed
-
-let mutable_flags_mask          = Int.bit_or mutable_flags_owned mutable_flags_borrowed
 
 let ft_flags_instantiated_targs = 1 lsl 8
 
@@ -330,7 +317,4 @@ let fp_flags_ifc_external      = 1 lsl 3
 
 let fp_flags_ifc_can_call      = 1 lsl 4
 
-(* let fp_flags_via_label_DEPRECATED         = 1 lsl 5 *)
-
-(* 6 and 7 are taken by mutability parameters above *)
 let fp_flags_readonly          = 1 lsl 8

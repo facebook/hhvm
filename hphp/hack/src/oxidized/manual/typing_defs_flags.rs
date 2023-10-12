@@ -15,18 +15,9 @@ bitflags! {
     #[derive(EqModuloPos)]
     pub struct FunTypeFlags: u16 {
         const RETURN_DISPOSABLE      = 1 << 0;
-        const RETURNS_MUTABLE        = 1 << 1;
-        const RETURNS_VOID_TO_RX     = 1 << 2;
         const IS_COROUTINE           = 1 << 3;
         const ASYNC                  = 1 << 4;
         const GENERATOR              = 1 << 5;
-
-        // These flags apply to the self type on methods.
-        const MUTABLE_FLAGS_OWNED    = 1 << 6;
-        const MUTABLE_FLAGS_BORROWED = 1 << 7;
-        const MUTABLE_FLAGS_MAYBE    = Self::MUTABLE_FLAGS_OWNED.bits | Self::MUTABLE_FLAGS_BORROWED.bits;
-        const MUTABLE_FLAGS_MASK     = Self::MUTABLE_FLAGS_OWNED.bits | Self::MUTABLE_FLAGS_BORROWED.bits;
-
         const INSTANTIATED_TARGS     = 1 << 8;
         const IS_FUNCTION_POINTER    = 1 << 9;
         const RETURNS_READONLY       = 1 << 10;
@@ -45,14 +36,6 @@ bitflags! {
         const HAS_DEFAULT            = 1 << 2;
         const IFC_EXTERNAL           = 1 << 3;
         const IFC_CAN_CALL           = 1 << 4;
-        // const VIA_LABEL_DEPRECATED              = 1 << 5;
-
-        // These flags apply to the parameter type.
-        const MUTABLE_FLAGS_OWNED    = 1 << 6;
-        const MUTABLE_FLAGS_BORROWED = 1 << 7;
-        const MUTABLE_FLAGS_MAYBE    = Self::MUTABLE_FLAGS_OWNED.bits | Self::MUTABLE_FLAGS_BORROWED.bits;
-        const MUTABLE_FLAGS_MASK     = Self::MUTABLE_FLAGS_OWNED.bits | Self::MUTABLE_FLAGS_BORROWED.bits;
-
         const READONLY       = 1 << 8;
     }
 }

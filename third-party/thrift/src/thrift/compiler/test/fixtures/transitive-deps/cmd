@@ -1,5 +1,8 @@
 mstch_py3 src/a.thrift
 mstch_py3 src/s.thrift
 mstch_python src/s.thrift
+mstch_python_capi src/s.thrift
 mstch_python src/b.thrift
+mstch_python_capi src/b.thrift
 mstch_python src/c.thrift
+mstch_python_capi src/c.thrift

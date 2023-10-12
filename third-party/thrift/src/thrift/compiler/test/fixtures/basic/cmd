@@ -10,3 +10,4 @@ mstch_rust src/module.thrift
 mstch_java src/module.thrift
 py:json src/module.thrift
 mstch_python src/module.thrift
+mstch_python_capi src/module.thrift

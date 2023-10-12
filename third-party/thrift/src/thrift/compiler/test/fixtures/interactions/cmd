@@ -1,6 +1,7 @@
 mstch_cpp2 src/module.thrift
 mstch_py3 src/module.thrift
 mstch_python src/module.thrift
+mstch_python_capi src/module.thrift
 hack src/module.thrift
 mstch_java src/module.thrift
 mstch_pyi src/module.thrift

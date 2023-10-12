@@ -6,3 +6,4 @@ mstch_python:root_module_prefix=python_module_root src/extend.thrift
 mstch_python:root_module_prefix=python_module_root src/hsmodule.thrift
 mstch_py3 src/emptyns.thrift
 mstch_python src/emptyns.thrift
+mstch_python_capi src/emptyns.thrift

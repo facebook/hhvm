@@ -11,3 +11,4 @@ mstch_rust src/terse_write.thrift
 mstch_java src/terse_write.thrift
 py:json src/terse_write.thrift
 mstch_python src/terse_write.thrift
+mstch_python_capi src/terse_write.thrift

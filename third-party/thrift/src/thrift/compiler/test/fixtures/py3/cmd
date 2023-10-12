@@ -3,4 +3,5 @@ mstch_cpp2:py3cpp src/empty.thrift
 mstch_py3:py3cpp,intercompatible src/module.thrift
 mstch_py3:py3cpp src/empty.thrift
 mstch_python src/empty.thrift
+mstch_python_capi src/empty.thrift
 mstch_python:base_library_package=fbcode.thrift.python,import_static src/module.thrift

@@ -16,6 +16,10 @@ mstch_go src/matching_names.thrift
 mstch_py3 src/service.thrift
 mstch_py3 src/matching_struct_names.thrift
 mstch_python src/service.thrift
+mstch_python_capi src/service.thrift
 mstch_python src/module.thrift
+mstch_python_capi src/module.thrift
 mstch_python src/transitive.thrift
+mstch_python_capi src/transitive.thrift
 mstch_python src/includes.thrift
+mstch_python_capi src/includes.thrift

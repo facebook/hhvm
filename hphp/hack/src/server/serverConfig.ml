@@ -477,6 +477,8 @@ let load ~silent options : t * ServerLocalConfig.t =
           local_config.ServerLocalConfig.remote_old_decls_no_limit
         ~tco_fetch_remote_old_decls:
           local_config.ServerLocalConfig.fetch_remote_old_decls
+        ~tco_use_old_decls_from_cas:
+          local_config.ServerLocalConfig.use_old_decls_from_cas
         ~tco_populate_member_heaps:
           local_config.ServerLocalConfig.populate_member_heaps
         ~tco_skip_hierarchy_checks:

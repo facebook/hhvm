@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9ab56fde3066f4a8f97d567a995455e6>>
+// @generated SignedSource<<9f0dbc11951617313a969ed67e68aef3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -221,4 +221,29 @@ pub enum Decl {
     Typedef(TypedefDecl),
     Const(ConstDecl),
     Module(ModuleDecl),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving show")]
+#[repr(C, u8)]
+pub enum NamedDecl {
+    NClass(String, ClassDecl),
+    NFun(String, FunDecl),
+    NTypedef(String, TypedefDecl),
+    NConst(String, ConstDecl),
+    NModule(String, ModuleDecl),
 }

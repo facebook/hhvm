@@ -160,6 +160,7 @@ s_map::SMap
 s_set::SSet
 saved_state_rollouts::Flag
 shallow_decl_defs::Decl
+shallow_decl_defs::NamedDecl
 tany_sentinel::TanySentinel
 tast::MutabilityEnv
 tast::Reactivity

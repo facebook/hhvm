@@ -197,6 +197,14 @@ type decl =
   | Module of module_decl
 [@@deriving show]
 
+type named_decl =
+  | NClass of string * class_decl
+  | NFun of string * fun_decl
+  | NTypedef of string * typedef_decl
+  | NConst of string * const_decl
+  | NModule of string * module_decl
+[@@deriving show]
+
 val to_class_decl_opt : decl -> class_decl option
 
 val to_fun_decl_opt : decl -> fun_decl option

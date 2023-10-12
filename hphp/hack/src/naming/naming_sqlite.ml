@@ -513,6 +513,7 @@ module SymbolTable = struct
         SELECT
           NAMING_FILE_INFO.PATH_PREFIX_TYPE,
           NAMING_FILE_INFO.PATH_SUFFIX,
+          NAMING_FILE_INFO.FILE_DIGEST,
           {table_name}.FLAGS,
           {table_name}.DECL_HASH
         FROM {table_name}
@@ -551,15 +552,18 @@ module SymbolTable = struct
     | Sqlite3.Rc.ROW ->
       let prefix_type = column_int64 get_stmt 0 in
       let suffix = column_str get_stmt 1 in
-      let flag = Option.value_exn (column_int64 get_stmt 2 |> Int64.to_int) in
-      let decl_hash = column_int64 get_stmt 3 |> Int64.to_string in
+      let file_hash_opt = column_str_option get_stmt 2 in
+      let file_hash = Option.value file_hash_opt ~default:"" in
+      let flag = Option.value_exn (column_int64 get_stmt 3 |> Int64.to_int) in
+      let decl_hash = column_int64 get_stmt 4 |> Int64.to_string in
       let name_kind =
         Option.value_exn (flag |> Naming_types.name_kind_of_enum)
       in
       Some
         ( make_relative_path ~prefix_int:prefix_type ~suffix,
           name_kind,
-          decl_hash )
+          decl_hash,
+          file_hash )
     | rc ->
       failwith
         (Printf.sprintf "Failure retrieving row: %s" (Sqlite3.Rc.to_string rc))
@@ -960,44 +964,57 @@ let sqlite_exn_wrapped_get_db_and_stmt_cache db_path name =
     Exception.reraise e
 
 let get_type_wrapper
-    (result : (Relative_path.t * Naming_types.name_kind * string) option) :
+    (result :
+      (Relative_path.t * Naming_types.name_kind * string * string) option) :
     (Relative_path.t * Naming_types.kind_of_type) option =
   match result with
   | None -> None
-  | Some (filename, Naming_types.Type_kind kind_of_type, _) ->
+  | Some (filename, Naming_types.Type_kind kind_of_type, _, _) ->
     Some (filename, kind_of_type)
-  | Some (_, _, _) -> failwith "wrong symbol kind"
+  | Some (_, _, _, _) -> failwith "wrong symbol kind"
 
 let get_fun_wrapper
-    (result : (Relative_path.t * Naming_types.name_kind * string) option) :
+    (result :
+      (Relative_path.t * Naming_types.name_kind * string * string) option) :
     Relative_path.t option =
   match result with
   | None -> None
-  | Some (filename, Naming_types.Fun_kind, _) -> Some filename
-  | Some (_, _, _) -> failwith "wrong symbol kind"
+  | Some (filename, Naming_types.Fun_kind, _, _) -> Some filename
+  | Some (_, _, _, _) -> failwith "wrong symbol kind"
 
 let get_const_wrapper
-    (result : (Relative_path.t * Naming_types.name_kind * string) option) :
+    (result :
+      (Relative_path.t * Naming_types.name_kind * string * string) option) :
     Relative_path.t option =
   match result with
   | None -> None
-  | Some (filename, Naming_types.Const_kind, _) -> Some filename
-  | Some (_, _, _) -> failwith "wrong symbol kind"
+  | Some (filename, Naming_types.Const_kind, _, _) -> Some filename
+  | Some (_, _, _, _) -> failwith "wrong symbol kind"
 
 let get_module_wrapper
-    (result : (Relative_path.t * Naming_types.name_kind * string) option) :
+    (result :
+      (Relative_path.t * Naming_types.name_kind * string * string) option) :
     Relative_path.t option =
   match result with
   | None -> None
-  | Some (filename, Naming_types.Module_kind, _) -> Some filename
-  | Some (_, _, _) -> failwith "wrong symbol kind"
+  | Some (filename, Naming_types.Module_kind, _, _) -> Some filename
+  | Some (_, _, _, _) -> failwith "wrong symbol kind"
 
 let get_decl_hash_wrapper
-    (result : (Relative_path.t * Naming_types.name_kind * string) option) :
+    (result :
+      (Relative_path.t * Naming_types.name_kind * string * string) option) :
     string option =
   match result with
   | None -> None
-  | Some (_, _, decl_hash) -> Some decl_hash
+  | Some (_, _, decl_hash, _) -> Some decl_hash
+
+let get_file_hash_wrapper
+    (result :
+      (Relative_path.t * Naming_types.name_kind * string * string) option) :
+    string option =
+  match result with
+  | None -> None
+  | Some (_, _, _, file_hash) -> Some file_hash
 
 let get_type_path_by_name (db_path : db_path) name =
   let (db, stmt_cache) =
@@ -1062,9 +1079,14 @@ let get_module_path_by_name (db_path : db_path) name =
 let get_path_by_64bit_dep (db_path : db_path) (dep : Typing_deps.Dep.t) =
   let (db, stmt_cache) = get_db_and_stmt_cache db_path in
   SymbolTable.get db stmt_cache dep SymbolTable.get_sqlite
-  |> Option.map ~f:(function (first, second, _) -> (first, second))
+  |> Option.map ~f:(function (first, second, _, _) -> (first, second))
 
 let get_decl_hash_by_64bit_dep (db_path : db_path) (dep : Typing_deps.Dep.t) =
   let (db, stmt_cache) = get_db_and_stmt_cache db_path in
   SymbolTable.get db stmt_cache dep SymbolTable.get_sqlite
   |> get_decl_hash_wrapper
+
+let get_file_hash_by_64bit_dep (db_path : db_path) (dep : Typing_deps.Dep.t) =
+  let (db, stmt_cache) = get_db_and_stmt_cache db_path in
+  SymbolTable.get db stmt_cache dep SymbolTable.get_sqlite
+  |> get_file_hash_wrapper

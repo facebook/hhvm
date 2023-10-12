@@ -109,6 +109,8 @@ type t = {
   (* Flag to fetch old decls from remote decl store *)
   tco_remote_old_decls_no_limit: bool;
   (* Don't limit amount of remote old decls fetched *)
+  tco_use_old_decls_from_cas: bool;
+  (* Fetch old decls from CAS instead of memcache/manifold *)
   tco_fetch_remote_old_decls: bool;
   (* Populate the member signature heaps.
 
@@ -370,6 +372,7 @@ val set :
   ?log_levels:int SMap.t ->
   ?po_disable_lval_as_an_expression:bool ->
   ?tco_remote_old_decls_no_limit:bool ->
+  ?tco_use_old_decls_from_cas:bool ->
   ?tco_fetch_remote_old_decls:bool ->
   ?tco_populate_member_heaps:bool ->
   ?tco_skip_hierarchy_checks:bool ->

@@ -69,6 +69,12 @@ module Utils = struct
     let dep = Typing_deps.(Dep.make (Dep.Type name)) in
     let decl_hash = Naming_sqlite.get_decl_hash_by_64bit_dep db_path dep in
     decl_hash
+
+  let name_to_file_hash_opt ~(name : string) ~(db_path : Naming_sqlite.db_path)
+      =
+    let dep = Typing_deps.(Dep.make (Dep.Type name)) in
+    let file_hash = Naming_sqlite.get_file_hash_by_64bit_dep db_path dep in
+    file_hash
 end
 
 module FetchAsync = struct
@@ -118,71 +124,107 @@ let fetch_async ~hhconfig_version ~destination_path ~no_limit decl_hashes =
        { hhconfig_version; destination_path; no_limit; decl_hashes })
     (fun _output -> Hh_logger.log "Finished fetching remote old decls")
 
+let fetch_old_decls_via_file_hashes
+    ~(db_path : Naming_sqlite.db_path) (names : string list) :
+    Shallow_decl_defs.shallow_class option SMap.t =
+  (* TODO(bobren): names should really be a list of deps *)
+  let file_hashes =
+    List.filter_map
+      ~f:(fun name -> Utils.name_to_file_hash_opt ~name ~db_path)
+      names
+  in
+  match Remote_old_decls_ffi.get_decls_via_file_hashes file_hashes with
+  | Ok named_old_decls ->
+    (* TODO(bobren) do funs typedefs consts and modules *)
+    let old_decls =
+      List.fold
+        ~init:SMap.empty
+        ~f:(fun acc ndecl ->
+          match ndecl with
+          | Shallow_decl_defs.NClass (name, cls) -> SMap.add name (Some cls) acc
+          | _ -> acc)
+        named_old_decls
+    in
+    old_decls
+  | Error msg ->
+    Hh_logger.log "Error fetching remote decls: %s" msg;
+    SMap.empty
+
 let fetch_old_decls ~(ctx : Provider_context.t) (names : string list) :
     Shallow_decl_defs.shallow_class option SMap.t =
   let db_path_opt = Utils.db_path_of_ctx ~ctx in
   match db_path_opt with
   | None -> SMap.empty
   | Some db_path ->
-    let decl_hashes =
-      List.filter_map
-        ~f:(fun name -> Utils.name_to_decl_hash_opt ~name ~db_path)
-        names
+    let use_old_decls_from_cas =
+      TypecheckerOptions.use_old_decls_from_cas (Provider_context.get_tcopt ctx)
     in
-    (match decl_hashes with
-    | [] -> SMap.empty
-    | _ ->
-      let hhconfig_version = Utils.get_version () in
-      let start_t = Unix.gettimeofday () in
-      let no_limit =
-        TypecheckerOptions.remote_old_decls_no_limit
-          (Provider_context.get_tcopt ctx)
+    Hh_logger.log "Using old decls from CAS? %b" use_old_decls_from_cas;
+    (match use_old_decls_from_cas with
+    | true -> fetch_old_decls_via_file_hashes ~db_path names
+    | false ->
+      let decl_hashes =
+        List.filter_map
+          ~f:(fun name -> Utils.name_to_decl_hash_opt ~name ~db_path)
+          names
       in
-      let tmp_dir = Tempfile.mkdtemp ~skip_mocking:false in
-      let destination_path = Path.(to_string @@ concat tmp_dir "decl_blobs") in
-      let decl_fetch_future =
-        fetch_async ~hhconfig_version ~destination_path ~no_limit decl_hashes
-      in
-      (match Future.get ~timeout:120 decl_fetch_future with
-      | Error e ->
-        Hh_logger.log
-          "Failed to fetch decls from remote decl store: %s"
-          (Future.error_to_string e);
-        SMap.empty
-      | Ok () ->
-        let chan = Stdlib.open_in_bin destination_path in
-        let decl_hashes_and_blobs : (string * string) list =
-          Marshal.from_channel chan
+      (match decl_hashes with
+      | [] -> SMap.empty
+      | _ ->
+        let hhconfig_version = Utils.get_version () in
+        let start_t = Unix.gettimeofday () in
+        let no_limit =
+          TypecheckerOptions.remote_old_decls_no_limit
+            (Provider_context.get_tcopt ctx)
         in
-        let decl_blobs =
-          List.map ~f:(fun (_decl_hash, blob) -> blob) decl_hashes_and_blobs
+        let tmp_dir = Tempfile.mkdtemp ~skip_mocking:false in
+        let destination_path =
+          Path.(to_string @@ concat tmp_dir "decl_blobs")
         in
-        Stdlib.close_in chan;
-        let decls =
-          List.fold
-            ~init:SMap.empty
-            ~f:(fun acc blob ->
-              let contents : Shallow_decl_defs.decl SMap.t =
-                Marshal.from_string blob 0
-              in
-              SMap.fold
-                (fun name decl acc ->
-                  match decl with
-                  | Shallow_decl_defs.Class cls -> SMap.add name (Some cls) acc
-                  | _ -> acc)
-                contents
-                acc)
-            decl_blobs
+        let decl_fetch_future =
+          fetch_async ~hhconfig_version ~destination_path ~no_limit decl_hashes
         in
-        let telemetry =
-          Telemetry.create ()
-          |> Telemetry.int_ ~key:"to_fetch" ~value:(List.length names)
-          |> Telemetry.int_ ~key:"fetched" ~value:(SMap.cardinal decls)
-        in
-        Hh_logger.log
-          "Fetched %d/%d decls remotely"
-          (SMap.cardinal decls)
-          (List.length names);
+        (match Future.get ~timeout:120 decl_fetch_future with
+        | Error e ->
+          Hh_logger.log
+            "Failed to fetch decls from remote decl store: %s"
+            (Future.error_to_string e);
+          SMap.empty
+        | Ok () ->
+          let chan = Stdlib.open_in_bin destination_path in
+          let decl_hashes_and_blobs : (string * string) list =
+            Marshal.from_channel chan
+          in
+          let decl_blobs =
+            List.map ~f:(fun (_decl_hash, blob) -> blob) decl_hashes_and_blobs
+          in
+          Stdlib.close_in chan;
+          let decls =
+            List.fold
+              ~init:SMap.empty
+              ~f:(fun acc blob ->
+                let contents : Shallow_decl_defs.decl SMap.t =
+                  Marshal.from_string blob 0
+                in
+                SMap.fold
+                  (fun name decl acc ->
+                    match decl with
+                    | Shallow_decl_defs.Class cls ->
+                      SMap.add name (Some cls) acc
+                    | _ -> acc)
+                  contents
+                  acc)
+              decl_blobs
+          in
+          let telemetry =
+            Telemetry.create ()
+            |> Telemetry.int_ ~key:"to_fetch" ~value:(List.length names)
+            |> Telemetry.int_ ~key:"fetched" ~value:(SMap.cardinal decls)
+          in
+          Hh_logger.log
+            "Fetched %d/%d decls remotely"
+            (SMap.cardinal decls)
+            (List.length names);
 
-        HackEventLogger.remote_old_decl_end telemetry start_t;
-        decls))
+          HackEventLogger.remote_old_decl_end telemetry start_t;
+          decls)))

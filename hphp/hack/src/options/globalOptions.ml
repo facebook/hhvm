@@ -91,6 +91,7 @@ type t = {
   log_levels: int SMap.t;
   po_disable_lval_as_an_expression: bool;
   tco_remote_old_decls_no_limit: bool;
+  tco_use_old_decls_from_cas: bool;
   tco_fetch_remote_old_decls: bool;
   tco_populate_member_heaps: bool;
   tco_skip_hierarchy_checks: bool;
@@ -222,6 +223,7 @@ let default =
     log_levels = SMap.empty;
     po_disable_lval_as_an_expression = true;
     tco_remote_old_decls_no_limit = false;
+    tco_use_old_decls_from_cas = false;
     tco_fetch_remote_old_decls = false;
     tco_populate_member_heaps = true;
     tco_skip_hierarchy_checks = false;
@@ -350,6 +352,7 @@ let set
     ?log_levels
     ?po_disable_lval_as_an_expression
     ?tco_remote_old_decls_no_limit
+    ?tco_use_old_decls_from_cas
     ?tco_fetch_remote_old_decls
     ?tco_populate_member_heaps
     ?tco_skip_hierarchy_checks
@@ -531,6 +534,8 @@ let set
       setting
         tco_remote_old_decls_no_limit
         options.tco_remote_old_decls_no_limit;
+    tco_use_old_decls_from_cas =
+      setting tco_use_old_decls_from_cas options.tco_use_old_decls_from_cas;
     tco_fetch_remote_old_decls =
       setting tco_fetch_remote_old_decls options.tco_fetch_remote_old_decls;
     tco_populate_member_heaps =

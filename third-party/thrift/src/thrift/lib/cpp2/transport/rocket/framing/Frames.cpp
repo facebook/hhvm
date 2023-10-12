@@ -31,10 +31,13 @@
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
 
+#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/FrameType.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Serializer.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Util.h>
+
+THRIFT_FLAG_DEFINE_bool(fix_cpp_fragmentation, false);
 
 namespace apache {
 namespace thrift {
@@ -69,23 +72,30 @@ void serializeInFragmentsSlowCommon(
   bufferQueue.append(std::move(frame.payload()).buffer());
 
   bool isFirstFrame = true;
-  bool finished = false;
+  const bool complete = flags.complete();
+  bool follows;
+
   do {
     size_t metadataChunk = std::min(metadataSize, kMaxFragmentedPayloadSize);
     metadataSize -= metadataChunk;
     auto chunk = bufferQueue.splitAtMost(kMaxFragmentedPayloadSize);
-    finished = bufferQueue.empty();
+    follows = !bufferQueue.empty();
 
     auto p = Payload::makeCombined(std::move(chunk), metadataChunk);
     if (std::exchange(isFirstFrame, false)) {
       frame.payload() = std::move(p);
-      frame.setHasFollows(!finished);
+      frame.setHasFollows(follows);
       std::move(frame).serialize(writer);
     } else {
-      PayloadFrame pf(frame.streamId(), std::move(p), flags.follows(!finished));
+      bool completeFlag =
+          THRIFT_FLAG(fix_cpp_fragmentation) ? !follows && complete : complete;
+      PayloadFrame pf(
+          frame.streamId(),
+          std::move(p),
+          flags.follows(follows).complete(completeFlag));
       std::move(pf).serialize(writer);
     }
-  } while (!finished);
+  } while (follows);
 }
 
 FOLLY_CREATE_MEMBER_INVOKER(has_initial_request_n_invoker, initialRequestN);

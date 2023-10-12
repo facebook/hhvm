@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function foo(int $y): int {
   return $y;

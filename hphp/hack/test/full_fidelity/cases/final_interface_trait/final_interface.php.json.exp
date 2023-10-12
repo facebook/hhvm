@@ -29,13 +29,9 @@
               "offset":2,
               "leading_width":0,
               "width":2,
-              "trailing_width":11,
+              "trailing_width":1,
               "leading":[],
-              "trailing":[
-                {"kind":"whitespace","text":" ","offset":4,"width":1},
-                {"kind":"single_line_comment","text":"// strict","offset":5,"width":9},
-                {"kind":"end_of_line","text":"\n","offset":14,"width":1}
-              ],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":4,"width":1}],
               "line_number":1
             }
           }
@@ -51,7 +47,7 @@
               "token":{
                 "kind":"final",
                 "text":"final",
-                "offset":15,
+                "offset":5,
                 "leading_width":58,
                 "width":5,
                 "trailing_width":1,
@@ -59,13 +55,13 @@
                   {
                     "kind":"single_line_comment",
                     "text":"// Copyright 2004-present Facebook. All Rights Reserved.",
-                    "offset":15,
+                    "offset":5,
                     "width":56
                   },
-                  {"kind":"end_of_line","text":"\n","offset":71,"width":1},
-                  {"kind":"end_of_line","text":"\n","offset":72,"width":1}
+                  {"kind":"end_of_line","text":"\n","offset":61,"width":1},
+                  {"kind":"end_of_line","text":"\n","offset":62,"width":1}
                 ],
-                "trailing":[{"kind":"whitespace","text":" ","offset":78,"width":1}],
+                "trailing":[{"kind":"whitespace","text":" ","offset":68,"width":1}],
                 "line_number":4
               }
             }
@@ -76,12 +72,12 @@
           "token":{
             "kind":"interface",
             "text":"interface",
-            "offset":79,
+            "offset":69,
             "leading_width":0,
             "width":9,
             "trailing_width":1,
             "leading":[],
-            "trailing":[{"kind":"whitespace","text":" ","offset":88,"width":1}],
+            "trailing":[{"kind":"whitespace","text":" ","offset":78,"width":1}],
             "line_number":4
           }
         },
@@ -90,12 +86,12 @@
           "token":{
             "kind":"name",
             "text":"I",
-            "offset":89,
+            "offset":79,
             "leading_width":0,
             "width":1,
             "trailing_width":1,
             "leading":[],
-            "trailing":[{"kind":"whitespace","text":" ","offset":90,"width":1}],
+            "trailing":[{"kind":"whitespace","text":" ","offset":80,"width":1}],
             "line_number":4
           }
         },
@@ -106,12 +102,12 @@
             "token":{
               "kind":"{",
               "text":"{",
-              "offset":91,
+              "offset":81,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"end_of_line","text":"\n","offset":92,"width":1}],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":82,"width":1}],
               "line_number":4
             }
           },
@@ -120,12 +116,12 @@
             "token":{
               "kind":"}",
               "text":"}",
-              "offset":93,
+              "offset":83,
               "leading_width":1,
               "width":1,
               "trailing_width":1,
-              "leading":[{"kind":"end_of_line","text":"\n","offset":93,"width":1}],
-              "trailing":[{"kind":"end_of_line","text":"\n","offset":95,"width":1}],
+              "leading":[{"kind":"end_of_line","text":"\n","offset":83,"width":1}],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":85,"width":1}],
               "line_number":6
             }
           }
@@ -138,7 +134,7 @@
           "token":{
             "kind":"end_of_file",
             "text":"",
-            "offset":96,
+            "offset":86,
             "leading_width":0,
             "width":0,
             "trailing_width":0,

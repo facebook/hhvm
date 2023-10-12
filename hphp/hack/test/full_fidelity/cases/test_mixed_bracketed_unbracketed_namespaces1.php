@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 namespace foo;
 namespace bar {}
 namespace blah {}

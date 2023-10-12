@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 $f = &() ==> { $x = 5; return $x; }; // error
 $x = &$foo->bar?->baz; // error

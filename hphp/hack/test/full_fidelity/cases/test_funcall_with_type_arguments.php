@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // ficticious functions with size-discernable names
 f('hi'); // normal function call w/o generics

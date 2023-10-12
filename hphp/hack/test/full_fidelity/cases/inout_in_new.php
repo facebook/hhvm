@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class Foo {
   public function __construct(inout $bar) {}

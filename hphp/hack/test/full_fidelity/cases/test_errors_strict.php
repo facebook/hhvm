@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 function foo($a) { // two errors; missing annotation on $a and foo.
   return $a;
 }

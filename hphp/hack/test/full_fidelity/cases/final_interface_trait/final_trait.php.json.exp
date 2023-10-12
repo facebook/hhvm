@@ -29,13 +29,9 @@
               "offset":2,
               "leading_width":0,
               "width":2,
-              "trailing_width":11,
+              "trailing_width":1,
               "leading":[],
-              "trailing":[
-                {"kind":"whitespace","text":" ","offset":4,"width":1},
-                {"kind":"single_line_comment","text":"// strict","offset":5,"width":9},
-                {"kind":"end_of_line","text":"\n","offset":14,"width":1}
-              ],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":4,"width":1}],
               "line_number":1
             }
           }
@@ -51,7 +47,7 @@
               "token":{
                 "kind":"final",
                 "text":"final",
-                "offset":15,
+                "offset":5,
                 "leading_width":58,
                 "width":5,
                 "trailing_width":1,
@@ -59,13 +55,13 @@
                   {
                     "kind":"single_line_comment",
                     "text":"// Copyright 2004-present Facebook. All Rights Reserved.",
-                    "offset":15,
+                    "offset":5,
                     "width":56
                   },
-                  {"kind":"end_of_line","text":"\n","offset":71,"width":1},
-                  {"kind":"end_of_line","text":"\n","offset":72,"width":1}
+                  {"kind":"end_of_line","text":"\n","offset":61,"width":1},
+                  {"kind":"end_of_line","text":"\n","offset":62,"width":1}
                 ],
-                "trailing":[{"kind":"whitespace","text":" ","offset":78,"width":1}],
+                "trailing":[{"kind":"whitespace","text":" ","offset":68,"width":1}],
                 "line_number":4
               }
             }
@@ -76,12 +72,12 @@
           "token":{
             "kind":"trait",
             "text":"trait",
-            "offset":79,
+            "offset":69,
             "leading_width":0,
             "width":5,
             "trailing_width":1,
             "leading":[],
-            "trailing":[{"kind":"whitespace","text":" ","offset":84,"width":1}],
+            "trailing":[{"kind":"whitespace","text":" ","offset":74,"width":1}],
             "line_number":4
           }
         },
@@ -90,12 +86,12 @@
           "token":{
             "kind":"name",
             "text":"T",
-            "offset":85,
+            "offset":75,
             "leading_width":0,
             "width":1,
             "trailing_width":1,
             "leading":[],
-            "trailing":[{"kind":"whitespace","text":" ","offset":86,"width":1}],
+            "trailing":[{"kind":"whitespace","text":" ","offset":76,"width":1}],
             "line_number":4
           }
         },
@@ -106,12 +102,12 @@
             "token":{
               "kind":"{",
               "text":"{",
-              "offset":87,
+              "offset":77,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"end_of_line","text":"\n","offset":88,"width":1}],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":78,"width":1}],
               "line_number":4
             }
           },
@@ -120,12 +116,12 @@
             "token":{
               "kind":"}",
               "text":"}",
-              "offset":89,
+              "offset":79,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"end_of_line","text":"\n","offset":90,"width":1}],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":80,"width":1}],
               "line_number":5
             }
           }
@@ -138,7 +134,7 @@
           "token":{
             "kind":"end_of_file",
             "text":"",
-            "offset":91,
+            "offset":81,
             "leading_width":0,
             "width":0,
             "trailing_width":0,

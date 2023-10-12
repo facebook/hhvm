@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 const A = 10;
 const A;
 const int A;

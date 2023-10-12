@@ -1,1 +1,1 @@
-<?hh // strict
+<?hh

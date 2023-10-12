@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function noop<T>(inout T $_): void {}
 

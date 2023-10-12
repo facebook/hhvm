@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 class ConcreteRight {
   const int i1 = 4;

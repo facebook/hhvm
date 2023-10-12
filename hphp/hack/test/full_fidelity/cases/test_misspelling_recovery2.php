@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 abstract ckass C { // error1058
 }

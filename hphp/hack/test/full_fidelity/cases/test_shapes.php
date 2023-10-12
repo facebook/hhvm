@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 shape(1 => 1);
 shape(true => 1);

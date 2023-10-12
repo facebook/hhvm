@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function f(int $x, inout mixed ...$ys): void {} // ERROR
 

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // legal because 'list' can be the value clause of a foreach
 foreach($array as list($odd, $even)){

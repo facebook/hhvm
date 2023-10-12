@@ -29,13 +29,9 @@
               "offset":2,
               "leading_width":0,
               "width":2,
-              "trailing_width":11,
+              "trailing_width":1,
               "leading":[],
-              "trailing":[
-                {"kind":"whitespace","text":" ","offset":4,"width":1},
-                {"kind":"single_line_comment","text":"// strict","offset":5,"width":9},
-                {"kind":"end_of_line","text":"\n","offset":14,"width":1}
-              ],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":4,"width":1}],
               "line_number":1
             }
           }
@@ -52,12 +48,12 @@
               "token":{
                 "kind":"variable",
                 "text":"$y",
-                "offset":15,
+                "offset":5,
                 "leading_width":1,
                 "width":2,
                 "trailing_width":1,
-                "leading":[{"kind":"end_of_line","text":"\n","offset":15,"width":1}],
-                "trailing":[{"kind":"whitespace","text":" ","offset":18,"width":1}],
+                "leading":[{"kind":"end_of_line","text":"\n","offset":5,"width":1}],
+                "trailing":[{"kind":"whitespace","text":" ","offset":8,"width":1}],
                 "line_number":3
               }
             }
@@ -67,12 +63,12 @@
             "token":{
               "kind":"=",
               "text":"=",
-              "offset":19,
+              "offset":9,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":20,"width":1}],
+              "trailing":[{"kind":"whitespace","text":" ","offset":10,"width":1}],
               "line_number":3
             }
           },
@@ -83,7 +79,7 @@
               "token":{
                 "kind":"$",
                 "text":"$",
-                "offset":21,
+                "offset":11,
                 "leading_width":0,
                 "width":1,
                 "trailing_width":0,
@@ -99,7 +95,7 @@
                 "token":{
                   "kind":"variable",
                   "text":"$s",
-                  "offset":22,
+                  "offset":12,
                   "leading_width":0,
                   "width":2,
                   "trailing_width":0,
@@ -116,12 +112,12 @@
           "token":{
             "kind":";",
             "text":";",
-            "offset":24,
+            "offset":14,
             "leading_width":0,
             "width":1,
             "trailing_width":1,
             "leading":[],
-            "trailing":[{"kind":"end_of_line","text":"\n","offset":25,"width":1}],
+            "trailing":[{"kind":"end_of_line","text":"\n","offset":15,"width":1}],
             "line_number":3
           }
         }
@@ -133,7 +129,7 @@
           "token":{
             "kind":"end_of_file",
             "text":"",
-            "offset":26,
+            "offset":16,
             "leading_width":0,
             "width":0,
             "trailing_width":0,

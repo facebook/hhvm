@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // legal
 interface c extends a, b {

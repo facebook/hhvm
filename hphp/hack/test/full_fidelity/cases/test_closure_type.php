@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function foo ((function (int) : int) $f) : int {
   $x = $f(0);

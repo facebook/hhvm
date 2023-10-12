@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function test1<T1<_>>() : void {}
 

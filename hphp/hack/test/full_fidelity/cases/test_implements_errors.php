@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 class Bar1 implements Foo1
 {
 }

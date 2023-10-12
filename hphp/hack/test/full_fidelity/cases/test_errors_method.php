@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class E {
   public private function f () : void {}

@@ -1,14 +1,14 @@
 Parsing[1002] A type specifier is expected here. [1]
 
 zero_width_syntax_err.php:3:22
-    1 | <?hh // strict
+    1 | <?hh
     2 | 
 [1] 3 | class Foo extends    {}
 
 Parsing[1002] Encountered unexpected text ``, was expecting a type hint. [1]
 
 zero_width_syntax_err.php:3:22
-    1 | <?hh // strict
+    1 | <?hh
     2 | 
 [1] 3 | class Foo extends    {}
 

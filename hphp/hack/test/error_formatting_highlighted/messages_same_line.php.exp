@@ -1,7 +1,7 @@
 Typing[4030] Was expecting a return type hint [1]
 
 messages_same_line.php:3:34
-    1 | <?hh // strict
+    1 | <?hh
     2 | 
 [1] 3 | function foo(): void {} function bar() { foo(1); }
 
@@ -9,7 +9,7 @@ Typing[4105] Too many arguments (expected 0 but got 1) [1]
 -> Definition is here [2]
 
 messages_same_line.php:3:42
-      1 | <?hh // strict
+      1 | <?hh
       2 | 
 [1,2] 3 | function foo(): void {} function bar() { foo(1); }
 

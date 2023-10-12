@@ -3712,6 +3712,25 @@ module Eval_primary = struct
       lazy [(decl_pos, "Declaration is here")],
       [] )
 
+  let static_call_on_trait_require_class
+      call_pos meth_name trait_name req_class_name =
+    let trait_name = Render.strip_ns trait_name in
+    let req_class_name = Render.strip_ns req_class_name in
+    ( Error_code.StaticCallOnTraitRequireClass,
+      lazy
+        ( call_pos,
+          "Invoking static methods on traits is not sane and must be avoided. Since trait "
+          ^ trait_name
+          ^ " has a "
+          ^ Markdown_lite.md_codify ("require class " ^ req_class_name)
+          ^ " constraint, replace "
+          ^ Markdown_lite.md_codify (trait_name ^ "::" ^ meth_name ^ "(...)")
+          ^ " with "
+          ^ Markdown_lite.md_codify (req_class_name ^ "::" ^ meth_name ^ "(...)")
+          ^ "." ),
+      lazy [],
+      [] )
+
   let isset_in_strict pos =
     ( Error_code.IssetEmptyInStrict,
       lazy
@@ -4801,6 +4820,9 @@ module Eval_primary = struct
       classname_abstract_call pos meth_name class_name decl_pos
     | Static_synthetic_method { pos; meth_name; class_name; decl_pos } ->
       static_synthetic_method pos meth_name class_name decl_pos
+    | Static_call_on_trait_require_class
+        { pos; meth_name; trait_name; req_class_name } ->
+      static_call_on_trait_require_class pos meth_name trait_name req_class_name
     | Isset_in_strict pos -> isset_in_strict pos
     | Isset_inout_arg pos -> isset_inout_arg pos
     | Unpacking_disallowed_builtin_function { pos; fn_name } ->

@@ -1,0 +1,6 @@
+File "static_access_04.bad.php", line 14, characters 6-8:
+No static method `foo` in `T` (Typing[4090])
+  File "static_access_04.bad.php", line 3, characters 7-7:
+  Declaration of `T` is here
+File "static_access_04.bad.php", line 14, characters 6-8:
+Invoking static methods on traits is not sane and must be avoided. Since trait T has a `require class C` constraint, replace `T::foo(...)` with `C::foo(...)`. (Typing[4476])

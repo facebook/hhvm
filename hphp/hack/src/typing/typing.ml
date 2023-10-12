@@ -1189,7 +1189,8 @@ let is_hack_collection env ty =
       ty
       (MakeType.const_collection Reason.Rnone (MakeType.mixed Reason.Rnone))
 
-let check_class_get env p def_pos cid mid ce (_, _cid_pos, e) function_pointer =
+let check_class_get
+    env p def_pos cid mid ce (_, _cid_pos, e) function_pointer is_method =
   match e with
   | CIself when get_ce_abstract ce -> begin
     match Env.get_self_id env with
@@ -1264,6 +1265,29 @@ let check_class_get env p def_pos cid mid ce (_, _cid_pos, e) function_pointer =
         primary
         @@ Primary.Static_synthetic_method
              { class_name; meth_name = mid; pos = p; decl_pos = def_pos })
+  | CI (_, class_name) when is_method ->
+    (match Env.get_class env class_name with
+    | None -> ()
+    | Some cd ->
+      let req_class = Cls.all_ancestor_req_class_requirements cd in
+      if Ast_defs.is_c_trait (Cls.kind cd) && not (List.is_empty req_class) then
+        Typing_error_utils.add_typing_error
+          ~env
+          Typing_error.(
+            primary
+            @@ Primary.Static_call_on_trait_require_class
+                 {
+                   trait_name = class_name;
+                   meth_name = mid;
+                   req_class_name =
+                     (match
+                        TUtils.try_unwrap_class_type
+                          (snd (List.hd_exn req_class))
+                      with
+                     | None -> ""
+                     | Some (_r, (_p, req_name), _paraml) -> req_name);
+                   pos = p;
+                 }))
   | _ -> ()
 
 (** Given an identifier for a function, find its function type in the
@@ -8435,7 +8459,16 @@ and class_get_inner
           Option.iter
             ~f:(Typing_error_utils.add_typing_error ~env)
             (TVis.check_deprecated ~use_pos:p ~def_pos env ce_deprecated);
-          check_class_get env p def_pos c mid ce cid is_function_pointer;
+          check_class_get
+            env
+            p
+            def_pos
+            c
+            mid
+            ce
+            cid
+            is_function_pointer
+            is_method;
           let (env, member_ty, et_enforced, tal) =
             match deref member_decl_ty with
             (* We special case Tfun here to allow passing in explicit tparams to localize_ft. *)

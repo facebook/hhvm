@@ -2,3 +2,5 @@ File "req_class_private0.bad.php", line 22, characters 16-25:
 You cannot access this member (Typing[4112])
   File "req_class_private0.bad.php", line 7, characters 27-36:
   This member is private
+File "req_class_private0.bad.php", line 28, characters 10-17:
+Invoking static methods on traits is not sane and must be avoided. Since trait TDemo has a `require class DemoClass` constraint, replace `TDemo::demoFunc(...)` with `DemoClass::demoFunc(...)`. (Typing[4476])

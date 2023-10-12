@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 <<__Sealed(T2::class)>>
 trait T {}

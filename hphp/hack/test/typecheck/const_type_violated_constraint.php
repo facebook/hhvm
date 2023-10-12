@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class Test {
   const dict<?string, string> test_dict = dict[

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 // hh_show is discouraged. However, due to the nature of how the type system
 // convolutes array and varray, this is the most straightforward approach.

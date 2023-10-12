@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class Foo {}
 class Bar extends Foo {}

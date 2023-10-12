@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 /**
  * Create nested Tunion that can occur as a result of anonymous

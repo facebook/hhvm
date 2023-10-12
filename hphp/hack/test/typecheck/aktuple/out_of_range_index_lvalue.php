@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 /**
  * Setting an out-of range key in tuple-like array downgrades it to a vec-like

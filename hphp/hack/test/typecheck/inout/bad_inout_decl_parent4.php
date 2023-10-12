@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class C1 {
   public function foo(inout int $x): void {}

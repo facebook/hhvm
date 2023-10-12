@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 <<__SupportDynamicType>>
 interface ILegacyEnum<-TIn as supportdyn<mixed> , TOut  as supportdyn<mixed> as TIn> { };

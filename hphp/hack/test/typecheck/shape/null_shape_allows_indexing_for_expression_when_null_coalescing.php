@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 // Despite how improper the usage seems here,
 // hhvm does not throw an error

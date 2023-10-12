@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 class Demo {
   public function getReadonly(string $s): readonly string {
     return $s;

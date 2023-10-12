@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 abstract class Base {
   private int $x = 0;

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function make_num(): num {
   return 10101;

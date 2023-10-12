@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 <<__Const>>
 class A {}

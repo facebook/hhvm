@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 // The unprovided 'a' should not produce errors.
 // The provided 'b' should not produce errors.

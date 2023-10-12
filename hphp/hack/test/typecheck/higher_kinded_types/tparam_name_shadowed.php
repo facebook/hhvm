@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class Test1<T1<T2>, T2> {}
 

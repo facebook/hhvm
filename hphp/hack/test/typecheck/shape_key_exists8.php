@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 // Non-literal index
 

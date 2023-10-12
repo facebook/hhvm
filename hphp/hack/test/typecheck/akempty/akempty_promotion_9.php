@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 /**
  * Test confilicting AKempty promotions - in one branch it's promoted to

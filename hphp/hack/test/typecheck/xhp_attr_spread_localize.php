@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 /**
  * Tests whether or not XHP attribute types are correctly localized when we try
  * to spread them.

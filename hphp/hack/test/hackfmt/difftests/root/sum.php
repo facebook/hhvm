@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /**
  * Returns the sum of the two arguments.

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class C<<<__Enforceable>> reify T> {
   public function gate_as(mixed $x): void {

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 abstract class BaseIterable<Tv> {
   public function filterInstanceOf<Tout>(

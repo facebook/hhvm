@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function f(nonnull $x): bool {
   return $x === 42;

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 /* If a class takes even one reified parameter, all hints where the class is

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function test(bool $b, Traversable<int> $t, vec<int> $v): void {
   $x = $b ? $t : $v;

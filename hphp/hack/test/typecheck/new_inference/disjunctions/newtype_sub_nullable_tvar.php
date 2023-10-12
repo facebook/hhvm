@@ -1,11 +1,11 @@
 ////file1.php
-<?hh
+<?hh // strict
 
 newtype N as ?B = ?B;
 newtype M as ?N = ?N;
 
 ////file2.php
-<?hh
+<?hh // strict
 
 class A<T> {
   private ?T $x;

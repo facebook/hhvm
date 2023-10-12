@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 // Abstract class for expression abstract syntax tree
 abstract class Exp<+T> {

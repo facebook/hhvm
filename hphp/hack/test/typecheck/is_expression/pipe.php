@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function f(mixed $x): void {
   $x |> $$ is int ? expect_int($$) : null;

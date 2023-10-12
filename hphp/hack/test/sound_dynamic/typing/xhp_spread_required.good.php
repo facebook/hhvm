@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 abstract class XHPTest {
     public function __construct(

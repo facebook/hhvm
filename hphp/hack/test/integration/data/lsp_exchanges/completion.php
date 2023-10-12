@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 function testing_area(): void {
 

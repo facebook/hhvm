@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function testBools(dynamic $x): void {
   $y = $x && true; // $y : bool

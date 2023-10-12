@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 class C<Tv> {
   const type T = int;

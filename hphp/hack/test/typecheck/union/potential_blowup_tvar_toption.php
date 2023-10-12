@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function make_tvaropt<T>(): ?T {
   return null;

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 final class MyParent {
   public function foo(): void { echo "myparent\n"; }

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 <<__Sealed(SomeTrait::class)>>
 interface SomeInterface {}

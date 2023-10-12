@@ -1,10 +1,10 @@
 //// file1.php
-<?hh
+<?hh // strict
 
 newtype N<+T> = int;
 
 //// file2.php
-<?hh
+<?hh // strict
 
 function nullthrows<T>(?T $x): T {
   throw new Exception();

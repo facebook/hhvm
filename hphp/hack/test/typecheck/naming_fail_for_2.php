@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function foo(): void {
   for (; true; $x = 1) {

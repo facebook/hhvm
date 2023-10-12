@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class MyClass {
   public int $x = 0;

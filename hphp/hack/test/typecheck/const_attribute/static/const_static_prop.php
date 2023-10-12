@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class A {
   <<__Const>> static public int $static_const_prop = 5;

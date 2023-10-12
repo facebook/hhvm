@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 // These should all have typing errors.
 function bad_interp(bool $a, float $b, null $c, string $d): void {

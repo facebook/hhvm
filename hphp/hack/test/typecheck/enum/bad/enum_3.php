@@ -1,5 +1,5 @@
 //// def.php
-<?hh
+<?hh // strict
 
 abstract class Enum {
   abstract const type TInner;
@@ -12,7 +12,7 @@ class Foo extends Enum {
 newtype lol = int;
 
 //// use.php
-<?hh
+<?hh // strict
 
 // Should fail because FOO is a newtype
 function f(): int {

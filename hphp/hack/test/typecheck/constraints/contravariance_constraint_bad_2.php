@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 // Trying to replicate one of the contravariant constraint issues in www
 // This is the last one that shows up in www

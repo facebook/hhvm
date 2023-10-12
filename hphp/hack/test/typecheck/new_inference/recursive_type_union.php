@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function test(bool $b): ?int {
   $x = new Vector(null); // new tvar v, $x : Vector<v>

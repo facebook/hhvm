@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 type REACT_XHP_FIX<+T> = T;
 

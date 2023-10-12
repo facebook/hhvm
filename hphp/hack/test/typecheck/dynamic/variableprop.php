@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function testDynamicProp(dynamic $x, string $y): void {
   $z = $x->$y();

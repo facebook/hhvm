@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 // Too few arguments
 

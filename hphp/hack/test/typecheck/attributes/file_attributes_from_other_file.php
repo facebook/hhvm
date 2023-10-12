@@ -1,11 +1,11 @@
 //// file1.php
-<?hh
+<?hh // strict
 namespace A {
   class X implements \HH\FileAttribute { }
 }
 
 //// file2.php
-<?hh
+<?hh // strict
 <<file: A\X>>
 
 namespace B {

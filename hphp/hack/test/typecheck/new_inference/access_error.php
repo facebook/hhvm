@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 /**
  * Shape-like arrays preserve element types - usage that should report errors.

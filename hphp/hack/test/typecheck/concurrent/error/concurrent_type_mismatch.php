@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 async function gen1(): Awaitable<float> { return 42.; }
 async function gen2(): Awaitable<void> {}

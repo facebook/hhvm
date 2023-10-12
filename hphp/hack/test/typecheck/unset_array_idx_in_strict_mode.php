@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function f(): void {
   // Unsetting array indexes should be fine

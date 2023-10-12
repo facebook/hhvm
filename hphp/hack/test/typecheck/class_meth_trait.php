@@ -1,5 +1,5 @@
 //// file1.php
-<?hh
+<?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 trait MyTestTrait {
@@ -7,7 +7,7 @@ trait MyTestTrait {
 }
 
 //// file2.php
-<?hh
+<?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 final class MyTestClass {

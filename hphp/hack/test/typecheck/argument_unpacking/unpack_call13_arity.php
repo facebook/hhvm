@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function test_splat_arity(): void {
   $tuple2 = tuple(1, 2);

@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 function simple_for_each(vec<string> $x): string {
   $accum = "";

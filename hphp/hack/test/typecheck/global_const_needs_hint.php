@@ -4,6 +4,6 @@
 const mixed Y = 1;
 
 //// file2.php
-<?hh
+<?hh// strict
 
 const mixed X = Y;

@@ -1,5 +1,5 @@
 //// strict.php
-<?hh
+<?hh// strict
 
 function test(): void {
   f1();

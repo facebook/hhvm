@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 type TBar<+T> = T;
 type TFoo = TBar<string>;

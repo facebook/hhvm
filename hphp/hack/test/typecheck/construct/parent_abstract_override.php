@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 abstract class BaseClass {
   public abstract function __construct();

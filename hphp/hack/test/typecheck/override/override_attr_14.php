@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 interface IFoo {
   <<__Override>>

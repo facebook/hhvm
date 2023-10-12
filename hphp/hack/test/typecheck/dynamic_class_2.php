@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class Foo {
   public static function bar(): void {}

@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 function fun(dict<string, vec<KeyedContainer<string, string>>> $in): void {
   $stack = Vector {dict['k' => 'v']};

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function keyset_gen_map<Tv, Tk as arraykey>(
   Traversable<Tv> $_,

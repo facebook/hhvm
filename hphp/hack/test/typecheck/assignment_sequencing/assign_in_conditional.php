@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function takes_int_makes_string(int $x): string {
   return "";

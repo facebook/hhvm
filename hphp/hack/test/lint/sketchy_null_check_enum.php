@@ -1,5 +1,5 @@
 //// file1.php
-<?hh
+<?hh // strict
 
 enum Foo : int {
   ONE = 1;
@@ -7,7 +7,7 @@ enum Foo : int {
 }
 
 //// file2.php
-<?hh
+<?hh // strict
 
 function test(?Foo $x): void {
   if ($x) {

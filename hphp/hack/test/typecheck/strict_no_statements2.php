@@ -1,3 +1,3 @@
-<?hh
+<?hh // strict
 
 $f = 1;

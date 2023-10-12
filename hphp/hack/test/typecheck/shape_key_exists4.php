@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 // Nonexisting field in intersection of declared shapes
 

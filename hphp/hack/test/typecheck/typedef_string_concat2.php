@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 type TDef = int;
 

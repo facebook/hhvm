@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 // Test a bunch of sequencing things that don't cause errors.
 

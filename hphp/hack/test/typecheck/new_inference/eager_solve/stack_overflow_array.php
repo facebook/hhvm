@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function fill <Tk as arraykey, Tv> (
   Container<Tk> $keys,

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function f(Container<string> $x): void {
   $y = $x ?as vec<_>;

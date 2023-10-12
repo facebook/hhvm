@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 abstract class C {
   abstract const type T;

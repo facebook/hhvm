@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class Data {
   <<__Policied("PUBLIC")>>

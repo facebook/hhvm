@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 /**
  * Test if the upgraded type is accepted with no errors by a compatible function

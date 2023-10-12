@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function get_int(): int {

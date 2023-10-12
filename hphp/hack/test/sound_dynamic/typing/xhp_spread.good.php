@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 <<__SupportDynamicType>>
 abstract class XHPTest {
   public function __construct(

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function testCollections(dynamic $x): void {
   $y = vec[];

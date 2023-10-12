@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 /**
  * Test AKempty promotion affecting an array inside a collection

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function apply<T, Tr>((function(T): Tr) $f, T $x): Tr {

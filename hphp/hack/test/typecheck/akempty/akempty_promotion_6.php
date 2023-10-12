@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 /**
  * Rvalue [...] usage should not cause AKempty upgrade

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function makeFunction<T1,T2>((function(T1):T2) $f):(function(T1):T2) {

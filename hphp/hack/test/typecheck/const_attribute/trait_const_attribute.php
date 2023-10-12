@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 trait T {
   <<__Const>>

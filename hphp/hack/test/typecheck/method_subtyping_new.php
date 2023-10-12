@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class Foo {
   public function qq(int $x): num {

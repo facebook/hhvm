@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 // https://rosettacode.org/wiki/Balanced_brackets#PHP
 

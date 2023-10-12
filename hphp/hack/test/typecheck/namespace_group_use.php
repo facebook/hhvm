@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 namespace Foo\Bar\Baz {
   function f1(): void {}

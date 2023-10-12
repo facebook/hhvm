@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 // Bad because reading and writing from $x on LHS
 function test(varray<int> $a, varray<int> $b): int {

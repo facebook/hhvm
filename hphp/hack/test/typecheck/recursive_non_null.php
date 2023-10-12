@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function opt<T>(T $x): ?T {
   return $x;

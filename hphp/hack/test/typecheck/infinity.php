@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class A {
   public int $infinity = 0;

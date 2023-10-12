@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function consumeArrayOfInt(varray<int> $arg): void {}
 

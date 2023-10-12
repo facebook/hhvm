@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function f(bool $b, string $x): void {
   if ($b && ($x = 1) !== 0) {

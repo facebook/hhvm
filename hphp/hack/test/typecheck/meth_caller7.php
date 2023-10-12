@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class C {
   public function foo2(int $x, string $y): void {}

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function takes_mixed(mixed $_): void {}
 

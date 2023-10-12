@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class Foo implements Iterator<int> {
   public function current(): int {

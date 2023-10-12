@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 abstract class :mixin {
   children empty;

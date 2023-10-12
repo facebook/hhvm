@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 interface ILoader<T> {
   public static function gen(): Awaitable<T>;

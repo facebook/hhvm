@@ -1,12 +1,12 @@
 //// xhp_namespace_use_in_same_namespace_def.php
-<?hh
+<?hh // strict
 
 namespace foo;
 
 xhp class bar extends \XHPTest {}
 
 //// xhp_namespace_use_in_same_namespace_usage.php
-<?hh
+<?hh // strict
 
 namespace foo;
 

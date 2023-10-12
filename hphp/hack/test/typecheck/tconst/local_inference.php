@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 interface IFoo {
   const type T = int;
 

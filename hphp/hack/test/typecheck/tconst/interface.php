@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 interface Tabstract {
   abstract const type T as mixed;

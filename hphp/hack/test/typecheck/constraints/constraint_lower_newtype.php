@@ -1,9 +1,9 @@
 ////file1.php
-<?hh
+<?hh // strict
 newtype MyType as arraykey = string;
 
 ////file2.php
-<?hh
+<?hh // strict
 function test_bound<T super MyType>(MyType $x): T {
   return $x;
 }

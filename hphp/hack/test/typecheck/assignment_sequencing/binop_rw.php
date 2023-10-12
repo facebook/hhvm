@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function f(mixed $x): int {
   return 2;

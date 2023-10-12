@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 function f(bool $cond, string $key): void {
   $m = Map {};

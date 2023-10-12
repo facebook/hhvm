@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 interface I<Ta, Tb as Ta> {}
 

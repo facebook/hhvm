@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 type ShapeWithKnownAndUnknownFields = shape(
   'field1' => int,

@@ -1,3 +1,3 @@
-<?hh
+<?hh // strict
 
 <<file: MyAttribute('foo')>>

@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 /**
  * Difference between nested and local-var tuple-like arrays

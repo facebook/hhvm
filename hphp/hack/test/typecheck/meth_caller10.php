@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class X<T> {
   public function foo(T $x): T {

@@ -1,5 +1,5 @@
 //// file1.php
-<?hh
+<?hh // strict
 
 newtype B = int;
 
@@ -8,7 +8,7 @@ newtype C as ?int = int;
 type D = ?int;
 
 //// file2.php
-<?hh
+<?hh // strict
 
 class A {}
 

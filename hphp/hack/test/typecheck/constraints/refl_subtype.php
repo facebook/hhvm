@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class C {}
 trait TR<Tr as ?C> {

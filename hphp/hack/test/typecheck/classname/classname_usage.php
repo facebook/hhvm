@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 trait Tr {
   public static function bar(): string {

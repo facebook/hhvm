@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class Example {
   public function __clone(): string {

@@ -1,5 +1,5 @@
 ////file1.php
-<?hh
+<?hh // strict
 
 class C1 {
   const type T = C2::T;

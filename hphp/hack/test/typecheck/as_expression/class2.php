@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 abstract class A<+T> {}
 final class B<+T> extends A<T> {} // covariant

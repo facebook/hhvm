@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class E<Ta, Tb> {}
 

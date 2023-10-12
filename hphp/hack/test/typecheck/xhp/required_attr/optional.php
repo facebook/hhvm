@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class :a extends XHPTest { attribute int a @required, int b @lateinit; }

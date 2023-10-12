@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function expectMixedReturn((function(int):mixed) $f):void { }
 

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 type UNSAFE_TYPE_HH_FIXME_<T> = T;
 

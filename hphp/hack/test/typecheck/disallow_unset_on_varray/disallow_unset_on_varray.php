@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function test_varray(varray<int> $x): void {
   unset($x[0]);

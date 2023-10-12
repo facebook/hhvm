@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 // This is to mimic the super global class "GlobalENV" in www/flib/core/superglobals/GlobalENV.php
 class GlobalENV {

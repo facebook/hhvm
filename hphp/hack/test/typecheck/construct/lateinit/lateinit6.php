@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 abstract class C {
   public int $foo;

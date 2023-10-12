@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 abstract class A {
   abstract const type T as nonnull = int;

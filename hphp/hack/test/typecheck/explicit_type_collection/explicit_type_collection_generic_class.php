@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class foo<T>{
   private T $var;

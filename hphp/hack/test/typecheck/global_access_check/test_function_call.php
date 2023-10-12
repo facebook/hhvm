@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 class Bar {
   public int $prop = 0;

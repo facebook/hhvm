@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 xhp class foo extends XHPTest {
     // Verify that attributes are allowed.

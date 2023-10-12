@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function member_and_function_call_chain(MyObject $my_object): void {
   $my_object

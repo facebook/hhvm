@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 abstract class Base {
   private function f(): int { return 0; }

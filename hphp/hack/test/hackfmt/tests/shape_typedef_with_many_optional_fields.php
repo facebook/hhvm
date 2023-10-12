@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 type ShapeWithOptionalField =
 shape(
 ?'1' => int,

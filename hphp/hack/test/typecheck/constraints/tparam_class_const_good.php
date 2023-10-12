@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class C {
   const int X = 42;

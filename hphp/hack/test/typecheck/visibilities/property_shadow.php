@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class A {
   public function __construct(private int $x) {}

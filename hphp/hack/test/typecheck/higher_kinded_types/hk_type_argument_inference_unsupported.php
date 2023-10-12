@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 
 function test<T1, T2<T3>>() : void {}

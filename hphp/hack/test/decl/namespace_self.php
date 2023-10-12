@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 namespace NS1\NS2;
 

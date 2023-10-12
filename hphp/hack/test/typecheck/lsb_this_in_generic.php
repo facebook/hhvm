@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class A {
   <<__LSB>> private static vec<this> $v = vec[];

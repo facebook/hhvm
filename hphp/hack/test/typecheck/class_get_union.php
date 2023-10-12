@@ -1,5 +1,5 @@
 //// file1.php
-<?hh
+<?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class A {
@@ -10,7 +10,7 @@ class A {
 }
 
 //// file2.php
-<?hh
+<?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class C1<T> {

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function f(int $x): void {
   expect_int($x as mixed);

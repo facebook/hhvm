@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 /**
  * Setting a non-static key in tuple-like array downgrades it to a vec-like

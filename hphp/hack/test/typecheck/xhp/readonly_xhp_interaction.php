@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 class Bar{}
 final class :xhp_ui extends XHPTest {
 

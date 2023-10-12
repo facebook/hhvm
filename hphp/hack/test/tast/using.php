@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class Handle implements IDisposable {
   public function __dispose(): void {}

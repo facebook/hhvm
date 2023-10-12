@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 async function run<T>(
   (function (int): Awaitable<T>) $x,

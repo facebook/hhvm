@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 interface I {
   public function __construct();

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 class C {
   public function blah(bool $x): ?D {
     return $x ? new D() : null;

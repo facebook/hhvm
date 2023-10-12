@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 // The test proves that it is safe to allow the 'this' type as a public
 // property. Attempting to assign to a property of type 'this' will fail

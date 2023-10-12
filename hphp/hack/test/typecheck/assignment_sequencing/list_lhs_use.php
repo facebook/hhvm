@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 // Bad because assigning to $x and using it on LHS.
 // Lots of nesting here.

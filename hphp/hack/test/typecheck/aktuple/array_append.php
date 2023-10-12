@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 /* For now, we don't grow tuple-like arrays - appending to them just downgrades
  * them to vector-like arrays */

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class A {
   <<__LSB>> public static int $x = 0;

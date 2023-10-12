@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function takes_fun((function (int): num) $f): void {}
 

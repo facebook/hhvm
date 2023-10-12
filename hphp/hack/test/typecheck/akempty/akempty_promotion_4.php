@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 /**
  * Test AKempty to AKvarray upgrade when inside a nested type

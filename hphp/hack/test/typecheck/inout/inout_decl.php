@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function foo(inout bool $io): void {
   $io = true;

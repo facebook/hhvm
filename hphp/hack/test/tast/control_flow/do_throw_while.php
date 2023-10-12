@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function throwFromDoWhileLoop(bool $cond): void {
   do {

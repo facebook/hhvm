@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 // Copyright 2022-present Facebook. All Rights Reserved.
 
 function foo(string $s) : int {

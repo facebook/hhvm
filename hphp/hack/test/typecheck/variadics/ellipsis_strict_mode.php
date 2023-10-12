@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function bar((function(): void) $fn): void {}
 

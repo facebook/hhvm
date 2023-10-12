@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class NoCtor implements \HH\FunctionAttribute {
   public int $x = 42;

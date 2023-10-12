@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 type Sopt = shape (?'a' => int);
 type S = shape ('a' => int, ...);

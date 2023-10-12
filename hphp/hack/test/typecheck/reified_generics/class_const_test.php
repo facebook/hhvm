@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class C {
   const string HELLO = "hi";

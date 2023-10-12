@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 async function gen_void(): Awaitable<void> {}
 

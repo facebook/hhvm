@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class C {
   public static ?int $thing = null;

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function f(): Generator<bool, string, int> {
   $x = yield true => 'a';

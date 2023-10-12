@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class Ec implements HH\EnumClassAttribute {}
 class Ec2 implements HH\EnumClassAttribute {}

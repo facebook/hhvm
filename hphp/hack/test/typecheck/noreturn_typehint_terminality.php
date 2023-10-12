@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function my_invariant_violation(string $arg): noreturn {
   throw new Exception($arg);

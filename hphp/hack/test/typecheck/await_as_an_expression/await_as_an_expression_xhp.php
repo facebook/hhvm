@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 final class :my-xhp extends XHPTest {
   attribute int x;

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class C<Ta, Tb> {
   public function f<Tc>(Ta $a, Tc $c): (Ta, Tc) {

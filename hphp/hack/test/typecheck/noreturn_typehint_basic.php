@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function correct(): noreturn {
   throw new Exception('not returning here');

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /* Invalid construction: shape field names may not be int-like strings */
 function test(): void {

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 async function genx(): Awaitable<void> {}
 

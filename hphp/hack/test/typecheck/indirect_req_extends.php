@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class Base {
   public function foo(): ?int {

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 type ShapeWithNullableField = shape('a' => ?int);
 

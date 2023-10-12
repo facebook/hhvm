@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class A {
   private static function foo(): int {

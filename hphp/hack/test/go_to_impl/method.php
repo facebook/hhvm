@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 class A {
   public function test(): string {
     return "a";

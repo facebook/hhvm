@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function test(shape('x' => int, ...) $s): void {
   Shapes::removeKey(inout $s, 'x');

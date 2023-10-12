@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function null_<T>(): ?T {
   return null;

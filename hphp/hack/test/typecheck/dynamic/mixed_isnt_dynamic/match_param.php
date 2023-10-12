@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 interface FunAsClass<Tin, Tout> {
   public function do(Tin $x): Tout;

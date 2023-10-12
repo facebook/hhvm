@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class Bar {
   public async function maybeFoo(): Awaitable<?Foo> {

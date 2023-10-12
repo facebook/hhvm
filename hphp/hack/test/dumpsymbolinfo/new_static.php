@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 <<__ConsistentConstruct>>
 abstract class A {

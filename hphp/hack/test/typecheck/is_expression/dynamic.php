@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function main(int $x): void {
   if ($x is dynamic) {

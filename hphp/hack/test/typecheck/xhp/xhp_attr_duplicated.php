@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 final class :c {
   attribute

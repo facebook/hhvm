@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 // TODO(t11082787): identify namespace use statements
 namespace N1 {

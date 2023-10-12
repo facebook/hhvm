@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 namespace A {
   class MyAttr implements \HH\FileAttribute {

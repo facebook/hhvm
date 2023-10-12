@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function f(bool $b): arraykey {
   $x = $b ? 1 : "";

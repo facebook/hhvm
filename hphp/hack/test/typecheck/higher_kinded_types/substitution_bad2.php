@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 type ID<T> = T;
 type Apply<TF<_>, TA> = TF<TA>;

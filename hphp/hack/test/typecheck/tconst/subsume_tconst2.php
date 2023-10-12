@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 interface I {
   abstract const type T as arraykey;

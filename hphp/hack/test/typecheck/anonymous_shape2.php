@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 /**
  * Anonymous shape return type

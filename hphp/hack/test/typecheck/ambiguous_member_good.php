@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 interface I1<T> {
   public function dupe1(int $x): void;

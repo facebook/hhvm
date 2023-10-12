@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 async function genInt(): Awaitable<int> {
   return 1;

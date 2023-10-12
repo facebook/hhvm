@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /* This test verifies our ability to typecheck the body of a lambda when it is
  * used as an argument to a generically-typed higher-order function. */

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 // Should be on a single line
 if (true) print("hi");

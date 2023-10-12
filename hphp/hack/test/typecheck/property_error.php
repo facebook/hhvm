@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class Demo {
     public function __construct(private readonly string $field) {}

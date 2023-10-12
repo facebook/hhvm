@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class :my-foo<T> extends XHPTest {
   attribute vec<T> my-vec;

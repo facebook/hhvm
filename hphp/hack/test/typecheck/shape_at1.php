@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 type ClosedShape = shape(
   'required' => int,

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 
 function level0(int $x0): void {

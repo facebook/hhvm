@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class ABC {
   protected string $non_static_property = "";

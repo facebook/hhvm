@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * Invalid declaration: shape field names may not be int-like strings

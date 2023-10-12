@@ -1,5 +1,5 @@
 ////file1.php
-<?hh
+<?hh // strict
 
 abstract class C1 {
   abstract const int X;

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 /*
  * This file tests that Tunion type accesses
  * propogate dep_ty info correctly..

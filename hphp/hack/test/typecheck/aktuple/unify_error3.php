@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 function take_int(int $_): void {}
 

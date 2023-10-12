@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 class TestStringEnum extends Enum<string> {
   const A = 'A';
 }

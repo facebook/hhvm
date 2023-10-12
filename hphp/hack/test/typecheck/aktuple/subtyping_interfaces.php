@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 /**
  * Tuple-like arrays are subtypes of all the special interfaces that arrays are

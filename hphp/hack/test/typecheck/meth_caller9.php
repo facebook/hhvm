@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class C {
   public function var_args(int ...$x): void {}

@@ -1,11 +1,11 @@
 //// def.php
-<?hh
+<?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 newtype EmptierThanNothing as nothing = nothing;
 
 //// use.php
-<?hh
+<?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function expect_nothing(nothing $_): void {}

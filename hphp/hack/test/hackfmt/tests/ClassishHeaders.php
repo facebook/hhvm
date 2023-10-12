@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 abstract class ClassishHeaders extends ClassishHeadersBase implements IClassishHeaders, IHeaders, IClassish, IAbstract {

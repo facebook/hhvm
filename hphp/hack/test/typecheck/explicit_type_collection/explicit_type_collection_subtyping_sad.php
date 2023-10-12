@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class B {}
 class C extends B {}

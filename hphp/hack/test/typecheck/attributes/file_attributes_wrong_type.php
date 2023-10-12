@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 <<file: X(3)>>
 class X implements \HH\FileAttribute {

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class :foo {
   attribute int name, int age;

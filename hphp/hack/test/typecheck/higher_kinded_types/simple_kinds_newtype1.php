@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 newtype Test1<T1> = int;
 

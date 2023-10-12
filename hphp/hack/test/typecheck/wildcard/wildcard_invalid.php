@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function foo(_ $x): void {
 }

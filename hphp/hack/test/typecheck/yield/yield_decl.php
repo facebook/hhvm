@@ -1,4 +1,4 @@
-<?hh
+<?hh// strict
 
 async function foo() {
   yield 10;

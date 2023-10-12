@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 // Test of expression dependent type of local variable for try/catch/finally
 

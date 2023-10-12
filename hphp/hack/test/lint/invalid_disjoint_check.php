@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function contains<<<__NonDisjoint>> T1, <<__NonDisjoint>> T2>(Traversable<T1> $_t,
   T2 $_v):bool

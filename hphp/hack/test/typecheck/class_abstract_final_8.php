@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 abstract final class Foo extends Exception {}
 

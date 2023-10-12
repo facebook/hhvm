@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function make_tvar<T>(): T { // actually this does not work creating a tvar...
   throw new Exception();

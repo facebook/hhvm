@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function concat(string $first, string ...$rest): string {
   throw new Exception();

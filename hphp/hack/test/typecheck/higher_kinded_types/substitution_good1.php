@@ -1,5 +1,5 @@
 //// file1.php
-<?hh
+<?hh // strict
 
 type ID<T> = T;
 
@@ -22,7 +22,7 @@ function test3(Apply3<ID,int> $x) : int {
 }
 
 //// file2.php
-<?hh
+<?hh // strict
 
 function test4(Apply2<ID,int> $x) : int {
   return $x + $x;

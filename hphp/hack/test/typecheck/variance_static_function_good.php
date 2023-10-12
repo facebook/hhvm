@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 class Contra<-T> {
   public static final function foo(int $v): ?T {
     return null;

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class ParentClass {
   const type ID = arraykey;

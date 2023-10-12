@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 /**
  * Assignment to array makes it unsafe to return it as original generic type

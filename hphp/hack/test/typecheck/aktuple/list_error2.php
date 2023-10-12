@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 /* Tuple-like arrays used with list(...) statement check arity */
 function test(): void {

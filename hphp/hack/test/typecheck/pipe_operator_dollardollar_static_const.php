@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class Foo {
   const int MY_CONST = 5;

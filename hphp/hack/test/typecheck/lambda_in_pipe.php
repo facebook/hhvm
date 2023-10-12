@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function vec_filter(vec<int> $v, (function (int): bool) $_f): vec<int> {

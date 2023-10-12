@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function coalesce3<Tr, Ta as Tr, Tb as Tr, Tc as Tr>(

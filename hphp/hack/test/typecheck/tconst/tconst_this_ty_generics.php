@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 abstract class Box<T> {
   abstract const type TValue;

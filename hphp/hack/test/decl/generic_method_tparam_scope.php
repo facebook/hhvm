@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class C {
   public function f<Ta>(Ta $a): Ta {

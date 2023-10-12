@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 // This file is same as check/while.php except written in for loop syntax.
 // The results should be the same.

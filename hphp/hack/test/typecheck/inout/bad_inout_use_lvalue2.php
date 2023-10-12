@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 const SOME_CONST = 'FOO';
 

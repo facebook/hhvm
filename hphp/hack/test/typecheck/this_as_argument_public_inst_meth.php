@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 // This tests that using the 'this' type as an argument to a public instance
 // method is safe.

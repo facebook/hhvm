@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 // Removing field from intersection of shapes
 

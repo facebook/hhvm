@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class Cls {
   const Some_CLASS_CONST = 3.14159;

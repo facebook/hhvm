@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 // XHP classes do no allow leading colons in class names.
 xhp class :foo {}

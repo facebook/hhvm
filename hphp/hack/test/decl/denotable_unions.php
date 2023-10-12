@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 <<file: __EnableUnstableFeatures('union_intersection_type_hints')>>

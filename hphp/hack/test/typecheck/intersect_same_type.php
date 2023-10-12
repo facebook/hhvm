@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 function assertVectorLike(bool $b, KeyedContainer<arraykey, mixed> $x): void {
   if ($b) {

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 use namespace HH\Lib\Regex;
 

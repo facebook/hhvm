@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class D {
   public function g(): void {

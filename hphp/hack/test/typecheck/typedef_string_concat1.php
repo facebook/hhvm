@@ -1,5 +1,5 @@
 //// def.php
-<?hh
+<?hh // strict
 
 newtype TDef = int;
 class Vals {

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class A implements HH\ClassAttribute {
   public function __construct(public vec<mixed> $i) {}

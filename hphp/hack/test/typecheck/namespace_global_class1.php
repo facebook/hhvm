@@ -1,5 +1,5 @@
 //// global.php
-<?hh
+<?hh // strict
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -13,7 +13,7 @@
 class C {}
 
 //// local.php
-<?hh
+<?hh // strict
 
 namespace N {
   function f(): void {

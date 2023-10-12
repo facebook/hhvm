@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 class Inv<T> {
   public function __construct(public T $item) { }

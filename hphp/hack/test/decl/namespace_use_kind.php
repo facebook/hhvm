@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 use const UseNS\Foo;
 use type UseNS\Bar;

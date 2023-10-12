@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 abstract class Box {
  abstract const type TResult;
  abstract public function getValue(): this::TResult;

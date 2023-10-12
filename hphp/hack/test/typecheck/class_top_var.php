@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 class BadVarExample {
   public function testBadVarExample() {
     $this->thisFunctionShouldExist();

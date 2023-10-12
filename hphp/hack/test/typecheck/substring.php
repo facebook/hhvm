@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function maybe<T>(Container<T> $x): ?T {
   return null;

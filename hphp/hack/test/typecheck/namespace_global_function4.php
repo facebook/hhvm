@@ -1,5 +1,5 @@
 //// global.php
-<?hh
+<?hh // strict
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -15,7 +15,7 @@ function f(): int {
 }
 
 //// local.php
-<?hh
+<?hh // strict
 
 namespace N {
   function f(): string {

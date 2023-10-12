@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class C {
   const float PI = 3.14;

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function get(): int {
   return 1;

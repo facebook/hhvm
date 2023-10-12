@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function f<T>(T $_, T $_): void {}
 

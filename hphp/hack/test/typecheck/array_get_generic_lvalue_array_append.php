@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 /**
  * Appending to a vector-like array makes it unsafe to return it as original

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 final class Foo {
   public function bar(

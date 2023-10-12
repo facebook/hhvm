@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function cast_int(int $x): nonnull {
   return $x;

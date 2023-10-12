@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function coalesce<Tr, Ta as Tr, Tb as Tr>(?Ta $x , Tb $y): Tr {

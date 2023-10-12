@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class xhp {}
 class :foo {}

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function test1(bool $b, vec<int> $x, vec<string> $y, float $z): void {

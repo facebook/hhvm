@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 function test(bool $b): varray<string> {
   $a = darray[];

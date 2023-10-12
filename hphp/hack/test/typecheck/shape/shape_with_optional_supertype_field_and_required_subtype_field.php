@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 type Supertype = shape(?'a' => int);
 type Subtype = shape('a' => int);

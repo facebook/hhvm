@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 // Should fail because no constraint
 

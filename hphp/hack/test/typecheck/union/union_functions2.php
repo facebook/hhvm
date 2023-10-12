@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 function foo(): (function(float):mixed) {
   $f = $x ==> $x;
   if (count(varray[])) {

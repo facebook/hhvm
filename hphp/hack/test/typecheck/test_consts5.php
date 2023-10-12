@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class A {
   const int X = 10;

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 abstract class Foo {
   abstract const type TFoo as shape(
     ?'foo' => int,

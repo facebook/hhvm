@@ -10,7 +10,7 @@ function i(): I {
 }
 
 ////file2.php
-<?hh
+<?hh// strict
 
 function test(): I2 {
   /* HH_FIXME[4029] */

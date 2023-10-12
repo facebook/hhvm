@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function expect_arraykey(arraykey $_): void {}
 

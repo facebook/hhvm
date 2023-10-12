@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 namespace T1 {
   interface I {}

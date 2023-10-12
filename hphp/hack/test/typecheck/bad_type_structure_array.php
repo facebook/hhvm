@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function concrete(TypeStructure<varray<int>> $ts): void {
   hh_show($ts['kind']);

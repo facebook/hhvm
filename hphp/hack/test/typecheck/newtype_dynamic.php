@@ -1,11 +1,11 @@
 //// def.php
-<?hh
+<?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 newtype Foo as dynamic = dynamic;
 
 //// use.php
-<?hh
+<?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function test(Foo $x): vec<dynamic> {

@@ -6,7 +6,7 @@ function any(){
 }
 
 ////file2.php
-<?hh
+<?hh// strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function testany():void {

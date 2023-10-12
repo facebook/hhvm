@@ -1,3 +1,3 @@
-<?hh
+<?hh // strict
 
 enum Foo: nonnull {}

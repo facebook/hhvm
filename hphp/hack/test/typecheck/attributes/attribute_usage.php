@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class A implements HH\FunctionAttribute {
   public function __construct(public int $i) {}

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function foo(bool $b): int {
   // broken for now because eif is broken

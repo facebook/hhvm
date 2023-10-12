@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 namespace T {
   class A implements \Countable {

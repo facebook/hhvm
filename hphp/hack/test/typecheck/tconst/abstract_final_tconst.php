@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 // If a class is declared abstract final then it cannot contain any abstract
 // type constants

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class B { }
 class C<T as B> {

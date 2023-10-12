@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function id<T>(T $x): T {
   return $x;

@@ -1,5 +1,5 @@
 //// file1.php
-<?hh
+<?hh // strict
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -16,7 +16,7 @@ class Y {}
 newtype opaque_duck as Y = Duck;
 
 //// file2.php
-<?hh
+<?hh // strict
 
 function foo(opaque_duck $x): Y {
   return $x;

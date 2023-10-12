@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 function test(): void {
   $a = make_nullable_unresolved();

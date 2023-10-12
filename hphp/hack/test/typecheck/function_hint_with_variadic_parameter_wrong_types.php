@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 function variadic_int(int ...$y): void {}
 

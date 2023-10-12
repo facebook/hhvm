@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class C {
   private null $x;

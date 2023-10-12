@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 async function g(): Awaitable<int> {
   return 1;

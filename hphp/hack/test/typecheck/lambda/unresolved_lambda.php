@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 function checkExpected((function(mixed):arraykey) $f):void { }
 

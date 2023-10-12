@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class A<+T1, -T2 as T1> {
   private ?T2 $contents;

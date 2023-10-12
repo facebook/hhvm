@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function test(bool $b, arraykey $x): void {
   while ($b) {

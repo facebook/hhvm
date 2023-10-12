@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function test(shape() $empty_shape): shape(?'a' => string) {
   return $empty_shape;

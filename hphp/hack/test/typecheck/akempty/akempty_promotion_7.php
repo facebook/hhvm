@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 /**
  * Test AKempty promotion if assignment happens inside an expression, not on

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 async function f(): Awaitable<?float> {
   return 1.0;

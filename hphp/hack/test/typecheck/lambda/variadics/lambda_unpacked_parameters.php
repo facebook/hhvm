@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function test((string, int) $tup, Traversable<int> $ints, string ...$y): void {
   // OK

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 interface I {}
 type C1 = I;

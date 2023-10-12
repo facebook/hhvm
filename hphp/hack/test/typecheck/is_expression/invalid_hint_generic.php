@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function foo<T>(mixed $x): void {
   if ($x is T) {

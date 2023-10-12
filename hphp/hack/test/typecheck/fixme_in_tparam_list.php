@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 class Foo<
   T2,
   /* HH_FIXME[2049] */

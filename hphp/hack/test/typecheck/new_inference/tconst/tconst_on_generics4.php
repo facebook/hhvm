@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /* This test is essentially the same as tconst_on_generics, except we have
 `T2 super T1::T` */

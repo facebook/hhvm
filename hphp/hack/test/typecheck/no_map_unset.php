@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function get_map(): Map<string, int> {
   return Map {};

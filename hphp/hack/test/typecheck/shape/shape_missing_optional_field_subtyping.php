@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 type s = shape(...);
 type t = shape(?'z' => mixed, ...);

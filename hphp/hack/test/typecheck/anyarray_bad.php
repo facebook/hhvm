@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 function takes_array(AnyArray<int, int> $_): void {}
 function gives_array(): AnyArray<int, int> { return vec[]; }

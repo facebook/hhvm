@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 // Since finale class cannot be overridden, that also means their type constants
 // cannot be overridden. This means we do not need to generate expression

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 // All happy paths
 

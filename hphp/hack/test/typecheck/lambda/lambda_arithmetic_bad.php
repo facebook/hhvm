@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 function makeFun<T1,T2>((function(T1):T2) $f):(function(T1):T2) {
   return $f;
 }

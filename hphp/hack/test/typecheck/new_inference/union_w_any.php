@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function test(
   vec<_> $v1,

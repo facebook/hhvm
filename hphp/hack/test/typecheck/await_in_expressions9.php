@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 async function f1(Awaitable<int> $a): Awaitable<void> {
   $b = (await $a) |> f($$);

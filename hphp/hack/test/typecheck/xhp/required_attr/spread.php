@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class :x extends XHPTest { attribute int a @required; }
 class :x1 extends :x {}

@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class FooIsNotBrokenTest extends FooTest {
   <<Override>>

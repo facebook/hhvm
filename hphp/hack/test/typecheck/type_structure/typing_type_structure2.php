@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class Base {
   const type T = this;

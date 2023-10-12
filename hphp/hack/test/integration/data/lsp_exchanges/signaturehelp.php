@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /** Global function with doc block */
 function global_function(string $s, int $x): void {}

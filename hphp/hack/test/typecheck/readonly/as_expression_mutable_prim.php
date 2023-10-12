@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 class Foo {
   public int $x = 4;
   public readonly function getInt(): int {

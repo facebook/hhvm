@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 class MyAutocompleteAfterUse {
   use MyAUTO332
 }

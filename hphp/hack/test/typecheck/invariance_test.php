@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function my_array_keys<Tk as arraykey, Tv>(KeyedContainer<Tk, Tv> $input): vec<Tk> {

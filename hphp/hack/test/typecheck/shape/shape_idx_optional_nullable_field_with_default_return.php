@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 // Error: should be ?int
 function shape_idx_optional_nullable_field_with_default_return(

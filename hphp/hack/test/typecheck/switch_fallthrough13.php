@@ -1,4 +1,4 @@
-<?hh
+<?hh //strict
 
 class A {
   protected static function invariant_violation(): noreturn {

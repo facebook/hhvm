@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 type MyShape = shape(
   'first' => ?float,

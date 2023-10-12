@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function test1<TC<TX>>() : void {}
 

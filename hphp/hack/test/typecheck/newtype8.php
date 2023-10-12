@@ -1,12 +1,12 @@
 //// newtype.php
-<?hh
+<?hh // strict
 newtype FooInt as int = int;
 newtype FooString as string = string;
 newtype FooArray<T> as varray<T> = varray<T>;
 newtype FooMap<Tk as arraykey, Tv> as Map<Tk, Tv> = Map<Tk, Tv>;
 
 //// test.php
-<?hh
+<?hh // strict
 
 function test_ops_with_newtypes(
   FooInt $x,

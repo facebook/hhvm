@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 abstract class P<T> {
   abstract protected function foo(): T;

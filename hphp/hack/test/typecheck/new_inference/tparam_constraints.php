@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function dictCoalesce2(dict<string, int> $d, ?int $b): int {

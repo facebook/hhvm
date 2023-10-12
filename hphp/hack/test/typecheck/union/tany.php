@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function test(bool $b, mixed $x, $y): void {
   hh_show($x);

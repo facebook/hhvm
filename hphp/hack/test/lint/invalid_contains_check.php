@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function should_delete_assoc(
   dict<int, Map<string, mixed>> $table_data,

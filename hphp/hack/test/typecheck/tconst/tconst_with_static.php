@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 abstract class Base {
   abstract const type ID as arraykey;

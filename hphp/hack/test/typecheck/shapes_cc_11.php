@@ -1,12 +1,12 @@
 //// use.php
-<?hh
+<?hh // strict
 
 newtype blah = shape(
   Foo::BAR => int,
 );
 
 //// def.php
-<?hh
+<?hh // strict
 
 newtype blah2 = string;
 class Foo {

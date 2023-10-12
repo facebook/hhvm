@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 require_once('Bar.php');
 

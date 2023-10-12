@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 bake_bread(
   // rye

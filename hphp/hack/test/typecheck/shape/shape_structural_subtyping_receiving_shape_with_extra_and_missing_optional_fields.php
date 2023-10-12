@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 /*
  * It is permissible to drop optional fields and include additional fields in a

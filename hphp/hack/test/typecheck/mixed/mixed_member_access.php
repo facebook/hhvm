@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function mixed_method(mixed $foo): void {
   $foo->bar();

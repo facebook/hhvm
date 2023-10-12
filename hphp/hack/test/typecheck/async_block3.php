@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 async function f(): Awaitable<string> {
   $x = () ==> async {

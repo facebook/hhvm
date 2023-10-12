@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 class :a {
   attribute string foo;

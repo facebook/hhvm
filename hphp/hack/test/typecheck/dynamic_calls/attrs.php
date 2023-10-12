@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 <<__DynamicallyCallable>>
 function foo(): void {}

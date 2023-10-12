@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 abstract class Foo {
   abstract const int NUM;

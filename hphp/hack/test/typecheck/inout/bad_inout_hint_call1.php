@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function foo((function(inout int): void) $f): void {}
 

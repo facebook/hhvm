@@ -1,4 +1,4 @@
-<?hh
+<?hh // strict
 
 function f(): int {
   while (true) {

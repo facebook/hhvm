@@ -5344,8 +5344,13 @@ void in(ISS& env, const bc::CreateCl& op) {
   auto const nargs   = op.arg1;
 
   auto const rcls = env.index.resolve_class(op.str2);
+  if (!rcls) {
+    discard(env, nargs);
+    unreachable(env);
+    return push(env, TBottom);
+  }
   always_assert_flog(
-    rcls.has_value() && rcls->resolved(),
+    rcls->resolved(),
     "A closure class ({}) failed to resolve",
     op.str2
   );

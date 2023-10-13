@@ -938,6 +938,14 @@ struct Index {
   const php::Class* lookup_closure_context(const php::Class&) const;
 
   /*
+   * Look up the php::Class with the given name, returning nullptr if
+   * it does not exist. The presence of a php::Class does not
+   * necessarily mean the class is actually instantiable or won't
+   * fatal when referenced.
+   */
+  const php::Class* lookup_class(SString) const;
+
+  /*
    * Call the given callback for each (top-level) func defined in the
    * given Unit.
    */

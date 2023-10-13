@@ -7257,17 +7257,17 @@ struct FlattenJob {
     // Classes which have been determined to be uninstantiable
     // (therefore have no result output data).
     ISStringSet uninstantiable;
-    // New closures produced from trait flattening, grouped by the
-    // unit they belong to. Such new closures will require "fixups" in
-    // the php::Program data.
-    struct NewClosures {
+    // New closures produced from trait flattening. Such new closures
+    // will require "fixups" in the php::Program data.
+    struct NewClosure {
       SString unit;
-      std::vector<SString> names;
+      SString context;
+      SString name;
       template <typename SerDe> void serde(SerDe& sd) {
-        sd(unit)(names);
+        sd(unit)(context)(name);
       }
     };
-    std::vector<NewClosures> newClosures;
+    std::vector<NewClosure> newClosures;
     // Report parents of each class. A class is a parent of another if
     // it would appear on a subclass list. The parents of a closure
     // are not reported because that's implicit.
@@ -7563,6 +7563,7 @@ struct FlattenJob {
     }
 
     for (auto& clo : newClosures) {
+      assertx(clo->closureContextCls);
       // Only return the closures for classes we were actually
       // requested to flatten.
       if (!outNames.count(clo->closureContextCls)) continue;
@@ -7570,12 +7571,13 @@ struct FlattenJob {
       index.m_ctx = clo.get();
       SCOPE_EXIT { index.m_ctx = nullptr; };
 
-      auto& outNewClosures = outMeta.newClosures;
-      if (outNewClosures.empty() || outNewClosures.back().unit != clo->unit) {
-        outNewClosures.emplace_back();
-        outNewClosures.back().unit = clo->unit;
-      }
-      outNewClosures.back().names.emplace_back(clo->name);
+      outMeta.newClosures.emplace_back(
+        OutputMeta::NewClosure{
+          clo->unit,
+          clo->closureContextCls,
+          clo->name
+        }
+      );
 
       auto& cinfo = index.m_classInfos.at(clo->name);
       outClasses.vals.emplace_back(std::move(clo));
@@ -10034,7 +10036,7 @@ Job<MissingClassFixupJob> s_missingClassFixupJob;
  * calculate work buckets to allow us to do this.
  *
  * - The "root" classes are the leaf classes in the hierarchy. These are
- * the buckets which are not dependencies of anything.
+ *   the buckets which are not dependencies of anything.
  *
  * - The dependencies of a class are all of the (transitive) parent
  *   classes of that class (up to the top classes with no parents).
@@ -10064,6 +10066,7 @@ struct IndexFlattenMetadata {
     size_t idx; // Index into allCls vector
     bool isClosure{false};
     bool uninstantiable{false};
+    SString closureContext;
   };
   ISStringToOneT<ClassMeta> cls;
   // All classes to be flattened
@@ -10374,6 +10377,21 @@ flatten_classes_assign(IndexFlattenMetadata& meta) {
 
         for (auto const d : deps)       onDep(d);
         for (auto const clo : closures) onDep(clo);
+
+        if (out.instantiable) return out;
+        // If a class is not instantiable, then any of the closures
+        // which have it as a context are not either. Remove them as
+        // deps.
+        folly::erase_if(
+          out.deps,
+          [&] (SString d) {
+            auto const cloMeta = folly::get_ptr(meta.cls, d);
+            return
+              cloMeta &&
+              cloMeta->closureContext &&
+              cloMeta->closureContext->isame(cls);
+          }
+        );
         return out;
       }
     );
@@ -10886,22 +10904,20 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       ++outputIdx;
     }
 
-    for (auto const& [unit, names] : clsMeta.newClosures) {
-      for (auto const name : names) {
-        assertx(outputIdx < clsRefs.size());
-        assertx(outputIdx < clsMeta.classTypeUses.size());
-        updates.emplace_back(
-          ClassUpdate{
-            name,
-            std::move(clsRefs[outputIdx]),
-            std::move(bytecodeRefs[outputIdx]),
-            std::move(cinfoRefs[outputIdx]),
-            unit,
-            std::move(clsMeta.classTypeUses[outputIdx])
-          }
-        );
-        ++outputIdx;
-      }
+    for (auto const& [unit, cls, name] : clsMeta.newClosures) {
+      assertx(outputIdx < clsRefs.size());
+      assertx(outputIdx < clsMeta.classTypeUses.size());
+      updates.emplace_back(
+        ClassUpdate{
+          name,
+          std::move(clsRefs[outputIdx]),
+          std::move(bytecodeRefs[outputIdx]),
+          std::move(cinfoRefs[outputIdx]),
+          unit,
+          std::move(clsMeta.classTypeUses[outputIdx])
+        }
+      );
+      ++outputIdx;
     }
     assertx(outputIdx == clsRefs.size());
     assertx(outputIdx == clsMeta.classTypeUses.size());
@@ -13785,6 +13801,7 @@ IndexFlattenMetadata make_remote(IndexData& index,
     auto& meta = flattenMeta.cls[cls.name];
     if (cls.closureContext) {
       flattenMeta.cls[cls.closureContext].closures.emplace_back(cls.name);
+      meta.closureContext = cls.closureContext;
     }
     meta.isClosure = cls.isClosure;
     meta.deps.insert(begin(cls.dependencies), end(cls.dependencies));
@@ -15145,6 +15162,10 @@ const php::Unit* Index::lookup_class_unit(const php::Class& cls) const {
 
 const php::Class* Index::lookup_const_class(const php::Const& cns) const {
   return m_data->classes.at(cns.cls);
+}
+
+const php::Class* Index::lookup_class(SString name) const {
+  return folly::get_default(m_data->classes, name);
 }
 
 //////////////////////////////////////////////////////////////////////

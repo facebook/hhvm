@@ -399,13 +399,12 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
     auto const ret_assert = [&] { assertx(currentStackDepth == inst.numPop()); };
 
     auto const createcl = [&] (auto const& data) {
-      auto const rcls = euState.index.resolve_class(data.str2);
+      auto const cls = euState.index.lookup_class(data.str2);
       always_assert_flog(
-        rcls.has_value() && rcls->resolved(),
+        cls,
         "A closure class ({}) failed to resolve",
         data.str2
       );
-      auto const cls = rcls->cls();
       assertx(cls->unit == euState.unit->filename);
       assertx(is_closure(*cls));
       // Skip closures we've already recorded

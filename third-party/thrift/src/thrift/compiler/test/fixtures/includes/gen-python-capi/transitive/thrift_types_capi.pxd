@@ -15,6 +15,9 @@ from folly.iobuf cimport cIOBuf as __cIOBuf
 
 cdef api int can_extract__transitive__Foo(object) except -1
 
+cdef api __cIOBuf* extract__transitive__Foo(object) except NULL
+
+cdef api object construct__transitive__Foo(__unique_ptr[__cIOBuf])
 
 cdef api object init__transitive__Foo(object data)
 

@@ -29,34 +29,37 @@ bool ensure_module_imported() {
 
 ExtractorResult<::cpp2::CustomException>
 Extractor<::cpp2::CustomException>::operator()(PyObject* obj) {
-  int tCheckResult = typeCheck(obj);
-  if (tCheckResult != 1) {
-      if (tCheckResult == 0) {
-        PyErr_SetString(PyExc_TypeError, "Not a CustomException");
-      }
-      return extractorError<::cpp2::CustomException>(
-          "Marshal error: CustomException");
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::CustomException>(
+      "Module test.fixtures.interactions.module import error");
   }
-  StrongRef fbThriftData(getExceptionThriftData(obj));
-  return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::CustomException>>{}(*fbThriftData);
+  std::unique_ptr<folly::IOBuf> val(
+      extract__test__fixtures__interactions__module__CustomException(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::cpp2::CustomException>(
+        "Thrift serialize error: CustomException");
+  }
+  return detail::deserialize_iobuf<::cpp2::CustomException>(std::move(val));
 }
+
 
 ExtractorResult<::cpp2::CustomException>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::CustomException>>::operator()(PyObject* fbThriftData) {
-  ::cpp2::CustomException cpp;
-  std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
-      cpp.message_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 0 + 1),
-      error);
-  if (error) {
-    return folly::makeUnexpected(*error);
+    ::cpp2::CustomException>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::CustomException>(
+      "Module test.fixtures.interactions.module import error");
   }
-  return cpp;
+  auto obj = StrongRef(init__test__fixtures__interactions__module__CustomException(fbthrift_data));
+  if (!obj) {
+      return extractorError<::cpp2::CustomException>(
+          "Init from fbthrift error: CustomException");
+  }
+  return Extractor<::cpp2::CustomException>{}(*obj);
 }
-
 
 int Extractor<::cpp2::CustomException>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -79,28 +82,24 @@ PyObject* Constructor<::cpp2::CustomException>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::CustomException>> ctor;
-  StrongRef fbthrift_data(ctor(val));
-  if (!fbthrift_data) {
-    return nullptr;
+  auto ptr = construct__test__fixtures__interactions__module__CustomException(
+      detail::serialize_to_iobuf(val));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
   }
-  return init__test__fixtures__interactions__module__CustomException(*fbthrift_data);
+  return ptr;
 }
+
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::CustomException>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::CustomException& val) {
-  StrongRef fbthrift_data(createStructTuple(1));
-  StrongRef _fbthrift__message(
-    Constructor<Bytes>{}
-    .constructFrom(val.message_ref()));
-  if (!_fbthrift__message || setStructField(*fbthrift_data, 0, *_fbthrift__message) == -1) {
+    const ::cpp2::CustomException& val) {
+  auto obj = StrongRef(Constructor<::cpp2::CustomException>{}(val));
+  if (!obj) {
     return nullptr;
   }
-  return std::move(fbthrift_data).release();
+  return getExceptionThriftData(*obj);
 }
-
 
 } // namespace capi
 } // namespace python

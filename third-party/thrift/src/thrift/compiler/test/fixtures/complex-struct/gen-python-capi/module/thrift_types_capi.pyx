@@ -22,6 +22,16 @@ import module.thrift_types as __thrift_types
 cdef api int can_extract__module__MyStructFloatFieldThrowExp(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyStructFloatFieldThrowExp) else 0
 
+cdef api __cIOBuf* extract__module__MyStructFloatFieldThrowExp(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__module__MyStructFloatFieldThrowExp(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.MyStructFloatFieldThrowExp,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
 
 cdef api object init__module__MyStructFloatFieldThrowExp(object data):
     return __thrift_types.MyStructFloatFieldThrowExp._fbthrift_create(data)
@@ -29,6 +39,16 @@ cdef api object init__module__MyStructFloatFieldThrowExp(object data):
 cdef api int can_extract__module__MyStructMapFloatThrowExp(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyStructMapFloatThrowExp) else 0
 
+cdef api __cIOBuf* extract__module__MyStructMapFloatThrowExp(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__module__MyStructMapFloatThrowExp(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.MyStructMapFloatThrowExp,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
 
 cdef api object init__module__MyStructMapFloatThrowExp(object data):
     return __thrift_types.MyStructMapFloatThrowExp._fbthrift_create(data)
@@ -36,6 +56,16 @@ cdef api object init__module__MyStructMapFloatThrowExp(object data):
 cdef api int can_extract__module__MyStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyStruct) else 0
 
+cdef api __cIOBuf* extract__module__MyStruct(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__module__MyStruct(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.MyStruct,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
 
 cdef api object init__module__MyStruct(object data):
     return __thrift_types.MyStruct._fbthrift_create(data)
@@ -43,6 +73,16 @@ cdef api object init__module__MyStruct(object data):
 cdef api int can_extract__module__SimpleStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.SimpleStruct) else 0
 
+cdef api __cIOBuf* extract__module__SimpleStruct(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__module__SimpleStruct(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.SimpleStruct,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
 
 cdef api object init__module__SimpleStruct(object data):
     return __thrift_types.SimpleStruct._fbthrift_create(data)
@@ -50,6 +90,16 @@ cdef api object init__module__SimpleStruct(object data):
 cdef api int can_extract__module__defaultStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.defaultStruct) else 0
 
+cdef api __cIOBuf* extract__module__defaultStruct(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__module__defaultStruct(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.defaultStruct,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
 
 cdef api object init__module__defaultStruct(object data):
     return __thrift_types.defaultStruct._fbthrift_create(data)
@@ -57,6 +107,16 @@ cdef api object init__module__defaultStruct(object data):
 cdef api int can_extract__module__MyStructTypeDef(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyStructTypeDef) else 0
 
+cdef api __cIOBuf* extract__module__MyStructTypeDef(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__module__MyStructTypeDef(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.MyStructTypeDef,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
 
 cdef api object init__module__MyStructTypeDef(object data):
     return __thrift_types.MyStructTypeDef._fbthrift_create(data)
@@ -105,6 +165,16 @@ cdef api object init__module__MyUnionFloatFieldThrowExp(object data):
 cdef api int can_extract__module__ComplexNestedStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.ComplexNestedStruct) else 0
 
+cdef api __cIOBuf* extract__module__ComplexNestedStruct(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__module__ComplexNestedStruct(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.ComplexNestedStruct,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
 
 cdef api object init__module__ComplexNestedStruct(object data):
     return __thrift_types.ComplexNestedStruct._fbthrift_create(data)
@@ -112,6 +182,16 @@ cdef api object init__module__ComplexNestedStruct(object data):
 cdef api int can_extract__module__TypeRemapped(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.TypeRemapped) else 0
 
+cdef api __cIOBuf* extract__module__TypeRemapped(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__module__TypeRemapped(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.TypeRemapped,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
 
 cdef api object init__module__TypeRemapped(object data):
     return __thrift_types.TypeRemapped._fbthrift_create(data)
@@ -126,6 +206,16 @@ cdef api object init__module__emptyXcep(object data):
 cdef api int can_extract__module__reqXcep(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.reqXcep) else 0
 
+cdef api __cIOBuf* extract__module__reqXcep(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__module__reqXcep(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.reqXcep,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
 
 cdef api object init__module__reqXcep(object data):
     return __thrift_types.reqXcep._fbthrift_create(data)
@@ -133,6 +223,16 @@ cdef api object init__module__reqXcep(object data):
 cdef api int can_extract__module__optXcep(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.optXcep) else 0
 
+cdef api __cIOBuf* extract__module__optXcep(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__module__optXcep(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.optXcep,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
 
 cdef api object init__module__optXcep(object data):
     return __thrift_types.optXcep._fbthrift_create(data)
@@ -140,6 +240,16 @@ cdef api object init__module__optXcep(object data):
 cdef api int can_extract__module__complexException(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.complexException) else 0
 
+cdef api __cIOBuf* extract__module__complexException(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__module__complexException(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.complexException,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
 
 cdef api object init__module__complexException(object data):
     return __thrift_types.complexException._fbthrift_create(data)

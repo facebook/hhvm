@@ -15,6 +15,9 @@ from folly.iobuf cimport cIOBuf as __cIOBuf
 
 cdef api int can_extract__includes__Included(object) except -1
 
+cdef api __cIOBuf* extract__includes__Included(object) except NULL
+
+cdef api object construct__includes__Included(__unique_ptr[__cIOBuf])
 
 cdef api object init__includes__Included(object data)
 

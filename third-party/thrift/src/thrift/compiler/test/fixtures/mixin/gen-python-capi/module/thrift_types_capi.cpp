@@ -29,34 +29,37 @@ bool ensure_module_imported() {
 
 ExtractorResult<::cpp2::Mixin1>
 Extractor<::cpp2::Mixin1>::operator()(PyObject* obj) {
-  int tCheckResult = typeCheck(obj);
-  if (tCheckResult != 1) {
-      if (tCheckResult == 0) {
-        PyErr_SetString(PyExc_TypeError, "Not a Mixin1");
-      }
-      return extractorError<::cpp2::Mixin1>(
-          "Marshal error: Mixin1");
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::Mixin1>(
+      "Module module import error");
   }
-  StrongRef fbThriftData(getThriftData(obj));
-  return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::Mixin1>>{}(*fbThriftData);
+  std::unique_ptr<folly::IOBuf> val(
+      extract__module__Mixin1(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::cpp2::Mixin1>(
+        "Thrift serialize error: Mixin1");
+  }
+  return detail::deserialize_iobuf<::cpp2::Mixin1>(std::move(val));
 }
+
 
 ExtractorResult<::cpp2::Mixin1>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::Mixin1>>::operator()(PyObject* fbThriftData) {
-  ::cpp2::Mixin1 cpp;
-  std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
-      cpp.field1_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 0 + 1),
-      error);
-  if (error) {
-    return folly::makeUnexpected(*error);
+    ::cpp2::Mixin1>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::Mixin1>(
+      "Module module import error");
   }
-  return cpp;
+  auto obj = StrongRef(init__module__Mixin1(fbthrift_data));
+  if (!obj) {
+      return extractorError<::cpp2::Mixin1>(
+          "Init from fbthrift error: Mixin1");
+  }
+  return Extractor<::cpp2::Mixin1>{}(*obj);
 }
-
 
 int Extractor<::cpp2::Mixin1>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -79,63 +82,58 @@ PyObject* Constructor<::cpp2::Mixin1>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Mixin1>> ctor;
-  StrongRef fbthrift_data(ctor(val));
-  if (!fbthrift_data) {
-    return nullptr;
+  auto ptr = construct__module__Mixin1(
+      detail::serialize_to_iobuf(val));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
   }
-  return init__module__Mixin1(*fbthrift_data);
+  return ptr;
 }
+
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::Mixin1>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::Mixin1& val) {
-  StrongRef fbthrift_data(createStructTuple(1));
-  StrongRef _fbthrift__field1(
-    Constructor<Bytes>{}
-    .constructFrom(val.field1_ref()));
-  if (!_fbthrift__field1 || setStructField(*fbthrift_data, 0, *_fbthrift__field1) == -1) {
+    const ::cpp2::Mixin1& val) {
+  auto obj = StrongRef(Constructor<::cpp2::Mixin1>{}(val));
+  if (!obj) {
     return nullptr;
   }
-  return std::move(fbthrift_data).release();
+  return getThriftData(*obj);
 }
-
 
 ExtractorResult<::cpp2::Mixin2>
 Extractor<::cpp2::Mixin2>::operator()(PyObject* obj) {
-  int tCheckResult = typeCheck(obj);
-  if (tCheckResult != 1) {
-      if (tCheckResult == 0) {
-        PyErr_SetString(PyExc_TypeError, "Not a Mixin2");
-      }
-      return extractorError<::cpp2::Mixin2>(
-          "Marshal error: Mixin2");
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::Mixin2>(
+      "Module module import error");
   }
-  StrongRef fbThriftData(getThriftData(obj));
-  return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::Mixin2>>{}(*fbThriftData);
+  std::unique_ptr<folly::IOBuf> val(
+      extract__module__Mixin2(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::cpp2::Mixin2>(
+        "Thrift serialize error: Mixin2");
+  }
+  return detail::deserialize_iobuf<::cpp2::Mixin2>(std::move(val));
 }
+
 
 ExtractorResult<::cpp2::Mixin2>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::Mixin2>>::operator()(PyObject* fbThriftData) {
-  ::cpp2::Mixin2 cpp;
-  std::optional<std::string_view> error;
-  Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Mixin1>>{}.extractInto(
-      cpp.m1_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 0 + 1),
-      error);
-  Extractor<Bytes>{}.extractInto(
-      cpp.field2_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 1 + 1),
-      error);
-  if (error) {
-    return folly::makeUnexpected(*error);
+    ::cpp2::Mixin2>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::Mixin2>(
+      "Module module import error");
   }
-  return cpp;
+  auto obj = StrongRef(init__module__Mixin2(fbthrift_data));
+  if (!obj) {
+      return extractorError<::cpp2::Mixin2>(
+          "Init from fbthrift error: Mixin2");
+  }
+  return Extractor<::cpp2::Mixin2>{}(*obj);
 }
-
 
 int Extractor<::cpp2::Mixin2>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -158,65 +156,58 @@ PyObject* Constructor<::cpp2::Mixin2>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Mixin2>> ctor;
-  StrongRef fbthrift_data(ctor(val));
-  if (!fbthrift_data) {
-    return nullptr;
+  auto ptr = construct__module__Mixin2(
+      detail::serialize_to_iobuf(val));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
   }
-  return init__module__Mixin2(*fbthrift_data);
+  return ptr;
 }
+
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::Mixin2>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::Mixin2& val) {
-  StrongRef fbthrift_data(createStructTuple(2));
-  StrongRef _fbthrift__m1(
-    Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Mixin1>>{}
-    .constructFrom(val.m1_ref()));
-  if (!_fbthrift__m1 || setStructField(*fbthrift_data, 0, *_fbthrift__m1) == -1) {
+    const ::cpp2::Mixin2& val) {
+  auto obj = StrongRef(Constructor<::cpp2::Mixin2>{}(val));
+  if (!obj) {
     return nullptr;
   }
-  StrongRef _fbthrift__field2(
-    Constructor<Bytes>{}
-    .constructFrom(val.field2_ref()));
-  if (!_fbthrift__field2 || setStructField(*fbthrift_data, 1, *_fbthrift__field2) == -1) {
-    return nullptr;
-  }
-  return std::move(fbthrift_data).release();
+  return getThriftData(*obj);
 }
-
 
 ExtractorResult<::cpp2::Mixin3Base>
 Extractor<::cpp2::Mixin3Base>::operator()(PyObject* obj) {
-  int tCheckResult = typeCheck(obj);
-  if (tCheckResult != 1) {
-      if (tCheckResult == 0) {
-        PyErr_SetString(PyExc_TypeError, "Not a Mixin3Base");
-      }
-      return extractorError<::cpp2::Mixin3Base>(
-          "Marshal error: Mixin3Base");
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::Mixin3Base>(
+      "Module module import error");
   }
-  StrongRef fbThriftData(getThriftData(obj));
-  return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::Mixin3Base>>{}(*fbThriftData);
+  std::unique_ptr<folly::IOBuf> val(
+      extract__module__Mixin3Base(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::cpp2::Mixin3Base>(
+        "Thrift serialize error: Mixin3Base");
+  }
+  return detail::deserialize_iobuf<::cpp2::Mixin3Base>(std::move(val));
 }
+
 
 ExtractorResult<::cpp2::Mixin3Base>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::Mixin3Base>>::operator()(PyObject* fbThriftData) {
-  ::cpp2::Mixin3Base cpp;
-  std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
-      cpp.field3_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 0 + 1),
-      error);
-  if (error) {
-    return folly::makeUnexpected(*error);
+    ::cpp2::Mixin3Base>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::Mixin3Base>(
+      "Module module import error");
   }
-  return cpp;
+  auto obj = StrongRef(init__module__Mixin3Base(fbthrift_data));
+  if (!obj) {
+      return extractorError<::cpp2::Mixin3Base>(
+          "Init from fbthrift error: Mixin3Base");
+  }
+  return Extractor<::cpp2::Mixin3Base>{}(*obj);
 }
-
 
 int Extractor<::cpp2::Mixin3Base>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -239,67 +230,58 @@ PyObject* Constructor<::cpp2::Mixin3Base>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Mixin3Base>> ctor;
-  StrongRef fbthrift_data(ctor(val));
-  if (!fbthrift_data) {
-    return nullptr;
+  auto ptr = construct__module__Mixin3Base(
+      detail::serialize_to_iobuf(val));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
   }
-  return init__module__Mixin3Base(*fbthrift_data);
+  return ptr;
 }
+
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::Mixin3Base>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::Mixin3Base& val) {
-  StrongRef fbthrift_data(createStructTuple(1));
-  StrongRef _fbthrift__field3(
-    Constructor<Bytes>{}
-    .constructFrom(val.field3_ref()));
-  if (!_fbthrift__field3 || setStructField(*fbthrift_data, 0, *_fbthrift__field3) == -1) {
+    const ::cpp2::Mixin3Base& val) {
+  auto obj = StrongRef(Constructor<::cpp2::Mixin3Base>{}(val));
+  if (!obj) {
     return nullptr;
   }
-  return std::move(fbthrift_data).release();
+  return getThriftData(*obj);
 }
-
 
 ExtractorResult<::cpp2::Foo>
 Extractor<::cpp2::Foo>::operator()(PyObject* obj) {
-  int tCheckResult = typeCheck(obj);
-  if (tCheckResult != 1) {
-      if (tCheckResult == 0) {
-        PyErr_SetString(PyExc_TypeError, "Not a Foo");
-      }
-      return extractorError<::cpp2::Foo>(
-          "Marshal error: Foo");
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::Foo>(
+      "Module module import error");
   }
-  StrongRef fbThriftData(getThriftData(obj));
-  return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::Foo>>{}(*fbThriftData);
+  std::unique_ptr<folly::IOBuf> val(
+      extract__module__Foo(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::cpp2::Foo>(
+        "Thrift serialize error: Foo");
+  }
+  return detail::deserialize_iobuf<::cpp2::Foo>(std::move(val));
 }
+
 
 ExtractorResult<::cpp2::Foo>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::Foo>>::operator()(PyObject* fbThriftData) {
-  ::cpp2::Foo cpp;
-  std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
-      cpp.field4_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 0 + 1),
-      error);
-  Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Mixin2>>{}.extractInto(
-      cpp.m2_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 1 + 1),
-      error);
-  Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Mixin3Base>>{}.extractInto(
-      cpp.m3_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 2 + 1),
-      error);
-  if (error) {
-    return folly::makeUnexpected(*error);
+    ::cpp2::Foo>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::Foo>(
+      "Module module import error");
   }
-  return cpp;
+  auto obj = StrongRef(init__module__Foo(fbthrift_data));
+  if (!obj) {
+      return extractorError<::cpp2::Foo>(
+          "Init from fbthrift error: Foo");
+  }
+  return Extractor<::cpp2::Foo>{}(*obj);
 }
-
 
 int Extractor<::cpp2::Foo>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -322,40 +304,24 @@ PyObject* Constructor<::cpp2::Foo>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Foo>> ctor;
-  StrongRef fbthrift_data(ctor(val));
-  if (!fbthrift_data) {
-    return nullptr;
+  auto ptr = construct__module__Foo(
+      detail::serialize_to_iobuf(val));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
   }
-  return init__module__Foo(*fbthrift_data);
+  return ptr;
 }
+
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::Foo>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::Foo& val) {
-  StrongRef fbthrift_data(createStructTuple(3));
-  StrongRef _fbthrift__field4(
-    Constructor<Bytes>{}
-    .constructFrom(val.field4_ref()));
-  if (!_fbthrift__field4 || setStructField(*fbthrift_data, 0, *_fbthrift__field4) == -1) {
+    const ::cpp2::Foo& val) {
+  auto obj = StrongRef(Constructor<::cpp2::Foo>{}(val));
+  if (!obj) {
     return nullptr;
   }
-  StrongRef _fbthrift__m2(
-    Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Mixin2>>{}
-    .constructFrom(val.m2_ref()));
-  if (!_fbthrift__m2 || setStructField(*fbthrift_data, 1, *_fbthrift__m2) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__m3(
-    Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Mixin3Base>>{}
-    .constructFrom(val.m3_ref()));
-  if (!_fbthrift__m3 || setStructField(*fbthrift_data, 2, *_fbthrift__m3) == -1) {
-    return nullptr;
-  }
-  return std::move(fbthrift_data).release();
+  return getThriftData(*obj);
 }
-
 
 } // namespace capi
 } // namespace python

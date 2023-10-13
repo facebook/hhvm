@@ -358,8 +358,7 @@ struct Extractor<map<KeyT, ValT, CppT>>
       if constexpr (has_emplace_v<CppT, KeyT, ValT>) {
         ret.emplace(std::move(*key), std::move(*val));
       } else {
-        // DO NOT CODEMOD to try_emplace
-        ret.insert({std::move(*key), std::move(*val)});
+        ret.try_emplace(std::move(*key), std::move(*val));
       }
     }
 

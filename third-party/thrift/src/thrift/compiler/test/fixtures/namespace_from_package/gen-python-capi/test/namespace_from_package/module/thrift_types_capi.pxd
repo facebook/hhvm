@@ -15,6 +15,9 @@ from folly.iobuf cimport cIOBuf as __cIOBuf
 
 cdef api int can_extract__test__namespace_from_package__module__Foo(object) except -1
 
+cdef api __cIOBuf* extract__test__namespace_from_package__module__Foo(object) except NULL
+
+cdef api object construct__test__namespace_from_package__module__Foo(__unique_ptr[__cIOBuf])
 
 cdef api object init__test__namespace_from_package__module__Foo(object data)
 

@@ -29,34 +29,37 @@ bool ensure_module_imported() {
 
 ExtractorResult<::cpp2::C>
 Extractor<::cpp2::C>::operator()(PyObject* obj) {
-  int tCheckResult = typeCheck(obj);
-  if (tCheckResult != 1) {
-      if (tCheckResult == 0) {
-        PyErr_SetString(PyExc_TypeError, "Not a C");
-      }
-      return extractorError<::cpp2::C>(
-          "Marshal error: C");
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::C>(
+      "Module c import error");
   }
-  StrongRef fbThriftData(getThriftData(obj));
-  return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::C>>{}(*fbThriftData);
+  std::unique_ptr<folly::IOBuf> val(
+      extract__c__C(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::cpp2::C>(
+        "Thrift serialize error: C");
+  }
+  return detail::deserialize_iobuf<::cpp2::C>(std::move(val));
 }
+
 
 ExtractorResult<::cpp2::C>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::C>>::operator()(PyObject* fbThriftData) {
-  ::cpp2::C cpp;
-  std::optional<std::string_view> error;
-  Extractor<int64_t>{}.extractInto(
-      cpp.i_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 0 + 1),
-      error);
-  if (error) {
-    return folly::makeUnexpected(*error);
+    ::cpp2::C>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::C>(
+      "Module c import error");
   }
-  return cpp;
+  auto obj = StrongRef(init__c__C(fbthrift_data));
+  if (!obj) {
+      return extractorError<::cpp2::C>(
+          "Init from fbthrift error: C");
+  }
+  return Extractor<::cpp2::C>{}(*obj);
 }
-
 
 int Extractor<::cpp2::C>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -79,28 +82,24 @@ PyObject* Constructor<::cpp2::C>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::C>> ctor;
-  StrongRef fbthrift_data(ctor(val));
-  if (!fbthrift_data) {
-    return nullptr;
+  auto ptr = construct__c__C(
+      detail::serialize_to_iobuf(val));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
   }
-  return init__c__C(*fbthrift_data);
+  return ptr;
 }
+
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::C>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::C& val) {
-  StrongRef fbthrift_data(createStructTuple(1));
-  StrongRef _fbthrift__i(
-    Constructor<int64_t>{}
-    .constructFrom(val.i_ref()));
-  if (!_fbthrift__i || setStructField(*fbthrift_data, 0, *_fbthrift__i) == -1) {
+    const ::cpp2::C& val) {
+  auto obj = StrongRef(Constructor<::cpp2::C>{}(val));
+  if (!obj) {
     return nullptr;
   }
-  return std::move(fbthrift_data).release();
+  return getThriftData(*obj);
 }
-
 
 ExtractorResult<::cpp2::E>
 Extractor<::cpp2::E>::operator()(PyObject* obj) {

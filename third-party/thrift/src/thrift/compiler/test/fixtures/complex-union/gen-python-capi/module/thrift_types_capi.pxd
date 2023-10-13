@@ -39,6 +39,9 @@ cdef api object init__module__DataUnion(object data)
 
 cdef api int can_extract__module__Val(object) except -1
 
+cdef api __cIOBuf* extract__module__Val(object) except NULL
+
+cdef api object construct__module__Val(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__Val(object data)
 
@@ -60,6 +63,9 @@ cdef api object init__module__VirtualComplexUnion(object data)
 
 cdef api int can_extract__module__NonCopyableStruct(object) except -1
 
+cdef api __cIOBuf* extract__module__NonCopyableStruct(object) except NULL
+
+cdef api object construct__module__NonCopyableStruct(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__NonCopyableStruct(object data)
 

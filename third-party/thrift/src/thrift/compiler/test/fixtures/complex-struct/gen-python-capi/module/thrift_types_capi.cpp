@@ -29,46 +29,37 @@ bool ensure_module_imported() {
 
 ExtractorResult<::cpp2::MyStructFloatFieldThrowExp>
 Extractor<::cpp2::MyStructFloatFieldThrowExp>::operator()(PyObject* obj) {
-  int tCheckResult = typeCheck(obj);
-  if (tCheckResult != 1) {
-      if (tCheckResult == 0) {
-        PyErr_SetString(PyExc_TypeError, "Not a MyStructFloatFieldThrowExp");
-      }
-      return extractorError<::cpp2::MyStructFloatFieldThrowExp>(
-          "Marshal error: MyStructFloatFieldThrowExp");
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::MyStructFloatFieldThrowExp>(
+      "Module module import error");
   }
-  StrongRef fbThriftData(getThriftData(obj));
-  return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::MyStructFloatFieldThrowExp>>{}(*fbThriftData);
+  std::unique_ptr<folly::IOBuf> val(
+      extract__module__MyStructFloatFieldThrowExp(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::cpp2::MyStructFloatFieldThrowExp>(
+        "Thrift serialize error: MyStructFloatFieldThrowExp");
+  }
+  return detail::deserialize_iobuf<::cpp2::MyStructFloatFieldThrowExp>(std::move(val));
 }
+
 
 ExtractorResult<::cpp2::MyStructFloatFieldThrowExp>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::MyStructFloatFieldThrowExp>>::operator()(PyObject* fbThriftData) {
-  ::cpp2::MyStructFloatFieldThrowExp cpp;
-  std::optional<std::string_view> error;
-  Extractor<int64_t>{}.extractInto(
-      cpp.myLongField_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 0 + 1),
-      error);
-  Extractor<int8_t>{}.extractInto(
-      cpp.MyByteField_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 1 + 1),
-      error);
-  Extractor<Bytes>{}.extractInto(
-      cpp.myStringField_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 2 + 1),
-      error);
-  Extractor<float>{}.extractInto(
-      cpp.myFloatField_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 3 + 1),
-      error);
-  if (error) {
-    return folly::makeUnexpected(*error);
+    ::cpp2::MyStructFloatFieldThrowExp>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::MyStructFloatFieldThrowExp>(
+      "Module module import error");
   }
-  return cpp;
+  auto obj = StrongRef(init__module__MyStructFloatFieldThrowExp(fbthrift_data));
+  if (!obj) {
+      return extractorError<::cpp2::MyStructFloatFieldThrowExp>(
+          "Init from fbthrift error: MyStructFloatFieldThrowExp");
+  }
+  return Extractor<::cpp2::MyStructFloatFieldThrowExp>{}(*obj);
 }
-
 
 int Extractor<::cpp2::MyStructFloatFieldThrowExp>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -91,81 +82,58 @@ PyObject* Constructor<::cpp2::MyStructFloatFieldThrowExp>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyStructFloatFieldThrowExp>> ctor;
-  StrongRef fbthrift_data(ctor(val));
-  if (!fbthrift_data) {
-    return nullptr;
+  auto ptr = construct__module__MyStructFloatFieldThrowExp(
+      detail::serialize_to_iobuf(val));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
   }
-  return init__module__MyStructFloatFieldThrowExp(*fbthrift_data);
+  return ptr;
 }
+
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::MyStructFloatFieldThrowExp>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::MyStructFloatFieldThrowExp& val) {
-  StrongRef fbthrift_data(createStructTuple(4));
-  StrongRef _fbthrift__myLongField(
-    Constructor<int64_t>{}
-    .constructFrom(val.myLongField_ref()));
-  if (!_fbthrift__myLongField || setStructField(*fbthrift_data, 0, *_fbthrift__myLongField) == -1) {
+    const ::cpp2::MyStructFloatFieldThrowExp& val) {
+  auto obj = StrongRef(Constructor<::cpp2::MyStructFloatFieldThrowExp>{}(val));
+  if (!obj) {
     return nullptr;
   }
-  StrongRef _fbthrift__MyByteField(
-    Constructor<int8_t>{}
-    .constructFrom(val.MyByteField_ref()));
-  if (!_fbthrift__MyByteField || setStructField(*fbthrift_data, 1, *_fbthrift__MyByteField) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__myStringField(
-    Constructor<Bytes>{}
-    .constructFrom(val.myStringField_ref()));
-  if (!_fbthrift__myStringField || setStructField(*fbthrift_data, 2, *_fbthrift__myStringField) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__myFloatField(
-    Constructor<float>{}
-    .constructFrom(val.myFloatField_ref()));
-  if (!_fbthrift__myFloatField || setStructField(*fbthrift_data, 3, *_fbthrift__myFloatField) == -1) {
-    return nullptr;
-  }
-  return std::move(fbthrift_data).release();
+  return getThriftData(*obj);
 }
-
 
 ExtractorResult<::cpp2::MyStructMapFloatThrowExp>
 Extractor<::cpp2::MyStructMapFloatThrowExp>::operator()(PyObject* obj) {
-  int tCheckResult = typeCheck(obj);
-  if (tCheckResult != 1) {
-      if (tCheckResult == 0) {
-        PyErr_SetString(PyExc_TypeError, "Not a MyStructMapFloatThrowExp");
-      }
-      return extractorError<::cpp2::MyStructMapFloatThrowExp>(
-          "Marshal error: MyStructMapFloatThrowExp");
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::MyStructMapFloatThrowExp>(
+      "Module module import error");
   }
-  StrongRef fbThriftData(getThriftData(obj));
-  return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::MyStructMapFloatThrowExp>>{}(*fbThriftData);
+  std::unique_ptr<folly::IOBuf> val(
+      extract__module__MyStructMapFloatThrowExp(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::cpp2::MyStructMapFloatThrowExp>(
+        "Thrift serialize error: MyStructMapFloatThrowExp");
+  }
+  return detail::deserialize_iobuf<::cpp2::MyStructMapFloatThrowExp>(std::move(val));
 }
+
 
 ExtractorResult<::cpp2::MyStructMapFloatThrowExp>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::MyStructMapFloatThrowExp>>::operator()(PyObject* fbThriftData) {
-  ::cpp2::MyStructMapFloatThrowExp cpp;
-  std::optional<std::string_view> error;
-  Extractor<int64_t>{}.extractInto(
-      cpp.myLongField_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 0 + 1),
-      error);
-  Extractor<map<int32_t, list<list<float>>>>{}.extractInto(
-      cpp.mapListOfFloats_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 1 + 1),
-      error);
-  if (error) {
-    return folly::makeUnexpected(*error);
+    ::cpp2::MyStructMapFloatThrowExp>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::MyStructMapFloatThrowExp>(
+      "Module module import error");
   }
-  return cpp;
+  auto obj = StrongRef(init__module__MyStructMapFloatThrowExp(fbthrift_data));
+  if (!obj) {
+      return extractorError<::cpp2::MyStructMapFloatThrowExp>(
+          "Init from fbthrift error: MyStructMapFloatThrowExp");
+  }
+  return Extractor<::cpp2::MyStructMapFloatThrowExp>{}(*obj);
 }
-
 
 int Extractor<::cpp2::MyStructMapFloatThrowExp>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -188,173 +156,58 @@ PyObject* Constructor<::cpp2::MyStructMapFloatThrowExp>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyStructMapFloatThrowExp>> ctor;
-  StrongRef fbthrift_data(ctor(val));
-  if (!fbthrift_data) {
-    return nullptr;
+  auto ptr = construct__module__MyStructMapFloatThrowExp(
+      detail::serialize_to_iobuf(val));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
   }
-  return init__module__MyStructMapFloatThrowExp(*fbthrift_data);
+  return ptr;
 }
+
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::MyStructMapFloatThrowExp>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::MyStructMapFloatThrowExp& val) {
-  StrongRef fbthrift_data(createStructTuple(2));
-  StrongRef _fbthrift__myLongField(
-    Constructor<int64_t>{}
-    .constructFrom(val.myLongField_ref()));
-  if (!_fbthrift__myLongField || setStructField(*fbthrift_data, 0, *_fbthrift__myLongField) == -1) {
+    const ::cpp2::MyStructMapFloatThrowExp& val) {
+  auto obj = StrongRef(Constructor<::cpp2::MyStructMapFloatThrowExp>{}(val));
+  if (!obj) {
     return nullptr;
   }
-  StrongRef _fbthrift__mapListOfFloats(
-    Constructor<map<int32_t, list<list<float>>>>{}
-    .constructFrom(val.mapListOfFloats_ref()));
-  if (!_fbthrift__mapListOfFloats || setStructField(*fbthrift_data, 1, *_fbthrift__mapListOfFloats) == -1) {
-    return nullptr;
-  }
-  return std::move(fbthrift_data).release();
+  return getThriftData(*obj);
 }
-
 
 ExtractorResult<::cpp2::MyStruct>
 Extractor<::cpp2::MyStruct>::operator()(PyObject* obj) {
-  int tCheckResult = typeCheck(obj);
-  if (tCheckResult != 1) {
-      if (tCheckResult == 0) {
-        PyErr_SetString(PyExc_TypeError, "Not a MyStruct");
-      }
-      return extractorError<::cpp2::MyStruct>(
-          "Marshal error: MyStruct");
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::MyStruct>(
+      "Module module import error");
   }
-  StrongRef fbThriftData(getThriftData(obj));
-  return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::MyStruct>>{}(*fbThriftData);
+  std::unique_ptr<folly::IOBuf> val(
+      extract__module__MyStruct(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::cpp2::MyStruct>(
+        "Thrift serialize error: MyStruct");
+  }
+  return detail::deserialize_iobuf<::cpp2::MyStruct>(std::move(val));
 }
+
 
 ExtractorResult<::cpp2::MyStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::MyStruct>>::operator()(PyObject* fbThriftData) {
-  ::cpp2::MyStruct cpp;
-  std::optional<std::string_view> error;
-  Extractor<int64_t>{}.extractInto(
-      cpp.MyIntField_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 0 + 1),
-      error);
-  Extractor<Bytes>{}.extractInto(
-      cpp.MyStringField_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 1 + 1),
-      error);
-  Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyDataItem>>{}.extractInto(
-      cpp.MyDataField_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 2 + 1),
-      error);
-  Extractor<::apache::thrift::python::capi::ComposedEnum<::cpp2::MyEnum>>{}.extractInto(
-      cpp.myEnum_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 3 + 1),
-      error);
-  Extractor<bool>{}.extractInto(
-      cpp.MyBoolField_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 4 + 1),
-      error);
-  Extractor<int8_t>{}.extractInto(
-      cpp.MyByteField_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 5 + 1),
-      error);
-  Extractor<int16_t>{}.extractInto(
-      cpp.MyShortField_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 6 + 1),
-      error);
-  Extractor<int64_t>{}.extractInto(
-      cpp.MyLongField_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 7 + 1),
-      error);
-  Extractor<double>{}.extractInto(
-      cpp.MyDoubleField_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 8 + 1),
-      error);
-  Extractor<list<double>>{}.extractInto(
-      cpp.lDouble_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 9 + 1),
-      error);
-  Extractor<list<int16_t>>{}.extractInto(
-      cpp.lShort_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 10 + 1),
-      error);
-  Extractor<list<int32_t>>{}.extractInto(
-      cpp.lInteger_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 11 + 1),
-      error);
-  Extractor<list<int64_t>>{}.extractInto(
-      cpp.lLong_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 12 + 1),
-      error);
-  Extractor<list<Bytes>>{}.extractInto(
-      cpp.lString_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 13 + 1),
-      error);
-  Extractor<list<bool>>{}.extractInto(
-      cpp.lBool_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 14 + 1),
-      error);
-  Extractor<list<int8_t>>{}.extractInto(
-      cpp.lByte_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 15 + 1),
-      error);
-  Extractor<map<int16_t, Bytes>>{}.extractInto(
-      cpp.mShortString_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 16 + 1),
-      error);
-  Extractor<map<int32_t, Bytes>>{}.extractInto(
-      cpp.mIntegerString_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 17 + 1),
-      error);
-  Extractor<map<Bytes, ::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>{}.extractInto(
-      cpp.mStringMyStruct_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 18 + 1),
-      error);
-  Extractor<map<Bytes, bool>>{}.extractInto(
-      cpp.mStringBool_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 19 + 1),
-      error);
-  Extractor<map<int32_t, int32_t>>{}.extractInto(
-      cpp.mIntegerInteger_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 20 + 1),
-      error);
-  Extractor<map<int32_t, bool>>{}.extractInto(
-      cpp.mIntegerBool_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 21 + 1),
-      error);
-  Extractor<set<int16_t>>{}.extractInto(
-      cpp.sShort_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 22 + 1),
-      error);
-  Extractor<set<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>{}.extractInto(
-      cpp.sMyStruct_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 23 + 1),
-      error);
-  Extractor<set<int64_t>>{}.extractInto(
-      cpp.sLong_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 24 + 1),
-      error);
-  Extractor<set<Bytes>>{}.extractInto(
-      cpp.sString_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 25 + 1),
-      error);
-  Extractor<set<int8_t>>{}.extractInto(
-      cpp.sByte_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 26 + 1),
-      error);
-  Extractor<map<list<int32_t>, list<int32_t>>>{}.extractInto(
-      cpp.mListList_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 27 + 1),
-      error);
-  if (error) {
-    return folly::makeUnexpected(*error);
+    ::cpp2::MyStruct>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::MyStruct>(
+      "Module module import error");
   }
-  return cpp;
+  auto obj = StrongRef(init__module__MyStruct(fbthrift_data));
+  if (!obj) {
+      return extractorError<::cpp2::MyStruct>(
+          "Init from fbthrift error: MyStruct");
+  }
+  return Extractor<::cpp2::MyStruct>{}(*obj);
 }
-
 
 int Extractor<::cpp2::MyStruct>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -377,225 +230,58 @@ PyObject* Constructor<::cpp2::MyStruct>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyStruct>> ctor;
-  StrongRef fbthrift_data(ctor(val));
-  if (!fbthrift_data) {
-    return nullptr;
+  auto ptr = construct__module__MyStruct(
+      detail::serialize_to_iobuf(val));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
   }
-  return init__module__MyStruct(*fbthrift_data);
+  return ptr;
 }
+
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::MyStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::MyStruct& val) {
-  StrongRef fbthrift_data(createStructTuple(28));
-  StrongRef _fbthrift__MyIntField(
-    Constructor<int64_t>{}
-    .constructFrom(val.MyIntField_ref()));
-  if (!_fbthrift__MyIntField || setStructField(*fbthrift_data, 0, *_fbthrift__MyIntField) == -1) {
+    const ::cpp2::MyStruct& val) {
+  auto obj = StrongRef(Constructor<::cpp2::MyStruct>{}(val));
+  if (!obj) {
     return nullptr;
   }
-  StrongRef _fbthrift__MyStringField(
-    Constructor<Bytes>{}
-    .constructFrom(val.MyStringField_ref()));
-  if (!_fbthrift__MyStringField || setStructField(*fbthrift_data, 1, *_fbthrift__MyStringField) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__MyDataField(
-    Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyDataItem>>{}
-    .constructFrom(val.MyDataField_ref()));
-  if (!_fbthrift__MyDataField || setStructField(*fbthrift_data, 2, *_fbthrift__MyDataField) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__myEnum(
-    Constructor<::apache::thrift::python::capi::ComposedEnum<::cpp2::MyEnum>>{}
-    .constructFrom(val.myEnum_ref()));
-  if (!_fbthrift__myEnum || setStructField(*fbthrift_data, 3, *_fbthrift__myEnum) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__MyBoolField(
-    Constructor<bool>{}
-    .constructFrom(val.MyBoolField_ref()));
-  if (!_fbthrift__MyBoolField || setStructField(*fbthrift_data, 4, *_fbthrift__MyBoolField) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__MyByteField(
-    Constructor<int8_t>{}
-    .constructFrom(val.MyByteField_ref()));
-  if (!_fbthrift__MyByteField || setStructField(*fbthrift_data, 5, *_fbthrift__MyByteField) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__MyShortField(
-    Constructor<int16_t>{}
-    .constructFrom(val.MyShortField_ref()));
-  if (!_fbthrift__MyShortField || setStructField(*fbthrift_data, 6, *_fbthrift__MyShortField) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__MyLongField(
-    Constructor<int64_t>{}
-    .constructFrom(val.MyLongField_ref()));
-  if (!_fbthrift__MyLongField || setStructField(*fbthrift_data, 7, *_fbthrift__MyLongField) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__MyDoubleField(
-    Constructor<double>{}
-    .constructFrom(val.MyDoubleField_ref()));
-  if (!_fbthrift__MyDoubleField || setStructField(*fbthrift_data, 8, *_fbthrift__MyDoubleField) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__lDouble(
-    Constructor<list<double>>{}
-    .constructFrom(val.lDouble_ref()));
-  if (!_fbthrift__lDouble || setStructField(*fbthrift_data, 9, *_fbthrift__lDouble) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__lShort(
-    Constructor<list<int16_t>>{}
-    .constructFrom(val.lShort_ref()));
-  if (!_fbthrift__lShort || setStructField(*fbthrift_data, 10, *_fbthrift__lShort) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__lInteger(
-    Constructor<list<int32_t>>{}
-    .constructFrom(val.lInteger_ref()));
-  if (!_fbthrift__lInteger || setStructField(*fbthrift_data, 11, *_fbthrift__lInteger) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__lLong(
-    Constructor<list<int64_t>>{}
-    .constructFrom(val.lLong_ref()));
-  if (!_fbthrift__lLong || setStructField(*fbthrift_data, 12, *_fbthrift__lLong) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__lString(
-    Constructor<list<Bytes>>{}
-    .constructFrom(val.lString_ref()));
-  if (!_fbthrift__lString || setStructField(*fbthrift_data, 13, *_fbthrift__lString) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__lBool(
-    Constructor<list<bool>>{}
-    .constructFrom(val.lBool_ref()));
-  if (!_fbthrift__lBool || setStructField(*fbthrift_data, 14, *_fbthrift__lBool) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__lByte(
-    Constructor<list<int8_t>>{}
-    .constructFrom(val.lByte_ref()));
-  if (!_fbthrift__lByte || setStructField(*fbthrift_data, 15, *_fbthrift__lByte) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__mShortString(
-    Constructor<map<int16_t, Bytes>>{}
-    .constructFrom(val.mShortString_ref()));
-  if (!_fbthrift__mShortString || setStructField(*fbthrift_data, 16, *_fbthrift__mShortString) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__mIntegerString(
-    Constructor<map<int32_t, Bytes>>{}
-    .constructFrom(val.mIntegerString_ref()));
-  if (!_fbthrift__mIntegerString || setStructField(*fbthrift_data, 17, *_fbthrift__mIntegerString) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__mStringMyStruct(
-    Constructor<map<Bytes, ::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>{}
-    .constructFrom(val.mStringMyStruct_ref()));
-  if (!_fbthrift__mStringMyStruct || setStructField(*fbthrift_data, 18, *_fbthrift__mStringMyStruct) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__mStringBool(
-    Constructor<map<Bytes, bool>>{}
-    .constructFrom(val.mStringBool_ref()));
-  if (!_fbthrift__mStringBool || setStructField(*fbthrift_data, 19, *_fbthrift__mStringBool) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__mIntegerInteger(
-    Constructor<map<int32_t, int32_t>>{}
-    .constructFrom(val.mIntegerInteger_ref()));
-  if (!_fbthrift__mIntegerInteger || setStructField(*fbthrift_data, 20, *_fbthrift__mIntegerInteger) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__mIntegerBool(
-    Constructor<map<int32_t, bool>>{}
-    .constructFrom(val.mIntegerBool_ref()));
-  if (!_fbthrift__mIntegerBool || setStructField(*fbthrift_data, 21, *_fbthrift__mIntegerBool) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__sShort(
-    Constructor<set<int16_t>>{}
-    .constructFrom(val.sShort_ref()));
-  if (!_fbthrift__sShort || setStructField(*fbthrift_data, 22, *_fbthrift__sShort) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__sMyStruct(
-    Constructor<set<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>{}
-    .constructFrom(val.sMyStruct_ref()));
-  if (!_fbthrift__sMyStruct || setStructField(*fbthrift_data, 23, *_fbthrift__sMyStruct) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__sLong(
-    Constructor<set<int64_t>>{}
-    .constructFrom(val.sLong_ref()));
-  if (!_fbthrift__sLong || setStructField(*fbthrift_data, 24, *_fbthrift__sLong) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__sString(
-    Constructor<set<Bytes>>{}
-    .constructFrom(val.sString_ref()));
-  if (!_fbthrift__sString || setStructField(*fbthrift_data, 25, *_fbthrift__sString) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__sByte(
-    Constructor<set<int8_t>>{}
-    .constructFrom(val.sByte_ref()));
-  if (!_fbthrift__sByte || setStructField(*fbthrift_data, 26, *_fbthrift__sByte) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__mListList(
-    Constructor<map<list<int32_t>, list<int32_t>>>{}
-    .constructFrom(val.mListList_ref()));
-  if (!_fbthrift__mListList || setStructField(*fbthrift_data, 27, *_fbthrift__mListList) == -1) {
-    return nullptr;
-  }
-  return std::move(fbthrift_data).release();
+  return getThriftData(*obj);
 }
-
 
 ExtractorResult<::cpp2::SimpleStruct>
 Extractor<::cpp2::SimpleStruct>::operator()(PyObject* obj) {
-  int tCheckResult = typeCheck(obj);
-  if (tCheckResult != 1) {
-      if (tCheckResult == 0) {
-        PyErr_SetString(PyExc_TypeError, "Not a SimpleStruct");
-      }
-      return extractorError<::cpp2::SimpleStruct>(
-          "Marshal error: SimpleStruct");
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::SimpleStruct>(
+      "Module module import error");
   }
-  StrongRef fbThriftData(getThriftData(obj));
-  return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::SimpleStruct>>{}(*fbThriftData);
+  std::unique_ptr<folly::IOBuf> val(
+      extract__module__SimpleStruct(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::cpp2::SimpleStruct>(
+        "Thrift serialize error: SimpleStruct");
+  }
+  return detail::deserialize_iobuf<::cpp2::SimpleStruct>(std::move(val));
 }
+
 
 ExtractorResult<::cpp2::SimpleStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::SimpleStruct>>::operator()(PyObject* fbThriftData) {
-  ::cpp2::SimpleStruct cpp;
-  std::optional<std::string_view> error;
-  Extractor<int64_t>{}.extractInto(
-      cpp.age_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 0 + 1),
-      error);
-  Extractor<Bytes>{}.extractInto(
-      cpp.name_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 1 + 1),
-      error);
-  if (error) {
-    return folly::makeUnexpected(*error);
+    ::cpp2::SimpleStruct>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::SimpleStruct>(
+      "Module module import error");
   }
-  return cpp;
+  auto obj = StrongRef(init__module__SimpleStruct(fbthrift_data));
+  if (!obj) {
+      return extractorError<::cpp2::SimpleStruct>(
+          "Init from fbthrift error: SimpleStruct");
+  }
+  return Extractor<::cpp2::SimpleStruct>{}(*obj);
 }
-
 
 int Extractor<::cpp2::SimpleStruct>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -618,149 +304,58 @@ PyObject* Constructor<::cpp2::SimpleStruct>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::SimpleStruct>> ctor;
-  StrongRef fbthrift_data(ctor(val));
-  if (!fbthrift_data) {
-    return nullptr;
+  auto ptr = construct__module__SimpleStruct(
+      detail::serialize_to_iobuf(val));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
   }
-  return init__module__SimpleStruct(*fbthrift_data);
+  return ptr;
 }
+
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::SimpleStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::SimpleStruct& val) {
-  StrongRef fbthrift_data(createStructTuple(2));
-  StrongRef _fbthrift__age(
-    Constructor<int64_t>{}
-    .constructFrom(val.age_ref()));
-  if (!_fbthrift__age || setStructField(*fbthrift_data, 0, *_fbthrift__age) == -1) {
+    const ::cpp2::SimpleStruct& val) {
+  auto obj = StrongRef(Constructor<::cpp2::SimpleStruct>{}(val));
+  if (!obj) {
     return nullptr;
   }
-  StrongRef _fbthrift__name(
-    Constructor<Bytes>{}
-    .constructFrom(val.name_ref()));
-  if (!_fbthrift__name || setStructField(*fbthrift_data, 1, *_fbthrift__name) == -1) {
-    return nullptr;
-  }
-  return std::move(fbthrift_data).release();
+  return getThriftData(*obj);
 }
-
 
 ExtractorResult<::cpp2::defaultStruct>
 Extractor<::cpp2::defaultStruct>::operator()(PyObject* obj) {
-  int tCheckResult = typeCheck(obj);
-  if (tCheckResult != 1) {
-      if (tCheckResult == 0) {
-        PyErr_SetString(PyExc_TypeError, "Not a defaultStruct");
-      }
-      return extractorError<::cpp2::defaultStruct>(
-          "Marshal error: defaultStruct");
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::defaultStruct>(
+      "Module module import error");
   }
-  StrongRef fbThriftData(getThriftData(obj));
-  return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::defaultStruct>>{}(*fbThriftData);
+  std::unique_ptr<folly::IOBuf> val(
+      extract__module__defaultStruct(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::cpp2::defaultStruct>(
+        "Thrift serialize error: defaultStruct");
+  }
+  return detail::deserialize_iobuf<::cpp2::defaultStruct>(std::move(val));
 }
+
 
 ExtractorResult<::cpp2::defaultStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::defaultStruct>>::operator()(PyObject* fbThriftData) {
-  ::cpp2::defaultStruct cpp;
-  std::optional<std::string_view> error;
-  Extractor<int64_t>{}.extractInto(
-      cpp.myLongDFset_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 0 + 1),
-      error);
-  Extractor<int64_t>{}.extractInto(
-      cpp.myLongDF_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 1 + 1),
-      error);
-  Extractor<int32_t>{}.extractInto(
-      cpp.portDFset_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 2 + 1),
-      error);
-  Extractor<int32_t>{}.extractInto(
-      cpp.portNum_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 3 + 1),
-      error);
-  Extractor<Bytes>{}.extractInto(
-      cpp.myBinaryDFset_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 4 + 1),
-      error);
-  Extractor<Bytes>{}.extractInto(
-      cpp.myBinary_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 5 + 1),
-      error);
-  Extractor<int8_t>{}.extractInto(
-      cpp.myByteDFSet_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 6 + 1),
-      error);
-  Extractor<int8_t>{}.extractInto(
-      cpp.myByte_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 7 + 1),
-      error);
-  Extractor<double>{}.extractInto(
-      cpp.myDoubleDFset_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 8 + 1),
-      error);
-  Extractor<double>{}.extractInto(
-      cpp.myDoubleDFZero_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 9 + 1),
-      error);
-  Extractor<double>{}.extractInto(
-      cpp.myDouble_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 10 + 1),
-      error);
-  Extractor<map<int32_t, Bytes>>{}.extractInto(
-      cpp.field3_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 11 + 1),
-      error);
-  Extractor<list<::apache::thrift::python::capi::ComposedEnum<::cpp2::MyEnum>>>{}.extractInto(
-      cpp.myList_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 12 + 1),
-      error);
-  Extractor<set<Bytes>>{}.extractInto(
-      cpp.mySet_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 13 + 1),
-      error);
-  Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::SimpleStruct>>{}.extractInto(
-      cpp.simpleStruct_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 14 + 1),
-      error);
-  Extractor<list<::apache::thrift::python::capi::ComposedStruct<::cpp2::SimpleStruct>>>{}.extractInto(
-      cpp.listStructDFset_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 15 + 1),
-      error);
-  Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyUnion>>{}.extractInto(
-      cpp.myUnion_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 16 + 1),
-      error);
-  Extractor<list<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyUnion>>>{}.extractInto(
-      cpp.listUnionDFset_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 17 + 1),
-      error);
-  Extractor<map<int32_t, list<::apache::thrift::python::capi::ComposedStruct<::cpp2::SimpleStruct>>>>{}.extractInto(
-      cpp.mapNestlistStructDfSet_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 18 + 1),
-      error);
-  Extractor<map<int64_t, Bytes>>{}.extractInto(
-      cpp.mapJavaTypeDFset_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 19 + 1),
-      error);
-  Extractor<map<int64_t, int32_t>>{}.extractInto(
-      cpp.emptyMap_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 20 + 1),
-      error);
-  Extractor<map<Bytes, map<int32_t, ::apache::thrift::python::capi::ComposedEnum<::cpp2::MyEnum>>>>{}.extractInto(
-      cpp.enumMapDFset_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 21 + 1),
-      error);
-  if (error) {
-    return folly::makeUnexpected(*error);
+    ::cpp2::defaultStruct>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::defaultStruct>(
+      "Module module import error");
   }
-  return cpp;
+  auto obj = StrongRef(init__module__defaultStruct(fbthrift_data));
+  if (!obj) {
+      return extractorError<::cpp2::defaultStruct>(
+          "Init from fbthrift error: defaultStruct");
+  }
+  return Extractor<::cpp2::defaultStruct>{}(*obj);
 }
-
 
 int Extractor<::cpp2::defaultStruct>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -783,217 +378,58 @@ PyObject* Constructor<::cpp2::defaultStruct>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::defaultStruct>> ctor;
-  StrongRef fbthrift_data(ctor(val));
-  if (!fbthrift_data) {
-    return nullptr;
+  auto ptr = construct__module__defaultStruct(
+      detail::serialize_to_iobuf(val));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
   }
-  return init__module__defaultStruct(*fbthrift_data);
+  return ptr;
 }
+
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::defaultStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::defaultStruct& val) {
-  StrongRef fbthrift_data(createStructTuple(22));
-  StrongRef _fbthrift__myLongDFset(
-    Constructor<int64_t>{}
-    .constructFrom(val.myLongDFset_ref()));
-  if (!_fbthrift__myLongDFset || setStructField(*fbthrift_data, 0, *_fbthrift__myLongDFset) == -1) {
+    const ::cpp2::defaultStruct& val) {
+  auto obj = StrongRef(Constructor<::cpp2::defaultStruct>{}(val));
+  if (!obj) {
     return nullptr;
   }
-  StrongRef _fbthrift__myLongDF(
-    Constructor<int64_t>{}
-    .constructFrom(val.myLongDF_ref()));
-  if (!_fbthrift__myLongDF || setStructField(*fbthrift_data, 1, *_fbthrift__myLongDF) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__portDFset(
-    Constructor<int32_t>{}
-    .constructFrom(val.portDFset_ref()));
-  if (!_fbthrift__portDFset || setStructField(*fbthrift_data, 2, *_fbthrift__portDFset) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__portNum(
-    Constructor<int32_t>{}
-    .constructFrom(val.portNum_ref()));
-  if (!_fbthrift__portNum || setStructField(*fbthrift_data, 3, *_fbthrift__portNum) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__myBinaryDFset(
-    Constructor<Bytes>{}
-    .constructFrom(val.myBinaryDFset_ref()));
-  if (!_fbthrift__myBinaryDFset || setStructField(*fbthrift_data, 4, *_fbthrift__myBinaryDFset) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__myBinary(
-    Constructor<Bytes>{}
-    .constructFrom(val.myBinary_ref()));
-  if (!_fbthrift__myBinary || setStructField(*fbthrift_data, 5, *_fbthrift__myBinary) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__myByteDFSet(
-    Constructor<int8_t>{}
-    .constructFrom(val.myByteDFSet_ref()));
-  if (!_fbthrift__myByteDFSet || setStructField(*fbthrift_data, 6, *_fbthrift__myByteDFSet) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__myByte(
-    Constructor<int8_t>{}
-    .constructFrom(val.myByte_ref()));
-  if (!_fbthrift__myByte || setStructField(*fbthrift_data, 7, *_fbthrift__myByte) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__myDoubleDFset(
-    Constructor<double>{}
-    .constructFrom(val.myDoubleDFset_ref()));
-  if (!_fbthrift__myDoubleDFset || setStructField(*fbthrift_data, 8, *_fbthrift__myDoubleDFset) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__myDoubleDFZero(
-    Constructor<double>{}
-    .constructFrom(val.myDoubleDFZero_ref()));
-  if (!_fbthrift__myDoubleDFZero || setStructField(*fbthrift_data, 9, *_fbthrift__myDoubleDFZero) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__myDouble(
-    Constructor<double>{}
-    .constructFrom(val.myDouble_ref()));
-  if (!_fbthrift__myDouble || setStructField(*fbthrift_data, 10, *_fbthrift__myDouble) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__field3(
-    Constructor<map<int32_t, Bytes>>{}
-    .constructFrom(val.field3_ref()));
-  if (!_fbthrift__field3 || setStructField(*fbthrift_data, 11, *_fbthrift__field3) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__myList(
-    Constructor<list<::apache::thrift::python::capi::ComposedEnum<::cpp2::MyEnum>>>{}
-    .constructFrom(val.myList_ref()));
-  if (!_fbthrift__myList || setStructField(*fbthrift_data, 12, *_fbthrift__myList) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__mySet(
-    Constructor<set<Bytes>>{}
-    .constructFrom(val.mySet_ref()));
-  if (!_fbthrift__mySet || setStructField(*fbthrift_data, 13, *_fbthrift__mySet) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__simpleStruct(
-    Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::SimpleStruct>>{}
-    .constructFrom(val.simpleStruct_ref()));
-  if (!_fbthrift__simpleStruct || setStructField(*fbthrift_data, 14, *_fbthrift__simpleStruct) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__listStructDFset(
-    Constructor<list<::apache::thrift::python::capi::ComposedStruct<::cpp2::SimpleStruct>>>{}
-    .constructFrom(val.listStructDFset_ref()));
-  if (!_fbthrift__listStructDFset || setStructField(*fbthrift_data, 15, *_fbthrift__listStructDFset) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__myUnion(
-    Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyUnion>>{}
-    .constructFrom(val.myUnion_ref()));
-  if (!_fbthrift__myUnion || setStructField(*fbthrift_data, 16, *_fbthrift__myUnion) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__listUnionDFset(
-    Constructor<list<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyUnion>>>{}
-    .constructFrom(val.listUnionDFset_ref()));
-  if (!_fbthrift__listUnionDFset || setStructField(*fbthrift_data, 17, *_fbthrift__listUnionDFset) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__mapNestlistStructDfSet(
-    Constructor<map<int32_t, list<::apache::thrift::python::capi::ComposedStruct<::cpp2::SimpleStruct>>>>{}
-    .constructFrom(val.mapNestlistStructDfSet_ref()));
-  if (!_fbthrift__mapNestlistStructDfSet || setStructField(*fbthrift_data, 18, *_fbthrift__mapNestlistStructDfSet) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__mapJavaTypeDFset(
-    Constructor<map<int64_t, Bytes>>{}
-    .constructFrom(val.mapJavaTypeDFset_ref()));
-  if (!_fbthrift__mapJavaTypeDFset || setStructField(*fbthrift_data, 19, *_fbthrift__mapJavaTypeDFset) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__emptyMap(
-    Constructor<map<int64_t, int32_t>>{}
-    .constructFrom(val.emptyMap_ref()));
-  if (!_fbthrift__emptyMap || setStructField(*fbthrift_data, 20, *_fbthrift__emptyMap) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__enumMapDFset(
-    Constructor<map<Bytes, map<int32_t, ::apache::thrift::python::capi::ComposedEnum<::cpp2::MyEnum>>>>{}
-    .constructFrom(val.enumMapDFset_ref()));
-  if (!_fbthrift__enumMapDFset || setStructField(*fbthrift_data, 21, *_fbthrift__enumMapDFset) == -1) {
-    return nullptr;
-  }
-  return std::move(fbthrift_data).release();
+  return getThriftData(*obj);
 }
-
 
 ExtractorResult<::cpp2::MyStructTypeDef>
 Extractor<::cpp2::MyStructTypeDef>::operator()(PyObject* obj) {
-  int tCheckResult = typeCheck(obj);
-  if (tCheckResult != 1) {
-      if (tCheckResult == 0) {
-        PyErr_SetString(PyExc_TypeError, "Not a MyStructTypeDef");
-      }
-      return extractorError<::cpp2::MyStructTypeDef>(
-          "Marshal error: MyStructTypeDef");
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::MyStructTypeDef>(
+      "Module module import error");
   }
-  StrongRef fbThriftData(getThriftData(obj));
-  return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::MyStructTypeDef>>{}(*fbThriftData);
+  std::unique_ptr<folly::IOBuf> val(
+      extract__module__MyStructTypeDef(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::cpp2::MyStructTypeDef>(
+        "Thrift serialize error: MyStructTypeDef");
+  }
+  return detail::deserialize_iobuf<::cpp2::MyStructTypeDef>(std::move(val));
 }
+
 
 ExtractorResult<::cpp2::MyStructTypeDef>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::MyStructTypeDef>>::operator()(PyObject* fbThriftData) {
-  ::cpp2::MyStructTypeDef cpp;
-  std::optional<std::string_view> error;
-  Extractor<int64_t>{}.extractInto(
-      cpp.myLongField_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 0 + 1),
-      error);
-  Extractor<int64_t>{}.extractInto(
-      cpp.myLongTypeDef_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 1 + 1),
-      error);
-  Extractor<Bytes>{}.extractInto(
-      cpp.myStringField_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 2 + 1),
-      error);
-  Extractor<Bytes>{}.extractInto(
-      cpp.myStringTypedef_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 3 + 1),
-      error);
-  Extractor<map<int16_t, Bytes>>{}.extractInto(
-      cpp.myMapField_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 4 + 1),
-      error);
-  Extractor<map<int16_t, Bytes>>{}.extractInto(
-      cpp.myMapTypedef_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 5 + 1),
-      error);
-  Extractor<list<double>>{}.extractInto(
-      cpp.myListField_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 6 + 1),
-      error);
-  Extractor<list<double>>{}.extractInto(
-      cpp.myListTypedef_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 7 + 1),
-      error);
-  Extractor<map<int16_t, list<list<double>>>>{}.extractInto(
-      cpp.myMapListOfTypeDef_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 8 + 1),
-      error);
-  if (error) {
-    return folly::makeUnexpected(*error);
+    ::cpp2::MyStructTypeDef>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::MyStructTypeDef>(
+      "Module module import error");
   }
-  return cpp;
+  auto obj = StrongRef(init__module__MyStructTypeDef(fbthrift_data));
+  if (!obj) {
+      return extractorError<::cpp2::MyStructTypeDef>(
+          "Init from fbthrift error: MyStructTypeDef");
+  }
+  return Extractor<::cpp2::MyStructTypeDef>{}(*obj);
 }
-
 
 int Extractor<::cpp2::MyStructTypeDef>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -1016,76 +452,24 @@ PyObject* Constructor<::cpp2::MyStructTypeDef>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyStructTypeDef>> ctor;
-  StrongRef fbthrift_data(ctor(val));
-  if (!fbthrift_data) {
-    return nullptr;
+  auto ptr = construct__module__MyStructTypeDef(
+      detail::serialize_to_iobuf(val));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
   }
-  return init__module__MyStructTypeDef(*fbthrift_data);
+  return ptr;
 }
+
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::MyStructTypeDef>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::MyStructTypeDef& val) {
-  StrongRef fbthrift_data(createStructTuple(9));
-  StrongRef _fbthrift__myLongField(
-    Constructor<int64_t>{}
-    .constructFrom(val.myLongField_ref()));
-  if (!_fbthrift__myLongField || setStructField(*fbthrift_data, 0, *_fbthrift__myLongField) == -1) {
+    const ::cpp2::MyStructTypeDef& val) {
+  auto obj = StrongRef(Constructor<::cpp2::MyStructTypeDef>{}(val));
+  if (!obj) {
     return nullptr;
   }
-  StrongRef _fbthrift__myLongTypeDef(
-    Constructor<int64_t>{}
-    .constructFrom(val.myLongTypeDef_ref()));
-  if (!_fbthrift__myLongTypeDef || setStructField(*fbthrift_data, 1, *_fbthrift__myLongTypeDef) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__myStringField(
-    Constructor<Bytes>{}
-    .constructFrom(val.myStringField_ref()));
-  if (!_fbthrift__myStringField || setStructField(*fbthrift_data, 2, *_fbthrift__myStringField) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__myStringTypedef(
-    Constructor<Bytes>{}
-    .constructFrom(val.myStringTypedef_ref()));
-  if (!_fbthrift__myStringTypedef || setStructField(*fbthrift_data, 3, *_fbthrift__myStringTypedef) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__myMapField(
-    Constructor<map<int16_t, Bytes>>{}
-    .constructFrom(val.myMapField_ref()));
-  if (!_fbthrift__myMapField || setStructField(*fbthrift_data, 4, *_fbthrift__myMapField) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__myMapTypedef(
-    Constructor<map<int16_t, Bytes>>{}
-    .constructFrom(val.myMapTypedef_ref()));
-  if (!_fbthrift__myMapTypedef || setStructField(*fbthrift_data, 5, *_fbthrift__myMapTypedef) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__myListField(
-    Constructor<list<double>>{}
-    .constructFrom(val.myListField_ref()));
-  if (!_fbthrift__myListField || setStructField(*fbthrift_data, 6, *_fbthrift__myListField) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__myListTypedef(
-    Constructor<list<double>>{}
-    .constructFrom(val.myListTypedef_ref()));
-  if (!_fbthrift__myListTypedef || setStructField(*fbthrift_data, 7, *_fbthrift__myListTypedef) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__myMapListOfTypeDef(
-    Constructor<map<int16_t, list<list<double>>>>{}
-    .constructFrom(val.myMapListOfTypeDef_ref()));
-  if (!_fbthrift__myMapListOfTypeDef || setStructField(*fbthrift_data, 8, *_fbthrift__myMapListOfTypeDef) == -1) {
-    return nullptr;
-  }
-  return std::move(fbthrift_data).release();
+  return getThriftData(*obj);
 }
-
 
 ExtractorResult<::cpp2::MyDataItem>
 Extractor<::cpp2::MyDataItem>::operator()(PyObject* obj) {
@@ -1297,102 +681,37 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 ExtractorResult<::cpp2::ComplexNestedStruct>
 Extractor<::cpp2::ComplexNestedStruct>::operator()(PyObject* obj) {
-  int tCheckResult = typeCheck(obj);
-  if (tCheckResult != 1) {
-      if (tCheckResult == 0) {
-        PyErr_SetString(PyExc_TypeError, "Not a ComplexNestedStruct");
-      }
-      return extractorError<::cpp2::ComplexNestedStruct>(
-          "Marshal error: ComplexNestedStruct");
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::ComplexNestedStruct>(
+      "Module module import error");
   }
-  StrongRef fbThriftData(getThriftData(obj));
-  return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::ComplexNestedStruct>>{}(*fbThriftData);
+  std::unique_ptr<folly::IOBuf> val(
+      extract__module__ComplexNestedStruct(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::cpp2::ComplexNestedStruct>(
+        "Thrift serialize error: ComplexNestedStruct");
+  }
+  return detail::deserialize_iobuf<::cpp2::ComplexNestedStruct>(std::move(val));
 }
+
 
 ExtractorResult<::cpp2::ComplexNestedStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::ComplexNestedStruct>>::operator()(PyObject* fbThriftData) {
-  ::cpp2::ComplexNestedStruct cpp;
-  std::optional<std::string_view> error;
-  Extractor<set<set<int32_t>>>{}.extractInto(
-      cpp.setOfSetOfInt_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 0 + 1),
-      error);
-  Extractor<list<list<list<list<::apache::thrift::python::capi::ComposedEnum<::cpp2::MyEnum>>>>>>{}.extractInto(
-      cpp.listofListOfListOfListOfEnum_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 1 + 1),
-      error);
-  Extractor<list<list<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>>{}.extractInto(
-      cpp.listOfListOfMyStruct_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 2 + 1),
-      error);
-  Extractor<set<list<list<int64_t>>>>{}.extractInto(
-      cpp.setOfListOfListOfLong_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 3 + 1),
-      error);
-  Extractor<set<set<set<int64_t>>>>{}.extractInto(
-      cpp.setOfSetOfsetOfLong_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 4 + 1),
-      error);
-  Extractor<map<int32_t, list<list<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>>>{}.extractInto(
-      cpp.mapStructListOfListOfLong_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 5 + 1),
-      error);
-  Extractor<map<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>, int32_t>>{}.extractInto(
-      cpp.mKeyStructValInt_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 6 + 1),
-      error);
-  Extractor<list<map<int32_t, int32_t>>>{}.extractInto(
-      cpp.listOfMapKeyIntValInt_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 7 + 1),
-      error);
-  Extractor<list<map<Bytes, list<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>>>{}.extractInto(
-      cpp.listOfMapKeyStrValList_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 8 + 1),
-      error);
-  Extractor<map<set<int32_t>, int64_t>>{}.extractInto(
-      cpp.mapKeySetValLong_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 9 + 1),
-      error);
-  Extractor<map<list<Bytes>, int32_t>>{}.extractInto(
-      cpp.mapKeyListValLong_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 10 + 1),
-      error);
-  Extractor<map<map<int32_t, Bytes>, map<int32_t, Bytes>>>{}.extractInto(
-      cpp.mapKeyMapValMap_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 11 + 1),
-      error);
-  Extractor<map<set<list<int32_t>>, map<list<set<Bytes>>, Bytes>>>{}.extractInto(
-      cpp.mapKeySetValMap_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 12 + 1),
-      error);
-  Extractor<map<map<map<int32_t, Bytes>, Bytes>, map<int32_t, Bytes>>>{}.extractInto(
-      cpp.NestedMaps_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 13 + 1),
-      error);
-  Extractor<map<int32_t, list<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>>{}.extractInto(
-      cpp.mapKeyIntValList_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 14 + 1),
-      error);
-  Extractor<map<int32_t, set<bool>>>{}.extractInto(
-      cpp.mapKeyIntValSet_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 15 + 1),
-      error);
-  Extractor<map<set<bool>, ::apache::thrift::python::capi::ComposedEnum<::cpp2::MyEnum>>>{}.extractInto(
-      cpp.mapKeySetValInt_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 16 + 1),
-      error);
-  Extractor<map<list<int32_t>, set<map<double, Bytes>>>>{}.extractInto(
-      cpp.mapKeyListValSet_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 17 + 1),
-      error);
-  if (error) {
-    return folly::makeUnexpected(*error);
+    ::cpp2::ComplexNestedStruct>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::ComplexNestedStruct>(
+      "Module module import error");
   }
-  return cpp;
+  auto obj = StrongRef(init__module__ComplexNestedStruct(fbthrift_data));
+  if (!obj) {
+      return extractorError<::cpp2::ComplexNestedStruct>(
+          "Init from fbthrift error: ComplexNestedStruct");
+  }
+  return Extractor<::cpp2::ComplexNestedStruct>{}(*obj);
 }
-
 
 int Extractor<::cpp2::ComplexNestedStruct>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -1415,173 +734,58 @@ PyObject* Constructor<::cpp2::ComplexNestedStruct>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::ComplexNestedStruct>> ctor;
-  StrongRef fbthrift_data(ctor(val));
-  if (!fbthrift_data) {
-    return nullptr;
+  auto ptr = construct__module__ComplexNestedStruct(
+      detail::serialize_to_iobuf(val));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
   }
-  return init__module__ComplexNestedStruct(*fbthrift_data);
+  return ptr;
 }
+
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::ComplexNestedStruct>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::ComplexNestedStruct& val) {
-  StrongRef fbthrift_data(createStructTuple(18));
-  StrongRef _fbthrift__setOfSetOfInt(
-    Constructor<set<set<int32_t>>>{}
-    .constructFrom(val.setOfSetOfInt_ref()));
-  if (!_fbthrift__setOfSetOfInt || setStructField(*fbthrift_data, 0, *_fbthrift__setOfSetOfInt) == -1) {
+    const ::cpp2::ComplexNestedStruct& val) {
+  auto obj = StrongRef(Constructor<::cpp2::ComplexNestedStruct>{}(val));
+  if (!obj) {
     return nullptr;
   }
-  StrongRef _fbthrift__listofListOfListOfListOfEnum(
-    Constructor<list<list<list<list<::apache::thrift::python::capi::ComposedEnum<::cpp2::MyEnum>>>>>>{}
-    .constructFrom(val.listofListOfListOfListOfEnum_ref()));
-  if (!_fbthrift__listofListOfListOfListOfEnum || setStructField(*fbthrift_data, 1, *_fbthrift__listofListOfListOfListOfEnum) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__listOfListOfMyStruct(
-    Constructor<list<list<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>>{}
-    .constructFrom(val.listOfListOfMyStruct_ref()));
-  if (!_fbthrift__listOfListOfMyStruct || setStructField(*fbthrift_data, 2, *_fbthrift__listOfListOfMyStruct) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__setOfListOfListOfLong(
-    Constructor<set<list<list<int64_t>>>>{}
-    .constructFrom(val.setOfListOfListOfLong_ref()));
-  if (!_fbthrift__setOfListOfListOfLong || setStructField(*fbthrift_data, 3, *_fbthrift__setOfListOfListOfLong) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__setOfSetOfsetOfLong(
-    Constructor<set<set<set<int64_t>>>>{}
-    .constructFrom(val.setOfSetOfsetOfLong_ref()));
-  if (!_fbthrift__setOfSetOfsetOfLong || setStructField(*fbthrift_data, 4, *_fbthrift__setOfSetOfsetOfLong) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__mapStructListOfListOfLong(
-    Constructor<map<int32_t, list<list<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>>>{}
-    .constructFrom(val.mapStructListOfListOfLong_ref()));
-  if (!_fbthrift__mapStructListOfListOfLong || setStructField(*fbthrift_data, 5, *_fbthrift__mapStructListOfListOfLong) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__mKeyStructValInt(
-    Constructor<map<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>, int32_t>>{}
-    .constructFrom(val.mKeyStructValInt_ref()));
-  if (!_fbthrift__mKeyStructValInt || setStructField(*fbthrift_data, 6, *_fbthrift__mKeyStructValInt) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__listOfMapKeyIntValInt(
-    Constructor<list<map<int32_t, int32_t>>>{}
-    .constructFrom(val.listOfMapKeyIntValInt_ref()));
-  if (!_fbthrift__listOfMapKeyIntValInt || setStructField(*fbthrift_data, 7, *_fbthrift__listOfMapKeyIntValInt) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__listOfMapKeyStrValList(
-    Constructor<list<map<Bytes, list<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>>>{}
-    .constructFrom(val.listOfMapKeyStrValList_ref()));
-  if (!_fbthrift__listOfMapKeyStrValList || setStructField(*fbthrift_data, 8, *_fbthrift__listOfMapKeyStrValList) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__mapKeySetValLong(
-    Constructor<map<set<int32_t>, int64_t>>{}
-    .constructFrom(val.mapKeySetValLong_ref()));
-  if (!_fbthrift__mapKeySetValLong || setStructField(*fbthrift_data, 9, *_fbthrift__mapKeySetValLong) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__mapKeyListValLong(
-    Constructor<map<list<Bytes>, int32_t>>{}
-    .constructFrom(val.mapKeyListValLong_ref()));
-  if (!_fbthrift__mapKeyListValLong || setStructField(*fbthrift_data, 10, *_fbthrift__mapKeyListValLong) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__mapKeyMapValMap(
-    Constructor<map<map<int32_t, Bytes>, map<int32_t, Bytes>>>{}
-    .constructFrom(val.mapKeyMapValMap_ref()));
-  if (!_fbthrift__mapKeyMapValMap || setStructField(*fbthrift_data, 11, *_fbthrift__mapKeyMapValMap) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__mapKeySetValMap(
-    Constructor<map<set<list<int32_t>>, map<list<set<Bytes>>, Bytes>>>{}
-    .constructFrom(val.mapKeySetValMap_ref()));
-  if (!_fbthrift__mapKeySetValMap || setStructField(*fbthrift_data, 12, *_fbthrift__mapKeySetValMap) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__NestedMaps(
-    Constructor<map<map<map<int32_t, Bytes>, Bytes>, map<int32_t, Bytes>>>{}
-    .constructFrom(val.NestedMaps_ref()));
-  if (!_fbthrift__NestedMaps || setStructField(*fbthrift_data, 13, *_fbthrift__NestedMaps) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__mapKeyIntValList(
-    Constructor<map<int32_t, list<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>>{}
-    .constructFrom(val.mapKeyIntValList_ref()));
-  if (!_fbthrift__mapKeyIntValList || setStructField(*fbthrift_data, 14, *_fbthrift__mapKeyIntValList) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__mapKeyIntValSet(
-    Constructor<map<int32_t, set<bool>>>{}
-    .constructFrom(val.mapKeyIntValSet_ref()));
-  if (!_fbthrift__mapKeyIntValSet || setStructField(*fbthrift_data, 15, *_fbthrift__mapKeyIntValSet) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__mapKeySetValInt(
-    Constructor<map<set<bool>, ::apache::thrift::python::capi::ComposedEnum<::cpp2::MyEnum>>>{}
-    .constructFrom(val.mapKeySetValInt_ref()));
-  if (!_fbthrift__mapKeySetValInt || setStructField(*fbthrift_data, 16, *_fbthrift__mapKeySetValInt) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__mapKeyListValSet(
-    Constructor<map<list<int32_t>, set<map<double, Bytes>>>>{}
-    .constructFrom(val.mapKeyListValSet_ref()));
-  if (!_fbthrift__mapKeyListValSet || setStructField(*fbthrift_data, 17, *_fbthrift__mapKeyListValSet) == -1) {
-    return nullptr;
-  }
-  return std::move(fbthrift_data).release();
+  return getThriftData(*obj);
 }
-
 
 ExtractorResult<::cpp2::TypeRemapped>
 Extractor<::cpp2::TypeRemapped>::operator()(PyObject* obj) {
-  int tCheckResult = typeCheck(obj);
-  if (tCheckResult != 1) {
-      if (tCheckResult == 0) {
-        PyErr_SetString(PyExc_TypeError, "Not a TypeRemapped");
-      }
-      return extractorError<::cpp2::TypeRemapped>(
-          "Marshal error: TypeRemapped");
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::TypeRemapped>(
+      "Module module import error");
   }
-  StrongRef fbThriftData(getThriftData(obj));
-  return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::TypeRemapped>>{}(*fbThriftData);
+  std::unique_ptr<folly::IOBuf> val(
+      extract__module__TypeRemapped(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::cpp2::TypeRemapped>(
+        "Thrift serialize error: TypeRemapped");
+  }
+  return detail::deserialize_iobuf<::cpp2::TypeRemapped>(std::move(val));
 }
+
 
 ExtractorResult<::cpp2::TypeRemapped>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::TypeRemapped>>::operator()(PyObject* fbThriftData) {
-  ::cpp2::TypeRemapped cpp;
-  std::optional<std::string_view> error;
-  Extractor<map<int64_t, Bytes>>{}.extractInto(
-      cpp.lsMap_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 0 + 1),
-      error);
-  Extractor<map<int32_t, map<int32_t, int64_t>>>{}.extractInto(
-      cpp.ioMap_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 1 + 1),
-      error);
-  Extractor<int32_t>{}.extractInto(
-      cpp.BigInteger_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 2 + 1),
-      error);
-  Extractor<Bytes>{}.extractInto(
-      cpp.binaryTestBuffer_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 3 + 1),
-      error);
-  if (error) {
-    return folly::makeUnexpected(*error);
+    ::cpp2::TypeRemapped>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::TypeRemapped>(
+      "Module module import error");
   }
-  return cpp;
+  auto obj = StrongRef(init__module__TypeRemapped(fbthrift_data));
+  if (!obj) {
+      return extractorError<::cpp2::TypeRemapped>(
+          "Init from fbthrift error: TypeRemapped");
+  }
+  return Extractor<::cpp2::TypeRemapped>{}(*obj);
 }
-
 
 int Extractor<::cpp2::TypeRemapped>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -1604,46 +808,24 @@ PyObject* Constructor<::cpp2::TypeRemapped>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::TypeRemapped>> ctor;
-  StrongRef fbthrift_data(ctor(val));
-  if (!fbthrift_data) {
-    return nullptr;
+  auto ptr = construct__module__TypeRemapped(
+      detail::serialize_to_iobuf(val));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
   }
-  return init__module__TypeRemapped(*fbthrift_data);
+  return ptr;
 }
+
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::TypeRemapped>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::TypeRemapped& val) {
-  StrongRef fbthrift_data(createStructTuple(4));
-  StrongRef _fbthrift__lsMap(
-    Constructor<map<int64_t, Bytes>>{}
-    .constructFrom(val.lsMap_ref()));
-  if (!_fbthrift__lsMap || setStructField(*fbthrift_data, 0, *_fbthrift__lsMap) == -1) {
+    const ::cpp2::TypeRemapped& val) {
+  auto obj = StrongRef(Constructor<::cpp2::TypeRemapped>{}(val));
+  if (!obj) {
     return nullptr;
   }
-  StrongRef _fbthrift__ioMap(
-    Constructor<map<int32_t, map<int32_t, int64_t>>>{}
-    .constructFrom(val.ioMap_ref()));
-  if (!_fbthrift__ioMap || setStructField(*fbthrift_data, 1, *_fbthrift__ioMap) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__BigInteger(
-    Constructor<int32_t>{}
-    .constructFrom(val.BigInteger_ref()));
-  if (!_fbthrift__BigInteger || setStructField(*fbthrift_data, 2, *_fbthrift__BigInteger) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__binaryTestBuffer(
-    Constructor<Bytes>{}
-    .constructFrom(val.binaryTestBuffer_ref()));
-  if (!_fbthrift__binaryTestBuffer || setStructField(*fbthrift_data, 3, *_fbthrift__binaryTestBuffer) == -1) {
-    return nullptr;
-  }
-  return std::move(fbthrift_data).release();
+  return getThriftData(*obj);
 }
-
 
 ExtractorResult<::cpp2::emptyXcep>
 Extractor<::cpp2::emptyXcep>::operator()(PyObject* obj) {
@@ -1707,38 +889,37 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 ExtractorResult<::cpp2::reqXcep>
 Extractor<::cpp2::reqXcep>::operator()(PyObject* obj) {
-  int tCheckResult = typeCheck(obj);
-  if (tCheckResult != 1) {
-      if (tCheckResult == 0) {
-        PyErr_SetString(PyExc_TypeError, "Not a reqXcep");
-      }
-      return extractorError<::cpp2::reqXcep>(
-          "Marshal error: reqXcep");
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::reqXcep>(
+      "Module module import error");
   }
-  StrongRef fbThriftData(getExceptionThriftData(obj));
-  return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::reqXcep>>{}(*fbThriftData);
+  std::unique_ptr<folly::IOBuf> val(
+      extract__module__reqXcep(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::cpp2::reqXcep>(
+        "Thrift serialize error: reqXcep");
+  }
+  return detail::deserialize_iobuf<::cpp2::reqXcep>(std::move(val));
 }
+
 
 ExtractorResult<::cpp2::reqXcep>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::reqXcep>>::operator()(PyObject* fbThriftData) {
-  ::cpp2::reqXcep cpp;
-  std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
-      cpp.message_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 0 + 1),
-      error);
-  Extractor<int32_t>{}.extractInto(
-      cpp.errorCode_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 1 + 1),
-      error);
-  if (error) {
-    return folly::makeUnexpected(*error);
+    ::cpp2::reqXcep>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::reqXcep>(
+      "Module module import error");
   }
-  return cpp;
+  auto obj = StrongRef(init__module__reqXcep(fbthrift_data));
+  if (!obj) {
+      return extractorError<::cpp2::reqXcep>(
+          "Init from fbthrift error: reqXcep");
+  }
+  return Extractor<::cpp2::reqXcep>{}(*obj);
 }
-
 
 int Extractor<::cpp2::reqXcep>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -1761,69 +942,58 @@ PyObject* Constructor<::cpp2::reqXcep>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::reqXcep>> ctor;
-  StrongRef fbthrift_data(ctor(val));
-  if (!fbthrift_data) {
-    return nullptr;
+  auto ptr = construct__module__reqXcep(
+      detail::serialize_to_iobuf(val));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
   }
-  return init__module__reqXcep(*fbthrift_data);
+  return ptr;
 }
+
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::reqXcep>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::reqXcep& val) {
-  StrongRef fbthrift_data(createStructTuple(2));
-  StrongRef _fbthrift__message(
-    Constructor<Bytes>{}
-    .constructFrom(val.message_ref()));
-  if (!_fbthrift__message || setStructField(*fbthrift_data, 0, *_fbthrift__message) == -1) {
+    const ::cpp2::reqXcep& val) {
+  auto obj = StrongRef(Constructor<::cpp2::reqXcep>{}(val));
+  if (!obj) {
     return nullptr;
   }
-  StrongRef _fbthrift__errorCode(
-    Constructor<int32_t>{}
-    .constructFrom(val.errorCode_ref()));
-  if (!_fbthrift__errorCode || setStructField(*fbthrift_data, 1, *_fbthrift__errorCode) == -1) {
-    return nullptr;
-  }
-  return std::move(fbthrift_data).release();
+  return getExceptionThriftData(*obj);
 }
-
 
 ExtractorResult<::cpp2::optXcep>
 Extractor<::cpp2::optXcep>::operator()(PyObject* obj) {
-  int tCheckResult = typeCheck(obj);
-  if (tCheckResult != 1) {
-      if (tCheckResult == 0) {
-        PyErr_SetString(PyExc_TypeError, "Not a optXcep");
-      }
-      return extractorError<::cpp2::optXcep>(
-          "Marshal error: optXcep");
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::optXcep>(
+      "Module module import error");
   }
-  StrongRef fbThriftData(getExceptionThriftData(obj));
-  return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::optXcep>>{}(*fbThriftData);
+  std::unique_ptr<folly::IOBuf> val(
+      extract__module__optXcep(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::cpp2::optXcep>(
+        "Thrift serialize error: optXcep");
+  }
+  return detail::deserialize_iobuf<::cpp2::optXcep>(std::move(val));
 }
+
 
 ExtractorResult<::cpp2::optXcep>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::optXcep>>::operator()(PyObject* fbThriftData) {
-  ::cpp2::optXcep cpp;
-  std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
-      cpp.message_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 0 + 1),
-      error);
-  Extractor<int32_t>{}.extractInto(
-      cpp.errorCode_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 1 + 1),
-      error);
-  if (error) {
-    return folly::makeUnexpected(*error);
+    ::cpp2::optXcep>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::optXcep>(
+      "Module module import error");
   }
-  return cpp;
+  auto obj = StrongRef(init__module__optXcep(fbthrift_data));
+  if (!obj) {
+      return extractorError<::cpp2::optXcep>(
+          "Init from fbthrift error: optXcep");
+  }
+  return Extractor<::cpp2::optXcep>{}(*obj);
 }
-
 
 int Extractor<::cpp2::optXcep>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -1846,85 +1016,58 @@ PyObject* Constructor<::cpp2::optXcep>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::optXcep>> ctor;
-  StrongRef fbthrift_data(ctor(val));
-  if (!fbthrift_data) {
-    return nullptr;
+  auto ptr = construct__module__optXcep(
+      detail::serialize_to_iobuf(val));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
   }
-  return init__module__optXcep(*fbthrift_data);
+  return ptr;
 }
+
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::optXcep>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::optXcep& val) {
-  StrongRef fbthrift_data(createStructTuple(2));
-  StrongRef _fbthrift__message(
-    Constructor<Bytes>{}
-    .constructFrom(val.message_ref()));
-  if (!_fbthrift__message || setStructField(*fbthrift_data, 0, *_fbthrift__message) == -1) {
+    const ::cpp2::optXcep& val) {
+  auto obj = StrongRef(Constructor<::cpp2::optXcep>{}(val));
+  if (!obj) {
     return nullptr;
   }
-  StrongRef _fbthrift__errorCode(
-    Constructor<int32_t>{}
-    .constructFrom(val.errorCode_ref()));
-  if (!_fbthrift__errorCode || setStructField(*fbthrift_data, 1, *_fbthrift__errorCode) == -1) {
-    return nullptr;
-  }
-  return std::move(fbthrift_data).release();
+  return getExceptionThriftData(*obj);
 }
-
 
 ExtractorResult<::cpp2::complexException>
 Extractor<::cpp2::complexException>::operator()(PyObject* obj) {
-  int tCheckResult = typeCheck(obj);
-  if (tCheckResult != 1) {
-      if (tCheckResult == 0) {
-        PyErr_SetString(PyExc_TypeError, "Not a complexException");
-      }
-      return extractorError<::cpp2::complexException>(
-          "Marshal error: complexException");
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::complexException>(
+      "Module module import error");
   }
-  StrongRef fbThriftData(getExceptionThriftData(obj));
-  return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::complexException>>{}(*fbThriftData);
+  std::unique_ptr<folly::IOBuf> val(
+      extract__module__complexException(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::cpp2::complexException>(
+        "Thrift serialize error: complexException");
+  }
+  return detail::deserialize_iobuf<::cpp2::complexException>(std::move(val));
 }
+
 
 ExtractorResult<::cpp2::complexException>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::complexException>>::operator()(PyObject* fbThriftData) {
-  ::cpp2::complexException cpp;
-  std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
-      cpp.message_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 0 + 1),
-      error);
-  Extractor<list<Bytes>>{}.extractInto(
-      cpp.listStrings_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 1 + 1),
-      error);
-  Extractor<::apache::thrift::python::capi::ComposedEnum<::cpp2::MyEnum>>{}.extractInto(
-      cpp.errorEnum_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 2 + 1),
-      error);
-  Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyUnion>>{}.extractInto(
-      cpp.unionError_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 3 + 1),
-      error);
-  Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>{}.extractInto(
-      cpp.structError_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 4 + 1),
-      error);
-  Extractor<map<int64_t, Bytes>>{}.extractInto(
-      cpp.lsMap_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 5 + 1),
-      error);
-  if (error) {
-    return folly::makeUnexpected(*error);
+    ::cpp2::complexException>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::complexException>(
+      "Module module import error");
   }
-  return cpp;
+  auto obj = StrongRef(init__module__complexException(fbthrift_data));
+  if (!obj) {
+      return extractorError<::cpp2::complexException>(
+          "Init from fbthrift error: complexException");
+  }
+  return Extractor<::cpp2::complexException>{}(*obj);
 }
-
 
 int Extractor<::cpp2::complexException>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -1947,58 +1090,24 @@ PyObject* Constructor<::cpp2::complexException>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::complexException>> ctor;
-  StrongRef fbthrift_data(ctor(val));
-  if (!fbthrift_data) {
-    return nullptr;
+  auto ptr = construct__module__complexException(
+      detail::serialize_to_iobuf(val));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
   }
-  return init__module__complexException(*fbthrift_data);
+  return ptr;
 }
+
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::complexException>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::complexException& val) {
-  StrongRef fbthrift_data(createStructTuple(6));
-  StrongRef _fbthrift__message(
-    Constructor<Bytes>{}
-    .constructFrom(val.message_ref()));
-  if (!_fbthrift__message || setStructField(*fbthrift_data, 0, *_fbthrift__message) == -1) {
+    const ::cpp2::complexException& val) {
+  auto obj = StrongRef(Constructor<::cpp2::complexException>{}(val));
+  if (!obj) {
     return nullptr;
   }
-  StrongRef _fbthrift__listStrings(
-    Constructor<list<Bytes>>{}
-    .constructFrom(val.listStrings_ref()));
-  if (!_fbthrift__listStrings || setStructField(*fbthrift_data, 1, *_fbthrift__listStrings) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__errorEnum(
-    Constructor<::apache::thrift::python::capi::ComposedEnum<::cpp2::MyEnum>>{}
-    .constructFrom(val.errorEnum_ref()));
-  if (!_fbthrift__errorEnum || setStructField(*fbthrift_data, 2, *_fbthrift__errorEnum) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__unionError(
-    Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyUnion>>{}
-    .constructFrom(val.unionError_ref()));
-  if (!_fbthrift__unionError || setStructField(*fbthrift_data, 3, *_fbthrift__unionError) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__structError(
-    Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>{}
-    .constructFrom(val.structError_ref()));
-  if (!_fbthrift__structError || setStructField(*fbthrift_data, 4, *_fbthrift__structError) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__lsMap(
-    Constructor<map<int64_t, Bytes>>{}
-    .constructFrom(val.lsMap_ref()));
-  if (!_fbthrift__lsMap || setStructField(*fbthrift_data, 5, *_fbthrift__lsMap) == -1) {
-    return nullptr;
-  }
-  return std::move(fbthrift_data).release();
+  return getExceptionThriftData(*obj);
 }
-
 
 ExtractorResult<::cpp2::MyEnum>
 Extractor<::cpp2::MyEnum>::operator()(PyObject* obj) {

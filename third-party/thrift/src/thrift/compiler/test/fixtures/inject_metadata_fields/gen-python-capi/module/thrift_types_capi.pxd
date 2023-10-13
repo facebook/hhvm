@@ -15,21 +15,33 @@ from folly.iobuf cimport cIOBuf as __cIOBuf
 
 cdef api int can_extract__module__Fields(object) except -1
 
+cdef api __cIOBuf* extract__module__Fields(object) except NULL
+
+cdef api object construct__module__Fields(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__Fields(object data)
 
 cdef api int can_extract__module__FieldsInjectedToEmptyStruct(object) except -1
 
+cdef api __cIOBuf* extract__module__FieldsInjectedToEmptyStruct(object) except NULL
+
+cdef api object construct__module__FieldsInjectedToEmptyStruct(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__FieldsInjectedToEmptyStruct(object data)
 
 cdef api int can_extract__module__FieldsInjectedToStruct(object) except -1
 
+cdef api __cIOBuf* extract__module__FieldsInjectedToStruct(object) except NULL
+
+cdef api object construct__module__FieldsInjectedToStruct(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__FieldsInjectedToStruct(object data)
 
 cdef api int can_extract__module__FieldsInjectedWithIncludedStruct(object) except -1
 
+cdef api __cIOBuf* extract__module__FieldsInjectedWithIncludedStruct(object) except NULL
+
+cdef api object construct__module__FieldsInjectedWithIncludedStruct(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__FieldsInjectedWithIncludedStruct(object data)
 

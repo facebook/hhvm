@@ -15,6 +15,9 @@ from folly.iobuf cimport cIOBuf as __cIOBuf
 
 cdef api int can_extract__module__MyStruct(object) except -1
 
+cdef api __cIOBuf* extract__module__MyStruct(object) except NULL
+
+cdef api object construct__module__MyStruct(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__MyStruct(object data)
 

@@ -344,7 +344,15 @@ class python_capi_mstch_program : public mstch_program {
   }
 
   bool check_has_marshal_types() {
-    return has_types() && !has_option("serialize_python_capi");
+    if (has_option("marshal_python_capi") && has_types()) {
+      return true;
+    }
+    for (const t_structured* s : program_->structured_definitions()) {
+      if (marshal_capi_override_annotation(*s)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   void gather_capi_includes() {
@@ -441,55 +449,11 @@ class python_capi_mstch_struct : public mstch_struct {
         });
   }
 
-  bool type_or_adapter_override(const t_type* type) {
-    return t_typedef::get_first_structured_annotation_or_null(
-               type, kCppTypeUri) ||
-        t_typedef::get_first_structured_annotation_or_null(
-               type, kCppAdapterUri) ||
-        t_typedef::get_first_annotation_or_null(
-               type,
-               {"cpp.type", "cpp2.type", "cpp.template", "cpp2.template"});
-  }
-
   mstch::node marshal_capi() {
-    if (struct_->generated() || has_option("serialize_python_capi")) {
-      return false;
-    }
-    if (has_option("marshal_python_capi") ||
-        marshal_capi_override_annotation(*struct_)) {
-      return true;
-    } else if (struct_->is_union()) {
-      // unions work opt-in
-      return false;
-    }
-    for (const auto& f : struct_->fields()) {
-      if (f.find_structured_annotation_or_null(kCppTypeUri) ||
-          f.find_structured_annotation_or_null(kCppAdapterUri)) {
-        return false;
-      }
-      const auto* type_ = f.get_type();
-      if (type_or_adapter_override(type_)) {
-        return false;
-      }
-      if (type_->is_list() &&
-          type_or_adapter_override(
-              dynamic_cast<const t_list*>(type_)->get_elem_type())) {
-        return false;
-      }
-      if (type_->is_set() &&
-          type_or_adapter_override(
-              dynamic_cast<const t_set*>(type_)->get_elem_type())) {
-        return false;
-      }
-      if (type_->is_map() &&
-          (type_or_adapter_override(
-               dynamic_cast<const t_map*>(type_)->get_key_type()) ||
-           type_or_adapter_override(
-               dynamic_cast<const t_map*>(type_)->get_val_type()))) {
-        return false;
-      }
-    }
-    return true;
+    return !struct_->generated() &&
+        (has_option("marshal_python_capi") ||
+         marshal_capi_override_annotation(*struct_) ||
+         struct_->fields().empty());
   }
 
   mstch::node cpp_adapter() {

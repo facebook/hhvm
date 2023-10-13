@@ -15,11 +15,17 @@ from folly.iobuf cimport cIOBuf as __cIOBuf
 
 cdef api int can_extract__test__fixtures__patch__module__MyData(object) except -1
 
+cdef api __cIOBuf* extract__test__fixtures__patch__module__MyData(object) except NULL
+
+cdef api object construct__test__fixtures__patch__module__MyData(__unique_ptr[__cIOBuf])
 
 cdef api object init__test__fixtures__patch__module__MyData(object data)
 
 cdef api int can_extract__test__fixtures__patch__module__MyDataWithCustomDefault(object) except -1
 
+cdef api __cIOBuf* extract__test__fixtures__patch__module__MyDataWithCustomDefault(object) except NULL
+
+cdef api object construct__test__fixtures__patch__module__MyDataWithCustomDefault(__unique_ptr[__cIOBuf])
 
 cdef api object init__test__fixtures__patch__module__MyDataWithCustomDefault(object data)
 
@@ -54,16 +60,25 @@ cdef api object init__test__fixtures__patch__module__LateDefStruct(object data)
 
 cdef api int can_extract__test__fixtures__patch__module__Recursive(object) except -1
 
+cdef api __cIOBuf* extract__test__fixtures__patch__module__Recursive(object) except NULL
+
+cdef api object construct__test__fixtures__patch__module__Recursive(__unique_ptr[__cIOBuf])
 
 cdef api object init__test__fixtures__patch__module__Recursive(object data)
 
 cdef api int can_extract__test__fixtures__patch__module__Bar(object) except -1
 
+cdef api __cIOBuf* extract__test__fixtures__patch__module__Bar(object) except NULL
+
+cdef api object construct__test__fixtures__patch__module__Bar(__unique_ptr[__cIOBuf])
 
 cdef api object init__test__fixtures__patch__module__Bar(object data)
 
 cdef api int can_extract__test__fixtures__patch__module__Loop(object) except -1
 
+cdef api __cIOBuf* extract__test__fixtures__patch__module__Loop(object) except NULL
+
+cdef api object construct__test__fixtures__patch__module__Loop(__unique_ptr[__cIOBuf])
 
 cdef api object init__test__fixtures__patch__module__Loop(object data)
 

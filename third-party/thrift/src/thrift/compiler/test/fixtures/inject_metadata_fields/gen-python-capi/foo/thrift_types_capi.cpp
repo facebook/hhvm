@@ -29,42 +29,37 @@ bool ensure_module_imported() {
 
 ExtractorResult<::cpp2::Fields>
 Extractor<::cpp2::Fields>::operator()(PyObject* obj) {
-  int tCheckResult = typeCheck(obj);
-  if (tCheckResult != 1) {
-      if (tCheckResult == 0) {
-        PyErr_SetString(PyExc_TypeError, "Not a Fields");
-      }
-      return extractorError<::cpp2::Fields>(
-          "Marshal error: Fields");
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::Fields>(
+      "Module foo import error");
   }
-  StrongRef fbThriftData(getThriftData(obj));
-  return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::Fields>>{}(*fbThriftData);
+  std::unique_ptr<folly::IOBuf> val(
+      extract__foo__Fields(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::cpp2::Fields>(
+        "Thrift serialize error: Fields");
+  }
+  return detail::deserialize_iobuf<::cpp2::Fields>(std::move(val));
 }
+
 
 ExtractorResult<::cpp2::Fields>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::Fields>>::operator()(PyObject* fbThriftData) {
-  ::cpp2::Fields cpp;
-  std::optional<std::string_view> error;
-  Extractor<Bytes>{}.extractInto(
-      cpp.injected_field_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 0 + 1),
-      error);
-  Extractor<Bytes>{}.extractInto(
-      cpp.injected_structured_annotation_field_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 1 + 1),
-      error);
-  Extractor<Bytes>{}.extractInto(
-      cpp.injected_unstructured_annotation_field_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 2 + 1),
-      error);
-  if (error) {
-    return folly::makeUnexpected(*error);
+    ::cpp2::Fields>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::cpp2::Fields>(
+      "Module foo import error");
   }
-  return cpp;
+  auto obj = StrongRef(init__foo__Fields(fbthrift_data));
+  if (!obj) {
+      return extractorError<::cpp2::Fields>(
+          "Init from fbthrift error: Fields");
+  }
+  return Extractor<::cpp2::Fields>{}(*obj);
 }
-
 
 int Extractor<::cpp2::Fields>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -87,40 +82,24 @@ PyObject* Constructor<::cpp2::Fields>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Fields>> ctor;
-  StrongRef fbthrift_data(ctor(val));
-  if (!fbthrift_data) {
-    return nullptr;
+  auto ptr = construct__foo__Fields(
+      detail::serialize_to_iobuf(val));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
   }
-  return init__foo__Fields(*fbthrift_data);
+  return ptr;
 }
+
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::Fields>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::cpp2::Fields& val) {
-  StrongRef fbthrift_data(createStructTuple(3));
-  StrongRef _fbthrift__injected_field(
-    Constructor<Bytes>{}
-    .constructFrom(val.injected_field_ref()));
-  if (!_fbthrift__injected_field || setStructField(*fbthrift_data, 0, *_fbthrift__injected_field) == -1) {
+    const ::cpp2::Fields& val) {
+  auto obj = StrongRef(Constructor<::cpp2::Fields>{}(val));
+  if (!obj) {
     return nullptr;
   }
-  StrongRef _fbthrift__injected_structured_annotation_field(
-    Constructor<Bytes>{}
-    .constructFrom(val.injected_structured_annotation_field_ref()));
-  if (!_fbthrift__injected_structured_annotation_field || setStructField(*fbthrift_data, 1, *_fbthrift__injected_structured_annotation_field) == -1) {
-    return nullptr;
-  }
-  StrongRef _fbthrift__injected_unstructured_annotation_field(
-    Constructor<Bytes>{}
-    .constructFrom(val.injected_unstructured_annotation_field_ref()));
-  if (!_fbthrift__injected_unstructured_annotation_field || setStructField(*fbthrift_data, 2, *_fbthrift__injected_unstructured_annotation_field) == -1) {
-    return nullptr;
-  }
-  return std::move(fbthrift_data).release();
+  return getThriftData(*obj);
 }
-
 
 } // namespace capi
 } // namespace python

@@ -22,6 +22,16 @@ import test.fixtures.patch.module.thrift_types as __thrift_types
 cdef api int can_extract__test__fixtures__patch__module__MyData(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyData) else 0
 
+cdef api __cIOBuf* extract__test__fixtures__patch__module__MyData(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__patch__module__MyData(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.MyData,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
 
 cdef api object init__test__fixtures__patch__module__MyData(object data):
     return __thrift_types.MyData._fbthrift_create(data)
@@ -29,6 +39,16 @@ cdef api object init__test__fixtures__patch__module__MyData(object data):
 cdef api int can_extract__test__fixtures__patch__module__MyDataWithCustomDefault(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyDataWithCustomDefault) else 0
 
+cdef api __cIOBuf* extract__test__fixtures__patch__module__MyDataWithCustomDefault(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__patch__module__MyDataWithCustomDefault(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.MyDataWithCustomDefault,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
 
 cdef api object init__test__fixtures__patch__module__MyDataWithCustomDefault(object data):
     return __thrift_types.MyDataWithCustomDefault._fbthrift_create(data)
@@ -94,6 +114,16 @@ cdef api object init__test__fixtures__patch__module__LateDefStruct(object data):
 cdef api int can_extract__test__fixtures__patch__module__Recursive(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.Recursive) else 0
 
+cdef api __cIOBuf* extract__test__fixtures__patch__module__Recursive(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__patch__module__Recursive(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.Recursive,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
 
 cdef api object init__test__fixtures__patch__module__Recursive(object data):
     return __thrift_types.Recursive._fbthrift_create(data)
@@ -101,6 +131,16 @@ cdef api object init__test__fixtures__patch__module__Recursive(object data):
 cdef api int can_extract__test__fixtures__patch__module__Bar(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.Bar) else 0
 
+cdef api __cIOBuf* extract__test__fixtures__patch__module__Bar(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__patch__module__Bar(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.Bar,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
 
 cdef api object init__test__fixtures__patch__module__Bar(object data):
     return __thrift_types.Bar._fbthrift_create(data)
@@ -108,6 +148,16 @@ cdef api object init__test__fixtures__patch__module__Bar(object data):
 cdef api int can_extract__test__fixtures__patch__module__Loop(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.Loop) else 0
 
+cdef api __cIOBuf* extract__test__fixtures__patch__module__Loop(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__test__fixtures__patch__module__Loop(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.Loop,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
 
 cdef api object init__test__fixtures__patch__module__Loop(object data):
     return __thrift_types.Loop._fbthrift_create(data)

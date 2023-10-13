@@ -29,34 +29,37 @@ bool ensure_module_imported() {
 
 ExtractorResult<::test::namespace_from_package_without_module_name::Foo>
 Extractor<::test::namespace_from_package_without_module_name::Foo>::operator()(PyObject* obj) {
-  int tCheckResult = typeCheck(obj);
-  if (tCheckResult != 1) {
-      if (tCheckResult == 0) {
-        PyErr_SetString(PyExc_TypeError, "Not a Foo");
-      }
-      return extractorError<::test::namespace_from_package_without_module_name::Foo>(
-          "Marshal error: Foo");
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::test::namespace_from_package_without_module_name::Foo>(
+      "Module test.namespace_from_package_without_module_name.module import error");
   }
-  StrongRef fbThriftData(getThriftData(obj));
-  return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::test::namespace_from_package_without_module_name::Foo>>{}(*fbThriftData);
+  std::unique_ptr<folly::IOBuf> val(
+      extract__test__namespace_from_package_without_module_name__module__Foo(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::test::namespace_from_package_without_module_name::Foo>(
+        "Thrift serialize error: Foo");
+  }
+  return detail::deserialize_iobuf<::test::namespace_from_package_without_module_name::Foo>(std::move(val));
 }
+
 
 ExtractorResult<::test::namespace_from_package_without_module_name::Foo>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::namespace_from_package_without_module_name::Foo>>::operator()(PyObject* fbThriftData) {
-  ::test::namespace_from_package_without_module_name::Foo cpp;
-  std::optional<std::string_view> error;
-  Extractor<int64_t>{}.extractInto(
-      cpp.MyInt_ref(),
-      PyTuple_GET_ITEM(fbThriftData, 0 + 1),
-      error);
-  if (error) {
-    return folly::makeUnexpected(*error);
+    ::test::namespace_from_package_without_module_name::Foo>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::test::namespace_from_package_without_module_name::Foo>(
+      "Module test.namespace_from_package_without_module_name.module import error");
   }
-  return cpp;
+  auto obj = StrongRef(init__test__namespace_from_package_without_module_name__module__Foo(fbthrift_data));
+  if (!obj) {
+      return extractorError<::test::namespace_from_package_without_module_name::Foo>(
+          "Init from fbthrift error: Foo");
+  }
+  return Extractor<::test::namespace_from_package_without_module_name::Foo>{}(*obj);
 }
-
 
 int Extractor<::test::namespace_from_package_without_module_name::Foo>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -79,28 +82,24 @@ PyObject* Constructor<::test::namespace_from_package_without_module_name::Foo>::
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::namespace_from_package_without_module_name::Foo>> ctor;
-  StrongRef fbthrift_data(ctor(val));
-  if (!fbthrift_data) {
-    return nullptr;
+  auto ptr = construct__test__namespace_from_package_without_module_name__module__Foo(
+      detail::serialize_to_iobuf(val));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
   }
-  return init__test__namespace_from_package_without_module_name__module__Foo(*fbthrift_data);
+  return ptr;
 }
+
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::namespace_from_package_without_module_name::Foo>>::operator()(
-    FOLLY_MAYBE_UNUSED const ::test::namespace_from_package_without_module_name::Foo& val) {
-  StrongRef fbthrift_data(createStructTuple(1));
-  StrongRef _fbthrift__MyInt(
-    Constructor<int64_t>{}
-    .constructFrom(val.MyInt_ref()));
-  if (!_fbthrift__MyInt || setStructField(*fbthrift_data, 0, *_fbthrift__MyInt) == -1) {
+    const ::test::namespace_from_package_without_module_name::Foo& val) {
+  auto obj = StrongRef(Constructor<::test::namespace_from_package_without_module_name::Foo>{}(val));
+  if (!obj) {
     return nullptr;
   }
-  return std::move(fbthrift_data).release();
+  return getThriftData(*obj);
 }
-
 
 } // namespace capi
 } // namespace python

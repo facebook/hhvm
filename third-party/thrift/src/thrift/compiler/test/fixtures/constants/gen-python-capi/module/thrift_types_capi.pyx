@@ -22,6 +22,16 @@ import module.thrift_types as __thrift_types
 cdef api int can_extract__module__Internship(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.Internship) else 0
 
+cdef api __cIOBuf* extract__module__Internship(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__module__Internship(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.Internship,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
 
 cdef api object init__module__Internship(object data):
     return __thrift_types.Internship._fbthrift_create(data)
@@ -29,6 +39,16 @@ cdef api object init__module__Internship(object data):
 cdef api int can_extract__module__Range(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.Range) else 0
 
+cdef api __cIOBuf* extract__module__Range(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__module__Range(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.Range,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
 
 cdef api object init__module__Range(object data):
     return __thrift_types.Range._fbthrift_create(data)
@@ -36,6 +56,16 @@ cdef api object init__module__Range(object data):
 cdef api int can_extract__module__struct1(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.struct1) else 0
 
+cdef api __cIOBuf* extract__module__struct1(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__module__struct1(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.struct1,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
 
 cdef api object init__module__struct1(object data):
     return __thrift_types.struct1._fbthrift_create(data)
@@ -43,6 +73,16 @@ cdef api object init__module__struct1(object data):
 cdef api int can_extract__module__struct2(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.struct2) else 0
 
+cdef api __cIOBuf* extract__module__struct2(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__module__struct2(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.struct2,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
 
 cdef api object init__module__struct2(object data):
     return __thrift_types.struct2._fbthrift_create(data)
@@ -50,6 +90,16 @@ cdef api object init__module__struct2(object data):
 cdef api int can_extract__module__struct3(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.struct3) else 0
 
+cdef api __cIOBuf* extract__module__struct3(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__module__struct3(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.struct3,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
 
 cdef api object init__module__struct3(object data):
     return __thrift_types.struct3._fbthrift_create(data)
@@ -57,6 +107,16 @@ cdef api object init__module__struct3(object data):
 cdef api int can_extract__module__struct4(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.struct4) else 0
 
+cdef api __cIOBuf* extract__module__struct4(object __obj) except NULL:
+    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
+    return __buf._ours.release()
+
+cdef api object construct__module__struct4(__unique_ptr[__cIOBuf] __s):
+    return __deserialize(
+        __thrift_types.struct4,
+        __IOBuf_from_unique_ptr(__move(__s)),
+        protocol=__Protocol.BINARY
+    )
 
 cdef api object init__module__struct4(object data):
     return __thrift_types.struct4._fbthrift_create(data)

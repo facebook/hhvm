@@ -61,6 +61,9 @@ RequestLoggingContext buildRequestLoggingContext(
     requestLoggingContext.clientId = *clientId;
   }
   requestLoggingContext.methodName = reqContext.getMethodName();
+  if (const auto* requestId = reqContext.getClientRequestId()) {
+    requestLoggingContext.requestId = *requestId;
+  }
 
   return requestLoggingContext;
 }

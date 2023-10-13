@@ -131,6 +131,8 @@ struct RequestLoggingContext {
   std::optional<ResponseRpcError> responseRpcError;
   std::string methodName;
   std::string clientId;
+  // request id passed from the client
+  std::string requestId;
 };
 
 class RequestEventHandler : public LoggingEventHandler {

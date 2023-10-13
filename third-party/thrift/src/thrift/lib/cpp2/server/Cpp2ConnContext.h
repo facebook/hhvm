@@ -698,6 +698,18 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
     return nullptr;
   }
 
+  const std::string* getClientRequestId() const {
+    if (auto* header = getHeader()) {
+      if (const auto& loggingContext = header->loggingContext()) {
+        if (const auto requestIdRef = loggingContext->requestId();
+            requestIdRef.has_value() && !requestIdRef->empty()) {
+          return &*requestIdRef;
+        }
+      }
+    }
+    return nullptr;
+  }
+
  protected:
   apache::thrift::server::TServerObserver::CallTimestamps timestamps_;
 

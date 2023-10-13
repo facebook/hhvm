@@ -49,7 +49,11 @@ class t_generator {
 
   bool add_gen_dir() const { return add_gen_dir_; }
 
-  // Called before generate_program to process options.
+  /**
+   * Called before generate_program to process options.
+   *
+   * @throws std::exception if the given options are invalid.
+   */
   virtual void process_options(const std::map<std::string, std::string>&) {}
 
   virtual void fill_validator_list(validator_list&) const {}
@@ -59,6 +63,8 @@ class t_generator {
   virtual void generate_program() = 0;
 
   const t_program* get_program() const { return program_; }
+
+  t_program* get_program() { return program_; }
 
   std::unordered_set<std::string> get_genfiles() { return generated_files_; }
 

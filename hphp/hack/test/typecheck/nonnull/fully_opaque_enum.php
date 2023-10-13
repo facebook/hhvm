@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 enum E: string {
   V1 = 'V1';

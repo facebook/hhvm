@@ -1,5 +1,5 @@
 //// file1.php
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 abstract class A {
@@ -17,7 +17,7 @@ function b(): B {
 }
 
 //// file2.php
-<?hh // strict
+<?hh
 
 function call<Ta, Tb>(
   Ta $x,

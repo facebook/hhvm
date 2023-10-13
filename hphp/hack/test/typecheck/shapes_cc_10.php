@@ -1,5 +1,5 @@
 //// def.php
-<?hh // strict
+<?hh
 
 newtype FooType = int;
 class X {
@@ -8,7 +8,7 @@ class X {
 }
 
 //// use.php
-<?hh // strict
+<?hh
 
 // Reject: type of keys is opaque
 type myshape = shape(X::X1 => int, X::X2 => bool);

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 namespace TestFormatter {
   use Some\Very\Long\Name\Space\{

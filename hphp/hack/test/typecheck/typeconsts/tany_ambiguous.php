@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 type ANY<T> = T;
 /* HH_FIXME[4101] trick to create Tany type */

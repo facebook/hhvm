@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 class A {
   public function __construct(?Vector<int> $values = null) {}

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function map(
   Map<int, string> $m,

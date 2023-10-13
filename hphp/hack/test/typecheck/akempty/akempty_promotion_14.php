@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 /**
  * Could be no-error, but the typechecker doesn't track copy-by-value semantics

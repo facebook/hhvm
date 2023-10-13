@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 type Tfun = (function(string, inout int): void);
 

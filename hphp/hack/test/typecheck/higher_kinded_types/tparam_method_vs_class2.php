@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class Test<TA<TB>> {
 

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 xhp class div extends XHPTest {}
 
 xhp class test:default_attributes extends XHPTest {

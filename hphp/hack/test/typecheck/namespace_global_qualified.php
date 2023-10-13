@@ -1,6 +1,6 @@
 //// N.php
 
-<?hh // strict
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -17,7 +17,7 @@ namespace N {
 
 //// test.php
 
-<?hh // strict
+<?hh
 
 function f(N\C $x): \N\C {
   return $x;

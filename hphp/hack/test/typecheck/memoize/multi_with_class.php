@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class Bar implements IMemoizeParam {
   public function getInstanceKey(): string {

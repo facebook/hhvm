@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 async function f(bool $b, Traversable<mixed> $vals): Awaitable<keyset<string>> {

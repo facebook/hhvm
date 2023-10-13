@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 namespace N1 {
   function foo(): void {}

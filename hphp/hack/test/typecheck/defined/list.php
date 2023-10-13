@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function f(): void {
   list($a, $b) = tuple(1, 2);

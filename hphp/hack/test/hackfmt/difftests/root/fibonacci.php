@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function fibonacci($pos){
   $arr = varray[0, 1];

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // constants are case sensitive.
 const int FOO = 4;

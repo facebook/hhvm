@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class Basic {
   <<__Policied("S")>>

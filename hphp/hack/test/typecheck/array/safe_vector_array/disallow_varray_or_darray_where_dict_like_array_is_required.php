@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function consumeArrayOfArraykeyToInt(darray<arraykey, int> $arg): void {}
 

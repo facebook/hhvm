@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class X {
   private static int $prop = 10;

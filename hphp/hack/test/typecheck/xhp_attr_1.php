@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 class :blah extends XHPTest {}
 class GenericClass<T> {}
 class SomeClass {

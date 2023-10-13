@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 /*
  * A parameter that is a shape with unknown fields should not be fulfilled by a

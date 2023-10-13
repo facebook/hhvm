@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function f(inout C $c): void {}
 

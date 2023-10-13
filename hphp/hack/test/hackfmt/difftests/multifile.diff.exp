@@ -1,5 +1,5 @@
 *** balanced_brackets.php
-<?hh // strict
+<?hh
 
 // https://rosettacode.org/wiki/Balanced_brackets#PHP
 
@@ -18,7 +18,7 @@ function isbalanced(string $s): bool {
   return ($bal == 0);
 }
 *** fibonacci.php
-<?hh // strict
+<?hh
 
 function fibonacci($pos){
   $arr = varray[0, 1];

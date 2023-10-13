@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function test(): bool {
   $s = shape('x' => 42, 'y' => 'foo');

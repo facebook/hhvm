@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class Cls {
   const Array_CLASS_CONST = varray[42, 'foo'];

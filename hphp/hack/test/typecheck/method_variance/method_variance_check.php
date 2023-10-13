@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function bar0<+T>(): void {}
 function bar1<-T>(): void {}

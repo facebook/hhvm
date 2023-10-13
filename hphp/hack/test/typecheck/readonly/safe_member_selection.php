@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 class Ref<T> {}
 final class MyFoo {
     public function __construct(public readonly Ref<mixed> $x) {}

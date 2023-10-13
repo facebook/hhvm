@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 final class A {
   private static int $a = 1;

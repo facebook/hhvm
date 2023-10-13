@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function f(?int $x): void {
   if ($x is nonnull) {

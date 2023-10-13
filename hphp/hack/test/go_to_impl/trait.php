@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 trait BaseTrait {
 
   public static function test(): string {

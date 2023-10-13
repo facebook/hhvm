@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class PublicData {
   <<__InferFlows>>

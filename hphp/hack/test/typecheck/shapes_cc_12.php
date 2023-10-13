@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 /*
  * Invalid declaration: shape key names may not be empty.

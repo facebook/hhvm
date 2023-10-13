@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function testString(dynamic $x): void {
   $y = $x."hello"; // $y : string

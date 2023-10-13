@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function takes_float(float $f): void { }
 

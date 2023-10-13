@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function consumeKeyedTraversable(KeyedTraversable<arraykey, num> $arg): void {}
 function consumeKeyedContainer(KeyedContainer<arraykey, num> $arg): void {}

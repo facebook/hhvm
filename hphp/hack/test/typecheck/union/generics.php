@@ -1,5 +1,5 @@
 //// file1.php
-<?hh // strict
+<?hh
 
 newtype E<T> = mixed;
 
@@ -8,7 +8,7 @@ newtype F<+T> = mixed;
 
 
 //// file2.php
-<?hh // strict
+<?hh
 
 abstract class AA<T> {
   abstract const type Tabs;

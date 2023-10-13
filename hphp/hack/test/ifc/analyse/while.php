@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 <<__InferFlows>>
 function simple(bool $b, string $s1, string $s2): arraykey {

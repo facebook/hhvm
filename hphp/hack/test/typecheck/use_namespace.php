@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 namespace herp {
   class derp {}

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function test(Pair<int, int> $x): void {
   if ($x) {

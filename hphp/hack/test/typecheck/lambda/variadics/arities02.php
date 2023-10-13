@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function expect_fn((function(int, string, string, int...): int) $f): void {
   $f(1, "hello", "world");

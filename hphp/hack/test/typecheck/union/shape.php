@@ -1,11 +1,11 @@
 //// file1.php
-<?hh // strict
+<?hh
 
 class C<T> {}
 newtype B = C<mixed>;
 
 //// file2.php
-<?hh // strict
+<?hh
 
 class A {}
 

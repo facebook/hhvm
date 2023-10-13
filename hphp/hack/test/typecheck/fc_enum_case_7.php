@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 enum Bar: int {
   FOO = 1;

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function test_compare(DateTimeImmutable $d): bool {
   $new_datetime = new DateTimeImmutable();

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 async function bar(): Awaitable<int> {
   return 42;

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class Baz {
   public int $prop = 0;

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function foo(): string {
   $x = 5 + 1.2;

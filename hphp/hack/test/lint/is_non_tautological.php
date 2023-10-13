@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 abstract class A {
   public function a(): void {}

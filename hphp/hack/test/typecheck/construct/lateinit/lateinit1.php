@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 final class C1 {
   <<__LateInit>>

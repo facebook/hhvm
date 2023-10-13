@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 <<__Whatever>>
 class C {}

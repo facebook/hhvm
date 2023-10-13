@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 function global_test_method(): int {
   return 1;

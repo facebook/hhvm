@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 namespace X {
   use Foo\Bar\Baz\{CL, function f1, const     CN, CL2};
 

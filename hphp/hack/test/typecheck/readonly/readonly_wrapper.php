@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 final class Readonly<T> {
     public function __construct(public readonly T $value)[] {}
 

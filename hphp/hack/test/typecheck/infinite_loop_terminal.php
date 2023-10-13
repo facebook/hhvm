@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function f(bool $b): int {
   while (true) {

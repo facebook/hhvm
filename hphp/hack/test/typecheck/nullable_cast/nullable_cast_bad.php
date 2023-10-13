@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function test_bad(): void {
   $foo = null;

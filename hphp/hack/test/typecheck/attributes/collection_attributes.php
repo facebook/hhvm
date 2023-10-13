@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class A implements HH\ClassAttribute {
   public function __construct(mixed $x) {}

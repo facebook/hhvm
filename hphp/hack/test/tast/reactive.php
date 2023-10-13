@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 <<__Rx>>
 
 function foo() : Pure<(function (int) : void)> {

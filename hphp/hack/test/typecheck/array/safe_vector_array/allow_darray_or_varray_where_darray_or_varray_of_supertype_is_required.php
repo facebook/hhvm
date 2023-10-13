@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function consumeDarrayOrVarrayOfNum(varray_or_darray<num> $arg): void {}
 

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // Nonexisting field in intersection of ad-hoc shapes
 

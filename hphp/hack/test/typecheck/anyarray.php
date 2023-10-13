@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 function takes_array(AnyArray<int, int> $_): void {}
 function takes_container(Container<int> $_): void {}

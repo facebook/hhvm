@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 class A {
 
   private function get(): int {

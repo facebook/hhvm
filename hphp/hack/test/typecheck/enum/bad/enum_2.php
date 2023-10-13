@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 abstract class Enum {
   abstract const type TInner;

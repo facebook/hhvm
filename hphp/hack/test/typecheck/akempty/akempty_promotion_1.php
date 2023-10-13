@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 /**
  * Test if the inner value type of AKvarray is correctly inferred

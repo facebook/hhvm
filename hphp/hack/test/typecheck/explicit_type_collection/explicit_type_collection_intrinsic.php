@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function f(): void {
   $a = vec<int>[0, 1, 2];

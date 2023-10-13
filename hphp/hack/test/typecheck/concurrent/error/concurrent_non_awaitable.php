@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function get(): int { return 42; }
 async function gen(): Awaitable<int> { return 42; }

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 newtype Foo<T> as string = string;
 

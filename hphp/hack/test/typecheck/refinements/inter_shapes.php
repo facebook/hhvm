@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 type A = shape(?'a' => int, ?'b' => int, 'c' => int);

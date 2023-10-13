@@ -4,7 +4,7 @@
   function returnsAny() { return 5; }
 
 ////file2.php
-<?hh// strict
+<?hh
 
   // ADDITION
 function doAddIntAny(int $x): void {

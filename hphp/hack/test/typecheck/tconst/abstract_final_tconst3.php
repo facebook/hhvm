@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 abstract class Foo {
   const type T = int;

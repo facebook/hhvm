@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 enum E:int as int {}
 

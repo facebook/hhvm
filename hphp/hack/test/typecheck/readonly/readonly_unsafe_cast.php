@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 class Foo {
   public int $prop = 44;
 }

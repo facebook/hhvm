@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class A {
   public static async function foo(int $x, int $y): Awaitable<int> {

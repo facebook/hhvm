@@ -1,2 +1,2 @@
-<?hh // strict
+<?hh
 echo(include('baz.php'));

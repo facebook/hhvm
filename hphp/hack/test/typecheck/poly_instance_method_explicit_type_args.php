@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class Foo {
   public function bar<T1>(T1 $x): T1 {

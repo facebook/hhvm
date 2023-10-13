@@ -1,11 +1,11 @@
 //// def.php
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 newtype N as nothing = nothing;
 
 //// use.php
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class Inv<T> {}

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 namespace A\B {
   class X implements \HH\FunctionAttribute {

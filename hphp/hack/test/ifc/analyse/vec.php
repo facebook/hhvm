@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 <<__InferFlows>>
 function empty(): vec<int> {

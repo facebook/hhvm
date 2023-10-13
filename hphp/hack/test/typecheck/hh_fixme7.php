@@ -1,9 +1,9 @@
 //// newtype.php
-<?hh // strict
+<?hh
 newtype FBID = int;
 
 //// usage.php
-<?hh // strict
+<?hh
 
 class C {
   /* HH_FIXME[4338] */ const FBID mark = 4;

@@ -1,10 +1,10 @@
 ////file1.php
-<?hh // strict
+<?hh
 
 newtype MyFloat as float = float;
 
 ////file2.php
-<?hh // strict
+<?hh
   function MyDiv(MyFloat $x, MyFloat $y): float {
     return $x / $y;
     }

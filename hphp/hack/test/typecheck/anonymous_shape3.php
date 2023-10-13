@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 /**
  * Anonymous shape parameter type hint

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 <<__InferFlows>>
 function binop(int $x, int $y): int {

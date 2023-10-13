@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class C<T> {
   const type TC1 = this;

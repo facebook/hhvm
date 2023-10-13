@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function f(bool $option): void {
   $x = $option ? return_int() : return_nstring();

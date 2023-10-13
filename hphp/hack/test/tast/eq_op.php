@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function f(int $x): int {
   $x -= 4;

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class X {
   <<__Deprecated('use bar() instead')>>

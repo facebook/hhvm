@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // With respect to the implicitly constructed lattice:
 //

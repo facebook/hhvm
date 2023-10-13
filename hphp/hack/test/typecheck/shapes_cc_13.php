@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 /* Invalid construction: shape field names may not be empty */
 

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class Both<Ta, reify Tb> {}
 

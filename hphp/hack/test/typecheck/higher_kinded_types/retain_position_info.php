@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // This is a regression test to ensure that when we add a bound to a type
 // parameter, we don't accidentally delete the information about where it was

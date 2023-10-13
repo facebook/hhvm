@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class C {
   <<__LSB>> private static int $id = 0;

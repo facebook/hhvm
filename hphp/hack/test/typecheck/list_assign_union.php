@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function f(vec<int> $a, (string, bool) $b, bool $x): void {

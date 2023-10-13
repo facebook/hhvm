@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function concrete(TypeStructure<(arraykey, ?num)> $ts): void {
   hh_show($ts['kind']);

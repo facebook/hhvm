@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // These should typecheck fine.
 function good_equality(

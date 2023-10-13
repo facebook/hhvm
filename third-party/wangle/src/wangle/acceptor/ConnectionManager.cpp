@@ -350,7 +350,7 @@ void ConnectionManager::dropConnections(double pct) {
 void ConnectionManager::dropEstablishedConnections(
     double pct,
     const std::function<bool(ManagedConnection*)>& filter) {
-  const size_t N = conns_.size();
+  const size_t N = getNumActiveConnections();
   auto front = conns_.iterator_to(conns_.front());
   if (idleIterator_ == front || N == 0) {
     return;

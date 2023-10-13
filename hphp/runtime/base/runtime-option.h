@@ -403,6 +403,7 @@ struct RuntimeOption {
   static int ServerThreadJobLIFOSwitchThreshold;
   static int ServerThreadJobMaxQueuingMilliSeconds;
   static bool AlwaysDecodePostDataDefault;
+  static bool SetChunkedTransferEncoding;
   static bool ServerThreadDropStack;
   static bool ServerHttpSafeMode;
   static bool ServerFixPathInfo;

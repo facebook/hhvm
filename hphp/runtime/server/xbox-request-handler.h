@@ -20,6 +20,7 @@
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/request-id.h"
 
 namespace HPHP {
 
@@ -56,7 +57,7 @@ private:
   time_t m_lastReset;
   Optional<CLIContext> m_cli;
 
-  void initState();
+  void initState(RequestId requestId);
 
   bool executePHPFunction(Transport *transport);
 

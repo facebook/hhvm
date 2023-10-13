@@ -22,6 +22,7 @@
 #include "hphp/util/rds-local.h"
 
 #include "hphp/runtime/base/code-coverage.h"
+#include "hphp/runtime/base/request-id.h"
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/surprise-flags.h"
 
@@ -89,9 +90,9 @@ struct RequestInfo {
    * might try to access RequestInfo::s_requestInfo here instead of in the
    * constructor.
    */
-  void init();
+  void threadInit();
 
-  void onSessionInit();
+  void onSessionInit(RequestId id);
   void onSessionExit();
 
   /*
@@ -119,6 +120,9 @@ struct RequestInfo {
   ~RequestInfo();
 
   ////////////////////////////////////////////////////////////////////
+
+  /* Unique request ID */
+  RequestId m_id;
 
   RequestInjectionData m_reqInjectionData;
 

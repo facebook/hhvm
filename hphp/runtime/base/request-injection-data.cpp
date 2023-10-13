@@ -385,6 +385,9 @@ void RequestInjectionData::threadInit() {
       "zstd.window_log",
       std::to_string(RuntimeOption::ZstdWindowLog).c_str(),
       &m_zstdWindowLog);
+
+  // TODO(20427335): Get rid of this illogical onSessionInit() call.
+  onSessionInit();
 }
 
 std::string RequestInjectionData::getDefaultIncludePath() {

@@ -60,7 +60,7 @@ const int64_t ONE_SEC_IN_MICROSEC = 1000000;
 struct TreadmillRequestInfo {
   GenCount  startTime;
   pthread_t pthreadId;
-  int64_t requestId;
+  RequestInfo* requestInfo;
   SessionKind sessionKind;
 };
 
@@ -190,7 +190,7 @@ void checkOldest(Optional<GenCountGuard>& guard) {
   auto const msg = folly::sformat(
     "Oldest request ({}, {}, {}) has been running for {} "
     "seconds. Aborting the server.",
-    request.requestId,
+    request.requestInfo ? request.requestInfo->m_id.toString() : "none",
     request.startTime,
     getSessionKindName(request.sessionKind),
     ageOldest
@@ -252,7 +252,8 @@ void startRequest(SessionKind session_kind) {
     }
     s_inflightRequests[requestIdx].startTime = correctTime(startTime);
     s_inflightRequests[requestIdx].pthreadId = Process::GetThreadId();
-    s_inflightRequests[requestIdx].requestId = Logger::GetRequestId();
+    s_inflightRequests[requestIdx].requestInfo =
+      RequestInfo::s_requestInfo.isNull() ? nullptr : &RI();
     s_inflightRequests[requestIdx].sessionKind = session_kind;
     FTRACE(1, "requestIdx {} pthreadId {} start @gen {}\n", requestIdx,
            s_inflightRequests[requestIdx].pthreadId,
@@ -419,7 +420,7 @@ std::string dumpTreadmillInfo(bool forCrash) {
           &out,
           "{} {} {} {}{}\n",
           req.pthreadId,
-          req.requestId,
+          req.requestInfo ? req.requestInfo->m_id.toString() : "none",
           req.startTime,
           getSessionKindName(req.sessionKind),
           req.startTime == oldestStart ? " OLDEST" : ""

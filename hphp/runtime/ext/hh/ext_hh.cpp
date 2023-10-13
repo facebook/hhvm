@@ -1457,7 +1457,7 @@ TypedValue HHVM_FUNCTION(get_executable_lines, StringArg path) {
 }
 
 int64_t HHVM_FUNCTION(hphp_get_logger_request_id) {
-  return Logger::GetRequestId();
+  return RI().m_id.id();
 }
 
 void HHVM_FUNCTION(enable_function_coverage) {

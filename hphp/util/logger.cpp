@@ -135,21 +135,10 @@ void Logger::Log(LogLevelType level, const char* type, const Exception& e,
   LogImpl(level, msg, nullptr);
 }
 
-void Logger::OnNewRequest() {
+void Logger::OnNewRequest(int64_t requestId) {
   ThreadData *threadData = s_threadData.get();
-  ++threadData->request;
+  threadData->requestId = requestId;
   threadData->message = 0;
-}
-
-void Logger::ResetRequestCount() {
-  ThreadData *threadData = s_threadData.get();
-  threadData->request = 0;
-  threadData->message = 0;
-}
-
-int64_t Logger::GetRequestId() {
-  ThreadData *threadData = s_threadData.get();
-  return threadData->request;
 }
 
 void Logger::LogImpl(LogLevelType level, const std::string &msg,
@@ -286,11 +275,11 @@ std::string Logger::GetHeader() {
 
   char header[128];
   ThreadData *threadData = s_threadData.get();
-  snprintf(header, sizeof(header), "[%s] [hphp] [%lld:%llx:%d:%06d%s] ",
+  snprintf(header, sizeof(header), "[%s] [hphp] [%lld:%llx:%lld:%06d%s] ",
            snow,
            (unsigned long long)s_pid,
            (unsigned long long)Process::GetThreadId(),
-           threadData->request,
+           (long long)threadData->requestId,
            (threadData->message == -1 ? 0 : threadData->message),
            ExtraHeader.c_str());
   return header;

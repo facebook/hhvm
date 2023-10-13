@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "hphp/runtime/base/request-id.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/util/optional.h"
@@ -87,7 +88,8 @@ void cli_client_init();
 void cli_client_thread_init();
 void cli_client_thread_exit();
 void hphp_session_init(Treadmill::SessionKind session_kind,
-                       Transport* transport = nullptr);
+                       Transport* transport = nullptr,
+                       RequestId id = RequestId());
 
 void invoke_prelude_script(
      const char* currentDir,

@@ -111,8 +111,7 @@ struct Logger {
 
   static void Log(LogLevelType level, const char* type, const Exception& e,
                   const char* file = nullptr, int line = 0);
-  static void OnNewRequest();
-  static void ResetRequestCount();
+  static void OnNewRequest(int64_t requestId);
 
   static bool SetThreadLog(const char *file, bool threadOnly);
   static void ClearThreadLog();
@@ -137,7 +136,6 @@ struct Logger {
   static void FlushAll();
   static void SetBatchSize(size_t bsize);
   static void SetFlushTimeout(std::chrono::milliseconds timeoutMs);
-  static int64_t GetRequestId();
 
   virtual FILE* fileForStackTrace() { return output(); }
 
@@ -151,7 +149,7 @@ struct Logger {
 
 protected:
   struct ThreadData {
-    int request{0};
+    int64_t requestId{0};
     int message{0};
     LogFileFlusher flusher;
     FILE *log{nullptr};

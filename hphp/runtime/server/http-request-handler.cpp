@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/request-id.h"
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/debugger/debugger.h"
@@ -235,7 +236,8 @@ void HttpRequestHandler::teardownRequest(Transport* transport) noexcept {
 void HttpRequestHandler::handleRequest(Transport *transport) {
   ExecutionProfiler ep(RequestInfo::RuntimeFunctions);
 
-  Logger::OnNewRequest();
+  auto const requestId = RequestId::allocate();
+  Logger::OnNewRequest(requestId.id());
   transport->enableCompression();
 
   ServerStatsHelper ssh("all",
@@ -359,7 +361,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
   std::string tmpfile = HttpProtocol::RecordRequest(transport);
 
   // main body
-  hphp_session_init(Treadmill::SessionKind::HttpRequest, transport);
+  hphp_session_init(Treadmill::SessionKind::HttpRequest, transport, requestId);
   RequestInfo::s_requestInfo->m_reqInjectionData.
     setTimeout(requestTimeoutSeconds);
 

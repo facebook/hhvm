@@ -70,11 +70,10 @@ RequestInfo::~RequestInfo() {
   s_request_infos.erase(this);
 }
 
-void RequestInfo::init() {
+void RequestInfo::threadInit() {
   s_stackLimitWithSlack = s_stackLimit + StackSlack;
+  assertx(m_id.unallocated());
   m_reqInjectionData.threadInit();
-  onSessionInit();
-  // TODO(20427335): Get rid of the illogical onSessionInit() call above.
   Lock lock(s_request_info_mutex);
   s_request_infos.insert(this);
 }
@@ -137,7 +136,10 @@ void RequestInfo::InvokeOOMKiller(int maxToKill) {
   OOMKillerInvokeCounter->addValue(1);
 }
 
-void RequestInfo::onSessionInit() {
+void RequestInfo::onSessionInit(RequestId id) {
+  assertx(!id.unallocated());
+  assertx(m_id.unallocated());
+  m_id = id;
   m_reqInjectionData.onSessionInit();
   m_coverage.onSessionInit();
 }
@@ -155,6 +157,9 @@ void RequestInfo::setPendingException(Exception* e) {
 }
 
 void RequestInfo::onSessionExit() {
+  assertx(!m_id.unallocated());
+  m_id = RequestId();
+
   // Clear any timeout handlers to they don't fire when the request has already
   // been destroyed.
   m_reqInjectionData.setTimeout(0);

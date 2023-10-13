@@ -41,6 +41,7 @@
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/recorder.h"
 #include "hphp/runtime/base/replayer.h"
+#include "hphp/runtime/base/request-id.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stat-cache.h"
@@ -2333,7 +2334,7 @@ void hphp_thread_init(bool skipExtensions /* = false */) {
   tl_heap.getCheck()->init();
 
   assertx(RequestInfo::s_requestInfo.isNull());
-  RequestInfo::s_requestInfo.getCheck()->init();
+  RequestInfo::s_requestInfo.getCheck()->threadInit();
 
   HardwareCounter::s_counter.getCheck();
   if (!skipExtensions) ExtensionRegistry::threadInit();
@@ -2368,14 +2369,14 @@ void cli_client_init() {
   zend_rand_init();
   get_server_note();
   assertx(RequestInfo::s_requestInfo.isNull());
-  RequestInfo::s_requestInfo.getCheck()->init();
+  RequestInfo::s_requestInfo.getCheck()->threadInit();
   HardwareCounter::s_counter.getCheck();
   InitFiniNode::ThreadInit();
   hphp_memory_cleanup();
   g_context.getCheck();
   AsioSession::Init();
   Socket::clearLastError();
-  RI().onSessionInit();
+  RI().onSessionInit(RequestId::allocate());
   tl_heap->resetExternalStats();
   g_thread_safe_locale_handler->reset();
   Treadmill::startRequest(Treadmill::SessionKind::CLIServer);
@@ -2387,7 +2388,7 @@ void cli_client_thread_init() {
   g_context.getCheck();
   AsioSession::Init();
   Socket::clearLastError();
-  RI().onSessionInit();
+  RI().onSessionInit(RequestId::allocate());
   tl_heap->resetExternalStats();
   g_thread_safe_locale_handler->reset();
   Treadmill::startRequest(Treadmill::SessionKind::CLIServer);
@@ -2749,13 +2750,15 @@ static bool hphp_warmup(ExecutionContext *context,
 }
 
 void hphp_session_init(Treadmill::SessionKind session_kind,
-                       Transport* transport) {
+                       Transport* transport,
+                       RequestId id) {
+  if (id.unallocated()) id = RequestId::allocate();
   assertx(!*s_sessionInitialized);
   MemoryManager::requestInit();
   g_context.getCheck();
   AsioSession::Init();
   Socket::clearLastError();
-  RI().onSessionInit();
+  RI().onSessionInit(id);
   tl_heap->resetExternalStats();
   unitCacheClearSync();
 

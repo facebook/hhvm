@@ -60,8 +60,8 @@ XboxRequestHandler::~XboxRequestHandler() {
   assertx(!vmStack().isAllocated());
 }
 
-void XboxRequestHandler::initState() {
-  hphp_session_init(Treadmill::SessionKind::RpcRequest);
+void XboxRequestHandler::initState(RequestId requestId) {
+  hphp_session_init(Treadmill::SessionKind::RpcRequest, nullptr, requestId);
   m_context = g_context.getNoCheck();
   if (!is_any_cli_mode()) {
     m_context->obStart(uninit_null(),
@@ -79,7 +79,6 @@ void XboxRequestHandler::initState() {
   }
   m_lastReset = time(0);
 
-  Logger::ResetRequestCount();
   if (m_logResets) {
     Logger::Info("initializing Xbox request handler");
   }
@@ -97,11 +96,12 @@ void XboxRequestHandler::teardownRequest(Transport*) noexcept {
 }
 
 void XboxRequestHandler::handleRequest(Transport *transport) {
-  initState();
+  auto const requestId = RequestId::allocate();
+  initState(requestId);
 
   ExecutionProfiler ep(RequestInfo::RuntimeFunctions);
 
-  Logger::OnNewRequest();
+  Logger::OnNewRequest(requestId.id());
   GetAccessLog().onNewRequest();
   m_context->setTransport(transport);
   transport->enableCompression();

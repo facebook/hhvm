@@ -205,6 +205,7 @@ typing_defs_core::ValKind
 typing_defs_core::XhpAttr
 typing_defs_flags::class_elt::ClassElt
 typing_defs_flags::fun::Fun
+typing_defs_flags::fun_param::FunParam
 typing_defs_flags::FunParamFlags
 typing_defs_flags::FunTypeFlags
 typing_defs::CeVisibility

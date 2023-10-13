@@ -229,7 +229,7 @@ type 'ty fun_param = {
   fp_pos: Pos_or_decl.t; [@hash.ignore] [@equal (fun _ _ -> true)]
   fp_name: string option;
   fp_type: 'ty possibly_enforced_ty;
-  fp_flags: Typing_defs_flags.fun_param_flags;
+  fp_flags: Typing_defs_flags.FunParam.t;
 }
 [@@deriving eq, hash]
 
@@ -510,16 +510,11 @@ module Flags = struct
 
   let get_ft_fun_kind ft = Fun.fun_kind ft.ft_flags
 
-  let get_fp_ifc_external fp = is_set fp.fp_flags fp_flags_ifc_external
+  let get_fp_ifc_external fp = FunParam.ifc_external fp.fp_flags
 
-  let get_fp_ifc_can_call fp = is_set fp.fp_flags fp_flags_ifc_can_call
+  let get_fp_ifc_can_call fp = FunParam.ifc_can_call fp.fp_flags
 
-  let get_fp_readonly fp = is_set fp.fp_flags fp_flags_readonly
-
-  let mode_to_flags mode =
-    match mode with
-    | FPnormal -> 0x0
-    | FPinout -> fp_flags_inout
+  let get_fp_readonly fp = FunParam.readonly fp.fp_flags
 
   let make_fp_flags
       ~mode
@@ -528,21 +523,25 @@ module Flags = struct
       ~ifc_external
       ~ifc_can_call
       ~readonly =
-    let flags = mode_to_flags mode in
-    let flags = set_bit fp_flags_accept_disposable accept_disposable flags in
-    let flags = set_bit fp_flags_has_default has_default flags in
-    let flags = set_bit fp_flags_ifc_external ifc_external flags in
-    let flags = set_bit fp_flags_ifc_can_call ifc_can_call flags in
-    let flags = set_bit fp_flags_readonly readonly flags in
-    flags
+    let inout =
+      match mode with
+      | FPinout -> true
+      | FPnormal -> false
+    in
+    FunParam.make
+      ~inout
+      ~accept_disposable
+      ~has_default
+      ~ifc_external
+      ~ifc_can_call
+      ~readonly
 
-  let get_fp_accept_disposable fp =
-    is_set fp.fp_flags fp_flags_accept_disposable
+  let get_fp_accept_disposable fp = FunParam.accept_disposable fp.fp_flags
 
-  let get_fp_has_default fp = is_set fp.fp_flags fp_flags_has_default
+  let get_fp_has_default fp = FunParam.has_default fp.fp_flags
 
   let get_fp_mode fp =
-    if is_set fp.fp_flags fp_flags_inout then
+    if FunParam.inout fp.fp_flags then
       FPinout
     else
       FPnormal
@@ -1352,7 +1351,7 @@ and ft_param_compare :
   match
     possibly_enforced_ty_compare ~normalize_lists param1.fp_type param2.fp_type
   with
-  | 0 -> Int.compare param1.fp_flags param2.fp_flags
+  | 0 -> Typing_defs_flags.FunParam.compare param1.fp_flags param2.fp_flags
   | n -> n
 
 and ft_params_compare :

@@ -9,7 +9,7 @@
 
 open Hh_prelude
 
-type flags = int
+type flags = int [@@deriving eq, hash, ord]
 
 type bit_mask = int
 
@@ -23,6 +23,8 @@ let set_bit bit value flags =
     Int.bit_or bit flags
   else
     Int.bit_and (Int.bit_not bit) flags
+
+(* NB: Keep the values of these flags in sync with typing_defs_flags.rs. *)
 
 module Fun : sig
   type t [@@deriving eq, hash, ord, show]
@@ -81,7 +83,7 @@ module Fun : sig
 
   val default : t
 end = struct
-  type t = int [@@deriving eq, hash, ord]
+  type t = flags [@@deriving eq, hash, ord]
 
   type record = {
     return_disposable: bool;
@@ -210,7 +212,95 @@ end = struct
   let show t = Format.asprintf "%a" pp t
 end
 
-type fun_param_flags = int [@@deriving eq, hash]
+module FunParam : sig
+  type t [@@deriving eq, hash, ord]
+
+  val accept_disposable : t -> bool
+
+  val inout : t -> bool
+
+  val has_default : t -> bool
+
+  val ifc_external : t -> bool
+
+  val ifc_can_call : t -> bool
+
+  val readonly : t -> bool
+
+  val set_accept_disposable : bool -> t -> t
+
+  val set_inout : bool -> t -> t
+
+  val set_has_default : bool -> t -> t
+
+  val set_ifc_external : bool -> t -> t
+
+  val set_ifc_can_call : bool -> t -> t
+
+  val set_readonly : bool -> t -> t
+
+  val make :
+    inout:bool ->
+    accept_disposable:bool ->
+    has_default:bool ->
+    ifc_external:bool ->
+    ifc_can_call:bool ->
+    readonly:bool ->
+    t
+end = struct
+  type t = flags [@@deriving eq, hash, ord]
+
+  let accept_disposable_mask = 1 lsl 0
+
+  let inout_mask = 1 lsl 1
+
+  let has_default_mask = 1 lsl 2
+
+  let ifc_external_mask = 1 lsl 3
+
+  let ifc_can_call_mask = 1 lsl 4
+
+  let readonly_mask = 1 lsl 8
+
+  let accept_disposable = is_set accept_disposable_mask
+
+  let inout = is_set inout_mask
+
+  let has_default = is_set has_default_mask
+
+  let ifc_external = is_set ifc_external_mask
+
+  let ifc_can_call = is_set ifc_can_call_mask
+
+  let readonly = is_set readonly_mask
+
+  let set_accept_disposable = set_bit accept_disposable_mask
+
+  let set_inout = set_bit inout_mask
+
+  let set_has_default = set_bit has_default_mask
+
+  let set_ifc_external = set_bit ifc_external_mask
+
+  let set_ifc_can_call = set_bit ifc_can_call_mask
+
+  let set_readonly = set_bit readonly_mask
+
+  let make
+      ~inout
+      ~accept_disposable
+      ~has_default
+      ~ifc_external
+      ~ifc_can_call
+      ~readonly =
+    0x0
+    |> set_inout inout
+    |> set_accept_disposable accept_disposable
+    |> set_has_default has_default
+    |> set_ifc_external ifc_external
+    |> set_ifc_can_call ifc_can_call
+    |> set_readonly readonly
+end
 
 module ClassElt : sig
   type t [@@deriving show]
@@ -464,20 +554,3 @@ end = struct
 
   let reset_superfluous_override = set Field.SuperfluousOverride false
 end
-
-[@@@ocamlformat "disable"]
-
-(* NB: Keep the values of these flags in sync with typing_defs_flags.rs. *)
-
-(* fun_param flags *)
-let fp_flags_accept_disposable = 1 lsl 0
-
-let fp_flags_inout             = 1 lsl 1
-
-let fp_flags_has_default       = 1 lsl 2
-
-let fp_flags_ifc_external      = 1 lsl 3
-
-let fp_flags_ifc_can_call      = 1 lsl 4
-
-let fp_flags_readonly          = 1 lsl 8

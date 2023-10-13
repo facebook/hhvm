@@ -216,7 +216,7 @@ type 'ty fun_param = {
   fp_pos: Pos_or_decl.t;
   fp_name: string option;
   fp_type: 'ty possibly_enforced_ty;
-  fp_flags: int;
+  fp_flags: Typing_defs_flags.FunParam.t;
 }
 [@@deriving hash]
 
@@ -466,8 +466,6 @@ module Flags : sig
 
   val get_fp_readonly : 'a fun_param -> bool
 
-  val mode_to_flags : param_mode -> int
-
   val make_fp_flags :
     mode:param_mode ->
     accept_disposable:bool ->
@@ -475,7 +473,7 @@ module Flags : sig
     ifc_external:bool ->
     ifc_can_call:bool ->
     readonly:bool ->
-    Hh_prelude.Int.t
+    Typing_defs_flags.FunParam.t
 
   val get_fp_accept_disposable : 'a fun_param -> bool
 

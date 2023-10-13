@@ -183,6 +183,11 @@ pub mod fun {
     pub type Fun = FunTypeFlags;
 }
 
+pub mod fun_param {
+    use super::FunParamFlags;
+    pub type FunParam = FunParamFlags;
+}
+
 impl ocamlrep::ToOcamlRep for ClassEltFlags {
     fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, _alloc: &'a A) -> ocamlrep::Value<'a> {
         ocamlrep::Value::int(self.bits() as isize)

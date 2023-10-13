@@ -166,9 +166,21 @@ class ConnectionManager : public folly::DelayedDestruction,
       double pct,
       const std::function<bool(ManagedConnection*)>& filter);
 
-  size_t getNumConnections() const {
-    return conns_.size();
-  }
+  /**
+   * Returns total number of connections managed by this ConnectionManager.
+   * This includes active + idle connections.
+   */
+  size_t getNumConnections() const;
+
+  /**
+   * Returns number of active connections in the ConnectionManger.
+   */
+  size_t getNumActiveConnections() const;
+
+  /**
+   * Returns number of idle connection in the ConnectionManger.
+   */
+  size_t getNumIdleConnections() const;
 
   template <typename F>
   void forEachConnection(F func) {
@@ -369,5 +381,7 @@ class ConnectionManager : public folly::DelayedDestruction,
    * time is less than idleConnEarlyDropThreshold_.
    */
   std::chrono::milliseconds idleConnEarlyDropThreshold_;
+
+  size_t idleConnections_{0};
 };
 } // namespace wangle

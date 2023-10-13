@@ -45,6 +45,12 @@ class ConnectionAgeTimeout : public folly::HHWheelTimer::Callback {
 class ManagedConnection : public folly::HHWheelTimer::Callback,
                           public folly::DelayedDestruction {
  public:
+  /**
+   * ManagedConnection can be in two state either it's active or idle.
+   * This is in connection with ConnectionManager which based on activy
+   * moves connections between two state.
+   */
+  enum ActivationState { ACTIVE, IDLE };
   ManagedConnection();
 
   class Callback {
@@ -160,6 +166,14 @@ class ManagedConnection : public folly::HHWheelTimer::Callback,
     return creationTime_;
   }
 
+  void setActivationState(ManagedConnection::ActivationState state) {
+    activationState_ = state;
+  }
+
+  const ManagedConnection::ActivationState& getActivationState() const {
+    return activationState_;
+  }
+
  protected:
   ~ManagedConnection() override;
 
@@ -185,6 +199,10 @@ class ManagedConnection : public folly::HHWheelTimer::Callback,
   const std::chrono::steady_clock::time_point creationTime_;
 
   folly::SafeIntrusiveListHook listHook_;
+
+  // When connection is created we can assume it to be in active state.
+  // it will only later can be moved to idle state.
+  ActivationState activationState_{ActivationState::IDLE};
 };
 
 std::ostream& operator<<(std::ostream& os, const ManagedConnection& conn);

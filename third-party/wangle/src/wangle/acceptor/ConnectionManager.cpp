@@ -58,6 +58,7 @@ void ConnectionManager::addConnection(
     bool idleTimeout,
     bool connectionAgeTimeout) {
   CHECK_NOTNULL(connection);
+  connection->setActivationState(ManagedConnection::ActivationState::ACTIVE);
   ConnectionManager* oldMgr = connection->getConnectionManager();
   if (oldMgr != this) {
     if (oldMgr) {
@@ -130,6 +131,11 @@ void ConnectionManager::scheduleTimeout(
 }
 
 void ConnectionManager::removeConnection(ManagedConnection* connection) {
+  if (connection->getActivationState() ==
+      ManagedConnection::ActivationState::IDLE) {
+    CHECK_GT(idleConnections_, 0);
+    --idleConnections_;
+  }
   if (connection->getConnectionManager() == this) {
     connection->cancelTimeout();
     connection->setConnectionManager(nullptr);
@@ -152,6 +158,21 @@ void ConnectionManager::removeConnection(ManagedConnection* connection) {
       }
     }
   }
+}
+
+size_t ConnectionManager::getNumActiveConnections() const {
+  auto totalConnections = getNumConnections();
+  auto idleConnections = getNumIdleConnections();
+  CHECK_GE(totalConnections, idleConnections);
+  return totalConnections - idleConnections;
+}
+
+size_t ConnectionManager::getNumIdleConnections() const {
+  return idleConnections_;
+}
+
+size_t ConnectionManager::getNumConnections() const {
+  return conns_.size();
 }
 
 void ConnectionManager::initiateGracefulShutdown(
@@ -336,7 +357,8 @@ void ConnectionManager::dropEstablishedConnections(
   }
   const size_t numToDrop = N * folly::constexpr_clamp(pct, 0., 1.);
   size_t droppedConns = 0;
-  auto it = --idleIterator_;
+  auto it = idleIterator_;
+  --it;
 
   bool last{false};
   while (!conns_.empty() && droppedConns < numToDrop) {
@@ -362,6 +384,13 @@ void ConnectionManager::reportActivity(ManagedConnection& conn) {
 }
 
 void ConnectionManager::onActivated(ManagedConnection& conn) {
+  // We want to keep track case when an idle connections becomes active again
+  if (conn.getActivationState() == ManagedConnection::ActivationState::IDLE) {
+    CHECK_GT(idleConnections_, 0);
+    --idleConnections_;
+  }
+
+  conn.setActivationState(ManagedConnection::ActivationState::ACTIVE);
   auto it = conns_.iterator_to(conn);
   if (it == idleIterator_) {
     idleIterator_++;
@@ -371,6 +400,11 @@ void ConnectionManager::onActivated(ManagedConnection& conn) {
 }
 
 void ConnectionManager::onDeactivated(ManagedConnection& conn) {
+  CHECK_EQ(
+      conn.getActivationState(), ManagedConnection::ActivationState::ACTIVE);
+  ++idleConnections_;
+  conn.setActivationState(ManagedConnection::ActivationState::IDLE);
+
   auto it = conns_.iterator_to(conn);
   bool moveDrainIter = false;
   if (it == drainIterator_) {

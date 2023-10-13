@@ -130,10 +130,14 @@ void MockConnection::closeWhenIdleImpl() {
 TEST_F(ConnectionManagerTest, testShutdownSequence) {
   InSequence enforceOrder;
 
+  EXPECT_EQ(cm_->getNumActiveConnections(), 65);
   // activate one connection, it should not be exempt from notifyPendingShutdown
   cm_->onActivated(*conns_.front());
+  EXPECT_EQ(cm_->getNumActiveConnections(), 65);
   // make sure the idleIterator points to !end
   cm_->onDeactivated(*conns_.back());
+  EXPECT_EQ(cm_->getNumIdleConnections(), 1);
+  EXPECT_EQ(cm_->getNumActiveConnections(), 64);
   for (const auto& conn : conns_) {
     EXPECT_CALL(*conn, notifyPendingShutdown());
   }
@@ -152,6 +156,7 @@ TEST_F(ConnectionManagerTest, testRemoveDrainIterator) {
 
   // activate one connection, it should not be exempt from notifyPendingShutdown
   cm_->onActivated(*conns_.front());
+  EXPECT_EQ(cm_->getNumActiveConnections(), 66);
   for (size_t i = 0; i < conns_.size() - 1; i++) {
     EXPECT_CALL(*conns_[i], notifyPendingShutdown());
   }
@@ -160,10 +165,10 @@ TEST_F(ConnectionManagerTest, testRemoveDrainIterator) {
   eventBase_.runInLoop([&] {
     // deactivate the drain iterator
     cm_->onDeactivated(*conn65);
+    EXPECT_EQ(cm_->getNumIdleConnections(), 1);
     // remove the drain iterator
     cm_->removeConnection(conn66);
-    // deactivate the new drain iterator, now it's the end of the list
-    cm_->onDeactivated(*conn65);
+    EXPECT_EQ(cm_->getNumIdleConnections(), 1);
   });
   cm_->initiateGracefulShutdown(std::chrono::milliseconds(50));
   // Schedule a loop callback to remove the connection pointed to by the drain
@@ -201,12 +206,16 @@ TEST_F(ConnectionManagerTest, testIdleGraceTimeout) {
 TEST_F(ConnectionManagerTest, testDropAll) {
   InSequence enforceOrder;
 
+  EXPECT_EQ(cm_->getNumActiveConnections(), 65);
   for (const auto& conn : conns_) {
     EXPECT_CALL(*conn, dropConnection(_))
         .WillOnce(Invoke(
             [&](const std::string&) { cm_->removeConnection(conn.get()); }));
   }
+  EXPECT_EQ(cm_->getNumIdleConnections(), 0);
   cm_->dropAllConnections();
+  EXPECT_EQ(cm_->getNumActiveConnections(), 0);
+  EXPECT_EQ(cm_->getNumIdleConnections(), 0);
 }
 
 TEST_F(ConnectionManagerTest, testDropEstablishedFilterDropAll) {
@@ -253,6 +262,7 @@ TEST_F(ConnectionManagerTest, testDropEstablishedVerifyOrder) {
 }
 
 TEST_F(ConnectionManagerTest, testDropFilterDropNone) {
+  EXPECT_EQ(cm_->getNumActiveConnections(), 65);
   for (const auto& conn : conns_) {
     EXPECT_CALL(*conn, dropConnection(_)).Times(0);
   }
@@ -263,9 +273,11 @@ TEST_F(ConnectionManagerTest, testDropFilterDropNone) {
     (void)managedConn->getPeerAddress();
     return false;
   });
+  EXPECT_EQ(cm_->getNumActiveConnections(), 65);
 }
 
 TEST_F(ConnectionManagerTest, testDropFilterDropHalfOnly) {
+  EXPECT_EQ(cm_->getNumActiveConnections(), 65);
   std::vector<int> identifiers{1, 4, 10, 30};
   auto containsIdentifier = [&identifiers](int num) {
     return std::find(identifiers.begin(), identifiers.end(), num) !=
@@ -290,6 +302,7 @@ TEST_F(ConnectionManagerTest, testDropFilterDropHalfOnly) {
   };
 
   cm_->dropEstablishedConnections(1, filter);
+  EXPECT_EQ(cm_->getNumActiveConnections(), 61);
 }
 
 // We call onDeactivated on connection with identifier 30, as a result this
@@ -332,6 +345,7 @@ TEST_F(ConnectionManagerTest, testDropPercent) {
     removeConn(conns_.begin()->get());
   }
   EXPECT_EQ(100, cm_->getNumConnections());
+  EXPECT_EQ(100, cm_->getNumActiveConnections());
 
   // Drop 20% of connections.
   double pct = 0.2;
@@ -347,6 +361,7 @@ TEST_F(ConnectionManagerTest, testDropPercent) {
   // Make sure they are gone.
   EXPECT_EQ(0, numToDrop);
   EXPECT_EQ(80, cm_->getNumConnections());
+  EXPECT_EQ(cm_->getNumActiveConnections(), 80);
 
   // Then drop 50% of the remaining 80 connections.
   pct = 0.5;
@@ -361,6 +376,7 @@ TEST_F(ConnectionManagerTest, testDropPercent) {
   // Make sure those are gone as well.
   EXPECT_EQ(0, numToDrop);
   EXPECT_EQ(40, cm_->getNumConnections());
+  EXPECT_EQ(40, cm_->getNumActiveConnections());
 }
 
 TEST_F(ConnectionManagerTest, testDrainPercent) {
@@ -434,14 +450,23 @@ TEST_F(ConnectionManagerTest, testDropIdle) {
         .WillRepeatedly(Return(std::chrono::milliseconds(100)));
   }
 
+  int idleCount_{0};
   // Mark the first half of the connections idle
   for (size_t i = 0; i < conns_.size() / 2; i++) {
+    EXPECT_EQ(cm_->getNumIdleConnections(), idleCount_);
     cm_->onDeactivated(*conns_[i]);
+    idleCount_++;
   }
+  EXPECT_EQ(
+      idleCount_, cm_->getNumConnections() - cm_->getNumActiveConnections());
   // reactivate conn 0
   cm_->onActivated(*conns_[0]);
+  EXPECT_EQ(cm_->getNumIdleConnections(), idleCount_ - 1);
   // remove the first idle conn
   cm_->removeConnection(conns_[1].get());
+  // Given we reactivated idle connection we expect number of idle connections
+  // to be one less than before
+  EXPECT_EQ(cm_->getNumIdleConnections(), idleCount_ - 2);
 
   InSequence enforceOrder;
 

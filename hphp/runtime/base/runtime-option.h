@@ -1315,8 +1315,8 @@ struct RuntimeOption {
   /* When this flag is on, print_r for
    * classes and lazy classes outputs a string. */                      \
   F(bool, ClassAsStringGetType, true)                                   \
-  /* Raise warning when strings are used as classes. */                 \
-  F(bool, RaiseStrToClsConversionWarning, false)                        \
+  /* Raise sampled notice when strings are used as classes. */          \
+  F(uint32_t, RaiseStrToClsConversionNoticeSampleRate, 0)               \
   F(bool, EmitMethCallerFuncPointers, false)                            \
   /* trigger E_USER_WARNING error when getClassName()/getMethodName()
    * is used on __SystemLib\MethCallerHelper */                         \

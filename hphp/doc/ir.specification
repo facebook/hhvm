@@ -2309,9 +2309,10 @@ ReqBindJmp and CallFuncEntry.
   or cleared states.
   Can only be used in memoized wrapper functions.
 
-| RaiseStrToClassNotice, ND, S(Str), NF
+| RaiseStrToClassNotice<sample rate>, ND, S(Str), NF
 
-  Raise a notice if a string is implicitly converted to a class.
+  Raise a notice if a string is implicitly converted to a class, sampled 1 out
+  of "sample rate" times
 
 | CheckClsMethFunc, ND, S(Func), NF
 

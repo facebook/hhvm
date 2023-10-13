@@ -2226,7 +2226,8 @@ OPTBLD_INLINE void iopEnumClassLabel(Id id) {
 OPTBLD_INLINE void iopClassGetC() {
   auto const cell = vmStack().topC();
   if (isStringType(cell->m_type)) {
-    raise_str_to_class_notice(cell->m_data.pstr);
+    raise_str_to_class_notice(cell->m_data.pstr,
+                              RO::EvalRaiseStrToClsConversionNoticeSampleRate);
   }
   auto const cls = lookupClsRef(cell);
   vmStack().popC();
@@ -4187,7 +4188,8 @@ iopFCallClsMethodM(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
   auto const cell = vmStack().topC();
   auto isString = isStringType(cell->m_type);
   if (isString) {
-    raise_str_to_class_notice(cell->m_data.pstr);
+    raise_str_to_class_notice(cell->m_data.pstr,
+                              RO::EvalRaiseStrToClsConversionNoticeSampleRate);
   }
   auto const cls = lookupClsRef(cell);
   vmStack().popC();

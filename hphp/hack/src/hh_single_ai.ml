@@ -176,6 +176,8 @@ let parse_options () =
       ~po_enable_xhp_class_modifier:!enable_xhp_class_modifier
       ~po_allowed_decl_fixme_codes:
         (Option.value !allowed_decl_fixme_codes ~default:ISet.empty)
+      ~tco_enable_sound_dynamic:true
+      ~tco_everything_sdt:true
       GlobalOptions.default
   in
   Errors.allowed_fixme_codes_strict :=
@@ -211,7 +213,7 @@ let parse_and_name ctx files_contents =
                 ast
             in
             Ast_provider.provide_ast_hint fn ast Ast_provider.Full;
-            { parsed_file with Parser_return.ast })
+            ())
       in
       match Direct_decl_utils.direct_decl_parse_and_cache ctx fn with
       | None -> failwith "no file contents"
@@ -339,6 +341,7 @@ let decl_and_run_mode
         Naming_table.load_from_sqlite ctx path)
   in
   let (errors, files_info) = parse_name_and_skip_decl ctx to_decl in
+  let ctx = Provider_context.set_backend ctx Provider_backend.Analysis in
   handle_mode
     ai_options
     ctx
@@ -359,6 +362,7 @@ let main_hack
   let (_handle : SharedMem.handle) =
     SharedMem.init ~num_workers:0 sharedmem_config
   in
+  Decl_store.set Ai_decl_heap.decl_store;
   Tempfile.with_tempdir (fun hhi_root ->
       Hhi.set_hhi_root_for_unit_test hhi_root;
       Relative_path.set_path_prefix Relative_path.Root root;

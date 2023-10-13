@@ -71,7 +71,7 @@ class D extends B {
 }
 
 // TEST-CHECK-1: define $root.MethCaller$C$b
-// CHECK: define $root.MethCaller$C$b($this: *void, $o: *HackMixed, $args: .variadic *array) : *HackMixed {
+// CHECK: define $root.MethCaller$C$b($this: *void, $o: *HackMixed, $args: .variadic *HackVec) : *HackMixed {
 
 // TEST-CHECK-BAL: define $root.fcall_func
 // CHECK: define $root.fcall_func($this: *void) : *void {

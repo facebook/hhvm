@@ -7,4 +7,4 @@ vec(5) {
 }
 is_variadic = 1
 name = objects
-type = array<HH\int>
+type = HH\vec<HH\int>

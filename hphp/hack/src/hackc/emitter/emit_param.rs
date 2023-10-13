@@ -109,15 +109,15 @@ fn from_ast<'a, 'arena, 'decl>(
     if param.is_variadic && param.name == "..." {
         return Ok(None);
     };
-    if param.is_variadic {
-        tparams.push("array");
-    };
     let type_info = {
         let param_type_hint = if param.is_variadic {
             Some(Hint(
                 Pos::NONE,
                 Box::new(Hint_::mk_happly(
-                    Id(Pos::NONE, "array".to_string()),
+                    Id(
+                        Pos::NONE,
+                        naming_special_names_rust::collections::VEC.to_string(),
+                    ),
                     param
                         .type_hint
                         .get_hint()

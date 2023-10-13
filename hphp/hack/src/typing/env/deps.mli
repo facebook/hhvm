@@ -43,6 +43,7 @@ val add_member_dep :
 val make_depend_on_parent :
   Typing_env_types.env ->
   skip_constructor_dep:bool ->
+  is_req:bool ->
   string ->
   Decl_provider.Class.t option ->
   unit

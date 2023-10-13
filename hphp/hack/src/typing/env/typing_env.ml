@@ -718,13 +718,13 @@ let get_class (env : env) (name : Decl_provider.type_key) : Cls.t option =
   Deps.make_depend_on_class env name res;
   res
 
-let get_parent env ~skip_constructor_dep name : Cls.t option =
+let get_parent env ~skip_constructor_dep ~is_req name : Cls.t option =
   let res = get_class env name in
-  Deps.make_depend_on_parent env ~skip_constructor_dep name res;
+  Deps.make_depend_on_parent env ~skip_constructor_dep ~is_req name res;
   res
 
-let add_parent_dep env ~skip_constructor_dep name : unit =
-  let _ = get_parent env ~skip_constructor_dep name in
+let add_parent_dep env ~skip_constructor_dep ~is_req name : unit =
+  let _ = get_parent env ~skip_constructor_dep ~is_req name in
   ()
 
 let get_class_or_typedef env x =

@@ -565,11 +565,14 @@ let rec check_implements_or_extends_unique impl ~env =
 
 (** Add a dependency to constructors or produce an error if not a Tapply. *)
 let check_is_tapply_add_constructor_extends_dep
-    env ?(skip_constructor_dep = false) deps =
+    env
+    ?(skip_constructor_dep = false)
+    (deps : ((pos * _) * decl_ty) list)
+    ~is_req =
   List.iter deps ~f:(fun ((p, _dep_hint), dep) ->
       match get_node dep with
       | Tapply ((_, class_name), _) ->
-        Env.add_parent_dep env ~skip_constructor_dep class_name
+        Env.add_parent_dep env ~skip_constructor_dep ~is_req class_name
       | Tgeneric _ ->
         Typing_error_utils.add_typing_error
           ~env
@@ -1522,20 +1525,24 @@ let check_parents_are_tapply_add_constructor_deps
   } =
     parents
   in
-  check_is_tapply_add_constructor_extends_dep env extends;
+  check_is_tapply_add_constructor_extends_dep env ~is_req:false extends;
   check_is_tapply_add_constructor_extends_dep
     env
     implements
     ~skip_constructor_dep:
-      (not (Ast_defs.is_c_trait c.c_kind || Ast_defs.is_c_abstract c.c_kind));
-  check_is_tapply_add_constructor_extends_dep env uses;
-  check_is_tapply_add_constructor_extends_dep env req_class;
-  check_is_tapply_add_constructor_extends_dep env req_extends;
-  check_is_tapply_add_constructor_extends_dep env req_implements;
-  Option.iter enum_includes ~f:(check_is_tapply_add_constructor_extends_dep env);
+      (not (Ast_defs.is_c_trait c.c_kind || Ast_defs.is_c_abstract c.c_kind))
+    ~is_req:false;
+  check_is_tapply_add_constructor_extends_dep env ~is_req:false uses;
+  check_is_tapply_add_constructor_extends_dep env ~is_req:true req_class;
+  check_is_tapply_add_constructor_extends_dep env ~is_req:true req_extends;
+  check_is_tapply_add_constructor_extends_dep env ~is_req:true req_implements;
+  Option.iter
+    enum_includes
+    ~f:(check_is_tapply_add_constructor_extends_dep env ~is_req:false);
   check_is_tapply_add_constructor_extends_dep
     env
     xhp_attr_uses
+    ~is_req:false
     ~skip_constructor_dep:true;
   ()
 

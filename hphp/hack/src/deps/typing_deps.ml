@@ -30,6 +30,7 @@ module Dep = struct
     | Fun : string -> 'a variant
     | Type : string -> 'a variant
     | Extends : string -> dependency variant
+    | RequireExtends : string -> dependency variant
     | Const : string * string -> dependency variant
     | Constructor : string -> dependency variant
     | Prop : string * string -> dependency variant
@@ -55,6 +56,7 @@ module Dep = struct
     | Constructor s -> Constructor s
     | AllMembers s -> AllMembers s
     | Extends s -> Extends s
+    | RequireExtends s -> RequireExtends s
     | Declares -> Declares
 
   (** NOTE: keep in sync with `typing_deps_hash.rs`. *)
@@ -63,6 +65,7 @@ module Dep = struct
     | KFun [@value 1]
     | KType [@value 2]
     | KExtends [@value 3]
+    | KRequireExtends [@value 4]
     | KConst [@value 5]
     | KConstructor [@value 6]
     | KProp [@value 7]
@@ -148,16 +151,17 @@ module Dep = struct
     | Fun _ -> 1
     | Type _ -> 2
     | Extends _ -> 3
-    | Const _ -> 4
-    | Constructor _ -> 5
-    | Prop _ -> 6
-    | SProp _ -> 7
-    | Method _ -> 8
-    | SMethod _ -> 9
-    | AllMembers _ -> 10
-    | GConstName _ -> 11
-    | Module _ -> 12
-    | Declares -> 13
+    | RequireExtends _ -> 4
+    | Const _ -> 5
+    | Constructor _ -> 6
+    | Prop _ -> 7
+    | SProp _ -> 8
+    | Method _ -> 9
+    | SMethod _ -> 10
+    | AllMembers _ -> 11
+    | GConstName _ -> 12
+    | Module _ -> 13
+    | Declares -> 14
 
   let compare_variant (type a) (v1 : a variant) (v2 : a variant) : int =
     match (v1, v2) with
@@ -165,6 +169,7 @@ module Dep = struct
     | (Fun x1, Fun x2)
     | (Type x1, Type x2)
     | (Extends x1, Extends x2)
+    | (RequireExtends x1, RequireExtends x2)
     | (Constructor x1, Constructor x2)
     | (AllMembers x1, AllMembers x2)
     | (GConstName x1, GConstName x2) ->
@@ -181,9 +186,9 @@ module Dep = struct
         String.compare m1 m2
     | (Declares, Declares) -> 0
     | ( _,
-        ( GConst _ | Fun _ | Type _ | Extends _ | Const _ | Constructor _
-        | Prop _ | SProp _ | Method _ | SMethod _ | AllMembers _ | GConstName _
-        | Module _ | Declares ) ) ->
+        ( GConst _ | Fun _ | Type _ | Extends _ | RequireExtends _ | Const _
+        | Constructor _ | Prop _ | SProp _ | Method _ | SMethod _ | AllMembers _
+        | GConstName _ | Module _ | Declares ) ) ->
       ordinal_variant v1 - ordinal_variant v2
 
   let dep_kind_of_variant : type a. a variant -> dep_kind = function
@@ -199,6 +204,7 @@ module Dep = struct
     | Constructor _ -> KConstructor
     | AllMembers _ -> KAllMembers
     | Extends _ -> KExtends
+    | RequireExtends _ -> KRequireExtends
     | Module _ -> KModule
     | Declares -> KDeclares
 
@@ -206,15 +212,21 @@ module Dep = struct
     let (dep_kind, member_name) = Member.to_dep_kind_and_name member in
     hash2 (dep_kind_to_enum dep_kind) type_dep member_name
 
+  let extends_of_class class_dep = class_dep lxor 1
+
+  let require_extends_of_class class_dep =
+    hash2 (dep_kind_to_enum KRequireExtends) class_dep ""
+
   (* Keep in sync with the tags for `DepType` in `typing_deps_hash.rs`. *)
   let rec make : type a. a variant -> t = function
     (* Deps on defs *)
     | GConst name1 -> hash1 (dep_kind_to_enum KGConst) name1
     | Fun name1 -> hash1 (dep_kind_to_enum KFun) name1
-    | Type name1 -> hash1 (dep_kind_to_enum KType) name1
-    | Extends name1 -> hash1 (dep_kind_to_enum KExtends) name1
     | GConstName name1 -> hash1 (dep_kind_to_enum KGConstName) name1
     | Module mname -> hash1 (dep_kind_to_enum KModule) mname
+    | Type name1 -> hash1 (dep_kind_to_enum KType) name1
+    | Extends name1 -> hash1 (dep_kind_to_enum KExtends) name1
+    | RequireExtends name1 -> require_extends_of_class (make (Type name1))
     (* Deps on members *)
     | Constructor name1 ->
       make_member_dep_from_type_dep (make (Type name1)) Member.Constructor
@@ -234,23 +246,27 @@ module Dep = struct
 
   let is_class x = x land 1 = 1
 
-  let extends_of_class x = x lxor 1
+  let extends_and_req_extends_of_class class_dep =
+    (extends_of_class class_dep, require_extends_of_class class_dep)
 
   let compare = Int.compare
 
   let extract_name : type a. a variant -> string = function
-    | GConst s -> Utils.strip_ns s
-    | GConstName s -> Utils.strip_ns s
-    | Const (cls, s) -> spf "%s::%s" (Utils.strip_ns cls) s
-    | Type s -> Utils.strip_ns s
-    | Fun s -> Utils.strip_ns s
-    | Prop (cls, s) -> spf "%s::%s" (Utils.strip_ns cls) s
-    | SProp (cls, s) -> spf "%s::%s" (Utils.strip_ns cls) s
-    | Method (cls, s) -> spf "%s::%s" (Utils.strip_ns cls) s
-    | SMethod (cls, s) -> spf "%s::%s" (Utils.strip_ns cls) s
-    | Constructor s -> Utils.strip_ns s
-    | AllMembers s -> Utils.strip_ns s
-    | Extends s -> Utils.strip_ns s
+    | Const (cls, s)
+    | Prop (cls, s)
+    | SProp (cls, s)
+    | Method (cls, s)
+    | SMethod (cls, s) ->
+      spf "%s::%s" (Utils.strip_ns cls) s
+    | GConst s
+    | GConstName s
+    | Type s
+    | Fun s
+    | Constructor s
+    | AllMembers s
+    | Extends s
+    | RequireExtends s ->
+      Utils.strip_ns s
     | Module m -> m
     | Declares -> "__declares__"
 
@@ -262,6 +278,7 @@ module Dep = struct
     | Constructor s
     | AllMembers s
     | Extends s
+    | RequireExtends s
     | Module s
     | Type s
     | Fun s
@@ -282,6 +299,7 @@ module Dep = struct
     | Constructor _
     | AllMembers _
     | Extends _
+    | RequireExtends _
     | Module _
     | Type _
     | Fun _
@@ -295,15 +313,17 @@ module Dep = struct
       Some s
 
   let to_decl_reference : type a. a variant -> Decl_reference.t = function
-    | Type s -> Decl_reference.Type s
-    | Const (s, _) -> Decl_reference.Type s
-    | Extends s -> Decl_reference.Type s
-    | AllMembers s -> Decl_reference.Type s
-    | Constructor s -> Decl_reference.Type s
-    | Prop (s, _) -> Decl_reference.Type s
-    | SProp (s, _) -> Decl_reference.Type s
-    | Method (s, _) -> Decl_reference.Type s
-    | SMethod (s, _) -> Decl_reference.Type s
+    | Type s
+    | Const (s, _)
+    | Extends s
+    | RequireExtends s
+    | AllMembers s
+    | Constructor s
+    | Prop (s, _)
+    | SProp (s, _)
+    | Method (s, _)
+    | SMethod (s, _) ->
+      Decl_reference.Type s
     | GConst s
     | GConstName s ->
       Decl_reference.GlobalConstant s
@@ -337,6 +357,7 @@ module Dep = struct
       | Constructor _ -> "Constructor"
       | AllMembers _ -> "AllMembers"
       | Extends _ -> "Extends"
+      | RequireExtends _ -> "RequireExtends"
       | Module _ -> "Module"
       | Declares -> "Declares"
     in

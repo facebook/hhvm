@@ -66,6 +66,13 @@ function f_g(G $x): void {
   $x->foo("");
 }
 
+//// base-use-E.php
+<?hh
+
+function f_E(): void {
+  new E();
+}
+
 //// changed-a.php
 <?hh
 
@@ -134,4 +141,11 @@ function f_d(D $x): void {
 
 function f_g(G $x): void {
   $x->foo("");
+}
+
+//// changed-use-E.php
+<?hh
+
+function f_E(): void {
+  new E();
 }

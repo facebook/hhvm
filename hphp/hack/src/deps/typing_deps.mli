@@ -40,6 +40,7 @@ module Dep : sig
         (** Represents another class depending on a class via an
         inheritance-like mechanism (`extends`, `implements`, `use`, `require
         extends`, `require implements`, etc.) *)
+    | RequireExtends : string -> dependency variant
     | Const : string * string -> dependency variant
         (** Represents something depending on a class constant. *)
     | Constructor : string -> dependency variant
@@ -72,6 +73,7 @@ module Dep : sig
     | KFun
     | KType
     | KExtends
+    | KRequireExtends
     | KConst
     | KConstructor
     | KProp
@@ -120,7 +122,7 @@ module Dep : sig
 
   val is_class : t -> bool
 
-  val extends_of_class : t -> t
+  val extends_and_req_extends_of_class : t -> t * t
 
   val compare : t -> t -> int
 

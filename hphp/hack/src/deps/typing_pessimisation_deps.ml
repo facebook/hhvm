@@ -260,6 +260,7 @@ let should_ignore_node node =
       false
     | Typing_deps.Dep.KType
     | Typing_deps.Dep.KExtends
+    | Typing_deps.Dep.KRequireExtends
     | Typing_deps.Dep.KAllMembers
     | Typing_deps.Dep.KGConstName
     | Typing_deps.Dep.KModule

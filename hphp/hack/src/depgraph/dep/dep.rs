@@ -41,6 +41,14 @@ impl Dep {
         }
     }
 
+    pub fn class_to_require_extends(self) -> Self {
+        Dep(typing_deps_hash::hash2(
+            DepType::RequireExtends,
+            self.0,
+            &[],
+        ))
+    }
+
     /// The `Declares` special dep, used to mark declared members.
     pub fn declares() -> Self {
         Dep(declares_hash())

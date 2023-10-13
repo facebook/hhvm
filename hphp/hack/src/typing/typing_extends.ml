@@ -623,7 +623,11 @@ let add_pessimisation_dependency
 let add_member_dep
     env class_ parent_class (member_kind, member_name, member_origin) =
   let origin_pos = Cls.pos parent_class in
-  if not (Pos_or_decl.is_hhi origin_pos) then (
+  if
+    (not
+       (TypecheckerOptions.optimized_member_fanout @@ Typing_env.get_tcopt env))
+    && not (Pos_or_decl.is_hhi origin_pos)
+  then (
     let dep =
       match member_kind with
       | MemberKind.Method -> Dep.Method (member_origin, member_name)

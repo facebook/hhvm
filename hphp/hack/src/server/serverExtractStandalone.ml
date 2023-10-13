@@ -281,15 +281,17 @@ end = struct
    fun dep ->
     Typing_deps.Dep.(
       match dep with
-      | Const (cls, _) -> Some cls
-      | Method (cls, _) -> Some cls
-      | SMethod (cls, _) -> Some cls
-      | Prop (cls, _) -> Some cls
-      | SProp (cls, _) -> Some cls
-      | Type cls -> Some cls
-      | Constructor cls -> Some cls
-      | AllMembers cls -> Some cls
-      | Extends cls -> Some cls
+      | Const (cls, _)
+      | Method (cls, _)
+      | SMethod (cls, _)
+      | Prop (cls, _)
+      | SProp (cls, _)
+      | Type cls
+      | Constructor cls
+      | AllMembers cls
+      | Extends cls
+      | RequireExtends cls ->
+        Some cls
       | Module md -> Some md
       | Fun _
       | GConst _
@@ -309,7 +311,8 @@ end = struct
     | SProp (name, _)
     | Constructor name
     | AllMembers name
-    | Extends name ->
+    | Extends name
+    | RequireExtends name ->
       Decl.get_class_or_typedef_pos ctx name
     | GConst name
     | GConstName name ->
@@ -2049,6 +2052,7 @@ end = struct
       | SProp _
       | AllMembers _
       | Extends _
+      | RequireExtends _
       (* TODO(T108206307) *)
       | Module _
       | Declares ->

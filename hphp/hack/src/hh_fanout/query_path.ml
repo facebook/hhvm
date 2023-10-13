@@ -45,8 +45,8 @@ let rec search
     let dep_path_acc = current :: dep_path_acc in
     let extends_deps =
       current
-      |> Typing_deps.Dep.extends_of_class
-      |> Typing_deps.DepSet.singleton
+      |> Typing_deps.Dep.extends_and_req_extends_of_class
+      |> (fun (x, y) -> Typing_deps.DepSet.of_list [x; y])
       |> Typing_deps.add_typing_deps deps_mode
       |> Typing_deps.DepSet.elements
     in

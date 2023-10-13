@@ -119,20 +119,28 @@ impl<B: BaseDepgraphTrait> DepGraphWithDelta<B> {
         if !visited.insert(source_class) {
             return;
         }
-        let extends_hash = match source_class.class_to_extends() {
-            None => return,
-            Some(hash) => hash,
-        };
-        self.iter_dependents_with_duplicates(extends_hash, |iter| {
-            iter.for_each(|dep: Dep| {
-                if dep.is_class() {
+        if source_class.is_class() {
+            let extends_hash = source_class.class_to_extends().unwrap();
+            self.iter_dependents_with_duplicates(extends_hash, |iter| {
+                iter.for_each(|dep: Dep| {
+                    if dep.is_class() {
+                        if !acc.contains(&dep) {
+                            acc.insert_mut(dep);
+                            queue.push_back(dep);
+                        }
+                    }
+                })
+            });
+            let require_extends_hash = source_class.class_to_require_extends();
+            self.iter_dependents_with_duplicates(require_extends_hash, |iter| {
+                iter.for_each(|dep: Dep| {
                     if !acc.contains(&dep) {
                         acc.insert_mut(dep);
                         queue.push_back(dep);
                     }
-                }
-            })
-        })
+                })
+            });
+        }
     }
 
     /// Returns the union of the provided dep set and their recursive 'extends' dependents.
@@ -165,7 +173,7 @@ impl<B: BaseDepgraphTrait> DepGraphWithDelta<B> {
         let mut visited = HashSet::default();
 
         self.visit_class_dep_for_member_fanout(
-            class_dep,
+            (class_dep, false),
             member_type,
             member_name,
             &mut visited,
@@ -189,18 +197,20 @@ impl<B: BaseDepgraphTrait> DepGraphWithDelta<B> {
 
     fn visit_class_dep_for_member_fanout(
         &self,
-        class_dep: Dep,
+        (class_dep, via_req): (Dep, bool),
         member_type: DepType,
         member_name: &str,
-        visited: &mut HashSet<Dep>,
-        queue: &mut VecDeque<Dep>,
+        visited: &mut HashSet<(Dep, bool)>,
+        queue: &mut VecDeque<(Dep, bool)>,
         fanout_acc: &mut HashTrieSet<Dep>,
         stop_if_declared: bool,
     ) {
-        if !visited.insert(class_dep) {
+        if !visited.insert((class_dep, via_req)) {
             return;
         }
-        fanout_acc.insert_mut(class_dep);
+        if !via_req {
+            fanout_acc.insert_mut(class_dep);
+        }
         let member_dep = class_dep.member(member_type, member_name);
         let mut member_is_declared = false;
         let mut member_deps = HashSet::default();
@@ -222,8 +232,12 @@ impl<B: BaseDepgraphTrait> DepGraphWithDelta<B> {
                 .for_each(|dep| fanout_acc.insert_mut(dep));
             let extends_dep_for_class = class_dep.class_to_extends().unwrap();
             self.iter_dependents_with_duplicates(extends_dep_for_class, |iter| {
-                iter.for_each(|dep| queue.push_back(dep));
-            })
+                iter.for_each(|dep| queue.push_back((dep, via_req)));
+            });
+            let requires_extends_dep_for_class = class_dep.class_to_require_extends();
+            self.iter_dependents_with_duplicates(requires_extends_dep_for_class, |iter| {
+                iter.for_each(|dep| queue.push_back((dep, true)));
+            });
         }
     }
 

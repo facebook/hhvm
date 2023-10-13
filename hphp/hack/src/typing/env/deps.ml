@@ -144,12 +144,22 @@ let make_depend_on_module env name md =
   | Some md when Pos_or_decl.is_hhi md.Typing_defs.mdt_pos -> ()
   | _ -> make_depend_on_module_name env name
 
-let make_depend_on_parent env ~skip_constructor_dep name class_ =
+let make_depend_on_parent env ~skip_constructor_dep ~is_req name class_ =
   match class_ with
   | Some cd when Pos_or_decl.is_hhi (Cls.pos cd) -> ()
   | _ ->
     if not skip_constructor_dep then make_depend_on_constructor_name env name;
-    add_dependency_edge env (Dep.Extends name)
+    let dep =
+      if
+        TypecheckerOptions.optimized_member_fanout
+          Typing_env_types.(env.genv.tcopt)
+        && is_req
+      then
+        Dep.RequireExtends name
+      else
+        Dep.Extends name
+    in
+    add_dependency_edge env dep
 
 let add_member_dep ~is_method ~is_static env (class_ : Cls.t) mid class_elt_opt
     =

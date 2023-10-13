@@ -120,7 +120,8 @@ val env_with_constructor_droot_member : env -> env
 (** Get class declaration from the appropriate backend and add dependency. *)
 val get_class : env -> type_key -> class_decl option
 
-val add_parent_dep : env -> skip_constructor_dep:bool -> string -> unit
+val add_parent_dep :
+  env -> skip_constructor_dep:bool -> is_req:bool -> string -> unit
 
 (** Get function declaration from the appropriate backend and add dependency. *)
 val get_fun : env -> Decl_provider.fun_key -> Decl_provider.fun_decl option

@@ -76,7 +76,8 @@
                   returns_readonly = false; readonly_this = false;
                   support_dynamic_type = false; is_memoized = false;
                   variadic = false };
-                ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+                ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+                ft_cross_package = None }));
           sm_visibility = Public; sm_deprecated = None; sm_flags = abstract;
           sm_attributes = [] };
          { Shallow_decl_defs.sm_name = ([9:28-30], "f1");
@@ -86,14 +87,14 @@
                { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
                  { capability =
-                   (CapTy (Rhint ([9:32-47]),
-                           (Tintersection
-                              [(Rhint ([9:33-46]),
-                                (Tapply (
-                                   ([9:33-46],
-                                    "\\HH\\Contexts\\zoned_shallow"),
-                                   [])))
-                                ])))
+                   (CapTy
+                      (Rhint ([9:32-47]),
+                       (Tintersection
+                          [(Rhint ([9:33-46]),
+                            (Tapply (
+                               ([9:33-46], "\\HH\\Contexts\\zoned_shallow"),
+                               [])))
+                            ])))
                    };
                  ft_ret =
                  { et_enforced = Typing_defs_core.Unenforced;
@@ -105,7 +106,8 @@
                    returns_readonly = false; readonly_this = false;
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
-                 ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+                 ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+                 ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = abstract;
            sm_attributes = [] };
          { Shallow_decl_defs.sm_name = ([10:28-30], "f2");
@@ -115,18 +117,18 @@
                { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
                  { capability =
-                   (CapTy (Rhint ([10:32-59]),
-                           (Tintersection
-                              [(Rhint ([10:33-46]),
-                                (Tapply (
-                                   ([10:33-46],
-                                    "\\HH\\Contexts\\zoned_shallow"),
-                                   [])));
-                                (Rhint ([10:48-58]),
-                                 (Tapply (
-                                    ([10:48-58], "\\HH\\Contexts\\rx_shallow"),
-                                    [])))
-                                ])))
+                   (CapTy
+                      (Rhint ([10:32-59]),
+                       (Tintersection
+                          [(Rhint ([10:33-46]),
+                            (Tapply (
+                               ([10:33-46], "\\HH\\Contexts\\zoned_shallow"),
+                               [])));
+                            (Rhint ([10:48-58]),
+                             (Tapply (
+                                ([10:48-58], "\\HH\\Contexts\\rx_shallow"),
+                                [])))
+                            ])))
                    };
                  ft_ret =
                  { et_enforced = Typing_defs_core.Unenforced;
@@ -138,7 +140,8 @@
                    returns_readonly = false; readonly_this = false;
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
-                 ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+                 ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+                 ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = abstract;
            sm_attributes = [] }
          ];

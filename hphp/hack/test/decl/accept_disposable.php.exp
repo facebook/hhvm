@@ -30,7 +30,8 @@
                   returns_readonly = false; readonly_this = false;
                   support_dynamic_type = false; is_memoized = false;
                   variadic = false };
-                ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+                ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+                ft_cross_package = None }));
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
           sm_attributes = [] };
          { Shallow_decl_defs.sm_name = ([6:19-22], "foo");
@@ -50,7 +51,8 @@
                    returns_readonly = false; readonly_this = false;
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
-                 ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+                 ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+                 ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] }
          ];
@@ -73,8 +75,8 @@
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = true;
                    inout = false; has_default = false; ifc_external = false;
-                   ifc_can_call = false; readonly = false };
-                  }
+                   ifc_can_call = false; readonly = false }
+                 }
                 ];
               ft_implicit_params = { capability = (CapDefaults [9:10-11]) };
               ft_ret =
@@ -87,7 +89,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [9:10-11]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }))

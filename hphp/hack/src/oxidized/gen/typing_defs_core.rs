@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b5713c6f625ef293e2fbcc91ffed096a>>
+// @generated SignedSource<<048de537b12da1e4fe96b0d67a4d4cf1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -62,14 +62,14 @@ pub enum CeVisibility {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, hash, ord)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, ord, (show { with_path = false }))")]
 #[repr(C, u8)]
 pub enum IfcFunDecl {
     FDPolicied(Option<String>),
     FDInferFlows,
 }
 
-#[rust_to_ocaml(attr = "deriving (eq, hash, ord)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, ord, (show { with_path = false }))")]
 pub type CrossPackageDecl = Option<String>;
 
 #[derive(
@@ -443,7 +443,7 @@ arena_deserializer::impl_deserialize_in_arena!(Enforcement);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, (show { with_path = false }))")]
 #[repr(C, u8)]
 pub enum Capability {
     CapDefaults(pos_or_decl::PosOrDecl),
@@ -467,7 +467,7 @@ pub enum Capability {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, (show { with_path = false }))")]
 #[repr(C)]
 pub struct FunImplicitParams {
     pub capability: Capability,
@@ -488,7 +488,7 @@ pub struct FunImplicitParams {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, (show { with_path = false }))")]
 #[rust_to_ocaml(prefix = "et_")]
 #[repr(C)]
 pub struct PossiblyEnforcedTy {
@@ -512,7 +512,7 @@ pub struct PossiblyEnforcedTy {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, (show { with_path = false }))")]
 #[rust_to_ocaml(prefix = "fp_")]
 #[repr(C)]
 pub struct FunParam {
@@ -524,7 +524,7 @@ pub struct FunParam {
     pub flags: typing_defs_flags::fun_param::FunParam,
 }
 
-#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, (show { with_path = false }))")]
 pub type FunParams = Vec<FunParam>;
 
 /// The type of a function AND a method.
@@ -543,7 +543,7 @@ pub type FunParams = Vec<FunParam>;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, (show { with_path = false }))")]
 #[rust_to_ocaml(prefix = "ft_")]
 #[repr(C)]
 pub struct FunType {
@@ -573,7 +573,7 @@ pub struct FunType {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving hash")]
+#[rust_to_ocaml(attr = "deriving (hash, (show { with_path = false }))")]
 #[repr(C, u8)]
 pub enum NegType {
     #[rust_to_ocaml(name = "Neg_prim")]

@@ -140,13 +140,14 @@
                { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
                  { capability =
-                   (CapTy (Rhint ([15:29-42]),
-                           (Tintersection
-                              [(Rhint ([15:30-41]),
-                                (Tapply (
-                                   ([15:30-41], "\\HH\\Contexts\\write_props"),
-                                   [])))
-                                ])))
+                   (CapTy
+                      (Rhint ([15:29-42]),
+                       (Tintersection
+                          [(Rhint ([15:30-41]),
+                            (Tapply (
+                               ([15:30-41], "\\HH\\Contexts\\write_props"),
+                               [])))
+                            ])))
                    };
                  ft_ret =
                  { et_enforced = Typing_defs_core.Unenforced;
@@ -158,7 +159,8 @@
                    returns_readonly = false; readonly_this = false;
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
-                 ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+                 ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+                 ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] }
           ];

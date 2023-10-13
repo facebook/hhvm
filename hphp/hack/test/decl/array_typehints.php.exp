@@ -23,7 +23,8 @@
                returns_readonly = false; readonly_this = false;
                support_dynamic_type = false; is_memoized = false;
                variadic = false };
-             ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+             ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+             ft_cross_package = None }));
        fe_pos = [3:10-12]; fe_php_std_lib = false;
        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
        fe_no_auto_likes = false }));
@@ -50,7 +51,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [8:10-12]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -77,7 +79,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [12:10-12]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -105,7 +108,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [17:10-12]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -134,7 +138,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [21:10-12]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -162,7 +167,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [26:10-13]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -190,7 +196,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [30:10-13]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -217,7 +224,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [34:10-13]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -240,7 +248,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [38:10-13]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }))

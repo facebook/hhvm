@@ -31,18 +31,19 @@
                    { Typing_defs_flags.FunParam.accept_disposable = false;
                      inout = false; has_default = false;
                      ifc_external = false; ifc_can_call = false;
-                     readonly = false };
-                    }
+                     readonly = false }
+                   }
                   ];
                 ft_implicit_params =
                 { capability =
-                  (CapTy (Rhint ([4:35-48]),
-                          (Tintersection
-                             [(Rhint ([4:36-47]),
-                               (Tapply (
-                                  ([4:36-47], "\\HH\\Contexts\\write_props"),
-                                  [])))
-                               ])))
+                  (CapTy
+                     (Rhint ([4:35-48]),
+                      (Tintersection
+                         [(Rhint ([4:36-47]),
+                           (Tapply (
+                              ([4:36-47], "\\HH\\Contexts\\write_props"), 
+                              [])))
+                           ])))
                   };
                 ft_ret =
                 { et_enforced = Typing_defs_core.Unenforced;
@@ -54,7 +55,8 @@
                   returns_readonly = false; readonly_this = false;
                   support_dynamic_type = false; is_memoized = false;
                   variadic = false };
-                ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+                ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+                ft_cross_package = None }));
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
           sm_attributes = [] }
          ];

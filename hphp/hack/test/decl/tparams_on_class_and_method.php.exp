@@ -40,8 +40,8 @@
                    { Typing_defs_flags.FunParam.accept_disposable = false;
                      inout = false; has_default = false;
                      ifc_external = false; ifc_can_call = false;
-                     readonly = false };
-                    };
+                     readonly = false }
+                   };
                   { fp_pos = [4:35-37]; fp_name = (Some "$c");
                     fp_type =
                     { et_enforced = Typing_defs_core.Unenforced;
@@ -50,8 +50,8 @@
                     { Typing_defs_flags.FunParam.accept_disposable = false;
                       inout = false; has_default = false;
                       ifc_external = false; ifc_can_call = false;
-                      readonly = false };
-                     }
+                      readonly = false }
+                    }
                   ];
                 ft_implicit_params = { capability = (CapDefaults [4:19-20]) };
                 ft_ret =
@@ -69,7 +69,8 @@
                   returns_readonly = false; readonly_this = false;
                   support_dynamic_type = false; is_memoized = false;
                   variadic = false };
-                ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+                ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+                ft_cross_package = None }));
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
           sm_attributes = [] };
          { Shallow_decl_defs.sm_name = ([8:19-20], "g");
@@ -92,8 +93,8 @@
                     { Typing_defs_flags.FunParam.accept_disposable = false;
                       inout = false; has_default = false;
                       ifc_external = false; ifc_can_call = false;
-                      readonly = false };
-                     };
+                      readonly = false }
+                    };
                    { fp_pos = [8:35-37]; fp_name = (Some "$d");
                      fp_type =
                      { et_enforced = Typing_defs_core.Unenforced;
@@ -102,8 +103,8 @@
                      { Typing_defs_flags.FunParam.accept_disposable = false;
                        inout = false; has_default = false;
                        ifc_external = false; ifc_can_call = false;
-                       readonly = false };
-                      }
+                       readonly = false }
+                     }
                    ];
                  ft_implicit_params =
                  { capability = (CapDefaults [8:19-20]) };
@@ -122,7 +123,8 @@
                    returns_readonly = false; readonly_this = false;
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
-                 ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+                 ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+                 ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] }
          ];

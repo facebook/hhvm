@@ -28,7 +28,8 @@
                   returns_readonly = false; readonly_this = false;
                   support_dynamic_type = false; is_memoized = false;
                   variadic = false };
-                ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+                ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+                ft_cross_package = None }));
           sm_visibility = Public;
           sm_deprecated =
           (Some "The method foo is deprecated: use bar() instead");
@@ -50,7 +51,8 @@
                    returns_readonly = false; readonly_this = false;
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
-                 ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+                 ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+                 ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] };
          { Shallow_decl_defs.sm_name = ([11:19-22], "baz");
@@ -70,7 +72,8 @@
                    returns_readonly = false; readonly_this = false;
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
-                 ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+                 ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+                 ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] };
          { Shallow_decl_defs.sm_name = ([14:19-23], "foo2");
@@ -90,7 +93,8 @@
                    returns_readonly = false; readonly_this = false;
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
-                 ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+                 ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+                 ft_cross_package = None }));
            sm_visibility = Public;
            sm_deprecated =
            (Some "The method foo2 is deprecated: use bar2() instead");
@@ -117,7 +121,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [18:10-13]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -140,7 +145,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [21:10-13]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -163,7 +169,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [24:10-13]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -187,7 +194,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [27:10-14]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }))

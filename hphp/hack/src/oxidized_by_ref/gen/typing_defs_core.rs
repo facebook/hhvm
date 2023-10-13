@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<29d85c633abd8990e1182648166c73cb>>
+// @generated SignedSource<<dc79ae68ffc68250a3994a022fff961c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -68,7 +68,7 @@ arena_deserializer::impl_deserialize_in_arena!(CeVisibility<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, hash, ord)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, ord, (show { with_path = false }))")]
 #[repr(C, u8)]
 pub enum IfcFunDecl<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -78,7 +78,7 @@ pub enum IfcFunDecl<'a> {
 impl<'a> TrivialDrop for IfcFunDecl<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(IfcFunDecl<'arena>);
 
-#[rust_to_ocaml(attr = "deriving (eq, hash, ord)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, ord, (show { with_path = false }))")]
 pub type CrossPackageDecl<'a> = Option<&'a str>;
 
 pub use oxidized::typing_defs_core::FunTparamsKind;
@@ -364,7 +364,7 @@ pub use oxidized::typing_defs_core::Enforcement;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, (show { with_path = false }))")]
 #[repr(C, u8)]
 pub enum Capability<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -392,7 +392,7 @@ arena_deserializer::impl_deserialize_in_arena!(Capability<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, (show { with_path = false }))")]
 #[repr(C)]
 pub struct FunImplicitParams<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -416,7 +416,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunImplicitParams<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, (show { with_path = false }))")]
 #[rust_to_ocaml(prefix = "et_")]
 #[repr(C)]
 pub struct PossiblyEnforcedTy<'a> {
@@ -443,7 +443,7 @@ arena_deserializer::impl_deserialize_in_arena!(PossiblyEnforcedTy<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, (show { with_path = false }))")]
 #[rust_to_ocaml(prefix = "fp_")]
 #[repr(C)]
 pub struct FunParam<'a> {
@@ -460,7 +460,7 @@ pub struct FunParam<'a> {
 impl<'a> TrivialDrop for FunParam<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(FunParam<'arena>);
 
-#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, (show { with_path = false }))")]
 pub type FunParams<'a> = [&'a FunParam<'a>];
 
 /// The type of a function AND a method.
@@ -479,7 +479,7 @@ pub type FunParams<'a> = [&'a FunParam<'a>];
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, hash)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, (show { with_path = false }))")]
 #[rust_to_ocaml(prefix = "ft_")]
 #[repr(C)]
 pub struct FunType<'a> {
@@ -519,7 +519,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunType<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving hash")]
+#[rust_to_ocaml(attr = "deriving (hash, (show { with_path = false }))")]
 #[repr(C, u8)]
 pub enum NegType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

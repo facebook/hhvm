@@ -17,7 +17,8 @@
                returns_readonly = false; readonly_this = false;
                support_dynamic_type = false; is_memoized = false;
                variadic = false };
-             ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+             ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+             ft_cross_package = None }));
        fe_pos = [3:10-25]; fe_php_std_lib = false;
        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
        fe_no_auto_likes = false }));
@@ -40,7 +41,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [4:10-29]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -63,7 +65,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [7:10-35]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -83,8 +86,8 @@
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; has_default = false; ifc_external = false;
-                   ifc_can_call = false; readonly = false };
-                  };
+                   ifc_can_call = false; readonly = false }
+                 };
                 { fp_pos = [11:46-51]; fp_name = (Some "$arg2");
                   fp_type =
                   { et_enforced = Typing_defs_core.Unenforced;
@@ -92,8 +95,8 @@
                   fp_flags =
                   { Typing_defs_flags.FunParam.accept_disposable = false;
                     inout = false; has_default = false; ifc_external = false;
-                    ifc_can_call = false; readonly = false };
-                   }
+                    ifc_can_call = false; readonly = false }
+                  }
                 ];
               ft_implicit_params = { capability = (CapDefaults [11:10-28]) };
               ft_ret =
@@ -106,7 +109,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [11:10-28]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -136,8 +140,8 @@
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; has_default = false; ifc_external = false;
-                   ifc_can_call = false; readonly = false };
-                  }
+                   ifc_can_call = false; readonly = false }
+                 }
                 ];
               ft_implicit_params = { capability = (CapDefaults [14:10-42]) };
               ft_ret =
@@ -152,7 +156,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [14:10-42]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -178,8 +183,8 @@
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; has_default = false; ifc_external = false;
-                   ifc_can_call = false; readonly = false };
-                  }
+                   ifc_can_call = false; readonly = false }
+                 }
                 ];
               ft_implicit_params = { capability = (CapDefaults [18:10-26]) };
               ft_ret =
@@ -192,7 +197,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [18:10-26]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -224,8 +230,8 @@
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; has_default = false; ifc_external = false;
-                   ifc_can_call = false; readonly = false };
-                  };
+                   ifc_can_call = false; readonly = false }
+                 };
                 { fp_pos = [24:6-11]; fp_name = (Some "$arg2");
                   fp_type =
                   { et_enforced = Typing_defs_core.Unenforced;
@@ -233,8 +239,8 @@
                   fp_flags =
                   { Typing_defs_flags.FunParam.accept_disposable = false;
                     inout = false; has_default = false; ifc_external = false;
-                    ifc_can_call = false; readonly = false };
-                   }
+                    ifc_can_call = false; readonly = false }
+                  }
                 ];
               ft_implicit_params = { capability = (CapDefaults [22:10-38]) };
               ft_ret =
@@ -247,7 +253,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [22:10-38]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -274,7 +281,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [29:10-30]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -297,8 +305,8 @@
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; has_default = false; ifc_external = false;
-                   ifc_can_call = false; readonly = false };
-                  }
+                   ifc_can_call = false; readonly = false }
+                 }
                 ];
               ft_implicit_params = { capability = (CapDefaults [33:10-24]) };
               ft_ret =
@@ -311,7 +319,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [33:10-24]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -331,8 +340,8 @@
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = true; has_default = false; ifc_external = false;
-                   ifc_can_call = false; readonly = false };
-                  }
+                   ifc_can_call = false; readonly = false }
+                 }
                 ];
               ft_implicit_params = { capability = (CapDefaults [35:10-16]) };
               ft_ret =
@@ -345,7 +354,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [35:10-16]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -371,8 +381,8 @@
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; has_default = false; ifc_external = false;
-                   ifc_can_call = false; readonly = false };
-                  };
+                   ifc_can_call = false; readonly = false }
+                 };
                 { fp_pos = [39:24-31]; fp_name = (Some "$unused");
                   fp_type =
                   { et_enforced = Typing_defs_core.Unenforced;
@@ -390,8 +400,8 @@
                              { Typing_defs_flags.FunParam.accept_disposable =
                                false; inout = false; has_default = false;
                                ifc_external = false; ifc_can_call = false;
-                               readonly = false };
-                              }
+                               readonly = false }
+                             }
                             ];
                           ft_implicit_params =
                           { capability = (CapDefaults [39:3-23]) };
@@ -406,14 +416,14 @@
                             returns_readonly = false; readonly_this = false;
                             support_dynamic_type = false;
                             is_memoized = false; variadic = false };
-                          ft_ifc_decl = FDPolicied {PUBLIC};
+                          ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                           ft_cross_package = None }))
                     };
                   fp_flags =
                   { Typing_defs_flags.FunParam.accept_disposable = false;
                     inout = false; has_default = false; ifc_external = false;
-                    ifc_can_call = false; readonly = false };
-                   }
+                    ifc_can_call = false; readonly = false }
+                  }
                 ];
               ft_implicit_params = { capability = (CapDefaults [37:10-37]) };
               ft_ret =
@@ -445,8 +455,8 @@
                                       has_default = false;
                                       ifc_external = false;
                                       ifc_can_call = false; readonly = false
-                                      };
-                                     }
+                                      }
+                                    }
                                    ];
                                  ft_implicit_params =
                                  { capability = (CapDefaults [40:14-34]) };
@@ -464,15 +474,15 @@
                                    readonly_this = false;
                                    support_dynamic_type = false;
                                    is_memoized = false; variadic = false };
-                                 ft_ifc_decl = FDPolicied {PUBLIC};
+                                 ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                                  ft_cross_package = None }))
                            };
                          fp_flags =
                          { Typing_defs_flags.FunParam.accept_disposable =
                            false; inout = false; has_default = false;
                            ifc_external = false; ifc_can_call = false;
-                           readonly = false };
-                          }
+                           readonly = false }
+                         }
                         ];
                       ft_implicit_params =
                       { capability = (CapDefaults [40:4-42]) };
@@ -487,7 +497,7 @@
                         returns_readonly = false; readonly_this = false;
                         support_dynamic_type = false; is_memoized = false;
                         variadic = false };
-                      ft_ifc_decl = FDPolicied {PUBLIC};
+                      ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                       ft_cross_package = None }))
                 };
               ft_flags =
@@ -497,7 +507,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [37:10-37]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -523,8 +534,8 @@
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; has_default = false; ifc_external = false;
-                   ifc_can_call = false; readonly = false };
-                  }
+                   ifc_can_call = false; readonly = false }
+                 }
                 ];
               ft_implicit_params = { capability = (CapDefaults [46:10-28]) };
               ft_ret =
@@ -543,7 +554,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [46:10-28]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -587,8 +599,8 @@
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; has_default = false; ifc_external = false;
-                   ifc_can_call = false; readonly = false };
-                  }
+                   ifc_can_call = false; readonly = false }
+                 }
                 ];
               ft_implicit_params = { capability = (CapDefaults [52:10-24]) };
               ft_ret =
@@ -601,7 +613,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [52:10-24]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -621,8 +634,8 @@
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; has_default = false; ifc_external = false;
-                   ifc_can_call = false; readonly = false };
-                  }
+                   ifc_can_call = false; readonly = false }
+                 }
                 ];
               ft_implicit_params = { capability = (CapDefaults [56:10-28]) };
               ft_ret =
@@ -635,7 +648,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [56:10-28]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -658,7 +672,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [60:10-28]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -678,8 +693,8 @@
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; has_default = false; ifc_external = false;
-                   ifc_can_call = false; readonly = false };
-                  }
+                   ifc_can_call = false; readonly = false }
+                 }
                 ];
               ft_implicit_params = { capability = (CapDefaults [65:10-27]) };
               ft_ret =
@@ -692,7 +707,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = true };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [65:10-27]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }))

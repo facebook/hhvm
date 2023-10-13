@@ -35,8 +35,8 @@
                       { Typing_defs_flags.FunParam.accept_disposable = false;
                         inout = false; has_default = false;
                         ifc_external = false; ifc_can_call = false;
-                        readonly = false };
-                       }
+                        readonly = false }
+                      }
                      ];
                    ft_implicit_params =
                    { capability = (CapDefaults [4:66-83]) };
@@ -50,8 +50,8 @@
                      returns_readonly = false; readonly_this = false;
                      support_dynamic_type = false; is_memoized = false;
                      variadic = false };
-                   ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None
-                   }))
+                   ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+                   ft_cross_package = None }))
              ]));
        td_is_ctx = false; td_attributes = []; td_internal = false;
        td_docs_url = None }));

@@ -14,8 +14,8 @@
                 fp_flags =
                 { Typing_defs_flags.FunParam.accept_disposable = false;
                   inout = false; has_default = false; ifc_external = false;
-                  ifc_can_call = false; readonly = false };
-                 }
+                  ifc_can_call = false; readonly = false }
+                }
                ];
              ft_implicit_params = { capability = (CapDefaults [3:10-11]) };
              ft_ret =
@@ -28,7 +28,8 @@
                returns_readonly = false; readonly_this = false;
                support_dynamic_type = false; is_memoized = false;
                variadic = false };
-             ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+             ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+             ft_cross_package = None }));
        fe_pos = [3:10-11]; fe_php_std_lib = false;
        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
        fe_no_auto_likes = false }))

@@ -24,9 +24,10 @@ type ce_visibility =
 type ifc_fun_decl =
   | FDPolicied of string option
   | FDInferFlows
-[@@deriving eq, hash, ord]
+[@@deriving eq, hash, ord, show { with_path = false }]
 
-type cross_package_decl = string option [@@deriving eq, hash, ord]
+type cross_package_decl = string option
+[@@deriving eq, hash, ord, show { with_path = false }]
 
 (* The default policy is the public one. PUBLIC is a keyword, so no need to prevent class collisions *)
 let default_ifc_fun_decl = FDPolicied (Some "PUBLIC")
@@ -83,7 +84,7 @@ type tshape_field_name =
 [@@deriving eq, hash, ord, show]
 
 module TShapeField = struct
-  type t = tshape_field_name [@@deriving hash]
+  type t = tshape_field_name [@@deriving hash, show { with_path = false }]
 
   let pos : t -> Pos_or_decl.t = function
     | TSFlit_int (p, _)
@@ -211,19 +212,19 @@ type enforcement =
 type 'ty capability =
   | CapDefaults of (Pos_or_decl.t[@hash.ignore])
   | CapTy of 'ty
-[@@deriving eq, hash]
+[@@deriving eq, hash, show { with_path = false }]
 
 (** Companion to fun_params type, intended to consolidate checking of
  * implicit params for functions. *)
 type 'ty fun_implicit_params = { capability: 'ty capability }
-[@@deriving eq, hash]
+[@@deriving eq, hash, show { with_path = false }]
 
 type 'ty possibly_enforced_ty = {
   et_enforced: enforcement;
       (** True if consumer of this type enforces it at runtime *)
   et_type: 'ty;
 }
-[@@deriving eq, hash]
+[@@deriving eq, hash, show { with_path = false }]
 
 type 'ty fun_param = {
   fp_pos: Pos_or_decl.t; [@hash.ignore] [@equal (fun _ _ -> true)]
@@ -231,9 +232,10 @@ type 'ty fun_param = {
   fp_type: 'ty possibly_enforced_ty;
   fp_flags: Typing_defs_flags.FunParam.t;
 }
-[@@deriving eq, hash]
+[@@deriving eq, hash, show { with_path = false }]
 
-type 'ty fun_params = 'ty fun_param list [@@deriving eq, hash]
+type 'ty fun_params = 'ty fun_param list
+[@@deriving eq, hash, show { with_path = false }]
 
 (** The type of a function AND a method. *)
 type 'ty fun_type = {
@@ -247,12 +249,12 @@ type 'ty fun_type = {
   ft_ifc_decl: ifc_fun_decl;
   ft_cross_package: cross_package_decl;
 }
-[@@deriving eq, hash]
+[@@deriving eq, hash, show { with_path = false }]
 
 type neg_type =
   | Neg_prim of Ast_defs.tprim
   | Neg_class of pos_id
-[@@deriving hash]
+[@@deriving hash, show { with_path = false }]
 
 (* This is to avoid a compile error with ppx_hash "Unbound value _hash_fold_phase". *)
 let _hash_fold_phase hsv _ = hsv
@@ -559,18 +561,6 @@ module Pp = struct
     pp_ty_ fmt a1;
     Format.fprintf fmt "@])"
 
-  and pp_neg_type : Format.formatter -> neg_type -> unit =
-   fun fmt neg_ty ->
-    match neg_ty with
-    | Neg_prim tp ->
-      Format.fprintf fmt "(@[<2>Neg_prim@ ";
-      Aast.pp_tprim fmt tp;
-      Format.fprintf fmt "@])"
-    | Neg_class c ->
-      Format.fprintf fmt "(@[<2>Neg_class ";
-      pp_pos_id fmt c;
-      Format.fprintf fmt "@])"
-
   and pp_ty_ : type a. Format.formatter -> a ty_ -> unit =
    fun fmt ty ->
     match ty with
@@ -626,7 +616,7 @@ module Pp = struct
       Format.fprintf fmt "@])"
     | Tfun a0 ->
       Format.fprintf fmt "(@[<2>Tfun@ ";
-      pp_fun_type fmt a0;
+      pp_fun_type pp_ty fmt a0;
       Format.fprintf fmt "@])"
     | Ttuple a0 ->
       Format.fprintf fmt "(@[<2>Ttuple@ ";
@@ -718,7 +708,7 @@ module Pp = struct
     Format.fprintf fmt ";@ ";
     Format.fprintf fmt "}@]"
 
-  and pp_exact fmt e =
+  and pp_exact fmt (e : exact) =
     match e with
     | Exact -> Format.pp_print_string fmt "Exact"
     | Nonexact cr ->
@@ -735,184 +725,38 @@ module Pp = struct
     Format.fprintf fmt "@,]@]";
     Format.fprintf fmt "@])"
 
-  and pp_possibly_enforced_ty :
-      type a. Format.formatter -> a ty possibly_enforced_ty -> unit =
-   fun fmt x ->
-    Format.fprintf fmt "@[<2>{ ";
-
-    Format.fprintf fmt "@[%s =@ " "et_enforced";
-    Format.fprintf fmt "%a" pp_enforcement x.et_enforced;
-    Format.fprintf fmt "@]";
-    Format.fprintf fmt ";@ ";
-
-    Format.fprintf fmt "@[%s =@ " "et_type";
-    pp_ty fmt x.et_type;
-    Format.fprintf fmt "@]";
-    Format.fprintf fmt "@ }@]"
-
-  and pp_capability : type a. Format.formatter -> a ty capability -> unit =
-   fun fmt -> function
-    | CapTy ty ->
-      Format.pp_print_string fmt "(CapTy ";
-      pp_ty fmt ty;
-      Format.pp_print_string fmt ")"
-    | CapDefaults pos ->
-      Format.pp_print_string fmt "(CapDefaults ";
-      Pos_or_decl.pp fmt pos;
-      Format.pp_print_string fmt ")"
-
-  and pp_fun_implicit_params :
-      type a. Format.formatter -> a ty fun_implicit_params -> unit =
-   fun fmt x ->
-    Format.fprintf fmt "@[<2>{ ";
-
-    Format.fprintf fmt "@[%s =@ " "capability";
-    pp_capability fmt x.capability;
-    Format.fprintf fmt "@]";
-
-    Format.fprintf fmt "@ }@]"
-
   and pp_shape_field_type :
       type a. Format.formatter -> a shape_field_type -> unit =
-   fun fmt x ->
+   fun fmt { sft_optional; sft_ty } ->
     Format.fprintf fmt "@[<2>{ ";
     Format.fprintf fmt "@[%s =@ " "sft_optional";
-    Format.fprintf fmt "%B" x.sft_optional;
+    Format.fprintf fmt "%B" sft_optional;
     Format.fprintf fmt "@]";
     Format.fprintf fmt ";@ ";
     Format.fprintf fmt "@[%s =@ " "sft_ty";
-    pp_ty fmt x.sft_ty;
+    pp_ty fmt sft_ty;
     Format.fprintf fmt "@]";
     Format.fprintf fmt "@ }@]"
 
-  and pp_ifc_fun_decl : Format.formatter -> ifc_fun_decl -> unit =
-   fun fmt r ->
-    match r with
-    | FDInferFlows -> Format.pp_print_string fmt "FDInferFlows"
-    | FDPolicied None -> Format.pp_print_string fmt "FDPolicied {}"
-    | FDPolicied (Some s) ->
-      Format.pp_print_string fmt "FDPolicied {";
-      Format.pp_print_string fmt s;
-      Format.pp_print_string fmt "}"
-
-  and pp_cross_package_decl : Format.formatter -> cross_package_decl -> unit =
-   fun fmt r ->
-    match r with
-    | Some s ->
-      Format.pp_print_string fmt "CrossPackage(";
-      Format.pp_print_string fmt s;
-      Format.pp_print_string fmt ")"
-    | None -> Format.pp_print_string fmt "None"
-
   and pp_shape_type : type a. Format.formatter -> a shape_type -> unit =
-   fun fmt x ->
+   fun fmt { s_origin; s_fields; s_unknown_value } ->
     Format.fprintf fmt "@[<2>{ ";
 
     Format.fprintf fmt "@[%s =@ " "s_origin";
-    pp_type_origin fmt x.s_origin;
+    pp_type_origin fmt s_origin;
     Format.fprintf fmt "@]";
     Format.fprintf fmt ";@ ";
 
     Format.fprintf fmt "@[%s =@ " "s_fields";
-    TShapeMap.pp pp_shape_field_type fmt x.s_fields;
+    TShapeMap.pp pp_shape_field_type fmt s_fields;
     Format.fprintf fmt "@]";
     Format.fprintf fmt ";@ ";
 
     Format.fprintf fmt "@[%s =@ " "s_unknown_value";
-    pp_ty fmt x.s_unknown_value;
+    pp_ty fmt s_unknown_value;
     Format.fprintf fmt "@]";
 
     Format.fprintf fmt "@ }@]"
-
-  and pp_fun_type : type a. Format.formatter -> a ty fun_type -> unit =
-   fun fmt x ->
-    Format.fprintf fmt "@[<2>{ ";
-
-    Format.fprintf fmt "@[%s =@ " "ft_tparams";
-    pp_list pp_tparam_ fmt x.ft_tparams;
-    Format.fprintf fmt "@]";
-    Format.fprintf fmt ";@ ";
-
-    Format.fprintf fmt "@[%s =@ " "ft_where_constraints";
-    pp_list pp_where_constraint_ fmt x.ft_where_constraints;
-    Format.fprintf fmt "@]";
-    Format.fprintf fmt ";@ ";
-
-    Format.fprintf fmt "@[%s =@ " "ft_params";
-    pp_list pp_fun_param fmt x.ft_params;
-    Format.fprintf fmt "@]";
-    Format.fprintf fmt ";@ ";
-
-    Format.fprintf fmt "@[%s =@ " "ft_implicit_params";
-    pp_fun_implicit_params fmt x.ft_implicit_params;
-    Format.fprintf fmt "@]";
-    Format.fprintf fmt ";@ ";
-
-    Format.fprintf fmt "@[%s =@ " "ft_ret";
-    pp_possibly_enforced_ty fmt x.ft_ret;
-    Format.fprintf fmt "@]";
-    Format.fprintf fmt ";@ ";
-
-    Format.fprintf fmt "@[%s =@ " "ft_flags";
-    Typing_defs_flags.Fun.pp fmt x.ft_flags;
-    Format.fprintf fmt "@]";
-    Format.fprintf fmt ";@ ";
-
-    Format.fprintf fmt "@[%s =@ " "ft_ifc_decl";
-    pp_ifc_fun_decl fmt x.ft_ifc_decl;
-    Format.fprintf fmt "@]";
-    Format.fprintf fmt ";@ ";
-
-    Format.fprintf fmt "@[%s =@ " "ft_cross_package";
-    pp_cross_package_decl fmt x.ft_cross_package;
-    Format.fprintf fmt "@]";
-
-    Format.fprintf fmt "@ }@]"
-
-  and pp_where_constraint_ :
-      type a. Format.formatter -> a ty where_constraint -> unit =
-   (fun fmt whcstr -> pp_where_constraint pp_ty fmt whcstr)
-
-  and pp_fun_param : type a. Format.formatter -> a ty fun_param -> unit =
-   fun fmt x ->
-    Format.fprintf fmt "@[<2>{ ";
-
-    Format.fprintf fmt "@[%s =@ " "fp_pos";
-    Pos_or_decl.pp fmt x.fp_pos;
-    Format.fprintf fmt "@]";
-    Format.fprintf fmt ";@ ";
-
-    Format.fprintf fmt "@[%s =@ " "fp_name";
-    (match x.fp_name with
-    | None -> Format.pp_print_string fmt "None"
-    | Some x ->
-      Format.pp_print_string fmt "(Some ";
-      Format.fprintf fmt "%S" x;
-      Format.pp_print_string fmt ")");
-    Format.fprintf fmt "@]";
-    Format.fprintf fmt ";@ ";
-
-    Format.fprintf fmt "@[%s =@ " "fp_type";
-    pp_possibly_enforced_ty fmt x.fp_type;
-    Format.fprintf fmt "@]";
-    Format.fprintf fmt ";@ ";
-
-    Format.fprintf fmt "@[%s =@ " "fp_flags";
-    Typing_defs_flags.FunParam.pp fmt x.fp_flags;
-    Format.fprintf fmt "@]";
-    Format.fprintf fmt ";@ ";
-    Format.fprintf fmt "@ }@]"
-
-  and pp_tparam_ : type a. Format.formatter -> a ty tparam -> unit =
-   (fun fmt tparam -> pp_tparam pp_ty fmt tparam)
-
-  let pp_possibly_enforced_ty :
-      type a.
-      (Format.formatter -> a ty -> unit) ->
-      Format.formatter ->
-      a ty possibly_enforced_ty ->
-      unit =
-   (fun _ fmt x -> pp_possibly_enforced_ty fmt x)
 
   let pp_decl_ty : Format.formatter -> decl_ty -> unit =
    (fun fmt ty -> pp_ty fmt ty)

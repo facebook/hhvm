@@ -25,7 +25,7 @@ type cross_package_decl = string option [@@deriving eq, ord]
 type ifc_fun_decl =
   | FDPolicied of string option
   | FDInferFlows
-[@@deriving eq, ord]
+[@@deriving eq, ord, show]
 
 val default_ifc_fun_decl : ifc_fun_decl
 
@@ -92,7 +92,7 @@ type tshape_field_name =
     instead of Pos.t. Aast.ShapeField is used in shape expressions,
     while this is used in shape types. *)
 module TShapeField : sig
-  type t = tshape_field_name
+  type t = tshape_field_name [@@deriving show]
 
   val pos : t -> Pos_or_decl.t
 
@@ -191,7 +191,7 @@ type neg_type =
        of values, then (Neg_class C) is complement (Union tyl. C<tyl>), that is
        all values that are not in C<t1, ..., tn> for any application of C to type
        arguments. *)
-[@@deriving hash]
+[@@deriving hash, show]
 
 (** Because Tfun is currently used as both a decl and locl ty, without this,
   the HH\Contexts\defaults alias must be stored in shared memory for a
@@ -200,17 +200,18 @@ type neg_type =
 type 'ty capability =
   | CapDefaults of Pos_or_decl.t  (** Should not be used for lambda inference *)
   | CapTy of 'ty
-[@@deriving hash]
+[@@deriving hash, show]
 
 (** Companion to fun_params type, intended to consolidate checking of
   implicit params for functions. *)
-type 'ty fun_implicit_params = { capability: 'ty capability } [@@deriving hash]
+type 'ty fun_implicit_params = { capability: 'ty capability }
+[@@deriving hash, show]
 
 type 'ty possibly_enforced_ty = {
   et_enforced: enforcement;
   et_type: 'ty;
 }
-[@@deriving hash]
+[@@deriving hash, show]
 
 type 'ty fun_param = {
   fp_pos: Pos_or_decl.t;
@@ -218,7 +219,7 @@ type 'ty fun_param = {
   fp_type: 'ty possibly_enforced_ty;
   fp_flags: Typing_defs_flags.FunParam.t;
 }
-[@@deriving hash]
+[@@deriving hash, show]
 
 type 'ty fun_params = 'ty fun_param list [@@deriving hash]
 
@@ -233,7 +234,7 @@ type 'ty fun_type = {
   ft_ifc_decl: ifc_fun_decl;
   ft_cross_package: cross_package_decl;
 }
-[@@deriving hash]
+[@@deriving hash, show]
 
 (** = Reason.t * 'phase ty_ *)
 type 'phase ty
@@ -495,28 +496,11 @@ module Pp : sig
 
   val pp_taccess_type : Format.formatter -> 'a taccess_type -> unit
 
-  val pp_possibly_enforced_ty :
-    (Format.formatter -> 'a ty -> unit) ->
-    Format.formatter ->
-    'a ty possibly_enforced_ty ->
-    unit
-
-  val pp_fun_implicit_params :
-    Format.formatter -> 'a ty fun_implicit_params -> unit
-
   val pp_shape_field_type : Format.formatter -> 'a shape_field_type -> unit
-
-  val pp_fun_type : Format.formatter -> 'a ty fun_type -> unit
-
-  val pp_fun_param : Format.formatter -> 'a ty fun_param -> unit
 
   val show_decl_ty : decl_ty -> string
 
   val show_locl_ty : locl_ty -> string
-
-  val pp_ifc_fun_decl : Format.formatter -> ifc_fun_decl -> unit
-
-  val pp_cross_package_decl : Format.formatter -> cross_package_decl -> unit
 end
 
 include module type of Pp

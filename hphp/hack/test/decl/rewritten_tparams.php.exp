@@ -63,8 +63,9 @@
                          ft_params = [];
                          ft_implicit_params =
                          { capability =
-                           (CapTy (Rhint ([8:16-17]),
-                                   (Tgeneric ("T/[ctx $f]", []))))
+                           (CapTy
+                              (Rhint ([8:16-17]),
+                               (Tgeneric ("T/[ctx $f]", []))))
                            };
                          ft_ret =
                          { et_enforced = Typing_defs_core.Unenforced;
@@ -77,14 +78,14 @@
                            returns_readonly = false; readonly_this = false;
                            support_dynamic_type = false; is_memoized = false;
                            variadic = false };
-                         ft_ifc_decl = FDPolicied {PUBLIC};
+                         ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                          ft_cross_package = None }))
                    };
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; has_default = false; ifc_external = false;
-                   ifc_can_call = false; readonly = false };
-                  };
+                   ifc_can_call = false; readonly = false }
+                 };
                 { fp_pos = [9:5-7]; fp_name = (Some "$v");
                   fp_type =
                   { et_enforced = Typing_defs_core.Unenforced;
@@ -92,17 +93,16 @@
                   fp_flags =
                   { Typing_defs_flags.FunParam.accept_disposable = false;
                     inout = false; has_default = false; ifc_external = false;
-                    ifc_can_call = false; readonly = false };
-                   }
+                    ifc_can_call = false; readonly = false }
+                  }
                 ];
               ft_implicit_params =
               { capability =
-                (CapTy (Rhint ([10:2-17]),
-                        (Tintersection
-                           [(Rhint ([10:3-9]), (Tgeneric ("T/[ctx $f]", [])));
-                             (Rhint ([10:11-16]),
-                              (Tgeneric ("T/[$v::C]", [])))
-                             ])))
+                (CapTy
+                   (Rhint ([10:2-17]),
+                    (Tintersection
+                       [(Rhint ([10:3-9]), (Tgeneric ("T/[ctx $f]", [])));
+                         (Rhint ([10:11-16]), (Tgeneric ("T/[$v::C]", [])))])))
                 };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
@@ -114,7 +114,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [7:10-11]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -153,8 +154,8 @@
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; has_default = false; ifc_external = false;
-                   ifc_can_call = false; readonly = false };
-                  }
+                   ifc_can_call = false; readonly = false }
+                 }
                 ];
               ft_implicit_params =
               { capability =
@@ -169,7 +170,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [14:10-11]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -217,8 +219,9 @@
                              ft_params = [];
                              ft_implicit_params =
                              { capability =
-                               (CapTy (Rhint ([19:17-18]),
-                                       (Tgeneric ("T/[ctx $f]", []))))
+                               (CapTy
+                                  (Rhint ([19:17-18]),
+                                   (Tgeneric ("T/[ctx $f]", []))))
                                };
                              ft_ret =
                              { et_enforced = Typing_defs_core.Unenforced;
@@ -233,14 +236,14 @@
                                readonly_this = false;
                                support_dynamic_type = false;
                                is_memoized = false; variadic = false };
-                             ft_ifc_decl = FDPolicied {PUBLIC};
+                             ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                              ft_cross_package = None }))))
                    };
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; has_default = false; ifc_external = false;
-                   ifc_can_call = false; readonly = false };
-                  };
+                   ifc_can_call = false; readonly = false }
+                 };
                 { fp_pos = [20:6-8]; fp_name = (Some "$v");
                   fp_type =
                   { et_enforced = Typing_defs_core.Unenforced;
@@ -251,17 +254,16 @@
                   fp_flags =
                   { Typing_defs_flags.FunParam.accept_disposable = false;
                     inout = false; has_default = false; ifc_external = false;
-                    ifc_can_call = false; readonly = false };
-                   }
+                    ifc_can_call = false; readonly = false }
+                  }
                 ];
               ft_implicit_params =
               { capability =
-                (CapTy (Rhint ([21:2-17]),
-                        (Tintersection
-                           [(Rhint ([21:3-9]), (Tgeneric ("T/[ctx $f]", [])));
-                             (Rhint ([21:11-16]),
-                              (Tgeneric ("T/[$v::C]", [])))
-                             ])))
+                (CapTy
+                   (Rhint ([21:2-17]),
+                    (Tintersection
+                       [(Rhint ([21:3-9]), (Tgeneric ("T/[ctx $f]", [])));
+                         (Rhint ([21:11-16]), (Tgeneric ("T/[$v::C]", [])))])))
                 };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
@@ -273,7 +275,8 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
+              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
+              ft_cross_package = None }));
         fe_pos = [18:10-11]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }))

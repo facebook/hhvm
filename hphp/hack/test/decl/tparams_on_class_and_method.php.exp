@@ -62,9 +62,12 @@
                         (Rhint ([4:45-47]), (Tgeneric ("Tc", [])))]))
                   };
                 ft_flags =
-                (make_ft_flags FSync ~return_disposable:false
-                  ~returns_readonly:false ~support_dynamic_type:false
-                  ~readonly_this:false ~is_memoized:false ~variadic:false);
+                { Typing_defs_flags.Fun.return_disposable = false;
+                  async = false; generator = false; fun_kind = FSync;
+                  instantiated_targs = false; is_function_pointer = false;
+                  returns_readonly = false; readonly_this = false;
+                  support_dynamic_type = false; is_memoized = false;
+                  variadic = false };
                 ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
           sm_attributes = [] };
@@ -112,9 +115,12 @@
                          (Rhint ([8:45-47]), (Tgeneric ("Td", [])))]))
                    };
                  ft_flags =
-                 (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~support_dynamic_type:false
-                   ~readonly_this:false ~is_memoized:false ~variadic:false);
+                 { Typing_defs_flags.Fun.return_disposable = false;
+                   async = false; generator = false; fun_kind = FSync;
+                   instantiated_targs = false; is_function_pointer = false;
+                   returns_readonly = false; readonly_this = false;
+                   support_dynamic_type = false; is_memoized = false;
+                   variadic = false };
                  ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] }

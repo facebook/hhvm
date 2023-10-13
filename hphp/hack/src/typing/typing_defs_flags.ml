@@ -25,7 +25,7 @@ let set_bit bit value flags =
     Int.bit_and (Int.bit_not bit) flags
 
 module Fun : sig
-  type t [@@deriving eq, hash, ord]
+  type t [@@deriving eq, hash, ord, show]
 
   val return_disposable : t -> bool
 
@@ -82,6 +82,21 @@ module Fun : sig
   val default : t
 end = struct
   type t = int [@@deriving eq, hash, ord]
+
+  type record = {
+    return_disposable: bool;
+    async: bool;
+    generator: bool;
+    fun_kind: Ast_defs.fun_kind;
+    instantiated_targs: bool;
+    is_function_pointer: bool;
+    returns_readonly: bool;
+    readonly_this: bool;
+    support_dynamic_type: bool;
+    is_memoized: bool;
+    variadic: bool;
+  }
+  [@@deriving show]
 
   let return_disposable_mask = 1 lsl 0
 
@@ -174,6 +189,25 @@ end = struct
     |> set_variadic variadic
 
   let default = 0
+
+  let as_record t =
+    {
+      return_disposable = return_disposable t;
+      async = async t;
+      generator = generator t;
+      fun_kind = fun_kind t;
+      instantiated_targs = instantiated_targs t;
+      is_function_pointer = is_function_pointer t;
+      returns_readonly = returns_readonly t;
+      readonly_this = readonly_this t;
+      support_dynamic_type = support_dynamic_type t;
+      is_memoized = is_memoized t;
+      variadic = variadic t;
+    }
+
+  let pp fmt t = pp_record fmt (as_record t)
+
+  let show t = Format.asprintf "%a" pp t
 end
 
 type fun_param_flags = int [@@deriving eq, hash]

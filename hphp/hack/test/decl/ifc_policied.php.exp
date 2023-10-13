@@ -37,9 +37,12 @@
                  { et_enforced = Typing_defs_core.Unenforced;
                    et_type = (Rhint ([7:24-28]), (Tprim Tvoid)) };
                  ft_flags =
-                 (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~support_dynamic_type:false
-                   ~readonly_this:false ~is_memoized:false ~variadic:false);
+                 { Typing_defs_flags.Fun.return_disposable = false;
+                   async = false; generator = false; fun_kind = FSync;
+                   instantiated_targs = false; is_function_pointer = false;
+                   returns_readonly = false; readonly_this = false;
+                   support_dynamic_type = false; is_memoized = false;
+                   variadic = false };
                  ft_ifc_decl = FDPolicied {Test}; ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] };
@@ -54,9 +57,12 @@
                   { et_enforced = Typing_defs_core.Unenforced;
                     et_type = (Rhint ([10:24-28]), (Tprim Tvoid)) };
                   ft_flags =
-                  (make_ft_flags FSync ~return_disposable:false
-                    ~returns_readonly:false ~support_dynamic_type:false
-                    ~readonly_this:false ~is_memoized:false ~variadic:false);
+                  { Typing_defs_flags.Fun.return_disposable = false;
+                    async = false; generator = false; fun_kind = FSync;
+                    instantiated_targs = false; is_function_pointer = false;
+                    returns_readonly = false; readonly_this = false;
+                    support_dynamic_type = false; is_memoized = false;
+                    variadic = false };
                   ft_ifc_decl = FDPolicied {Public}; ft_cross_package = None
                   }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
@@ -72,9 +78,12 @@
                   { et_enforced = Typing_defs_core.Unenforced;
                     et_type = (Rhint ([13:31-35]), (Tprim Tvoid)) };
                   ft_flags =
-                  (make_ft_flags FSync ~return_disposable:false
-                    ~returns_readonly:false ~support_dynamic_type:false
-                    ~readonly_this:false ~is_memoized:false ~variadic:false);
+                  { Typing_defs_flags.Fun.return_disposable = false;
+                    async = false; generator = false; fun_kind = FSync;
+                    instantiated_targs = false; is_function_pointer = false;
+                    returns_readonly = false; readonly_this = false;
+                    support_dynamic_type = false; is_memoized = false;
+                    variadic = false };
                   ft_ifc_decl = FDPolicied {}; ft_cross_package = None }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
             sm_attributes = [] };
@@ -89,9 +98,12 @@
                   { et_enforced = Typing_defs_core.Unenforced;
                     et_type = (Rhint ([16:33-37]), (Tprim Tvoid)) };
                   ft_flags =
-                  (make_ft_flags FSync ~return_disposable:false
-                    ~returns_readonly:false ~support_dynamic_type:false
-                    ~readonly_this:false ~is_memoized:false ~variadic:false);
+                  { Typing_defs_flags.Fun.return_disposable = false;
+                    async = false; generator = false; fun_kind = FSync;
+                    instantiated_targs = false; is_function_pointer = false;
+                    returns_readonly = false; readonly_this = false;
+                    support_dynamic_type = false; is_memoized = false;
+                    variadic = false };
                   ft_ifc_decl = FDInferFlows; ft_cross_package = None }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
             sm_attributes = [] };
@@ -106,9 +118,12 @@
                   { et_enforced = Typing_defs_core.Unenforced;
                     et_type = (Rhint ([19:32-36]), (Tprim Tvoid)) };
                   ft_flags =
-                  (make_ft_flags FSync ~return_disposable:false
-                    ~returns_readonly:false ~support_dynamic_type:false
-                    ~readonly_this:false ~is_memoized:false ~variadic:false);
+                  { Typing_defs_flags.Fun.return_disposable = false;
+                    async = false; generator = false; fun_kind = FSync;
+                    instantiated_targs = false; is_function_pointer = false;
+                    returns_readonly = false; readonly_this = false;
+                    support_dynamic_type = false; is_memoized = false;
+                    variadic = false };
                   ft_ifc_decl = FDPolicied {\Policy}; ft_cross_package = None
                   }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
@@ -124,9 +139,12 @@
                   { et_enforced = Typing_defs_core.Unenforced;
                     et_type = (Rhint ([22:31-35]), (Tprim Tvoid)) };
                   ft_flags =
-                  (make_ft_flags FSync ~return_disposable:false
-                    ~returns_readonly:false ~support_dynamic_type:false
-                    ~readonly_this:false ~is_memoized:false ~variadic:false);
+                  { Typing_defs_flags.Fun.return_disposable = false;
+                    async = false; generator = false; fun_kind = FSync;
+                    instantiated_targs = false; is_function_pointer = false;
+                    returns_readonly = false; readonly_this = false;
+                    support_dynamic_type = false; is_memoized = false;
+                    variadic = false };
                   ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None
                   }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
@@ -165,11 +183,14 @@
                                 et_type = (Rhint ([26:32-36]), (Tprim Tvoid))
                                 };
                               ft_flags =
-                              (make_ft_flags FSync ~return_disposable:false
-                                ~returns_readonly:false
-                                ~support_dynamic_type:false
-                                ~readonly_this:false ~is_memoized:false
-                                ~variadic:false);
+                              { Typing_defs_flags.Fun.return_disposable =
+                                false; async = false; generator = false;
+                                fun_kind = FSync; instantiated_targs = false;
+                                is_function_pointer = false;
+                                returns_readonly = false;
+                                readonly_this = false;
+                                support_dynamic_type = false;
+                                is_memoized = false; variadic = false };
                               ft_ifc_decl = FDPolicied {PUBLIC};
                               ft_cross_package = None }))
                         };
@@ -186,9 +207,12 @@
                   { et_enforced = Typing_defs_core.Unenforced;
                     et_type = (Rhint ([27:6-10]), (Tprim Tvoid)) };
                   ft_flags =
-                  (make_ft_flags FSync ~return_disposable:false
-                    ~returns_readonly:false ~support_dynamic_type:false
-                    ~readonly_this:false ~is_memoized:false ~variadic:false);
+                  { Typing_defs_flags.Fun.return_disposable = false;
+                    async = false; generator = false; fun_kind = FSync;
+                    instantiated_targs = false; is_function_pointer = false;
+                    returns_readonly = false; readonly_this = false;
+                    support_dynamic_type = false; is_memoized = false;
+                    variadic = false };
                   ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None
                   }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
@@ -208,9 +232,12 @@
               { et_enforced = Typing_defs_core.Unenforced;
                 et_type = (Rhint ([31:24-28]), (Tprim Tvoid)) };
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                instantiated_targs = false; is_function_pointer = false;
+                returns_readonly = false; readonly_this = false;
+                support_dynamic_type = false; is_memoized = false;
+                variadic = false };
               ft_ifc_decl = FDInferFlows; ft_cross_package = None }));
         fe_pos = [31:10-20]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;

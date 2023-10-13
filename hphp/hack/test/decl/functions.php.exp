@@ -11,9 +11,12 @@
              { et_enforced = Typing_defs_core.Unenforced;
                et_type = (Rhint ([3:29-33]), (Tprim Tvoid)) };
              ft_flags =
-             (make_ft_flags FSync ~return_disposable:false
-               ~returns_readonly:false ~support_dynamic_type:false
-               ~readonly_this:false ~is_memoized:false ~variadic:false);
+             { Typing_defs_flags.Fun.return_disposable = false;
+               async = false; generator = false; fun_kind = FSync;
+               instantiated_targs = false; is_function_pointer = false;
+               returns_readonly = false; readonly_this = false;
+               support_dynamic_type = false; is_memoized = false;
+               variadic = false };
              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
        fe_pos = [3:10-25]; fe_php_std_lib = false;
        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -31,9 +34,12 @@
               { et_enforced = Typing_defs_core.Unenforced;
                 et_type = (Rhint ([4:33-36]), (Tprim Tint)) };
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                instantiated_targs = false; is_function_pointer = false;
+                returns_readonly = false; readonly_this = false;
+                support_dynamic_type = false; is_memoized = false;
+                variadic = false };
               ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
         fe_pos = [4:10-29]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -51,9 +57,12 @@
               { et_enforced = Typing_defs_core.Unenforced;
                 et_type = (Rhint ([7:39-44]), (Tprim Tfloat)) };
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                instantiated_targs = false; is_function_pointer = false;
+                returns_readonly = false; readonly_this = false;
+                support_dynamic_type = false; is_memoized = false;
+                variadic = false };
               ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
         fe_pos = [7:10-35]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -91,9 +100,12 @@
               { et_enforced = Typing_defs_core.Unenforced;
                 et_type = (Rhint ([11:54-58]), (Tprim Tvoid)) };
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                instantiated_targs = false; is_function_pointer = false;
+                returns_readonly = false; readonly_this = false;
+                support_dynamic_type = false; is_memoized = false;
+                variadic = false };
               ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
         fe_pos = [11:10-28]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -134,9 +146,12 @@
                 (Rhint ([14:59-66]), (Tapply (([14:59-66], "\\Typedef"), [])))
                 };
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                instantiated_targs = false; is_function_pointer = false;
+                returns_readonly = false; readonly_this = false;
+                support_dynamic_type = false; is_memoized = false;
+                variadic = false };
               ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
         fe_pos = [14:10-42]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -171,9 +186,12 @@
               { et_enforced = Typing_defs_core.Unenforced;
                 et_type = (Rhint ([18:40-41]), (Tgeneric ("T", []))) };
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                instantiated_targs = false; is_function_pointer = false;
+                returns_readonly = false; readonly_this = false;
+                support_dynamic_type = false; is_memoized = false;
+                variadic = false };
               ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
         fe_pos = [18:10-26]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -223,9 +241,12 @@
               { et_enforced = Typing_defs_core.Unenforced;
                 et_type = (Rhint ([25:4-6]), (Tgeneric ("T1", []))) };
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                instantiated_targs = false; is_function_pointer = false;
+                returns_readonly = false; readonly_this = false;
+                support_dynamic_type = false; is_memoized = false;
+                variadic = false };
               ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
         fe_pos = [22:10-38]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -247,9 +268,12 @@
                     [(Rhint ([29:49-52]), (Tprim Tint))])))
                 };
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                instantiated_targs = false; is_function_pointer = false;
+                returns_readonly = false; readonly_this = false;
+                support_dynamic_type = false; is_memoized = false;
+                variadic = false };
               ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
         fe_pos = [29:10-30]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -281,9 +305,12 @@
               { et_enforced = Typing_defs_core.Unenforced;
                 et_type = (Rhint ([33:35-39]), (Tprim Tvoid)) };
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                instantiated_targs = false; is_function_pointer = false;
+                returns_readonly = false; readonly_this = false;
+                support_dynamic_type = false; is_memoized = false;
+                variadic = false };
               ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
         fe_pos = [33:10-24]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -312,9 +339,12 @@
               { et_enforced = Typing_defs_core.Unenforced;
                 et_type = (Rhint ([35:32-36]), (Tprim Tvoid)) };
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                instantiated_targs = false; is_function_pointer = false;
+                returns_readonly = false; readonly_this = false;
+                support_dynamic_type = false; is_memoized = false;
+                variadic = false };
               ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
         fe_pos = [35:10-16]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -370,10 +400,13 @@
                           { et_enforced = Typing_defs_core.Unenforced;
                             et_type = (Rhint ([39:18-22]), (Tprim Tvoid)) };
                           ft_flags =
-                          (make_ft_flags FSync ~return_disposable:false
-                            ~returns_readonly:false
-                            ~support_dynamic_type:false ~readonly_this:false
-                            ~is_memoized:false ~variadic:false);
+                          { Typing_defs_flags.Fun.return_disposable = false;
+                            async = false; generator = false;
+                            fun_kind = FSync; instantiated_targs = false;
+                            is_function_pointer = false;
+                            returns_readonly = false; readonly_this = false;
+                            support_dynamic_type = false;
+                            is_memoized = false; variadic = false };
                           ft_ifc_decl = FDPolicied {PUBLIC};
                           ft_cross_package = None }))
                     };
@@ -422,12 +455,15 @@
                                    et_type =
                                    (Rhint ([40:29-33]), (Tprim Tvoid)) };
                                  ft_flags =
-                                 (make_ft_flags FSync
-                                   ~return_disposable:false
-                                   ~returns_readonly:false
-                                   ~support_dynamic_type:false
-                                   ~readonly_this:false ~is_memoized:false
-                                   ~variadic:false);
+                                 { Typing_defs_flags.Fun.return_disposable =
+                                   false; async = false; generator = false;
+                                   fun_kind = FSync;
+                                   instantiated_targs = false;
+                                   is_function_pointer = false;
+                                   returns_readonly = false;
+                                   readonly_this = false;
+                                   support_dynamic_type = false;
+                                   is_memoized = false; variadic = false };
                                  ft_ifc_decl = FDPolicied {PUBLIC};
                                  ft_cross_package = None }))
                            };
@@ -444,17 +480,23 @@
                       { et_enforced = Typing_defs_core.Unenforced;
                         et_type = (Rhint ([40:37-41]), (Tprim Tvoid)) };
                       ft_flags =
-                      (make_ft_flags FSync ~return_disposable:false
-                        ~returns_readonly:false ~support_dynamic_type:false
-                        ~readonly_this:false ~is_memoized:false
-                        ~variadic:false);
+                      { Typing_defs_flags.Fun.return_disposable = false;
+                        async = false; generator = false; fun_kind = FSync;
+                        instantiated_targs = false;
+                        is_function_pointer = false;
+                        returns_readonly = false; readonly_this = false;
+                        support_dynamic_type = false; is_memoized = false;
+                        variadic = false };
                       ft_ifc_decl = FDPolicied {PUBLIC};
                       ft_cross_package = None }))
                 };
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                instantiated_targs = false; is_function_pointer = false;
+                returns_readonly = false; readonly_this = false;
+                support_dynamic_type = false; is_memoized = false;
+                variadic = false };
               ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
         fe_pos = [37:10-37]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -495,9 +537,12 @@
                     )))
                 };
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                instantiated_targs = false; is_function_pointer = false;
+                returns_readonly = false; readonly_this = false;
+                support_dynamic_type = false; is_memoized = false;
+                variadic = false };
               ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
         fe_pos = [46:10-28]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -550,9 +595,12 @@
               { et_enforced = Typing_defs_core.Unenforced;
                 et_type = (Rhint ([52:47-51]), (Tprim Tnull)) };
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                instantiated_targs = false; is_function_pointer = false;
+                returns_readonly = false; readonly_this = false;
+                support_dynamic_type = false; is_memoized = false;
+                variadic = false };
               ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
         fe_pos = [52:10-24]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -581,9 +629,12 @@
               { et_enforced = Typing_defs_core.Unenforced;
                 et_type = (Rhint ([56:43-51]), (Tprim Tresource)) };
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                instantiated_targs = false; is_function_pointer = false;
+                returns_readonly = false; readonly_this = false;
+                support_dynamic_type = false; is_memoized = false;
+                variadic = false };
               ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
         fe_pos = [56:10-28]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -601,9 +652,12 @@
               { et_enforced = Typing_defs_core.Unenforced;
                 et_type = (Rhint ([60:32-40]), (Tprim Tnoreturn)) };
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                instantiated_targs = false; is_function_pointer = false;
+                returns_readonly = false; readonly_this = false;
+                support_dynamic_type = false; is_memoized = false;
+                variadic = false };
               ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
         fe_pos = [60:10-28]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -632,9 +686,12 @@
               { et_enforced = Typing_defs_core.Unenforced;
                 et_type = (Rhint ([65:45-49]), (Tprim Tvoid)) };
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:true);
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                instantiated_targs = false; is_function_pointer = false;
+                returns_readonly = false; readonly_this = false;
+                support_dynamic_type = false; is_memoized = false;
+                variadic = true };
               ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
         fe_pos = [65:10-27]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;

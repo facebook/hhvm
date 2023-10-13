@@ -854,48 +854,8 @@ module Pp = struct
     Format.fprintf fmt "@]";
     Format.fprintf fmt ";@ ";
 
-    let pp_ft_flags fmt ft =
-      Format.fprintf fmt "@[<2>(%s@ " "make_ft_flags";
-
-      Format.fprintf fmt "@[";
-      Format.fprintf fmt "%s" (Ast_defs.show_fun_kind (get_ft_fun_kind ft));
-      Format.fprintf fmt "@]";
-      Format.fprintf fmt "@ ";
-
-      Format.fprintf fmt "@[~%s:" "return_disposable";
-      Format.fprintf fmt "%B" (get_ft_return_disposable ft);
-      Format.fprintf fmt "@]";
-      Format.fprintf fmt "@ ";
-
-      Format.fprintf fmt "@[~%s:" "returns_readonly";
-      Format.fprintf fmt "%B" (get_ft_returns_readonly ft);
-      Format.fprintf fmt "@]";
-      Format.fprintf fmt "@ ";
-
-      Format.fprintf fmt "@[~%s:" "support_dynamic_type";
-      Format.fprintf fmt "%B" (get_ft_support_dynamic_type ft);
-      Format.fprintf fmt "@]";
-      Format.fprintf fmt "@ ";
-
-      Format.fprintf fmt "@[~%s:" "readonly_this";
-      Format.fprintf fmt "%B" (get_ft_readonly_this ft);
-      Format.fprintf fmt "@]";
-      Format.fprintf fmt "@ ";
-
-      Format.fprintf fmt "@[~%s:" "is_memoized";
-      Format.fprintf fmt "%B" (get_ft_is_memoized ft);
-      Format.fprintf fmt "@]";
-      Format.fprintf fmt "@ ";
-
-      Format.fprintf fmt "@[~%s:" "variadic";
-      Format.fprintf fmt "%B" (get_ft_variadic ft);
-      Format.fprintf fmt "@]";
-
-      Format.fprintf fmt ")@]"
-    in
-
     Format.fprintf fmt "@[%s =@ " "ft_flags";
-    pp_ft_flags fmt x;
+    Typing_defs_flags.Fun.pp fmt x.ft_flags;
     Format.fprintf fmt "@]";
     Format.fprintf fmt ";@ ";
 

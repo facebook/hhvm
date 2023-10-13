@@ -18,9 +18,12 @@
                    )))
                };
              ft_flags =
-             (make_ft_flags FGenerator ~return_disposable:false
-               ~returns_readonly:false ~support_dynamic_type:false
-               ~readonly_this:false ~is_memoized:false ~variadic:false);
+             { Typing_defs_flags.Fun.return_disposable = false;
+               async = false; generator = true; fun_kind = FGenerator;
+               instantiated_targs = false; is_function_pointer = false;
+               returns_readonly = false; readonly_this = false;
+               support_dynamic_type = false; is_memoized = false;
+               variadic = false };
              ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
        fe_pos = [3:10-11]; fe_php_std_lib = false;
        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -38,9 +41,12 @@
               { et_enforced = Typing_defs_core.Unenforced;
                 et_type = (Rhint ([7:15-19]), (Tprim Tvoid)) };
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                instantiated_targs = false; is_function_pointer = false;
+                returns_readonly = false; readonly_this = false;
+                support_dynamic_type = false; is_memoized = false;
+                variadic = false };
               ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
         fe_pos = [7:10-11]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -58,9 +64,12 @@
               { et_enforced = Typing_defs_core.Unenforced;
                 et_type = (Rhint ([13:15-19]), (Tprim Tvoid)) };
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                instantiated_targs = false; is_function_pointer = false;
+                returns_readonly = false; readonly_this = false;
+                support_dynamic_type = false; is_memoized = false;
+                variadic = false };
               ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
         fe_pos = [13:10-11]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -82,9 +91,12 @@
                     [(Rhint ([19:31-35]), (Tprim Tvoid))])))
                 };
               ft_flags =
-              (make_ft_flags FAsync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = true; generator = false; fun_kind = FAsync;
+                instantiated_targs = false; is_function_pointer = false;
+                returns_readonly = false; readonly_this = false;
+                support_dynamic_type = false; is_memoized = false;
+                variadic = false };
               ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
         fe_pos = [19:16-17]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -108,9 +120,12 @@
                     )))
                 };
               ft_flags =
-              (make_ft_flags FAsyncGenerator ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = true; generator = true; fun_kind = FAsyncGenerator;
+                instantiated_targs = false; is_function_pointer = false;
+                returns_readonly = false; readonly_this = false;
+                support_dynamic_type = false; is_memoized = false;
+                variadic = false };
               ft_ifc_decl = FDPolicied {PUBLIC}; ft_cross_package = None }));
         fe_pos = [26:16-17]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;

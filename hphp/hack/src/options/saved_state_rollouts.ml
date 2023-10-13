@@ -13,7 +13,6 @@ type t = {
   dummy_two: bool;
   dummy_three: bool;
   optimized_member_fanout: bool;
-  optimized_private_member_fanout: bool;
   optimized_parent_fanout: bool;
 }
 [@@deriving eq, show]
@@ -32,7 +31,6 @@ type flag =
   | Dummy_two
   | Dummy_three
   | Optimized_member_fanout
-  | Optimized_private_member_fanout
   | Optimized_parent_fanout
 [@@deriving show { with_path = false }]
 
@@ -145,8 +143,7 @@ let rollout_order =
   | Dummy_two -> 1
   | Dummy_three -> 2
   | Optimized_member_fanout -> 4
-  | Optimized_private_member_fanout -> 5
-  | Optimized_parent_fanout -> 6
+  | Optimized_parent_fanout -> 5
 
 let make
     ~current_rolled_out_flag_idx
@@ -174,8 +171,6 @@ let make
     dummy_two = get_flag_value Dummy_two;
     dummy_three = get_flag_value Dummy_three;
     optimized_member_fanout = get_flag_value Optimized_member_fanout;
-    optimized_private_member_fanout =
-      get_flag_value Optimized_private_member_fanout;
     optimized_parent_fanout = get_flag_value Optimized_parent_fanout;
   }
 
@@ -195,7 +190,6 @@ let output t =
     dummy_two;
     dummy_three;
     optimized_member_fanout;
-    optimized_private_member_fanout;
     optimized_parent_fanout;
   } =
     t
@@ -204,7 +198,6 @@ let output t =
   print_flag Dummy_two dummy_two;
   print_flag Dummy_three dummy_three;
   print_flag Optimized_member_fanout optimized_member_fanout;
-  print_flag Optimized_private_member_fanout optimized_private_member_fanout;
   print_flag Optimized_parent_fanout optimized_parent_fanout;
   ()
 
@@ -218,7 +211,6 @@ let to_bit_array_string t : string =
     dummy_two;
     dummy_three;
     optimized_member_fanout;
-    optimized_private_member_fanout;
     optimized_parent_fanout;
   } =
     t
@@ -227,7 +219,6 @@ let to_bit_array_string t : string =
   ^ s dummy_two
   ^ s dummy_three
   ^ s optimized_member_fanout
-  ^ s optimized_private_member_fanout
   ^ s optimized_parent_fanout
 
 let to_hh_json t : Hh_json.json =
@@ -236,7 +227,6 @@ let to_hh_json t : Hh_json.json =
     dummy_two = _;
     dummy_three = _;
     optimized_member_fanout;
-    optimized_private_member_fanout;
     optimized_parent_fanout;
   } =
     t
@@ -244,7 +234,5 @@ let to_hh_json t : Hh_json.json =
   Hh_json.JSON_Object
     [
       ("optimized_member_fanout", Hh_json.bool_ optimized_member_fanout);
-      ( "optimized_private_member_fanout",
-        Hh_json.bool_ optimized_private_member_fanout );
       ("optimized_parent_fanout", Hh_json.bool_ optimized_parent_fanout);
     ]

@@ -6,8 +6,6 @@
  *
  *)
 
-type by_names
-
 type t [@@deriving yojson_of]
 
 val is_enabled : TypecheckerOptions.t -> bool

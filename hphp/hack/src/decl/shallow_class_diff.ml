@@ -160,7 +160,7 @@ let diff_members
           Member.diff old_member new_member
           |> Option.map ~f:(fun change ->
                  if
-                   TypecheckerOptions.optimized_private_member_fanout
+                   TypecheckerOptions.optimized_member_fanout
                      (Provider_context.get_tcopt ctx)
                    && (not Ast_defs.(is_c_trait classish_kind))
                    && Member.is_private old_member

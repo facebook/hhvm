@@ -251,10 +251,6 @@ let optimized_member_fanout t =
   GlobalOptions.(t.tco_saved_state.rollouts)
     .Saved_state_rollouts.optimized_member_fanout
 
-let optimized_private_member_fanout t =
-  GlobalOptions.(t.tco_saved_state.rollouts)
-    .Saved_state_rollouts.optimized_private_member_fanout
-
 let optimized_parent_fanout t =
   GlobalOptions.(t.tco_saved_state.rollouts)
     .Saved_state_rollouts.optimized_parent_fanout

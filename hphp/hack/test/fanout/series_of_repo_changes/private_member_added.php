@@ -15,6 +15,11 @@ class B extends A {
   }
 }
 
+//// c.php
+<?hh
+
+class C extends A {}
+
 //// main.php
 <?hh
 

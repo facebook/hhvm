@@ -42,7 +42,6 @@ impl Flag {
             Self::DummyTwo => 1,
             Self::DummyThree => 2,
             Self::OptimizedMemberFanout => 4,
-            Self::OptimizedPrivateMemberFanout => 5,
             Self::OptimizedParentFanout => 6,
         }
     }
@@ -53,7 +52,6 @@ impl Flag {
             Self::DummyTwo => "dummy_two",
             Self::DummyThree => "dummy_three",
             Self::OptimizedMemberFanout => "optimized_member_fanout",
-            Self::OptimizedPrivateMemberFanout => "optimized_private_member_fanout",
             Self::OptimizedParentFanout => "optimized_parent_fanout",
         }
     }
@@ -97,7 +95,6 @@ impl SavedStateRollouts {
             dummy_two: get_flag_value(Flag::DummyTwo)?,
             dummy_three: get_flag_value(Flag::DummyThree)?,
             optimized_member_fanout: get_flag_value(Flag::OptimizedMemberFanout)?,
-            optimized_private_member_fanout: get_flag_value(Flag::OptimizedPrivateMemberFanout)?,
             optimized_parent_fanout: get_flag_value(Flag::OptimizedParentFanout)?,
         })
     }

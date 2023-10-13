@@ -3719,7 +3719,7 @@ module Eval_primary = struct
     ( Error_code.StaticCallOnTraitRequireClass,
       lazy
         ( call_pos,
-          "Invoking static methods on traits is not sane and must be avoided. Since trait "
+          "Invoking static methods on traits is dangerous and must be avoided. Since trait "
           ^ trait_name
           ^ " has a "
           ^ Markdown_lite.md_codify ("require class " ^ req_class_name)

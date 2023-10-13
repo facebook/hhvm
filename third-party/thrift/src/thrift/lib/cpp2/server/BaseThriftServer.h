@@ -1157,12 +1157,35 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   }
 
   /**
+   * Set the queue timeout to processing timeout percentage. This is to ensure
+   * server can load shedding effectively when service is hosting many clients
+   * that has different client timeout. If set, Thrift Server will choose the
+   * high queue Timeout from this setting and queue timeout from
+   * setQueueTimeout() above. Also, notes if client side set queue_timeout
+   * explicitly, then server side queuetimeout setting will be ignored.
+   */
+  virtual void setQueueTimeoutPct(uint32_t queueTimeoutPct) {
+    thriftConfig_.setQueueTimeoutPct(
+        folly::observer::makeStaticObserver(std::optional{queueTimeoutPct}),
+        AttributeSource::OVERRIDE);
+  }
+
+  /**
    * Get the time requests are allowed to stay on the queue
    *
    * @return queue timeout
    */
   std::chrono::milliseconds getQueueTimeout() const {
     return thriftConfig_.getQueueTimeout().get();
+  }
+
+  /**
+   * Get the queue_timeout_pct.
+   *
+   * @return queue timeout percent
+   */
+  uint32_t getQueueTimeoutPct() const {
+    return thriftConfig_.getQueueTimeoutPct().get();
   }
 
   /**

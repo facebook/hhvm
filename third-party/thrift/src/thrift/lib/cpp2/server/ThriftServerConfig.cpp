@@ -252,6 +252,11 @@ ThriftServerConfig::getQueueTimeout() const {
   return queueTimeout_;
 }
 
+const ServerAttributeDynamic<uint32_t>& ThriftServerConfig::getQueueTimeoutPct()
+    const {
+  return queueTimeoutPct_;
+}
+
 const std::optional<std::chrono::milliseconds>
 ThriftServerConfig::getBaselineQueueTimeout() const {
   return queueTimeout_.getBaseline();
@@ -472,6 +477,12 @@ void ThriftServerConfig::setQueueTimeout(
     folly::observer::Observer<std::optional<std::chrono::milliseconds>> timeout,
     AttributeSource source) {
   queueTimeout_.set(timeout, source);
+}
+
+void ThriftServerConfig::setQueueTimeoutPct(
+    folly::observer::Observer<std::optional<uint32_t>> timeoutPct,
+    AttributeSource source) {
+  queueTimeoutPct_.set(timeoutPct, source);
 }
 
 void ThriftServerConfig::setSocketQueueTimeout(

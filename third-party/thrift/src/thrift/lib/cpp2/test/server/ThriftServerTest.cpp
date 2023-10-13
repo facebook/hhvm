@@ -2185,6 +2185,73 @@ TEST(ThriftServer, LatencyHeader_QueueTimeout) {
   std::move(slowRequestFuture).via(&base).getVia(&base);
 }
 
+TEST(ThriftServer, QueueTimeoutPctSetTest) {
+  ScopedServerInterfaceThread runner(std::make_shared<TestInterface>());
+  auto client =
+      runner.newStickyClient<TestServiceAsyncClient>(nullptr, [](auto socket) {
+        return HeaderClientChannel::newChannel(std::move(socket));
+      });
+
+  // setup a small queue timeout which will be overrided by QueueTimeoutPct.
+  runner.getThriftServer().setQueueTimeout(std::chrono::milliseconds(5));
+  runner.getThriftServer().setQueueTimeoutPct(50);
+
+  // Run a long request.
+  auto slowRequestFuture = client->semifuture_sendResponse(20000);
+
+  RpcOptions rpcOptions;
+  // QueueTimeout will be set to 100ms.
+  rpcOptions.setTimeout(std::chrono::milliseconds(200));
+
+  std::string response;
+  try {
+    client->sync_sendResponse(rpcOptions, response, 1000);
+  } catch (const TApplicationException&) {
+    FAIL() << "Should not trigger timeout.";
+  }
+  // Run another long request.
+  auto slowRequestFuture1 = client->semifuture_sendResponse(20000);
+  // Client Timeout not set, setQueueTimeoutPct will not be effective.
+  RpcOptions rpcOptions1;
+  std::string response1;
+  EXPECT_ANY_THROW(client->sync_sendResponse(rpcOptions1, response1, 1000));
+
+  folly::EventBase base;
+  std::move(slowRequestFuture).via(&base).getVia(&base);
+  std::move(slowRequestFuture1).via(&base).getVia(&base);
+}
+
+TEST(ThriftServer, QueueTimeoutDisabledTest) {
+  ScopedServerInterfaceThread runner(std::make_shared<TestInterface>());
+  auto client =
+      runner.newStickyClient<TestServiceAsyncClient>(nullptr, [](auto socket) {
+        return HeaderClientChannel::newChannel(std::move(socket));
+      });
+
+  // setup queuetimeout to 0 disables queuetimeout.
+  runner.getThriftServer().setQueueTimeout(std::chrono::milliseconds(0));
+  runner.getThriftServer().setQueueTimeoutPct(10);
+
+  // Run a long request.
+  auto slowRequestFuture = client->semifuture_sendResponse(20000);
+
+  RpcOptions rpcOptions;
+
+  // QueueTimeout will be set to 1ms if not disabled. However, since it was
+  // disabled by setQueueTimeout above, queue timeout won't be triggerd.
+  rpcOptions.setTimeout(std::chrono::milliseconds(10));
+
+  std::string response;
+  EXPECT_ANY_THROW(client->sync_sendResponse(rpcOptions, response, 1000));
+
+  // Latency headers are NOT set, when client times out.
+  validateLatencyHeaders(
+      rpcOptions.getReadHeaders(), LatencyHeaderStatus::NOT_EXPECTED);
+
+  folly::EventBase base;
+  std::move(slowRequestFuture).via(&base).getVia(&base);
+}
+
 TEST(ThriftServer, ClientTimeoutTest) {
   TestThriftServerFactory<TestInterface> factory;
   auto server = factory.create();

@@ -213,6 +213,12 @@ class ThriftServerConfig {
   const ServerAttributeDynamic<size_t>&
   getMinPayloadSizeToEnforceIngressMemoryLimit() const;
 
+  /**
+   * Get Queue Timeout Percentage, to tune Queue Timeout based on Client
+   * timeout.
+   */
+  const ServerAttributeDynamic<uint32_t>& getQueueTimeoutPct() const;
+
   const ServerAttributeDynamic<size_t>& getEgressBufferBackpressureThreshold()
       const;
 
@@ -454,6 +460,7 @@ class ThriftServerConfig {
       folly::observer::Observer<std::optional<std::chrono::milliseconds>>
           timeout,
       AttributeSource source = AttributeSource::OVERRIDE);
+
   /**
    * Sets the duration before which new connections waiting on a socket's
    * queue are closed. A value of 0 represents an infinite duration. See
@@ -504,6 +511,14 @@ class ThriftServerConfig {
   void setMinPayloadSizeToEnforceIngressMemoryLimit(
       folly::observer::Observer<std::optional<size_t>>
           minPayloadSizeToEnforceIngressMemoryLimit,
+      AttributeSource source = AttributeSource::OVERRIDE);
+
+  /**
+   * Set the queue_timeout to client timeout percentage. If the queue_timeout
+   * was set explicitly by client then this function does nothing.
+   */
+  void setQueueTimeoutPct(
+      folly::observer::Observer<std::optional<uint32_t>> queueTimeoutPct,
       AttributeSource source = AttributeSource::OVERRIDE);
 
   /**
@@ -654,6 +669,7 @@ class ThriftServerConfig {
             }
             return std::chrono::milliseconds(**timeoutMs);
           })};
+
   /**
    * The time we'll allow a new connection socket to wait on the queue
    * before closing the connection. See
@@ -784,6 +800,12 @@ class ThriftServerConfig {
               -> size_t { return **o < 0 ? 0ul : static_cast<size_t>(**o); })};
 
   /**
+   * Set this value to use client_timeout to determine queue_timeout. By default
+   * this was disabled.
+   */
+  ServerAttributeDynamic<uint32_t> queueTimeoutPct_{0};
+
+  /**
    * Per-connection threshold for number of allocated bytes allowed in
    * egress buffer before applying backpressure by pausing streams. (0 ==
    * disabled)
@@ -862,6 +884,7 @@ class ThriftServerInitialConfig {
   THRIFT_SERVER_INITIAL_CONFIG_DEFINE(size_t, ingressMemoryLimit, 0)
   THRIFT_SERVER_INITIAL_CONFIG_DEFINE(
       size_t, minPayloadSizeToEnforceIngressMemoryLimit, 0)
+
   /*
    * Running UBSan causes some tests to FATAL. The current theory is that this
    * is caused by the compiler not generating proper code for FOLLY_CONSTEVAL.

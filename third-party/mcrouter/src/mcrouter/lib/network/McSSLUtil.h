@@ -28,8 +28,11 @@ class McSSLUtil {
       folly::Function<bool(folly::AsyncSSLSocket*, bool, X509_STORE_CTX*)
                           const noexcept>;
 
+  using CertPair = std::tuple<
+      std::unique_ptr<folly::AsyncTransportCertificate>,
+      std::unique_ptr<folly::AsyncTransportCertificate>>;
   using DropCertificateX509PayloadFunction =
-      folly::Function<bool(folly::AsyncSSLSocket&) const noexcept>;
+      folly::Function<CertPair(folly::AsyncSSLSocket&) const noexcept>;
 
   static const std::string kTlsToPlainProtocolName;
 
@@ -105,7 +108,8 @@ class McSSLUtil {
   /**
    * Drops certificate x509 payload after connection is established
    */
-  static void dropCertificateX509Payload(folly::AsyncSSLSocket& sock) noexcept;
+  static CertPair dropCertificateX509Payload(
+      folly::AsyncSSLSocket& sock) noexcept;
 
   /**
    * Move the existing transport to kTLS if possible.  Return value of

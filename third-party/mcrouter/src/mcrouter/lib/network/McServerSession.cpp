@@ -764,7 +764,9 @@ void McServerSession::onAccepted() {
       std::make_unique<const McServerThriftRequestContext>(transport_.get());
   /* Trims the certificate memory */
   if (auto sock = transport_->getUnderlyingTransport<folly::AsyncSSLSocket>()) {
-    McSSLUtil::dropCertificateX509Payload(*sock);
+    auto [selfCert, peerCert] = McSSLUtil::dropCertificateX509Payload(*sock);
+    sock->setSelfCertificate(std::move(selfCert));
+    sock->setPeerCertificate(std::move(peerCert));
   }
   debugFifo_ = getDebugFifo(
       options_.debugFifoPath, transport_.get(), onRequest_->name());

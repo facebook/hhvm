@@ -267,6 +267,5 @@ let retype_magic_func
       {
         ft with
         ft_params = xs;
-        ft_flags =
-          Typing_defs_flags.(set_bit ft_flags_variadic false ft.ft_flags);
+        ft_flags = Typing_defs_flags.Fun.set_variadic false ft.ft_flags;
       } )

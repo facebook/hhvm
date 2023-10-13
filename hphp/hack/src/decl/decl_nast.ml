@@ -65,7 +65,7 @@ let lambda_decl_in_env (env : Decl_env.env) (f : Nast.fun_) :
             ft_implicit_params = { capability };
             ft_ret = { et_type = ret_ty; et_enforced = Unenforced };
             ft_flags =
-              make_ft_flags
+              Typing_defs_flags.Fun.make
                 f.f_fun_kind
                 ~return_disposable
                 ~returns_readonly:(Option.is_some f.f_readonly_ret)

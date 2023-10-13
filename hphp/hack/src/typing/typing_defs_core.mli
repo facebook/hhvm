@@ -229,7 +229,7 @@ type 'ty fun_type = {
   ft_params: 'ty fun_params;
   ft_implicit_params: 'ty fun_implicit_params;
   ft_ret: 'ty possibly_enforced_ty;
-  ft_flags: int;
+  ft_flags: Typing_defs_flags.Fun.t;
   ft_ifc_decl: ifc_fun_decl;
   ft_cross_package: cross_package_decl;
 }
@@ -454,6 +454,8 @@ module Flags : sig
 
   val get_ft_support_dynamic_type : 'a fun_type -> bool
 
+  val set_ft_support_dynamic_type : 'a fun_type -> bool -> 'a fun_type
+
   val get_ft_is_memoized : 'a fun_type -> bool
 
   val get_ft_variadic : 'a fun_type -> bool
@@ -463,18 +465,6 @@ module Flags : sig
   val get_fp_ifc_external : 'a fun_param -> bool
 
   val get_fp_readonly : 'a fun_param -> bool
-
-  val fun_kind_to_flags : Ast_defs.fun_kind -> Hh_prelude.Int.t
-
-  val make_ft_flags :
-    Ast_defs.fun_kind ->
-    return_disposable:bool ->
-    returns_readonly:bool ->
-    readonly_this:bool ->
-    support_dynamic_type:bool ->
-    is_memoized:bool ->
-    variadic:bool ->
-    Hh_prelude.Int.t
 
   val mode_to_flags : param_mode -> int
 

@@ -24,7 +24,157 @@ let set_bit bit value flags =
   else
     Int.bit_and (Int.bit_not bit) flags
 
-type fun_type_flags = int [@@deriving eq, hash]
+module Fun : sig
+  type t [@@deriving eq, hash, ord]
+
+  val return_disposable : t -> bool
+
+  val set_return_disposable : bool -> t -> t
+
+  val async : t -> bool
+
+  val set_async : bool -> t -> t
+
+  val generator : t -> bool
+
+  val set_generator : bool -> t -> t
+
+  val instantiated_targs : t -> bool
+
+  val set_instantiated_targs : bool -> t -> t
+
+  val is_function_pointer : t -> bool
+
+  val set_is_function_pointer : bool -> t -> t
+
+  val returns_readonly : t -> bool
+
+  val set_returns_readonly : bool -> t -> t
+
+  val readonly_this : t -> bool
+
+  val set_readonly_this : bool -> t -> t
+
+  val support_dynamic_type : t -> bool
+
+  val set_support_dynamic_type : bool -> t -> t
+
+  val is_memoized : t -> bool
+
+  val set_is_memoized : bool -> t -> t
+
+  val variadic : t -> bool
+
+  val set_variadic : bool -> t -> t
+
+  val fun_kind : t -> Ast_defs.fun_kind
+
+  val make :
+    Ast_defs.fun_kind ->
+    return_disposable:bool ->
+    returns_readonly:bool ->
+    readonly_this:bool ->
+    support_dynamic_type:bool ->
+    is_memoized:bool ->
+    variadic:bool ->
+    t
+
+  val default : t
+end = struct
+  type t = int [@@deriving eq, hash, ord]
+
+  let return_disposable_mask = 1 lsl 0
+
+  let return_disposable = is_set return_disposable_mask
+
+  let set_return_disposable = set_bit return_disposable_mask
+
+  let async_mask = 1 lsl 4
+
+  let async = is_set async_mask
+
+  let set_async = set_bit async_mask
+
+  let generator_mask = 1 lsl 5
+
+  let generator = is_set generator_mask
+
+  let set_generator = set_bit generator_mask
+
+  let fun_kind_to_flags kind =
+    match kind with
+    | Ast_defs.FSync -> 0
+    | Ast_defs.FAsync -> async_mask
+    | Ast_defs.FGenerator -> generator_mask
+    | Ast_defs.FAsyncGenerator -> Int.bit_or async_mask generator_mask
+
+  let fun_kind t =
+    match (async t, generator t) with
+    | (false, false) -> Ast_defs.FSync
+    | (true, false) -> Ast_defs.FAsync
+    | (false, true) -> Ast_defs.FGenerator
+    | (true, true) -> Ast_defs.FAsyncGenerator
+
+  let instantiated_targs_mask = 1 lsl 8
+
+  let instantiated_targs = is_set instantiated_targs_mask
+
+  let set_instantiated_targs = set_bit instantiated_targs_mask
+
+  let is_function_pointer_mask = 1 lsl 9
+
+  let is_function_pointer = is_set is_function_pointer_mask
+
+  let set_is_function_pointer = set_bit is_function_pointer_mask
+
+  let returns_readonly_mask = 1 lsl 10
+
+  let returns_readonly = is_set returns_readonly_mask
+
+  let set_returns_readonly = set_bit returns_readonly_mask
+
+  let readonly_this_mask = 1 lsl 11
+
+  let readonly_this = is_set readonly_this_mask
+
+  let set_readonly_this = set_bit readonly_this_mask
+
+  let support_dynamic_type_mask = 1 lsl 12
+
+  let support_dynamic_type = is_set support_dynamic_type_mask
+
+  let set_support_dynamic_type = set_bit support_dynamic_type_mask
+
+  let is_memoized_mask = 1 lsl 13
+
+  let is_memoized = is_set is_memoized_mask
+
+  let set_is_memoized = set_bit is_memoized_mask
+
+  let variadic_mask = 1 lsl 14
+
+  let variadic = is_set variadic_mask
+
+  let set_variadic = set_bit variadic_mask
+
+  let make
+      kind
+      ~return_disposable
+      ~returns_readonly
+      ~readonly_this
+      ~support_dynamic_type
+      ~is_memoized
+      ~variadic =
+    fun_kind_to_flags kind
+    |> set_return_disposable return_disposable
+    |> set_returns_readonly returns_readonly
+    |> set_readonly_this readonly_this
+    |> set_support_dynamic_type support_dynamic_type
+    |> set_is_memoized is_memoized
+    |> set_variadic variadic
+
+  let default = 0
+end
 
 type fun_param_flags = int [@@deriving eq, hash]
 
@@ -284,27 +434,6 @@ end
 [@@@ocamlformat "disable"]
 
 (* NB: Keep the values of these flags in sync with typing_defs_flags.rs. *)
-
-(* Function type flags *)
-let ft_flags_return_disposable  = 1 lsl 0
-
-let ft_flags_async              = 1 lsl 4
-
-let ft_flags_generator          = 1 lsl 5
-
-let ft_flags_instantiated_targs = 1 lsl 8
-
-let ft_flags_is_function_pointer = 1 lsl 9
-
-let ft_flags_returns_readonly = 1 lsl 10
-
-let ft_flags_readonly_this = 1 lsl 11
-
-let ft_flags_support_dynamic_type = 1 lsl 12
-
-let ft_flags_is_memoized = 1 lsl 13
-
-let ft_flags_variadic          = 1 lsl 14
 
 (* fun_param flags *)
 let fp_flags_accept_disposable = 1 lsl 0

@@ -1615,7 +1615,7 @@ let default_constructor_ce class_ =
       ft_params = [];
       ft_implicit_params = { capability = CapTy (MakeType.mixed r) };
       ft_ret = { et_type = MakeType.void r; et_enforced = Unenforced };
-      ft_flags = 0;
+      ft_flags = Typing_defs_flags.Fun.default;
       ft_ifc_decl = default_ifc_fun_decl;
       ft_cross_package = None;
     }

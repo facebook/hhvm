@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<eaf05db40fddaeebd2bc3d67c9d84470>>
+// @generated SignedSource<<67394429d0411c301a4f0f6276c95f78>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -494,7 +494,7 @@ pub struct FunType<'a> {
     /// Carries through the sync/async information from the aast
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub ret: &'a PossiblyEnforcedTy<'a>,
-    pub flags: typing_defs_flags::FunTypeFlags,
+    pub flags: typing_defs_flags::fun::Fun,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub ifc_decl: IfcFunDecl<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

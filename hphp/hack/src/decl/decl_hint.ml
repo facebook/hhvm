@@ -185,7 +185,7 @@ and hint_ p env = function
         ft_implicit_params = implicit_params;
         ft_ret = ret;
         ft_flags =
-          make_ft_flags
+          Typing_defs_flags.Fun.make
             Ast_defs.FSync
             ~return_disposable:false
             ~returns_readonly:(readonly_opt readonly_ret)

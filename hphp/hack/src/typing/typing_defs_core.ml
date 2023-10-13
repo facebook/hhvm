@@ -243,7 +243,7 @@ type 'ty fun_type = {
   ft_implicit_params: 'ty fun_implicit_params;
   ft_ret: 'ty possibly_enforced_ty;
       (** Carries through the sync/async information from the aast *)
-  ft_flags: Typing_defs_flags.fun_type_flags;
+  ft_flags: Typing_defs_flags.Fun.t;
   ft_ifc_decl: ifc_fun_decl;
   ft_cross_package: cross_package_decl;
 }
@@ -457,25 +457,23 @@ let refined_const_kind_str : type a. a refined_const -> string =
 module Flags = struct
   open Typing_defs_flags
 
-  let get_ft_return_disposable ft =
-    is_set ft.ft_flags ft_flags_return_disposable
+  let get_ft_return_disposable ft = Fun.return_disposable ft.ft_flags
 
-  let get_ft_returns_readonly ft = is_set ft.ft_flags ft_flags_returns_readonly
+  let get_ft_returns_readonly ft = Fun.returns_readonly ft.ft_flags
 
-  let get_ft_readonly_this ft = is_set ft.ft_flags ft_flags_readonly_this
+  let get_ft_readonly_this ft = Fun.readonly_this ft.ft_flags
 
-  let get_ft_async ft = is_set ft.ft_flags ft_flags_async
+  let get_ft_async ft = Fun.async ft.ft_flags
 
-  let get_ft_generator ft = is_set ft.ft_flags ft_flags_generator
+  let get_ft_generator ft = Fun.generator ft.ft_flags
 
-  let get_ft_support_dynamic_type ft =
-    is_set ft.ft_flags ft_flags_support_dynamic_type
+  let get_ft_support_dynamic_type ft = Fun.support_dynamic_type ft.ft_flags
 
   (* This flag is set true only if the exact method has the memoized attribute. *)
-  let get_ft_is_memoized ft = is_set ft.ft_flags ft_flags_is_memoized
+  let get_ft_is_memoized ft = Fun.is_memoized ft.ft_flags
 
   let get_ft_ftk ft =
-    if is_set ft.ft_flags ft_flags_instantiated_targs then
+    if Fun.instantiated_targs ft.ft_flags then
       FTKinstantiated_targs
     else
       FTKtparams
@@ -484,8 +482,7 @@ module Flags = struct
     {
       ft with
       ft_flags =
-        set_bit
-          ft_flags_instantiated_targs
+        Fun.set_instantiated_targs
           (match ftk with
           | FTKinstantiated_targs -> true
           | FTKtparams -> false)
@@ -493,66 +490,31 @@ module Flags = struct
     }
 
   let set_ft_is_function_pointer ft is_fp =
-    {
-      ft with
-      ft_flags = set_bit ft_flags_is_function_pointer is_fp ft.ft_flags;
-    }
+    { ft with ft_flags = Fun.set_is_function_pointer is_fp ft.ft_flags }
+
+  let get_ft_is_function_pointer ft = Fun.is_function_pointer ft.ft_flags
 
   let set_ft_readonly_this ft readonly_this =
-    {
-      ft with
-      ft_flags = set_bit ft_flags_readonly_this readonly_this ft.ft_flags;
-    }
+    { ft with ft_flags = Fun.set_readonly_this readonly_this ft.ft_flags }
 
   let set_ft_returns_readonly ft readonly_return =
+    { ft with ft_flags = Fun.set_returns_readonly readonly_return ft.ft_flags }
+
+  let set_ft_support_dynamic_type ft readonly_return =
     {
       ft with
-      ft_flags = set_bit ft_flags_returns_readonly readonly_return ft.ft_flags;
+      ft_flags = Fun.set_support_dynamic_type readonly_return ft.ft_flags;
     }
 
-  let get_ft_is_function_pointer ft =
-    is_set ft.ft_flags ft_flags_is_function_pointer
+  let get_ft_variadic ft = Fun.variadic ft.ft_flags
 
-  let get_ft_variadic ft = is_set ft.ft_flags ft_flags_variadic
-
-  let get_ft_fun_kind ft =
-    match (get_ft_async ft, get_ft_generator ft) with
-    | (false, false) -> Ast_defs.FSync
-    | (true, false) -> Ast_defs.FAsync
-    | (false, true) -> Ast_defs.FGenerator
-    | (true, true) -> Ast_defs.FAsyncGenerator
+  let get_ft_fun_kind ft = Fun.fun_kind ft.ft_flags
 
   let get_fp_ifc_external fp = is_set fp.fp_flags fp_flags_ifc_external
 
   let get_fp_ifc_can_call fp = is_set fp.fp_flags fp_flags_ifc_can_call
 
   let get_fp_readonly fp = is_set fp.fp_flags fp_flags_readonly
-
-  let fun_kind_to_flags kind =
-    match kind with
-    | Ast_defs.FSync -> 0
-    | Ast_defs.FAsync -> ft_flags_async
-    | Ast_defs.FGenerator -> ft_flags_generator
-    | Ast_defs.FAsyncGenerator -> Int.bit_or ft_flags_async ft_flags_generator
-
-  let make_ft_flags
-      kind
-      ~return_disposable
-      ~returns_readonly
-      ~readonly_this
-      ~support_dynamic_type
-      ~is_memoized
-      ~variadic =
-    let flags = fun_kind_to_flags kind in
-    let flags = set_bit ft_flags_return_disposable return_disposable flags in
-    let flags = set_bit ft_flags_returns_readonly returns_readonly flags in
-    let flags = set_bit ft_flags_readonly_this readonly_this flags in
-    let flags =
-      set_bit ft_flags_support_dynamic_type support_dynamic_type flags
-    in
-    let flags = set_bit ft_flags_is_memoized is_memoized flags in
-    let flags = set_bit ft_flags_variadic variadic flags in
-    flags
 
   let mode_to_flags mode =
     match mode with
@@ -1362,7 +1324,7 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
             where_constraints_compare where_constraints1 where_constraints2
           with
           | 0 -> begin
-            match Int.compare flags1 flags2 with
+            match Typing_defs_flags.Fun.compare flags1 flags2 with
             | 0 ->
               let { capability = capability1 } = implicit_params1 in
               let { capability = capability2 } = implicit_params2 in

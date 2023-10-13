@@ -164,14 +164,7 @@ let make_like env changed ty =
 let maybe_wrap_with_supportdyn ~should_wrap locl_r ft =
   if should_wrap then
     let r = Reason.Rsupport_dynamic_type (Reason.to_pos locl_r) in
-    let ft =
-      {
-        ft with
-        ft_flags =
-          Typing_defs_flags.(
-            set_bit ft_flags_support_dynamic_type false ft.ft_flags);
-      }
-    in
+    let ft = Typing_defs_core.set_ft_support_dynamic_type ft false in
     Typing_make_type.supportdyn r (mk (locl_r, Tfun ft))
   else
     mk (locl_r, Tfun ft)

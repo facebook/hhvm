@@ -178,6 +178,11 @@ pub mod class_elt {
     pub type ClassElt = ClassEltFlags;
 }
 
+pub mod fun {
+    use super::FunTypeFlags;
+    pub type Fun = FunTypeFlags;
+}
+
 impl ocamlrep::ToOcamlRep for ClassEltFlags {
     fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, _alloc: &'a A) -> ocamlrep::Value<'a> {
         ocamlrep::Value::int(self.bits() as isize)

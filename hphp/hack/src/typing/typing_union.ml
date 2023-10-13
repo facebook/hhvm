@@ -581,7 +581,7 @@ and union_lists ~approx_cancel_neg env tyl1 tyl2 r =
 and union_funs ~approx_cancel_neg env fty1 fty2 =
   (* TODO: If we later add fields to ft, they will be forgotten here. *)
   if
-    Int.equal fty1.ft_flags fty2.ft_flags
+    Typing_defs_flags.Fun.equal fty1.ft_flags fty2.ft_flags
     && Int.equal (ft_params_compare fty1.ft_params fty2.ft_params) 0
   then
     let (env, ft_ret) =

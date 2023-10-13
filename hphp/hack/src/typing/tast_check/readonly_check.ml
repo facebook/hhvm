@@ -466,11 +466,8 @@ let call
         match reason with
         (* If we got this function from a typehint, we suggest marking the function (readonly function) *)
         | Typing_reason.Rhint _ ->
-          let new_flags =
-            Typing_defs_flags.(set_bit ft_flags_readonly_this true fty.ft_flags)
-          in
-          let readonly_fty = Tfun { fty with ft_flags = new_flags } in
-          let suggested_fty = mk (reason, readonly_fty) in
+          let fty = Typing_defs_core.set_ft_readonly_this fty true in
+          let suggested_fty = mk (reason, Tfun fty) in
           let suggested_fty_str = Tast_env.print_ty env suggested_fty in
           "annotate this typehint as a " ^ suggested_fty_str
         (* Otherwise, it's likely from a Rwitness, but we suggest declaring it as readonly *)

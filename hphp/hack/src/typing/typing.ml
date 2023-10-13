@@ -9020,7 +9020,7 @@ and call_construct
         ft_implicit_params =
           { capability = CapDefaults (Pos_or_decl.of_raw_pos p) };
         ft_flags =
-          make_ft_flags
+          Typing_defs_flags.Fun.make
             Ast_defs.FSync
             ~return_disposable:false
             ~returns_readonly:false
@@ -9945,7 +9945,7 @@ and call
           let ft_ret = MakeType.enforced return_ty in
           let ft_flags =
             (* Keep supertype as permissive as possible: *)
-            make_ft_flags
+            Typing_defs_flags.Fun.make
               Ast_defs.FSync (* `FSync` fun can still return `Awaitable<_>` *)
               ~return_disposable:false (* TODO: deal with disposable return *)
               ~returns_readonly:false

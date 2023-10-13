@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<86573c49e780053c9324241e4d3da9d9>>
+// @generated SignedSource<<d73c21322b38e664c42a2a8f41cbc05f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -553,7 +553,7 @@ pub struct FunType {
     pub implicit_params: FunImplicitParams,
     /// Carries through the sync/async information from the aast
     pub ret: PossiblyEnforcedTy,
-    pub flags: typing_defs_flags::FunTypeFlags,
+    pub flags: typing_defs_flags::fun::Fun,
     pub ifc_decl: IfcFunDecl,
     pub cross_package: CrossPackageDecl,
 }

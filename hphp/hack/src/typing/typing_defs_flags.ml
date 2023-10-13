@@ -213,7 +213,7 @@ end = struct
 end
 
 module FunParam : sig
-  type t [@@deriving eq, hash, ord]
+  type t [@@deriving eq, hash, ord, show]
 
   val accept_disposable : t -> bool
 
@@ -249,6 +249,16 @@ module FunParam : sig
     t
 end = struct
   type t = flags [@@deriving eq, hash, ord]
+
+  type record = {
+    accept_disposable: bool;
+    inout: bool;
+    has_default: bool;
+    ifc_external: bool;
+    ifc_can_call: bool;
+    readonly: bool;
+  }
+  [@@deriving show]
 
   let accept_disposable_mask = 1 lsl 0
 
@@ -300,6 +310,20 @@ end = struct
     |> set_ifc_external ifc_external
     |> set_ifc_can_call ifc_can_call
     |> set_readonly readonly
+
+  let as_record t =
+    {
+      accept_disposable = accept_disposable t;
+      inout = inout t;
+      has_default = has_default t;
+      ifc_external = ifc_external t;
+      ifc_can_call = ifc_can_call t;
+      readonly = readonly t;
+    }
+
+  let pp fmt t = pp_record fmt (as_record t)
+
+  let show t = Format.asprintf "%a" pp t
 end
 
 module ClassElt : sig

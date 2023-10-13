@@ -122,20 +122,20 @@
                     { et_enforced = Typing_defs_core.Unenforced;
                       et_type = (Rhint ([15:5-11]), (Tprim Tstring)) };
                     fp_flags =
-                    (make_fp_flags ~accept_disposable:false
-                      ~has_default:false ~mode:Typing_defs_core.FPnormal
-                      ~ifc_external:false ~ifc_can_call:false
-                      ~readonly:false);
+                    { Typing_defs_flags.FunParam.accept_disposable = false;
+                      inout = false; has_default = false;
+                      ifc_external = false; ifc_can_call = false;
+                      readonly = false };
                      };
                    { fp_pos = [16:9-14]; fp_name = (Some "$arg2");
                      fp_type =
                      { et_enforced = Typing_defs_core.Unenforced;
                        et_type = (Rhint ([16:5-8]), (Tprim Tint)) };
                      fp_flags =
-                     (make_fp_flags ~accept_disposable:false
-                       ~has_default:false ~mode:Typing_defs_core.FPnormal
-                       ~ifc_external:false ~ifc_can_call:false
-                       ~readonly:false);
+                     { Typing_defs_flags.FunParam.accept_disposable = false;
+                       inout = false; has_default = false;
+                       ifc_external = false; ifc_can_call = false;
+                       readonly = false };
                       }
                    ];
                  ft_implicit_params =
@@ -247,32 +247,30 @@
                          { et_enforced = Typing_defs_core.Unenforced;
                            et_type = (Rhint ([29:13-19]), (Tprim Tstring)) };
                          fp_flags =
-                         (make_fp_flags ~accept_disposable:false
-                           ~has_default:false ~mode:Typing_defs_core.FPnormal
-                           ~ifc_external:false ~ifc_can_call:false
-                           ~readonly:false);
+                         { Typing_defs_flags.FunParam.accept_disposable =
+                           false; inout = false; has_default = false;
+                           ifc_external = false; ifc_can_call = false;
+                           readonly = false };
                           };
                         { fp_pos = [30:22-32]; fp_name = (Some "$protected");
                           fp_type =
                           { et_enforced = Typing_defs_core.Unenforced;
                             et_type = (Rhint ([30:15-21]), (Tprim Tstring)) };
                           fp_flags =
-                          (make_fp_flags ~accept_disposable:false
-                            ~has_default:false
-                            ~mode:Typing_defs_core.FPnormal
-                            ~ifc_external:false ~ifc_can_call:false
-                            ~readonly:false);
+                          { Typing_defs_flags.FunParam.accept_disposable =
+                            false; inout = false; has_default = false;
+                            ifc_external = false; ifc_can_call = false;
+                            readonly = false };
                            };
                         { fp_pos = [31:19-26]; fp_name = (Some "$public");
                           fp_type =
                           { et_enforced = Typing_defs_core.Unenforced;
                             et_type = (Rhint ([31:12-18]), (Tprim Tstring)) };
                           fp_flags =
-                          (make_fp_flags ~accept_disposable:false
-                            ~has_default:false
-                            ~mode:Typing_defs_core.FPnormal
-                            ~ifc_external:false ~ifc_can_call:false
-                            ~readonly:false);
+                          { Typing_defs_flags.FunParam.accept_disposable =
+                            false; inout = false; has_default = false;
+                            ifc_external = false; ifc_can_call = false;
+                            readonly = false };
                            };
                         { fp_pos = [32:19-30];
                           fp_name = (Some "$hasDefault");
@@ -280,10 +278,10 @@
                           { et_enforced = Typing_defs_core.Unenforced;
                             et_type = (Rhint ([32:12-18]), (Tprim Tstring)) };
                           fp_flags =
-                          (make_fp_flags ~accept_disposable:false
-                            ~has_default:true ~mode:Typing_defs_core.FPnormal
-                            ~ifc_external:false ~ifc_can_call:false
-                            ~readonly:false);
+                          { Typing_defs_flags.FunParam.accept_disposable =
+                            false; inout = false; has_default = true;
+                            ifc_external = false; ifc_can_call = false;
+                            readonly = false };
                            }
                         ];
                       ft_implicit_params =

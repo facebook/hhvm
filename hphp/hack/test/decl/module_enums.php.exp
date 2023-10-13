@@ -65,9 +65,9 @@ File root|module_enums.php--X.php
                    et_type =
                    (Rhint ([12:22-23]), (Tapply (([12:22-23], "\\X"), []))) };
                  fp_flags =
-                 (make_fp_flags ~accept_disposable:false ~has_default:false
-                   ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~readonly:false);
+                 { Typing_defs_flags.FunParam.accept_disposable = false;
+                   inout = false; has_default = false; ifc_external = false;
+                   ifc_can_call = false; readonly = false };
                   }
                 ];
               ft_implicit_params = { capability = (CapDefaults [12:19-21]) };
@@ -100,9 +100,9 @@ File root|module_enums.php--X.php
                    et_type =
                    (Rhint ([15:13-14]), (Tapply (([15:13-14], "\\X"), []))) };
                  fp_flags =
-                 (make_fp_flags ~accept_disposable:false ~has_default:false
-                   ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~readonly:false);
+                 { Typing_defs_flags.FunParam.accept_disposable = false;
+                   inout = false; has_default = false; ifc_external = false;
+                   ifc_can_call = false; readonly = false };
                   }
                 ];
               ft_implicit_params = { capability = (CapDefaults [15:10-12]) };
@@ -184,9 +184,9 @@ File root|module_enums.php--Y.php
                   et_type =
                   (Rhint ([6:13-14]), (Tapply (([6:13-14], "\\X"), []))) };
                 fp_flags =
-                (make_fp_flags ~accept_disposable:false ~has_default:false
-                  ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                  ~ifc_can_call:false ~readonly:false);
+                { Typing_defs_flags.FunParam.accept_disposable = false;
+                  inout = false; has_default = false; ifc_external = false;
+                  ifc_can_call = false; readonly = false };
                  }
                ];
              ft_implicit_params = { capability = (CapDefaults [6:10-12]) };
@@ -245,9 +245,9 @@ File root|module_enums.php--no-module.php
                   et_type =
                   (Rhint ([3:13-14]), (Tapply (([3:13-14], "\\X"), []))) };
                 fp_flags =
-                (make_fp_flags ~accept_disposable:false ~has_default:false
-                  ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                  ~ifc_can_call:false ~readonly:false);
+                { Typing_defs_flags.FunParam.accept_disposable = false;
+                  inout = false; has_default = false; ifc_external = false;
+                  ifc_can_call = false; readonly = false };
                  }
                ];
              ft_implicit_params = { capability = (CapDefaults [3:10-12]) };

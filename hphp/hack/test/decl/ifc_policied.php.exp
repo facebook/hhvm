@@ -163,10 +163,10 @@
                         (Tapply (([25:20-21], "\\C"), [])))
                        };
                      fp_flags =
-                     (make_fp_flags ~accept_disposable:false
-                       ~has_default:false ~mode:Typing_defs_core.FPnormal
-                       ~ifc_external:true ~ifc_can_call:false
-                       ~readonly:false);
+                     { Typing_defs_flags.FunParam.accept_disposable = false;
+                       inout = false; has_default = false;
+                       ifc_external = true; ifc_can_call = false;
+                       readonly = false };
                       };
                     { fp_pos = [26:38-40]; fp_name = (Some "$f");
                       fp_type =
@@ -195,10 +195,10 @@
                               ft_cross_package = None }))
                         };
                       fp_flags =
-                      (make_fp_flags ~accept_disposable:false
-                        ~has_default:false ~mode:Typing_defs_core.FPnormal
-                        ~ifc_external:false ~ifc_can_call:true
-                        ~readonly:false);
+                      { Typing_defs_flags.FunParam.accept_disposable = false;
+                        inout = false; has_default = false;
+                        ifc_external = false; ifc_can_call = true;
+                        readonly = false };
                        }
                     ];
                   ft_implicit_params =

@@ -22,9 +22,9 @@
                  { et_enforced = Typing_defs_core.Unenforced;
                    et_type = (Rhint ([7:12-18]), (Tprim Tstring)) };
                  fp_flags =
-                 (make_fp_flags ~accept_disposable:false ~has_default:false
-                   ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~readonly:false);
+                 { Typing_defs_flags.FunParam.accept_disposable = false;
+                   inout = false; has_default = false; ifc_external = false;
+                   ifc_can_call = false; readonly = false };
                   }
                 ];
               ft_implicit_params = { capability = (CapDefaults [7:10-11]) };
@@ -69,10 +69,10 @@
                       (Rhint ([10:21-22]), (Tapply (([10:21-22], "\\X"), [])))
                       };
                     fp_flags =
-                    (make_fp_flags ~accept_disposable:false
-                      ~has_default:false ~mode:Typing_defs_core.FPnormal
-                      ~ifc_external:false ~ifc_can_call:false
-                      ~readonly:false);
+                    { Typing_defs_flags.FunParam.accept_disposable = false;
+                      inout = false; has_default = false;
+                      ifc_external = false; ifc_can_call = false;
+                      readonly = false };
                      }
                    ];
                  ft_implicit_params =

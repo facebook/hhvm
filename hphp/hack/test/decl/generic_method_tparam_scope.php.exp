@@ -29,9 +29,10 @@
                    { et_enforced = Typing_defs_core.Unenforced;
                      et_type = (Rhint ([4:25-27]), (Tgeneric ("Ta", []))) };
                    fp_flags =
-                   (make_fp_flags ~accept_disposable:false ~has_default:false
-                     ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                     ~ifc_can_call:false ~readonly:false);
+                   { Typing_defs_flags.FunParam.accept_disposable = false;
+                     inout = false; has_default = false;
+                     ifc_external = false; ifc_can_call = false;
+                     readonly = false };
                     }
                   ];
                 ft_implicit_params = { capability = (CapDefaults [4:19-20]) };
@@ -65,10 +66,10 @@
                     { et_enforced = Typing_defs_core.Unenforced;
                       et_type = (Rhint ([8:25-27]), (Tgeneric ("Tb", []))) };
                     fp_flags =
-                    (make_fp_flags ~accept_disposable:false
-                      ~has_default:false ~mode:Typing_defs_core.FPnormal
-                      ~ifc_external:false ~ifc_can_call:false
-                      ~readonly:false);
+                    { Typing_defs_flags.FunParam.accept_disposable = false;
+                      inout = false; has_default = false;
+                      ifc_external = false; ifc_can_call = false;
+                      readonly = false };
                      }
                    ];
                  ft_implicit_params =

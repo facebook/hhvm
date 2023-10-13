@@ -38,9 +38,10 @@ File root|module_hint.php--here.php
                    { et_enforced = Typing_defs_core.Unenforced;
                      et_type = (Rhint ([7:23-28]), Tmixed) };
                    fp_flags =
-                   (make_fp_flags ~accept_disposable:false ~has_default:false
-                     ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                     ~ifc_can_call:false ~readonly:false);
+                   { Typing_defs_flags.FunParam.accept_disposable = false;
+                     inout = false; has_default = false;
+                     ifc_external = false; ifc_can_call = false;
+                     readonly = false };
                     }
                   ];
                 ft_implicit_params = { capability = (CapDefaults [7:19-22]) };
@@ -150,9 +151,9 @@ File root|module_hint.php--everywhere.php
                    (Toption (Rhint ([3:21-22]), (Tgeneric ("T", [])))))
                   };
                 fp_flags =
-                (make_fp_flags ~accept_disposable:false ~has_default:false
-                  ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                  ~ifc_can_call:false ~readonly:false);
+                { Typing_defs_flags.FunParam.accept_disposable = false;
+                  inout = false; has_default = false; ifc_external = false;
+                  ifc_can_call = false; readonly = false };
                  }
                ];
              ft_implicit_params = { capability = (CapDefaults [3:10-16]) };

@@ -64,9 +64,10 @@
                           [([13:27-31], "TInt")])))
                      };
                    fp_flags =
-                   (make_fp_flags ~accept_disposable:false ~has_default:false
-                     ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                     ~ifc_can_call:false ~readonly:false);
+                   { Typing_defs_flags.FunParam.accept_disposable = false;
+                     inout = false; has_default = false;
+                     ifc_external = false; ifc_can_call = false;
+                     readonly = false };
                     }
                   ];
                 ft_implicit_params =

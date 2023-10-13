@@ -12,9 +12,9 @@
                 { et_enforced = Typing_defs_core.Unenforced;
                   et_type = (Rhint ([5:21-24]), (Tprim Tint)) };
                 fp_flags =
-                (make_fp_flags ~accept_disposable:false ~has_default:false
-                  ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                  ~ifc_can_call:false ~readonly:false);
+                { Typing_defs_flags.FunParam.accept_disposable = false;
+                  inout = false; has_default = false; ifc_external = false;
+                  ifc_can_call = false; readonly = false };
                  }
                ];
              ft_implicit_params = { capability = (CapDefaults [5:10-20]) };
@@ -56,9 +56,9 @@
                  { et_enforced = Typing_defs_core.Unenforced;
                    et_type = (Rhint ([7:23-24]), (Tgeneric ("T", []))) };
                  fp_flags =
-                 (make_fp_flags ~accept_disposable:false ~has_default:false
-                   ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~readonly:false);
+                 { Typing_defs_flags.FunParam.accept_disposable = false;
+                   inout = false; has_default = false; ifc_external = false;
+                   ifc_can_call = false; readonly = false };
                   }
                 ];
               ft_implicit_params = { capability = (CapDefaults [7:10-11]) };
@@ -116,10 +116,10 @@
                           ((Rhint ([14:21-28]), Tthis), [([14:27-28], "T")])))
                       };
                     fp_flags =
-                    (make_fp_flags ~accept_disposable:false
-                      ~has_default:false ~mode:Typing_defs_core.FPnormal
-                      ~ifc_external:false ~ifc_can_call:false
-                      ~readonly:false);
+                    { Typing_defs_flags.FunParam.accept_disposable = false;
+                      inout = false; has_default = false;
+                      ifc_external = false; ifc_can_call = false;
+                      readonly = false };
                      }
                    ];
                  ft_implicit_params =

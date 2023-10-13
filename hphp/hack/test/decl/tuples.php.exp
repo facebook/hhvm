@@ -28,9 +28,9 @@
                          (Rhint ([5:30-35]), (Tprim Tfloat))]))
                    };
                  fp_flags =
-                 (make_fp_flags ~accept_disposable:false ~has_default:false
-                   ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~readonly:false);
+                 { Typing_defs_flags.FunParam.accept_disposable = false;
+                   inout = false; has_default = false; ifc_external = false;
+                   ifc_can_call = false; readonly = false };
                   }
                 ];
               ft_implicit_params = { capability = (CapDefaults [5:10-21]) };
@@ -68,9 +68,9 @@
                     (Tapply (([9:24-34], "\\Coordinate"), [])))
                    };
                  fp_flags =
-                 (make_fp_flags ~accept_disposable:false ~has_default:false
-                   ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~readonly:false);
+                 { Typing_defs_flags.FunParam.accept_disposable = false;
+                   inout = false; has_default = false; ifc_external = false;
+                   ifc_can_call = false; readonly = false };
                   }
                 ];
               ft_implicit_params = { capability = (CapDefaults [9:10-23]) };
@@ -118,9 +118,9 @@
                          (Rhint ([13:31-32]), (Tgeneric ("T", [])))]))
                    };
                  fp_flags =
-                 (make_fp_flags ~accept_disposable:false ~has_default:false
-                   ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~readonly:false);
+                 { Typing_defs_flags.FunParam.accept_disposable = false;
+                   inout = false; has_default = false; ifc_external = false;
+                   ifc_can_call = false; readonly = false };
                   }
                 ];
               ft_implicit_params = { capability = (CapDefaults [13:10-23]) };

@@ -47,20 +47,20 @@
                     { et_enforced = Typing_defs_core.Unenforced;
                       et_type = (Rhint ([11:35-36]), (Tgeneric ("T", []))) };
                     fp_flags =
-                    (make_fp_flags ~accept_disposable:false
-                      ~has_default:false ~mode:Typing_defs_core.FPnormal
-                      ~ifc_external:false ~ifc_can_call:false
-                      ~readonly:false);
+                    { Typing_defs_flags.FunParam.accept_disposable = false;
+                      inout = false; has_default = false;
+                      ifc_external = false; ifc_can_call = false;
+                      readonly = false };
                      };
                    { fp_pos = [11:43-45]; fp_name = (Some "$b");
                      fp_type =
                      { et_enforced = Typing_defs_core.Unenforced;
                        et_type = (Rhint ([11:41-42]), (Tgeneric ("T", []))) };
                      fp_flags =
-                     (make_fp_flags ~accept_disposable:false
-                       ~has_default:false ~mode:Typing_defs_core.FPnormal
-                       ~ifc_external:false ~ifc_can_call:false
-                       ~readonly:false);
+                     { Typing_defs_flags.FunParam.accept_disposable = false;
+                       inout = false; has_default = false;
+                       ifc_external = false; ifc_can_call = false;
+                       readonly = false };
                       }
                    ];
                  ft_implicit_params =

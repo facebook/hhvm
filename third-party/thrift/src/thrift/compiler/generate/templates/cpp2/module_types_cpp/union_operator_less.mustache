@@ -16,35 +16,5 @@
 
 %>
 bool <%struct:cpp_underlying_name%>::operator<(FOLLY_MAYBE_UNUSED const <%struct:cpp_underlying_name%>& rhs) const {
-<%#struct:thrift_uri%>
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
-<%/struct:thrift_uri%>
-<%^struct:thrift_uri%>
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-<%#struct:fields%>
-    case Type::<%field:cpp_name%>:
-<%#field:type%>
-<%#field:raw_binary?%>
-    return !apache::thrift::StringTraits<<% > types/indirected_string_type%>>::isEqual(<% > types/apply_indirection_pre%>value_.<%field:cpp_name%><% > types/apply_indirection_post%>, <% > types/apply_indirection_pre%>rhs.value_.<%field:cpp_name%><% > types/apply_indirection_post%>) &&
-      apache::thrift::StringTraits<<% > types/indirected_string_type%>>::isLess(<% > types/apply_indirection_pre%>value_.<%field:cpp_name%><% > types/apply_indirection_post%>, <% > types/apply_indirection_pre%>rhs.value_.<%field:cpp_name%><% > types/apply_indirection_post%>);
-<%/field:raw_binary?%>
-<%^field:raw_binary?%>
-<%#field:cpp_first_adapter%>
-      return ::apache::thrift::adapt_detail::less<<%field:cpp_first_adapter%>, <%field:cpp_type%>>(
-<%#field:cpp_ref?%>*<%/field:cpp_ref?%>value_.<%field:cpp_name%>, <%#field:cpp_ref?%>*<%/field:cpp_ref?%>rhs.value_.<%field:cpp_name%>);
-<%/field:cpp_first_adapter%>
-<%^field:cpp_first_adapter%>
-      return <%#field:cpp_ref?%>*<%/field:cpp_ref?%>lhs.value_.<%field:cpp_name%> < <%#field:cpp_ref?%>*<%/field:cpp_ref?%>rhs.value_.<%field:cpp_name%>;
-<%/field:cpp_first_adapter%>
-<%/field:raw_binary?%>
-<%/field:type%>
-<%/struct:fields%>
-    default:
-      return false;
-  }
-<%/struct:thrift_uri%>
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }

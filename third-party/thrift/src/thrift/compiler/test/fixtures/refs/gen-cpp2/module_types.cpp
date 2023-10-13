@@ -123,18 +123,7 @@ bool MyUnion::operator==(const MyUnion& rhs) const {
 }
 
 bool MyUnion::operator<(FOLLY_MAYBE_UNUSED const MyUnion& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::anInteger:
-      return *lhs.value_.anInteger < *rhs.value_.anInteger;
-    case Type::aString:
-      return *lhs.value_.aString < *rhs.value_.aString;
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 void swap(MyUnion& a, MyUnion& b) {
@@ -225,16 +214,7 @@ bool NonTriviallyDestructibleUnion::operator==(const NonTriviallyDestructibleUni
 }
 
 bool NonTriviallyDestructibleUnion::operator<(FOLLY_MAYBE_UNUSED const NonTriviallyDestructibleUnion& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::int_field:
-      return *lhs.value_.int_field < *rhs.value_.int_field;
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 void swap(NonTriviallyDestructibleUnion& a, NonTriviallyDestructibleUnion& b) {

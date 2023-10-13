@@ -620,16 +620,7 @@ bool AdaptedUnion::operator==(const AdaptedUnion& rhs) const {
 }
 
 bool AdaptedUnion::operator<(FOLLY_MAYBE_UNUSED const AdaptedUnion& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::best:
-      return lhs.value_.best < rhs.value_.best;
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 void swap(AdaptedUnion& a, AdaptedUnion& b) {

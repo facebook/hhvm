@@ -605,18 +605,7 @@ bool SimpleUnion::operator==(const SimpleUnion& rhs) const {
 }
 
 bool SimpleUnion::operator<(FOLLY_MAYBE_UNUSED const SimpleUnion& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::intValue:
-      return lhs.value_.intValue < rhs.value_.intValue;
-    case Type::stringValue:
-      return lhs.value_.stringValue < rhs.value_.stringValue;
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 void swap(SimpleUnion& a, SimpleUnion& b) {
@@ -792,73 +781,7 @@ bool ComplexUnion::operator==(const ComplexUnion& rhs) const {
 }
 
 bool ComplexUnion::operator<(FOLLY_MAYBE_UNUSED const ComplexUnion& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::intValue:
-      return lhs.value_.intValue < rhs.value_.intValue;
-    case Type::opt_intValue:
-      return lhs.value_.opt_intValue < rhs.value_.opt_intValue;
-    case Type::stringValue:
-      return lhs.value_.stringValue < rhs.value_.stringValue;
-    case Type::opt_stringValue:
-      return lhs.value_.opt_stringValue < rhs.value_.opt_stringValue;
-    case Type::intValue2:
-      return lhs.value_.intValue2 < rhs.value_.intValue2;
-    case Type::intValue3:
-      return lhs.value_.intValue3 < rhs.value_.intValue3;
-    case Type::doubelValue:
-      return lhs.value_.doubelValue < rhs.value_.doubelValue;
-    case Type::boolValue:
-      return lhs.value_.boolValue < rhs.value_.boolValue;
-    case Type::union_list:
-      return lhs.value_.union_list < rhs.value_.union_list;
-    case Type::union_set:
-      return lhs.value_.union_set < rhs.value_.union_set;
-    case Type::union_map:
-      return lhs.value_.union_map < rhs.value_.union_map;
-    case Type::opt_union_map:
-      return lhs.value_.opt_union_map < rhs.value_.opt_union_map;
-    case Type::enum_field:
-      return lhs.value_.enum_field < rhs.value_.enum_field;
-    case Type::enum_container:
-      return lhs.value_.enum_container < rhs.value_.enum_container;
-    case Type::a_struct:
-      return lhs.value_.a_struct < rhs.value_.a_struct;
-    case Type::a_set_struct:
-      return lhs.value_.a_set_struct < rhs.value_.a_set_struct;
-    case Type::a_union:
-      return lhs.value_.a_union < rhs.value_.a_union;
-    case Type::opt_a_union:
-      return lhs.value_.opt_a_union < rhs.value_.opt_a_union;
-    case Type::a_union_list:
-      return lhs.value_.a_union_list < rhs.value_.a_union_list;
-    case Type::a_union_typedef:
-      return lhs.value_.a_union_typedef < rhs.value_.a_union_typedef;
-    case Type::a_union_typedef_list:
-      return lhs.value_.a_union_typedef_list < rhs.value_.a_union_typedef_list;
-    case Type::MyBinaryField:
-    return !apache::thrift::StringTraits<std::string>::isEqual(value_.MyBinaryField, rhs.value_.MyBinaryField) &&
-      apache::thrift::StringTraits<std::string>::isLess(value_.MyBinaryField, rhs.value_.MyBinaryField);
-    case Type::MyBinaryField2:
-    return !apache::thrift::StringTraits<std::string>::isEqual(value_.MyBinaryField2, rhs.value_.MyBinaryField2) &&
-      apache::thrift::StringTraits<std::string>::isLess(value_.MyBinaryField2, rhs.value_.MyBinaryField2);
-    case Type::MyBinaryListField4:
-      return lhs.value_.MyBinaryListField4 < rhs.value_.MyBinaryListField4;
-    case Type::ref_field:
-      return *lhs.value_.ref_field < *rhs.value_.ref_field;
-    case Type::ref_field2:
-      return *lhs.value_.ref_field2 < *rhs.value_.ref_field2;
-    case Type::excp_field:
-      return lhs.value_.excp_field < rhs.value_.excp_field;
-    case Type::MyCustomField:
-      return ::apache::thrift::adapt_detail::less<::CustomProtocolAdapter, ::some::valid::ns::CustomProtocolType>(
-value_.MyCustomField, rhs.value_.MyCustomField);
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 ::std::unique_ptr<::some::valid::ns::MyStruct>& ComplexUnion::set_ref_field(::some::valid::ns::MyStruct const &t) {
@@ -2933,18 +2856,7 @@ bool FloatUnion::operator==(const FloatUnion& rhs) const {
 }
 
 bool FloatUnion::operator<(FOLLY_MAYBE_UNUSED const FloatUnion& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::floatSide:
-      return lhs.value_.floatSide < rhs.value_.floatSide;
-    case Type::doubleSide:
-      return lhs.value_.doubleSide < rhs.value_.doubleSide;
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 void swap(FloatUnion& a, FloatUnion& b) {

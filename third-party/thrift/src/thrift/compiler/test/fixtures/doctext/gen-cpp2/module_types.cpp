@@ -182,18 +182,7 @@ bool U::operator==(const U& rhs) const {
 }
 
 bool U::operator<(FOLLY_MAYBE_UNUSED const U& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::i:
-      return lhs.value_.i < rhs.value_.i;
-    case Type::s:
-      return lhs.value_.s < rhs.value_.s;
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 void swap(U& a, U& b) {

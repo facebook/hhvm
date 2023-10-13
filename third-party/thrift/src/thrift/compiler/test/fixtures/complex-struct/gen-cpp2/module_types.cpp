@@ -1514,26 +1514,7 @@ bool MyUnion::operator==(const MyUnion& rhs) const {
 }
 
 bool MyUnion::operator<(FOLLY_MAYBE_UNUSED const MyUnion& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::myEnum:
-      return lhs.value_.myEnum < rhs.value_.myEnum;
-    case Type::myStruct:
-      return lhs.value_.myStruct < rhs.value_.myStruct;
-    case Type::myDataItem:
-      return lhs.value_.myDataItem < rhs.value_.myDataItem;
-    case Type::complexNestedStruct:
-      return lhs.value_.complexNestedStruct < rhs.value_.complexNestedStruct;
-    case Type::longValue:
-      return lhs.value_.longValue < rhs.value_.longValue;
-    case Type::intValue:
-      return lhs.value_.intValue < rhs.value_.intValue;
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 void swap(MyUnion& a, MyUnion& b) {
@@ -1651,22 +1632,7 @@ bool MyUnionFloatFieldThrowExp::operator==(const MyUnionFloatFieldThrowExp& rhs)
 }
 
 bool MyUnionFloatFieldThrowExp::operator<(FOLLY_MAYBE_UNUSED const MyUnionFloatFieldThrowExp& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::myEnum:
-      return lhs.value_.myEnum < rhs.value_.myEnum;
-    case Type::setFloat:
-      return lhs.value_.setFloat < rhs.value_.setFloat;
-    case Type::myDataItem:
-      return lhs.value_.myDataItem < rhs.value_.myDataItem;
-    case Type::complexNestedStruct:
-      return lhs.value_.complexNestedStruct < rhs.value_.complexNestedStruct;
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 void swap(MyUnionFloatFieldThrowExp& a, MyUnionFloatFieldThrowExp& b) {

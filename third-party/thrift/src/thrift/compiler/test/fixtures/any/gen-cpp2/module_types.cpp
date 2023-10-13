@@ -218,7 +218,7 @@ bool MyUnion::operator==(const MyUnion& rhs) const {
 }
 
 bool MyUnion::operator<(FOLLY_MAYBE_UNUSED const MyUnion& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 void swap(MyUnion& a, MyUnion& b) {

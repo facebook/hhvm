@@ -97,26 +97,7 @@ bool ComplexUnion::operator==(const ComplexUnion& rhs) const {
 }
 
 bool ComplexUnion::operator<(FOLLY_MAYBE_UNUSED const ComplexUnion& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::intValue:
-      return lhs.value_.intValue < rhs.value_.intValue;
-    case Type::stringValue:
-      return lhs.value_.stringValue < rhs.value_.stringValue;
-    case Type::intListValue:
-      return lhs.value_.intListValue < rhs.value_.intListValue;
-    case Type::stringListValue:
-      return lhs.value_.stringListValue < rhs.value_.stringListValue;
-    case Type::typedefValue:
-      return lhs.value_.typedefValue < rhs.value_.typedefValue;
-    case Type::stringRef:
-      return *lhs.value_.stringRef < *rhs.value_.stringRef;
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 void swap(ComplexUnion& a, ComplexUnion& b) {
@@ -210,18 +191,7 @@ bool ListUnion::operator==(const ListUnion& rhs) const {
 }
 
 bool ListUnion::operator<(FOLLY_MAYBE_UNUSED const ListUnion& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::intListValue:
-      return lhs.value_.intListValue < rhs.value_.intListValue;
-    case Type::stringListValue:
-      return lhs.value_.stringListValue < rhs.value_.stringListValue;
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 void swap(ListUnion& a, ListUnion& b) {
@@ -315,19 +285,7 @@ bool DataUnion::operator==(const DataUnion& rhs) const {
 }
 
 bool DataUnion::operator<(FOLLY_MAYBE_UNUSED const DataUnion& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::binaryData:
-    return !apache::thrift::StringTraits<std::string>::isEqual(value_.binaryData, rhs.value_.binaryData) &&
-      apache::thrift::StringTraits<std::string>::isLess(value_.binaryData, rhs.value_.binaryData);
-    case Type::stringData:
-      return lhs.value_.stringData < rhs.value_.stringData;
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 void swap(DataUnion& a, DataUnion& b) {
@@ -539,18 +497,7 @@ bool ValUnion::operator==(const ValUnion& rhs) const {
 }
 
 bool ValUnion::operator<(FOLLY_MAYBE_UNUSED const ValUnion& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::v1:
-      return lhs.value_.v1 < rhs.value_.v1;
-    case Type::v2:
-      return lhs.value_.v2 < rhs.value_.v2;
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 void swap(ValUnion& a, ValUnion& b) {
@@ -656,18 +603,7 @@ bool VirtualComplexUnion::operator==(const VirtualComplexUnion& rhs) const {
 }
 
 bool VirtualComplexUnion::operator<(FOLLY_MAYBE_UNUSED const VirtualComplexUnion& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::thingOne:
-      return lhs.value_.thingOne < rhs.value_.thingOne;
-    case Type::thingTwo:
-      return lhs.value_.thingTwo < rhs.value_.thingTwo;
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 void swap(VirtualComplexUnion& a, VirtualComplexUnion& b) {
@@ -836,16 +772,7 @@ bool NonCopyableUnion::operator==(const NonCopyableUnion& rhs) const {
 }
 
 bool NonCopyableUnion::operator<(FOLLY_MAYBE_UNUSED const NonCopyableUnion& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::s:
-      return lhs.value_.s < rhs.value_.s;
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 void swap(NonCopyableUnion& a, NonCopyableUnion& b) {

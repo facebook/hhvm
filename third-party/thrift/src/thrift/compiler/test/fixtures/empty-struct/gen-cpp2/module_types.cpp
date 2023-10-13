@@ -150,14 +150,7 @@ bool Nada::operator==(const Nada& rhs) const {
 }
 
 bool Nada::operator<(FOLLY_MAYBE_UNUSED const Nada& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 void swap(Nada& a, Nada& b) {

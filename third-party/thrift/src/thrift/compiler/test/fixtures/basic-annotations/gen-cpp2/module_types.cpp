@@ -196,14 +196,7 @@ bool YourUnion::operator==(const YourUnion& rhs) const {
 }
 
 bool YourUnion::operator<(FOLLY_MAYBE_UNUSED const YourUnion& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 void swap(YourUnion& a, YourUnion& b) {

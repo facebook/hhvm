@@ -813,18 +813,7 @@ bool union1::operator==(const union1& rhs) const {
 }
 
 bool union1::operator<(FOLLY_MAYBE_UNUSED const union1& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::i:
-      return lhs.value_.i < rhs.value_.i;
-    case Type::d:
-      return lhs.value_.d < rhs.value_.d;
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 void swap(union1& a, union1& b) {
@@ -924,22 +913,7 @@ bool union2::operator==(const union2& rhs) const {
 }
 
 bool union2::operator<(FOLLY_MAYBE_UNUSED const union2& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::i:
-      return lhs.value_.i < rhs.value_.i;
-    case Type::d:
-      return lhs.value_.d < rhs.value_.d;
-    case Type::s:
-      return lhs.value_.s < rhs.value_.s;
-    case Type::u:
-      return lhs.value_.u < rhs.value_.u;
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 void swap(union2& a, union2& b) {

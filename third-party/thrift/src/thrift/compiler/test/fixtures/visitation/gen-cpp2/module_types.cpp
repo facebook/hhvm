@@ -167,22 +167,7 @@ bool union1::operator==(const union1& rhs) const {
 }
 
 bool union1::operator<(FOLLY_MAYBE_UNUSED const union1& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::ui:
-      return lhs.value_.ui < rhs.value_.ui;
-    case Type::ud:
-      return lhs.value_.ud < rhs.value_.ud;
-    case Type::us:
-      return lhs.value_.us < rhs.value_.us;
-    case Type::ue:
-      return lhs.value_.ue < rhs.value_.ue;
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 void swap(union1& a, union1& b) {
@@ -282,22 +267,7 @@ bool union2::operator==(const union2& rhs) const {
 }
 
 bool union2::operator<(FOLLY_MAYBE_UNUSED const union2& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::ui_2:
-      return lhs.value_.ui_2 < rhs.value_.ui_2;
-    case Type::ud_2:
-      return lhs.value_.ud_2 < rhs.value_.ud_2;
-    case Type::us_2:
-      return lhs.value_.us_2 < rhs.value_.us_2;
-    case Type::ue_2:
-      return lhs.value_.ue_2 < rhs.value_.ue_2;
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 void swap(union2& a, union2& b) {
@@ -397,22 +367,7 @@ bool union3::operator==(const union3& rhs) const {
 }
 
 bool union3::operator<(FOLLY_MAYBE_UNUSED const union3& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::ui_3:
-      return lhs.value_.ui_3 < rhs.value_.ui_3;
-    case Type::ud_3:
-      return lhs.value_.ud_3 < rhs.value_.ud_3;
-    case Type::us_3:
-      return lhs.value_.us_3 < rhs.value_.us_3;
-    case Type::ue_3:
-      return lhs.value_.ue_3 < rhs.value_.ue_3;
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 void swap(union3& a, union3& b) {
@@ -619,24 +574,7 @@ bool unionA::operator==(const unionA& rhs) const {
 }
 
 bool unionA::operator<(FOLLY_MAYBE_UNUSED const unionA& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::i:
-      return lhs.value_.i < rhs.value_.i;
-    case Type::d:
-      return lhs.value_.d < rhs.value_.d;
-    case Type::s:
-      return lhs.value_.s < rhs.value_.s;
-    case Type::e:
-      return lhs.value_.e < rhs.value_.e;
-    case Type::a:
-      return lhs.value_.a < rhs.value_.a;
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 void swap(unionA& a, unionA& b) {
@@ -2814,70 +2752,7 @@ bool union_with_special_names::operator==(const union_with_special_names& rhs) c
 }
 
 bool union_with_special_names::operator<(FOLLY_MAYBE_UNUSED const union_with_special_names& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::get:
-      return lhs.value_.get < rhs.value_.get;
-    case Type::getter:
-      return lhs.value_.getter < rhs.value_.getter;
-    case Type::lists:
-      return lhs.value_.lists < rhs.value_.lists;
-    case Type::maps:
-      return lhs.value_.maps < rhs.value_.maps;
-    case Type::name:
-      return lhs.value_.name < rhs.value_.name;
-    case Type::name_to_value:
-      return lhs.value_.name_to_value < rhs.value_.name_to_value;
-    case Type::names:
-      return lhs.value_.names < rhs.value_.names;
-    case Type::prefix_tree:
-      return lhs.value_.prefix_tree < rhs.value_.prefix_tree;
-    case Type::sets:
-      return lhs.value_.sets < rhs.value_.sets;
-    case Type::setter:
-      return lhs.value_.setter < rhs.value_.setter;
-    case Type::str:
-      return lhs.value_.str < rhs.value_.str;
-    case Type::strings:
-      return lhs.value_.strings < rhs.value_.strings;
-    case Type::type:
-      return lhs.value_.type < rhs.value_.type;
-    case Type::value:
-      return lhs.value_.value < rhs.value_.value;
-    case Type::value_to_name:
-      return lhs.value_.value_to_name < rhs.value_.value_to_name;
-    case Type::values:
-      return lhs.value_.values < rhs.value_.values;
-    case Type::id:
-      return lhs.value_.id < rhs.value_.id;
-    case Type::ids:
-      return lhs.value_.ids < rhs.value_.ids;
-    case Type::descriptor:
-      return lhs.value_.descriptor < rhs.value_.descriptor;
-    case Type::descriptors:
-      return lhs.value_.descriptors < rhs.value_.descriptors;
-    case Type::key:
-      return lhs.value_.key < rhs.value_.key;
-    case Type::keys:
-      return lhs.value_.keys < rhs.value_.keys;
-    case Type::annotation:
-      return lhs.value_.annotation < rhs.value_.annotation;
-    case Type::annotations:
-      return lhs.value_.annotations < rhs.value_.annotations;
-    case Type::member:
-      return lhs.value_.member < rhs.value_.member;
-    case Type::members:
-      return lhs.value_.members < rhs.value_.members;
-    case Type::field:
-      return lhs.value_.field < rhs.value_.field;
-    case Type::fields:
-      return lhs.value_.fields < rhs.value_.fields;
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 void swap(union_with_special_names& a, union_with_special_names& b) {

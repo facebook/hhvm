@@ -474,7 +474,7 @@ bool Baz::operator==(const Baz& rhs) const {
 }
 
 bool Baz::operator<(FOLLY_MAYBE_UNUSED const Baz& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 void swap(Baz& a, Baz& b) {
@@ -2332,7 +2332,7 @@ bool ThriftAdaptTestUnion::operator==(const ThriftAdaptTestUnion& rhs) const {
 }
 
 bool ThriftAdaptTestUnion::operator<(FOLLY_MAYBE_UNUSED const ThriftAdaptTestUnion& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 void swap(ThriftAdaptTestUnion& a, ThriftAdaptTestUnion& b) {

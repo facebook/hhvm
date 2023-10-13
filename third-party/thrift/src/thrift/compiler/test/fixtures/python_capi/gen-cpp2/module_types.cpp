@@ -2105,7 +2105,7 @@ bool Shallot::operator==(const Shallot& rhs) const {
 }
 
 bool Shallot::operator<(FOLLY_MAYBE_UNUSED const Shallot& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
 }
 
 void swap(Shallot& a, Shallot& b) {

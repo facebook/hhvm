@@ -40,6 +40,8 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
   RO::EvalRaiseClassConversionNoticeSampleRate     = RaiseClassConversionNoticeSampleRate;
   RO::EvalClassPassesClassname                     = ClassPassesClassname;
   RO::EvalClassnameNoticesSampleRate               = ClassnameNoticesSampleRate;
+  RO::EvalStringPassesClass                        = StringPassesClass;
+  RO::EvalClassNoticesSampleRate                   = ClassNoticesSampleRate;
   RO::EvalClassStringHintNoticesSampleRate         = ClassStringHintNoticesSampleRate;
   RO::EvalClassIsStringNotices                     = ClassIsStringNotices;
   RO::EvalTraitConstantInterfaceBehavior           = TraitConstantInterfaceBehavior;
@@ -105,6 +107,8 @@ std::string show(const RepoGlobalData& gd) {
   SHOW(RaiseClassConversionNoticeSampleRate);
   SHOW(ClassPassesClassname);
   SHOW(ClassnameNoticesSampleRate);
+  SHOW(StringPassesClass);
+  SHOW(ClassNoticesSampleRate);
   SHOW(ClassStringHintNoticesSampleRate);
   SHOW(ClassIsStringNotices);
   SHOW(StrictArrayFillKeys);

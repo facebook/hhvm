@@ -122,6 +122,7 @@ Unit* lookupSyslibUnit(StringData* path);
   R(EvalUnitCacheBreaker)                       \
   R(EvalDiamondTraitMethods)                    \
   R(EvalClassPassesClassname)                   \
+  R(EvalStringPassesClass)                      \
   R(PHP7_NoHexNumerics)                         \
   R(PHP7_Builtins)                              \
   R(PHP7_Substr)                                \

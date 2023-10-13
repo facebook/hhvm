@@ -269,6 +269,10 @@ RepoGlobalData get_global_data() {
     RuntimeOption::EvalClassPassesClassname;
   gd.ClassnameNoticesSampleRate =
     RuntimeOption::EvalClassnameNoticesSampleRate;
+  gd.StringPassesClass =
+    RuntimeOption::EvalStringPassesClass;
+  gd.ClassNoticesSampleRate =
+    RuntimeOption::EvalClassNoticesSampleRate;
   gd.ClassStringHintNoticesSampleRate =
     RO::EvalClassStringHintNoticesSampleRate;
   gd.ClassIsStringNotices = RuntimeOption::EvalClassIsStringNotices;

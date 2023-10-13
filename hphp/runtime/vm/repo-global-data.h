@@ -137,6 +137,12 @@ struct RepoGlobalData {
   /* Whether passing (lazy) classes to classname can raise a notice */
   uint32_t ClassnameNoticesSampleRate = 0;
 
+  /* Whether class type-hint accepts strings */
+  bool StringPassesClass = false;
+
+  /* Whether passing strings to class can raise a notice */
+  uint32_t ClassNoticesSampleRate = 0;
+
   /* Whether passing (lazy) classes to string type-hints can raise a notice */
   uint32_t ClassStringHintNoticesSampleRate = 0;
 
@@ -237,6 +243,8 @@ struct RepoGlobalData {
       (RaiseClassConversionNoticeSampleRate)
       (ClassPassesClassname)
       (ClassnameNoticesSampleRate)
+      (StringPassesClass)
+      (ClassNoticesSampleRate)
       (ClassStringHintNoticesSampleRate)
       (ClassIsStringNotices)
       (StrictArrayFillKeys)

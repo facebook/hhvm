@@ -27,13 +27,6 @@
 namespace HPHP {
 
 void JobQueueDropVMStack::dropCache() {
-  if (vmStack().isAllocated()) {
-    // For XboxRequestHandler threads, the ExecutionContext can stay
-    // alive across requests, but its always ok to kill it between
-    // requests, so do so now
-    XboxRequestHandler::cleanupState();
-  }
-
   tl_heap->flush();
 
   flush_evaluation_stack();

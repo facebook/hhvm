@@ -2922,7 +2922,7 @@ void cli_client_thread_exit() {
   *s_sessionInitialized = false;
 }
 
-void hphp_session_exit(Transport* transport) {
+void hphp_session_exit() {
   assertx(*s_sessionInitialized);
   // Server note and INI have to live long enough for the access log to fire.
   // RequestLocal is too early.

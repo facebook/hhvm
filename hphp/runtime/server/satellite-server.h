@@ -82,11 +82,8 @@ public:
   std::chrono::seconds getTimeoutSeconds() const { return m_timeoutSeconds;}
 
   // only for RPCServer
-  int getMaxRequest() const { return m_maxRequest;}
-  int getMaxDuration() const { return m_maxDuration;}
   const std::string &getReqInitFunc() const { return m_reqInitFunc;}
   const std::string &getReqInitDoc() const { return m_reqInitDoc;}
-  bool alwaysReset() const { return m_alwaysReset;}
   Transport::Method getMethod() const { return m_method;}
 
 protected:
@@ -94,14 +91,11 @@ protected:
   SatelliteServer::Type m_type;
   int m_port = 0;
   int m_threadCount = 5;
-  int m_maxRequest = 500;
-  int m_maxDuration = 120;
   std::string m_serverIP;
   std::chrono::seconds m_timeoutSeconds;
   std::set<std::string> m_urls; // url regex patterns
   std::string m_reqInitFunc;
   std::string m_reqInitDoc;
-  bool m_alwaysReset = false;
   std::set<std::string> m_functions;
   Transport::Method m_method;
 };

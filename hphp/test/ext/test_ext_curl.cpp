@@ -35,7 +35,11 @@
 struct TestCurlRequestHandler final : RequestHandler {
   explicit TestCurlRequestHandler(int timeout) : RequestHandler(timeout) {}
   // implementing RequestHandler
-  void handleRequest(Transport *transport) override {
+  void teardownRequest(Transport*) noexcept override {
+    hphp_memory_cleanup();
+  }
+
+  void handleRequest(Transport* transport) override {
     g_context.getCheck();
     transport->addHeader("ECHOED", transport->getHeader("ECHO").c_str());
 
@@ -48,9 +52,8 @@ struct TestCurlRequestHandler final : RequestHandler {
     } else {
       transport->sendString("OK");
     }
-    hphp_memory_cleanup();
   }
-  void abortRequest(Transport *transport) override {
+  void abortRequest(Transport* transport) override {
     transport->sendString("Aborted");
   }
 };

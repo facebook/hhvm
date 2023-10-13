@@ -40,15 +40,9 @@ struct XboxRequestHandler : RequestHandler {
   void setLogInfo(bool logInfo);
 
   // implementing RequestHandler
+  void teardownRequest(Transport* transport) noexcept override;
   void handleRequest(Transport* transport) override;
   void abortRequest(Transport* transport) override;
-
-  static void cleanupState();
-
-  /**
-   * Force a reset before the next request.
-   */
-  void setReset() { m_reset = true; }
 
   time_t getLastResetTime() const { return m_lastReset; }
 
@@ -58,14 +52,11 @@ struct XboxRequestHandler : RequestHandler {
 private:
   ExecutionContext *m_context;
   std::shared_ptr<SatelliteServerInfo> m_serverInfo;
-  int m_requestsSinceReset;
-  bool m_reset;
   bool m_logResets;
   time_t m_lastReset;
   Optional<CLIContext> m_cli;
 
   void initState();
-  bool needReset() const;
 
   bool executePHPFunction(Transport *transport);
 

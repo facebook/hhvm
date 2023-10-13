@@ -53,13 +53,11 @@ AccessLog XboxRequestHandler::s_accessLog(
 
 XboxRequestHandler::XboxRequestHandler()
   : RequestHandler(RuntimeOption::RequestTimeoutSeconds),
-    m_requestsSinceReset(0),
-    m_reset(false),
     m_logResets(false) {
 }
 
 XboxRequestHandler::~XboxRequestHandler() {
-  if (vmStack().isAllocated()) cleanupState();
+  assertx(!vmStack().isAllocated());
 }
 
 void XboxRequestHandler::initState() {
@@ -85,34 +83,21 @@ void XboxRequestHandler::initState() {
   if (m_logResets) {
     Logger::Info("initializing Xbox request handler");
   }
-
-  m_reset = false;
-  m_requestsSinceReset = 0;
-}
-
-void XboxRequestHandler::cleanupState() {
-  hphp_context_exit();
-  hphp_session_exit();
-}
-
-bool XboxRequestHandler::needReset() const {
-  return (m_reset ||
-          !vmStack().isAllocated() ||
-          m_serverInfo->alwaysReset() ||
-          ((time(0) - m_lastReset) > m_serverInfo->getMaxDuration()) ||
-          (m_requestsSinceReset >= m_serverInfo->getMaxRequest()));
 }
 
 void XboxRequestHandler::setLogInfo(bool logInfo) {
   m_logResets = logInfo;
 }
 
+void XboxRequestHandler::teardownRequest(Transport*) noexcept {
+  if (!vmStack().isAllocated()) return;
+
+  hphp_context_exit();
+  hphp_session_exit();
+}
+
 void XboxRequestHandler::handleRequest(Transport *transport) {
-  if (needReset()) {
-    if (vmStack().isAllocated()) cleanupState();
-    initState();
-  }
-  ++m_requestsSinceReset;
+  initState();
 
   ExecutionProfiler ep(RequestInfo::RuntimeFunctions);
 
@@ -187,7 +172,6 @@ void XboxRequestHandler::abortRequest(Transport *transport) {
   if (!vmStack().isAllocated()) {
     hphp_memory_cleanup();
   }
-  m_reset = true;
 }
 
 const StaticString
@@ -258,7 +242,6 @@ bool XboxRequestHandler::executePHPFunction(Transport *transport) {
       code = 500;
       transport->sendString(
           "Serialization of the return value failed", 500);
-      m_reset = true;
     } else {
       transport->sendRaw(response.data(), response.size());
       code = transport->getResponseCode();
@@ -266,7 +249,6 @@ bool XboxRequestHandler::executePHPFunction(Transport *transport) {
   } else if (error) {
     code = 500;
     transport->sendString(errorMsg, 500);
-    m_reset = true;
   } else {
     code = 404;
     transport->sendString("Not Found", 404);

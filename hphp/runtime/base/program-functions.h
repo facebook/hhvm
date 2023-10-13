@@ -118,11 +118,9 @@ void init_current_pthread_stack_limits();
 
 void hphp_memory_cleanup();
 /*
- * Tear down various internal state at the very end of a session. If transport
- * is provided, various statistics about resources consumed by the request will
- * be logged to ServiceData.
+ * Tear down various internal state at the very end of a session.
  */
-void hphp_session_exit(Transport* transport = nullptr);
+void hphp_session_exit();
 void hphp_process_exit() noexcept;
 bool is_hphp_session_initialized();
 std::string get_systemlib(const std::string &section);

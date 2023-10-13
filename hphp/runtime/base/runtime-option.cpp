@@ -872,11 +872,8 @@ bool RuntimeOption::AllowRunAsRoot = false; // Allow running hhvm as root.
 
 int RuntimeOption::XboxServerThreadCount = 10;
 int RuntimeOption::XboxServerMaxQueueLength = INT_MAX;
-int RuntimeOption::XboxServerInfoMaxRequest = 500;
-int RuntimeOption::XboxServerInfoDuration = 120;
 std::string RuntimeOption::XboxServerInfoReqInitFunc;
 std::string RuntimeOption::XboxServerInfoReqInitDoc;
-bool RuntimeOption::XboxServerInfoAlwaysReset = false;
 bool RuntimeOption::XboxServerLogInfo = false;
 std::string RuntimeOption::XboxProcessMessageFunc = "xbox_process_message";
 
@@ -2629,16 +2626,10 @@ void RuntimeOption::Load(
     Config::Bind(XboxServerMaxQueueLength, ini, config,
                  "Xbox.ServerInfo.MaxQueueLength", INT_MAX);
     if (XboxServerMaxQueueLength < 0) XboxServerMaxQueueLength = INT_MAX;
-    Config::Bind(XboxServerInfoMaxRequest, ini, config,
-                 "Xbox.ServerInfo.MaxRequest", 500);
-    Config::Bind(XboxServerInfoDuration, ini, config,
-                 "Xbox.ServerInfo.MaxDuration", 120);
     Config::Bind(XboxServerInfoReqInitFunc, ini, config,
                  "Xbox.ServerInfo.RequestInitFunction", "");
     Config::Bind(XboxServerInfoReqInitDoc, ini, config,
                  "Xbox.ServerInfo.RequestInitDocument", "");
-    Config::Bind(XboxServerInfoAlwaysReset, ini, config,
-                 "Xbox.ServerInfo.AlwaysReset", false);
     Config::Bind(XboxServerLogInfo, ini, config, "Xbox.ServerInfo.LogInfo",
                  false);
     Config::Bind(XboxProcessMessageFunc, ini, config, "Xbox.ProcessMessageFunc",

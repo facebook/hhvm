@@ -65,14 +65,9 @@ struct XboxServerInfo : SatelliteServerInfo {
 
   void reload() {
     m_threadCount = RuntimeOption::XboxServerThreadCount;
-    m_maxRequest  = RuntimeOption::XboxServerInfoMaxRequest;
-    m_maxDuration = RuntimeOption::XboxServerInfoDuration;
     m_reqInitFunc = RuntimeOption::XboxServerInfoReqInitFunc;
     m_reqInitDoc  = RuntimeOption::XboxServerInfoReqInitDoc;
-    m_alwaysReset = RuntimeOption::XboxServerInfoAlwaysReset;
   }
-
-  void setMaxDuration(int duration) { m_maxDuration = duration; }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

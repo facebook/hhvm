@@ -93,7 +93,7 @@ struct RequestHandler {
    * Called before and after request-handling work.
    */
   virtual void setupRequest(Transport* /*transport*/) {}
-  virtual void teardownRequest(Transport* /*transport*/) noexcept {}
+  virtual void teardownRequest(Transport* /*transport*/) = 0;
 
   /**
    * Sub-class handles a request by implementing this function.

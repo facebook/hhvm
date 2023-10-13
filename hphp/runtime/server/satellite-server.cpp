@@ -41,14 +41,11 @@ SatelliteServerInfo::SatelliteServerInfo(const IniSetting::Map& ini,
   m_serverIP = Config::GetString(ini, hdf, "IP",
                                  RuntimeOption::ServerIP, false);
   m_threadCount = Config::GetInt32(ini, hdf, "ThreadCount", 5, false);
-  m_maxRequest = Config::GetInt32(ini, hdf, "MaxRequest", 500, false);
-  m_maxDuration = Config::GetInt32(ini, hdf, "MaxDuration", 120, false);
   m_timeoutSeconds = std::chrono::seconds(
     Config::GetInt32(ini, hdf, "TimeoutSeconds",
                       RuntimeOption::RequestTimeoutSeconds, false));
   m_reqInitFunc = Config::GetString(ini, hdf, "RequestInitFunction", "", false);
   m_reqInitDoc = Config::GetString(ini, hdf, "RequestInitDocument", "", false);
-  m_alwaysReset = Config::GetBool(ini, hdf, "AlwaysReset", false, false);
   m_functions = Config::GetSet(ini, hdf, "Functions", m_functions, false);
 
   std::string method  = Config::GetString(ini, hdf, "Method", "", false);

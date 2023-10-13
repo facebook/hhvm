@@ -561,11 +561,8 @@ struct RuntimeOption {
 
   static int XboxServerThreadCount;
   static int XboxServerMaxQueueLength;
-  static int XboxServerInfoMaxRequest;
-  static int XboxServerInfoDuration;
   static std::string XboxServerInfoReqInitFunc;
   static std::string XboxServerInfoReqInitDoc;
-  static bool XboxServerInfoAlwaysReset;
   static bool XboxServerLogInfo;
   static std::string XboxProcessMessageFunc;
 

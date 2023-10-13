@@ -255,6 +255,9 @@ void TestServer::KillServer() {
 struct TestServerRequestHandler : RequestHandler {
   explicit TestServerRequestHandler(int timeout) : RequestHandler(timeout) {}
   // implementing RequestHandler
+  void teardownRequest(Transport* /*transport*/) noexcept override {
+    // do nothing
+  }
   void handleRequest(Transport* /*transport*/) override {
     // do nothing
   }
@@ -664,7 +667,10 @@ bool TestServer::TestTakeoverServer() {
 struct EchoHandler final : RequestHandler {
   explicit EchoHandler(int timeout) : RequestHandler(timeout) {}
   // implementing RequestHandler
-  void handleRequest(Transport *transport) override {
+  void teardownRequest(Transport*) noexcept override {
+    hphp_memory_cleanup();
+  }
+  void handleRequest(Transport* transport) override {
     g_context.getCheck();
     const HeaderMap& headers = transport->getHeaders();
 
@@ -693,9 +699,8 @@ struct EchoHandler final : RequestHandler {
 
     transport->addHeader("Custom", "blah");
     transport->sendString(response);
-    hphp_memory_cleanup();
   }
-  void abortRequest(Transport *transport) override {
+  void abortRequest(Transport* transport) override {
     transport->sendString("Service Unavailable", 503);
   }
 };

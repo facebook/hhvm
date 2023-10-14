@@ -419,7 +419,10 @@ impl TextualFile<'_> {
             self.write_comment("----- CURRIES -----")?;
 
             let curry_tys = std::mem::take(&mut self.curry_tys);
-            for curry in curry_tys.into_iter() {
+            for curry in curry_tys
+                .into_iter()
+                .sorted_by(|a, b| a.name.cmp(&b.name, strings))
+            {
                 self.write_curry_definition(curry)?;
             }
 
@@ -435,8 +438,11 @@ impl TextualFile<'_> {
                 });
         non_builtin_fns.sort_by(|a, b| a.cmp(b, strings));
 
-        let referenced_globals =
-            &self.referenced_globals - &self.internal_globals.keys().cloned().collect();
+        let referenced_globals = (&self.referenced_globals
+            - &self.internal_globals.keys().cloned().collect())
+            .into_iter()
+            .sorted_by(|a, b| a.cmp(b, strings))
+            .collect_vec();
 
         if !non_builtin_fns.is_empty() || !referenced_globals.is_empty() {
             self.write_comment("----- EXTERNALS -----")?;

@@ -70,15 +70,13 @@ class D extends B {
   public static function bar(): void { }
 }
 
-// TEST-CHECK-1: define $root.MethCaller$C$b
-// CHECK: define $root.MethCaller$C$b($this: *void, $o: *HackMixed, $args: .variadic *HackVec) : *HackMixed {
-
 // TEST-CHECK-BAL: define $root.fcall_func
 // CHECK: define $root.fcall_func($this: *void) : *void {
 // CHECK: #b0:
 // CHECK:   n0 = $root.f(null, $builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
 // CHECK:   ret null
 // CHECK: }
+
 function fcall_func(): void {
   f(1, 2, 3);
 }
@@ -223,6 +221,9 @@ function fcall_meth_caller(C $b): void {
   $x($b, 1, 2, 3);
 }
 
+// TEST-CHECK-1: define $root.MethCaller$C$b
+// CHECK: define $root.MethCaller$C$b($this: *void, $o: *HackMixed, $args: .variadic *HackVec) : *HackMixed {
+
 // TEST-CHECK-BAL: define $root.fcall_cls_method
 // CHECK: define $root.fcall_cls_method($this: *void, $a: *Classname) : *void {
 // CHECK: #b0:
@@ -247,19 +248,19 @@ function fcall_readonly(): void {
   readonly_param(readonly g());
 }
 
-// TEST-CHECK-BAL: type C$static_sb$curry
-// CHECK: type C$static_sb$curry = .kind="class" .final {
-// CHECK:   this: .private *C$static
+// TEST-CHECK-BAL: type MethCaller$C$b$curry
+// CHECK: type MethCaller$C$b$curry = .kind="class" .final {
+// CHECK:   arg0: .private *void
 // CHECK: }
 
-// TEST-CHECK-BAL: define .final .curry C$static_sb$curry.__invoke
-// CHECK: define .final .curry C$static_sb$curry.__invoke(this: *C$static_sb$curry, args: .variadic *HackVec) : *HackMixed {
+// TEST-CHECK-BAL: define .final .curry MethCaller$C$b$curry.__invoke
+// CHECK: define .final .curry MethCaller$C$b$curry.__invoke(this: *MethCaller$C$b$curry, args: .variadic *HackVec) : *HackMixed {
 // CHECK: #b0:
-// CHECK:   n0: *C$static_sb$curry = load &this
-// CHECK:   n1: *HackVec = load &args
-// CHECK:   n2 = $builtins.__sil_splat(n1)
-// CHECK:   n3: *C$static = load n0.C$static_sb$curry.this
-// CHECK:   n4 = n3.C$static.sb(n2)
+// CHECK:   n0: *MethCaller$C$b$curry = load &this
+// CHECK:   n1: *void = load n0.MethCaller$C$b$curry.arg0
+// CHECK:   n2: *HackVec = load &args
+// CHECK:   n3 = $builtins.__sil_splat(n2)
+// CHECK:   n4 = $root.MethCaller$C$b(null, n1, n3)
 // CHECK:   ret n4
 // CHECK: }
 
@@ -277,19 +278,19 @@ function fcall_readonly(): void {
 // CHECK:   ret n3
 // CHECK: }
 
-// TEST-CHECK-BAL: type MethCaller$C$b$curry
-// CHECK: type MethCaller$C$b$curry = .kind="class" .final {
-// CHECK:   arg0: .private *void
+// TEST-CHECK-BAL: type C$static_sb$curry
+// CHECK: type C$static_sb$curry = .kind="class" .final {
+// CHECK:   this: .private *C$static
 // CHECK: }
 
-// TEST-CHECK-BAL: define .final .curry MethCaller$C$b$curry.__invoke
-// CHECK: define .final .curry MethCaller$C$b$curry.__invoke(this: *MethCaller$C$b$curry, args: .variadic *HackVec) : *HackMixed {
+// TEST-CHECK-BAL: define .final .curry C$static_sb$curry.__invoke
+// CHECK: define .final .curry C$static_sb$curry.__invoke(this: *C$static_sb$curry, args: .variadic *HackVec) : *HackMixed {
 // CHECK: #b0:
-// CHECK:   n0: *MethCaller$C$b$curry = load &this
-// CHECK:   n1: *void = load n0.MethCaller$C$b$curry.arg0
-// CHECK:   n2: *HackVec = load &args
-// CHECK:   n3 = $builtins.__sil_splat(n2)
-// CHECK:   n4 = $root.MethCaller$C$b(null, n1, n3)
+// CHECK:   n0: *C$static_sb$curry = load &this
+// CHECK:   n1: *HackVec = load &args
+// CHECK:   n2 = $builtins.__sil_splat(n1)
+// CHECK:   n3: *C$static = load n0.C$static_sb$curry.this
+// CHECK:   n4 = n3.C$static.sb(n2)
 // CHECK:   ret n4
 // CHECK: }
 

@@ -42,7 +42,7 @@ def strip_existing_check(input, idx):
 
 
 # Find input that matches the expected TEST-CHECK
-def fetch_check(filename, line, check, test, old):
+def fetch_check(filename, line, check, test, old, starting_line):
     indent = test.find("//")
     if indent == -1:
         indent = 0
@@ -58,7 +58,7 @@ def fetch_check(filename, line, check, test, old):
     if what:
         # A single line. If the asterisk is present then matches anywhere on the line.
         any = what == "TEST-CHECK-1*"
-        where = find_line_with(filename, line, check, expect, any)
+        where = find_line_with(filename, line, check, expect, any, starting_line)
 
         output = build_output(indent, check, where, 1)
         return output, where
@@ -66,7 +66,7 @@ def fetch_check(filename, line, check, test, old):
     expect, what = match_and_strip(test, "TEST-CHECK-BAL")
     if what:
         # Balanced braces
-        where = find_line_with(filename, line, check, expect, 0)
+        where = find_line_with(filename, line, check, expect, False, starting_line)
 
         balance = count_balance(check[where])
         lines = 1
@@ -152,19 +152,19 @@ def is_match(inp, expect, any_match):
     return True
 
 
-def find_line_with(filename, line, check, expect, any_match):
-    idx = 0
-    while idx < len(check):
-        inp = check[idx]
-        if is_match(inp, expect, any_match):
-            return idx
-        idx += 1
+def find_line_with(filename, line, check, expect, any_match, starting_line):
+    for cur in (range(starting_line, len(check)), range(0, starting_line)):
+        for idx in cur:
+            inp = check[idx]
+            if is_match(inp, expect, any_match):
+                return idx
+            idx += 1
     bail(filename, line, f"Expected string '{expect}' not found")
 
 
-def update_test(filename, input, idx, check):
+def update_test(filename, input, idx, check, starting_line):
     old = strip_existing_check(input, idx + 1)
-    check, start = fetch_check(filename, idx, check, input[idx], old)
+    check, start = fetch_check(filename, idx, check, input[idx], old, starting_line)
     input[idx + 1 : idx + 1] = check
 
     return 1 + len(check), start
@@ -214,7 +214,7 @@ def update_file(filename):
     while idx < len(file):
         inp = file[idx].strip()
         if inp.startswith("// TEST-CHECK:") or inp.startswith("// TEST-CHECK-"):
-            count, start = update_test(filename, file, idx, check)
+            count, start = update_test(filename, file, idx, check, last_seen)
         elif inp.startswith("// CHECK:") or inp.startswith("// CHECK-"):
             warn(filename, idx, "Naked CHECK found")
         else:

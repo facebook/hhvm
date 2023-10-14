@@ -2,17 +2,6 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-// TEST-CHECK-BAL: define Closure$basic1232.__construct
-// CHECK: define Closure$basic1232.__construct($this: *Closure$basic1232, b: *HackMixed, _0splice0: *HackMixed) : *HackMixed {
-// CHECK: #b0:
-// CHECK:   n0: *HackMixed = load &b
-// CHECK:   n1: *HackMixed = load &$this
-// CHECK:   store n1.?.b <- n0: *HackMixed
-// CHECK:   n2: *HackMixed = load &_0splice0
-// CHECK:   store n1.?._0splice0 <- n2: *HackMixed
-// CHECK:   ret null
-// CHECK: }
-
 // TEST-CHECK-BAL: define $root.basic1
 // CHECK: define $root.basic1($this: *void, $b: *A) : *HackMixed {
 // CHECK: local $0splice0: *void, $0: *void
@@ -25,6 +14,17 @@
 // CHECK:   n4 = n2.?.__invoke()
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK:   ret n4
+// CHECK: }
+
+// TEST-CHECK-BAL: define Closure$basic1232.__construct
+// CHECK: define Closure$basic1232.__construct($this: *Closure$basic1232, b: *HackMixed, _0splice0: *HackMixed) : *HackMixed {
+// CHECK: #b0:
+// CHECK:   n0: *HackMixed = load &b
+// CHECK:   n1: *HackMixed = load &$this
+// CHECK:   store n1.?.b <- n0: *HackMixed
+// CHECK:   n2: *HackMixed = load &_0splice0
+// CHECK:   store n1.?._0splice0 <- n2: *HackMixed
+// CHECK:   ret null
 // CHECK: }
 function basic1(A $b): mixed {
   return A`${$b}`;

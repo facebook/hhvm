@@ -11,6 +11,7 @@
 //!
 //! To get the static class singleton call `load_static_class`.
 
+use std::cmp::Ordering;
 use std::sync::Arc;
 
 use anyhow::Error;
@@ -110,7 +111,8 @@ impl ClassState<'_, '_, '_> {
             self.write_factory()?;
         }
 
-        let methods = std::mem::take(&mut self.class.methods);
+        let mut methods = std::mem::take(&mut self.class.methods);
+        methods.sort_by(|a, b| cmp_method(a, b, &self.unit_state.strings));
         for method in methods {
             self.write_method(method)?;
         }
@@ -346,4 +348,21 @@ fn compute_base(class: &ir::Class<'_>) -> Option<ir::ClassId> {
     } else {
         class.base
     }
+}
+
+fn cmp_method(a: &ir::Method<'_>, b: &ir::Method<'_>, strings: &ir::StringInterner) -> Ordering {
+    let line_a = a.func.locs[a.func.loc_id].line_begin as usize;
+    let line_b = b.func.locs[b.func.loc_id].line_begin as usize;
+    line_a
+        .cmp(&line_b)
+        .then_with(|| {
+            // Same source line - use name.
+            let name_a = strings.lookup_bstr(a.name.id);
+            let name_b = strings.lookup_bstr(b.name.id);
+            name_a.cmp(&name_b)
+        })
+        .then_with(|| {
+            // Same name - use param count.
+            a.func.params.len().cmp(&b.func.params.len())
+        })
 }

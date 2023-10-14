@@ -1,12 +1,6 @@
 // RUN: %hackc compile-infer --fail-fast --keep-memo %s | FileCheck %s
 
 class C {
-  // TEST-CHECK-1: define C$static.memometh_static$memoize_impl
-  // CHECK: define C$static.memometh_static$memoize_impl($this: *C$static, $a: *HackInt, $b: *HackInt) : *HackInt {
-
-  // TEST-CHECK-1: define C$static.memometh_lsb$memoize_impl
-  // CHECK: define C$static.memometh_lsb$memoize_impl($this: *C$static, $a: *HackInt, $b: *HackInt) : *HackInt {
-
   // TEST-CHECK-BAL: define C.memometh_inst
   // CHECK: define C.memometh_inst($this: *C, $a: *HackInt, $b: *HackInt) : *HackInt {
   // CHECK: local memocache::_C_2ememometh__inst: *void, $0: *void, $1: *void
@@ -74,6 +68,9 @@ class C {
     return $a + $b;
   }
 
+  // TEST-CHECK-1: define C$static.memometh_static$memoize_impl
+  // CHECK: define C$static.memometh_static$memoize_impl($this: *C$static, $a: *HackInt, $b: *HackInt) : *HackInt {
+
   // TEST-CHECK-BAL: define C$static.memometh_lsb
   // CHECK: define C$static.memometh_lsb($this: *C$static, $a: *HackInt, $b: *HackInt) : *HackInt {
   // CHECK: local memocache::_C$static_2ememometh__lsb: *void, $0: *void, $1: *void
@@ -108,8 +105,8 @@ class C {
   }
 }
 
-// TEST-CHECK-1: define $root.memofunc$memoize_impl
-// CHECK: define $root.memofunc$memoize_impl($this: *void, $a: *HackInt, $b: *HackInt) : *HackInt {
+// TEST-CHECK-1: define C$static.memometh_lsb$memoize_impl
+// CHECK: define C$static.memometh_lsb$memoize_impl($this: *C$static, $a: *HackInt, $b: *HackInt) : *HackInt {
 
 // TEST-CHECK-BAL: define $root.memofunc
 // CHECK: define $root.memofunc($this: *void, $a: *HackInt, $b: *HackInt) : *HackInt {
@@ -143,8 +140,8 @@ function memofunc(int $a, int $b)[]: int {
   return $a + $b;
 }
 
-// TEST-CHECK-1: define .async $root.memo_async_func$memoize_impl
-// CHECK: define .async $root.memo_async_func$memoize_impl($this: *void, $a: *HackInt, $b: *HackInt) : *HackInt {
+// TEST-CHECK-1: define $root.memofunc$memoize_impl
+// CHECK: define $root.memofunc$memoize_impl($this: *void, $a: *HackInt, $b: *HackInt) : *HackInt {
 
 // TEST-CHECK-BAL: define .async $root.memo_async_func
 // CHECK: define .async $root.memo_async_func($this: *void, $a: *HackInt, $b: *HackInt) : *HackInt {
@@ -178,3 +175,6 @@ function memofunc(int $a, int $b)[]: int {
 async function memo_async_func(int $a, int $b)[]: Awaitable<int> {
   return $a + $b;
 }
+
+// TEST-CHECK-1: define .async $root.memo_async_func$memoize_impl
+// CHECK: define .async $root.memo_async_func$memoize_impl($this: *void, $a: *HackInt, $b: *HackInt) : *HackInt {

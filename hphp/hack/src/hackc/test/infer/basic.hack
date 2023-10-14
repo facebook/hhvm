@@ -206,8 +206,8 @@ function check_noreturn(): noreturn {
   invariant(false, "bad");
 }
 
-// TEST-CHECK-1: global global::_SERVER
-// CHECK: global global::_SERVER : *HackMixed
-
 // TEST-CHECK-1: global gconst::GLOBAL_CONSTANT
 // CHECK: global gconst::GLOBAL_CONSTANT : *HackMixed
+
+// TEST-CHECK-1: global global::_SERVER
+// CHECK: global global::_SERVER : *HackMixed

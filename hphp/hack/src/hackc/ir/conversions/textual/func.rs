@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::borrow::Cow;
 use std::collections::HashSet;
 use std::sync::Arc;
 
@@ -75,37 +76,80 @@ pub(crate) fn write_function(
     lower_and_write_func(txf, state, textual::Ty::VoidPtr, function.func, func_info)
 }
 
-pub(crate) fn compute_func_params<'a, 'b>(
+fn add_attr<'a>(attr: &mut Option<Vec<Cow<'a, str>>>, s: impl Into<Cow<'a, str>>) {
+    match attr {
+        Some(attr) => attr.push(s.into()),
+        None => *attr = Some(vec![s.into()]),
+    }
+}
+
+fn compute_func_ty<'a>(
+    attr: &mut Option<Vec<Cow<'a, str>>>,
+    ty: &ir::TypeInfo,
+    unit_state: &UnitState,
+) -> textual::Ty {
+    let is_typevar = ty
+        .enforced
+        .modifiers
+        .contains(ir::TypeConstraintFlags::TypeVar);
+    if is_typevar {
+        let name = match ty.enforced.ty {
+            ir::BaseType::Class(cid) => TypeName::Class(cid),
+            _ => unreachable!(),
+        };
+        let text = format!(
+            "{}=\"{}\"",
+            textual::TYPEVAR,
+            name.display(&unit_state.strings)
+        );
+        add_attr(attr, text);
+        textual::Ty::mixed_ptr()
+    } else {
+        convert_ty(&ty.enforced, &unit_state.strings)
+    }
+}
+
+fn compute_func_params<'a, 'b>(
     params: &Vec<ir::Param<'_>>,
     unit_state: &'a mut UnitState,
     this_ty: textual::Ty,
-) -> Result<Vec<(textual::Param<'b>, LocalId)>> {
+) -> Vec<(textual::Param<'b>, LocalId)> {
     let mut result = Vec::new();
 
     let this_lid = LocalId::Named(unit_state.strings.intern_str(special_idents::THIS));
     // Prepend the 'this' parameter.
     let this_param = textual::Param {
         name: VarName::Local(this_lid),
-        attr: None,
+        attrs: None,
         ty: this_ty.into(),
     };
     result.push((this_param, this_lid));
 
     for p in params {
-        let mut attr = Vec::new();
+        let mut attrs = None;
         if p.is_variadic {
-            attr.push(textual::VARIADIC);
+            add_attr(&mut attrs, textual::VARIADIC);
         }
+        let ty = compute_func_ty(&mut attrs, &p.ty, unit_state);
         let lid = LocalId::Named(p.name);
         let param = textual::Param {
             name: VarName::Local(lid),
-            attr: Some(attr.into_boxed_slice()),
-            ty: convert_ty(&p.ty.enforced, &unit_state.strings).into(),
+            attrs: attrs.map(Vec::into_boxed_slice),
+            ty,
         };
         result.push((param, lid));
     }
 
-    Ok(result)
+    result
+}
+
+fn compute_func_ret_ty<'a>(ti: &ir::TypeInfo, unit_state: &UnitState) -> textual::Return<'a> {
+    let mut attrs = None;
+    let ty = compute_func_ty(&mut attrs, ti, unit_state);
+    textual::Return {
+        attrs: attrs.map(Vec::into_boxed_slice),
+        ty,
+    }
 }
 
 pub(crate) fn lower_and_write_func(
@@ -230,11 +274,11 @@ fn write_func(
 
     let params = std::mem::take(&mut func.params);
     let (tx_params, param_lids): (Vec<_>, Vec<_>) =
-        compute_func_params(&params, unit_state, this_ty)?
+        compute_func_params(&params, unit_state, this_ty)
             .into_iter()
             .unzip();
 
-    let ret_ty = convert_ty(&func.return_type.enforced, &strings);
+    let ret_ty = compute_func_ret_ty(&func.return_type, unit_state);
 
     let lids = func
         .body_instrs()
@@ -327,12 +371,12 @@ pub(crate) fn write_func_decl(
     func_info: Arc<FuncInfo<'_>>,
 ) -> Result {
     let params = std::mem::take(&mut func.params);
-    let param_tys = compute_func_params(&params, unit_state, this_ty)?
+    let param_tys = compute_func_params(&params, unit_state, this_ty)
         .into_iter()
         .map(|(param, _)| textual::Ty::clone(&param.ty))
         .collect_vec();
 
-    let ret_ty = convert_ty(&func.return_type.enforced, &unit_state.strings);
+    let ret_ty = compute_func_ret_ty(&func.return_type, unit_state).ty;
 
     let name = match *func_info {
         FuncInfo::Method(ref mi) => match mi.name {
@@ -369,7 +413,7 @@ fn write_instance_stub(
     unit_state: &mut UnitState,
     method_info: &MethodInfo<'_>,
     tx_params: &[textual::Param<'_>],
-    ret_ty: &textual::Ty,
+    ret_ty: &textual::Return<'_>,
     span: &ir::SrcLoc,
 ) -> Result {
     let strings = &unit_state.strings;
@@ -382,7 +426,7 @@ fn write_instance_stub(
 
     let mut tx_params = tx_params.to_vec();
     let inst_ty = method_info.non_static_ty();
-    tx_params[0].ty = (&inst_ty).into();
+    tx_params[0].ty = inst_ty.clone();
 
     let locals = Vec::default();
     txf.define_function(

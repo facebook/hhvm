@@ -34,6 +34,7 @@ use crate::mangle::VarName;
 
 pub(crate) const INDENT: &str = "  ";
 pub(crate) const VARIADIC: &str = ".variadic";
+pub(crate) const TYPEVAR: &str = ".typevar";
 
 type Result<T = (), E = Error> = std::result::Result<T, E>;
 
@@ -127,7 +128,7 @@ impl TextualFile<'_> {
         loc: Option<&SrcLoc>,
         attributes: &FuncAttributes,
         params: &[Param<'_>],
-        ret_ty: &Ty,
+        ret_ty: &Return<'_>,
         locals: &[(LocalId, &Ty)],
         body: impl FnOnce(&mut FuncBuilder<'_, '_>) -> Result<R>,
     ) -> Result<R> {
@@ -162,7 +163,7 @@ impl TextualFile<'_> {
                 "{sep}{name}: ",
                 name = param.name.display(&self.strings),
             )?;
-            if let Some(attrs) = param.attr.as_ref() {
+            if let Some(attrs) = param.attrs.as_ref() {
                 for attr in attrs.iter() {
                     write!(self.w, "{attr} ")?;
                 }
@@ -170,7 +171,13 @@ impl TextualFile<'_> {
             write!(self.w, "{ty}", ty = param.ty.display(&self.strings))?;
             sep = ", ";
         }
-        writeln!(self.w, ") : {} {{", ret_ty.display(&self.strings))?;
+        write!(self.w, ") : ")?;
+        if let Some(attrs) = ret_ty.attrs.as_ref() {
+            for attr in attrs.iter() {
+                write!(self.w, "{attr} ")?;
+            }
+        }
+        writeln!(self.w, "{} {{", ret_ty.ty.display(&self.strings))?;
 
         if !locals.is_empty() {
             let mut sep = "";
@@ -329,16 +336,16 @@ impl TextualFile<'_> {
             // ignored 'this' parameter
             Param {
                 name: VarName::Local(this_lid),
-                attr: None,
-                ty: (&this_ty_ptr).into(),
+                attrs: None,
+                ty: this_ty_ptr.clone(),
             },
             Param {
                 name: VarName::Local(varargs_lid),
-                attr: Some(vec![VARIADIC].into_boxed_slice()),
-                ty: (&args_ty).into(),
+                attrs: Some(vec![Cow::Borrowed(VARIADIC)].into_boxed_slice()),
+                ty: args_ty.clone(),
             },
         ];
-        let ret_ty = Ty::mixed_ptr();
+        let ret_ty = Return::new(Ty::mixed_ptr());
         let method = FunctionName::Intrinsic(Intrinsic::Invoke(curry_ty));
         let attrs = FuncAttributes {
             is_async: false,
@@ -1499,6 +1506,18 @@ pub(crate) struct Field<'a> {
 #[derive(Clone)]
 pub(crate) struct Param<'a> {
     pub name: VarName,
-    pub attr: Option<Box<[&'a str]>>,
-    pub ty: Cow<'a, Ty>,
+    pub attrs: Option<Box<[Cow<'a, str>]>>,
+    pub ty: Ty,
+}
+
+#[derive(Clone)]
+pub(crate) struct Return<'a> {
+    pub attrs: Option<Box<[Cow<'a, str>]>>,
+    pub ty: Ty,
+}
+
+impl Return<'_> {
+    pub(crate) fn new(ty: Ty) -> Self {
+        Return { attrs: None, ty }
+    }
 }

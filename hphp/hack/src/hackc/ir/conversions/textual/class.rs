@@ -253,12 +253,12 @@ impl ClassState<'_, '_, '_> {
     fn write_factory(&mut self) -> Result {
         let name = FunctionName::Intrinsic(Intrinsic::Factory(self.class.name));
         let static_ty = static_ty(self.class.name);
-        let ty = non_static_ty(self.class.name);
+        let ty = textual::Return::new(non_static_ty(self.class.name));
 
         let this_lid = LocalId::Named(self.unit_state.strings.intern_str(special_idents::THIS));
         let params = vec![textual::Param {
             name: VarName::Local(this_lid),
-            attr: None,
+            attrs: None,
             ty: static_ty.into(),
         }];
         let attributes = textual::FuncAttributes::default();
@@ -271,7 +271,7 @@ impl ClassState<'_, '_, '_> {
             &ty,
             &[],
             |fb| {
-                let obj = fb.write_expr_stmt(textual::Expr::Alloc(ty.deref()))?;
+                let obj = fb.write_expr_stmt(textual::Expr::Alloc(ty.ty.deref()))?;
                 fb.ret(obj)?;
                 Ok(())
             },

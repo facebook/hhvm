@@ -111,7 +111,7 @@ function likeParam(~string $a): void {
 }
 
 // TEST-CHECK-BAL: define $root.genericRet
-// CHECK: define $root.genericRet($this: *void, $a: *T) : *T {
+// CHECK: define $root.genericRet($this: *void, $a: .typevar="T" *HackMixed) : .typevar="T" *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$a
 // CHECK:   ret n0
@@ -121,7 +121,7 @@ function genericRet<T>(T $a): T {
 }
 
 // TEST-CHECK-BAL: define .async $root.genericAsyncRet
-// CHECK: define .async $root.genericAsyncRet($this: *void, $a: *T) : *T {
+// CHECK: define .async $root.genericAsyncRet($this: *void, $a: .typevar="T" *HackMixed) : .typevar="T" *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$a
 // CHECK:   ret n0

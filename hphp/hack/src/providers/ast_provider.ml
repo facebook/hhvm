@@ -240,16 +240,9 @@ let get_ast_with_error ~(full : bool) ctx path =
       (* It's in the parser-heap! hurrah! *)
       (Errors.empty, ast)
   end
-  | (_, Provider_backend.Analysis) -> begin
-    (* Zoncolan has its own caching layers and does not make use of Hack's.
-       However, for unit tests, split files end up in the parser heap.
-    *)
-    match (ParserHeap.get path, full) with
-    | (Some (ast, Full), _) ->
-      (* It's in the parser-heap! hurrah! *)
-      (Errors.empty, ast)
-    | _ -> parse_from_disk_no_caching ~apply_file_filter:false
-  end
+  | (_, Provider_backend.Analysis) ->
+    (* Zoncolan has its own caching layers and does not make use of Hack's *)
+    parse_from_disk_no_caching ~apply_file_filter:false
   | (_, Provider_backend.Local_memory _) ->
     (* We never cache ASTs for this provider. There'd be no use. *)
     (* The only valuable caching is to cache decls. *)

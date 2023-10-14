@@ -112,8 +112,6 @@ let map_tcopt (t : t) ~(f : TypecheckerOptions.t -> TypecheckerOptions.t) : t =
 
 let get_backend (t : t) : Provider_backend.t = t.backend
 
-let set_backend (t : t) (b : Provider_backend.t) = { t with backend = b }
-
 let get_deps_mode (t : t) : Typing_deps_mode.t = t.deps_mode
 
 let map_deps_mode (t : t) ~(f : Typing_deps_mode.t -> Typing_deps_mode.t) : t =

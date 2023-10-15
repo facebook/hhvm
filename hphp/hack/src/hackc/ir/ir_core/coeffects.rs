@@ -16,7 +16,7 @@ pub struct CtxConstant<'a> {
     pub is_abstract: bool,
 }
 
-#[derive(Default, Debug)]
+#[derive(Clone, Default, Debug)]
 pub struct Coeffects<'a> {
     pub static_coeffects: Vec<Ctx>,
     pub unenforced_static_coeffects: Vec<Str<'a>>,
@@ -29,12 +29,12 @@ pub struct Coeffects<'a> {
     pub caller: bool,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct CcThis<'arena> {
     pub types: Vec<Str<'arena>>,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct CcReified<'arena> {
     pub is_class: bool,
     pub index: u32,

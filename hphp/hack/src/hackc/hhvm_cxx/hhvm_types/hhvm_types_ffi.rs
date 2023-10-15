@@ -159,6 +159,12 @@ pub use ffi::Attr;
 pub use ffi::TypeConstraintFlags;
 pub use ffi::TypeStructureKind;
 
+impl Default for Attr {
+    fn default() -> Self {
+        Attr::AttrNone
+    }
+}
+
 impl Default for TypeConstraintFlags {
     fn default() -> Self {
         TypeConstraintFlags::NoFlags

@@ -206,7 +206,10 @@ impl TryCatchId {
 ///
 #[derive(Clone, Debug, Default)]
 pub struct Func<'a> {
+    pub attributes: Vec<Attribute>,
+    pub attrs: Attr,
     pub blocks: IdVec<BlockId, Block>,
+    pub coeffects: Coeffects<'a>,
     pub doc_comment: Option<Str<'a>>,
     pub ex_frames: ExFrameIdMap<ExFrame>,
     pub instrs: IdVec<InstrId, Instr>,
@@ -445,9 +448,6 @@ impl<'a> Func<'a> {
 /// A top-level Hack function.
 #[derive(Debug)]
 pub struct Function<'a> {
-    pub attributes: Vec<Attribute>,
-    pub attrs: Attr,
-    pub coeffects: Coeffects<'a>,
     pub flags: FunctionFlags,
     pub name: FunctionId,
     pub func: Func<'a>,
@@ -456,9 +456,6 @@ pub struct Function<'a> {
 /// A Hack method contained within a Class.
 #[derive(Debug)]
 pub struct Method<'a> {
-    pub attributes: Vec<Attribute>,
-    pub attrs: Attr,
-    pub coeffects: Coeffects<'a>,
     pub flags: MethodFlags,
     pub func: Func<'a>,
     pub name: MethodId,

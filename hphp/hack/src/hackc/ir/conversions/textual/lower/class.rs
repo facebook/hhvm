@@ -6,7 +6,6 @@ use ir::Attribute;
 use ir::BaseType;
 use ir::Class;
 use ir::ClassId;
-use ir::Coeffects;
 use ir::Constant;
 use ir::EnforceableType;
 use ir::FuncBuilder;
@@ -51,11 +50,11 @@ pub(crate) fn lower_class<'a>(mut class: Class<'a>, strings: Arc<StringInterner>
     for method in &mut class.methods {
         if method.name.is_86pinit(&strings) {
             // We want 86pinit to be 'instance' but hackc marks it as 'static'.
-            method.attrs -= Attr::AttrStatic;
+            method.func.attrs -= Attr::AttrStatic;
         }
         if method.flags.contains(MethodFlags::IS_CLOSURE_BODY) {
             // We want closure bodies to be 'instance' but hackc marks it as 'static'.
-            method.attrs -= Attr::AttrStatic;
+            method.func.attrs -= Attr::AttrStatic;
         }
         if classish_is_trait {
             // Let's insert a `self` parameter so infer's analysis can
@@ -189,9 +188,6 @@ fn create_default_closure_constructor<'a>(class: &mut Class<'a>, strings: Arc<St
     });
 
     let method = Method {
-        attributes: Vec::new(),
-        attrs: Attr::AttrNone,
-        coeffects: Coeffects::default(),
         flags: MethodFlags::empty(),
         func,
         name,
@@ -213,16 +209,12 @@ fn create_method_if_missing<'a>(
     let func = FuncBuilder::build_func(strings, |fb| {
         let loc = fb.add_loc(class.src_loc.clone());
         fb.func.loc_id = loc;
+        fb.func.attrs = is_static.as_attr();
         let null = fb.emit_constant(Constant::Null);
         fb.emit(Instr::ret(null, loc));
     });
 
-    let attrs = is_static.as_attr();
-
     let method = Method {
-        attributes: Vec::new(),
-        attrs,
-        coeffects: Coeffects::default(),
         flags: MethodFlags::empty(),
         func,
         name,

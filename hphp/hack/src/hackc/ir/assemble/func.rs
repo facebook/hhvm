@@ -28,8 +28,6 @@ use ir_core::instr::MemoGetEager;
 use ir_core::instr::Predicate;
 use ir_core::instr::Special;
 use ir_core::instr::Terminator;
-use ir_core::Attr;
-use ir_core::Attribute;
 use ir_core::Block;
 use ir_core::BlockId;
 use ir_core::CcParam;
@@ -155,15 +153,12 @@ impl Default for ClassState {
 
 pub(crate) struct FunctionParser<'a, 'b> {
     alloc: &'a Bump,
-    attributes: Vec<Attribute>,
-    attrs: Attr,
     // A local cache for the (Block x (InstrId, Instr)) state.  BlockId::NONE
     // (where we put the non-block instrs like params) is guaranteed to be
     // blocks[0].
     blocks: Vec<BlockInfo>,
     builder: FuncBuilder<'a>,
     class_state: Option<&'b mut ClassState>,
-    coeffects: Coeffects<'a>,
     cur_loc: LocId,
     flags: FunctionFlags,
 }
@@ -217,6 +212,7 @@ impl<'a, 'b> FunctionParser<'a, 'b> {
                 params,
                 tparams,
                 shadowed_tparams,
+                attrs,
                 ..Default::default()
             },
             Arc::clone(&unit_state.unit.strings),
@@ -238,12 +234,9 @@ impl<'a, 'b> FunctionParser<'a, 'b> {
 
         let mut state = FunctionParser {
             alloc: unit_state.alloc,
-            attributes: Default::default(),
-            attrs,
             blocks,
             builder,
             class_state,
-            coeffects: Default::default(),
             cur_loc,
             flags: Default::default(),
         };
@@ -262,13 +255,13 @@ impl<'a, 'b> FunctionParser<'a, 'b> {
                 ".coeffects_cc_reified" => state.parse_coeffects_cc_reified(tokenizer),
                 ".coeffects_cc_this" => state.parse_coeffects_cc_this(tokenizer),
                 ".coeffects_closure_parent_scope" => {
-                    state.coeffects.closure_parent_scope = true;
+                    state.builder.func.coeffects.closure_parent_scope = true;
                     Ok(())
                 }
                 ".coeffects_fun_param" => state.parse_coeffects_fun_param(tokenizer),
                 ".coeffects_static" => state.parse_coeffects_static(tokenizer),
                 ".coeffects_caller" => {
-                    state.coeffects.caller = true;
+                    state.builder.func.coeffects.caller = true;
                     Ok(())
                 }
                 ".const" => state.parse_const(tokenizer),
@@ -297,9 +290,6 @@ impl<'a, 'b> FunctionParser<'a, 'b> {
         state.latch_blocks();
 
         Ok(Function {
-            attributes: state.attributes,
-            attrs: state.attrs,
-            coeffects: state.coeffects,
             flags: state.flags,
             name,
             func: state.builder.finish(),
@@ -1107,7 +1097,7 @@ impl FunctionParser<'_, '_> {
 impl FunctionParser<'_, '_> {
     fn parse_attr(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
         let attr = parse_attribute(tokenizer)?;
-        self.attributes.push(attr);
+        self.builder.func.attributes.push(attr);
         Ok(())
     }
 
@@ -1120,7 +1110,11 @@ impl FunctionParser<'_, '_> {
     fn parse_coeffects_cc_param(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
         parse!(tokenizer, <index:parse_u32> <ctx_name:string>);
         let ctx_name = Str::new_slice(self.alloc, &ctx_name.unescaped_string()?);
-        self.coeffects.cc_param.push(CcParam { index, ctx_name });
+        self.builder
+            .func
+            .coeffects
+            .cc_param
+            .push(CcParam { index, ctx_name });
         Ok(())
     }
 
@@ -1137,7 +1131,7 @@ impl FunctionParser<'_, '_> {
             }
         }
 
-        self.coeffects.cc_reified.push(CcReified {
+        self.builder.func.coeffects.cc_reified.push(CcReified {
             is_class,
             index,
             types,
@@ -1151,13 +1145,13 @@ impl FunctionParser<'_, '_> {
             .into_iter()
             .map(|t| Ok(Str::new_slice(self.alloc, &t.unescaped_string()?)))
             .collect::<Result<_>>()?;
-        self.coeffects.cc_this.push(CcThis { types });
+        self.builder.func.coeffects.cc_this.push(CcThis { types });
         Ok(())
     }
 
     fn parse_coeffects_fun_param(&mut self, tokenizer: &mut Tokenizer<'_>) -> Result<()> {
         parse!(tokenizer, <fun_param:parse_u32,+>);
-        self.coeffects.fun_param = fun_param;
+        self.builder.func.coeffects.fun_param = fun_param;
         Ok(())
     }
 
@@ -1190,7 +1184,7 @@ impl FunctionParser<'_, '_> {
             Vec::new()
         };
 
-        self.coeffects = Coeffects {
+        self.builder.func.coeffects = Coeffects {
             static_coeffects,
             unenforced_static_coeffects,
             ..Coeffects::default()

@@ -69,7 +69,7 @@ pub(crate) fn write_function(
 
     let func_info = FuncInfo::Function(FunctionInfo {
         name: function.name,
-        attrs: function.attrs,
+        attrs: function.func.attrs,
         flags: function.flags,
     });
 

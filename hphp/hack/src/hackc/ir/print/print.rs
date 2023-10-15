@@ -621,11 +621,11 @@ fn print_function(
         shadowed_tparams = FmtShadowedTParams(&f.func.shadowed_tparams, strings),
         params = FmtFuncParams(&f.func, strings),
         ret_type = FmtTypeInfo(&f.func.return_type, strings),
-        attr = FmtAttr(f.attrs, AttrContext::Function),
+        attr = FmtAttr(f.func.attrs, AttrContext::Function),
     )?;
     print_function_flags(w, f.flags)?;
-    print_attributes(w, &f.attributes, strings)?;
-    print_coeffects(w, &f.coeffects)?;
+    print_attributes(w, &f.func.attributes, strings)?;
+    print_coeffects(w, &f.func.coeffects)?;
     print_func_body(w, &f.func, verbose, strings, None, None)?;
     writeln!(w, "}}")?;
     writeln!(w)
@@ -1822,11 +1822,11 @@ fn print_method(
         params = FmtFuncParams(&method.func, strings),
         ret_type = FmtTypeInfo(&method.func.return_type, strings),
         vis = FmtVisibility(method.visibility),
-        attr = FmtAttr(method.attrs, AttrContext::Method),
+        attr = FmtAttr(method.func.attrs, AttrContext::Method),
     )?;
     print_method_flags(w, method.flags)?;
-    print_attributes(w, &method.attributes, strings)?;
-    print_coeffects(w, &method.coeffects)?;
+    print_attributes(w, &method.func.attributes, strings)?;
+    print_coeffects(w, &method.func.coeffects)?;
     print_func_body(w, &method.func, verbose, strings, None, None)?;
     writeln!(w, "}}")?;
     writeln!(w)

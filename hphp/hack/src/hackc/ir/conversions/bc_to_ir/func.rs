@@ -33,20 +33,19 @@ pub(crate) fn convert_function<'a>(
     trace!("--- convert_function {}", src.name.unsafe_as_str());
 
     let span = ir::SrcLoc::from_span(filename, &src.span);
-    let func = convert_body(unit, filename, &src.body, span, unit_state);
+    let func = convert_body(
+        unit,
+        filename,
+        &src.body,
+        &src.attributes,
+        src.attrs,
+        &src.coeffects,
+        span,
+        unit_state,
+    );
     ir::verify::verify_func(&func, &Default::default(), &unit.strings);
 
-    let attributes = src
-        .attributes
-        .as_ref()
-        .iter()
-        .map(|a| convert::convert_attribute(a, &unit.strings))
-        .collect();
-
     let function = ir::Function {
-        attributes,
-        attrs: src.attrs,
-        coeffects: convert_coeffects(&src.coeffects),
         func,
         flags: src.flags,
         name: ir::FunctionId::from_hhbc(src.name, &unit.strings),
@@ -66,20 +65,19 @@ pub(crate) fn convert_method<'a>(
     trace!("--- convert_method {}", src.name.unsafe_as_str());
 
     let span = ir::SrcLoc::from_span(filename, &src.span);
-    let func = convert_body(unit, filename, &src.body, span, unit_state);
+    let func = convert_body(
+        unit,
+        filename,
+        &src.body,
+        &src.attributes,
+        src.attrs,
+        &src.coeffects,
+        span,
+        unit_state,
+    );
     ir::verify::verify_func(&func, &Default::default(), &unit.strings);
 
-    let attributes = src
-        .attributes
-        .as_ref()
-        .iter()
-        .map(|attr| crate::convert::convert_attribute(attr, &unit.strings))
-        .collect();
-
     let method = ir::Method {
-        attributes,
-        attrs: src.attrs,
-        coeffects: convert_coeffects(&src.coeffects),
         flags: src.flags,
         func,
         name: ir::MethodId::from_hhbc(src.name, &unit.strings),
@@ -94,6 +92,9 @@ fn convert_body<'a>(
     unit: &mut ir::Unit<'a>,
     filename: ir::Filename,
     body: &Body<'a>,
+    attributes: &[hhbc::Attribute<'_>],
+    attrs: ir::Attr,
+    coeffects: &hhbc::Coeffects<'a>,
     src_loc: ir::SrcLoc,
     unit_state: &UnitState<'a>,
 ) -> ir::Func<'a> {
@@ -135,8 +136,19 @@ fn convert_body<'a>(
     let mut locs: IdVec<ir::LocId, ir::SrcLoc> = Default::default();
     locs.push(src_loc);
 
+    let attributes = attributes
+        .as_ref()
+        .iter()
+        .map(|a| convert::convert_attribute(a, &unit.strings))
+        .collect();
+
+    let coeffects = convert_coeffects(coeffects);
+
     let func = ir::Func {
+        attributes,
+        attrs,
         blocks: Default::default(),
+        coeffects,
         doc_comment: doc_comment.clone().into_option(),
         ex_frames: Default::default(),
         instrs: Default::default(),

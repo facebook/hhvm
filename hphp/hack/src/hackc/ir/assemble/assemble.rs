@@ -227,9 +227,6 @@ impl<'a> UnitParser<'a> {
         let class = self.unit.classes.iter_mut().find(|c| c.name == clsid);
         if let Some(class) = class {
             let Function {
-                attributes,
-                attrs,
-                coeffects,
                 flags: _,
                 name,
                 func,
@@ -238,9 +235,6 @@ impl<'a> UnitParser<'a> {
             let name = MethodId::new(name.id);
 
             class.methods.push(Method {
-                attributes,
-                attrs,
-                coeffects,
                 flags: cs.flags,
                 func,
                 name,

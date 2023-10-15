@@ -287,7 +287,7 @@ impl ClassState<'_, '_, '_> {
             method.name.as_bstr(&self.unit_state.strings)
         );
 
-        let is_static = match method.attrs.is_static() {
+        let is_static = match method.func.attrs.is_static() {
             true => IsStatic::Static,
             false => IsStatic::NonStatic,
         };
@@ -296,13 +296,13 @@ impl ClassState<'_, '_, '_> {
 
         let func_info = FuncInfo::Method(MethodInfo {
             name: method.name,
-            attrs: method.attrs,
+            attrs: method.func.attrs,
             class: &self.class,
             is_static,
             flags: method.flags,
         });
 
-        if method.attrs.is_abstract() {
+        if method.func.attrs.is_abstract() {
             func::write_func_decl(
                 self.txf,
                 self.unit_state,

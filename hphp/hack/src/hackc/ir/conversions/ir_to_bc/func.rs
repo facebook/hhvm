@@ -141,7 +141,7 @@ pub(crate) fn convert_func<'a>(
 
 pub(crate) fn convert_function<'a>(
     unit: &mut UnitBuilder<'a>,
-    function: ir::Function<'a>,
+    mut function: ir::Function<'a>,
     strings: &StringCache<'a>,
 ) {
     trace!(
@@ -149,38 +149,44 @@ pub(crate) fn convert_function<'a>(
         function.name.as_bstr(&strings.interner)
     );
     let span = function.func.loc(function.func.loc_id).to_span();
+    let attributes =
+        convert::convert_attributes(std::mem::take(&mut function.func.attributes), strings);
+    let attrs = function.func.attrs;
+    let coeffects = convert_coeffects(strings.alloc, &function.func.coeffects);
     let body = convert_func(function.func, strings, &mut unit.adata_cache);
-    let attributes = convert::convert_attributes(function.attributes, strings);
     let hhas_func = hhbc::Function {
         attributes,
         body,
-        coeffects: convert_coeffects(strings.alloc, &function.coeffects),
+        coeffects,
         flags: function.flags,
         name: strings.lookup_function_name(function.name),
         span,
-        attrs: function.attrs,
+        attrs,
     };
     unit.functions.push(hhas_func);
 }
 
 pub(crate) fn convert_method<'a>(
-    method: ir::Method<'a>,
+    mut method: ir::Method<'a>,
     strings: &StringCache<'a>,
     adata: &mut AdataCache<'a>,
 ) -> Method<'a> {
     trace!("convert_method {}", method.name.as_bstr(&strings.interner));
     let span = method.func.loc(method.func.loc_id).to_span();
+    let attrs = method.func.attrs;
+    let coeffects = convert_coeffects(strings.alloc, &method.func.coeffects);
+    let attributes =
+        convert::convert_attributes(std::mem::take(&mut method.func.attributes), strings);
     let body = convert_func(method.func, strings, adata);
-    let attributes = convert::convert_attributes(method.attributes, strings);
     hhbc::Method {
         attributes,
         name: strings.lookup_method_name(method.name),
         body,
         span,
-        coeffects: convert_coeffects(strings.alloc, &method.coeffects),
+        coeffects,
         flags: method.flags,
         visibility: method.visibility,
-        attrs: method.attrs,
+        attrs,
     }
 }
 

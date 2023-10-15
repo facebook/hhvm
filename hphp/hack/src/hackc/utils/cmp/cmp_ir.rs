@@ -383,38 +383,47 @@ fn cmp_func(
     let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
 
     let Func {
+        attributes: a_attributes,
+        attrs: a_attrs,
         blocks: a_blocks,
+        coeffects: a_coeffects,
+        constants: _,
         doc_comment: a_doc_comment,
         ex_frames: a_ex_frames,
         instrs: a_instrs,
         is_memoize_wrapper: a_is_memoize_wrapper,
         is_memoize_wrapper_lsb: a_is_memoize_wrapper_lsb,
-        constants: _,
+        loc_id: a_loc_id,
         locs: _,
         num_iters: a_num_iters,
         params: a_params,
         return_type: a_return_type,
         shadowed_tparams: a_shadowed_tparams,
-        loc_id: a_loc_id,
         tparams: a_tparams,
     } = a;
     let Func {
+        attributes: b_attributes,
+        attrs: b_attrs,
         blocks: b_blocks,
+        coeffects: b_coeffects,
+        constants: _,
         doc_comment: b_doc_comment,
         ex_frames: b_ex_frames,
         instrs: b_instrs,
         is_memoize_wrapper: b_is_memoize_wrapper,
         is_memoize_wrapper_lsb: b_is_memoize_wrapper_lsb,
-        constants: _,
+        loc_id: b_loc_id,
         locs: _,
         num_iters: b_num_iters,
         params: b_params,
         return_type: b_return_type,
         shadowed_tparams: b_shadowed_tparams,
-        loc_id: b_loc_id,
         tparams: b_tparams,
     } = b;
 
+    cmp_attributes((a_attributes, a_strings), (b_attributes, b_strings)).qualified("attributes")?;
+    cmp_eq(a_attrs, b_attrs).qualified("attrs")?;
+    cmp_coeffects(a_coeffects, b_coeffects).qualified("coeffects")?;
     cmp_eq(a_doc_comment, b_doc_comment).qualified("doc_comment")?;
     cmp_eq(a_is_memoize_wrapper, b_is_memoize_wrapper).qualified("is_memoize_wrapper")?;
     cmp_eq(a_is_memoize_wrapper_lsb, b_is_memoize_wrapper_lsb)
@@ -463,25 +472,16 @@ fn cmp_function(
     let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
 
     let Function {
-        attributes: a_attributes,
-        attrs: a_attrs,
-        coeffects: a_coeffects,
         flags: a_flags,
         name: a_name,
         func: a_func,
     } = a;
     let Function {
-        attributes: b_attributes,
-        attrs: b_attrs,
-        coeffects: b_coeffects,
         flags: b_flags,
         name: b_name,
         func: b_func,
     } = b;
 
-    cmp_attributes((a_attributes, a_strings), (b_attributes, b_strings)).qualified("attributes")?;
-    cmp_eq(a_attrs, b_attrs).qualified("attrs")?;
-    cmp_coeffects(a_coeffects, b_coeffects).qualified("coeffects")?;
     cmp_eq(a_flags, b_flags).qualified("flags")?;
     cmp_id(a_name.id, b_name.id).qualified("name")?;
     cmp_func((a_func, a_strings), (b_func, b_strings)).qualified("func")?;
@@ -1407,26 +1407,17 @@ fn cmp_method(
     let cmp_id = |a: UnitBytesId, b: UnitBytesId| cmp_id((a, a_strings), (b, b_strings));
 
     let Method {
-        attributes: a_attributes,
-        attrs: a_attrs,
-        coeffects: a_coeffects,
         flags: a_flags,
         func: a_func,
         name: a_name,
         visibility: a_visibility,
     } = a;
     let Method {
-        attributes: b_attributes,
-        attrs: b_attrs,
-        coeffects: b_coeffects,
         flags: b_flags,
         func: b_func,
         name: b_name,
         visibility: b_visibility,
     } = b;
-    cmp_attributes((a_attributes, a_strings), (b_attributes, b_strings)).qualified("attributes")?;
-    cmp_eq(a_attrs, b_attrs).qualified("attrs")?;
-    cmp_coeffects(a_coeffects, b_coeffects).qualified("coeffects")?;
     cmp_eq(a_flags, b_flags).qualified("flags")?;
     cmp_func((a_func, a_strings), (b_func, b_strings)).qualified("func")?;
     cmp_id(a_name.id, b_name.id).qualified("name")?;

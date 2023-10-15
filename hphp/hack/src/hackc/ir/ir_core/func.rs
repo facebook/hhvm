@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::ops::Deref;
+
 use ffi::Str;
 use newtype::newtype_int;
 use newtype::IdVec;
@@ -388,6 +390,12 @@ impl<'a> Func<'a> {
     pub fn is_terminal(&self, vid: ValueId) -> bool {
         vid.instr()
             .map_or(false, |iid| self.instr(iid).is_terminal())
+    }
+
+    pub fn is_reified(&self, strings: &crate::StringInterner) -> bool {
+        self.attributes
+            .iter()
+            .any(|attr| attr.name.as_bstr(strings).deref() == "__Reified")
     }
 
     pub fn loc(&self, loc: LocId) -> &SrcLoc {

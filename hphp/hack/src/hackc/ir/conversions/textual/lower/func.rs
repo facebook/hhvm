@@ -46,6 +46,12 @@ pub(crate) fn lower_func<'a>(
         FuncInfo::Function(_) => {}
     }
 
+    // If the function is reified then make the implied 0ReifiedGenerics
+    // parameter explicit.
+    if func.is_reified(&strings) {
+        add_reified_parameter(&mut func, &strings);
+    }
+
     // Start by 'unasync'ing the Func.
     ir::passes::unasync(&mut func);
     trace!(
@@ -88,6 +94,24 @@ pub(crate) fn lower_func<'a>(
     );
 
     func
+}
+
+fn add_reified_parameter(func: &mut Func<'_>, strings: &StringInterner) {
+    func.params.push(ir::Param {
+        name: strings.intern_str(hhbc_string_utils::reified::GENERICS_LOCAL_NAME),
+        is_variadic: false,
+        is_inout: false,
+        is_readonly: false,
+        user_attributes: Default::default(),
+        ty: ir::TypeInfo {
+            user_type: None,
+            enforced: ir::EnforceableType {
+                ty: ir::BaseType::Vec,
+                modifiers: ir::TypeConstraintFlags::NoFlags,
+            },
+        },
+        default_value: None,
+    });
 }
 
 fn call_base_func(builder: &mut FuncBuilder<'_>, method_info: &MethodInfo<'_>, loc: LocId) {

@@ -209,19 +209,20 @@ def update_file(filename):
     ).decode("utf-8", "ignore")
     check = stdout.split("\n")
 
-    last_seen = 0
+    last_seen = -1
     idx = 0
     while idx < len(file):
         inp = file[idx].strip()
         if inp.startswith("// TEST-CHECK:") or inp.startswith("// TEST-CHECK-"):
-            count, start = update_test(filename, file, idx, check, last_seen)
+            count, start = update_test(filename, file, idx, check, last_seen + 1)
         elif inp.startswith("// CHECK:") or inp.startswith("// CHECK-"):
             warn(filename, idx, "Naked CHECK found")
         else:
-            count, start = 1, last_seen
+            idx += 1
+            continue
 
         if start is not None:
-            if start < last_seen:
+            if start <= last_seen:
                 bail(
                     filename,
                     idx,

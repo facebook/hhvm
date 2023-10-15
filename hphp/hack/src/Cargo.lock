@@ -5353,6 +5353,7 @@ dependencies = [
  "ascii",
  "escaper",
  "hash",
+ "hhbc_string_utils",
  "ir",
  "itertools 0.10.5",
  "log",

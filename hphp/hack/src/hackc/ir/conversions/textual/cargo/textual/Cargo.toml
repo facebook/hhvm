@@ -13,6 +13,7 @@ anyhow = "=1.0.72"
 ascii = "1.0"
 escaper = { version = "0.0.0", path = "../../../../../../utils/escaper" }
 hash = { version = "0.0.0", path = "../../../../../../utils/hash" }
+hhbc_string_utils = { version = "0.0.0", path = "../../../../../utils/cargo/hhbc_string_utils" }
 ir = { version = "0.0.0", path = "../../../.." }
 itertools = "0.10.3"
 log = { version = "0.4.17", features = ["kv_unstable", "kv_unstable_std"] }

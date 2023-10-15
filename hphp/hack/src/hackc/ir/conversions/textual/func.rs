@@ -178,9 +178,10 @@ pub(crate) fn lower_and_write_func(
         // functions which each take a different number of parameters,
         // initialize them and then forward on to the function that takes all
         // the parameters.
-        let inits = split_default_func(&func, &func_info, &unit_state.strings);
-        for init in inits {
-            lower_and_write_func_(txf, unit_state, this_ty.clone(), init, func_info.clone())?;
+        if let Some(inits) = split_default_func(&func, &func_info, &unit_state.strings) {
+            for init in inits {
+                lower_and_write_func_(txf, unit_state, this_ty.clone(), init, func_info.clone())?;
+            }
         }
     }
 
@@ -194,44 +195,75 @@ fn split_default_func<'a>(
     orig_func: &Func<'a>,
     func_info: &FuncInfo<'_>,
     strings: &StringInterner,
-) -> Vec<Func<'a>> {
+) -> Option<Vec<Func<'a>>> {
     let mut result = Vec::new();
     let loc = orig_func.loc_id;
 
+    // Caution here: If we have varargs then the final param is "magic".  Since
+    // we're before lowering the 0ReifiedGenerics param won't exist yet.
+    let mut max_params = orig_func.params.len();
     let min_params = orig_func
         .params
         .iter()
         .take_while(|p| p.default_value.is_none())
         .count();
-    let max_params = orig_func.params.len();
+    if min_params == max_params {
+        return None;
+    }
+
+    let has_reified = orig_func.is_reified(strings);
+    let mut variadic_idx = None;
+    if orig_func.params[max_params - 1].is_variadic {
+        max_params -= 1;
+        variadic_idx = Some(max_params);
+    }
+
     for param_count in min_params..max_params {
         let mut func = orig_func.clone();
-        let target_bid = func.params[param_count].default_value.unwrap().init;
+        let target_bid = func.params[param_count].default_value.map(|dv| dv.init);
         func.params.truncate(param_count);
         for i in min_params..param_count {
             func.params[i].default_value = None;
         }
 
         // replace the entrypoint with a jump to the initializer.
-        let iid = func.alloc_instr(Instr::Terminator(ir::instr::Terminator::Jmp(
-            target_bid, loc,
-        )));
-        func.block_mut(Func::ENTRY_BID).iids = vec![iid];
+        if let Some(target_bid) = target_bid {
+            let mut block = Vec::new();
+
+            if let Some(variadic_idx) = variadic_idx {
+                // We need to fake up setting an empty variadic parameter.
+                let new_vec =
+                    func.alloc_constant(Constant::Array(Arc::new(ir::TypedValue::Vec(Vec::new()))));
+                let lid = LocalId::Named(orig_func.params[variadic_idx].name);
+                let iid = func.alloc_instr(Instr::Hhbc(Hhbc::SetL(new_vec.into(), lid, loc)));
+                block.push(iid);
+            }
+
+            let iid = func.alloc_instr(Instr::Terminator(ir::instr::Terminator::Jmp(
+                target_bid, loc,
+            )));
+            block.push(iid);
+            func.block_mut(Func::ENTRY_BID).iids = block;
+        }
 
         // And turn the 'enter' calls into a tail call into the non-default
         // function.
         let exit_bid = {
             let mut block = ir::Block::default();
-            let params = orig_func
-                .params
-                .iter()
-                .map(|param| {
-                    let instr = Instr::Hhbc(Hhbc::CGetL(LocalId::Named(param.name), loc));
-                    let iid = func.alloc_instr(instr);
-                    block.iids.push(iid);
-                    ValueId::from(iid)
-                })
-                .collect_vec();
+            let mut params = Vec::new();
+            for param in &orig_func.params {
+                let instr = Instr::Hhbc(Hhbc::CGetL(LocalId::Named(param.name), loc));
+                let iid = func.alloc_instr(instr);
+                block.iids.push(iid);
+                params.push(ValueId::from(iid));
+            }
+            if has_reified {
+                let name = strings.intern_str(hhbc_string_utils::reified::GENERICS_LOCAL_NAME);
+                let instr = Instr::Hhbc(Hhbc::CGetL(LocalId::Named(name), loc));
+                let iid = func.alloc_instr(instr);
+                block.iids.push(iid);
+                params.push(ValueId::from(iid));
+            }
             let instr = match func_info {
                 FuncInfo::Function(fi) => Instr::simple_call(fi.name, &params, loc),
                 FuncInfo::Method(mi) => {
@@ -260,7 +292,7 @@ fn split_default_func<'a>(
         result.push(func);
     }
 
-    result
+    Some(result)
 }
 
 fn write_func(
@@ -924,19 +956,24 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
         })
         .collect_vec();
 
+    // Argument Order:
+    // <params> <splat> <generics>
+
+    // A 'generic' is a call with explicit generics:
+    //   foo<int>(5)
+    let mut generics = None;
+    if flags & FCallArgsFlags::HasGenerics != 0 {
+        generics = args.pop();
+    }
+
     // A 'splat' is a call with an expanded array:
     //   foo(1, 2, ...$a)
     let mut splat = None;
-
     if flags & FCallArgsFlags::HasUnpack != 0 {
         // 'unpack' means that the last arg was a splat.
         splat = args.pop();
     }
-    if flags & FCallArgsFlags::HasGenerics != 0 {
-        textual_todo! {
-            state.fb.comment("TODO: FCallArgsFlags::HasGenerics")?;
-        }
-    }
+
     if flags & FCallArgsFlags::SkipRepack != 0 {
         textual_todo! {
             state.fb.comment("TODO: FCallArgsFlags::SkipRepack")?;
@@ -989,6 +1026,12 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
         // can recognize so it understands that it needs some extra analysis.
         let splat = hack::call_builtin(state.fb, hack::Builtin::SilSplat, [splat])?;
         args.push(splat.into());
+    }
+
+    if let Some(generics) = generics {
+        // Mark the generics for the model.
+        let generics = hack::call_builtin(state.fb, hack::Builtin::SilGenerics, [generics])?;
+        args.push(generics.into());
     }
 
     let mut output = match *detail {

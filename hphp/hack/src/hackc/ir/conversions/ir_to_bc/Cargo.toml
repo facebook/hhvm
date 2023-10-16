@@ -16,7 +16,7 @@ hash = { version = "0.0.0", path = "../../../../utils/hash" }
 hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
 instruction_sequence = { version = "0.0.0", path = "../../../emitter/cargo/instruction_sequence" }
 ir = { version = "0.0.0", path = "../.." }
-itertools = "0.10.3"
+itertools = "0.11.0"
 log = { version = "0.4.17", features = ["kv_unstable", "kv_unstable_std"] }
 smallvec = { version = "1.6.1", features = ["serde", "specialization", "union"] }
 stack_depth = { version = "0.0.0", path = "../../../utils/cargo/stack_depth" }

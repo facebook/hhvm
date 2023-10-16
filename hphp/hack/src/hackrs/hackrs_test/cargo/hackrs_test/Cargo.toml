@@ -17,7 +17,7 @@ file_provider = { version = "0.0.0", path = "../../../file_provider/cargo/file_p
 folded_decl_provider = { version = "0.0.0", path = "../../../folded_decl_provider/cargo/folded_decl_provider" }
 hackrs_test_utils = { version = "0.0.0", path = "../../../hackrs_test_utils/cargo/hackrs_test_utils" }
 hh24_test = { version = "0.0.0", path = "../../../../utils/cargo/hh24_test" }
-itertools = "0.10.3"
+itertools = "0.11.0"
 maplit = "1.0"
 naming_provider = { version = "0.0.0", path = "../../../naming_provider/cargo/naming_provider" }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }

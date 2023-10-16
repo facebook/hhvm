@@ -15,7 +15,7 @@ bumpalo = { version = "3.11.1", features = ["collections"] }
 ffi = { version = "0.0.0", path = "../../../utils/ffi" }
 hash = { version = "0.0.0", path = "../../../utils/hash" }
 ir_core = { version = "0.0.0", path = "../ir_core" }
-itertools = "0.10.3"
+itertools = "0.11.0"
 log = { version = "0.4.17", features = ["kv_unstable", "kv_unstable_std"] }
 naming_special_names_rust = { version = "0.0.0", path = "../../../naming" }
 parse_macro_ir = { version = "0.0.0", path = "../cargo/parse_macro" }

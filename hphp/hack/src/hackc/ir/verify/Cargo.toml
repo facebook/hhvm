@@ -11,5 +11,5 @@ path = "lib.rs"
 [dependencies]
 analysis = { version = "0.0.0", path = "../analysis" }
 ir_core = { version = "0.0.0", path = "../ir_core" }
-itertools = "0.10.3"
+itertools = "0.11.0"
 print = { version = "0.0.0", path = "../print" }

@@ -14,7 +14,7 @@ bumpalo = { version = "3.11.1", features = ["collections"] }
 escaper = { version = "0.0.0", path = "../../utils/escaper" }
 hash = { version = "0.0.0", path = "../../utils/hash" }
 html_entities = { version = "0.0.0", path = "../../utils/html_entities" }
-itertools = "0.10.3"
+itertools = "0.11.0"
 lazy_static = "1.4"
 lint_rust = { version = "0.0.0", path = "../../utils/lint" }
 naming_special_names_rust = { version = "0.0.0", path = "../../naming" }

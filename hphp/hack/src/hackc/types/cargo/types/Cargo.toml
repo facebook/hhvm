@@ -12,7 +12,7 @@ path = "../../lib.rs"
 decl_provider = { version = "0.0.0", path = "../../../decl_provider" }
 hash = { version = "0.0.0", path = "../../../../utils/hash" }
 hh_autoimport_rust = { version = "0.0.0", path = "../../../../parser/cargo/hh_autoimport" }
-itertools = "0.10.3"
+itertools = "0.11.0"
 lazy_static = "1.4"
 naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }

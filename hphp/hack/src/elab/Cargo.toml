@@ -16,7 +16,7 @@ elaborate_namespaces_visitor = { version = "0.0.0", path = "../naming/cargo/elab
 file_info = { version = "0.0.0", path = "../deps/rust/file_info" }
 hack_macros = { version = "0.0.0", path = "../utils/hack_macros/cargo/hack_macros" }
 hash = { version = "0.0.0", path = "../utils/hash" }
-itertools = "0.10.3"
+itertools = "0.11.0"
 naming_special_names_rust = { version = "0.0.0", path = "../naming" }
 oxidized = { version = "0.0.0", path = "../oxidized" }
 relative_path = { version = "0.0.0", path = "../utils/rust/relative_path" }

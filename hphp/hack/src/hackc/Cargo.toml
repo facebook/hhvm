@@ -36,7 +36,7 @@ hhvm_config = { version = "0.0.0", path = "hhvm_config/cargo/options" }
 hhvm_options = { version = "0.0.0", path = "../utils/hhvm_options" }
 ir = { version = "0.0.0", path = "ir" }
 ir_to_bc = { version = "0.0.0", path = "ir/conversions/ir_to_bc" }
-itertools = "0.10.3"
+itertools = "0.11.0"
 jwalk = "0.6"
 log = { version = "0.4.17", features = ["kv_unstable", "kv_unstable_std"] }
 multifile_rust = { version = "0.0.0", path = "../utils/multifile" }

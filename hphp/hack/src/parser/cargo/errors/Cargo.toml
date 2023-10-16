@@ -14,7 +14,7 @@ doctest = false
 escaper = { version = "0.0.0", path = "../../../utils/escaper" }
 hash = { version = "0.0.0", path = "../../../utils/hash" }
 hh_autoimport_rust = { version = "0.0.0", path = "../hh_autoimport" }
-itertools = "0.10.3"
+itertools = "0.11.0"
 naming_special_names_rust = { version = "0.0.0", path = "../../../naming" }
 oxidized = { version = "0.0.0", path = "../../../oxidized" }
 parser_core_types = { version = "0.0.0", path = "../core_types" }

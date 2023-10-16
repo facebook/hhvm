@@ -16,6 +16,6 @@ ffi = { version = "0.0.0", path = "../../utils/ffi" }
 hash = { version = "0.0.0", path = "../../utils/hash" }
 hhbc = { version = "0.0.0", path = "../hhbc/cargo/hhbc" }
 hhbc-gen = { version = "0.0.0", path = "../../../../tools/hhbc-gen" }
-itertools = "0.10.3"
+itertools = "0.11.0"
 log = { version = "0.4.17", features = ["kv_unstable", "kv_unstable_std"] }
 newtype = { version = "0.0.0", path = "../../utils/newtype" }

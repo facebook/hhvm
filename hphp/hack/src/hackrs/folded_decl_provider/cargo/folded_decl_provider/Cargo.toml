@@ -15,7 +15,7 @@ decl_enforceability = { version = "0.0.0", path = "../../../decl_enforceability"
 eq_modulo_pos = { version = "0.0.0", path = "../../../../utils/eq_modulo_pos" }
 hash = { version = "0.0.0", path = "../../../../utils/hash" }
 indexmap = { version = "1.9.2", features = ["arbitrary", "rayon", "serde-1"] }
-itertools = "0.10.3"
+itertools = "0.11.0"
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 pos = { version = "0.0.0", path = "../../../pos/cargo/pos" }
 shallow_decl_provider = { version = "0.0.0", path = "../../../shallow_decl_provider/cargo/shallow_decl_provider" }

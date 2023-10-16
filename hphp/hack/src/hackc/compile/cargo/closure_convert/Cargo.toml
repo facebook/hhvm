@@ -17,7 +17,7 @@ hack_macros = { version = "0.0.0", path = "../../../../utils/hack_macros/cargo/h
 hash = { version = "0.0.0", path = "../../../../utils/hash" }
 hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
 hhbc_string_utils = { version = "0.0.0", path = "../../../utils/cargo/hhbc_string_utils" }
-itertools = "0.10.3"
+itertools = "0.11.0"
 naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
 options = { version = "0.0.0", path = "../options" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }

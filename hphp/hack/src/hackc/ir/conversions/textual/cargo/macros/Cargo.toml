@@ -12,7 +12,7 @@ doctest = false
 proc-macro = true
 
 [dependencies]
-itertools = "0.10.3"
+itertools = "0.11.0"
 proc-macro-error = "1.0"
 proc-macro2 = { version = "1.0.64", features = ["span-locations"] }
 quote = "1.0.29"

@@ -21,7 +21,7 @@ hash = { version = "0.0.0", path = "../utils/hash" }
 hh24_types = { version = "0.0.0", path = "../utils/hh24_types" }
 hh_autoimport_rust = { version = "0.0.0", path = "../parser/cargo/hh_autoimport" }
 hh_hash = { version = "0.0.0", path = "../utils/hh_hash" }
-itertools = "0.10.3"
+itertools = "0.11.0"
 naming_types = { version = "0.0.0", path = "../naming/rust/naming_types" }
 no_pos_hash = { version = "0.0.0", path = "../utils/no_pos_hash" }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }

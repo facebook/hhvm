@@ -11,7 +11,7 @@ path = "../../parser_core_types_lib.rs"
 [dependencies]
 bitflags = "1.3"
 bumpalo = { version = "3.11.1", features = ["collections"] }
-itertools = "0.10.3"
+itertools = "0.11.0"
 line_break_map = { version = "0.0.0", path = "../../../utils/line_break_map" }
 ocaml_helper = { version = "0.0.0", path = "../../../utils/ocaml_helper" }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }

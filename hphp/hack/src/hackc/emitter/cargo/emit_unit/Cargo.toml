@@ -28,7 +28,7 @@ hhbc_string_utils = { version = "0.0.0", path = "../../../utils/cargo/hhbc_strin
 hhvm_types_ffi = { version = "0.0.0", path = "../../../hhvm_cxx/hhvm_types" }
 indexmap = { version = "1.9.2", features = ["arbitrary", "rayon", "serde-1"] }
 instruction_sequence = { version = "0.0.0", path = "../instruction_sequence" }
-itertools = "0.10.3"
+itertools = "0.11.0"
 label_rewriter = { version = "0.0.0", path = "../label_rewriter" }
 lazy_static = "1.4"
 naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }

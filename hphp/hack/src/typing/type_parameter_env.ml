@@ -26,7 +26,8 @@ let empty_bounds = TySet.empty
 
 let singleton_bound ty = TySet.singleton ty
 
-type tparam_info = Typing_kinding_defs.kind [@@deriving hash]
+type tparam_info = Typing_kinding_defs.kind
+[@@deriving hash, show { with_path = false }]
 
 let tparam_info_size tpinfo =
   TySet.cardinal tpinfo.lower_bounds + TySet.cardinal tpinfo.upper_bounds
@@ -38,7 +39,7 @@ type t = {
           (i.e., without a source location that defines it) *)
   consistent: bool;
 }
-[@@deriving hash]
+[@@deriving hash, show { with_path = false }]
 
 let empty = { tparams = SMap.empty; consistent = true }
 
@@ -368,63 +369,6 @@ let add_generic_parameters tpenv tparaml =
 
 let get_parameter_names tpi =
   List.map tpi.parameters ~f:(fun (name, _) -> snd name)
-
-let rec pp_tparam_info fmt tpi =
-  Format.fprintf fmt "@[<hv 2>{ ";
-
-  Format.fprintf fmt "@[%s =@ " "lower_bounds";
-  TySet.pp fmt tpi.lower_bounds;
-  Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
-
-  Format.fprintf fmt "@[%s =@ " "upper_bounds";
-  TySet.pp fmt tpi.upper_bounds;
-  Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
-
-  Format.fprintf fmt "@[%s =@ " "reified";
-  Aast.pp_reify_kind fmt tpi.reified;
-  Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
-
-  Format.fprintf fmt "@[%s =@ " "enforceable";
-  Format.pp_print_bool fmt tpi.enforceable;
-  Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
-
-  Format.fprintf fmt "@[%s =@ " "newable";
-  Format.pp_print_bool fmt tpi.newable;
-  Format.fprintf fmt "@]";
-
-  Format.fprintf fmt "(@[parameters: (@,";
-  ignore
-    (List.fold_left
-       ~f:(fun sep (name, x) ->
-         if sep then Format.fprintf fmt ";@ ";
-         let () = Typing_defs.pp_pos_id fmt name in
-         Format.fprintf fmt ":@ ";
-         pp_tparam_info fmt x;
-         true)
-       ~init:false
-       tpi.parameters);
-  Format.fprintf fmt "@,]@]";
-  Format.fprintf fmt "@,))@]";
-
-  Format.fprintf fmt " }@]"
-
-let pp_tpenv fmt tpenv =
-  Format.fprintf fmt "@[<hv 2>{ ";
-
-  Format.fprintf fmt "@[%s =@ " "tparams";
-  (* FiXME: also print position? *)
-  SMap.pp (fun fmt (_, tpi) -> pp_tparam_info fmt tpi) fmt tpenv.tparams;
-
-  Format.fprintf fmt "@[%s =@ " "consistent";
-  Format.pp_print_bool fmt tpenv.consistent;
-
-  Format.fprintf fmt " }@]"
-
-let pp = pp_tpenv
 
 let force_lazy_values_tparam_info (info : tparam_info) =
   Typing_kinding_defs.force_lazy_values info

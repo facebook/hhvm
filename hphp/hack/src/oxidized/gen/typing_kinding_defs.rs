@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d6c1f0ed9091ec33cceac4f4e0aca579>>
+// @generated SignedSource<<84c7d40727ebaa6f3e6d4cbe87504240>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -19,7 +19,7 @@ pub use crate::typing_set as ty_set;
 #[allow(unused_imports)]
 use crate::*;
 
-#[rust_to_ocaml(attr = "deriving hash")]
+#[rust_to_ocaml(attr = "deriving (hash, show)")]
 pub type TparamBounds = ty_set::TySet;
 
 #[derive(
@@ -62,6 +62,6 @@ pub struct Kind {
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
-#[rust_to_ocaml(attr = "deriving hash")]
+#[rust_to_ocaml(attr = "deriving (hash, show)")]
 #[repr(C)]
 pub struct NamedKind(pub PosId, pub Kind);

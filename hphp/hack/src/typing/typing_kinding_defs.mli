@@ -28,7 +28,7 @@ type kind = {
   parameters: named_kind list;
 }
 
-and named_kind = pos_id * kind [@@deriving hash]
+and named_kind = pos_id * kind [@@deriving hash, show]
 
 (** This can be used in situations where we don't have a name for a type
   parameter at hand. All error functions must be aware of this and not print the dummy name. *)

@@ -710,6 +710,16 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
     return nullptr;
   }
 
+  const std::string* tenantId() const {
+    if (auto header = getHeader(); header && header->tenantId()) {
+      return &*header->tenantId();
+    }
+    if (auto headers = getHeadersPtr()) {
+      return folly::get_ptr(*headers, transport::THeader::kTenantId);
+    }
+    return nullptr;
+  }
+
  protected:
   apache::thrift::server::TServerObserver::CallTimestamps timestamps_;
 

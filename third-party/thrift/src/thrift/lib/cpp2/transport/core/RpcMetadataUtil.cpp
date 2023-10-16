@@ -77,8 +77,13 @@ RequestRpcMetadata makeRequestRpcMetadata(
   if (const auto& clientId = header.clientId()) {
     metadata.clientId_ref() = *clientId;
   }
+
   if (const auto& serviceTraceMeta = header.serviceTraceMeta()) {
     metadata.serviceTraceMeta_ref() = *serviceTraceMeta;
+  }
+
+  if (const auto& tenantId = header.tenantId()) {
+    metadata.tenantId_ref() = *tenantId;
   }
 
   auto loadIt = writeHeaders.find(transport::THeader::QUERY_LOAD_HEADER);

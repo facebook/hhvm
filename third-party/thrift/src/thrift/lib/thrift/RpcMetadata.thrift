@@ -205,6 +205,8 @@ struct RequestRpcMetadata {
   22: optional FdMetadata fdMetadata;
   // store client logging metadata such as log sampling ratios, request id, etc. MAY be set.
   23: optional LoggingContext loggingContext;
+  // Pass tenantId to support multi-tenant platforms.
+  24: optional string tenantId;
 }
 
 struct ErrorClassification {

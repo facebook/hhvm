@@ -132,6 +132,10 @@ ThriftRequestCore::ThriftRequestCore(
   if (auto loggingContext = metadata.loggingContext_ref()) {
     header_.loggingContext() = std::move(*loggingContext);
   }
+  if (auto tenantId = metadata.tenantId_ref()) {
+    header_.setTenantId(*tenantId);
+    header_.setReadHeader(transport::THeader::kTenantId, std::move(*tenantId));
+  }
 
   // Store client's compression configs (if client explicitly requested
   // compression codec and size limit, use these settings to compress

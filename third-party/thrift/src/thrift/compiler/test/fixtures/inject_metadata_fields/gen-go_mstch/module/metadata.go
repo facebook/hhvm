@@ -28,7 +28,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -45,7 +45,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -62,7 +62,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(1).
@@ -72,7 +72,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -89,7 +89,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(-1101).
@@ -99,7 +99,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(-1100).
@@ -109,7 +109,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(1).
@@ -119,7 +119,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),

@@ -19,7 +19,16 @@
   This template defines the mapping from an AST type to Thrift metadata type setter function name.
 
 }}{{#type:typedef?}}{{!
-  }}SetTTypedef{{!
+  }}{{#type:typedef}}{{!
+    }}{{#typedef:defined_kind?}}{{!
+      }}SetTTypedef{{!
+    }}{{/typedef:defined_kind?}}{{!
+    }}{{^typedef:defined_kind?}}{{!
+      }}{{#type:typedef_type}}{{!
+        }}{{> metadata/thrift_type_setter}}{{!
+      }}{{/type:typedef_type}}{{!
+    }}{{/typedef:defined_kind?}}{{!
+  }}{{/type:typedef}}{{!
 }}{{/type:typedef?}}{{!
 }}{{^type:typedef?}}{{!
   }}{{#type:metadata_primitive?}}{{!

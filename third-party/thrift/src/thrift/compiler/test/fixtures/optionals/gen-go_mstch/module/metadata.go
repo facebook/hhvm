@@ -26,7 +26,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(2).
@@ -36,7 +36,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(3).
@@ -46,7 +46,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(4).
@@ -56,7 +56,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -74,7 +74,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.Color"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(2).
@@ -84,7 +84,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(3).
@@ -94,7 +94,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(4).
@@ -104,7 +104,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(5).
@@ -114,7 +114,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -133,11 +133,11 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.PersonID").
             SetUnderlyingType(
-              metadata.NewThriftType().
-                  SetTPrimitive(
-                      metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-                  )            ),
-    ),
+                metadata.NewThriftType().
+            SetTPrimitive(
+                metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
+            )    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(2).
@@ -147,7 +147,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(3).
@@ -157,7 +157,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I16_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(4).
@@ -167,7 +167,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(5).
@@ -178,7 +178,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.Color"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(6).
@@ -193,12 +193,12 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.PersonID").
             SetUnderlyingType(
-              metadata.NewThriftType().
-                  SetTPrimitive(
-                      metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-                  )            ),
-    )),
-    ),
+                metadata.NewThriftType().
+            SetTPrimitive(
+                metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
+            )    ),
+            )),
+            ),
     ),
             metadata.NewThriftField().
     SetId(7).
@@ -210,11 +210,11 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.PersonID").
             SetUnderlyingType(
-              metadata.NewThriftType().
-                  SetTPrimitive(
-                      metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-                  )            ),
-    ),
+                metadata.NewThriftType().
+            SetTPrimitive(
+                metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
+            )    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(8).
@@ -228,12 +228,12 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTEnum(
         metadata.NewThriftEnumType().
             SetName("module.Animal"),
-    )).
+            )).
             SetValueType(metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    )),
-    ),
+            )),
+            ),
     ),
             metadata.NewThriftField().
     SetId(9).
@@ -244,7 +244,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTEnum(
         metadata.NewThriftEnumType().
             SetName("module.Animal"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(10).
@@ -258,8 +258,8 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.Vehicle"),
-    )),
-    ),
+            )),
+            ),
     ),
         },
     ),

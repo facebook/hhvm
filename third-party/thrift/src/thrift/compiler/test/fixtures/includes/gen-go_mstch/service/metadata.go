@@ -37,7 +37,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-    ),
+            ),
     ).
     SetArguments(
         []*metadata.ThriftField{
@@ -50,7 +50,7 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.MyStruct"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(2).
@@ -61,7 +61,7 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetTStruct(
         metadata.NewThriftStructType().
             SetName("includes.Included"),
-    ),
+            ),
     ),
         },
     ),
@@ -72,7 +72,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-    ),
+            ),
     ).
     SetArguments(
         []*metadata.ThriftField{
@@ -85,7 +85,7 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.MyStruct"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(2).
@@ -96,7 +96,7 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetTStruct(
         metadata.NewThriftStructType().
             SetName("includes.Included"),
-    ),
+            ),
     ),
         },
     ),

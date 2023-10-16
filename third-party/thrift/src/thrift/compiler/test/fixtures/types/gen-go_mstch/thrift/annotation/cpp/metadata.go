@@ -26,7 +26,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(2).
@@ -36,7 +36,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -54,7 +54,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTEnum(
         metadata.NewThriftEnumType().
             SetName("cpp.RefType"),
-    ),
+            ),
     ),
         },
     ),
@@ -71,7 +71,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -91,7 +91,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(2).
@@ -101,7 +101,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(3).
@@ -111,7 +111,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(4).
@@ -121,7 +121,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(5).
@@ -131,7 +131,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -148,7 +148,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -177,7 +177,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(2).
@@ -187,7 +187,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -208,7 +208,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTEnum(
         metadata.NewThriftEnumType().
             SetName("cpp.EnumUnderlyingType"),
-    ),
+            ),
     ),
         },
     ),

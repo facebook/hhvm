@@ -26,7 +26,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(2).
@@ -36,7 +36,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(3).
@@ -44,15 +44,9 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetIsOptional(false).
     SetType(
         metadata.NewThriftType().
-    SetTTypedef(
-        metadata.NewThriftTypedefType().
-            SetName("module.MyDataItem").
-            SetUnderlyingType(
-              metadata.NewThriftType().
-                  SetTStruct(
-                      metadata.NewThriftStructType().
-                          SetName("module.MyDataItem"),
-                  )            ),
+    SetTStruct(
+        metadata.NewThriftStructType().
+    SetName("module.MyDataItem"),
     ),
     ),
             metadata.NewThriftField().
@@ -64,7 +58,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTEnum(
         metadata.NewThriftEnumType().
             SetName("module.MyEnum"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(5).
@@ -74,7 +68,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(6).
@@ -84,7 +78,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(7).
@@ -94,7 +88,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(8).
@@ -107,8 +101,8 @@ var structMetadatas = []*metadata.ThriftStruct{
             SetValueType(metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_FLOAT_TYPE.Ptr(),
-    )),
-    ),
+            )),
+            ),
     ),
             metadata.NewThriftField().
     SetId(9).
@@ -118,7 +112,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -139,7 +133,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTEnum(
         metadata.NewThriftEnumType().
             SetName("module.MyEnum"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(2).
@@ -150,7 +144,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.MyStruct"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(3).
@@ -161,7 +155,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.MyDataItem"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(4).
@@ -174,8 +168,8 @@ var structMetadatas = []*metadata.ThriftStruct{
             SetValueType(metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_FLOAT_TYPE.Ptr(),
-    )),
-    ),
+            )),
+            ),
     ),
         },
     ),
@@ -192,7 +186,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -209,7 +203,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -249,7 +243,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -265,7 +259,7 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.ReservedKeyword"),
-    ),
+            ),
     ).
     SetArguments(
         []*metadata.ThriftField{
@@ -277,7 +271,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -294,7 +288,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftFunction().
     SetName("getRandomData").
@@ -303,7 +297,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftFunction().
     SetName("sink").
@@ -312,7 +306,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-    ),
+            ),
     ).
     SetArguments(
         []*metadata.ThriftField{
@@ -324,7 +318,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -335,7 +329,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-    ),
+            ),
     ).
     SetArguments(
         []*metadata.ThriftField{
@@ -347,7 +341,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(2).
@@ -357,7 +351,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -368,7 +362,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
-    ),
+            ),
     ).
     SetArguments(
         []*metadata.ThriftField{
@@ -380,7 +374,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -391,7 +385,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ).
     SetArguments(
         []*metadata.ThriftField{
@@ -403,7 +397,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -414,7 +408,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-    ),
+            ),
     ).
     SetArguments(
         []*metadata.ThriftField{
@@ -426,7 +420,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -437,7 +431,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-    ),
+            ),
     ).
     SetArguments(
         []*metadata.ThriftField{
@@ -449,7 +443,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(2).
@@ -459,7 +453,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -473,8 +467,8 @@ var serviceMetadatas = []*metadata.ThriftService{
             SetValueType(metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_FLOAT_TYPE.Ptr(),
-    )),
-    ),
+            )),
+            ),
     ),
             metadata.NewThriftFunction().
     SetName("rpc_skipped_codegen").
@@ -483,7 +477,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -498,7 +492,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE.Ptr(),
-    ),
+            ),
     ).
     SetArguments(
         []*metadata.ThriftField{
@@ -510,7 +504,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -521,7 +515,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE.Ptr(),
-    ),
+            ),
     ).
     SetArguments(
         []*metadata.ThriftField{
@@ -533,7 +527,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),

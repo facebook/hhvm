@@ -28,7 +28,7 @@ var exceptionMetadatas = []*metadata.ThriftException{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -49,7 +49,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),

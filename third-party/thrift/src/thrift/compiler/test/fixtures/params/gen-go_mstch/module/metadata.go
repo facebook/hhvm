@@ -33,7 +33,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-    ),
+            ),
     ).
     SetArguments(
         []*metadata.ThriftField{
@@ -48,16 +48,16 @@ var serviceMetadatas = []*metadata.ThriftService{
             SetKeyType(metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-    )).
+            )).
             SetValueType(metadata.NewThriftType().
     SetTList(
         metadata.NewThriftListType().
             SetValueType(metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-    )),
-    )),
-    ),
+            )),
+            )),
+            ),
     ),
         },
     ),
@@ -68,7 +68,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-    ),
+            ),
     ).
     SetArguments(
         []*metadata.ThriftField{
@@ -83,16 +83,16 @@ var serviceMetadatas = []*metadata.ThriftService{
             SetKeyType(metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-    )).
+            )).
             SetValueType(metadata.NewThriftType().
     SetTSet(
         metadata.NewThriftSetType().
             SetValueType(metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-    )),
-    )),
-    ),
+            )),
+            )),
+            ),
     ),
         },
     ),
@@ -103,7 +103,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-    ),
+            ),
     ).
     SetArguments(
         []*metadata.ThriftField{
@@ -121,13 +121,13 @@ var serviceMetadatas = []*metadata.ThriftService{
             SetKeyType(metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-    )).
+            )).
             SetValueType(metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-    )),
-    )),
-    ),
+            )),
+            )),
+            ),
     ),
         },
     ),
@@ -138,7 +138,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-    ),
+            ),
     ).
     SetArguments(
         []*metadata.ThriftField{
@@ -156,9 +156,9 @@ var serviceMetadatas = []*metadata.ThriftService{
             SetValueType(metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-    )),
-    )),
-    ),
+            )),
+            )),
+            ),
     ),
         },
     ),
@@ -169,7 +169,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-    ),
+            ),
     ).
     SetArguments(
         []*metadata.ThriftField{
@@ -190,26 +190,26 @@ var serviceMetadatas = []*metadata.ThriftService{
             SetKeyType(metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-    )).
+            )).
             SetValueType(metadata.NewThriftType().
     SetTMap(
         metadata.NewThriftMapType().
             SetKeyType(metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-    )).
+            )).
             SetValueType(metadata.NewThriftType().
     SetTSet(
         metadata.NewThriftSetType().
             SetValueType(metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-    )),
-    )),
-    )),
-    )),
-    )),
-    ),
+            )),
+            )),
+            )),
+            )),
+            )),
+            ),
     ),
         },
     ),

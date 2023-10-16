@@ -29,7 +29,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTStruct(
         metadata.NewThriftStructType().
             SetName("includes.Included"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(2).
@@ -40,7 +40,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTStruct(
         metadata.NewThriftStructType().
             SetName("includes.Included"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(3).
@@ -52,11 +52,11 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("includes.IncludedInt64").
             SetUnderlyingType(
-              metadata.NewThriftType().
-                  SetTPrimitive(
-                      metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-                  )            ),
-    ),
+                metadata.NewThriftType().
+            SetTPrimitive(
+                metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
+            )    ),
+            ),
     ),
         },
     ),

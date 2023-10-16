@@ -29,7 +29,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTStruct(
         metadata.NewThriftStructType().
             SetName("IncludesAlso.Also"),
-    ),
+            ),
     ),
         },
     ),

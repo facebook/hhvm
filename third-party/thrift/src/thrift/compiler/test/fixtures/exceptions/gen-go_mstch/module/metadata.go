@@ -28,7 +28,7 @@ var exceptionMetadatas = []*metadata.ThriftException{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -44,7 +44,7 @@ var exceptionMetadatas = []*metadata.ThriftException{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -60,7 +60,7 @@ var exceptionMetadatas = []*metadata.ThriftException{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(2).
@@ -70,7 +70,7 @@ var exceptionMetadatas = []*metadata.ThriftException{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -86,7 +86,7 @@ var exceptionMetadatas = []*metadata.ThriftException{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(2).
@@ -96,7 +96,7 @@ var exceptionMetadatas = []*metadata.ThriftException{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -112,7 +112,7 @@ var exceptionMetadatas = []*metadata.ThriftException{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(2).
@@ -122,7 +122,7 @@ var exceptionMetadatas = []*metadata.ThriftException{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -138,7 +138,7 @@ var exceptionMetadatas = []*metadata.ThriftException{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(2).
@@ -148,7 +148,7 @@ var exceptionMetadatas = []*metadata.ThriftException{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -171,7 +171,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftFunction().
     SetName("doRaise").
@@ -180,7 +180,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-    ),
+            ),
     ).
     SetExceptions(
         []*metadata.ThriftField{
@@ -190,15 +190,9 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetIsOptional(true).
     SetType(
         metadata.NewThriftType().
-    SetTTypedef(
-        metadata.NewThriftTypedefType().
-            SetName("module.Banal").
-            SetUnderlyingType(
-              metadata.NewThriftType().
-                  SetTStruct(
-                      metadata.NewThriftStructType().
-                          SetName("module.Banal"),
-                  )            ),
+    SetTStruct(
+        metadata.NewThriftStructType().
+    SetName("module.Banal"),
     ),
     ),
             metadata.NewThriftField().
@@ -210,7 +204,7 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.Fiery"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(3).
@@ -221,7 +215,7 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.Serious"),
-    ),
+            ),
     ),
         },
     ),
@@ -232,7 +226,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
             metadata.NewThriftFunction().
     SetName("get500").
@@ -241,7 +235,7 @@ var serviceMetadatas = []*metadata.ThriftService{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ).
     SetExceptions(
         []*metadata.ThriftField{
@@ -254,7 +248,7 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.Fiery"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(2).
@@ -262,15 +256,9 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetIsOptional(true).
     SetType(
         metadata.NewThriftType().
-    SetTTypedef(
-        metadata.NewThriftTypedefType().
-            SetName("module.Banal").
-            SetUnderlyingType(
-              metadata.NewThriftType().
-                  SetTStruct(
-                      metadata.NewThriftStructType().
-                          SetName("module.Banal"),
-                  )            ),
+    SetTStruct(
+        metadata.NewThriftStructType().
+    SetName("module.Banal"),
     ),
     ),
             metadata.NewThriftField().
@@ -282,7 +270,7 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.Serious"),
-    ),
+            ),
     ),
         },
     ),

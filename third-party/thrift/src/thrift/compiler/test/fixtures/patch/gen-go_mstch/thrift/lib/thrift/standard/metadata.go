@@ -28,11 +28,11 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("standard.Uri").
             SetUnderlyingType(
-              metadata.NewThriftType().
-                  SetTPrimitive(
-                      metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-                  )            ),
-    ),
+                metadata.NewThriftType().
+            SetTPrimitive(
+                metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
+            )    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(2).
@@ -44,11 +44,11 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("standard.ByteString").
             SetUnderlyingType(
-              metadata.NewThriftType().
-                  SetTPrimitive(
-                      metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE.Ptr(),
-                  )            ),
-    ),
+                metadata.NewThriftType().
+            SetTPrimitive(
+                metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE.Ptr(),
+            )    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(3).
@@ -58,7 +58,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    ),
+            ),
     ),
         },
     ),
@@ -76,7 +76,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTEnum(
         metadata.NewThriftEnumType().
             SetName("standard.Void"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(2).
@@ -87,7 +87,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTEnum(
         metadata.NewThriftEnumType().
             SetName("standard.Void"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(3).
@@ -98,7 +98,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTEnum(
         metadata.NewThriftEnumType().
             SetName("standard.Void"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(4).
@@ -109,7 +109,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTEnum(
         metadata.NewThriftEnumType().
             SetName("standard.Void"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(5).
@@ -120,7 +120,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTEnum(
         metadata.NewThriftEnumType().
             SetName("standard.Void"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(6).
@@ -131,7 +131,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTEnum(
         metadata.NewThriftEnumType().
             SetName("standard.Void"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(7).
@@ -142,7 +142,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTEnum(
         metadata.NewThriftEnumType().
             SetName("standard.Void"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(8).
@@ -153,7 +153,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTEnum(
         metadata.NewThriftEnumType().
             SetName("standard.Void"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(9).
@@ -164,7 +164,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTEnum(
         metadata.NewThriftEnumType().
             SetName("standard.Void"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(10).
@@ -175,7 +175,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTUnion(
         metadata.NewThriftUnionType().
             SetName("standard.TypeUri"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(11).
@@ -186,7 +186,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTUnion(
         metadata.NewThriftUnionType().
             SetName("standard.TypeUri"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(12).
@@ -197,7 +197,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTUnion(
         metadata.NewThriftUnionType().
             SetName("standard.TypeUri"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(13).
@@ -208,7 +208,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTUnion(
         metadata.NewThriftUnionType().
             SetName("standard.TypeUri"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(14).
@@ -219,7 +219,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTEnum(
         metadata.NewThriftEnumType().
             SetName("standard.Void"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(15).
@@ -230,7 +230,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTEnum(
         metadata.NewThriftEnumType().
             SetName("standard.Void"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(16).
@@ -241,7 +241,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTEnum(
         metadata.NewThriftEnumType().
             SetName("standard.Void"),
-    ),
+            ),
     ),
             metadata.NewThriftField().
     SetId(17).
@@ -252,7 +252,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetTUnion(
         metadata.NewThriftUnionType().
             SetName("standard.TypeUri"),
-    ),
+            ),
     ),
         },
     ),

@@ -37,6 +37,7 @@ let global_opts =
     ~tco_saved_state:GlobalOptions.default_saved_state
     ~po_disable_xhp_element_mangling:false
     ~po_deregister_php_stdlib:true
+    ~tco_fetch_remote_old_decls:false
     GlobalOptions.default
 
 let server_config = ServerConfig.set_tc_options server_config global_opts

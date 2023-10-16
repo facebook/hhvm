@@ -6,12 +6,9 @@ import json
 import os
 import shlex
 import shutil
-import sqlite3
 import stat
-import sys
 import time
-import unittest
-from typing import Optional, TextIO
+from typing import TextIO
 
 import common_tests
 import hierarchy_tests
@@ -39,6 +36,7 @@ lazy_init2 = true
 incremental_init = true
 enable_fuzzy_search = false
 max_workers = 2
+fetch_remote_old_decls = false
 """
             )
 
@@ -79,7 +77,7 @@ class SavedStateTests(TestCase[SavedStateTestDriver]):
         """
         self.test_driver.start_hh_server()
         self.test_driver.check_cmd(["No errors!"])
-        with open(os.path.join(self.test_driver.repo_dir, ".hhconfig"), "w") as f:
+        with open(os.path.join(self.test_driver.repo_dir, ".hhconfig"), "a") as f:
             f.write(
                 r"""
 # some comment
@@ -368,6 +366,7 @@ lazy_decl = true
 lazy_parse = true
 lazy_init2 = true
 enable_naming_table_fallback = true
+fetch_remote_old_decls = false
 """
             )
 

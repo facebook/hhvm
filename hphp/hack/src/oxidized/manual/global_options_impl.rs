@@ -62,7 +62,7 @@ impl Default for GlobalOptions {
             log_levels: s_map::SMap::new(),
             po_disable_lval_as_an_expression: false, // true in ocaml
             tco_remote_old_decls_no_limit: false,
-            tco_fetch_remote_old_decls: false,
+            tco_fetch_remote_old_decls: true,
             tco_populate_member_heaps: true,
             tco_skip_hierarchy_checks: false,
             tco_skip_tast_checks: false,

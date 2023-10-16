@@ -1,1 +1,2 @@
 disable_xhp_element_mangling=false
+fetch_remote_old_decls = false

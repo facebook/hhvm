@@ -3,3 +3,4 @@ enable_sound_dynamic_type = true
 union_intersection_type_hints = true
 everything_sdt = true
 enable_no_auto_dynamic = true
+fetch_remote_old_decls = false

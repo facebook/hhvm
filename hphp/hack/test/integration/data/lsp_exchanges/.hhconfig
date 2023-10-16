@@ -4,3 +4,4 @@ assume_php = false
 auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
 disable_xhp_element_mangling=false
 allowed_fixme_codes_strict = 4110
+fetch_remote_old_decls = false

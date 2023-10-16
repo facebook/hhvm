@@ -15,6 +15,7 @@
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncServerSocket.h>
 #include <folly/io/async/EventBaseManager.h>
+#include <folly/logging/xlog.h>
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 #include <folly/ssl/OpenSSLCertUtils.h>
@@ -36,7 +37,7 @@ using namespace CurlService;
 
 namespace {
 
-const std::string kTestDir = getContainingDirectory(__FILE__).str();
+const std::string kTestDir = getContainingDirectory(XLOG_FILENAME).str();
 
 }
 

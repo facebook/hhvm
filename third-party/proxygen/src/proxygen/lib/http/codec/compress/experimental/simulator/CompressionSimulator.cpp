@@ -6,6 +6,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <folly/logging/xlog.h>
+
 #include <proxygen/lib/http/codec/compress/experimental/simulator/CompressionSimulator.h>
 #include <proxygen/lib/http/codec/compress/experimental/simulator/CompressionUtils.h>
 #include <proxygen/lib/http/codec/compress/experimental/simulator/HPACKScheme.h>
@@ -24,7 +26,7 @@ namespace {
 // This needs to be synchronized with HPACKEncoder::kAutoFlushThreshold.
 const size_t kMTU = 1400;
 
-const std::string kTestDir = getContainingDirectory(__FILE__).str();
+const std::string kTestDir = getContainingDirectory(XLOG_FILENAME).str();
 
 } // namespace
 

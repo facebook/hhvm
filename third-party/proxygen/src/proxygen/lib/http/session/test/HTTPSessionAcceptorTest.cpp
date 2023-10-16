@@ -13,6 +13,7 @@
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/test/MockAsyncServerSocket.h>
 #include <folly/io/async/test/MockAsyncSocket.h>
+#include <folly/logging/xlog.h>
 #include <proxygen/lib/http/session/test/HTTPSessionMocks.h>
 #include <proxygen/lib/utils/TestUtils.h>
 
@@ -26,7 +27,7 @@ using folly::test::MockAsyncSocket;
 
 namespace {
 
-const std::string kTestDir = getContainingDirectory(__FILE__).str();
+const std::string kTestDir = getContainingDirectory(XLOG_FILENAME).str();
 
 }
 

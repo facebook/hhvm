@@ -99,6 +99,7 @@ constexpr std::string_view kDeriveKindFilterKey{"derive_kind"};
 constexpr std::string_view kExtendsFilterKey{"extends"};
 constexpr std::string_view kRequiresFilterKey{"require extends"};
 
+// Filter on TypeKind: Class, Enum, Interface, or Trait
 struct KindFilterData {
   bool m_removeClasses = false;
   bool m_removeEnums = false;
@@ -170,6 +171,7 @@ struct KindFilterData {
   }
 };
 
+// Filter on base/derived relationship (extends or requires)
 struct DeriveKindFilterData {
   static constexpr DeriveKindFilterData includeEverything() noexcept {
     return {.m_removeExtends = false, .m_removeRequires = false};
@@ -221,12 +223,6 @@ struct InheritanceFilterData {
     return {
         .m_kindFilters = KindFilterData::includeEverything(),
         .m_deriveKindFilters = DeriveKindFilterData::includeEverything()};
-  }
-
-  static InheritanceFilterData removeEverything() noexcept {
-    return {
-        .m_kindFilters = KindFilterData::removeEverything(),
-        .m_deriveKindFilters = DeriveKindFilterData::removeEverything()};
   }
 
   static InheritanceFilterData createFromShape(const ArrayData* filters) {
@@ -683,7 +679,7 @@ struct FactsStoreImpl final
   Array getBaseTypes(const String& derivedType, const Variant& filters)
       override {
     return logPerformance(__func__, [&]() {
-      return getBaseTypes(
+      return filterBaseTypes(
           derivedType,
           InheritanceFilterData::createFromShape(
               filters.isArray() ? filters.getArrayData() : nullptr));
@@ -693,7 +689,7 @@ struct FactsStoreImpl final
   Array getDerivedTypes(const String& baseType, const Variant& filters)
       override {
     return logPerformance(__func__, [&]() {
-      return getDerivedTypes(
+      return filterDerivedTypes(
           baseType,
           InheritanceFilterData::createFromShape(
               filters.isArray() ? filters.getArrayData() : nullptr));
@@ -1115,7 +1111,7 @@ struct FactsStoreImpl final
     return {std::move(alteredPaths), std::move(deletedPaths)};
   }
 
-  Array getBaseTypes(
+  Array filterBaseTypes(
       const String& derivedType,
       const InheritanceFilterData& filters) {
     std::vector<Symbol<SymKind::Type>> baseTypes;
@@ -1143,7 +1139,7 @@ struct FactsStoreImpl final
         filterByKind(std::move(baseTypes), filters.m_kindFilters));
   }
 
-  Array getDerivedTypes(
+  Array filterDerivedTypes(
       const String& baseType,
       const InheritanceFilterData& filters) {
     std::vector<Symbol<SymKind::Type>> derivedTypes;

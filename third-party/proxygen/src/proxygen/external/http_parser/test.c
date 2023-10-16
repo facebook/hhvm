@@ -2507,8 +2507,10 @@ test_simple (const char *buf, enum http_errno err_expected)
    */
 #if HTTP_PARSER_STRICT_URL || HTTP_PARSER_STRICT_HOSTNAME
   if (err_expected != err && err_expected != HPE_OK && err != HPE_STRICT) {
+    assert(pass != 0);
 #else
   if (err_expected != err) {
+    assert(pass == 0);
 #endif
     fprintf(stderr, "\n*** test_simple expected %s, but saw %s ***\n\n%s\n",
         http_errno_name(err_expected), http_errno_name(err), buf);
@@ -2540,6 +2542,7 @@ test_lax_in_strict_mode (const char *buf, enum http_errno err_expected)
    * long as the caller isn't expecting success.
    */
   if (err_expected != err && err_expected != HPE_OK && err != HPE_STRICT) {
+    assert(pass != 0);
     fprintf(stderr, "\n*** test_simple expected %s, but saw %s ***\n\n%s\n",
         http_errno_name(err_expected), http_errno_name(err), buf);
     exit(1);

@@ -675,7 +675,7 @@ class mstch_go_typedef : public mstch_typedef {
              &mstch_go_typedef::go_qualified_write_func},
             {"typedef:go_qualified_read_func",
              &mstch_go_typedef::go_qualified_read_func},
-            {"typedef:placeholder?", &mstch_go_typedef::is_placeholder},
+            {"typedef:defined_kind?", &mstch_go_typedef::is_defined_kind},
             {"typedef:scoped_name", &mstch_go_typedef::scoped_name},
         });
   }
@@ -704,15 +704,15 @@ class mstch_go_typedef : public mstch_typedef {
     auto name = go_name_();
     return prefix + "Read" + name;
   }
-  mstch::node is_placeholder() {
-    // Special handling for the following two scenarios:
-    //   1. t_placeholder_typedef is not an actual typedef, but a
-    //   dummy hack/workaround in Thrift compiler AST.
-    //   2. Unnamed typedef to hold unstructured annotations.
-    //
-    // In either case, we want to skip a few steps down the chain to the
-    // "actual" types if order to generate code properly.
-    return typedef_->typedef_kind() != t_typedef::kind::defined;
+  mstch::node is_defined_kind() {
+    // NOTE: there are multiple typedef "kinds":
+    //  * defined - typedef actually defined in a Thrift schema by a human.
+    //  * unnamed - typedef used for unstructured annotations.
+    //  * placeholder - typedef used as a placeholder during AST parsing
+    //    when not all type are fully known yet. During generation, when we
+    //    encounter this kind fo typedef, we should skip it to the underlying
+    //    "real" type or "defined" typedef to ensure code correctness.
+    return typedef_->typedef_kind() == t_typedef::kind::defined;
   }
   mstch::node scoped_name() { return typedef_->get_scoped_name(); }
 

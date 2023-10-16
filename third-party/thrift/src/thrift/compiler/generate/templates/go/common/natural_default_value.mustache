@@ -33,14 +33,14 @@
 
 }}{{#type:typedef?}}{{!
   }}{{#type:typedef}}{{!
-    }}{{#typedef:placeholder?}}{{
+    }}{{#typedef:defined_kind?}}{{
+      }}{{typedef:go_qualified_new_func}}(){{!
+    }}{{/typedef:defined_kind?}}{{
+    }}{{^typedef:defined_kind?}}{{
       }}{{#type:typedef_type}}{{
         }}{{> common/natural_default_value}}{{!
       }}{{/type:typedef_type}}{{
-    }}{{/typedef:placeholder?}}{{
-    }}{{^typedef:placeholder?}}{{
-      }}{{typedef:go_qualified_new_func}}(){{!
-    }}{{/typedef:placeholder?}}{{
+    }}{{/typedef:defined_kind?}}{{
   }}{{/type:typedef}}{{!
 }}{{/type:typedef?}}{{!
 }}{{^type:typedef?}}{{!

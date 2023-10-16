@@ -21,14 +21,14 @@
 }}
 {{#type:typedef?}}
 {{#type:typedef}}
-{{#typedef:placeholder?}}
+{{#typedef:defined_kind?}}
+{{> codec/encode_typedef}}
+{{/typedef:defined_kind?}}
+{{^typedef:defined_kind?}}
 {{#type:typedef_type}}
 {{> codec/encode}}
 {{/type:typedef_type}}
-{{/typedef:placeholder?}}
-{{^typedef:placeholder?}}
-{{> codec/encode_typedef}}
-{{/typedef:placeholder?}}
+{{/typedef:defined_kind?}}
 {{/type:typedef}}
 {{/type:typedef?}}
 {{^type:typedef?}}

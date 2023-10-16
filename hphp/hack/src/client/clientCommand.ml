@@ -16,6 +16,7 @@ type command =
   | CSavedStateProjectMetadata of ClientEnv.client_check_env
   | CDownloadSavedState of ClientDownloadSavedState.env
   | CRage of ClientRage.env
+  | CDecompressZhhdg of ClientDecompressZhhdg.env
 
 type command_keyword =
   | CKCheck
@@ -27,6 +28,7 @@ type command_keyword =
   | CKSavedStateProjectMetadata
   | CKDownloadSavedState
   | CKRage
+  | CKDecompressZhhdg
 
 let get_custom_telemetry_data command =
   match command with
@@ -38,7 +40,8 @@ let get_custom_telemetry_data command =
   | CLsp _
   | CSavedStateProjectMetadata _
   | CDownloadSavedState _
-  | CRage _ ->
+  | CRage _
+  | CDecompressZhhdg _ ->
     []
 
 let command_name = function
@@ -50,4 +53,5 @@ let command_name = function
   | CKSavedStateProjectMetadata -> "saved-state-project-metadata"
   | CKDownloadSavedState -> "download-saved-state"
   | CKRage -> "rage"
+  | CKDecompressZhhdg -> "decompress-zhhdg"
   | CKNone -> ""

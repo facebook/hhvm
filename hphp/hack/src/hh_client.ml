@@ -72,6 +72,7 @@ let () =
     | ClientCommand.CSavedStateProjectMetadata _ -> "SavedStateProjectMetadata"
     | ClientCommand.CDownloadSavedState _ -> "DownloadSavedState"
     | ClientCommand.CRage _ -> "Rage"
+    | ClientCommand.CDecompressZhhdg _ -> "DecompressZhhdg"
   in
 
   (* The global variable Relative_path.root must be initialized for a wide variety of things *)
@@ -166,6 +167,7 @@ let () =
       | ClientCommand.CDownloadSavedState env ->
         Lwt_utils.run_main (fun () ->
             ClientDownloadSavedState.main env (Option.value_exn local_config))
+      | ClientCommand.CDecompressZhhdg env -> ClientDecompressZhhdg.main env
     in
     Exit.exit exit_status
   with

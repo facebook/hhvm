@@ -102,6 +102,7 @@ let parse_command () =
     | "saved-state-project-metadata" -> CKSavedStateProjectMetadata
     | "download-saved-state" -> CKDownloadSavedState
     | "rage" -> CKRage
+    | "decompress-zhhdg" -> CKDecompressZhhdg
     | _ -> CKNone
 
 let parse_without_command options usage command =
@@ -204,6 +205,7 @@ let parse_check_args cmd ~from_default =
     | CKRage
     | CKRestart
     | CKStart
+    | CKDecompressZhhdg
     | CKStop ->
       failwith "No other keywords should make it here"
   in
@@ -1091,6 +1093,37 @@ let parse_rage_args () =
       lsp_log = !lsp_log;
     }
 
+let parse_decompress_zhhdg_args () =
+  let usage =
+    Printf.sprintf
+      {|Usage: %s decompress-zhhdg --path [PATH]
+
+Decompress a .zhhdg file by running the depgraph decompressor, and write a .hhdg file in the same directory.
+|}
+      Sys.argv.(0)
+  in
+  let from = ref "" in
+  let path = ref "" in
+  let options =
+    Arg.align
+      [
+        Common_argspecs.from from;
+        ( "--path",
+          Arg.String (fun arg -> path := arg),
+          " The path on disk to the .zhhdg file" );
+      ]
+  in
+  let _args = parse_without_command options usage "decompress-zhhdg" in
+  let path =
+    match !path with
+    | "" ->
+      print_endline "The '--path' option is required.";
+      exit 2
+    | p -> p
+  in
+  let from = !from in
+  CDecompressZhhdg { ClientDecompressZhhdg.path; from }
+
 let parse_download_saved_state_args () =
   let usage =
     Printf.sprintf
@@ -1184,6 +1217,7 @@ let parse_args ~(from_default : string) : command =
   | CKSavedStateProjectMetadata ->
     parse_saved_state_project_metadata_args ~from_default
   | CKDownloadSavedState -> parse_download_saved_state_args ()
+  | CKDecompressZhhdg -> parse_decompress_zhhdg_args ()
 
 let root = function
   | CCheck { ClientEnv.root; _ }
@@ -1194,7 +1228,9 @@ let root = function
   | CSavedStateProjectMetadata { ClientEnv.root; _ }
   | CDownloadSavedState { ClientDownloadSavedState.root; _ } ->
     Some root
-  | CLsp _ -> None
+  | CLsp _
+  | CDecompressZhhdg _ ->
+    None
 
 let config = function
   | CCheck { ClientEnv.config; _ }
@@ -1205,7 +1241,8 @@ let config = function
     Some config
   | CStop _
   | CDownloadSavedState _
-  | CRage _ ->
+  | CRage _
+  | CDecompressZhhdg _ ->
     None
 
 let from = function
@@ -1216,5 +1253,6 @@ let from = function
   | CSavedStateProjectMetadata { ClientEnv.from; _ }
   | CStop { ClientStop.from; _ }
   | CDownloadSavedState { ClientDownloadSavedState.from; _ }
-  | CRage { ClientRage.from; _ } ->
+  | CRage { ClientRage.from; _ }
+  | CDecompressZhhdg { ClientDecompressZhhdg.from; _ } ->
     from

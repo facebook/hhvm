@@ -10,7 +10,7 @@
              ft_ret =
              { et_enforced = Typing_defs_core.Unenforced;
                et_type =
-               (Rret_fun_kind_from_decl ([4:16-29]),
+               (Rret_fun_kind_from_decl ([4:16-29], FAsync),
                 (Tapply (([4:16-29], "\\HH\\Awaitable"),
                    [(Rwitness_from_decl ([4:16-29]), Tany)])))
                };
@@ -38,7 +38,7 @@
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
-                (Rret_fun_kind_from_decl ([7:10-27]),
+                (Rret_fun_kind_from_decl ([7:10-27], FGenerator),
                  (Tapply (([7:10-27], "\\Generator"),
                     [(Rwitness_from_decl ([7:10-27]), Tany);
                       (Rwitness_from_decl ([7:10-27]), Tany);
@@ -69,7 +69,7 @@
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
-                (Rret_fun_kind_from_decl ([12:16-39]),
+                (Rret_fun_kind_from_decl ([12:16-39], FAsyncGenerator),
                  (Tapply (([12:16-39], "\\HH\\AsyncGenerator"),
                     [(Rwitness_from_decl ([12:16-39]), Tany);
                       (Rwitness_from_decl ([12:16-39]), Tany);

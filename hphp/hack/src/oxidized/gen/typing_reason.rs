@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a289959865446ef67ac05299621c481a>>
+// @generated SignedSource<<9a65594b3b4ab1c8fd2cf6661743b78e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -128,9 +128,6 @@ pub enum Blame {
 
 #[rust_to_ocaml(attr = "deriving show")]
 pub type LazyString = lazy::Lazy<String>;
-
-#[rust_to_ocaml(attr = "deriving show")]
-pub type LazyStringList<A> = Vec<(A, lazy::Lazy<String>)>;
 
 /// The reason why something is expected to have a certain type
 #[derive(

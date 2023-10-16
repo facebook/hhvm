@@ -48,8 +48,6 @@ type lazy_string = string Lazy.t [@@deriving show]
 (* The pp/show function for a lazy value would print "<not evaluated>" when
  * the lazy value has not been forced yet. *)
 
-type 'a lazy_string_list = ('a * string Lazy.t) list [@@deriving show]
-
 (* This is to avoid a compile error with ppx_hash "Unbound value _hash_fold_phase". *)
 let _hash_fold_phase hsv _ = hsv
 
@@ -383,25 +381,227 @@ let to_constructor_string : type ph. ph t_ -> string = function
 
 let rec pp_t_ : type ph. _ -> ph t_ -> unit =
  fun fmt r ->
-  Format.pp_print_string fmt
-  @@
+  let open_paren () = Format.fprintf fmt "(@[" in
+  let close_paren () = Format.fprintf fmt "@])" in
+  let open_bracket () = Format.fprintf fmt "[@[" in
+  let close_bracket () = Format.fprintf fmt "@]]" in
+  let comma_ fmt () = Format.fprintf fmt ",@ " in
+  let comma () = comma_ fmt () in
+  let pp_lazy_string fmt s =
+    pp_lazy_string fmt s;
+    if not @@ Lazy.is_val s then (
+      Format.fprintf fmt "@ ";
+      let (lazy s) = s in
+      Format.pp_print_string fmt s
+    )
+  in
+  Format.pp_print_string fmt @@ to_constructor_string r;
   match r with
-  | Rtypeconst (r1, (p, s), lazy_s, r2) ->
-    Printf.sprintf
-      "Rtypeconst (%s, (%s, %s), %s, %s)"
-      (show_t_ r1)
-      (Pos_or_decl.show p)
-      s
-      (show_lazy_string lazy_s)
-      (show_t_ r2)
-  | Rtype_access (r, l) ->
-    Printf.sprintf
-      "Rtype_access (%s, %s)"
-      (show_t_ r)
-      (show_lazy_string_list pp_t_ l)
-  | r ->
-    let pos = to_raw_pos r in
-    Printf.sprintf "%s (%s)" (to_constructor_string r) (Pos_or_decl.show pos)
+  | Rnone
+  | Rinvalid ->
+    ()
+  | _ ->
+    Format.fprintf fmt "@ (@[";
+    (match r with
+    | Rnone
+    | Rinvalid ->
+      failwith "already matched"
+    | Rtypeconst (r1, (p, s1), lazy_s, r2) ->
+      pp_t_ fmt r1;
+      comma ();
+      open_paren ();
+      Pos_or_decl.pp fmt p;
+      comma ();
+      Format.pp_print_string fmt s1;
+      close_paren ();
+      comma ();
+      pp_lazy_string fmt lazy_s;
+      comma ();
+      pp_t_ fmt r2
+    | Rtype_access (r, l) ->
+      pp_t_ fmt r;
+      comma ();
+      open_bracket ();
+      Format.pp_print_list
+        ~pp_sep:comma_
+        (fun fmt (r, lazy_s) ->
+          open_paren ();
+          pp_t_ fmt r;
+          comma ();
+          pp_lazy_string fmt lazy_s;
+          close_paren ())
+        fmt
+        l;
+      close_bracket ()
+    | Rret_fun_kind (p, fk) ->
+      Pos.pp fmt p;
+      comma ();
+      Ast_defs.pp_fun_kind fmt fk;
+      ()
+    | Rret_fun_kind_from_decl (p, fk) ->
+      Pos_or_decl.pp fmt p;
+      comma ();
+      Ast_defs.pp_fun_kind fmt fk;
+      ()
+    | Rinstantiate (r1, s, r2) ->
+      pp_t_ fmt r1;
+      comma ();
+      Format.pp_print_string fmt s;
+      comma ();
+      pp_t_ fmt r2
+    | Rexpr_dep_type (r, p, edtr) ->
+      pp_t_ fmt r;
+      comma ();
+      Pos_or_decl.pp fmt p;
+      comma ();
+      pp_expr_dep_type_reason fmt edtr
+    | Rimplicit_upper_bound (p, s)
+    | Rmissing_optional_field (p, s)
+    | Rclass_class (p, s) ->
+      Pos_or_decl.pp fmt p;
+      comma ();
+      Format.pp_print_string fmt s;
+      ()
+    | Rhint p
+    | Rwitness_from_decl p
+    | Rvar_param_from_decl p
+    | Rglobal_fun_param p
+    | Rglobal_fun_ret p
+    | Renforceable p
+    | Rsolve_fail p
+    | Rvarray_or_darray_key p
+    | Rvec_or_dict_key p
+    | Rdefault_capability p
+    | Ridx_vector_from_decl p
+    | Rinout_param p
+    | Rsupport_dynamic_type p
+    | Rglobal_class_prop p ->
+      Pos_or_decl.pp fmt p
+    | Rtconst_no_cstr pid -> pp_pos_id fmt pid
+    | Rcstr_on_generics (p, pid) ->
+      Pos_or_decl.pp fmt p;
+      comma ();
+      pp_pos_id fmt pid
+    | Rglobal_type_variable_generics (p, s1, s2) ->
+      Pos_or_decl.pp fmt p;
+      comma ();
+      Format.pp_print_string fmt s1;
+      comma ();
+      Format.pp_print_string fmt s2;
+      ()
+    | Rtype_variable_generics (p, s1, s2) ->
+      Pos.pp fmt p;
+      comma ();
+      Format.pp_print_string fmt s1;
+      comma ();
+      Format.pp_print_string fmt s2;
+      ()
+    | Ridx_vector p
+    | Rforeach p
+    | Rasyncforeach p
+    | Rarith p
+    | Rarith_ret p
+    | Rarith_dynamic p
+    | Rcomp p
+    | Rconcat_ret p
+    | Rlogic_ret p
+    | Rbitwise p
+    | Rbitwise_ret p
+    | Rno_return p
+    | Rno_return_async p
+    | Rthrow p
+    | Rplaceholder p
+    | Rret_div p
+    | Ryield_gen p
+    | Ryield_asyncgen p
+    | Ryield_asyncnull p
+    | Ryield_send p
+    | Runknown_class p
+    | Rvar_param p
+    | Rnullsafe_op p
+    | Ris p
+    | Ras p
+    | Requal p
+    | Rusing p
+    | Rdynamic_prop p
+    | Rdynamic_call p
+    | Rdynamic_construct p
+    | Ridx_dict p
+    | Rset_element p
+    | Rregex p
+    | Rarith_ret_int p
+    | Rbitwise_dynamic p
+    | Rincdec_dynamic p
+    | Rtype_variable p
+    | Rtype_variable_error p
+    | Rshape_literal p
+    | Rdestructure p
+    | Rkey_value_collection_key p
+    | Rsplice p
+    | Ret_boolean p
+    | Rconcat_operand p
+    | Rinterp_operand p
+    | Rmissing_class p
+    | Rwitness p ->
+      Pos.pp fmt p
+    | Runset_field (p, s)
+    | Rshape (p, s)
+    | Rpredicated (p, s) ->
+      Pos.pp fmt p;
+      comma ();
+      Format.pp_print_string fmt s
+    | Ridx (p, r)
+    | Rlambda_param (p, r) ->
+      Pos.pp fmt p;
+      comma ();
+      pp_t_ fmt r
+    | Rformat (p, s, r) ->
+      Pos.pp fmt p;
+      comma ();
+      Format.pp_print_string fmt s;
+      comma ();
+      pp_t_ fmt r
+    | Rdynamic_partial_enforcement (p, s, r)
+    | Ropaque_type_from_module (p, s, r) ->
+      Pos_or_decl.pp fmt p;
+      comma ();
+      Format.pp_print_string fmt s;
+      comma ();
+      pp_t_ fmt r
+    | Runpack_param (p1, p2, i) ->
+      Pos.pp fmt p1;
+      comma ();
+      Pos_or_decl.pp fmt p2;
+      comma ();
+      Format.pp_print_int fmt i
+    | Rarith_ret_float (p, r, ap)
+    | Rarith_ret_num (p, r, ap) ->
+      Pos.pp fmt p;
+      comma ();
+      pp_t_ fmt r;
+      comma ();
+      pp_arg_position fmt ap
+    | Rrigid_tvar_escape (p, s1, s2, r) ->
+      Pos.pp fmt p;
+      comma ();
+      Format.pp_print_string fmt s1;
+      comma ();
+      Format.pp_print_string fmt s2;
+      comma ();
+      pp_t_ fmt r
+    | Rinvariant_generic (r, s)
+    | Rcontravariant_generic (r, s) ->
+      pp_t_ fmt r;
+      comma ();
+      Format.pp_print_string fmt s
+    | Rlost_info (s, r, b) ->
+      Format.pp_print_string fmt s;
+      comma ();
+      pp_t_ fmt r;
+      comma ();
+      pp_blame fmt b
+    | Rdynamic_coercion r -> pp_t_ fmt r);
+    Format.fprintf fmt "@])"
 
 and show_t_ : type ph. ph t_ -> string = (fun r -> Format.asprintf "%a" pp_t_ r)
 

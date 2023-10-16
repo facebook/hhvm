@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e619681b2474e419669022f2f5d8d7c9>>
+// @generated SignedSource<<7b0cb924209dc1119ac7abfd2449bd95>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -87,9 +87,6 @@ arena_deserializer::impl_deserialize_in_arena!(Blame<'arena>);
 
 #[rust_to_ocaml(attr = "deriving show")]
 pub type LazyString<'a> = lazy::Lazy<&'a str>;
-
-#[rust_to_ocaml(attr = "deriving show")]
-pub type LazyStringList<'a, A> = [(A, &'a lazy::Lazy<&'a str>)];
 
 /// The reason why something is expected to have a certain type
 #[derive(

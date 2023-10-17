@@ -1326,6 +1326,10 @@ void FetchOperation::socketActionable() {
                 mysql, SESSION_TRACK_GTIDS, &data, &length)) {
           current_recv_gtid_ = std::string(data, length);
         }
+        if (!mysql_session_track_get_first(
+                mysql, SESSION_TRACK_SCHEMA, &data, &length)) {
+          conn()->setCurrentSchema(std::string_view(data, length));
+        }
         current_resp_attrs_ = readResponseAttributes();
         more_results = mysql_more_results(mysql);
         active_fetch_action_ = more_results ? FetchAction::StartQuery

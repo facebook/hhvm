@@ -349,6 +349,14 @@ class Connection {
     return false;
   }
 
+  // Don't actually store the new schema at this point - just the presence of an
+  // updated schema is sufficient to indicate we shouldn't reuse the connection
+  // for pooling as it means that someone ran a "USE <dbname>" command.
+  void setCurrentSchema(std::string_view /*schema*/) const {
+    CHECK_THROW(mysql_connection_ != nullptr, db::InvalidConnectionException);
+    mysql_connection_->setReusable(false);
+  }
+
   bool inTransaction() const {
     CHECK_THROW(mysql_connection_ != nullptr, db::InvalidConnectionException);
     return mysql_connection_->inTransaction();

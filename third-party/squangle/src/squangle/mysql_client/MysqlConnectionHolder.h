@@ -137,6 +137,7 @@ class MysqlConnectionHolder {
   bool needResetBeforeReuse_ = false;
 
   bool can_reuse_;
+  std::optional<std::string> current_schema_;
 
   // copy not allowed
   MysqlConnectionHolder() = delete;

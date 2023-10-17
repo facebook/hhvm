@@ -15,6 +15,8 @@ type saved_state_loading = {
       (** Collects the age of a saved state (in seconds) and distance (in globalrevs) for telemetry *)
   use_manifold_cython_client: bool;
       (** Required for Hedwig support for saved state downloads *)
+  zstd_decompress_by_file: bool;
+      (** When decompressing a saved state folder, pass specific files into zstd *)
 }
 
 val default_saved_state_loading : saved_state_loading
@@ -34,6 +36,8 @@ val with_saved_state_manifold_api_key :
 val with_use_manifold_cython_client : bool -> saved_state -> saved_state
 
 val with_log_saved_state_age_and_distance : bool -> saved_state -> saved_state
+
+val with_zstd_decompress_by_file : bool -> saved_state -> saved_state
 
 (** Naming conventions for fieds:
   - tco_<feature/flag/setting> - type checker option

@@ -1073,6 +1073,13 @@ let load_
   let autocomplete_cache =
     bool_ "autocomplete_cache" ~default:default.autocomplete_cache config
   in
+  let zstd_decompress_by_file =
+    bool_
+      "zstd_decompress_by_file"
+      ~default:
+        GlobalOptions.(default_saved_state_loading.zstd_decompress_by_file)
+      config
+  in
   {
     saved_state =
       {
@@ -1081,6 +1088,7 @@ let load_
             GlobalOptions.saved_state_manifold_api_key;
             log_saved_state_age_and_distance;
             use_manifold_cython_client;
+            zstd_decompress_by_file;
           };
         rollouts = saved_state_flags;
         project_metadata_w_flags;
@@ -1235,4 +1243,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
         options.ide_naming_table_update_threshold;
       saved_state_rollouts = options.saved_state.GlobalOptions.rollouts;
       autocomplete_cache = options.autocomplete_cache;
+      zstd_decompress_by_file =
+        GlobalOptions.(options.saved_state.loading.zstd_decompress_by_file);
     }

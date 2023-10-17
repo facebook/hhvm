@@ -26,6 +26,7 @@ type saved_state_loading = {
   saved_state_manifold_api_key: string option;
   log_saved_state_age_and_distance: bool;
   use_manifold_cython_client: bool;
+  zstd_decompress_by_file: bool;
 }
 [@@deriving show, eq]
 
@@ -34,6 +35,7 @@ let default_saved_state_loading =
     saved_state_manifold_api_key = None;
     log_saved_state_age_and_distance = false;
     use_manifold_cython_client = false;
+    zstd_decompress_by_file = false;
   }
 
 type saved_state = {
@@ -58,6 +60,9 @@ let with_use_manifold_cython_client use_manifold_cython_client ss =
 
 let with_log_saved_state_age_and_distance log_saved_state_age_and_distance ss =
   { ss with loading = { ss.loading with log_saved_state_age_and_distance } }
+
+let with_zstd_decompress_by_file zstd_decompress_by_file ss =
+  { ss with loading = { ss.loading with zstd_decompress_by_file } }
 
 (** Naming conventions for fields in this struct:
   - tco_<feature/flag/setting> - type checker option

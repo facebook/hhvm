@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/apc-object.h"
 #include "hphp/runtime/base/apc-stats.h"
+#include "hphp/runtime/base/request-id.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
@@ -65,7 +66,7 @@ void StoreValue::set(APCHandle* v, int64_t expire_ttl, int64_t max_ttl, int64_t 
   setHandle(v);
   uint32_t mtime = time(nullptr);
   if (c_time == 0)  c_time = mtime;
-  expireRequestIdx.store(Treadmill::kIdleGenCount, std::memory_order_relaxed);
+  expireRequestId.store(RequestId(), std::memory_order_relaxed);
   expireTime.store(expire_ttl ? mtime + expire_ttl : 0, std::memory_order_release);
   bumpTTL.store(bump_ttl, std::memory_order_release);
   maxExpireTime.store(max_ttl ? mtime + max_ttl : 0, std::memory_order_release);
@@ -445,8 +446,8 @@ bool ConcurrentTableSharedStore::eraseImpl(const char* key,
         !var->isUncounted()) {
       return false;
     }
-    assertx(storeVal.expireRequestIdx.load(std::memory_order_acquire) ==
-            Treadmill::kIdleGenCount);
+    assertx(
+      storeVal.expireRequestId.load(std::memory_order_acquire).unallocated());
     assertx(storeVal.rawExpire() == e);
     return true;
   }();
@@ -584,14 +585,14 @@ bool ConcurrentTableSharedStore::checkExpire(const String& keyStr,
 
   if (e == 1) {
     // Treat as expired iff this thread was the one setting the 1.
-    if (sval->expireRequestIdx.load(std::memory_order_acquire) ==
-        Treadmill::getRequestGenCount()) {
+    if (sval->expireRequestId.load(std::memory_order_acquire) ==
+        RI().m_id) {
       FTRACE(3, "Previously expired by us: {}\n", show(*sval));
       return true;
     }
     FTRACE(5, "Expired by {}, we are {}\n",
-           sval->expireRequestIdx.load(std::memory_order_acquire),
-           Treadmill::getRequestGenCount());
+           sval->expireRequestId.load(std::memory_order_acquire).toString(),
+           RI().m_id.toString());
     return false;
   }
 
@@ -606,9 +607,9 @@ bool ConcurrentTableSharedStore::checkExpire(const String& keyStr,
     }
 
     // Try to mark entry as expired.
-    auto expected = Treadmill::kIdleGenCount;
-    auto const desired = Treadmill::getRequestGenCount();
-    if (!sval->expireRequestIdx.compare_exchange_strong(expected, desired)) {
+    auto expected = RequestId();
+    auto const desired = RI().m_id;
+    if (!sval->expireRequestId.compare_exchange_strong(expected, desired)) {
       // Another thread raced us and won, so not expired.
       return false;
     }

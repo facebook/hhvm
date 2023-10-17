@@ -27,6 +27,7 @@ struct RequestId {
   std::string toString() const;
   int64_t id() const { return m_id; }
   bool unallocated() const { return m_id == 0; }
+  bool operator==(RequestId o) const { return m_id == o.m_id; }
 private:
   int64_t m_id;
 };

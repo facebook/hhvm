@@ -33,8 +33,8 @@
 
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/apc-stats.h"
+#include "hphp/runtime/base/request-id.h"
 #include "hphp/runtime/server/server-stats.h"
-#include "hphp/runtime/vm/treadmill.h"
 
 namespace HPHP {
 
@@ -111,7 +111,7 @@ struct StoreValue {
   mutable std::atomic<HotCacheIdx> hotIndex{kHotCacheUnknown};
   APCKind kind;
   mutable std::atomic<uint16_t> bumpTTL{0};
-  mutable std::atomic<int64_t> expireRequestIdx{Treadmill::kIdleGenCount};
+  mutable std::atomic<RequestId> expireRequestId{RequestId()};
   uint32_t c_time{0}; // Creation time; 0 for primed values
   mutable std::atomic<uint32_t> maxExpireTime{};
 };

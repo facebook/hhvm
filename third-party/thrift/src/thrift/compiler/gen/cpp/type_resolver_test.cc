@@ -359,9 +359,12 @@ TEST_F(TypeResolverTest, Stream) {
       resolver_.get_return_type(fun1),
       "::apache::thrift::ServerStream<uint64_t>");
 
-  auto stream2 = std::make_unique<t_stream_response>(ui64);
-  stream2->set_first_response_type(t_type_ref(ui64));
-  auto fun2 = t_function(nullptr, {}, "", {}, std::move(stream2));
+  auto fun2 = t_function(
+      nullptr,
+      t_type_ref(ui64),
+      "",
+      {},
+      std::make_unique<t_stream_response>(ui64));
   EXPECT_EQ(
       resolver_.get_return_type(fun2),
       "::apache::thrift::ResponseAndServerStream<uint64_t, uint64_t>");
@@ -378,7 +381,8 @@ TEST_F(TypeResolverTest, Sink) {
 
   auto sink2 = std::make_unique<t_sink>(tstruct, tstruct);
   sink2->set_first_response_type(t_type_ref(tstruct));
-  auto fun2 = t_function(nullptr, {}, "", {}, std::move(sink2));
+  auto fun2 =
+      t_function(nullptr, t_type_ref(tstruct), "", {}, std::move(sink2));
   EXPECT_EQ(
       resolver_.get_return_type(fun2),
       "::apache::thrift::ResponseAndSinkConsumer<"

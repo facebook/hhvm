@@ -106,8 +106,8 @@ const std::string& type_resolver::get_return_type(const t_function& fun) {
 
   type_resolve_fn resolve_fn = &type_resolver::get_native_type;
   if (const t_sink* sink = fun.sink()) {
-    return detail::get_or_gen(sink_cache_, sink, [=]() {
-      if (!sink->first_response_type().empty()) {
+    return detail::get_or_gen(sink_cache_, sink, [&]() {
+      if (fun.has_return_type()) {
         return detail::gen_template_type(
             "::apache::thrift::ResponseAndSinkConsumer",
             {resolve(resolve_fn, *sink->get_first_response_type()),
@@ -122,11 +122,11 @@ const std::string& type_resolver::get_return_type(const t_function& fun) {
   }
 
   const t_stream_response* stream = fun.stream();
-  return detail::get_or_gen(type_cache_, stream, [=]() {
-    if (!stream->first_response_type().empty()) {
+  return detail::get_or_gen(type_cache_, stream, [&]() {
+    if (fun.has_return_type()) {
       return detail::gen_template_type(
           "::apache::thrift::ResponseAndServerStream",
-          {resolve(resolve_fn, *stream->get_first_response_type()),
+          {resolve(resolve_fn, *fun.return_type().get_type()),
            resolve(resolve_fn, *stream->get_elem_type())});
     }
     return detail::gen_template_type(

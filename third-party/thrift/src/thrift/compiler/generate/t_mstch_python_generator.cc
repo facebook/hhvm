@@ -266,8 +266,8 @@ class python_mstch_program : public mstch_program {
             visit_type(field.get_type());
           }
         }
-        if (const t_type* resp_type = stream->get_first_response_type()) {
-          visit_type(resp_type);
+        if (function.has_return_type()) {
+          visit_type(function.return_type().get_type());
         }
         visit_type(stream->get_elem_type());
       } else {
@@ -534,16 +534,13 @@ class python_mstch_function : public mstch_function {
 
   mstch::node returns_tuple() {
     // TOOD add in sinks, etc
-    const t_stream_response* stream = function_->stream();
-    return (stream && !stream->first_response_type().empty()) ||
+    return (function_->stream() && function_->has_return_type()) ||
         (function_->interaction() && !function_->return_type()->is_void());
   }
 
   mstch::node early_client_return() {
     // TOOD add in sinks, etc
-    const t_stream_response* stream = function_->stream();
-    return stream ? !stream->first_response_type().empty()
-                  : !function_->return_type()->is_void();
+    return !function_->return_type()->is_void();
   }
 
   mstch::node regular_response_type() {
@@ -551,17 +548,10 @@ class python_mstch_function : public mstch_function {
       return {};
     }
     const t_type* rettype = function_->return_type()->get_true_type();
-    if (const t_stream_response* stream = function_->stream()) {
-      rettype = stream->has_first_response() ? stream->get_first_response_type()
-                                             : &t_base_type::t_void();
-    }
     return context_.type_factory->make_mstch_object(rettype, context_, pos_);
   }
 
   mstch::node with_regular_response() {
-    if (auto stream = function_->stream()) {
-      return !stream->first_response_type().empty();
-    }
     return !function_->return_type()->is_void();
   }
 

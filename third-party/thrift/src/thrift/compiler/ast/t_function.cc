@@ -42,10 +42,6 @@ t_function::t_function(
     } else if (auto* sink = dynamic_cast<t_sink*>(sink_or_stream_.get())) {
       // TODO: move first response out of t_sink.
       sink->set_first_response_type(return_type);
-    } else {
-      auto* stream = dynamic_cast<t_stream_response*>(sink_or_stream_.get());
-      // TODO: move first response out of t_stream_response.
-      stream->set_first_response_type(return_type);
     }
   } else {
     return_type_ = t_type_ref::from_ptr(&t_base_type::t_void());

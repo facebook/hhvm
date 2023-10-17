@@ -34,32 +34,17 @@ class t_stream_response : public t_type {
 
   const t_type_ref& elem_type() const { return elem_type_; }
 
-  // Returns nullptr when the throws clause is absent.
+  // Returns the exceptions declared in the throws clause or or null if there
+  // is no throws clause.
   t_throws* exceptions() { return exceptions_.get(); }
   const t_throws* exceptions() const { return exceptions_.get(); }
-  // Use nullptr to indicate an absent throws clause.
   void set_exceptions(std::unique_ptr<t_throws> exceptions) {
     exceptions_ = std::move(exceptions);
-  }
-
-  void set_first_response_type(t_type_ref first_response_type) {
-    first_response_type_ = std::move(first_response_type);
-  }
-
-  const t_type_ref& first_response_type() const { return first_response_type_; }
-
-  std::string get_full_name() const override {
-    std::string result = "stream<" + elem_type_->get_full_name() + ">";
-    if (!first_response_type_.empty()) {
-      result = first_response_type_->get_full_name() + ", " + result;
-    }
-    return result;
   }
 
  private:
   t_type_ref elem_type_;
   std::unique_ptr<t_throws> exceptions_;
-  t_type_ref first_response_type_;
 
   // TODO(afuller): Remove everything below here. It is provided only for
   // backwards compatibility.
@@ -70,17 +55,14 @@ class t_stream_response : public t_type {
     set_exceptions(std::move(throws));
   }
 
-  void set_first_response_type(const t_type* first_response_type) {
-    set_first_response_type(t_type_ref::from_ptr(first_response_type));
-  }
   const t_type* get_elem_type() const { return elem_type().get_type(); }
-  const t_type* get_first_response_type() const {
-    return first_response_type().get_type();
-  }
-  bool has_first_response() const { return !first_response_type_.empty(); }
 
   bool is_streamresponse() const override { return true; }
   type get_type_value() const override { return type::t_stream; }
+
+  std::string get_full_name() const override {
+    return "stream<" + elem_type_->get_full_name() + ">";
+  }
 };
 
 } // namespace compiler

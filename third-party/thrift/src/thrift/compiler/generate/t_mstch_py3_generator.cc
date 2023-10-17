@@ -1200,10 +1200,10 @@ void py3_mstch_program::visit_type_single_service(const t_service* service) {
     std::string return_type_name;
     if (stream && !function.is_interaction_constructor()) {
       return_type_name = "Stream__";
-      const t_type* resp_type = stream->get_first_response_type();
       const t_type* elem_type = stream->get_elem_type();
-      if (resp_type) {
-        return_type_name = "ResponseAndStream__" + visit_type(resp_type) + "_";
+      if (function.has_return_type()) {
+        return_type_name = "ResponseAndStream__" +
+            visit_type(function.return_type().get_type()) + "_";
       }
       std::string elem_type_name = visit_type(elem_type);
       return_type_name += elem_type_name;
@@ -1213,7 +1213,7 @@ void py3_mstch_program::visit_type_single_service(const t_service* service) {
       type->set_flat_name(return_type_name);
       streamTypes_.emplace(elem_type_name, elem_type);
       bool inserted = seenTypeNames_.insert(return_type_name).second;
-      if (inserted && resp_type) {
+      if (inserted && function.has_return_type()) {
         response_and_stream_functions_.push_back(&function);
       }
     } else if (!function.sink()) {

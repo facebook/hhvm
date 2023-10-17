@@ -57,12 +57,10 @@ struct Env {
   Env(const RegionContext& ctx,
       TransKind kind,
       InterpSet& interp,
-      SrcKey& breakAt,
       int32_t maxBCInstrs,
       bool inlining)
     : ctx(ctx)
     , interp(interp)
-    , breakAt(breakAt)
     , sk{ctx.sk}
     , startSk(sk)
     , region(std::make_shared<RegionDesc>())
@@ -91,7 +89,6 @@ struct Env {
 
   const RegionContext& ctx;
   InterpSet& interp;
-  SrcKey& breakAt;
   SrcKey sk;
   const SrcKey startSk;
   NormalizedInstruction inst;
@@ -513,12 +510,6 @@ RegionDescPtr form_region(Env& env) {
       break;
     }
 
-    if (!firstInst && env.sk == env.breakAt) {
-      FTRACE(1, "selectTracelet: breaking region at breakAt: {}\n",
-             show(env.sk));
-      break;
-    }
-
     // Break translation if there's already a translation starting at the
     // current SrcKey.
     if (!firstInst) {
@@ -640,7 +631,6 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, TransKind kind,
                              int32_t maxBCInstrs, bool inlining /* = false */) {
   Timer _t(Timer::selectTracelet, nullptr);
   InterpSet interp;
-  SrcKey breakAt;
   RegionDescPtr region;
   uint32_t tries = 0;
 
@@ -662,7 +652,7 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, TransKind kind,
   }
 
   do {
-    Env env{ctx, kind, interp, breakAt, maxBCInstrs, inlining};
+    Env env{ctx, kind, interp, maxBCInstrs, inlining};
     region = form_region(env);
     ++tries;
   } while (!region);

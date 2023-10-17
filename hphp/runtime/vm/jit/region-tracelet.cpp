@@ -62,7 +62,6 @@ struct Env {
     : ctx(ctx)
     , interp(interp)
     , sk{ctx.sk}
-    , startSk(sk)
     , region(std::make_shared<RegionDesc>())
     , curBlock(region->addBlock(sk, 0, ctx.spOffset))
     , prevBlocks()
@@ -90,7 +89,6 @@ struct Env {
   const RegionContext& ctx;
   InterpSet& interp;
   SrcKey sk;
-  const SrcKey startSk;
   NormalizedInstruction inst;
   RegionDescPtr region;
   RegionDesc::Block* curBlock;

@@ -473,7 +473,8 @@ class parser {
     auto ret = return_clause();
     if (token_.kind == tok::identifier) {
       // Parse an interaction or type name.
-      ret.name = identifier{consume_token().string_value(), token_.range.begin};
+      ret.name = identifier{token_.string_value(), token_.range.begin};
+      consume_token();
       if (!try_consume_token(',')) {
         return ret;
       }

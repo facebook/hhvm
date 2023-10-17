@@ -751,6 +751,7 @@ bool canDCE(const IRInstruction& inst) {
     return false;
 
   case IsTypeStruct:
+  case IsTypeStructShallow:
   case EqStr:
   case NeqStr:
     return !opcodeMayRaise(inst.op());

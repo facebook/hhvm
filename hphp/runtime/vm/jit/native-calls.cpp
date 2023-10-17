@@ -435,6 +435,8 @@ static CallMap s_callMap {
     /* is/as expressions */
     {IsTypeStruct, isTypeStructHelper, DSSA, SSync,
                     {{SSA, 0}, {TV, 1}, {extra(&RDSHandleData::handle)}}},
+    {IsTypeStructShallow, isTypeStructShallowHelper, DSSA, SSync,
+                    {{SSA, 0}, {TV, 1}, {extra(&RDSHandleData::handle)}}},
     {ThrowAsTypeStructException, throwAsTypeStructExceptionHelper, DNone, SSync,
                                    {{SSA, 0}, {TV, 1}}},
 

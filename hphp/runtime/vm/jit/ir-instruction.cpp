@@ -950,6 +950,7 @@ bool IRInstruction::maySyncVMRegsWithSources() const {
     case EqStr:
     case NeqStr:
     case IsTypeStruct:
+    case IsTypeStructShallow:
     case StructDictUnset:
       return true;
 

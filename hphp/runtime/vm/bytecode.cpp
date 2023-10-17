@@ -1661,10 +1661,21 @@ inline void checkThis(ActRec* fp) {
 } // namespace
 
 OPTBLD_INLINE void iopIsTypeStructC(TypeStructResolveOp op, TypeStructEnforceKind kind) {
-    (void)kind;
   auto const c = vmStack().indC(1);
   auto const ts = maybeResolveAndErrorOnTypeStructure(op, true);
-  auto b = checkTypeStructureMatchesTV(ts, *c);
+  bool b;
+  switch (kind) {
+  case TypeStructEnforceKind::Deep:
+    b = checkTypeStructureMatchesTV(ts, *c);
+    break;
+  case TypeStructEnforceKind::Shallow:
+    // The checkTypeStructureMatchesTV overload which accepts a warn flag runs
+    // checkTypeStructureMatchesTVImpl with isOrAsOp=false, giving the shallow
+    // checking behavior used for param verification and which we want here.
+    bool warn = false;
+    b = checkTypeStructureMatchesTV(ts, *c, warn);
+    break;
+  }
   vmStack().popC(); // pop c
   vmStack().replaceC<KindOfBoolean>(b);
 }

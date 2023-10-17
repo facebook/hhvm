@@ -241,6 +241,7 @@ Optional<Opcode> negateCmpOp(Opcode opc) {
 bool opcodeMayRaise(Opcode opc) {
   switch (opc) {
   case IsTypeStruct:
+  case IsTypeStructShallow:
     return RuntimeOption::EvalIsExprEnableUnresolvedWarning ||
            RuntimeOption::EvalIsVecNotices ||
            RuntimeOption::EvalWarnOnImplicitCoercionOfEnumValue;

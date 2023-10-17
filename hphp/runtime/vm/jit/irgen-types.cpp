@@ -37,6 +37,7 @@
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
 #include "hphp/util/text-util.h"
+#include <hphp/runtime/vm/hhbc-shared.h>
 
 namespace HPHP::jit::irgen {
 
@@ -1261,7 +1262,7 @@ SSATmp* handleIsResolutionAndCommonOpts(
 
 } // namespace
 
-void emitIsTypeStructC(IRGS& env, TypeStructResolveOp op, TypeStructEnforceKind _kind) {
+void emitIsTypeStructC(IRGS& env, TypeStructResolveOp op, TypeStructEnforceKind kind) {
   auto const a = topC(env);
   auto const c = topC(env, BCSPRelOffset { 1 });
   bool done = false, shouldDecRef = true, checkValid = false;
@@ -1297,6 +1298,11 @@ void emitIsTypeStructC(IRGS& env, TypeStructResolveOp op, TypeStructEnforceKind 
     decRef(env, c, DecRefProfileId::IsTypeStructCc);
     decRef(env, a, DecRefProfileId::IsTypeStructCa);
   };
+
+  if (kind == TypeStructEnforceKind::Shallow) {
+    finish(gen(env, IsTypeStructShallow, block, data, tc, c));
+    return;
+  }
 
   if (profile.profiling()) {
     gen(env, ProfileIsTypeStruct, RDSHandleData { profile.handle() }, a);

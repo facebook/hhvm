@@ -575,6 +575,17 @@ bool isTypeStructHelper(ArrayData* a, TypedValue c, rds::Handle h) {
   return c.m_data.pobj->getVMClass()->classofNonIFace(cls);
 }
 
+bool isTypeStructShallowHelper(ArrayData* a, TypedValue c, rds::Handle h) {
+  auto const cls = TSClassCache::write(h, a);
+  // The checkTypeStructureMatchesTV overload which accepts a warn flag runs
+  // checkTypeStructureMatchesTVImpl with isOrAsOp=false, giving the shallow
+  // checking behavior used for param verification and which we want here.
+  bool warn = false;
+  if (!cls) return checkTypeStructureMatchesTV(ArrNR(a), c, warn);
+  if (!tvIsObject(c)) return false;
+  return c.m_data.pobj->getVMClass()->classofNonIFace(cls);
+}
+
 void profileIsTypeStructHelper(ArrayData* a, IsTypeStructProfile* prof) {
   prof->update(a);
 }

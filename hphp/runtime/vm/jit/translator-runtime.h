@@ -178,6 +178,7 @@ ArrayData* resolveTypeStructHelper(
   bool isOrAsOp
 );
 bool isTypeStructHelper(ArrayData*, TypedValue, rds::Handle);
+bool isTypeStructShallowHelper(ArrayData*, TypedValue, rds::Handle);
 void profileIsTypeStructHelper(ArrayData*, IsTypeStructProfile*);
 [[noreturn]] void throwAsTypeStructExceptionHelper(ArrayData*, TypedValue);
 ArrayData* errorOnIsAsExpressionInvalidTypesHelper(ArrayData*);

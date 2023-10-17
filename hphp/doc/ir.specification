@@ -678,6 +678,13 @@ To string conversions:
   is a subtype of S0. The input type structure (S0) must be resolved.
   Handle is used for caching purposes.
 
+| IsTypeStructShallow<handle>, D(Bool), S(Dict) S(Cell), LA
+
+  Returns whether S1 matches the type structure of a defined type in S0 and S1
+  is a subtype of S0 (but without recursive behavior, matching the semantics of
+  VerifyReifiedLocalType). The input type structure (S0) must be resolved.
+  Handle is used for caching purposes.
+
 | IsTypeStructCached, D(Bool), S(Dict) S(Cell), B|LA
 
   Checks if S0 is cached in TSClassCache and if so, returns whehter S1 is a

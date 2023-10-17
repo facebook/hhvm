@@ -3058,6 +3058,7 @@ X(ThrowReadonlyMismatch,        ParamData);
 X(ThrowParameterWrongType,      FuncArgTypeData);
 X(IsFunReifiedGenericsMatched,  FuncData);
 X(IsTypeStruct,                 RDSHandleData);
+X(IsTypeStructShallow,          RDSHandleData);
 X(InterpOne,                    InterpOneData);
 X(InterpOneCF,                  InterpOneData);
 X(StClosureArg,                 IndexData);

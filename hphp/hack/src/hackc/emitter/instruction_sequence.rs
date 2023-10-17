@@ -345,17 +345,6 @@ pub mod instr {
         f_call_obj_method_d_(fcall_args, method, ObjMethodOp::NullThrows)
     }
 
-    pub fn is_type_struct_c_dontresolve<'a>() -> InstrSeq<'a> {
-        is_type_struct_c(
-            TypeStructResolveOp::DontResolve,
-            TypeStructEnforceKind::Deep,
-        )
-    }
-
-    pub fn is_type_struct_c_resolve<'a>() -> InstrSeq<'a> {
-        is_type_struct_c(TypeStructResolveOp::Resolve, TypeStructEnforceKind::Deep)
-    }
-
     pub fn iter_break<'a>(label: Label, iters: Vec<IterId>) -> InstrSeq<'a> {
         let mut vec: Vec<Instruct<'a>> = iters
             .into_iter()

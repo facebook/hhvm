@@ -2996,6 +2996,25 @@ fn emit_is<'a, 'arena, 'decl>(
     pos: &Pos,
     h: &ast::Hint,
 ) -> Result<InstrSeq<'arena>> {
+    emit_is_with_kind(e, env, pos, h, hhbc::TypeStructEnforceKind::Deep)
+}
+
+fn emit_is_shallow<'a, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
+    env: &Env<'a, 'arena>,
+    pos: &Pos,
+    h: &ast::Hint,
+) -> Result<InstrSeq<'arena>> {
+    emit_is_with_kind(e, env, pos, h, hhbc::TypeStructEnforceKind::Shallow)
+}
+
+fn emit_is_with_kind<'a, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
+    env: &Env<'a, 'arena>,
+    pos: &Pos,
+    h: &ast::Hint,
+    kind: hhbc::TypeStructEnforceKind,
+) -> Result<InstrSeq<'arena>> {
     let (ts_instrs, is_static) = emit_reified_arg(e, env, pos, true, h)?;
     Ok(if is_static {
         match &*h.1 {
@@ -3012,11 +3031,14 @@ fn emit_is<'a, 'arena, 'decl>(
                     TypeRefinementInHint::Disallowed,
                     h,
                 )?,
-                instr::is_type_struct_c_resolve(),
+                instr::is_type_struct_c(hhbc::TypeStructResolveOp::Resolve, kind),
             ]),
         }
     } else {
-        InstrSeq::gather(vec![ts_instrs, instr::is_type_struct_c_dontresolve()])
+        InstrSeq::gather(vec![
+            ts_instrs,
+            instr::is_type_struct_c(hhbc::TypeStructResolveOp::DontResolve, kind),
+        ])
     })
 }
 
@@ -3407,6 +3429,15 @@ fn emit_call_expr<'a, 'arena, 'decl>(
                 ))),
             );
             emit_expr(e, env, &lvar)
+        }
+        (Expr_::Id(id), [arg], None)
+            if id.1 == "\\__hhvm_intrinsics\\isTypeStructShallow" && targs.len() == 1 =>
+        {
+            let is = emit_is_shallow(e, env, pos, &targs[0].1)?;
+            Ok(InstrSeq::gather(vec![
+                emit_expr(e, env, error::expect_normal_paramkind(arg)?)?,
+                is,
+            ]))
         }
         (_, _, _) => {
             let instrs = emit_call(
@@ -5017,8 +5048,14 @@ fn emit_as<'a, 'arena, 'decl>(
                 ts_instrs,
                 instr::set_l(type_struct_local),
                 match resolve {
-                    TypeStructResolveOp::Resolve => instr::is_type_struct_c_resolve(),
-                    TypeStructResolveOp::DontResolve => instr::is_type_struct_c_dontresolve(),
+                    TypeStructResolveOp::Resolve => instr::is_type_struct_c(
+                        hhbc::TypeStructResolveOp::Resolve,
+                        hhbc::TypeStructEnforceKind::Deep,
+                    ),
+                    TypeStructResolveOp::DontResolve => instr::is_type_struct_c(
+                        hhbc::TypeStructResolveOp::DontResolve,
+                        hhbc::TypeStructEnforceKind::Deep,
+                    ),
                     _ => panic!("Enum value does not match one of listed variants"),
                 },
                 instr::jmp_nz(then_label),

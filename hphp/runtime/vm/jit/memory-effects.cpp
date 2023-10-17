@@ -1996,6 +1996,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AddNewElemVec:
   case RaiseErrorOnInvalidIsAsExpressionType:
   case IsTypeStruct:
+  case IsTypeStructShallow:
   case RecordReifiedGenericsAndGetTSList:
   case CopyArray:
     return may_load_store(AElemAny, AEmpty);

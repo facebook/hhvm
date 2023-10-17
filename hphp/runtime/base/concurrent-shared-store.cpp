@@ -445,12 +445,8 @@ bool ConcurrentTableSharedStore::eraseImpl(const char* key,
         !var->isUncounted()) {
       return false;
     }
-    auto expected = Treadmill::kIdleGenCount;
-    auto const desired = Treadmill::kPurgedGenCount;
-    if (!storeVal.expireRequestIdx.compare_exchange_strong(expected,
-                                                            desired)) {
-      return false;
-    }
+    assertx(storeVal.expireRequestIdx.load(std::memory_order_acquire) ==
+            Treadmill::kIdleGenCount);
     assertx(storeVal.rawExpire() == e);
     return true;
   }();
@@ -584,6 +580,8 @@ bool ConcurrentTableSharedStore::checkExpire(const String& keyStr,
    * treat it as expired, in particular, the periodic purging.
    */
   auto const e = sval->expireTime.load(std::memory_order_acquire);
+  if (e == 0) return false;
+
   if (e == 1) {
     // Treat as expired iff this thread was the one setting the 1.
     if (sval->expireRequestIdx.load(std::memory_order_acquire) ==
@@ -594,50 +592,52 @@ bool ConcurrentTableSharedStore::checkExpire(const String& keyStr,
     FTRACE(5, "Expired by {}, we are {}\n",
            sval->expireRequestIdx.load(std::memory_order_acquire),
            Treadmill::getRequestGenCount());
-  } else if (e != 0) {
-    auto now = time(nullptr);
-    if (now >= e) {
-      if (!apcExtension::DeferredExpiration) {
-        acc.release();
-        eraseImpl(tag, true,
-                  apcExtension::UseUncounted ?
-                  HPHP::Treadmill::getOldestStartTime() : 0, nullptr);
-        return true;
-      }
-      // Try to mark entry as expired.
-      auto expected = Treadmill::kIdleGenCount;
-      auto const desired = Treadmill::getRequestGenCount();
-      if (sval->expireRequestIdx.compare_exchange_strong(expected, desired)) {
-        FTRACE(3, "Deferred expire: {}\n", show(*sval));
-        sval->expireTime.store(1, std::memory_order_release);
-        auto const key = intptr_t(acc->first);
-        // release acc so the m_expSet.erase won't deadlock with a
-        // concurrent purgeExpired.
-        acc.release();
-        // make sure purgeExpired doesn't kill it before we have a
-        // chance to refill it.
-        m_expSet.erase(key);
-        g_context->enqueueAPCDeferredExpire(keyStr);
-        return true;
-      }
-      if (expected == Treadmill::kPurgedGenCount) {
-        // purgeExpired killed this entry, so don't return it.
-        return true;
-      }
+    return false;
+  }
+
+  auto now = time(nullptr);
+  if (now >= e) {
+    if (!apcExtension::DeferredExpiration) {
+      acc.release();
+      eraseImpl(tag, true,
+                apcExtension::UseUncounted ?
+                HPHP::Treadmill::getOldestStartTime() : 0, nullptr);
+      return true;
+    }
+
+    // Try to mark entry as expired.
+    auto expected = Treadmill::kIdleGenCount;
+    auto const desired = Treadmill::getRequestGenCount();
+    if (!sval->expireRequestIdx.compare_exchange_strong(expected, desired)) {
       // Another thread raced us and won, so not expired.
-    } else {
-      auto diff = e - now;
-      auto bumpTTL = sval->bumpTTL.load(std::memory_order_acquire);
-      if (bumpTTL != 0 && diff <= (bumpTTL / 2)) {
-        auto maxExpireTime = sval->maxExpireTime.load(std::memory_order_acquire);
-        auto expireTime = sval->expireTime.load(std::memory_order_acquire);
-        if (expireTime < maxExpireTime) {
-          uint32_t newExpire = now + bumpTTL;
-          newExpire = maxExpireTime == 0 ? newExpire : std::min(newExpire, maxExpireTime);
-          FTRACE(3, "Expire soon so extend to {}: {}\n", newExpire, show(*sval));
-          sval->expireTime.store(newExpire, std::memory_order_release);
-        }
-      }
+      return false;
+    }
+
+    FTRACE(3, "Deferred expire: {}\n", show(*sval));
+    sval->expireTime.store(1, std::memory_order_release);
+    auto const key = intptr_t(acc->first);
+    // release acc so the m_expSet.erase won't deadlock with a
+    // concurrent purgeExpired.
+    acc.release();
+    // make sure purgeExpired doesn't kill it before we have a
+    // chance to refill it.
+    m_expSet.erase(key);
+    g_context->enqueueAPCDeferredExpire(keyStr);
+    return true;
+  }
+
+  auto diff = e - now;
+  auto bumpTTL = sval->bumpTTL.load(std::memory_order_acquire);
+  if (bumpTTL != 0 && diff <= (bumpTTL / 2)) {
+    auto maxExpireTime = sval->maxExpireTime.load(std::memory_order_acquire);
+    if (e < maxExpireTime) {
+      uint32_t newExpire = now + bumpTTL;
+      newExpire = maxExpireTime == 0
+        ? newExpire : std::min(newExpire, maxExpireTime);
+      FTRACE(3, "Expire soon so extend to {}: {}\n", newExpire, show(*sval));
+      auto expected = e;
+      sval->expireTime.compare_exchange_strong(
+        expected, newExpire, std::memory_order_release);
     }
   }
   return false;

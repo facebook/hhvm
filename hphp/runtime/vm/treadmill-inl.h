@@ -45,7 +45,6 @@ void enqueueInternal(std::unique_ptr<WorkItem>);
 
 using GenCount = int64_t;
 auto constexpr kIdleGenCount = GenCount{0}; // not processing any requests.
-auto constexpr kPurgedGenCount = GenCount{-1}; // used by apc
 
 struct WorkItem {
   WorkItem() = default;

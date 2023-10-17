@@ -1,4 +1,4 @@
-<?hh  //strict
+<?hh
 
 enum Elsa: string {
   Alonso = "hello";

@@ -38,7 +38,7 @@ export HH_TMPDIR="$hh_tmpdir"
 
 # write files
 cat <<EOF > "c.php"
-<?hh // strict
+<?hh
 class C {
   public static function cf(): void {D::df();}
 }
@@ -46,7 +46,7 @@ EOF
 test -f "c.php" || err 30 'cannot write c.php'
 
 cat <<EOF > "d.php"
-<?hh // strict
+<?hh
 class D {
   public static function df(): void {C::cf();}
 }

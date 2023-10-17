@@ -1,4 +1,4 @@
-<?hh  //strict
+<?hh
 
 function a_highlight(): int {
   return b_highlight();

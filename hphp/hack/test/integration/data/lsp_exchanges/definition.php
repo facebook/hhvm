@@ -1,4 +1,4 @@
-<?hh  //strict
+<?hh
 
 function a_definition(): int {
   return b_definition();

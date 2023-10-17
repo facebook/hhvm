@@ -1,4 +1,4 @@
-<?hh  //strict
+<?hh
 
 class HoverWithErrorsClass {
   /** Constructor with doc block */

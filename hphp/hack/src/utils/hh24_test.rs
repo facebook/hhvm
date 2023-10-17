@@ -185,13 +185,13 @@ mod test {
     fn test_repo_expected_files() {
         let files: BTreeMap<&str, &str> = convert_args!(btreemap!(
             "foo.php" => r#"
-<?hh // strict
+<?hh
 class Foo {
     public function get(): int { return 0; }
 }
             "#,
             "nested/bar.php" => r#"
-<?hh // strict
+<?hh
 class Bar {
     public function get(): int { return 0; }
 }

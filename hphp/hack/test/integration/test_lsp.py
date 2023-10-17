@@ -3586,11 +3586,10 @@ class TestLsp(TestCase[LspTestDriver]):
                 result=[
                     {
                         "range": {
-                            "start": {"line": 0, "character": 0},
+                            "start": {"line": 3, "character": 0},
                             "end": {"line": 11, "character": 0},
                         },
-                        "newText": "<?hh //strict\n\nfunction x(): string {\n"
-                        + '     $a = "this";\n\n'
+                        "newText": '     $a = "this";\n\n'
                         + '     $b = "is";\n\n'
                         + '     $c = "messy";\n\n'
                         + '     $d = ".";\n'
@@ -5240,7 +5239,7 @@ function call_method(ClassWithFooBar $mc): void {
             .write_to_disk(
                 uri=changed_php_file_uri,
                 contents="""\
-<?hh // strict
+<?hh
 class BaseClassIncremental {
   public function foo(): string { return ''; }
 }
@@ -5323,7 +5322,7 @@ class BaseClassIncremental {
                     "contentChanges": [
                         {
                             "text": """\
-<?hh // strict
+<?hh
 // comment
 function a_hover(): int {
   return b_hover();
@@ -5394,7 +5393,7 @@ function b_hover(): string {
                         "languageId": "hack",
                         "version": 1,
                         "text": """\
-<?hh  //strict
+<?hh
 function unsaved_bar(): bool { return true; }
 """,
                     }
@@ -5427,7 +5426,7 @@ function unsaved_bar(): bool { return true; }
                     "contentChanges": [
                         {
                             "text": """\
-<?hh  //strict
+<?hh
 function unsaved_bar(): string { return "hello"; }
 """
                         }
@@ -5468,7 +5467,7 @@ function unsaved_bar(): string { return "hello"; }
                 comment="save signature in 'unsaved2' to return string",
                 uri=variables["unsaved2_file_uri"],
                 contents="""\
-<?hh // strict
+<?hh
 function unsaved_bar(): string { return "hello"; }
 """,
                 notify=True,
@@ -6537,7 +6536,7 @@ function aaa(): string {
             .write_to_disk(
                 notify=True,
                 uri="file://${root_path}/beforeInit1.php",
-                contents="<?hh // strict\nfunction beforeInit1(): int {\n  return 42;\n}\n",
+                contents="<?hh\nfunction beforeInit1(): int {\n  return 42;\n}\n",
             )
             .notification(
                 comment="open a file before init has finished",
@@ -6547,7 +6546,7 @@ function aaa(): string {
                         "uri": "file://${root_path}/beforeInit2.php",
                         "languageId": "hack",
                         "version": 1,
-                        "text": "<?hh // strict\nfunction beforeInit2(): void {\n  $foo = beforeInit1();\n}\n",
+                        "text": "<?hh\nfunction beforeInit2(): void {\n  $foo = beforeInit1();\n}\n",
                     }
                 },
             )

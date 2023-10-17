@@ -1,4 +1,4 @@
-<?hh  //strict
+<?hh
 
 function a_didchange(): int {
   return b_didchange();

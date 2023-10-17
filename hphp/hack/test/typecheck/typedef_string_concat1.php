@@ -7,7 +7,7 @@ class Vals {
 }
 
 //// use.php
-<?hh  // strict
+<?hh
 
 class C {
   private TDef $x = Vals::foo;

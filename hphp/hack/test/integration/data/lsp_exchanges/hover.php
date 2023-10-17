@@ -1,4 +1,4 @@
-<?hh  //strict
+<?hh
 // comment
 function a_hover(): int {
   return b_hover();

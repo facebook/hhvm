@@ -759,6 +759,26 @@ const list<i32> BIG = [1, 2, 3];
 const list<i16> LITTLE = [1, 2, 3];
 ```
 
+Initializers can have the following inferred types:
+
+| Initializer         | Inferred Type                          |
+| ------------------- | -------------------------------------- |
+| `integer`           | an integer type, a floating-point type |
+| `float`             | a floating-point type                  |
+| `string_literal`    | `string`, `binary`                     |
+| `bool_literal`      | `bool`                                 |
+
+The value of the initializer must be representable by the inferred type. For example:
+
+```thrift
+const i16 LOWER = 10000;  // OK
+const i16 UPPER = 100000; // error: 100000 is out of range for i16
+```
+
+:::caution
+For legacy reasons some implementations support additional kinds of inference not listed in the table above. Using them is discouraged.
+:::
+
 A name referring to a constant can be one of:
 
 * An identifier that denotes a constant defined in the same Thrift file.
@@ -820,6 +840,8 @@ primitive_type ::=  "bool" | "byte" | "i16" | "i32" | "i64" |
 * `string`: a UTF-8 string
 * `binary`: a byte array
 
+Integer types consist of `byte`, `i16`, `i32` and `i64`. Floating-point types consist of `float` and `double`.
+
 Thrift does not support unsigned integers because they have no direct translation to native types in some of Thrift’s target languages such as Hack and Java.
 
 `binary` and `string` are encoded identically in the Binary and Compact protocols used for RPC and are interchangeable. However, they are encoded differently in JSON protocols: `binary` is Base64-encoded while `string` only has special characters escaped.
@@ -862,7 +884,7 @@ default_value ::=  "=" initializer
 All fields of struct types and exception types have a default value. This is either explicitly provided via the syntax shown above, or (if not explicitly provided) is the natural default value for that type. The natural default values for listed below:
 
 * bool: `false`
-* byte and integer types: 0
+* Integer types: 0
 * enum: 0 (even enum has no value for zero)
 * float and double: 0.0
 * string and binary: empty string

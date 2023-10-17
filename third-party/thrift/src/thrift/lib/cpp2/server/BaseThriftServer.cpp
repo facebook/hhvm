@@ -147,10 +147,10 @@ bool BaseThriftServer::getTaskExpireTimeForRequest(
     queueTimeout = getQueueTimeout();
   }
   auto useClientTimeout = getUseClientTimeout() && clientTimeoutMs.count() >= 0;
-  auto queueTimeoutPct = getQueueTimeoutPct();
   // If queue timeout was set to 0 explicitly, this request has opt-out of queue
   // timeout.
   if (queueTimeout != std::chrono::milliseconds(0)) {
+    auto queueTimeoutPct = getQueueTimeoutPct();
     // If queueTimeoutPct was set, we use it to calculate another queue timeout
     // based on client timeout. And then use the max of the explicite setting
     // and inferenced queue timeout.

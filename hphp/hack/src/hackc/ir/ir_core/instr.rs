@@ -37,6 +37,7 @@ use crate::SetRangeOp;
 use crate::SilenceOp;
 use crate::SpecialClsRef;
 use crate::SwitchKind;
+use crate::TypeStructEnforceKind;
 use crate::TypeStructResolveOp;
 use crate::UnitBytesId;
 use crate::ValueId;
@@ -482,7 +483,12 @@ pub enum Hhbc {
     IsTypeC(ValueId, IsTypeOp, LocId),
     #[has_operands(none)]
     IsTypeL(LocalId, IsTypeOp, LocId),
-    IsTypeStructC([ValueId; 2], TypeStructResolveOp, LocId),
+    IsTypeStructC(
+        [ValueId; 2],
+        TypeStructResolveOp,
+        TypeStructEnforceKind,
+        LocId,
+    ),
     IssetG(ValueId, LocId),
     IssetL(LocalId, LocId),
     IssetS([ValueId; 2], LocId),

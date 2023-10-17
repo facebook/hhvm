@@ -100,7 +100,7 @@ namespace HPHP {
   O(InstanceOf,      NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(InstanceOfD,     ONE(SA),          ONE(CV),         ONE(CV),    NF) \
   O(IsLateBoundCls,  NA,               ONE(CV),         ONE(CV),    NF) \
-  O(IsTypeStructC,   ONE(OA(TypeStructResolveOp)),                      \
+  O(IsTypeStructC,   TWO(OA(TypeStructResolveOp),OA(TypeStructEnforceKind)), \
                                        TWO(CV,CV),      ONE(CV),    NF) \
   O(ThrowAsTypeStructException,                                         \
                      NA,               TWO(CV,CV),      NOV,        TF) \

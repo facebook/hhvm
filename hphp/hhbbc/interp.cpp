@@ -2982,7 +2982,7 @@ void in(ISS& env, const bc::IsTypeStructC& op) {
         env,
         bc::PopC {},
         bc::Dict { ts },
-        bc::IsTypeStructC { TypeStructResolveOp::DontResolve }
+        bc::IsTypeStructC { TypeStructResolveOp::DontResolve, op.subop2 }
       );
     }
     if (auto const val = get_ts_this_type_access(a->m_data.parr)) {
@@ -2997,7 +2997,7 @@ void in(ISS& env, const bc::IsTypeStructC& op) {
         bc::LateBoundCls {},
         bc::String {val},
         bc::FCallFuncD {FCallArgs(2), s_hh_type_structure_no_throw.get()},
-        bc::IsTypeStructC { TypeStructResolveOp::DontResolve }
+        bc::IsTypeStructC { TypeStructResolveOp::DontResolve, op.subop2 }
       );
     }
   }

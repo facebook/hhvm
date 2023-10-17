@@ -65,11 +65,24 @@ fn print_binary_op(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func<'_>, op
         }
         Hhbc::Concat([lhs, rhs], _) => ("concat", ",", lhs, rhs),
         Hhbc::Div([lhs, rhs], _) => ("div", ",", lhs, rhs),
-        Hhbc::IsTypeStructC([lhs, rhs], op, _) => {
-            let op = match op {
-                TypeStructResolveOp::Resolve => " resolve",
-                TypeStructResolveOp::DontResolve => " dont_resolve",
-                _ => panic!("bad TypeStructResolveOp value"),
+        Hhbc::IsTypeStructC([lhs, rhs], op, kind, _) => {
+            let op = match (op, kind) {
+                (TypeStructResolveOp::Resolve, TypeStructEnforceKind::Deep) => " resolve deep",
+                (TypeStructResolveOp::DontResolve, TypeStructEnforceKind::Deep) => {
+                    " dont_resolve deep"
+                }
+                (TypeStructResolveOp::Resolve, TypeStructEnforceKind::Shallow) => {
+                    " resolve shallow"
+                }
+                (TypeStructResolveOp::DontResolve, TypeStructEnforceKind::Shallow) => {
+                    " dont_resolve shallow"
+                }
+                (_, TypeStructEnforceKind::Deep | TypeStructEnforceKind::Shallow) => {
+                    panic!("bad TypeStructResolveOp value")
+                }
+                _ => {
+                    panic!("bad TypeStructEnforceKind value")
+                }
             };
             ("is_type_struct_c", op, lhs, rhs)
         }

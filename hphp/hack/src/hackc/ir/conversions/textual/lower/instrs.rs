@@ -41,6 +41,7 @@ use ir::PropId;
 use ir::ReadonlyOp;
 use ir::SetOpOp;
 use ir::SpecialClsRef;
+use ir::TypeStructEnforceKind;
 use ir::TypeStructResolveOp;
 use ir::UnitBytesId;
 use ir::ValueId;
@@ -655,18 +656,24 @@ impl TransformInstr for LowerInstrs<'_> {
             Instr::Hhbc(Hhbc::InitProp(vid, pid, op, loc)) => {
                 self.init_prop(builder, vid, pid, op, loc)
             }
-            Instr::Hhbc(Hhbc::IsTypeStructC([obj, ts], op, loc)) => {
+            Instr::Hhbc(Hhbc::IsTypeStructC([obj, ts], op, kind, loc)) => {
                 let builtin = hack::Hhbc::IsTypeStructC;
                 let op = match op {
                     TypeStructResolveOp::DontResolve => 0,
                     TypeStructResolveOp::Resolve => 1,
                     _ => unreachable!(),
                 };
+                let kind = match kind {
+                    TypeStructEnforceKind::Deep => 0,
+                    TypeStructEnforceKind::Shallow => 1,
+                    _ => unreachable!(),
+                };
                 match rewrite_constant_type_check(builder, obj, ts, loc) {
                     Some(null_check) => null_check,
                     None => {
                         let op = builder.emit_constant(Constant::Int(op));
-                        builder.hhbc_builtin(builtin, &[obj, ts, op], loc)
+                        let kind = builder.emit_constant(Constant::Int(kind));
+                        builder.hhbc_builtin(builtin, &[obj, ts, op, kind], loc)
                     }
                 }
             }

@@ -841,8 +841,9 @@ fn cmp_instr_hhbc(
         (Hhbc::IsTypeL(_, x0, _), Hhbc::IsTypeL(_, x1, _)) => {
             cmp_eq(x0, x1).qualified("IsTypeL param x")?;
         }
-        (Hhbc::IsTypeStructC(_, x0, _), Hhbc::IsTypeStructC(_, x1, _)) => {
+        (Hhbc::IsTypeStructC(_, x0, y0, _), Hhbc::IsTypeStructC(_, x1, y1, _)) => {
             cmp_eq(x0, x1).qualified("IsTypeStructC param x")?;
+            cmp_eq(y0, y1).qualified("IsTypeStructC param y")?;
         }
         (Hhbc::IterFree(x0, _), Hhbc::IterFree(x1, _)) => {
             cmp_eq(x0, x1).qualified("IterFree param x")?;

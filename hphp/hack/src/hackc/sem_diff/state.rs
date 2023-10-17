@@ -1718,7 +1718,7 @@ fn clean_opcode<'arena>(opcode: &Opcode<'arena>) -> Opcode<'arena> {
         | Opcode::InstanceOfD(_)
         | Opcode::Int(_)
         | Opcode::IsTypeC(_)
-        | Opcode::IsTypeStructC(_)
+        | Opcode::IsTypeStructC(_, _)
         | Opcode::IterFree(_)
         | Opcode::LazyClass(_)
         | Opcode::NewCol(_)

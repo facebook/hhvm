@@ -79,6 +79,7 @@ pub use hhbc::Span;
 pub use hhbc::SpecialClsRef;
 pub use hhbc::SwitchKind;
 pub use hhbc::TraitReqKind;
+pub use hhbc::TypeStructEnforceKind;
 pub use hhbc::TypeStructResolveOp;
 pub use hhbc::Visibility;
 pub use hhvm_types_ffi::ffi::Attr;

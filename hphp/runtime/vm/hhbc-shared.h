@@ -114,6 +114,16 @@ enum class TypeStructResolveOp : uint8_t {
 #undef OP
 };
 
+#define TYPE_STRUCT_ENFORCE_KINDS \
+  KIND(Deep)                      \
+  KIND(Shallow)
+
+enum class TypeStructEnforceKind : uint8_t {
+#define KIND(name) name,
+  TYPE_STRUCT_ENFORCE_KINDS
+#undef KIND
+};
+
 #define IS_LOG_AS_DYNAMIC_CALL_OPS                  \
   IS_LOG_AS_DYNAMIC_CALL_OP(LogAsDynamicCall)       \
   IS_LOG_AS_DYNAMIC_CALL_OP(DontLogAsDynamicCall)

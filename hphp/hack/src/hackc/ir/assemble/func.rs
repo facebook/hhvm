@@ -102,6 +102,7 @@ use crate::parse::parse_special_cls_ref_opt;
 use crate::parse::parse_src_loc;
 use crate::parse::parse_string_id;
 use crate::parse::parse_type_info;
+use crate::parse::parse_type_struct_enforce_kind;
 use crate::parse::parse_type_struct_resolve_op;
 use crate::parse::parse_u32;
 use crate::parse::parse_user_id;
@@ -1360,7 +1361,7 @@ impl FunctionParser<'_, '_> {
             "is_late_bound_cls" => I::Hhbc(H::IsLateBoundCls(self.vid(tok)?, loc)),
             "is_type_c" => parse_instr!(tok, I::Hhbc(H::IsTypeC(p0, p1, loc)), <p0:self.vid> "," <p1:parse_is_type_op>),
             "is_type_l" => parse_instr!(tok, I::Hhbc(H::IsTypeL(p0, p1, loc)), <p0:self.lid> "," <p1:parse_is_type_op>),
-            "is_type_struct_c" => parse_instr!(tok, I::Hhbc(H::IsTypeStructC([p0, p1], p2, loc)), <p0:self.vid> <p2:parse_type_struct_resolve_op> <p1:self.vid>),
+            "is_type_struct_c" => parse_instr!(tok, I::Hhbc(H::IsTypeStructC([p0, p1], p2, p3, loc)), <p0:self.vid> <p2:parse_type_struct_resolve_op> <p3:parse_type_struct_enforce_kind> <p1:self.vid>),
             "isset_g" => I::Hhbc(H::IssetG(self.vid(tok)?, loc)),
             "isset_l" => I::Hhbc(H::IssetL(self.lid(tok)?, loc)),
             "isset_s" => parse_instr!(tok, I::Hhbc(H::IssetS([p0, p1], loc)), <p0:self.vid> "::" <p1:self.vid>),

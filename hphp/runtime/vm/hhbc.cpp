@@ -948,6 +948,12 @@ static const char* TypeStructResolveOp_names[] = {
 #undef OP
 };
 
+static const char* TypeStructEnforceKind_names[] = {
+#define KIND(x) #x,
+  TYPE_STRUCT_ENFORCE_KINDS
+#undef KIND
+};
+
 static const char* MOpMode_names[] = {
 #define MODE(x) #x,
   M_OP_MODES
@@ -1045,6 +1051,8 @@ X(QueryMOp,       static_cast<int>(QueryMOp::CGet))
 X(SetRangeOp,     static_cast<int>(SetRangeOp::Forward))
 X(TypeStructResolveOp,
                   static_cast<int>(TypeStructResolveOp::Resolve))
+X(TypeStructEnforceKind,
+                  static_cast<int>(TypeStructEnforceKind::Deep))
 X(MOpMode,        static_cast<int>(MOpMode::None))
 X(ContCheckOp,    static_cast<int>(ContCheckOp::IgnoreStarted))
 X(SpecialClsRef,  static_cast<int>(SpecialClsRef::SelfCls))

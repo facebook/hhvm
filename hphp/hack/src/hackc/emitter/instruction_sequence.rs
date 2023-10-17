@@ -204,6 +204,7 @@ pub mod instr {
     use hhbc::SrcLoc;
     use hhbc::StackIndex;
     use hhbc::SwitchKind;
+    use hhbc::TypeStructEnforceKind;
     use hhbc::TypeStructResolveOp;
 
     use crate::InstrSeq;
@@ -345,11 +346,14 @@ pub mod instr {
     }
 
     pub fn is_type_struct_c_dontresolve<'a>() -> InstrSeq<'a> {
-        is_type_struct_c(TypeStructResolveOp::DontResolve)
+        is_type_struct_c(
+            TypeStructResolveOp::DontResolve,
+            TypeStructEnforceKind::Deep,
+        )
     }
 
     pub fn is_type_struct_c_resolve<'a>() -> InstrSeq<'a> {
-        is_type_struct_c(TypeStructResolveOp::Resolve)
+        is_type_struct_c(TypeStructResolveOp::Resolve, TypeStructEnforceKind::Deep)
     }
 
     pub fn iter_break<'a>(label: Label, iters: Vec<IterId>) -> InstrSeq<'a> {

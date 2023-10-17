@@ -46,6 +46,7 @@ use ir_core::SpecialClsRef;
 use ir_core::SrcLoc;
 use ir_core::TypeConstraintFlags;
 use ir_core::TypeInfo;
+use ir_core::TypeStructEnforceKind;
 use ir_core::TypeStructResolveOp;
 use ir_core::TypedValue;
 use ir_core::UnitBytesId;
@@ -742,6 +743,18 @@ pub(crate) fn parse_type_struct_resolve_op(
         Some(match id {
             "resolve" => TypeStructResolveOp::Resolve,
             "dont_resolve" => TypeStructResolveOp::DontResolve,
+            _ => return None,
+        })
+    })
+}
+
+pub(crate) fn parse_type_struct_enforce_kind(
+    tokenizer: &mut Tokenizer<'_>,
+) -> Result<TypeStructEnforceKind> {
+    parse_enum(tokenizer, "TypeStructEnforceKind", |id| {
+        Some(match id {
+            "deep" => TypeStructEnforceKind::Deep,
+            "shallow" => TypeStructEnforceKind::Shallow,
             _ => return None,
         })
     })

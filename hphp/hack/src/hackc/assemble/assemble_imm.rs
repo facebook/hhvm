@@ -171,6 +171,10 @@ assemble_imm_for_enum!(
         TypeStructResolveOp::Resolve,
     ]
 );
+assemble_imm_for_enum!(
+    hhbc::TypeStructEnforceKind,
+    [TypeStructEnforceKind::Deep, TypeStructEnforceKind::Shallow]
+);
 
 assemble_imm_for_enum!(
     hhbc::ContCheckOp,

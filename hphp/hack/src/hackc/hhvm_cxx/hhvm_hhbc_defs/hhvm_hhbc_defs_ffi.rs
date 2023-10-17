@@ -108,6 +108,13 @@ pub mod ffi {
 
     #[repr(u8)]
     #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
+    enum TypeStructEnforceKind {
+        Deep,
+        Shallow,
+    }
+
+    #[repr(u8)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum IsLogAsDynamicCallOp {
         LogAsDynamicCall,
         DontLogAsDynamicCall,
@@ -234,6 +241,7 @@ pub mod ffi {
         type SpecialClsRef;
         type SwitchKind;
         type TypeStructResolveOp;
+        type TypeStructEnforceKind;
         fn fcall_flags_to_string_ffi(flags: FCallArgsFlags) -> String;
     }
 }

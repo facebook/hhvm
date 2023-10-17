@@ -555,7 +555,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                 let local = self.lookup_local(lid);
                 Opcode::IsTypeL(local, op)
             }
-            Hhbc::IsTypeStructC(_, op, _) => Opcode::IsTypeStructC(op),
+            Hhbc::IsTypeStructC(_, op, kind, _) => Opcode::IsTypeStructC(op, kind),
             Hhbc::IssetG(_, _) => Opcode::IssetG,
             Hhbc::IssetL(lid, _) => {
                 let local = self.lookup_local(lid);

@@ -45,6 +45,7 @@ use crate::SpecialClsRef;
 use crate::StackIndex;
 use crate::SwitchKind;
 use crate::Targets;
+use crate::TypeStructEnforceKind;
 use crate::TypeStructResolveOp;
 use crate::NUM_ACT_REC_CELLS;
 

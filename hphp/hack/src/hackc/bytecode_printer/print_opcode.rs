@@ -46,6 +46,7 @@ use hhbc::SilenceOp;
 use hhbc::SpecialClsRef;
 use hhbc::StackIndex;
 use hhbc::SwitchKind;
+use hhbc::TypeStructEnforceKind;
 use hhbc::TypeStructResolveOp;
 use hhbc_string_utils::float;
 use print_opcode::PrintOpcode;
@@ -192,6 +193,7 @@ print_with_debug!(print_silence_op, SilenceOp);
 print_with_debug!(print_special_cls_ref, SpecialClsRef);
 print_with_debug!(print_switch_kind, SwitchKind);
 print_with_debug!(print_type_struct_resolve_op, TypeStructResolveOp);
+print_with_debug!(print_type_struct_enforce_kind, TypeStructEnforceKind);
 
 fn print_adata_id(w: &mut dyn Write, id: &AdataId<'_>) -> Result<()> {
     w.write_all(b"@")?;

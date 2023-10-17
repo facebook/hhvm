@@ -16,6 +16,7 @@ use crate::Instr;
 use crate::IsTypeOp;
 use crate::LocId;
 use crate::TypeConstraintFlags;
+use crate::TypeStructEnforceKind;
 use crate::TypeStructResolveOp;
 use crate::ValueId;
 
@@ -221,6 +222,7 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
                     Instr::Hhbc(Hhbc::IsTypeStructC(
                         [vid, adata],
                         TypeStructResolveOp::Resolve,
+                        TypeStructEnforceKind::Deep,
                         loc,
                     ))
                 }

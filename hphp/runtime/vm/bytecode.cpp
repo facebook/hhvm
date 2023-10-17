@@ -178,6 +178,9 @@ inline const char* prettytype(SetRangeOp) { return "SetRangeOp"; }
 inline const char* prettytype(TypeStructResolveOp) {
   return "TypeStructResolveOp";
 }
+inline const char* prettytype(TypeStructEnforceKind) {
+  return "TypeStructEnforceKind";
+}
 inline const char* prettytype(ReadonlyOp) { return "ReadonlyOp"; }
 inline const char* prettytype(ContCheckOp) { return "ContCheckOp"; }
 inline const char* prettytype(SpecialClsRef) { return "SpecialClsRef"; }
@@ -1657,7 +1660,8 @@ inline void checkThis(ActRec* fp) {
 
 } // namespace
 
-OPTBLD_INLINE void iopIsTypeStructC(TypeStructResolveOp op) {
+OPTBLD_INLINE void iopIsTypeStructC(TypeStructResolveOp op, TypeStructEnforceKind kind) {
+    (void)kind;
   auto const c = vmStack().indC(1);
   auto const ts = maybeResolveAndErrorOnTypeStructure(op, true);
   auto b = checkTypeStructureMatchesTV(ts, *c);

@@ -353,7 +353,7 @@ function cgets(): void {
 // CHECK:   n2 = $root.source(null)
 // CHECK:   store &$0 <- n2: *HackMixed
 // CHECK:   store &$1 <- n0: *HackMixed
-// CHECK:   n3 = $builtins.hhbc_is_type_struct_c(n2, n0, $builtins.hack_int(1))
+// CHECK:   n3 = $builtins.hhbc_is_type_struct_c(n2, n0, $builtins.hack_int(1), $builtins.hack_int(0))
 // CHECK:   jmp b1, b2
 // CHECK: #b1:
 // CHECK:   prune $builtins.hack_is_true(n3)

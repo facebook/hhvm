@@ -125,15 +125,18 @@ let fetch_async ~hhconfig_version ~destination_path ~no_limit decl_hashes =
     (fun _output -> Hh_logger.log "Finished fetching remote old decls")
 
 let fetch_old_decls_via_file_hashes
-    ~(db_path : Naming_sqlite.db_path) (names : string list) :
-    Shallow_decl_defs.shallow_class option SMap.t =
+    ~(ctx : Provider_context.t)
+    ~(db_path : Naming_sqlite.db_path)
+    (names : string list) : Shallow_decl_defs.shallow_class option SMap.t =
   (* TODO(bobren): names should really be a list of deps *)
   let file_hashes =
     List.filter_map
       ~f:(fun name -> Utils.name_to_file_hash_opt ~name ~db_path)
       names
   in
-  match Remote_old_decls_ffi.get_decls_via_file_hashes file_hashes with
+  let popt = Provider_context.get_popt ctx in
+  let opts = DeclParserOptions.from_parser_options popt in
+  match Remote_old_decls_ffi.get_decls_via_file_hashes opts file_hashes with
   | Ok named_old_decls ->
     (* TODO(bobren) do funs typedefs consts and modules *)
     let old_decls =
@@ -161,7 +164,7 @@ let fetch_old_decls ~(ctx : Provider_context.t) (names : string list) :
     in
     Hh_logger.log "Using old decls from CAS? %b" use_old_decls_from_cas;
     (match use_old_decls_from_cas with
-    | true -> fetch_old_decls_via_file_hashes ~db_path names
+    | true -> fetch_old_decls_via_file_hashes ~ctx ~db_path names
     | false ->
       let decl_hashes =
         List.filter_map

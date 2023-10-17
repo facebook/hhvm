@@ -23,14 +23,14 @@ function rr_nv_nd<reify T>(int $a): void {
 }
 
 // TEST-CHECK-1: define $root.nr_vv_nd
-// CHECK: define $root.nr_vv_nd($this: *void, $a: *HackInt, $b: .variadic *HackVec) : *void {
+// CHECK: define $root.nr_vv_nd($this: *void, $a: *HackInt, $b: .variadic .typevar="array" *HackMixed) : *void {
 function nr_vv_nd(int $a, int... $b): void {
   echo "--- ", __FUNCTION__, "\n";
   var_dump($a, $b);
 }
 
 // TEST-CHECK-1: define $root.rr_vv_nd
-// CHECK: define $root.rr_vv_nd($this: *void, $a: *HackInt, $b: .variadic *HackVec, $0ReifiedGenerics: *HackVec) : *void {
+// CHECK: define $root.rr_vv_nd($this: *void, $a: *HackInt, $b: .variadic .typevar="array" *HackMixed, $0ReifiedGenerics: *HackVec) : *void {
 function rr_vv_nd<reify T>(int $a, int... $b): void {
   echo "--- ", __FUNCTION__, "\n";
   var_dump($a, $b);
@@ -94,7 +94,7 @@ function rr_nv_dd<reify T>(int $a, int $b = 5): void {
 // CHECK: }
 
 // TEST-CHECK-1: define $root.nr_vv_dd
-// CHECK: define $root.nr_vv_dd($this: *void, $a: *HackInt, $b: *HackInt, $c: .variadic *HackVec) : *void {
+// CHECK: define $root.nr_vv_dd($this: *void, $a: *HackInt, $b: *HackInt, $c: .variadic .typevar="array" *HackMixed) : *void {
 function nr_vv_dd(int $a, int $b = 5, int... $c): void {
   echo "--- ", __FUNCTION__, "\n";
   var_dump($a, $b, $c);
@@ -118,7 +118,7 @@ function nr_vv_dd(int $a, int $b = 5, int... $c): void {
 // CHECK: }
 
 // TEST-CHECK-1: define $root.rr_vv_dd
-// CHECK: define $root.rr_vv_dd($this: *void, $a: *HackInt, $b: *HackInt, $c: .variadic *HackVec, $0ReifiedGenerics: *HackVec) : *void {
+// CHECK: define $root.rr_vv_dd($this: *void, $a: *HackInt, $b: *HackInt, $c: .variadic .typevar="array" *HackMixed, $0ReifiedGenerics: *HackVec) : *void {
 function rr_vv_dd<reify T>(int $a, int $b = 5, int... $c): void {
   echo "--- ", __FUNCTION__, "\n";
   var_dump($a, $b, $c);

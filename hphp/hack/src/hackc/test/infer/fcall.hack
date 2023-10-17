@@ -222,7 +222,7 @@ function fcall_meth_caller(C $b): void {
 }
 
 // TEST-CHECK-1: define $root.MethCaller$C$b
-// CHECK: define $root.MethCaller$C$b($this: *void, $o: *HackMixed, $args: .variadic *HackVec) : *HackMixed {
+// CHECK: define $root.MethCaller$C$b($this: *void, $o: *HackMixed, $args: .variadic .typevar="array" *HackMixed) : *HackMixed {
 
 // TEST-CHECK-BAL: define $root.fcall_cls_method
 // CHECK: define $root.fcall_cls_method($this: *void, $a: *Classname) : *void {

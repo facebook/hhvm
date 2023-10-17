@@ -168,6 +168,9 @@ val map_tcopt : t -> f:(TypecheckerOptions.t -> TypecheckerOptions.t) -> t
 (** Get the [Provider_backend.t] that backs this [t]. *)
 val get_backend : t -> Provider_backend.t
 
+(** Override the [Provider_backend.t] that backs this [t]. *)
+val set_backend : t -> Provider_backend.t -> t
+
 (** Get the [Typing_deps_mode.t] that backs this [t]. *)
 val get_deps_mode : t -> Typing_deps_mode.t
 

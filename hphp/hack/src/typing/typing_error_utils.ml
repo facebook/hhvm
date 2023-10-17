@@ -1404,6 +1404,7 @@ module Eval_primary = struct
         else
           "does not include"
       in
+      let module_missing = Pos_or_decl.equal Pos_or_decl.none module_pos in
       let claim =
         lazy
           ( pos,
@@ -1421,8 +1422,12 @@ module Eval_primary = struct
                 target_package );
             ( module_pos,
               Printf.sprintf
-                "But this is from %s, which belongs to %s"
+                "But %s%s %s"
                 current_module
+                (if module_missing then
+                  " is undefined, though it would belong to"
+                else
+                  " belongs to")
                 current_package );
             ( (if is_default then
                 module_pos

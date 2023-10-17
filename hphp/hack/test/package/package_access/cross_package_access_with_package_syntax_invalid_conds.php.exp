@@ -9,7 +9,7 @@ cross_package_access_with_package_syntax_invalid_conds.php--c.php:15:9
 
 Typing[4472] Cannot access a public element which belongs to package pkg1 from package pkg3 [1]
 -> This is from module a, which belongs to package pkg1 [2]
--> But this is from module c, which belongs to package pkg3 [3]
+-> But module c belongs to package pkg3 [3]
 -> And package pkg3 does not include package pkg1 [4]
 
 cross_package_access_with_package_syntax_invalid_conds.php--c.php:7:7
@@ -37,7 +37,7 @@ PACKAGES.toml:11:11
 
 Typing[4472] Cannot access a public element which belongs to package pkg1 from package pkg3 [1]
 -> This is from module a, which belongs to package pkg1 [2]
--> But this is from module c, which belongs to package pkg3 [3]
+-> But module c belongs to package pkg3 [3]
 -> And package pkg3 does not include package pkg1 [4]
 
 cross_package_access_with_package_syntax_invalid_conds.php--c.php:10:7
@@ -65,7 +65,7 @@ PACKAGES.toml:11:11
 
 Typing[4472] Cannot access a public element which belongs to package pkg1 from package pkg3 [1]
 -> This is from module a, which belongs to package pkg1 [2]
--> But this is from module c, which belongs to package pkg3 [3]
+-> But module c belongs to package pkg3 [3]
 -> And package pkg3 does not include package pkg1 [4]
 
 cross_package_access_with_package_syntax_invalid_conds.php--c.php:13:7
@@ -93,7 +93,7 @@ PACKAGES.toml:11:11
 
 Typing[4472] Cannot access a public element which belongs to package pkg1 from package pkg3 [1]
 -> This is from module a, which belongs to package pkg1 [2]
--> But this is from module c, which belongs to package pkg3 [3]
+-> But module c belongs to package pkg3 [3]
 -> And package pkg3 does not include package pkg1 [4]
 
 cross_package_access_with_package_syntax_invalid_conds.php--c.php:16:7
@@ -121,7 +121,7 @@ PACKAGES.toml:11:11
 
 Typing[4472] Cannot access a public element which belongs to package pkg1 from package pkg3 [1]
 -> This is from module a, which belongs to package pkg1 [2]
--> But this is from module c, which belongs to package pkg3 [3]
+-> But module c belongs to package pkg3 [3]
 -> And package pkg3 does not include package pkg1 [4]
 
 cross_package_access_with_package_syntax_invalid_conds.php--c.php:19:9

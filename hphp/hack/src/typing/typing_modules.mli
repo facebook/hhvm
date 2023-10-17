@@ -29,8 +29,6 @@ val can_access_public :
   current:string option ->
   target:string option ->
   [ `Yes
-  | `ImportsNotSatisfied of string * Pos_or_decl.t
-  | `ExportsNotSatisfied of string * Pos_or_decl.t
   | `PackageNotSatisfied of Pos.t * Pos_or_decl.t
   | `PackageSoftIncludes of Pos.t * Pos_or_decl.t
   ]

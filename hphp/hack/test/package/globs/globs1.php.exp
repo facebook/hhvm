@@ -1,6 +1,6 @@
 Typing[4472] Cannot access a public element which belongs to package pkg3 from the default package [1]
 -> This is from module foo, which belongs to package pkg3 [2]
--> But this is from the default module, which belongs to the default package [3]
+-> But the default module belongs to the default package [3]
 -> And the default package does not include package pkg3 [4]
 
 globs1.php--test.php:4:13
@@ -15,7 +15,7 @@ globs1.php--foo.php:3:14
      2 | module foo;
 [2]  3 | public class Foo {}
 
-/tmp/ldruIvG2Pc/modules.hhi:5:12
+/tmp/qCZyXab1uC/modules.hhi:5:12
      3 |   This module can be globbed by PACKAGES.toml, but you can't write `module default;` explicitly in any code.
      4 | **/
 [3]  5 | new module default {}
@@ -28,7 +28,7 @@ PACKAGES.toml:12:11
 
 Typing[4472] Cannot access a public element which belongs to package pkg1 from the default package [1]
 -> This is from module foo.bar, which belongs to package pkg1 [2]
--> But this is from the default module, which belongs to the default package [3]
+-> But the default module belongs to the default package [3]
 -> And the default package does not include package pkg1 [4]
 
 globs1.php--test.php:5:13
@@ -43,7 +43,7 @@ globs1.php--foobar.php:3:14
      2 | module foo.bar;
 [2]  3 | public class FooBar {}
 
-/tmp/ldruIvG2Pc/modules.hhi:5:12
+/tmp/qCZyXab1uC/modules.hhi:5:12
      3 |   This module can be globbed by PACKAGES.toml, but you can't write `module default;` explicitly in any code.
      4 | **/
 [3]  5 | new module default {}
@@ -56,7 +56,7 @@ PACKAGES.toml:12:11
 
 Typing[4472] Cannot access a public element which belongs to package pkg2 from the default package [1]
 -> This is from module foo.bar.baz, which belongs to package pkg2 [2]
--> But this is from the default module, which belongs to the default package [3]
+-> But the default module belongs to the default package [3]
 -> And the default package does not include package pkg2 [4]
 
 globs1.php--test.php:6:13
@@ -70,7 +70,7 @@ globs1.php--foobarbaz.php:3:14
      2 | module foo.bar.baz;
 [2]  3 | public class FooBarBaz {}
 
-/tmp/ldruIvG2Pc/modules.hhi:5:12
+/tmp/qCZyXab1uC/modules.hhi:5:12
      3 |   This module can be globbed by PACKAGES.toml, but you can't write `module default;` explicitly in any code.
      4 | **/
 [3]  5 | new module default {}

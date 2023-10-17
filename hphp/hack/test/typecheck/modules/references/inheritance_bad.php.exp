@@ -1,6 +1,0 @@
-File "inheritance_bad.php--b.php", line 6, characters 24-24:
-Cannot access a public element from module 'A' in module 'B' (Typing[4444])
-  File "inheritance_bad.php--a.php", line 6, characters 14-14:
-  This is from module `A`
-  File "inheritance_bad.php--a.module.php", line 5, characters 12-12:
-  Module 'A' does not export its public members to module 'B'

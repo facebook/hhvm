@@ -1,0 +1,64 @@
+Naming[2049] Unbound name: b.undefined (a module) [1]
+
+package_access_default4.php--a.php:3:8
+    1 | <?hh
+    2 | // undefined module, but would belong to pkg1
+[1] 3 | module b.undefined;
+    4 | 
+    5 | type YInt = XInt; // error
+
+Typing[4472] Cannot access a public element which belongs to package pkg2 from package pkg1 [1]
+-> This is from module b.b1, which belongs to package pkg2 [2]
+-> But module b.undefined is undefined, though it would belong to package pkg1 [3]
+-> And package pkg1 does not include package pkg2 [4]
+
+package_access_default4.php--a.php:5:13
+    3 | module b.undefined;
+    4 | 
+[1] 5 | type YInt = XInt; // error
+    6 | function test(): void {
+    7 |   foo(); // error
+
+package_access_default4.php--x.php:3:6
+    1 | <?hh
+    2 | module b.b1;
+[2] 3 | type XInt = int;
+    4 | function foo(): void {}
+
+.:0:0
+[3] 0 | No source found
+
+PACKAGES.toml:3:11
+    1 | [packages]
+    2 | 
+[4] 3 | [packages.pkg1]
+    4 | uses = ["a", "b.*"]
+    5 | includes=["default"]
+
+Typing[4472] Cannot access a public element which belongs to package pkg2 from package pkg1 [1]
+-> This is from module b.b1, which belongs to package pkg2 [2]
+-> But module b.undefined is undefined, though it would belong to package pkg1 [3]
+-> And package pkg1 does not include package pkg2 [4]
+
+package_access_default4.php--a.php:7:3
+    5 | type YInt = XInt; // error
+    6 | function test(): void {
+[1] 7 |   foo(); // error
+    8 | }
+
+package_access_default4.php--x.php:4:10
+    2 | module b.b1;
+    3 | type XInt = int;
+[2] 4 | function foo(): void {}
+
+.:0:0
+[3] 0 | No source found
+
+PACKAGES.toml:3:11
+    1 | [packages]
+    2 | 
+[4] 3 | [packages.pkg1]
+    4 | uses = ["a", "b.*"]
+    5 | includes=["default"]
+
+3 errors found.

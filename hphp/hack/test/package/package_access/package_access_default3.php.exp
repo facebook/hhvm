@@ -1,0 +1,10 @@
+Naming[2049] Unbound name: y (a module) [1]
+
+package_access_default3.php--a.php:3:8
+    1 | <?hh
+    2 | // undefined module, but would belong to default package
+[1] 3 | module y;
+    4 | 
+    5 | type YInt = XInt; // ok
+
+1 error found.

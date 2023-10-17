@@ -158,28 +158,6 @@ let check_public_access env use_pos def_pos target =
       ~target
   with
   | `Yes -> None
-  | `ImportsNotSatisfied (module_name, module_pos) ->
-    Some
-      (Typing_error.modules
-         (Module_missing_import
-            {
-              pos = use_pos;
-              decl_pos = def_pos;
-              module_pos;
-              current_module = module_name;
-              target_module_opt = target;
-            }))
-  | `ExportsNotSatisfied (module_name, module_pos) ->
-    Some
-      (Typing_error.modules
-         (Module_missing_export
-            {
-              pos = use_pos;
-              decl_pos = def_pos;
-              module_pos;
-              current_module_opt = Env.get_current_module env;
-              target_module = module_name;
-            }))
   | `PackageNotSatisfied (package_pos, module_pos) ->
     let current_module = Env.get_current_module env in
     Some

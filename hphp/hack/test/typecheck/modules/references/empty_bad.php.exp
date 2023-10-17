@@ -1,6 +1,0 @@
-File "empty_bad.php--main.php", line 4, characters 8-9:
-Cannot access a public element from module 'A' in module 'global' (Typing[4444])
-  File "empty_bad.php--a.php", line 5, characters 17-18:
-  This is from module `A`
-  File "empty_bad.php--a.module.php", line 5, characters 12-12:
-  Module 'A' does not export its public members to module 'global'

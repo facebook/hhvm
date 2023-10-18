@@ -1,4 +1,0 @@
-File "enum_class_label_bad.php", line 8, characters 39-40:
-Parameters to memoized function must be null, bool, int, float, string, an object deriving IMemoizeParam, or a Container thereof. See also http://docs.hhvm.com/hack/attributes/special#__memoize (Typing[4149])
-  File "enum_class_label_bad.php", line 8, characters 12-37:
-  This is a value of type HH\EnumClass\Label<E, int>

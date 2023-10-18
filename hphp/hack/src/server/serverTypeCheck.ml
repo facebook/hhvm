@@ -330,7 +330,7 @@ let do_redecl
       ~previously_oldified_defs:FileInfo.empty_names
       ~defs:defs_per_file
   in
-  ServerProgress.with_message "determining files" @@ fun () ->
+  ServerProgress.with_message "resolving files" @@ fun () ->
   let to_recheck = Naming_provider.get_files ctx to_recheck_deps in
   { changed; to_recheck; to_recheck_deps; old_decl_missing_count }
 

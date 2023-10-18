@@ -636,7 +636,10 @@ let get_files_to_recheck
       ~defs:defs_per_file_to_redeclare
   in
   Decl_redecl_service.remove_old_defs ctx ~bucket_size genv.workers dirty_names;
-  let files_to_recheck = Naming_provider.get_files ctx to_recheck in
+  let files_to_recheck =
+    ServerProgress.with_message "resolving files" @@ fun () ->
+    Naming_provider.get_files ctx to_recheck
+  in
   log_fanout_information to_recheck files_to_recheck;
   files_to_recheck
 

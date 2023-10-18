@@ -37,7 +37,7 @@ let compute_class_diffs
   in
   let possibly_changed_classes = all_defs.FileInfo.n_classes in
   let old_classes =
-    Shallow_classes_provider.get_old_batch
+    Old_shallow_classes_provider.get_old_batch
       ctx
       ~during_init
       possibly_changed_classes

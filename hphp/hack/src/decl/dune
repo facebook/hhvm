@@ -369,6 +369,7 @@
   shallow_class_diff
   shallow_class_fanout
   shallow_classes_provider
+  old_shallow_classes_provider
   shallow_decl_defs
   typing_defs)
  (preprocess

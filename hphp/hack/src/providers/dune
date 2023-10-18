@@ -149,6 +149,21 @@
   (pps ppx_deriving.std)))
 
 (library
+ (name old_shallow_classes_provider)
+ (modules old_shallow_classes_provider)
+ (libraries
+  bloom_filter
+  decl_service_client
+  direct_decl_utils
+  provider_backend
+  provider_context
+  remote_old_decl_client
+  rust_provider_backend_stubs
+  shallow_classes_heap)
+ (preprocess
+  (pps ppx_deriving.std)))
+
+(library
  (name tast_provider)
  (modules tast_provider)
  (libraries

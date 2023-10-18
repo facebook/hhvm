@@ -15,16 +15,6 @@ val get : Provider_context.t -> string -> shallow_class option
 
 val get_batch : Provider_context.t -> SSet.t -> shallow_class option SMap.t
 
-val get_old_batch :
-  Provider_context.t ->
-  during_init:bool ->
-  SSet.t ->
-  shallow_class option SMap.t
-
-val oldify_batch : Provider_context.t -> SSet.t -> unit
-
-val remove_old_batch : Provider_context.t -> SSet.t -> unit
-
 val remove_batch : Provider_context.t -> SSet.t -> unit
 
 val local_changes_push_sharedmem_stack : unit -> unit

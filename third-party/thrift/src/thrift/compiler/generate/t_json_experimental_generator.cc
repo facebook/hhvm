@@ -193,8 +193,9 @@ class json_experimental_function : public mstch_function {
       const t_function* f,
       mstch_context& ctx,
       mstch_element_position pos,
+      const t_interface* iface,
       source_manager* sm)
-      : mstch_function(f, ctx, pos), source_mgr_(*sm) {
+      : mstch_function(f, ctx, pos, iface), source_mgr_(*sm) {
     register_methods(
         this,
         {

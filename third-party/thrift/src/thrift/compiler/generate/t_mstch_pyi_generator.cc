@@ -530,8 +530,9 @@ class pyi_mstch_function : public mstch_function {
   pyi_mstch_function(
       const t_function* function,
       mstch_context& context,
-      mstch_element_position position)
-      : mstch_function(function, context, position) {
+      mstch_element_position position,
+      const t_interface* iface)
+      : mstch_function(function, context, position, iface) {
     register_methods(
         this,
         {

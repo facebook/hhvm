@@ -450,14 +450,16 @@ class python_mstch_service : public mstch_service {
     return make_mstch_functions(
         get_supported_functions([](const t_function* func) -> bool {
           return !func->sink() && !func->is_interaction_constructor();
-        }));
+        }),
+        service_);
   }
 
   mstch::node supported_service_functions() {
     return make_mstch_functions(
         get_supported_functions([](const t_function* func) -> bool {
           return !func->sink() && !func->is_interaction_constructor();
-        }));
+        }),
+        service_);
   }
 
   mstch::node is_external_program() { return prog_ != service_->program(); }
@@ -509,8 +511,11 @@ class no_reserved_key_in_namespace_validator : virtual public validator {
 class python_mstch_function : public mstch_function {
  public:
   python_mstch_function(
-      const t_function* f, mstch_context& ctx, mstch_element_position pos)
-      : mstch_function(f, ctx, pos) {
+      const t_function* f,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const t_interface* iface)
+      : mstch_function(f, ctx, pos, iface) {
     register_methods(
         this,
         {

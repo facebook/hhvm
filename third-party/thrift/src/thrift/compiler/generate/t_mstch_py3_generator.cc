@@ -203,7 +203,7 @@ class py3_mstch_program : public mstch_program {
       }
     }
 
-    return make_mstch_functions(functions);
+    return make_mstch_functions(functions, nullptr);
   }
 
   mstch::node getCustomTemplates() {
@@ -221,7 +221,7 @@ class py3_mstch_program : public mstch_program {
   }
 
   mstch::node response_and_stream_functions() {
-    return make_mstch_functions(response_and_stream_functions_);
+    return make_mstch_functions(response_and_stream_functions_, nullptr);
   }
 
   mstch::node getStreamExceptions() {
@@ -472,11 +472,11 @@ class py3_mstch_service : public mstch_service {
   }
 
   mstch::node get_lifecycle_functions() {
-    return make_mstch_functions(lifecycleFunctions());
+    return make_mstch_functions(lifecycleFunctions(), service_);
   }
 
   mstch::node get_supported_functions() {
-    return make_mstch_functions(supportedFunctions());
+    return make_mstch_functions(supportedFunctions(), service_);
   }
 
   mstch::node get_supported_functions_with_lifecycle() {
@@ -484,7 +484,7 @@ class py3_mstch_service : public mstch_service {
     for (auto* func : lifecycleFunctions()) {
       funcs.push_back(func);
     }
-    return make_mstch_functions(funcs);
+    return make_mstch_functions(funcs, service_);
   }
 
  protected:
@@ -494,8 +494,11 @@ class py3_mstch_service : public mstch_service {
 class py3_mstch_function : public mstch_function {
  public:
   py3_mstch_function(
-      const t_function* f, mstch_context& ctx, mstch_element_position pos)
-      : mstch_function(f, ctx, pos), cppName_(cpp2::get_name(f)) {
+      const t_function* f,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const t_interface* iface)
+      : mstch_function(f, ctx, pos, iface), cppName_(cpp2::get_name(f)) {
     register_methods(
         this,
         {{"function:eb", &py3_mstch_function::event_based},

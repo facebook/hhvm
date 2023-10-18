@@ -642,7 +642,7 @@ class mstch_java_service : public mstch_service {
         funcs.push_back(func);
       }
     }
-    return make_mstch_functions(funcs);
+    return make_mstch_functions(funcs, service_);
   }
   mstch::node get_request_response_functions() {
     std::vector<t_function*> funcs;
@@ -652,7 +652,7 @@ class mstch_java_service : public mstch_service {
         funcs.push_back(func);
       }
     }
-    return make_mstch_functions(funcs);
+    return make_mstch_functions(funcs, service_);
   }
   mstch::node get_single_request_functions() {
     std::vector<t_function*> funcs;
@@ -661,7 +661,7 @@ class mstch_java_service : public mstch_service {
         funcs.push_back(func);
       }
     }
-    return make_mstch_functions(funcs);
+    return make_mstch_functions(funcs, service_);
   }
 
   mstch::node get_streaming_functions() {
@@ -671,7 +671,7 @@ class mstch_java_service : public mstch_service {
         funcs.push_back(func);
       }
     }
-    return make_mstch_functions(funcs);
+    return make_mstch_functions(funcs, service_);
   }
 
   mstch::node get_sink_functions() {
@@ -681,15 +681,18 @@ class mstch_java_service : public mstch_service {
         funcs.push_back(func);
       }
     }
-    return make_mstch_functions(funcs);
+    return make_mstch_functions(funcs, service_);
   }
 };
 
 class mstch_java_function : public mstch_function {
  public:
   mstch_java_function(
-      const t_function* f, mstch_context& ctx, mstch_element_position pos)
-      : mstch_function(f, ctx, pos) {
+      const t_function* f,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const t_interface* iface)
+      : mstch_function(f, ctx, pos, iface) {
     register_methods(
         this,
         {

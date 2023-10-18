@@ -99,7 +99,7 @@ using mstch_program_factory = mstch_factory<t_program>;
 using mstch_service_factory = mstch_factory<t_service>;
 using mstch_interaction_factory =
     mstch_factory<t_interaction, const t_service*>;
-using mstch_function_factory = mstch_factory<t_function>;
+using mstch_function_factory = mstch_factory<t_function, const t_interface*>;
 using mstch_type_factory = mstch_factory<t_type>;
 using mstch_typedef_factory = mstch_factory<t_typedef>;
 using mstch_struct_factory = mstch_factory<t_structured>;
@@ -597,8 +597,11 @@ class mstch_function : public mstch_base {
   using ast_type = t_function;
 
   mstch_function(
-      const t_function* f, mstch_context& ctx, mstch_element_position pos)
-      : mstch_base(ctx, pos), function_(f) {
+      const t_function* f,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const t_interface* iface)
+      : mstch_base(ctx, pos), function_(f), interface_(iface) {
     register_methods(
         this,
         {
@@ -747,6 +750,7 @@ class mstch_function : public mstch_base {
 
  protected:
   const t_function* function_;
+  const t_interface* interface_;
 
   bool has_args_() { return function_->params().has_fields(); }
 

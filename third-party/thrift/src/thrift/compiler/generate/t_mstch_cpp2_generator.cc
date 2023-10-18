@@ -724,7 +724,7 @@ class cpp_mstch_service : public mstch_service {
         oneway_functions.push_back(function);
       }
     }
-    return make_mstch_functions(oneway_functions);
+    return make_mstch_functions(oneway_functions, service_);
   }
   mstch::node has_oneway() {
     for (const auto* function : get_functions()) {
@@ -819,8 +819,10 @@ class cpp_mstch_function : public mstch_function {
       const t_function* function,
       mstch_context& ctx,
       mstch_element_position pos,
+      const t_interface* iface,
       std::shared_ptr<cpp2_generator_context> cpp_ctx)
-      : mstch_function(function, ctx, pos), cpp_context_(std::move(cpp_ctx)) {
+      : mstch_function(function, ctx, pos, iface),
+        cpp_context_(std::move(cpp_ctx)) {
     register_methods(
         this,
         {

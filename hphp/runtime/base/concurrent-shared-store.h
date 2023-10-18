@@ -387,7 +387,7 @@ private:
 
 private:
   bool checkExpire(const String& keyStr, Map::const_accessor& acc);
-  bool eraseImpl(const char*, bool, int64_t, ExpSet::accessor* expAcc);
+  bool eraseImpl(const char*, bool, ExpSet::accessor* expAcc);
   bool storeImpl(const String&, const Variant&, int64_t, int64_t, bool, bool);
   bool handlePromoteObj(const String&, APCHandle*, const Variant&, bool);
   void dumpKeyAndValue(std::ostream&);

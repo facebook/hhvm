@@ -79,15 +79,6 @@ void finishRequest();
 int64_t getOldestRequestGenCount();
 
 /*
- * Returns the oldest start time in seconds of all requests in flight.
- * If there are no requests in flight the return value is 0.
- * The value returned should be used as a conservative and true value
- * for the oldest start time of any request in flight. In that sense
- * the value is safe to compare against in a less-than relationship.
- */
-int64_t getOldestStartTime();
-
-/*
  * Returns for how long (wall time) the oldest request in flight has
  * been running, in seconds.
  */

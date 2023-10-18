@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
-#include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/util/logger.h"
 #include "hphp/util/timer.h"
@@ -385,7 +384,7 @@ bool ConcurrentTableSharedStore::clear() {
 
 bool ConcurrentTableSharedStore::eraseKey(const String& key) {
   assertx(!key.isNull());
-  return eraseImpl(tagStringData(key.get()), false, 0, nullptr);
+  return eraseImpl(tagStringData(key.get()), false, nullptr);
 }
 
 /*
@@ -398,7 +397,6 @@ bool ConcurrentTableSharedStore::eraseKey(const String& key) {
  */
 bool ConcurrentTableSharedStore::eraseImpl(const char* key,
                                            bool expired,
-                                           int64_t oldestLive,
                                            ExpSet::accessor* expAcc) {
   assertx(key);
 
@@ -426,37 +424,14 @@ bool ConcurrentTableSharedStore::eraseImpl(const char* key,
     return false;
   }
 
-  bool wasCached = s_hotCache.clearValue(storeVal);
+  s_hotCache.clearValue(storeVal);
 
   FTRACE(2, "Remove {} {}\n", acc->first, show(acc->second));
   auto const var = storeVal.data();
   auto const e = storeVal.rawExpire();
   APCStats::getAPCStats().removeAPCValue(storeVal.dataSize, var,
                                           e == 0, expired);
-  /*
-    * As an optimization, we eagerly delete uncounted values that expired
-    * long ago. But HotCache does not check expiration on every 'get', so
-    * any values previously cached there must take the usual treadmill route.
-    */
-  auto const canKillNow = [&] {
-    if (!expired ||
-        wasCached ||
-        e >= oldestLive ||
-        e == 1 ||
-        !var->isUncounted()) {
-      return false;
-    }
-    assertx(
-      storeVal.expireRequestId.load(std::memory_order_acquire).unallocated());
-    assertx(storeVal.rawExpire() == e);
-    return true;
-  }();
-  if (canKillNow) {
-    FTRACE(3, " - bypass treadmill {}\n", acc->first);
-    APCTypedValue::fromHandle(var)->deleteUncounted();
-  } else {
-    var->unreferenceRoot(storeVal.dataSize);
-  }
+  var->unreferenceRoot(storeVal.dataSize);
 
   APCStats::getAPCStats().removeKey(strlen(acc->first));
   const void* vpkey = acc->first;
@@ -499,8 +474,6 @@ void ConcurrentTableSharedStore::purgeExpired() {
                                                std::memory_order_acq_rel)) {
     return;                             // someone beat us
   }
-  int64_t oldestLive = apcExtension::UseUncounted ?
-      HPHP::Treadmill::getOldestStartTime() : 0;
   ExpirationPair tmp;
   int i = 0;
   int j = 0;
@@ -512,7 +485,7 @@ void ConcurrentTableSharedStore::purgeExpired() {
     ExpSet::accessor acc;
     if (m_expSet.find(acc, tmp.first)) {
       FTRACE(3, "Expiring {}...", (char*)tmp.first);
-      if (eraseImpl((char*)tmp.first, true, oldestLive, &acc)) {
+      if (eraseImpl((char*)tmp.first, true, &acc)) {
         FTRACE(3, "succeeded\n");
         ++i;
         continue;
@@ -526,7 +499,7 @@ void ConcurrentTableSharedStore::purgeExpired() {
 
 void ConcurrentTableSharedStore::purgeDeferred(req::vector<StringData*>&& keys) {
   for (auto const& key : keys) {
-    if (eraseImpl(tagStringData(key), true, 0, nullptr)) {
+    if (eraseImpl(tagStringData(key), true, nullptr)) {
       FTRACE(3, "purgeDeferred: {}\n", key);
     }
   }

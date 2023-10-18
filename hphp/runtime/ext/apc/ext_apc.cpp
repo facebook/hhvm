@@ -97,8 +97,6 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
                PurgeInterval);
   Config::Bind(AllowObj, ini, config, "Server.APC.AllowObject", true);
   Config::Bind(TTLLimit, ini, config, "Server.APC.TTLLimit", -1);
-  Config::Bind(DeferredExpiration, ini, config,
-               "Server.APC.DeferredExpiration", DeferredExpiration);
   // Any TTL > TTLMaxFinite will be made infinite. NB: Applied *after* TTLLimit.
   Config::Bind(TTLMaxFinite, ini, config, "Server.APC.TTLMaxFinite",
                std::numeric_limits<int64_t>::max());
@@ -164,7 +162,6 @@ bool apcExtension::ShareUncounted = true;
 bool apcExtension::Stat = true;
 // Different from zend default but matches what we've been returning for years
 bool apcExtension::EnableCLI = true;
-bool apcExtension::DeferredExpiration = true;
 uint32_t apcExtension::SizedSampleBytes = 0;
 
 static apcExtension s_apc_extension;

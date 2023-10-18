@@ -45,7 +45,6 @@ struct apcExtension final : Extension {
   static bool ShareUncounted;
   static bool Stat;
   static bool EnableCLI;
-  static bool DeferredExpiration;
   static uint32_t SizedSampleBytes;
 
   void moduleLoad(const IniSetting::Map& ini, Hdf config) override;

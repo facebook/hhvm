@@ -598,14 +598,6 @@ bool ConcurrentTableSharedStore::checkExpire(const String& keyStr,
 
   auto now = time(nullptr);
   if (now >= e) {
-    if (!apcExtension::DeferredExpiration) {
-      acc.release();
-      eraseImpl(tag, true,
-                apcExtension::UseUncounted ?
-                HPHP::Treadmill::getOldestStartTime() : 0, nullptr);
-      return true;
-    }
-
     // Try to mark entry as expired.
     auto expected = RequestId();
     auto const desired = RI().m_id;

@@ -209,6 +209,7 @@ let parallel_redecl_compare_and_get_fanout
     (defs_per_file : FileInfo.names Relative_path.Map.t)
     (fnl : Relative_path.t list) : Fanout.t * int =
   try
+    ServerProgress.with_frame @@ fun () ->
     OnTheFlyStore.store defs_per_file;
     let files_initial_count = List.length fnl in
     let files_declared_count = ref 0 in
@@ -396,7 +397,8 @@ let filter_dependent_classes_parallel
   let classes_initial_count = List.length maybe_dependent_classes in
   if classes_initial_count < 10 then
     filter_dependent_classes classes maybe_dependent_classes
-  else (
+  else
+    ServerProgress.with_frame @@ fun () ->
     ClassSetStore.store classes;
     let classes_filtered_count = ref 0 in
     let t = Unix.gettimeofday () in
@@ -425,7 +427,6 @@ let filter_dependent_classes_parallel
     in
     ClassSetStore.clear ();
     res
-  )
 
 let get_dependent_classes
     (ctx : Provider_context.t)
@@ -472,6 +473,7 @@ let get_elems
     if classes_initial_count < 10 then
       Decl_class_elements.get_for_classes ~old classes
     else
+      ServerProgress.with_frame @@ fun () ->
       let classes_processed_count = ref 0 in
       ServerProgress.write_percentage
         ~operation:"getting members of"

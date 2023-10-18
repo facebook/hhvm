@@ -890,7 +890,7 @@ let initialize_naming_table
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     (cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
-  ServerProgress.write "%s" progress_message;
+  ServerProgress.with_message progress_message @@ fun () ->
   let (get_next, count, t) =
     match fnl with
     | Some fnl ->

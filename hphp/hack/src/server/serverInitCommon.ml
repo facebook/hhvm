@@ -77,7 +77,7 @@ let update_reverse_naming_table_from_env_and_get_duplicate_name_errors
     ~(cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
   CgroupProfiler.step_start_end cgroup_steps telemetry_label
   @@ fun _cgroup_step ->
-  ServerProgress.write "resolving symbol references";
+  ServerProgress.with_message "resolving symbol references" @@ fun () ->
   let ctx = Provider_utils.ctx_from_server_env env in
   let count = ref 0 in
   let env =

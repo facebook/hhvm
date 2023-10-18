@@ -25,6 +25,16 @@ type t = {
   timestamp: float;
 }
 
+let stack : string ref list ref = ref [ref ""]
+
+let write_stack message = List.hd_exn !stack := message
+
+let push_stack () = stack := ref "" :: !stack
+
+let pop_stack_and_peek () =
+  stack := List.tl_exn !stack;
+  !(List.hd_exn !stack)
+
 (** The caller must set this before attempting to send progress, otherwise exception *)
 let root : Path.t option ref = ref None
 
@@ -124,15 +134,36 @@ let read () : t =
       HackEventLogger.server_progress_read_exn ~server_progress_file e;
       synthesize_stopped "unknown state")
 
+let write_message ?(include_in_logs = true) ?(disposition = DWorking) message =
+  if include_in_logs then Hh_logger.log "[progress] %s" message;
+  let timestamp = Unix.gettimeofday () in
+  write_file { pid = Unix.getpid (); disposition; message; timestamp };
+  ()
+
 let write ?(include_in_logs = true) ?(disposition = DWorking) fmt =
   let f message =
     begin
-      if include_in_logs then Hh_logger.log "[progress] %s" message;
-      let timestamp = Unix.gettimeofday () in
-      write_file { pid = Unix.getpid (); disposition; message; timestamp }
+      write_stack message;
+      write_message ~include_in_logs ~disposition message
     end
   in
   Printf.ksprintf f fmt
+
+let with_message ?(include_in_logs = true) ?(disposition = DWorking) message f =
+  push_stack ();
+  write_stack message;
+  write_message ~include_in_logs ~disposition message;
+  let res = f () in
+  let previous_message = pop_stack_and_peek () in
+  write_message ~include_in_logs:false ~disposition previous_message;
+  res
+
+let with_frame ?(disposition = DWorking) f =
+  push_stack ();
+  let res = f () in
+  let previous_message = pop_stack_and_peek () in
+  write_message ~include_in_logs:false ~disposition previous_message;
+  res
 
 (* The message will look roughly like this:
    <operation> <done_count>/<total_count> <unit> <percent done> <extra>*)

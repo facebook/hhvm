@@ -988,7 +988,7 @@ let resolve_init_approach genv : ServerInit.init_approach * string =
 
 let program_init genv env =
   Hh_logger.log "Init id: %s" env.init_env.init_id;
-  ServerProgress.write "initializing...";
+  ServerProgress.with_message "initializing..." @@ fun () ->
   ServerProgress.enable_error_production
     genv.local_config.ServerLocalConfig.produce_streaming_errors;
   Exit.add_hook_upon_clean_exit (fun _finale_data ->

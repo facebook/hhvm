@@ -62,6 +62,23 @@ val write :
   ('a, unit, string, unit) format4 ->
   'a
 
+(** [with_message msg f] writes message [msg], calls [f], then writes
+  back the message displayed before calling [with_message].
+  [f] can call [write], [with_message] or [with_frame]: we'd still
+  show the message displayed before this call to [with_message]
+  when [f] finishes. *)
+val with_message :
+  ?include_in_logs:bool ->
+  ?disposition:disposition ->
+  string ->
+  (unit -> 'a) ->
+  'a
+
+(** [with_frame f] calls [f] (which can display messages using
+  [write], [with_message] or [with_frame]) then writes
+  back the message displayed before calling [with_frame]. *)
+val with_frame : ?disposition:disposition -> (unit -> 'a) -> 'a
+
 (** Shorthand for [write ~include_in_logs:false ~disposition:DWorking "%s" message]
 for the message "<operation> <done_count>/<total_count> <unit> <percent done> <extra>". *)
 val write_percentage :

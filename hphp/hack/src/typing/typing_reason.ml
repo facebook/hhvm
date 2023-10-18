@@ -44,10 +44,6 @@ type decl_phase = private DeclPhase [@@deriving eq, hash, show]
 
 type locl_phase = private LoclPhase [@@deriving eq, hash, show]
 
-type lazy_string = string Lazy.t [@@deriving show]
-(* The pp/show function for a lazy value would print "<not evaluated>" when
- * the lazy value has not been forced yet. *)
-
 (* This is to avoid a compile error with ppx_hash "Unbound value _hash_fold_phase". *)
 let _hash_fold_phase hsv _ = hsv
 
@@ -387,14 +383,6 @@ let rec pp_t_ : type ph. _ -> ph t_ -> unit =
   let close_bracket () = Format.fprintf fmt "@]]" in
   let comma_ fmt () = Format.fprintf fmt ",@ " in
   let comma () = comma_ fmt () in
-  let pp_lazy_string fmt s =
-    pp_lazy_string fmt s;
-    if not @@ Lazy.is_val s then (
-      Format.fprintf fmt "@ ";
-      let (lazy s) = s in
-      Format.pp_print_string fmt s
-    )
-  in
   Format.pp_print_string fmt @@ to_constructor_string r;
   match r with
   | Rnone
@@ -406,7 +394,7 @@ let rec pp_t_ : type ph. _ -> ph t_ -> unit =
     | Rnone
     | Rinvalid ->
       failwith "already matched"
-    | Rtypeconst (r1, (p, s1), lazy_s, r2) ->
+    | Rtypeconst (r1, (p, s1), (lazy s2), r2) ->
       pp_t_ fmt r1;
       comma ();
       open_paren ();
@@ -415,7 +403,7 @@ let rec pp_t_ : type ph. _ -> ph t_ -> unit =
       Format.pp_print_string fmt s1;
       close_paren ();
       comma ();
-      pp_lazy_string fmt lazy_s;
+      Format.pp_print_string fmt s2;
       comma ();
       pp_t_ fmt r2
     | Rtype_access (r, l) ->
@@ -424,11 +412,11 @@ let rec pp_t_ : type ph. _ -> ph t_ -> unit =
       open_bracket ();
       Format.pp_print_list
         ~pp_sep:comma_
-        (fun fmt (r, lazy_s) ->
+        (fun fmt (r, (lazy s)) ->
           open_paren ();
           pp_t_ fmt r;
           comma ();
-          pp_lazy_string fmt lazy_s;
+          Format.pp_print_string fmt s;
           close_paren ())
         fmt
         l;

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7b0cb924209dc1119ac7abfd2449bd95>>
+// @generated SignedSource<<36adc84677c26eda4344fa33e690ab57>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -84,9 +84,6 @@ pub enum Blame<'a> {
 }
 impl<'a> TrivialDrop for Blame<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Blame<'arena>);
-
-#[rust_to_ocaml(attr = "deriving show")]
-pub type LazyString<'a> = lazy::Lazy<&'a str>;
 
 /// The reason why something is expected to have a certain type
 #[derive(

@@ -73,7 +73,7 @@ let run_saved_state_future
       result
       Future.t) : (loaded_info, load_state_error) result =
   let t = Unix.gettimeofday () in
-  match Future.get dependency_table_saved_state_future ~timeout:60 with
+  match Future.get dependency_table_saved_state_future ~timeout:300 with
   | Error error ->
     Hh_logger.log
       "Unhandled Future.error from state loader: %s"

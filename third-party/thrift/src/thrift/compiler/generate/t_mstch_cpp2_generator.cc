@@ -1069,8 +1069,8 @@ class cpp_mstch_type : public mstch_type {
         {"cpp.declare_equal_to", "cpp2.declare_equal_to"});
   }
   mstch::node cpp_use_allocator() {
-    return resolved_type_->has_annotation("cpp.use_allocator") ||
-        type_->has_annotation("cpp.use_allocator");
+    return t_typedef::get_first_annotation_or_null(
+        type_, {"cpp.use_allocator"});
   }
   mstch::node is_non_empty_struct() {
     auto as_struct = dynamic_cast<const t_struct*>(resolved_type_);

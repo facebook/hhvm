@@ -2884,17 +2884,10 @@ let should_use_snippet_edits (initialize_params : Initialize.params option) :
                .ClientExperimentalCapabilities.snippetTextEdit)
   |> Option.value ~default:false
 
-let do_codeAction_local
-    (ide_service : ClientIdeService.t ref)
-    (env : env)
-    (tracking_id : string)
-    (ref_unblocked_time : float ref)
+let location_of_code_action_request
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : CodeActionRequest.params) :
-    (CodeAction.command_or_action list
-    * Path.t
-    * Errors.finalized_error list option)
-    Lwt.t =
+    ClientIdeMessage.document * Ide_api_types.range * Path.t =
   let text_document =
     get_text_document_item
       editor_open_files
@@ -2903,6 +2896,19 @@ let do_codeAction_local
   let document = lsp_document_to_ide text_document in
   let file_path = document.ClientIdeMessage.file_path in
   let range = lsp_range_to_ide params.CodeActionRequest.range in
+  (document, range, file_path)
+
+let do_codeAction_local
+    (ide_service : ClientIdeService.t ref)
+    (env : env)
+    (tracking_id : string)
+    (ref_unblocked_time : float ref)
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
+    (params : CodeActionRequest.params) :
+    (CodeAction.result * Path.t * Errors.finalized_error list option) Lwt.t =
+  let (document, range, file_path) =
+    location_of_code_action_request editor_open_files params
+  in
   let%lwt (actions, errors_opt) =
     ide_rpc
       ide_service
@@ -2921,13 +2927,9 @@ let do_codeAction_resolve_local
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : CodeActionRequest.params)
     ~(resolve_title : string) : CodeActionResolve.result Lwt.t =
-  let text_document =
-    get_text_document_item
-      editor_open_files
-      params.CodeActionRequest.textDocument.TextDocumentIdentifier.uri
+  let (document, range, _file_path) =
+    location_of_code_action_request editor_open_files params
   in
-  let document = lsp_document_to_ide text_document in
-  let range = lsp_range_to_ide params.CodeActionRequest.range in
   let use_snippet_edits = should_use_snippet_edits !initialize_params_ref in
   ide_rpc
     ide_service

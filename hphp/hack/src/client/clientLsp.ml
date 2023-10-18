@@ -1993,7 +1993,7 @@ let do_hover_common (infos : HoverService.hover_info list) : Hover.result =
   else
     Some { Hover.contents; range }
 
-let do_hover_local
+let do_hover
     (ide_service : ClientIdeService.t ref)
     (env : env)
     (tracking_id : string)
@@ -2011,7 +2011,7 @@ let do_hover_local
   in
   Lwt.return (do_hover_common infos)
 
-let do_typeDefinition_local
+let do_typeDefinition
     (ide_service : ClientIdeService.t ref)
     (env : env)
     (tracking_id : string)
@@ -2036,7 +2036,7 @@ let do_typeDefinition_local
   in
   Lwt.return results
 
-let do_definition_local
+let do_definition
     (ide_service : ClientIdeService.t ref)
     (env : env)
     (tracking_id : string)
@@ -2168,7 +2168,7 @@ let make_ide_completion_response
       items = List.map result.completions ~f:hack_completion_to_lsp;
     }
 
-let do_completion_local
+let do_completion
     (ide_service : ClientIdeService.t ref)
     (env : env)
     (tracking_id : string)
@@ -2238,7 +2238,7 @@ let resolve_ranking_source
  * And it's totally okay to mix and match requests to serverless IDE and
  * hh_server.
  *)
-let do_resolve_local
+let do_resolve
     (ide_service : ClientIdeService.t ref)
     (env : env)
     (tracking_id : string)
@@ -2250,7 +2250,7 @@ let do_resolve_local
   else
     let raw_kind = params.Completion.kind in
     let kind = completion_kind_to_si_kind raw_kind in
-    (* [do_completion_local] happens to provide line+col+filename for members.
+    (* [do_completion] happens to provide line+col+filename for members.
        Since docblock resolution needs line+col+filename, and we've already computed them,
        let's just use them! *)
     let%lwt result =
@@ -2350,7 +2350,7 @@ let hack_symbol_to_lsp (symbol : SearchUtils.symbol) =
     containerName = None;
   }
 
-let do_workspaceSymbol_local
+let do_workspaceSymbol
     (ide_service : ClientIdeService.t ref)
     (env : env)
     (tracking_id : string)
@@ -2416,7 +2416,7 @@ let rec hack_symbol_tree_to_lsp
     in
     hack_symbol_tree_to_lsp ~filename ~accu ~container_name defs
 
-let do_documentSymbol_local
+let do_documentSymbol
     (ide_service : ClientIdeService.t ref)
     (env : env)
     (tracking_id : string)
@@ -2439,7 +2439,7 @@ let do_documentSymbol_local
   in
   Lwt.return converted
 
-let do_findReferences_local
+let do_findReferences
     (state : state)
     (ide_service : ClientIdeService.t ref)
     (env : env)
@@ -2661,7 +2661,7 @@ let do_findReferences2 ~shellout_standard_response ~hh_locations :
   | None ->
     Lwt.return (FindReferencesResult all_locations, List.length all_locations)
 
-let do_goToImplementation_local
+let do_goToImplementation
     (state : state)
     (ide_service : ClientIdeService.t ref)
     (env : env)
@@ -2736,7 +2736,7 @@ let do_goToImplementation2 ~ide_calculated_positions ~hh_locations :
 let hack_range_to_lsp_highlight range =
   { DocumentHighlight.range = ide_range_to_lsp range; kind = None }
 
-let do_highlight_local
+let do_highlight
     (ide_service : ClientIdeService.t ref)
     (env : env)
     (tracking_id : string)
@@ -2898,7 +2898,7 @@ let location_of_code_action_request
   let range = lsp_range_to_ide params.CodeActionRequest.range in
   (document, range, file_path)
 
-let do_codeAction_local
+let do_codeAction
     (ide_service : ClientIdeService.t ref)
     (env : env)
     (tracking_id : string)
@@ -2919,7 +2919,7 @@ let do_codeAction_local
   in
   Lwt.return (actions, file_path, errors_opt)
 
-let do_codeAction_resolve_local
+let do_codeAction_resolve
     (ide_service : ClientIdeService.t ref)
     (env : env)
     (tracking_id : string)
@@ -2939,7 +2939,7 @@ let do_codeAction_resolve_local
     (ClientIdeMessage.Code_action_resolve
        { document; range; resolve_title; use_snippet_edits })
 
-let do_signatureHelp_local
+let do_signatureHelp
     (ide_service : ClientIdeService.t ref)
     (env : env)
     (tracking_id : string)
@@ -2997,7 +2997,7 @@ let patches_to_workspace_edit (patches : ServerRenameTypes.patch list) :
   in
   { WorkspaceEdit.changes }
 
-let do_documentRename_local
+let do_documentRename
     (state : state)
     (ide_service : ClientIdeService.t ref)
     (env : env)
@@ -3157,7 +3157,7 @@ let hack_type_hierarchy_to_lsp
   | None -> None
   | Some h -> Some (hack_hierarchy_entry_to_Lsp h)
 
-let do_typeHierarchy_local
+let do_typeHierarchy
     (ide_service : ClientIdeService.t ref)
     (env : env)
     (tracking_id : string)
@@ -4394,7 +4394,7 @@ let handle_client_message
     | (_, RequestMessage (id, CompletionRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result =
-        do_completion_local
+        do_completion
           ide_service
           env
           tracking_id
@@ -4409,7 +4409,7 @@ let handle_client_message
     | (_, RequestMessage (id, CompletionItemResolveRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result =
-        do_resolve_local ide_service env tracking_id ref_unblocked_time params
+        do_resolve ide_service env tracking_id ref_unblocked_time params
       in
       respond_jsonrpc
         ~powered_by:Serverless_ide
@@ -4420,7 +4420,7 @@ let handle_client_message
     | (_, RequestMessage (id, DocumentHighlightRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result =
-        do_highlight_local
+        do_highlight
           ide_service
           env
           tracking_id
@@ -4437,7 +4437,7 @@ let handle_client_message
     | (_, RequestMessage (id, HoverRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result =
-        do_hover_local
+        do_hover
           ide_service
           env
           tracking_id
@@ -4455,7 +4455,7 @@ let handle_client_message
     | (_, RequestMessage (id, DocumentSymbolRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result =
-        do_documentSymbol_local
+        do_documentSymbol
           ide_service
           env
           tracking_id
@@ -4471,12 +4471,7 @@ let handle_client_message
     | (_, RequestMessage (id, WorkspaceSymbolRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
       let%lwt result =
-        do_workspaceSymbol_local
-          ide_service
-          env
-          tracking_id
-          ref_unblocked_time
-          params
+        do_workspaceSymbol ide_service env tracking_id ref_unblocked_time params
       in
       respond_jsonrpc
         ~powered_by:Serverless_ide
@@ -4486,7 +4481,7 @@ let handle_client_message
     | (_, RequestMessage (id, DefinitionRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt (result, _has_xhp_attribute) =
-        do_definition_local
+        do_definition
           ide_service
           env
           tracking_id
@@ -4499,7 +4494,7 @@ let handle_client_message
     | (_, RequestMessage (id, TypeDefinitionRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result =
-        do_typeDefinition_local
+        do_typeDefinition
           ide_service
           env
           tracking_id
@@ -4516,7 +4511,7 @@ let handle_client_message
     | (_, RequestMessage (id, FindReferencesRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
       let%lwt (new_state, result_telemetry) =
-        do_findReferences_local
+        do_findReferences
           !state
           ide_service
           env
@@ -4532,7 +4527,7 @@ let handle_client_message
     | (_, RequestMessage (id, ImplementationRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
       let%lwt (new_state, result_telemetry) =
-        do_goToImplementation_local
+        do_goToImplementation
           !state
           ide_service
           env
@@ -4549,7 +4544,7 @@ let handle_client_message
     | (_, RequestMessage (id, RenameRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
       let%lwt (new_state, result_telemetry) =
-        do_documentRename_local
+        do_documentRename
           !state
           ide_service
           env
@@ -4565,7 +4560,7 @@ let handle_client_message
     | (_, RequestMessage (id, SignatureHelpRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result =
-        do_signatureHelp_local
+        do_signatureHelp
           ide_service
           env
           tracking_id
@@ -4584,7 +4579,7 @@ let handle_client_message
     | (_, RequestMessage (id, CodeActionRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt (result, file_path, errors_opt) =
-        do_codeAction_local
+        do_codeAction
           ide_service
           env
           tracking_id
@@ -4611,7 +4606,7 @@ let handle_client_message
       in
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result =
-        do_codeAction_resolve_local
+        do_codeAction_resolve
           ide_service
           env
           tracking_id
@@ -4681,7 +4676,7 @@ let handle_client_message
     | (_, RequestMessage (id, TypeHierarchyRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result =
-        do_typeHierarchy_local
+        do_typeHierarchy
           ide_service
           env
           tracking_id

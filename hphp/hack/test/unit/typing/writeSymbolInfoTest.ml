@@ -11,6 +11,7 @@ open Hh_json
 open Hh_json.Access
 open Hh_json_helpers
 open OUnit2
+open Symbol_glean_schema.Hack
 module Util = Symbol_json_util
 module Build_json = Symbol_build_json
 module Predicate = Symbol_predicate
@@ -123,7 +124,11 @@ let test_build_xrefs _test_ctxt =
   Relative_path.set_path_prefix Relative_path.Root (Path.make "www");
   let file = Relative_path.from_root ~suffix:"test.php" in
   let decl_name = "TestDecl" in
-  let target_json = JSON_Object [("declaration", JSON_String decl_name)] in
+  let target =
+    XRefTarget.Declaration
+      (Declaration.ModuleDeclaration
+         ModuleDeclaration.(Key { name = Name.Key decl_name }))
+  in
   let target_id = Fact_id.next () in
   let ref_pos =
     Pos.set_file
@@ -149,19 +154,24 @@ let test_build_xrefs _test_ctxt =
          ~pos_start:(3, 25, 40)
          ~pos_end:(3, 25, 45))
   in
-  let target = XRefs.{ target = target_json; receiver_type = None } in
+  let target = XRefs.{ target; receiver_type = None } in
   let xrefs = XRefs.add xrefs target_id next_ref_pos target in
   let xrefs = XRefs.add xrefs target_id ref_pos target in
   let XRefs.{ fact_map; _ } = XRefs.add xrefs target_id dup_ref_pos target in
   let result =
-    List.nth_exn (get_array_exn (Build_json.build_xrefs_json fact_map)) 0
+    List.nth_exn (Build_json.build_xrefs fact_map) 0 |> XRef.to_json
   in
   let target_decl =
-    return result >>= get_obj "target" >>= get_string "declaration"
+    return result
+    >>= get_obj "target"
+    >>= get_obj "declaration"
+    >>= get_obj "module"
+    >>= get_obj "key"
+    >>= get_obj "name"
+    >>= get_string "key"
   in
   (match target_decl with
-  | Ok (name, _) ->
-    String_asserter.assert_equals decl_name name "Target decl JSON set"
+  | Ok (name, _) -> String_asserter.assert_equals decl_name name "TestDecl"
   | _ -> assert_failure "Could not extract decl JSON");
   let ranges_arr = return result >>= get_array "ranges" in
   match ranges_arr with

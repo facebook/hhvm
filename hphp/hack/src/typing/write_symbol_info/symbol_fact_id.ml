@@ -6,7 +6,7 @@
  *
  *)
 
-type t = int
+type t = int [@@deriving ord]
 
 let next =
   let x = ref 1 in

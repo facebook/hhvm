@@ -6,6 +6,9 @@
  *
  *)
 
+module Fact_id = Symbol_fact_id
+open Symbol_glean_schema.Hack
+
 (* Predicate types for the JSON facts emitted *)
 type hack =
   | ClassConstDeclaration
@@ -66,9 +69,17 @@ type parent_container_type =
   | InterfaceContainer
   | TraitContainer
 
-val parent_decl_predicate : parent_container_type -> string * t
+val parent_decl_predicate : parent_container_type -> t
 
 val get_parent_kind : Ast_defs.classish_kind -> parent_container_type
+
+val container_ref : parent_container_type -> Fact_id.t -> Declaration.t
+
+val container_decl :
+  parent_container_type -> Fact_id.t -> ContainerDeclaration.t
+
+val container_decl_qname :
+  parent_container_type -> QName.t -> ContainerDeclaration.t
 
 module Fact_acc : sig
   (* fact accumulator. This is used to maintain state through indexing

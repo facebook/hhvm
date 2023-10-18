@@ -8,7 +8,9 @@
 
 open Aast
 open Hh_prelude
-open Hh_json
+open Symbol_glean_schema.Src
+open Symbol_glean_schema.Hack
+open Symbol_glean_schema.GenCode
 module Util = Symbol_json_util
 module Build_json = Symbol_build_json
 module Predicate = Symbol_predicate
@@ -16,14 +18,17 @@ module Fact_id = Symbol_fact_id
 module Fact_acc = Symbol_predicate.Fact_acc
 module XRefs = Symbol_xrefs
 
+let is_async = function
+  | Ast_defs.FAsync -> true
+  | Ast_defs.FAsyncGenerator -> true
+  | _ -> false
+
 let namespace_decl name progress =
-  let json_fields =
-    [("name", Build_json.build_namespaceqname_json_nested name)]
+  let json =
+    NamespaceDeclaration.(
+      { name = NamespaceQName.(Key (of_string name)) } |> to_json_key)
   in
-  Fact_acc.add_fact
-    Predicate.(Hack NamespaceDeclaration)
-    (JSON_Object json_fields)
-    progress
+  Fact_acc.add_fact Predicate.(Hack NamespaceDeclaration) json progress
 
 (* create a namespace fact from a namespace attribute in node. Name can be empty
    in that case we simply ignore it *)
@@ -34,235 +39,247 @@ let namespace_decl_opt name progress =
   | Some name -> namespace_decl name progress |> snd
 
 let container_decl decl_pred name progress =
-  let json = JSON_Object [("name", Build_json.build_qname_json_nested name)] in
+  let qname = QName.(Key (of_string name)) in
+  let json =
+    match decl_pred with
+    | Predicate.(Hack ClassDeclaration) ->
+      ClassDeclaration.(to_json_key { name = qname })
+    | Predicate.(Hack EnumDeclaration) ->
+      EnumDeclaration.(to_json_key { name = qname })
+    | Predicate.(Hack InterfaceDeclaration) ->
+      InterfaceDeclaration.(to_json_key { name = qname })
+    | Predicate.(Hack TraitDeclaration) ->
+      TraitDeclaration.(to_json_key { name = qname })
+    | _ -> failwith "Impossible has happened"
+  in
   Fact_acc.add_fact decl_pred json progress
 
-(* Helper function for adding facts for container parents, given
-   a context, a list of declarations, a predicate type, and progress state *)
 let parent_decls ctx decls pred prog =
   List.fold decls ~init:([], prog) ~f:(fun (decl_refs, prog) decl ->
       let name = Util.strip_tparams (Util.get_type_from_hint ctx decl) in
       let (decl_id, prog) = container_decl pred name prog in
-      let ref = Build_json.build_id_json decl_id in
-      (ref :: decl_refs, prog))
+      (decl_id :: decl_refs, prog))
+
+let parent_decls_enum ctx decls prog =
+  let (fact_ids, prog) =
+    parent_decls ctx decls Predicate.(Hack EnumDeclaration) prog
+  in
+  (List.map ~f:(fun x -> EnumDeclaration.Id x) fact_ids, prog)
+
+let parent_decls_class ctx decls prog =
+  let (fact_ids, prog) =
+    parent_decls ctx decls Predicate.(Hack ClassDeclaration) prog
+  in
+  (List.map ~f:(fun x -> ClassDeclaration.Id x) fact_ids, prog)
+
+let parent_decls_trait ctx decls prog =
+  let (fact_ids, prog) =
+    parent_decls ctx decls Predicate.(Hack TraitDeclaration) prog
+  in
+  (List.map ~f:(fun x -> TraitDeclaration.Id x) fact_ids, prog)
+
+let parent_decls_interface ctx decls prog =
+  let (fact_ids, prog) =
+    parent_decls ctx decls Predicate.(Hack InterfaceDeclaration) prog
+  in
+  (List.map ~f:(fun x -> InterfaceDeclaration.Id x) fact_ids, prog)
 
 let module_decl name progress =
-  let json = JSON_Object [("name", Build_json.build_name_json_nested name)] in
+  let json = ModuleDeclaration.({ name = Name.Key name } |> to_json_key) in
   Fact_acc.add_fact Predicate.(Hack ModuleDeclaration) json progress
 
 let module_field module_ internal progress =
   match module_ with
-  | None -> ([], progress)
+  | None -> (None, progress)
   | Some (_pos, module_name) ->
     let (decl_id, progress) = module_decl module_name progress in
-    ( [("module_", Build_json.build_module_membership_nested decl_id ~internal)],
-      progress )
+    (Some (Build_json.build_module_membership decl_id ~internal), progress)
 
 let member_cluster ~members prog =
-  let json = JSON_Object [("members", JSON_Array members)] in
+  let json = MemberCluster.({ members } |> to_json_key) in
   Fact_acc.add_fact Predicate.(Hack MemberCluster) json prog
 
 let inherited_members ~container_type ~container_id ~member_clusters prog =
   let json =
-    JSON_Object
-      [
-        ( "container",
-          Build_json.build_container_json_ref container_type container_id );
-        ( "inheritedMembers",
-          JSON_Array (List.map ~f:Build_json.build_id_json member_clusters) );
-      ]
+    InheritedMembers.(
+      {
+        container = Predicate.container_decl container_type container_id;
+        inheritedMembers =
+          List.map ~f:(fun x -> MemberCluster.Id x) member_clusters;
+      }
+      |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack InheritedMembers) json prog
 
-let container_defn ctx source_text clss decl_id member_decls prog =
+let container_defn ctx source_text clss decl_id members prog =
   let prog = namespace_decl_opt clss.c_namespace prog in
-  let tparams =
-    List.map
-      clss.c_tparams
-      ~f:(Build_json.build_type_param_json ctx source_text)
+  let typeParams =
+    List.map clss.c_tparams ~f:(Build_json.build_type_param ctx source_text)
   in
-  let (mf, prog) = module_field clss.c_module clss.c_internal prog in
-  let common_fields =
-    mf
-    @ [
-        ("declaration", Build_json.build_id_json decl_id);
-        ("members", JSON_Array member_decls);
-        ( "attributes",
-          Build_json.build_attributes_json_nested
-            source_text
-            clss.c_user_attributes );
-        ("typeParams", JSON_Array tparams);
-      ]
+  let (module_, prog) = module_field clss.c_module clss.c_internal prog in
+  let attributes =
+    Build_json.build_attributes source_text clss.c_user_attributes
   in
   let (req_extends_hints, req_implements_hints, req_class_hints) =
     Aast.partition_map_require_kind ~f:(fun x -> x) clss.c_reqs
   in
-  let (req_extends, prog) =
-    parent_decls
-      ctx
-      (List.map req_extends_hints ~f:fst)
-      Predicate.(Hack ClassDeclaration)
-      prog
+  let (requireExtends, prog) =
+    parent_decls_class ctx (List.map req_extends_hints ~f:fst) prog
   in
-  let (req_implements, prog) =
-    parent_decls
-      ctx
-      (List.map req_implements_hints ~f:fst)
-      Predicate.(Hack InterfaceDeclaration)
-      prog
+  let (requireImplements, prog) =
+    parent_decls_interface ctx (List.map req_implements_hints ~f:fst) prog
   in
-  let (req_class, prog) =
-    parent_decls
-      ctx
-      (List.map req_class_hints ~f:fst)
-      Predicate.(Hack ClassDeclaration)
-      prog
+  let (requireClass, prog) =
+    parent_decls_class ctx (List.map req_class_hints ~f:fst) prog
   in
-  let (defn_pred, json_fields, prog) =
-    match Predicate.get_parent_kind clss.c_kind with
-    | Predicate.InterfaceContainer ->
-      let (extends, prog) =
-        parent_decls
-          ctx
-          clss.c_extends
-          Predicate.(Hack InterfaceDeclaration)
-          prog
-      in
-      let req_fields =
-        common_fields
-        @ [
-            ("extends_", JSON_Array extends);
-            ("requireExtends", JSON_Array req_extends);
-          ]
-      in
-      (Predicate.(Hack InterfaceDefinition), req_fields, prog)
-    | Predicate.TraitContainer ->
-      let (impls, prog) =
-        parent_decls
-          ctx
-          clss.c_implements
-          Predicate.(Hack InterfaceDeclaration)
-          prog
-      in
-      let (uses, prog) =
-        parent_decls ctx clss.c_uses Predicate.(Hack TraitDeclaration) prog
-      in
-      let req_fields =
-        common_fields
-        @ [
-            ("implements_", JSON_Array impls);
-            ("uses", JSON_Array uses);
-            ("requireExtends", JSON_Array req_extends);
-            ("requireImplements", JSON_Array req_implements);
-            ("requireClass", JSON_Array req_class);
-          ]
-      in
-      (Predicate.(Hack TraitDefinition), req_fields, prog)
-    | Predicate.ClassContainer ->
-      let is_abstract = Ast_defs.is_classish_abstract clss.c_kind in
-      let (class_fields, prog) =
-        let (impls, prog) =
-          parent_decls
-            ctx
-            clss.c_implements
-            Predicate.(Hack InterfaceDeclaration)
-            prog
-        in
-        let (uses, prog) =
-          parent_decls ctx clss.c_uses Predicate.(Hack TraitDeclaration) prog
-        in
-        let req_class_fields =
-          common_fields
-          @ Hh_json.
-              [
-                ("isAbstract", JSON_Bool is_abstract);
-                ("isFinal", JSON_Bool clss.c_final);
-                ("implements_", JSON_Array impls);
-                ("uses", JSON_Array uses);
-              ]
-        in
-        match clss.c_extends with
-        | [] -> (req_class_fields, prog)
-        | [parent] ->
-          let (decl_id, prog) =
-            let parent_clss =
-              Util.strip_tparams (Util.get_type_from_hint ctx parent)
-            in
-            container_decl Predicate.(Hack ClassDeclaration) parent_clss prog
+  match Predicate.get_parent_kind clss.c_kind with
+  | Predicate.InterfaceContainer ->
+    let (extends_, prog) = parent_decls_interface ctx clss.c_extends prog in
+    let json =
+      InterfaceDefinition.(
+        {
+          declaration = InterfaceDeclaration.Id decl_id;
+          typeParams;
+          members;
+          attributes;
+          extends_;
+          requireExtends;
+          module_;
+        }
+        |> to_json_key)
+    in
+    Fact_acc.add_fact Predicate.(Hack InterfaceDefinition) json prog
+  | Predicate.TraitContainer ->
+    let (implements_, prog) =
+      parent_decls_interface ctx clss.c_implements prog
+    in
+    let (uses, prog) = parent_decls_trait ctx clss.c_uses prog in
+    let json =
+      TraitDefinition.(
+        {
+          declaration = TraitDeclaration.Id decl_id;
+          members;
+          implements_;
+          uses;
+          attributes;
+          typeParams;
+          requireExtends;
+          requireImplements;
+          requireClass = Some requireClass;
+          module_;
+        }
+        |> to_json_key)
+    in
+    Fact_acc.add_fact Predicate.(Hack TraitDefinition) json prog
+  | Predicate.ClassContainer ->
+    let (implements_, prog) =
+      parent_decls_interface ctx clss.c_implements prog
+    in
+    let (uses, prog) = parent_decls_trait ctx clss.c_uses prog in
+    let (extends_, prog) =
+      match clss.c_extends with
+      | [] -> (None, prog)
+      | [parent] ->
+        let (decl_id, prog) =
+          let parent_clss =
+            Util.strip_tparams (Util.get_type_from_hint ctx parent)
           in
-          ( ("extends_", Build_json.build_id_json decl_id) :: req_class_fields,
-            prog )
-        | _ ->
-          Hh_logger.log
-            "WARNING: skipping extends field for class with multiple parents %s"
-            (snd clss.c_name);
-          (req_class_fields, prog)
-      in
-      (Predicate.(Hack ClassDefinition), class_fields, prog)
-  in
-  Fact_acc.add_fact defn_pred (JSON_Object json_fields) prog
+          let qname = QName.(Key (of_string parent_clss)) in
+          let json = ClassDeclaration.(to_json_key { name = qname }) in
+          Fact_acc.add_fact Predicate.(Hack ClassDeclaration) json prog
+        in
+        (Some (ClassDeclaration.Id decl_id), prog)
+      | _ ->
+        Hh_logger.log
+          "WARNING: skipping extends field for class with multiple parents %s"
+          (snd clss.c_name);
+        (None, prog)
+    in
+    let json =
+      ClassDefinition.(
+        {
+          declaration = ClassDeclaration.Id decl_id;
+          isAbstract = Ast_defs.is_classish_abstract clss.c_kind;
+          isFinal = clss.c_final;
+          members;
+          extends_;
+          implements_;
+          uses;
+          attributes;
+          typeParams;
+          module_;
+        }
+        |> to_json_key)
+    in
+    Fact_acc.add_fact Predicate.(Hack ClassDefinition) json prog
 
 let property_decl con_type decl_id name progress =
   let json =
-    JSON_Object
-      [
-        ("name", Build_json.build_name_json_nested name);
-        ("container", Build_json.build_container_json_ref con_type decl_id);
-      ]
+    PropertyDeclaration.(
+      {
+        name = Name.Key name;
+        container = Predicate.container_decl con_type decl_id;
+      }
+      |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack PropertyDeclaration) json progress
 
 let class_const_decl con_type decl_id name progress =
   let json =
-    JSON_Object
-      [
-        ("name", Build_json.build_name_json_nested name);
-        ("container", Build_json.build_container_json_ref con_type decl_id);
-      ]
+    ClassConstDeclaration.(
+      {
+        name = Name.Key name;
+        container = Predicate.container_decl con_type decl_id;
+      }
+      |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack ClassConstDeclaration) json progress
 
 let type_const_decl con_type decl_id name progress =
   let json =
-    JSON_Object
-      [
-        ("name", Build_json.build_name_json_nested name);
-        ("container", Build_json.build_container_json_ref con_type decl_id);
-      ]
+    TypeConstDeclaration.(
+      {
+        name = Name.Key name;
+        container = Predicate.container_decl con_type decl_id;
+      }
+      |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack TypeConstDeclaration) json progress
 
 let method_decl con_type decl_id name progress =
   let json =
-    JSON_Object
-      [
-        ("name", Build_json.build_name_json_nested name);
-        ("container", Build_json.build_container_json_ref con_type decl_id);
-      ]
+    MethodDeclaration.(
+      {
+        name = Name.Key name;
+        container = Predicate.container_decl con_type decl_id;
+      }
+      |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack MethodDeclaration) json progress
 
 let type_info ~ty sym_pos progress =
   let json =
-    JSON_Object
-      [
-        ("displayType", Build_json.build_type_json_nested ty);
-        ("xrefs", Build_json.build_hint_xrefs_json sym_pos);
-      ]
+    TypeInfo.(
+      Key.
+        {
+          displayType = Type.Key ty;
+          xrefs = Build_json.build_hint_xrefs sym_pos;
+        }
+      |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack TypeInfo) json progress
 
-let aggregate_pos (json_pos_list : (json * Util.pos) list) :
-    (json * Util.pos list) list =
+let aggregate_pos (json_pos_list : (XRefTarget.t * Util.pos) list) :
+    (XRefTarget.t * Util.pos list) list =
   let jmap =
-    List.fold json_pos_list ~init:JMap.empty ~f:(fun acc (json, pos) ->
+    List.fold json_pos_list ~init:Map.Poly.empty ~f:(fun acc (json, pos) ->
         let f = function
-          | None -> Some [pos]
-          | Some prev -> Some (pos :: prev)
+          | None -> [pos]
+          | Some prev -> pos :: prev
         in
-        JMap.update json f acc)
+        Map.Poly.update acc json ~f)
   in
-  JMap.to_seq jmap |> Caml.List.of_seq
+  Map.Poly.to_alist jmap
 
 let build_signature ctx pos_map_opt source_text params ctxs ret progress =
   let pos_map =
@@ -296,24 +313,14 @@ let build_signature ctx pos_map_opt source_text params ctxs ret progress =
   let params = List.rev params in
   let (ret_ty, return_info, progress) = hint_to_str_opt ret progress in
   let signature =
-    Build_json.build_signature_json
-      ctx
-      source_text
-      params
-      ctxs
-      ~ret_ty
-      ~return_info
+    Build_json.build_signature ctx source_text params ctxs ~ret_ty ~return_info
   in
   (signature, progress)
 
-let readonly_assoc key = function
-  | None -> []
-  | Some elem -> [(key, Build_json.build_readonly_kind_json elem)]
-
 let method_defn ctx source_text meth decl_id progress =
   let m_tparams = Util.remove_generated_tparams meth.m_tparams in
-  let tparams =
-    List.map m_tparams ~f:(Build_json.build_type_param_json ctx source_text)
+  let typeParams =
+    List.map m_tparams ~f:(Build_json.build_type_param ctx source_text)
   in
   let (signature, progress) =
     build_signature
@@ -325,192 +332,169 @@ let method_defn ctx source_text meth decl_id progress =
       meth.m_ret
       progress
   in
-  let readonly_ret = readonly_assoc "readonlyRet" meth.m_readonly_ret in
-  let is_readonly_this =
+  let readonlyRet =
+    Option.map meth.m_readonly_ret ~f:(fun _ -> ReadonlyKind.ReadOnly)
+  in
+  let isReadonlyThis =
     if meth.m_readonly_this then
-      [("isReadonlyThis", JSON_Bool meth.m_readonly_this)]
+      Some meth.m_readonly_this
     else
-      []
+      None
   in
   let json =
-    JSON_Object
-      (List.concat
-         [
-           [
-             ("declaration", Build_json.build_id_json decl_id);
-             ("signature", signature);
-             ("visibility", Build_json.build_visibility_json meth.m_visibility);
-             ("isAbstract", JSON_Bool meth.m_abstract);
-             ("isAsync", Build_json.build_is_async_json meth.m_fun_kind);
-             ("isFinal", JSON_Bool meth.m_final);
-             ("isStatic", JSON_Bool meth.m_static);
-             ( "attributes",
-               Build_json.build_attributes_json_nested
-                 source_text
-                 meth.m_user_attributes );
-             ("typeParams", JSON_Array tparams);
-           ];
-           readonly_ret;
-           is_readonly_this;
-         ])
+    MethodDefinition.(
+      {
+        declaration = MethodDeclaration.Id decl_id;
+        signature;
+        visibility = Visibility.(of_visibility meth.m_visibility);
+        isAbstract = meth.m_abstract;
+        isAsync = is_async meth.m_fun_kind;
+        isFinal = meth.m_final;
+        isStatic = meth.m_static;
+        attributes =
+          Build_json.build_attributes source_text meth.m_user_attributes;
+        typeParams;
+        readonlyRet;
+        isReadonlyThis;
+      }
+      |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack MethodDefinition) json progress
 
 let method_overrides
     meth_name base_cont_name base_cont_type der_cont_name der_cont_type prog =
   let json =
-    JSON_Object
-      [
-        ( "derived",
-          Build_json.build_method_decl_nested
-            meth_name
-            der_cont_name
-            der_cont_type );
-        ( "base",
-          Build_json.build_method_decl_nested
-            meth_name
-            base_cont_name
-            base_cont_type );
-      ]
+    MethodOverrides.(
+      Key.
+        {
+          derived =
+            Build_json.build_method_decl meth_name der_cont_name der_cont_type;
+          base =
+            Build_json.build_method_decl meth_name base_cont_name base_cont_type;
+        }
+      |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack MethodOverrides) json prog
 
 let property_defn ctx source_text prop decl_id progress =
-  let base_fields =
-    [
-      ("declaration", Build_json.build_id_json decl_id);
-      ("visibility", Build_json.build_visibility_json prop.cv_visibility);
-      ("isFinal", JSON_Bool prop.cv_final);
-      ("isAbstract", JSON_Bool prop.cv_abstract);
-      ("isStatic", JSON_Bool prop.cv_is_static);
-      ( "attributes",
-        Build_json.build_attributes_json_nested
-          source_text
-          prop.cv_user_attributes );
-    ]
+  let type_ =
+    Option.map
+      ~f:(fun x -> Type.Key (Util.get_type_from_hint ctx x))
+      (hint_of_type_hint prop.cv_type)
   in
-  let json_fields =
-    match hint_of_type_hint prop.cv_type with
-    | None -> base_fields
-    | Some h ->
-      let ty = Util.get_type_from_hint ctx h in
-      ("type", Build_json.build_type_json_nested ty) :: base_fields
+  let json =
+    PropertyDefinition.(
+      {
+        declaration = PropertyDeclaration.Id decl_id;
+        type_ : Type.t option;
+        visibility = Visibility.(of_visibility prop.cv_visibility);
+        isFinal = prop.cv_final;
+        isAbstract = prop.cv_abstract;
+        isStatic = prop.cv_is_static;
+        attributes =
+          Build_json.build_attributes source_text prop.cv_user_attributes;
+      }
+      |> to_json_key)
   in
-  Fact_acc.add_fact
-    Predicate.(Hack PropertyDefinition)
-    (JSON_Object json_fields)
-    progress
+  Fact_acc.add_fact Predicate.(Hack PropertyDefinition) json progress
 
 let class_const_defn ctx source_text const decl_id progress =
-  let base_fields = [("declaration", Build_json.build_id_json decl_id)] in
-  let json_fields =
+  let value =
     match const.cc_kind with
-    | CCAbstract None -> base_fields
+    | CCAbstract None -> None
     | CCAbstract (Some expr)
     | CCConcrete expr ->
-      let value = Util.ast_expr_to_json source_text expr in
-      ("value", value) :: base_fields
+      Some (Util.ast_expr_to_string_stripped source_text expr)
   in
-  let json_fields =
-    match const.cc_type with
-    | None -> json_fields
-    | Some h ->
-      let ty = Util.get_type_from_hint ctx h in
-      ("type", Build_json.build_type_json_nested ty) :: json_fields
+  let type_ =
+    Option.map
+      ~f:(fun x -> Type.Key (Util.get_type_from_hint ctx x))
+      const.cc_type
   in
-  Fact_acc.add_fact
-    Predicate.(Hack ClassConstDefinition)
-    (JSON_Object json_fields)
-    progress
+  let json =
+    ClassConstDefinition.(
+      { declaration = ClassConstDeclaration.Id decl_id; type_; value }
+      |> to_json_key)
+  in
+  Fact_acc.add_fact Predicate.(Hack ClassConstDefinition) json progress
 
 let type_const_defn ctx source_text tc decl_id progress =
-  let base_fields =
-    [
-      ("declaration", Build_json.build_id_json decl_id);
-      ("kind", Build_json.build_type_const_kind_json tc.c_tconst_kind);
-      ( "attributes",
-        Build_json.build_attributes_json_nested
-          source_text
-          tc.c_tconst_user_attributes );
-    ]
-  in
-  let json_fields =
-    (* TODO(T88552052) should the default of an abstract type constant be used
+  (* TODO(T88552052) should the default of an abstract type constant be used
      * as a value here *)
+  let type_ =
     match tc.c_tconst_kind with
     | TCConcrete { c_tc_type = h }
     | TCAbstract { c_atc_default = Some h; _ } ->
-      let ty = Util.get_type_from_hint ctx h in
-      ("type", Build_json.build_type_json_nested ty) :: base_fields
-    | TCAbstract { c_atc_default = None; _ } -> base_fields
+      Some (Type.Key (Util.get_type_from_hint ctx h))
+    | TCAbstract { c_atc_default = None; _ } -> None
   in
-  Fact_acc.add_fact
-    Predicate.(Hack TypeConstDefinition)
-    (JSON_Object json_fields)
-    progress
+  let json =
+    TypeConstDefinition.(
+      {
+        declaration = TypeConstDeclaration.Id decl_id;
+        kind = TypeConstKind.(of_ast_const_kind tc.c_tconst_kind);
+        type_;
+        attributes =
+          Build_json.build_attributes source_text tc.c_tconst_user_attributes;
+      }
+      |> to_json_key)
+  in
+  Fact_acc.add_fact Predicate.(Hack TypeConstDefinition) json progress
 
 let enum_decl name progress =
-  let json = JSON_Object [("name", Build_json.build_qname_json_nested name)] in
+  let json =
+    EnumDeclaration.({ name = QName.(Key (of_string name)) } |> to_json_key)
+  in
   Fact_acc.add_fact Predicate.(Hack EnumDeclaration) json progress
 
 let enum_defn ctx source_text enm enum_id enum_data enumerators progress =
+  let enumerators = List.map enumerators ~f:(fun x -> Enumerator.Id x) in
   let prog = namespace_decl_opt enm.c_namespace progress in
-  let (includes, prog) =
-    parent_decls ctx enum_data.e_includes Predicate.(Hack EnumDeclaration) prog
+  let (includes, prog) = parent_decls_enum ctx enum_data.e_includes prog in
+  let (module_, prog) = module_field enm.c_module enm.c_internal prog in
+  let enumConstraint =
+    Option.map enum_data.e_constraint ~f:(fun x ->
+        Type.Key (Util.get_type_from_hint ctx x))
   in
-  let is_enum_class = Aast.is_enum_class enm in
-  let (mf, prog) = module_field enm.c_module enm.c_internal prog in
-  let json_fields =
-    mf
-    @ [
-        ("declaration", Build_json.build_id_json enum_id);
-        ( "enumBase",
-          Build_json.build_type_json_nested
-            (Util.get_type_from_hint ctx enum_data.e_base) );
-        ("enumerators", JSON_Array enumerators);
-        ( "attributes",
-          Build_json.build_attributes_json_nested
-            source_text
-            enm.c_user_attributes );
-        ("includes", JSON_Array includes);
-        ("isEnumClass", JSON_Bool is_enum_class);
-      ]
+  let json =
+    EnumDefinition.(
+      {
+        declaration = EnumDeclaration.Id enum_id;
+        enumBase = Type.Key (Util.get_type_from_hint ctx enum_data.e_base);
+        enumerators;
+        attributes =
+          Build_json.build_attributes source_text enm.c_user_attributes;
+        includes;
+        isEnumClass = Aast.is_enum_class enm;
+        module_;
+        enumConstraint;
+      }
+      |> to_json_key)
   in
-  let json_fields =
-    match enum_data.e_constraint with
-    | None -> json_fields
-    | Some c ->
-      ( "enumConstraint",
-        Build_json.build_type_json_nested (Util.get_type_from_hint ctx c) )
-      :: json_fields
-  in
-  Fact_acc.add_fact
-    Predicate.(Hack EnumDefinition)
-    (JSON_Object json_fields)
-    prog
+  Fact_acc.add_fact Predicate.(Hack EnumDefinition) json prog
 
 let enumerator decl_id const_name progress =
   let json =
-    JSON_Object
-      [
-        ("name", Build_json.build_name_json_nested const_name);
-        ("enumeration", Build_json.build_id_json decl_id);
-      ]
+    Enumerator.(
+      { name = Name.Key const_name; enumeration = EnumDeclaration.Id decl_id }
+      |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack Enumerator) json progress
 
 let func_decl name progress =
-  let json = JSON_Object [("name", Build_json.build_qname_json_nested name)] in
+  let json =
+    FunctionDeclaration.({ name = QName.(Key (of_string name)) } |> to_json_key)
+  in
   Fact_acc.add_fact Predicate.(Hack FunctionDeclaration) json progress
 
 let func_defn ctx source_text fd decl_id progress =
   let elem = fd.fd_fun in
   let prog = namespace_decl_opt fd.fd_namespace progress in
   let fd_tparams = Util.remove_generated_tparams fd.fd_tparams in
-  let tparams =
-    List.map fd_tparams ~f:(Build_json.build_type_param_json ctx source_text)
+  let typeParams =
+    List.map fd_tparams ~f:(Build_json.build_type_param ctx source_text)
   in
-  let (mf, prog) = module_field fd.fd_module fd.fd_internal prog in
+  let (module_, prog) = module_field fd.fd_module fd.fd_internal prog in
   let (signature, prog) =
     build_signature
       ctx
@@ -521,52 +505,46 @@ let func_defn ctx source_text fd decl_id progress =
       elem.f_ret
       prog
   in
-  let readonly_ret = readonly_assoc "readonlyRet" elem.f_readonly_ret in
-  let json_fields =
-    List.concat
-      [
-        mf;
-        [
-          ("declaration", Build_json.build_id_json decl_id);
-          ("signature", signature);
-          ("isAsync", Build_json.build_is_async_json elem.f_fun_kind);
-          ( "attributes",
-            Build_json.build_attributes_json_nested
-              source_text
-              elem.f_user_attributes );
-          ("typeParams", JSON_Array tparams);
-        ];
-        readonly_ret;
-      ]
+  let readonlyRet =
+    Option.map elem.f_readonly_ret ~f:(fun _ -> ReadonlyKind.ReadOnly)
   in
-
-  Fact_acc.add_fact
-    Predicate.(Hack FunctionDefinition)
-    (JSON_Object json_fields)
-    prog
+  let json =
+    FunctionDefinition.(
+      {
+        declaration = FunctionDeclaration.Id decl_id;
+        signature;
+        isAsync = is_async elem.f_fun_kind;
+        attributes =
+          Build_json.build_attributes source_text elem.f_user_attributes;
+        typeParams;
+        readonlyRet;
+        module_;
+      }
+      |> to_json_key)
+  in
+  Fact_acc.add_fact Predicate.(Hack FunctionDefinition) json prog
 
 let module_defn _ctx source_text elem decl_id progress =
-  let json_fields =
-    [
-      ("declaration", Build_json.build_id_json decl_id);
-      ( "attributes",
-        Build_json.build_attributes_json_nested
-          source_text
-          elem.md_user_attributes );
-    ]
+  let json =
+    ModuleDefinition.(
+      {
+        declaration = ModuleDeclaration.Id decl_id;
+        attributes =
+          Build_json.build_attributes source_text elem.md_user_attributes;
+      }
+      |> to_json_key)
   in
-  Fact_acc.add_fact
-    Predicate.(Hack ModuleDefinition)
-    (JSON_Object json_fields)
-    progress
+  Fact_acc.add_fact Predicate.(Hack ModuleDefinition) json progress
 
 let typedef_decl name progress =
-  let json = JSON_Object [("name", Build_json.build_qname_json_nested name)] in
+  let json =
+    TypedefDeclaration.({ name = QName.(Key (of_string name)) } |> to_json_key)
+  in
   Fact_acc.add_fact Predicate.(Hack TypedefDeclaration) json progress
 
 let typedef_defn ctx source_text elem decl_id progress =
   let prog = namespace_decl_opt elem.t_namespace progress in
-  let is_transparent =
+  let isTransparent =
     match elem.t_vis with
     | Transparent -> true
     | CaseType
@@ -574,195 +552,167 @@ let typedef_defn ctx source_text elem decl_id progress =
     | OpaqueModule ->
       false
   in
-  let tparams =
-    List.map
-      elem.t_tparams
-      ~f:(Build_json.build_type_param_json ctx source_text)
+  let typeParams =
+    List.map elem.t_tparams ~f:(Build_json.build_type_param ctx source_text)
   in
-  let (mf, prog) = module_field elem.t_module elem.t_internal prog in
-  let json_fields =
-    mf
-    @ [
-        ("declaration", Build_json.build_id_json decl_id);
-        ("isTransparent", JSON_Bool is_transparent);
-        ( "attributes",
-          Build_json.build_attributes_json_nested
-            source_text
-            elem.t_user_attributes );
-        ("typeParams", JSON_Array tparams);
-      ]
+  let (module_, prog) = module_field elem.t_module elem.t_internal prog in
+  let json =
+    TypedefDefinition.(
+      {
+        declaration = TypedefDeclaration.Id decl_id;
+        isTransparent;
+        attributes =
+          Build_json.build_attributes source_text elem.t_user_attributes;
+        typeParams;
+        module_;
+      }
+      |> to_json_key)
   in
-  Fact_acc.add_fact
-    Predicate.(Hack TypedefDefinition)
-    (JSON_Object json_fields)
-    prog
+  Fact_acc.add_fact Predicate.(Hack TypedefDefinition) json prog
 
 let gconst_decl name progress =
-  let json = JSON_Object [("name", Build_json.build_qname_json_nested name)] in
+  let json =
+    GlobalConstDeclaration.(
+      { name = QName.(Key (of_string name)) } |> to_json_key)
+  in
   Fact_acc.add_fact Predicate.(Hack GlobalConstDeclaration) json progress
 
 let gconst_defn ctx source_text elem decl_id progress =
   let prog = namespace_decl_opt elem.cst_namespace progress in
-  let value = Util.ast_expr_to_json source_text elem.cst_value in
-  let req_fields =
-    [("declaration", Build_json.build_id_json decl_id); ("value", value)]
+  let value = Util.ast_expr_to_string_stripped source_text elem.cst_value in
+  let type_ =
+    Option.map elem.cst_type ~f:(fun x ->
+        Type.Key (Util.get_type_from_hint ctx x))
   in
-  let json_fields =
-    match elem.cst_type with
-    | None -> req_fields
-    | Some h ->
-      let ty = Util.get_type_from_hint ctx h in
-      ("type", Build_json.build_type_json_nested ty) :: req_fields
+  let json =
+    GlobalConstDefinition.(
+      { declaration = GlobalConstDeclaration.Id decl_id; type_; value }
+      |> to_json_key)
   in
-  let json = JSON_Object json_fields in
   Fact_acc.add_fact Predicate.(Hack GlobalConstDefinition) json prog
 
-let decl_loc ~path pos decl_json progress =
+let decl_loc ~path pos declaration progress =
   let json =
-    JSON_Object
-      [
-        ("declaration", decl_json);
-        ("file", Build_json.build_file_json_nested path);
-        ("span", Build_json.build_bytespan_json pos);
-      ]
+    DeclarationLocation.(
+      { declaration; file = File.(Key path); span = ByteSpan.(of_pos pos) }
+      |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack DeclarationLocation) json progress
 
-let decl_comment ~path pos decl_json progress =
+let decl_comment ~path pos declaration progress =
   let json =
-    JSON_Object
-      [
-        ("declaration", decl_json);
-        ("file", Build_json.build_file_json_nested path);
-        ("span", Build_json.build_bytespan_json pos);
-      ]
+    DeclarationComment.(
+      { declaration; file = File.Key path; span = ByteSpan.of_pos pos }
+      |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack DeclarationComment) json progress
 
-let decl_span ~path pos decl_json progress =
+let decl_span ~path pos declaration progress =
   let json =
-    JSON_Object
-      [
-        ("declaration", decl_json);
-        ("file", Build_json.build_file_json_nested path);
-        ("span", Build_json.build_bytespan_json pos);
-      ]
+    DeclarationSpan.(
+      { declaration; file = File.Key path; span = ByteSpan.of_pos pos }
+      |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack DeclarationSpan) json progress
 
 let file_lines ~path sourceText progress =
-  let lineLengths =
+  let lengths =
     Line_break_map.offsets_to_line_lengths
       sourceText.Full_fidelity_source_text.offset_map
   in
   let endsInNewline = Util.ends_in_newline sourceText in
   let hasUnicodeOrTabs = Util.has_tabs_or_multibyte_codepoints sourceText in
   let json =
-    Build_json.build_file_lines_json
-      path
-      lineLengths
-      endsInNewline
-      hasUnicodeOrTabs
+    FileLines.(
+      to_json_key
+        { file = File.Key path; lengths; endsInNewline; hasUnicodeOrTabs })
   in
   Fact_acc.add_fact Predicate.(Src FileLines) json progress
 
-let gen_code ~path ~fully_generated ~signature ~source ~command ~class_ progress
-    =
-  let json =
-    Build_json.build_gen_code_json
-      ~path
-      ~fully_generated
-      ~signature
-      ~source
-      ~command
-      ~class_
-  in
-  Fact_acc.add_fact Predicate.(Gencode GenCode) json progress
-
 let file_xrefs ~path fact_map progress =
   let json =
-    JSON_Object
-      [
-        ("file", Build_json.build_file_json_nested path);
-        ("xrefs", Build_json.build_xrefs_json fact_map);
-      ]
+    FileXRefs.(
+      Key.{ file = File.Key path; xrefs = Build_json.build_xrefs fact_map }
+      |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack FileXRefs) json progress
 
-let file_decls ~path decls progress =
+let file_decls ~path declarations progress =
   let json =
-    JSON_Object
-      [
-        ("file", Build_json.build_file_json_nested path);
-        ("declarations", JSON_Array decls);
-      ]
+    FileDeclarations.(Key.{ file = File.Key path; declarations } |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack FileDeclarations) json progress
 
 let method_occ receiver_class name progress =
-  let module SO = SymbolOccurrence in
   let json =
-    List.concat
-    @@ [
-         [("name", Build_json.build_name_json_nested name)];
-         (match receiver_class with
-         | SO.ClassName className ->
-           [("className", Build_json.build_name_json_nested className)]
-         | SO.UnknownClass -> []);
-       ]
+    MethodOccurrence.(
+      {
+        name = Name.Key name;
+        className =
+          (match receiver_class with
+          | SymbolOccurrence.UnknownClass -> None
+          | SymbolOccurrence.ClassName className -> Some (Name.Key className));
+      }
+      |> to_json_key)
   in
-  Fact_acc.add_fact
-    Predicate.(Hack MethodOccurrence)
-    (JSON_Object json)
-    progress
+  Fact_acc.add_fact Predicate.(Hack MethodOccurrence) json progress
 
 let file_call ~path pos ~callee_infos ~call_args ~dispatch_arg progress =
   let callee_xrefs = List.map callee_infos ~f:(fun ti -> ti.XRefs.target) in
-  let receiver_type =
-    match List.find_map callee_infos ~f:(fun ti -> ti.XRefs.receiver_type) with
-    | None -> []
-    | Some receiver_type -> [("receiver_type", receiver_type)]
-  in
-  let dispatch_arg =
-    match dispatch_arg with
-    | None -> receiver_type
-    | Some dispatch_arg -> ("dispatch_arg", dispatch_arg) :: receiver_type
-  in
-  (* pick an abitrary target, but resolved if possible. "declaration"
-     before "occurrence" *)
   let callee_xref =
-    match List.sort ~compare:Hh_json.JsonKey.compare callee_xrefs with
-    | [] -> []
-    | hd :: _ -> [("callee_xref", hd)]
+    match List.sort ~compare:XRefTarget.compare callee_xrefs with
+    | [] -> None
+    | hd :: _ -> Some hd
+  in
+  let receiver_type =
+    List.find_map callee_infos ~f:(fun ti -> ti.XRefs.receiver_type)
   in
   let json =
-    JSON_Object
-      (callee_xref
-      @ dispatch_arg
-      @ [
-          ("file", Build_json.build_file_json_nested path);
-          ("callee_span", Build_json.build_bytespan_json pos);
-          ("call_args", JSON_Array call_args);
-          ("callee_xrefs", JSON_Array callee_xrefs);
-        ])
+    FileCall.(
+      {
+        file = File.Key path;
+        callee_span = ByteSpan.(of_pos pos);
+        callee_xref;
+        dispatch_arg;
+        receiver_type;
+        call_args;
+        callee_xrefs;
+      }
+      |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack FileCall) json progress
 
 let global_namespace_alias ~from ~to_ progress =
   let json =
-    JSON_Object
-      [
-        ("from", Build_json.build_name_json_nested from);
-        ("to", Build_json.build_namespaceqname_json_nested to_);
-      ]
+    GlobalNamespaceAlias.(
+      { from = Name.(Key from); to_ = NamespaceQName.(Key (of_string to_)) }
+      |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack GlobalNamespaceAlias) json progress
 
 let indexerInputsHash key hashes progress =
+  let key = IndexerInputHash.(key |> to_json_key) in
   let value =
-    JSON_String
-      (List.map hashes ~f:(fun x -> Md5.to_binary x |> Base64.encode_string)
-      |> String.concat)
+    IndexerInputHash.(List.map hashes ~f:Md5.to_binary |> to_json_value)
   in
-  let key = JSON_String key in
   Fact_acc.add_fact Predicate.(Hack IndexerInputsHash) key ~value progress
+
+let gen_code ~path ~fully_generated ~signature ~source ~command ~class_ progress
+    =
+  let json =
+    GenCode.(
+      {
+        file = File.Key path;
+        variant =
+          (if fully_generated then
+            GenCodeVariant.Full
+          else
+            GenCodeVariant.Partial);
+        source = Option.map ~f:(fun x -> File.Key x) source;
+        signature = Option.map ~f:(fun x -> GenCodeSignature.Key x) signature;
+        command = Option.map ~f:(fun x -> GenCodeCommand.Key x) command;
+        class_ = Option.map ~f:(fun x -> GenCodeClass.Key x) class_;
+      }
+      |> to_json_key)
+  in
+  Fact_acc.add_fact Predicate.(Gencode GenCode) json progress

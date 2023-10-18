@@ -12,6 +12,7 @@
  *)
 
 open Hh_prelude
+open Symbol_glean_schema.Hack
 module Fact_id = Symbol_fact_id
 module Predicate = Symbol_predicate
 module Fact_acc = Symbol_predicate.Fact_acc
@@ -23,18 +24,11 @@ val namespace_decl : string -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 val container_decl :
   Symbol_predicate.t -> string -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
-val parent_decls :
-  Provider_context.t ->
-  Aast.hint list ->
-  Symbol_predicate.t ->
-  Fact_acc.t ->
-  Hh_json.json list * Fact_acc.t
-
 val member_cluster :
-  members:Hh_json.json list -> Fact_acc.t -> Fact_id.t * Fact_acc.t
+  members:Declaration.t list -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
 val inherited_members :
-  container_type:string ->
+  container_type:Predicate.parent_container_type ->
   container_id:Fact_id.t ->
   member_clusters:Fact_id.t list ->
   Fact_acc.t ->
@@ -45,21 +39,37 @@ val container_defn :
   Full_fidelity_source_text.t ->
   ('a, 'b) Aast.class_ ->
   Fact_id.t ->
-  Hh_json.json list ->
+  Declaration.t list ->
   Fact_acc.t ->
   Fact_id.t * Fact_acc.t
 
 val property_decl :
-  string -> Fact_id.t -> string -> Fact_acc.t -> Fact_id.t * Fact_acc.t
+  Predicate.parent_container_type ->
+  Fact_id.t ->
+  string ->
+  Fact_acc.t ->
+  Fact_id.t * Fact_acc.t
 
 val class_const_decl :
-  string -> Fact_id.t -> string -> Fact_acc.t -> Fact_id.t * Fact_acc.t
+  Predicate.parent_container_type ->
+  Fact_id.t ->
+  string ->
+  Fact_acc.t ->
+  Fact_id.t * Fact_acc.t
 
 val type_const_decl :
-  string -> Fact_id.t -> string -> Fact_acc.t -> Fact_id.t * Fact_acc.t
+  Predicate.parent_container_type ->
+  Fact_id.t ->
+  string ->
+  Fact_acc.t ->
+  Fact_id.t * Fact_acc.t
 
 val method_decl :
-  string -> Fact_id.t -> string -> Fact_acc.t -> Fact_id.t * Fact_acc.t
+  Predicate.parent_container_type ->
+  Fact_id.t ->
+  string ->
+  Fact_acc.t ->
+  Fact_id.t * Fact_acc.t
 
 val method_defn :
   Provider_context.t ->
@@ -72,9 +82,9 @@ val method_defn :
 val method_overrides :
   string ->
   string ->
+  Predicate.parent_container_type ->
   string ->
-  string ->
-  string ->
+  Predicate.parent_container_type ->
   Fact_acc.t ->
   Fact_id.t * Fact_acc.t
 
@@ -110,7 +120,7 @@ val enum_defn :
   ('a, 'b) Aast.class_ ->
   Fact_id.t ->
   Aast.enum_ ->
-  Hh_json.json list ->
+  Fact_id.t list ->
   Fact_acc.t ->
   Fact_id.t * Fact_acc.t
 
@@ -157,13 +167,13 @@ val gconst_defn :
   Fact_id.t * Fact_acc.t
 
 val decl_loc :
-  path:string -> Pos.t -> Hh_json.json -> Fact_acc.t -> Fact_id.t * Fact_acc.t
+  path:string -> Pos.t -> Declaration.t -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
 val decl_comment :
-  path:string -> Pos.t -> Hh_json.json -> Fact_acc.t -> Fact_id.t * Fact_acc.t
+  path:string -> Pos.t -> Declaration.t -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
 val decl_span :
-  path:string -> Pos.t -> Hh_json.json -> Fact_acc.t -> Fact_id.t * Fact_acc.t
+  path:string -> Pos.t -> Declaration.t -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
 val file_lines :
   path:string ->
@@ -185,14 +195,14 @@ val file_xrefs :
   path:string -> XRefs.fact_map -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
 val file_decls :
-  path:string -> Hh_json.json list -> Fact_acc.t -> Fact_id.t * Fact_acc.t
+  path:string -> Declaration.t list -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
 val file_call :
   path:string ->
   Pos.t ->
   callee_infos:XRefs.target_info list ->
-  call_args:Hh_json.json list ->
-  dispatch_arg:Hh_json.json option ->
+  call_args:CallArgument.t list ->
+  dispatch_arg:CallArgument.t option ->
   Fact_acc.t ->
   Fact_id.t * Fact_acc.t
 
@@ -210,6 +220,6 @@ val indexerInputsHash :
 
 val type_info :
   ty:string ->
-  (Hh_json.json * Util.pos list) list ->
+  (XRefTarget.t * Util.pos list) list ->
   Fact_acc.t ->
   Fact_id.t * Fact_acc.t

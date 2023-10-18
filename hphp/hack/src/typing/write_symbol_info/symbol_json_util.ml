@@ -98,8 +98,8 @@ let split_name (s : string) : (string * string) option =
     else
       Some (parent_namespace, name)
 
-let ast_expr_to_json source_text (_, pos, _) =
-  Hh_json.JSON_String (strip_nested_quotes (source_at_span source_text pos))
+let ast_expr_to_string_stripped source_text (_, pos, _) =
+  strip_nested_quotes (source_at_span source_text pos)
 
 let ast_expr_to_string source_text (_, pos, _) = source_at_span source_text pos
 

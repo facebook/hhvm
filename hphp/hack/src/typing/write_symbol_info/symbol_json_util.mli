@@ -48,8 +48,8 @@ val split_name : string -> (string * string) option
    the source file, in lack of a better solution. This assumes that the
     expr comes from the the source text parameter. Should be replaced
     by proper pretty-printing functions. *)
-val ast_expr_to_json :
-  Full_fidelity_source_text.t -> ('a, 'b) Aast.expr -> Hh_json.json
+val ast_expr_to_string_stripped :
+  Full_fidelity_source_text.t -> ('a, 'b) Aast.expr -> string
 
 val ast_expr_to_string :
   Full_fidelity_source_text.t -> ('a, 'b) Aast.expr -> string

@@ -6,6 +6,7 @@
  *
  *)
 
+open Symbol_glean_schema.Hack
 module Fact_id = Symbol_fact_id
 
 module PosMap = WrappedMap.Make (struct
@@ -14,11 +15,11 @@ module PosMap = WrappedMap.Make (struct
   type t = Pos.t
 end)
 
-type fact_map = (Hh_json.json * Pos.t list) Fact_id.Map.t
+type fact_map = (XRefTarget.t * Pos.t list) Fact_id.Map.t
 
 type target_info = {
-  target: Hh_json.json;
-  receiver_type: Hh_json.json option;
+  target: XRefTarget.t;
+  receiver_type: Declaration.t option;
 }
 
 type pos_map = target_info list PosMap.t

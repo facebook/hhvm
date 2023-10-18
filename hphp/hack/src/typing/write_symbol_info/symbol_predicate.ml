@@ -9,6 +9,7 @@
 module Fact_id = Symbol_fact_id
 open Hh_prelude
 open Hh_json
+open Symbol_glean_schema.Hack
 
 (* Predicate types for the JSON facts emitted *)
 type hack =
@@ -173,13 +174,29 @@ type parent_container_type =
   | InterfaceContainer
   | TraitContainer
 
-(* Get the container name and predicate type for a given parent
-   container kind. *)
 let parent_decl_predicate parent_container_type =
   match parent_container_type with
-  | ClassContainer -> ("class_", Hack ClassDeclaration)
-  | InterfaceContainer -> ("interface_", Hack InterfaceDeclaration)
-  | TraitContainer -> ("trait", Hack TraitDeclaration)
+  | ClassContainer -> Hack ClassDeclaration
+  | InterfaceContainer -> Hack InterfaceDeclaration
+  | TraitContainer -> Hack TraitDeclaration
+
+let container_decl container_type id =
+  match container_type with
+  | ClassContainer -> ContainerDeclaration.Class_ (ClassDeclaration.Id id)
+  | InterfaceContainer ->
+    ContainerDeclaration.Interface_ (InterfaceDeclaration.Id id)
+  | TraitContainer -> ContainerDeclaration.Trait (TraitDeclaration.Id id)
+
+let container_decl_qname container_type name =
+  match container_type with
+  | ClassContainer ->
+    ContainerDeclaration.Class_ ClassDeclaration.(Key { name })
+  | InterfaceContainer ->
+    ContainerDeclaration.Interface_ InterfaceDeclaration.(Key { name })
+  | TraitContainer -> ContainerDeclaration.Trait TraitDeclaration.(Key { name })
+
+let container_ref container_type id =
+  Declaration.Container (container_decl container_type id)
 
 let get_parent_kind = function
   | Ast_defs.Cenum_class _ ->

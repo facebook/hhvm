@@ -6,17 +6,18 @@
  *
  *)
 
+open Symbol_glean_schema.Hack
 module Fact_id = Symbol_fact_id
 
 module PosMap : WrappedMap_sig.S with type key = Pos.t
 
 (** maps a target fact id to the json representation of the corresponding fact,
    and the positions of symbol that reference it *)
-type fact_map = (Hh_json.json * Pos.t list) Fact_id.Map.t
+type fact_map = (XRefTarget.t * Pos.t list) Fact_id.Map.t
 
 type target_info = {
-  target: Hh_json.json;
-  receiver_type: Hh_json.json option;
+  target: XRefTarget.t;
+  receiver_type: Declaration.t option;
 }
 
 (** maps a position to various info about the target *)

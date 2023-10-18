@@ -11,6 +11,8 @@ type t = private int
 (* return consecutive fact ids, starting from 1 *)
 val next : unit -> t
 
+val compare : t -> t -> int
+
 val to_json_number : t -> Hh_json.json
 
 module Map : Map.S with type key = t

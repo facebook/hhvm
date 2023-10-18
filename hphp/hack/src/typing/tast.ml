@@ -169,49 +169,83 @@ let map_by_names (x : by_names) ~(f : def -> def) : by_names =
     module_tasts = SMap.map f module_tasts;
   }
 
-let program_by_names program =
-  Hh_prelude.List.fold program ~init:empty_by_names ~f:(fun acc def ->
-      match def with
-      | Fun f ->
-        {
-          acc with
-          fun_tasts =
-            SMap.add
-              (snd f.fd_name)
-              (Tast_with_dynamic.mk_without_dynamic def)
-              acc.fun_tasts;
-        }
-      | Class c ->
-        {
-          acc with
-          class_tasts =
-            SMap.add
-              (snd c.c_name)
-              (Tast_with_dynamic.mk_without_dynamic def)
-              acc.class_tasts;
-        }
-      | Typedef td ->
-        {
-          acc with
-          typedef_tasts = SMap.add (snd td.t_name) def acc.typedef_tasts;
-        }
-      | Constant c ->
-        {
-          acc with
-          gconst_tasts = SMap.add (snd c.cst_name) def acc.gconst_tasts;
-        }
-      | Module m ->
-        {
-          acc with
-          module_tasts = SMap.add (snd m.md_name) def acc.module_tasts;
-        }
-      | Stmt _
-      | Namespace _
-      | NamespaceUse _
-      | SetNamespaceEnv _
-      | FileAttributes _
-      | SetModule _ ->
-        acc)
+let program_by_names (program : program Tast_with_dynamic.t) : by_names =
+  let add
+      ~(under_normal_assumptions : bool)
+      name
+      (def : def)
+      (map : def Tast_with_dynamic.t SMap.t) : def Tast_with_dynamic.t SMap.t =
+    let entry =
+      match SMap.find_opt name map with
+      | None -> Tast_with_dynamic.mk_without_dynamic def
+      | Some entry -> entry
+    in
+    let entry =
+      if under_normal_assumptions then
+        { entry with Tast_with_dynamic.under_normal_assumptions = def }
+      else
+        { entry with Tast_with_dynamic.under_dynamic_assumptions = Some def }
+    in
+    SMap.add name entry map
+  in
+  let program_by_names
+      ~under_normal_assumptions (by_names : by_names) (program : program) :
+      by_names =
+    Hh_prelude.List.fold program ~init:by_names ~f:(fun acc def ->
+        match def with
+        | Fun f ->
+          {
+            acc with
+            fun_tasts =
+              add ~under_normal_assumptions (snd f.fd_name) def acc.fun_tasts;
+          }
+        | Class c ->
+          {
+            acc with
+            class_tasts =
+              add ~under_normal_assumptions (snd c.c_name) def acc.class_tasts;
+          }
+        | Typedef td ->
+          {
+            acc with
+            typedef_tasts = SMap.add (snd td.t_name) def acc.typedef_tasts;
+          }
+        | Constant c ->
+          {
+            acc with
+            gconst_tasts = SMap.add (snd c.cst_name) def acc.gconst_tasts;
+          }
+        | Module m ->
+          {
+            acc with
+            module_tasts = SMap.add (snd m.md_name) def acc.module_tasts;
+          }
+        | Stmt _
+        | Namespace _
+        | NamespaceUse _
+        | SetNamespaceEnv _
+        | FileAttributes _
+        | SetModule _ ->
+          acc)
+  in
+  let { Tast_with_dynamic.under_normal_assumptions; under_dynamic_assumptions }
+      =
+    program
+  in
+  let by_names = empty_by_names in
+  let by_names =
+    program_by_names
+      ~under_normal_assumptions:true
+      by_names
+      under_normal_assumptions
+  in
+  let by_names =
+    Option.fold
+      under_dynamic_assumptions
+      ~init:by_names
+      ~f:(program_by_names ~under_normal_assumptions:false)
+  in
+  by_names
 
 let tasts_as_list
     ({ fun_tasts; class_tasts; typedef_tasts; gconst_tasts; module_tasts } :

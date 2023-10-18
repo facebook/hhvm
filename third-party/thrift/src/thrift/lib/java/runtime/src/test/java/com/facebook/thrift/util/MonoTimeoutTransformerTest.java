@@ -17,7 +17,6 @@
 package com.facebook.thrift.util;
 
 import com.facebook.thrift.util.resources.RpcResources;
-import io.netty.util.concurrent.FastThreadLocalThread;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -153,7 +152,10 @@ public class MonoTimeoutTransformerTest {
             throwable -> {
               Assert.assertTrue(throwable instanceof TimeoutException);
               Thread thread = Thread.currentThread();
-              Assert.assertTrue(thread instanceof FastThreadLocalThread);
+              Assert.assertTrue(
+                  thread instanceof io.netty.util.concurrent.FastThreadLocalThread
+                      || thread
+                          instanceof com.facebook.thrift.util.resources.FastThreadLocalThread);
             });
   }
 

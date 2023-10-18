@@ -585,8 +585,12 @@ let redo_type_decl
   remove_old_defs ctx all_defs all_elems;
 
   Hh_logger.log "Finished recomputing type declarations:";
-  Hh_logger.log "  changed: %d" (DepSet.cardinal fanout.Fanout.changed);
-  Hh_logger.log "  to_recheck: %d" (DepSet.cardinal fanout.Fanout.to_recheck);
+  Hh_logger.log
+    "  changed defs count: %d"
+    (DepSet.cardinal fanout.Fanout.changed);
+  Hh_logger.log
+    "  defs to recheck count: %d"
+    (DepSet.cardinal fanout.Fanout.to_recheck);
 
   { fanout; old_decl_missing_count }
 

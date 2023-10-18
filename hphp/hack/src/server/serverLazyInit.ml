@@ -847,7 +847,7 @@ let calculate_fanout_and_defer_or_do_type_check
       ~dirty_count:(Relative_path.Set.cardinal dirty_files_changed_decls)
       ~recheck_count:(Relative_path.Set.cardinal to_recheck);
     Hh_logger.log
-      "ServerInit type_check_dirty count: %d. recheck count: %d"
+      "ServerInit type_check_dirty count: %d. Files to recheck count: %d"
       (Relative_path.Set.cardinal dirty_files_changed_decls)
       (Relative_path.Set.cardinal to_recheck);
     result

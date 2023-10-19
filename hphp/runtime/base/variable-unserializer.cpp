@@ -1227,6 +1227,12 @@ void VariableUnserializer::unserializeVariant(
     } else {
       throwUnknownType(type);
     }
+  case 'e':
+    {
+      auto const s = makeStaticString(unserializeString());
+      tvMove(make_tv<KindOfEnumClassLabel>(s), self);
+      break;
+    }
   default:
     throwUnknownType(type);
   }

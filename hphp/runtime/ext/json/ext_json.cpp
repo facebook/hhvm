@@ -115,7 +115,7 @@ Variant json_guard_error_result(const String& partial_error_output,
 TypedValue json_encode_impl(const Variant& value, int64_t options,
                             int64_t depth, bool pure) {
   // Special case for resource since VariableSerializer does not take care of it
-  if (value.isResource() || value.isEnumClassLabel()) {
+  if (value.isResource()) {
     json_set_last_error_code(json_error_codes::JSON_ERROR_UNSUPPORTED_TYPE);
     return tvReturn(json_guard_error_result("null", options));
   }

@@ -1,5 +1,0 @@
-Warning: json_encode(): type is unsupported, encoded as false in %s on line 15
-bool(false)
-vec(0) {
-}
-enum class label (#A)

@@ -1709,13 +1709,17 @@ void VariableSerializer::serializeEnumClassLabel(const StringData* label) {
         m_buf->append(")\n");
       break;
     case Type::JSON:
+      write(StrNR(label));
+      break;
     case Type::Serialize:
     case Type::DebuggerSerialize:
     case Type::Internal:
     case Type::APCSerialize:
-      SystemLib::throwInvalidOperationExceptionObject(
-        "Unable to serialize enum class labels"
-      );
+      m_buf->append("e:");
+      m_buf->append(label->size());
+      m_buf->append(":\"");
+      m_buf->append(label->data(), label->size());
+      m_buf->append("\";");
   }
 }
 

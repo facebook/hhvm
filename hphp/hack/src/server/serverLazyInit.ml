@@ -66,11 +66,7 @@ let run_saved_state_future
     (genv : genv)
     (ctx : Provider_context.t)
     (dependency_table_saved_state_future :
-      ( ( Saved_state_loader.Naming_and_dep_table_info.main_artifacts,
-          Saved_state_loader.Naming_and_dep_table_info.additional_info )
-        Saved_state_loader.load_result,
-        ServerInitTypes.load_state_error )
-      result
+      (Saved_state_loader.load_result, ServerInitTypes.load_state_error) result
       Future.t) : (loaded_info, load_state_error) result =
   let t = Unix.gettimeofday () in
   match Future.get dependency_table_saved_state_future ~timeout:300 with
@@ -251,11 +247,7 @@ let download_and_load_state_exn
   in
   let ssopt = genv.local_config.ServerLocalConfig.saved_state in
   let dependency_table_saved_state_future :
-      ( ( Saved_state_loader.Naming_and_dep_table_info.main_artifacts,
-          Saved_state_loader.Naming_and_dep_table_info.additional_info )
-        Saved_state_loader.load_result,
-        ServerInitTypes.load_state_error )
-      result
+      (Saved_state_loader.load_result, ServerInitTypes.load_state_error) result
       Future.t =
     Hh_logger.log "Downloading dependency graph from DevX infra";
     let loader_future =
@@ -269,7 +261,6 @@ let download_and_load_state_exn
         ~watchman_opts:
           Saved_state_loader.Watchman_options.{ root; sockname = None }
         ~ignore_hh_version
-        ~saved_state_type:Saved_state_loader.Naming_and_dep_table_distc
       |> Future.with_timeout
            ~timeout:genv.local_config.SLC.load_state_natively_download_timeout
     in

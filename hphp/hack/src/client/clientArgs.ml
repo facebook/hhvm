@@ -1133,12 +1133,8 @@ Download a saved-state to disk for the given repository, to make future
 invocations of `hh` faster.|}
       Sys.argv.(0)
   in
-  let valid_types_message =
-    "Valid values are: naming-and-dep-table, naming-table"
-  in
 
   let from = ref "" in
-  let saved_state_type = ref None in
   let should_save_replay = ref false in
   let replay_token = ref None in
   let saved_state_manifold_api_key = ref None in
@@ -1146,11 +1142,7 @@ invocations of `hh` faster.|}
     Arg.align
       [
         Common_argspecs.from from;
-        ( "--type",
-          Arg.String (fun arg -> saved_state_type := Some arg),
-          Printf.sprintf
-            " The type of saved-state to download. %s"
-            valid_types_message );
+        ("--type", Arg.String (fun _ -> ()), " (unused)");
         ( "--save-replay",
           Arg.Set should_save_replay,
           " Produce a token that can be later consumed by --replay-token to replay the same saved-state download."
@@ -1180,25 +1172,10 @@ invocations of `hh` faster.|}
       exit 2
     | from -> from
   in
-  let saved_state_type =
-    match !saved_state_type with
-    | None ->
-      Printf.printf "The '--type' option is required. %s\n" valid_types_message;
-      exit 2
-    | Some "naming-and-dep-table" ->
-      ClientDownloadSavedState.Naming_and_dep_table
-    | Some saved_state_type ->
-      Printf.printf
-        "Unrecognized value '%s' for '--type'. %s\n"
-        saved_state_type
-        valid_types_message;
-      exit 2
-  in
   CDownloadSavedState
     {
       ClientDownloadSavedState.root;
       from;
-      saved_state_type;
       saved_state_manifold_api_key = !saved_state_manifold_api_key;
       should_save_replay = !should_save_replay;
       replay_token = !replay_token;

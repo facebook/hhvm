@@ -45,7 +45,6 @@ let main (env : ClientEnv.client_check_env) (config : ServerLocalConfig.t) :
   let%lwt result =
     State_loader_lwt.get_project_metadata
       ~progress_callback:(fun _ -> ())
-      ~saved_state_type:Saved_state_loader.Naming_and_dep_table_distc
       ~repo:root
       ~ignore_hh_version
       ~opts:config.ServerLocalConfig.saved_state

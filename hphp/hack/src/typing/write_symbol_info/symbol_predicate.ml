@@ -264,27 +264,26 @@ module Fact_acc = struct
     | l -> (ownership_unit, [json]) :: l
 
   let update_glean_json
-      predicate json factkey_opt ({ ownership; ownership_unit; _ } as progress)
-      =
+      predicate json factkey_opt ({ ownership; ownership_unit; _ } as fa) =
     let update (opt_key : owned_facts option) : owned_facts option =
       match opt_key with
       | Some facts -> Some (add_to_owned_facts ownership_unit json facts)
       | None -> failwith "All predicate keys should be in the map"
     in
-    let resultJson = Map.update predicate update progress.resultJson in
+    let resultJson = Map.update predicate update fa.resultJson in
     let factIds =
       match factkey_opt with
-      | None -> progress.factIds
+      | None -> fa.factIds
       | Some (fact_id, json_key) ->
         JsonPredicateMap.add
           (cache_key ownership ownership_unit json_key predicate)
           fact_id
-          progress.factIds
+          fa.factIds
     in
-    { progress with resultJson; factIds }
+    { fa with resultJson; factIds }
 
   let add_fact
-      predicate json_key ?value ({ ownership_unit; ownership; _ } as progress) =
+      predicate json_key ?value ({ ownership_unit; ownership; _ } as fa) =
     let value =
       match value with
       | None -> []
@@ -299,18 +298,13 @@ module Fact_acc = struct
       ( should_cache predicate,
         JsonPredicateMap.find_opt
           (cache_key ownership ownership_unit json_key predicate)
-          progress.factIds )
+          fa.factIds )
     with
-    | (false, _) ->
-      (fact_id, update_glean_json predicate json_fact None progress)
+    | (false, _) -> (fact_id, update_glean_json predicate json_fact None fa)
     | (true, None) ->
       ( fact_id,
-        update_glean_json
-          predicate
-          json_fact
-          (Some (fact_id, json_key))
-          progress )
-    | (true, Some fid) -> (fid, progress)
+        update_glean_json predicate json_fact (Some (fact_id, json_key)) fa )
+    | (true, Some fid) -> (fid, fa)
 
   let init ~ownership =
     let resultJson =
@@ -340,10 +334,10 @@ module Fact_acc = struct
     | true -> List.map owned_facts ~f:(fun (ou, facts) -> fact_object ~ou facts)
     | false -> [fact_object ~ou:None (List.concat_map owned_facts ~f:snd)]
 
-  let to_json ({ ownership; _ } as progress) =
+  let to_json ({ ownership; _ } as fa) =
     let preds =
       List.map
-        ~f:(fun pred -> (to_string pred, Map.find pred progress.resultJson))
+        ~f:(fun pred -> (to_string pred, Map.find pred fa.resultJson))
         ordered_all
     in
     List.concat_map preds ~f:(owned_facts_to_json ~ownership)

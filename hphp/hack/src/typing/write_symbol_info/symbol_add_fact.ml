@@ -23,22 +23,22 @@ let is_async = function
   | Ast_defs.FAsyncGenerator -> true
   | _ -> false
 
-let namespace_decl name progress =
+let namespace_decl name fa =
   let json =
     NamespaceDeclaration.(
       { name = NamespaceQName.(Key (of_string name)) } |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack NamespaceDeclaration) json progress
+  Fact_acc.add_fact Predicate.(Hack NamespaceDeclaration) json fa
 
 (* create a namespace fact from a namespace attribute in node. Name can be empty
    in that case we simply ignore it *)
-let namespace_decl_opt name progress =
+let namespace_decl_opt name fa =
   match name.Namespace_env.ns_name with
-  | None -> progress (* global name space *)
-  | Some "" -> progress
-  | Some name -> namespace_decl name progress |> snd
+  | None -> fa (* global name space *)
+  | Some "" -> fa
+  | Some name -> namespace_decl name fa |> snd
 
-let container_decl decl_pred name progress =
+let container_decl decl_pred name fa =
   let qname = QName.(Key (of_string name)) in
   let json =
     match decl_pred with
@@ -52,54 +52,54 @@ let container_decl decl_pred name progress =
       TraitDeclaration.(to_json_key { name = qname })
     | _ -> failwith "Impossible has happened"
   in
-  Fact_acc.add_fact decl_pred json progress
+  Fact_acc.add_fact decl_pred json fa
 
-let parent_decls ctx decls pred prog =
-  List.fold decls ~init:([], prog) ~f:(fun (decl_refs, prog) decl ->
+let parent_decls ctx decls pred fa =
+  List.fold decls ~init:([], fa) ~f:(fun (decl_refs, fa) decl ->
       let name = Util.strip_tparams (Util.get_type_from_hint ctx decl) in
-      let (decl_id, prog) = container_decl pred name prog in
-      (decl_id :: decl_refs, prog))
+      let (decl_id, fa) = container_decl pred name fa in
+      (decl_id :: decl_refs, fa))
 
-let parent_decls_enum ctx decls prog =
-  let (fact_ids, prog) =
-    parent_decls ctx decls Predicate.(Hack EnumDeclaration) prog
+let parent_decls_enum ctx decls fa =
+  let (fact_ids, fa) =
+    parent_decls ctx decls Predicate.(Hack EnumDeclaration) fa
   in
-  (List.map ~f:(fun x -> EnumDeclaration.Id x) fact_ids, prog)
+  (List.map ~f:(fun x -> EnumDeclaration.Id x) fact_ids, fa)
 
-let parent_decls_class ctx decls prog =
-  let (fact_ids, prog) =
-    parent_decls ctx decls Predicate.(Hack ClassDeclaration) prog
+let parent_decls_class ctx decls fa =
+  let (fact_ids, fa) =
+    parent_decls ctx decls Predicate.(Hack ClassDeclaration) fa
   in
-  (List.map ~f:(fun x -> ClassDeclaration.Id x) fact_ids, prog)
+  (List.map ~f:(fun x -> ClassDeclaration.Id x) fact_ids, fa)
 
-let parent_decls_trait ctx decls prog =
-  let (fact_ids, prog) =
-    parent_decls ctx decls Predicate.(Hack TraitDeclaration) prog
+let parent_decls_trait ctx decls fa =
+  let (fact_ids, fa) =
+    parent_decls ctx decls Predicate.(Hack TraitDeclaration) fa
   in
-  (List.map ~f:(fun x -> TraitDeclaration.Id x) fact_ids, prog)
+  (List.map ~f:(fun x -> TraitDeclaration.Id x) fact_ids, fa)
 
-let parent_decls_interface ctx decls prog =
-  let (fact_ids, prog) =
-    parent_decls ctx decls Predicate.(Hack InterfaceDeclaration) prog
+let parent_decls_interface ctx decls fa =
+  let (fact_ids, fa) =
+    parent_decls ctx decls Predicate.(Hack InterfaceDeclaration) fa
   in
-  (List.map ~f:(fun x -> InterfaceDeclaration.Id x) fact_ids, prog)
+  (List.map ~f:(fun x -> InterfaceDeclaration.Id x) fact_ids, fa)
 
-let module_decl name progress =
+let module_decl name fa =
   let json = ModuleDeclaration.({ name = Name.Key name } |> to_json_key) in
-  Fact_acc.add_fact Predicate.(Hack ModuleDeclaration) json progress
+  Fact_acc.add_fact Predicate.(Hack ModuleDeclaration) json fa
 
-let module_field module_ internal progress =
+let module_field module_ internal fa =
   match module_ with
-  | None -> (None, progress)
+  | None -> (None, fa)
   | Some (_pos, module_name) ->
-    let (decl_id, progress) = module_decl module_name progress in
-    (Some (Build_json.build_module_membership decl_id ~internal), progress)
+    let (decl_id, fa) = module_decl module_name fa in
+    (Some (Build_json.build_module_membership decl_id ~internal), fa)
 
-let member_cluster ~members prog =
+let member_cluster ~members fa =
   let json = MemberCluster.({ members } |> to_json_key) in
-  Fact_acc.add_fact Predicate.(Hack MemberCluster) json prog
+  Fact_acc.add_fact Predicate.(Hack MemberCluster) json fa
 
-let inherited_members ~container_type ~container_id ~member_clusters prog =
+let inherited_members ~container_type ~container_id ~member_clusters fa =
   let json =
     InheritedMembers.(
       {
@@ -109,32 +109,32 @@ let inherited_members ~container_type ~container_id ~member_clusters prog =
       }
       |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack InheritedMembers) json prog
+  Fact_acc.add_fact Predicate.(Hack InheritedMembers) json fa
 
-let container_defn ctx source_text clss decl_id members prog =
-  let prog = namespace_decl_opt clss.c_namespace prog in
+let container_defn ctx source_text clss decl_id members fa =
+  let fa = namespace_decl_opt clss.c_namespace fa in
   let typeParams =
     List.map clss.c_tparams ~f:(Build_json.build_type_param ctx source_text)
   in
-  let (module_, prog) = module_field clss.c_module clss.c_internal prog in
+  let (module_, fa) = module_field clss.c_module clss.c_internal fa in
   let attributes =
     Build_json.build_attributes source_text clss.c_user_attributes
   in
   let (req_extends_hints, req_implements_hints, req_class_hints) =
     Aast.partition_map_require_kind ~f:(fun x -> x) clss.c_reqs
   in
-  let (requireExtends, prog) =
-    parent_decls_class ctx (List.map req_extends_hints ~f:fst) prog
+  let (requireExtends, fa) =
+    parent_decls_class ctx (List.map req_extends_hints ~f:fst) fa
   in
-  let (requireImplements, prog) =
-    parent_decls_interface ctx (List.map req_implements_hints ~f:fst) prog
+  let (requireImplements, fa) =
+    parent_decls_interface ctx (List.map req_implements_hints ~f:fst) fa
   in
-  let (requireClass, prog) =
-    parent_decls_class ctx (List.map req_class_hints ~f:fst) prog
+  let (requireClass, fa) =
+    parent_decls_class ctx (List.map req_class_hints ~f:fst) fa
   in
   match Predicate.get_parent_kind clss.c_kind with
   | Predicate.InterfaceContainer ->
-    let (extends_, prog) = parent_decls_interface ctx clss.c_extends prog in
+    let (extends_, fa) = parent_decls_interface ctx clss.c_extends fa in
     let json =
       InterfaceDefinition.(
         {
@@ -148,12 +148,10 @@ let container_defn ctx source_text clss decl_id members prog =
         }
         |> to_json_key)
     in
-    Fact_acc.add_fact Predicate.(Hack InterfaceDefinition) json prog
+    Fact_acc.add_fact Predicate.(Hack InterfaceDefinition) json fa
   | Predicate.TraitContainer ->
-    let (implements_, prog) =
-      parent_decls_interface ctx clss.c_implements prog
-    in
-    let (uses, prog) = parent_decls_trait ctx clss.c_uses prog in
+    let (implements_, fa) = parent_decls_interface ctx clss.c_implements fa in
+    let (uses, fa) = parent_decls_trait ctx clss.c_uses fa in
     let json =
       TraitDefinition.(
         {
@@ -170,30 +168,28 @@ let container_defn ctx source_text clss decl_id members prog =
         }
         |> to_json_key)
     in
-    Fact_acc.add_fact Predicate.(Hack TraitDefinition) json prog
+    Fact_acc.add_fact Predicate.(Hack TraitDefinition) json fa
   | Predicate.ClassContainer ->
-    let (implements_, prog) =
-      parent_decls_interface ctx clss.c_implements prog
-    in
-    let (uses, prog) = parent_decls_trait ctx clss.c_uses prog in
-    let (extends_, prog) =
+    let (implements_, fa) = parent_decls_interface ctx clss.c_implements fa in
+    let (uses, fa) = parent_decls_trait ctx clss.c_uses fa in
+    let (extends_, fa) =
       match clss.c_extends with
-      | [] -> (None, prog)
+      | [] -> (None, fa)
       | [parent] ->
-        let (decl_id, prog) =
+        let (decl_id, fa) =
           let parent_clss =
             Util.strip_tparams (Util.get_type_from_hint ctx parent)
           in
           let qname = QName.(Key (of_string parent_clss)) in
           let json = ClassDeclaration.(to_json_key { name = qname }) in
-          Fact_acc.add_fact Predicate.(Hack ClassDeclaration) json prog
+          Fact_acc.add_fact Predicate.(Hack ClassDeclaration) json fa
         in
-        (Some (ClassDeclaration.Id decl_id), prog)
+        (Some (ClassDeclaration.Id decl_id), fa)
       | _ ->
         Hh_logger.log
           "WARNING: skipping extends field for class with multiple parents %s"
           (snd clss.c_name);
-        (None, prog)
+        (None, fa)
     in
     let json =
       ClassDefinition.(
@@ -211,9 +207,9 @@ let container_defn ctx source_text clss decl_id members prog =
         }
         |> to_json_key)
     in
-    Fact_acc.add_fact Predicate.(Hack ClassDefinition) json prog
+    Fact_acc.add_fact Predicate.(Hack ClassDefinition) json fa
 
-let property_decl con_type decl_id name progress =
+let property_decl con_type decl_id name fa =
   let json =
     PropertyDeclaration.(
       {
@@ -222,9 +218,9 @@ let property_decl con_type decl_id name progress =
       }
       |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack PropertyDeclaration) json progress
+  Fact_acc.add_fact Predicate.(Hack PropertyDeclaration) json fa
 
-let class_const_decl con_type decl_id name progress =
+let class_const_decl con_type decl_id name fa =
   let json =
     ClassConstDeclaration.(
       {
@@ -233,9 +229,9 @@ let class_const_decl con_type decl_id name progress =
       }
       |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack ClassConstDeclaration) json progress
+  Fact_acc.add_fact Predicate.(Hack ClassConstDeclaration) json fa
 
-let type_const_decl con_type decl_id name progress =
+let type_const_decl con_type decl_id name fa =
   let json =
     TypeConstDeclaration.(
       {
@@ -244,9 +240,9 @@ let type_const_decl con_type decl_id name progress =
       }
       |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack TypeConstDeclaration) json progress
+  Fact_acc.add_fact Predicate.(Hack TypeConstDeclaration) json fa
 
-let method_decl con_type decl_id name progress =
+let method_decl con_type decl_id name fa =
   let json =
     MethodDeclaration.(
       {
@@ -255,9 +251,9 @@ let method_decl con_type decl_id name progress =
       }
       |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack MethodDeclaration) json progress
+  Fact_acc.add_fact Predicate.(Hack MethodDeclaration) json fa
 
-let type_info ~ty sym_pos progress =
+let type_info ~ty sym_pos fa =
   let json =
     TypeInfo.(
       Key.
@@ -267,7 +263,7 @@ let type_info ~ty sym_pos progress =
         }
       |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack TypeInfo) json progress
+  Fact_acc.add_fact Predicate.(Hack TypeInfo) json fa
 
 let aggregate_pos (json_pos_list : (XRefTarget.t * Util.pos) list) :
     (XRefTarget.t * Util.pos list) list =
@@ -281,15 +277,15 @@ let aggregate_pos (json_pos_list : (XRefTarget.t * Util.pos) list) :
   in
   Map.Poly.to_alist jmap
 
-let build_signature ctx pos_map_opt source_text params ctxs ret progress =
+let build_signature ctx pos_map_opt source_text params ctxs ret fa =
   let pos_map =
     match pos_map_opt with
     | Some pos_map -> pos_map
     | None -> failwith "Internal error: pos_map should be set in previous phase"
   in
-  let hint_to_str_opt h progress =
+  let hint_to_str_opt h fa =
     match hint_of_type_hint h with
-    | None -> (None, None, progress)
+    | None -> (None, None, fa)
     | Some hint ->
       let legacy_ty = Util.get_type_from_hint ctx hint in
       let (ty, sym_pos) = Util.hint_to_string_and_symbols ctx hint in
@@ -300,37 +296,35 @@ let build_signature ctx pos_map_opt source_text params ctxs ret progress =
             | _ -> None)
       in
       let decl_json_aggr_pos = aggregate_pos decl_json_pos in
-      let (fact_id, progress) = type_info ~ty decl_json_aggr_pos progress in
-      (Some legacy_ty, Some fact_id, progress)
+      let (fact_id, fa) = type_info ~ty decl_json_aggr_pos fa in
+      (Some legacy_ty, Some fact_id, fa)
   in
-  let (params, progress) =
-    List.fold params ~init:([], progress) ~f:(fun (t_params, progress) p ->
-        let (p_ty, fact_id, progress) =
-          hint_to_str_opt p.param_type_hint progress
-        in
-        ((p, fact_id, p_ty) :: t_params, progress))
+  let (params, fa) =
+    List.fold params ~init:([], fa) ~f:(fun (t_params, fa) p ->
+        let (p_ty, fact_id, fa) = hint_to_str_opt p.param_type_hint fa in
+        ((p, fact_id, p_ty) :: t_params, fa))
   in
   let params = List.rev params in
-  let (ret_ty, return_info, progress) = hint_to_str_opt ret progress in
+  let (ret_ty, return_info, fa) = hint_to_str_opt ret fa in
   let signature =
     Build_json.build_signature ctx source_text params ctxs ~ret_ty ~return_info
   in
-  (signature, progress)
+  (signature, fa)
 
-let method_defn ctx source_text meth decl_id progress =
+let method_defn ctx source_text meth decl_id fa =
   let m_tparams = Util.remove_generated_tparams meth.m_tparams in
   let typeParams =
     List.map m_tparams ~f:(Build_json.build_type_param ctx source_text)
   in
-  let (signature, progress) =
+  let (signature, fa) =
     build_signature
       ctx
-      (Fact_acc.get_pos_map progress)
+      (Fact_acc.get_pos_map fa)
       source_text
       meth.m_params
       meth.m_ctxs
       meth.m_ret
-      progress
+      fa
   in
   let readonlyRet =
     Option.map meth.m_readonly_ret ~f:(fun _ -> ReadonlyKind.ReadOnly)
@@ -359,10 +353,10 @@ let method_defn ctx source_text meth decl_id progress =
       }
       |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack MethodDefinition) json progress
+  Fact_acc.add_fact Predicate.(Hack MethodDefinition) json fa
 
 let method_overrides
-    meth_name base_cont_name base_cont_type der_cont_name der_cont_type prog =
+    meth_name base_cont_name base_cont_type der_cont_name der_cont_type fa =
   let json =
     MethodOverrides.(
       Key.
@@ -374,9 +368,9 @@ let method_overrides
         }
       |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack MethodOverrides) json prog
+  Fact_acc.add_fact Predicate.(Hack MethodOverrides) json fa
 
-let property_defn ctx source_text prop decl_id progress =
+let property_defn ctx source_text prop decl_id fa =
   let type_ =
     Option.map
       ~f:(fun x -> Type.Key (Util.get_type_from_hint ctx x))
@@ -396,9 +390,9 @@ let property_defn ctx source_text prop decl_id progress =
       }
       |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack PropertyDefinition) json progress
+  Fact_acc.add_fact Predicate.(Hack PropertyDefinition) json fa
 
-let class_const_defn ctx source_text const decl_id progress =
+let class_const_defn ctx source_text const decl_id fa =
   let value =
     match const.cc_kind with
     | CCAbstract None -> None
@@ -416,9 +410,9 @@ let class_const_defn ctx source_text const decl_id progress =
       { declaration = ClassConstDeclaration.Id decl_id; type_; value }
       |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack ClassConstDefinition) json progress
+  Fact_acc.add_fact Predicate.(Hack ClassConstDefinition) json fa
 
-let type_const_defn ctx source_text tc decl_id progress =
+let type_const_defn ctx source_text tc decl_id fa =
   (* TODO(T88552052) should the default of an abstract type constant be used
      * as a value here *)
   let type_ =
@@ -439,19 +433,19 @@ let type_const_defn ctx source_text tc decl_id progress =
       }
       |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack TypeConstDefinition) json progress
+  Fact_acc.add_fact Predicate.(Hack TypeConstDefinition) json fa
 
-let enum_decl name progress =
+let enum_decl name fa =
   let json =
     EnumDeclaration.({ name = QName.(Key (of_string name)) } |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack EnumDeclaration) json progress
+  Fact_acc.add_fact Predicate.(Hack EnumDeclaration) json fa
 
-let enum_defn ctx source_text enm enum_id enum_data enumerators progress =
+let enum_defn ctx source_text enm enum_id enum_data enumerators fa =
   let enumerators = List.map enumerators ~f:(fun x -> Enumerator.Id x) in
-  let prog = namespace_decl_opt enm.c_namespace progress in
-  let (includes, prog) = parent_decls_enum ctx enum_data.e_includes prog in
-  let (module_, prog) = module_field enm.c_module enm.c_internal prog in
+  let fa = namespace_decl_opt enm.c_namespace fa in
+  let (includes, fa) = parent_decls_enum ctx enum_data.e_includes fa in
+  let (module_, fa) = module_field enm.c_module enm.c_internal fa in
   let enumConstraint =
     Option.map enum_data.e_constraint ~f:(fun x ->
         Type.Key (Util.get_type_from_hint ctx x))
@@ -471,39 +465,39 @@ let enum_defn ctx source_text enm enum_id enum_data enumerators progress =
       }
       |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack EnumDefinition) json prog
+  Fact_acc.add_fact Predicate.(Hack EnumDefinition) json fa
 
-let enumerator decl_id const_name progress =
+let enumerator decl_id const_name fa =
   let json =
     Enumerator.(
       { name = Name.Key const_name; enumeration = EnumDeclaration.Id decl_id }
       |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack Enumerator) json progress
+  Fact_acc.add_fact Predicate.(Hack Enumerator) json fa
 
-let func_decl name progress =
+let func_decl name fa =
   let json =
     FunctionDeclaration.({ name = QName.(Key (of_string name)) } |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack FunctionDeclaration) json progress
+  Fact_acc.add_fact Predicate.(Hack FunctionDeclaration) json fa
 
-let func_defn ctx source_text fd decl_id progress =
+let func_defn ctx source_text fd decl_id fa =
   let elem = fd.fd_fun in
-  let prog = namespace_decl_opt fd.fd_namespace progress in
+  let fa = namespace_decl_opt fd.fd_namespace fa in
   let fd_tparams = Util.remove_generated_tparams fd.fd_tparams in
   let typeParams =
     List.map fd_tparams ~f:(Build_json.build_type_param ctx source_text)
   in
-  let (module_, prog) = module_field fd.fd_module fd.fd_internal prog in
-  let (signature, prog) =
+  let (module_, fa) = module_field fd.fd_module fd.fd_internal fa in
+  let (signature, fa) =
     build_signature
       ctx
-      (Fact_acc.get_pos_map progress)
+      (Fact_acc.get_pos_map fa)
       source_text
       elem.f_params
       elem.f_ctxs
       elem.f_ret
-      prog
+      fa
   in
   let readonlyRet =
     Option.map elem.f_readonly_ret ~f:(fun _ -> ReadonlyKind.ReadOnly)
@@ -522,9 +516,9 @@ let func_defn ctx source_text fd decl_id progress =
       }
       |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack FunctionDefinition) json prog
+  Fact_acc.add_fact Predicate.(Hack FunctionDefinition) json fa
 
-let module_defn _ctx source_text elem decl_id progress =
+let module_defn _ctx source_text elem decl_id fa =
   let json =
     ModuleDefinition.(
       {
@@ -534,16 +528,16 @@ let module_defn _ctx source_text elem decl_id progress =
       }
       |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack ModuleDefinition) json progress
+  Fact_acc.add_fact Predicate.(Hack ModuleDefinition) json fa
 
-let typedef_decl name progress =
+let typedef_decl name fa =
   let json =
     TypedefDeclaration.({ name = QName.(Key (of_string name)) } |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack TypedefDeclaration) json progress
+  Fact_acc.add_fact Predicate.(Hack TypedefDeclaration) json fa
 
-let typedef_defn ctx source_text elem decl_id progress =
-  let prog = namespace_decl_opt elem.t_namespace progress in
+let typedef_defn ctx source_text elem decl_id fa =
+  let fa = namespace_decl_opt elem.t_namespace fa in
   let isTransparent =
     match elem.t_vis with
     | Transparent -> true
@@ -555,7 +549,7 @@ let typedef_defn ctx source_text elem decl_id progress =
   let typeParams =
     List.map elem.t_tparams ~f:(Build_json.build_type_param ctx source_text)
   in
-  let (module_, prog) = module_field elem.t_module elem.t_internal prog in
+  let (module_, fa) = module_field elem.t_module elem.t_internal fa in
   let json =
     TypedefDefinition.(
       {
@@ -568,17 +562,17 @@ let typedef_defn ctx source_text elem decl_id progress =
       }
       |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack TypedefDefinition) json prog
+  Fact_acc.add_fact Predicate.(Hack TypedefDefinition) json fa
 
-let gconst_decl name progress =
+let gconst_decl name fa =
   let json =
     GlobalConstDeclaration.(
       { name = QName.(Key (of_string name)) } |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack GlobalConstDeclaration) json progress
+  Fact_acc.add_fact Predicate.(Hack GlobalConstDeclaration) json fa
 
-let gconst_defn ctx source_text elem decl_id progress =
-  let prog = namespace_decl_opt elem.cst_namespace progress in
+let gconst_defn ctx source_text elem decl_id fa =
+  let fa = namespace_decl_opt elem.cst_namespace fa in
   let value = Util.ast_expr_to_string_stripped source_text elem.cst_value in
   let type_ =
     Option.map elem.cst_type ~f:(fun x ->
@@ -589,33 +583,33 @@ let gconst_defn ctx source_text elem decl_id progress =
       { declaration = GlobalConstDeclaration.Id decl_id; type_; value }
       |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack GlobalConstDefinition) json prog
+  Fact_acc.add_fact Predicate.(Hack GlobalConstDefinition) json fa
 
-let decl_loc ~path pos declaration progress =
+let decl_loc ~path pos declaration fa =
   let json =
     DeclarationLocation.(
       { declaration; file = File.(Key path); span = ByteSpan.(of_pos pos) }
       |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack DeclarationLocation) json progress
+  Fact_acc.add_fact Predicate.(Hack DeclarationLocation) json fa
 
-let decl_comment ~path pos declaration progress =
+let decl_comment ~path pos declaration fa =
   let json =
     DeclarationComment.(
       { declaration; file = File.Key path; span = ByteSpan.of_pos pos }
       |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack DeclarationComment) json progress
+  Fact_acc.add_fact Predicate.(Hack DeclarationComment) json fa
 
-let decl_span ~path pos declaration progress =
+let decl_span ~path pos declaration fa =
   let json =
     DeclarationSpan.(
       { declaration; file = File.Key path; span = ByteSpan.of_pos pos }
       |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack DeclarationSpan) json progress
+  Fact_acc.add_fact Predicate.(Hack DeclarationSpan) json fa
 
-let file_lines ~path sourceText progress =
+let file_lines ~path sourceText fa =
   let lengths =
     Line_break_map.offsets_to_line_lengths
       sourceText.Full_fidelity_source_text.offset_map
@@ -627,23 +621,23 @@ let file_lines ~path sourceText progress =
       to_json_key
         { file = File.Key path; lengths; endsInNewline; hasUnicodeOrTabs })
   in
-  Fact_acc.add_fact Predicate.(Src FileLines) json progress
+  Fact_acc.add_fact Predicate.(Src FileLines) json fa
 
-let file_xrefs ~path fact_map progress =
+let file_xrefs ~path fact_map fa =
   let json =
     FileXRefs.(
       Key.{ file = File.Key path; xrefs = Build_json.build_xrefs fact_map }
       |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack FileXRefs) json progress
+  Fact_acc.add_fact Predicate.(Hack FileXRefs) json fa
 
-let file_decls ~path declarations progress =
+let file_decls ~path declarations fa =
   let json =
     FileDeclarations.(Key.{ file = File.Key path; declarations } |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack FileDeclarations) json progress
+  Fact_acc.add_fact Predicate.(Hack FileDeclarations) json fa
 
-let method_occ receiver_class name progress =
+let method_occ receiver_class name fa =
   let json =
     MethodOccurrence.(
       {
@@ -655,9 +649,9 @@ let method_occ receiver_class name progress =
       }
       |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack MethodOccurrence) json progress
+  Fact_acc.add_fact Predicate.(Hack MethodOccurrence) json fa
 
-let file_call ~path pos ~callee_infos ~call_args ~dispatch_arg progress =
+let file_call ~path pos ~callee_infos ~call_args ~dispatch_arg fa =
   let callee_xrefs = List.map callee_infos ~f:(fun ti -> ti.XRefs.target) in
   let callee_xref =
     match List.sort ~compare:XRefTarget.compare callee_xrefs with
@@ -680,25 +674,24 @@ let file_call ~path pos ~callee_infos ~call_args ~dispatch_arg progress =
       }
       |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack FileCall) json progress
+  Fact_acc.add_fact Predicate.(Hack FileCall) json fa
 
-let global_namespace_alias ~from ~to_ progress =
+let global_namespace_alias ~from ~to_ fa =
   let json =
     GlobalNamespaceAlias.(
       { from = Name.(Key from); to_ = NamespaceQName.(Key (of_string to_)) }
       |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Hack GlobalNamespaceAlias) json progress
+  Fact_acc.add_fact Predicate.(Hack GlobalNamespaceAlias) json fa
 
-let indexerInputsHash key hashes progress =
+let indexerInputsHash key hashes fa =
   let key = IndexerInputHash.(key |> to_json_key) in
   let value =
     IndexerInputHash.(List.map hashes ~f:Md5.to_binary |> to_json_value)
   in
-  Fact_acc.add_fact Predicate.(Hack IndexerInputsHash) key ~value progress
+  Fact_acc.add_fact Predicate.(Hack IndexerInputsHash) key ~value fa
 
-let gen_code ~path ~fully_generated ~signature ~source ~command ~class_ progress
-    =
+let gen_code ~path ~fully_generated ~signature ~source ~command ~class_ fa =
   let json =
     GenCode.(
       {
@@ -715,4 +708,4 @@ let gen_code ~path ~fully_generated ~signature ~source ~command ~class_ progress
       }
       |> to_json_key)
   in
-  Fact_acc.add_fact Predicate.(Gencode GenCode) json progress
+  Fact_acc.add_fact Predicate.(Gencode GenCode) json fa

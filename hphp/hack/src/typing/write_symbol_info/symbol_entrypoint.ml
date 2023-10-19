@@ -75,11 +75,11 @@ let write_facts_file out_dir num_tasts json_chunks =
    - symbol hash facts for incrementality (empty if gen_sym_hash isn't set)
    - the namespace aliases defined in .hhconfig *)
 let gen_global_facts ns ~ownership ~shard_name all_hashes =
-  let progress = Fact_acc.init ~ownership in
+  let fa = Fact_acc.init ~ownership in
   let list_hashes = Md5.Set.to_list all_hashes in
-  if ownership then Fact_acc.set_ownership_unit progress (Some ".hhconfig");
-  List.fold ns ~init:progress ~f:(fun progress (from, to_) ->
-      Add_fact.global_namespace_alias progress ~from ~to_ |> snd)
+  if ownership then Fact_acc.set_ownership_unit fa (Some ".hhconfig");
+  List.fold ns ~init:fa ~f:(fun fa (from, to_) ->
+      Add_fact.global_namespace_alias fa ~from ~to_ |> snd)
   |> Add_fact.indexerInputsHash shard_name list_hashes
   |> snd
   |> Fact_acc.to_json
@@ -125,7 +125,7 @@ let recheck_job
     (ctx : Provider_context.t)
     (opts : Indexer_options.t)
     (_ : JobReturn.t)
-    (progress : Indexable.t list) : JobReturn.t =
+    (fa : Indexable.t list) : JobReturn.t =
   let open Indexer_options in
   let start_time = Unix.gettimeofday () in
 
@@ -137,7 +137,7 @@ let recheck_job
   let gen_references = Option.is_some opts.referenced_file in
   let files_info =
     List.map
-      progress
+      fa
       ~f:
         (File_info.create
            ctx

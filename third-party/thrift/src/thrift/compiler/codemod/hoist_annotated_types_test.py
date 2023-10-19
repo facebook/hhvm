@@ -60,6 +60,8 @@ class HoistAnnotatedTypes(unittest.TestCase):
                 }
 
                 const S (moar_annotated) c = {};
+
+                typedef map<S, float> (annotated = "1") map_S_float_4022
                 """
             ),
         )
@@ -95,13 +97,14 @@ class HoistAnnotatedTypes(unittest.TestCase):
 
                 const S_8730 c = {};
 
+                typedef map<S, float> (annotated = "1") map_S_float_4022
+
                 // The following were automatically generated and may benefit from renaming.
                 typedef S (annotated = "1") S_866
                 typedef S (moar_annotated = "1") S_8730
                 typedef i16 (annotated = "1") i16_2065
                 typedef i32 (cpp.type = "uint32_t") i32_7683
                 typedef list<S_866> (annotated = "1") list_S_5175
-                typedef map<S, float> (annotated = "1") map_S_float_4022
                 typedef map<i32, fooMap> (annotated = "1") map_i32_fooMap_1878
                 typedef set<i16_2065> (annotated = "1") set_i16_5922
                 """

@@ -263,6 +263,16 @@ class hoist_annotated_types {
     auto name = name_typedef(type);
     if (typedefs_.count(name)) {
       assert(typedefs_[name].name == render_type(type));
+    } else if (
+        auto existing = prog_.scope()->find_type(prog_.scope_name(name))) {
+      if (existing->get_true_type()->get_full_name() !=
+          type->get_true_type()->get_full_name()) {
+        throw std::runtime_error(fmt::format(
+            "Type conflict: {} is already defined as {} but we need to define it as {}",
+            name,
+            existing->get_true_type()->get_full_name(),
+            type->get_true_type()->get_full_name()));
+      }
     } else {
       auto typedf = std::make_unique<t_typedef>(&prog_, name, type);
       typedefs_[name] = {render_type(type), typedf.get()};

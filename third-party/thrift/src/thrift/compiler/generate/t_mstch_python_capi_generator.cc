@@ -446,7 +446,38 @@ class python_capi_mstch_struct : public mstch_struct {
             {"struct:cpp_name", &python_capi_mstch_struct::cpp_name},
             {"struct:cpp_adapter?", &python_capi_mstch_struct::cpp_adapter},
             {"struct:fields_size", &python_capi_mstch_struct::fields_size},
+            {"struct:tuple_positions",
+             &python_capi_mstch_struct::tuple_positions},
         });
+  }
+
+  mstch::node tuple_positions() {
+    std::vector<std::pair<int, int>> index_keys;
+    size_t cpp_index = 0;
+    for (const auto& f : struct_->fields()) {
+      index_keys.emplace_back(f.get_key(), cpp_index++);
+    }
+    // sort by key to match thrift-python tuple ordering
+    std::sort(index_keys.begin(), index_keys.end());
+    // replace key with python tuple index
+    for (size_t i = 0; i < index_keys.size(); ++i) {
+      // offset by 1 because tuple position 0 is isset indicator
+      index_keys[i].first = i + 1;
+    }
+    // now sort by cpp index
+    std::sort(
+        index_keys.begin(),
+        index_keys.end(),
+        [](const auto& tup_cpp1, const auto& tup_cpp2) {
+          return tup_cpp1.second < tup_cpp2.second;
+        });
+    mstch::array a;
+    for (size_t i = 0; i < index_keys.size(); ++i) {
+      a.push_back(mstch::map{
+          {"tuple:index", index_keys[i].first},
+          {"tuple:comma", std::string_view(i == 0 ? "" : ", ")}});
+    }
+    return a;
   }
 
   mstch::node marshal_capi() {

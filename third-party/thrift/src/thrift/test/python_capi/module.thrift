@@ -179,10 +179,10 @@ struct ComposeStruct {
   3: PrimitiveStruct primitive;
   @cpp.Ref{type = cpp.RefType.Shared}
   4: ListAlias aliased;
-  5: thrift_dep.DepEnum xenum;
   6: thrift_dep.DepStruct xstruct;
-  7: list<thrift_dep.DepStruct> friends;
+  5: thrift_dep.DepEnum xenum;
   8: serialized_dep.SerializedStruct serial_struct;
+  7: list<thrift_dep.DepStruct> friends;
   9: serialized_dep.SerializedUnion serial_union;
   10: serialized_dep.SerializedError serial_error;
 } (cpp.noncopyable)
@@ -190,8 +190,8 @@ struct ComposeStruct {
 union Onion {
   1: MyEnum myEnum;
   2: PrimitiveStruct myStruct;
-  4: string myString;
   6: set<i64> intSet;
+  4: string myString;
   8: list<double> doubleList;
   9: map<binary, string> strMap;
   10: id.ProtocolId adapted_int;

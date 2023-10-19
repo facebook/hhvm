@@ -90,16 +90,16 @@ struct enum_;
 struct renamed_;
 struct primitive;
 struct aliased;
-struct xenum;
 struct xstruct;
-struct friends;
+struct xenum;
 struct serial_struct;
+struct friends;
 struct serial_union;
 struct serial_error;
 struct myEnum;
 struct myStruct;
-struct myString;
 struct intSet;
+struct myString;
 struct doubleList;
 struct strMap;
 struct adaptedInt;
@@ -404,21 +404,21 @@ APACHE_THRIFT_DEFINE_ACCESSOR(primitive);
 #define APACHE_THRIFT_ACCESSOR_aliased
 APACHE_THRIFT_DEFINE_ACCESSOR(aliased);
 #endif
-#ifndef APACHE_THRIFT_ACCESSOR_xenum
-#define APACHE_THRIFT_ACCESSOR_xenum
-APACHE_THRIFT_DEFINE_ACCESSOR(xenum);
-#endif
 #ifndef APACHE_THRIFT_ACCESSOR_xstruct
 #define APACHE_THRIFT_ACCESSOR_xstruct
 APACHE_THRIFT_DEFINE_ACCESSOR(xstruct);
 #endif
-#ifndef APACHE_THRIFT_ACCESSOR_friends
-#define APACHE_THRIFT_ACCESSOR_friends
-APACHE_THRIFT_DEFINE_ACCESSOR(friends);
+#ifndef APACHE_THRIFT_ACCESSOR_xenum
+#define APACHE_THRIFT_ACCESSOR_xenum
+APACHE_THRIFT_DEFINE_ACCESSOR(xenum);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_serial_struct
 #define APACHE_THRIFT_ACCESSOR_serial_struct
 APACHE_THRIFT_DEFINE_ACCESSOR(serial_struct);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_friends
+#define APACHE_THRIFT_ACCESSOR_friends
+APACHE_THRIFT_DEFINE_ACCESSOR(friends);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_serial_union
 #define APACHE_THRIFT_ACCESSOR_serial_union
@@ -436,13 +436,13 @@ APACHE_THRIFT_DEFINE_ACCESSOR(myEnum);
 #define APACHE_THRIFT_ACCESSOR_myStruct
 APACHE_THRIFT_DEFINE_ACCESSOR(myStruct);
 #endif
-#ifndef APACHE_THRIFT_ACCESSOR_myString
-#define APACHE_THRIFT_ACCESSOR_myString
-APACHE_THRIFT_DEFINE_ACCESSOR(myString);
-#endif
 #ifndef APACHE_THRIFT_ACCESSOR_intSet
 #define APACHE_THRIFT_ACCESSOR_intSet
 APACHE_THRIFT_DEFINE_ACCESSOR(intSet);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_myString
+#define APACHE_THRIFT_ACCESSOR_myString
+APACHE_THRIFT_DEFINE_ACCESSOR(myString);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_doubleList
 #define APACHE_THRIFT_ACCESSOR_doubleList
@@ -4953,24 +4953,24 @@ class ComposeStruct final  {
     ::apache::thrift::ident::renamed_,
     ::apache::thrift::ident::primitive,
     ::apache::thrift::ident::aliased,
-    ::apache::thrift::ident::xenum,
     ::apache::thrift::ident::xstruct,
-    ::apache::thrift::ident::friends,
+    ::apache::thrift::ident::xenum,
     ::apache::thrift::ident::serial_struct,
+    ::apache::thrift::ident::friends,
     ::apache::thrift::ident::serial_union,
     ::apache::thrift::ident::serial_error
   >;
 
-  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10};
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,6,5,8,7,9,10};
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::enum_t<::test::fixtures::python_capi::MyEnum>,
     ::apache::thrift::type::enum_t<::test::fixtures::python_capi::NormalDecentEnum>,
     ::apache::thrift::type::struct_t<::test::fixtures::python_capi::PrimitiveStruct>,
     ::apache::thrift::type::struct_t<::test::fixtures::python_capi::ListStruct>,
-    ::apache::thrift::type::enum_t<::test::fixtures::python_capi::DepEnum>,
     ::apache::thrift::type::struct_t<::test::fixtures::python_capi::DepStruct>,
-    ::apache::thrift::type::list<::apache::thrift::type::struct_t<::test::fixtures::python_capi::DepStruct>>,
+    ::apache::thrift::type::enum_t<::test::fixtures::python_capi::DepEnum>,
     ::apache::thrift::type::struct_t<::test::fixtures::python_capi::SerializedStruct>,
+    ::apache::thrift::type::list<::apache::thrift::type::struct_t<::test::fixtures::python_capi::DepStruct>>,
     ::apache::thrift::type::union_t<::test::fixtures::python_capi::SerializedUnion>,
     ::apache::thrift::type::exception_t<::test::fixtures::python_capi::SerializedError>
   >;
@@ -5009,7 +5009,7 @@ class ComposeStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  ComposeStruct(apache::thrift::FragileConstructor, ::test::fixtures::python_capi::MyEnum enum___arg, ::test::fixtures::python_capi::NormalDecentEnum renamed___arg, ::test::fixtures::python_capi::PrimitiveStruct primitive__arg, ::std::shared_ptr<const ::test::fixtures::python_capi::ListAlias> aliased__arg, ::test::fixtures::python_capi::DepEnum xenum__arg, ::test::fixtures::python_capi::DepStruct xstruct__arg, ::std::vector<::test::fixtures::python_capi::DepStruct> friends__arg, ::test::fixtures::python_capi::SerializedStruct serial_struct__arg, ::test::fixtures::python_capi::SerializedUnion serial_union__arg, ::test::fixtures::python_capi::SerializedError serial_error__arg);
+  ComposeStruct(apache::thrift::FragileConstructor, ::test::fixtures::python_capi::MyEnum enum___arg, ::test::fixtures::python_capi::NormalDecentEnum renamed___arg, ::test::fixtures::python_capi::PrimitiveStruct primitive__arg, ::std::shared_ptr<const ::test::fixtures::python_capi::ListAlias> aliased__arg, ::test::fixtures::python_capi::DepStruct xstruct__arg, ::test::fixtures::python_capi::DepEnum xenum__arg, ::test::fixtures::python_capi::SerializedStruct serial_struct__arg, ::std::vector<::test::fixtures::python_capi::DepStruct> friends__arg, ::test::fixtures::python_capi::SerializedUnion serial_union__arg, ::test::fixtures::python_capi::SerializedError serial_error__arg);
 
   ComposeStruct(ComposeStruct&&) noexcept;
 
@@ -5027,13 +5027,13 @@ class ComposeStruct final  {
  private:
   ::std::shared_ptr<const ::test::fixtures::python_capi::ListAlias> __fbthrift_field_aliased;
  private:
-  ::test::fixtures::python_capi::DepEnum __fbthrift_field_xenum;
- private:
   ::test::fixtures::python_capi::DepStruct __fbthrift_field_xstruct;
  private:
-  ::std::vector<::test::fixtures::python_capi::DepStruct> __fbthrift_field_friends;
+  ::test::fixtures::python_capi::DepEnum __fbthrift_field_xenum;
  private:
   ::test::fixtures::python_capi::SerializedStruct __fbthrift_field_serial_struct;
+ private:
+  ::std::vector<::test::fixtures::python_capi::DepStruct> __fbthrift_field_friends;
  private:
   ::test::fixtures::python_capi::SerializedUnion __fbthrift_field_serial_union;
  private:
@@ -5205,164 +5205,164 @@ class ComposeStruct final  {
     return static_cast<const T&&>(__fbthrift_field_aliased);
   }
 
-  template <typename..., typename T = ::test::fixtures::python_capi::DepEnum>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> xenum_ref() const& {
-    return {this->__fbthrift_field_xenum, __isset.at(3), __isset.bit(3)};
-  }
-
-  template <typename..., typename T = ::test::fixtures::python_capi::DepEnum>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> xenum_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_xenum), __isset.at(3), __isset.bit(3)};
-  }
-
-  template <typename..., typename T = ::test::fixtures::python_capi::DepEnum>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> xenum_ref() & {
-    return {this->__fbthrift_field_xenum, __isset.at(3), __isset.bit(3)};
-  }
-
-  template <typename..., typename T = ::test::fixtures::python_capi::DepEnum>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> xenum_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_xenum), __isset.at(3), __isset.bit(3)};
-  }
-
-  template <typename..., typename T = ::test::fixtures::python_capi::DepEnum>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> xenum() const& {
-    return {this->__fbthrift_field_xenum, __isset.at(3), __isset.bit(3)};
-  }
-
-  template <typename..., typename T = ::test::fixtures::python_capi::DepEnum>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> xenum() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_xenum), __isset.at(3), __isset.bit(3)};
-  }
-
-  template <typename..., typename T = ::test::fixtures::python_capi::DepEnum>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> xenum() & {
-    return {this->__fbthrift_field_xenum, __isset.at(3), __isset.bit(3)};
-  }
-
-  template <typename..., typename T = ::test::fixtures::python_capi::DepEnum>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> xenum() && {
-    return {static_cast<T&&>(this->__fbthrift_field_xenum), __isset.at(3), __isset.bit(3)};
-  }
-
   template <typename..., typename T = ::test::fixtures::python_capi::DepStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> xstruct_ref() const& {
-    return {this->__fbthrift_field_xstruct, __isset.at(4), __isset.bit(4)};
+    return {this->__fbthrift_field_xstruct, __isset.at(3), __isset.bit(3)};
   }
 
   template <typename..., typename T = ::test::fixtures::python_capi::DepStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> xstruct_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_xstruct), __isset.at(4), __isset.bit(4)};
+    return {static_cast<const T&&>(this->__fbthrift_field_xstruct), __isset.at(3), __isset.bit(3)};
   }
 
   template <typename..., typename T = ::test::fixtures::python_capi::DepStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> xstruct_ref() & {
-    return {this->__fbthrift_field_xstruct, __isset.at(4), __isset.bit(4)};
+    return {this->__fbthrift_field_xstruct, __isset.at(3), __isset.bit(3)};
   }
 
   template <typename..., typename T = ::test::fixtures::python_capi::DepStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> xstruct_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_xstruct), __isset.at(4), __isset.bit(4)};
+    return {static_cast<T&&>(this->__fbthrift_field_xstruct), __isset.at(3), __isset.bit(3)};
   }
 
   template <typename..., typename T = ::test::fixtures::python_capi::DepStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> xstruct() const& {
-    return {this->__fbthrift_field_xstruct, __isset.at(4), __isset.bit(4)};
+    return {this->__fbthrift_field_xstruct, __isset.at(3), __isset.bit(3)};
   }
 
   template <typename..., typename T = ::test::fixtures::python_capi::DepStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> xstruct() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_xstruct), __isset.at(4), __isset.bit(4)};
+    return {static_cast<const T&&>(this->__fbthrift_field_xstruct), __isset.at(3), __isset.bit(3)};
   }
 
   template <typename..., typename T = ::test::fixtures::python_capi::DepStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> xstruct() & {
-    return {this->__fbthrift_field_xstruct, __isset.at(4), __isset.bit(4)};
+    return {this->__fbthrift_field_xstruct, __isset.at(3), __isset.bit(3)};
   }
 
   template <typename..., typename T = ::test::fixtures::python_capi::DepStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> xstruct() && {
-    return {static_cast<T&&>(this->__fbthrift_field_xstruct), __isset.at(4), __isset.bit(4)};
+    return {static_cast<T&&>(this->__fbthrift_field_xstruct), __isset.at(3), __isset.bit(3)};
   }
 
-  template <typename..., typename T = ::std::vector<::test::fixtures::python_capi::DepStruct>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> friends_ref() const& {
-    return {this->__fbthrift_field_friends, __isset.at(5), __isset.bit(5)};
+  template <typename..., typename T = ::test::fixtures::python_capi::DepEnum>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> xenum_ref() const& {
+    return {this->__fbthrift_field_xenum, __isset.at(4), __isset.bit(4)};
   }
 
-  template <typename..., typename T = ::std::vector<::test::fixtures::python_capi::DepStruct>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> friends_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_friends), __isset.at(5), __isset.bit(5)};
+  template <typename..., typename T = ::test::fixtures::python_capi::DepEnum>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> xenum_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_xenum), __isset.at(4), __isset.bit(4)};
   }
 
-  template <typename..., typename T = ::std::vector<::test::fixtures::python_capi::DepStruct>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> friends_ref() & {
-    return {this->__fbthrift_field_friends, __isset.at(5), __isset.bit(5)};
+  template <typename..., typename T = ::test::fixtures::python_capi::DepEnum>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> xenum_ref() & {
+    return {this->__fbthrift_field_xenum, __isset.at(4), __isset.bit(4)};
   }
 
-  template <typename..., typename T = ::std::vector<::test::fixtures::python_capi::DepStruct>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> friends_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_friends), __isset.at(5), __isset.bit(5)};
+  template <typename..., typename T = ::test::fixtures::python_capi::DepEnum>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> xenum_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_xenum), __isset.at(4), __isset.bit(4)};
   }
 
-  template <typename..., typename T = ::std::vector<::test::fixtures::python_capi::DepStruct>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> friends() const& {
-    return {this->__fbthrift_field_friends, __isset.at(5), __isset.bit(5)};
+  template <typename..., typename T = ::test::fixtures::python_capi::DepEnum>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> xenum() const& {
+    return {this->__fbthrift_field_xenum, __isset.at(4), __isset.bit(4)};
   }
 
-  template <typename..., typename T = ::std::vector<::test::fixtures::python_capi::DepStruct>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> friends() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_friends), __isset.at(5), __isset.bit(5)};
+  template <typename..., typename T = ::test::fixtures::python_capi::DepEnum>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> xenum() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_xenum), __isset.at(4), __isset.bit(4)};
   }
 
-  template <typename..., typename T = ::std::vector<::test::fixtures::python_capi::DepStruct>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> friends() & {
-    return {this->__fbthrift_field_friends, __isset.at(5), __isset.bit(5)};
+  template <typename..., typename T = ::test::fixtures::python_capi::DepEnum>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> xenum() & {
+    return {this->__fbthrift_field_xenum, __isset.at(4), __isset.bit(4)};
   }
 
-  template <typename..., typename T = ::std::vector<::test::fixtures::python_capi::DepStruct>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> friends() && {
-    return {static_cast<T&&>(this->__fbthrift_field_friends), __isset.at(5), __isset.bit(5)};
+  template <typename..., typename T = ::test::fixtures::python_capi::DepEnum>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> xenum() && {
+    return {static_cast<T&&>(this->__fbthrift_field_xenum), __isset.at(4), __isset.bit(4)};
   }
 
   template <typename..., typename T = ::test::fixtures::python_capi::SerializedStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> serial_struct_ref() const& {
-    return {this->__fbthrift_field_serial_struct, __isset.at(6), __isset.bit(6)};
+    return {this->__fbthrift_field_serial_struct, __isset.at(5), __isset.bit(5)};
   }
 
   template <typename..., typename T = ::test::fixtures::python_capi::SerializedStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> serial_struct_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_serial_struct), __isset.at(6), __isset.bit(6)};
+    return {static_cast<const T&&>(this->__fbthrift_field_serial_struct), __isset.at(5), __isset.bit(5)};
   }
 
   template <typename..., typename T = ::test::fixtures::python_capi::SerializedStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> serial_struct_ref() & {
-    return {this->__fbthrift_field_serial_struct, __isset.at(6), __isset.bit(6)};
+    return {this->__fbthrift_field_serial_struct, __isset.at(5), __isset.bit(5)};
   }
 
   template <typename..., typename T = ::test::fixtures::python_capi::SerializedStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> serial_struct_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_serial_struct), __isset.at(6), __isset.bit(6)};
+    return {static_cast<T&&>(this->__fbthrift_field_serial_struct), __isset.at(5), __isset.bit(5)};
   }
 
   template <typename..., typename T = ::test::fixtures::python_capi::SerializedStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> serial_struct() const& {
-    return {this->__fbthrift_field_serial_struct, __isset.at(6), __isset.bit(6)};
+    return {this->__fbthrift_field_serial_struct, __isset.at(5), __isset.bit(5)};
   }
 
   template <typename..., typename T = ::test::fixtures::python_capi::SerializedStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> serial_struct() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_serial_struct), __isset.at(6), __isset.bit(6)};
+    return {static_cast<const T&&>(this->__fbthrift_field_serial_struct), __isset.at(5), __isset.bit(5)};
   }
 
   template <typename..., typename T = ::test::fixtures::python_capi::SerializedStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> serial_struct() & {
-    return {this->__fbthrift_field_serial_struct, __isset.at(6), __isset.bit(6)};
+    return {this->__fbthrift_field_serial_struct, __isset.at(5), __isset.bit(5)};
   }
 
   template <typename..., typename T = ::test::fixtures::python_capi::SerializedStruct>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> serial_struct() && {
-    return {static_cast<T&&>(this->__fbthrift_field_serial_struct), __isset.at(6), __isset.bit(6)};
+    return {static_cast<T&&>(this->__fbthrift_field_serial_struct), __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::vector<::test::fixtures::python_capi::DepStruct>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> friends_ref() const& {
+    return {this->__fbthrift_field_friends, __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = ::std::vector<::test::fixtures::python_capi::DepStruct>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> friends_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_friends), __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = ::std::vector<::test::fixtures::python_capi::DepStruct>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> friends_ref() & {
+    return {this->__fbthrift_field_friends, __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = ::std::vector<::test::fixtures::python_capi::DepStruct>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> friends_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_friends), __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = ::std::vector<::test::fixtures::python_capi::DepStruct>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> friends() const& {
+    return {this->__fbthrift_field_friends, __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = ::std::vector<::test::fixtures::python_capi::DepStruct>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> friends() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_friends), __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = ::std::vector<::test::fixtures::python_capi::DepStruct>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> friends() & {
+    return {this->__fbthrift_field_friends, __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = ::std::vector<::test::fixtures::python_capi::DepStruct>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> friends() && {
+    return {static_cast<T&&>(this->__fbthrift_field_friends), __isset.at(6), __isset.bit(6)};
   }
 
   template <typename..., typename T = ::test::fixtures::python_capi::SerializedUnion>
@@ -5473,6 +5473,15 @@ class ComposeStruct final  {
     primitive_ref() = std::forward<T_ComposeStruct_primitive_struct_setter>(primitive_);
     return __fbthrift_field_primitive;
   }
+  const ::test::fixtures::python_capi::DepStruct& get_xstruct() const&;
+  ::test::fixtures::python_capi::DepStruct get_xstruct() &&;
+
+  template <typename T_ComposeStruct_xstruct_struct_setter = ::test::fixtures::python_capi::DepStruct>
+  [[deprecated("Use `FOO.xstruct_ref() = BAR;` instead of `FOO.set_xstruct(BAR);`")]]
+  ::test::fixtures::python_capi::DepStruct& set_xstruct(T_ComposeStruct_xstruct_struct_setter&& xstruct_) {
+    xstruct_ref() = std::forward<T_ComposeStruct_xstruct_struct_setter>(xstruct_);
+    return __fbthrift_field_xstruct;
+  }
 
   ::test::fixtures::python_capi::DepEnum get_xenum() const {
     return __fbthrift_field_xenum;
@@ -5483,14 +5492,14 @@ class ComposeStruct final  {
     xenum_ref() = xenum_;
     return __fbthrift_field_xenum;
   }
-  const ::test::fixtures::python_capi::DepStruct& get_xstruct() const&;
-  ::test::fixtures::python_capi::DepStruct get_xstruct() &&;
+  const ::test::fixtures::python_capi::SerializedStruct& get_serial_struct() const&;
+  ::test::fixtures::python_capi::SerializedStruct get_serial_struct() &&;
 
-  template <typename T_ComposeStruct_xstruct_struct_setter = ::test::fixtures::python_capi::DepStruct>
-  [[deprecated("Use `FOO.xstruct_ref() = BAR;` instead of `FOO.set_xstruct(BAR);`")]]
-  ::test::fixtures::python_capi::DepStruct& set_xstruct(T_ComposeStruct_xstruct_struct_setter&& xstruct_) {
-    xstruct_ref() = std::forward<T_ComposeStruct_xstruct_struct_setter>(xstruct_);
-    return __fbthrift_field_xstruct;
+  template <typename T_ComposeStruct_serial_struct_struct_setter = ::test::fixtures::python_capi::SerializedStruct>
+  [[deprecated("Use `FOO.serial_struct_ref() = BAR;` instead of `FOO.set_serial_struct(BAR);`")]]
+  ::test::fixtures::python_capi::SerializedStruct& set_serial_struct(T_ComposeStruct_serial_struct_struct_setter&& serial_struct_) {
+    serial_struct_ref() = std::forward<T_ComposeStruct_serial_struct_struct_setter>(serial_struct_);
+    return __fbthrift_field_serial_struct;
   }
   const ::std::vector<::test::fixtures::python_capi::DepStruct>& get_friends() const&;
   ::std::vector<::test::fixtures::python_capi::DepStruct> get_friends() &&;
@@ -5500,15 +5509,6 @@ class ComposeStruct final  {
   ::std::vector<::test::fixtures::python_capi::DepStruct>& set_friends(T_ComposeStruct_friends_struct_setter&& friends_) {
     friends_ref() = std::forward<T_ComposeStruct_friends_struct_setter>(friends_);
     return __fbthrift_field_friends;
-  }
-  const ::test::fixtures::python_capi::SerializedStruct& get_serial_struct() const&;
-  ::test::fixtures::python_capi::SerializedStruct get_serial_struct() &&;
-
-  template <typename T_ComposeStruct_serial_struct_struct_setter = ::test::fixtures::python_capi::SerializedStruct>
-  [[deprecated("Use `FOO.serial_struct_ref() = BAR;` instead of `FOO.set_serial_struct(BAR);`")]]
-  ::test::fixtures::python_capi::SerializedStruct& set_serial_struct(T_ComposeStruct_serial_struct_struct_setter&& serial_struct_) {
-    serial_struct_ref() = std::forward<T_ComposeStruct_serial_struct_struct_setter>(serial_struct_);
-    return __fbthrift_field_serial_struct;
   }
   const ::test::fixtures::python_capi::SerializedUnion& get_serial_union() const&;
   ::test::fixtures::python_capi::SerializedUnion get_serial_union() &&;
@@ -5567,19 +5567,19 @@ class Shallot final  {
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::myEnum,
     ::apache::thrift::ident::myStruct,
-    ::apache::thrift::ident::myString,
     ::apache::thrift::ident::intSet,
+    ::apache::thrift::ident::myString,
     ::apache::thrift::ident::doubleList,
     ::apache::thrift::ident::strMap,
     ::apache::thrift::ident::adaptedInt
   >;
 
-  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,4,6,8,9,10};
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,6,4,8,9,10};
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::enum_t<::test::fixtures::python_capi::MyEnum>,
     ::apache::thrift::type::struct_t<::test::fixtures::python_capi::PrimitiveStruct>,
-    ::apache::thrift::type::string_t,
     ::apache::thrift::type::set<::apache::thrift::type::i64_t>,
+    ::apache::thrift::type::string_t,
     ::apache::thrift::type::list<::apache::thrift::type::double_t>,
     ::apache::thrift::type::map<::apache::thrift::type::binary_t, ::apache::thrift::type::string_t>,
     ::apache::thrift::type::adapted<::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>, ::apache::thrift::type::i64_t>
@@ -5617,8 +5617,8 @@ class Shallot final  {
     __EMPTY__ = 0,
     myEnum = 1,
     myStruct = 2,
-    myString = 4,
     intSet = 6,
+    myString = 4,
     doubleList = 8,
     strMap = 9,
     adaptedInt = 10,
@@ -5645,14 +5645,14 @@ class Shallot final  {
         set_myStruct(std::move(rhs.value_.myStruct));
         break;
       }
-      case Type::myString:
-      {
-        set_myString(std::move(rhs.value_.myString));
-        break;
-      }
       case Type::intSet:
       {
         set_intSet(std::move(rhs.value_.intSet));
+        break;
+      }
+      case Type::myString:
+      {
+        set_myString(std::move(rhs.value_.myString));
         break;
       }
       case Type::doubleList:
@@ -5697,14 +5697,14 @@ class Shallot final  {
         set_myStruct(rhs.value_.myStruct);
         break;
       }
-      case Type::myString:
-      {
-        set_myString(rhs.value_.myString);
-        break;
-      }
       case Type::intSet:
       {
         set_intSet(rhs.value_.intSet);
+        break;
+      }
+      case Type::myString:
+      {
+        set_myString(rhs.value_.myString);
         break;
       }
       case Type::doubleList:
@@ -5748,14 +5748,14 @@ class Shallot final  {
         set_myStruct(std::move(rhs.value_.myStruct));
         break;
       }
-      case Type::myString:
-      {
-        set_myString(std::move(rhs.value_.myString));
-        break;
-      }
       case Type::intSet:
       {
         set_intSet(std::move(rhs.value_.intSet));
+        break;
+      }
+      case Type::myString:
+      {
+        set_myString(std::move(rhs.value_.myString));
         break;
       }
       case Type::doubleList:
@@ -5801,14 +5801,14 @@ class Shallot final  {
         set_myStruct(rhs.value_.myStruct);
         break;
       }
-      case Type::myString:
-      {
-        set_myString(rhs.value_.myString);
-        break;
-      }
       case Type::intSet:
       {
         set_intSet(rhs.value_.intSet);
+        break;
+      }
+      case Type::myString:
+      {
+        set_myString(rhs.value_.myString);
         break;
       }
       case Type::doubleList:
@@ -5842,8 +5842,8 @@ class Shallot final  {
   union storage_type {
     ::test::fixtures::python_capi::MyEnum myEnum;
     ::test::fixtures::python_capi::PrimitiveStruct myStruct;
-    ::std::string myString;
     ::std::set<::std::int64_t> intSet;
+    ::std::string myString;
     ::std::vector<double> doubleList;
     ::std::map<::std::string, ::std::string> strMap;
     ::apache::thrift::type::ProtocolId adaptedInt;
@@ -5893,33 +5893,6 @@ class Shallot final  {
   }
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
-  ::std::string& set_myString(::std::string const &t) {
-    using T0 = ::std::string;
-    using T = folly::type_t<T0, A...>;
-    __fbthrift_clear();
-    type_ = folly::to_underlying(Type::myString);
-    ::new (std::addressof(value_.myString)) T(t);
-    return value_.myString;
-  }
-
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
-  ::std::string& set_myString(::std::string&& t) {
-    using T0 = ::std::string;
-    using T = folly::type_t<T0, A...>;
-    __fbthrift_clear();
-    type_ = folly::to_underlying(Type::myString);
-    ::new (std::addressof(value_.myString)) T(std::move(t));
-    return value_.myString;
-  }
-
-  template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::std::string& set_myString(T&&... t) {
-    __fbthrift_clear();
-    type_ = folly::to_underlying(Type::myString);
-    ::new (std::addressof(value_.myString)) ::std::string(std::forward<T>(t)...);
-    return value_.myString;
-  }
-
-  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
   ::std::set<::std::int64_t>& set_intSet(::std::set<::std::int64_t> const &t) {
     using T0 = ::std::set<::std::int64_t>;
     using T = folly::type_t<T0, A...>;
@@ -5944,6 +5917,33 @@ class Shallot final  {
     type_ = folly::to_underlying(Type::intSet);
     ::new (std::addressof(value_.intSet)) ::std::set<::std::int64_t>(std::forward<T>(t)...);
     return value_.intSet;
+  }
+
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  ::std::string& set_myString(::std::string const &t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::myString);
+    ::new (std::addressof(value_.myString)) T(t);
+    return value_.myString;
+  }
+
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  ::std::string& set_myString(::std::string&& t) {
+    using T0 = ::std::string;
+    using T = folly::type_t<T0, A...>;
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::myString);
+    ::new (std::addressof(value_.myString)) T(std::move(t));
+    return value_.myString;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::std::string& set_myString(T&&... t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::myString);
+    ::new (std::addressof(value_.myString)) ::std::string(std::forward<T>(t)...);
+    return value_.myString;
   }
 
   template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
@@ -6024,18 +6024,18 @@ class Shallot final  {
     return value_.myStruct;
   }
 
-  ::std::string const& get_myString() const {
-    if (getType() != Type::myString) {
-      ::apache::thrift::detail::throw_on_bad_union_field_access();
-    }
-    return value_.myString;
-  }
-
   ::std::set<::std::int64_t> const& get_intSet() const {
     if (getType() != Type::intSet) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
     }
     return value_.intSet;
+  }
+
+  ::std::string const& get_myString() const {
+    if (getType() != Type::myString) {
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
+    }
+    return value_.myString;
   }
 
   ::std::vector<double> const& get_doubleList() const {
@@ -6069,14 +6069,14 @@ class Shallot final  {
     return value_.myStruct;
   }
 
-  ::std::string& mutable_myString() {
-    assert(getType() == Type::myString);
-    return value_.myString;
-  }
-
   ::std::set<::std::int64_t>& mutable_intSet() {
     assert(getType() == Type::intSet);
     return value_.intSet;
+  }
+
+  ::std::string& mutable_myString() {
+    assert(getType() == Type::myString);
+    return value_.myString;
   }
 
   ::std::vector<double>& mutable_doubleList() {
@@ -6104,14 +6104,14 @@ class Shallot final  {
     return std::move(value_.myStruct);
   }
 
-  ::std::string move_myString() {
-    assert(getType() == Type::myString);
-    return std::move(value_.myString);
-  }
-
   ::std::set<::std::int64_t> move_intSet() {
     assert(getType() == Type::intSet);
     return std::move(value_.intSet);
+  }
+
+  ::std::string move_myString() {
+    assert(getType() == Type::myString);
+    return std::move(value_.myString);
   }
 
   ::std::vector<double> move_doubleList() {
@@ -6167,25 +6167,6 @@ class Shallot final  {
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> myStruct_ref() && {
     return {std::move(value_.myStruct), type_, folly::to_underlying(Type::myStruct), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
-  template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> myString_ref() const& {
-    return {value_.myString, type_, folly::to_underlying(Type::myString), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
-  }
-
-  template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> myString_ref() const&& {
-    return {std::move(value_.myString), type_, folly::to_underlying(Type::myString), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
-  }
-
-  template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> myString_ref() & {
-    return {value_.myString, type_, folly::to_underlying(Type::myString), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
-  }
-
-  template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> myString_ref() && {
-    return {std::move(value_.myString), type_, folly::to_underlying(Type::myString), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
-  }
   template <typename..., typename T = ::std::set<::std::int64_t>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> intSet_ref() const& {
     return {value_.intSet, type_, folly::to_underlying(Type::intSet), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
@@ -6204,6 +6185,25 @@ class Shallot final  {
   template <typename..., typename T = ::std::set<::std::int64_t>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> intSet_ref() && {
     return {std::move(value_.intSet), type_, folly::to_underlying(Type::intSet), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> myString_ref() const& {
+    return {value_.myString, type_, folly::to_underlying(Type::myString), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> myString_ref() const&& {
+    return {std::move(value_.myString), type_, folly::to_underlying(Type::myString), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> myString_ref() & {
+    return {value_.myString, type_, folly::to_underlying(Type::myString), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> myString_ref() && {
+    return {std::move(value_.myString), type_, folly::to_underlying(Type::myString), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   template <typename..., typename T = ::std::vector<double>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> doubleList_ref() const& {

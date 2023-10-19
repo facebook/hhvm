@@ -1823,10 +1823,10 @@ ComposeStruct::ComposeStruct(FOLLY_MAYBE_UNUSED ComposeStruct&& other) noexcept 
     __fbthrift_field_renamed_(std::move(other.__fbthrift_field_renamed_)),
     __fbthrift_field_primitive(std::move(other.__fbthrift_field_primitive)),
     __fbthrift_field_aliased(std::move(other.__fbthrift_field_aliased)),
-    __fbthrift_field_xenum(std::move(other.__fbthrift_field_xenum)),
     __fbthrift_field_xstruct(std::move(other.__fbthrift_field_xstruct)),
-    __fbthrift_field_friends(std::move(other.__fbthrift_field_friends)),
+    __fbthrift_field_xenum(std::move(other.__fbthrift_field_xenum)),
     __fbthrift_field_serial_struct(std::move(other.__fbthrift_field_serial_struct)),
+    __fbthrift_field_friends(std::move(other.__fbthrift_field_friends)),
     __fbthrift_field_serial_union(std::move(other.__fbthrift_field_serial_union)),
     __fbthrift_field_serial_error(std::move(other.__fbthrift_field_serial_error)),
     __isset(other.__isset) {
@@ -1837,10 +1837,10 @@ ComposeStruct& ComposeStruct::operator=(FOLLY_MAYBE_UNUSED ComposeStruct&& other
     this->__fbthrift_field_renamed_ = std::move(other.__fbthrift_field_renamed_);
     this->__fbthrift_field_primitive = std::move(other.__fbthrift_field_primitive);
     this->__fbthrift_field_aliased = std::move(other.__fbthrift_field_aliased);
-    this->__fbthrift_field_xenum = std::move(other.__fbthrift_field_xenum);
     this->__fbthrift_field_xstruct = std::move(other.__fbthrift_field_xstruct);
-    this->__fbthrift_field_friends = std::move(other.__fbthrift_field_friends);
+    this->__fbthrift_field_xenum = std::move(other.__fbthrift_field_xenum);
     this->__fbthrift_field_serial_struct = std::move(other.__fbthrift_field_serial_struct);
+    this->__fbthrift_field_friends = std::move(other.__fbthrift_field_friends);
     this->__fbthrift_field_serial_union = std::move(other.__fbthrift_field_serial_union);
     this->__fbthrift_field_serial_error = std::move(other.__fbthrift_field_serial_error);
     __isset = other.__isset;
@@ -1848,15 +1848,15 @@ ComposeStruct& ComposeStruct::operator=(FOLLY_MAYBE_UNUSED ComposeStruct&& other
 }
 
 
-ComposeStruct::ComposeStruct(apache::thrift::FragileConstructor, ::test::fixtures::python_capi::MyEnum enum___arg, ::test::fixtures::python_capi::NormalDecentEnum renamed___arg, ::test::fixtures::python_capi::PrimitiveStruct primitive__arg, ::std::shared_ptr<const ::test::fixtures::python_capi::ListAlias> aliased__arg, ::test::fixtures::python_capi::DepEnum xenum__arg, ::test::fixtures::python_capi::DepStruct xstruct__arg, ::std::vector<::test::fixtures::python_capi::DepStruct> friends__arg, ::test::fixtures::python_capi::SerializedStruct serial_struct__arg, ::test::fixtures::python_capi::SerializedUnion serial_union__arg, ::test::fixtures::python_capi::SerializedError serial_error__arg) :
+ComposeStruct::ComposeStruct(apache::thrift::FragileConstructor, ::test::fixtures::python_capi::MyEnum enum___arg, ::test::fixtures::python_capi::NormalDecentEnum renamed___arg, ::test::fixtures::python_capi::PrimitiveStruct primitive__arg, ::std::shared_ptr<const ::test::fixtures::python_capi::ListAlias> aliased__arg, ::test::fixtures::python_capi::DepStruct xstruct__arg, ::test::fixtures::python_capi::DepEnum xenum__arg, ::test::fixtures::python_capi::SerializedStruct serial_struct__arg, ::std::vector<::test::fixtures::python_capi::DepStruct> friends__arg, ::test::fixtures::python_capi::SerializedUnion serial_union__arg, ::test::fixtures::python_capi::SerializedError serial_error__arg) :
     __fbthrift_field_enum_(std::move(enum___arg)),
     __fbthrift_field_renamed_(std::move(renamed___arg)),
     __fbthrift_field_primitive(std::move(primitive__arg)),
     __fbthrift_field_aliased(std::move(aliased__arg)),
-    __fbthrift_field_xenum(std::move(xenum__arg)),
     __fbthrift_field_xstruct(std::move(xstruct__arg)),
-    __fbthrift_field_friends(std::move(friends__arg)),
+    __fbthrift_field_xenum(std::move(xenum__arg)),
     __fbthrift_field_serial_struct(std::move(serial_struct__arg)),
+    __fbthrift_field_friends(std::move(friends__arg)),
     __fbthrift_field_serial_union(std::move(serial_union__arg)),
     __fbthrift_field_serial_error(std::move(serial_error__arg)) {
   __isset.set(folly::index_constant<0>(), true);
@@ -1877,10 +1877,10 @@ void ComposeStruct::__fbthrift_clear() {
   this->__fbthrift_field_renamed_ = ::test::fixtures::python_capi::NormalDecentEnum();
   ::apache::thrift::clear(this->__fbthrift_field_primitive);
   if (this->__fbthrift_field_aliased) this->__fbthrift_field_aliased = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::test::fixtures::python_capi::ListAlias>>();
-  this->__fbthrift_field_xenum = ::test::fixtures::python_capi::DepEnum();
   ::apache::thrift::clear(this->__fbthrift_field_xstruct);
-  this->__fbthrift_field_friends.clear();
+  this->__fbthrift_field_xenum = ::test::fixtures::python_capi::DepEnum();
   ::apache::thrift::clear(this->__fbthrift_field_serial_struct);
+  this->__fbthrift_field_friends.clear();
   ::apache::thrift::clear(this->__fbthrift_field_serial_union);
   ::apache::thrift::clear(this->__fbthrift_field_serial_error);
   __isset = {};
@@ -1917,20 +1917,20 @@ const ::test::fixtures::python_capi::DepStruct& ComposeStruct::get_xstruct() con
   return std::move(__fbthrift_field_xstruct);
 }
 
-const ::std::vector<::test::fixtures::python_capi::DepStruct>& ComposeStruct::get_friends() const& {
-  return __fbthrift_field_friends;
-}
-
-::std::vector<::test::fixtures::python_capi::DepStruct> ComposeStruct::get_friends() && {
-  return std::move(__fbthrift_field_friends);
-}
-
 const ::test::fixtures::python_capi::SerializedStruct& ComposeStruct::get_serial_struct() const& {
   return __fbthrift_field_serial_struct;
 }
 
 ::test::fixtures::python_capi::SerializedStruct ComposeStruct::get_serial_struct() && {
   return std::move(__fbthrift_field_serial_struct);
+}
+
+const ::std::vector<::test::fixtures::python_capi::DepStruct>& ComposeStruct::get_friends() const& {
+  return __fbthrift_field_friends;
+}
+
+::std::vector<::test::fixtures::python_capi::DepStruct> ComposeStruct::get_friends() && {
+  return std::move(__fbthrift_field_friends);
 }
 
 const ::test::fixtures::python_capi::SerializedUnion& ComposeStruct::get_serial_union() const& {
@@ -1956,10 +1956,10 @@ void swap(FOLLY_MAYBE_UNUSED ComposeStruct& a, FOLLY_MAYBE_UNUSED ComposeStruct&
   swap(a.__fbthrift_field_renamed_, b.__fbthrift_field_renamed_);
   swap(a.__fbthrift_field_primitive, b.__fbthrift_field_primitive);
   swap(a.__fbthrift_field_aliased, b.__fbthrift_field_aliased);
-  swap(a.__fbthrift_field_xenum, b.__fbthrift_field_xenum);
   swap(a.__fbthrift_field_xstruct, b.__fbthrift_field_xstruct);
-  swap(a.__fbthrift_field_friends, b.__fbthrift_field_friends);
+  swap(a.__fbthrift_field_xenum, b.__fbthrift_field_xenum);
   swap(a.__fbthrift_field_serial_struct, b.__fbthrift_field_serial_struct);
+  swap(a.__fbthrift_field_friends, b.__fbthrift_field_friends);
   swap(a.__fbthrift_field_serial_union, b.__fbthrift_field_serial_union);
   swap(a.__fbthrift_field_serial_error, b.__fbthrift_field_serial_error);
   swap(a.__isset, b.__isset);
@@ -1995,14 +1995,14 @@ static_assert(
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         ComposeStruct,
-        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
-        ::std::vector<::test::fixtures::python_capi::DepStruct>>,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::python_capi::SerializedStruct>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         ComposeStruct,
-        ::apache::thrift::type_class::structure,
-        ::test::fixtures::python_capi::SerializedStruct>,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector<::test::fixtures::python_capi::DepStruct>>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
@@ -2074,11 +2074,11 @@ void Shallot::__fbthrift_clear() {
     case Type::myStruct:
       destruct(value_.myStruct);
       break;
-    case Type::myString:
-      destruct(value_.myString);
-      break;
     case Type::intSet:
       destruct(value_.intSet);
+      break;
+    case Type::myString:
+      destruct(value_.myString);
       break;
     case Type::doubleList:
       destruct(value_.doubleList);

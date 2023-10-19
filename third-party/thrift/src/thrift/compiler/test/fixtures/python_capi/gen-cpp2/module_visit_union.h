@@ -24,10 +24,10 @@ struct VisitUnion<::test::fixtures::python_capi::Shallot> {
       return f(0, *static_cast<T&&>(t).myEnum_ref());
     case Union::Type::myStruct:
       return f(1, *static_cast<T&&>(t).myStruct_ref());
-    case Union::Type::myString:
-      return f(2, *static_cast<T&&>(t).myString_ref());
     case Union::Type::intSet:
-      return f(3, *static_cast<T&&>(t).intSet_ref());
+      return f(2, *static_cast<T&&>(t).intSet_ref());
+    case Union::Type::myString:
+      return f(3, *static_cast<T&&>(t).myString_ref());
     case Union::Type::doubleList:
       return f(4, *static_cast<T&&>(t).doubleList_ref());
     case Union::Type::strMap:

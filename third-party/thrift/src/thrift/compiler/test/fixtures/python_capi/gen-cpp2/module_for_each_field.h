@@ -157,10 +157,10 @@ struct ForEachField<::test::fixtures::python_capi::ComposeStruct> {
     f(1, static_cast<T&&>(t).renamed__ref()...);
     f(2, static_cast<T&&>(t).primitive_ref()...);
     f(3, static_cast<T&&>(t).aliased_ref()...);
-    f(4, static_cast<T&&>(t).xenum_ref()...);
-    f(5, static_cast<T&&>(t).xstruct_ref()...);
-    f(6, static_cast<T&&>(t).friends_ref()...);
-    f(7, static_cast<T&&>(t).serial_struct_ref()...);
+    f(4, static_cast<T&&>(t).xstruct_ref()...);
+    f(5, static_cast<T&&>(t).xenum_ref()...);
+    f(6, static_cast<T&&>(t).serial_struct_ref()...);
+    f(7, static_cast<T&&>(t).friends_ref()...);
     f(8, static_cast<T&&>(t).serial_union_ref()...);
     f(9, static_cast<T&&>(t).serial_error_ref()...);
   }
@@ -172,8 +172,8 @@ struct ForEachField<::test::fixtures::python_capi::Shallot> {
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).myEnum_ref()...);
     f(1, static_cast<T&&>(t).myStruct_ref()...);
-    f(2, static_cast<T&&>(t).myString_ref()...);
-    f(3, static_cast<T&&>(t).intSet_ref()...);
+    f(2, static_cast<T&&>(t).intSet_ref()...);
+    f(3, static_cast<T&&>(t).myString_ref()...);
     f(4, static_cast<T&&>(t).doubleList_ref()...);
     f(5, static_cast<T&&>(t).strMap_ref()...);
     f(6, static_cast<T&&>(t).adaptedInt_ref()...);

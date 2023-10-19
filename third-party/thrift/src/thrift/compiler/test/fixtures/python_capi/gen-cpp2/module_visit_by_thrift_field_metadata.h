@@ -265,14 +265,14 @@ struct VisitByFieldId<::test::fixtures::python_capi::ComposeStruct> {
       return f(2, static_cast<T&&>(t).primitive_ref());
     case 4:
       return f(3, static_cast<T&&>(t).aliased_ref());
-    case 5:
-      return f(4, static_cast<T&&>(t).xenum_ref());
     case 6:
-      return f(5, static_cast<T&&>(t).xstruct_ref());
-    case 7:
-      return f(6, static_cast<T&&>(t).friends_ref());
+      return f(4, static_cast<T&&>(t).xstruct_ref());
+    case 5:
+      return f(5, static_cast<T&&>(t).xenum_ref());
     case 8:
-      return f(7, static_cast<T&&>(t).serial_struct_ref());
+      return f(6, static_cast<T&&>(t).serial_struct_ref());
+    case 7:
+      return f(7, static_cast<T&&>(t).friends_ref());
     case 9:
       return f(8, static_cast<T&&>(t).serial_union_ref());
     case 10:
@@ -292,10 +292,10 @@ struct VisitByFieldId<::test::fixtures::python_capi::Shallot> {
       return f(0, static_cast<T&&>(t).myEnum_ref());
     case 2:
       return f(1, static_cast<T&&>(t).myStruct_ref());
-    case 4:
-      return f(2, static_cast<T&&>(t).myString_ref());
     case 6:
-      return f(3, static_cast<T&&>(t).intSet_ref());
+      return f(2, static_cast<T&&>(t).intSet_ref());
+    case 4:
+      return f(3, static_cast<T&&>(t).myString_ref());
     case 8:
       return f(4, static_cast<T&&>(t).doubleList_ref());
     case 9:

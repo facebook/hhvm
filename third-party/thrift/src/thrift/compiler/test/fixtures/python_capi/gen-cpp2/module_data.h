@@ -44,8 +44,8 @@ template <> struct TEnumDataStorage<::test::fixtures::python_capi::Shallot::Type
   static constexpr std::array<type, size> values = {{
       type::myEnum,
       type::myStruct,
-      type::myString,
       type::intSet,
+      type::myString,
       type::doubleList,
       type::strMap,
       type::adaptedInt,
@@ -53,8 +53,8 @@ template <> struct TEnumDataStorage<::test::fixtures::python_capi::Shallot::Type
   static constexpr std::array<folly::StringPiece, size> names = {{
       "myEnum",
       "myStruct",
-      "myString",
       "intSet",
+      "myString",
       "doubleList",
       "strMap",
       "adaptedInt",

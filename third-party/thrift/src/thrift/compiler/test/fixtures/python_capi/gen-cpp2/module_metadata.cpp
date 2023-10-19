@@ -358,10 +358,10 @@ StructMetadata<::test::fixtures::python_capi::ComposeStruct>::gen(ThriftMetadata
     {2, "renamed_", false, std::make_unique<Enum<::test::fixtures::python_capi::NormalDecentEnum>>("module.AnnoyingEnum"), std::vector<ThriftConstStruct>{}},
     {3, "primitive", false, std::make_unique<Struct<::test::fixtures::python_capi::PrimitiveStruct>>("module.PrimitiveStruct"), std::vector<ThriftConstStruct>{}},
     {4, "aliased", false, std::make_unique<Typedef>("module.ListAlias", std::make_unique<Struct<::test::fixtures::python_capi::ListStruct>>("module.ListStruct"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{*cvStruct("cpp.Ref", {{"type", cvInteger(1)}}).cv_struct_ref(), }},
-    {5, "xenum", false, std::make_unique<Enum<::test::fixtures::python_capi::DepEnum>>("thrift_dep.DepEnum"), std::vector<ThriftConstStruct>{}},
     {6, "xstruct", false, std::make_unique<Struct<::test::fixtures::python_capi::DepStruct>>("thrift_dep.DepStruct"), std::vector<ThriftConstStruct>{}},
-    {7, "friends", false, std::make_unique<List>(std::make_unique<Struct<::test::fixtures::python_capi::DepStruct>>("thrift_dep.DepStruct")), std::vector<ThriftConstStruct>{}},
+    {5, "xenum", false, std::make_unique<Enum<::test::fixtures::python_capi::DepEnum>>("thrift_dep.DepEnum"), std::vector<ThriftConstStruct>{}},
     {8, "serial_struct", false, std::make_unique<Struct<::test::fixtures::python_capi::SerializedStruct>>("serialized_dep.SerializedStruct"), std::vector<ThriftConstStruct>{}},
+    {7, "friends", false, std::make_unique<List>(std::make_unique<Struct<::test::fixtures::python_capi::DepStruct>>("thrift_dep.DepStruct")), std::vector<ThriftConstStruct>{}},
     {9, "serial_union", false, std::make_unique<Union<::test::fixtures::python_capi::SerializedUnion>>("serialized_dep.SerializedUnion"), std::vector<ThriftConstStruct>{}},
     {10, "serial_error", false, std::make_unique<Struct<::test::fixtures::python_capi::SerializedError>>("serialized_dep.SerializedError"), std::vector<ThriftConstStruct>{}},
   }};
@@ -389,8 +389,8 @@ StructMetadata<::test::fixtures::python_capi::Shallot>::gen(ThriftMetadata& meta
   module_Onion_fields = new std::array<EncodedThriftField, 7>{{
     {1, "myEnum", false, std::make_unique<Enum<::test::fixtures::python_capi::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{}},
     {2, "myStruct", false, std::make_unique<Struct<::test::fixtures::python_capi::PrimitiveStruct>>("module.PrimitiveStruct"), std::vector<ThriftConstStruct>{}},
-    {4, "myString", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
     {6, "intSet", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{}},
+    {4, "myString", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
     {8, "doubleList", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE)), std::vector<ThriftConstStruct>{}},
     {9, "strMap", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}},
     {10, "adaptedInt", false, std::make_unique<Typedef>("id.ProtocolId", std::make_unique<Typedef>("id.ExternId", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{*cvStruct("thrift.Experimental", {}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::type::detail::StrongIntegerAdapter<::apache::thrift::type::ProtocolId>")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},

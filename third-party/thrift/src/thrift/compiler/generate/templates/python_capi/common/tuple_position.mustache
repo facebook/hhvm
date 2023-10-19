@@ -1,0 +1,9 @@
+  {{#struct:marshal_capi?}}
+  {{^struct:union?}}
+  {{#struct:fields?}}
+  static constexpr std::int16_t _fbthrift__{{struct:name}}__tuple_pos[{{struct:fields_size}}] = {
+    {{#struct:tuple_positions}}{{tuple:comma}}{{tuple:index}}{{/struct:tuple_positions}}
+  };
+  {{/struct:fields?}}
+  {{/struct:union?}}
+  {{/struct:marshal_capi?}}

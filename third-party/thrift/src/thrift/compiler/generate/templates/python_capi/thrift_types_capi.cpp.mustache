@@ -41,6 +41,9 @@ bool ensure_module_imported() {
       ::import_{{program:capi_module_prefix}}__thrift_types_capi));
   return import();
 }
+{{#program:structs}}
+{{> common/tuple_position }}
+{{/program:structs}}
 {{/program:generate_capi?}}
 } // namespace
 
@@ -104,7 +107,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
   {{#struct:fields}}
   Extractor<{{field:marshal_type}}>{}.extractInto(
       cpp.{{field:cpp_name}}_ref(),
-      PyTuple_GET_ITEM(fbThriftData, {{field:index}} + 1),{{! idx=0 records which fields set}}
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__{{struct:name}}__tuple_pos[{{field:index}}]),
       error);
   {{/struct:fields}}
   {{/struct:union?}}
@@ -208,7 +211,11 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   StrongRef _fbthrift__{{field:name}}(
     Constructor<{{field:marshal_type}}>{}
     .constructFrom(val.{{field:cpp_name}}_ref()));
-  if (!_fbthrift__{{field:name}} || setStructField(*fbthrift_data, {{field:index}}, *_fbthrift__{{field:name}}) == -1) {
+  if (!_fbthrift__{{field:name}} ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__{{struct:name}}__tuple_pos[{{field:index}}],
+          *_fbthrift__{{field:name}}) == -1) {
     {{! struct and previous fields auto-decref'd by StrongRef}}
     return nullptr;
   }

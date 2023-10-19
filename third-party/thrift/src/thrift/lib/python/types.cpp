@@ -653,7 +653,7 @@ PyObject* FOLLY_NULLABLE getExceptionThriftData(PyObject* generatedError) {
  *
  * Also, this assumes that struct_tuple has been created from PyTuple_New
  * without setting any fields. If this is used with a struct_tuple created
- * from python, it will leak the old value at index + 1.
+ * from python, it will leak the old value at index.
  */
 int setStructField(PyObject* struct_tuple, int16_t index, PyObject* value) {
   try {
@@ -666,7 +666,7 @@ int setStructField(PyObject* struct_tuple, int16_t index, PyObject* value) {
     return -1;
   }
   Py_INCREF(value);
-  PyTuple_SET_ITEM(struct_tuple, index + 1, value);
+  PyTuple_SET_ITEM(struct_tuple, index, value);
   return 0;
 }
 

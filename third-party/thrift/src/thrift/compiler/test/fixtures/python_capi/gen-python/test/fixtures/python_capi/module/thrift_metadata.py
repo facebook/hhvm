@@ -507,10 +507,10 @@ def _fbthrift_gen_metadata_struct_ComposeStruct(metadata_struct: _fbthrift_metad
     new_struct = _fbthrift_gen_metadata_enum_AnnoyingEnum(new_struct) # renamed_
     new_struct = _fbthrift_gen_metadata_struct_PrimitiveStruct(new_struct) # primitive
     new_struct = _fbthrift_gen_metadata_struct_ListStruct(new_struct) # aliased
-    new_struct = test.fixtures.python_capi.thrift_dep.thrift_metadata._fbthrift_gen_metadata_enum_DepEnum(new_struct) # xenum
     new_struct = test.fixtures.python_capi.thrift_dep.thrift_metadata._fbthrift_gen_metadata_struct_DepStruct(new_struct) # xstruct
-    new_struct = test.fixtures.python_capi.thrift_dep.thrift_metadata._fbthrift_gen_metadata_struct_DepStruct(new_struct) # friends
+    new_struct = test.fixtures.python_capi.thrift_dep.thrift_metadata._fbthrift_gen_metadata_enum_DepEnum(new_struct) # xenum
     new_struct = test.fixtures.python_capi.serialized_dep.thrift_metadata._fbthrift_gen_metadata_struct_SerializedStruct(new_struct) # serial_struct
+    new_struct = test.fixtures.python_capi.thrift_dep.thrift_metadata._fbthrift_gen_metadata_struct_DepStruct(new_struct) # friends
     new_struct = test.fixtures.python_capi.serialized_dep.thrift_metadata._fbthrift_gen_metadata_struct_SerializedUnion(new_struct) # serial_union
     new_struct = test.fixtures.python_capi.serialized_dep.thrift_metadata._fbthrift_gen_metadata_exception_SerializedError(new_struct) # serial_error
 
@@ -550,8 +550,8 @@ def _fbthrift_gen_metadata_struct_Onion(metadata_struct: _fbthrift_metadata.Thri
 
     new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct) # myEnum
     new_struct = _fbthrift_gen_metadata_struct_PrimitiveStruct(new_struct) # myStruct
-     # myString
      # intSet
+     # myString
      # doubleList
      # key
      # val  # strMap

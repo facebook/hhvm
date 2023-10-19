@@ -12,7 +12,7 @@ open Symbol_glean_schema.Hack
 module Add_fact = Symbol_add_fact
 module Fact_acc = Symbol_predicate.Fact_acc
 module Fact_id = Symbol_fact_id
-module Util = Symbol_json_util
+module Util = Symbol_util
 module Predicate = Symbol_predicate
 module File_info = Symbol_file_info
 module XRefs = Symbol_xrefs

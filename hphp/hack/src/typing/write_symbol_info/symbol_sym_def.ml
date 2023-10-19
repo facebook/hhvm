@@ -7,7 +7,7 @@
  *)
 
 open Hh_prelude
-module Util = Symbol_json_util
+module Util = Symbol_util
 
 type t = {
   kind: SymbolDefinition.kind;

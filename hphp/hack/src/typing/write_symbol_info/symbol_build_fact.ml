@@ -11,17 +11,17 @@ open Ast_defs
 open Hh_prelude
 open Symbol_glean_schema.Hack
 open Symbol_glean_schema.Src
-module Util = Symbol_json_util
+module Util = Symbol_util
 module Fact_id = Symbol_fact_id
 module XRefs = Symbol_xrefs
 module Predicate = Symbol_predicate
 
-let build_method_decl meth_name con_name con_type =
+let method_decl meth_name con_name con_type =
   let qname = QName.(Key (of_string con_name)) in
   let container = Predicate.container_decl_qname con_type qname in
   MethodDeclaration.(Key { name = Name.Key meth_name; container })
 
-let build_attributes source_text attrs =
+let attributes source_text attrs =
   List.map attrs ~f:(fun attr ->
       let (_, name) = attr.ua_name in
       let parameters =
@@ -30,7 +30,7 @@ let build_attributes source_text attrs =
       in
       UserAttribute.(Key { name = Name.Key name; parameters; qname = None }))
 
-let build_call_arguments arguments =
+let call_arguments arguments =
   let argument span arg_opt = CallArgument.{ span; argument = arg_opt } in
   let f (fields, last_start) (arg_opt, pos) =
     let (start, _) = Pos.info_raw pos in
@@ -40,7 +40,7 @@ let build_call_arguments arguments =
   in
   List.fold arguments ~init:([], 0) ~f |> fst |> List.rev
 
-let build_constraint ctx (kind, hint) =
+let constraint_ ctx (kind, hint) =
   let type_string = Util.get_type_from_hint ctx hint in
   Constraint.
     {
@@ -48,7 +48,7 @@ let build_constraint ctx (kind, hint) =
       type_ = Type.Key type_string;
     }
 
-let build_signature
+let signature
     ctx
     source_text
     params
@@ -58,7 +58,7 @@ let build_signature
   let hint_to_ctx hint = Context.Key (Util.get_context_from_hint ctx hint) in
   let f (_pos, hint) = List.map ~f:hint_to_ctx hint in
   let ctxs_hints = Option.map ctxs_hints ~f in
-  let build_param (p, type_xref, ty) =
+  let param (p, type_xref, ty) =
     Parameter.
       {
         name = Name.Key p.param_name;
@@ -71,13 +71,13 @@ let build_signature
           | Pinout _ -> true
           | Pnormal -> false);
         isVariadic = p.param_is_variadic;
-        attributes = build_attributes source_text p.param_user_attributes;
+        attributes = attributes source_text p.param_user_attributes;
         typeInfo = Option.map ~f:(fun x -> TypeInfo.Id x) type_xref;
         readonly =
           Option.map ~f:(fun _ -> ReadonlyKind.ReadOnly) p.param_readonly;
       }
   in
-  let parameters = List.map params ~f:build_param in
+  let parameters = List.map params ~f:param in
   Signature.(
     Key
       {
@@ -87,19 +87,19 @@ let build_signature
         returnsTypeInfo = Option.map ~f:(fun x -> TypeInfo.Id x) return_info;
       })
 
-let build_type_param ctx source_text tp =
+let type_param ctx source_text tp =
   let (_, name) = tp.tp_name in
-  let constraints = List.map tp.tp_constraints ~f:(build_constraint ctx) in
+  let constraints = List.map tp.tp_constraints ~f:(constraint_ ctx) in
   TypeParameter.
     {
       name = Name.Key name;
       variance = Variance.of_ast_variance tp.tp_variance;
       reifyKind = ReifyKind.of_ast_reifyKind tp.tp_reified;
       constraints;
-      attributes = build_attributes source_text tp.tp_user_attributes;
+      attributes = attributes source_text tp.tp_user_attributes;
     }
 
-let build_generic_xrefs (sym_pos : (XRefTarget.t * Util.pos list) Seq.t) =
+let generic_xrefs (sym_pos : (XRefTarget.t * Util.pos list) Seq.t) =
   let xrefs =
     Caml.Seq.fold_left
       (fun acc (target, pos_list) ->
@@ -122,7 +122,7 @@ let build_generic_xrefs (sym_pos : (XRefTarget.t * Util.pos list) Seq.t) =
      when diffing dbs *)
   List.sort ~compare:XRef.compare xrefs
 
-let build_xrefs (fact_map : XRefs.fact_map) =
+let xrefs (fact_map : XRefs.fact_map) =
   let f (_fact_id, (target, pos_list)) =
     let util_pos_list =
       List.map pos_list ~f:(fun pos ->
@@ -133,9 +133,9 @@ let build_xrefs (fact_map : XRefs.fact_map) =
     (target, util_pos_list)
   in
   let sym_pos = Fact_id.Map.to_seq fact_map |> Caml.Seq.map f in
-  build_generic_xrefs sym_pos
+  generic_xrefs sym_pos
 
-let build_hint_xrefs sym_pos = Caml.List.to_seq sym_pos |> build_generic_xrefs
+let hint_xrefs sym_pos = Caml.List.to_seq sym_pos |> generic_xrefs
 
-let build_module_membership decl_id ~internal =
+let module_membership decl_id ~internal =
   ModuleMembership.{ declaration = ModuleDeclaration.Id decl_id; internal }

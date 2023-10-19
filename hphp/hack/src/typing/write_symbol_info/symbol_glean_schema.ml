@@ -7,7 +7,7 @@
 
 open Hh_json
 open Hh_prelude
-module Util = Symbol_json_util
+module Util = Symbol_util
 module Fact_id = Symbol_fact_id
 
 let key v = JSON_Object [("key", v)]

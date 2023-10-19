@@ -14,6 +14,7 @@ module Predicate = Symbol_predicate
 module File_info = Symbol_file_info
 module XRefs = Symbol_xrefs
 module Sym_def = Symbol_sym_def
+module Build_fact = Symbol_build_fact
 
 let call_handler ~path fa_ref (pos_map : XRefs.pos_map) =
   object (_self)
@@ -40,9 +41,7 @@ let call_handler ~path fa_ref (pos_map : XRefs.pos_map) =
         in
         (arg, arg_pos)
       in
-      let call_args =
-        Symbol_build_json.build_call_arguments (List.map args ~f)
-      in
+      let call_args = Build_fact.call_arguments (List.map args ~f) in
       let (id_pos, receiver_span) =
         match callee_exp with
         | Aast.Id (id_pos, _) -> (Some id_pos, None)
@@ -55,7 +54,7 @@ let call_handler ~path fa_ref (pos_map : XRefs.pos_map) =
       let dispatch_arg =
         Option.(
           receiver_span >>= fun pos ->
-          match Symbol_build_json.build_call_arguments [(None, pos)] with
+          match Build_fact.call_arguments [(None, pos)] with
           | [arg] -> Some arg
           | _ -> None)
       in

@@ -12,8 +12,8 @@ open Hh_json.Access
 open Hh_json_helpers
 open OUnit2
 open Symbol_glean_schema.Hack
-module Util = Symbol_json_util
-module Build_json = Symbol_build_json
+module Util = Symbol_util
+module Build_fact = Symbol_build_fact
 module Predicate = Symbol_predicate
 module Add_fact = Symbol_add_fact
 module Fact_id = Symbol_fact_id
@@ -158,9 +158,7 @@ let test_build_xrefs _test_ctxt =
   let xrefs = XRefs.add xrefs target_id next_ref_pos target in
   let xrefs = XRefs.add xrefs target_id ref_pos target in
   let XRefs.{ fact_map; _ } = XRefs.add xrefs target_id dup_ref_pos target in
-  let result =
-    List.nth_exn (Build_json.build_xrefs fact_map) 0 |> XRef.to_json
-  in
+  let result = List.nth_exn (Build_fact.xrefs fact_map) 0 |> XRef.to_json in
   let target_decl =
     return result
     >>= get_obj "target"

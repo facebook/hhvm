@@ -17,7 +17,7 @@ module Fact_id = Symbol_fact_id
 module Predicate = Symbol_predicate
 module Fact_acc = Symbol_predicate.Fact_acc
 module XRefs = Symbol_xrefs
-module Util = Symbol_json_util
+module Util = Symbol_util
 
 val namespace_decl : string -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 

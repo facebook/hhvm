@@ -8,10 +8,10 @@
   symbol_indexable
   symbol_file_info
   symbol_add_fact
-  symbol_build_json
+  symbol_build_fact
   symbol_fact_id
   symbol_xrefs
-  symbol_json_util
+  symbol_util
   symbol_sym_hash
   symbol_index_batch
   symbol_index_decls

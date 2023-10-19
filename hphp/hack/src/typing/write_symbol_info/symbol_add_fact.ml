@@ -11,8 +11,8 @@ open Hh_prelude
 open Symbol_glean_schema.Src
 open Symbol_glean_schema.Hack
 open Symbol_glean_schema.GenCode
-module Util = Symbol_json_util
-module Build_json = Symbol_build_json
+module Util = Symbol_util
+module Build_fact = Symbol_build_fact
 module Predicate = Symbol_predicate
 module Fact_id = Symbol_fact_id
 module Fact_acc = Symbol_predicate.Fact_acc
@@ -93,7 +93,7 @@ let module_field module_ internal fa =
   | None -> (None, fa)
   | Some (_pos, module_name) ->
     let (decl_id, fa) = module_decl module_name fa in
-    (Some (Build_json.build_module_membership decl_id ~internal), fa)
+    (Some (Build_fact.module_membership decl_id ~internal), fa)
 
 let member_cluster ~members fa =
   let json = MemberCluster.({ members } |> to_json_key) in
@@ -114,12 +114,10 @@ let inherited_members ~container_type ~container_id ~member_clusters fa =
 let container_defn ctx source_text clss decl_id members fa =
   let fa = namespace_decl_opt clss.c_namespace fa in
   let typeParams =
-    List.map clss.c_tparams ~f:(Build_json.build_type_param ctx source_text)
+    List.map clss.c_tparams ~f:(Build_fact.type_param ctx source_text)
   in
   let (module_, fa) = module_field clss.c_module clss.c_internal fa in
-  let attributes =
-    Build_json.build_attributes source_text clss.c_user_attributes
-  in
+  let attributes = Build_fact.attributes source_text clss.c_user_attributes in
   let (req_extends_hints, req_implements_hints, req_class_hints) =
     Aast.partition_map_require_kind ~f:(fun x -> x) clss.c_reqs
   in
@@ -256,11 +254,7 @@ let method_decl con_type decl_id name fa =
 let type_info ~ty sym_pos fa =
   let json =
     TypeInfo.(
-      Key.
-        {
-          displayType = Type.Key ty;
-          xrefs = Build_json.build_hint_xrefs sym_pos;
-        }
+      Key.{ displayType = Type.Key ty; xrefs = Build_fact.hint_xrefs sym_pos }
       |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack TypeInfo) json fa
@@ -307,14 +301,14 @@ let build_signature ctx pos_map_opt source_text params ctxs ret fa =
   let params = List.rev params in
   let (ret_ty, return_info, fa) = hint_to_str_opt ret fa in
   let signature =
-    Build_json.build_signature ctx source_text params ctxs ~ret_ty ~return_info
+    Build_fact.signature ctx source_text params ctxs ~ret_ty ~return_info
   in
   (signature, fa)
 
 let method_defn ctx source_text meth decl_id fa =
   let m_tparams = Util.remove_generated_tparams meth.m_tparams in
   let typeParams =
-    List.map m_tparams ~f:(Build_json.build_type_param ctx source_text)
+    List.map m_tparams ~f:(Build_fact.type_param ctx source_text)
   in
   let (signature, fa) =
     build_signature
@@ -345,8 +339,7 @@ let method_defn ctx source_text meth decl_id fa =
         isAsync = is_async meth.m_fun_kind;
         isFinal = meth.m_final;
         isStatic = meth.m_static;
-        attributes =
-          Build_json.build_attributes source_text meth.m_user_attributes;
+        attributes = Build_fact.attributes source_text meth.m_user_attributes;
         typeParams;
         readonlyRet;
         isReadonlyThis;
@@ -361,10 +354,8 @@ let method_overrides
     MethodOverrides.(
       Key.
         {
-          derived =
-            Build_json.build_method_decl meth_name der_cont_name der_cont_type;
-          base =
-            Build_json.build_method_decl meth_name base_cont_name base_cont_type;
+          derived = Build_fact.method_decl meth_name der_cont_name der_cont_type;
+          base = Build_fact.method_decl meth_name base_cont_name base_cont_type;
         }
       |> to_json_key)
   in
@@ -385,8 +376,7 @@ let property_defn ctx source_text prop decl_id fa =
         isFinal = prop.cv_final;
         isAbstract = prop.cv_abstract;
         isStatic = prop.cv_is_static;
-        attributes =
-          Build_json.build_attributes source_text prop.cv_user_attributes;
+        attributes = Build_fact.attributes source_text prop.cv_user_attributes;
       }
       |> to_json_key)
   in
@@ -429,7 +419,7 @@ let type_const_defn ctx source_text tc decl_id fa =
         kind = TypeConstKind.(of_ast_const_kind tc.c_tconst_kind);
         type_;
         attributes =
-          Build_json.build_attributes source_text tc.c_tconst_user_attributes;
+          Build_fact.attributes source_text tc.c_tconst_user_attributes;
       }
       |> to_json_key)
   in
@@ -456,8 +446,7 @@ let enum_defn ctx source_text enm enum_id enum_data enumerators fa =
         declaration = EnumDeclaration.Id enum_id;
         enumBase = Type.Key (Util.get_type_from_hint ctx enum_data.e_base);
         enumerators;
-        attributes =
-          Build_json.build_attributes source_text enm.c_user_attributes;
+        attributes = Build_fact.attributes source_text enm.c_user_attributes;
         includes;
         isEnumClass = Aast.is_enum_class enm;
         module_;
@@ -486,7 +475,7 @@ let func_defn ctx source_text fd decl_id fa =
   let fa = namespace_decl_opt fd.fd_namespace fa in
   let fd_tparams = Util.remove_generated_tparams fd.fd_tparams in
   let typeParams =
-    List.map fd_tparams ~f:(Build_json.build_type_param ctx source_text)
+    List.map fd_tparams ~f:(Build_fact.type_param ctx source_text)
   in
   let (module_, fa) = module_field fd.fd_module fd.fd_internal fa in
   let (signature, fa) =
@@ -508,8 +497,7 @@ let func_defn ctx source_text fd decl_id fa =
         declaration = FunctionDeclaration.Id decl_id;
         signature;
         isAsync = is_async elem.f_fun_kind;
-        attributes =
-          Build_json.build_attributes source_text elem.f_user_attributes;
+        attributes = Build_fact.attributes source_text elem.f_user_attributes;
         typeParams;
         readonlyRet;
         module_;
@@ -523,8 +511,7 @@ let module_defn _ctx source_text elem decl_id fa =
     ModuleDefinition.(
       {
         declaration = ModuleDeclaration.Id decl_id;
-        attributes =
-          Build_json.build_attributes source_text elem.md_user_attributes;
+        attributes = Build_fact.attributes source_text elem.md_user_attributes;
       }
       |> to_json_key)
   in
@@ -547,7 +534,7 @@ let typedef_defn ctx source_text elem decl_id fa =
       false
   in
   let typeParams =
-    List.map elem.t_tparams ~f:(Build_json.build_type_param ctx source_text)
+    List.map elem.t_tparams ~f:(Build_fact.type_param ctx source_text)
   in
   let (module_, fa) = module_field elem.t_module elem.t_internal fa in
   let json =
@@ -555,8 +542,7 @@ let typedef_defn ctx source_text elem decl_id fa =
       {
         declaration = TypedefDeclaration.Id decl_id;
         isTransparent;
-        attributes =
-          Build_json.build_attributes source_text elem.t_user_attributes;
+        attributes = Build_fact.attributes source_text elem.t_user_attributes;
         typeParams;
         module_;
       }
@@ -626,7 +612,7 @@ let file_lines ~path sourceText fa =
 let file_xrefs ~path fact_map fa =
   let json =
     FileXRefs.(
-      Key.{ file = File.Key path; xrefs = Build_json.build_xrefs fact_map }
+      Key.{ file = File.Key path; xrefs = Build_fact.xrefs fact_map }
       |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack FileXRefs) json fa

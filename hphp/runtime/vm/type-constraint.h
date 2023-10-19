@@ -63,9 +63,15 @@ struct TypeConstraint {
   /// An ClassConstraint is used to represent class-specific (or
   /// enum-specific) information about a TypeConstraint.
   struct ClassConstraint {
+    enum class ClsNameKind : uint8_t {
+      Unset = 0,
+      Object = 1,
+      Class = 2
+    };
+    using NamePtr = TaggedLowStringPtr<ClsNameKind>;
     /// Resolved class name. Only valid if this TypeConstraint represents a
     /// resolved object or enum.
-    LowStringPtr m_clsName;
+    NamePtr m_clsName;
     /// Source type name. In general this is the name from the source code.
     LowStringPtr m_typeName;
     /// The NamedType is used to differentiate implementations of
@@ -76,7 +82,7 @@ struct TypeConstraint {
 
     ClassConstraint() = default;
     explicit ClassConstraint(LowStringPtr typeName);
-    ClassConstraint(LowStringPtr clsName,
+    ClassConstraint(NamePtr clsName,
                     LowStringPtr typeName,
                     LowPtr<const NamedType> namedType);
     explicit ClassConstraint(Class& cls);
@@ -523,6 +529,7 @@ struct TypeConstraint {
 private:
   void initSingle();
   void initUnion();
+  ClassConstraint makeClass(Type type, const LowStringPtr typeName);
 
   TypeConstraint(TypeConstraintFlags flags,
                  UnionTypeMask mask,

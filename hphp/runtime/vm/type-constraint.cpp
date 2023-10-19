@@ -51,6 +51,8 @@ using ClassConstraint = TypeConstraint::ClassConstraint;
 using UnionConstraint = TypeConstraint::UnionConstraint;
 using UnionClassList = TypeConstraint::UnionClassList;
 using UnionTypeMask = TypeConstraint::UnionTypeMask;
+using ClsNameKind = ClassConstraint::ClsNameKind;
+using NamePtr = ClassConstraint::NamePtr;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -94,12 +96,11 @@ TypeConstraint::TypeConstraint(Type type, TypeConstraintFlags flags, ClassConstr
 TypeConstraint::TypeConstraint(Type type,
                                TypeConstraintFlags flags,
                                const LowStringPtr typeName)
-  : TypeConstraint(type,
-                   flags,
-                   type == AnnotType::Object
-                   ? ClassConstraint { typeName, typeName, nullptr }
-                   : ClassConstraint { typeName }) {
-}
+  : TypeConstraint(
+    type,
+    flags,
+    makeClass(type, typeName)
+  ) {}
 
 TypeConstraint::TypeConstraint(Type type, TypeConstraintFlags flags)
   : TypeConstraint(type, flags, nullptr) {
@@ -372,11 +373,11 @@ template void TypeConstraint::serdeSingle(BlobEncoder&);
 template void TypeConstraint::serdeSingle(BlobDecoder&);
 
 ClassConstraint::ClassConstraint(LowStringPtr typeName)
-  : ClassConstraint(nullptr, typeName, nullptr) {
+  : ClassConstraint(NamePtr{}, typeName, nullptr) {
   assertx(!typeName || typeName->isStatic());
 }
 
-ClassConstraint::ClassConstraint(LowStringPtr clsName,
+ClassConstraint::ClassConstraint(NamePtr clsName,
                                  LowStringPtr typeName,
                                  LowPtr<const NamedType> namedType)
   : m_clsName(clsName)
@@ -387,20 +388,28 @@ ClassConstraint::ClassConstraint(LowStringPtr clsName,
   assertx(!typeName || typeName->isStatic());
 }
 
-ClassConstraint::ClassConstraint(Class& cls) : ClassConstraint(cls.name(), cls.name(), nullptr) {
-}
+ClassConstraint::ClassConstraint(Class& cls)
+  : ClassConstraint(NamePtr{cls.name(), ClsNameKind::Unset},
+                    cls.name(),
+                    nullptr) {}
 
 void ClassConstraint::serdeHelper(BlobDecoder& sd, bool isObject) {
   sd(m_typeName);
   if (isObject) {
-    sd(m_clsName);
+    const StringData* clsName;
+    sd(clsName);
+    ClsNameKind k;
+    sd(k);
+    m_clsName = NamePtr{clsName, k};
   }
 }
 
 void ClassConstraint::serdeHelper(BlobEncoder& sd, bool isObject) const {
   sd(m_typeName);
   if (isObject) {
-    sd(m_clsName);
+    auto const clsName = m_clsName.get();
+    sd(clsName);
+    sd(m_clsName.kind());
   }
 }
 
@@ -452,6 +461,20 @@ void TypeConstraint::initSingle() {
           this, typeName()->data());
   }
   single.class_.init(single.type);
+}
+
+ClassConstraint TypeConstraint::makeClass(Type type,
+                                          const LowStringPtr typeName) {
+  switch (type) {
+    case Type::Object:
+      return ClassConstraint {
+        NamePtr{typeName.get(), ClsNameKind::Unset},
+        typeName,
+        nullptr
+      };
+    default:
+      return ClassConstraint { typeName };
+  }
 }
 
 namespace {
@@ -1822,7 +1845,7 @@ void TypeConstraint::resolveType(AnnotType t,
   m_flags |= TypeConstraintFlags::Resolved;
   if (nullable) m_flags |= TypeConstraintFlags::Nullable;
   m_u.single.type = t;
-  m_u.single.class_.m_clsName = clsName;
+  m_u.single.class_.m_clsName.set(clsName, ClsNameKind::Unset);
 }
 
 void TypeConstraint::unresolve() {
@@ -1831,7 +1854,7 @@ void TypeConstraint::unresolve() {
   }
   m_flags &= ~TypeConstraintFlags::Resolved;
   m_u.single.type = AnnotType::Unresolved;
-  m_u.single.class_.m_clsName = nullptr;
+  m_u.single.class_.m_clsName.reset();
 }
 
 //////////////////////////////////////////////////////////////////////

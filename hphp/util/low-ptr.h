@@ -235,6 +235,64 @@ private:
   storage_type m_s{0};
 };
 
+///////////////////////////////////////////////////////////////////////////////
+
+/* TagType must be an enum with values 0-3 to fit in two bits */
+template<class T, class TagType = uint8_t>
+struct TaggedLowPtr {
+  using storage_type = detail::low_storage_t;
+  static constexpr storage_type kMaxEnumValue = 0b11;
+
+  /*
+   * Constructors.
+   */
+  TaggedLowPtr() = default;
+  explicit TaggedLowPtr(LowPtr<T> px, TagType t) : m_s{pack(px, t)} {}
+  TaggedLowPtr(const TaggedLowPtr<T, TagType>&) = default;
+  TaggedLowPtr(TaggedLowPtr<T, TagType>&&) = default;
+
+  /*
+   * Assignments.
+   */
+  TaggedLowPtr& operator=(const TaggedLowPtr<T, TagType>&) = default;
+  TaggedLowPtr& operator=(TaggedLowPtr<T, TagType>&&) = default;
+
+  /*
+   * Methods.
+   */
+  LowPtr<T> get() const {
+    return reinterpret_cast<T*>(m_s & ~kMaxEnumValue);
+  }
+  TagType kind() const {
+    return static_cast<TagType>(m_s & kMaxEnumValue);
+  }
+  void set(LowPtr<T> px, TagType t) {
+    m_s = pack(px, t);
+  }
+  void reset() { m_s = 0; }
+
+  /**
+   * Conversions.
+   */
+  T& operator*()               const { return *get(); }
+  T* operator->()              const { return get(); }
+  /* implicit */ operator T*() const { return get(); }
+  explicit operator bool()     const { return get(); }
+
+private:
+  storage_type pack(LowPtr<T> px, TagType t) {
+    auto const iptr = detail::to_low(static_cast<T*>(px));
+    assertx((iptr & kMaxEnumValue) == 0); // LowPtr is 4-byte aligned
+
+    auto const itag = static_cast<storage_type>(t);
+    assertx(0 <= itag);
+    assertx(itag <= kMaxEnumValue);
+
+    return iptr | itag;
+  }
+  storage_type m_s{0};
+};
+
 template<class T,
          std::memory_order read_order = std::memory_order_relaxed,
          std::memory_order write_order = std::memory_order_relaxed>

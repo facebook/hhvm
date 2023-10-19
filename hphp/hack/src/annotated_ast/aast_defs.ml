@@ -102,6 +102,12 @@ and ('ex, 'en) program = ('ex, 'en) def list
 and ('ex, 'en) stmt = (pos[@transform.opaque]) * ('ex, 'en) stmt_
 
 and ('ex, 'en) stmt_ =
+  | Noop
+      (** No-op, the empty statement.
+       *
+       *     {}
+       *     while (true) ;
+       *     if ($foo) {} // the else is Noop here *)
   | Fallthrough
       (** Marker for a switch statement that falls through.
        *
@@ -232,12 +238,6 @@ and ('ex, 'en) stmt_ =
        *     } finally {
        *       baz();
        *     } *)
-  | Noop
-      (** No-op, the empty statement.
-       *
-       *     {}
-       *     while (true) ;
-       *     if ($foo) {} // the else is Noop here *)
   | Declare_local of lid * hint * ('ex, 'en) expr option
       (** Declare a local variable with the given type and optional initial value *)
   | Block of lid list option * ('ex, 'en) block
@@ -397,6 +397,18 @@ and ('ex, 'en) expression_tree = {
 }
 
 and ('ex, 'en) expr_ =
+  | Null
+      (** Null literal.
+       *
+       *     null *)
+  | True
+      (** Boolean literal.
+       *
+       *     true *)
+  | False
+      (** Boolean literal.
+       *
+       *     false *)
   | Darray of
       ('ex targ * 'ex targ) option * (('ex, 'en) expr * ('ex, 'en) expr) list
       (** darray literal.
@@ -433,22 +445,10 @@ and ('ex, 'en) expr_ =
        *     dict['x' => 1, 'y' => 2]
        *     Map<int, string> {}
        *     ImmMap {} *)
-  | Null
-      (** Null literal.
-       *
-       *     null *)
   | This
       (** The local variable representing the current class instance.
        *
        *     $this *)
-  | True
-      (** Boolean literal.
-       *
-       *     true *)
-  | False
-      (** Boolean literal.
-       *
-       *     false *)
   | Omitted
       (** The empty expression.
        *
@@ -1248,11 +1248,12 @@ and hint_fun = {
 }
 
 and hint_ =
+  | Hprim of (tprim[@transform.opaque])
+  | Happly of class_name * hint list
   | Hoption of hint
   | Hlike of hint
   | Hfun of hint_fun
   | Htuple of hint list
-  | Happly of class_name * hint list
   | Hclass_args of hint
   | Hshape of nast_shape_info
   | Haccess of hint * sid list
@@ -1283,7 +1284,6 @@ and hint_ =
   | Hnonnull
   | Habstr of string * hint list
   | Hvec_or_dict of hint option * hint
-  | Hprim of (tprim[@transform.opaque])
   | Hthis
   | Hdynamic
   | Hnothing

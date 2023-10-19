@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ec5ba5b5964a4f6c1f34f29e390fd079>>
+// @generated SignedSource<<4330aeb6ec53a46a95fb8d9f6b96c001>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -12,6 +12,9 @@ use crate::aast_defs::*;
 use crate::ast_defs;
 use crate::LocalIdMap;
 impl<Ex, En> Stmt_<Ex, En> {
+    pub fn mk_noop() -> Self {
+        Stmt_::Noop
+    }
     pub fn mk_fallthrough() -> Self {
         Stmt_::Fallthrough
     }
@@ -75,9 +78,6 @@ impl<Ex, En> Stmt_<Ex, En> {
     pub fn mk_try(p0: Block<Ex, En>, p1: Vec<Catch<Ex, En>>, p2: FinallyBlock<Ex, En>) -> Self {
         Stmt_::Try(Box::new((p0, p1, p2)))
     }
-    pub fn mk_noop() -> Self {
-        Stmt_::Noop
-    }
     pub fn mk_declare_local(p0: Lid, p1: Hint, p2: Option<Expr<Ex, En>>) -> Self {
         Stmt_::DeclareLocal(Box::new((p0, p1, p2)))
     }
@@ -89,6 +89,12 @@ impl<Ex, En> Stmt_<Ex, En> {
     }
     pub fn mk_assert_env(p0: EnvAnnot, p1: LocalIdMap<(Pos, Ex)>) -> Self {
         Stmt_::AssertEnv(Box::new((p0, p1)))
+    }
+    pub fn is_noop(&self) -> bool {
+        match self {
+            Stmt_::Noop => true,
+            _ => false,
+        }
     }
     pub fn is_fallthrough(&self) -> bool {
         match self {
@@ -195,12 +201,6 @@ impl<Ex, En> Stmt_<Ex, En> {
     pub fn is_try(&self) -> bool {
         match self {
             Stmt_::Try(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_noop(&self) -> bool {
-        match self {
-            Stmt_::Noop => true,
             _ => false,
         }
     }
@@ -986,6 +986,15 @@ impl<Ex, En> FunctionPtrId<Ex, En> {
     }
 }
 impl<Ex, En> Expr_<Ex, En> {
+    pub fn mk_null() -> Self {
+        Expr_::Null
+    }
+    pub fn mk_true() -> Self {
+        Expr_::True
+    }
+    pub fn mk_false() -> Self {
+        Expr_::False
+    }
     pub fn mk_darray(
         p0: Option<(Targ<Ex>, Targ<Ex>)>,
         p1: Vec<(Expr<Ex, En>, Expr<Ex, En>)>,
@@ -1012,17 +1021,8 @@ impl<Ex, En> Expr_<Ex, En> {
     ) -> Self {
         Expr_::KeyValCollection(Box::new((p0, p1, p2)))
     }
-    pub fn mk_null() -> Self {
-        Expr_::Null
-    }
     pub fn mk_this() -> Self {
         Expr_::This
-    }
-    pub fn mk_true() -> Self {
-        Expr_::True
-    }
-    pub fn mk_false() -> Self {
-        Expr_::False
     }
     pub fn mk_omitted() -> Self {
         Expr_::Omitted
@@ -1174,6 +1174,24 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_nameof(p0: ClassId<Ex, En>) -> Self {
         Expr_::Nameof(Box::new(p0))
     }
+    pub fn is_null(&self) -> bool {
+        match self {
+            Expr_::Null => true,
+            _ => false,
+        }
+    }
+    pub fn is_true(&self) -> bool {
+        match self {
+            Expr_::True => true,
+            _ => false,
+        }
+    }
+    pub fn is_false(&self) -> bool {
+        match self {
+            Expr_::False => true,
+            _ => false,
+        }
+    }
     pub fn is_darray(&self) -> bool {
         match self {
             Expr_::Darray(..) => true,
@@ -1204,27 +1222,9 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => false,
         }
     }
-    pub fn is_null(&self) -> bool {
-        match self {
-            Expr_::Null => true,
-            _ => false,
-        }
-    }
     pub fn is_this(&self) -> bool {
         match self {
             Expr_::This => true,
-            _ => false,
-        }
-    }
-    pub fn is_true(&self) -> bool {
-        match self {
-            Expr_::True => true,
-            _ => false,
-        }
-    }
-    pub fn is_false(&self) -> bool {
-        match self {
-            Expr_::False => true,
             _ => false,
         }
     }
@@ -3609,6 +3609,12 @@ impl XhpChildOp {
     }
 }
 impl Hint_ {
+    pub fn mk_hprim(p0: Tprim) -> Self {
+        Hint_::Hprim(p0)
+    }
+    pub fn mk_happly(p0: ClassName, p1: Vec<Hint>) -> Self {
+        Hint_::Happly(p0, p1)
+    }
     pub fn mk_hoption(p0: Hint) -> Self {
         Hint_::Hoption(p0)
     }
@@ -3620,9 +3626,6 @@ impl Hint_ {
     }
     pub fn mk_htuple(p0: Vec<Hint>) -> Self {
         Hint_::Htuple(p0)
-    }
-    pub fn mk_happly(p0: ClassName, p1: Vec<Hint>) -> Self {
-        Hint_::Happly(p0, p1)
     }
     pub fn mk_hclass_args(p0: Hint) -> Self {
         Hint_::HclassArgs(p0)
@@ -3660,9 +3663,6 @@ impl Hint_ {
     pub fn mk_hvec_or_dict(p0: Option<Hint>, p1: Hint) -> Self {
         Hint_::HvecOrDict(p0, p1)
     }
-    pub fn mk_hprim(p0: Tprim) -> Self {
-        Hint_::Hprim(p0)
-    }
     pub fn mk_hthis() -> Self {
         Hint_::Hthis
     }
@@ -3683,6 +3683,18 @@ impl Hint_ {
     }
     pub fn mk_hvar(p0: String) -> Self {
         Hint_::Hvar(p0)
+    }
+    pub fn is_hprim(&self) -> bool {
+        match self {
+            Hint_::Hprim(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_happly(&self) -> bool {
+        match self {
+            Hint_::Happly(..) => true,
+            _ => false,
+        }
     }
     pub fn is_hoption(&self) -> bool {
         match self {
@@ -3705,12 +3717,6 @@ impl Hint_ {
     pub fn is_htuple(&self) -> bool {
         match self {
             Hint_::Htuple(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_happly(&self) -> bool {
-        match self {
-            Hint_::Happly(..) => true,
             _ => false,
         }
     }
@@ -3786,12 +3792,6 @@ impl Hint_ {
             _ => false,
         }
     }
-    pub fn is_hprim(&self) -> bool {
-        match self {
-            Hint_::Hprim(..) => true,
-            _ => false,
-        }
-    }
     pub fn is_hthis(&self) -> bool {
         match self {
             Hint_::Hthis => true,
@@ -3834,6 +3834,18 @@ impl Hint_ {
             _ => false,
         }
     }
+    pub fn as_hprim(&self) -> Option<&Tprim> {
+        match self {
+            Hint_::Hprim(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_happly(&self) -> Option<(&ClassName, &Vec<Hint>)> {
+        match self {
+            Hint_::Happly(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
+    }
     pub fn as_hoption(&self) -> Option<&Hint> {
         match self {
             Hint_::Hoption(p0) => Some(p0),
@@ -3855,12 +3867,6 @@ impl Hint_ {
     pub fn as_htuple(&self) -> Option<&Vec<Hint>> {
         match self {
             Hint_::Htuple(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_happly(&self) -> Option<(&ClassName, &Vec<Hint>)> {
-        match self {
-            Hint_::Happly(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }
@@ -3906,12 +3912,6 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_hprim(&self) -> Option<&Tprim> {
-        match self {
-            Hint_::Hprim(p0) => Some(p0),
-            _ => None,
-        }
-    }
     pub fn as_hunion(&self) -> Option<&Vec<Hint>> {
         match self {
             Hint_::Hunion(p0) => Some(p0),
@@ -3936,6 +3936,18 @@ impl Hint_ {
             _ => None,
         }
     }
+    pub fn as_hprim_mut(&mut self) -> Option<&mut Tprim> {
+        match self {
+            Hint_::Hprim(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_happly_mut(&mut self) -> Option<(&mut ClassName, &mut Vec<Hint>)> {
+        match self {
+            Hint_::Happly(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
+    }
     pub fn as_hoption_mut(&mut self) -> Option<&mut Hint> {
         match self {
             Hint_::Hoption(p0) => Some(p0),
@@ -3957,12 +3969,6 @@ impl Hint_ {
     pub fn as_htuple_mut(&mut self) -> Option<&mut Vec<Hint>> {
         match self {
             Hint_::Htuple(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_happly_mut(&mut self) -> Option<(&mut ClassName, &mut Vec<Hint>)> {
-        match self {
-            Hint_::Happly(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }
@@ -4008,12 +4014,6 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_hprim_mut(&mut self) -> Option<&mut Tprim> {
-        match self {
-            Hint_::Hprim(p0) => Some(p0),
-            _ => None,
-        }
-    }
     pub fn as_hunion_mut(&mut self) -> Option<&mut Vec<Hint>> {
         match self {
             Hint_::Hunion(p0) => Some(p0),
@@ -4038,6 +4038,18 @@ impl Hint_ {
             _ => None,
         }
     }
+    pub fn as_hprim_into(self) -> Option<Tprim> {
+        match self {
+            Hint_::Hprim(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_happly_into(self) -> Option<(ClassName, Vec<Hint>)> {
+        match self {
+            Hint_::Happly(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
+    }
     pub fn as_hoption_into(self) -> Option<Hint> {
         match self {
             Hint_::Hoption(p0) => Some(p0),
@@ -4059,12 +4071,6 @@ impl Hint_ {
     pub fn as_htuple_into(self) -> Option<Vec<Hint>> {
         match self {
             Hint_::Htuple(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_happly_into(self) -> Option<(ClassName, Vec<Hint>)> {
-        match self {
-            Hint_::Happly(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }
@@ -4107,12 +4113,6 @@ impl Hint_ {
     pub fn as_hvec_or_dict_into(self) -> Option<(Option<Hint>, Hint)> {
         match self {
             Hint_::HvecOrDict(p0, p1) => Some((p0, p1)),
-            _ => None,
-        }
-    }
-    pub fn as_hprim_into(self) -> Option<Tprim> {
-        match self {
-            Hint_::Hprim(p0) => Some(p0),
             _ => None,
         }
     }

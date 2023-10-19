@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<04cb298e09f90972a8cddc114caae7e1>>
+// @generated SignedSource<<705458c218c24a43b4abdf946a65f369>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1041,15 +1041,15 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
             a.3.accept(c, v)
         }
         match self {
+            Expr_::Null => Ok(()),
+            Expr_::True => Ok(()),
+            Expr_::False => Ok(()),
             Expr_::Darray(a) => helper0(a, c, v),
             Expr_::Varray(a) => helper1(a, c, v),
             Expr_::Shape(a0) => a0.accept(c, v),
             Expr_::ValCollection(a) => helper2(a, c, v),
             Expr_::KeyValCollection(a) => helper3(a, c, v),
-            Expr_::Null => Ok(()),
             Expr_::This => Ok(()),
-            Expr_::True => Ok(()),
-            Expr_::False => Ok(()),
             Expr_::Omitted => Ok(()),
             Expr_::Invalid(a0) => a0.accept(c, v),
             Expr_::Id(a0) => a0.accept(c, v),
@@ -1398,14 +1398,15 @@ impl<P: Params> NodeMut<P> for Hint_ {
         v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
         match self {
-            Hint_::Hoption(a0) => a0.accept(c, v),
-            Hint_::Hlike(a0) => a0.accept(c, v),
-            Hint_::Hfun(a0) => a0.accept(c, v),
-            Hint_::Htuple(a0) => a0.accept(c, v),
+            Hint_::Hprim(a0) => a0.accept(c, v),
             Hint_::Happly(a0, a1) => {
                 a0.accept(c, v)?;
                 a1.accept(c, v)
             }
+            Hint_::Hoption(a0) => a0.accept(c, v),
+            Hint_::Hlike(a0) => a0.accept(c, v),
+            Hint_::Hfun(a0) => a0.accept(c, v),
+            Hint_::Htuple(a0) => a0.accept(c, v),
             Hint_::HclassArgs(a0) => a0.accept(c, v),
             Hint_::Hshape(a0) => a0.accept(c, v),
             Hint_::Haccess(a0, a1) => {
@@ -1430,7 +1431,6 @@ impl<P: Params> NodeMut<P> for Hint_ {
                 a0.accept(c, v)?;
                 a1.accept(c, v)
             }
-            Hint_::Hprim(a0) => a0.accept(c, v),
             Hint_::Hthis => Ok(()),
             Hint_::Hdynamic => Ok(()),
             Hint_::Hnothing => Ok(()),
@@ -2082,6 +2082,7 @@ impl<P: Params> NodeMut<P> for Stmt_<P::Ex, P::En> {
             a.1.accept(c, v)
         }
         match self {
+            Stmt_::Noop => Ok(()),
             Stmt_::Fallthrough => Ok(()),
             Stmt_::Expr(a0) => a0.accept(c, v),
             Stmt_::Break => Ok(()),
@@ -2100,7 +2101,6 @@ impl<P: Params> NodeMut<P> for Stmt_<P::Ex, P::En> {
             Stmt_::Match(a0) => a0.accept(c, v),
             Stmt_::Foreach(a) => helper6(a, c, v),
             Stmt_::Try(a) => helper7(a, c, v),
-            Stmt_::Noop => Ok(()),
             Stmt_::DeclareLocal(a) => helper8(a, c, v),
             Stmt_::Block(a) => helper9(a, c, v),
             Stmt_::Markup(a0) => a0.accept(c, v),

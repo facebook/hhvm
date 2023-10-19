@@ -6,4 +6,4 @@ class B extends A {
   public function m(): void {}
 }
 
-const int B = 3;
+const bool B = true;

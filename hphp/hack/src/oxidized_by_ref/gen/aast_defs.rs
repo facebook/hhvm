@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<aea21b0e6425e07c97eb44dd8c46935d>>
+// @generated SignedSource<<97fad9f13e746665dd16d6c4dc7ebc8b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -136,6 +136,12 @@ arena_deserializer::impl_deserialize_in_arena!(Stmt<'arena, Ex, En>);
 #[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum Stmt_<'a, Ex, En> {
+    /// No-op, the empty statement.
+    ///
+    ///     {}
+    ///     while (true) ;
+    ///     if ($foo) {} // the else is Noop here
+    Noop,
     /// Marker for a switch statement that falls through.
     ///
     ///     // FALLTHROUGH
@@ -316,12 +322,6 @@ pub enum Stmt_<'a, Ex, En> {
             &'a FinallyBlock<'a, Ex, En>,
         ),
     ),
-    /// No-op, the empty statement.
-    ///
-    ///     {}
-    ///     while (true) ;
-    ///     if ($foo) {} // the else is Noop here
-    Noop,
     /// Declare a local variable with the given type and optional initial value
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Declare_local")]
@@ -891,6 +891,18 @@ arena_deserializer::impl_deserialize_in_arena!(ExpressionTree<'arena, Ex, En>);
 #[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum Expr_<'a, Ex, En> {
+    /// Null literal.
+    ///
+    ///     null
+    Null,
+    /// Boolean literal.
+    ///
+    ///     true
+    True,
+    /// Boolean literal.
+    ///
+    ///     false
+    False,
     /// darray literal.
     ///
     ///     darray['x' => 0, 'y' => 1]
@@ -945,22 +957,10 @@ pub enum Expr_<'a, Ex, En> {
             &'a [&'a Field<'a, Ex, En>],
         ),
     ),
-    /// Null literal.
-    ///
-    ///     null
-    Null,
     /// The local variable representing the current class instance.
     ///
     ///     $this
     This,
-    /// Boolean literal.
-    ///
-    ///     true
-    True,
-    /// Boolean literal.
-    ///
-    ///     false
-    False,
     /// The empty expression.
     ///
     ///     list(, $y) = vec[1, 2] // Omitted is the first expression inside list()
@@ -3094,6 +3094,11 @@ arena_deserializer::impl_deserialize_in_arena!(HintFun<'arena>);
 #[repr(C, u8)]
 pub enum Hint_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Hprim(&'a oxidized::aast_defs::Tprim),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
+    Happly(&'a (&'a ClassName<'a>, &'a [&'a Hint<'a>])),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hoption(&'a Hint<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hlike(&'a Hint<'a>),
@@ -3101,9 +3106,6 @@ pub enum Hint_<'a> {
     Hfun(&'a HintFun<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Htuple(&'a [&'a Hint<'a>]),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(inline_tuple)]
-    Happly(&'a (&'a ClassName<'a>, &'a [&'a Hint<'a>])),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Hclass_args")]
     HclassArgs(&'a Hint<'a>),
@@ -3145,8 +3147,6 @@ pub enum Hint_<'a> {
     #[rust_to_ocaml(name = "Hvec_or_dict")]
     #[rust_to_ocaml(inline_tuple)]
     HvecOrDict(&'a (Option<&'a Hint<'a>>, &'a Hint<'a>)),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Hprim(&'a oxidized::aast_defs::Tprim),
     Hthis,
     Hdynamic,
     Hnothing,

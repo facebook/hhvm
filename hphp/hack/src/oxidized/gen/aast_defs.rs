@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<df62b338fab25bde6afbfda6c912bc1f>>
+// @generated SignedSource<<34638860dcb63b4ee1df85a950a2cede>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -112,6 +112,12 @@ pub struct Stmt<Ex, En>(pub Pos, pub Stmt_<Ex, En>);
 #[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum Stmt_<Ex, En> {
+    /// No-op, the empty statement.
+    ///
+    ///     {}
+    ///     while (true) ;
+    ///     if ($foo) {} // the else is Noop here
+    Noop,
     /// Marker for a switch statement that falls through.
     ///
     ///     // FALLTHROUGH
@@ -249,12 +255,6 @@ pub enum Stmt_<Ex, En> {
     ///     }
     #[rust_to_ocaml(inline_tuple)]
     Try(Box<(Block<Ex, En>, Vec<Catch<Ex, En>>, FinallyBlock<Ex, En>)>),
-    /// No-op, the empty statement.
-    ///
-    ///     {}
-    ///     while (true) ;
-    ///     if ($foo) {} // the else is Noop here
-    Noop,
     /// Declare a local variable with the given type and optional initial value
     #[rust_to_ocaml(name = "Declare_local")]
     #[rust_to_ocaml(inline_tuple)]
@@ -716,6 +716,18 @@ pub struct ExpressionTree<Ex, En> {
 #[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum Expr_<Ex, En> {
+    /// Null literal.
+    ///
+    ///     null
+    Null,
+    /// Boolean literal.
+    ///
+    ///     true
+    True,
+    /// Boolean literal.
+    ///
+    ///     false
+    False,
     /// darray literal.
     ///
     ///     darray['x' => 0, 'y' => 1]
@@ -759,22 +771,10 @@ pub enum Expr_<Ex, En> {
             Vec<Field<Ex, En>>,
         )>,
     ),
-    /// Null literal.
-    ///
-    ///     null
-    Null,
     /// The local variable representing the current class instance.
     ///
     ///     $this
     This,
-    /// Boolean literal.
-    ///
-    ///     true
-    True,
-    /// Boolean literal.
-    ///
-    ///     false
-    False,
     /// The empty expression.
     ///
     ///     list(, $y) = vec[1, 2] // Omitted is the first expression inside list()
@@ -2564,11 +2564,12 @@ pub struct HintFun {
 #[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum Hint_ {
+    Hprim(Tprim),
+    Happly(ClassName, Vec<Hint>),
     Hoption(Hint),
     Hlike(Hint),
     Hfun(HintFun),
     Htuple(Vec<Hint>),
-    Happly(ClassName, Vec<Hint>),
     #[rust_to_ocaml(name = "Hclass_args")]
     HclassArgs(Hint),
     Hshape(NastShapeInfo),
@@ -2599,7 +2600,6 @@ pub enum Hint_ {
     Habstr(String, Vec<Hint>),
     #[rust_to_ocaml(name = "Hvec_or_dict")]
     HvecOrDict(Option<Hint>, Hint),
-    Hprim(Tprim),
     Hthis,
     Hdynamic,
     Hnothing,

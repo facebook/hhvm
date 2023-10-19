@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8d1de4ae752e1a53e8eb23c956822893>>
+// @generated SignedSource<<c08a4f60c0931c4b26d153586a0b8978>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -223,6 +223,7 @@ impl Transform for Stmt_ {
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
+            Stmt_::Noop => {}
             Stmt_::Fallthrough => {}
             Stmt_::Expr(ref mut __binding_0) => __binding_0.transform(env, pass),
             Stmt_::Break => {}
@@ -241,7 +242,6 @@ impl Transform for Stmt_ {
             Stmt_::Match(ref mut __binding_0) => __binding_0.transform(env, pass),
             Stmt_::Foreach(ref mut __binding_0) => __binding_0.transform(env, pass),
             Stmt_::Try(ref mut __binding_0) => __binding_0.transform(env, pass),
-            Stmt_::Noop => {}
             Stmt_::DeclareLocal(ref mut __binding_0) => __binding_0.transform(env, pass),
             Stmt_::Block(ref mut __binding_0) => __binding_0.transform(env, pass),
             _ => {}
@@ -606,15 +606,15 @@ impl Transform for Expr_ {
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
+            Expr_::Null => {}
+            Expr_::True => {}
+            Expr_::False => {}
             Expr_::Darray(ref mut __binding_0) => __binding_0.transform(env, pass),
             Expr_::Varray(ref mut __binding_0) => __binding_0.transform(env, pass),
             Expr_::Shape(ref mut __binding_0) => __binding_0.transform(env, pass),
             Expr_::ValCollection(ref mut __binding_0) => __binding_0.transform(env, pass),
             Expr_::KeyValCollection(ref mut __binding_0) => __binding_0.transform(env, pass),
-            Expr_::Null => {}
             Expr_::This => {}
-            Expr_::True => {}
-            Expr_::False => {}
             Expr_::Omitted => {}
             Expr_::Invalid(ref mut __binding_0) => __binding_0.transform(env, pass),
             Expr_::Id(ref mut __binding_0) => __binding_0.transform(env, pass),
@@ -2192,16 +2192,17 @@ impl Transform for Hint_ {
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
-            Hint_::Hoption(ref mut __binding_0) => __binding_0.transform(env, pass),
-            Hint_::Hlike(ref mut __binding_0) => __binding_0.transform(env, pass),
-            Hint_::Hfun(ref mut __binding_0) => __binding_0.transform(env, pass),
-            Hint_::Htuple(ref mut __binding_0) => __binding_0.transform(env, pass),
+            Hint_::Hprim(ref mut __binding_0) => __binding_0.transform(env, pass),
             Hint_::Happly(ref mut __binding_0, ref mut __binding_1) => {
                 {
                     __binding_0.transform(env, pass)
                 }
                 { __binding_1.transform(env, pass) }
             }
+            Hint_::Hoption(ref mut __binding_0) => __binding_0.transform(env, pass),
+            Hint_::Hlike(ref mut __binding_0) => __binding_0.transform(env, pass),
+            Hint_::Hfun(ref mut __binding_0) => __binding_0.transform(env, pass),
+            Hint_::Htuple(ref mut __binding_0) => __binding_0.transform(env, pass),
             Hint_::HclassArgs(ref mut __binding_0) => __binding_0.transform(env, pass),
             Hint_::Hshape(ref mut __binding_0) => __binding_0.transform(env, pass),
             Hint_::Haccess(ref mut __binding_0, ref mut __binding_1) => {
@@ -2234,7 +2235,6 @@ impl Transform for Hint_ {
                 }
                 { __binding_1.transform(env, pass) }
             }
-            Hint_::Hprim(ref mut __binding_0) => __binding_0.transform(env, pass),
             Hint_::Hthis => {}
             Hint_::Hdynamic => {}
             Hint_::Hnothing => {}

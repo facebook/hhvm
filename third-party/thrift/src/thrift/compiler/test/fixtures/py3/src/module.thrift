@@ -139,7 +139,7 @@ const SimpleStruct A_STRUCT = {
   "big_int": 8,
   "real": 9.9,
 };
-const SimpleStruct EMPTY = "{}";
+const SimpleStruct EMPTY = {};
 const list<string> WORD_LIST = [
   "the",
   "quick",

@@ -631,7 +631,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -652,7 +652,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           }
@@ -670,7 +670,7 @@
   "name" : "Frozen2Exclude",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : false
+        "value" : {}
       }
         },
         "fields" : {
@@ -799,7 +799,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -820,7 +820,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           }
@@ -838,7 +838,7 @@
   "name" : "Frozen2Exclude",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : false
+        "value" : {}
       }
         },
         "fields" : {
@@ -919,7 +919,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -968,7 +968,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           }
@@ -1035,7 +1035,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -1084,7 +1084,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -1105,7 +1105,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -1125,7 +1125,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           }
@@ -1798,7 +1798,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -1819,7 +1819,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -1839,7 +1839,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -1859,7 +1859,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -1879,7 +1879,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -1899,7 +1899,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -1919,7 +1919,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -1939,7 +1939,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -1959,7 +1959,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -1979,7 +1979,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -2000,7 +2000,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -2021,7 +2021,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -2042,7 +2042,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -2063,7 +2063,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -2084,7 +2084,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -2105,7 +2105,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -2126,7 +2126,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -2147,7 +2147,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -2168,7 +2168,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -2188,7 +2188,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -2208,7 +2208,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -2228,7 +2228,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -2248,7 +2248,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -2269,7 +2269,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -2290,7 +2290,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -2311,7 +2311,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -2332,7 +2332,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -2353,7 +2353,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -2374,7 +2374,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -2395,7 +2395,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -2416,7 +2416,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -2437,7 +2437,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           },
@@ -2457,7 +2457,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           }
@@ -2475,7 +2475,7 @@
   "name" : "Frozen2Exclude",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : false
+        "value" : {}
       }
         },
         "fields" : {
@@ -2868,7 +2868,7 @@
   "name" : "Frozen2Exclude",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : false
+        "value" : {}
       }
         },
         "is_exception" : false,
@@ -3020,7 +3020,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           }
@@ -3038,7 +3038,7 @@
   "name" : "Frozen2Exclude",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : false
+        "value" : {}
       }
         },
         "fields" : {
@@ -3166,7 +3166,7 @@
   "name" : "InternBox",
   "path" : "thrift/annotation/thrift.thrift"
 },
-            "value" : false
+            "value" : {}
           }
                 }
           }
@@ -3184,7 +3184,7 @@
   "name" : "Frozen2Exclude",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : false
+        "value" : {}
       }
         },
         "fields" : {

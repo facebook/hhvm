@@ -143,7 +143,7 @@ struct StructGen {
     if (!annotation) {
       return;
     }
-    auto value = std::make_unique<t_const_value>();
+    auto value = t_const_value::make_map();
     value->set_ttype(*annotation);
     auto frozen_exclude =
         std::make_unique<t_const>(&program_, annotation, "", std::move(value));
@@ -154,9 +154,8 @@ struct StructGen {
     const t_type* annotation = dynamic_cast<const t_type*>(
         program_.scope()->find_by_uri(kCppAdapterUri));
     assert(annotation); // transitive include from patch.thrift
-    auto value = std::make_unique<t_const_value>();
+    auto value = t_const_value::make_map();
     auto ns = gen::cpp::namespace_resolver::gen_namespace(program_);
-    value->set_map();
     value->add_map(
         std::make_unique<t_const_value>("name"),
         std::make_unique<t_const_value>(
@@ -183,7 +182,7 @@ struct StructGen {
       return field;
     }
 
-    auto value = std::make_unique<t_const_value>();
+    auto value = t_const_value::make_map();
     value->set_ttype(*annotation);
     auto intern_box =
         std::make_unique<t_const>(&program_, annotation, "", std::move(value));

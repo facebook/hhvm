@@ -23,7 +23,7 @@ using apache::thrift::compiler::test::check_compile;
 
 TEST(CompilerTest, diagnostic_in_last_line) {
   check_compile(R"(
-    struct s {
+    struct S {
       1: i32 i;
       # expected-error: expected type)");
 }
@@ -464,6 +464,14 @@ TEST(CompilerTest, const_double_value) {
     const float c4 = -10000000000000001;
     # expected-warning@-1: 64-bit constant -10000000000000001 may not work in all languages
     # expected-error@-2: value error: const `c4` cannot be represented precisely as `float` or `double`.
+  )");
+}
+
+TEST(CompilerTest, invalid_struct_initializer) {
+  check_compile(R"(
+    struct S {}
+    const S s1 = ""; # expected-error: string is incompatible with `S`
+    const S s2 = []; # expected-warning: list is incompatible with `S`
   )");
 }
 

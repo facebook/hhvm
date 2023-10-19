@@ -64,6 +64,12 @@ class t_const_value {
   t_const_value(t_const_value&&) = delete;
   t_const_value& operator=(const t_const_value&) = delete;
 
+  static std::unique_ptr<t_const_value> make_map() {
+    auto value = std::make_unique<t_const_value>();
+    value->set_map();
+    return value;
+  }
+
   std::unique_ptr<t_const_value> clone() const {
     auto clone = std::make_unique<t_const_value>();
     switch (get_type()) {

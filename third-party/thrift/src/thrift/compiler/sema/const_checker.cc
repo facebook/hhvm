@@ -59,6 +59,28 @@ bool is_valid_custom_default_float(const t_const_value* value) {
 } // namespace detail
 
 namespace {
+
+// Returns the category of a const value (initializer). It is not a real type
+// because the types of initializers are inferred later.
+const char* get_category(const t_const_value* val) {
+  switch (val->get_type()) {
+    case t_const_value::CV_BOOL:
+      return "bool";
+    case t_const_value::CV_INTEGER:
+      return "integer";
+    case t_const_value::CV_DOUBLE:
+      return "floating-point number";
+    case t_const_value::CV_STRING:
+      return "string";
+    case t_const_value::CV_MAP:
+      return "map";
+    case t_const_value::CV_LIST:
+      return "list";
+  }
+  assert(false && "unknown category");
+  return "unknown";
+}
+
 class const_checker {
  public:
   const_checker(
@@ -252,10 +274,20 @@ class const_checker {
   }
 
   void check_struct(const t_struct* type, const t_const_value* value) {
-    if (value->get_type() != t_const_value::CV_MAP) {
-      report_type_mismatch_warning("struct");
+    if (value->get_type() == t_const_value::CV_MAP) {
+      check_fields(type, value->get_map());
+      return;
     }
-    check_fields(type, value->get_map());
+    // Only warn on initialization from [] for legacy reasons.
+    auto level = value->get_type() == t_const_value::CV_LIST
+        ? diagnostic_level::warning
+        : diagnostic_level::error;
+    diags_.report(
+        node_,
+        level,
+        "{} is incompatible with `{}`",
+        get_category(value),
+        type->name());
   }
 
   void check_exception(const t_exception* type, const t_const_value* value) {

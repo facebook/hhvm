@@ -26,4 +26,4 @@ rayon = "1.2"
 serde = { version = "1.0.185", features = ["derive", "rc"] }
 shallow_decl_provider = { version = "0.0.0", path = "../../../shallow_decl_provider/cargo/shallow_decl_provider" }
 ty = { version = "0.0.0", path = "../../../ty/cargo/ty" }
-zstd = { version = "0.11.2+zstd.1.5.2", features = ["experimental", "zstdmt"] }
+zstd = { version = "0.13", features = ["experimental", "zstdmt"] }

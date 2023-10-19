@@ -28,4 +28,4 @@ parking_lot = { version = "0.12.1", features = ["send_guard"] }
 pos = { version = "0.0.0", path = "../../../hackrs/pos/cargo/pos" }
 serde = { version = "1.0.185", features = ["derive", "rc"] }
 shmffi = { version = "0.0.0", path = "../shmffi" }
-zstd = { version = "0.11.2+zstd.1.5.2", features = ["experimental", "zstdmt"] }
+zstd = { version = "0.13", features = ["experimental", "zstdmt"] }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3861ed72cc3693f1ca31c03f526ae658>>
+// @generated SignedSource<<8d1de4ae752e1a53e8eb23c956822893>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2202,6 +2202,7 @@ impl Transform for Hint_ {
                 }
                 { __binding_1.transform(env, pass) }
             }
+            Hint_::HclassArgs(ref mut __binding_0) => __binding_0.transform(env, pass),
             Hint_::Hshape(ref mut __binding_0) => __binding_0.transform(env, pass),
             Hint_::Haccess(ref mut __binding_0, ref mut __binding_1) => {
                 {

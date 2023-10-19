@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<822598171b90982697a79624b7c750db>>
+// @generated SignedSource<<04cb298e09f90972a8cddc114caae7e1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1406,6 +1406,7 @@ impl<P: Params> NodeMut<P> for Hint_ {
                 a0.accept(c, v)?;
                 a1.accept(c, v)
             }
+            Hint_::HclassArgs(a0) => a0.accept(c, v),
             Hint_::Hshape(a0) => a0.accept(c, v),
             Hint_::Haccess(a0, a1) => {
                 a0.accept(c, v)?;

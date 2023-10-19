@@ -1253,6 +1253,7 @@ and hint_ =
   | Hfun of hint_fun
   | Htuple of hint list
   | Happly of class_name * hint list
+  | Hclass_args of hint
   | Hshape of nast_shape_info
   | Haccess of hint * sid list
       (** Accessing a type constant. Type constants are accessed like normal

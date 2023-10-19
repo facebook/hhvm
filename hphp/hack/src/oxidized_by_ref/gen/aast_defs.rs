@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a1d960e7a96683747254003016b3e2bc>>
+// @generated SignedSource<<aea21b0e6425e07c97eb44dd8c46935d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -3104,6 +3104,9 @@ pub enum Hint_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Happly(&'a (&'a ClassName<'a>, &'a [&'a Hint<'a>])),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Hclass_args")]
+    HclassArgs(&'a Hint<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hshape(&'a NastShapeInfo<'a>),
     /// Accessing a type constant. Type constants are accessed like normal

@@ -648,6 +648,7 @@ let rec hint : Env.t -> variance -> Aast_defs.hint -> unit =
       env.Env.enclosing_class
       ~default:()
       ~f:(check_final_this_pos_variance env.Env.env variance pos)
+  | Hclass_args h
   | Hoption h
   | Hlike h
   | Hsoft h

@@ -427,6 +427,7 @@ end = struct
 
   let class_names hint =
     let rec aux acc = function
+      | Aast_defs.Hclass_args hint -> aux acc @@ snd hint
       | Aast_defs.Happly ((_, nm), hints) -> auxs (nm :: acc) hints
       | Aast_defs.(Haccess (hint, _) | Hlike hint | Hsoft hint | Hoption hint)
         ->
@@ -1032,6 +1033,8 @@ end = struct
             @@ pair ~sep:comma (pp tparams) (pp tparams))
             ppf
             (fst, snd)
+        | Hclass_args (_, Happly ((_, class_name), _)) ->
+          Fmt.(suffix (const string "::class") string) ppf class_name
         | Happly ((_, name), [(_, Happly ((_, class_name), _))])
           when String.(name = SN.Classes.cClassname) ->
           Fmt.(suffix (const string "::class") string) ppf class_name
@@ -1163,6 +1166,7 @@ end = struct
         | Hrefinement _
         (* places where function types shouldn't appear *)
         | Haccess _
+        | Hclass_args _
         | Happly _
         (* non-denotable types *)
         | Hany

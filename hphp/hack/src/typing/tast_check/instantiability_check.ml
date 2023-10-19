@@ -32,6 +32,7 @@ let rec validate_classname env (pos, hint) =
   | Aast.Hnothing ->
     ()
   | Aast.Hrefinement (h, _) -> validate_classname env h
+  | Aast.Hclass_args _ (* TODO: future Hclass will be valid *)
   | Aast.Htuple _
   | Aast.Hunion _
   | Aast.Hintersection _
@@ -107,6 +108,9 @@ let rec check_hint env (pos, hint) =
   | Aast.Hvec_or_dict (hopt1, h2) ->
     Option.iter hopt1 ~f:(check_hint env);
     check_hint env h2
+  | Aast.Hclass_args h ->
+    check_hint env h;
+    validate_classname (Tast_env.tast_env_as_typing_env env) h
   | Aast.Hoption h
   | Aast.Hlike h
   | Aast.Hsoft h ->

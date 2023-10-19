@@ -110,6 +110,8 @@ let rec pp_hint ~is_ctx ppf (pos, hint_) =
   | Aast.Habstr (name, [])
   | Aast.Happly ((_, name), []) ->
     Fmt.string ppf name
+  | Aast.Hclass_args h ->
+    Fmt.(prefix (const string "class") @@ angles @@ pp_hint ~is_ctx:false) ppf h
   | Aast.Habstr (name, hints)
   | Aast.Happly ((_, name), hints) ->
     Fmt.(

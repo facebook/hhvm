@@ -185,6 +185,7 @@ and hint_ ~in_signature env p h_ =
   | Hunion hl
   | Hintersection hl ->
     hints env hl
+  | Hclass_args h
   | Hoption h
   | Hsoft h
   | Hlike h ->

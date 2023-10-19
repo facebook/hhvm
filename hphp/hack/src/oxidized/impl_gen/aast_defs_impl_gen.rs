@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1e7e972c0e018ce16283bec34b0398d4>>
+// @generated SignedSource<<ec5ba5b5964a4f6c1f34f29e390fd079>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -3624,6 +3624,9 @@ impl Hint_ {
     pub fn mk_happly(p0: ClassName, p1: Vec<Hint>) -> Self {
         Hint_::Happly(p0, p1)
     }
+    pub fn mk_hclass_args(p0: Hint) -> Self {
+        Hint_::HclassArgs(p0)
+    }
     pub fn mk_hshape(p0: NastShapeInfo) -> Self {
         Hint_::Hshape(p0)
     }
@@ -3708,6 +3711,12 @@ impl Hint_ {
     pub fn is_happly(&self) -> bool {
         match self {
             Hint_::Happly(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_hclass_args(&self) -> bool {
+        match self {
+            Hint_::HclassArgs(..) => true,
             _ => false,
         }
     }
@@ -3855,6 +3864,12 @@ impl Hint_ {
             _ => None,
         }
     }
+    pub fn as_hclass_args(&self) -> Option<&Hint> {
+        match self {
+            Hint_::HclassArgs(p0) => Some(p0),
+            _ => None,
+        }
+    }
     pub fn as_hshape(&self) -> Option<&NastShapeInfo> {
         match self {
             Hint_::Hshape(p0) => Some(p0),
@@ -3951,6 +3966,12 @@ impl Hint_ {
             _ => None,
         }
     }
+    pub fn as_hclass_args_mut(&mut self) -> Option<&mut Hint> {
+        match self {
+            Hint_::HclassArgs(p0) => Some(p0),
+            _ => None,
+        }
+    }
     pub fn as_hshape_mut(&mut self) -> Option<&mut NastShapeInfo> {
         match self {
             Hint_::Hshape(p0) => Some(p0),
@@ -4044,6 +4065,12 @@ impl Hint_ {
     pub fn as_happly_into(self) -> Option<(ClassName, Vec<Hint>)> {
         match self {
             Hint_::Happly(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
+    }
+    pub fn as_hclass_args_into(self) -> Option<Hint> {
+        match self {
+            Hint_::HclassArgs(p0) => Some(p0),
             _ => None,
         }
     }

@@ -319,7 +319,7 @@ impl TypedLocal {
     fn simplify_hint(&self, hint: &mut Hint) -> bool {
         let Hint(_, box hint_) = hint;
         match hint_ {
-            Hint_::Hoption(h) | Hint_::Hlike(h) => self.simplify_hint(h),
+            Hint_::Hoption(h) | Hint_::Hlike(h) | Hint_::HclassArgs(h) => self.simplify_hint(h),
             Hint_::Htuple(hints) => {
                 for h in hints {
                     self.simplify_hint(h);

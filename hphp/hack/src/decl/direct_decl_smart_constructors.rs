@@ -5361,6 +5361,24 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         }
     }
 
+    fn make_class_args_type_specifier(
+        &mut self,
+        class: Self::Output,
+        _lt: Self::Output,
+        targ: Self::Output,
+        _trailing_comma: Self::Output,
+        _gt: Self::Output,
+    ) -> Self::Output {
+        self.make_apply(
+            (
+                self.get_pos(class),
+                naming_special_names::classes::CLASS_NAME,
+            ),
+            targ,
+            self.get_pos(targ),
+        )
+    }
+
     fn make_scope_resolution_expression(
         &mut self,
         class_name: Self::Output,

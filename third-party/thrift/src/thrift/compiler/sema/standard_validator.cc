@@ -92,13 +92,8 @@ void report_redef_error(
     const t_node& /*existing*/) {
   // TODO(afuller): Use `existing` to provide more detail in the
   // diagnostic.
-  diags.report(
-      child,
-      diagnostic_level::error,
-      "{} `{}` is already defined for `{}`.",
-      kind,
-      name,
-      parent.name());
+  diags.error(
+      child, "{} `{}` is already defined for `{}`.", kind, name, parent.name());
 }
 
 // Helper for checking for the redefinition of a name in the context of a node.
@@ -524,31 +519,9 @@ void validate_mixin_field_attributes(
   }
 }
 
-/*
- * Validates whether all fields which have annotations cpp.ref or cpp2.ref are
- * also optional.
- */
-void validate_ref_field_attributes(
-    diagnostic_context& ctx, const t_field& node) {
-  if (!cpp2::has_ref_annotation(node)) {
-    return;
-  }
-
-  if (node.qualifier() != t_field_qualifier::optional &&
-      dynamic_cast<const t_union*>(ctx.parent()) == nullptr) {
-    ctx.warning(
-        "`cpp.ref` field `{}` must be optional if it is recursive.",
-        node.name());
-  }
-}
-
 void validate_required_field(diagnostic_context& ctx, const t_field& field) {
   if (field.qualifier() == t_field_qualifier::required) {
-    ctx.report(
-        field,
-        diagnostic_level::warning,
-        "Required field is deprecated: `{}`.",
-        field.name());
+    ctx.warning(field, "Required field is deprecated: `{}`.", field.name());
   }
 }
 
@@ -648,9 +621,8 @@ void limit_terse_write_on_experimental_mode(
 
 void validate_field_id(diagnostic_context& ctx, const t_field& node) {
   if (node.explicit_id() != node.id()) {
-    ctx.report(
+    ctx.warning(
         node,
-        diagnostic_level::warning,
         "No field id specified for `{}`, resulting protocol may have conflicts "
         "or not be backwards compatible!",
         node.name());
@@ -1170,7 +1142,6 @@ ast_validator standard_validator() {
   validator.add_field_visitor(&validate_field_id);
   validator.add_field_visitor(&validate_mixin_field_attributes);
   validator.add_field_visitor(&validate_boxed_field_attributes);
-  validator.add_field_visitor(&validate_ref_field_attributes);
   validator.add_field_visitor(&validate_field_default_value);
   validator.add_field_visitor(&validate_ref_annotation);
   validator.add_field_visitor(&validate_ref_unique_and_box_annotation);

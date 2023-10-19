@@ -140,27 +140,6 @@ class CompilerFailureTest(unittest.TestCase):
             "file `foo.thrift` is already parsed.\n",
         )
 
-    def test_struct_optional_refs(self):
-        write_file(
-            "foo.thrift",
-            textwrap.dedent(
-                """\
-                struct A {
-                    1: A rec (cpp.ref);
-                }
-                """
-            ),
-        )
-
-        ret, out, err = self.run_thrift("foo.thrift")
-
-        self.assertEqual(ret, 0)
-        self.assertEqual(
-            err,
-            "[WARNING:foo.thrift:2] `cpp.ref` field `rec` must be optional if it is recursive.\n"
-            "[WARNING:foo.thrift:2] cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box annotation instead in `rec`.\n",
-        )
-
     def test_structured_ref(self):
         write_file(
             "foo.thrift",
@@ -440,7 +419,6 @@ class CompilerFailureTest(unittest.TestCase):
             err,
             textwrap.dedent(
                 """\
-                [WARNING:foo.thrift:3] `cpp.ref` field `a` must be optional if it is recursive.
                 [WARNING:foo.thrift:3] cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box annotation instead in `a`.
                 [ERROR:foo.thrift:3] Mixin field `a` can not be a ref in cpp.
                 """

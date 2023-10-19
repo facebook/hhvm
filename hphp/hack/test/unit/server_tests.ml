@@ -130,7 +130,7 @@ let test_process_file_deferring () =
 
   true
 
-let expected_decling_count = 81
+let expected_decling_count = 71
 
 (* This test verifies that the deferral/counting machinery works for
    ProviderUtils.compute_tast_and_errors_unquarantined. *)

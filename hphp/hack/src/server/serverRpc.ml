@@ -54,9 +54,12 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         Live_status
     in
     let last_recheck_stats =
-      Option.map
-        env.ServerEnv.last_recheck_loop_stats_for_actual_work
-        ~f:ServerEnv.RecheckLoopStats.to_user_telemetry
+      match env.ServerEnv.last_recheck_loop_stats_for_actual_work with
+      | None -> None
+      | Some recheck_stats ->
+        Some
+          (ServerEnv.RecheckLoopStats.to_user_telemetry recheck_stats
+          |> Telemetry.string_ ~key:"init_id" ~value:env.init_env.init_id)
     in
     ( env,
       { Server_status.liveness; error_list; dropped_count; last_recheck_stats }

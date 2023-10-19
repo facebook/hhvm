@@ -290,6 +290,11 @@ void HHVM_FUNCTION(debug_zval_dump, const Variant& variable) {
   vs.serialize(variable, false);
 }
 
+void HHVM_FUNCTION(debugger_dump, const Variant& variable) {
+  VariableSerializer vs(VariableSerializer::Type::DebuggerDump, 0, 2);
+  vs.serialize(variable, false);
+}
+
 /*
  * Intrinsic for Containers, i.e. the subset of \HH\Traversable including
  * 1. array:
@@ -669,6 +674,7 @@ void StandardExtension::initVariable() {
   HHVM_FE(var_export);
   HHVM_FE(var_export_pure);
   HHVM_FE(debug_zval_dump);
+  HHVM_FE(debugger_dump);
   HHVM_FE(var_dump);
   HHVM_FE(serialize);
   HHVM_FE(serialize_pure);

@@ -155,6 +155,9 @@ function var_dump(readonly mixed $arg1, mixed... $argv): void;
 <<__Native>>
 function debug_zval_dump(mixed $variable): void;
 
+<<__Native>>
+function debugger_dump(mixed $variable): void;
+
 /**
  * Generates a storable representation of a value  This is useful for storing
  * or passing PHP values around without losing their type and structure.  To

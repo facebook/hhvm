@@ -27,10 +27,9 @@ namespace apache {
 namespace thrift {
 namespace compiler {
 
-class t_stream_response : public t_type {
+class t_stream : public t_type {
  public:
-  explicit t_stream_response(t_type_ref elem_type)
-      : elem_type_(std::move(elem_type)) {}
+  explicit t_stream(t_type_ref elem_type) : elem_type_(std::move(elem_type)) {}
 
   const t_type_ref& elem_type() const { return elem_type_; }
 
@@ -49,9 +48,9 @@ class t_stream_response : public t_type {
   // TODO(afuller): Remove everything below here. It is provided only for
   // backwards compatibility.
  public:
-  explicit t_stream_response(
+  explicit t_stream(
       const t_type* elem_type, std::unique_ptr<t_throws> throws = nullptr)
-      : t_stream_response(t_type_ref::from_req_ptr(elem_type)) {
+      : t_stream(t_type_ref::from_req_ptr(elem_type)) {
     set_exceptions(std::move(throws));
   }
 

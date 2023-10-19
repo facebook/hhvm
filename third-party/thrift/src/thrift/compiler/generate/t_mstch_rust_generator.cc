@@ -930,7 +930,7 @@ class rust_mstch_function : public mstch_function {
     return rust_make_unique_exceptions(function_->exceptions());
   }
   mstch::node rust_unique_stream_exceptions() {
-    const t_stream_response* stream = function_->stream();
+    const t_stream* stream = function_->stream();
     return rust_make_unique_exceptions(stream ? stream->exceptions() : nullptr);
   }
   mstch::node rust_make_unique_exceptions(const t_struct* s) {

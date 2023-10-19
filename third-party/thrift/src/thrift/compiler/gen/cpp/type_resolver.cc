@@ -121,7 +121,7 @@ const std::string& type_resolver::get_return_type(const t_function& fun) {
     });
   }
 
-  const t_stream_response* stream = fun.stream();
+  const t_stream* stream = fun.stream();
   return detail::get_or_gen(type_cache_, stream, [&]() {
     if (fun.has_return_type()) {
       return detail::gen_template_type(

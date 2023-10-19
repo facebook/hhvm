@@ -46,7 +46,7 @@ class MockAstVisitor {
   MOCK_METHOD(void, visit_function, (const t_function*));
   MOCK_METHOD(void, visit_throws, (const t_throws*));
   MOCK_METHOD(void, visit_sink, (const t_sink*));
-  MOCK_METHOD(void, visit_stream_response, (const t_stream_response*));
+  MOCK_METHOD(void, visit_stream, (const t_stream*));
 
   MOCK_METHOD(void, visit_structured, (const t_structured*));
   MOCK_METHOD(void, visit_union, (const t_union*));
@@ -88,9 +88,8 @@ class MockAstVisitor {
     visitor.add_throws_visitor(
         [this](const t_throws& node) { visit_throws(&node); });
     visitor.add_sink_visitor([this](const t_sink& node) { visit_sink(&node); });
-    visitor.add_stream_response_visitor([this](const t_stream_response& node) {
-      visit_stream_response(&node);
-    });
+    visitor.add_stream_visitor(
+        [this](const t_stream& node) { visit_stream(&node); });
 
     visitor.add_structured_visitor(
         [this](const t_structured& node) { visit_structured(&node); });
@@ -142,9 +141,7 @@ class OverloadedVisitor {
   void operator()(const t_list& node) { mock_->visit_list(&node); }
   void operator()(const t_map& node) { mock_->visit_map(&node); }
   void operator()(const t_sink& node) { mock_->visit_sink(&node); }
-  void operator()(const t_stream_response& node) {
-    mock_->visit_stream_response(&node);
-  }
+  void operator()(const t_stream& node) { mock_->visit_stream(&node); }
 
  private:
   MockAstVisitor* mock_;
@@ -406,10 +403,10 @@ TEST(AstVisitorTest, Sink) {
 }
 
 TEST(AstVisitorTest, StreamResponse) {
-  auto stream1 = std::make_unique<t_stream_response>(t_base_type::t_i32());
+  auto stream1 = std::make_unique<t_stream>(t_base_type::t_i32());
   auto stream1ptr = stream1.get();
   stream1->set_exceptions(std::make_unique<t_throws>());
-  auto stream2 = std::make_unique<t_stream_response>(t_base_type::t_i32());
+  auto stream2 = std::make_unique<t_stream>(t_base_type::t_i32());
   auto stream2ptr = stream2.get();
 
   auto program = t_program("path/to/program.thrift");
@@ -422,9 +419,9 @@ TEST(AstVisitorTest, StreamResponse) {
   program.add_service(std::move(service));
 
   auto visitor = ast_visitor();
-  auto responses = std::vector<const t_stream_response*>();
-  visitor.add_stream_response_visitor(
-      [&](const t_stream_response& node) { responses.push_back(&node); });
+  auto responses = std::vector<const t_stream*>();
+  visitor.add_stream_visitor(
+      [&](const t_stream& node) { responses.push_back(&node); });
   auto throws = std::vector<const t_throws*>();
   visitor.add_throws_visitor(
       [&](const t_throws& node) { throws.push_back(&node); });

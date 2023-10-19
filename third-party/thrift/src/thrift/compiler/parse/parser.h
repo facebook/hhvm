@@ -35,7 +35,7 @@ class lexer;
 
 class t_base_type;
 class t_sink;
-class t_stream_response;
+class t_stream;
 class t_throws;
 
 struct identifier {
@@ -129,7 +129,7 @@ class parser_actions {
       type_throws_spec sink_spec,
       type_throws_spec final_response_spec) = 0;
 
-  virtual std::unique_ptr<t_stream_response> on_stream(
+  virtual std::unique_ptr<t_stream> on_stream(
       source_range range, type_throws_spec spec) = 0;
 
   virtual t_type_ref on_list_type(

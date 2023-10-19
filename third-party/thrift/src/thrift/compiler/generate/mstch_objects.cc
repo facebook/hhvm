@@ -465,7 +465,7 @@ mstch::node mstch_function::return_type() {
   if (function_->is_interaction_constructor()) {
     // The old syntax (performs) treats an interaction as a response.
     type = function_->interaction().get_type();
-  } else if (const t_stream_response* stream = function_->stream()) {
+  } else if (const t_stream* stream = function_->stream()) {
     type = stream;
   } else if (function_->sink()) {
     type = &t_base_type::t_void();
@@ -518,14 +518,14 @@ mstch::node mstch_function::sink_final_response_exceptions() {
 }
 
 mstch::node mstch_function::stream_elem_type() {
-  const t_stream_response* stream = function_->stream();
+  const t_stream* stream = function_->stream();
   return stream ? context_.type_factory->make_mstch_object(
                       stream->get_elem_type(), context_, pos_)
                 : mstch::node();
 }
 
 mstch::node mstch_function::stream_first_response_type() {
-  const t_stream_response* stream = function_->stream();
+  const t_stream* stream = function_->stream();
   if (!stream || !function_->has_return_type()) {
     return {};
   }
@@ -534,7 +534,7 @@ mstch::node mstch_function::stream_first_response_type() {
 }
 
 mstch::node mstch_function::stream_exceptions() {
-  const t_stream_response* stream = function_->stream();
+  const t_stream* stream = function_->stream();
   return stream ? make_exceptions(stream->exceptions()) : mstch::node();
 }
 

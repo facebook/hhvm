@@ -2447,7 +2447,7 @@ std::unique_ptr<t_const_value> t_hack_generator::function_to_tmeta(
     return_tmeta->set_map();
     return_tmeta->add_map(
         std::make_unique<t_const_value>("t_sink"), std::move(sink_tmeta));
-  } else if (const t_stream_response* stream = function->stream()) {
+  } else if (const t_stream* stream = function->stream()) {
     auto stream_tmeta = std::make_unique<t_const_value>();
     stream_tmeta->set_map();
     stream_tmeta->add_map(
@@ -6164,7 +6164,7 @@ void t_hack_generator::generate_php_stream_function_helpers(
     const t_function* function, const std::string& prefix) {
   generate_php_function_args_helpers(function, prefix);
 
-  const t_stream_response* stream = function->stream();
+  const t_stream* stream = function->stream();
   generate_php_function_result_helpers(
       function,
       stream->get_elem_type(),
@@ -6299,7 +6299,7 @@ void t_hack_generator::generate_php_docstring(
   if (tfunction->qualifier() == t_function_qualifier::oneway) {
     out << "oneway ";
   }
-  if (const t_stream_response* stream = tfunction->stream()) {
+  if (const t_stream* stream = tfunction->stream()) {
     if (tfunction->has_return_type()) {
       out << thrift_type_name(tfunction->return_type().get_type()) << ", ";
     } else {

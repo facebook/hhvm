@@ -75,8 +75,8 @@ class t_function final : public t_named {
   const t_sink* sink() const {
     return dynamic_cast<const t_sink*>(sink_or_stream_.get());
   }
-  const t_stream_response* stream() const {
-    return dynamic_cast<const t_stream_response*>(sink_or_stream_.get());
+  const t_stream* stream() const {
+    return dynamic_cast<const t_stream*>(sink_or_stream_.get());
   }
 
   t_paramlist& params() { return *params_; }

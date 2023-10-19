@@ -547,7 +547,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
     }
     if (func.has_return_type()) {
       const t_type* type = func.return_type().get_type();
-      if (auto stream = dynamic_cast<const t_stream_response*>(type)) {
+      if (auto stream = dynamic_cast<const t_stream*>(type)) {
         assert(false); // handled below
       } else if (auto sink = dynamic_cast<const t_sink*>(type)) {
         assert(false); // handled below

@@ -737,12 +737,12 @@ class mstch_function : public mstch_base {
   mstch::node has_stream() { return function_->stream() != nullptr; }
   mstch::node stream_elem_type();
   mstch::node stream_has_first_response() {
-    const t_stream_response* stream = function_->stream();
+    const t_stream* stream = function_->stream();
     return stream && function_->has_return_type();
   }
   mstch::node stream_first_response_type();
   mstch::node has_stream_exceptions() {
-    const t_stream_response* stream = function_->stream();
+    const t_stream* stream = function_->stream();
     const t_throws* exceptions = stream ? stream->exceptions() : nullptr;
     return exceptions && exceptions->has_fields();
   }

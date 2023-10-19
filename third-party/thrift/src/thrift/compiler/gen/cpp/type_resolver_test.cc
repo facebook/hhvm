@@ -353,18 +353,13 @@ TEST_F(TypeResolverTest, Stream) {
   t_base_type ui64(t_base_type::t_i64());
   ui64.set_annotation("cpp.type", "uint64_t");
 
-  auto fun1 = t_function(
-      nullptr, {}, "", {}, std::make_unique<t_stream_response>(ui64));
+  auto fun1 = t_function(nullptr, {}, "", {}, std::make_unique<t_stream>(ui64));
   EXPECT_EQ(
       resolver_.get_return_type(fun1),
       "::apache::thrift::ServerStream<uint64_t>");
 
   auto fun2 = t_function(
-      nullptr,
-      t_type_ref(ui64),
-      "",
-      {},
-      std::make_unique<t_stream_response>(ui64));
+      nullptr, t_type_ref(ui64), "", {}, std::make_unique<t_stream>(ui64));
   EXPECT_EQ(
       resolver_.get_return_type(fun2),
       "::apache::thrift::ResponseAndServerStream<uint64_t, uint64_t>");

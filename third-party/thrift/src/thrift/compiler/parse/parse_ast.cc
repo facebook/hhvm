@@ -699,9 +699,9 @@ class ast_builder : public parser_actions {
     return sink;
   }
 
-  std::unique_ptr<t_stream_response> on_stream(
+  std::unique_ptr<t_stream> on_stream(
       source_range range, type_throws_spec spec) override {
-    auto stream = std::make_unique<t_stream_response>(std::move(spec.type));
+    auto stream = std::make_unique<t_stream>(std::move(spec.type));
     stream->set_src_range(range);
     stream->set_exceptions(std::move(spec.throws));
     return stream;

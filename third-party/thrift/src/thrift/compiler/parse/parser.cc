@@ -528,7 +528,7 @@ class parser {
   }
 
   // stream: "stream" "<" type [throws] ">"
-  std::unique_ptr<t_stream_response> parse_stream() {
+  std::unique_ptr<t_stream> parse_stream() {
     auto range = track_range();
     consume_token();
     expect_and_consume('<');

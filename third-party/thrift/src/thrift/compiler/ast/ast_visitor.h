@@ -187,8 +187,7 @@ class basic_ast_visitor {
       // Do nothing.
     } else if (auto* sink = ast_detail::as<t_sink>(sink_or_stream)) {
       visit_child(*sink, args...);
-    } else if (
-        auto* stream = ast_detail::as<t_stream_response>(sink_or_stream)) {
+    } else if (auto* stream = ast_detail::as<t_stream>(sink_or_stream)) {
       visit_child(*stream, args...);
     }
     if (node.exceptions()) {
@@ -206,8 +205,8 @@ class basic_ast_visitor {
     }
     end_visit(node, args...);
   }
-  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(stream_response) {
-    begin_visit(stream_response_visitors_, node, args...);
+  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(stream) {
+    begin_visit(stream_visitors_, node, args...);
     if (node.exceptions()) {
       visit_child(*node.exceptions(), args...);
     }

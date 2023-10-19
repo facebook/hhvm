@@ -477,6 +477,12 @@ fn write_instance_stub(
             let target =
                 FunctionName::method(method_info.class.name, IsStatic::Static, method_info.name);
 
+            let mut tx_params = tx_params.clone();
+            // If the static method is declared in a trait, this removes the last [self] argument, since it should
+            // be given dynamically during the analysis.
+            if method_info.declared_in_trait() {
+                tx_params.pop();
+            }
             let params: Vec<Sid> = std::iter::once(Ok(static_this))
                 .chain(
                     tx_params

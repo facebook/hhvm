@@ -292,6 +292,16 @@ trait T2 {
   // CHECK:   n1 = __self__$static.f(n0)
   // CHECK:   ret null
   // CHECK: }
+
+  // TEST-CHECK-BAL: define T2.trait_self_caller
+  // CHECK: define T2.trait_self_caller($this: *T2, self: *HackMixed) : *void {
+  // CHECK: #b0:
+  // CHECK: // forward to the static method
+  // CHECK:   n0: *T2 = load &$this
+  // CHECK:   n1 = $builtins.hack_get_static_class(n0)
+  // CHECK:   n2 = T2$static.trait_self_caller(n1)
+  // CHECK:   ret n2
+  // CHECK: }
   public static function trait_self_caller(): void {
     self::f();
   }

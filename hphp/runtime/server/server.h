@@ -270,6 +270,11 @@ public:
   virtual size_t getMaxThreadCount() = 0;
 
   /**
+   * Set the max threads that can be used for handling requests.
+   */
+  virtual void setMaxThreadCount(size_t count) = 0;
+
+  /**
    * How many threads are actively working on handling requests.
    */
   virtual int getActiveWorker() = 0;
@@ -447,4 +452,3 @@ struct InvalidHeaderException : ServerException {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

@@ -146,6 +146,9 @@ struct ProxygenServer : Server,
   size_t getMaxThreadCount() override {
     return m_dispatcher.getMaxThreadCount();
   }
+  void setMaxThreadCount(size_t count) override {
+    m_dispatcher.setMaxThreadCount(count);
+  }
   int getActiveWorker() override {
     return m_dispatcher.getActiveWorker();
   }

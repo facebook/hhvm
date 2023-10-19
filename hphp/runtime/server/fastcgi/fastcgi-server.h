@@ -117,6 +117,9 @@ struct FastCGIServer : public Server,
   size_t getMaxThreadCount() override {
     return m_dispatcher.getMaxThreadCount();
   }
+  void setMaxThreadCount(size_t count) override {
+    return m_dispatcher.setMaxThreadCount(count);
+  }
   int getActiveWorker() override { return m_dispatcher.getActiveWorker(); }
   int getQueuedJobs()   override { return m_dispatcher.getQueuedJobs();   }
   void updateMaxActiveWorkers(int num) override {

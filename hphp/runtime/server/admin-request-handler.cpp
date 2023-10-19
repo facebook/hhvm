@@ -53,8 +53,8 @@
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/server/pagelet-server.h"
-#include "hphp/runtime/server/xbox-request-handler.h"
 #include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/server/xbox-request-handler.h"
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/build-info.h"
@@ -381,6 +381,12 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/invalidate-units: remove specified files from the unit cache\n"
         "    path           absolute path of files to invalidate\n"
 
+        "/set-server-threads: set the number of server threads. This is a\n"
+        "                     temporary setting and may be overridden by \n"
+        "                     server logic\n"
+        "    count            maximum number of threads to set\n"
+        "/get-server-threads: get the number of server threads\n"
+
         "/relocate:        relocate translations\n"
         "    random        optional, default false, relocate random subset\n"
         "       all        optional, default false, relocate all translations\n"
@@ -661,6 +667,26 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       string translated = translate_stack(transport->getParam("stack").c_str(),
                                           transport->getParam("bare").empty());
       transport->sendString(translated);
+      break;
+    }
+    if (cmd == "set-server-threads") {
+      try {
+        const auto maxThreads = folly::to<size_t>(transport->getParam("count"));
+        HttpServer::Server->getPageServer()->setMaxThreadCount(maxThreads);
+
+        // New value may not be equal to `maxThreads` due to dispatcher logic
+        transport->sendString(folly::sformat(
+            "Server threads updated to {}\n",
+            HttpServer::Server->getPageServer()->getMaxThreadCount()));
+      } catch (...) {
+        transport->sendString("Something went wrong.\n");
+      }
+      break;
+    }
+    if (cmd == "get-server-threads") {
+      transport->sendString(folly::sformat(
+          "Server threads currently set to to {}\n",
+          HttpServer::Server->getPageServer()->getMaxThreadCount()));
       break;
     }
     if (strncmp(cmd.c_str(), "check", 5) == 0 &&

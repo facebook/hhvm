@@ -19,6 +19,7 @@ enum ConfigSourceType {
   SystemConfig = 1,
   UserConfig = 2,
   CommandLine = 3,
+  Dynamic = 4,
 }
 
 enum ConfigReloadBehavior {

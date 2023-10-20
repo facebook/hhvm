@@ -1302,7 +1302,11 @@ void emitModuleBoundaryCheckKnown(IRGS& env, const Func* symbol) {
       auto const data = OptClassAndFuncData { curClass(env), caller };
       gen(env, RaiseModuleBoundaryViolation, data, callee);
   }
-  emitDeploymentBoundaryCheck(env, callee);
+  auto const& packageInfo = env.unit.packageInfo();
+  if (packageInfo.violatesDeploymentBoundary(*symbol)) {
+    auto const data = OptClassAndFuncData { curClass(env), caller };
+    gen(env, RaiseDeploymentBoundaryViolation, data, callee);
+  }
 }
 
 void emitModuleBoundaryCheckKnown(IRGS& env, const Class* symbol) {
@@ -1312,7 +1316,11 @@ void emitModuleBoundaryCheckKnown(IRGS& env, const Class* symbol) {
       auto const data = OptClassAndFuncData { curClass(env), caller };
       gen(env, RaiseModuleBoundaryViolation, data, callee);
   }
-  emitDeploymentBoundaryCheck(env, callee);
+  auto const& packageInfo = env.unit.packageInfo();
+  if (packageInfo.violatesDeploymentBoundary(*symbol)) {
+    auto const data = OptClassAndFuncData { curClass(env), caller };
+    gen(env, RaiseDeploymentBoundaryViolation, data, callee);
+  }
 }
 
 void emitModuleBoundaryCheckKnown(IRGS& env, const Class::Prop* prop) {

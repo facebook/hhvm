@@ -109,7 +109,7 @@ class DestinationRoute {
       auto finalReq = addDeleteRequestSource(
           req, memcache::McDeleteRequestSource::FAILED_INVALIDATION);
       // Make sure bucket id is set in request
-      finalReq.bucketId_ref() = *bucketId;
+      finalReq.bucketId_ref() = fmt::to_string(*bucketId);
       spool(finalReq, axonCtx, bucketId);
       auto reply = createReply(DefaultReply, finalReq);
       reply.setDestination(destination_->accessPoint());

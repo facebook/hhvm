@@ -1,0 +1,4 @@
+File "nested_key_existence_inside_coalesce.php", line 6, characters 8-25:
+You are accessing a field known to not exist (Typing[4321])
+  File "nested_key_existence_inside_coalesce.php", line 5, characters 8-37:
+  The field `c` is not defined in this shape

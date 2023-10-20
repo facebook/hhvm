@@ -176,18 +176,17 @@ let handler =
           method_name
           shape
           (Pos_or_decl.of_raw_pos pos, field_name)
-      | ( _,
-          p,
-          Binop
-            {
-              bop = Ast_defs.QuestionQuestion;
-              lhs = (_, _, Array_get (shape, Some (_, pos, String field_name)));
-              _;
-            } ) ->
-        shape_access_with_non_existent_field
-          p
-          env
-          shape
-          (Pos_or_decl.of_raw_pos pos, field_name)
+      | (_, p, Binop { bop = Ast_defs.QuestionQuestion; lhs = exp; _ }) ->
+        let rec check_nested_accesses = function
+          | (_, _, Array_get (exp, Some (_, pos, String field_name))) ->
+            shape_access_with_non_existent_field
+              p
+              env
+              exp
+              (Pos_or_decl.of_raw_pos pos, field_name);
+            check_nested_accesses exp
+          | _ -> ()
+        in
+        check_nested_accesses exp
       | _ -> ()
   end

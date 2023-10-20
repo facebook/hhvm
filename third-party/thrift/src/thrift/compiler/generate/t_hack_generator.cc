@@ -818,10 +818,13 @@ class t_hack_generator : public t_concat_generator {
     return "";
   }
 
-  const std::string find_attributes(const t_named& tnamed) {
-    if (const std::string* annotation =
-            tnamed.find_annotation_or_null("hack.attributes")) {
-      return *annotation;
+  const std::string find_attributes(
+      const t_named& tnamed, bool include_unstructured) {
+    if (include_unstructured) {
+      if (const std::string* annotation =
+              tnamed.find_annotation_or_null("hack.attributes")) {
+        return *annotation;
+      }
     }
     if (const auto annotation =
             tnamed.find_structured_annotation_or_null(kHackAttributeUri)) {
@@ -4254,7 +4257,7 @@ void t_hack_generator::generate_php_struct_fields(
       generate_php_docstring(out, &field);
     }
 
-    const std::string field_attributes = find_attributes(field);
+    const std::string field_attributes = find_attributes(field, true);
     if (!field_attributes.empty()) {
       indent(out) << "<<" << field_attributes << ">>\n";
     }
@@ -5050,7 +5053,7 @@ void t_hack_generator::generate_hack_attributes(
   }
 
   if (include_user_defined) {
-    const std::string user_attributes = find_attributes(*type);
+    const std::string user_attributes = find_attributes(*type, true);
     if (!user_attributes.empty()) {
       attributes_parts.emplace_back(user_attributes);
     }
@@ -7131,6 +7134,10 @@ void t_hack_generator::_generate_sendImpl_arg(
 
 void t_hack_generator::_generate_service_client_children(
     std::ofstream& out, const t_service* tservice, bool mangle, bool async) {
+  auto attributes = find_attributes(*tservice, false);
+  if (!attributes.empty()) {
+    indent(out) << "<<" << attributes << ">>\n";
+  }
   std::string long_name = php_servicename_mangle(mangle, tservice);
   std::string class_suffix = std::string(async ? "Async" : "");
   std::string interface_suffix = std::string(async ? "AsyncClient" : "Client");

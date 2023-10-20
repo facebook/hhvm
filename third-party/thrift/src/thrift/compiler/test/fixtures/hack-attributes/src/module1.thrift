@@ -56,3 +56,12 @@ union UnionTestingStructured {
   1: string foo;
   3: i64 bar;
 }
+
+@hack.Attributes{attributes = ["Oncalls('thrift')"]}
+service FooService {
+  i32 ping(1: string str_arg);
+}
+
+service FooService1 {
+  i32 ping(1: string str_arg);
+} (hack.attributes = "Oncalls('thrift')")

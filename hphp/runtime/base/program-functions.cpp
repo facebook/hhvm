@@ -238,6 +238,7 @@ const StaticString
   s_REQUEST_START_TIME("REQUEST_START_TIME"),
   s_REQUEST_TIME("REQUEST_TIME"),
   s_REQUEST_TIME_FLOAT("REQUEST_TIME_FLOAT"),
+  s_REQUEST_TIME_NS("REQUEST_TIME_NS"),
   s_DOCUMENT_ROOT("DOCUMENT_ROOT"),
   s_SCRIPT_FILENAME("SCRIPT_FILENAME"),
   s_SCRIPT_NAME("SCRIPT_NAME"),
@@ -661,6 +662,18 @@ void handle_destructor_exception(const char* situation) {
   }
 }
 
+void init_server_request_time(Array& server) {
+  auto const nowNs = std::chrono::nanoseconds(
+    std::chrono::system_clock::now().time_since_epoch()).count();
+  auto const nowS = nowNs / 1000000000;
+  auto const nowF = nowNs / 1000000000.0;
+
+  server.set(s_REQUEST_START_TIME, nowS);
+  server.set(s_REQUEST_TIME, nowS);
+  server.set(s_REQUEST_TIME_FLOAT, nowF);
+  server.set(s_REQUEST_TIME_NS, nowNs);
+}
+
 static RDS_LOCAL(rqtrace::Trace, tl_cmdTrace);
 
 void init_command_line_session(int argc, char** argv) {
@@ -713,23 +726,11 @@ init_command_line_globals(
   {
     auto serverArr = Array::CreateDict();
     process_env_variables(serverArr, envp, envVariables);
-    time_t now;
-    struct timeval tp = {0};
-    double now_double;
-    if (!gettimeofday(&tp, nullptr)) {
-      now_double = (double)(tp.tv_sec + tp.tv_usec / 1000000.00);
-      now = tp.tv_sec;
-    } else {
-      now = time(nullptr);
-      now_double = (double)now;
-    }
     String file = empty_string();
     if (argc > 0) {
       file = String::attach(StringData::Make(argv[0], CopyString));
     }
-    serverArr.set(s_REQUEST_START_TIME, now);
-    serverArr.set(s_REQUEST_TIME, now);
-    serverArr.set(s_REQUEST_TIME_FLOAT, now_double);
+    init_server_request_time(serverArr);
     serverArr.set(s_DOCUMENT_ROOT, empty_string_tv());
     serverArr.set(s_SCRIPT_FILENAME, file);
     serverArr.set(s_SCRIPT_NAME, file);

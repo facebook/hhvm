@@ -94,7 +94,6 @@ const VirtualHost *HttpProtocol::GetVirtualHost(Transport *transport) {
 }
 
 const StaticString
-  s_REQUEST_START_TIME("REQUEST_START_TIME"),
   s_HPHP("HPHP"),
   s_HHVM("HHVM"),
   s_HHVM_JIT("HHVM_JIT"),
@@ -139,8 +138,6 @@ const StaticString
   s_POST("POST"),
   s_HTTPS("HTTPS"),
   s_on("on"),
-  s_REQUEST_TIME("REQUEST_TIME"),
-  s_REQUEST_TIME_FLOAT("REQUEST_TIME_FLOAT"),
   s_QUERY_STRING("QUERY_STRING"),
   s_REMOTE_ADDR("REMOTE_ADDR"),
   s_REMOTE_HOST("REMOTE_HOST"),
@@ -183,22 +180,6 @@ static void PrepareEnv(Array& env, Transport *transport) {
     env.set(env.convertKey<IntishCast::Cast>(key),
             make_tv<KindOfString>(value.get()));
   }
-}
-
-static void StartRequest(Array& server) {
-  server.set(s_REQUEST_START_TIME, time(nullptr));
-  time_t now;
-  struct timeval tp = {0};
-  double now_double;
-  if (!gettimeofday(&tp, nullptr)) {
-    now_double = (double)(tp.tv_sec + tp.tv_usec / 1000000.00);
-    now = tp.tv_sec;
-  } else {
-    now = time(nullptr);
-    now_double = (double)now;
-  }
-  server.set(s_REQUEST_TIME, now);
-  server.set(s_REQUEST_TIME_FLOAT, now_double);
 }
 
 /**
@@ -279,7 +260,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   }
 
   // Server
-  StartRequest(SERVERarr);
+  init_server_request_time(SERVERarr);
   PrepareServerVariable(SERVERarr, transport, r, vhost);
 
   // Request

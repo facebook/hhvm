@@ -50,6 +50,11 @@ void init_command_line_globals(
 );
 
 /**
+ * Set up REQUEST_TIME related fields in $_SERVER.
+ */
+void init_server_request_time(Array& server);
+
+/**
  * Setting up environment variables.
  */
 void process_env_variables(Array& variables);

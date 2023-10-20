@@ -2703,7 +2703,7 @@ void HQSession::abortStream(quic::StreamId id) {
 
 void HQSession::HQStreamTransportBase::updatePriority(
     const HTTPMessage& headers) noexcept {
-  auto sock = session_.sock_;
+  const auto& sock = session_.sock_;
   auto streamId = getStreamId();
   auto httpPriority = httpPriorityFromHTTPMessage(headers);
   if (sock && httpPriority) {

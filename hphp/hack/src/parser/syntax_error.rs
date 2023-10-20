@@ -531,7 +531,6 @@ pub const invalid_syntax_concurrent_block: Error = Cow::Borrowed(concat!(
 ));
 pub const statement_without_await_in_concurrent_block: Error =
     Cow::Borrowed("Statement without an `await` in a concurrent block");
-pub const concurrent_is_disabled: Error = Cow::Borrowed("`concurrent` is disabled");
 pub const invalid_await_position: Error = Cow::Borrowed(concat!(
     "`await` cannot be used as an expression in this ",
     "location because it's conditionally executed.",

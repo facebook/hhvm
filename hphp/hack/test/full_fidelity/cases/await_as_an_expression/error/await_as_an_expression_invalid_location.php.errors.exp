@@ -23,7 +23,7 @@
 (26,16)-(26,27) `await` cannot be used as an expression right of a pipe operator, unless unstable feature: `pipe_await` is enabled.
 (27,14)-(27,25) `await` cannot be used as an expression right of a pipe operator, unless unstable feature: `pipe_await` is enabled.
 (28,16)-(28,34) `await` cannot be used as an expression right of a pipe operator, unless unstable feature: `pipe_await` is enabled.
-(29,16)-(29,28) `await` cannot be used as an expression inside another await expression. Pull the inner `await` out into its own statement.
+(29,16)-(29,28) `await` cannot be used as an expression inside another await expression, unless unstable feature: `pipe_await` is enabled. Pull the inner `await` out into its own statement.
 (30,17)-(30,29) `await` cannot be used as an expression in this location because it's conditionally executed.
 (31,21)-(31,33) `await` cannot be used as an expression in this location because it's conditionally executed.
 (32,10)-(32,22) `await` cannot be used as an expression in this location because it's conditionally executed.

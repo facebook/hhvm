@@ -80,7 +80,7 @@ pub fn elaborate_program_for_codegen(
     elaborate_for_codegen(&env, program, opts);
     // Passes below here can emit errors
     typed_local::elaborate_program(&mut env, program, tco.po_codegen);
-    lift_await::elaborate_program(&mut env, program);
+    lift_await::elaborate_program(&mut env, program, tco.po_codegen);
     let errs = env.into_errors();
     match Vec1::try_from_vec(errs) {
         Err(_) => Ok(()),
@@ -101,6 +101,7 @@ pub fn elaborate_program(
     }
     lambda_captures::elaborate_program(&mut env, program);
     typed_local::elaborate_program(&mut env, program, false);
+    lift_await::elaborate_program(&mut env, program, false);
     elaborate_for_typechecking(env, program)
 }
 
@@ -117,6 +118,7 @@ pub fn elaborate_fun_def(
     }
     lambda_captures::elaborate_fun_def(&mut env, f);
     typed_local::elaborate_fun_def(&mut env, f, false);
+    lift_await::elaborate_fun_def(&mut env, f, false);
     elaborate_for_typechecking(env, f)
 }
 
@@ -133,6 +135,7 @@ pub fn elaborate_class_(
     }
     lambda_captures::elaborate_class_(&mut env, c);
     typed_local::elaborate_class_(&mut env, c, false);
+    lift_await::elaborate_class_(&mut env, c, false);
     elaborate_for_typechecking(env, c)
 }
 

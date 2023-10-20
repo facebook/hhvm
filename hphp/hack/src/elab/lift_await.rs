@@ -5,6 +5,7 @@
 // use std::collections::BTreeMap;
 // use std::collections::HashSet;
 
+use hack_macros::hack_expr;
 use hack_macros::hack_stmt;
 use naming_special_names_rust::special_idents;
 use nast::Afield;
@@ -23,7 +24,9 @@ use oxidized::aast_visitor::AstParams;
 use oxidized::aast_visitor::NodeMut;
 use oxidized::aast_visitor::VisitorMut;
 use oxidized::ast::Binop;
+use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::nast;
+use oxidized::parsing_error::ParsingError;
 
 use crate::Env;
 
@@ -75,6 +78,217 @@ impl<'a> VisitorMut<'a> for ContainsAwait {
     }
 }
 
+/// How an expression uses await in its sub-expressions
+enum AwaitUsage {
+    /// The expression does not await
+    NoAwait,
+    /// The expression has a single await
+    ContainsAwait,
+    /// The expression contains multiple awaits that can be run concurrently
+    ConcurrentAwait,
+    /// The expression contains multiple awaits that must be sequentialised
+    Sequential,
+    /// The expression contains multiple awaits that require concurrent execution of
+    /// sequentialised awaits. For example `await f($x) + (await g($y) |> await h($$))`
+    Error,
+}
+
+fn combine_con(await1: AwaitUsage, await2: AwaitUsage) -> AwaitUsage {
+    use AwaitUsage::*;
+    match (await1, await2) {
+        (Sequential, NoAwait) | (NoAwait, Sequential) => Sequential,
+        // Errors propagate
+        (Error, _) | (_, Error) => Error,
+        // Can't concurrently combine a sequential with an await
+        (Sequential, _) | (_, Sequential) => Error,
+        // If both sides have an await, then we have concurrent composition
+        (ConcurrentAwait, _) | (_, ConcurrentAwait) | (ContainsAwait, ContainsAwait) => {
+            ConcurrentAwait
+        }
+        (NoAwait, ContainsAwait) | (ContainsAwait, NoAwait) => ContainsAwait,
+        (NoAwait, NoAwait) => NoAwait,
+    }
+}
+
+/// check how the expression uses nested awaits
+fn check_await_usage(expr: &Expr) -> AwaitUsage {
+    use AwaitUsage::*;
+    let Expr((), _pos, e) = expr;
+    match e {
+        // Expressions with no sub-expressions that we can lift an await out of
+        Expr_::Dollardollar(_)
+        | Expr_::Null
+        | Expr_::This
+        | Expr_::True
+        | Expr_::False
+        | Expr_::Omitted
+        | Expr_::Id(_)
+        | Expr_::Lvar(_)
+        | Expr_::Int(_)
+        | Expr_::Float(_)
+        | Expr_::String(_)
+        | Expr_::Efun(_)
+        | Expr_::Lfun(_)
+        | Expr_::Lplaceholder(_)
+        | Expr_::MethodCaller(_)
+        | Expr_::Invalid(box None)
+        | Expr_::EnumClassLabel(_)
+        | Expr_::ClassConst(_)
+        | Expr_::Nameof(_)
+        | Expr_::FunctionPointer(_)
+        | Expr_::ClassGet(_)
+        | Expr_::Package(_) => NoAwait,
+
+        // Expressions with exactly one sub-expression that we can lift an await out of
+        Expr_::Invalid(box Some(expr))
+        | Expr_::Clone(box expr)
+        | Expr_::PrefixedString(box (_, expr))
+        | Expr_::ReadonlyExpr(box expr)
+        | Expr_::Cast(box (_, expr))
+        | Expr_::Is(box (expr, _))
+        | Expr_::As(box (expr, _, _))
+        | Expr_::Upcast(box (expr, _))
+        | Expr_::Import(box (_, expr))
+        | Expr_::Hole(box (expr, _, _, _))
+        | Expr_::Yield(box Afield::AFvalue(expr))
+        | Expr_::ETSplice(box expr)
+        | Expr_::Unop(box (_, expr))
+        | Expr_::ArrayGet(box (expr, None)) => check_await_usage(expr),
+
+        // Expressions with exactly two sub-expressions that we can lift an await out of
+        // and run concurrently
+        Expr_::ArrayGet(box (expr1, Some(expr2)))
+        | Expr_::Pair(box (_, expr1, expr2))
+        | Expr_::ObjGet(box (expr1, expr2, _, _))
+        | Expr_::Yield(box Afield::AFkvalue(expr1, expr2))
+        | Expr_::Binop(box nast::Binop {
+            bop: _, // Can't have await in || or && (parse error)
+            lhs: expr1,
+            rhs: expr2,
+        }) => combine_con(check_await_usage(expr1), check_await_usage(expr2)),
+
+        // Expressions with lists of sub-expressions that we can lift an await out of
+        // and run concurrently
+        Expr_::KeyValCollection(box (_, _, args)) => args
+            .iter()
+            .map(|nast::Field(arg_k, arg_v)| {
+                combine_con(check_await_usage(arg_k), check_await_usage(arg_v))
+            })
+            .fold(NoAwait, combine_con),
+        Expr_::Darray(box (_, args)) => args
+            .iter()
+            .map(|(arg_k, arg_v)| combine_con(check_await_usage(arg_k), check_await_usage(arg_v)))
+            .fold(NoAwait, combine_con),
+        Expr_::Tuple(args)
+        | Expr_::String2(args)
+        | Expr_::ValCollection(box (_, _, args))
+        | Expr_::Varray(box (_, args)) => args
+            .iter()
+            .map(check_await_usage)
+            .fold(NoAwait, combine_con),
+        Expr_::Shape(fields) => fields
+            .iter()
+            .map(|(_, expr)| check_await_usage(expr))
+            .fold(NoAwait, combine_con),
+        Expr_::Call(box nast::CallExpr {
+            func,
+            targs: _,
+            args,
+            unpacked_arg,
+        }) => {
+            let res = args
+                .iter()
+                .map(|(_, arg)| check_await_usage(arg))
+                .fold(check_await_usage(func), combine_con);
+            unpacked_arg
+                .iter()
+                .map(check_await_usage)
+                .fold(res, combine_con)
+        }
+        Expr_::New(box (nast::ClassId(_, _, cid), _, args, unpacked_arg, _)) => {
+            let mut res = match cid {
+                ClassId_::CIexpr(expr) => check_await_usage(expr),
+                ClassId_::CIparent | ClassId_::CIself | ClassId_::CIstatic | ClassId_::CI(_) => {
+                    NoAwait
+                }
+            };
+            res = args.iter().map(check_await_usage).fold(res, combine_con);
+            unpacked_arg
+                .iter()
+                .map(check_await_usage)
+                .fold(res, combine_con)
+        }
+        Expr_::Xml(box (_, attrs, exprs)) => {
+            let res = attrs
+                .iter()
+                .map(|attr| match attr {
+                    XhpAttribute::XhpSpread(expr)
+                    | XhpAttribute::XhpSimple(nast::XhpSimple { expr, .. }) => {
+                        check_await_usage(expr)
+                    }
+                })
+                .fold(NoAwait, combine_con);
+            exprs.iter().map(check_await_usage).fold(res, combine_con)
+        }
+        Expr_::Collection(box (_, _, afields)) => afields
+            .iter()
+            .map(|afield| match afield {
+                Afield::AFvalue(expr) => check_await_usage(expr),
+                Afield::AFkvalue(expr1, expr2) => {
+                    combine_con(check_await_usage(expr1), check_await_usage(expr2))
+                }
+            })
+            .fold(NoAwait, combine_con),
+        // Await
+        Expr_::Await(box expr1) => match check_await_usage(expr1) {
+            NoAwait => ContainsAwait,
+            ContainsAwait | Sequential | ConcurrentAwait => Sequential,
+            Error => Error,
+        },
+        // Seq
+        Expr_::Pipe(box (_, expr1, expr2)) => match check_await_usage(expr2) {
+            Error => Error,
+            // If the rhs contains an await, then we need to finish the lhs
+            // prior to doing the await
+            ContainsAwait | ConcurrentAwait | Sequential => Sequential,
+            NoAwait => check_await_usage(expr1),
+        },
+        // Can't have await in the branches (parse error)
+        Expr_::Eif(box (cond, _, _)) => check_await_usage(cond),
+        Expr_::ExpressionTree(box nast::ExpressionTree {
+            hint: _,
+            splices,
+            function_pointers: _,
+            virtualized_expr: _,
+            runtime_expr,
+            dollardollar_pos: _,
+        }) => splices
+            .iter()
+            .map(|stmt| {
+                if let Stmt(
+                    _,
+                    Stmt_::Expr(box Expr(
+                        (),
+                        _,
+                        Expr_::Binop(box nast::Binop {
+                            bop: Bop::Eq(None),
+                            lhs: _,
+                            rhs: expr,
+                        }),
+                    )),
+                ) = stmt
+                {
+                    check_await_usage(expr)
+                } else {
+                    NoAwait
+                }
+            })
+            .fold(check_await_usage(runtime_expr), combine_con),
+        // lvalues: shouldn't contain await or $$
+        Expr_::List(_) => NoAwait,
+    }
+}
+
 /// Lift await will lift awaits out of expressions into Awaitall statements.
 /// It uses tmp_var_counter to allocate temporary variables, and replace_dd
 /// to update the $$ variable on the right of |> when it has to sequentialise
@@ -83,6 +297,11 @@ impl<'a> VisitorMut<'a> for ContainsAwait {
 struct LiftAwait {
     tmp_var_counter: isize,
     replace_dd: Option<nast::Expr_>,
+    for_codegen: bool,
+    // allow_con_of_seq allows concurrent compositions of sequential compositions, by over sequentialising.
+    // This is experimental and for testing only.
+    allow_con_of_seq: bool,
+    leave_await: bool,
 }
 
 fn sequentialise(
@@ -199,6 +418,70 @@ impl LiftAwait {
         }
     }
 
+    // process the argument to an await expression
+    fn do_await(
+        &mut self,
+        leave_await: bool,
+        pos: &Pos,
+        e: &mut nast::Expr_,
+        con: &mut Vec<(Lid, nast::Expr)>,
+        seq: &mut Vec<nast::Stmt>,
+        tmps: &mut Vec<Lid>,
+    ) {
+        let mut con1 = vec![];
+        let mut seq1 = vec![];
+        let mut tmps1 = vec![];
+        match e {
+            Expr_::Await(box sub_expr) => {
+                let mut awaited_expr = Expr((), Pos::NONE, Expr_::Null);
+                std::mem::swap(&mut awaited_expr, sub_expr);
+                self.extract_await(&mut awaited_expr, &mut con1, &mut seq1, &mut tmps1);
+                if con1.is_empty() && seq1.is_empty() && tmps1.is_empty() {
+                    if leave_await {
+                        // If we're in a top-level await and there were no nested awaits, we
+                        // don't need to do anything
+                        std::mem::swap(&mut awaited_expr, sub_expr);
+                        return;
+                    }
+                    // If there were no nested awaits, just lift the expression
+                    let tmp = Lid(pos.clone(), self.gen_tmp_local());
+                    let lvar = Expr_::Lvar(Box::new(tmp.clone()));
+                    *e = lvar;
+                    con.push((tmp, awaited_expr));
+                    return;
+                }
+                let tmp1 = self.gen_tmp_local();
+                seq1.push(hack_stmt!(
+                    pos = pos.clone(),
+                    "#{lvar(clone(tmp1))} = #awaited_expr;"
+                ));
+                let mut stmts1 = sequentialise(pos.clone(), con1, seq1, tmps1);
+                let tmp2 = self.gen_tmp_local();
+                let tmp2_lid = Lid(pos.clone(), tmp2.clone());
+                let tmp3 = self.gen_tmp_local();
+                let tmp3_lid = Lid(pos.clone(), tmp3.clone());
+                let mut stmts2 = sequentialise(
+                    pos.clone(),
+                    vec![(tmp2_lid, hack_expr!("#{lvar(clone(tmp1))}"))],
+                    vec![hack_stmt!("#{lvar(clone(tmp3))} = #{lvar(clone(tmp2))};")],
+                    vec![],
+                );
+                stmts1.append(&mut stmts2);
+                let block = Stmt(
+                    pos.clone(),
+                    Stmt_::Block(Box::new((
+                        Some(vec![Lid(pos.clone(), tmp1)]),
+                        Block(stmts1),
+                    ))),
+                );
+                seq.append(&mut vec![block]);
+                tmps.push(tmp3_lid.clone());
+                *e = Expr_::Lvar(Box::new(tmp3_lid));
+            }
+            _ => panic!(),
+        }
+    }
+
     // extract_await(e, &mut con, &mut seq) transforms e by pulling awaits out into con' and
     // turning |> (with await on the rhs) into seq', such that it should be run as Awaitall (con') {seq'; e}.
     // It then appends con' and seq' to con and seq. It also appends any escaping temporaries to tmps.
@@ -209,193 +492,230 @@ impl LiftAwait {
         seq: &mut Vec<nast::Stmt>,
         tmps: &mut Vec<Lid>,
     ) {
+        let leave_await = self.leave_await;
+        self.leave_await = false;
         let Expr((), pos, e) = expr;
         match e {
             Expr_::Lvar(box Lid(_, id)) if id.1 == special_idents::DOLLAR_DOLLAR => {
-            if let Some(replace_expr) = &self.replace_dd {
-                *e = replace_expr.clone();
+                if let Some(replace_expr) = &self.replace_dd {
+                    *e = replace_expr.clone();
+                }
             }
-        }
-        Expr_::Dollardollar(_) => {
-            if let Some(replace_expr) = &self.replace_dd {
-                *e = replace_expr.clone();
+            Expr_::Dollardollar(_) => {
+                if let Some(replace_expr) = &self.replace_dd {
+                    *e = replace_expr.clone();
+                }
             }
-        }
-        // Leaf expressions, can't contain await to be lifted
-        Expr_::Null
-        | Expr_::This
-        | Expr_::True
-        | Expr_::False
-        | Expr_::Omitted
-        | Expr_::Id(_)
-        | Expr_::Lvar(_)
-        | Expr_::Int(_)
-        | Expr_::Float(_)
-        | Expr_::String(_)
-        | Expr_::Efun(_)
-        | Expr_::Lfun(_)
-        | Expr_::Lplaceholder(_)
-        | Expr_::MethodCaller(_)
-        | Expr_::Invalid(box None)
-        | Expr_::EnumClassLabel(_)
-        | Expr_::ClassConst(_)
-        | Expr_::Nameof(_)
-        | Expr_::FunctionPointer(_)
-        | Expr_::ClassGet(_) // Can't contain an expression in strict mode
-        | Expr_::Package(_) => {}
+            // Leaf expressions, can't contain await to be lifted
+            Expr_::Null
+            | Expr_::This
+            | Expr_::True
+            | Expr_::False
+            | Expr_::Omitted
+            | Expr_::Id(_)
+            | Expr_::Lvar(_)
+            | Expr_::Int(_)
+            | Expr_::Float(_)
+            | Expr_::String(_)
+            | Expr_::Efun(_)
+            | Expr_::Lfun(_)
+            | Expr_::Lplaceholder(_)
+            | Expr_::MethodCaller(_)
+            | Expr_::Invalid(box None)
+            | Expr_::EnumClassLabel(_)
+            | Expr_::ClassConst(_)
+            | Expr_::Nameof(_)
+            | Expr_::FunctionPointer(_)
+            | Expr_::ClassGet(_)
+            | Expr_::Package(_) => {}
 
-        // Expressions with exactly one sub-expression that we can lift an await out of
-        Expr_::Invalid(box Some(expr))
-        | Expr_::Clone(box expr)
-        | Expr_::PrefixedString(box (_, expr))
-        | Expr_::ReadonlyExpr(box expr)
-        | Expr_::Cast(box (_, expr))
-        | Expr_::Is(box (expr, _))
-        | Expr_::As(box (expr, _, _))
-        | Expr_::Upcast(box (expr, _))
-        | Expr_::Import(box (_, expr))
-        | Expr_::Hole(box (expr, _, _, _))
-        | Expr_::Yield(box Afield::AFvalue(expr))
-        | Expr_::ETSplice(box expr)
-        | Expr_::Unop(box (_, expr)) => {
-            self.extract_await(expr, con, seq, tmps)
-        }
+            // Expressions with exactly one sub-expression that we can lift an await out of
+            Expr_::Invalid(box Some(expr))
+            | Expr_::Clone(box expr)
+            | Expr_::PrefixedString(box (_, expr))
+            | Expr_::ReadonlyExpr(box expr)
+            | Expr_::Cast(box (_, expr))
+            | Expr_::Is(box (expr, _))
+            | Expr_::As(box (expr, _, _))
+            | Expr_::Upcast(box (expr, _))
+            | Expr_::Import(box (_, expr))
+            | Expr_::Hole(box (expr, _, _, _))
+            | Expr_::Yield(box Afield::AFvalue(expr))
+            | Expr_::ETSplice(box expr)
+            | Expr_::Unop(box (_, expr))
+            | Expr_::ArrayGet(box (expr, None)) => self.extract_await(expr, con, seq, tmps),
 
-        // Expressions with exactly two sub-expressions that we can lift an await out of
-        // and run concurrently
-        Expr_::ArrayGet(box (expr1, Some(expr2)))
-        | Expr_::Pair(box (_, expr1, expr2))
-        | Expr_::ObjGet(box (expr1, expr2, _, _))
-        | Expr_::Yield(box Afield::AFkvalue(expr1, expr2))
-        | Expr_::Binop(box nast::Binop{bop:_, lhs:expr1, rhs:expr2}) => {
-            // If the operator is || or &&, there are syntactic restrictions that
-            // there is no await on the rhs, and so it is safe to traverse it here
-            // just to replace $$
-            self.extract_await(expr1, con, seq, tmps);
-            self.extract_await(expr2, con, seq, tmps)
-        }
-
-        // Expressions with lists of sub-expressions that we can lift an await out of
-        // and run concurrently
-        Expr_::KeyValCollection(box (_, _, args)) => {
-            for nast::Field(arg_k, arg_v) in args {
-                self.extract_await(arg_k, con, seq, tmps);
-                self.extract_await(arg_v, con, seq, tmps)
+            // Expressions with exactly two sub-expressions that we can lift an await out of
+            // and run concurrently
+            Expr_::ArrayGet(box (expr1, Some(expr2)))
+            | Expr_::Pair(box (_, expr1, expr2))
+            | Expr_::ObjGet(box (expr1, expr2, _, _))
+            | Expr_::Yield(box Afield::AFkvalue(expr1, expr2)) => {
+                self.extract_await(expr1, con, seq, tmps);
+                self.extract_await(expr2, con, seq, tmps)
             }
-        }
-        Expr_::Darray(box (_, args)) => {
-            for (arg_k, arg_v) in args {
-                self.extract_await(arg_k, con, seq, tmps);
-                self.extract_await(arg_v, con, seq, tmps)
+            Expr_::Binop(box nast::Binop { bop, lhs, rhs }) => {
+                // If the operator is || or &&, there are syntactic restrictions that
+                // there is no await on the rhs, and so it is safe to traverse it here
+                // just to replace $$
+                self.extract_await(lhs, con, seq, tmps);
+                if matches!(bop, Bop::Eq(None)) {
+                    self.leave_await = leave_await;
+                }
+                self.extract_await(rhs, con, seq, tmps)
             }
-        }
-        Expr_::Tuple(args)
-        | Expr_::String2(args)
-        | Expr_::ValCollection(box(_, _, args))
-        | Expr_::Varray(box (_, args)) => {
-            for arg in args {
-                self.extract_await(arg, con, seq, tmps)
+            // Expressions with lists of sub-expressions that we can lift an await out of
+            // and run concurrently
+            Expr_::KeyValCollection(box (_, _, args)) => {
+                for nast::Field(arg_k, arg_v) in args {
+                    self.extract_await(arg_k, con, seq, tmps);
+                    self.extract_await(arg_v, con, seq, tmps)
+                }
             }
-        }
-        Expr_::Shape(fields) => {
-            for (_, expr) in fields {
-                self.extract_await(expr, con, seq, tmps)
+            Expr_::Darray(box (_, args)) => {
+                for (arg_k, arg_v) in args {
+                    self.extract_await(arg_k, con, seq, tmps);
+                    self.extract_await(arg_v, con, seq, tmps)
+                }
             }
-        }
-        Expr_::Call(box nast::CallExpr { func, targs: _, args, unpacked_arg }) => {
-            self.extract_await(func, con, seq, tmps);
-            for (_, arg) in args {
-                self.extract_await(arg, con, seq, tmps)
+            Expr_::Tuple(args)
+            | Expr_::String2(args)
+            | Expr_::ValCollection(box (_, _, args))
+            | Expr_::Varray(box (_, args)) => {
+                for arg in args {
+                    self.extract_await(arg, con, seq, tmps)
+                }
             }
-            for unpack in unpacked_arg {
-                self.extract_await(unpack, con, seq, tmps)
-            }
-        }
-        Expr_::New(box (nast::ClassId(_, _, cid), _, args, unpacked_arg, _)) => {
-            match cid {
-                ClassId_::CIexpr(expr) => {
+            Expr_::Shape(fields) => {
+                for (_, expr) in fields {
                     self.extract_await(expr, con, seq, tmps)
                 }
-                ClassId_::CIparent
-                | ClassId_::CIself
-                | ClassId_::CIstatic
-                | ClassId_::CI(_) => {}
             }
-            for arg in args {
-                self.extract_await(arg, con, seq, tmps)
-            }
-            for unpack in unpacked_arg {
-                self.extract_await(unpack, con, seq, tmps)
-            }
-        }
-        Expr_::Xml(box (_, attrs, exprs)) => {
-            for attr in attrs {
-                match attr {
-                XhpAttribute::XhpSpread(expr)
-                | XhpAttribute::XhpSimple(nast::XhpSimple{expr, ..}) =>
-                    self.extract_await(expr, con, seq, tmps),
+            Expr_::Call(box nast::CallExpr {
+                func,
+                targs: _,
+                args,
+                unpacked_arg,
+            }) => {
+                self.extract_await(func, con, seq, tmps);
+                for (_, arg) in args {
+                    self.extract_await(arg, con, seq, tmps)
+                }
+                for unpack in unpacked_arg {
+                    self.extract_await(unpack, con, seq, tmps)
                 }
             }
-            for expr in exprs {
-                self.extract_await(expr, con, seq, tmps);
+            Expr_::New(box (nast::ClassId(_, _, cid), _, args, unpacked_arg, _)) => {
+                match cid {
+                    ClassId_::CIexpr(expr) => self.extract_await(expr, con, seq, tmps),
+                    ClassId_::CIparent
+                    | ClassId_::CIself
+                    | ClassId_::CIstatic
+                    | ClassId_::CI(_) => {}
+                }
+                for arg in args {
+                    self.extract_await(arg, con, seq, tmps)
+                }
+                for unpack in unpacked_arg {
+                    self.extract_await(unpack, con, seq, tmps)
+                }
             }
-        }
-        Expr_::Collection(box (_, _, afields)) => {
-            for afield in afields {
-                match afield {
-                    Afield::AFvalue(expr) =>{
-                        self.extract_await(expr, con, seq, tmps);
-                    }
-                    Afield::AFkvalue(expr1, expr2) => {
-                        self.extract_await(expr1, con, seq, tmps);
-                        self.extract_await(expr2, con, seq, tmps)
+            Expr_::Xml(box (_, attrs, exprs)) => {
+                for attr in attrs {
+                    match attr {
+                        XhpAttribute::XhpSpread(expr)
+                        | XhpAttribute::XhpSimple(nast::XhpSimple { expr, .. }) => {
+                            self.extract_await(expr, con, seq, tmps)
+                        }
                     }
                 }
-            }
-        }
-
-        // Await
-        Expr_::Await(box expr1) => {
-            let mut awaited_expr = Expr((), Pos::NONE, Expr_::Null);
-            std::mem::swap(&mut awaited_expr, expr1);
-            if self.replace_dd.is_some() {
-                // There's no await in an await (syntactic restriction), so we just
-                // need to get the $$ replacement.
-                self.extract_await(&mut awaited_expr, con, seq, tmps);
-            }
-            let tmp = Lid(pos.clone(), self.gen_tmp_local());
-            let lvar = Expr_::Lvar(Box::new(tmp.clone()));
-            *e = lvar;
-            con.push((tmp, awaited_expr))
-        }
-        // Seq
-        Expr_::Pipe(box(_, _, _)) => {
-          self.do_pipe(e, pos, con, seq, tmps);
-        }
-        Expr_::Eif(box (cond, t, f)) => {
-            self.extract_await(cond, con, seq, tmps);
-            if self.replace_dd.is_some() {
-                // Relying on syntactic checks that there are no await in t or f,
-                // but still need to traverse in case there is $$
-                for expr in t {
-                    self.extract_await(expr, con, seq, tmps)
-                }
-                self.extract_await(f, con, seq, tmps)
-            }
-        }
-
-        Expr_::ExpressionTree(box nast::ExpressionTree{ hint:_, splices, function_pointers:_, virtualized_expr:_, runtime_expr, dollardollar_pos:_ }) => {
-            for stmt in splices {
-                if let Stmt(_, Stmt_::Expr(box Expr((), _, Expr_::Binop(box nast::Binop{ bop:Bop::Eq(None), lhs:_, rhs:expr})))) = stmt {
-                    self.extract_await(expr, con, seq, tmps)
+                for expr in exprs {
+                    self.extract_await(expr, con, seq, tmps);
                 }
             }
-            self.extract_await(runtime_expr, con, seq, tmps)
-        }
+            Expr_::Collection(box (_, _, afields)) => {
+                for afield in afields {
+                    match afield {
+                        Afield::AFvalue(expr) => {
+                            self.extract_await(expr, con, seq, tmps);
+                        }
+                        Afield::AFkvalue(expr1, expr2) => {
+                            self.extract_await(expr1, con, seq, tmps);
+                            self.extract_await(expr2, con, seq, tmps)
+                        }
+                    }
+                }
+            }
+            // Await
+            Expr_::Await(_) => self.do_await(leave_await, pos, e, con, seq, tmps),
+            // Seq
+            Expr_::Pipe(_) => self.do_pipe(e, pos, con, seq, tmps),
+            Expr_::Eif(box (cond, t, f)) => {
+                self.extract_await(cond, con, seq, tmps);
+                if self.replace_dd.is_some() {
+                    // Relying on syntactic checks that there are no await in t or f,
+                    // but still need to traverse in case there is $$
+                    for expr in t {
+                        self.extract_await(expr, con, seq, tmps)
+                    }
+                    self.extract_await(f, con, seq, tmps)
+                }
+            }
 
-        // lvalues: shouldn't contain await or $$
-        Expr_::ArrayGet(box (_, None))
-        | Expr_::List(_) => {}
+            Expr_::ExpressionTree(box nast::ExpressionTree {
+                hint: _,
+                splices,
+                function_pointers: _,
+                virtualized_expr: _,
+                runtime_expr,
+                dollardollar_pos: _,
+            }) => {
+                for stmt in splices {
+                    if let Stmt(
+                        _,
+                        Stmt_::Expr(box Expr(
+                            (),
+                            _,
+                            Expr_::Binop(box nast::Binop {
+                                bop: Bop::Eq(None),
+                                lhs: _,
+                                rhs: expr,
+                            }),
+                        )),
+                    ) = stmt
+                    {
+                        self.extract_await(expr, con, seq, tmps)
+                    }
+                }
+                self.extract_await(runtime_expr, con, seq, tmps)
+            }
+
+            // lvalues: shouldn't contain await or $$
+            Expr_::List(_) => {}
+        }
+    }
+
+    fn check_and_extract_await(
+        &mut self,
+        env: &mut Env,
+        expr: &mut nast::Expr,
+        con: &mut Vec<(Lid, nast::Expr)>,
+        seq: &mut Vec<nast::Stmt>,
+        tmps: &mut Vec<Lid>,
+    ) {
+        use AwaitUsage::*;
+        match check_await_usage(expr) {
+            Error if !self.allow_con_of_seq => {
+                env.emit_error(NamingPhaseError::Parsing(ParsingError::ParsingError{pos:expr.1.clone(), msg:
+                       "`await` cannot be used as an expression inside another await expression. Pull the inner `await` out into its own statement.".to_string(),
+                        quickfixes:vec![]}));
+            }
+            ContainsAwait | ConcurrentAwait | Sequential | Error => {
+                if self.for_codegen {
+                    self.extract_await(expr, con, seq, tmps)
+                }
+            }
+            NoAwait => {}
         }
     }
 }
@@ -412,22 +732,17 @@ impl<'a> VisitorMut<'a> for LiftAwait {
         let mut seq = vec![];
         let mut tmps = vec![];
         match &mut stmt_ {
-            Stmt_::Expr(expr) if is_assign_await(expr) => {
-                expr.accept(env, self.object())?;
-                sequentialise_stmt(&pos, elem, stmt_, vec![], vec![], vec![]);
-                Ok(())
-            }
             Stmt_::Expr(box expr) | Stmt_::Return(box Some(expr)) => {
                 expr.accept(env, self.object())?;
-                if !is_await(expr) {
-                    self.extract_await(expr, &mut con, &mut seq, &mut tmps);
-                }
+                self.leave_await = true;
+                self.check_and_extract_await(env, expr, &mut con, &mut seq, &mut tmps);
+                self.leave_await = false;
                 sequentialise_stmt(&pos, elem, stmt_, con, seq, tmps);
                 Ok(())
             }
             Stmt_::Throw(box expr) => {
                 expr.accept(env, self.object())?;
-                self.extract_await(expr, &mut con, &mut seq, &mut tmps);
+                self.check_and_extract_await(env, expr, &mut con, &mut seq, &mut tmps);
                 sequentialise_stmt(&pos, elem, stmt_, con, seq, tmps);
                 Ok(())
             }
@@ -444,7 +759,7 @@ impl<'a> VisitorMut<'a> for LiftAwait {
                 for expr in exprs {
                     expr.accept(env, self.object())?;
                     if !is_await(expr) && !is_assign_await(expr) {
-                        self.extract_await(expr, &mut con, &mut seq, &mut tmps);
+                        self.check_and_extract_await(env, expr, &mut con, &mut seq, &mut tmps);
                     }
                 }
                 block.accept(env, self.object())?;
@@ -453,7 +768,7 @@ impl<'a> VisitorMut<'a> for LiftAwait {
             }
             Stmt_::If(box (expr, b1, b2)) => {
                 expr.accept(env, self.object())?;
-                self.extract_await(expr, &mut con, &mut seq, &mut tmps);
+                self.check_and_extract_await(env, expr, &mut con, &mut seq, &mut tmps);
                 b1.accept(env, self.object())?;
                 b2.accept(env, self.object())?;
                 sequentialise_stmt(&pos, elem, stmt_, con, seq, tmps);
@@ -462,7 +777,7 @@ impl<'a> VisitorMut<'a> for LiftAwait {
             Stmt_::For(box (init_exprs, test, update, block)) => {
                 for expr in init_exprs {
                     expr.accept(env, self.object())?;
-                    self.extract_await(expr, &mut con, &mut seq, &mut tmps);
+                    self.check_and_extract_await(env, expr, &mut con, &mut seq, &mut tmps);
                 }
                 // No await in the test or update positions (parse error)
                 test.accept(env, self.object())?;
@@ -472,8 +787,9 @@ impl<'a> VisitorMut<'a> for LiftAwait {
                 Ok(())
             }
             Stmt_::Switch(box (case, block, default)) => {
+                // No await in the case expression positions (parse error)
                 case.accept(env, self.object())?;
-                self.extract_await(case, &mut con, &mut seq, &mut tmps);
+                self.check_and_extract_await(env, case, &mut con, &mut seq, &mut tmps);
                 block.accept(env, self.object())?;
                 default.accept(env, self.object())?;
                 sequentialise_stmt(&pos, elem, stmt_, con, seq, tmps);
@@ -481,19 +797,24 @@ impl<'a> VisitorMut<'a> for LiftAwait {
             }
             Stmt_::Foreach(box (expr, as_expr, block)) => {
                 expr.accept(env, self.object())?;
-                self.extract_await(expr, &mut con, &mut seq, &mut tmps);
+                self.check_and_extract_await(env, expr, &mut con, &mut seq, &mut tmps);
                 as_expr.accept(env, self.object())?;
                 block.accept(env, self.object())?;
                 sequentialise_stmt(&pos, elem, stmt_, con, seq, tmps);
                 Ok(())
             }
-            Stmt_::DeclareLocal(_) => {
-                panic!("Typed local should be elaborated before await lifting")
-            } // elaborate typed locals before lifting awaits
+            Stmt_::DeclareLocal(box (_, _, expr_opt)) => {
+                if let Some(expr) = expr_opt {
+                    expr.accept(env, self.object())?;
+                    self.check_and_extract_await(env, expr, &mut con, &mut seq, &mut tmps)
+                }
+                sequentialise_stmt(&pos, elem, stmt_, con, seq, tmps);
+                Ok(())
+            }
             // await cannot appear in expression in do or while (parse error)
-            Stmt_::Block(_)
-            | Stmt_::Do(_)
+            Stmt_::Do(_)
             | Stmt_::While(_)
+            | Stmt_::Block(_)
             | Stmt_::Try(_)
             | Stmt_::Match(_)
             | Stmt_::AssertEnv(_)
@@ -510,13 +831,13 @@ impl<'a> VisitorMut<'a> for LiftAwait {
                 *elem = Stmt(pos, stmt_);
                 Ok(())
             }
-            Stmt_::Concurrent(Block(stmts)) => {
+            Stmt_::Concurrent(Block(stmts)) if self.for_codegen => {
                 for stmt in stmts.iter_mut() {
                     match stmt {
                         Stmt(_, Stmt_::Expr(box expr)) => {
                             expr.accept(env, self.object())?;
                             let is_await = expr.2.is_await();
-                            self.extract_await(expr, &mut con, &mut seq, &mut tmps);
+                            self.check_and_extract_await(env, expr, &mut con, &mut seq, &mut tmps);
                             if is_await {
                                 expr.2 = Expr_::Null;
                             }
@@ -599,13 +920,36 @@ impl<'a> VisitorMut<'a> for LiftAwait {
                 );
                 Ok(())
             }
+            Stmt_::Concurrent(_) => {
+                *elem = Stmt(pos, stmt_);
+                elem.recurse(env, self.object())
+            }
         }
     }
 }
 
-pub fn elaborate_program(env: &mut Env, program: &mut nast::Program) {
-    let mut tl: LiftAwait = Default::default();
-    tl.visit_program(env, program).unwrap();
+pub fn elaborate_program(env: &mut Env, program: &mut nast::Program, for_codegen: bool) {
+    let mut la = LiftAwait {
+        for_codegen,
+        ..Default::default()
+    };
+    la.visit_program(env, program).unwrap();
+}
+
+pub fn elaborate_fun_def(env: &mut Env, f: &mut nast::FunDef, for_codegen: bool) {
+    let mut la = LiftAwait {
+        for_codegen,
+        ..Default::default()
+    };
+    la.visit_fun_def(env, f).unwrap();
+}
+
+pub fn elaborate_class_(env: &mut Env, c: &mut nast::Class_, for_codegen: bool) {
+    let mut la = LiftAwait {
+        for_codegen,
+        ..Default::default()
+    };
+    la.visit_class_(env, c).unwrap();
 }
 
 #[cfg(test)]
@@ -616,6 +960,19 @@ mod tests {
     use nast::Program;
 
     use super::*;
+
+    pub fn elaborate_program_test(
+        env: &mut Env,
+        program: &mut nast::Program,
+        allow_con_of_seq: bool,
+    ) {
+        let mut la = LiftAwait {
+            allow_con_of_seq,
+            for_codegen: true,
+            ..Default::default()
+        };
+        la.visit_program(env, program).unwrap();
+    }
 
     fn build_program(stmt: Stmt) -> Program {
         nast::Program(vec![Def::Stmt(Box::new(stmt))])
@@ -655,7 +1012,7 @@ mod tests {
         let mut env = Env::default();
         let mut orig = build_program(hack_stmt!("$x0 * $x1 + $x2 * $x3;"));
         let res = build_program(hack_stmt!("$x0 * $x1 + $x2 * $x3;"));
-        self::elaborate_program(&mut env, &mut orig);
+        self::elaborate_program(&mut env, &mut orig, true);
         assert_eq!(orig, res);
     }
 
@@ -664,7 +1021,7 @@ mod tests {
         let mut env = Env::default();
         let mut orig = build_program(hack_stmt!("($x0 * $x1) |> ($x2 * $$);"));
         let res = build_program(hack_stmt!("($x0 * $x1) |> ($x2 * $$);"));
-        self::elaborate_program(&mut env, &mut orig);
+        self::elaborate_program(&mut env, &mut orig, true);
         assert_eq!(orig, res);
     }
 
@@ -673,7 +1030,7 @@ mod tests {
         let mut env = Env::default();
         let mut orig = build_program(hack_stmt!("($x0 |> $$) + ($x2 |> $$);"));
         let res = build_program(hack_stmt!("($x0 |> $$) + ($x2 |> $$);"));
-        self::elaborate_program(&mut env, &mut orig);
+        self::elaborate_program(&mut env, &mut orig, true);
         assert_eq!(orig, res);
     }
 
@@ -682,7 +1039,7 @@ mod tests {
         let mut env = Env::default();
         let mut orig = build_program(hack_stmt!("await $x;"));
         let res = build_program(hack_stmt!("await $x;"));
-        self::elaborate_program(&mut env, &mut orig);
+        self::elaborate_program(&mut env, &mut orig, true);
         assert_eq!(orig, res);
     }
 
@@ -691,7 +1048,7 @@ mod tests {
         let mut env = Env::default();
         let mut orig = build_program(hack_stmt!("$y = await $x;"));
         let res = build_program(hack_stmt!("$y = await $x;"));
-        self::elaborate_program(&mut env, &mut orig);
+        self::elaborate_program(&mut env, &mut orig, true);
         assert_eq!(orig, res);
     }
 
@@ -705,7 +1062,7 @@ mod tests {
             Block(hack_stmts!("#{lvar(tmp)} + $y;")),
         );
         let res = build_program(awaitall);
-        self::elaborate_program(&mut env, &mut orig);
+        self::elaborate_program(&mut env, &mut orig, true);
         assert_eq!(orig, res);
     }
 
@@ -729,7 +1086,7 @@ mod tests {
             )),
         );
         let res = build_program(awaitall);
-        self::elaborate_program(&mut env, &mut orig);
+        self::elaborate_program(&mut env, &mut orig, true);
         assert_eq!(orig, res);
     }
 
@@ -743,7 +1100,7 @@ mod tests {
             Block(hack_stmts!("#{lvar(tmp)} |> $$;")),
         );
         let res = build_program(awaitall);
-        self::elaborate_program(&mut env, &mut orig);
+        self::elaborate_program(&mut env, &mut orig, true);
         assert_eq!(orig, res);
     }
 
@@ -761,7 +1118,7 @@ mod tests {
             Block(hack_stmts!("#{lvar(tmp0)} + #{lvar(tmp1)} |> $$;")),
         );
         let res = build_program(awaitall);
-        self::elaborate_program(&mut env, &mut orig);
+        self::elaborate_program(&mut env, &mut orig, true);
         assert_eq!(orig, res);
     }
 
@@ -782,7 +1139,7 @@ mod tests {
         let stmt = Stmt(Pos::NONE, Stmt_::Expr(Box::new(tmp2_lvar)));
         let b1 = mk_block(vec![tmp0], hack_stmts!("#tmp0_lvar = $x; #awaitall;"));
         let res = build_program(mk_block(vec![tmp2], hack_stmts!("#b1; #stmt;")));
-        self::elaborate_program(&mut env, &mut orig);
+        self::elaborate_program(&mut env, &mut orig, true);
         assert_eq!(orig, res);
     }
 
@@ -809,7 +1166,7 @@ mod tests {
         let stmt = Stmt(Pos::NONE, Stmt_::Expr(Box::new(tmp3_lvar)));
         let b1 = mk_block(vec![tmp1], hack_stmts!("#awaitall1; #awaitall2;"));
         let res = build_program(mk_block(vec![tmp3], hack_stmts!("#b1; #stmt;")));
-        self::elaborate_program(&mut env, &mut orig);
+        self::elaborate_program(&mut env, &mut orig, true);
         assert_eq!(orig, res);
     }
 
@@ -853,7 +1210,7 @@ mod tests {
         let b3 = mk_block(vec![tmp4], hack_stmts!("#b2; #awaitall3;"));
         let stmt = Stmt(Pos::NONE, Stmt_::Expr(Box::new(tmp6_lvar)));
         let res = build_program(mk_block(vec![tmp6], hack_stmts!("#b3; #stmt;")));
-        self::elaborate_program(&mut env, &mut orig);
+        self::elaborate_program(&mut env, &mut orig, true);
         assert_eq!(orig, res);
     }
 
@@ -900,7 +1257,7 @@ mod tests {
         let b2 = mk_block(vec![tmp5], hack_stmts!("#b1; #tmp6_lvar = #tmp5_lvar;"));
         let b3 = mk_block(vec![tmp1], hack_stmts!("#awaitall1; #b2;"));
         let res = build_program(mk_block(vec![tmp6], hack_stmts!("#b3; #stmt;")));
-        self::elaborate_program(&mut env, &mut orig);
+        self::elaborate_program(&mut env, &mut orig, true);
         assert_eq!(orig, res);
     }
 
@@ -937,7 +1294,7 @@ mod tests {
         let b1 = mk_block(vec![tmp2], hack_stmts!("#awaitall1; #awaitall2;"));
         let stmt = Stmt(Pos::NONE, Stmt_::Expr(Box::new(tmp5_lvar)));
         let res = build_program(mk_block(vec![tmp5], hack_stmts!("#b1; #stmt;")));
-        self::elaborate_program(&mut env, &mut orig);
+        self::elaborate_program(&mut env, &mut orig, true);
         assert_eq!(orig, res);
     }
 
@@ -971,7 +1328,81 @@ mod tests {
             Block(hack_stmts!("#b1; #tmp0_lvar + #tmp4_lvar;")),
         );
         let res = build_program(hack_stmt!("#awaitall3;"));
-        self::elaborate_program(&mut env, &mut orig);
+        self::elaborate_program_test(&mut env, &mut orig, true);
+        assert_eq!(orig, res);
+    }
+
+    #[test]
+    fn test_nested_await1() {
+        let mut env = Env::default();
+        let mut orig = build_program(hack_stmt!("g(await f(await $x));"));
+        let tmp0 = mk_lid("__tmp$lift_await0");
+        let tmp0_lvar = mk_lvar(tmp0.clone());
+        let tmp1 = mk_lid("__tmp$lift_await1");
+        let tmp1_lvar = mk_lvar(tmp1.clone());
+        let tmp2 = mk_lid("__tmp$lift_await2");
+        let tmp2_lvar = mk_lvar(tmp2.clone());
+        let tmp3 = mk_lid("__tmp$lift_await3");
+        let tmp3_lvar = mk_lvar(tmp3.clone());
+        let awaitall1 = mk_awaitall(
+            vec![(tmp0, hack_expr!("$x"))],
+            Block(hack_stmts!("#{clone(tmp1_lvar)} = f(#tmp0_lvar);")),
+        );
+        let awaitall2 = mk_awaitall(
+            vec![(tmp2, tmp1_lvar)],
+            Block(hack_stmts!("#{clone(tmp3_lvar)} = #tmp2_lvar;")),
+        );
+        let stmt = hack_stmt!("g(#tmp3_lvar);");
+        let b1 = mk_block(vec![tmp1], hack_stmts!("#awaitall1; #awaitall2;"));
+        // Same result as "await $x |> await $$"
+        let res = build_program(mk_block(vec![tmp3], hack_stmts!("#b1; #stmt;")));
+        self::elaborate_program(&mut env, &mut orig, true);
+        assert_eq!(orig, res);
+    }
+
+    #[test]
+    fn test_nested_await2() {
+        let mut env = Env::default();
+        let mut orig = build_program(hack_stmt!("h (await g(await f(await $x, await $y)));"));
+        let tmp0 = mk_lid("__tmp$lift_await0");
+        let tmp0_lvar = mk_lvar(tmp0.clone());
+        let tmp1 = mk_lid("__tmp$lift_await1");
+        let tmp1_lvar = mk_lvar(tmp1.clone());
+        let tmp2 = mk_lid("__tmp$lift_await2");
+        let tmp2_lvar = mk_lvar(tmp2.clone());
+        let tmp3 = mk_lid("__tmp$lift_await3");
+        let tmp3_lvar = mk_lvar(tmp3.clone());
+        let tmp4 = mk_lid("__tmp$lift_await4");
+        let tmp4_lvar = mk_lvar(tmp4.clone());
+        let tmp5 = mk_lid("__tmp$lift_await5");
+        let tmp5_lvar = mk_lvar(tmp5.clone());
+        let tmp6 = mk_lid("__tmp$lift_await6");
+        let tmp6_lvar = mk_lvar(tmp6.clone());
+        let tmp7 = mk_lid("__tmp$lift_await7");
+        let tmp7_lvar = mk_lvar(tmp7.clone());
+        let awaitall1 = mk_awaitall(
+            vec![(tmp0, hack_expr!("$x")), (tmp1, hack_expr!("$y"))],
+            Block(hack_stmts!(
+                "#{clone(tmp2_lvar)} = f(#tmp0_lvar, #tmp1_lvar);"
+            )),
+        );
+        let awaitall2 = mk_awaitall(
+            vec![(tmp3, tmp2_lvar)],
+            Block(hack_stmts!("#{clone(tmp4_lvar)} = #tmp3_lvar;")),
+        );
+        let b1 = mk_block(vec![tmp2], hack_stmts!("#awaitall1; #awaitall2;"));
+        let b2 = mk_block(
+            vec![tmp4],
+            hack_stmts!("#b1; #{clone(tmp5_lvar)} = g(#tmp4_lvar);"),
+        );
+        let awaitall3 = mk_awaitall(
+            vec![(tmp6, tmp5_lvar)],
+            Block(hack_stmts!("#{clone(tmp7_lvar)} = #tmp6_lvar;")),
+        );
+        let b3 = mk_block(vec![tmp5], hack_stmts!("#b2; #awaitall3;"));
+        let stmt = hack_stmt!("h(#tmp7_lvar);");
+        let res = build_program(mk_block(vec![tmp7], hack_stmts!("#b3; #stmt;")));
+        self::elaborate_program(&mut env, &mut orig, true);
         assert_eq!(orig, res);
     }
 }

@@ -1,2 +1,2 @@
 
-Fatal error: `await` cannot be used as an expression inside another await expression. Pull the inner `await` out into its own statement. in %s/fn_call2.php on line 17
+Fatal error: `await` cannot be used as an expression inside another await expression, unless unstable feature: `pipe_await` is enabled. Pull the inner `await` out into its own statement. in %s/fn_call2.php on line 17

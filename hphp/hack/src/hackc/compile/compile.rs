@@ -638,13 +638,17 @@ fn emit_fatal_experimental_feature_error<'arena>(
 }
 
 fn emit_fatal_parsing_error<'arena>(
-    _alloc: &'arena bumpalo::Bump,
+    alloc: &'arena bumpalo::Bump,
     err: &ParsingError,
 ) -> Result<Unit<'arena>, Error> {
     match err {
         ParsingError::FixmeFormat(_) => todo!(),
         ParsingError::HhIgnoreComment(_) => todo!(),
-        ParsingError::ParsingError { .. } => todo!(),
+        ParsingError::ParsingError {
+            pos,
+            msg,
+            quickfixes: _,
+        } => emit_unit::emit_fatal_unit(alloc, FatalOp::Parse, pos.clone(), msg.clone()),
         ParsingError::XhpParsingError { .. } => todo!(),
         ParsingError::PackageConfigError { .. } => todo!(),
     }

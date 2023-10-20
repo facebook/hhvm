@@ -2863,13 +2863,18 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     break;
                 }
                 LambdaExpression(x) if std::ptr::eq(node, &x.body) => break,
-                // Dependent awaits are not allowed currently
                 PrefixUnaryExpression(x) if token_kind(&x.operator) == Some(TokenKind::Await) => {
-                    self.errors.push(make_error_from_node(
-                        await_node,
-                        errors::invalid_await_position_dependent,
-                    ));
-                    break;
+                    let (feature, enabled) = self.is_pipe_await_enabled();
+                    if !enabled {
+                        self.errors.push(make_error_from_node(
+                            await_node,
+                            Cow::Owned(format!(
+                            "`await` cannot be used as an expression inside another await expression, unless unstable feature: `{}` is enabled. Pull the inner `await` out into its own statement.",
+                            feature)
+                        )));
+                        break;
+                    }
+                    continue;
                 }
                 // Unary based expressions have their own custom fanout
                 PrefixUnaryExpression(x) if unop_allows_await(&x.operator) => {
@@ -2886,15 +2891,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     if std::ptr::eq(node, &x.right_operand)
                         && token_kind(&x.operator) == Some(TokenKind::BarGreaterThan) =>
                 {
-                    let feature = UnstableFeatures::PipeAwait;
-                    let enabled = self.env.context.active_unstable_features.contains(&feature)
-                    // Preview features with an ongoing release should be allowed by the
-                    // runtime, but not the typechecker
-                    || {
-                        feature.get_feature_status() == FeatureStatus::OngoingRelease
-                            && self.env.codegen
-                    };
-
+                    let (feature, enabled) = self.is_pipe_await_enabled();
                     if !enabled {
                         self.errors.push(make_error_from_node(
                             node,
@@ -3014,6 +3011,15 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 // We must have already errored in for loop
             }
         }
+    }
+
+    fn is_pipe_await_enabled(&self) -> (UnstableFeatures, bool) {
+        let feature = UnstableFeatures::PipeAwait;
+        // Preview features with an ongoing release should be allowed by the
+        // runtime, but not the typechecker
+        let enabled = self.env.context.active_unstable_features.contains(&feature)
+            || (feature.get_feature_status() == FeatureStatus::OngoingRelease && self.env.codegen);
+        (feature, enabled)
     }
 
     fn node_has_await_child(&mut self, node: S<'a>) -> bool {

@@ -15,26 +15,9 @@
 */
 #pragma once
 
-#include "hphp/util/rds-local.h"
-
-#include <folly/Likely.h>
-
-#include <atomic>
-#include <memory>
 #include <utility>
 
 namespace HPHP::Treadmill {
-
-extern std::atomic<int64_t> g_nextThreadIdx;
-extern RDS_LOCAL_NO_CHECK(int64_t, rl_thisRequestIdx);
-
-inline int64_t requestIdx() {
-  if (UNLIKELY(*rl_thisRequestIdx == kInvalidRequestIdx)) {
-    *rl_thisRequestIdx =
-      g_nextThreadIdx.fetch_add(1, std::memory_order_relaxed);
-  }
-  return *rl_thisRequestIdx;
-}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -42,9 +25,6 @@ struct WorkItem;
 void enqueueInternal(std::unique_ptr<WorkItem>);
 
 //////////////////////////////////////////////////////////////////////
-
-using GenCount = int64_t;
-auto constexpr kIdleGenCount = GenCount{0}; // not processing any requests.
 
 struct WorkItem {
   WorkItem() = default;
@@ -62,7 +42,7 @@ private:
   // Inherently racy. We get a lower bound on the generation;
   // presumably clients are aware of this, and are creating the
   // trigger for an object that was reachable strictly in the past.
-  GenCount m_gen{0};
+  Clock::time_point m_timestamp;
 };
 
 template<class F>

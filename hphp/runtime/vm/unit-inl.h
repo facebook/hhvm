@@ -14,9 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_UNIT_INL_H_
-#error "unit-inl.h should only be included by unit.h"
-#endif
+#pragma once
 
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-string.h"
@@ -164,14 +162,20 @@ inline void Unit::setNextCachedByHash(Unit* u) {
 ///////////////////////////////////////////////////////////////////////////////
 // Idle unit reaping
 
-inline void Unit::setLastTouchRequest(int64_t request) {
+inline void
+Unit::setLastTouchRequest(Treadmill::Clock::time_point requestStartTime) {
   assertx(!RuntimeOption::RepoAuthoritative);
   assertx(RuntimeOption::EvalIdleUnitTimeoutSecs > 0);
+  assertx(requestStartTime != Treadmill::kNoStartTime);
   assertx(m_extended);
   auto u = getExtended();
-  auto old = u->m_lastTouchRequest.load();
-  while (old < request) {
-    if (u->m_lastTouchRequest.compare_exchange_weak(old, request)) return;
+  auto old = u->m_lastTouchRequestStartTime.load();
+  while (old < requestStartTime) {
+    if (u->m_lastTouchRequestStartTime
+      .compare_exchange_weak(old, requestStartTime)
+    ) {
+      return;
+    }
   }
 }
 
@@ -186,14 +190,14 @@ inline void Unit::setLastTouchTime(TouchClock::time_point now) {
   }
 }
 
-inline std::pair<int64_t, Unit::TouchClock::time_point>
+inline std::pair<Treadmill::Clock::time_point, Unit::TouchClock::time_point>
 Unit::getLastTouch() const {
   assertx(!RuntimeOption::RepoAuthoritative);
   assertx(RuntimeOption::EvalIdleUnitTimeoutSecs > 0);
   assertx(m_extended);
   auto const u = getExtended();
   return std::make_pair(
-    u->m_lastTouchRequest.load(),
+    u->m_lastTouchRequestStartTime.load(),
     u->m_lastTouchTime.load()
   );
 }

@@ -1351,7 +1351,7 @@ CachedUnit lookupUnitNonRepoAuth(const StringData* requestedPath,
       // updating the timestamp on the Unit until this request ends
       // (the expiration time should be measured from the end of the
       // last request which used it).
-      cu.unit->setLastTouchRequest(Treadmill::getRequestGenCount());
+      cu.unit->setLastTouchRequest(Treadmill::getRequestStartTime());
       g_context->m_touchedUnits.emplace(cu.unit);
     }
 
@@ -2183,7 +2183,7 @@ Unit* compileEvalString(const StringData* code, const char* evalFilename) {
   }
   if (RO::EvalIdleUnitTimeoutSecs > 0 && !RO::RepoAuthoritative) {
     // Mark this Unit like we do for normal Units
-    acc->second->setLastTouchRequest(Treadmill::getRequestGenCount());
+    acc->second->setLastTouchRequest(Treadmill::getRequestStartTime());
     g_context->m_touchedUnits.emplace(acc->second);
   }
   return acc->second;
@@ -2256,16 +2256,17 @@ private:
   // running request), and its touch timestamp plus the expiration
   // time is before now.
   bool isExpired(Clock::time_point now,
-                 int64_t oldestRequest,
-                 int64_t lastRequest,
+                 Treadmill::Clock::time_point oldestRequest,
+                 Treadmill::Clock::time_point lastRequest,
                  Clock::time_point lastTime) const {
-    assertx(oldestRequest);
+    assertx(oldestRequest != Treadmill::kNoStartTime);
     if (lastRequest >= oldestRequest) return false;
     if (now < lastTime + m_timeout) return false;
     return true;
   }
 
-  void reapPathCaches(Clock::time_point now, int64_t oldestRequest) {
+  void reapPathCaches(Clock::time_point now,
+                      Treadmill::Clock::time_point oldestRequest) {
     auto const threshold = RO::EvalIdleUnitMinThreshold;
 
     // Do a quick check if the total size of the caches is below the
@@ -2381,7 +2382,8 @@ private:
 
   // Reap the evaled Unit cache. Only the path Unit caches, we don't
   // keep any threshold here.
-  void reapEvalCaches(Clock::time_point now, int64_t oldestRequest) {
+  void reapEvalCaches(Clock::time_point now,
+                      Treadmill::Clock::time_point oldestRequest) {
     if (s_evaledUnits.empty()) return;
 
     // Iterate over the cache. This is safe because we never delete
@@ -2421,10 +2423,10 @@ private:
     // things from being deleted out under us.
     HphpSession _{Treadmill::SessionKind::UnitReaper};
 
-    auto const oldestRequest = Treadmill::getOldestRequestGenCount();
+    auto const oldestRequest = Treadmill::getOldestRequestStartTime();
     // Since this is a request, we should always have an oldest
     // request (maybe ourself).
-    assertx(oldestRequest);
+    assertx(oldestRequest != Treadmill::kNoStartTime);
 
     reapPathCaches(now, oldestRequest);
     reapEvalCaches(now, oldestRequest);

@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/source-location.h"
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-alias.h"
 
 #include "hphp/util/check-size.h"
@@ -293,7 +294,7 @@ public:
   /*
    * Mark that this Unit has been touched by the given request.
    */
-  void setLastTouchRequest(int64_t request);
+  void setLastTouchRequest(Treadmill::Clock::time_point requestStartTime);
 
   /*
    * Mark that this Unit has been touched at the given timestamp.
@@ -304,7 +305,8 @@ public:
    * Get the newest request which has touched this Unit, and the
    * latest timestamp of the touch.
    */
-  std::pair<int64_t, TouchClock::time_point> getLastTouch() const;
+  std::pair<Treadmill::Clock::time_point, TouchClock::time_point>
+    getLastTouch() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Code locations.                                                    [const]
@@ -634,8 +636,8 @@ struct UnitExtended : Unit {
   rds::Link<LowStringPtr, rds::Mode::Normal> m_perRequestFilepath;
 
   // Used by Eval.IdleUnitTimeoutSecs:
-  std::atomic<int64_t> m_lastTouchRequest{0};
-  std::atomic<TouchClock::time_point> m_lastTouchTime{TouchClock::time_point{}};
+  std::atomic<Treadmill::Clock::time_point> m_lastTouchRequestStartTime{};
+  std::atomic<TouchClock::time_point> m_lastTouchTime{};
 
   std::atomic<Unit*> m_nextCachedByHash{nullptr};
 };

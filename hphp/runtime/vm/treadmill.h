@@ -17,6 +17,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <chrono>
 #include <memory>
 
 namespace HPHP::Treadmill {
@@ -51,13 +52,15 @@ enum class SessionKind {
 };
 
 /*
- * An invalid request index.
+ * Treadmill uses steady clock to track the oldest running request.
  */
-constexpr int64_t kInvalidRequestIdx = -1;
+using Clock = std::chrono::steady_clock;
+
 /*
- * Return the current thread's index.
+ * A special value of start time indicating either an idle request in request
+ * context, or no request in flight in global context.
  */
-int64_t requestIdx();
+constexpr Clock::time_point kNoStartTime = Clock::time_point{};
 
 /*
  * Return the current thread's session kind.
@@ -73,21 +76,15 @@ void startRequest(SessionKind session_kind);
 void finishRequest();
 
 /*
- * Returns the unique GenCount identifying the oldest request in
- * flight (or zero if there is none).
+ * Returns the start time of the oldest request in flight, or kNoStartTime
+ * if there is none.
  */
-int64_t getOldestRequestGenCount();
+Clock::time_point getOldestRequestStartTime();
 
 /*
- * Returns for how long (wall time) the oldest request in flight has
- * been running, in seconds.
+ * Returns the start time of this request.
  */
-int64_t getAgeOldestRequest();
-
-/*
- * Returns the unique GenCount identifying this request.
- */
-int64_t getRequestGenCount();
+Clock::time_point getRequestStartTime();
 
 /*
  * Ask for memory to be freed (as in free, not delete) by the next

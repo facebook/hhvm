@@ -18,8 +18,7 @@
 
 #include <vector>
 
-#include <glog/logging.h>
-
+#include <folly/GLog.h>
 #include <folly/Overload.h>
 #include <folly/String.h>
 #include <folly/experimental/io/AsyncIoUringSocketFactory.h>
@@ -72,6 +71,35 @@ void Cpp2Worker::initRequestsRegistry() {
 }
 
 void Cpp2Worker::onNewConnection(
+    folly::AsyncTransport::UniquePtr sock,
+    const folly::SocketAddress* addr,
+    const std::string& nextProtocolName,
+    wangle::SecureTransportType secureTransportType,
+    const wangle::TransportInfo& tinfo) {
+  /**
+   * Most commonly, we are called in a noexcept callback sequence, which means
+   * that `onNewConnection` is effectively `noexcept`.
+   *
+   * Since `Cpp2Worker` delegates to a routing handler, and the
+   * `TransportRoutingHandler::handleConnection` interface is not marked
+   * `noexcept`, it is very easy for an implementation to introduce code that
+   * may throw (e.g. calling `socket_->getPeerAddress(...)`), thus crashing
+   * the process.
+   *
+   * Don't you simply love exceptions?
+   */
+
+  try {
+    onNewConnectionThatMayThrow(
+        std::move(sock), addr, nextProtocolName, secureTransportType, tinfo);
+  } catch (...) {
+    FB_LOG_EVERY_MS(WARNING, 1000)
+        << "Cpp2Worker::onNewConnection(...) caught an unhandled exception: "
+        << folly::exceptionStr(std::current_exception());
+  }
+}
+
+void Cpp2Worker::onNewConnectionThatMayThrow(
     folly::AsyncTransport::UniquePtr sock,
     const folly::SocketAddress* addr,
     const std::string& nextProtocolName,

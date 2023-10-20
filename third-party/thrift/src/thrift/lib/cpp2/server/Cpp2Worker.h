@@ -360,6 +360,13 @@ class Cpp2Worker : public IOWorkerContext,
   MemoryTracker& getEgressMemoryTracker() { return *egressMemoryTracker_; }
 
  private:
+  void onNewConnectionThatMayThrow(
+      folly::AsyncTransport::UniquePtr,
+      const folly::SocketAddress*,
+      const std::string&,
+      wangle::SecureTransportType,
+      const wangle::TransportInfo&);
+
   /// The mother ship.
   ThriftServer* server_;
 

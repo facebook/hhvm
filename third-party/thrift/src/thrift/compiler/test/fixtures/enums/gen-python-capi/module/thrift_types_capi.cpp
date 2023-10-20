@@ -29,37 +29,49 @@ bool ensure_module_imported() {
 
 ExtractorResult<::test::fixtures::enums::SomeStruct>
 Extractor<::test::fixtures::enums::SomeStruct>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::enums::SomeStruct>(
-      "Module test.fixtures.enums.module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a SomeStruct");
+      }
+      return extractorError<::test::fixtures::enums::SomeStruct>(
+          "Marshal error: SomeStruct");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__test__fixtures__enums__module__SomeStruct(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::test::fixtures::enums::SomeStruct>(
-        "Thrift serialize error: SomeStruct");
-  }
-  return detail::deserialize_iobuf<::test::fixtures::enums::SomeStruct>(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::enums::SomeStruct>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::test::fixtures::enums::SomeStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::enums::SomeStruct>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::enums::SomeStruct>(
-      "Module test.fixtures.enums.module import error");
+    ::test::fixtures::enums::SomeStruct>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::enums::SomeStruct cpp;
+  std::optional<std::string_view> error;
+  const int _fbthrift__tuple_pos[4] = {
+    1, 2, 3, 4
+  };
+  Extractor<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::enums::Metasyntactic>>{}.extractInto(
+      cpp.reasonable_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      error);
+  Extractor<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::enums::Metasyntactic>>{}.extractInto(
+      cpp.fine_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[1]),
+      error);
+  Extractor<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::enums::Metasyntactic>>{}.extractInto(
+      cpp.questionable_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[2]),
+      error);
+  Extractor<set<int32_t>>{}.extractInto(
+      cpp.tags_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[3]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
   }
-  auto obj = StrongRef(init__test__fixtures__enums__module__SomeStruct(fbthrift_data));
-  if (!obj) {
-      return extractorError<::test::fixtures::enums::SomeStruct>(
-          "Init from fbthrift error: SomeStruct");
-  }
-  return Extractor<::test::fixtures::enums::SomeStruct>{}(*obj);
+  return cpp;
 }
+
 
 int Extractor<::test::fixtures::enums::SomeStruct>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -82,58 +94,99 @@ PyObject* Constructor<::test::fixtures::enums::SomeStruct>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__test__fixtures__enums__module__SomeStruct(
-      detail::serialize_to_iobuf(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::enums::SomeStruct>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__test__fixtures__enums__module__SomeStruct(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::enums::SomeStruct>>::operator()(
-    const ::test::fixtures::enums::SomeStruct& val) {
-  auto obj = StrongRef(Constructor<::test::fixtures::enums::SomeStruct>{}(val));
-  if (!obj) {
+    FOLLY_MAYBE_UNUSED const ::test::fixtures::enums::SomeStruct& val) {
+  const int _fbthrift__tuple_pos[4] = {
+    1, 2, 3, 4
+  };
+  StrongRef fbthrift_data(createStructTuple(4));
+  StrongRef _fbthrift__reasonable(
+    Constructor<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::enums::Metasyntactic>>{}
+    .constructFrom(val.reasonable_ref()));
+  if (!_fbthrift__reasonable ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__reasonable) == -1) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  StrongRef _fbthrift__fine(
+    Constructor<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::enums::Metasyntactic>>{}
+    .constructFrom(val.fine_ref()));
+  if (!_fbthrift__fine ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[1], *_fbthrift__fine) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__questionable(
+    Constructor<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::enums::Metasyntactic>>{}
+    .constructFrom(val.questionable_ref()));
+  if (!_fbthrift__questionable ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[2], *_fbthrift__questionable) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__tags(
+    Constructor<set<int32_t>>{}
+    .constructFrom(val.tags_ref()));
+  if (!_fbthrift__tags ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[3], *_fbthrift__tags) == -1) {
+    return nullptr;
+  }
+  return std::move(fbthrift_data).release();
 }
+
 
 ExtractorResult<::test::fixtures::enums::MyStruct>
 Extractor<::test::fixtures::enums::MyStruct>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::enums::MyStruct>(
-      "Module test.fixtures.enums.module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a MyStruct");
+      }
+      return extractorError<::test::fixtures::enums::MyStruct>(
+          "Marshal error: MyStruct");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__test__fixtures__enums__module__MyStruct(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::test::fixtures::enums::MyStruct>(
-        "Thrift serialize error: MyStruct");
-  }
-  return detail::deserialize_iobuf<::test::fixtures::enums::MyStruct>(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::enums::MyStruct>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::test::fixtures::enums::MyStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::enums::MyStruct>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::enums::MyStruct>(
-      "Module test.fixtures.enums.module import error");
+    ::test::fixtures::enums::MyStruct>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::enums::MyStruct cpp;
+  std::optional<std::string_view> error;
+  const int _fbthrift__tuple_pos[4] = {
+    1, 2, 3, 4
+  };
+  Extractor<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::enums::MyEnum2>>{}.extractInto(
+      cpp.me2_3_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      error);
+  Extractor<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::enums::MyEnum3>>{}.extractInto(
+      cpp.me3_n3_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[1]),
+      error);
+  Extractor<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::enums::MyEnum1>>{}.extractInto(
+      cpp.me1_t1_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[2]),
+      error);
+  Extractor<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::enums::MyEnum1>>{}.extractInto(
+      cpp.me1_t2_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[3]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
   }
-  auto obj = StrongRef(init__test__fixtures__enums__module__MyStruct(fbthrift_data));
-  if (!obj) {
-      return extractorError<::test::fixtures::enums::MyStruct>(
-          "Init from fbthrift error: MyStruct");
-  }
-  return Extractor<::test::fixtures::enums::MyStruct>{}(*obj);
+  return cpp;
 }
+
 
 int Extractor<::test::fixtures::enums::MyStruct>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -156,24 +209,53 @@ PyObject* Constructor<::test::fixtures::enums::MyStruct>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__test__fixtures__enums__module__MyStruct(
-      detail::serialize_to_iobuf(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::enums::MyStruct>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__test__fixtures__enums__module__MyStruct(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::enums::MyStruct>>::operator()(
-    const ::test::fixtures::enums::MyStruct& val) {
-  auto obj = StrongRef(Constructor<::test::fixtures::enums::MyStruct>{}(val));
-  if (!obj) {
+    FOLLY_MAYBE_UNUSED const ::test::fixtures::enums::MyStruct& val) {
+  const int _fbthrift__tuple_pos[4] = {
+    1, 2, 3, 4
+  };
+  StrongRef fbthrift_data(createStructTuple(4));
+  StrongRef _fbthrift__me2_3(
+    Constructor<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::enums::MyEnum2>>{}
+    .constructFrom(val.me2_3_ref()));
+  if (!_fbthrift__me2_3 ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__me2_3) == -1) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  StrongRef _fbthrift__me3_n3(
+    Constructor<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::enums::MyEnum3>>{}
+    .constructFrom(val.me3_n3_ref()));
+  if (!_fbthrift__me3_n3 ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[1], *_fbthrift__me3_n3) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__me1_t1(
+    Constructor<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::enums::MyEnum1>>{}
+    .constructFrom(val.me1_t1_ref()));
+  if (!_fbthrift__me1_t1 ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[2], *_fbthrift__me1_t1) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__me1_t2(
+    Constructor<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::enums::MyEnum1>>{}
+    .constructFrom(val.me1_t2_ref()));
+  if (!_fbthrift__me1_t2 ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[3], *_fbthrift__me1_t2) == -1) {
+    return nullptr;
+  }
+  return std::move(fbthrift_data).release();
 }
+
 
 ExtractorResult<::test::fixtures::enums::Metasyntactic>
 Extractor<::test::fixtures::enums::Metasyntactic>::operator()(PyObject* obj) {

@@ -29,16 +29,6 @@ cdef api object init__apache__thrift__fixtures__types__module__empty_struct(obje
 cdef api int can_extract__apache__thrift__fixtures__types__module__decorated_struct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.decorated_struct) else 0
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__decorated_struct(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__apache__thrift__fixtures__types__module__decorated_struct(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.decorated_struct,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__apache__thrift__fixtures__types__module__decorated_struct(object data):
     return __thrift_types.decorated_struct._fbthrift_create(data)
@@ -80,16 +70,6 @@ cdef api object init__apache__thrift__fixtures__types__module__CppTypeStruct(obj
 cdef api int can_extract__apache__thrift__fixtures__types__module__VirtualStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.VirtualStruct) else 0
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__VirtualStruct(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__apache__thrift__fixtures__types__module__VirtualStruct(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.VirtualStruct,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__apache__thrift__fixtures__types__module__VirtualStruct(object data):
     return __thrift_types.VirtualStruct._fbthrift_create(data)
@@ -97,16 +77,6 @@ cdef api object init__apache__thrift__fixtures__types__module__VirtualStruct(obj
 cdef api int can_extract__apache__thrift__fixtures__types__module__MyStructWithForwardRefEnum(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyStructWithForwardRefEnum) else 0
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__MyStructWithForwardRefEnum(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__apache__thrift__fixtures__types__module__MyStructWithForwardRefEnum(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.MyStructWithForwardRefEnum,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__apache__thrift__fixtures__types__module__MyStructWithForwardRefEnum(object data):
     return __thrift_types.MyStructWithForwardRefEnum._fbthrift_create(data)
@@ -114,16 +84,6 @@ cdef api object init__apache__thrift__fixtures__types__module__MyStructWithForwa
 cdef api int can_extract__apache__thrift__fixtures__types__module__TrivialNumeric(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.TrivialNumeric) else 0
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__TrivialNumeric(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__apache__thrift__fixtures__types__module__TrivialNumeric(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.TrivialNumeric,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__apache__thrift__fixtures__types__module__TrivialNumeric(object data):
     return __thrift_types.TrivialNumeric._fbthrift_create(data)
@@ -131,16 +91,6 @@ cdef api object init__apache__thrift__fixtures__types__module__TrivialNumeric(ob
 cdef api int can_extract__apache__thrift__fixtures__types__module__TrivialNestedWithDefault(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.TrivialNestedWithDefault) else 0
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__TrivialNestedWithDefault(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__apache__thrift__fixtures__types__module__TrivialNestedWithDefault(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.TrivialNestedWithDefault,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__apache__thrift__fixtures__types__module__TrivialNestedWithDefault(object data):
     return __thrift_types.TrivialNestedWithDefault._fbthrift_create(data)
@@ -148,16 +98,6 @@ cdef api object init__apache__thrift__fixtures__types__module__TrivialNestedWith
 cdef api int can_extract__apache__thrift__fixtures__types__module__ComplexString(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.ComplexString) else 0
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__ComplexString(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__apache__thrift__fixtures__types__module__ComplexString(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.ComplexString,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__apache__thrift__fixtures__types__module__ComplexString(object data):
     return __thrift_types.ComplexString._fbthrift_create(data)
@@ -165,16 +105,6 @@ cdef api object init__apache__thrift__fixtures__types__module__ComplexString(obj
 cdef api int can_extract__apache__thrift__fixtures__types__module__ComplexNestedWithDefault(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.ComplexNestedWithDefault) else 0
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__ComplexNestedWithDefault(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__apache__thrift__fixtures__types__module__ComplexNestedWithDefault(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.ComplexNestedWithDefault,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__apache__thrift__fixtures__types__module__ComplexNestedWithDefault(object data):
     return __thrift_types.ComplexNestedWithDefault._fbthrift_create(data)
@@ -182,16 +112,6 @@ cdef api object init__apache__thrift__fixtures__types__module__ComplexNestedWith
 cdef api int can_extract__apache__thrift__fixtures__types__module__MinPadding(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MinPadding) else 0
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__MinPadding(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__apache__thrift__fixtures__types__module__MinPadding(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.MinPadding,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__apache__thrift__fixtures__types__module__MinPadding(object data):
     return __thrift_types.MinPadding._fbthrift_create(data)
@@ -216,16 +136,6 @@ cdef api object init__apache__thrift__fixtures__types__module__MinPaddingWithCus
 cdef api int can_extract__apache__thrift__fixtures__types__module__MyStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyStruct) else 0
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__MyStruct(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__apache__thrift__fixtures__types__module__MyStruct(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.MyStruct,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__apache__thrift__fixtures__types__module__MyStruct(object data):
     return __thrift_types.MyStruct._fbthrift_create(data)
@@ -240,16 +150,6 @@ cdef api object init__apache__thrift__fixtures__types__module__MyDataItem(object
 cdef api int can_extract__apache__thrift__fixtures__types__module__Renaming(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.Renaming) else 0
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__Renaming(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__apache__thrift__fixtures__types__module__Renaming(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.Renaming,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__apache__thrift__fixtures__types__module__Renaming(object data):
     return __thrift_types.Renaming._fbthrift_create(data)
@@ -257,16 +157,6 @@ cdef api object init__apache__thrift__fixtures__types__module__Renaming(object d
 cdef api int can_extract__apache__thrift__fixtures__types__module__AnnotatedTypes(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.AnnotatedTypes) else 0
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__AnnotatedTypes(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__apache__thrift__fixtures__types__module__AnnotatedTypes(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.AnnotatedTypes,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__apache__thrift__fixtures__types__module__AnnotatedTypes(object data):
     return __thrift_types.AnnotatedTypes._fbthrift_create(data)
@@ -274,16 +164,6 @@ cdef api object init__apache__thrift__fixtures__types__module__AnnotatedTypes(ob
 cdef api int can_extract__apache__thrift__fixtures__types__module__ForwardUsageRoot(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.ForwardUsageRoot) else 0
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__ForwardUsageRoot(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__apache__thrift__fixtures__types__module__ForwardUsageRoot(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.ForwardUsageRoot,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__apache__thrift__fixtures__types__module__ForwardUsageRoot(object data):
     return __thrift_types.ForwardUsageRoot._fbthrift_create(data)
@@ -291,16 +171,6 @@ cdef api object init__apache__thrift__fixtures__types__module__ForwardUsageRoot(
 cdef api int can_extract__apache__thrift__fixtures__types__module__ForwardUsageStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.ForwardUsageStruct) else 0
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__ForwardUsageStruct(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__apache__thrift__fixtures__types__module__ForwardUsageStruct(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.ForwardUsageStruct,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__apache__thrift__fixtures__types__module__ForwardUsageStruct(object data):
     return __thrift_types.ForwardUsageStruct._fbthrift_create(data)
@@ -308,16 +178,6 @@ cdef api object init__apache__thrift__fixtures__types__module__ForwardUsageStruc
 cdef api int can_extract__apache__thrift__fixtures__types__module__ForwardUsageByRef(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.ForwardUsageByRef) else 0
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__ForwardUsageByRef(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__apache__thrift__fixtures__types__module__ForwardUsageByRef(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.ForwardUsageByRef,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__apache__thrift__fixtures__types__module__ForwardUsageByRef(object data):
     return __thrift_types.ForwardUsageByRef._fbthrift_create(data)
@@ -325,16 +185,6 @@ cdef api object init__apache__thrift__fixtures__types__module__ForwardUsageByRef
 cdef api int can_extract__apache__thrift__fixtures__types__module__IncompleteMap(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.IncompleteMap) else 0
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__IncompleteMap(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__apache__thrift__fixtures__types__module__IncompleteMap(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.IncompleteMap,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__apache__thrift__fixtures__types__module__IncompleteMap(object data):
     return __thrift_types.IncompleteMap._fbthrift_create(data)
@@ -438,16 +288,6 @@ cdef api object init__apache__thrift__fixtures__types__module__AdaptedList(objec
 cdef api int can_extract__apache__thrift__fixtures__types__module__AdaptedListDep(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.AdaptedListDep) else 0
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__AdaptedListDep(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__apache__thrift__fixtures__types__module__AdaptedListDep(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.AdaptedListDep,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__apache__thrift__fixtures__types__module__AdaptedListDep(object data):
     return __thrift_types.AdaptedListDep._fbthrift_create(data)
@@ -472,16 +312,6 @@ cdef api object init__apache__thrift__fixtures__types__module__DependentAdaptedL
 cdef api int can_extract__apache__thrift__fixtures__types__module__DependentAdaptedListDep(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.DependentAdaptedListDep) else 0
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__DependentAdaptedListDep(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__apache__thrift__fixtures__types__module__DependentAdaptedListDep(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.DependentAdaptedListDep,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__apache__thrift__fixtures__types__module__DependentAdaptedListDep(object data):
     return __thrift_types.DependentAdaptedListDep._fbthrift_create(data)
@@ -489,16 +319,6 @@ cdef api object init__apache__thrift__fixtures__types__module__DependentAdaptedL
 cdef api int can_extract__apache__thrift__fixtures__types__module__AllocatorAware(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.AllocatorAware) else 0
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__AllocatorAware(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__apache__thrift__fixtures__types__module__AllocatorAware(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.AllocatorAware,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__apache__thrift__fixtures__types__module__AllocatorAware(object data):
     return __thrift_types.AllocatorAware._fbthrift_create(data)
@@ -506,16 +326,6 @@ cdef api object init__apache__thrift__fixtures__types__module__AllocatorAware(ob
 cdef api int can_extract__apache__thrift__fixtures__types__module__AllocatorAware2(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.AllocatorAware2) else 0
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__AllocatorAware2(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__apache__thrift__fixtures__types__module__AllocatorAware2(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.AllocatorAware2,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__apache__thrift__fixtures__types__module__AllocatorAware2(object data):
     return __thrift_types.AllocatorAware2._fbthrift_create(data)
@@ -540,16 +350,6 @@ cdef api object init__apache__thrift__fixtures__types__module__TypedefStruct(obj
 cdef api int can_extract__apache__thrift__fixtures__types__module__StructWithDoubleUnderscores(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.StructWithDoubleUnderscores) else 0
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__StructWithDoubleUnderscores(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__apache__thrift__fixtures__types__module__StructWithDoubleUnderscores(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.StructWithDoubleUnderscores,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__apache__thrift__fixtures__types__module__StructWithDoubleUnderscores(object data):
     return __thrift_types.StructWithDoubleUnderscores._fbthrift_create(data)

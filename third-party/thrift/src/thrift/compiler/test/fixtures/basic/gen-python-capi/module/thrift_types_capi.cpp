@@ -29,37 +29,69 @@ bool ensure_module_imported() {
 
 ExtractorResult<::test::fixtures::basic::MyStruct>
 Extractor<::test::fixtures::basic::MyStruct>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::basic::MyStruct>(
-      "Module test.fixtures.basic.module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a MyStruct");
+      }
+      return extractorError<::test::fixtures::basic::MyStruct>(
+          "Marshal error: MyStruct");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__test__fixtures__basic__module__MyStruct(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::test::fixtures::basic::MyStruct>(
-        "Thrift serialize error: MyStruct");
-  }
-  return detail::deserialize_iobuf<::test::fixtures::basic::MyStruct>(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::basic::MyStruct>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::test::fixtures::basic::MyStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::basic::MyStruct>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::basic::MyStruct>(
-      "Module test.fixtures.basic.module import error");
+    ::test::fixtures::basic::MyStruct>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::basic::MyStruct cpp;
+  std::optional<std::string_view> error;
+  const int _fbthrift__tuple_pos[9] = {
+    1, 2, 3, 4, 5, 6, 7, 8, 9
+  };
+  Extractor<int64_t>{}.extractInto(
+      cpp.MyIntField_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      error);
+  Extractor<Bytes>{}.extractInto(
+      cpp.MyStringField_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[1]),
+      error);
+  Extractor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyDataItem>>{}.extractInto(
+      cpp.MyDataField_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[2]),
+      error);
+  Extractor<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::basic::MyEnum>>{}.extractInto(
+      cpp.myEnum_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[3]),
+      error);
+  Extractor<bool>{}.extractInto(
+      cpp.oneway_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[4]),
+      error);
+  Extractor<bool>{}.extractInto(
+      cpp.readonly_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[5]),
+      error);
+  Extractor<bool>{}.extractInto(
+      cpp.idempotent_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[6]),
+      error);
+  Extractor<set<float>>{}.extractInto(
+      cpp.floatSet_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[7]),
+      error);
+  Extractor<Bytes>{}.extractInto(
+      cpp.no_hack_codegen_field_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[8]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
   }
-  auto obj = StrongRef(init__test__fixtures__basic__module__MyStruct(fbthrift_data));
-  if (!obj) {
-      return extractorError<::test::fixtures::basic::MyStruct>(
-          "Init from fbthrift error: MyStruct");
-  }
-  return Extractor<::test::fixtures::basic::MyStruct>{}(*obj);
+  return cpp;
 }
+
 
 int Extractor<::test::fixtures::basic::MyStruct>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -82,24 +114,88 @@ PyObject* Constructor<::test::fixtures::basic::MyStruct>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__test__fixtures__basic__module__MyStruct(
-      detail::serialize_to_iobuf(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic::MyStruct>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__test__fixtures__basic__module__MyStruct(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::basic::MyStruct>>::operator()(
-    const ::test::fixtures::basic::MyStruct& val) {
-  auto obj = StrongRef(Constructor<::test::fixtures::basic::MyStruct>{}(val));
-  if (!obj) {
+    FOLLY_MAYBE_UNUSED const ::test::fixtures::basic::MyStruct& val) {
+  const int _fbthrift__tuple_pos[9] = {
+    1, 2, 3, 4, 5, 6, 7, 8, 9
+  };
+  StrongRef fbthrift_data(createStructTuple(9));
+  StrongRef _fbthrift__MyIntField(
+    Constructor<int64_t>{}
+    .constructFrom(val.MyIntField_ref()));
+  if (!_fbthrift__MyIntField ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__MyIntField) == -1) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  StrongRef _fbthrift__MyStringField(
+    Constructor<Bytes>{}
+    .constructFrom(val.MyStringField_ref()));
+  if (!_fbthrift__MyStringField ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[1], *_fbthrift__MyStringField) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__MyDataField(
+    Constructor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyDataItem>>{}
+    .constructFrom(val.MyDataField_ref()));
+  if (!_fbthrift__MyDataField ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[2], *_fbthrift__MyDataField) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__myEnum(
+    Constructor<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::basic::MyEnum>>{}
+    .constructFrom(val.myEnum_ref()));
+  if (!_fbthrift__myEnum ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[3], *_fbthrift__myEnum) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__oneway(
+    Constructor<bool>{}
+    .constructFrom(val.oneway_ref()));
+  if (!_fbthrift__oneway ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[4], *_fbthrift__oneway) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__readonly(
+    Constructor<bool>{}
+    .constructFrom(val.readonly_ref()));
+  if (!_fbthrift__readonly ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[5], *_fbthrift__readonly) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__idempotent(
+    Constructor<bool>{}
+    .constructFrom(val.idempotent_ref()));
+  if (!_fbthrift__idempotent ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[6], *_fbthrift__idempotent) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__floatSet(
+    Constructor<set<float>>{}
+    .constructFrom(val.floatSet_ref()));
+  if (!_fbthrift__floatSet ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[7], *_fbthrift__floatSet) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__no_hack_codegen_field(
+    Constructor<Bytes>{}
+    .constructFrom(val.no_hack_codegen_field_ref()));
+  if (!_fbthrift__no_hack_codegen_field ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[8], *_fbthrift__no_hack_codegen_field) == -1) {
+    return nullptr;
+  }
+  return std::move(fbthrift_data).release();
 }
+
 
 ExtractorResult<::test::fixtures::basic::MyDataItem>
 Extractor<::test::fixtures::basic::MyDataItem>::operator()(PyObject* obj) {
@@ -237,37 +333,37 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 ExtractorResult<::test::fixtures::basic::ReservedKeyword>
 Extractor<::test::fixtures::basic::ReservedKeyword>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::basic::ReservedKeyword>(
-      "Module test.fixtures.basic.module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a ReservedKeyword");
+      }
+      return extractorError<::test::fixtures::basic::ReservedKeyword>(
+          "Marshal error: ReservedKeyword");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__test__fixtures__basic__module__ReservedKeyword(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::test::fixtures::basic::ReservedKeyword>(
-        "Thrift serialize error: ReservedKeyword");
-  }
-  return detail::deserialize_iobuf<::test::fixtures::basic::ReservedKeyword>(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::basic::ReservedKeyword>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::test::fixtures::basic::ReservedKeyword>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::basic::ReservedKeyword>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::basic::ReservedKeyword>(
-      "Module test.fixtures.basic.module import error");
+    ::test::fixtures::basic::ReservedKeyword>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::basic::ReservedKeyword cpp;
+  std::optional<std::string_view> error;
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  Extractor<int32_t>{}.extractInto(
+      cpp.reserved_field_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
   }
-  auto obj = StrongRef(init__test__fixtures__basic__module__ReservedKeyword(fbthrift_data));
-  if (!obj) {
-      return extractorError<::test::fixtures::basic::ReservedKeyword>(
-          "Init from fbthrift error: ReservedKeyword");
-  }
-  return Extractor<::test::fixtures::basic::ReservedKeyword>{}(*obj);
+  return cpp;
 }
+
 
 int Extractor<::test::fixtures::basic::ReservedKeyword>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -290,24 +386,32 @@ PyObject* Constructor<::test::fixtures::basic::ReservedKeyword>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__test__fixtures__basic__module__ReservedKeyword(
-      detail::serialize_to_iobuf(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic::ReservedKeyword>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__test__fixtures__basic__module__ReservedKeyword(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::basic::ReservedKeyword>>::operator()(
-    const ::test::fixtures::basic::ReservedKeyword& val) {
-  auto obj = StrongRef(Constructor<::test::fixtures::basic::ReservedKeyword>{}(val));
-  if (!obj) {
+    FOLLY_MAYBE_UNUSED const ::test::fixtures::basic::ReservedKeyword& val) {
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  StrongRef fbthrift_data(createStructTuple(1));
+  StrongRef _fbthrift__reserved_field(
+    Constructor<int32_t>{}
+    .constructFrom(val.reserved_field_ref()));
+  if (!_fbthrift__reserved_field ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__reserved_field) == -1) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return std::move(fbthrift_data).release();
 }
+
 
 ExtractorResult<::test::fixtures::basic::UnionToBeRenamed>
 Extractor<::test::fixtures::basic::UnionToBeRenamed>::operator()(PyObject* obj) {

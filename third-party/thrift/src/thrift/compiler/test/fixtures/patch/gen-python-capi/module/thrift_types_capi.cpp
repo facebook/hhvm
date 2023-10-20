@@ -14,6 +14,8 @@
 #include <thrift/compiler/test/fixtures/patch/src/gen-python-capi/module/thrift_types_api.h>
 #include <thrift/compiler/test/fixtures/patch/src/gen-python-capi/module/thrift_types_capi.h>
 
+#include "thrift/lib/thrift/gen-python-capi/patch/thrift_types_capi.h"
+#include "thrift/lib/thrift/gen-python-capi/standard/thrift_types_capi.h"
 
 namespace apache {
 namespace thrift {
@@ -29,37 +31,41 @@ bool ensure_module_imported() {
 
 ExtractorResult<::test::fixtures::patch::MyData>
 Extractor<::test::fixtures::patch::MyData>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::patch::MyData>(
-      "Module test.fixtures.patch.module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a MyData");
+      }
+      return extractorError<::test::fixtures::patch::MyData>(
+          "Marshal error: MyData");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__test__fixtures__patch__module__MyData(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::test::fixtures::patch::MyData>(
-        "Thrift serialize error: MyData");
-  }
-  return detail::deserialize_iobuf<::test::fixtures::patch::MyData>(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::patch::MyData>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::test::fixtures::patch::MyData>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::patch::MyData>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::patch::MyData>(
-      "Module test.fixtures.patch.module import error");
+    ::test::fixtures::patch::MyData>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::patch::MyData cpp;
+  std::optional<std::string_view> error;
+  const int _fbthrift__tuple_pos[2] = {
+    1, 2
+  };
+  Extractor<Bytes>{}.extractInto(
+      cpp.data1_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      error);
+  Extractor<int32_t>{}.extractInto(
+      cpp.data2_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[1]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
   }
-  auto obj = StrongRef(init__test__fixtures__patch__module__MyData(fbthrift_data));
-  if (!obj) {
-      return extractorError<::test::fixtures::patch::MyData>(
-          "Init from fbthrift error: MyData");
-  }
-  return Extractor<::test::fixtures::patch::MyData>{}(*obj);
+  return cpp;
 }
+
 
 int Extractor<::test::fixtures::patch::MyData>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -82,58 +88,77 @@ PyObject* Constructor<::test::fixtures::patch::MyData>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__test__fixtures__patch__module__MyData(
-      detail::serialize_to_iobuf(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::MyData>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__test__fixtures__patch__module__MyData(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::patch::MyData>>::operator()(
-    const ::test::fixtures::patch::MyData& val) {
-  auto obj = StrongRef(Constructor<::test::fixtures::patch::MyData>{}(val));
-  if (!obj) {
+    FOLLY_MAYBE_UNUSED const ::test::fixtures::patch::MyData& val) {
+  const int _fbthrift__tuple_pos[2] = {
+    1, 2
+  };
+  StrongRef fbthrift_data(createStructTuple(2));
+  StrongRef _fbthrift__data1(
+    Constructor<Bytes>{}
+    .constructFrom(val.data1_ref()));
+  if (!_fbthrift__data1 ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__data1) == -1) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  StrongRef _fbthrift__data2(
+    Constructor<int32_t>{}
+    .constructFrom(val.data2_ref()));
+  if (!_fbthrift__data2 ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[1], *_fbthrift__data2) == -1) {
+    return nullptr;
+  }
+  return std::move(fbthrift_data).release();
 }
+
 
 ExtractorResult<::test::fixtures::patch::MyDataWithCustomDefault>
 Extractor<::test::fixtures::patch::MyDataWithCustomDefault>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::patch::MyDataWithCustomDefault>(
-      "Module test.fixtures.patch.module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a MyDataWithCustomDefault");
+      }
+      return extractorError<::test::fixtures::patch::MyDataWithCustomDefault>(
+          "Marshal error: MyDataWithCustomDefault");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__test__fixtures__patch__module__MyDataWithCustomDefault(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::test::fixtures::patch::MyDataWithCustomDefault>(
-        "Thrift serialize error: MyDataWithCustomDefault");
-  }
-  return detail::deserialize_iobuf<::test::fixtures::patch::MyDataWithCustomDefault>(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::patch::MyDataWithCustomDefault>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::test::fixtures::patch::MyDataWithCustomDefault>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::patch::MyDataWithCustomDefault>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::patch::MyDataWithCustomDefault>(
-      "Module test.fixtures.patch.module import error");
+    ::test::fixtures::patch::MyDataWithCustomDefault>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::patch::MyDataWithCustomDefault cpp;
+  std::optional<std::string_view> error;
+  const int _fbthrift__tuple_pos[2] = {
+    1, 2
+  };
+  Extractor<Bytes>{}.extractInto(
+      cpp.data1_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      error);
+  Extractor<int32_t>{}.extractInto(
+      cpp.data2_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[1]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
   }
-  auto obj = StrongRef(init__test__fixtures__patch__module__MyDataWithCustomDefault(fbthrift_data));
-  if (!obj) {
-      return extractorError<::test::fixtures::patch::MyDataWithCustomDefault>(
-          "Init from fbthrift error: MyDataWithCustomDefault");
-  }
-  return Extractor<::test::fixtures::patch::MyDataWithCustomDefault>{}(*obj);
+  return cpp;
 }
+
 
 int Extractor<::test::fixtures::patch::MyDataWithCustomDefault>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -156,24 +181,39 @@ PyObject* Constructor<::test::fixtures::patch::MyDataWithCustomDefault>::operato
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__test__fixtures__patch__module__MyDataWithCustomDefault(
-      detail::serialize_to_iobuf(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::MyDataWithCustomDefault>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__test__fixtures__patch__module__MyDataWithCustomDefault(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::patch::MyDataWithCustomDefault>>::operator()(
-    const ::test::fixtures::patch::MyDataWithCustomDefault& val) {
-  auto obj = StrongRef(Constructor<::test::fixtures::patch::MyDataWithCustomDefault>{}(val));
-  if (!obj) {
+    FOLLY_MAYBE_UNUSED const ::test::fixtures::patch::MyDataWithCustomDefault& val) {
+  const int _fbthrift__tuple_pos[2] = {
+    1, 2
+  };
+  StrongRef fbthrift_data(createStructTuple(2));
+  StrongRef _fbthrift__data1(
+    Constructor<Bytes>{}
+    .constructFrom(val.data1_ref()));
+  if (!_fbthrift__data1 ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__data1) == -1) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  StrongRef _fbthrift__data2(
+    Constructor<int32_t>{}
+    .constructFrom(val.data2_ref()));
+  if (!_fbthrift__data2 ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[1], *_fbthrift__data2) == -1) {
+    return nullptr;
+  }
+  return std::move(fbthrift_data).release();
 }
+
 
 ExtractorResult<::test::fixtures::patch::InnerUnion>
 Extractor<::test::fixtures::patch::InnerUnion>::operator()(PyObject* obj) {
@@ -459,37 +499,37 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 ExtractorResult<::test::fixtures::patch::Recursive>
 Extractor<::test::fixtures::patch::Recursive>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::patch::Recursive>(
-      "Module test.fixtures.patch.module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a Recursive");
+      }
+      return extractorError<::test::fixtures::patch::Recursive>(
+          "Marshal error: Recursive");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__test__fixtures__patch__module__Recursive(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::test::fixtures::patch::Recursive>(
-        "Thrift serialize error: Recursive");
-  }
-  return detail::deserialize_iobuf<::test::fixtures::patch::Recursive>(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::patch::Recursive>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::test::fixtures::patch::Recursive>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::patch::Recursive>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::patch::Recursive>(
-      "Module test.fixtures.patch.module import error");
+    ::test::fixtures::patch::Recursive>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::patch::Recursive cpp;
+  std::optional<std::string_view> error;
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  Extractor<map<Bytes, ::apache::thrift::python::capi::ComposedStruct<::test::fixtures::patch::Recursive>>>{}.extractInto(
+      cpp.nodes_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
   }
-  auto obj = StrongRef(init__test__fixtures__patch__module__Recursive(fbthrift_data));
-  if (!obj) {
-      return extractorError<::test::fixtures::patch::Recursive>(
-          "Init from fbthrift error: Recursive");
-  }
-  return Extractor<::test::fixtures::patch::Recursive>{}(*obj);
+  return cpp;
 }
+
 
 int Extractor<::test::fixtures::patch::Recursive>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -512,58 +552,66 @@ PyObject* Constructor<::test::fixtures::patch::Recursive>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__test__fixtures__patch__module__Recursive(
-      detail::serialize_to_iobuf(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::Recursive>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__test__fixtures__patch__module__Recursive(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::patch::Recursive>>::operator()(
-    const ::test::fixtures::patch::Recursive& val) {
-  auto obj = StrongRef(Constructor<::test::fixtures::patch::Recursive>{}(val));
-  if (!obj) {
+    FOLLY_MAYBE_UNUSED const ::test::fixtures::patch::Recursive& val) {
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  StrongRef fbthrift_data(createStructTuple(1));
+  StrongRef _fbthrift__nodes(
+    Constructor<map<Bytes, ::apache::thrift::python::capi::ComposedStruct<::test::fixtures::patch::Recursive>>>{}
+    .constructFrom(val.nodes_ref()));
+  if (!_fbthrift__nodes ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__nodes) == -1) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return std::move(fbthrift_data).release();
 }
+
 
 ExtractorResult<::test::fixtures::patch::Bar>
 Extractor<::test::fixtures::patch::Bar>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::patch::Bar>(
-      "Module test.fixtures.patch.module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a Bar");
+      }
+      return extractorError<::test::fixtures::patch::Bar>(
+          "Marshal error: Bar");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__test__fixtures__patch__module__Bar(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::test::fixtures::patch::Bar>(
-        "Thrift serialize error: Bar");
-  }
-  return detail::deserialize_iobuf<::test::fixtures::patch::Bar>(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::patch::Bar>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::test::fixtures::patch::Bar>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::patch::Bar>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::patch::Bar>(
-      "Module test.fixtures.patch.module import error");
+    ::test::fixtures::patch::Bar>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::patch::Bar cpp;
+  std::optional<std::string_view> error;
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  Extractor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::patch::Loop>>{}.extractInto(
+      cpp.loop_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
   }
-  auto obj = StrongRef(init__test__fixtures__patch__module__Bar(fbthrift_data));
-  if (!obj) {
-      return extractorError<::test::fixtures::patch::Bar>(
-          "Init from fbthrift error: Bar");
-  }
-  return Extractor<::test::fixtures::patch::Bar>{}(*obj);
+  return cpp;
 }
+
 
 int Extractor<::test::fixtures::patch::Bar>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -586,58 +634,66 @@ PyObject* Constructor<::test::fixtures::patch::Bar>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__test__fixtures__patch__module__Bar(
-      detail::serialize_to_iobuf(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::Bar>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__test__fixtures__patch__module__Bar(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::patch::Bar>>::operator()(
-    const ::test::fixtures::patch::Bar& val) {
-  auto obj = StrongRef(Constructor<::test::fixtures::patch::Bar>{}(val));
-  if (!obj) {
+    FOLLY_MAYBE_UNUSED const ::test::fixtures::patch::Bar& val) {
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  StrongRef fbthrift_data(createStructTuple(1));
+  StrongRef _fbthrift__loop(
+    Constructor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::patch::Loop>>{}
+    .constructFrom(val.loop_ref()));
+  if (!_fbthrift__loop ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__loop) == -1) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return std::move(fbthrift_data).release();
 }
+
 
 ExtractorResult<::test::fixtures::patch::Loop>
 Extractor<::test::fixtures::patch::Loop>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::patch::Loop>(
-      "Module test.fixtures.patch.module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a Loop");
+      }
+      return extractorError<::test::fixtures::patch::Loop>(
+          "Marshal error: Loop");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__test__fixtures__patch__module__Loop(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::test::fixtures::patch::Loop>(
-        "Thrift serialize error: Loop");
-  }
-  return detail::deserialize_iobuf<::test::fixtures::patch::Loop>(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::patch::Loop>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::test::fixtures::patch::Loop>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::patch::Loop>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::patch::Loop>(
-      "Module test.fixtures.patch.module import error");
+    ::test::fixtures::patch::Loop>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::patch::Loop cpp;
+  std::optional<std::string_view> error;
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  Extractor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::patch::Bar>>{}.extractInto(
+      cpp.bar_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
   }
-  auto obj = StrongRef(init__test__fixtures__patch__module__Loop(fbthrift_data));
-  if (!obj) {
-      return extractorError<::test::fixtures::patch::Loop>(
-          "Init from fbthrift error: Loop");
-  }
-  return Extractor<::test::fixtures::patch::Loop>{}(*obj);
+  return cpp;
 }
+
 
 int Extractor<::test::fixtures::patch::Loop>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -660,24 +716,32 @@ PyObject* Constructor<::test::fixtures::patch::Loop>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__test__fixtures__patch__module__Loop(
-      detail::serialize_to_iobuf(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::Loop>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__test__fixtures__patch__module__Loop(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::patch::Loop>>::operator()(
-    const ::test::fixtures::patch::Loop& val) {
-  auto obj = StrongRef(Constructor<::test::fixtures::patch::Loop>{}(val));
-  if (!obj) {
+    FOLLY_MAYBE_UNUSED const ::test::fixtures::patch::Loop& val) {
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  StrongRef fbthrift_data(createStructTuple(1));
+  StrongRef _fbthrift__bar(
+    Constructor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::patch::Bar>>{}
+    .constructFrom(val.bar_ref()));
+  if (!_fbthrift__bar ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__bar) == -1) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return std::move(fbthrift_data).release();
 }
+
 
 ExtractorResult<::test::fixtures::patch::MyDataPatchStruct>
 Extractor<::test::fixtures::patch::MyDataPatchStruct>::operator()(PyObject* obj) {

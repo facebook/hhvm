@@ -22,16 +22,6 @@ import module.thrift_types as __thrift_types
 cdef api int can_extract__module__Fields(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.Fields) else 0
 
-cdef api __cIOBuf* extract__module__Fields(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__module__Fields(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.Fields,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__module__Fields(object data):
     return __thrift_types.Fields._fbthrift_create(data)
@@ -39,16 +29,6 @@ cdef api object init__module__Fields(object data):
 cdef api int can_extract__module__FieldsInjectedToEmptyStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.FieldsInjectedToEmptyStruct) else 0
 
-cdef api __cIOBuf* extract__module__FieldsInjectedToEmptyStruct(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__module__FieldsInjectedToEmptyStruct(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.FieldsInjectedToEmptyStruct,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__module__FieldsInjectedToEmptyStruct(object data):
     return __thrift_types.FieldsInjectedToEmptyStruct._fbthrift_create(data)
@@ -56,16 +36,6 @@ cdef api object init__module__FieldsInjectedToEmptyStruct(object data):
 cdef api int can_extract__module__FieldsInjectedToStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.FieldsInjectedToStruct) else 0
 
-cdef api __cIOBuf* extract__module__FieldsInjectedToStruct(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__module__FieldsInjectedToStruct(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.FieldsInjectedToStruct,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__module__FieldsInjectedToStruct(object data):
     return __thrift_types.FieldsInjectedToStruct._fbthrift_create(data)
@@ -73,16 +43,6 @@ cdef api object init__module__FieldsInjectedToStruct(object data):
 cdef api int can_extract__module__FieldsInjectedWithIncludedStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.FieldsInjectedWithIncludedStruct) else 0
 
-cdef api __cIOBuf* extract__module__FieldsInjectedWithIncludedStruct(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__module__FieldsInjectedWithIncludedStruct(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.FieldsInjectedWithIncludedStruct,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__module__FieldsInjectedWithIncludedStruct(object data):
     return __thrift_types.FieldsInjectedWithIncludedStruct._fbthrift_create(data)

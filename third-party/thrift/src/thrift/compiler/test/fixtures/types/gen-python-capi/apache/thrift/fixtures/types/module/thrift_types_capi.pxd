@@ -20,9 +20,6 @@ cdef api object init__apache__thrift__fixtures__types__module__empty_struct(obje
 
 cdef api int can_extract__apache__thrift__fixtures__types__module__decorated_struct(object) except -1
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__decorated_struct(object) except NULL
-
-cdef api object construct__apache__thrift__fixtures__types__module__decorated_struct(__unique_ptr[__cIOBuf])
 
 cdef api object init__apache__thrift__fixtures__types__module__decorated_struct(object data)
 
@@ -44,57 +41,36 @@ cdef api object init__apache__thrift__fixtures__types__module__CppTypeStruct(obj
 
 cdef api int can_extract__apache__thrift__fixtures__types__module__VirtualStruct(object) except -1
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__VirtualStruct(object) except NULL
-
-cdef api object construct__apache__thrift__fixtures__types__module__VirtualStruct(__unique_ptr[__cIOBuf])
 
 cdef api object init__apache__thrift__fixtures__types__module__VirtualStruct(object data)
 
 cdef api int can_extract__apache__thrift__fixtures__types__module__MyStructWithForwardRefEnum(object) except -1
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__MyStructWithForwardRefEnum(object) except NULL
-
-cdef api object construct__apache__thrift__fixtures__types__module__MyStructWithForwardRefEnum(__unique_ptr[__cIOBuf])
 
 cdef api object init__apache__thrift__fixtures__types__module__MyStructWithForwardRefEnum(object data)
 
 cdef api int can_extract__apache__thrift__fixtures__types__module__TrivialNumeric(object) except -1
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__TrivialNumeric(object) except NULL
-
-cdef api object construct__apache__thrift__fixtures__types__module__TrivialNumeric(__unique_ptr[__cIOBuf])
 
 cdef api object init__apache__thrift__fixtures__types__module__TrivialNumeric(object data)
 
 cdef api int can_extract__apache__thrift__fixtures__types__module__TrivialNestedWithDefault(object) except -1
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__TrivialNestedWithDefault(object) except NULL
-
-cdef api object construct__apache__thrift__fixtures__types__module__TrivialNestedWithDefault(__unique_ptr[__cIOBuf])
 
 cdef api object init__apache__thrift__fixtures__types__module__TrivialNestedWithDefault(object data)
 
 cdef api int can_extract__apache__thrift__fixtures__types__module__ComplexString(object) except -1
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__ComplexString(object) except NULL
-
-cdef api object construct__apache__thrift__fixtures__types__module__ComplexString(__unique_ptr[__cIOBuf])
 
 cdef api object init__apache__thrift__fixtures__types__module__ComplexString(object data)
 
 cdef api int can_extract__apache__thrift__fixtures__types__module__ComplexNestedWithDefault(object) except -1
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__ComplexNestedWithDefault(object) except NULL
-
-cdef api object construct__apache__thrift__fixtures__types__module__ComplexNestedWithDefault(__unique_ptr[__cIOBuf])
 
 cdef api object init__apache__thrift__fixtures__types__module__ComplexNestedWithDefault(object data)
 
 cdef api int can_extract__apache__thrift__fixtures__types__module__MinPadding(object) except -1
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__MinPadding(object) except NULL
-
-cdef api object construct__apache__thrift__fixtures__types__module__MinPadding(__unique_ptr[__cIOBuf])
 
 cdef api object init__apache__thrift__fixtures__types__module__MinPadding(object data)
 
@@ -108,9 +84,6 @@ cdef api object init__apache__thrift__fixtures__types__module__MinPaddingWithCus
 
 cdef api int can_extract__apache__thrift__fixtures__types__module__MyStruct(object) except -1
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__MyStruct(object) except NULL
-
-cdef api object construct__apache__thrift__fixtures__types__module__MyStruct(__unique_ptr[__cIOBuf])
 
 cdef api object init__apache__thrift__fixtures__types__module__MyStruct(object data)
 
@@ -121,49 +94,31 @@ cdef api object init__apache__thrift__fixtures__types__module__MyDataItem(object
 
 cdef api int can_extract__apache__thrift__fixtures__types__module__Renaming(object) except -1
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__Renaming(object) except NULL
-
-cdef api object construct__apache__thrift__fixtures__types__module__Renaming(__unique_ptr[__cIOBuf])
 
 cdef api object init__apache__thrift__fixtures__types__module__Renaming(object data)
 
 cdef api int can_extract__apache__thrift__fixtures__types__module__AnnotatedTypes(object) except -1
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__AnnotatedTypes(object) except NULL
-
-cdef api object construct__apache__thrift__fixtures__types__module__AnnotatedTypes(__unique_ptr[__cIOBuf])
 
 cdef api object init__apache__thrift__fixtures__types__module__AnnotatedTypes(object data)
 
 cdef api int can_extract__apache__thrift__fixtures__types__module__ForwardUsageRoot(object) except -1
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__ForwardUsageRoot(object) except NULL
-
-cdef api object construct__apache__thrift__fixtures__types__module__ForwardUsageRoot(__unique_ptr[__cIOBuf])
 
 cdef api object init__apache__thrift__fixtures__types__module__ForwardUsageRoot(object data)
 
 cdef api int can_extract__apache__thrift__fixtures__types__module__ForwardUsageStruct(object) except -1
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__ForwardUsageStruct(object) except NULL
-
-cdef api object construct__apache__thrift__fixtures__types__module__ForwardUsageStruct(__unique_ptr[__cIOBuf])
 
 cdef api object init__apache__thrift__fixtures__types__module__ForwardUsageStruct(object data)
 
 cdef api int can_extract__apache__thrift__fixtures__types__module__ForwardUsageByRef(object) except -1
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__ForwardUsageByRef(object) except NULL
-
-cdef api object construct__apache__thrift__fixtures__types__module__ForwardUsageByRef(__unique_ptr[__cIOBuf])
 
 cdef api object init__apache__thrift__fixtures__types__module__ForwardUsageByRef(object data)
 
 cdef api int can_extract__apache__thrift__fixtures__types__module__IncompleteMap(object) except -1
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__IncompleteMap(object) except NULL
-
-cdef api object construct__apache__thrift__fixtures__types__module__IncompleteMap(__unique_ptr[__cIOBuf])
 
 cdef api object init__apache__thrift__fixtures__types__module__IncompleteMap(object data)
 
@@ -221,9 +176,6 @@ cdef api object init__apache__thrift__fixtures__types__module__AdaptedList(objec
 
 cdef api int can_extract__apache__thrift__fixtures__types__module__AdaptedListDep(object) except -1
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__AdaptedListDep(object) except NULL
-
-cdef api object construct__apache__thrift__fixtures__types__module__AdaptedListDep(__unique_ptr[__cIOBuf])
 
 cdef api object init__apache__thrift__fixtures__types__module__AdaptedListDep(object data)
 
@@ -237,25 +189,16 @@ cdef api object init__apache__thrift__fixtures__types__module__DependentAdaptedL
 
 cdef api int can_extract__apache__thrift__fixtures__types__module__DependentAdaptedListDep(object) except -1
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__DependentAdaptedListDep(object) except NULL
-
-cdef api object construct__apache__thrift__fixtures__types__module__DependentAdaptedListDep(__unique_ptr[__cIOBuf])
 
 cdef api object init__apache__thrift__fixtures__types__module__DependentAdaptedListDep(object data)
 
 cdef api int can_extract__apache__thrift__fixtures__types__module__AllocatorAware(object) except -1
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__AllocatorAware(object) except NULL
-
-cdef api object construct__apache__thrift__fixtures__types__module__AllocatorAware(__unique_ptr[__cIOBuf])
 
 cdef api object init__apache__thrift__fixtures__types__module__AllocatorAware(object data)
 
 cdef api int can_extract__apache__thrift__fixtures__types__module__AllocatorAware2(object) except -1
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__AllocatorAware2(object) except NULL
-
-cdef api object construct__apache__thrift__fixtures__types__module__AllocatorAware2(__unique_ptr[__cIOBuf])
 
 cdef api object init__apache__thrift__fixtures__types__module__AllocatorAware2(object data)
 
@@ -269,9 +212,6 @@ cdef api object init__apache__thrift__fixtures__types__module__TypedefStruct(obj
 
 cdef api int can_extract__apache__thrift__fixtures__types__module__StructWithDoubleUnderscores(object) except -1
 
-cdef api __cIOBuf* extract__apache__thrift__fixtures__types__module__StructWithDoubleUnderscores(object) except NULL
-
-cdef api object construct__apache__thrift__fixtures__types__module__StructWithDoubleUnderscores(__unique_ptr[__cIOBuf])
 
 cdef api object init__apache__thrift__fixtures__types__module__StructWithDoubleUnderscores(object data)
 

@@ -15,9 +15,6 @@ from folly.iobuf cimport cIOBuf as __cIOBuf
 
 cdef api int can_extract__emptyns__Foo(object) except -1
 
-cdef api __cIOBuf* extract__emptyns__Foo(object) except NULL
-
-cdef api object construct__emptyns__Foo(__unique_ptr[__cIOBuf])
 
 cdef api object init__emptyns__Foo(object data)
 

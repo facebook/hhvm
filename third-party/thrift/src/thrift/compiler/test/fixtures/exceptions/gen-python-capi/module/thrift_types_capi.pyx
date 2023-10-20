@@ -22,16 +22,6 @@ import module.thrift_types as __thrift_types
 cdef api int can_extract__module__Fiery(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.Fiery) else 0
 
-cdef api __cIOBuf* extract__module__Fiery(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__module__Fiery(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.Fiery,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__module__Fiery(object data):
     return __thrift_types.Fiery._fbthrift_create(data)
@@ -39,16 +29,6 @@ cdef api object init__module__Fiery(object data):
 cdef api int can_extract__module__Serious(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.Serious) else 0
 
-cdef api __cIOBuf* extract__module__Serious(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__module__Serious(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.Serious,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__module__Serious(object data):
     return __thrift_types.Serious._fbthrift_create(data)
@@ -56,16 +36,6 @@ cdef api object init__module__Serious(object data):
 cdef api int can_extract__module__ComplexFieldNames(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.ComplexFieldNames) else 0
 
-cdef api __cIOBuf* extract__module__ComplexFieldNames(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__module__ComplexFieldNames(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.ComplexFieldNames,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__module__ComplexFieldNames(object data):
     return __thrift_types.ComplexFieldNames._fbthrift_create(data)
@@ -73,16 +43,6 @@ cdef api object init__module__ComplexFieldNames(object data):
 cdef api int can_extract__module__CustomFieldNames(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.CustomFieldNames) else 0
 
-cdef api __cIOBuf* extract__module__CustomFieldNames(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__module__CustomFieldNames(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.CustomFieldNames,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__module__CustomFieldNames(object data):
     return __thrift_types.CustomFieldNames._fbthrift_create(data)
@@ -90,16 +50,6 @@ cdef api object init__module__CustomFieldNames(object data):
 cdef api int can_extract__module__ExceptionWithPrimitiveField(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.ExceptionWithPrimitiveField) else 0
 
-cdef api __cIOBuf* extract__module__ExceptionWithPrimitiveField(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__module__ExceptionWithPrimitiveField(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.ExceptionWithPrimitiveField,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__module__ExceptionWithPrimitiveField(object data):
     return __thrift_types.ExceptionWithPrimitiveField._fbthrift_create(data)
@@ -107,16 +57,6 @@ cdef api object init__module__ExceptionWithPrimitiveField(object data):
 cdef api int can_extract__module__ExceptionWithStructuredAnnotation(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.ExceptionWithStructuredAnnotation) else 0
 
-cdef api __cIOBuf* extract__module__ExceptionWithStructuredAnnotation(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__module__ExceptionWithStructuredAnnotation(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.ExceptionWithStructuredAnnotation,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__module__ExceptionWithStructuredAnnotation(object data):
     return __thrift_types.ExceptionWithStructuredAnnotation._fbthrift_create(data)

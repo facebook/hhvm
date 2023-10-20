@@ -15,9 +15,6 @@ from folly.iobuf cimport cIOBuf as __cIOBuf
 
 cdef api int can_extract__foo__Fields(object) except -1
 
-cdef api __cIOBuf* extract__foo__Fields(object) except NULL
-
-cdef api object construct__foo__Fields(__unique_ptr[__cIOBuf])
 
 cdef api object init__foo__Fields(object data)
 

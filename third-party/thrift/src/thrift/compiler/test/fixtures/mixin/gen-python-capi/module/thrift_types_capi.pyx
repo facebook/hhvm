@@ -22,16 +22,6 @@ import module.thrift_types as __thrift_types
 cdef api int can_extract__module__Mixin1(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.Mixin1) else 0
 
-cdef api __cIOBuf* extract__module__Mixin1(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__module__Mixin1(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.Mixin1,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__module__Mixin1(object data):
     return __thrift_types.Mixin1._fbthrift_create(data)
@@ -39,16 +29,6 @@ cdef api object init__module__Mixin1(object data):
 cdef api int can_extract__module__Mixin2(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.Mixin2) else 0
 
-cdef api __cIOBuf* extract__module__Mixin2(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__module__Mixin2(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.Mixin2,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__module__Mixin2(object data):
     return __thrift_types.Mixin2._fbthrift_create(data)
@@ -56,16 +36,6 @@ cdef api object init__module__Mixin2(object data):
 cdef api int can_extract__module__Mixin3Base(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.Mixin3Base) else 0
 
-cdef api __cIOBuf* extract__module__Mixin3Base(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__module__Mixin3Base(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.Mixin3Base,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__module__Mixin3Base(object data):
     return __thrift_types.Mixin3Base._fbthrift_create(data)
@@ -73,16 +43,6 @@ cdef api object init__module__Mixin3Base(object data):
 cdef api int can_extract__module__Foo(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.Foo) else 0
 
-cdef api __cIOBuf* extract__module__Foo(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__module__Foo(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.Foo,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__module__Foo(object data):
     return __thrift_types.Foo._fbthrift_create(data)

@@ -15,33 +15,21 @@ from folly.iobuf cimport cIOBuf as __cIOBuf
 
 cdef api int can_extract__module__Mixin1(object) except -1
 
-cdef api __cIOBuf* extract__module__Mixin1(object) except NULL
-
-cdef api object construct__module__Mixin1(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__Mixin1(object data)
 
 cdef api int can_extract__module__Mixin2(object) except -1
 
-cdef api __cIOBuf* extract__module__Mixin2(object) except NULL
-
-cdef api object construct__module__Mixin2(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__Mixin2(object data)
 
 cdef api int can_extract__module__Mixin3Base(object) except -1
 
-cdef api __cIOBuf* extract__module__Mixin3Base(object) except NULL
-
-cdef api object construct__module__Mixin3Base(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__Mixin3Base(object data)
 
 cdef api int can_extract__module__Foo(object) except -1
 
-cdef api __cIOBuf* extract__module__Foo(object) except NULL
-
-cdef api object construct__module__Foo(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__Foo(object data)
 

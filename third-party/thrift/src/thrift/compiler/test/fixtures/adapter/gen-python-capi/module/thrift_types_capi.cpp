@@ -29,37 +29,41 @@ bool ensure_module_imported() {
 
 ExtractorResult<::facebook::thrift::test::MyAnnotation>
 Extractor<::facebook::thrift::test::MyAnnotation>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::MyAnnotation>(
-      "Module facebook.thrift.test.module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a MyAnnotation");
+      }
+      return extractorError<::facebook::thrift::test::MyAnnotation>(
+          "Marshal error: MyAnnotation");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__MyAnnotation(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::MyAnnotation>(
-        "Thrift serialize error: MyAnnotation");
-  }
-  return detail::deserialize_iobuf<::facebook::thrift::test::MyAnnotation>(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::facebook::thrift::test::MyAnnotation>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::facebook::thrift::test::MyAnnotation>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::MyAnnotation>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::MyAnnotation>(
-      "Module facebook.thrift.test.module import error");
+    ::facebook::thrift::test::MyAnnotation>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::MyAnnotation cpp;
+  std::optional<std::string_view> error;
+  const int _fbthrift__tuple_pos[2] = {
+    1, 2
+  };
+  Extractor<Bytes>{}.extractInto(
+      cpp.signature_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      error);
+  Extractor<::apache::thrift::python::capi::ComposedEnum<::facebook::thrift::test::Color>>{}.extractInto(
+      cpp.color_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[1]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__MyAnnotation(fbthrift_data));
-  if (!obj) {
-      return extractorError<::facebook::thrift::test::MyAnnotation>(
-          "Init from fbthrift error: MyAnnotation");
-  }
-  return Extractor<::facebook::thrift::test::MyAnnotation>{}(*obj);
+  return cpp;
 }
+
 
 int Extractor<::facebook::thrift::test::MyAnnotation>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -82,24 +86,39 @@ PyObject* Constructor<::facebook::thrift::test::MyAnnotation>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__MyAnnotation(
-      detail::serialize_to_iobuf(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::facebook::thrift::test::MyAnnotation>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__facebook__thrift__test__module__MyAnnotation(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::MyAnnotation>>::operator()(
-    const ::facebook::thrift::test::MyAnnotation& val) {
-  auto obj = StrongRef(Constructor<::facebook::thrift::test::MyAnnotation>{}(val));
-  if (!obj) {
+    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::MyAnnotation& val) {
+  const int _fbthrift__tuple_pos[2] = {
+    1, 2
+  };
+  StrongRef fbthrift_data(createStructTuple(2));
+  StrongRef _fbthrift__signature(
+    Constructor<Bytes>{}
+    .constructFrom(val.signature_ref()));
+  if (!_fbthrift__signature ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__signature) == -1) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  StrongRef _fbthrift__color(
+    Constructor<::apache::thrift::python::capi::ComposedEnum<::facebook::thrift::test::Color>>{}
+    .constructFrom(val.color_ref()));
+  if (!_fbthrift__color ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[1], *_fbthrift__color) == -1) {
+    return nullptr;
+  }
+  return std::move(fbthrift_data).release();
 }
+
 
 ExtractorResult<::facebook::thrift::test::Foo>
 Extractor<::facebook::thrift::test::Foo>::operator()(PyObject* obj) {
@@ -325,39 +344,37 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 ExtractorResult<::facebook::thrift::test::detail::DirectlyAdapted>
 Extractor<::facebook::thrift::test::detail::DirectlyAdapted>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::detail::DirectlyAdapted>(
-      "Module facebook.thrift.test.module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a DirectlyAdapted");
+      }
+      return extractorError<::facebook::thrift::test::detail::DirectlyAdapted>(
+          "Marshal error: DirectlyAdapted");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__DirectlyAdapted(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::detail::DirectlyAdapted>(
-        "Thrift serialize error: DirectlyAdapted");
-  }
-  return detail::deserialize_iobuf_to_adapted<
-      ::facebook::thrift::test::detail::DirectlyAdapted, ::my::Adapter
-    >(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::facebook::thrift::test::detail::DirectlyAdapted>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::facebook::thrift::test::detail::DirectlyAdapted>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::detail::DirectlyAdapted>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::detail::DirectlyAdapted>(
-      "Module facebook.thrift.test.module import error");
+    ::facebook::thrift::test::detail::DirectlyAdapted>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::detail::DirectlyAdapted cpp;
+  std::optional<std::string_view> error;
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  Extractor<int32_t>{}.extractInto(
+      cpp.field_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__DirectlyAdapted(fbthrift_data));
-  if (!obj) {
-      return extractorError<::facebook::thrift::test::detail::DirectlyAdapted>(
-          "Init from fbthrift error: DirectlyAdapted");
-  }
-  return Extractor<::facebook::thrift::test::detail::DirectlyAdapted>{}(*obj);
+  return cpp;
 }
+
 
 int Extractor<::facebook::thrift::test::detail::DirectlyAdapted>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -380,60 +397,66 @@ PyObject* Constructor<::facebook::thrift::test::detail::DirectlyAdapted>::operat
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__DirectlyAdapted(
-      detail::serialize_adapted_to_iobuf<::my::Adapter>(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::facebook::thrift::test::detail::DirectlyAdapted>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__facebook__thrift__test__module__DirectlyAdapted(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::detail::DirectlyAdapted>>::operator()(
-    const ::facebook::thrift::test::detail::DirectlyAdapted& val) {
-  auto obj = StrongRef(Constructor<::facebook::thrift::test::detail::DirectlyAdapted>{}(val));
-  if (!obj) {
+    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::detail::DirectlyAdapted& val) {
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  StrongRef fbthrift_data(createStructTuple(1));
+  StrongRef _fbthrift__field(
+    Constructor<int32_t>{}
+    .constructFrom(val.field_ref()));
+  if (!_fbthrift__field ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__field) == -1) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return std::move(fbthrift_data).release();
 }
+
 
 ExtractorResult<::facebook::thrift::test::detail::IndependentDirectlyAdapted>
 Extractor<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::detail::IndependentDirectlyAdapted>(
-      "Module facebook.thrift.test.module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a IndependentDirectlyAdapted");
+      }
+      return extractorError<::facebook::thrift::test::detail::IndependentDirectlyAdapted>(
+          "Marshal error: IndependentDirectlyAdapted");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__IndependentDirectlyAdapted(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::detail::IndependentDirectlyAdapted>(
-        "Thrift serialize error: IndependentDirectlyAdapted");
-  }
-  return detail::deserialize_iobuf_to_adapted<
-      ::facebook::thrift::test::detail::IndependentDirectlyAdapted, ::my::Adapter
-    >(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::facebook::thrift::test::detail::IndependentDirectlyAdapted>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::facebook::thrift::test::detail::IndependentDirectlyAdapted>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::detail::IndependentDirectlyAdapted>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::detail::IndependentDirectlyAdapted>(
-      "Module facebook.thrift.test.module import error");
+    ::facebook::thrift::test::detail::IndependentDirectlyAdapted>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::detail::IndependentDirectlyAdapted cpp;
+  std::optional<std::string_view> error;
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  Extractor<int32_t>{}.extractInto(
+      cpp.field_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__IndependentDirectlyAdapted(fbthrift_data));
-  if (!obj) {
-      return extractorError<::facebook::thrift::test::detail::IndependentDirectlyAdapted>(
-          "Init from fbthrift error: IndependentDirectlyAdapted");
-  }
-  return Extractor<::facebook::thrift::test::detail::IndependentDirectlyAdapted>{}(*obj);
+  return cpp;
 }
+
 
 int Extractor<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -456,24 +479,32 @@ PyObject* Constructor<::facebook::thrift::test::detail::IndependentDirectlyAdapt
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__IndependentDirectlyAdapted(
-      detail::serialize_adapted_to_iobuf<::my::Adapter>(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::facebook::thrift::test::detail::IndependentDirectlyAdapted>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__facebook__thrift__test__module__IndependentDirectlyAdapted(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::detail::IndependentDirectlyAdapted>>::operator()(
-    const ::facebook::thrift::test::detail::IndependentDirectlyAdapted& val) {
-  auto obj = StrongRef(Constructor<::facebook::thrift::test::detail::IndependentDirectlyAdapted>{}(val));
-  if (!obj) {
+    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::detail::IndependentDirectlyAdapted& val) {
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  StrongRef fbthrift_data(createStructTuple(1));
+  StrongRef _fbthrift__field(
+    Constructor<int32_t>{}
+    .constructFrom(val.field_ref()));
+  if (!_fbthrift__field ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__field) == -1) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return std::move(fbthrift_data).release();
 }
+
 
 ExtractorResult<::facebook::thrift::test::StructWithFieldAdapter>
 Extractor<::facebook::thrift::test::StructWithFieldAdapter>::operator()(PyObject* obj) {
@@ -759,39 +790,37 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 ExtractorResult<::facebook::thrift::test::Config>
 Extractor<::facebook::thrift::test::Config>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::Config>(
-      "Module facebook.thrift.test.module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a Config");
+      }
+      return extractorError<::facebook::thrift::test::Config>(
+          "Marshal error: Config");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__Config(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::Config>(
-        "Thrift serialize error: Config");
-  }
-  return detail::deserialize_iobuf_to_adapted<
-      ::facebook::thrift::test::Config, MyVarAdapter
-    >(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::facebook::thrift::test::Config>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::facebook::thrift::test::Config>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::Config>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::Config>(
-      "Module facebook.thrift.test.module import error");
+    ::facebook::thrift::test::Config>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::Config cpp;
+  std::optional<std::string_view> error;
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  Extractor<Bytes>{}.extractInto(
+      cpp.path_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__Config(fbthrift_data));
-  if (!obj) {
-      return extractorError<::facebook::thrift::test::Config>(
-          "Init from fbthrift error: Config");
-  }
-  return Extractor<::facebook::thrift::test::Config>{}(*obj);
+  return cpp;
 }
+
 
 int Extractor<::facebook::thrift::test::Config>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -814,24 +843,32 @@ PyObject* Constructor<::facebook::thrift::test::Config>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__Config(
-      detail::serialize_adapted_to_iobuf<MyVarAdapter>(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::facebook::thrift::test::Config>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__facebook__thrift__test__module__Config(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::Config>>::operator()(
-    const ::facebook::thrift::test::Config& val) {
-  auto obj = StrongRef(Constructor<::facebook::thrift::test::Config>{}(val));
-  if (!obj) {
+    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::Config& val) {
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  StrongRef fbthrift_data(createStructTuple(1));
+  StrongRef _fbthrift__path(
+    Constructor<Bytes>{}
+    .constructFrom(val.path_ref()));
+  if (!_fbthrift__path ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__path) == -1) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return std::move(fbthrift_data).release();
 }
+
 
 ExtractorResult<::facebook::thrift::test::MyStruct>
 Extractor<::facebook::thrift::test::MyStruct>::operator()(PyObject* obj) {
@@ -1057,37 +1094,37 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 ExtractorResult<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>
 Extractor<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>(
-      "Module facebook.thrift.test.module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a AdaptTemplatedNestedTestStruct");
+      }
+      return extractorError<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>(
+          "Marshal error: AdaptTemplatedNestedTestStruct");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__AdaptTemplatedNestedTestStruct(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>(
-        "Thrift serialize error: AdaptTemplatedNestedTestStruct");
-  }
-  return detail::deserialize_iobuf<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::facebook::thrift::test::AdaptTemplatedNestedTestStruct>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::AdaptTemplatedNestedTestStruct>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>(
-      "Module facebook.thrift.test.module import error");
+    ::facebook::thrift::test::AdaptTemplatedNestedTestStruct>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::AdaptTemplatedNestedTestStruct cpp;
+  std::optional<std::string_view> error;
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  Extractor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::AdaptTemplatedTestStruct>>{}.extractInto(
+      cpp.adaptedStruct_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__AdaptTemplatedNestedTestStruct(fbthrift_data));
-  if (!obj) {
-      return extractorError<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>(
-          "Init from fbthrift error: AdaptTemplatedNestedTestStruct");
-  }
-  return Extractor<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>{}(*obj);
+  return cpp;
 }
+
 
 int Extractor<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -1110,24 +1147,32 @@ PyObject* Constructor<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>:
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__AdaptTemplatedNestedTestStruct(
-      detail::serialize_to_iobuf(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::facebook::thrift::test::AdaptTemplatedNestedTestStruct>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__facebook__thrift__test__module__AdaptTemplatedNestedTestStruct(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::AdaptTemplatedNestedTestStruct>>::operator()(
-    const ::facebook::thrift::test::AdaptTemplatedNestedTestStruct& val) {
-  auto obj = StrongRef(Constructor<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>{}(val));
-  if (!obj) {
+    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::AdaptTemplatedNestedTestStruct& val) {
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  StrongRef fbthrift_data(createStructTuple(1));
+  StrongRef _fbthrift__adaptedStruct(
+    Constructor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::AdaptTemplatedTestStruct>>{}
+    .constructFrom(val.adaptedStruct_ref()));
+  if (!_fbthrift__adaptedStruct ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__adaptedStruct) == -1) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return std::move(fbthrift_data).release();
 }
+
 
 ExtractorResult<::facebook::thrift::test::ThriftAdaptTestUnion>
 Extractor<::facebook::thrift::test::ThriftAdaptTestUnion>::operator()(PyObject* obj) {
@@ -1205,37 +1250,37 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 ExtractorResult<::facebook::thrift::test::ThriftAdaptedStruct>
 Extractor<::facebook::thrift::test::ThriftAdaptedStruct>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::ThriftAdaptedStruct>(
-      "Module facebook.thrift.test.module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a AdaptedStruct");
+      }
+      return extractorError<::facebook::thrift::test::ThriftAdaptedStruct>(
+          "Marshal error: AdaptedStruct");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__AdaptedStruct(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::ThriftAdaptedStruct>(
-        "Thrift serialize error: AdaptedStruct");
-  }
-  return detail::deserialize_iobuf<::facebook::thrift::test::ThriftAdaptedStruct>(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::facebook::thrift::test::ThriftAdaptedStruct>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::facebook::thrift::test::ThriftAdaptedStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::ThriftAdaptedStruct>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::ThriftAdaptedStruct>(
-      "Module facebook.thrift.test.module import error");
+    ::facebook::thrift::test::ThriftAdaptedStruct>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::ThriftAdaptedStruct cpp;
+  std::optional<std::string_view> error;
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  Extractor<int64_t>{}.extractInto(
+      cpp.data_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__AdaptedStruct(fbthrift_data));
-  if (!obj) {
-      return extractorError<::facebook::thrift::test::ThriftAdaptedStruct>(
-          "Init from fbthrift error: AdaptedStruct");
-  }
-  return Extractor<::facebook::thrift::test::ThriftAdaptedStruct>{}(*obj);
+  return cpp;
 }
+
 
 int Extractor<::facebook::thrift::test::ThriftAdaptedStruct>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -1258,60 +1303,66 @@ PyObject* Constructor<::facebook::thrift::test::ThriftAdaptedStruct>::operator()
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__AdaptedStruct(
-      detail::serialize_to_iobuf(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::facebook::thrift::test::ThriftAdaptedStruct>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__facebook__thrift__test__module__AdaptedStruct(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::ThriftAdaptedStruct>>::operator()(
-    const ::facebook::thrift::test::ThriftAdaptedStruct& val) {
-  auto obj = StrongRef(Constructor<::facebook::thrift::test::ThriftAdaptedStruct>{}(val));
-  if (!obj) {
+    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::ThriftAdaptedStruct& val) {
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  StrongRef fbthrift_data(createStructTuple(1));
+  StrongRef _fbthrift__data(
+    Constructor<int64_t>{}
+    .constructFrom(val.data_ref()));
+  if (!_fbthrift__data ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__data) == -1) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return std::move(fbthrift_data).release();
 }
+
 
 ExtractorResult<::facebook::thrift::test::detail::DirectlyAdaptedStruct>
 Extractor<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::detail::DirectlyAdaptedStruct>(
-      "Module facebook.thrift.test.module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a DirectlyAdaptedStruct");
+      }
+      return extractorError<::facebook::thrift::test::detail::DirectlyAdaptedStruct>(
+          "Marshal error: DirectlyAdaptedStruct");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__DirectlyAdaptedStruct(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::detail::DirectlyAdaptedStruct>(
-        "Thrift serialize error: DirectlyAdaptedStruct");
-  }
-  return detail::deserialize_iobuf_to_adapted<
-      ::facebook::thrift::test::detail::DirectlyAdaptedStruct, ::apache::thrift::test::TemplatedTestAdapter
-    >(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::facebook::thrift::test::detail::DirectlyAdaptedStruct>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::facebook::thrift::test::detail::DirectlyAdaptedStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::detail::DirectlyAdaptedStruct>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::detail::DirectlyAdaptedStruct>(
-      "Module facebook.thrift.test.module import error");
+    ::facebook::thrift::test::detail::DirectlyAdaptedStruct>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::detail::DirectlyAdaptedStruct cpp;
+  std::optional<std::string_view> error;
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  Extractor<int64_t>{}.extractInto(
+      cpp.data_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__DirectlyAdaptedStruct(fbthrift_data));
-  if (!obj) {
-      return extractorError<::facebook::thrift::test::detail::DirectlyAdaptedStruct>(
-          "Init from fbthrift error: DirectlyAdaptedStruct");
-  }
-  return Extractor<::facebook::thrift::test::detail::DirectlyAdaptedStruct>{}(*obj);
+  return cpp;
 }
+
 
 int Extractor<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -1334,24 +1385,32 @@ PyObject* Constructor<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__DirectlyAdaptedStruct(
-      detail::serialize_adapted_to_iobuf<::apache::thrift::test::TemplatedTestAdapter>(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::facebook::thrift::test::detail::DirectlyAdaptedStruct>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__facebook__thrift__test__module__DirectlyAdaptedStruct(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::detail::DirectlyAdaptedStruct>>::operator()(
-    const ::facebook::thrift::test::detail::DirectlyAdaptedStruct& val) {
-  auto obj = StrongRef(Constructor<::facebook::thrift::test::detail::DirectlyAdaptedStruct>{}(val));
-  if (!obj) {
+    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::detail::DirectlyAdaptedStruct& val) {
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  StrongRef fbthrift_data(createStructTuple(1));
+  StrongRef _fbthrift__data(
+    Constructor<int64_t>{}
+    .constructFrom(val.data_ref()));
+  if (!_fbthrift__data ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__data) == -1) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return std::move(fbthrift_data).release();
 }
+
 
 ExtractorResult<::facebook::thrift::test::StructFieldAdaptedStruct>
 Extractor<::facebook::thrift::test::StructFieldAdaptedStruct>::operator()(PyObject* obj) {
@@ -1429,37 +1488,37 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 ExtractorResult<::facebook::thrift::test::CircularAdaptee>
 Extractor<::facebook::thrift::test::CircularAdaptee>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::CircularAdaptee>(
-      "Module facebook.thrift.test.module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a CircularAdaptee");
+      }
+      return extractorError<::facebook::thrift::test::CircularAdaptee>(
+          "Marshal error: CircularAdaptee");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__CircularAdaptee(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::CircularAdaptee>(
-        "Thrift serialize error: CircularAdaptee");
-  }
-  return detail::deserialize_iobuf<::facebook::thrift::test::CircularAdaptee>(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::facebook::thrift::test::CircularAdaptee>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::facebook::thrift::test::CircularAdaptee>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::CircularAdaptee>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::CircularAdaptee>(
-      "Module facebook.thrift.test.module import error");
+    ::facebook::thrift::test::CircularAdaptee>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::CircularAdaptee cpp;
+  std::optional<std::string_view> error;
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  Extractor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::CircularStruct>>{}.extractInto(
+      cpp.field_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__CircularAdaptee(fbthrift_data));
-  if (!obj) {
-      return extractorError<::facebook::thrift::test::CircularAdaptee>(
-          "Init from fbthrift error: CircularAdaptee");
-  }
-  return Extractor<::facebook::thrift::test::CircularAdaptee>{}(*obj);
+  return cpp;
 }
+
 
 int Extractor<::facebook::thrift::test::CircularAdaptee>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -1482,24 +1541,32 @@ PyObject* Constructor<::facebook::thrift::test::CircularAdaptee>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__CircularAdaptee(
-      detail::serialize_to_iobuf(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::facebook::thrift::test::CircularAdaptee>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__facebook__thrift__test__module__CircularAdaptee(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::CircularAdaptee>>::operator()(
-    const ::facebook::thrift::test::CircularAdaptee& val) {
-  auto obj = StrongRef(Constructor<::facebook::thrift::test::CircularAdaptee>{}(val));
-  if (!obj) {
+    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::CircularAdaptee& val) {
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  StrongRef fbthrift_data(createStructTuple(1));
+  StrongRef _fbthrift__field(
+    Constructor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::CircularStruct>>{}
+    .constructFrom(val.field_ref()));
+  if (!_fbthrift__field ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__field) == -1) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return std::move(fbthrift_data).release();
 }
+
 
 ExtractorResult<::facebook::thrift::test::CircularStruct>
 Extractor<::facebook::thrift::test::CircularStruct>::operator()(PyObject* obj) {
@@ -1711,39 +1778,37 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 ExtractorResult<::facebook::thrift::test::UnderlyingRenamedStruct>
 Extractor<::facebook::thrift::test::UnderlyingRenamedStruct>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::UnderlyingRenamedStruct>(
-      "Module facebook.thrift.test.module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a RenamedStruct");
+      }
+      return extractorError<::facebook::thrift::test::UnderlyingRenamedStruct>(
+          "Marshal error: RenamedStruct");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__RenamedStruct(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::UnderlyingRenamedStruct>(
-        "Thrift serialize error: RenamedStruct");
-  }
-  return detail::deserialize_iobuf_to_adapted<
-      ::facebook::thrift::test::UnderlyingRenamedStruct, ::apache::thrift::test::TemplatedTestAdapter
-    >(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::facebook::thrift::test::UnderlyingRenamedStruct>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::facebook::thrift::test::UnderlyingRenamedStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::UnderlyingRenamedStruct>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::UnderlyingRenamedStruct>(
-      "Module facebook.thrift.test.module import error");
+    ::facebook::thrift::test::UnderlyingRenamedStruct>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::UnderlyingRenamedStruct cpp;
+  std::optional<std::string_view> error;
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  Extractor<int64_t>{}.extractInto(
+      cpp.data_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__RenamedStruct(fbthrift_data));
-  if (!obj) {
-      return extractorError<::facebook::thrift::test::UnderlyingRenamedStruct>(
-          "Init from fbthrift error: RenamedStruct");
-  }
-  return Extractor<::facebook::thrift::test::UnderlyingRenamedStruct>{}(*obj);
+  return cpp;
 }
+
 
 int Extractor<::facebook::thrift::test::UnderlyingRenamedStruct>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -1766,60 +1831,66 @@ PyObject* Constructor<::facebook::thrift::test::UnderlyingRenamedStruct>::operat
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__RenamedStruct(
-      detail::serialize_adapted_to_iobuf<::apache::thrift::test::TemplatedTestAdapter>(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::facebook::thrift::test::UnderlyingRenamedStruct>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__facebook__thrift__test__module__RenamedStruct(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::UnderlyingRenamedStruct>>::operator()(
-    const ::facebook::thrift::test::UnderlyingRenamedStruct& val) {
-  auto obj = StrongRef(Constructor<::facebook::thrift::test::UnderlyingRenamedStruct>{}(val));
-  if (!obj) {
+    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::UnderlyingRenamedStruct& val) {
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  StrongRef fbthrift_data(createStructTuple(1));
+  StrongRef _fbthrift__data(
+    Constructor<int64_t>{}
+    .constructFrom(val.data_ref()));
+  if (!_fbthrift__data ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__data) == -1) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return std::move(fbthrift_data).release();
 }
+
 
 ExtractorResult<::facebook::thrift::test::UnderlyingSameNamespaceStruct>
 Extractor<::facebook::thrift::test::UnderlyingSameNamespaceStruct>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::UnderlyingSameNamespaceStruct>(
-      "Module facebook.thrift.test.module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a SameNamespaceStruct");
+      }
+      return extractorError<::facebook::thrift::test::UnderlyingSameNamespaceStruct>(
+          "Marshal error: SameNamespaceStruct");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__SameNamespaceStruct(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::UnderlyingSameNamespaceStruct>(
-        "Thrift serialize error: SameNamespaceStruct");
-  }
-  return detail::deserialize_iobuf_to_adapted<
-      ::facebook::thrift::test::UnderlyingSameNamespaceStruct, ::apache::thrift::test::TemplatedTestAdapter
-    >(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::facebook::thrift::test::UnderlyingSameNamespaceStruct>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::facebook::thrift::test::UnderlyingSameNamespaceStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::UnderlyingSameNamespaceStruct>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::UnderlyingSameNamespaceStruct>(
-      "Module facebook.thrift.test.module import error");
+    ::facebook::thrift::test::UnderlyingSameNamespaceStruct>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::UnderlyingSameNamespaceStruct cpp;
+  std::optional<std::string_view> error;
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  Extractor<int64_t>{}.extractInto(
+      cpp.data_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__SameNamespaceStruct(fbthrift_data));
-  if (!obj) {
-      return extractorError<::facebook::thrift::test::UnderlyingSameNamespaceStruct>(
-          "Init from fbthrift error: SameNamespaceStruct");
-  }
-  return Extractor<::facebook::thrift::test::UnderlyingSameNamespaceStruct>{}(*obj);
+  return cpp;
 }
+
 
 int Extractor<::facebook::thrift::test::UnderlyingSameNamespaceStruct>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -1842,24 +1913,32 @@ PyObject* Constructor<::facebook::thrift::test::UnderlyingSameNamespaceStruct>::
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__SameNamespaceStruct(
-      detail::serialize_adapted_to_iobuf<::apache::thrift::test::TemplatedTestAdapter>(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::facebook::thrift::test::UnderlyingSameNamespaceStruct>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__facebook__thrift__test__module__SameNamespaceStruct(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::UnderlyingSameNamespaceStruct>>::operator()(
-    const ::facebook::thrift::test::UnderlyingSameNamespaceStruct& val) {
-  auto obj = StrongRef(Constructor<::facebook::thrift::test::UnderlyingSameNamespaceStruct>{}(val));
-  if (!obj) {
+    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::UnderlyingSameNamespaceStruct& val) {
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  StrongRef fbthrift_data(createStructTuple(1));
+  StrongRef _fbthrift__data(
+    Constructor<int64_t>{}
+    .constructFrom(val.data_ref()));
+  if (!_fbthrift__data ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__data) == -1) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return std::move(fbthrift_data).release();
 }
+
 
 ExtractorResult<::facebook::thrift::test::detail::HeapAllocated>
 Extractor<::facebook::thrift::test::detail::HeapAllocated>::operator()(PyObject* obj) {
@@ -2265,39 +2344,37 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 ExtractorResult<::facebook::thrift::test::Person>
 Extractor<::facebook::thrift::test::Person>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::Person>(
-      "Module facebook.thrift.test.module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a Person");
+      }
+      return extractorError<::facebook::thrift::test::Person>(
+          "Marshal error: Person");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__Person(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::Person>(
-        "Thrift serialize error: Person");
-  }
-  return detail::deserialize_iobuf_to_adapted<
-      ::facebook::thrift::test::Person, ::apache::thrift::test::VariableAdapter
-    >(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::facebook::thrift::test::Person>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::facebook::thrift::test::Person>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::Person>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::Person>(
-      "Module facebook.thrift.test.module import error");
+    ::facebook::thrift::test::Person>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::Person cpp;
+  std::optional<std::string_view> error;
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  Extractor<Bytes>{}.extractInto(
+      cpp.name_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__Person(fbthrift_data));
-  if (!obj) {
-      return extractorError<::facebook::thrift::test::Person>(
-          "Init from fbthrift error: Person");
-  }
-  return Extractor<::facebook::thrift::test::Person>{}(*obj);
+  return cpp;
 }
+
 
 int Extractor<::facebook::thrift::test::Person>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -2320,58 +2397,66 @@ PyObject* Constructor<::facebook::thrift::test::Person>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__Person(
-      detail::serialize_adapted_to_iobuf<::apache::thrift::test::VariableAdapter>(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::facebook::thrift::test::Person>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__facebook__thrift__test__module__Person(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::Person>>::operator()(
-    const ::facebook::thrift::test::Person& val) {
-  auto obj = StrongRef(Constructor<::facebook::thrift::test::Person>{}(val));
-  if (!obj) {
+    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::Person& val) {
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  StrongRef fbthrift_data(createStructTuple(1));
+  StrongRef _fbthrift__name(
+    Constructor<Bytes>{}
+    .constructFrom(val.name_ref()));
+  if (!_fbthrift__name ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__name) == -1) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return std::move(fbthrift_data).release();
 }
+
 
 ExtractorResult<::facebook::thrift::test::Person2>
 Extractor<::facebook::thrift::test::Person2>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::Person2>(
-      "Module facebook.thrift.test.module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a Person2");
+      }
+      return extractorError<::facebook::thrift::test::Person2>(
+          "Marshal error: Person2");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__facebook__thrift__test__module__Person2(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::facebook::thrift::test::Person2>(
-        "Thrift serialize error: Person2");
-  }
-  return detail::deserialize_iobuf<::facebook::thrift::test::Person2>(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::facebook::thrift::test::Person2>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::facebook::thrift::test::Person2>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::Person2>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::facebook::thrift::test::Person2>(
-      "Module facebook.thrift.test.module import error");
+    ::facebook::thrift::test::Person2>>::operator()(PyObject* fbThriftData) {
+  ::facebook::thrift::test::Person2 cpp;
+  std::optional<std::string_view> error;
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  Extractor<Bytes>{}.extractInto(
+      cpp.name_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
   }
-  auto obj = StrongRef(init__facebook__thrift__test__module__Person2(fbthrift_data));
-  if (!obj) {
-      return extractorError<::facebook::thrift::test::Person2>(
-          "Init from fbthrift error: Person2");
-  }
-  return Extractor<::facebook::thrift::test::Person2>{}(*obj);
+  return cpp;
 }
+
 
 int Extractor<::facebook::thrift::test::Person2>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -2394,24 +2479,32 @@ PyObject* Constructor<::facebook::thrift::test::Person2>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__facebook__thrift__test__module__Person2(
-      detail::serialize_to_iobuf(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::facebook::thrift::test::Person2>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__facebook__thrift__test__module__Person2(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::Person2>>::operator()(
-    const ::facebook::thrift::test::Person2& val) {
-  auto obj = StrongRef(Constructor<::facebook::thrift::test::Person2>{}(val));
-  if (!obj) {
+    FOLLY_MAYBE_UNUSED const ::facebook::thrift::test::Person2& val) {
+  const int _fbthrift__tuple_pos[1] = {
+    1
+  };
+  StrongRef fbthrift_data(createStructTuple(1));
+  StrongRef _fbthrift__name(
+    Constructor<Bytes>{}
+    .constructFrom(val.name_ref()));
+  if (!_fbthrift__name ||
+      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__name) == -1) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return std::move(fbthrift_data).release();
 }
+
 
 ExtractorResult<::facebook::thrift::test::Color>
 Extractor<::facebook::thrift::test::Color>::operator()(PyObject* obj) {

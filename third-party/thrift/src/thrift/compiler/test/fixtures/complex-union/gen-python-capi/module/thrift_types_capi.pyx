@@ -73,16 +73,6 @@ cdef api object init__module__DataUnion(object data):
 cdef api int can_extract__module__Val(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.Val) else 0
 
-cdef api __cIOBuf* extract__module__Val(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__module__Val(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.Val,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__module__Val(object data):
     return __thrift_types.Val._fbthrift_create(data)
@@ -124,16 +114,6 @@ cdef api object init__module__VirtualComplexUnion(object data):
 cdef api int can_extract__module__NonCopyableStruct(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.NonCopyableStruct) else 0
 
-cdef api __cIOBuf* extract__module__NonCopyableStruct(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__module__NonCopyableStruct(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.NonCopyableStruct,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__module__NonCopyableStruct(object data):
     return __thrift_types.NonCopyableStruct._fbthrift_create(data)

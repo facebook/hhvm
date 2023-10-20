@@ -15,49 +15,31 @@ from folly.iobuf cimport cIOBuf as __cIOBuf
 
 cdef api int can_extract__module__Internship(object) except -1
 
-cdef api __cIOBuf* extract__module__Internship(object) except NULL
-
-cdef api object construct__module__Internship(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__Internship(object data)
 
 cdef api int can_extract__module__Range(object) except -1
 
-cdef api __cIOBuf* extract__module__Range(object) except NULL
-
-cdef api object construct__module__Range(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__Range(object data)
 
 cdef api int can_extract__module__struct1(object) except -1
 
-cdef api __cIOBuf* extract__module__struct1(object) except NULL
-
-cdef api object construct__module__struct1(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__struct1(object data)
 
 cdef api int can_extract__module__struct2(object) except -1
 
-cdef api __cIOBuf* extract__module__struct2(object) except NULL
-
-cdef api object construct__module__struct2(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__struct2(object data)
 
 cdef api int can_extract__module__struct3(object) except -1
 
-cdef api __cIOBuf* extract__module__struct3(object) except NULL
-
-cdef api object construct__module__struct3(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__struct3(object data)
 
 cdef api int can_extract__module__struct4(object) except -1
 
-cdef api __cIOBuf* extract__module__struct4(object) except NULL
-
-cdef api object construct__module__struct4(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__struct4(object data)
 

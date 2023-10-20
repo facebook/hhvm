@@ -15,49 +15,31 @@ from folly.iobuf cimport cIOBuf as __cIOBuf
 
 cdef api int can_extract__module__Fiery(object) except -1
 
-cdef api __cIOBuf* extract__module__Fiery(object) except NULL
-
-cdef api object construct__module__Fiery(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__Fiery(object data)
 
 cdef api int can_extract__module__Serious(object) except -1
 
-cdef api __cIOBuf* extract__module__Serious(object) except NULL
-
-cdef api object construct__module__Serious(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__Serious(object data)
 
 cdef api int can_extract__module__ComplexFieldNames(object) except -1
 
-cdef api __cIOBuf* extract__module__ComplexFieldNames(object) except NULL
-
-cdef api object construct__module__ComplexFieldNames(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__ComplexFieldNames(object data)
 
 cdef api int can_extract__module__CustomFieldNames(object) except -1
 
-cdef api __cIOBuf* extract__module__CustomFieldNames(object) except NULL
-
-cdef api object construct__module__CustomFieldNames(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__CustomFieldNames(object data)
 
 cdef api int can_extract__module__ExceptionWithPrimitiveField(object) except -1
 
-cdef api __cIOBuf* extract__module__ExceptionWithPrimitiveField(object) except NULL
-
-cdef api object construct__module__ExceptionWithPrimitiveField(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__ExceptionWithPrimitiveField(object data)
 
 cdef api int can_extract__module__ExceptionWithStructuredAnnotation(object) except -1
 
-cdef api __cIOBuf* extract__module__ExceptionWithStructuredAnnotation(object) except NULL
-
-cdef api object construct__module__ExceptionWithStructuredAnnotation(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__ExceptionWithStructuredAnnotation(object data)
 

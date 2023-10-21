@@ -657,7 +657,8 @@ PyObject* FOLLY_NULLABLE getExceptionThriftData(PyObject* generatedError) {
  */
 int setStructField(PyObject* struct_tuple, int16_t index, PyObject* value) {
   try {
-    setStructIsset(struct_tuple, index, 1);
+    DCHECK_GT(index, 0);
+    setStructIsset(struct_tuple, index - 1, 1);
   } catch (std::runtime_error& e) {
     // In error case, folly::handlePythonError clears error indicator
     // and throws std::runtime_error with message fetched from PyErr.

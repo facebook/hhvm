@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/base/record-replay.h"
 
+#include <exception>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -24,12 +26,19 @@
 #include <folly/json.h>
 #include <sys/stat.h>
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/attr.h"
+#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/base/req-ptr.h"
+#include "hphp/runtime/base/req-root.h"
+#include "hphp/runtime/base/request-info.h"
+#include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/vm/func.h"
@@ -88,6 +97,7 @@ bool shouldRecordReplay(NativeFunction ptr) {
       return false;
     }
   }
+  VMRegAnchor _;
   auto func{vmfp()->func()};
   if (func->nativeFuncPtr() != ptr) {
     func = Func::load(StringData::Make(name));
@@ -97,15 +107,15 @@ bool shouldRecordReplay(NativeFunction ptr) {
   return !((attrs & AttrNoRecording) | (attrs & AttrIsFoldable));
 }
 
-
 template<>
 String serialize(Variant value) {
-  UnlimitSerializationScope _;
+  TmpAssign _1{RO::NoticeFrequency, 0L};
+  TmpAssign _2{RO::WarningFrequency, 0L};
   VariableSerializer vs{VariableSerializer::Type::DebuggerSerialize};
   try {
-    return vs.serializeValue(value, false);
-  } catch (const req::root<Object>&) {
-    return vs.serializeValue(init_null(), false); // TODO Record the error
+    return vs.serializeValue(value, true);
+  } catch (...) {
+    return vs.serializeValue(init_null(), true); // TODO Record the error
   }
 }
 
@@ -144,17 +154,39 @@ String serialize(req::ptr<File> value) {
   if (value && value->seekable()) {
     const auto pos{value->tell()};
     value->rewind();
-    const auto contents{value->read()};
+    String contents;
+    try {
+      contents = value->read();
+    } catch (const StringBufferLimitException&) {}
     value->seek(pos);
-    return serialize<Variant>(contents);
-  } else {
-    return serialize<Variant>(init_null());
+    if (!contents.isNull()) {
+      return serialize<Variant>(contents);
+    }
   }
+  return serialize<Variant>(init_null());
 }
 
 template<>
 String serialize(req::ptr<StreamContext> value) {
   return serialize<Variant>(value ? Resource{value} : init_null());
+}
+
+template<>
+String serialize(std::exception_ptr value) {
+  try {
+    std::rethrow_exception(value);
+  } catch (const req::root<Object>& e) {
+    return serialize<Variant>(e);
+  } catch (const FatalErrorException& e) {
+    return serialize<Variant>(make_vec_array(
+      e.getMessage(),
+      e.getBacktrace(),
+      e.isRecoverable(),
+      e.isSilent()
+    ));
+  } catch (...) {
+    return serialize<Variant>(init_null());
+  }
 }
 
 template<>
@@ -195,18 +227,22 @@ String serialize(const Class* value) {
 }
 
 template<>
+String serialize(ObjectData* value) {
+  if (value != nullptr && value->instanceof("Generator")) {
+    return serialize(init_null());
+  } else {
+    return serialize(Variant{value});
+  }
+}
+
+template<>
 String serialize(Object value) {
-  return serialize<Variant>(value);
+  return serialize<ObjectData*>(value.get());
 }
 
 template<>
 String serialize(ObjectArg value) {
-  return serialize(Variant{value.get()});
-}
-
-template<>
-String serialize(ObjectData* value) {
-  return serialize(Variant{value});
+  return serialize<ObjectData*>(value.get());
 }
 
 template<>
@@ -246,7 +282,9 @@ String serialize(TypedValue value) {
 
 template<>
 Variant unserialize(const String& recordedValue) {
-  TmpAssign _{RO::EvalCheckPropTypeHints, 0};
+  TmpAssign _1{RO::NoticeFrequency, 0L};
+  TmpAssign _2{RO::WarningFrequency, 0L};
+  TmpAssign _3{RO::EvalCheckPropTypeHints, 0};
   return VariableUnserializer{
     recordedValue.data(),
     static_cast<std::size_t>(recordedValue.size()),
@@ -295,6 +333,27 @@ req::ptr<File> unserialize(const String& recordedValue) {
     always_assert_flog(variant.isString(), "{}", recordedValue);
     const auto contents{variant.asCStrRef()};
     return req::make<MemFile>(contents.c_str(), contents.size());
+  }
+}
+
+template<>
+std::exception_ptr unserialize(const String& recordedValue) {
+  const auto variant{unserialize<Variant>(recordedValue)};
+  if (variant.isObject()) {
+    return std::make_exception_ptr(req::root<Object>{variant.asCObjRef()});
+  } else if (variant.isArray()) {
+    const auto array{variant.asCArrRef()};
+    always_assert_flog(array.size() == 4, "{}", array.size());
+    auto exc{FatalErrorException{
+      array[0].asCStrRef().toCppString(),
+      array[1].asCArrRef(),
+      array[2].asBooleanVal(),
+    }};
+    exc.setSilent(array[3].asBooleanVal());
+    return std::make_exception_ptr(exc);
+  } else {
+    always_assert_flog(variant.isNull(), "{}", recordedValue);
+    return std::make_exception_ptr(std::exception{});
   }
 }
 
@@ -384,8 +443,12 @@ Resource unserialize(const String& recordedValue) {
 template<>
 String unserialize(const String& recordedValue) {
   const auto variant{unserialize<Variant>(recordedValue)};
-  always_assert_flog(variant.isString(), "{}", recordedValue);
-  return variant.asCStrRef();
+  if (variant.isNull()) {
+    return String{};
+  } else {
+    always_assert_flog(variant.isString(), "{}", recordedValue);
+    return variant.asCStrRef();
+  }
 }
 
 template<>

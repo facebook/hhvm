@@ -150,7 +150,7 @@ struct ReflectionClassHandle : SystemLib::ClassLoader<"ReflectionClass"> {
   }
 
   Variant sleep() const {
-    return String(getClass()->nameStr());
+    return m_cls ? String(m_cls->nameStr()) : empty_string();
   }
 
   void wakeup(const Variant& content, ObjectData* obj);
@@ -286,4 +286,3 @@ Variant default_arg_from_php_code(const Func::ParamInfo& fpi, const Func* func,
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

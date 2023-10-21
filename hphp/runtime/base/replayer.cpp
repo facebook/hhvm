@@ -331,7 +331,11 @@ namespace {
 
 template<>
 void Replayer::nativeArg(const String& recordedArg, ObjectData* arg) {
-  const auto object{unserialize<Object>(recordedArg)};
+  const auto variant{unserialize<Variant>(recordedArg)};
+  if (variant.isNull()) {
+    return always_assert(serialize(Variant{arg}).isNull());
+  }
+  const auto object{variant.asCObjRef()};
   const auto cls{object->getVMClass()};
   const auto argCls{arg->getVMClass()};
   always_assert_flog(cls == argCls, "{} != {}", cls->name(), argCls->name());

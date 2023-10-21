@@ -37,7 +37,6 @@
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/replayer.h"
-#include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
@@ -154,12 +153,8 @@ void Recorder::requestExit() {
       const auto file{dir / (std::to_string(folly::Random::rand64()) + ".hhr")};
       std::ofstream ofs{file, std::ios::binary};
       ofs.write(data.data(), data.size());
-    } catch (const std::exception& e) {
-      Logger::FWarning("Error while recording: {}", e.what());
-    } catch (const req::root<Object>& e) {
-      Logger::FWarning("Error while recording: {}", e.get()->invokeToString());
     } catch (...) {
-      Logger::FWarning("Error while recording: {}", current_exception_name());
+      // TODO Record failure to record
     }
     m_enabled = false;
     m_factsStore.clear();
@@ -479,8 +474,10 @@ struct Recorder::LoggerHook final : public HPHP::LoggerHook {
 
 struct Recorder::StdoutHook final : public ExecutionContext::StdoutHook {
   void operator()(const char* s, int len) override {
-    g_context->writeStdout(s, len, true);
-    get()->m_nativeCalls.back().stdouts.append(std::string(s, len));
+    if (g_context->numStdoutHooks() == 1) {
+      g_context->writeStdout(s, len, true);
+      get()->m_nativeCalls.back().stdouts.append(std::string(s, len));
+    }
   }
 };
 
@@ -611,8 +608,6 @@ void Recorder::onNativeCallEntry(NativeFunction ptr) {
   static LoggerHook loggerHook;
   m_nativeCalls.emplace_back().ptr = ptr;
   g_context->addStdoutHook(getStdoutHook());
-  g_context->backupSession();
-  g_context->clearUserErrorHandlers();
   Logger::SetThreadHook(&loggerHook);
   m_enabled = false;
 
@@ -622,7 +617,6 @@ void Recorder::onNativeCallEntry(NativeFunction ptr) {
 
 void Recorder::onNativeCallExit() {
   g_context->removeStdoutHook(getStdoutHook());
-  g_context->restoreSession();
   Logger::SetThreadHook(nullptr);
   m_enabled = true;
 }
@@ -633,11 +627,7 @@ void Recorder::onNativeCallReturn(const String& ret) {
 }
 
 void Recorder::onNativeCallThrow(std::exception_ptr exc) {
-  try {
-    std::rethrow_exception(exc);
-  } catch (const req::root<Object>& e) {
-    m_nativeCalls.back().exc = serialize(Variant{e});
-  }
+  m_nativeCalls.back().exc = serialize(exc);
   onNativeCallExit();
 }
 

@@ -26,7 +26,7 @@ namespace php Thrift_RpcMetadata
 namespace py thrift.lib.thrift.RpcMetadata
 namespace py.asyncio thrift.lib.thrift.asyncio.RpcMetadata
 namespace py3 thrift.lib.thrift
-namespace go thrift.lib.thrift.RpcMetadata
+namespace go thrift.lib.thrift.rpcmetadata
 
 include "thrift/annotation/thrift.thrift"
 

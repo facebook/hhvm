@@ -22,7 +22,7 @@ use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized::parser_options::ParserOptions;
 use pos::RelativePathCtx;
 use shallow_decl_provider::LazyShallowDeclProvider;
-use tempdir::TempDir;
+use tempfile::TempDir;
 use ty::reason::BReason;
 
 mod folded_decl_provider_test;
@@ -38,7 +38,7 @@ impl TestContext {
     fn new(_fb: FacebookInit, files: BTreeMap<&str, &str>) -> Result<Self> {
         let root = TestRepo::new(&files)?;
 
-        let tmpdir = TempDir::new("rupro_test")?;
+        let tmpdir = TempDir::with_prefix("rupro_test.")?;
         let naming_db = tmpdir.path().join("names.sql");
         hh24_test::create_naming_table(&naming_db, &files)?;
         let naming_provider = Arc::new(SqliteNamingTable::new(&naming_db).unwrap());

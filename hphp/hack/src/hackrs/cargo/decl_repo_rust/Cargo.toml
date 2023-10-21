@@ -27,5 +27,5 @@ rayon = "1.2"
 rusqlite = { version = "0.29.0", features = ["backup", "blob", "column_decltype", "limits"] }
 serde = { version = "1.0.185", features = ["derive", "rc"] }
 serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_depth"] }
-tempdir = "0.3"
+tempfile = "3.5"
 ty = { version = "0.0.0", path = "../../ty/cargo/ty" }

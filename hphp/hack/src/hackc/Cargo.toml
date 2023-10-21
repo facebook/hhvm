@@ -58,7 +58,7 @@ sem_diff = { version = "0.0.0", path = "sem_diff" }
 serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_depth"] }
 shallow_decl_provider = { version = "0.0.0", path = "../hackrs/shallow_decl_provider/cargo/shallow_decl_provider" }
 strum = { version = "0.24", features = ["derive"] }
-tempdir = "0.3"
+tempfile = "3.5"
 textual = { version = "0.0.0", path = "ir/conversions/textual/cargo/textual" }
 thiserror = "1.0.43"
 tracing = { features = ["log"] }

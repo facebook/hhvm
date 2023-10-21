@@ -25,5 +25,5 @@ oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 pos = { version = "0.0.0", path = "../../../pos/cargo/pos" }
 relative_path = { version = "0.0.0", path = "../../../../utils/rust/relative_path" }
 shallow_decl_provider = { version = "0.0.0", path = "../../../shallow_decl_provider/cargo/shallow_decl_provider" }
-tempdir = "0.3"
+tempfile = "3.5"
 ty = { version = "0.0.0", path = "../../../ty/cargo/ty" }

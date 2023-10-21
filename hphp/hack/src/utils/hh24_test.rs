@@ -15,7 +15,7 @@ use hh24_types::ToplevelSymbolHash;
 use names::FileSummary;
 use relative_path::Prefix;
 use relative_path::RelativePath;
-use tempdir::TempDir;
+use tempfile::TempDir;
 
 pub struct TestRepo {
     root: TempDir,
@@ -29,7 +29,7 @@ impl TestRepo {
     ///
     /// See tests for example usage.
     pub fn new(files: &BTreeMap<&str, &str>) -> Result<Self> {
-        let tmpdir = TempDir::new("test_repo")?;
+        let tmpdir = TempDir::with_prefix("test_repo.")?;
         create_repo(tmpdir.path(), files)?;
 
         Ok(Self { root: tmpdir })

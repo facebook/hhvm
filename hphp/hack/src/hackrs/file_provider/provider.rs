@@ -9,7 +9,7 @@ use anyhow::Result;
 use bstr::BString;
 use pos::RelativePath;
 use pos::RelativePathCtx;
-use tempdir::TempDir;
+use tempfile::TempDir;
 
 #[derive(Debug)]
 pub struct DiskProvider {

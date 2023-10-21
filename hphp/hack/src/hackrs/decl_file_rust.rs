@@ -67,7 +67,7 @@ fn main() {
 
 fn decl_files<R: Reason>(opts: &CliOptions) {
     // Add hhi files to the given list of filenames
-    let hhi_root = tempdir::TempDir::new("rupro_decl_file_hhi").unwrap();
+    let hhi_root = tempfile::TempDir::with_prefix("rupro_decl_file_hhi.").unwrap();
     hhi::write_hhi_files(hhi_root.path()).unwrap();
 
     let path_ctx = Arc::new(RelativePathCtx {

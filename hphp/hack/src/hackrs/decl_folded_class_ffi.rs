@@ -180,7 +180,7 @@ ocaml_ffi! {
         partition_index: usize,
     ) -> BTreeMap<String, Arc<FoldedClass<BReason>>> {
         // Collect hhi files
-        let hhi_root = tempdir::TempDir::new("rupro_decl_repo_hhi").unwrap();
+        let hhi_root = tempfile::TempDir::with_prefix("rupro_decl_repo_hhi.").unwrap();
         hhi::write_hhi_files(hhi_root.path()).unwrap();
         let hhi_root_path: PathBuf = hhi_root.path().into();
         let mut filenames: Vec<RelativePath> = find_hack_files(&hhi_root_path)

@@ -76,7 +76,7 @@ pub fn build_naming_table(args: Args) -> anyhow::Result<ExitStatus> {
             return Ok(ExitStatus::InputError);
         }
     } else {
-        let tmpdir = tempdir::TempDir::new("hh_naming_table_builder_hhi")?;
+        let tmpdir = tempfile::TempDir::with_prefix("hh_naming_table_builder_hhi.")?;
         let path = tmpdir.path().to_owned();
         slog::info!(log, "Extracting HHI files to {}", path.display());
         hhi::write_hhi_files(&path)?;

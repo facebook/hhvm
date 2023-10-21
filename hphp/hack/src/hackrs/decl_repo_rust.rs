@@ -26,7 +26,7 @@ use pos::RelativePath;
 use pos::RelativePathCtx;
 use pos::TypeName;
 use rayon::prelude::*;
-use tempdir::TempDir;
+use tempfile::TempDir;
 use ty::reason::BReason;
 use ty::reason::NReason;
 use ty::reason::Reason;
@@ -85,7 +85,7 @@ fn main() {
             .unwrap();
     }
 
-    let hhi_root = TempDir::new("rupro_decl_repo_hhi").unwrap();
+    let hhi_root = TempDir::with_prefix("rupro_decl_repo_hhi.").unwrap();
     hhi::write_hhi_files(hhi_root.path()).unwrap();
 
     let path_ctx = Arc::new(RelativePathCtx {

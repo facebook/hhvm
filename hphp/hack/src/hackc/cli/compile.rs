@@ -47,7 +47,7 @@ use relative_path::Prefix;
 use relative_path::RelativePath;
 use shallow_decl_provider::LazyShallowDeclProvider;
 use shallow_decl_provider::ShallowDeclProvider;
-use tempdir::TempDir;
+use tempfile::TempDir;
 use ty::reason::NReason;
 use ty::reason::Reason;
 
@@ -408,7 +408,7 @@ impl<'a, R: Reason> DeclProvider<'a> for SingleDeclProvider<'a, R> {
 fn make_naming_table_powered_shallow_decl_provider<R: Reason>(
     hackc_opts: &crate::Opts,
 ) -> Result<impl ShallowDeclProvider<R>> {
-    let hhi_root = TempDir::new("rupro_decl_repo_hhi")?;
+    let hhi_root = TempDir::with_prefix("rupro_decl_repo_hhi.")?;
     hhi::write_hhi_files(hhi_root.path()).unwrap();
 
     let root = hackc_opts

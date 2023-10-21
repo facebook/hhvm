@@ -95,7 +95,7 @@ class PythonCapiFixture(unittest.TestCase):
         return PrimitiveStruct(
             booly=True,
             # charry left deliberately unset, should be 0
-            shorty=0,
+            shorty=1,
             inty=2**31 - 1,
             longy=2**63 - 1,
             # leave optional `floaty` `dubby`, `stringy`, `bytey` unset
@@ -277,6 +277,17 @@ class PythonCapiRoundtrip(PythonCapiFixture):
         self.assertIsNone(unset_primitive.bytey)
         with self.assertRaises(TypeError):
             fixture.roundtrip_PrimitiveStruct(self.my_struct())
+
+    def test_update_primitive(self) -> None:
+        unset_primitive = fixture.roundtrip_PrimitiveStruct(self.primitive_unset())
+
+        self.assertTrue(unset_primitive.booly)
+        updated_primitive = unset_primitive(charry=12)
+        self.assertTrue(unset_primitive.booly)
+
+        expected = self.primitive_unset()
+        expected = expected(charry=12)
+        self.assertEqual(updated_primitive, expected)
 
     def test_memleak_primitive(self) -> None:
         # Use non-singleton objects to avoid noise from runtime

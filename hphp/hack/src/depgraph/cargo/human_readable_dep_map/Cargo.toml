@@ -16,4 +16,4 @@ hash = { version = "0.0.0", path = "../../../utils/hash" }
 typing_deps_hash = { version = "0.0.0", path = "../../../deps/cargo/typing_deps_hash" }
 
 [dev-dependencies]
-tempfile = "3.5"
+tempfile = "3.8"

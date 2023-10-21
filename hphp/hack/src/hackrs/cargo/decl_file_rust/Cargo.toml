@@ -19,5 +19,5 @@ hhi = { version = "0.0.0", path = "../../../hhi/rust" }
 jwalk = "0.6"
 oxidized = { version = "0.0.0", path = "../../../oxidized" }
 pos = { version = "0.0.0", path = "../../pos/cargo/pos" }
-tempfile = "3.5"
+tempfile = "3.8"
 ty = { version = "0.0.0", path = "../../ty/cargo/ty" }

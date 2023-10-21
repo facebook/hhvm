@@ -29,4 +29,4 @@ rayon = "1.2"
 relative_path = { version = "0.0.0", path = "../utils/rust/relative_path" }
 si_addendum = { version = "0.0.0", path = "../utils/cargo/si_addendum" }
 slog = { version = "2.7", features = ["max_level_trace", "nested-values"] }
-tempfile = "3.5"
+tempfile = "3.8"

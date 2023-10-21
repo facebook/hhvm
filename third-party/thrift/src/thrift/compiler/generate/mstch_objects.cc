@@ -484,12 +484,11 @@ mstch::node mstch_function::exceptions() {
 
 mstch::node mstch_function::sink_first_response_type() {
   const t_sink* sink = function_->sink();
-  if (!sink) {
+  if (!sink || !function_->has_return_type()) {
     return {};
   }
-  const t_type* type = sink->get_first_response_type();
-  return type ? context_.type_factory->make_mstch_object(type, context_, pos_)
-              : mstch::node();
+  return context_.type_factory->make_mstch_object(
+      function_->return_type().get_type(), context_, pos_);
 }
 
 mstch::node mstch_function::sink_elem_type() {

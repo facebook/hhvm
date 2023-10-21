@@ -375,7 +375,6 @@ TEST_F(TypeResolverTest, Sink) {
       "::apache::thrift::SinkConsumer<::path::to::Foo, ::path::to::Foo>");
 
   auto sink2 = std::make_unique<t_sink>(tstruct, tstruct);
-  sink2->set_first_response_type(t_type_ref(tstruct));
   auto fun2 =
       t_function(nullptr, t_type_ref(tstruct), "", {}, std::move(sink2));
   EXPECT_EQ(

@@ -621,7 +621,7 @@ class t_hack_generator : public t_concat_generator {
       const std::string& struct_class_name,
       bool is_field_nullable = false);
   std::string get_stream_function_return_typehint(const t_function* function);
-  std::string get_sink_function_return_typehint(const t_sink* tsink);
+  std::string get_sink_function_return_typehint(const t_function* function);
   std::string get_container_keyword(
       const t_type* ttype, std::map<TypeToTypehintVariations, bool> variations);
   std::string type_to_typehint(
@@ -2431,10 +2431,10 @@ std::unique_ptr<t_const_value> t_hack_generator::function_to_tmeta(
     sink_tmeta->add_map(
         std::make_unique<t_const_value>("finalResponseType"),
         type_to_tmeta(sink->get_final_response_type()));
-    if (sink->sink_has_first_response()) {
+    if (function->has_return_type()) {
       sink_tmeta->add_map(
           std::make_unique<t_const_value>("initialResponseType"),
-          type_to_tmeta(sink->get_first_response_type()));
+          type_to_tmeta(function->return_type().get_type()));
     } else {
       auto first_response_type = std::make_unique<t_const_value>();
       first_response_type->set_map();
@@ -4894,7 +4894,7 @@ std::string t_hack_generator::render_service_metadata_response(
     } else if (const auto* fun = dynamic_cast<const t_function*>(next)) {
       if (const t_sink* sink = fun->sink()) {
         queue.push(sink->get_elem_type());
-        queue.push(sink->get_first_response_type());
+        queue.push(fun->return_type().get_type());
         queue.push(sink->get_final_response_type());
       } else {
         queue.push(fun->stream()->get_elem_type());
@@ -6191,21 +6191,21 @@ void t_hack_generator::generate_php_stream_function_helpers(
  * @param tfunction The function
  */
 void t_hack_generator::generate_php_sink_function_helpers(
-    const t_function* tfunction, const std::string& prefix) {
-  generate_php_function_args_helpers(tfunction, prefix);
+    const t_function* function, const std::string& prefix) {
+  generate_php_function_args_helpers(function, prefix);
 
-  const t_sink* sink = tfunction->sink();
+  const t_sink* sink = function->sink();
 
   generate_php_function_result_helpers(
-      tfunction,
-      sink->get_first_response_type(),
-      tfunction->exceptions(),
+      function,
+      function->return_type().get_type(),
+      function->exceptions(),
       prefix,
       "_FirstResponse",
-      !sink->sink_has_first_response());
+      !function->has_return_type());
 
   generate_php_function_result_helpers(
-      tfunction,
+      function,
       sink->get_elem_type(),
       sink->sink_exceptions(),
       prefix,
@@ -6213,7 +6213,7 @@ void t_hack_generator::generate_php_sink_function_helpers(
       /* is_void */ false);
 
   generate_php_function_result_helpers(
-      tfunction,
+      function,
       sink->get_final_response_type(),
       sink->final_response_exceptions(),
       prefix,
@@ -6312,8 +6312,8 @@ void t_hack_generator::generate_php_docstring(
     generate_php_docstring_stream_exceptions(out, stream->exceptions());
     out << ">\n";
   } else if (const t_sink* sink = tfunction->sink()) {
-    if (sink->sink_has_first_response()) {
-      out << thrift_type_name(sink->get_first_response_type()) << ", ";
+    if (tfunction->has_return_type()) {
+      out << thrift_type_name(tfunction->return_type().get_type()) << ", ";
     } else {
       out << "void, ";
     }
@@ -6740,19 +6740,19 @@ std::string t_hack_generator::get_stream_function_return_typehint(
 }
 
 std::string t_hack_generator::get_sink_function_return_typehint(
-    const t_sink* tsink) {
+    const t_function* function) {
   // Finally, the function declaration.
-  std::string return_typehint = type_to_typehint(tsink->get_elem_type()) +
-      ", " + type_to_typehint(tsink->get_final_response_type()) + ">";
+  const t_sink* sink = function->sink();
+  std::string return_typehint = type_to_typehint(sink->get_elem_type()) + ", " +
+      type_to_typehint(sink->get_final_response_type()) + ">";
 
-  if (tsink->sink_has_first_response()) {
-    auto first_response_type_hint =
-        type_to_typehint(tsink->get_first_response_type());
-    return "\\ResponseAndClientSink<" + first_response_type_hint + ", " +
-        return_typehint;
-  } else {
+  if (!function->has_return_type()) {
     return "\\ResponseAndClientSink<null, " + return_typehint;
   }
+  auto first_response_type_hint =
+      type_to_typehint(function->return_type().get_type());
+  return "\\ResponseAndClientSink<" + first_response_type_hint + ", " +
+      return_typehint;
 }
 /**
  * Generate an appropriate string for a parameter typehint.
@@ -6851,7 +6851,7 @@ void t_hack_generator::generate_service_interface(
     if (function->stream()) {
       return_typehint = get_stream_function_return_typehint(function);
     } else if (const t_sink* sink = function->sink()) {
-      return_typehint = get_sink_function_return_typehint(sink);
+      return_typehint = get_sink_function_return_typehint(function);
     } else {
       return_typehint = type_to_typehint(function->return_type().get_type());
     }
@@ -7372,10 +7372,8 @@ void t_hack_generator::_generate_service_client_sink_child_fn(
   const std::string& tservice_name =
       (tservice->is_interaction() ? service_name_ : tservice->name());
 
-  const auto* sink = tfunction->sink();
-  std::string return_typehint = get_sink_function_return_typehint(sink);
-
   generate_php_docstring(out, tfunction);
+  std::string return_typehint = get_sink_function_return_typehint(tfunction);
   indent(out) << "public async function " << funname << "("
               << argument_list(
                      tfunction->params(), "", true, nullable_everything_)
@@ -7415,7 +7413,7 @@ void t_hack_generator::_generate_service_client_sink_child_fn(
       << first_response_type << "::class, " << sink_payload_type << "::class, "
       << final_response_type << "::class, "
       << "\"" << tfunction->name() << "\", "
-      << (!sink->sink_has_first_response() ? "true" : "false")
+      << (!tfunction->has_return_type() ? "true" : "false")
       << ", $currentseqid, $rpc_options";
   if (legacy_arrays) {
     out << ", shape('read_options' => \\THRIFT_MARK_LEGACY_ARRAYS)";

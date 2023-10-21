@@ -110,7 +110,7 @@ const std::string& type_resolver::get_return_type(const t_function& fun) {
       if (fun.has_return_type()) {
         return detail::gen_template_type(
             "::apache::thrift::ResponseAndSinkConsumer",
-            {resolve(resolve_fn, *sink->get_first_response_type()),
+            {resolve(resolve_fn, *fun.return_type().get_type()),
              resolve(resolve_fn, *sink->get_elem_type()),
              resolve(resolve_fn, *sink->get_final_response_type())});
       }

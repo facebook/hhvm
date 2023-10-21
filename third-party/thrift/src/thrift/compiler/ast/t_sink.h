@@ -62,17 +62,11 @@ class t_sink : public t_node {
     final_response_exceptions_ = std::move(final_response_exceptions);
   }
 
-  void set_first_response_type(t_type_ref first_response) {
-    first_response_type_ = std::move(first_response);
-  }
-  const t_type_ref& first_response_type() const { return first_response_type_; }
-
  private:
   t_type_ref elem_type_;
   std::unique_ptr<t_throws> sink_exceptions_;
   t_type_ref final_response_type_;
   std::unique_ptr<t_throws> final_response_exceptions_;
-  t_type_ref first_response_type_;
 
  public:
   // TODO(afuller): Delete everything below here. It is only provided for
@@ -90,15 +84,7 @@ class t_sink : public t_node {
     set_final_response_exceptions(std::move(final_response_exceptions));
   }
 
-  void set_first_response(const t_type* first_response) {
-    set_first_response_type(t_type_ref::from_ptr(first_response));
-  }
-
-  bool sink_has_first_response() const { return !first_response_type_.empty(); }
   const t_type* get_elem_type() const { return elem_type().get_type(); }
-  const t_type* get_first_response_type() const {
-    return first_response_type_.get_type();
-  }
   const t_type* get_final_response_type() const {
     return final_response_type().get_type();
   }

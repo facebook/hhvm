@@ -714,8 +714,7 @@ class mstch_function : public mstch_base {
 
   mstch::node has_sink() { return function_->sink() != nullptr; }
   mstch::node sink_has_first_response() {
-    const t_sink* sink = function_->sink();
-    return sink && sink->sink_has_first_response();
+    return function_->has_return_type() && function_->sink();
   }
   mstch::node sink_first_response_type();
   mstch::node sink_elem_type();
@@ -737,8 +736,7 @@ class mstch_function : public mstch_base {
   mstch::node has_stream() { return function_->stream() != nullptr; }
   mstch::node stream_elem_type();
   mstch::node stream_has_first_response() {
-    const t_stream* stream = function_->stream();
-    return stream && function_->has_return_type();
+    return function_->has_return_type() && function_->stream();
   }
   mstch::node stream_first_response_type();
   mstch::node has_stream_exceptions() {

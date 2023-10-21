@@ -121,7 +121,8 @@ static const struct {
   { OpNewPair,     {StackTop2,        Stack1,       OutObject       }},
   { OpColFromArray,   {Stack1,        Stack1,       OutObject       }},
   { OpCnsE,        {None,             Stack1,       OutCns          }},
-  { OpClsCns,      {Stack1,           Stack1,       OutUnknown      }},
+  { OpClsCns,      {Stack1|DontGuardAny,
+                                      Stack1,       OutUnknown      }},
   { OpClsCnsD,     {None,             Stack1,       OutUnknown      }},
   { OpClsCnsL,     {Stack1|Local,     Stack1,       OutUnknown      }},
   { OpFile,        {None,             Stack1,       OutString       }},
@@ -183,8 +184,10 @@ static const struct {
   { OpSelect,      {StackTop3,        Stack1,       OutUnknown      }},
   { OpPrint,       {Stack1,           Stack1,       OutInt64        }},
   { OpClone,       {Stack1,           Stack1,       OutObject       }},
-  { OpExit,        {Stack1,           Stack1,       OutNull         }},
-  { OpFatal,       {Stack1,           None,         OutNone         }},
+  { OpExit,        {Stack1|DontGuardAny,
+                                      Stack1,       OutNull         }},
+  { OpFatal,       {Stack1|DontGuardAny,
+                                      None,         OutNone         }},
 
   /*** 4. Control flow instructions ***/
 
@@ -241,13 +244,18 @@ static const struct {
   { OpSetG,        {StackTop2,        Stack1,       OutSameAsInput1  }},
   { OpSetS,        {StackTop3,        Stack1,       OutSameAsInput1  }},
   { OpSetOpL,      {Stack1|Local,     Stack1|Local, OutSetOp        }},
-  { OpSetOpG,      {StackTop2,        Stack1,       OutUnknown      }},
-  { OpSetOpS,      {StackTop3,        Stack1,       OutUnknown      }},
+  { OpSetOpG,      {StackTop2|DontGuardAny,
+                                      Stack1,       OutUnknown      }},
+  { OpSetOpS,      {StackTop3|DontGuardAny,
+                                      Stack1,       OutUnknown      }},
   { OpIncDecL,     {Local,            Stack1|Local, OutIncDec       }},
-  { OpIncDecG,     {Stack1,           Stack1,       OutUnknown      }},
-  { OpIncDecS,     {StackTop2,        Stack1,       OutUnknown      }},
+  { OpIncDecG,     {Stack1|DontGuardAny,
+                                      Stack1,       OutUnknown      }},
+  { OpIncDecS,     {StackTop2|DontGuardAny,
+                                      Stack1,       OutUnknown      }},
   { OpUnsetL,      {Local,            Local,        OutNone         }},
-  { OpUnsetG,      {Stack1,           None,         OutNone         }},
+  { OpUnsetG,      {Stack1|DontGuardAny,
+                                      None,         OutNone         }},
 
   /*** 8. Call instructions ***/
 
@@ -274,7 +282,8 @@ static const struct {
   { OpFCallFunc,   {Stack1,           StackN,       OutUnknown      }},
   { OpFCallFuncD,  {None,             StackN,       OutUnknown      }},
   { OpFCallObjMethod,
-                   {Stack1,           StackN,       OutUnknown      }},
+                   {Stack1|DontGuardAny,
+                                      StackN,       OutUnknown      }},
   { OpFCallObjMethodD,
                    {None,             StackN,       OutUnknown      }},
 
@@ -289,19 +298,26 @@ static const struct {
 
   /*** 12. Include, eval, and define instructions ***/
 
-  { OpIncl,        {Stack1,           Stack1,       OutUnknown      }},
-  { OpInclOnce,    {Stack1,           Stack1,       OutUnknown      }},
-  { OpReq,         {Stack1,           Stack1,       OutUnknown      }},
-  { OpReqOnce,     {Stack1,           Stack1,       OutUnknown      }},
-  { OpReqDoc,      {Stack1,           Stack1,       OutUnknown      }},
-  { OpEval,        {Stack1,           Stack1,       OutUnknown      }},
+  { OpIncl,        {Stack1|DontGuardAny,
+                                     Stack1,       OutUnknown      }},
+  { OpInclOnce,    {Stack1|DontGuardAny,
+                                     Stack1,       OutUnknown      }},
+  { OpReq,         {Stack1|DontGuardAny,
+                                     Stack1,       OutUnknown      }},
+  { OpReqOnce,     {Stack1|DontGuardAny,
+                                     Stack1,       OutUnknown      }},
+  { OpReqDoc,      {Stack1|DontGuardAny,
+                                     Stack1,       OutUnknown      }},
+  { OpEval,        {Stack1|DontGuardAny,
+                                     Stack1,       OutUnknown      }},
 
   /*** 13. Miscellaneous instructions ***/
 
   { OpThis,        {None,             Stack1,       OutThisObject   }},
   { OpBareThis,    {None,             Stack1,       OutUnknown      }},
   { OpCheckThis,   {This,             None,         OutNone         }},
-  { OpChainFaults, {StackTop2,        Stack1,       OutObject       }},
+  { OpChainFaults, {StackTop2|DontGuardAny,
+                                      Stack1,       OutObject       }},
   { OpVerifyParamType,
                    {Stack1,           Stack1,       OutUnknown      }},
   { OpVerifyParamTypeTS,
@@ -420,6 +436,12 @@ static const struct {
                                       Stack1,       OutSameAsInput1 }},
   { OpMemoSetEager, {Stack1|LocalRange,
                                       Stack1,       OutSameAsInput1 }},
+  { OpNop,         {None|DontGuardAny,
+                                      None,         OutNone         }},
+  { OpCGetCUNop,   {Stack1|DontGuardAny,
+                                      Stack1,       OutCInput       }},
+  { OpUGetCUNop,   {Stack1|DontGuardAny,
+                                      Stack1,       OutNullUninit   }},
 };
 
 namespace {
@@ -828,10 +850,14 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, SBInvOffset bcSPOff) {
   SKTRACE(1, sk, "stack args: virtual sfo now %d\n", stackOff.offset);
   TRACE(1, "%s\n", Trace::prettyNode("Inputs", inputs).c_str());
 
-  if ((flags & DontGuardAny) || dontGuardAnyInputs(ni)) {
+  if ((flags & DontGuardAny)) {
     for (auto& info : inputs) info.dontGuard = true;
   }
   return inputs;
+}
+
+bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
+  return getInstrInfo(ni.op()).in & DontGuardAny;
 }
 
 /*
@@ -866,241 +892,6 @@ jit::fast_set<uint32_t> getLocalOutputs(const NormalizedInstruction& ni) {
   }
 
   return locals;
-}
-
-bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
-  switch (ni.op()) {
-  case Op::IterNext:
-  case Op::LIterNext:
-  case Op::IterInit:
-  case Op::LIterInit:
-  case Op::Enter:
-  case Op::Jmp:
-  case Op::JmpZ:
-  case Op::JmpNZ:
-  case Op::ClsCnsD:
-  case Op::NewStructDict:
-  case Op::Switch:
-  case Op::SSwitch:
-  case Op::Lt:
-  case Op::Lte:
-  case Op::Gt:
-  case Op::Gte:
-  case Op::Cmp:
-  case Op::SetOpL:
-  case Op::InitProp:
-  case Op::BreakTraceHint:
-  case Op::IsTypeL:
-  case Op::IsTypeC:
-  case Op::IncDecL:
-  case Op::Eq:
-  case Op::Neq:
-  case Op::AssertRATL:
-  case Op::AssertRATStk:
-  case Op::SetL:
-  case Op::CastBool:
-  case Op::Same:
-  case Op::NSame:
-  case Op::Yield:
-  case Op::YieldK:
-  case Op::ContEnter:
-  case Op::ContRaise:
-  case Op::CreateCont:
-  case Op::Await:
-  case Op::AwaitAll:
-  case Op::BitAnd:
-  case Op::BitOr:
-  case Op::BitXor:
-  case Op::Sub:
-  case Op::Mul:
-  case Op::Add:
-  case Op::ClassGetC:
-  case Op::ClassGetTS:
-  case Op::AKExists:
-  case Op::AddElemC:
-  case Op::AddNewElemC:
-  case Op::Dict:
-  case Op::Keyset:
-  case Op::Vec:
-  case Op::ArrayIdx:
-  case Op::ArrayMarkLegacy:
-  case Op::ArrayUnmarkLegacy:
-  case Op::BareThis:
-  case Op::BitNot:
-  case Op::CGetG:
-  case Op::CGetL:
-  case Op::CGetQuietL:
-  case Op::CGetL2:
-  case Op::CGetS:
-  case Op::CUGetL:
-  case Op::CastDouble:
-  case Op::CastInt:
-  case Op::CastString:
-  case Op::CastDict:
-  case Op::CastKeyset:
-  case Op::CastVec:
-  case Op::DblAsBits:
-  case Op::CheckProp:
-  case Op::CheckThis:
-  case Op::Clone:
-  case Op::CnsE:
-  case Op::ColFromArray:
-  case Op::CombineAndResolveTypeStruct:
-  case Op::RecordReifiedGeneric:
-  case Op::CheckClsReifiedGenericMismatch:
-  case Op::ClassHasReifiedGenerics:
-  case Op::GetClsRGProp:
-  case Op::HasReifiedParent:
-  case Op::CheckClsRGSoft:
-  case Op::ConcatN:
-  case Op::Concat:
-  case Op::ContCheck:
-  case Op::ContCurrent:
-  case Op::ContKey:
-  case Op::ContValid:
-  case Op::ContGetReturn:
-  case Op::CreateCl:
-  case Op::Dir:
-  case Op::Div:
-  case Op::Double:
-  case Op::Dup:
-  case Op::FCallClsMethod:
-  case Op::FCallClsMethodM:
-  case Op::FCallClsMethodD:
-  case Op::FCallClsMethodS:
-  case Op::FCallClsMethodSD:
-  case Op::FCallCtor:
-  case Op::FCallFunc:
-  case Op::FCallFuncD:
-  case Op::FCallObjMethodD:
-  case Op::ResolveRFunc:
-  case Op::ResolveFunc:
-  case Op::ResolveMethCaller:
-  case Op::ResolveClsMethod:
-  case Op::ResolveClsMethodD:
-  case Op::ResolveClsMethodS:
-  case Op::ResolveRClsMethod:
-  case Op::ResolveRClsMethodD:
-  case Op::ResolveRClsMethodS:
-  case Op::ResolveClass:
-  case Op::LazyClass:
-  case Op::EnumClassLabel:
-  case Op::False:
-  case Op::File:
-  case Op::FuncCred:
-  case Op::GetMemoKeyL:
-  case Op::Idx:
-  case Op::InstanceOf:
-  case Op::InstanceOfD:
-  case Op::IsLateBoundCls:
-  case Op::IsTypeStructC:
-  case Op::Int:
-  case Op::IssetG:
-  case Op::IssetL:
-  case Op::IssetS:
-  case Op::IsUnsetL:
-  case Op::IterFree:
-  case Op::LIterFree:
-  case Op::LateBoundCls:
-  case Op::Method:
-  case Op::Mod:
-  case Op::Pow:
-  case Op::ClassName:
-  case Op::LazyClassFromClass:
-  case Op::EnumClassLabelName:
-  case Op::NativeImpl:
-  case Op::NewCol:
-  case Op::NewPair:
-  case Op::NewDictArray:
-  case Op::NewVec:
-  case Op::NewKeysetArray:
-  case Op::NewObj:
-  case Op::NewObjD:
-  case Op::NewObjS:
-  case Op::Not:
-  case Op::Null:
-  case Op::NullUninit:
-  case Op::OODeclExists:
-  case Op::ParentCls:
-  case Op::PopC:
-  case Op::PopU:
-  case Op::PopU2:
-  case Op::PopL:
-  case Op::Print:
-  case Op::PushL:
-  case Op::RetC:
-  case Op::RetCSuspended:
-  case Op::SelfCls:
-  case Op::SetG:
-  case Op::SetS:
-  case Op::Shl:
-  case Op::Shr:
-  case Op::Silence:
-  case Op::String:
-  case Op::This:
-  case Op::Throw:
-  case Op::ThrowAsTypeStructException:
-  case Op::ThrowNonExhaustiveSwitch:
-  case Op::RaiseClassStringConversionNotice:
-  case Op::True:
-  case Op::UnsetL:
-  case Op::VerifyParamType:
-  case Op::VerifyParamTypeTS:
-  case Op::VerifyRetTypeC:
-  case Op::VerifyRetTypeTS:
-  case Op::VerifyRetNonNullC:
-  case Op::VerifyOutType:
-  case Op::WHResult:
-  case Op::BaseGC:
-  case Op::BaseGL:
-  case Op::BaseSC:
-  case Op::BaseL:
-  case Op::BaseC:
-  case Op::BaseH:
-  case Op::Dim:
-  case Op::QueryM:
-  case Op::SetM:
-  case Op::IncDecM:
-  case Op::SetOpM:
-  case Op::UnsetM:
-  case Op::SetRangeM:
-  case Op::MemoGet:
-  case Op::MemoGetEager:
-  case Op::MemoSet:
-  case Op::MemoSetEager:
-  case Op::RetM:
-  case Op::Select:
-  case Op::LockObj:
-  case Op::ClsCnsL:
-  case Op::SetImplicitContextByValue:
-  case Op::VerifyImplicitContextState:
-  case Op::CreateSpecialImplicitContext:
-    return false;
-
-  // These are instructions that are always interp-one'd, or are always no-ops.
-  case Op::Nop:
-  case Op::CGetCUNop:
-  case Op::UGetCUNop:
-  case Op::ClsCns:
-  case Op::Exit:
-  case Op::Fatal:
-  case Op::SetOpG:
-  case Op::SetOpS:
-  case Op::IncDecG:
-  case Op::IncDecS:
-  case Op::UnsetG:
-  case Op::FCallObjMethod:
-  case Op::Incl:
-  case Op::InclOnce:
-  case Op::Req:
-  case Op::ReqOnce:
-  case Op::ReqDoc:
-  case Op::Eval:
-  case Op::ChainFaults:
-    return true;
-  }
-
-  always_assert_flog(0, "invalid opcode {}\n", static_cast<uint32_t>(ni.op()));
 }
 
 bool instrBreaksProfileBB(const NormalizedInstruction& inst) {

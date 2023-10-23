@@ -1465,10 +1465,6 @@ struct RuntimeOption {
   F(uint64_t, DynamicMethCallerLevel, 1)                                \
   F(bool, APCSerializeFuncs, true)                                      \
   F(bool, APCSerializeClsMeth, true)                                    \
-  /* When set:
-   * - `is_array` becomes equivalent to `is_any_array` or
-   *  `isTvArrayLike` instead of being a strict PHP array check.
-   */                                                                   \
   F(bool, EnablePerFileCoverage, false)                                 \
   F(bool, LogOnIsArrayFunction, false)                                  \
   /* Unit prefetching options */                                        \

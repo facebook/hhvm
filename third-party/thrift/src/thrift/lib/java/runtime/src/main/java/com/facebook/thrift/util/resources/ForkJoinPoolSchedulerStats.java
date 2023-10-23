@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 
 final class ForkJoinPoolSchedulerStats {
   private static final Logger LOGGER = LoggerFactory.getLogger(ForkJoinPoolSchedulerStats.class);
-
   private final String name;
   private final Ewma pending;
   private final Ewma active;
@@ -42,7 +41,7 @@ final class ForkJoinPoolSchedulerStats {
     this.active = Ewma.oneMinuteDecay();
     this.disposed = new LongAdder();
     this.completed = new LongAdder();
-    this.executionTime = new Recorder(43200000000000L, 3);
+    this.executionTime = new Recorder(3, false);
   }
 
   public long incrementPendingAndStartRecordingTime() {
@@ -61,14 +60,7 @@ final class ForkJoinPoolSchedulerStats {
   public void incrementCompletedTasksAndRecordTime(long startTime) {
     completed.add(1);
     long time = System.nanoTime() - startTime;
-    try {
-      executionTime.recordValue(time);
-    } catch (Throwable t) {
-      LOGGER.warn(
-          "error recording value, a thread has run longer than 43200000000000L nanosecondes: "
-              + time,
-          t);
-    }
+    executionTime.recordValue(time);
   }
 
   public Map<String, Long> getStats() {

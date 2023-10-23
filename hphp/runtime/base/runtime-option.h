@@ -1501,6 +1501,7 @@ struct RuntimeOption {
   F(hphp_fast_string_set, StartOptionLogExcludeOptions, {})             \
   F(bool, RecordReplay, false)                                          \
   F(uint64_t, RecordSampleRate, 0)                                      \
+  F(string, RecordSampleUrl, std::string(""))                           \
   F(string, RecordDir, std::string(""))                                 \
   F(bool, Replay, false)                                                \
   F(bool, DumpStacktraceToErrorLogOnCrash, true)                        \

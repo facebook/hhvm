@@ -23,6 +23,7 @@
 #include <string>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 #include <folly/Likely.h>
 
@@ -45,6 +46,11 @@ struct c_ExternalThreadEventWaitHandle;
 namespace Stream { struct Wrapper; }
 
 struct Recorder {
+  struct Writer {
+    virtual ~Writer() = default;
+    virtual void write(const std::vector<char>& recording) = 0;
+  };
+
   static void onGetFactsForRequest(FactsStore*& map);
   static void onHasReceived(bool received);
   static void onProcessSleepEvents(std::int64_t now);
@@ -57,6 +63,7 @@ struct Recorder {
   static void onVisitEntity(const std::string& entity);
   void requestExit();
   void requestInit();
+  static void setWriter(Writer* writer);
 
   template<auto f>
   static auto wrapNativeFunc(const char* name) {

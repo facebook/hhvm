@@ -64,9 +64,20 @@ namespace HPHP {
 using namespace rr;
 
 namespace {
+  static struct DefaultWriter final : public Recorder::Writer {
+    void write(const std::vector<char>& recording) override {
+      const auto dir{std::filesystem::canonical(RO::EvalRecordDir)};
+      std::filesystem::create_directory(dir);
+      const auto name{std::to_string(folly::Random::rand64()) + ".hhr"};
+      std::ofstream ofs{dir / name, std::ios::binary};
+      ofs.write(recording.data(), recording.size());
+    }
+  } g_defaultWriter;
+
   static std::string g_entryPoint;
   static std::string g_hdf;
   static std::string g_ini;
+  static Recorder::Writer* g_writer{&g_defaultWriter};
 } // namespace
 
 void Recorder::onGetFactsForRequest(HPHP::FactsStore*& map) {
@@ -142,17 +153,12 @@ void Recorder::onVisitEntity(const std::string& entity) {
 
 void Recorder::requestExit() {
   if (UNLIKELY(m_enabled)) {
+    resolveWaitHandles();
+    Stream::setThreadLocalFileHandler(m_parentStreamWrapper);
     try {
-      resolveWaitHandles();
-      Stream::setThreadLocalFileHandler(m_parentStreamWrapper);
       BlobEncoder encoder;
       toArray().serde(encoder);
-      const auto data{encoder.take()};
-      const auto dir{std::filesystem::canonical(RO::EvalRecordDir)};
-      std::filesystem::create_directory(dir);
-      const auto file{dir / (std::to_string(folly::Random::rand64()) + ".hhr")};
-      std::ofstream ofs{file, std::ios::binary};
-      ofs.write(data.data(), data.size());
+      g_writer->write(encoder.take());
     } catch (...) {
       // TODO Record failure to record
     }
@@ -174,7 +180,10 @@ void Recorder::requestInit() {
   switch (HPHP::Treadmill::sessionKind()) {
     case HPHP::Treadmill::SessionKind::CLISession:
     case HPHP::Treadmill::SessionKind::HttpRequest:
-      m_enabled = folly::Random::oneIn64(RO::EvalRecordSampleRate);
+      if (folly::Random::oneIn64(RO::EvalRecordSampleRate)) {
+        const auto& url{RO::EvalRecordSampleUrl};
+        m_enabled = url.empty() || url == g_context->getRequestUrl();
+      }
       break;
     default:
       break;
@@ -186,6 +195,10 @@ void Recorder::requestInit() {
     Stream::setThreadLocalFileHandler(getStreamWrapper());
     HPHP::DebuggerHook::attach<DebuggerHook>();
   }
+}
+
+void Recorder::setWriter(Writer* writer) {
+  g_writer = writer != nullptr ? writer : &g_defaultWriter;
 }
 
 struct Recorder::DebuggerHook final : public HPHP::DebuggerHook {

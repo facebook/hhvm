@@ -148,6 +148,19 @@ let fetch_old_decls_via_file_hashes
           | _ -> acc)
         named_old_decls
     in
+    let start_t = Unix.gettimeofday () in
+    let names_length = List.length names in
+    let telemetry =
+      Telemetry.create ()
+      |> Telemetry.int_ ~key:"to_fetch" ~value:names_length
+      |> Telemetry.int_ ~key:"fetched" ~value:(SMap.cardinal old_decls)
+    in
+    Hh_logger.log
+      "Fetched %d/%d decls remotely"
+      (SMap.cardinal old_decls)
+      names_length;
+
+    HackEventLogger.remote_old_decl_end telemetry start_t;
     old_decls
   | Error msg ->
     Hh_logger.log "Error fetching remote decls: %s" msg;

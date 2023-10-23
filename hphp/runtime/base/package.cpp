@@ -296,7 +296,7 @@ bool PackageInfo::isModuleSoftDeployed(const StringData* module) const {
   return false;
 }
 
-bool PackageInfo::outsideActiveDeployment(const StringData* module) const {
+bool PackageInfo::violatesDeploymentBoundary(const StringData* module) const {
   if (!RO::EvalEnforceDeployment) return false;
   if (auto const activeDeployment = getActiveDeployment()) {
     if (RO::RepoAuthoritative) {
@@ -320,7 +320,7 @@ bool PackageInfo::violatesDeploymentBoundary(const Func& callee) const {
   if (RO::RepoAuthoritative) {
     return callee.unit()->isSoftDeployedRepoOnly();
   }
-  return outsideActiveDeployment(callee.moduleName());
+  return violatesDeploymentBoundary(callee.moduleName());
 }
 
 bool PackageInfo::violatesDeploymentBoundary(const Class& cls) const {
@@ -328,7 +328,7 @@ bool PackageInfo::violatesDeploymentBoundary(const Class& cls) const {
   if (RO::RepoAuthoritative) {
     return cls.preClass()->unit()->isSoftDeployedRepoOnly();
   }
-  return outsideActiveDeployment(cls.moduleName());
+  return violatesDeploymentBoundary(cls.moduleName());
 }
 
 } // namespace HPHP

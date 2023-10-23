@@ -891,11 +891,12 @@ void handleModuleBoundaryViolation(const Func* callee, const Func* caller) {
   if (will_symbol_raise_module_boundary_violation(callee, caller)) {
     raiseModuleBoundaryViolation(nullptr, callee, caller->moduleName());
   }
-  if (RO::EvalEnforceDeployment && caller->moduleName() != callee->moduleName()) {
-    auto const& packageInfo = g_context->getPackageInfo();
-    if (packageInfo.violatesDeploymentBoundary(*callee)) {
-      raiseDeploymentBoundaryViolation(callee);
-    }
+  auto const& packageInfo = g_context->getPackageInfo();
+  if (RO::EvalEnforceDeployment &&
+      caller->moduleName() != callee->moduleName() &&
+      !packageInfo.violatesDeploymentBoundary(caller->moduleName()) &&
+      packageInfo.violatesDeploymentBoundary(*callee)) {
+    raiseDeploymentBoundaryViolation(callee);
   }
 }
 } // namespace

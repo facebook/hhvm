@@ -3,7 +3,9 @@
 function test($t) :mixed{
   fb_enable_code_coverage();
   var_dump($t);
-  fb_disable_code_coverage();
+  $coverage = fb_disable_code_coverage();
+  echo "Coverage:\n";
+  var_dump(idx($coverage,__FILE__,dict[]));
 }
 
 

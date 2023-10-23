@@ -1,1 +1,10 @@
 string(5) "hello"
+Coverage:
+dict(3) {
+  [4]=>
+  int(1)
+  [5]=>
+  int(1)
+  [6]=>
+  int(1)
+}

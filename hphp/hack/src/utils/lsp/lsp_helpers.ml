@@ -1,6 +1,6 @@
 (* A few helpful wrappers around LSP *)
 
-module Option = Base.Option
+open Hh_prelude
 open Lsp
 open Lsp_fmt
 
@@ -18,7 +18,7 @@ let lsp_uri_to_path (uri : documentUri) : string =
   let uri = string_of_uri uri in
   if Str.string_match url_scheme_regex uri 0 then
     let scheme = Str.matched_group 1 uri in
-    if scheme = "file" then
+    if String.equal scheme "file" then
       File_url.parse uri
     else
       raise
@@ -32,7 +32,7 @@ let lsp_uri_to_path (uri : documentUri) : string =
     uri
 
 let path_to_lsp_uri (path : string) ~(default_path : string) : Lsp.documentUri =
-  if path = "" then begin
+  if String.equal path "" then begin
     HackEventLogger.invariant_violation_bug "missing path";
     Hh_logger.log
       "missing path %s"
@@ -84,7 +84,7 @@ let apply_changes
     (text : string)
     (contentChanges : DidChange.textDocumentContentChangeEvent list) :
     (string, string * Exception.t) result =
-  let edits = List.map lsp_edit_to_fc contentChanges in
+  let edits = List.map ~f:lsp_edit_to_fc contentChanges in
   File_content.edit_file text edits
 
 let get_char_from_lsp_position (content : string) (position : Lsp.position) :

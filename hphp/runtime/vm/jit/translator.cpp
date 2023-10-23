@@ -467,8 +467,7 @@ const InstrInfo& getInstrInfo(Op op) {
 namespace {
 int64_t countOperands(uint64_t mask) {
   const uint64_t ignore = Local | Iter | DontGuardStack1 |
-    DontGuardAny | This | MBase | StackI | StackI2 | MKey | LocalRange |
-    DontGuardBase;
+    DontGuardAny | This | MBase | StackI | StackI2 | MKey | LocalRange;
   mask &= ~ignore;
 
   static const uint64_t counts[][2] = {
@@ -837,12 +836,8 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, SBInvOffset bcSPOff) {
         break;
     }
   }
-  if (flags & MBase) {
-    inputs.emplace_back(Location::MBase{});
-    if (flags & DontGuardBase) {
-      inputs.back().dontGuard = true;
-    }
-  }
+
+  if (flags & MBase) inputs.emplace_back(Location::MBase{});
 
   SKTRACE(1, sk, "stack args: virtual sfo now %d\n", stackOff.offset);
   TRACE(1, "%s\n", Trace::prettyNode("Inputs", inputs).c_str());

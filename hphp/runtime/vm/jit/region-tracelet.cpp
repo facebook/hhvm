@@ -123,20 +123,17 @@ SBInvOffset curSpOffset(const Env& env) {
 }
 
 /*
- * Check if the current predicted type for the location in ii is specific
- * enough for what the current opcode wants. If not, return false.
+ * Check if the input has a known datatype or whether we need
+ * to insert a guard.
  */
-bool consumeInput(Env& env, const InputInfo& input) {
-  if (input.dontGuard) return true;
+bool needGuardForInput(Env& env, const InputInfo& input) {
+  if (input.dontGuard) return false;
   auto const type = irgen::provenType(env.irgs, input.loc);
 
-  if (!type.isKnownDataType()) {
-    // Trying to consume a value without a precise enough type.
-    FTRACE(1, "selectTracelet: {} tried to consume {}, type {}\n",
-           env.inst.toString(), show(input.loc), type.toString());
-    return false;
-  }
+  if (type.isKnownDataType()) return false;
 
+  FTRACE(1, "selectTracelet: {} input {}, needs a guard due to unknown type {}\n",
+         env.inst.toString(), show(input.loc), type.toString());
   return true;
 }
 
@@ -242,9 +239,8 @@ bool prepareInstruction(Env& env) {
     addGuardIfUntracked(Location::Stack{sbInvOff});
   }
 
-  // Check all the inputs for unknown values.
   for (auto const& input : inputInfos) {
-    if (!consumeInput(env, input)) {
+    if (needGuardForInput(env, input)) {
       FTRACE(2, "Stopping tracelet consuming {} input {}\n",
              opcodeToName(env.inst.op()), show(input.loc));
       return false;

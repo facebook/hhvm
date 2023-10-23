@@ -205,7 +205,7 @@ dependencies = [
 name = "arena_deserializer"
 version = "0.0.0"
 dependencies = [
- "bstr 1.6.0",
+ "bstr",
  "bumpalo",
  "ocamlrep_caml_builtins",
  "serde",
@@ -217,7 +217,7 @@ version = "0.0.0"
 dependencies = [
  "arena_deserializer",
  "bincode",
- "bstr 1.6.0",
+ "bstr",
  "bumpalo",
  "oxidized_by_ref",
  "relative_path",
@@ -263,7 +263,7 @@ name = "assemble_ir"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bstr 1.6.0",
+ "bstr",
  "bumpalo",
  "ffi",
  "hash",
@@ -425,7 +425,7 @@ name = "bc_to_ir"
 version = "0.0.0"
 dependencies = [
  "b2i_macros",
- "bstr 1.6.0",
+ "bstr",
  "ffi",
  "hash",
  "hhbc",
@@ -504,24 +504,12 @@ dependencies = [
 
 [[package]]
 name = "bstr"
-version = "0.2.17"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba3569f383e8f1598449f1a423e72e99569137b47740b1da11ef19af3d5c3223"
-dependencies = [
- "lazy_static",
- "memchr",
- "regex-automata 0.1.9",
- "serde",
-]
-
-[[package]]
-name = "bstr"
 version = "1.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6798148dccfbff0fae41c7574d2fa8f1ef3492fba0face179de5d8d447d67b05"
 dependencies = [
  "memchr",
- "regex-automata 0.3.8",
+ "regex-automata",
  "serde",
 ]
 
@@ -545,7 +533,7 @@ name = "bytecode_printer"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bstr 1.6.0",
+ "bstr",
  "escaper",
  "ffi",
  "hash",
@@ -848,7 +836,7 @@ dependencies = [
  "aast_parser",
  "anyhow",
  "bc_to_ir",
- "bstr 1.6.0",
+ "bstr",
  "bumpalo",
  "bytecode_printer",
  "clap 4.3.11",
@@ -911,7 +899,7 @@ dependencies = [
 name = "config_file"
 version = "0.0.0"
 dependencies = [
- "bstr 1.6.0",
+ "bstr",
  "lazy_static",
  "regex",
  "serde_json",
@@ -1189,22 +1177,21 @@ dependencies = [
 
 [[package]]
 name = "csv"
-version = "1.1.3"
+version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "00affe7f6ab566df61b4be3ce8cf16bc2576bca0963ceb0955e45d514bf9a279"
+checksum = "ac574ff4d437a7b5ad237ef331c17ccca63c46479e5b5453eb8e10bb99a759fe"
 dependencies = [
- "bstr 0.2.17",
  "csv-core",
- "itoa 0.4.8",
+ "itoa",
  "ryu",
  "serde",
 ]
 
 [[package]]
 name = "csv-core"
-version = "0.1.10"
+version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2b2466559f260f48ad25fe6317b3c8dac77b5bdb5763ac7d9d6103530663bc90"
+checksum = "5efa2b3d7902f4b634a20cae3c9c4e6209dc4779feb6863329607560143efa70"
 dependencies = [
  "memchr",
 ]
@@ -1497,7 +1484,7 @@ name = "direct_decl_smart_constructors"
 version = "0.0.0"
 dependencies = [
  "arena_collections",
- "bstr 1.6.0",
+ "bstr",
  "bumpalo",
  "escaper",
  "flatten_smart_constructors",
@@ -1563,7 +1550,7 @@ name = "elab"
 version = "0.0.0"
 dependencies = [
  "bitflags 1.3.2",
- "bstr 1.6.0",
+ "bstr",
  "core_utils_rust",
  "elaborate_namespaces_visitor",
  "file_info",
@@ -1657,7 +1644,7 @@ version = "0.0.0"
 dependencies = [
  "ast_scope",
  "bitflags 1.3.2",
- "bstr 1.6.0",
+ "bstr",
  "bumpalo",
  "constant_folder",
  "core_utils_rust",
@@ -1766,7 +1753,7 @@ name = "eq_modulo_pos"
 version = "0.0.0"
 dependencies = [
  "arena_collections",
- "bstr 1.6.0",
+ "bstr",
  "eq_modulo_pos_derive",
  "hcons",
  "indexmap",
@@ -1834,7 +1821,7 @@ dependencies = [
 name = "escaper"
 version = "0.0.0"
 dependencies = [
- "bstr 1.6.0",
+ "bstr",
  "bumpalo",
  "pretty_assertions",
 ]
@@ -1891,7 +1878,7 @@ checksum = "25cbce373ec4653f1a01a31e8a5e5ec0c622dc27ff9c4e6606eefef5cbbed4a5"
 name = "ffi"
 version = "0.0.0"
 dependencies = [
- "bstr 1.6.0",
+ "bstr",
  "bumpalo",
  "serde",
  "write_bytes",
@@ -1931,7 +1918,7 @@ name = "file_provider"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bstr 1.6.0",
+ "bstr",
  "pos",
  "tempfile",
 ]
@@ -1945,14 +1932,14 @@ dependencies = [
 
 [[package]]
 name = "filetime"
-version = "0.2.12"
+version = "0.2.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3ed85775dcc68644b5c950ac06a2b23768d3bc9390464151aaf27136998dcf9e"
+checksum = "d4029edd3e734da6fe05b6cd7bd2960760a616bd2ddd0d59a0124746d6272af0"
 dependencies = [
- "cfg-if 0.1.10",
+ "cfg-if 1.0.0",
  "libc",
- "redox_syscall 0.1.57",
- "winapi",
+ "redox_syscall 0.3.5",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]
@@ -2255,7 +2242,7 @@ name = "hackrs_provider_backend"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bstr 1.6.0",
+ "bstr",
  "bumpalo",
  "datastore",
  "decl_parser",
@@ -2584,7 +2571,7 @@ name = "hhbc"
 version = "0.0.0"
 dependencies = [
  "bitflags 1.3.2",
- "bstr 1.6.0",
+ "bstr",
  "bumpalo",
  "emit_opcodes_macro",
  "ffi",
@@ -2614,7 +2601,7 @@ dependencies = [
 name = "hhbc_string_utils"
 version = "0.0.0"
 dependencies = [
- "bstr 1.6.0",
+ "bstr",
  "escaper",
  "lazy_static",
  "libc",
@@ -2834,7 +2821,7 @@ dependencies = [
 name = "ir_core"
 version = "0.0.0"
 dependencies = [
- "bstr 1.6.0",
+ "bstr",
  "ffi",
  "hash",
  "hhbc",
@@ -2903,12 +2890,6 @@ checksum = "b1c173a5686ce8bfa551b3563d0c2170bf24ca44da99c7ca4bfdab5418c3fe57"
 dependencies = [
  "either",
 ]
-
-[[package]]
-name = "itoa"
-version = "0.4.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b71991ff56294aa922b450139ee08b3bfc70982c6b2c7562771375cf73542dd4"
 
 [[package]]
 name = "itoa"
@@ -3065,7 +3046,7 @@ dependencies = [
 name = "lowerer"
 version = "0.0.0"
 dependencies = [
- "bstr 1.6.0",
+ "bstr",
  "bumpalo",
  "escaper",
  "hash",
@@ -3471,7 +3452,7 @@ name = "no_pos_hash"
 version = "0.0.0"
 dependencies = [
  "arena_collections",
- "bstr 1.6.0",
+ "bstr",
  "fnv",
  "no_pos_hash_derive",
  "ocamlrep_caml_builtins",
@@ -3565,7 +3546,7 @@ dependencies = [
 name = "ocamlrep"
 version = "0.1.0"
 dependencies = [
- "bstr 1.6.0",
+ "bstr",
  "bumpalo",
  "indexmap",
  "ocamlrep_derive",
@@ -3658,7 +3639,7 @@ dependencies = [
 name = "options"
 version = "0.0.0"
 dependencies = [
- "bstr 1.6.0",
+ "bstr",
  "hhbc_string_utils",
  "oxidized",
  "serde",
@@ -3678,7 +3659,7 @@ dependencies = [
  "arena_deserializer",
  "arena_trait",
  "bitflags 1.3.2",
- "bstr 1.6.0",
+ "bstr",
  "bumpalo",
  "eq_modulo_pos",
  "file_info",
@@ -3710,7 +3691,7 @@ dependencies = [
  "arena_deserializer",
  "arena_trait",
  "bitflags 1.3.2",
- "bstr 1.6.0",
+ "bstr",
  "bumpalo",
  "eq_modulo_pos",
  "hh24_types",
@@ -3947,7 +3928,7 @@ name = "pos"
 version = "0.0.0"
 dependencies = [
  "arena_trait",
- "bstr 1.6.0",
+ "bstr",
  "bumpalo",
  "eq_modulo_pos",
  "hh24_types",
@@ -4040,7 +4021,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "ast_scope",
- "bstr 1.6.0",
+ "bstr",
  "bumpalo",
  "core_utils_rust",
  "emit_type_hint",
@@ -4267,12 +4248,6 @@ dependencies = [
 
 [[package]]
 name = "redox_syscall"
-version = "0.1.57"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "41cc0f7e4d5d4544e8861606a285bb08d3e70712ccc7d2b84d7c0ccfaf4b05ce"
-
-[[package]]
-name = "redox_syscall"
 version = "0.2.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8383f39639269cde97d255a32bdb68c047337295414940c68bdd30c2e13203ff"
@@ -4307,17 +4282,8 @@ checksum = "697061221ea1b4a94a624f67d0ae2bfe4e22b8a17b6a192afb11046542cc8c47"
 dependencies = [
  "aho-corasick",
  "memchr",
- "regex-automata 0.3.8",
+ "regex-automata",
  "regex-syntax",
-]
-
-[[package]]
-name = "regex-automata"
-version = "0.1.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ae1ded71d66a4a97f5e961fd0cb25a5f366a42a41570d16a763a69c092c26ae4"
-dependencies = [
- "byteorder",
 ]
 
 [[package]]
@@ -4746,7 +4712,7 @@ version = "1.0.107"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6b420ce6e3d8bd882e9b243c6eed35dbc9a6110c9769e74b584e0d68d1f20c65"
 dependencies = [
- "itoa 1.0.5",
+ "itoa",
  "ryu",
  "serde",
 ]
@@ -4846,7 +4812,7 @@ dependencies = [
 name = "signed_source"
 version = "0.0.0"
 dependencies = [
- "bstr 1.6.0",
+ "bstr",
  "hex",
  "md-5",
  "once_cell",
@@ -5145,7 +5111,7 @@ version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9d3ccd10346f925c2fbd97b75e8573b38e34431bfba04cc531cd23aad0fbabb8"
 dependencies = [
- "itoa 1.0.5",
+ "itoa",
  "ryu",
  "sval",
 ]
@@ -5156,7 +5122,7 @@ version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a12e1488defd6344e23243c17ea4a1b185c547968749e8a281373fde0bde2d5"
 dependencies = [
- "itoa 1.0.5",
+ "itoa",
  "ryu",
  "sval",
 ]
@@ -5400,7 +5366,7 @@ version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a561bf4617eebd33bca6434b988f39ed798e527f51a1e797d0ee4f61c0a38376"
 dependencies = [
- "itoa 1.0.5",
+ "itoa",
  "serde",
  "time-core",
  "time-macros",
@@ -6069,7 +6035,7 @@ dependencies = [
 name = "write_bytes"
 version = "0.0.0"
 dependencies = [
- "bstr 1.6.0",
+ "bstr",
  "write_bytes-macro",
 ]
 

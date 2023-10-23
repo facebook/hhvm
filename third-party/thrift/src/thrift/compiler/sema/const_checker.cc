@@ -278,16 +278,7 @@ class const_checker {
       check_fields(type, value->get_map());
       return;
     }
-    // Only warn on initialization from [] for legacy reasons.
-    auto level = value->get_type() == t_const_value::CV_LIST
-        ? diagnostic_level::warning
-        : diagnostic_level::error;
-    diags_.report(
-        node_,
-        level,
-        "{} is incompatible with `{}`",
-        get_category(value),
-        type->name());
+    error("{} is incompatible with `{}`", get_category(value), type->name());
   }
 
   void check_exception(const t_exception* type, const t_const_value* value) {

@@ -467,11 +467,15 @@ TEST(CompilerTest, const_double_value) {
   )");
 }
 
-TEST(CompilerTest, invalid_struct_initializer) {
+TEST(CompilerTest, struct_initializer) {
   check_compile(R"(
     struct S {}
-    const S s1 = ""; # expected-error: string is incompatible with `S`
-    const S s2 = []; # expected-warning: list is incompatible with `S`
+    const S s1 = {};   # OK
+    const S s2 = 42;   # expected-error: integer is incompatible with `S`
+    const S s3 = 4.2;  # expected-error: floating-point number is incompatible with `S`
+    const S s4 = "";   # expected-error: string is incompatible with `S`
+    const S s5 = true; # expected-error: bool is incompatible with `S`
+    const S s6 = [];   # expected-error: list is incompatible with `S`
   )");
 }
 

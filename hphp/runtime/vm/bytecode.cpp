@@ -949,7 +949,7 @@ void checkModuleBoundaryViolation(const Class* ctx, const Func& callee) {
   }
   // Only check deployment boundary violation for toplevel function calls
   // since class method calls will be handled at the class level.
-  if (!ctx && RO::EvalEnforceDeployment) {
+  if (!ctx && RO::EvalEnforceDeployment && caller->moduleName() != callee.moduleName()) {
     auto const& packageInfo = g_context->getPackageInfo();
     if (packageInfo.violatesDeploymentBoundary(callee)) {
       raiseDeploymentBoundaryViolation(&callee);
@@ -962,7 +962,7 @@ void checkModuleBoundaryViolation(const Class& cls) {
   if (will_symbol_raise_module_boundary_violation(&cls, caller)) {
     raiseModuleBoundaryViolation(&cls, caller->moduleName());
   }
-  if (RO::EvalEnforceDeployment) {
+  if (RO::EvalEnforceDeployment && caller->moduleName() != cls.moduleName()) {
     auto const& packageInfo = g_context->getPackageInfo();
     if (packageInfo.violatesDeploymentBoundary(cls)) {
       raiseDeploymentBoundaryViolation(&cls);

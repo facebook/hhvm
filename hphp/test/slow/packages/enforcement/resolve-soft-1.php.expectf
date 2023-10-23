@@ -1,20 +1,14 @@
 Warning: Calling function soft_baz1 outside the active deployment is not allowed in %s/resolve-soft-1.php on line 7
 
-Warning: Calling function soft_foo outside the active deployment is not allowed in %s/resolve-soft-1.inc on line 7
-
 Warning: Calling function soft_baz2 outside the active deployment is not allowed in %s/resolve-soft-1.php on line 9
 
 Warning: Calling function soft_foo outside the active deployment is not allowed in %s/resolve-soft-1.php on line 10
 in soft_foo
 
 Warning: Calling function soft_baz3 outside the active deployment is not allowed in %s/resolve-soft-1.php on line 12
-
-Warning: Calling function soft_foo outside the active deployment is not allowed in %s/resolve-soft-1.inc on line 15
 in soft_foo
 
 Warning: Calling function soft_baz4 outside the active deployment is not allowed in %s/resolve-soft-1.php on line 15
-
-Warning: Accessing class SoftFoo outside the active deployment is not allowed in %s/resolve-soft-1.inc on line 19
 
 Warning: Calling function soft_baz5 outside the active deployment is not allowed in %s/resolve-soft-1.php on line 17
 

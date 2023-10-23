@@ -352,14 +352,19 @@ SSATmp* simplifyCallViolatesModuleBoundary(State& env,
 
 SSATmp* simplifyCallViolatesDeploymentBoundary(State& env,
                                                const IRInstruction* inst) {
+  auto const caller = inst->extra<FuncData>()->func;
   auto const& packageInfo = env.unit.packageInfo();
   if (inst->src(0)->hasConstVal(TFunc)) {
     auto const symbol = inst->src(0)->funcVal();
+    if (caller->moduleName() == symbol->moduleName()) return cns(env, false);
     return cns(env,
                packageInfo.violatesDeploymentBoundary(*symbol));
   }
   if (inst->src(0)->hasConstVal(TCls)) {
     auto const symbol = inst->src(0)->clsVal();
+    return cns(env,
+               packageInfo.violatesDeploymentBoundary(*symbol));
+    if (caller->moduleName() == symbol->moduleName()) return cns(env, false);
     return cns(env,
                packageInfo.violatesDeploymentBoundary(*symbol));
   }

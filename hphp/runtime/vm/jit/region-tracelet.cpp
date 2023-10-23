@@ -130,7 +130,7 @@ bool consumeInput(Env& env, const InputInfo& input) {
   if (input.dontGuard) return true;
   auto const type = irgen::provenType(env.irgs, input.loc);
 
-  if (!input.dontBreak && !type.isKnownDataType()) {
+  if (!type.isKnownDataType()) {
     // Trying to consume a value without a precise enough type.
     FTRACE(1, "selectTracelet: {} tried to consume {}, type {}\n",
            env.inst.toString(), show(input.loc), type.toString());

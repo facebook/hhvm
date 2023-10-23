@@ -767,7 +767,6 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, SBInvOffset bcSPOff) {
     for (int i = 0; i < numArgs; i++) {
       inputs.emplace_back(Location::Stack { stackOff-- });
       inputs.back().dontGuard = true;
-      inputs.back().dontBreak = true;
     }
   }
   if (flags & BStackN) {
@@ -777,7 +776,6 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, SBInvOffset bcSPOff) {
     for (int i = 0; i < numArgs; i++) {
       inputs.emplace_back(Location::Stack { stackOff-- });
       inputs.back().dontGuard = true;
-      inputs.back().dontBreak = true;
     }
   }
   if (isFCall(ni.op())) {
@@ -843,7 +841,6 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, SBInvOffset bcSPOff) {
     inputs.emplace_back(Location::MBase{});
     if (flags & DontGuardBase) {
       inputs.back().dontGuard = true;
-      inputs.back().dontBreak = true;
     }
   }
 

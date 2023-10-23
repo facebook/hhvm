@@ -104,7 +104,6 @@ inline bool opcodeIgnoresInnerType(const Op op) {
 
 inline std::string InputInfo::pretty() const {
   std::string p = show(loc);
-  if (dontBreak) p += ":dc";
   if (dontGuard) p += ":dg";
   return p;
 }

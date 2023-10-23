@@ -197,10 +197,6 @@ public:
   // Location specifier for the input.
   Location loc;
 
-  // If an input is unknowable, don't break the tracelet just to find its
-  // type---but still generate a guard if that will tell us its type.
-  bool dontBreak{false};
-
   // Never break the tracelet nor generate a guard on account of this input.
   bool dontGuard{false};
 };

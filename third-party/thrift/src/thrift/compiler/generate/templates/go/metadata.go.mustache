@@ -44,7 +44,7 @@ var _ = metadata.GoUnusedProtection__
 var structMetadatas = []*{{program:metadata_qualifier}}ThriftStruct{
     {{#program:structs}}
     {{^struct:exception?}}
-    {{> metadata/struct_metadata}},
+    {{> metadata/thrift_metadata_struct}},
     {{/struct:exception?}}
     {{/program:structs}}
 }
@@ -52,20 +52,20 @@ var structMetadatas = []*{{program:metadata_qualifier}}ThriftStruct{
 var exceptionMetadatas = []*{{program:metadata_qualifier}}ThriftException{
     {{#program:structs}}
     {{#struct:exception?}}
-    {{> metadata/exception_metadata}},
+    {{> metadata/thrift_metadata_exception}},
     {{/struct:exception?}}
     {{/program:structs}}
 }
 
 var enumMetadatas = []*{{program:metadata_qualifier}}ThriftEnum{
     {{#program:enums}}
-    {{> metadata/enum_metadata}},
+    {{> metadata/thrift_metadata_enum}},
     {{/program:enums}}
 }
 
 var serviceMetadatas = []*{{program:metadata_qualifier}}ThriftService{
     {{#program:services}}
-    {{> metadata/service_metadata}},
+    {{> metadata/thrift_metadata_service}},
     {{/program:services}}
 }
 

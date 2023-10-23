@@ -30,14 +30,14 @@
     SetArguments(
         []*{{program:metadata_qualifier}}ThriftField{
             {{#function:args}}
-            {{> metadata/field_metadata}},
+            {{> metadata/thrift_metadata_field}},
             {{/function:args}}
         },
     ){{/function:args?}}{{#function:exceptions?}}.
     SetExceptions(
         []*{{program:metadata_qualifier}}ThriftField{
             {{#function:exceptions}}
-            {{> metadata/field_metadata}},
+            {{> metadata/thrift_metadata_field}},
             {{/function:exceptions}}
         },
     ){{/function:exceptions?}}

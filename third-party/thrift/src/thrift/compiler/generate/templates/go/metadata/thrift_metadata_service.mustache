@@ -16,16 +16,22 @@
 
 }}{{!
 
-  This template defines metadata for a Thrift struct.
+  This template defines metadata for a Thrift service.
 
 }}
-{{program:metadata_qualifier}}NewThriftStruct().
-    SetName("{{struct:scoped_name}}").
-    SetIsUnion({{#struct:union?}}true{{/struct:union?}}{{^struct:union?}}false{{/struct:union?}}){{#struct:fields?}}.
-    SetFields(
-        []*{{program:metadata_qualifier}}ThriftField{
-            {{#struct:fields_sorted}}
-            {{> metadata/field_metadata}},
-            {{/struct:fields_sorted}}
+{{program:metadata_qualifier}}NewThriftService().
+    SetName("{{service:scoped_name}}").
+    {{#service:extends?}}
+    {{#service:extends}}
+    SetParent(thrift.StringPtr("{{service:scoped_name}}")).
+    {{/service:extends}}
+    {{/service:extends?}}
+    SetFunctions(
+        []*{{program:metadata_qualifier}}ThriftFunction{
+            {{#service:functions}}
+            {{#function:go_supported?}}
+            {{> metadata/thrift_metadata_function}},
+            {{/function:go_supported?}}
+            {{/service:functions}}
         },
-    ){{/struct:fields?}}
+    )

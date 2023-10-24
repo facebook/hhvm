@@ -64,8 +64,22 @@ var structMetadatas = []*metadata.ThriftStruct{
         },
     ),
     metadata.NewThriftStruct().
-    SetName("python.MarshalCapi").
-    SetIsUnion(false),
+    SetName("python.UseCAPI").
+    SetIsUnion(false).
+    SetFields(
+        []*metadata.ThriftField{
+            metadata.NewThriftField().
+    SetId(1).
+    SetName("serialize").
+    SetIsOptional(false).
+    SetType(
+        metadata.NewThriftType().
+    SetTPrimitive(
+        metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
+            ),
+    ),
+        },
+    ),
 }
 
 var exceptionMetadatas = []*metadata.ThriftException{

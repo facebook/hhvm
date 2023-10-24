@@ -44,7 +44,7 @@ def __EXPAND_THRIFT_SPEC(spec):
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'Py3Hidden', 'Flags', 'Name', 'Adapter', 'MarshalCapi']
+__all__ = ['UTF8STRINGS', 'Py3Hidden', 'Flags', 'Name', 'Adapter', 'UseCAPI']
 
 class Py3Hidden:
 
@@ -445,11 +445,16 @@ class Adapter:
   def _to_py_deprecated(self):
     return self
 
-class MarshalCapi:
+class UseCAPI:
+  r"""
+  Attributes:
+   - serialize
+  """
 
   thrift_spec = None
   thrift_field_annotations = None
   thrift_struct_annotations = None
+  __init__ = None
   @staticmethod
   def isUnion():
     return False
@@ -466,6 +471,11 @@ class MarshalCapi:
       (fname, ftype, fid) = iprot.readFieldBegin()
       if ftype == TType.STOP:
         break
+      if fid == 1:
+        if ftype == TType.BOOL:
+          self.serialize = iprot.readBool()
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -478,7 +488,11 @@ class MarshalCapi:
     if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
       oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
       return
-    oprot.writeStructBegin('MarshalCapi')
+    oprot.writeStructBegin('UseCAPI')
+    if self.serialize != None:
+      oprot.writeFieldBegin('serialize', TType.BOOL, 1)
+      oprot.writeBool(self.serialize)
+      oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
 
@@ -494,10 +508,16 @@ class MarshalCapi:
     json_obj = json
     if is_text:
       json_obj = loads(json)
+    if 'serialize' in json_obj and json_obj['serialize'] is not None:
+      self.serialize = json_obj['serialize']
 
   def __repr__(self):
     L = []
     padding = ' ' * 4
+    if self.serialize is not None:
+      value = pprint.pformat(self.serialize, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    serialize=%s' % (value))
     return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
 
   def __eq__(self, other):
@@ -511,6 +531,7 @@ class MarshalCapi:
 
   def __dir__(self):
     return (
+      'serialize',
     )
 
   __hash__ = object.__hash__
@@ -519,13 +540,13 @@ class MarshalCapi:
     import importlib
     import thrift.python.converter
     python_types = importlib.import_module("facebook.thrift.annotation.python.thrift_types")
-    return thrift.python.converter.to_python_struct(python_types.MarshalCapi, self)
+    return thrift.python.converter.to_python_struct(python_types.UseCAPI, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
     py3_types = importlib.import_module("facebook.thrift.annotation.python.types")
-    return thrift.py3.converter.to_py3_struct(py3_types.MarshalCapi, self)
+    return thrift.py3.converter.to_py3_struct(py3_types.UseCAPI, self)
 
   def _to_py_deprecated(self):
     return self
@@ -596,15 +617,28 @@ def Adapter__setstate__(self, state):
 Adapter.__getstate__ = lambda self: self.__dict__.copy()
 Adapter.__setstate__ = Adapter__setstate__
 
-all_structs.append(MarshalCapi)
-MarshalCapi.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+all_structs.append(UseCAPI)
+UseCAPI.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+  (1, TType.BOOL, 'serialize', None, False, 2, ), # 1
 )))
 
-MarshalCapi.thrift_struct_annotations = {
-  "thrift.uri": "facebook.com/thrift/annotation/python/MarshalCapi",
+UseCAPI.thrift_struct_annotations = {
+  "thrift.uri": "facebook.com/thrift/annotation/python/UseCAPI",
 }
-MarshalCapi.thrift_field_annotations = {
+UseCAPI.thrift_field_annotations = {
 }
+
+def UseCAPI__init__(self, serialize=UseCAPI.thrift_spec[1][4],):
+  self.serialize = serialize
+
+UseCAPI.__init__ = UseCAPI__init__
+
+def UseCAPI__setstate__(self, state):
+  state.setdefault('serialize', False)
+  self.__dict__ = state
+
+UseCAPI.__getstate__ = lambda self: self.__dict__.copy()
+UseCAPI.__setstate__ = UseCAPI__setstate__
 
 fix_spec(all_structs)
 del all_structs

@@ -607,40 +607,101 @@ func (x *Adapter) String() string {
     return sb.String()
 }
 
-type MarshalCapi struct {
+type UseCAPI struct {
+    Serialize bool `thrift:"serialize,1" json:"serialize" db:"serialize"`
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &MarshalCapi{}
+var _ thrift.Struct = &UseCAPI{}
 
-func NewMarshalCapi() *MarshalCapi {
-    return (&MarshalCapi{})
+func NewUseCAPI() *UseCAPI {
+    return (&UseCAPI{}).
+        SetSerializeNonCompat(false)
+}
+
+func (x *UseCAPI) GetSerializeNonCompat() bool {
+    return x.Serialize
+}
+
+func (x *UseCAPI) GetSerialize() bool {
+    return x.Serialize
+}
+
+func (x *UseCAPI) SetSerializeNonCompat(value bool) *UseCAPI {
+    x.Serialize = value
+    return x
+}
+
+func (x *UseCAPI) SetSerialize(value bool) *UseCAPI {
+    x.Serialize = value
+    return x
+}
+
+func (x *UseCAPI) writeField1(p thrift.Protocol) error {  // Serialize
+    if err := p.WriteFieldBegin("serialize", thrift.BOOL, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetSerializeNonCompat()
+    if err := p.WriteBool(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *UseCAPI) readField1(p thrift.Protocol) error {  // Serialize
+    result, err := p.ReadBool()
+if err != nil {
+    return err
+}
+
+    x.SetSerializeNonCompat(result)
+    return nil
+}
+
+func (x *UseCAPI) toString1() string {  // Serialize
+    return fmt.Sprintf("%v", x.GetSerializeNonCompat())
 }
 
 
 // Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMarshalCapi().Set<FieldNameFoo>().Set<FieldNameBar>()
-type MarshalCapiBuilder struct {
-    obj *MarshalCapi
+// e.g NewUseCAPI().Set<FieldNameFoo>().Set<FieldNameBar>()
+type UseCAPIBuilder struct {
+    obj *UseCAPI
 }
 
 // Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMarshalCapi().Set<FieldNameFoo>().Set<FieldNameBar>()
-func NewMarshalCapiBuilder() *MarshalCapiBuilder {
-    return &MarshalCapiBuilder{
-        obj: NewMarshalCapi(),
+// e.g NewUseCAPI().Set<FieldNameFoo>().Set<FieldNameBar>()
+func NewUseCAPIBuilder() *UseCAPIBuilder {
+    return &UseCAPIBuilder{
+        obj: NewUseCAPI(),
     }
 }
 
 // Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewMarshalCapi().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MarshalCapiBuilder) Emit() *MarshalCapi {
-    var objCopy MarshalCapi = *x.obj
+// e.g NewUseCAPI().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *UseCAPIBuilder) Serialize(value bool) *UseCAPIBuilder {
+    x.obj.Serialize = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewUseCAPI().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *UseCAPIBuilder) Emit() *UseCAPI {
+    var objCopy UseCAPI = *x.obj
     return &objCopy
 }
 
-func (x *MarshalCapi) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("MarshalCapi"); err != nil {
+func (x *UseCAPI) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("UseCAPI"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
     }
 
     if err := p.WriteFieldStop(); err != nil {
@@ -653,7 +714,7 @@ func (x *MarshalCapi) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *MarshalCapi) Read(p thrift.Protocol) error {
+func (x *UseCAPI) Read(p thrift.Protocol) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -669,6 +730,17 @@ func (x *MarshalCapi) Read(p thrift.Protocol) error {
         }
 
         switch id {
+        case 1:  // serialize
+            expectedType := thrift.Type(thrift.BOOL)
+            if wireType == expectedType {
+                if err := x.readField1(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
         default:
             if err := p.Skip(wireType); err != nil {
                 return err
@@ -687,14 +759,15 @@ func (x *MarshalCapi) Read(p thrift.Protocol) error {
     return nil
 }
 
-func (x *MarshalCapi) String() string {
+func (x *UseCAPI) String() string {
     if x == nil {
         return "<nil>"
     }
 
     var sb strings.Builder
 
-    sb.WriteString("MarshalCapi({")
+    sb.WriteString("UseCAPI({")
+    sb.WriteString(fmt.Sprintf("Serialize:%s", x.toString1()))
     sb.WriteString("})")
 
     return sb.String()
@@ -708,6 +781,6 @@ func RegisterTypes(registry interface {
     registry.RegisterType("facebook.com/thrift/annotation/python/Flags", func() any { return NewFlags() })
     registry.RegisterType("facebook.com/thrift/annotation/python/Name", func() any { return NewName() })
     registry.RegisterType("facebook.com/thrift/annotation/python/Adapter", func() any { return NewAdapter() })
-    registry.RegisterType("facebook.com/thrift/annotation/python/MarshalCapi", func() any { return NewMarshalCapi() })
+    registry.RegisterType("facebook.com/thrift/annotation/python/UseCAPI", func() any { return NewUseCAPI() })
 
 }

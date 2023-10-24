@@ -26,6 +26,9 @@ bool ensure_module_imported() {
       ::import_module__thrift_types_capi));
   return import();
 }
+  static constexpr std::int16_t _fbthrift__MyStruct__tuple_pos[3] = {
+    1, 2, 3
+  };
 } // namespace
 
 ExtractorResult<::cpp2::MyStruct>
@@ -48,20 +51,17 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::cpp2::MyStruct>>::operator()(PyObject* fbThriftData) {
   ::cpp2::MyStruct cpp;
   std::optional<std::string_view> error;
-  const int _fbthrift__tuple_pos[3] = {
-    1, 2, 3
-  };
   Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Included>>{}.extractInto(
       cpp.MyIncludedField_ref(),
-      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyStruct__tuple_pos[0]),
       error);
   Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Included>>{}.extractInto(
       cpp.MyOtherIncludedField_ref(),
-      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[1]),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyStruct__tuple_pos[1]),
       error);
   Extractor<int64_t>{}.extractInto(
       cpp.MyIncludedInt_ref(),
-      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[2]),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyStruct__tuple_pos[2]),
       error);
   if (error) {
     return folly::makeUnexpected(*error);
@@ -103,29 +103,35 @@ PyObject* Constructor<::cpp2::MyStruct>::operator()(
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::MyStruct>>::operator()(
     FOLLY_MAYBE_UNUSED const ::cpp2::MyStruct& val) {
-  const int _fbthrift__tuple_pos[3] = {
-    1, 2, 3
-  };
   StrongRef fbthrift_data(createStructTuple(3));
   StrongRef _fbthrift__MyIncludedField(
     Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Included>>{}
     .constructFrom(val.MyIncludedField_ref()));
   if (!_fbthrift__MyIncludedField ||
-      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__MyIncludedField) == -1) {
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__MyStruct__tuple_pos[0],
+          *_fbthrift__MyIncludedField) == -1) {
     return nullptr;
   }
   StrongRef _fbthrift__MyOtherIncludedField(
     Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Included>>{}
     .constructFrom(val.MyOtherIncludedField_ref()));
   if (!_fbthrift__MyOtherIncludedField ||
-      setStructField(*fbthrift_data, _fbthrift__tuple_pos[1], *_fbthrift__MyOtherIncludedField) == -1) {
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__MyStruct__tuple_pos[1],
+          *_fbthrift__MyOtherIncludedField) == -1) {
     return nullptr;
   }
   StrongRef _fbthrift__MyIncludedInt(
     Constructor<int64_t>{}
     .constructFrom(val.MyIncludedInt_ref()));
   if (!_fbthrift__MyIncludedInt ||
-      setStructField(*fbthrift_data, _fbthrift__tuple_pos[2], *_fbthrift__MyIncludedInt) == -1) {
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__MyStruct__tuple_pos[2],
+          *_fbthrift__MyIncludedInt) == -1) {
     return nullptr;
   }
   return std::move(fbthrift_data).release();

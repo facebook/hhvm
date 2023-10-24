@@ -25,6 +25,12 @@ bool ensure_module_imported() {
       ::import_with_containers__thrift_types_capi));
   return import();
 }
+  static constexpr std::int16_t _fbthrift__AnnotationWithContainers__tuple_pos[2] = {
+    1, 2
+  };
+  static constexpr std::int16_t _fbthrift__MyStruct__tuple_pos[1] = {
+    1
+  };
 } // namespace
 
 ExtractorResult<::cpp2::AnnotationWithContainers>
@@ -47,16 +53,13 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::cpp2::AnnotationWithContainers>>::operator()(PyObject* fbThriftData) {
   ::cpp2::AnnotationWithContainers cpp;
   std::optional<std::string_view> error;
-  const int _fbthrift__tuple_pos[2] = {
-    1, 2
-  };
   Extractor<list<Bytes>>{}.extractInto(
       cpp.names_ref(),
-      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__AnnotationWithContainers__tuple_pos[0]),
       error);
   Extractor<map<Bytes, int32_t>>{}.extractInto(
       cpp.counts_ref(),
-      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[1]),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__AnnotationWithContainers__tuple_pos[1]),
       error);
   if (error) {
     return folly::makeUnexpected(*error);
@@ -98,22 +101,25 @@ PyObject* Constructor<::cpp2::AnnotationWithContainers>::operator()(
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::AnnotationWithContainers>>::operator()(
     FOLLY_MAYBE_UNUSED const ::cpp2::AnnotationWithContainers& val) {
-  const int _fbthrift__tuple_pos[2] = {
-    1, 2
-  };
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__names(
     Constructor<list<Bytes>>{}
     .constructFrom(val.names_ref()));
   if (!_fbthrift__names ||
-      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__names) == -1) {
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__AnnotationWithContainers__tuple_pos[0],
+          *_fbthrift__names) == -1) {
     return nullptr;
   }
   StrongRef _fbthrift__counts(
     Constructor<map<Bytes, int32_t>>{}
     .constructFrom(val.counts_ref()));
   if (!_fbthrift__counts ||
-      setStructField(*fbthrift_data, _fbthrift__tuple_pos[1], *_fbthrift__counts) == -1) {
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__AnnotationWithContainers__tuple_pos[1],
+          *_fbthrift__counts) == -1) {
     return nullptr;
   }
   return std::move(fbthrift_data).release();
@@ -140,12 +146,9 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::cpp2::MyStruct>>::operator()(PyObject* fbThriftData) {
   ::cpp2::MyStruct cpp;
   std::optional<std::string_view> error;
-  const int _fbthrift__tuple_pos[1] = {
-    1
-  };
   Extractor<int32_t>{}.extractInto(
       cpp.abc_ref(),
-      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyStruct__tuple_pos[0]),
       error);
   if (error) {
     return folly::makeUnexpected(*error);
@@ -187,15 +190,15 @@ PyObject* Constructor<::cpp2::MyStruct>::operator()(
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::MyStruct>>::operator()(
     FOLLY_MAYBE_UNUSED const ::cpp2::MyStruct& val) {
-  const int _fbthrift__tuple_pos[1] = {
-    1
-  };
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__abc(
     Constructor<int32_t>{}
     .constructFrom(val.abc_ref()));
   if (!_fbthrift__abc ||
-      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__abc) == -1) {
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__MyStruct__tuple_pos[0],
+          *_fbthrift__abc) == -1) {
     return nullptr;
   }
   return std::move(fbthrift_data).release();

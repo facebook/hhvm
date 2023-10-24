@@ -415,29 +415,47 @@ func (p *Adapter) String() string {
   return fmt.Sprintf("Adapter({Name:%s TypeHint:%s})", nameVal, typeHintVal)
 }
 
-type MarshalCapi struct {
+// Attributes:
+//  - Serialize
+type UseCAPI struct {
+  Serialize bool `thrift:"serialize,1" db:"serialize" json:"serialize"`
 }
 
-func NewMarshalCapi() *MarshalCapi {
-  return &MarshalCapi{}
+func NewUseCAPI() *UseCAPI {
+  return &UseCAPI{}
 }
 
-type MarshalCapiBuilder struct {
-  obj *MarshalCapi
+
+func (p *UseCAPI) GetSerialize() bool {
+  return p.Serialize
+}
+type UseCAPIBuilder struct {
+  obj *UseCAPI
 }
 
-func NewMarshalCapiBuilder() *MarshalCapiBuilder{
-  return &MarshalCapiBuilder{
-    obj: NewMarshalCapi(),
+func NewUseCAPIBuilder() *UseCAPIBuilder{
+  return &UseCAPIBuilder{
+    obj: NewUseCAPI(),
   }
 }
 
-func (p MarshalCapiBuilder) Emit() *MarshalCapi{
-  return &MarshalCapi{
+func (p UseCAPIBuilder) Emit() *UseCAPI{
+  return &UseCAPI{
+    Serialize: p.obj.Serialize,
   }
 }
 
-func (p *MarshalCapi) Read(iprot thrift.Protocol) error {
+func (u *UseCAPIBuilder) Serialize(serialize bool) *UseCAPIBuilder {
+  u.obj.Serialize = serialize
+  return u
+}
+
+func (u *UseCAPI) SetSerialize(serialize bool) *UseCAPI {
+  u.Serialize = serialize
+  return u
+}
+
+func (p *UseCAPI) Read(iprot thrift.Protocol) error {
   if _, err := iprot.ReadStructBegin(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
   }
@@ -449,8 +467,15 @@ func (p *MarshalCapi) Read(iprot thrift.Protocol) error {
       return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
     }
     if fieldTypeId == thrift.STOP { break; }
-    if err := iprot.Skip(fieldTypeId); err != nil {
-      return err
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
     }
     if err := iprot.ReadFieldEnd(); err != nil {
       return err
@@ -462,9 +487,19 @@ func (p *MarshalCapi) Read(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MarshalCapi) Write(oprot thrift.Protocol) error {
-  if err := oprot.WriteStructBegin("MarshalCapi"); err != nil {
+func (p *UseCAPI)  ReadField1(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadBool(); err != nil {
+    return thrift.PrependError("error reading field 1: ", err)
+  } else {
+    p.Serialize = v
+  }
+  return nil
+}
+
+func (p *UseCAPI) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("UseCAPI"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
   if err := oprot.WriteFieldStop(); err != nil {
     return thrift.PrependError("write field stop error: ", err) }
   if err := oprot.WriteStructEnd(); err != nil {
@@ -472,11 +507,22 @@ func (p *MarshalCapi) Write(oprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MarshalCapi) String() string {
+func (p *UseCAPI) writeField1(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("serialize", thrift.BOOL, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:serialize: ", p), err) }
+  if err := oprot.WriteBool(bool(p.Serialize)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.serialize (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:serialize: ", p), err) }
+  return err
+}
+
+func (p *UseCAPI) String() string {
   if p == nil {
     return "<nil>"
   }
 
-  return fmt.Sprintf("MarshalCapi({})")
+  serializeVal := fmt.Sprintf("%v", p.Serialize)
+  return fmt.Sprintf("UseCAPI({Serialize:%s})", serializeVal)
 }
 

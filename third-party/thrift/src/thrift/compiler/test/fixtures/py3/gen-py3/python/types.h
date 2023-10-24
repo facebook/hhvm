@@ -57,9 +57,12 @@ inline void reset_field<::facebook::thrift::annotation::python::Adapter>(
 }
 
 template<>
-inline void reset_field<::facebook::thrift::annotation::python::MarshalCapi>(
-    ::facebook::thrift::annotation::python::MarshalCapi& obj, uint16_t index) {
+inline void reset_field<::facebook::thrift::annotation::python::UseCAPI>(
+    ::facebook::thrift::annotation::python::UseCAPI& obj, uint16_t index) {
   switch (index) {
+    case 0:
+      obj.serialize_ref().copy_from(default_inst<::facebook::thrift::annotation::python::UseCAPI>().serialize_ref());
+      return;
   }
 }
 
@@ -105,7 +108,7 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::facebook::thrift::annotation::python::MarshalCapi>::namesmap() {
+    ::facebook::thrift::annotation::python::UseCAPI>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

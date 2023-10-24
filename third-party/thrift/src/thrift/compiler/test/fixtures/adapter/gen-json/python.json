@@ -122,21 +122,36 @@
         }
       }
     },
-    "MarshalCapi" : {
-      "lineno" : 80,
+    "UseCAPI" : {
+      "lineno" : 84,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
-
+        "serialize" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "default_value" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 86,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 86,
+              "column" : 29
+            }
+          }
+        }
       },
       "source_range" : {
         "begin" : {
-          "line" : 80,
+          "line" : 84,
           "column" : 1
         },
         "end" : {
-          "line" : 83,
-          "column" : 2
+          "line" : 87,
+          "column" : 65
         }
       }
     }

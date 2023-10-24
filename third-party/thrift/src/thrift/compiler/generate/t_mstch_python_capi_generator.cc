@@ -114,10 +114,6 @@ std::string_view get_annotation_property(
   return "";
 }
 
-bool marshal_capi_override_annotation(const t_named& node) {
-  return node.find_structured_annotation_or_null(kMarshalCapiUri) != nullptr;
-}
-
 inline std::string get_capi_include(
     const t_program* prog, const t_program* this_prog) {
   const std::string& prefix = prog->include_prefix();
@@ -483,11 +479,21 @@ class python_capi_mstch_struct : public mstch_struct {
   }
 
   mstch::node marshal_capi() {
-    if (struct_->generated() || has_option("serialize_python_capi")) {
+    const auto marshal_override =
+        struct_->find_structured_annotation_or_null(kUseCAPIUri);
+    auto force_serialize = [marshal_override]() {
+      const auto serialize_field = marshal_override
+          ? marshal_override->get_value_from_structured_annotation_or_null(
+                "serialize")
+          : nullptr;
+      return serialize_field && serialize_field->get_bool();
+    };
+
+    if (struct_->generated() || has_option("serialize_python_capi") ||
+        force_serialize()) {
       return false;
     }
-    if (has_option("marshal_python_capi") ||
-        marshal_capi_override_annotation(*struct_)) {
+    if (has_option("marshal_python_capi") || marshal_override) {
       return true;
     } else if (struct_->is_union()) {
       // unions work opt-in

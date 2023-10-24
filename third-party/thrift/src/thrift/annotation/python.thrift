@@ -76,8 +76,12 @@ struct Adapter {
   2: string typeHint;
 } (thrift.uri = "facebook.com/thrift/annotation/python/Adapter")
 
-// Use to opt-in a struct or union to cpp <-> python marshaling instead of serialization.
+// Controls cpp <-> python FFI for a struct or union
+// By default, struct uses marshal C API unless cpp.Type or cpp.Adapter is present
+// on a field or a type
+// Use this annotation to opt-in struct to marshal in spite of cpp.Type or cpp.Adapter
+// Alternatively, use this struct with serialize = false to use serialization for FFI.
 @scope.Structured
-struct MarshalCapi {} (
-  thrift.uri = "facebook.com/thrift/annotation/python/MarshalCapi",
-)
+struct UseCAPI {
+  1: bool serialize = false;
+} (thrift.uri = "facebook.com/thrift/annotation/python/UseCAPI")

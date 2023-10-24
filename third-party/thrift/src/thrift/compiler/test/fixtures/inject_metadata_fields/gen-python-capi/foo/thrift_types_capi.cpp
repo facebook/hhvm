@@ -25,6 +25,9 @@ bool ensure_module_imported() {
       ::import_foo__thrift_types_capi));
   return import();
 }
+  static constexpr std::int16_t _fbthrift__Fields__tuple_pos[3] = {
+    1, 2, 3
+  };
 } // namespace
 
 ExtractorResult<::cpp2::Fields>
@@ -47,20 +50,17 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::cpp2::Fields>>::operator()(PyObject* fbThriftData) {
   ::cpp2::Fields cpp;
   std::optional<std::string_view> error;
-  const int _fbthrift__tuple_pos[3] = {
-    1, 2, 3
-  };
   Extractor<Bytes>{}.extractInto(
       cpp.injected_field_ref(),
-      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Fields__tuple_pos[0]),
       error);
   Extractor<Bytes>{}.extractInto(
       cpp.injected_structured_annotation_field_ref(),
-      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[1]),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Fields__tuple_pos[1]),
       error);
   Extractor<Bytes>{}.extractInto(
       cpp.injected_unstructured_annotation_field_ref(),
-      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[2]),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Fields__tuple_pos[2]),
       error);
   if (error) {
     return folly::makeUnexpected(*error);
@@ -102,29 +102,35 @@ PyObject* Constructor<::cpp2::Fields>::operator()(
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::Fields>>::operator()(
     FOLLY_MAYBE_UNUSED const ::cpp2::Fields& val) {
-  const int _fbthrift__tuple_pos[3] = {
-    1, 2, 3
-  };
   StrongRef fbthrift_data(createStructTuple(3));
   StrongRef _fbthrift__injected_field(
     Constructor<Bytes>{}
     .constructFrom(val.injected_field_ref()));
   if (!_fbthrift__injected_field ||
-      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__injected_field) == -1) {
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Fields__tuple_pos[0],
+          *_fbthrift__injected_field) == -1) {
     return nullptr;
   }
   StrongRef _fbthrift__injected_structured_annotation_field(
     Constructor<Bytes>{}
     .constructFrom(val.injected_structured_annotation_field_ref()));
   if (!_fbthrift__injected_structured_annotation_field ||
-      setStructField(*fbthrift_data, _fbthrift__tuple_pos[1], *_fbthrift__injected_structured_annotation_field) == -1) {
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Fields__tuple_pos[1],
+          *_fbthrift__injected_structured_annotation_field) == -1) {
     return nullptr;
   }
   StrongRef _fbthrift__injected_unstructured_annotation_field(
     Constructor<Bytes>{}
     .constructFrom(val.injected_unstructured_annotation_field_ref()));
   if (!_fbthrift__injected_unstructured_annotation_field ||
-      setStructField(*fbthrift_data, _fbthrift__tuple_pos[2], *_fbthrift__injected_unstructured_annotation_field) == -1) {
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Fields__tuple_pos[2],
+          *_fbthrift__injected_unstructured_annotation_field) == -1) {
     return nullptr;
   }
   return std::move(fbthrift_data).release();

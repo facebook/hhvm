@@ -27,6 +27,21 @@ bool ensure_module_imported() {
       ::import_test__fixtures__patch__module__thrift_types_capi));
   return import();
 }
+  static constexpr std::int16_t _fbthrift__MyData__tuple_pos[2] = {
+    1, 2
+  };
+  static constexpr std::int16_t _fbthrift__MyDataWithCustomDefault__tuple_pos[2] = {
+    1, 2
+  };
+  static constexpr std::int16_t _fbthrift__Recursive__tuple_pos[1] = {
+    1
+  };
+  static constexpr std::int16_t _fbthrift__Bar__tuple_pos[1] = {
+    1
+  };
+  static constexpr std::int16_t _fbthrift__Loop__tuple_pos[1] = {
+    1
+  };
 } // namespace
 
 ExtractorResult<::test::fixtures::patch::MyData>
@@ -49,16 +64,13 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::test::fixtures::patch::MyData>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::patch::MyData cpp;
   std::optional<std::string_view> error;
-  const int _fbthrift__tuple_pos[2] = {
-    1, 2
-  };
   Extractor<Bytes>{}.extractInto(
       cpp.data1_ref(),
-      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyData__tuple_pos[0]),
       error);
   Extractor<int32_t>{}.extractInto(
       cpp.data2_ref(),
-      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[1]),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyData__tuple_pos[1]),
       error);
   if (error) {
     return folly::makeUnexpected(*error);
@@ -100,22 +112,25 @@ PyObject* Constructor<::test::fixtures::patch::MyData>::operator()(
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::patch::MyData>>::operator()(
     FOLLY_MAYBE_UNUSED const ::test::fixtures::patch::MyData& val) {
-  const int _fbthrift__tuple_pos[2] = {
-    1, 2
-  };
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__data1(
     Constructor<Bytes>{}
     .constructFrom(val.data1_ref()));
   if (!_fbthrift__data1 ||
-      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__data1) == -1) {
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__MyData__tuple_pos[0],
+          *_fbthrift__data1) == -1) {
     return nullptr;
   }
   StrongRef _fbthrift__data2(
     Constructor<int32_t>{}
     .constructFrom(val.data2_ref()));
   if (!_fbthrift__data2 ||
-      setStructField(*fbthrift_data, _fbthrift__tuple_pos[1], *_fbthrift__data2) == -1) {
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__MyData__tuple_pos[1],
+          *_fbthrift__data2) == -1) {
     return nullptr;
   }
   return std::move(fbthrift_data).release();
@@ -142,16 +157,13 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::test::fixtures::patch::MyDataWithCustomDefault>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::patch::MyDataWithCustomDefault cpp;
   std::optional<std::string_view> error;
-  const int _fbthrift__tuple_pos[2] = {
-    1, 2
-  };
   Extractor<Bytes>{}.extractInto(
       cpp.data1_ref(),
-      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyDataWithCustomDefault__tuple_pos[0]),
       error);
   Extractor<int32_t>{}.extractInto(
       cpp.data2_ref(),
-      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[1]),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyDataWithCustomDefault__tuple_pos[1]),
       error);
   if (error) {
     return folly::makeUnexpected(*error);
@@ -193,22 +205,25 @@ PyObject* Constructor<::test::fixtures::patch::MyDataWithCustomDefault>::operato
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::patch::MyDataWithCustomDefault>>::operator()(
     FOLLY_MAYBE_UNUSED const ::test::fixtures::patch::MyDataWithCustomDefault& val) {
-  const int _fbthrift__tuple_pos[2] = {
-    1, 2
-  };
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__data1(
     Constructor<Bytes>{}
     .constructFrom(val.data1_ref()));
   if (!_fbthrift__data1 ||
-      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__data1) == -1) {
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__MyDataWithCustomDefault__tuple_pos[0],
+          *_fbthrift__data1) == -1) {
     return nullptr;
   }
   StrongRef _fbthrift__data2(
     Constructor<int32_t>{}
     .constructFrom(val.data2_ref()));
   if (!_fbthrift__data2 ||
-      setStructField(*fbthrift_data, _fbthrift__tuple_pos[1], *_fbthrift__data2) == -1) {
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__MyDataWithCustomDefault__tuple_pos[1],
+          *_fbthrift__data2) == -1) {
     return nullptr;
   }
   return std::move(fbthrift_data).release();
@@ -517,12 +532,9 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::test::fixtures::patch::Recursive>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::patch::Recursive cpp;
   std::optional<std::string_view> error;
-  const int _fbthrift__tuple_pos[1] = {
-    1
-  };
   Extractor<map<Bytes, ::apache::thrift::python::capi::ComposedStruct<::test::fixtures::patch::Recursive>>>{}.extractInto(
       cpp.nodes_ref(),
-      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Recursive__tuple_pos[0]),
       error);
   if (error) {
     return folly::makeUnexpected(*error);
@@ -564,15 +576,15 @@ PyObject* Constructor<::test::fixtures::patch::Recursive>::operator()(
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::patch::Recursive>>::operator()(
     FOLLY_MAYBE_UNUSED const ::test::fixtures::patch::Recursive& val) {
-  const int _fbthrift__tuple_pos[1] = {
-    1
-  };
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__nodes(
     Constructor<map<Bytes, ::apache::thrift::python::capi::ComposedStruct<::test::fixtures::patch::Recursive>>>{}
     .constructFrom(val.nodes_ref()));
   if (!_fbthrift__nodes ||
-      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__nodes) == -1) {
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Recursive__tuple_pos[0],
+          *_fbthrift__nodes) == -1) {
     return nullptr;
   }
   return std::move(fbthrift_data).release();
@@ -599,12 +611,9 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::test::fixtures::patch::Bar>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::patch::Bar cpp;
   std::optional<std::string_view> error;
-  const int _fbthrift__tuple_pos[1] = {
-    1
-  };
   Extractor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::patch::Loop>>{}.extractInto(
       cpp.loop_ref(),
-      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Bar__tuple_pos[0]),
       error);
   if (error) {
     return folly::makeUnexpected(*error);
@@ -646,15 +655,15 @@ PyObject* Constructor<::test::fixtures::patch::Bar>::operator()(
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::patch::Bar>>::operator()(
     FOLLY_MAYBE_UNUSED const ::test::fixtures::patch::Bar& val) {
-  const int _fbthrift__tuple_pos[1] = {
-    1
-  };
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__loop(
     Constructor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::patch::Loop>>{}
     .constructFrom(val.loop_ref()));
   if (!_fbthrift__loop ||
-      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__loop) == -1) {
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Bar__tuple_pos[0],
+          *_fbthrift__loop) == -1) {
     return nullptr;
   }
   return std::move(fbthrift_data).release();
@@ -681,12 +690,9 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     ::test::fixtures::patch::Loop>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::patch::Loop cpp;
   std::optional<std::string_view> error;
-  const int _fbthrift__tuple_pos[1] = {
-    1
-  };
   Extractor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::patch::Bar>>{}.extractInto(
       cpp.bar_ref(),
-      PyTuple_GET_ITEM(fbThriftData, _fbthrift__tuple_pos[0]),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Loop__tuple_pos[0]),
       error);
   if (error) {
     return folly::makeUnexpected(*error);
@@ -728,15 +734,15 @@ PyObject* Constructor<::test::fixtures::patch::Loop>::operator()(
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::patch::Loop>>::operator()(
     FOLLY_MAYBE_UNUSED const ::test::fixtures::patch::Loop& val) {
-  const int _fbthrift__tuple_pos[1] = {
-    1
-  };
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__bar(
     Constructor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::patch::Bar>>{}
     .constructFrom(val.bar_ref()));
   if (!_fbthrift__bar ||
-      setStructField(*fbthrift_data, _fbthrift__tuple_pos[0], *_fbthrift__bar) == -1) {
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Loop__tuple_pos[0],
+          *_fbthrift__bar) == -1) {
     return nullptr;
   }
   return std::move(fbthrift_data).release();

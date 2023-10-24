@@ -452,25 +452,38 @@ class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
 
 /**
  * Original thrift struct:-
- * MarshalCapi
+ * UseCAPI
  */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/python/MarshalCapi'))>>
-class MarshalCapi implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/python/UseCAPI'))>>
+class UseCAPI implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'serialize',
+      'type' => \TType::BOOL,
+    ),
   ];
   const dict<string, int> FIELDMAP = dict[
+    'serialize' => 1,
   ];
 
   const type TConstructorShape = shape(
+    ?'serialize' => ?bool,
   );
 
   const type TShape = shape(
+    'serialize' => bool,
   );
-  const int STRUCTURAL_ID = 957977401221134810;
+  const int STRUCTURAL_ID = 1251623031795142618;
+  /**
+   * Original thrift field:-
+   * 1: bool serialize
+   */
+  public bool $serialize;
 
-  public function __construct()[] {
+  public function __construct(?bool $serialize = null)[] {
+    $this->serialize = $serialize ?? false;
   }
 
   public static function withDefaultValues()[]: this {
@@ -479,11 +492,12 @@ class MarshalCapi implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
 
   public static function fromShape(self::TConstructorShape $shape)[]: this {
     return new static(
+      Shapes::idx($shape, 'serialize'),
     );
   }
 
   public function getName()[]: string {
-    return 'MarshalCapi';
+    return 'UseCAPI';
   }
 
   public function clearTerseFields()[write_props]: void {
@@ -492,7 +506,20 @@ class MarshalCapi implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
-        "name" => "python.MarshalCapi",
+        "name" => "python.UseCAPI",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "serialize",
+            )
+          ),
+        ],
         "is_union" => false,
       )
     );
@@ -513,11 +540,13 @@ class MarshalCapi implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
+      $shape['serialize'],
     );
   }
 
   public function __toShape()[]: self::TShape {
     return shape(
+      'serialize' => $this->serialize,
     );
   }
   public function getInstanceKey()[write_props]: string {
@@ -531,6 +560,9 @@ class MarshalCapi implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
       throw new \TProtocolException("Cannot parse the given json string.");
     }
 
+    if (idx($parsed, 'serialize') !== null) {
+      $this->serialize = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['serialize']);
+    }
   }
 
 }

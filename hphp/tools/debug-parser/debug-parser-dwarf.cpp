@@ -29,6 +29,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include "llvm/DebugInfo/DWARF/DWARFContext.h"
+
 #include <dwarf.h>
 
 #include "hphp/util/assertions.h"
@@ -39,6 +41,7 @@
 
 #include "hphp/tools/debug-parser/debug-parser.h"
 #include "hphp/tools/debug-parser/dwarfstate.h"
+#include "hphp/tools/debug-parser/dwarf-context-manager.h"
 
 /*
  * Debug parser for DWARF (using dwarfstate)
@@ -1903,308 +1906,73 @@ void TypeParserImpl::fillFuncArgs(Dwarf_Die die, FuncType& func) {
   );
 }
 
-/*
-* Print out the DWARF header information, which is largely stored in the Context
-* struct. Aim to match output style of `llvm-dwarfdump` for comparison and
-* debugging purposes.
-*/
-void printContext(const DwarfState &dwarf, std::ostream &os,
-                  const debug_parser::DwarfState::Context *context) {
-  auto const compileUnit = context->unitType == DW_UT_compile ||
-                           context->unitType == DW_UT_split_compile;
-
-  os << fmt::format("{:#010x}:", context->offset)
-     << (compileUnit ? " Compile Unit:" : " Type Unit:")
-     << fmt::format(" length = {:#010x}",
-                    context->size - (context->is64Bit ? 12 : 4))
-     << fmt::format(", version = {:#06x}", context->version)
-     << fmt::format(", unit_type = {}", dwarf.utToString(context->unitType))
-     << fmt::format(", abbr_offset = {:#06x}", context->abbrevOffset)
-     << fmt::format(", addr_size = {:#04x}", context->addrSize);
-
-  if (compileUnit) {
-    os << fmt::format(", DWO_id = {:#018x}", context->dwoId);
-  } else {
-    os << fmt::format(", type_signature = {:#018x}", context->typeSignature)
-       << fmt::format(", type_offset = {:#06x}", context->typeOffset);
-  }
-
-  if (context->isDWP) {
-    os << fmt::format(", str_offsets_base = {:#010x}", context->strOffsetsBase)
-       << fmt::format(", rnglists_base = {:#010x}", context->rnglistsBase);
-  }
-
-  os << fmt::format(" (next unit at {:#010x})", context->offset + context->size)
-     << std::endl
-     << std::endl;
-}
-
-/*
- * Print out the given DIE (including children) in textual format to the given
- * ostream. Only actually print out DIEs which begin in the range between the
- * begin and end parameters.
- */
-
-void printDIE(std::ostream& os,
-              const DwarfState& dwarf,
-              Dwarf_Die die,
-              std::pair<uint64_t,GlobalOff>* sig,
-              std::size_t begin,
-              std::size_t end,
-              int indent = 0) {
-  auto tag = dwarf.getTag(die);
-  auto tag_name = dwarf.tagToString(tag);
-  auto name = dwarf.getDIEName(die);
-  auto offset = dwarf.getDIEOffset(die).offset();
-
-  auto const indentPadding = [](size_t count) {
-    return std::string(count * 2, ' ');
-  };
-
-  const auto recurse = [&]{
-    // Find the last child DIE which does not start with the begin/end
-    // range. This DIE is the first one which contains some data within the
-    // begin/end range, so that must be the first one to begin recursion at.
-    HPHP::Optional<uint64_t> first;
-    if (begin > 0) {
-      dwarf.forEachChild(
-        die,
-        [&](Dwarf_Die child) {
-          const auto offset = dwarf.getDIEOffset(child).offset();
-          if (offset <= begin) {
-            first = offset;
-            return true;
-          } else {
-            return false;
-          }
-        }
-      );
-    }
-
-    // Only actually recurse if this child DIE is the above computed first DIE,
-    // or one following it, and begins before the end parameter.
-    dwarf.forEachChild(
-      die,
-      [&](Dwarf_Die child) {
-        const auto offset = dwarf.getDIEOffset(child).offset();
-        if ((!first || offset >= *first) && offset < end) {
-          printDIE(os, dwarf, child, nullptr, begin, end, indent+1);
-        }
-        return offset < end;
-      }
-    );
-  };
-
-  if (offset < begin) {
-    recurse();
-    return;
-  } else if (offset >= end) {
-    return;
-  }
-
-  auto const printSig = [&] (uint64_t sig) {
-    return folly::sformat("ref_sig8:{:016x}", sig);
-  };
-
-  os << indentPadding(indent);
-  os << fmt::format("{:#010x}: ", offset) << tag_name << " (" << tag << ") \""
-     << name << "\"";
-  if (sig && sig->first) {
-    os << folly::sformat(" {{{} -> #{}}}", printSig(sig->first), sig->second);
-  }
-  os << "\n";
-
-  dwarf.forEachAttribute(
-    die,
-    [&](Dwarf_Attribute attr) {
-      auto const type = dwarf.getAttributeType(attr);
-      auto const attr_name = dwarf.attributeTypeToString(type);
-      auto const form = dwarf.getAttributeForm(attr);
-      auto const attr_form = dwarf.attributeFormToString(form);
-
-      auto attr_value = [&]() -> std::string {
-        if (type == DW_AT_ranges) {
-          // Dwarf v5 uses debug_rnglists, whereas previous versions use
-          // debug_ranges and both can coexist in the same file
-          auto const ranges = die->context->version >= 5 ?
-            dwarf.getRngLists(attr) :
-            dwarf.getRanges(attr);
-          auto const padding = indentPadding(indent + 2);
-          std::string res = fmt::format("{}", padding);
-          for (auto range : ranges) {
-            if (range.dwr_addr1 == DwarfState::Dwarf_Ranges::kSelection) {
-              folly::format(&res, "\n{}{:#010x} ", padding, range.dwr_addr2);
-            } else {
-              folly::format(&res, "\n{}[{:#018x}, {:#018x})",
-                            padding, range.dwr_addr1, range.dwr_addr2);
-            }
-          }
-          return res;
-        }
-        switch (dwarf.getAttributeForm(attr)) {
-          case DW_FORM_data1:
-          case DW_FORM_data2:
-          case DW_FORM_data4:
-          case DW_FORM_data8:
-          case DW_FORM_udata:
-            return folly::sformat("{}", dwarf.getAttributeValueUData(attr));
-
-          case DW_FORM_sdata:
-            return folly::sformat("{}", dwarf.getAttributeValueSData(attr));
-
-          case DW_FORM_string:
-          case DW_FORM_strp:
-            return folly::sformat(
-              "\"{}\"",
-              dwarf.getAttributeValueString(attr)
-            );
-
-          case DW_FORM_flag:
-          case DW_FORM_flag_present:
-            return dwarf.getAttributeValueFlag(attr) ? "true" : "false";
-
-          case DW_FORM_addr:
-            return folly::sformat(
-              "{:#010x}",
-              dwarf.getAttributeValueAddr(attr)
-            );
-
-          case DW_FORM_ref1:
-          case DW_FORM_ref2:
-          case DW_FORM_ref4:
-          case DW_FORM_ref8:
-          case DW_FORM_ref_udata:
-          case DW_FORM_ref_addr:
-            return folly::sformat("#{}", dwarf.getAttributeValueRef(attr));
-          case DW_FORM_ref_sig8: {
-            return printSig(dwarf.getAttributeValueSig8(attr));
-          }
-
-          case DW_FORM_exprloc: {
-            std::string output;
-            for (const auto& expr : dwarf.getAttributeValueExprLoc(attr)) {
-              if (expr.lr_atom == DW_OP_addr) {
-                output += folly::sformat(
-                  "<OP_addr: {:#x}>,",
-                  expr.lr_number
-                );
-              } else {
-                output += folly::sformat(
-                  "<{}:{}:{}:{}>,",
-                  dwarf.opToString(expr.lr_atom),
-                  expr.lr_number,
-                  expr.lr_number2,
-                  expr.lr_offset
-                );
-              }
-            }
-            return folly::sformat("Location: [{}]", output);
-          }
-
-          case DW_FORM_strx1:
-          case DW_FORM_strx2:
-          case DW_FORM_strx3:
-          case DW_FORM_strx4:
-            return folly::sformat(
-              "\"{}\"",
-              dwarf.getAttributeValueString(attr)
-            );
-
-          case DW_FORM_block1:
-          case DW_FORM_block2:
-          case DW_FORM_block4:
-          case DW_FORM_block: return "{BLOCK}";
-
-          case DW_FORM_indirect: return "{INDIRECT}";
-          case DW_FORM_sec_offset: return "{SECTION OFFSET}";
-          default: return "{UNKNOWN}";
-        }
-      }();
-
-      for (int i = 0; i < indent; ++i) {
-        os << "  ";
-      }
-      os << folly::sformat("   **** {} ({}) ==> {} [{}:{}]\n",
-                           attr_name, type, attr_value,
-                           attr_form, form);
-      return true;
-    }
-  );
-
-  recurse();
-}
-
 struct PrinterImpl : Printer {
-  explicit PrinterImpl(const std::string& filename): m_filename{filename} {}
-  void operator()(std::ostream& os,
-                  std::size_t begin,
-                  std::size_t end,
-                  bool dwp) const override {
-    DwarfState dwarf{m_filename};
+  explicit PrinterImpl(const std::string &filename)
+      : m_filename{filename}, m_dwarfContext{filename} {}
 
-    if (dwp) {
-      // DWP doesn't have a types section, to just print info
-      print_section(os, dwarf, true, true, begin, end);
-    } else {
-      print_section(os, dwarf, true, false, begin, end);
-      print_section(os, dwarf, false, false, begin, end);
-    }
+  void operator()(std::ostream &os, std::size_t begin = 0,
+                  std::size_t end = std::numeric_limits<std::size_t>::max(),
+                  bool dwp = false) const override {
 
-    os << std::flush;
-  }
-private:
-  void print_section(std::ostream& os,
-                     const DwarfState& dwarf,
-                     bool isInfo,
-                     bool isDWP,
-                     std::size_t begin,
-                     std::size_t end) const {
-    // If a non-default begin parameter was specified, first iterate over all
-    // the compilation units. Find the first compilation unit which at least
-    // partially lies within the range given by the begin parameter. This is the
-    // first compilation unit to begin printing from.
-    HPHP::Optional<uint64_t> last;
-    if (begin > 0) {
-      dwarf.forEachTopLevelUnit(
-        [&](Dwarf_Die cu) {
-          const auto offset = dwarf.getDIEOffset(cu).offset();
-          if (offset <= begin) last = offset;
-        },
-        isInfo,
-        isDWP
-      );
-    }
+    auto printUnits = [&](auto &&unitFunction) {
+      // If a non-default begin parameter was specified, first iterate over all
+      // the compilation units. Find the first compilation unit which at least
+      // partially lies within the range given by the begin parameter. This is
+      // the first compilation unit to begin printing from.
+      HPHP::Optional<uint64_t> last;
+      unitFunction([&](const std::unique_ptr<llvm::DWARFUnit> &unit) {
+        const auto offset = unit->getOffset();
+        if (offset > end)
+          return false;
+        if (offset <= begin)
+          last = offset;
+        return true;
+      });
 
-    // Now iterate over all the compilation units again. Only actually print out
-    // compilation units if they lie within the begin/end parameter range.
-    dwarf.forEachTopLevelUnit(
-      [&] (Dwarf_Die cu) {
-        auto context = cu->context;
-        auto type_offset = GlobalOff { context->typeOffset, context->isInfo, context->isDWP };
-        auto pair = std::make_pair(context->typeSignature, type_offset);
-        const auto offset = dwarf.getDIEOffset(cu).offset();
-        if (offset >= end) return false;
-        if ((!last || offset >= *last)) {
-          printContext(dwarf, os, context);
-          printDIE(
-            os,
-            dwarf,
-            cu,
-            &pair,
-            // If this compilation unit entirely lies within the begin/end
-            // range, specify a begin parameter of "0", which will stop
-            // printDIE() from doing range checks (which is more efficient).
-            (!last || (offset > *last)) ? 0 : begin,
-            end
-          );
+      // Now iterate over all the compilation units again. Only actually print
+      // out dies that lie within the last/end parameter range.
+      unitFunction([&](std::unique_ptr<llvm::DWARFUnit> &unit) {
+        const auto offset = unit->getOffset();
+        if (offset > end)
+          return false;
+        if (!last || offset >= *last) {
+          unit->dump(llvm::outs(), llvm::DIDumpOptions{});
+          llvm::DWARFDie unitDie =
+              unit->getUnitDIE(/*ExtractUnitDIEOnly=*/false);
+          for (auto const &die : unitDie.children()) {
+            printDie(os, die, last ? *last : begin, end, 1);
+          }
         }
         return true;
-      },
-      isInfo,
-      isDWP
-    );
+      });
+    };
+
+    if (!dwp) {
+      printUnits([&](auto &&func) { m_dwarfContext.forEachNormalUnit(func); });
+    } else {
+      printUnits([&](auto &&func) { m_dwarfContext.forEachDwoUnit(func); });
+    }
   }
+
+private:
+  /*
+   * Print out the given DIE (including children) in textual format to the given
+   * ostream. Only actually print out DIEs which begin in the range between the
+   * begin and end parameters.
+   */
+  void printDie(std::ostream &os, const llvm::DWARFDie &dwarfDie, size_t begin,
+                size_t end, unsigned level = 0) const {
+    if (dwarfDie.getOffset() >= begin && dwarfDie.getOffset() <= end) {
+      dwarfDie.dump(llvm::outs(), level);
+    }
+
+    for (auto const &child : dwarfDie.children()) {
+      printDie(os, child, begin, end, level + 1);
+    }
+  }
+
   std::string m_filename;
+  DWARFContextManager m_dwarfContext;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

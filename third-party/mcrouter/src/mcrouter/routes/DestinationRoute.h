@@ -382,11 +382,8 @@ class DestinationRoute {
       const std::shared_ptr<AxonContext>& axonCtx,
       const std::optional<uint64_t>& bucketId) const {
     // return true if axonlog is enabled and appending to axon client succeed.
-    auto axonLogRes = bucketId && axonCtx &&
-        spoolAxonProxy(fiber_local<RouterInfo>::getSharedCtx()->proxy(),
-                       req,
-                       axonCtx,
-                       *bucketId);
+    auto axonLogRes =
+        bucketId && axonCtx && spoolAxonProxy(req, axonCtx, *bucketId);
     // Try spool asynclog for mcreplay when:
     // 1. Axon is not enabled
     // 2. Axon is enabled, but isn't configured with fallback to Asynclog.

@@ -40,7 +40,6 @@ memcache::McDeleteRequest addDeleteRequestSource(
     memcache::McDeleteRequestSource source);
 
 FOLLY_NOINLINE bool spoolAxonProxy(
-    const ProxyBase& proxy,
     const memcache::McDeleteRequest& req,
     const std::shared_ptr<AxonContext>& axonCtx,
     uint64_t bucketId,

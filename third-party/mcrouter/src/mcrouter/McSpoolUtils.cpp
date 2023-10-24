@@ -22,7 +22,6 @@ memcache::McDeleteRequest addDeleteRequestSource(
 }
 
 FOLLY_NOINLINE bool spoolAxonProxy(
-    const ProxyBase& proxy,
     const memcache::McDeleteRequest& req,
     const std::shared_ptr<AxonContext>& axonCtx,
     uint64_t bucketId,
@@ -40,10 +39,7 @@ FOLLY_NOINLINE bool spoolAxonProxy(
     region.emplace(axonCtx->defaultRegionFilter);
     // otherwise it's a misconfig:
   } else {
-    MC_LOG_FAILURE(
-        proxy.router().opts(),
-        memcache::failure::Category::kBrokenLogic,
-        "Could not write to Axon proxy as no to destination region info provided");
+    // if no target region configured, don't spool to Axon
     return false;
   }
   std::optional<std::string> pool;

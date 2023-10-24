@@ -42,36 +42,6 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
 }
 } // namespace detail
 
-namespace {
-RequestLoggingContext buildRequestLoggingContext(
-    const ResponseRpcMetadata& metadata,
-    const std::optional<ResponseRpcError>& responseRpcError,
-    const server::TServerObserver::CallTimestamps& timestamps,
-    const ThriftRequestCore& thriftRequest) {
-  RequestLoggingContext requestLoggingContext;
-  requestLoggingContext.timestamps = timestamps;
-  requestLoggingContext.responseRpcError = responseRpcError;
-  if (auto payloadMetadata = metadata.payloadMetadata()) {
-    if (auto exceptionMetadata = payloadMetadata->exceptionMetadata_ref()) {
-      requestLoggingContext.exceptionMetaData = *exceptionMetadata;
-    }
-  }
-
-  const auto* reqContext = thriftRequest.getRequestContext();
-  if (const auto* clientId = reqContext->clientId()) {
-    requestLoggingContext.clientId = *clientId;
-  }
-  requestLoggingContext.methodName = reqContext->getMethodName();
-  if (const auto* requestId = reqContext->getClientRequestId()) {
-    requestLoggingContext.requestId = *requestId;
-  }
-  requestLoggingContext.requestStartedProcessing =
-      thriftRequest.isStartedProcessing();
-
-  return requestLoggingContext;
-}
-} // namespace
-
 ThriftRequestCore::ThriftRequestCore(
     server::ServerConfigs& serverConfigs,
     RequestRpcMetadata&& metadata,
@@ -215,6 +185,52 @@ ThriftRequestCore::LogRequestSampleCallback::~LogRequestSampleCallback() {
       handler.logSampled(samplingRatio, requestLoggingContext_);
     }
   }
+}
+
+RequestLoggingContext
+ThriftRequestCore::LogRequestSampleCallback::buildRequestLoggingContext(
+    const ResponseRpcMetadata& metadata,
+    const std::optional<ResponseRpcError>& responseRpcError,
+    const server::TServerObserver::CallTimestamps& timestamps,
+    const ThriftRequestCore& thriftRequest) {
+  RequestLoggingContext requestLoggingContext;
+  requestLoggingContext.timestamps = timestamps;
+  requestLoggingContext.responseRpcError = responseRpcError;
+  if (auto payloadMetadata = metadata.payloadMetadata()) {
+    if (auto exceptionMetadata = payloadMetadata->exceptionMetadata_ref()) {
+      requestLoggingContext.exceptionMetaData = *exceptionMetadata;
+    }
+  }
+
+  const auto& reqContext = thriftRequest.getRequestContext();
+  if (const auto* clientId = reqContext->clientId()) {
+    requestLoggingContext.clientId = *clientId;
+  }
+  requestLoggingContext.methodName = reqContext->getMethodName();
+  if (const auto* requestId = reqContext->getClientRequestId()) {
+    requestLoggingContext.requestId = *requestId;
+  }
+  requestLoggingContext.requestStartedProcessing =
+      thriftRequest.isStartedProcessing();
+
+  // final timeout
+  requestLoggingContext.finalQueueTimeoutMs = thriftRequest.queueTimeout_.value;
+  requestLoggingContext.finalTaskTimeoutMs = thriftRequest.taskTimeout_.value;
+  // server timeout
+  requestLoggingContext.serverQueueTimeoutMs =
+      thriftRequest.serverConfigs_.getQueueTimeout();
+  requestLoggingContext.serverTaskTimeoutMs =
+      thriftRequest.serverConfigs_.getTaskExpireTime();
+  requestLoggingContext.serverQueueTimeoutPct =
+      thriftRequest.serverConfigs_.getQueueTimeoutPct();
+  requestLoggingContext.serverUseClientTimeout =
+      thriftRequest.serverConfigs_.getUseClientTimeout();
+  // client timeout
+  requestLoggingContext.clientQueueTimeoutMs =
+      thriftRequest.clientQueueTimeout_;
+  requestLoggingContext.clientTimeoutMs = thriftRequest.clientTimeout_;
+
+  return requestLoggingContext;
 }
 
 MessageChannel::SendCallbackPtr ThriftRequestCore::createRequestLoggingCallback(

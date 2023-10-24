@@ -813,7 +813,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
         AttributeSource::OVERRIDE);
   }
 
-  bool getUseClientTimeout() const {
+  bool getUseClientTimeout() const override {
     return thriftConfig_.getUseClientTimeout().get();
   }
 
@@ -1122,7 +1122,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
    *
    * @return task expire time
    */
-  std::chrono::milliseconds getTaskExpireTime() const {
+  std::chrono::milliseconds getTaskExpireTime() const override {
     return thriftConfig_.getTaskExpireTime().get();
   }
 
@@ -1175,7 +1175,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
    *
    * @return queue timeout
    */
-  std::chrono::milliseconds getQueueTimeout() const {
+  std::chrono::milliseconds getQueueTimeout() const override {
     return thriftConfig_.getQueueTimeout().get();
   }
 
@@ -1184,7 +1184,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
    *
    * @return queue timeout percent
    */
-  uint32_t getQueueTimeoutPct() const {
+  uint32_t getQueueTimeoutPct() const override {
     return thriftConfig_.getQueueTimeoutPct().get();
   }
 

@@ -103,6 +103,12 @@ class MockServerConfigs : public apache::thrift::server::ServerConfigs {
       getHandlerExecutorKeepAlive,
       (),
       (const, override));
+  MOCK_METHOD(
+      std::chrono::milliseconds, getQueueTimeout, (), (const, override));
+  MOCK_METHOD(uint32_t, getQueueTimeoutPct, (), (const, override));
+  MOCK_METHOD(bool, getUseClientTimeout, (), (const, override));
+  MOCK_METHOD(
+      std::chrono::milliseconds, getTaskExpireTime, (), (const, override));
 };
 
 } // namespace apache::thrift::server::test

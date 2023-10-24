@@ -133,6 +133,30 @@ struct RequestLoggingContext {
   std::string clientId;
   // request id passed from the client
   std::string requestId;
+
+  // timeout settings
+  // final timeout values that are used by thrift server
+  std::chrono::milliseconds finalQueueTimeoutMs;
+  std::chrono::milliseconds finalTaskTimeoutMs;
+
+  // queue timout from thrift server
+  std::chrono::milliseconds serverQueueTimeoutMs;
+  // task timeout from thrift server
+  std::chrono::milliseconds serverTaskTimeoutMs;
+
+  // queue timeout passed from client
+  std::chrono::milliseconds clientQueueTimeoutMs;
+  // client timeout passed from client
+  std::chrono::milliseconds clientTimeoutMs;
+
+  // queue timeout pecentage from thrift server, it's used to derive the final
+  // queue timeout based on client timeout
+  uint32_t serverQueueTimeoutPct;
+
+  // by default server uses client timeout to set task timeout
+  // but server can opt-out to use the task timeout set from thrift server
+  bool serverUseClientTimeout;
+
   bool requestStartedProcessing;
 };
 

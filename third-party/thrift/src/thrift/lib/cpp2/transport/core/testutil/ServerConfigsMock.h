@@ -137,6 +137,22 @@ class ServerConfigsMock : public ServerConfigs {
     return {};
   }
 
+  std::chrono::milliseconds getQueueTimeout() const override {
+    return queueTimeout_;
+  }
+
+  uint32_t getQueueTimeoutPct() const override {
+    return thriftServerConfig_.getQueueTimeoutPct().get();
+  }
+
+  bool getUseClientTimeout() const override {
+    return thriftServerConfig_.getUseClientTimeout().get();
+  }
+
+  std::chrono::milliseconds getTaskExpireTime() const override {
+    return taskTimeout_;
+  }
+
  public:
   uint64_t maxResponseSize_{0};
   std::chrono::milliseconds queueTimeout_{std::chrono::milliseconds(500)};

@@ -18,6 +18,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <cstdint>
 #include <string>
 #include <variant>
 
@@ -222,6 +223,11 @@ class ServerConfigs {
       Cpp2RequestContext*, concurrency::PRIORITY defaultPriority) {
     return concurrency::ThreadManager::ExecutionScope(defaultPriority);
   }
+
+  virtual std::chrono::milliseconds getQueueTimeout() const = 0;
+  virtual uint32_t getQueueTimeoutPct() const = 0;
+  virtual bool getUseClientTimeout() const = 0;
+  virtual std::chrono::milliseconds getTaskExpireTime() const = 0;
 
  private:
   folly::relaxed_atomic<int32_t> activeRequests_{0};

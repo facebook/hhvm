@@ -130,6 +130,12 @@ class ThriftRequestCore : public ResponseChannelRequest {
     ~LogRequestSampleCallback() override;
 
    private:
+    RequestLoggingContext buildRequestLoggingContext(
+        const ResponseRpcMetadata& metadata,
+        const std::optional<ResponseRpcError>& responseRpcError,
+        const server::TServerObserver::CallTimestamps& timestamps,
+        const ThriftRequestCore& thriftRequest);
+
     RequestLoggingContext requestLoggingContext_;
     server::TServerObserver* observer_;
     MessageChannel::SendCallback* chainedCallback_;
@@ -528,6 +534,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
   friend struct QueueTimeout;
   friend struct TaskTimeout;
   friend class ThriftProcessor;
+  friend class LogRequestSampleCallback;
 
   server::TServerObserver::CallTimestamps& getTimestamps() {
     return static_cast<server::TServerObserver::CallTimestamps&>(

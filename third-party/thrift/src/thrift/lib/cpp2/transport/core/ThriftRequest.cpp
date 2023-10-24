@@ -47,7 +47,7 @@ RequestLoggingContext buildRequestLoggingContext(
     const ResponseRpcMetadata& metadata,
     const std::optional<ResponseRpcError>& responseRpcError,
     const server::TServerObserver::CallTimestamps& timestamps,
-    const Cpp2RequestContext& reqContext) {
+    const ThriftRequestCore& thriftRequest) {
   RequestLoggingContext requestLoggingContext;
   requestLoggingContext.timestamps = timestamps;
   requestLoggingContext.responseRpcError = responseRpcError;
@@ -57,13 +57,16 @@ RequestLoggingContext buildRequestLoggingContext(
     }
   }
 
-  if (const auto* clientId = reqContext.clientId()) {
+  const auto* reqContext = thriftRequest.getRequestContext();
+  if (const auto* clientId = reqContext->clientId()) {
     requestLoggingContext.clientId = *clientId;
   }
-  requestLoggingContext.methodName = reqContext.getMethodName();
-  if (const auto* requestId = reqContext.getClientRequestId()) {
+  requestLoggingContext.methodName = reqContext->getMethodName();
+  if (const auto* requestId = reqContext->getClientRequestId()) {
     requestLoggingContext.requestId = *requestId;
   }
+  requestLoggingContext.requestStartedProcessing =
+      thriftRequest.isStartedProcessing();
 
   return requestLoggingContext;
 }
@@ -158,11 +161,11 @@ ThriftRequestCore::LogRequestSampleCallback::LogRequestSampleCallback(
     const ResponseRpcMetadata& metadata,
     const std::optional<ResponseRpcError>& responseRpcError,
     const server::TServerObserver::CallTimestamps& timestamps,
-    const Cpp2RequestContext& reqContext,
+    const ThriftRequestCore& thriftRequest,
     server::TServerObserver* observer,
     MessageChannel::SendCallback* chainedCallback)
     : requestLoggingContext_(buildRequestLoggingContext(
-          metadata, responseRpcError, timestamps, reqContext)),
+          metadata, responseRpcError, timestamps, thriftRequest)),
       observer_(observer),
       chainedCallback_(chainedCallback) {}
 
@@ -195,7 +198,8 @@ ThriftRequestCore::LogRequestSampleCallback::~LogRequestSampleCallback() {
   const auto& samplingStatus =
       requestLoggingContext_.timestamps.getSamplingStatus();
 
-  if (samplingStatus.isEnabledByServer() && observer_) {
+  if (samplingStatus.isEnabledByServer() && observer_ &&
+      requestLoggingContext_.requestStartedProcessing) {
     observer_->callCompleted(requestLoggingContext_.timestamps);
   }
 
@@ -223,15 +227,14 @@ MessageChannel::SendCallbackPtr ThriftRequestCore::createRequestLoggingCallback(
   // which also implements MessageChannel::SendCallback. Callers of
   // sendReply/sendError are responsible for cleaning up their own callbacks.
   auto& timestamps = getTimestamps();
-  if (stateMachine_.getStartedProcessing() &&
-      timestamps.getSamplingStatus().isEnabled()) {
+  if (timestamps.getSamplingStatus().isEnabled()) {
     auto chainedCallback = cbPtr.release();
     return MessageChannel::SendCallbackPtr(
         new ThriftRequestCore::LogRequestSampleCallback(
             metadata,
             responseRpcError,
             timestamps,
-            reqContext_,
+            *this,
             observer,
             chainedCallback));
   }

@@ -133,6 +133,7 @@ struct RequestLoggingContext {
   std::string clientId;
   // request id passed from the client
   std::string requestId;
+  bool requestStartedProcessing;
 };
 
 class RequestEventHandler : public LoggingEventHandler {

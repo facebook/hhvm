@@ -97,6 +97,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
   }
 
   Cpp2RequestContext* getRequestContext() { return &reqContext_; }
+  const Cpp2RequestContext* getRequestContext() const { return &reqContext_; }
 
   const transport::THeader& getTHeader() const { return header_; }
 
@@ -108,6 +109,10 @@ class ThriftRequestCore : public ResponseChannelRequest {
     return compressionConfig_;
   }
 
+  bool isStartedProcessing() const {
+    return stateMachine_.getStartedProcessing();
+  }
+
   // LogRequestSampleCallback is a wrapper for sampled requests
   class LogRequestSampleCallback : public MessageChannel::SendCallback {
    public:
@@ -115,7 +120,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
         const ResponseRpcMetadata& metadata,
         const std::optional<ResponseRpcError>& responseRpcError,
         const server::TServerObserver::CallTimestamps& timestamps,
-        const Cpp2RequestContext& reqContext,
+        const ThriftRequestCore& thriftRequest,
         server::TServerObserver* observer,
         MessageChannel::SendCallback* chainedCallback = nullptr);
 

@@ -1281,12 +1281,12 @@ void emitDeploymentBoundaryCheck(IRGS& env, SSATmp* symbol) {
   if (!RO::EvalEnforceDeployment) return;
   auto const caller = curFunc(env);
   if (env.unit.packageInfo().violatesDeploymentBoundary(*caller)) return;
-  ifElse(
+  ifThen(
     env,
-    [&] (Block* skip) {
+    [&] (Block* taken) {
       auto violate =
         gen(env, CallViolatesDeploymentBoundary, FuncData { caller }, symbol);
-      gen(env, JmpZero, skip, violate);
+      gen(env, JmpNZero, taken, violate);
     },
     [&] {
       hint(env, Block::Hint::Unlikely);

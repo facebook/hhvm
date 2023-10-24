@@ -641,7 +641,7 @@ void Acceptor::dropEstablishedConnections(
 void Acceptor::dropIdleConnectionsBasedOnTimeout(
     std::chrono::milliseconds targetIdleTimeMs,
     const std::function<void(size_t)>& droppedConnectionsCB) {
-  base_->runInEventBaseThread([&] {
+  base_->runInEventBaseThread([this, targetIdleTimeMs, droppedConnectionsCB] {
     if (downstreamConnectionManager_) {
       VLOG(3) << "Dropping connections based on idle timeout "
               << targetIdleTimeMs.count() << " from acceptor=" << this

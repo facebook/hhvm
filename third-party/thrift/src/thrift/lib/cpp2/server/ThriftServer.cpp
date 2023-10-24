@@ -72,7 +72,7 @@ FOLLY_GFLAGS_DEFINE_bool(
     "Abort the server if failed to drain active requests within deadline");
 
 FOLLY_GFLAGS_DEFINE_string(
-    thrift_ssl_policy, "disabled", "SSL required / permitted / disabled");
+    thrift_ssl_policy, "required", "SSL required / permitted / disabled");
 
 FOLLY_GFLAGS_DEFINE_string(
     service_identity,
@@ -248,6 +248,8 @@ void ThriftServer::initializeDefaults() {
     sslPolicy_ = SSLPolicy::REQUIRED;
   } else if (FLAGS_thrift_ssl_policy == "permitted") {
     sslPolicy_ = SSLPolicy::PERMITTED;
+  } else if (FLAGS_thrift_ssl_policy == "disabled") {
+    sslPolicy_ = SSLPolicy::DISABLED;
   }
   metadata().wrapper = "ThriftServer-cpp";
   auto extraInterfaces = apache::thrift::detail::createDefaultExtraInterfaces();

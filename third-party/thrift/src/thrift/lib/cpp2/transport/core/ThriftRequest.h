@@ -255,6 +255,9 @@ class ThriftRequestCore : public ResponseChannelRequest {
 
   void sendQueueTimeoutResponse() final {
     if (tryCancel() && !isOneway()) {
+      // once queue timeout is fired, there's no need for task timeout.
+      // Also queue timeout is always <= task timeout,
+      // so it makes sense to cancel both queue timeout and task timeout
       cancelTimeout();
       if (auto* observer = serverConfigs_.getObserver()) {
         observer->queueTimeout();
@@ -264,7 +267,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
               TApplicationException::TApplicationExceptionType::TIMEOUT,
               fmt::format(
                   "Load Shedding Due to Queue Timeout: {} ms",
-                  queueTimeoutUsed_.count())),
+                  queueTimeout_.value.count())),
           kServerQueueTimeoutErrorCode,
           {},
           {});
@@ -328,27 +331,28 @@ class ThriftRequestCore : public ResponseChannelRequest {
   virtual folly::EventBase* getEventBase() noexcept = 0;
 
   void scheduleTimeouts() {
-    queueTimeout_.request_ = this;
-    taskTimeout_.request_ = this;
-    std::chrono::milliseconds taskTimeout;
     auto differentTimeouts = serverConfigs_.getTaskExpireTimeForRequest(
-        clientQueueTimeout_, clientTimeout_, queueTimeoutUsed_, taskTimeout);
+        clientQueueTimeout_,
+        clientTimeout_,
+        queueTimeout_.value,
+        taskTimeout_.value);
 
     auto reqContext = getRequestContext();
     if (clientTimeout_ > std::chrono::milliseconds::zero()) {
       reqContext->setRequestTimeout(clientTimeout_);
     } else {
-      reqContext->setRequestTimeout(taskTimeout);
+      reqContext->setRequestTimeout(taskTimeout_.value);
     }
 
     if (differentTimeouts) {
-      if (queueTimeoutUsed_ > std::chrono::milliseconds(0)) {
+      if (queueTimeout_.value > std::chrono::milliseconds(0)) {
         getEventBase()->timer().scheduleTimeout(
-            &queueTimeout_, queueTimeoutUsed_);
+            &queueTimeout_, queueTimeout_.value);
       }
     }
-    if (taskTimeout > std::chrono::milliseconds(0)) {
-      getEventBase()->timer().scheduleTimeout(&taskTimeout_, taskTimeout);
+    if (taskTimeout_.value > std::chrono::milliseconds(0)) {
+      getEventBase()->timer().scheduleTimeout(
+          &taskTimeout_, taskTimeout_.value);
     }
   }
 
@@ -481,29 +485,37 @@ class ThriftRequestCore : public ResponseChannelRequest {
         buf.computeChainDataLength() <= maxResponseSize;
   }
 
-  class QueueTimeout : public folly::HHWheelTimer::Callback {
-    ThriftRequestCore* request_;
-    const server::ServerConfigs& serverConfigs_;
-    QueueTimeout(const server::ServerConfigs& serverConfigs)
-        : serverConfigs_(serverConfigs) {}
+  struct QueueTimeout : public folly::HHWheelTimer::Callback {
+    ThriftRequestCore& request;
+    // final timeout value used
+    std::chrono::milliseconds value;
+
+    explicit QueueTimeout(ThriftRequestCore& requestP) : request(requestP) {}
+
     void timeoutExpired() noexcept override {
-      if (request_->stateMachine_.tryStopProcessing()) {
-        request_->sendQueueTimeoutResponse();
+      if (request.stateMachine_.tryStopProcessing()) {
+        request.sendQueueTimeoutResponse();
       }
     }
-    friend class ThriftRequestCore;
   };
-  class TaskTimeout : public folly::HHWheelTimer::Callback {
-    ThriftRequestCore* request_;
-    const server::ServerConfigs& serverConfigs_;
-    TaskTimeout(const server::ServerConfigs& serverConfigs)
-        : serverConfigs_(serverConfigs) {}
+
+  struct TaskTimeout : public folly::HHWheelTimer::Callback {
+    ThriftRequestCore& request;
+    // final timeout value used
+    std::chrono::milliseconds value;
+    const server::ServerConfigs& serverConfigs;
+
+    TaskTimeout(
+        ThriftRequestCore& requestP,
+        const server::ServerConfigs& serverConfigsP)
+        : request(requestP), serverConfigs(serverConfigsP) {}
+
     void timeoutExpired() noexcept override {
-      if (request_->tryCancel() && !request_->isOneway()) {
-        if (auto* observer = serverConfigs_.getObserver()) {
+      if (request.tryCancel() && !request.isOneway()) {
+        if (auto* observer = serverConfigs.getObserver()) {
           observer->taskTimeout();
         }
-        request_->sendErrorWrappedInternal(
+        request.sendErrorWrappedInternal(
             TApplicationException(
                 TApplicationException::TApplicationExceptionType::TIMEOUT,
                 "Task expired"),
@@ -512,10 +524,9 @@ class ThriftRequestCore : public ResponseChannelRequest {
             {});
       }
     }
-    friend class ThriftRequestCore;
   };
-  friend class QueueTimeout;
-  friend class TaskTimeout;
+  friend struct QueueTimeout;
+  friend struct TaskTimeout;
   friend class ThriftProcessor;
 
   server::TServerObserver::CallTimestamps& getTimestamps() {
@@ -536,7 +547,6 @@ class ThriftRequestCore : public ResponseChannelRequest {
 
   QueueTimeout queueTimeout_;
   TaskTimeout taskTimeout_;
-  std::chrono::milliseconds queueTimeoutUsed_{0};
   std::chrono::milliseconds clientQueueTimeout_{0};
   std::chrono::milliseconds clientTimeout_{0};
 

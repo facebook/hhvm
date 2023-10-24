@@ -89,8 +89,8 @@ ThriftRequestCore::ThriftRequestCore(
           &header_,
           metadata.name_ref() ? std::move(*metadata.name_ref()).str()
                               : std::string{}),
-      queueTimeout_(serverConfigs_),
-      taskTimeout_(serverConfigs_),
+      queueTimeout_(*this),
+      taskTimeout_(*this, serverConfigs_),
       stateMachine_(
           includeInRecentRequestsCount(reqContext_.getMethodName()),
           serverConfigs_.getAdaptiveConcurrencyController(),
@@ -350,7 +350,7 @@ ResponseRpcMetadata ThriftRequestCore::makeResponseRpcMetadata(
     queueMetadata.queueingTimeMs_ref() = -1;
   }
 
-  queueMetadata.queueTimeoutMs_ref() = queueTimeoutUsed_.count();
+  queueMetadata.queueTimeoutMs_ref() = queueTimeout_.value.count();
 
   return metadata;
 }

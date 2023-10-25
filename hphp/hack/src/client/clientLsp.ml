@@ -103,6 +103,15 @@ type errors_conn =
       q: ServerProgress.ErrorsRead.read_result Lwt_stream.t;
     }  (** We are tailing this errors.bin file *)
 
+(** What triggered the errors that we're sending right now? *)
+type errors_trigger =
+  | Initialize_trigger
+      (** After initialization is done, we send errors for all open files *)
+  | Message_trigger of {
+      message: lsp_message;
+      metadata: incoming_metadata;
+    }  (** In receipt of didOpen/didChange and similar, we update live errors *)
+
 module Run_env = struct
   type stream_file = {
     file: Path.t;
@@ -122,13 +131,15 @@ module Run_env = struct
   }
   [@@deriving show]
 
+  (** This identifies an LSP *request* that triggered something (typically a shellout).
+  It's strongly typed to be bound to a request, i.e. something that has an lsp_id,
+  so we know that an LSP response is needed, and know how to respond. *)
   type triggering_request = {
     id: lsp_id;
     metadata: incoming_metadata;
     start_time_local_handle: float;
     request: lsp_request;
   }
-  [@@warning "-69"]
 
   type shellable_type =
     | FindRefs of shellout_standard_response
@@ -718,7 +729,15 @@ let get_next_event
       try
         let message = Lsp_fmt.parse_lsp json get_outstanding_request_exn in
         let activity_key = Jget.obj_opt (Some json) "activityKey" in
-        let activity_id = Jget.string_d activity_key "id" ~default:"_" in
+        let activity_id =
+          Jget.string_d
+            activity_key
+            "id"
+            ~default:("[hh]" ^ Random_id.short_string ())
+        in
+        (* activity_id is used in telemetry for joins on other tables;
+           tracking_suffix is used as extra disambiguation since activity-ids
+           are sometimes shared between events *)
         let rnd = Random_id.short_string () in
         let tracking_suffix =
           match message with
@@ -3378,10 +3397,14 @@ let validate_error_complete_TEMPORARY (lenv : Run_env.t) ~(start_time : float) :
   in
   { lenv with Run_env.uris_with_standalone_diagnostics }
 
-(** Used to publish clientIdeDaemon errors in [ide_standalone] mode. *)
-let publish_errors_if_standalone
-    (state : state) (file_path : Path.t) (errors : Errors.finalized_error list)
-    : state =
+(** This function shold be called anytime we've recomputed live squiggles
+(e.g. upon didChange, codeAction, didClose). It (1) sends publishDiagnostics
+as necessary, (2) sends an LSP telemetry/event to say what it has done. *)
+let publish_and_report_after_recomputing_live_squiggles
+    (state : state)
+    (file_path : Path.t)
+    (errors : Errors.finalized_error list)
+    ~(trigger : errors_trigger) : state =
   match state with
   | Pre_init -> failwith "how we got errors before initialize?"
   | Post_shutdown -> state (* no-op *)
@@ -3389,6 +3412,7 @@ let publish_errors_if_standalone
     let file_path = Path.to_string file_path in
     let uri = path_to_lsp_uri file_path ~default_path:file_path in
     let uris = lenv.Run_env.uris_with_standalone_diagnostics in
+    let previously_had_diagnostics = UriMap.mem uri uris in
     let uris_with_standalone_diagnostics =
       if List.is_empty errors then
         UriMap.remove uri uris
@@ -3402,6 +3426,48 @@ let publish_errors_if_standalone
     let params = hack_errors_to_lsp_diagnostic file_path errors in
     let notification = PublishDiagnosticsNotification params in
     notify_jsonrpc ~powered_by:Serverless_ide notification;
+
+    (* We'll also send a telemetry/event that describes when+why this was sent *)
+    let telemetry_notification =
+      TelemetryNotification
+        ( {
+            LogMessage.type_ = MessageType.InfoMessage;
+            message = "timing info for file check";
+          },
+          [
+            ("telemetryKind", Hh_json.string_ "timingForCheck");
+            ("checkScope", Hh_json.string_ "file");
+            ("uri", Hh_json.string_ (File_url.create file_path));
+            ( "diagnostics_exist_before",
+              Hh_json.bool_ previously_had_diagnostics );
+            ("diagnostics_exist_now", Hh_json.bool_ (not (List.is_empty errors)));
+            ("diagnostics_published", Hh_json.bool_ true);
+          ]
+          @
+          match trigger with
+          | Initialize_trigger -> [("triggerKind", Hh_json.string_ "init")]
+          | Message_trigger { message; metadata } ->
+            [
+              ("triggerKind", Hh_json.string_ "message");
+              ( "duration_ms",
+                Hh_json.int_
+                  (int_of_float
+                     Float.(
+                       (Unix.gettimeofday () -. metadata.timestamp) * 1000.0))
+              );
+              ( "triggerMessage",
+                Hh_json.JSON_Object
+                  [
+                    ( "method",
+                      Hh_json.string_ (Lsp_fmt.message_name_to_string message)
+                    );
+                    ("activity_id", Hh_json.string_ metadata.activity_id);
+                  ] );
+            ] )
+    in
+
+    notify_jsonrpc ~powered_by:Serverless_ide telemetry_notification;
+
     let new_state =
       Running { lenv with Run_env.uris_with_standalone_diagnostics }
     in
@@ -4016,7 +4082,7 @@ let send_file_to_ide_and_get_errors_if_needed
     ~state
     ~uri
     ~file_contents
-    ~tracking_id
+    ~(trigger : errors_trigger)
     ~ref_unblocked_time : state Lwt.t =
   let file_path = uri |> lsp_uri_to_path |> Path.make in
   let subsequent_didchange_for_this_uri =
@@ -4043,6 +4109,11 @@ let send_file_to_ide_and_get_errors_if_needed
   let should_calculate_errors =
     Option.is_none subsequent_didchange_for_this_uri
   in
+  let tracking_id =
+    match trigger with
+    | Initialize_trigger -> Random_id.short_string ()
+    | Message_trigger { metadata; _ } -> metadata.tracking_id
+  in
   let%lwt errors =
     ide_rpc
       ide_service
@@ -4056,7 +4127,12 @@ let send_file_to_ide_and_get_errors_if_needed
   let new_state =
     match errors with
     | None -> !state
-    | Some errors -> publish_errors_if_standalone !state file_path errors
+    | Some errors ->
+      publish_and_report_after_recomputing_live_squiggles
+        !state
+        file_path
+        errors
+        ~trigger
   in
   Lwt.return new_state
 
@@ -4097,8 +4173,8 @@ let handle_editor_buffer_message
         ~state
         ~uri
         ~file_contents
+        ~trigger:(Message_trigger { metadata; message })
         ~ref_unblocked_time
-        ~tracking_id:metadata.tracking_id
     in
     state := new_state;
     Lwt.return_unit
@@ -4114,7 +4190,12 @@ let handle_editor_buffer_message
         ~ref_unblocked_time
         (ClientIdeMessage.Did_close file_path)
     in
-    state := publish_errors_if_standalone !state file_path errors;
+    state :=
+      publish_and_report_after_recomputing_live_squiggles
+        !state
+        file_path
+        errors
+        ~trigger:(Message_trigger { message; metadata });
     Lwt.return_unit
   | _ ->
     (* Don't handle other events for now. When we show typechecking errors for
@@ -4595,7 +4676,12 @@ let handle_client_message
         match errors_opt with
         | None -> ()
         | Some errors ->
-          state := publish_errors_if_standalone !state file_path errors
+          state :=
+            publish_and_report_after_recomputing_live_squiggles
+              !state
+              file_path
+              errors
+              ~trigger:(Message_trigger { message; metadata })
       end;
       Lwt.return_some (make_result_telemetry (List.length result))
     (* codeAction/resolve request *)
@@ -4740,8 +4826,8 @@ let handle_daemon_notification
               ~state
               ~uri
               ~file_contents
+              ~trigger:Initialize_trigger
               ~ref_unblocked_time
-              ~tracking_id:(Random_id.short_string ())
           in
           state := new_state;
           Lwt.return_unit)

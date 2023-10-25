@@ -232,37 +232,42 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 ExtractorResult<::test::fixtures::patch::InnerUnion>
 Extractor<::test::fixtures::patch::InnerUnion>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::patch::InnerUnion>(
-      "Module test.fixtures.patch.module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a InnerUnion");
+      }
+      return extractorError<::test::fixtures::patch::InnerUnion>(
+          "Marshal error: InnerUnion");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__test__fixtures__patch__module__InnerUnion(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::test::fixtures::patch::InnerUnion>(
-        "Thrift serialize error: InnerUnion");
-  }
-  return detail::deserialize_iobuf<::test::fixtures::patch::InnerUnion>(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::patch::InnerUnion>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::test::fixtures::patch::InnerUnion>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::patch::InnerUnion>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::patch::InnerUnion>(
-      "Module test.fixtures.patch.module import error");
+    ::test::fixtures::patch::InnerUnion>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::patch::InnerUnion cpp;
+  std::optional<std::string_view> error;
+  auto type_tag = Extractor<int64_t>{}(PyTuple_GET_ITEM(fbThriftData, 0));
+  if (type_tag.hasError()) {
+    return folly::makeUnexpected(type_tag.error());
   }
-  auto obj = StrongRef(init__test__fixtures__patch__module__InnerUnion(fbthrift_data));
-  if (!obj) {
-      return extractorError<::test::fixtures::patch::InnerUnion>(
-          "Init from fbthrift error: InnerUnion");
+  switch (*type_tag) {
+    case 0:
+      break; // union is unset
+    case 1:
+      Extractor<Bytes>{}.extractInto(
+          cpp.innerOption_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
   }
-  return Extractor<::test::fixtures::patch::InnerUnion>{}(*obj);
+  if (error) {
+    return folly::makeUnexpected(*error);
+  }
+  return cpp;
 }
+
 
 int Extractor<::test::fixtures::patch::InnerUnion>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -285,58 +290,84 @@ PyObject* Constructor<::test::fixtures::patch::InnerUnion>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__test__fixtures__patch__module__InnerUnion(
-      detail::serialize_to_iobuf(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::InnerUnion>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__test__fixtures__patch__module__InnerUnion(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::patch::InnerUnion>>::operator()(
-    const ::test::fixtures::patch::InnerUnion& val) {
-  auto obj = StrongRef(Constructor<::test::fixtures::patch::InnerUnion>{}(val));
-  if (!obj) {
+    FOLLY_MAYBE_UNUSED const ::test::fixtures::patch::InnerUnion& val) {
+  int64_t type_key = static_cast<int64_t>(val.getType());
+  StrongRef py_val;
+  switch (type_key) {
+    case 0:
+      Py_INCREF(Py_None);
+      py_val = StrongRef(Py_None);
+      break;
+    case 1:
+      py_val = StrongRef(
+          Constructor<Bytes>{}
+          .constructFrom(val.innerOption_ref()));
+      break;
+  }
+  if (!py_val) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return unionTupleFromValue(type_key, *py_val);
 }
+
 
 ExtractorResult<::test::fixtures::patch::MyUnion>
 Extractor<::test::fixtures::patch::MyUnion>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::patch::MyUnion>(
-      "Module test.fixtures.patch.module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a MyUnion");
+      }
+      return extractorError<::test::fixtures::patch::MyUnion>(
+          "Marshal error: MyUnion");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__test__fixtures__patch__module__MyUnion(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::test::fixtures::patch::MyUnion>(
-        "Thrift serialize error: MyUnion");
-  }
-  return detail::deserialize_iobuf<::test::fixtures::patch::MyUnion>(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::patch::MyUnion>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::test::fixtures::patch::MyUnion>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::patch::MyUnion>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::patch::MyUnion>(
-      "Module test.fixtures.patch.module import error");
+    ::test::fixtures::patch::MyUnion>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::patch::MyUnion cpp;
+  std::optional<std::string_view> error;
+  auto type_tag = Extractor<int64_t>{}(PyTuple_GET_ITEM(fbThriftData, 0));
+  if (type_tag.hasError()) {
+    return folly::makeUnexpected(type_tag.error());
   }
-  auto obj = StrongRef(init__test__fixtures__patch__module__MyUnion(fbthrift_data));
-  if (!obj) {
-      return extractorError<::test::fixtures::patch::MyUnion>(
-          "Init from fbthrift error: MyUnion");
+  switch (*type_tag) {
+    case 0:
+      break; // union is unset
+    case 1:
+      Extractor<Bytes>{}.extractInto(
+          cpp.option1_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
+    case 2:
+      Extractor<int32_t>{}.extractInto(
+          cpp.option2_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
+    case 3:
+      Extractor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::patch::InnerUnion>>{}.extractInto(
+          cpp.option3_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
   }
-  return Extractor<::test::fixtures::patch::MyUnion>{}(*obj);
+  if (error) {
+    return folly::makeUnexpected(*error);
+  }
+  return cpp;
 }
+
 
 int Extractor<::test::fixtures::patch::MyUnion>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -359,24 +390,47 @@ PyObject* Constructor<::test::fixtures::patch::MyUnion>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__test__fixtures__patch__module__MyUnion(
-      detail::serialize_to_iobuf(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::patch::MyUnion>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__test__fixtures__patch__module__MyUnion(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::patch::MyUnion>>::operator()(
-    const ::test::fixtures::patch::MyUnion& val) {
-  auto obj = StrongRef(Constructor<::test::fixtures::patch::MyUnion>{}(val));
-  if (!obj) {
+    FOLLY_MAYBE_UNUSED const ::test::fixtures::patch::MyUnion& val) {
+  int64_t type_key = static_cast<int64_t>(val.getType());
+  StrongRef py_val;
+  switch (type_key) {
+    case 0:
+      Py_INCREF(Py_None);
+      py_val = StrongRef(Py_None);
+      break;
+    case 1:
+      py_val = StrongRef(
+          Constructor<Bytes>{}
+          .constructFrom(val.option1_ref()));
+      break;
+    case 2:
+      py_val = StrongRef(
+          Constructor<int32_t>{}
+          .constructFrom(val.option2_ref()));
+      break;
+    case 3:
+      py_val = StrongRef(
+          Constructor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::patch::InnerUnion>>{}
+          .constructFrom(val.option3_ref()));
+      break;
+  }
+  if (!py_val) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return unionTupleFromValue(type_key, *py_val);
 }
+
 
 ExtractorResult<::test::fixtures::patch::MyStruct>
 Extractor<::test::fixtures::patch::MyStruct>::operator()(PyObject* obj) {

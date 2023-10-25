@@ -45,17 +45,11 @@ cdef api object init__module__struct4(object data)
 
 cdef api int can_extract__module__union1(object) except -1
 
-cdef api __cIOBuf* extract__module__union1(object) except NULL
-
-cdef api object construct__module__union1(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__union1(object data)
 
 cdef api int can_extract__module__union2(object) except -1
 
-cdef api __cIOBuf* extract__module__union2(object) except NULL
-
-cdef api object construct__module__union2(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__union2(object data)
 

@@ -1450,37 +1450,62 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 ExtractorResult<::cpp2::MyUnion>
 Extractor<::cpp2::MyUnion>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::cpp2::MyUnion>(
-      "Module module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a MyUnion");
+      }
+      return extractorError<::cpp2::MyUnion>(
+          "Marshal error: MyUnion");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__module__MyUnion(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::cpp2::MyUnion>(
-        "Thrift serialize error: MyUnion");
-  }
-  return detail::deserialize_iobuf<::cpp2::MyUnion>(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::cpp2::MyUnion>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::cpp2::MyUnion>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::MyUnion>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::cpp2::MyUnion>(
-      "Module module import error");
+    ::cpp2::MyUnion>>::operator()(PyObject* fbThriftData) {
+  ::cpp2::MyUnion cpp;
+  std::optional<std::string_view> error;
+  auto type_tag = Extractor<int64_t>{}(PyTuple_GET_ITEM(fbThriftData, 0));
+  if (type_tag.hasError()) {
+    return folly::makeUnexpected(type_tag.error());
   }
-  auto obj = StrongRef(init__module__MyUnion(fbthrift_data));
-  if (!obj) {
-      return extractorError<::cpp2::MyUnion>(
-          "Init from fbthrift error: MyUnion");
+  switch (*type_tag) {
+    case 0:
+      break; // union is unset
+    case 1:
+      Extractor<::apache::thrift::python::capi::ComposedEnum<::cpp2::MyEnum>>{}.extractInto(
+          cpp.myEnum_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
+    case 2:
+      Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>{}.extractInto(
+          cpp.myStruct_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
+    case 3:
+      Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyDataItem>>{}.extractInto(
+          cpp.myDataItem_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
+    case 4:
+      Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::ComplexNestedStruct>>{}.extractInto(
+          cpp.complexNestedStruct_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
+    case 5:
+      Extractor<int64_t>{}.extractInto(
+          cpp.longValue_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
+    case 6:
+      Extractor<int32_t>{}.extractInto(
+          cpp.intValue_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
   }
-  return Extractor<::cpp2::MyUnion>{}(*obj);
+  if (error) {
+    return folly::makeUnexpected(*error);
+  }
+  return cpp;
 }
+
 
 int Extractor<::cpp2::MyUnion>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -1503,58 +1528,113 @@ PyObject* Constructor<::cpp2::MyUnion>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__module__MyUnion(
-      detail::serialize_to_iobuf(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::cpp2::MyUnion>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__module__MyUnion(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::MyUnion>>::operator()(
-    const ::cpp2::MyUnion& val) {
-  auto obj = StrongRef(Constructor<::cpp2::MyUnion>{}(val));
-  if (!obj) {
+    FOLLY_MAYBE_UNUSED const ::cpp2::MyUnion& val) {
+  int64_t type_key = static_cast<int64_t>(val.getType());
+  StrongRef py_val;
+  switch (type_key) {
+    case 0:
+      Py_INCREF(Py_None);
+      py_val = StrongRef(Py_None);
+      break;
+    case 1:
+      py_val = StrongRef(
+          Constructor<::apache::thrift::python::capi::ComposedEnum<::cpp2::MyEnum>>{}
+          .constructFrom(val.myEnum_ref()));
+      break;
+    case 2:
+      py_val = StrongRef(
+          Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>{}
+          .constructFrom(val.myStruct_ref()));
+      break;
+    case 3:
+      py_val = StrongRef(
+          Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyDataItem>>{}
+          .constructFrom(val.myDataItem_ref()));
+      break;
+    case 4:
+      py_val = StrongRef(
+          Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::ComplexNestedStruct>>{}
+          .constructFrom(val.complexNestedStruct_ref()));
+      break;
+    case 5:
+      py_val = StrongRef(
+          Constructor<int64_t>{}
+          .constructFrom(val.longValue_ref()));
+      break;
+    case 6:
+      py_val = StrongRef(
+          Constructor<int32_t>{}
+          .constructFrom(val.intValue_ref()));
+      break;
+  }
+  if (!py_val) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return unionTupleFromValue(type_key, *py_val);
 }
+
 
 ExtractorResult<::cpp2::MyUnionFloatFieldThrowExp>
 Extractor<::cpp2::MyUnionFloatFieldThrowExp>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::cpp2::MyUnionFloatFieldThrowExp>(
-      "Module module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a MyUnionFloatFieldThrowExp");
+      }
+      return extractorError<::cpp2::MyUnionFloatFieldThrowExp>(
+          "Marshal error: MyUnionFloatFieldThrowExp");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__module__MyUnionFloatFieldThrowExp(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::cpp2::MyUnionFloatFieldThrowExp>(
-        "Thrift serialize error: MyUnionFloatFieldThrowExp");
-  }
-  return detail::deserialize_iobuf<::cpp2::MyUnionFloatFieldThrowExp>(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::cpp2::MyUnionFloatFieldThrowExp>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::cpp2::MyUnionFloatFieldThrowExp>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::MyUnionFloatFieldThrowExp>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::cpp2::MyUnionFloatFieldThrowExp>(
-      "Module module import error");
+    ::cpp2::MyUnionFloatFieldThrowExp>>::operator()(PyObject* fbThriftData) {
+  ::cpp2::MyUnionFloatFieldThrowExp cpp;
+  std::optional<std::string_view> error;
+  auto type_tag = Extractor<int64_t>{}(PyTuple_GET_ITEM(fbThriftData, 0));
+  if (type_tag.hasError()) {
+    return folly::makeUnexpected(type_tag.error());
   }
-  auto obj = StrongRef(init__module__MyUnionFloatFieldThrowExp(fbthrift_data));
-  if (!obj) {
-      return extractorError<::cpp2::MyUnionFloatFieldThrowExp>(
-          "Init from fbthrift error: MyUnionFloatFieldThrowExp");
+  switch (*type_tag) {
+    case 0:
+      break; // union is unset
+    case 1:
+      Extractor<::apache::thrift::python::capi::ComposedEnum<::cpp2::MyEnum>>{}.extractInto(
+          cpp.myEnum_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
+    case 2:
+      Extractor<list<list<float>>>{}.extractInto(
+          cpp.setFloat_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
+    case 3:
+      Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyDataItem>>{}.extractInto(
+          cpp.myDataItem_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
+    case 4:
+      Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::ComplexNestedStruct>>{}.extractInto(
+          cpp.complexNestedStruct_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
   }
-  return Extractor<::cpp2::MyUnionFloatFieldThrowExp>{}(*obj);
+  if (error) {
+    return folly::makeUnexpected(*error);
+  }
+  return cpp;
 }
+
 
 int Extractor<::cpp2::MyUnionFloatFieldThrowExp>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -1577,24 +1657,52 @@ PyObject* Constructor<::cpp2::MyUnionFloatFieldThrowExp>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__module__MyUnionFloatFieldThrowExp(
-      detail::serialize_to_iobuf(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::cpp2::MyUnionFloatFieldThrowExp>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__module__MyUnionFloatFieldThrowExp(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::MyUnionFloatFieldThrowExp>>::operator()(
-    const ::cpp2::MyUnionFloatFieldThrowExp& val) {
-  auto obj = StrongRef(Constructor<::cpp2::MyUnionFloatFieldThrowExp>{}(val));
-  if (!obj) {
+    FOLLY_MAYBE_UNUSED const ::cpp2::MyUnionFloatFieldThrowExp& val) {
+  int64_t type_key = static_cast<int64_t>(val.getType());
+  StrongRef py_val;
+  switch (type_key) {
+    case 0:
+      Py_INCREF(Py_None);
+      py_val = StrongRef(Py_None);
+      break;
+    case 1:
+      py_val = StrongRef(
+          Constructor<::apache::thrift::python::capi::ComposedEnum<::cpp2::MyEnum>>{}
+          .constructFrom(val.myEnum_ref()));
+      break;
+    case 2:
+      py_val = StrongRef(
+          Constructor<list<list<float>>>{}
+          .constructFrom(val.setFloat_ref()));
+      break;
+    case 3:
+      py_val = StrongRef(
+          Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyDataItem>>{}
+          .constructFrom(val.myDataItem_ref()));
+      break;
+    case 4:
+      py_val = StrongRef(
+          Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::ComplexNestedStruct>>{}
+          .constructFrom(val.complexNestedStruct_ref()));
+      break;
+  }
+  if (!py_val) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return unionTupleFromValue(type_key, *py_val);
 }
+
 
 ExtractorResult<::cpp2::ComplexNestedStruct>
 Extractor<::cpp2::ComplexNestedStruct>::operator()(PyObject* obj) {

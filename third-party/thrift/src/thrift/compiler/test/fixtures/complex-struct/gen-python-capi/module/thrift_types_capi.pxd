@@ -50,17 +50,11 @@ cdef api object init__module__MyDataItem(object data)
 
 cdef api int can_extract__module__MyUnion(object) except -1
 
-cdef api __cIOBuf* extract__module__MyUnion(object) except NULL
-
-cdef api object construct__module__MyUnion(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__MyUnion(object data)
 
 cdef api int can_extract__module__MyUnionFloatFieldThrowExp(object) except -1
 
-cdef api __cIOBuf* extract__module__MyUnionFloatFieldThrowExp(object) except NULL
-
-cdef api object construct__module__MyUnionFloatFieldThrowExp(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__MyUnionFloatFieldThrowExp(object data)
 

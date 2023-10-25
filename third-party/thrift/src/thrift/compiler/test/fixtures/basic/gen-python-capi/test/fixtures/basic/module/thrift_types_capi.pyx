@@ -36,16 +36,6 @@ cdef api object init__test__fixtures__basic__module__MyDataItem(object data):
 cdef api int can_extract__test__fixtures__basic__module__MyUnion(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyUnion) else 0
 
-cdef api __cIOBuf* extract__test__fixtures__basic__module__MyUnion(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__test__fixtures__basic__module__MyUnion(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.MyUnion,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__test__fixtures__basic__module__MyUnion(object data):
     return __thrift_types.MyUnion._fbthrift_create(data)
@@ -60,16 +50,6 @@ cdef api object init__test__fixtures__basic__module__ReservedKeyword(object data
 cdef api int can_extract__test__fixtures__basic__module__UnionToBeRenamed(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.UnionToBeRenamed) else 0
 
-cdef api __cIOBuf* extract__test__fixtures__basic__module__UnionToBeRenamed(object __obj) except NULL:
-    cdef __IOBuf __buf = __serialize_iobuf(__obj, protocol=__Protocol.BINARY)
-    return __buf._ours.release()
-
-cdef api object construct__test__fixtures__basic__module__UnionToBeRenamed(__unique_ptr[__cIOBuf] __s):
-    return __deserialize(
-        __thrift_types.UnionToBeRenamed,
-        __IOBuf_from_unique_ptr(__move(__s)),
-        protocol=__Protocol.BINARY
-    )
 
 cdef api object init__test__fixtures__basic__module__UnionToBeRenamed(object data):
     return __thrift_types.UnionToBeRenamed._fbthrift_create(data)

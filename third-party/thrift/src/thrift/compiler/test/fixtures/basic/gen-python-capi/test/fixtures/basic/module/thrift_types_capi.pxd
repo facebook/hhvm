@@ -25,9 +25,6 @@ cdef api object init__test__fixtures__basic__module__MyDataItem(object data)
 
 cdef api int can_extract__test__fixtures__basic__module__MyUnion(object) except -1
 
-cdef api __cIOBuf* extract__test__fixtures__basic__module__MyUnion(object) except NULL
-
-cdef api object construct__test__fixtures__basic__module__MyUnion(__unique_ptr[__cIOBuf])
 
 cdef api object init__test__fixtures__basic__module__MyUnion(object data)
 
@@ -38,9 +35,6 @@ cdef api object init__test__fixtures__basic__module__ReservedKeyword(object data
 
 cdef api int can_extract__test__fixtures__basic__module__UnionToBeRenamed(object) except -1
 
-cdef api __cIOBuf* extract__test__fixtures__basic__module__UnionToBeRenamed(object) except NULL
-
-cdef api object construct__test__fixtures__basic__module__UnionToBeRenamed(__unique_ptr[__cIOBuf])
 
 cdef api object init__test__fixtures__basic__module__UnionToBeRenamed(object data)
 

@@ -286,37 +286,54 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 ExtractorResult<::test::fixtures::basic::MyUnion>
 Extractor<::test::fixtures::basic::MyUnion>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::basic::MyUnion>(
-      "Module test.fixtures.basic.module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a MyUnion");
+      }
+      return extractorError<::test::fixtures::basic::MyUnion>(
+          "Marshal error: MyUnion");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__test__fixtures__basic__module__MyUnion(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::test::fixtures::basic::MyUnion>(
-        "Thrift serialize error: MyUnion");
-  }
-  return detail::deserialize_iobuf<::test::fixtures::basic::MyUnion>(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::basic::MyUnion>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::test::fixtures::basic::MyUnion>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::basic::MyUnion>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::basic::MyUnion>(
-      "Module test.fixtures.basic.module import error");
+    ::test::fixtures::basic::MyUnion>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::basic::MyUnion cpp;
+  std::optional<std::string_view> error;
+  auto type_tag = Extractor<int64_t>{}(PyTuple_GET_ITEM(fbThriftData, 0));
+  if (type_tag.hasError()) {
+    return folly::makeUnexpected(type_tag.error());
   }
-  auto obj = StrongRef(init__test__fixtures__basic__module__MyUnion(fbthrift_data));
-  if (!obj) {
-      return extractorError<::test::fixtures::basic::MyUnion>(
-          "Init from fbthrift error: MyUnion");
+  switch (*type_tag) {
+    case 0:
+      break; // union is unset
+    case 1:
+      Extractor<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::basic::MyEnum>>{}.extractInto(
+          cpp.myEnum_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
+    case 2:
+      Extractor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyStruct>>{}.extractInto(
+          cpp.myStruct_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
+    case 3:
+      Extractor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyDataItem>>{}.extractInto(
+          cpp.myDataItem_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
+    case 4:
+      Extractor<set<float>>{}.extractInto(
+          cpp.floatSet_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
   }
-  return Extractor<::test::fixtures::basic::MyUnion>{}(*obj);
+  if (error) {
+    return folly::makeUnexpected(*error);
+  }
+  return cpp;
 }
+
 
 int Extractor<::test::fixtures::basic::MyUnion>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -339,24 +356,52 @@ PyObject* Constructor<::test::fixtures::basic::MyUnion>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__test__fixtures__basic__module__MyUnion(
-      detail::serialize_to_iobuf(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic::MyUnion>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__test__fixtures__basic__module__MyUnion(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::basic::MyUnion>>::operator()(
-    const ::test::fixtures::basic::MyUnion& val) {
-  auto obj = StrongRef(Constructor<::test::fixtures::basic::MyUnion>{}(val));
-  if (!obj) {
+    FOLLY_MAYBE_UNUSED const ::test::fixtures::basic::MyUnion& val) {
+  int64_t type_key = static_cast<int64_t>(val.getType());
+  StrongRef py_val;
+  switch (type_key) {
+    case 0:
+      Py_INCREF(Py_None);
+      py_val = StrongRef(Py_None);
+      break;
+    case 1:
+      py_val = StrongRef(
+          Constructor<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::basic::MyEnum>>{}
+          .constructFrom(val.myEnum_ref()));
+      break;
+    case 2:
+      py_val = StrongRef(
+          Constructor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyStruct>>{}
+          .constructFrom(val.myStruct_ref()));
+      break;
+    case 3:
+      py_val = StrongRef(
+          Constructor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyDataItem>>{}
+          .constructFrom(val.myDataItem_ref()));
+      break;
+    case 4:
+      py_val = StrongRef(
+          Constructor<set<float>>{}
+          .constructFrom(val.floatSet_ref()));
+      break;
+  }
+  if (!py_val) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return unionTupleFromValue(type_key, *py_val);
 }
+
 
 ExtractorResult<::test::fixtures::basic::ReservedKeyword>
 Extractor<::test::fixtures::basic::ReservedKeyword>::operator()(PyObject* obj) {
@@ -439,37 +484,42 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 ExtractorResult<::test::fixtures::basic::UnionToBeRenamed>
 Extractor<::test::fixtures::basic::UnionToBeRenamed>::operator()(PyObject* obj) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::basic::UnionToBeRenamed>(
-      "Module test.fixtures.basic.module import error");
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a UnionToBeRenamed");
+      }
+      return extractorError<::test::fixtures::basic::UnionToBeRenamed>(
+          "Marshal error: UnionToBeRenamed");
   }
-  std::unique_ptr<folly::IOBuf> val(
-      extract__test__fixtures__basic__module__UnionToBeRenamed(obj));
-  if (!val) {
-    CHECK(PyErr_Occurred());
-    return extractorError<::test::fixtures::basic::UnionToBeRenamed>(
-        "Thrift serialize error: UnionToBeRenamed");
-  }
-  return detail::deserialize_iobuf<::test::fixtures::basic::UnionToBeRenamed>(std::move(val));
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::basic::UnionToBeRenamed>>{}(*fbThriftData);
 }
-
 
 ExtractorResult<::test::fixtures::basic::UnionToBeRenamed>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::basic::UnionToBeRenamed>>::operator()(PyObject* fbthrift_data) {
-  if (!ensure_module_imported()) {
-    DCHECK(PyErr_Occurred() != nullptr);
-    return extractorError<::test::fixtures::basic::UnionToBeRenamed>(
-      "Module test.fixtures.basic.module import error");
+    ::test::fixtures::basic::UnionToBeRenamed>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::basic::UnionToBeRenamed cpp;
+  std::optional<std::string_view> error;
+  auto type_tag = Extractor<int64_t>{}(PyTuple_GET_ITEM(fbThriftData, 0));
+  if (type_tag.hasError()) {
+    return folly::makeUnexpected(type_tag.error());
   }
-  auto obj = StrongRef(init__test__fixtures__basic__module__UnionToBeRenamed(fbthrift_data));
-  if (!obj) {
-      return extractorError<::test::fixtures::basic::UnionToBeRenamed>(
-          "Init from fbthrift error: UnionToBeRenamed");
+  switch (*type_tag) {
+    case 0:
+      break; // union is unset
+    case 1:
+      Extractor<int32_t>{}.extractInto(
+          cpp.reserved_field_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
   }
-  return Extractor<::test::fixtures::basic::UnionToBeRenamed>{}(*obj);
+  if (error) {
+    return folly::makeUnexpected(*error);
+  }
+  return cpp;
 }
+
 
 int Extractor<::test::fixtures::basic::UnionToBeRenamed>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
@@ -492,24 +542,37 @@ PyObject* Constructor<::test::fixtures::basic::UnionToBeRenamed>::operator()(
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
-  auto ptr = construct__test__fixtures__basic__module__UnionToBeRenamed(
-      detail::serialize_to_iobuf(val));
-  if (!ptr) {
-    CHECK(PyErr_Occurred());
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::basic::UnionToBeRenamed>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
   }
-  return ptr;
+  return init__test__fixtures__basic__module__UnionToBeRenamed(*fbthrift_data);
 }
-
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::test::fixtures::basic::UnionToBeRenamed>>::operator()(
-    const ::test::fixtures::basic::UnionToBeRenamed& val) {
-  auto obj = StrongRef(Constructor<::test::fixtures::basic::UnionToBeRenamed>{}(val));
-  if (!obj) {
+    FOLLY_MAYBE_UNUSED const ::test::fixtures::basic::UnionToBeRenamed& val) {
+  int64_t type_key = static_cast<int64_t>(val.getType());
+  StrongRef py_val;
+  switch (type_key) {
+    case 0:
+      Py_INCREF(Py_None);
+      py_val = StrongRef(Py_None);
+      break;
+    case 1:
+      py_val = StrongRef(
+          Constructor<int32_t>{}
+          .constructFrom(val.reserved_field_ref()));
+      break;
+  }
+  if (!py_val) {
     return nullptr;
   }
-  return getThriftData(*obj);
+  return unionTupleFromValue(type_key, *py_val);
 }
+
 
 ExtractorResult<::test::fixtures::basic::MyEnum>
 Extractor<::test::fixtures::basic::MyEnum>::operator()(PyObject* obj) {

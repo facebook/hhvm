@@ -495,9 +495,6 @@ class python_capi_mstch_struct : public mstch_struct {
     }
     if (has_option("marshal_python_capi") || marshal_override) {
       return true;
-    } else if (struct_->is_union()) {
-      // unions work opt-in
-      return false;
     }
     for (const auto& f : struct_->fields()) {
       if (f.find_structured_annotation_or_null(kCppTypeUri) ||

@@ -41,6 +41,12 @@ constexpr bool is_optional_maybe_boxed_field_ref_v =
     apache::thrift::detail::is_optional_field_ref_v<RValue> ||
     apache::thrift::detail::is_optional_boxed_field_ref_v<RValue>;
 
+template <typename Field>
+struct is_union_field_ref : std::false_type {};
+template <typename FieldT>
+struct is_union_field_ref<::apache::thrift::union_field_ref<FieldT>>
+    : std::true_type {};
+
 /*
  * RAII wrapper around PyObject* representing a strong reference, i.e.,
  * a PyObject* returned by a C api function that returns a *new* reference.

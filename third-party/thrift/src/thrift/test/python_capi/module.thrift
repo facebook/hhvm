@@ -190,9 +190,12 @@ struct ComposeStruct {
 union Onion {
   1: MyEnum myEnum;
   2: PrimitiveStruct myStruct;
+  @thrift.Box
   6: set<i64> intSet;
   4: string myString;
+  @cpp.Ref{type = cpp.RefType.Shared}
   8: list<double> doubleList;
+  @cpp.Ref{type = cpp.RefType.Unique}
   9: map<binary, string> strMap;
   10: id.ProtocolId adapted_int;
 } (cpp.name = "Shallot")

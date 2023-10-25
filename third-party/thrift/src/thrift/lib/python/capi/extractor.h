@@ -84,7 +84,9 @@ struct BaseExtractor {
     if (error) {
       return;
     }
-    if constexpr (is_optional_maybe_boxed_field_ref_v<FieldRef>) {
+    if constexpr (
+        is_optional_maybe_boxed_field_ref_v<FieldRef> ||
+        is_union_field_ref<FieldRef>{}) {
       if (obj == Py_None) {
         return;
       }
@@ -93,7 +95,7 @@ struct BaseExtractor {
     if (extractResult.hasError()) {
       error = extractResult.error();
     } else {
-      ref = std::move(*extractResult);
+      ref.emplace(std::move(*extractResult));
     }
   }
   template <typename S>

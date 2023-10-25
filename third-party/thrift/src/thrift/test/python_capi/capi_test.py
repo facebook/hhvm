@@ -67,6 +67,7 @@ class PythonCapiFixture(unittest.TestCase):
         yield MyUnion()
         yield MyUnion(myEnum=MyEnum.MyValue1)
         yield MyUnion(myStruct=self.primitive())
+        yield MyUnion(intSet={1, 2, 3, 5, 8})
         yield MyUnion(myString="acef")
         yield MyUnion(doubleList=[1.0, 2.0, 3.0])
         yield MyUnion(strMap={b"key": "val", b"bytes": "str"})
@@ -140,7 +141,7 @@ class PythonCapiFixture(unittest.TestCase):
     def set_struct(self) -> SetStruct:
         return SetStruct(
             enumz={MyEnum.MyValue1, MyEnum.MyValue2},
-            intz={1, 1, 2, 3, 5, 8, 13, 23, 42},
+            intz={1, 2, 3, 5, 8, 13, 23, 42},
             binnaz={b"abcd", b"efgh", b"ijkl", b"mnop"},
             encoded={b"abcd", b"bcda", b"cdab", b"dabc"},
             uidz={0, 10, 100, 1000, 10000},

@@ -183,5 +183,28 @@
         }
     }{{!
     }}{{/type:binary?}}{{!
+
+    }}{{^typedef:newtype?}}{{#type:i64?}}
+
+    impl<P> ::fbthrift::Serialize<P> for LocalImpl<{{>lib/type}}>
+    where
+        P: ::fbthrift::ProtocolWriter,
+        {{>lib/type}}: ::fbthrift::Serialize<P>,
+    {
+        fn write(&self, p: &mut P) {
+            self.0.write(p)
+        }
+    }
+
+    impl<P> ::fbthrift::Deserialize<P> for LocalImpl<{{>lib/type}}>
+    where
+        P: ::fbthrift::ProtocolReader,
+        {{>lib/type}}: ::fbthrift::Deserialize<P>,
+    {
+        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+          Ok(LocalImpl({{>lib/type}}::read(p)?))
+        }
+    }{{!
+    }}{{/type:i64?}}{{/typedef:newtype?}}{{!
 }}{{/program:nonstandardTypes}}
 {{!newline}}

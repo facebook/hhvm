@@ -12,6 +12,20 @@ import (
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
+// Primitive Thrift types
+var (
+    primitiveThriftType_THRIFT_STRING_TYPE = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr())
+    primitiveThriftType_THRIFT_BINARY_TYPE = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE.Ptr())
+    primitiveThriftType_THRIFT_BOOL_TYPE   = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr())
+    primitiveThriftType_THRIFT_BYTE_TYPE   = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_BYTE_TYPE.Ptr())
+    primitiveThriftType_THRIFT_I16_TYPE    = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE.Ptr())
+    primitiveThriftType_THRIFT_I32_TYPE    = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr())
+    primitiveThriftType_THRIFT_I64_TYPE    = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr())
+    primitiveThriftType_THRIFT_DOUBLE_TYPE = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE.Ptr())
+    primitiveThriftType_THRIFT_FLOAT_TYPE  = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_FLOAT_TYPE.Ptr())
+    primitiveThriftType_THRIFT_VOID_TYPE   = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr())
+)
+
 var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("module.MyStructNestedAnnotation").
@@ -23,10 +37,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("name").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_STRING_TYPE,
     ),
         },
     ),
@@ -43,60 +54,42 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("package").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_STRING_TYPE,
     ),
             metadata.NewThriftField().
     SetId(2).
     SetName("major").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_I64_TYPE,
     ),
             metadata.NewThriftField().
     SetId(3).
     SetName("annotation_with_quote").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_STRING_TYPE,
     ),
             metadata.NewThriftField().
     SetId(4).
     SetName("class_").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_STRING_TYPE,
     ),
             metadata.NewThriftField().
     SetId(5).
     SetName("annotation_with_trailing_comma").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_STRING_TYPE,
     ),
             metadata.NewThriftField().
     SetId(6).
     SetName("empty_annotations").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_STRING_TYPE,
     ),
             metadata.NewThriftField().
     SetId(7).
@@ -117,10 +110,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTList(
         metadata.NewThriftListType().
-            SetValueType(metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            )),
+            SetValueType(primitiveThriftType_THRIFT_STRING_TYPE),
             ),
     ),
             metadata.NewThriftField().
@@ -146,20 +136,14 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("id").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_I64_TYPE,
     ),
             metadata.NewThriftField().
     SetId(2).
     SetName("password").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_STRING_TYPE,
     ),
         },
     ),
@@ -191,10 +175,7 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetName("ping").
     SetIsOneway(false).
     SetReturnType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_VOID_TYPE,
     ).
     SetExceptions(
         []*metadata.ThriftField{
@@ -215,19 +196,13 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetName("getRandomData").
     SetIsOneway(false).
     SetReturnType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_STRING_TYPE,
     ),
             metadata.NewThriftFunction().
     SetName("hasDataById").
     SetIsOneway(false).
     SetReturnType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_BOOL_TYPE,
     ).
     SetArguments(
         []*metadata.ThriftField{
@@ -236,10 +211,7 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetName("id").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_I64_TYPE,
     ),
         },
     ),
@@ -247,10 +219,7 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetName("getDataById").
     SetIsOneway(false).
     SetReturnType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_STRING_TYPE,
     ).
     SetArguments(
         []*metadata.ThriftField{
@@ -259,10 +228,7 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetName("id").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_I64_TYPE,
     ),
         },
     ),
@@ -270,10 +236,7 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetName("putDataById").
     SetIsOneway(false).
     SetReturnType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_VOID_TYPE,
     ).
     SetArguments(
         []*metadata.ThriftField{
@@ -282,20 +245,14 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetName("id").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_I64_TYPE,
     ),
             metadata.NewThriftField().
     SetId(2).
     SetName("data").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_STRING_TYPE,
     ),
         },
     ),
@@ -303,10 +260,7 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetName("lobDataById").
     SetIsOneway(true).
     SetReturnType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_VOID_TYPE,
     ).
     SetArguments(
         []*metadata.ThriftField{
@@ -315,20 +269,14 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetName("id").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_I64_TYPE,
     ),
             metadata.NewThriftField().
     SetId(2).
     SetName("data").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_STRING_TYPE,
     ),
         },
     ),
@@ -336,10 +284,7 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetName("doNothing").
     SetIsOneway(false).
     SetReturnType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_VOID_TYPE,
     ),
         },
     ),
@@ -351,19 +296,13 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetName("ping").
     SetIsOneway(false).
     SetReturnType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_VOID_TYPE,
     ),
             metadata.NewThriftFunction().
     SetName("pong").
     SetIsOneway(false).
     SetReturnType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_VOID_TYPE,
     ),
         },
     ),
@@ -376,10 +315,7 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetName("pang").
     SetIsOneway(false).
     SetReturnType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_VOID_TYPE,
     ),
         },
     ),
@@ -391,10 +327,7 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetName("bar").
     SetIsOneway(false).
     SetReturnType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_I32_TYPE,
     ),
         },
     ),
@@ -406,28 +339,19 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetName("foo").
     SetIsOneway(false).
     SetReturnType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_VOID_TYPE,
     ),
             metadata.NewThriftFunction().
     SetName("bar").
     SetIsOneway(false).
     SetReturnType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_VOID_TYPE,
     ),
             metadata.NewThriftFunction().
     SetName("baz").
     SetIsOneway(false).
     SetReturnType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_VOID_TYPE,
     ),
         },
     ),

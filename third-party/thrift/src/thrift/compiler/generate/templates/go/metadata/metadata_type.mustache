@@ -19,7 +19,20 @@
   This template defines a ThriftType initializer for an AST type.
 
 }}
-{{program:metadata_qualifier}}NewThriftType().
+{{#type:typedef?}}{{!
+}}{{program:metadata_qualifier}}NewThriftType().
     {{> metadata/thrift_type_setter}}(
         {{> metadata/thrift_type_instance}}
-    )
+    ){{!
+}}{{/type:typedef?}}{{!
+}}{{^type:typedef?}}{{!
+}}{{#type:metadata_primitive?}}{{!
+}}primitiveThriftType_{{> metadata/thrift_primitive_type}}{{!
+}}{{/type:metadata_primitive?}}{{!
+}}{{^type:metadata_primitive?}}{{!
+}}{{program:metadata_qualifier}}NewThriftType().
+    {{> metadata/thrift_type_setter}}(
+        {{> metadata/thrift_type_instance}}
+    ){{!
+}}{{/type:metadata_primitive?}}{{!
+}}{{/type:typedef?}}

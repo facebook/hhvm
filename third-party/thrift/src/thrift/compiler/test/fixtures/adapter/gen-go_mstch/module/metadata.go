@@ -12,6 +12,20 @@ import (
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
+// Primitive Thrift types
+var (
+    primitiveThriftType_THRIFT_STRING_TYPE = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr())
+    primitiveThriftType_THRIFT_BINARY_TYPE = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE.Ptr())
+    primitiveThriftType_THRIFT_BOOL_TYPE   = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr())
+    primitiveThriftType_THRIFT_BYTE_TYPE   = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_BYTE_TYPE.Ptr())
+    primitiveThriftType_THRIFT_I16_TYPE    = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE.Ptr())
+    primitiveThriftType_THRIFT_I32_TYPE    = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr())
+    primitiveThriftType_THRIFT_I64_TYPE    = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr())
+    primitiveThriftType_THRIFT_DOUBLE_TYPE = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE.Ptr())
+    primitiveThriftType_THRIFT_FLOAT_TYPE  = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_FLOAT_TYPE.Ptr())
+    primitiveThriftType_THRIFT_VOID_TYPE   = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr())
+)
+
 var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("module.MyAnnotation").
@@ -23,10 +37,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("signature").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_STRING_TYPE,
     ),
             metadata.NewThriftField().
     SetId(2).
@@ -51,30 +62,21 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("intField").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_I32_TYPE,
     ),
             metadata.NewThriftField().
     SetId(2).
     SetName("optionalIntField").
     SetIsOptional(true).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_I32_TYPE,
     ),
             metadata.NewThriftField().
     SetId(3).
     SetName("intFieldWithDefault").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_I32_TYPE,
     ),
             metadata.NewThriftField().
     SetId(4).
@@ -89,10 +91,7 @@ var structMetadatas = []*metadata.ThriftStruct{
                 metadata.NewThriftType().
             SetTSet(
                 metadata.NewThriftSetType().
-            SetValueType(metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            )),
+            SetValueType(primitiveThriftType_THRIFT_STRING_TYPE),
             )    ),
             ),
     ),
@@ -109,10 +108,7 @@ var structMetadatas = []*metadata.ThriftStruct{
                 metadata.NewThriftType().
             SetTSet(
                 metadata.NewThriftSetType().
-            SetValueType(metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            )),
+            SetValueType(primitiveThriftType_THRIFT_STRING_TYPE),
             )    ),
             ),
     ),
@@ -124,10 +120,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTMap(
         metadata.NewThriftMapType().
-            SetKeyType(metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            )).
+            SetKeyType(primitiveThriftType_THRIFT_STRING_TYPE).
             SetValueType(metadata.NewThriftType().
     SetTTypedef(
         metadata.NewThriftTypedefType().
@@ -151,10 +144,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.StringWithAdapter").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_STRING_TYPE    ),
             )),
             )    ),
             )    ),
@@ -170,10 +160,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTMap(
         metadata.NewThriftMapType().
-            SetKeyType(metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            )).
+            SetKeyType(primitiveThriftType_THRIFT_STRING_TYPE).
             SetValueType(metadata.NewThriftType().
     SetTTypedef(
         metadata.NewThriftTypedefType().
@@ -197,10 +184,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.StringWithAdapter").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_STRING_TYPE    ),
             )),
             )    ),
             )    ),
@@ -213,10 +197,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("binaryField").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_BINARY_TYPE,
     ),
             metadata.NewThriftField().
     SetId(9).
@@ -228,10 +209,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.MyI64").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_I64_TYPE    ),
             ),
     ),
             metadata.NewThriftField().
@@ -244,10 +222,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.MyI64").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_I64_TYPE    ),
             ),
     ),
             metadata.NewThriftField().
@@ -265,10 +240,7 @@ var structMetadatas = []*metadata.ThriftStruct{
                 metadata.NewThriftTypedefType().
             SetName("module.MyI64").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_I64_TYPE    ),
             )    ),
             ),
     ),
@@ -284,10 +256,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("intField").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_I32_TYPE,
     ),
             metadata.NewThriftField().
     SetId(4).
@@ -302,10 +271,7 @@ var structMetadatas = []*metadata.ThriftStruct{
                 metadata.NewThriftType().
             SetTSet(
                 metadata.NewThriftSetType().
-            SetValueType(metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            )),
+            SetValueType(primitiveThriftType_THRIFT_STRING_TYPE),
             )    ),
             ),
     ),
@@ -317,10 +283,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTMap(
         metadata.NewThriftMapType().
-            SetKeyType(metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            )).
+            SetKeyType(primitiveThriftType_THRIFT_STRING_TYPE).
             SetValueType(metadata.NewThriftType().
     SetTTypedef(
         metadata.NewThriftTypedefType().
@@ -344,10 +307,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.StringWithAdapter").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_STRING_TYPE    ),
             )),
             )    ),
             )    ),
@@ -360,10 +320,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("binaryField").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_BINARY_TYPE,
     ),
             metadata.NewThriftField().
     SetId(9).
@@ -375,10 +332,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.MyI64").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_I64_TYPE    ),
             ),
     ),
         },
@@ -509,10 +463,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("field").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_I32_TYPE,
     ),
         },
     ),
@@ -526,10 +477,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("field").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_I32_TYPE,
     ),
         },
     ),
@@ -543,40 +491,28 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("field").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_I32_TYPE,
     ),
             metadata.NewThriftField().
     SetId(2).
     SetName("shared_field").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_I32_TYPE,
     ),
             metadata.NewThriftField().
     SetId(3).
     SetName("opt_shared_field").
     SetIsOptional(true).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_I32_TYPE,
     ),
             metadata.NewThriftField().
     SetId(4).
     SetName("opt_boxed_field").
     SetIsOptional(true).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_I32_TYPE,
     ),
         },
     ),
@@ -590,20 +526,14 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("int_field").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_I32_TYPE,
     ),
             metadata.NewThriftField().
     SetId(2).
     SetName("string_field").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_STRING_TYPE,
     ),
             metadata.NewThriftField().
     SetId(3).
@@ -613,10 +543,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTSet(
         metadata.NewThriftSetType().
-            SetValueType(metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-            )),
+            SetValueType(primitiveThriftType_THRIFT_I32_TYPE),
             ),
     ),
         },
@@ -658,10 +585,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("path").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_STRING_TYPE,
     ),
         },
     ),
@@ -675,10 +599,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("field").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_I32_TYPE,
     ),
             metadata.NewThriftField().
     SetId(2).
@@ -693,10 +614,7 @@ var structMetadatas = []*metadata.ThriftStruct{
                 metadata.NewThriftType().
             SetTSet(
                 metadata.NewThriftSetType().
-            SetValueType(metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            )),
+            SetValueType(primitiveThriftType_THRIFT_STRING_TYPE),
             )    ),
             ),
     ),
@@ -717,10 +635,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.DurationMs").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_I64_TYPE    ),
             ),
     ),
             metadata.NewThriftField().
@@ -733,10 +648,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.CustomProtocolType").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_BINARY_TYPE    ),
             ),
     ),
             metadata.NewThriftField().
@@ -744,30 +656,21 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("timeout").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_I64_TYPE,
     ),
             metadata.NewThriftField().
     SetId(4).
     SetName("data").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_I64_TYPE,
     ),
             metadata.NewThriftField().
     SetId(5).
     SetName("meta").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_STRING_TYPE,
     ),
             metadata.NewThriftField().
     SetId(6).
@@ -779,10 +682,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.IndirectionString").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_STRING_TYPE    ),
             ),
     ),
             metadata.NewThriftField().
@@ -790,10 +690,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("string_data").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_STRING_TYPE,
     ),
             metadata.NewThriftField().
     SetId(8).
@@ -805,10 +702,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.AdaptedBool").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_BOOL_TYPE    ),
             ),
     ),
             metadata.NewThriftField().
@@ -821,10 +715,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.AdaptedInteger").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_I32_TYPE    ),
             ),
     ),
             metadata.NewThriftField().
@@ -832,10 +723,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("binary_data").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_BINARY_TYPE,
     ),
         },
     ),
@@ -854,10 +742,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.AdaptedBool").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_BOOL_TYPE    ),
             ),
     ),
             metadata.NewThriftField().
@@ -870,10 +755,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.AdaptedByte").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_BYTE_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_BYTE_TYPE    ),
             ),
     ),
             metadata.NewThriftField().
@@ -886,10 +768,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.AdaptedShort").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_I16_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_I16_TYPE    ),
             ),
     ),
             metadata.NewThriftField().
@@ -902,10 +781,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.AdaptedInteger").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_I32_TYPE    ),
             ),
     ),
             metadata.NewThriftField().
@@ -918,10 +794,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.AdaptedLong").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_I64_TYPE    ),
             ),
     ),
             metadata.NewThriftField().
@@ -934,10 +807,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.AdaptedDouble").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_DOUBLE_TYPE    ),
             ),
     ),
             metadata.NewThriftField().
@@ -950,10 +820,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.AdaptedString").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_STRING_TYPE    ),
             ),
     ),
             metadata.NewThriftField().
@@ -964,10 +831,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTList(
         metadata.NewThriftListType().
-            SetValueType(metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            )),
+            SetValueType(primitiveThriftType_THRIFT_I64_TYPE),
             ),
     ),
             metadata.NewThriftField().
@@ -978,10 +842,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTSet(
         metadata.NewThriftSetType().
-            SetValueType(metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            )),
+            SetValueType(primitiveThriftType_THRIFT_I64_TYPE),
             ),
     ),
             metadata.NewThriftField().
@@ -992,14 +853,8 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTMap(
         metadata.NewThriftMapType().
-            SetKeyType(metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            )).
-            SetValueType(metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            )),
+            SetKeyType(primitiveThriftType_THRIFT_I64_TYPE).
+            SetValueType(primitiveThriftType_THRIFT_I64_TYPE),
             ),
     ),
             metadata.NewThriftField().
@@ -1012,10 +867,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.AdaptedBool").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_BOOL_TYPE    ),
             ),
     ),
             metadata.NewThriftField().
@@ -1028,10 +880,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.AdaptedByte").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_BYTE_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_BYTE_TYPE    ),
             ),
     ),
             metadata.NewThriftField().
@@ -1044,10 +893,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.AdaptedShort").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_I16_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_I16_TYPE    ),
             ),
     ),
             metadata.NewThriftField().
@@ -1060,10 +906,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.AdaptedInteger").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_I32_TYPE    ),
             ),
     ),
             metadata.NewThriftField().
@@ -1076,10 +919,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.AdaptedLong").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_I64_TYPE    ),
             ),
     ),
             metadata.NewThriftField().
@@ -1092,10 +932,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.AdaptedDouble").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_DOUBLE_TYPE    ),
             ),
     ),
             metadata.NewThriftField().
@@ -1108,10 +945,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.AdaptedString").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_STRING_TYPE    ),
             ),
     ),
             metadata.NewThriftField().
@@ -1139,10 +973,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTList(
         metadata.NewThriftListType().
-            SetValueType(metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            )),
+            SetValueType(primitiveThriftType_THRIFT_I64_TYPE),
             ),
     ),
             metadata.NewThriftField().
@@ -1153,10 +984,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTSet(
         metadata.NewThriftSetType().
-            SetValueType(metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            )),
+            SetValueType(primitiveThriftType_THRIFT_I64_TYPE),
             ),
     ),
             metadata.NewThriftField().
@@ -1167,14 +995,8 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftType().
     SetTMap(
         metadata.NewThriftMapType().
-            SetKeyType(metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            )).
-            SetValueType(metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            )),
+            SetKeyType(primitiveThriftType_THRIFT_I64_TYPE).
+            SetValueType(primitiveThriftType_THRIFT_I64_TYPE),
             ),
     ),
             metadata.NewThriftField().
@@ -1192,10 +1014,7 @@ var structMetadatas = []*metadata.ThriftStruct{
                 metadata.NewThriftTypedefType().
             SetName("module.AdaptedBool").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_BOOL_TYPE    ),
             )    ),
             ),
     ),
@@ -1234,10 +1053,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.DurationMs").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_I64_TYPE    ),
             ),
     ),
             metadata.NewThriftField().
@@ -1250,10 +1066,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.CustomProtocolType").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_BINARY_TYPE    ),
             ),
     ),
         },
@@ -1268,10 +1081,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("data").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_I64_TYPE,
     ),
         },
     ),
@@ -1285,10 +1095,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("data").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_I64_TYPE,
     ),
         },
     ),
@@ -1428,10 +1235,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("data").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_I64_TYPE,
     ),
         },
     ),
@@ -1445,10 +1249,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("data").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_I64_TYPE,
     ),
         },
     ),
@@ -1483,10 +1284,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("ptr").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_I64_TYPE,
     ),
         },
     ),
@@ -1506,10 +1304,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("regularInt").
     SetIsOptional(true).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_I64_TYPE,
     ),
             metadata.NewThriftField().
     SetId(2).
@@ -1521,10 +1316,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         metadata.NewThriftTypedefType().
             SetName("module.CountingInt").
             SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            )    ),
+                primitiveThriftType_THRIFT_I64_TYPE    ),
             ),
     ),
             metadata.NewThriftField().
@@ -1532,10 +1324,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("regularString").
     SetIsOptional(true).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_STRING_TYPE,
     ),
         },
     ),
@@ -1549,10 +1338,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("name").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_STRING_TYPE,
     ),
         },
     ),
@@ -1566,10 +1352,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("name").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_STRING_TYPE,
     ),
         },
     ),
@@ -1618,10 +1401,7 @@ var serviceMetadatas = []*metadata.ThriftService{
                 metadata.NewThriftTypedefType().
     SetName("module.MyI32").
     SetUnderlyingType(
-        metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-            )    ),
+        primitiveThriftType_THRIFT_I32_TYPE    ),
     )    ),
     ),
     ).
@@ -1642,10 +1422,7 @@ var serviceMetadatas = []*metadata.ThriftService{
                 metadata.NewThriftTypedefType().
     SetName("module.StringWithAdapter").
     SetUnderlyingType(
-        metadata.NewThriftType().
-            SetTPrimitive(
-                metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            )    ),
+        primitiveThriftType_THRIFT_STRING_TYPE    ),
     )    ),
     ),
     ),
@@ -1654,10 +1431,7 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetName("arg2").
     SetIsOptional(false).
     SetType(
-        metadata.NewThriftType().
-    SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            ),
+        primitiveThriftType_THRIFT_STRING_TYPE,
     ),
             metadata.NewThriftField().
     SetId(3).

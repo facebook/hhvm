@@ -41,6 +41,20 @@ var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 {{/program:import_metadata_package?}}
 
+// Primitive Thrift types
+var (
+    primitiveThriftType_THRIFT_STRING_TYPE = {{program:metadata_qualifier}}NewThriftType().SetTPrimitive({{program:metadata_qualifier}}ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr())
+    primitiveThriftType_THRIFT_BINARY_TYPE = {{program:metadata_qualifier}}NewThriftType().SetTPrimitive({{program:metadata_qualifier}}ThriftPrimitiveType_THRIFT_BINARY_TYPE.Ptr())
+    primitiveThriftType_THRIFT_BOOL_TYPE   = {{program:metadata_qualifier}}NewThriftType().SetTPrimitive({{program:metadata_qualifier}}ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr())
+    primitiveThriftType_THRIFT_BYTE_TYPE   = {{program:metadata_qualifier}}NewThriftType().SetTPrimitive({{program:metadata_qualifier}}ThriftPrimitiveType_THRIFT_BYTE_TYPE.Ptr())
+    primitiveThriftType_THRIFT_I16_TYPE    = {{program:metadata_qualifier}}NewThriftType().SetTPrimitive({{program:metadata_qualifier}}ThriftPrimitiveType_THRIFT_I16_TYPE.Ptr())
+    primitiveThriftType_THRIFT_I32_TYPE    = {{program:metadata_qualifier}}NewThriftType().SetTPrimitive({{program:metadata_qualifier}}ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr())
+    primitiveThriftType_THRIFT_I64_TYPE    = {{program:metadata_qualifier}}NewThriftType().SetTPrimitive({{program:metadata_qualifier}}ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr())
+    primitiveThriftType_THRIFT_DOUBLE_TYPE = {{program:metadata_qualifier}}NewThriftType().SetTPrimitive({{program:metadata_qualifier}}ThriftPrimitiveType_THRIFT_DOUBLE_TYPE.Ptr())
+    primitiveThriftType_THRIFT_FLOAT_TYPE  = {{program:metadata_qualifier}}NewThriftType().SetTPrimitive({{program:metadata_qualifier}}ThriftPrimitiveType_THRIFT_FLOAT_TYPE.Ptr())
+    primitiveThriftType_THRIFT_VOID_TYPE   = {{program:metadata_qualifier}}NewThriftType().SetTPrimitive({{program:metadata_qualifier}}ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr())
+)
+
 var structMetadatas = []*{{program:metadata_qualifier}}ThriftStruct{
     {{#program:structs}}
     {{^struct:exception?}}

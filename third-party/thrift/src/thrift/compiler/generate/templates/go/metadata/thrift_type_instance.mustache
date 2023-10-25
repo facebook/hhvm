@@ -39,7 +39,7 @@
 {{/type:typedef?}}
 {{^type:typedef?}}
 {{#type:metadata_primitive?}}
-{{program:metadata_qualifier}}{{> metadata/thrift_primitive_type}}.Ptr(),
+{{program:metadata_qualifier}}ThriftPrimitiveType_{{> metadata/thrift_primitive_type}}.Ptr(),
 {{/type:metadata_primitive?}}
 {{#type:enum?}}
 {{#type:enum}}

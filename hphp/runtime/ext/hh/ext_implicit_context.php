@@ -1,5 +1,7 @@
 <?hh
 
+<<file: __EnableUnstableFeatures('nameof_class')>>
+
 namespace HH {
 
 namespace ImplicitContext {
@@ -209,7 +211,7 @@ abstract class ImplicitContext {
   )[zoned, ctx $f]: Awaitable<Tout> {
     $prev = ImplicitContext\_Private\set_implicit_context_by_value(
       ImplicitContext\_Private\create_implicit_context(
-        static::class,
+        nameof static,
         $context,
       ),
     );
@@ -229,7 +231,7 @@ abstract class ImplicitContext {
   )[zoned, ctx $f]: Tout {
     $prev = ImplicitContext\_Private\set_implicit_context_by_value(
       ImplicitContext\_Private\create_implicit_context(
-        static::class,
+        nameof static,
         $context,
       ),
     );
@@ -241,7 +243,7 @@ abstract class ImplicitContext {
   }
 
   protected static function get()[zoned]: ?this::T {
-    return ImplicitContext\_Private\get_implicit_context(static::class);
+    return ImplicitContext\_Private\get_implicit_context(nameof static);
   }
 }
 

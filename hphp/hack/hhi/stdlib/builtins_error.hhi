@@ -47,6 +47,8 @@ function hphp_throw_fatal_error(string $error_msg)[]: noreturn;
 <<__PHPStdLib>>
 function hphp_clear_unflushed(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
+function hphp_debug_caller_identifier()[leak_safe]: string;
+<<__PHPStdLib>>
 function hphp_debug_caller_info()[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function hphp_debug_backtrace_hash(int $options = 0)[leak_safe]: int;

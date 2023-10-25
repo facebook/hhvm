@@ -624,7 +624,7 @@ void Acceptor::dropConnections(double pctToDrop) {
 void Acceptor::dropEstablishedConnections(
     double pctToDrop,
     const std::function<bool(ManagedConnection*)>& filter) {
-  base_->runInEventBaseThread([&, pctToDrop, filter] {
+  base_->runInEventBaseThread([this, pctToDrop, filter] {
     if (downstreamConnectionManager_) {
       VLOG(3) << "Dropping " << pctToDrop * 100 << "% of "
               << getNumConnections()

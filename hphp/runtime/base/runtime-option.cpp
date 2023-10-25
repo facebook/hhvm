@@ -412,7 +412,7 @@ const RepoOptions& RepoOptions::forFile(const std::string& path) {
   // Wrap filesystem accesses if needed to proxy info from cli server client.
   Stream::Wrapper* wrapper = nullptr;
   if (is_cli_server_mode() || RO::EvalRecordReplay) {
-    wrapper = Stream::getWrapperFromURI(path, nullptr, !RO::EvalRecordReplay);
+    wrapper = Stream::getWrapperFromURI(path);
     if (wrapper && !wrapper->isNormalFileStream()) wrapper = nullptr;
   }
   auto const wrapped_open = [&](const char* path) -> Optional<String> {

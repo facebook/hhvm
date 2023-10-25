@@ -234,10 +234,6 @@ bool ExecutionContext::removeStdoutHook(StdoutHook* hook) {
   return m_stdoutHooks.erase(hook) != 0;
 }
 
-std::size_t ExecutionContext::numStdoutHooks() const {
-  return m_stdoutHooks.size();
-}
-
 static void safe_stdout(const  void  *ptr,  size_t  size) {
   write(fileno(stdout), ptr, size);
 }

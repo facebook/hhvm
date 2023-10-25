@@ -192,7 +192,7 @@ class SimpleXMLIterator extends SimpleXMLElement
   <<__Native>>
   public function key(): mixed;
 
-  <<__Native("NoRecording")>>
+  <<__Native>>
   public function next(): void;
 
   <<__Native>>

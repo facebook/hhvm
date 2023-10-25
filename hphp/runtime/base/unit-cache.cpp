@@ -397,7 +397,6 @@ Optional<String> loadFileContents(const char* path,
   if (wrapper) {
     // We only allow normal file streams, which cannot re-enter
     assertx(wrapper->isNormalFileStream());
-    TmpAssign __{RO::WarningFrequency, 0L};
     if (auto const f = wrapper->open(String{path}, "r", 0, nullptr)) {
       return f->read();
     }
@@ -1813,7 +1812,7 @@ void prefetchUnit(StringData* requestedPath,
   // can't support CLI wrappers because the request that its
   // associated with will be gone.
   auto [cache, wrapper] = getNonRepoCacheWithWrapper(path);
-  if (!cache || (wrapper && !wrapper->isNormalFileStream())) return;
+  if (!cache || wrapper) return;
 
   // We're definitely going to enqueue this request. Bump the gate if
   // provided.

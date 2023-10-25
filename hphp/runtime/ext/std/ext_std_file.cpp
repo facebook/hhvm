@@ -179,7 +179,7 @@ static int accessSyscall(
   Stream::Wrapper* w = Stream::getWrapperFromURI(uri_or_path);
   if (!w) return -1;
 
-  if (useFileCache && w->isNormalFileStream()) {
+  if (useFileCache && dynamic_cast<FileStreamWrapper*>(w)) {
     String path(uri_or_path);
     if (UNLIKELY(StringUtil::IsFileUrl(uri_or_path.data()))) {
       path = StringUtil::DecodeFileUrl(uri_or_path);

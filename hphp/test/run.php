@@ -2528,8 +2528,13 @@ function should_skip_test_simple(
     return 'skip-only_running_NON_remote_executable_tests';
   }
 
-  if (($options->record || $options->replay) && file_exists($test . ".norecord")) {
-    return 'skip-record';
+  if ($options->record || $options->replay) {
+    if (file_exists($test . ".verify")) {
+      return 'skip-verify';
+    }
+    if (find_debug_config($test, 'hphpd.ini')) {
+      return 'skip-debugger';
+    }
   }
 
   return null;
@@ -3478,7 +3483,7 @@ function run_test(Options $options, string $test): mixed {
     // we got --count from 2 sources (e.g. .opts file and multi_request_mode)
     // this can't work so skip the test
     return 'skip-count';
-  } else if ($options->jit_serialize is nonnull || $options->replay) {
+  } else if ($options->jit_serialize is nonnull) {
     // jit-serialize adds the --count option later, so even 1 --count in the
     // command means we have to skip
     if (preg_grep('/ --count[ =][0-9]+( |$)/', $hhvm)) {

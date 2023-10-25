@@ -20,7 +20,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <deque>
-#include <exception>
 #include <string>
 #include <type_traits>
 #include <unordered_map>
@@ -111,7 +110,8 @@ struct Replayer {
       }
     }
     if (call.ret.empty()) {
-      std::rethrow_exception(rr::unserialize<std::exception_ptr>(call.exc));
+      // NOLINTNEXTLINE(facebook-hte-ThrowNonStdExceptionIssue)
+      throw req::root<Object>(rr::unserialize<Object>(call.exc));
     } else {
       return rr::unserialize<R>(call.ret);
     }

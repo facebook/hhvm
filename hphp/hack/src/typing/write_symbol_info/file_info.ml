@@ -7,8 +7,6 @@
  *)
 
 open Hh_prelude
-module Indexable = Symbol_indexable
-module Sym_def = Symbol_sym_def
 module Class = Typing_classes_heap.Api
 
 type symbol = {

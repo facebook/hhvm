@@ -6,10 +6,9 @@
  *
  *)
 
-module Fact_id = Symbol_fact_id
 open Hh_prelude
 open Hh_json
-open Symbol_glean_schema.Hack
+open Glean_schema.Hack
 
 (* Predicate types for the JSON facts emitted *)
 type hack =
@@ -246,7 +245,7 @@ module Fact_acc = struct
     resultJson: owned_facts Map.t;
     factIds: Fact_id.t JsonPredicateMap.t;
     mutable ownership_unit: ownership_unit;
-    mutable xrefs: Symbol_xrefs.pos_map option;
+    mutable xrefs: Xrefs.pos_map option;
     ownership: bool;
   }
 

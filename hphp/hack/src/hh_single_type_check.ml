@@ -2013,10 +2013,10 @@ let handle_mode
       Printf.printf "%s should be an empty dir\n" out_dir;
       exit 1
     ) else
-      Symbol_entrypoint.index_files ctx ~out_dir ~files:filenames
+      Write_symbol_info.Entrypoint.index_files ctx ~out_dir ~files:filenames
   | Glean_sym_hash ->
     List.iter
-      (Symbol_entrypoint.sym_hashes ctx ~files:filenames)
+      (Write_symbol_info.Entrypoint.sym_hashes ctx ~files:filenames)
       ~f:(fun (path, hash) -> Printf.printf "%s %s\n" path (Md5.to_hex hash))
   | Lint ->
     let lint_errors =

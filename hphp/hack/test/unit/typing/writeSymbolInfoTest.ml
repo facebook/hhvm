@@ -11,14 +11,9 @@ open Hh_json
 open Hh_json.Access
 open Hh_json_helpers
 open OUnit2
-open Symbol_glean_schema.Hack
-module Util = Symbol_util
-module Build_fact = Symbol_build_fact
-module Predicate = Symbol_predicate
-module Add_fact = Symbol_add_fact
-module Fact_id = Symbol_fact_id
-module Fact_acc = Symbol_predicate.Fact_acc
-module XRefs = Symbol_xrefs
+open Write_symbol_info
+open Glean_schema.Hack
+module Fact_acc = Predicate.Fact_acc
 
 let extract_facts_from_obj pred_name = function
   | JSON_Object [("predicate", JSON_String p); ("facts", JSON_Array l)]
@@ -120,7 +115,7 @@ let test_add_decl_fact _test_ctxt =
   | _ -> assert_failure "Could not extract decl name"
 
 let test_build_xrefs _test_ctxt =
-  let xrefs = XRefs.empty in
+  let xrefs = Xrefs.empty in
   Relative_path.set_path_prefix Relative_path.Root (Path.make "www");
   let file = Relative_path.from_root ~suffix:"test.php" in
   let decl_name = "TestDecl" in
@@ -154,10 +149,10 @@ let test_build_xrefs _test_ctxt =
          ~pos_start:(3, 25, 40)
          ~pos_end:(3, 25, 45))
   in
-  let target = XRefs.{ target; receiver_type = None } in
-  let xrefs = XRefs.add xrefs target_id next_ref_pos target in
-  let xrefs = XRefs.add xrefs target_id ref_pos target in
-  let XRefs.{ fact_map; _ } = XRefs.add xrefs target_id dup_ref_pos target in
+  let target = Xrefs.{ target; receiver_type = None } in
+  let xrefs = Xrefs.add xrefs target_id next_ref_pos target in
+  let xrefs = Xrefs.add xrefs target_id ref_pos target in
+  let Xrefs.{ fact_map; _ } = Xrefs.add xrefs target_id dup_ref_pos target in
   let result = List.nth_exn (Build_fact.xrefs fact_map) 0 |> XRef.to_json in
   let target_decl =
     return result

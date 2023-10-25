@@ -7,8 +7,6 @@
  *)
 
 open Hh_prelude
-module Indexable = Symbol_indexable
-module Sym_def = Symbol_sym_def
 
 type symbol = private {
   occ: Relative_path.t SymbolOccurrence.t;

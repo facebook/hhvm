@@ -8,12 +8,7 @@
 
 open Hh_prelude
 open Hh_json
-module File_info = Symbol_file_info
-module Add_fact = Symbol_add_fact
-module Fact_acc = Symbol_predicate.Fact_acc
-module Indexable = Symbol_indexable
-module Sym_hash = Symbol_sym_hash
-module Indexer_options = Symbol_indexer_options
+module Fact_acc = Predicate.Fact_acc
 
 module JobReturn = struct
   type t = {
@@ -96,9 +91,7 @@ let write_json
   (List.iter files_info ~f:(fun File_info.{ tast; path; _ } ->
        if List.length tast > 2000 then Hh_logger.log "Large file: %s" path);
    try
-     let json_chunks =
-       Symbol_index_batch.build_json ctx files_info ~ownership
-     in
+     let json_chunks = Index_batch.build_json ctx files_info ~ownership in
      write_facts_file out_dir (List.length files_info) json_chunks
    with
    | WorkerCancel.Worker_should_exit as exn ->

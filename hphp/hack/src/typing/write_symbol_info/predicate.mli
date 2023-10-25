@@ -6,8 +6,7 @@
  *
  *)
 
-module Fact_id = Symbol_fact_id
-open Symbol_glean_schema.Hack
+open Glean_schema.Hack
 
 (* Predicate types for the JSON facts emitted *)
 type hack =
@@ -101,9 +100,9 @@ module Fact_acc : sig
      the ownership_unit is ignored. *)
   val set_ownership_unit : t -> string option -> unit
 
-  val set_pos_map : t -> Symbol_xrefs.pos_map -> unit
+  val set_pos_map : t -> Xrefs.pos_map -> unit
 
-  val get_pos_map : t -> Symbol_xrefs.pos_map option
+  val get_pos_map : t -> Xrefs.pos_map option
 
   (** [add_fact pred fact t] returns an [id] and a new accumulator [t'].
      If a fact already exists in [t] for this [pred], returns [t] unchanged
@@ -113,9 +112,5 @@ module Fact_acc : sig
      If [ownership] is set, we distinguish between identical facts with different
      owners *)
   val add_fact :
-    predicate ->
-    Hh_json.json ->
-    ?value:Hh_json.json ->
-    t ->
-    Symbol_fact_id.t * t
+    predicate -> Hh_json.json -> ?value:Hh_json.json -> t -> Fact_id.t * t
 end

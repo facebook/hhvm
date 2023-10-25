@@ -12,17 +12,13 @@
  *)
 
 open Hh_prelude
-open Symbol_glean_schema.Hack
-module Fact_id = Symbol_fact_id
-module Predicate = Symbol_predicate
-module Fact_acc = Symbol_predicate.Fact_acc
-module XRefs = Symbol_xrefs
-module Util = Symbol_util
+open Glean_schema.Hack
+module Fact_acc = Predicate.Fact_acc
 
 val namespace_decl : string -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
 val container_decl :
-  Symbol_predicate.t -> string -> Fact_acc.t -> Fact_id.t * Fact_acc.t
+  Predicate.t -> string -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
 val member_cluster :
   members:Declaration.t list -> Fact_acc.t -> Fact_id.t * Fact_acc.t
@@ -192,7 +188,7 @@ val gen_code :
   Fact_id.t * Fact_acc.t
 
 val file_xrefs :
-  path:string -> XRefs.fact_map -> Fact_acc.t -> Fact_id.t * Fact_acc.t
+  path:string -> Xrefs.fact_map -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
 val file_decls :
   path:string -> Declaration.t list -> Fact_acc.t -> Fact_id.t * Fact_acc.t
@@ -200,7 +196,7 @@ val file_decls :
 val file_call :
   path:string ->
   Pos.t ->
-  callee_infos:XRefs.target_info list ->
+  callee_infos:Xrefs.target_info list ->
   call_args:CallArgument.t list ->
   dispatch_arg:CallArgument.t option ->
   Fact_acc.t ->

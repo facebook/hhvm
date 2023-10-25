@@ -9,12 +9,8 @@
 open Aast
 open Ast_defs
 open Hh_prelude
-open Symbol_glean_schema.Hack
-open Symbol_glean_schema.Src
-module Util = Symbol_util
-module Fact_id = Symbol_fact_id
-module XRefs = Symbol_xrefs
-module Predicate = Symbol_predicate
+open Glean_schema.Hack
+open Glean_schema.Src
 
 let method_decl meth_name con_name con_type =
   let qname = QName.(Key (of_string con_name)) in
@@ -122,7 +118,7 @@ let generic_xrefs (sym_pos : (XRefTarget.t * Util.pos list) Seq.t) =
      when diffing dbs *)
   List.sort ~compare:XRef.compare xrefs
 
-let xrefs (fact_map : XRefs.fact_map) =
+let xrefs (fact_map : Xrefs.fact_map) =
   let f (_fact_id, (target, pos_list)) =
     let util_pos_list =
       List.map pos_list ~f:(fun pos ->

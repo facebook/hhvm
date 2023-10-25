@@ -927,6 +927,7 @@ let write_symbol_info
     (env : ServerEnv.env)
     (cgroup_steps : CgroupProfiler.step_group)
     (t : float) : ServerEnv.env * float =
+  let open Write_symbol_info in
   let (env, t) =
     ServerInitCommon
     .update_reverse_naming_table_from_env_and_get_duplicate_name_errors
@@ -944,19 +945,15 @@ let write_symbol_info
      from the naming table, depending on the combination of options *)
   let files =
     if List.length paths > 0 || Option.is_some paths_file then
-      Symbol_indexable.from_options ~paths ~paths_file ~include_hhi
+      Indexable.from_options ~paths ~paths_file ~include_hhi
     else
-      Symbol_indexable.from_naming_table
-        env.naming_table
-        ~include_hhi
-        ~ignore_paths
+      Indexable.from_naming_table env.naming_table ~include_hhi ~ignore_paths
   in
   match env.swriteopt.symbol_write_index_paths_file_output with
   | Some output ->
     (* Don't run indexer, just returns list of all files to index *)
     List.map
-      ~f:(fun Symbol_indexable.{ path; _ } ->
-        Relative_path.storage_to_string path)
+      ~f:(fun Indexable.{ path; _ } -> Relative_path.storage_to_string path)
       files
     |> Out_channel.write_lines output;
     (env, t)
@@ -966,10 +963,10 @@ let write_symbol_info
       | None -> failwith "No write directory specified for --write-symbol-info"
       | Some s -> s
     in
-    let opts = Symbol_indexer_options.create env.swriteopt ~out_dir in
+    let opts = Indexer_options.create env.swriteopt ~out_dir in
     let namespace_map = ParserOptions.auto_namespace_map env.tcopt in
     let ctx = Provider_utils.ctx_from_server_env env in
-    Symbol_entrypoint.go genv.workers ctx opts ~namespace_map ~files;
+    Entrypoint.go genv.workers ctx opts ~namespace_map ~files;
     (env, t)
 
 let write_symbol_info_full_init

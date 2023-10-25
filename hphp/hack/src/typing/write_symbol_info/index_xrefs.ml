@@ -7,16 +7,10 @@
  *)
 
 open Hh_prelude
-open Symbol_glean_schema.Hack
-module Add_fact = Symbol_add_fact
-module Fact_acc = Symbol_predicate.Fact_acc
-module Predicate = Symbol_predicate
-module File_info = Symbol_file_info
-module XRefs = Symbol_xrefs
-module Sym_def = Symbol_sym_def
-module Build_fact = Symbol_build_fact
+open Glean_schema.Hack
+module Fact_acc = Predicate.Fact_acc
 
-let call_handler ~path fa_ref (pos_map : XRefs.pos_map) =
+let call_handler ~path fa_ref (pos_map : Xrefs.pos_map) =
   object (_self)
     inherit Tast_visitor.handler_base
 
@@ -31,8 +25,8 @@ let call_handler ~path fa_ref (pos_map : XRefs.pos_map) =
             Some Argument.(Lit (StringLiteral.Key s))
           | Aast.Id (id_pos, _)
           | Aast.Class_const (_, (id_pos, _)) ->
-            (match XRefs.PosMap.find_opt id_pos pos_map with
-            | Some (XRefs.{ target; _ } :: _) ->
+            (match Xrefs.PosMap.find_opt id_pos pos_map with
+            | Some (Xrefs.{ target; _ } :: _) ->
               (* there shouldn't be more than one target for a symbol in that
                  position *)
               Some (Argument.XRef target)
@@ -62,7 +56,7 @@ let call_handler ~path fa_ref (pos_map : XRefs.pos_map) =
         match id_pos with
         | None -> []
         | Some pos ->
-          (match XRefs.PosMap.find_opt pos pos_map with
+          (match Xrefs.PosMap.find_opt pos pos_map with
           | Some l -> l
           | None -> [])
       in
@@ -90,7 +84,7 @@ let process_xref decl_fun decl_ref_fun symbol_name pos ?receiver_type (xrefs, fa
     =
   let (target_id, fa) = decl_fun symbol_name fa in
   let target = XRefTarget.Declaration (decl_ref_fun target_id) in
-  let xrefs = XRefs.add xrefs target_id pos XRefs.{ target; receiver_type } in
+  let xrefs = Xrefs.add xrefs target_id pos Xrefs.{ target; receiver_type } in
   (xrefs, fa)
 
 let process_enum_xref symbol_name pos (xrefs, fa) =
@@ -262,11 +256,11 @@ let receiver_type occ =
   | _ -> None
 
 (* given symbols occurring in a file, compute the maps of xrefs *)
-let process_xrefs ctx symbols fa : XRefs.t * Fact_acc.t =
+let process_xrefs ctx symbols fa : Xrefs.t * Fact_acc.t =
   let open SymbolOccurrence in
   List.fold
     symbols
-    ~init:(XRefs.empty, fa)
+    ~init:(Xrefs.empty, fa)
     ~f:(fun (xrefs, fa) (File_info.{ occ; def } as sym) ->
       if occ.is_declaration then
         (xrefs, fa)
@@ -289,7 +283,7 @@ let process_xrefs ctx symbols fa : XRefs.t * Fact_acc.t =
                   Occurrence.{ method_ = MethodOccurrence.Id target_id }
               in
               let xrefs =
-                XRefs.add xrefs target_id pos XRefs.{ target; receiver_type }
+                Xrefs.add xrefs target_id pos Xrefs.{ target; receiver_type }
               in
               (xrefs, fa)
             | _ -> (xrefs, fa))
@@ -348,6 +342,6 @@ let process_xrefs ctx symbols fa : XRefs.t * Fact_acc.t =
 
 let process_xrefs_and_calls ctx fa File_info.{ path; tast; symbols; _ } =
   Fact_acc.set_ownership_unit fa (Some path);
-  let ((XRefs.{ pos_map; _ } as xrefs), fa) = process_xrefs ctx symbols fa in
+  let ((Xrefs.{ pos_map; _ } as xrefs), fa) = process_xrefs ctx symbols fa in
   let fa = process_calls ctx path tast pos_map fa in
   (fa, xrefs)

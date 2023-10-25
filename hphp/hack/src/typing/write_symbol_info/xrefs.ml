@@ -6,8 +6,7 @@
  *
  *)
 
-open Symbol_glean_schema.Hack
-module Fact_id = Symbol_fact_id
+open Glean_schema.Hack
 
 module PosMap = WrappedMap.Make (struct
   let compare = Pos.compare

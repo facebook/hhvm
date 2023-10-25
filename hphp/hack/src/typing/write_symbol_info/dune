@@ -1,24 +1,24 @@
 (library
  (name write_symbol_info)
- (wrapped false)
+ (wrapped true)
  (modules
-  symbol_glean_schema
-  symbol_sym_def
-  symbol_gencode
-  symbol_indexable
-  symbol_file_info
-  symbol_add_fact
-  symbol_build_fact
-  symbol_fact_id
-  symbol_xrefs
-  symbol_util
-  symbol_sym_hash
-  symbol_index_batch
-  symbol_index_decls
-  symbol_index_xrefs
-  symbol_indexer_options
-  symbol_entrypoint
-  symbol_predicate)
+  glean_schema
+  sym_def
+  gencode
+  indexable
+  file_info
+  add_fact
+  build_fact
+  fact_id
+  xrefs
+  util
+  sym_hash
+  index_batch
+  index_decls
+  index_xrefs
+  indexer_options
+  entrypoint
+  predicate)
  (libraries
   ast_provider
   naming_table

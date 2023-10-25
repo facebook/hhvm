@@ -8,15 +8,10 @@
 
 open Aast
 open Hh_prelude
-open Symbol_glean_schema.Src
-open Symbol_glean_schema.Hack
-open Symbol_glean_schema.GenCode
-module Util = Symbol_util
-module Build_fact = Symbol_build_fact
-module Predicate = Symbol_predicate
-module Fact_id = Symbol_fact_id
-module Fact_acc = Symbol_predicate.Fact_acc
-module XRefs = Symbol_xrefs
+open Glean_schema.Src
+open Glean_schema.Hack
+open Glean_schema.GenCode
+module Fact_acc = Predicate.Fact_acc
 
 let is_async = function
   | Ast_defs.FAsync -> true
@@ -285,8 +280,8 @@ let build_signature ctx pos_map_opt source_text params ctxs ret fa =
       let (ty, sym_pos) = Util.hint_to_string_and_symbols ctx hint in
       let decl_json_pos =
         List.filter_map sym_pos ~f:(fun (source_pos, pos) ->
-            match XRefs.PosMap.find_opt source_pos pos_map with
-            | Some (XRefs.{ target; _ } :: _) -> Some (target, pos)
+            match Xrefs.PosMap.find_opt source_pos pos_map with
+            | Some (Xrefs.{ target; _ } :: _) -> Some (target, pos)
             | _ -> None)
       in
       let decl_json_aggr_pos = aggregate_pos decl_json_pos in
@@ -638,14 +633,14 @@ let method_occ receiver_class name fa =
   Fact_acc.add_fact Predicate.(Hack MethodOccurrence) json fa
 
 let file_call ~path pos ~callee_infos ~call_args ~dispatch_arg fa =
-  let callee_xrefs = List.map callee_infos ~f:(fun ti -> ti.XRefs.target) in
+  let callee_xrefs = List.map callee_infos ~f:(fun ti -> ti.Xrefs.target) in
   let callee_xref =
     match List.sort ~compare:XRefTarget.compare callee_xrefs with
     | [] -> None
     | hd :: _ -> Some hd
   in
   let receiver_type =
-    List.find_map callee_infos ~f:(fun ti -> ti.XRefs.receiver_type)
+    List.find_map callee_infos ~f:(fun ti -> ti.Xrefs.receiver_type)
   in
   let json =
     FileCall.(

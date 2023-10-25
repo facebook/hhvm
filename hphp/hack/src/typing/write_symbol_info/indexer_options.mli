@@ -6,8 +6,6 @@
  *
  *)
 
-module Sym_hash = Symbol_sym_hash
-
 type t = private {
   (* if provided, create a file containing all php files referenced by the indexed files *)
   referenced_file: string option;

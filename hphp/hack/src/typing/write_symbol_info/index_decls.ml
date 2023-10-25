@@ -8,14 +8,8 @@
 
 open Aast
 open Hh_prelude
-open Symbol_glean_schema.Hack
-module Add_fact = Symbol_add_fact
-module Fact_acc = Symbol_predicate.Fact_acc
-module Fact_id = Symbol_fact_id
-module Util = Symbol_util
-module Predicate = Symbol_predicate
-module File_info = Symbol_file_info
-module XRefs = Symbol_xrefs
+open Glean_schema.Hack
+module Fact_acc = Predicate.Fact_acc
 
 let process_doc_comment
     (comment : Aast.doc_comment option)
@@ -371,10 +365,10 @@ let process_mod_xref fa xrefs (pos, id) =
     XRefTarget.Declaration
       (Declaration.ModuleDeclaration (ModuleDeclaration.Id target_id))
   in
-  (XRefs.add xrefs target_id pos XRefs.{ target; receiver_type = None }, fa)
+  (Xrefs.add xrefs target_id pos Xrefs.{ target; receiver_type = None }, fa)
 
 let process_tast_decls ctx ~path tast source_text (decls, fa) =
-  List.fold tast ~init:(XRefs.empty, decls, fa) ~f:(fun acc (def, im) ->
+  List.fold tast ~init:(Xrefs.empty, decls, fa) ~f:(fun acc (def, im) ->
       match def with
       | Class en when Util.is_enum_or_enum_class en.c_kind ->
         process_enum_decl ctx path source_text en acc

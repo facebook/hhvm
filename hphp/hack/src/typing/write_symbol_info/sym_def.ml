@@ -7,7 +7,6 @@
  *)
 
 open Hh_prelude
-module Util = Symbol_util
 
 type t = {
   kind: SymbolDefinition.kind;

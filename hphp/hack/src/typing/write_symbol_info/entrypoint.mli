@@ -9,9 +9,6 @@
 (* entry point to the hack indexer *)
 
 open Hh_prelude
-module Indexable = Symbol_indexable
-module Sym_hash = Symbol_sym_hash
-module Indexer_options = Symbol_indexer_options
 
 (* simpler entry point, uses default options indexing options, doesn't
    use worker. This is used by hh_single_type_check. *)

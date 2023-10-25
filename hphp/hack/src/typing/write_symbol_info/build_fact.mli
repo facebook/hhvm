@@ -10,10 +10,7 @@
  * Helper fact builder functions
  *)
 
-open Symbol_glean_schema.Hack
-module Fact_id = Symbol_fact_id
-module Util = Symbol_util
-module Predicate = Symbol_predicate
+open Glean_schema.Hack
 
 val call_arguments : (Argument.t option * Pos.t) list -> CallArgument.t list
 

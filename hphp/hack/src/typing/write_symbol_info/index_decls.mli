@@ -10,6 +10,6 @@
     a XRefs map for the module references *)
 val process_decls :
   Provider_context.t ->
-  Symbol_predicate.Fact_acc.t ->
-  Symbol_file_info.t ->
-  Symbol_xrefs.t * Symbol_predicate.Fact_acc.t
+  Predicate.Fact_acc.t ->
+  File_info.t ->
+  Xrefs.t * Predicate.Fact_acc.t

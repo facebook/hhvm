@@ -8,6 +8,6 @@
 
 val process_xrefs_and_calls :
   Provider_context.t ->
-  Symbol_predicate.Fact_acc.t ->
-  Symbol_file_info.t ->
-  Symbol_predicate.Fact_acc.t * Symbol_xrefs.t
+  Predicate.Fact_acc.t ->
+  File_info.t ->
+  Predicate.Fact_acc.t * Xrefs.t

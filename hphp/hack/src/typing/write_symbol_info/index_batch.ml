@@ -8,16 +8,11 @@
 
 (** Indexing a Hack file consists in three distinct passes
   1. Indexing source text (regex matching for extracting gencode info from comments)
-  2. Indexing declarations, done in [Symbol_index_decls]
-  3. Indexing xrefs and filecalls, done in [Symbol_index_refs] *)
+  2. Indexing declarations, done in [index_decls]
+  3. Indexing xrefs and filecalls, done in [index_refs] *)
 
 open Hh_prelude
-module File_info = Symbol_file_info
-module Gencode = Symbol_gencode
-module Add_fact = Symbol_add_fact
-module Fact_acc = Symbol_predicate.Fact_acc
-module XRefs = Symbol_xrefs
-module Fact_id = Symbol_fact_id
+module Fact_acc = Predicate.Fact_acc
 
 let process_source_text _ctx fa File_info.{ path; source_text; _ } =
   let text = Full_fidelity_source_text.text source_text in
@@ -47,13 +42,11 @@ let build_json ctx files_info ~ownership =
     let path = file_info.File_info.path in
     Fact_acc.set_ownership_unit fa (Some path);
     let fa = process_source_text ctx fa file_info in
-    let (fa, xrefs) =
-      Symbol_index_xrefs.process_xrefs_and_calls ctx fa file_info
-    in
-    Fact_acc.set_pos_map fa xrefs.XRefs.pos_map;
-    let (mod_xrefs, fa) = Symbol_index_decls.process_decls ctx fa file_info in
-    let fact_map_xrefs = xrefs.XRefs.fact_map in
-    let fact_map_module_xrefs = mod_xrefs.XRefs.fact_map in
+    let (fa, xrefs) = Index_xrefs.process_xrefs_and_calls ctx fa file_info in
+    Fact_acc.set_pos_map fa xrefs.Xrefs.pos_map;
+    let (mod_xrefs, fa) = Index_decls.process_decls ctx fa file_info in
+    let fact_map_xrefs = xrefs.Xrefs.fact_map in
+    let fact_map_module_xrefs = mod_xrefs.Xrefs.fact_map in
     let merge _ x _ = Some x in
     let all_xrefs =
       Fact_id.Map.union merge fact_map_module_xrefs fact_map_xrefs

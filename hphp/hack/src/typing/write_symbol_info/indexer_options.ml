@@ -6,7 +6,6 @@
  *
  *)
 
-module Sym_hash = Symbol_sym_hash
 open Hh_prelude
 
 type t = {
@@ -53,7 +52,7 @@ let create writeopt ~out_dir =
     hhi_path = writeopt.symbol_write_hhi_path;
     incremental =
       Option.map
-        ~f:(fun path -> Symbol_sym_hash.read ~path)
+        ~f:(fun path -> Sym_hash.read ~path)
         writeopt.symbol_write_sym_hash_in;
   }
 

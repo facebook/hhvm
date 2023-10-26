@@ -5,8 +5,8 @@
 use std::collections::BTreeMap;
 use std::collections::HashSet;
 
-#[allow(unused_imports)]
-use hack_macros::hack_stmts;
+use hack_macros::hack_expr;
+use naming_special_names_rust::special_idents;
 use nast::AsExpr;
 use nast::Binop;
 use nast::Block;
@@ -51,9 +51,18 @@ pub struct TypedLocal {
     // The in-scope erased generics
     erased_generics: HashSet<String>,
     should_elab: bool,
+    tmp_var_counter: isize,
 }
 
 impl TypedLocal {
+    fn gen_tmp_local(&mut self) -> nast::LocalId {
+        let name = special_idents::TMP_VAR_PREFIX.to_string()
+            + "typed_local"
+            + &self.tmp_var_counter.to_string();
+        self.tmp_var_counter += 1;
+        (0, name)
+    }
+
     fn add_local(&mut self, id: String, hint: Option<(Hint, bool)>, pos: &Pos) {
         self.locals.insert(id, (hint, pos.clone()));
     }
@@ -243,41 +252,77 @@ impl TypedLocal {
 
     // Collect all of the variables a lhs might need to enforce and put them in hints as 'as' expressions
     // These include list() variables, and $x[e] array index where the hint to enforce might be a shape or tuple
-    fn get_vars_to_enforce_lhs(&mut self, expr: &Expr, in_array_get: bool, hints: &mut Vec<Expr>) {
+    fn get_vars_to_enforce_lhs(
+        &mut self,
+        expr: &mut Expr,
+        in_array_get: bool,
+        in_op_assign: bool,
+        hints: &mut Vec<Expr>,
+        assign_tmp: &mut Vec<Expr>,
+        used_tmps: &mut Vec<Lid>,
+    ) {
         match expr {
-            Expr(_, pos, Expr_::Lvar(box lid)) => {
+            Expr(_, ref pos, Expr_::Lvar(box lid)) => {
                 if let Some((hint, could_be_shape_or_tuple)) = self.get_hint_or_add_assign(lid, pos)
                 {
-                    if !in_array_get || could_be_shape_or_tuple {
-                        let mut expr = expr.clone();
-                        self.wrap_rhs_with_as(&mut expr, hint, pos);
-                        hints.push(expr);
+                    if self.should_elab
+                        && (!in_array_get || could_be_shape_or_tuple || in_op_assign)
+                    {
+                        let mut tmp = Lid(pos.clone(), self.gen_tmp_local());
+                        used_tmps.push(tmp.clone());
+                        std::mem::swap(lid, &mut tmp);
+                        let orig_lid = Expr((), pos.clone(), Expr_::Lvar(Box::new(tmp)));
+                        if in_array_get || in_op_assign {
+                            let tmp_lid = Expr((), pos.clone(), Expr_::Lvar(Box::new(lid.clone())));
+                            assign_tmp.push(hack_expr!(
+                                pos = pos.clone(),
+                                "#tmp_lid = #{clone(orig_lid)}"
+                            ));
+                        }
+                        let mut as_expr = expr.clone();
+                        self.wrap_rhs_with_as(&mut as_expr, hint, pos);
+                        hints.push(hack_expr!(pos = pos.clone(), "#orig_lid = #as_expr"));
                     }
                 }
             }
             Expr(_, _pos, Expr_::List(exprs)) => {
                 for expr in exprs {
-                    self.get_vars_to_enforce_lhs(expr, in_array_get, hints)
+                    self.get_vars_to_enforce_lhs(
+                        expr,
+                        in_array_get,
+                        in_op_assign,
+                        hints,
+                        assign_tmp,
+                        used_tmps,
+                    )
                 }
             }
             Expr(_, _pos, Expr_::ArrayGet(box (lhs, Some(_)))) => {
-                self.get_vars_to_enforce_lhs(lhs, true, hints)
+                self.get_vars_to_enforce_lhs(lhs, true, in_op_assign, hints, assign_tmp, used_tmps)
             }
             _ => {}
         }
     }
 
-    fn get_vars_to_enforce(&mut self, expr: &Expr, hints: &mut Vec<Expr>) {
+    fn get_vars_to_enforce(
+        &mut self,
+        expr: &mut Expr,
+        hints: &mut Vec<Expr>,
+        assign_tmp: &mut Vec<Expr>,
+        used_tmps: &mut Vec<Lid>,
+    ) {
         match expr {
             Expr(
                 (),
                 _pos,
                 Expr_::Binop(box Binop {
-                    bop: Bop::Eq(_),
+                    bop: Bop::Eq(op),
                     lhs,
                     rhs: _,
                 }),
-            ) => self.get_vars_to_enforce_lhs(lhs, false, hints),
+            ) => {
+                self.get_vars_to_enforce_lhs(lhs, false, op.is_some(), hints, assign_tmp, used_tmps)
+            }
             _ => {}
         }
     }
@@ -294,6 +339,7 @@ impl TypedLocal {
         &mut self,
         env: &mut Env,
         init_exprs: &mut Vec<Expr>,
+        used_tmps: &mut Vec<Lid>,
     ) -> Result<Vec<Expr>, ()> {
         let mut new_init_expr = vec![];
         for mut init_expr in init_exprs.drain(..) {
@@ -302,12 +348,19 @@ impl TypedLocal {
                 Ok(()) => new_init_expr.push(init_expr),
                 Err(()) => {
                     let mut exprs = vec![];
-                    self.get_vars_to_enforce(&init_expr, &mut exprs);
+                    let mut assign_tmp = vec![];
+                    self.get_vars_to_enforce(
+                        &mut init_expr,
+                        &mut exprs,
+                        &mut assign_tmp,
+                        used_tmps,
+                    );
+                    if self.should_elab {
+                        new_init_expr.extend(assign_tmp.into_iter());
+                    }
                     new_init_expr.push(init_expr);
                     if self.should_elab {
-                        for expr in exprs.drain(..) {
-                            new_init_expr.push(expr);
-                        }
+                        new_init_expr.extend(exprs.into_iter());
                     }
                 }
             }
@@ -433,15 +486,16 @@ impl TypedLocal {
     }
 }
 
-fn exprs_to_stmts(expr: Option<Expr>, mut exprs: Vec<Expr>) -> Vec<Stmt> {
-    let mut stmts = vec![];
-    if let Some(expr) = expr {
-        stmts.push(Stmt(expr.1.clone(), Stmt_::Expr(Box::new(expr))));
-    }
-    for expr in exprs.drain(..) {
-        stmts.push(Stmt(expr.1.clone(), Stmt_::Expr(Box::new(expr))));
-    }
-    stmts
+fn expr_to_stmt(e: Expr) -> Stmt {
+    Stmt(e.1.clone(), Stmt_::Expr(Box::new(e)))
+}
+
+fn exprs_to_stmts(pre_exprs: Vec<Expr>, exprs: Vec<Expr>) -> Vec<Stmt> {
+    pre_exprs
+        .into_iter()
+        .chain(exprs)
+        .map(expr_to_stmt)
+        .collect()
 }
 
 fn add_to_block(mut stmts: Vec<Stmt>, block: &mut Block) {
@@ -451,6 +505,26 @@ fn add_to_block(mut stmts: Vec<Stmt>, block: &mut Block) {
             std::mem::swap(&mut stmts, stmts2);
         }
     }
+}
+
+fn wrap_block_with_tmps(stmt_: &mut Stmt_, pos: &Pos, used_tmps: Vec<Lid>) {
+    if !used_tmps.is_empty() {
+        let mut stmt2 = Stmt_::Break;
+        std::mem::swap(&mut stmt2, stmt_);
+        let block = Stmt_::Block(Box::new((
+            Some(used_tmps),
+            Block(vec![Stmt(pos.clone(), stmt2)]),
+        )));
+        let _ = std::mem::replace(stmt_, block);
+    }
+}
+
+fn add_tmp_foreach(tl: &mut TypedLocal, e: &mut Expr, pos: &Pos, used_tmps: &mut Vec<Lid>) -> Expr {
+    let tmp = tl.gen_tmp_local();
+    used_tmps.push(Lid(pos.clone(), tmp.clone()));
+    let mut tmp_expr = hack_expr!(pos = pos.clone(), "#{lvar(clone(tmp))}");
+    std::mem::swap(&mut tmp_expr, e);
+    hack_expr!(pos = pos.clone(), "#tmp_expr = #{lvar(tmp)}")
 }
 
 impl<'a> VisitorMut<'a> for TypedLocal {
@@ -507,12 +581,22 @@ impl<'a> VisitorMut<'a> for TypedLocal {
                 expr.recurse(env, self.object())?;
                 if let Err(()) = self.enforce_assign_expr_rhs(expr) {
                     let mut exprs = vec![];
-                    self.get_vars_to_enforce(expr, &mut exprs);
+                    let mut assign_tmps = vec![];
+                    let mut used_tmps = vec![];
+                    self.get_vars_to_enforce(expr, &mut exprs, &mut assign_tmps, &mut used_tmps);
                     if !exprs.is_empty() && self.should_elab {
                         let mut new_expr = Expr((), Pos::NONE, Expr_::Null);
                         std::mem::swap(expr, &mut new_expr);
-                        let stmts = exprs_to_stmts(Some(new_expr), exprs);
-                        let mut block = Stmt_::Block(Box::new((None, Block(stmts))));
+                        assign_tmps.push(new_expr);
+                        let stmts = exprs_to_stmts(assign_tmps, exprs);
+                        let mut block = Stmt_::Block(Box::new((
+                            if !used_tmps.is_empty() {
+                                Some(used_tmps)
+                            } else {
+                                None
+                            },
+                            Block(stmts),
+                        )));
                         std::mem::swap(stmt_, &mut block);
                     }
                 }
@@ -528,12 +612,16 @@ impl<'a> VisitorMut<'a> for TypedLocal {
                 Ok(())
             }
             Stmt_::For(box (init_exprs, cond, update_exprs, body)) => {
-                let mut new_init_exprs = self.add_enforcement_exprs_in_list(env, init_exprs)?;
+                let mut used_tmps = vec![];
+                let mut new_init_exprs =
+                    self.add_enforcement_exprs_in_list(env, init_exprs, &mut used_tmps)?;
                 std::mem::swap(&mut new_init_exprs, init_exprs);
                 cond.recurse(env, self.object())?;
                 body.recurse(env, self.object())?;
-                let mut new_update_exprs = self.add_enforcement_exprs_in_list(env, update_exprs)?;
+                let mut new_update_exprs =
+                    self.add_enforcement_exprs_in_list(env, update_exprs, &mut used_tmps)?;
                 std::mem::swap(&mut new_update_exprs, update_exprs);
+                wrap_block_with_tmps(stmt_, pos, used_tmps);
                 Ok(())
             }
             Stmt_::Using(box UsingStmt {
@@ -588,22 +676,57 @@ impl<'a> VisitorMut<'a> for TypedLocal {
             Stmt_::Foreach(box (expr, as_expr, block)) => {
                 expr.recurse(env, self.object())?;
                 let mut hints = vec![];
+                let mut assign_tmp = vec![];
+                let mut used_tmps = vec![];
                 match as_expr {
                     AsExpr::AsV(e) | AsExpr::AwaitAsV(_, e) => {
                         e.recurse(env, self.object())?;
-                        self.get_vars_to_enforce_lhs(e, false, &mut hints)
+                        self.get_vars_to_enforce_lhs(
+                            e,
+                            false,
+                            false,
+                            &mut hints,
+                            &mut assign_tmp,
+                            &mut used_tmps,
+                        );
+                        if !assign_tmp.is_empty() {
+                            // Must have been assigning to an array index, so we need to use a temporary
+                            assign_tmp.push(add_tmp_foreach(self, e, pos, &mut used_tmps))
+                        }
                     }
                     AsExpr::AsKv(e1, e2) | AsExpr::AwaitAsKv(_, e1, e2) => {
                         e1.recurse(env, self.object())?;
                         e2.recurse(env, self.object())?;
-                        self.get_vars_to_enforce_lhs(e1, false, &mut hints);
-                        self.get_vars_to_enforce_lhs(e2, false, &mut hints);
+                        self.get_vars_to_enforce_lhs(
+                            e1,
+                            false,
+                            false,
+                            &mut hints,
+                            &mut assign_tmp,
+                            &mut used_tmps,
+                        );
+                        if !assign_tmp.is_empty() {
+                            assign_tmp.push(add_tmp_foreach(self, e1, pos, &mut used_tmps))
+                        }
+                        let len = assign_tmp.len();
+                        self.get_vars_to_enforce_lhs(
+                            e2,
+                            false,
+                            false,
+                            &mut hints,
+                            &mut assign_tmp,
+                            &mut used_tmps,
+                        );
+                        if len != assign_tmp.len() {
+                            assign_tmp.push(add_tmp_foreach(self, e2, pos, &mut used_tmps))
+                        }
                     }
                 }
                 block.recurse(env, self.object())?;
                 if self.should_elab {
-                    let stmts = exprs_to_stmts(None, hints);
+                    let stmts = exprs_to_stmts(assign_tmp, hints);
                     add_to_block(stmts, block);
+                    wrap_block_with_tmps(stmt_, pos, used_tmps);
                 }
                 Ok(())
             }
@@ -731,11 +854,25 @@ pub fn elaborate_class_(env: &mut Env, c: &mut nast::Class_, should_elab: bool) 
 #[cfg(test)]
 mod tests {
 
+    use hack_macros::hack_stmts;
     use nast::Block;
     use nast::Def;
+    use nast::LocalId;
     use nast::Program;
 
     use super::*;
+
+    fn mk_lid(name: &str) -> LocalId {
+        (0, name.to_string())
+    }
+
+    fn mk_lid2(l: LocalId) -> Lid {
+        Lid(Pos::NONE, l)
+    }
+
+    fn mk_block(lids: Vec<Lid>, body: Vec<Stmt>) -> Stmt {
+        Stmt(Pos::NONE, Stmt_::Block(Box::new((Some(lids), Block(body)))))
+    }
 
     fn build_program(stmts: Vec<Stmt>) -> Program {
         nast::Program(vec![Def::Stmt(Box::new(Stmt(
@@ -835,13 +972,17 @@ mod tests {
 
     #[test]
     fn test_for3() {
+        let tmp0 = mk_lid("__tmp$typed_local0");
+        let tmp1 = mk_lid("__tmp$typed_local1");
         let mut env = Env::default();
         let mut orig = build_program(hack_stmts!(
             "let $x:t = 1; for (list($x, $y) = vec[1,2]; ; $x[0] = 1, $y = 0) { }"
         ));
-        let res = build_program(hack_stmts!(
-            "$x = 1 as t; for (list($x, $y) = vec[1,2], $x as t; ; $x[0] = 1, $x as t, $y = 0) { }"
-        ));
+        let for_res = hack_stmts!(
+            "for (list(#{lvar(clone(tmp0))}, $y) = vec[1,2], $x = #{lvar(clone(tmp0))} as t; ; #{lvar(clone(tmp1))} = $x, #{lvar(clone(tmp1))}[0] = 1, $x = #{lvar(clone(tmp1))} as t, $y = 0) { };"
+        );
+        let block = mk_block(vec![mk_lid2(tmp0), mk_lid2(tmp1)], for_res);
+        let res = build_program(hack_stmts!("$x = 1 as t; #block;"));
         self::elaborate_program(&mut env, &mut orig, true);
         assert_eq!(orig, res);
     }
@@ -897,24 +1038,31 @@ mod tests {
 
     #[test]
     fn test_list1() {
+        let tmp0 = mk_lid("__tmp$typed_local0");
         let mut env = Env::default();
         let mut orig = build_program(hack_stmts!("let $x:int = 1; list($x, $y) = vec[1, 2];"));
-        let res = build_program(hack_stmts!(
-            "$x = 1 as int; {list($x, $y) = vec[1, 2]; $x as int;}"
-        ));
+        let stmt = hack_stmts!(
+            "list(#{lvar(clone(tmp0))}, $y) = vec[1, 2]; $x = #{lvar(clone(tmp0))} as int;"
+        );
+        let block = mk_block(vec![mk_lid2(tmp0)], stmt);
+        let res = build_program(hack_stmts!("$x = 1 as int; #block;"));
         self::elaborate_program(&mut env, &mut orig, true);
         assert_eq!(orig, res);
     }
 
     #[test]
     fn test_list2() {
+        let tmp0 = mk_lid("__tmp$typed_local0");
+        let tmp1 = mk_lid("__tmp$typed_local1");
         let mut env = Env::default();
         let mut orig = build_program(hack_stmts!(
             "let $x:int = 1; let $y: int = 1; list($x, list ($z, $y)) = vec[1, vec[2, 3]];"
         ));
-        let res = build_program(hack_stmts!(
-            "$x = 1 as int; $y = 1as int; {list($x, list ($z, $y)) = vec[1, vec[2, 3]]; $x as int; $y as int;}"
-        ));
+        let stmt = hack_stmts!(
+            "list(#{lvar(clone(tmp0))}, list ($z, #{lvar(clone(tmp1))})) = vec[1, vec[2, 3]]; $x = #{lvar(clone(tmp0))} as int; $y = #{lvar(clone(tmp1))} as int;"
+        );
+        let block = mk_block(vec![mk_lid2(tmp0), mk_lid2(tmp1)], stmt);
+        let res = build_program(hack_stmts!("$x = 1 as int; $y = 1 as int; #block;"));
         self::elaborate_program(&mut env, &mut orig, true);
         assert_eq!(orig, res);
     }
@@ -930,10 +1078,16 @@ mod tests {
 
     #[test]
     fn test_array2() {
+        let tmp0 = mk_lid("__tmp$typed_local0");
         let mut env = Env::default();
         let mut orig = build_program(hack_stmts!("let $x:t = vec[1]; $x[0] = 1;"));
-        let res = build_program(hack_stmts!("$x = vec[1] as t; {$x[0] = 1; $x as t;}"));
+        let stmt = hack_stmts!(
+            "#{lvar(clone(tmp0))} = $x; #{lvar(clone(tmp0))}[0] = 1; $x = #{lvar(clone(tmp0))} as t;"
+        );
+        let block = mk_block(vec![mk_lid2(tmp0)], stmt);
+        let res = build_program(hack_stmts!("$x = vec[1] as t; #block;"));
         self::elaborate_program(&mut env, &mut orig, true);
+        println!("{:#?}", orig);
         assert_eq!(orig, res);
     }
 
@@ -959,9 +1113,16 @@ mod tests {
     fn test_foreach1() {
         let mut env = Env::default();
         let mut orig = build_program(hack_stmts!("let $x:int = 1; foreach (e as $x) {  }"));
-        let res = build_program(hack_stmts!(
-            "$x = 1 as int; foreach (e as $x) { $x as int; }"
-        ));
+        let tmp0 = mk_lid("__tmp$typed_local0");
+        let tmp = nast::Expr(
+            (),
+            Pos::NONE,
+            Expr_::Lvar(Box::new(Lid(Pos::NONE, tmp0.clone()))),
+        );
+        let stmt =
+            hack_stmts!("foreach (e as #{clone(tmp)}) { $x = #{lvar(clone(tmp0))} as int; }");
+        let block = mk_block(vec![mk_lid2(tmp0)], stmt);
+        let res = build_program(hack_stmts!("$x = 1 as int; #block;"));
         self::elaborate_program(&mut env, &mut orig, true);
         assert_eq!(orig, res);
     }
@@ -972,9 +1133,28 @@ mod tests {
         let mut orig = build_program(hack_stmts!(
             "let $x:t = 1; let $y:t = 1; foreach (e as $x[0] => $y[0]) { 1; }"
         ));
-        let res = build_program(hack_stmts!(
-            "$x = 1 as t; $y = 1 as t; foreach (e as $x[0] => $y[0]) { $x as t; $y as t; 1;}"
-        ));
+        let tmp0 = mk_lid("__tmp$typed_local0");
+        let tmp1 = mk_lid("__tmp$typed_local1");
+        let tmp2 = mk_lid("__tmp$typed_local2");
+        let tmp3 = mk_lid("__tmp$typed_local3");
+        let foreach = Stmt(
+            Pos::NONE,
+            Stmt_::Foreach(Box::new((
+                hack_expr!("e"),
+                AsExpr::AsKv(
+                    hack_expr!("#{lvar(clone(tmp1))}"),
+                    hack_expr!("#{lvar(clone(tmp3))}"),
+                ),
+                Block(hack_stmts!(
+                    "#{lvar(clone(tmp0))} = $x; #{lvar(clone(tmp0))}[0] = #{lvar(clone(tmp1))}; #{lvar(clone(tmp2))} = $y; #{lvar(clone(tmp2))}[0] = #{lvar(clone(tmp3))}; $x = #{lvar(clone(tmp0))} as t; $y = #{lvar(clone(tmp2))} as t; 1;"
+                )),
+            ))),
+        );
+        let block = mk_block(
+            vec![mk_lid2(tmp0), mk_lid2(tmp1), mk_lid2(tmp2), mk_lid2(tmp3)],
+            vec![foreach],
+        );
+        let res = build_program(hack_stmts!("$x = 1 as t; $y = 1 as t; #block;"));
         self::elaborate_program(&mut env, &mut orig, true);
         assert_eq!(orig, res);
     }
@@ -982,120 +1162,45 @@ mod tests {
     #[test]
     fn test_eqop() {
         let mut env = Env::default();
-        // hack_stmts! macro brolen on += operator
-        let mut orig = build_program(vec![
-            Stmt(
+        // hack_stmts! macro broken on += operator
+        let stmt = Stmt(
+            Pos::NONE,
+            Stmt_::Expr(Box::new(Expr(
+                (),
                 Pos::NONE,
-                Stmt_::DeclareLocal(Box::new((
-                    Lid(Pos::NONE, (0, "$x".to_string())),
-                    Hint(
+                Expr_::Binop(Box::new(Binop {
+                    bop: Bop::Eq(Some(Box::new(Bop::Plus))),
+                    lhs: Expr(
+                        (),
                         Pos::NONE,
-                        Box::new(Hint_::Happly(nast::Id(Pos::NONE, "t".to_string()), vec![])),
+                        Expr_::Lvar(Box::new(Lid(Pos::NONE, (0, "$x".to_string())))),
                     ),
-                    Some(Expr((), Pos::NONE, Expr_::Int("1".to_string()))),
-                ))),
-            ),
-            Stmt(
+                    rhs: Expr((), Pos::NONE, Expr_::Int("1".to_string())),
+                })),
+            ))),
+        );
+        let mut orig = build_program(hack_stmts!("let $x:t = 1; #stmt;"));
+        let tmp0 = mk_lid("__tmp$typed_local0");
+        let res_stmt = Stmt(
+            Pos::NONE,
+            Stmt_::Expr(Box::new(Expr(
+                (),
                 Pos::NONE,
-                Stmt_::Expr(Box::new(Expr(
-                    (),
-                    Pos::NONE,
-                    Expr_::Binop(Box::new(Binop {
-                        bop: Bop::Eq(Some(Box::new(Bop::Plus))),
-                        lhs: Expr(
-                            (),
-                            Pos::NONE,
-                            Expr_::Lvar(Box::new(Lid(Pos::NONE, (0, "$x".to_string())))),
-                        ),
-                        rhs: Expr((), Pos::NONE, Expr_::Int("1".to_string())),
-                    })),
-                ))),
-            ),
-        ]);
-        let res = build_program(vec![
-            Stmt(
-                Pos::NONE,
-                Stmt_::Expr(Box::new(Expr(
-                    (),
-                    Pos::NONE,
-                    Expr_::Binop(Box::new(Binop {
-                        bop: Bop::Eq(None),
-                        lhs: Expr(
-                            (),
-                            Pos::NONE,
-                            Expr_::Lvar(Box::new(Lid(Pos::NONE, (0, "$x".to_string())))),
-                        ),
-                        rhs: Expr(
-                            (),
-                            Pos::NONE,
-                            Expr_::As(Box::new((
-                                Expr((), Pos::NONE, Expr_::Int("1".to_string())),
-                                Hint(
-                                    Pos::NONE,
-                                    Box::new(Hint_::Happly(
-                                        nast::Id(Pos::NONE, "t".to_string()),
-                                        vec![],
-                                    )),
-                                ),
-                                false,
-                            ))),
-                        ),
-                    })),
-                ))),
-            ),
-            Stmt(
-                Pos::NONE,
-                Stmt_::Block(Box::new((
-                    None,
-                    Block(vec![
-                        Stmt(
-                            Pos::NONE,
-                            Stmt_::Expr(Box::new(Expr(
-                                (),
-                                Pos::NONE,
-                                Expr_::Binop(Box::new(Binop {
-                                    bop: Bop::Eq(Some(Box::new(Bop::Plus))),
-                                    lhs: Expr(
-                                        (),
-                                        Pos::NONE,
-                                        Expr_::Lvar(Box::new(Lid(
-                                            Pos::NONE,
-                                            (0, "$x".to_string()),
-                                        ))),
-                                    ),
-                                    rhs: Expr((), Pos::NONE, Expr_::Int("1".to_string())),
-                                })),
-                            ))),
-                        ),
-                        Stmt(
-                            Pos::NONE,
-                            Stmt_::Expr(Box::new(Expr(
-                                (),
-                                Pos::NONE,
-                                Expr_::As(Box::new((
-                                    Expr(
-                                        (),
-                                        Pos::NONE,
-                                        Expr_::Lvar(Box::new(Lid(
-                                            Pos::NONE,
-                                            (0, "$x".to_string()),
-                                        ))),
-                                    ),
-                                    Hint(
-                                        Pos::NONE,
-                                        Box::new(Hint_::Happly(
-                                            nast::Id(Pos::NONE, "t".to_string()),
-                                            vec![],
-                                        )),
-                                    ),
-                                    false,
-                                ))),
-                            ))),
-                        ),
-                    ]),
-                ))),
-            ),
-        ]);
+                Expr_::Binop(Box::new(Binop {
+                    bop: Bop::Eq(Some(Box::new(Bop::Plus))),
+                    lhs: Expr(
+                        (),
+                        Pos::NONE,
+                        Expr_::Lvar(Box::new(Lid(Pos::NONE, tmp0.clone()))),
+                    ),
+                    rhs: Expr((), Pos::NONE, Expr_::Int("1".to_string())),
+                })),
+            ))),
+        );
+        let stmt =
+            hack_stmts!("#{lvar(clone(tmp0))} = $x; #res_stmt; $x = #{lvar(clone(tmp0))} as t;");
+        let block = mk_block(vec![mk_lid2(tmp0)], stmt);
+        let res = build_program(hack_stmts!("$x = 1 as t; #block;"));
         self::elaborate_program(&mut env, &mut orig, true);
         assert_eq!(orig, res);
     }

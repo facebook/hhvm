@@ -273,6 +273,7 @@ bool PackageInfo::moduleInDeployment(const StringData* module,
 
 bool PackageInfo::moduleInASoftPackage(const StringData* module) const {
   if (!module || module->empty()) return false;
+  if (RO::RepoAuthoritative) return isModuleSoftDeployed(module);
   for (auto& [_, deployment] : deployments()) {
     if (moduleInDeployment(module, deployment, DeployKind::Soft)) {
       return true;

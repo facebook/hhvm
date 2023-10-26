@@ -622,7 +622,7 @@ checksum = "4d7ac49647ca72e4ecf4a1ca559dbc7fa43e2c5620dbd2cf198e6bf4671de6f2"
 dependencies = [
  "clap 3.2.25",
  "heck",
- "indexmap",
+ "indexmap 1.9.2",
  "log",
  "proc-macro2",
  "quote",
@@ -660,7 +660,7 @@ version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bf74ea341ae8905eac9a234b6a5a845e118c25bbbdecf85ec77431a8b3bfa0be"
 dependencies = [
- "indexmap",
+ "indexmap 1.9.2",
  "lazy_static",
  "num-traits",
  "regex",
@@ -705,7 +705,7 @@ dependencies = [
  "bitflags 1.3.2",
  "clap_derive 3.2.25",
  "clap_lex 0.2.2",
- "indexmap",
+ "indexmap 1.9.2",
  "once_cell",
  "regex",
  "strsim",
@@ -939,7 +939,7 @@ dependencies = [
  "ffi",
  "hhbc",
  "hhbc_string_utils",
- "indexmap",
+ "indexmap 1.9.2",
  "itertools 0.11.0",
  "naming_special_names_rust",
  "oxidized",
@@ -1659,7 +1659,7 @@ dependencies = [
  "hhbc",
  "hhbc_string_utils",
  "hhvm_types_ffi",
- "indexmap",
+ "indexmap 1.9.2",
  "instruction_sequence",
  "itertools 0.11.0",
  "label_rewriter",
@@ -1716,7 +1716,7 @@ dependencies = [
  "hash",
  "hhbc",
  "hhbc_string_utils",
- "indexmap",
+ "indexmap 1.9.2",
  "naming_special_names_rust",
  "options",
  "oxidized",
@@ -1756,7 +1756,7 @@ dependencies = [
  "bstr",
  "eq_modulo_pos_derive",
  "hcons",
- "indexmap",
+ "indexmap 1.9.2",
  "ocamlrep_caml_builtins",
 ]
 
@@ -1768,6 +1768,12 @@ dependencies = [
  "quote",
  "synstructure",
 ]
+
+[[package]]
+name = "equivalent"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "88bffebc5d80432c9b140ee17875ff173a8ab62faad5b257da912bd2f6c1c0a1"
 
 [[package]]
 name = "erased-serde"
@@ -1986,7 +1992,7 @@ dependencies = [
  "decl_enforceability",
  "eq_modulo_pos",
  "hash",
- "indexmap",
+ "indexmap 1.9.2",
  "itertools 0.11.0",
  "oxidized",
  "pos",
@@ -2302,7 +2308,7 @@ name = "hash"
 version = "0.0.0"
 dependencies = [
  "dashmap",
- "indexmap",
+ "indexmap 1.9.2",
  "rustc-hash",
 ]
 
@@ -2740,6 +2746,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "indexmap"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d5477fe2230a79769d8dc68e0eabf5437907c0457a5614a9e8dddb67f65eb65d"
+dependencies = [
+ "equivalent",
+ "hashbrown 0.14.0",
+]
+
+[[package]]
 name = "indicatif"
 version = "0.17.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2782,7 +2798,7 @@ dependencies = [
  "bincode",
  "fnv",
  "hashbrown 0.12.3",
- "indexmap",
+ "indexmap 1.9.2",
  "once_cell",
  "parking_lot",
  "rand",
@@ -2826,7 +2842,7 @@ dependencies = [
  "hash",
  "hhbc",
  "hhvm_types_ffi",
- "indexmap",
+ "indexmap 1.9.2",
  "macros",
  "naming_special_names_rust",
  "newtype",
@@ -3100,7 +3116,7 @@ dependencies = [
  "cactus",
  "cfgrammar",
  "filetime",
- "indexmap",
+ "indexmap 1.9.2",
  "lazy_static",
  "lrtable",
  "num-traits",
@@ -3548,7 +3564,7 @@ version = "0.1.0"
 dependencies = [
  "bstr",
  "bumpalo",
- "indexmap",
+ "indexmap 1.9.2",
  "ocamlrep_derive",
  "rustc-hash",
  "serde",
@@ -3680,7 +3696,7 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
- "toml 0.7.3",
+ "toml 0.8.4",
 ]
 
 [[package]]
@@ -3715,7 +3731,7 @@ dependencies = [
  "hash",
  "once_cell",
  "serde",
- "toml 0.7.3",
+ "toml 0.8.4",
 ]
 
 [[package]]
@@ -3933,7 +3949,7 @@ dependencies = [
  "eq_modulo_pos",
  "hh24_types",
  "im",
- "indexmap",
+ "indexmap 1.9.2",
  "intern",
  "ocamlrep",
  "oxidized",
@@ -4719,9 +4735,9 @@ dependencies = [
 
 [[package]]
 name = "serde_spanned"
-version = "0.6.1"
+version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0efd8caf556a6cebd3b285caf480045fcc1ac04f6bd786b09a6f11af30c4fcf4"
+checksum = "12022b835073e5b11e90a14f86838ceb1c8fb0325b72416845c487ac0fa95e80"
 dependencies = [
  "serde",
 ]
@@ -5429,9 +5445,9 @@ dependencies = [
 
 [[package]]
 name = "toml"
-version = "0.7.3"
+version = "0.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b403acf6f2bb0859c93c7f0d967cb4a75a7ac552100f9322faf64dc047669b21"
+checksum = "2ef75d881185fd2df4a040793927c153d863651108a93c7e17a9e591baa95cc6"
 dependencies = [
  "serde",
  "serde_spanned",
@@ -5441,20 +5457,20 @@ dependencies = [
 
 [[package]]
 name = "toml_datetime"
-version = "0.6.1"
+version = "0.6.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3ab8ed2edee10b50132aed5f331333428b011c99402b5a534154ed15746f9622"
+checksum = "3550f4e9685620ac18a50ed434eb3aec30db8ba93b0287467bca5826ea25baf1"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "toml_edit"
-version = "0.19.8"
+version = "0.20.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "239410c8609e8125456927e6707163a3b1fdb40561e4b803bc041f466ccfdc13"
+checksum = "380f9e8120405471f7c9ad1860a713ef5ece6a670c7eae39225e477340f32fc4"
 dependencies = [
- "indexmap",
+ "indexmap 2.0.0",
  "serde",
  "serde_spanned",
  "toml_datetime",
@@ -6024,9 +6040,9 @@ checksum = "1a515f5799fe4961cb532f983ce2b23082366b898e52ffbce459c86f67c8378a"
 
 [[package]]
 name = "winnow"
-version = "0.4.1"
+version = "0.5.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ae8970b36c66498d8ff1d66685dc86b91b29db0c7739899012f63a63814b4b28"
+checksum = "a3b801d0e0a6726477cc207f60162da452f3a95adb368399bef20a946e06f65c"
 dependencies = [
  "memchr",
 ]

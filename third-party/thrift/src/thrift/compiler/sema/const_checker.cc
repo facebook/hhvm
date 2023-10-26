@@ -261,7 +261,8 @@ class const_checker {
 
   void check_union(const t_union* type, const t_const_value* value) {
     if (value->get_type() != t_const_value::CV_MAP) {
-      report_type_mismatch("union");
+      error("{} is incompatible with `{}`", get_category(value), type->name());
+      return;
     }
     const auto& map = value->get_map();
     if (map.size() > 1) {

@@ -479,6 +479,18 @@ TEST(CompilerTest, struct_initializer) {
   )");
 }
 
+TEST(CompilerTest, union_initializer) {
+  check_compile(R"(
+    union U {}
+    const U u1 = {};   # OK
+    const U u2 = 42;   # expected-error: integer is incompatible with `U`
+    const U u3 = 4.2;  # expected-error: floating-point number is incompatible with `U`
+    const U u4 = "";   # expected-error: string is incompatible with `U`
+    const U u5 = true; # expected-error: bool is incompatible with `U`
+    const U u6 = [];   # expected-error: list is incompatible with `U`
+  )");
+}
+
 TEST(CompilerTest, struct_fields_wrong_type) {
   check_compile(R"(
     struct Annot {

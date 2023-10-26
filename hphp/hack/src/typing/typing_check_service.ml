@@ -846,6 +846,8 @@ let process_with_hh_distc
     |> Result.ok_or_failwith
   in
   let fd_distc = Hh_distc_ffi.get_fd hh_distc_handle in
+  let re_session_id = Hh_distc_ffi.get_re_session_id hh_distc_handle in
+  Hh_logger.log "hh_distc RE session id: %s" re_session_id;
   ServerProgress.write "hh_distc running";
   let handlers =
     interrupt.MultiThreadedCall.handlers interrupt.MultiThreadedCall.env

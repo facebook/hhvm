@@ -18,4 +18,6 @@ let is_finished _ = failwith "is_finished not implemented"
 
 let get_fd _ = failwith "get_fd not implemented"
 
+let get_re_session_id _ = failwith "get_re_session_id not implemented"
+
 let recv _ = failwith "recv not implemented"

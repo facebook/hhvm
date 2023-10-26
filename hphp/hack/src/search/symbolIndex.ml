@@ -89,6 +89,7 @@ let find_matching_symbols
       | Ac_workspace_symbol -> []
       | Acid
       | Acnew
+      | Acclassish
       | Actype
       | Actrait_only ->
         List.filter_map !sienv_ref.sie_namespace_map ~f:(fun (alias, map) ->

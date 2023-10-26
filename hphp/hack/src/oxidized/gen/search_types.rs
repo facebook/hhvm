@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b9427dadb5d4875fbf6a17be59d13dd6>>
+// @generated SignedSource<<958bf8057ef06bb233e7115cc39353f7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -129,6 +129,8 @@ pub struct SiAddendum {
 pub enum AutocompleteType {
     /// satisfies [valid_for_acid], e.g. in autocomplete contexts like `|` at the start of a statement
     Acid,
+    /// satisfies [valid_for_acclassish], currently only used for `nameof`
+    Acclassish,
     /// satisfies [valid_for_acnew] AND isn't an abstract class, e.g. in autocomplete contexts like `$x = new |`
     Acnew,
     /// satisfies [valid_for_actype], e.g. in autocomplete contexts like `Foo<|`

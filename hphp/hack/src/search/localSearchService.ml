@@ -96,6 +96,8 @@ let search_local_symbols
       | (Acnew, _) ->
         SearchTypes.valid_for_acnew symbol.SearchUtils.sif_kind
         && not symbol.SearchUtils.sif_is_abstract
+      | (Acclassish, _) ->
+        SearchTypes.valid_for_acclassish symbol.SearchUtils.sif_kind
       | (Acid, _) -> SearchTypes.valid_for_acid symbol.SearchUtils.sif_kind
       | (Actrait_only, _) -> is_si_trait symbol.sif_kind
       | (Ac_workspace_symbol, Some kind_match) ->

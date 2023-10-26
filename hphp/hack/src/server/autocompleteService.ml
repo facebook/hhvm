@@ -1484,6 +1484,7 @@ let find_global_results
       match completion_type with
       | Acnew -> Some SI_Class
       | Actrait_only -> Some SI_Trait
+      | Acclassish
       | Acid
       | Actype
       | Ac_workspace_symbol ->
@@ -1571,6 +1572,7 @@ let find_global_results
     match completion_type with
     | Acid
     | Actrait_only
+    | Acclassish
     | Ac_workspace_symbol
     | Acnew ->
       ()
@@ -1805,6 +1807,12 @@ let visitor
       | Aast.CI id -> self#complete_global env id Acnew
       | _ -> ());
       super#on_New env cid el unpacked_element
+
+    method! on_Nameof env ((_, _, cid_) as cid) =
+      (match cid_ with
+      | Aast.CI id -> self#complete_global env id Acclassish
+      | _ -> ());
+      super#on_Nameof env cid
 
     method! on_Happly env sid hl =
       self#complete_global env sid Actype;

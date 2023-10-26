@@ -40,6 +40,8 @@ type si_addendum = {
 type autocomplete_type =
   | Acid
       (** satisfies [valid_for_acid], e.g. in autocomplete contexts like `|` at the start of a statement *)
+  | Acclassish
+      (** satisfies [valid_for_acclassish], currently only used for `nameof` *)
   | Acnew
       (** satisfies [valid_for_acnew] AND isn't an abstract class, e.g. in autocomplete contexts like `$x = new |` *)
   | Actype
@@ -139,6 +141,16 @@ let valid_for_actype (kind : si_kind) : bool =
   | SI_GlobalConstant ->
     false
   | _ -> true
+
+(** Acclassish represents entities that parse as ClassishDeclaration *)
+let valid_for_acclassish = function
+  | SI_Class
+  | SI_Interface
+  | SI_Enum
+  | SI_Trait
+  | SI_XHP ->
+    true
+  | _ -> false
 
 (** ACNEW represents instantiation of an object. (Caller should also verify that it's not abstract.) *)
 let valid_for_acnew (kind : si_kind) : bool =

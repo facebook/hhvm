@@ -210,7 +210,7 @@ folly::Try<EncodingList> parseEncoding(const folly::StringPiece header) {
     }
     result.emplace_back(encoding, std::move(params));
   }
-  return folly::Try<EncodingList>(std::move(result));
+  return folly::Try<EncodingList>(result);
 }
 
 bool acceptsEncoding(const folly::StringPiece header,

@@ -19,4 +19,4 @@ indexmap = { version = "1.9.2", features = ["arbitrary", "rayon", "serde-1"] }
 serde = { version = "1.0.185", features = ["derive", "rc"] }
 signed_source = { version = "0.0.0", path = "../../utils/rust/signed_source" }
 syn = { version = "1.0.109", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
-toml = "0.8.4"
+toml = "0.7.3"

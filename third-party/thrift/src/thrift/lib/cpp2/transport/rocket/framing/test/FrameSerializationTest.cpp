@@ -21,7 +21,6 @@
 
 #include <folly/Optional.h>
 #include <folly/Range.h>
-#include <folly/Singleton.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
 
@@ -702,15 +701,3 @@ TEST(FrameSerialization, ExtEmptyMetadataSanity) {
 } // namespace rocket
 } // namespace thrift
 } // namespace apache
-
-// TODO: Needed to make xplat test happy, we can get rid of this once we
-// remove fix_cpp_fragmentation flag.
-int main(int argc, char** argv) {
-  // Enable glog logging to stderr by default.
-  FLAGS_logtostderr = true;
-
-  ::testing::InitGoogleTest(&argc, argv);
-  folly::SingletonVault::singleton()->registrationComplete();
-
-  return RUN_ALL_TESTS();
-}

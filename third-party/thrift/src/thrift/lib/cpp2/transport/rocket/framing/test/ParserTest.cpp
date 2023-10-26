@@ -17,7 +17,6 @@
 #include <folly/portability/GTest.h>
 
 #include <folly/ExceptionWrapper.h>
-#include <folly/Singleton.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/DelayedDestruction.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Parser.h>
@@ -90,13 +89,3 @@ TEST(ParserTest, noResizeBufferReadBufEqMaxTest) {
 } // namespace rocket
 } // namespace thrift
 } // namespace apache
-
-int main(int argc, char** argv) {
-  // Enable glog logging to stderr by default.
-  FLAGS_logtostderr = true;
-
-  ::testing::InitGoogleTest(&argc, argv);
-  folly::SingletonVault::singleton()->registrationComplete();
-
-  return RUN_ALL_TESTS();
-}

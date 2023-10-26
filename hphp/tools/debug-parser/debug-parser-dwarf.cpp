@@ -672,7 +672,7 @@ TypeParserImpl::interpretLocAddress(const DWARFContextManager& dwarfContext,
   if (form != llvm::dwarf::DW_FORM_exprloc) return std::nullopt;
 
   llvm::DataExtractor extractor(
-    attr.Value.getAsBlock().getValue(),
+    *attr.Value.getAsBlock(),
     dwarfContext.getDWARFContext()->isLittleEndian(),
     die.getDwarfUnit()->getAddressByteSize()
   );
@@ -701,7 +701,7 @@ TypeParserImpl::parseSpecification(const DWARFContextManager& dwarfContext,
     [&](const llvm::DWARFAttribute& attr) {
       switch (attr.Attr) {
         case llvm::dwarf::DW_AT_abstract_origin: {
-          const auto attrOffset = attr.Value.getAsReference().getValue();
+          const auto attrOffset = *attr.Value.getAsReference();
           const auto die2 = dwarfContext.getDieAtOffset(attrOffset);
           offset = parseSpecification(dwarfContext, die2, false, spec);
           break;
@@ -729,7 +729,7 @@ TypeParserImpl::parseSpecification(const DWARFContextManager& dwarfContext,
         case llvm::dwarf::DW_AT_low_pc: {
           if (spec.address == StaticSpec::kNoAddress) {
             // TODO: check the func here
-            spec.address = attr.Value.getAsCStringOffset().getValue();
+            spec.address = *attr.Value.getAsCStringOffset();
             // Sometimes GCC and Clang will emit invalid function
             // addresses. Usually zero, but sometimes a very low
             // number. These numbers have the appearance of being
@@ -825,7 +825,7 @@ void TypeParserImpl::genNames(Env& env,
               linkage_name = attr.Value.getAsCString().get();
               break;
             case llvm::dwarf::DW_AT_declaration:
-              incomplete = attr.Value.getAsUnsignedConstant().getValue() != 0;
+              incomplete = *attr.Value.getAsUnsignedConstant() != 0;
               break;
             case llvm::dwarf::DW_AT_specification:
               // The compiler can spit out a declaration for a
@@ -838,12 +838,12 @@ void TypeParserImpl::genNames(Env& env,
               // definition's name (this feels a little backwards,
               // but its how dwarf works).
               if (updateOffsets) {
-                declarationOffset = dwarfContext.getGlobalOffset(attr.Value.getAsReference().getValue());
+                declarationOffset = dwarfContext.getGlobalOffset(*attr.Value.getAsReference());
               }
               break;
             case llvm::dwarf::DW_AT_signature: {
               if (updateOffsets && attr.Value.getForm() == llvm::dwarf::DW_FORM_ref_sig8) {
-                const auto sig8 = attr.Value.getAsReference().getValue();
+                const auto sig8 = *attr.Value.getAsReference();
                 // The actual definition is in another type-unit, we
                 // can ignore this declaration.
                 definitionOffset = dwarfContext.getTypeUnitOffset(sig8);
@@ -1154,7 +1154,7 @@ void TypeParserImpl::genNames(Env& env,
                   [&](const llvm::DWARFAttribute& attr) {
                     if (attr.Attr == llvm::dwarf::DW_AT_signature &&
                         attr.Value.getForm() == llvm::dwarf::DW_FORM_ref_sig8) {
-                      const auto sig8 = attr.Value.getAsReference().getValue();
+                      const auto sig8 = *attr.Value.getAsReference();
                       offset = dwarfContext.getTypeUnitOffset(sig8);
                       return false;
                     }
@@ -1212,10 +1212,10 @@ Object TypeParserImpl::genObject(const llvm::DWARFDie& die,
           size = attr.Value.getAsUnsignedConstant().value();
           break;
         case llvm::dwarf::DW_AT_declaration:
-          incomplete = attr.Value.getAsUnsignedConstant().getValue() != 0;
+          incomplete = *attr.Value.getAsUnsignedConstant() != 0;
           break;
         case llvm::dwarf::DW_AT_signature: {
-          const auto sig8 = attr.Value.getAsReference().getValue();
+          const auto sig8 = *attr.Value.getAsReference();
           definition_offset = m_dwarfContext.getTypeUnitOffset(sig8);
           break;
         }
@@ -1352,7 +1352,7 @@ Type TypeParserImpl::genType(const llvm::DWARFDie& die) {
           containing_type_offset = m_dwarfContext.getGlobalOffset(attr.Value.getAsReference().value());
           break;
         case llvm::dwarf::DW_AT_signature: {
-          const auto sig8 = attr.Value.getAsReference().getValue();
+          const auto sig8 = *attr.Value.getAsReference();
           definition_offset = m_dwarfContext.getTypeUnitOffset(sig8);
           return false;
         }
@@ -1506,13 +1506,13 @@ Object::Member TypeParserImpl::genMember(const llvm::DWARFDie& die,
           address = interpretLocAddress(m_dwarfContext, die, attr);
           break;
         case llvm::dwarf::DW_AT_data_member_location:
-          offset = attr.Value.getAsUnsignedConstant().getValue();
+          offset = *attr.Value.getAsUnsignedConstant();
           break;
         case llvm::dwarf::DW_AT_type:
-          die_offset = m_dwarfContext.getGlobalOffset(attr.Value.getAsReference().getValue());
+          die_offset = m_dwarfContext.getGlobalOffset(*attr.Value.getAsReference());
           break;
         case llvm::dwarf::DW_AT_declaration:
-          is_static = attr.Value.getAsUnsignedConstant().getValue() != 0;
+          is_static = *attr.Value.getAsUnsignedConstant() != 0;
           break;
         default:
           break;
@@ -1585,7 +1585,7 @@ Object::Function TypeParserImpl::genFunction(const llvm::DWARFDie& die) {
           name = std::string(attr.Value.getAsCString().get());
           break;
         case llvm::dwarf::DW_AT_type: {
-          const auto tyDie = m_dwarfContext.getDieAtOffset(attr.Value.getAsReference().getValue());
+          const auto tyDie = m_dwarfContext.getDieAtOffset(*attr.Value.getAsReference());
           ret_type = genType(tyDie);
           break;
         }
@@ -1593,7 +1593,7 @@ Object::Function TypeParserImpl::genFunction(const llvm::DWARFDie& die) {
           linkage_name = std::string(attr.Value.getAsCString().get());
           break;
         case llvm::dwarf::DW_AT_virtuality:
-          is_virtual = attr.Value.getAsUnsignedConstant().getValue() != llvm::dwarf::DW_VIRTUALITY_none;
+          is_virtual = *attr.Value.getAsUnsignedConstant() != llvm::dwarf::DW_VIRTUALITY_none;
           break;
         case llvm::dwarf::DW_AT_object_pointer:
           is_member = true;
@@ -1637,12 +1637,12 @@ Object::Function TypeParserImpl::genFunction(const llvm::DWARFDie& die) {
         [&](const llvm::DWARFAttribute& attr) {
           switch (attr.Attr) {
             case llvm::dwarf::DW_AT_type: {
-              const auto ty_die = m_dwarfContext.getDieAtOffset(attr.Value.getAsReference().getValue());
+              const auto ty_die = m_dwarfContext.getDieAtOffset(*attr.Value.getAsReference());
               arg_type = genType(ty_die);
               break;
             }
             case llvm::dwarf::DW_AT_artificial:
-              is_artificial = attr.Value.getAsUnsignedConstant().getValue() != 0;
+              is_artificial = *attr.Value.getAsUnsignedConstant() != 0;
               break;
             default:
               break;
@@ -1707,10 +1707,10 @@ Object::Base TypeParserImpl::genBase(const llvm::DWARFDie& die,
           name = std::string(attr.Value.getAsCString().get());
           break;
         case llvm::dwarf::DW_AT_type:
-          die_offset = m_dwarfContext.getGlobalOffset(attr.Value.getAsReference().getValue());
+          die_offset = m_dwarfContext.getGlobalOffset(*attr.Value.getAsReference());
           break;
         case llvm::dwarf::DW_AT_virtuality:
-          is_virtual = attr.Value.getAsUnsignedConstant().getValue() != llvm::dwarf::DW_VIRTUALITY_none;
+          is_virtual = *attr.Value.getAsUnsignedConstant() != llvm::dwarf::DW_VIRTUALITY_none;
           break;
         default:
           break;
@@ -1727,7 +1727,7 @@ Object::Base TypeParserImpl::genBase(const llvm::DWARFDie& die,
       [&](const llvm::DWARFAttribute& attr) {
         switch (attr.Attr) {
           case llvm::dwarf::DW_AT_data_member_location:
-            offset = attr.Value.getAsUnsignedConstant().getValue();
+            offset = *attr.Value.getAsUnsignedConstant();
             break;
           default:
             break;
@@ -1777,7 +1777,7 @@ Object::TemplateParam TypeParserImpl::genTemplateParam(const llvm::DWARFDie& die
     [&](const llvm::DWARFAttribute& attr) {
       switch (attr.Attr) {
         case llvm::dwarf::DW_AT_type: {
-          const auto off = attr.Value.getAsReference().getValue();
+          const auto off = *attr.Value.getAsReference();
           die_offset = m_dwarfContext.getGlobalOffset(off);
           break;
         }

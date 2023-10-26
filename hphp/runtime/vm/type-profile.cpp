@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/code-coverage-util.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/tc.h"
@@ -83,9 +84,7 @@ void profileRequestStart() {
     if (RuntimeOption::EvalEnableCodeCoverage > 1) return true;
     if (RuntimeOption::EvalEnableCodeCoverage == 1) {
       if (RuntimeOption::RepoAuthoritative) return false;
-      auto const tport = g_context->getTransport();
-      return tport &&
-             tport->getParam("enable_code_coverage").compare("true") == 0;
+      return isEnableCodeCoverageReqParamTrue();
     }
     return false;
   }();

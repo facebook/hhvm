@@ -48,6 +48,7 @@
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/code-coverage-util.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/fb/VariantController.h"
 #include "hphp/runtime/server/xbox-server.h"
@@ -1189,9 +1190,7 @@ void HHVM_FUNCTION(fb_enable_code_coverage) {
       "Eval.EnableCodeCoverage");
   }
   if (RuntimeOption::EvalEnableCodeCoverage == 1) {
-    auto const tport = g_context->getTransport();
-    if (!tport ||
-        tport->getParam("enable_code_coverage").compare("true") != 0) {
+    if (!isEnableCodeCoverageReqParamTrue()) {
       SystemLib::throwRuntimeExceptionObject(
         "Calling fb_enable_code_coverage without adding "
         "'enable_code_coverage' in request params");

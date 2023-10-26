@@ -156,7 +156,6 @@ let valid_for_acclassish = function
 let valid_for_acnew (kind : si_kind) : bool =
   match kind with
   | SI_Class
-  | SI_Typedef
   | SI_XHP ->
     true
   | _ -> false

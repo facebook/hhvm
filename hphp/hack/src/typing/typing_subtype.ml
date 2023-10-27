@@ -761,6 +761,7 @@ and default_subtype
                     ~subtype_env
                     ~sub_supportdyn
                     ~this_ty
+                    ~super_like
                     ty_sub
                     ty_super))
       | (_, Tgeneric (name_sub, tyargs)) ->
@@ -961,6 +962,7 @@ and simplify_subtype_i
         | false -> ""
       in
       flag " sub_supportdyn" (Option.is_some sub_supportdyn)
+      ^ flag " super_supportdyn" super_supportdyn
       ^ flag " super_like" super_like
       ^ flag " require_soundness" subtype_env.require_soundness
       ^ flag " require_completeness" subtype_env.require_completeness)

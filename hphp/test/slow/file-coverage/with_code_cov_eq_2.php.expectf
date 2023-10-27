@@ -1,0 +1,3 @@
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'Cannot enable per-file coverage with Eval.EnableCodeCoverage=2' in %S:%d
+Stack trace:
+%a

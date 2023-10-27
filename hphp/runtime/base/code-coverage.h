@@ -66,6 +66,11 @@ struct CodeCoverage {
    */
   void dumpOnExit() { shouldDump = true; }
 
+  /*
+   * Whether or not coverage should use per file coverage
+   */
+  bool m_should_use_per_file_coverage{false};
+
 private:
   using CodeCoverageMap = req::vector_map<const char*, req::dynamic_bitset>;
   Optional<CodeCoverageMap> m_hits;

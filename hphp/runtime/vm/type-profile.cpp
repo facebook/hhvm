@@ -89,6 +89,13 @@ void profileRequestStart() {
     return false;
   }();
 
+  auto const shouldUsePerFileCoverage = []{
+    if (RO::RepoAuthoritative) return false;
+    if (RO::EvalEnablePerFileCoverage > 1) return true;
+    return RO::EvalEnablePerFileCoverage == 1 &&
+      isEnablePerFileCoverageReqParamTrue();
+  }();
+
   // Force the request to use interpreter (not even running jitted code) during
   // retranslateAll when we need to dump out precise profile data.
   auto const forceInterp = (jit::mcgen::pendingRetranslateAllScheduled() &&
@@ -101,7 +108,11 @@ void profileRequestStart() {
     } else if (!okToJit) {
       RID().setJittingDisabled(true);
     }
+    if (shouldUsePerFileCoverage) {
+      RI().m_coverage.m_should_use_per_file_coverage = true;
+    }
   }
+
   jit::setMayAcquireLease(okToJit);
 
   // Force interpretation if needed.

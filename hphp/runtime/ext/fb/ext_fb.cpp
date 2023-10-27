@@ -1196,6 +1196,16 @@ void HHVM_FUNCTION(fb_enable_code_coverage) {
         "'enable_code_coverage' in request params");
     }
   }
+  if (isEnablePerFileCoverageReqParamTrue()) {
+    SystemLib::throwRuntimeExceptionObject(
+      "Calling fb_enable_code_coverage with "
+      "'enable_per_file_coverage' in request params");
+  }
+  if (RuntimeOption::EvalEnablePerFileCoverage == 2) {
+    SystemLib::throwRuntimeExceptionObject(
+      "Calling fb_enable_code_coverage with "
+      "Eval.EnablePerFileCoverage=2");
+  }
 }
 
 Array disable_code_coverage_helper(bool report_frequency) {

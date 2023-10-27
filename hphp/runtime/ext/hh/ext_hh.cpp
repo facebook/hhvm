@@ -41,6 +41,7 @@
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/bespoke/type-structure.h"
+#include "hphp/runtime/base/code-coverage-util.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/core/ext_core_closure.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
@@ -991,16 +992,31 @@ TypedValue HHVM_FUNCTION(classname_from_string_unsafe, StringArg cls) {
 namespace {
 
 const StaticString
-  s_no_repo_mode("Cannot enable code coverage in Repo.Authoritative mode"),
-  s_no_flag_set("Must set Eval.EnablePerFileCoverage");
+  s_no_repo_mode("Cannot enable per-file coverage in Repo.Authoritative mode"),
+  s_no_code_cov_2("Cannot enable per-file coverage with Eval.EnableCodeCoverage=2"),
+  s_no_flag_set("Must set Eval.EnablePerFileCoverage"),
+  s_no_req_param_set("Using Per File Coverage without adding 'enable_per_file_coverage' in request params"),
+  s_plain_cov_req_param_set("Using Per File Coverage with 'enable_code_coverage' in request params");
 
 void check_coverage_flags() {
   if (RO::RepoAuthoritative) {
     throw_invalid_operation_exception(s_no_repo_mode.get());
   }
-  if (!RO::EvalEnablePerFileCoverage) {
+  if (RO::EvalEnableCodeCoverage == 2) {
+    throw_invalid_operation_exception(s_no_code_cov_2.get());
+  }
+  if (isEnableCodeCoverageReqParamTrue()) {
+    throw_invalid_operation_exception(s_plain_cov_req_param_set.get());
+  }
+  if (RO::EvalEnablePerFileCoverage == 0) {
     throw_invalid_operation_exception(s_no_flag_set.get());
   }
+  if (RO::EvalEnablePerFileCoverage == 1) {
+    if (!isEnablePerFileCoverageReqParamTrue()) {
+      throw_invalid_operation_exception(s_no_req_param_set.get());
+    }
+  }
+  always_assert(RI().m_coverage.m_should_use_per_file_coverage);
 }
 
 Unit* loadUnit(StringData* path) {

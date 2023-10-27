@@ -1,0 +1,3 @@
+Fatal error: Uncaught exception 'RuntimeException' with message 'Calling fb_enable_code_coverage with Eval.EnablePerFileCoverage=2' in %S:%d
+Stack trace:
+%a

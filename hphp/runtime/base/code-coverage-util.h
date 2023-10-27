@@ -26,5 +26,11 @@ namespace HPHP {
  */
 bool isEnableCodeCoverageReqParamTrue();
 
+/**
+ * Returns whether or not the current request has a GET parameter
+ * "enable_per_file_coverage" and its value is "true"
+ */
+bool isEnablePerFileCoverageReqParamTrue();
+
 ///////////////////////////////////////////////////////////////////////////////
 }

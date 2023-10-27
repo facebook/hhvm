@@ -5389,7 +5389,7 @@ void recordCodeCoverage(PC /*pc*/) {
   auto const func = vmfp()->func();
   Unit* unit = func->unit();
   assertx(unit != nullptr);
-  if (!RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage) {
+  if (RI().m_coverage.m_should_use_per_file_coverage) {
     if (unit->isCoverageEnabled()) {
       unit->recordCoverage(func->getLineNumber(pcOff()));
     }
@@ -5697,7 +5697,7 @@ ModeType updateCoverageModeThreaded(ModeType modes) {
 template <bool breakOnCtlFlow>
 JitResumeAddr dispatchImpl() {
   auto const checkCoverage = [&] {
-    return !RO::EvalEnablePerFileCoverage
+    return !RI().m_coverage.m_should_use_per_file_coverage
       ? RID().getCoverage()
       : vmfp() && vmfp()->unit()->isCoverageEnabled();
   };

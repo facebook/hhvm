@@ -802,6 +802,12 @@ struct RuntimeOption {
    *  2 - Code coverage enabled                                         \
    */                                                                   \
   F(uint32_t, EnableCodeCoverage,      0)                               \
+  /*                                                                    \
+   *  0 - Per-file coverage cannot be enabled through request param     \
+   *  1 - Per-file coverage can be enabled through request param        \
+   *  2 - Per-file coverage enabled                                     \
+   */                                                                   \
+  F(uint32_t, EnablePerFileCoverage, 0)                                 \
   F(bool, EnableFuncCoverage,          false)                           \
   /* The number of worker threads to spawn for facts extraction. */     \
   F(uint64_t, FactsWorkers,            Process::GetCPUCount())          \
@@ -1465,7 +1471,6 @@ struct RuntimeOption {
   F(uint64_t, DynamicMethCallerLevel, 1)                                \
   F(bool, APCSerializeFuncs, true)                                      \
   F(bool, APCSerializeClsMeth, true)                                    \
-  F(bool, EnablePerFileCoverage, false)                                 \
   F(bool, LogOnIsArrayFunction, false)                                  \
   /* Unit prefetching options */                                        \
   F(uint32_t, UnitPrefetcherMaxThreads, 0)                              \

@@ -26,5 +26,11 @@ bool isEnableCodeCoverageReqParamTrue() {
             tport->getParam("enable_code_coverage").compare("true") == 0;
 }
 
+bool isEnablePerFileCoverageReqParamTrue() {
+    auto const tport = g_context->getTransport();
+    return tport &&
+            tport->getParam("enable_per_file_coverage").compare("true") == 0;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

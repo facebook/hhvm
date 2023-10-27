@@ -53,3 +53,58 @@ dict(2) {
     int(1)
   }
 }"
+Enable Code Coverage = 1 && Enable Per File Coverage = 1
+Requesting 'test_code_coverage.php'
+string(100) "string(87) "Calling fb_enable_code_coverage without adding 'enable_code_coverage' in request params""
+Requesting 'test_code_coverage.php?enable_code_coverage=true'
+string(%d) "Code coverage: true
+I'm FOOO
+dict(2) {
+  ["/:systemlib.phpfb"]=>
+  dict(1) {
+    [%d]=>
+    int(1)
+  }
+  [%s]=>
+  dict(5) {
+    [4]=>
+    int(1)
+    [5]=>
+    int(1)
+    [14]=>
+    int(1)
+    [15]=>
+    int(1)
+    [16]=>
+    int(1)
+  }
+}"
+Requesting 'test_code_coverage.php?enable_code_coverage=true&enable_per_file_coverage=true'
+string(114) "Code coverage: true
+string(81) "Calling fb_enable_code_coverage with 'enable_per_file_coverage' in request params""
+Requesting 'test_per_file_coverage.php'
+string(96) "string(83) "Using Per File Coverage without adding 'enable_per_file_coverage' in request params""
+Requesting 'test_per_file_coverage.php?enable_code_coverage=true'
+string(82) "string(69) "Using Per File Coverage with 'enable_code_coverage' in request params""
+Requesting 'test_per_file_coverage.php?enable_per_file_coverage=true'
+string(%d) "Per file coverage: true
+I'm FOOO
+bool(false)
+TTest: foo!
+dict(2) {
+  ["%s/test_per_file_coverage.inc"]=>
+  vec(2) {
+    int(7)
+    int(8)
+  }
+  ["%s/test_per_file_coverage.php"]=>
+  vec(7) {
+    int(5)
+    int(6)
+    int(19)
+    int(20)
+    int(21)
+    int(22)
+    int(23)
+  }
+}"

@@ -262,8 +262,7 @@ void emitGuards(irgen::IRGS& irgs,
   // Finish emitting guards, and emit profiling counters.
   if (isEntry) {
     irgen::gen(irgs, EndGuards);
-
-    if (!RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage &&
+    if (RI().m_coverage.m_should_use_per_file_coverage &&
         !sk.trivialDVFuncEntry()) {
       irgen::checkCoverage(irgs);
     }

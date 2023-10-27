@@ -1784,13 +1784,19 @@ let kickoff_shell_out_and_maybe_cancel
            the invariant that "current_hh_shell must always give rise to an LSP response".
            (Later in the function we overwrite current_hh_shell with the new shellout, so right here
            right now is the only place that can fulfill that invariant for the prev shellout). *)
-        let message =
-          Printf.sprintf
-            "Cancelled (displaced by another request #%s)"
-            (Lsp_fmt.id_to_string triggering_request.Run_env.id)
-        in
         let lsp_error =
-          make_lsp_error ~code:Lsp.Error.RequestCancelled message
+          make_lsp_error
+            ~code:Lsp.Error.RequestCancelled
+            "Cancelled (displaced by another request)"
+            ~data:
+              (Some
+                 (Hh_json.JSON_Object
+                    [
+                      ( "new_request_id",
+                        Hh_json.string_
+                          (Lsp_fmt.id_to_string triggering_request.Run_env.id)
+                      );
+                    ]))
         in
         respond_jsonrpc
           ~powered_by:Language_server

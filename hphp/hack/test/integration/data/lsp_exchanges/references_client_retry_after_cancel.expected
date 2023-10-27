@@ -108,7 +108,7 @@
     "id": 12,
     "error": {
       "code": -32800,
-      "message": "Cancelled (displaced by another request #14)"
+      "message": "Cancelled (displaced by another request)"
     }
   },
   {

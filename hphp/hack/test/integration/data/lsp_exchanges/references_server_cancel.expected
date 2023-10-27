@@ -66,7 +66,7 @@
     "id": 11,
     "error": {
       "code": -32800,
-      "message": "Cancelled (displaced by another request #12)"
+      "message": "Cancelled (displaced by another request)"
     }
   },
   {
@@ -74,7 +74,7 @@
     "id": 12,
     "error": {
       "code": -32800,
-      "message": "Cancelled (displaced by another request #13)"
+      "message": "Cancelled (displaced by another request)"
     }
   },
   {

@@ -19,13 +19,6 @@
 #include <type_traits>
 
 #include <fmt/core.h>
-#include <folly/portability/GFlags.h>
-
-FOLLY_GFLAGS_DEFINE_bool(
-    thrift_cpp2_simple_json_base64_allow_padding,
-    true,
-    "Allow '=' padding when decoding base64 encoded binary fields in "
-    "SimpleJsonProtocol");
 
 namespace {
 

@@ -136,21 +136,3 @@ TEST_F(SimpleJSONProtocolTest, roundtrip_binary_with_padding) {
   EXPECT_EQ(serialized.size(), size);
   EXPECT_EQ(orig, deserialized);
 }
-
-TEST_F(SimpleJSONProtocolTest, roundtrip_binary_disallow_padding) {
-  StructWithBinaryField orig;
-  orig.field() = "0123";
-  const std::string serialized = "{\"field\":\"MDEyMw==\"}";
-
-  // Deserialize with allowBase64Padding disabled
-  StructWithBinaryField deserialized;
-  SimpleJSONProtocolReader reader;
-  folly::IOBuf buf{folly::IOBuf::WRAP_BUFFER, folly::StringPiece(serialized)};
-  reader.setInput(&buf);
-  reader.setAllowBase64Padding(false);
-  deserialized.read(&reader);
-  auto const size = reader.getCursor().getCurrentPosition();
-
-  EXPECT_EQ(serialized.size(), size);
-  EXPECT_NE(orig, deserialized);
-}

@@ -28,11 +28,8 @@
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
 #include <folly/json.h>
-#include <folly/portability/GFlags.h>
 #include <thrift/lib/cpp/protocol/TBase64Utils.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
-
-FOLLY_GFLAGS_DECLARE_bool(thrift_cpp2_simple_json_base64_allow_padding);
 
 namespace apache {
 namespace thrift {
@@ -175,13 +172,9 @@ class JSONProtocolWriterCommon : public detail::ProtocolBase {
 class JSONProtocolReaderCommon : public detail::ProtocolBase {
  public:
   explicit JSONProtocolReaderCommon(
-      ExternalBufferSharing /*sharing*/ = COPY_EXTERNAL_BUFFER /* ignored */)
-      : allowBase64Padding_(
-            FLAGS_thrift_cpp2_simple_json_base64_allow_padding) {}
+      ExternalBufferSharing /*sharing*/ = COPY_EXTERNAL_BUFFER /* ignored */) {}
 
   inline void setAllowDecodeUTF8(bool val) { allowDecodeUTF8_ = val; }
-
-  void setAllowBase64Padding(bool val) { allowBase64Padding_ = val; }
 
   /**
    * The IOBuf itself is managed by the caller.
@@ -321,7 +314,6 @@ class JSONProtocolReaderCommon : public detail::ProtocolBase {
   uint32_t skippedChars_{0};
   bool skippedIsUnread_{false};
   bool allowDecodeUTF8_{true};
-  bool allowBase64Padding_;
 };
 
 } // namespace thrift

@@ -762,10 +762,8 @@ inline void JSONProtocolReaderCommon::readJSONBase64(StrType& str) {
   str.clear();
 
   // Allow optional trailing '=' as padding
-  if (allowBase64Padding_) {
-    while (len > 0 && b[len - 1] == '=') {
-      --len;
-    }
+  while (len > 0 && b[len - 1] == '=') {
+    --len;
   }
 
   while (len >= 4) {

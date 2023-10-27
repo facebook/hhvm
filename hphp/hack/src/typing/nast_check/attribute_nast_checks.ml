@@ -111,6 +111,22 @@ let check_deprecated_static attrs =
   end
   | _ -> ()
 
+let check_autocomplete_valid_text attrs =
+  let attr =
+    Naming_attributes.find SN.UserAttributes.uaAutocompleteSortText attrs
+  in
+  match attr with
+  | Some { ua_name = _; ua_params = [msg] } -> begin
+    match Nast_eval.static_string msg with
+    | Error p ->
+      Errors.add_error
+        Nast_check_error.(
+          to_user_error
+          @@ Attribute_param_type { pos = p; x = "static string literal" })
+    | _ -> ()
+  end
+  | _ -> ()
+
 let check_no_auto_dynamic env attrs =
   if TypecheckerOptions.enable_no_auto_dynamic (Nast_check_env.get_tcopt env)
   then
@@ -180,6 +196,7 @@ let handler =
         SN.UserAttributes.uaDeprecated
         (`Range (1, 2));
       check_deprecated_static f.f_user_attributes;
+      check_autocomplete_valid_text f.f_user_attributes;
       check_no_auto_dynamic env f.f_user_attributes;
       check_ifc_enabled (Nast_check_env.get_tcopt env) f.f_user_attributes;
       let params = f.f_params in
@@ -223,6 +240,10 @@ let handler =
         (`Range (0, 1));
       check_attribute_arity
         m.m_user_attributes
+        SN.UserAttributes.uaAutocompleteSortText
+        (`Exact 1);
+      check_attribute_arity
+        m.m_user_attributes
         SN.UserAttributes.uaInferFlows
         (`Exact 0);
       check_ifc_enabled (Nast_check_env.get_tcopt env) m.m_user_attributes;
@@ -234,6 +255,7 @@ let handler =
         (Aast_defs.equal_visibility m.m_visibility Aast_defs.Internal)
         m.m_user_attributes;
       check_deprecated_static m.m_user_attributes;
+      check_autocomplete_valid_text m.m_user_attributes;
       check_duplicate_memoize m.m_user_attributes;
       check_no_auto_dynamic env m.m_user_attributes;
       List.iter check_soft_internal_on_param m.m_params;

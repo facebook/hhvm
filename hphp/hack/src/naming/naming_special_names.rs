@@ -231,6 +231,8 @@ pub mod members {
 pub mod user_attributes {
     pub const OVERRIDE: &str = "__Override";
 
+    pub const AUTOCOMPLETE_SORT_TEXT: &str = "__AutocompleteSortText";
+
     pub const CONSISTENT_CONSTRUCT: &str = "__ConsistentConstruct";
 
     pub const CONST: &str = "__Const";

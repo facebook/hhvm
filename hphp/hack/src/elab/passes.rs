@@ -63,6 +63,7 @@ pub mod validate_shape_name;
 pub mod validate_supportdyn;
 pub mod validate_trait_internal;
 pub mod validate_user_attribute_arity;
+pub mod validate_user_attribute_autocomplete_sort_text_static;
 pub mod validate_user_attribute_deprecated_static;
 pub mod validate_user_attribute_dynamically_callable;
 pub mod validate_user_attribute_entry_point;

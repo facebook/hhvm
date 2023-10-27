@@ -406,6 +406,7 @@ fn elaborate_for_typechecking<T: Transform>(env: Env, node: &mut T) -> Vec<Namin
         Box::<passes::validate_xhp_attribute::ValidateXhpAttributePass>::default(),
         Box::<passes::validate_user_attribute_arity::ValidateUserAttributeArityPass>::default(),
         Box::<passes::validate_user_attribute_deprecated_static::ValidateUserAttributeDeprecatedStaticPass>::default(),
+        Box::<passes::validate_user_attribute_autocomplete_sort_text_static::ValidateUserAttributeAutocompleteSortTextStaticPass>::default(),
         Box::<passes::validate_user_attribute_entry_point::ValidateUserAttributeEntryPointPass>::default(),
         Box::<passes::validate_user_attribute_no_auto_dynamic::ValidateUserAttributeNoAutoDynamic>::default(),
         Box::<passes::validate_user_attribute_infer_flows::ValidateUserAttributeInferFlowsPass>::default(),

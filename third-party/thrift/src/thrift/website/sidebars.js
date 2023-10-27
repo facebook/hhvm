@@ -140,7 +140,6 @@ module.exports = {
           Experimental: [
             'features/patch',
             'features/schema',
-            'features/yaml',
             ...fbInternalOnly(['fb/features/metadata']),
           ],
         },

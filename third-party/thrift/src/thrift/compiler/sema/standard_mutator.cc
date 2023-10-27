@@ -403,7 +403,9 @@ void lower_type_annotations(
     // Wrap in an unnamed typedef :(
     auto& program = mCtx.program();
     auto unnamed = t_typedef::make_unnamed(
-        &program, node_type->get_name(), t_type_ref::from_ptr(node_type));
+        const_cast<t_program*>(node_type->get_program()),
+        node_type->get_name(),
+        t_type_ref::from_ptr(node_type));
     for (auto& pair : unstructured) {
       unnamed->set_annotation(pair.first, pair.second);
     }

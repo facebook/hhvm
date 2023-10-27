@@ -71,6 +71,8 @@ class diagnostic {
   const std::string& name() const { return name_; }
   std::string str() const;
 
+  void set_name(std::string&& name) { name_ = std::move(name); }
+
  private:
   diagnostic_level level_;
   std::string message_;

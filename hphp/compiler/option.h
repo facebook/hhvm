@@ -63,11 +63,12 @@ struct Option {
   static bool ConstFoldFileBC;
 
   /*
-   * Whether to generate HHBC, HHAS, or a textual dump of HHBC
+   * Whether to generate HHBC, HHAS, a textual dump of HHBC, or none.
    */
   static bool GenerateTextHHBC;
   static bool GenerateHhasHHBC;
   static bool GenerateBinaryHHBC;
+  static bool NoOutputHHBC;
 
   /*
    * Number of threads to use for parsing

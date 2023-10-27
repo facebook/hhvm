@@ -560,7 +560,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("help", "display this message")
     ("version", "display version number")
     ("format,f", value<std::vector<std::string>>(&formats)->composing(),
-     "HHBC Output format: binary (default) | hhas | text")
+     "HHBC Output format: binary (default) | hhas | text | none")
     ("repo-options-dir", value<std::string>(&po.repoOptionsDir),
      "repo options directory")
     ("input-dir", value<std::string>(&po.inputDir), "input directory")
@@ -707,6 +707,12 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
         Option::GenerateHhasHHBC = true;
       } else if (format == "binary") {
         Option::GenerateBinaryHHBC = true;
+      } else if (format == "none") {
+        if (formats.size() > 1) {
+          Logger::Error("Cannot specify 'none' with other formats");
+          return -1;
+        }
+        Option::NoOutputHHBC = true;
       } else {
         Logger::Error("Unknown format for HHBC target: %s", format.c_str());
         std::cout << desc << "\n";
@@ -1204,6 +1210,8 @@ bool process(CompilerOptions &po) {
   // Emit a fully processed unit (either processed by HHBBC or not).
   auto const emitUnit = [&] (std::unique_ptr<UnitEmitter> ue) {
     assertx(ue);
+    if (Option::NoOutputHHBC) return;
+
     assertx(Option::GenerateBinaryHHBC ||
             Option::GenerateTextHHBC ||
             Option::GenerateHhasHHBC);

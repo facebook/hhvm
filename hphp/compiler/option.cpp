@@ -48,6 +48,7 @@ bool Option::ConstFoldFileBC = false;
 bool Option::GenerateTextHHBC = false;
 bool Option::GenerateHhasHHBC = false;
 bool Option::GenerateBinaryHHBC = false;
+bool Option::NoOutputHHBC = false;
 
 int Option::ParserThreadCount = 0;
 

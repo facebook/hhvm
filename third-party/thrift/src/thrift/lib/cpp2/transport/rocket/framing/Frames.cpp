@@ -31,13 +31,10 @@
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
 
-#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/FrameType.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Serializer.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Util.h>
-
-THRIFT_FLAG_DEFINE_bool(fix_cpp_fragmentation, false);
 
 namespace apache {
 namespace thrift {
@@ -87,12 +84,10 @@ void serializeInFragmentsSlowCommon(
       frame.setHasFollows(follows);
       std::move(frame).serialize(writer);
     } else {
-      bool completeFlag =
-          THRIFT_FLAG(fix_cpp_fragmentation) ? !follows && complete : complete;
       PayloadFrame pf(
           frame.streamId(),
           std::move(p),
-          flags.follows(follows).complete(completeFlag));
+          flags.follows(follows).complete(!follows && complete));
       std::move(pf).serialize(writer);
     }
   } while (follows);

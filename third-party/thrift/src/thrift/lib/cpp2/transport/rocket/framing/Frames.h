@@ -25,15 +25,12 @@
 #include <folly/Range.h>
 #include <folly/lang/Exception.h>
 
-#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/ErrorCode.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Flags.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/FrameType.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Util.h>
-
-THRIFT_FLAG_DECLARE_bool(fix_cpp_fragmentation);
 
 namespace apache {
 namespace thrift {
@@ -356,9 +353,7 @@ class PayloadFrame {
   bool hasFollows() const noexcept { return flags_.follows(); }
   void setHasFollows(bool hasFollows) noexcept {
     flags_.follows(hasFollows);
-    if (THRIFT_FLAG(fix_cpp_fragmentation)) {
-      flags_.complete(!hasFollows && hasComplete());
-    }
+    flags_.complete(!hasFollows && hasComplete());
   }
   bool hasComplete() const noexcept { return flags_.complete(); }
   bool hasNext() const noexcept { return flags_.next(); }

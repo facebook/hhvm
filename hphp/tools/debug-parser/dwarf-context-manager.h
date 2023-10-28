@@ -31,13 +31,6 @@ public:
   template <typename F> void forEachDwoUnit(F &&f) const;
   template <typename F> void forEachUnit(F &&f) const;
 
-  /*
-  * These methods primarily supported for backwards compatibility, but just call
-  * out to `die.children()` and `die.attributes()`.
-  */
-  template <typename F> void forEachChild(const llvm::DWARFDie& die, F &&f) const;
-  template <typename F> void forEachAttribute(const llvm::DWARFDie& die, F &&f) const;
-
   // Provided for backwards compatibility, llvm's `getShortName` will resolve
   // DW_AT_specification or DW_AT_abstract_origin which is not what we want.
   std::string getDIEName(llvm::DWARFDie die) const;
@@ -89,29 +82,6 @@ void DWARFContextManager::forEachUnit(F &&f) const {
   auto unitIter = dwoContext_ ? dwoContext_->dwo_units() : dwarfContext_->normal_units();
   for (const auto& unit : unitIter) {
     if (!f(unit)) return;
-  }
-}
-
-/*
- * Iterate over all children of this DIE, calling the given callable for
- * each. Iteration is stopped early if any of the calls return false.
- */
-template <typename F>
-void DWARFContextManager::forEachChild(const llvm::DWARFDie& die, F&& f) const {
-  if (!die.hasChildren()) return;
-  for (const auto& child : die.children()) {
-    if (!f(child)) return;
-  }
-}
-
-/*
- * Iterate over all attributes of the given DIE, calling the given callable for
- * each. Iteration is stopped early if any of the calls return false.
- */
-template <typename F>
-void DWARFContextManager::forEachAttribute(const llvm::DWARFDie& die, F&& f) const {
-  for (const auto& attr : die.attributes()) {
-    if (!f(attr)) return;
   }
 }
 

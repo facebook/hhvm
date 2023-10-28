@@ -219,4 +219,4 @@ val print_lsp_notification : Lsp.lsp_notification -> Hh_json.json
 
 val print_lsp : Lsp.lsp_message -> Hh_json.json
 
-val get_uri_opt : Lsp.lsp_message -> Lsp.documentUri option
+val get_uri_opt : Lsp.lsp_message -> Lsp.DocumentUri.t option

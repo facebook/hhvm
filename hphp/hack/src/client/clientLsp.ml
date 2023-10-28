@@ -1065,8 +1065,8 @@ let hack_errors_to_lsp_diagnostic
 (** Retrieves a TextDocumentItem for a given URI from editor_open_files,
  or raises LSP [InvalidRequest] if not open *)
 let get_text_document_item
-    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t) (uri : documentUri) :
-    TextDocumentItem.t =
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t) (uri : DocumentUri.t)
+    : TextDocumentItem.t =
   match UriMap.find_opt uri editor_open_files with
   | Some document -> document
   | None ->
@@ -1081,8 +1081,8 @@ let get_text_document_item
 (** Retrieves the content of this file, or raises an LSP [InvalidRequest] exception
 if the file isn't currently open *)
 let get_document_contents
-    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t) (uri : documentUri) :
-    string =
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t) (uri : DocumentUri.t)
+    : string =
   let document = get_text_document_item editor_open_files uri in
   document.TextDocumentItem.text
 
@@ -1948,10 +1948,11 @@ let do_shutdown
 
 let state_to_rage (state : state) : string =
   let uris_to_string uris =
-    List.map uris ~f:(fun (DocumentUri uri) -> uri) |> String.concat ~sep:","
+    List.map uris ~f:(fun (DocumentUri.Uri uri) -> uri)
+    |> String.concat ~sep:","
   in
   let timestamped_uris_to_string uris =
-    List.map uris ~f:(fun (DocumentUri uri, (timestamp, errors_from)) ->
+    List.map uris ~f:(fun (DocumentUri.Uri uri, (timestamp, errors_from)) ->
         Printf.sprintf
           "%s [%s] @ %0.2f"
           (show_errors_from errors_from)
@@ -2641,7 +2642,7 @@ let do_findReferences2 ~shellout_standard_response ~hh_locations :
   (* lsp_locations return a file for each position. To support unsaved, edited files
      let's discard locations for files that we previously fetched from ClientIDEDaemon.
 
-     First: filter out locations for any where the documentUri matches a relative_path
+     First: filter out locations for any where the DocumentUri.t matches a relative_path
      in the returned map
      Second: augment above list with values in `ide_calculated_positions`
   *)
@@ -2780,7 +2781,7 @@ let do_highlight
   Lwt.return (List.map ranges ~f:hack_range_to_lsp_highlight)
 
 let do_formatting_common
-    (uri : Lsp.documentUri)
+    (uri : Lsp.DocumentUri.t)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (action : ServerFormatTypes.ide_action)
     (options : DocumentFormatting.formattingOptions) : TextEdit.t list =
@@ -3207,7 +3208,7 @@ let do_typeHierarchy
 
 (** TEMPORARY VALIDATION FOR IDE_STANDALONE. TODO(ljw): delete this once ide_standalone ships T92870399 *)
 let validate_error_TEMPORARY
-    (uri : documentUri)
+    (uri : DocumentUri.t)
     (lenv : Run_env.t)
     (actual : float * errors_from)
     ~(expected : Errors.finalized_error list)
@@ -4108,7 +4109,7 @@ let send_file_to_ide_and_get_errors_if_needed
                   { VersionedTextDocumentIdentifier.uri = uri2; _ };
                 _;
               })
-          when Lsp.equal_documentUri uri uri2 ->
+          when Lsp.DocumentUri.equal uri uri2 ->
           true
         | _ -> false)
   in

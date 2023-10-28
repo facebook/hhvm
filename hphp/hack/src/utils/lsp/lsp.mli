@@ -29,7 +29,7 @@
  *   request can have its own custom error type, although most don't.
  * - Most datatypes go in modules since there are so many name-clashes in
  *   the protocol and OCaml doesn't like name-clashes. Only exceptions are
- *   the really primitive types like location and documentUri.
+ *   the really primitive types like location and DocumentUri.t.
  *   The few places where we still had to rename fields to avoid OCaml name
  *   clashes I've noted in the comments with the word "wire" to indicate the
  *   over-the-wire form of the name.
@@ -39,6 +39,7 @@
  *   doesn't make sense to encode them in a type system. I've omitted them
  *   entirely.
 *)
+open Hh_prelude
 
 type lsp_id =
   | NumberId of int
@@ -47,11 +48,15 @@ type lsp_id =
 type partial_result_token = PartialResultToken of string
 
 (** Note: this datatype provides no invariants that the string is well-formed. *)
-type documentUri = DocumentUri of string [@@deriving eq]
+module DocumentUri : sig
+  type t = Uri of string [@@deriving eq, ord]
 
-val uri_of_string : string -> documentUri
+  module Map : WrappedMap.S with type key := t
+end
 
-val string_of_uri : documentUri -> string
+val uri_of_string : string -> DocumentUri.t
+
+val string_of_uri : DocumentUri.t -> string
 
 (** A position is between two characters like an 'insert' cursor in a editor *)
 type position = {
@@ -76,7 +81,7 @@ type textDocumentSaveReason =
 (** Represents a location inside a resource, such as a line inside a text file *)
 module Location : sig
   type t = {
-    uri: documentUri;
+    uri: DocumentUri.t;
     range: range;
   }
   [@@deriving eq]
@@ -124,13 +129,13 @@ end
 
 (** Text documents are identified using a URI. *)
 module TextDocumentIdentifier : sig
-  type t = { uri: documentUri }
+  type t = { uri: DocumentUri.t }
 end
 
 (** An identifier to denote a specific version of a text document. *)
 module VersionedTextDocumentIdentifier : sig
   type t = {
-    uri: documentUri;
+    uri: DocumentUri.t;
     version: int;
   }
 end
@@ -158,7 +163,7 @@ end
    version number strictly increases after each change, including undo/redo. *)
 module TextDocumentItem : sig
   type t = {
-    uri: documentUri;
+    uri: DocumentUri.t;
     languageId: string;
     version: int;
     text: string;
@@ -253,7 +258,7 @@ module CallHierarchyItem : sig
     name: string;
     kind: SymbolInformation.symbolKind;
     detail: string option;
-    uri: documentUri;
+    uri: DocumentUri.t;
     range: range;
     selectionRange: range;
   }
@@ -365,7 +370,7 @@ module Initialize : sig
   type params = {
     processId: int option;  (** pid of parent process *)
     rootPath: string option;  (** deprecated *)
-    rootUri: documentUri option;  (** the root URI of the workspace *)
+    rootUri: DocumentUri.t option;  (** the root URI of the workspace *)
     initializationOptions: initializationOptions;
     client_capabilities: client_capabilities;  (** "capabilities" over wire *)
     trace: trace;  (** the initial trace setting, default="off" *)
@@ -624,7 +629,7 @@ module PublishDiagnostics : sig
   type params = publishDiagnosticsParams
 
   and publishDiagnosticsParams = {
-    uri: documentUri;
+    uri: DocumentUri.t;
     diagnostics: diagnostic list;
     isStatusFB: bool;
         (** FB-specific extension, for diagnostics used only to show status *)
@@ -722,7 +727,7 @@ module DidChangeWatchedFiles : sig
   type params = { changes: fileEvent list }
 
   and fileEvent = {
-    uri: documentUri;
+    uri: DocumentUri.t;
     type_: fileChangeType;
   }
 end
@@ -1109,7 +1114,7 @@ module TypeHierarchy : sig
     name: string;
     snippet: string;
     kind: memberKind;
-    uri: documentUri;
+    uri: DocumentUri.t;
     range: range;
     origin: string;
   }
@@ -1126,13 +1131,13 @@ module TypeHierarchy : sig
     | AncestorDetails of {
         name: string;
         kind: entryKind;
-        uri: documentUri;
+        uri: DocumentUri.t;
         range: range;
       }
 
   type hierarchyEntry = {
     name: string;
-    uri: documentUri;
+    uri: DocumentUri.t;
     range: range;
     kind: entryKind;
     ancestors: ancestorEntry list;
@@ -1361,7 +1366,7 @@ module IdKey : sig
 end
 
 module IdSet : sig
-  include module type of Set.Make (IdKey)
+  include module type of Caml.Set.Make (IdKey)
 end
 
 module IdMap : sig
@@ -1369,13 +1374,13 @@ module IdMap : sig
 end
 
 module UriKey : sig
-  type t = documentUri
+  type t = DocumentUri.t
 
   val compare : t -> t -> int
 end
 
 module UriSet : sig
-  include module type of Set.Make (UriKey)
+  include module type of Caml.Set.Make (UriKey)
 end
 
 module UriMap : sig

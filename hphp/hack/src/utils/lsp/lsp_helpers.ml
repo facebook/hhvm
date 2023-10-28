@@ -14,7 +14,7 @@ let url_scheme_regex = Str.regexp "^\\([a-zA-Z][a-zA-Z0-9+.-]+\\):"
 
 (* this requires schemes with 2+ characters, so "c:\path" isn't considered a scheme *)
 
-let lsp_uri_to_path (uri : documentUri) : string =
+let lsp_uri_to_path (uri : DocumentUri.t) : string =
   let uri = string_of_uri uri in
   if Str.string_match url_scheme_regex uri 0 then
     let scheme = Str.matched_group 1 uri in
@@ -31,7 +31,8 @@ let lsp_uri_to_path (uri : documentUri) : string =
   else
     uri
 
-let path_to_lsp_uri (path : string) ~(default_path : string) : Lsp.documentUri =
+let path_to_lsp_uri (path : string) ~(default_path : string) : Lsp.DocumentUri.t
+    =
   if String.equal path "" then begin
     HackEventLogger.invariant_violation_bug "missing path";
     Hh_logger.log

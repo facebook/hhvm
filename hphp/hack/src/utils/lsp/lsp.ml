@@ -15,11 +15,18 @@ type lsp_id =
 
 type partial_result_token = PartialResultToken of string
 
-type documentUri = DocumentUri of string [@@deriving eq]
+module DocumentUri = struct
+  module M = struct
+    type t = Uri of string [@@deriving eq, ord]
+  end
 
-let uri_of_string (s : string) : documentUri = DocumentUri s
+  include M
+  module Map = WrappedMap.Make (M)
+end
 
-let string_of_uri (DocumentUri s) : string = s
+let uri_of_string (s : string) : DocumentUri.t = DocumentUri.Uri s
+
+let string_of_uri (DocumentUri.Uri s) : string = s
 
 type position = {
   line: int;
@@ -41,7 +48,7 @@ type textDocumentSaveReason =
 
 module Location = struct
   type t = {
-    uri: documentUri;
+    uri: DocumentUri.t;
     range: range;
   }
   [@@deriving eq]
@@ -74,12 +81,12 @@ module TextEdit = struct
 end
 
 module TextDocumentIdentifier = struct
-  type t = { uri: documentUri }
+  type t = { uri: DocumentUri.t }
 end
 
 module VersionedTextDocumentIdentifier = struct
   type t = {
-    uri: documentUri;
+    uri: DocumentUri.t;
     version: int;
   }
 end
@@ -97,7 +104,7 @@ end
 
 module TextDocumentItem = struct
   type t = {
-    uri: documentUri;
+    uri: DocumentUri.t;
     languageId: string;
     version: int;
     text: string;
@@ -174,7 +181,7 @@ module CallHierarchyItem = struct
     name: string;
     kind: SymbolInformation.symbolKind;
     detail: string option;
-    uri: documentUri;
+    uri: DocumentUri.t;
     range: range;
     selectionRange: range;
   }
@@ -277,7 +284,7 @@ module Initialize = struct
   type params = {
     processId: int option;
     rootPath: string option;
-    rootUri: documentUri option;
+    rootUri: DocumentUri.t option;
     initializationOptions: initializationOptions;
     client_capabilities: client_capabilities;
     trace: trace;
@@ -466,7 +473,7 @@ module PublishDiagnostics = struct
   type params = publishDiagnosticsParams
 
   and publishDiagnosticsParams = {
-    uri: documentUri;
+    uri: DocumentUri.t;
     diagnostics: diagnostic list;
     isStatusFB: bool;
   }
@@ -558,7 +565,7 @@ module DidChangeWatchedFiles = struct
   type params = { changes: fileEvent list }
 
   and fileEvent = {
-    uri: documentUri;
+    uri: DocumentUri.t;
     type_: fileChangeType;
   }
 end
@@ -889,7 +896,7 @@ module TypeHierarchy = struct
     name: string;
     snippet: string;
     kind: memberKind;
-    uri: documentUri;
+    uri: DocumentUri.t;
     range: range;
     origin: string;
   }
@@ -906,13 +913,13 @@ module TypeHierarchy = struct
     | AncestorDetails of {
         name: string;
         kind: entryKind;
-        uri: documentUri;
+        uri: DocumentUri.t;
         range: range;
       }
 
   type hierarchyEntry = {
     name: string;
-    uri: documentUri;
+    uri: DocumentUri.t;
     range: range;
     kind: entryKind;
     ancestors: ancestorEntry list;
@@ -1157,9 +1164,9 @@ module IdSet = Caml.Set.Make (IdKey)
 module IdMap = WrappedMap.Make (IdKey)
 
 module UriKey = struct
-  type t = documentUri
+  type t = DocumentUri.t
 
-  let compare (DocumentUri x) (DocumentUri y) = String.compare x y
+  let compare (DocumentUri.Uri x) (DocumentUri.Uri y) = String.compare x y
 end
 
 module UriSet = Caml.Set.Make (UriKey)

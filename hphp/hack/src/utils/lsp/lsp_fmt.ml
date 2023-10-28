@@ -1382,7 +1382,7 @@ let parse_didChangeWatchedFiles (json : Hh_json.json option) :
 (* universal parser+printer                                             *)
 (************************************************************************)
 
-let get_uri_opt (m : lsp_message) : Lsp.documentUri option =
+let get_uri_opt (m : lsp_message) : Lsp.DocumentUri.t option =
   let open TextDocumentIdentifier in
   match m with
   | RequestMessage (_, DocumentCodeLensRequest p) ->
@@ -1571,7 +1571,7 @@ let message_name_to_string (message : lsp_message) : string =
 let denorm_message_to_string (message : lsp_message) : string =
   let uri =
     match get_uri_opt message with
-    | Some (DocumentUri uri) -> "(" ^ uri ^ ")"
+    | Some (DocumentUri.Uri uri) -> "(" ^ uri ^ ")"
     | None -> ""
   in
   match message with

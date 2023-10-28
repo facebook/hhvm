@@ -519,6 +519,7 @@ fn emit_fatal_naming_error<'arena>(
         NamingError::HKTAliasWithImplicitConstraints { .. } => todo!(),
         NamingError::ExplicitConsistentConstructor { .. } => todo!(),
         NamingError::ModuleDeclarationOutsideAllowedFiles(_) => todo!(),
+        NamingError::InternalModuleLevelTrait(_) => todo!(),
         NamingError::DynamicMethodAccess(_) => todo!(),
         NamingError::DeprecatedUse { .. } => todo!(),
         NamingError::UnnecessaryAttribute { .. } => todo!(),

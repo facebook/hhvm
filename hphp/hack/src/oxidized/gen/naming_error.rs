@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<300986842c3e4c9ed96b1db608bbb336>>
+// @generated SignedSource<<2a7281a9773f9d07d94f120de5d13ae8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -386,6 +386,8 @@ pub enum NamingError {
     },
     #[rust_to_ocaml(name = "Module_declaration_outside_allowed_files")]
     ModuleDeclarationOutsideAllowedFiles(pos::Pos),
+    #[rust_to_ocaml(name = "Internal_module_level_trait")]
+    InternalModuleLevelTrait(pos::Pos),
     #[rust_to_ocaml(name = "Dynamic_method_access")]
     DynamicMethodAccess(pos::Pos),
     #[rust_to_ocaml(name = "Deprecated_use")]

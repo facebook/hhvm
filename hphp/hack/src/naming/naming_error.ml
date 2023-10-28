@@ -271,6 +271,7 @@ type t =
       classish_kind: Ast_defs.classish_kind;
     }
   | Module_declaration_outside_allowed_files of Pos.t
+  | Internal_module_level_trait of Pos.t
   | Dynamic_method_access of Pos.t
   | Deprecated_use of {
       pos: Pos.t;
@@ -1225,6 +1226,12 @@ let module_declaration_outside_allowed_files pos =
       ^ "The set of approved files is in .hhconfig" )
     []
 
+let internal_module_level_trait pos =
+  User_error.make
+    Error_code.(to_enum InternalModuleLevelTrait)
+    (pos, "Internal modules cannot have the <<__ModuleLevelTrait>> attribute")
+    []
+
 let deprecated_use pos fn_name =
   let msg =
     "The builtin "
@@ -1397,6 +1404,7 @@ let to_user_error = function
     explicit_consistent_constructor classish_kind pos
   | Module_declaration_outside_allowed_files pos ->
     module_declaration_outside_allowed_files pos
+  | Internal_module_level_trait pos -> internal_module_level_trait pos
   | Dynamic_method_access pos -> dynamic_method_access pos
   | Deprecated_use { pos; fn_name } -> deprecated_use pos fn_name
   | Unnecessary_attribute { pos; attr; class_pos; class_name; suggestion } ->

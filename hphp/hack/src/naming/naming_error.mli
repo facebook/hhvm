@@ -267,6 +267,7 @@ type t =
       classish_kind: Ast_defs.classish_kind;
     }
   | Module_declaration_outside_allowed_files of Pos.t
+  | Internal_module_level_trait of Pos.t
   | Dynamic_method_access of Pos.t
   | Deprecated_use of {
       pos: Pos.t;

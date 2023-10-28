@@ -165,6 +165,7 @@ module Naming = struct
     | InvalidMemoizeLabel [@value 2124]
     | DynamicHintDisallowed [@value 2125]
     | IllegalTypedLocal [@value 2126]
+    | InternalModuleLevelTrait [@value 2127]
   (* Add new Naming codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

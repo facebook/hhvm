@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use nast::ModuleDef;
+use oxidized::ast_defs::ClassishKind;
 
 use crate::prelude::*;
 
@@ -16,6 +17,21 @@ impl Pass for ValidateModulePass {
             env.emit_error(NamingError::ModuleDeclarationOutsideAllowedFiles(
                 module.span.clone(),
             ));
+        }
+        Continue(())
+    }
+    fn on_ty_class__top_down(
+        &mut self,
+        env: &Env,
+        cls: &mut oxidized::aast::Class_<(), ()>,
+    ) -> ControlFlow<()> {
+        let is_trait = cls.kind == ClassishKind::Ctrait;
+        let is_module_level_trait = cls
+            .user_attributes
+            .iter()
+            .any(|ua| ua.name.name() == sn::user_attributes::MODULE_LEVEL_TRAIT);
+        if is_trait && cls.internal && is_module_level_trait {
+            env.emit_error(NamingError::InternalModuleLevelTrait(cls.span.clone()));
         }
         Continue(())
     }

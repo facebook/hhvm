@@ -661,7 +661,7 @@ let print_codeAction
         ("title", Some (JSON_String c.title));
         ("kind", Some (JSON_String (CodeActionKind.string_of_kind c.kind)));
         ("diagnostics", Some (print_diagnostic_list c.diagnostics));
-        ("edit", Option.map edit ~f:print_documentRename);
+        ("edit", Option.map edit ~f:print_workspaceEdit);
         ("command", Option.map command ~f:print_command);
         ("data", Option.map data ~f:print_params);
       ])

@@ -904,7 +904,7 @@ let dismiss_diagnostics (state : state) : state =
 
 let lsp_uri_to_path = Lsp_helpers.lsp_uri_to_path
 
-let path_to_lsp_uri = Lsp_helpers.path_to_lsp_uri
+let path_string_to_lsp_uri = Lsp_helpers.path_string_to_lsp_uri
 
 let lsp_position_to_ide (position : Lsp.position) : Ide_api_types.position =
   { Ide_api_types.line = position.line + 1; column = position.character + 1 }
@@ -931,7 +931,7 @@ let ide_shell_out_pos_to_lsp_location
   let open FindRefsWireFormat in
   Lsp.Location.
     {
-      uri = path_to_lsp_uri pos.filename ~default_path:pos.filename;
+      uri = path_string_to_lsp_uri pos.filename ~default_path:pos.filename;
       range =
         {
           start = { line = pos.line - 1; character = pos.char_start - 1 };
@@ -943,7 +943,7 @@ let hack_pos_to_lsp_location (pos : Pos.absolute) ~(default_path : string) :
     Lsp.Location.t =
   Lsp.Location.
     {
-      uri = path_to_lsp_uri (Pos.filename pos) ~default_path;
+      uri = path_string_to_lsp_uri (Pos.filename pos) ~default_path;
       range = Lsp_helpers.hack_pos_to_lsp_range ~equal:String.equal pos;
     }
 
@@ -1057,7 +1057,8 @@ let hack_errors_to_lsp_diagnostic
      the following path_to_lsp_uri will fall back to the default path - which
      is also empty - and throw, logging appropriate telemetry. *)
   {
-    Lsp.PublishDiagnostics.uri = path_to_lsp_uri filename ~default_path:"";
+    Lsp.PublishDiagnostics.uri =
+      path_string_to_lsp_uri filename ~default_path:"";
     isStatusFB = false;
     diagnostics = List.map errors ~f:hack_error_to_lsp_diagnostic;
   }
@@ -1584,7 +1585,7 @@ let watch_refs_stream_file
       in
       let results =
         List.filter results ~f:(fun { FindRefsWireFormat.filename; _ } ->
-            let uri = path_to_lsp_uri filename ~default_path:filename in
+            let uri = path_string_to_lsp_uri filename ~default_path:filename in
             not (UriMap.mem uri open_file_results))
       in
       if not (List.is_empty results) then add (Some results);
@@ -3318,7 +3319,7 @@ let validate_error_item_TEMPORARY
   let lenv =
     Relative_path.Map.fold expected ~init:lenv ~f:(fun path expected lenv ->
         let path = Relative_path.to_absolute path in
-        let uri = path_to_lsp_uri path ~default_path:path in
+        let uri = path_string_to_lsp_uri path ~default_path:path in
         let actual_opt =
           UriMap.find_opt uri lenv.Run_env.uris_with_standalone_diagnostics
         in
@@ -3417,7 +3418,7 @@ let publish_and_report_after_recomputing_live_squiggles
   | Post_shutdown -> state (* no-op *)
   | Running lenv ->
     let file_path = Path.to_string file_path in
-    let uri = path_to_lsp_uri file_path ~default_path:file_path in
+    let uri = path_string_to_lsp_uri file_path ~default_path:file_path in
     let uris = lenv.Run_env.uris_with_standalone_diagnostics in
     let previously_had_diagnostics = UriMap.mem uri uris in
     let uris_with_standalone_diagnostics =
@@ -3610,7 +3611,7 @@ let handle_errors_file_item
         ~init:lenv.Run_env.uris_with_standalone_diagnostics
         ~f:(fun path file_errors acc ->
           let path = Relative_path.to_absolute path in
-          let uri = path_to_lsp_uri path ~default_path:path in
+          let uri = path_string_to_lsp_uri path ~default_path:path in
           if UriMap.mem uri lenv.Run_env.editor_open_files then
             acc
           else

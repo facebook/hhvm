@@ -813,10 +813,11 @@ let handle_request
                     |> List.map ~f:snd
                   in
                   let urikey =
-                    Lsp_helpers.path_to_lsp_uri
+                    Lsp_helpers.path_string_to_lsp_uri
                       stringified_path
                       ~default_path:stringified_path
                   in
+
                   let updated_map =
                     Lsp.UriMap.add urikey single_file_pos accum
                   in
@@ -939,7 +940,7 @@ let handle_request
                         List.hd_exn positions |> snd |> Pos.filename
                       in
                       let uri =
-                        Lsp_helpers.path_to_lsp_uri
+                        Lsp_helpers.path_string_to_lsp_uri
                           ~default_path:filename
                           filename
                       in
@@ -1012,10 +1013,11 @@ let handle_request
                     |> ServerFindRefs.to_absolute
                   in
                   let urikey =
-                    Lsp_helpers.path_to_lsp_uri
+                    Lsp_helpers.path_string_to_lsp_uri
                       stringified_path
                       ~default_path:stringified_path
                   in
+
                   let updated_map =
                     Lsp.UriMap.add urikey single_file_ref accum
                   in

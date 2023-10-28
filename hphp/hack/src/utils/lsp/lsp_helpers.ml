@@ -31,8 +31,8 @@ let lsp_uri_to_path (uri : DocumentUri.t) : string =
   else
     uri
 
-let path_to_lsp_uri (path : string) ~(default_path : string) : Lsp.DocumentUri.t
-    =
+let path_string_to_lsp_uri (path : string) ~(default_path : string) :
+    Lsp.DocumentUri.t =
   if String.equal path "" then begin
     HackEventLogger.invariant_violation_bug "missing path";
     Hh_logger.log
@@ -168,7 +168,7 @@ let symbol_to_lsp_call_item
         sym_def.SymbolDefinition.pos )
   in
   let filename_ = Pos.to_absolute file_pos |> Pos.filename in
-  let uri_ = path_to_lsp_uri filename_ ~default_path:"www" in
+  let uri_ = path_string_to_lsp_uri filename_ ~default_path:"www" in
   {
     name = sym_occ.name;
     kind = sym_occ_kind_to_lsp_sym_info_kind sym_occ.type_;

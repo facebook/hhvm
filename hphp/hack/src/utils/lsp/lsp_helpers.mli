@@ -25,6 +25,11 @@ val url_scheme_regex : Str.regexp
 
 val lsp_uri_to_path : Lsp.DocumentUri.t -> string
 
+(** If given a relative path with a dummy prefix, the file
+uri will include a fake prefix like '/dummy_from_path_to_lsp_uri/' *)
+val path_to_lsp_uri : Relative_path.t -> Lsp.DocumentUri.t
+
+(** prefer [path_to_lsp_uri] *)
 val path_string_to_lsp_uri : string -> default_path:string -> Lsp.DocumentUri.t
 
 val lsp_textDocumentIdentifier_to_filename :

@@ -42,6 +42,19 @@ let path_string_to_lsp_uri (path : string) ~(default_path : string) :
   end else
     File_url.create path |> uri_of_string
 
+let path_to_lsp_uri (path : Relative_path.t) : Lsp.DocumentUri.t =
+  match Relative_path.prefix path with
+  | Relative_path.(Root | Hhi | Tmp) ->
+    let absolute = Relative_path.to_absolute path in
+    path_string_to_lsp_uri absolute ~default_path:absolute
+  | Relative_path.Dummy ->
+    (* This is bad, we're saying something is a file path when it's not.
+       A particular case where we reach here is via `hh_single_type_check --ide-code-actions.
+       This is a symptom of overusing LSP types in internals of our language server.
+       TODO(T168350458): try to make this unreachable or behave more reasonably
+    *)
+    Lsp.DocumentUri.Uri (Relative_path.to_absolute path)
+
 let lsp_textDocumentIdentifier_to_filename
     (identifier : Lsp.TextDocumentIdentifier.t) : string =
   Lsp.TextDocumentIdentifier.(lsp_uri_to_path identifier.uri)

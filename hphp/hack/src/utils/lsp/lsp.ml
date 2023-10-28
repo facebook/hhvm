@@ -7,6 +7,8 @@
  *
  *)
 
+open Hh_prelude
+
 type lsp_id =
   | NumberId of int
   | StringId of string
@@ -205,7 +207,7 @@ module CodeActionKind = struct
     in
     (fun (k, ks) (x, xs) -> String.equal k x && is_prefix_of ks xs)
 
-  let contains_kind k ks = List.exists (is_kind k) ks
+  let contains_kind k ks = List.exists ~f:(is_kind k) ks
 
   let contains_kind_opt ~default k ks =
     match ks with
@@ -214,11 +216,12 @@ module CodeActionKind = struct
 
   let kind_of_string : string -> t =
    fun s ->
-    match String.split_on_char '.' s with
+    match Caml.String.split_on_char '.' s with
     | [] -> failwith "split_on_char does not return an empty list"
     | k :: ks -> (k, ks)
 
-  let string_of_kind : t -> string = (fun (k, ks) -> String.concat "." (k :: ks))
+  let string_of_kind : t -> string =
+   (fun (k, ks) -> String.concat ~sep:"." (k :: ks))
 
   let sub_kind : t -> string -> t =
     let cons_to_end (ss : string list) (s : string) =
@@ -1150,7 +1153,7 @@ module IdKey = struct
     | (StringId _, NumberId _) -> 1
 end
 
-module IdSet = Set.Make (IdKey)
+module IdSet = Caml.Set.Make (IdKey)
 module IdMap = WrappedMap.Make (IdKey)
 
 module UriKey = struct
@@ -1159,7 +1162,7 @@ module UriKey = struct
   let compare (DocumentUri x) (DocumentUri y) = String.compare x y
 end
 
-module UriSet = Set.Make (UriKey)
+module UriSet = Caml.Set.Make (UriKey)
 module UriMap = WrappedMap.Make (UriKey)
 
 let lsp_result_to_log_string = function

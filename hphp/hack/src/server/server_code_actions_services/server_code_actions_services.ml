@@ -42,7 +42,9 @@ let remove_snippets Lsp.WorkspaceEdit.{ changes } =
     Lsp.TextEdit.
       { text_edit with newText = un_snippet_string text_edit.newText }
   in
-  let changes = SMap.map (List.map ~f:un_snippet_text_edit) changes in
+  let changes =
+    Lsp.DocumentUri.Map.map (List.map ~f:un_snippet_text_edit) changes
+  in
   Lsp.WorkspaceEdit.{ changes }
 
 let find

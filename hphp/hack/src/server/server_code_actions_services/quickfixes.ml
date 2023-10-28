@@ -22,8 +22,8 @@ let convert_quickfix
   let edit =
     lazy
       (let changes =
-         SMap.singleton
-           (Relative_path.to_absolute path)
+         Lsp.DocumentUri.Map.singleton
+           (Lsp_helpers.path_to_lsp_uri path)
            (text_edits classish_starts quickfix)
        in
        Lsp.WorkspaceEdit.{ changes })

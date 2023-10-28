@@ -140,8 +140,8 @@ let edit_of_candidate ~source_text ~path candidate : Lsp.WorkspaceEdit.t =
     edit_replace_call_of_candidate ~source_text ~return_var candidate
   in
   let changes =
-    SMap.singleton
-      (Relative_path.to_absolute path)
+    Lsp.DocumentUri.Map.singleton
+      (Lsp_helpers.path_to_lsp_uri path)
       [edit_remove_method; edit_inline; edit_replace_call]
   in
   Lsp.WorkspaceEdit.{ changes }

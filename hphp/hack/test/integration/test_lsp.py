@@ -5090,7 +5090,7 @@ function call_method(ClassWithFooBar $mc): void {
                     "diagnostics": [],
                     "edit": {
                         "changes": {
-                            "${root_path}/code_action_flip_around_comma.php": [
+                            "${php_file_uri}": [
                                 {
                                     "range": {
                                         "start": {"line": 3, "character": 6},

@@ -155,7 +155,8 @@ end
    array of TextEdits to be applied to the document with that URI. *)
 module WorkspaceEdit : sig
   type t = {
-    changes: TextEdit.t list SMap.t; (* holds changes to existing docs *)
+    changes: TextEdit.t list DocumentUri.Map.t;
+        (* holds changes to existing docs *)
   }
 end
 

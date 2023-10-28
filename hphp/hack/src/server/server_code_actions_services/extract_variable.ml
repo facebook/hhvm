@@ -175,8 +175,8 @@ let refactor_of_candidate ~source_text ~path { stmt_pos; pos; placeholder_n } =
   let edit =
     lazy
       (let changes =
-         SMap.singleton
-           (Relative_path.to_absolute path)
+         Lsp.DocumentUri.Map.singleton
+           (Lsp_helpers.path_to_lsp_uri path)
            [change_add_assignment; change_expression]
        in
        Lsp.WorkspaceEdit.{ changes })

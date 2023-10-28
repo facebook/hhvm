@@ -1173,25 +1173,32 @@ let shellout_patch_list_to_lsp_edits_exn (stdout : string) : Lsp.WorkspaceEdit.t
       | "insert"
       | "replace" ->
         let loc = ide_shell_out_pos_to_lsp_location ide_shell_out_pos in
-        ( File_url.create patch.filename,
+        ( Lsp_helpers.path_string_to_lsp_uri
+            patch.filename
+            ~default_path:patch.filename,
           {
             TextEdit.range = loc.Lsp.Location.range;
             newText = patch.replacement;
           } )
       | "remove" ->
         let loc = ide_shell_out_pos_to_lsp_location ide_shell_out_pos in
-        ( File_url.create patch.filename,
+        ( Lsp_helpers.path_string_to_lsp_uri
+            patch.filename
+            ~default_path:patch.filename,
           { TextEdit.range = loc.Lsp.Location.range; newText = "" } )
       | e -> failwith ("invalid patch type: " ^ e)
     in
     let changes = List.map ~f:patch_to_workspace_edit_change locations in
     let changes =
-      List.fold changes ~init:SMap.empty ~f:(fun acc (uri, text_edit) ->
+      List.fold
+        changes
+        ~init:Lsp.DocumentUri.Map.empty
+        ~f:(fun acc (uri, text_edit) ->
           let current_edits =
-            Option.value ~default:[] (SMap.find_opt uri acc)
+            Option.value ~default:[] (Lsp.DocumentUri.Map.find_opt uri acc)
           in
           let new_edits = text_edit :: current_edits in
-          SMap.add uri new_edits acc)
+          Lsp.DocumentUri.Map.add uri new_edits acc)
     in
     { WorkspaceEdit.changes }
   | `Int _
@@ -2985,7 +2992,7 @@ let do_signatureHelp
   Lwt.return signatures
 
 let patch_to_workspace_edit_change (patch : ServerRenameTypes.patch) :
-    string * TextEdit.t =
+    Lsp.DocumentUri.t * TextEdit.t =
   let open ServerRenameTypes in
   let open Pos in
   let text_edit =
@@ -3004,23 +3011,28 @@ let patch_to_workspace_edit_change (patch : ServerRenameTypes.patch) :
         newText = "";
       }
   in
-  let uri =
+  let uri_string =
     match patch with
     | Insert insert_patch
     | Replace insert_patch ->
       File_url.create (filename insert_patch.pos)
     | Remove pos -> File_url.create (filename pos)
   in
-  (uri, text_edit)
+  (Lsp.DocumentUri.Uri uri_string, text_edit)
 
 let patches_to_workspace_edit (patches : ServerRenameTypes.patch list) :
     WorkspaceEdit.t =
   let changes = List.map patches ~f:patch_to_workspace_edit_change in
   let changes =
-    List.fold changes ~init:SMap.empty ~f:(fun acc (uri, text_edit) ->
-        let current_edits = Option.value ~default:[] (SMap.find_opt uri acc) in
+    List.fold
+      changes
+      ~init:Lsp.DocumentUri.Map.empty
+      ~f:(fun acc (uri, text_edit) ->
+        let current_edits =
+          Option.value ~default:[] (Lsp.DocumentUri.Map.find_opt uri acc)
+        in
         let new_edits = text_edit :: current_edits in
-        SMap.add uri new_edits acc)
+        Lsp.DocumentUri.Map.add uri new_edits acc)
   in
   { WorkspaceEdit.changes }
 
@@ -3099,13 +3111,16 @@ let do_documentRename2 ~ide_calculated_patches ~hh_edits : Lsp.lsp_result * int
   let hh_changes = hh_edits.WorkspaceEdit.changes in
   let ide_changes = patches_to_workspace_edit ide_calculated_patches in
   let changes =
-    SMap.fold
-      (fun file ide combined -> SMap.add file ide combined)
+    Lsp.DocumentUri.Map.fold
+      (fun file ide combined -> Lsp.DocumentUri.Map.add file ide combined)
       ide_changes.WorkspaceEdit.changes
       hh_changes
   in
   let result_count =
-    SMap.fold (fun _file changes tot -> tot + List.length changes) changes 0
+    Lsp.DocumentUri.Map.fold
+      (fun _file changes tot -> tot + List.length changes)
+      changes
+      0
   in
   (RenameResult { WorkspaceEdit.changes }, result_count)
 

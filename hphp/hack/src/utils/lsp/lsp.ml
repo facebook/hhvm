@@ -99,7 +99,7 @@ module TextDocumentEdit = struct
 end
 
 module WorkspaceEdit = struct
-  type t = { changes: TextEdit.t list SMap.t }
+  type t = { changes: TextEdit.t list DocumentUri.Map.t }
 end
 
 module TextDocumentItem = struct

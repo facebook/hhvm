@@ -212,15 +212,16 @@ let print_textEdits (r : TextEdit.t list) : json =
 
 let print_workspaceEdit (r : WorkspaceEdit.t) : json =
   WorkspaceEdit.(
-    let print_workspace_edit_changes (uri, text_edits) =
+    let print_workspace_edit_changes (Lsp.DocumentUri.Uri uri, text_edits) =
       (uri, print_textEdits text_edits)
     in
     JSON_Object
       [
         ( "changes",
           JSON_Object
-            (List.map (SMap.elements r.changes) ~f:print_workspace_edit_changes)
-        );
+            (List.map
+               (Lsp.DocumentUri.Map.elements r.changes)
+               ~f:print_workspace_edit_changes) );
       ])
 
 let print_command (command : Command.t) : json =

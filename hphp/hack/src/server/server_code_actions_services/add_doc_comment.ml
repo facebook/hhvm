@@ -19,7 +19,9 @@ let edit_of_candidate source_text ~path candidate : Lsp.WorkspaceEdit.t =
  */
 |} }
   in
-  let changes = SMap.singleton (Relative_path.to_absolute path) [edit] in
+  let changes =
+    Lsp.DocumentUri.Map.singleton (Lsp_helpers.path_to_lsp_uri path) [edit]
+  in
   Lsp.WorkspaceEdit.{ changes }
 
 let to_refactor source_text ~path candidate =

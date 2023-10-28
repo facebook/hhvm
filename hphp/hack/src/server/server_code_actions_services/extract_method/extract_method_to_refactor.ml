@@ -297,8 +297,8 @@ let edit_of_candidate
       }
   in
   let changes =
-    SMap.singleton
-      (Relative_path.to_absolute path)
+    Lsp.DocumentUri.Map.singleton
+      (Lsp_helpers.path_to_lsp_uri path)
       [change_add_method; change_add_call]
   in
   Lsp.WorkspaceEdit.{ changes }

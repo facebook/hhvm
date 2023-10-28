@@ -42,7 +42,9 @@ let patched_text_of_command_or_action ~source_text path = function
       let pos = lsp_range_to_pos ~source_text path range in
       ServerRenameTypes.Replace ServerRenameTypes.{ pos; text }
     in
-    let patches = SMap.values changes |> List.concat |> List.map ~f:to_patch in
+    let patches =
+      Lsp.DocumentUri.Map.values changes |> List.concat |> List.map ~f:to_patch
+    in
     let source_text = Sys_utils.cat @@ Relative_path.to_absolute path in
     let rewritten_contents = apply_patches_to_string source_text patches in
     Some rewritten_contents

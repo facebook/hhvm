@@ -88,7 +88,9 @@ let edit_of_candidate ~path { lhs_var; lhs_type_string; lhs_pos } :
     in
     Lsp.TextEdit.{ range; newText = text }
   in
-  let changes = SMap.singleton (Relative_path.to_absolute path) [edit] in
+  let changes =
+    Lsp.DocumentUri.Map.singleton (Lsp_helpers.path_to_lsp_uri path) [edit]
+  in
   Lsp.WorkspaceEdit.{ changes }
 
 let to_refactor ~path candidate =

@@ -18,7 +18,7 @@
 namespace HH {
 
   /**
-   * **Prefer `keyeset` over `Set`**. If you need reference semantics,
+   * **Prefer `keyset` over `Set`**. If you need reference semantics,
    * you can wrap the `keyset` in a `Ref`.
    *
    * `Set` is an ordered set-style collection. HHVM provides a native

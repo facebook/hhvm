@@ -39,12 +39,12 @@ struct StaticWatcher : public Watcher {
   /**
    * Return all of our files as changed files.
    */
-  folly::SemiFuture<Results> getChanges(Clock lastClock) override {
-    std::vector<ResultFile> resultFiles;
-    resultFiles.reserve(m_paths.size());
+  folly::SemiFuture<Delta> getChanges(Clock lastClock) override {
+    std::vector<FileDelta> fileDeltas;
+    fileDeltas.reserve(m_paths.size());
     for (auto const& path : m_paths) {
-      resultFiles.push_back(
-          ResultFile{.m_path = path, .m_exists = true, .m_watcher_hash = {}});
+      fileDeltas.push_back(
+          FileDelta{.m_path = path, .m_exists = true, .m_watcher_hash = {}});
     }
     auto newClock = [](const auto& lastClockStr) -> Clock {
       if (lastClockStr.empty()) {
@@ -52,17 +52,17 @@ struct StaticWatcher : public Watcher {
       }
       return Clock{.m_clock = std::to_string(std::stoll(lastClockStr) + 1)};
     }(lastClock.m_clock);
-    return folly::makeSemiFuture(Results{
+    return folly::makeSemiFuture(Delta{
         .m_lastClock = {std::move(lastClock)},
         .m_newClock = std::move(newClock),
         .m_fresh = true,
-        .m_files = std::move(resultFiles),
+        .m_files = std::move(fileDeltas),
     });
   }
 
   void subscribe(
       const Clock& _lastClock,
-      std::function<void(Results&&)> _callback) override {}
+      std::function<void(Delta&&)> _callback) override {}
 
   const std::vector<std::filesystem::path> m_paths;
 };

@@ -87,11 +87,11 @@ TEST(WatchmanWatcherTest, filesAndExistenceArePassedThrough) {
   EXPECT_THAT(
       results.m_files,
       ElementsAre(
-          Watcher::ResultFile{
+          Watcher::FileDelta{
               .m_path = "a.hck",
               .m_exists = true,
               .m_watcher_hash = "faceb00c"},
-          Watcher::ResultFile{.m_path = "b.hck", .m_exists = false}));
+          Watcher::FileDelta{.m_path = "b.hck", .m_exists = false}));
 }
 
 TEST(WatchmanWatcherTest, malformedWatchmanOutput) {
@@ -206,11 +206,11 @@ TEST(WatchmanWatcherTest, HgTransactionUpdate) {
       }));
 
   Clock oldClock{.m_clock = "1"};
-  watcher->subscribe(oldClock, [&](Watcher::Results&& results) {
-    EXPECT_FALSE(results.m_lastClock);
-    EXPECT_EQ(results.m_newClock, Clock{.m_clock = "2"});
-    EXPECT_FALSE(results.m_fresh);
-    EXPECT_TRUE(results.m_files.empty());
+  watcher->subscribe(oldClock, [&](Watcher::Delta&& delta) {
+    EXPECT_FALSE(delta.m_lastClock);
+    EXPECT_EQ(delta.m_newClock, Clock{.m_clock = "2"});
+    EXPECT_FALSE(delta.m_fresh);
+    EXPECT_TRUE(delta.m_files.empty());
   });
 }
 

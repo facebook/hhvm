@@ -288,7 +288,7 @@ struct SqliteAutoloadMapFactory final : public FactsFactory {
   /**
    * Map from root to AutoloadMap
    */
-  hphp_hash_map<SqliteAutoloadMapKey, std::shared_ptr<FactsStore>> m_maps;
+  hphp_hash_map<SqliteAutoloadMapKey, std::shared_ptr<FactsStore>> m_stores;
 
   /**
    * Map from root to time we last accessed the AutoloadMap
@@ -353,7 +353,7 @@ struct FactsExtension final : Extension {
   // your new member is destroyed at the right time.
   struct FactsData {
     std::chrono::seconds m_idleSec{kDefaultIdleSec};
-    std::unique_ptr<SqliteAutoloadMapFactory> m_mapFactory;
+    std::unique_ptr<SqliteAutoloadMapFactory> m_factory;
     WatchmanWatcherOpts m_watchmanWatcherOpts;
   };
   Optional<FactsData> m_data;
@@ -410,8 +410,8 @@ FactsStore* SqliteAutoloadMapFactory::getForOptions(
   m_lastUsed.insert_or_assign(*mapKey, std::chrono::steady_clock::now());
 
   // Try to return a corresponding SqliteAutoloadMap
-  auto const it = m_maps.find(*mapKey);
-  if (it != m_maps.end()) {
+  auto const it = m_stores.find(*mapKey);
+  if (it != m_stores.end()) {
     return it->second.get();
   }
 
@@ -431,7 +431,7 @@ FactsStore* SqliteAutoloadMapFactory::getForOptions(
         "Loading {} from trusted Autoload DB at {}",
         mapKey->m_root.native(),
         mapKey->m_dbKey.m_path.native());
-    return m_maps
+    return m_stores
         .insert(
             {*mapKey,
              make_trusted_facts(
@@ -450,7 +450,7 @@ FactsStore* SqliteAutoloadMapFactory::getForOptions(
   // Prefetch a FactsDB if we don't have one, while guarded by m_mutex
   prefetchDb(mapKey->m_root, mapKey->m_dbKey);
 
-  return m_maps
+  return m_stores
       .insert(
           {*mapKey,
            make_watcher_facts(
@@ -472,7 +472,7 @@ void SqliteAutoloadMapFactory::garbageCollectUnusedAutoloadMaps(
     auto deadline = std::chrono::steady_clock::now() - idleSec;
 
     std::vector<SqliteAutoloadMapKey> keysToRemove;
-    for (auto const& [mapKey, _] : m_maps) {
+    for (auto const& [mapKey, _] : m_stores) {
       auto lastUsedIt = m_lastUsed.find(mapKey);
       if (lastUsedIt == m_lastUsed.end() || lastUsedIt->second < deadline) {
         keysToRemove.push_back(mapKey);
@@ -483,10 +483,10 @@ void SqliteAutoloadMapFactory::garbageCollectUnusedAutoloadMaps(
     maps.reserve(keysToRemove.size());
     for (auto const& mapKey : keysToRemove) {
       XLOG(INFO) << "Evicting SqliteAutoloadMap: " << mapKey.toString();
-      auto it = m_maps.find(mapKey);
-      if (it != m_maps.end()) {
+      auto it = m_stores.find(mapKey);
+      if (it != m_stores.end()) {
         maps.push_back(std::move(it->second));
-        m_maps.erase(it);
+        m_stores.erase(it);
       }
       m_lastUsed.erase(mapKey);
     }
@@ -862,8 +862,8 @@ void FactsExtension::moduleInit() {
     XLOG(INFO) << "watchman.socket.root was not provided.";
   }
 
-  m_data->m_mapFactory = std::make_unique<SqliteAutoloadMapFactory>();
-  FactsFactory::setInstance(m_data->m_mapFactory.get());
+  m_data->m_factory = std::make_unique<SqliteAutoloadMapFactory>();
+  FactsFactory::setInstance(m_data->m_factory.get());
 }
 
 } // namespace Facts

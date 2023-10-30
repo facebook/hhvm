@@ -74,7 +74,7 @@ Optional<std::string> getSha1Hash(const folly::dynamic& pathData) {
  * Process the given Watchman results into a type-safe struct. Throw `UpdateExc`
  * if the results don't conform to the structure we expected.
  */
-Watcher::Results parseWatchmanResults(
+Watcher::Delta parseWatchmanResults(
     Optional<Clock> lastClock,
     folly::dynamic&& result) {
   if (result.count("error")) {
@@ -82,7 +82,7 @@ Watcher::Results parseWatchmanResults(
         folly::sformat("Got a watchman error: {}\n", folly::toJson(result))};
   }
 
-  std::vector<Watcher::ResultFile> alteredPaths;
+  std::vector<Watcher::FileDelta> alteredPaths;
   auto* resultFiles = result.get_ptr("files");
   if (resultFiles && resultFiles->isArray()) {
     alteredPaths.reserve(resultFiles->size());
@@ -192,7 +192,7 @@ struct WatchmanWatcher final
   WatchmanWatcher(WatchmanWatcher&&) = delete;
   WatchmanWatcher& operator=(WatchmanWatcher&&) = delete;
 
-  folly::SemiFuture<Results> getChanges(Clock lastClock) override {
+  folly::SemiFuture<Delta> getChanges(Clock lastClock) override {
     auto queryExpr = addWatchmanSince(m_queryExpr, lastClock);
     XLOGF(INFO, "Querying watchman ({})\n", folly::toJson(queryExpr));
     return getChanges(
@@ -201,7 +201,7 @@ struct WatchmanWatcher final
 
   void subscribe(
       const Clock& lastClock,
-      std::function<void(Results&& callback)> callback) override {
+      std::function<void(Delta&& callback)> callback) override {
     m_watchmanClient->subscribe(
         addWatchmanSince(m_queryExpr, lastClock),
         [cb = std::move(callback)](folly::Try<folly::dynamic>&& results) {
@@ -215,7 +215,7 @@ struct WatchmanWatcher final
   }
 
  private:
-  folly::SemiFuture<Results>
+  folly::SemiFuture<Delta>
   getChanges(Clock lastClock, folly::dynamic queryExpr, int32_t retries) {
     return queryWatchman(queryExpr, retries)
         .deferValue([lastClock = std::move(lastClock)](

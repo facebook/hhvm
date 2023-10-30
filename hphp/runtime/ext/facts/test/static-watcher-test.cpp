@@ -41,7 +41,7 @@ TEST(StaticWatcherTest, sinceAndClockAndFilesArePassedThrough) {
   EXPECT_EQ(result.m_newClock, Clock{.m_clock = "1"});
   EXPECT_THAT(
       result.m_files,
-      ElementsAre(Watcher::ResultFile{
+      ElementsAre(Watcher::FileDelta{
           .m_path = "a.hck", .m_exists = true, .m_watcher_hash = {}}));
 }
 
@@ -54,7 +54,7 @@ TEST(StaticWatcherTest, incrementsClock) {
   EXPECT_EQ(result.m_newClock, Clock{.m_clock = "43"});
   EXPECT_THAT(
       result.m_files,
-      ElementsAre(Watcher::ResultFile{
+      ElementsAre(Watcher::FileDelta{
           .m_path = "a.hck", .m_exists = true, .m_watcher_hash = {}}));
 }
 

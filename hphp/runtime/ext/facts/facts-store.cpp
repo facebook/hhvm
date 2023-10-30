@@ -431,7 +431,10 @@ struct FactsStoreImpl final
             1,
             make_thread_factory("Autoload update"))},
         m_root{std::move(root)},
-        m_map{m_root, std::move(dbOpener), std::move(indexedMethodAttributes)},
+        m_symbolMap{
+            m_root,
+            std::move(dbOpener),
+            std::move(indexedMethodAttributes)},
         m_watcher{std::move(watcher)},
         m_suppressionFilePath{std::move(suppressionFilePath)} {}
 
@@ -440,8 +443,10 @@ struct FactsStoreImpl final
       AutoloadDB::Opener dbOpener,
       hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttributes)
       : m_root{std::move(root)},
-        m_map{m_root, std::move(dbOpener), std::move(indexedMethodAttributes)} {
-  }
+        m_symbolMap{
+            m_root,
+            std::move(dbOpener),
+            std::move(indexedMethodAttributes)} {}
 
   ~FactsStoreImpl() override {
     try {
@@ -478,8 +483,8 @@ struct FactsStoreImpl final
    * Return an object representing the last time this store was updated
    */
   Clock getClock() const {
-    auto version = m_map.getClock();
-    return version.isInitial() ? m_map.dbClock() : version;
+    auto version = m_symbolMap.getClock();
+    return version.isInitial() ? m_symbolMap.dbClock() : version;
   }
 
   /**
@@ -504,7 +509,7 @@ struct FactsStoreImpl final
 
   Variant getTypeName(const String& type) override {
     return logPerformance(__func__, [&]() {
-      auto name = m_map.getTypeName(*type.get());
+      auto name = m_symbolMap.getTypeName(*type.get());
       if (!name) {
         return Variant{Variant::NullInit{}};
       } else {
@@ -515,7 +520,7 @@ struct FactsStoreImpl final
 
   Variant getKind(const String& type) override {
     return logPerformance(__func__, [&]() {
-      auto const kind = m_map.getKind(Symbol<SymKind::Type>{*type.get()});
+      auto const kind = m_symbolMap.getKind(Symbol<SymKind::Type>{*type.get()});
       auto const kindStr = typeKindToString(kind).get();
 
       if (kindStr == nullptr || kindStr->empty()) {
@@ -528,12 +533,12 @@ struct FactsStoreImpl final
 
   bool isTypeAbstract(const String& type) override {
     return logPerformance(
-        __func__, [&]() { return m_map.isTypeAbstract(*type.get()); });
+        __func__, [&]() { return m_symbolMap.isTypeAbstract(*type.get()); });
   }
 
   bool isTypeFinal(const String& type) override {
     return logPerformance(
-        __func__, [&]() { return m_map.isTypeFinal(*type.get()); });
+        __func__, [&]() { return m_symbolMap.isTypeFinal(*type.get()); });
   }
 
   Optional<AutoloadMap::FileResult> getTypeOrTypeAliasFile(
@@ -698,30 +703,32 @@ struct FactsStoreImpl final
 
   Array getTypesWithAttribute(const String& attr) override {
     return logPerformance(__func__, [&]() {
-      return makeVecOfString(m_map.getTypesWithAttribute(*attr.get()));
+      return makeVecOfString(m_symbolMap.getTypesWithAttribute(*attr.get()));
     });
   }
 
   Array getTypeAliasesWithAttribute(const String& attr) override {
     return logPerformance(__func__, [&]() {
-      return makeVecOfString(m_map.getTypeAliasesWithAttribute(*attr.get()));
+      return makeVecOfString(
+          m_symbolMap.getTypeAliasesWithAttribute(*attr.get()));
     });
   }
 
   Array getMethodsWithAttribute(const String& attr) override {
     return logPerformance(__func__, [&]() {
-      if (UNLIKELY(!m_map.isAttrIndexed(*attr.get()))) {
+      if (UNLIKELY(!m_symbolMap.isAttrIndexed(*attr.get()))) {
         HPHP::SystemLib::throwRuntimeExceptionObject(fmt::format(
             "Queried attribute {} not found in IndexedMethodAttributes",
             attr.get()->data()));
       }
-      return makeVecOfStringString(m_map.getMethodsWithAttribute(*attr.get()));
+      return makeVecOfStringString(
+          m_symbolMap.getMethodsWithAttribute(*attr.get()));
     });
   }
 
   Array getFilesWithAttribute(const String& attr) override {
     return logPerformance(__func__, [&]() {
-      return makeVecOfString(m_map.getFilesWithAttribute(*attr.get()));
+      return makeVecOfString(m_symbolMap.getFilesWithAttribute(*attr.get()));
     });
   }
 
@@ -730,47 +737,49 @@ struct FactsStoreImpl final
       const folly::dynamic& value) override {
     return logPerformance(__func__, [&]() {
       return makeVecOfString(
-          m_map.getFilesWithAttributeAndAnyValue(*attr.get(), value));
+          m_symbolMap.getFilesWithAttributeAndAnyValue(*attr.get(), value));
     });
   }
 
   Array getTypeAttributes(const String& type) override {
     return logPerformance(__func__, [&]() {
-      return makeVecOfString(m_map.getAttributesOfType(*type.get()));
+      return makeVecOfString(m_symbolMap.getAttributesOfType(*type.get()));
     });
   }
 
   Array getTypeAliasAttributes(const String& typeAlias) override {
     return logPerformance(__func__, [&]() {
-      return makeVecOfString(m_map.getAttributesOfTypeAlias(*typeAlias.get()));
+      return makeVecOfString(
+          m_symbolMap.getAttributesOfTypeAlias(*typeAlias.get()));
     });
   }
 
   Array getMethodAttributes(const String& type, const String& method) override {
     return logPerformance(__func__, [&]() {
       return makeVecOfString(
-          m_map.getAttributesOfMethod(*type.get(), *method.get()));
+          m_symbolMap.getAttributesOfMethod(*type.get(), *method.get()));
     });
   }
 
   Array getFileAttributes(const String& file) override {
     return logPerformance(__func__, [&]() {
-      return makeVecOfString(m_map.getAttributesOfFile(Path{*file.get()}));
+      return makeVecOfString(
+          m_symbolMap.getAttributesOfFile(Path{*file.get()}));
     });
   }
 
   Array getTypeAttrArgs(const String& type, const String& attribute) override {
     return logPerformance(__func__, [&]() {
       return makeVecOfDynamic(
-          m_map.getTypeAttributeArgs(*type.get(), *attribute.get()));
+          m_symbolMap.getTypeAttributeArgs(*type.get(), *attribute.get()));
     });
   }
 
   Array getTypeAliasAttrArgs(const String& typeAlias, const String& attribute)
       override {
     return logPerformance(__func__, [&]() {
-      return makeVecOfDynamic(
-          m_map.getTypeAliasAttributeArgs(*typeAlias.get(), *attribute.get()));
+      return makeVecOfDynamic(m_symbolMap.getTypeAliasAttributeArgs(
+          *typeAlias.get(), *attribute.get()));
     });
   }
 
@@ -779,15 +788,15 @@ struct FactsStoreImpl final
       const String& method,
       const String& attribute) override {
     return logPerformance(__func__, [&]() {
-      return makeVecOfDynamic(m_map.getMethodAttributeArgs(
+      return makeVecOfDynamic(m_symbolMap.getMethodAttributeArgs(
           *type.get(), *method.get(), *attribute.get()));
     });
   }
 
   Array getFileAttrArgs(const String& file, const String& attribute) override {
     return logPerformance(__func__, [&]() {
-      return makeVecOfDynamic(
-          m_map.getFileAttributeArgs(Path{*file.get()}, *attribute.get()));
+      return makeVecOfDynamic(m_symbolMap.getFileAttributeArgs(
+          Path{*file.get()}, *attribute.get()));
     });
   }
 
@@ -798,16 +807,16 @@ struct FactsStoreImpl final
     if (!m_watcher) {
       return;
     }
-    auto clock = m_map.getClock();
+    auto clock = m_symbolMap.getClock();
     if (clock.isInitial()) {
-      clock = m_map.dbClock();
+      clock = m_symbolMap.dbClock();
     }
     m_watcher->subscribe(
-        clock, [weakThis = weak_from_this()](Watcher::Results&& results) {
+        clock, [weakThis = weak_from_this()](Watcher::Delta&& delta) {
           XLOGF(
               INFO,
               "Subscription result: {} paths received.",
-              results.m_files.size());
+              delta.m_files.size());
           auto sharedThis = weakThis.lock();
           if (!sharedThis) {
             return;
@@ -865,15 +874,15 @@ struct FactsStoreImpl final
                 m_lastWatchmanQueryStart = std::chrono::steady_clock::now();
                 return m_watcher->getChanges(getClock());
               })
-              .thenTry([this](folly::Try<Watcher::Results>&& results) {
-                if (results.hasException()) {
+              .thenTry([this](folly::Try<Watcher::Delta>&& delta) {
+                if (delta.hasException()) {
                   auto msg = folly::sformat(
                       "Exception while querying watcher: {}",
-                      results.exception().what());
+                      delta.exception().what());
                   XLOG(ERR) << msg;
                   throw UpdateExc{msg};
                 }
-                return updateWithDelta(std::move(results.value()));
+                return updateWithDelta(std::move(delta.value()));
               }));
     }
     return updateFuture->getFuture()
@@ -910,19 +919,19 @@ struct FactsStoreImpl final
         .semi();
   }
 
-  folly::SemiFuture<folly::Unit> updateWithDelta(Watcher::Results&& results) {
+  folly::SemiFuture<folly::Unit> updateWithDelta(Watcher::Delta&& delta) {
     if (m_closing) {
       throw UpdateExc{"Shutting down"};
     }
 
     tracing::Block _{"autoload-update-parse-results"};
-    bool isFresh = results.m_fresh;
-    Clock lastClock = *results.m_lastClock;
-    Clock newClock = results.m_newClock;
+    bool isFresh = delta.m_fresh;
+    Clock lastClock = *delta.m_lastClock;
+    Clock newClock = delta.m_newClock;
 
     auto [alteredPathsAndHashes, deletedPaths] = isFresh
-        ? getFreshDelta(std::move(results))
-        : getIncrementalDelta(std::move(results));
+        ? getFreshDelta(std::move(delta))
+        : getIncrementalDelta(std::move(delta));
 
     if (RO::EvalAutoloadEagerSyncUnitCache) {
       unitCacheSyncRepo(this, m_root, alteredPathsAndHashes, deletedPaths);
@@ -1018,7 +1027,7 @@ struct FactsStoreImpl final
         newClock,
         alteredPathsAndHashes.size(),
         deletedPaths.size());
-    m_map.update(
+    m_symbolMap.update(
         lastClock,
         newClock,
         // See comment above for why we no longer trust the hashes from this set
@@ -1037,16 +1046,16 @@ struct FactsStoreImpl final
    */
 
   std::tuple<std::vector<PathAndOptionalHash>, std::vector<fs::path>>
-  getFreshDelta(Watcher::Results&& result) const {
-    auto allPaths = m_map.getAllPathsWithHashes();
+  getFreshDelta(Watcher::Delta&& delta) const {
+    auto allPaths = m_symbolMap.getAllPathsWithHashes();
     XLOGF(
         INFO,
         "Received fresh query, checking against our list of {} paths.",
         allPaths.size());
 
     std::vector<PathAndOptionalHash> alteredPaths;
-    alteredPaths.reserve(result.m_files.size());
-    for (auto& pathData : std::move(result.m_files)) {
+    alteredPaths.reserve(delta.m_files.size());
+    for (auto& pathData : std::move(delta.m_files)) {
       assertx(pathData.m_exists);
 
       auto& path = pathData.m_path;
@@ -1097,10 +1106,10 @@ struct FactsStoreImpl final
    * update when Watchman gives us an incremental update.
    */
   std::tuple<std::vector<PathAndOptionalHash>, std::vector<fs::path>>
-  getIncrementalDelta(Watcher::Results&& result) const {
+  getIncrementalDelta(Watcher::Delta&& delta) const {
     std::vector<PathAndOptionalHash> alteredPaths;
     std::vector<fs::path> deletedPaths;
-    for (auto& pathData : result.m_files) {
+    for (auto& pathData : delta.m_files) {
       if (!pathData.m_exists) {
         deletedPaths.push_back(std::move(pathData.m_path));
       } else {
@@ -1117,8 +1126,8 @@ struct FactsStoreImpl final
     std::vector<Symbol<SymKind::Type>> baseTypes;
 
     auto addBaseTypes = [&](DeriveKind kind) {
-      auto newBaseTypes =
-          m_map.getBaseTypes(Symbol<SymKind::Type>{*derivedType.get()}, kind);
+      auto newBaseTypes = m_symbolMap.getBaseTypes(
+          Symbol<SymKind::Type>{*derivedType.get()}, kind);
       baseTypes.reserve(baseTypes.size() + newBaseTypes.size());
       std::move(
           std::begin(newBaseTypes),
@@ -1145,8 +1154,8 @@ struct FactsStoreImpl final
     std::vector<Symbol<SymKind::Type>> derivedTypes;
 
     auto addDerivedTypes = [&](DeriveKind kind) {
-      auto newDerivedTypes =
-          m_map.getDerivedTypes(Symbol<SymKind::Type>{*baseType.get()}, kind);
+      auto newDerivedTypes = m_symbolMap.getDerivedTypes(
+          Symbol<SymKind::Type>{*baseType.get()}, kind);
       derivedTypes.reserve(derivedTypes.size() + newDerivedTypes.size());
       std::move(
           std::begin(newDerivedTypes),
@@ -1176,7 +1185,7 @@ struct FactsStoreImpl final
       folly::splitFuture(folly::makeFuture())};
   std::atomic<bool> m_closing{false};
   fs::path m_root;
-  SymbolMap m_map;
+  SymbolMap m_symbolMap;
   std::shared_ptr<Watcher> m_watcher;
   Optional<std::filesystem::path> m_suppressionFilePath;
 
@@ -1188,14 +1197,14 @@ struct FactsStoreImpl final
 
     auto symbols = [&]() -> std::vector<Symbol<k>> {
       if (path.slice().at(0) != '/') {
-        return lambda(m_map, Path{*path.get()});
+        return lambda(m_symbolMap, Path{*path.get()});
       }
       auto resolvedPath =
           resolvePathRelativeToRoot(fs::path{path.toCppString()}, m_root);
       if (!resolvedPath) {
         return {};
       }
-      return lambda(m_map, Path{*resolvedPath});
+      return lambda(m_symbolMap, Path{*resolvedPath});
     }();
     VecInit ret{symbols.size()};
     for (auto s : std::move(symbols)) {
@@ -1217,7 +1226,7 @@ struct FactsStoreImpl final
 
   template <SymKind K, class T>
   Optional<fs::path> getSymbolFile(std::string_view symbol, T lambda) {
-    const StringData* fileStr = lambda(m_map, Symbol<K>{symbol}).get();
+    const StringData* fileStr = lambda(m_symbolMap, Symbol<K>{symbol}).get();
     if (UNLIKELY(!fileStr))
       return std::nullopt;
     fs::path p{fileStr->toCppString()};
@@ -1243,7 +1252,7 @@ struct FactsStoreImpl final
             types.begin(),
             types.end(),
             [&](const Symbol<SymKind::Type>& type) {
-              auto kind = m_map.getKind(type);
+              auto kind = m_symbolMap.getKind(type);
               switch (kind) {
                 case Facts::TypeKind::Class:
                   return kinds.m_removeClasses;

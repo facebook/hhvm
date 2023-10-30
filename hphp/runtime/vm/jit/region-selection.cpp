@@ -74,6 +74,14 @@ RegionMode regionMode() {
   return RegionMode::None;
 }
 
+std::string show(RegionMode mode) {
+  switch (mode) {
+    case RegionMode::None:     return "none";
+    case RegionMode::Method:   return "method";
+    case RegionMode::Tracelet: return "tracelet";
+  }
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -834,7 +842,7 @@ RegionDescPtr selectRegion(const RegionContext& context,
 
   FTRACE(1,
     "Select region: mode={} context:\n{}",
-    static_cast<int>(mode), show(context)
+    show(mode), show(context)
   );
 
   auto region = [&]{

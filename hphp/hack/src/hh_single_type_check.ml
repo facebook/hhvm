@@ -317,7 +317,6 @@ let parse_options () =
   let custom_error_config_path = ref None in
   let allow_all_files_for_module_declarations = ref true in
   let loop_iteration_upper_bound = ref None in
-  let substitution_mutation = ref false in
   let get_some_file_deps_full_hierarchy = ref false in
   let options =
     [
@@ -797,10 +796,6 @@ let parse_options () =
       ( "--expression-tree-virtualize-functions",
         Arg.Set expression_tree_virtualize_functions,
         " Enables function virtualization in Expression Trees" );
-      ( "--substitution-mutation",
-        Arg.Set substitution_mutation,
-        " Applies substitution mutation to applicable entities and typechecks them"
-      );
       ( "--remove-dead-unsafe-casts",
         Arg.Unit (fun () -> set_mode RemoveDeadUnsafeCasts ()),
         " Removes dead unsafe casts from a file" );
@@ -984,7 +979,6 @@ let parse_options () =
       ~tco_loop_iteration_upper_bound:!loop_iteration_upper_bound
       ~tco_expression_tree_virtualize_functions:
         !expression_tree_virtualize_functions
-      ~tco_substitution_mutation:!substitution_mutation
       ~tco_rust_elab:!rust_elab
       GlobalOptions.default
   in

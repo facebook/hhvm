@@ -149,7 +149,6 @@ impl Default for GlobalOptions {
             tco_record_fine_grained_dependencies: false,
             tco_loop_iteration_upper_bound: None,
             tco_expression_tree_virtualize_functions: false,
-            tco_substitution_mutation: false,
             tco_use_type_alias_heap: false,
             tco_populate_dead_unsafe_cast_heap: false,
             po_disallow_static_constants_in_default_func_args: false,

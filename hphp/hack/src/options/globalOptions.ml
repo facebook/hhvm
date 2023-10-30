@@ -184,7 +184,6 @@ type t = {
   tco_record_fine_grained_dependencies: bool;
   tco_loop_iteration_upper_bound: int option;
   tco_expression_tree_virtualize_functions: bool;
-  tco_substitution_mutation: bool;
   tco_use_type_alias_heap: bool;
   tco_populate_dead_unsafe_cast_heap: bool;
   po_disallow_static_constants_in_default_func_args: bool;
@@ -314,7 +313,6 @@ let default =
     tco_record_fine_grained_dependencies = false;
     tco_loop_iteration_upper_bound = None;
     tco_expression_tree_virtualize_functions = false;
-    tco_substitution_mutation = false;
     tco_use_type_alias_heap = false;
     tco_populate_dead_unsafe_cast_heap = false;
     po_disallow_static_constants_in_default_func_args = false;
@@ -442,7 +440,6 @@ let set
     ?tco_record_fine_grained_dependencies
     ?tco_loop_iteration_upper_bound
     ?tco_expression_tree_virtualize_functions
-    ?tco_substitution_mutation
     ?tco_use_type_alias_heap
     ?tco_populate_dead_unsafe_cast_heap
     ?po_disallow_static_constants_in_default_func_args
@@ -765,8 +762,6 @@ let set
       setting
         tco_expression_tree_virtualize_functions
         options.tco_expression_tree_virtualize_functions;
-    tco_substitution_mutation =
-      setting tco_substitution_mutation options.tco_substitution_mutation;
     tco_use_type_alias_heap =
       setting tco_use_type_alias_heap options.tco_use_type_alias_heap;
     tco_populate_dead_unsafe_cast_heap =

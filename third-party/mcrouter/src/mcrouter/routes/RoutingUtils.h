@@ -76,21 +76,34 @@ static ToRequest createRequestFromMessage(
 
 /**
  * The function to extract the routing key from the request
+ * (no salt).
+ *
+ * @param(req)          - the request to extract the routing key from
+ *
+ * @return(folly::StringPiece) - the non-salted routing key
+ */
+template <class Request>
+static folly::StringPiece getRoutingKey(const Request& req) {
+  return req.key_ref()->routingKey();
+}
+
+/**
+ * The function to extract the routing key from the request
  * and add the salt if it is not empty.
  *
  * @param(req)          - the request to extract the routing key from
- * @param(salt)         - salt to add to the end of the routing key, can be
- *                        empty string
+ * @param(salt)         - salt to add to the end of the routing key; assumed not
+ * to be an empty string (use the other overload in that case)
  *
  * @return(std::string) - the resulting routing key
  */
 template <class Request>
 static std::string getRoutingKey(const Request& req, const std::string& salt) {
-  auto routingKey = req.key_ref()->routingKey().str();
-  if (!salt.empty()) {
-    routingKey += salt;
-  }
-  return routingKey;
+  std::string ret;
+  ret.reserve(req.key_ref()->routingKey().size() + salt.size());
+  ret += req.key_ref()->routingKey();
+  ret += salt;
+  return ret;
 }
 
 } // namespace mcrouter

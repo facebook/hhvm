@@ -76,7 +76,11 @@ class McBucketRoute {
       return t(*rh_, req);
     }
     auto bucketId = folly::fibers::runInMainContext([this, &req]() {
-      return ch3_(getRoutingKey<Request>(req, this->salt_));
+      if (this->salt_.empty()) {
+        return ch3_(getRoutingKey<Request>(req));
+      } else {
+        return ch3_(getRoutingKey<Request>(req, this->salt_));
+      }
     });
     if (bucketId < bucketizeUntil_) {
       if (auto* ctx = fiber_local<RouterInfo>::getTraverseCtx()) {
@@ -97,7 +101,11 @@ class McBucketRoute {
   template <class Request>
   ReplyT<Request> route(const Request& req) const {
     auto bucketId = folly::fibers::runInMainContext([this, &req]() {
-      return ch3_(getRoutingKey<Request>(req, this->salt_));
+      if (this->salt_.empty()) {
+        return ch3_(getRoutingKey<Request>(req));
+      } else {
+        return ch3_(getRoutingKey<Request>(req, this->salt_));
+      }
     });
     auto& ctx = fiber_local<RouterInfo>::getSharedCtx();
 

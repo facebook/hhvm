@@ -9,6 +9,7 @@
 #include "mcrouter/McrouterFiberContext.h"
 #include "mcrouter/lib/network/gen/MemcacheMessages.h"
 #include "mcrouter/lib/network/gen/MemcacheRouterInfo.h"
+#include "mcrouter/routes/RoutingUtils.h"
 #include "mcrouter/routes/test/RouteHandleTestUtil.h"
 
 #include <vector>
@@ -193,4 +194,13 @@ TEST(McBucketRouteTest, recordBucketizationData) {
   EXPECT_EQ("getReq", keyBucketPairs[0].first);
   EXPECT_EQ("28", keyBucketPairs[0].second);
 }
+
+TEST(McBucketRouteTest, GetRoutingKey) {
+  auto req = McGetRequest("getReq");
+
+  EXPECT_EQ(getRoutingKey(req), "getReq");
+  EXPECT_EQ(getRoutingKey(req, "someSalt"), "getReqsomeSalt");
+  EXPECT_EQ(getRoutingKey(req, std::string()), "getReq");
+}
+
 } // namespace facebook::memcache::mcrouter

@@ -409,7 +409,6 @@ fn elaborate_for_typechecking<T: Transform>(env: Env, node: &mut T) -> Vec<Namin
         Box::<passes::validate_user_attribute_autocomplete_sort_text_static::ValidateUserAttributeAutocompleteSortTextStaticPass>::default(),
         Box::<passes::validate_user_attribute_entry_point::ValidateUserAttributeEntryPointPass>::default(),
         Box::<passes::validate_user_attribute_no_auto_dynamic::ValidateUserAttributeNoAutoDynamic>::default(),
-        Box::<passes::validate_user_attribute_infer_flows::ValidateUserAttributeInferFlowsPass>::default(),
         Box::<passes::validate_user_attribute_memoize::ValidateUserAttributeMemoizePass>::default(),
         Box::<passes::validate_user_attribute_soft_internal::ValidateUserAttributeSoftInternalPass>::default(),
 

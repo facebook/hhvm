@@ -67,7 +67,6 @@ pub mod validate_user_attribute_autocomplete_sort_text_static;
 pub mod validate_user_attribute_deprecated_static;
 pub mod validate_user_attribute_dynamically_callable;
 pub mod validate_user_attribute_entry_point;
-pub mod validate_user_attribute_infer_flows;
 pub mod validate_user_attribute_memoize;
 pub mod validate_user_attribute_no_auto_dynamic;
 pub mod validate_user_attribute_soft_internal;

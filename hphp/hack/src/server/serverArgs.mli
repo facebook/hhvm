@@ -39,8 +39,6 @@ val custom_telemetry_data : options -> (string * string) list
 
 val dump_fanout : options -> bool
 
-val enable_ifc : options -> string list
-
 val enable_global_access_check : options -> bool
 
 val from : options -> string

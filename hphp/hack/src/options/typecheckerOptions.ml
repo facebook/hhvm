@@ -46,12 +46,6 @@ let experimental_generics_arity = "generics_arity"
 let experimental_forbid_nullable_cast = "forbid_nullable_cast"
 
 (*
-* Allow typechecker to do global inference and infer IFC flows
-* with the <<InferFlows>> flag
-*)
-let experimental_infer_flows = "ifc_infer_flows"
-
-(*
 * Disallow static memoized functions in non-final classes
 *)
 let experimental_disallow_static_memoized = "disallow_static_memoized"
@@ -79,7 +73,6 @@ let experimental_all =
       experimental_forbid_nullable_cast;
       experimental_disallow_static_memoized;
       experimental_abstract_type_const_with_default;
-      experimental_infer_flows;
       experimental_supportdynamic_type_hint;
       experimental_always_pessimise_return;
       experimental_consider_type_const_enforceable;
@@ -126,11 +119,6 @@ let local_coeffects t = t.GlobalOptions.tco_coeffects_local
 let any_coeffects t = call_coeffects t || local_coeffects t
 
 let strict_contexts t = t.GlobalOptions.tco_strict_contexts
-
-(* Fully enable IFC on the tcopt *)
-let enable_ifc t = GlobalOptions.{ t with tco_ifc_enabled = ["/"] }
-
-let ifc_enabled t = t.GlobalOptions.tco_ifc_enabled
 
 let enable_global_access_check t =
   GlobalOptions.{ t with tco_global_access_check_enabled = true }

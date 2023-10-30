@@ -472,8 +472,6 @@ let set_tcopt_unstable_features env { fa_user_attributes; _ } =
     let ( = ) = String.equal in
     List.fold ua_params ~init:env ~f:(fun env (_, _, feature) ->
         match feature with
-        | Aast.String s when s = SN.UnstableFeatures.ifc ->
-          Env.map_tcopt ~f:TCO.enable_ifc env
         | Aast.String s when s = SN.UnstableFeatures.modules ->
           Env.map_tcopt ~f:(fun t -> TCO.set_modules t true) env
         | Aast.String s when s = SN.UnstableFeatures.expression_trees ->

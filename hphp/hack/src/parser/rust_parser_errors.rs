@@ -88,7 +88,6 @@ pub enum UnstableFeatures {
     UnionIntersectionTypeHints,
     ClassLevelWhere,
     ExpressionTrees,
-    Ifc,
     Readonly,
     Modules,
     ModuleReferences,
@@ -122,7 +121,6 @@ impl UnstableFeatures {
             UnstableFeatures::UnionIntersectionTypeHints => Unstable,
             UnstableFeatures::ClassLevelWhere => Unstable,
             UnstableFeatures::ExpressionTrees => Unstable,
-            UnstableFeatures::Ifc => Unstable,
             UnstableFeatures::Readonly => Preview,
             UnstableFeatures::Modules => OngoingRelease,
             UnstableFeatures::ModuleReferences => Unstable,
@@ -1263,13 +1261,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 parser_options.tco_union_intersection_type_hints
             }
             UnstableFeatures::ClassLevelWhere => parser_options.po_enable_class_level_where_clauses,
-            UnstableFeatures::Ifc => {
-                let file_path = format!("/{}", self.env.text.source_text().file_path().path_str());
-                parser_options
-                    .tco_ifc_enabled
-                    .iter()
-                    .any(|prefix| file_path.find(prefix) == Some(0))
-            }
 
             _ => false,
         } || self.env.context.active_unstable_features.contains(feature)
@@ -1980,9 +1971,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         for node in attr_spec_to_node_list(attrs) {
             match self.attr_name(node) {
                 Some(n) => {
-                    if sn::user_attributes::is_ifc(n) {
-                        self.check_can_use_feature(node, &UnstableFeatures::Ifc)
-                    }
                     if (sn::user_attributes::ignore_readonly_local_errors(n)
                         || sn::user_attributes::ignore_coeffect_local_errors(n)
                         || sn::user_attributes::is_native(n))
@@ -2298,15 +2286,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         }
     }
 
-    fn check_parameter_ifc(&mut self, node: S<'a>) {
-        if let ParameterDeclaration(x) = &node.children {
-            let attr = &x.attribute;
-            if self.attribute_specification_contains(attr, sn::user_attributes::EXTERNAL) {
-                self.check_can_use_feature(attr, &UnstableFeatures::Ifc);
-            }
-        }
-    }
-
     fn check_parameter_readonly(&mut self, node: S<'a>) {
         if let ParameterDeclaration(x) = &node.children {
             if x.readonly.is_readonly() {
@@ -2330,7 +2309,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         let param_errors = |self_: &mut Self, params| {
             for x in syntax_to_list_no_separators(params) {
                 self_.check_parameter_this(x);
-                self_.check_parameter_ifc(x);
                 self_.check_parameter_readonly(x);
             }
             self_.params_errors(params)
@@ -2343,7 +2321,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 });
 
                 self.check_type_hint(&p.type_);
-                self.check_parameter_ifc(node);
                 self.check_parameter_readonly(node);
 
                 if let Some(inout_modifier) = parameter_callconv(node) {

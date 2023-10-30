@@ -26,7 +26,6 @@ type options = {
   from: string;
   gen_saved_ignore_type_errors: bool;
   ignore_hh_version: bool;
-  enable_ifc: string list;
   enable_global_access_check: bool;
   saved_state_ignore_hhconfig: bool;
   json_mode: bool;
@@ -69,9 +68,6 @@ module Messages = struct
   let daemon = " detach process"
 
   let dump_fanout = " dump fanout to stdout as JSON, then exit"
-
-  let enable_ifc =
-    " run IFC analysis on any file whose path is prefixed by the argument (format: comma separated list of path prefixes)"
 
   let enable_global_access_check =
     " run global access checker to check global writes and reads"
@@ -144,7 +140,6 @@ let parse_options () : options =
   let custom_hhi_path = ref None in
   let custom_telemetry_data = ref [] in
   let dump_fanout = ref false in
-  let enable_ifc = ref [] in
   let enable_global_access_check = ref false in
   let from = ref "" in
   let from_emacs = ref false in
@@ -177,7 +172,6 @@ let parse_options () : options =
   let set_wait fd = waiting_client := Some (Handle.wrap_handle fd) in
   let set_with_saved_state s = with_saved_state := Some s in
   let set_write_symbol_info s = write_symbol_info := Some s in
-  let set_enable_ifc s = enable_ifc := String_utils.split ',' s in
   let set_from s = from := s in
   let options =
     [
@@ -199,7 +193,6 @@ let parse_options () : options =
       );
       ("--daemon", Arg.Set should_detach, Messages.daemon);
       ("--dump-fanout", Arg.Set dump_fanout, Messages.dump_fanout);
-      ("--enable-ifc", Arg.String set_enable_ifc, Messages.enable_ifc);
       ( "--enable-global-access-check",
         Arg.Set enable_global_access_check,
         Messages.enable_global_access_check );
@@ -298,7 +291,6 @@ let parse_options () : options =
     custom_hhi_path = !custom_hhi_path;
     custom_telemetry_data = !custom_telemetry_data;
     dump_fanout = !dump_fanout;
-    enable_ifc = !enable_ifc;
     enable_global_access_check = !enable_global_access_check;
     from = !from;
     gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
@@ -331,7 +323,6 @@ let default_options ~root =
     custom_hhi_path = None;
     custom_telemetry_data = [];
     dump_fanout = false;
-    enable_ifc = [];
     enable_global_access_check = false;
     from = "";
     gen_saved_ignore_type_errors = false;
@@ -375,8 +366,6 @@ let custom_hhi_path options = options.custom_hhi_path
 let custom_telemetry_data options = options.custom_telemetry_data
 
 let dump_fanout options = options.dump_fanout
-
-let enable_ifc options = options.enable_ifc
 
 let enable_global_access_check options = options.enable_global_access_check
 
@@ -463,7 +452,6 @@ let to_string
       custom_hhi_path;
       custom_telemetry_data;
       dump_fanout;
-      enable_ifc;
       enable_global_access_check;
       from;
       gen_saved_ignore_type_errors;
@@ -549,9 +537,6 @@ let to_string
            ~f:(fun (key, value) -> Printf.sprintf "%s=%s" key value)
            config)
   in
-  let enable_ifc_str =
-    Printf.sprintf "[%s]" (String.concat ~sep:"," enable_ifc)
-  in
   let custom_telemetry_data_str =
     custom_telemetry_data
     |> List.map ~f:(fun (column, value) -> Printf.sprintf "%s=%s" column value)
@@ -574,9 +559,6 @@ let to_string
     custom_telemetry_data_str;
     "dump_fanout: ";
     string_of_bool dump_fanout;
-    ", ";
-    "enable_ifc: ";
-    enable_ifc_str;
     ", ";
     "enable_global_access_check: ";
     string_of_bool enable_global_access_check;

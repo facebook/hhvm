@@ -499,7 +499,6 @@ let load ~silent options : t * ServerLocalConfig.t =
         ~tco_log_inference_constraints:
           (ServerArgs.log_inference_constraints options)
         ~po_parser_errors_only:(Option.is_some (ServerArgs.ai_mode options))
-        ~tco_ifc_enabled:(ServerArgs.enable_ifc options)
         ~tco_global_access_check_enabled:
           (ServerArgs.enable_global_access_check options)
         ~dump_tast_hashes:local_config.dump_tast_hashes

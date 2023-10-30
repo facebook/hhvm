@@ -34,7 +34,6 @@ let standard_deviation mean samples =
 (*****************************************************************************)
 
 type mode =
-  | Ifc of string * string
   | Cst_search
   | Dump_symbol_info
   | Glean_index of string
@@ -228,11 +227,6 @@ let parse_options () =
     | Errors -> mode := x
     | _ -> raise (Arg.Bad "only a single mode should be specified")
   in
-  let ifc_mode = ref "" in
-  let set_ifc lattice =
-    set_mode (Ifc (!ifc_mode, lattice)) ();
-    batch_mode := true
-  in
   let config_overrides = ref [] in
   let error_format = ref Errors.Highlighted in
   let forbid_nullable_cast = ref false in
@@ -343,9 +337,6 @@ let parse_options () =
       ( "--extra-builtin",
         Arg.String (fun f -> extra_builtins := f :: !extra_builtins),
         " HHI file to parse and declare" );
-      ( "--ifc",
-        Arg.Tuple [Arg.String (fun m -> ifc_mode := m); Arg.String set_ifc],
-        " Run the flow analysis" );
       ( "--shape-analysis",
         Arg.String
           (fun mode ->
@@ -858,11 +849,6 @@ let parse_options () =
     | ([], _) -> die usage
     | (x, _) -> x
   in
-  let is_ifc_mode =
-    match !mode with
-    | Ifc _ -> true
-    | _ -> false
-  in
 
   (match !mode with
   | Get_some_file_deps { depth; _ } ->
@@ -973,11 +959,6 @@ let parse_options () =
       ~tco_report_pos_from_reason:!report_pos_from_reason
       ~tco_enable_sound_dynamic:!enable_sound_dynamic
       ~tco_skip_check_under_dynamic:!skip_check_under_dynamic
-      ~tco_ifc_enabled:
-        (if is_ifc_mode then
-          ["/"]
-        else
-          [])
       ~tco_global_access_check_enabled:!enable_global_access_check
       ~po_interpret_soft_types_as_like_types:!interpret_soft_types_as_like_types
       ~tco_enable_strict_string_concat_interp:
@@ -1035,14 +1016,6 @@ let parse_options () =
     if !forbid_nullable_cast then
       SSet.add
         TypecheckerOptions.experimental_forbid_nullable_cast
-        tco_experimental_features
-    else
-      tco_experimental_features
-  in
-  let tco_experimental_features =
-    if is_ifc_mode then
-      SSet.add
-        TypecheckerOptions.experimental_infer_flows
         tco_experimental_features
     else
       tco_experimental_features
@@ -1923,58 +1896,6 @@ let handle_mode
       ~iter_over_files
       ~profile_type_check_multi
       ~memtrace
-  | Ifc (mode, lattice) ->
-    (* Timing mode is same as check except we print out the time it takes to
-       analyse the file. *)
-    let (mode, should_time) =
-      if String.equal mode "time" then
-        ("check", true)
-      else
-        (mode, false)
-    in
-    let ifc_opts =
-      match Ifc_options.parse ~mode ~lattice with
-      | Ok opts -> opts
-      | Error e -> die ("could not parse IFC options: " ^ e)
-    in
-    let time f =
-      let start_time = Unix.gettimeofday () in
-      let result = Lazy.force f in
-      let elapsed_time = Unix.gettimeofday () -. start_time in
-      if should_time then Printf.printf "Duration: %f\n" elapsed_time;
-      result
-    in
-    let print_errors = List.iter ~f:(print_error ~oc:stdout error_format) in
-    let process_file filename =
-      Printf.printf
-        "=== IFC analysis results for %s\n%!"
-        (Relative_path.to_absolute filename);
-      let files_contents = Multifile.file_to_files filename in
-      let (parse_errors, file_info) = parse_name_and_decl ctx files_contents in
-      let check_errors =
-        let error_list = Errors.get_sorted_error_list parse_errors in
-        check_file ctx error_list file_info ~profile_type_check_multi ~memtrace
-      in
-      if not (List.is_empty check_errors) then
-        print_errors check_errors
-      else
-        try
-          let ifc_errors = time @@ lazy (Ifc_main.do_ ifc_opts file_info ctx) in
-          if not (List.is_empty ifc_errors) then print_errors ifc_errors
-        with
-        | exn ->
-          let e = Exception.wrap exn in
-          Stdlib.Printexc.register_printer (function
-              | Ifc_types.IFCError err ->
-                Some
-                  (Printf.sprintf "IFCError(%s)"
-                  @@ Ifc_types.show_ifc_error_ty err)
-              | _ -> None);
-          Printf.printf "Uncaught exception: %s" (Exception.to_string e)
-    in
-    iter_over_files (fun filename ->
-        Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-            process_file filename))
   | Cst_search ->
     let path = expect_single_file () in
     let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in

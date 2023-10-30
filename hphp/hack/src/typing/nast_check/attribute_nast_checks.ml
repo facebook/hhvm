@@ -139,20 +139,6 @@ let check_no_auto_dynamic env attrs =
         Nast_check_error.(to_user_error @@ Attribute_no_auto_dynamic pos)
     | _ -> ()
 
-let check_ifc_enabled tcopt attrs =
-  let inferflows_opt = find_attribute SN.UserAttributes.uaInferFlows attrs in
-  match
-    ( inferflows_opt,
-      TypecheckerOptions.experimental_feature_enabled
-        tcopt
-        TypecheckerOptions.experimental_infer_flows )
-  with
-  | (Some { ua_name = (pos, _); _ }, false) ->
-    Errors.experimental_feature pos "IFC InferFlows"
-  | _ -> ()
-
-(* TODO: error if both Governed and InferFlows are attributes on a function or method *)
-
 let handler =
   object
     inherit Nast_visitor.handler_base
@@ -198,7 +184,6 @@ let handler =
       check_deprecated_static f.f_user_attributes;
       check_autocomplete_valid_text f.f_user_attributes;
       check_no_auto_dynamic env f.f_user_attributes;
-      check_ifc_enabled (Nast_check_env.get_tcopt env) f.f_user_attributes;
       let params = f.f_params in
       List.iter
         (fun fp ->
@@ -246,7 +231,6 @@ let handler =
         m.m_user_attributes
         SN.UserAttributes.uaInferFlows
         (`Exact 0);
-      check_ifc_enabled (Nast_check_env.get_tcopt env) m.m_user_attributes;
       check_attribute_arity
         m.m_user_attributes
         SN.UserAttributes.uaDeprecated

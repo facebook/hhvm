@@ -157,7 +157,6 @@ type t = {
   tco_pessimise_builtins: bool;
   tco_enable_no_auto_dynamic: bool;
   tco_skip_check_under_dynamic: bool;
-  tco_ifc_enabled: string list;
   tco_global_access_check_enabled: bool;
   po_interpret_soft_types_as_like_types: bool;
   tco_enable_strict_string_concat_interp: bool;
@@ -288,7 +287,6 @@ let default =
     tco_pessimise_builtins = false;
     tco_enable_no_auto_dynamic = false;
     tco_skip_check_under_dynamic = false;
-    tco_ifc_enabled = [];
     tco_global_access_check_enabled = false;
     po_interpret_soft_types_as_like_types = false;
     tco_enable_strict_string_concat_interp = false;
@@ -417,7 +415,6 @@ let set
     ?tco_pessimise_builtins
     ?tco_enable_no_auto_dynamic
     ?tco_skip_check_under_dynamic
-    ?tco_ifc_enabled
     ?tco_global_access_check_enabled
     ?po_interpret_soft_types_as_like_types
     ?tco_enable_strict_string_concat_interp
@@ -683,7 +680,6 @@ let set
       setting tco_enable_no_auto_dynamic options.tco_enable_no_auto_dynamic;
     tco_skip_check_under_dynamic =
       setting tco_skip_check_under_dynamic options.tco_skip_check_under_dynamic;
-    tco_ifc_enabled = setting tco_ifc_enabled options.tco_ifc_enabled;
     tco_global_access_check_enabled =
       setting
         tco_global_access_check_enabled

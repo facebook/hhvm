@@ -12,8 +12,6 @@
    (:include dune_config/ld-opts.sexp)))
  (libraries
   camlp-streams
-  ifc
-  ifc_lib
   client_get_definition
   client_highlight_refs
   code_actions_cli_lib

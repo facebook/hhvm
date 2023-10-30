@@ -221,10 +221,6 @@ type t = {
       (** Allow use of attribute <<__NoAutoDynamic>> *)
   tco_skip_check_under_dynamic: bool;
       (** Skip second check of method under dynamic assumptions *)
-  tco_ifc_enabled: string list;
-      (** Enable ifc on the specified list of path prefixes
-         (a list containing the empty string would denote all files,
-         an empty list denotes no files) *)
   tco_global_access_check_enabled: bool;
   po_interpret_soft_types_as_like_types: bool;  (** <<__Soft>> T -> ~T *)
   tco_enable_strict_string_concat_interp: bool;
@@ -397,7 +393,6 @@ val set :
   ?tco_pessimise_builtins:bool ->
   ?tco_enable_no_auto_dynamic:bool ->
   ?tco_skip_check_under_dynamic:bool ->
-  ?tco_ifc_enabled:string list ->
   ?tco_global_access_check_enabled:bool ->
   ?po_interpret_soft_types_as_like_types:bool ->
   ?tco_enable_strict_string_concat_interp:bool ->

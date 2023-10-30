@@ -368,10 +368,6 @@ pub mod user_attributes {
         name == SOFT
     }
 
-    pub fn is_ifc(name: &str) -> bool {
-        name == POLICIED || name == INFERFLOWS || name == EXTERNAL
-    }
-
     pub fn is_cross_package(name: &str) -> bool {
         name == CROSS_PACKAGE
     }
@@ -1139,7 +1135,6 @@ pub mod xhp {
 
 pub mod unstable_features {
     pub const COEFFECTS_PROVISIONAL: &str = "coeffects_provisional";
-    pub const IFC: &str = "ifc";
     pub const READONLY: &str = "readonly";
     pub const EXPRESSION_TREES: &str = "expression_trees";
     pub const MODULES: &str = "modules";

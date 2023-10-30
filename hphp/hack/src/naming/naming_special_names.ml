@@ -677,34 +677,6 @@ module UserAttributes = struct
               doc =
                 "Allows initializing class constants with class instances (not just constant expressions). Used when desugaring `enum class`.";
             } );
-          ( uaPolicied,
-            {
-              contexts = [fn; mthd; instProperty; parameter];
-              autocomplete = false;
-              doc =
-                "Associate a definition with a policy. Used for information flow control, requires `<<file:__EnableUnstableFeatures('ifc')>>`.";
-            } );
-          ( uaInferFlows,
-            {
-              contexts = [fn; mthd];
-              autocomplete = false;
-              doc =
-                "Used for IFC, requires `<<file:__EnableUnstableFeatures('ifc')>>`.";
-            } );
-          ( uaExternal,
-            {
-              contexts = [parameter];
-              autocomplete = false;
-              doc =
-                "Used for IFC, requires `<<file:__EnableUnstableFeatures('ifc')>>`.";
-            } );
-          ( uaCanCall,
-            {
-              contexts = [parameter];
-              autocomplete = false;
-              doc =
-                "Used for IFC, requires `<<file:__EnableUnstableFeatures('ifc')>>`.";
-            } );
           ( uaSupportDynamicType,
             {
               contexts = [fn; cls; mthd; lambda; enumcls];
@@ -1256,8 +1228,6 @@ end
  * to the typechecker *)
 module UnstableFeatures = struct
   let coeffects_provisional = "coeffects_provisional"
-
-  let ifc = "ifc"
 
   let readonly = "readonly"
 

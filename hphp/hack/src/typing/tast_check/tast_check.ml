@@ -75,7 +75,6 @@ let visitor ctx =
           Some Type_const_check.handler;
           Some Static_method_generics_check.handler;
           hierarchy_check Class_inherited_member_case_check.handler;
-          Some Ifc_tast_check.handler;
           Some Readonly_check.handler;
           Some Meth_caller_check.handler;
           Some Expression_tree_check.handler;

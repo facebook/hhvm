@@ -880,12 +880,13 @@ struct RuntimeOption {
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \
   F(uint32_t, DumpRingBufferOnCrash,   0)                               \
+  F(string, PerfMapsDir,               "/tmp")                          \
   F(bool, PerfPidMap,                  true)                            \
   F(bool, PerfPidMapIncludeFilePath,   true)                            \
+  F(bool, KeepPerfPidMap,              false)                           \
   F(bool, PerfJitDump,                 false)                           \
   F(string, PerfJitDumpDir,            "/tmp")                          \
   F(bool, PerfDataMap,                 false)                           \
-  F(bool, KeepPerfPidMap,              false)                           \
   F(uint32_t, ThreadTCMainBufferSize,  6 << 20)                         \
   F(uint32_t, ThreadTCColdBufferSize,  6 << 20)                         \
   F(uint32_t, ThreadTCFrozenBufferSize,4 << 20)                         \

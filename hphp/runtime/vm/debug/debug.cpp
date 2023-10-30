@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/execution-context.h"
 
 #include "hphp/util/current-executable.h"
+#include "hphp/util/logger.h"
 #include "hphp/util/portability.h"
 
 #include <sys/types.h>
@@ -39,6 +40,7 @@
 
 #endif
 
+#include <folly/portability/Filesystem.h>
 #include <folly/portability/Unistd.h>
 #include <folly/Demangle.h>
 
@@ -46,7 +48,17 @@ using namespace HPHP::jit;
 
 namespace HPHP {
 namespace Debug {
-namespace { DebugInfo* s_info; }
+namespace {
+DebugInfo* s_info;
+
+bool checkValidDir(const char* dirName) {
+  if (!dirName || !strlen(dirName))  return false;
+
+  folly::fs::path dirPath(dirName);
+  return folly::fs::is_directory(dirPath);
+}
+
+}
 
 void* DebugInfo::pidMapOverlayStart;
 void* DebugInfo::pidMapOverlayEnd;
@@ -67,14 +79,24 @@ DebugInfo* DebugInfo::Get() {
 }
 
 DebugInfo::DebugInfo() {
-  m_perfMapName = folly::sformat("/tmp/perf-{}.map", getpid());
+  auto const perfmaps_dir = RuntimeOption::EvalPerfMapsDir.data();
+
+  if (checkValidDir(perfmaps_dir)) {
+    m_perfMapName = folly::sformat("{}/perf-{}.map", perfmaps_dir, getpid());
+    m_dataMapName = folly::sformat("{}/perf-data-{}.map", perfmaps_dir, getpid());
+  } else {
+    m_perfMapName = folly::sformat("/tmp/perf-{}.map", getpid());
+    m_dataMapName = folly::sformat("/tmp/perf-data-{}.map", getpid());
+  }
+  Logger::Info("perfmap file: %s", m_perfMapName.c_str());
+  Logger::Info("perf-data-map file: %s", m_dataMapName.c_str());
+
   if (RuntimeOption::EvalPerfPidMap) {
     m_perfMap = fopen(m_perfMapName.c_str(), "w");
   }
   if (RuntimeOption::EvalPerfJitDump) {
     initPerfJitDump();
   }
-  m_dataMapName = folly::sformat("/tmp/perf-data-{}.map", getpid());
   if (RuntimeOption::EvalPerfDataMap) {
     m_dataMap = fopen(m_dataMapName.c_str(), "w");
   }

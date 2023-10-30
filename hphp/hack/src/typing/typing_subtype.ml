@@ -4087,7 +4087,6 @@ and simplify_subtype_variance_for_non_injective
 and simplify_subtype_params
     ~(subtype_env : subtype_env)
     ~for_override
-    ?(check_params_ifc = false)
     (subl : locl_fun_param list)
     (superl : locl_fun_param list)
     (variadic_sub_ty : bool)
@@ -4158,12 +4157,6 @@ and simplify_subtype_params
     |> simplify_param_modes ~subtype_env sub super
     &&& simplify_param_readonly ~subtype_env sub super
     &&& simplify_param_accept_disposable ~subtype_env sub super
-    &&& begin
-          if check_params_ifc then
-            simplify_param_ifc ~subtype_env sub super
-          else
-            valid
-        end
     &&& begin
           fun env ->
             match (get_fp_mode sub, get_fp_mode super) with
@@ -4303,24 +4296,6 @@ and simplify_param_accept_disposable ~subtype_env param1 param2 env =
       env
   | (_, _) -> valid env
 
-and simplify_param_ifc ~subtype_env sub super env =
-  let { fp_pos = pos_sub; _ } = sub in
-  let { fp_pos = pos_super; _ } = super in
-  (* TODO: also handle <<CanCall>> *)
-  match (get_fp_ifc_external sub, get_fp_ifc_external super) with
-  | (true, false) ->
-    invalid
-      ~fail:
-        (Option.map
-           subtype_env.on_error
-           ~f:
-             Typing_error.(
-               fun on_error ->
-                 apply_reasons ~on_error
-                 @@ Secondary.Ifc_external_contravariant { pos_super; pos_sub }))
-      env
-  | _ -> valid env
-
 and simplify_param_readonly ~subtype_env sub super env =
   (* The sub param here (as with all simplify_param_* functions)
      is actually the parameter on ft_super, since params are contravariant *)
@@ -4347,14 +4322,6 @@ and simplify_param_readonly ~subtype_env sub super env =
       env
   else
     valid env
-
-and ifc_policy_matches (ifc1 : ifc_fun_decl) (ifc2 : ifc_fun_decl) =
-  match (ifc1, ifc2) with
-  | (FDPolicied (Some s1), FDPolicied (Some s2)) when String.equal s1 s2 -> true
-  | (FDPolicied None, FDPolicied None) -> true
-  (* TODO(T79510128): IFC needs to check that the constraints inferred by the parent entail those by the subtype *)
-  | (FDInferFlows, FDInferFlows) -> true
-  | _ -> false
 
 and readonly_subtype (r_sub : bool) (r_super : bool) =
   match (r_sub, r_super) with
@@ -4386,11 +4353,6 @@ and simplify_subtype_funs_attributes
     env =
   let p_sub = Reason.to_pos r_sub in
   let p_super = Reason.to_pos r_super in
-  let ifc_policy_err_str = function
-    | FDPolicied (Some s) -> s
-    | FDPolicied None -> "the existential policy"
-    | FDInferFlows -> "an inferred policy"
-  in
   let print_cross_pkg_reason (c : string option) (is_sub : bool) =
     match c with
     | Some s when is_sub ->
@@ -4403,21 +4365,6 @@ and simplify_subtype_funs_attributes
     | None -> "This function is not cross package"
   in
   (env, TL.valid)
-  |> check_with
-       (ifc_policy_matches ft_sub.ft_ifc_decl ft_super.ft_ifc_decl)
-       (Option.map
-          subtype_env.on_error
-          ~f:
-            Typing_error.(
-              fun on_error ->
-                apply_reasons ~on_error
-                @@ Secondary.Ifc_policy_mismatch
-                     {
-                       pos = p_sub;
-                       policy = ifc_policy_err_str ft_sub.ft_ifc_decl;
-                       pos_super = p_super;
-                       policy_super = ifc_policy_err_str ft_super.ft_ifc_decl;
-                     }))
   |> check_with
        (readonly_subtype
           (* Readonly this is contravariant, so check ft_super_ro <: ft_sub_ro *)
@@ -4616,18 +4563,9 @@ and simplify_subtype_funs
   |> simplify_subtype_funs_attributes ~subtype_env r_sub ft_sub r_super ft_super
   &&& (* Now do contravariant subtyping on parameters *)
   begin
-    (* If both fun policies are IFC public, there's no need to check for inheritance issues *)
-    (* There is the chance that the super function has an <<__External>> argument and the sub function does not,
-       but <<__External>> on a public policied function literally just means the argument must be governed by the public policy,
-       so should be an error in any case.
-    *)
-    let check_params_ifc =
-      non_public_ifc ft_super.ft_ifc_decl || non_public_ifc ft_sub.ft_ifc_decl
-    in
     simplify_subtype_params
       ~subtype_env
       ~for_override
-      ~check_params_ifc
       ft_super.ft_params
       ft_sub.ft_params
       (get_ft_variadic ft_super)

@@ -28,7 +28,6 @@
                   returns_readonly = false; readonly_this = false;
                   support_dynamic_type = false; is_memoized = false;
                   variadic = false };
-                ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                 ft_cross_package = None }));
           sm_visibility = Public;
           sm_deprecated =
@@ -51,7 +50,6 @@
                    returns_readonly = false; readonly_this = false;
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
-                 ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] };
@@ -72,7 +70,6 @@
                    returns_readonly = false; readonly_this = false;
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
-                 ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] };
@@ -93,7 +90,6 @@
                    returns_readonly = false; readonly_this = false;
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
-                 ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                  ft_cross_package = None }));
            sm_visibility = Public;
            sm_deprecated =
@@ -121,7 +117,6 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
               ft_cross_package = None }));
         fe_pos = [18:10-13]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -145,7 +140,6 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
               ft_cross_package = None }));
         fe_pos = [21:10-13]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -169,7 +163,6 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
               ft_cross_package = None }));
         fe_pos = [24:10-13]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -194,7 +187,6 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
               ft_cross_package = None }));
         fe_pos = [27:10-14]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;

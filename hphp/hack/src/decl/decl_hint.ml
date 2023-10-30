@@ -158,9 +158,6 @@ and hint_ p env = function
             ~mode:kind
             ~accept_disposable:false
             ~has_default:false
-              (* Currently do not support external and cancall on parameters of function parameters *)
-            ~ifc_external:false
-            ~ifc_can_call:false
             ~readonly;
       }
     in
@@ -196,8 +193,6 @@ and hint_ p env = function
             ~support_dynamic_type:false
             ~is_memoized:false
             ~variadic;
-        (* TODO: handle function parameters with <<CanCall>> *)
-        ft_ifc_decl = default_ifc_fun_decl;
         (* TODO *)
         ft_cross_package = None;
       }

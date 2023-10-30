@@ -38,9 +38,7 @@
                      et_type = (Rhint ([4:25-27]), (Tgeneric ("Ta", []))) };
                    fp_flags =
                    { Typing_defs_flags.FunParam.accept_disposable = false;
-                     inout = false; has_default = false;
-                     ifc_external = false; ifc_can_call = false;
-                     readonly = false }
+                     inout = false; has_default = false; readonly = false }
                    };
                   { fp_pos = [4:35-37]; fp_name = (Some "$c");
                     fp_type =
@@ -48,9 +46,7 @@
                       et_type = (Rhint ([4:32-34]), (Tgeneric ("Tc", []))) };
                     fp_flags =
                     { Typing_defs_flags.FunParam.accept_disposable = false;
-                      inout = false; has_default = false;
-                      ifc_external = false; ifc_can_call = false;
-                      readonly = false }
+                      inout = false; has_default = false; readonly = false }
                     }
                   ];
                 ft_implicit_params = { capability = (CapDefaults [4:19-20]) };
@@ -69,7 +65,6 @@
                   returns_readonly = false; readonly_this = false;
                   support_dynamic_type = false; is_memoized = false;
                   variadic = false };
-                ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                 ft_cross_package = None }));
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
           sm_attributes = [] };
@@ -91,9 +86,7 @@
                       et_type = (Rhint ([8:25-27]), (Tgeneric ("Tb", []))) };
                     fp_flags =
                     { Typing_defs_flags.FunParam.accept_disposable = false;
-                      inout = false; has_default = false;
-                      ifc_external = false; ifc_can_call = false;
-                      readonly = false }
+                      inout = false; has_default = false; readonly = false }
                     };
                    { fp_pos = [8:35-37]; fp_name = (Some "$d");
                      fp_type =
@@ -101,9 +94,7 @@
                        et_type = (Rhint ([8:32-34]), (Tgeneric ("Td", []))) };
                      fp_flags =
                      { Typing_defs_flags.FunParam.accept_disposable = false;
-                       inout = false; has_default = false;
-                       ifc_external = false; ifc_can_call = false;
-                       readonly = false }
+                       inout = false; has_default = false; readonly = false }
                      }
                    ];
                  ft_implicit_params =
@@ -123,7 +114,6 @@
                    returns_readonly = false; readonly_this = false;
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
-                 ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] }

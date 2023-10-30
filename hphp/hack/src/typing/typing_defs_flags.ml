@@ -163,8 +163,6 @@ module FunParam = struct
     accept_disposable: bool;
     inout: bool;
     has_default: bool;
-    ifc_external: bool;
-    ifc_can_call: bool;
     readonly: bool;
   }
   [@@deriving show]
@@ -175,10 +173,6 @@ module FunParam = struct
 
   let has_default_mask = 1 lsl 2
 
-  let ifc_external_mask = 1 lsl 3
-
-  let ifc_can_call_mask = 1 lsl 4
-
   let readonly_mask = 1 lsl 8
 
   let accept_disposable = is_set accept_disposable_mask
@@ -186,10 +180,6 @@ module FunParam = struct
   let inout = is_set inout_mask
 
   let has_default = is_set has_default_mask
-
-  let ifc_external = is_set ifc_external_mask
-
-  let ifc_can_call = is_set ifc_can_call_mask
 
   let readonly = is_set readonly_mask
 
@@ -199,25 +189,13 @@ module FunParam = struct
 
   let set_has_default = set_bit has_default_mask
 
-  let set_ifc_external = set_bit ifc_external_mask
-
-  let set_ifc_can_call = set_bit ifc_can_call_mask
-
   let set_readonly = set_bit readonly_mask
 
-  let make
-      ~inout
-      ~accept_disposable
-      ~has_default
-      ~ifc_external
-      ~ifc_can_call
-      ~readonly =
+  let make ~inout ~accept_disposable ~has_default ~readonly =
     0x0
     |> set_inout inout
     |> set_accept_disposable accept_disposable
     |> set_has_default has_default
-    |> set_ifc_external ifc_external
-    |> set_ifc_can_call ifc_can_call
     |> set_readonly readonly
 
   let as_record t =
@@ -225,8 +203,6 @@ module FunParam = struct
       accept_disposable = accept_disposable t;
       inout = inout t;
       has_default = has_default t;
-      ifc_external = ifc_external t;
-      ifc_can_call = ifc_can_call t;
       readonly = readonly t;
     }
 

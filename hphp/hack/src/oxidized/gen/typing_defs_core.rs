@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<048de537b12da1e4fe96b0d67a4d4cf1>>
+// @generated SignedSource<<b0bdd19a9cda4551e7656fc0f8890a4b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -45,28 +45,6 @@ pub enum CeVisibility {
     Vprivate(String),
     Vprotected(String),
     Vinternal(String),
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(attr = "deriving (eq, hash, ord, (show { with_path = false }))")]
-#[repr(C, u8)]
-pub enum IfcFunDecl {
-    FDPolicied(Option<String>),
-    FDInferFlows,
 }
 
 #[rust_to_ocaml(attr = "deriving (eq, hash, ord, (show { with_path = false }))")]
@@ -554,7 +532,6 @@ pub struct FunType {
     /// Carries through the sync/async information from the aast
     pub ret: PossiblyEnforcedTy,
     pub flags: typing_defs_flags::fun::Fun,
-    pub ifc_decl: IfcFunDecl,
     pub cross_package: CrossPackageDecl,
 }
 

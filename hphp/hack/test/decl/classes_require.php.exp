@@ -28,7 +28,6 @@
                   returns_readonly = false; readonly_this = false;
                   support_dynamic_type = false; is_memoized = false;
                   variadic = false };
-                ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                 ft_cross_package = None }));
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
           sm_attributes = [] };
@@ -49,7 +48,6 @@
                    returns_readonly = false; readonly_this = false;
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
-                 ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] }
@@ -86,7 +84,6 @@
                    returns_readonly = false; readonly_this = false;
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
-                 ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = abstract;
            sm_attributes = [] }
@@ -127,7 +124,6 @@
                    returns_readonly = false; readonly_this = false;
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
-                 ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] }
@@ -164,7 +160,6 @@
                    returns_readonly = false; readonly_this = false;
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
-                 ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = abstract;
            sm_attributes = [] }
@@ -205,7 +200,6 @@
                    returns_readonly = false; readonly_this = false;
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
-                 ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] }
@@ -250,7 +244,6 @@
                    returns_readonly = false; readonly_this = false;
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
-                 ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] };
@@ -271,7 +264,6 @@
                     returns_readonly = false; readonly_this = false;
                     support_dynamic_type = false; is_memoized = false;
                     variadic = false };
-                  ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                   ft_cross_package = None }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
             sm_attributes = [] }

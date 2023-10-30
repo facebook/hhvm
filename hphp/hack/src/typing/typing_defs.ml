@@ -665,11 +665,6 @@ let is_suggest_mode = ref false
 
 let is_type_no_return : locl_ty_ -> bool = equal_locl_ty_ (Tprim Aast.Tnoreturn)
 
-let non_public_ifc ifc =
-  match ifc with
-  | FDPolicied (Some "PUBLIC") -> false
-  | _ -> true
-
 let get_ce_abstract ce = ClassElt.is_abstract ce.ce_flags
 
 let get_ce_final ce = ClassElt.is_final ce.ce_flags

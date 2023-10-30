@@ -18,7 +18,6 @@
                returns_readonly = false; readonly_this = false;
                support_dynamic_type = false; is_memoized = false;
                variadic = false };
-             ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
              ft_cross_package = None }));
        fe_pos = [4:10-16]; fe_php_std_lib = false;
        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -43,7 +42,6 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
               ft_cross_package = None }));
         fe_pos = [7:10-16]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;

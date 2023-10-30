@@ -26,18 +26,6 @@ impl<'a> ToOxidized<'a> for CeVisibility {
     }
 }
 
-impl<'a> ToOxidized<'a> for IfcFunDecl {
-    type Output = obr::typing_defs::IfcFunDecl<'a>;
-
-    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
-        use obr::typing_defs::IfcFunDecl as Obr;
-        match self {
-            IfcFunDecl::FDPolicied(x) => Obr::FDPolicied(x.to_oxidized(arena)),
-            IfcFunDecl::FDInferFlows => Obr::FDInferFlows,
-        }
-    }
-}
-
 impl<'a> ToOxidized<'a> for UserAttributeParam {
     type Output = obr::typing_defs::UserAttributeParam<'a>;
 
@@ -276,7 +264,6 @@ impl<'a, R: Reason> ToOxidized<'a> for FunType<R, Ty<R>> {
             implicit_params: self.implicit_params.to_oxidized(arena),
             ret: self.ret.to_oxidized(arena),
             flags: self.flags,
-            ifc_decl: self.ifc_decl.to_oxidized(arena),
             cross_package: self.cross_package.to_oxidized(arena),
         })
     }

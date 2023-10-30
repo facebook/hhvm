@@ -4469,7 +4469,6 @@ and expr_
             ft_implicit_params = fty.ft_implicit_params;
             ft_ret = fty.ft_ret;
             ft_flags = fty.ft_flags;
-            ft_ifc_decl = fty.ft_ifc_decl;
             ft_cross_package = fty.ft_cross_package;
           }
         in
@@ -9027,7 +9026,6 @@ and call_construct
             ~is_memoized:false
             ~variadic:false;
         ft_ret = MakeType.unenforced (MakeType.void r);
-        ft_ifc_decl = default_ifc_fun_decl;
         ft_cross_package = None;
       }
     in
@@ -9904,8 +9902,6 @@ and call
                 ~mode:FPnormal (* TODO: deal with `inout` parameters *)
                 ~accept_disposable:false (* TODO: deal with disposables *)
                 ~has_default:false
-                ~ifc_external:false
-                ~ifc_can_call:false
                 ~readonly:false
             in
             {
@@ -9952,7 +9948,6 @@ and call
               ~is_memoized:false
               ~variadic:(not (List.is_empty ft_arity))
           in
-          let ft_ifc_decl = Typing_defs_core.default_ifc_fun_decl in
           let fun_locl_type =
             {
               ft_tparams;
@@ -9961,7 +9956,6 @@ and call
               ft_implicit_params;
               ft_ret;
               ft_flags;
-              ft_ifc_decl;
               ft_cross_package;
             }
           in

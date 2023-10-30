@@ -185,7 +185,6 @@ impl<'a, R: Reason> Substitution<'a, R> {
                     where_constraints,
                     flags: ft.flags,
                     implicit_params: ft.implicit_params.clone(),
-                    ifc_decl: ft.ifc_decl.clone(),
                     cross_package: ft.cross_package.clone(),
                 }))
             }

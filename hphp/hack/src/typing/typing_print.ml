@@ -1873,8 +1873,6 @@ module Json = struct
                         ~mode:callconv
                         ~accept_disposable:false
                         ~has_default:false
-                        ~ifc_external:false
-                        ~ifc_can_call:false
                         ~readonly:false;
                     (* Dummy values: these aren't currently serialized. *)
                     fp_pos = Pos_or_decl.none;
@@ -1895,7 +1893,6 @@ module Json = struct
                  ft_tparams = [];
                  ft_where_constraints = [];
                  ft_flags = Typing_defs_flags.Fun.default;
-                 ft_ifc_decl = default_ifc_fun_decl;
                  ft_cross_package = None;
                })
         | _ ->

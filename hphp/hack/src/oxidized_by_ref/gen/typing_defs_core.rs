@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<dc79ae68ffc68250a3994a022fff961c>>
+// @generated SignedSource<<2eb5c1ba110d05c6f66f3089a11e5788>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -51,32 +51,6 @@ pub enum CeVisibility<'a> {
 }
 impl<'a> TrivialDrop for CeVisibility<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(CeVisibility<'arena>);
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(attr = "deriving (eq, hash, ord, (show { with_path = false }))")]
-#[repr(C, u8)]
-pub enum IfcFunDecl<'a> {
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    FDPolicied(Option<&'a str>),
-    FDInferFlows,
-}
-impl<'a> TrivialDrop for IfcFunDecl<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(IfcFunDecl<'arena>);
 
 #[rust_to_ocaml(attr = "deriving (eq, hash, ord, (show { with_path = false }))")]
 pub type CrossPackageDecl<'a> = Option<&'a str>;
@@ -495,8 +469,6 @@ pub struct FunType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub ret: &'a PossiblyEnforcedTy<'a>,
     pub flags: typing_defs_flags::fun::Fun,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub ifc_decl: IfcFunDecl<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub cross_package: CrossPackageDecl<'a>,
 }

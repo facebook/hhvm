@@ -34,8 +34,6 @@ bitflags! {
         const ACCEPT_DISPOSABLE      = 1 << 0;
         const INOUT                  = 1 << 1;
         const HAS_DEFAULT            = 1 << 2;
-        const IFC_EXTERNAL           = 1 << 3;
-        const IFC_CAN_CALL           = 1 << 4;
         const READONLY       = 1 << 8;
     }
 }

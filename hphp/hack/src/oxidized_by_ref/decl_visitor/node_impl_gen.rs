@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c876bad7623c92231281de177a4b7f97>>
+// @generated SignedSource<<fdb13d9865a820f15c7fa56ac31ac05b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -324,17 +324,6 @@ impl<'a> Node<'a> for Decl<'a> {
         }
     }
 }
-impl<'a> Node<'a> for IfcFunDecl<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_ifc_fun_decl(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            IfcFunDecl::FDPolicied(ref __binding_0) => __binding_0.accept(v),
-            IfcFunDecl::FDInferFlows => {}
-        }
-    }
-}
 impl<'a> Node<'a> for TypeOrigin<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_type_origin(self)
@@ -561,8 +550,7 @@ impl<'a> Node<'a> for FunType<'a> {
                 implicit_params: ref __binding_3,
                 ret: ref __binding_4,
                 flags: ref __binding_5,
-                ifc_decl: ref __binding_6,
-                cross_package: ref __binding_7,
+                cross_package: ref __binding_6,
             } => {
                 {
                     __binding_0.accept(v)
@@ -582,10 +570,7 @@ impl<'a> Node<'a> for FunType<'a> {
                 {
                     __binding_5.accept(v)
                 }
-                {
-                    __binding_6.accept(v)
-                }
-                { __binding_7.accept(v) }
+                { __binding_6.accept(v) }
             }
         }
     }

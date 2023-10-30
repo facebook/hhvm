@@ -982,7 +982,6 @@ and obj_get_concrete_class_without_member_info
         ft_ret =
           { et_type = MakeType.void Reason.Rnone; et_enforced = Unenforced };
         ft_flags = Typing_defs_flags.Fun.default;
-        ft_ifc_decl = default_ifc_fun_decl;
         ft_cross_package = None;
       }
     in

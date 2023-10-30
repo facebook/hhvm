@@ -37,7 +37,6 @@
                 returns_readonly = true; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
               ft_cross_package = None }));
         fe_pos = [5:16-32]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -67,7 +66,6 @@
                 returns_readonly = false; readonly_this = false;
                 support_dynamic_type = false; is_memoized = false;
                 variadic = false };
-              ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
               ft_cross_package = None }));
         fe_pos = [9:16-30]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
@@ -112,7 +110,6 @@
                          fp_flags =
                          { Typing_defs_flags.FunParam.accept_disposable =
                            false; inout = false; has_default = false;
-                           ifc_external = false; ifc_can_call = false;
                            readonly = true }
                          }
                         ];
@@ -130,7 +127,6 @@
                         returns_readonly = false; readonly_this = false;
                         support_dynamic_type = false; is_memoized = false;
                         variadic = false };
-                      ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                       ft_cross_package = None }));
                 sm_visibility = Public; sm_deprecated = None;
                 sm_flags = (empty); sm_attributes = [] });
@@ -163,14 +159,11 @@
                               returns_readonly = false; readonly_this = true;
                               support_dynamic_type = false;
                               is_memoized = false; variadic = false };
-                            ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                             ft_cross_package = None }))
                       };
                     fp_flags =
                     { Typing_defs_flags.FunParam.accept_disposable = false;
-                      inout = false; has_default = false;
-                      ifc_external = false; ifc_can_call = false;
-                      readonly = false }
+                      inout = false; has_default = false; readonly = false }
                     }
                    ];
                  ft_implicit_params =
@@ -185,7 +178,6 @@
                    returns_readonly = false; readonly_this = true;
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
-                 ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] }

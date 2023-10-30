@@ -45,7 +45,6 @@
                        is_function_pointer = false; returns_readonly = false;
                        readonly_this = false; support_dynamic_type = false;
                        is_memoized = false; variadic = false };
-                     ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                      ft_cross_package = None }));
                sm_visibility = Public; sm_deprecated = None;
                sm_flags = (empty); sm_attributes = [] });
@@ -68,7 +67,6 @@
                   returns_readonly = false; readonly_this = false;
                   support_dynamic_type = false; is_memoized = false;
                   variadic = false };
-                ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                 ft_cross_package = None }));
           sm_visibility = Private; sm_deprecated = None; sm_flags = (empty);
           sm_attributes = [] };
@@ -89,7 +87,6 @@
                    returns_readonly = false; readonly_this = false;
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
-                 ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] };
@@ -110,7 +107,6 @@
                    returns_readonly = false; readonly_this = false;
                    support_dynamic_type = false; is_memoized = false;
                    variadic = false };
-                 ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                  ft_cross_package = None }));
            sm_visibility = Protected; sm_deprecated = None;
            sm_flags = (empty); sm_attributes = [] };
@@ -126,9 +122,7 @@
                       et_type = (Rhint ([15:5-11]), (Tprim Tstring)) };
                     fp_flags =
                     { Typing_defs_flags.FunParam.accept_disposable = false;
-                      inout = false; has_default = false;
-                      ifc_external = false; ifc_can_call = false;
-                      readonly = false }
+                      inout = false; has_default = false; readonly = false }
                     };
                    { fp_pos = [16:9-14]; fp_name = (Some "$arg2");
                      fp_type =
@@ -136,9 +130,7 @@
                        et_type = (Rhint ([16:5-8]), (Tprim Tint)) };
                      fp_flags =
                      { Typing_defs_flags.FunParam.accept_disposable = false;
-                       inout = false; has_default = false;
-                       ifc_external = false; ifc_can_call = false;
-                       readonly = false }
+                       inout = false; has_default = false; readonly = false }
                      }
                    ];
                  ft_implicit_params =
@@ -160,7 +152,6 @@
                    is_function_pointer = false; returns_readonly = false;
                    readonly_this = false; support_dynamic_type = false;
                    is_memoized = false; variadic = false };
-                 ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] }
@@ -253,7 +244,6 @@
                          fp_flags =
                          { Typing_defs_flags.FunParam.accept_disposable =
                            false; inout = false; has_default = false;
-                           ifc_external = false; ifc_can_call = false;
                            readonly = false }
                          };
                         { fp_pos = [30:22-32]; fp_name = (Some "$protected");
@@ -263,7 +253,6 @@
                           fp_flags =
                           { Typing_defs_flags.FunParam.accept_disposable =
                             false; inout = false; has_default = false;
-                            ifc_external = false; ifc_can_call = false;
                             readonly = false }
                           };
                         { fp_pos = [31:19-26]; fp_name = (Some "$public");
@@ -273,7 +262,6 @@
                           fp_flags =
                           { Typing_defs_flags.FunParam.accept_disposable =
                             false; inout = false; has_default = false;
-                            ifc_external = false; ifc_can_call = false;
                             readonly = false }
                           };
                         { fp_pos = [32:19-30];
@@ -284,7 +272,6 @@
                           fp_flags =
                           { Typing_defs_flags.FunParam.accept_disposable =
                             false; inout = false; has_default = true;
-                            ifc_external = false; ifc_can_call = false;
                             readonly = false }
                           }
                         ];
@@ -302,7 +289,6 @@
                         returns_readonly = false; readonly_this = false;
                         support_dynamic_type = false; is_memoized = false;
                         variadic = false };
-                      ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                       ft_cross_package = None }));
                 sm_visibility = Public; sm_deprecated = None;
                 sm_flags = (empty); sm_attributes = [] });

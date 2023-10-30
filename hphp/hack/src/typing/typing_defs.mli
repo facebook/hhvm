@@ -368,8 +368,6 @@ val is_suggest_mode : bool Hh_prelude.ref
 
 val is_type_no_return : locl_ty_ -> bool
 
-val non_public_ifc : ifc_fun_decl -> bool
-
 val get_ce_abstract : class_elt -> bool
 
 val get_ce_final : class_elt -> bool

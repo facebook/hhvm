@@ -6,9 +6,6 @@
  *
  *)
 
-val find_policied_attribute :
-  Nast.user_attribute list -> Typing_defs.ifc_fun_decl
-
 val has_return_disposable_attribute : Nast.user_attribute list -> bool
 
 val has_memoize_attribute : Nast.user_attribute list -> bool

@@ -82,10 +82,6 @@ module FunParam : sig
 
   val has_default : t -> bool
 
-  val ifc_external : t -> bool
-
-  val ifc_can_call : t -> bool
-
   val readonly : t -> bool
 
   val set_accept_disposable : bool -> t -> t
@@ -94,18 +90,12 @@ module FunParam : sig
 
   val set_has_default : bool -> t -> t
 
-  val set_ifc_external : bool -> t -> t
-
-  val set_ifc_can_call : bool -> t -> t
-
   val set_readonly : bool -> t -> t
 
   val make :
     inout:bool ->
     accept_disposable:bool ->
     has_default:bool ->
-    ifc_external:bool ->
-    ifc_can_call:bool ->
     readonly:bool ->
     t
 end

@@ -63,7 +63,6 @@ use oxidized_by_ref::typing_defs::FunImplicitParams;
 use oxidized_by_ref::typing_defs::FunParam;
 use oxidized_by_ref::typing_defs::FunParams;
 use oxidized_by_ref::typing_defs::FunType;
-use oxidized_by_ref::typing_defs::IfcFunDecl;
 use oxidized_by_ref::typing_defs::ParamMode;
 use oxidized_by_ref::typing_defs::PosByteString;
 use oxidized_by_ref::typing_defs::PosId;
@@ -530,10 +529,6 @@ const TANY_: Ty_<'_> = Ty_::Tany(oxidized_by_ref::tany_sentinel::TanySentinel);
 const TANY: &Ty<'_> = &Ty(Reason::none(), TANY_);
 
 const NO_POS: &Pos<'_> = Pos::none();
-
-fn default_ifc_fun_decl<'a>() -> IfcFunDecl<'a> {
-    IfcFunDecl::FDPolicied(Some("PUBLIC"))
-}
 
 #[derive(Debug)]
 struct Modifiers {
@@ -1155,9 +1150,6 @@ struct Attributes<'a> {
     dynamically_callable: bool,
     returns_disposable: bool,
     php_std_lib: bool,
-    ifc_attribute: IfcFunDecl<'a>,
-    external: bool,
-    can_call: bool,
     soft: bool,
     support_dynamic_type: bool,
     no_auto_likes: bool,
@@ -1598,9 +1590,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             dynamically_callable: false,
             returns_disposable: false,
             php_std_lib: false,
-            ifc_attribute: default_ifc_fun_decl(),
-            external: false,
-            can_call: false,
             soft: false,
             support_dynamic_type: false,
             no_auto_likes: false,
@@ -1612,8 +1601,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             Node::List(&nodes) | Node::BracketedList(&(_, nodes, _)) => nodes,
             _ => return attributes,
         };
-
-        let mut ifc_already_policied = false;
 
         // Iterate in reverse, to match the behavior of OCaml decl in error conditions.
         for attribute in nodes.iter().rev() {
@@ -1657,30 +1644,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                     }
                     "__PHPStdLib" => {
                         attributes.php_std_lib = true;
-                    }
-                    "__Policied" => {
-                        attributes.ifc_attribute = IfcFunDecl::FDPolicied(
-                            attribute.params.first().and_then(|a| match a {
-                                AttributeParam::Classname(cn) => Some(cn.1),
-                                AttributeParam::String(_, s) => {
-                                    Some(self.str_from_utf8_for_bytes_in_arena(s))
-                                }
-                                _ => None,
-                            }),
-                        );
-                        ifc_already_policied = true;
-                    }
-
-                    "__InferFlows" => {
-                        if !ifc_already_policied {
-                            attributes.ifc_attribute = IfcFunDecl::FDInferFlows;
-                        }
-                    }
-                    "__External" => {
-                        attributes.external = true;
-                    }
-                    "__CanCall" => {
-                        attributes.can_call = true;
                     }
                     "__Soft" => {
                         attributes.soft = true;
@@ -1878,8 +1841,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             flags |= FunTypeFlags::VARIADIC
         }
 
-        let ifc_decl = attributes.ifc_attribute;
-
         let cross_package = attributes.cross_package;
 
         // Pop the type params stack only after creating all inner types.
@@ -1904,7 +1865,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                 type_,
             }),
             flags,
-            ifc_decl,
             cross_package,
         });
 
@@ -1978,12 +1938,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                             let mut flags = FunParamFlags::empty();
                             if attributes.accept_disposable {
                                 flags |= FunParamFlags::ACCEPT_DISPOSABLE
-                            }
-                            if attributes.external {
-                                flags |= FunParamFlags::IFC_EXTERNAL
-                            }
-                            if attributes.can_call {
-                                flags |= FunParamFlags::IFC_CAN_CALL
                             }
                             if readonly {
                                 flags |= FunParamFlags::READONLY
@@ -5721,7 +5675,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 type_: pess_return_type,
             }),
             flags,
-            ifc_decl: default_ifc_fun_decl(),
             cross_package: None,
         }));
 

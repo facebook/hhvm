@@ -12,32 +12,8 @@ open Aast
 open Typing_defs
 module SN = Naming_special_names
 
-let get_classname_or_literal_attribute_param = function
-  | [(_, _, Aast.String s)] -> Some s
-  | [(_, _, Class_const ((_, _, CI (_, s)), (_, name)))]
-    when String.equal name SN.Members.mClass ->
-    Some s
-  | _ -> None
-
-let find_policied_attribute user_attributes : ifc_fun_decl =
-  match Naming_attributes.find SN.UserAttributes.uaPolicied user_attributes with
-  | Some { ua_params; _ } ->
-    (match get_classname_or_literal_attribute_param ua_params with
-    | Some s -> FDPolicied (Some s)
-    | None -> FDPolicied None)
-  | None
-    when Naming_attributes.mem SN.UserAttributes.uaInferFlows user_attributes ->
-    FDInferFlows
-  | None -> default_ifc_fun_decl
-
 let has_accept_disposable_attribute user_attributes =
   Naming_attributes.mem SN.UserAttributes.uaAcceptDisposable user_attributes
-
-let has_external_attribute user_attributes =
-  Naming_attributes.mem SN.UserAttributes.uaExternal user_attributes
-
-let has_can_call_attribute user_attributes =
-  Naming_attributes.mem SN.UserAttributes.uaCanCall user_attributes
 
 let has_return_disposable_attribute user_attributes =
   Naming_attributes.mem SN.UserAttributes.uaReturnDisposable user_attributes
@@ -86,8 +62,6 @@ let make_param_ty env param =
         ~accept_disposable:
           (has_accept_disposable_attribute param.param_user_attributes)
         ~has_default:(Option.is_some param.param_expr)
-        ~ifc_external:(has_external_attribute param.param_user_attributes)
-        ~ifc_can_call:(has_can_call_attribute param.param_user_attributes)
         ~readonly:(Option.is_some param.param_readonly);
   }
 

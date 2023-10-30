@@ -36,8 +36,6 @@ let pp_decl_ty = Typing_defs.pp_decl_ty
 
 let show_decl_ty = Typing_defs.show_decl_ty
 
-let pp_ifc_fun_decl fmt d = Typing_defs.pp_ifc_fun_decl fmt d
-
 (* Contains information about a specific function that we
     a) want to make available to TAST checks
     b) isn't otherwise (space-efficiently) present in the saved typing env *)

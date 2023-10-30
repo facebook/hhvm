@@ -21,14 +21,6 @@ type ce_visibility =
 
 type cross_package_decl = string option [@@deriving eq, ord]
 
-(* Represents <<Policied()>> or <<InferFlows>> attribute *)
-type ifc_fun_decl =
-  | FDPolicied of string option
-  | FDInferFlows
-[@@deriving eq, ord, show]
-
-val default_ifc_fun_decl : ifc_fun_decl
-
 (* All the possible types, reason is a trace of why a type
    was inferred in a certain way.
 
@@ -231,7 +223,6 @@ type 'ty fun_type = {
   ft_implicit_params: 'ty fun_implicit_params;
   ft_ret: 'ty possibly_enforced_ty;
   ft_flags: Typing_defs_flags.Fun.t;
-  ft_ifc_decl: ifc_fun_decl;
   ft_cross_package: cross_package_decl;
 }
 [@@deriving hash, show]
@@ -461,18 +452,12 @@ module Flags : sig
 
   val get_ft_variadic : 'a fun_type -> bool
 
-  val get_fp_ifc_can_call : 'a fun_param -> bool
-
-  val get_fp_ifc_external : 'a fun_param -> bool
-
   val get_fp_readonly : 'a fun_param -> bool
 
   val make_fp_flags :
     mode:param_mode ->
     accept_disposable:bool ->
     has_default:bool ->
-    ifc_external:bool ->
-    ifc_can_call:bool ->
     readonly:bool ->
     Typing_defs_flags.FunParam.t
 

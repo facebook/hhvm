@@ -488,7 +488,6 @@ impl<'a, R: Reason> ToOxidized<'a> for FunType<R> {
                 type_: &*arena.alloc(ret.to_oxidized(arena)),
             }),
             flags: flags.clone(),
-            ifc_decl: oxidized_by_ref::typing_defs_core::IfcFunDecl::FDInferFlows,
             cross_package: None,
         }
     }

@@ -39,9 +39,7 @@ File root|module_hint.php--here.php
                      et_type = (Rhint ([7:23-28]), Tmixed) };
                    fp_flags =
                    { Typing_defs_flags.FunParam.accept_disposable = false;
-                     inout = false; has_default = false;
-                     ifc_external = false; ifc_can_call = false;
-                     readonly = false }
+                     inout = false; has_default = false; readonly = false }
                    }
                   ];
                 ft_implicit_params = { capability = (CapDefaults [7:19-22]) };
@@ -55,7 +53,6 @@ File root|module_hint.php--here.php
                   returns_readonly = false; readonly_this = false;
                   support_dynamic_type = false; is_memoized = false;
                   variadic = false };
-                ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
                 ft_cross_package = None }));
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
           sm_attributes = [] }
@@ -153,8 +150,7 @@ File root|module_hint.php--everywhere.php
                   };
                 fp_flags =
                 { Typing_defs_flags.FunParam.accept_disposable = false;
-                  inout = false; has_default = false; ifc_external = false;
-                  ifc_can_call = false; readonly = false }
+                  inout = false; has_default = false; readonly = false }
                 }
                ];
              ft_implicit_params = { capability = (CapDefaults [3:10-16]) };
@@ -171,7 +167,6 @@ File root|module_hint.php--everywhere.php
                returns_readonly = false; readonly_this = false;
                support_dynamic_type = false; is_memoized = false;
                variadic = false };
-             ft_ifc_decl = (FDPolicied (Some "PUBLIC"));
              ft_cross_package = None }));
        fe_pos = [3:10-16]; fe_php_std_lib = false;
        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;

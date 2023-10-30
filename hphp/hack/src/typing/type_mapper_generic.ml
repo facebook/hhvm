@@ -242,7 +242,6 @@ class ['env] deep_type_mapper =
         ft_implicit_params;
         ft_ret;
         ft_flags;
-        ft_ifc_decl;
         ft_cross_package;
       } =
         ft
@@ -264,7 +263,6 @@ class ['env] deep_type_mapper =
           ft_implicit_params;
           ft_ret;
           ft_flags;
-          ft_ifc_decl;
           ft_cross_package;
         }
       in

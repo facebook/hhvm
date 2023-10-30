@@ -20,17 +20,8 @@ type ce_visibility =
   | Vinternal of string
 [@@deriving eq, ord, show]
 
-(* Represents <<__Policied()>> or <<__InferFlows>> attribute *)
-type ifc_fun_decl =
-  | FDPolicied of string option
-  | FDInferFlows
-[@@deriving eq, hash, ord, show { with_path = false }]
-
 type cross_package_decl = string option
 [@@deriving eq, hash, ord, show { with_path = false }]
-
-(* The default policy is the public one. PUBLIC is a keyword, so no need to prevent class collisions *)
-let default_ifc_fun_decl = FDPolicied (Some "PUBLIC")
 
 (* All the possible types, reason is a trace of why a type
    was inferred in a certain way.
@@ -246,7 +237,6 @@ type 'ty fun_type = {
   ft_ret: 'ty possibly_enforced_ty;
       (** Carries through the sync/async information from the aast *)
   ft_flags: Typing_defs_flags.Fun.t;
-  ft_ifc_decl: ifc_fun_decl;
   ft_cross_package: cross_package_decl;
 }
 [@@deriving eq, hash, show { with_path = false }]
@@ -512,31 +502,15 @@ module Flags = struct
 
   let get_ft_fun_kind ft = Fun.fun_kind ft.ft_flags
 
-  let get_fp_ifc_external fp = FunParam.ifc_external fp.fp_flags
-
-  let get_fp_ifc_can_call fp = FunParam.ifc_can_call fp.fp_flags
-
   let get_fp_readonly fp = FunParam.readonly fp.fp_flags
 
-  let make_fp_flags
-      ~mode
-      ~accept_disposable
-      ~has_default
-      ~ifc_external
-      ~ifc_can_call
-      ~readonly =
+  let make_fp_flags ~mode ~accept_disposable ~has_default ~readonly =
     let inout =
       match mode with
       | FPinout -> true
       | FPnormal -> false
     in
-    FunParam.make
-      ~inout
-      ~accept_disposable
-      ~has_default
-      ~ifc_external
-      ~ifc_can_call
-      ~readonly
+    FunParam.make ~inout ~accept_disposable ~has_default ~readonly
 
   let get_fp_accept_disposable fp = FunParam.accept_disposable fp.fp_flags
 
@@ -1063,7 +1037,6 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
       ft_params = params1;
       ft_flags = flags1;
       ft_implicit_params = implicit_params1;
-      ft_ifc_decl = ifc_decl1;
       ft_tparams = tparams1;
       ft_where_constraints = where_constraints1;
       ft_cross_package = cross_package1;
@@ -1075,7 +1048,6 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
       ft_params = params2;
       ft_flags = flags2;
       ft_implicit_params = implicit_params2;
-      ft_ifc_decl = ifc_decl2;
       ft_tparams = tparams2;
       ft_where_constraints = where_constraints2;
       ft_cross_package = cross_package2;
@@ -1098,12 +1070,7 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
               let { capability = capability2 } = implicit_params2 in
               begin
                 match capability_compare capability1 capability2 with
-                | 0 -> begin
-                  match compare_ifc_fun_decl ifc_decl1 ifc_decl2 with
-                  | 0 ->
-                    compare_cross_package_decl cross_package1 cross_package2
-                  | n -> n
-                end
+                | 0 -> compare_cross_package_decl cross_package1 cross_package2
                 | n -> n
               end
             | n -> n

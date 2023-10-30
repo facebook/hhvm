@@ -51,16 +51,6 @@ impl From<obr::typing_defs::CeVisibility<'_>> for ty::CeVisibility {
     }
 }
 
-impl From<obr::typing_defs::IfcFunDecl<'_>> for ty::IfcFunDecl {
-    fn from(x: obr::typing_defs::IfcFunDecl<'_>) -> Self {
-        use obr::typing_defs_core::IfcFunDecl as Obr;
-        match x {
-            Obr::FDPolicied(s) => Self::FDPolicied(s.map(Into::into)),
-            Obr::FDInferFlows => Self::FDInferFlows,
-        }
-    }
-}
-
 fn tshape_field_name_from_decl<P: Pos>(
     x: obr::typing_defs::TshapeFieldName<'_>,
 ) -> (ty::ShapeFieldNamePos<P>, ty::TshapeFieldName) {
@@ -266,7 +256,6 @@ impl<R: Reason> From<&obr::typing_defs::FunType<'_>> for ty::FunType<R, Ty<R>> {
             implicit_params: ft.implicit_params.into(),
             ret: ft.ret.into(),
             flags: ft.flags,
-            ifc_decl: ft.ifc_decl.into(),
             cross_package: ft.cross_package.as_ref().map(|s| (*s).into()),
         }
     }

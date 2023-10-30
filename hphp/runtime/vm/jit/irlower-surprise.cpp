@@ -82,9 +82,6 @@ static void handleSurpriseCheck() {
   if (flags & TimedOutFlag) {
     RID().invokeUserTimeoutCallback();
   }
-  if (flags & DebuggerSignalFlag) {
-    markFunctionWithDebuggerIntr(vmfp()->func());
-  }
 }
 
 void cgHandleRequestSurprise(IRLS& env, const IRInstruction* inst) {

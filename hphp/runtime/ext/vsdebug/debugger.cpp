@@ -1000,6 +1000,8 @@ DebuggerRequestInfo* Debugger::attachToRequest(RequestInfo* ti) {
   // Try to attach our debugger hook to the request.
   if (!isDebuggerAttached(ti)) {
     if (DebuggerHook::attach<VSDebugHook>(ti)) {
+      ti->m_reqInjectionData.setFlag(DebuggerSignalFlag);
+
       // Install all breakpoints as pending for this request.
       const std::unordered_set<int> breakpoints =
         m_session->getBreakpointManager()->getAllBreakpointIds();
@@ -2372,7 +2374,6 @@ void Debugger::interruptAllThreads() {
     [&](RequestInfo* ti, DebuggerRequestInfo* ri) {
       assertx(ti != nullptr);
       ti->m_reqInjectionData.setDebuggerIntr(true);
-      ti->m_reqInjectionData.setFlag(DebuggerSignalFlag);
     },
     false /* includeDummyRequest */
   );

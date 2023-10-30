@@ -1834,9 +1834,6 @@ OPTBLD_INLINE void jmpSurpriseCheck(Offset offset) {
     if (flags & TimedOutFlag) {
       RID().invokeUserTimeoutCallback();
     }
-    if (flags & DebuggerSignalFlag) {
-      markFunctionWithDebuggerIntr(vmfp()->func());
-    }
   }
 }
 

@@ -55,7 +55,6 @@ void VSDebugHook::onRequestInit() {
 
 void VSDebugHook::onOpcode(PC /*pc*/) {
   RID().setDebuggerIntr(false);
-  RID().clearFlag(DebuggerSignalFlag);
   BreakContext breakContext(true);
 }
 

@@ -216,6 +216,10 @@ void t_ast_generator::generate_program() {
     auto program_id = positionToId<apache::thrift::type::ProgramId>(pos);
     program_index[&program] = program_id;
     hydrate_const(programs.emplace_back(), *schema_source.gen_schema(program));
+    if (program.has_doc()) {
+      programs.back().attrs()->docs()->sourceRange() =
+          src_range(program.doc_range(), &program);
+    }
 
     auto is_root_program = std::exchange(is_root_program_, false);
     for (auto* include : program.get_included_programs()) {

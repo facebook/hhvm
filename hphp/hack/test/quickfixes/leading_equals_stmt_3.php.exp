@@ -1,10 +1,10 @@
-convert to 'var_dump'
+convert to 'debugger_dump'
 
 <?hh
 
 function foo(): void {
   if (true) {
-var_dump(((int $y) ==> {
+    debugger_dump(((int $y) ==> {
       $x = $y;
       return $x;
     })() + 1);

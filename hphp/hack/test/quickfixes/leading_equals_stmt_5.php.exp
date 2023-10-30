@@ -1,7 +1,7 @@
-convert to 'var_dump'
+convert to 'debugger_dump'
 
 <?hh
 
 function foo(int $x): void {
-var_dump($x);
+  debugger_dump($x);
 }

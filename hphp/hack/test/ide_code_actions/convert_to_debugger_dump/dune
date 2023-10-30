@@ -1,0 +1,22 @@
+(rule
+ (alias ide_code_actions_convert_to_debugger_dump)
+ (deps
+  %{exe:../../../src/hh_single_type_check.exe}
+  %{project_root}/hack/test/verify.py
+  %{project_root}/hack/test/review.sh
+  (glob_files %{project_root}/hack/test/ide_code_actions/convert_to_debugger_dump/HH_FLAGS)
+  (glob_files %{project_root}/hack/test/ide_code_actions/convert_to_debugger_dump/*.php)
+  (glob_files %{project_root}/hack/test/ide_code_actions/convert_to_debugger_dump/*.exp))
+ (action
+  (run
+   %{project_root}/hack/test/verify.py
+   %{project_root}/hack/test/ide_code_actions/convert_to_debugger_dump
+   --program
+   %{exe:../../../src/hh_single_type_check.exe}
+   --flags
+   --ide-code-actions "convert to 'var_dump'")))
+
+(alias
+ (name runtest)
+ (deps
+  (alias ide_code_actions_convert_to_debugger_dump)))

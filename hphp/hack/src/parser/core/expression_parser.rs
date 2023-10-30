@@ -333,9 +333,9 @@ where
                         self.with_error(
                             Errors::error2078,
                             vec![SyntaxQuickfix {
-                                title: "convert to 'var_dump'".into(),
+                                title: "convert to 'debugger_dump'".into(),
                                 edits: vec![
-                                    (lhs_start_offset, lhs_end_offset, "var_dump(".into()),
+                                    (lhs_start_offset, lhs_end_offset, "debugger_dump(".into()),
                                     (rhs_offset, rhs_offset, ")".into()),
                                 ],
                             }],

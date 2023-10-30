@@ -1,4 +1,4 @@
-convert to 'var_dump'
+convert to 'debugger_dump'
 
 <?hh
 
@@ -8,5 +8,5 @@ function foo(): void {
   $x = 1;
   // This refactor is probably not very helpful
   // but at least produces valid Hack
-  bar(var_dump($x));
+  bar(debugger_dump($x));
 }

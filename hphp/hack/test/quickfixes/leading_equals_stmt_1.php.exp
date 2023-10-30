@@ -1,8 +1,8 @@
-convert to 'var_dump'
+convert to 'debugger_dump'
 
 <?hh
 
 function foo(): void {
   foo();
-var_dump($x + 20 + 30);
+  debugger_dump($x + 20 + 30);
 }

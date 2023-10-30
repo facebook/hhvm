@@ -1,9 +1,9 @@
-convert to 'var_dump'
+convert to 'debugger_dump'
 
 <?hh
 
 function foo(): void {
   if (true) {
-var_dump($foo());
+    debugger_dump($foo());
   }
 }

@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/debugger-hook.h"
 
 #include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/debugger/break_point.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
@@ -601,6 +602,13 @@ String getCurrentFilePath(int* pLine) {
   }
   auto const filepath = const_cast<StringData*>(unit->filepath());
   return File::TranslatePath(String(filepath));
+}
+
+std::string getFilePathForUnit(const HPHP::Unit* compilationUnit) {
+  const auto path =
+    HPHP::String(const_cast<StringData*>(compilationUnit->filepath()));
+  const auto translatedPath = File::TranslatePath(path).toCppString();
+  return realpathLibc(translatedPath.c_str());
 }
 
 /////////////////////////////////////////////////////////////////////////

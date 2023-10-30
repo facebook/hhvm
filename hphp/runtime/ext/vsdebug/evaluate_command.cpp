@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
+#include "hphp/runtime/ext/vsdebug/debugger-request-info.h"
 #include "hphp/runtime/ext/vsdebug/php_executor.h"
 #include "hphp/runtime/vm/runtime-compiler.h"
 
@@ -156,6 +157,9 @@ bool EvaluateCommand::executeImpl(
     evalSilent
   };
 
+  if (m_debugger->isDummyRequest()) {
+    m_debugger->checkForFileChanges(m_debugger->getRequestInfo());
+  }
   executor.execute();
   auto result = executor.m_result;
 

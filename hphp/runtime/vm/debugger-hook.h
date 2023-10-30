@@ -81,6 +81,10 @@ enum class StackDepthDisposition {
   Deeper,       // Greater than baseline.
 };
 
+// Normalizes the file path for a compilation unit.
+std::string getFilePathForUnit(const HPHP::Unit* compilationUnit);
+
+
 ////////////////////////////////////////////////////////////////////////////////
 // DebuggerHook
 // A hook for debugger events.  Any extension can subclass this class and
@@ -305,7 +309,6 @@ StackDepthDisposition getStackDisposition(int baseline);
 PCFilter* getBreakPointFilter();
 PCFilter* getFlowFilter();
 
-String getCurrentFilePath(int* pLine);
 
 }
 

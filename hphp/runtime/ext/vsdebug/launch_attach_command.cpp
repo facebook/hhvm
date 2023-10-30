@@ -70,6 +70,8 @@ bool LaunchAttachCommand::executeImpl(DebuggerSession* /*session*/,
   bool disableJit =
     tryGetBool(args, "disableJit", RuntimeOption::EvalJitDisabledByVSDebug);
 
+  bool warnOnFileChange = tryGetBool(args, "warnOnFileChange", true);
+
   const auto& logFilePath =
     tryGetString(args, "logFilePath", emptyString);
 
@@ -129,6 +131,7 @@ bool LaunchAttachCommand::executeImpl(DebuggerSession* /*session*/,
   options.maxReturnedStringLength = maxReturnedStringLength;
   options.disableStdoutRedirection = disableStdoutRedirection;
   options.disableJit = disableJit;
+  options.warnOnFileChange = warnOnFileChange;
   m_debugger->setDebuggerOptions(options);
 
   // Send the InitializedEvent to indicate to the front-end that we are up

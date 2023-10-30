@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<28ffdac0faf3877e2a9c2ca86cc3ecaf>>
+// @generated SignedSource<<31b9bdc853b027928d2a24afece62c49>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -133,6 +133,13 @@ pub enum DeclError {
         name: String,
         parent_pos: pos_or_decl::PosOrDecl,
         parent_kind: ast_defs::ClassishKind,
+        parent_name: String,
+    },
+    #[rust_to_ocaml(name = "Wrong_use_kind")]
+    WrongUseKind {
+        pos: pos::Pos,
+        name: String,
+        parent_pos: pos_or_decl::PosOrDecl,
         parent_name: String,
     },
     #[rust_to_ocaml(name = "Cyclic_class_def")]

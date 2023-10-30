@@ -649,6 +649,17 @@ where
                 parent_kind,
                 parent_name: parent_name.into(),
             },
+            Obr::WrongUseKind {
+                pos,
+                name,
+                parent_pos,
+                parent_name,
+            } => Self::WrongUseKind {
+                pos: pos.into(),
+                name: name.into(),
+                parent_pos: parent_pos.into(),
+                parent_name: parent_name.into(),
+            },
             Obr::CyclicClassDef { pos, stack } => {
                 Self::CyclicClassDef(pos.into(), stack.iter().copied().map(Into::into).collect())
             }

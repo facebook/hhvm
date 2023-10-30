@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<aa626adf7069408ff2f7a1b99ed48c3f>>
+// @generated SignedSource<<dab4d2c4fb32896c9a8350606faf80bc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -109,6 +109,17 @@ pub enum DeclError<'a> {
         #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
         parent_pos: &'a pos_or_decl::PosOrDecl<'a>,
         parent_kind: oxidized::ast_defs::ClassishKind,
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        parent_name: &'a str,
+    },
+    #[rust_to_ocaml(name = "Wrong_use_kind")]
+    WrongUseKind {
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        pos: &'a pos::Pos<'a>,
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        name: &'a str,
+        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+        parent_pos: &'a pos_or_decl::PosOrDecl<'a>,
         #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
         parent_name: &'a str,
     },

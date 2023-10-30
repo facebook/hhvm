@@ -2405,6 +2405,29 @@ module Eval_primary = struct
     in
     (Error_code.WrongExtendKind, claim, reason, [])
 
+  let wrong_use_kind pos name parent_pos parent_name =
+    let parent_name = Render.strip_ns parent_name in
+    let child_name = Render.strip_ns name in
+    let reason =
+      lazy
+        [
+          ( parent_pos,
+            "Trait "
+            ^ parent_name
+            ^ " is not annotated with <<__ModuleLevelTrait>>." );
+        ]
+    in
+    let claim =
+      lazy
+        ( pos,
+          "Module level trait "
+          ^ child_name
+          ^ " cannot use the non-module level trait "
+          ^ parent_name
+          ^ "." )
+    in
+    (Error_code.WrongUseKind, claim, reason, [])
+
   let cyclic_class_def pos stack =
     let claim =
       lazy
@@ -4437,6 +4460,8 @@ module Eval_primary = struct
     | Wrong_extend_kind
         { pos; kind; name; parent_pos; parent_kind; parent_name } ->
       wrong_extend_kind pos kind name parent_pos parent_kind parent_name
+    | Wrong_use_kind { pos; name; parent_pos; parent_name } ->
+      wrong_use_kind pos name parent_pos parent_name
     | Smember_not_found
         { pos; kind; member_name; class_name; class_pos; hint; quickfixes } ->
       smember_not_found

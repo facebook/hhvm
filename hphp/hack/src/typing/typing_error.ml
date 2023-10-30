@@ -657,6 +657,12 @@ module Primary = struct
         parent_kind: Ast_defs.classish_kind;
         parent_name: string;
       }
+    | Wrong_use_kind of {
+        pos: Pos.t;
+        name: string;
+        parent_pos: Pos_or_decl.t;
+        parent_name: string;
+      }
     | Cyclic_class_def of {
         pos: Pos.t;
         stack: SSet.t;

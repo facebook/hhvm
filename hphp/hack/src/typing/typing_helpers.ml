@@ -90,6 +90,8 @@ let decl_error_to_typing_error decl_error =
         { pos; kind; name; parent_pos; parent_kind; parent_name } ->
       Typing_error.Primary.Wrong_extend_kind
         { pos; kind; name; parent_pos; parent_kind; parent_name }
+    | Decl_defs.Wrong_use_kind { pos; name; parent_pos; parent_name } ->
+      Typing_error.Primary.Wrong_use_kind { pos; name; parent_pos; parent_name }
     | Decl_defs.Cyclic_class_def { pos; stack } ->
       Typing_error.Primary.Cyclic_class_def { pos; stack }
   in

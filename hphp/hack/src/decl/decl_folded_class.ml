@@ -69,6 +69,28 @@ let check_extend_kind
            name = child_name;
          })
 
+let check_use_kind
+    (parent_pos : Pos_or_decl.t)
+    (parent_kind : Ast_defs.classish_kind)
+    (parent_name : string)
+    (parent_is_module_level_trait : bool)
+    (child_pos : Pos_or_decl.t)
+    (child_kind : Ast_defs.classish_kind)
+    (child_name : string)
+    (child_is_module_level_trait : bool) : decl_error option =
+  match (parent_kind, child_kind) with
+  | (Ast_defs.Ctrait, Ast_defs.Ctrait)
+    when child_is_module_level_trait && not parent_is_module_level_trait ->
+    Some
+      (Wrong_use_kind
+         {
+           parent_pos;
+           parent_name;
+           pos = Pos_or_decl.unsafe_to_raw_pos child_pos;
+           name = child_name;
+         })
+  | _ -> None
+
 (*****************************************************************************)
 (* Functions used retrieve everything implemented in parent classes
  * The return values:
@@ -100,21 +122,40 @@ let add_grand_parents_or_traits
   let class_pos = fst shallow_class.sc_name in
   let classish_kind = shallow_class.sc_kind in
   let class_name = snd shallow_class.sc_name in
+  let class_is_module_level_trait =
+    Attributes.mem
+      SN.UserAttributes.uaModuleLevelTrait
+      shallow_class.sc_user_attributes
+  in
   let decl_errors =
-    if phys_equal pass `Extends_pass then
-      match
-        check_extend_kind
-          parent_pos
-          parent_type.dc_kind
-          parent_type.dc_name
-          class_pos
-          classish_kind
-          class_name
-      with
+    match pass with
+    | `Extends_pass ->
+      (match
+         check_extend_kind
+           parent_pos
+           parent_type.dc_kind
+           parent_type.dc_name
+           class_pos
+           classish_kind
+           class_name
+       with
       | Some err -> err :: decl_errors
-      | None -> decl_errors
-    else
-      decl_errors
+      | None -> decl_errors)
+    | `Traits_pass ->
+      (match
+         check_use_kind
+           parent_pos
+           parent_type.dc_kind
+           parent_type.dc_name
+           parent_type.dc_is_module_level_trait
+           class_pos
+           classish_kind
+           class_name
+           class_is_module_level_trait
+       with
+      | Some err -> err :: decl_errors
+      | None -> decl_errors)
+    | `Xhp_pass -> decl_errors
   in
 
   (* If we are crawling the xhp attribute deps, we need to merge their xhp deps

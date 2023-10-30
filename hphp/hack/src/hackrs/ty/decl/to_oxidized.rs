@@ -574,6 +574,17 @@ impl<'a, P: ToOxidized<'a, Output = &'a obr::pos::Pos<'a>>> ToOxidized<'a>
                 parent_kind,
                 parent_name: parent_name.to_oxidized(arena),
             },
+            &Self::WrongUseKind {
+                ref pos,
+                name,
+                ref parent_pos,
+                parent_name,
+            } => DeclError::WrongUseKind {
+                pos: pos.to_oxidized(arena),
+                name: name.to_oxidized(arena),
+                parent_pos: parent_pos.to_oxidized(arena),
+                parent_name: parent_name.to_oxidized(arena),
+            },
             Self::CyclicClassDef(pos, stack) => DeclError::CyclicClassDef {
                 pos: pos.to_oxidized(arena),
                 stack: obr::s_set::SSet::from(arena, stack.iter().map(|s| s.to_oxidized(arena))),

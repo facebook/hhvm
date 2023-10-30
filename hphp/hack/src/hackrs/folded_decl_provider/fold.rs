@@ -502,6 +502,33 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         }
     }
 
+    fn check_use_kind(
+        &mut self,
+        parent_pos: &R::Pos,
+        parent_kind: ClassishKind,
+        parent_name: TypeName,
+        parent_is_module_level_trait: bool,
+    ) {
+        let child_is_module_level_trait = self
+            .child
+            .user_attributes
+            .iter()
+            .any(|ua| ua.name.id() == *sn::user_attributes::uaModuleLevelTrait);
+        match (parent_kind, self.child.kind) {
+            (ClassishKind::Ctrait, ClassishKind::Ctrait)
+                if child_is_module_level_trait && !parent_is_module_level_trait =>
+            {
+                self.errors.push(DeclError::WrongUseKind {
+                    parent_pos: parent_pos.clone(),
+                    parent_name,
+                    pos: self.child.name.pos().clone(),
+                    name: self.child.name.id(),
+                })
+            }
+            _ => {}
+        }
+    }
+
     fn add_class_parent_or_trait(
         &mut self,
         pass: Pass,
@@ -511,15 +538,24 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         let (_, pos_id, _) = ty.unwrap_class_type();
         extends.insert(pos_id.id());
         if let Some(cls) = self.parents.get(&pos_id.id()) {
-            if pass == Pass::Extends {
-                self.check_extend_kind(pos_id.pos(), cls.kind, cls.name);
-            }
-
-            if pass == Pass::Xhp {
-                // If we are crawling the xhp attribute deps, need to merge their xhp deps as well
-                // XHP attribute dependencies don't actually pull the trait into the class,
-                // so we need to track them totally separately.
-                extends.extend(cls.xhp_attr_deps.iter().cloned());
+            match pass {
+                Pass::Extends => {
+                    self.check_extend_kind(pos_id.pos(), cls.kind, cls.name);
+                }
+                Pass::Traits => {
+                    self.check_use_kind(
+                        pos_id.pos(),
+                        cls.kind,
+                        cls.name,
+                        cls.is_module_level_trait,
+                    );
+                }
+                Pass::Xhp => {
+                    // If we are crawling the xhp attribute deps, need to merge their xhp deps as well
+                    // XHP attribute dependencies don't actually pull the trait into the class,
+                    // so we need to track them totally separately.
+                    extends.extend(cls.xhp_attr_deps.iter().cloned());
+                }
             }
             extends.extend(cls.extends.iter().cloned());
         }

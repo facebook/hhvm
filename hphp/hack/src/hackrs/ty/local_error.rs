@@ -49,6 +49,17 @@ impl<R: Reason> From<&DeclError<R::Pos>> for TypingError<R> {
                 parent_kind,
                 parent_name,
             }),
+            &DeclError::WrongUseKind {
+                ref pos,
+                name,
+                ref parent_pos,
+                parent_name,
+            } => Self::Primary(Primary::WrongUseKind {
+                pos: pos.clone(),
+                name,
+                parent_pos: parent_pos.clone(),
+                parent_name,
+            }),
             DeclError::CyclicClassDef(pos, stack) => {
                 Self::Primary(Primary::CyclicClassDef(pos.clone(), stack.clone()))
             }

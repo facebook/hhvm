@@ -26,4 +26,10 @@ pub enum Primary<R: Reason> {
         kind: oxidized::ast_defs::ClassishKind,
         name: TypeName,
     },
+    WrongUseKind {
+        parent_pos: R::Pos,
+        parent_name: TypeName,
+        pos: R::Pos,
+        name: TypeName,
+    },
 }

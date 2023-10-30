@@ -18,5 +18,11 @@ pub enum DeclError<P> {
         parent_kind: oxidized::ast_defs::ClassishKind,
         parent_name: TypeName,
     },
+    WrongUseKind {
+        pos: P,
+        name: TypeName,
+        parent_pos: P,
+        parent_name: TypeName,
+    },
     CyclicClassDef(P, Vec<TypeName>),
 }

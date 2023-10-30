@@ -960,110 +960,6 @@ module Eval_primary = struct
         readonly_closure_call pos decl_pos suggestion
   end
 
-  module Eval_ifc = struct
-    let illegal_information_flow
-        pos secondaries source_poss source sink_poss sink =
-      let explain poss node printer reasons =
-        let msg = printer node in
-        List.map ~f:(fun pos -> (pos, msg)) poss @ reasons
-      in
-      let source = Markdown_lite.md_codify source in
-      let sink = Markdown_lite.md_codify sink in
-      let sprintf_main = sprintf "Data with policy %s appears in context %s." in
-      let claim = lazy (pos, sprintf_main source sink) in
-      let reasons =
-        lazy
-          (let sprintf = Printf.sprintf in
-           let sprintf_source =
-             sprintf "This may be the data source with policy %s"
-           in
-           let sprintf_sink =
-             sprintf "This may be the data sink with policy %s"
-           in
-           let other_occurrences =
-             let f p =
-               (p, "Another program point contributing to the illegal flow")
-             in
-             List.map ~f secondaries
-           in
-           []
-           |> explain source_poss source sprintf_source
-           |> explain sink_poss sink sprintf_sink
-           |> List.append other_occurrences
-           |> List.rev)
-      in
-      (Error_code.IllegalInformationFlow, claim, reasons, [])
-
-    let ifc_internal_error pos msg =
-      let claim =
-        lazy
-          ( pos,
-            "IFC Internal Error: "
-            ^ msg
-            ^ ". If you see this error and aren't expecting it, please `hh rage` and let the Hack team know."
-          )
-      in
-      (Error_code.IFCInternalError, claim, lazy [], [])
-
-    let unknown_information_flow pos what =
-      let claim =
-        lazy
-          ( pos,
-            "Unable to analyze information flow for "
-            ^ what
-            ^ ". This might be unsafe." )
-      in
-      (Error_code.UnknownInformationFlow, claim, lazy [], [])
-
-    let context_implicit_policy_leakage
-        pos secondaries source_poss source sink_poss sink =
-      let claim =
-        lazy
-          ( pos,
-            Printf.sprintf
-              "Context-implicit policy leaks into %s via %s."
-              (Markdown_lite.md_codify sink)
-              (Markdown_lite.md_codify source) )
-      and reasons =
-        lazy
-          (let program_point p =
-             (p, "Another program point contributing to the leakage")
-           in
-           let explain_source p = (p, "Leakage source") in
-           let explain_sink p = (p, "Leakage sink") in
-
-           List.map ~f:program_point secondaries
-           @ List.map ~f:explain_source source_poss
-           @ List.map ~f:explain_sink sink_poss)
-      in
-      (Error_code.ContextImplicitPolicyLeakage, claim, reasons, [])
-
-    let to_error t ~env:_ =
-      let open Typing_error.Primary.Ifc in
-      match t with
-      | Illegal_information_flow
-          { pos; secondaries; source_poss; source; sink_poss; sink } ->
-        illegal_information_flow
-          pos
-          secondaries
-          source_poss
-          source
-          sink_poss
-          sink
-      | Ifc_internal_error { pos; msg } -> ifc_internal_error pos msg
-      | Unknown_information_flow { pos; what } ->
-        unknown_information_flow pos what
-      | Context_implicit_policy_leakage
-          { pos; secondaries; source_poss; source; sink_poss; sink } ->
-        context_implicit_policy_leakage
-          pos
-          secondaries
-          source_poss
-          source
-          sink_poss
-          sink
-  end
-
   module Eval_coeffect = struct
     let call_coeffect
         pos available_pos available_incl_unsafe required_pos required =
@@ -4373,7 +4269,6 @@ module Eval_primary = struct
     | Coeffect err -> Eval_coeffect.to_error err ~env
     | Enum err -> Eval_enum.to_error err ~env
     | Expr_tree err -> Eval_expr_tree.to_error err ~env
-    | Ifc err -> Eval_ifc.to_error err ~env
     | Modules err -> Eval_modules.to_error err ~env
     | Readonly err -> Eval_readonly.to_error err ~env
     | Shape err -> Eval_shape.to_error err ~env
@@ -5497,18 +5392,6 @@ end = struct
     in
     (Error_code.AcceptDisposableInvariant, reasons)
 
-  let ifc_external_contravariant pos_sub pos_super =
-    let reasons =
-      lazy
-        [
-          ( pos_super,
-            "Parameters with `<<__External>>` must be overridden by other parameters with <<__External>>. This parameter is marked `<<__External>>`"
-          );
-          (pos_sub, "But this parameter is not marked `<<__External>>`");
-        ]
-    in
-    (Error_code.IFCExternalContravariant, reasons)
-
   let required_field_is_optional pos name decl_pos def_pos =
     let reasons =
       lazy
@@ -5537,20 +5420,6 @@ end = struct
          [(pos_super, msg); (pos_sub, reason_msg)])
     in
     (Error_code.ReturnDisposableMismatch, reasons)
-
-  let ifc_policy_mismatch pos policy pos_super policy_super =
-    let reasons =
-      lazy
-        [
-          ( pos,
-            "IFC policies must be invariant with respect to inheritance. This method is policied with "
-            ^ policy );
-          ( pos_super,
-            "This is incompatible with its inherited policy, which is "
-            ^ policy_super );
-        ]
-    in
-    (Error_code.IFCPolicyMismatch, reasons)
 
   let override_final pos parent_pos =
     let reasons =
@@ -5990,8 +5859,6 @@ end = struct
     | Missing_constructor pos -> Eval_result.single (missing_constructor pos)
     | Accept_disposable_invariant { pos; decl_pos } ->
       Eval_result.single (accept_disposable_invariant pos decl_pos)
-    | Ifc_external_contravariant { pos_sub; pos_super } ->
-      Eval_result.single (ifc_external_contravariant pos_sub pos_super)
     | Required_field_is_optional { pos; name; decl_pos; def_pos } ->
       Eval_result.single (required_field_is_optional pos name decl_pos def_pos)
     | Return_disposable_mismatch
@@ -6001,8 +5868,6 @@ end = struct
            pos_sub
            is_marked_return_disposable
            pos_super)
-    | Ifc_policy_mismatch { pos; policy; pos_super; policy_super } ->
-      Eval_result.single (ifc_policy_mismatch pos policy pos_super policy_super)
     | Override_final { pos; parent_pos } ->
       Eval_result.single (override_final pos parent_pos)
     | Override_async { pos; parent_pos } ->

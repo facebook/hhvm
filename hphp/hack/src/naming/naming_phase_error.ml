@@ -15,7 +15,6 @@ type experimental_feature =
   (* We use these constructors in Rust elaboration *)
   | Const_attr of Pos.t [@warning "-37"]
   | Const_static_prop of Pos.t [@warning "-37"]
-  | IFC_infer_flows of Pos.t [@warning "-37"]
 [@@ocaml.warning "-37"]
 
 type t =
@@ -86,7 +85,6 @@ let emit_experimental_feature = function
     Errors.experimental_feature pos "The __Const attribute is not supported."
   | Const_static_prop pos ->
     Errors.experimental_feature pos "Const properties cannot be static."
-  | IFC_infer_flows pos -> Errors.experimental_feature pos "IFC InferFlows"
 
 let emit
     {

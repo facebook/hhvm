@@ -221,35 +221,6 @@ module Primary : sig
     [@@deriving show]
   end
 
-  module Ifc : sig
-    type t =
-      | Illegal_information_flow of {
-          pos: Pos.t;
-          secondaries: Pos_or_decl.t list;
-          source_poss: Pos_or_decl.t list;
-          source: string;
-          sink_poss: Pos_or_decl.t list;
-          sink: string;
-        }
-      | Context_implicit_policy_leakage of {
-          pos: Pos.t;
-          secondaries: Pos_or_decl.t list;
-          source_poss: Pos_or_decl.t list;
-          source: string;
-          sink_poss: Pos_or_decl.t list;
-          sink: string;
-        }
-      | Unknown_information_flow of {
-          pos: Pos.t;
-          what: string;
-        }
-      | Ifc_internal_error of {
-          pos: Pos.t;
-          msg: string;
-        }
-    [@@deriving show]
-  end
-
   module Coeffect : sig
     type t =
       | Call_coeffect of {
@@ -394,7 +365,6 @@ module Primary : sig
     | Coeffect of Coeffect.t
     | Enum of Enum.t
     | Expr_tree of Expr_tree.t
-    | Ifc of Ifc.t
     | Modules of Modules.t
     | Readonly of Readonly.t
     | Shape of Shape.t
@@ -1441,10 +1411,6 @@ and Secondary : sig
         pos: Pos_or_decl.t;
         decl_pos: Pos_or_decl.t;
       }
-    | Ifc_external_contravariant of {
-        pos_sub: Pos_or_decl.t;
-        pos_super: Pos_or_decl.t;
-      }
     | Invalid_destructure of {
         pos: Pos_or_decl.t;
         decl_pos: Pos_or_decl.t;
@@ -1488,12 +1454,6 @@ and Secondary : sig
         pos_sub: Pos_or_decl.t;
         is_marked_return_disposable: bool;
         pos_super: Pos_or_decl.t;
-      }
-    | Ifc_policy_mismatch of {
-        pos: Pos_or_decl.t;
-        policy: string;
-        pos_super: Pos_or_decl.t;
-        policy_super: string;
       }
     | Overriding_prop_const_mismatch of {
         pos: Pos_or_decl.t;
@@ -1929,9 +1889,6 @@ val enum : Primary.Enum.t -> t
 
 (** Lift a `Primary.Expr_tree.t` error to a `Typing_error.t` *)
 val expr_tree : Primary.Expr_tree.t -> t
-
-(** Lift a `Primary.Coeffect.t` error to a `Typing_error.t` *)
-val ifc : Primary.Ifc.t -> t
 
 (** Lift a `Primary.Modules.t` error to a `Typing_error.t` *)
 val modules : Primary.Modules.t -> t

@@ -682,9 +682,9 @@ module Typing = struct
     (* | ViaLabelInvalidParameterDEPRECATED [@value 4395] *)
     | EnumClassLabelAsExpression [@value 4396]
     (* | EnumClassLabelInvalidArgumentDEPRECATED [@value 4397] *)
-    | IFCInternalError [@value 4398]
-    | IFCExternalContravariant [@value 4399]
-    | IFCPolicyMismatch [@value 4400]
+    (* | IFCInternalErrorDEPRECATED [@value 4398] *)
+    (* | IFCExternalContravariantDEPRECATED [@value 4399] *)
+    (* | IFCPolicyMismatchDEPRECATED [@value 4400] *)
     | OpCoeffects [@value 4401]
     | ImplementsDynamic [@value 4402]
     | SubtypeCoeffects [@value 4403]

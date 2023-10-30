@@ -242,35 +242,6 @@ module Primary = struct
     [@@deriving show]
   end
 
-  module Ifc = struct
-    type t =
-      | Illegal_information_flow of {
-          pos: Pos.t;
-          secondaries: Pos_or_decl.t list;
-          source_poss: Pos_or_decl.t list;
-          source: string;
-          sink_poss: Pos_or_decl.t list;
-          sink: string;
-        }
-      | Context_implicit_policy_leakage of {
-          pos: Pos.t;
-          secondaries: Pos_or_decl.t list;
-          source_poss: Pos_or_decl.t list;
-          source: string;
-          sink_poss: Pos_or_decl.t list;
-          sink: string;
-        }
-      | Unknown_information_flow of {
-          pos: Pos.t;
-          what: string;
-        }
-      | Ifc_internal_error of {
-          pos: Pos.t;
-          msg: string;
-        }
-    [@@deriving show]
-  end
-
   module Coeffect = struct
     type t =
       | Call_coeffect of {
@@ -414,7 +385,6 @@ module Primary = struct
     | Coeffect of Coeffect.t
     | Enum of Enum.t
     | Expr_tree of Expr_tree.t
-    | Ifc of Ifc.t
     | Modules of Modules.t
     | Readonly of Readonly.t
     | Shape of Shape.t
@@ -1361,8 +1331,6 @@ module rec Error : sig
 
   val expr_tree : Primary.Expr_tree.t -> t
 
-  val ifc : Primary.Ifc.t -> t
-
   val modules : Primary.Modules.t -> t
 
   val readonly : Primary.Readonly.t -> t
@@ -1437,8 +1405,6 @@ end = struct
   let enum err = primary @@ Primary.Enum err
 
   let expr_tree err = primary @@ Primary.Expr_tree err
-
-  let ifc err = primary @@ Primary.Ifc err
 
   let modules err = primary @@ Primary.Modules err
 
@@ -1609,10 +1575,6 @@ and Secondary : sig
         pos: Pos_or_decl.t;
         decl_pos: Pos_or_decl.t;
       }
-    | Ifc_external_contravariant of {
-        pos_sub: Pos_or_decl.t;
-        pos_super: Pos_or_decl.t;
-      }
     | Invalid_destructure of {
         pos: Pos_or_decl.t;
         decl_pos: Pos_or_decl.t;
@@ -1656,12 +1618,6 @@ and Secondary : sig
         pos_sub: Pos_or_decl.t;
         is_marked_return_disposable: bool;
         pos_super: Pos_or_decl.t;
-      }
-    | Ifc_policy_mismatch of {
-        pos: Pos_or_decl.t;
-        policy: string;
-        pos_super: Pos_or_decl.t;
-        policy_super: string;
       }
     | Overriding_prop_const_mismatch of {
         pos: Pos_or_decl.t;
@@ -1897,10 +1853,6 @@ end = struct
         pos: Pos_or_decl.t;
         decl_pos: Pos_or_decl.t;
       }
-    | Ifc_external_contravariant of {
-        pos_sub: Pos_or_decl.t;
-        pos_super: Pos_or_decl.t;
-      }
     | Invalid_destructure of {
         pos: Pos_or_decl.t;
         decl_pos: Pos_or_decl.t;
@@ -1944,12 +1896,6 @@ end = struct
         pos_sub: Pos_or_decl.t;
         is_marked_return_disposable: bool;
         pos_super: Pos_or_decl.t;
-      }
-    | Ifc_policy_mismatch of {
-        pos: Pos_or_decl.t;
-        policy: string;
-        pos_super: Pos_or_decl.t;
-        policy_super: string;
       }
     | Overriding_prop_const_mismatch of {
         pos: Pos_or_decl.t;

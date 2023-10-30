@@ -634,7 +634,6 @@ fn emit_fatal_experimental_feature_error<'arena>(
         ExperimentalFeature::Supportdyn(_) => todo!(),
         ExperimentalFeature::ConstAttr(_) => todo!(),
         ExperimentalFeature::ConstStaticProp(_) => todo!(),
-        ExperimentalFeature::IFCInferFlows(_) => todo!(),
     }
 }
 

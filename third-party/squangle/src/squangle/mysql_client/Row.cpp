@@ -26,6 +26,9 @@ std::shared_ptr<RowFields> EphemeralRowFields::makeBufferedFields() const {
   std::vector<enum_field_types> mysql_field_types;
 
   field_names.reserve(num_fields_);
+  table_names.reserve(num_fields_);
+  mysql_field_flags.reserve(num_fields_);
+  mysql_field_types.reserve(num_fields_);
   for (int i = 0; i < num_fields_; ++i) {
     MYSQL_FIELD* mysql_field = &fields_[i];
     field_names.emplace_back(mysql_field->name, mysql_field->name_length);

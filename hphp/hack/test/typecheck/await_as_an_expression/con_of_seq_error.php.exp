@@ -1,0 +1,20 @@
+File "con_of_seq_error.php", line 14, characters 5-44:
+Nested or piped `await` expressions cannot be used alongside other concurrent awaits (Parsing[1002])
+File "con_of_seq_error.php", line 15, characters 5-44:
+Nested or piped `await` expressions cannot be used alongside other concurrent awaits (Parsing[1002])
+File "con_of_seq_error.php", line 16, characters 5-38:
+Nested or piped `await` expressions cannot be used alongside other concurrent awaits (Parsing[1002])
+File "con_of_seq_error.php", line 17, characters 5-38:
+Nested or piped `await` expressions cannot be used alongside other concurrent awaits (Parsing[1002])
+File "con_of_seq_error.php", line 21, characters 5-29:
+Nested or piped `await` expressions cannot be used in concurrent block (Parsing[1002])
+File "con_of_seq_error.php", line 25, characters 5-29:
+Nested or piped `await` expressions cannot be used in concurrent block (Parsing[1002])
+File "con_of_seq_error.php", line 31, characters 5-23:
+Nested or piped `await` expressions cannot be used in concurrent block (Parsing[1002])
+File "con_of_seq_error.php", line 35, characters 5-23:
+Nested or piped `await` expressions cannot be used in concurrent block (Parsing[1002])
+File "con_of_seq_error.php", line 40, characters 7-40:
+Nested or piped `await` expressions cannot be used in concurrent block (Parsing[1002])
+File "con_of_seq_error.php", line 47, characters 20-59:
+Nested or piped `await` expressions cannot be used alongside other concurrent awaits (Parsing[1002])

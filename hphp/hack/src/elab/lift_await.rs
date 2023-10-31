@@ -46,19 +46,6 @@ fn is_await(expr: &Expr) -> bool {
     matches!(expr, Expr((), _pos, Expr_::Await(_)))
 }
 
-fn is_assign_await(expr: &Expr) -> bool {
-    if let Expr_::Binop(box Binop {
-        bop: Bop::Eq(None),
-        lhs: _,
-        rhs,
-    }) = &expr.2
-    {
-        is_await(rhs)
-    } else {
-        false
-    }
-}
-
 impl<'a> VisitorMut<'a> for ContainsAwait {
     type Params = AstParams<Env, ()>;
     fn object(&mut self) -> &mut dyn VisitorMut<'a, Params = Self::Params> {
@@ -90,7 +77,7 @@ enum AwaitUsage {
     Sequential,
     /// The expression contains multiple awaits that require concurrent execution of
     /// sequentialised awaits. For example `await f($x) + (await g($y) |> await h($$))`
-    Error,
+    Error(Option<Pos>),
 }
 
 fn combine_con(await1: AwaitUsage, await2: AwaitUsage) -> AwaitUsage {
@@ -98,9 +85,11 @@ fn combine_con(await1: AwaitUsage, await2: AwaitUsage) -> AwaitUsage {
     match (await1, await2) {
         (Sequential, NoAwait) | (NoAwait, Sequential) => Sequential,
         // Errors propagate
-        (Error, _) | (_, Error) => Error,
+        (Error(Some(pos)), _) => Error(Some(pos)),
+        (_, Error(Some(pos))) => Error(Some(pos)),
+        (Error(None), _) | (_, Error(None)) => Error(None),
         // Can't concurrently combine a sequential with an await
-        (Sequential, _) | (_, Sequential) => Error,
+        (Sequential, _) | (_, Sequential) => Error(None),
         // If both sides have an await, then we have concurrent composition
         (ConcurrentAwait, _) | (_, ConcurrentAwait) | (ContainsAwait, ContainsAwait) => {
             ConcurrentAwait
@@ -113,8 +102,8 @@ fn combine_con(await1: AwaitUsage, await2: AwaitUsage) -> AwaitUsage {
 /// check how the expression uses nested awaits
 fn check_await_usage(expr: &Expr) -> AwaitUsage {
     use AwaitUsage::*;
-    let Expr((), _pos, e) = expr;
-    match e {
+    let Expr((), pos, e) = expr;
+    let await_usage = match e {
         // Expressions with no sub-expressions that we can lift an await out of
         Expr_::Dollardollar(_)
         | Expr_::Null
@@ -243,11 +232,11 @@ fn check_await_usage(expr: &Expr) -> AwaitUsage {
         Expr_::Await(box expr1) => match check_await_usage(expr1) {
             NoAwait => ContainsAwait,
             ContainsAwait | Sequential | ConcurrentAwait => Sequential,
-            Error => Error,
+            Error(p) => Error(p),
         },
         // Seq
         Expr_::Pipe(box (_, expr1, expr2)) => match check_await_usage(expr2) {
-            Error => Error,
+            Error(p) => Error(p),
             // If the rhs contains an await, then we need to finish the lhs
             // prior to doing the await
             ContainsAwait | ConcurrentAwait | Sequential => Sequential,
@@ -286,6 +275,10 @@ fn check_await_usage(expr: &Expr) -> AwaitUsage {
             .fold(check_await_usage(runtime_expr), combine_con),
         // lvalues: shouldn't contain await or $$
         Expr_::List(_) => NoAwait,
+    };
+    match await_usage {
+        Error(None) => Error(Some(pos.clone())),
+        _ => await_usage,
     }
 }
 
@@ -705,12 +698,14 @@ impl LiftAwait {
     ) {
         use AwaitUsage::*;
         match check_await_usage(expr) {
-            Error if !self.allow_con_of_seq => {
-                env.emit_error(NamingPhaseError::Parsing(ParsingError::ParsingError{pos:expr.1.clone(), msg:
-                       "`await` cannot be used as an expression inside another await expression. Pull the inner `await` out into its own statement.".to_string(),
-                        quickfixes:vec![]}));
+            Error(p) if !self.allow_con_of_seq => {
+                env.emit_error(NamingPhaseError::Parsing(ParsingError::ParsingError {
+                    pos: p.unwrap_or(expr.1.clone()),
+                    msg: "Nested or piped `await` expressions cannot be used alongside other concurrent awaits".to_string(),
+                    quickfixes: vec![],
+                }));
             }
-            ContainsAwait | ConcurrentAwait | Sequential | Error => {
+            ContainsAwait | ConcurrentAwait | Sequential | Error(_) => {
                 if self.for_codegen {
                     self.extract_await(expr, con, seq, tmps)
                 }
@@ -758,9 +753,9 @@ impl<'a> VisitorMut<'a> for LiftAwait {
             }) => {
                 for expr in exprs {
                     expr.accept(env, self.object())?;
-                    if !is_await(expr) && !is_assign_await(expr) {
-                        self.check_and_extract_await(env, expr, &mut con, &mut seq, &mut tmps);
-                    }
+                    self.leave_await = true;
+                    self.check_and_extract_await(env, expr, &mut con, &mut seq, &mut tmps);
+                    self.leave_await = false;
                 }
                 block.accept(env, self.object())?;
                 sequentialise_stmt(&pos, elem, stmt_, con, seq, tmps);
@@ -831,21 +826,48 @@ impl<'a> VisitorMut<'a> for LiftAwait {
                 *elem = Stmt(pos, stmt_);
                 Ok(())
             }
-            Stmt_::Concurrent(Block(stmts)) if self.for_codegen => {
+            Stmt_::Concurrent(Block(stmts)) => {
                 for stmt in stmts.iter_mut() {
                     match stmt {
-                        Stmt(_, Stmt_::Expr(box expr)) => {
+                        Stmt(_, Stmt_::Expr(box expr))
+                        | Stmt(_, Stmt_::DeclareLocal(box (_, _, Some(expr)))) => {
                             expr.accept(env, self.object())?;
                             let is_await = expr.2.is_await();
-                            self.check_and_extract_await(env, expr, &mut con, &mut seq, &mut tmps);
-                            if is_await {
-                                expr.2 = Expr_::Null;
+                            match check_await_usage(expr) {
+                                AwaitUsage::Sequential | AwaitUsage::Error(None) =>
+                                    env.emit_error(NamingPhaseError::Parsing(ParsingError::ParsingError {
+                                        pos: expr.1.clone(),
+                                        msg:
+                                            "Nested or piped `await` expressions cannot be used in concurrent block"
+                                                .to_string(),
+                                        quickfixes: vec![],
+                                    })),
+                                AwaitUsage::Error(Some(pos)) =>
+                                    env.emit_error(NamingPhaseError::Parsing(ParsingError::ParsingError {
+                                        pos: pos.clone(),
+                                        msg:
+                                            "Nested or piped `await` expressions cannot be used in concurrent block"
+                                                .to_string(),
+                                        quickfixes: vec![],
+                                    })),
+                                _ => {}
+                            };
+                            if self.for_codegen {
+                                self.extract_await(expr, &mut con, &mut seq, &mut tmps);
+                                if is_await {
+                                    expr.2 = Expr_::Null;
+                                }
                             }
                         }
+                        Stmt(_, Stmt_::DeclareLocal(box (_, _, None))) => {}
                         _ => panic!(
                             "Concurrent block contains a statement that is not an expression-statement."
                         ),
                     }
+                }
+                if !self.for_codegen {
+                    *elem = Stmt(pos, stmt_);
+                    return Ok(());
                 }
                 let scope = con
                     .iter()
@@ -919,10 +941,6 @@ impl<'a> VisitorMut<'a> for LiftAwait {
                     Stmt_::mk_block(Some(scope), Block(vec![awaitall_stmt])),
                 );
                 Ok(())
-            }
-            Stmt_::Concurrent(_) => {
-                *elem = Stmt(pos, stmt_);
-                elem.recurse(env, self.object())
             }
         }
     }

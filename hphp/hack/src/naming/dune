@@ -187,6 +187,7 @@
   naming_phase_error
   naming_phase_pass
   naming_typed_locals
+  naming_validate_await
   naming_validate_cast_expr
   naming_validate_class_req
   naming_validate_consistent_construct

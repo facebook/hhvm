@@ -58,7 +58,6 @@ folly::Future<<% > types/return_type_server_lift_unit%>> <% > service_common/ser
   return apache::thrift::detail::si::future(semifuture_<%function:cpp_name%>(<% > service_common/param_list_move%>), getInternalKeepAlive());
 }
 <%/service:interaction?%>
-<%#function:coroutine?%>
 
 #if FOLLY_HAS_COROUTINES
 folly::coro::Task<<% > types/return_type_server%>> <% > service_common/service_class_name%>::co_<%function:cpp_name%>(<% > service_common/function_param_list_server%>) {
@@ -79,7 +78,6 @@ folly::coro::Task<<% > types/return_type_server%>> <% > service_common/service_c
   return co_<%function:cpp_name%>(<% > service_common/param_list_move%>);
 }
 #endif // FOLLY_HAS_COROUTINES
-<%/function:coroutine?%>
 <%#function:oneway?%>
 
 void <% > service_common/service_class_name%>::async_tm_<%function:cpp_name%>(std::unique_ptr<apache::thrift::HandlerCallbackBase> callback<%function:comma%><% > service_common/function_param_list_server%>) {
@@ -93,17 +91,14 @@ void <% > service_common/service_class_name%>::async_tm_<%function:cpp_name%>(st
   // available to the future through the thread-local backchannel, so we create
   // a RAII object that sets up RequestParams and clears them on destruction.
   apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
-<%#function:coroutine?%>
 #if FOLLY_HAS_COROUTINES
 determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
-<%/function:coroutine?%>
   auto invocationType = __fbthrift_invocation_<%function:cpp_name%>.load(std::memory_order_relaxed);
   try {
     switch (invocationType) {
       case apache::thrift::detail::si::InvocationType::AsyncTm:
       {
-<%#function:coroutine?%>
 #if FOLLY_HAS_COROUTINES
         __fbthrift_invocation_<%function:cpp_name%>.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::CoroParam, std::memory_order_relaxed);
         apache::thrift::RequestParams params{callback->getRequestContext(),
@@ -112,7 +107,6 @@ determineInvocationType:
         apache::thrift::detail::si::<%#function:oneway?%>async_tm_coro_oneway<%/function:oneway?%><%^function:oneway?%>async_tm_coro<%/function:oneway?%>(std::move(callback), std::move(task));
         return;
 #else // FOLLY_HAS_COROUTINES
-<%/function:coroutine?%>
 <%^service:interaction?%>
         __fbthrift_invocation_<%function:cpp_name%>.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
 <%/service:interaction?%>
@@ -120,9 +114,7 @@ determineInvocationType:
         __fbthrift_invocation_<%function:cpp_name%>.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::SemiFuture, std::memory_order_relaxed);
 <%/service:interaction?%>
         FOLLY_FALLTHROUGH;
-<%#function:coroutine?%>
 #endif // FOLLY_HAS_COROUTINES
-<%/function:coroutine?%>
       }
 <%^service:interaction?%>
       case apache::thrift::detail::si::InvocationType::Future:
@@ -138,7 +130,6 @@ determineInvocationType:
         apache::thrift::detail::si::<%#function:oneway?%>async_tm_semifuture_oneway<%/function:oneway?%><%^function:oneway?%>async_tm_semifuture<%/function:oneway?%>(std::move(callback), std::move(fut));
         return;
       }
-<%#function:coroutine?%>
 #if FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::CoroParam:
       {
@@ -155,7 +146,6 @@ determineInvocationType:
         return;
       }
 #endif // FOLLY_HAS_COROUTINES
-<%/function:coroutine?%>
       case apache::thrift::detail::si::InvocationType::Sync:
       {
 <%^function:sync_returns_by_outparam?%>
@@ -181,7 +171,6 @@ determineInvocationType:
         folly::assume_unreachable();
       }
     }
-<%#function:coroutine?%>
 #if FOLLY_HAS_COROUTINES
   } catch (apache::thrift::detail::si::UnimplementedCoroMethod&<%^function:stack_arguments?%> ex<%/function:stack_arguments?%>) {
     <%^function:stack_arguments?%>
@@ -189,7 +178,6 @@ determineInvocationType:
     <%/function:stack_arguments?%>
     goto determineInvocationType;
 #endif // FOLLY_HAS_COROUTINES
-<%/function:coroutine?%>
   } catch (...) {
     callback->exception(std::current_exception());
   }

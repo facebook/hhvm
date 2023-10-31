@@ -23,12 +23,10 @@
   virtual folly::Future<<% > types/return_type_server_lift_unit%>> future_<%function:cpp_name%>(<% > service_common/function_param_list_server%>);
 <%/service:interaction?%>
   virtual folly::SemiFuture<<% > types/return_type_server_lift_unit%>> semifuture_<%function:cpp_name%>(<% > service_common/function_param_list_server%>);
-<%#function:coroutine?%>
 #if FOLLY_HAS_COROUTINES
   virtual folly::coro::Task<<% > types/return_type_server%>> co_<%function:cpp_name%>(<% > service_common/function_param_list_server%>);
   virtual folly::coro::Task<<% > types/return_type_server%>> co_<%function:cpp_name%>(apache::thrift::RequestParams params<%function:comma%><% > service_common/function_param_list_server%>);
 #endif
-<%/function:coroutine?%>
 <%/function:eb%>
 <%#function:oneway?%>
   virtual void async_<%#function:eb%>eb<%/function:eb%><%^function:eb%>tm<%/function:eb%>_<%function:cpp_name%>(std::unique_ptr<apache::thrift::HandlerCallbackBase> callback<%function:comma%><% > service_common/function_param_list_server%>);

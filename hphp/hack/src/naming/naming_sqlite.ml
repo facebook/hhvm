@@ -352,7 +352,9 @@ module FileInfoTable = struct
   let read_row ~stmt ~path ~base_index =
     let file_mode =
       let open Option in
-      Int64.to_int (column_int64 stmt base_index) >>= FileInfo.mode_of_enum
+      column_int64_option stmt base_index
+      >>= Int64.to_int
+      >>= FileInfo.mode_of_enum
     in
     let hash = Some (column_int64 stmt (base_index + 1)) in
     let to_ids ~value ~name_type =

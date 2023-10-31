@@ -30,25 +30,31 @@
 using namespace apache::thrift::compiler;
 
 namespace {
+bool is_container(const t_type& type) {
+  auto true_type = type.get_true_type();
+  return true_type && true_type->is_container();
+}
+
 class structure_annotations {
  public:
   structure_annotations(source_manager& sm, t_program& program)
       : fm_(sm, program), sm_(sm), prog_(program) {}
 
-  std::set<std::string> visit_type(t_type_ref type, const t_named& node) {
+  std::set<std::string> visit_type(t_type_ref typeRef, const t_named& node) {
     std::set<std::string> to_add;
-    if (type->is_base_type() || type->is_container() ||
-        (type->is_typedef() &&
-         static_cast<const t_typedef&>(*type).typedef_kind() !=
+    if (!typeRef.resolve() || typeRef->is_base_type() ||
+        typeRef->is_container() ||
+        (typeRef->is_typedef() &&
+         static_cast<const t_typedef&>(*typeRef).typedef_kind() !=
              t_typedef::kind::defined)) {
+      auto type = typeRef.get_type();
       std::vector<t_annotation> to_remove;
       bool has_cpp_type = node.find_structured_annotation_or_null(kCppTypeUri);
       for (const auto& [name, data] : type->annotations()) {
         // cpp type
         if (name == "cpp.template" || name == "cpp2.template") {
           to_remove.emplace_back(name, data);
-          if (type->get_true_type()->is_container() &&
-              !std::exchange(has_cpp_type, true)) {
+          if (is_container(*type) && !std::exchange(has_cpp_type, true)) {
             to_add.insert(
                 fmt::format("@cpp.Type{{template = \"{}\"}}", data.value));
             fm_.add_include("thrift/annotation/cpp.thrift");
@@ -96,10 +102,8 @@ class structure_annotations {
       if (name == "cpp.template" || name == "cpp2.template") {
         to_remove.emplace_back(name, data);
         if (is_typedef &&
-            static_cast<const t_typedef&>(node)
-                .type()
-                ->get_true_type()
-                ->is_container() &&
+            is_container(
+                *static_cast<const t_typedef&>(node).type().get_type()) &&
             !std::exchange(has_cpp_type, true)) {
           to_add.insert(
               fmt::format("@cpp.Type{{template = \"{}\"}}", data.value));

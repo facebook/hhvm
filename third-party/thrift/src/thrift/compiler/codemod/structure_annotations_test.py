@@ -48,6 +48,7 @@ class HoistAnnotatedTypes(unittest.TestCase):
                     2: i32 qux (cpp.type = "oops!");
                     3: foo noAdd;
                     4: i32 (cpp.template = "oops!") notContainer;
+                    5: UnknownType (cpp.type = "foo") unknown;
                 }
 
                 """
@@ -74,6 +75,8 @@ class HoistAnnotatedTypes(unittest.TestCase):
                     2: i32 qux ;
                     3: foo noAdd;
                     4: i32  notContainer;
+                    @cpp.Type{name = "foo"}
+                    5: UnknownType  unknown;
                 }
                 """
             ),

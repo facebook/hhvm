@@ -394,9 +394,7 @@ struct TypeConstraint {
   std::string displayName(const Class* context = nullptr,
                           bool extra = false) const;
 
-#ifndef NDEBUG
   std::string debugName() const;
-#endif
 
   /*
    * Obtain an initial value suitable for this type-constraint. Where possible,

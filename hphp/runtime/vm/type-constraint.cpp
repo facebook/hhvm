@@ -703,8 +703,6 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
   return name;
 }
 
-#ifndef NDEBUG
-
 namespace {
 
 bool contains(UnionTypeMask value, UnionTypeMask bit) {
@@ -782,13 +780,13 @@ std::string show(AnnotType t) {
     case AnnotType::Classname: return "Classname";
     case AnnotType::Unresolved: return "Unresolved";
   }
+  not_reached();
 }
 
 } // anonymous namespace
 
 std::string TypeConstraint::debugName() const {
   std::string name;
-
 
   auto flags = show(m_flags);
   auto tn = show(typeName());
@@ -819,8 +817,6 @@ std::string TypeConstraint::debugName() const {
       tn);
   }
 }
-
-#endif // NDEBUG
 
 TypedValue TypeConstraint::defaultValue() const {
   // Nullable type-constraints should always default to null, as Hack

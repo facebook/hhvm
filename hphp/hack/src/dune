@@ -82,6 +82,7 @@
   search
   server_autocomplete_services
   server_search
+  server_services
   string
   sys_utils
   utils_core))

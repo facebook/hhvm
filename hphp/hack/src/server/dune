@@ -320,6 +320,7 @@
  (name server_services)
  (wrapped false)
  (modules
+  autocloseTags
   cstSearchService
   findRefsService
   identifySymbolService

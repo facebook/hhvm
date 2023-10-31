@@ -27,6 +27,7 @@ type mode =
     }
   | Findrefs_glean of { dry_run: bool }
   | Resolve of { is_manually_invoked: bool }
+  | XHP_close
 
 type options = {
   files: string list;
@@ -166,6 +167,10 @@ let parse_options () =
       ( "--resolve",
         Arg.Unit (set_mode (Resolve { is_manually_invoked = false })),
         " Produce what is returned from Completion_resolve requests - including signature and docblock"
+      );
+      ( "--xhp-close",
+        Arg.Unit (set_mode XHP_close),
+        " Produce what is returned from AutoClose requests, aka the closing xhp tag"
       );
       ( "--root",
         Arg.String (fun s -> root := Some s),
@@ -553,6 +558,30 @@ let handle_autocomplete ctx sienv naming_table ~is_manually_invoked filename =
                 Printf.printf "  %s\n" line)
           | None -> ()))
 
+(** This handles "--xhp-close"  *)
+let handle_xhp_close ctx _ _ filename =
+  let files_contents = Multifile.file_to_file_list filename in
+  let files_with_token =
+    files_contents
+    |> List.filter ~f:(fun (_path, contents) ->
+           String.is_substring contents ~substring:"AUTOCLOSE332")
+  in
+  List.iter files_with_token ~f:(fun (path, contents) ->
+      let (ctx, entry) =
+        Provider_context.add_or_overwrite_entry_contents ~ctx ~path ~contents
+      in
+      let offset = String_utils.substring_index "AUTOCLOSE332" contents in
+      let position = File_content.offset_to_position contents offset in
+      let line = position.File_content.line in
+      let column = position.File_content.column in
+
+      let close_tag =
+        AutocloseTags.go_xhp_close_tag ~ctx ~entry ~line ~column
+      in
+      match close_tag with
+      | Some close_tag -> Printf.printf "Close Tag: %s\n" close_tag
+      | None -> Printf.printf "Close Tag: None")
+
 (** This handles "--resolve" which for now, just autocomplete and shows the results
 and the signature (next up - docblock!), AKA whatever is already done
 in ClientIdeDaemon in response to Completion_resolve requests. *)
@@ -715,6 +744,7 @@ let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) naming_table =
   | Findrefs_glean { dry_run } -> handle_findrefs_glean sienv ~dry_run filename
   | Resolve { is_manually_invoked } ->
     handle_resolve ctx sienv naming_table ~is_manually_invoked filename
+  | XHP_close -> handle_xhp_close ctx sienv naming_table filename
 
 (*****************************************************************************)
 (* Main entry point *)

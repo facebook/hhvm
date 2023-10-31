@@ -14,6 +14,7 @@ namespace HH\Readonly {
    * Value types include numerics, strings, bools, null and Hack arrays of value
    * types.
    */
+  <<__NoAutoLikes>>
   function as_mut<T>(readonly T $x)[]: T;
 
   abstract final class Shapes {

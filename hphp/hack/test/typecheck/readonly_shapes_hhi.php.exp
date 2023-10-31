@@ -10,5 +10,5 @@ File "readonly_shapes_hhi.php", line 14, characters 3-13:
   int
 File "readonly_shapes_hhi.php", line 17, characters 3-28:
 This function call returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])
-  File "stdlib/builtins_readonly.hhi", line 54, characters 28-33:
+  File "stdlib/builtins_readonly.hhi", line 55, characters 28-33:
   The function call is defined here.

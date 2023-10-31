@@ -176,8 +176,6 @@ class HeaderOrRocketTest {
 template <typename T>
 class LoggingEventTest : public testing::Test {
  protected:
-  void SetUp() override { apache::thrift::useMockLoggingEventRegistry(); }
-
   template <typename H>
   T& fetchHandler(
       H& (LoggingEventRegistry::*method)(std::string_view) const,

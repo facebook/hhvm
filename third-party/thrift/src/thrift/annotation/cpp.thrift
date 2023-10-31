@@ -47,6 +47,14 @@ struct Ref {
   1: RefType type;
 }
 
+/**
+ * Changes the name of the definition in generated C++ code.
+ */
+@scope.Definition
+struct Name {
+  1: string value;
+}
+
 @scope.Field
 struct Lazy {
   // Use std::unique_ptr<folly::IOBuf> instead of folly::IOBuf to store serialized data.

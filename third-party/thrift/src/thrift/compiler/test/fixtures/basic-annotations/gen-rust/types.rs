@@ -383,6 +383,20 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
             return Some(r);
         }
 
+        if type_id == ::std::any::TypeId::of::<cpp::types::Name>() {
+            let mut tmp = Some(cpp::types::Name {
+                value: "YourUnion".to_owned(),
+                ..::std::default::Default::default()
+            });
+            let r: &mut dyn ::std::any::Any = &mut tmp;
+            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            return r.take();
+        }
+
+        if let Some(r) = <cpp::types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return Some(r);
+        }
+
         None
     }
 

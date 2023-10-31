@@ -78,6 +78,7 @@ StructMetadata<::cpp2::detail::YourUnion>::gen(ThriftMetadata& metadata) {
   module_MyUnion.name() = "module.MyUnion";
   module_MyUnion.is_union() = true;
   module_MyUnion.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::StaticCast")}}).cv_struct_ref());
+  module_MyUnion.structured_annotations()->push_back(*cvStruct("cpp.Name", {{"value", cvString("YourUnion")}}).cv_struct_ref());
   return res.first->second;
 }
 void StructMetadata<::cpp2::detail::YourException>::unstructured_annotations(FOLLY_MAYBE_UNUSED ::apache::thrift::metadata::ThriftStruct& thriftStruct){

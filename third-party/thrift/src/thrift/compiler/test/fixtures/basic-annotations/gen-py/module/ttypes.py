@@ -768,7 +768,6 @@ MyUnion.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 )))
 
 MyUnion.thrift_struct_annotations = {
-  "cpp.name": "YourUnion",
 }
 MyUnion.thrift_field_annotations = {
 }

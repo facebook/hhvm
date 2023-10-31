@@ -552,6 +552,172 @@ func (x *Ref) String() string {
     return sb.String()
 }
 
+type Name struct {
+    Value string `thrift:"value,1" json:"value" db:"value"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &Name{}
+
+func NewName() *Name {
+    return (&Name{}).
+        SetValueNonCompat("")
+}
+
+func (x *Name) GetValueNonCompat() string {
+    return x.Value
+}
+
+func (x *Name) GetValue() string {
+    return x.Value
+}
+
+func (x *Name) SetValueNonCompat(value string) *Name {
+    x.Value = value
+    return x
+}
+
+func (x *Name) SetValue(value string) *Name {
+    x.Value = value
+    return x
+}
+
+func (x *Name) writeField1(p thrift.Protocol) error {  // Value
+    if err := p.WriteFieldBegin("value", thrift.STRING, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetValueNonCompat()
+    if err := p.WriteString(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Name) readField1(p thrift.Protocol) error {  // Value
+    result, err := p.ReadString()
+if err != nil {
+    return err
+}
+
+    x.SetValueNonCompat(result)
+    return nil
+}
+
+func (x *Name) toString1() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewName().Set<FieldNameFoo>().Set<FieldNameBar>()
+type NameBuilder struct {
+    obj *Name
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewName().Set<FieldNameFoo>().Set<FieldNameBar>()
+func NewNameBuilder() *NameBuilder {
+    return &NameBuilder{
+        obj: NewName(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewName().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *NameBuilder) Value(value string) *NameBuilder {
+    x.obj.Value = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewName().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *NameBuilder) Emit() *Name {
+    var objCopy Name = *x.obj
+    return &objCopy
+}
+
+func (x *Name) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("Name"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Name) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch id {
+        case 1:  // value
+            expectedType := thrift.Type(thrift.STRING)
+            if wireType == expectedType {
+                if err := x.readField1(p); err != nil {
+                   return err
+                }
+            } else {
+                if err := p.Skip(wireType); err != nil {
+                    return err
+                }
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *Name) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Name({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
 type Lazy struct {
     Ref bool `thrift:"ref,1" json:"ref" db:"ref"`
 }
@@ -2498,6 +2664,7 @@ func RegisterTypes(registry interface {
 }) {
     registry.RegisterType("facebook.com/thrift/annotation/cpp/Type", func() any { return NewType() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/Ref", func() any { return NewRef() })
+    registry.RegisterType("facebook.com/thrift/annotation/cpp/Name", func() any { return NewName() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/Lazy", func() any { return NewLazy() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/DisableLazyChecksum", func() any { return NewDisableLazyChecksum() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/Adapter", func() any { return NewAdapter() })

@@ -225,6 +225,11 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
             "name" => "::StaticCast",
           )
         ),
+        '\facebook\thrift\annotation\cpp\Name' => \facebook\thrift\annotation\cpp\Name::fromShape(
+          shape(
+            "value" => "YourUnion",
+          )
+        ),
       ],
       'fields' => dict[
       ],
@@ -660,6 +665,11 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::StaticCast",
+              )
+            ),
+            '\facebook\thrift\annotation\cpp\Name' => \facebook\thrift\annotation\cpp\Name::fromShape(
+              shape(
+                "value" => "YourUnion",
               )
             ),
           ],

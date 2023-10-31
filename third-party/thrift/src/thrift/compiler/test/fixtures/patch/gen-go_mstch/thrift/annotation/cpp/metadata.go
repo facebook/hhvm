@@ -67,6 +67,20 @@ var structMetadatas = []*metadata.ThriftStruct{
         },
     ),
     metadata.NewThriftStruct().
+    SetName("cpp.Name").
+    SetIsUnion(false).
+    SetFields(
+        []*metadata.ThriftField{
+            metadata.NewThriftField().
+    SetId(1).
+    SetName("value").
+    SetIsOptional(false).
+    SetType(
+        primitiveThriftType_THRIFT_STRING_TYPE,
+    ),
+        },
+    ),
+    metadata.NewThriftStruct().
     SetName("cpp.Lazy").
     SetIsUnion(false).
     SetFields(

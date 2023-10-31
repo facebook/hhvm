@@ -552,8 +552,9 @@ t_struct& patch_generator::gen_suffix_struct(
   ctx_.check(!orig.uri().empty(), annot, "URI required to support patching.");
   t_struct& generated =
       gen_struct(annot, orig.name() + suffix, orig.uri() + suffix);
-  if (const auto* cpp_name = orig.find_annotation_or_null("cpp.name")) {
-    generated.set_annotation("cpp.name", *cpp_name + suffix);
+  if (const auto& cpp_name = gen::cpp::namespace_resolver::get_cpp_name(orig);
+      cpp_name != orig.name()) {
+    generated.set_annotation("cpp.name", cpp_name + suffix);
   }
   return generated;
 }

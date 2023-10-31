@@ -58,6 +58,11 @@ class namespace_resolver {
   }
 
   static const std::string& get_cpp_name(const t_named& node) {
+    if (const auto* cpp_name =
+            node.find_structured_annotation_or_null(kCppNameUri)) {
+      return cpp_name->get_value_from_structured_annotation("value")
+          .get_string();
+    }
     return node.get_annotation("cpp.name", &node.name());
   }
 

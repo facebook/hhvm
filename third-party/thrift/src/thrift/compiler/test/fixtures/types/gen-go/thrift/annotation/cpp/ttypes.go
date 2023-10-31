@@ -395,6 +395,119 @@ func (p *Ref) String() string {
   return fmt.Sprintf("Ref({Type:%s})", typeVal)
 }
 
+// Changes the name of the definition in generated C++ code.
+// 
+// Attributes:
+//  - Value
+type Name struct {
+  Value string `thrift:"value,1" db:"value" json:"value"`
+}
+
+func NewName() *Name {
+  return &Name{}
+}
+
+
+func (p *Name) GetValue() string {
+  return p.Value
+}
+type NameBuilder struct {
+  obj *Name
+}
+
+func NewNameBuilder() *NameBuilder{
+  return &NameBuilder{
+    obj: NewName(),
+  }
+}
+
+func (p NameBuilder) Emit() *Name{
+  return &Name{
+    Value: p.obj.Value,
+  }
+}
+
+func (n *NameBuilder) Value(value string) *NameBuilder {
+  n.obj.Value = value
+  return n
+}
+
+func (n *Name) SetValue(value string) *Name {
+  n.Value = value
+  return n
+}
+
+func (p *Name) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *Name)  ReadField1(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadString(); err != nil {
+    return thrift.PrependError("error reading field 1: ", err)
+  } else {
+    p.Value = v
+  }
+  return nil
+}
+
+func (p *Name) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("Name"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *Name) writeField1(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("value", thrift.STRING, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:value: ", p), err) }
+  if err := oprot.WriteString(string(p.Value)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.value (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:value: ", p), err) }
+  return err
+}
+
+func (p *Name) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  valueVal := fmt.Sprintf("%v", p.Value)
+  return fmt.Sprintf("Name({Value:%s})", valueVal)
+}
+
 // Attributes:
 //  - Ref
 type Lazy struct {

@@ -29,7 +29,7 @@
       }
     },
     "EnumUnderlyingType" : {
-      "lineno" : 211,
+      "lineno" : 219,
       "constants" : {
         "I8" : 0,
         "U8" : 1,
@@ -39,11 +39,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 211,
+          "line" : 219,
           "column" : 1
         },
         "end" : {
-          "line" : 222,
+          "line" : 230,
           "column" : 2
         }
       }
@@ -151,8 +151,43 @@
         }
       }
     },
+    "Name" : {
+      "lineno" : 53,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Definition" : {  }
+      },
+      "fields" : {
+        "value" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 55,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 55,
+              "column" : 19
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 53,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 56,
+          "column" : 2
+        }
+      }
+    },
     "Lazy" : {
-      "lineno" : 50,
+      "lineno" : 58,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -166,11 +201,11 @@
           "default_value" : false,
           "source_range" : {
             "begin" : {
-              "line" : 53,
+              "line" : 61,
               "column" : 3
             },
             "end" : {
-              "line" : 53,
+              "line" : 61,
               "column" : 23
             }
           }
@@ -178,17 +213,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 50,
+          "line" : 58,
           "column" : 1
         },
         "end" : {
-          "line" : 54,
+          "line" : 62,
           "column" : 2
         }
       }
     },
     "DisableLazyChecksum" : {
-      "lineno" : 56,
+      "lineno" : 64,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -199,17 +234,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 56,
+          "line" : 64,
           "column" : 1
         },
         "end" : {
-          "line" : 57,
+          "line" : 65,
           "column" : 30
         }
       }
     },
     "Adapter" : {
-      "lineno" : 76,
+      "lineno" : 84,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -225,11 +260,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 104,
+              "line" : 112,
               "column" : 3
             },
             "end" : {
-              "line" : 104,
+              "line" : 112,
               "column" : 18
             }
           }
@@ -240,11 +275,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 110,
+              "line" : 118,
               "column" : 3
             },
             "end" : {
-              "line" : 110,
+              "line" : 118,
               "column" : 25
             }
           }
@@ -255,11 +290,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 124,
+              "line" : 132,
               "column" : 3
             },
             "end" : {
-              "line" : 124,
+              "line" : 132,
               "column" : 28
             }
           }
@@ -270,11 +305,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 125,
+              "line" : 133,
               "column" : 3
             },
             "end" : {
-              "line" : 125,
+              "line" : 133,
               "column" : 28
             }
           }
@@ -285,11 +320,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 128,
+              "line" : 136,
               "column" : 3
             },
             "end" : {
-              "line" : 128,
+              "line" : 136,
               "column" : 20
             }
           }
@@ -297,17 +332,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 76,
+          "line" : 84,
           "column" : 1
         },
         "end" : {
-          "line" : 129,
+          "line" : 137,
           "column" : 2
         }
       }
     },
     "PackIsset" : {
-      "lineno" : 131,
+      "lineno" : 139,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -321,11 +356,11 @@
           "default_value" : true,
           "source_range" : {
             "begin" : {
-              "line" : 133,
+              "line" : 141,
               "column" : 3
             },
             "end" : {
-              "line" : 133,
+              "line" : 141,
               "column" : 25
             }
           }
@@ -333,17 +368,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 131,
+          "line" : 139,
           "column" : 1
         },
         "end" : {
-          "line" : 134,
+          "line" : 142,
           "column" : 2
         }
       }
     },
     "MinimizePadding" : {
-      "lineno" : 136,
+      "lineno" : 144,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -354,17 +389,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 136,
+          "line" : 144,
           "column" : 1
         },
         "end" : {
-          "line" : 137,
+          "line" : 145,
           "column" : 26
         }
       }
     },
     "TriviallyRelocatable" : {
-      "lineno" : 139,
+      "lineno" : 147,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -375,17 +410,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 139,
+          "line" : 147,
           "column" : 1
         },
         "end" : {
-          "line" : 140,
+          "line" : 148,
           "column" : 31
         }
       }
     },
     "ScopedEnumAsUnionType" : {
-      "lineno" : 142,
+      "lineno" : 150,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -396,17 +431,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 142,
+          "line" : 150,
           "column" : 1
         },
         "end" : {
-          "line" : 143,
+          "line" : 151,
           "column" : 32
         }
       }
     },
     "StrongType" : {
-      "lineno" : 159,
+      "lineno" : 167,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -418,17 +453,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 159,
+          "line" : 167,
           "column" : 1
         },
         "end" : {
-          "line" : 161,
+          "line" : 169,
           "column" : 21
         }
       }
     },
     "FieldInterceptor" : {
-      "lineno" : 177,
+      "lineno" : 185,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -442,11 +477,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 194,
+              "line" : 202,
               "column" : 3
             },
             "end" : {
-              "line" : 194,
+              "line" : 202,
               "column" : 18
             }
           }
@@ -457,11 +492,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 200,
+              "line" : 208,
               "column" : 3
             },
             "end" : {
-              "line" : 200,
+              "line" : 208,
               "column" : 20
             }
           }
@@ -469,17 +504,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 177,
+          "line" : 185,
           "column" : 1
         },
         "end" : {
-          "line" : 201,
+          "line" : 209,
           "column" : 2
         }
       }
     },
     "UseOpEncode" : {
-      "lineno" : 203,
+      "lineno" : 211,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -491,17 +526,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 203,
+          "line" : 211,
           "column" : 1
         },
         "end" : {
-          "line" : 205,
+          "line" : 213,
           "column" : 22
         }
       }
     },
     "EnumType" : {
-      "lineno" : 241,
+      "lineno" : 249,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -514,11 +549,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 243,
+              "line" : 251,
               "column" : 3
             },
             "end" : {
-              "line" : 243,
+              "line" : 251,
               "column" : 30
             }
           }
@@ -526,17 +561,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 241,
+          "line" : 249,
           "column" : 1
         },
         "end" : {
-          "line" : 244,
+          "line" : 252,
           "column" : 2
         }
       }
     },
     "Frozen2Exclude" : {
-      "lineno" : 249,
+      "lineno" : 257,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -547,17 +582,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 249,
+          "line" : 257,
           "column" : 1
         },
         "end" : {
-          "line" : 250,
+          "line" : 258,
           "column" : 25
         }
       }
     },
     "Frozen2RequiresCompleteContainerParams" : {
-      "lineno" : 256,
+      "lineno" : 264,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -568,11 +603,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 256,
+          "line" : 264,
           "column" : 1
         },
         "end" : {
-          "line" : 257,
+          "line" : 265,
           "column" : 49
         }
       }

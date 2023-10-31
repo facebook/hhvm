@@ -31,7 +31,8 @@ struct MyStructNestedAnnotation {
 }
 
 @cpp.Adapter{name = '::StaticCast'}
-union MyUnion {} (cpp.name = "YourUnion")
+@cpp.Name{value = "YourUnion"}
+union MyUnion {}
 @cpp.Adapter{name = '::StaticCast'}
 safe exception MyException {} (cpp.name = "YourException")
 

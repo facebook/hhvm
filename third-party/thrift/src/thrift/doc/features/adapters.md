@@ -4,7 +4,7 @@
 
 ## Overview
 
-Thrift Adapter is the standard customization method to allow users to use their own custom types on Thrift generated structs and fields. Thrift Adapter **must** be able to convert from [standard type](../glossary/#kinds-of-types) to [adapted type](../glossary/#kinds-of-types) and vice versa. Thrift Adapter is designed so that it can be enabled per each langauge without intefering wire format. Thrift Adapter serves as a building blocks for other Thrift features, such as [Thrift Patch](patch.md) and Thrift Any.
+Thrift Adapter is the standard customization method to allow users to use their own custom types on Thrift generated structs and fields. Thrift Adapter **must** be able to convert from [standard type](../glossary/#kinds-of-types) to [adapted type](../glossary/#kinds-of-types) and vice versa. Thrift Adapter is designed so that it can be enabled per each langauge without intefering wire format. Thrift Adapter serves as a building blocks for other Thrift features, such as [Thrift Patch](patch.md) and Protocol Object.
 
 Thrift Adapter **may** provide customization for [value operators](operators.md), including comparison, equality, hash, clear, serialized size, serialize, and deserialize. This allows Thrift Adapter to avoid conversion back to standard type for evaluation and manipulation.
 
@@ -164,11 +164,11 @@ struct Adapter {
 Thrift Adapter allows further customization points to avoid calling `fromThrift` and `toThrift` for optimization. Assume `obj` has type `AdaptedType`.
 
 * Comparison and Equality
-  * Comparison Priority
+  * Equality Priority
     * `Adapter::equal(const AdaptedType& lhs, const AdaptedType& rhs)`
     * `AdaptedType::operator==(const AdaptedType& rhs)`
     * `DefaultType::operator==(const DefaultType& rhs)` using `Adapter::toThrift(lhs) == Adapter::toThrift(rhs)`
-  * Equality Priority is same as above.
+  * Comparison Priority is same as above.
 
 * Hash
   * Hash Priority

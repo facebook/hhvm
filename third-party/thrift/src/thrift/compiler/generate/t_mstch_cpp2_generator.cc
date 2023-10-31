@@ -836,6 +836,7 @@ class cpp_mstch_function : public mstch_function {
              &cpp_mstch_function::created_interaction},
             {"function:sync_returns_by_outparam?",
              &cpp_mstch_function::sync_returns_by_outparam},
+            {"function:prefixed_name", &cpp_mstch_function::prefixed_name},
         });
   }
   mstch::node coroutine() {
@@ -871,6 +872,13 @@ class cpp_mstch_function : public mstch_function {
   mstch::node sync_returns_by_outparam() {
     return is_complex_return(function_->return_type()->get_true_type()) &&
         !function_->interaction() && !function_->sink_or_stream();
+  }
+
+  mstch::node prefixed_name() {
+    return interface_->is_interaction()
+        ? fmt::format(
+              "{}_{}", interface_->get_name(), cpp2::get_name(function_))
+        : cpp_name();
   }
 
  private:

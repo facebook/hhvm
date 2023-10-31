@@ -22,7 +22,7 @@ void <% > service_common/client_class_name%>::<%function:cpp_name%>T(Protocol_* 
   setInteraction(<%#function:creates_interaction?%>handle, <%/function:creates_interaction?%>rpcOpts);
   <%/function:in_or_creates_interaction?%>
 
-  <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_pargs args;
+  <% > common/namespace_cpp2%><%service:parent_service_cpp_name%>_<%function:prefixed_name%>_pargs args;
 <%#function:args%><%#field:type%>
 <%^type:resolves_to_complex_return?%>
   args.get<<%field:index%>>().value = &p_<%field:cpp_name%>;

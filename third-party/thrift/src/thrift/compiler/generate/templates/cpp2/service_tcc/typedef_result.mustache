@@ -20,7 +20,7 @@
 <%^function:sink?%>
 typedef apache::thrift::ThriftPresult<true<% > service_tcc/field_data_return%><%!
     %><%#function:exceptions%><% > service_tcc/field_data_throws%><%/function:exceptions%>><%!
-    %> <%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult;
+    %> <%service:parent_service_cpp_name%>_<%function:prefixed_name%>_presult;
 <%/function:sink?%><%!
 
 %><%#function:sink?%>
@@ -31,7 +31,7 @@ typedef apache::thrift::ThriftPResultSink<
       %><%#function:sink_exceptions%><% > service_tcc/field_data_throws%><%/function:sink_exceptions%>>,
     apache::thrift::ThriftPresult<true<%#function:sink_final_response_type%><% > service_tcc/field_data_return%><%/function:sink_final_response_type%><%!
       %><%#function:sink_final_response_exceptions%><% > service_tcc/field_data_throws%><%/function:sink_final_response_exceptions%>>
-    > <%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult;
+    > <%service:parent_service_cpp_name%>_<%function:prefixed_name%>_presult;
 <%/function:sink?%>
 <%/function:stream?%><%!
 
@@ -41,7 +41,7 @@ typedef apache::thrift::ThriftPResultStream<
       %><%#function:exceptions%><% > service_tcc/field_data_throws%><%/function:exceptions%>>,
     apache::thrift::ThriftPresult<true<%#function:stream_elem_type%><% > service_tcc/field_data_return%><%/function:stream_elem_type%><%!
       %><%#function:stream_exceptions%><% > service_tcc/field_data_throws%><%/function:stream_exceptions%>>
-    > <%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult;
+    > <%service:parent_service_cpp_name%>_<%function:prefixed_name%>_presult;
 <%/function:stream?%>
 <%/function:oneway?%>
 <%/function:return_type%>

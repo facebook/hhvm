@@ -2001,15 +2001,22 @@ let refine_and_simplify_intersection
     let (env, ty2) =
       intersect ~hint_first:false ~is_class env reason ty hint_ty
     in
-    match get_node hint_ty with
+    let rec is_enforced hint_ty =
+      match get_node hint_ty with
+      | Toption ty -> is_enforced ty
+      | Tclass (_, _, [])
+      | Tprim _ ->
+        true
+      | _ -> false
+    in
     (* If the hint is fully enforced, keep that information around *)
-    | Tclass (_, _, [])
-    | Tprim _ ->
+    if is_enforced hint_ty then
       let (env, dyn_ty) =
         Inter.intersect env ~r:reason (MakeType.dynamic reason) hint_ty
       in
       Union.union env dyn_ty ty2
-    | _ -> (env, MakeType.locl_like reason ty2)
+    else
+      (env, MakeType.locl_like reason ty2)
   in
   match TUtils.try_strip_dynamic env ivar_ty with
   | Some ty when TCO.enable_sound_dynamic (Env.get_tcopt env) ->

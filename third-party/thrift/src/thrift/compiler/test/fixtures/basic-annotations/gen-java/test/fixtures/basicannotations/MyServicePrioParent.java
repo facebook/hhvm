@@ -33,7 +33,7 @@ public interface MyServicePrioParent extends java.io.Closeable, com.facebook.thr
             @java.lang.Override
             public MyServicePrioParent build(Mono<RpcClient> rpcClientMono) {
                 MyServicePrioParent.Reactive _delegate =
-                    new MyServicePrioParentReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    new MyServicePrioParentReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 return new MyServicePrioParentReactiveBlockingWrapper(_delegate);
             }
         };
@@ -55,7 +55,7 @@ public interface MyServicePrioParent extends java.io.Closeable, com.facebook.thr
                 @java.lang.Override
                 public MyServicePrioParent.Async build(Mono<RpcClient> rpcClientMono) {
                     MyServicePrioParent.Reactive _delegate =
-                        new MyServicePrioParentReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                        new MyServicePrioParentReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                     return new MyServicePrioParentReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -132,7 +132,7 @@ public interface MyServicePrioParent extends java.io.Closeable, com.facebook.thr
             return new ClientBuilder<MyServicePrioParent.Reactive>() {
                 @java.lang.Override
                 public MyServicePrioParent.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new MyServicePrioParentReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    return new MyServicePrioParentReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 }
             };
         }

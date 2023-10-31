@@ -33,7 +33,7 @@ public interface TestService extends java.io.Closeable, com.facebook.thrift.util
             @java.lang.Override
             public TestService build(Mono<RpcClient> rpcClientMono) {
                 TestService.Reactive _delegate =
-                    new TestServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    new TestServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 return new TestServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -55,7 +55,7 @@ public interface TestService extends java.io.Closeable, com.facebook.thrift.util
                 @java.lang.Override
                 public TestService.Async build(Mono<RpcClient> rpcClientMono) {
                     TestService.Reactive _delegate =
-                        new TestServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                        new TestServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                     return new TestServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -112,7 +112,7 @@ public interface TestService extends java.io.Closeable, com.facebook.thrift.util
             return new ClientBuilder<TestService.Reactive>() {
                 @java.lang.Override
                 public TestService.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new TestServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    return new TestServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 }
             };
         }

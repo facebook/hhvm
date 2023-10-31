@@ -34,11 +34,19 @@ public class MyServicePrioChildReactiveClient extends test.fixtures.basicannotat
   }
 
   public MyServicePrioChildReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
-    this(_protocolId, _rpcClient, _headers, _persistentHeaders, new AtomicLong(), ConcurrentHashMap.newKeySet());
+    this(_protocolId, _rpcClient, reactor.core.publisher.Mono.just(_headers != null ? _headers : java.util.Collections.emptyMap()), reactor.core.publisher.Mono.just(_persistentHeaders != null ? _persistentHeaders : java.util.Collections.emptyMap()), new AtomicLong(), ConcurrentHashMap.newKeySet());
+  }
+
+  public MyServicePrioChildReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono) {
+    this(_protocolId, _rpcClient, _headersMono, _persistentHeadersMono, new AtomicLong(), ConcurrentHashMap.newKeySet());
   }
 
   public MyServicePrioChildReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders, AtomicLong interactionCounter, Set<Long> activeInteractions) {
-    super(_protocolId, _rpcClient, _headers, _persistentHeaders, interactionCounter, activeInteractions);
+    this(_protocolId,_rpcClient, reactor.core.publisher.Mono.just(_headers != null ? _headers : java.util.Collections.emptyMap()), reactor.core.publisher.Mono.just(_persistentHeaders != null ? _persistentHeaders : java.util.Collections.emptyMap()), interactionCounter, activeInteractions);
+  }
+
+  public MyServicePrioChildReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono, AtomicLong interactionCounter, Set<Long> activeInteractions) {
+    super(_protocolId, _rpcClient, _headersMono, _persistentHeadersMono, interactionCounter, activeInteractions);
   }
 
   @java.lang.Override
@@ -60,11 +68,11 @@ public class MyServicePrioChildReactiveClient extends test.fixtures.basicannotat
   @java.lang.Override
   public reactor.core.publisher.Mono<com.facebook.thrift.client.ResponseWrapper<Void>> pangWrapper( final com.facebook.thrift.client.RpcOptions rpcOptions) {
     return _rpcClient
-      .flatMap(_rpc -> {
+      .flatMap(_rpc -> getHeaders(rpcOptions).flatMap(headers -> {
         org.apache.thrift.RequestRpcMetadata _metadata = new org.apache.thrift.RequestRpcMetadata.Builder()
                 .setName("pang")
                 .setKind(org.apache.thrift.RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE)
-                .setOtherMetadata(getHeaders(rpcOptions))
+                .setOtherMetadata(headers)
                 .setProtocol(_protocolId)
                 .build();
 
@@ -79,7 +87,7 @@ public class MyServicePrioChildReactiveClient extends test.fixtures.basicannotat
 
             return _rpc
                 .singleRequestSingleResponse(_crp, rpcOptions).doOnNext(_p -> {if(_p.getException() != null) throw com.facebook.thrift.util.ExceptionUtil.propagate(_p);});
-      });
+      }));
   }
 
   @java.lang.Override
@@ -94,17 +102,18 @@ public class MyServicePrioChildReactiveClient extends test.fixtures.basicannotat
 
 
 
-  private Map<String, String> getHeaders(com.facebook.thrift.client.RpcOptions rpcOptions) {
-      Map<String, String> headers = new HashMap<>();
+  private reactor.core.publisher.Mono<Map<String, String>> getHeaders(com.facebook.thrift.client.RpcOptions rpcOptions) {
+      Map<String, String> requestHeaders = new HashMap<>();
       if (rpcOptions.getRequestHeaders() != null && !rpcOptions.getRequestHeaders().isEmpty()) {
-          headers.putAll(rpcOptions.getRequestHeaders());
+          requestHeaders.putAll(rpcOptions.getRequestHeaders());
       }
-      if (_headers != null && !_headers.isEmpty()) {
-          headers.putAll(_headers);
-      }
-      if (_persistentHeaders != null && !_persistentHeaders.isEmpty()) {
-          headers.putAll(_persistentHeaders);
-      }
-      return headers;
+
+      return _headersMono.defaultIfEmpty(java.util.Collections.emptyMap()).zipWith(_persistentHeadersMono.defaultIfEmpty(java.util.Collections.emptyMap()), (headers, persistentHeaders) -> {
+          Map<String, String> result = new HashMap<>();
+          result.putAll(requestHeaders);
+          result.putAll(headers);
+          result.putAll(persistentHeaders);
+          return result;
+      });
   }
 }

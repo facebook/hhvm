@@ -33,7 +33,7 @@ public interface PrimitivesService extends java.io.Closeable, com.facebook.thrif
             @java.lang.Override
             public PrimitivesService build(Mono<RpcClient> rpcClientMono) {
                 PrimitivesService.Reactive _delegate =
-                    new PrimitivesServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    new PrimitivesServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 return new PrimitivesServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -55,7 +55,7 @@ public interface PrimitivesService extends java.io.Closeable, com.facebook.thrif
                 @java.lang.Override
                 public PrimitivesService.Async build(Mono<RpcClient> rpcClientMono) {
                     PrimitivesService.Reactive _delegate =
-                        new PrimitivesServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                        new PrimitivesServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                     return new PrimitivesServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -182,7 +182,7 @@ public interface PrimitivesService extends java.io.Closeable, com.facebook.thrif
             return new ClientBuilder<PrimitivesService.Reactive>() {
                 @java.lang.Override
                 public PrimitivesService.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new PrimitivesServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    return new PrimitivesServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 }
             };
         }

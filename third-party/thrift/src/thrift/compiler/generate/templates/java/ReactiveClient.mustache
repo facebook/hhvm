@@ -39,8 +39,8 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
 
   protected final org.apache.thrift.ProtocolId _protocolId;
   protected final reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient;
-  protected final Map<String, String> _headers;
-  protected final Map<String, String> _persistentHeaders;
+  protected final reactor.core.publisher.Mono<Map<String, String>> _headersMono;
+  protected final reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono;
   protected final Set<Long> _activeInteractions;
   {{/service:extends}}
 
@@ -128,23 +128,31 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
     {{^service:extends}}
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
-    this._headers = java.util.Collections.emptyMap();
-    this._persistentHeaders = java.util.Collections.emptyMap();
+    this._headersMono = reactor.core.publisher.Mono.empty();
+    this._persistentHeadersMono = reactor.core.publisher.Mono.empty();
     this._activeInteractions = ConcurrentHashMap.newKeySet();
     {{/service:extends}}
   }
 
   public {{service:javaCapitalName}}ReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
-    this(_protocolId, _rpcClient, _headers, _persistentHeaders, new AtomicLong(), ConcurrentHashMap.newKeySet());
+    this(_protocolId, _rpcClient, reactor.core.publisher.Mono.just(_headers != null ? _headers : java.util.Collections.emptyMap()), reactor.core.publisher.Mono.just(_persistentHeaders != null ? _persistentHeaders : java.util.Collections.emptyMap()), new AtomicLong(), ConcurrentHashMap.newKeySet());
+  }
+
+  public {{service:javaCapitalName}}ReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono) {
+    this(_protocolId, _rpcClient, _headersMono, _persistentHeadersMono, new AtomicLong(), ConcurrentHashMap.newKeySet());
   }
 
   public {{service:javaCapitalName}}ReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders, AtomicLong interactionCounter, Set<Long> activeInteractions) {
-    {{#service:extends}}super(_protocolId, _rpcClient, _headers, _persistentHeaders, interactionCounter, activeInteractions);{{/service:extends}}
+    this(_protocolId,_rpcClient, reactor.core.publisher.Mono.just(_headers != null ? _headers : java.util.Collections.emptyMap()), reactor.core.publisher.Mono.just(_persistentHeaders != null ? _persistentHeaders : java.util.Collections.emptyMap()), interactionCounter, activeInteractions);
+  }
+
+  public {{service:javaCapitalName}}ReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono, AtomicLong interactionCounter, Set<Long> activeInteractions) {
+    {{#service:extends}}super(_protocolId, _rpcClient, _headersMono, _persistentHeadersMono, interactionCounter, activeInteractions);{{/service:extends}}
     {{^service:extends}}
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
-    this._headers = _headers;
-    this._persistentHeaders = _persistentHeaders;
+    this._headersMono = _headersMono;
+    this._persistentHeadersMono = _persistentHeadersMono;
     this._activeInteractions = activeInteractions;
     {{/service:extends}}
   }
@@ -186,11 +194,11 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
   @java.lang.Override
   public reactor.core.publisher.Mono<com.facebook.thrift.client.ResponseWrapper<{{#function:return_type}}{{> BoxedType}}{{/function:return_type}}>> {{function:javaName}}Wrapper({{#function:args}}final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}, {{/function:args}} final com.facebook.thrift.client.RpcOptions rpcOptions) {
     return _rpcClient
-      .flatMap(_rpc -> {
+      .flatMap(_rpc -> getHeaders(rpcOptions).flatMap(headers -> {
         org.apache.thrift.RequestRpcMetadata _metadata = new org.apache.thrift.RequestRpcMetadata.Builder()
                 .setName("{{function:name}}")
                 .setKind(org.apache.thrift.RpcKind.{{#function:oneway?}}SINGLE_REQUEST_NO_RESPONSE{{/function:oneway?}}{{^function:oneway?}}SINGLE_REQUEST_SINGLE_RESPONSE{{/function:oneway?}})
-                .setOtherMetadata(getHeaders(rpcOptions))
+                .setOtherMetadata(headers)
                 .setProtocol(_protocolId)
                 .build();
 
@@ -206,7 +214,7 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
             return _rpc
                 {{#function:oneway?}}.singleRequestNoResponse(_crp, rpcOptions).thenReturn(ResponseWrapper.create(null, java.util.Collections.emptyMap(), java.util.Collections.emptyMap())){{/function:oneway?}}{{!
                 }}{{^function:oneway?}}.singleRequestSingleResponse(_crp, rpcOptions).doOnNext(_p -> {if(_p.getException() != null) throw com.facebook.thrift.util.ExceptionUtil.propagate(_p);}){{/function:oneway?}};
-      });
+      }));
   }
 
   @java.lang.Override
@@ -262,11 +270,11 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
   @java.lang.Override
   public reactor.core.publisher.Flux<com.facebook.thrift.client.ResponseWrapper<{{#function:return_type}}{{> StreamReturnType}}{{/function:return_type}}>> {{function:javaName}}Wrapper({{#function:args}}final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}, {{/function:args}} final com.facebook.thrift.client.RpcOptions rpcOptions) {
     return _rpcClient
-      .flatMapMany(_rpc -> {
+      .flatMapMany(_rpc -> getHeaders(rpcOptions).flatMapMany(headers -> {
         org.apache.thrift.RequestRpcMetadata _metadata = new org.apache.thrift.RequestRpcMetadata.Builder()
                 .setName("{{function:name}}")
                 .setKind(org.apache.thrift.RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE)
-                .setOtherMetadata(getHeaders(rpcOptions))
+                .setOtherMetadata(headers)
                 .setProtocol(_protocolId)
                 .build();
 
@@ -286,7 +294,7 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
                 .doOnNext(_p -> {if(_p.getException() != null) throw reactor.core.Exceptions.propagate(_p.getException());}){{#function:return_type}}{{^function:stream_has_first_response?}}
                 .filter((_p) -> ((com.facebook.thrift.model.StreamResponse)_p.getData()).isSetData()){{/function:stream_has_first_response?}}{{/function:return_type}}
                 .map(_p -> ResponseWrapper.create((({{#function:return_type}}{{> StreamResponseGeneric}}{{/function:return_type}})_p.getData()){{#function:return_type}}{{^function:stream_has_first_response?}}.getData(){{/function:stream_has_first_response?}}{{/function:return_type}}, _p.getHeaders(), _p.getBinaryHeaders()));
-      });
+      }));
   }
 
   @java.lang.Override
@@ -358,11 +366,11 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
   @java.lang.Override
   public {{#function:return_type}}{{> SinkWrapperReturnType}}{{/function:return_type}} {{function:javaName}}Wrapper({{#function:args}}final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}, {{/function:args}} org.reactivestreams.Publisher<{{#function:return_type}}{{#function:sink_elem_type}}{{ >BoxedType}}{{/function:sink_elem_type}}{{/function:return_type}}> payloads, com.facebook.thrift.client.RpcOptions rpcOptions) {
     return _rpcClient
-      .flatMapMany(_rpc -> {
+      .flatMapMany(_rpc -> getHeaders(rpcOptions).flatMapMany(headers -> {
         org.apache.thrift.RequestRpcMetadata _metadata = new org.apache.thrift.RequestRpcMetadata.Builder()
                 .setName("{{function:name}}")
                 .setKind(org.apache.thrift.RpcKind.SINK)
-                .setOtherMetadata(getHeaders(rpcOptions))
+                .setOtherMetadata(headers)
                 .setProtocol(_protocolId)
                 .build();
 
@@ -394,7 +402,7 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
                 .doOnNext(_p -> {if(_p.getException() != null) throw reactor.core.Exceptions.propagate(_p.getException());}){{#function:return_type}}{{^function:sink_has_first_response?}}
                 .filter((_p) -> ((com.facebook.thrift.model.StreamResponse)_p.getData()).isSetData()){{/function:sink_has_first_response?}}{{/function:return_type}}
                 .map(_p -> ResponseWrapper.create((({{#function:return_type}}{{> SinkResponseGeneric}}{{/function:return_type}})_p.getData()){{#function:return_type}}{{^function:sink_has_first_response?}}.getData(){{/function:sink_has_first_response?}}{{/function:return_type}}, _p.getHeaders(), _p.getBinaryHeaders()));
-      }){{#function:return_type}}{{^function:sink_has_first_response?}}.single(){{/function:sink_has_first_response?}}{{/function:return_type}};
+      })){{#function:return_type}}{{^function:sink_has_first_response?}}.single(){{/function:sink_has_first_response?}}{{/function:return_type}};
   }
 
   @java.lang.Override
@@ -474,12 +482,12 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
     public reactor.core.publisher.Mono<ResponseWrapper<{{#function:return_type}}{{> BoxedType}}{{/function:return_type}}>> {{function:javaName}}Wrapper({{#function:args}}final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}, {{/function:args}}RpcOptions rpcOptions)  {
       return _rpcClient
         .subscriberContext(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
-        .flatMap(_rpc -> {
+        .flatMap(_rpc -> getHeaders(rpcOptions).flatMap(headers -> {
           String interactionName = "{{service:name}}.{{function:name}}";
           org.apache.thrift.RequestRpcMetadata.Builder _metadataBuilder = new org.apache.thrift.RequestRpcMetadata.Builder()
                   .setName(interactionName)
                   .setKind(org.apache.thrift.RpcKind.{{#function:oneway?}}SINGLE_REQUEST_NO_RESPONSE{{/function:oneway?}}{{^function:oneway?}}SINGLE_REQUEST_SINGLE_RESPONSE{{/function:oneway?}})
-                  .setOtherMetadata(getHeaders(rpcOptions))
+                  .setOtherMetadata(headers)
                   .setProtocol(_protocolId);
 
           if (_activeInteractions.contains(interactionId)) {
@@ -508,7 +516,7 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
           return _rpc
               {{#function:oneway?}}.singleRequestNoResponse(_crp, rpcOptions).thenReturn(ResponseWrapper.create(null, java.util.Collections.emptyMap(), java.util.Collections.emptyMap())){{/function:oneway?}}{{!
               }}{{^function:oneway?}}.singleRequestSingleResponse(_crp, rpcOptions).doOnNext(_p -> {if(_p.getException() != null) throw com.facebook.thrift.util.ExceptionUtil.propagate(_p);}){{/function:oneway?}};
-        });
+        }));
     }
 
     {{/service:singleRequestFunctions}}
@@ -553,12 +561,12 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
     public reactor.core.publisher.Flux<com.facebook.thrift.client.ResponseWrapper<{{#function:return_type}}{{> StreamReturnType}}{{/function:return_type}}>> {{function:javaName}}Wrapper({{#function:args}}final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}, {{/function:args}} final com.facebook.thrift.client.RpcOptions rpcOptions) {
       return _rpcClient
         .subscriberContext(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
-        .flatMapMany(_rpc -> {
+        .flatMapMany(_rpc -> getHeaders(rpcOptions).flatMapMany(headers -> {
           String interactionName = "{{service:name}}.{{function:name}}";
           org.apache.thrift.RequestRpcMetadata.Builder _metadataBuilder = new org.apache.thrift.RequestRpcMetadata.Builder()
                   .setName(interactionName)
                   .setKind(org.apache.thrift.RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE)
-                  .setOtherMetadata(getHeaders(rpcOptions))
+                  .setOtherMetadata(headers)
                   .setProtocol(_protocolId);
 
           if (_activeInteractions.contains(interactionId)) {
@@ -591,7 +599,7 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
               .doOnNext(_p -> {if(_p.getException() != null) throw reactor.core.Exceptions.propagate(_p.getException());}){{#function:return_type}}{{^function:stream_has_first_response?}}
               .filter((_p) -> ((com.facebook.thrift.model.StreamResponse)_p.getData()).isSetData()){{/function:stream_has_first_response?}}{{/function:return_type}}
               .map(_p -> ResponseWrapper.create((({{#function:return_type}}{{> StreamResponseGeneric}}{{/function:return_type}})_p.getData()){{#function:return_type}}{{^function:stream_has_first_response?}}.getData(){{/function:stream_has_first_response?}}{{/function:return_type}}, _p.getHeaders(), _p.getBinaryHeaders()));
-        });
+        }));
     }
 
     @java.lang.Override
@@ -627,17 +635,18 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
   {{/last?}}
   {{/service:interactions}}
 
-  private Map<String, String> getHeaders(com.facebook.thrift.client.RpcOptions rpcOptions) {
-      Map<String, String> headers = new HashMap<>();
+  private reactor.core.publisher.Mono<Map<String, String>> getHeaders(com.facebook.thrift.client.RpcOptions rpcOptions) {
+      Map<String, String> requestHeaders = new HashMap<>();
       if (rpcOptions.getRequestHeaders() != null && !rpcOptions.getRequestHeaders().isEmpty()) {
-          headers.putAll(rpcOptions.getRequestHeaders());
+          requestHeaders.putAll(rpcOptions.getRequestHeaders());
       }
-      if (_headers != null && !_headers.isEmpty()) {
-          headers.putAll(_headers);
-      }
-      if (_persistentHeaders != null && !_persistentHeaders.isEmpty()) {
-          headers.putAll(_persistentHeaders);
-      }
-      return headers;
+
+      return _headersMono.defaultIfEmpty(java.util.Collections.emptyMap()).zipWith(_persistentHeadersMono.defaultIfEmpty(java.util.Collections.emptyMap()), (headers, persistentHeaders) -> {
+          Map<String, String> result = new HashMap<>();
+          result.putAll(requestHeaders);
+          result.putAll(headers);
+          result.putAll(persistentHeaders);
+          return result;
+      });
   }
 }

@@ -33,7 +33,7 @@ public interface Service extends java.io.Closeable, com.facebook.thrift.util.Blo
             @java.lang.Override
             public Service build(Mono<RpcClient> rpcClientMono) {
                 Service.Reactive _delegate =
-                    new ServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    new ServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 return new ServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -55,7 +55,7 @@ public interface Service extends java.io.Closeable, com.facebook.thrift.util.Blo
                 @java.lang.Override
                 public Service.Async build(Mono<RpcClient> rpcClientMono) {
                     Service.Reactive _delegate =
-                        new ServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                        new ServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                     return new ServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -124,7 +124,7 @@ public interface Service extends java.io.Closeable, com.facebook.thrift.util.Blo
             return new ClientBuilder<Service.Reactive>() {
                 @java.lang.Override
                 public Service.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new ServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    return new ServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 }
             };
         }

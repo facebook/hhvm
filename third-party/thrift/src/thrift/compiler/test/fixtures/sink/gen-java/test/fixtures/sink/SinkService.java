@@ -33,7 +33,7 @@ public interface SinkService extends java.io.Closeable, com.facebook.thrift.util
             @java.lang.Override
             public SinkService build(Mono<RpcClient> rpcClientMono) {
                 SinkService.Reactive _delegate =
-                    new SinkServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    new SinkServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 return new SinkServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -55,7 +55,7 @@ public interface SinkService extends java.io.Closeable, com.facebook.thrift.util
                 @java.lang.Override
                 public SinkService.Async build(Mono<RpcClient> rpcClientMono) {
                     SinkService.Reactive _delegate =
-                        new SinkServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                        new SinkServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                     return new SinkServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -81,7 +81,7 @@ public interface SinkService extends java.io.Closeable, com.facebook.thrift.util
             return new ClientBuilder<SinkService.Reactive>() {
                 @java.lang.Override
                 public SinkService.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new SinkServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    return new SinkServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 }
             };
         }

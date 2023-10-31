@@ -33,7 +33,7 @@ public interface BadService extends java.io.Closeable, com.facebook.thrift.util.
             @java.lang.Override
             public BadService build(Mono<RpcClient> rpcClientMono) {
                 BadService.Reactive _delegate =
-                    new BadServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    new BadServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 return new BadServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -55,7 +55,7 @@ public interface BadService extends java.io.Closeable, com.facebook.thrift.util.
                 @java.lang.Override
                 public BadService.Async build(Mono<RpcClient> rpcClientMono) {
                     BadService.Reactive _delegate =
-                        new BadServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                        new BadServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                     return new BadServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -122,7 +122,7 @@ public interface BadService extends java.io.Closeable, com.facebook.thrift.util.
             return new ClientBuilder<BadService.Reactive>() {
                 @java.lang.Override
                 public BadService.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new BadServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    return new BadServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 }
             };
         }

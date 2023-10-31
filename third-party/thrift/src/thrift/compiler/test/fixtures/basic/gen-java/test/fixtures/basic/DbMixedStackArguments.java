@@ -33,7 +33,7 @@ public interface DbMixedStackArguments extends java.io.Closeable, com.facebook.t
             @java.lang.Override
             public DbMixedStackArguments build(Mono<RpcClient> rpcClientMono) {
                 DbMixedStackArguments.Reactive _delegate =
-                    new DbMixedStackArgumentsReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    new DbMixedStackArgumentsReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 return new DbMixedStackArgumentsReactiveBlockingWrapper(_delegate);
             }
         };
@@ -55,7 +55,7 @@ public interface DbMixedStackArguments extends java.io.Closeable, com.facebook.t
                 @java.lang.Override
                 public DbMixedStackArguments.Async build(Mono<RpcClient> rpcClientMono) {
                     DbMixedStackArguments.Reactive _delegate =
-                        new DbMixedStackArgumentsReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                        new DbMixedStackArgumentsReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                     return new DbMixedStackArgumentsReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -144,7 +144,7 @@ public interface DbMixedStackArguments extends java.io.Closeable, com.facebook.t
             return new ClientBuilder<DbMixedStackArguments.Reactive>() {
                 @java.lang.Override
                 public DbMixedStackArguments.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new DbMixedStackArgumentsReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    return new DbMixedStackArgumentsReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 }
             };
         }

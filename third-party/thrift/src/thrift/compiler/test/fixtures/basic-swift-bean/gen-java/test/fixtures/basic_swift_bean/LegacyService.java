@@ -33,7 +33,7 @@ public interface LegacyService extends java.io.Closeable, com.facebook.thrift.ut
             @java.lang.Override
             public LegacyService build(Mono<RpcClient> rpcClientMono) {
                 LegacyService.Reactive _delegate =
-                    new LegacyServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    new LegacyServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 return new LegacyServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -55,7 +55,7 @@ public interface LegacyService extends java.io.Closeable, com.facebook.thrift.ut
                 @java.lang.Override
                 public LegacyService.Async build(Mono<RpcClient> rpcClientMono) {
                     LegacyService.Reactive _delegate =
-                        new LegacyServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                        new LegacyServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                     return new LegacyServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -118,7 +118,7 @@ public interface LegacyService extends java.io.Closeable, com.facebook.thrift.ut
             return new ClientBuilder<LegacyService.Reactive>() {
                 @java.lang.Override
                 public LegacyService.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new LegacyServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    return new LegacyServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 }
             };
         }

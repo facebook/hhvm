@@ -33,7 +33,7 @@ public interface FB303Service extends java.io.Closeable, com.facebook.thrift.uti
             @java.lang.Override
             public FB303Service build(Mono<RpcClient> rpcClientMono) {
                 FB303Service.Reactive _delegate =
-                    new FB303ServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    new FB303ServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 return new FB303ServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -55,7 +55,7 @@ public interface FB303Service extends java.io.Closeable, com.facebook.thrift.uti
                 @java.lang.Override
                 public FB303Service.Async build(Mono<RpcClient> rpcClientMono) {
                     FB303Service.Reactive _delegate =
-                        new FB303ServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                        new FB303ServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                     return new FB303ServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -112,7 +112,7 @@ public interface FB303Service extends java.io.Closeable, com.facebook.thrift.uti
             return new ClientBuilder<FB303Service.Reactive>() {
                 @java.lang.Override
                 public FB303Service.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new FB303ServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    return new FB303ServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 }
             };
         }

@@ -33,7 +33,7 @@ public interface MyNode extends java.io.Closeable, com.facebook.thrift.util.Bloc
             @java.lang.Override
             public MyNode build(Mono<RpcClient> rpcClientMono) {
                 MyNode.Reactive _delegate =
-                    new MyNodeReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    new MyNodeReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 return new MyNodeReactiveBlockingWrapper(_delegate);
             }
         };
@@ -55,7 +55,7 @@ public interface MyNode extends java.io.Closeable, com.facebook.thrift.util.Bloc
                 @java.lang.Override
                 public MyNode.Async build(Mono<RpcClient> rpcClientMono) {
                     MyNode.Reactive _delegate =
-                        new MyNodeReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                        new MyNodeReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                     return new MyNodeReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -106,7 +106,7 @@ public interface MyNode extends java.io.Closeable, com.facebook.thrift.util.Bloc
             return new ClientBuilder<MyNode.Reactive>() {
                 @java.lang.Override
                 public MyNode.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new MyNodeReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    return new MyNodeReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 }
             };
         }

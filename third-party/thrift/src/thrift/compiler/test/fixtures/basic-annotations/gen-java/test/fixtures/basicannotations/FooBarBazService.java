@@ -33,7 +33,7 @@ public interface FooBarBazService extends java.io.Closeable, com.facebook.thrift
             @java.lang.Override
             public FooBarBazService build(Mono<RpcClient> rpcClientMono) {
                 FooBarBazService.Reactive _delegate =
-                    new FooBarBazServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    new FooBarBazServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 return new FooBarBazServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -55,7 +55,7 @@ public interface FooBarBazService extends java.io.Closeable, com.facebook.thrift
                 @java.lang.Override
                 public FooBarBazService.Async build(Mono<RpcClient> rpcClientMono) {
                     FooBarBazService.Reactive _delegate =
-                        new FooBarBazServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                        new FooBarBazServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                     return new FooBarBazServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -158,7 +158,7 @@ public interface FooBarBazService extends java.io.Closeable, com.facebook.thrift
             return new ClientBuilder<FooBarBazService.Reactive>() {
                 @java.lang.Override
                 public FooBarBazService.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new FooBarBazServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    return new FooBarBazServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 }
             };
         }

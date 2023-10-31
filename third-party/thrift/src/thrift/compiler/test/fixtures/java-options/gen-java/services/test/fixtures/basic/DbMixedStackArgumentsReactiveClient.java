@@ -26,8 +26,8 @@ public class DbMixedStackArgumentsReactiveClient
 
   protected final org.apache.thrift.ProtocolId _protocolId;
   protected final reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient;
-  protected final Map<String, String> _headers;
-  protected final Map<String, String> _persistentHeaders;
+  protected final reactor.core.publisher.Mono<Map<String, String>> _headersMono;
+  protected final reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono;
   protected final Set<Long> _activeInteractions;
 
   private static final TField _getDataByKey0_KEY_FIELD_DESC = new TField("key", TType.STRING, (short)1);
@@ -42,21 +42,29 @@ public class DbMixedStackArgumentsReactiveClient
     
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
-    this._headers = java.util.Collections.emptyMap();
-    this._persistentHeaders = java.util.Collections.emptyMap();
+    this._headersMono = reactor.core.publisher.Mono.empty();
+    this._persistentHeadersMono = reactor.core.publisher.Mono.empty();
     this._activeInteractions = ConcurrentHashMap.newKeySet();
   }
 
   public DbMixedStackArgumentsReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
-    this(_protocolId, _rpcClient, _headers, _persistentHeaders, new AtomicLong(), ConcurrentHashMap.newKeySet());
+    this(_protocolId, _rpcClient, reactor.core.publisher.Mono.just(_headers != null ? _headers : java.util.Collections.emptyMap()), reactor.core.publisher.Mono.just(_persistentHeaders != null ? _persistentHeaders : java.util.Collections.emptyMap()), new AtomicLong(), ConcurrentHashMap.newKeySet());
+  }
+
+  public DbMixedStackArgumentsReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono) {
+    this(_protocolId, _rpcClient, _headersMono, _persistentHeadersMono, new AtomicLong(), ConcurrentHashMap.newKeySet());
   }
 
   public DbMixedStackArgumentsReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders, AtomicLong interactionCounter, Set<Long> activeInteractions) {
+    this(_protocolId,_rpcClient, reactor.core.publisher.Mono.just(_headers != null ? _headers : java.util.Collections.emptyMap()), reactor.core.publisher.Mono.just(_persistentHeaders != null ? _persistentHeaders : java.util.Collections.emptyMap()), interactionCounter, activeInteractions);
+  }
+
+  public DbMixedStackArgumentsReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono, AtomicLong interactionCounter, Set<Long> activeInteractions) {
     
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
-    this._headers = _headers;
-    this._persistentHeaders = _persistentHeaders;
+    this._headersMono = _headersMono;
+    this._persistentHeadersMono = _persistentHeadersMono;
     this._activeInteractions = activeInteractions;
   }
 
@@ -88,11 +96,11 @@ public class DbMixedStackArgumentsReactiveClient
   @java.lang.Override
   public reactor.core.publisher.Mono<com.facebook.thrift.client.ResponseWrapper<byte[]>> getDataByKey0Wrapper(final String key,  final com.facebook.thrift.client.RpcOptions rpcOptions) {
     return _rpcClient
-      .flatMap(_rpc -> {
+      .flatMap(_rpc -> getHeaders(rpcOptions).flatMap(headers -> {
         org.apache.thrift.RequestRpcMetadata _metadata = new org.apache.thrift.RequestRpcMetadata.Builder()
                 .setName("getDataByKey0")
                 .setKind(org.apache.thrift.RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE)
-                .setOtherMetadata(getHeaders(rpcOptions))
+                .setOtherMetadata(headers)
                 .setProtocol(_protocolId)
                 .build();
 
@@ -107,7 +115,7 @@ public class DbMixedStackArgumentsReactiveClient
 
             return _rpc
                 .singleRequestSingleResponse(_crp, rpcOptions).doOnNext(_p -> {if(_p.getException() != null) throw com.facebook.thrift.util.ExceptionUtil.propagate(_p);});
-      });
+      }));
   }
 
   @java.lang.Override
@@ -145,11 +153,11 @@ public class DbMixedStackArgumentsReactiveClient
   @java.lang.Override
   public reactor.core.publisher.Mono<com.facebook.thrift.client.ResponseWrapper<byte[]>> getDataByKey1Wrapper(final String key,  final com.facebook.thrift.client.RpcOptions rpcOptions) {
     return _rpcClient
-      .flatMap(_rpc -> {
+      .flatMap(_rpc -> getHeaders(rpcOptions).flatMap(headers -> {
         org.apache.thrift.RequestRpcMetadata _metadata = new org.apache.thrift.RequestRpcMetadata.Builder()
                 .setName("getDataByKey1")
                 .setKind(org.apache.thrift.RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE)
-                .setOtherMetadata(getHeaders(rpcOptions))
+                .setOtherMetadata(headers)
                 .setProtocol(_protocolId)
                 .build();
 
@@ -164,7 +172,7 @@ public class DbMixedStackArgumentsReactiveClient
 
             return _rpc
                 .singleRequestSingleResponse(_crp, rpcOptions).doOnNext(_p -> {if(_p.getException() != null) throw com.facebook.thrift.util.ExceptionUtil.propagate(_p);});
-      });
+      }));
   }
 
   @java.lang.Override
@@ -179,17 +187,18 @@ public class DbMixedStackArgumentsReactiveClient
 
 
 
-  private Map<String, String> getHeaders(com.facebook.thrift.client.RpcOptions rpcOptions) {
-      Map<String, String> headers = new HashMap<>();
+  private reactor.core.publisher.Mono<Map<String, String>> getHeaders(com.facebook.thrift.client.RpcOptions rpcOptions) {
+      Map<String, String> requestHeaders = new HashMap<>();
       if (rpcOptions.getRequestHeaders() != null && !rpcOptions.getRequestHeaders().isEmpty()) {
-          headers.putAll(rpcOptions.getRequestHeaders());
+          requestHeaders.putAll(rpcOptions.getRequestHeaders());
       }
-      if (_headers != null && !_headers.isEmpty()) {
-          headers.putAll(_headers);
-      }
-      if (_persistentHeaders != null && !_persistentHeaders.isEmpty()) {
-          headers.putAll(_persistentHeaders);
-      }
-      return headers;
+
+      return _headersMono.defaultIfEmpty(java.util.Collections.emptyMap()).zipWith(_persistentHeadersMono.defaultIfEmpty(java.util.Collections.emptyMap()), (headers, persistentHeaders) -> {
+          Map<String, String> result = new HashMap<>();
+          result.putAll(requestHeaders);
+          result.putAll(headers);
+          result.putAll(persistentHeaders);
+          return result;
+      });
   }
 }

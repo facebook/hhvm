@@ -33,7 +33,7 @@ public interface FooService extends java.io.Closeable, com.facebook.thrift.util.
             @java.lang.Override
             public FooService build(Mono<RpcClient> rpcClientMono) {
                 FooService.Reactive _delegate =
-                    new FooServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    new FooServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 return new FooServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -55,7 +55,7 @@ public interface FooService extends java.io.Closeable, com.facebook.thrift.util.
                 @java.lang.Override
                 public FooService.Async build(Mono<RpcClient> rpcClientMono) {
                     FooService.Reactive _delegate =
-                        new FooServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                        new FooServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                     return new FooServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -106,7 +106,7 @@ public interface FooService extends java.io.Closeable, com.facebook.thrift.util.
             return new ClientBuilder<FooService.Reactive>() {
                 @java.lang.Override
                 public FooService.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new FooServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    return new FooServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 }
             };
         }

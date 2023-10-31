@@ -33,7 +33,7 @@ public interface NestedContainers extends java.io.Closeable, com.facebook.thrift
             @java.lang.Override
             public NestedContainers build(Mono<RpcClient> rpcClientMono) {
                 NestedContainers.Reactive _delegate =
-                    new NestedContainersReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    new NestedContainersReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 return new NestedContainersReactiveBlockingWrapper(_delegate);
             }
         };
@@ -55,7 +55,7 @@ public interface NestedContainers extends java.io.Closeable, com.facebook.thrift
                 @java.lang.Override
                 public NestedContainers.Async build(Mono<RpcClient> rpcClientMono) {
                     NestedContainers.Reactive _delegate =
-                        new NestedContainersReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                        new NestedContainersReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                     return new NestedContainersReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -240,7 +240,7 @@ public interface NestedContainers extends java.io.Closeable, com.facebook.thrift
             return new ClientBuilder<NestedContainers.Reactive>() {
                 @java.lang.Override
                 public NestedContainers.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new NestedContainersReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    return new NestedContainersReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 }
             };
         }

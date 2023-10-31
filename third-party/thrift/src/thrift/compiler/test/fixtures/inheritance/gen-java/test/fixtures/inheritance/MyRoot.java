@@ -33,7 +33,7 @@ public interface MyRoot extends java.io.Closeable, com.facebook.thrift.util.Bloc
             @java.lang.Override
             public MyRoot build(Mono<RpcClient> rpcClientMono) {
                 MyRoot.Reactive _delegate =
-                    new MyRootReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    new MyRootReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 return new MyRootReactiveBlockingWrapper(_delegate);
             }
         };
@@ -55,7 +55,7 @@ public interface MyRoot extends java.io.Closeable, com.facebook.thrift.util.Bloc
                 @java.lang.Override
                 public MyRoot.Async build(Mono<RpcClient> rpcClientMono) {
                     MyRoot.Reactive _delegate =
-                        new MyRootReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                        new MyRootReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                     return new MyRootReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -106,7 +106,7 @@ public interface MyRoot extends java.io.Closeable, com.facebook.thrift.util.Bloc
             return new ClientBuilder<MyRoot.Reactive>() {
                 @java.lang.Override
                 public MyRoot.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new MyRootReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    return new MyRootReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 }
             };
         }

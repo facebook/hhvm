@@ -18,15 +18,14 @@ package com.facebook.thrift.client;
 
 import com.google.common.base.Preconditions;
 import java.net.SocketAddress;
-import java.util.Collections;
 import java.util.Map;
 import org.apache.thrift.ProtocolId;
 import reactor.core.publisher.Mono;
 
 public abstract class ClientBuilder<T> {
   protected ProtocolId protocolId = ProtocolId.COMPACT;
-  protected Map<String, String> headers = Collections.emptyMap();
-  protected Map<String, String> persistentHeaders = Collections.emptyMap();
+  protected Mono<Map<String, String>> headersMono = Mono.empty();
+  protected Mono<Map<String, String>> persistentHeadersMono = Mono.empty();
 
   public ClientBuilder<T> setProtocolId(ProtocolId protocolId) {
     this.protocolId = Preconditions.checkNotNull(protocolId);
@@ -34,12 +33,23 @@ public abstract class ClientBuilder<T> {
   }
 
   public ClientBuilder<T> setHeaders(Map<String, String> headers) {
-    this.headers = Preconditions.checkNotNull(headers);
+    this.headersMono = Mono.just(Preconditions.checkNotNull(headers));
     return this;
   }
 
   public ClientBuilder<T> setPersistentHeaders(Map<String, String> persistentHeaders) {
-    this.persistentHeaders = Preconditions.checkNotNull(persistentHeaders);
+    this.persistentHeadersMono = Mono.just(Preconditions.checkNotNull(persistentHeaders));
+    return this;
+  }
+
+  public ClientBuilder<T> setHeadersMono(Mono<Map<String, String>> headersMono) {
+    this.headersMono = headersMono;
+    return this;
+  }
+
+  public ClientBuilder<T> setPersistentHeadersMono(
+      Mono<Map<String, String>> persistentHeadersMono) {
+    this.persistentHeadersMono = persistentHeadersMono;
     return this;
   }
 

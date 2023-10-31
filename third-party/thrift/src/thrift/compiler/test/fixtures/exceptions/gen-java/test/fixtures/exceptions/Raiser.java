@@ -33,7 +33,7 @@ public interface Raiser extends java.io.Closeable, com.facebook.thrift.util.Bloc
             @java.lang.Override
             public Raiser build(Mono<RpcClient> rpcClientMono) {
                 Raiser.Reactive _delegate =
-                    new RaiserReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    new RaiserReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 return new RaiserReactiveBlockingWrapper(_delegate);
             }
         };
@@ -55,7 +55,7 @@ public interface Raiser extends java.io.Closeable, com.facebook.thrift.util.Bloc
                 @java.lang.Override
                 public Raiser.Async build(Mono<RpcClient> rpcClientMono) {
                     Raiser.Reactive _delegate =
-                        new RaiserReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                        new RaiserReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                     return new RaiserReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -204,7 +204,7 @@ public interface Raiser extends java.io.Closeable, com.facebook.thrift.util.Bloc
             return new ClientBuilder<Raiser.Reactive>() {
                 @java.lang.Override
                 public Raiser.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new RaiserReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    return new RaiserReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 }
             };
         }

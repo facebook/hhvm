@@ -26,8 +26,8 @@ public class SinkServiceReactiveClient
 
   protected final org.apache.thrift.ProtocolId _protocolId;
   protected final reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient;
-  protected final Map<String, String> _headers;
-  protected final Map<String, String> _persistentHeaders;
+  protected final reactor.core.publisher.Mono<Map<String, String>> _headersMono;
+  protected final reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono;
   protected final Set<Long> _activeInteractions;
 
   private static final TField _method_SINK_TFIELD = new TField("payload", TType.STRUCT, (short)0);
@@ -65,21 +65,29 @@ public class SinkServiceReactiveClient
     
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
-    this._headers = java.util.Collections.emptyMap();
-    this._persistentHeaders = java.util.Collections.emptyMap();
+    this._headersMono = reactor.core.publisher.Mono.empty();
+    this._persistentHeadersMono = reactor.core.publisher.Mono.empty();
     this._activeInteractions = ConcurrentHashMap.newKeySet();
   }
 
   public SinkServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
-    this(_protocolId, _rpcClient, _headers, _persistentHeaders, new AtomicLong(), ConcurrentHashMap.newKeySet());
+    this(_protocolId, _rpcClient, reactor.core.publisher.Mono.just(_headers != null ? _headers : java.util.Collections.emptyMap()), reactor.core.publisher.Mono.just(_persistentHeaders != null ? _persistentHeaders : java.util.Collections.emptyMap()), new AtomicLong(), ConcurrentHashMap.newKeySet());
+  }
+
+  public SinkServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono) {
+    this(_protocolId, _rpcClient, _headersMono, _persistentHeadersMono, new AtomicLong(), ConcurrentHashMap.newKeySet());
   }
 
   public SinkServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders, AtomicLong interactionCounter, Set<Long> activeInteractions) {
+    this(_protocolId,_rpcClient, reactor.core.publisher.Mono.just(_headers != null ? _headers : java.util.Collections.emptyMap()), reactor.core.publisher.Mono.just(_persistentHeaders != null ? _persistentHeaders : java.util.Collections.emptyMap()), interactionCounter, activeInteractions);
+  }
+
+  public SinkServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono, AtomicLong interactionCounter, Set<Long> activeInteractions) {
     
     this._protocolId = _protocolId;
     this._rpcClient = _rpcClient;
-    this._headers = _headers;
-    this._persistentHeaders = _persistentHeaders;
+    this._headersMono = _headersMono;
+    this._persistentHeadersMono = _persistentHeadersMono;
     this._activeInteractions = activeInteractions;
   }
 
@@ -118,11 +126,11 @@ public class SinkServiceReactiveClient
   @java.lang.Override
   public reactor.core.publisher.Mono<ResponseWrapper<test.fixtures.sink.FinalResponse>> methodWrapper( org.reactivestreams.Publisher<test.fixtures.sink.SinkPayload> payloads, com.facebook.thrift.client.RpcOptions rpcOptions) {
     return _rpcClient
-      .flatMapMany(_rpc -> {
+      .flatMapMany(_rpc -> getHeaders(rpcOptions).flatMapMany(headers -> {
         org.apache.thrift.RequestRpcMetadata _metadata = new org.apache.thrift.RequestRpcMetadata.Builder()
                 .setName("method")
                 .setKind(org.apache.thrift.RpcKind.SINK)
-                .setOtherMetadata(getHeaders(rpcOptions))
+                .setOtherMetadata(headers)
                 .setProtocol(_protocolId)
                 .build();
 
@@ -152,7 +160,7 @@ public class SinkServiceReactiveClient
                 .doOnNext(_p -> {if(_p.getException() != null) throw reactor.core.Exceptions.propagate(_p.getException());})
                 .filter((_p) -> ((com.facebook.thrift.model.StreamResponse)_p.getData()).isSetData())
                 .map(_p -> ResponseWrapper.create(((com.facebook.thrift.model.StreamResponse<Void, test.fixtures.sink.FinalResponse>)_p.getData()).getData(), _p.getHeaders(), _p.getBinaryHeaders()));
-      }).single();
+      })).single();
   }
 
   @java.lang.Override
@@ -197,11 +205,11 @@ public class SinkServiceReactiveClient
   @java.lang.Override
   public reactor.core.publisher.Flux<ResponseWrapper<com.facebook.thrift.model.StreamResponse<test.fixtures.sink.InitialResponse,test.fixtures.sink.FinalResponse>>> methodAndReponseWrapper( org.reactivestreams.Publisher<test.fixtures.sink.SinkPayload> payloads, com.facebook.thrift.client.RpcOptions rpcOptions) {
     return _rpcClient
-      .flatMapMany(_rpc -> {
+      .flatMapMany(_rpc -> getHeaders(rpcOptions).flatMapMany(headers -> {
         org.apache.thrift.RequestRpcMetadata _metadata = new org.apache.thrift.RequestRpcMetadata.Builder()
                 .setName("methodAndReponse")
                 .setKind(org.apache.thrift.RpcKind.SINK)
-                .setOtherMetadata(getHeaders(rpcOptions))
+                .setOtherMetadata(headers)
                 .setProtocol(_protocolId)
                 .build();
 
@@ -232,7 +240,7 @@ public class SinkServiceReactiveClient
                 .streamingRequestStreamingResponse(_sink, rpcOptions)
                 .doOnNext(_p -> {if(_p.getException() != null) throw reactor.core.Exceptions.propagate(_p.getException());})
                 .map(_p -> ResponseWrapper.create(((com.facebook.thrift.model.StreamResponse<test.fixtures.sink.InitialResponse,test.fixtures.sink.FinalResponse>)_p.getData()), _p.getHeaders(), _p.getBinaryHeaders()));
-      });
+      }));
   }
 
   @java.lang.Override
@@ -276,11 +284,11 @@ public class SinkServiceReactiveClient
   @java.lang.Override
   public reactor.core.publisher.Mono<ResponseWrapper<test.fixtures.sink.FinalResponse>> methodThrowWrapper( org.reactivestreams.Publisher<test.fixtures.sink.SinkPayload> payloads, com.facebook.thrift.client.RpcOptions rpcOptions) {
     return _rpcClient
-      .flatMapMany(_rpc -> {
+      .flatMapMany(_rpc -> getHeaders(rpcOptions).flatMapMany(headers -> {
         org.apache.thrift.RequestRpcMetadata _metadata = new org.apache.thrift.RequestRpcMetadata.Builder()
                 .setName("methodThrow")
                 .setKind(org.apache.thrift.RpcKind.SINK)
-                .setOtherMetadata(getHeaders(rpcOptions))
+                .setOtherMetadata(headers)
                 .setProtocol(_protocolId)
                 .build();
 
@@ -310,7 +318,7 @@ public class SinkServiceReactiveClient
                 .doOnNext(_p -> {if(_p.getException() != null) throw reactor.core.Exceptions.propagate(_p.getException());})
                 .filter((_p) -> ((com.facebook.thrift.model.StreamResponse)_p.getData()).isSetData())
                 .map(_p -> ResponseWrapper.create(((com.facebook.thrift.model.StreamResponse<Void, test.fixtures.sink.FinalResponse>)_p.getData()).getData(), _p.getHeaders(), _p.getBinaryHeaders()));
-      }).single();
+      })).single();
   }
 
   @java.lang.Override
@@ -354,11 +362,11 @@ public class SinkServiceReactiveClient
   @java.lang.Override
   public reactor.core.publisher.Mono<ResponseWrapper<test.fixtures.sink.FinalResponse>> methodSinkThrowWrapper( org.reactivestreams.Publisher<test.fixtures.sink.SinkPayload> payloads, com.facebook.thrift.client.RpcOptions rpcOptions) {
     return _rpcClient
-      .flatMapMany(_rpc -> {
+      .flatMapMany(_rpc -> getHeaders(rpcOptions).flatMapMany(headers -> {
         org.apache.thrift.RequestRpcMetadata _metadata = new org.apache.thrift.RequestRpcMetadata.Builder()
                 .setName("methodSinkThrow")
                 .setKind(org.apache.thrift.RpcKind.SINK)
-                .setOtherMetadata(getHeaders(rpcOptions))
+                .setOtherMetadata(headers)
                 .setProtocol(_protocolId)
                 .build();
 
@@ -388,7 +396,7 @@ public class SinkServiceReactiveClient
                 .doOnNext(_p -> {if(_p.getException() != null) throw reactor.core.Exceptions.propagate(_p.getException());})
                 .filter((_p) -> ((com.facebook.thrift.model.StreamResponse)_p.getData()).isSetData())
                 .map(_p -> ResponseWrapper.create(((com.facebook.thrift.model.StreamResponse<Void, test.fixtures.sink.FinalResponse>)_p.getData()).getData(), _p.getHeaders(), _p.getBinaryHeaders()));
-      }).single();
+      })).single();
   }
 
   @java.lang.Override
@@ -432,11 +440,11 @@ public class SinkServiceReactiveClient
   @java.lang.Override
   public reactor.core.publisher.Mono<ResponseWrapper<test.fixtures.sink.FinalResponse>> methodFinalThrowWrapper( org.reactivestreams.Publisher<test.fixtures.sink.SinkPayload> payloads, com.facebook.thrift.client.RpcOptions rpcOptions) {
     return _rpcClient
-      .flatMapMany(_rpc -> {
+      .flatMapMany(_rpc -> getHeaders(rpcOptions).flatMapMany(headers -> {
         org.apache.thrift.RequestRpcMetadata _metadata = new org.apache.thrift.RequestRpcMetadata.Builder()
                 .setName("methodFinalThrow")
                 .setKind(org.apache.thrift.RpcKind.SINK)
-                .setOtherMetadata(getHeaders(rpcOptions))
+                .setOtherMetadata(headers)
                 .setProtocol(_protocolId)
                 .build();
 
@@ -466,7 +474,7 @@ public class SinkServiceReactiveClient
                 .doOnNext(_p -> {if(_p.getException() != null) throw reactor.core.Exceptions.propagate(_p.getException());})
                 .filter((_p) -> ((com.facebook.thrift.model.StreamResponse)_p.getData()).isSetData())
                 .map(_p -> ResponseWrapper.create(((com.facebook.thrift.model.StreamResponse<Void, test.fixtures.sink.FinalResponse>)_p.getData()).getData(), _p.getHeaders(), _p.getBinaryHeaders()));
-      }).single();
+      })).single();
   }
 
   @java.lang.Override
@@ -510,11 +518,11 @@ public class SinkServiceReactiveClient
   @java.lang.Override
   public reactor.core.publisher.Mono<ResponseWrapper<test.fixtures.sink.FinalResponse>> methodBothThrowWrapper( org.reactivestreams.Publisher<test.fixtures.sink.SinkPayload> payloads, com.facebook.thrift.client.RpcOptions rpcOptions) {
     return _rpcClient
-      .flatMapMany(_rpc -> {
+      .flatMapMany(_rpc -> getHeaders(rpcOptions).flatMapMany(headers -> {
         org.apache.thrift.RequestRpcMetadata _metadata = new org.apache.thrift.RequestRpcMetadata.Builder()
                 .setName("methodBothThrow")
                 .setKind(org.apache.thrift.RpcKind.SINK)
-                .setOtherMetadata(getHeaders(rpcOptions))
+                .setOtherMetadata(headers)
                 .setProtocol(_protocolId)
                 .build();
 
@@ -544,7 +552,7 @@ public class SinkServiceReactiveClient
                 .doOnNext(_p -> {if(_p.getException() != null) throw reactor.core.Exceptions.propagate(_p.getException());})
                 .filter((_p) -> ((com.facebook.thrift.model.StreamResponse)_p.getData()).isSetData())
                 .map(_p -> ResponseWrapper.create(((com.facebook.thrift.model.StreamResponse<Void, test.fixtures.sink.FinalResponse>)_p.getData()).getData(), _p.getHeaders(), _p.getBinaryHeaders()));
-      }).single();
+      })).single();
   }
 
   @java.lang.Override
@@ -588,11 +596,11 @@ public class SinkServiceReactiveClient
   @java.lang.Override
   public reactor.core.publisher.Mono<ResponseWrapper<test.fixtures.sink.FinalResponse>> methodFastWrapper( org.reactivestreams.Publisher<test.fixtures.sink.SinkPayload> payloads, com.facebook.thrift.client.RpcOptions rpcOptions) {
     return _rpcClient
-      .flatMapMany(_rpc -> {
+      .flatMapMany(_rpc -> getHeaders(rpcOptions).flatMapMany(headers -> {
         org.apache.thrift.RequestRpcMetadata _metadata = new org.apache.thrift.RequestRpcMetadata.Builder()
                 .setName("methodFast")
                 .setKind(org.apache.thrift.RpcKind.SINK)
-                .setOtherMetadata(getHeaders(rpcOptions))
+                .setOtherMetadata(headers)
                 .setProtocol(_protocolId)
                 .build();
 
@@ -622,7 +630,7 @@ public class SinkServiceReactiveClient
                 .doOnNext(_p -> {if(_p.getException() != null) throw reactor.core.Exceptions.propagate(_p.getException());})
                 .filter((_p) -> ((com.facebook.thrift.model.StreamResponse)_p.getData()).isSetData())
                 .map(_p -> ResponseWrapper.create(((com.facebook.thrift.model.StreamResponse<Void, test.fixtures.sink.FinalResponse>)_p.getData()).getData(), _p.getHeaders(), _p.getBinaryHeaders()));
-      }).single();
+      })).single();
   }
 
   @java.lang.Override
@@ -636,17 +644,18 @@ public class SinkServiceReactiveClient
   }
 
 
-  private Map<String, String> getHeaders(com.facebook.thrift.client.RpcOptions rpcOptions) {
-      Map<String, String> headers = new HashMap<>();
+  private reactor.core.publisher.Mono<Map<String, String>> getHeaders(com.facebook.thrift.client.RpcOptions rpcOptions) {
+      Map<String, String> requestHeaders = new HashMap<>();
       if (rpcOptions.getRequestHeaders() != null && !rpcOptions.getRequestHeaders().isEmpty()) {
-          headers.putAll(rpcOptions.getRequestHeaders());
+          requestHeaders.putAll(rpcOptions.getRequestHeaders());
       }
-      if (_headers != null && !_headers.isEmpty()) {
-          headers.putAll(_headers);
-      }
-      if (_persistentHeaders != null && !_persistentHeaders.isEmpty()) {
-          headers.putAll(_persistentHeaders);
-      }
-      return headers;
+
+      return _headersMono.defaultIfEmpty(java.util.Collections.emptyMap()).zipWith(_persistentHeadersMono.defaultIfEmpty(java.util.Collections.emptyMap()), (headers, persistentHeaders) -> {
+          Map<String, String> result = new HashMap<>();
+          result.putAll(requestHeaders);
+          result.putAll(headers);
+          result.putAll(persistentHeaders);
+          return result;
+      });
   }
 }

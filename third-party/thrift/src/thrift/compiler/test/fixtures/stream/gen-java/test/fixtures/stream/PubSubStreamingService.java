@@ -33,7 +33,7 @@ public interface PubSubStreamingService extends java.io.Closeable, com.facebook.
             @java.lang.Override
             public PubSubStreamingService build(Mono<RpcClient> rpcClientMono) {
                 PubSubStreamingService.Reactive _delegate =
-                    new PubSubStreamingServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    new PubSubStreamingServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 return new PubSubStreamingServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -55,7 +55,7 @@ public interface PubSubStreamingService extends java.io.Closeable, com.facebook.
                 @java.lang.Override
                 public PubSubStreamingService.Async build(Mono<RpcClient> rpcClientMono) {
                     PubSubStreamingService.Reactive _delegate =
-                        new PubSubStreamingServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                        new PubSubStreamingServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                     return new PubSubStreamingServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -81,7 +81,7 @@ public interface PubSubStreamingService extends java.io.Closeable, com.facebook.
             return new ClientBuilder<PubSubStreamingService.Reactive>() {
                 @java.lang.Override
                 public PubSubStreamingService.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new PubSubStreamingServiceReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    return new PubSubStreamingServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 }
             };
         }

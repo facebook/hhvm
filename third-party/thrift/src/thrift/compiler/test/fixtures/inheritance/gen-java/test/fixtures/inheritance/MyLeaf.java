@@ -33,7 +33,7 @@ public interface MyLeaf extends java.io.Closeable, com.facebook.thrift.util.Bloc
             @java.lang.Override
             public MyLeaf build(Mono<RpcClient> rpcClientMono) {
                 MyLeaf.Reactive _delegate =
-                    new MyLeafReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    new MyLeafReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 return new MyLeafReactiveBlockingWrapper(_delegate);
             }
         };
@@ -55,7 +55,7 @@ public interface MyLeaf extends java.io.Closeable, com.facebook.thrift.util.Bloc
                 @java.lang.Override
                 public MyLeaf.Async build(Mono<RpcClient> rpcClientMono) {
                     MyLeaf.Reactive _delegate =
-                        new MyLeafReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                        new MyLeafReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                     return new MyLeafReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -106,7 +106,7 @@ public interface MyLeaf extends java.io.Closeable, com.facebook.thrift.util.Bloc
             return new ClientBuilder<MyLeaf.Reactive>() {
                 @java.lang.Override
                 public MyLeaf.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new MyLeafReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    return new MyLeafReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 }
             };
         }

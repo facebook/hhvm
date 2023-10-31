@@ -45,7 +45,7 @@ public interface {{service:javaCapitalName}} extends java.io.Closeable, com.face
             @java.lang.Override
             public {{service:javaCapitalName}} build(Mono<RpcClient> rpcClientMono) {
                 {{service:javaCapitalName}}.Reactive _delegate =
-                    new {{service:javaCapitalName}}ReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    new {{service:javaCapitalName}}ReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 return new {{service:javaCapitalName}}ReactiveBlockingWrapper(_delegate);
             }
         };
@@ -67,7 +67,7 @@ public interface {{service:javaCapitalName}} extends java.io.Closeable, com.face
                 @java.lang.Override
                 public {{service:javaCapitalName}}.Async build(Mono<RpcClient> rpcClientMono) {
                     {{service:javaCapitalName}}.Reactive _delegate =
-                        new {{service:javaCapitalName}}ReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                        new {{service:javaCapitalName}}ReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                     return new {{service:javaCapitalName}}ReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -174,7 +174,7 @@ public interface {{service:javaCapitalName}} extends java.io.Closeable, com.face
             return new ClientBuilder<{{service:javaCapitalName}}.Reactive>() {
                 @java.lang.Override
                 public {{service:javaCapitalName}}.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new {{service:javaCapitalName}}ReactiveClient(protocolId, rpcClientMono, headers, persistentHeaders);
+                    return new {{service:javaCapitalName}}ReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
                 }
             };
         }

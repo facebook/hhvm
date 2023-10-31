@@ -963,7 +963,6 @@ let main
   (* That's a hack, just to avoid having to pass local_config into loads of callsites
      in this module. *)
   let mode_s = ClientEnv.Variants_of_client_mode.to_name args.mode in
-  HackEventLogger.set_from args.from;
   HackEventLogger.client_set_mode mode_s;
 
   HackEventLogger.client_check_start ();

@@ -25,14 +25,32 @@ type args = {
 
 type env = {
   args: args;
-  init_id: string;
+  root: Path.t;
+  hhconfig_version_and_switch: string;
+  local_config: ServerLocalConfig.t;
 }
+
+(** We're storing [env] as global state. It gets initialized right at the start of [main].
+But we have to fill it with some kind of dummy default, for sake of the type system. *)
+let env =
+  ref
+    {
+      args =
+        {
+          from = "[init]";
+          config = [];
+          ignore_hh_version = false;
+          naming_table = None;
+          verbose = false;
+          root_from_cli = Path.dummy_path;
+        };
+      root = Path.dummy_path;
+      hhconfig_version_and_switch = "[init]";
+      local_config = ServerLocalConfig.default;
+    }
 
 (** When did this binary start? *)
 let binary_start_time = Unix.gettimeofday ()
-
-(** This gets initialized to env.from, but maybe modified in the light of the initialize request *)
-let from = ref "[init]"
 
 (************************************************************************)
 (* Protocol orchestration & helpers                                     *)
@@ -227,26 +245,6 @@ type ide_refactor_patch = {
 
 let initialize_params_ref : Lsp.Initialize.params option ref = ref None
 
-let initialize_params_exc () : Lsp.Initialize.params =
-  match !initialize_params_ref with
-  | None -> failwith "initialize_params not yet received"
-  | Some initialize_params -> initialize_params
-
-(** root only becomes available after the initialize message *)
-let get_root_opt () : Path.t option =
-  match !initialize_params_ref with
-  | None -> None
-  | Some initialize_params ->
-    let paths = [Lsp_helpers.get_root initialize_params] in
-    Some (Wwwroot.interpret_command_line_root_parameter paths)
-
-(** root only becomes available after the initialize message *)
-let get_root_exn () : Path.t = Option.value_exn (get_root_opt ())
-
-(** We remember the last version of .hhconfig, and hack_rc_mode switch,
-so that if they change then we know we must terminate and be restarted. *)
-let hhconfig_version_and_switch : string ref = ref "[NotYetInitialized]"
-
 (** This flag is used to control how much will be written
 to log-files. It can be turned on initially by --verbose at the command-line or
 setting "trace:Verbose" in initializationParams. Thereafter, it can
@@ -279,9 +277,16 @@ let latest_hh_server_errors : errors_conn ref =
 (** This is the latest state of the progress.json file, updated once a second
 in a background Lwt process [background_status_refresher]. This file is where the
 monitor reports its status like "starting up", and hh_server reports its status
-like "typechecking". If there is no hh_server or monitor, the state is reported
-as "Stopped". *)
-let latest_hh_server_progress : ServerProgress.t option ref = ref None
+like "typechecking". *)
+let latest_hh_server_progress : ServerProgress.t ref =
+  ref
+    ServerProgress.
+      {
+        pid = 0;
+        disposition = DWorking;
+        message = "connecting";
+        timestamp = Unix.gettimeofday ();
+      }
 
 (** Have we already sent a status message over LSP? If so, and our new
 status will be just the same as the previous one, we won't need to send it
@@ -293,17 +298,6 @@ let log s = Hh_logger.log ("[client-lsp] " ^^ s)
 let log_debug s = Hh_logger.debug ("[client-lsp] " ^^ s)
 
 let log_error s = Hh_logger.error ("[client-lsp] " ^^ s)
-
-let set_up_hh_logger_for_client_lsp (root : Path.t) : unit =
-  (* Log to a file on disk. Note that calls to `Hh_logger` will always write to
-     `stderr`; this is in addition to that. *)
-  let client_lsp_log_fn = ServerFiles.client_lsp_log root in
-  begin
-    try Sys.rename client_lsp_log_fn (client_lsp_log_fn ^ ".old") with
-    | _e -> ()
-  end;
-  Hh_logger.set_log client_lsp_log_fn;
-  log "Starting clientLsp at %s" client_lsp_log_fn
 
 let to_stdout (json : Hh_json.json) : unit =
   let s = Hh_json.json_to_string json ^ "\r\n\r\n" in
@@ -509,7 +503,7 @@ let ignore_promise_but_handle_failure
             ]
         in
         HackEventLogger.client_lsp_exception
-          ~root:(get_root_opt ())
+          ~root:!env.root
           ~message:"Unhandled exception"
           ~data_opt:(Some data)
           ~source:"lsp_misc";
@@ -575,25 +569,22 @@ let si_kind_to_completion_kind (kind : SearchTypes.si_kind) :
   | SearchTypes.SI_Typedef -> Some Completion.TypeParameter
   | SearchTypes.SI_Unknown -> None
 
-let read_hhconfig_version () : string Lwt.t =
-  match get_root_opt () with
-  | None -> Lwt.return "[NoRoot]"
-  | Some root ->
-    let file = Filename.concat (Path.to_string root) ".hhconfig" in
-    let%lwt config = Config_file_lwt.parse_hhconfig file in
-    (match config with
-    | Ok (_hash, config) ->
-      let version =
-        config
-        |> Config_file.Getters.string_opt "version"
-        |> Config_file_lwt.parse_version
-        |> Config_file_lwt.version_to_string_opt
-        |> Option.value ~default:"[NoVersion]"
-      in
-      Lwt.return version
-    | Error message -> Lwt.return (Printf.sprintf "[NoHhconfig:%s]" message))
+let read_hhconfig_version (root : Path.t) : string Lwt.t =
+  let file = Filename.concat (Path.to_string root) ".hhconfig" in
+  let%lwt config = Config_file_lwt.parse_hhconfig file in
+  match config with
+  | Ok (_hash, config) ->
+    let version =
+      config
+      |> Config_file.Getters.string_opt "version"
+      |> Config_file_lwt.parse_version
+      |> Config_file_lwt.version_to_string_opt
+      |> Option.value ~default:"[NoVersion]"
+    in
+    Lwt.return version
+  | Error message -> Lwt.return (Printf.sprintf "[NoHhconfig:%s]" message)
 
-let read_hhconfig_version_and_switch () : string Lwt.t =
+let read_hhconfig_version_and_switch (root : Path.t) : string Lwt.t =
   let%lwt hack_rc_mode_result =
     Lwt_utils.read_all (Sys_utils.expanduser "~/.hack_rc_mode")
   in
@@ -607,13 +598,15 @@ let read_hhconfig_version_and_switch () : string Lwt.t =
     | Some s -> " HH_HOME=" ^ s
     | None -> ""
   in
-  let%lwt hhconfig_version = read_hhconfig_version () in
+  let%lwt hhconfig_version = read_hhconfig_version root in
   Lwt.return (hhconfig_version ^ hack_rc_mode ^ hh_home)
 
 let terminate_if_version_changed_since_start_of_lsp () : unit Lwt.t =
-  let%lwt current_version_and_switch = read_hhconfig_version_and_switch () in
+  let%lwt current_version_and_switch =
+    read_hhconfig_version_and_switch !env.root
+  in
   let is_ok =
-    String.equal !hhconfig_version_and_switch current_version_and_switch
+    String.equal !env.hhconfig_version_and_switch current_version_and_switch
   in
   if is_ok then
     Lwt.return_unit
@@ -624,7 +617,7 @@ let terminate_if_version_changed_since_start_of_lsp () : unit Lwt.t =
     let message =
       ""
       ^ "Version in hhconfig+switch that spawned the current hh_client: "
-      ^ !hhconfig_version_and_switch
+      ^ !env.hhconfig_version_and_switch
       ^ "\nVersion in hhconfig+switch currently: "
       ^ current_version_and_switch
       ^ "\n"
@@ -854,8 +847,9 @@ let respond_to_error (event : event option) (e : Lsp.Error.t) : unit =
     Lsp_helpers.telemetry_error to_stdout e.message ~extras
 
 (** request_showStatusFB: pops up a dialog *)
-let request_showStatusFB (params : ShowStatusFB.params) : unit =
-  let initialize_params = initialize_params_exc () in
+let request_showStatusFB
+    (params : ShowStatusFB.params) ~(initialize_params : Lsp.Initialize.params)
+    : unit =
   if not (Lsp_helpers.supports_status initialize_params) then
     ()
   else
@@ -1216,7 +1210,7 @@ let shellout_patch_list_to_lsp_edits_exn (stdout : string) : Lsp.WorkspaceEdit.t
 (* Connection and rpc                                                   *)
 (************************************************************************)
 
-let start_server ~(env : env) (root : Path.t) : unit =
+let start_server () : unit =
   (* This basically does "hh_client start": a single attempt to open the     *)
   (* socket, send+read version and compare for mismatch, send handoff and    *)
   (* read response. It will print information to stderr. If the server is in *)
@@ -1225,25 +1219,26 @@ let start_server ~(env : env) (root : Path.t) : unit =
   (* responsive enough to print "ready". It will do a hard program exit if   *)
   (* there were spawn problems.                                              *)
   let env_start =
-    {
-      ClientStart.root;
-      from = !from;
-      no_load = false;
-      watchman_debug_logging = false;
-      log_inference_constraints = false;
-      silent = true;
-      exit_on_failure = false;
-      ignore_hh_version = false;
-      saved_state_ignore_hhconfig = false;
-      mini_state = None;
-      save_64bit = None;
-      save_human_readable_64bit_dep_map = None;
-      prechecked = None;
-      config = env.args.config;
-      custom_hhi_path = None;
-      custom_telemetry_data = [];
-      allow_non_opt_build = false;
-    }
+    ClientStart.
+      {
+        root = !env.root;
+        from = !env.args.from;
+        no_load = false;
+        watchman_debug_logging = false;
+        log_inference_constraints = false;
+        silent = true;
+        exit_on_failure = false;
+        ignore_hh_version = false;
+        saved_state_ignore_hhconfig = false;
+        mini_state = None;
+        save_64bit = None;
+        save_human_readable_64bit_dep_map = None;
+        prechecked = None;
+        config = !env.args.config;
+        custom_hhi_path = None;
+        custom_telemetry_data = [];
+        allow_non_opt_build = false;
+      }
   in
   let _exit_status = ClientStart.main env_start in
   ()
@@ -1294,15 +1289,10 @@ important for correctness - the rest of the codebase can send other requests
 to the ide_service at any time, safe in the knowledge that such requests will
 necessarily be delivered after the initialize request. *)
 let run_ide_service
-    (env : env)
     (ide_service : ClientIdeService.t)
     (initialize_params : Lsp.Initialize.params)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t option) : unit Lwt.t =
   let open Lsp.Initialize in
-  let root =
-    [Lsp_helpers.get_root initialize_params]
-    |> Wwwroot.interpret_command_line_root_parameter
-  in
   if
     not
       initialize_params.client_capabilities.workspace.didChangeWatchedFiles
@@ -1313,7 +1303,7 @@ let run_ide_service
   let naming_table_load_info =
     match
       ( initialize_params.initializationOptions.namingTableSavedStatePath,
-        env.args.naming_table )
+        !env.args.naming_table )
     with
     | (Some _, Some _) ->
       log_error
@@ -1340,10 +1330,10 @@ let run_ide_service
   let%lwt result =
     ClientIdeService.initialize_from_saved_state
       ide_service
-      ~root
+      ~root:!env.root
       ~naming_table_load_info
-      ~config:env.args.config
-      ~ignore_hh_version:env.args.ignore_hh_version
+      ~config:!env.args.config
+      ~ignore_hh_version:!env.args.ignore_hh_version
       ~open_files
   in
   log_debug "initialize_from_saved_state.done";
@@ -1470,7 +1460,7 @@ let merge_statuses_standalone
     if Sys_utils.deterministic_behavior_for_tests () then
       "<ROOT>"
     else
-      get_root_exn () |> Path.to_string
+      !env.root |> Path.to_string
   in
   let tooltip =
     Printf.sprintf
@@ -1494,19 +1484,18 @@ let merge_statuses_standalone
   }
 
 let refresh_status ~(ide_service : ClientIdeService.t ref) : unit =
-  match !latest_hh_server_progress with
-  | Some latest_hh_server_progress ->
+  match !initialize_params_ref with
+  | Some initialize_params ->
     let status =
       merge_statuses_standalone
-        latest_hh_server_progress
+        !latest_hh_server_progress
         !latest_hh_server_errors
         !ide_service
     in
-    request_showStatusFB status
+    request_showStatusFB status ~initialize_params
   | None ->
-    (* [latest_hh_server_progress] gets set in [background_status_refresher]. The only way it might
-       be None is if root hasn't yet been set, in which case declining to refresh status is
-       the right thing to do. *)
+    (* [initialize_params_ref] gets set in the Initialize message. We can't report
+       status unless we know what client capabilities were sent in that message. *)
     ()
 
 (** This kicks off a permanent process which, once a second, reads progress.json
@@ -1514,12 +1503,7 @@ and calls [refresh_status]. Because it's an Lwt process, it's able to update
 status even when we're stuck waiting for RPC. *)
 let background_status_refresher (ide_service : ClientIdeService.t ref) : unit =
   let rec loop () =
-    (* Currently clientLsp does not know root until after the Initialize request.
-       That's a bit of a pain and should be changed to assume current-working-directory.
-       The "initialize" handler both sets root and calls ServerProgress.set_root,
-       and we use the former as a proxy for the latter... *)
-    if Option.is_some (get_root_opt ()) then
-      latest_hh_server_progress := Some (ServerProgress.read ());
+    latest_hh_server_progress := ServerProgress.read ();
     refresh_status ~ide_service;
     let%lwt () = Lwt_unix.sleep 1.0 in
     loop ()
@@ -1530,11 +1514,9 @@ let background_status_refresher (ide_service : ClientIdeService.t ref) : unit =
 (** A thin wrapper around ClientIdeMessage which turns errors into exceptions *)
 let ide_rpc
     (ide_service : ClientIdeService.t ref)
-    ~(env : env)
     ~(tracking_id : string)
     ~(ref_unblocked_time : float ref)
     (message : 'a ClientIdeMessage.t) : 'a Lwt.t =
-  let (_ : env) = env in
   let%lwt result =
     ClientIdeService.rpc
       !ide_service
@@ -1680,7 +1662,7 @@ let log_response_if_necessary
         message ) ->
     let (kind, method_) = get_message_kind_and_method_for_logging message in
     HackEventLogger.client_lsp_method_handled
-      ~root:(get_root_opt ())
+      ~root:!env.root
       ~method_
       ~kind
       ~path_opt:(get_filename_in_message_for_logging message)
@@ -1704,7 +1686,6 @@ let hack_log_error
     (e : Lsp.Error.t)
     (source : error_source)
     (unblocked_time : float) : unit =
-  let root = get_root_opt () in
   let is_expected =
     match source with
     | Error_from_lsp_cancelled -> true
@@ -1727,7 +1708,7 @@ let hack_log_error
   | Some (Client_message (metadata, message)) ->
     let (kind, method_) = get_message_kind_and_method_for_logging message in
     HackEventLogger.client_lsp_method_exception
-      ~root
+      ~root:!env.root
       ~method_
       ~kind
       ~path_opt:(get_filename_in_message_for_logging message)
@@ -1740,7 +1721,7 @@ let hack_log_error
       ~source
   | _ ->
     HackEventLogger.client_lsp_exception
-      ~root
+      ~root:!env.root
       ~message:e.Error.message
       ~data_opt:e.Error.data
       ~source
@@ -1760,7 +1741,7 @@ let kickoff_shell_out_and_maybe_cancel
         "--json";
         "--autostart-server";
         "false";
-        get_root_exn () |> Path.to_string;
+        !env.root |> Path.to_string;
       ]
     |> Array.of_list
   in
@@ -1987,14 +1968,16 @@ let state_to_rage (state : state) : string =
   Printf.sprintf "clientLsp state: %s\n%s\n" (state_to_string state) details
 
 let do_rageFB (state : state) : RageFB.result Lwt.t =
-  let%lwt current_version_and_switch = read_hhconfig_version_and_switch () in
+  let%lwt current_version_and_switch =
+    read_hhconfig_version_and_switch !env.root
+  in
   let data =
     Printf.sprintf
       ("%s\n\n"
       ^^ "version previously read from .hhconfig and switch: %s\n"
       ^^ "version in .hhconfig and switch: %s\n\n")
       (state_to_rage state)
-      !hhconfig_version_and_switch
+      !env.hhconfig_version_and_switch
       current_version_and_switch
   in
   Lwt.return [{ RageFB.title = None; data }]
@@ -2029,7 +2012,6 @@ let do_hover_common (infos : HoverService.hover_info list) : Hover.result =
 
 let do_hover
     (ide_service : ClientIdeService.t ref)
-    (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -2038,7 +2020,6 @@ let do_hover
   let%lwt infos =
     ide_rpc
       ide_service
-      ~env
       ~tracking_id
       ~ref_unblocked_time
       (ClientIdeMessage.Hover (document, location))
@@ -2047,7 +2028,6 @@ let do_hover
 
 let do_typeDefinition
     (ide_service : ClientIdeService.t ref)
-    (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -2056,7 +2036,6 @@ let do_typeDefinition
   let%lwt results =
     ide_rpc
       ide_service
-      ~env
       ~tracking_id
       ~ref_unblocked_time
       (ClientIdeMessage.Type_definition (document, location))
@@ -2072,7 +2051,6 @@ let do_typeDefinition
 
 let do_definition
     (ide_service : ClientIdeService.t ref)
-    (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -2081,7 +2059,6 @@ let do_definition
   let%lwt results =
     ide_rpc
       ide_service
-      ~env
       ~tracking_id
       ~ref_unblocked_time
       (ClientIdeMessage.Definition (document, location))
@@ -2103,8 +2080,6 @@ let make_ide_completion_response
     Completion.completionList Lwt.t =
   let open AutocompleteTypes in
   let open Completion in
-  let p = initialize_params_exc () in
-
   let hack_to_insert (completion : autocomplete_item) :
       TextEdit.t * Completion.insertTextFormat * TextEdit.t list =
     let additional_edits =
@@ -2114,7 +2089,8 @@ let make_ide_completion_response
     let range = ide_range_to_lsp completion.res_replace_pos in
     match completion.res_insert_text with
     | InsertAsSnippet { snippet; fallback } ->
-      if Lsp_helpers.supports_snippets p then
+      let initialize_params = Option.value_exn !initialize_params_ref in
+      if Lsp_helpers.supports_snippets initialize_params then
         (TextEdit.{ range; newText = snippet }, SnippetFormat, additional_edits)
       else
         (TextEdit.{ range; newText = fallback }, PlainText, additional_edits)
@@ -2204,7 +2180,6 @@ let make_ide_completion_response
 
 let do_completion
     (ide_service : ClientIdeService.t ref)
-    (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -2225,7 +2200,7 @@ let do_completion
       (document, location, { ClientIdeMessage.is_manually_invoked })
   in
   let%lwt infos =
-    ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
+    ide_rpc ide_service ~tracking_id ~ref_unblocked_time request
   in
   let filename = document.ClientIdeMessage.file_path |> Path.to_string in
   let%lwt response = make_ide_completion_response infos filename in
@@ -2274,7 +2249,6 @@ let resolve_ranking_source
  *)
 let do_resolve
     (ide_service : ClientIdeService.t ref)
-    (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (params : CompletionItemResolve.params) : CompletionItemResolve.result Lwt.t
@@ -2308,7 +2282,7 @@ let do_resolve
                 resolve_ranking_source kind ranking_source )
           in
           let%lwt raw_docblock =
-            ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
+            ide_rpc ide_service ~tracking_id ~ref_unblocked_time request
           in
           let documentation =
             docblock_with_ranking_detail
@@ -2333,7 +2307,7 @@ let do_resolve
         in
 
         let%lwt raw_docblock =
-          ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
+          ide_rpc ide_service ~tracking_id ~ref_unblocked_time request
         in
         let documentation =
           docblock_to_markdown
@@ -2386,14 +2360,13 @@ let hack_symbol_to_lsp (symbol : SearchUtils.symbol) =
 
 let do_workspaceSymbol
     (ide_service : ClientIdeService.t ref)
-    (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (params : WorkspaceSymbol.params) : WorkspaceSymbol.result Lwt.t =
   let query = params.WorkspaceSymbol.query in
   let request = ClientIdeMessage.Workspace_symbol query in
   let%lwt results =
-    ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
+    ide_rpc ide_service ~tracking_id ~ref_unblocked_time request
   in
   Lwt.return (List.map results ~f:hack_symbol_to_lsp)
 
@@ -2452,7 +2425,6 @@ let rec hack_symbol_tree_to_lsp
 
 let do_documentSymbol
     (ide_service : ClientIdeService.t ref)
-    (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -2466,7 +2438,7 @@ let do_documentSymbol
   let document = lsp_document_to_ide text_document in
   let request = ClientIdeMessage.Document_symbol document in
   let%lwt outline =
-    ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
+    ide_rpc ide_service ~tracking_id ~ref_unblocked_time request
   in
   let converted =
     hack_symbol_tree_to_lsp ~filename ~accu:[] ~container_name:None outline
@@ -2476,7 +2448,6 @@ let do_documentSymbol
 let do_findReferences
     (state : state)
     (ide_service : ClientIdeService.t ref)
-    (env : env)
     (metadata : incoming_metadata)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -2490,7 +2461,6 @@ let do_findReferences
   let%lwt response =
     ide_rpc
       ide_service
-      ~env
       ~tracking_id:metadata.tracking_id
       ~ref_unblocked_time
       (ClientIdeMessage.Find_references (document, location, all_open_documents))
@@ -2698,7 +2668,6 @@ let do_findReferences2 ~shellout_standard_response ~hh_locations :
 let do_goToImplementation
     (state : state)
     (ide_service : ClientIdeService.t ref)
-    (env : env)
     (metadata : incoming_metadata)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
@@ -2710,7 +2679,6 @@ let do_goToImplementation
   let%lwt response =
     ide_rpc
       ide_service
-      ~env
       ~tracking_id
       ~ref_unblocked_time
       (ClientIdeMessage.Go_to_implementation
@@ -2772,7 +2740,6 @@ let hack_range_to_lsp_highlight range =
 
 let do_highlight
     (ide_service : ClientIdeService.t ref)
-    (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -2781,7 +2748,6 @@ let do_highlight
   let%lwt ranges =
     ide_rpc
       ide_service
-      ~env
       ~tracking_id
       ~ref_unblocked_time
       (ClientIdeMessage.Document_highlight (document, location))
@@ -2934,7 +2900,6 @@ let location_of_code_action_request
 
 let do_codeAction
     (ide_service : ClientIdeService.t ref)
-    (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -2946,7 +2911,6 @@ let do_codeAction
   let%lwt (actions, errors_opt) =
     ide_rpc
       ide_service
-      ~env
       ~tracking_id
       ~ref_unblocked_time
       (ClientIdeMessage.Code_action (document, range))
@@ -2955,7 +2919,6 @@ let do_codeAction
 
 let do_codeAction_resolve
     (ide_service : ClientIdeService.t ref)
-    (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -2967,7 +2930,6 @@ let do_codeAction_resolve
   let use_snippet_edits = should_use_snippet_edits !initialize_params_ref in
   ide_rpc
     ide_service
-    ~env
     ~tracking_id
     ~ref_unblocked_time
     (ClientIdeMessage.Code_action_resolve
@@ -2975,7 +2937,6 @@ let do_codeAction_resolve
 
 let do_signatureHelp
     (ide_service : ClientIdeService.t ref)
-    (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -2984,7 +2945,6 @@ let do_signatureHelp
   let%lwt signatures =
     ide_rpc
       ide_service
-      ~env
       ~tracking_id
       ~ref_unblocked_time
       (ClientIdeMessage.Signature_help (document, location))
@@ -3039,7 +2999,6 @@ let patches_to_workspace_edit (patches : ServerRenameTypes.patch list) :
 let do_documentRename
     (state : state)
     (ide_service : ClientIdeService.t ref)
-    (env : env)
     (metadata : incoming_metadata)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -3055,7 +3014,6 @@ let do_documentRename
   let%lwt response =
     ide_rpc
       ide_service
-      ~env
       ~tracking_id:metadata.tracking_id
       ~ref_unblocked_time
       (ClientIdeMessage.Rename (document, location, new_name, all_open_documents))
@@ -3201,7 +3159,6 @@ let hack_type_hierarchy_to_lsp
 
 let do_typeHierarchy
     (ide_service : ClientIdeService.t ref)
-    (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -3214,7 +3171,6 @@ let do_typeHierarchy
   let%lwt result =
     ide_rpc
       ide_service
-      ~env
       ~tracking_id
       ~ref_unblocked_time
       (ClientIdeMessage.Type_Hierarchy (document, location))
@@ -3658,13 +3614,10 @@ If we're in [errors_conn = TrailingErrors] already, this function is a no-op.
 If we're called before even having received the initialize request from LSP client
 (hence before we even know the project root), this is a no-op. *)
 let try_open_errors_file ~(state : state ref) : unit Lwt.t =
-  match (!latest_hh_server_errors, get_root_opt ()) with
-  | (TailingErrors _, _) -> Lwt.return_unit
-  | (SeekingErrors _, None) ->
-    (* we haven't received initialize request yet *)
-    Lwt.return_unit
-  | (SeekingErrors { prev_st_ino; seek_reason }, Some root) ->
-    let errors_file_path = ServerFiles.errors_file_path root in
+  match !latest_hh_server_errors with
+  | TailingErrors _ -> Lwt.return_unit
+  | SeekingErrors { prev_st_ino; seek_reason } ->
+    let errors_file_path = ServerFiles.errors_file_path !env.root in
     (* 1. can we open the file? *)
     let result =
       try
@@ -3876,8 +3829,7 @@ let handle_shell_out_complete
     Lwt.return_some (make_result_telemetry 0 ~log_immediately:false)
   | _ -> Lwt.return_some (make_result_telemetry result_count ?result_extra_data)
 
-let do_initialize (local_config : ServerLocalConfig.t) : Initialize.result =
-  let initialize_params = initialize_params_exc () in
+let do_initialize ~initialize_params : Initialize.result =
   Initialize.
     {
       server_capabilities =
@@ -3923,7 +3875,7 @@ let do_initialize (local_config : ServerLocalConfig.t) : Initialize.result =
           documentLinkProvider = None;
           executeCommandProvider = None;
           implementationProvider =
-            local_config.ServerLocalConfig.go_to_implementation;
+            !env.local_config.ServerLocalConfig.go_to_implementation;
           rageProviderFB = true;
           server_experimental =
             Some ServerExperimentalCapabilities.{ snippetTextEdit = true };
@@ -4099,7 +4051,6 @@ Unless there are subsequent didChange events for this uri already in the queue
 (e.g. because the user is typing). In this case we don't ask for TAST/errors;
 the work can be deferred until that next didChange. *)
 let send_file_to_ide_and_get_errors_if_needed
-    ~env
     ~client
     ~ide_service
     ~state
@@ -4140,7 +4091,6 @@ let send_file_to_ide_and_get_errors_if_needed
   let%lwt errors =
     ide_rpc
       ide_service
-      ~env
       ~tracking_id
       ~ref_unblocked_time
       ClientIdeMessage.(
@@ -4165,7 +4115,6 @@ let send_file_to_ide_and_get_errors_if_needed
 
 (** send DidOpen/Close/Change/Save ide_service as needed *)
 let handle_editor_buffer_message
-    ~(env : env)
     ~(state : state ref)
     ~(client : Jsonrpc.t)
     ~(ide_service : ClientIdeService.t ref)
@@ -4190,7 +4139,6 @@ let handle_editor_buffer_message
     let file_contents = get_document_contents editor_open_files uri in
     let%lwt new_state =
       send_file_to_ide_and_get_errors_if_needed
-        ~env
         ~client
         ~ide_service
         ~state
@@ -4208,7 +4156,6 @@ let handle_editor_buffer_message
     let%lwt errors =
       ide_rpc
         ide_service
-        ~env
         ~tracking_id:metadata.tracking_id
         ~ref_unblocked_time
         (ClientIdeMessage.Did_close file_path)
@@ -4228,7 +4175,6 @@ let handle_editor_buffer_message
 
 let set_verbose_to_file
     ~(ide_service : ClientIdeService.t ref)
-    ~(env : env)
     ~(tracking_id : string)
     (value : bool) : unit =
   verbose_to_file := value;
@@ -4240,7 +4186,6 @@ let set_verbose_to_file
   let (promise : unit Lwt.t) =
     ide_rpc
       ide_service
-      ~env
       ~tracking_id
       ~ref_unblocked_time
       (ClientIdeMessage.Verbose_to_file !verbose_to_file)
@@ -4253,7 +4198,6 @@ let set_verbose_to_file
 
 (* Process and respond to a message from VSCode, and update [state] accordingly. *)
 let handle_client_message
-    ~(env : env)
     ~(state : state ref)
     ~(client : Jsonrpc.t)
     ~(ide_service : ClientIdeService.t ref)
@@ -4312,7 +4256,7 @@ let handle_client_message
         | SetTraceNotification.Verbose -> true
         | SetTraceNotification.Off -> false
       in
-      set_verbose_to_file ~ide_service ~env ~tracking_id value;
+      set_verbose_to_file ~ide_service ~tracking_id value;
       Lwt.return_none
     (* test entrypoint: shutdown client_ide_service *)
     | (_, RequestMessage (id, HackTestShutdownServerlessRequestFB)) ->
@@ -4329,72 +4273,33 @@ let handle_client_message
       Lwt.return_none
     (* test entrypoint: stop hh_server *)
     | (_, RequestMessage (id, HackTestStopServerRequestFB)) ->
-      let root_folder =
-        Path.make (Relative_path.path_of_prefix Relative_path.Root)
-      in
-      ClientStop.kill_server root_folder !from;
+      ClientStop.kill_server !env.root !env.args.from;
       respond_jsonrpc ~powered_by:Serverless_ide id HackTestStopServerResultFB;
       Lwt.return_none
     (* test entrypoint: start hh_server *)
     | (_, RequestMessage (id, HackTestStartServerRequestFB)) ->
-      let root_folder =
-        Path.make (Relative_path.path_of_prefix Relative_path.Root)
-      in
-      start_server ~env root_folder;
+      start_server ();
       respond_jsonrpc ~powered_by:Serverless_ide id HackTestStartServerResultFB;
       Lwt.return_none
     (* initialize request *)
     | (Pre_init, RequestMessage (id, InitializeRequest initialize_params)) ->
-      let open Initialize in
       initialize_params_ref := Some initialize_params;
 
-      (* There's a lot of global-mutable-variable initialization we can only do after
-         we get root, here in the handler of the initialize request. The function
-         [get_root_exn] becomes available after we've set up initialize_params_ref, above. *)
-      let root = get_root_exn () in
-      ServerProgress.set_root root;
-      set_up_hh_logger_for_client_lsp root;
-      Relative_path.set_path_prefix Relative_path.Root root;
-      if not (Path.equal root env.args.root_from_cli) then
-        HackEventLogger.invariant_violation_bug
-          ~data:
-            (Printf.sprintf
-               "root_from_cli=%s initialize.root=%s"
-               (Path.to_string env.args.root_from_cli)
-               (Path.to_string root))
-          "lsp initialize.root differs from launch arg";
-
-      Hh_logger.log "cmd: %s" (String.concat ~sep:" " (Array.to_list Sys.argv));
-      Hh_logger.log "LSP Init id: %s" env.init_id;
-
-      (* Following is a hack. Atom incorrectly passes '--from vscode', rendering us
-         unable to distinguish Atom from VSCode. But Atom is now frozen at vscode client
-         v3.14. So by looking at the version, we can at least distinguish that it's old. *)
-      if
-        (not
-           initialize_params.client_capabilities.textDocument.declaration
-             .declarationLinkSupport)
-        && String.equal env.args.from "vscode"
+      let root_from_initialize_params =
+        Wwwroot.interpret_command_line_root_parameter
+          [Lsp_helpers.get_root initialize_params]
+      in
+      if not (Path.equal !env.args.root_from_cli root_from_initialize_params)
       then begin
-        from := "vscode_pre314";
-        HackEventLogger.set_from !from
+        let data =
+          Printf.sprintf
+            "root_from_cli=%s initialize.root=%s"
+            (Path.to_string !env.args.root_from_cli)
+            (Path.to_string root_from_initialize_params)
+        in
+        failwith ("lsp initialize.root differs from launch arg - " ^ data)
       end;
 
-      let server_args =
-        ServerArgs.default_options ~root:(Path.to_string root)
-      in
-      let server_args = ServerArgs.set_config server_args env.args.config in
-      let local_config = snd @@ ServerConfig.load ~silent:true server_args in
-      HackEventLogger.set_rollout_flags
-        (ServerLocalConfig.to_rollout_flags local_config);
-      HackEventLogger.set_rollout_group
-        local_config.ServerLocalConfig.rollout_group;
-
-      let%lwt version = read_hhconfig_version () in
-      HackEventLogger.set_hhconfig_version
-        (Some (String_utils.lstrip version "^"));
-      let%lwt version_and_switch = read_hhconfig_version_and_switch () in
-      hhconfig_version_and_switch := version_and_switch;
       state :=
         Running
           {
@@ -4410,13 +4315,13 @@ let handle_client_message
         | Initialize.Off -> ()
         | Initialize.Messages
         | Initialize.Verbose ->
-          set_verbose_to_file ~ide_service ~env ~tracking_id true
+          set_verbose_to_file ~ide_service ~tracking_id true
       end;
-      let result = do_initialize local_config in
+      let result = do_initialize ~initialize_params in
       respond_jsonrpc ~powered_by:Language_server id (InitializeResult result);
 
       let (promise : unit Lwt.t) =
-        run_ide_service env !ide_service initialize_params None
+        run_ide_service !ide_service initialize_params None
       in
       ignore_promise_but_handle_failure
         promise
@@ -4435,7 +4340,7 @@ let handle_client_message
       if not (Sys_utils.deterministic_behavior_for_tests ()) then
         Lsp_helpers.telemetry_log
           to_stdout
-          ("Version in hhconfig and switch=" ^ !hhconfig_version_and_switch);
+          ("Version in hhconfig and switch=" ^ !env.hhconfig_version_and_switch);
       Lwt.return_none
     (* any request/notification if we haven't yet initialized *)
     | (Pre_init, _) ->
@@ -4487,7 +4392,6 @@ let handle_client_message
       let%lwt () =
         ide_rpc
           ide_service
-          ~env
           ~tracking_id
           ~ref_unblocked_time
           (ClientIdeMessage.Did_change_watched_files changes)
@@ -4500,7 +4404,6 @@ let handle_client_message
       let%lwt result =
         do_completion
           ide_service
-          env
           tracking_id
           ref_unblocked_time
           editor_open_files
@@ -4513,7 +4416,7 @@ let handle_client_message
     | (_, RequestMessage (id, CompletionItemResolveRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result =
-        do_resolve ide_service env tracking_id ref_unblocked_time params
+        do_resolve ide_service tracking_id ref_unblocked_time params
       in
       respond_jsonrpc
         ~powered_by:Serverless_ide
@@ -4526,7 +4429,6 @@ let handle_client_message
       let%lwt result =
         do_highlight
           ide_service
-          env
           tracking_id
           ref_unblocked_time
           editor_open_files
@@ -4543,7 +4445,6 @@ let handle_client_message
       let%lwt result =
         do_hover
           ide_service
-          env
           tracking_id
           ref_unblocked_time
           editor_open_files
@@ -4561,7 +4462,6 @@ let handle_client_message
       let%lwt result =
         do_documentSymbol
           ide_service
-          env
           tracking_id
           ref_unblocked_time
           editor_open_files
@@ -4575,7 +4475,7 @@ let handle_client_message
     | (_, RequestMessage (id, WorkspaceSymbolRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
       let%lwt result =
-        do_workspaceSymbol ide_service env tracking_id ref_unblocked_time params
+        do_workspaceSymbol ide_service tracking_id ref_unblocked_time params
       in
       respond_jsonrpc
         ~powered_by:Serverless_ide
@@ -4587,7 +4487,6 @@ let handle_client_message
       let%lwt (result, _has_xhp_attribute) =
         do_definition
           ide_service
-          env
           tracking_id
           ref_unblocked_time
           editor_open_files
@@ -4600,7 +4499,6 @@ let handle_client_message
       let%lwt result =
         do_typeDefinition
           ide_service
-          env
           tracking_id
           ref_unblocked_time
           editor_open_files
@@ -4618,7 +4516,6 @@ let handle_client_message
         do_findReferences
           !state
           ide_service
-          env
           metadata
           ref_unblocked_time
           editor_open_files
@@ -4634,7 +4531,6 @@ let handle_client_message
         do_goToImplementation
           !state
           ide_service
-          env
           metadata
           tracking_id
           ref_unblocked_time
@@ -4651,7 +4547,6 @@ let handle_client_message
         do_documentRename
           !state
           ide_service
-          env
           metadata
           ref_unblocked_time
           editor_open_files
@@ -4666,7 +4561,6 @@ let handle_client_message
       let%lwt result =
         do_signatureHelp
           ide_service
-          env
           tracking_id
           ref_unblocked_time
           editor_open_files
@@ -4685,7 +4579,6 @@ let handle_client_message
       let%lwt (result, file_path, errors_opt) =
         do_codeAction
           ide_service
-          env
           tracking_id
           ref_unblocked_time
           editor_open_files
@@ -4717,7 +4610,6 @@ let handle_client_message
       let%lwt result =
         do_codeAction_resolve
           ide_service
-          env
           tracking_id
           ref_unblocked_time
           editor_open_files
@@ -4772,7 +4664,6 @@ let handle_client_message
           | DidCloseNotification _ | DidSaveNotification _ ) ) ->
       let%lwt () =
         handle_editor_buffer_message
-          ~env
           ~state
           ~client
           ~ide_service
@@ -4787,7 +4678,6 @@ let handle_client_message
       let%lwt result =
         do_typeHierarchy
           ide_service
-          env
           tracking_id
           ref_unblocked_time
           editor_open_files
@@ -4815,7 +4705,6 @@ let handle_client_message
 
 (** Process and respond to a notification from clientIdeDaemon, and update [state] accordingly. *)
 let handle_daemon_notification
-    ~(env : env)
     ~(state : state ref)
     ~(client : Jsonrpc.t)
     ~(ide_service : ClientIdeService.t ref)
@@ -4843,7 +4732,6 @@ let handle_daemon_notification
         (fun (uri, { TextDocumentItem.text = file_contents; _ }) ->
           let%lwt new_state =
             send_file_to_ide_and_get_errors_if_needed
-              ~env
               ~client
               ~ide_service
               ~state
@@ -4876,33 +4764,52 @@ let handle_tick ~(state : state ref) : result_telemetry option Lwt.t =
     ~terminate_on_failure:false;
   Lwt.return_none
 
-let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
+let main (args : args) ~(init_id : string) ~(local_config : ServerLocalConfig.t)
+    : Exit_status.t Lwt.t =
   Printexc.record_backtrace true;
-  from := args.from;
-  HackEventLogger.set_from !from;
-  let env = { args; init_id } in
 
-  if env.args.verbose then begin
+  let root = args.root_from_cli in
+
+  (* Log to a file on disk. Note that calls to `Hh_logger` will always write to
+     `stderr`; this is in addition to that. *)
+  let client_lsp_log_fn = ServerFiles.client_lsp_log root in
+  begin
+    try Sys.rename client_lsp_log_fn (client_lsp_log_fn ^ ".old") with
+    | _e -> ()
+  end;
+  Hh_logger.set_log client_lsp_log_fn;
+  (* The --verbose flag in env.verbose is the only thing that controls verbosity
+     to stderr. Meanwhile, verbosity-to-file can be altered dynamically by the user.
+     Why are they different? because we should write to stderr under a test harness,
+     but we should never write to stderr when invoked by VSCode - it's not even guaranteed
+     to drain the stderr pipe. *)
+  if args.verbose then begin
     Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Debug;
     Hh_logger.Level.set_min_level_file Hh_logger.Level.Debug
   end else begin
     Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Error;
     Hh_logger.Level.set_min_level_file Hh_logger.Level.Info
   end;
-  (* The --verbose flag in env.verbose is the only thing that controls verbosity
-     to stderr. Meanwhile, verbosity-to-file can be altered dynamically by the user.
-     Why are they different? because we should write to stderr under a test harness,
-     but we should never write to stderr when invoked by VSCode - it's not even guaranteed
-     to drain the stderr pipe.
-     WARNING: we can't log yet, since until we've received "initialize" request,
-     we don't yet know which path to log to. *)
+  log "Starting clientLsp at %s" client_lsp_log_fn;
+  log "cmd: %s" (String.concat ~sep:" " (Array.to_list Sys.argv));
+  log "LSP Init id: %s" init_id;
+
+  ServerProgress.set_root root;
+  Relative_path.set_path_prefix Relative_path.Root root;
+
+  let%lwt version = read_hhconfig_version root in
+  let%lwt hhconfig_version_and_switch = read_hhconfig_version_and_switch root in
+  HackEventLogger.set_hhconfig_version (Some (String_utils.lstrip version "^"));
+
+  env := { args; hhconfig_version_and_switch; root; local_config };
+
   let ide_service =
     ref
       (ClientIdeService.make
          {
-           ClientIdeMessage.init_id = env.init_id;
-           verbose_to_stderr = env.args.verbose;
-           verbose_to_file = env.args.verbose;
+           ClientIdeMessage.init_id;
+           verbose_to_stderr = args.verbose;
+           verbose_to_file = args.verbose;
          })
   in
   background_status_refresher ide_service;
@@ -4942,7 +4849,6 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
         match event with
         | Client_message (metadata, message) ->
           handle_client_message
-            ~env
             ~state
             ~client
             ~ide_service
@@ -4951,7 +4857,6 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
             ~ref_unblocked_time
         | Daemon_notification notification ->
           handle_daemon_notification
-            ~env
             ~state
             ~client
             ~ide_service

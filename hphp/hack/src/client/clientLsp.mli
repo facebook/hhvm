@@ -27,4 +27,8 @@ type args = {
 
 (** This is the main loop for processing incoming Lsp client requests,
     and incoming server notifications. Never returns. *)
-val main : args -> init_id:string -> Exit_status.t Lwt.t
+val main :
+  args ->
+  init_id:string ->
+  local_config:ServerLocalConfig.t ->
+  Exit_status.t Lwt.t

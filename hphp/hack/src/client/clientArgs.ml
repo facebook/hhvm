@@ -1205,9 +1205,8 @@ let root = function
   | CSavedStateProjectMetadata { ClientEnv.root; _ }
   | CDownloadSavedState { ClientDownloadSavedState.root; _ } ->
     Some root
-  | CLsp _
-  | CDecompressZhhdg _ ->
-    None
+  | CLsp { ClientLsp.root_from_cli; _ } -> Some root_from_cli
+  | CDecompressZhhdg _ -> None
 
 let config = function
   | CCheck { ClientEnv.config; _ }

@@ -26,9 +26,10 @@ open Hh_prelude
 
 let () = Random.self_init ()
 
-let init_event_logger root command ~init_id config local_config : unit =
+let init_event_logger root command ~init_id ~from config local_config : unit =
   HackEventLogger.client_init
     ~init_id
+    ~from
     ~custom_columns:(ClientCommand.get_custom_telemetry_data command)
     ~always_add_sandcastle_info:
       (Option.exists local_config ~f:(fun c ->
@@ -38,6 +39,8 @@ let init_event_logger root command ~init_id config local_config : unit =
       HackEventLogger.set_hhconfig_version
         (ServerConfig.version config |> Config_file.version_to_string_opt));
   Option.iter local_config ~f:(fun local_config ->
+      HackEventLogger.set_rollout_group
+        local_config.ServerLocalConfig.rollout_group;
       HackEventLogger.set_rollout_flags
         (ServerLocalConfig.to_rollout_flags local_config));
   ()
@@ -116,7 +119,7 @@ let () =
          dont have ServerArgs (we only have client args!) but we do parse --from and --config
          options and will patch them onto a fake ServerArgs. *)
       let fake_server_args =
-        ServerArgs.default_options_with_check_mode ~root:(Path.to_string root)
+        ServerArgs.default_options ~root:(Path.to_string root)
       in
       let fake_server_args = ServerArgs.set_from fake_server_args from in
       let fake_server_args =
@@ -129,7 +132,8 @@ let () =
       in
       (Some local_config, Some config)
   in
-  init_event_logger root command ~init_id config local_config;
+
+  init_event_logger root command ~init_id ~from config local_config;
 
   try
     let exit_status =
@@ -155,7 +159,9 @@ let () =
       | ClientCommand.CRestart env ->
         Lwt_utils.run_main (fun () -> ClientRestart.main env)
       | ClientCommand.CLsp args ->
-        Lwt_utils.run_main (fun () -> ClientLsp.main args ~init_id)
+        let local_config = Option.value_exn local_config in
+        Lwt_utils.run_main (fun () ->
+            ClientLsp.main args ~init_id ~local_config)
       | ClientCommand.CRage env ->
         Lwt_utils.run_main (fun () ->
             ClientRage.main env (Option.value_exn local_config))

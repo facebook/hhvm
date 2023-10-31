@@ -293,7 +293,6 @@ let should_start env =
     true
 
 let main (env : env) : Exit_status.t Lwt.t =
-  HackEventLogger.set_from env.from;
   HackEventLogger.client_start ();
 
   (* TODO(ljw): There are some race conditions here. First scenario: two      *)

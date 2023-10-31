@@ -100,7 +100,6 @@ let do_kill env =
     | FailedToKill -> raise Exit_status.(Exit_with Kill_error))
 
 let main (env : env) : Exit_status.t Lwt.t =
-  HackEventLogger.set_from env.from;
   HackEventLogger.client_stop ();
   do_kill env;
   Lwt.return Exit_status.No_error

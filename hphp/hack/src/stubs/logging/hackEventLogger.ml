@@ -259,7 +259,8 @@ let glean_query
     ~glean_init_time:_
     ~count:_
     ~query:_
-    ~query_text:_ =
+    ~query_text:_
+    ~max_results:_ =
   ()
 
 let glean_query_error

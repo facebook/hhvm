@@ -358,8 +358,12 @@ void GeneratedAsyncProcessorBase::destroyAllInteractions(
   for (auto& [id, tile] : conn.tiles_) {
     ids.push_back(id);
   }
+  auto ctxStack =
+      getContextStack(getServiceName(), "#terminateInteraction", &conn);
   for (auto id : ids) {
-    conn.removeTile(id);
+    if (conn.removeTile(id) && ctxStack) {
+      ctxStack->onInteractionTerminate(id);
+    }
   }
 }
 

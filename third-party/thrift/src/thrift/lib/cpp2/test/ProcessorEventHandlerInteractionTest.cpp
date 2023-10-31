@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-#include <folly/experimental/coro/BlockingWait.h>
+#include <chrono>
+
+#include <folly/Synchronized.h>
 #include <folly/portability/GTest.h>
 
 #include <thrift/lib/cpp/EventHandlerBase.h>
+#include <thrift/lib/cpp2/async/RocketClientChannel.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/Calculator.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 
@@ -56,10 +59,10 @@ class TestEventHandler : public TProcessorEventHandler {
     UniqueInteractionId uniqueId{
         *reqCtx->getPeerAddress(), reqCtx->getInteractionId()};
     if (reqCtx->getInteractionCreate()) {
-      auto [_, added] = ids_.emplace(uniqueId);
+      auto [_, added] = ids_.wlock()->emplace(uniqueId);
       ASSERT_TRUE(added);
     } else {
-      ASSERT_TRUE(ids_.count(uniqueId));
+      ASSERT_TRUE(ids_.rlock()->count(uniqueId));
     }
   }
 
@@ -70,13 +73,13 @@ class TestEventHandler : public TProcessorEventHandler {
     ASSERT_TRUE(conn);
     ASSERT_GT(id, 0);
     UniqueInteractionId uniqueId{*conn->getPeerAddress(), id};
-    ASSERT_EQ(1, ids_.erase(uniqueId));
+    ASSERT_EQ(1, ids_.wlock()->erase(uniqueId));
   }
 
-  size_t countInteractions() const { return ids_.size(); }
+  size_t countInteractions() const { return ids_.rlock()->size(); }
 
  private:
-  std::unordered_set<UniqueInteractionId> ids_;
+  folly::Synchronized<std::unordered_set<UniqueInteractionId>> ids_;
 };
 
 class TestHandler : public ServiceHandler<test::Calculator> {
@@ -157,5 +160,49 @@ TEST(TProcessorEventHandlerTest, MultipleConcurrentInteractions) {
     EXPECT_EQ(add2.sync_getPrimitive(), 10);
     EXPECT_EQ(eventHandler->countInteractions(), 2);
   }
+  EXPECT_EQ(eventHandler->countInteractions(), 0);
+}
+
+TEST(TProcessorEventHandlerTest, ConnectionClose) {
+  using namespace std::chrono;
+
+  auto eventHandler = std::make_shared<TestEventHandler>();
+  TProcessorBase::addProcessorEventHandler(eventHandler);
+
+  // server
+  ScopedServerInterfaceThread runner(std::make_shared<TestHandler>());
+
+  // client
+  folly::EventBase evb;
+  auto socket = folly::AsyncSocket::newSocket(&evb, runner.getAddress());
+  auto channel = RocketClientChannel::newChannel(std::move(socket));
+  auto channelPtr = channel.get();
+  auto client = std::make_unique<apache::thrift::Client<test::Calculator>>(
+      std::move(channel));
+
+  // 1st interaction
+  auto add1 = client->sync_newAddition();
+  add1.sync_accumulatePrimitive(7);
+  EXPECT_EQ(add1.sync_getPrimitive(), 7);
+  add1.sync_accumulatePrimitive(5);
+  EXPECT_EQ(add1.sync_getPrimitive(), 12);
+
+  // 2nd interaction
+  auto add2 = client->sync_newAddition();
+  add2.sync_accumulatePrimitive(3);
+  EXPECT_EQ(add2.sync_getPrimitive(), 3);
+  add2.sync_accumulatePrimitive(7);
+  EXPECT_EQ(add2.sync_getPrimitive(), 10);
+
+  EXPECT_EQ(eventHandler->countInteractions(), 2);
+
+  // drop connection to the server
+  channelPtr->closeNow();
+
+  // wait for termination events
+  for (auto n = 10; n && eventHandler->countInteractions(); n--) {
+    /* sleep override */ std::this_thread::sleep_for(1s);
+  }
+
   EXPECT_EQ(eventHandler->countInteractions(), 0);
 }

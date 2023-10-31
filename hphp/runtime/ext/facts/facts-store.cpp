@@ -483,8 +483,8 @@ struct FactsStoreImpl final
    * Return an object representing the last time this store was updated
    */
   Clock getClock() const {
-    auto version = m_symbolMap.getClock();
-    return version.isInitial() ? m_symbolMap.dbClock() : version;
+    auto clock = m_symbolMap.getClock();
+    return clock.isInitial() ? m_symbolMap.dbClock() : clock;
   }
 
   /**
@@ -807,10 +807,7 @@ struct FactsStoreImpl final
     if (!m_watcher) {
       return;
     }
-    auto clock = m_symbolMap.getClock();
-    if (clock.isInitial()) {
-      clock = m_symbolMap.dbClock();
-    }
+    auto clock = getClock();
     m_watcher->subscribe(
         clock, [weakThis = weak_from_this()](Watcher::Delta&& delta) {
           XLOGF(

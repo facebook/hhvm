@@ -10,6 +10,7 @@
 
 #include <re2/re2.h>
 #include <chrono>
+#include <numeric>
 
 namespace facebook {
 namespace common {
@@ -61,11 +62,7 @@ int EphemeralRow::numFields() const {
 }
 
 uint64_t EphemeralRow::calculateRowLength() const {
-  uint64_t rowLength = 0;
-  for (int i = 0; i < numFields(); ++i) {
-    rowLength += field_lengths_[i];
-  }
-  return rowLength;
+  return std::reduce(field_lengths_, field_lengths_ + numFields());
 }
 
 Row::Row(const RowBlock* row_block, size_t row_number)

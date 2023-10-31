@@ -44,6 +44,7 @@
 #include <thrift/lib/cpp2/test/gen-cpp2/Child.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/DummyControl.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/DummyMonitor.h>
+#include <thrift/lib/cpp2/test/gen-cpp2/DummySecurity.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/DummyStatus.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/Parent.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/SchemaService.h>
@@ -371,6 +372,10 @@ TEST_P(
                   public ControlServerInterface {
     std::int64_t getOption() override { return 42; }
   };
+  class Security : public apache::thrift::ServiceHandler<DummySecurity>,
+                   public SecurityServerInterface {
+    std::int64_t getState() override { return 4200; }
+  };
   auto service =
       std::make_shared<ChildHandlerWithMetadata>([](auto defaultResult) {
         MethodMetadataMap result;
@@ -382,12 +387,14 @@ TEST_P(
     server.setStatusInterface(std::make_shared<Status>());
     server.setMonitoringInterface(std::make_shared<Monitor>());
     server.setControlInterface(std::make_shared<Control>());
+    server.setSecurityInterface(std::make_shared<Security>());
   });
 
   auto client = makeClientFor<ChildAsyncClient>(*runner);
   auto monitoringClient = makeClientFor<DummyMonitorAsyncClient>(*runner);
   auto statusClient = makeClientFor<DummyStatusAsyncClient>(*runner);
   auto controlClient = makeClientFor<DummyControlAsyncClient>(*runner);
+  auto securityClient = makeClientFor<DummySecurityAsyncClient>(*runner);
 
   EXPECT_EQ(client->semifuture_parentMethod1().get(), 42);
   // The monitoring interface should be invoked if the user interface doesn't
@@ -399,6 +406,9 @@ TEST_P(
   // The control interface should be invoked if no handler with higher
   // precedence has the method.
   EXPECT_EQ(controlClient->semifuture_getOption().get(), 42);
+  // The security interface should be invoked if no handler with higher
+  // precedence has the method.
+  EXPECT_EQ(securityClient->semifuture_getState().get(), 4200);
   // If the method is in neither user, status, or monitoring interfaces, we
   // expect an error.
   EXPECT_THROW(client->semifuture_parentMethod3().get(), TApplicationException);
@@ -440,6 +450,10 @@ TEST_P(
   class Control : public apache::thrift::ServiceHandler<DummyControl>,
                   public ControlServerInterface {
     std::int64_t getOption() override { return 42; }
+  };
+  class Security : public apache::thrift::ServiceHandler<DummySecurity>,
+                   public SecurityServerInterface {
+    std::int64_t getState() override { return 4200; }
   };
   class ChildHandlerWithWildcard : public ChildHandlerWithMetadata {
    public:
@@ -510,12 +524,14 @@ TEST_P(
     server.setStatusInterface(std::make_shared<Status>());
     server.setMonitoringInterface(std::make_shared<Monitor>());
     server.setControlInterface(std::make_shared<Control>());
+    server.setSecurityInterface(std::make_shared<Security>());
   });
 
   auto client = makeClientFor<ChildAsyncClient>(*runner);
   auto monitoringClient = makeClientFor<DummyMonitorAsyncClient>(*runner);
   auto statusClient = makeClientFor<DummyStatusAsyncClient>(*runner);
   auto controlClient = makeClientFor<DummyControlAsyncClient>(*runner);
+  auto securityClient = makeClientFor<DummySecurityAsyncClient>(*runner);
 
   EXPECT_EQ(client->semifuture_parentMethod1().get(), 42);
   // The monitoring interface should not be available
@@ -527,6 +543,9 @@ TEST_P(
   // The control interface should not be available
   EXPECT_THROW(
       controlClient->semifuture_getOption().get(), TApplicationException);
+  // The security interface should not be available
+  EXPECT_THROW(
+      securityClient->semifuture_getState().get(), TApplicationException);
 }
 
 INSTANTIATE_TEST_SUITE_P(

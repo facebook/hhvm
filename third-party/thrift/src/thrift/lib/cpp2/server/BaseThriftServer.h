@@ -48,6 +48,7 @@
 #include <thrift/lib/cpp2/server/MonitoringServerInterface.h>
 #include <thrift/lib/cpp2/server/ResourcePool.h>
 #include <thrift/lib/cpp2/server/ResourcePoolSet.h>
+#include <thrift/lib/cpp2/server/SecurityServerInterface.h>
 #include <thrift/lib/cpp2/server/ServerAttribute.h>
 #include <thrift/lib/cpp2/server/ServerConfigs.h>
 #include <thrift/lib/cpp2/server/ServerFlags.h>
@@ -292,6 +293,9 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
 
   // Explicitly set control service interface handler
   std::shared_ptr<ControlServerInterface> controlServiceHandler_;
+
+  // Explicitly set security service interface handler
+  std::shared_ptr<SecurityServerInterface> securityServiceHandler_;
 
   // Server behavior to wrt header traffic
   LegacyTransport legacyTransport_{LegacyTransport::DEFAULT};
@@ -1105,6 +1109,18 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
 
   const std::shared_ptr<ControlServerInterface>& getControlInterface() const {
     return controlServiceHandler_;
+  }
+
+  /**
+   * Sets the interface that will be used for security RPCs only.
+   */
+  void setSecurityInterface(std::shared_ptr<SecurityServerInterface> iface) {
+    CHECK(configMutable());
+    securityServiceHandler_ = std::move(iface);
+  }
+
+  const std::shared_ptr<SecurityServerInterface>& getSecurityInterface() const {
+    return securityServiceHandler_;
   }
 
   /**

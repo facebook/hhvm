@@ -48,6 +48,10 @@ service DummyControl {
   i64 getOption();
 }
 
+service DummySecurity {
+  i64 getState();
+}
+
 @thrift.GenerateRuntimeSchema
 service SchemaService {
   i64 getOption();

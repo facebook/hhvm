@@ -109,7 +109,10 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
     apache::thrift::ThriftServer::ExtraInterfaces,
     createDefaultExtraInterfaces) {
   return {
-      nullptr /* monitoring */, nullptr /* status */, nullptr /* control */};
+      nullptr /* monitoring */,
+      nullptr /* status */,
+      nullptr /* control */,
+      nullptr /* security */};
 }
 
 THRIFT_PLUGGABLE_FUNC_REGISTER(
@@ -157,6 +160,7 @@ std::unique_ptr<AsyncProcessorFactory> createDecoratedProcessorFactory(
     std::shared_ptr<StatusServerInterface> statusProcessorFactory,
     std::shared_ptr<MonitoringServerInterface> monitoringProcessorFactory,
     std::shared_ptr<ControlServerInterface> controlProcessorFactory,
+    std::shared_ptr<SecurityServerInterface> securityProcessorFactory,
     bool shouldCheckForUnimplementedExtraInterfaces) {
   std::vector<std::shared_ptr<AsyncProcessorFactory>> servicesToMultiplex;
   CHECK(processorFactory != nullptr);
@@ -168,6 +172,9 @@ std::unique_ptr<AsyncProcessorFactory> createDecoratedProcessorFactory(
   }
   if (controlProcessorFactory != nullptr) {
     servicesToMultiplex.emplace_back(std::move(controlProcessorFactory));
+  }
+  if (securityProcessorFactory != nullptr) {
+    servicesToMultiplex.emplace_back(std::move(securityProcessorFactory));
   }
 
   const bool shouldPlaceExtraInterfacesInFront =
@@ -290,6 +297,7 @@ void ThriftServer::initializeDefaults() {
   setMonitoringInterface(std::move(extraInterfaces.monitoring));
   setStatusInterface(std::move(extraInterfaces.status));
   setControlInterface(std::move(extraInterfaces.control));
+  setSecurityInterface(std::move(extraInterfaces.security));
   getAdaptiveConcurrencyController().setConfigUpdateCallback(
       [this](auto snapshot) {
         if (snapshot->isEnabled()) {
@@ -1533,6 +1541,7 @@ void ThriftServer::ensureDecoratedProcessorFactoryInitialized() {
         getStatusInterface(),
         getMonitoringInterface(),
         getControlInterface(),
+        getSecurityInterface(),
         isCheckUnimplementedExtraInterfacesAllowed() &&
             THRIFT_FLAG(server_check_unimplemented_extra_interfaces));
   }

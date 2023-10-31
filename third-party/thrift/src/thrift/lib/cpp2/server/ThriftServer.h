@@ -1094,6 +1094,8 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
     std::shared_ptr<StatusServerInterface> status;
     // See ThriftServer::setControlInterface
     std::shared_ptr<ControlServerInterface> control;
+    // See ThriftServer::setSecurityInterface
+    std::shared_ptr<SecurityServerInterface> security;
   };
 
   // ThriftServer by defaults uses a global ShutdownSocketSet, so all socket's

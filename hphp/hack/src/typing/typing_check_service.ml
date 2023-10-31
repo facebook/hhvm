@@ -1101,45 +1101,61 @@ let go_with_interrupt
       ServerProgress.ErrorsWrite.telemetry
         (Telemetry.create ()
         |> Telemetry.bool_ ~key:"will_use_distc" ~value:will_use_distc);
-    let results_via_distc =
-      if will_use_distc then (
-        (* TODO(ljw): time_first_error isn't properly calculated in this path *)
-        (* distc doesn't yet give any profiling_info about how its workers fared *)
-        let profiling_info = Telemetry.create () in
-        match process_with_hh_distc ~root ~interrupt ~check_info ~tcopt with
-        | Success (errors, map_reduce_data, dep_edges, env) ->
-          Some
-            ( { errors; map_reduce_data; dep_edges; profiling_info },
-              telemetry,
-              env,
-              None,
-              None )
-        | Cancel (env, reason) ->
-          (* Typecheck is cancelled due to interrupt *)
-          Some
-            ( {
-                errors = Errors.empty;
-                map_reduce_data = Map_reduce.empty;
-                dep_edges = Typing_deps.dep_edges_make ();
-                profiling_info;
-              },
-              telemetry,
-              env,
-              Some (original_fnl, reason),
-              None )
-        | DistCError msg ->
-          Hh_logger.log "Error with hh_distc: %s" msg;
-          HackEventLogger.invariant_violation_bug
-            "Unexpected hh_distc error"
-            ~data:msg;
-          None
-      ) else
-        None
-    in
-    (* None means either we didn't attempt distc, or we did but it failed and we'll fall back to parallel... *)
-    match results_via_distc with
-    | Some results -> results
-    | None ->
+    if will_use_distc then (
+      let start_time = Unix.gettimeofday () in
+      (* TODO(ljw): time_first_error isn't properly calculated in this path *)
+      (* distc doesn't yet give any profiling_info about how its workers fared *)
+      let profiling_info = Telemetry.create () in
+      match process_with_hh_distc ~root ~interrupt ~check_info ~tcopt with
+      | Success (errors, map_reduce_data, dep_edges, env) ->
+        ( { errors; map_reduce_data; dep_edges; profiling_info },
+          telemetry,
+          env,
+          None,
+          None )
+      | Cancel (env, reason) ->
+        (* Typecheck is cancelled due to interrupt *)
+        ( {
+            errors = Errors.empty;
+            map_reduce_data = Map_reduce.empty;
+            dep_edges = Typing_deps.dep_edges_make ();
+            profiling_info;
+          },
+          telemetry,
+          env,
+          Some (original_fnl, reason),
+          None )
+      | DistCError msg ->
+        Hh_logger.log "Error with hh_distc: %s" msg;
+        HackEventLogger.invariant_violation_bug
+          "Unexpected hh_distc error"
+          ~data:msg;
+        if check_info.log_errors then
+          ServerProgress.ErrorsWrite.telemetry
+            (Telemetry.create ()
+            |> Telemetry.bool_ ~key:"process_in_parallel" ~value:true);
+        let distc_fallback_info =
+          Telemetry.create ()
+          |> Telemetry.string_ ~key:"distc_error" ~value:msg
+          |> Telemetry.duration ~key:"distc_duration" ~start_time
+        in
+        let telemetry =
+          telemetry
+          |> Telemetry.object_
+               ~key:"distc_fallback_info"
+               ~value:distc_fallback_info
+        in
+        process_in_parallel
+          ctx
+          workers
+          telemetry
+          fnl
+          ~interrupt
+          ~memory_cap
+          ~longlived_workers
+          ~check_info
+          ~typecheck_info
+    ) else (
       if check_info.log_errors then
         ServerProgress.ErrorsWrite.telemetry
           (Telemetry.create ()
@@ -1154,6 +1170,7 @@ let go_with_interrupt
         ~longlived_workers
         ~check_info
         ~typecheck_info
+    )
   in
   let { errors; map_reduce_data; dep_edges; profiling_info } = typing_result in
   Typing_deps.register_discovered_dep_edges dep_edges;
@@ -1162,7 +1179,6 @@ let go_with_interrupt
     ~init_id:check_info.init_id
     ~recheck_id:check_info.recheck_id
     map_reduce_data;
-
   let telemetry =
     telemetry |> Telemetry.object_ ~key:"profiling_info" ~value:profiling_info
   in

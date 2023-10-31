@@ -24,6 +24,7 @@
 #include <fizz/crypto/exchange/X25519.h>
 #include <fizz/protocol/Certificate.h>
 #include <fizz/protocol/HandshakeContext.h>
+#include <fizz/protocol/IFactory.h>
 #include <fizz/protocol/KeyScheduler.h>
 #include <fizz/record/EncryptedRecordLayer.h>
 #include <fizz/record/PlaintextRecordLayer.h>
@@ -34,47 +35,44 @@ namespace fizz {
 /**
  * This class instantiates various objects to facilitate testing.
  */
-class Factory {
+class Factory : public IFactory {
  public:
-  enum class KeyExchangeMode { Server, Client };
-
-  virtual ~Factory() = default;
-
   virtual std::unique_ptr<PlaintextReadRecordLayer>
-  makePlaintextReadRecordLayer() const {
+  makePlaintextReadRecordLayer() const override {
     return std::make_unique<PlaintextReadRecordLayer>();
   }
 
   virtual std::unique_ptr<PlaintextWriteRecordLayer>
-  makePlaintextWriteRecordLayer() const {
+  makePlaintextWriteRecordLayer() const override {
     return std::make_unique<PlaintextWriteRecordLayer>();
   }
 
   virtual std::unique_ptr<EncryptedReadRecordLayer>
-  makeEncryptedReadRecordLayer(EncryptionLevel encryptionLevel) const {
+  makeEncryptedReadRecordLayer(EncryptionLevel encryptionLevel) const override {
     return std::make_unique<EncryptedReadRecordLayer>(encryptionLevel);
   }
 
   virtual std::unique_ptr<EncryptedWriteRecordLayer>
-  makeEncryptedWriteRecordLayer(EncryptionLevel encryptionLevel) const {
+  makeEncryptedWriteRecordLayer(
+      EncryptionLevel encryptionLevel) const override {
     return std::make_unique<EncryptedWriteRecordLayer>(encryptionLevel);
   }
 
   virtual std::unique_ptr<KeyScheduler> makeKeyScheduler(
-      CipherSuite cipher) const {
+      CipherSuite cipher) const override {
     auto keyDer = makeKeyDeriver(cipher);
     return std::make_unique<KeyScheduler>(std::move(keyDer));
   }
 
   virtual std::unique_ptr<KeyDerivation> makeKeyDeriver(
-      CipherSuite cipher) const = 0;
+      CipherSuite cipher) const override = 0;
 
   virtual std::unique_ptr<HandshakeContext> makeHandshakeContext(
-      CipherSuite cipher) const = 0;
+      CipherSuite cipher) const override = 0;
 
   virtual std::unique_ptr<KeyExchange> makeKeyExchange(
       NamedGroup group,
-      KeyExchangeMode mode) const {
+      KeyExchangeMode mode) const override {
     (void)mode;
     switch (group) {
       case NamedGroup::secp256r1:
@@ -90,7 +88,7 @@ class Factory {
     }
   }
 
-  virtual std::unique_ptr<Aead> makeAead(CipherSuite cipher) const {
+  virtual std::unique_ptr<Aead> makeAead(CipherSuite cipher) const override {
     switch (cipher) {
       case CipherSuite::TLS_CHACHA20_POLY1305_SHA256:
         return OpenSSLEVPCipher::makeCipher<ChaCha20Poly1305>();
@@ -111,29 +109,31 @@ class Factory {
     }
   }
 
-  virtual Random makeRandom() const {
+  virtual Random makeRandom() const override {
     return RandomGenerator<Random().size()>().generateRandom();
   }
 
-  virtual uint32_t makeTicketAgeAdd() const {
+  virtual uint32_t makeTicketAgeAdd() const override {
     return RandomNumGenerator<uint32_t>().generateRandom();
   }
 
-  virtual std::unique_ptr<folly::IOBuf> makeRandomBytes(size_t count) const {
+  virtual std::unique_ptr<folly::IOBuf> makeRandomBytes(
+      size_t count) const override {
     return RandomBufGenerator(count).generateRandom();
   }
 
   virtual std::shared_ptr<PeerCert> makePeerCert(
       CertificateEntry certEntry,
-      bool /*leaf*/) const {
+      bool /*leaf*/) const override {
     return CertUtils::makePeerCert(std::move(certEntry.cert_data));
   }
 
-  virtual std::shared_ptr<Cert> makeIdentityOnlyCert(std::string ident) const {
+  virtual std::shared_ptr<Cert> makeIdentityOnlyCert(
+      std::string ident) const override {
     return std::make_shared<IdentityCert>(std::move(ident));
   }
 
-  virtual std::string getHkdfPrefix() const {
+  virtual std::string getHkdfPrefix() const override {
     return kHkdfLabelPrefix.str();
   }
 };

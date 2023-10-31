@@ -271,7 +271,7 @@ void cgLdImplicitContext(IRLS& env, const IRInstruction* inst) {
     rvmtl()[ImplicitContext::activeCtx.handle()],
     dst.reg(0) /* data */
   };
-  v << testb{dst.reg(0), dst.reg(0), sf};
+  v << testq{dst.reg(0), dst.reg(0), sf};
   v << cmovb{
     CC_Z,
     sf,

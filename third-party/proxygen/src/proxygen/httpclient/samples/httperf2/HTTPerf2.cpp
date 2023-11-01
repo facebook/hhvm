@@ -336,12 +336,17 @@ ClientRunner::ClientRunner(HTTPerfStats& parentStats,
     request_.setMethod(HTTPMethod::GET);
   }
 
+  serverName_ = FLAGS_server;
+  if (!FLAGS_server_name.empty()) {
+    serverName_ = FLAGS_server_name;
+  }
+
   if (FLAGS_http10) {
     request_.setHTTPVersion(1, 0);
   } else {
     request_.setHTTPVersion(1, 1);
     if (!FLAGS_nohost) {
-      request_.getHeaders().add(HTTP_HEADER_HOST, FLAGS_server);
+      request_.getHeaders().add(HTTP_HEADER_HOST, serverName_);
     }
   }
 
@@ -369,10 +374,6 @@ ClientRunner::ClientRunner(HTTPerfStats& parentStats,
       } while (pos < header.length() && isspace(header.at(pos)));
       request_.getHeaders().add(headerName, header.substr(pos));
     }
-  }
-  serverName_ = FLAGS_server;
-  if (!FLAGS_server_name.empty()) {
-    serverName_ = FLAGS_server_name;
   }
 }
 

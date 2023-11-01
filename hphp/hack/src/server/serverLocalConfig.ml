@@ -239,8 +239,6 @@ type t = {
   disable_naming_table_fallback_loading: bool;
       (** Stop loading from OCaml marshalled naming table if sqlite table is missing. *)
   use_type_alias_heap: bool;  (** optimize type alias expansions *)
-  override_load_state_natively: bool;
-      (** Overrides load_state_natively on Sandcastle when true *)
   use_server_revision_tracker_v2: bool;
       (** control serverRevisionTracker.ml watchman subscription event tracking *)
   use_hh_distc_instead_of_hulk: bool;
@@ -342,7 +340,6 @@ let default =
     cache_remote_decls = false;
     disable_naming_table_fallback_loading = false;
     use_type_alias_heap = false;
-    override_load_state_natively = false;
     use_server_revision_tracker_v2 = false;
     use_hh_distc_instead_of_hulk = true;
     use_compressed_dep_graph = true;
@@ -1006,13 +1003,6 @@ let load_
       ~current_version
       config
   in
-  let override_load_state_natively =
-    bool_if_min_version
-      "override_load_state_natively"
-      ~default:default.override_load_state_natively
-      ~current_version
-      config
-  in
   let use_server_revision_tracker_v2 =
     bool_if_min_version
       "use_server_revision_tracker_v2"
@@ -1178,7 +1168,6 @@ let load_
     cache_remote_decls;
     disable_naming_table_fallback_loading;
     use_type_alias_heap;
-    override_load_state_natively;
     use_server_revision_tracker_v2;
     use_hh_distc_instead_of_hulk;
     use_compressed_dep_graph;
@@ -1228,7 +1217,7 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       disable_naming_table_fallback_loading =
         options.disable_naming_table_fallback_loading;
       use_type_alias_heap = options.use_type_alias_heap;
-      override_load_state_natively = options.override_load_state_natively;
+      load_state_natively_v4 = options.load_state_natively;
       use_server_revision_tracker_v2 = options.use_server_revision_tracker_v2;
       rust_provider_backend = options.rust_provider_backend;
       use_hh_distc_instead_of_hulk = options.use_hh_distc_instead_of_hulk;

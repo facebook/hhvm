@@ -384,7 +384,6 @@ person_get($a_person, #email); // string
     "A `private` method or property can only be accessed from methods defined on the current class."
     ^ "\n\nPrivate items can be accessed on any instance of the current class. "
     ^ "For example, if you have a private property `name`, you can access both `$this->name` and `$other_instance->name`."
-    ^ "\n\nIf the current class `use`s a trait, the trait methods can also access `private` methods and properties."
     ^ "\n\nSee also `public` and `protected`."
   | SymbolOccurrence.Internal ->
     "An `internal` symbol can only be accessed from files that belong to the current `module`."

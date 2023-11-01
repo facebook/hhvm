@@ -18,6 +18,7 @@
 
 #include <stdint.h>
 #include <cstring>
+#include <string_view>
 
 #include "hphp/util/portability.h"
 
@@ -255,6 +256,11 @@ strhash_t hash_string_i_unsafe(const char *arKey, uint32_t nKeyLength) {
 }
 
 #endif
+
+// Convenience wrapper for std::string_view
+inline strhash_t hash_string_cs(std::string_view s) {
+  return hash_string_cs(s.data(), s.size());
+}
 
 // These functions implement hashing in software. And will return the same thing
 // between different hardware

@@ -166,11 +166,6 @@ SQLiteKey getDBKey(const fs::path& root, const RepoOptions& repoOptions) {
   return SQLiteKey::readWrite(dbPath);
 }
 
-// Convenience wrapper for std::string_view
-inline strhash_t hash_string_view_cs(std::string_view s) {
-  return hash_string_cs(s.data(), s.size());
-}
-
 /**
  * List of options making a SqliteAutoloadMap unique
  */
@@ -232,7 +227,7 @@ struct SqliteAutoloadMapKey {
 
   strhash_t hash() const noexcept {
     return folly::hash::hash_combine(
-        hash_string_view_cs(m_root.native()),
+        hash_string_cs(m_root.native()),
         m_queryExpr.hash(),
         folly::hash::hash_range(
             m_indexedMethodAttrs.begin(), m_indexedMethodAttrs.end()),

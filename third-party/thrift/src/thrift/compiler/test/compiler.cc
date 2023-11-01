@@ -16,17 +16,42 @@
 
 #include <thrift/compiler/test/compiler.h>
 
+#include <algorithm>
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include <re2/re2.h>
 
 #include <boost/filesystem.hpp>
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <re2/re2.h>
 
 #include <thrift/compiler/compiler.h>
 #include <thrift/compiler/diagnostic.h>
 #include <thrift/compiler/source_location.h>
+
+namespace apache::thrift::compiler {
+// Add newlines when printing diagnostics to improve readability.
+void PrintTo(const diagnostic& d, std::ostream* os) {
+  *os << "\n" << d << "\n";
+}
+
+// Avoid order dependence when comparing diagnostics on one line.
+bool operator<(const diagnostic& diag1, const diagnostic& diag2) {
+  // @lint-ignore-every CLANGTIDY facebook-hte-MissingBraces
+  if (diag1.file() != diag2.file())
+    return diag1.file() < diag2.file();
+  if (diag1.lineno() != diag2.lineno())
+    return diag1.lineno() < diag2.lineno();
+  if (diag1.level() != diag2.level())
+    return diag1.level() < diag2.level();
+  if (diag1.message() != diag2.message())
+    return diag1.message() < diag2.message();
+  if (diag1.name() != diag2.name())
+    return diag1.name() < diag2.name();
+  return false;
+}
+} // namespace apache::thrift::compiler
 
 namespace apache::thrift::compiler::test {
 
@@ -92,13 +117,15 @@ void check_compile(const std::string& source, std::vector<std::string> args) {
 
   std::vector<diagnostic> extracted_diagnostics =
       extract_expected_diagnostics(source, TEST_FILE_NAME);
-  compile_retcode expected_ret_code = compile_retcode::success;
-  for (const auto& diag : extracted_diagnostics) {
-    if (diag.level() == diagnostic_level::error) {
-      expected_ret_code = compile_retcode::failure;
-      break;
-    }
-  }
+  compile_retcode expected_ret_code =
+      std::any_of(
+          extracted_diagnostics.begin(),
+          extracted_diagnostics.end(),
+          [](const auto& diag) {
+            return diag.level() == diagnostic_level::error;
+          })
+      ? compile_retcode::failure
+      : compile_retcode::success;
 
   args.insert(args.begin(), "thrift_binary"); // Ignored argument
   args.emplace_back("--gen"); // generator arg
@@ -115,13 +142,9 @@ void check_compile(const std::string& source, std::vector<std::string> args) {
   EXPECT_EQ(expected_ret_code, result.retcode);
 
   auto diagnostics = result.detail.diagnostics();
-  std::sort(
-      diagnostics.begin(),
-      diagnostics.end(),
-      [](const diagnostic& diag1, const diagnostic& diag2) {
-        return diag1.lineno() < diag2.lineno();
-      });
-  EXPECT_EQ(diagnostics, extracted_diagnostics);
+  std::sort(diagnostics.begin(), diagnostics.end());
+  std::sort(extracted_diagnostics.begin(), extracted_diagnostics.end());
+  EXPECT_THAT(diagnostics, ::testing::ContainerEq(extracted_diagnostics));
 }
 
 void check_compile(const std::string& source) {

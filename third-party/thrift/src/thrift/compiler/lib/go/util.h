@@ -116,6 +116,7 @@ bool is_type_go_struct(const t_type* type);
 bool is_type_go_nilable(const t_type* type);
 bool is_type_go_comparable(
     const t_type* type, std::map<std::string, int> visited_type_names = {});
+bool is_type_metadata_primitive(const t_type* type);
 
 std::string get_go_field_name(const t_field* field);
 std::string get_go_func_name(const t_function* func);

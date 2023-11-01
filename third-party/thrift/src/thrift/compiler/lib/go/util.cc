@@ -428,6 +428,15 @@ bool is_type_go_comparable(
   return true;
 }
 
+bool is_type_metadata_primitive(const t_type* type) {
+  // Whether this type is primitive from metadata.thrift perspective.
+  // i.e. see ThriftPrimitiveType enum in metadata.thrift
+  return type->is_bool() || type->is_byte() || type->is_i16() ||
+      type->is_i32() || type->is_i64() || type->is_float() ||
+      type->is_double() || type->is_binary() || type->is_string() ||
+      type->is_void();
+}
+
 std::string get_go_func_name(const t_function* func) {
   auto name_override = get_go_name_annotation(func);
   if (name_override != nullptr) {

@@ -645,11 +645,7 @@ class mstch_go_type : public mstch_type {
     // Whether this type is primitive from metadata.thrift perspective.
     // i.e. see ThriftPrimitiveType enum in metadata.thrift
     auto real_type = type_->get_true_type();
-    return real_type->is_bool() || real_type->is_byte() ||
-        real_type->is_i16() || real_type->is_i32() || real_type->is_i64() ||
-        real_type->is_float() || real_type->is_double() ||
-        real_type->is_binary() || real_type->is_string() ||
-        real_type->is_void();
+    return go::is_type_metadata_primitive(real_type);
   }
 
  private:

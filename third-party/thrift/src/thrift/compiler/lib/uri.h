@@ -20,116 +20,141 @@ namespace apache {
 namespace thrift {
 namespace compiler {
 
-// TODO(dokwon): Make uris inline when thrift compiler is C++17 ready.
-
 // thrift
-constexpr auto kBitmaskEnum = "facebook.com/thrift/annotation/BitmaskEnum";
-constexpr auto kBoxUri = "facebook.com/thrift/annotation/Box";
-constexpr auto kInternBoxUri = "facebook.com/thrift/annotation/InternBox";
-constexpr auto kExperimentalUri = "facebook.com/thrift/annotation/Experimental";
-constexpr auto kExceptionMessageUri =
+inline constexpr auto kBitmaskEnum =
+    "facebook.com/thrift/annotation/BitmaskEnum";
+inline constexpr auto kBoxUri = "facebook.com/thrift/annotation/Box";
+inline constexpr auto kInternBoxUri =
+    "facebook.com/thrift/annotation/InternBox";
+inline constexpr auto kExperimentalUri =
+    "facebook.com/thrift/annotation/Experimental";
+inline constexpr auto kExceptionMessageUri =
     "facebook.com/thrift/annotation/ExceptionMessage";
-constexpr auto kGenerateRuntimeSchemaUri =
+inline constexpr auto kGenerateRuntimeSchemaUri =
     "facebook.com/thrift/annotation/GenerateRuntimeSchema";
-constexpr auto kInjectMetadataFieldsUri =
+inline constexpr auto kInjectMetadataFieldsUri =
     "facebook.com/thrift/annotation/InjectMetadataFields";
-constexpr auto kMixinUri = "facebook.com/thrift/annotation/Mixin";
-constexpr auto kNoLegacyUri = "facebook.com/thrift/annotation/NoLegacy";
-constexpr auto kReserveIdsUri = "facebook.com/thrift/annotation/ReserveIds";
-constexpr auto kSerializeInFieldIdOrderUri =
+inline constexpr auto kMixinUri = "facebook.com/thrift/annotation/Mixin";
+inline constexpr auto kNoLegacyUri = "facebook.com/thrift/annotation/NoLegacy";
+inline constexpr auto kReserveIdsUri =
+    "facebook.com/thrift/annotation/ReserveIds";
+inline constexpr auto kSerializeInFieldIdOrderUri =
     "facebook.com/thrift/annotation/SerializeInFieldIdOrder";
-constexpr auto kSetGeneratedUri = "facebook.com/thrift/annotation/SetGenerated";
-constexpr auto kSchemaAnnotationUri = "facebook.com/thrift/annotation/Schema";
-constexpr auto kTerseWriteUri = "facebook.com/thrift/annotation/TerseWrite";
-constexpr auto kTransitiveUri = "facebook.com/thrift/annotation/Transitive";
+inline constexpr auto kSetGeneratedUri =
+    "facebook.com/thrift/annotation/SetGenerated";
+inline constexpr auto kSchemaAnnotationUri =
+    "facebook.com/thrift/annotation/Schema";
+inline constexpr auto kTerseWriteUri =
+    "facebook.com/thrift/annotation/TerseWrite";
+inline constexpr auto kTransitiveUri =
+    "facebook.com/thrift/annotation/Transitive";
 
 // scope
-constexpr auto kScopeProgramUri = "facebook.com/thrift/annotation/Program";
-constexpr auto kScopeStructUri = "facebook.com/thrift/annotation/Struct";
-constexpr auto kScopeUnionUri = "facebook.com/thrift/annotation/Union";
-constexpr auto kScopeExceptionUri = "facebook.com/thrift/annotation/Exception";
-constexpr auto kScopeFieldUri = "facebook.com/thrift/annotation/Field";
-constexpr auto kScopeTypedefUri = "facebook.com/thrift/annotation/Typedef";
-constexpr auto kScopeServiceUri = "facebook.com/thrift/annotation/Service";
-constexpr auto kScopeInteractionUri =
+inline constexpr auto kScopeProgramUri =
+    "facebook.com/thrift/annotation/Program";
+inline constexpr auto kScopeStructUri = "facebook.com/thrift/annotation/Struct";
+inline constexpr auto kScopeUnionUri = "facebook.com/thrift/annotation/Union";
+inline constexpr auto kScopeExceptionUri =
+    "facebook.com/thrift/annotation/Exception";
+inline constexpr auto kScopeFieldUri = "facebook.com/thrift/annotation/Field";
+inline constexpr auto kScopeTypedefUri =
+    "facebook.com/thrift/annotation/Typedef";
+inline constexpr auto kScopeServiceUri =
+    "facebook.com/thrift/annotation/Service";
+inline constexpr auto kScopeInteractionUri =
     "facebook.com/thrift/annotation/Interaction";
-constexpr auto kScopeFunctionUri = "facebook.com/thrift/annotation/Function";
-constexpr auto kScopeEnumUri = "facebook.com/thrift/annotation/Enum";
-constexpr auto kScopeEnumValueUri = "facebook.com/thrift/annotation/EnumValue";
-constexpr auto kScopeConstUri = "facebook.com/thrift/annotation/Const";
+inline constexpr auto kScopeFunctionUri =
+    "facebook.com/thrift/annotation/Function";
+inline constexpr auto kScopeEnumUri = "facebook.com/thrift/annotation/Enum";
+inline constexpr auto kScopeEnumValueUri =
+    "facebook.com/thrift/annotation/EnumValue";
+inline constexpr auto kScopeConstUri = "facebook.com/thrift/annotation/Const";
 
 // compatibility
-constexpr auto kStringsUri = "facebook.com/thrift/annotation/Strings";
-constexpr auto kEnumsUri = "facebook.com/thrift/annotation/Enums";
+inline constexpr auto kStringsUri = "facebook.com/thrift/annotation/Strings";
+inline constexpr auto kEnumsUri = "facebook.com/thrift/annotation/Enums";
 
 // cpp
-constexpr auto kCppAdapterUri = "facebook.com/thrift/annotation/cpp/Adapter";
-constexpr auto kCppDisableLazyChecksumUri =
+inline constexpr auto kCppAdapterUri =
+    "facebook.com/thrift/annotation/cpp/Adapter";
+inline constexpr auto kCppDisableLazyChecksumUri =
     "facebook.com/thrift/annotation/cpp/DisableLazyChecksum";
-constexpr auto kCppEnumTypeUri = "facebook.com/thrift/annotation/cpp/EnumType";
-constexpr auto kCppFieldInterceptorUri =
+inline constexpr auto kCppEnumTypeUri =
+    "facebook.com/thrift/annotation/cpp/EnumType";
+inline constexpr auto kCppFieldInterceptorUri =
     "facebook.com/thrift/annotation/cpp/FieldInterceptor";
-constexpr auto kCppGenerateTypedInterceptor =
+inline constexpr auto kCppGenerateTypedInterceptor =
     "facebook.com/thrift/annotation/cpp/GenerateTypedInterceptor";
-constexpr auto kCppLazyUri = "facebook.com/thrift/annotation/cpp/Lazy";
-constexpr auto kCppMinimizePaddingUri =
+inline constexpr auto kCppLazyUri = "facebook.com/thrift/annotation/cpp/Lazy";
+inline constexpr auto kCppMinimizePaddingUri =
     "facebook.com/thrift/annotation/cpp/MinimizePadding";
-constexpr auto kCppPackIssetUri =
+inline constexpr auto kCppPackIssetUri =
     "facebook.com/thrift/annotation/cpp/PackIsset";
-constexpr auto kCppRefUri = "facebook.com/thrift/annotation/cpp/Ref";
-constexpr auto kCppScopedEnumAsUnionTypeUri =
+inline constexpr auto kCppRefUri = "facebook.com/thrift/annotation/cpp/Ref";
+inline constexpr auto kCppScopedEnumAsUnionTypeUri =
     "facebook.com/thrift/annotation/cpp/ScopedEnumAsUnionType";
-constexpr auto kCppTriviallyRelocatableUri =
+inline constexpr auto kCppTriviallyRelocatableUri =
     "facebook.com/thrift/annotation/cpp/TriviallyRelocatable";
-constexpr auto kCppUseOpEncodeUri =
+inline constexpr auto kCppUseOpEncodeUri =
     "facebook.com/thrift/annotation/cpp/UseOpEncode";
-constexpr auto kCppFrozen2ExcludeUri =
+inline constexpr auto kCppFrozen2ExcludeUri =
     "facebook.com/thrift/annotation/cpp/Frozen2Exclude";
-constexpr auto kCppTypeUri = "facebook.com/thrift/annotation/cpp/Type";
-constexpr auto kCppNameUri = "facebook.com/thrift/annotation/cpp/Name";
+inline constexpr auto kCppTypeUri = "facebook.com/thrift/annotation/cpp/Type";
+inline constexpr auto kCppNameUri = "facebook.com/thrift/annotation/cpp/Name";
 
 // java
-constexpr auto kJavaMutableUri = "facebook.com/thrift/annotation/java/Mutable";
-constexpr auto kJavaAnnotationUri =
+inline constexpr auto kJavaMutableUri =
+    "facebook.com/thrift/annotation/java/Mutable";
+inline constexpr auto kJavaAnnotationUri =
     "facebook.com/thrift/annotation/java/Annotation";
-constexpr auto kJavaAdapterUri = "facebook.com/thrift/annotation/java/Adapter";
-constexpr auto kJavaWrapperUri = "facebook.com/thrift/annotation/java/Wrapper";
+inline constexpr auto kJavaAdapterUri =
+    "facebook.com/thrift/annotation/java/Adapter";
+inline constexpr auto kJavaWrapperUri =
+    "facebook.com/thrift/annotation/java/Wrapper";
 
 // python
-constexpr auto kPythonAdapterUri =
+inline constexpr auto kPythonAdapterUri =
     "facebook.com/thrift/annotation/python/Adapter";
-constexpr auto kPythonPy3HiddenUri =
+inline constexpr auto kPythonPy3HiddenUri =
     "facebook.com/thrift/annotation/python/Py3Hidden";
-constexpr auto kPythonFlagsUri = "facebook.com/thrift/annotation/python/Flags";
-constexpr auto kPythonNameUri = "facebook.com/thrift/annotation/python/Name";
-constexpr auto kUseCAPIUri = "facebook.com/thrift/annotation/python/UseCAPI";
+inline constexpr auto kPythonFlagsUri =
+    "facebook.com/thrift/annotation/python/Flags";
+inline constexpr auto kPythonNameUri =
+    "facebook.com/thrift/annotation/python/Name";
+inline constexpr auto kUseCAPIUri =
+    "facebook.com/thrift/annotation/python/UseCAPI";
 
 // hack
-constexpr auto kHackAdapterUri = "facebook.com/thrift/annotation/hack/Adapter";
-constexpr auto kHackAttributeUri =
+inline constexpr auto kHackAdapterUri =
+    "facebook.com/thrift/annotation/hack/Adapter";
+inline constexpr auto kHackAttributeUri =
     "facebook.com/thrift/annotation/hack/Attributes";
-constexpr auto kHackFieldWrapperUri =
+inline constexpr auto kHackFieldWrapperUri =
     "facebook.com/thrift/annotation/hack/FieldWrapper";
-constexpr auto kHackNameUri = "facebook.com/thrift/annotation/hack/Name";
-constexpr auto kHackSkipCodegenUri =
+inline constexpr auto kHackNameUri = "facebook.com/thrift/annotation/hack/Name";
+inline constexpr auto kHackSkipCodegenUri =
     "facebook.com/thrift/annotation/hack/SkipCodegen";
-constexpr auto kHackStructAsTraitUri =
+inline constexpr auto kHackStructAsTraitUri =
     "facebook.com/thrift/annotation/hack/StructAsTrait";
-constexpr auto kHackStructTraitUri =
+inline constexpr auto kHackStructTraitUri =
     "facebook.com/thrift/annotation/hack/StructTrait";
-constexpr auto kHackUnionEnumAttributesUri =
+inline constexpr auto kHackUnionEnumAttributesUri =
     "facebook.com/thrift/annotation/hack/UnionEnumAttributes";
-constexpr auto kHackWrapperUri = "facebook.com/thrift/annotation/hack/Wrapper";
-constexpr auto kHackModuleInternalUri =
+inline constexpr auto kHackWrapperUri =
+    "facebook.com/thrift/annotation/hack/Wrapper";
+inline constexpr auto kHackModuleInternalUri =
     "facebook.com/thrift/annotation/hack/ModuleInternal";
 
 // go
-constexpr auto kGoNameUri = "facebook.com/thrift/annotation/go/Name";
-constexpr auto kGoTagUri = "facebook.com/thrift/annotation/go/Tag";
-constexpr auto kGoNewTypeUri = "facebook.com/thrift/annotation/go/NewType";
+inline constexpr auto kGoNameUri = "facebook.com/thrift/annotation/go/Name";
+inline constexpr auto kGoTagUri = "facebook.com/thrift/annotation/go/Tag";
+inline constexpr auto kGoNewTypeUri =
+    "facebook.com/thrift/annotation/go/NewType";
 
-constexpr auto kGeneratePatchUri = "facebook.com/thrift/op/GeneratePatch";
-constexpr auto kAssignOnlyPatchUri = "facebook.com/thrift/op/AssignOnlyPatch";
+inline constexpr auto kGeneratePatchUri =
+    "facebook.com/thrift/op/GeneratePatch";
+inline constexpr auto kAssignOnlyPatchUri =
+    "facebook.com/thrift/op/AssignOnlyPatch";
 
 } // namespace compiler
 } // namespace thrift

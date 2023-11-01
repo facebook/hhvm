@@ -45,18 +45,21 @@ namespace apache::thrift {
   try {
     ap->executeRequest(std::move(serverRequest), metadata);
   } catch (...) {
-    LOG(WARNING) << "exception in executeRequest: "
-                 << folly::exceptionStr(std::current_exception());
+    auto exceptionStr = folly::exceptionStr(std::current_exception());
+    LOG(WARNING) << "exception in executeRequest: " << exceptionStr;
 
     auto eb = detail::ServerRequestHelper::eventBase(serverRequest);
     auto req = detail::ServerRequestHelper::request(std::move(serverRequest));
     // We can return an error if the request has not been consumed already
     if (eb && req) {
-      eb->runInEventBaseThread([request = std::move(req)]() {
+      eb->runInEventBaseThread([request = std::move(req),
+                                exceptionStr = std::move(exceptionStr)]() {
         request->sendErrorWrapped(
             folly::make_exception_wrapper<TApplicationException>(
                 TApplicationException::INTERNAL_ERROR,
-                "AsyncProcessorHelper::executeRequest exception"),
+                fmt::format(
+                    "AsyncProcessorHelper::executeRequest(...) caught an unhandled exception: {}",
+                    exceptionStr)),
             kUnknownErrorCode);
       });
     }

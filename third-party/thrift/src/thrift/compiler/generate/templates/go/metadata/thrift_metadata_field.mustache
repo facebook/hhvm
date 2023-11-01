@@ -23,8 +23,4 @@
     SetId({{field:key}}).
     SetName("{{field:name}}").
     SetIsOptional({{#field:optional?}}true{{/field:optional?}}{{^field:optional?}}false{{/field:optional?}}).
-    SetType(
-        {{#field:type}}
-        {{> metadata/metadata_type}},
-        {{/field:type}}
-    )
+    SetType({{#field:type}}{{type:metadata_name}}{{/field:type}})

@@ -22,11 +22,7 @@
 {{program:metadata_qualifier}}NewThriftFunction().
     SetName("{{function:name}}").
     SetIsOneway({{#function:oneway?}}true{{/function:oneway?}}{{^function:oneway?}}false{{/function:oneway?}}).
-    SetReturnType(
-        {{#function:return_type}}
-        {{> metadata/metadata_type}},
-        {{/function:return_type}}
-    ){{#function:args?}}.
+    SetReturnType({{#function:return_type}}{{type:metadata_name}}{{/function:return_type}}){{#function:args?}}.
     SetArguments(
         []*{{program:metadata_qualifier}}ThriftField{
             {{#function:args}}

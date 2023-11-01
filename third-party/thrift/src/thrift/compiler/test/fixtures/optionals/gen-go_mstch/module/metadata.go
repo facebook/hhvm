@@ -12,18 +12,53 @@ import (
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
-// Primitive Thrift types
+// Premade Thrift types
 var (
-    primitiveThriftType_THRIFT_STRING_TYPE = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr())
-    primitiveThriftType_THRIFT_BINARY_TYPE = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE.Ptr())
-    primitiveThriftType_THRIFT_BOOL_TYPE   = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr())
-    primitiveThriftType_THRIFT_BYTE_TYPE   = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_BYTE_TYPE.Ptr())
-    primitiveThriftType_THRIFT_I16_TYPE    = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE.Ptr())
-    primitiveThriftType_THRIFT_I32_TYPE    = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr())
-    primitiveThriftType_THRIFT_I64_TYPE    = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr())
-    primitiveThriftType_THRIFT_DOUBLE_TYPE = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE.Ptr())
-    primitiveThriftType_THRIFT_FLOAT_TYPE  = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_FLOAT_TYPE.Ptr())
-    primitiveThriftType_THRIFT_VOID_TYPE   = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr())
+    premadeThriftType_double = metadata.NewThriftType().SetTPrimitive(
+        metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE.Ptr(),
+            )
+    premadeThriftType_module_Color = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.Color"),
+            )
+    premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
+        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
+            )
+    premadeThriftType_bool = metadata.NewThriftType().SetTPrimitive(
+        metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
+            )
+    premadeThriftType_i64 = metadata.NewThriftType().SetTPrimitive(
+        metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
+            )
+    premadeThriftType_module_PersonID = metadata.NewThriftType().SetTTypedef(
+        metadata.NewThriftTypedefType().
+            SetName("module.PersonID").
+            SetUnderlyingType(premadeThriftType_i64),
+            )
+    premadeThriftType_i16 = metadata.NewThriftType().SetTPrimitive(
+        metadata.ThriftPrimitiveType_THRIFT_I16_TYPE.Ptr(),
+            )
+    premadeThriftType_set_module_PersonID = metadata.NewThriftType().SetTSet(
+        metadata.NewThriftSetType().
+            SetValueType(premadeThriftType_module_PersonID),
+            )
+    premadeThriftType_module_Animal = metadata.NewThriftType().SetTEnum(
+        metadata.NewThriftEnumType().
+            SetName("module.Animal"),
+            )
+    premadeThriftType_map_module_Animal_string = metadata.NewThriftType().SetTMap(
+        metadata.NewThriftMapType().
+            SetKeyType(premadeThriftType_module_Animal).
+            SetValueType(premadeThriftType_string),
+            )
+    premadeThriftType_module_Vehicle = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.Vehicle"),
+            )
+    premadeThriftType_list_module_Vehicle = metadata.NewThriftType().SetTList(
+        metadata.NewThriftListType().
+            SetValueType(premadeThriftType_module_Vehicle),
+            )
 )
 
 var structMetadatas = []*metadata.ThriftStruct{
@@ -36,30 +71,22 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetId(1).
     SetName("red").
     SetIsOptional(false).
-    SetType(
-        primitiveThriftType_THRIFT_DOUBLE_TYPE,
-    ),
+    SetType(premadeThriftType_double),
             metadata.NewThriftField().
     SetId(2).
     SetName("green").
     SetIsOptional(false).
-    SetType(
-        primitiveThriftType_THRIFT_DOUBLE_TYPE,
-    ),
+    SetType(premadeThriftType_double),
             metadata.NewThriftField().
     SetId(3).
     SetName("blue").
     SetIsOptional(false).
-    SetType(
-        primitiveThriftType_THRIFT_DOUBLE_TYPE,
-    ),
+    SetType(premadeThriftType_double),
             metadata.NewThriftField().
     SetId(4).
     SetName("alpha").
     SetIsOptional(false).
-    SetType(
-        primitiveThriftType_THRIFT_DOUBLE_TYPE,
-    ),
+    SetType(premadeThriftType_double),
         },
     ),
     metadata.NewThriftStruct().
@@ -71,41 +98,27 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetId(1).
     SetName("color").
     SetIsOptional(false).
-    SetType(
-        metadata.NewThriftType().
-    SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.Color"),
-            ),
-    ),
+    SetType(premadeThriftType_module_Color),
             metadata.NewThriftField().
     SetId(2).
     SetName("licensePlate").
     SetIsOptional(true).
-    SetType(
-        primitiveThriftType_THRIFT_STRING_TYPE,
-    ),
+    SetType(premadeThriftType_string),
             metadata.NewThriftField().
     SetId(3).
     SetName("description").
     SetIsOptional(true).
-    SetType(
-        primitiveThriftType_THRIFT_STRING_TYPE,
-    ),
+    SetType(premadeThriftType_string),
             metadata.NewThriftField().
     SetId(4).
     SetName("name").
     SetIsOptional(true).
-    SetType(
-        primitiveThriftType_THRIFT_STRING_TYPE,
-    ),
+    SetType(premadeThriftType_string),
             metadata.NewThriftField().
     SetId(5).
     SetName("hasAC").
     SetIsOptional(true).
-    SetType(
-        primitiveThriftType_THRIFT_BOOL_TYPE,
-    ),
+    SetType(premadeThriftType_bool),
         },
     ),
     metadata.NewThriftStruct().
@@ -117,119 +130,52 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetId(1).
     SetName("id").
     SetIsOptional(false).
-    SetType(
-        metadata.NewThriftType().
-    SetTTypedef(
-        metadata.NewThriftTypedefType().
-            SetName("module.PersonID").
-            SetUnderlyingType(
-                primitiveThriftType_THRIFT_I64_TYPE    ),
-            ),
-    ),
+    SetType(premadeThriftType_module_PersonID),
             metadata.NewThriftField().
     SetId(2).
     SetName("name").
     SetIsOptional(false).
-    SetType(
-        primitiveThriftType_THRIFT_STRING_TYPE,
-    ),
+    SetType(premadeThriftType_string),
             metadata.NewThriftField().
     SetId(3).
     SetName("age").
     SetIsOptional(true).
-    SetType(
-        primitiveThriftType_THRIFT_I16_TYPE,
-    ),
+    SetType(premadeThriftType_i16),
             metadata.NewThriftField().
     SetId(4).
     SetName("address").
     SetIsOptional(true).
-    SetType(
-        primitiveThriftType_THRIFT_STRING_TYPE,
-    ),
+    SetType(premadeThriftType_string),
             metadata.NewThriftField().
     SetId(5).
     SetName("favoriteColor").
     SetIsOptional(true).
-    SetType(
-        metadata.NewThriftType().
-    SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.Color"),
-            ),
-    ),
+    SetType(premadeThriftType_module_Color),
             metadata.NewThriftField().
     SetId(6).
     SetName("friends").
     SetIsOptional(true).
-    SetType(
-        metadata.NewThriftType().
-    SetTSet(
-        metadata.NewThriftSetType().
-            SetValueType(metadata.NewThriftType().
-    SetTTypedef(
-        metadata.NewThriftTypedefType().
-            SetName("module.PersonID").
-            SetUnderlyingType(
-                primitiveThriftType_THRIFT_I64_TYPE    ),
-            )),
-            ),
-    ),
+    SetType(premadeThriftType_set_module_PersonID),
             metadata.NewThriftField().
     SetId(7).
     SetName("bestFriend").
     SetIsOptional(true).
-    SetType(
-        metadata.NewThriftType().
-    SetTTypedef(
-        metadata.NewThriftTypedefType().
-            SetName("module.PersonID").
-            SetUnderlyingType(
-                primitiveThriftType_THRIFT_I64_TYPE    ),
-            ),
-    ),
+    SetType(premadeThriftType_module_PersonID),
             metadata.NewThriftField().
     SetId(8).
     SetName("petNames").
     SetIsOptional(true).
-    SetType(
-        metadata.NewThriftType().
-    SetTMap(
-        metadata.NewThriftMapType().
-            SetKeyType(metadata.NewThriftType().
-    SetTEnum(
-        metadata.NewThriftEnumType().
-            SetName("module.Animal"),
-            )).
-            SetValueType(primitiveThriftType_THRIFT_STRING_TYPE),
-            ),
-    ),
+    SetType(premadeThriftType_map_module_Animal_string),
             metadata.NewThriftField().
     SetId(9).
     SetName("afraidOfAnimal").
     SetIsOptional(true).
-    SetType(
-        metadata.NewThriftType().
-    SetTEnum(
-        metadata.NewThriftEnumType().
-            SetName("module.Animal"),
-            ),
-    ),
+    SetType(premadeThriftType_module_Animal),
             metadata.NewThriftField().
     SetId(10).
     SetName("vehicles").
     SetIsOptional(true).
-    SetType(
-        metadata.NewThriftType().
-    SetTList(
-        metadata.NewThriftListType().
-            SetValueType(metadata.NewThriftType().
-    SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.Vehicle"),
-            )),
-            ),
-    ),
+    SetType(premadeThriftType_list_module_Vehicle),
         },
     ),
 }

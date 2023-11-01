@@ -90,6 +90,8 @@ class mstch_go_program : public mstch_program {
              &mstch_go_program::should_import_metadata_package},
             {"program:metadata_qualifier",
              &mstch_go_program::metadata_qualifier},
+            {"program:thrift_metadata_types",
+             &mstch_go_program::thrift_metadata_types},
         });
   }
   mstch::node go_pkg_name() {
@@ -137,6 +139,10 @@ class mstch_go_program : public mstch_program {
     } else {
       return std::string("");
     }
+  }
+  mstch::node thrift_metadata_types() {
+    return make_mstch_array(
+        data_.thrift_metadata_types, *context_.type_factory);
   }
 
  private:
@@ -637,6 +643,8 @@ class mstch_go_type : public mstch_type {
         {
             {"type:go_comparable?", &mstch_go_type::is_go_comparable},
             {"type:metadata_primitive?", &mstch_go_type::is_metadata_primitive},
+            {"type:full_name", &mstch_go_type::full_name},
+            {"type:metadata_name", &mstch_go_type::metadata_name},
         });
   }
 
@@ -646,6 +654,16 @@ class mstch_go_type : public mstch_type {
     // i.e. see ThriftPrimitiveType enum in metadata.thrift
     auto real_type = type_->get_true_type();
     return go::is_type_metadata_primitive(real_type);
+  }
+  mstch::node full_name() { return type_->get_full_name(); }
+  mstch::node metadata_name() {
+    std::string full_name = type_->get_full_name();
+    boost::replace_all(full_name, " ", "");
+    boost::replace_all(full_name, ".", "_");
+    boost::replace_all(full_name, ",", "_");
+    boost::replace_all(full_name, "<", "_");
+    boost::replace_all(full_name, ">", "");
+    return "premadeThriftType_" + full_name;
   }
 
  private:
@@ -735,6 +753,7 @@ void t_mstch_go_generator::generate_program() {
   data_.compute_go_package_aliases();
   data_.compute_struct_to_field_names();
   data_.compute_service_to_req_resp_structs();
+  data_.compute_thrift_metadata_types();
 
   if (auto thrift_lib_import = get_option("thrift_import")) {
     data_.thrift_lib_import = *thrift_lib_import;

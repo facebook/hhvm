@@ -58,12 +58,18 @@ class codegen_data {
   // Mapping of service name to a vector of req/resp structs for that service.
   std::map<std::string, std::vector<t_struct*>> service_to_req_resp_structs =
       {};
+  // A vector of types for which we need to generate metadata.
+  // Order matters here - items later in the list may have a dependency
+  // on items earlier in the list. This ensures that the Go code can
+  // successfully build when generated based on the items in this list.
+  std::vector<const t_type*> thrift_metadata_types = {};
 
   void set_current_program(const t_program* program);
 
   void compute_go_package_aliases();
   void compute_struct_to_field_names();
   void compute_service_to_req_resp_structs();
+  void compute_thrift_metadata_types();
 
   bool is_current_program(const t_program* program);
 
@@ -72,6 +78,8 @@ class codegen_data {
 
  private:
   std::string make_go_package_name_unique(const std::string& name);
+  void add_to_thrift_metadata_types(
+      const t_type* type, std::set<std::string>& visited_type_names);
 
   // The current program being generated.
   const t_program* current_program_;

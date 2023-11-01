@@ -12,18 +12,31 @@ import (
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
-// Primitive Thrift types
+// Premade Thrift types
 var (
-    primitiveThriftType_THRIFT_STRING_TYPE = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr())
-    primitiveThriftType_THRIFT_BINARY_TYPE = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE.Ptr())
-    primitiveThriftType_THRIFT_BOOL_TYPE   = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr())
-    primitiveThriftType_THRIFT_BYTE_TYPE   = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_BYTE_TYPE.Ptr())
-    primitiveThriftType_THRIFT_I16_TYPE    = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE.Ptr())
-    primitiveThriftType_THRIFT_I32_TYPE    = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr())
-    primitiveThriftType_THRIFT_I64_TYPE    = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr())
-    primitiveThriftType_THRIFT_DOUBLE_TYPE = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE.Ptr())
-    primitiveThriftType_THRIFT_FLOAT_TYPE  = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_FLOAT_TYPE.Ptr())
-    primitiveThriftType_THRIFT_VOID_TYPE   = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr())
+    premadeThriftType_module_Metasyntactic = metadata.NewThriftType().SetTEnum(
+        metadata.NewThriftEnumType().
+            SetName("module.Metasyntactic"),
+            )
+    premadeThriftType_i32 = metadata.NewThriftType().SetTPrimitive(
+        metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
+            )
+    premadeThriftType_set_i32 = metadata.NewThriftType().SetTSet(
+        metadata.NewThriftSetType().
+            SetValueType(premadeThriftType_i32),
+            )
+    premadeThriftType_module_MyEnum2 = metadata.NewThriftType().SetTEnum(
+        metadata.NewThriftEnumType().
+            SetName("module.MyEnum2"),
+            )
+    premadeThriftType_module_MyEnum3 = metadata.NewThriftType().SetTEnum(
+        metadata.NewThriftEnumType().
+            SetName("module.MyEnum3"),
+            )
+    premadeThriftType_module_MyEnum1 = metadata.NewThriftType().SetTEnum(
+        metadata.NewThriftEnumType().
+            SetName("module.MyEnum1"),
+            )
 )
 
 var structMetadatas = []*metadata.ThriftStruct{
@@ -36,46 +49,22 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetId(1).
     SetName("reasonable").
     SetIsOptional(false).
-    SetType(
-        metadata.NewThriftType().
-    SetTEnum(
-        metadata.NewThriftEnumType().
-            SetName("module.Metasyntactic"),
-            ),
-    ),
+    SetType(premadeThriftType_module_Metasyntactic),
             metadata.NewThriftField().
     SetId(2).
     SetName("fine").
     SetIsOptional(false).
-    SetType(
-        metadata.NewThriftType().
-    SetTEnum(
-        metadata.NewThriftEnumType().
-            SetName("module.Metasyntactic"),
-            ),
-    ),
+    SetType(premadeThriftType_module_Metasyntactic),
             metadata.NewThriftField().
     SetId(3).
     SetName("questionable").
     SetIsOptional(false).
-    SetType(
-        metadata.NewThriftType().
-    SetTEnum(
-        metadata.NewThriftEnumType().
-            SetName("module.Metasyntactic"),
-            ),
-    ),
+    SetType(premadeThriftType_module_Metasyntactic),
             metadata.NewThriftField().
     SetId(4).
     SetName("tags").
     SetIsOptional(false).
-    SetType(
-        metadata.NewThriftType().
-    SetTSet(
-        metadata.NewThriftSetType().
-            SetValueType(primitiveThriftType_THRIFT_I32_TYPE),
-            ),
-    ),
+    SetType(premadeThriftType_set_i32),
         },
     ),
     metadata.NewThriftStruct().
@@ -87,46 +76,22 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetId(1).
     SetName("me2_3").
     SetIsOptional(false).
-    SetType(
-        metadata.NewThriftType().
-    SetTEnum(
-        metadata.NewThriftEnumType().
-            SetName("module.MyEnum2"),
-            ),
-    ),
+    SetType(premadeThriftType_module_MyEnum2),
             metadata.NewThriftField().
     SetId(2).
     SetName("me3_n3").
     SetIsOptional(false).
-    SetType(
-        metadata.NewThriftType().
-    SetTEnum(
-        metadata.NewThriftEnumType().
-            SetName("module.MyEnum3"),
-            ),
-    ),
+    SetType(premadeThriftType_module_MyEnum3),
             metadata.NewThriftField().
     SetId(4).
     SetName("me1_t1").
     SetIsOptional(false).
-    SetType(
-        metadata.NewThriftType().
-    SetTEnum(
-        metadata.NewThriftEnumType().
-            SetName("module.MyEnum1"),
-            ),
-    ),
+    SetType(premadeThriftType_module_MyEnum1),
             metadata.NewThriftField().
     SetId(6).
     SetName("me1_t2").
     SetIsOptional(false).
-    SetType(
-        metadata.NewThriftType().
-    SetTEnum(
-        metadata.NewThriftEnumType().
-            SetName("module.MyEnum1"),
-            ),
-    ),
+    SetType(premadeThriftType_module_MyEnum1),
         },
     ),
 }

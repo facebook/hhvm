@@ -154,6 +154,91 @@ void codegen_data::compute_service_to_req_resp_structs() {
   }
 }
 
+void codegen_data::add_to_thrift_metadata_types(
+    const t_type* type, std::set<std::string>& visited_type_names) {
+  auto type_name = type->get_full_name();
+  if (visited_type_names.count(type_name) > 0) {
+    return; // Already visited
+  }
+
+  visited_type_names.insert(type_name);
+
+  // The recursion below is equivalent to post-order tree traversal.
+  // It ensures that the types are recorded in the dependency order.
+
+  if (type->is_typedef()) {
+    auto typedef_ = dynamic_cast<const t_typedef*>(type);
+    auto underlying_type = typedef_->get_type();
+    add_to_thrift_metadata_types(underlying_type, visited_type_names);
+  } else if (type->is_list()) {
+    auto list_type = dynamic_cast<const t_list*>(type);
+    auto elem_type = list_type->elem_type().get_type();
+    add_to_thrift_metadata_types(elem_type, visited_type_names);
+  } else if (type->is_set()) {
+    auto set_type = dynamic_cast<const t_set*>(type);
+    auto elem_type = set_type->elem_type().get_type();
+    add_to_thrift_metadata_types(elem_type, visited_type_names);
+  } else if (type->is_map()) {
+    auto map_type = dynamic_cast<const t_map*>(type);
+    auto key_type = map_type->key_type().get_type();
+    auto val_type = map_type->val_type().get_type();
+    add_to_thrift_metadata_types(key_type, visited_type_names);
+    add_to_thrift_metadata_types(val_type, visited_type_names);
+  }
+
+  thrift_metadata_types.push_back(type);
+}
+
+void codegen_data::compute_thrift_metadata_types() {
+  // The following items need metadata generated for them:
+  //   * Struct/union/exception field types
+  //   * Typedef underlying types
+  //   * Function return types
+  //   * Function argument types
+  //   * Function exception types
+
+  std::set<std::string> visited_type_names;
+
+  for (auto const& struct_ : current_program_->structs_and_unions()) {
+    for (auto const& field : struct_->fields()) {
+      auto type = field.type().get_type();
+      add_to_thrift_metadata_types(type, visited_type_names);
+    }
+  }
+  for (auto const& exception : current_program_->exceptions()) {
+    for (auto const& field : exception->get_members()) {
+      auto type = field->get_type();
+      add_to_thrift_metadata_types(type, visited_type_names);
+    }
+  }
+  for (auto const& typedef_ : current_program_->typedefs()) {
+    auto type = typedef_->get_type();
+    add_to_thrift_metadata_types(type, visited_type_names);
+  }
+
+  for (auto const& service : current_program_->services()) {
+    for (const auto& func : service->functions()) {
+      if (!is_func_go_supported(&func)) {
+        continue; // Skip unsupported functions
+      }
+
+      auto return_type = func.return_type().get_type();
+      add_to_thrift_metadata_types(return_type, visited_type_names);
+
+      for (const auto& parameter : func.params().get_members()) {
+        auto type = parameter->get_type();
+        add_to_thrift_metadata_types(type, visited_type_names);
+      }
+      if (func.exceptions() != nullptr) {
+        for (const auto& exception : func.exceptions()->get_members()) {
+          auto type = exception->get_type();
+          add_to_thrift_metadata_types(type, visited_type_names);
+        }
+      }
+    }
+  }
+}
+
 bool codegen_data::is_current_program(const t_program* program) {
   return (program == current_program_);
 }

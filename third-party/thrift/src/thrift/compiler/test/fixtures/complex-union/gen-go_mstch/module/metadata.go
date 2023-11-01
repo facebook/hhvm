@@ -12,18 +12,49 @@ import (
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
-// Primitive Thrift types
+// Premade Thrift types
 var (
-    primitiveThriftType_THRIFT_STRING_TYPE = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr())
-    primitiveThriftType_THRIFT_BINARY_TYPE = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE.Ptr())
-    primitiveThriftType_THRIFT_BOOL_TYPE   = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr())
-    primitiveThriftType_THRIFT_BYTE_TYPE   = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_BYTE_TYPE.Ptr())
-    primitiveThriftType_THRIFT_I16_TYPE    = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE.Ptr())
-    primitiveThriftType_THRIFT_I32_TYPE    = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr())
-    primitiveThriftType_THRIFT_I64_TYPE    = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr())
-    primitiveThriftType_THRIFT_DOUBLE_TYPE = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE.Ptr())
-    primitiveThriftType_THRIFT_FLOAT_TYPE  = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_FLOAT_TYPE.Ptr())
-    primitiveThriftType_THRIFT_VOID_TYPE   = metadata.NewThriftType().SetTPrimitive(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr())
+    premadeThriftType_i64 = metadata.NewThriftType().SetTPrimitive(
+        metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
+            )
+    premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
+        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
+            )
+    premadeThriftType_list_i64 = metadata.NewThriftType().SetTList(
+        metadata.NewThriftListType().
+            SetValueType(premadeThriftType_i64),
+            )
+    premadeThriftType_list_string = metadata.NewThriftType().SetTList(
+        metadata.NewThriftListType().
+            SetValueType(premadeThriftType_string),
+            )
+    premadeThriftType_i16 = metadata.NewThriftType().SetTPrimitive(
+        metadata.ThriftPrimitiveType_THRIFT_I16_TYPE.Ptr(),
+            )
+    premadeThriftType_map_i16_string = metadata.NewThriftType().SetTMap(
+        metadata.NewThriftMapType().
+            SetKeyType(premadeThriftType_i16).
+            SetValueType(premadeThriftType_string),
+            )
+    premadeThriftType_module_containerTypedef = metadata.NewThriftType().SetTTypedef(
+        metadata.NewThriftTypedefType().
+            SetName("module.containerTypedef").
+            SetUnderlyingType(premadeThriftType_map_i16_string),
+            )
+    premadeThriftType_binary = metadata.NewThriftType().SetTPrimitive(
+        metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE.Ptr(),
+            )
+    premadeThriftType_i32 = metadata.NewThriftType().SetTPrimitive(
+        metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
+            )
+    premadeThriftType_module_Val = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.Val"),
+            )
+    premadeThriftType_module_NonCopyableStruct = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.NonCopyableStruct"),
+            )
 )
 
 var structMetadatas = []*metadata.ThriftStruct{
@@ -36,63 +67,32 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetId(1).
     SetName("intValue").
     SetIsOptional(false).
-    SetType(
-        primitiveThriftType_THRIFT_I64_TYPE,
-    ),
+    SetType(premadeThriftType_i64),
             metadata.NewThriftField().
     SetId(2).
     SetName("intListValue").
     SetIsOptional(false).
-    SetType(
-        metadata.NewThriftType().
-    SetTList(
-        metadata.NewThriftListType().
-            SetValueType(primitiveThriftType_THRIFT_I64_TYPE),
-            ),
-    ),
+    SetType(premadeThriftType_list_i64),
             metadata.NewThriftField().
     SetId(3).
     SetName("stringListValue").
     SetIsOptional(false).
-    SetType(
-        metadata.NewThriftType().
-    SetTList(
-        metadata.NewThriftListType().
-            SetValueType(primitiveThriftType_THRIFT_STRING_TYPE),
-            ),
-    ),
+    SetType(premadeThriftType_list_string),
             metadata.NewThriftField().
     SetId(5).
     SetName("stringValue").
     SetIsOptional(false).
-    SetType(
-        primitiveThriftType_THRIFT_STRING_TYPE,
-    ),
+    SetType(premadeThriftType_string),
             metadata.NewThriftField().
     SetId(9).
     SetName("typedefValue").
     SetIsOptional(false).
-    SetType(
-        metadata.NewThriftType().
-    SetTTypedef(
-        metadata.NewThriftTypedefType().
-            SetName("module.containerTypedef").
-            SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTMap(
-                metadata.NewThriftMapType().
-            SetKeyType(primitiveThriftType_THRIFT_I16_TYPE).
-            SetValueType(primitiveThriftType_THRIFT_STRING_TYPE),
-            )    ),
-            ),
-    ),
+    SetType(premadeThriftType_module_containerTypedef),
             metadata.NewThriftField().
     SetId(14).
     SetName("stringRef").
     SetIsOptional(false).
-    SetType(
-        primitiveThriftType_THRIFT_STRING_TYPE,
-    ),
+    SetType(premadeThriftType_string),
         },
     ),
     metadata.NewThriftStruct().
@@ -104,24 +104,12 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetId(2).
     SetName("intListValue").
     SetIsOptional(false).
-    SetType(
-        metadata.NewThriftType().
-    SetTList(
-        metadata.NewThriftListType().
-            SetValueType(primitiveThriftType_THRIFT_I64_TYPE),
-            ),
-    ),
+    SetType(premadeThriftType_list_i64),
             metadata.NewThriftField().
     SetId(3).
     SetName("stringListValue").
     SetIsOptional(false).
-    SetType(
-        metadata.NewThriftType().
-    SetTList(
-        metadata.NewThriftListType().
-            SetValueType(primitiveThriftType_THRIFT_STRING_TYPE),
-            ),
-    ),
+    SetType(premadeThriftType_list_string),
         },
     ),
     metadata.NewThriftStruct().
@@ -133,16 +121,12 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetId(1).
     SetName("binaryData").
     SetIsOptional(false).
-    SetType(
-        primitiveThriftType_THRIFT_BINARY_TYPE,
-    ),
+    SetType(premadeThriftType_binary),
             metadata.NewThriftField().
     SetId(2).
     SetName("stringData").
     SetIsOptional(false).
-    SetType(
-        primitiveThriftType_THRIFT_STRING_TYPE,
-    ),
+    SetType(premadeThriftType_string),
         },
     ),
     metadata.NewThriftStruct().
@@ -154,34 +138,17 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetId(1).
     SetName("strVal").
     SetIsOptional(false).
-    SetType(
-        primitiveThriftType_THRIFT_STRING_TYPE,
-    ),
+    SetType(premadeThriftType_string),
             metadata.NewThriftField().
     SetId(2).
     SetName("intVal").
     SetIsOptional(false).
-    SetType(
-        primitiveThriftType_THRIFT_I32_TYPE,
-    ),
+    SetType(premadeThriftType_i32),
             metadata.NewThriftField().
     SetId(9).
     SetName("typedefValue").
     SetIsOptional(false).
-    SetType(
-        metadata.NewThriftType().
-    SetTTypedef(
-        metadata.NewThriftTypedefType().
-            SetName("module.containerTypedef").
-            SetUnderlyingType(
-                metadata.NewThriftType().
-            SetTMap(
-                metadata.NewThriftMapType().
-            SetKeyType(primitiveThriftType_THRIFT_I16_TYPE).
-            SetValueType(primitiveThriftType_THRIFT_STRING_TYPE),
-            )    ),
-            ),
-    ),
+    SetType(premadeThriftType_module_containerTypedef),
         },
     ),
     metadata.NewThriftStruct().
@@ -193,24 +160,12 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetId(1).
     SetName("v1").
     SetIsOptional(false).
-    SetType(
-        metadata.NewThriftType().
-    SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.Val"),
-            ),
-    ),
+    SetType(premadeThriftType_module_Val),
             metadata.NewThriftField().
     SetId(2).
     SetName("v2").
     SetIsOptional(false).
-    SetType(
-        metadata.NewThriftType().
-    SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.Val"),
-            ),
-    ),
+    SetType(premadeThriftType_module_Val),
         },
     ),
     metadata.NewThriftStruct().
@@ -222,16 +177,12 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetId(1).
     SetName("thingOne").
     SetIsOptional(false).
-    SetType(
-        primitiveThriftType_THRIFT_STRING_TYPE,
-    ),
+    SetType(premadeThriftType_string),
             metadata.NewThriftField().
     SetId(2).
     SetName("thingTwo").
     SetIsOptional(false).
-    SetType(
-        primitiveThriftType_THRIFT_STRING_TYPE,
-    ),
+    SetType(premadeThriftType_string),
         },
     ),
     metadata.NewThriftStruct().
@@ -243,9 +194,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetId(1).
     SetName("num").
     SetIsOptional(false).
-    SetType(
-        primitiveThriftType_THRIFT_I64_TYPE,
-    ),
+    SetType(premadeThriftType_i64),
         },
     ),
     metadata.NewThriftStruct().
@@ -257,13 +206,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetId(1).
     SetName("s").
     SetIsOptional(false).
-    SetType(
-        metadata.NewThriftType().
-    SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.NonCopyableStruct"),
-            ),
-    ),
+    SetType(premadeThriftType_module_NonCopyableStruct),
         },
     ),
 }

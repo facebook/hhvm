@@ -1,6 +1,0 @@
-=== Shape analysis results for parameter2.php
-Constraints for \f:
-   5: Parameter at [5:12-33]
-   5: ParamLike (([5:12-33], "\\f"), (Index 0))
-   5: ParamLike (([5:43-47], "\\f"), Return)
-

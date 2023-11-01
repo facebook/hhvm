@@ -1,4 +1,0 @@
-=== Shape analysis results for class_extends.php
-Constraints for \D:
-   6: Extends ([6:17-18], "\\C") 
-

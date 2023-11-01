@@ -1,4 +1,0 @@
-=== Shape analysis results for empty_dict.php
-Summary for \f:
-[4:3-9] [Allocation]:
-  shape()

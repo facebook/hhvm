@@ -1,8 +1,0 @@
-=== Shape analysis results for await2.php
-Summary for \f:
-[3:18-46] [Parameter]:
-  shape()
-[3:52-67] [Return]:
-  shape()
-[6:11-13] [Debug]:
-  shape('k' => int)

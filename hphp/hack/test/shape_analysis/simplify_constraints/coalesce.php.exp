@@ -1,6 +1,0 @@
-=== Shape analysis results for coalesce.php
-Summary for \f:
-[3:12-30] [Parameter]:
-  shape('a' => mixed, 'b' => mixed)
-[5:11-13] [Debug]:
-  shape('a' => mixed, ?'b' => mixed)

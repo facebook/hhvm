@@ -1,7 +1,0 @@
-=== Shape analysis results for call_simple.php
-Summary after closing and simplifying for \f:
-[4:5-20] [Allocation]:
-  shape('a' => int, 'b' => mixed)
-Summary after closing and simplifying for \g:
-[7:12-30] [Parameter]:
-  shape(?'a' => int, 'b' => mixed)

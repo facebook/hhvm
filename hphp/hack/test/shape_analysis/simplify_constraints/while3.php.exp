@@ -1,8 +1,0 @@
-=== Shape analysis results for while3.php
-Summary for \f:
-[4:8-25] [Allocation]:
-  shape('a' => bool)
-[7:10-26] [Allocation]:
-  shape('b' => string)
-[9:11-13] [Debug]:
-  shape(?'a' => bool, ?'b' => string)

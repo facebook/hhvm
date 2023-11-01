@@ -1,8 +1,0 @@
-=== Shape analysis results for return3.php
-Summary for \multi_return:
-[5:26-45] [Return]:
-  shape(?'a' => int, ?'b' => bool)
-[8:12-27] [Allocation]:
-  shape('a' => int)
-[10:10-25] [Allocation]:
-  shape('b' => bool)

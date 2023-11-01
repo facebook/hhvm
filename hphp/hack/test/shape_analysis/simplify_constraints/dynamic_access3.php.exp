@@ -1,4 +1,0 @@
-=== Shape analysis results for dynamic_access3.php
-Summary for \f:
-[8:11-13] : dynamic
-(ParamLike (([3:12-31], "\\f"), (Index 0))) : dynamic

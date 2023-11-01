@@ -66,7 +66,6 @@ type mode =
   | Go_to_impl of int * int
   | Hover of (int * int) option
   | Apply_quickfixes
-  | Shape_analysis of string
   | Refactor_sound_dynamic of string * string * string
   | RemoveDeadUnsafeCasts
   | CountImpreciseTypes
@@ -336,12 +335,6 @@ let parse_options () =
       ( "--extra-builtin",
         Arg.String (fun f -> extra_builtins := f :: !extra_builtins),
         " HHI file to parse and declare" );
-      ( "--shape-analysis",
-        Arg.String
-          (fun mode ->
-            batch_mode := true;
-            set_mode (Shape_analysis mode) ()),
-        " Run the shape analysis" );
       ( "--refactor-sound-dynamic",
         (let refactor_analysis_mode = ref "" in
          let refactor_mode = ref "" in
@@ -1869,22 +1862,6 @@ let handle_mode
       ~do_:(Sdt_analysis.do_ ~command ~on_bad_command:die ~verbosity)
       "SDT"
       ()
-      ctx
-      error_format
-      ~iter_over_files
-      ~profile_type_check_multi
-      ~memtrace
-  | Shape_analysis mode ->
-    let opts =
-      match Shape_analysis_options.parse_mode mode with
-      | Some (command, mode) ->
-        Shape_analysis_options.mk ~command ~mode ~verbosity
-      | None -> die "invalid shape analysis mode"
-    in
-    handle_constraint_mode
-      ~do_:Shape_analysis.do_
-      "Shape"
-      opts
       ctx
       error_format
       ~iter_over_files

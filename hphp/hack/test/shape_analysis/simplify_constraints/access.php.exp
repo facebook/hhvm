@@ -1,4 +1,0 @@
-=== Shape analysis results for access.php
-Summary for \f:
-[4:3-18] [Allocation]:
-  shape('a' => int)

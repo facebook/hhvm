@@ -1,8 +1,0 @@
-=== Shape analysis results for parameter3.php
-Summary for \f:
-[3:12-29] [Parameter]:
-  shape()
-[4:8-14] [Allocation]:
-  shape()
-[6:11-13] [Debug]:
-  shape('k' => int)

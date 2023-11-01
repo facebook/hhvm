@@ -1,7 +1,0 @@
-=== Shape analysis results for trait_const_1_wip.php
-Summary after closing and simplifying for \TheTrait::DICT:
-[5:9-28] [Constant]:
-  shape()
-[5:36-42] [Allocation]:
-  shape()
-Summary after closing and simplifying for \main:

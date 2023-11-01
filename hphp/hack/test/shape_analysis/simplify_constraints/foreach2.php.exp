@@ -1,8 +1,0 @@
-=== Shape analysis results for foreach2.php
-Summary for \f:
-[4:12-27] [Allocation]:
-  shape('a' => int)
-[7:13-15] [Debug]:
-  shape('a' => int, 'b' => bool)
-[9:11-16] [Debug]:
-  shape(?'a' => int)

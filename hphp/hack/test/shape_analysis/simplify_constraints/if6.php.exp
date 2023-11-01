@@ -1,6 +1,0 @@
-=== Shape analysis results for if6.php
-Summary for \f:
-[4:8-14] [Allocation]:
-  shape()
-[8:11-13] [Debug]:
-  shape(?'a' => nothing)

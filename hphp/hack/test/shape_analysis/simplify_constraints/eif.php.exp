@@ -1,6 +1,0 @@
-=== Shape analysis results for eif.php
-Summary for \f:
-[4:8-14] [Allocation]:
-  shape()
-[6:11-13] [Debug]:
-  shape(?'a' => nothing, ?'b' => nothing)

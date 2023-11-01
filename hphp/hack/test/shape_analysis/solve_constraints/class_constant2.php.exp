@@ -1,7 +1,0 @@
-=== Shape analysis results for class_constant2.php
-Summary after closing and simplifying for \C::DICT:
-[4:9-28] [Constant]:
-  shape('a' => int, ?'b' => mixed)
-[4:36-51] [Allocation]:
-  shape('a' => int, ?'b' => mixed)
-Summary after closing and simplifying for \main:

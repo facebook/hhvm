@@ -1,8 +1,0 @@
-=== Shape analysis results for trait_const_2_wip.php
-Summary after closing and simplifying for \Child:
-Summary after closing and simplifying for \Childish::foo:
-Summary after closing and simplifying for \TheParent::DICT:
-[5:11-31] [Constant]:
-  shape('a' => string)
-[5:39-55] [Allocation]:
-  shape('a' => string)

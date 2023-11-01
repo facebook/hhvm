@@ -1,9 +1,0 @@
-=== Shape analysis results for argument_as_dynamic.php
-Summary for \f:
-[7:8-25] [Allocation]:
-  shape('b' => bool)
-[6:8-23] : dynamic
-(ParamLike (([5:15-19], "\\f"), Return)) : dynamic
-Summary for \g:
-(ParamLike (([3:12-31], "\\g"), (Index 0))) : dynamic
-(ParamLike (([3:37-41], "\\g"), Return)) : dynamic

@@ -1,6 +1,0 @@
-=== Shape analysis results for while4.php
-Summary for \f:
-[4:8-23] [Allocation]:
-  shape('a' => int)
-[8:10-26] [Allocation]:
-  shape('b' => string)

@@ -1,9 +1,0 @@
-=== Shape analysis results for return3.php
-Summary after closing and simplifying for \bar:
-[10:17-36] [Return]:
-  shape(?'a' => mixed)
-[11:10-16] [Allocation]:
-  shape(?'a' => mixed)
-Summary after closing and simplifying for \foo:
-[4:17-36] [Return]:
-  shape('a' => mixed)

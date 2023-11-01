@@ -1,7 +1,0 @@
-=== Shape analysis results for const2.php
-Summary after closing and simplifying for \DICT:
-[3:7-26] [Constant]:
-  shape('a' => int, ?'b1' => mixed, ?'b2' => mixed)
-[3:34-49] [Allocation]:
-  shape('a' => int)
-Summary after closing and simplifying for \main:

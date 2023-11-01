@@ -185,11 +185,6 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
- (name shape_analysis_scuba_stubs)
- (wrapped false)
- (modules shape_analysis_scuba))
-
-(library
  (name file_scuba_logger_ffi_externs)
  (wrapped false)
  (modules file_scuba_logger_ffi_externs)

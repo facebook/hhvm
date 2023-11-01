@@ -1,9 +1,0 @@
-=== Shape analysis results for return2.php
-Summary after closing and simplifying for \bar:
-[9:17-36] [Return]:
-  shape('a' => int)
-[10:10-24] [Allocation]:
-  shape('a' => int)
-Summary after closing and simplifying for \foo:
-[3:17-36] [Return]:
-  shape('a' => int, 'b' => int)

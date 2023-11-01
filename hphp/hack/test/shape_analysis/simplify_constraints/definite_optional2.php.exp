@@ -1,6 +1,0 @@
-=== Shape analysis results for definite_optional2.php
-Summary for \f:
-[4:8-14] [Allocation]:
-  shape()
-[10:11-13] [Debug]:
-  shape('a' => string)

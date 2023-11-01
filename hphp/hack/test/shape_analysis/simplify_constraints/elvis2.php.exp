@@ -1,8 +1,0 @@
-=== Shape analysis results for elvis2.php
-Summary for \f:
-[4:8-26] [Allocation]:
-  shape('key1' => int)
-[4:30-54] [Allocation]:
-  shape('key2' => string)
-[5:11-13] [Debug]:
-  shape(?'key1' => int, ?'key2' => string)

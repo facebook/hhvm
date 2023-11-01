@@ -1,4 +1,0 @@
-=== Shape analysis results for parameter1.php
-Summary for \f:
-[3:12-29] [Parameter]:
-  shape('k' => int)

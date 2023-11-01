@@ -1,6 +1,0 @@
-=== Shape analysis results for return1.php
-Summary for \f:
-[4:15-34] [Return]:
-  shape('a' => int)
-[5:10-25] [Allocation]:
-  shape('a' => int)

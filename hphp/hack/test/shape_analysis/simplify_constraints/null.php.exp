@@ -1,4 +1,0 @@
-=== Shape analysis results for null.php
-Summary for \f:
-[4:3-20] [Allocation]:
-  shape('a' => null)

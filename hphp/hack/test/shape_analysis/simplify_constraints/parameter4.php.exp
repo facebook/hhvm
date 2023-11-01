@@ -1,4 +1,0 @@
-=== Shape analysis results for parameter4.php
-Summary for \f:
-[3:12-31] [Parameter]:
-  shape('b' => mixed)

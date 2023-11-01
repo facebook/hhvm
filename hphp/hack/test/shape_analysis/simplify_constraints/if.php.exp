@@ -1,6 +1,0 @@
-=== Shape analysis results for if.php
-Summary for \f:
-[5:5-20] [Allocation]:
-  shape('a' => int)
-[7:5-22] [Allocation]:
-  shape('b' => bool)

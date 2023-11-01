@@ -1,4 +1,0 @@
-=== Shape analysis results for return_super.php
-Summary for \f:
-[4:10-25] : dynamic
-(ParamLike (([3:15-20], "\\f"), Return)) : dynamic

@@ -1,7 +1,0 @@
-=== Shape analysis results for class_constants8_wip.php
-Summary after closing and simplifying for \C1::DICT:
-[4:11-30] [Constant]:
-  shape('a' => int, ?'extra' => mixed)
-[4:38-52] [Allocation]:
-  shape('a' => int)
-Summary after closing and simplifying for \fn:

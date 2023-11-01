@@ -1,9 +1,0 @@
-=== Shape analysis results for call_assign.php
-Summary after closing and simplifying for \f:
-[4:5-20] [Allocation]:
-  shape('a' => int)
-Summary after closing and simplifying for \g:
-[7:12-30] [Parameter]:
-  shape(?'a' => int)
-[9:11-13] [Debug]:
-  shape(?'a' => int, 'b' => bool)

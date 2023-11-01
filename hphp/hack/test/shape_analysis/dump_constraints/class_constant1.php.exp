@@ -1,9 +1,0 @@
-=== Shape analysis results for class_constant1.php
-Constraints for \C::DICT:
-   4: Constant at [4:9-28]
-   4: [4:36-51] ⊆ (Constant ([4:9-28], "\\C::DICT"))
-   4: Allocation at [4:36-51]
-   4: ! SK [4:36-51] : shape('a' => int)
-   4: Constant ([4:9-28], "\\C::DICT")
-   4: Constant initialization at [4:36-51]
-

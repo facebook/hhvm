@@ -1,7 +1,0 @@
-=== Shape analysis results for approximate_2.php
-Summary after closing and simplifying for \K::meth:
-[4:24-29] [Parameter]:
-  shape()
-Summary after closing and simplifying for \foo:
-[10:12-18] [Allocation]:
-  shape()

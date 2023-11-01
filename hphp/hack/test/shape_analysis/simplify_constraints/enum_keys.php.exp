@@ -1,6 +1,0 @@
-=== Shape analysis results for enum_keys.php
-Summary for \f:
-[13:8-43] [Allocation]:
-  shape(\C::K1 => int, \D::K1 => string)
-[15:11-13] [Debug]:
-  shape(\C::K1 => int, \C::K2 => float, \D::K1 => string)

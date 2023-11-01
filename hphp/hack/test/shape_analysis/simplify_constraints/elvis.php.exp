@@ -1,4 +1,0 @@
-=== Shape analysis results for elvis.php
-Summary for \f:
-[3:12-31] [Parameter]:
-  shape('key1' => mixed, 'key2' => mixed)

@@ -1,7 +1,0 @@
-=== Shape analysis results for argument.php
-Constraints for \f:
-   4: Allocation at [4:8-14]
-   5: Debug at [5:11-13]
-   5: [4:8-14] ⊆ [5:11-13]
-   3: ParamLike (([3:15-19], "\\f"), Return)
-

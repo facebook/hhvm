@@ -1,7 +1,0 @@
-=== Shape analysis results for const_self.php
-Summary after closing and simplifying for \Foo::DICT:
-[4:11-31] [Constant]:
-  shape('a' => string, ?'b' => string)
-[4:39-55] [Allocation]:
-  shape('a' => string)
-Summary after closing and simplifying for \Foo::foo:

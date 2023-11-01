@@ -1,6 +1,0 @@
-=== Shape analysis results for switch5.php
-Summary for \f:
-[4:8-14] [Allocation]:
-  shape()
-[17:11-13] [Debug]:
-  shape(?'a' => nothing, ?'b1' => nothing, ?'b2' => int, ?'c1' => int, ?'c2' => int)

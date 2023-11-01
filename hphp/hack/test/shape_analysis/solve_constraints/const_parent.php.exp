@@ -1,8 +1,0 @@
-=== Shape analysis results for const_parent.php
-Summary after closing and simplifying for \TheChild:
-Summary after closing and simplifying for \TheChild::foo:
-Summary after closing and simplifying for \TheParent::DICT:
-[4:11-31] [Constant]:
-  shape('a' => string, ?'b' => string)
-[4:39-55] [Allocation]:
-  shape('a' => string)

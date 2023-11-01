@@ -1,9 +1,0 @@
-=== Shape analysis results for nested.php
-Constraints for \f:
-   4: Allocation at [4:3-31]
-   4: [4:15-30] ⊆ [4:3-31]
-   4: ! SK [4:3-31] : shape('a' => \HH\dict<string, int>)
-   4: Allocation at [4:15-30]
-   4: ! SK [4:15-30] : shape('b' => int)
-   3: ParamLike (([3:15-19], "\\f"), Return)
-

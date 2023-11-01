@@ -1,4 +1,0 @@
-=== Shape analysis results for out_of_bounds_wip.php
-Summary for \main:
-[4:8-22] [Allocation]:
-  shape('a' => int, 'b' => int)

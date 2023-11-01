@@ -1,4 +1,0 @@
-=== Shape analysis results for optional_backwards.php
-Summary for \f:
-[3:12-31] [Parameter]:
-  shape('a' => mixed, ?'b' => mixed, 'c' => mixed)

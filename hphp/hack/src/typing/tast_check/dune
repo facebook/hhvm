@@ -6,8 +6,6 @@
   tany_logger
   core_kernel
   nast
-  shape_analysis
-  shape_analysis_scuba
   sdt_analysis
   remove_dead_unsafe_casts
   tast_env

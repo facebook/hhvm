@@ -1,7 +1,0 @@
-=== Shape analysis results for no_shapes_expected.php
-Summary for \foo:
-[6:3-4] [Parameter]:
-  shape()
-Summary for \gen_void:
-[10:5-20] [Return]:
-  shape()

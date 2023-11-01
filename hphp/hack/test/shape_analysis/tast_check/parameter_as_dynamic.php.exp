@@ -1,6 +1,0 @@
-=== Shape analysis results for parameter_as_dynamic.php
-Summary for \f:
-[5:3-20] [Allocation]:
-  shape('b' => bool)
-(ParamLike (([3:12-31], "\\f"), (Index 0))) : dynamic
-(ParamLike (([3:37-41], "\\f"), Return)) : dynamic

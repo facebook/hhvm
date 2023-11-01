@@ -1,7 +1,0 @@
-=== Shape analysis results for const_classname1_wip.php
-Summary after closing and simplifying for \Foo::DICT:
-[4:11-30] [Constant]:
-  shape()
-[4:38-44] [Allocation]:
-  shape()
-Summary after closing and simplifying for \f:

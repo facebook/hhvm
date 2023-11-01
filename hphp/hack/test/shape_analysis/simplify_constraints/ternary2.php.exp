@@ -1,8 +1,0 @@
-=== Shape analysis results for ternary2.php
-Summary for \f:
-[4:13-28] [Allocation]:
-  shape('a' => int)
-[4:31-46] [Allocation]:
-  shape('b' => int)
-[5:11-13] [Debug]:
-  shape(?'a' => int, ?'b' => int)

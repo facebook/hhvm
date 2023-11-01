@@ -1,5 +1,0 @@
-=== Shape analysis results for dynamic2.php
-Summary after closing and simplifying for \f:
-(ParamLike (([3:12-31], "\\f"), (Index 0))) : dynamic
-Summary after closing and simplifying for \main:
-[9:5-19] : dynamic

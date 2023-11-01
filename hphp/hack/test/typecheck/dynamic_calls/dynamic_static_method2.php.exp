@@ -1,2 +1,2 @@
-File "dynamic_static_method2.php", line 18, characters 8-9:
-Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()` (Naming[2121])
+File "dynamic_static_method2.php", line 18, characters 3-9:
+Dynamic calls to static methods may only have the form `$d1::$d2()` (Parsing[1002])

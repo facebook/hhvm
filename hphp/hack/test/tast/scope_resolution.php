@@ -107,7 +107,6 @@ EOD
 function class_get(dynamic $x): void {
   Foo::$x;
   $x::$x;
-  Foo::$x();
   $x::$x();
 
   (Foo::$x);
@@ -117,7 +116,6 @@ function class_get(dynamic $x): void {
 
   Foo::$_;
   (Foo::$_);
-  Foo::$_();
   (Foo::$_)();
 
   Foo::{$x};

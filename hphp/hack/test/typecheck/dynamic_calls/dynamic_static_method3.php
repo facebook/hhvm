@@ -10,10 +10,5 @@ function test(dynamic $x, string $y): void {
   $r3 = $x::$z(); // $z undefined
   $r4 = $x::$w();
 
-  $r5 = Foo::$x();
-  $r6 = Foo::$y();
-  $r7 = Foo::$z(); // $z undefined
-  $r8 = Foo::$w();
-
-  hh_show(tuple($r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8));
+  hh_show(tuple($r1, $r2, $r3, $r4));
 }

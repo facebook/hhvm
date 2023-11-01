@@ -1,45 +1,43 @@
 Errors:
-  [165:9-14] Cannot use dynamic class or method name in strict mode
-  [166:10-21] Cannot use dynamic class or method name in strict mode
-  [167:10-31] Cannot use dynamic class or method name in strict mode
-  [169:9-17] Cannot use dynamic class or method name in strict mode
-  [170:10-18] Cannot use dynamic class or method name in strict mode
-  [171:10-18] Cannot use dynamic class or method name in strict mode
-  [173:9-13] Cannot use dynamic class or method name in strict mode
-  [174:10-14] Cannot use dynamic class or method name in strict mode
-  [175:10-14] Cannot use dynamic class or method name in strict mode
-  [177:9-13] Cannot use dynamic class or method name in strict mode
-  [178:10-14] Cannot use dynamic class or method name in strict mode
-  [179:10-14] Cannot use dynamic class or method name in strict mode
-  [181:9-15] Cannot use dynamic class or method name in strict mode
-  [182:10-16] Cannot use dynamic class or method name in strict mode
-  [183:10-16] Cannot use dynamic class or method name in strict mode
-  [185:9-15] Cannot use dynamic class or method name in strict mode
-  [186:10-16] Cannot use dynamic class or method name in strict mode
-  [187:10-16] Cannot use dynamic class or method name in strict mode
-  [189:9-13] Cannot use dynamic class or method name in strict mode
-  [190:10-14] Cannot use dynamic class or method name in strict mode
-  [191:10-14] Cannot use dynamic class or method name in strict mode
-  [193:9-13] Cannot use dynamic class or method name in strict mode
-  [194:10-14] Cannot use dynamic class or method name in strict mode
-  [195:10-14] Cannot use dynamic class or method name in strict mode
-  [110:8-10] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [111:7-9] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [120:8-10] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [125:9-11] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [130:9-11] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [133:9-14] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [134:9-30] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [135:9-28] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [137:9-17] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [139:9-22] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [163:9-14] Cannot use dynamic class or method name in strict mode
+  [164:10-21] Cannot use dynamic class or method name in strict mode
+  [165:10-31] Cannot use dynamic class or method name in strict mode
+  [167:9-17] Cannot use dynamic class or method name in strict mode
+  [168:10-18] Cannot use dynamic class or method name in strict mode
+  [169:10-18] Cannot use dynamic class or method name in strict mode
+  [171:9-13] Cannot use dynamic class or method name in strict mode
+  [172:10-14] Cannot use dynamic class or method name in strict mode
+  [173:10-14] Cannot use dynamic class or method name in strict mode
+  [175:9-13] Cannot use dynamic class or method name in strict mode
+  [176:10-14] Cannot use dynamic class or method name in strict mode
+  [177:10-14] Cannot use dynamic class or method name in strict mode
+  [179:9-15] Cannot use dynamic class or method name in strict mode
+  [180:10-16] Cannot use dynamic class or method name in strict mode
+  [181:10-16] Cannot use dynamic class or method name in strict mode
+  [183:9-15] Cannot use dynamic class or method name in strict mode
+  [184:10-16] Cannot use dynamic class or method name in strict mode
+  [185:10-16] Cannot use dynamic class or method name in strict mode
+  [187:9-13] Cannot use dynamic class or method name in strict mode
+  [188:10-14] Cannot use dynamic class or method name in strict mode
+  [189:10-14] Cannot use dynamic class or method name in strict mode
+  [191:9-13] Cannot use dynamic class or method name in strict mode
+  [192:10-14] Cannot use dynamic class or method name in strict mode
+  [193:10-14] Cannot use dynamic class or method name in strict mode
+  [110:7-9] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [123:9-11] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [128:9-11] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [131:9-14] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [132:9-30] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [133:9-28] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [135:9-17] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [137:9-22] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [139:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [141:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [143:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [143:9-15] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [145:9-15] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [147:9-15] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [147:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [149:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [151:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [153:9-155:4] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [151:9-153:4] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
 [(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -234,7 +232,7 @@ Errors:
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([107:10-19], "\\class_get");
        fd_fun =
-       { f_span = [107:1-157:2]; f_readonly_this = None; f_annotation = (); 
+       { f_span = [107:1-155:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((), (Some ([107:33-37], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (); param_type_hint = ((), (Some ([107:20-27], Hdynamic))); 
@@ -247,132 +245,129 @@ Errors:
          { fb_ast =
            [([108:3-11], (Expr ((), [108:3-10], (Class_get (((), [108:3-6], (CI ([108:3-6], "\\Foo"))), (CGstring ([108:8-10], "$x")), Is_prop)))));
              ([109:3-10], (Expr ((), [109:3-9], (Class_get (((), [109:3-5], (CIexpr ((), [109:3-5], (Lvar ([109:3-5], $x))))), (CGstring ([109:7-9], "$x")), Is_prop)))));
-             ([110:3-13],
+             ([110:3-12],
               (Expr
-                 ((), [110:3-12],
+                 ((), [110:3-11],
                   (Call
-                     { func = ((), [110:3-10], (Class_get (((), [110:3-6], (CI ([110:3-6], "\\Foo"))), (CGexpr ((), [110:8-10], (Lvar ([110:8-10], $x)))), Is_method))); 
+                     { func = ((), [110:3-9], (Class_get (((), [110:3-5], (CIexpr ((), [110:3-5], (Lvar ([110:3-5], $x))))), (CGexpr ((), [110:7-9], (Lvar ([110:7-9], $x)))), Is_method)));
                        targs = []; args = []; unpacked_arg = None }))));
-             ([111:3-12],
+             ([112:3-13], (Expr ((), [112:4-11], (Class_get (((), [112:4-7], (CI ([112:4-7], "\\Foo"))), (CGstring ([112:9-11], "$x")), Is_prop)))));
+             ([113:3-14], (Expr ((), [113:5-11], (Class_get (((), [113:5-7], (CIexpr ((), [113:5-7], (Lvar ([113:5-7], $x))))), (CGstring ([113:9-11], "$x")), Is_prop)))));
+             ([114:3-19],
               (Expr
-                 ((), [111:3-11],
+                 ((), [114:3-18],
+                  (Call { func = ((), [114:6-13], (Class_get (((), [114:6-9], (CI ([114:6-9], "\\Foo"))), (CGstring ([114:11-13], "$x")), Is_prop))); targs = []; args = []; unpacked_arg = None }))));
+             ([115:3-20],
+              (Expr
+                 ((), [115:3-19],
                   (Call
-                     { func = ((), [111:3-9], (Class_get (((), [111:3-5], (CIexpr ((), [111:3-5], (Lvar ([111:3-5], $x))))), (CGexpr ((), [111:7-9], (Lvar ([111:7-9], $x)))), Is_method)));
+                     { func = ((), [115:7-13], (Class_get (((), [115:7-9], (CIexpr ((), [115:7-9], (Lvar ([115:7-9], $x))))), (CGstring ([115:11-13], "$x")), Is_prop))); 
                        targs = []; args = []; unpacked_arg = None }))));
-             ([113:3-13], (Expr ((), [113:4-11], (Class_get (((), [113:4-7], (CI ([113:4-7], "\\Foo"))), (CGstring ([113:9-11], "$x")), Is_prop)))));
-             ([114:3-14], (Expr ((), [114:5-11], (Class_get (((), [114:5-7], (CIexpr ((), [114:5-7], (Lvar ([114:5-7], $x))))), (CGstring ([114:9-11], "$x")), Is_prop)))));
-             ([115:3-19],
+             ([117:3-11], (Expr ((), [117:3-10], (Class_get (((), [117:3-6], (CI ([117:3-6], "\\Foo"))), (CGstring ([117:8-10], "$_")), Is_prop)))));
+             ([118:3-13], (Expr ((), [118:4-11], (Class_get (((), [118:4-7], (CI ([118:4-7], "\\Foo"))), (CGstring ([118:9-11], "$_")), Is_prop)))));
+             ([119:3-15],
               (Expr
-                 ((), [115:3-18],
-                  (Call { func = ((), [115:6-13], (Class_get (((), [115:6-9], (CI ([115:6-9], "\\Foo"))), (CGstring ([115:11-13], "$x")), Is_prop))); targs = []; args = []; unpacked_arg = None }))));
-             ([116:3-20],
+                 ((), [119:3-14],
+                  (Call { func = ((), [119:4-11], (Class_get (((), [119:4-7], (CI ([119:4-7], "\\Foo"))), (CGstring ([119:9-11], "$_")), Is_prop))); targs = []; args = []; unpacked_arg = None }))));
+             ([121:3-13], (Expr ((), [121:3-12], (Class_get (((), [121:3-6], (CI ([121:3-6], "\\Foo"))), (CGstring ([121:9-11], "$x")), Is_prop)))));
+             ([122:3-15], (Expr ((), [122:4-13], (Class_get (((), [122:4-7], (CI ([122:4-7], "\\Foo"))), (CGstring ([122:10-12], "$x")), Is_prop)))));
+             ([123:3-15],
               (Expr
-                 ((), [116:3-19],
+                 ((), [123:3-14],
                   (Call
-                     { func = ((), [116:7-13], (Class_get (((), [116:7-9], (CIexpr ((), [116:7-9], (Lvar ([116:7-9], $x))))), (CGstring ([116:11-13], "$x")), Is_prop))); 
+                     { func = ((), [123:3-12], (Class_get (((), [123:3-6], (CI ([123:3-6], "\\Foo"))), (CGexpr ((), [123:9-11], (Lvar ([123:9-11], $x)))), Is_method))); 
                        targs = []; args = []; unpacked_arg = None }))));
-             ([118:3-11], (Expr ((), [118:3-10], (Class_get (((), [118:3-6], (CI ([118:3-6], "\\Foo"))), (CGstring ([118:8-10], "$_")), Is_prop)))));
-             ([119:3-13], (Expr ((), [119:4-11], (Class_get (((), [119:4-7], (CI ([119:4-7], "\\Foo"))), (CGstring ([119:9-11], "$_")), Is_prop)))));
-             ([120:3-13],
+             ([124:3-17],
               (Expr
-                 ((), [120:3-12],
+                 ((), [124:3-16],
+                  (Call { func = ((), [124:4-13], (Class_get (((), [124:4-7], (CI ([124:4-7], "\\Foo"))), (CGstring ([124:10-12], "$x")), Is_prop))); targs = []; args = []; unpacked_arg = None }))));
+             ([126:3-13], (Expr ((), [126:3-12], (Class_get (((), [126:3-6], (CI ([126:3-6], "\\Foo"))), (CGstring ([126:9-11], "$_")), Is_prop)))));
+             ([127:3-15], (Expr ((), [127:4-13], (Class_get (((), [127:4-7], (CI ([127:4-7], "\\Foo"))), (CGstring ([127:10-12], "$_")), Is_prop)))));
+             ([128:3-15],
+              (Expr
+                 ((), [128:3-14],
                   (Call
-                     { func = ((), [120:3-10], (Class_get (((), [120:3-6], (CI ([120:3-6], "\\Foo"))), (CGexpr ((), [120:8-10], (Lplaceholder [120:8-10]))), Is_method))); 
+                     { func = ((), [128:3-12], (Class_get (((), [128:3-6], (CI ([128:3-6], "\\Foo"))), (CGexpr ((), [128:9-11], (Lplaceholder [128:9-11]))), Is_method))); 
                        targs = []; args = []; unpacked_arg = None }))));
-             ([121:3-15],
+             ([129:3-17],
               (Expr
-                 ((), [121:3-14],
-                  (Call { func = ((), [121:4-11], (Class_get (((), [121:4-7], (CI ([121:4-7], "\\Foo"))), (CGstring ([121:9-11], "$_")), Is_prop))); targs = []; args = []; unpacked_arg = None }))));
-             ([123:3-13], (Expr ((), [123:3-12], (Class_get (((), [123:3-6], (CI ([123:3-6], "\\Foo"))), (CGstring ([123:9-11], "$x")), Is_prop)))));
-             ([124:3-15], (Expr ((), [124:4-13], (Class_get (((), [124:4-7], (CI ([124:4-7], "\\Foo"))), (CGstring ([124:10-12], "$x")), Is_prop)))));
-             ([125:3-15],
+                 ((), [129:3-16],
+                  (Call { func = ((), [129:4-13], (Class_get (((), [129:4-7], (CI ([129:4-7], "\\Foo"))), (CGstring ([129:10-12], "$_")), Is_prop))); targs = []; args = []; unpacked_arg = None }))));
+             ([131:3-18],
               (Expr
-                 ((), [125:3-14],
-                  (Call
-                     { func = ((), [125:3-12], (Class_get (((), [125:3-6], (CI ([125:3-6], "\\Foo"))), (CGexpr ((), [125:9-11], (Lvar ([125:9-11], $x)))), Is_method))); 
-                       targs = []; args = []; unpacked_arg = None }))));
-             ([126:3-17],
-              (Expr
-                 ((), [126:3-16],
-                  (Call { func = ((), [126:4-13], (Class_get (((), [126:4-7], (CI ([126:4-7], "\\Foo"))), (CGstring ([126:10-12], "$x")), Is_prop))); targs = []; args = []; unpacked_arg = None }))));
-             ([128:3-13], (Expr ((), [128:3-12], (Class_get (((), [128:3-6], (CI ([128:3-6], "\\Foo"))), (CGstring ([128:9-11], "$_")), Is_prop)))));
-             ([129:3-15], (Expr ((), [129:4-13], (Class_get (((), [129:4-7], (CI ([129:4-7], "\\Foo"))), (CGstring ([129:10-12], "$_")), Is_prop)))));
-             ([130:3-15],
-              (Expr
-                 ((), [130:3-14],
-                  (Call
-                     { func = ((), [130:3-12], (Class_get (((), [130:3-6], (CI ([130:3-6], "\\Foo"))), (CGexpr ((), [130:9-11], (Lplaceholder [130:9-11]))), Is_method))); 
-                       targs = []; args = []; unpacked_arg = None }))));
-             ([131:3-17],
-              (Expr
-                 ((), [131:3-16],
-                  (Call { func = ((), [131:4-13], (Class_get (((), [131:4-7], (CI ([131:4-7], "\\Foo"))), (CGstring ([131:10-12], "$_")), Is_prop))); targs = []; args = []; unpacked_arg = None }))));
-             ([133:3-18],
-              (Expr
-                 ((), [133:3-17],
+                 ((), [131:3-17],
                   (Call
                      { func =
-                       ((), [133:3-15],
-                        (Class_get (((), [133:3-6], (CI ([133:3-6], "\\Foo"))),
-                           (CGexpr ((), [133:9-14], (Call { func = ((), [133:9-12], (Id ([133:9-12], "\\bar"))); targs = []; args = []; unpacked_arg = None }))), Is_method)));
+                       ((), [131:3-15],
+                        (Class_get (((), [131:3-6], (CI ([131:3-6], "\\Foo"))),
+                           (CGexpr ((), [131:9-14], (Call { func = ((), [131:9-12], (Id ([131:9-12], "\\bar"))); targs = []; args = []; unpacked_arg = None }))), Is_method)));
                        targs = []; args = []; unpacked_arg = None }))));
-             ([134:3-34],
+             ([132:3-34],
               (Expr
-                 ((), [134:3-33],
+                 ((), [132:3-33],
                   (Call
                      { func =
-                       ((), [134:3-31],
-                        (Class_get (((), [134:3-6], (CI ([134:3-6], "\\Foo"))),
+                       ((), [132:3-31],
+                        (Class_get (((), [132:3-6], (CI ([132:3-6], "\\Foo"))),
                            (CGexpr
-                              ((), [134:9-30],
+                              ((), [132:9-30],
                                (Call
-                                  { func = ((), [134:9-17], (Id ([134:9-17], "\\vsprintf"))); 
-                                    targs = []; args = [(Pnormal, ((), [134:18-22], (String "%s"))); (Pnormal, ((), [134:24-29], (String "wow")))]; 
+                                  { func = ((), [132:9-17], (Id ([132:9-17], "\\vsprintf"))); 
+                                    targs = []; args = [(Pnormal, ((), [132:18-22], (String "%s"))); (Pnormal, ((), [132:24-29], (String "wow")))]; 
                                     unpacked_arg = None }))),
                            Is_method)));
                        targs = []; args = []; unpacked_arg = None }))));
-             ([135:3-32],
+             ([133:3-32],
               (Expr
-                 ((), [135:3-31],
+                 ((), [133:3-31],
                   (Call
                      { func =
-                       ((), [135:3-29],
-                        (Class_get (((), [135:3-6], (CI ([135:3-6], "\\Foo"))),
+                       ((), [133:3-29],
+                        (Class_get (((), [133:3-6], (CI ([133:3-6], "\\Foo"))),
                            (CGexpr
-                              ((), [135:9-28],
-                               (Cast (([135:10-16], (Hprim Tstring)), ((), [135:18-27], (Binop { bop = Plus; lhs = ((), [135:18-21], (Int "123")); rhs = ((), [135:24-27], (Int "456")) })))))),
+                              ((), [133:9-28],
+                               (Cast (([133:10-16], (Hprim Tstring)), ((), [133:18-27], (Binop { bop = Plus; lhs = ((), [133:18-21], (Int "123")); rhs = ((), [133:24-27], (Int "456")) })))))),
                            Is_method)));
                        targs = []; args = []; unpacked_arg = None }))));
-             ([137:3-21],
+             ([135:3-21],
               (Expr
-                 ((), [137:3-20],
+                 ((), [135:3-20],
                   (Call
                      { func =
-                       ((), [137:3-18],
-                        (Class_get (((), [137:3-6], (CI ([137:3-6], "\\Foo"))),
-                           (CGexpr ((), [137:9-17], (Binop { bop = Dot; lhs = ((), [137:9-13], (String "ba")); rhs = ((), [137:14-17], (String "r")) }))), Is_method)));
+                       ((), [135:3-18],
+                        (Class_get (((), [135:3-6], (CI ([135:3-6], "\\Foo"))),
+                           (CGexpr ((), [135:9-17], (Binop { bop = Dot; lhs = ((), [135:9-13], (String "ba")); rhs = ((), [135:14-17], (String "r")) }))), Is_method)));
                        targs = []; args = []; unpacked_arg = None }))));
-             ([139:3-26],
+             ([137:3-26],
               (Expr
-                 ((), [139:3-25],
+                 ((), [137:3-25],
                   (Call
                      { func =
-                       ((), [139:3-23],
-                        (Class_get (((), [139:3-6], (CI ([139:3-6], "\\Foo"))),
-                           (CGexpr ((), [139:9-22], (Binop { bop = Dot; lhs = ((), [139:9-16], (String "bar\\")); rhs = ((), [139:17-22], (String "baz")) }))), Is_method)));
+                       ((), [137:3-23],
+                        (Class_get (((), [137:3-6], (CI ([137:3-6], "\\Foo"))),
+                           (CGexpr ((), [137:9-22], (Binop { bop = Dot; lhs = ((), [137:9-16], (String "bar\\")); rhs = ((), [137:17-22], (String "baz")) }))), Is_method)));
+                       targs = []; args = []; unpacked_arg = None }))));
+             ([139:3-17],
+              (Expr
+                 ((), [139:3-16],
+                  (Call
+                     { func = ((), [139:3-14], (Class_get (((), [139:3-6], (CI ([139:3-6], "\\Foo"))), (CGexpr ((), [139:9-13], (String2 [((), [139:10-12], (Lvar ([139:10-12], $x)))]))), Is_method)));
                        targs = []; args = []; unpacked_arg = None }))));
              ([141:3-17],
               (Expr
                  ((), [141:3-16],
                   (Call
-                     { func = ((), [141:3-14], (Class_get (((), [141:3-6], (CI ([141:3-6], "\\Foo"))), (CGexpr ((), [141:9-13], (String2 [((), [141:10-12], (Lvar ([141:10-12], $x)))]))), Is_method)));
+                     { func =
+                       ((), [141:3-14], (Class_get (((), [141:3-6], (CI ([141:3-6], "\\Foo"))), (CGexpr ((), [141:9-13], (String2 [((), [141:10-12], (Lplaceholder [141:10-12]))]))), Is_method)));
                        targs = []; args = []; unpacked_arg = None }))));
-             ([143:3-17],
+             ([143:3-19],
               (Expr
-                 ((), [143:3-16],
+                 ((), [143:3-18],
                   (Call
                      { func =
-                       ((), [143:3-14], (Class_get (((), [143:3-6], (CI ([143:3-6], "\\Foo"))), (CGexpr ((), [143:9-13], (String2 [((), [143:10-12], (Lplaceholder [143:10-12]))]))), Is_method)));
+                       ((), [143:3-16],
+                        (Class_get (((), [143:3-6], (CI ([143:3-6], "\\Foo"))), (
+                           CGexpr ((), [143:9-15], (String2 [((), [143:10-12], (String "ba")); ((), [143:12-14], (Lvar ([143:12-14], $x)))]))), Is_method)));
                        targs = []; args = []; unpacked_arg = None }))));
              ([145:3-19],
               (Expr
@@ -381,16 +376,16 @@ Errors:
                      { func =
                        ((), [145:3-16],
                         (Class_get (((), [145:3-6], (CI ([145:3-6], "\\Foo"))), (
-                           CGexpr ((), [145:9-15], (String2 [((), [145:10-12], (String "ba")); ((), [145:12-14], (Lvar ([145:12-14], $x)))]))), Is_method)));
+                           CGexpr ((), [145:9-15], (String2 [((), [145:10-12], (String "ba")); ((), [145:12-14], (Lplaceholder [145:12-14]))]))), Is_method)));
                        targs = []; args = []; unpacked_arg = None }))));
-             ([147:3-19],
+             ([147:3-17],
               (Expr
-                 ((), [147:3-18],
+                 ((), [147:3-16],
                   (Call
                      { func =
-                       ((), [147:3-16],
-                        (Class_get (((), [147:3-6], (CI ([147:3-6], "\\Foo"))), (
-                           CGexpr ((), [147:9-15], (String2 [((), [147:10-12], (String "ba")); ((), [147:12-14], (Lplaceholder [147:12-14]))]))), Is_method)));
+                       ((), [147:3-14],
+                        (Class_get (((), [147:3-6], (CI ([147:3-6], "\\Foo"))),
+                           (CGexpr ((), [147:9-13], (Call { func = ((), [147:9-11], (Lvar ([147:9-11], $x))); targs = []; args = []; unpacked_arg = None }))), Is_method)));
                        targs = []; args = []; unpacked_arg = None }))));
              ([149:3-17],
               (Expr
@@ -399,25 +394,16 @@ Errors:
                      { func =
                        ((), [149:3-14],
                         (Class_get (((), [149:3-6], (CI ([149:3-6], "\\Foo"))),
-                           (CGexpr ((), [149:9-13], (Call { func = ((), [149:9-11], (Lvar ([149:9-11], $x))); targs = []; args = []; unpacked_arg = None }))), Is_method)));
+                           (CGexpr ((), [149:9-13], (Call { func = ((), [149:9-11], (Lplaceholder [149:9-11])); targs = []; args = []; unpacked_arg = None }))), Is_method)));
                        targs = []; args = []; unpacked_arg = None }))));
-             ([151:3-17],
+             ([151:3-154:7],
               (Expr
-                 ((), [151:3-16],
+                 ((), [151:3-154:6],
                   (Call
                      { func =
-                       ((), [151:3-14],
+                       ((), [151:3-154:4],
                         (Class_get (((), [151:3-6], (CI ([151:3-6], "\\Foo"))),
-                           (CGexpr ((), [151:9-13], (Call { func = ((), [151:9-11], (Lplaceholder [151:9-11])); targs = []; args = []; unpacked_arg = None }))), Is_method)));
-                       targs = []; args = []; unpacked_arg = None }))));
-             ([153:3-156:7],
-              (Expr
-                 ((), [153:3-156:6],
-                  (Call
-                     { func =
-                       ((), [153:3-156:4],
-                        (Class_get (((), [153:3-6], (CI ([153:3-6], "\\Foo"))),
-                           (CGexpr ((), [153:9-155:4], (String2 [((), [154:1-6], (Lvar ([154:1-6], $much))); ((), [154:6-11], (String " doge"))]))), Is_method)));
+                           (CGexpr ((), [151:9-153:4], (String2 [((), [152:1-6], (Lvar ([152:1-6], $much))); ((), [152:6-11], (String " doge"))]))), Is_method)));
                        targs = []; args = []; unpacked_arg = None }))))
              ]
            };
@@ -429,219 +415,219 @@ Errors:
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([159:10-23], "\\invalid_exprs");
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([157:10-23], "\\invalid_exprs");
        fd_fun =
-       { f_span = [159:1-196:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), (Some ([159:37-41], (Hprim Tvoid))));
+       { f_span = [157:1-194:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([157:37-41], (Hprim Tvoid))));
          f_params =
-         [{ param_annotation = (); param_type_hint = ((), (Some ([159:24-31], Hdynamic))); 
-            param_is_variadic = false; param_pos = [159:32-34]; param_name = "$x"; 
+         [{ param_annotation = (); param_type_hint = ((), (Some ([157:24-31], Hdynamic))); 
+            param_is_variadic = false; param_pos = [157:32-34]; param_name = "$x"; 
             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
-           [([165:3-16],
+           [([163:3-16],
              (Expr
-                ((), [165:3-15],
+                ((), [163:3-15],
                  (Invalid
-                    (Some ((), [165:3-15],
-                           (Class_get (((), [165:3-6], (CI ([165:3-6], "\\Foo"))),
-                              (CGexpr ((), [165:9-14], (Call { func = ((), [165:9-12], (Id ([165:9-12], "\\bar"))); targs = []; args = []; unpacked_arg = None }))), Is_prop))))))));
-             ([166:3-24],
+                    (Some ((), [163:3-15],
+                           (Class_get (((), [163:3-6], (CI ([163:3-6], "\\Foo"))),
+                              (CGexpr ((), [163:9-14], (Call { func = ((), [163:9-12], (Id ([163:9-12], "\\bar"))); targs = []; args = []; unpacked_arg = None }))), Is_prop))))))));
+             ([164:3-24],
               (Expr
-                 ((), [166:4-22],
+                 ((), [164:4-22],
                   (Invalid
-                     (Some ((), [166:4-22],
-                            (Class_get (((), [166:4-7], (CI ([166:4-7], "\\Foo"))),
+                     (Some ((), [164:4-22],
+                            (Class_get (((), [164:4-7], (CI ([164:4-7], "\\Foo"))),
                                (CGexpr
-                                  ((), [166:10-21],
+                                  ((), [164:10-21],
                                    (Binop
-                                      { bop = Dot; lhs = ((), [166:10-15], (Call { func = ((), [166:10-13], (Id ([166:10-13], "\\bar"))); targs = []; args = []; unpacked_arg = None }));
-                                        rhs = ((), [166:16-21], (Call { func = ((), [166:16-19], (Id ([166:16-19], "\\baz"))); targs = []; args = []; unpacked_arg = None })) }))),
+                                      { bop = Dot; lhs = ((), [164:10-15], (Call { func = ((), [164:10-13], (Id ([164:10-13], "\\bar"))); targs = []; args = []; unpacked_arg = None }));
+                                        rhs = ((), [164:16-21], (Call { func = ((), [164:16-19], (Id ([164:16-19], "\\baz"))); targs = []; args = []; unpacked_arg = None })) }))),
                                Is_prop))))))));
-             ([167:3-36],
+             ([165:3-36],
               (Expr
-                 ((), [167:3-35],
+                 ((), [165:3-35],
                   (Call
                      { func =
-                       ((), [167:4-32],
+                       ((), [165:4-32],
                         (Invalid
-                           (Some ((), [167:4-32],
-                                  (Class_get (((), [167:4-7], (CI ([167:4-7], "\\Foo"))),
+                           (Some ((), [165:4-32],
+                                  (Class_get (((), [165:4-7], (CI ([165:4-7], "\\Foo"))),
                                      (CGexpr
-                                        ((), [167:10-31],
+                                        ((), [165:10-31],
                                          (Call
-                                            { func = ((), [167:10-18], (Id ([167:10-18], "\\vsprintf"))); 
-                                              targs = []; args = [(Pnormal, ((), [167:19-23], (String "%s"))); (Pnormal, ((), [167:25-30], (String "wow")))]; 
+                                            { func = ((), [165:10-18], (Id ([165:10-18], "\\vsprintf"))); 
+                                              targs = []; args = [(Pnormal, ((), [165:19-23], (String "%s"))); (Pnormal, ((), [165:25-30], (String "wow")))]; 
                                               unpacked_arg = None }))),
                                      Is_prop))))));
                        targs = []; args = []; unpacked_arg = None }))));
-             ([169:3-19],
+             ([167:3-19],
               (Expr
-                 ((), [169:3-18],
+                 ((), [167:3-18],
                   (Invalid
-                     (Some ((), [169:3-18],
-                            (Class_get (((), [169:3-6], (CI ([169:3-6], "\\Foo"))),
-                               (CGexpr ((), [169:9-17], (Binop { bop = Dot; lhs = ((), [169:9-13], (String "ba")); rhs = ((), [169:14-17], (String "r")) }))), Is_prop))))))));
-             ([170:3-21],
+                     (Some ((), [167:3-18],
+                            (Class_get (((), [167:3-6], (CI ([167:3-6], "\\Foo"))),
+                               (CGexpr ((), [167:9-17], (Binop { bop = Dot; lhs = ((), [167:9-13], (String "ba")); rhs = ((), [167:14-17], (String "r")) }))), Is_prop))))))));
+             ([168:3-21],
               (Expr
-                 ((), [170:4-19],
+                 ((), [168:4-19],
                   (Invalid
-                     (Some ((), [170:4-19],
-                            (Class_get (((), [170:4-7], (CI ([170:4-7], "\\Foo"))),
-                               (CGexpr ((), [170:10-18], (Binop { bop = Dot; lhs = ((), [170:10-14], (String "ba")); rhs = ((), [170:15-18], (String "r")) }))), Is_prop))))))));
-             ([171:3-23],
+                     (Some ((), [168:4-19],
+                            (Class_get (((), [168:4-7], (CI ([168:4-7], "\\Foo"))),
+                               (CGexpr ((), [168:10-18], (Binop { bop = Dot; lhs = ((), [168:10-14], (String "ba")); rhs = ((), [168:15-18], (String "r")) }))), Is_prop))))))));
+             ([169:3-23],
               (Expr
-                 ((), [171:3-22],
+                 ((), [169:3-22],
                   (Call
                      { func =
-                       ((), [171:4-19],
+                       ((), [169:4-19],
                         (Invalid
-                           (Some ((), [171:4-19],
-                                  (Class_get (((), [171:4-7], (CI ([171:4-7], "\\Foo"))),
-                                     (CGexpr ((), [171:10-18], (Binop { bop = Dot; lhs = ((), [171:10-13], (String "b")); rhs = ((), [171:14-18], (String "ar")) }))), Is_prop))))));
+                           (Some ((), [169:4-19],
+                                  (Class_get (((), [169:4-7], (CI ([169:4-7], "\\Foo"))),
+                                     (CGexpr ((), [169:10-18], (Binop { bop = Dot; lhs = ((), [169:10-13], (String "b")); rhs = ((), [169:14-18], (String "ar")) }))), Is_prop))))));
                        targs = []; args = []; unpacked_arg = None }))));
-             ([173:3-15],
+             ([171:3-15],
               (Expr
-                 ((), [173:3-14],
+                 ((), [171:3-14],
                   (Invalid
-                     (Some ((), [173:3-14], (Class_get (((), [173:3-6], (CI ([173:3-6], "\\Foo"))), (CGexpr ((), [173:9-13], (String2 [((), [173:10-12], (Lvar ([173:10-12], $x)))]))), Is_prop))))))));
-             ([174:3-17],
+                     (Some ((), [171:3-14], (Class_get (((), [171:3-6], (CI ([171:3-6], "\\Foo"))), (CGexpr ((), [171:9-13], (String2 [((), [171:10-12], (Lvar ([171:10-12], $x)))]))), Is_prop))))))));
+             ([172:3-17],
               (Expr
-                 ((), [174:4-15],
+                 ((), [172:4-15],
                   (Invalid
-                     (Some ((), [174:4-15], (Class_get (((), [174:4-7], (CI ([174:4-7], "\\Foo"))), (CGexpr ((), [174:10-14], (String2 [((), [174:11-13], (Lvar ([174:11-13], $x)))]))), Is_prop))))))));
-             ([175:3-19],
+                     (Some ((), [172:4-15], (Class_get (((), [172:4-7], (CI ([172:4-7], "\\Foo"))), (CGexpr ((), [172:10-14], (String2 [((), [172:11-13], (Lvar ([172:11-13], $x)))]))), Is_prop))))))));
+             ([173:3-19],
               (Expr
-                 ((), [175:3-18],
+                 ((), [173:3-18],
                   (Call
                      { func =
-                       ((), [175:4-15],
+                       ((), [173:4-15],
                         (Invalid
-                           (Some ((), [175:4-15],
-                                  (Class_get (((), [175:4-7], (CI ([175:4-7], "\\Foo"))), (CGexpr ((), [175:10-14], (String2 [((), [175:11-13], (Lvar ([175:11-13], $x)))]))), Is_prop))))));
+                           (Some ((), [173:4-15],
+                                  (Class_get (((), [173:4-7], (CI ([173:4-7], "\\Foo"))), (CGexpr ((), [173:10-14], (String2 [((), [173:11-13], (Lvar ([173:11-13], $x)))]))), Is_prop))))));
                        targs = []; args = []; unpacked_arg = None }))));
-             ([177:3-15],
+             ([175:3-15],
               (Expr
-                 ((), [177:3-14],
+                 ((), [175:3-14],
                   (Invalid
-                     (Some ((), [177:3-14], (Class_get (((), [177:3-6], (CI ([177:3-6], "\\Foo"))), (CGexpr ((), [177:9-13], (String2 [((), [177:10-12], (Lplaceholder [177:10-12]))]))), Is_prop))))))));
-             ([178:3-17],
+                     (Some ((), [175:3-14], (Class_get (((), [175:3-6], (CI ([175:3-6], "\\Foo"))), (CGexpr ((), [175:9-13], (String2 [((), [175:10-12], (Lplaceholder [175:10-12]))]))), Is_prop))))))));
+             ([176:3-17],
               (Expr
-                 ((), [178:4-15],
+                 ((), [176:4-15],
                   (Invalid
-                     (Some ((), [178:4-15], (Class_get (((), [178:4-7], (CI ([178:4-7], "\\Foo"))), (CGexpr ((), [178:10-14], (String2 [((), [178:11-13], (Lplaceholder [178:11-13]))]))), Is_prop))))))));
-             ([179:3-19],
+                     (Some ((), [176:4-15], (Class_get (((), [176:4-7], (CI ([176:4-7], "\\Foo"))), (CGexpr ((), [176:10-14], (String2 [((), [176:11-13], (Lplaceholder [176:11-13]))]))), Is_prop))))))));
+             ([177:3-19],
               (Expr
-                 ((), [179:3-18],
+                 ((), [177:3-18],
                   (Call
                      { func =
-                       ((), [179:4-15],
+                       ((), [177:4-15],
                         (Invalid
-                           (Some ((), [179:4-15],
-                                  (Class_get (((), [179:4-7], (CI ([179:4-7], "\\Foo"))), (CGexpr ((), [179:10-14], (String2 [((), [179:11-13], (Lplaceholder [179:11-13]))]))), Is_prop))))));
+                           (Some ((), [177:4-15],
+                                  (Class_get (((), [177:4-7], (CI ([177:4-7], "\\Foo"))), (CGexpr ((), [177:10-14], (String2 [((), [177:11-13], (Lplaceholder [177:11-13]))]))), Is_prop))))));
                        targs = []; args = []; unpacked_arg = None }))));
-             ([181:3-17],
+             ([179:3-17],
               (Expr
-                 ((), [181:3-16],
+                 ((), [179:3-16],
                   (Invalid
-                     (Some ((), [181:3-16],
-                            (Class_get (((), [181:3-6], (CI ([181:3-6], "\\Foo"))),
-                               (CGexpr ((), [181:9-15], (String2 [((), [181:10-12], (String "ba")); ((), [181:12-14], (Lvar ([181:12-14], $x)))]))), Is_prop))))))));
-             ([182:3-19],
+                     (Some ((), [179:3-16],
+                            (Class_get (((), [179:3-6], (CI ([179:3-6], "\\Foo"))),
+                               (CGexpr ((), [179:9-15], (String2 [((), [179:10-12], (String "ba")); ((), [179:12-14], (Lvar ([179:12-14], $x)))]))), Is_prop))))))));
+             ([180:3-19],
               (Expr
-                 ((), [182:4-17],
+                 ((), [180:4-17],
                   (Invalid
-                     (Some ((), [182:4-17],
-                            (Class_get (((), [182:4-7], (CI ([182:4-7], "\\Foo"))),
-                               (CGexpr ((), [182:10-16], (String2 [((), [182:11-13], (String "ba")); ((), [182:13-15], (Lvar ([182:13-15], $x)))]))), Is_prop))))))));
-             ([183:3-21],
+                     (Some ((), [180:4-17],
+                            (Class_get (((), [180:4-7], (CI ([180:4-7], "\\Foo"))),
+                               (CGexpr ((), [180:10-16], (String2 [((), [180:11-13], (String "ba")); ((), [180:13-15], (Lvar ([180:13-15], $x)))]))), Is_prop))))))));
+             ([181:3-21],
               (Expr
-                 ((), [183:3-20],
+                 ((), [181:3-20],
                   (Call
                      { func =
-                       ((), [183:4-17],
+                       ((), [181:4-17],
                         (Invalid
-                           (Some ((), [183:4-17],
-                                  (Class_get (((), [183:4-7], (CI ([183:4-7], "\\Foo"))),
-                                     (CGexpr ((), [183:10-16], (String2 [((), [183:11-13], (String "ba")); ((), [183:13-15], (Lvar ([183:13-15], $x)))]))), Is_prop))))));
+                           (Some ((), [181:4-17],
+                                  (Class_get (((), [181:4-7], (CI ([181:4-7], "\\Foo"))),
+                                     (CGexpr ((), [181:10-16], (String2 [((), [181:11-13], (String "ba")); ((), [181:13-15], (Lvar ([181:13-15], $x)))]))), Is_prop))))));
                        targs = []; args = []; unpacked_arg = None }))));
-             ([185:3-17],
+             ([183:3-17],
               (Expr
-                 ((), [185:3-16],
+                 ((), [183:3-16],
                   (Invalid
-                     (Some ((), [185:3-16],
-                            (Class_get (((), [185:3-6], (CI ([185:3-6], "\\Foo"))),
-                               (CGexpr ((), [185:9-15], (String2 [((), [185:10-12], (String "ba")); ((), [185:12-14], (Lplaceholder [185:12-14]))]))), Is_prop))))))));
-             ([186:3-19],
+                     (Some ((), [183:3-16],
+                            (Class_get (((), [183:3-6], (CI ([183:3-6], "\\Foo"))),
+                               (CGexpr ((), [183:9-15], (String2 [((), [183:10-12], (String "ba")); ((), [183:12-14], (Lplaceholder [183:12-14]))]))), Is_prop))))))));
+             ([184:3-19],
               (Expr
-                 ((), [186:4-17],
+                 ((), [184:4-17],
                   (Invalid
-                     (Some ((), [186:4-17],
-                            (Class_get (((), [186:4-7], (CI ([186:4-7], "\\Foo"))),
-                               (CGexpr ((), [186:10-16], (String2 [((), [186:11-13], (String "ba")); ((), [186:13-15], (Lplaceholder [186:13-15]))]))), Is_prop))))))));
-             ([187:3-21],
+                     (Some ((), [184:4-17],
+                            (Class_get (((), [184:4-7], (CI ([184:4-7], "\\Foo"))),
+                               (CGexpr ((), [184:10-16], (String2 [((), [184:11-13], (String "ba")); ((), [184:13-15], (Lplaceholder [184:13-15]))]))), Is_prop))))))));
+             ([185:3-21],
               (Expr
-                 ((), [187:3-20],
+                 ((), [185:3-20],
                   (Call
                      { func =
-                       ((), [187:4-17],
+                       ((), [185:4-17],
                         (Invalid
-                           (Some ((), [187:4-17],
-                                  (Class_get (((), [187:4-7], (CI ([187:4-7], "\\Foo"))),
-                                     (CGexpr ((), [187:10-16], (String2 [((), [187:11-13], (String "ba")); ((), [187:13-15], (Lplaceholder [187:13-15]))]))), Is_prop))))));
+                           (Some ((), [185:4-17],
+                                  (Class_get (((), [185:4-7], (CI ([185:4-7], "\\Foo"))),
+                                     (CGexpr ((), [185:10-16], (String2 [((), [185:11-13], (String "ba")); ((), [185:13-15], (Lplaceholder [185:13-15]))]))), Is_prop))))));
                        targs = []; args = []; unpacked_arg = None }))));
-             ([189:3-15],
+             ([187:3-15],
               (Expr
-                 ((), [189:3-14],
+                 ((), [187:3-14],
                   (Invalid
-                     (Some ((), [189:3-14],
-                            (Class_get (((), [189:3-6], (CI ([189:3-6], "\\Foo"))),
-                               (CGexpr ((), [189:9-13], (Call { func = ((), [189:9-11], (Lvar ([189:9-11], $x))); targs = []; args = []; unpacked_arg = None }))), Is_prop))))))));
-             ([190:3-17],
+                     (Some ((), [187:3-14],
+                            (Class_get (((), [187:3-6], (CI ([187:3-6], "\\Foo"))),
+                               (CGexpr ((), [187:9-13], (Call { func = ((), [187:9-11], (Lvar ([187:9-11], $x))); targs = []; args = []; unpacked_arg = None }))), Is_prop))))))));
+             ([188:3-17],
               (Expr
-                 ((), [190:4-15],
+                 ((), [188:4-15],
                   (Invalid
-                     (Some ((), [190:4-15],
-                            (Class_get (((), [190:4-7], (CI ([190:4-7], "\\Foo"))),
-                               (CGexpr ((), [190:10-14], (Call { func = ((), [190:10-12], (Lvar ([190:10-12], $x))); targs = []; args = []; unpacked_arg = None }))), Is_prop))))))));
-             ([191:3-19],
+                     (Some ((), [188:4-15],
+                            (Class_get (((), [188:4-7], (CI ([188:4-7], "\\Foo"))),
+                               (CGexpr ((), [188:10-14], (Call { func = ((), [188:10-12], (Lvar ([188:10-12], $x))); targs = []; args = []; unpacked_arg = None }))), Is_prop))))))));
+             ([189:3-19],
               (Expr
-                 ((), [191:3-18],
+                 ((), [189:3-18],
                   (Call
                      { func =
-                       ((), [191:4-15],
+                       ((), [189:4-15],
                         (Invalid
-                           (Some ((), [191:4-15],
-                                  (Class_get (((), [191:4-7], (CI ([191:4-7], "\\Foo"))),
-                                     (CGexpr ((), [191:10-14], (Call { func = ((), [191:10-12], (Lvar ([191:10-12], $x))); targs = []; args = []; unpacked_arg = None }))), Is_prop))))));
+                           (Some ((), [189:4-15],
+                                  (Class_get (((), [189:4-7], (CI ([189:4-7], "\\Foo"))),
+                                     (CGexpr ((), [189:10-14], (Call { func = ((), [189:10-12], (Lvar ([189:10-12], $x))); targs = []; args = []; unpacked_arg = None }))), Is_prop))))));
                        targs = []; args = []; unpacked_arg = None }))));
-             ([193:3-15],
+             ([191:3-15],
               (Expr
-                 ((), [193:3-14],
+                 ((), [191:3-14],
                   (Invalid
-                     (Some ((), [193:3-14],
-                            (Class_get (((), [193:3-6], (CI ([193:3-6], "\\Foo"))),
-                               (CGexpr ((), [193:9-13], (Call { func = ((), [193:9-11], (Lplaceholder [193:9-11])); targs = []; args = []; unpacked_arg = None }))), Is_prop))))))));
-             ([194:3-17],
+                     (Some ((), [191:3-14],
+                            (Class_get (((), [191:3-6], (CI ([191:3-6], "\\Foo"))),
+                               (CGexpr ((), [191:9-13], (Call { func = ((), [191:9-11], (Lplaceholder [191:9-11])); targs = []; args = []; unpacked_arg = None }))), Is_prop))))))));
+             ([192:3-17],
               (Expr
-                 ((), [194:4-15],
+                 ((), [192:4-15],
                   (Invalid
-                     (Some ((), [194:4-15],
-                            (Class_get (((), [194:4-7], (CI ([194:4-7], "\\Foo"))),
-                               (CGexpr ((), [194:10-14], (Call { func = ((), [194:10-12], (Lplaceholder [194:10-12])); targs = []; args = []; unpacked_arg = None }))), Is_prop))))))));
-             ([195:3-19],
+                     (Some ((), [192:4-15],
+                            (Class_get (((), [192:4-7], (CI ([192:4-7], "\\Foo"))),
+                               (CGexpr ((), [192:10-14], (Call { func = ((), [192:10-12], (Lplaceholder [192:10-12])); targs = []; args = []; unpacked_arg = None }))), Is_prop))))))));
+             ([193:3-19],
               (Expr
-                 ((), [195:3-18],
+                 ((), [193:3-18],
                   (Call
                      { func =
-                       ((), [195:4-15],
+                       ((), [193:4-15],
                         (Invalid
-                           (Some ((), [195:4-15],
-                                  (Class_get (((), [195:4-7], (CI ([195:4-7], "\\Foo"))),
-                                     (CGexpr ((), [195:10-14], (Call { func = ((), [195:10-12], (Lplaceholder [195:10-12])); targs = []; args = []; unpacked_arg = None }))), Is_prop))))));
+                           (Some ((), [193:4-15],
+                                  (Class_get (((), [193:4-7], (CI ([193:4-7], "\\Foo"))),
+                                     (CGexpr ((), [193:10-14], (Call { func = ((), [193:10-12], (Lplaceholder [193:10-12])); targs = []; args = []; unpacked_arg = None }))), Is_prop))))));
                        targs = []; args = []; unpacked_arg = None }))))
              ]
            };

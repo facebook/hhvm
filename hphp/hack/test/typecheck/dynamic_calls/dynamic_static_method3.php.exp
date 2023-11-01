@@ -1,10 +1,6 @@
-File "dynamic_static_method3.php", line 18, characters 3-56:
-  (dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic)
+File "dynamic_static_method3.php", line 13, characters 3-36:
+  (dynamic, dynamic, dynamic, dynamic)
 File "dynamic_static_method3.php", line 10, characters 13-14:
-Variable `$z` is undefined, or not always defined. (Naming[2050])
-  File "dynamic_static_method3.php", line 5, characters 34-35:
-  Did you mean `$y` instead?
-File "dynamic_static_method3.php", line 15, characters 14-15:
 Variable `$z` is undefined, or not always defined. (Naming[2050])
   File "dynamic_static_method3.php", line 5, characters 34-35:
   Did you mean `$y` instead?
@@ -15,12 +11,4 @@ Dynamic method access is not allowed. Please use the method name directly, for e
 File "dynamic_static_method3.php", line 10, characters 13-14:
 Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()` (Naming[2121])
 File "dynamic_static_method3.php", line 11, characters 13-14:
-Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()` (Naming[2121])
-File "dynamic_static_method3.php", line 13, characters 14-15:
-Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()` (Naming[2121])
-File "dynamic_static_method3.php", line 14, characters 14-15:
-Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()` (Naming[2121])
-File "dynamic_static_method3.php", line 15, characters 14-15:
-Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()` (Naming[2121])
-File "dynamic_static_method3.php", line 16, characters 14-15:
 Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()` (Naming[2121])

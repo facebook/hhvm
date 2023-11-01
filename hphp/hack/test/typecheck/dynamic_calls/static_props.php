@@ -24,7 +24,6 @@ function h(): void {
   $foo = Foo::class as dynamic;
 
   // $baz undefined
-  hh_show(Foo::$baz());
   hh_show($foo::{$baz}());
 
   $baz = 'bar';
@@ -34,6 +33,5 @@ function h(): void {
   hh_show((Foo::{$baz})());
 
   // invoke static meth named in $baz
-  hh_show(Foo::$baz());
   hh_show($foo::{$baz}());
 }

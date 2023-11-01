@@ -2056,6 +2056,14 @@ fn p_scope_resolution_expr<'a>(
     match &c.name.children {
         Token(token) if token.kind() == TK::Variable => {
             if location == ExprLocation::CallReceiver {
+                if env.is_typechecker() && !qual.2.is_lvar() {
+                    return Err(Error::ParsingError {
+                        message: String::from(
+                            "Dynamic calls to static methods may only have the form `$d1::$d2()`",
+                        ),
+                        pos,
+                    });
+                };
                 let ast::Id(p, name) = pos_name(&c.name, env)?;
                 Ok(Expr_::mk_class_get(
                     ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),

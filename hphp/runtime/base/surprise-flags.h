@@ -81,6 +81,7 @@ enum SurpriseFlag : size_t {
   StickyFlags =
     AsyncEventHookFlag |
     DebuggerHookFlag |
+    DebuggerSignalFlag |
     EventHookFlag |
     InterceptFlag |
     XenonSignalFlag |

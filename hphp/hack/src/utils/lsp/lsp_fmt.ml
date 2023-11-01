@@ -479,8 +479,6 @@ let parse_documentRename (params : json option) : Rename.params =
       newName = Jget.string_exn params "newName";
     }
 
-let print_documentRename : Rename.result -> json = print_workspaceEdit
-
 (************************************************************************)
 
 let parse_documentCodeLens (params : json option) : DocumentCodeLens.params =
@@ -1823,7 +1821,7 @@ let print_lsp_response (id : lsp_id) (result : lsp_result) : json =
     | DocumentRangeFormattingResult r -> print_documentRangeFormatting r
     | DocumentOnTypeFormattingResult r -> print_documentOnTypeFormatting r
     | RageResultFB r -> print_rage r
-    | RenameResult r -> print_documentRename r
+    | RenameResult r -> print_workspaceEdit r
     | DocumentCodeLensResult r -> print_documentCodeLens r
     | SignatureHelpResult r -> print_signatureHelp r
     | TypeHierarchyResult r -> print_typeHierarchy r

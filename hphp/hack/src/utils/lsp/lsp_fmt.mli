@@ -87,8 +87,6 @@ val print_signatureHelp : Lsp.SignatureHelp.result -> Hh_json.json
 
 val parse_documentRename : Hh_json.json option -> Lsp.Rename.params
 
-val print_documentRename : Lsp.Rename.result -> Hh_json.json
-
 val print_diagnostics : Lsp.PublishDiagnostics.params -> Hh_json.json
 
 val print_codeActionResult :

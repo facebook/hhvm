@@ -611,6 +611,29 @@
           "column" : 49
         }
       }
+    },
+    "GenerateTypedInterceptor" : {
+      "lineno" : 285,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Service" : {  },
+        "scope.Interaction" : {  },
+        "scope.Function" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 285,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 288,
+          "column" : 35
+        }
+      }
     }
   }
 }

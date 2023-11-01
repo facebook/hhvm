@@ -196,6 +196,13 @@ inline void reset_field<::facebook::thrift::annotation::cpp::Frozen2RequiresComp
 }
 
 template<>
+inline void reset_field<::facebook::thrift::annotation::cpp::GenerateTypedInterceptor>(
+    ::facebook::thrift::annotation::cpp::GenerateTypedInterceptor& obj, uint16_t index) {
+  switch (index) {
+  }
+}
+
+template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::cpp::Type>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
@@ -348,6 +355,16 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::cpp::Frozen2RequiresCompleteContainerParams>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::facebook::thrift::annotation::cpp::GenerateTypedInterceptor>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

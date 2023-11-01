@@ -263,3 +263,26 @@ struct Frozen2Exclude {}
  */
 @scope.Typedef
 struct Frozen2RequiresCompleteContainerParams {}
+
+/**
+ * Generates typed interceptor stubs that can be overriden by user,
+ * and adorn the handler methods. This can be used on individual functions
+ * or on services (equivalent to adding it to all functions).
+ *
+ *   service MyService {
+ *     @cpp.GenerateTypedInterceptor
+ *     void ping();
+ *   }
+ *
+ * This will generate the following interface:
+ *
+ *   class TypedInterceptor<MyService> {
+ *     TypeErasedStorage before_ping();
+ *     TypeErasedStorage after_ping();
+ *   }
+ *
+ */
+@scope.Service
+@scope.Interaction
+@scope.Function
+struct GenerateTypedInterceptor {}

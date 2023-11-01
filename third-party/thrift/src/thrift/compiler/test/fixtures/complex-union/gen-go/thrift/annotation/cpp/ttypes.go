@@ -1898,3 +1898,84 @@ func (p *Frozen2RequiresCompleteContainerParams) String() string {
   return fmt.Sprintf("Frozen2RequiresCompleteContainerParams({})")
 }
 
+// Generates typed interceptor stubs that can be overriden by user,
+// and adorn the handler methods. This can be used on individual functions
+// or on services (equivalent to adding it to all functions).
+// 
+//   service MyService {
+//     @cpp.GenerateTypedInterceptor
+//     void ping();
+//   }
+// 
+// This will generate the following interface:
+// 
+//   class TypedInterceptor<MyService> {
+//     TypeErasedStorage before_ping();
+//     TypeErasedStorage after_ping();
+//   }
+// 
+type GenerateTypedInterceptor struct {
+}
+
+func NewGenerateTypedInterceptor() *GenerateTypedInterceptor {
+  return &GenerateTypedInterceptor{}
+}
+
+type GenerateTypedInterceptorBuilder struct {
+  obj *GenerateTypedInterceptor
+}
+
+func NewGenerateTypedInterceptorBuilder() *GenerateTypedInterceptorBuilder{
+  return &GenerateTypedInterceptorBuilder{
+    obj: NewGenerateTypedInterceptor(),
+  }
+}
+
+func (p GenerateTypedInterceptorBuilder) Emit() *GenerateTypedInterceptor{
+  return &GenerateTypedInterceptor{
+  }
+}
+
+func (p *GenerateTypedInterceptor) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    if err := iprot.Skip(fieldTypeId); err != nil {
+      return err
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *GenerateTypedInterceptor) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("GenerateTypedInterceptor"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *GenerateTypedInterceptor) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  return fmt.Sprintf("GenerateTypedInterceptor({})")
+}
+

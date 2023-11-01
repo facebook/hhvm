@@ -529,6 +529,39 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 264
+      },
+      "GenerateTypedInterceptor" : {
+        "name" : "GenerateTypedInterceptor",
+        "structured_annotations": {
+          "scope.Service" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Service",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Interaction" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Interaction",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Function" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Function",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "docstring" : "Generates typed interceptor stubs that can be overriden by user,\nand adorn the handler methods. This can be used on individual functions\nor on services (equivalent to adding it to all functions).\n\n  service MyService {\n    @cpp.GenerateTypedInterceptor\n    void ping();\n  }\n\nThis will generate the following interface:\n\n  class TypedInterceptor<MyService> {\n    TypeErasedStorage before_ping();\n    TypeErasedStorage after_ping();\n  }\n\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 285
       }
       },
   "source_path" : "thrift/annotation/cpp",

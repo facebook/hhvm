@@ -69,6 +69,8 @@ constexpr auto kCppDisableLazyChecksumUri =
 constexpr auto kCppEnumTypeUri = "facebook.com/thrift/annotation/cpp/EnumType";
 constexpr auto kCppFieldInterceptorUri =
     "facebook.com/thrift/annotation/cpp/FieldInterceptor";
+constexpr auto kCppGenerateTypedInterceptor =
+    "facebook.com/thrift/annotation/cpp/GenerateTypedInterceptor";
 constexpr auto kCppLazyUri = "facebook.com/thrift/annotation/cpp/Lazy";
 constexpr auto kCppMinimizePaddingUri =
     "facebook.com/thrift/annotation/cpp/MinimizePadding";

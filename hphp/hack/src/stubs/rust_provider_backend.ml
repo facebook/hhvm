@@ -8,8 +8,6 @@
 
 type t
 
-let make _ = failwith "unimplemented"
-
 let set _ : unit = failwith "unimplemented"
 
 let push_local_changes _ : unit = failwith "unimplemented"

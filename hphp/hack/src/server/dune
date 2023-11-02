@@ -567,6 +567,7 @@
     custom_error_config
     direct_decl_service
     folly_stubs
+    hh_server_provider_backend_stubs
     load_script
     lwt
     memory_stats

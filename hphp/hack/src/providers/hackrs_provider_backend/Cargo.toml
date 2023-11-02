@@ -10,6 +10,7 @@ path = "hackrs_provider_backend.rs"
 
 [dependencies]
 anyhow = "=1.0.72"
+bincode = "1.3.3"
 bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
 bumpalo = { version = "3.11.1", features = ["collections"] }
 datastore = { version = "0.0.0", path = "../../hackrs/datastore" }
@@ -29,7 +30,8 @@ oxidized = { version = "0.0.0", path = "../../oxidized" }
 oxidized_by_ref = { version = "0.0.0", path = "../../oxidized_by_ref" }
 parking_lot = { version = "0.12.1", features = ["send_guard"] }
 pos = { version = "0.0.0", path = "../../hackrs/pos/cargo/pos" }
-rust_provider_backend_api = { version = "0.0.0", path = ".." }
+rust_provider_backend_ffi = { version = "0.0.0", path = "../cargo/rust_provider_backend_ffi" }
+rust_provider_backend_ffi_trait = { version = "0.0.0", path = "../cargo/rust_provider_backend_ffi_trait" }
 serde = { version = "1.0.185", features = ["derive", "rc"] }
 shallow_decl_provider = { version = "0.0.0", path = "../../hackrs/shallow_decl_provider/cargo/shallow_decl_provider" }
 shm_store = { version = "0.0.0", path = "../../shmffi/cargo/shm_store" }

@@ -92,7 +92,9 @@ let init
   in
   let popt = ServerConfig.parser_options server_config in
   let tcopt = { popt with GlobalOptions.tco_higher_kinded_types = true } in
-  if rust_provider_backend then Provider_backend.set_rust_backend popt;
+  (if rust_provider_backend then
+    let backend = Hh_server_provider_backend.make popt in
+    Provider_backend.set_rust_backend backend);
   let ctx =
     Provider_context.empty_for_tool
       ~popt

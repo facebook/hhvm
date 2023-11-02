@@ -8,8 +8,6 @@
 
 type t
 
-val make : ParserOptions.t -> t
-
 (** Initialize with a given [Rust_provider_backend.t] value (constructed on the
     Rust side) instead of the default backend constructed by [make]. *)
 val set : t -> unit

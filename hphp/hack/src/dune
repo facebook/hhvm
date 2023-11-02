@@ -23,6 +23,7 @@
   direct_decl_parser
   direct_decl_utils
   gen_deps
+  hh_server_provider_backend_stubs
   hhi
   hhi_get
   naming_ast_print
@@ -164,6 +165,7 @@
   default_injector_config
   direct_decl_parser
   file_provider
+  hh_server_provider_backend_stubs
   ocamlrep_marshal_ffi
   package_info
   ppxlib.print_diff

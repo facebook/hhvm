@@ -39,6 +39,13 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
+ (name hh_server_provider_backend_stubs)
+ (wrapped false)
+ (modules hh_server_provider_backend)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
  (name server_local_config_knobs_stubs)
  (wrapped false)
  (modules serverLocalConfigKnobs)

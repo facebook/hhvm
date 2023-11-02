@@ -15,10 +15,6 @@ external register_custom_types : unit -> unit
 
 let () = register_custom_types ()
 
-external make_ffi :
-  root:string -> hhi_root:string -> tmp:string -> ParserOptions.t -> t
-  = "hh_rust_provider_backend_make"
-
 external push_local_changes_ffi : t -> unit
   = "hh_rust_provider_backend_push_local_changes"
 
@@ -392,17 +388,6 @@ module Decl = struct
     set_decl_store t;
     with_ctx_proxy_opt t ctx @@ fun () -> declare_folded_class t name
 end
-
-let make popt =
-  let backend =
-    make_ffi
-      ~root:Relative_path.(path_of_prefix Root)
-      ~hhi_root:Relative_path.(path_of_prefix Hhi)
-      ~tmp:Relative_path.(path_of_prefix Tmp)
-      popt
-  in
-  Decl.set_decl_store backend;
-  backend
 
 let set backend = Decl.set_decl_store backend
 

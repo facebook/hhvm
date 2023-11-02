@@ -57,7 +57,8 @@ let init root popt ~rust_provider_backend : Provider_context.t =
   in
   let tcopt = { popt with GlobalOptions.tco_higher_kinded_types = true } in
   if rust_provider_backend then
-    Provider_backend.set_rust_backend popt
+    let backend = Hh_server_provider_backend.make popt in
+    Provider_backend.set_rust_backend backend
   else
     Provider_backend.set_shared_memory_backend ();
   let ctx =

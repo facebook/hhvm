@@ -2604,14 +2604,15 @@ let decl_and_run_mode
   in
   let tcopt = { tcopt with GlobalOptions.tco_package_info = package_info } in
   let ctx =
-    if rust_provider_backend then (
-      Provider_backend.set_rust_backend tcopt;
+    if rust_provider_backend then
+      let backend = Hh_server_provider_backend.make tcopt in
+      let () = Provider_backend.set_rust_backend backend in
       Provider_context.empty_for_tool
         ~popt:tcopt
         ~tcopt
         ~backend:(Provider_backend.get ())
         ~deps_mode:(Typing_deps_mode.InMemoryMode None)
-    ) else
+    else
       Provider_context.empty_for_test
         ~popt:tcopt
         ~tcopt

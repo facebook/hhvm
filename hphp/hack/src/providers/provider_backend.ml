@@ -236,10 +236,7 @@ let set_pessimised_shared_memory_backend info : unit =
   Decl_store.set Decl_store.shared_memory_store;
   ()
 
-let set_rust_backend popt : unit =
-  backend_ref := Rust_provider_backend (Rust_provider_backend.make popt)
-
-let set_custom_rust_backend backend : unit =
+let set_rust_backend backend : unit =
   Rust_provider_backend.set backend;
   backend_ref := Rust_provider_backend backend
 

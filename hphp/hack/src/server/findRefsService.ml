@@ -250,25 +250,118 @@ let fold_one_tast ctx target acc symbol =
   | (IGConst cst_name, SO.GConst) -> process_gconst_id cst_name (pos, name)
   | _ -> Pos.Map.empty
 
+let should_cancel ~stream_file =
+  match stream_file with
+  | None -> false
+  | Some stream_file -> not (Path.file_exists stream_file)
+
+module Iter = struct
+  exception Cancelled
+
+  (** This datastructure is used for the [find_refs] function, which iterates
+  over a list of files, finds references in them, and streams them. *)
+  type acc = {
+    last_cancellation_check: float;
+        (** When did we last check for cancellation? *)
+    results: (string * Pos.t) list list;
+        (** Accumulates all results from [find_refs] *)
+    to_stream_at_end_of_batch: (string * Pos.absolute) list list;
+        (** Accumulates only those results that should be streamed at the end of [find_refs] *)
+    streamed_so_far: int;
+        (** How many individual references have been streamed so far *)
+  }
+
+  let init () =
+    {
+      last_cancellation_check = Unix.gettimeofday ();
+      results = [];
+      to_stream_at_end_of_batch = [];
+      streamed_so_far = 0;
+    }
+
+  (** We'll check a few times a second whether we should cancel. *)
+  let raise_if_should_cancel acc ~t_now ~stream_file =
+    let last_cancellation_check =
+      if Float.(t_now > acc.last_cancellation_check +. 0.2) then begin
+        if should_cancel ~stream_file then raise Cancelled;
+        t_now
+      end else
+        acc.last_cancellation_check
+    in
+    { acc with last_cancellation_check }
+
+  (** Stream on a per-file basis for the first few results of a find-refs,
+  but on a per-job basis for the rest. (Each job covers several hundred files).
+  We do it this way because a find-refs might have 50k results, and it's too much
+  for 30 processes to do 50k locks between them over the course of the find-refs. *)
+  let stream_file ~per_file ~stream_fd ~t_now ~t_start acc =
+    match stream_fd with
+    | None -> acc
+    | Some stream_fd ->
+      let max_results_to_stream_by_file = 20 in
+      let max_secs_to_stream_by_file = 10.0 in
+      let should_stream_now =
+        acc.streamed_so_far < max_results_to_stream_by_file
+        && Float.(t_now < t_start +. max_secs_to_stream_by_file)
+      in
+      let abs_results =
+        List.map per_file ~f:(fun (r, p) -> (r, Pos.to_absolute p))
+      in
+      if should_stream_now then
+        let () =
+          FindRefsWireFormat.Ide_stream.lock_and_append stream_fd abs_results
+        in
+        {
+          acc with
+          streamed_so_far = acc.streamed_so_far + List.length abs_results;
+        }
+      else
+        {
+          acc with
+          to_stream_at_end_of_batch =
+            abs_results :: acc.to_stream_at_end_of_batch;
+        }
+
+  (** This streams any results from the job that haven't already been done on
+  a per-file basis earlier by [stream_file]. *)
+  let stream_job ~stream_fd acc =
+    match stream_fd with
+    | None -> ()
+    | Some stream_fd ->
+      FindRefsWireFormat.Ide_stream.lock_and_append
+        stream_fd
+        (List.concat acc.to_stream_at_end_of_batch)
+end
+
 (** Either returns results from this batch (concatenated with [acc]), or [Error] if cancelled *)
 let find_refs
     (ctx : Provider_context.t)
     (target : action_internal)
-    (acc : ((string * Pos.t) list, unit) Result.t)
+    (job_acc : ((string * Pos.t) list, unit) Result.t)
     (files : Relative_path.t list)
     ~(omit_declaration : bool)
-    ~(stream_file : Path.t option) : ((string * Pos.t) list, unit) Result.t =
-  (* The helper function 'results_from_tast' takes a tast, looks at all *)
-  (* use-sites in the tast e.g. "foo(1)" is a use-site of symbol foo,   *)
-  (* and returns a map from use-site-position to name of the symbol.    *)
-  let results_from_tast tast : string Pos.Map.t =
-    IdentifySymbolService.all_symbols ctx tast
-    |> List.filter ~f:(fun symbol ->
-           if omit_declaration then
-             not symbol.SymbolOccurrence.is_declaration
-           else
-             true)
-    |> List.fold ~init:Pos.Map.empty ~f:(fold_one_tast ctx target)
+    ~(stream_file : Path.t option)
+    ~(t_start : float) : ((string * Pos.t) list, unit) Result.t =
+  (* The helper function 'results_from_tast' takes a tast, looks at all
+     use-sites in the tast e.g. "foo(1)" is a use-site of symbol foo,
+     and returns a list of use-site-position along with the string name they used. *)
+  let results_from_tast tast_opt =
+    match tast_opt with
+    | None -> []
+    | Some tast ->
+      let results_map =
+        IdentifySymbolService.all_symbols ctx tast
+        |> List.filter ~f:(fun symbol ->
+               if omit_declaration then
+                 not symbol.SymbolOccurrence.is_declaration
+               else
+                 true)
+        |> List.fold ~init:Pos.Map.empty ~f:(fold_one_tast ctx target)
+      in
+      let results_list =
+        Pos.Map.fold (fun p str acc -> (str, p) :: acc) results_map []
+      in
+      results_list
   in
 
   (* Helper: [files] can legitimately refer to non-existent files, e.g.
@@ -290,40 +383,33 @@ let find_refs
     | _ when not (is_entry_valid entry) -> None
   in
 
-  let stream_fd =
-    match stream_file with
-    | None -> Ok None
-    | Some stream_file ->
-      let stream_file = Path.to_string stream_file in
-      (try
-         Ok
-           (Some
-              (Unix.openfile stream_file [Unix.O_WRONLY; Unix.O_APPEND] 0o666))
-       with
-      | Unix.Unix_error (Unix.ENOENT, _, _) -> Error ())
-  in
-  let open Result.Monad_infix in
-  acc >>= fun acc ->
-  stream_fd >>= fun stream_fd ->
-  Utils.try_finally
-    ~finally:(fun () -> Option.iter stream_fd ~f:Unix.close)
-    ~f:(fun () ->
-      let batch_results =
-        List.concat_map files ~f:(fun path ->
-            match tast_of_file path with
-            | None -> []
-            | Some tast ->
-              let results : string Pos.Map.t = results_from_tast tast in
-              let results : (string * Pos.t) list =
-                Pos.Map.fold (fun p str acc -> (str, p) :: acc) results []
-              in
-              Option.iter stream_fd ~f:(fun fd ->
-                  results
-                  |> List.map ~f:(fun (r, p) -> (r, Pos.to_absolute p))
-                  |> FindRefsWireFormat.Ide_stream.lock_and_append fd);
-              results)
-      in
-      Ok (batch_results @ acc))
+  try
+    let stream_fd =
+      Option.map stream_file ~f:(fun stream_file ->
+          let file = Path.to_string stream_file in
+          try Unix.openfile file [Unix.O_WRONLY; Unix.O_APPEND] 0o666 with
+          | Unix.Unix_error (Unix.ENOENT, _, _) -> raise Iter.Cancelled)
+    in
+    Utils.try_finally
+      ~finally:(fun () -> Option.iter stream_fd ~f:Unix.close)
+      ~f:(fun () ->
+        let acc =
+          List.fold files ~init:(Iter.init ()) ~f:(fun acc path ->
+              let t_now = Unix.gettimeofday () in
+              let acc = Iter.raise_if_should_cancel ~stream_file ~t_now acc in
+              let per_file = results_from_tast (tast_of_file path) in
+              let acc = Iter.{ acc with results = per_file :: acc.results } in
+              Iter.stream_file ~per_file ~stream_fd ~t_now ~t_start acc)
+        in
+        Iter.stream_job ~stream_fd acc;
+        let job_acc =
+          match job_acc with
+          | Ok job_acc -> job_acc
+          | Error () -> raise Iter.Cancelled
+        in
+        Ok (List.rev_append job_acc (List.concat acc.Iter.results)))
+  with
+  | Iter.Cancelled -> Error ()
 
 let find_refs_ctx
     ~(ctx : Provider_context.t)
@@ -343,16 +429,21 @@ let parallel_find_refs
     target
     ctx
     ~(omit_declaration : bool)
-    ~(stream_file : Path.t option) =
+    ~(stream_file : Path.t option)
+    ~(t_start : float) =
   MultiWorker.call
     workers
-    ~job:(find_refs ctx target ~omit_declaration ~stream_file)
+    ~job:(find_refs ctx target ~omit_declaration ~stream_file ~t_start)
     ~neutral:(Ok [])
     ~merge:(fun output acc ->
       match (output, acc) with
       | (Ok output, Ok acc) -> Ok (List.rev_append output acc)
       | _ -> Error ())
-    ~next:(MultiWorker.next workers files)
+    ~next:(fun () ->
+      if should_cancel ~stream_file then
+        Bucket.Done
+      else
+        MultiWorker.next workers files ())
 
 let get_definitions ctx action =
   List.map ~f:(fun (name, pos) ->
@@ -415,9 +506,17 @@ let get_definitions ctx action =
 let find_references ctx workers target include_defs files ~stream_file =
   let len = List.length files in
   Hh_logger.debug "find_references: %d files" len;
+  let t_start = Unix.gettimeofday () in
   let results =
     if len < 10 then
-      find_refs ctx target (Ok []) files ~omit_declaration:true ~stream_file
+      find_refs
+        ctx
+        target
+        (Ok [])
+        files
+        ~omit_declaration:true
+        ~stream_file
+        ~t_start
     else
       parallel_find_refs
         workers
@@ -426,6 +525,7 @@ let find_references ctx workers target include_defs files ~stream_file =
         ctx
         ~omit_declaration:true
         ~stream_file
+        ~t_start
   in
   match results with
   | Error () ->
@@ -455,6 +555,7 @@ let find_references_single_file ctx target file =
       [file]
       ~omit_declaration:false
       ~stream_file:None
+      ~t_start:(Unix.gettimeofday ())
   in
   match results with
   | Ok results -> results

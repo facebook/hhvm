@@ -462,7 +462,28 @@ struct FuncInfo2 {
   template <typename SerDe> void serde(SerDe&);
 };
 
+//////////////////////////////////////////////////////////////////////
+
 namespace {
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * FuncInfos2 for the methods of a class which does not have a
+ * ClassInfo2 (because it's uninstantiable). Even if a class doesn't
+ * have a ClassInfo2, we might still need FuncInfo2 for it's
+ * methods. These are stored in here.
+ */
+struct MethodsWithoutCInfo {
+  SString cls;
+  // Same order as the methods vector on the associated php::Class.
+  CompactVector<std::unique_ptr<FuncInfo2>> finfos;
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(cls)
+      (finfos)
+      ;
+  }
+};
 
 //////////////////////////////////////////////////////////////////////
 
@@ -5118,6 +5139,11 @@ struct Index::IndexData {
   ISStringToOneT<UniquePtrRef<php::ClassBytecode>> classBytecodeRefs;
   ISStringToOneT<UniquePtrRef<php::FuncBytecode>> funcBytecodeRefs;
 
+  // Uninstantiable classes do not have ClassInfo2s, but their methods
+  // still have FuncInfo2s. Since we don't have a ClassInfo2 to store
+  // them on, we do it separately.
+  ISStringToOneT<UniquePtrRef<MethodsWithoutCInfo>> uninstantiableClsMethRefs;
+
   // Func family entries representing all methods with a particular
   // name.
   SStringToOneT<FuncFamilyEntry> nameOnlyMethodFamilies;
@@ -7259,6 +7285,7 @@ split_buckets(const std::vector<std::vector<SString>>& items,
 struct HierarchicalWorkBucket {
   std::vector<SString> classes;
   std::vector<SString> deps;
+  std::vector<SString> uninstantiable;
 };
 
 /*
@@ -7315,21 +7342,12 @@ assign_hierarchical_work(std::vector<SString> roots,
       assertx(bucketIdx < buckets.size());
       auto& bucket = buckets[bucketIdx];
 
-      // Gather up all dependencies for this bucket, and remove
-      // non-instantiable root classes.
+      // Gather up all dependencies for this bucket
       ISStringSet deps;
-      bucket.erase(
-        std::remove_if(
-          begin(bucket),
-          end(bucket),
-          [&] (SString cls) {
-            auto const [d, instantiable] = getDeps(cls);
-            deps.insert(begin(*d), end(*d));
-            return !instantiable;
-          }
-        ),
-        end(bucket)
-      );
+      for (auto const cls : bucket) {
+        auto const d = getDeps(cls).first;
+        deps.insert(begin(*d), end(*d));
+      }
 
       // Make sure dependencies and roots are disjoint.
       for (auto const c : bucket) deps.erase(c);
@@ -7387,20 +7405,37 @@ assign_hierarchical_work(std::vector<SString> roots,
         );
         if (hash == s.lowestHash && bucketIdx == s.lowestBucket) {
           bucket.emplace_back(d);
-        } else {
-          // Otherwise keep it as a dependency.
+        } else if (getDeps(d).second) {
+          // Otherwise keep it as a dependency, but only if it's
+          // actually instantiable.
           depOut.emplace_back(d);
         }
       }
 
+      // Split off any uninstantiable classes in the bucket.
+      auto const bucketEnd = std::partition(
+        begin(bucket),
+        end(bucket),
+        [&] (SString cls) { return getDeps(cls).second; }
+      );
+      std::vector<SString> uninstantiable{bucketEnd, end(bucket)};
+      bucket.erase(bucketEnd, end(bucket));
+
       // Keep deterministic ordering. Make sure there's no duplicates.
       std::sort(bucket.begin(), bucket.end(), string_data_lti{});
       std::sort(depOut.begin(), depOut.end(), string_data_lti{});
+      std::sort(uninstantiable.begin(), uninstantiable.end(),
+                string_data_lti{});
       assertx(std::adjacent_find(bucket.begin(), bucket.end()) == bucket.end());
       assertx(std::adjacent_find(depOut.begin(), depOut.end()) == depOut.end());
+      assertx(
+        std::adjacent_find(uninstantiable.begin(), uninstantiable.end()) ==
+        uninstantiable.end()
+      );
       return HierarchicalWorkBucket{
         std::move(bucket),
-        std::move(depOut)
+        std::move(depOut),
+        std::move(uninstantiable)
       };
     }
   );
@@ -7476,7 +7511,7 @@ struct FlattenJob {
    * Job returns a list of (potentially modified) php::Class, a list
    * of new ClassInfo2, a list of (potentially modified) php::Func,
    * and metadata for the entire job. The order of the lists reflects
-   * the order of the input classes and functions(skipping over
+   * the order of the input classes and functions (skipping over
    * classes marked as uninstantiable in the metadata).
    */
   using Output = Multi<
@@ -7485,6 +7520,7 @@ struct FlattenJob {
     Variadic<std::unique_ptr<ClassInfo2>>,
     Variadic<std::unique_ptr<php::Func>>,
     Variadic<std::unique_ptr<FuncInfo2>>,
+    Variadic<std::unique_ptr<MethodsWithoutCInfo>>,
     OutputMeta
   >;
 
@@ -7510,6 +7546,7 @@ struct FlattenJob {
                     Variadic<std::unique_ptr<php::Class>> deps,
                     Variadic<std::unique_ptr<php::ClassBytecode>> classBytecode,
                     Variadic<std::unique_ptr<php::Func>> funcs,
+                    Variadic<std::unique_ptr<php::Class>> uninstantiable,
                     std::vector<TypeMapping> typeMappings,
                     std::vector<SString> missingTypes) {
     LocalIndex index;
@@ -7629,6 +7666,7 @@ struct FlattenJob {
     // Format the output data and put it in a deterministic order.
     Variadic<std::unique_ptr<php::Class>> outClasses;
     Variadic<std::unique_ptr<ClassInfo2>> outInfos;
+    Variadic<std::unique_ptr<MethodsWithoutCInfo>> outMethods;
     OutputMeta outMeta;
     ISStringSet outNames;
 
@@ -7638,13 +7676,31 @@ struct FlattenJob {
     outNames.reserve(classes.vals.size());
     outMeta.parents.reserve(classes.vals.size() + newClosures.size());
 
+    auto const makeMethodsWithoutCInfo = [&] (const php::Class& cls) {
+      always_assert(outMeta.uninstantiable.emplace(cls.name).second);
+      // Even though the class is uninstantiable, we still need to
+      // create FuncInfos for it's methods. These are stored
+      // separately (there's no ClassInfo to store it in!)
+      auto methods = std::make_unique<MethodsWithoutCInfo>();
+      methods->cls = cls.name;
+      for (auto const& func : cls.methods) {
+        methods->finfos.emplace_back(make_func_info(index, *func));
+      }
+      outMethods.vals.emplace_back(std::move(methods));
+    };
+
     // Do the processing which relies on a fully accessible
     // LocalIndex
     for (auto& cls : classes.vals) {
       auto const cinfoIt = index.m_classInfos.find(cls->name);
       if (cinfoIt == end(index.m_classInfos)) {
+        ITRACE(
+          4, "{} discovered to be not instantiable, instead "
+          "creating MethodsWithoutCInfo for it\n",
+          cls->name
+        );
         always_assert(index.uninstantiable(cls->name));
-        outMeta.uninstantiable.emplace(cls->name);
+        makeMethodsWithoutCInfo(*cls);
         continue;
       }
       auto& cinfo = cinfoIt->second;
@@ -7692,6 +7748,17 @@ struct FlattenJob {
       for (auto const& func : clo->methods) {
         cinfo->funcInfos.emplace_back(make_func_info(index, *func));
       }
+    }
+
+    // We don't process classes marked as uninstantiable beforehand,
+    // except for creating method FuncInfos for them.
+    for (auto const& cls : uninstantiable.vals) {
+      ITRACE(
+        4, "{} already known to be not instantiable, creating "
+        "MethodsWithoutCInfo for it\n",
+        cls->name
+      );
+      makeMethodsWithoutCInfo(*cls);
     }
 
     // Now move the classes out of LocalIndex and into the output. At
@@ -7802,6 +7869,7 @@ struct FlattenJob {
       std::move(outInfos),
       std::move(funcs),
       std::move(funcInfos),
+      std::move(outMethods),
       std::move(outMeta)
     );
   }
@@ -10190,6 +10258,7 @@ struct FlattenClassesWork {
   std::vector<SString> classes;
   std::vector<SString> deps;
   std::vector<SString> funcs;
+  std::vector<SString> uninstantiable;
 };
 
 std::vector<FlattenClassesWork>
@@ -10270,25 +10339,24 @@ flatten_classes_assign(IndexFlattenMetadata& meta) {
         out.instantiable = !it->second.uninstantiable;
         auto const onDep = [&] (SString d) {
           auto const& lookup = self(d, visited, self);
-          out.deps.insert(begin(lookup.deps), end(lookup.deps));
-          if (!lookup.instantiable) {
-            // If the dependency is not instantiable, this isn't
-            // either. Note, however, we still need to preserve the
-            // already gathered dependencies, since they'll have to be
-            // placed in some bucket.
-            if (out.instantiable) {
-              FTRACE(
-                4, "{} is not instantiable because it depends on {}, "
-                "which is not instantiable\n",
-                cls, d
-              );
-              it->second.uninstantiable = true;
-            }
-            out.instantiable = false;
-          } else {
-            // Only add this if instantiable.
+          if (lookup.instantiable || meta.cls.count(d)) {
             out.deps.emplace(d);
           }
+          out.deps.insert(begin(lookup.deps), end(lookup.deps));
+          if (lookup.instantiable) return;
+          // If the dependency is not instantiable, this isn't
+          // either. Note, however, we still need to preserve the
+          // already gathered dependencies, since they'll have to be
+          // placed in some bucket.
+          if (out.instantiable) {
+            FTRACE(
+              4, "{} is not instantiable because it depends on {}, "
+              "which is not instantiable\n",
+              cls, d
+            );
+            it->second.uninstantiable = true;
+          }
+          out.instantiable = false;
         };
 
         for (auto const d : deps)       onDep(d);
@@ -10354,7 +10422,8 @@ flatten_classes_assign(IndexFlattenMetadata& meta) {
       FlattenClassesWork{
         std::move(assignments[0].classes),
         std::move(assignments[0].deps),
-        std::move(funcBuckets[0])
+        std::move(funcBuckets[0]),
+        std::move(assignments[0].uninstantiable)
       }
     );
   } else {
@@ -10365,20 +10434,21 @@ flatten_classes_assign(IndexFlattenMetadata& meta) {
         FlattenClassesWork{
           std::move(assignment.classes),
           std::move(assignment.deps),
-          {}
+          {},
+          std::move(assignment.uninstantiable)
         }
       );
     }
     for (auto& bucket : funcBuckets) {
       work.emplace_back(
-        FlattenClassesWork{ {}, {}, std::move(bucket) }
+        FlattenClassesWork{ {}, {}, std::move(bucket), {} }
       );
     }
   }
 
   if (Trace::moduleEnabled(Trace::hhbbc_index, 5)) {
     for (size_t i = 0; i < work.size(); ++i) {
-      auto const& [classes, deps, funcs] = work[i];
+      auto const& [classes, deps, funcs, uninstantiable] = work[i];
       FTRACE(5, "flatten work item #{}:\n", i);
       FTRACE(5, "  classes ({}):\n", classes.size());
       for (auto const DEBUG_ONLY c : classes) FTRACE(5, "    {}\n", c);
@@ -10386,6 +10456,8 @@ flatten_classes_assign(IndexFlattenMetadata& meta) {
       for (auto const DEBUG_ONLY d : deps) FTRACE(5, "    {}\n", d);
       FTRACE(5, "  funcs ({}):\n", funcs.size());
       for (auto const DEBUG_ONLY f : funcs) FTRACE(5, "    {}\n", f);
+      FTRACE(5, "  uninstantiable classes ({}):\n", uninstantiable.size());
+      for (auto const DEBUG_ONLY c : uninstantiable) FTRACE(5, "    {}\n", c);
     }
   }
 
@@ -10463,13 +10535,19 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     UniquePtrRef<FuncInfo2> finfo;
     ISStringSet typeUses;
   };
-  using Update = boost::variant<ClassUpdate, FuncUpdate>;
+  struct MethodUpdate {
+    SString name;
+    UniquePtrRef<MethodsWithoutCInfo> methods;
+  };
+  using Update = boost::variant<ClassUpdate, FuncUpdate, MethodUpdate>;
   using UpdateVec = std::vector<Update>;
 
   auto const run = [&] (FlattenClassesWork work) -> coro::Task<UpdateVec> {
     co_await coro::co_reschedule_on_current_executor;
 
-    if (work.classes.empty() && work.funcs.empty()) {
+    if (work.classes.empty() &&
+        work.funcs.empty() &&
+        work.uninstantiable.empty()) {
       assertx(work.deps.empty());
       co_return UpdateVec{};
     }
@@ -10477,7 +10555,11 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     Client::ExecMetadata metadata{
       .job_key = folly::sformat(
         "flatten classes {}",
-        work.classes.empty() ? work.funcs[0] : work.classes[0]
+        work.classes.empty()
+          ? (work.uninstantiable.empty()
+             ? work.funcs[0]
+             : work.uninstantiable[0])
+          : work.classes[0]
       )
     };
     auto classes = from(work.classes)
@@ -10491,6 +10573,9 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       | as<std::vector>();
     auto funcs = from(work.funcs)
       | map([&] (SString f) { return index.funcRefs.at(f); })
+      | as<std::vector>();
+    auto uninstantiableRefs = from(work.uninstantiable)
+      | map([&] (SString c) { return index.classRefs.at(c); })
       | as<std::vector>();
 
     // Gather any type-mappings or missing types referenced by these
@@ -10553,6 +10638,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
             std::move(deps),
             std::move(bytecode),
             std::move(funcs),
+            std::move(uninstantiableRefs),
             std::move(typeMappingsRef),
             std::move(missingTypesRef)
           )
@@ -10562,8 +10648,8 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     // Every flattening job is a single work-unit, so we should only
     // ever get one result for each one.
     assertx(results.size() == 1);
-    auto& [clsRefs, bytecodeRefs, cinfoRefs, funcRefs, finfoRefs, classMetaRef]
-      = results[0];
+    auto& [clsRefs, bytecodeRefs, cinfoRefs, funcRefs,
+           finfoRefs, methodRefs, classMetaRef] = results[0];
     assertx(clsRefs.size() == cinfoRefs.size());
     assertx(clsRefs.size() == bytecodeRefs.size());
     assertx(funcRefs.size() == work.funcs.size());
@@ -10572,6 +10658,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     // We need the output metadata, but everything else stays
     // uploaded.
     auto clsMeta = co_await index.client->load(std::move(classMetaRef));
+    assertx(methodRefs.size() == clsMeta.uninstantiable.size());
 
     // Create the updates by combining the job output (but skipping
     // over uninstantiable classes).
@@ -10580,8 +10667,16 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
 
     size_t outputIdx = 0;
     size_t parentIdx = 0;
+    size_t methodIdx = 0;
     for (auto const name : work.classes) {
-      if (clsMeta.uninstantiable.count(name)) continue;
+      if (clsMeta.uninstantiable.count(name)) {
+        assertx(methodIdx < methodRefs.size());
+        updates.emplace_back(
+          MethodUpdate{ name, std::move(methodRefs[methodIdx]) }
+        );
+        ++methodIdx;
+        continue;
+      }
       assertx(outputIdx < clsRefs.size());
       assertx(outputIdx < clsMeta.classTypeUses.size());
 
@@ -10632,6 +10727,16 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     }
     assertx(outputIdx == clsRefs.size());
     assertx(outputIdx == clsMeta.classTypeUses.size());
+
+    for (auto const name : work.uninstantiable) {
+      assertx(clsMeta.uninstantiable.count(name));
+      assertx(methodIdx < methodRefs.size());
+      updates.emplace_back(
+        MethodUpdate{ name, std::move(methodRefs[methodIdx]) }
+      );
+      ++methodIdx;
+    }
+    assertx(methodIdx == methodRefs.size());
 
     assertx(work.funcs.size() == clsMeta.funcTypeUses.size());
     for (size_t i = 0, size = work.funcs.size(); i < size; ++i) {
@@ -10790,6 +10895,20 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
             auto u = boost::get<ClassUpdate>(&update);
             if (!u || !u->isInterface) continue;
             subclassMeta.interfaces.emplace(u->name);
+          }
+        }
+      },
+      [&] {
+        for (auto& updates : allUpdates) {
+          for (auto& update : updates) {
+            auto u = boost::get<MethodUpdate>(&update);
+            if (!u) continue;
+            always_assert(
+              index.uninstantiableClsMethRefs.emplace(
+                u->name,
+                std::move(u->methods)
+              ).second
+            );
           }
         }
       },
@@ -14322,6 +14441,7 @@ struct AggregateJob {
     std::vector<std::unique_ptr<php::FuncBytecode>> funcBytecode;
     std::vector<std::unique_ptr<php::Unit>> units;
     std::vector<FuncFamilyGroup> funcFamilies;
+    std::vector<std::unique_ptr<MethodsWithoutCInfo>> methInfos;
 
     template <typename SerDe> void serde(SerDe& sd) {
       ScopedStringDataIndexer _;
@@ -14334,6 +14454,7 @@ struct AggregateJob {
         (funcBytecode)
         (units)
         (funcFamilies)
+        (methInfos)
         ;
     }
   };
@@ -14345,7 +14466,8 @@ struct AggregateJob {
                     Variadic<std::unique_ptr<FuncInfo2>> funcInfos,
                     Variadic<std::unique_ptr<php::FuncBytecode>> funcBytecode,
                     Variadic<std::unique_ptr<php::Unit>> units,
-                    Variadic<FuncFamilyGroup> funcFamilies) {
+                    Variadic<FuncFamilyGroup> funcFamilies,
+                    Variadic<std::unique_ptr<MethodsWithoutCInfo>> methInfos) {
     Bundle bundle;
     bundle.classes.reserve(classes.vals.size());
     bundle.classInfos.reserve(classInfos.vals.size());
@@ -14355,6 +14477,7 @@ struct AggregateJob {
     bundle.funcBytecode.reserve(funcBytecode.vals.size());
     bundle.units.reserve(units.vals.size());
     bundle.funcFamilies.reserve(funcFamilies.vals.size());
+    bundle.methInfos.reserve(methInfos.vals.size());
     for (auto& c : classes.vals) {
       bundle.classes.emplace_back(std::move(c));
     }
@@ -14379,11 +14502,23 @@ struct AggregateJob {
     for (auto& group : funcFamilies.vals) {
       bundle.funcFamilies.emplace_back(std::move(group));
     }
+    for (auto& m : methInfos.vals) {
+      bundle.methInfos.emplace_back(std::move(m));
+    }
     return bundle;
   }
 };
 
 Job<AggregateJob> s_aggregateJob;
+
+void remote_func_info_to_local(IndexData& index,
+                               const php::Func& func,
+                               FuncInfo2& rfinfo) {
+  assertx(func.name == rfinfo.name);
+  auto finfo = func_info(index, &func);
+  assertx(finfo->returnTy.is(BInitCell));
+  finfo->returnTy = std::move(rfinfo.returnTy);
+}
 
 // Convert the FuncInfo2s we loaded from extern-worker into their
 // equivalent FuncInfos.
@@ -14401,11 +14536,7 @@ void make_func_infos_local(IndexData& index,
         "Func-info for {} has no associated php::Func in index",
         rfinfo->name
       );
-      auto const func = it->second;
-      assertx(func->name == rfinfo->name);
-      auto finfo = func_info(index, func);
-      assertx(finfo->returnTy.is(BInitCell));
-      finfo->returnTy = std::move(rfinfo->returnTy);
+      remote_func_info_to_local(index, *it->second, *rfinfo);
     }
   );
 }
@@ -14839,10 +14970,7 @@ void make_class_infos_local(
       for (size_t i = 0, size = cinfo->cls->methods.size(); i < size; ++i) {
         auto& func = cinfo->cls->methods[i];
         auto& rfi = rcinfo->funcInfos[i];
-        assertx(func->name == rfi->name);
-        auto fi = func_info(index, func.get());
-        assertx(fi->returnTy.is(BInitCell));
-        fi->returnTy = std::move(rfi->returnTy);
+        remote_func_info_to_local(index, *func, *rfi);
       }
 
       // Free memory as we go.
@@ -15018,7 +15146,8 @@ void make_local(IndexData& index) {
     items.reserve(
       index.unitRefs.size() + index.classRefs.size() +
       index.classInfoRefs.size() + index.funcRefs.size() +
-      index.funcInfoRefs.size() + index.funcFamilyRefs.size()
+      index.funcInfoRefs.size() + index.funcFamilyRefs.size() +
+      index.uninstantiableClsMethRefs.size()
     );
     for (auto const& [name, ref] : index.unitRefs) {
       totalSize += ref.id().m_size;
@@ -15051,6 +15180,11 @@ void make_local(IndexData& index) {
       items.emplace_back(name);
     }
     for (auto const& [name, ref] : index.funcBytecodeRefs) {
+      totalSize += ref.id().m_size;
+      if (!seen.emplace(name).second) continue;
+      items.emplace_back(name);
+    }
+    for (auto const& [name, ref] : index.uninstantiableClsMethRefs) {
       totalSize += ref.id().m_size;
       if (!seen.emplace(name).second) continue;
       items.emplace_back(name);
@@ -15095,6 +15229,9 @@ void make_local(IndexData& index) {
   std::vector<std::unique_ptr<FuncInfo2>> remoteFuncInfos;
   remoteFuncInfos.reserve(index.funcInfoRefs.size());
 
+  std::vector<std::unique_ptr<MethodsWithoutCInfo>> remoteMethInfos;
+  remoteMethInfos.reserve(index.uninstantiableClsMethRefs.size());
+
   hphp_fast_set<FuncFamily2::Id> remoteFuncFamilyIds;
   std::vector<std::unique_ptr<FuncFamily2>> remoteFuncFamilies;
   remoteFuncFamilies.reserve(index.funcFamilyRefs.size());
@@ -15112,6 +15249,7 @@ void make_local(IndexData& index) {
     std::vector<UniquePtrRef<php::FuncBytecode>> funcBytecode;
     std::vector<UniquePtrRef<php::Unit>> units;
     std::vector<Ref<FuncFamilyGroup>> funcFamilies;
+    std::vector<UniquePtrRef<MethodsWithoutCInfo>> methInfos;
 
     // Since a name can map to multiple items, and different case
     // sensitive version of the same name can appear in the same
@@ -15156,6 +15294,12 @@ void make_local(IndexData& index) {
           funcFamilies.emplace_back(*r);
         }
       }
+      if (auto const r = folly::get_optional(index.uninstantiableClsMethRefs,
+                                             name)) {
+        if (ids.emplace(r->id()).second) {
+          methInfos.emplace_back(*r);
+        }
+      }
     }
 
     AggregateJob::Bundle chunk;
@@ -15178,7 +15322,8 @@ void make_local(IndexData& index) {
             std::move(funcInfos),
             std::move(funcBytecode),
             std::move(units),
-            std::move(funcFamilies)
+            std::move(funcFamilies),
+            std::move(methInfos)
           )
         ),
         std::move(metadata)
@@ -15190,7 +15335,7 @@ void make_local(IndexData& index) {
     } else {
       // If we're using subprocess mode, we don't need to aggregate
       // and we can just download the items directly.
-      auto [c, cinfo, cbc, f, finfo, fbc, u, ff] =
+      auto [c, cinfo, cbc, f, finfo, fbc, u, ff, minfo] =
         co_await coro::collectAll(
           index.client->load(std::move(classes)),
           index.client->load(std::move(classInfos)),
@@ -15199,7 +15344,8 @@ void make_local(IndexData& index) {
           index.client->load(std::move(funcInfos)),
           index.client->load(std::move(funcBytecode)),
           index.client->load(std::move(units)),
-          index.client->load(std::move(funcFamilies))
+          index.client->load(std::move(funcFamilies)),
+          index.client->load(std::move(methInfos))
         );
       chunk.classes.insert(
         end(chunk.classes),
@@ -15240,6 +15386,11 @@ void make_local(IndexData& index) {
         end(chunk.funcFamilies),
         std::make_move_iterator(begin(ff)),
         std::make_move_iterator(end(ff))
+      );
+      chunk.methInfos.insert(
+        end(chunk.methInfos),
+        std::make_move_iterator(begin(minfo)),
+        std::make_move_iterator(end(minfo))
       );
     }
 
@@ -15287,6 +15438,11 @@ void make_local(IndexData& index) {
         std::make_move_iterator(begin(chunk.funcInfos)),
         std::make_move_iterator(end(chunk.funcInfos))
       );
+      remoteMethInfos.insert(
+        end(remoteMethInfos),
+        std::make_move_iterator(begin(chunk.methInfos)),
+        std::make_move_iterator(end(chunk.methInfos))
+      );
       for (auto& group : chunk.funcFamilies) {
         for (auto& ff : group.m_ffs) {
           if (remoteFuncFamilyIds.emplace(ff->m_id).second) {
@@ -15323,6 +15479,9 @@ void make_local(IndexData& index) {
   decltype(index.funcFamilyRefs){}.swap(index.funcFamilyRefs);
   decltype(index.classBytecodeRefs){}.swap(index.classBytecodeRefs);
   decltype(index.funcBytecodeRefs){}.swap(index.funcBytecodeRefs);
+  decltype(index.uninstantiableClsMethRefs){}.swap(
+    index.uninstantiableClsMethRefs
+  );
 
   // Done with any extern-worker stuff at this point:
   index.configRef.reset();
@@ -15385,6 +15544,24 @@ void make_local(IndexData& index) {
     index,
     std::move(remoteClassInfos),
     std::move(remoteFuncFamilies)
+  );
+
+  // Convert any "orphan" FuncInfo2s (those representing methods for a
+  // class without a ClassInfo).
+  parallel::for_each(
+    remoteMethInfos,
+    [&] (std::unique_ptr<MethodsWithoutCInfo>& meths) {
+      auto const cls = folly::get_default(index.classes, meths->cls);
+      always_assert_flog(
+        cls,
+        "php::Class for {} not found in index",
+        meths->cls
+      );
+      assertx(cls->methods.size() == meths->finfos.size());
+      for (size_t i = 0, size = cls->methods.size(); i < size; ++i) {
+        remote_func_info_to_local(index, *cls->methods[i], *meths->finfos[i]);
+      }
+    }
   );
 }
 
@@ -17971,6 +18148,7 @@ void PublicSPropMutations::mergeUnknown(Context ctx) {
 MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::ClassInfo2);
 MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::FuncInfo2);
 MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::FuncFamily2);
+MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::MethodsWithoutCInfo);
 MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::BuildSubclassListJob::Split);
 
 //////////////////////////////////////////////////////////////////////

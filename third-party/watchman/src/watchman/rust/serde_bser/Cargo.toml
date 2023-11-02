@@ -6,7 +6,7 @@ edition = "2021"
 description = "Implements the Watchman BSER encoding for serde. https://facebook.github.io/watchman/docs/bser.html"
 documentation = "https://docs.rs/serde_bser"
 repository = "https://github.com/facebook/watchman/"
-license = "Apache-2.0"
+license = "MIT"
 
 [dependencies]
 anyhow = "1.0"

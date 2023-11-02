@@ -22,7 +22,7 @@
     "protocol"
   ],
   "author": "Wez Furlong <wez@fb.com> (http://wezfurlong.org)",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/facebook/watchman/issues"
   },

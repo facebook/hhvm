@@ -6,7 +6,7 @@ edition = "2021"
 description = "a client for the Watchman file watching service"
 documentation = "https://docs.rs/watchman_client"
 repository = "https://github.com/facebook/watchman/"
-license = "Apache-2.0"
+license = "MIT"
 exclude = ["examples/*"]
 
 [dependencies]

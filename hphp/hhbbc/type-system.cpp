@@ -34,6 +34,7 @@
 #include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 
+#include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/eval-cell.h"
 #include "hphp/hhbbc/index.h"

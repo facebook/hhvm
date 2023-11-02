@@ -39,7 +39,6 @@
 #include "hphp/runtime/vm/type-constraint.h"
 
 #include "hphp/hhbbc/bc.h"
-#include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/src-loc.h"
 

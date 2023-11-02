@@ -25,6 +25,7 @@
 
 #include <folly/Lazy.h>
 
+#include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/hhbbc.h"
 #include "hphp/hhbbc/misc.h"
@@ -7674,7 +7675,6 @@ TEST(Type, IterTypes) {
     EXPECT_EQ(iter.mayThrowOnNext, p.second.mayThrowOnNext);
   }
 }
-
 
 TEST(Type, ResolveClasses) {
   auto const index = make_index();

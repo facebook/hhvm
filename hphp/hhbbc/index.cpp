@@ -67,6 +67,7 @@
 #include "hphp/hhbbc/wide-func.h"
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/bitset-utils.h"
 #include "hphp/util/check-size.h"
 #include "hphp/util/hash-set.h"
 #include "hphp/util/lock-free-lazy.h"
@@ -85,6 +86,7 @@ using namespace extern_worker;
 
 //////////////////////////////////////////////////////////////////////
 
+struct ClassInfo;
 struct ClassInfo2;
 
 //////////////////////////////////////////////////////////////////////
@@ -1103,6 +1105,10 @@ struct FuncFamilyEntry {
 
 //////////////////////////////////////////////////////////////////////
 
+}
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * ClassGraph is an abstraction for representing a subset of the
  * complete class hierarchy in a program. Every instance of ClassGraph
@@ -1127,18 +1133,38 @@ struct ClassGraph {
   // create them.
   ClassGraph() = default;
 
+  // A ClassGraph is falsey if it has been default-constructed.
+  explicit operator bool() const { return this_; }
+
   // Retrieve the name of this class.
   SString name() const;
-  // Retrieve an optional ClassInfo2 associated with this class. A
-  // ClassGraph is not guaranteed to have a ClassInfo2, but if it
-  // does, this can be used to save a name -> info lookup.
-  ClassInfo2* cinfo() const;
+
+  // Retrieve an optional ClassInfo/ClassInfo2 associated with this
+  // class. A ClassGraph is not guaranteed to have a
+  // ClassInfo/ClassInfo2, but if it does, this can be used to save a
+  // name -> info lookup.
+  ClassInfo* cinfo() const;
+  ClassInfo2* cinfo2() const;
+
+  ClassGraph withoutNonRegular() const;
+
+  // Whether the class might be a regular or non-regular class. This
+  // check is precise if isMissing() is false.
+  bool mightBeRegular() const;
+  bool mightBeNonRegular() const;
+
+  // Whether this class might have any regular or non-regular
+  // subclasses (not including this class itself). This check is
+  // precise if hasCompleteChildren() or isConservative() is true.
+  bool mightHaveRegularSubclass() const;
+  bool mightHaveNonRegularSubclass() const;
 
   // A "missing" ClassGraph is a special variant which represents a
   // class about which nothing is known. The class might not even
   // exist. The only valid thing to do with such a class is query its
   // name.
   bool isMissing() const;
+
   // A class might or might not have complete knowledge about its
   // children. If this returns true, you can perform any of the below
   // queries on it. If not, you can only perform queries related to
@@ -1146,17 +1172,28 @@ struct ClassGraph {
   // information).
   bool hasCompleteChildren() const;
 
-  // Whether this class is an interface.
+  // A conservative class is one which will never have complete
+  // children. This generally means that the class has too many
+  // subclasses to efficiently represent. We treat such classes
+  // conservatively, except in a few cases.
+  bool isConservative() const;
+
+  // Whether this class is an interface, a trait, an enum, or an
+  // abstract class. It is invalid to check these if isMissing() is
+  // true.
   bool isInterface() const;
-  // Whether this class is mocked (has a direct child which is a mock
-  // class).
-  bool isMocked() const;
-  // Whether this class or any children are mocked.
-  bool isSubMocked() const;
-  // Whether any children are regular (not this class).
-  bool hasRegularSubclass() const;
-  // Whether any children are non-regular (not this class).
-  bool hasNonRegularSubclass() const;
+  bool isTrait() const;
+  bool isEnum() const;
+  bool isAbstract() const;
+
+  // Retrieve the immediate base class of this class. If this class
+  // doesn't have an immediate base, or if isMissing() is true, a
+  // falsey ClassGraph is returned.
+  ClassGraph base() const;
+
+  // Retrieve the "topmost" base class of this class. This is the base
+  // class which does not have a base class.
+  ClassGraph topBase() const;
 
   // Retrieve all base classes of this class, including this
   // class. The ordering is from top-most class to this one (so this
@@ -1171,23 +1208,19 @@ struct ClassGraph {
   // this class does.
   std::vector<ClassGraph> interfaces() const;
 
-  // The combined set of all interfaces implemented by any
-  // non-interface, non-trait, non-enum child classes of this
-  // class. The ordering is alphabetical. This is only valid to call
-  // if hasCompleteChildren() is true. The returned classes may not
-  // have complete child information.
-  std::vector<ClassGraph> subRegInterfaces() const;
+  // Retrieve the interfaces which conflict with this class (if it is
+  // an interface). An interface conflicts with another interface if
+  // there's a class which simultaneously implements both
+  // interfaces. The total number of subclasses of this interface is
+  // also returned. This information is needed to compute the
+  // interface vtable slots.
+  std::pair<ISStringSet, size_t> interfaceConflicts() const;
 
   // Retrieve all children of this class (including this class
-  // itself). The difference between subclasses() and children() is
-  // that subclasses() doesn't recurse through traits, while
-  // children() does. In other words, subclasses() represents the set
-  // of classes which have a "is-a" relationship with this class,
-  // while children() is just classes linked by inheritance
-  // tree. These are only valid to call if hasCompleteChildren() is
-  // true. All returned classes will also have complete child
-  // information.
-  std::vector<ClassGraph> subclasses() const;
+  // itself). This is only valid to call if hasCompleteChildren() is
+  // true. NB: Being on a class' children list does not necessarily
+  // mean that it has a "is-a" relationship. Namely, classes on a
+  // trait's children list are not instances of the trait itself.
   std::vector<ClassGraph> children() const;
 
   // Retrieve the interfaces implemented by this class directly.
@@ -1200,14 +1233,33 @@ struct ClassGraph {
     return directParents(FlagTrait);
   }
 
-  // Used when building ClassGraphs initially.
-  void setCompleteChildren();
-  void setIsMockClass();
+  // Retrieve the direct parents of this class (all of the classes for
+  // which this class is a direct child).
+  std::vector<ClassGraph> directParents() const;
 
+  // Retrieve the set of classes which *might* be equivalent to this
+  // class when ignoring non-regular classes. This does not include
+  // subclasses of this class.
+  std::vector<ClassGraph> candidateRegOnlyEquivs() const;
+
+  // Subtype checks
+  bool exactSubtypeOfExact(ClassGraph, bool nonRegL, bool nonRegR) const;
+  bool exactSubtypeOf(ClassGraph, bool nonRegL, bool nonRegR) const;
+  bool subSubtypeOf(ClassGraph, bool nonRegL, bool nonRegR) const;
+
+  // Could-be checks
+  bool exactCouldBeExact(ClassGraph, bool nonRegL, bool nonRegR) const;
+  bool exactCouldBe(ClassGraph, bool nonRegL, bool nonRegR) const;
+  bool subCouldBe(ClassGraph, bool nonRegL, bool nonRegR) const;
+
+  // Used when building ClassGraphs initially.
+  void setClosureBase();
+  void setComplete();
   void setBase(ClassGraph);
   void addParent(ClassGraph);
   void flattenTraitInto(ClassGraph);
-
+  void setCInfo(ClassInfo&);
+  void setRegOnlyEquivs() const;
   void reset();
 
   // ClassGraphs are ordered by their name alphabetically.
@@ -1215,21 +1267,22 @@ struct ClassGraph {
   bool operator!=(ClassGraph h) const { return this_ != h.this_; }
   bool operator<(ClassGraph h) const;
 
-  // Create a new ClassGraph corresponding to the given php::Class,
-  // and store an optional ClassInfo2 along with it. This function
-  // will assert if a ClassGraph with the php::Class' name already
-  // exists.
-  static ClassGraph create(const php::Class&,
-                           ClassInfo2* cinfo = nullptr);
+  // Create a new ClassGraph corresponding to the given php::Class.
+  // This function will assert if a ClassGraph with the php::Class'
+  // name already exists.
+  static ClassGraph create(const php::Class&);
   // Retrieve a ClassGraph with the given name, asserting if one
   // doesn't exist.
   static ClassGraph get(SString);
+  // Retrieve a "missing" ClassGraph with the given name, asserting if
+  // a non-missing one already exists. This is mainly used for tests.
+  static ClassGraph getMissing(SString);
 
   // Before using ClassGraph, it must be initialized (particularly
   // before deserializing any). initConcurrent() must be used if any
   // deserialization with be performed in multiple threads
   // concurrently.
-  static void init(bool setChildrenComplete = true);
+  static void init();
   static void initConcurrent();
   // If initConcurrent() was used, this must be used when
   // deserialization is done and perform querying any ClassGraphs.
@@ -1237,7 +1290,7 @@ struct ClassGraph {
   // Called to clean up memory used by ClassGraph framework.
   static void destroy();
 
-  template <typename SerDe> void serde(SerDe&, ClassInfo2*);
+  template <typename SerDe, typename T> void serde(SerDe&, T);
 
   // When serializing multiple ClassGraphs, this can be declared
   // before serializing any of them, to allow for the serialization to
@@ -1249,18 +1302,27 @@ private:
   struct SerdeState;
   struct Table;
 
-  using Visited = hphp_fast_set<Node*>;
+  using NodeSet = hphp_fast_set<Node*>;
+  template <typename T> using NodeMap = hphp_fast_map<Node*, T>;
+  using NodeVec = TinyVector<Node*, 4>;
 
-  enum Flags : std::uint8_t {
-    FlagNone      = 0,
-    FlagInterface = (1 << 0),
-    FlagTrait     = (1 << 1),
-    FlagAbstract  = (1 << 2),
-    FlagEnum      = (1 << 3),
-    FlagMockClass = (1 << 4),
-    FlagWait      = (1 << 5),
-    FlagChildren  = (1 << 6),
-    FlagMissing   = (1 << 7)
+  struct SmallBitset;
+  struct LargeBitset;
+  template <typename> struct ParentTracker;
+
+  enum Flags : std::uint16_t {
+    FlagNone         = 0,
+    FlagInterface    = (1 << 0),
+    FlagTrait        = (1 << 1),
+    FlagAbstract     = (1 << 2),
+    FlagEnum         = (1 << 3),
+    FlagCInfo2       = (1 << 4),
+    FlagRegSub       = (1 << 5),
+    FlagNonRegSub    = (1 << 6),
+    FlagWait         = (1 << 7),
+    FlagChildren     = (1 << 8),
+    FlagConservative = (1 << 9),
+    FlagMissing      = (1 << 10)
   };
 
   // Iterating through parents or children can result in one of three
@@ -1272,41 +1334,82 @@ private:
          // this class
   };
 
-  static Table& table();
-
   std::vector<ClassGraph> directParents(Flags) const;
 
-  template <typename F>
-  static Action forEachParent(Node&, const F&, Visited&);
-  template <typename F>
-  static Action forEachParent(Node& n, const F& f) {
-    Visited v;
-    return forEachParent(n, f, v);
-  }
+  static Table& table();
+
+  static NodeVec combine(const NodeVec&, const NodeVec&,
+                         bool, bool, bool, bool);
+  static NodeVec intersect(const NodeVec&, const NodeVec&,
+                           bool, bool, bool&);
+  static NodeVec removeNonReg(const NodeVec&);
+  static bool couldBeIsect(const NodeVec&, const NodeVec&, bool, bool);
+  static NodeVec canonicalize(const NodeSet&, bool);
 
   template <typename F>
-  static Action forEachChild(Node&, const F&, Visited&);
+  static void enumerateIsectMembers(const NodeVec&, bool,
+                                    const F&, bool = false);
+
+  static std::pair<NodeSet, NodeSet> calcSubclassOfSplit(Node&);
+  static NodeSet calcSubclassOf(Node&);
+  static Node* calcRegOnlyEquiv(Node&, const NodeSet&);
+
+  static bool betterNode(const Node*, const Node*);
+
+  template <typename F>
+  static Action forEachParent(Node& n, const F& f, NodeSet& v) {
+    return forEachParentImpl(n, f, v, true);
+  }
+  template <typename F>
+  static Action forEachParent(Node& n, const F& f) {
+    NodeSet v;
+    return forEachParentImpl(n, f, v, true);
+  }
+  template <typename F>
+  static Action forEachParentImpl(Node&, const F&, NodeSet&, bool);
+
+  template <typename F>
+  static Action forEachChild(Node& n, const F& f, NodeSet& v) {
+    return forEachChildImpl(n, f, v, true);
+  }
   template <typename F>
   static Action forEachChild(Node& n, const F& f) {
-    Visited v;
-    return forEachChild(n, f, v);
+    NodeSet v;
+    return forEachChildImpl(n, f, v, true);
   }
+  template <typename F>
+  static Action forEachChildImpl(Node&, const F&, NodeSet&, bool);
+
+  template <typename F, typename F2, typename T>
+  static T foldParents(Node& n, const F& f, const F2& f2, NodeMap<T>& m) {
+    return foldParentsImpl(n, f, f2, m, true);
+  }
+  template <typename F, typename F2, typename T>
+  static T foldParentsImpl(Node&, const F&, const F2&, NodeMap<T>&, bool);
+
+  static bool findParent(Node&, Node&, NodeSet&);
+  static bool findParent(Node& n1, Node& n2) {
+    NodeSet visited;
+    return findParent(n1, n2, visited);
+  }
+
+  static NodeSet allParents(Node&);
 
   struct LockedSerdeImpl;
   struct UnlockedSerdeImpl;
 
   static std::vector<Node*> sort(const hphp_fast_set<Node*>&);
 
-  template <typename SerDe> static void encodeName(SerDe&, SString);
-  template <typename SerDe> static SString decodeName(SerDe&);
+  template <typename SerDe, typename Impl, typename T>
+  void serdeImpl(SerDe&, const Impl&, T);
 
-  template <typename SerDe, typename Impl> void serdeImpl(SerDe&,
-                                                          const Impl&,
-                                                          ClassInfo2*);
   template <typename SerDe, typename Impl>
   static void deserBlock(SerDe&, const Impl&);
   template <typename SerDe> static size_t serDownward(SerDe&, Node&);
   template <typename SerDe> static bool serUpward(SerDe&, Node&);
+
+  template <typename Impl>
+  static std::pair<Flags, Optional<size_t>> setCompleteImpl(const Impl&, Node&);
 
   static std::unique_ptr<Table> g_table;
   static __thread SerdeState* tl_serde_state;
@@ -1322,23 +1425,55 @@ __thread ClassGraph::SerdeState* ClassGraph::tl_serde_state{nullptr};
 // Node on the graph:
 struct ClassGraph::Node {
   // The flags are stored along with any ClassInfo to save memory.
-  using CIAndFlags = CompactTaggedPtr<ClassInfo2, Flags>;
+  using CIAndFlags = CompactTaggedPtr<void, Flags>;
 
   SString name{nullptr};
   // Atomic because they might be manipulated from multiple threads
   // during deserialization.
   std::atomic<CIAndFlags::Opaque> ci{CIAndFlags{}.getOpaque()};
   // Direct (not transitive) parents and children of this node.
-  hphp_fast_set<Node*> parents;
-  hphp_fast_set<Node*> children;
+  NodeSet parents;
+  NodeSet children;
+
+  // This information is lazily cached (and is not serialized).
+  struct NonRegularInfo {
+    NodeSet subclassOf;
+    Node* regOnlyEquiv{nullptr};
+  };
+  LockFreeLazyPtr<NonRegularInfo> nonRegInfo;
 
   Flags flags() const { return CIAndFlags{ci.load()}.tag(); }
-  ClassInfo2* cinfo() const { return CIAndFlags{ci.load()}.ptr(); }
+  ClassInfo* cinfo() const {
+    CIAndFlags cif{ci.load()};
+    if (cif.tag() & FlagCInfo2) return nullptr;
+    return (ClassInfo*)cif.ptr();
+  }
+  ClassInfo2* cinfo2() const {
+    CIAndFlags cif{ci.load()};
+    if (!(cif.tag() & FlagCInfo2)) return nullptr;
+    return (ClassInfo2*)cif.ptr();
+  }
+  void* rawPtr() const {
+    CIAndFlags cif{ci.load()};
+    return cif.ptr();
+  }
 
   bool isBase() const { return !(flags() & (FlagInterface | FlagTrait)); }
   bool isRegular() const {
     return !(flags() & (FlagInterface | FlagTrait | FlagAbstract | FlagEnum));
   }
+  bool isTrait() const { return flags() & FlagTrait; }
+  bool isInterface() const { return flags() & FlagInterface; }
+  bool isEnum() const { return flags() & FlagEnum; }
+  bool isAbstract() const { return flags() & FlagAbstract; }
+  bool isMissing() const { return flags() & FlagMissing; }
+  bool hasCompleteChildren() const { return flags() & FlagChildren; }
+  bool isConservative() const { return flags() & FlagConservative; }
+
+  bool hasRegularSubclass() const { return flags() & FlagRegSub; }
+  bool hasNonRegularSubclass() const { return flags() & FlagNonRegSub; }
+
+  const NonRegularInfo& nonRegularInfo();
 
   // NB: These aren't thread-safe, so don't use them during concurrent
   // deserialization.
@@ -1347,33 +1482,38 @@ struct ClassGraph::Node {
     old.set((Flags)(old.tag() | f), old.ptr());
     ci.store(old.getOpaque());
   }
+  void setCInfo(ClassInfo& c) {
+    CIAndFlags old{ci.load()};
+    old.set((Flags)(old.tag() & ~FlagCInfo2), &c);
+    ci.store(old.getOpaque());
+  }
   void setCInfo(ClassInfo2& c) {
     CIAndFlags old{ci.load()};
-    assertx(!old.ptr() || old.ptr() == &c);
-    old.set(old.tag(), &c);
+    old.set((Flags)(old.tag() | FlagCInfo2), &c);
     ci.store(old.getOpaque());
   }
 };
 
 struct ClassGraph::SerdeState {
-  hphp_fast_set<Node*> upward;
-  hphp_fast_set<Node*> downward;
-
-  std::vector<SString> strings;
-  std::vector<SString> newStrings;
-  SStringToOneT<size_t> strToIdx;
+  NodeSet upward;
+  NodeSet downward;
 };
 
 struct ClassGraph::Table {
   // Node map to ensure pointer stability.
   ISStringToOneNodeT<Node> nodes;
+  // Mapping of one node equivalent to another when only considering
+  // regular subclasses. No entry if the mapping is an identity or to
+  // a subclass (which is common). Stored separately to save memory
+  // since it's rare.
+  hphp_fast_map<Node*, Node*> regOnlyEquivs;
   struct Locking {
     folly::SharedMutex table;
     std::array<std::mutex, 2048> nodes;
+    folly::SharedMutex equivs;
   };
   // If present, we're doing concurrent deserialization.
   Optional<Locking> locking;
-  bool deserChildrenComplete{true};
 };
 
 struct ClassGraph::ScopedSerdeState {
@@ -1399,396 +1539,198 @@ private:
   Optional<SerdeState> s;
 };
 
-SString ClassGraph::name() const {
-  assertx(this_);
-  return this_->name;
-}
-
-ClassInfo2* ClassGraph::cinfo() const {
-  assertx(this_);
-  return this_->cinfo();
-}
-
-bool ClassGraph::isMissing() const {
-  assertx(this_);
-  return this_->flags() & FlagMissing;
-}
-
-bool ClassGraph::hasCompleteChildren() const {
-  assertx(this_);
-  return this_->flags() & FlagChildren;
-}
-
-bool ClassGraph::isInterface() const {
-  assertx(this_);
-  assertx(!isMissing());
-  return this_->flags() & FlagInterface;
-}
-
-void ClassGraph::setCompleteChildren() {
-  assertx(!table().locking);
-  assertx(this_);
-  assertx(!isMissing());
-
-  // Complete children is transitive, so mark every child as having
-  // complete children as well.
-  forEachChild(
-    *this_,
-    [&] (Node& c) {
-      // Stop if we hit the flag already set, since all children
-      // beyond this should already have it set.
-      if (c.flags() & FlagChildren) return Action::Skip;
-      c.setFlags(FlagChildren);
-      return Action::Continue;
-    }
-  );
-}
-
-void ClassGraph::setIsMockClass() {
-  assertx(!table().locking);
-  assertx(this_);
-  assertx(!isMissing());
-  this_->setFlags(FlagMockClass);
-}
-
-void ClassGraph::setBase(ClassGraph b) {
-  assertx(!table().locking);
-  assertx(this_);
-  assertx(b.this_);
-  assertx(!isMissing());
-  assertx(!b.isMissing());
-  assertx(b.this_->isBase());
-  this_->parents.emplace(b.this_);
-  if (!is_closure_base(b.name())) {
-    b.this_->children.emplace(this_);
+/*
+ * When operating over ClassGraph nodes, we often need compact sets of
+ * them. This is easy to do with bitsets, but we don't have a fixed
+ * upper-size of the sets. We could always use dynamic_bitset, but
+ * this can be inefficient. Instead we templatize the algorithm over
+ * the bitset, and use a fixed size std::bitset for the common case
+ * and dynamic_bitset for the (rare) exceptions.
+ */
+struct ClassGraph::SmallBitset {
+  explicit SmallBitset(size_t limit) {
+    assertx(limit <= bits.size());
   }
-}
-
-void ClassGraph::addParent(ClassGraph p) {
-  assertx(!table().locking);
-  assertx(this_);
-  assertx(p.this_);
-  assertx(!isMissing());
-  assertx(!p.isMissing());
-  assertx(!p.this_->isBase());
-  assertx(!is_closure_base(p.name()));
-  this_->parents.emplace(p.this_);
-  p.this_->children.emplace(this_);
-}
-
-void ClassGraph::flattenTraitInto(ClassGraph t) {
-  assertx(!table().locking);
-  assertx(this_);
-  assertx(t.this_);
-  assertx(t.this_->flags() & FlagTrait);
-  assertx(!isMissing());
-  assertx(!t.isMissing());
-
-  // Remove this trait as a parent, and move all of it's parents into
-  // this class.
-  always_assert(this_->parents.erase(t.this_));
-  always_assert(t.this_->children.erase(this_));
-  for (auto const p : t.this_->parents) {
-    this_->parents.emplace(p);
-    p->children.emplace(this_);
+  SmallBitset(size_t limit, size_t idx) {
+    assertx(limit <= bits.size());
+    assertx(idx < limit);
+    bits[idx] = true;
   }
-}
-
-void ClassGraph::reset() {
-  assertx(!table().locking);
-  assertx(this_);
-  assertx(this_->children.empty());
-  assertx(!isMissing());
-  for (auto const parent : this_->parents) {
-    always_assert(parent->children.erase(this_));
+  SmallBitset& operator|=(const SmallBitset& o) {
+    bits |= o.bits;
+    return *this;
   }
-  this_->parents.clear();
-  this_->ci.store(Node::CIAndFlags::Opaque{});
-  this_ = nullptr;
-}
-
-bool ClassGraph::operator<(ClassGraph h) const {
-  return string_data_lti{}(this_->name, h.this_->name);
-}
-
-std::vector<ClassGraph> ClassGraph::bases() const {
-  assertx(!table().locking);
-  assertx(this_);
-  assertx(!isMissing());
-
-  std::vector<ClassGraph> out;
-  auto current = this_;
-  do {
-    out.emplace_back(ClassGraph{ current });
-    auto const& parents = current->parents;
-    current = nullptr;
-    // There should be at most one base on the parent list. Verify
-    // this in debug builds.
-    for (auto const p : parents) {
-      if (p->isBase()) {
-        assertx(!current);
-        current = p;
-        if (!debug) break;
-      }
-    }
-  } while (current);
-
-  std::reverse(begin(out), end(out));
-  return out;
-}
-
-std::vector<ClassGraph> ClassGraph::interfaces() const {
-  assertx(!table().locking);
-  assertx(this_);
-  assertx(!isMissing());
-
-  std::vector<ClassGraph> out;
-  forEachParent(
-    *this_,
-    [&] (Node& p) {
-      if (p.flags() & FlagInterface) out.emplace_back(ClassGraph{ &p });
-      return Action::Continue;
-    }
-  );
-
-  std::sort(begin(out), end(out));
-  return out;
-}
-
-std::vector<ClassGraph> ClassGraph::subRegInterfaces() const {
-  assertx(!table().locking);
-  assertx(this_);
-  assertx(hasCompleteChildren());
-  assertx(!isMissing());
-
-  std::vector<ClassGraph> out;
-  Visited visited;
-  forEachChild(
-    *this_,
-    [&] (Node& c) {
-      if (!(c.flags() & (FlagInterface | FlagTrait | FlagEnum))) {
-        forEachParent(
-          c,
-          [&] (Node& p) {
-            if (p.flags() & FlagInterface) {
-              out.emplace_back(ClassGraph{ &p });
-            }
-            return Action::Continue;
-          },
-          visited
-        );
-      }
-      return Action::Continue;
-    }
-  );
-
-  std::sort(begin(out), end(out));
-  return out;
-}
-
-bool ClassGraph::isMocked() const {
-  assertx(!table().locking);
-  assertx(this_);
-  assertx(hasCompleteChildren());
-  assertx(!isMissing());
-  for (auto const child : this_->children) {
-    if (child->flags() & FlagMockClass) return true;
+  SmallBitset& operator&=(const SmallBitset& o) {
+    bits &= o.bits;
+    return *this;
   }
-  return false;
-}
-
-bool ClassGraph::isSubMocked() const {
-  assertx(!table().locking);
-  assertx(this_);
-  assertx(hasCompleteChildren());
-  assertx(!isMissing());
-  auto const action = forEachChild(
-    *this_,
-    [&] (Node& c) {
-      return ((c.flags() & FlagMockClass) && &c != this_)
-        ? Action::Stop
-        : Action::Continue;
-    }
-  );
-  return action == Action::Stop;
-}
-
-bool ClassGraph::hasRegularSubclass() const {
-  assertx(!table().locking);
-  assertx(this_);
-  assertx(hasCompleteChildren());
-  assertx(!isMissing());
-  auto const action = forEachChild(
-    *this_,
-    [&] (Node& c) {
-      return (c.isRegular() && &c != this_)
-        ? Action::Stop
-        : Action::Continue;
-    }
-  );
-  return action == Action::Stop;
-}
-
-bool ClassGraph::hasNonRegularSubclass() const {
-  assertx(!table().locking);
-  assertx(this_);
-  assertx(hasCompleteChildren());
-  assertx(!isMissing());
-  auto const action = forEachChild(
-    *this_,
-    [&] (Node& c) {
-      return (!c.isRegular() && &c != this_)
-        ? Action::Stop
-        : Action::Continue;
-    }
-  );
-  return action == Action::Stop;
-}
-
-std::vector<ClassGraph> ClassGraph::subclasses() const {
-  assertx(!table().locking);
-  assertx(this_);
-  assertx(hasCompleteChildren());
-  assertx(!isMissing());
-
-  std::vector<ClassGraph> out;
-  forEachChild(
-    *this_,
-    [&] (Node& c) {
-      out.emplace_back(ClassGraph{ &c });
-      // Stop on a trait.
-      return (c.flags() & FlagTrait)
-        ? Action::Skip
-        : Action::Continue;
-    }
-  );
-  std::sort(begin(out), end(out));
-  return out;
-}
-
-std::vector<ClassGraph> ClassGraph::children() const {
-  assertx(!table().locking);
-  assertx(this_);
-  assertx(hasCompleteChildren());
-  assertx(!isMissing());
-
-  std::vector<ClassGraph> out;
-  forEachChild(
-    *this_,
-    [&] (Node& c) {
-      out.emplace_back(ClassGraph{ &c });
-      return Action::Continue;
-    }
-  );
-  std::sort(begin(out), end(out));
-  return out;
-}
-
-std::vector<ClassGraph> ClassGraph::directParents(Flags flags) const {
-  assertx(!table().locking);
-  assertx(this_);
-  assertx(!isMissing());
-
-  std::vector<ClassGraph> out;
-  out.reserve(this_->parents.size());
-  for (auto const p : this_->parents) {
-    if (!(p->flags() & flags)) continue;
-    out.emplace_back(ClassGraph { p });
+  SmallBitset& operator-=(size_t idx) {
+    assertx(idx < bits.size());
+    bits[idx] = false;
+    return *this;
   }
-  std::sort(begin(out), end(out));
-  return out;
-}
-
-template <typename F>
-ClassGraph::Action ClassGraph::forEachParent(Node& n,
-                                             const F& f,
-                                             Visited& v) {
-  if (!v.emplace(&n).second) return Action::Skip;
-  auto const action = f(n);
-  if (action != Action::Continue) return action;
-  for (auto const parent : n.parents) {
-    if (forEachParent(*parent, f, v) == Action::Stop) return Action::Stop;
+  SmallBitset& flip(size_t limit) {
+    assertx(limit <= bits.size());
+    bits.flip();
+    auto const offset = bits.size() - limit;
+    bits <<= offset;
+    bits >>= offset;
+    return *this;
   }
-  return Action::Continue;
-}
-
-template <typename F>
-ClassGraph::Action
-ClassGraph::forEachChild(Node& n, const F& f, Visited& v) {
-  if (!v.emplace(&n).second) return Action::Skip;
-  auto const action = f(n);
-  if (action != Action::Continue) return action;
-  for (auto const child : n.children) {
-    if (forEachChild(*child, f, v) == Action::Stop) return Action::Stop;
+  bool test(size_t idx) const {
+    assertx(idx < bits.size());
+    return bits[idx];
   }
-  return Action::Continue;
-}
+  bool any() const { return bits.any(); }
+  bool none() const { return bits.none(); }
+  bool all(size_t limit) const {
+    auto s = *this;
+    s.flip(limit);
+    return s.none();
+  }
+  size_t first() const { return bitset_find_first(bits); }
+  size_t next(size_t prev) const { return bitset_find_next(bits, prev); }
+  bool operator==(const SmallBitset& o) const { return bits == o.bits; }
 
-ClassGraph ClassGraph::create(const php::Class& cls, ClassInfo2* cinfo) {
-  assertx(!table().locking);
+  static constexpr size_t kMaxSize = 64;
+  using B = std::bitset<kMaxSize>;
+  B bits;
 
-  auto const& [n, emplaced] = table().nodes.try_emplace(cls.name);
-  always_assert_flog(
-    emplaced,
-    "Attempting to create already existing ClassGraph node '{}'",
-    cls.name
-  );
-  assertx(!n->second.name);
-  assertx(n->second.flags() == FlagNone);
-  assertx(!n->second.cinfo());
-  n->second.name = cls.name;
-  if (cinfo) n->second.setCInfo(*cinfo);
+  struct Hasher {
+    size_t operator()(const SmallBitset& b) const {
+      return std::hash<B>{}(b.bits);
+    }
+  };
+};
 
-  auto f = FlagNone;
-  if (cls.attrs & AttrInterface)              f = Flags(f | FlagInterface);
-  if (cls.attrs & AttrTrait)                  f = Flags(f | FlagTrait);
-  if (cls.attrs & AttrAbstract)               f = Flags(f | FlagAbstract);
-  if (cls.attrs & (AttrEnum | AttrEnumClass)) f = Flags(f | FlagEnum);
-  n->second.setFlags(f);
+struct ClassGraph::LargeBitset {
+  explicit LargeBitset(size_t limit): bits{limit} {}
+  LargeBitset(size_t limit, size_t idx): bits{limit} {
+    assertx(idx < limit);
+    bits[idx] = true;
+  }
+  LargeBitset& operator|=(const LargeBitset& o) {
+    bits |= o.bits;
+    return *this;
+  }
+  LargeBitset& operator&=(const LargeBitset& o) {
+    bits &= o.bits;
+    return *this;
+  }
+  LargeBitset& operator-=(size_t idx) {
+    assertx(idx < bits.size());
+    bits[idx] = false;
+    return *this;
+  }
+  LargeBitset& flip(size_t limit) {
+    assertx(limit == bits.size());
+    bits.flip();
+    return *this;
+  }
+  bool test(size_t idx) const {
+    assertx(idx < bits.size());
+    return bits[idx];
+  }
+  bool any() const { return bits.any(); }
+  bool none() const { return bits.none(); }
+  bool all(size_t) const { return bits.all(); }
+  size_t first() const { return bits.find_first(); }
+  size_t next(size_t prev) const { return bits.find_next(prev); }
+  bool operator==(const LargeBitset& o) const { return bits == o.bits; }
 
-  return ClassGraph{ &n->second };
-}
+  boost::dynamic_bitset<> bits;
 
-ClassGraph ClassGraph::get(SString name) {
-  assertx(!table().locking);
-  auto n = folly::get_ptr(table().nodes, name);
-  always_assert_flog(
-    n,
-    "Attempting to retrieve missing ClassGraph node '{}'",
-    name
-  );
-  assertx(n->name->isame(name));
-  return ClassGraph{ n };
-}
+  struct Hasher {
+    size_t operator()(const LargeBitset& b) const {
+      return std::hash<boost::dynamic_bitset<>>{}(b.bits);
+    }
+  };
+};
 
-void ClassGraph::init(bool setChildrenComplete) {
-  always_assert(!g_table);
-  g_table = std::make_unique<Table>();
-  g_table->deserChildrenComplete = setChildrenComplete;
-}
+// Helper class (parameterized over bitset type) to track Nodes and
+// their parents.
+template <typename Set>
+struct ClassGraph::ParentTracker {
+  // Heads is the universe of nodes which are tracked.
+  template <typename T>
+  explicit ParentTracker(const T& heads, const NodeSet* ignore = nullptr)
+    : count{heads.size()}
+    , valid{count}
+    , ignore{ignore}
+  {
+    toNode.insert(heads.begin(), heads.end());
+    indices.reserve(count);
+    for (size_t i = 0; i < count; ++i) indices[toNode[i]] = i;
+    valid.flip(count);
+  }
 
-void ClassGraph::initConcurrent() {
-  always_assert(!g_table);
-  g_table = std::make_unique<Table>();
-  g_table->locking.emplace();
-}
+  // Intersect this node and it's parents with the current valid ones
+  // and return true if any remain.
+  bool operator()(Node& n) {
+    valid &= set(n);
+    return valid.any();
+  }
+  // Return true if this node and it's parents contain all nodes being
+  // tracked.
+  bool all(Node& n) { return set(n).all(count); }
 
-void ClassGraph::stopConcurrent() {
-  always_assert(g_table);
-  g_table->locking.reset();
-}
+  // Return all nodes left in the valid set.
+  NodeSet nodes() const {
+    NodeSet s;
+    for (auto i = valid.first(); i < count; i = valid.next(i)) {
+      s.emplace(toNode[i]);
+    }
+    return s;
+  }
 
-void ClassGraph::destroy() {
-  g_table.reset();
-}
+private:
+  struct Wrapper {
+    explicit Wrapper(size_t limit): s{limit} {}
+    Wrapper(size_t limit, size_t b): s{limit, b} {}
+    explicit operator bool() const { return stop; }
+    Wrapper& operator|=(const Wrapper& o) {
+      s |= o.s;
+      stop &= o.stop;
+      return *this;
+    }
+    Set s;
+    bool stop{false};
+  };
 
-ClassGraph::Table& ClassGraph::table() {
-  always_assert_flog(
-    g_table,
-    "Attempting to access ClassGraph node table when one isn't active!"
-  );
-  return *g_table;
-}
+  Set set(Node& n) {
+    if (n.isMissing()) {
+      auto const idx = folly::get_ptr(indices, &n);
+      if (!idx) return Set{count};
+      assertx(*idx < count);
+      return Set{count, *idx};
+    }
+
+    auto wrapper = foldParents(
+      n,
+      [&] (Node& p) {
+        if (ignore && ignore->count(&p)) {
+          Wrapper w{count};
+          w.stop = true;
+          return w;
+        }
+        auto const idx = folly::get_ptr(indices, &p);
+        if (!idx) return Wrapper{count};
+        assertx(*idx < count);
+        return Wrapper{count, *idx};
+      },
+      [&] { return Wrapper{count}; },
+      nodeToParents
+    );
+    return wrapper.s;
+  }
+
+  size_t count;
+  Set valid;
+  NodeMap<size_t> indices;
+  NodeMap<Wrapper> nodeToParents;
+  NodeVec toNode;
+  const NodeSet* ignore;
+};
 
 // Abstractions for whether we're deserializing concurrently or
 // not. This separates out the locking logic and let's us avoid any
@@ -1817,22 +1759,24 @@ struct ClassGraph::UnlockedSerdeImpl {
     assertx(n->name->isame(name));
     return *n;
   }
+  void setEquiv(Node& n, Node& e) const {
+    auto const [it, s] = table().regOnlyEquivs.emplace(&n, &e);
+    always_assert(s || it->second == &e);
+  }
   template <typename F> void lock(Node&, const F& f) const { f(); }
   void signal(Node& n, Flags f) const {
     assertx(n.flags() == FlagNone);
     assertx(!(f & FlagWait));
     n.setFlags(f);
   }
+  void setCInfo(Node& n, ClassInfo& cinfo) const { n.setCInfo(cinfo); }
   void setCInfo(Node& n, ClassInfo2& cinfo) const { n.setCInfo(cinfo); }
-  bool setFlagChildren(Node& n) const {
-    if (n.flags() & FlagChildren) return false;
-    n.setFlags(FlagChildren);
-    return true;
-  }
-  void setNotMissing(Node& n, Flags flags) const {
-    assertx(!(flags & (FlagMissing | FlagWait | FlagChildren)));
-    assertx(n.flags() == FlagMissing);
-    n.ci.store(Node::CIAndFlags{flags, n.cinfo()}.getOpaque());
+  void updateFlags(Node& n, Flags add, Flags remove = FlagNone) const {
+    if (add == FlagNone && remove == FlagNone) return;
+    auto const oldFlags = n.flags();
+    auto const newFlags = (Flags)((oldFlags | add) & ~remove);
+    if (newFlags == oldFlags) return;
+    n.ci.store(Node::CIAndFlags{newFlags, n.rawPtr()}.getOpaque());
   }
 };
 
@@ -1907,6 +1851,19 @@ struct ClassGraph::LockedSerdeImpl {
     assertx(!(n->flags() & FlagWait));
     return *n;
   }
+  void setEquiv(Node& n, Node& e) const {
+    auto& t = table();
+    {
+      folly::SharedMutex::ReadHolder _{t.locking->equivs};
+      if (auto const old = folly::get_default(t.regOnlyEquivs, &n)) {
+        assertx(old == &e);
+        return;
+      }
+    }
+    folly::SharedMutex::WriteHolder _{t.locking->equivs};
+    auto const [it, s] = t.regOnlyEquivs.emplace(&n, &e);
+    always_assert(s || it->second == &e);
+  }
   // Lock a node by using the lock it hashes to and execute f() while
   // holding the lock.
   template <typename F> void lock(Node& n, const F& f) const {
@@ -1937,53 +1894,1436 @@ struct ClassGraph::LockedSerdeImpl {
   }
   // Set a ClassInfo2 on this node, using CAS to detect concurrent
   // modifications.
+  void setCInfo(Node& n, ClassInfo& c) const {
+    while (true) {
+      auto old = n.ci.load();
+      Node::CIAndFlags f{old};
+      f.set((Flags)(f.tag() & ~FlagCInfo2), &c);
+      if (n.ci.compare_exchange_strong(old, f.getOpaque())) break;
+    }
+  }
   void setCInfo(Node& n, ClassInfo2& c) const {
     while (true) {
       auto old = n.ci.load();
       Node::CIAndFlags f{old};
-      assertx(!f.ptr() || f.ptr() == &c);
-      f.set(f.tag(), &c);
+      f.set((Flags)(f.tag() | FlagCInfo2), &c);
       if (n.ci.compare_exchange_strong(old, f.getOpaque())) break;
     }
   }
-  // Set FlagChildren on this node, using CAS to detect concurrent
-  // modifications.
-  bool setFlagChildren(Node& n) const {
+  void updateFlags(Node& n, Flags add, Flags remove = FlagNone) const {
+    if (add == FlagNone && remove == FlagNone) return;
     while (true) {
       auto old = n.ci.load();
       Node::CIAndFlags f{old};
-      if (f.tag() & FlagChildren) return false;
-      f.set((Flags)(f.tag() | FlagChildren), f.ptr());
-      if (n.ci.compare_exchange_strong(old, f.getOpaque())) return true;
-    }
-  }
-  // Clear FlagMissing on this node, using CAS to detect concurrent
-  // modifications. This is used when we've previously deserialized
-  // this node as "missing" but now we've deserialized a non-missing
-  // version of the same node. We want to turn this node into a
-  // non-missing one.
-  void setNotMissing(Node& n, Flags flags) const {
-    assertx(!(flags & (FlagMissing | FlagWait | FlagChildren)));
-    while (true) {
-      auto old = n.ci.load();
-      Node::CIAndFlags f{old};
-      assertx(!(f.tag() & FlagWait));
-      if (!(f.tag() & FlagMissing)) {
-        // If FlagMissing is gone, another thread got to it before we
-        // did.
-        assertx(f.tag() == flags);
-        break;
-      }
-      // In a missing class, FlagMissing is the only valid flag.
-      assertx(f.tag() == FlagMissing);
-      f.set(flags, f.ptr());
+      auto const oldFlags = (Flags)f.tag();
+      auto const newFlags = (Flags)((oldFlags | add) & ~remove);
+      if (newFlags == oldFlags) break;
+      f.set(newFlags, f.ptr());
       if (n.ci.compare_exchange_strong(old, f.getOpaque())) break;
     }
   }
 };
 
-template <typename SerDe> void ClassGraph::serde(SerDe& sd,
-                                                 ClassInfo2* cinfo) {
+SString ClassGraph::name() const {
+  assertx(this_);
+  return this_->name;
+}
+
+ClassInfo* ClassGraph::cinfo() const {
+  assertx(this_);
+  return this_->cinfo();
+}
+
+ClassInfo2* ClassGraph::cinfo2() const {
+  assertx(this_);
+  return this_->cinfo2();
+}
+
+bool ClassGraph::mightBeRegular() const {
+  assertx(this_);
+  return this_->isMissing() || this_->isRegular();
+}
+
+bool ClassGraph::mightBeNonRegular() const {
+  assertx(this_);
+  return this_->isMissing() || !this_->isRegular();
+}
+
+bool ClassGraph::mightHaveRegularSubclass() const {
+  assertx(this_);
+  if (this_->hasCompleteChildren() || this_->isConservative()) {
+    return this_->hasRegularSubclass();
+  }
+  return true;
+}
+
+bool ClassGraph::mightHaveNonRegularSubclass() const {
+  assertx(this_);
+  if (this_->hasCompleteChildren() || this_->isConservative()) {
+    return this_->hasNonRegularSubclass();
+  }
+  return true;
+}
+
+bool ClassGraph::isMissing() const {
+  assertx(this_);
+  return this_->isMissing();
+}
+
+bool ClassGraph::hasCompleteChildren() const {
+  assertx(this_);
+  return !this_->isMissing() && this_->hasCompleteChildren();
+}
+
+bool ClassGraph::isConservative() const {
+  assertx(this_);
+  return !this_->isMissing() && this_->isConservative();
+}
+
+bool ClassGraph::isInterface() const {
+  assertx(this_);
+  assertx(!isMissing());
+  return this_->isInterface();
+}
+
+bool ClassGraph::isTrait() const {
+  assertx(this_);
+  assertx(!isMissing());
+  return this_->isTrait();
+}
+
+bool ClassGraph::isEnum() const {
+  assertx(this_);
+  assertx(!isMissing());
+  return this_->isEnum();
+}
+
+bool ClassGraph::isAbstract() const {
+  assertx(this_);
+  assertx(!isMissing());
+  return this_->isAbstract();
+}
+
+void ClassGraph::setComplete() {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(!this_->isMissing());
+  assertx(!this_->hasCompleteChildren());
+  assertx(!this_->isConservative());
+  setCompleteImpl(UnlockedSerdeImpl{}, *this_);
+}
+
+void ClassGraph::setClosureBase() {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(!this_->isMissing());
+  assertx(!this_->hasCompleteChildren());
+  assertx(!this_->isConservative());
+  assertx(is_closure_base(this_->name));
+  this_->children.clear();
+  this_->setFlags((Flags)(FlagConservative | FlagRegSub));
+}
+
+void ClassGraph::setBase(ClassGraph b) {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(b.this_);
+  assertx(!isMissing());
+  assertx(!b.isMissing());
+  assertx(b.this_->isBase());
+  this_->parents.emplace(b.this_);
+  if (!b.this_->isConservative()) b.this_->children.emplace(this_);
+}
+
+void ClassGraph::addParent(ClassGraph p) {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(p.this_);
+  assertx(!isMissing());
+  assertx(!p.isMissing());
+  assertx(!p.this_->isBase());
+  this_->parents.emplace(p.this_);
+  if (!p.this_->isConservative()) p.this_->children.emplace(this_);
+}
+
+void ClassGraph::flattenTraitInto(ClassGraph t) {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(t.this_);
+  assertx(t.this_->isTrait());
+  assertx(!isMissing());
+  assertx(!t.isMissing());
+  assertx(!t.isConservative());
+  assertx(!t.hasCompleteChildren());
+
+  // Remove this trait as a parent, and move all of it's parents into
+  // this class.
+  always_assert(this_->parents.erase(t.this_));
+  always_assert(t.this_->children.erase(this_));
+  for (auto const p : t.this_->parents) {
+    this_->parents.emplace(p);
+    p->children.emplace(this_);
+  }
+}
+
+void ClassGraph::reset() {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(this_->children.empty());
+  assertx(!this_->isMissing());
+  assertx(!this_->isConservative());
+  assertx(!this_->hasCompleteChildren());
+  for (auto const parent : this_->parents) {
+    if (parent->isConservative()) continue;
+    always_assert(parent->children.erase(this_));
+  }
+  this_->parents.clear();
+  this_->ci.store(Node::CIAndFlags::Opaque{});
+  this_ = nullptr;
+}
+
+void ClassGraph::setCInfo(ClassInfo& ci) {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(!this_->isMissing());
+  assertx(this_->hasCompleteChildren() || this_->isConservative());
+  this_->setCInfo(ci);
+}
+
+bool ClassGraph::operator<(ClassGraph h) const {
+  return string_data_lti{}(this_->name, h.this_->name);
+}
+
+ClassGraph ClassGraph::withoutNonRegular() const {
+  assertx(!table().locking);
+  assertx(this_);
+  if (this_->isMissing() || this_->isRegular()) return *this;
+  return ClassGraph { this_->nonRegularInfo().regOnlyEquiv };
+}
+
+ClassGraph ClassGraph::base() const {
+  assertx(!table().locking);
+  assertx(this_);
+  if (this_->isMissing()) return ClassGraph { nullptr };
+  for (auto const p : this_->parents) {
+    if (p->isBase()) return ClassGraph { p };
+  }
+  return ClassGraph { nullptr };
+}
+
+ClassGraph ClassGraph::topBase() const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(!isMissing());
+
+  auto current = this_;
+  auto last = this_;
+  do {
+    last = this_;
+    auto const& parents = current->parents;
+    current = nullptr;
+    // There should be at most one base on the parent list. Verify
+    // this in debug builds.
+    for (auto const p : parents) {
+      if (p->isBase()) {
+        assertx(!current);
+        current = p;
+        if (!debug) break;
+      }
+    }
+  } while (current);
+
+  return ClassGraph { last };
+}
+
+std::vector<ClassGraph> ClassGraph::bases() const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(!isMissing());
+
+  std::vector<ClassGraph> out;
+  auto current = this_;
+  do {
+    out.emplace_back(ClassGraph{ current });
+    auto const& parents = current->parents;
+    current = nullptr;
+    // There should be at most one base on the parent list. Verify
+    // this in debug builds.
+    for (auto const p : parents) {
+      if (p->isBase()) {
+        assertx(!current);
+        current = p;
+        if (!debug) break;
+      }
+    }
+  } while (current);
+
+  std::reverse(begin(out), end(out));
+  return out;
+}
+
+std::vector<ClassGraph> ClassGraph::interfaces() const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(!isMissing());
+
+  std::vector<ClassGraph> out;
+  forEachParent(
+    *this_,
+    [&] (Node& p) {
+      if (p.isInterface()) out.emplace_back(ClassGraph{ &p });
+      return Action::Continue;
+    }
+  );
+  std::sort(begin(out), end(out));
+  return out;
+}
+
+std::pair<ISStringSet, size_t> ClassGraph::interfaceConflicts() const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(!this_->isMissing());
+  assertx(isInterface());
+
+  ISStringSet out;
+  size_t count = 0;
+  NodeSet visited;
+  forEachChild(
+    *this_,
+    [&] (Node& c) {
+      ++count;
+      if (!(c.flags() & (FlagInterface | FlagTrait | FlagEnum))) {
+        forEachParent(
+          c,
+          [&] (Node& p) {
+            if (p.isInterface()) out.emplace(p.name);
+            return Action::Continue;
+          },
+          visited
+        );
+      }
+      return Action::Continue;
+    }
+  );
+  return std::make_pair(std::move(out), count);
+}
+
+std::vector<ClassGraph> ClassGraph::children() const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(!isMissing());
+  assertx(hasCompleteChildren());
+
+  std::vector<ClassGraph> out;
+  // If this_ is a trait, then forEachChild won't walk the list. Use
+  // forEachChildImpl with the right params to prevent this.
+  NodeSet visited;
+  forEachChildImpl(
+    *this_,
+    [&] (Node& c) {
+      out.emplace_back(ClassGraph{ &c });
+      return Action::Continue;
+    },
+    visited,
+    false
+  );
+  std::sort(begin(out), end(out));
+  return out;
+}
+
+std::vector<ClassGraph> ClassGraph::directParents(Flags flags) const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(!isMissing());
+
+  std::vector<ClassGraph> out;
+  out.reserve(this_->parents.size());
+  for (auto const p : this_->parents) {
+    if (!(p->flags() & flags)) continue;
+    out.emplace_back(ClassGraph { p });
+  }
+  std::sort(begin(out), end(out));
+  return out;
+}
+
+std::vector<ClassGraph> ClassGraph::directParents() const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(!isMissing());
+
+  std::vector<ClassGraph> out;
+  out.reserve(this_->parents.size());
+  for (auto const p : this_->parents) out.emplace_back(ClassGraph { p });
+  std::sort(begin(out), end(out));
+  return out;
+}
+
+std::vector<ClassGraph> ClassGraph::candidateRegOnlyEquivs() const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(!this_->isMissing());
+
+  if (this_->isRegular() || this_->isConservative()) return {};
+  assertx(this_->hasCompleteChildren());
+  auto const nonParents = calcSubclassOfSplit(*this_).first;
+  if (nonParents.empty()) return {};
+  if (nonParents.size() == 1) return { ClassGraph { *nonParents.begin() } };
+
+  auto heads = nonParents;
+
+  // Remove any nodes which are reachable from another node. Such
+  // nodes are redundant.
+  NodeSet visited;
+  for (auto const n : nonParents) {
+    if (!heads.count(n)) continue;
+    forEachParent(
+      *n,
+      [&] (Node& p) {
+        if (&p == n) return Action::Continue;
+        if (!nonParents.count(&p)) return Action::Continue;
+        if (!heads.count(&p)) return Action::Skip;
+        heads.erase(&p);
+        return Action::Continue;
+      },
+      visited
+    );
+    visited.erase(n);
+  }
+
+  // Remove any nodes which have a (regular) child which does not have
+  // this_ a parent. Such a node can't be an equivalent because it
+  // contains more regular nodes than this_. Note that we might not
+  // have complete children information for all nodes, so this check
+  // is conservative. We only remove nodes which are definitely not
+  // candidates.
+  folly::erase_if(
+    heads,
+    [&] (Node* n) {
+      auto const action = forEachChild(
+        *n,
+        [&] (Node& c) {
+          if (!c.isRegular()) return Action::Continue;
+          if (!findParent(c, *this_)) return Action::Stop;
+          return Action::Skip;
+        }
+      );
+      return action == Action::Stop;
+    }
+  );
+
+  std::vector<ClassGraph> out;
+  out.reserve(heads.size());
+  for (auto const n : heads) out.emplace_back(ClassGraph { n });
+  std::sort(begin(out), end(out));
+  return out;
+}
+
+void ClassGraph::setRegOnlyEquivs() const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(!this_->isMissing());
+  if (this_->isRegular() || this_->isConservative()) return;
+  assertx(this_->hasCompleteChildren());
+  auto const equiv = calcRegOnlyEquiv(*this_, calcSubclassOf(*this_));
+  if (!equiv || equiv == this_ || findParent(*equiv, *this_)) return;
+  auto const [it, s] = table().regOnlyEquivs.emplace(this_, equiv);
+  always_assert(s || it->second == equiv);
+}
+
+const ClassGraph::Node::NonRegularInfo&
+ClassGraph::Node::nonRegularInfo() {
+  assertx(!table().locking);
+  assertx(!isMissing());
+  assertx(!isRegular());
+  return nonRegInfo.get(
+    [this] {
+      auto info = std::make_unique<NonRegularInfo>();
+      info->subclassOf = calcSubclassOf(*this);
+      info->regOnlyEquiv = calcRegOnlyEquiv(*this, info->subclassOf);
+      return info.release();
+    }
+  );
+}
+
+bool ClassGraph::exactSubtypeOfExact(ClassGraph o,
+                                     bool nonRegL,
+                                     bool nonRegR) const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(o.this_);
+  // Two exact classes are only subtypes of another if they're the
+  // same. One additional complication is if the class isn't regular
+  // and we're not considering non-regular classes. In that case, the
+  // class is actually Bottom, and we need to apply the rules of
+  // subtyping to Bottom (Bottom is a subtype of everything, but
+  // nothing is a subtype of it).
+  if (this_->isMissing()) {
+    // Missing classes are only definitely a subtype if it's the same
+    // node and the lhs can become bottom or the rhs cannot.
+    return (this_ == o.this_) && (!nonRegL || nonRegR);
+  } else if (!nonRegL && !this_->isRegular()) {
+    // Lhs is a bottom, so a subtype of everything.
+    return true;
+  } else if (o.this_->isMissing() || (!nonRegR && !o.this_->isRegular())) {
+    // Lhs is not a bottom, check if the rhs is.
+    return false;
+  } else {
+    // Neither is bottom, check for equality.
+    return this_ == o.this_;
+  }
+}
+
+bool ClassGraph::exactSubtypeOf(ClassGraph o,
+                                bool nonRegL,
+                                bool nonRegR) const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(o.this_);
+  // If we want to exclude non-regular classes on either side, and the
+  // lhs is not regular, there's no subtype relation. If nonRegL is
+  // false, then lhs is just a bottom (and bottom is a subtype of
+  // everything), and if nonRegularR is false, then the rhs does not
+  // contain any non-regular classes, so lhs is guaranteed to not be
+  // part of it.
+  if (this_->isMissing()) {
+    // If the lhs side is missing, it's identical to
+    // exactSubtypeOfExact.
+    return (this_ == o.this_) && (!nonRegL || nonRegR);
+  } else if ((!nonRegL || !nonRegR) && !this_->isRegular()) {
+    return !nonRegL;
+  } else if (this_ == o.this_) {
+    return true;
+  } else if (o.this_->isMissing() || o.this_->isTrait()) {
+    // The lhs is not missing, so cannot be a subtype of a missing
+    // class. Nothing is a subtype of a trait.
+    return false;
+  } else {
+    // Otherwise try to find the rhs node among the parents of the lhs
+    // side.
+    return findParent(*this_, *o.this_);
+  }
+}
+
+bool ClassGraph::subSubtypeOf(ClassGraph o, bool nonRegL, bool nonRegR) const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(o.this_);
+
+  if (nonRegL && !nonRegR) {
+    if (this_->isMissing() || !this_->isRegular()) return false;
+    auto const action = forEachChild(
+      *this_,
+      [&] (Node& c) {
+        return c.isRegular() ? Action::Continue : Action::Stop;
+      }
+    );
+    if (action == Action::Stop) return false;
+  }
+
+  // If this_ must be part of the lhs, it's equivalent to
+  // exactSubtypeOf. Otherwise if exactSubtypeOf returns true for the
+  // conservative case, then it must always be true, so we don't need
+  // to look at children.
+  if (nonRegL || this_->isMissing() || this_->isRegular()) {
+    return exactSubtypeOf(o, nonRegL, nonRegR);
+  }
+  if (exactSubtypeOf(o, true, true)) return true;
+
+  // this_ is not regular and will not be part of the lhs. We need to
+  // look at the regular children of this_ and check whether they're
+  // all subtypes of the rhs.
+
+  // Traits have no children for the purposes of this test.
+  if (this_->isTrait() || o.this_->isMissing() || o.this_->isTrait()) {
+    return false;
+  }
+  return this_->nonRegularInfo().subclassOf.count(o.this_);
+}
+
+bool ClassGraph::exactCouldBeExact(ClassGraph o,
+                                   bool nonRegL,
+                                   bool nonRegR) const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(o.this_);
+  // Two exact classes can only be each other if they're the same
+  // class. The only complication is if the class isn't regular and
+  // we're not considering non-regular classes. In that case, the
+  // class is actually Bottom, a Bottom can never could-be anything
+  // (not even itself).
+  if (this_ != o.this_) return false;
+  if (this_->isMissing() || this_->isRegular()) return true;
+  return nonRegL && nonRegR;
+}
+
+bool ClassGraph::exactCouldBe(ClassGraph o, bool nonRegL, bool nonRegR) const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(o.this_);
+  // exactCouldBe is almost identical to exactSubtypeOf, except the
+  // case of the lhs being bottom is treated differently (bottom in
+  // exactSubtypeOf implies true, but here it implies false).
+  if (this_->isMissing()) {
+    if (o.this_->isMissing()) return true;
+    if ((!nonRegL || !nonRegR) &&
+        !o.this_->isRegular() &&
+        !o.this_->hasRegularSubclass()) {
+      return false;
+    }
+    return !o.this_->hasCompleteChildren();
+  } else if ((!nonRegL || !nonRegR) && !this_->isRegular()) {
+    return false;
+  } else if (this_ == o.this_) {
+    return true;
+  } else if (o.this_->isMissing() || o.this_->isTrait()) {
+    return false;
+  } else {
+    return findParent(*this_, *o.this_);
+  }
+}
+
+bool ClassGraph::subCouldBe(ClassGraph o, bool nonRegL, bool nonRegR) const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(o.this_);
+
+  auto const regOnly = !nonRegL || !nonRegR;
+
+  if (exactCouldBe(o, nonRegL, nonRegR) ||
+      o.exactCouldBe(*this, nonRegR, nonRegL)) {
+    return true;
+  } else if (this_->isMissing() || o.this_->isMissing() ||
+             this_->isTrait() || o.this_->isTrait()) {
+    return false;
+  } else if (regOnly &&
+             ((!this_->isRegular() && !this_->hasRegularSubclass()) ||
+              (!o.this_->isRegular() && !o.this_->hasRegularSubclass()))) {
+    return false;
+  }
+
+  auto left = this_;
+  auto right = o.this_;
+  if (betterNode(right, left)) std::swap(left, right);
+
+  if (!left->hasCompleteChildren()) return true;
+
+  NodeSet visited;
+  auto const action = forEachChild(
+    *left,
+    [&] (Node& c) {
+      if (regOnly && !c.isRegular()) return Action::Continue;
+      return findParent(c, *right, visited)
+        ? Action::Stop : Action::Continue;
+    }
+  );
+  return action == Action::Stop;
+}
+
+// Calculate all the classes which this class could be a subclass
+// of. This is only necessary if the class is non-regular (for regular
+// classes the subtype check is trivial). This not only speeds up
+// subtypeOf checks, but it is used when calculating reg-only
+// equivalent classes. The results are split into the nodes which
+// aren't parents of this class, and the ones which are not.
+std::pair<ClassGraph::NodeSet, ClassGraph::NodeSet>
+ClassGraph::calcSubclassOfSplit(Node& n) {
+  assertx(!table().locking);
+  assertx(!n.isMissing());
+  assertx(!n.isRegular());
+
+  // Traits cannot be a subclass of anything but itself, and if we
+  // don't know all of the children, we have to be pessimistic and
+  // report only the parents.
+  if (n.isTrait()) return std::make_pair(NodeSet{}, NodeSet{});
+  if (!n.hasCompleteChildren()) {
+    return std::make_pair(NodeSet{}, allParents(n));
+  }
+
+  // Find the first regular child of this non-regular class.
+  Node* first = nullptr;
+  forEachChild(
+    n,
+    [&] (Node& c) {
+      if (!c.isRegular()) return Action::Continue;
+      assertx(&c != &n);
+      // n has complete children, so all children must as well.
+      assertx(c.hasCompleteChildren());
+      first = &c;
+      return Action::Stop;
+    }
+  );
+  // No regular child
+  if (!first) return std::make_pair(NodeSet{}, NodeSet{});
+
+  auto parents = allParents(n);
+
+  // Given the regular class we found, gather all of it's
+  // children. This is the initial set of candidates.
+  NodeVec candidates;
+  forEachParent(
+    *first,
+    [&] (Node& p) {
+      // Ignore parents since we already know about this.
+      if (parents.count(&p)) return Action::Skip;
+      candidates.emplace_back(&p);
+      return Action::Continue;
+    }
+  );
+  if (candidates.empty()) return std::make_pair(NodeSet{}, std::move(parents));
+
+  // Then use ParentTracker to remove any nodes which are not parents
+  // of the other children.
+  auto const run = [&] (auto tracker) {
+    forEachChild(
+      n,
+      [&] (Node& c) {
+        if (!c.isRegular()) return Action::Continue;
+        return tracker(c) ? Action::Skip : Action::Stop;
+      }
+    );
+    auto nodes = tracker.nodes();
+    return std::make_pair(std::move(nodes), std::move(parents));
+  };
+
+  if (candidates.size() <= SmallBitset::kMaxSize) {
+    return run(ParentTracker<SmallBitset>{candidates, &parents});
+  } else {
+    return run(ParentTracker<LargeBitset>{candidates, &parents});
+  }
+}
+
+ClassGraph::NodeSet ClassGraph::calcSubclassOf(Node& n) {
+  assertx(!table().locking);
+  assertx(!n.isMissing());
+  assertx(!n.isRegular());
+  auto [nonParents, parents] = calcSubclassOfSplit(n);
+  nonParents.insert(begin(parents), end(parents));
+  return nonParents;
+}
+
+// Calculate the "best" Node which is equivalent to this Node when
+// considering only regular children. We canonicalize this Node to the
+// equivalent Node where appropriate. Nullptr is returned if the
+// "equivalent" Node is actually Bottom (because there are no regular
+// children). subclassOf gives the set of "candidate" Nodes.
+ClassGraph::Node* ClassGraph::calcRegOnlyEquiv(Node& base,
+                                               const NodeSet& subclassOf) {
+  assertx(!table().locking);
+  assertx(!base.isMissing());
+  assertx(!base.isRegular());
+
+  if (subclassOf.empty()) return nullptr;
+  if (!base.hasRegularSubclass()) return nullptr;
+  if (subclassOf.size() == 1) {
+    assertx(subclassOf.count(&base));
+    return &base;
+  }
+  // Traits should be captured by one of the above checks.
+  assertx(!base.isTrait());
+
+  // If we recorded an equivalent when deserializing, just use that.
+  if (auto const e = folly::get_default(table().regOnlyEquivs, &base)) {
+    assertx(e->hasCompleteChildren());
+    return e;
+  }
+  // Otherwise calculate it.
+
+  auto heads = subclassOf;
+
+  // Remove any nodes which are reachable from another node. Such
+  // nodes are redundant.
+  NodeSet visited;
+  for (auto const n : subclassOf) {
+    if (!heads.count(n)) continue;
+    forEachParent(
+      *n,
+      [&] (Node& p) {
+        if (&p == n) return Action::Continue;
+        if (!subclassOf.count(&p)) return Action::Continue;
+        if (!heads.count(&p)) return Action::Skip;
+        heads.erase(&p);
+        return Action::Continue;
+      },
+      visited
+    );
+    visited.erase(n);
+  }
+  if (heads.size() == 1) return *heads.begin();
+
+  assertx(base.hasCompleteChildren());
+
+  // Find the best node among the remaining candidates.
+  auto const run = [&] (auto tracker) {
+    // A node is only a valid candidate (and thus sufficient) if all
+    // of it's children are subclasses of the "base" Node.
+    auto const isSufficient = [&] (Node* n) {
+      if (n == &base) return true;
+      if (findParent(*n, base)) return true;
+      if (!n->hasCompleteChildren()) return false;
+      auto const action = forEachChild(
+        *n,
+        [&] (Node& c) {
+          if (!c.isRegular()) return Action::Continue;
+          return tracker.all(c) ? Action::Skip : Action::Stop;
+        }
+      );
+      return action != Action::Stop;
+    };
+
+    Node* best = nullptr;
+    for (auto const n : heads) {
+      if (!isSufficient(n)) continue;
+      if (!best || betterNode(n, best)) best = n;
+    }
+    assertx(best);
+    return best;
+  };
+
+  if (heads.size() <= SmallBitset::kMaxSize) {
+    return run(ParentTracker<SmallBitset>{heads});
+  } else {
+    return run(ParentTracker<LargeBitset>{heads});
+  }
+}
+
+// Someone arbitrarily ranks two Nodes in a consistent manner.
+bool ClassGraph::betterNode(const Node* n1, const Node* n2) {
+  if (n1 == n2) return false;
+
+  // Non-missing nodes are always better. Two missing nodes are ranked
+  // according to name.
+  if (n1->isMissing()) {
+    if (!n2->isMissing()) return false;
+    return string_data_lti{}(n1->name, n2->name);
+  } else if (n2->isMissing()) {
+    return true;
+  }
+
+  // Nodes with complete children are better than those that don't.
+  if (!n1->hasCompleteChildren()) {
+    if (n2->hasCompleteChildren()) return false;
+    return string_data_lti{}(n1->name, n2->name);
+  } else if (!n2->hasCompleteChildren()) {
+    return true;
+  }
+
+  // Choose the one with the least (immediate) children. Calculating
+  // the full subclass list would be better, but more
+  // expensive. Traits are always considered to have no children.
+  auto const s1 = n1->isTrait() ? 0 : n1->children.size();
+  auto const s2 = n2->isTrait() ? 0 : n2->children.size();
+  if (s1 != s2) return s1 < s2;
+
+  // Otherwise rank them acccording to what flags they have and then
+  // finally by name.
+  auto const weight = [] (const Node* n) {
+    auto const f = n->flags();
+    if (f & FlagAbstract)  return 1;
+    if (f & FlagInterface) return 2;
+    if (f & FlagTrait)     return 3;
+    if (f & FlagEnum)      return 4;
+    return 0;
+  };
+  auto const w1 = weight(n1);
+  auto const w2 = weight(n2);
+  if (w1 != w2) return w1 < w2;
+  return string_data_lti{}(n1->name, n2->name);
+}
+
+// Union together two sets of intersected classes.
+ClassGraph::NodeVec ClassGraph::combine(const NodeVec& lhs,
+                                        const NodeVec& rhs,
+                                        bool isSubL,
+                                        bool isSubR,
+                                        bool nonRegL,
+                                        bool nonRegR) {
+  assertx(!table().locking);
+  assertx(!lhs.empty());
+  assertx(!rhs.empty());
+  assertx(IMPLIES(!isSubL, lhs.size() == 1));
+  assertx(IMPLIES(!isSubR, rhs.size() == 1));
+
+  // Combine two sets, keeping only the nodes that are in both
+  // sets. An empty set is equivalent to Top (not Bottom), thus
+  // everything in the othe other set goes in.
+  NodeSet combined;
+  auto const combine = [&] (const NodeSet& s1, const NodeSet& s2) {
+    if (s1.empty()) {
+      always_assert(!s2.empty());
+      combined.insert(begin(s2), end(s2));
+    } else if (s2.empty()) {
+      combined.insert(begin(s1), end(s1));
+    } else if (s1.size() < s2.size()) {
+      for (auto const e : s1) {
+        if (s2.count(e)) combined.emplace(e);
+      }
+    } else {
+      for (auto const e : s2) {
+        if (s1.count(e)) combined.emplace(e);
+      }
+    }
+  };
+
+  /*
+   * (A&B) | (C&D) = (A|C) & (A|D) & (B|C) & (B|D)
+   *
+   * (this generalizes to arbitrary size lists). So to union together
+   * two intersection sets, we need to calculate the union of
+   * individual classes pair-wise, then intersect them together.
+   */
+  auto const process = [&] (Node* l, Node* r) {
+    // Order the l and r to cut down on the number of cases to deal
+    // with below.
+    auto const flip = [&] {
+      if (l->isMissing()) return false;
+      if (r->isMissing()) return true;
+      if (nonRegL || l->isRegular()) return false;
+      if (nonRegR || r->isRegular()) return true;
+      if (isSubL) return false;
+      return isSubR;
+    }();
+    if (flip) std::swap(l, r);
+    auto const flipSubL = flip ? isSubR : isSubL;
+    auto const flipSubR = flip ? isSubL : isSubR;
+    auto const flipNonRegL = flip ? nonRegR : nonRegL;
+    auto const flipNonRegR = flip ? nonRegL : nonRegR;
+
+    // This logic handles the unioning of two classes. If two classes
+    // don't have a common parent, their union if Top, which is
+    // dropped from the intersection list. For regular classes, we can
+    // just get the parent list. For non-regular classes, we need to
+    // use subclassOf.
+    if (l->isMissing()) {
+      if (l == r) combined.emplace(l);
+    } else if (flipNonRegL || l->isRegular()) {
+      if (flipNonRegR || r->isRegular()) {
+        combine(allParents(*l), allParents(*r));
+      } else if (flipSubR) {
+        combine(allParents(*l), r->nonRegularInfo().subclassOf);
+      } else {
+        combine(allParents(*l), {});
+      }
+    } else if (flipSubL) {
+      if (flipSubR) {
+        combine(l->nonRegularInfo().subclassOf,
+                r->nonRegularInfo().subclassOf);
+      } else {
+        combine(l->nonRegularInfo().subclassOf, {});
+      }
+    } else {
+      always_assert(false);
+    }
+  };
+
+  for (auto const l : lhs) {
+    for (auto const r : rhs) process(l, r);
+  }
+
+  // The resultant list is not in canonical form, so canonicalize it.
+  return canonicalize(combined, nonRegL || nonRegR);
+}
+
+// Intersect two sets of intersected classes together. This seems like
+// you would just combine the lists, but the intersection of the two
+// might have more specific classes in common.
+ClassGraph::NodeVec ClassGraph::intersect(const NodeVec& lhs,
+                                          const NodeVec& rhs,
+                                          bool nonRegL,
+                                          bool nonRegR,
+                                          bool& nonRegOut) {
+  assertx(!table().locking);
+  assertx(!lhs.empty());
+  assertx(!rhs.empty());
+
+  // Combine the two lists together.
+  NodeVec combined;
+  combined.reserve(lhs.size() + rhs.size());
+  std::set_union(
+    lhs.begin(), lhs.end(),
+    rhs.begin(), rhs.end(),
+    std::back_inserter(combined),
+    betterNode
+  );
+
+  // Build the "heads". These are the nodes which could potentially be
+  // part of the new intersection list, but don't need to be
+  // calculated below. We leave them out to reduce the amount of work.
+  NodeSet heads;
+  for (auto const n : combined) {
+    if (n->isMissing()) {
+      heads.emplace(n);
+    } else if ((nonRegL && nonRegR) || n->isRegular()) {
+      auto const p = allParents(*n);
+      heads.insert(p.begin(), p.end());
+    } else if (!n->hasRegularSubclass()) {
+      nonRegOut = false;
+      return {};
+    } else {
+      auto const& s = n->nonRegularInfo().subclassOf;
+      heads.insert(s.begin(), s.end());
+    }
+  }
+
+  // Then enumerate over all of the classes in the combined set and
+  // track which parents they *all* have in common.
+
+  Optional<ParentTracker<SmallBitset>> small;
+  Optional<ParentTracker<LargeBitset>> large;
+  nonRegOut = false;
+
+  enumerateIsectMembers(
+    combined,
+    nonRegL && nonRegR,
+    [&] (Node& n) {
+      if (n.isMissing() || !n.hasCompleteChildren()) {
+        if (nonRegL && nonRegR) nonRegOut = true;
+      } else if (!n.isRegular()) {
+        nonRegOut = true;
+      } else if (!nonRegOut && nonRegL && nonRegR) {
+        if (n.hasNonRegularSubclass()) nonRegOut = true;
+      }
+
+      // If we already created a tracker, use it.
+      if (small) {
+        return (*small)(n);
+      } else if (large) {
+        return (*large)(n);
+      } else {
+        // Otherwise this is the first time. Find the initial set of
+        // candidates (all of the parents of this node minus the
+        // heads) and set up the tracker.
+        auto common = n.isMissing() ? NodeSet{&n} : allParents(n);
+        folly::erase_if(common, [&] (Node* c) { return heads.count(c); });
+        if (common.size() <= SmallBitset::kMaxSize) {
+          small.emplace(common, &heads);
+        } else {
+          large.emplace(common, &heads);
+        }
+        return !common.empty();
+      }
+    }
+  );
+  assertx(IMPLIES(!nonRegL || !nonRegR, !nonRegOut));
+
+  // At this point the tracker only contains all of the parents which
+  // are in common. These nodes, plus the heads, only need to be
+  // canonicalized.
+  if (small) {
+    auto s = small->nodes();
+    s.insert(heads.begin(), heads.end());
+    return canonicalize(s, nonRegOut);
+  } else if (large) {
+    auto s = large->nodes();
+    s.insert(heads.begin(), heads.end());
+    return canonicalize(s, nonRegOut);
+  } else {
+    return NodeVec{};
+  }
+}
+
+// Given a set of intersected nodes, return an equivalent set with all
+// of the non-regular classes removed.
+ClassGraph::NodeVec ClassGraph::removeNonReg(const NodeVec& v) {
+  assertx(!table().locking);
+  assertx(!v.empty());
+
+  // We can just treat this as an intersection:
+  NodeVec lhs;
+  NodeVec rhs;
+  for (auto const n : v) {
+    if (n->isMissing() || n->isRegular()) {
+      lhs.emplace_back(n);
+    } else if (auto const e = n->nonRegularInfo().regOnlyEquiv) {
+      lhs.emplace_back(e);
+    } else {
+      return NodeVec{};
+    }
+  }
+  if (lhs.size() <= 1) return lhs;
+
+  std::sort(lhs.begin(), lhs.end(), betterNode);
+  rhs.emplace_back(lhs.back());
+  lhs.pop_back();
+
+  auto nonRegOut = false;
+  SCOPE_EXIT { assertx(!nonRegOut); };
+  return intersect(lhs, rhs, false, false, nonRegOut);
+}
+
+// Given two lists of intersected classes, return true if the
+// intersection of the two lists might be non-empty.
+bool ClassGraph::couldBeIsect(const NodeVec& lhs,
+                              const NodeVec& rhs,
+                              bool nonRegL,
+                              bool nonRegR) {
+  assertx(!table().locking);
+  assertx(!lhs.empty());
+  assertx(!rhs.empty());
+
+  NodeVec combined;
+  combined.reserve(lhs.size() + rhs.size());
+  std::set_union(
+    lhs.begin(), lhs.end(),
+    rhs.begin(), rhs.end(),
+    std::back_inserter(combined),
+    betterNode
+  );
+
+  auto couldBe = false;
+  enumerateIsectMembers(
+    combined,
+    nonRegL && nonRegR,
+    [&] (Node&) {
+      couldBe = true;
+      return false;
+    }
+  );
+  return couldBe;
+}
+
+// Call the provided callback for each Node in the given intersection
+// list. If "all" is true, all Nodes are provided. Otherwise, only the
+// "top most" children are provided (the children which meet the
+// criteria and don't have any parents which do).
+template <typename F>
+void ClassGraph::enumerateIsectMembers(const NodeVec& nodes,
+                                       bool nonReg,
+                                       const F& f,
+                                       bool all) {
+  assertx(!table().locking);
+
+  if (nodes.empty()) return;
+
+  // Find the "best" node to start with.
+  auto head = *std::min_element(nodes.begin(), nodes.end(), betterNode);
+  if (head->isMissing() || !head->hasCompleteChildren()) {
+    // If the best node is missing or doesn't have complete children,
+    // they all don't, so just supply the input list.
+    for (auto const n : nodes) {
+      assertx(n->isMissing() || !n->hasCompleteChildren());
+      if (!f(*n)) break;
+    }
+    return;
+  }
+
+  // Otherwise report Nodes which are children of all of the Nodes.
+  auto const run = [&] (auto tracker) {
+    forEachChild(
+      *head,
+      [&] (Node& c) {
+        if (nonReg || c.isRegular()) {
+          if (tracker.all(c)) {
+            if (!f(c)) return Action::Stop;
+            return all ? Action::Continue : Action::Skip;
+          }
+        }
+        return Action::Continue;
+      }
+    );
+  };
+
+  if (nodes.size() <= SmallBitset::kMaxSize) {
+    return run(ParentTracker<SmallBitset>{nodes});
+  } else {
+    return run(ParentTracker<LargeBitset>{nodes});
+  }
+}
+
+// "Canonicalize" a set of intersected classes by removing redundant
+// Nodes and putting them in a deterministic order.
+ClassGraph::NodeVec ClassGraph::canonicalize(const NodeSet& nodes,
+                                             bool nonReg) {
+  NodeVec out;
+  if (nodes.size() <= 1) {
+    // Trivial cases
+    out.insert(begin(nodes), end(nodes));
+    return out;
+  }
+
+  // Remove redundant nodes. A node is redundant if it is reachable
+  // via another node. In that case, this node is implied by the other
+  // and can be removed.
+  auto heads = nodes;
+  NodeSet visited;
+  for (auto const n : nodes) {
+    if (!heads.count(n)) continue;
+    if (n->isMissing()) continue;
+    forEachParent(
+      *n,
+      [&] (Node& p) {
+        if (&p == n) return Action::Continue;
+        if (!nodes.count(&p)) return Action::Continue;
+        if (!heads.count(&p)) return Action::Skip;
+        heads.erase(&p);
+        return Action::Continue;
+      },
+      visited
+    );
+    visited.erase(n);
+  }
+
+  // A node can be redundant with another even they aren't reachable
+  // via each other. This can only happen if we're considering only
+  // regular nodes. If a class is a super type of another, it's
+  // redundant, as the other class implies this class. If they classes
+  // are both super types of each other, they're equivalent, and we
+  // keep the "best" one.
+  if (!nonReg) {
+    for (auto const n1 : heads) {
+      auto const hasSuperType = [&] {
+        for (auto const n2 : heads) {
+          if (n1 == n2) continue;
+          if (!ClassGraph{n2}.subSubtypeOf(ClassGraph{n1}, false, false)) {
+            continue;
+          }
+          if (!ClassGraph{n1}.subSubtypeOf(ClassGraph{n2}, false, false)) {
+            return true;
+          }
+          if (betterNode(n2, n1)) return true;
+        }
+        return false;
+      }();
+      if (!hasSuperType) out.emplace_back(n1);
+    }
+  } else {
+    out.insert(begin(heads), end(heads));
+  }
+
+  // Finally sort them according to how good they are.
+  std::sort(out.begin(), out.end(), betterNode);
+  return out;
+}
+
+template <typename F>
+ClassGraph::Action ClassGraph::forEachParentImpl(Node& n,
+                                                 const F& f,
+                                                 NodeSet& v,
+                                                 bool start) {
+  assertx(!n.isMissing());
+  if (!v.emplace(&n).second) return Action::Skip;
+  if (start || !n.isTrait()) {
+    auto const action = f(n);
+    if (action != Action::Continue) return action;
+  }
+  for (auto const parent : n.parents) {
+    if (forEachParentImpl(*parent, f, v, false) == Action::Stop) {
+      return Action::Stop;
+    }
+  }
+  return Action::Continue;
+}
+
+template <typename F, typename F2, typename T>
+T ClassGraph::foldParentsImpl(Node& n,
+                              const F& f,
+                              const F2& f2,
+                              NodeMap<T>& m,
+                              bool start) {
+  assertx(!n.isMissing());
+  if (auto const t = folly::get_ptr(m, &n)) return *t;
+  T t = (start || !n.isTrait()) ? f(n) : f2();
+  for (auto const parent : n.parents) {
+    if (t) break;
+    t |= foldParentsImpl(*parent, f, f2, m, false);
+  }
+  m.insert_or_assign(&n, t);
+  return t;
+}
+
+bool ClassGraph::findParent(Node& start, Node& target, NodeSet& visited) {
+  assertx(!start.isMissing());
+  auto const action = forEachParent(
+    start,
+    [&] (Node& p) { return (&p == &target) ? Action::Stop : Action::Continue; },
+    visited
+  );
+  return action == Action::Stop;
+}
+
+ClassGraph::NodeSet ClassGraph::allParents(Node& n) {
+  assertx(!n.isMissing());
+  NodeSet s;
+  forEachParent(
+    n,
+    [&] (Node& p) {
+      s.emplace(&p);
+      return Action::Continue;
+    }
+  );
+  return s;
+}
+
+template <typename F>
+ClassGraph::Action
+ClassGraph::forEachChildImpl(Node& n, const F& f, NodeSet& v, bool start) {
+  assertx(!n.isMissing());
+  if (!v.emplace(&n).second) return Action::Skip;
+  auto const action = f(n);
+  if (action != Action::Continue) return action;
+  if (start && n.isTrait()) return action;
+  for (auto const child : n.children) {
+    if (forEachChildImpl(*child, f, v, false) == Action::Stop) {
+      return Action::Stop;
+    }
+  }
+  return Action::Continue;
+}
+
+ClassGraph ClassGraph::create(const php::Class& cls) {
+  assertx(!table().locking);
+
+  auto const& [n, emplaced] = table().nodes.try_emplace(cls.name);
+  always_assert_flog(
+    emplaced,
+    "Attempting to create already existing ClassGraph node '{}'",
+    cls.name
+  );
+  assertx(!n->second.name);
+  assertx(n->second.flags() == FlagNone);
+  assertx(!n->second.cinfo());
+  assertx(!n->second.cinfo2());
+  n->second.name = cls.name;
+
+  auto f = FlagNone;
+  if (cls.attrs & AttrInterface)              f = Flags(f | FlagInterface);
+  if (cls.attrs & AttrTrait)                  f = Flags(f | FlagTrait);
+  if (cls.attrs & AttrAbstract)               f = Flags(f | FlagAbstract);
+  if (cls.attrs & (AttrEnum | AttrEnumClass)) f = Flags(f | FlagEnum);
+  n->second.setFlags(f);
+
+  return ClassGraph{ &n->second };
+}
+
+ClassGraph ClassGraph::get(SString name) {
+  assertx(!table().locking);
+  auto n = folly::get_ptr(table().nodes, name);
+  always_assert_flog(
+    n,
+    "Attempting to retrieve missing ClassGraph node '{}'",
+    name
+  );
+  assertx(n->name->isame(name));
+  assertx(!(n->flags() & FlagMissing));
+  return ClassGraph{ n };
+}
+
+ClassGraph ClassGraph::getMissing(SString name) {
+  assertx(!table().locking);
+
+  auto const& [n, emplaced] = table().nodes.try_emplace(name);
+  if (emplaced) {
+    assertx(!n->second.name);
+    assertx(n->second.flags() == FlagNone);
+    assertx(!n->second.cinfo());
+    assertx(!n->second.cinfo2());
+    n->second.name = name;
+    n->second.setFlags(FlagMissing);
+  } else {
+    assertx(n->second.name->isame(name));
+    assertx(n->second.flags() == FlagMissing);
+  }
+  return ClassGraph{ &n->second };
+}
+
+void ClassGraph::init() {
+  always_assert(!g_table);
+  g_table = std::make_unique<Table>();
+}
+
+void ClassGraph::initConcurrent() {
+  always_assert(!g_table);
+  g_table = std::make_unique<Table>();
+  g_table->locking.emplace();
+}
+
+void ClassGraph::stopConcurrent() {
+  always_assert(g_table);
+  g_table->locking.reset();
+}
+
+void ClassGraph::destroy() {
+  g_table.reset();
+}
+
+ClassGraph::Table& ClassGraph::table() {
+  always_assert_flog(
+    g_table,
+    "Attempting to access ClassGraph node table when one isn't active!"
+  );
+  return *g_table;
+}
+
+// Set the FlagComplete/FlagConservative and FlagRegSub/FlagNonRegSub
+// flags in this class and it's children. Return the
+// FlagRegSub/FlagNonRegSub flags from the children, along with the
+// count of the subclass list from that child. If std::nullopt is
+// given as the count, we've exceeded the limit we want to track.
+template <typename Impl>
+std::pair<ClassGraph::Flags, Optional<size_t>>
+ClassGraph::setCompleteImpl(const Impl& impl, Node& n) {
+  assertx(!n.isMissing());
+
+  // Conservative nodes don't have children. However, they're
+  // guaranteed to have their FlagRegSub and FlagNonRegSub flags set
+  // properly, so we don't need to.
+  if (n.isConservative()) {
+    assertx(n.children.empty());
+    auto f = FlagNone;
+    if (n.isRegular() || n.hasRegularSubclass()) {
+      f = (Flags)(f | FlagRegSub);
+    }
+    if (!n.isRegular() || n.hasNonRegularSubclass()) {
+      f = (Flags)(f | FlagNonRegSub);
+    }
+    return std::make_pair(f, std::nullopt);
+  }
+
+  // Otherwise aggregate the flags and counts from the children.
+  auto flags = FlagNone;
+  Optional<size_t> count;
+  count.emplace(1);
+
+  // Copy the children list for concurrency safety.
+  NodeSet children;
+  impl.lock(n, [&] { children = n.children; });
+  for (auto const child : children) {
+    auto const [f, c] = setCompleteImpl(impl, *child);
+    flags = (Flags)(flags | f);
+    if (count) {
+      if (c) {
+        *count += *c;
+      } else {
+        count.reset();
+      }
+    }
+  }
+
+  // Implemented in next diff
+  if (!count || false/**count > options.preciseSubclassLimit*/) {
+    // The child is conservative, or we've exceeded the subclass list
+    // limit. Mark this node as being conservative.
+    assertx(!n.hasCompleteChildren());
+    impl.updateFlags(n, (Flags)(flags | FlagConservative));
+    impl.lock(n, [&] { n.children.clear(); });
+    count.reset();
+  } else if (n.hasCompleteChildren()) {
+    // Otherwise if this node is already marked as having complete
+    // children, verify we inferred the same thing already stored
+    // here.
+    assertx(n.hasRegularSubclass() == bool(flags & FlagRegSub));
+    assertx(n.hasNonRegularSubclass() == bool(flags & FlagNonRegSub));
+  } else {
+    // Didn't have complete children, but now does. Update the flags.
+    impl.updateFlags(n, (Flags)(flags | FlagChildren));
+  }
+
+  if (n.isRegular())  flags = (Flags)(flags | FlagRegSub);
+  if (!n.isRegular()) flags = (Flags)(flags | FlagNonRegSub);
+  return std::make_pair(flags, count);
+}
+
+template <typename SerDe, typename T>
+void ClassGraph::serde(SerDe& sd, T cinfo) {
   // Serialization/deserialization entry point. If we're operating
   // concurrently, use one Impl, otherwise, use the other.
   if (SerDe::deserializing && table().locking) {
@@ -1993,122 +3333,103 @@ template <typename SerDe> void ClassGraph::serde(SerDe& sd,
   }
 }
 
-template <typename SerDe, typename Impl>
+template <typename SerDe, typename Impl, typename T>
 void ClassGraph::serdeImpl(SerDe& sd,
                            const Impl& impl,
-                           ClassInfo2* cinfo) {
+                           T cinfo) {
   // Allocate SerdeState if someone else hasn't already.
   ScopedSerdeState _;
 
-  // Along with all of the nodes, we also encode a string table. Since
-  // names are used to link the nodes of the graph, this provides
-  // space savings, as we can use table indices instead of the
-  // string. We can't we just use the standard static string table
-  // encoding for this? That only works if you're guaranteed to
-  // deserialization all of the data (the ids are reconstructed on the
-  // fly). However, for ClassGraph, we might skip over parts of the
-  // encoded data (if we know that data has already been deserialized
-  // by someone else). By using an explicit table, we can use compact
-  // encoding without having to traverse all of the encoded data.
-  sd.alternate(
-    [&] {
-      if constexpr (SerDe::deserializing) {
-        // Deserializing:
+  if constexpr (SerDe::deserializing) {
+    // Deserializing:
 
-        // First ensure that all nodes reachable by this node are
-        // deserialized. This will skip over subsets of the data which
-        // already exist.
-        sd.readWithLazyCount([&] { deserBlock(sd, impl); });
+    // First ensure that all nodes reachable by this node are
+    // deserialized.
+    sd.readWithLazyCount([&] { deserBlock(sd, impl); });
 
-        // Then obtain a pointer to the node that ClassGraph points
-        // to.
-        if (auto const name = decodeName(sd)) {
-          this_ = &impl.get(name);
-          if (cinfo) impl.setCInfo(*this_, *cinfo);
+    // Then obtain a pointer to the node that ClassGraph points
+    // to.
+    if (auto const name = sd.template make<const StringData*>()) {
+      this_ = &impl.get(name);
 
-          // If this node was marked as having complete children (and
-          // we're not ignoring that), mark this node and all of it's
-          // transitive children as also having complete children.
-          bool complete;
-          sd(complete);
-          if (complete && table().deserChildrenComplete) {
-            assertx(!isMissing());
-            forEachChild(
-              *this_,
-              [&] (Node& c) {
-                assertx(!(c.flags() & FlagMissing));
-                // Stop recursing if the node has the flag already
-                // set.
-                return impl.setFlagChildren(c)
-                  ? Action::Continue
-                  : Action::Skip;
-              }
-            );
+      // If this node was marked as having complete children (and
+      // we're not ignoring that), mark this node and all of it's
+      // transitive children as also having complete children.
+      bool complete;
+      sd(complete);
+      if (complete && !this_->hasCompleteChildren()) {
+        assertx(!this_->isConservative());
+        setCompleteImpl(impl, *this_);
+        assertx(this_->hasCompleteChildren());
+      }
+
+      // If this node isn't regular, and we've recorded an equivalent
+      // node for it, make sure that the equivalent is
+      // hasCompleteChildren(), as that's an invariant.
+      if (!this_->isRegular()) {
+        if (auto const equiv = sd.template make<const StringData*>()) {
+          auto const equivNode = &impl.get(equiv);
+          if (!equivNode->hasCompleteChildren()) {
+            assertx(!equivNode->isConservative());
+            setCompleteImpl(impl, *equivNode);
+            assertx(equivNode->hasCompleteChildren());
           }
-        } else {
-          this_ = nullptr;
-        }
-      } else {
-        // Serializing:
-
-        // Serialize all of the nodes reachable by this node (parents,
-        // children, and parents of children) and encode how many.
-        sd.lazyCount(
-          [&] () -> size_t {
-            if (!this_) return 0;
-            return serDownward(sd, *this_);
-          }
-        );
-        // Encode the "entry-point" into the graph represented by this
-        // ClassGraph.
-        if (this_) {
-          encodeName(sd, this_->name);
-          // Record whether this node has complete children, so we can
-          // reconstruct that when deserializing.
-          sd(hasCompleteChildren());
-        } else {
-          encodeName(sd, nullptr);
+          impl.setEquiv(*this_, *equivNode);
         }
       }
-    },
-    [&] {
-      // When serializing, we write this out last. When deserializing,
-      // we read it first.
-      assertx(tl_serde_state);
-      sd(tl_serde_state->newStrings);
-      tl_serde_state->strings.insert(
-        end(tl_serde_state->strings),
-        begin(tl_serde_state->newStrings),
-        end(tl_serde_state->newStrings)
-      );
-      tl_serde_state->newStrings.clear();
+
+      if constexpr (!std::is_null_pointer_v<T>) {
+        if (cinfo) {
+          assertx(!this_->isMissing());
+          impl.setCInfo(*this_, *cinfo);
+        }
+      }
+    } else {
+      this_ = nullptr;
     }
-  );
-}
+  } else {
+    // Serializing:
 
-// Serialize a string using the string table.
-template <typename SerDe>
-void ClassGraph::encodeName(SerDe& sd, SString s) {
-  assertx(tl_serde_state);
-  if (auto const idx = folly::get_ptr(tl_serde_state->strToIdx, s)) {
-    sd(*idx);
-    return;
+    // Serialize all of the nodes reachable by this node (parents,
+    // children, and parents of children) and encode how many.
+    sd.lazyCount(
+      [&] () -> size_t {
+        if (!this_) return 0;
+        auto count = serDownward(sd, *this_);
+        if (auto const e = folly::get_default(table().regOnlyEquivs, this_)) {
+          assertx(!this_->isRegular());
+          assertx(e->hasCompleteChildren());
+          count += serDownward(sd, *e);
+        }
+        return count;
+      }
+    );
+    // Encode the "entry-point" into the graph represented by this
+    // ClassGraph.
+    if (this_) {
+      sd(this_->name);
+      // Record whether this node has complete children, so we can
+      // reconstruct that when deserializing.
+      assertx(IMPLIES(hasCompleteChildren(), !isConservative()));
+      assertx(IMPLIES(isConservative(), this_->children.empty()));
+      sd(this_->hasCompleteChildren());
+
+      // If this Node isn't regular and has an equivalent node, record
+      // that here.
+      if (!this_->isRegular()) {
+        if (auto const e = folly::get_default(table().regOnlyEquivs, this_)) {
+          assertx(e->hasCompleteChildren());
+          sd(e->name);
+        } else {
+          sd((const StringData*)nullptr);
+        }
+      }
+      // We record nothing for regular classes since they never have a
+      // (non-trivial) equivalent.
+    } else {
+      sd((const StringData*)nullptr);
+    }
   }
-  auto const idx =
-    tl_serde_state->strings.size() + tl_serde_state->newStrings.size();
-  tl_serde_state->newStrings.emplace_back(s);
-  tl_serde_state->strToIdx.emplace(s, idx);
-  sd(idx);
-}
-
-// Deserialize a string using the string table.
-template <typename SerDe>
-SString ClassGraph::decodeName(SerDe& sd) {
-  assertx(tl_serde_state);
-  size_t idx;
-  sd(idx);
-  always_assert(idx < tl_serde_state->strings.size());
-  return tl_serde_state->strings[idx];
 }
 
 // Sort a hphp_fast_set of nodes to a vector. Used to ensure
@@ -2130,82 +3451,78 @@ std::vector<ClassGraph::Node*> ClassGraph::sort(const hphp_fast_set<Node*>& v) {
 template <typename SerDe, typename Impl>
 void ClassGraph::deserBlock(SerDe& sd, const Impl& impl) {
   // First get the name for this node.
-  auto const name = decodeName(sd);
+  auto const name = sd.template make<const StringData*>();
+  assertx(name);
 
   // Try to create it:
   auto const [node, created] = impl.create(name);
-  if (!created && !(node->flags() & FlagMissing)) {
-    // It already existed and is not a special "missing" node. The
-    // fact that this node already exists guarantees that all of it's
-    // dependent nodes also exist, so we don't need to go any
-    // further. Skip past that data.
-    sd.skipWithSize32();
-    return;
+
+  // Either it already existed and we got an existing Node, or we
+  // created it. Even if it already existed, we still need to process
+  // it below as if it was new, because this might have additional
+  // flags to add to the Node.
+
+  // Deserialize dependent nodes.
+  sd.readWithLazyCount([&] { deserBlock(sd, impl); });
+
+  // At this point all dependent nodes are guaranteed to exist.
+
+  // Read the parent links. The children links are not encoded as
+  // they can be inferred from the parent links.
+  std::vector<SString> parents;
+  {
+    size_t size;
+    sd(size);
+    parents.reserve(size);
+    for (size_t i = 0; i < size; ++i) {
+      parents.emplace_back(sd.template make<const StringData*>());
+    }
   }
 
-  // Otherwise we created it, or it's a "missing" node:
-
-  // Encode all of the following with a size block so it can easily be
-  // skipped over.
-  sd.withSize32(
-    [&, node=node, created=created] {
-      // Deserialize dependent nodes (this might short-circuit if any
-      // dependents already exist).
-      sd.readWithLazyCount([&] { deserBlock(sd, impl); });
-
-      // At this point all dependent nodes are guaranteed to exist.
-
-      // Read the parent links. The children links are not encoded as
-      // they can be inferred from the parent links.
-      std::vector<SString> parents;
-      {
-        size_t size;
-        sd(size);
-        parents.reserve(size);
-        for (size_t i = 0; i < size; ++i) {
-          parents.emplace_back(decodeName(sd));
-        }
+  // For each parent, register this node as a child. Lock the
+  // appropriate node if we're concurrent deserializing.
+  for (auto const parent : parents) {
+    // This should always succeed because all dependents should
+    // exist.
+    auto& parentNode = impl.get(parent);
+    impl.lock(
+      *node,
+      [&, node=node] { node->parents.emplace(&parentNode); }
+    );
+    impl.lock(
+      parentNode,
+      [&, node=node] {
+        if (!parentNode.isConservative()) parentNode.children.emplace(node);
       }
+    );
+  }
 
-      // For each parent, register this node as a child. Lock the
-      // appropriate node if we're concurrent deserializing.
-      for (auto const parent : parents) {
-        // This should always succeed because all dependents should
-        // exist.
-        auto& parentNode = impl.get(parent);
-        impl.lock(
-          *node,
-          [&, node=node] { node->parents.emplace(&parentNode); }
-        );
-        impl.lock(
-          parentNode,
-          [&, node=node] { parentNode.children.emplace(node); }
-        );
-      }
-
-      Flags flags;
-      sd(flags);
-      // These flags are never encoded and only exist at runtime.
-      assertx(!(flags & (FlagWait | FlagChildren)));
-      // If this is a "missing" node, it shouldn't have any links
-      // (because we shouldn't know anything about it).
-      assertx(IMPLIES(flags & FlagMissing, parents.empty()));
-
-      if (created) {
-        // If we created this node, we need to clear FlagWait and
-        // simultaneously set the node's flags to what we decoded.
-        impl.signal(*node, flags);
-      } else if (!(flags & FlagMissing)) {
-        // Otherwise the node was existing, but "missing". If the node
-        // we deserialized is not missing, then we can clear
-        // FlagMissing and simultaneously set it to the decoded flags.
-        impl.setNotMissing(*node, flags);
-      }
-      // Otherwise the existing node was "missing" and so was the
-      // decoded one. Nothing to do because they're already
-      // equivalent.
-    }
+  Flags flags;
+  sd(flags);
+  // These flags are never encoded and only exist at runtime.
+  assertx(
+    !(flags & (FlagWait | FlagChildren | FlagCInfo2))
   );
+  // If this is a "missing" node, it shouldn't have any links
+  // (because we shouldn't know anything about it).
+  assertx(IMPLIES(flags & FlagMissing, parents.empty()));
+  assertx(IMPLIES(flags & FlagMissing, flags == FlagMissing));
+
+  if (created) {
+    // If we created this node, we need to clear FlagWait and
+    // simultaneously set the node's flags to what we decoded.
+    impl.signal(*node, flags);
+  } else if (node->isMissing()) {
+    if (!(flags & FlagMissing)) impl.updateFlags(*node, flags, FlagMissing);
+  } else if (node->isConservative()) {
+    assertx(!(flags & FlagConservative) ||
+            ((node->flags() & ~(FlagChildren | FlagCInfo2))) == flags);
+  } else if (!node->hasCompleteChildren()) {
+    impl.updateFlags(*node, flags);
+    if (node->isConservative()) {
+      impl.lock(*node, [node=node] { node->children.clear(); });
+    }
+  }
 }
 
 // Walk downward through a node's children until we hit a leaf. At
@@ -2217,6 +3534,7 @@ size_t ClassGraph::serDownward(SerDe& sd, Node& n) {
   assertx(!table().locking);
   assertx(tl_serde_state);
   if (!tl_serde_state->downward.emplace(&n).second) return 0;
+
   if (n.children.empty()) return serUpward(sd, n);
 
   size_t count = 0;
@@ -2237,53 +3555,42 @@ bool ClassGraph::serUpward(SerDe& sd, Node& n) {
   if (!tl_serde_state->upward.emplace(&n).second) return false;
 
   assertx(n.name);
-  assertx(IMPLIES(n.flags() & FlagMissing, n.parents.empty()));
-  assertx(IMPLIES(n.flags() & FlagMissing, n.flags() == FlagMissing));
-  // Encode the name before the parent nodes. During deserialization
-  // this lets us detect if this node has already been deserialized
-  // and let's us skip over it.
-  encodeName(sd, n.name);
+  assertx(IMPLIES(n.isMissing(), n.parents.empty()));
+  assertx(IMPLIES(n.isMissing(), n.children.empty()));
+  assertx(IMPLIES(n.isMissing(), n.flags() == FlagMissing));
+  assertx(IMPLIES(n.isConservative(), n.children.empty()));
 
-  // Encode within a size block so we can easily skip over when
-  // deserializing.
-  sd.withSize32(
+  sd(n.name);
+
+  // Sort the parents into a deterministic order.
+  auto const sorted = sort(n.parents);
+
+  // Recursively serialize all parents of this node. This ensures
+  // that when deserializing, the parents will be available before
+  // deserializing this node.
+  sd.lazyCount(
     [&] {
-      // Sort the parents into a deterministic order.
-      auto const sorted = sort(n.parents);
-
-      // Recursively serialize all parents of this node. This ensures
-      // that when deserializing, the parents will be available before
-      // deserializing this node.
-      sd.lazyCount(
-        [&] {
-          size_t count = 0;
-          for (auto const parent : sorted) {
-            count += serUpward(sd, *parent);
-          }
-          return count;
-        }
-      );
-
-      // Record the names of the parents, to restore the links when
-      // deserializing.
-      sd(sorted.size());
-      for (auto const p : sorted) {
-        assertx(p->name);
-        encodeName(sd, p->name);
+      size_t count = 0;
+      for (auto const parent : sorted) {
+        count += serUpward(sd, *parent);
       }
-      // Shouldn't have any FlagWait when serializing.
-      assertx(!(n.flags() & FlagWait));
-      // FlagChildren is only set at runtime, it shouldn't be
-      // serialized.
-      sd((Flags)(n.flags() & ~FlagChildren));
+      return count;
     }
   );
 
+  // Record the names of the parents, to restore the links when
+  // deserializing.
+  sd(sorted.size());
+  for (auto const p : sorted) {
+    assertx(p->name);
+    sd(p->name);
+  }
+  // Shouldn't have any FlagWait when serializing.
+  assertx(!(n.flags() & FlagWait));
+  // These are only set at runtime, so shouldn't be serialized.
+  sd((Flags)(n.flags() & ~(FlagChildren | FlagCInfo2)));
+
   return true;
-}
-
-//////////////////////////////////////////////////////////////////////
-
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2741,20 +4048,30 @@ struct ClassInfo2 {
   bool initialNoReifiedInit{false};
 
   /*
+   * Whether is_mock_class() is true for this class.
+   */
+  bool isMockClass{false};
+
+  /*
+   * Whether this class is mocked (has a direct subclass for which
+   * is_mock_class() is true).
+   */
+  bool isMocked{false};
+
+  /*
+   * Whether isMocked is true for this class, or any of its
+   * subclasses.
+   */
+  bool isSubMocked{false};
+
+  /*
    * Whether is_regular_class() is true for this class.
    */
   bool isRegularClass{false};
 
-  /*
-   * True if there's at least one regular/non-regular class on
-   * subclassList (not including this class). If both are false, that
-   * implies this class doesn't have any subclasses.
-   */
-  bool hasRegularSubclass{false};
-  bool hasNonRegularSubclass{false};
-
   template <typename SerDe> void serde(SerDe& sd) {
     ScopedStringDataIndexer _;
+    ClassGraph::ScopedSerdeState _2;
     sd(name)
       (parent)
       (clsConstants, string_data_lt{})
@@ -2774,9 +4091,10 @@ struct ClassInfo2 {
       (hasReifiedGeneric)
       (subHasReifiedGeneric)
       (initialNoReifiedInit)
+      (isMockClass)
+      (isMocked)
+      (isSubMocked)
       (isRegularClass)
-      (hasRegularSubclass)
-      (hasNonRegularSubclass)
       ;
   }
 };
@@ -5646,15 +6964,36 @@ struct CheckClassInfoInvariantsJob {
     // ClassGraph stored in a ClassInfo should not be missing, always
     // have the ClassInfo stored, and have complete children
     // information.
+    always_assert(cinfo->classGraph);
     always_assert(!cinfo->classGraph.isMissing());
     always_assert(cinfo->classGraph.name()->isame(cinfo->name));
-    always_assert(cinfo->classGraph.cinfo() == cinfo.get());
+    always_assert(cinfo->classGraph.cinfo2() == cinfo.get());
     if (is_closure_base(cinfo->name)) {
       // The closure base class is special. We don't store it's
       // children information because it's too large.
       always_assert(!cinfo->classGraph.hasCompleteChildren());
+      always_assert(cinfo->classGraph.isConservative());
     } else {
-      always_assert(cinfo->classGraph.hasCompleteChildren());
+      always_assert(cinfo->classGraph.hasCompleteChildren() ||
+                    cinfo->classGraph.isConservative());
+    }
+
+    // This class and withoutNonRegular should be equivalent when
+    // ignoring non-regular classes. The withoutNonRegular class
+    // should be a fixed-point.
+    if (auto const without = cinfo->classGraph.withoutNonRegular()) {
+      always_assert(without.hasCompleteChildren() ||
+                    without.isConservative());
+      always_assert(without.subSubtypeOf(cinfo->classGraph, false, false));
+      always_assert(cinfo->classGraph.subSubtypeOf(without, false, false));
+      always_assert(without.withoutNonRegular() == without);
+      always_assert(cinfo->classGraph.mightBeRegular() ||
+                    cinfo->classGraph.mightHaveRegularSubclass());
+      always_assert(IMPLIES(cinfo->classGraph.mightBeRegular(),
+                            without == cinfo->classGraph));
+    } else if (!is_used_trait(*cls)) {
+      always_assert(!cinfo->classGraph.mightBeRegular());
+      always_assert(!cinfo->classGraph.mightHaveRegularSubclass());
     }
 
     // AttrNoOverride is a superset of AttrNoOverrideRegular
@@ -5666,31 +7005,20 @@ struct CheckClassInfoInvariantsJob {
     // Override attrs and what we know about the subclasses should be in
     // agreement.
     if (cls->attrs & AttrNoOverride) {
-      always_assert(!cinfo->hasRegularSubclass);
-      always_assert(!cinfo->hasNonRegularSubclass);
+      always_assert(!cinfo->classGraph.mightHaveRegularSubclass());
+      always_assert(!cinfo->classGraph.mightHaveNonRegularSubclass());
     } else if (cls->attrs & AttrNoOverrideRegular) {
-      always_assert(!cinfo->hasRegularSubclass);
-      always_assert(cinfo->hasNonRegularSubclass);
+      always_assert(!cinfo->classGraph.mightHaveRegularSubclass());
+      always_assert(cinfo->classGraph.mightHaveNonRegularSubclass());
     }
 
     // Make sure the information stored on the ClassInfo matches that
     // which the ClassGraph reports.
-    if (!is_closure_base(cinfo->name)) {
-      always_assert(
-        cinfo->hasRegularSubclass ==
-        cinfo->classGraph.hasRegularSubclass()
-      );
-      always_assert(
-        cinfo->hasNonRegularSubclass ==
-        cinfo->classGraph.hasNonRegularSubclass()
-      );
-
-      if (cls->attrs & AttrNoMock) {
-        always_assert(!cinfo->classGraph.isMocked());
-        always_assert(!cinfo->classGraph.isSubMocked());
-      } else {
-        always_assert(cinfo->classGraph.isSubMocked());
-      }
+    if (cls->attrs & AttrNoMock) {
+      always_assert(!cinfo->isMocked);
+      always_assert(!cinfo->isSubMocked);
+    } else {
+      always_assert(cinfo->isSubMocked);
     }
 
     always_assert(
@@ -5760,13 +7088,14 @@ struct CheckClassInfoInvariantsJob {
     }
 
     if (is_closure_name(cinfo->name)) {
+      assertx(cinfo->classGraph.hasCompleteChildren());
       // Closures have no children.
       auto const subclasses = cinfo->classGraph.children();
       always_assert(subclasses.size() == 1);
       always_assert(subclasses[0].name()->isame(cinfo->name));
-    } else if (!is_closure_base(cinfo->name)) {
-      // Otherwise subclassList is non-empty, contains this ClassInfo, and
-      // contains only unique elements.
+    } else if (cinfo->classGraph.hasCompleteChildren()) {
+      // Otherwise the children list is non-empty, contains this
+      // class, and contains only unique elements.
       auto const subclasses = cinfo->classGraph.children();
       always_assert(
         std::find_if(
@@ -5781,7 +7110,7 @@ struct CheckClassInfoInvariantsJob {
       always_assert(cpy.size() == subclasses.size());
     }
 
-    // The baseList is non-empty, and the last element is this class.
+    // The base list is non-empty, and the last element is this class.
     auto const bases = cinfo->classGraph.bases();
     always_assert(!bases.empty());
     always_assert(cinfo->classGraph == bases.back());
@@ -7557,6 +8886,14 @@ struct FlattenJob {
         outMeta.interfaces.emplace(name);
       }
 
+      // We always know the subclass status of closures and the
+      // closure base class.
+      if (is_closure_base(*cls)) {
+        cinfo->classGraph.setClosureBase();
+      } else if (is_closure(*cls)) {
+        cinfo->classGraph.setComplete();
+      }
+
       outClasses.vals.emplace_back(std::move(cls));
       outInfos.vals.emplace_back(std::move(cinfo));
     }
@@ -7580,6 +8917,12 @@ struct FlattenJob {
       );
 
       auto& cinfo = index.m_classInfos.at(clo->name);
+
+      // Closures are always leafs.
+      cinfo->classGraph.setComplete();
+      assertx(!cinfo->classGraph.mightHaveRegularSubclass());
+      assertx(!cinfo->classGraph.mightHaveNonRegularSubclass());
+
       outClasses.vals.emplace_back(std::move(clo));
       outInfos.vals.emplace_back(std::move(cinfo));
     }
@@ -7941,16 +9284,15 @@ private:
     cinfo->hasReifiedGeneric = cls.userAttributes.count(s___Reified.get());
     cinfo->subHasReifiedGeneric = cinfo->hasReifiedGeneric;
     cinfo->initialNoReifiedInit = cls.attrs & AttrNoReifiedInit;
+    cinfo->isMockClass = is_mock_class(&cls);
     cinfo->isRegularClass = is_regular_class(cls);
 
     // Create a ClassGraph for this class. If we decide to not keep
     // the ClassInfo, reset the ClassGraph to keep it from ending up
     // in the graph.
-    cinfo->classGraph = ClassGraph::create(cls, cinfo.get());
+    cinfo->classGraph = ClassGraph::create(cls);
     auto success = false;
     SCOPE_EXIT { if (!success) cinfo->classGraph.reset(); };
-
-    if (is_mock_class(&cls)) cinfo->classGraph.setIsMockClass();
 
     // Assume the class isn't overridden. This is true for leafs and
     // non-leafs will get updated when we build subclass information.
@@ -7958,8 +9300,6 @@ private:
       attribute_setter(cls.attrs, true, AttrNoOverride);
       attribute_setter(cls.attrs, true, AttrNoOverrideRegular);
     } else {
-      cinfo->hasRegularSubclass = true;
-      cinfo->hasNonRegularSubclass = false;
       attribute_setter(cls.attrs, false, AttrNoOverride);
       attribute_setter(cls.attrs, false, AttrNoOverrideRegular);
     }
@@ -8202,6 +9542,7 @@ private:
       always_assert(!cinfo->hasReifiedGeneric);
       always_assert(!cinfo->subHasReifiedGeneric);
       always_assert(!cinfo->initialNoReifiedInit);
+      always_assert(!cinfo->isMockClass);
       always_assert(cinfo->isRegularClass);
       always_assert(!is_mock_class(&cls));
     }
@@ -8234,11 +9575,6 @@ private:
 
     // We're going to use this ClassInfo.
     success = true;
-    // This is a lie, but needed if this class ends up being a
-    // leaf. If not, we'll load it in BuildSubclassListJob ignoring
-    // the flags, then set it again when we know all the children are
-    // present.
-    if (!is_closure_base(cls)) cinfo->classGraph.setCompleteChildren();
     return cinfo;
   }
 
@@ -9662,63 +10998,13 @@ private:
                                   php::Class& cls,
                                   ClassInfo2& cinfo) {
     assertx(cinfo.hasBadRedeclareProp);
-    assertx(cinfo.hasBadInitialPropValues);
 
     auto const isClosure = is_closure(cls);
 
     cinfo.hasBadRedeclareProp = false;
-    cinfo.hasBadInitialPropValues = false;
     for (auto& prop : cls.properties) {
       assertx(!(prop.attrs & AttrNoBadRedeclare));
       assertx(!(prop.attrs & AttrNoImplicitNullable));
-      assertx(!(prop.attrs & AttrInitialSatisfiesTC));
-
-      // Check whether the property's initial value satisfies it's
-      // type-hint.
-      auto const initialSatisfies = [&] {
-        if (isClosure) return true;
-        if (is_used_trait(cls)) return false;
-
-        // Any property with an unresolved type-constraint here might
-        // fatal when we initialize the class.
-        if (prop.typeConstraint.isUnresolved()) return false;
-        for (auto const& ub : prop.ubs.m_constraints) {
-          if (ub.isUnresolved()) return false;
-        }
-
-        if (prop.attrs & (AttrSystemInitialValue | AttrLateInit)) return true;
-
-        auto const initial = from_cell(prop.val);
-        if (initial.subtypeOf(BUninit)) return false;
-
-        auto const make_type = [&] (const TypeConstraint& tc) {
-          auto lookup = type_from_constraint(
-            tc,
-            TInitCell,
-            [] (SString name) { return res::Class::makeUnresolved(name); },
-            [&] () -> Optional<Type> {
-              auto const& ctx = cls.closureContextCls
-                ? index.cls(cls.closureContextCls)
-                : cls;
-              if (ctx.attrs & AttrTrait) return std::nullopt;
-              return subCls(res::Class::makeUnresolved(ctx.name));
-            }
-          );
-          return unctx(std::move(lookup.lower));
-        };
-
-        if (!initial.subtypeOf(make_type(prop.typeConstraint))) return false;
-        for (auto const& ub : prop.ubs.m_constraints) {
-          if (!initial.subtypeOf(make_type(ub))) return false;
-        }
-        return true;
-      }();
-
-      if (initialSatisfies) {
-        attribute_setter(prop.attrs, true, AttrInitialSatisfiesTC);
-      } else {
-        cinfo.hasBadInitialPropValues = true;
-      }
 
       auto const noBadRedeclare = [&] {
         // Closures should never have redeclared properties.
@@ -10284,6 +11570,7 @@ struct InitTypesMetadata {
     // Dependencies of the class. A dependency is a class in a
     // property/param/return type-hint.
     ISStringSet deps;
+    ISStringSet candidateRegOnlyEquivs;
   };
   struct FuncMeta {
     // Same as ClsMeta, but for the func
@@ -10734,7 +12021,7 @@ struct BuildSubclassListJob {
   static std::string name() { return "hhbbc-build-subclass"; }
   static void init(const Config& config) {
     process_init(config.o, config.gd, false);
-    ClassGraph::init(false);
+    ClassGraph::init();
   }
   static void fini() { ClassGraph::destroy(); }
 
@@ -10785,23 +12072,30 @@ struct BuildSubclassListJob {
     // initial values).
     SStringSet propsWithImplicitNullable;
 
+    // The classes for whom isMocked would be true due to one of the
+    // classes making up this Data. The classes in this set may not
+    // necessarily be also part of this Data.
+    ISStringSet mockedClasses;
+
     bool hasConstProp{false};
     bool hasReifiedGeneric{false};
 
+    bool isSubMocked{false};
+
+    // The meaning of these differ depending on whether the ClassInfo
+    // contains just it's info, or all of it's subclass info.
     bool hasRegularClass{false};
-    bool hasNonRegularClass{false};
-    bool hasRegularSubclass{false};
-    bool hasNonRegularSubclass{false};
+    bool hasRegularClassFull{false};
 
     template <typename SerDe> void serde(SerDe& sd) {
       sd(methods, string_data_lt{})
         (propsWithImplicitNullable, string_data_lt{})
+        (mockedClasses, string_data_lti{})
         (hasConstProp)
         (hasReifiedGeneric)
+        (isSubMocked)
         (hasRegularClass)
-        (hasNonRegularClass)
-        (hasRegularSubclass)
-        (hasNonRegularSubclass)
+        (hasRegularClassFull)
         ;
     }
   };
@@ -10862,6 +12156,7 @@ struct BuildSubclassListJob {
     // they must be aggregated together afterwards.
     std::vector<std::pair<SString, FuncFamilyEntry>> nameOnly;
     std::vector<InterfaceConflicts> interfaces;
+    std::vector<std::vector<SString>> regOnlyEquivCandidates;
 
     template <typename SerDe> void serde(SerDe& sd) {
       ScopedStringDataIndexer _;
@@ -10869,6 +12164,7 @@ struct BuildSubclassListJob {
         (newFuncFamilyIds)
         (nameOnly)
         (interfaces)
+        (regOnlyEquivCandidates)
         ;
     }
   };
@@ -10877,6 +12173,7 @@ struct BuildSubclassListJob {
     Variadic<std::unique_ptr<Split>>,
     Variadic<std::unique_ptr<php::Class>>,
     Variadic<FuncFamilyGroup>,
+    Variadic<std::unique_ptr<ClassInfo2>>,
     OutputMeta
   >;
 
@@ -10897,12 +12194,27 @@ struct BuildSubclassListJob {
       Variadic<FuncFamilyGroup> funcFamilies) {
     // Store mappings of names to classes and edges.
     LocalIndex index;
+
+    if (debug) {
+      for (auto const& cinfo : classes.vals) {
+        always_assert(!cinfo->classGraph.isMissing());
+        always_assert(!cinfo->classGraph.hasCompleteChildren());
+        always_assert(!cinfo->classGraph.isConservative());
+      }
+      for (auto const& cinfo : leafs.vals) {
+        always_assert(!cinfo->classGraph.isMissing());
+        always_assert(!cinfo->classGraph.isConservative());
+      }
+      for (auto const& cinfo : deps.vals) {
+        always_assert(!cinfo->classGraph.isMissing());
+      }
+    }
+
     for (auto& cinfo : classes.vals) {
       always_assert(
         index.classInfos.emplace(cinfo->name, cinfo.get()).second
       );
       index.top.emplace(cinfo->name);
-      cinfo->classGraph.setCompleteChildren();
     }
     for (auto& cinfo : deps.vals) {
       always_assert(
@@ -10943,32 +12255,61 @@ struct BuildSubclassListJob {
 
     OutputMeta meta;
 
+    // First gather the interface conflicts. This needs to be done
+    // first because it depends on the full subclass list, before we
+    // potentially drop it due to size.
+    for (auto const& cinfo : classes.vals) {
+      auto const& cls = index.cls(cinfo->name);
+      if (!(cls.attrs & AttrInterface)) continue;
+
+      meta.interfaces.emplace_back(InterfaceConflicts{cinfo->name});
+
+      auto [ifaces, size] = cinfo->classGraph.interfaceConflicts();
+
+      auto& back = meta.interfaces.back();
+      back.usage = size;
+      for (auto const iface : ifaces) {
+        if (iface->isame(cinfo->name)) continue;
+        back.conflicts.emplace_back(iface);
+      }
+      std::sort(
+        begin(back.conflicts),
+        end(back.conflicts),
+        string_data_lti{}
+      );
+    }
+
+    // Mark all of the classes (including leafs) as being complete
+    // since their subclass lists are correct.
+    for (auto& cinfo : leafs.vals) {
+      if (cinfo->classGraph.hasCompleteChildren()) continue;
+      cinfo->classGraph.setComplete();
+    }
+    for (auto& cinfo : classes.vals) {
+      if (cinfo->classGraph.hasCompleteChildren() ||
+          cinfo->classGraph.isConservative()) {
+        continue;
+      }
+      cinfo->classGraph.setComplete();
+    }
+
+    // Store the regular-only equivalent classes in the output
+    // metadata. This will be used in the init-types pass.
+    meta.regOnlyEquivCandidates.reserve(classes.vals.size());
+    for (auto& cinfo : classes.vals) {
+      meta.regOnlyEquivCandidates.emplace_back();
+      auto& candidates = meta.regOnlyEquivCandidates.back();
+      for (auto const g : cinfo->classGraph.candidateRegOnlyEquivs()) {
+        candidates.emplace_back(g.name());
+      }
+    }
+
     // If there's no classes or splits, this job is doing nothing but
     // calculating name only func family entries (so should have at
     // least one leaf).
     if (!index.top.empty()) {
       build_children(index, edges.vals);
       process_roots(index, classes.vals, splits.vals);
-
-      for (auto const& cinfo : classes.vals) {
-        auto const& cls = index.cls(cinfo->name);
-        if (!(cls.attrs & AttrInterface)) continue;
-
-        meta.interfaces.emplace_back(InterfaceConflicts{cinfo->name});
-
-        auto& back = meta.interfaces.back();
-        back.usage = cinfo->classGraph.children().size();
-
-        for (auto const iface : cinfo->classGraph.subRegInterfaces()) {
-          if (iface.name()->isame(cinfo->name)) continue;
-          back.conflicts.emplace_back(iface.name());
-        }
-        std::sort(
-          begin(back.conflicts),
-          end(back.conflicts),
-          string_data_lti{}
-        );
-      }
     } else {
       assertx(classes.vals.empty());
       assertx(splits.vals.empty());
@@ -11022,6 +12363,7 @@ struct BuildSubclassListJob {
       std::move(splits),
       std::move(phpClasses),
       std::move(funcFamilyGroups),
+      std::move(leafs),
       std::move(meta)
     );
   }
@@ -11125,6 +12467,13 @@ protected:
     // means some subset of the children were processed in another
     // Job.
     ISStringToOneT<ISStringSet> children;
+
+    // The leafs in this job. This isn't necessarily an actual leaf,
+    // but one whose children haven't been provided in this job
+    // (because they've already been processed). Classes which are
+    // leafs have information in their ClassInfo2 which reflect all of
+    // their subclasses, otherwise just their own information.
+    ISStringSet leafs;
 
     // All func families available in this Job, either from inputs, or
     // created during processing.
@@ -11317,11 +12666,19 @@ protected:
     // First record direct children. This can be inferred from the
     // parents of all present ClassInfos:
 
+    // Everything starts out as a leaf.
+    index.leafs.reserve(index.classInfos.size());
+    for (auto const [name, _] : index.classInfos) {
+      index.leafs.emplace(name);
+    }
+
     auto const onParent = [&] (SString parent, const ClassInfo2* child) {
       // Due to how work is divided, a class might have parents not
       // present in this job. Ignore those.
       if (!index.classInfos.count(parent)) return;
       index.children[parent].emplace(child->name);
+      // If you're a parent, you're not a leaf.
+      index.leafs.erase(parent);
     };
 
     for (auto const [name, cinfo] : index.classInfos) {
@@ -11557,20 +12914,21 @@ protected:
 
       data.hasConstProp = cinfo->subHasConstProp;
       data.hasReifiedGeneric = cinfo->subHasReifiedGeneric;
-      data.hasRegularClass =
-        cinfo->hasRegularSubclass || cinfo->isRegularClass;
-      data.hasNonRegularClass =
-        cinfo->hasNonRegularSubclass || !cinfo->isRegularClass;
 
-      // If this class is the one we're ultimately calculating results
-      // for, ignore it for the purposes of these booleans. They only
-      // reflect subclasses and not the class itself.
-      if (clsname->isame(top)) {
-        data.hasRegularSubclass = cinfo->hasRegularSubclass;
-        data.hasNonRegularSubclass = cinfo->hasNonRegularSubclass;
-      } else {
-        data.hasRegularSubclass = data.hasRegularClass;
-        data.hasNonRegularSubclass = data.hasNonRegularClass;
+      // If this is a mock class, any direct parent of this class
+      // should be marked as mocked.
+      if (cinfo->isMockClass) {
+        for (auto const p : cinfo->classGraph.directParents()) {
+          data.mockedClasses.emplace(p.name());
+        }
+      }
+      data.isSubMocked = cinfo->isMocked || cinfo->isSubMocked;
+
+      data.hasRegularClass = cinfo->isRegularClass;
+      data.hasRegularClassFull =
+        data.hasRegularClass || cinfo->classGraph.mightHaveRegularSubclass();
+      if (!data.hasRegularClass && index.leafs.count(clsname)) {
+        data.hasRegularClass = data.hasRegularClassFull;
       }
 
       for (auto const& prop : cls.properties) {
@@ -11656,7 +13014,7 @@ protected:
               info.nonRegularMeths.emplace(meth);
             }
             info.complete &= childInfo->complete;
-            if (childData.hasRegularClass) {
+            if (childData.hasRegularClassFull) {
               info.regularComplete &= childInfo->regularComplete;
               info.privateAncestor |= childInfo->privateAncestor;
             } else {
@@ -11731,13 +13089,17 @@ protected:
         end(childData.propsWithImplicitNullable)
       );
 
+      data.mockedClasses.insert(
+        begin(childData.mockedClasses),
+        end(childData.mockedClasses)
+      );
+
       // The rest are booleans which can just be unioned together.
       data.hasConstProp |= childData.hasConstProp;
       data.hasReifiedGeneric |= childData.hasReifiedGeneric;
+      data.isSubMocked |= childData.isSubMocked;
       data.hasRegularClass |= childData.hasRegularClass;
-      data.hasNonRegularClass |= childData.hasNonRegularClass;
-      data.hasRegularSubclass |= childData.hasRegularSubclass;
-      data.hasNonRegularSubclass |= childData.hasNonRegularSubclass;
+      data.hasRegularClassFull |= childData.hasRegularClassFull;
     }
 
     index.children.erase(top);
@@ -11975,20 +13337,20 @@ protected:
       // These are just copied directly from Data.
       cinfo->subHasConstProp = data.hasConstProp;
       cinfo->subHasReifiedGeneric = data.hasReifiedGeneric;
-      cinfo->hasRegularSubclass = data.hasRegularSubclass;
-      cinfo->hasNonRegularSubclass = data.hasNonRegularSubclass;
 
       auto& cls = index.cls(cinfo->name);
 
       // This class is mocked if its on the mocked classes list.
-      attribute_setter(cls.attrs, !cinfo->classGraph.isSubMocked(), AttrNoMock);
+      cinfo->isMocked = (bool)data.mockedClasses.count(cinfo->name);
+      cinfo->isSubMocked = data.isSubMocked || cinfo->isMocked;
+      attribute_setter(cls.attrs, !cinfo->isSubMocked, AttrNoMock);
 
       // We can use whether we saw regular/non-regular subclasses to
       // infer if this class is overridden.
-      if (cinfo->hasRegularSubclass) {
+      if (cinfo->classGraph.mightHaveRegularSubclass()) {
         attribute_setter(cls.attrs, false, AttrNoOverrideRegular);
         attribute_setter(cls.attrs, false, AttrNoOverride);
-      } else if (cinfo->hasNonRegularSubclass) {
+      } else if (cinfo->classGraph.mightHaveNonRegularSubclass()) {
         attribute_setter(cls.attrs, true, AttrNoOverrideRegular);
         attribute_setter(cls.attrs, false, AttrNoOverride);
       } else {
@@ -12117,7 +13479,8 @@ protected:
             always_assert(info.complete);
             always_assert(info.regularComplete);
 
-            if (cinfo->isRegularClass || cinfo->hasRegularSubclass) {
+            if (cinfo->isRegularClass ||
+                cinfo->classGraph.mightHaveRegularSubclass()) {
               always_assert(info.regularMeths.size() == 1);
               always_assert(info.regularMeths.count(meth));
               always_assert(info.nonRegularPrivateMeths.empty());
@@ -12140,7 +13503,8 @@ protected:
             }
 
             if (mte.hasPrivateAncestor() &&
-                (cinfo->isRegularClass || cinfo->hasRegularSubclass)) {
+                (cinfo->isRegularClass ||
+                 cinfo->classGraph.mightHaveRegularSubclass())) {
               always_assert(info.privateAncestor);
             } else {
               always_assert(!info.privateAncestor);
@@ -12758,8 +14122,10 @@ build_subclass_lists(IndexData& index,
     std::vector<
       std::pair<SString, hphp_fast_set<FuncFamily2::Id>>
     > funcFamilyDeps;
+    std::vector<std::pair<SString, UniquePtrRef<ClassInfo2>>> leafs;
     std::vector<std::pair<SString, FuncFamilyEntry>> nameOnly;
     std::vector<InterfaceConflicts> ifaceConflicts;
+    std::vector<std::pair<SString, SString>> candidateRegOnlyEquivs;
   };
 
   auto const run = [&] (SubclassWork::Bucket bucket, size_t round)
@@ -12878,14 +14244,17 @@ build_subclass_lists(IndexData& index,
     // Every job is a single work-unit, so we should only ever get one
     // result for each one.
     assertx(results.size() == 1);
-    auto& [cinfoRefs, outSplitRefs, clsRefs, ffRefs, outMetaRef] = results[0];
+    auto& [cinfoRefs, outSplitRefs, clsRefs, ffRefs, leafRefs, outMetaRef]
+      = results[0];
     assertx(cinfoRefs.size() == bucket.classes.size());
     assertx(outSplitRefs.size() == bucket.splits.size());
     assertx(clsRefs.size() == bucket.classes.size());
+    assertx(leafRefs.size() == bucket.leafs.size());
 
     auto outMeta = HPHP_CORO_AWAIT(index.client->load(std::move(outMetaRef)));
     assertx(outMeta.newFuncFamilyIds.size() == ffRefs.size());
     assertx(outMeta.funcFamilyDeps.size() == cinfoRefs.size());
+    assertx(outMeta.regOnlyEquivCandidates.size() == cinfoRefs.size());
 
     Updates updates;
     updates.classes.reserve(bucket.classes.size());
@@ -12893,12 +14262,16 @@ build_subclass_lists(IndexData& index,
     updates.funcFamilies.reserve(outMeta.newFuncFamilyIds.size());
     updates.funcFamilyDeps.reserve(outMeta.funcFamilyDeps.size());
     updates.nameOnly.reserve(outMeta.nameOnly.size());
+    updates.leafs.reserve(bucket.leafs.size());
 
     for (size_t i = 0, size = bucket.classes.size(); i < size; ++i) {
       updates.classes.emplace_back(bucket.classes[i], cinfoRefs[i], clsRefs[i]);
     }
     for (size_t i = 0, size = bucket.splits.size(); i < size; ++i) {
       updates.splits.emplace_back(bucket.splits[i], outSplitRefs[i]);
+    }
+    for (size_t i = 0, size = bucket.leafs.size(); i < size; ++i) {
+      updates.leafs.emplace_back(bucket.leafs[i], leafRefs[i]);
     }
     for (size_t i = 0, size = outMeta.newFuncFamilyIds.size(); i < size; ++i) {
       auto const ref = ffRefs[i];
@@ -12914,6 +14287,13 @@ build_subclass_lists(IndexData& index,
     }
     updates.nameOnly = std::move(outMeta.nameOnly);
     updates.ifaceConflicts = std::move(outMeta.interfaces);
+    for (size_t i = 0, size = outMeta.regOnlyEquivCandidates.size();
+         i < size; ++i) {
+      auto const name = bucket.classes[i];
+      for (auto const c : outMeta.regOnlyEquivCandidates[i]) {
+        updates.candidateRegOnlyEquivs.emplace_back(name, c);
+      }
+    }
 
     HPHP_CORO_MOVE_RETURN(updates);
   };
@@ -12944,6 +14324,9 @@ build_subclass_lists(IndexData& index,
           for (auto const& [name, cinfo, cls] : u.classes) {
             index.classInfoRefs.at(name) = cinfo;
             index.classRefs.at(name) = cls;
+          }
+          for (auto const& [name, cinfo] : u.leafs) {
+            index.classInfoRefs.at(name) = cinfo;
           }
         }
       );
@@ -12991,6 +14374,10 @@ build_subclass_lists(IndexData& index,
             for (auto& [name, entry] : u.nameOnly) {
               initTypesMeta.nameOnlyFF[name].emplace_back(std::move(entry));
             }
+            for (auto [name, candidate] : u.candidateRegOnlyEquivs) {
+              initTypesMeta.classes[name]
+                .candidateRegOnlyEquivs.emplace(candidate);
+            }
           }
         },
         [&] {
@@ -13025,7 +14412,8 @@ build_subclass_lists(IndexData& index,
 
 /*
  * Initialize the return-types of functions and methods from their
- * type-hints.
+ * type-hints. Also set AttrInitialSatisfiesTC on properties if
+ * appropriate (which must be done after types are initialized).
  */
 struct InitTypesJob {
   static std::string name() { return "hhbbc-init-types"; }
@@ -13051,19 +14439,38 @@ struct InitTypesJob {
     for (auto const& cls : classes.vals) {
       always_assert(index.classes.emplace(cls->name, cls.get()).second);
     }
+
+    // All of the classes which might be a regular only equivalent
+    // have been provided to the job. So, we can now definitely set
+    // the regular only equivalent (if necessary). We need to do this
+    // before setting the initial types because we need that
+    // information to canonicalize.
     for (auto const& cinfo : cinfos.vals) {
       always_assert(index.classInfos.emplace(cinfo->name, cinfo.get()).second);
+      cinfo->classGraph.setRegOnlyEquivs();
+      // If this is a regular class, we don't need the "expanded"
+      // method family information anymore, so clear it here to save
+      // memory.
+      if (cinfo->isRegularClass) {
+        folly::erase_if(
+          cinfo->methodFamilies,
+          [&] (auto const& e) { return !cinfo->methods.count(e.first); }
+        );
+      }
     }
     for (auto const& cinfo : cinfoDeps.vals) {
       always_assert(index.classInfos.emplace(cinfo->name, cinfo.get()).second);
+      cinfo->classGraph.setRegOnlyEquivs();
     }
 
     assertx(classes.vals.size() == cinfos.vals.size());
     for (size_t i = 0, size = classes.vals.size(); i < size; ++i) {
-      auto const& cls = classes.vals[i];
+      auto& cls = classes.vals[i];
       auto& cinfo = cinfos.vals[i];
       assertx(cls->name->isame(cinfo->name));
       assertx(cinfo->funcInfos.size() == cls->methods.size());
+
+      set_bad_initial_prop_values(index, *cls, *cinfo);
       for (size_t j = 0, size = cls->methods.size(); j < size; ++j) {
         auto const& func = cls->methods[j];
         auto& finfo = cinfo->funcInfos[j];
@@ -13123,7 +14530,7 @@ private:
           },
           [&] () -> Optional<Type> {
             if (!f.cls) return std::nullopt;
-            auto const& cls = [&] {
+            auto const& cls = [&] () -> const php::Class& {
               if (!f.cls->closureContextCls) return *f.cls;
               auto const c =
                 folly::get_default(index.classes, f.cls->closureContextCls);
@@ -13184,6 +14591,78 @@ private:
     FTRACE(3, "Initial return type for {}: {}\n",
            func_fullname(f), show(ty));
     return ty;
+  }
+
+  static void set_bad_initial_prop_values(const LocalIndex& index,
+                                          php::Class& cls,
+                                          ClassInfo2& cinfo) {
+    assertx(cinfo.hasBadInitialPropValues);
+
+    auto const isClosure = is_closure(cls);
+
+    cinfo.hasBadInitialPropValues = false;
+    for (auto& prop : cls.properties) {
+      assertx(!(prop.attrs & AttrInitialSatisfiesTC));
+
+      // Check whether the property's initial value satisfies it's
+      // type-hint.
+      auto const initialSatisfies = [&] {
+        if (isClosure) return true;
+        if (is_used_trait(cls)) return false;
+
+        // Any property with an unresolved type-constraint here might
+        // fatal when we initialize the class.
+        if (prop.typeConstraint.isUnresolved()) return false;
+        for (auto const& ub : prop.ubs.m_constraints) {
+          if (ub.isUnresolved()) return false;
+        }
+
+        if (prop.attrs & (AttrSystemInitialValue | AttrLateInit)) return true;
+
+        auto const initial = from_cell(prop.val);
+        if (initial.subtypeOf(BUninit)) return false;
+
+        auto const make_type = [&] (const TypeConstraint& tc) {
+          auto lookup = type_from_constraint(
+            tc,
+            initial,
+            [&] (SString name) -> Optional<res::Class> {
+              return res::Class::makeUnresolved(name);
+            },
+            [&] () -> Optional<Type> {
+              auto const& ctx = [&] () -> const php::Class& {
+                if (!cls.closureContextCls) return cls;
+                auto const c =
+                  folly::get_default(index.classes, cls.closureContextCls);
+                always_assert_flog(
+                  c,
+                  "When processing bad initial prop values for {}, "
+                  "tried to access missing class {}",
+                  cls.name,
+                  cls.closureContextCls
+                );
+                return *c;
+              }();
+              if (ctx.attrs & AttrTrait) return std::nullopt;
+              return subCls(res::Class::makeUnresolved(ctx.name));
+            }
+          );
+          return unctx(std::move(lookup.lower));
+        };
+
+        if (!initial.subtypeOf(make_type(prop.typeConstraint))) return false;
+        for (auto const& ub : prop.ubs.m_constraints) {
+          if (!initial.subtypeOf(make_type(ub))) return false;
+        }
+        return true;
+      }();
+
+      if (initialSatisfies) {
+        attribute_setter(prop.attrs, true, AttrInitialSatisfiesTC);
+      } else {
+        cinfo.hasBadInitialPropValues = true;
+      }
+    }
   }
 };
 
@@ -13445,9 +14924,19 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
       if (meta.funcs.count(w)) funcNames.emplace_back(w);
     }
 
-    auto const addDep = [&] (SString dep) {
+    // Add a dependency to the job. A class is a dependency if it
+    // shows up in a class' type-hints, or if it's a potential
+    // reg-only equivalent.
+    auto const addDep = [&] (SString dep, bool addEquiv) {
       if (!meta.classes.count(dep) || roots.count(dep)) return;
       cinfoDeps.emplace_back(index.classInfoRefs.at(dep));
+      if (!addEquiv) return;
+      if (auto const cls = folly::get_ptr(meta.classes, dep)) {
+        for (auto const d : cls->candidateRegOnlyEquivs) {
+          if (!meta.classes.count(d) || roots.count(d)) return;
+          cinfoDeps.emplace_back(index.classInfoRefs.at(d));
+        }
+      }
     };
 
     for (auto const w : work) {
@@ -13458,16 +14947,20 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
           classes.emplace_back(index.classRefs.at(clo));
           cinfos.emplace_back(index.classInfoRefs.at(clo));
         }
-        for (auto const d : cls->deps) addDep(d);
+        for (auto const d : cls->deps) addDep(d, true);
+        for (auto const d : cls->candidateRegOnlyEquivs) addDep(d, false);
       }
       // Not else if. A name can correspond to both a class and a
       // func.
       if (auto const func = folly::get_ptr(meta.funcs, w)) {
         funcs.emplace_back(index.funcRefs.at(w));
         finfos.emplace_back(index.funcInfoRefs.at(w));
-        for (auto const d : func->deps) addDep(d);
+        for (auto const d : func->deps) addDep(d, true);
       }
     }
+    addDep(s_Awaitable.get(), true);
+    addDep(s_AsyncGenerator.get(), true);
+    addDep(s_Generator.get(), true);
 
     // Record that we've read our inputs
     typesLatch.count_down();
@@ -13976,6 +15469,7 @@ struct AggregateJob {
 
     template <typename SerDe> void serde(SerDe& sd) {
       ScopedStringDataIndexer _;
+      ClassGraph::ScopedSerdeState _2;
       sd(classes)
         (classInfos)
         (classBytecode)
@@ -14327,10 +15821,15 @@ void make_class_infos_local(
       cinfo->hasConstProp = rcinfo->hasConstProp;
       cinfo->hasReifiedParent = rcinfo->hasReifiedParent;
       cinfo->subHasConstProp = rcinfo->subHasConstProp;
-      cinfo->hasRegularSubclass = rcinfo->hasRegularSubclass;
-      cinfo->hasNonRegularSubclass = rcinfo->hasNonRegularSubclass;
-      cinfo->isSubMocked = !(cinfo->cls->attrs & AttrNoMock);
-      cinfo->isMocked = cinfo->isSubMocked && rcinfo->classGraph.isMocked();
+      cinfo->isMocked = rcinfo->isMocked;
+      cinfo->isSubMocked = rcinfo->isSubMocked;
+
+      assertx(rcinfo->classGraph.hasCompleteChildren() ||
+              rcinfo->classGraph.isConservative());
+      cinfo->hasRegularSubclass =
+        rcinfo->classGraph.mightHaveRegularSubclass();
+      cinfo->hasNonRegularSubclass =
+        rcinfo->classGraph.mightHaveNonRegularSubclass();
 
       auto const noOverride = [&] (SString name) {
         if (auto const mte = folly::get_ptr(cinfo->methods, name)) {
@@ -14668,7 +16167,7 @@ void make_local(IndexData& index) {
   // actual aggregation.
   auto const sizePerBucket = usingSubprocess
     ? 256*1024*1024
-    : 32*1024*1024;
+    : 128*1024*1024;
 
   /*
    * We'll use the names of the various items as the items to

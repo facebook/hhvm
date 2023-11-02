@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/attr.h"
 
 #include "hphp/hhbbc/misc.h"
+#include "hphp/hhbbc/representation.h"
 
 namespace HPHP {
 
@@ -27,11 +28,6 @@ struct UserAttributeMap;
 namespace HHBBC {
 
 namespace res { struct Class; }
-namespace php {
-struct Class;
-struct Func;
-struct Prop;
-}
 struct Index;
 struct Type;
 
@@ -110,8 +106,15 @@ bool is_used_trait(const php::Class& cls);
  * interface, enum, trait, or abstract class. Those types of classes
  * cannot be instantiated (but can be interacted with statically).
  */
-bool is_regular_class(const php::Class&);
-bool is_regular_class(Attr);
+inline bool is_regular_class(Attr attrs) {
+  return
+    !(attrs & (AttrInterface | AttrTrait |
+               AttrAbstract | AttrEnum |
+               AttrEnumClass));
+}
+inline bool is_regular_class(const php::Class& c) {
+  return is_regular_class(c.attrs);
+}
 
 Type get_type_of_reified_list(const UserAttributeMap& ua);
 

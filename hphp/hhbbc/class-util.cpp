@@ -115,17 +115,6 @@ bool is_used_trait(const php::Class& c) {
     (c.attrs & (AttrTrait | AttrNoOverride)) == AttrTrait;
 }
 
-bool is_regular_class(Attr attrs) {
-  return
-    !(attrs & (AttrInterface | AttrTrait |
-               AttrAbstract | AttrEnum |
-               AttrEnumClass));
-}
-
-bool is_regular_class(const php::Class& c) {
-  return is_regular_class(c.attrs);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 Type get_type_of_reified_list(const UserAttributeMap& ua) {

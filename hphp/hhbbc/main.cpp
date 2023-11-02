@@ -130,9 +130,6 @@ void parse_options(int argc, char** argv) {
       po::value(&parallel::final_threads)->default_value(
         defaultFinalThreadCount),
       "Number of threads to use for the final pass")
-    ("parallel-work-size",
-      po::value(&parallel::work_chunk)->default_value(120),
-      "Work unit size for parallelism")
     ("trace",
       po::value(&trace_fns)->composing(),
       "Add a function to increase tracing level on (for debugging)")
@@ -219,7 +216,7 @@ void parse_options(int argc, char** argv) {
 }
 
 UNUSED void validate_options() {
-  if (parallel::work_chunk <= 10 || parallel::num_threads < 1) {
+  if (parallel::num_threads < 1) {
     std::cerr << "Invalid parallelism configuration.\n";
     std::exit(1);
   }

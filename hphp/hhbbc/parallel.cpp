@@ -23,7 +23,6 @@ namespace parallel {
 
 size_t num_threads = 31;
 size_t final_threads = 31;
-size_t work_chunk  = 120;
 
 }
 

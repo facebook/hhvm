@@ -43,7 +43,6 @@ namespace parallel {
  */
 extern size_t num_threads;
 extern size_t final_threads;
-extern size_t work_chunk;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -52,16 +51,9 @@ namespace detail {
 template<class Items>
 auto size_info(Items&& items) {
   auto const size = items.size();
-  if (!size) return std::make_tuple(size, size, size);
-  // If work_chunk is too big to use all the threads, reduce it. Round
-  // down to avoid reducing num_threads in the next step.
-  auto const chunk = std::min(
-    std::max(size_t{1}, size / num_threads), work_chunk
-  );
-  // If we still don't have enough chunks to use all the threads,
-  // reduce the number of threads
-  auto const threads = std::min((size + chunk - 1) / chunk, num_threads);
-  return std::make_tuple(size, threads, chunk);
+  if (!size) return std::make_tuple(size, size);
+  auto const threads = std::min(num_threads, size);
+  return std::make_tuple(size, threads);
 }
 
 template<class Func, class Item>
@@ -92,23 +84,20 @@ void for_each(Items&& inputs, Func func) {
   auto const size = std::get<0>(info);
   if (!size) return;
   auto const threads = std::get<1>(info);
-  auto const chunk = std::get<2>(info);
 
   std::vector<std::thread> workers;
   for (auto worker = size_t{0}; worker < threads; ++worker) {
     workers.push_back(std::thread([&, worker] {
       try {
         HphpSessionAndThread _{Treadmill::SessionKind::HHBBC};
-
-        for (;;) {
-          auto start = index.fetch_add(chunk);
-          auto const stop = std::min(start + chunk, size);
-          if (start >= stop) break;
-          for (auto i = start; i != stop; ++i) {
-            detail::caller(func,
-                           std::forward<Items>(inputs)[i],
-                           worker);
-          }
+        while (true) {
+          auto const i = index++;
+          if (i >= size) break;
+          detail::caller(
+            func,
+            std::forward<Items>(inputs)[i],
+            worker
+          );
         }
       } catch (const std::exception& e) {
         std::fprintf(stderr,
@@ -142,7 +131,6 @@ auto map(Items&& inputs, Func func) -> std::vector<decltype(func(inputs[0]))> {
   std::vector<decltype(func(inputs[0]))> retVec(size);
   if (!size) return retVec;
   auto const threads = std::get<1>(info);
-  auto const chunk = std::get<2>(info);
 
   auto const retMem = &retVec[0];
 
@@ -154,17 +142,10 @@ auto map(Items&& inputs, Func func) -> std::vector<decltype(func(inputs[0]))> {
     workers.push_back(std::thread([&] {
       try {
         HphpSessionAndThread _{Treadmill::SessionKind::HHBBC};
-
-        for (;;) {
-          auto start = index.fetch_add(chunk);
-          auto const stop = std::min(start + chunk, inputs.size());
-          if (start >= stop) break;
-
-          std::transform(
-            begin(inputs) + start, begin(inputs) + stop,
-            retMem + start,
-            func
-          );
+        while (true) {
+          auto const i = index++;
+          if (i >= size) break;
+          retMem[i] = func(std::forward<Items>(inputs)[i]);
         }
       } catch (const std::runtime_error& e) {
         std::fprintf(stderr,
@@ -209,7 +190,7 @@ auto gen(size_t count, Func func) -> std::vector<decltype(func(0))> {
         try {
           HphpSessionAndThread _{Treadmill::SessionKind::HHBBC};
           while (true) {
-            auto const i = index.fetch_add(1);
+            auto const i = index++;
             if (i >= count) break;
             retVec[i] = func(i);
           }

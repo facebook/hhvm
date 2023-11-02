@@ -444,13 +444,14 @@ Type adjust_type_for_prop(const Index& index,
 ConstraintType
 type_from_constraint(const TypeConstraint& tc,
                      const Type& candidate,
-                     const std::function<res::Class(SString)>& resolve,
+                     const std::function<Optional<res::Class>(SString)>& resolve,
                      const std::function<Optional<Type>()>& self);
 
 /*
  * Given two ConstraintTypes, compute and return the union.
  */
-ConstraintType union_constraint(const ConstraintType& a, const ConstraintType& b);
+ConstraintType union_constraint(const ConstraintType& a,
+                                const ConstraintType& b);
 std::string show(const ConstraintType&);
 
 //////////////////////////////////////////////////////////////////////

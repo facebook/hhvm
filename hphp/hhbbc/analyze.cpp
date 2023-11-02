@@ -1447,7 +1447,7 @@ ConstraintType type_from_constraint_impl(const TypeConstraint& tc,
           case KindOfEnumClassLabel: return exact(TEnumClassLabel);
           case KindOfObject: {
             auto const cls = resolve(tc.clsName());
-            auto lower = subObj(cls);
+            auto lower = cls ? subObj(*cls) : TBottom;
             auto upper = lower;
 
             // The "magic" interfaces cannot be represented with a single
@@ -1456,20 +1456,20 @@ ConstraintType type_from_constraint_impl(const TypeConstraint& tc,
             // use any provided candidate type to refine the lower bound
             // and supply the subset which would allow us to optimize away
             // the check.
-            if (interface_supports_arrlike(cls.name())) {
+            if (interface_supports_arrlike(tc.clsName())) {
               if (candidate.subtypeOf(BArrLike)) lower = TArrLike;
               upper |= TArrLike;
             }
-            if (interface_supports_int(cls.name())) {
+            if (interface_supports_int(tc.clsName())) {
               if (candidate.subtypeOf(BInt)) lower = TInt;
               upper |= TInt;
             }
-            if (interface_supports_double(cls.name())) {
+            if (interface_supports_double(tc.clsName())) {
               if (candidate.subtypeOf(BDbl)) lower = TDbl;
               upper |= TDbl;
             }
 
-            if (interface_supports_string(cls.name())) {
+            if (interface_supports_string(tc.clsName())) {
               if (candidate.subtypeOf(BStr)) lower = TStr;
               upper |= union_of(TStr, TCls, TLazyCls);
               return C{
@@ -1529,7 +1529,7 @@ ConstraintType type_from_constraint_impl(const TypeConstraint& tc,
         };
       case AnnotMetaType::Classname:
         return C{
-          RO::EvalClassnameNoticesSampleRate > 0 ? 
+          RO::EvalClassnameNoticesSampleRate > 0 ?
             TStr : union_of(TStr, TCls, TLazyCls),
           union_of(TStr, TCls, TLazyCls)
         };
@@ -1561,7 +1561,7 @@ ConstraintType type_from_constraint_impl(const TypeConstraint& tc,
 ConstraintType type_from_constraint(
   const TypeConstraint& tc,
   const Type& candidate,
-  const std::function<res::Class(SString)>& resolve,
+  const std::function<Optional<res::Class>(SString)>& resolve,
   const std::function<Optional<Type>()>& self)
 {
   return type_from_constraint_impl(tc, candidate, resolve, self);
@@ -1574,13 +1574,7 @@ lookup_constraint(const Index& index,
                   const Type& candidate) {
   return type_from_constraint_impl(
     tc, candidate,
-    [&] (SString name) {
-      auto const cls = index.resolve_class(name);
-      // At this point we shouldn't have type constraints with
-      // non-existent classes.
-      assertx(cls.has_value());
-      return *cls;
-    },
+    [&] (SString name) { return index.resolve_class(name); },
     [&] { return selfCls(index, ctx); }
   );
 }

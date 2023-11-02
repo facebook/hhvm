@@ -778,6 +778,14 @@ struct TypeMapping {
   // first enum encountered when resolving a type-alias.
   LSString firstEnum;
   TypeConstraint value;
+
+  bool operator==(const TypeMapping& o) const {
+    return name->isame(o.name);
+  }
+  bool operator<(const TypeMapping& o) const {
+    return string_data_lti{}(name, o.name);
+  }
+
   template <typename SerDe> void serde(SerDe& sd) {
     sd(name)(firstEnum)(value);
   }

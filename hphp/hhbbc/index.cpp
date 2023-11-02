@@ -7480,7 +7480,6 @@ struct FlattenJob {
       for (auto const& func : cls->methods) {
         cinfo->funcInfos.emplace_back(make_func_info(index, *func));
       }
-
       outNames.emplace(cls->name);
     }
 
@@ -7563,6 +7562,7 @@ struct FlattenJob {
     }
 
     for (auto& clo : newClosures) {
+      assertx(!is_closure_base(*clo));
       assertx(clo->closureContextCls);
       // Only return the closures for classes we were actually
       // requested to flatten.
@@ -9505,6 +9505,13 @@ private:
     return newClosures;
   }
 
+  static std::unique_ptr<FuncInfo2> make_func_info(const LocalIndex& index,
+                                                   const php::Func& f) {
+    auto finfo = std::make_unique<FuncInfo2>();
+    finfo->name = f.name;
+    return finfo;
+  }
+
   static bool resolveOne(TypeConstraint& tc,
                          const TypeConstraint& tv,
                          SString firstEnum,
@@ -9607,10 +9614,14 @@ private:
                                       ISStringSet* uses) {
     for (auto& p : func.params) {
       update_type_constraint(index, p.typeConstraint, false, uses);
-      for (auto& ub : p.upperBounds.m_constraints) update_type_constraint(index, ub, false, uses);
+      for (auto& ub : p.upperBounds.m_constraints) {
+        update_type_constraint(index, ub, false, uses);
+      }
     }
     update_type_constraint(index, func.retTypeConstraint, false, uses);
-    for (auto& ub : func.returnUBs.m_constraints) update_type_constraint(index, ub, false, uses);
+    for (auto& ub : func.returnUBs.m_constraints) {
+      update_type_constraint(index, ub, false, uses);
+    }
   }
 
   static void update_type_constraints(const LocalIndex& index,
@@ -9622,93 +9633,10 @@ private:
     for (auto& meth : cls.methods) update_type_constraints(index, *meth, uses);
     for (auto& prop : cls.properties) {
       update_type_constraint(index, prop.typeConstraint, true, uses);
-      for (auto& ub : prop.ubs.m_constraints) update_type_constraint(index, ub, true, uses);
+      for (auto& ub : prop.ubs.m_constraints) {
+        update_type_constraint(index, ub, true, uses);
+      }
     }
-  }
-
-  static std::unique_ptr<FuncInfo2> make_func_info(const LocalIndex& index,
-                                                   const php::Func& f) {
-    auto finfo = std::make_unique<FuncInfo2>();
-    finfo->name = f.name;
-    finfo->returnTy = initial_return_type(index, f);
-    return finfo;
-  }
-
-  static Type initial_return_type(const LocalIndex& index,
-                                  const php::Func& f) {
-    auto const ty = [&] {
-      // Return type of native functions is calculated differently.
-      if (f.isNative) return native_function_return_type(&f);
-
-      if ((f.attrs & AttrBuiltin) || f.isMemoizeWrapper) return TInitCell;
-
-      if (f.isGenerator) {
-        if (f.isAsync) {
-          // Async generators always return AsyncGenerator object.
-          return objExact(res::Class::makeUnresolved(s_AsyncGenerator.get()));
-        }
-        // Non-async generators always return Generator object.
-        return objExact(res::Class::makeUnresolved(s_Generator.get()));
-      }
-
-      auto const make_type = [&] (const TypeConstraint& tc) {
-        auto lookup = type_from_constraint(
-          tc,
-          TInitCell,
-          [] (SString name) { return res::Class::makeUnresolved(name); },
-          [&] () -> Optional<Type> {
-            if (!f.cls) return std::nullopt;
-            auto const& cls = f.cls->closureContextCls
-              ? index.cls(f.cls->closureContextCls)
-              : *f.cls;
-            if (cls.attrs & AttrTrait) return std::nullopt;
-            return subCls(res::Class::makeUnresolved(cls.name));
-          }
-        );
-        if (lookup.coerceClassToString == TriBool::Yes) {
-          lookup.upper = promote_classish(std::move(lookup.upper));
-        } else if (lookup.coerceClassToString == TriBool::Maybe) {
-          lookup.upper |= TSStr;
-        }
-        return unctx(std::move(lookup.upper));
-      };
-
-      auto const process = [&] (const TypeConstraint& tc,
-                                const TypeIntersectionConstraint& ubs) {
-        auto ret = TInitCell;
-        ret = intersection_of(std::move(ret), make_type(tc));
-        for (auto const& ub : ubs.m_constraints) {
-          ret = intersection_of(std::move(ret), make_type(ub));
-        }
-        return ret;
-      };
-
-      auto ret = process(f.retTypeConstraint, f.returnUBs);
-      if (f.hasInOutArgs && !ret.is(BBottom)) {
-        std::vector<Type> types;
-        types.reserve(f.params.size() + 1);
-        types.emplace_back(std::move(ret));
-        for (auto const& p : f.params) {
-          if (!p.inout) continue;
-          auto t = process(p.typeConstraint, p.upperBounds);
-          if (t.is(BBottom)) return TBottom;
-          types.emplace_back(std::move(t));
-        }
-        std::reverse(begin(types)+1, end(types));
-        ret = vec(std::move(types));
-      }
-
-      if (f.isAsync) {
-        // Async functions always return WaitH<T>, where T is the type
-        // returned internally.
-        return wait_handle_unresolved(std::move(ret));
-      }
-      return ret;
-    }();
-
-    FTRACE(3, "Initial return type for {}: {}\n",
-           func_fullname(f), show(ty));
-    return ty;
   }
 
   /*
@@ -9880,155 +9808,8 @@ private:
   }
 };
 
-/*
- * "Fixups" a php::Unit by removing specified funcs from it, and
- * adding specified classes. This is needed to add closures created
- * from trait flattening into their associated units. While we're
- * doing this, we also remove redundant meth caller funcs here
- * (because it's convenient).
- */
-struct UnitFixupJob {
-  static std::string name() { return "hhbbc-flatten-fixup"; }
-  static void init(const Config& config) {
-    process_init(config.o, config.gd, false);
-  }
-  static void fini() {}
-
-  // For a given unit, the classes to add and the funcs to remove.
-  struct Fixup {
-    std::vector<SString> addClass;
-    std::vector<SString> removeFunc;
-    template <typename SerDe> void serde(SerDe& sd) {
-      sd(addClass)(removeFunc);
-    }
-  };
-
-  static std::unique_ptr<php::Unit> run(std::unique_ptr<php::Unit> unit,
-                                        const Fixup& fixup) {
-    if (!fixup.removeFunc.empty()) {
-      // If we want to remove a func, it should be in this unit.
-      auto DEBUG_ONLY erased = false;
-      unit->funcs.erase(
-        std::remove_if(
-          begin(unit->funcs),
-          end(unit->funcs),
-          [&] (SString func) {
-            // This is a kinda dumb O(N^2) algorithm, but these lists
-            // are typicaly size 1.
-            auto const erase = std::any_of(
-              begin(fixup.removeFunc),
-              end(fixup.removeFunc),
-              [&] (SString remove) { return remove == func; }
-            );
-            if (erase) erased = true;
-            return erase;
-          }
-        ),
-        end(unit->funcs)
-      );
-      assertx(erased);
-    }
-
-    unit->classes.insert(
-      end(unit->classes),
-      begin(fixup.addClass),
-      end(fixup.addClass)
-    );
-    return unit;
-  }
-};
-
-/*
- * We might have resolved a type-constraint during FlattenJob and then
- * later on learned that one of the types are invalid. For example, we
- * resolved a type-constraint to a particular object type, and then
- * realized the associated class isn't instantiable. We have the hard
- * invariant that a resolved type-constraint always points at a valid
- * type (which means for objects they have a ClassInfo). So, if we
- * determined if a type is invalid during FlattenJob, we then "fixup"
- * the type-constraint here by making it unresolved again. This is
- * rare, as such invalid types don't occur in well-typed code, so the
- * extra overhead of another job is fine.
- */
-struct MissingClassFixupJob {
-static std::string name() { return "hhbbc-flatten-missing"; }
-  static void init(const Config& config) {
-    process_init(config.o, config.gd, false);
-    ClassGraph::init();
-  }
-  static void fini() { ClassGraph::destroy(); }
-
-  using Output = Multi<
-    Variadic<std::unique_ptr<php::Class>>,
-    Variadic<std::unique_ptr<ClassInfo2>>,
-    Variadic<std::unique_ptr<php::Func>>,
-    Variadic<std::unique_ptr<FuncInfo2>>
-  >;
-  static Output run(Variadic<std::unique_ptr<php::Class>> classes,
-                    Variadic<std::unique_ptr<ClassInfo2>> cinfos,
-                    Variadic<std::unique_ptr<php::Func>> funcs,
-                    Variadic<std::unique_ptr<FuncInfo2>> finfos,
-                    std::vector<SString> missingIn) {
-    assertx(classes.vals.size() == cinfos.vals.size());
-    assertx(funcs.vals.size() == finfos.vals.size());
-    ISStringSet missing{ begin(missingIn), end(missingIn) };
-    for (size_t i = 0, size = classes.vals.size(); i < size; ++i) {
-      update(*classes.vals[i], *cinfos.vals[i], missing);
-    }
-    for (size_t i = 0, size = funcs.vals.size(); i < size; ++i) {
-      update(*funcs.vals[i], *finfos.vals[i], missing);
-    }
-    return std::make_tuple(
-      std::move(classes),
-      std::move(cinfos),
-      std::move(funcs),
-      std::move(finfos)
-    );
-  }
-private:
-  static bool update(TypeConstraint& tc, const ISStringSet& missing) {
-    auto const name = tc.clsName();
-    if (!name || !missing.count(name)) return false;
-    tc.unresolve();
-    return true;
-  }
-
-  static void update(php::Func& func,
-                     FuncInfo2& finfo,
-                     const ISStringSet& missing) {
-    for (auto& p : func.params) {
-      update(p.typeConstraint, missing);
-      for (auto& ub : p.upperBounds.m_constraints) update(ub, missing);
-    }
-    auto updated = update(func.retTypeConstraint, missing);
-    for (auto& ub : func.returnUBs.m_constraints) updated |= update(ub, missing);
-    if (updated) {
-      // One of the return constraints corresponds to a missing
-      // type. This means the function can never return and must have
-      // a Bottom return type.
-      FTRACE(2, "Fixing up return type of {} to Bottom\n", func_fullname(func));
-      finfo.returnTy = TBottom;
-    }
-  }
-
-  static void update(php::Class& cls,
-                     ClassInfo2& cinfo,
-                     const ISStringSet& missing) {
-    assertx(cls.methods.size() == cinfo.funcInfos.size());
-    if (cls.attrs & AttrEnum) update(cls.enumBaseTy, missing);
-    for (size_t i = 0, size = cls.methods.size(); i < size; ++i) {
-      update(*cls.methods[i], *cinfo.funcInfos[i], missing);
-    }
-    for (auto& prop : cls.properties) {
-      update(prop.typeConstraint, missing);
-      for (auto& ub : prop.ubs.m_constraints) update(ub, missing);
-    }
-  }
-};
 
 Job<FlattenJob> s_flattenJob;
-Job<UnitFixupJob> s_unitFixupJob;
-Job<MissingClassFixupJob> s_missingClassFixupJob;
 
 /*
  * For efficiency reasons, we want to do class flattening all in one
@@ -10476,235 +10257,6 @@ flatten_classes_assign(IndexFlattenMetadata& meta) {
   return work;
 }
 
-// Run MissingClassFixupJob to fixup any type-constraints in classes
-// and funcs which were resolved to types which are now invalid.
-void flatten_classes_fixup_missing(IndexData& index,
-                                   ISStringToOneT<ISStringSet> typeUsesByClass,
-                                   ISStringToOneT<ISStringSet> typeUsesByFunc,
-                                   ISStringSet uninstantiable) {
-  // If FlattenJob didn't find anything uninstantiable, we don't need
-  // to do this (this is the common case).
-  if (uninstantiable.empty()) return;
-  trace_time timer{"flatten classes fixup missing", index.sample};
-
-  // Build a map of classes and funcs that reference the
-  // uninstantiable types.
-  ISStringToOneT<ISStringSet> classes;
-  ISStringToOneT<ISStringSet> funcs;
-  for (auto const u : uninstantiable) {
-    if (auto const uses = folly::get_ptr(typeUsesByClass, u)) {
-      for (auto const use : *uses) classes[use].emplace(u);
-    }
-    if (auto const uses = folly::get_ptr(typeUsesByFunc, u)) {
-      for (auto const use : *uses) funcs[use].emplace(u);
-    }
-  }
-  // We found uninstantiable types, but they're not actually used, so
-  // we don't have to fix anything up.
-  if (classes.empty() && funcs.empty()) return;
-
-  constexpr size_t kBucketSize = 3000;
-
-  auto buckets = consistently_bucketize(
-    [&] {
-      // NB: classes and funcs are in different namespaces and can
-      // have the same name. If that happens, they'll be de-duped
-      // here. This is harmless, as it just means the class and func
-      // will be assigned to the same bucket.
-      std::vector<SString> sorted;
-      sorted.reserve(classes.size() + funcs.size());
-      for (auto const& [c, _] : classes) sorted.emplace_back(c);
-      for (auto const& [f, _] : funcs) sorted.emplace_back(f);
-      std::sort(begin(sorted), end(sorted), string_data_lti{});
-      sorted.erase(
-        std::unique(
-          begin(sorted), end(sorted),
-          [&] (SString a, SString b) { return a->isame(b); }
-        ),
-        end(sorted)
-      );
-      return sorted;
-    }(),
-    kBucketSize
-  );
-
-  using namespace folly::gen;
-
-  auto const run = [&] (std::vector<SString> work) -> coro::Task<void> {
-    HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
-
-    if (work.empty()) HPHP_CORO_RETURN_VOID;
-
-    Client::ExecMetadata metadata{
-      .job_key = folly::sformat("fixup missing classes {}", work[0])
-    };
-
-    std::vector<UniquePtrRef<php::Class>> clsRefs;
-    std::vector<UniquePtrRef<php::Func>> funcRefs;
-    std::vector<UniquePtrRef<ClassInfo2>> cinfoRefs;
-    std::vector<UniquePtrRef<FuncInfo2>> finfoRefs;
-    std::vector<SString> clsNames;
-    std::vector<SString> funcNames;
-    ISStringSet missingSet;
-
-    for (auto const w : work) {
-      if (auto const used = folly::get_ptr(classes, w)) {
-        missingSet.insert(begin(*used), end(*used));
-        clsRefs.emplace_back(index.classRefs.at(w));
-        cinfoRefs.emplace_back(index.classInfoRefs.at(w));
-        clsNames.emplace_back(w);
-      }
-      // Not else if because of potentially collision between class
-      // and func names.
-      if (auto const used = folly::get_ptr(funcs, w)) {
-        missingSet.insert(begin(*used), end(*used));
-        funcRefs.emplace_back(index.funcRefs.at(w));
-        finfoRefs.emplace_back(index.funcInfoRefs.at(w));
-        funcNames.emplace_back(w);
-      }
-    }
-    assertx(!missingSet.empty());
-
-    std::vector<SString> missing{begin(missingSet), end(missingSet)};
-    std::sort(begin(missing), end(missing), string_data_lti{});
-
-    auto [missingRef, config] = HPHP_CORO_AWAIT(
-      coro::collect(
-        index.client->store(std::move(missing)),
-        index.configRef->getCopy()
-      )
-    );
-
-    auto results = HPHP_CORO_AWAIT(
-      index.client->exec(
-        s_missingClassFixupJob,
-        std::move(config),
-        singleton_vec(
-          std::make_tuple(
-            std::move(clsRefs),
-            std::move(cinfoRefs),
-            std::move(funcRefs),
-            std::move(finfoRefs),
-            std::move(missingRef)
-          )
-        ),
-        std::move(metadata)
-      )
-    );
-    assertx(results.size() == 1);
-    auto& [outClsRefs, outCInfoRefs, outFuncRefs, outFInfoRefs] = results[0];
-    assertx(outClsRefs.size() == clsNames.size());
-    assertx(outFuncRefs.size() == funcNames.size());
-    assertx(outClsRefs.size() == outCInfoRefs.size());
-    assertx(outFuncRefs.size() == outFInfoRefs.size());
-
-    for (size_t i = 0, size = clsNames.size(); i < size; ++i) {
-      index.classRefs.at(clsNames[i]) = outClsRefs[i];
-      index.classInfoRefs.at(clsNames[i]) = outCInfoRefs[i];
-    }
-    for (size_t i = 0, size = funcNames.size(); i < size; ++i) {
-      index.funcRefs.at(funcNames[i]) = outFuncRefs[i];
-      index.funcInfoRefs.at(funcNames[i]) = outFInfoRefs[i];
-    }
-
-    HPHP_CORO_RETURN_VOID;
-  };
-
-  coro::wait(coro::collectRange(
-    from(buckets)
-      | move
-      | map([&] (std::vector<SString> work) {
-          return run(std::move(work)).scheduleOn(index.executor->sticky());
-        })
-      | as<std::vector>()
-  ));
-}
-
-// Run FixupUnitJob on all of the given fixups and store the new
-// php::Unit refs in the Index.
-void flatten_classes_fixup_units(IndexData& index,
-                                 SStringToOneT<UnitFixupJob::Fixup> allFixups) {
-  trace_time trace("flatten classes fixup units", index.sample);
-
-  using namespace folly::gen;
-
-  auto const run = [&] (std::vector<SString> units) -> coro::Task<void> {
-    HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
-
-    if (units.empty()) HPHP_CORO_RETURN_VOID;
-
-    std::vector<UnitFixupJob::Fixup> fixups;
-
-    // Gather up the fixups and ensure a deterministic ordering.
-    fixups.reserve(units.size());
-    for (auto const unit : units) {
-      auto f = std::move(allFixups.at(unit));
-      assertx(!f.addClass.empty() || !f.removeFunc.empty());
-      std::sort(f.addClass.begin(), f.addClass.end(), string_data_lti{});
-      std::sort(f.removeFunc.begin(), f.removeFunc.end(), string_data_lt{});
-      fixups.emplace_back(std::move(f));
-    }
-    auto fixupRefs =
-      HPHP_CORO_AWAIT(index.client->storeMulti(std::move(fixups)));
-    assertx(fixupRefs.size() == units.size());
-
-    std::vector<std::tuple<UniquePtrRef<php::Unit>, Ref<UnitFixupJob::Fixup>>>
-      inputs;
-    inputs.reserve(units.size());
-
-    for (size_t i = 0, size = units.size(); i < size; ++i) {
-      inputs.emplace_back(
-        index.unitRefs.at(units[i]),
-        std::move(fixupRefs[i])
-      );
-    }
-
-    Client::ExecMetadata metadata{
-      .job_key = folly::sformat("fixup units {}", units[0])
-    };
-
-    auto config = HPHP_CORO_AWAIT(index.configRef->getCopy());
-    auto outputs = HPHP_CORO_AWAIT(index.client->exec(
-      s_unitFixupJob,
-      std::move(config),
-      std::move(inputs),
-      std::move(metadata)
-    ));
-    assertx(outputs.size() == units.size());
-
-    // Every unit is already in the Index table, so we can overwrite
-    // them without locking.
-    for (size_t i = 0, size = units.size(); i < size; ++i) {
-      index.unitRefs.at(units[i]) = std::move(outputs[i]);
-    }
-
-    HPHP_CORO_RETURN_VOID;
-  };
-
-  constexpr size_t kBucketSize = 3000;
-
-  // Bucketize by unit
-  auto buckets = consistently_bucketize(
-    [&] {
-      std::vector<SString> sorted;
-      sorted.reserve(allFixups.size());
-      for (auto& [unit, _] : allFixups) sorted.emplace_back(unit);
-      std::sort(sorted.begin(), sorted.end(), string_data_lt{});
-      return sorted;
-    }(),
-    kBucketSize
-  );
-
-  coro::wait(coro::collectRange(
-    from(buckets)
-      | move
-      | map([&] (std::vector<SString> units) {
-          return run(std::move(units)).scheduleOn(index.executor->sticky());
-        })
-      | as<std::vector>()
-  ));
-}
-
 // Metadata used to assign work buckets for building subclasses. This
 // is produced from flattening classes. We don't put closures (or
 // Closure base class) into here. There's a lot of them, but we can
@@ -10723,8 +10275,38 @@ struct SubclassMetadata {
   ISStringSet interfaces;
 };
 
-SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
+// Metadata used to drive the init-types pass. This is produced from
+// flattening classes and added to when building subclasses.
+struct InitTypesMetadata {
+  struct ClsMeta {
+    // Closures of the class
+    ISStringSet closures;
+    // Dependencies of the class. A dependency is a class in a
+    // property/param/return type-hint.
+    ISStringSet deps;
+  };
+  struct FuncMeta {
+    // Same as ClsMeta, but for the func
+    ISStringSet deps;
+  };
+  // Modifications to make to an unit
+  struct Fixup {
+    std::vector<SString> addClass;
+    std::vector<SString> removeFunc;
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(addClass)(removeFunc);
+    }
+  };
+  ISStringToOneT<ClsMeta> classes;
+  ISStringToOneT<FuncMeta> funcs;
+  SStringToOneT<Fixup> fixups;
+  SStringToOneT<std::vector<FuncFamilyEntry>> nameOnlyFF;
+};
+
+std::pair<SubclassMetadata, InitTypesMetadata>
+flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
   trace_time trace("flatten classes", index.sample);
+  trace.ignore_client_stats();
 
   using namespace folly::gen;
 
@@ -10734,6 +10316,7 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     UniquePtrRef<php::ClassBytecode> bytecode;
     UniquePtrRef<ClassInfo2> cinfo;
     SString unitToAddTo;
+    SString closureContext;
     ISStringSet typeUses;
     bool isInterface{false};
     CompactVector<SString> parents;
@@ -10746,9 +10329,6 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
   };
   using Update = boost::variant<ClassUpdate, FuncUpdate>;
   using UpdateVec = std::vector<Update>;
-
-  ISStringSet uninstantiable;
-  std::mutex uninstantiableLock;
 
   auto const run = [&] (FlattenClassesWork work) -> coro::Task<UpdateVec> {
     HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
@@ -10867,16 +10447,11 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     size_t outputIdx = 0;
     size_t parentIdx = 0;
     for (auto const name : work.classes) {
-      if (clsMeta.uninstantiable.count(name)) {
-        // Uninstantiable classes are very rare, so taking a lock here
-        // is fine.
-        std::scoped_lock<std::mutex> _{uninstantiableLock};
-        uninstantiable.emplace(name);
-        continue;
-      }
-
+      if (clsMeta.uninstantiable.count(name)) continue;
       assertx(outputIdx < clsRefs.size());
       assertx(outputIdx < clsMeta.classTypeUses.size());
+
+      auto const& flattenMeta = meta.cls.at(name);
       updates.emplace_back(
         ClassUpdate{
           name,
@@ -10884,6 +10459,7 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
           std::move(bytecodeRefs[outputIdx]),
           std::move(cinfoRefs[outputIdx]),
           nullptr,
+          flattenMeta.closureContext,
           std::move(clsMeta.classTypeUses[outputIdx]),
           (bool)clsMeta.interfaces.count(name)
         }
@@ -10891,7 +10467,7 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
 
       // Ignore closures. We don't run the build subclass pass for
       // closures, so we don't need information for them.
-      if (!meta.cls.at(name).isClosure) {
+      if (!flattenMeta.isClosure) {
         assertx(parentIdx < clsMeta.parents.size());
         auto const& parents = clsMeta.parents[parentIdx].names;
         auto& update = boost::get<ClassUpdate>(updates.back());
@@ -10904,7 +10480,7 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       ++outputIdx;
     }
 
-    for (auto const& [unit, cls, name] : clsMeta.newClosures) {
+    for (auto const& [unit, context, name] : clsMeta.newClosures) {
       assertx(outputIdx < clsRefs.size());
       assertx(outputIdx < clsMeta.classTypeUses.size());
       updates.emplace_back(
@@ -10914,6 +10490,7 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
           std::move(bytecodeRefs[outputIdx]),
           std::move(cinfoRefs[outputIdx]),
           unit,
+          context,
           std::move(clsMeta.classTypeUses[outputIdx])
         }
       );
@@ -10957,11 +10534,8 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
   // needs to be done in a single threaded context (per data
   // structure). This also gathers up all the fixups needed.
 
-  SStringToOneT<UnitFixupJob::Fixup> unitFixups;
   SubclassMetadata subclassMeta;
-
-  ISStringToOneT<ISStringSet> typeUsesByClass;
-  ISStringToOneT<ISStringSet> typeUsesByFunc;
+  InitTypesMetadata initTypesMeta;
 
   {
     trace_time trace2("flatten classes update");
@@ -11034,26 +10608,11 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
           for (auto& update : updates) {
             auto u = boost::get<ClassUpdate>(&update);
             if (!u || !u->unitToAddTo) continue;
-            unitFixups[u->unitToAddTo].addClass.emplace_back(u->name);
+            initTypesMeta.fixups[u->unitToAddTo].addClass.emplace_back(u->name);
           }
         }
         for (auto& [unit, deletions] : meta.unitDeletions) {
-          unitFixups[unit].removeFunc = std::move(deletions);
-        }
-      },
-      [&] {
-        for (auto& updates : allUpdates) {
-          for (auto& update : updates) {
-            if (auto const u = boost::get<ClassUpdate>(&update)) {
-              for (auto const t : u->typeUses) {
-                typeUsesByClass[t].emplace(u->name);
-              }
-            } else if (auto const f = boost::get<FuncUpdate>(&update)) {
-              for (auto const t : f->typeUses) {
-                typeUsesByFunc[t].emplace(f->name);
-              }
-            }
-          }
+          initTypesMeta.fixups[unit].removeFunc = std::move(deletions);
         }
       },
       [&] {
@@ -11067,8 +10626,7 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
 
             // We shouldn't have parents for closures because we
             // special case those explicitly.
-            if (is_closure_name(u->name) ||
-                u->name->isame(s_Closure.get())) {
+            if (is_closure_name(u->name) || is_closure_base(u->name)) {
               assertx(u->parents.empty());
               continue;
             }
@@ -11100,21 +10658,31 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
             subclassMeta.interfaces.emplace(u->name);
           }
         }
+      },
+      [&] {
+        for (auto& updates : allUpdates) {
+          for (auto& update : updates) {
+            if (auto const u = boost::get<ClassUpdate>(&update)) {
+              if (!u->closureContext) {
+                auto& meta = initTypesMeta.classes[u->name];
+                meta.deps.insert(begin(u->typeUses), end(u->typeUses));
+              } else {
+                auto& meta = initTypesMeta.classes[u->closureContext];
+                meta.deps.insert(begin(u->typeUses), end(u->typeUses));
+                meta.closures.emplace(u->name);
+              }
+            } else if (auto const u = boost::get<FuncUpdate>(&update)) {
+              auto& meta = initTypesMeta.funcs[u->name];
+              assertx(meta.deps.empty());
+              meta.deps.insert(begin(u->typeUses), end(u->typeUses));
+            }
+          }
+        }
       }
     );
   }
 
-  flatten_classes_fixup_missing(
-    index,
-    std::move(typeUsesByClass),
-    std::move(typeUsesByFunc),
-    std::move(uninstantiable)
-  );
-
-  // Apply the fixups
-  flatten_classes_fixup_units(index, std::move(unitFixups));
-
-  return subclassMeta;
+  return std::make_pair(std::move(subclassMeta), std::move(initTypesMeta));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -12682,108 +12250,7 @@ protected:
   }
 };
 
-/*
- * BuildSubclassListJob produces name-only func family entries. This
- * job merges entries for the same name into one.
- */
-struct AggregateNameOnlyJob: public BuildSubclassListJob {
-  static std::string name() { return "hhbbc-aggregate-name-only"; }
-
-  struct OutputMeta {
-    std::vector<std::vector<FuncFamily2::Id>> newFuncFamilyIds;
-    std::vector<FuncFamilyEntry> nameOnly;
-    template <typename SerDe> void serde(SerDe& sd) {
-      ScopedStringDataIndexer _;
-      sd(newFuncFamilyIds)
-        (nameOnly)
-        ;
-    }
-  };
-  using Output = Multi<
-    Variadic<FuncFamilyGroup>,
-    OutputMeta
-  >;
-
-  static Output
-  run(std::vector<std::pair<SString, std::vector<FuncFamilyEntry>>> allEntries,
-      Variadic<FuncFamilyGroup> funcFamilies) {
-    LocalIndex index;
-
-    for (auto& group : funcFamilies.vals) {
-      for (auto& ff : group.m_ffs) {
-        auto const id = ff->m_id;
-        // We could have multiple groups which contain the same
-        // FuncFamily, so don't assert uniqueness here. We'll just
-        // take the first one we see (they should all be equivalent).
-        index.funcFamilies.emplace(id, std::move(ff));
-      }
-    }
-
-    OutputMeta meta;
-
-    for (auto const& [name, entries] : allEntries) {
-      Data::MethInfo info;
-      info.complete = false;
-      info.regularComplete = false;
-
-      for (auto const& entry : entries) {
-        auto entryInfo = meth_info_from_func_family_entry(index, entry);
-        for (auto const& meth : entryInfo.regularMeths) {
-          if (info.regularMeths.count(meth)) continue;
-          info.regularMeths.emplace(meth);
-          info.nonRegularPrivateMeths.erase(meth);
-          info.nonRegularMeths.erase(meth);
-        }
-        for (auto const& meth : entryInfo.nonRegularPrivateMeths) {
-          if (info.regularMeths.count(meth) ||
-              info.nonRegularPrivateMeths.count(meth)) {
-            continue;
-          }
-          info.nonRegularPrivateMeths.emplace(meth);
-          info.nonRegularMeths.erase(meth);
-        }
-        for (auto const& meth : entryInfo.nonRegularMeths) {
-          if (info.regularMeths.count(meth) ||
-              info.nonRegularPrivateMeths.count(meth) ||
-              info.nonRegularMeths.count(meth)) {
-            continue;
-          }
-          info.nonRegularMeths.emplace(meth);
-        }
-
-        if (entryInfo.allStatic) {
-          if (!info.allStatic) {
-            info.allStatic = std::move(*entryInfo.allStatic);
-          } else {
-            *info.allStatic |= *entryInfo.allStatic;
-          }
-        }
-        if (entryInfo.regularStatic) {
-          if (!info.regularStatic) {
-            info.regularStatic = std::move(*entryInfo.regularStatic);
-          } else {
-            *info.regularStatic |= *entryInfo.regularStatic;
-          }
-        }
-      }
-
-      meta.nameOnly.emplace_back(
-        make_method_family_entry(index, name, std::move(info))
-      );
-    }
-
-    Variadic<FuncFamilyGroup> funcFamilyGroups;
-    group_func_families(index, funcFamilyGroups.vals, meta.newFuncFamilyIds);
-
-    return std::make_tuple(
-      std::move(funcFamilyGroups),
-      std::move(meta)
-    );
-  }
-};
-
 Job<BuildSubclassListJob> s_buildSubclassJob;
-Job<AggregateNameOnlyJob> s_aggregateNameOnlyJob;
 
 struct SubclassWork {
   ISStringToOneT<std::unique_ptr<BuildSubclassListJob::Split>> allSplits;
@@ -13255,175 +12722,12 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
   return out;
 }
 
-/*
- * Aggregate together func family entries corresponding to the same
- * name. Insert the aggregate entries into the index.
- */
-void aggregate_name_only_entries(
-  IndexData& index,
-  SStringToOneT<std::vector<FuncFamilyEntry>> work
-) {
-  trace_time tracer{"aggregate name-only entries", index.sample};
-
-  using namespace folly::gen;
-
-  constexpr size_t kBucketSize = 3000;
-
-  auto buckets = consistently_bucketize(
-    [&] {
-      std::vector<SString> sorted;
-      sorted.reserve(work.size());
-      for (auto const& [name, entries] : work) {
-        if (entries.size() <= 1) {
-          // If there's only one entry for a name, there's nothing to
-          // aggregate, and can be inserted directly as the final
-          // result.
-          always_assert(
-            index.nameOnlyMethodFamilies.emplace(name, entries[0]).second
-          );
-          continue;
-        }
-        // Otherwise insert a dummy entry. This will let us update the
-        // entry later from multiple threads without having to mutate
-        // the map.
-        always_assert(
-          index.nameOnlyMethodFamilies.emplace(name, FuncFamilyEntry{}).second
-        );
-        sorted.emplace_back(name);
-      }
-      std::sort(begin(sorted), end(sorted), string_data_lt{});
-      return sorted;
-    }(),
-    kBucketSize
-  );
-
-  if (buckets.empty()) return;
-
-  struct Updates {
-    std::vector<
-      std::pair<FuncFamily2::Id, Ref<FuncFamilyGroup>>
-    > funcFamilies;
-  };
-
-  auto const run = [&] (std::vector<SString> names) -> coro::Task<Updates> {
-    HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
-
-    if (names.empty()) HPHP_CORO_RETURN(Updates{});
-
-    std::vector<std::pair<SString, std::vector<FuncFamilyEntry>>> entries;
-    std::vector<Ref<FuncFamilyGroup>> funcFamilies;
-
-    entries.reserve(names.size());
-    // Extract out any func families the entries refer to, so they can
-    // be provided to the job.
-    for (auto const n : names) {
-      auto& e = work.at(n);
-      entries.emplace_back(n, std::move(e));
-      for (auto const& entry : entries.back().second) {
-        match<void>(
-          entry.m_meths,
-          [&] (const FuncFamilyEntry::BothFF& e) {
-            funcFamilies.emplace_back(index.funcFamilyRefs.at(e.m_ff));
-          },
-          [&] (const FuncFamilyEntry::FFAndSingle& e) {
-            funcFamilies.emplace_back(index.funcFamilyRefs.at(e.m_ff));
-          },
-          [&] (const FuncFamilyEntry::FFAndNone& e) {
-            funcFamilies.emplace_back(index.funcFamilyRefs.at(e.m_ff));
-          },
-          [&] (const FuncFamilyEntry::BothSingle&)    {},
-          [&] (const FuncFamilyEntry::SingleAndNone&) {},
-          [&] (const FuncFamilyEntry::None&)          {}
-        );
-      }
-    }
-
-    std::sort(begin(funcFamilies), end(funcFamilies));
-    funcFamilies.erase(
-      std::unique(begin(funcFamilies), end(funcFamilies)),
-      end(funcFamilies)
-    );
-
-    auto [entriesRef, config] = HPHP_CORO_AWAIT(coro::collect(
-      index.client->store(std::move(entries)),
-      index.configRef->getCopy()
-    ));
-
-    Client::ExecMetadata metadata{
-      .job_key = folly::sformat(
-        "aggregate name-only {}",
-        names[0]
-      )
-    };
-
-    auto results = HPHP_CORO_AWAIT(
-      index.client->exec(
-        s_aggregateNameOnlyJob,
-        std::move(config),
-        singleton_vec(
-          std::make_tuple(std::move(entriesRef), std::move(funcFamilies))
-        ),
-        std::move(metadata)
-      )
-    );
-    assertx(results.size() == 1);
-    auto& [ffRefs, outMetaRef] = results[0];
-
-    auto outMeta = HPHP_CORO_AWAIT(index.client->load(std::move(outMetaRef)));
-    assertx(outMeta.newFuncFamilyIds.size() == ffRefs.size());
-    assertx(outMeta.nameOnly.size() == names.size());
-
-    // Update the dummy entries with the actual result.
-    for (size_t i = 0, size = names.size(); i < size; ++i) {
-      auto& old = index.nameOnlyMethodFamilies.at(names[i]);
-      assertx(boost::get<FuncFamilyEntry::None>(&old.m_meths));
-      old = std::move(outMeta.nameOnly[i]);
-    }
-
-    Updates updates;
-    updates.funcFamilies.reserve(outMeta.newFuncFamilyIds.size());
-    for (size_t i = 0, size = outMeta.newFuncFamilyIds.size(); i < size; ++i) {
-      auto const ref = ffRefs[i];
-      for (auto const& id : outMeta.newFuncFamilyIds[i]) {
-        updates.funcFamilies.emplace_back(id, ref);
-      }
-    }
-
-    HPHP_CORO_RETURN(updates);
-  };
-
-  auto const updates = coro::wait(coro::collectRange(
-    from(buckets)
-      | move
-      | map([&] (std::vector<SString>&& n) {
-          return run(std::move(n)).scheduleOn(index.executor->sticky());
-        })
-      | as<std::vector>()
-  ));
-
-  for (auto const& u : updates) {
-    for (auto const& [id, ref] : u.funcFamilies) {
-      // The same FuncFamily can be grouped into multiple
-      // different groups. Prefer the group that's smaller and
-      // if they're the same size, use the one with the lowest
-      // id to keep determinism.
-      auto const& [existing, inserted] =
-        index.funcFamilyRefs.emplace(id, ref);
-      if (inserted) continue;
-      if (existing->second.id().m_size < ref.id().m_size) continue;
-      if (ref.id().m_size < existing->second.id().m_size) {
-        existing->second = ref;
-        continue;
-      }
-      if (existing->second.id() <= ref.id()) continue;
-      existing->second = ref;
-    }
-  }
-}
-
-std::vector<InterfaceConflicts> build_subclass_lists(IndexData& index,
-                                                     SubclassMetadata meta) {
+std::vector<InterfaceConflicts>
+build_subclass_lists(IndexData& index,
+                     SubclassMetadata meta,
+                     InitTypesMetadata& initTypesMeta) {
   trace_time tracer{"build subclass lists", index.sample};
+  tracer.ignore_client_stats();
 
   using namespace folly::gen;
 
@@ -13432,8 +12736,6 @@ std::vector<InterfaceConflicts> build_subclass_lists(IndexData& index,
   ISStringToOneT<UniquePtrRef<BuildSubclassListJob::Split>> splitsToRefs;
 
   ISStringToOneT<hphp_fast_set<FuncFamily2::Id>> funcFamilyDeps;
-
-  SStringToOneT<std::vector<FuncFamilyEntry>> nameOnlyEntries;
 
   std::vector<InterfaceConflicts> ifaceConflicts;
 
@@ -13687,7 +12989,7 @@ std::vector<InterfaceConflicts> build_subclass_lists(IndexData& index,
         [&] {
           for (auto& u : updates) {
             for (auto& [name, entry] : u.nameOnly) {
-              nameOnlyEntries[name].emplace_back(std::move(entry));
+              initTypesMeta.nameOnlyFF[name].emplace_back(std::move(entry));
             }
           }
         },
@@ -13716,9 +13018,715 @@ std::vector<InterfaceConflicts> build_subclass_lists(IndexData& index,
   }
   work.leafInterfaces.clear();
 
-  aggregate_name_only_entries(index, std::move(nameOnlyEntries));
-
   return ifaceConflicts;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Initialize the return-types of functions and methods from their
+ * type-hints.
+ */
+struct InitTypesJob {
+  static std::string name() { return "hhbbc-init-types"; }
+  static void init(const Config& config) {
+    process_init(config.o, config.gd, false);
+    ClassGraph::init();
+  }
+  static void fini() { ClassGraph::destroy(); }
+
+  using Output = Multi<
+    Variadic<std::unique_ptr<php::Class>>,
+    Variadic<std::unique_ptr<ClassInfo2>>,
+    Variadic<std::unique_ptr<php::Func>>,
+    Variadic<std::unique_ptr<FuncInfo2>>
+  >;
+  static Output run(Variadic<std::unique_ptr<php::Class>> classes,
+                    Variadic<std::unique_ptr<ClassInfo2>> cinfos,
+                    Variadic<std::unique_ptr<php::Func>> funcs,
+                    Variadic<std::unique_ptr<FuncInfo2>> finfos,
+                    Variadic<std::unique_ptr<ClassInfo2>> cinfoDeps) {
+    LocalIndex index;
+
+    for (auto const& cls : classes.vals) {
+      always_assert(index.classes.emplace(cls->name, cls.get()).second);
+    }
+    for (auto const& cinfo : cinfos.vals) {
+      always_assert(index.classInfos.emplace(cinfo->name, cinfo.get()).second);
+    }
+    for (auto const& cinfo : cinfoDeps.vals) {
+      always_assert(index.classInfos.emplace(cinfo->name, cinfo.get()).second);
+    }
+
+    assertx(classes.vals.size() == cinfos.vals.size());
+    for (size_t i = 0, size = classes.vals.size(); i < size; ++i) {
+      auto const& cls = classes.vals[i];
+      auto& cinfo = cinfos.vals[i];
+      assertx(cls->name->isame(cinfo->name));
+      assertx(cinfo->funcInfos.size() == cls->methods.size());
+      for (size_t j = 0, size = cls->methods.size(); j < size; ++j) {
+        auto const& func = cls->methods[j];
+        auto& finfo = cinfo->funcInfos[j];
+        assertx(func->name == finfo->name);
+        assertx(finfo->returnTy.is(BInitCell));
+        finfo->returnTy = initial_return_type(index, *func);
+      }
+    }
+
+    assertx(funcs.vals.size() == finfos.vals.size());
+    for (size_t i = 0, size = funcs.vals.size(); i < size; ++i) {
+      auto const& func = funcs.vals[i];
+      auto& finfo = finfos.vals[i];
+      assertx(func->name == finfo->name);
+      assertx(finfo->returnTy.is(BInitCell));
+      finfo->returnTy = initial_return_type(index, *func);
+    }
+
+    return std::make_tuple(
+      std::move(classes),
+      std::move(cinfos),
+      std::move(funcs),
+      std::move(finfos)
+    );
+  }
+
+private:
+
+  struct LocalIndex {
+    ISStringToOneT<const ClassInfo2*> classInfos;
+    ISStringToOneT<const php::Class*> classes;
+  };
+
+  static Type initial_return_type(const LocalIndex& index, const php::Func& f) {
+    auto const ty = [&] {
+      // Return type of native functions is calculated differently.
+      if (f.isNative) return native_function_return_type(&f);
+
+      if ((f.attrs & AttrBuiltin) || f.isMemoizeWrapper) return TInitCell;
+
+      if (f.isGenerator) {
+        if (f.isAsync) {
+          // Async generators always return AsyncGenerator object.
+          return objExact(res::Class::makeUnresolved(s_AsyncGenerator.get()));
+        }
+        // Non-async generators always return Generator object.
+        return objExact(res::Class::makeUnresolved(s_Generator.get()));
+      }
+
+      auto const make_type = [&] (const TypeConstraint& tc) {
+        auto lookup = type_from_constraint(
+          tc,
+          TInitCell,
+          [&] (SString name) -> Optional<res::Class> {
+            if (!index.classInfos.count(name)) return std::nullopt;
+            return res::Class::makeUnresolved(name);
+          },
+          [&] () -> Optional<Type> {
+            if (!f.cls) return std::nullopt;
+            auto const& cls = [&] {
+              if (!f.cls->closureContextCls) return *f.cls;
+              auto const c =
+                folly::get_default(index.classes, f.cls->closureContextCls);
+              always_assert_flog(
+                c,
+                "When processing return-type for {}, "
+                "tried to access missing class {}",
+                func_fullname(f),
+                f.cls->closureContextCls
+              );
+              return *c;
+            }();
+            if (cls.attrs & AttrTrait) return std::nullopt;
+            return subCls(res::Class::makeUnresolved(cls.name));
+          }
+        );
+        if (lookup.coerceClassToString == TriBool::Yes) {
+          lookup.upper = promote_classish(std::move(lookup.upper));
+        } else if (lookup.coerceClassToString == TriBool::Maybe) {
+          lookup.upper |= TSStr;
+        }
+        return unctx(std::move(lookup.upper));
+      };
+
+      auto const process = [&] (const TypeConstraint& tc,
+                                const TypeIntersectionConstraint& ubs) {
+        auto ret = TInitCell;
+        ret = intersection_of(std::move(ret), make_type(tc));
+        for (auto const& ub : ubs.m_constraints) {
+          ret = intersection_of(std::move(ret), make_type(ub));
+        }
+        return ret;
+      };
+
+      auto ret = process(f.retTypeConstraint, f.returnUBs);
+      if (f.hasInOutArgs && !ret.is(BBottom)) {
+        std::vector<Type> types;
+        types.reserve(f.params.size() + 1);
+        types.emplace_back(std::move(ret));
+        for (auto const& p : f.params) {
+          if (!p.inout) continue;
+          auto t = process(p.typeConstraint, p.upperBounds);
+          if (t.is(BBottom)) return TBottom;
+          types.emplace_back(std::move(t));
+        }
+        std::reverse(begin(types)+1, end(types));
+        ret = vec(std::move(types));
+      }
+
+      if (f.isAsync) {
+        // Async functions always return WaitH<T>, where T is the type
+        // returned internally.
+        return wait_handle_unresolved(std::move(ret));
+      }
+      return ret;
+    }();
+
+    FTRACE(3, "Initial return type for {}: {}\n",
+           func_fullname(f), show(ty));
+    return ty;
+  }
+};
+
+/*
+ * "Fixups" a php::Unit by removing specified funcs from it, and
+ * adding specified classes. This is needed to add closures created
+ * from trait flattening into their associated units. While we're
+ * doing this, we also remove redundant meth caller funcs here
+ * (because it's convenient).
+ */
+struct UnitFixupJob {
+  static std::string name() { return "hhbbc-unit-fixup"; }
+  static void init(const Config& config) {
+    process_init(config.o, config.gd, false);
+  }
+  static void fini() {}
+
+  static std::unique_ptr<php::Unit> run(std::unique_ptr<php::Unit> unit,
+                                        const InitTypesMetadata::Fixup& fixup) {
+    if (!fixup.removeFunc.empty()) {
+      // If we want to remove a func, it should be in this unit.
+      auto DEBUG_ONLY erased = false;
+      unit->funcs.erase(
+        std::remove_if(
+          begin(unit->funcs),
+          end(unit->funcs),
+          [&] (SString func) {
+            // This is a kinda dumb O(N^2) algorithm, but these lists
+            // are typicaly size 1.
+            auto const erase = std::any_of(
+              begin(fixup.removeFunc),
+              end(fixup.removeFunc),
+              [&] (SString remove) { return remove == func; }
+            );
+            if (erase) erased = true;
+            return erase;
+          }
+        ),
+        end(unit->funcs)
+      );
+      assertx(erased);
+    }
+
+    unit->classes.insert(
+      end(unit->classes),
+      begin(fixup.addClass),
+      end(fixup.addClass)
+    );
+    return unit;
+  }
+};
+
+/*
+ * BuildSubclassListJob produces name-only func family entries. This
+ * job merges entries for the same name into one.
+ */
+struct AggregateNameOnlyJob: public BuildSubclassListJob {
+  static std::string name() { return "hhbbc-aggregate-name-only"; }
+
+  struct OutputMeta {
+    std::vector<std::vector<FuncFamily2::Id>> newFuncFamilyIds;
+    std::vector<FuncFamilyEntry> nameOnly;
+    template <typename SerDe> void serde(SerDe& sd) {
+      ScopedStringDataIndexer _;
+      sd(newFuncFamilyIds)
+        (nameOnly)
+        ;
+    }
+  };
+  using Output = Multi<
+    Variadic<FuncFamilyGroup>,
+    OutputMeta
+  >;
+
+  static Output
+  run(std::vector<std::pair<SString, std::vector<FuncFamilyEntry>>> allEntries,
+      Variadic<FuncFamilyGroup> funcFamilies) {
+    LocalIndex index;
+
+    for (auto& group : funcFamilies.vals) {
+      for (auto& ff : group.m_ffs) {
+        auto const id = ff->m_id;
+        // We could have multiple groups which contain the same
+        // FuncFamily, so don't assert uniqueness here. We'll just
+        // take the first one we see (they should all be equivalent).
+        index.funcFamilies.emplace(id, std::move(ff));
+      }
+    }
+
+    OutputMeta meta;
+
+    for (auto const& [name, entries] : allEntries) {
+      Data::MethInfo info;
+      info.complete = false;
+      info.regularComplete = false;
+
+      for (auto const& entry : entries) {
+        auto entryInfo = meth_info_from_func_family_entry(index, entry);
+        for (auto const& meth : entryInfo.regularMeths) {
+          if (info.regularMeths.count(meth)) continue;
+          info.regularMeths.emplace(meth);
+          info.nonRegularPrivateMeths.erase(meth);
+          info.nonRegularMeths.erase(meth);
+        }
+        for (auto const& meth : entryInfo.nonRegularPrivateMeths) {
+          if (info.regularMeths.count(meth) ||
+              info.nonRegularPrivateMeths.count(meth)) {
+            continue;
+          }
+          info.nonRegularPrivateMeths.emplace(meth);
+          info.nonRegularMeths.erase(meth);
+        }
+        for (auto const& meth : entryInfo.nonRegularMeths) {
+          if (info.regularMeths.count(meth) ||
+              info.nonRegularPrivateMeths.count(meth) ||
+              info.nonRegularMeths.count(meth)) {
+            continue;
+          }
+          info.nonRegularMeths.emplace(meth);
+        }
+
+        if (entryInfo.allStatic) {
+          if (!info.allStatic) {
+            info.allStatic = std::move(*entryInfo.allStatic);
+          } else {
+            *info.allStatic |= *entryInfo.allStatic;
+          }
+        }
+        if (entryInfo.regularStatic) {
+          if (!info.regularStatic) {
+            info.regularStatic = std::move(*entryInfo.regularStatic);
+          } else {
+            *info.regularStatic |= *entryInfo.regularStatic;
+          }
+        }
+      }
+
+      meta.nameOnly.emplace_back(
+        make_method_family_entry(index, name, std::move(info))
+      );
+    }
+
+    Variadic<FuncFamilyGroup> funcFamilyGroups;
+    group_func_families(index, funcFamilyGroups.vals, meta.newFuncFamilyIds);
+
+    return std::make_tuple(
+      std::move(funcFamilyGroups),
+      std::move(meta)
+    );
+  }
+};
+
+Job<InitTypesJob> s_initTypesJob;
+Job<UnitFixupJob> s_unitFixupJob;
+Job<AggregateNameOnlyJob> s_aggregateNameOnlyJob;
+
+// Initialize return-types, fixup units, and aggregate name-only
+// func-families all at once.
+void init_types(IndexData& index, InitTypesMetadata meta) {
+  trace_time tracer{"init types", index.sample};
+
+  constexpr size_t kTypesBucketSize = 2000;
+  constexpr size_t kFixupsBucketSize = 3000;
+  constexpr size_t kAggregateBucketSize = 3000;
+
+  auto typeBuckets = consistently_bucketize(
+    [&] {
+      std::vector<SString> roots;
+      roots.reserve(meta.classes.size() + meta.funcs.size());
+      for (auto const& [name, _] : meta.classes) {
+        roots.emplace_back(name);
+      }
+      for (auto const& [name, _] : meta.funcs) {
+        // A class and a func could have the same name. Avoid
+        // duplicates. If we do have a name collision it just means
+        // the func and class will be assigned to the same bucket.
+        if (meta.classes.count(name)) continue;
+        roots.emplace_back(name);
+      }
+      return roots;
+    }(),
+    kTypesBucketSize
+  );
+
+  auto fixupBuckets = consistently_bucketize(
+    [&] {
+      std::vector<SString> sorted;
+      sorted.reserve(meta.fixups.size());
+      for (auto& [unit, _] : meta.fixups) sorted.emplace_back(unit);
+      std::sort(sorted.begin(), sorted.end(), string_data_lt{});
+      return sorted;
+    }(),
+    kFixupsBucketSize
+  );
+
+  auto aggregateBuckets = consistently_bucketize(
+    [&] {
+      std::vector<SString> sorted;
+      sorted.reserve(meta.nameOnlyFF.size());
+      for (auto const& [name, entries] : meta.nameOnlyFF) {
+        if (entries.size() <= 1) {
+          // If there's only one entry for a name, there's nothing to
+          // aggregate, and can be inserted directly as the final
+          // result.
+          always_assert(
+            index.nameOnlyMethodFamilies.emplace(name, entries[0]).second
+          );
+          continue;
+        }
+        // Otherwise insert a dummy entry. This will let us update the
+        // entry later from multiple threads without having to mutate
+        // the map.
+        always_assert(
+          index.nameOnlyMethodFamilies.emplace(name, FuncFamilyEntry{}).second
+        );
+        sorted.emplace_back(name);
+      }
+      std::sort(begin(sorted), end(sorted), string_data_lt{});
+      return sorted;
+    }(),
+    kAggregateBucketSize
+  );
+
+  // We want to avoid updating any Index data-structures until after
+  // all jobs have read their inputs. We use the latch to block tasks
+  // until all tasks have passed the point of reading their inputs.
+  coro::Latch typesLatch{typeBuckets.size()};
+
+  auto const runTypes = [&] (std::vector<SString> work) -> coro::Task<void> {
+    HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
+
+    if (work.empty()) {
+      typesLatch.count_down();
+      HPHP_CORO_RETURN_VOID;
+    }
+
+    std::vector<UniquePtrRef<php::Class>> classes;
+    std::vector<UniquePtrRef<ClassInfo2>> cinfos;
+    std::vector<UniquePtrRef<php::Func>> funcs;
+    std::vector<UniquePtrRef<FuncInfo2>> finfos;
+    std::vector<UniquePtrRef<ClassInfo2>> cinfoDeps;
+
+    ISStringSet roots;
+    std::vector<SString> classNames;
+    std::vector<SString> funcNames;
+
+    roots.reserve(work.size());
+    classNames.reserve(work.size());
+
+    for (auto const w : work) {
+      if (auto const cls = folly::get_ptr(meta.classes, w)) {
+        always_assert(roots.emplace(w).second);
+        classNames.emplace_back(w);
+        for (auto const clo : cls->closures) {
+          always_assert(roots.emplace(clo).second);
+          classNames.emplace_back(clo);
+        }
+      }
+      if (meta.funcs.count(w)) funcNames.emplace_back(w);
+    }
+
+    auto const addDep = [&] (SString dep) {
+      if (!meta.classes.count(dep) || roots.count(dep)) return;
+      cinfoDeps.emplace_back(index.classInfoRefs.at(dep));
+    };
+
+    for (auto const w : work) {
+      if (auto const cls = folly::get_ptr(meta.classes, w)) {
+        classes.emplace_back(index.classRefs.at(w));
+        cinfos.emplace_back(index.classInfoRefs.at(w));
+        for (auto const clo : cls->closures) {
+          classes.emplace_back(index.classRefs.at(clo));
+          cinfos.emplace_back(index.classInfoRefs.at(clo));
+        }
+        for (auto const d : cls->deps) addDep(d);
+      }
+      // Not else if. A name can correspond to both a class and a
+      // func.
+      if (auto const func = folly::get_ptr(meta.funcs, w)) {
+        funcs.emplace_back(index.funcRefs.at(w));
+        finfos.emplace_back(index.funcInfoRefs.at(w));
+        for (auto const d : func->deps) addDep(d);
+      }
+    }
+
+    // Record that we've read our inputs
+    typesLatch.count_down();
+
+    std::sort(begin(cinfoDeps), end(cinfoDeps));
+    cinfoDeps.erase(
+      std::unique(begin(cinfoDeps), end(cinfoDeps)),
+      end(cinfoDeps)
+    );
+
+    auto config = HPHP_CORO_AWAIT(index.configRef->getCopy());
+
+    Client::ExecMetadata metadata{
+      .job_key = folly::sformat("init types {}", work[0])
+    };
+
+    auto results = HPHP_CORO_AWAIT(
+      index.client->exec(
+        s_initTypesJob,
+        std::move(config),
+        singleton_vec(
+          std::make_tuple(
+            std::move(classes),
+            std::move(cinfos),
+            std::move(funcs),
+            std::move(finfos),
+            std::move(cinfoDeps)
+          )
+        ),
+        std::move(metadata)
+      )
+    );
+    assertx(results.size() == 1);
+    auto& [classRefs, cinfoRefs, funcRefs, finfoRefs] = results[0];
+    assertx(classRefs.size() == classNames.size());
+    assertx(cinfoRefs.size() == classNames.size());
+    assertx(funcRefs.size() == funcNames.size());
+    assertx(finfoRefs.size() == funcNames.size());
+
+    // Wait for all tasks to finish reading from the Index ref tables
+    // before starting to overwrite them.
+    HPHP_CORO_AWAIT(typesLatch.wait());
+
+    for (size_t i = 0, size = classNames.size(); i < size; ++i) {
+      auto const name = classNames[i];
+      index.classRefs.at(name) = std::move(classRefs[i]);
+      index.classInfoRefs.at(name) = std::move(cinfoRefs[i]);
+    }
+    for (size_t i = 0, size = funcNames.size(); i < size; ++i) {
+      auto const name = funcNames[i];
+      index.funcRefs.at(name) = std::move(funcRefs[i]);
+      index.funcInfoRefs.at(name) = std::move(finfoRefs[i]);
+    }
+
+    HPHP_CORO_RETURN_VOID;
+  };
+
+  auto const runFixups = [&] (std::vector<SString> units) -> coro::Task<void> {
+    HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
+
+    if (units.empty()) HPHP_CORO_RETURN_VOID;
+
+    std::vector<InitTypesMetadata::Fixup> fixups;
+
+    // Gather up the fixups and ensure a deterministic ordering.
+    fixups.reserve(units.size());
+    for (auto const unit : units) {
+      auto f = std::move(meta.fixups.at(unit));
+      assertx(!f.addClass.empty() || !f.removeFunc.empty());
+      std::sort(f.addClass.begin(), f.addClass.end(), string_data_lti{});
+      std::sort(f.removeFunc.begin(), f.removeFunc.end(), string_data_lt{});
+      fixups.emplace_back(std::move(f));
+    }
+    auto fixupRefs =
+      HPHP_CORO_AWAIT(index.client->storeMulti(std::move(fixups)));
+    assertx(fixupRefs.size() == units.size());
+
+    std::vector<
+      std::tuple<UniquePtrRef<php::Unit>, Ref<InitTypesMetadata::Fixup>>
+    > inputs;
+    inputs.reserve(units.size());
+
+    for (size_t i = 0, size = units.size(); i < size; ++i) {
+      inputs.emplace_back(
+        index.unitRefs.at(units[i]),
+        std::move(fixupRefs[i])
+      );
+    }
+
+    Client::ExecMetadata metadata{
+      .job_key = folly::sformat("fixup units {}", units[0])
+    };
+
+    auto config = HPHP_CORO_AWAIT(index.configRef->getCopy());
+    auto outputs = HPHP_CORO_AWAIT(index.client->exec(
+      s_unitFixupJob,
+      std::move(config),
+      std::move(inputs),
+      std::move(metadata)
+    ));
+    assertx(outputs.size() == units.size());
+
+    // Every unit is already in the Index table, so we can overwrite
+    // them without locking.
+    for (size_t i = 0, size = units.size(); i < size; ++i) {
+      index.unitRefs.at(units[i]) = std::move(outputs[i]);
+    }
+
+    HPHP_CORO_RETURN_VOID;
+  };
+
+  struct AggregateUpdates {
+    std::vector<
+      std::pair<FuncFamily2::Id, Ref<FuncFamilyGroup>>
+    > funcFamilies;
+  };
+
+  auto const runAggregate = [&] (std::vector<SString> names)
+    -> coro::Task<AggregateUpdates> {
+    HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
+
+    if (names.empty()) HPHP_CORO_RETURN(AggregateUpdates{});
+
+    std::vector<std::pair<SString, std::vector<FuncFamilyEntry>>> entries;
+    std::vector<Ref<FuncFamilyGroup>> funcFamilies;
+
+    entries.reserve(names.size());
+    // Extract out any func families the entries refer to, so they can
+    // be provided to the job.
+    for (auto const n : names) {
+      auto& e = meta.nameOnlyFF.at(n);
+      entries.emplace_back(n, std::move(e));
+      for (auto const& entry : entries.back().second) {
+        match<void>(
+          entry.m_meths,
+          [&] (const FuncFamilyEntry::BothFF& e) {
+            funcFamilies.emplace_back(index.funcFamilyRefs.at(e.m_ff));
+          },
+          [&] (const FuncFamilyEntry::FFAndSingle& e) {
+            funcFamilies.emplace_back(index.funcFamilyRefs.at(e.m_ff));
+          },
+          [&] (const FuncFamilyEntry::FFAndNone& e) {
+            funcFamilies.emplace_back(index.funcFamilyRefs.at(e.m_ff));
+          },
+          [&] (const FuncFamilyEntry::BothSingle&)    {},
+          [&] (const FuncFamilyEntry::SingleAndNone&) {},
+          [&] (const FuncFamilyEntry::None&)          {}
+        );
+      }
+    }
+
+    std::sort(begin(funcFamilies), end(funcFamilies));
+    funcFamilies.erase(
+      std::unique(begin(funcFamilies), end(funcFamilies)),
+      end(funcFamilies)
+    );
+
+    auto [entriesRef, config] = HPHP_CORO_AWAIT(coro::collect(
+      index.client->store(std::move(entries)),
+      index.configRef->getCopy()
+    ));
+
+    Client::ExecMetadata metadata{
+      .job_key = folly::sformat("aggregate name-only {}", names[0])
+    };
+
+    auto results = HPHP_CORO_AWAIT(
+      index.client->exec(
+        s_aggregateNameOnlyJob,
+        std::move(config),
+        singleton_vec(
+          std::make_tuple(std::move(entriesRef), std::move(funcFamilies))
+        ),
+        std::move(metadata)
+      )
+    );
+    assertx(results.size() == 1);
+    auto& [ffRefs, outMetaRef] = results[0];
+
+    auto outMeta = HPHP_CORO_AWAIT(index.client->load(std::move(outMetaRef)));
+    assertx(outMeta.newFuncFamilyIds.size() == ffRefs.size());
+    assertx(outMeta.nameOnly.size() == names.size());
+
+    // Update the dummy entries with the actual result.
+    for (size_t i = 0, size = names.size(); i < size; ++i) {
+      auto& old = index.nameOnlyMethodFamilies.at(names[i]);
+      assertx(boost::get<FuncFamilyEntry::None>(&old.m_meths));
+      old = std::move(outMeta.nameOnly[i]);
+    }
+
+    AggregateUpdates updates;
+    updates.funcFamilies.reserve(outMeta.newFuncFamilyIds.size());
+    for (size_t i = 0, size = outMeta.newFuncFamilyIds.size(); i < size; ++i) {
+      auto const ref = ffRefs[i];
+      for (auto const& id : outMeta.newFuncFamilyIds[i]) {
+        updates.funcFamilies.emplace_back(id, ref);
+      }
+    }
+
+    HPHP_CORO_RETURN(updates);
+  };
+
+  auto const runAggregateCombine = [&] (auto tasks) -> coro::Task<void> {
+    HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
+
+    auto const updates = HPHP_CORO_AWAIT(coro::collectRange(std::move(tasks)));
+
+    for (auto const& u : updates) {
+      for (auto const& [id, ref] : u.funcFamilies) {
+        // The same FuncFamily can be grouped into multiple
+        // different groups. Prefer the group that's smaller and
+        // if they're the same size, use the one with the lowest
+        // id to keep determinism.
+        auto const& [existing, inserted] =
+          index.funcFamilyRefs.emplace(id, ref);
+        if (inserted) continue;
+        if (existing->second.id().m_size < ref.id().m_size) continue;
+        if (ref.id().m_size < existing->second.id().m_size) {
+          existing->second = ref;
+          continue;
+        }
+        if (existing->second.id() <= ref.id()) continue;
+        existing->second = ref;
+      }
+    }
+
+    HPHP_CORO_RETURN_VOID;
+  };
+
+  using namespace folly::gen;
+
+  std::vector<coro::TaskWithExecutor<void>> tasks;
+  tasks.reserve(typeBuckets.size() + fixupBuckets.size() + 1);
+
+  for (auto& work : typeBuckets) {
+    tasks.emplace_back(
+      runTypes(std::move(work)).scheduleOn(index.executor->sticky())
+    );
+  }
+  for (auto& work : fixupBuckets) {
+    tasks.emplace_back(
+      runFixups(std::move(work)).scheduleOn(index.executor->sticky())
+    );
+  }
+  auto subTasks = from(aggregateBuckets)
+    | move
+    | map([&] (std::vector<SString>&& work) {
+        return runAggregate(
+          std::move(work)
+        ).scheduleOn(index.executor->sticky());
+      })
+    | as<std::vector>();
+  tasks.emplace_back(
+    runAggregateCombine(
+      std::move(subTasks)
+    ).scheduleOn(index.executor->sticky())
+  );
+
+  coro::wait(coro::collectRange(std::move(tasks)));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -15118,8 +15126,11 @@ Index::Index(Input input,
   );
 
   flatten_type_mappings(*m_data, flattenMeta);
-  auto subclassMeta = flatten_classes(*m_data, std::move(flattenMeta));
-  auto ifaceConflicts = build_subclass_lists(*m_data, std::move(subclassMeta));
+  auto [subclassMeta, initTypesMeta] =
+    flatten_classes(*m_data, std::move(flattenMeta));
+  auto ifaceConflicts =
+    build_subclass_lists(*m_data, std::move(subclassMeta), initTypesMeta);
+  init_types(*m_data, std::move(initTypesMeta));
   compute_iface_vtables(*m_data, std::move(ifaceConflicts));
   check_invariants(*m_data);
   make_local(*m_data);

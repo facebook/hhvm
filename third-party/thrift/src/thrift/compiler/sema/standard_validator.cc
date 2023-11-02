@@ -731,7 +731,7 @@ void validate_ref_unique_and_box_annotation(
             "cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box "
             "annotation instead in `{}` with @cpp.Adapter.",
             node.name());
-      } else {
+      } else if (node.qualifier() == t_field_qualifier::optional) {
         ctx.warning(
             "cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box "
             "annotation instead in `{}`.",
@@ -745,7 +745,7 @@ void validate_ref_unique_and_box_annotation(
             "Please use @thrift.Box annotation instead in `{}` with "
             "@cpp.Adapter.",
             node.name());
-      } else {
+      } else if (node.qualifier() == t_field_qualifier::optional) {
         ctx.warning(
             "cpp.ref_type = `unique`, cpp2.ref_type = `unique` are deprecated. "
             "Please use @thrift.Box annotation instead in `{}`.",
@@ -758,7 +758,7 @@ void validate_ref_unique_and_box_annotation(
             "@cpp.Ref{{type = cpp.RefType.Unique}} is deprecated. Please use "
             "@thrift.Box annotation instead in `{}` with @cpp.Adapter.",
             node.name());
-      } else {
+      } else if (node.qualifier() == t_field_qualifier::optional) {
         ctx.warning(
             "@cpp.Ref{{type = cpp.RefType.Unique}} is deprecated. Please use "
             "@thrift.Box annotation instead in `{}`.",

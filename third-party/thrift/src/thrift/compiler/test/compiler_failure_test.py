@@ -419,7 +419,6 @@ class CompilerFailureTest(unittest.TestCase):
             err,
             textwrap.dedent(
                 """\
-                [WARNING:foo.thrift:3] cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box annotation instead in `a`.
                 [ERROR:foo.thrift:3] Mixin field `a` can not be a ref in cpp.
                 """
             ),

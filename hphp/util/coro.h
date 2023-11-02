@@ -232,6 +232,27 @@ private:
   folly::fibers::Semaphore m_sem;
 };
 
+// Block coro task until the latch has been signalled N times. NB: If
+// coros are being emulated, this class will be a no-op. This is
+// because in that situation tasks run synchronously and using a latch
+// will typically cause deadlock. Be aware of this possibility when
+// using it.
+struct Latch {
+  explicit Latch(uint64_t c) : m_count{c} {}
+  Task<void> wait() { co_await m_baton; }
+  void count_down() {
+    if (!--m_count) m_baton.post();
+  }
+
+  Latch(const Latch&) = delete;
+  Latch(Latch&&) = delete;
+  Latch& operator=(const Latch&) = delete;
+  Latch& operator=(Latch&&) = delete;
+private:
+  std::atomic<uint64_t> m_count;
+  folly::coro::Baton m_baton;
+};
+
 // Allows you to run coroutines asynchronously. Assign an executor to
 // a Task, then add it to the AsyncScope. The coroutine will start
 // running and will be automatically cleaned up when done. Since you
@@ -396,6 +417,21 @@ struct Semaphore {
   Task<void> wait() { m_sem.wait(); return Task<void>{}; }
 private:
   folly::LifoSem m_sem;
+};
+
+// No-op implementation. In coro emulation, all tasks run
+// synchronously and thus using a latch to block a task to wait for
+// another will just deadlock. Only use Latch in situations where this
+// is acceptable behavior.
+struct Latch {
+  explicit Latch(uint64_t) {}
+  Task<void> wait() { return Task<void>{}; }
+  void count_down() {}
+
+  Latch(const Latch&) = delete;
+  Latch(Latch&&) = delete;
+  Latch& operator=(const Latch&) = delete;
+  Latch& operator=(Latch&&) = delete;
 };
 
 //////////////////////////////////////////////////////////////////////

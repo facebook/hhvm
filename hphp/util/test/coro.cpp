@@ -528,4 +528,30 @@ TEST(Coro, CurrentExecutor) {
   EXPECT_EQ(coro::using_coros ? global.get() : nullptr, executor);
 }
 
+TEST(Coro, Latch) {
+  coro::Latch latch1{3};
+  coro::Latch latch2{1};
+
+  std::atomic<int> sum{0};
+  auto const worker = [&] (int x) -> coro::Task<void> {
+    HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
+    sum += x;
+    latch1.count_down();
+    HPHP_CORO_AWAIT(latch2.wait());
+    sum += x;
+    HPHP_CORO_RETURN_VOID;
+  };
+
+  coro::AsyncScope scope;
+  scope.add(worker(101).scheduleOn(folly::getGlobalCPUExecutor()));
+  scope.add(worker(50).scheduleOn(folly::getGlobalCPUExecutor()));
+  scope.add(worker(60).scheduleOn(folly::getGlobalCPUExecutor()));
+
+  coro::wait(latch1.wait());
+  EXPECT_EQ(sum, coro::using_coros ? 211 : 422);
+  latch2.count_down();
+  coro::wait(scope.joinAsync());
+  EXPECT_EQ(sum, 422);
+}
+
 }

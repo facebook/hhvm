@@ -1,0 +1,13 @@
+string(3) "Bar"
+bool(true)
+string(3) "Bar"
+vec(2) {
+  string(3) "Bar"
+  NULL
+}
+string(3) "Foo"
+string(2) "sm"
+int(10)
+string(1) "m"
+
+Fatal error: Cls: Expected string or object, got null in %s/class-ptr/class-eager-string.php on line 32

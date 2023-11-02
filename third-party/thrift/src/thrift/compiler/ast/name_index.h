@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <unordered_map>
 
@@ -53,10 +54,10 @@ class name_index {
   //
   // Both `name` and `node` must out live the name_index entry. `name` must also
   // not change while in the name_index.
-  const T* put(const std::string& name, const T& node);
+  const T* put(std::string_view name, const T& node);
   // Must be l-values.
   const T* put(std::string&& name, const T& node) = delete;
-  const T* put(const std::string& name, T&& node) = delete;
+  const T* put(std::string_view name, T&& node) = delete;
 
   // Adds all the entries from other, replacing any existing entries.
   void put_all(const name_index& other);
@@ -65,38 +66,30 @@ class name_index {
   void clear() { index_.clear(); }
 
   // Returns true iff the given name is in the map.
-  bool contains(const std::string& name) const {
+  bool contains(std::string_view name) const {
     return index_.find(name) != index_.end();
   }
 
   // Returns the node associated with the given name, or nullptr.
-  const T* find(const std::string& name) const;
+  const T* find(std::string_view name) const;
 
-  // Calls the given function with `(const std::string& name, const T& node)`,
+  // Calls the given function with `(std::string_view name, const T& node)`,
   // for each entry in the name_index.
   // TODO(afuller): Generalize the iterator adapter in detail/view.h and expose
   // them here.
   template <typename F>
   void for_each(const F& cb) const {
     for (const auto& entry : index_) {
-      cb(entry.first.get(), *entry.second);
+      cb(entry.first, *entry.second);
     }
   }
 
  private:
-  // TODO(afuller): Use boost::string_view instead of
-  // std::reference_wrapper<const std::string>.
-  // TODO(afuller): Switch to std::string_view when c++17 can be used.
-  std::unordered_map<
-      std::reference_wrapper<const std::string>,
-      const T*,
-      std::hash<std::string>,
-      std::equal_to<std::string>>
-      index_;
+  std::unordered_map<std::string_view, const T*> index_;
 };
 
 template <typename T>
-const T* name_index<T>::put(const std::string& name, const T& node) {
+const T* name_index<T>::put(std::string_view name, const T& node) {
   auto key = std::ref(name);
   const T* result = nullptr;
   auto itr = index_.find(key);
@@ -113,12 +106,12 @@ const T* name_index<T>::put(const std::string& name, const T& node) {
 template <typename T>
 void name_index<T>::put_all(const name_index& other) {
   for (const auto& entry : other.index_) {
-    put(entry.first.get(), *entry.second);
+    put(entry.first, *entry.second);
   }
 }
 
 template <typename T>
-const T* name_index<T>::find(const std::string& name) const {
+const T* name_index<T>::find(std::string_view name) const {
   auto itr = index_.find(name);
   if (itr != index_.end()) {
     return itr->second;

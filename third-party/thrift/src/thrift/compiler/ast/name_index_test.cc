@@ -80,8 +80,8 @@ TEST_F(NameIndexTest, PutAll) {
   EXPECT_EQ(index1.find("s3"), s3.get());
 
   std::vector<const t_struct*> nodes;
-  index1.for_each([&](const std::string& name, const t_struct& node) {
-    EXPECT_EQ(&name, &node.name());
+  index1.for_each([&](std::string_view name, const t_struct& node) {
+    EXPECT_EQ(name, node.name());
     nodes.emplace_back(&node);
   });
   EXPECT_THAT(

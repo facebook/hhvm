@@ -86,7 +86,7 @@ bool has_lazy_field(const t_structured& node) {
 void report_redef_error(
     diagnostics_engine& diags,
     const char* kind,
-    const std::string& name,
+    std::string_view name,
     const t_named& parent,
     const t_node& child,
     const t_node& /*existing*/) {
@@ -110,8 +110,7 @@ class redef_checker {
   // inherited. In this case 'node' wold be the mixin type, from which `name`
   // was derived, while `child` is the mixin field that caused the name to be
   // inherited.
-  void check(
-      const std::string& name, const t_named& node, const t_node& child) {
+  void check(std::string_view name, const t_named& node, const t_node& child) {
     if (const auto* existing = seen_.put(name, node)) {
       if (&node == &parent_ && existing == &parent_) {
         // The degenerate case where parent_ is conflicting with itself.
@@ -130,7 +129,7 @@ class redef_checker {
     }
   }
   void check(std::string&&, const t_named&, const t_node&) = delete;
-  void check(const std::string&, t_named&&, const t_node&) = delete;
+  void check(std::string_view, t_named&&, const t_node&) = delete;
 
   // Helpers for the common case where the names are from child t_nameds of
   // the parent.
@@ -403,7 +402,7 @@ void validate_field_names_uniqueness(
     if (const auto* mixin = get_mixin_type(field)) {
       const auto& mixin_metadata = ctx.cache().get<structured_metadata>(*mixin);
       mixin_metadata.field_name_to_parent.for_each(
-          [&](const std::string& name, const t_structured& parent) {
+          [&](std::string_view name, const t_structured& parent) {
             checker.check(name, parent, field);
           });
     }

@@ -197,7 +197,5 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
 
 const LoggingEventRegistry& getLoggingEventRegistry();
 
-void useMockLoggingEventRegistry();
-
 } // namespace thrift
 } // namespace apache

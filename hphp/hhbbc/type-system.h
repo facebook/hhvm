@@ -653,8 +653,7 @@ private:
   friend Optional<int64_t> arr_size(const Type& t);
   friend ArrayCat categorize_array(const Type& t);
   friend CompactVector<LSString> get_string_keys(const Type& t);
-  friend Type wait_handle(const Index&, Type);
-  friend Type wait_handle_unresolved(Type);
+  friend Type wait_handle(Type);
   friend bool is_specialized_wait_handle(const Type&);
   friend bool is_specialized_array_like(const Type&);
   friend bool is_specialized_array_like_arrval(const Type&);
@@ -777,10 +776,6 @@ private:
   friend struct ArrLikePackedCOWer;
   friend struct ArrLikeMapNCOWer;
   friend struct ArrLikeMapCOWer;
-
-  friend Type resolve_classes(const Index&, Type);
-  friend void resolve_classes_impl(const Index&, const Type&, COWer&);
-
 
   // These have to be defined here but are not meant to be used
   // outside of type-system.cpp
@@ -920,8 +915,7 @@ struct DWaitHandle {
   DCls cls;
   Type inner;
 
-  void serde(BlobEncoder&) const;
-  void serde(BlobDecoder&);
+  template <typename SerDe> void serde(SerDe& sd) { sd(inner)(cls); }
 };
 
 struct DArrLikePacked {
@@ -982,13 +976,7 @@ HHBBC_TYPE_PREDEFINED(X)
 /*
  * Return WaitH<T> for a type t.
  */
-Type wait_handle(const Index&, Type t);
-
-/*
- * Like wait_handle, but does not resolve the wait handle class (so
- * does not require an Index).
- */
-Type wait_handle_unresolved(Type t);
+Type wait_handle(Type t);
 
 /*
  * Return T from a WaitH<T>.
@@ -1554,15 +1542,6 @@ Type add_nonemptiness(Type t);
  */
 Type assert_emptiness(Type);
 Type assert_nonemptiness(Type);
-
-/*
- * Convert any unresolved classes/objects within the type (including
- * nested types) into their resolved equivalents (using the provided
- * Index). Some classes/objects will always be unresolved and will
- * remain so. If any class/object resolves into a non-existent type,
- * it will be removed from the type (which may produce a Bottom).
- */
-Type resolve_classes(const Index&, Type);
 
 /*
  * If t is definitely an array with a known size, return

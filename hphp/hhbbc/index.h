@@ -282,7 +282,9 @@ using ResolvedPropInits = CompactVector<std::pair<size_t, PropInitInfo>>;
 //////////////////////////////////////////////////////////////////////
 
 // private types
+struct ClassGraph;
 struct ClassInfo;
+struct ClassInfo2;
 struct FuncInfo2;
 struct FuncFamily2;
 
@@ -330,9 +332,9 @@ struct Class {
    * context dependent and specified by nonRegularL and nonRegularR.
    */
   bool exactSubtypeOf(const Class& o, bool nonRegularL, bool nonRegularR) const;
-  bool exactSubtypeOfExact(
-    const Class& o, bool nonRegularL, bool nonRegularR
-  ) const;
+  bool exactSubtypeOfExact(const Class& o,
+                           bool nonRegularL,
+                           bool nonRegularR) const;
   bool subSubtypeOf(const Class& o, bool nonRegularL, bool nonRegularR) const;
 
   /*
@@ -353,9 +355,9 @@ struct Class {
    * context dependent and specified by nonRegularL and nonRegularR.
    */
   bool exactCouldBe(const Class& o, bool nonRegularL, bool nonRegularR) const;
-  bool exactCouldBeExact(
-      const Class& o, bool nonRegularL, bool nonRegularR
-  ) const;
+  bool exactCouldBeExact(const Class& o,
+                         bool nonRegularL,
+                         bool nonRegularR) const;
   bool subCouldBe(const Class& o, bool nonRegularL, bool nonRegularR) const;
 
   /*
@@ -462,16 +464,14 @@ struct Class {
 
   /*
    * Returns the res::Class for this Class's parent if there is one,
-   * or nullptr.
+   * or std::nullopt.
    */
   Optional<Class> parent() const;
 
   /*
    * Returns true if we have a ClassInfo for this Class.
    */
-  bool resolved() const {
-    return val.right() != nullptr;
-  }
+  bool resolved() const;
 
   /*
    * Returns the php::Class for this Class if there is one, or
@@ -479,11 +479,20 @@ struct Class {
    */
   const php::Class* cls() const;
 
+  bool hasCompleteChildren() const;
+  bool isComplete() const;
+
   /*
    * Invoke the given function on every possible subclass of this
-   * class. This must be a resolved class.
+   * class (including itself), providing the name and the Attr bits of
+   * the subclass. Only the Attr bits corresponding to the type of
+   * class are provided (AttrEnum/AttrTrait/AttrInterface). Returns
+   * false and doesn't call the function if this class does not know
+   * it's complete children, true otherwise.
    */
-  void forEachSubclass(const std::function<void(const php::Class*)>&) const;
+  bool forEachSubclass(const std::function<void(SString, Attr)>&) const;
+
+  using ClassVec = TinyVector<Class, 4>;
 
   /*
    * Given two lists of classes, calculate the union between them (in
@@ -494,12 +503,12 @@ struct Class {
    * TCls). This function is really an implementation detail of
    * union_of() and not a general purpose interface.
    */
-  static TinyVector<Class, 2> combine(folly::Range<const Class*> classes1,
-                                      folly::Range<const Class*> classes2,
-                                      bool isSub1,
-                                      bool isSub2,
-                                      bool nonRegular1,
-                                      bool nonRegular2);
+  static ClassVec combine(folly::Range<const Class*> classes1,
+                          folly::Range<const Class*> classes2,
+                          bool isSub1,
+                          bool isSub2,
+                          bool nonRegular1,
+                          bool nonRegular2);
   /*
    * Given two lists of classes, calculate the intersection between
    * them (in canonical form). A list of size 1 represents a single
@@ -509,11 +518,11 @@ struct Class {
    * (equivalent to Bottom). This function is really an implementation
    * detail of intersection_of() and not a general purpose interface.
    */
-  static TinyVector<Class, 2> intersect(folly::Range<const Class*> classes1,
-                                        folly::Range<const Class*> classes2,
-                                        bool nonRegular1,
-                                        bool nonRegular2,
-                                        bool& nonRegularOut);
+  static ClassVec intersect(folly::Range<const Class*> classes1,
+                            folly::Range<const Class*> classes2,
+                            bool nonRegular1,
+                            bool nonRegular2,
+                            bool& nonRegularOut);
 
   /*
    * Given a list of classes, return a new list of classes
@@ -521,8 +530,7 @@ struct Class {
    * canonicalized). If the output list is empty, there are no regular
    * classes.
    */
-  static TinyVector<Class, 2>
-  removeNonRegular(folly::Range<const Class*> classes);
+  static ClassVec removeNonRegular(folly::Range<const Class*> classes);
 
   /*
    * Given two lists of classes, calculate whether their intersection
@@ -535,61 +543,49 @@ struct Class {
                            bool nonRegular2);
 
   /*
-   * Produce an unresolved class representing the base class of a wait
-   * handle (this will be a sub-class of Awaitable). Since this is
-   * unresolved, it does not require an Index.
-   */
-  static Class unresolvedWaitHandle();
-
-  /*
    * Convert this class to/from an opaque integer. The integer is
    * "pointerish" (has upper bits cleared), so can be used in
    * something like CompactTaggedPtr. It is not, however, guaranteed
    * to be aligned (lower bits may be set).
    */
-  uintptr_t toOpaque() const { return val.toOpaque(); }
-  static Class fromOpaque(uintptr_t o) {
-    return Class{decltype(val)::fromOpaque(o)};
-  }
+  uintptr_t toOpaque() const { return (uintptr_t)opaque.p; }
+  static Class fromOpaque(uintptr_t o) { return Class{Opaque{(void*)o}}; }
 
-  size_t hash() const { return val.toOpaque(); }
+  size_t hash() const { return toOpaque(); }
 
   /*
-   * Make an unresolved Class representing the given name. Mainly
-   * meant for tests.
+   * Obtain with a given name or associated with the given ClassInfo.
    */
-  static Class makeUnresolved(SString n) { return Class { n }; };
+  static Class get(SString);
+  static Class get(const ClassInfo&);
+  static Class get(const ClassInfo2&);
 
   /*
-   * NB: Serd-ing a Class only encodes the name. Deserializing it
-   * always produces a name-only unresolved class, regardless of the
-   * original. If necessary, the Class must be manually resolved
-   * afterwards.
+   * Make an unresolved Class representing the given name. The name
+   * cannot be an existing class. Mainly meant for tests.
    */
-  template <typename SerDe> void serde(SerDe& sd) {
-    static_assert(!SerDe::deserializing);
-    sd(name());
-  }
+  static Class getUnresolved(SString);
 
-  template <typename SerDe> static Class makeForSerde(SerDe& sd) {
-    SString n;
-    sd(n);
-    assertx(n);
-    return Class{n};
-  }
+  void serde(BlobEncoder&) const;
+  static Class makeForSerde(BlobDecoder&);
+
 private:
-  explicit Class(Either<SString,ClassInfo*> val) : val{val} {}
+  ClassGraph graph() const;
+  ClassInfo* cinfo() const;
+  ClassInfo2* cinfo2() const;
 
   template <typename F>
   static void visitEverySub(folly::Range<const Class*>, bool, const F&);
-  static ClassInfo* commonAncestor(ClassInfo*, ClassInfo*);
-  static TinyVector<Class, 2> canonicalizeIsects(const TinyVector<Class, 8>&, bool);
-private:
+
   friend std::string show(const Class&);
+
   friend struct ::HPHP::HHBBC::Index;
-  friend struct ::HPHP::HHBBC::PublicSPropMutations;
-  friend struct ::HPHP::HHBBC::ClassInfo;
-  Either<SString,ClassInfo*> val;
+
+  struct Opaque { void* p; };
+  Opaque opaque;
+
+  explicit Class(ClassGraph);
+  explicit Class(Opaque o): opaque{o} {}
 };
 
 /*
@@ -1032,13 +1028,6 @@ struct Index {
    * Pre: obj.subtypeOf(BObj)
    */
   res::Func resolve_ctor(const Type& obj) const;
-
-  /*
-   * Return a resolved class representing the base class of a wait
-   * handle (this will be a sub-class of Awaitable). This is stored in
-   * the Index as it is typically cached.
-   */
-  res::Class wait_handle_class() const;
 
   /*
    * Lookup metadata about the constant access `cls'::`name', in the

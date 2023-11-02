@@ -458,9 +458,7 @@ struct FuncInfo2 {
    */
   Type returnTy = TInitCell;
 
-  template <typename SerDe> void serde(SerDe& sd) {
-    sd(name)(returnTy);
-  }
+  template <typename SerDe> void serde(SerDe&);
 };
 
 namespace {
@@ -1413,6 +1411,8 @@ private:
 
   static std::unique_ptr<Table> g_table;
   static __thread SerdeState* tl_serde_state;
+
+  friend struct res::Class;
 
   explicit ClassGraph(Node* n) : this_{n} {}
 
@@ -3298,8 +3298,7 @@ ClassGraph::setCompleteImpl(const Impl& impl, Node& n) {
     }
   }
 
-  // Implemented in next diff
-  if (!count || false/**count > options.preciseSubclassLimit*/) {
+  if (!count || *count > options.preciseSubclassLimit) {
     // The child is conservative, or we've exceeded the subclass list
     // limit. Mark this node as being conservative.
     assertx(!n.hasCompleteChildren());
@@ -3595,6 +3594,16 @@ bool ClassGraph::serUpward(SerDe& sd, Node& n) {
 
 //////////////////////////////////////////////////////////////////////
 
+template <typename SerDe> void FuncInfo2::serde(SerDe& sd) {
+  ScopedStringDataIndexer _;
+  ClassGraph::ScopedSerdeState _2;
+  sd(name)
+    (returnTy)
+    ;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * Known information about an instantiatiable class.
  */
@@ -3609,12 +3618,6 @@ struct ClassInfo {
    * The info for the parent of this Class.
    */
   ClassInfo* parent = nullptr;
-
-  /*
-   * A (case-insensitive) map from interface names supported by this class to
-   * their ClassInfo structures, flattened across the hierarchy.
-   */
-  ISStringToOneT<const ClassInfo*> implInterfaces;
 
   struct ConstIndex {
     const php::Const& operator*() const {
@@ -3707,91 +3710,7 @@ struct ClassInfo {
   folly::sorted_vector_map<SString, FuncFamilyOrSingle> methodFamilies;
   folly::sorted_vector_map<SString, FuncFamilyOrSingle> methodFamiliesAux;
 
-  /*
-   * For classes (abstract and non-abstract), this is the subclasses
-   * of this class, including the class itself.
-   *
-   * For interfaces, this is the list of classes that implement this
-   * interface, including the interface itself.
-   *
-   * For traits, this is the list of classes that use the trait where
-   * the trait wasn't flattened into the class (including the trait
-   * itself). Note that unlike the other cases, a class being on a
-   * trait's subclass list does *not* imply a "is-a" relationship at
-   * runtime. You usually want to avoid iterating the subclass list of
-   * a trait.
-   *
-   * As an optimization, Closure has an empty subclass list (this is
-   * the only situation where the subclass list can be completely
-   * empty). Closure's actual subclass list can grow pathologically
-   * large on a big code base and it's rarely useful. We force Closure
-   * to be unresolved whenever its inside a res::Class, so we never
-   * need the list.
-   *
-   * The elements in this vector are sorted by their pointer value.
-   */
-  CompactVector<ClassInfo*> subclassList;
-
-  /*
-   * A vector of ClassInfo that encodes the inheritance hierarchy,
-   * unless if this ClassInfo represents an interface.
-   *
-   * This is the list of base classes for this class in inheritance
-   * order.
-   */
-  CompactVector<ClassInfo*> baseList;
-
-  /*
-   * Information about interfaces' relationship to each other. Used to
-   * speed up subtypeOf and couldBe operations involving
-   * interfaces. Since interfaces are a minority, we heap allocate the
-   * information (so only need a pointer when we don't need
-   * it). Furthermore, we lazily calculate the information (we may not
-   * need the information ever for a given interface).
-   */
-  struct InterfaceInfo {
-    // The set of interfaces or base classes which have some non-empty
-    // intersection with this interface. If an interface is in this
-    // set, one of it's implementations also implements this
-    // ClassInfo. If a non-interface is in this set, it or one of it's
-    // base classes implements this ClassInfo. This set can
-    // potentially be large and is needed rarely, so it is lazily
-    // calculated (on top of InterfaceInfo being lazily
-    // calculated). We keep two variants. The first only includes
-    // information from the interface's implementations which are
-    // regular classes. The second uses all of the interface's
-    // implementations (and the interface itself).
-    using CouldBeSet = hphp_fast_set<const ClassInfo*>;
-    mutable LockFreeLazy<CouldBeSet> lazyCouldBe;
-    mutable LockFreeLazy<CouldBeSet> lazyCouldBeNonRegular;
-
-    // The set of interfaces which this interface is a subtype
-    // of. That is, every implementation of this interface also
-    // implements those interfaces. Every interface is a subtypeOf
-    // itself, but itself is not stored here (space optimization).
-    hphp_fast_set<const ClassInfo*> subtypeOf;
-
-    // Non-nullptr if there's a single class which is a super class of
-    // all implementations of this interface, nullptr otherwise.
-    const ClassInfo* commonBase;
-  };
-  // Don't access this directly, use interfaceInfo().
-  LockFreeLazyPtr<InterfaceInfo> lazyInterfaceInfo;
-  LockFreeLazyPtrNoDelete<ClassInfo> lazyEquivalent;
-
-  // Obtain the InterfaceInfo or CouldBeSet for this interface
-  // (calculating it if necessary). This class must be an interface.
-  const InterfaceInfo& interfaceInfo();
-  const InterfaceInfo::CouldBeSet& couldBe();
-  const InterfaceInfo::CouldBeSet& couldBeNonRegular();
-
-  /*
-   * Obtain an equivalent ClassInfo for an interface or abstract class
-   * when ignoring all non-regular subclasses. This is used for
-   * canonicalizing types. The class must have at least one
-   * non-regular subclass (so check before calling).
-   */
-  const ClassInfo* withoutNonRegularEquivalent();
+  ClassGraph classGraph;
 
   /*
    * Property types for public static properties, declared on this exact class
@@ -3832,49 +3751,6 @@ struct ClassInfo {
    * Track if this class has a reified parent.
    */
   bool hasReifiedParent{false};
-
-  /*
-   * True if there's at least one regular/non-regular class on
-   * subclassList (not including this class).
-   */
-  bool hasRegularSubclass{false};
-  bool hasNonRegularSubclass{false};
-
-  /*
-   * Return true if this is derived from o.
-   */
-  bool derivedFrom(const ClassInfo& o) const {
-    if (this == &o) return true;
-    // If o is an interface, see if this declared it.
-    if (o.cls->attrs & AttrInterface) return implInterfaces.count(o.cls->name);
-    // Nothing derives from traits, and we already known they're not
-    // the same.
-    if (o.cls->attrs & AttrTrait) return false;
-    // Otherwise check for direct inheritance.
-    if (baseList.size() >= o.baseList.size()) {
-      return baseList[o.baseList.size() - 1] == &o;
-    }
-    return false;
-  }
-
-  /*
-   * Given two ClassInfos, return the most specific ancestor they have
-   * in common, or nullptr if they have no common ancestor.
-   */
-  static const ClassInfo* commonAncestor(const ClassInfo* c1,
-                                         const ClassInfo* c2) {
-    if (c1 == c2) return c1;
-    const ClassInfo* ancestor = nullptr;
-    auto it1 = c1->baseList.begin();
-    auto it2 = c2->baseList.begin();
-    while (it1 != c1->baseList.end() && it2 != c2->baseList.end()) {
-      if (*it1 != *it2) break;
-      ancestor = *it1;
-      ++it1;
-      ++it2;
-    }
-    return ancestor;
-  }
 };
 
 /*
@@ -3898,6 +3774,12 @@ struct ClassInfo2 {
    * The name of the parent of this class (or nullptr if none).
    */
   LSString parent{nullptr};
+
+  /*
+   * php::Class associated with this ClassInfo. Must be set manually
+   * when needed.
+   */
+  const php::Class* cls{nullptr};
 
   /*
    * Represents a class constant, pointing to where the constant was
@@ -4099,854 +3981,245 @@ struct ClassInfo2 {
   }
 };
 
-namespace {
-
-ClassInfo::InterfaceInfo::CouldBeSet couldBeSetBuilder(const ClassInfo* cinfo,
-                                                       bool nonRegular) {
-  assertx(cinfo->cls->attrs & AttrInterface);
-  // For every implementation of this interface, add all of the other
-  // interfaces this implementation implements, and also all of its
-  // parent classes.
-  ClassInfo::InterfaceInfo::CouldBeSet couldBe;
-  assertx(!cinfo->subclassList.empty());
-  for (auto const sub : cinfo->subclassList) {
-    if (!nonRegular && !is_regular_class(*sub->cls)) continue;
-    for (auto const& [_, impl] : sub->implInterfaces) couldBe.emplace(impl);
-
-    auto c = sub;
-    do {
-      // If we already added it, all subsequent parents are also
-      // added, so we can stop.
-      if (!couldBe.emplace(c).second) break;
-      c = c->parent;
-    } while (c);
-  }
-  return couldBe;
-}
-
-}
-
-const ClassInfo::InterfaceInfo::CouldBeSet& ClassInfo::couldBe() {
-  return interfaceInfo().lazyCouldBe.get(
-    [this] { return couldBeSetBuilder(this, false); }
-  );
-}
-
-const ClassInfo::InterfaceInfo::CouldBeSet& ClassInfo::couldBeNonRegular() {
-  return interfaceInfo().lazyCouldBeNonRegular.get(
-    [this] { return couldBeSetBuilder(this, true); }
-  );
-}
-
-const ClassInfo::InterfaceInfo& ClassInfo::interfaceInfo() {
-  assertx(cls->attrs & AttrInterface);
-  return lazyInterfaceInfo.get(
-    [this] {
-      auto info = std::make_unique<ClassInfo::InterfaceInfo>();
-
-      // Start out with the info from the first implementation.
-      assertx(!subclassList.empty());
-      size_t idx = 0;
-      while (idx < subclassList.size()) {
-        auto const sub = subclassList[idx++];
-        if (!is_regular_class(*sub->cls)) continue;
-        info->commonBase = sub;
-        for (auto const& [_, impl] : sub->implInterfaces) {
-          info->subtypeOf.emplace(impl);
-        }
-        break;
-      }
-
-      // Update the common base and subtypeOf list for every
-      // implementation. We're only a subtype of an interface if
-      // *every* implementation of us implements that interface, so
-      // the set can only shrink.
-      while (idx < subclassList.size()) {
-        auto const sub = subclassList[idx++];
-        if (!is_regular_class(*sub->cls)) continue;
-        if (info->commonBase) {
-          info->commonBase = commonAncestor(info->commonBase, sub);
-        }
-        folly::erase_if(
-          info->subtypeOf,
-          [&] (const ClassInfo* i) {
-            return !sub->implInterfaces.count(i->cls->name);
-          }
-        );
-        if (!info->commonBase && info->subtypeOf.empty()) break;
-      }
-
-      return info.release();
-    }
-  );
-}
-
-const ClassInfo* ClassInfo::withoutNonRegularEquivalent() {
-  assertx(cls->attrs & (AttrInterface | AttrAbstract));
-  assertx(hasRegularSubclass);
-  return &lazyEquivalent.get(
-    [this] {
-      // Remove the non-regular classes, which will automatically
-      // canonicalize this class to its "best" equivalent (which may
-      // be itself).
-      auto const without = res::Class::removeNonRegular(
-        std::array<res::Class, 1>{res::Class { this } }
-      );
-      // We shouldn't get anything other than one result back. It
-      // shouldn't be zero because we already checked it has at least
-      // one regular subclass, and we shouldn't get intersections
-      // because the common base class should be a subtype of any
-      // interfaces.
-      always_assert(without.size() == 1);
-      auto const w = without.front();
-      assertx(w.val.right());
-      return w.val.right();
-    }
-  );
-}
-
 //////////////////////////////////////////////////////////////////////
 
 namespace res {
 
+Class::Class(ClassGraph g): opaque{g.this_} {
+  assertx(g.this_);
+}
+
+ClassGraph Class::graph() const {
+  assertx(opaque.p);
+  return ClassGraph{ (ClassGraph::Node*)opaque.p };
+}
+
+ClassInfo* Class::cinfo() const {
+  return graph().cinfo();
+}
+
+ClassInfo2* Class::cinfo2() const {
+  return graph().cinfo2();
+}
+
 bool Class::same(const Class& o) const {
-  return val == o.val;
+  return graph() == o.graph();
 }
 
 bool Class::exactSubtypeOfExact(const Class& o,
-                                bool nonRegularL,
-                                bool nonRegularR) const {
-  // Two exact classes are only subtypes of another if they're the
-  // same. One additional complication is if the class isn't regular
-  // and we're not considering non-regular classes. In that case, the
-  // class is actually Bottom, and we need to apply the rules of
-  // subtyping to Bottom (Bottom is a subtype of everything, but
-  // nothing is a subtype of it).
-  if (auto const lname = val.left()) {
-    // For unresolved classes, we can't actually check if
-    // is_regular_class(), so we need to be pessimistic.
-    if (auto const rname = o.val.left()) {
-      // Two exact unresolved classes are only guarantee to subtypes
-      // of another if they're the same name and the lhs might not
-      // become Bottom, but the rhs could (we're assuming the class
-      // might not be regular). NB: if the class doesn't actually
-      // exist, this is correct as both sides will be Bottom.
-      return (!nonRegularL || nonRegularR) && lname->isame(rname);
-    }
-    // If the rhs is resolved, it's similar to the unresolved case,
-    // except we can know whether the class is regular or not. If an
-    // unresolved and resolved refer to the same class, the resolved
-    // one is considered a subtype of the unresolved one.
-    auto const c2 = o.val.right();
-    return
-      !nonRegularL &&
-      lname->isame(c2->cls->name) &&
-      !is_regular_class(*c2->cls);
-  } else if (auto const rname = o.val.left()) {
-    auto const c1 = val.right();
-    return
-      rname->isame(c1->cls->name) &&
-      (!nonRegularL || nonRegularR || is_regular_class(*c1->cls));
-  } else {
-    // Otherwise both sides are resolved and we can do a precise
-    // check.
-    auto const c1 = val.right();
-    auto const c2 = o.val.right();
-    auto const bottomL = !nonRegularL && !is_regular_class(*c1->cls);
-    auto const bottomR = !nonRegularR && !is_regular_class(*c2->cls);
-    return bottomL || (!bottomR && c1 == c2);
-  }
+                                bool nonRegL,
+                                bool nonRegR) const {
+  return graph().exactSubtypeOfExact(o.graph(), nonRegL, nonRegR);
 }
 
-bool Class::exactSubtypeOf(const Class& o,
-                           bool nonRegularL,
-                           bool nonRegularR) const {
-  if (auto const lname = val.left()) {
-    // For unresolved classes, we can't actually check if
-    // is_regular_class(), so we need to be pessimistic and assume
-    // either side could go to Bottom if nonRegular is false.
-    if (auto const rname = o.val.left()) {
-      return (!nonRegularL || nonRegularR) && lname->isame(rname);
-    }
-    auto const c2 = o.val.right();
-    if (lname->isame(c2->cls->name)) {
-      // If they represent the same class, the lhs isn't a subtype of
-      // the rhs because the lhs is unresolved. The only exception is
-      // if the lhs is actually Bottom because it's not regular and we
-      // don't want those.
-      return !nonRegularL && !is_regular_class(*c2->cls);
-    }
-    if (c2->cls->attrs & AttrTrait) return false;
-    // The lhs is unresolved, but the rhs is resolved. Check to see if
-    // lhs exists on rhs subclass-list and is not filtered out from
-    // being a non-regular class.
-    for (auto const sub : c2->subclassList) {
-      if (!sub->cls->name->isame(lname)) continue;
-      return !nonRegularL || nonRegularR || is_regular_class(*sub->cls);
-    }
-    return false;
-  }
-
-  auto const c1 = val.right();
-  // If we want to exclude non-regular classes on either side, and the
-  // lhs is not regular, there's no subtype relation. If nonRegularL
-  // is false, then lhs is just a bottom (and bottom is a subtype of
-  // everything), and if nonRegularR is false, then the rhs might not
-  // contain any non-regular classes, so lhs is not guaranteed to be
-  // part of it.
-  if ((!nonRegularL || !nonRegularR) && !is_regular_class(*c1->cls)) {
-    return !nonRegularL;
-  }
-
-  if (auto const rname = o.val.left()) {
-    // The lhs is resolved, but the rhs is not. The lhs is a subtype
-    // of rhs if any of its bases have the same name or if it
-    // implements rname.
-    for (auto const base : c1->baseList) {
-      if (base->cls->name->isame(rname)) return true;
-    }
-    return c1->implInterfaces.count(rname);
-  }
-
-  // Otherwise just do an inheritance check.
-  return c1->derivedFrom(*o.val.right());
+bool Class::exactSubtypeOf(const Class& o, bool nonRegL, bool nonRegR) const {
+  return graph().exactSubtypeOf(o.graph(), nonRegL, nonRegR);
 }
 
-bool Class::subSubtypeOf(const Class& o,
-                         bool nonRegularL,
-                         bool nonRegularR) const {
-  // An unresolved class is only a subtype of another if they're both
-  // unresolved, have the same name, and the lhs doesn't contain
-  // non-regular classes if the rhs doesn't.
-  if (auto const lname = val.left()) {
-    if (auto const rname = o.val.left()) {
-      // If both classes are unresolved, we can't really say for sure
-      // if they're subclasses or not. However, as a special case, if
-      // their names are the same (and if the lhs doesn't contain
-      // non-regular classes if the rhs doesn't).
-      return (!nonRegularL || nonRegularR) && lname->isame(rname);
-    }
-    // The lhs is unresolved, but the rhs is resolved. We can use the
-    // rhs subclass list to see if the lhs is on it.
-    auto const c2 = o.val.right();
-    if (lname->isame(c2->cls->name)) {
-      // If they represent the same class, the lhs isn't a subtype of
-      // the rhs because the lhs is unresolved. The only exception is
-      // if the lhs is actually Bottom because it's not regular (and
-      // none of it's children are) and we don't want those.
-      return
-        !nonRegularL &&
-        !is_regular_class(*c2->cls) &&
-        !c2->hasRegularSubclass;
-    }
-    if (c2->cls->attrs & AttrTrait) return false;
-    // The lhs is unresolved, but the rhs is resolved. Check to see if
-    // lhs exists on rhs subclass-list and is not filtered out from
-    // being a non-regular class.
-    for (auto const sub : c2->subclassList) {
-      if (!sub->cls->name->isame(lname)) continue;
-      return !nonRegularL || nonRegularR || is_regular_class(*sub->cls);
-    }
-    return false;
-  } else if (auto const rname = o.val.left()) {
-    auto const c1 = val.right();
-    // The lhs is resolved, but the rhs is not. The lhs is a subtype
-    // of rhs if any of its bases have the same name or if it
-    // implements rname.
-
-    if (!is_regular_class(*c1->cls)) {
-      // If the lhs could contains non-regular types, but the rhs can
-      // not, then the lhs cannot ever be a subtype of rhs (because
-      // lhs is non-regular itself).
-      if (nonRegularL) {
-        if (!nonRegularR) return false;
-      } else if (!c1->hasRegularSubclass) {
-        // If lhs is excluding non-regular classes, and lhs does not
-        // have any regular subclasses (and lhs itself is
-        // non-regular), then lhs is a Bottom, so always a subtype.
-        return true;
-      }
-    }
-    for (auto const base : c1->baseList) {
-      if (base->cls->name->isame(rname)) return true;
-    }
-    if (c1->implInterfaces.count(rname)) return true;
-    // The above checks are sufficient if the lhs is regular or if
-    // we're considering non-regular classes. Otherwise, we need to
-    // check all of the lhs regular children if they implement rname.
-    if (is_regular_class(*c1->cls) || nonRegularL) return false;
-    return std::all_of(
-      begin(c1->subclassList),
-      end(c1->subclassList),
-      [&] (const ClassInfo* sub) {
-        return
-          !is_regular_class(*sub->cls) ||
-          sub->implInterfaces.count(rname);
-      }
-    );
-  }
-
-  auto const c1 = val.right();
-  auto const c2 = o.val.right();
-
-  // If the lhs might contain non-regular types, we'll just do a
-  // normal derivedFrom check (there's no distinguishing regular and
-  // non-regular classes here). However, if the rhs does not contain
-  // non-regular types (or if the lhs doesn't actually contain any),
-  // then lhs can't be a subtype of rhs (by definition the lhs has at
-  // least one class which can't be in the rhs).
-  if (nonRegularL) {
-    if (nonRegularR ||
-        (is_regular_class(*c1->cls) && !c1->hasNonRegularSubclass)) {
-      return c1->derivedFrom(*c2);
-    }
-    return false;
-  }
-
-  if (c1->cls->attrs & AttrInterface) {
-    // lhs is an interface. Since this is the "sub" variant, it means
-    // any implementation of the interface (not the interface class
-    // itself).
-
-    // Ooops, the interface has no regular implementations. This means
-    // lhs is a bottom, and a bottom is a subtype of everything.
-    if (!c1->hasRegularSubclass) return true;
-
-    // An interface can never be a subtype of a trait.
-    if (c2->cls->attrs & AttrTrait) return false;
-
-    auto const& info = c1->interfaceInfo();
-    if (c2->cls->attrs & AttrInterface) {
-      // If both are interfaces, we can use the InterfaceInfo to see
-      // if lhs is a subtype of the rhs.
-      return info.subtypeOf.count(c2);
-    }
-
-    // lhs is an interface, but rhs is not. The interface can only be
-    // a subtype of the non-interface if it has a common base which is
-    // a subtype of the rhs.
-    return info.commonBase && info.commonBase->derivedFrom(*c2);
-  }
-  // Since this is the "sub" variant, and we're only considering
-  // regular classes, a Trait as the lhs is a bottom (since Traits
-  // never have subclasses).
-  if (c1->cls->attrs & AttrTrait) return true;
-
-  if (c1->cls->attrs & AttrAbstract) {
-    // No regular subclasses of the abstract class. This is a bottom.
-    if (!c1->hasRegularSubclass) return true;
-    // Do an inheritance check first. If it passes, we're gone. If
-    // not, we need to do a more expensive check.
-    if (c1->derivedFrom(*c2)) return true;
-    // For abstract classes, the inheritance check isn't absolute. To
-    // be precise we need to check every (regular) subclass of the
-    // abstract class.
-    assertx(!c1->subclassList.empty());
-    for (auto const sub : c1->subclassList) {
-      if (!is_regular_class(*sub->cls)) continue;
-      if (!sub->derivedFrom(*c2)) return false;
-    }
-    return true;
-  }
-
-  // If lhs is a regular non-abstract class, we can just use the
-  // standard inheritance checks.
-  return c1->derivedFrom(*c2);
+bool Class::subSubtypeOf(const Class& o, bool nonRegL, bool nonRegR) const {
+  return graph().subSubtypeOf(o.graph(), nonRegL, nonRegR);
 }
 
 bool Class::exactCouldBeExact(const Class& o,
-                              bool nonRegularL,
-                              bool nonRegularR) const {
-  if (auto const lname = val.left()) {
-    if (auto const rname = o.val.left()) return lname->isame(rname);
-    // An unresolved lhs and a resolved rhs can only be each other if
-    // their name is the same and neither side can become a Bottom.
-    auto const c2 = o.val.right();
-    return lname->isame(c2->cls->name) &&
-      ((nonRegularL && nonRegularR) ||
-       is_regular_class(*c2->cls) ||
-       c2->hasRegularSubclass);
-  } else if (auto const rname = o.val.left()) {
-    auto const c1 = val.right();
-    return rname->isame(c1->cls->name) &&
-      ((nonRegularL && nonRegularR) ||
-       is_regular_class(*c1->cls) ||
-       c1->hasRegularSubclass);
-  } else {
-    // Two resolved exact classes can only be each other if they're the
-    // same class. The only complication is if the class isn't regular
-    // and we're not considering non-regular classes. In that case, the
-    // class is actually Bottom, a Bottom can never could-be anything
-    // (not even itself).
-    auto const c1 = val.right();
-    auto const c2 = o.val.right();
-    if (c1 != c2) return false;
-    auto const bottomL = !nonRegularL && !is_regular_class(*c1->cls);
-    auto const bottomR = !nonRegularR && !is_regular_class(*c2->cls);
-    return !bottomL && !bottomR;
-  }
+                              bool nonRegL,
+                              bool nonRegR) const {
+  return graph().exactCouldBeExact(o.graph(), nonRegL, nonRegR);
 }
 
-bool Class::exactCouldBe(const Class& o,
-                         bool nonRegularL,
-                         bool nonRegularR) const {
-  if (auto const lname = val.left()) {
-    // Two unresolved classes can always potentially be each other.
-    if (o.val.left()) return true;
-    // The lhs is unresolved but the rhs is resolved. The lhs can only
-    // be the rhs if it's on the rhs's subclass list.
-    auto const c2 = o.val.right();
-    if (lname->isame(c2->cls->name)) {
-      // If they're the same name, we still need to check if either
-      // side goes to Bottom.
-      return (nonRegularL && nonRegularR) || is_regular_class(*c2->cls);
-    }
-    // Traits don't have subclasses in the sense we care about here.
-    if (c2->cls->attrs & AttrTrait) return false;
-    for (auto const sub : c2->subclassList) {
-      if (!sub->cls->name->isame(lname)) continue;
-      // We found the class. If it's not regular and either side wants
-      // only regular classes, no match is possible.
-      return (nonRegularL && nonRegularR) || is_regular_class(*sub->cls);
-    }
-    return false;
-  }
-
-  // Otherwise the check is very similar to exactSubtypeOf (except for
-  // the handling of bottoms).
-  auto const c1 = val.right();
-  if ((!nonRegularL || !nonRegularR) && !is_regular_class(*c1->cls)) {
-    return false;
-  }
-
-  if (auto const rname = o.val.left()) {
-    // The lhs is resolved, but the rhs is not. The lhs is a subtype
-    // of rhs if any of its bases have the same name (and therefore
-    // could be).
-    for (auto const base : c1->baseList) {
-      if (base->cls->name->isame(rname)) return true;
-    }
-    return c1->implInterfaces.count(rname);
-  }
-
-  return c1->derivedFrom(*o.val.right());
+bool Class::exactCouldBe(const Class& o, bool nonRegL, bool nonRegR) const {
+  return graph().exactCouldBe(o.graph(), nonRegL, nonRegR);
 }
 
-bool Class::subCouldBe(const Class& o,
-                       bool nonRegularL,
-                       bool nonRegularR) const {
-  // If we only want to consider regular classes on either side. If
-  // true, this means that any possible intersection between the
-  // classes can only include regular classes. If either side doesn't
-  // have any regular classes, then no intersection is possible.
-  auto const eitherRegOnly = !nonRegularL || !nonRegularR;
-
-  if (auto const lname = val.left()) {
-    // Two unresolved classes can always potentially be each other.
-    if (o.val.left()) return true;
-
-    // The lhs is unresolved, and the rhs is resolved. The lhs could
-    // be the rhs if the rhs has a subclass which has a parent or
-    // implemented interface with the same name as the lhs.
-    auto const c2 = o.val.right();
-    if (c2->cls->attrs & AttrTrait) {
-      if (eitherRegOnly) return false;
-      for (auto const base : c2->baseList) {
-        if (base->cls->name->isame(lname)) return true;
-      }
-      return c2->implInterfaces.count(lname);
-    }
-
-    for (auto const sub : c2->subclassList) {
-      if (eitherRegOnly && !is_regular_class(*sub->cls)) continue;
-      for (auto const base : sub->baseList) {
-        if (eitherRegOnly && !is_regular_class(*base->cls)) continue;
-        if (base->cls->name->isame(lname)) return true;
-      }
-      if (!eitherRegOnly && sub->implInterfaces.count(lname)) {
-        return true;
-      }
-    }
-    return false;
-  } else if (auto const rname = o.val.left()) {
-    // This is the same as above, but with the lhs and rhs flipped
-    // (for the necessary symmetry of couldBe).
-    auto const c1 = val.right();
-    if (c1->cls->attrs & AttrTrait) {
-      if (eitherRegOnly) return false;
-      for (auto const base : c1->baseList) {
-        if (base->cls->name->isame(rname)) return true;
-      }
-      return c1->implInterfaces.count(rname);
-    }
-
-    for (auto const sub : c1->subclassList) {
-      if (eitherRegOnly && !is_regular_class(*sub->cls)) continue;
-      for (auto const base : sub->baseList) {
-        if (eitherRegOnly && !is_regular_class(*base->cls)) continue;
-        if (base->cls->name->isame(rname)) return true;
-      }
-      if (!eitherRegOnly && sub->implInterfaces.count(rname)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  auto const c1 = val.right();
-  auto const c2 = o.val.right();
-  if (c1->cls->attrs & AttrInterface) {
-    // Check if interface has any regular implementations if that's
-    // all we care about.
-    if (eitherRegOnly && !c1->hasRegularSubclass) return false;
-
-    if (c2->cls->attrs & AttrInterface) {
-      // Do similar implementation check for other side.
-      if (eitherRegOnly && !c2->hasRegularSubclass) return false;
-
-      // Both classes are interfaces. The appropriate could-be sets
-      // for the interfaces determine if there's any intersection
-      // between them. Since couldBe() is symmetric, we can use either
-      // interface's set. We arbitrarily use the interface with the
-      // smaller subclass list. By forcing any ordering like this, we
-      // should reduce the number of could-be sets we need to create.
-      auto const smaller = c1->subclassList.size() <= c2->subclassList.size()
-        ? c1 : c2;
-      auto const larger = c1->subclassList.size() <= c2->subclassList.size()
-        ? c2 : c1;
-
-      // First do the check *only* considering regular classes,
-      // regardless of what was requested. If this passes, it's always
-      // true, so we can skip creating the set which includes
-      // non-regular classes.
-      if (smaller->couldBe().count(larger)) return true;
-      // It didn't pass. If we're only considering regular classes,
-      // then there's nothing to check further.
-      if (eitherRegOnly) return false;
-      // Otherwise there could be non-regular classes in the
-      // intersection (but not any regular classes since we ruled that
-      // out already). If the interface has no non-regular
-      // implementations, the only possible candidate is the interface
-      // itself, so do an implements check.
-      if (!smaller->hasNonRegularSubclass) {
-        return smaller->implInterfaces.count(larger->cls->name);
-      }
-      // The smaller interface has non-regular implementations. Do the
-      // check against it's could-be set which includes non-regular
-      // classes.
-      return smaller->couldBeNonRegular().count(larger);
-    }
-    if (c2->cls->attrs & AttrTrait) {
-      // An interface and a trait can only intersect if the trait
-      // implements the interface, and we're including non-regular
-      // classes (since a trait is always a single non-regular class).
-      return !eitherRegOnly && c2->implInterfaces.count(c1->cls->name);
-    }
-
-    // c2 is either a normal class or an abstract class:
-
-    if (eitherRegOnly && !c2->hasRegularSubclass) {
-      // c2 doesn't have any regular subclasses and only regular class
-      // intersections have been requested. If c2 is abstract, no
-      // intersection is possible. Otherwise the only intersection is
-      // c2 itself, so do an implements check against that.
-      if (c2->cls->attrs & AttrAbstract) return false;
-      return c2->implInterfaces.count(c1->cls->name);
-    }
-    // First do the check *only* considering regular classes,
-    // regardless of what was requested. If this passes, it's always
-    // true, so we don't need to do any further checking.
-    if (c1->couldBe().count(c2)) return true;
-    // No intersection considering just regular classes. If the
-    // intersection can only contain regular classes, or if the
-    // interface has no regular implementations, we know there's no
-    // intersection at all.
-    if (eitherRegOnly || !c1->hasNonRegularSubclass) return false;
-    // Otherwise check against the interface's could-be set which
-    // includes non-regular classes.
-    return c1->couldBeNonRegular().count(c2);
-  }
-
-  if (c2->cls->attrs & AttrInterface) {
-    // Check if interface contains at least one regular subclass if
-    // that's all we care about.
-    if (eitherRegOnly && !c2->hasRegularSubclass) return false;
-
-    // c1 cannot be an interface because we already checked that
-    // above.
-
-    if (c1->cls->attrs & AttrTrait) {
-      // A trait only intersects an interface if the trait implements
-      // the interface. Traits are non-regular and have no subclasses,
-      // so if we only want regular classes in the intersection, there
-      // is no intersection.
-      return !eitherRegOnly && c1->implInterfaces.count(c2->cls->name);
-    }
-
-    // c1 is either a normal class or an abstract class:
-
-    if (!nonRegularL && !c1->hasRegularSubclass) {
-      // c1 doesn't have any regular subclasses and only regular class
-      // intersections have been requested. If c1 is abstract, no
-      // intersection is possible. Otherwise the only intersection is
-      // c1 itself, so do an implements check against that.
-      if (c1->cls->attrs & AttrAbstract) return false;
-      return c1->implInterfaces.count(c2->cls->name);
-    }
-    // First do the check *only* considering regular classes,
-    // regardless of what was requested. If this passes, it's always
-    // true, so we don't need to do any further checking.
-    if (c2->couldBe().count(c1)) return true;
-    // No intersection considering just regular classes. If the
-    // intersection can only contain regular classes, or if the
-    // interface has no regular implementations, we know there's no
-    // intersection at all.
-    if (eitherRegOnly || !c2->hasNonRegularSubclass) return false;
-    // Otherwise check against the interface's could-be set which
-    // includes non-regular classes.
-    return c2->couldBeNonRegular().count(c1);
-  }
-
-  // A trait can only intersect with itself, and only if we're
-  // including non-regular classes in the intersection.
-  if (c1->cls->attrs & AttrTrait) return !eitherRegOnly && c1 == c2;
-  if (c2->cls->attrs & AttrTrait) return false;
-
-  // Check if either class only contains non-regular subclasses and
-  // we're only looking for regular intersections.
-  if (eitherRegOnly) {
-    if ((c1->cls->attrs & AttrAbstract) && !c1->hasRegularSubclass) {
-      return false;
-    }
-    if ((c2->cls->attrs & AttrAbstract) && !c2->hasRegularSubclass) {
-      return false;
-    }
-  }
-
-  // Both types are non-interfaces so they "could be" if they are in
-  // an inheritance relationship.
-  if (c1->baseList.size() >= c2->baseList.size()) {
-    return c1->baseList[c2->baseList.size() - 1] == c2;
-  } else {
-    return c2->baseList[c1->baseList.size() - 1] == c1;
-  }
+bool Class::subCouldBe(const Class& o, bool nonRegL, bool nonRegR) const {
+  return graph().subCouldBe(o.graph(), nonRegL, nonRegR);
 }
 
-SString Class::name() const {
-  return val.match(
-    [] (SString s) { return s; },
-    [] (ClassInfo* ci) { return ci->cls->name.get(); }
-  );
-}
+SString Class::name() const { return graph().name(); }
 
 Optional<res::Class> Class::withoutNonRegular() const {
-  return val.match(
-    [&] (SString) -> Optional<res::Class> { return *this; },
-    [&] (ClassInfo* cinfo) -> Optional<res::Class> {
-      // Regular classes are always unchanged
-      if (is_regular_class(*cinfo->cls)) return *this;
-      // Non-regular class with no regular subclasses just becomes Bottom
-      if (!cinfo->hasRegularSubclass) return std::nullopt;
-      // Traits can have things on their subclass list (any
-      // unflattened users), but still becomes Bottom.
-      if (cinfo->cls->attrs & AttrTrait) return std::nullopt;
-      if (!(cinfo->cls->attrs & (AttrInterface | AttrAbstract))) return *this;
-      // Interfaces or abstract classes need to be canonicalized to
-      // their equivalent (which may be themself).
-      return Class {
-        const_cast<ClassInfo*>(cinfo->withoutNonRegularEquivalent())
-      };
-    }
-  );
+  if (auto const g = graph().withoutNonRegular()) {
+    return Class { g };
+  } else {
+    return std::nullopt;
+  }
 }
 
-bool Class::mightBeRegular() const {
-  return val.match(
-    [] (SString) { return true; },
-    [] (ClassInfo* cinfo) { return is_regular_class(*cinfo->cls); }
-  );
-}
-
-bool Class::mightBeNonRegular() const {
-  return val.match(
-    [] (SString) { return true; },
-    [] (ClassInfo* cinfo) { return !is_regular_class(*cinfo->cls); }
-  );
-}
+bool Class::mightBeRegular()    const { return graph().mightBeRegular(); }
+bool Class::mightBeNonRegular() const { return graph().mightBeNonRegular(); }
 
 bool Class::couldBeOverridden() const {
-  return val.match(
-    [] (SString) { return true; },
-    [] (ClassInfo* cinfo) {
-      return !(cinfo->cls->attrs & (AttrTrait|AttrNoOverride));
-    }
-  );
+  if (!graph().isMissing() && graph().isTrait()) return false;
+  return
+    graph().mightHaveRegularSubclass() ||
+    graph().mightHaveNonRegularSubclass();
 }
 
 bool Class::couldBeOverriddenByRegular() const {
-  return val.match(
-    [] (SString) { return true; },
-    [] (ClassInfo* cinfo) {
-      return !(cinfo->cls->attrs & (AttrTrait|AttrNoOverrideRegular));
-    }
-  );
+  if (!graph().isMissing() && graph().isTrait()) return false;
+  return graph().mightHaveRegularSubclass();
 }
 
 bool Class::mightContainNonRegular() const {
-  return val.match(
-    [] (SString) { return true; },
-    [] (ClassInfo* cinfo) {
-      return
-        !is_regular_class(*cinfo->cls) || cinfo->hasNonRegularSubclass;
-    }
-  );
+  return graph().mightBeNonRegular() || graph().mightHaveNonRegularSubclass();
 }
 
 bool Class::couldHaveMagicBool() const {
-  return val.match(
-    [] (SString) { return true; },
-    [] (ClassInfo* cinfo) {
-      if (cinfo->cls->attrs & AttrInterface) {
-        assertx(!cinfo->subclassList.empty());
-        for (auto const sub : cinfo->subclassList) {
-          if (has_magic_bool_conversion(sub->baseList[0]->cls->name)) {
-            return true;
-          }
-        }
-        return false;
-      }
-      return has_magic_bool_conversion(cinfo->baseList[0]->cls->name);
-    }
-  );
-}
-
-bool Class::couldHaveMockedSubClass() const {
-  return val.match(
-    [] (SString) { return true; },
-    [] (ClassInfo* cinfo) {
-      return cinfo->isSubMocked;
-    }
-  );
-}
-
-bool Class::couldBeMocked() const {
-  return val.match(
-    [] (SString) { return true; },
-    [] (ClassInfo* cinfo) {
-      return cinfo->isMocked;
-    }
-  );
-}
-
-bool Class::couldHaveReifiedGenerics() const {
-  return val.match(
-    [] (SString) { return true; },
-    [] (ClassInfo* cinfo) {
-      return cinfo->cls->hasReifiedGenerics;
-    }
-  );
-}
-
-bool Class::mustHaveReifiedGenerics() const {
-  return val.match(
-    [] (SString) { return false; },
-    [] (ClassInfo* cinfo) {
-      return cinfo->cls->hasReifiedGenerics;
-    }
-  );
-}
-
-bool Class::couldHaveReifiedParent() const {
-  return val.match(
-    [] (SString) { return true; },
-    [] (ClassInfo* cinfo) {
-      return cinfo->hasReifiedParent;
-    }
-  );
-}
-
-bool Class::mustHaveReifiedParent() const {
-  return val.match(
-    [] (SString) { return false; },
-    [] (ClassInfo* cinfo) {
-      return cinfo->hasReifiedParent;
-    }
-  );
-}
-
-bool Class::mightCareAboutDynConstructs() const {
-  if (RuntimeOption::EvalForbidDynamicConstructs > 0) {
-    return val.match(
-      [] (SString) { return true; },
-      [] (ClassInfo* cinfo) {
-        return !(cinfo->cls->attrs & AttrDynamicallyConstructible);
-      }
-    );
+  auto const g = graph();
+  if (g.isMissing()) return true;
+  if (!g.isInterface()) return has_magic_bool_conversion(g.topBase().name());
+  if (!g.hasCompleteChildren()) return true;
+  for (auto const c : g.children()) {
+    if (has_magic_bool_conversion(c.topBase().name())) return true;
   }
   return false;
 }
 
+bool Class::couldHaveMockedSubClass() const {
+  if (auto const ci = cinfo()) {
+    return ci->isSubMocked;
+  } else if (auto const ci = cinfo2()) {
+    return ci->isSubMocked;
+  } else {
+    return true;
+  }
+}
+
+bool Class::couldBeMocked() const {
+  if (auto const ci = cinfo()) {
+    return ci->isMocked;
+  } else if (auto const ci = cinfo2()) {
+    return ci->isMocked;
+  } else {
+    return true;
+  }
+}
+
+bool Class::couldHaveReifiedGenerics() const {
+  if (auto const ci = cinfo()) {
+    return ci->cls->hasReifiedGenerics;
+  } else if (auto const ci = cinfo2()) {
+    return ci->hasReifiedGeneric;
+  } else {
+    return true;
+  }
+}
+
+bool Class::mustHaveReifiedGenerics() const {
+  if (auto const ci = cinfo()) {
+    return ci->cls->hasReifiedGenerics;
+  } else if (auto const ci = cinfo2()) {
+    return ci->hasReifiedGeneric;
+  } else {
+    return false;
+  }
+}
+
+bool Class::couldHaveReifiedParent() const {
+  if (auto const ci = cinfo()) {
+    return ci->hasReifiedParent;
+  } else if (auto const ci = cinfo2()) {
+    return ci->hasReifiedParent;
+  } else {
+    return true;
+  }
+}
+
+bool Class::mustHaveReifiedParent() const {
+  if (auto const ci = cinfo()) {
+    return ci->hasReifiedParent;
+  } else if (auto const ci = cinfo2()) {
+    return ci->hasReifiedParent;
+  } else {
+    return false;
+  }
+}
+
+bool Class::mightCareAboutDynConstructs() const {
+  if (!RuntimeOption::EvalForbidDynamicConstructs) return false;
+  if (auto const ci = cinfo()) {
+    return !(ci->cls->attrs & AttrDynamicallyConstructible);
+  } else if (auto const ci = cinfo2()) {
+    return !ci->cls || !(ci->cls->attrs & AttrDynamicallyConstructible);
+  } else {
+    return true;
+  }
+}
+
 bool Class::couldHaveConstProp() const {
-  return val.match(
-    [] (SString) { return true; },
-    [] (ClassInfo* cinfo) { return cinfo->hasConstProp; }
-  );
+  if (auto const ci = cinfo()) {
+    return ci->hasConstProp;
+  } else if (auto const ci = cinfo2()) {
+    return ci->hasConstProp;
+  } else {
+    return true;
+  }
 }
 
 bool Class::subCouldHaveConstProp() const {
-  return val.match(
-    [] (SString) { return true; },
-    [] (ClassInfo* cinfo) { return cinfo->subHasConstProp; }
-  );
-}
-Optional<res::Class> Class::parent() const {
-  if (!val.right()) return std::nullopt;
-  auto parent = val.right()->parent;
-  if (!parent) return std::nullopt;
-  if (is_closure_base(*parent->cls)) {
-    return res::Class { parent->cls->name.get() };
+  if (auto const ci = cinfo()) {
+    return ci->subHasConstProp;
+  } else if (auto const ci = cinfo2()) {
+    return ci->subHasConstProp;
+  } else {
+    return true;
   }
-  return res::Class { parent };
+}
+
+Optional<res::Class> Class::parent() const {
+  if (auto const p = graph().base()) {
+    return Class { p };
+  } else {
+    return std::nullopt;
+  }
+}
+
+bool Class::resolved() const {
+  return cinfo() || cinfo2();
 }
 
 const php::Class* Class::cls() const {
-  return val.right() ? val.right()->cls : nullptr;
+  if (auto const ci = cinfo()) {
+    return ci->cls;
+  } else if (auto const ci = cinfo2()) {
+    return ci->cls;
+  } else {
+    return nullptr;
+  }
 }
 
-void
-Class::forEachSubclass(const std::function<void(const php::Class*)>& f) const {
-  auto const cinfo = val.right();
-  assertx(cinfo);
-  assertx(!cinfo->subclassList.empty());
-  for (auto const& s : cinfo->subclassList) f(s->cls);
+bool Class::hasCompleteChildren() const {
+  return graph().hasCompleteChildren();
+}
+
+bool Class::isComplete() const {
+  return
+    !graph().isMissing() &&
+    (graph().hasCompleteChildren() || graph().isConservative());
+}
+
+bool
+Class::forEachSubclass(const std::function<void(SString, Attr)>& f) const {
+  auto const g = graph();
+  if (g.isMissing() || !g.hasCompleteChildren()) return false;
+  for (auto const c : g.children()) {
+    auto const attrs = [&] {
+      if (c.isInterface()) return AttrInterface;
+      if (c.isTrait())     return AttrTrait;
+      if (c.isEnum())      return AttrEnum;
+      if (c.isAbstract())  return AttrAbstract;
+      return AttrNone;
+    }();
+    f(c.name(), attrs);
+  }
+  return true;
 }
 
 std::string show(const Class& c) {
-  return c.val.match(
-    [] (SString s) {
-      return folly::sformat("\"{}\"", s);
-    },
-    [] (ClassInfo* cinfo) {
-      return cinfo->cls->name->toCppString();
-    }
-  );
-}
-
-ClassInfo* Class::commonAncestor(ClassInfo* a, ClassInfo* b) {
-  if (a == b) return a;
-  if (!a || !b) return nullptr;
-  ClassInfo* ancestor = nullptr;
-  // Walk the arrays of base classes until they match. For common
-  // ancestors to exist they must be on both sides of the baseList
-  // at the same positions
-  auto it1 = a->baseList.begin();
-  auto it2 = b->baseList.begin();
-  while (it1 != a->baseList.end() && it2 != b->baseList.end()) {
-    if (*it1 != *it2) break;
-    ancestor = *it1;
-    ++it1; ++it2;
+  if (c.isComplete()) {
+    return c.graph().name()->toCppString();
+  } else {
+    return folly::sformat("\"{}\"", c.graph().name());
   }
-  return ancestor;
 }
 
 // Call the given callable for every class which is a subclass of
@@ -4957,682 +4230,132 @@ ClassInfo* Class::commonAncestor(ClassInfo* a, ClassInfo* b) {
 // callable, but the unresolved classes themself will not be passed to
 // the callable. If the callable returns false, iteration is
 // stopped. If includeNonRegular is true, non-regular subclasses are
-// visited (normally they are skipped). The callable also receives a
-// bool which indicates whether the class passed to the callable
-// represents an exact type or a sub type. The only case where the
-// type can be a sub type is if all classes are unresolved.
+// visited (normally they are skipped).
 template <typename F>
 void Class::visitEverySub(folly::Range<const Class*> classes,
                           bool includeNonRegular,
                           const F& f) {
-  assertx(!classes.empty());
-
-  // Simple case: if there's only one class, just iterate over the
-  // subclass list.
   if (classes.size() == 1) {
-    auto const cinfo = classes.front().val.right();
-    if (!cinfo) {
-      f(classes.front(), false);
-    } else if (cinfo->cls->attrs & AttrTrait) {
-      if (includeNonRegular) f(Class { cinfo }, true);
-    } else {
-      assertx(!cinfo->subclassList.empty());
-      for (auto const sub : cinfo->subclassList) {
-        if (!includeNonRegular && !is_regular_class(*sub->cls)) continue;
-        if (!f(Class { sub }, true)) break;
-      }
+    auto const n = classes[0].graph().this_;
+    if (n->isMissing() || !n->hasCompleteChildren()) {
+      f(Class{ClassGraph{ n }});
+      return;
     }
-    return;
-  }
-
-  // Otherwise we need to find all of the classes in common:
-  CompactVector<ClassInfo*> common;
-
-  // Find the first resolved class, and use that to initialize the
-  // list of subclasses.
-  auto const numClasses = classes.size();
-  size_t resolvedIdx = 0;
-  while (resolvedIdx < numClasses) {
-    auto const cinfo = classes[resolvedIdx].val.right();
-    if (!cinfo) {
-      ++resolvedIdx;
-      continue;
-    }
-
-    if (cinfo->cls->attrs & AttrTrait) {
-      if (includeNonRegular) common.emplace_back(cinfo);
-    } else if (includeNonRegular ||
-               (!cinfo->hasNonRegularSubclass &&
-                is_regular_class(*cinfo->cls))) {
-      common = cinfo->subclassList;
-    } else {
-      for (auto const sub : cinfo->subclassList) {
-        if (!is_regular_class(*sub->cls)) continue;
-        common.emplace_back(sub);
-      }
-    }
-    break;
-  }
-
-  // We didn't find any resolved classes. This list is nothing but
-  // unresolved classes, so just provide them to the callable and then
-  // we're done.
-  if (resolvedIdx == numClasses) {
-    assertx(common.empty());
-    for (auto const c : classes) {
-      assertx(c.val.left());
-      if (!f(c, false)) break;
-    }
-    return;
-  }
-
-  // Otherwise we found a resolved class. Now process the rest of the
-  // resolved classes, removing any subclasses from the list which
-  // aren't a subclass of all of the classes.
-  CompactVector<ClassInfo*> newCommon;
-  // We start again from 0 to process any unresolved classes we might
-  // have skipped over above.
-  for (size_t idx = 0; idx < numClasses; ++idx) {
-    assertx(!common.empty());
-    // Don't process the class we selected above twice.
-    if (idx == resolvedIdx) continue;
-    newCommon.clear();
-
-    // NB: We don't need to check includeNonRegular here. If it's
-    // false, we won't have any non-regular classes in common
-    // initially, so none will be part of any intersection.
-    if (auto const cinfo = classes[idx].val.right()) {
-      // If this class is resolved, intersect the subclass list with
-      // the common set of classes.
-      assertx(idx > resolvedIdx);
-      std::set_intersection(
-        begin(common),
-        end(common),
-        begin(cinfo->subclassList),
-        end(cinfo->subclassList),
-        std::back_inserter(newCommon)
-      );
-    } else {
-      // If this class is unresolved, we can remove any classes from
-      // the common set which couldn't be the unresolved class.
-      for (auto const c : common) {
-        Class resolved{ c };
-        if (resolved.exactCouldBe(classes[idx],
-                                  includeNonRegular,
-                                  includeNonRegular)) {
-          newCommon.emplace_back(c);
+    ClassGraph::forEachChild(
+      *n,
+      [&] (ClassGraph::Node& c) {
+        assertx(!c.isMissing());
+        if (includeNonRegular || c.isRegular()) {
+          if (!f(Class{ClassGraph{ &c }})) return ClassGraph::Action::Stop;
         }
+        return ClassGraph::Action::Continue;
       }
-    }
-    std::swap(common, newCommon);
-    if (common.empty()) return;
+    );
+    return;
   }
-  assertx(!common.empty());
 
-  // We have the final list. Iterate over these and report them to the
-  // callable.
-  for (auto const c : common) {
-    assertx(IMPLIES(!includeNonRegular, is_regular_class(*c->cls)));
-    if (!f(Class { c }, true)) return;
-  }
+  ClassGraph::NodeVec v;
+  v.reserve(classes.size());
+  for (auto const c : classes) v.emplace_back(c.graph().this_);
+
+  ClassGraph::enumerateIsectMembers(
+    v,
+    includeNonRegular,
+    [&] (ClassGraph::Node& c) { return f(Class{ClassGraph{ &c }}); },
+    true
+  );
 }
 
-// Given a list of classes, put them in canonical form for a
-// DCls::IsectSet. It is assumed that couldBe is true between all of
-// the classes in the list, but nothing is assumed otherwise.
-TinyVector<Class, 2> Class::canonicalizeIsects(const TinyVector<Class, 8>& in,
-                                               bool nonRegular) {
-  auto const size = in.size();
-  if (size == 0) return {};
-  if (size < 2) return { in.front() };
-
-  // Canonical ordering:
-  auto const compare = [] (Class a, Class b) {
-    auto const c1 = a.val.right();
-    auto const c2 = b.val.right();
-    // Resolved classes always come before unresolved classes.
-    if (!c1) {
-      if (c2) return 1;
-      // Two unresolved classes are just compared by name.
-      return a.val.left()->compare(b.val.left());
-    } else if (!c2) {
-      return -1;
-    }
-
-    // "Smaller" classes (those with less subclasses) should come
-    // first.
-    auto const s1 = c1->subclassList.size();
-    auto const s2 = c2->subclassList.size();
-    if (s1 < s2) return -1;
-    if (s1 > s2) return 1;
-
-    // Regular classes come first, followed by abstract classes,
-    // interfaces, then traits.
-    auto const weight = [] (const ClassInfo* c) {
-      if (c->cls->attrs & AttrAbstract) return 1;
-      if (c->cls->attrs & AttrInterface) return 2;
-      if (c->cls->attrs & AttrTrait) return 3;
-      return 0;
-    };
-    auto const w1 = weight(c1);
-    auto const w2 = weight(c2);
-    if (w1 < w2) return -1;
-    if (w1 > w2) return 1;
-
-    // All else being equal, compare the name.
-    return c1->cls->name->compare(c2->cls->name);
-  };
-
-  // Remove any class which is a superclass of another. Such classes
-  // are redundant because there's a "smaller" class which already
-  // implies it. This also gets rid of duplicates. This is a naive
-  // O(N^2) algorithm but it's fine because the lists do not get very
-  // large at all.
-  TinyVector<Class, 2> out;
-  for (int i = 0; i < size; ++i) {
-    // For every pair of classes:
-    auto const c1 = in[i];
-    auto const subtypeOf = [&] {
-      for (int j = 0; j < size; ++j) {
-        auto const c2 = in[j];
-        if (i == j || !c2.subSubtypeOf(c1, nonRegular, nonRegular)) continue;
-        // c2 is a subtype of c1. If c1 is not a subtype of c2, then
-        // c2 is preferred and we return true to drop c1.
-        if (!c1.subSubtypeOf(c2, nonRegular, nonRegular)) return true;
-        // They're both subtypes of each other, so they're actually
-        // equivalent. We only want to keep one, so use the sorting
-        // order and keep the "lesser" one.
-        auto const cmp = compare(c1, c2);
-        if (cmp > 0 || (cmp == 0 && i > j)) return true;
-      }
-      return false;
-    }();
-    if (!subtypeOf) out.emplace_back(c1);
-  }
-
-  // Finally sort the list
-  std::sort(
-    out.begin(),
-    out.end(),
-    [&] (Class a, Class b) { return compare(a, b) < 0; }
-  );
+Class::ClassVec Class::combine(folly::Range<const Class*> classes1,
+                               folly::Range<const Class*> classes2,
+                               bool isSub1,
+                               bool isSub2,
+                               bool nonRegular1,
+                               bool nonRegular2) {
+  ClassGraph::NodeVec v1;
+  ClassGraph::NodeVec v2;
+  v1.reserve(classes1.size());
+  v2.reserve(classes2.size());
+  for (auto const c : classes1) v1.emplace_back(c.graph().this_);
+  for (auto const c : classes2) v2.emplace_back(c.graph().this_);
+  auto const i =
+    ClassGraph::combine(v1, v2, isSub1, isSub2, nonRegular1, nonRegular2);
+  ClassVec out;
+  out.reserve(i.size());
+  for (auto const c : i) out.emplace_back(Class{ClassGraph { c }});
   return out;
 }
 
-TinyVector<Class, 2> Class::combine(folly::Range<const Class*> classes1,
-                                    folly::Range<const Class*> classes2,
-                                    bool isSub1,
-                                    bool isSub2,
-                                    bool nonRegular1,
-                                    bool nonRegular2) {
-  TinyVector<Class, 8> common;
-  Optional<ClassInfo*> commonBase;
-  Optional<hphp_fast_set<ClassInfo*>> commonInterfaces;
-
-  // The algorithm for unioning together two intersection lists is
-  // simple. For every class which is "in" either the first or second
-  // list, track the interfaces which are implemented by all of the
-  // classes, and the common base class amongst all of them. Build a
-  // list of these classes and normalize them.
-
-  auto const processNormal = [&] (ClassInfo* cinfo) {
-    // NB: isSub and nonRegular is irrelevant here... Everything that
-    // we look at in the base class here must also be true for all of
-    // its children.
-
-    // Set commonBase, or update it depending on whether this is the
-    // first class processed.
-    if (!commonBase) {
-      commonBase = cinfo;
-    } else {
-      commonBase = commonAncestor(*commonBase, cinfo);
-    }
-
-    // Likewise, initialize the set of common interfaces, or remove
-    // any which aren't present.
-    if (!commonInterfaces) {
-      commonInterfaces.emplace();
-      for (auto const i : cinfo->implInterfaces) {
-        commonInterfaces->emplace(const_cast<ClassInfo*>(i.second));
-      }
-    } else {
-      folly::erase_if(
-        *commonInterfaces,
-        [&] (ClassInfo* i) {
-          return !cinfo->implInterfaces.count(i->cls->name);
-        }
-      );
-    }
-  };
-
-  // Process an interface's implementations (but not the interface
-  // itself).
-  auto const processIface = [&] (ClassInfo* cinfo) {
-    assertx(cinfo->cls->attrs & AttrInterface);
-    auto& info = cinfo->interfaceInfo();
-
-    // We assume !nonRegular here since if it was true, we'd be
-    // processing the interface in processNormal(). info.subtypeOf and
-    // info.commonBase are calculated ignoring non-regular
-    // implementations.
-
-    // The logic for processing an interface is similar to processSub,
-    // except we use the interface's common base (if any).
-    auto const ifaceCommon = const_cast<ClassInfo*>(info.commonBase);
-    if (!commonBase) {
-      commonBase = ifaceCommon;
-    } else {
-      commonBase = commonAncestor(*commonBase, ifaceCommon);
-    }
-
-    // Instead of implInterfaces, we use the set of interfaces it is a
-    // subtype of.
-    if (!commonInterfaces) {
-      commonInterfaces.emplace();
-      for (auto const i : info.subtypeOf) {
-        commonInterfaces->emplace(const_cast<ClassInfo*>(i));
-      }
-      commonInterfaces->emplace(cinfo);
-    } else {
-      folly::erase_if(
-        *commonInterfaces,
-        [&] (ClassInfo* i) { return i != cinfo && !info.subtypeOf.count(i); }
-      );
-    }
-  };
-
-  auto const processList = [&] (folly::Range<const Class*> classes,
-                                bool isSub,
-                                bool nonRegular) {
-    if (classes.size() == 1) {
-      // If the list is just a single class, we can process things
-      // more efficiently.
-      auto const cinfo = classes[0].val.right();
-      // We dealt with lists of all unresolved classes specially
-      // below, so shouldn't get here.
-      assertx(cinfo);
-      if (cinfo->cls->attrs & (AttrAbstract|AttrInterface)) {
-        // Are we including non-regular classes? If we are, we can
-        // process this like any other.
-        if (nonRegular) {
-          processNormal(cinfo);
-          return;
-        }
-        // We're non-regular. Do we care about sub-classes? If not,
-        // there's nothing more to do. We're not processing this
-        // class, nor its sub-classes.
-        if (!isSub) return;
-        // Otherwise we're not processing the base class, but we are
-        // its sub-classes. For interfaces we can deal with this
-        // specially.
-        if (cinfo->cls->attrs & AttrInterface) {
-          processIface(cinfo);
-          return;
-        }
-        // For abstract classes, however, we'll fall through and use
-        // visitEverySub.
-      } else if (cinfo->cls->attrs & AttrTrait) {
-        // Traits have no subclasses, so isSub doesn't matter. Process
-        // it if we're including non-regular classes.
-        if (nonRegular) processNormal(cinfo);
-        return;
-      } else {
-        // A regular class. Always process it.
-        processNormal(cinfo);
-        return;
-      }
-    }
-
-    // The list has multiple classes or we have an abstract class and
-    // we only care about its subclasses. This is more expensive, we
-    // need to visit every subclass in the intersection of the classes
-    // on the list.
-    visitEverySub(
-      classes,
-      nonRegular,
-      [&] (res::Class c, bool isExact) {
-        // visitEverySub will only report an unresolved class if the
-        // entire list is unresolved, and we deal with that case
-        // specially below and shouldn't get here.
-        assertx(c.val.right());
-        assertx(isExact);
-        // We'll only "visit" exact sub-classes, so only use
-        // processNormal here.
-        processNormal(c.val.right());
-        // No point in continuing if there's nothing in common left.
-        return *commonBase || !commonInterfaces->empty();
-      }
-    );
-  };
-
-  assertx(!classes1.empty());
-  assertx(!classes2.empty());
-  assertx(IMPLIES(!isSub1, classes1.size() == 1));
-  assertx(IMPLIES(!isSub2, classes2.size() == 1));
-
-  // If either side is composed of nothing but unresolved classes, we
-  // need to deal with that specially (because we cannot know their
-  // subclasses, the above logic doesn't work). If either side has
-  // *some* (but not all) unresolved classes, that is fine, because
-  // visitEverySub will handle that for us.
-  auto const allUnresolved1 = std::all_of(
-    classes1.begin(), classes1.end(),
-    [] (res::Class c) { return (bool)c.val.left(); }
-  );
-  auto const allUnresolved2 = std::all_of(
-    classes2.begin(), classes2.end(),
-    [] (res::Class c) { return (bool)c.val.left(); }
-  );
-
-  if (!allUnresolved1 && !allUnresolved2) {
-    // There's resolved classes on both sides. We can use the normal
-    // process logic.
-    processList(classes1, isSub1, nonRegular1);
-    processList(classes2, isSub2, nonRegular2);
-    // Combine the common classes
-    if (commonBase && *commonBase) {
-      // Don't process resolved classes for Closure.
-      if (!is_closure_base(*(*commonBase)->cls)) {
-        common.emplace_back(Class { *commonBase });
-      } else {
-        assertx(!commonInterfaces || commonInterfaces->empty());
-        common.emplace_back(Class { (*commonBase)->cls->name.get() });
-      }
-    }
-    if (commonInterfaces) {
-      for (auto const i : *commonInterfaces) {
-        common.emplace_back(Class { i });
-      }
-    }
-  } else {
-    // Either side (maybe both) is made up of unresolved
-    // classes. Instead of the above subclass based logic, only keep
-    // the classes (on either side) which are a subtype of a class on
-    // the opposite side.
-    auto const either = nonRegular1 || nonRegular2;
-    for (auto const c1 : classes1) {
-      auto const subtypeOf = std::any_of(
-        classes2.begin(), classes2.end(),
-        [&] (res::Class c2) {
-          return isSub2
-            ? c2.subSubtypeOf(c1, either, either)
-            : c2.exactSubtypeOf(c1, either, either);
-        }
-      );
-      if (subtypeOf) common.emplace_back(c1);
-    }
-    for (auto const c2 : classes2) {
-      auto const subtypeOf = std::any_of(
-        classes1.begin(), classes1.end(),
-        [&] (res::Class c1) {
-          return isSub1
-            ? c1.subSubtypeOf(c2, either, either)
-            : c1.exactSubtypeOf(c2, either, either);
-        }
-      );
-      if (subtypeOf) common.emplace_back(c2);
-    }
-  }
-
-  // Finally canonicalize the set
-  return canonicalizeIsects(common, nonRegular1 || nonRegular2);
+Class::ClassVec Class::removeNonRegular(folly::Range<const Class*> classes) {
+  ClassGraph::NodeVec v;
+  v.reserve(classes.size());
+  for (auto const c : classes) v.emplace_back(c.graph().this_);
+  auto const i = ClassGraph::removeNonReg(v);
+  ClassVec out;
+  out.reserve(i.size());
+  for (auto const c : i) out.emplace_back(Class{ClassGraph { c }});
+  return out;
 }
 
-TinyVector<Class, 2>
-Class::removeNonRegular(folly::Range<const Class*> classes) {
-  TinyVector<Class, 8> common;
-  Optional<ClassInfo*> commonBase;
-  Optional<hphp_fast_set<ClassInfo*>> commonInterfaces;
-
-  // Iterate over every exact member of the class list, filtering out
-  // non-regular classes, and rebuild the common base and common
-  // interface.
-  visitEverySub(
-    classes,
-    false,
-    [&] (res::Class c, bool isExact) {
-      // Unresolved classes are always "regular" (we can't tell
-      // otherwise), so they remain as is.
-      if (c.val.left()) {
-        common.emplace_back(c);
-        return true;
-      }
-
-      // Must have a cinfo because we checked above all the classes
-      // were resolved.
-      auto const cinfo = c.val.right();
-      assertx(cinfo);
-      assertx(isExact);
-      assertx(is_regular_class(*cinfo->cls));
-
-      if (!commonBase) {
-        commonBase = cinfo;
-      } else {
-        commonBase = commonAncestor(*commonBase, cinfo);
-      }
-
-      if (!commonInterfaces) {
-        commonInterfaces.emplace();
-        for (auto const i : cinfo->implInterfaces) {
-          commonInterfaces->emplace(const_cast<ClassInfo*>(i.second));
-        }
-      } else {
-        folly::erase_if(
-          *commonInterfaces,
-          [&] (ClassInfo* i) {
-            return !cinfo->implInterfaces.count(i->cls->name);
-          }
-        );
-      }
-
-      // Stop iterating if there's no longer anything in common.
-      return *commonBase || !commonInterfaces->empty();
-    }
-  );
-
-  if (commonBase && *commonBase) {
-    common.emplace_back(Class { *commonBase });
-  }
-  if (commonInterfaces) {
-    for (auto const i : *commonInterfaces) {
-      common.emplace_back(Class { i });
-    }
-  }
-
-  // Canonicalize the common base classes/interfaces.
-  return canonicalizeIsects(common, false);
-}
-
-TinyVector<Class, 2> Class::intersect(folly::Range<const Class*> classes1,
-                                      folly::Range<const Class*> classes2,
-                                      bool nonRegular1,
-                                      bool nonRegular2,
-                                      bool& nonRegularOut) {
-  TinyVector<Class, 8> common;
-
-  // The algorithm for intersecting two intersection lists is similar
-  // to unioning, except we only need to consider the classes which
-  // are subclasses of all the classes in *both* lists.
-
-  assertx(!classes1.empty());
-  assertx(!classes2.empty());
-
-  auto const bothNonRegular = nonRegular1 && nonRegular2;
-  nonRegularOut = bothNonRegular;
-
-  // Even if both the lhs and rhs contain non-regular classes, the
-  // intersection may not. We check if the intersection contains any
-  // non-regular classes so we can inform the caller to set up the
-  // type appropriately.
-  auto isectContainsNonRegular = false;
-
-  // Estimate the sizes of each side by summing their subclass list
-  // lengths. We want to iterate over the "smaller" set of classes.
-  size_t size1 = 0;
-  size_t size2 = 0;
-  for (auto const c : classes1) {
-    if (auto const cinfo = c.val.right()) {
-      assertx(!cinfo->subclassList.empty());
-      size1 += cinfo->subclassList.size();
-    }
-  }
-  for (auto const c : classes2) {
-    if (auto const cinfo = c.val.right()) {
-      assertx(!cinfo->subclassList.empty());
-      size2 += cinfo->subclassList.size();
-    }
-  }
-
-  auto const process = [&] (folly::Range<const Class*> lhs,
-                            folly::Range<const Class*> rhs) {
-    Optional<ClassInfo*> commonBase;
-    Optional<hphp_fast_set<ClassInfo*>> commonInterfaces;
-
-    // Since we're calculating the intersection, we only have to visit
-    // one list, and check against the other.
-    visitEverySub(
-      lhs,
-      bothNonRegular,
-      [&] (res::Class c, bool isExact) {
-        auto const cinfo = c.val.right();
-        // We shouldn't use visitEverySub if the class list is nothing
-        // but unresolved classes, so we should never get an
-        // unresolved class in the callback.
-        assertx(cinfo);
-        assertx(isExact);
-        assertx(IMPLIES(!bothNonRegular, is_regular_class(*cinfo->cls)));
-
-        // Could this class be a class in the other list? If not, ignore
-        // it (it's not part of the intersection result).
-        for (auto const other : rhs) {
-          if (!c.exactCouldBe(other, bothNonRegular, bothNonRegular)) {
-            return true;
-          }
-        }
-
-        // Otherwise it is part of the intersection, and we need to
-        // update the common base and interfaces likewise.
-
-        if (!commonBase) {
-          commonBase = cinfo;
-        } else {
-          commonBase = commonAncestor(*commonBase, cinfo);
-        }
-
-        if (!commonInterfaces) {
-          commonInterfaces.emplace();
-          for (auto const i : cinfo->implInterfaces) {
-            commonInterfaces->emplace(const_cast<ClassInfo*>(i.second));
-          }
-        } else {
-          folly::erase_if(
-            *commonInterfaces,
-            [&] (ClassInfo* i) {
-              return !cinfo->implInterfaces.count(i->cls->name);
-            }
-          );
-        }
-
-        if (bothNonRegular &&
-            !isectContainsNonRegular &&
-            !is_regular_class(*cinfo->cls)) {
-          isectContainsNonRegular = true;
-        }
-
-        // Stop iterating if there's no longer anything in common.
-        return *commonBase || !commonInterfaces->empty();
-      }
-    );
-
-    if (commonBase && *commonBase) {
-      common.emplace_back(Class { *commonBase });
-    }
-    if (commonInterfaces) {
-      for (auto const i : *commonInterfaces) {
-        common.emplace_back(Class { i });
-      }
-    }
-
-    // If the common set is empty at this point, the intersection is
-    // empty anyways, so we don't need to worry about any unresolved
-    // classes. Otherwise add unresolved classes on both sides to the
-    // common set. Canonicalization will remove them if they're
-    // redundant.
-    if (!common.empty()) {
-      for (auto const c : classes1) {
-        if (c.val.left()) common.emplace_back(c);
-      }
-      for (auto const c : classes2) {
-        if (c.val.left()) common.emplace_back(c);
-      }
-    }
-  };
-
-  // The first parameter is the class range we'll call visitEverySub
-  // on, so use the smaller of the two ranges. Don't use a range with
-  // a "size" of 0, which means it's nothing but unresolved classes.
-  if (size1 == 0) {
-    if (size2 > 0) {
-      process(classes2, classes1);
-    } else {
-      // If both ranges are nothing but unresolved classes, we don't
-      // need to process them at all. The intersection is just the
-      // combined list of classes (canonicalization will remove any
-      // redundancies).
-      for (auto const c : classes1) {
-        if (c.val.left()) common.emplace_back(c);
-      }
-      for (auto const c : classes2) {
-        if (c.val.left()) common.emplace_back(c);
-      }
-      isectContainsNonRegular = bothNonRegular;
-    }
-  } else if (size2 == 0 || size1 <= size2) {
-    process(classes1, classes2);
-  } else {
-    process(classes2, classes1);
-  }
-
-  // Canonicalize the common base classes/interfaces.
-  assertx(IMPLIES(!bothNonRegular, !isectContainsNonRegular));
-  nonRegularOut = isectContainsNonRegular;
-  return canonicalizeIsects(common, isectContainsNonRegular);
+Class::ClassVec Class::intersect(folly::Range<const Class*> classes1,
+                                 folly::Range<const Class*> classes2,
+                                 bool nonRegular1,
+                                 bool nonRegular2,
+                                 bool& nonRegularOut) {
+  ClassGraph::NodeVec v1;
+  ClassGraph::NodeVec v2;
+  v1.reserve(classes1.size());
+  v2.reserve(classes2.size());
+  for (auto const c : classes1) v1.emplace_back(c.graph().this_);
+  for (auto const c : classes2) v2.emplace_back(c.graph().this_);
+  auto const i =
+    ClassGraph::intersect(v1, v2, nonRegular1, nonRegular2, nonRegularOut);
+  ClassVec out;
+  out.reserve(i.size());
+  for (auto const c : i) out.emplace_back(Class{ClassGraph { c }});
+  return out;
 }
 
 bool Class::couldBeIsect(folly::Range<const Class*> classes1,
                          folly::Range<const Class*> classes2,
                          bool nonRegular1,
                          bool nonRegular2) {
-  assertx(!classes1.empty());
-  assertx(!classes2.empty());
-
-  auto const bothNonReg = nonRegular1 && nonRegular2;
-
-  // Decompose the first class list into each of it's exact
-  // subclasses, and do a could-be check against every class on the
-  // second list. This is precise since the lhs is always exact.
-  auto couldBe = false;
-  visitEverySub(
-    classes1,
-    bothNonReg,
-    [&] (res::Class c, bool isExact) {
-      couldBe = std::all_of(
-        classes2.begin(),
-        classes2.end(),
-        [&] (Class c2) {
-          return isExact
-            ? c.exactCouldBe(c2, bothNonReg, bothNonReg)
-            : c.subCouldBe(c2, bothNonReg, bothNonReg);
-        }
-      );
-      return !couldBe;
-    }
-  );
-  return couldBe;
+  ClassGraph::NodeVec v1;
+  ClassGraph::NodeVec v2;
+  v1.reserve(classes1.size());
+  v2.reserve(classes2.size());
+  for (auto const c : classes1) v1.emplace_back(c.graph().this_);
+  for (auto const c : classes2) v2.emplace_back(c.graph().this_);
+  return ClassGraph::couldBeIsect(v1, v2, nonRegular1, nonRegular2);
 }
 
-Class Class::unresolvedWaitHandle() {
-  return Class { s_Awaitable.get() };
+Class Class::get(SString name) {
+  return Class{ ClassGraph::get(name) };
+}
+
+Class Class::get(const ClassInfo& cinfo) {
+  assertx(cinfo.classGraph);
+  return Class{ cinfo.classGraph };
+}
+
+Class Class::get(const ClassInfo2& cinfo) {
+  assertx(cinfo.classGraph);
+  return Class{ cinfo.classGraph };
+}
+
+Class Class::getUnresolved(SString name) {
+  return Class{ ClassGraph::getMissing(name) };
+}
+
+void Class::serde(BlobEncoder& sd) const {
+  sd(graph(), nullptr);
+}
+
+Class Class::makeForSerde(BlobDecoder& sd) {
+  ClassGraph g;
+  sd(g, nullptr);
+  assertx(g.this_);
+  return Class{ Opaque { g.this_ } };
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -6519,11 +5242,6 @@ struct Index::IndexData {
    * that so we can return it again.
    */
   ContextRetTyMap contextualReturnTypes{};
-
-  /*
-   * Lazily calculate the class that should be used for wait-handles.
-   */
-  LockFreeLazy<res::Class> lazyWaitHandleCls;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -7292,13 +6010,46 @@ void check_local_invariants(const IndexData& index, const ClassInfo* cinfo) {
             !(cinfo->cls->attrs & AttrNoOverride))
   );
 
+  always_assert(cinfo->classGraph);
+  always_assert(!cinfo->classGraph.isMissing());
+  always_assert(cinfo->classGraph.name()->isame(cinfo->cls->name));
+  always_assert(cinfo->classGraph.cinfo() == cinfo);
+  if (is_closure_base(cinfo->cls->name)) {
+    // The closure base class is special. We don't store it's children
+    // information because it's too large.
+    always_assert(!cinfo->classGraph.hasCompleteChildren());
+    always_assert(cinfo->classGraph.isConservative());
+  } else {
+    always_assert(cinfo->classGraph.hasCompleteChildren() ||
+                  cinfo->classGraph.isConservative());
+  }
+
+  // This class and withoutNonRegular should be equivalent when
+  // ignoring non-regular classes. The withoutNonRegular class should
+  // be a fixed-point.
+  if (auto const without = cinfo->classGraph.withoutNonRegular()) {
+    always_assert(without.hasCompleteChildren() ||
+                  without.isConservative());
+    always_assert(without.subSubtypeOf(cinfo->classGraph, false, false));
+    always_assert(cinfo->classGraph.subSubtypeOf(without, false, false));
+    always_assert(without.withoutNonRegular() == without);
+    always_assert(cinfo->classGraph.mightBeRegular() ||
+                  cinfo->classGraph.mightHaveRegularSubclass());
+    always_assert(IMPLIES(cinfo->classGraph.mightBeRegular(),
+                          without == cinfo->classGraph));
+  } else if (!is_used_trait(*cinfo->cls)) {
+    always_assert(!cinfo->classGraph.mightBeRegular());
+    always_assert(!cinfo->classGraph.mightHaveRegularSubclass());
+  }
+
   // Override attrs and what we know about the subclasses should be in
   // agreement.
   if (cinfo->cls->attrs & AttrNoOverride) {
-    always_assert(!cinfo->hasRegularSubclass);
-    always_assert(!cinfo->hasNonRegularSubclass);
+    always_assert(!cinfo->classGraph.mightHaveRegularSubclass());
+    always_assert(!cinfo->classGraph.mightHaveNonRegularSubclass());
   } else if (cinfo->cls->attrs & AttrNoOverrideRegular) {
-    always_assert(!cinfo->hasRegularSubclass);
+    always_assert(!cinfo->classGraph.mightHaveRegularSubclass());
+    always_assert(cinfo->classGraph.mightHaveNonRegularSubclass());
   }
 
   if (cinfo->cls->attrs & AttrNoMock) {
@@ -7537,33 +6288,39 @@ void check_local_invariants(const IndexData& index, const ClassInfo* cinfo) {
     }
   }
 
-  // The subclassList is non-empty, contains this ClassInfo, and
-  // contains only unique elements.
-  always_assert(!cinfo->subclassList.empty());
-  if (!is_closure_base(*cinfo->cls)) {
+  if (is_closure_name(cinfo->cls->name)) {
+    assertx(cinfo->classGraph.hasCompleteChildren());
+    // Closures have no children.
+    auto const subclasses = cinfo->classGraph.children();
+    always_assert(subclasses.size() == 1);
+    always_assert(subclasses[0].name()->isame(cinfo->cls->name));
+  } else if (cinfo->classGraph.hasCompleteChildren()) {
+    // Otherwise the children list is non-empty, contains this
+    // class, and contains only unique elements.
+    auto const subclasses = cinfo->classGraph.children();
     always_assert(
-      std::find(
-        begin(cinfo->subclassList),
-        end(cinfo->subclassList),
-        cinfo
-      ) != end(cinfo->subclassList)
+      std::find_if(
+        begin(subclasses),
+        end(subclasses),
+        [&] (ClassGraph g) { return g.name()->isame(cinfo->cls->name); }
+      ) != end(subclasses)
     );
-    auto cpy = cinfo->subclassList;
+    auto cpy = subclasses;
     std::sort(begin(cpy), end(cpy));
     cpy.erase(std::unique(begin(cpy), end(cpy)), end(cpy));
-    always_assert(cpy.size() == cinfo->subclassList.size());
-  } else if (is_closure(*cinfo->cls)) {
-    always_assert(cinfo->subclassList.size() == 2);
-    always_assert(is_closure_base(*cinfo->subclassList[0]->cls));
-    always_assert(cinfo->subclassList[1] == cinfo);
-  } else {
-    always_assert(cinfo->subclassList.size() == 1);
-    always_assert(cinfo->subclassList[0] == cinfo);
+    always_assert(cpy.size() == subclasses.size());
   }
 
-  // The baseList is non-empty, and the last element is this class.
-  always_assert(!cinfo->baseList.empty());
-  always_assert(cinfo->baseList.back() == cinfo);
+  // The base list is non-empty, and the last element is this class.
+  auto const bases = cinfo->classGraph.bases();
+  always_assert(!bases.empty());
+  always_assert(cinfo->classGraph == bases.back());
+  if (is_closure_base(cinfo->cls->name)) {
+    always_assert(bases.size() == 1);
+  } else if (is_closure_name(cinfo->cls->name)) {
+    always_assert(bases.size() == 2);
+    always_assert(bases[0].name()->isame(s_Closure.get()));
+  }
 }
 
 void check_local_invariants(const IndexData& data, const FuncFamily& ff) {
@@ -7857,7 +6614,9 @@ bool static_is_accessible(const ClassInfo* clsCtx,
     case AttrProtected:
       // Protected is accessible from both derived classes and parent
       // classes
-      return clsCtx && (clsCtx->derivedFrom(*cls) || cls->derivedFrom(*clsCtx));
+      return clsCtx &&
+        (clsCtx->classGraph.exactSubtypeOf(cls->classGraph, true, true) ||
+         cls->classGraph.exactSubtypeOf(clsCtx->classGraph, true, true));
     case AttrPrivate:
       // Private is only accessible from within the declared class
       return clsCtx == cls;
@@ -14514,10 +13273,10 @@ private:
       if (f.isGenerator) {
         if (f.isAsync) {
           // Async generators always return AsyncGenerator object.
-          return objExact(res::Class::makeUnresolved(s_AsyncGenerator.get()));
+          return objExact(res::Class::get(s_AsyncGenerator.get()));
         }
         // Non-async generators always return Generator object.
-        return objExact(res::Class::makeUnresolved(s_Generator.get()));
+        return objExact(res::Class::get(s_Generator.get()));
       }
 
       auto const make_type = [&] (const TypeConstraint& tc) {
@@ -14525,8 +13284,12 @@ private:
           tc,
           TInitCell,
           [&] (SString name) -> Optional<res::Class> {
-            if (!index.classInfos.count(name)) return std::nullopt;
-            return res::Class::makeUnresolved(name);
+            if (auto const ci = folly::get_default(index.classInfos, name)) {
+              auto const c = res::Class::get(*ci);
+              assertx(c.isComplete());
+              return c;
+            }
+            return std::nullopt;
           },
           [&] () -> Optional<Type> {
             if (!f.cls) return std::nullopt;
@@ -14544,7 +13307,9 @@ private:
               return *c;
             }();
             if (cls.attrs & AttrTrait) return std::nullopt;
-            return subCls(res::Class::makeUnresolved(cls.name));
+            auto const c = res::Class::get(cls.name);
+            assertx(c.isComplete());
+            return subCls(c);
           }
         );
         if (lookup.coerceClassToString == TriBool::Yes) {
@@ -14583,7 +13348,7 @@ private:
       if (f.isAsync) {
         // Async functions always return WaitH<T>, where T is the type
         // returned internally.
-        return wait_handle_unresolved(std::move(ret));
+        return wait_handle(std::move(ret));
       }
       return ret;
     }();
@@ -14627,7 +13392,12 @@ private:
             tc,
             initial,
             [&] (SString name) -> Optional<res::Class> {
-              return res::Class::makeUnresolved(name);
+              if (auto const ci = folly::get_default(index.classInfos, name)) {
+                auto const c = res::Class::get(*ci);
+                assertx(c.isComplete());
+                return c;
+              }
+              return std::nullopt;
             },
             [&] () -> Optional<Type> {
               auto const& ctx = [&] () -> const php::Class& {
@@ -14644,7 +13414,9 @@ private:
                 return *c;
               }();
               if (ctx.attrs & AttrTrait) return std::nullopt;
-              return subCls(res::Class::makeUnresolved(ctx.name));
+              auto const c = res::Class::get(ctx.name);
+              assertx(c.isComplete());
+              return subCls(c);
             }
           );
           return unctx(std::move(lookup.lower));
@@ -15740,15 +14512,6 @@ void make_class_infos_local(
       auto const cinfo = get(rcinfo->name);
       if (rcinfo->parent) cinfo->parent = get(rcinfo->parent);
 
-      {
-        auto const bases = rcinfo->classGraph.bases();
-        cinfo->baseList.reserve(bases.size());
-        for (auto const base : bases) {
-          cinfo->baseList.emplace_back(get(base.name()));
-        }
-        cinfo->baseList.shrink_to_fit();
-      }
-
       if (!(cinfo->cls->attrs & AttrNoExpandTrait)) {
         auto const traits = rcinfo->classGraph.usedTraits();
         cinfo->usedTraits.reserve(traits.size());
@@ -15758,14 +14521,6 @@ void make_class_infos_local(
         cinfo->usedTraits.shrink_to_fit();
       }
       cinfo->traitProps = std::move(rcinfo->traitProps);
-
-      {
-        auto const ifaces = rcinfo->classGraph.interfaces();
-        cinfo->implInterfaces.reserve(ifaces.size());
-        for (auto const iface : ifaces) {
-          cinfo->implInterfaces.emplace(iface.name(), get(iface.name()));
-        }
-      }
 
       cinfo->clsConstants.reserve(rcinfo->clsConstants.size());
       for (auto const& [name, cns] : rcinfo->clsConstants) {
@@ -15804,18 +14559,6 @@ void make_class_infos_local(
         cinfo->methods.shrink_to_fit();
       }
 
-      if (!is_closure_base(*cinfo->cls)) {
-        for (auto const sub : rcinfo->classGraph.children()) {
-          cinfo->subclassList.emplace_back(get(sub.name()));
-        }
-      } else {
-        cinfo->subclassList.emplace_back(cinfo);
-      }
-      // children() returns sorted by name, but we want sorted by
-      // pointer here.
-      std::sort(begin(cinfo->subclassList), end(cinfo->subclassList));
-      cinfo->subclassList.shrink_to_fit();
-
       cinfo->hasBadRedeclareProp = rcinfo->hasBadRedeclareProp;
       cinfo->hasBadInitialPropValues = rcinfo->hasBadInitialPropValues;
       cinfo->hasConstProp = rcinfo->hasConstProp;
@@ -15824,12 +14567,8 @@ void make_class_infos_local(
       cinfo->isMocked = rcinfo->isMocked;
       cinfo->isSubMocked = rcinfo->isSubMocked;
 
-      assertx(rcinfo->classGraph.hasCompleteChildren() ||
-              rcinfo->classGraph.isConservative());
-      cinfo->hasRegularSubclass =
-        rcinfo->classGraph.mightHaveRegularSubclass();
-      cinfo->hasNonRegularSubclass =
-        rcinfo->classGraph.mightHaveNonRegularSubclass();
+      cinfo->classGraph = rcinfo->classGraph;
+      cinfo->classGraph.setCInfo(*cinfo);
 
       auto const noOverride = [&] (SString name) {
         if (auto const mte = folly::get_ptr(cinfo->methods, name)) {
@@ -15853,7 +14592,7 @@ void make_class_infos_local(
         auto expanded = false;
         if (!cinfo->methods.count(name)) {
           if (!(cinfo->cls->attrs & (AttrAbstract|AttrInterface))) continue;
-          if (!cinfo->hasRegularSubclass) continue;
+          if (!cinfo->classGraph.mightHaveRegularSubclass()) continue;
           if (entry.m_regularIncomplete || entry.m_privateAncestor) continue;
           if (name == s_construct.get()) continue;
           expanded = true;
@@ -16564,23 +15303,6 @@ void make_local(IndexData& index) {
     std::move(remoteClassInfos),
     std::move(remoteFuncFamilies)
   );
-
-  // Done with any ClassGraphs. Destroy them now to free up memory.
-  ClassGraph::destroy();
-
-  // Any classes in the FuncInfo return types are unresolved. Now that
-  // the index is completely built, we can resolve them to resolved
-  // classes instead.
-  trace_time tracer2{"resolve classes"};
-  tracer2.ignore_client_stats();
-
-  parallel::for_each(
-    index.funcInfo,
-    [&] (FuncInfo& fi) {
-      if (!fi.func) return;
-      fi.returnTy = resolve_classes(*index.m_index, std::move(fi.returnTy));
-    }
-  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -16818,6 +15540,8 @@ void Index::preresolve_type_structures() {
   parallel::for_each(
     m_data->allClassInfos,
     [&] (std::unique_ptr<ClassInfo>& cinfo) {
+      if (!cinfo->classGraph.hasCompleteChildren()) return;
+
       for (auto& cns : const_cast<php::Class*>(cinfo->cls)->constants) {
         assertx(cns.invariance == php::Const::Invariance::None);
         if (cns.kind != ConstModifiers::Kind::Type) continue;
@@ -16829,7 +15553,11 @@ void Index::preresolve_type_structures() {
 
         // Assume it doesn't change
         auto invariance = php::Const::Invariance::Same;
-        for (auto const& s : cinfo->subclassList) {
+        for (auto const g : cinfo->classGraph.children()) {
+          assertx(!g.isMissing());
+          assertx(g.hasCompleteChildren());
+          auto const s = g.cinfo();
+          assertx(s);
           assertx(invariance != php::Const::Invariance::None);
           assertx(
             IMPLIES(!checkClassname,
@@ -16905,33 +15633,15 @@ Index::lookup_extra_methods(const php::Class* cls) const {
 
 Optional<res::Class> Index::resolve_class(SString clsName) const {
   clsName = normalizeNS(clsName);
-
   auto const it = m_data->classInfo.find(clsName);
   if (it == end(m_data->classInfo)) return std::nullopt;
-  auto const cinfo = it->second;
-
-  if (is_closure_base(*cinfo->cls)) {
-    // Force Closure to be unresolved
-    return res::Class { clsName };
-  }
-  return res::Class { cinfo };
+  return res::Class::get(*it->second);
 }
 
 const php::TypeAlias* Index::lookup_type_alias(SString name) const {
   auto const it = m_data->typeAliases.find(name);
   if (it == m_data->typeAliases.end()) return nullptr;
   return it->second;
-}
-
-res::Class Index::wait_handle_class() const {
-  return m_data->lazyWaitHandleCls.get(
-    [&] {
-      auto const awaitable = builtin_class(*this, s_Awaitable.get());
-      auto const without = awaitable.withoutNonRegular();
-      assertx(without.has_value());
-      return *without;
-    }
-  );
 }
 
 // Given a DCls, return the most specific res::Func for that DCls. For
@@ -16948,7 +15658,7 @@ res::Func Index::rfunc_from_dcls(const DCls& dcls,
   if (!dcls.isIsect()) {
     // If this isn't an intersection, there's only one cinfo to
     // process and we're done.
-    auto const cinfo = dcls.cls().val.right();
+    auto const cinfo = dcls.cls().cinfo();
     if (!cinfo) return general(dcls.containsNonRegular());
     return process(cinfo, dcls.isExact(), dcls.containsNonRegular());
   }
@@ -16978,8 +15688,13 @@ res::Func Index::rfunc_from_dcls(const DCls& dcls,
   Func::Isect isect;
   const php::Func* singleMethod = nullptr;
 
+  auto const DEBUG_ONLY allIncomplete = !debug || std::all_of(
+    begin(dcls.isect()), end(dcls.isect()),
+    [] (res::Class c) { return !c.hasCompleteChildren(); }
+  );
+
   for (auto const i : dcls.isect()) {
-    auto const cinfo = i.val.right();
+    auto const cinfo = i.cinfo();
     if (!cinfo) continue;
 
     auto const func = process(cinfo, false, dcls.containsNonRegular());
@@ -16987,14 +15702,21 @@ res::Func Index::rfunc_from_dcls(const DCls& dcls,
       func.val,
       [&] (Func::MethodName) {},
       [&] (Func::Method m) {
-        assertx(IMPLIES(singleMethod, singleMethod == m.finfo->func));
-        assertx(IMPLIES(singleMethod, isect.families.empty()));
-        assertx(missing != TriBool::Yes);
-        if (!singleMethod) {
+        if (singleMethod) {
+          assertx(missing != TriBool::Yes);
+          assertx(isect.families.empty());
+          if (singleMethod != m.finfo->func) {
+            assertx(allIncomplete);
+            singleMethod = nullptr;
+            missing = TriBool::Yes;
+          } else {
+            missing = TriBool::No;
+          }
+        } else if (missing != TriBool::Yes) {
           singleMethod = m.finfo->func;
           isect.families.clear();
+          missing = TriBool::No;
         }
-        missing = TriBool::No;
       },
       [&] (Func::MethodFamily fam) {
         if (missing == TriBool::Yes) {
@@ -17012,20 +15734,21 @@ res::Func Index::rfunc_from_dcls(const DCls& dcls,
         isect.regularOnly |= fam.regularOnly;
       },
       [&] (Func::MethodOrMissing m) {
-        assertx(IMPLIES(singleMethod, singleMethod == m.finfo->func));
-        assertx(IMPLIES(singleMethod, isect.families.empty()));
-        if (missing == TriBool::Yes) {
-          assertx(!singleMethod);
+        if (singleMethod) {
+          assertx(missing != TriBool::Yes);
           assertx(isect.families.empty());
-          return;
-        }
-        if (!singleMethod) {
+          if (singleMethod != m.finfo->func) {
+            assertx(allIncomplete);
+            singleMethod = nullptr;
+            missing = TriBool::Yes;
+          }
+        } else if (missing != TriBool::Yes) {
           singleMethod = m.finfo->func;
           isect.families.clear();
         }
       },
       [&] (Func::Missing) {
-        assertx(missing != TriBool::No);
+        assertx(IMPLIES(missing == TriBool::No, allIncomplete));
         singleMethod = nullptr;
         isect.families.clear();
         missing = TriBool::Yes;
@@ -17224,7 +15947,11 @@ res::Func Index::resolve_method(Context ctx,
         if (it == end(m_data->classInfo)) return nullptr;
         auto const ctxCInfo = it->second;
         // Is this context a parent of our class?
-        if (!cinfo->derivedFrom(*ctxCInfo)) return nullptr;
+        if (!cinfo->classGraph.exactSubtypeOf(ctxCInfo->classGraph,
+                                              true,
+                                              true)) {
+          return nullptr;
+        }
         // It is. See if it defines a private method.
         auto const it2 = ctxCInfo->methods.find(name);
         if (it2 == end(ctxCInfo->methods)) return nullptr;
@@ -17258,7 +15985,7 @@ res::Func Index::resolve_method(Context ctx,
         // subclasses (in which case there's no resolution at all), or
         // because there's regular subclasses, but they use the same
         // method (in which case the result is just ftarget).
-        if (!cinfo->hasRegularSubclass) {
+        if (!cinfo->classGraph.mightHaveRegularSubclass()) {
           return Func { Func::Missing { name } };
         }
         return Func { Func::Method { func_info(*m_data, ftarget) } };
@@ -17371,7 +16098,7 @@ res::Func Index::resolve_ctor(const Type& obj) const {
         // subclasses (or if it's exact), this resolution will always
         // fail.
         if (!is_regular_class(*cinfo->cls) &&
-            (isExact || !cinfo->hasRegularSubclass)) {
+            (isExact || !cinfo->classGraph.mightHaveRegularSubclass())) {
           return Func { Func::Missing { s_construct.get() } };
         }
         return Func { Func::Method { func_info(*m_data, ftarget) } };
@@ -17451,45 +16178,44 @@ bool Index::func_depends_on_arg(const php::Func* func, size_t arg) const {
 template <typename F>
 bool Index::visit_every_dcls_cls(const DCls& dcls, const F& f) const {
   if (dcls.isExact()) {
-    auto const cinfo = dcls.cls().val.right();
+    auto const cinfo = dcls.cls().cinfo();
     if (!cinfo) return false;
     if (dcls.containsNonRegular() || is_regular_class(*cinfo->cls)) {
       f(cinfo);
     }
     return true;
   } else if (dcls.isSub()) {
-    auto const cinfo = dcls.cls().val.right();
-    if (!cinfo) return false;
-    if (cinfo->cls->attrs & AttrTrait) {
-      if (dcls.containsNonRegular()) f(cinfo);
-    } else {
-      assertx(!cinfo->subclassList.empty());
-      for (auto const sub : cinfo->subclassList) {
-        if (!dcls.containsNonRegular() && !is_regular_class(*sub->cls)) {
-          continue;
+    auto unresolved = false;
+    res::Class::visitEverySub(
+      std::array<res::Class, 1>{dcls.cls()},
+      dcls.containsNonRegular(),
+      [&] (res::Class c) {
+        if (c.hasCompleteChildren()) {
+          if (auto const cinfo = c.cinfo()) return f(cinfo);
         }
-        if (!f(sub)) break;
+        unresolved = true;
+        return false;
       }
-    }
-    return true;
-  }
-  auto const& isect = dcls.isect();
-  assertx(isect.size() > 1);
+    );
+    return !unresolved;
+  } else {
+    auto const& isect = dcls.isect();
+    assertx(isect.size() > 1);
 
-  auto unresolved = false;
-  res::Class::visitEverySub(
-    isect,
-    dcls.containsNonRegular(),
-    [&] (res::Class c, bool isExact) {
-      if (auto const cinfo = c.val.right()) {
-        assertx(isExact);
-        return f(cinfo);
+    auto unresolved = false;
+    res::Class::visitEverySub(
+      isect,
+      dcls.containsNonRegular(),
+      [&] (res::Class c) {
+        if (c.hasCompleteChildren()) {
+          if (auto const cinfo = c.cinfo()) return f(cinfo);
+        }
+        unresolved = true;
+        return false;
       }
-      unresolved = true;
-      return false;
-    }
-  );
-  return !unresolved;
+    );
+    return !unresolved;
+  }
 }
 
 ClsConstLookupResult Index::lookup_class_constant(Context ctx,
@@ -17593,7 +16319,7 @@ ClsConstLookupResult Index::lookup_class_constant(Context ctx,
     // Before anything, look up this entry in the cache. We don't
     // bother with the cache for the exact case because it's quick and
     // there's little point.
-    auto const cinfo = dcls.cls().val.right();
+    auto const cinfo = dcls.cls().cinfo();
     if (!cinfo) return conservative();
     if (auto const it =
         m_data->clsConstLookupCache.find(std::make_pair(cinfo->cls, sname));
@@ -17622,7 +16348,7 @@ ClsConstLookupResult Index::lookup_class_constant(Context ctx,
 
   // Save this for future lookups if we can
   if (dcls.isSub() && cachable) {
-    auto const cinfo = dcls.cls().val.right();
+    auto const cinfo = dcls.cls().cinfo();
     assertx(cinfo);
     m_data->clsConstLookupCache.emplace(
       std::make_pair(cinfo->cls, sname),
@@ -18212,8 +16938,9 @@ PropLookupResult Index::lookup_static(Context ctx,
     // resolve the class since we're currently processing it). If it
     // does, be conservative.
     auto const rCtx = resolve_class(ctx.cls->name);
-    if (!rCtx || rCtx->val.left()) return conservative();
-    ctxCls = rCtx->val.right();
+    if (!rCtx) return conservative();
+    ctxCls = rCtx->cinfo();
+    if (!ctxCls) return conservative();
   }
 
   auto const& dcls = dcls_of(cls);
@@ -18230,7 +16957,7 @@ PropLookupResult Index::lookup_static(Context ctx,
         privateProps,
         cinfo,
         sname,
-        dcls.isSub() && !sname && cinfo != start.val.right()
+        dcls.isSub() && !sname && cinfo != start.cinfo()
       );
       ITRACE(4, "{} -> {}\n", cinfo->cls->name, show(r));
       if (!result) {
@@ -18279,12 +17006,14 @@ Type Index::lookup_public_prop(const php::Class* cls, SString name) const {
 }
 
 bool Index::lookup_class_init_might_raise(Context ctx, res::Class cls) const {
-  return cls.val.match(
-    []  (SString) { return true; },
-    [&] (ClassInfo* cinfo) {
-      return class_init_might_raise(*m_data, ctx, cinfo);
-    }
-  );
+  if (auto const ci = cls.cinfo()) {
+    return class_init_might_raise(*m_data, ctx, ci);
+  } else if (cls.cinfo2()) {
+    // Not implemented yet
+    always_assert(false);
+  } else {
+    return true;
+  }
 }
 
 Slot
@@ -18380,8 +17109,8 @@ PropMergeResult Index::merge_static_type(
     // class is not instantiable. In that case, the merge can't
     // happen.
     if (!rCtx) return R{ TBottom, TriBool::No };
-    if (rCtx->val.left()) return unknownCls();
-    ctxCls = rCtx->val.right();
+    ctxCls = rCtx->cinfo();
+    if (!ctxCls) return unknownCls();
   }
 
   auto const mergePublic = [&] (const ClassInfo* ci,
@@ -18410,7 +17139,7 @@ PropMergeResult Index::merge_static_type(
         checkUB,
         ignoreConst,
         mustBeReadOnly,
-        dcls.isSub() && !sname && cinfo != start->val.right()
+        dcls.isSub() && !sname && cinfo != start->cinfo()
       );
       ITRACE(4, "{} -> {}\n", cinfo->cls->name, show(r));
       if (!result) {

@@ -50,6 +50,8 @@ TRACE_SET_MOD(hhbbc);
 HHBBC_TYPE_PREDEFINED(X)
 #undef X
 
+const StaticString s_Awaitable("HH\\Awaitable");
+
 namespace {
 
 //////////////////////////////////////////////////////////////////////
@@ -2115,26 +2117,6 @@ void DCls::serde(BlobDecoder& sd) {
 
 //////////////////////////////////////////////////////////////////////
 
-// We do not explicitly serialize cls, since it's always the wait
-// handle class.
-void DWaitHandle::serde(BlobEncoder& sd) const {
-  sd(inner);
-  assertx(!cls.containsNonRegular());
-  assertx(cls.isSub());
-  assertx(!cls.isCtx());
-  assertx(
-    cls.cls().name()->isame(
-      res::Class::unresolvedWaitHandle().name()
-    )
-  );
-}
-void DWaitHandle::serde(BlobDecoder& sd) {
-  sd(inner);
-  cls = DCls::MakeSub(res::Class::unresolvedWaitHandle(), false);
-}
-
-//////////////////////////////////////////////////////////////////////
-
 MapElem MapElem::KeyFromType(const Type& key, Type val) {
   assertx(is_scalar_counted(key));
   assertx(is_specialized_int(key) || is_specialized_string(key));
@@ -2872,8 +2854,6 @@ bool Type::checkInvariants() const {
           m_data.dcls.cls().mightBeRegular()
         )
       );
-      assertx(!m_data.dcls.cls().resolved() ||
-              !is_closure_base(*m_data.dcls.cls().cls()));
     } else if (m_data.dcls.isSub()) {
       assertx(m_data.dcls.cls().couldBeOverridden());
       assertx(
@@ -2888,8 +2868,6 @@ bool Type::checkInvariants() const {
           m_data.dcls.cls().couldBeOverriddenByRegular()
         )
       );
-      assertx(!m_data.dcls.cls().resolved() ||
-              !is_closure_base(*m_data.dcls.cls().cls()));
     } else {
       assertx(m_data.dcls.isIsect());
       // There's way more things we could verify here, but it gets
@@ -2902,7 +2880,6 @@ bool Type::checkInvariants() const {
             c.mightBeRegular() || c.couldBeOverriddenByRegular()
           )
         );
-        assertx(!c.resolved() || !is_closure_base(*c.cls()));
       }
     }
     break;
@@ -2912,12 +2889,8 @@ bool Type::checkInvariants() const {
     assertx(!m_data.dobj.containsNonRegular());
     if (m_data.dobj.isExact()) {
       assertx(m_data.dobj.cls().mightBeRegular());
-      assertx(!m_data.dobj.cls().resolved() ||
-              !is_closure_base(*m_data.dobj.cls().cls()));
     } else if (m_data.dobj.isSub()) {
       assertx(m_data.dobj.cls().couldBeOverriddenByRegular());
-      assertx(!m_data.dobj.cls().resolved() ||
-              !is_closure_base(*m_data.dobj.cls().cls()));
     } else {
       assertx(m_data.dobj.isIsect());
       // There's way more things we could verify here, but it gets
@@ -2925,7 +2898,6 @@ bool Type::checkInvariants() const {
       assertx(m_data.dobj.isect().size() > 1);
       for (auto const DEBUG_ONLY c : m_data.dobj.isect()) {
         assertx(c.mightBeRegular() || c.couldBeOverriddenByRegular());
-        assertx(!c.resolved() || !is_closure_base(*c.cls()));
       }
     }
     break;
@@ -2940,10 +2912,9 @@ bool Type::checkInvariants() const {
     assertx(m_data.dwh->cls.isSub());
     assertx(!m_data.dwh->cls.isCtx());
     assertx(
-      m_data.dwh->cls.cls().name()->isame(
-        res::Class::unresolvedWaitHandle().name()
-      )
+      m_data.dwh->cls.cls().name()->isame(s_Awaitable.get())
     );
+    assertx(m_data.dwh->cls.cls().isComplete());
     break;
   case DataTag::ArrLikeVal: {
     assertx(m_data.aval->isStatic());
@@ -3119,29 +3090,10 @@ bool Type::checkInvariants() const {
 
 //////////////////////////////////////////////////////////////////////
 
-Type wait_handle(const Index& index, Type inner) {
+Type wait_handle(Type inner) {
   assertx(inner.subtypeOf(BInitCell));
-  auto const wh = index.wait_handle_class();
-  assertx(wh.couldBeOverriddenByRegular());
-  auto t = Type { BObj, LegacyMark::Bottom };
-
-  auto dcls = DCls::MakeSub(wh, false);
-  if (!inner.strictSubtypeOf(BInitCell)) {
-    construct(t.m_data.dobj, std::move(dcls));
-    t.m_dataTag = DataTag::Obj;
-  } else {
-    construct(
-      t.m_data.dwh,
-      copy_ptr<DWaitHandle>(std::move(dcls), std::move(inner))
-    );
-    t.m_dataTag = DataTag::WaitHandle;
-  }
-  assertx(t.checkInvariants());
-  return t;
-}
-
-Type wait_handle_unresolved(Type inner) {
-  auto const wh = res::Class::unresolvedWaitHandle();
+  auto const wh = res::Class::get(s_Awaitable.get());
+  assertx(wh.isComplete());
   assertx(wh.couldBeOverriddenByRegular());
   auto t = Type { BObj, LegacyMark::Bottom };
 
@@ -4587,12 +4539,12 @@ Type intersection_of(Type a, Type b) {
     // class is exact, any intersection must contain only it (or be
     // Bottom).
     if (acls.isExact()) {
-      assertx(!acls.cls().resolved());
+      assertx(!acls.cls().hasCompleteChildren());
       assertx(!bcls.isExact());
       acls.setNonReg(isectNonReg);
       return setctx(reuse(a), ctx);
     } else if (bcls.isExact()) {
-      assertx(!bcls.cls().resolved());
+      assertx(!bcls.cls().hasCompleteChildren());
       bcls.setNonReg(isectNonReg);
       return setctx(reuse(b), ctx);
     }
@@ -5858,318 +5810,6 @@ Type assert_nonemptiness(Type t) {
     t.m_legacyMark = project(t.m_legacyMark, t.bits());
   }
   assertx(t.checkInvariants());
-  return t;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-// The COWer subclasses allow for traversing specializations while
-// potentially COWing the types. We can avoid COWing the type (and all
-// of it's parent types) until we know we're going to make a change.
-
-struct COWer {
-  virtual Type& operator()() = 0;
-  virtual const Type& noCOW() const = 0;
-};
-
-struct WaitHandleCOWer : public COWer {
-  WaitHandleCOWer(COWer& parent, const DWaitHandle& h)
-    : parent{parent}, current{&h} {}
-  const DWaitHandle& get() const { return *current; }
-  DWaitHandle& getAndCOW() {
-    if (!cowed) {
-      auto& t = parent();
-      assertx(t.m_dataTag == DataTag::WaitHandle);
-      cowed = t.m_data.dwh.mutate();
-      current = cowed;
-    }
-    return *cowed;
-  }
-  Type& operator()() { return getAndCOW().inner; }
-  const Type& noCOW() const { return get().inner; }
-  COWer& parent;
-  DWaitHandle* cowed{nullptr};
-  const DWaitHandle* current;
-};
-
-struct ArrLikePackedNCOWer : public COWer {
-  ArrLikePackedNCOWer(COWer& parent, const DArrLikePackedN& h)
-    : parent{parent}, current{&h} {}
-  const DArrLikePackedN& get() const { return *current; }
-  DArrLikePackedN& getAndCOW() {
-    if (!cowed) {
-      auto& t = parent();
-      assertx(t.m_dataTag == DataTag::ArrLikePackedN);
-      cowed = t.m_data.packedn.mutate();
-      current = cowed;
-    }
-    return *cowed;
-  }
-  Type& operator()() { return getAndCOW().type; }
-  const Type& noCOW() const { return get().type; }
-  COWer& parent;
-  DArrLikePackedN* cowed{nullptr};
-  const DArrLikePackedN* current;
-};
-
-struct ArrLikePackedCOWer : public COWer {
-  ArrLikePackedCOWer(COWer& parent, const DArrLikePacked& h)
-    : parent{parent}, current{&h} {}
-  const DArrLikePacked& get() const { return *current; }
-  DArrLikePacked& getAndCOW() {
-    if (!cowed) {
-      auto& t = parent();
-      assertx(t.m_dataTag == DataTag::ArrLikePacked);
-      cowed = t.m_data.packed.mutate();
-      current = cowed;
-    }
-    return *cowed;
-  }
-  Type& operator()() { return getAndCOW().elems[idx]; }
-  const Type& noCOW() const { return currentElem(); }
-
-  const Type& currentElem() const { return get().elems[idx]; }
-  bool nextElem() {
-    assertx(idx < get().elems.size());
-    return ++idx < get().elems.size();
-  }
-
-  COWer& parent;
-  DArrLikePacked* cowed{nullptr};
-  const DArrLikePacked* current;
-  size_t idx{0};
-};
-
-struct ArrLikeMapNCOWer: public COWer {
-  ArrLikeMapNCOWer(COWer& parent, const DArrLikeMapN& h)
-    : parent{parent}, current{&h} {}
-  const DArrLikeMapN& get() const { return *current; }
-  DArrLikeMapN& getAndCOW() {
-    if (!cowed) {
-      auto& t = parent();
-      assertx(t.m_dataTag == DataTag::ArrLikeMapN);
-      cowed = t.m_data.mapn.mutate();
-      current = cowed;
-    }
-    return *cowed;
-  }
-  Type& operator()() { return isKey ? getAndCOW().key : getAndCOW().val; }
-  const Type& noCOW() const { return keyOrValue(); }
-
-  const Type& keyOrValue() const { return isKey ? get().key : get().val; }
-  void toValue() { assertx(isKey); isKey = false; }
-
-  COWer& parent;
-  DArrLikeMapN* cowed{nullptr};
-  const DArrLikeMapN* current;
-  bool isKey{true};
-};
-
-struct ArrLikeMapCOWer : public COWer {
-  ArrLikeMapCOWer(COWer& parent, const DArrLikeMap& h)
-    : parent{parent}, current{&h} { iter = begin(current->map); }
-  const DArrLikeMap& get() const { return *current; }
-  DArrLikeMap& getAndCOW() {
-    if (!cowed) {
-      auto& t = parent();
-      assertx(t.m_dataTag == DataTag::ArrLikeMap);
-      cowed = t.m_data.map.mutate();
-      current = cowed;
-      iter = begin(cowed->map);
-      for (size_t i = 0; i < idx; ++i) ++iter;
-    }
-    return *cowed;
-  }
-  Type& operator()() {
-    auto& m = getAndCOW();
-    if (iter != end(m.map)) return const_cast<Type&>(iter->second.val);
-    return isOptKey ? m.optKey : m.optVal;
-  }
-  const Type& noCOW() const {
-    auto const& m = get();
-    if (iter != end(m.map)) return iter->second.val;
-    return isOptKey ? m.optKey : m.optVal;
-  }
-
-  const Type& currentElem() const {
-    assertx(iter != end(get().map));
-    return iter->second.val;
-  }
-  bool nextElem() {
-    assertx(iter != end(get().map));
-    ++idx;
-    return ++iter != end(get().map);
-  }
-
-  const Type& optKeyOrValue() const {
-    return isOptKey ? get().optKey : get().optVal;
-  }
-  void toOptVal() {
-    assertx(iter == end(get().map));
-    assertx(isOptKey);
-    isOptKey = false;
-  }
-
-  COWer& parent;
-  DArrLikeMap* cowed{nullptr};
-  const DArrLikeMap* current;
-  size_t idx{0};
-  MapElems::iterator iter;
-  bool isOptKey{true};
-};
-
-struct TypeCOWer : public COWer {
-  explicit TypeCOWer(Type& t) : t{t} {}
-  Type& operator()() { return t; }
-  const Type& noCOW() const { return t; }
-  Type& t;
-};
-
-//////////////////////////////////////////////////////////////////////
-
-void resolve_classes_impl(const Index& index, const Type& t, COWer& parent) {
-  SCOPE_EXIT { parent.noCOW().checkInvariants(); };
-
-  auto const onDCls = [&] (const DCls& dcls, bool isObj) {
-    auto newT = [&] () -> Optional<Type> {
-      if (dcls.isIsect()) {
-        auto const& isect = dcls.isect();
-        if (!std::any_of(
-              isect.begin(),
-              isect.end(),
-              [] (res::Class i) { return !i.resolved(); }
-            )) {
-          return std::nullopt;
-        }
-
-        auto out = TInitCell;
-        for (auto const& i : isect) {
-          auto const resolved = [&] () -> Optional<res::Class> {
-            if (i.resolved()) return i;
-            return index.resolve_class(i.name());
-          }();
-          if (!resolved) return TBottom;
-          out &= isObj
-            ? subObj(*resolved)
-            : subCls(*resolved, dcls.containsNonRegular());
-        }
-        return out;
-      }
-
-      auto const& cls = dcls.cls();
-      if (cls.resolved()) return std::nullopt;
-
-      auto const resolved = index.resolve_class(cls.name());
-      if (!resolved) return TBottom;
-      if (!resolved->resolved()) return std::nullopt;
-
-      if (dcls.isExact()) {
-        return isObj
-          ? objExact(*resolved)
-          : clsExact(*resolved, dcls.containsNonRegular());
-      } else {
-        assertx(dcls.isSub());
-        return isObj
-          ? subObj(*resolved)
-          : subCls(*resolved, dcls.containsNonRegular());
-      }
-    }();
-    if (!newT) return;
-    auto& p = parent();
-    if (newT->is(BBottom)) {
-      p = isObj ? remove_obj(std::move(p)) : remove_cls(std::move(p));
-    } else {
-      auto const bits = p.m_bits;
-      p = setctx(std::move(*newT), dcls.isCtx());
-      p.m_bits = bits;
-    }
-  };
-
-  switch (t.m_dataTag) {
-    case DataTag::None:
-    case DataTag::Int:
-    case DataTag::Dbl:
-    case DataTag::Str:
-    case DataTag::LazyCls:
-    case DataTag::EnumClassLabel:
-    case DataTag::ArrLikeVal:
-      // These can never contain objects or classes.
-      break;
-    case DataTag::WaitHandle: {
-      WaitHandleCOWer next{parent, *t.m_data.dwh};
-      resolve_classes_impl(index, next.get().inner, next);
-      auto const& dcls = next.get().cls;
-      if (!dcls.cls().resolved()) {
-        next.getAndCOW().cls.setCls(index.wait_handle_class());
-      }
-      break;
-    }
-    case DataTag::ArrLikePacked: {
-      ArrLikePackedCOWer next{parent, *t.m_data.packed};
-      do {
-        resolve_classes_impl(index, next.currentElem(), next);
-        if (next.currentElem().is(BBottom)) {
-          auto& p = parent();
-          p = remove_bits(std::move(p), BArrLikeN);
-          break;
-        }
-      } while (next.nextElem());
-      break;
-    }
-    case DataTag::ArrLikePackedN: {
-      ArrLikePackedNCOWer next{parent, *t.m_data.packedn};
-      resolve_classes_impl(index, next.get().type, next);
-      if (next.get().type.is(BBottom)) {
-        auto& p = parent();
-        p = remove_bits(std::move(p), BArrLikeN);
-      }
-      break;
-    }
-    case DataTag::ArrLikeMap: {
-      ArrLikeMapCOWer next{parent, *t.m_data.map};
-      auto isBottom = false;
-      do {
-        resolve_classes_impl(index, next.currentElem(), next);
-        if (next.currentElem().is(BBottom)) {
-          auto& p = parent();
-          p = remove_bits(std::move(p), BArrLikeN);
-          isBottom = true;
-          break;
-        }
-      } while(next.nextElem());
-      if (!isBottom) {
-        assertx(next.optKeyOrValue().is(BBottom) ||
-                next.optKeyOrValue().subtypeOf(BArrKey));
-        assertx(!next.optKeyOrValue().couldBe(BCls | BObj));
-        next.toOptVal();
-        resolve_classes_impl(index, next.optKeyOrValue(), next);
-      }
-      break;
-    }
-    case DataTag::ArrLikeMapN: {
-      ArrLikeMapNCOWer next{parent, *t.m_data.mapn};
-      assertx(next.keyOrValue().subtypeOf(BArrKey));
-      assertx(!next.keyOrValue().couldBe(BCls | BObj));
-      next.toValue();
-      resolve_classes_impl(index, next.keyOrValue(), next);
-      if (next.keyOrValue().is(BBottom)) {
-        auto& p = parent();
-        p = remove_bits(std::move(p), BArrLikeN);
-      }
-      break;
-    }
-    case DataTag::Obj:
-      onDCls(t.m_data.dobj, true);
-      break;
-    case DataTag::Cls:
-      onDCls(t.m_data.dcls, false);
-      break;
-  }
-}
-
-Type resolve_classes(const Index& index, Type t) {
-  TypeCOWer cower{t};
-  resolve_classes_impl(index, t, cower);
   return t;
 }
 

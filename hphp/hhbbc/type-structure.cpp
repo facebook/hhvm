@@ -673,16 +673,15 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
       .finish();
   }
 
-  auto const resolvedCls = [&] (const php::Class* cls, bool setExact) {
+  auto const resolvedCls = [&] (SString name, Attr attrs, bool setExact) {
     auto const kind = [&] {
-      auto const attrs = cls->attrs;
       if (attrs & AttrEnum)      return TypeStructure::Kind::T_enum;
       if (attrs & AttrTrait)     return TypeStructure::Kind::T_trait;
       if (attrs & AttrInterface) return TypeStructure::Kind::T_interface;
       return TypeStructure::Kind::T_class;
     }();
 
-    auto b = setKindAndName(kind, cls->name);
+    auto b = setKindAndName(kind, name);
     if (setExact) b.set(s_exact, make_tv<KindOfBoolean>(true));
     return
       b.resolve(s_generic_types, get_ts_generic_types_opt(ts),
@@ -695,42 +694,50 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
 
   if (ctx.selfCls) {
     if (clsName->isame(s_hh_this.get())) {
-      if (ctx.thisCls) return resolvedCls(ctx.thisCls, true);
+      if (ctx.thisCls) {
+        return resolvedCls(ctx.thisCls->name, ctx.thisCls->attrs, true);
+      }
       if (ctx.selfCls->attrs & AttrNoOverride) {
-        return resolvedCls(ctx.selfCls, true);
+        return resolvedCls(ctx.selfCls->name, ctx.selfCls->attrs, true);
       }
 
       auto const rcls = ctx.index->resolve_class(ctx.selfCls->name);
       if (!rcls) return Resolution{ TBottom, true };
-      if (!rcls->resolved()) return Resolution{ TDictN, true };
 
       Optional<Resolution> resolution;
-      rcls->forEachSubclass(
-        [&] (const php::Class* sub) {
+      auto const knowsChildren = rcls->forEachSubclass(
+        [&] (SString name, Attr attrs) {
           if (!resolution) {
-            resolution.emplace(resolvedCls(sub, true));
+            resolution.emplace(resolvedCls(name, attrs, true));
           } else {
-            *resolution |= resolvedCls(sub, true);
+            *resolution |= resolvedCls(name, attrs, true);
           }
         }
       );
+      if (!knowsChildren) return Resolution{ TDictN, true };
       if (!resolution) return Resolution{ TBottom, true };
       return *resolution;
     }
 
-    if (clsName->isame(s_self.get())) return resolvedCls(ctx.selfCls, false);
+    if (clsName->isame(s_self.get())) {
+      return resolvedCls(ctx.selfCls->name, ctx.selfCls->attrs, false);
+    }
 
     if (clsName->isame(s_parent.get())) {
       if (!ctx.selfCls->parentName) return Resolution { TBottom, true };
       auto const rcls = ctx.index->resolve_class(ctx.selfCls->parentName);
       if (!rcls) return Resolution { TBottom, true };
       if (!rcls->resolved()) return Resolution{ TDictN, true };
-      return resolvedCls(rcls->cls(), false);
+      auto const cls = rcls->cls();
+      return resolvedCls(cls->name, cls->attrs, false);
     }
   }
 
   if (auto const rcls = ctx.index->resolve_class(clsName)) {
-    if (rcls->resolved()) return resolvedCls(rcls->cls(), false);
+    if (rcls->resolved()) {
+      auto const cls = rcls->cls();
+        return resolvedCls(cls->name, cls->attrs, false);
+    }
     return Resolution{ TDictN, true };
   }
 

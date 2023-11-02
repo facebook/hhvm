@@ -298,7 +298,7 @@ Type fixup_return_type(const Index& index, const php::Func& func, Type ty) {
   } else if (func.isAsync) {
     // Async functions always return WaitH<T>, where T is the type returned
     // internally.
-    return wait_handle(index, std::move(ty));
+    return wait_handle(std::move(ty));
   } else {
     return ty;
   }
@@ -1143,9 +1143,9 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
       auto const wf = php::WideFunc::cns(f);
       auto const context = AnalysisContext { meta.unit, wf, meta.cls };
 
-      work.propsRefined = false;
+      work.noPropRefine = true;
       auto results = do_analyze(index, context, &clsAnalysis, &clsCnsWork);
-      assertx(!work.propsRefined);
+      work.noPropRefine = false;
 
       if (!meta.output) continue;
 

@@ -272,7 +272,7 @@ void PropertiesInfo::mergeInPrivateProp(const Index& index,
   if (it->second.ty.strictlyMoreRefined(newT)) {
     it->second.ty = std::move(newT);
     if (m_cls->work) {
-      m_cls->work->propsRefined = true;
+      always_assert(!m_cls->work->noPropRefine);
       m_cls->work->worklist.scheduleForProp(name);
     }
   }
@@ -300,7 +300,7 @@ void PropertiesInfo::mergeInPrivateStatic(const Index& index,
   if (it->second.ty.strictlyMoreRefined(newT)) {
     it->second.ty = std::move(newT);
     if (m_cls->work) {
-      m_cls->work->propsRefined = true;
+      always_assert(!m_cls->work->noPropRefine);
       m_cls->work->worklist.scheduleForProp(name);
     }
   }
@@ -320,7 +320,7 @@ void PropertiesInfo::mergeInPrivateStaticPreAdjusted(SString name,
   if (it->second.ty.strictlyMoreRefined(newT)) {
     it->second.ty = std::move(newT);
     if (m_cls->work) {
-      m_cls->work->propsRefined = true;
+      always_assert(!m_cls->work->noPropRefine);
       m_cls->work->worklist.scheduleForProp(name);
     }
   }
@@ -342,7 +342,7 @@ void PropertiesInfo::mergeInAllPrivateProps(const Index& index,
     if (kv.second.ty.strictlyMoreRefined(newT)) {
       kv.second.ty = std::move(newT);
       if (m_cls->work) {
-        m_cls->work->propsRefined = true;
+        always_assert(!m_cls->work->noPropRefine);
         m_cls->work->worklist.scheduleForProp(kv.first);
       }
     }
@@ -369,7 +369,7 @@ void PropertiesInfo::mergeInAllPrivateStatics(const Index& index,
     if (kv.second.ty.strictlyMoreRefined(newT)) {
       kv.second.ty = std::move(newT);
       if (m_cls->work) {
-        m_cls->work->propsRefined = true;
+        always_assert(!m_cls->work->noPropRefine);
         m_cls->work->worklist.scheduleForProp(kv.first);
       }
     }

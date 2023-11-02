@@ -71,6 +71,8 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
+const StaticString s_Awaitable("HH\\Awaitable");
+
 const StaticString s_test("test");
 const StaticString s_C("C");
 
@@ -79,7 +81,7 @@ const StaticString s_ChildClosure2("Closure$ChildClosure2");
 const StaticString s_ChildClosure3("Closure$ChildClosure3");
 
 #define TEST_CLASSES                            \
-  Y(Closure)                                    \
+  X(Closure)                                    \
                                                 \
   X(TestClass)                                  \
   X(TestClassDeriver)                           \
@@ -777,8 +779,8 @@ Type make_specialized_double(trep bits, double d) {
   return set_trep_for_testing(dval(d), bits);
 }
 
-Type make_specialized_wait_handle(trep bits, Type inner, const Index& index) {
-  return set_trep_for_testing(wait_handle(index, std::move(inner)), bits);
+Type make_specialized_wait_handle(trep bits, Type inner) {
+  return set_trep_for_testing(wait_handle(std::move(inner)), bits);
 }
 
 Type make_specialized_exact_object(trep bits, res::Class cls,
@@ -995,9 +997,9 @@ std::vector<Type> withData(const Index& index) {
   auto const clsX21 = index.resolve_class(s_X21.get());
   if (!clsX21 || !clsX21->resolved()) ADD_FAILURE();
 
-  auto const clsFoo1 = res::Class::makeUnresolved(s_Foo1.get());
+  auto const clsFoo1 = res::Class::getUnresolved(s_Foo1.get());
   if (clsFoo1.resolved()) ADD_FAILURE();
-  auto const clsFoo2 = res::Class::makeUnresolved(s_Foo2.get());
+  auto const clsFoo2 = res::Class::getUnresolved(s_Foo2.get());
   if (clsFoo2.resolved()) ADD_FAILURE();
 
   auto const svec1 = static_vec(s_A.get(), s_B.get());
@@ -1037,10 +1039,10 @@ std::vector<Type> withData(const Index& index) {
       types.emplace_back(make_specialized_double(b, 2.718));
     }
     if (couldBe(b, BObj) && subtypeOf(b, BObj | nonSupport)) {
-      types.emplace_back(make_specialized_wait_handle(b, TInt, index));
-      types.emplace_back(make_specialized_wait_handle(b, TStr, index));
-      types.emplace_back(make_specialized_wait_handle(b, TArrKey, index));
-      types.emplace_back(make_specialized_wait_handle(b, TBottom, index));
+      types.emplace_back(make_specialized_wait_handle(b, TInt));
+      types.emplace_back(make_specialized_wait_handle(b, TStr));
+      types.emplace_back(make_specialized_wait_handle(b, TArrKey));
+      types.emplace_back(make_specialized_wait_handle(b, TBottom));
 
       types.emplace_back(make_specialized_exact_object(b, *clsA));
       types.emplace_back(make_specialized_exact_object(b, *clsAA));
@@ -1065,10 +1067,10 @@ std::vector<Type> withData(const Index& index) {
       types.emplace_back(subIB);
 
       if (subtypeOf(b, BInitCell)) {
-        types.emplace_back(make_specialized_wait_handle(b, subIBase, index));
-        types.emplace_back(make_specialized_wait_handle(b, subIA, index));
-        types.emplace_back(make_specialized_wait_handle(b, subIAA, index));
-        types.emplace_back(make_specialized_wait_handle(b, subIB, index));
+        types.emplace_back(make_specialized_wait_handle(b, subIBase));
+        types.emplace_back(make_specialized_wait_handle(b, subIA));
+        types.emplace_back(make_specialized_wait_handle(b, subIAA));
+        types.emplace_back(make_specialized_wait_handle(b, subIB));
       }
 
       types.emplace_back(make_specialized_exact_object(b, *clsA, true));
@@ -1080,7 +1082,7 @@ std::vector<Type> withData(const Index& index) {
       types.emplace_back(make_specialized_sub_object(b, *clsAB, true));
 
       auto const dobj =
-        dobj_of(make_specialized_wait_handle(b, TArrKey, index));
+        dobj_of(make_specialized_wait_handle(b, TArrKey));
       if (!dobj.cls().resolved()) ADD_FAILURE();
       types.emplace_back(make_specialized_sub_object(b, dobj.cls()));
       types.emplace_back(make_specialized_exact_object(b, dobj.cls()));
@@ -1543,7 +1545,7 @@ std::vector<Type> specializedClasses(const Index& index) {
   }
 #define Y(name)                                                         \
   {                                                                     \
-    auto const cls = res::Class::makeUnresolved(s_##name.get());        \
+    auto const cls = res::Class::getUnresolved(s_##name.get());        \
     if (cls.resolved()) ADD_FAILURE();                                  \
     addExactSub(cls);                                                   \
   }
@@ -1562,7 +1564,7 @@ std::vector<Type> specializedClasses(const Index& index) {
   addExactSub(*childClo2);
   addExactSub(*childClo3);
 
-  auto const awaitable = index.wait_handle_class();
+  auto const awaitable = res::Class::get(s_Awaitable.get());
   addExactSub(awaitable);
 
   auto const clsX2 = index.resolve_class(s_X2.get());
@@ -1570,19 +1572,19 @@ std::vector<Type> specializedClasses(const Index& index) {
   auto const clsX18 = index.resolve_class(s_X18.get());
   auto const clsY3 = index.resolve_class(s_Y3.get());
 
-  types.emplace(make_specialized_wait_handle(BObj, TInt, index));
-  types.emplace(make_specialized_wait_handle(BObj, TStr, index));
-  types.emplace(make_specialized_wait_handle(BObj, TArrKey, index));
-  types.emplace(make_specialized_wait_handle(BObj, TBottom, index));
+  types.emplace(make_specialized_wait_handle(BObj, TInt));
+  types.emplace(make_specialized_wait_handle(BObj, TStr));
+  types.emplace(make_specialized_wait_handle(BObj, TArrKey));
+  types.emplace(make_specialized_wait_handle(BObj, TBottom));
 
-  types.emplace(make_specialized_wait_handle(BObj, subObj(*clsX2), index));
-  types.emplace(make_specialized_wait_handle(BObj, subObj(*clsX6), index));
-  types.emplace(make_specialized_wait_handle(BObj, subObj(*clsX18), index));
-  types.emplace(make_specialized_wait_handle(BObj, subObj(*clsY3), index));
-  types.emplace(make_specialized_wait_handle(BObj, objExact(*clsX2), index));
-  types.emplace(make_specialized_wait_handle(BObj, objExact(*clsX6), index));
-  types.emplace(make_specialized_wait_handle(BObj, objExact(*clsX18), index));
-  types.emplace(make_specialized_wait_handle(BObj, objExact(*clsY3), index));
+  types.emplace(make_specialized_wait_handle(BObj, subObj(*clsX2)));
+  types.emplace(make_specialized_wait_handle(BObj, subObj(*clsX6)));
+  types.emplace(make_specialized_wait_handle(BObj, subObj(*clsX18)));
+  types.emplace(make_specialized_wait_handle(BObj, subObj(*clsY3)));
+  types.emplace(make_specialized_wait_handle(BObj, objExact(*clsX2)));
+  types.emplace(make_specialized_wait_handle(BObj, objExact(*clsX6)));
+  types.emplace(make_specialized_wait_handle(BObj, objExact(*clsX18)));
+  types.emplace(make_specialized_wait_handle(BObj, objExact(*clsY3)));
 
   types.emplace(TObj);
   types.emplace(TCls);
@@ -1746,7 +1748,7 @@ TEST(Type, Prims) {
 
       if (t1.is(BUninit) || t2.is(BUninit)) continue;
 
-      test(wait_handle(index, t1), wait_handle(index, t2), true);
+      test(wait_handle(t1), wait_handle(t2), true);
 
       const std::vector<Type> arrays1{
         dict_packed({t1, t1}),
@@ -1976,28 +1978,28 @@ TEST(Type, SpecializedClasses) {
     if (!dcls1 || !dcls2) return false;
     if (isObj1 != isObj2) return false;
     if (dcls1->isExact()) {
-      if (dcls1->cls().resolved()) return false;
+      if (dcls1->cls().hasCompleteChildren()) return false;
       if (dcls2->isIsect()) {
         return std::all_of(
           dcls2->isect().begin(),
           dcls2->isect().end(),
-          [] (res::Class c) { return !c.resolved(); }
+          [] (res::Class c) { return !c.hasCompleteChildren(); }
         );
       }
       if (dcls2->isExact()) return false;
-      return !dcls2->cls().resolved();
+      return !dcls2->cls().hasCompleteChildren();
     }
     if (dcls2->isExact()) {
-      if (dcls2->cls().resolved()) return false;
+      if (dcls2->cls().hasCompleteChildren()) return false;
       if (dcls1->isIsect()) {
         return std::all_of(
           dcls1->isect().begin(),
           dcls1->isect().end(),
-          [] (res::Class c) { return !c.resolved(); }
+          [] (res::Class c) { return !c.hasCompleteChildren(); }
         );
       }
       if (dcls1->isExact()) return false;
-      return !dcls1->cls().resolved();
+      return !dcls1->cls().hasCompleteChildren();
     }
     return false;
   };
@@ -2024,7 +2026,7 @@ TEST(Type, Closure) {
   auto index = make_index();
 
   auto const closureCls = index.resolve_class(s_Closure.get());
-  if (!closureCls || closureCls->resolved()) ADD_FAILURE();
+  if (!closureCls || closureCls->hasCompleteChildren()) ADD_FAILURE();
 
   auto const childCls1 = index.resolve_class(s_ChildClosure1.get());
   if (!childCls1 || !childCls1->resolved()) ADD_FAILURE();
@@ -2879,12 +2881,12 @@ TEST(Type, ObjToCls) {
   auto const clsCanon10 = index.resolve_class(s_Canon10.get());
   if (!clsCanon10 || !clsCanon10->resolved()) ADD_FAILURE();
 
-  auto const clsFoo1 = res::Class::makeUnresolved(s_Foo1.get());
+  auto const clsFoo1 = res::Class::getUnresolved(s_Foo1.get());
   if (clsFoo1.resolved()) ADD_FAILURE();
-  auto const clsFoo2 = res::Class::makeUnresolved(s_Foo2.get());
+  auto const clsFoo2 = res::Class::getUnresolved(s_Foo2.get());
   if (clsFoo2.resolved()) ADD_FAILURE();
 
-  auto const awaitable = index.wait_handle_class();
+  auto const awaitable = res::Class::get(s_Awaitable.get());
 
   EXPECT_EQ(toobj(TCls), TObj);
   EXPECT_EQ(toobj(make_specialized_sub_class(BCls, *clsA)),
@@ -2987,7 +2989,7 @@ TEST(Type, ObjToCls) {
             make_specialized_sub_class(BCls, *clsA));
   EXPECT_EQ(objcls(make_specialized_exact_object(BObj, *clsA)),
             make_specialized_exact_class(BCls, *clsA));
-  EXPECT_EQ(objcls(make_specialized_wait_handle(BObj, TInt, index)),
+  EXPECT_EQ(objcls(make_specialized_wait_handle(BObj, TInt)),
             make_specialized_sub_class(BCls, awaitable, false, true, false));
 
   EXPECT_EQ(
@@ -3087,8 +3089,8 @@ TEST(Type, Option) {
     EXPECT_EQ(t, opt(unopt(t)));
   }
 
-  EXPECT_TRUE(wait_handle(index, opt(dval(2.0))).couldBe(
-    wait_handle(index, dval(2.0))));
+  EXPECT_TRUE(wait_handle(opt(dval(2.0))).couldBe(
+    wait_handle(dval(2.0))));
 }
 
 TEST(Type, OptUnionOf) {
@@ -3128,13 +3130,13 @@ TEST(Type, OptUnionOf) {
   EXPECT_EQ(TOptRClsMeth, union_of(TInitNull, TRClsMeth));
 
   auto index = make_index();
-  auto const rcls = index.wait_handle_class();
+  auto const rcls = res::Class::get(s_Awaitable.get());
 
   EXPECT_TRUE(union_of(TObj, opt(objExact(rcls))) == TOptObj);
 
-  auto wh1 = wait_handle(index, TInt);
-  auto wh2 = wait_handle(index, ival(2));
-  auto wh3 = wait_handle(index, ival(3));
+  auto wh1 = wait_handle(TInt);
+  auto wh2 = wait_handle(ival(2));
+  auto wh3 = wait_handle(ival(3));
 
   EXPECT_TRUE(union_of(wh1, wh2) == wh1);
   auto owh1 = opt(wh1);
@@ -5061,7 +5063,7 @@ TEST(Type, Canonicalization) {
   auto const clsCanon14 = idx.resolve_class(s_Canon14.get());
   if (!clsCanon14) ADD_FAILURE();
 
-  auto const clsFoo1 = res::Class::makeUnresolved(s_Foo1.get());
+  auto const clsFoo1 = res::Class::getUnresolved(s_Foo1.get());
   if (clsFoo1.resolved()) ADD_FAILURE();
 
   EXPECT_EQ(subObj(*clsICanon1), TBottom);
@@ -5208,13 +5210,13 @@ TEST(Type, Canonicalization) {
 TEST(Type, WaitH) {
   auto index = make_index();
 
-  auto const rcls   = index.wait_handle_class();
+  auto const rcls   = res::Class::get(s_Awaitable.get());
   auto const twhobj = subObj(rcls);
 
   auto const& all = allCases(index);
   for (auto const& t : all) {
     if (!t.subtypeOf(BInitCell)) continue;
-    auto const wh = wait_handle(index, t);
+    auto const wh = wait_handle(t);
     if (t.strictSubtypeOf(BInitCell)) {
       EXPECT_TRUE(is_specialized_wait_handle(wh));
     } else {
@@ -5224,7 +5226,7 @@ TEST(Type, WaitH) {
     }
     EXPECT_TRUE(wh.couldBe(twhobj));
     EXPECT_TRUE(wh.subtypeOf(twhobj));
-    EXPECT_TRUE(wh.subtypeOf(wait_handle(index, TInitCell)));
+    EXPECT_TRUE(wh.subtypeOf(wait_handle(TInitCell)));
   }
 
   // union_of(WaitH<A>, WaitH<B>) == WaitH<union_of(A, B)>
@@ -5234,11 +5236,11 @@ TEST(Type, WaitH) {
       auto const& t2 = p2.second;
       if (!t1.subtypeOf(BInitCell) || !t2.subtypeOf(BInitCell)) continue;
       auto const u1 = union_of(t1, t2);
-      auto const u2 = union_of(wait_handle(index, t1), wait_handle(index, t2));
+      auto const u2 = union_of(wait_handle(t1), wait_handle(t2));
       if (u1.strictSubtypeOf(BInitCell)) {
         EXPECT_TRUE(is_specialized_wait_handle(u2));
         EXPECT_EQ(wait_handle_inner(u2), u1);
-        EXPECT_EQ(wait_handle(index, u1), u2);
+        EXPECT_EQ(wait_handle(u1), u2);
       } else {
         EXPECT_FALSE(is_specialized_wait_handle(u2));
         EXPECT_TRUE(is_specialized_obj(u2));
@@ -5246,18 +5248,18 @@ TEST(Type, WaitH) {
       }
 
       if (t1.subtypeOf(t2)) {
-        EXPECT_TRUE(wait_handle(index, t1).subtypeOf(wait_handle(index, t2)));
+        EXPECT_TRUE(wait_handle(t1).subtypeOf(wait_handle(t2)));
       } else {
-        EXPECT_FALSE(wait_handle(index, t1).subtypeOf(wait_handle(index, t2)));
+        EXPECT_FALSE(wait_handle(t1).subtypeOf(wait_handle(t2)));
       }
 
       // Two wait handles can always be each other
-      EXPECT_TRUE(wait_handle(index, t1).couldBe(wait_handle(index, t2)));
+      EXPECT_TRUE(wait_handle(t1).couldBe(wait_handle(t2)));
       auto const isect =
-        intersection_of(wait_handle(index, t1), wait_handle(index, t2));
+        intersection_of(wait_handle(t1), wait_handle(t2));
       EXPECT_FALSE(isect.is(BBottom));
-      EXPECT_TRUE(isect.subtypeOf(wait_handle(index, t1)));
-      EXPECT_TRUE(isect.subtypeOf(wait_handle(index, t2)));
+      EXPECT_TRUE(isect.subtypeOf(wait_handle(t1)));
+      EXPECT_TRUE(isect.subtypeOf(wait_handle(t2)));
     }
   }
 
@@ -5268,34 +5270,34 @@ TEST(Type, WaitH) {
       auto const& t2 = p2.second;
       if (t1.is(BBottom) || t2.is(BBottom)) continue;
       if (!t1.subtypeOf(BInitCell) || !t2.subtypeOf(BInitCell)) continue;
-      auto const w1 = opt(wait_handle(index, t1));
-      auto const w2 = opt(wait_handle(index, t2));
+      auto const w1 = opt(wait_handle(t1));
+      auto const w2 = opt(wait_handle(t2));
       auto const u1 = union_of(w1, w2);
-      auto const u2 = opt(wait_handle(index, union_of(t1, t2)));
+      auto const u2 = opt(wait_handle(union_of(t1, t2)));
       EXPECT_EQ(u1, u2);
     }
   }
 
   // Some test cases with optional wait handles.
-  auto const optWH = opt(wait_handle(index, ival(2)));
+  auto const optWH = opt(wait_handle(ival(2)));
   EXPECT_TRUE(TInitNull.subtypeOf(optWH));
   EXPECT_TRUE(optWH.subtypeOf(BOptObj));
   EXPECT_TRUE(optWH.subtypeOf(opt(twhobj)));
-  EXPECT_TRUE(wait_handle(index, ival(2)).subtypeOf(optWH));
-  EXPECT_FALSE(optWH.subtypeOf(wait_handle(index, ival(2))));
-  EXPECT_TRUE(optWH.couldBe(wait_handle(index, ival(2))));
+  EXPECT_TRUE(wait_handle(ival(2)).subtypeOf(optWH));
+  EXPECT_FALSE(optWH.subtypeOf(wait_handle(ival(2))));
+  EXPECT_TRUE(optWH.couldBe(wait_handle(ival(2))));
 
   // union_of(WaitH<T>, Obj<=Awaitable) == Obj<=Awaitable
   for (auto const& t : all) {
     if (!t.subtypeOf(BInitCell)) continue;
-    auto const u = union_of(wait_handle(index, t), twhobj);
+    auto const u = union_of(wait_handle(t), twhobj);
     EXPECT_EQ(u, twhobj);
   }
 
   for (auto const& t : all) {
     if (!t.subtypeOf(BInitCell)) continue;
-    auto const u1 = union_of(wait_handle(index, t), TInitNull);
-    auto const u2 = union_of(TInitNull, wait_handle(index, t));
+    auto const u1 = union_of(wait_handle(t), TInitNull);
+    auto const u2 = union_of(TInitNull, wait_handle(t));
     EXPECT_EQ(u1, u2);
     if (t.strictSubtypeOf(BInitCell)) {
       EXPECT_TRUE(is_specialized_wait_handle(u1));
@@ -5310,15 +5312,15 @@ TEST(Type, WaitH) {
 
   for (auto const& t : all) {
     if (!t.subtypeOf(BInitCell)) continue;
-    auto const wh = wait_handle(index, t);
+    auto const wh = wait_handle(t);
     EXPECT_EQ(intersection_of(wh, twhobj), wh);
   }
 
   EXPECT_EQ(
-    intersection_of(wait_handle(index, TInt), wait_handle(index, TStr)),
-    wait_handle(index, TBottom)
+    intersection_of(wait_handle(TInt), wait_handle(TStr)),
+    wait_handle(TBottom)
   );
-  EXPECT_TRUE(wait_handle(index, TInt).couldBe(wait_handle(index, TStr)));
+  EXPECT_TRUE(wait_handle(TInt).couldBe(wait_handle(TStr)));
 
 }
 
@@ -5929,8 +5931,8 @@ TEST(Type, LoosenStaticness) {
     EXPECT_EQ(loosen_mark_for_testing(loosen_staticness(opt(a))),
               loosen_mark_for_testing(opt(b)));
     if (a.strictSubtypeOf(BInitCell)) {
-      EXPECT_EQ(loosen_mark_for_testing(loosen_staticness(wait_handle(index, a))),
-                loosen_mark_for_testing(wait_handle(index, b)));
+      EXPECT_EQ(loosen_mark_for_testing(loosen_staticness(wait_handle(a))),
+                loosen_mark_for_testing(wait_handle(b)));
       EXPECT_EQ(loosen_mark_for_testing(loosen_staticness(dict_packedn(a))),
                 loosen_mark_for_testing(dict_packedn(b)));
       EXPECT_EQ(loosen_mark_for_testing(loosen_staticness(dict_packed({a}))),
@@ -6005,7 +6007,7 @@ TEST(Type, LoosenStaticness) {
     { vec_n(Type{BInitCell & ~BCStr}), TVecN },
     { dict_n(TArrKey, Type{BInitCell & ~BCStr}), TDictN },
     { dict_n(Type{BInt|BSStr}, TInitCell), TDictN },
-    { wait_handle(index, Type{BInitCell & ~BCStr}), wait_handle(index, TInitCell) },
+    { wait_handle(Type{BInitCell & ~BCStr}), wait_handle(TInitCell) },
     { vec_val(static_vec(s_A.get(), 123, s_B.get(), 456)),
       vec({sval_nonstatic(s_A), ival(123), sval_nonstatic(s_B), ival(456)}) },
     { sdict_map({map_elem(s_A, TSStr)}, TSStr, TSStr), dict_map({map_elem_nonstatic(s_A, TStr)}, TStr, TStr) },
@@ -6097,7 +6099,7 @@ TEST(Type, LoosenArrayStaticness) {
     EXPECT_EQ(loosen_array_staticness(opt(t)), opt(loosen_array_staticness(t)));
 
     if (t.strictSubtypeOf(BInitCell)) {
-      EXPECT_EQ(loosen_array_staticness(wait_handle(index, t)), wait_handle(index, t));
+      EXPECT_EQ(loosen_array_staticness(wait_handle(t)), wait_handle(t));
       EXPECT_EQ(loosen_array_staticness(dict_packedn(t)), dict_packedn(t));
       EXPECT_EQ(loosen_array_staticness(dict_packed({t})), dict_packed({t}));
       EXPECT_EQ(loosen_array_staticness(dict_n(TSStr, t)), dict_n(TSStr, t));
@@ -6157,7 +6159,7 @@ TEST(Type, LoosenArrayStaticness) {
     { TInitCell, TInitCell },
     { vec_n(Type{BInitCell & ~BCArrLike}), vec_n(Type{BInitCell & ~BCArrLike}) },
     { dict_n(TArrKey, Type{BInitCell & ~BCArrLike}), dict_n(TArrKey, Type{BInitCell & ~BCArrLike}) },
-    { wait_handle(index, Type{BInitCell & ~BCArrLike}), wait_handle(index, Type{BInitCell & ~BCArrLike}) },
+    { wait_handle(Type{BInitCell & ~BCArrLike}), wait_handle(Type{BInitCell & ~BCArrLike}) },
     { vec_val(static_vec(s_A.get(), 123, s_B.get(), 456)),
       vec({sval(s_A), ival(123), sval(s_B), ival(456)}) },
     { sdict_map({map_elem(s_A, TSStr)}, TSStr, TSStr), dict_map({map_elem(s_A, TSStr)}, TSStr, TSStr) },
@@ -6187,7 +6189,7 @@ TEST(Type, Emptiness) {
     { TArrLikeN, Emptiness::NonEmpty },
     { TArrLike, Emptiness::Maybe },
     { TObj, Emptiness::Maybe },
-    { wait_handle(index, TInt), Emptiness::NonEmpty },
+    { wait_handle(TInt), Emptiness::NonEmpty },
     { ival(0), Emptiness::Empty },
     { ival(1), Emptiness::NonEmpty },
     { opt(ival(0)), Emptiness::Empty },
@@ -6255,7 +6257,7 @@ TEST(Type, AssertNonEmptiness) {
     { TArrLike, TArrLikeN },
     { TObj, TObj },
     { Type{BInt|BFalse}, TInt },
-    { wait_handle(index, TInt), wait_handle(index, TInt) },
+    { wait_handle(TInt), wait_handle(TInt) },
     { ival(0), TBottom },
     { ival(1), ival(1) },
     { sempty(), TBottom },
@@ -6322,7 +6324,7 @@ TEST(Type, AssertEmptiness) {
     { Type{BInt|BFalse}, union_of(ival(0),TFalse) },
     { Type{BInt|BTrue}, ival(0) },
     { Type{BInt|BBool}, union_of(ival(0),TFalse) },
-    { wait_handle(index, TInt), TBottom },
+    { wait_handle(TInt), TBottom },
     { ival(0), ival(0) },
     { ival(1), TBottom },
     { sempty(), sempty() },
@@ -7467,8 +7469,8 @@ TEST(Type, LoosenLikenessRecursively) {
       EXPECT_EQ(loosen_likeness_recursively(opt(t)),
                 opt(loosen_likeness_recursively(t)));
       EXPECT_EQ(
-        loosen_likeness_recursively(wait_handle(index, t)),
-        wait_handle(index, loosen_likeness_recursively(t)));
+        loosen_likeness_recursively(wait_handle(t)),
+        wait_handle(loosen_likeness_recursively(t)));
       EXPECT_EQ(
         loosen_likeness_recursively(vec_n(t)),
         vec_n(loosen_likeness_recursively(t)));
@@ -7506,9 +7508,9 @@ TEST(Type, LoosenLikenessRecursively) {
     { TInt, TInt },
     { TEnumClassLabel, TEnumClassLabel },
     { Type{BInt|BCls}, Type{BCls|BSStr|BInt} },
-    { wait_handle(index, TInt), wait_handle(index, TInt) },
-    { wait_handle(index, TCls), wait_handle(index, Type{BCls|BSStr}) },
-    { wait_handle(index, TClsMeth), wait_handle(index, Type{BClsMeth}) },
+    { wait_handle(TInt), wait_handle(TInt) },
+    { wait_handle(TCls), wait_handle(Type{BCls|BSStr}) },
+    { wait_handle(TClsMeth), wait_handle(Type{BClsMeth}) },
     { vec_n(TInt), vec_n(TInt) },
     { vec_n(TCls), vec_n(Type{BCls|BSStr}) },
     { vec_n(TClsMeth), vec_n(Type{BClsMeth}) },
@@ -7674,122 +7676,6 @@ TEST(Type, IterTypes) {
     EXPECT_EQ(iter.mayThrowOnInit, p.second.mayThrowOnInit);
     EXPECT_EQ(iter.mayThrowOnNext, p.second.mayThrowOnNext);
   }
-}
-
-TEST(Type, ResolveClasses) {
-  auto const index = make_index();
-
-  struct Hasher {
-    size_t operator()(const std::pair<Type, Type>& p) const {
-      return folly::hash::hash_combine(
-        TypeHasher{}(p.first),
-        TypeHasher{}(p.second)
-      );
-    }
-  };
-  hphp_fast_set<std::pair<Type, Type>, Hasher> types;
-
-#define MAKE(name) {                                                    \
-    auto const u = res::Class::makeUnresolved(s_##name.get());          \
-    if (u.resolved()) ADD_FAILURE();                                    \
-    auto const r = index.resolve_class(s_##name.get());                 \
-    auto const t1 = r ? subObj(*r) : TBottom;                           \
-    auto const t2 = r ? objExact(*r) : TBottom;                         \
-    auto const t3 = r ? subCls(*r) : TBottom;                           \
-    auto const t4 = r ? clsExact(*r) : TBottom;                         \
-    types.emplace(subObj(u), t1);                                       \
-    types.emplace(objExact(u), t2);                                     \
-    types.emplace(subCls(u), t3);                                       \
-    types.emplace(clsExact(u), t4);                                     \
-  }
-#define X(name) MAKE(name)
-#define Y(name) MAKE(name)
-  TEST_CLASSES
-#undef Y
-#undef X
-#undef MAKE
-
-  for (auto const& [t1, t2] : types) {
-    for (auto const& [t3, t4] : types) {
-      EXPECT_TRUE(
-        intersection_of(t2, t4).subtypeOf(
-          resolve_classes(
-            index,
-            intersection_of(t1, t3)
-          )
-        )
-      );
-    }
-  }
-
-  EXPECT_EQ(resolve_classes(index, TBottom), TBottom);
-  EXPECT_EQ(resolve_classes(index, TInitCell), TInitCell);
-  EXPECT_EQ(resolve_classes(index, TInt), TInt);
-  EXPECT_EQ(resolve_classes(index, TCls), TCls);
-  EXPECT_EQ(resolve_classes(index, TObj), TObj);
-
-  EXPECT_EQ(resolve_classes(index, make_specialized_int(BInt, 1)),
-            make_specialized_int(BInt, 1));
-  EXPECT_EQ(resolve_classes(index, make_specialized_string(BStr, s_A.get())),
-            make_specialized_string(BStr, s_A.get()));
-  EXPECT_EQ(resolve_classes(index, make_specialized_lazycls(BLazyCls, s_A.get())),
-            make_specialized_lazycls(BLazyCls, s_A.get()));
-  EXPECT_EQ(resolve_classes(index, make_specialized_double(BDbl, 1.23)),
-            make_specialized_double(BDbl, 1.23));
-
-  auto const svec = static_vec(1, 2, 3, 4);
-  EXPECT_EQ(resolve_classes(index, make_specialized_arrval(BSVecN, svec)),
-            make_specialized_arrval(BSVecN, svec));
-
-  EXPECT_EQ(resolve_classes(index, make_specialized_wait_handle(BObj, TInt, index)),
-            make_specialized_wait_handle(BObj, TInt, index));
-  EXPECT_EQ(resolve_classes(index, make_specialized_arrpackedn(BVecN, TSStr)),
-            make_specialized_arrpackedn(BVecN, TSStr));
-  EXPECT_EQ(resolve_classes(index, make_specialized_arrpacked(BVecN, {TInt, TStr})),
-            make_specialized_arrpacked(BVecN, {TInt, TStr}));
-  EXPECT_EQ(resolve_classes(index, make_specialized_arrmapn(BDictN, TStr, TInt)),
-            make_specialized_arrmapn(BDictN, TStr, TInt));
-  EXPECT_EQ(resolve_classes(index, make_specialized_arrmap(BDictN, {map_elem(s_A, TInt)})),
-            make_specialized_arrmap(BDictN, {map_elem(s_A, TInt)}));
-
-  auto const u1 = res::Class::makeUnresolved(s_Base.get());
-  if (u1.resolved()) ADD_FAILURE();
-  auto const r1 = index.resolve_class(s_Base.get());
-  if (!r1 || !r1->resolved()) ADD_FAILURE();
-
-  auto const uobj1 = subObj(u1);
-  auto const robj1 = subObj(*r1);
-  EXPECT_EQ(resolve_classes(index, make_specialized_wait_handle(BObj, uobj1, index)),
-            make_specialized_wait_handle(BObj, robj1, index));
-  EXPECT_EQ(resolve_classes(index, make_specialized_arrpackedn(BVecN, uobj1)),
-            make_specialized_arrpackedn(BVecN, robj1));
-  EXPECT_EQ(resolve_classes(index, make_specialized_arrpacked(BVecN, {uobj1, uobj1})),
-            make_specialized_arrpacked(BVecN, {robj1, robj1}));
-  EXPECT_EQ(resolve_classes(index, make_specialized_arrmapn(BDictN, TStr, uobj1)),
-            make_specialized_arrmapn(BDictN, TStr, robj1));
-  EXPECT_EQ(resolve_classes(index, make_specialized_arrmap(BDictN, {map_elem(s_A, uobj1)})),
-            make_specialized_arrmap(BDictN, {map_elem(s_A, robj1)}));
-  EXPECT_EQ(resolve_classes(index, make_specialized_sub_object(BObj|BBool, u1)),
-            make_specialized_sub_object(BObj|BBool, *r1));
-
-  auto const u2 = res::Class::makeUnresolved(s_Foo1.get());
-  if (u2.resolved()) ADD_FAILURE();
-  auto const uobj2 = subObj(u2);
-
-  EXPECT_EQ(resolve_classes(index, make_specialized_wait_handle(BObj, uobj2, index)),
-            make_specialized_wait_handle(BObj, TBottom, index));
-  EXPECT_EQ(resolve_classes(index, make_specialized_arrpackedn(BVecN, uobj2)), TBottom);
-  EXPECT_EQ(resolve_classes(index, make_specialized_arrpacked(BVecN, {TInt, uobj2})), TBottom);
-  EXPECT_EQ(resolve_classes(index, make_specialized_arrmapn(BDictN, TStr, uobj2)), TBottom);
-  EXPECT_EQ(resolve_classes(index, make_specialized_arrmap(BDictN, {map_elem(s_A, uobj2)})), TBottom);
-  EXPECT_EQ(resolve_classes(index, make_specialized_sub_object(BObj|BBool, u2)), TBool);
-
-  EXPECT_EQ(resolve_classes(index, make_specialized_wait_handle(BObj|BBool, uobj2, index)),
-            make_specialized_wait_handle(BObj|BBool, TBottom, index));
-  EXPECT_EQ(resolve_classes(index, make_specialized_arrpackedn(BVecN|BBool, uobj2)), TBool);
-  EXPECT_EQ(resolve_classes(index, make_specialized_arrpacked(BVecN|BBool, {TInt, uobj2})), TBool);
-  EXPECT_EQ(resolve_classes(index, make_specialized_arrmapn(BDictN|BBool, TStr, uobj2)), TBool);
-  EXPECT_EQ(resolve_classes(index, make_specialized_arrmap(BDictN|BBool, {map_elem(s_A, uobj2)})), TBool);
 }
 
 //////////////////////////////////////////////////////////////////////

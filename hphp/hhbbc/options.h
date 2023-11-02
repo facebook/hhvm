@@ -80,6 +80,16 @@ struct Options {
   //////////////////////////////////////////////////////////////////////
 
   /*
+   * Only track the subclasses of a class if the total number of
+   * subclasses is below this limit. Some classes can have
+   * pathologically large subclass lists, which become very expensive
+   * to process.
+   */
+  uint32_t preciseSubclassLimit = 10000;
+
+  //////////////////////////////////////////////////////////////////////
+
+  /*
    * If true, analyze calls to functions in a context-sensitive way.
    *
    * Disabled by default because its slow, with very little gain.
@@ -154,6 +164,7 @@ struct Options {
       (analyzeClassWideningLimit)
       (returnTypeRefineLimit)
       (publicSPropRefineLimit)
+      (preciseSubclassLimit)
       (ContextSensitiveInterp)
       (SourceRootForFileBC)
       (CoreDump)

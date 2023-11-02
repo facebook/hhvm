@@ -89,6 +89,14 @@ raises an exception. *)
 val try_finally :
   f:(unit -> 'a Lwt.t) -> finally:(unit -> unit Lwt.t) -> 'a Lwt.t
 
+(** Asynchronous version of [Sys_utils.with_lock]. Locks the entire file
+using [Lwt_utils.lockf], and runs the callback. *)
+val with_lock :
+  Lwt_unix.file_descr ->
+  Lwt_unix.lock_command ->
+  f:(unit -> 'a Lwt.t) ->
+  'a Lwt.t
+
 (** Asynchronous version of [Utils.with_context]. Call [enter], then run and
 wait for [do_] to complete, and finally call [exit], even if [f] raises an exception. *)
 val with_context :

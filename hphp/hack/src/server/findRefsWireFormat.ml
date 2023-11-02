@@ -73,42 +73,45 @@ end
 
 (** Used by hh_server's findRefsService to write to a streaming file, read by clientLsp *)
 module Ide_stream = struct
-  let append (fd : Unix.file_descr) (results : (string * Pos.absolute) list) :
-      unit =
-    let bytes =
-      List.map results ~f:(fun (name, pos) ->
-          Printf.sprintf
-            "%s\n"
-            (pos_to_one_based_json
-               (name, pos)
-               ~half_open_interval:true
-               ~timestamp:(Unix.gettimeofday ())
-            |> Hh_json.json_to_string))
-      |> String.concat ~sep:""
-      |> Bytes.of_string
-    in
-    Sys_utils.with_lock fd Unix.F_LOCK ~f:(fun () ->
-        let (_ : int) = Unix.lseek fd 0 Unix.SEEK_END in
-        Sys_utils.write_non_intr fd bytes 0 (Bytes.length bytes);
-        Unix.fsync fd)
+  let lock_and_append
+      (fd : Unix.file_descr) (results : (string * Pos.absolute) list) : unit =
+    if List.is_empty results then
+      ()
+    else begin
+      let bytes =
+        List.map results ~f:(fun (name, pos) ->
+            Printf.sprintf
+              "%s\n"
+              (pos_to_one_based_json
+                 (name, pos)
+                 ~half_open_interval:true
+                 ~timestamp:(Unix.gettimeofday ())
+              |> Hh_json.json_to_string))
+        |> String.concat ~sep:""
+        |> Bytes.of_string
+      in
+      Sys_utils.with_lock fd Unix.F_LOCK ~f:(fun () ->
+          let (_ : int) = Unix.lseek fd 0 Unix.SEEK_END in
+          Sys_utils.write_non_intr fd bytes 0 (Bytes.length bytes);
+          Unix.fsync fd)
+    end
 
-  let read (fd : Unix.file_descr) ~(pos : int) : half_open_one_based list * int
-      =
-    Sys_utils.with_lock fd Unix.F_RLOCK ~f:(fun () ->
-        let end_pos = Unix.lseek fd 0 Unix.SEEK_END in
-        if pos = end_pos then
-          ([], pos)
-        else
-          let (_ : int) = Unix.lseek fd pos Unix.SEEK_SET in
-          let bytes =
-            Sys_utils.read_non_intr fd (end_pos - pos) |> Option.value_exn
-          in
-          let jsons =
-            Bytes.to_string bytes
-            |> String_utils.split_on_newlines
-            |> List.map ~f:Hh_json.json_of_string
-          in
-          (List.map jsons ~f:half_open_one_based_json_to_pos_exn, end_pos))
+  let read_from_locked_file (fd : Unix.file_descr) ~(pos : int) :
+      half_open_one_based list * int =
+    let end_pos = Unix.lseek fd 0 Unix.SEEK_END in
+    if pos = end_pos then
+      ([], pos)
+    else
+      let (_ : int) = Unix.lseek fd pos Unix.SEEK_SET in
+      let bytes =
+        Sys_utils.read_non_intr fd (end_pos - pos) |> Option.value_exn
+      in
+      let jsons =
+        Bytes.to_string bytes
+        |> String_utils.split_on_newlines
+        |> List.map ~f:Hh_json.json_of_string
+      in
+      (List.map jsons ~f:half_open_one_based_json_to_pos_exn, end_pos)
 end
 
 (** Used "hh --find-refs --json" and read by HackAst and other tools *)

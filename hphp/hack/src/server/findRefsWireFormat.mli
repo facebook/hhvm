@@ -25,11 +25,12 @@ end
 (** Used by hh_server's findRefsService to write to a streaming file, read by clientLsp *)
 module Ide_stream : sig
   (** Locks the file and appends refs to it *)
-  val append : Unix.file_descr -> (string * Pos.absolute) list -> unit
+  val lock_and_append : Unix.file_descr -> (string * Pos.absolute) list -> unit
 
-  (** Locks the file and reads the refs in the file that came after [pos], if any;
-  returns a new [pos] after the last ref that was read.*)
-  val read : Unix.file_descr -> pos:int -> half_open_one_based list * int
+  (** Reads the refs in the file that came after [pos], if any;
+  returns a new [pos] after the last ref that was read. Caller must acquire F_RLOCK first. *)
+  val read_from_locked_file :
+    Unix.file_descr -> pos:int -> half_open_one_based list * int
 end
 
 (** Used "hh --find-refs --json" and read by HackAst and other tools *)

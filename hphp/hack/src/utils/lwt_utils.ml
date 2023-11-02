@@ -284,6 +284,32 @@ let try_finally ~(f : unit -> 'a Lwt.t) ~(finally : unit -> unit Lwt.t) :
   let%lwt () = finally () in
   Lwt.return res
 
+let with_lock
+    (fd : Lwt_unix.file_descr)
+    (lock_command : Unix.lock_command)
+    ~(f : unit -> 'a Lwt.t) : 'a Lwt.t =
+  (* helper function to set current file position to 0, then do "f",
+     then restore it to what it was before *)
+  let with_pos0 ~f =
+    let%lwt pos = Lwt_unix.lseek fd 0 Unix.SEEK_CUR in
+    let%lwt _ = Lwt_unix.lseek fd 0 Unix.SEEK_SET in
+    let%lwt result = f () in
+    let%lwt _ = Lwt_unix.lseek fd pos Unix.SEEK_SET in
+    Lwt.return result
+  in
+
+  try_finally
+    ~f:(fun () ->
+      (* lockf is applied starting at the file-descriptors current position.
+         We use "with_pos0" so that when we acquire or release the lock,
+         we're locking from the start of the file through to (len=0) the end. *)
+      let%lwt () = with_pos0 ~f:(fun () -> Lwt_unix.lockf fd lock_command 0) in
+      let%lwt r = f () in
+      Lwt.return r)
+    ~finally:(fun () ->
+      let%lwt () = with_pos0 ~f:(fun () -> Lwt_unix.lockf fd Unix.F_ULOCK 0) in
+      Lwt.return_unit)
+
 let with_context
     ~(enter : unit -> unit Lwt.t)
     ~(exit : unit -> unit Lwt.t)

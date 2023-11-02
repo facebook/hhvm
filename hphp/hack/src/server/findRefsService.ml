@@ -308,7 +308,7 @@ let find_refs
               Option.iter stream_fd ~f:(fun fd ->
                   results
                   |> List.map ~f:(fun (r, p) -> (r, Pos.to_absolute p))
-                  |> FindRefsWireFormat.Ide_stream.append fd);
+                  |> FindRefsWireFormat.Ide_stream.lock_and_append fd);
               results)
       in
       batch_results @ acc)

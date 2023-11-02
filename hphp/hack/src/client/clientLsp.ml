@@ -1557,20 +1557,25 @@ let watch_refs_stream_file
     |> List.map ~f:(fun (_name, pos) -> FindRefsWireFormat.from_absolute pos)
   in
   if not (List.is_empty ide_results) then add (Some ide_results);
-
-  let fd = Unix.openfile (Path.to_string file) [Unix.O_RDONLY] 0o666 in
-  let rec watch file_pos =
-    match (Unix.fstat fd).Unix.st_size with
+  let rec watch_loop fd file_pos =
+    let%lwt fstat = Lwt_unix.fstat fd in
+    match fstat.Unix.st_size with
     | size when file_pos = size && not (Path.file_exists file) ->
       (* The stream only gets closed if we've read everything up to the end... *)
       add None;
       Lwt.return_unit
     | size when file_pos = size ->
       let%lwt () = Lwt_unix.sleep 0.2 in
-      watch file_pos
+      watch_loop fd file_pos
     | _ ->
-      let (results, file_pos) =
-        FindRefsWireFormat.Ide_stream.read fd ~pos:file_pos
+      let%lwt (results, file_pos) =
+        Lwt_utils.with_lock fd Unix.F_RLOCK ~f:(fun () ->
+            let r =
+              FindRefsWireFormat.Ide_stream.read_from_locked_file
+                (Lwt_unix.unix_file_descr fd)
+                ~pos:file_pos
+            in
+            Lwt.return r)
       in
       let results =
         List.filter results ~f:(fun { FindRefsWireFormat.filename; _ } ->
@@ -1578,9 +1583,17 @@ let watch_refs_stream_file
             not (UriMap.mem uri open_file_results))
       in
       if not (List.is_empty results) then add (Some results);
-      watch file_pos
+      watch_loop fd file_pos
   in
-  let (_watcher_future : unit Lwt.t) = watch 0 in
+  let watcher () =
+    let%lwt fd =
+      Lwt_unix.openfile (Path.to_string file) [Unix.O_RDONLY] 0o666
+    in
+    let%lwt () = watch_loop fd 0 in
+    let%lwt () = Lwt_unix.close fd in
+    Lwt.return_unit
+  in
+  let (_watcher_future : unit Lwt.t) = watcher () in
   q
 
 (** If there was a streaming find-refs result file, this function will unlink it.
@@ -1590,7 +1603,10 @@ let unlink_refs_stream_file_if_present (shellable_type : Run_env.shellable_type)
     : unit =
   match shellable_type with
   | Run_env.(FindRefs { stream_file = Some { file; _ }; _ }) ->
-    (try Unix.unlink (Path.to_string file) with
+    (try
+       Unix.unlink (Path.to_string file);
+       log "unlinked streaming-find-refs file %s" (Path.to_string file)
+     with
     | exn ->
       let e = Exception.wrap exn in
       (* The [current_hh_shell] invariant is that if and only if it is Some, then the stream-file exists:
@@ -2657,6 +2673,7 @@ let do_findReferences2 ~shellout_standard_response ~hh_locations :
   match stream_file with
   | Some { Run_env.file; q; partial_result_token = _ } ->
     Unix.unlink (Path.to_string file);
+    log "Unlinked find-refs streaming file %s" (Path.to_string file);
     (* [Lwt_stream.to_list] awaits until the stream is closed, picking up all remaining items. *)
     let%lwt items_list = Lwt_stream.to_list q in
     List.iter items_list ~f:(fun items ->

@@ -2256,27 +2256,20 @@ dependencies = [
  "file_info",
  "file_provider",
  "folded_decl_provider",
- "hh24_test",
- "hh24_types",
- "libc",
- "maplit",
- "names",
  "naming_provider",
+ "naming_table_rust",
  "ocaml_runtime",
  "ocamlrep",
  "ocamlrep_caml_builtins",
  "ocamlrep_ocamlpool",
  "oxidized",
  "oxidized_by_ref",
- "parking_lot",
  "pos",
- "rpds",
  "rust_provider_backend_ffi",
  "rust_provider_backend_ffi_trait",
  "serde",
  "shallow_decl_provider",
  "shm_store",
- "shmffi",
  "ty",
 ]
 
@@ -3414,6 +3407,30 @@ dependencies = [
  "oxidized",
  "relative_path",
  "unwrap_ocaml",
+]
+
+[[package]]
+name = "naming_table_rust"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "datastore",
+ "deps_rust",
+ "file_info",
+ "hh24_test",
+ "hh24_types",
+ "libc",
+ "maplit",
+ "names",
+ "naming_provider",
+ "ocamlrep",
+ "oxidized",
+ "parking_lot",
+ "pos",
+ "rpds",
+ "serde",
+ "shm_store",
+ "shmffi",
 ]
 
 [[package]]

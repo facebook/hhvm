@@ -3,6 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+#[cfg(test)]
+mod test_naming_table;
+
 use std::path::PathBuf;
 use std::sync::Arc;
 
@@ -95,7 +98,7 @@ impl NamingTable {
             .insert(name, ((&pos_and_kind.0).into(), pos_and_kind.1))
     }
 
-    pub(crate) fn get_type_pos(&self, name: TypeName) -> Result<Option<(Pos, KindOfType)>> {
+    pub fn get_type_pos(&self, name: TypeName) -> Result<Option<(Pos, KindOfType)>> {
         self.types.get_pos(name)
     }
 
@@ -103,7 +106,7 @@ impl NamingTable {
         self.types.remove_batch(names.iter().copied())
     }
 
-    pub(crate) fn get_canon_type_name(&self, name: TypeName) -> Result<Option<TypeName>> {
+    pub fn get_canon_type_name(&self, name: TypeName) -> Result<Option<TypeName>> {
         self.types.get_canon_name(name)
     }
 
@@ -111,7 +114,7 @@ impl NamingTable {
         self.funs.insert(name, pos.into())
     }
 
-    pub(crate) fn get_fun_pos(&self, name: FunName) -> Result<Option<Pos>> {
+    pub fn get_fun_pos(&self, name: FunName) -> Result<Option<Pos>> {
         self.funs.get_pos(name)
     }
 
@@ -119,7 +122,7 @@ impl NamingTable {
         self.funs.remove_batch(names.iter().copied())
     }
 
-    pub(crate) fn get_canon_fun_name(&self, name: FunName) -> Result<Option<FunName>> {
+    pub fn get_canon_fun_name(&self, name: FunName) -> Result<Option<FunName>> {
         self.funs.get_canon_name(name)
     }
 
@@ -127,7 +130,7 @@ impl NamingTable {
         self.consts.insert(name.into(), pos.into())
     }
 
-    pub(crate) fn get_const_pos(&self, name: ConstName) -> Result<Option<Pos>> {
+    pub fn get_const_pos(&self, name: ConstName) -> Result<Option<Pos>> {
         self.consts.get(name.into())
     }
 
@@ -140,7 +143,7 @@ impl NamingTable {
         self.modules.insert(name.into(), pos.into())
     }
 
-    pub(crate) fn get_module_pos(&self, name: ModuleName) -> Result<Option<Pos>> {
+    pub fn get_module_pos(&self, name: ModuleName) -> Result<Option<Pos>> {
         self.modules.get(name.into())
     }
 
@@ -199,7 +202,7 @@ impl NamingTable {
     /// with no concurrent interaction with the OCaml runtime. The returned
     /// `UnsafeOcamlPtr` is unrooted and could be invalidated if the GC is
     /// triggered after this method returns.
-    pub(crate) unsafe fn get_ocaml_type_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+    pub unsafe fn get_ocaml_type_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
         self.types
             .get_ocaml_pos_by_hash(ToplevelSymbolHash::from_byte_string(
                 // NameType::Class and NameType::Typedef are handled the same here
@@ -211,7 +214,7 @@ impl NamingTable {
             // `None` so that the caller doesn't need to inspect the value.
             .filter(|ptr| ptr.is_block())
     }
-    pub(crate) unsafe fn get_ocaml_fun_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+    pub unsafe fn get_ocaml_fun_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
         self.funs
             .get_ocaml_pos_by_hash(ToplevelSymbolHash::from_byte_string(
                 file_info::NameType::Fun,
@@ -219,7 +222,7 @@ impl NamingTable {
             ))
             .filter(|ptr| ptr.is_block())
     }
-    pub(crate) unsafe fn get_ocaml_const_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+    pub unsafe fn get_ocaml_const_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
         if self.consts.has_local_changes() {
             None
         } else {
@@ -231,7 +234,7 @@ impl NamingTable {
                 .filter(|ptr| ptr.is_block())
         }
     }
-    pub(crate) unsafe fn get_ocaml_module_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+    pub unsafe fn get_ocaml_module_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
         if self.modules.has_local_changes() {
             None
         } else {

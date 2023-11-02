@@ -3,11 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-pub mod naming_table;
-
-#[cfg(test)]
-mod test_naming_table;
-
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::path::PathBuf;

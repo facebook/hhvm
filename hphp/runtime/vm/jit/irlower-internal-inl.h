@@ -225,7 +225,7 @@ void emitTypeTest(Vout& v, IRLS& env, Type type,
                   Loc typeSrc, Loc dataSrc, Vreg sf, JmpFn doJcc) {
   // Note: If you add new supported type tests, you should update
   // negativeCheckType() to indicate whether it is precise or not.
-  always_assert(!type.hasConstVal());
+  always_assert(type <= TCls || !type.hasConstVal());
   always_assert_flog(
     !type.subtypeOfAny(TCountedStr, TPersistentArrLike),
     "Unsupported type in emitTypeTest(): {}", type

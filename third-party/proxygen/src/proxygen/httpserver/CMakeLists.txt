@@ -36,6 +36,35 @@ install(
 )
 
 if (BUILD_SAMPLES)
+    add_library(
+        proxygendeviousbaton
+        samples/hq/devious/DeviousBaton.cpp
+    )
+    target_compile_options(
+        proxygendeviousbaton
+        PRIVATE
+            ${_PROXYGEN_COMMON_COMPILE_OPTIONS}
+    )
+    if (BUILD_SHARED_LIBS)
+        set_property(TARGET proxygendeviousbaton PROPERTY POSITION_INDEPENDENT_CODE ON)
+        if (DEFINED PACKAGE_VERSION)
+            set_target_properties(proxygendeviousbaton PROPERTIES VERSION ${PACKAGE_VERSION})
+        endif()
+    endif()
+
+    target_link_libraries(
+        proxygendeviousbaton
+        PUBLIC
+            proxygen
+    )
+    install(
+        TARGETS proxygendeviousbaton
+        EXPORT proxygen-exports
+        ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
+        LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+    )
+
+
   add_executable(proxygen_push
       samples/push/PushServer.cpp
       samples/push/PushRequestHandler.cpp
@@ -198,3 +227,4 @@ endforeach()
 add_subdirectory(tests)
 add_subdirectory(filters/tests)
 #add_subdirectory(samples/echo/test)
+#add_subdirectory(samples/hq/devious/test)

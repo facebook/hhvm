@@ -3578,12 +3578,18 @@ bool fcallOptimizeChecks(
         if (yesOrNo(fca.isInOut(i)) != kind.inOut) {
           // The function/method may not exist, in which case we should raise a
           // different error. Just defer the checks to the runtime.
-          if (!func.exactFunc()) return false;
+          auto const exact = func.exactFunc();
+          if (!exact) return false;
 
           // inout mismatch
           auto const exCls = makeStaticString("InvalidArgumentException");
-          auto const err = makeStaticString(formatParamInOutMismatch(
-                                              func.name()->data(), i, !fca.isInOut(i)));
+          auto const err = makeStaticString(
+            formatParamInOutMismatch(
+              exact->name->data(),
+              i,
+              !fca.isInOut(i)
+            )
+          );
 
           reduce(
             env,

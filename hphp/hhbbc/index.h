@@ -599,9 +599,9 @@ private:
  */
 struct Func {
   /*
-   * Returns the name of this function.  Non-null guarantee.
+   * Returns the (fully qualified) name of this function.
    */
-  SString name() const;
+  std::string name() const;
 
   /*
    * If this resolved function represents exactly one php::Func, return it.
@@ -684,6 +684,7 @@ private:
     SString name;
   };
   struct MethodName {
+    SString cls;
     SString name;
   };
   struct Fun {
@@ -695,7 +696,7 @@ private:
   struct Method {
     const FuncInfo* finfo;
   };
-  struct Method2{
+  struct Method2 {
     const FuncInfo2* finfo;
   };
   // Like Method, but the method is not guaranteed to actually exist
@@ -707,7 +708,11 @@ private:
     const FuncInfo2* finfo;
   };
   // Method/Func is known to not exist
-  struct Missing {
+  struct MissingFunc {
+    SString name;
+  };
+  struct MissingMethod {
+    SString cls;
     SString name;
   };
   // Group of methods (a wrapper around a FuncFamily).
@@ -740,7 +745,8 @@ private:
                             , MethodFamily2
                             , MethodOrMissing
                             , MethodOrMissing2
-                            , Missing
+                            , MissingFunc
+                            , MissingMethod
                             , Isect
                             , Isect2
                             >;

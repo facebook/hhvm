@@ -854,7 +854,8 @@ def get_flags_dummy(args_flags: List[str]) -> Callable[[str], List[str]]:
     return get_flags
 
 
-if __name__ == "__main__":
+def main() -> None:
+    global max_workers, dump_on_failure, verbose, args
     parser = argparse.ArgumentParser()
     parser.add_argument("test_path", help="A file or a directory. ")
     parser.add_argument("--program", type=os.path.abspath)
@@ -936,7 +937,7 @@ if __name__ == "__main__":
         "<program> in addition to any arguments "
         "specified by --flags" % parser.prog
     )
-    args: argparse.Namespace = parser.parse_args()
+    args = parser.parse_args()
 
     max_workers = args.max_workers
     verbose = args.verbose
@@ -1013,3 +1014,10 @@ if __name__ == "__main__":
             get_flags,
             check_expected_included_in_actual=args.check_expected_included_in_actual,
         )
+
+
+args: argparse.Namespace
+
+
+if __name__ == "__main__":
+    main()

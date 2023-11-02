@@ -15,7 +15,7 @@ def arg_extract(args: List[str], arg: str) -> str:
     return value
 
 
-if __name__ == "__main__":
+def main() -> None:
     # Parsing the arguments is not straightforward as pessimise_and_single_type_check
     # must be aware of all the arguments supported by hh_single_type_check, but we do
     # not want to duplicate the list here (which is long and moving fast).
@@ -115,3 +115,7 @@ if __name__ == "__main__":
 
     # Remark: in batch-mode the out files will have extension ".pess.out"
     # instead of ".out"
+
+
+if __name__ == "__main__":
+    main()

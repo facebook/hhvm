@@ -329,5 +329,9 @@ def main() -> int:
     return output_to_file_or_stdout(generator=generator, filename=args.output_file)
 
 
-if __name__ == "__main__":
+def invoke_main() -> None:
     sys.exit(main())
+
+
+if __name__ == "__main__":
+    invoke_main()

@@ -113,5 +113,9 @@ def main(args):
     return 0
 
 
-if __name__ == "__main__":
+def invoke_main() -> None:
     sys.exit(main(sys.argv))
+
+
+if __name__ == "__main__":
+    invoke_main()

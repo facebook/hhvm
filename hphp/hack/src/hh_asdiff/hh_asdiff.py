@@ -238,8 +238,12 @@ def main(args: List[str]) -> int:
     return exit_code
 
 
-if __name__ == "__main__":
+def invoke_main() -> None:
     logging.basicConfig(format="%(levelname)s: %(message)s")
     log.setLevel(logging.WARN)
 
     sys.exit(main(sys.argv))
+
+
+if __name__ == "__main__":
+    invoke_main()

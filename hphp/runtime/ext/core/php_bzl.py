@@ -41,7 +41,7 @@ def _verify(php_txt: str, php_bzl: str):
     assert expected == actual, "file need to be regenerated"
 
 
-if __name__ == "__main__":
+def main() -> None:
     if len(sys.argv) == 1:
         # This is to be invoked manually when `php.txt` changes
         _generate()
@@ -51,3 +51,7 @@ if __name__ == "__main__":
         _verify(php_txt, php_bzl)
     else:
         raise Exception("unknown mode")
+
+
+if __name__ == "__main__":
+    main()

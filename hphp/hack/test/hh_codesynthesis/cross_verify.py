@@ -141,7 +141,7 @@ def cross_verify_with_parameters(args: argparse.Namespace) -> bool:
         return cross_verify(args, tmp_file_name)
 
 
-if __name__ == "__main__":
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("test_path", help="A file or a directory. ")
     parser.add_argument("--typechecker", type=os.path.abspath)
@@ -155,3 +155,7 @@ if __name__ == "__main__":
 
     # Cross verify synthesized from parameters.
     cross_verify_with_parameters(args)
+
+
+if __name__ == "__main__":
+    main()

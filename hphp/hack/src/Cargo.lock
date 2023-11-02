@@ -876,12 +876,10 @@ dependencies = [
  "facts",
  "hash",
  "hhbc",
- "itertools 0.11.0",
  "libc",
  "options",
  "parser_core_types",
  "relative_path",
- "serde_json",
  "sha1",
  "thiserror",
 ]

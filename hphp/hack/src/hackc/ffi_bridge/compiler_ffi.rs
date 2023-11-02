@@ -118,67 +118,13 @@ pub mod compile_ffi {
         has_errors: bool,
     }
 
-    #[derive(Debug)]
-    enum TypeKind {
-        Class,
-        Interface,
-        Enum,
-        Trait,
-        TypeAlias,
-        Unknown,
-        Mixed,
-    }
-
-    #[derive(Debug, PartialEq)]
-    struct Attribute {
-        name: String,
-
-        /// Values are Hack values encoded as JSON
-        args: Vec<String>,
-    }
-
-    #[derive(Debug, PartialEq)]
-    struct MethodDetails {
-        name: String,
-        attributes: Vec<Attribute>,
-    }
-
-    #[derive(Debug, PartialEq)]
-    pub struct TypeDetails {
-        name: String,
-        kind: TypeKind,
-        flags: u8,
-
-        /// List of types which this `extends`, `implements`, or `use`s
-        base_types: Vec<String>,
-
-        // List of attributes and their arguments
-        attributes: Vec<Attribute>,
-
-        /// List of classes which this `require class`
-        require_class: Vec<String>,
-
-        /// List of classes or interfaces which this `require extends`
-        require_extends: Vec<String>,
-
-        /// List of interfaces which this `require implements`
-        require_implements: Vec<String>,
-        methods: Vec<MethodDetails>,
-    }
-
-    #[derive(Debug, PartialEq)]
-    struct ModuleDetails {
-        name: String,
-    }
-
+    /// Toplevel symbols from a single source file
     #[derive(Debug, Default, PartialEq)]
-    pub struct FileFacts {
-        types: Vec<TypeDetails>,
+    pub struct FileSymbols {
+        types: Vec<String>,
         functions: Vec<String>,
         constants: Vec<String>,
-        modules: Vec<ModuleDetails>,
-        attributes: Vec<Attribute>,
-        sha1hex: String,
+        modules: Vec<String>,
     }
 
     extern "Rust" {
@@ -219,10 +165,11 @@ pub mod compile_ffi {
         /// For testing: return true if deserializing produces the expected Decls.
         fn verify_deserialization(decls: &DeclsAndBlob) -> bool;
 
-        /// Extract Facts from Decls, passing along the source text hash.
-        fn decls_to_facts(decls: &DeclsHolder, sha1sum: &CxxString) -> FileFacts;
+        /// Extract toplevel symbols from Decls
+        fn decls_to_symbols(decls: &DeclsHolder) -> FileSymbols;
 
-        /// Extract Facts in condensed JSON format from Decls, including the source text hash.
+        /// Extract hackc::Facts in condensed JSON format from Decls,
+        /// including the source text SHA1 hash.
         fn decls_to_facts_json(decls: &DeclsHolder, sha1sum: &CxxString) -> String;
     }
 }
@@ -483,12 +430,8 @@ fn compile_unit_from_text(
     .map_err(|e| e.to_string())
 }
 
-fn decls_to_facts(holder: &DeclsHolder, sha1sum: &CxxString) -> compile_ffi::FileFacts {
-    let facts = facts::Facts::from_decls(&holder.parsed_file);
-    compile_ffi::FileFacts {
-        sha1hex: sha1sum.to_string_lossy().into_owned(),
-        ..facts.into()
-    }
+fn decls_to_symbols(holder: &DeclsHolder) -> compile_ffi::FileSymbols {
+    facts::Facts::from_decls(&holder.parsed_file).into()
 }
 
 fn decls_to_facts_json(decls: &DeclsHolder, sha1sum: &CxxString) -> String {

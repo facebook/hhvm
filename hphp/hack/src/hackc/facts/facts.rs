@@ -7,6 +7,7 @@
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 
+use hash::IndexSet;
 use hhbc_string_utils::mangle_xhp_id;
 use hhbc_string_utils::strip_global_ns;
 use naming_special_names_rust::user_attributes;
@@ -190,6 +191,22 @@ impl Facts {
             constants,
             file_attributes,
             modules,
+        }
+    }
+
+    /// If indexed_method_attrs is non-empty, then remove method attributes that are
+    /// not in the provided set. Then, remove all MethodFacts with no attributes.
+    pub fn filter_method_attributes(&mut self, indexed_method_attrs: &IndexSet<String>) {
+        // Only keep methods that have some attributes after accounting for indexed_method_attrs
+        for types in self.types.values_mut() {
+            types.methods.retain(|_, method_facts| {
+                if !indexed_method_attrs.is_empty() {
+                    method_facts
+                        .attributes
+                        .retain(|attr, _| indexed_method_attrs.contains(attr));
+                }
+                !method_facts.attributes.is_empty()
+            })
         }
     }
 }

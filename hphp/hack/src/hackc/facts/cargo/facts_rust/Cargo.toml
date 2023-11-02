@@ -9,6 +9,7 @@ edition = "2021"
 path = "../../facts.rs"
 
 [dependencies]
+hash = { version = "0.0.0", path = "../../../../utils/hash" }
 hhbc_string_utils = { version = "0.0.0", path = "../../../utils/cargo/hhbc_string_utils" }
 naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
 oxidized_by_ref = { version = "0.0.0", path = "../../../../oxidized_by_ref" }

@@ -5806,6 +5806,30 @@ struct CheckClassInfoInvariantsJob {
       }
     }
 
+    // If the class is marked as having not having bad initial prop
+    // values, all of it's properties should have
+    // AttrInitialSatisfiesTC set. Likewise, if it is, at least one
+    // property should not have it set.
+    if (!cinfo->hasBadInitialPropValues) {
+      auto const all = std::all_of(
+        begin(cls->properties),
+        end(cls->properties),
+        [] (const php::Prop& p) {
+          return p.attrs & AttrInitialSatisfiesTC;
+        }
+      );
+      always_assert(all);
+    } else {
+      auto const someBad = std::any_of(
+        begin(cls->properties),
+        end(cls->properties),
+        [] (const php::Prop& p) {
+          return !(p.attrs & AttrInitialSatisfiesTC);
+        }
+      );
+      always_assert(someBad);
+    }
+
     if (is_closure_name(cinfo->name)) {
       assertx(cinfo->classGraph.hasCompleteChildren());
       // Closures have no children.
@@ -6005,6 +6029,8 @@ void check_invariants(const IndexData& index) {
 }
 
 void check_local_invariants(const IndexData& index, const ClassInfo* cinfo) {
+  SCOPE_ASSERT_DETAIL("class") { return cinfo->cls->name->toCppString(); };
+
   // AttrNoOverride is a superset of AttrNoOverrideRegular
   always_assert(
     IMPLIES(!(cinfo->cls->attrs & AttrNoOverrideRegular),
@@ -6287,6 +6313,30 @@ void check_local_invariants(const IndexData& index, const ClassInfo* cinfo) {
     } else if (auto const func = entry.func()) {
       always_assert(func->cls != cinfo->cls);
     }
+  }
+
+  // If the class is marked as having not having bad initial prop
+  // values, all of it's properties should have AttrInitialSatisfiesTC
+  // set. Likewise, if it is, at least one property should not have it
+  // set.
+  if (!cinfo->hasBadInitialPropValues) {
+    auto const all = std::all_of(
+      begin(cinfo->cls->properties),
+      end(cinfo->cls->properties),
+      [] (const php::Prop& p) {
+        return p.attrs & AttrInitialSatisfiesTC;
+      }
+    );
+    always_assert(all);
+  } else {
+    auto const someBad = std::any_of(
+      begin(cinfo->cls->properties),
+      end(cinfo->cls->properties),
+      [] (const php::Prop& p) {
+        return !(p.attrs & AttrInitialSatisfiesTC);
+      }
+    );
+    always_assert(someBad);
   }
 
   if (is_closure_name(cinfo->cls->name)) {
@@ -17542,7 +17592,15 @@ void Index::update_prop_initial_values(const Context& ctx,
   if (it == end(m_data->classInfo)) return;
   auto const cinfo = it->second;
 
-  assertx(cinfo->hasBadInitialPropValues);
+  // Both a pinit and a sinit can have resolved property values. When
+  // analyzing constants we'll process each function separately and
+  // potentially in different threads. Both will want to inspect the
+  // property Attrs and the hasBadInitialPropValues. So, if we reach
+  // here, take a lock to ensure both don't stomp on each other.
+  static std::array<std::mutex, 256> locks;
+  auto& lock = locks[pointer_hash<const php::Class>{}(ctx.cls) % locks.size()];
+  std::lock_guard<std::mutex> _{lock};
+
   auto const noBad = std::all_of(
     begin(props), end(props),
     [] (const php::Prop& prop) {
@@ -17550,9 +17608,15 @@ void Index::update_prop_initial_values(const Context& ctx,
     }
   );
 
-  if (noBad) {
-    cinfo->hasBadInitialPropValues = false;
-    find_deps(*m_data, ctx.cls, Dep::PropBadInitialValues, deps);
+  if (cinfo->hasBadInitialPropValues) {
+    if (noBad) {
+      cinfo->hasBadInitialPropValues = false;
+      find_deps(*m_data, ctx.cls, Dep::PropBadInitialValues, deps);
+    }
+  } else {
+    // If it's false, another thread got here before us and set it to
+    // false.
+    always_assert(noBad);
   }
 }
 

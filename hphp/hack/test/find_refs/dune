@@ -13,7 +13,8 @@
    %{project_root}/hack/test/verify.py
    %{project_root}/hack/test/find_refs
    --program
-   %{exe:../../src/hh_single_type_check.exe})))
+   %{exe:../../src/hh_single_type_check.exe}
+   --no-stderr)))
 
 (alias
  (name runtest)

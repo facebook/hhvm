@@ -250,13 +250,14 @@ let fold_one_tast ctx target acc symbol =
   | (IGConst cst_name, SO.GConst) -> process_gconst_id cst_name (pos, name)
   | _ -> Pos.Map.empty
 
+(** Either returns results from this batch (concatenated with [acc]), or [Error] if cancelled *)
 let find_refs
     (ctx : Provider_context.t)
     (target : action_internal)
-    (acc : (string * Pos.t) list)
+    (acc : ((string * Pos.t) list, unit) Result.t)
     (files : Relative_path.t list)
     ~(omit_declaration : bool)
-    ~(stream_file : Path.t option) : (string * Pos.t) list =
+    ~(stream_file : Path.t option) : ((string * Pos.t) list, unit) Result.t =
   (* The helper function 'results_from_tast' takes a tast, looks at all *)
   (* use-sites in the tast e.g. "foo(1)" is a use-site of symbol foo,   *)
   (* and returns a map from use-site-position to name of the symbol.    *)
@@ -290,9 +291,20 @@ let find_refs
   in
 
   let stream_fd =
-    Option.map stream_file ~f:(fun file ->
-        Unix.openfile (Path.to_string file) [Unix.O_WRONLY; Unix.O_APPEND] 0o666)
+    match stream_file with
+    | None -> Ok None
+    | Some stream_file ->
+      let stream_file = Path.to_string stream_file in
+      (try
+         Ok
+           (Some
+              (Unix.openfile stream_file [Unix.O_WRONLY; Unix.O_APPEND] 0o666))
+       with
+      | Unix.Unix_error (Unix.ENOENT, _, _) -> Error ())
   in
+  let open Result.Monad_infix in
+  acc >>= fun acc ->
+  stream_fd >>= fun stream_fd ->
   Utils.try_finally
     ~finally:(fun () -> Option.iter stream_fd ~f:Unix.close)
     ~f:(fun () ->
@@ -311,7 +323,7 @@ let find_refs
                   |> FindRefsWireFormat.Ide_stream.lock_and_append fd);
               results)
       in
-      batch_results @ acc)
+      Ok (batch_results @ acc))
 
 let find_refs_ctx
     ~(ctx : Provider_context.t)
@@ -335,8 +347,11 @@ let parallel_find_refs
   MultiWorker.call
     workers
     ~job:(find_refs ctx target ~omit_declaration ~stream_file)
-    ~neutral:[]
-    ~merge:List.rev_append
+    ~neutral:(Ok [])
+    ~merge:(fun output acc ->
+      match (output, acc) with
+      | (Ok output, Ok acc) -> Ok (List.rev_append output acc)
+      | _ -> Error ())
     ~next:(MultiWorker.next workers files)
 
 let get_definitions ctx action =
@@ -402,7 +417,7 @@ let find_references ctx workers target include_defs files ~stream_file =
   Hh_logger.debug "find_references: %d files" len;
   let results =
     if len < 10 then
-      find_refs ctx target [] files ~omit_declaration:true ~stream_file
+      find_refs ctx target (Ok []) files ~omit_declaration:true ~stream_file
     else
       parallel_find_refs
         workers
@@ -412,26 +427,38 @@ let find_references ctx workers target include_defs files ~stream_file =
         ~omit_declaration:true
         ~stream_file
   in
-  let () =
-    Hh_logger.debug "find_references: %d results" (List.length results)
-  in
-  if include_defs then
-    let defs = get_definitions ctx target in
-    let () = Hh_logger.debug "find_references: +%d defs" (List.length defs) in
+  match results with
+  | Error () ->
+    Hh_logger.log "find-references: cancelled";
+    []
+  | Ok results ->
+    let defs =
+      if include_defs then
+        get_definitions ctx target
+      else
+        []
+    in
+    Hh_logger.log
+      "find-references: %d files -> %d results + %d defs(%b)"
+      len
+      (List.length results)
+      (List.length defs)
+      include_defs;
     List.rev_append defs results
-  else
-    results
 
 let find_references_single_file ctx target file =
   let results =
-    find_refs ctx target [] [file] ~omit_declaration:false ~stream_file:None
+    find_refs
+      ctx
+      target
+      (Ok [])
+      [file]
+      ~omit_declaration:false
+      ~stream_file:None
   in
-  let () =
-    Hh_logger.debug
-      "find_references_single_file: %d results"
-      (List.length results)
-  in
-  results
+  match results with
+  | Ok results -> results
+  | Error () -> []
 
 let get_dependent_files_function ctx _workers f_name =
   (* This is performant enough to not need to go parallel for now *)

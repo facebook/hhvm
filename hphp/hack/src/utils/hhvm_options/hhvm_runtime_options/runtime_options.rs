@@ -94,11 +94,13 @@ pub fn apply_tier_overrides(mut config: hdf::Value) -> Result<hdf::Value> {
     Ok(config)
 }
 
+#[allow(clippy::todo)]
 fn match_shard(_en: bool, _hostname: &str, _config: &hdf::Value) -> bool {
     todo!();
 }
 
 // Config::matchHdfPattern()
+#[allow(clippy::todo)]
 fn match_hdf_pattern(_value: &str, config: &hdf::Value, name: &str, suffix: &str) -> Result<bool> {
     let pattern = config.get_str(name)?.unwrap_or_default();
     if !pattern.is_empty() {

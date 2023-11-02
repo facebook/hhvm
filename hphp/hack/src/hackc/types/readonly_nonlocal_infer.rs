@@ -63,6 +63,7 @@ macro_rules! box_tup {
 }
 
 impl<'decl> Infer<'decl> {
+    #[allow(clippy::todo)]
     fn infer_expr(
         &mut self,
         expr: &ast::Expr,
@@ -569,6 +570,7 @@ impl<'decl> Infer<'decl> {
         }
     }
 
+    #[allow(clippy::todo)]
     fn infer_stmt(&mut self, stmt: &ast::Stmt, ctx: Ctx, where_: Where<'_>) -> (ast::Stmt, Ctx) {
         let aast::Stmt(pos, st) = stmt;
         use aast::Stmt_::*;

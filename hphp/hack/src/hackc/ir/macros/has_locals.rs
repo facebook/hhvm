@@ -312,6 +312,7 @@ enum FieldKind<'a> {
     Numbered(usize),
 }
 
+#[allow(clippy::todo)]
 fn reference_for_ty(
     kind: &FieldKind<'_>,
     ty: &SimpleType<'_>,
@@ -380,6 +381,7 @@ fn push_handler(
     variants.push(quote!(#enum_name::#variant_name #params => #reference));
 }
 
+#[allow(clippy::todo)]
 fn handle_has_locals_attr(attrs: &[Attribute]) -> Result<Option<Field<'_>>> {
     for attr in attrs {
         if attr.path.is_ident("has_locals") {

@@ -1775,6 +1775,7 @@ fn assemble_opcode<'arena>(
 }
 
 /// Opcodes and Pseudos
+#[allow(clippy::todo)]
 fn assemble_instr<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,

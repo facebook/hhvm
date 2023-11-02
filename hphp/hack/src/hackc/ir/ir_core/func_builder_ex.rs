@@ -137,6 +137,7 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
         self.emit_constant(Constant::String(self.strings.intern_str(s)))
     }
 
+    #[allow(clippy::todo)]
     fn is(&mut self, vid: ValueId, ety: &EnforceableType, loc: LocId) -> Instr {
         let mut modifiers = ety.modifiers;
 

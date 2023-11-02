@@ -944,6 +944,7 @@ pub fn cast_to_bool(x: TypedValue<'_>) -> bool {
 
 /// Cast to an integer: the (int) operator in PHP. Return None if we can't
 /// or won't produce the correct value
+#[allow(clippy::todo)]
 pub fn cast_to_int(x: TypedValue<'_>) -> Option<i64> {
     match x {
         TypedValue::Uninit => None, // Should not happen

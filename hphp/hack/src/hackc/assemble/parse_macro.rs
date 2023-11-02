@@ -126,6 +126,7 @@ enum Predicate {
 }
 
 impl Predicate {
+    #[allow(clippy::todo)]
     fn to_stream(&self, tokenizer: &TokenTree, context: Context) -> TokenStream {
         match (context, self) {
             (Context::None, Predicate::Any) => {
@@ -552,6 +553,7 @@ impl State {
         }
     }
 
+    #[allow(clippy::todo)]
     fn emit_ast(&self, ast: Ast, context: Context) -> TokenStream {
         let tokenizer = &self.tokenizer;
         match ast {

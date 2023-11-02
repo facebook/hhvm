@@ -428,6 +428,7 @@ impl<'a> ToOxidized<'a> for Exact {
     }
 }
 
+#[allow(clippy::todo)]
 impl<'a, R: Reason> ToOxidized<'a> for Ty<R> {
     type Output = oxidized_by_ref::typing_defs::Ty<'a>;
 

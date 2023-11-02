@@ -219,6 +219,7 @@ fn print_expr_to_string(
     Ok(buf.into())
 }
 
+#[allow(clippy::todo)]
 fn print_expr(
     ctx: &Context<'_>,
     w: &mut dyn Write,

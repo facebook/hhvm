@@ -1273,6 +1273,7 @@ fn cmp_member_key(
     Ok(())
 }
 
+#[allow(clippy::todo)]
 fn cmp_instr_special(a: &Special, b: &Special) -> Result {
     cmp_eq(&std::mem::discriminant(a), &std::mem::discriminant(b))?;
 

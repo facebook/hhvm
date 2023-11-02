@@ -188,6 +188,7 @@ fn parse_opcode_pat<'a, 'b>(
     Ok((opcode_path, data))
 }
 
+#[allow(clippy::todo)]
 fn parse_convert_simple(
     input: ParseStream<'_>,
     pat: &Pat,
@@ -378,6 +379,7 @@ fn parse_convert_simple(
     Ok(arm)
 }
 
+#[allow(clippy::todo)]
 fn parse_convert_todo(
     _input: ParseStream<'_>,
     pat: &Pat,

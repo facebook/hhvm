@@ -509,6 +509,7 @@ impl State {
         }
     }
 
+    #[allow(clippy::todo)]
     fn emit_ast(&self, ast: Ast, context: Context) -> TokenStream {
         let tokenizer = &self.tokenizer;
         match ast {

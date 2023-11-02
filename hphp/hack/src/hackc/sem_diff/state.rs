@@ -1,3 +1,5 @@
+#![allow(clippy::todo)]
+
 use std::collections::hash_map::Entry;
 use std::rc::Rc;
 

@@ -249,6 +249,7 @@ struct FmtSpec {
     name: FmtSpecName,
 }
 
+#[allow(clippy::todo)]
 fn read_fmt_spec<I: Iterator<Item = u8>>(
     it: &mut std::iter::Peekable<I>,
     span: Span,

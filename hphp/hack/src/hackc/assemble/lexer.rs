@@ -428,6 +428,7 @@ fn gather_quoted(source: &[u8], count: usize) -> (&[u8], &[u8]) {
     source.split_at(count + len)
 }
 
+#[allow(clippy::todo)]
 fn parse_token(mut source: &[u8], line: Line) -> (Option<Token<'_>>, &[u8]) {
     let tok = if let Some(lead) = source.first() {
         match *lead {

@@ -58,6 +58,7 @@ pub(crate) fn write(
     Ok(())
 }
 
+#[allow(clippy::todo)]
 fn emit_mop(state: &mut FuncState<'_, '_, '_>, mop: &ir::instr::MemberOp) -> Result<Option<Sid>> {
     let mut locals = mop.locals.iter().copied();
     let mut operands = mop.operands.iter().copied();
@@ -416,6 +417,7 @@ where
         Ok(())
     }
 
+    #[allow(clippy::todo)]
     fn finish(mut self, final_op: &FinalOp) -> Result<Option<Sid>> {
         use textual::Const;
 

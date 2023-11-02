@@ -219,6 +219,7 @@ pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
             }
         }
 
+        #[allow(clippy::todo)]
         fn compute_label(
             opcode_name: &str,
             imm_name: &Ident,

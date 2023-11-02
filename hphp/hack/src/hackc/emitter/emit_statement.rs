@@ -105,6 +105,7 @@ fn is_single_await_all_block(lids: &[a::Lid], stmts: &[ast::Stmt]) -> bool {
     )
 }
 
+#[allow(clippy::todo)]
 pub fn emit_stmt<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,

@@ -205,6 +205,7 @@ impl Attributes {
     }
 }
 
+#[allow(clippy::todo)]
 fn convert_immediate(name: &str, imm: &ImmType) -> TokenStream {
     let name = Ident::new(name, Span::call_site());
     match imm {

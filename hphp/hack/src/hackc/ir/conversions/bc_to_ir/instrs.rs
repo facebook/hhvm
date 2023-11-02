@@ -142,6 +142,7 @@ pub(crate) fn convert_sequence<'a, 'b>(ctx: &mut Context<'a, 'b>, addr: Addr) {
     assert_eq!(ctx.stack.len(), 0, "Sequence ended with a non-empty stack!");
 }
 
+#[allow(clippy::todo)]
 fn convert_base<'a, 'b>(ctx: &mut Context<'a, 'b>, base: &Opcode<'a>) {
     if let Some(mop) = ctx.member_op.as_ref() {
         panic!(
@@ -809,6 +810,7 @@ fn convert_control_flow<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) 
 }
 
 #[b2i_macros::bc_to_ir]
+#[allow(clippy::todo)]
 fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> bool {
     use instr::Hhbc;
     use ir::Constant;

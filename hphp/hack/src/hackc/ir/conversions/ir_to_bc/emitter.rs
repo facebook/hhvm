@@ -779,6 +779,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
     /// Emitter for a MemberOp instruction. In IR the MemberOp is a single
     /// instruction but that maps to multiple HHBC instructions (a BaseOp, zero
     /// or more Dim Instructs, and a FinalOp).
+    #[allow(clippy::todo)]
     fn emit_member_op(&mut self, op: &instr::MemberOp) {
         use instr::BaseOp;
         use instr::FinalOp;

@@ -772,6 +772,7 @@ impl Expr {
         Expr::Const(Const::Null)
     }
 
+    #[allow(clippy::todo)]
     pub(crate) fn ty(&self) -> Ty {
         match self {
             Expr::Sid(_) => Ty::mixed_ptr(),

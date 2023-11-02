@@ -18,6 +18,7 @@ pub use user_error::*;
 /// If `is_term` is true, ansi colors and styles will be used according to the format.
 /// Absolute paths are formed (at the discretion of the error format) from error
 /// positions using the provided RelativePathCtx.
+#[allow(clippy::todo)]
 pub fn print_error_list<'e, I>(
     mut w: impl Write,
     is_term: bool,

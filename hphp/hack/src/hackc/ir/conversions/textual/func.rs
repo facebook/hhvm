@@ -533,6 +533,7 @@ fn write_block(state: &mut FuncState<'_, '_, '_>, bid: BlockId) -> Result {
     Ok(())
 }
 
+#[allow(clippy::todo)]
 fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
     let instr = state.func.instr(iid);
     trace!("    Instr {iid}: {instr:?}");
@@ -759,6 +760,7 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
     Ok(())
 }
 
+#[allow(clippy::todo)]
 fn write_copy(state: &mut FuncState<'_, '_, '_>, iid: InstrId, vid: ValueId) -> Result {
     use hack::Builtin;
     use textual::Const;

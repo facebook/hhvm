@@ -26,6 +26,7 @@
 #include "hphp/runtime/ext/vsdebug/debugger-request-info.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/util/process.h"
+#include "hphp/util/timer.h"
 
 #include <folly/dynamic.h>
 
@@ -2095,6 +2096,22 @@ void Debugger::onBreakpointHit(
         );
 
         // Breakpoint hit!
+        assertx(bp);
+        if (RuntimeOption::LogBreakpointHitTime && StructuredLog::enabled() &&
+            !ri->m_firstBpHit && bp->m_type == BreakpointType::Source &&
+            !isDummyRequest() && g_context->getTransport()) {
+          ri->m_firstBpHit = true;
+          StructuredLogEntry ent;
+          ent.setStr("filename", bp->m_filePath.filename().c_str());
+          ent.setInt("line_number", bp->m_line);
+		    	struct timespec now;
+          Timer::GetMonotonicTime(now);
+          auto t =
+            gettime_diff_us(g_context->getTransport()->getWallTime(), now);
+          ent.setInt("time_to_hit", t);
+          StructuredLog::log("hhvm_time_till_bp", ent);
+        }
+
         pauseTarget(ri, false);
         bpMgr->onBreakpointHit(bpId);
 

@@ -1378,7 +1378,7 @@ TypedValue HHVM_FUNCTION(classname_to_class, TypedValue cname) {
       auto const c = Class::load(name);
       if (!c) {
         SystemLib::throwInvalidArgumentExceptionObject(
-          folly::sformat("Failed to load class {} for {}.", name, __FUNCTION__+2)
+          folly::sformat("Failed to load class from string {} for {}.", name, __FUNCTION__+2)
         );
       }
       if (folly::Random::oneIn(RO::EvalDynamicallyReferencedNoticeSampleRate) &&
@@ -1390,7 +1390,16 @@ TypedValue HHVM_FUNCTION(classname_to_class, TypedValue cname) {
     case KindOfClass:
       return cname;
     case KindOfLazyClass:
-      return make_tv<KindOfClass>(Class::load(cname.m_data.plazyclass.name()));
+    {
+      auto const name = cname.m_data.plazyclass.name();
+      auto const c = Class::load(name);
+      if (!c) {
+        SystemLib::throwInvalidArgumentExceptionObject(
+          folly::sformat("Failed to load class from lazy class {} for {}.", name, __FUNCTION__+2)
+        );
+      }
+      return make_tv<KindOfClass>(c);
+    }
     default:
       SystemLib::throwInvalidArgumentExceptionObject(
         folly::sformat(

@@ -784,10 +784,11 @@ void validate_function_priority_annotation(
 
 void validate_exception_php_annotations(
     diagnostic_context& ctx, const t_exception& node) {
-  constexpr const char* annotations[] = {"message", "code"};
+  constexpr std::string_view annotations[] = {"message", "code"};
   for (const auto& annotation : annotations) {
-    if (node.get_field_by_name(annotation) != nullptr &&
-        strcmp(annotation, node.get_annotation(annotation).c_str()) != 0) {
+    if (node.has_annotation({annotation}) &&
+        node.get_field_by_name(annotation) &&
+        node.get_annotation({annotation}) != annotation) {
       ctx.warning(
           "Some generators (e.g. PHP) will ignore annotation '{}' as it is "
           "also used as field",

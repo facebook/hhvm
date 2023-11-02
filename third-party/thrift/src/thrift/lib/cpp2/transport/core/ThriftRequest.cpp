@@ -203,6 +203,9 @@ ThriftRequestCore::LogRequestSampleCallback::buildRequestLoggingContext(
   }
 
   const auto& reqContext = thriftRequest.getRequestContext();
+  if (const auto* routingTarget = reqContext->getRoutingTarget()) {
+    requestLoggingContext.routingTarget = *routingTarget;
+  }
   if (const auto* clientId = reqContext->clientId()) {
     requestLoggingContext.clientId = *clientId;
   }

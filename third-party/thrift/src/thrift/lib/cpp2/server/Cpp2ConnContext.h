@@ -710,6 +710,18 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
     return nullptr;
   }
 
+  const std::string* getRoutingTarget() const {
+    if (auto* header = getHeader()) {
+      if (const auto& loggingContext = header->loggingContext()) {
+        if (const auto routingTargetRef = loggingContext->routingTarget();
+            routingTargetRef.has_value() && !routingTargetRef->empty()) {
+          return &*routingTargetRef;
+        }
+      }
+    }
+    return nullptr;
+  }
+
   const std::string* tenantId() const {
     if (auto header = getHeader(); header && header->tenantId()) {
       return &*header->tenantId();

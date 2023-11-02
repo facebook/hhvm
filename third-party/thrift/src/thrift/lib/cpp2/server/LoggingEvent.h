@@ -129,6 +129,7 @@ struct RequestLoggingContext {
   // for thrift internal exception, e.g. OVERLOAD, QUEUE_TIMEOUT,
   // UNKNOWN_METHOD.
   std::optional<ResponseRpcError> responseRpcError;
+  std::string routingTarget;
   std::string methodName;
   std::string clientId;
   // request id passed from the client

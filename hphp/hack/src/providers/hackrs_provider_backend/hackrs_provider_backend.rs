@@ -24,9 +24,6 @@ use naming_table::NamingTable;
 use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
-use ocamlrep_caml_builtins::Int64;
-use oxidized::file_info::HashType;
-use oxidized::file_info::Mode;
 use oxidized::file_info::NameType;
 use oxidized::file_info::Names;
 use oxidized::global_options::GlobalOptions;
@@ -971,85 +968,5 @@ impl NamingProvider for NamingTableWithContext {
             }
         }
         self.fallback.get_canon_fun_name(name)
-    }
-}
-
-/// An id contains a pos, name and a optional decl hash. The decl hash is None
-/// only in the case when we didn't compute it for performance reasons
-///
-/// We can't use oxidized::file_info::Id here because that data structure
-/// contains an Arc, which can't be used in a multi-threading context.
-#[derive(Clone, Debug)]
-pub struct Id(naming_table::Pos, String, Option<Int64>);
-
-impl From<Id> for oxidized::file_info::Id {
-    fn from(val: Id) -> Self {
-        oxidized::file_info::Id(val.0.into(), val.1, val.2)
-    }
-}
-
-/// Variant of `FileInfo` which is compatible with parallelism.
-///
-/// Can be converted into OCaml via it's `Into<oxidized::file_info::FileInfo>` trait.
-#[derive(Clone, Debug)]
-pub struct FileInfo {
-    pub hash: HashType,
-    pub file_mode: Option<Mode>,
-    pub funs: Vec<Id>,
-    pub classes: Vec<Id>,
-    pub typedefs: Vec<Id>,
-    pub consts: Vec<Id>,
-    pub modules: Vec<Id>,
-}
-
-impl From<FileInfo> for oxidized::file_info::FileInfo {
-    fn from(val: FileInfo) -> Self {
-        oxidized::file_info::FileInfo {
-            hash: val.hash,
-            file_mode: val.file_mode,
-            funs: val.funs.into_iter().map(Into::into).collect(),
-            classes: val.classes.into_iter().map(Into::into).collect(),
-            typedefs: val.typedefs.into_iter().map(Into::into).collect(),
-            consts: val.consts.into_iter().map(Into::into).collect(),
-            modules: val.modules.into_iter().map(Into::into).collect(),
-            comments: None,
-        }
-    }
-}
-
-impl<'a> From<ParsedFileWithHashes<'a>> for FileInfo {
-    /// c.f. OCaml Direct_decl_parser.decls_to_fileinfo
-
-    fn from(file: ParsedFileWithHashes<'a>) -> Self {
-        let mut info = FileInfo {
-            hash: HashType(Some(Int64::from(file.file_decls_hash.as_u64() as i64))),
-            file_mode: file.mode,
-            funs: vec![],
-            classes: vec![],
-            typedefs: vec![],
-            consts: vec![],
-            modules: vec![],
-        };
-        let pos = |p: &oxidized_by_ref::pos::Pos<'_>| naming_table::Pos::Full(p.into());
-        use oxidized_by_ref::shallow_decl_defs::Decl;
-        for &(name, decl, hash) in file.iter() {
-            let hash = Int64::from(hash.as_u64() as i64);
-            match decl {
-                Decl::Class(x) => info
-                    .classes
-                    .push(Id(pos(x.name.0), name.into(), Some(hash))),
-                Decl::Fun(x) => info.funs.push(Id(pos(x.pos), name.into(), Some(hash))),
-                Decl::Typedef(x) => info.typedefs.push(Id(pos(x.pos), name.into(), Some(hash))),
-                Decl::Const(x) => info.consts.push(Id(pos(x.pos), name.into(), Some(hash))),
-                Decl::Module(x) => info.modules.push(Id(pos(x.pos), name.into(), Some(hash))),
-            }
-        }
-        // Match OCaml ordering
-        info.classes.reverse();
-        info.funs.reverse();
-        info.typedefs.reverse();
-        info.consts.reverse();
-        info.modules.reverse();
-        info
     }
 }

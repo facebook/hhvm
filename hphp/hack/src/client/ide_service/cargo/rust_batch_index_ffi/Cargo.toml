@@ -15,7 +15,8 @@ crate-type = ["lib", "staticlib"]
 anyhow = "=1.0.72"
 bumpalo = { version = "3.11.1", features = ["collections"] }
 direct_decl_parser = { version = "0.0.0", path = "../../../../parser/api/cargo/direct_decl_parser" }
-hackrs_provider_backend = { version = "0.0.0", path = "../../../../providers/hackrs_provider_backend" }
+file_info = { version = "0.0.0", path = "../../../../deps/rust/file_info" }
+ocamlrep_caml_builtins = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_ocamlpool = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 oxidized_by_ref = { version = "0.0.0", path = "../../../../oxidized_by_ref" }

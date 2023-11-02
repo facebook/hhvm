@@ -2243,37 +2243,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "hackrs_provider_backend"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "bincode",
- "bstr",
- "bumpalo",
- "datastore",
- "decl_parser",
- "deps_rust",
- "file_info",
- "file_provider",
- "folded_decl_provider",
- "naming_provider",
- "naming_table_rust",
- "ocaml_runtime",
- "ocamlrep",
- "ocamlrep_caml_builtins",
- "ocamlrep_ocamlpool",
- "oxidized",
- "oxidized_by_ref",
- "pos",
- "rust_provider_backend_ffi",
- "rust_provider_backend_ffi_trait",
- "serde",
- "shallow_decl_provider",
- "shm_store",
- "ty",
-]
-
-[[package]]
 name = "hackrs_test_utils"
 version = "0.0.0"
 dependencies = [
@@ -2419,21 +2388,6 @@ name = "hex"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
-
-[[package]]
-name = "hh24_test"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "bumpalo",
- "direct_decl_parser",
- "hh24_types",
- "maplit",
- "names",
- "oxidized_by_ref",
- "relative_path",
- "tempfile",
-]
 
 [[package]]
 name = "hh24_types"
@@ -3138,15 +3092,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "lru"
-version = "0.11.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a4a83fb7698b3643a0e34f9ae6f2e8f0178c0fd42f8b59d493aa271ff3a5bf21"
-dependencies = [
- "hashbrown 0.14.0",
-]
-
-[[package]]
 name = "lz4"
 version = "1.24.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3407,30 +3352,6 @@ dependencies = [
  "oxidized",
  "relative_path",
  "unwrap_ocaml",
-]
-
-[[package]]
-name = "naming_table_rust"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "datastore",
- "deps_rust",
- "file_info",
- "hh24_test",
- "hh24_types",
- "libc",
- "maplit",
- "names",
- "naming_provider",
- "ocamlrep",
- "oxidized",
- "parking_lot",
- "pos",
- "rpds",
- "serde",
- "shm_store",
- "shmffi",
 ]
 
 [[package]]
@@ -4445,7 +4366,8 @@ dependencies = [
  "anyhow",
  "bumpalo",
  "direct_decl_parser",
- "hackrs_provider_backend",
+ "file_info",
+ "ocamlrep_caml_builtins",
  "ocamlrep_ocamlpool",
  "oxidized",
  "oxidized_by_ref",
@@ -4512,54 +4434,6 @@ dependencies = [
  "parser_core_types",
  "positioned_by_ref_parser",
  "to_ocaml_impl",
-]
-
-[[package]]
-name = "rust_provider_backend_api"
-version = "0.0.0"
-dependencies = [
- "file_provider",
- "folded_decl_provider",
- "naming_provider",
- "shallow_decl_provider",
- "ty",
-]
-
-[[package]]
-name = "rust_provider_backend_ffi"
-version = "0.0.0"
-dependencies = [
- "bstr",
- "deps_rust",
- "file_info",
- "ocamlrep",
- "ocamlrep_custom",
- "ocamlrep_ocamlpool",
- "oxidized",
- "oxidized_by_ref",
- "pos",
- "rust_decl_ffi",
- "rust_provider_backend_ffi_trait",
- "ty",
-]
-
-[[package]]
-name = "rust_provider_backend_ffi_trait"
-version = "0.0.0"
-dependencies = [
- "bstr",
- "bumpalo",
- "deps_rust",
- "file_info",
- "file_provider",
- "naming_provider",
- "ocamlrep",
- "ocamlrep_ocamlpool",
- "oxidized",
- "oxidized_by_ref",
- "pos",
- "rust_provider_backend_api",
- "ty",
 ]
 
 [[package]]
@@ -4822,29 +4696,6 @@ dependencies = [
  "serde",
  "thiserror",
  "ty",
-]
-
-[[package]]
-name = "shm_store"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "bincode",
- "datastore",
- "hh24_types",
- "intern",
- "lru",
- "lz4",
- "md-5",
- "measure",
- "ocaml_blob",
- "ocamlrep",
- "ocamlrep_marshal",
- "parking_lot",
- "pos",
- "serde",
- "shmffi",
- "zstd",
 ]
 
 [[package]]

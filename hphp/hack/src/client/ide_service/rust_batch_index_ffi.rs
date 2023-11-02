@@ -9,14 +9,50 @@ use std::path::PathBuf;
 
 use anyhow::Result;
 use bumpalo::Bump;
+use file_info::FileInfo;
+use file_info::Id;
+use ocamlrep_caml_builtins::Int64;
 use ocamlrep_ocamlpool::ocaml_ffi;
 use oxidized::decl_parser_options::DeclParserOptions;
-use oxidized::file_info::FileInfo;
 use oxidized::search_types::SiAddendum;
 use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes;
 use rayon::prelude::*;
 use relative_path::RelativePath;
 use unwrap_ocaml::UnwrapOcaml;
+
+fn parsed_file_to_file_info<'a>(file: ParsedFileWithHashes<'a>) -> FileInfo {
+    let mut info = FileInfo {
+        hash: file_info::HashType(Some(Int64::from(file.file_decls_hash.as_u64() as i64))),
+        file_mode: file.mode,
+        funs: vec![],
+        classes: vec![],
+        typedefs: vec![],
+        consts: vec![],
+        modules: vec![],
+        comments: None,
+    };
+    let pos = |p: &oxidized_by_ref::pos::Pos<'_>| file_info::Pos::Full(p.to_owned());
+    use oxidized_by_ref::shallow_decl_defs::Decl;
+    for &(name, decl, hash) in file.iter() {
+        let hash = Int64::from(hash.as_u64() as i64);
+        match decl {
+            Decl::Class(x) => info
+                .classes
+                .push(Id(pos(x.name.0), name.into(), Some(hash))),
+            Decl::Fun(x) => info.funs.push(Id(pos(x.pos), name.into(), Some(hash))),
+            Decl::Typedef(x) => info.typedefs.push(Id(pos(x.pos), name.into(), Some(hash))),
+            Decl::Const(x) => info.consts.push(Id(pos(x.pos), name.into(), Some(hash))),
+            Decl::Module(x) => info.modules.push(Id(pos(x.pos), name.into(), Some(hash))),
+        }
+    }
+    // Match OCaml ordering
+    info.classes.reverse();
+    info.funs.reverse();
+    info.typedefs.reverse();
+    info.consts.reverse();
+    info.modules.reverse();
+    info
+}
 
 ocaml_ffi! {
     fn batch_index_hackrs_ffi_root_relative_paths_only(
@@ -51,7 +87,7 @@ ocaml_ffi! {
                 );
 
                 let addenda = si_addendum::get_si_addenda(&with_hashes);
-                let file_info: hackrs_provider_backend::FileInfo = with_hashes.into();
+                let file_info = parsed_file_to_file_info(with_hashes);
 
                 (relpath, Some((file_info, addenda)))
             })

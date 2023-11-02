@@ -363,26 +363,23 @@ inline bool Client::fellback() const {
 // Run the given callable, retrying if Throttle is thrown, until the
 // configured retry limit is reached.
 template <typename T, typename F>
-coro::Task<T> Client::tryWithThrottling(const F& f) {
-  HPHP_CORO_RETURN(
-    HPHP_CORO_AWAIT(
-      Impl::tryWithThrottling<T>(
-        m_options.m_throttleRetries,
-        m_options.m_throttleBaseWait,
-        m_stats->throttles,
-        f
-      )
-    )
-  );
+folly::coro::Task<T> Client::tryWithThrottling(const F& f) {
+  co_return co_await
+    Impl::tryWithThrottling<T>(
+      m_options.m_throttleRetries,
+      m_options.m_throttleBaseWait,
+      m_stats->throttles,
+      f
+    );
 }
 
 // Run the given callable F with the normal implementation. If it
 // throws an Error, set didFallback to true, and attempt to re-run F
 // with the fallback implementation.
 template <typename T, typename F>
-coro::Task<T> Client::tryWithFallback(const F& f,
-                                      bool& didFallback,
-                                      bool optimistic) {
+folly::coro::Task<T> Client::tryWithFallback(const F& f,
+                                             bool& didFallback,
+                                             bool optimistic) {
   // If we're forcing fallbacks, or if the main implementation has
   // disabled itself, go straight to the fallback case.
   Optional<std::string> errorMsg;
@@ -390,13 +387,10 @@ coro::Task<T> Client::tryWithFallback(const F& f,
     try {
       // Attempt the normal implementation.
       didFallback = false;
-      HPHP_CORO_RETURN(
-        HPHP_CORO_AWAIT(
-          tryWithThrottling<T>(
-            [&] { return f(*m_impl, false); }
-          )
-        )
-      );
+      co_return co_await
+        tryWithThrottling<T>(
+          [&] { return f(*m_impl, false); }
+        );
     } catch (const WorkerError& exn) {
       // If the worker failed, we'll retry with fallback even if we're
       // using optimistic mode.
@@ -418,7 +412,7 @@ coro::Task<T> Client::tryWithFallback(const F& f,
 
   // Fallback case:
   didFallback = true;
-  HPHP_CORO_SAFE_POINT;
+  co_await folly::coro::co_safe_point;
   // Avoid thundering herd of fallbacks which all fail in the same way
   // as the original (this is common if the workers are crashing due
   // to a bug). m_fallbackSem controls the number of allowed
@@ -427,10 +421,10 @@ coro::Task<T> Client::tryWithFallback(const F& f,
   // that successful fallbacks will allow for more fallbacks to be run
   // in parallel. If things keep failing, we'll only run one at a
   // time.
-  HPHP_CORO_AWAIT(m_fallbackSem.wait());
+  co_await m_fallbackSem.co_wait();
   SCOPE_EXIT { m_fallbackSem.signal(); };
   SCOPE_SUCCESS { m_fallbackSem.signal(); };
-  HPHP_CORO_SAFE_POINT;
+  co_await folly::coro::co_safe_point;
 
   // Check this again. The implementation could have disabled
   // itself while using it above, and in that case, its the
@@ -447,13 +441,13 @@ coro::Task<T> Client::tryWithFallback(const F& f,
   // (LockFreeLazy will ensure this), and call it. If it throws,
   // nothing to be done, it will be propagated to the caller.
   auto& fallback = *m_fallbackImpl.get([this] { return makeFallbackImpl(); });
-  auto ret = HPHP_CORO_AWAIT(f(fallback, true));
-  HPHP_CORO_SAFE_POINT;
-  HPHP_CORO_MOVE_RETURN(ret);
+  auto ret = co_await f(fallback, true);
+  co_await folly::coro::co_safe_point;
+  co_return ret;
 }
 
 template <typename T>
-coro::Task<T> Client::load(Ref<T> r) {
+folly::coro::Task<T> Client::load(Ref<T> r) {
   RequestId requestId{"load blob"};
 
   ++m_stats->loadCalls;
@@ -466,19 +460,19 @@ coro::Task<T> Client::load(Ref<T> r) {
   // Get the appropriate implementation (it could have been created by
   // a fallback implementation), and forward the request to it.
   auto& impl = r.m_fromFallback ? *m_fallbackImpl.rawGet() : *m_impl;
-  auto result = HPHP_CORO_AWAIT(tryWithThrottling<BlobVec>(
+  auto result = co_await tryWithThrottling<BlobVec>(
     [&] { return impl.load(requestId, IdVec{r.m_id}); }
-  ));
+  );
   assertx(result.size() == 1);
   FTRACE(4, "{} blob is {} bytes\n",
          requestId.tracePrefix(), result[0].size());
   ++m_stats->downloads;
   m_stats->bytesDownloaded += result[0].size();
-  HPHP_CORO_RETURN(unblobify<T>(std::move(result[0])));
+  co_return unblobify<T>(std::move(result[0]));
 }
 
 template <typename T, typename... Ts>
-coro::Task<std::tuple<T, Ts...>> Client::load(Ref<T> r, Ref<Ts>... rs) {
+folly::coro::Task<std::tuple<T, Ts...>> Client::load(Ref<T> r, Ref<Ts>... rs) {
   using namespace detail;
 
   RequestId requestId{"load blobs"};
@@ -524,17 +518,14 @@ coro::Task<std::tuple<T, Ts...>> Client::load(Ref<T> r, Ref<Ts>... rs) {
   // Do the loads from either implementation (in the normal case, only
   // one of these will be executed).
   auto mainBlobs = !main.empty()
-    ? HPHP_CORO_AWAIT(
+    ? co_await
         tryWithThrottling<BlobVec>(
           [&] { return m_impl->load(requestId, main); }
         )
-      )
     : BlobVec{};
   // Fallback impl cannot throttle
   auto fallbackBlobs = !fallback.empty()
-    ? HPHP_CORO_AWAIT(
-        m_fallbackImpl.rawGet()->load(requestId, std::move(fallback))
-      )
+    ? co_await m_fallbackImpl.rawGet()->load(requestId, std::move(fallback))
     : BlobVec{};
 
   assertx(mainBlobs.size() == mainSize);
@@ -582,11 +573,11 @@ coro::Task<std::tuple<T, Ts...>> Client::load(Ref<T> r, Ref<Ts>... rs) {
   );
 
   m_stats->downloads += (sizeof...(Ts) + 1);
-  HPHP_CORO_MOVE_RETURN(ret);
+  co_return ret;
 }
 
 template <typename T>
-coro::Task<std::vector<T>> Client::load(std::vector<Ref<T>> rs) {
+folly::coro::Task<std::vector<T>> Client::load(std::vector<Ref<T>> rs) {
   using namespace folly::gen;
 
   RequestId requestId{"load blobs"};
@@ -619,17 +610,14 @@ coro::Task<std::vector<T>> Client::load(std::vector<Ref<T>> rs) {
   // Do the loads from either implementation (in the normal case, only
   // one of these will be executed).
   auto mainBlobs = !main.empty()
-    ? HPHP_CORO_AWAIT(
+    ? co_await
         tryWithThrottling<BlobVec>(
           [&] { return m_impl->load(requestId, main); }
         )
-      )
     : BlobVec{};
   // Fallback impl cannot throttle
   auto fallbackBlobs = !fallback.empty()
-    ? HPHP_CORO_AWAIT(
-        m_fallbackImpl.rawGet()->load(requestId, std::move(fallback))
-      )
+    ? co_await m_fallbackImpl.rawGet()->load(requestId, std::move(fallback))
     : BlobVec{};
 
   assertx(mainBlobs.size() == mainSize);
@@ -663,11 +651,11 @@ coro::Task<std::vector<T>> Client::load(std::vector<Ref<T>> rs) {
   assertx(fallbackIdx == fallbackBlobs.size());
 
   m_stats->downloads += rs.size();
-  HPHP_CORO_MOVE_RETURN(out);
+  co_return out;
 }
 
 template <typename T, typename... Ts>
-coro::Task<std::vector<std::tuple<T, Ts...>>>
+folly::coro::Task<std::vector<std::tuple<T, Ts...>>>
 Client::load(std::vector<std::tuple<Ref<T>, Ref<Ts>...>> rs) {
   using namespace detail;
   using namespace folly::gen;
@@ -719,17 +707,14 @@ Client::load(std::vector<std::tuple<Ref<T>, Ref<Ts>...>> rs) {
   // Do the loads from either implementation (in the normal case, only
   // one of these will be executed).
   auto mainBlobs = !main.empty()
-    ? HPHP_CORO_AWAIT(
+    ? co_await
         tryWithThrottling<BlobVec>(
           [&] { return m_impl->load(requestId, main); }
         )
-      )
     : BlobVec{};
   // Fallback impl cannot throttle
   auto fallbackBlobs = !fallback.empty()
-    ? HPHP_CORO_AWAIT(
-        m_fallbackImpl.rawGet()->load(requestId, std::move(fallback))
-      )
+    ? co_await m_fallbackImpl.rawGet()->load(requestId, std::move(fallback))
     : BlobVec{};
 
   assertx(mainBlobs.size() == mainSize);
@@ -779,7 +764,7 @@ Client::load(std::vector<std::tuple<Ref<T>, Ref<Ts>...>> rs) {
   assertx(out.size() == rs.size());
 
   m_stats->downloads += (rs.size() * tupleSize);
-  HPHP_CORO_MOVE_RETURN(out);
+  co_return out;
 }
 
 // All of the store functions are similar: Serialize the inputs into
@@ -788,7 +773,7 @@ Client::load(std::vector<std::tuple<Ref<T>, Ref<Ts>...>> rs) {
 // appropriate types.
 
 template <typename T>
-coro::Task<Ref<T>> Client::storeImpl(bool optimistic, T t) {
+folly::coro::Task<Ref<T>> Client::storeImpl(bool optimistic, T t) {
   RequestId requestId{"store blob"};
 
   ++m_stats->blobs;
@@ -800,7 +785,7 @@ coro::Task<Ref<T>> Client::storeImpl(bool optimistic, T t) {
   };
 
   auto wasFallback = false;
-  auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
+  auto ids = co_await tryWithFallback<IdVec>(
     [&] (Impl& i, bool isFallback) {
       if (isFallback) ++m_stats->blobFallbacks;
       auto blob = blobify(t);
@@ -813,17 +798,18 @@ coro::Task<Ref<T>> Client::storeImpl(bool optimistic, T t) {
       );
     },
     wasFallback
-  ));
+  );
   assertx(ids.size() == 1);
 
   Ref<T> ref{std::move(ids[0]), wasFallback};
-  HPHP_CORO_MOVE_RETURN(ref);
+  co_return ref;
 }
 
 template <typename T, typename... Ts>
-coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> Client::storeImpl(bool optimistic,
-                                                             T t,
-                                                             Ts... ts) {
+folly::coro::Task<std::tuple<Ref<T>, Ref<Ts>...>>
+Client::storeImpl(bool optimistic,
+                  T t,
+                  Ts... ts) {
   using namespace detail;
   RequestId requestId{"store blobs"};
 
@@ -839,7 +825,7 @@ coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> Client::storeImpl(bool optimistic,
   };
 
   auto wasFallback = false;
-  auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
+  auto ids = co_await tryWithFallback<IdVec>(
     [&] (Impl& i, bool isFallback) {
       if (isFallback) m_stats->blobFallbacks += (sizeof...(Ts) + 1);
       BlobVec blobs{{ blobify(t), blobify(ts)... }};
@@ -857,7 +843,7 @@ coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> Client::storeImpl(bool optimistic,
       );
     },
     wasFallback
-  ));
+  );
   assertx(ids.size() == sizeof...(Ts) + 1);
 
   using OutTuple = std::tuple<T, Ts...>;
@@ -869,35 +855,35 @@ coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> Client::storeImpl(bool optimistic,
       };
     }
   );
-  HPHP_CORO_MOVE_RETURN(ret);
+  co_return ret;
 }
 
 template <typename T>
-coro::Task<Ref<T>> Client::store(T t) {
+folly::coro::Task<Ref<T>> Client::store(T t) {
   return storeImpl(false, std::move(t));
 }
 
 template <typename T, typename... Ts>
-coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> Client::store(T t,
-                                                         Ts... ts) {
+folly::coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> Client::store(T t,
+                                                                Ts... ts) {
   return storeImpl(false, std::move(t), std::move(ts)...);
 }
 
 template <typename T>
-coro::Task<Ref<T>> Client::storeOptimistically(T t) {
+folly::coro::Task<Ref<T>> Client::storeOptimistically(T t) {
   return storeImpl(true, std::move(t));
 }
 
 template <typename T, typename... Ts>
-coro::Task<std::tuple<Ref<T>, Ref<Ts>...>>
+folly::coro::Task<std::tuple<Ref<T>, Ref<Ts>...>>
 Client::storeOptimistically(T t,
                             Ts... ts) {
   return storeImpl(true, std::move(t), std::move(ts)...);
 }
 
 template <typename T>
-coro::Task<std::vector<Ref<T>>> Client::storeMulti(std::vector<T> ts,
-                                                   bool optimistic) {
+folly::coro::Task<std::vector<Ref<T>>> Client::storeMulti(std::vector<T> ts,
+                                                          bool optimistic) {
   using namespace folly::gen;
 
   RequestId requestId{"store blobs"};
@@ -918,7 +904,7 @@ coro::Task<std::vector<Ref<T>>> Client::storeMulti(std::vector<T> ts,
   };
 
   auto wasFallback = false;
-  auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
+  auto ids = co_await tryWithFallback<IdVec>(
     [&] (Impl& i, bool isFallback) {
       if (isFallback) m_stats->blobFallbacks += ts.size();
       auto blobs = from(ts)
@@ -938,18 +924,18 @@ coro::Task<std::vector<Ref<T>>> Client::storeMulti(std::vector<T> ts,
       );
     },
     wasFallback
-  ));
+  );
   assertx(ids.size() == ts.size());
 
   auto out = from(ids)
     | move
     | mapped([&] (RefId&& id) { return Ref<T>{std::move(id), wasFallback}; })
     | as<std::vector>();
-  HPHP_CORO_MOVE_RETURN(out);
+  co_return out;
 }
 
 template <typename T, typename... Ts>
-coro::Task<std::vector<std::tuple<Ref<T>, Ref<Ts>...>>>
+folly::coro::Task<std::vector<std::tuple<Ref<T>, Ref<Ts>...>>>
 Client::storeMultiTuple(std::vector<std::tuple<T, Ts...>> ts,
                         bool optimistic) {
   using namespace folly::gen;
@@ -976,7 +962,7 @@ Client::storeMultiTuple(std::vector<std::tuple<T, Ts...>> ts,
   };
 
   auto wasFallback = false;
-  auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
+  auto ids = co_await tryWithFallback<IdVec>(
     [&] (Impl& i, bool isFallback) {
       if (isFallback) m_stats->blobFallbacks += (ts.size() * tupleSize);
       // Map each tuple to a vector of RefIds, then concat all of the
@@ -1007,7 +993,7 @@ Client::storeMultiTuple(std::vector<std::tuple<T, Ts...>> ts,
       );
     },
     wasFallback
-  ));
+  );
   assertx(ids.size() == ts.size() * tupleSize);
 
   // Do the opposite to the output. Batch the output into the
@@ -1028,10 +1014,10 @@ Client::storeMultiTuple(std::vector<std::tuple<T, Ts...>> ts,
         );
       })
     | as<std::vector>();
-  HPHP_CORO_MOVE_RETURN(out);
+  co_return out;
 }
 
-template <typename C> coro::Task<typename Job<C>::ExecT>
+template <typename C> folly::coro::Task<typename Job<C>::ExecT>
 Client::exec(const Job<C>& job,
              typename Job<C>::ConfigT config,
              std::vector<typename Job<C>::InputsT> inputs,
@@ -1084,7 +1070,7 @@ Client::exec(const Job<C>& job,
   // Make all of the inputs come from the fallback
   // implementation. This is a lambda because we might have to do it
   // two different places.
-  auto const makeAllFallback = [&] () -> coro::Task<void> {
+  auto const makeAllFallback = [&] () -> folly::coro::Task<void> {
     // Vector of all RefIds which come from the non-fallback
     // implementation.
     IdVec ids;
@@ -1112,27 +1098,25 @@ Client::exec(const Job<C>& job,
 
     // If there's nothing there, everything is already from the
     // fallback implementation, so we're done.
-    if (ids.empty()) HPHP_CORO_RETURN_VOID;
+    if (ids.empty()) co_return;
 
     // Otherwise load just those from the non-fallback implementation
     // (if this fails, there's nothing we can do).
     auto const DEBUG_ONLY size = ids.size();
-    auto blobs = HPHP_CORO_AWAIT(
+    auto blobs = co_await
       tryWithThrottling<BlobVec>(
         [&] { return m_impl->load(requestId, ids); }
-      )
-    );
+      );
     assertx(blobs.size() == size);
 
     // Then store them with the fallback implementation.
-    auto stores = HPHP_CORO_AWAIT(
+    auto stores = co_await
       m_fallbackImpl.rawGet()->store(
         requestId,
         {},
         std::move(blobs),
         false
-      )
-    );
+      );
     assertx(stores.size() == size);
 
     // Iterate over all the inputs again. If the input came from the
@@ -1170,7 +1154,7 @@ Client::exec(const Job<C>& job,
 
     // At this point, all Refs should be from the fallback
     // implementation.
-    HPHP_CORO_RETURN_VOID;
+    co_return;
   };
 
   // Do we need to execute on the fallback implementation? If the
@@ -1185,7 +1169,7 @@ Client::exec(const Job<C>& job,
        vecIsFallback(inputs))) {
     // If we're executing on the fallback implementation, all inputs
     // need to be from there.
-    HPHP_CORO_AWAIT(makeAllFallback());
+    co_await makeAllFallback();
     useFallback = true;
   }
 
@@ -1275,72 +1259,66 @@ Client::exec(const Job<C>& job,
   // Execute the job using the appropriate executor, receiving the
   // outputs as RefVals (with the format prescribed by the
   // OutputTypes).
-  auto outputs = HPHP_CORO_AWAIT(coro::invoke(
-    [&] () -> coro::Task<std::vector<RefValVec>> {
+  auto outputs = co_await folly::coro::co_invoke(
+    [&] () -> folly::coro::Task<std::vector<RefValVec>> {
       if (useFallback) {
         ++m_stats->execFallbacks;
         auto configRefVals = toRefVals(config);
         auto inputsRefVals = from(inputs)
           | mapped(toRefVals)
           | as<std::vector>();
-        HPHP_CORO_RETURN(
-          HPHP_CORO_AWAIT(
-            m_fallbackImpl.rawGet()->exec(
-              requestId,
-              job.name(),
-              std::move(configRefVals),
-              std::move(inputsRefVals),
-              outputTypes,
-              finiTypes.get_pointer(),
-              metadata
-            )
-          )
-        );
+        co_return co_await
+          m_fallbackImpl.rawGet()->exec(
+            requestId,
+            job.name(),
+            std::move(configRefVals),
+            std::move(inputsRefVals),
+            outputTypes,
+            finiTypes.get_pointer(),
+            metadata
+          );
       } else {
         // Not using the fallback executor. Use tryWithFallback since
         // the execution can fail.
-        HPHP_CORO_RETURN(
-          HPHP_CORO_AWAIT(
-            tryWithFallback<std::vector<RefValVec>>(
-              [&] (Impl& i, bool fallback)
-              -> coro::Task<std::vector<RefValVec>> {
-                // If we've failed and we're now trying the fallback,
-                // we need to make all of the inputs be from the
-                // fallback executor.
-                if (fallback) {
-                  ++m_stats->execFallbacks;
-                  HPHP_CORO_AWAIT(makeAllFallback());
-                }
-                // Note we calculate the RefVals here within the
-                // lambda. This lets us move them into the exec call
-                // (so we don't need to copy in the common case where
-                // nothing fails).
-                auto configRefVals = toRefVals(config);
-                auto inputsRefVals = from(inputs)
-                  | mapped(toRefVals)
-                  | as<std::vector>();
-                HPHP_CORO_RETURN(HPHP_CORO_AWAIT(i.exec(
-                  requestId,
-                  job.name(),
-                  std::move(configRefVals),
-                  std::move(inputsRefVals),
-                  outputTypes,
-                  finiTypes.get_pointer(),
-                  metadata
-                )));
-              },
-              useFallback,
-              // Disable fallback if we're using optimistic
-              // stores. It's expected we'll get an exception thrown
-              // if everything isn't uploaded and we don't want to
-              // fallback in that case.
-              metadata.optimistic
-            )
-          )
-        );
+        co_return co_await
+          tryWithFallback<std::vector<RefValVec>>(
+            [&] (Impl& i, bool fallback)
+            -> folly::coro::Task<std::vector<RefValVec>> {
+              // If we've failed and we're now trying the fallback,
+              // we need to make all of the inputs be from the
+              // fallback executor.
+              if (fallback) {
+                ++m_stats->execFallbacks;
+                co_await makeAllFallback();
+              }
+              // Note we calculate the RefVals here within the
+              // lambda. This lets us move them into the exec call
+              // (so we don't need to copy in the common case where
+              // nothing fails).
+              auto configRefVals = toRefVals(config);
+              auto inputsRefVals = from(inputs)
+                | mapped(toRefVals)
+                | as<std::vector>();
+              co_return co_await i.exec(
+                requestId,
+                job.name(),
+                std::move(configRefVals),
+                std::move(inputsRefVals),
+                outputTypes,
+                finiTypes.get_pointer(),
+                metadata
+              );
+            },
+            useFallback,
+            // Disable fallback if we're using optimistic
+            // stores. It's expected we'll get an exception thrown
+            // if everything isn't uploaded and we don't want to
+            // fallback in that case.
+            metadata.optimistic
+          );
       }
     }
-  ));
+  );
 
   // Map a RefVal for a particular output into a Ref<T>, where T is
   // the type corresponding to their output.
@@ -1415,7 +1393,7 @@ Client::exec(const Job<C>& job,
           | mapped([&] (size_t i) { return toRetT(std::move(outputs[i])); } )
           | as<std::vector>();
     auto fini = toRef(std::move(outputs.back()), Tag<FiniT>{});
-    HPHP_CORO_RETURN(std::make_tuple(std::move(out), std::move(fini)));
+    co_return std::make_tuple(std::move(out), std::move(fini));
   } else {
     assertx(outputs.size() == inputs.size());
 
@@ -1424,7 +1402,7 @@ Client::exec(const Job<C>& job,
       | move
       | mapped(toRetT)
       | as<std::vector>();
-    HPHP_CORO_MOVE_RETURN(out);
+    co_return out;
   }
 }
 
@@ -1464,18 +1442,17 @@ template <typename T> std::string Client::blobify(const T& t) {
 // amount of time, then retry. Repeat the process until the max number
 // of retries is reached. Each retry will sleep longer.
 template <typename T, typename F>
-coro::Task<T> Client::Impl::tryWithThrottling(size_t retries,
-                                              std::chrono::milliseconds wait,
-                                              std::atomic<size_t>& throttles,
-                                              const F& f) {
+folly::coro::Task<T>
+Client::Impl::tryWithThrottling(size_t retries,
+                                std::chrono::milliseconds wait,
+                                std::atomic<size_t>& throttles,
+                                const F& f) {
   try {
     // If no retries, just run it normally
-    if (retries == 0) {
-      HPHP_CORO_RETURN(HPHP_CORO_AWAIT(f()));
-    }
+    if (retries == 0) co_return co_await f();
     for (size_t i = 0; i < retries-1; ++i) {
       try {
-        HPHP_CORO_RETURN(HPHP_CORO_AWAIT(f()));
+        co_return co_await f();
       } catch (const detail::Throttle&) {
         ++throttles;
         throttleSleep(i, wait);
@@ -1483,7 +1460,7 @@ coro::Task<T> Client::Impl::tryWithThrottling(size_t retries,
     }
     // The last retry will just let whatever throws escape, since we
     // won't rerun.
-    HPHP_CORO_RETURN(HPHP_CORO_AWAIT(f()));
+    co_return co_await f();
   } catch (const detail::Throttle& exn) {
     // Don't let a Throttle escape from here. Convert it to a normal
     // Error. This keeps us from getting nested throttles.
@@ -1498,9 +1475,9 @@ RefCache<K, V>::RefCache(Client& client)
   : m_client{client} {}
 
 template <typename K, typename V>
-coro::Task<Ref<V>> RefCache<K, V>::get(const K& key,
-                                       const V& val,
-                                       folly::Executor::KeepAlive<> e) {
+folly::coro::Task<Ref<V>> RefCache<K, V>::get(const K& key,
+                                              const V& val,
+                                              folly::Executor::KeepAlive<> e) {
   // This indirection avoids copying val unless we actually need to.
   return m_map.get(
     key,

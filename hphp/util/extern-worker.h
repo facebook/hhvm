@@ -512,15 +512,16 @@ struct Client {
   // return the data in a matching format. Using the variations which
   // take multiple at once is more efficient than using multiple
   // calls.
-  template <typename T> coro::Task<T> load(Ref<T>);
+  template <typename T> folly::coro::Task<T> load(Ref<T>);
 
   template <typename T, typename... Ts>
-  coro::Task<std::tuple<T, Ts...>> load(Ref<T>, Ref<Ts>...);
+  folly::coro::Task<std::tuple<T, Ts...>> load(Ref<T>, Ref<Ts>...);
 
-  template <typename T> coro::Task<std::vector<T>> load(std::vector<Ref<T>>);
+  template <typename T>
+  folly::coro::Task<std::vector<T>> load(std::vector<Ref<T>>);
 
   template <typename T, typename... Ts>
-  coro::Task<std::vector<std::tuple<T, Ts...>>>
+  folly::coro::Task<std::vector<std::tuple<T, Ts...>>>
   load(std::vector<std::tuple<Ref<T>, Ref<Ts>...>>);
 
   // Storing files. These take either a path, or a vector of paths,
@@ -532,10 +533,10 @@ struct Client {
   // contents of the file. Optimistic mode (if supported) won't ever
   // actually store anything. It will just generate the Refs and
   // assume the data is already stored.
-  coro::Task<Ref<std::string>> storeFile(std::filesystem::path,
-                                         bool optimistic = false);
+  folly::coro::Task<Ref<std::string>> storeFile(std::filesystem::path,
+                                                bool optimistic = false);
 
-  coro::Task<std::vector<Ref<std::string>>>
+  folly::coro::Task<std::vector<Ref<std::string>>>
   storeFile(std::vector<std::filesystem::path>,
             bool optimistic = false);
 
@@ -545,22 +546,23 @@ struct Client {
   // them. These have different names to avoid ambiguities (do you
   // want to upload a single vector of T, or multiple Ts passed as
   // vector?).
-  template <typename T> coro::Task<Ref<T>> store(T);
+  template <typename T> folly::coro::Task<Ref<T>> store(T);
 
   template <typename T, typename... Ts>
-  coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> store(T, Ts...);
+  folly::coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> store(T, Ts...);
 
-  template <typename T> coro::Task<Ref<T>> storeOptimistically(T);
+  template <typename T> folly::coro::Task<Ref<T>> storeOptimistically(T);
 
   template <typename T, typename... Ts>
-  coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> storeOptimistically(T, Ts...);
+  folly::coro::Task<std::tuple<Ref<T>, Ref<Ts>...>>
+  storeOptimistically(T, Ts...);
 
   template <typename T>
-  coro::Task<std::vector<Ref<T>>> storeMulti(std::vector<T>,
-                                             bool optimistic = false);
+  folly::coro::Task<std::vector<Ref<T>>> storeMulti(std::vector<T>,
+                                                    bool optimistic = false);
 
   template <typename T, typename... Ts>
-  coro::Task<std::vector<std::tuple<Ref<T>, Ref<Ts>...>>>
+  folly::coro::Task<std::vector<std::tuple<Ref<T>, Ref<Ts>...>>>
   storeMultiTuple(std::vector<std::tuple<T, Ts...>>,
                   bool optimistic = false);
 
@@ -594,14 +596,14 @@ struct Client {
   // side. If it doesn't, the execution will fail (by throwing an
   // exception), and the caller should (actually) store the data and
   // retry. The flag disables automatic fallback.
-  template <typename C> coro::Task<typename Job<C>::ExecT>
+  template <typename C> folly::coro::Task<typename Job<C>::ExecT>
   exec(const Job<C>& job,
        typename Job<C>::ConfigT config,
        std::vector<typename Job<C>::InputsT> inputs,
        ExecMetadata);
 
   // Exec with default metadata.
-  template <typename C> coro::Task<typename Job<C>::ExecT>
+  template <typename C> folly::coro::Task<typename Job<C>::ExecT>
   exec(const Job<C>& job,
        typename Job<C>::ConfigT config,
        std::vector<typename Job<C>::InputsT> inputs) {
@@ -714,18 +716,18 @@ private:
   Options m_options;
   Stats::Ptr m_stats;
   bool m_forceFallback;
-  coro::Semaphore m_fallbackSem;
+  folly::fibers::Semaphore m_fallbackSem;
 
-  template <typename T> coro::Task<Ref<T>> storeImpl(bool, T);
+  template <typename T> folly::coro::Task<Ref<T>> storeImpl(bool, T);
 
   template <typename T, typename... Ts>
-  coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> storeImpl(bool, T, Ts...);
+  folly::coro::Task<std::tuple<Ref<T>, Ref<Ts>...>> storeImpl(bool, T, Ts...);
 
   template <typename T, typename F>
-  coro::Task<T> tryWithThrottling(const F&);
+  folly::coro::Task<T> tryWithThrottling(const F&);
 
   template <typename T, typename F>
-  coro::Task<T> tryWithFallback(const F&, bool&, bool noFallback = false);
+  folly::coro::Task<T> tryWithFallback(const F&, bool&, bool noFallback = false);
 
   template <typename T> static T unblobify(std::string&&);
   template <typename T> static std::string blobify(const T&);
@@ -767,20 +769,20 @@ struct Client::Impl {
 
   // Load some number of RefIds, returning them as blobs (in the same
   // order as requested).
-  virtual coro::Task<BlobVec> load(const RequestId& requestId,
-                                   IdVec ids) = 0;
+  virtual folly::coro::Task<BlobVec> load(const RequestId& requestId,
+                                          IdVec ids) = 0;
   // Store some number of files and/or blobs, returning their
   // associated RefIds (in the same order as requested, with files
   // before blobs).
-  virtual coro::Task<IdVec> store(const RequestId& requestId,
-                                  PathVec files,
-                                  BlobVec blobs,
-                                  bool optimistic) = 0;
+  virtual folly::coro::Task<IdVec> store(const RequestId& requestId,
+                                         PathVec files,
+                                         BlobVec blobs,
+                                         bool optimistic) = 0;
 
   // Execute a job with the given sets of inputs. The job will be
   // executed on a worker, with the job's run function called once for
   // each set of inputs.
-  virtual coro::Task<std::vector<RefValVec>>
+  virtual folly::coro::Task<std::vector<RefValVec>>
   exec(const RequestId& requestId,
        const std::string& command,
        RefValVec config,
@@ -797,10 +799,10 @@ protected:
   Client::Stats& stats() { return *m_parent.m_stats; }
 
   template <typename T, typename F>
-  static coro::Task<T> tryWithThrottling(size_t,
-                                         std::chrono::milliseconds,
-                                         std::atomic<size_t>&,
-                                         const F&);
+  static folly::coro::Task<T> tryWithThrottling(size_t,
+                                                std::chrono::milliseconds,
+                                                std::atomic<size_t>&,
+                                                const F&);
 private:
   std::string m_name;
   Client& m_parent;
@@ -833,9 +835,11 @@ struct RefCache {
   // Lookup the associated Ref for the given key. If there's no entry,
   // store the given value (using the Client provided in the ctor) and
   // return the Ref created.
-  coro::Task<Ref<V>> get(const K&, const V&, folly::Executor::KeepAlive<>);
+  folly::coro::Task<Ref<V>> get(const K&,
+                                const V&,
+                                folly::Executor::KeepAlive<>);
 private:
-  coro::AsyncMap<K, Ref<V>> m_map;
+  CoroAsyncMap<K, Ref<V>> m_map;
   Client& m_client;
 };
 

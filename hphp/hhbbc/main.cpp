@@ -57,6 +57,7 @@
 namespace HPHP {
 
 using namespace extern_worker;
+namespace coro = folly::coro;
 
 namespace HHBBC {
 
@@ -333,7 +334,7 @@ Job<LoadRepoJob> s_loadRepoJob;
 
 // Load all UnitEmitters from the RepoFile and convert them into what
 // whole_program expects as input.
-std::pair<WholeProgramInput, Config> load_repo(coro::TicketExecutor& executor,
+std::pair<WholeProgramInput, Config> load_repo(TicketExecutor& executor,
                                                Client& client,
                                                StructuredLogEntry& sample) {
   trace_time timer("load repo", &sample);
@@ -345,7 +346,7 @@ std::pair<WholeProgramInput, Config> load_repo(coro::TicketExecutor& executor,
 
   // Start this as early as possible
   auto config = Config::get(RepoFile::globalData());
-  coro::AsyncValue<Ref<Config>> storedConfig{
+  CoroAsyncValue<Ref<Config>> storedConfig{
     [&client, config] () { return client.store(config); },
     executor.sticky()
   };
@@ -415,38 +416,37 @@ std::pair<WholeProgramInput, Config> load_repo(coro::TicketExecutor& executor,
           values.emplace_back(std::move(value));
         }
       }
-      if (keys.empty()) HPHP_CORO_RETURN_VOID;
-      auto valueRefs = HPHP_CORO_AWAIT(client.storeMulti(std::move(values)));
+      if (keys.empty()) co_return;
+      auto valueRefs = co_await client.storeMulti(std::move(values));
       auto const numKeys = keys.size();
       assertx(valueRefs.size() == numKeys);
       for (size_t i = 0; i < numKeys; ++i) {
         inputs.add(std::move(keys[i]), std::move(valueRefs[i]));
       }
-      HPHP_CORO_RETURN_VOID;
+      co_return;
     }
 
     // Store them (and the config we'll use).
-    auto [refs, configRef] = HPHP_CORO_AWAIT(coro::collect(
+    auto [refs, configRef] = co_await coro::collectAll(
       client.storeMulti(std::move(ues)),
       storedConfig.getCopy()
-    ));
+    );
 
     std::vector<std::tuple<Ref<UnitEmitterSerdeWrapper>>> tuplized;
     tuplized.reserve(refs.size());
     for (auto& r : refs) tuplized.emplace_back(std::move(r));
 
     // Run the job and get refs to the keys and values.
-    auto [valueRefs, keyRefs] = HPHP_CORO_AWAIT(
+    auto [valueRefs, keyRefs] = co_await
       client.exec(
         s_loadRepoJob,
         std::move(configRef),
         std::move(tuplized)
-      )
-    );
+      );
 
     // We need the keys locally, so load them. Values can stay as
     // Refs.
-    auto keys = HPHP_CORO_AWAIT(client.load(std::move(keyRefs)));
+    auto keys = co_await client.load(std::move(keyRefs));
 
     auto const numKeys = keys.size();
     size_t keyIdx = 0;
@@ -459,7 +459,7 @@ std::pair<WholeProgramInput, Config> load_repo(coro::TicketExecutor& executor,
     }
     always_assert(keyIdx == numKeys);
 
-    HPHP_CORO_RETURN_VOID;
+    co_return;
   };
 
   std::vector<coro::TaskWithExecutor<void>> tasks;
@@ -468,7 +468,7 @@ std::pair<WholeProgramInput, Config> load_repo(coro::TicketExecutor& executor,
     if (group.empty()) continue;
     tasks.emplace_back(load(i, std::move(group)).scheduleOn(executor.sticky()));
   }
-  coro::wait(coro::collectRange(std::move(tasks)));
+  coro::blockingWait(coro::collectAllRange(std::move(tasks)));
   return std::make_pair(std::move(inputs), std::move(config));
 }
 
@@ -507,7 +507,7 @@ extern_worker::Options make_extern_worker_options() {
 }
 
 void compile_repo() {
-  auto executor = std::make_unique<coro::TicketExecutor>(
+  auto executor = std::make_unique<TicketExecutor>(
     "HHBBCWorker",
     0,
     parallel::num_threads,
@@ -570,7 +570,7 @@ void compile_repo() {
 
   std::thread asyncDispose;
   SCOPE_EXIT { if (asyncDispose.joinable()) asyncDispose.join(); };
-  auto const dispose = [&] (std::unique_ptr<coro::TicketExecutor> e,
+  auto const dispose = [&] (std::unique_ptr<TicketExecutor> e,
                             std::unique_ptr<Client> c) {
     if (!options.ExternWorkerAsyncCleanup) {
       // If we don't want to cleanup asynchronously, do so now.

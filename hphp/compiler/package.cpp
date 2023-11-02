@@ -59,6 +59,8 @@
 using namespace HPHP;
 using namespace extern_worker;
 
+namespace coro = folly::coro;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString s_EntryPoint("__EntryPoint");
@@ -66,7 +68,7 @@ const StaticString s_EntryPoint("__EntryPoint");
 ///////////////////////////////////////////////////////////////////////////////
 
 Package::Package(const std::string& root,
-                 coro::TicketExecutor& executor,
+                 TicketExecutor& executor,
                  extern_worker::Client& client,
                  bool coredump)
   : m_root{root}
@@ -487,7 +489,7 @@ coro::Task<Package::GroupResult> Package::groupDirectories(
 ) {
   // We're not going to be blocking on I/O here, so make sure we're
   // running on the thread pool.
-  HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
+  co_await coro::co_reschedule_on_current_executor;
 
   GroupResult result;
   std::vector<coro::Task<GroupResult>> dirs;
@@ -535,7 +537,7 @@ coro::Task<Package::GroupResult> Package::groupDirectories(
   );
 
   // Coalesce the sub results
-  for (auto& sub : HPHP_CORO_AWAIT(coro::collectRange(std::move(dirs)))) {
+  for (auto& sub : co_await coro::collectAllRange(std::move(dirs))) {
     result.m_grouped.insert(
       result.m_grouped.end(),
       std::make_move_iterator(sub.m_grouped.begin()),
@@ -553,7 +555,7 @@ coro::Task<Package::GroupResult> Package::groupDirectories(
     groupFiles(result.m_grouped, std::move(result.m_ungrouped));
     assertx(result.m_ungrouped.empty());
   }
-  HPHP_CORO_MOVE_RETURN(result);
+  co_return result;
 }
 
 // Group sets of files together using consistent hashing
@@ -602,7 +604,7 @@ coro::Task<void> Package::parseGroups(
   const ParseCallback& callback,
   const UnitIndex& index
 ) {
-  if (groups.empty()) HPHP_CORO_RETURN_VOID;
+  if (groups.empty()) co_return;
 
   // Kick off the parsing. Each group gets its own sticky ticket (so
   // earlier groups will get scheduling priority over later ones).
@@ -614,8 +616,8 @@ coro::Task<void> Package::parseGroups(
     );
   }
 
-  HPHP_CORO_AWAIT(coro::collectRange(std::move(tasks)));
-  HPHP_CORO_RETURN_VOID;
+  co_await coro::collectAllRange(std::move(tasks));
+  co_return;
 }
 
 coro::Task<Package::Groups>
@@ -630,8 +632,7 @@ Package::groupAll(bool filterFiles, bool filterDirs) {
 
   // Gather together all top level files
   GroupResult top;
-  for (auto& result :
-         HPHP_CORO_AWAIT(coro::collectRange(std::move(tasks)))) {
+  for (auto& result : co_await coro::collectAllRange(std::move(tasks))) {
     top.m_grouped.insert(
       top.m_grouped.end(),
       std::make_move_iterator(result.m_grouped.begin()),
@@ -672,19 +673,19 @@ Package::groupAll(bool filterFiles, bool filterDirs) {
     }
   );
 
-  HPHP_CORO_RETURN(std::move(top.m_grouped));
+  co_return std::move(top.m_grouped);
 }
 
 coro::Task<void>
 Package::parseAll(const ParseCallback& callback, const UnitIndex& index) {
   // Find the initial set of groups.
-  auto groups = HPHP_CORO_AWAIT(groupAll(true, false));
+  auto groups = co_await groupAll(true, false);
 
   // Parse all input files and autoload-eligible files
   Timer timer{Timer::WallTime, "parsing files"};
-  HPHP_CORO_AWAIT(parseGroups(std::move(groups), callback, index));
+  co_await parseGroups(std::move(groups), callback, index);
   m_inputMicros = std::chrono::microseconds{timer.getMicroSeconds()};
-  HPHP_CORO_RETURN_VOID;
+  co_return;
 }
 
 coro::Task<bool> Package::parse(const UnitIndex& index,
@@ -692,16 +693,13 @@ coro::Task<bool> Package::parse(const UnitIndex& index,
   assertx(callback);
 
   Logger::FInfo(
-    "parsing using {} threads using {}{}",
+    "parsing using {} threads using {}",
     m_executor.numThreads(),
-    m_client.implName(),
-    coro::using_coros ? "" : " (coros disabled!)"
+    m_client.implName()
   );
 
-  HPHP_CORO_AWAIT(
-    parseAll(callback, index).scheduleOn(m_executor.sticky())
-  );
-  HPHP_CORO_RETURN(!m_failed.load());
+  co_await parseAll(callback, index).scheduleOn(m_executor.sticky());
+  co_return !m_failed.load();
 }
 
 namespace {
@@ -749,21 +747,19 @@ storeInputs(
   std::vector<coro::Task<Ref<RepoOptionsFlags>>>& options,
   Optional<std::vector<Ref<RepoOptionsFlags>>>& storedOptions,
   extern_worker::Client& client,
-  const coro::AsyncValue<extern_worker::Ref<Package::Config>>& config
+  const CoroAsyncValue<extern_worker::Ref<Package::Config>>& config
 ) {
   // Store the inputs and get their refs
   auto [fileRefs, metasRef, optionRefs, configRef] =
-    HPHP_CORO_AWAIT(
-      coro::collect(
-        client.storeFile(paths, optimistic),
-        optimistic
-          ? client.storeOptimistically(metas)
-          : client.store(metas),
-        // If we already called storeInputs, then options will be
-        // empty here (but storedOptions will be set).
-        coro::collectRange(std::move(options)),
-        *config
-      )
+    co_await coro::collectAll(
+      client.storeFile(paths, optimistic),
+      optimistic
+        ? client.storeOptimistically(metas)
+        : client.store(metas),
+      // If we already called storeInputs, then options will be
+      // empty here (but storedOptions will be set).
+      coro::collectAllRange(std::move(options)),
+      *config
     );
 
   assertx(fileRefs.size() == paths.size());
@@ -782,9 +778,9 @@ storeInputs(
     if (optimistic) storedOptions = optionRefs;
   }
 
-  HPHP_CORO_RETURN(std::make_tuple(
+  co_return std::make_tuple(
     configRef, metasRef, fileRefs, optionRefs
-  ));
+  );
 }
 
 }
@@ -815,13 +811,13 @@ coro::Task<void> Package::prepareInputs(
       m_repoOptions.get(
         repoOptions.cacheKeySha1(),
         repoOptions,
-        HPHP_CORO_CURRENT_EXECUTOR
+        co_await coro::co_current_executor
       )
     );
     paths.emplace_back(std::move(fullPath));
     metas.emplace_back(std::move(fileName), std::move(targetPath));
   }
-  HPHP_CORO_RETURN_VOID;
+  co_return;
 }
 
 // Parse a group using extern-worker and hand off the UnitEmitter or
@@ -834,19 +830,19 @@ coro::Task<void> Package::parseGroup(
   using namespace folly::gen;
 
   // Make sure we're running on the thread we should be
-  HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
+  co_await coro::co_reschedule_on_current_executor;
 
   try {
     // First build the inputs for the job
     std::vector<std::filesystem::path> paths;
     std::vector<FileMeta> metas;
     std::vector<coro::Task<Ref<RepoOptionsFlags>>> options;
-    HPHP_CORO_AWAIT(prepareInputs(std::move(group), paths, metas, options));
+    co_await prepareInputs(std::move(group), paths, metas, options);
 
     if (paths.empty()) {
       assertx(metas.empty());
       assertx(options.empty());
-      HPHP_CORO_RETURN_VOID;
+      co_return;
     }
 
     auto const workItems = paths.size();
@@ -869,10 +865,9 @@ coro::Task<void> Package::parseGroup(
     bool optimistic = Option::ParserOptimisticStore &&
                       m_client.supportsOptimistic();
     for (;;) {
-      auto [configRef, metasRef, fileRefs, optionsRefs] = HPHP_CORO_AWAIT(
+      auto [configRef, metasRef, fileRefs, optionsRefs] = co_await
         storeInputs(optimistic, paths, metas, options, storedOptions,
-                    m_client, m_config)
-      );
+                    m_client, m_config);
       std::vector<FileData> fds;
       fds.reserve(workItems);
       for (size_t i = 0; i < workItems; i++) {
@@ -896,12 +891,12 @@ coro::Task<void> Package::parseGroup(
             .job_key = folly::sformat("parse-{}-{}", attempts,
                                       metas[0].m_filename)
           };
-          auto parseMetas = HPHP_CORO_AWAIT(callback(
+          auto parseMetas = co_await callback(
             *configRef, metasRef, fds, metadata
-          ));
+          );
           if (parseMetas.empty()) {
             m_total += workItems;
-            HPHP_CORO_RETURN_VOID;
+            co_return;
           }
           always_assert(parseMetas.size() == workItems);
           // At least one item in the group needed additional decls.
@@ -935,7 +930,7 @@ coro::Task<void> Package::parseGroup(
     m_failed.store(true);
   }
 
-  HPHP_CORO_RETURN_VOID;
+  co_return;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1153,16 +1148,15 @@ Package::UnitDecls IndexJob::run(
 
 coro::Task<bool> Package::index(const IndexCallback& callback) {
   Logger::FInfo(
-    "indexing using {} threads using {}{}",
+    "indexing using {} threads using {}",
     m_executor.numThreads(),
-    m_client.implName(),
-    coro::using_coros ? "" : " (coros disabled!)"
+    m_client.implName()
   );
 
   // TODO: index systemlib. But here is too late; they have already been
   // parsed into UEs at startup, and not yet claimed.
-  HPHP_CORO_AWAIT(indexAll(callback).scheduleOn(m_executor.sticky()));
-  HPHP_CORO_RETURN(!m_failed.load());
+  co_await indexAll(callback).scheduleOn(m_executor.sticky());
+  co_return !m_failed.load();
 }
 
 coro::Task<void> Package::indexAll(const IndexCallback& callback) {
@@ -1172,19 +1166,19 @@ coro::Task<void> Package::indexAll(const IndexCallback& callback) {
   auto const filterDirs = false;
 
   // Compute the groups to index
-  auto groups = HPHP_CORO_AWAIT(groupAll(filterFiles, filterDirs));
+  auto groups = co_await groupAll(filterFiles, filterDirs);
   Logger::FInfo("indexing {:,} groups", groups.size());
 
   // Index all files
   Timer timer{Timer::WallTime, "indexing files"};
-  HPHP_CORO_AWAIT(indexGroups(callback, std::move(groups)));
-  HPHP_CORO_RETURN_VOID;
+  co_await indexGroups(callback, std::move(groups));
+  co_return;
 }
 
 // Index all of the files in the given groups
 coro::Task<void> Package::indexGroups(const IndexCallback& callback,
                                       Groups groups) {
-  if (groups.empty()) HPHP_CORO_RETURN_VOID;
+  if (groups.empty()) co_return;
 
   // Kick off indexing. Each group gets its own sticky ticket (so
   // earlier groups will get scheduling priority over later ones).
@@ -1194,8 +1188,8 @@ coro::Task<void> Package::indexGroups(const IndexCallback& callback,
       indexGroup(callback, std::move(group)).scheduleOn(m_executor.sticky())
     );
   }
-  HPHP_CORO_AWAIT(coro::collectRange(std::move(tasks)));
-  HPHP_CORO_RETURN_VOID;
+  co_await coro::collectAllRange(std::move(tasks));
+  co_return;
 }
 
 // Index a group using extern-worker, invoke callback with each IndexMeta.
@@ -1204,19 +1198,19 @@ coro::Task<void> Package::indexGroup(const IndexCallback& callback,
   using namespace folly::gen;
 
   // Make sure we're running on the thread we should be
-  HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
+  co_await coro::co_reschedule_on_current_executor;
 
   try {
     // First build the inputs for the job
     std::vector<std::filesystem::path> paths;
     std::vector<FileMeta> metas;
     std::vector<coro::Task<Ref<RepoOptionsFlags>>> options;
-    HPHP_CORO_AWAIT(prepareInputs(std::move(group), paths, metas, options));
+    co_await prepareInputs(std::move(group), paths, metas, options);
 
     if (paths.empty()) {
       assertx(metas.empty());
       assertx(options.empty());
-      HPHP_CORO_RETURN_VOID;
+      co_return;
     }
 
     auto const workItems = paths.size();
@@ -1226,15 +1220,13 @@ coro::Task<void> Package::indexGroup(const IndexCallback& callback,
     auto const doExec = [&] (
         auto configRef, auto metasRef, auto fileRefs, auto metadata
     ) -> coro::Task<ExecT> {
-      auto out = HPHP_CORO_AWAIT(
-        m_client.exec(
-          g_indexJob,
-          std::make_tuple(*configRef, std::move(metasRef)),
-          std::move(fileRefs),
-          std::move(metadata)
-        )
+      auto out = co_await m_client.exec(
+        g_indexJob,
+        std::make_tuple(*configRef, std::move(metasRef)),
+        std::move(fileRefs),
+        std::move(metadata)
       );
-      HPHP_CORO_MOVE_RETURN(out);
+      co_return out;
     };
 
     using IndexInputs = std::tuple<
@@ -1242,7 +1234,7 @@ coro::Task<void> Package::indexGroup(const IndexCallback& callback,
       Ref<RepoOptionsFlags>
     >;
 
-    auto [declsRefs, summariesRef] = HPHP_CORO_AWAIT(coro::invoke(
+    auto [declsRefs, summariesRef] = co_await coro::co_invoke(
       [&] () -> coro::Task<ExecT> {
         // Try optimistic mode first. We won't actually store
         // anything, just generate the Refs. If something isn't
@@ -1258,9 +1250,9 @@ coro::Task<void> Package::indexGroup(const IndexCallback& callback,
             .job_key = folly::sformat("index-{}", metas[0].m_filename)
           };
           auto [configRef, metasRef, fileRefs, optionRefs] =
-            HPHP_CORO_AWAIT(storeInputs(
+            co_await storeInputs(
               optimistic, paths, metas, options, storedOptions, m_client,
-              m_config));
+              m_config);
           // "Tuplize" the input refs according to signature of IndexJob::run()
           std::vector<IndexInputs> inputs;
           inputs.reserve(workItems);
@@ -1271,9 +1263,10 @@ coro::Task<void> Package::indexGroup(const IndexCallback& callback,
             );
           }
           try {
-            HPHP_CORO_RETURN(HPHP_CORO_AWAIT(doExec(
-              configRef, std::move(metasRef), std::move(inputs), std::move(metadata)
-            )));
+            co_return co_await doExec(
+              configRef, std::move(metasRef),
+              std::move(inputs), std::move(metadata)
+            );
           } catch (const extern_worker::WorkerError&) {
             throw;
           } catch (const extern_worker::Error&) {
@@ -1282,10 +1275,10 @@ coro::Task<void> Package::indexGroup(const IndexCallback& callback,
           }
         }
       }
-    ));
+    );
 
     // Load the summaries but leave decls in external storage
-    auto summaries = HPHP_CORO_AWAIT(m_client.load(summariesRef));
+    auto summaries = co_await m_client.load(summariesRef);
     assertx(metas.size() == workItems);
     assertx(declsRefs.size() == workItems);
     always_assert(summaries.size() == workItems);
@@ -1310,7 +1303,7 @@ coro::Task<void> Package::indexGroup(const IndexCallback& callback,
         );
       }
     }
-    HPHP_CORO_RETURN_VOID;
+    co_return;
   } catch (const Exception& e) {
     Logger::FError(
       "Fatal: An unexpected exception was thrown while indexing: {}",
@@ -1331,7 +1324,7 @@ coro::Task<void> Package::indexGroup(const IndexCallback& callback,
     Logger::Error("Fatal: An unexpected exception was thrown while indexing");
     m_failed.store(true);
   }
-  HPHP_CORO_RETURN_VOID;
+  co_return;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1366,10 +1359,9 @@ coro::Task<bool> Package::emit(const UnitIndex& index,
   assertx(localCallback);
 
   Logger::FInfo(
-    "emitting using {} threads using {}{}",
+    "emitting using {} threads using {}",
     m_executor.numThreads(),
-    m_client.implName(),
-    coro::using_coros ? "" : " (coros disabled!)"
+    m_client.implName()
   );
 
   HphpSession _{Treadmill::SessionKind::CompilerEmit};
@@ -1399,8 +1391,8 @@ coro::Task<bool> Package::emit(const UnitIndex& index,
   tasks.emplace_back(
     emitAll(callback, index, edgesPath).scheduleOn(m_executor.sticky())
   );
-  HPHP_CORO_AWAIT(coro::collectRange(std::move(tasks)));
-  HPHP_CORO_RETURN(!m_failed.load());
+  co_await coro::collectAllRange(std::move(tasks));
+  co_return !m_failed.load();
 }
 
 namespace {
@@ -1470,16 +1462,14 @@ Package::emitAll(const EmitCallback& callback, const UnitIndex& index,
   auto const logEdges = !edgesPath.native().empty();
 
   // Find the initial set of groups
-  auto input_groups = HPHP_CORO_AWAIT(groupAll(true, true));
+  auto input_groups = co_await groupAll(true, true);
 
   // Select the files specified as inputs, collect ondemand file names.
   std::vector<SymbolRefEdge> edges;
   OndemandInfo ondemand;
   {
     Timer timer{Timer::WallTime, "emitting inputs"};
-    ondemand = HPHP_CORO_AWAIT(
-      emitGroups(std::move(input_groups), callback, index)
-    );
+    ondemand = co_await emitGroups(std::move(input_groups), callback, index);
     if (logEdges) {
       edges.insert(
         edges.end(), ondemand.m_edges.begin(), ondemand.m_edges.end()
@@ -1488,18 +1478,14 @@ Package::emitAll(const EmitCallback& callback, const UnitIndex& index,
     m_inputMicros = std::chrono::microseconds{timer.getMicroSeconds()};
   }
 
-  if (ondemand.m_files.empty()) {
-    HPHP_CORO_RETURN_VOID;
-  }
+  if (ondemand.m_files.empty()) co_return;
 
   Timer timer{Timer::WallTime, "emitting on-demand"};
   // We have ondemand files, so keep emitting until a fix point.
   do {
     Groups ondemand_groups;
     groupFiles(ondemand_groups, std::move(ondemand.m_files));
-    ondemand = HPHP_CORO_AWAIT(
-      emitGroups(std::move(ondemand_groups), callback, index)
-    );
+    ondemand = co_await emitGroups(std::move(ondemand_groups), callback, index);
     if (logEdges) {
       edges.insert(
         edges.end(), ondemand.m_edges.begin(), ondemand.m_edges.end()
@@ -1513,7 +1499,7 @@ Package::emitAll(const EmitCallback& callback, const UnitIndex& index,
     saveSymbolRefEdges(std::move(edges), edgesPath);
   }
 
-  HPHP_CORO_RETURN_VOID;
+  co_return;
 }
 
 // Emit all of the files in the given group, returning a vector of
@@ -1523,7 +1509,7 @@ coro::Task<Package::OndemandInfo> Package::emitGroups(
   const EmitCallback& callback,
   const UnitIndex& index
 ) {
-  if (groups.empty()) HPHP_CORO_RETURN(OndemandInfo{});
+  if (groups.empty()) co_return OndemandInfo{};
 
   // Kick off emitting. Each group gets its own sticky ticket (so
   // earlier groups will get scheduling priority over later ones).
@@ -1537,7 +1523,7 @@ coro::Task<Package::OndemandInfo> Package::emitGroups(
 
   // Gather the on-demand files and return them
   OndemandInfo ondemand;
-  for (auto& info : HPHP_CORO_AWAIT(coro::collectRange(std::move(tasks)))) {
+  for (auto& info : co_await coro::collectAllRange(std::move(tasks))) {
     ondemand.m_files.insert(
       ondemand.m_files.end(),
       std::make_move_iterator(info.m_files.begin()),
@@ -1550,7 +1536,7 @@ coro::Task<Package::OndemandInfo> Package::emitGroups(
     );
   }
 
-  HPHP_CORO_MOVE_RETURN(ondemand);
+  co_return ondemand;
 }
 
 // Emit a group, hand off the UnitEmitter or WPI::Key/Value obtained,
@@ -1563,12 +1549,10 @@ coro::Task<Package::OndemandInfo> Package::emitGroup(
   using namespace folly::gen;
 
   // Make sure we're running on the thread we should be
-  HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
+  co_await coro::co_reschedule_on_current_executor;
 
   try {
-    if (group.m_files.empty()) {
-      HPHP_CORO_RETURN(OndemandInfo{});
-    }
+    if (group.m_files.empty()) co_return OndemandInfo{};
 
     auto const workItems = group.m_files.size();
     for (size_t i = 0; i < workItems; i++) {
@@ -1592,7 +1576,7 @@ coro::Task<Package::OndemandInfo> Package::emitGroup(
     // we also return a fixup list consisting of original indicies of the
     // omitted units. We later use this fixup list to compute the original
     // indicies of each unit.
-    auto parseMetasAndItemsToSkip = HPHP_CORO_AWAIT(callback(group.m_files));
+    auto parseMetasAndItemsToSkip = co_await callback(group.m_files);
     auto& [parseMetas, itemsToSkip] = parseMetasAndItemsToSkip;
     if (RO::EvalActiveDeployment.empty()) {
       // If a deployment is not set, then we should have gotten results for
@@ -1622,7 +1606,7 @@ coro::Task<Package::OndemandInfo> Package::emitGroup(
         resolveOnDemand(ondemand, filename, meta.m_symbol_refs, index);
       }
     }
-    HPHP_CORO_MOVE_RETURN(ondemand);
+    co_return ondemand;
   } catch (const Exception& e) {
     Logger::FError(
       "Fatal: An unexpected exception was thrown while emitting: {}",
@@ -1640,7 +1624,7 @@ coro::Task<Package::OndemandInfo> Package::emitGroup(
     m_failed.store(true);
   }
 
-  HPHP_CORO_RETURN(OndemandInfo{});
+  co_return OndemandInfo{};
 }
 
 Package::IndexMeta HPHP::summary_of_symbols(const hackc::FileSymbols& symbols) {

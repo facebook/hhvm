@@ -83,6 +83,7 @@ TRACE_SET_MOD(hhbbc_index);
 //////////////////////////////////////////////////////////////////////
 
 using namespace extern_worker;
+namespace coro = folly::coro;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -5048,12 +5049,12 @@ struct Index::IndexData {
   StructuredLogEntry* sample;
 
   // Async state:
-  std::unique_ptr<coro::TicketExecutor> executor;
+  std::unique_ptr<TicketExecutor> executor;
   std::unique_ptr<Client> client;
   DisposeCallback disposeClient;
 
   // Global configeration, stored in extern-worker.
-  std::unique_ptr<coro::AsyncValue<Ref<Config>>> configRef;
+  std::unique_ptr<CoroAsyncValue<Ref<Config>>> configRef;
 
   // Maps unit/class/func name to the extern-worker ref representing
   // php::Program data for that. Any associated bytecode is stored
@@ -5935,9 +5936,9 @@ void check_invariants(const IndexData& index) {
   using namespace folly::gen;
 
   auto const runCInfo = [&] (std::vector<SString> work) -> coro::Task<void> {
-    HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
+    co_await coro::co_reschedule_on_current_executor;
 
-    if (work.empty()) HPHP_CORO_RETURN_VOID;
+    if (work.empty()) co_return;
 
     auto inputs = from(work)
       | map([&] (SString name) {
@@ -5951,22 +5952,22 @@ void check_invariants(const IndexData& index) {
     Client::ExecMetadata metadata{
       .job_key = folly::sformat("check cinfo invariants {}", work[0])
     };
-    auto config = HPHP_CORO_AWAIT(index.configRef->getCopy());
-    auto outputs = HPHP_CORO_AWAIT(index.client->exec(
+    auto config = co_await index.configRef->getCopy();
+    auto outputs = co_await index.client->exec(
       s_checkCInfoInvariantsJob,
       std::move(config),
       std::move(inputs),
       std::move(metadata)
-    ));
+    );
     assertx(outputs.size() == work.size());
 
-    HPHP_CORO_RETURN_VOID;
+    co_return;
   };
 
   auto const runFF = [&] (std::vector<SString> work) -> coro::Task<void> {
-    HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
+    co_await coro::co_reschedule_on_current_executor;
 
-    if (work.empty()) HPHP_CORO_RETURN_VOID;
+    if (work.empty()) co_return;
 
     auto inputs = from(work)
       | map([&] (SString name) {
@@ -5977,16 +5978,16 @@ void check_invariants(const IndexData& index) {
     Client::ExecMetadata metadata{
       .job_key = folly::sformat("check func-family invariants {}", work[0])
     };
-    auto config = HPHP_CORO_AWAIT(index.configRef->getCopy());
-    auto outputs = HPHP_CORO_AWAIT(index.client->exec(
+    auto config = co_await index.configRef->getCopy();
+    auto outputs = co_await index.client->exec(
       s_checkFuncFamilyInvariantsJob,
       std::move(config),
       std::move(inputs),
       std::move(metadata)
-    ));
+    );
     assertx(outputs.size() == work.size());
 
-    HPHP_CORO_RETURN_VOID;
+    co_return;
   };
 
   std::vector<coro::TaskWithExecutor<void>> tasks;
@@ -6000,7 +6001,7 @@ void check_invariants(const IndexData& index) {
       runFF(std::move(work)).scheduleOn(index.executor->sticky())
     );
   }
-  coro::wait(coro::collectRange(std::move(tasks)));
+  coro::blockingWait(coro::collectAllRange(std::move(tasks)));
 }
 
 void check_local_invariants(const IndexData& index, const ClassInfo* cinfo) {
@@ -10377,11 +10378,11 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
   using UpdateVec = std::vector<Update>;
 
   auto const run = [&] (FlattenClassesWork work) -> coro::Task<UpdateVec> {
-    HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
+    co_await coro::co_reschedule_on_current_executor;
 
     if (work.classes.empty() && work.funcs.empty()) {
       assertx(work.deps.empty());
-      HPHP_CORO_RETURN(UpdateVec{});
+      co_return UpdateVec{};
     }
 
     Client::ExecMetadata metadata{
@@ -10446,15 +10447,14 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       std::sort(begin(missingTypes), end(missingTypes), string_data_lti{});
     }
 
-    auto [typeMappingsRef, missingTypesRef, config] = HPHP_CORO_AWAIT(
-      coro::collect(
+    auto [typeMappingsRef, missingTypesRef, config] = co_await
+      coro::collectAll(
         index.client->store(std::move(typeMappings)),
         index.client->store(std::move(missingTypes)),
         index.configRef->getCopy()
-      )
-    );
+      );
 
-    auto results = HPHP_CORO_AWAIT(
+    auto results = co_await
       index.client->exec(
         s_flattenJob,
         std::move(config),
@@ -10469,8 +10469,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
           )
         ),
         std::move(metadata)
-      )
-    );
+      );
     // Every flattening job is a single work-unit, so we should only
     // ever get one result for each one.
     assertx(results.size() == 1);
@@ -10483,7 +10482,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
 
     // We need the output metadata, but everything else stays
     // uploaded.
-    auto clsMeta = HPHP_CORO_AWAIT(index.client->load(std::move(classMetaRef)));
+    auto clsMeta = co_await index.client->load(std::move(classMetaRef));
 
     // Create the updates by combining the job output (but skipping
     // over uninstantiable classes).
@@ -10557,7 +10556,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       );
     }
 
-    HPHP_CORO_MOVE_RETURN(updates);
+    co_return updates;
   };
 
   // Calculate the grouping of classes into work units for flattening,
@@ -10566,7 +10565,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     auto assignments = flatten_classes_assign(meta);
 
     trace_time trace2("flatten classes work", index.sample);
-    return coro::wait(coro::collectRange(
+    return coro::blockingWait(coro::collectAllRange(
       from(assignments)
         | move
         | map([&] (FlattenClassesWork w) {
@@ -12889,13 +12888,13 @@ build_subclass_lists(IndexData& index,
 
   auto const run = [&] (SubclassWork::Bucket bucket, size_t round)
     -> coro::Task<Updates> {
-    HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
+    co_await coro::co_reschedule_on_current_executor;
 
     if (bucket.classes.empty() &&
         bucket.splits.empty() &&
         bucket.leafs.empty()) {
       assertx(bucket.splitDeps.empty());
-      HPHP_CORO_RETURN(Updates{});
+      co_return Updates{};
     }
 
     // We shouldn't get closures or Closure in any of this.
@@ -12963,11 +12962,11 @@ build_subclass_lists(IndexData& index,
     // ClassInfos and any dependency splits should already be
     // stored. Any splits as output of the job, or edges need to be
     // uploaded, however.
-    auto [splitRefs, edges, config] = HPHP_CORO_AWAIT(coro::collect(
+    auto [splitRefs, edges, config] = co_await coro::collectAll(
       index.client->storeMulti(std::move(splits)),
       index.client->storeMulti(std::move(bucket.edges)),
       index.configRef->getCopy()
-    ));
+    );
 
     Client::ExecMetadata metadata{
       .job_key = folly::sformat(
@@ -12981,7 +12980,7 @@ build_subclass_lists(IndexData& index,
       )
     };
 
-    auto results = HPHP_CORO_AWAIT(
+    auto results = co_await
       index.client->exec(
         s_buildSubclassJob,
         std::move(config),
@@ -12998,8 +12997,7 @@ build_subclass_lists(IndexData& index,
           )
         ),
         std::move(metadata)
-      )
-    );
+      );
     // Every job is a single work-unit, so we should only ever get one
     // result for each one.
     assertx(results.size() == 1);
@@ -13010,7 +13008,7 @@ build_subclass_lists(IndexData& index,
     assertx(clsRefs.size() == bucket.classes.size());
     assertx(leafRefs.size() == bucket.leafs.size());
 
-    auto outMeta = HPHP_CORO_AWAIT(index.client->load(std::move(outMetaRef)));
+    auto outMeta = co_await index.client->load(std::move(outMetaRef));
     assertx(outMeta.newFuncFamilyIds.size() == ffRefs.size());
     assertx(outMeta.funcFamilyDeps.size() == cinfoRefs.size());
     assertx(outMeta.regOnlyEquivCandidates.size() == cinfoRefs.size());
@@ -13054,7 +13052,7 @@ build_subclass_lists(IndexData& index,
       }
     }
 
-    HPHP_CORO_MOVE_RETURN(updates);
+    co_return updates;
   };
 
   {
@@ -13064,7 +13062,7 @@ build_subclass_lists(IndexData& index,
       auto& round = work.buckets[roundNum];
       // In each round, run all of the work for each bucket
       // simultaneously, gathering up updates from each job.
-      auto const updates = coro::wait(coro::collectRange(
+      auto const updates = coro::blockingWait(coro::collectAllRange(
         from(round)
           | move
           | map([&] (SubclassWork::Bucket&& b) {
@@ -13661,14 +13659,14 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
   // We want to avoid updating any Index data-structures until after
   // all jobs have read their inputs. We use the latch to block tasks
   // until all tasks have passed the point of reading their inputs.
-  coro::Latch typesLatch{typeBuckets.size()};
+  CoroLatch typesLatch{typeBuckets.size()};
 
   auto const runTypes = [&] (std::vector<SString> work) -> coro::Task<void> {
-    HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
+    co_await coro::co_reschedule_on_current_executor;
 
     if (work.empty()) {
       typesLatch.count_down();
-      HPHP_CORO_RETURN_VOID;
+      co_return;
     }
 
     std::vector<UniquePtrRef<php::Class>> classes;
@@ -13743,13 +13741,13 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
       end(cinfoDeps)
     );
 
-    auto config = HPHP_CORO_AWAIT(index.configRef->getCopy());
+    auto config = co_await index.configRef->getCopy();
 
     Client::ExecMetadata metadata{
       .job_key = folly::sformat("init types {}", work[0])
     };
 
-    auto results = HPHP_CORO_AWAIT(
+    auto results = co_await
       index.client->exec(
         s_initTypesJob,
         std::move(config),
@@ -13763,8 +13761,7 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
           )
         ),
         std::move(metadata)
-      )
-    );
+      );
     assertx(results.size() == 1);
     auto& [classRefs, cinfoRefs, funcRefs, finfoRefs] = results[0];
     assertx(classRefs.size() == classNames.size());
@@ -13774,7 +13771,7 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
 
     // Wait for all tasks to finish reading from the Index ref tables
     // before starting to overwrite them.
-    HPHP_CORO_AWAIT(typesLatch.wait());
+    co_await typesLatch.wait();
 
     for (size_t i = 0, size = classNames.size(); i < size; ++i) {
       auto const name = classNames[i];
@@ -13787,13 +13784,13 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
       index.funcInfoRefs.at(name) = std::move(finfoRefs[i]);
     }
 
-    HPHP_CORO_RETURN_VOID;
+    co_return;
   };
 
   auto const runFixups = [&] (std::vector<SString> units) -> coro::Task<void> {
-    HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
+    co_await coro::co_reschedule_on_current_executor;
 
-    if (units.empty()) HPHP_CORO_RETURN_VOID;
+    if (units.empty()) co_return;
 
     std::vector<InitTypesMetadata::Fixup> fixups;
 
@@ -13806,8 +13803,7 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
       std::sort(f.removeFunc.begin(), f.removeFunc.end(), string_data_lt{});
       fixups.emplace_back(std::move(f));
     }
-    auto fixupRefs =
-      HPHP_CORO_AWAIT(index.client->storeMulti(std::move(fixups)));
+    auto fixupRefs = co_await index.client->storeMulti(std::move(fixups));
     assertx(fixupRefs.size() == units.size());
 
     std::vector<
@@ -13826,13 +13822,13 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
       .job_key = folly::sformat("fixup units {}", units[0])
     };
 
-    auto config = HPHP_CORO_AWAIT(index.configRef->getCopy());
-    auto outputs = HPHP_CORO_AWAIT(index.client->exec(
+    auto config = co_await index.configRef->getCopy();
+    auto outputs = co_await index.client->exec(
       s_unitFixupJob,
       std::move(config),
       std::move(inputs),
       std::move(metadata)
-    ));
+    );
     assertx(outputs.size() == units.size());
 
     // Every unit is already in the Index table, so we can overwrite
@@ -13841,7 +13837,7 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
       index.unitRefs.at(units[i]) = std::move(outputs[i]);
     }
 
-    HPHP_CORO_RETURN_VOID;
+    co_return;
   };
 
   struct AggregateUpdates {
@@ -13852,9 +13848,9 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
 
   auto const runAggregate = [&] (std::vector<SString> names)
     -> coro::Task<AggregateUpdates> {
-    HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
+    co_await coro::co_reschedule_on_current_executor;
 
-    if (names.empty()) HPHP_CORO_RETURN(AggregateUpdates{});
+    if (names.empty()) co_return AggregateUpdates{};
 
     std::vector<std::pair<SString, std::vector<FuncFamilyEntry>>> entries;
     std::vector<Ref<FuncFamilyGroup>> funcFamilies;
@@ -13890,16 +13886,16 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
       end(funcFamilies)
     );
 
-    auto [entriesRef, config] = HPHP_CORO_AWAIT(coro::collect(
+    auto [entriesRef, config] = co_await coro::collectAll(
       index.client->store(std::move(entries)),
       index.configRef->getCopy()
-    ));
+    );
 
     Client::ExecMetadata metadata{
       .job_key = folly::sformat("aggregate name-only {}", names[0])
     };
 
-    auto results = HPHP_CORO_AWAIT(
+    auto results = co_await
       index.client->exec(
         s_aggregateNameOnlyJob,
         std::move(config),
@@ -13907,12 +13903,11 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
           std::make_tuple(std::move(entriesRef), std::move(funcFamilies))
         ),
         std::move(metadata)
-      )
-    );
+      );
     assertx(results.size() == 1);
     auto& [ffRefs, outMetaRef] = results[0];
 
-    auto outMeta = HPHP_CORO_AWAIT(index.client->load(std::move(outMetaRef)));
+    auto outMeta = co_await index.client->load(std::move(outMetaRef));
     assertx(outMeta.newFuncFamilyIds.size() == ffRefs.size());
     assertx(outMeta.nameOnly.size() == names.size());
 
@@ -13932,13 +13927,13 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
       }
     }
 
-    HPHP_CORO_RETURN(updates);
+    co_return updates;
   };
 
   auto const runAggregateCombine = [&] (auto tasks) -> coro::Task<void> {
-    HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
+    co_await coro::co_reschedule_on_current_executor;
 
-    auto const updates = HPHP_CORO_AWAIT(coro::collectRange(std::move(tasks)));
+    auto const updates = co_await coro::collectAllRange(std::move(tasks));
 
     for (auto const& u : updates) {
       for (auto const& [id, ref] : u.funcFamilies) {
@@ -13959,7 +13954,7 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
       }
     }
 
-    HPHP_CORO_RETURN_VOID;
+    co_return;
   };
 
   using namespace folly::gen;
@@ -13991,7 +13986,7 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
     ).scheduleOn(index.executor->sticky())
   );
 
-  coro::wait(coro::collectRange(std::move(tasks)));
+  coro::blockingWait(coro::collectAllRange(std::move(tasks)));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -13999,7 +13994,7 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
 Index::Input::UnitMeta make_native_unit_meta(IndexData& index) {
   auto unit = make_native_unit();
   auto const name = unit->filename;
-  auto unitRef = coro::wait(index.client->store(std::move(unit)));
+  auto unitRef = coro::blockingWait(index.client->store(std::move(unit)));
   return Index::Input::UnitMeta { std::move(unitRef), name };
 }
 
@@ -14009,7 +14004,7 @@ Index::Input::UnitMeta make_native_unit_meta(IndexData& index) {
 IndexFlattenMetadata make_remote(IndexData& index,
                                  Config config,
                                  Index::Input input,
-                                 std::unique_ptr<coro::TicketExecutor> executor,
+                                 std::unique_ptr<TicketExecutor> executor,
                                  std::unique_ptr<Client> client,
                                  DisposeCallback dispose) {
   trace_time tracer("make remote");
@@ -14024,7 +14019,7 @@ IndexFlattenMetadata make_remote(IndexData& index,
 
   // Kick off the storage of the global config. We'll start early so
   // it will (hopefully) be done before we need it.
-  index.configRef = std::make_unique<coro::AsyncValue<Ref<Config>>>(
+  index.configRef = std::make_unique<CoroAsyncValue<Ref<Config>>>(
     [&index, config = std::move(config)] () mutable {
       return index.client->store(std::move(config));
     },
@@ -15016,9 +15011,9 @@ void make_local(IndexData& index) {
   remoteFuncFamilies.reserve(index.funcFamilyRefs.size());
 
   auto const run = [&] (std::vector<SString> chunks) -> coro::Task<void> {
-    HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
+    co_await coro::co_reschedule_on_current_executor;
 
-    if (chunks.empty()) HPHP_CORO_RETURN_VOID;
+    if (chunks.empty()) co_return;
 
     std::vector<UniquePtrRef<php::Class>> classes;
     std::vector<UniquePtrRef<ClassInfo2>> classInfos;
@@ -15081,8 +15076,8 @@ void make_local(IndexData& index) {
       };
 
       // Aggregate the data, which makes downloading it more efficient.
-      auto config = HPHP_CORO_AWAIT(index.configRef->getCopy());
-      auto outputs = HPHP_CORO_AWAIT(index.client->exec(
+      auto config = co_await index.configRef->getCopy();
+      auto outputs = co_await index.client->exec(
         s_aggregateJob,
         std::move(config),
         singleton_vec(
@@ -15098,16 +15093,16 @@ void make_local(IndexData& index) {
           )
         ),
         std::move(metadata)
-      ));
+      );
       assertx(outputs.size() == 1);
 
       // Download the aggregate chunks.
-      chunk = HPHP_CORO_AWAIT(index.client->load(std::move(outputs[0])));
+      chunk = co_await index.client->load(std::move(outputs[0]));
     } else {
       // If we're using subprocess mode, we don't need to aggregate
       // and we can just download the items directly.
       auto [c, cinfo, cbc, f, finfo, fbc, u, ff] =
-        HPHP_CORO_AWAIT(coro::collect(
+        co_await coro::collectAll(
           index.client->load(std::move(classes)),
           index.client->load(std::move(classInfos)),
           index.client->load(std::move(classBytecode)),
@@ -15116,8 +15111,7 @@ void make_local(IndexData& index) {
           index.client->load(std::move(funcBytecode)),
           index.client->load(std::move(units)),
           index.client->load(std::move(funcFamilies))
-        )
-      );
+        );
       chunk.classes.insert(
         end(chunk.classes),
         std::make_move_iterator(begin(c)),
@@ -15213,13 +15207,13 @@ void make_local(IndexData& index) {
       }
     }
 
-    HPHP_CORO_RETURN_VOID;
+    co_return;
   };
 
   // We're going to load ClassGraphs concurrently.
   ClassGraph::initConcurrent();
 
-  coro::wait(coro::collectRange(
+  coro::blockingWait(coro::collectAllRange(
     from(buckets)
       | move
       | map([&] (std::vector<SString> chunks) {
@@ -15328,7 +15322,7 @@ std::vector<SString> Index::Input::makeDeps(const php::Class& cls) {
 
 Index::Index(Input input,
              Config config,
-             std::unique_ptr<coro::TicketExecutor> executor,
+             std::unique_ptr<TicketExecutor> executor,
              std::unique_ptr<Client> client,
              DisposeCallback dispose,
              StructuredLogEntry* sample)

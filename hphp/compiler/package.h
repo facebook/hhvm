@@ -52,7 +52,7 @@ struct SymbolRefEdge {
 
 struct Package {
   Package(const std::string& root,
-          coro::TicketExecutor& executor,
+          TicketExecutor& executor,
           extern_worker::Client& client,
           bool coredump);
 
@@ -245,7 +245,7 @@ struct Package {
   >;
   using IndexMetaVec = std::vector<IndexMeta>;
 
-  coro::Task<bool> index(const IndexCallback&);
+  folly::coro::Task<bool> index(const IndexCallback&);
 
   using UEVec = std::vector<std::unique_ptr<UnitEmitter>>;
   using FileMetaVec = std::vector<FileMeta>;
@@ -254,14 +254,14 @@ struct Package {
                               extern_worker::Ref<RepoOptionsFlags>,
                               std::vector<extern_worker::Ref<UnitDecls>>>;
 
-  using ParseCallback = std::function<coro::Task<ParseMetaVec>(
+  using ParseCallback = std::function<folly::coro::Task<ParseMetaVec>(
     const extern_worker::Ref<Config>&,
     extern_worker::Ref<FileMetaVec>,
     std::vector<FileData>,
     extern_worker::Client::ExecMetadata
   )>;
 
-  coro::Task<bool> parse(const UnitIndex&, const ParseCallback&);
+  folly::coro::Task<bool> parse(const UnitIndex&, const ParseCallback&);
 
   // These are meant to be called from extern-worker Jobs to perform
   // the actual parsing.
@@ -272,14 +272,14 @@ struct Package {
                                           const RepoOptionsFlags&,
                                           const std::vector<UnitDecls>&);
 
-  using LocalCallback = std::function<coro::Task<void>(UEVec)>;
+  using LocalCallback = std::function<folly::coro::Task<void>(UEVec)>;
   using ParseMetaItemsToSkipSet = hphp_fast_set<size_t>;
   using EmitCallBackResult = std::pair<ParseMetaVec, ParseMetaItemsToSkipSet>;
   using EmitCallback = std::function<
-    coro::Task<EmitCallBackResult>(const std::vector<std::filesystem::path>&)
+    folly::coro::Task<EmitCallBackResult>(const std::vector<std::filesystem::path>&)
   >;
-  coro::Task<bool> emit(const UnitIndex&, const EmitCallback&,
-                        const LocalCallback&, const std::filesystem::path&);
+  folly::coro::Task<bool> emit(const UnitIndex&, const EmitCallback&,
+                               const LocalCallback&, const std::filesystem::path&);
 
 private:
 
@@ -309,32 +309,33 @@ private:
   // Partition all files specified for this package into groups.
   // If filterFiles/Dirs==true, ignore excluded files and/or directories
   // according to options.
-  coro::Task<Groups> groupAll(bool filterFiles, bool filterDirs);
-  coro::Task<GroupResult>
+  folly::coro::Task<Groups> groupAll(bool filterFiles, bool filterDirs);
+  folly::coro::Task<GroupResult>
   groupDirectories(std::string, bool filterFiles, bool filterDirs);
   void groupFiles(Groups&, FileAndSizeVec);
 
-  coro::Task<void> prepareInputs(Group,
+  folly::coro::Task<void> prepareInputs(Group,
     std::vector<std::filesystem::path>& paths,
     std::vector<FileMeta>& metas,
-    std::vector<coro::Task<extern_worker::Ref<RepoOptionsFlags>>>& options);
+    std::vector<folly::coro::Task<extern_worker::Ref<RepoOptionsFlags>>>& options
+  );
 
-  coro::Task<void> indexAll(const IndexCallback&);
-  coro::Task<void> indexGroups(const IndexCallback&, Groups);
-  coro::Task<void> indexGroup(const IndexCallback&, Group);
+  folly::coro::Task<void> indexAll(const IndexCallback&);
+  folly::coro::Task<void> indexGroups(const IndexCallback&, Groups);
+  folly::coro::Task<void> indexGroup(const IndexCallback&, Group);
 
-  coro::Task<void> parseAll(const ParseCallback&, const UnitIndex&);
-  coro::Task<void> parseGroups(Groups, const ParseCallback&, const UnitIndex&);
-  coro::Task<void> parseGroup(Group, const ParseCallback&, const UnitIndex&);
+  folly::coro::Task<void> parseAll(const ParseCallback&, const UnitIndex&);
+  folly::coro::Task<void> parseGroups(Groups, const ParseCallback&, const UnitIndex&);
+  folly::coro::Task<void> parseGroup(Group, const ParseCallback&, const UnitIndex&);
 
   void resolveDecls(const UnitIndex&, const FileMetaVec&,
       const std::vector<ParseMeta>&, std::vector<FileData>&, size_t attempts);
 
-  coro::Task<void> emitAll(const EmitCallback&, const UnitIndex&,
-                           const std::filesystem::path&);
-  coro::Task<OndemandInfo>
+  folly::coro::Task<void> emitAll(const EmitCallback&, const UnitIndex&,
+                                  const std::filesystem::path&);
+  folly::coro::Task<OndemandInfo>
   emitGroups(Groups, const EmitCallback&, const UnitIndex&);
-  coro::Task<OndemandInfo>
+  folly::coro::Task<OndemandInfo>
   emitGroup(Group, const EmitCallback&, const UnitIndex&);
 
   void resolveOnDemand(OndemandInfo&, const StringData* fromFile,
@@ -358,9 +359,9 @@ private:
     std::string, std::string
   > m_discoveredStaticFiles;
 
-  coro::TicketExecutor& m_executor;
+  TicketExecutor& m_executor;
   extern_worker::Client& m_client;
-  coro::AsyncValue<extern_worker::Ref<Config>> m_config;
+  CoroAsyncValue<extern_worker::Ref<Config>> m_config;
 
   // Content-store for options: Map<hash(options), options>
   extern_worker::RefCache<SHA1, RepoOptionsFlags> m_repoOptions;

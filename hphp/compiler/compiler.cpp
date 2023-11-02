@@ -80,6 +80,8 @@
 
 using namespace boost::program_options;
 
+namespace coro = folly::coro;
+
 namespace HPHP {
 
 using namespace extern_worker;
@@ -881,7 +883,7 @@ namespace {
   // full repo build, but does not make repo decls available to systemlib.
   coro::Task<bool> indexBuiltinSymbolDecls(
     const Package::IndexCallback& callback,
-    coro::TicketExecutor& executor,
+    TicketExecutor& executor,
     extern_worker::Client& client
   ) {
     std::vector<coro::TaskWithExecutor<void>> tasks;
@@ -891,18 +893,18 @@ namespace {
       callback(
         "",
         summary,
-        HPHP_CORO_AWAIT(client.store(Package::UnitDecls{
+        co_await client.store(Package::UnitDecls{
           summary,
           std::string{d->serialized.begin(), d->serialized.end()}
-        }))
+        })
       );
-      HPHP_CORO_RETURN_VOID;
+      co_return;
     };
     for (auto const& d: Native::getAllBuiltinDecls()) {
       tasks.emplace_back(declCallback(d).scheduleOn(executor.sticky()));
     }
-    HPHP_CORO_AWAIT(coro::collectRange(std::move(tasks)));
-    HPHP_CORO_RETURN(true);
+    co_await coro::collectAllRange(std::move(tasks));
+    co_return true;
   }
 }
 
@@ -912,7 +914,7 @@ namespace {
 std::unique_ptr<UnitIndex> computeIndex(
     const CompilerOptions& po,
     StructuredLogEntry& sample,
-    coro::TicketExecutor& executor,
+    TicketExecutor& executor,
     extern_worker::Client& client
 ) {
   auto index = std::make_unique<UnitIndex>();
@@ -959,19 +961,17 @@ std::unique_ptr<UnitIndex> computeIndex(
   // * Indexing the build package
   // * Indexing builtin decls to be used by decl driven bytecode compilation
   // If DDB is not enabled, we will return early from the second task.
-  auto const [indexingRepoOK, indexingSystemlibDeclsOK] = coro::wait(
-    coro::collect(
+  auto const [indexingRepoOK, indexingSystemlibDeclsOK] =
+    coro::blockingWait(coro::collectAll(
       indexPackage.index(indexUnit),
-      coro::invoke([&]() -> coro::Task<bool> {
+      coro::co_invoke([&]() -> coro::Task<bool> {
         if (RO::EvalEnableDecl) {
-          HPHP_CORO_RETURN(HPHP_CORO_AWAIT(
-            indexBuiltinSymbolDecls(indexUnit, executor, client)
-          ));
+          co_return co_await
+            indexBuiltinSymbolDecls(indexUnit, executor, client);
         }
-        HPHP_CORO_RETURN(true);
+        co_return true;
       })
-    )
-  );
+    ));
 
   if (!indexingRepoOK || !indexingSystemlibDeclsOK) return nullptr;
 
@@ -1124,7 +1124,7 @@ bool process(CompilerOptions &po) {
   auto const outputFile = po.outputDir + "/hhvm.hhbc";
   unlink(outputFile.c_str());
 
-  auto executor = std::make_unique<coro::TicketExecutor>(
+  auto executor = std::make_unique<TicketExecutor>(
     "HPHPcWorker",
     0,
     size_t(Option::ParserThreadCount <= 0 ? 1 : Option::ParserThreadCount),
@@ -1154,7 +1154,7 @@ bool process(CompilerOptions &po) {
 
   // HHBBC specific state (if we're going to run it).
   Optional<WPI> hhbbcInputs;
-  Optional<coro::AsyncValue<Ref<HHBBC::Config>>> hhbbcConfig;
+  Optional<CoroAsyncValue<Ref<HHBBC::Config>>> hhbbcConfig;
   if (RO::EvalUseHHBBC) {
     hhbbcInputs.emplace();
     // We want to do this as early as possible
@@ -1264,8 +1264,8 @@ bool process(CompilerOptions &po) {
         }
       }
 
-      if (keys.empty()) HPHP_CORO_RETURN_VOID;
-      auto valueRefs = HPHP_CORO_AWAIT(client->storeMulti(std::move(values)));
+      if (keys.empty()) co_return;
+      auto valueRefs = co_await client->storeMulti(std::move(values));
 
       auto const numKeys = keys.size();
       assertx(valueRefs.size() == numKeys);
@@ -1273,12 +1273,12 @@ bool process(CompilerOptions &po) {
       for (size_t i = 0; i < numKeys; ++i) {
         hhbbcInputs->add(std::move(keys[i]), std::move(valueRefs[i]));
       }
-      HPHP_CORO_RETURN_VOID;
+      co_return;
     }
 
     // Otherwise just emit it
     for (auto& ue : ues) emitUnit(std::move(ue));
-    HPHP_CORO_RETURN_VOID;
+    co_return;
   };
 
   // Parse a group of files remotely
@@ -1290,9 +1290,9 @@ bool process(CompilerOptions &po) {
     if (RO::EvalUseHHBBC) {
       // Run the HHBBC parse job, which produces WholeProgramInput
       // key/values.
-      auto hhbbcConfigRef = HPHP_CORO_AWAIT(hhbbcConfig->getCopy());
-      auto [inputValueRefs, metaRefs] = HPHP_CORO_AWAIT(
-        client->exec(
+      auto hhbbcConfigRef = co_await hhbbcConfig->getCopy();
+      auto [inputValueRefs, metaRefs] =
+        co_await client->exec(
           s_parseForHHBBCJob,
           std::make_tuple(
             config,
@@ -1301,18 +1301,16 @@ bool process(CompilerOptions &po) {
           ),
           std::move(files),
           std::move(metadata)
-        )
-      );
+        );
 
       // The parse metadata and the keys are loaded, but the values
       // are kept as Refs.
-      auto [parseMetas, inputKeys] =
-        HPHP_CORO_AWAIT(client->load(std::move(metaRefs)));
+      auto [parseMetas, inputKeys] = co_await client->load(std::move(metaRefs));
 
       // Stop now if the index contains any missing decls.
       // parseRun() will retry this job with additional inputs.
       if (index->containsAnyMissing(parseMetas)) {
-        HPHP_CORO_MOVE_RETURN(parseMetas);
+        co_return parseMetas;
       }
 
       always_assert(parseMetas.size() == inputValueRefs.size());
@@ -1337,26 +1335,25 @@ bool process(CompilerOptions &po) {
       }
 
       // Indicate we're done by returning an empty vec.
-      HPHP_CORO_RETURN(Package::ParseMetaVec{});
+      co_return Package::ParseMetaVec{};
     }
 
     // Otherwise, do a "normal" (non-HHBBC parse job), load the
     // unit-emitters and parse metadata, and emit the unit-emitters.
-    auto [ueRefs, metaRefs] = HPHP_CORO_AWAIT(
-      client->exec(
+    auto [ueRefs, metaRefs] =
+      co_await client->exec(
         s_parseJob,
         std::make_tuple(config, std::move(fileMetas)),
         std::move(files),
         std::move(metadata)
-      )
-    );
+      );
 
-    auto parseMetas = HPHP_CORO_AWAIT(client->load(std::move(metaRefs)));
+    auto parseMetas = co_await client->load(std::move(metaRefs));
 
     // Stop now if the index contains any missing decls.
     // parseRun() will retry this job with additional inputs.
     if (index->containsAnyMissing(parseMetas)) {
-      HPHP_CORO_MOVE_RETURN(parseMetas);
+      co_return parseMetas;
     }
 
     always_assert(parseMetas.size() == ueRefs.size());
@@ -1372,7 +1369,7 @@ bool process(CompilerOptions &po) {
     }
 
     // Indicate we're done by returning an empty vec.
-    HPHP_CORO_RETURN(Package::ParseMetaVec{});
+    co_return Package::ParseMetaVec{};
   };
 
   // Emit a group of files that were parsed remotely
@@ -1424,8 +1421,8 @@ bool process(CompilerOptions &po) {
           hhbbcInputs->add(std::move(e.first), std::move(e.second));
         }
       }
-      HPHP_CORO_RETURN(std::make_pair(std::move(parseMetas),
-                                      std::move(itemsToSkip)));
+      co_return std::make_pair(std::move(parseMetas),
+                               std::move(itemsToSkip));
     }
 
     // Otherwise, retrieve ParseMeta and load unit-emitters from a normal
@@ -1459,16 +1456,14 @@ bool process(CompilerOptions &po) {
     }
 
     always_assert(parseMetas.size() == ueRefs.size());
-    auto ueWrappers = HPHP_CORO_AWAIT(
-      client->load(std::move(ueRefs))
-    );
+    auto ueWrappers = co_await client->load(std::move(ueRefs));
 
     for (auto& wrapper : ueWrappers) {
       if (!wrapper.m_ue) continue;
       emitUnit(std::move(wrapper.m_ue));
     }
-    HPHP_CORO_RETURN(std::make_pair(std::move(parseMetas),
-                                    std::move(itemsToSkip)));
+    co_return std::make_pair(std::move(parseMetas),
+                             std::move(itemsToSkip));
   };
 
   {
@@ -1496,7 +1491,10 @@ bool process(CompilerOptions &po) {
       if (!addAutoloadQueryToPackage(*parsePackage, queryStr)) return false;
     }
 
-    if (!coro::wait(parsePackage->parse(*index, parseRemoteUnit))) return false;
+    if (!coro::blockingWait(parsePackage->parse(*index,
+                                                parseRemoteUnit))) {
+      return false;
+    }
 
     logPhaseStats("parse", *parsePackage, *client, sample,
                   parseTimer.getMicroSeconds());
@@ -1522,8 +1520,8 @@ bool process(CompilerOptions &po) {
       repo.emplace(outputFile);
     }
 
-    if (!coro::wait(package->emit(*index, emitRemoteUnit, emitLocalUnit,
-                                  po.ondemandEdgesPath))) {
+    if (!coro::blockingWait(package->emit(*index, emitRemoteUnit, emitLocalUnit,
+                                          po.ondemandEdgesPath))) {
       return false;
     }
 
@@ -1560,7 +1558,7 @@ bool process(CompilerOptions &po) {
 
   std::thread asyncDispose;
   SCOPE_EXIT { if (asyncDispose.joinable()) asyncDispose.join(); };
-  auto const dispose = [&] (std::unique_ptr<coro::TicketExecutor> e,
+  auto const dispose = [&] (std::unique_ptr<TicketExecutor> e,
                             std::unique_ptr<Client> c) {
     if (!Option::ParserAsyncCleanup) {
       // If we don't want to cleanup asynchronously, do so now.

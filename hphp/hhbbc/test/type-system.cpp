@@ -48,6 +48,7 @@
 namespace HPHP::HHBBC {
 
 using namespace extern_worker;
+namespace coro = folly::coro;
 
 void PrintTo(const Type& t, ::std::ostream* os) { *os << show(t); }
 void PrintTo(Emptiness e, ::std::ostream* os) {
@@ -661,7 +662,7 @@ Index make_index() {
 
   Index::Input indexInput;
 
-  auto executor = std::make_unique<coro::TicketExecutor>(
+  auto executor = std::make_unique<TicketExecutor>(
     "HHBBCWorker",
     0,
     1,
@@ -687,7 +688,7 @@ Index make_index() {
 
   if (parse.unit) {
     auto const name = parse.unit->filename;
-    auto stored = coro::wait(client->store(std::move(parse.unit)));
+    auto stored = coro::blockingWait(client->store(std::move(parse.unit)));
     indexInput.units.emplace_back(
       Index::Input::UnitMeta{
         std::move(stored),
@@ -705,8 +706,8 @@ Index make_index() {
       bytecode->methodBCs.emplace_back(std::move(meth->rawBlocks));
     }
 
-    auto stored = coro::wait(client->store(std::move(c)));
-    auto storedBC = coro::wait(client->store(std::move(bytecode)));
+    auto stored = coro::blockingWait(client->store(std::move(c)));
+    auto storedBC = coro::blockingWait(client->store(std::move(bytecode)));
 
     indexInput.classes.emplace_back(
       Index::Input::ClassMeta{
@@ -728,8 +729,8 @@ Index make_index() {
     auto const name = f->name;
     auto bytecode =
       std::make_unique<php::FuncBytecode>(std::move(f->rawBlocks));
-    auto stored = coro::wait(client->store(std::move(f)));
-    auto storedBC = coro::wait(client->store(std::move(bytecode)));
+    auto stored = coro::blockingWait(client->store(std::move(f)));
+    auto storedBC = coro::blockingWait(client->store(std::move(bytecode)));
     indexInput.funcs.emplace_back(
       Index::Input::FuncMeta{
         std::move(stored),
@@ -751,7 +752,7 @@ Index make_index() {
     HHBBC::Config::get(RepoGlobalData{}),
     std::move(executor),
     std::move(client),
-    [] (std::unique_ptr<coro::TicketExecutor>,
+    [] (std::unique_ptr<TicketExecutor>,
         std::unique_ptr<Client>) {},
     nullptr
   };

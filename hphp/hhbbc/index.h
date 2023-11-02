@@ -860,7 +860,7 @@ struct Index {
    */
   Index(Input,
         Config,
-        std::unique_ptr<coro::TicketExecutor>,
+        std::unique_ptr<TicketExecutor>,
         std::unique_ptr<extern_worker::Client>,
         DisposeCallback,
         StructuredLogEntry*);

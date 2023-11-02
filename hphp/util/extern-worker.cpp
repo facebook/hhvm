@@ -36,6 +36,8 @@
 
 namespace fs = std::filesystem;
 
+namespace coro = folly::coro;
+
 namespace HPHP::extern_worker {
 
 //////////////////////////////////////////////////////////////////////
@@ -1044,7 +1046,7 @@ coro::Task<BlobVec> SubprocessImpl::load(const RequestId& requestId,
         return FD{id.m_id, true, false, false}.read(id.m_extra, id.m_size);
       })
     | as<std::vector>();
-  HPHP_CORO_MOVE_RETURN(out);
+  co_return out;
 }
 
 coro::Task<IdVec> SubprocessImpl::store(const RequestId& requestId,
@@ -1104,7 +1106,7 @@ coro::Task<IdVec> SubprocessImpl::store(const RequestId& requestId,
        })
     ))
     | as<std::vector>();
-  HPHP_CORO_MOVE_RETURN(out);
+  co_return out;
 }
 
 coro::Task<std::vector<RefValVec>>
@@ -1118,7 +1120,7 @@ SubprocessImpl::exec(const RequestId& requestId,
   FTRACE(4, "{} executing \"{}\" ({} runs)\n",
          requestId.tracePrefix(), command, inputs.size());
 
-  HPHP_CORO_SAFE_POINT;
+  co_await coro::co_safe_point;
 
   // Each set of inputs should always have the same size.
   if (debug && !inputs.empty()) {
@@ -1157,14 +1159,13 @@ SubprocessImpl::exec(const RequestId& requestId,
   SCOPE_EXIT { if (fd) m_fdManager->release(*fd); };
 
   // Do the actual fork+exec.
-  auto const outputBlob = HPHP_CORO_AWAIT(
+  auto const outputBlob = co_await
     doSubprocess(
       requestId,
       command,
       std::string{(const char*)encoder.data(), encoder.size()},
       fd->path()
-    )
-  );
+    );
   // The worker (maybe) wrote to the file, so we need to re-sync our
   // tracked offset.
   fd->syncOffset();
@@ -1202,7 +1203,7 @@ SubprocessImpl::exec(const RequestId& requestId,
   if (finiOutput) out.emplace_back(makeOutputs(*finiOutput));
 
   decoder.assertDone();
-  HPHP_CORO_MOVE_RETURN(out);
+  co_return out;
 }
 
 coro::Task<std::string>
@@ -1244,7 +1245,7 @@ SubprocessImpl::doSubprocess(const RequestId& requestId,
     inputBlob.size()
   );
 
-  HPHP_CORO_SAFE_POINT;
+  co_await coro::co_safe_point;
 
   auto const before = std::chrono::steady_clock::now();
 
@@ -1335,7 +1336,7 @@ SubprocessImpl::doSubprocess(const RequestId& requestId,
     stderr
   );
 
-  HPHP_CORO_SAFE_POINT;
+  co_await coro::co_safe_point;
 
   // Do this before checking the return code. If the process failed,
   // we want to capture anything it logged before throwing.
@@ -1372,7 +1373,7 @@ SubprocessImpl::doSubprocess(const RequestId& requestId,
     };
   }
 
-  HPHP_CORO_MOVE_RETURN(output);
+  co_return output;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1519,7 +1520,7 @@ coro::Task<Ref<std::string>> Client::storeFile(fs::path path,
   };
 
   auto wasFallback = false;
-  auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
+  auto ids = co_await tryWithFallback<IdVec>(
     [&] (Impl& i, bool isFallback) {
       if (isFallback) ++m_stats->fileFallbacks;
       return i.store(
@@ -1530,11 +1531,11 @@ coro::Task<Ref<std::string>> Client::storeFile(fs::path path,
       );
     },
     wasFallback
-  ));
+  );
   assertx(ids.size() == 1);
 
   Ref<std::string> ref{std::move(ids[0]), wasFallback};
-  HPHP_CORO_MOVE_RETURN(ref);
+  co_return ref;
 }
 
 coro::Task<std::vector<Ref<std::string>>>
@@ -1564,13 +1565,13 @@ Client::storeFile(std::vector<fs::path> paths,
 
   auto const DEBUG_ONLY size = paths.size();
   auto wasFallback = false;
-  auto ids = HPHP_CORO_AWAIT(tryWithFallback<IdVec>(
+  auto ids = co_await tryWithFallback<IdVec>(
     [&] (Impl& i, bool isFallback) {
       if (isFallback) m_stats->fileFallbacks += paths.size();
       return i.store(requestId, paths, {}, optimistic);
     },
     wasFallback
-  ));
+  );
   assertx(ids.size() == size);
 
   auto out = from(ids)
@@ -1579,7 +1580,7 @@ Client::storeFile(std::vector<fs::path> paths,
         return Ref<std::string>{std::move(id), wasFallback};
       })
     | as<std::vector>();
-  HPHP_CORO_MOVE_RETURN(out);
+  co_return out;
 }
 
 //////////////////////////////////////////////////////////////////////

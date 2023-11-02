@@ -100,12 +100,12 @@ using EmitCallback = std::function<void(std::unique_ptr<UnitEmitter>)>;
 // enables the caller to destroy the client asynchronously (since it
 // can be slow) while HHBBC still runs.
 using DisposeCallback =
-  std::function<void(std::unique_ptr<coro::TicketExecutor>,
+  std::function<void(std::unique_ptr<TicketExecutor>,
                      std::unique_ptr<extern_worker::Client>)>;
 
 void whole_program(WholeProgramInput inputs,
                    Config config,
-                   std::unique_ptr<coro::TicketExecutor> executor,
+                   std::unique_ptr<TicketExecutor> executor,
                    std::unique_ptr<extern_worker::Client> client,
                    const EmitCallback& callback,
                    DisposeCallback dispose,

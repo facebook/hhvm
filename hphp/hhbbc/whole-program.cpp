@@ -915,7 +915,7 @@ Index::Input make_index_input(WholeProgramInput input) {
 
 void whole_program(WholeProgramInput inputs,
                    Config config,
-                   std::unique_ptr<coro::TicketExecutor> executor,
+                   std::unique_ptr<TicketExecutor> executor,
                    std::unique_ptr<Client> client,
                    const EmitCallback& callback,
                    DisposeCallback dispose,

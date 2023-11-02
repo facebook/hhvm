@@ -139,6 +139,10 @@ struct
       Ropaque_type_from_module (pos_or_decl p, m, reason r)
     | Rmissing_class p -> Rmissing_class (pos p)
     | Rinvalid -> Rinvalid
+    | Rcaptured_like p -> Rcaptured_like (pos p)
+    | Rpessimised_inout p -> Rpessimised_inout (pos_or_decl p)
+    | Rpessimised_return p -> Rpessimised_return (pos_or_decl p)
+    | Rpessimised_prop p -> Rpessimised_prop (pos_or_decl p)
 
   let rec ty t =
     let (p, x) = deref t in

@@ -469,7 +469,7 @@ val try_strip_dynamic :
 val try_strip_dynamic_from_union :
   Typing_env_types.env ->
   Typing_defs.locl_ty list ->
-  Typing_defs.locl_ty list option
+  (Typing_defs.locl_ty * Typing_defs.locl_ty list) option
 
 (* If input is dynamic | t or t | dynamic then return t,
  * otherwise return type unchanged. *)
@@ -499,7 +499,10 @@ val make_supportdyn_decl_type :
 
 (* Wrap ~ around a type, unless it is already a dynamic or a like type *)
 val make_like :
-  Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty
+  ?reason:Typing_reason.t ->
+  Typing_env_types.env ->
+  Typing_defs.locl_ty ->
+  Typing_defs.locl_ty
 
 (* Wrap ~ around a type if it is enforced. This is used for returns, property
  * assignment, and default expression typing

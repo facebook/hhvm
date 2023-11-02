@@ -241,6 +241,10 @@ pub trait Reason:
                     RI::RopaqueTypeFromModule(pos.into(), Symbol::new(s), r.into())
                 }
                 OR::Rinvalid => RI::Rinvalid,
+                OR::RcapturedLike(pos) => RI::RcapturedLike(pos.into()),
+                OR::RpessimisedInout(pos) => RI::RpessimisedInout(pos.into()),
+                OR::RpessimisedReturn(pos) => RI::RpessimisedReturn(pos.into()),
+                OR::RpessimisedProp(pos) => RI::RpessimisedProp(pos.into()),
             }
         })
     }
@@ -395,6 +399,10 @@ pub enum ReasonImpl<R, P> {
     RopaqueTypeFromModule(P, Symbol, R),
     RmissingClass(P),
     Rinvalid,
+    RcapturedLike(P),
+    RpessimisedInout(P),
+    RpessimisedReturn(P),
+    RpessimisedProp(P),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -642,6 +650,10 @@ impl<'a> ToOxidized<'a> for BReason {
             ))),
             RI::RmissingClass(pos) => OR::RmissingClass(pos.to_oxidized(arena)),
             RI::Rinvalid => OR::Rinvalid,
+            RI::RcapturedLike(pos) => OR::RcapturedLike(pos.to_oxidized(arena)),
+            RI::RpessimisedInout(pos) => OR::RpessimisedInout(pos.to_oxidized(arena)),
+            RI::RpessimisedReturn(pos) => OR::RpessimisedReturn(pos.to_oxidized(arena)),
+            RI::RpessimisedProp(pos) => OR::RpessimisedProp(pos.to_oxidized(arena)),
         }
     }
 }

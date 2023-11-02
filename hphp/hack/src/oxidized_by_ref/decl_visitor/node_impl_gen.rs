@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fdb13d9865a820f15c7fa56ac31ac05b>>
+// @generated SignedSource<<d4be8ff41c32503c8a651876480a2b9f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1128,6 +1128,10 @@ impl<'a> Node<'a> for T_<'a> {
             T_::RopaqueTypeFromModule(ref __binding_0) => __binding_0.accept(v),
             T_::RmissingClass(ref __binding_0) => __binding_0.accept(v),
             T_::Rinvalid => {}
+            T_::RcapturedLike(ref __binding_0) => __binding_0.accept(v),
+            T_::RpessimisedInout(ref __binding_0) => __binding_0.accept(v),
+            T_::RpessimisedReturn(ref __binding_0) => __binding_0.accept(v),
+            T_::RpessimisedProp(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

@@ -1580,7 +1580,7 @@ and simplify_subtype_i
             None
         in
         match stripped_dynamic with
-        | Some tyl ->
+        | Some (ty_dynamic, tyl) ->
           let ty = MakeType.union r tyl in
           let (env, ty) = Env.expand_type env ty in
           let delay_push =
@@ -1677,7 +1677,7 @@ and simplify_subtype_i
                        ~sub_supportdyn:None
                        ~this_ty
                        ty
-                       (MakeType.dynamic Reason.Rnone)
+                       ty_dynamic
                   &&& simplify_subtype_i
                         ~subtype_env
                         ~sub_supportdyn

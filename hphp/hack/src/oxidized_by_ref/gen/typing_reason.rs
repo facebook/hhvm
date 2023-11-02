@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<36adc84677c26eda4344fa33e690ab57>>
+// @generated SignedSource<<68535c8aa2deca3aa2dcdb5d96c9ea3e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -415,6 +415,18 @@ pub enum T_<'a> {
     #[rust_to_ocaml(name = "Rmissing_class")]
     RmissingClass(&'a pos::Pos<'a>),
     Rinvalid,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Rcaptured_like")]
+    RcapturedLike(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Rpessimised_inout")]
+    RpessimisedInout(&'a pos_or_decl::PosOrDecl<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Rpessimised_return")]
+    RpessimisedReturn(&'a pos_or_decl::PosOrDecl<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Rpessimised_prop")]
+    RpessimisedProp(&'a pos_or_decl::PosOrDecl<'a>),
 }
 impl<'a> TrivialDrop for T_<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(T_<'arena>);

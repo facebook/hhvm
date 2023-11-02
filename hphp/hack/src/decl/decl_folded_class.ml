@@ -477,6 +477,7 @@ let build_prop_sprop_ty
       sp.sp_type
     else
       Decl_enforceability.maybe_pessimise_type
+        ~reason:(Reason.Rpessimised_prop (get_pos sp.sp_type))
         ~is_xhp_attr
         ~this_class
         ctx

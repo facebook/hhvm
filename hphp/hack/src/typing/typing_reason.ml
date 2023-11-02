@@ -177,6 +177,10 @@ type _ t_ =
       -> locl_phase t_
   | Rmissing_class : Pos.t -> locl_phase t_
   | Rinvalid : 'phase t_
+  | Rcaptured_like : Pos.t -> locl_phase t_
+  | Rpessimised_inout : Pos_or_decl.t -> 'phase t_
+  | Rpessimised_return : Pos_or_decl.t -> 'phase t_
+  | Rpessimised_prop : Pos_or_decl.t -> 'phase t_
 [@@deriving hash]
 
 let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
@@ -206,9 +210,13 @@ let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Ridx_vector_from_decl p
   | Rinout_param p
   | Rsupport_dynamic_type p
+  | Rpessimised_inout p
+  | Rpessimised_return p
+  | Rpessimised_prop p
   | Rglobal_class_prop p ->
     p
   | Rwitness p
+  | Rcaptured_like p
   | Ridx (p, _)
   | Ridx_vector p
   | Rforeach p
@@ -374,6 +382,10 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Ropaque_type_from_module _ -> "Ropaque_type_from_module"
   | Rmissing_class _ -> "Rmissing_class"
   | Rinvalid -> "Rinvalid"
+  | Rcaptured_like _ -> "Rcaptured_like"
+  | Rpessimised_inout _ -> "Rpessimised_inout"
+  | Rpessimised_return _ -> "Rpessimised_return"
+  | Rpessimised_prop _ -> "Rpessimised_prop"
 
 let rec pp_t_ : type ph. _ -> ph t_ -> unit =
  fun fmt r ->
@@ -452,6 +464,9 @@ let rec pp_t_ : type ph. _ -> ph t_ -> unit =
       ()
     | Rhint p
     | Rwitness_from_decl p
+    | Rpessimised_inout p
+    | Rpessimised_return p
+    | Rpessimised_prop p
     | Rvar_param_from_decl p
     | Rglobal_fun_param p
     | Rglobal_fun_ret p
@@ -530,7 +545,8 @@ let rec pp_t_ : type ph. _ -> ph t_ -> unit =
     | Rconcat_operand p
     | Rinterp_operand p
     | Rmissing_class p
-    | Rwitness p ->
+    | Rwitness p
+    | Rcaptured_like p ->
       Pos.pp fmt p
     | Runset_field (p, s)
     | Rshape (p, s)
@@ -634,6 +650,9 @@ let rec localize : decl_phase t_ -> locl_phase t_ = function
   | Rglobal_type_variable_generics (p, tp, n) ->
     Rglobal_type_variable_generics (p, tp, n)
   | Rinvalid -> Rinvalid
+  | Rpessimised_inout p -> Rpessimised_inout p
+  | Rpessimised_return p -> Rpessimised_return p
+  | Rpessimised_prop p -> Rpessimised_prop p
 
 let arg_pos_str ap =
   match ap with
@@ -738,6 +757,28 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
       ( p,
         prefix
         ^ " because this is the result of an integer arithmetic operation" );
+    ]
+  | Rcaptured_like _ ->
+    [
+      ( p,
+        prefix
+        ^ " because this is the type of a local that was captured in a closure"
+      );
+    ]
+  | Rpessimised_inout _ ->
+    [
+      ( p,
+        prefix
+        ^ " because the type of this inout parameter is implicitly a like-type"
+      );
+    ]
+  | Rpessimised_return _ ->
+    [(p, prefix ^ " because the type of this return is implicitly a like-type")]
+  | Rpessimised_prop _ ->
+    [
+      ( p,
+        prefix ^ " because the type of this property is implicitly a like-type"
+      );
     ]
   | Rarith_dynamic _ ->
     [
@@ -1325,6 +1366,10 @@ module Visitor = struct
         | Rtype_variable_generics (x, y, z) -> Rtype_variable_generics (x, y, z)
         | Rglobal_type_variable_generics (x, y, z) ->
           Rglobal_type_variable_generics (x, y, z)
+        | Rcaptured_like x -> Rcaptured_like x
+        | Rpessimised_inout x -> Rpessimised_inout x
+        | Rpessimised_return x -> Rpessimised_return x
+        | Rpessimised_prop x -> Rpessimised_prop x
 
       method on_lazy l = l
     end

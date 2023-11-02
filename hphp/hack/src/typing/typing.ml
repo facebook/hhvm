@@ -2528,11 +2528,19 @@ let rec bind_param
         | Enforced
           when TCO.enable_sound_dynamic env.genv.tcopt
                && Env.get_support_dynamic_type env ->
-          Some (TUtils.make_like env ty1)
+          Some
+            (TUtils.make_like
+               ~reason:(Reason.Rpessimised_inout (get_pos ty1))
+               env
+               ty1)
         | _ ->
           (* In implicit SD mode, all inout parameters are pessimised, unless marked <<__NoAutoLikes>> *)
           if TCO.everything_sdt env.genv.tcopt && not no_auto_likes then
-            Some (TUtils.make_like env ty1)
+            Some
+              (TUtils.make_like
+                 ~reason:(Reason.Rpessimised_inout (get_pos ty1))
+                 env
+                 ty1)
           else
             Some ty1
       end
@@ -6050,7 +6058,15 @@ and closure_make
       let like_locals =
         Local_id.Map.map
           (fun local ->
-            Typing_local_types.{ local with ty = TUtils.make_like env local.ty })
+            Typing_local_types.
+              {
+                local with
+                ty =
+                  TUtils.make_like
+                    ~reason:(Reason.Rcaptured_like lambda_pos)
+                    env
+                    local.ty;
+              })
           locals
       in
       Env.set_locals env like_locals
@@ -6075,7 +6091,11 @@ and closure_make
                   fp_type =
                     {
                       fp.fp_type with
-                      et_type = TUtils.make_like env fp.fp_type.et_type;
+                      et_type =
+                        TUtils.make_like
+                          ~reason:(Reason.Rpessimised_inout fp.fp_pos)
+                          env
+                          fp.fp_type.et_type;
                     };
                 }
               | _ -> fp);

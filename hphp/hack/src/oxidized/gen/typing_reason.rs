@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2b59729edbd6a3a7c8be1a74989d9312>>
+// @generated SignedSource<<ffa18ef8a99bcc1f86d934f9562950af>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -319,6 +319,14 @@ pub enum T_ {
     #[rust_to_ocaml(name = "Rmissing_class")]
     RmissingClass(pos::Pos),
     Rinvalid,
+    #[rust_to_ocaml(name = "Rcaptured_like")]
+    RcapturedLike(pos::Pos),
+    #[rust_to_ocaml(name = "Rpessimised_inout")]
+    RpessimisedInout(pos_or_decl::PosOrDecl),
+    #[rust_to_ocaml(name = "Rpessimised_return")]
+    RpessimisedReturn(pos_or_decl::PosOrDecl),
+    #[rust_to_ocaml(name = "Rpessimised_prop")]
+    RpessimisedProp(pos_or_decl::PosOrDecl),
 }
 
 pub type Reason = T_;

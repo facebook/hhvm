@@ -820,8 +820,8 @@ and strip_union tyl ~f =
 
 let rec try_strip_dynamic_from_union _env tyl =
   match strip_union ~f:Typing_defs.is_dynamic tyl with
-  | None -> None
-  | Some (_, tyl) -> Some tyl
+  | Some (ty :: _, tyl) -> Some (ty, tyl)
+  | _ -> None
 
 and try_strip_dynamic env ty =
   let (env, ty) = Env.expand_type env ty in
@@ -829,7 +829,7 @@ and try_strip_dynamic env ty =
   | Tunion tyl ->
     (match try_strip_dynamic_from_union env tyl with
     | None -> None
-    | Some tyl -> Some (MakeType.union (get_reason ty) tyl))
+    | Some (_, tyl) -> Some (MakeType.union (get_reason ty) tyl))
   | _ -> None
 
 and strip_dynamic env ty =
@@ -865,11 +865,15 @@ let simple_make_supportdyn r env ty =
 let make_supportdyn_decl_type p r ty =
   mk (r, Tapply ((p, SN.Classes.cSupportDyn), [ty]))
 
-let make_like env ty =
+let make_like ?reason env ty =
   if Typing_defs.is_dynamic ty || Option.is_some (try_strip_dynamic env ty) then
     ty
   else
-    let r = get_reason ty in
+    let r =
+      match reason with
+      | None -> get_reason ty
+      | Some r -> r
+    in
     MakeType.locl_like r ty
 
 let make_like_if_enforced env ety =

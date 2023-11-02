@@ -487,7 +487,7 @@ end
 module E = Enforce (ShallowContextAccess)
 include E
 
-let make_like_type ~intersect_with ~return_from_async ty =
+let make_like_type ~reason ~intersect_with ~return_from_async ty =
   let like_and_intersect r ty =
     let like_ty = Typing_make_type.like r ty in
     match intersect_with with
@@ -497,7 +497,7 @@ let make_like_type ~intersect_with ~return_from_async ty =
   let like_if_not_void ty =
     match get_node ty with
     | Tprim Aast.(Tvoid | Tnoreturn) -> ty
-    | _ -> like_and_intersect (get_reason ty) ty
+    | _ -> like_and_intersect reason ty
   in
   if return_from_async then
     match get_node ty with
@@ -539,18 +539,18 @@ let maybe_add_supportdyn_constraints ~this_class ctx p tparams =
   else
     tparams
 
-let pessimise_type ~is_xhp_attr ~this_class ctx ty =
+let pessimise_type ~reason ~is_xhp_attr ~this_class ctx ty =
   if
     (not is_xhp_attr)
     && is_enforceable ~return_from_async:false ~this_class ctx ty
   then
     ty
   else
-    make_like_type ~intersect_with:None ~return_from_async:false ty
+    make_like_type ~reason ~intersect_with:None ~return_from_async:false ty
 
-let maybe_pessimise_type ~is_xhp_attr ~this_class ctx ty =
+let maybe_pessimise_type ~reason ~is_xhp_attr ~this_class ctx ty =
   if Provider_context.implicit_sdt_for_class ctx this_class then
-    pessimise_type ~is_xhp_attr ~this_class ctx ty
+    pessimise_type ~reason ~is_xhp_attr ~this_class ctx ty
   else
     ty
 
@@ -577,6 +577,7 @@ let pessimise_param_type fp =
           et_enforced = Unenforced;
           et_type =
             make_like_type
+              ~reason:(Reason.Rpessimised_inout fp.fp_pos)
               ~intersect_with:None
               ~return_from_async:false
               fp.fp_type.et_type;
@@ -637,8 +638,11 @@ let pessimise_fun_type ~fun_kind ~this_class ~no_auto_likes ctx p ty =
             Tfun
               (update_return_ty
                  ft
-                 (make_like_type ~intersect_with:None ~return_from_async ret_ty))
-          )
+                 (make_like_type
+                    ~reason:(Reason.Rpessimised_return (get_pos ret_ty))
+                    ~intersect_with:None
+                    ~return_from_async
+                    ret_ty)) )
       | _ ->
         if optimistically_do_not_pessimise then
           mk (get_reason ty, Tfun ft)
@@ -661,7 +665,10 @@ let pessimise_fun_type ~fun_kind ~this_class ~no_auto_likes ctx p ty =
                 Tfun
                   (update_return_ty
                      ft
-                     (make_like_type ~intersect_with ~return_from_async ret_ty))
-              )
+                     (make_like_type
+                        ~reason:(Reason.Rpessimised_return (get_pos ret_ty))
+                        ~intersect_with
+                        ~return_from_async
+                        ret_ty)) )
         ))
   | _ -> ty

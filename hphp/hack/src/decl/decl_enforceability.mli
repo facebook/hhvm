@@ -82,6 +82,7 @@ val is_enforceable :
 (** If the type is not enforceable, turn it into a like type (~ty) otherwise
     return the type *)
 val pessimise_type :
+  reason:Typing_reason.decl_t ->
   is_xhp_attr:bool ->
   this_class:Shallow_decl_defs.shallow_class option ->
   Provider_context.t ->
@@ -91,6 +92,7 @@ val pessimise_type :
 (** Pessimise the type if in implicit pessimisation mode, otherwise
     return the type *)
 val maybe_pessimise_type :
+  reason:Typing_reason.decl_t ->
   is_xhp_attr:bool ->
   this_class:Shallow_decl_defs.shallow_class option ->
   Provider_context.t ->

@@ -167,6 +167,10 @@ type _ t_ =
       -> locl_phase t_
   | Rmissing_class : Pos.t -> locl_phase t_
   | Rinvalid : 'phase t_
+  | Rcaptured_like : Pos.t -> locl_phase t_
+  | Rpessimised_inout : Pos_or_decl.t -> 'phase t_
+  | Rpessimised_return : Pos_or_decl.t -> 'phase t_
+  | Rpessimised_prop : Pos_or_decl.t -> 'phase t_
 [@@deriving hash, show]
 
 type t = locl_phase t_ [@@deriving show]

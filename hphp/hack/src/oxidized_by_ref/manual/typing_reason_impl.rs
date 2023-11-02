@@ -115,7 +115,11 @@ impl<'a> Reason<'a> {
             | RsupportDynamicType(p)
             | RdynamicPartialEnforcement((p, _, _))
             | RrigidTvarEscape((p, _, _, _))
-            | RmissingClass(p) => Some(p),
+            | RmissingClass(p)
+            | RcapturedLike(p)
+            | RpessimisedInout(p)
+            | RpessimisedReturn(p)
+            | RpessimisedProp(p) => Some(p),
             RlostInfo((_, r, _))
             | Rinstantiate((_, _, r))
             | Rtypeconst((r, _, _, _))
@@ -257,6 +261,10 @@ impl<'a> std::fmt::Debug for T_<'a> {
                 .field(t)
                 .finish(),
             RmissingClass(p) => f.debug_tuple("RmissingClass").field(p).finish(),
+            RcapturedLike(p) => f.debug_tuple("RcapturedLike").field(p).finish(),
+            RpessimisedInout(p) => f.debug_tuple("RpessimisedInout").field(p).finish(),
+            RpessimisedReturn(p) => f.debug_tuple("RpessimisedReturn").field(p).finish(),
+            RpessimisedProp(p) => f.debug_tuple("RpessimisedProp").field(p).finish(),
             Rinvalid => f.debug_tuple("Rinvalid").finish(),
         }
     }

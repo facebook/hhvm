@@ -128,7 +128,7 @@ let make_param_local_ty ~dynamic_mode ~no_auto_likes env decl_hint param =
           (* For implicit pessimisation, without <<__NoAutoLikes>>, wrap like around non-enforced inout parameters *)
           match (et_enforced, param.param_callconv) with
           | (Unenforced, Ast_defs.Pinout _) when not no_auto_likes ->
-            MakeType.like (get_reason ty) ty
+            MakeType.like (Reason.Rpessimised_inout (get_pos ty)) ty
           | _ -> ty
         else
           ty

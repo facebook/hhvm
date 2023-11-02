@@ -157,10 +157,10 @@ let make_return_type
     in
     let localize ~wrap (env : env) (dty : decl_ty) =
       if TypecheckerOptions.everything_sdt env.genv.tcopt then (
+        let pos = get_pos dty in
         let dty =
           match get_node dty with
-          | Tfun _ ->
-            TUtils.make_supportdyn_decl_type (get_pos dty) (get_reason dty) dty
+          | Tfun _ -> TUtils.make_supportdyn_decl_type pos (get_reason dty) dty
           | _ -> dty
         in
         let ((env, ty_err_opt), ty) = Typing_phase.localize ~ety_env env dty in
@@ -168,10 +168,7 @@ let make_return_type
         (* If type doesn't already support dynamic then wrap it if supportdyn=true *)
         let (env, ty) =
           if supportdyn then
-            TUtils.make_supportdyn
-              (Reason.Rsupport_dynamic_type (get_pos ty))
-              env
-              ty
+            TUtils.make_supportdyn (Reason.Rsupport_dynamic_type pos) env ty
           else
             (env, ty)
         in
@@ -194,7 +191,7 @@ let make_return_type
           | Tprim Aast.Tvoid when not wrap -> ty
           | _ ->
             if add_like then
-              TUtils.make_like env ty
+              TUtils.make_like ~reason:(Reason.Rpessimised_return pos) env ty
             else
               ty
         in

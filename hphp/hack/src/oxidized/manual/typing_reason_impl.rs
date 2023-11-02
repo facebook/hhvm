@@ -93,7 +93,11 @@ impl Reason {
             | RsupportDynamicType(p)
             | RdynamicPartialEnforcement(p, _, _)
             | RrigidTvarEscape(p, _, _, _)
-            | RmissingClass(p) => Some(p),
+            | RmissingClass(p)
+            | RcapturedLike(p)
+            | RpessimisedInout(p)
+            | RpessimisedReturn(p)
+            | RpessimisedProp(p) => Some(p),
             RlostInfo(_, r, _)
             | Rinstantiate(_, _, r)
             | Rtypeconst(r, _, _, _)

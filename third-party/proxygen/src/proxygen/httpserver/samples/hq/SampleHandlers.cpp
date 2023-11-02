@@ -10,6 +10,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <proxygen/lib/utils/Logging.h>
 #include <string>
 
 namespace {
@@ -57,6 +58,11 @@ HTTPTransactionHandler* Dispatcher::getRequestHandler(HTTPMessage* msg) {
   }
   if (boost::algorithm::starts_with(path, "/push")) {
     return new ServerPushHandler(params_);
+  }
+
+  if (boost::algorithm::starts_with(path, "/webtransport/devious-baton")) {
+    return new DeviousBatonHandler(
+        params_, folly::EventBaseManager::get()->getEventBase());
   }
 
   if (!FLAGS_static_root.empty()) {
@@ -286,5 +292,162 @@ void ServerPushHandler::onEOM() noexcept {
 
 void ServerPushHandler::onError(const proxygen::HTTPException& error) noexcept {
   VLOG(10) << "ServerPushHandler::onError error=" << error.what();
+}
+
+void DeviousBatonHandler::onHeadersComplete(
+    std::unique_ptr<proxygen::HTTPMessage> msg) noexcept {
+  VLOG(10) << "WebtransHandler::" << __func__;
+  msg->dumpMessage(2);
+
+  if (msg->getMethod() != proxygen::HTTPMethod::CONNECT) {
+    LOG(ERROR) << "Method not supported";
+    proxygen::HTTPMessage resp;
+    resp.setVersionString(getHttpVersion());
+    resp.setStatusCode(400);
+    resp.setStatusMessage("ERROR");
+    resp.setWantsKeepalive(false);
+    txn_->sendHeaders(resp);
+    txn_->sendEOM();
+    txn_ = nullptr;
+    return;
+  }
+
+  VLOG(2) << "Received CONNECT request for " << msg->getPathAsStringPiece()
+          << " at: "
+          << std::chrono::duration_cast<std::chrono::microseconds>(
+                 std::chrono::steady_clock::now().time_since_epoch())
+                 .count();
+
+  auto status = 500;
+  auto wt = txn_->getWebTransport();
+  if (wt) {
+    devious_.emplace(wt,
+                     devious::DeviousBaton::Mode::SERVER,
+                     [this](WebTransport::StreamReadHandle* readHandle) {
+                       readHandle->awaitNextRead(
+                           evb_, [this](auto readHandle, auto streamData) {
+                             readHandler(readHandle, std::move(streamData));
+                           });
+                     });
+    auto respCode = devious_->onRequest(*msg);
+    if (!respCode) {
+      status = respCode.error();
+    } else {
+      status = 200;
+    }
+  }
+
+  // Send the response to the original get request
+  proxygen::HTTPMessage resp;
+  resp.setVersionString(getHttpVersion());
+  resp.setStatusCode(status);
+  resp.setIsChunked(true);
+  if (status / 100 == 2) {
+    resp.getHeaders().add("sec-webtransport-http3-draft", "draft02");
+    resp.setWantsKeepalive(true);
+  } else {
+    resp.setWantsKeepalive(false);
+    devious_.reset();
+  }
+  resp.dumpMessage(4);
+  txn_->sendHeaders(resp);
+
+  if (devious_) {
+    devious_->start();
+  } else {
+    txn_->sendEOM();
+    txn_ = nullptr;
+  }
+}
+
+void DeviousBatonHandler::readHandler(
+    WebTransport::StreamReadHandle* readHandle,
+    folly::Try<WebTransport::StreamData> streamData) {
+  if (streamData.hasException()) {
+    VLOG(4) << "read error=" << streamData.exception().what();
+  } else {
+    VLOG(4) << "read data id=" << readHandle->getID();
+    devious_->onStreamData(readHandle->getID(),
+                           streams_[readHandle->getID()],
+                           std::move(streamData->data),
+                           streamData->fin);
+    if (!streamData->fin) {
+      readHandle->awaitNextRead(evb_, [this](auto readHandle, auto streamData) {
+        readHandler(readHandle, std::move(streamData));
+      });
+    }
+  }
+}
+
+void DeviousBatonHandler::onWebTransportBidiStream(
+    HTTPCodec::StreamID id, WebTransport::BidiStreamHandle stream) noexcept {
+  VLOG(4) << "New Bidi Stream=" << id;
+  stream.readHandle->awaitNextRead(
+      evb_, [this](auto readHandle, auto streamData) {
+        readHandler(readHandle, std::move(streamData));
+      });
+}
+
+void DeviousBatonHandler::onWebTransportUniStream(
+    HTTPCodec::StreamID id,
+    WebTransport::StreamReadHandle* readHandle) noexcept {
+  VLOG(4) << "New Uni Stream=" << id;
+  readHandle->awaitNextRead(evb_, [this](auto readHandle, auto streamData) {
+    readHandler(readHandle, std::move(streamData));
+  });
+}
+
+void DeviousBatonHandler::onWebTransportSessionClose(
+    folly::Optional<uint32_t> error) noexcept {
+  VLOG(4) << "Session Close error="
+          << (error ? folly::to<std::string>(*error) : std::string("none"));
+}
+
+void DeviousBatonHandler::onDatagram(
+    std::unique_ptr<folly::IOBuf> datagram) noexcept {
+  VLOG(4) << "DeviousBatonHandler::" << __func__;
+}
+
+void DeviousBatonHandler::onBody(std::unique_ptr<folly::IOBuf> body) noexcept {
+  VLOG(4) << "DeviousBatonHandler::" << __func__;
+  VLOG(3) << IOBufPrinter::printHexFolly(body.get(), true);
+  folly::io::Cursor cursor(body.get());
+
+  // parse capsules
+  auto leftToParse = body->computeChainDataLength();
+  while (leftToParse > 0) {
+    auto typeRes = quic::decodeQuicInteger(cursor, leftToParse);
+    if (!typeRes) {
+      VLOG(2) << "Failed to decode capsule type l=" << leftToParse;
+      return;
+    }
+    leftToParse -= typeRes->first;
+    auto capLength = quic::decodeQuicInteger(cursor, leftToParse);
+    if (!capLength) {
+      VLOG(2) << "Failed to decode capsule length";
+      return;
+    }
+    leftToParse -= capLength->first;
+    if (capLength->second > leftToParse) {
+      VLOG(2) << "Derp";
+      return;
+    }
+    VLOG(2) << "Parsed Capsule t=" << typeRes->second
+            << " l=" << capLength->second;
+    cursor.skipAtMost(capLength->second);
+    leftToParse -= capLength->second;
+  }
+}
+
+void DeviousBatonHandler::onEOM() noexcept {
+  VLOG(4) << "DeviousBatonHandler::" << __func__;
+  if (txn_ && !txn_->isEgressEOMSeen()) {
+    txn_->sendEOM();
+  }
+}
+
+void DeviousBatonHandler::onError(
+    const proxygen::HTTPException& error) noexcept {
+  VLOG(4) << "DeviousBatonHandler::onError error=" << error.what();
 }
 } // namespace quic::samples

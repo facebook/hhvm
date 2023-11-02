@@ -201,6 +201,7 @@ if (BUILD_SAMPLES)
           proxygencurl
           proxygenhttpserver
           proxygenhqloggerhelper
+          proxygendeviousbaton
           mvfst::mvfst_transport
           mvfst::mvfst_client
           mvfst::mvfst_server

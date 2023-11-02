@@ -277,6 +277,7 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
         {.maxReceiveTimestampsPerAck = FLAGS_max_ack_receive_timestamps_to_send,
          .receiveTimestampsExponent = kDefaultReceiveTimestampsExponent});
   }
+  hqParams.transportSettings.datagramConfig.enabled = true;
 } // initializeTransportSettings
 
 void initializeHttpServerSettings(HQToolServerParams& hqParams) {

@@ -139,6 +139,10 @@ class QuicAcceptCB : public quic::QuicSocket::ConnectionSetupCallback {
       quicSocket->setConnectionSetupCallback(session);
       quicSocket->setConnectionCallback(session);
       session->setSocket(std::move(quicSocket));
+      session->setEgressSettings(
+          {{proxygen::SettingsId::ENABLE_CONNECT_PROTOCOL, 1},
+           {proxygen::SettingsId::_HQ_DATAGRAM_DRAFT_8, 1},
+           {proxygen::SettingsId::ENABLE_WEBTRANSPORT, 1}});
 
       session->startNow();
       session->onTransportReady();
@@ -248,6 +252,7 @@ HQServer::HQServer(
   server_->setBindV6Only(false);
   server_->setCongestionControllerFactory(
       std::make_shared<ServerCongestionControllerFactory>());
+  params_.transportSettings.datagramConfig.enabled = true;
   server_->setTransportSettings(params_.transportSettings);
 
   server_->setQuicServerTransportFactory(

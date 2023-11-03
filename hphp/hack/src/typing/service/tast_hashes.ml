@@ -67,7 +67,7 @@ let add m ~key ~data =
 
 let is_enabled tcopt = TypecheckerOptions.dump_tast_hashes tcopt
 
-let map ctx path tasts _errors =
+let map ctx path tasts (_errors : Errors.t) =
   let data =
     Timeout.with_timeout
       ~timeout:10

@@ -7,7 +7,7 @@
  *
  *)
 
-type error = (Pos.t, Pos_or_decl.t) User_error.t [@@deriving eq, show]
+type error = (Pos.t, Pos_or_decl.t) User_error.t [@@deriving eq, hash, show]
 
 type finalized_error = (Pos.absolute, Pos.absolute) User_error.t
 [@@deriving eq, show]

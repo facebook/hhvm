@@ -13,7 +13,7 @@ type ('prim_pos, 'pos) t = {
   custom_msgs: string list;
   is_fixmed: bool;
 }
-[@@deriving eq, ord, show]
+[@@deriving eq, hash, ord, show]
 
 val make :
   int ->

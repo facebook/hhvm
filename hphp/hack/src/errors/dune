@@ -17,7 +17,9 @@
   (name user_error)
   (wrapped false)
   (preprocess
-   (pps ppx_deriving.std))
+   (pps
+    ppx_deriving.std
+    ppx_hash))
   (modules
     markdown_lite
     render
@@ -37,7 +39,9 @@
  (name errors)
  (wrapped false)
  (preprocess
-  (pps ppx_deriving.std))
+  (pps
+   ppx_deriving.std
+   ppx_hash))
  (modules
    contextual_error_formatter
    error_category

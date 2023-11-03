@@ -75,7 +75,7 @@ let set_path_prefix prefix v =
 
 type t = prefix * string [@@deriving eq, hash, show, ord, sexp_of, yojson]
 
-type relative_path = t
+type relative_path = t [@@deriving hash]
 
 let prefix (p : t) = fst p
 
@@ -178,6 +178,8 @@ module Map = struct
   let show pp_data x = Format.asprintf "%a" (pp pp_data) x
 
   let yojson_of_t x = make_yojson_of_t suffix x
+
+  let hash_fold_t s t = make_hash_fold_t hash_fold_t s t
 end
 
 let create prefix s =

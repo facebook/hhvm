@@ -86,6 +86,12 @@ module Map : sig
   val show : (Format.formatter -> 'a -> unit) -> 'a t -> string
 
   val yojson_of_t : ('a -> Yojson.Safe.t) -> 'a t -> Yojson.Safe.t
+
+  val hash_fold_t :
+    (Base.Hash.state -> 'a -> Base.Hash.state) ->
+    Base.Hash.state ->
+    'a t ->
+    Base.Hash.state
 end
 
 val relativize_set : prefix -> SSet.t -> Set.t

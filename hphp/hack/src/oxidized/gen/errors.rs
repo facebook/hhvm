@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5a8948409116c0733a0e4026cc831695>>
+// @generated SignedSource<<7baa4aa4c83edf051c6b35aa9077be0b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -58,7 +58,7 @@ pub enum Format {
 impl TrivialDrop for Format {}
 arena_deserializer::impl_deserialize_in_arena!(Format);
 
-#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, ord, show)")]
 pub type Error = user_error::UserError<pos::Pos, pos_or_decl::PosOrDecl>;
 
 pub type PerFileErrors = Vec<Error>;

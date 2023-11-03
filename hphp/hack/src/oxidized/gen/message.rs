@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9c27bc0a3a9372cc14f5cd546ef552c7>>
+// @generated SignedSource<<dced07b7173c771cbc50e84f207f4f7b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -18,7 +18,7 @@ use serde::Serialize;
 #[allow(unused_imports)]
 use crate::*;
 
-#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, ord, show)")]
 pub type TByteString = String;
 
 /// We use `Pos.t message` and `Pos_or_decl.t message` on the server
@@ -38,6 +38,6 @@ pub type TByteString = String;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, ord, show)")]
 #[repr(C)]
 pub struct Message<A>(pub A, pub bstr::BString);

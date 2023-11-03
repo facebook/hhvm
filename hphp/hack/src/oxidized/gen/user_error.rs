@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<dd596b63609e073e5d38abaed07cc27d>>
+// @generated SignedSource<<1e89075be2f57b24e27b3aaea3944f2b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -31,12 +31,13 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, ord, show)")]
 #[repr(C)]
 pub struct UserError<PrimPos, Pos> {
     pub code: isize,
     pub claim: message::Message<PrimPos>,
     pub reasons: Vec<message::Message<Pos>>,
+    #[rust_to_ocaml(attr = "hash.ignore")]
     pub quickfixes: Vec<quickfix::Quickfix<PrimPos>>,
     pub custom_msgs: Vec<String>,
     pub is_fixmed: bool,

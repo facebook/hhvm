@@ -6,7 +6,7 @@
  *
  *)
 
-type 'a t = 'a * string [@@deriving eq, ord, show]
+type 'a t = 'a * string [@@deriving eq, hash, ord, show]
 
 val map : 'a t -> f:('a -> 'b) -> 'b t
 

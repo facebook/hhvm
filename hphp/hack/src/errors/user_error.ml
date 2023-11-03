@@ -11,11 +11,11 @@ type ('prim_pos, 'pos) t = {
   code: int;
   claim: 'prim_pos Message.t;
   reasons: 'pos Message.t list;
-  quickfixes: 'prim_pos Quickfix.t list;
+  quickfixes: 'prim_pos Quickfix.t list; [@hash.ignore]
   custom_msgs: string list;
   is_fixmed: bool;
 }
-[@@deriving eq, ord, show]
+[@@deriving eq, hash, ord, show]
 
 let make
     code

@@ -4114,7 +4114,7 @@ Optional<IsTypeOp> type_to_istypeop(const Type& t) {
   return std::nullopt;
 }
 
-Optional<Type> type_of_type_structure(const Index& index,
+Optional<Type> type_of_type_structure(const IIndex& index,
                                       Context ctx,
                                       SArray ts) {
   auto base = [&] () -> Optional<Type> {

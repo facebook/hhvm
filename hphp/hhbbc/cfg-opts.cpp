@@ -600,8 +600,9 @@ void split_critical_edges(const Index& index, FuncAnalysis& ainfo,
     });
     assertx(replacedDstTarget);
 
+    IndexAdaptor adaptor{index};
     auto collect = CollectedInfo {
-      index, ainfo.ctx, nullptr,
+      adaptor, ainfo.ctx, nullptr,
       CollectionOpts{}, nullptr, &ainfo
     };
     auto const ctx = AnalysisContext { ainfo.ctx.unit, func, ainfo.ctx.cls };

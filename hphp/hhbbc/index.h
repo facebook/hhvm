@@ -24,7 +24,6 @@
 #include <boost/variant.hpp>
 #include <tbb/concurrent_hash_map.h>
 
-#include <folly/synchronization/Baton.h>
 #include <folly/Hash.h>
 
 #include "hphp/util/compact-vector.h"
@@ -1399,6 +1398,243 @@ private:
 
 private:
   std::unique_ptr<IndexData> const m_data;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+// Abstracts away particular Index implementation from the analysis
+// logic.
+struct IIndex {
+  IIndex() = default;
+  IIndex(const IIndex&) = delete;
+  IIndex(IIndex&&) = delete;
+  IIndex& operator=(const IIndex&) = delete;
+  IIndex& operator=(IIndex&&) = delete;
+
+  virtual const php::Unit* lookup_func_unit(const php::Func&) const = 0;
+
+  virtual const php::Unit* lookup_class_unit(const php::Class&) const = 0;
+
+  virtual const php::Class* lookup_const_class(const php::Const&) const = 0;
+
+  virtual const php::Class* lookup_closure_context(const php::Class&) const = 0;
+
+  virtual const CompactVector<const php::Class*>*
+  lookup_closures(const php::Class*) const = 0;
+
+  virtual const hphp_fast_set<const php::Func*>*
+  lookup_extra_methods(const php::Class*) const = 0;
+
+  virtual Optional<res::Class> resolve_class(SString) const = 0;
+
+  virtual const php::TypeAlias* lookup_type_alias(SString) const = 0;
+
+  virtual res::Func resolve_func_or_method(const php::Func&) const = 0;
+
+  virtual res::Func resolve_func(SString) const = 0;
+
+  virtual res::Func resolve_method(Context,
+                                   const Type& thisType,
+                                   SString name) const = 0;
+
+  virtual res::Func resolve_ctor(const Type& obj) const = 0;
+
+  virtual std::vector<std::pair<SString, ClsConstInfo>>
+  lookup_class_constants(const php::Class&) const = 0;
+
+  virtual ClsConstLookupResult
+  lookup_class_constant(Context, const Type& cls, const Type& name) const = 0;
+
+  virtual ClsTypeConstLookupResult lookup_class_type_constant(
+      const Type& cls,
+      const Type& name,
+      const Index::ClsTypeConstLookupResolver& resolver = {}
+  ) const = 0;
+
+  virtual Type lookup_constant(Context, SString) const = 0;
+
+  virtual bool func_depends_on_arg(const php::Func* func, int arg) const = 0;
+
+  virtual Index::ReturnType
+  lookup_foldable_return_type(Context, const CallContext&) const = 0;
+
+  virtual Index::ReturnType
+  lookup_return_type(Context, MethodsInfo*, res::Func,
+                     Dep dep = Dep::ReturnTy) const = 0;
+
+  virtual Index::ReturnType
+  lookup_return_type(Context caller,
+                     MethodsInfo*,
+                     const CompactVector<Type>& args,
+                     const Type& context,
+                     res::Func,
+                     Dep dep = Dep::ReturnTy) const = 0;
+
+  virtual std::pair<Index::ReturnType, size_t>
+  lookup_return_type_raw(const php::Func*) const = 0;
+
+  virtual CompactVector<Type>
+  lookup_closure_use_vars(const php::Func*,
+                          bool move = false) const = 0;
+
+  virtual PropState lookup_private_props(const php::Class*,
+                                         bool move = false) const = 0;
+
+  virtual PropState lookup_private_statics(const php::Class*,
+                                           bool move = false) const = 0;
+
+  virtual PropLookupResult lookup_static(Context,
+                                         const PropertiesInfo& privateProps,
+                                         const Type& cls,
+                                         const Type& name) const = 0;
+
+  virtual Type lookup_public_prop(const Type& obj, const Type& name) const = 0;
+
+  virtual PropMergeResult
+  merge_static_type(Context ctx,
+                    PublicSPropMutations& publicMutations,
+                    PropertiesInfo& privateProps,
+                    const Type& cls,
+                    const Type& name,
+                    const Type& val,
+                    bool checkUB = false,
+                    bool ignoreConst = false,
+                    bool mustBeReadOnly = false) const = 0;
+
+  virtual bool using_class_dependencies() const = 0;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+struct IndexAdaptor : public IIndex {
+  explicit IndexAdaptor(const Index& index)
+   : index{const_cast<Index&>(index)} {}
+
+  const php::Unit* lookup_func_unit(const php::Func& f) const override {
+    return index.lookup_func_unit(f);
+  }
+  const php::Unit* lookup_class_unit(const php::Class& c) const override {
+    return index.lookup_class_unit(c);
+  }
+  const php::Class* lookup_const_class(const php::Const& c) const override {
+    return index.lookup_const_class(c);
+  }
+  const php::Class* lookup_closure_context(const php::Class& c) const override {
+    return index.lookup_closure_context(c);
+  }
+  const CompactVector<const php::Class*>*
+  lookup_closures(const php::Class* c) const override {
+    return index.lookup_closures(c);
+  }
+  const hphp_fast_set<const php::Func*>*
+  lookup_extra_methods(const php::Class* c) const override {
+    return index.lookup_extra_methods(c);
+  }
+  Optional<res::Class> resolve_class(SString c) const override {
+    return index.resolve_class(c);
+  }
+  const php::TypeAlias* lookup_type_alias(SString a) const override {
+    return index.lookup_type_alias(a);
+  }
+  res::Func resolve_func_or_method(const php::Func& f) const override {
+    return index.resolve_func_or_method(f);
+  }
+  res::Func resolve_func(SString s) const override {
+    return index.resolve_func(s);
+  }
+  res::Func resolve_method(Context c, const Type& t, SString n) const override {
+    return index.resolve_method(c, t, n);
+  }
+  res::Func resolve_ctor(const Type& o) const override {
+    return index.resolve_ctor(o);
+  }
+  std::vector<std::pair<SString, ClsConstInfo>>
+  lookup_class_constants(const php::Class& c) const override {
+    return index.lookup_class_constants(c);
+  }
+  ClsConstLookupResult lookup_class_constant(Context c,
+                                             const Type& t,
+                                             const Type& n) const override {
+    return index.lookup_class_constant(c, t, n);
+  }
+  ClsTypeConstLookupResult
+  lookup_class_type_constant(
+    const Type& c,
+    const Type& n,
+    const Index::ClsTypeConstLookupResolver& r = {}
+  ) const override {
+    return index.lookup_class_type_constant(c, n, r);
+  }
+  Type lookup_constant(Context c, SString s) const override {
+    return index.lookup_constant(c, s);
+  }
+  bool func_depends_on_arg(const php::Func* f, int p) const override {
+    return index.func_depends_on_arg(f, p);
+  }
+  Index::ReturnType
+  lookup_foldable_return_type(Context c1,
+                              const CallContext& c2) const override {
+    return index.lookup_foldable_return_type(c1, c2);
+  }
+  Index::ReturnType lookup_return_type(Context c, MethodsInfo* m, res::Func f,
+                                       Dep d = Dep::ReturnTy) const override {
+    return index.lookup_return_type(c, m, f, d);
+  }
+  Index::ReturnType lookup_return_type(Context c,
+                                       MethodsInfo* m,
+                                       const CompactVector<Type>& a,
+                                       const Type& t,
+                                       res::Func f,
+                                       Dep d = Dep::ReturnTy) const override {
+    return index.lookup_return_type(c, m, a, t, f, d);
+  }
+  std::pair<Index::ReturnType, size_t>
+  lookup_return_type_raw(const php::Func* f) const override {
+    return index.lookup_return_type_raw(f);
+  }
+  CompactVector<Type>
+  lookup_closure_use_vars(const php::Func* f, bool m = false) const override {
+    return index.lookup_closure_use_vars(f, m);
+  }
+  PropState lookup_private_props(const php::Class* c,
+                                 bool m = false) const override {
+    return index.lookup_private_props(c, m);
+  }
+  PropState lookup_private_statics(const php::Class* c,
+                                   bool m = false) const override {
+    return index.lookup_private_statics(c, m);
+  }
+  PropLookupResult lookup_static(Context c1,
+                                 const PropertiesInfo& p,
+                                 const Type& c2,
+                                 const Type& n) const override {
+    return index.lookup_static(c1, p, c2, n);
+  }
+  Type lookup_public_prop(const Type& o, const Type& n) const override {
+    return index.lookup_public_prop(o, n);
+  }
+  PropMergeResult
+  merge_static_type(Context ctx,
+                    PublicSPropMutations& publicMutations,
+                    PropertiesInfo& privateProps,
+                    const Type& cls,
+                    const Type& name,
+                    const Type& val,
+                    bool checkUB = false,
+                    bool ignoreConst = false,
+                    bool mustBeReadOnly = false) const override {
+    return index.merge_static_type(
+      ctx, publicMutations, privateProps,
+      cls, name, val, checkUB, ignoreConst,
+      mustBeReadOnly
+    );
+  }
+  bool using_class_dependencies() const override {
+    return index.using_class_dependencies();
+  }
+
+private:
+  Index& index;
 };
 
 //////////////////////////////////////////////////////////////////////

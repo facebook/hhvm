@@ -235,7 +235,7 @@ struct ClassAnalysis {
 // Local state for resolving class constants and reaching a fixed
 // point.
 struct ClsConstantWork {
-  ClsConstantWork(const Index&, const php::Class&);
+  ClsConstantWork(const IIndex&, const php::Class&);
 
   ClsConstLookupResult lookup(SString);
 
@@ -272,7 +272,7 @@ struct ClsConstantWork {
  *
  * This routine makes no changes to the php::Func.
  */
-FuncAnalysis analyze_func(const Index&, const AnalysisContext&,
+FuncAnalysis analyze_func(const IIndex&, const AnalysisContext&,
                           CollectionOpts opts);
 
 /*
@@ -285,7 +285,7 @@ FuncAnalysis analyze_func(const Index&, const AnalysisContext&,
  *
  * Currently this is not supported for closure bodies.
  */
-FuncAnalysis analyze_func_inline(const Index&,
+FuncAnalysis analyze_func_inline(const IIndex&,
                                  const AnalysisContext&,
                                  const Type& thisType,
                                  const CompactVector<Type>& args,
@@ -298,7 +298,7 @@ FuncAnalysis analyze_func_inline(const Index&,
  * This involves doing a analyze_func call on each of its functions,
  * and inferring some whole-class information at the same time.
  */
-ClassAnalysis analyze_class(const Index&, const Context&);
+ClassAnalysis analyze_class(const IIndex&, const Context&);
 
 /*
  * Represents the various interp state at some particular instruction
@@ -407,7 +407,7 @@ struct ConstraintType {
   // comes to properties.
   bool maybeMixed{false};
 };
-ConstraintType lookup_constraint(const Index&,
+ConstraintType lookup_constraint(const IIndex&,
                                  const Context&,
                                  const TypeConstraint&,
                                  const Type& candidate = TCell);
@@ -419,7 +419,7 @@ ConstraintType lookup_constraint(const Index&,
  * indicating whether the verification is effect free (the
  * verification could convert a type without causing a side-effect).
  */
-std::tuple<Type, bool, bool> verify_param_type(const Index&,
+std::tuple<Type, bool, bool> verify_param_type(const IIndex&,
                                                const Context&,
                                                uint32_t paramId,
                                                const Type&);
@@ -430,7 +430,7 @@ std::tuple<Type, bool, bool> verify_param_type(const Index&,
  * the type as is. This might return TBottom if the type is not compatible with
  * the type-hint.
  */
-Type adjust_type_for_prop(const Index& index,
+Type adjust_type_for_prop(const IIndex& index,
                           const php::Class& propCls,
                           const TypeConstraint* tc,
                           const Type& ty);
@@ -459,11 +459,11 @@ std::string show(const ConstraintType&);
 /*
  * Try to resolve self/parent types in the given context.
  */
-Optional<Type> selfCls(const Index&, const Context&);
-Optional<Type> selfClsExact(const Index&, const Context&);
+Optional<Type> selfCls(const IIndex&, const Context&);
+Optional<Type> selfClsExact(const IIndex&, const Context&);
 
-Optional<Type> parentCls(const Index&, const Context&);
-Optional<Type> parentClsExact(const Index&, const Context&);
+Optional<Type> parentCls(const IIndex&, const Context&);
+Optional<Type> parentClsExact(const IIndex&, const Context&);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -472,7 +472,7 @@ Optional<Type> parentClsExact(const Index&, const Context&);
  * index.resolve_class(), but has some additional sanity checks that
  * the resultant class is a builtin.
  */
-res::Class builtin_class(const Index&, SString);
+res::Class builtin_class(const IIndex&, SString);
 
 //////////////////////////////////////////////////////////////////////
 

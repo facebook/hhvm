@@ -162,7 +162,7 @@ struct StepFlags {
  * instruction, or for a whole block).
  */
 struct Interp {
-  const Index& index;
+  const IIndex& index;
   AnalysisContext ctx;
   CollectedInfo& collect;
   const BlockId bid;

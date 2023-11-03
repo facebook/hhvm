@@ -325,7 +325,7 @@ PropState make_unknown_propstate(const Index& index,
     if (filter(prop)) {
       auto& elem = ret[prop.name];
       elem.ty = adjust_type_for_prop(
-        index,
+        IndexAdaptor { index },
         *cls,
         &prop.typeConstraint,
         TCell
@@ -6513,7 +6513,7 @@ Type adjust_closure_context(const Index& index, const CallContext& ctx) {
       ctx.callee,
       index.lookup_closure_context(*ctx.callee->cls)
     };
-    if (auto const s = selfCls(index, withClosureContext)) {
+    if (auto const s = selfCls(IndexAdaptor { index }, withClosureContext)) {
       return setctx(toobj(*s));
     }
     return TObj;
@@ -6543,7 +6543,7 @@ Index::ReturnType context_sensitive_return_type(IndexData& data,
         finfo->func->cls
       };
       return callCtx.args[i].strictlyMoreRefined(
-        lookup_constraint(*data.m_index, ctx, constraint).upper
+        lookup_constraint(IndexAdaptor { *data.m_index }, ctx, constraint).upper
       );
     }
     return callCtx.args[i].strictSubtypeOf(TInitCell);
@@ -6601,7 +6601,7 @@ Index::ReturnType context_sensitive_return_type(IndexData& data,
       &ctx.forDep()
     };
     auto fa = analyze_func_inline(
-      *data.m_index,
+      IndexAdaptor { *data.m_index },
       calleeCtx,
       adjustedCtx,
       callCtx.args
@@ -6676,7 +6676,12 @@ Type initial_type_for_public_sprop(const Index& index,
   auto const ty = from_cell(prop.val);
   if (ty.subtypeOf(BUninit)) return TBottom;
   if (prop.attrs & AttrSystemInitialValue) return ty;
-  return adjust_type_for_prop(index, cls, &prop.typeConstraint, ty);
+  return adjust_type_for_prop(
+    IndexAdaptor { index },
+    cls,
+    &prop.typeConstraint,
+    ty
+  );
 }
 
 Type lookup_public_prop_impl(
@@ -6706,7 +6711,7 @@ Type lookup_public_prop_impl(
 
   // Get a type corresponding to its declared type-hint (if any).
   auto ty = adjust_type_for_prop(
-    *data.m_index, *knownCls, &prop->typeConstraint, TCell
+    IndexAdaptor { *data.m_index }, *knownCls, &prop->typeConstraint, TCell
   );
   // We might have to include the initial value which might be outside of the
   // type-hint.
@@ -6786,13 +6791,16 @@ PropMergeResult prop_tc_effects(const Index& index,
   auto const check = [&] (const TypeConstraint& tc, const Type& t) {
     // If the type as is satisfies the constraint, we won't throw and
     // the type is unchanged.
-      if (t.moreRefined(lookup_constraint(index, ctx, tc, t).lower)) {
+      if (t.moreRefined(
+            lookup_constraint(IndexAdaptor { index }, ctx, tc, t).lower)
+         ) {
       return R{ t, TriBool:: No };
     }
     // Otherwise adjust the type. If we get a Bottom we'll definitely
     // throw. We already know the type doesn't completely satisfy the
     // constraint, so we'll at least maybe throw.
-    auto adjusted = adjust_type_for_prop(index, *ctx.cls, &tc, t);
+    auto adjusted =
+      adjust_type_for_prop(IndexAdaptor { index }, *ctx.cls, &tc, t);
     auto const throws = yesOrMaybe(adjusted.subtypeOf(BBottom));
     return R{ std::move(adjusted), throws };
   };
@@ -6858,7 +6866,7 @@ PropLookupResult lookup_static_impl(IndexData& data,
           // value.
           return union_of(
             adjust_type_for_prop(
-              *data.m_index,
+              IndexAdaptor { *data.m_index },
               *ci->cls,
               &prop.typeConstraint,
               TInitCell
@@ -15710,8 +15718,12 @@ void Index::preresolve_type_structures() {
       CompactVector<TAUpdate> updates;
       for (auto const& typeAlias : unit->typeAliases) {
         assertx(typeAlias->resolvedTypeStructure.isNull());
-        if (auto const ts =
-            resolve_type_structure(*this, nullptr, *typeAlias).sarray()) {
+        if (auto const ts = resolve_type_structure(
+              IndexAdaptor { *this },
+              nullptr,
+              *typeAlias
+            ).sarray()
+           ) {
           updates.emplace_back(TAUpdate{ typeAlias.get(), ts });
         }
       }
@@ -15756,8 +15768,12 @@ void Index::preresolve_type_structures() {
         assertx(tvIsDict(*cns.val));
 
         // If we can resolve it, schedule an update
-        if (auto const resolved =
-            resolve_type_structure(*this, cns, *cinfo->cls).sarray()) {
+        if (auto const resolved = resolve_type_structure(
+              IndexAdaptor { *this },
+              cns,
+              *cinfo->cls
+            ).sarray()
+           ) {
           auto newCns = cns;
           newCns.resolvedTypeStructure = resolved;
           updates.emplace_back(CnsUpdate{ cinfo.get(), kv.second, newCns });
@@ -16731,7 +16747,7 @@ Index::lookup_class_type_constant(
     // the normal way.
     auto resolved = resolver
       ? resolver(cns, *ci->cls)
-      : resolve_type_structure(*this, cns, *ci->cls);
+      : resolve_type_structure(IndexAdaptor { *this }, cns, *ci->cls);
 
     // The result of resolve_type_structure isn't, in general,
     // static. However a type-constant will always be, so force that
@@ -16869,7 +16885,7 @@ Index::lookup_foldable_return_type(Context ctx,
 
     auto const wf = php::WideFunc::cns(func);
     auto const fa = analyze_func_inline(
-      *this,
+      IndexAdaptor { *this },
       AnalysisContext { func->unit, wf, func->cls, &ctx.forDep() },
       ctxType,
       calleeCtx.args,
@@ -17140,7 +17156,7 @@ PropState Index::lookup_public_statics(const php::Class* cls) const {
         return std::make_pair(
           union_of(
             adjust_type_for_prop(
-              *this,
+              IndexAdaptor { *this },
               *cls,
               &prop.typeConstraint,
               TInitCell
@@ -17360,7 +17376,7 @@ PropMergeResult Index::merge_static_type(
       ITRACE(4, "unknown class and prop. merging everything\n");
       publicMutations.mergeUnknown(ctx);
       privateProps.mergeInAllPrivateStatics(
-        *this, unctx(val), ignoreConst, mustBeReadOnly
+        IndexAdaptor { *this }, unctx(val), ignoreConst, mustBeReadOnly
       );
     } else {
       // Otherwise we don't know `cls', but do know the property
@@ -17373,7 +17389,7 @@ PropMergeResult Index::merge_static_type(
       // Assume that it could possibly affect any private property with
       // the same name.
       privateProps.mergeInPrivateStatic(
-        *this, sname, unctx(val), ignoreConst, mustBeReadOnly
+        IndexAdaptor { *this }, sname, unctx(val), ignoreConst, mustBeReadOnly
       );
     }
 
@@ -17921,7 +17937,7 @@ void Index::refine_public_statics(DependencyContextSet& deps) {
 
         // We can't keep context dependent types in public properties.
         auto newType = adjust_type_for_prop(
-          *this,
+          IndexAdaptor { *this },
           *cinfo->cls,
           &prop.typeConstraint,
           unctx(union_of(std::move(knownClsType), std::move(unknownClsType)))

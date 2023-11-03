@@ -73,7 +73,7 @@ struct ISS {
     , analyzeDepth(0)
   {}
 
-  const Index& index;
+  const IIndex& index;
   const AnalysisContext ctx;
   CollectedInfo& collect;
   const BlockId bid;
@@ -391,7 +391,7 @@ inline Type selfExact(ISS& env) {
 //////////////////////////////////////////////////////////////////////
 // class constants
 
-inline ClsConstLookupResult lookupClsConstant(const Index& index,
+inline ClsConstLookupResult lookupClsConstant(const IIndex& index,
                                               const Context& ctx,
                                               const CollectedInfo* collect,
                                               const Type& cls,

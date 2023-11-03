@@ -316,7 +316,8 @@ void insert_assertions(VisitContext& visit, BlockId bid, State state) {
   std::vector<uint8_t> obviousStackOutputs(state.stack.size(), false);
 
   auto fallthrough = cblk->fallthrough;
-  auto interp = Interp { index, ctx, visit.collect, bid, cblk.get(), state };
+  IndexAdaptor adaptor{ index };
+  auto interp = Interp { adaptor, ctx, visit.collect, bid, cblk.get(), state };
 
   for (auto& op : cblk->hhbcs) {
     FTRACE(2, "  == {}\n", show(*func, op));
@@ -458,7 +459,8 @@ struct OptimizeIterState {
     auto const& ainfo = visit.ainfo;
     auto const blk = func.blocks()[bid].get();
     auto const ctx = AnalysisContext { ainfo.ctx.unit, func, ainfo.ctx.cls };
-    auto interp = Interp { visit.index, ctx, visit.collect, bid, blk, state };
+    IndexAdaptor adaptor{ visit.index };
+    auto interp = Interp { adaptor, ctx, visit.collect, bid, blk, state };
     for (uint32_t opIdx = 0; opIdx < blk->hhbcs.size(); ++opIdx) {
       // If we've already determined that nothing is eligible, we can just stop.
       if (!eligible.any()) break;
@@ -673,7 +675,8 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo,
   bool again;
   Optional<CollectedInfo> collect;
   Optional<VisitContext> visit;
-  collect.emplace(index, ainfo.ctx, nullptr, CollectionOpts{}, nullptr, &ainfo);
+  IndexAdaptor adaptor{ index };
+  collect.emplace(adaptor, ainfo.ctx, nullptr, CollectionOpts{}, nullptr, &ainfo);
   visit.emplace(index, ainfo, *collect, func);
 
   update_bytecode(func, std::move(ainfo.blockUpdates), &ainfo);
@@ -701,10 +704,10 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo,
      * anything else.
      */
     auto const ctx = AnalysisContext { ainfo.ctx.unit, func, ainfo.ctx.cls };
-    ainfo = analyze_func(index, ctx, CollectionOpts{});
+    ainfo = analyze_func(adaptor, ctx, CollectionOpts{});
     update_bytecode(func, std::move(ainfo.blockUpdates), &ainfo);
     collect.emplace(
-      index, ainfo.ctx, nullptr, CollectionOpts{}, nullptr, &ainfo
+      adaptor, ainfo.ctx, nullptr, CollectionOpts{}, nullptr, &ainfo
     );
     visit.emplace(index, ainfo, *collect, func);
 

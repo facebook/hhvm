@@ -70,7 +70,7 @@ uint32_t rpoId(const FuncAnalysis& ai, BlockId blk) {
 const StaticString s_reified_generics_var("0ReifiedGenerics");
 const StaticString s_coeffects_var("0Coeffects");
 
-Optional<State> entry_state(const Index& index, CollectedInfo& collect,
+Optional<State> entry_state(const IIndex& index, CollectedInfo& collect,
                             const Context& ctx, const KnownArgs* knownArgs) {
   auto ret = State{};
   ret.initialized = true;
@@ -215,7 +215,7 @@ Optional<State> entry_state(const Index& index, CollectedInfo& collect,
  * this), but that case will be discovered when iterating.
  */
 dataflow_worklist<uint32_t>
-prepare_incompleteQ(const Index& index,
+prepare_incompleteQ(const IIndex& index,
                     FuncAnalysis& ai,
                     CollectedInfo& collect,
                     const KnownArgs* knownArgs) {
@@ -280,13 +280,13 @@ prepare_incompleteQ(const Index& index,
  * Note that in the interpreter code, ctx.func->cls is not
  * necessarily the same as ctx.cls because of closures.
  */
-AnalysisContext adjust_closure_context(const Index& index,
+AnalysisContext adjust_closure_context(const IIndex& index,
                                        AnalysisContext ctx) {
   if (ctx.cls) ctx.cls = index.lookup_closure_context(*ctx.cls);
   return ctx;
 }
 
-Type fixup_return_type(const Index& index, const php::Func& func, Type ty) {
+Type fixup_return_type(const IIndex& index, const php::Func& func, Type ty) {
   if (func.isGenerator) {
     if (func.isAsync) {
       // Async generators always return AsyncGenerator object.
@@ -304,7 +304,7 @@ Type fixup_return_type(const Index& index, const php::Func& func, Type ty) {
   }
 }
 
-FuncAnalysis do_analyze_collect(const Index& index,
+FuncAnalysis do_analyze_collect(const IIndex& index,
                                 const AnalysisContext& ctx,
                                 CollectedInfo& collect,
                                 const KnownArgs* knownArgs) {
@@ -524,7 +524,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
   return ai;
 }
 
-FuncAnalysis do_analyze(const Index& index,
+FuncAnalysis do_analyze(const IIndex& index,
                         const AnalysisContext& inputCtx,
                         ClassAnalysis* clsAnalysis,
                         ClsConstantWork* clsCnsWork = nullptr,
@@ -693,7 +693,7 @@ void ClassAnalysisWorklist::scheduleForReturnType(const php::Func& callee) {
 
 //////////////////////////////////////////////////////////////////////
 
-ClsConstantWork::ClsConstantWork(const Index& index,
+ClsConstantWork::ClsConstantWork(const IIndex& index,
                                  const php::Class& cls): cls{cls} {
   auto initial = index.lookup_class_constants(cls);
   for (auto& [name, info] : initial) constants.emplace(name, std::move(info));
@@ -780,12 +780,12 @@ FuncAnalysis::FuncAnalysis(AnalysisContext ctx)
   }
 }
 
-FuncAnalysis analyze_func(const Index& index, const AnalysisContext& ctx,
+FuncAnalysis analyze_func(const IIndex& index, const AnalysisContext& ctx,
                           CollectionOpts opts) {
   return do_analyze(index, ctx, nullptr, nullptr, nullptr, opts);
 }
 
-FuncAnalysis analyze_func_inline(const Index& index,
+FuncAnalysis analyze_func_inline(const IIndex& index,
                                  const AnalysisContext& ctx,
                                  const Type& thisType,
                                  const CompactVector<Type>& args,
@@ -800,7 +800,7 @@ FuncAnalysis analyze_func_inline(const Index& index,
                     opts | CollectionOpts::Inlining);
 }
 
-ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
+ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
 
   assertx(ctx.cls && !ctx.func && !is_used_trait(*ctx.cls));
 
@@ -1350,7 +1350,8 @@ locally_propagated_states(const Index& index,
   StateMutationUndo undos;
   undos.events.reserve((blk->hhbcs.size() + 1) * 4);
 
-  auto interp = Interp { index, ctx, collect, bid, blk, state, &undos };
+  IndexAdaptor adaptor{index};
+  auto interp = Interp { adaptor, ctx, collect, bid, blk, state, &undos };
 
   for (auto const& op : blk->hhbcs) {
     auto const markIdx = undos.events.size();
@@ -1383,7 +1384,8 @@ State locally_propagated_bid_state(const Index& index,
 
   auto const originalState = state;
   auto const blk = ctx.func.blocks()[bid].get();
-  auto interp = Interp { index, ctx, collect, bid, blk, state };
+  IndexAdaptor adaptor{index};
+  auto interp = Interp { adaptor, ctx, collect, bid, blk, state };
 
   State ret{};
   auto const propagate = [&] (BlockId target, const State* st) {
@@ -1568,7 +1570,7 @@ ConstraintType type_from_constraint(
 }
 
 ConstraintType
-lookup_constraint(const Index& index,
+lookup_constraint(const IIndex& index,
                   const Context& ctx,
                   const TypeConstraint& tc,
                   const Type& candidate) {
@@ -1579,7 +1581,7 @@ lookup_constraint(const Index& index,
   );
 }
 
-std::tuple<Type, bool, bool> verify_param_type(const Index& index,
+std::tuple<Type, bool, bool> verify_param_type(const IIndex& index,
                                                const Context& ctx,
                                                uint32_t paramId,
                                                const Type& t) {
@@ -1633,7 +1635,7 @@ std::tuple<Type, bool, bool> verify_param_type(const Index& index,
   return { std::move(refined), noop, effectFree };
 }
 
-Type adjust_type_for_prop(const Index& index,
+Type adjust_type_for_prop(const IIndex& index,
                           const php::Class& propCls,
                           const TypeConstraint* tc,
                           const Type& ty) {
@@ -1661,7 +1663,8 @@ Type adjust_type_for_prop(const Index& index,
   return ret;
 }
 
-ConstraintType union_constraint(const ConstraintType& a, const ConstraintType& b) {
+ConstraintType union_constraint(const ConstraintType& a,
+                                const ConstraintType& b) {
   return ConstraintType {
     intersection_of(a.lower, b.lower),
     union_of(a.upper, b.upper),
@@ -1672,7 +1675,7 @@ ConstraintType union_constraint(const ConstraintType& a, const ConstraintType& b
 
 //////////////////////////////////////////////////////////////////////
 
-Optional<Type> selfCls(const Index& index, const Context& ctx) {
+Optional<Type> selfCls(const IIndex& index, const Context& ctx) {
   if (!ctx.cls || is_used_trait(*ctx.cls)) {
     return std::nullopt;
   }
@@ -1682,7 +1685,7 @@ Optional<Type> selfCls(const Index& index, const Context& ctx) {
   return std::nullopt;
 }
 
-Optional<Type> selfClsExact(const Index& index, const Context& ctx) {
+Optional<Type> selfClsExact(const IIndex& index, const Context& ctx) {
   if (!ctx.cls || is_used_trait(*ctx.cls)) {
     return std::nullopt;
   }
@@ -1692,7 +1695,7 @@ Optional<Type> selfClsExact(const Index& index, const Context& ctx) {
   return std::nullopt;
 }
 
-Optional<Type> parentCls(const Index& index, const Context& ctx) {
+Optional<Type> parentCls(const IIndex& index, const Context& ctx) {
   if (!ctx.cls || is_used_trait(*ctx.cls) || !ctx.cls->parentName) {
     return std::nullopt;
   }
@@ -1702,7 +1705,7 @@ Optional<Type> parentCls(const Index& index, const Context& ctx) {
   return std::nullopt;
 }
 
-Optional<Type> parentClsExact(const Index& index, const Context& ctx) {
+Optional<Type> parentClsExact(const IIndex& index, const Context& ctx) {
   if (!ctx.cls || is_used_trait(*ctx.cls) || !ctx.cls->parentName) {
     return std::nullopt;
   }
@@ -1714,7 +1717,7 @@ Optional<Type> parentClsExact(const Index& index, const Context& ctx) {
 
 //////////////////////////////////////////////////////////////////////
 
-res::Class builtin_class(const Index& index, SString name) {
+res::Class builtin_class(const IIndex& index, SString name) {
   auto const rcls = index.resolve_class(name);
   // Builtin classes should always be resolved, except for Closure,
   // which are force to be unresolved.

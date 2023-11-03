@@ -153,7 +153,7 @@ std::string show(const php::Func& f, const Iter& iter) {
 
 //////////////////////////////////////////////////////////////////////
 
-CollectedInfo::CollectedInfo(const Index& index,
+CollectedInfo::CollectedInfo(const IIndex& index,
                              Context ctx,
                              ClassAnalysis* cls,
                              CollectionOpts opts,
@@ -172,7 +172,7 @@ CollectedInfo::CollectedInfo(const Index& index,
 
 //////////////////////////////////////////////////////////////////////
 
-State with_throwable_only(const Index& index, const State& src) {
+State with_throwable_only(const IIndex& index, const State& src) {
   auto throwable = subObj(builtin_class(index, s_Throwable.get()));
   auto ret          = State{};
   ret.initialized   = src.initialized;
@@ -204,7 +204,7 @@ State with_throwable_only(const Index& index, const State& src) {
 
 //////////////////////////////////////////////////////////////////////
 
-PropertiesInfo::PropertiesInfo(const Index& index,
+PropertiesInfo::PropertiesInfo(const IIndex& index,
                                Context ctx,
                                ClassAnalysis* cls)
   : m_cls(cls)
@@ -254,7 +254,7 @@ PropertiesInfo::readPrivateStatic(SString name) const {
   return it == m_privateStatics.end() ? nullptr : &it->second;
 }
 
-void PropertiesInfo::mergeInPrivateProp(const Index& index,
+void PropertiesInfo::mergeInPrivateProp(const IIndex& index,
                                         SString name,
                                         const Type& t) {
   if (!m_cls || t.is(BBottom)) return;
@@ -278,7 +278,7 @@ void PropertiesInfo::mergeInPrivateProp(const Index& index,
   }
 }
 
-void PropertiesInfo::mergeInPrivateStatic(const Index& index,
+void PropertiesInfo::mergeInPrivateStatic(const IIndex& index,
                                           SString name,
                                           const Type& t,
                                           bool ignoreConst,
@@ -326,7 +326,7 @@ void PropertiesInfo::mergeInPrivateStaticPreAdjusted(SString name,
   }
 }
 
-void PropertiesInfo::mergeInAllPrivateProps(const Index& index,
+void PropertiesInfo::mergeInAllPrivateProps(const IIndex& index,
                                             const Type& t) {
   if (!m_cls || t.is(BBottom)) return;
   for (auto& kv : m_cls->privateProperties) {
@@ -349,7 +349,7 @@ void PropertiesInfo::mergeInAllPrivateProps(const Index& index,
   }
 }
 
-void PropertiesInfo::mergeInAllPrivateStatics(const Index& index,
+void PropertiesInfo::mergeInAllPrivateStatics(const IIndex& index,
                                               const Type& t,
                                               bool ignoreConst,
                                               bool mustBeReadOnly) {

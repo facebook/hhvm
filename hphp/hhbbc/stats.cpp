@@ -374,9 +374,9 @@ void collect_func(Stats& stats, const Index& index, const php::Func& func) {
 
   if (!options.extendedStats) return;
 
-  auto const ctx =
-    AnalysisContext { func.unit, cf, func.cls };
-  auto const fa  = analyze_func(index, ctx, CollectionOpts{});
+  auto const ctx = AnalysisContext { func.unit, cf, func.cls };
+  IndexAdaptor adaptor{ index };
+  auto const fa  = analyze_func(adaptor, ctx, CollectionOpts{});
   {
     Trace::Bump bumper{Trace::hhbbc, kStatsBump};
     for (auto const bid : cf.blockRange()) {
@@ -385,9 +385,9 @@ void collect_func(Stats& stats, const Index& index, const php::Func& func) {
       if (!state.initialized) continue;
 
       CollectedInfo collect {
-        index, ctx, nullptr, CollectionOpts {}, nullptr, &fa
+        adaptor, ctx, nullptr, CollectionOpts {}, nullptr, &fa
       };
-      Interp interp { index, ctx, collect, bid, blk, state };
+      Interp interp { adaptor, ctx, collect, bid, blk, state };
       for (auto& bc : blk->hhbcs) {
         auto noop    = [] (BlockId, const State*) {};
         ISS env { interp, noop };

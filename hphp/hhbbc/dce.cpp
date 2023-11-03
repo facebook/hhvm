@@ -2713,10 +2713,12 @@ bool global_dce(const Index& index, const FuncAnalysis& ai,
     return ai.bdata[blk].rpoId;
   };
 
+  IndexAdaptor adaptor{index};
   auto collect = CollectedInfo{
-    index,
+    adaptor,
     ai.ctx,
-    nullptr, CollectionOpts{},
+    nullptr,
+    CollectionOpts{},
     nullptr,
     &ai
   };

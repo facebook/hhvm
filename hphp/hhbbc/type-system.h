@@ -177,7 +177,7 @@ namespace HPHP {
 namespace HHBBC {
 
 struct Context;
-struct Index;
+struct IIndex;
 struct Type;
 
 namespace res { struct Class; };
@@ -1303,7 +1303,7 @@ Optional<IsTypeOp> type_to_istypeop(const Type& t);
  * no matching Type is found.
  *
  */
-Optional<Type> type_of_type_structure(const Index&, Context, SArray ts);
+Optional<Type> type_of_type_structure(const IIndex&, Context, SArray ts);
 
 /*
  * Return the DCls structure for a strict subtype of TObj or TOptObj.

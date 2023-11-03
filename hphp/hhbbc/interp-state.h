@@ -424,7 +424,7 @@ struct State : StateBase {
  * Return a copy of a State without copying the evaluation stack, pushing
  * Throwable on the stack.
  */
-State with_throwable_only(const Index& env, const State&);
+State with_throwable_only(const IIndex& env, const State&);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -479,15 +479,15 @@ struct StateMutationUndo {
  * populated.
  */
 struct PropertiesInfo {
-  PropertiesInfo(const Index&, Context, ClassAnalysis*);
+  PropertiesInfo(const IIndex&, Context, ClassAnalysis*);
 
   const PropStateElem* readPrivateProp(SString name) const;
   const PropStateElem* readPrivateStatic(SString name) const;
 
-  void mergeInPrivateProp(const Index& index,
+  void mergeInPrivateProp(const IIndex& index,
                           SString name,
                           const Type& t);
-  void mergeInPrivateStatic(const Index& index,
+  void mergeInPrivateStatic(const IIndex& index,
                             SString name,
                             const Type& t,
                             bool ignoreConst,
@@ -495,8 +495,8 @@ struct PropertiesInfo {
 
   void mergeInPrivateStaticPreAdjusted(SString name, const Type& t);
 
-  void mergeInAllPrivateProps(const Index&, const Type&);
-  void mergeInAllPrivateStatics(const Index&, const Type&,
+  void mergeInAllPrivateProps(const IIndex&, const Type&);
+  void mergeInAllPrivateStatics(const IIndex&, const Type&,
                                 bool ignoreConst,
                                 bool mustBeReadOnly);
 
@@ -589,7 +589,7 @@ inline bool any(CollectionOpts o) { return static_cast<int>(o); }
  * a series of step operations (possibly cross block).
  */
 struct CollectedInfo {
-  CollectedInfo(const Index& index,
+  CollectedInfo(const IIndex& index,
                 Context ctx,
                 ClassAnalysis* cls,
                 CollectionOpts opts,

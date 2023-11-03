@@ -28,7 +28,6 @@ struct UserAttributeMap;
 namespace HHBBC {
 
 namespace res { struct Class; }
-struct Index;
 struct Type;
 
 //////////////////////////////////////////////////////////////////////

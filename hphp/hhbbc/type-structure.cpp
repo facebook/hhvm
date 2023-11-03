@@ -256,10 +256,10 @@ using GenericsMap = hphp_fast_map<std::string, Type>;
 struct Cache;
 
 struct ResolveCtx {
-  ResolveCtx(Context ctx, const Index* index, Cache* cache)
+  ResolveCtx(Context ctx, const IIndex* index, Cache* cache)
     : ctx{ctx}, index{index}, cache{cache} {}
   Context ctx;
-  const Index* index;
+  const IIndex* index;
   Cache* cache;
   const CollectedInfo* collect = nullptr;
   const php::Class* selfCls = nullptr;
@@ -916,7 +916,7 @@ Resolution resolve_type_structure(const ISS& env, SArray ts) {
   return resolveBespoke(ctx, ts);
 }
 
-Resolution resolve_type_structure(const Index& index,
+Resolution resolve_type_structure(const IIndex& index,
                                   const php::Const& cns,
                                   const php::Class& thiz) {
   assertx(cns.kind == ConstModifiers::Kind::Type);
@@ -936,7 +936,7 @@ Resolution resolve_type_structure(const Index& index,
   return resolveBespoke(ctx, val(*cns.val).parr);
 }
 
-Resolution resolve_type_structure(const Index& index,
+Resolution resolve_type_structure(const IIndex& index,
                                   const CollectedInfo* collect,
                                   const php::TypeAlias& typeAlias) {
   auto const& preresolved = typeAlias.resolvedTypeStructure;

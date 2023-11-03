@@ -43,7 +43,13 @@
 #include "hphp/hhbbc/src-loc.h"
 
 namespace HPHP {
-namespace HHBBC::php {
+namespace HHBBC {
+
+//////////////////////////////////////////////////////////////////////
+
+struct Index;
+
+namespace php {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -750,6 +756,8 @@ bool check(const Program&);
 }
 
 //////////////////////////////////////////////////////////////////////
+
+}
 
 MAKE_COPY_PTR_BLOB_SERDE_HELPER(HHBBC::php::Block)
 MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::Unit)

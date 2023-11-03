@@ -320,11 +320,14 @@ void analyze_iteratively(Index& index, AnalyzeMode mode) {
             ++total_funcs;
             auto const wf = php::WideFunc::cns(wi.ctx.func);
             auto const ctx = AnalysisContext { wi.ctx.unit, wf, wi.ctx.cls };
-            return WorkResult { analyze_func(index, ctx, CollectionOpts{}) };
+            IndexAdaptor adaptor{ index };
+            return WorkResult { analyze_func(adaptor, ctx, CollectionOpts{}) };
           }
-          case WorkType::Class:
+          case WorkType::Class: {
             ++total_classes;
-            return WorkResult { analyze_class(index, wi.ctx) };
+            IndexAdaptor adaptor{ index };
+            return WorkResult { analyze_class(adaptor, wi.ctx) };
+          }
           }
           not_reached();
         }
@@ -469,7 +472,8 @@ void final_pass(Index& index,
         // This const_cast is safe since no two threads update the same Func.
         auto func = php::WideFunc::mut(const_cast<php::Func*>(context.func));
         auto const ctx = AnalysisContext { context.unit, func, context.cls };
-        optimize_func(index, analyze_func(index, ctx, CollectionOpts{}), func);
+        IndexAdaptor adaptor{ index };
+        optimize_func(index, analyze_func(adaptor, ctx, CollectionOpts{}), func);
       }
       state_after("optimize", *unit, index);
       if (!dump_dir.empty()) {

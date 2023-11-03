@@ -1228,14 +1228,6 @@ struct ClassGraph {
   // this class does.
   std::vector<ClassGraph> interfaces() const;
 
-  // Retrieve the interfaces which conflict with this class (if it is
-  // an interface). An interface conflicts with another interface if
-  // there's a class which simultaneously implements both
-  // interfaces. The total number of subclasses of this interface is
-  // also returned. This information is needed to compute the
-  // interface vtable slots.
-  std::pair<ISStringSet, size_t> interfaceConflicts() const;
-
   // Retrieve all children of this class (including this class
   // itself). This is only valid to call if hasCompleteChildren() is
   // true. NB: Being on a class' children list does not necessarily
@@ -2199,35 +2191,6 @@ std::vector<ClassGraph> ClassGraph::interfaces() const {
   );
   std::sort(begin(out), end(out));
   return out;
-}
-
-std::pair<ISStringSet, size_t> ClassGraph::interfaceConflicts() const {
-  assertx(!table().locking);
-  assertx(this_);
-  assertx(!this_->isMissing());
-  assertx(isInterface());
-
-  ISStringSet out;
-  size_t count = 0;
-  NodeSet visited;
-  forEachChild(
-    *this_,
-    [&] (Node& c) {
-      ++count;
-      if (!(c.flags() & (FlagInterface | FlagTrait | FlagEnum))) {
-        forEachParent(
-          c,
-          [&] (Node& p) {
-            if (p.isInterface()) out.emplace(p.name);
-            return Action::Continue;
-          },
-          visited
-        );
-      }
-      return Action::Continue;
-    }
-  );
-  return std::make_pair(std::move(out), count);
 }
 
 std::vector<ClassGraph> ClassGraph::children() const {
@@ -5628,13 +5591,13 @@ void add_program_to_index(IndexData& index) {
  */
 
 struct InterfaceConflicts {
-  SString name;
+  SString name{nullptr};
   // The number of classes which implements this interface (used to
   // prioritize lower slots for more heavily used interfaces).
-  size_t usage;
-  std::vector<SString> conflicts;
+  size_t usage{0};
+  ISStringSet conflicts;
   template <typename SerDe> void serde(SerDe& sd) {
-    sd(name)(usage)(conflicts);
+    sd(name)(usage)(conflicts, string_data_lti{});
   }
 };
 
@@ -7503,6 +7466,7 @@ struct FlattenJob {
     // functions.
     std::vector<ISStringSet> classTypeUses;
     std::vector<ISStringSet> funcTypeUses;
+    std::vector<InterfaceConflicts> interfaceConflicts;
     template <typename SerDe> void serde(SerDe& sd) {
       ScopedStringDataIndexer _;
       sd(uninstantiable, string_data_lti{})
@@ -7511,6 +7475,7 @@ struct FlattenJob {
         (interfaces, string_data_lti{})
         (classTypeUses, string_data_lti{})
         (funcTypeUses, string_data_lti{})
+        (interfaceConflicts)
         ;
     }
   };
@@ -7699,6 +7664,8 @@ struct FlattenJob {
 
     // Do the processing which relies on a fully accessible
     // LocalIndex
+
+    ISStringToOneT<InterfaceConflicts> ifaceConflicts;
     for (auto& cls : classes.vals) {
       auto const cinfoIt = index.m_classInfos.find(cls->name);
       if (cinfoIt == end(index.m_classInfos)) {
@@ -7723,7 +7690,38 @@ struct FlattenJob {
         cinfo->funcInfos.emplace_back(make_func_info(index, *func));
       }
       outNames.emplace(cls->name);
+
+      // Record interface conflicts
+
+      // Only consider normal or abstract classes
+      if (cls->attrs &
+          (AttrInterface | AttrTrait | AttrEnum | AttrEnumClass)) {
+        continue;
+      }
+
+      auto const interfaces = cinfo->classGraph.interfaces();
+      for (auto const i1 : interfaces) {
+        auto& conflicts = ifaceConflicts[i1.name()];
+        conflicts.name = i1.name();
+        ++conflicts.usage;
+        for (auto const i2 : interfaces) {
+          if (i1 == i2) continue;
+          conflicts.conflicts.emplace(i2.name());
+        }
+      }
     }
+
+    outMeta.interfaceConflicts.reserve(ifaceConflicts.size());
+    for (auto& [_, c] : ifaceConflicts) {
+      outMeta.interfaceConflicts.emplace_back(std::move(c));
+    }
+    std::sort(
+      begin(outMeta.interfaceConflicts),
+      end(outMeta.interfaceConflicts),
+      [] (auto const& c1, auto const& c2) {
+        return string_data_lti{}(c1.name, c2.name);
+      }
+    );
 
     std::sort(
       begin(newClosures),
@@ -10526,7 +10524,7 @@ struct InitTypesMetadata {
   SStringToOneT<std::vector<FuncFamilyEntry>> nameOnlyFF;
 };
 
-std::pair<SubclassMetadata, InitTypesMetadata>
+std::tuple<SubclassMetadata, InitTypesMetadata, std::vector<InterfaceConflicts>>
 flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
   trace_time trace("flatten classes", index.sample);
   trace.ignore_client_stats();
@@ -10556,6 +10554,12 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
   };
   using Update = boost::variant<ClassUpdate, FuncUpdate, MethodUpdate>;
   using UpdateVec = std::vector<Update>;
+
+  tbb::concurrent_hash_map<
+    SString,
+    InterfaceConflicts,
+    string_data_hash_isame
+  > ifaceConflicts;
 
   auto const run = [&] (FlattenClassesWork work) -> coro::Task<UpdateVec> {
     co_await coro::co_reschedule_on_current_executor;
@@ -10765,6 +10769,14 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       );
     }
 
+    for (auto const& c : clsMeta.interfaceConflicts) {
+      decltype(ifaceConflicts)::accessor acc;
+      ifaceConflicts.insert(acc, c.name);
+      acc->second.name = c.name;
+      acc->second.usage += c.usage;
+      acc->second.conflicts.insert(begin(c.conflicts), end(c.conflicts));
+    }
+
     co_return updates;
   };
 
@@ -10950,7 +10962,16 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     );
   }
 
-  return std::make_pair(std::move(subclassMeta), std::move(initTypesMeta));
+  return std::make_tuple(
+    std::move(subclassMeta),
+    std::move(initTypesMeta),
+    [&] {
+      std::vector<InterfaceConflicts> out;
+      out.reserve(ifaceConflicts.size());
+      for (auto& [_, c] : ifaceConflicts) out.emplace_back(std::move(c));
+      return out;
+    }()
+  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -11136,7 +11157,6 @@ struct BuildSubclassListJob {
     // generally produce func family entries for the same name, so
     // they must be aggregated together afterwards.
     std::vector<std::pair<SString, FuncFamilyEntry>> nameOnly;
-    std::vector<InterfaceConflicts> interfaces;
     std::vector<std::vector<SString>> regOnlyEquivCandidates;
 
     template <typename SerDe> void serde(SerDe& sd) {
@@ -11144,7 +11164,6 @@ struct BuildSubclassListJob {
       sd(funcFamilyDeps, std::less<FuncFamily2::Id>{})
         (newFuncFamilyIds)
         (nameOnly)
-        (interfaces)
         (regOnlyEquivCandidates)
         ;
     }
@@ -11235,30 +11254,6 @@ struct BuildSubclassListJob {
     }
 
     OutputMeta meta;
-
-    // First gather the interface conflicts. This needs to be done
-    // first because it depends on the full subclass list, before we
-    // potentially drop it due to size.
-    for (auto const& cinfo : classes.vals) {
-      auto const& cls = index.cls(cinfo->name);
-      if (!(cls.attrs & AttrInterface)) continue;
-
-      meta.interfaces.emplace_back(InterfaceConflicts{cinfo->name});
-
-      auto [ifaces, size] = cinfo->classGraph.interfaceConflicts();
-
-      auto& back = meta.interfaces.back();
-      back.usage = size;
-      for (auto const iface : ifaces) {
-        if (iface->isame(cinfo->name)) continue;
-        back.conflicts.emplace_back(iface);
-      }
-      std::sort(
-        begin(back.conflicts),
-        end(back.conflicts),
-        string_data_lti{}
-      );
-    }
 
     // Mark all of the classes (including leafs) as being complete
     // since their subclass lists are correct.
@@ -13067,10 +13062,9 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
   return out;
 }
 
-std::vector<InterfaceConflicts>
-build_subclass_lists(IndexData& index,
-                     SubclassMetadata meta,
-                     InitTypesMetadata& initTypesMeta) {
+void build_subclass_lists(IndexData& index,
+                          SubclassMetadata meta,
+                          InitTypesMetadata& initTypesMeta) {
   trace_time tracer{"build subclass lists", index.sample};
   tracer.ignore_client_stats();
 
@@ -13105,7 +13099,6 @@ build_subclass_lists(IndexData& index,
     > funcFamilyDeps;
     std::vector<std::pair<SString, UniquePtrRef<ClassInfo2>>> leafs;
     std::vector<std::pair<SString, FuncFamilyEntry>> nameOnly;
-    std::vector<InterfaceConflicts> ifaceConflicts;
     std::vector<std::pair<SString, SString>> candidateRegOnlyEquivs;
   };
 
@@ -13266,7 +13259,6 @@ build_subclass_lists(IndexData& index,
       );
     }
     updates.nameOnly = std::move(outMeta.nameOnly);
-    updates.ifaceConflicts = std::move(outMeta.interfaces);
     for (size_t i = 0, size = outMeta.regOnlyEquivCandidates.size();
          i < size; ++i) {
       auto const name = bucket.classes[i];
@@ -13359,15 +13351,6 @@ build_subclass_lists(IndexData& index,
                 .candidateRegOnlyEquivs.emplace(candidate);
             }
           }
-        },
-        [&] {
-          for (auto& u : updates) {
-            ifaceConflicts.insert(
-              end(ifaceConflicts),
-              begin(u.ifaceConflicts),
-              end(u.ifaceConflicts)
-            );
-          }
         }
       );
     }
@@ -13384,8 +13367,6 @@ build_subclass_lists(IndexData& index,
     ifaceConflicts.emplace_back(InterfaceConflicts{iface, 1});
   }
   work.leafInterfaces.clear();
-
-  return ifaceConflicts;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -15622,10 +15603,9 @@ Index::Index(Input input,
   );
 
   flatten_type_mappings(*m_data, flattenMeta);
-  auto [subclassMeta, initTypesMeta] =
+  auto [subclassMeta, initTypesMeta, ifaceConflicts] =
     flatten_classes(*m_data, std::move(flattenMeta));
-  auto ifaceConflicts =
-    build_subclass_lists(*m_data, std::move(subclassMeta), initTypesMeta);
+  build_subclass_lists(*m_data, std::move(subclassMeta), initTypesMeta);
   init_types(*m_data, std::move(initTypesMeta));
   compute_iface_vtables(*m_data, std::move(ifaceConflicts));
   check_invariants(*m_data);

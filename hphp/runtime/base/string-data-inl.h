@@ -233,6 +233,13 @@ struct string_data_lti {
   }
 };
 
+struct string_data_hash_isame {
+  bool equal(const StringData* s1, const StringData* s2) const {
+    return s1->isame(s2);
+  }
+  size_t hash(const StringData* s) const { return s->hash(); }
+};
+
 //////////////////////////////////////////////////////////////////////
 
 }

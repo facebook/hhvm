@@ -929,10 +929,7 @@ void runInContext(CLIContext&& ctx,
   auto env = init_cli_globals(argv.size() - 1, &argv[0],
                               shared->ini, &envp[0]);
 
-  SCOPE_EXIT {
-    Logger::FInfo("Completed command with return code {}", ret);
-    teardown();
-  };
+  SCOPE_EXIT { teardown(); };
 
   MonitorThread monitor(data->client);
   CliStdoutHook stdout_hook(fileno(data->out));
@@ -951,6 +948,7 @@ void runInContext(CLIContext&& ctx,
   SCOPE_EXIT {
     finish(argv[0]);
 
+    LightProcess::shutdownDelegate();
     LightProcess::setThreadLocalAfdtOverride(nullptr);
     Stream::setThreadLocalFileHandler(nullptr);
     Logger::SetThreadHook(nullptr);

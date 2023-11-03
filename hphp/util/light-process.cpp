@@ -1049,6 +1049,7 @@ std::unique_ptr<LightProcess> LightProcess::setThreadLocalAfdtOverride(int fd) {
 }
 
 int LightProcess::cloneDelegate() {
+  always_assert(tl_proc != nullptr);
   return runLight("clone_delegate", [&] (LightProcess* proc) {
     auto const afdt_fd = proc->m_afdt_fd;
     lwp_write(afdt_fd, "clone_delegate");
@@ -1058,6 +1059,15 @@ int LightProcess::cloneDelegate() {
     if (buf == "error") return -1;
     return recv_fd(afdt_fd);
   }, -1);
+}
+
+void LightProcess::shutdownDelegate() {
+  always_assert(tl_proc != nullptr);
+  runLight("shutdown_delegate", [&] (LightProcess* proc) {
+    auto const afdt_fd = proc->m_afdt_fd;
+    lwp_write(afdt_fd, "exit");
+    return 0;
+  }, 0);
 }
 
 int LightProcess::createDelegate() {

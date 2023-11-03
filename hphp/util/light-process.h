@@ -95,6 +95,7 @@ struct LightProcess {
    */
   static int createDelegate();
   static int cloneDelegate();
+  static void shutdownDelegate();
 
   static std::unique_ptr<LightProcess> setThreadLocalAfdtOverride(int fd);
   static std::unique_ptr<LightProcess> setThreadLocalAfdtOverride(

@@ -1,0 +1,11 @@
+<?hh
+
+module MLT_B;
+
+class C {
+  use T;
+
+  public function zot($l) {
+    $l();
+  }
+}

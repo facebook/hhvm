@@ -9247,6 +9247,7 @@ private:
   clone_closure(const LocalIndex& index,
                 const php::Class& closure,
                 const php::Class& newContext,
+                bool requiresFromOriginalModule,
                 ClonedClosures& clonedClosures) {
     auto clone = std::make_unique<php::Class>(closure);
     assertx(clone->closureContextCls);
@@ -9266,10 +9267,11 @@ private:
       if (!meth->originalFilename) meth->originalFilename = meth->unit;
       if (!meth->originalUnit)     meth->originalUnit = meth->unit;
       if (!meth->originalClass)    meth->originalClass = closure.name;
+      meth->requiresFromOriginalModule = requiresFromOriginalModule;
       meth->unit = newContext.unit;
 
       clone->methods[i] =
-        clone_closures(index, std::move(meth), clonedClosures);
+        clone_closures(index, std::move(meth), requiresFromOriginalModule, clonedClosures);
       if (!clone->methods[i]) return nullptr;
     }
 
@@ -9279,6 +9281,7 @@ private:
   static std::unique_ptr<php::Func>
   clone_closures(const LocalIndex& index,
                  std::unique_ptr<php::Func> cloned,
+                 bool requiresFromOriginalModule,
                  ClonedClosures& clonedClosures) {
     if (!cloned->hasCreateCl) return cloned;
 
@@ -9303,6 +9306,7 @@ private:
         cloned->cls->closureContextCls
           ? index.cls(cloned->cls->closureContextCls)
           : *cloned->cls,
+        requiresFromOriginalModule,
         clonedClosures
       );
       if (!closure) return false;
@@ -9359,18 +9363,21 @@ private:
     // method to true. This flag causes the originalModuleName field to be
     // copied in the HHVM extendedSharedData section of the method, so that
     // HHVM is able to resolve correctly the original module of the method.
-    if (RO::EvalModuleLevelTraits && orig.fromModuleLevelTrait &&
-        !orig.requiresFromOriginalModule &&
-        orig.originalModuleName != dstCls.moduleName) {
-      cloned->requiresFromOriginalModule = true;
-    } else {
-      cloned->requiresFromOriginalModule = orig.requiresFromOriginalModule;
-    }
+    const bool requiresFromOriginalModule = [&] () {
+      if (RO::EvalModuleLevelTraits && orig.fromModuleLevelTrait &&
+         !orig.requiresFromOriginalModule &&
+         orig.originalModuleName != dstCls.moduleName) {
+        return true;
+      } else {
+        return orig.requiresFromOriginalModule;
+      }
+    }();
+    cloned->requiresFromOriginalModule = requiresFromOriginalModule;
 
     // cloned method isn't in any method table yet, so trash its
     // index.
     cloned->clsIdx = std::numeric_limits<uint32_t>::max();
-    return clone_closures(index, std::move(cloned), clonedClosures);
+    return clone_closures(index, std::move(cloned), requiresFromOriginalModule, clonedClosures);
   }
 
   static bool merge_inits(const LocalIndex& index,

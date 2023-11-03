@@ -45,7 +45,7 @@
 #include "hphp/tools/debug-parser/debug-parser.h"
 
 /*
- * Debug parser for DWARF (using dwarfstate)
+ * Debug parser for DWARF
  *
  * DWARF is structured as a forest of DIEs (Debug Information Entry). Each DIE
  * has a tag, which describes what kind of DIE it is, and a list of

@@ -928,7 +928,9 @@ struct LdBindAddrData : IRExtraData {
   explicit LdBindAddrData(SrcKey sk, SBInvOffset bcSPOff)
     : sk(sk)
     , bcSPOff(bcSPOff)
-  {}
+  {
+    assertx(!sk.funcEntry());
+  }
 
   std::string show() const {
     return folly::sformat("{}, SBInv {}", showShort(sk), bcSPOff.offset);
@@ -1027,13 +1029,12 @@ struct ProfileSwitchData : IRExtraData {
   int64_t base;
 };
 
-struct JmpSwitchData : IRExtraData {
-  JmpSwitchData* clone(Arena& arena) const {
-    JmpSwitchData* sd = new (arena) JmpSwitchData;
+struct LdSwitchData : IRExtraData {
+  LdSwitchData* clone(Arena& arena) const {
+    LdSwitchData* sd = new (arena) LdSwitchData;
     sd->cases = cases;
     sd->targets = new (arena) SrcKey[cases];
     sd->spOffBCFromStackBase = spOffBCFromStackBase;
-    sd->spOffBCFromIRSP = spOffBCFromIRSP;
     std::copy(targets, targets + cases, const_cast<SrcKey*>(sd->targets));
     return sd;
   }
@@ -1045,15 +1046,13 @@ struct JmpSwitchData : IRExtraData {
   size_t stableHash() const {
     return folly::hash::hash_combine(
       std::hash<int32_t>()(cases),
-      std::hash<int32_t>()(spOffBCFromStackBase.offset),
-      std::hash<int32_t>()(spOffBCFromIRSP.offset)
+      std::hash<int32_t>()(spOffBCFromStackBase.offset)
     );
   }
 
-  bool equals(const JmpSwitchData& o) const {
+  bool equals(const LdSwitchData& o) const {
     if (cases != o.cases) return false;
     if (spOffBCFromStackBase != o.spOffBCFromStackBase) return false;
-    if (spOffBCFromIRSP != o.spOffBCFromIRSP) return false;
     for (int64_t i = 0; i < cases; i++) {
       if (targets[i] != o.targets[i]) return false;
     }
@@ -1063,7 +1062,6 @@ struct JmpSwitchData : IRExtraData {
   int32_t cases;       // number of cases
   SrcKey* targets;     // srckeys for all targets
   SBInvOffset spOffBCFromStackBase;
-  IRSPRelOffset spOffBCFromIRSP;
 };
 
 struct LdTVAuxData : IRExtraData {
@@ -2939,7 +2937,7 @@ struct SampleRateData : IRExtraData {
 X(DictIdx,                      SizeHintData);
 X(LdBindAddr,                   LdBindAddrData);
 X(ProfileSwitchDest,            ProfileSwitchData);
-X(JmpSwitchDest,                JmpSwitchData);
+X(LdSwitchDest,                 LdSwitchData);
 X(LdSSwitchDest,                LdSSwitchData);
 X(CheckLoc,                     LocalId);
 X(AssertLoc,                    LocalId);
@@ -3130,7 +3128,7 @@ X(StArResumeAddr,               SuspendOffset);
 X(StContArState,                GeneratorState);
 X(ContEnter,                    ContEnterData);
 X(LoadBCSP,                     IRSPRelOffsetData);
-X(JmpSSwitchDest,               IRSPRelOffsetData);
+X(JmpExit,                      IRSPRelOffsetData);
 X(DbgTrashStk,                  IRSPRelOffsetData);
 X(DbgTrashFrame,                IRSPRelOffsetData);
 X(DbgTraceCall,                 IRSPRelOffsetData);

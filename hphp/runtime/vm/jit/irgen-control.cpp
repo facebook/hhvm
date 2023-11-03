@@ -159,7 +159,7 @@ void emitSwitch(IRGS& env, SwitchKind kind, int64_t base,
     // Emit conditional checks for all successors in this region, in descending
     // order of hotness. We rely on the region selector to decide which arcs
     // are appropriate to include in the region. Fall through to the
-    // fully-generic JmpSwitchDest at the end if nothing matches.
+    // fully-generic LdSwitchDest at the end if nothing matches.
     for (auto const& val : values) {
       auto targetOff = bcOff(env) + offsets[val.caseIdx];
       SrcKey sk(curSrcKey(env), targetOff);
@@ -196,15 +196,18 @@ void emitSwitch(IRGS& env, SwitchKind kind, int64_t base,
     targets.emplace_back(SrcKey{curSrcKey(env), bcOff(env) + offset});
   }
 
-  spillInlinedFrames(env);
-
-  auto data = JmpSwitchData{};
+  auto data = LdSwitchData{};
   data.cases = iv.size();
   data.targets = &targets[0];
   data.spOffBCFromStackBase = spOffBCFromStackBase(env);
-  data.spOffBCFromIRSP = spOffBCFromIRSP(env);
 
-  gen(env, JmpSwitchDest, data, index, sp(env), fp(env));
+  auto const target = gen(env, LdSwitchDest, data, index);
+  if (isInlining(env)) {
+    sideExitFromInlined(env, target);
+  } else {
+    auto const jmpData = IRSPRelOffsetData { spOffBCFromIRSP(env) };
+    gen(env, JmpExit, jmpData, target, sp(env), fp(env));
+  }
 }
 
 void emitSSwitch(IRGS& env, const ImmVector& iv) {
@@ -245,17 +248,14 @@ void emitSSwitch(IRGS& env, const ImmVector& iv) {
   data.defaultSk  = SrcKey{curSrcKey(env), defaultOff};
   data.bcSPOff    = spOffBCFromStackBase(env);
 
-  auto const dest = gen(env, LdSSwitchDest, data, testVal);
+  auto const target = gen(env, LdSSwitchDest, data, testVal);
   decRef(env, testVal);
-  spillInlinedFrames(env);
-  gen(
-    env,
-    JmpSSwitchDest,
-    IRSPRelOffsetData { spOffBCFromIRSP(env) },
-    dest,
-    sp(env),
-    fp(env)
-  );
+  if (isInlining(env)) {
+    sideExitFromInlined(env, target);
+  } else {
+    auto const jmpData = IRSPRelOffsetData { spOffBCFromIRSP(env) };
+    gen(env, JmpExit, jmpData, target, sp(env), fp(env));
+  }
 }
 
 void emitThrowNonExhaustiveSwitch(IRGS& env) {

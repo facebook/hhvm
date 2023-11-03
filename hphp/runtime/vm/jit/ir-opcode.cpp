@@ -696,10 +696,9 @@ bool opcodeMayRaise(Opcode opc) {
   case IsWaitHandle:
   case IterFree:
   case Jmp:
+  case JmpExit:
   case JmpNZero:
   case JmpPlaceholder:
-  case JmpSSwitchDest:
-  case JmpSwitchDest:
   case JmpZero:
   case KeysetFirst:
   case KeysetGetK:
@@ -782,6 +781,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdRetVal:
   case LdSmashable:
   case LdSmashableFunc:
+  case LdSwitchDest:
   case LdSSwitchDest:
   case LdStk:
   case LdStkAddr:

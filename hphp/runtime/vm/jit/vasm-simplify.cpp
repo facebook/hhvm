@@ -1476,12 +1476,27 @@ bool simplify(Env& env, const cmovq& inst, Vlabel b, size_t i) {
 
 /*
  * Simplify load followed by truncation:
+ *  load{s, tmp}; jmpr{tmp, args} -> jmpm{s, args}
  *  load{s, tmp}; movtqb{tmp, d} -> loadtqb{s, d}
  *  load{s, tmp}; movtql{tmp, d} -> loadtql{s, d}
  *  loadzbq{s, tmp}; movtqb{tmp, d} -> loadb{s, d}
  *  loadzwq{s, tmp}; movtqw{tmp, d} -> loadw{s, d}
  *  loadzlq{s, tmp}; movtql{tmp, d} -> loadl{s, d}
  */
+bool simplify_load_jmpr(Env& env, const load& load, Vlabel b, size_t i) {
+  if (env.use_counts[load.d] != 1) return false;
+  auto const& code = env.unit.blocks[b].code;
+  if (i + 1 >= code.size()) return false;
+
+  return if_inst<Vinstr::jmpr>(env, b, i + 1, [&] (const jmpr& jmpr) {
+    if (load.d != jmpr.target) return false;
+    return simplify_impl(env, b, i, [&] (Vout& v) {
+      v << jmpm{load.s, jmpr.args};
+      return 2;
+    });
+  });
+}
+
 template<Vinstr::Opcode mov_op, typename loadt, typename load_in>
 bool simplify_load_truncate(Env& env, const load_in& load, Vlabel b, size_t i) {
   if (env.use_counts[load.d] != 1) return false;
@@ -1499,6 +1514,7 @@ bool simplify_load_truncate(Env& env, const load_in& load, Vlabel b, size_t i) {
 
 bool simplify(Env& env, const load& load, Vlabel b, size_t i) {
   return
+    simplify_load_jmpr(env, load, b, i) ||
     simplify_load_truncate<Vinstr::movtqb, loadtqb>(env, load, b, i) ||
     simplify_load_truncate<Vinstr::movtql, loadtql>(env, load, b, i);
 }

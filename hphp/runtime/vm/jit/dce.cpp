@@ -210,6 +210,7 @@ bool canDCE(const IRInstruction& inst) {
   case AKExistsDict:
   case AKExistsKeyset:
   case LdBindAddr:
+  case LdSwitchDest:
   case LdSSwitchDest:
   case LdClosureCls:
   case LdClosureThis:
@@ -377,8 +378,7 @@ bool canDCE(const IRInstruction& inst) {
   case CmpArrLike:
   case JmpZero:
   case JmpNZero:
-  case JmpSSwitchDest:
-  case JmpSwitchDest:
+  case JmpExit:
   case ProfileSwitchDest:
   case CheckSurpriseFlags:
   case CheckSurpriseFlagsEnter:

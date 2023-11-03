@@ -323,13 +323,12 @@ void cgProfileSwitchDest(IRLS& env, const IRInstruction* inst) {
   );
 }
 
-void cgJmpSwitchDest(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<JmpSwitchDest>();
+void cgLdSwitchDest(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<LdSwitchDest>();
   auto const idx = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
   auto const marker = inst->marker();
   auto& v = vmain(env);
-
-  maybe_syncsp(v, marker, srcLoc(env, inst, 1).reg(), extra->spOffBCFromIRSP);
 
   auto const table = v.allocData<TCA>(extra->cases);
   for (int i = 0; i < extra->cases; i++) {
@@ -338,7 +337,7 @@ void cgJmpSwitchDest(IRLS& env, const IRInstruction* inst) {
 
   auto const t = v.makeReg();
   v << lead{table, t};
-  v << jmpm{t[idx * 8], cross_trace_args(marker, SrcKey{})};
+  v << load{t[idx * 8], dst};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -396,8 +395,8 @@ void cgLdSSwitchDest(IRLS& env, const IRInstruction* inst) {
 }
 
 
-void cgJmpSSwitchDest(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<JmpSSwitchDest>();
+void cgJmpExit(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<JmpExit>();
   auto const marker = inst->marker();
   auto& v = vmain(env);
 

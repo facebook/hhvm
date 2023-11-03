@@ -388,17 +388,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       stack_below(inst.extra<ReqRetranslateOpt>()->offset),
       AEmpty
     };
-  case JmpSwitchDest:
+  case JmpExit:
     return ExitEffects {
       *AUnknown.exclude_vm_reg(),
-      *stack_below(inst.extra<JmpSwitchDest>()->spOffBCFromIRSP).
-        precise_union(AMIStateAny),
-      AEmpty
-    };
-  case JmpSSwitchDest:
-    return ExitEffects {
-      *AUnknown.exclude_vm_reg(),
-      *stack_below(inst.extra<JmpSSwitchDest>()->offset).
+      *stack_below(inst.extra<JmpExit>()->offset).
         precise_union(AMIStateAny),
       AEmpty
     };
@@ -1768,6 +1761,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LteRes:
   case CmpRes:
   case LdBindAddr:
+  case LdSwitchDest:
   case LdSSwitchDest:
   case RBTraceEntry:
   case RBTraceMsg:

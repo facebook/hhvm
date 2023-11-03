@@ -132,8 +132,7 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
     // These instructions end a unit after executing the bytecode
     // instruction they correspond to.
     case InterpOneCF:
-    case JmpSSwitchDest:
-    case JmpSwitchDest:
+    case JmpExit:
     case Unreachable:
     case EndBlock:
       return instSk == sk;

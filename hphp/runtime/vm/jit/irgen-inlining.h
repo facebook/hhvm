@@ -47,6 +47,7 @@ void suspendFromInlined(IRGS&, SSATmp* waithandle);
  * Side exit the translation from an inlined frame to the specified target.
  */
 void sideExitFromInlined(IRGS&, SrcKey target);
+void sideExitFromInlined(IRGS&, SSATmp* target);
 
 /*
  * Emit an EndCatch equivalent from an inlined function.

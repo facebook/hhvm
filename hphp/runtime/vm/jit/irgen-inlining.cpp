@@ -668,6 +668,13 @@ void sideExitFromInlined(IRGS& env, SrcKey target) {
   }
 
   auto const invSP = spOffBCFromStackBase(env);
+  auto const bindData = LdBindAddrData { target, invSP };
+  auto const targetAddr = gen(env, LdBindAddr, bindData);
+  sideExitFromInlined(env, targetAddr);
+}
+
+void sideExitFromInlined(IRGS& env, SSATmp* target) {
+  auto const invSP = spOffBCFromStackBase(env);
   auto const sr = StackRange {
     spOffBCFromIRSP(env),
     safe_cast<uint32_t>(invSP - spOffEmpty(env))
@@ -676,9 +683,7 @@ void sideExitFromInlined(IRGS& env, SrcKey target) {
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  auto const bindData = LdBindAddrData { target, invSP };
-  auto const targetAddr = gen(env, LdBindAddr, bindData);
-  gen(env, Jmp, env.inlineState.frames.back().sideExitTarget, targetAddr);
+  gen(env, Jmp, env.inlineState.frames.back().sideExitTarget, target);
 }
 
 bool endCatchFromInlined(IRGS& env, EndCatchData::CatchMode mode) {

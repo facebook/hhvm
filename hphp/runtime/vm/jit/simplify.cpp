@@ -3732,28 +3732,61 @@ SSATmp* simplifyOrdStr(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyJmpSwitchDest(State& env, const IRInstruction* inst) {
+SSATmp* simplifyLdSwitchDest(State& env, const IRInstruction* inst) {
   auto const index = inst->src(0);
   if (!index->hasConstVal(TInt)) return nullptr;
 
   auto const indexVal = index->intVal();
-  auto const sp = inst->src(1);
-  auto const fp = inst->src(2);
-  auto const& extra = *inst->extra<JmpSwitchDest>();
+  auto const extra = inst->extra<LdSwitchDest>();
 
-  if (indexVal < 0 || indexVal >= extra.cases) {
+  if (indexVal < 0 || indexVal >= extra->cases) {
     // Instruction is unreachable.
     return gen(env, Unreachable, ASSERT_REASON);
   }
 
-  assertx(!extra.targets[indexVal].funcEntry());
-  auto const newExtra = ReqBindJmpData {
-    extra.targets[indexVal],
-    extra.spOffBCFromStackBase,
-    extra.spOffBCFromIRSP,
-    false /* popFrame */
+  assertx(!extra->targets[indexVal].funcEntry());
+  auto const bindData = LdBindAddrData {
+    extra->targets[indexVal],
+    extra->spOffBCFromStackBase,
   };
-  return gen(env, ReqBindJmp, newExtra, sp, fp);
+  return gen(env, LdBindAddr, bindData);
+}
+
+SSATmp* simplifyLdSSwitchDest(State& env, const IRInstruction* inst) {
+  auto const index = inst->src(0);
+  if (!index->hasConstVal(TStr)) return nullptr;
+
+  auto const indexVal = index->strVal();
+  auto const extra = inst->extra<LdSSwitchDest>();
+
+  auto const target = [&]{
+    for (int64_t i = 0; i < extra->numCases; ++i) {
+      if (!indexVal->same(extra->cases[i].str)) continue;
+      return extra->cases[i].dest;
+    }
+    return extra->defaultSk;
+  }();
+
+  assertx(!target.funcEntry());
+  auto const bindData = LdBindAddrData { target, extra->bcSPOff };
+  return gen(env, LdBindAddr, bindData);
+}
+
+SSATmp* simplifyJmpExit(State& env, const IRInstruction* inst) {
+  auto const bindAddr = inst->src(0)->inst();
+  if (!bindAddr->is(LdBindAddr)) return nullptr;
+
+  auto const bindExtra = bindAddr->extra<LdBindAddr>();
+  auto const jmpExtra = inst->extra<JmpExit>();
+
+  assertx(!bindExtra->sk.funcEntry());
+  auto const rbjData = ReqBindJmpData {
+    bindExtra->sk,
+    bindExtra->bcSPOff,
+    jmpExtra->offset,
+    false
+  };
+  return gen(env, ReqBindJmp, rbjData, inst->src(1), inst->src(2));
 }
 
 SSATmp* simplifyCheckRange(State& env, const IRInstruction* inst) {
@@ -4172,7 +4205,9 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(AKExistsKeyset)
       X(OrdStr)
       X(ChrInt)
-      X(JmpSwitchDest)
+      X(LdSwitchDest)
+      X(LdSSwitchDest)
+      X(JmpExit)
       X(CheckRange)
       X(GetMemoKey)
       X(GetMemoKeyScalar)

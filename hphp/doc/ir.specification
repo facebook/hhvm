@@ -780,20 +780,25 @@ To string conversions:
 
   Conditionally jump to based on S0.
 
-| JmpSSwitchDest, ND, S(TCA) S(StkPtr) S(FramePtr), T
+| JmpExit, ND, S(TCA) S(StkPtr) S(FramePtr), T
 
-  Jump to the target of a sswitch statement, leaving the region, where the
-  target TCA is S0.
-
-| JmpSwitchDest, ND, S(Int) S(StkPtr) S(FramePtr), T
-
-  Jump to the target of a switch statement, leaving the region, using table
-  metadata <JmpSwitchData> and index S0, which must be a valid index in the
-  jump table.
+  Jump to the specified target S0, leaving the region. The binding of the target
+  could be achieved using opcodes such as LdBindAddr, LdSwitchDest, etc.
 
 | ProfileSwitchDest<handle,nCases>, ND, S(Int), NF
 
   Profile a switch statement target.
+
+| LdSwitchDest<cases, targets>, D(TCA), S(Int), NF
+
+  Load the target of a switch statement, using table metadata <JmpSwitchData>
+  and index S0, which must be a valid index in the jump table.
+
+| LdSSwitchDest<numCases, cases, defaultOffset, bcSPOff>, D(TCA), S(Str), NF
+
+  Using the cases in the extra data, create a hash table for destination lookup.
+  Then, lookup the destination for the switched value in the table and yield the
+  default if not present.
 
 | CheckSurpriseFlags, ND, S(FramePtr,StkPtr), B
 
@@ -2440,12 +2445,6 @@ ReqBindJmp and CallFuncEntry.
   pointing either to the service request (before the service request is
   satisfied) or to the native code for the given target address (once the
   service request is satisfied).
-
-| LdSSwitchDest<numCases, cases, defaultOffset, bcSPOff>, D(TCA), S(Str), NF
-
-  Using the cases in the extra data, create a hash table for destination lookup.
-  Then, lookup the destination for the switched value in the table and yield the
-  default if not present.
 
 | InterpOne<T,spOff,bcOff,numPopped,numPushed>, ND,
 |                                               S(StkPtr) S(FramePtr),

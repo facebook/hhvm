@@ -7,6 +7,9 @@
  *
  *)
 
+(* Avoids warning 66 about unused open Ppx_yojson_conv_lib.Yojson_conv.Primitives *)
+let _ = yojson_of_unit
+
 module type Map_S = Reordered_argument_collections_sig.Map_S
 
 module Reordered_argument_map (S : WrappedMap.S) :

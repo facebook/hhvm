@@ -118,7 +118,10 @@ let default_derives () =
 let derive_copy ty = Convert_type.is_copy (Rust_type.rust_simple_type ty)
 
 let derive_default (ty : label) =
-  List.mem ["tast_hashes::ByNames"] ty ~equal:String.equal
+  List.mem
+    ["tast_hashes::ByNames"; "tast_hashes::FileInfo"]
+    ty
+    ~equal:String.equal
 
 let is_by_box () = not (is_by_ref ())
 

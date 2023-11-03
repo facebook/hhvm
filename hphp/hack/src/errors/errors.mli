@@ -167,6 +167,9 @@ val per_file_error_count : ?drop_fixmed:bool -> per_file_errors -> int
 val get_file_errors :
   ?drop_fixmed:bool -> t -> Relative_path.t -> per_file_errors
 
+val fold_per_file_errors :
+  per_file_errors -> init:'acc -> f:('acc -> error -> 'acc) -> 'acc
+
 val iter_error_list : ?drop_fixmed:bool -> (error -> unit) -> t -> unit
 
 val fold_errors :

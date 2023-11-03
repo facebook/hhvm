@@ -31,3 +31,6 @@ let pp fmt iset =
 let show iset = Format.asprintf "%a" pp iset
 
 let to_string = show
+
+let yojson_of_t t =
+  elements t |> List.sort IntKey.compare |> yojson_of_list IntKey.yojson_of_t

@@ -14,3 +14,9 @@ let pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit =
   make_pp (fun fmt s -> Format.fprintf fmt "%S" (Int64.to_string s)) pp_data
 
 let show pp_data x = Format.asprintf "%a" (pp pp_data) x
+
+let yojson_of_t yojson_of_value t =
+  make_yojson_of_t Int64Key.to_string yojson_of_value t
+
+(* Avoids warning 66 about unused open Ppx_yojson_conv_lib.Yojson_conv.Primitives *)
+let _ = yojson_of_unit

@@ -6,6 +6,8 @@
  *
  *)
 
+type by_names [@@deriving yojson_of]
+
 type t [@@deriving yojson_of]
 
 val is_enabled : TypecheckerOptions.t -> bool
@@ -22,4 +24,5 @@ val finalize :
   t ->
   unit
 
-val hash_tasts_by_file : Tast.by_names Relative_path.Map.t -> t
+val hash_tasts_by_file :
+  Tast.by_names Relative_path.Map.t -> by_names Relative_path.Map.t

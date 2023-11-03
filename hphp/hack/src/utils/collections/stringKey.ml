@@ -7,7 +7,7 @@
  *
  *)
 
-type t = string
+type t = string [@@deriving yojson_of]
 
 let compare (x : t) (y : t) = String.compare x y
 

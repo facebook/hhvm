@@ -795,6 +795,9 @@ let get_file_errors ?(drop_fixmed = true) (t : t) (file : Relative_path.t) :
     else
       errors
 
+let fold_per_file_errors (errors : per_file_errors) ~init ~f =
+  List.fold errors ~init ~f
+
 let iter_error_list ?(drop_fixmed = true) f err =
   List.iter ~f (get_sorted_error_list ~drop_fixmed err)
 

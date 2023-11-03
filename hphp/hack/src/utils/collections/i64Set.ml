@@ -8,3 +8,6 @@
  *)
 
 include Set.Make (Int64)
+
+let yojson_of_t t =
+  elements t |> List.sort Int64.compare |> yojson_of_list yojson_of_int64

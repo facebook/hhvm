@@ -9,6 +9,9 @@
 
 open Core
 
+(* Avoids warning 66 about unused open Ppx_yojson_conv_lib.Yojson_conv.Primitives *)
+let _ = yojson_of_unit
+
 module type S = sig
   include Caml.Map.S
 

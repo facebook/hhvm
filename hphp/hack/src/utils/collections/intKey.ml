@@ -7,6 +7,8 @@
  *
  *)
 
-type t = int
+type t = int [@@deriving yojson_of]
 
 let compare = Int.compare
+
+let to_string = Int.to_string

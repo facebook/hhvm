@@ -732,7 +732,7 @@ let main_internal
       Printf.printf "TAST hashes:\n\n";
       Relative_path.Map.map tasts ~f:Tast.program_by_names
       |> Tast_hashes.hash_tasts_by_file
-      |> Tast_hashes.yojson_of_t
+      |> Relative_path.Map.yojson_of_t Tast_hashes.yojson_of_by_names
       |> Yojson.Safe.pretty_to_channel Stdlib.stdout;
       Printf.printf
         "\n\n\nTASTs:\n\n%s\n%!"

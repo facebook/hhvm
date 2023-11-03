@@ -22,6 +22,9 @@ type 'a t = {
   merge: earlier:'a -> later:'a -> 'a;
 }
 
+(* Avoids warning 66 about unused open Ppx_yojson_conv_lib.Yojson_conv.Primitives *)
+let _ = yojson_of_unit
+
 let make ~is_canonical ~merge ?get_single_seq seq =
   let tbl = String.Table.create () in
   { tbl; get_single_seq; seq; is_canonical; merge }

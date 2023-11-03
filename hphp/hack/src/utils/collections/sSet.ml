@@ -53,3 +53,8 @@ let pp_large ?(max_elts = 5) fmt sset =
 
 let show_large ?(max_elts = 5) sset =
   Format.asprintf "%a" (pp_large ~max_elts) sset
+
+let yojson_of_t t =
+  elements t
+  |> List.sort StringKey.compare
+  |> yojson_of_list StringKey.yojson_of_t

@@ -2,4 +2,7 @@
  (name collections)
  (wrapped false)
  (libraries common core_kernel yojson)
- (preprocess (pps ppx_hash)))
+ (preprocess
+  (pps
+   ppx_hash
+   ppx_yojson_conv)))

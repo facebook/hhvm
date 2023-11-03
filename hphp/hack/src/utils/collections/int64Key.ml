@@ -7,6 +7,8 @@
  *
  *)
 
-type t = int64
+type t = int64 [@@deriving yojson_of]
 
 let compare = Int64.compare
+
+let to_string = Int64.to_string

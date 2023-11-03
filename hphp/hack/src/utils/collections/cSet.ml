@@ -8,3 +8,6 @@
  *)
 
 include Set.Make (Char)
+
+let yojson_of_t t =
+  elements t |> List.sort Char.compare |> yojson_of_list yojson_of_char

@@ -21,7 +21,13 @@ type by_names = {
 }
 [@@deriving yojson_of]
 
-type t = by_names Relative_path.Map.t [@@deriving yojson_of]
+type file_info = {
+  tast_hashes: by_names;
+  error_hashes: ISet.t;
+}
+[@@deriving yojson_of]
+
+type t = file_info Relative_path.Map.t [@@deriving yojson_of]
 
 let hash_tasts
     { Tast.fun_tasts; class_tasts; typedef_tasts; gconst_tasts; module_tasts } :
@@ -43,22 +49,32 @@ let union_by_names x y =
     module_tast_hashes = SMap.union x.module_tast_hashes y.module_tast_hashes;
   }
 
-let hash_tasts_by_file : Tast.by_names Relative_path.Map.t -> t =
+let union_file_info x y =
+  {
+    tast_hashes = union_by_names x.tast_hashes y.tast_hashes;
+    error_hashes = ISet.union x.error_hashes y.error_hashes;
+  }
+
+let hash_tasts_by_file :
+    Tast.by_names Relative_path.Map.t -> by_names Relative_path.Map.t =
   Relative_path.Map.map ~f:hash_tasts
 
 let error_while_hashing
     { Tast.fun_tasts; class_tasts; typedef_tasts; gconst_tasts; module_tasts } :
-    by_names =
+    file_info =
   let minus_one _ = -1 in
-  {
-    fun_tast_hashes = SMap.map minus_one fun_tasts;
-    class_tast_hashes = SMap.map minus_one class_tasts;
-    typedef_tast_hashes = SMap.map minus_one typedef_tasts;
-    gconst_tast_hashes = SMap.map minus_one gconst_tasts;
-    module_tast_hashes = SMap.map minus_one module_tasts;
-  }
+  let tast_hashes =
+    {
+      fun_tast_hashes = SMap.map minus_one fun_tasts;
+      class_tast_hashes = SMap.map minus_one class_tasts;
+      typedef_tast_hashes = SMap.map minus_one typedef_tasts;
+      gconst_tast_hashes = SMap.map minus_one gconst_tasts;
+      module_tast_hashes = SMap.map minus_one module_tasts;
+    }
+  in
+  { tast_hashes; error_hashes = ISet.empty }
 
-let empty = Relative_path.Map.empty
+let empty : t = Relative_path.Map.empty
 
 let add m ~key ~data =
   match data with
@@ -67,20 +83,30 @@ let add m ~key ~data =
 
 let is_enabled tcopt = TypecheckerOptions.dump_tast_hashes tcopt
 
-let map ctx path tasts (_errors : Errors.t) =
+let map ctx path tasts errors : t =
   let data =
     Timeout.with_timeout
       ~timeout:10
       ~on_timeout:(fun _timings -> error_while_hashing tasts)
       ~do_:(fun _timeout ->
         let tasts = Tast.map_by_names tasts ~f:(Tast_expand.expand_def ctx) in
-        hash_tasts tasts)
+        let tast_hashes = hash_tasts tasts in
+        let error_hashes =
+          let errors = Errors.get_file_errors ~drop_fixmed:true errors path in
+          Errors.fold_per_file_errors
+            errors
+            ~init:ISet.empty
+            ~f:(fun hashes error ->
+              let hash = Errors.hash_error error in
+              ISet.add hash hashes)
+        in
+        { tast_hashes; error_hashes })
   in
   add empty ~key:path ~data:(Some data)
 
-let reduce xs ys =
+let reduce (xs : t) (ys : t) : t =
   Relative_path.Map.union
-    ~combine:(fun _key x y -> Some (union_by_names x y))
+    ~combine:(fun _key x y -> Some (union_file_info x y))
     xs
     ys
 

@@ -52,3 +52,6 @@ let of_list list =
   let set = Hashtbl.Poly.create ~size:(List.length list) () in
   List.iter list ~f:(add set);
   set
+
+let yojson_of_t compare_a yojson_of_a t =
+  to_list t |> List.sort ~compare:compare_a |> yojson_of_list yojson_of_a

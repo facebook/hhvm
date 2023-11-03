@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<be69b3dada70a1c0a64f47ed641266bb>>
+// @generated SignedSource<<7cad70ba46b986e5cfca7530db6567b2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -56,5 +56,28 @@ pub struct ByNames {
     pub module_tast_hashes: s_map::SMap<Hash>,
 }
 
+#[derive(
+    Clone,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
 #[rust_to_ocaml(attr = "deriving yojson_of")]
-pub type TastHashes = relative_path::map::Map<ByNames>;
+#[repr(C)]
+pub struct FileInfo {
+    pub tast_hashes: ByNames,
+    pub error_hashes: i_set::ISet,
+}
+
+#[rust_to_ocaml(attr = "deriving yojson_of")]
+pub type TastHashes = relative_path::map::Map<FileInfo>;

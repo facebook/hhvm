@@ -40,3 +40,6 @@ val is_empty : 'a t -> bool
 val to_list : 'a t -> 'a list
 
 val of_list : 'a list -> 'a t
+
+val yojson_of_t :
+  ('a -> 'a -> int) -> ('a -> Yojson.Safe.t) -> 'a t -> Yojson.Safe.t

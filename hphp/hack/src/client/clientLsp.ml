@@ -1119,92 +1119,79 @@ let shellout_locations_to_lsp_locations_exn (stdout : string) :
   FindRefsWireFormat.IdeShellout.from_string_exn stdout
   |> List.map ~f:ide_shell_out_pos_to_lsp_location
 
+let edit_of_patch (patch : ide_refactor_patch) : Lsp.TextEdit.t =
+  let text =
+    match patch.patch_type with
+    | "insert"
+    | "replace" ->
+      patch.replacement
+    | "remove" -> ""
+    | e -> failwith ("invalid patch type: " ^ e)
+  in
+  let loc =
+    let ide_shell_out_pos =
+      {
+        FindRefsWireFormat.filename = patch.filename;
+        char_start = patch.char_start;
+        char_end = patch.char_end + 1;
+        (* This end is inclusive for range replacement *)
+        line = patch.line;
+      }
+    in
+    ide_shell_out_pos_to_lsp_location ide_shell_out_pos
+  in
+  { TextEdit.range = loc.Lsp.Location.range; newText = text }
+
 (** Parses output of "hh --ide-rename-by-symbol".
 If the output is malformed, raises an exception. *)
 let shellout_patch_list_to_lsp_edits_exn (stdout : string) : Lsp.WorkspaceEdit.t
     =
-  let json = Yojson.Safe.from_string stdout in
-  match json with
-  | `List positions ->
-    let patch_locations =
-      List.map positions ~f:(fun pos ->
+  let patches =
+    let json = Yojson.Safe.from_string stdout in
+    match json with
+    | `List positions ->
+      List.bind positions ~f:(fun pos ->
           let open Yojson.Basic.Util in
           let lst_json = Yojson.Safe.to_basic pos in
           let filename = lst_json |> member "filename" |> to_string in
-          let patches = lst_json |> member "patches" |> to_list in
-          let patches =
-            List.map
-              ~f:(fun x ->
-                let char_start = x |> member "col_start" |> to_int in
-                let char_end = x |> member "col_end" |> to_int in
-                let line = x |> member "line" |> to_int in
-                let patch_type = x |> member "patch_type" |> to_string in
-                let replacement = x |> member "replacement" |> to_string in
-                {
-                  filename;
-                  char_start;
-                  char_end;
-                  line;
-                  patch_type;
-                  replacement;
-                })
-              patches
-          in
-          patches)
-    in
-    let locations = List.concat patch_locations in
-    let patch_to_workspace_edit_change patch =
-      let ide_shell_out_pos =
-        {
-          FindRefsWireFormat.filename = patch.filename;
-          char_start = patch.char_start;
-          char_end = patch.char_end + 1;
-          (* This end is inclusive for range replacement *)
-          line = patch.line;
-        }
-      in
-      match patch.patch_type with
-      | "insert"
-      | "replace" ->
-        let loc = ide_shell_out_pos_to_lsp_location ide_shell_out_pos in
-        ( Lsp_helpers.path_string_to_lsp_uri
+          let raw_patches = lst_json |> member "patches" |> to_list in
+          List.map raw_patches ~f:(fun raw_patch ->
+              let char_start = raw_patch |> member "col_start" |> to_int in
+              let char_end = raw_patch |> member "col_end" |> to_int in
+              let line = raw_patch |> member "line" |> to_int in
+              let patch_type = raw_patch |> member "patch_type" |> to_string in
+              let replacement =
+                raw_patch |> member "replacement" |> to_string
+              in
+              { filename; char_start; char_end; line; patch_type; replacement }))
+    | `Int _
+    | `Tuple _
+    | `Bool _
+    | `Intlit _
+    | `Null
+    | `Variant _
+    | `Assoc _
+    | `Float _
+    | `String _ ->
+      failwith ("Expected list, got json like " ^ stdout)
+  in
+  let changes =
+    List.fold patches ~init:Lsp.DocumentUri.Map.empty ~f:(fun acc patch ->
+        let uri =
+          Lsp_helpers.path_string_to_lsp_uri
             patch.filename
-            ~default_path:patch.filename,
-          {
-            TextEdit.range = loc.Lsp.Location.range;
-            newText = patch.replacement;
-          } )
-      | "remove" ->
-        let loc = ide_shell_out_pos_to_lsp_location ide_shell_out_pos in
-        ( Lsp_helpers.path_string_to_lsp_uri
-            patch.filename
-            ~default_path:patch.filename,
-          { TextEdit.range = loc.Lsp.Location.range; newText = "" } )
-      | e -> failwith ("invalid patch type: " ^ e)
-    in
-    let changes = List.map ~f:patch_to_workspace_edit_change locations in
-    let changes =
-      List.fold
-        changes
-        ~init:Lsp.DocumentUri.Map.empty
-        ~f:(fun acc (uri, text_edit) ->
+            ~default_path:patch.filename
+        in
+        let new_edits =
+          let edit = edit_of_patch patch in
           let current_edits =
             Option.value ~default:[] (Lsp.DocumentUri.Map.find_opt uri acc)
           in
-          let new_edits = text_edit :: current_edits in
-          Lsp.DocumentUri.Map.add uri new_edits acc)
-    in
-    { WorkspaceEdit.changes }
-  | `Int _
-  | `Tuple _
-  | `Bool _
-  | `Intlit _
-  | `Null
-  | `Variant _
-  | `Assoc _
-  | `Float _
-  | `String _ ->
-    failwith ("Expected list, got json like " ^ stdout)
+          edit :: current_edits
+        in
+        Lsp.DocumentUri.Map.add uri new_edits acc)
+  in
+  { WorkspaceEdit.changes }
 
 (************************************************************************)
 (* Connection and rpc                                                   *)

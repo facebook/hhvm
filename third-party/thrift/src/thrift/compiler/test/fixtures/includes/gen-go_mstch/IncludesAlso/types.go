@@ -77,7 +77,7 @@ func (x *Also) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
+        switch {
         default:
             if err := p.Skip(wireType); err != nil {
                 return err

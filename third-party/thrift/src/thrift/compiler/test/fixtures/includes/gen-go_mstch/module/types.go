@@ -307,39 +307,18 @@ func (x *MyStruct) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // MyIncludedField
-            expectedType := thrift.Type(thrift.STRUCT)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.STRUCT)):  // MyIncludedField
+            if err := x.readField1(p); err != nil {
+                return err
             }
-        case 2:  // MyOtherIncludedField
-            expectedType := thrift.Type(thrift.STRUCT)
-            if wireType == expectedType {
-                if err := x.readField2(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 2 && wireType == thrift.Type(thrift.STRUCT)):  // MyOtherIncludedField
+            if err := x.readField2(p); err != nil {
+                return err
             }
-        case 3:  // MyIncludedInt
-            expectedType := thrift.Type(thrift.I64)
-            if wireType == expectedType {
-                if err := x.readField3(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 3 && wireType == thrift.Type(thrift.I64)):  // MyIncludedInt
+            if err := x.readField3(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {

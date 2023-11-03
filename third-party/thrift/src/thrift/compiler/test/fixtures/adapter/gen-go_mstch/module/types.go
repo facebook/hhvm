@@ -1203,28 +1203,14 @@ func (x *MyAnnotation) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // signature
-            expectedType := thrift.Type(thrift.STRING)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // signature
+            if err := x.readField1(p); err != nil {
+                return err
             }
-        case 2:  // color
-            expectedType := thrift.Type(thrift.I32)
-            if wireType == expectedType {
-                if err := x.readField2(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 2 && wireType == thrift.Type(thrift.I32)):  // color
+            if err := x.readField2(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {
@@ -2151,127 +2137,50 @@ func (x *Foo) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // intField
-            expectedType := thrift.Type(thrift.I32)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I32)):  // intField
+            if err := x.readField1(p); err != nil {
+                return err
             }
-        case 2:  // optionalIntField
-            expectedType := thrift.Type(thrift.I32)
-            if wireType == expectedType {
-                if err := x.readField2(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 2 && wireType == thrift.Type(thrift.I32)):  // optionalIntField
+            if err := x.readField2(p); err != nil {
+                return err
             }
-        case 3:  // intFieldWithDefault
-            expectedType := thrift.Type(thrift.I32)
-            if wireType == expectedType {
-                if err := x.readField3(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 3 && wireType == thrift.Type(thrift.I32)):  // intFieldWithDefault
+            if err := x.readField3(p); err != nil {
+                return err
             }
-        case 4:  // setField
-            expectedType := thrift.Type(thrift.SET)
-            if wireType == expectedType {
-                if err := x.readField4(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 4 && wireType == thrift.Type(thrift.SET)):  // setField
+            if err := x.readField4(p); err != nil {
+                return err
             }
-        case 5:  // optionalSetField
-            expectedType := thrift.Type(thrift.SET)
-            if wireType == expectedType {
-                if err := x.readField5(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 5 && wireType == thrift.Type(thrift.SET)):  // optionalSetField
+            if err := x.readField5(p); err != nil {
+                return err
             }
-        case 6:  // mapField
-            expectedType := thrift.Type(thrift.MAP)
-            if wireType == expectedType {
-                if err := x.readField6(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 6 && wireType == thrift.Type(thrift.MAP)):  // mapField
+            if err := x.readField6(p); err != nil {
+                return err
             }
-        case 7:  // optionalMapField
-            expectedType := thrift.Type(thrift.MAP)
-            if wireType == expectedType {
-                if err := x.readField7(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 7 && wireType == thrift.Type(thrift.MAP)):  // optionalMapField
+            if err := x.readField7(p); err != nil {
+                return err
             }
-        case 8:  // binaryField
-            expectedType := thrift.Type(thrift.STRING)
-            if wireType == expectedType {
-                if err := x.readField8(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 8 && wireType == thrift.Type(thrift.STRING)):  // binaryField
+            if err := x.readField8(p); err != nil {
+                return err
             }
-        case 9:  // longField
-            expectedType := thrift.Type(thrift.I64)
-            if wireType == expectedType {
-                if err := x.readField9(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 9 && wireType == thrift.Type(thrift.I64)):  // longField
+            if err := x.readField9(p); err != nil {
+                return err
             }
-        case 10:  // adaptedLongField
-            expectedType := thrift.Type(thrift.I64)
-            if wireType == expectedType {
-                if err := x.readField10(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 10 && wireType == thrift.Type(thrift.I64)):  // adaptedLongField
+            if err := x.readField10(p); err != nil {
+                return err
             }
-        case 11:  // doubleAdaptedField
-            expectedType := thrift.Type(thrift.I64)
-            if wireType == expectedType {
-                if err := x.readField11(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 11 && wireType == thrift.Type(thrift.I64)):  // doubleAdaptedField
+            if err := x.readField11(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {
@@ -2820,61 +2729,26 @@ func (x *Baz) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // intField
-            expectedType := thrift.Type(thrift.I32)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I32)):  // intField
+            if err := x.readField1(p); err != nil {
+                return err
             }
-        case 4:  // setField
-            expectedType := thrift.Type(thrift.SET)
-            if wireType == expectedType {
-                if err := x.readField4(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 4 && wireType == thrift.Type(thrift.SET)):  // setField
+            if err := x.readField4(p); err != nil {
+                return err
             }
-        case 6:  // mapField
-            expectedType := thrift.Type(thrift.MAP)
-            if wireType == expectedType {
-                if err := x.readField6(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 6 && wireType == thrift.Type(thrift.MAP)):  // mapField
+            if err := x.readField6(p); err != nil {
+                return err
             }
-        case 8:  // binaryField
-            expectedType := thrift.Type(thrift.STRING)
-            if wireType == expectedType {
-                if err := x.readField8(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 8 && wireType == thrift.Type(thrift.STRING)):  // binaryField
+            if err := x.readField8(p); err != nil {
+                return err
             }
-        case 9:  // longField
-            expectedType := thrift.Type(thrift.I64)
-            if wireType == expectedType {
-                if err := x.readField9(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 9 && wireType == thrift.Type(thrift.I64)):  // longField
+            if err := x.readField9(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {
@@ -3582,83 +3456,34 @@ func (x *Bar) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // structField
-            expectedType := thrift.Type(thrift.STRUCT)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.STRUCT)):  // structField
+            if err := x.readField1(p); err != nil {
+                return err
             }
-        case 2:  // optionalStructField
-            expectedType := thrift.Type(thrift.STRUCT)
-            if wireType == expectedType {
-                if err := x.readField2(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 2 && wireType == thrift.Type(thrift.STRUCT)):  // optionalStructField
+            if err := x.readField2(p); err != nil {
+                return err
             }
-        case 3:  // structListField
-            expectedType := thrift.Type(thrift.LIST)
-            if wireType == expectedType {
-                if err := x.readField3(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 3 && wireType == thrift.Type(thrift.LIST)):  // structListField
+            if err := x.readField3(p); err != nil {
+                return err
             }
-        case 4:  // optionalStructListField
-            expectedType := thrift.Type(thrift.LIST)
-            if wireType == expectedType {
-                if err := x.readField4(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 4 && wireType == thrift.Type(thrift.LIST)):  // optionalStructListField
+            if err := x.readField4(p); err != nil {
+                return err
             }
-        case 5:  // unionField
-            expectedType := thrift.Type(thrift.STRUCT)
-            if wireType == expectedType {
-                if err := x.readField5(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 5 && wireType == thrift.Type(thrift.STRUCT)):  // unionField
+            if err := x.readField5(p); err != nil {
+                return err
             }
-        case 6:  // optionalUnionField
-            expectedType := thrift.Type(thrift.STRUCT)
-            if wireType == expectedType {
-                if err := x.readField6(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 6 && wireType == thrift.Type(thrift.STRUCT)):  // optionalUnionField
+            if err := x.readField6(p); err != nil {
+                return err
             }
-        case 7:  // adaptedStructField
-            expectedType := thrift.Type(thrift.STRUCT)
-            if wireType == expectedType {
-                if err := x.readField7(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 7 && wireType == thrift.Type(thrift.STRUCT)):  // adaptedStructField
+            if err := x.readField7(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {
@@ -3820,17 +3645,10 @@ func (x *DirectlyAdapted) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // field
-            expectedType := thrift.Type(thrift.I32)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I32)):  // field
+            if err := x.readField1(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {
@@ -3986,17 +3804,10 @@ func (x *IndependentDirectlyAdapted) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // field
-            expectedType := thrift.Type(thrift.I32)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I32)):  // field
+            if err := x.readField1(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {
@@ -4365,50 +4176,22 @@ func (x *StructWithFieldAdapter) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // field
-            expectedType := thrift.Type(thrift.I32)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I32)):  // field
+            if err := x.readField1(p); err != nil {
+                return err
             }
-        case 2:  // shared_field
-            expectedType := thrift.Type(thrift.I32)
-            if wireType == expectedType {
-                if err := x.readField2(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 2 && wireType == thrift.Type(thrift.I32)):  // shared_field
+            if err := x.readField2(p); err != nil {
+                return err
             }
-        case 3:  // opt_shared_field
-            expectedType := thrift.Type(thrift.I32)
-            if wireType == expectedType {
-                if err := x.readField3(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 3 && wireType == thrift.Type(thrift.I32)):  // opt_shared_field
+            if err := x.readField3(p); err != nil {
+                return err
             }
-        case 4:  // opt_boxed_field
-            expectedType := thrift.Type(thrift.I32)
-            if wireType == expectedType {
-                if err := x.readField4(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 4 && wireType == thrift.Type(thrift.I32)):  // opt_boxed_field
+            if err := x.readField4(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {
@@ -4726,39 +4509,18 @@ func (x *TerseAdaptedFields) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // int_field
-            expectedType := thrift.Type(thrift.I32)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I32)):  // int_field
+            if err := x.readField1(p); err != nil {
+                return err
             }
-        case 2:  // string_field
-            expectedType := thrift.Type(thrift.STRING)
-            if wireType == expectedType {
-                if err := x.readField2(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // string_field
+            if err := x.readField2(p); err != nil {
+                return err
             }
-        case 3:  // set_field
-            expectedType := thrift.Type(thrift.SET)
-            if wireType == expectedType {
-                if err := x.readField3(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 3 && wireType == thrift.Type(thrift.SET)):  // set_field
+            if err := x.readField3(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {
@@ -4937,17 +4699,10 @@ func (x *B) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // a
-            expectedType := thrift.Type(thrift.STRUCT)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.STRUCT)):  // a
+            if err := x.readField1(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {
@@ -5042,7 +4797,7 @@ func (x *A) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
+        switch {
         default:
             if err := p.Skip(wireType); err != nil {
                 return err
@@ -5196,17 +4951,10 @@ func (x *Config) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // path
-            expectedType := thrift.Type(thrift.STRING)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // path
+            if err := x.readField1(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {
@@ -5432,28 +5180,14 @@ func (x *MyStruct) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // field
-            expectedType := thrift.Type(thrift.I32)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I32)):  // field
+            if err := x.readField1(p); err != nil {
+                return err
             }
-        case 2:  // set_string
-            expectedType := thrift.Type(thrift.SET)
-            if wireType == expectedType {
-                if err := x.readField2(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 2 && wireType == thrift.Type(thrift.SET)):  // set_string
+            if err := x.readField2(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {
@@ -6180,116 +5914,46 @@ func (x *AdaptTestStruct) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // delay
-            expectedType := thrift.Type(thrift.I64)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I64)):  // delay
+            if err := x.readField1(p); err != nil {
+                return err
             }
-        case 2:  // custom
-            expectedType := thrift.Type(thrift.STRING)
-            if wireType == expectedType {
-                if err := x.readField2(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // custom
+            if err := x.readField2(p); err != nil {
+                return err
             }
-        case 3:  // timeout
-            expectedType := thrift.Type(thrift.I64)
-            if wireType == expectedType {
-                if err := x.readField3(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 3 && wireType == thrift.Type(thrift.I64)):  // timeout
+            if err := x.readField3(p); err != nil {
+                return err
             }
-        case 4:  // data
-            expectedType := thrift.Type(thrift.I64)
-            if wireType == expectedType {
-                if err := x.readField4(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 4 && wireType == thrift.Type(thrift.I64)):  // data
+            if err := x.readField4(p); err != nil {
+                return err
             }
-        case 5:  // meta
-            expectedType := thrift.Type(thrift.STRING)
-            if wireType == expectedType {
-                if err := x.readField5(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 5 && wireType == thrift.Type(thrift.STRING)):  // meta
+            if err := x.readField5(p); err != nil {
+                return err
             }
-        case 6:  // indirectionString
-            expectedType := thrift.Type(thrift.STRING)
-            if wireType == expectedType {
-                if err := x.readField6(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 6 && wireType == thrift.Type(thrift.STRING)):  // indirectionString
+            if err := x.readField6(p); err != nil {
+                return err
             }
-        case 7:  // string_data
-            expectedType := thrift.Type(thrift.STRING)
-            if wireType == expectedType {
-                if err := x.readField7(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 7 && wireType == thrift.Type(thrift.STRING)):  // string_data
+            if err := x.readField7(p); err != nil {
+                return err
             }
-        case 8:  // double_wrapped_bool
-            expectedType := thrift.Type(thrift.BOOL)
-            if wireType == expectedType {
-                if err := x.readField8(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 8 && wireType == thrift.Type(thrift.BOOL)):  // double_wrapped_bool
+            if err := x.readField8(p); err != nil {
+                return err
             }
-        case 9:  // double_wrapped_integer
-            expectedType := thrift.Type(thrift.I32)
-            if wireType == expectedType {
-                if err := x.readField9(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 9 && wireType == thrift.Type(thrift.I32)):  // double_wrapped_integer
+            if err := x.readField9(p); err != nil {
+                return err
             }
-        case 10:  // binary_data
-            expectedType := thrift.Type(thrift.STRING)
-            if wireType == expectedType {
-                if err := x.readField10(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 10 && wireType == thrift.Type(thrift.STRING)):  // binary_data
+            if err := x.readField10(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {
@@ -8027,248 +7691,94 @@ func (x *AdaptTemplatedTestStruct) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // adaptedBool
-            expectedType := thrift.Type(thrift.BOOL)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.BOOL)):  // adaptedBool
+            if err := x.readField1(p); err != nil {
+                return err
             }
-        case 2:  // adaptedByte
-            expectedType := thrift.Type(thrift.BYTE)
-            if wireType == expectedType {
-                if err := x.readField2(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 2 && wireType == thrift.Type(thrift.BYTE)):  // adaptedByte
+            if err := x.readField2(p); err != nil {
+                return err
             }
-        case 3:  // adaptedShort
-            expectedType := thrift.Type(thrift.I16)
-            if wireType == expectedType {
-                if err := x.readField3(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 3 && wireType == thrift.Type(thrift.I16)):  // adaptedShort
+            if err := x.readField3(p); err != nil {
+                return err
             }
-        case 4:  // adaptedInteger
-            expectedType := thrift.Type(thrift.I32)
-            if wireType == expectedType {
-                if err := x.readField4(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 4 && wireType == thrift.Type(thrift.I32)):  // adaptedInteger
+            if err := x.readField4(p); err != nil {
+                return err
             }
-        case 5:  // adaptedLong
-            expectedType := thrift.Type(thrift.I64)
-            if wireType == expectedType {
-                if err := x.readField5(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 5 && wireType == thrift.Type(thrift.I64)):  // adaptedLong
+            if err := x.readField5(p); err != nil {
+                return err
             }
-        case 6:  // adaptedDouble
-            expectedType := thrift.Type(thrift.DOUBLE)
-            if wireType == expectedType {
-                if err := x.readField6(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 6 && wireType == thrift.Type(thrift.DOUBLE)):  // adaptedDouble
+            if err := x.readField6(p); err != nil {
+                return err
             }
-        case 7:  // adaptedString
-            expectedType := thrift.Type(thrift.STRING)
-            if wireType == expectedType {
-                if err := x.readField7(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 7 && wireType == thrift.Type(thrift.STRING)):  // adaptedString
+            if err := x.readField7(p); err != nil {
+                return err
             }
-        case 8:  // adaptedList
-            expectedType := thrift.Type(thrift.LIST)
-            if wireType == expectedType {
-                if err := x.readField8(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 8 && wireType == thrift.Type(thrift.LIST)):  // adaptedList
+            if err := x.readField8(p); err != nil {
+                return err
             }
-        case 9:  // adaptedSet
-            expectedType := thrift.Type(thrift.SET)
-            if wireType == expectedType {
-                if err := x.readField9(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 9 && wireType == thrift.Type(thrift.SET)):  // adaptedSet
+            if err := x.readField9(p); err != nil {
+                return err
             }
-        case 10:  // adaptedMap
-            expectedType := thrift.Type(thrift.MAP)
-            if wireType == expectedType {
-                if err := x.readField10(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 10 && wireType == thrift.Type(thrift.MAP)):  // adaptedMap
+            if err := x.readField10(p); err != nil {
+                return err
             }
-        case 11:  // adaptedBoolDefault
-            expectedType := thrift.Type(thrift.BOOL)
-            if wireType == expectedType {
-                if err := x.readField11(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 11 && wireType == thrift.Type(thrift.BOOL)):  // adaptedBoolDefault
+            if err := x.readField11(p); err != nil {
+                return err
             }
-        case 12:  // adaptedByteDefault
-            expectedType := thrift.Type(thrift.BYTE)
-            if wireType == expectedType {
-                if err := x.readField12(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 12 && wireType == thrift.Type(thrift.BYTE)):  // adaptedByteDefault
+            if err := x.readField12(p); err != nil {
+                return err
             }
-        case 13:  // adaptedShortDefault
-            expectedType := thrift.Type(thrift.I16)
-            if wireType == expectedType {
-                if err := x.readField13(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 13 && wireType == thrift.Type(thrift.I16)):  // adaptedShortDefault
+            if err := x.readField13(p); err != nil {
+                return err
             }
-        case 14:  // adaptedIntegerDefault
-            expectedType := thrift.Type(thrift.I32)
-            if wireType == expectedType {
-                if err := x.readField14(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 14 && wireType == thrift.Type(thrift.I32)):  // adaptedIntegerDefault
+            if err := x.readField14(p); err != nil {
+                return err
             }
-        case 15:  // adaptedLongDefault
-            expectedType := thrift.Type(thrift.I64)
-            if wireType == expectedType {
-                if err := x.readField15(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 15 && wireType == thrift.Type(thrift.I64)):  // adaptedLongDefault
+            if err := x.readField15(p); err != nil {
+                return err
             }
-        case 16:  // adaptedDoubleDefault
-            expectedType := thrift.Type(thrift.DOUBLE)
-            if wireType == expectedType {
-                if err := x.readField16(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 16 && wireType == thrift.Type(thrift.DOUBLE)):  // adaptedDoubleDefault
+            if err := x.readField16(p); err != nil {
+                return err
             }
-        case 17:  // adaptedStringDefault
-            expectedType := thrift.Type(thrift.STRING)
-            if wireType == expectedType {
-                if err := x.readField17(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 17 && wireType == thrift.Type(thrift.STRING)):  // adaptedStringDefault
+            if err := x.readField17(p); err != nil {
+                return err
             }
-        case 18:  // adaptedEnum
-            expectedType := thrift.Type(thrift.I32)
-            if wireType == expectedType {
-                if err := x.readField18(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 18 && wireType == thrift.Type(thrift.I32)):  // adaptedEnum
+            if err := x.readField18(p); err != nil {
+                return err
             }
-        case 19:  // adaptedListDefault
-            expectedType := thrift.Type(thrift.LIST)
-            if wireType == expectedType {
-                if err := x.readField19(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 19 && wireType == thrift.Type(thrift.LIST)):  // adaptedListDefault
+            if err := x.readField19(p); err != nil {
+                return err
             }
-        case 20:  // adaptedSetDefault
-            expectedType := thrift.Type(thrift.SET)
-            if wireType == expectedType {
-                if err := x.readField20(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 20 && wireType == thrift.Type(thrift.SET)):  // adaptedSetDefault
+            if err := x.readField20(p); err != nil {
+                return err
             }
-        case 21:  // adaptedMapDefault
-            expectedType := thrift.Type(thrift.MAP)
-            if wireType == expectedType {
-                if err := x.readField21(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 21 && wireType == thrift.Type(thrift.MAP)):  // adaptedMapDefault
+            if err := x.readField21(p); err != nil {
+                return err
             }
-        case 22:  // doubleTypedefBool
-            expectedType := thrift.Type(thrift.BOOL)
-            if wireType == expectedType {
-                if err := x.readField22(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 22 && wireType == thrift.Type(thrift.BOOL)):  // doubleTypedefBool
+            if err := x.readField22(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {
@@ -8466,17 +7976,10 @@ func (x *AdaptTemplatedNestedTestStruct) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // adaptedStruct
-            expectedType := thrift.Type(thrift.STRUCT)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.STRUCT)):  // adaptedStruct
+            if err := x.readField1(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {
@@ -8739,28 +8242,14 @@ func (x *AdaptTestUnion) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // delay
-            expectedType := thrift.Type(thrift.I64)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I64)):  // delay
+            if err := x.readField1(p); err != nil {
+                return err
             }
-        case 2:  // custom
-            expectedType := thrift.Type(thrift.STRING)
-            if wireType == expectedType {
-                if err := x.readField2(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // custom
+            if err := x.readField2(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {
@@ -8917,17 +8406,10 @@ func (x *AdaptedStruct) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // data
-            expectedType := thrift.Type(thrift.I64)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I64)):  // data
+            if err := x.readField1(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {
@@ -9083,17 +8565,10 @@ func (x *DirectlyAdaptedStruct) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // data
-            expectedType := thrift.Type(thrift.I64)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I64)):  // data
+            if err := x.readField1(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {
@@ -9516,50 +8991,22 @@ func (x *StructFieldAdaptedStruct) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // adaptedStruct
-            expectedType := thrift.Type(thrift.STRUCT)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.STRUCT)):  // adaptedStruct
+            if err := x.readField1(p); err != nil {
+                return err
             }
-        case 2:  // adaptedTypedef
-            expectedType := thrift.Type(thrift.STRUCT)
-            if wireType == expectedType {
-                if err := x.readField2(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 2 && wireType == thrift.Type(thrift.STRUCT)):  // adaptedTypedef
+            if err := x.readField2(p); err != nil {
+                return err
             }
-        case 3:  // directlyAdapted
-            expectedType := thrift.Type(thrift.STRUCT)
-            if wireType == expectedType {
-                if err := x.readField3(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 3 && wireType == thrift.Type(thrift.STRUCT)):  // directlyAdapted
+            if err := x.readField3(p); err != nil {
+                return err
             }
-        case 4:  // typedefOfAdapted
-            expectedType := thrift.Type(thrift.STRUCT)
-            if wireType == expectedType {
-                if err := x.readField4(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 4 && wireType == thrift.Type(thrift.STRUCT)):  // typedefOfAdapted
+            if err := x.readField4(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {
@@ -9739,17 +9186,10 @@ func (x *CircularAdaptee) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // field
-            expectedType := thrift.Type(thrift.STRUCT)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.STRUCT)):  // field
+            if err := x.readField1(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {
@@ -9925,17 +9365,10 @@ func (x *CircularStruct) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // field
-            expectedType := thrift.Type(thrift.STRUCT)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.STRUCT)):  // field
+            if err := x.readField1(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {
@@ -10112,17 +9545,10 @@ func (x *ReorderedStruct) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // reordered_dependent_adapted
-            expectedType := thrift.Type(thrift.STRUCT)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.STRUCT)):  // reordered_dependent_adapted
+            if err := x.readField1(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {
@@ -10217,7 +9643,7 @@ func (x *DeclaredAfterStruct) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
+        switch {
         default:
             if err := p.Skip(wireType); err != nil {
                 return err
@@ -10371,17 +9797,10 @@ func (x *RenamedStruct) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // data
-            expectedType := thrift.Type(thrift.I64)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I64)):  // data
+            if err := x.readField1(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {
@@ -10537,17 +9956,10 @@ func (x *SameNamespaceStruct) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // data
-            expectedType := thrift.Type(thrift.I64)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I64)):  // data
+            if err := x.readField1(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {
@@ -10642,7 +10054,7 @@ func (x *HeapAllocated) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
+        switch {
         default:
             if err := p.Skip(wireType); err != nil {
                 return err
@@ -10817,17 +10229,10 @@ func (x *MoveOnly) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // ptr
-            expectedType := thrift.Type(thrift.STRUCT)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.STRUCT)):  // ptr
+            if err := x.readField1(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {
@@ -10983,17 +10388,10 @@ func (x *AlsoMoveOnly) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // ptr
-            expectedType := thrift.Type(thrift.I64)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I64)):  // ptr
+            if err := x.readField1(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {
@@ -11088,7 +10486,7 @@ func (x *ApplyAdapter) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
+        switch {
         default:
             if err := p.Skip(wireType); err != nil {
                 return err
@@ -11181,7 +10579,7 @@ func (x *TransitiveAdapted) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
+        switch {
         default:
             if err := p.Skip(wireType); err != nil {
                 return err
@@ -11503,39 +10901,18 @@ func (x *CountingStruct) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // regularInt
-            expectedType := thrift.Type(thrift.I64)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I64)):  // regularInt
+            if err := x.readField1(p); err != nil {
+                return err
             }
-        case 2:  // countingInt
-            expectedType := thrift.Type(thrift.I64)
-            if wireType == expectedType {
-                if err := x.readField2(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 2 && wireType == thrift.Type(thrift.I64)):  // countingInt
+            if err := x.readField2(p); err != nil {
+                return err
             }
-        case 3:  // regularString
-            expectedType := thrift.Type(thrift.STRING)
-            if wireType == expectedType {
-                if err := x.readField3(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        case (id == 3 && wireType == thrift.Type(thrift.STRING)):  // regularString
+            if err := x.readField3(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {
@@ -11693,17 +11070,10 @@ func (x *Person) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // name
-            expectedType := thrift.Type(thrift.STRING)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // name
+            if err := x.readField1(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {
@@ -11859,17 +11229,10 @@ func (x *Person2) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
-        case 1:  // name
-            expectedType := thrift.Type(thrift.STRING)
-            if wireType == expectedType {
-                if err := x.readField1(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // name
+            if err := x.readField1(p); err != nil {
+                return err
             }
         default:
             if err := p.Skip(wireType); err != nil {

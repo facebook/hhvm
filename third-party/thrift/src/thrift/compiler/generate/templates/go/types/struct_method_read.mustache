@@ -34,21 +34,14 @@ func (x *{{struct:go_name}}) Read(p thrift.Protocol) error {
             break;
         }
 
-        switch id {
+        switch {
         {{#struct:fields_sorted}}
-        case {{field:key}}:  // {{field:name}}
-            {{#field:type}}
-            expectedType := thrift.Type({{> common/ttype}})
-            if wireType == expectedType {
-                if err := x.readField{{field:key_str}}(p); err != nil {
-                   return err
-                }
-            } else {
-                if err := p.Skip(wireType); err != nil {
-                    return err
-                }
+        {{#field:type}}
+        case (id == {{field:key}} && wireType == thrift.Type({{> common/ttype}})):  // {{field:name}}
+            if err := x.readField{{field:key_str}}(p); err != nil {
+                return err
             }
-            {{/field:type}}
+        {{/field:type}}
         {{/struct:fields_sorted}}
         default:
             if err := p.Skip(wireType); err != nil {

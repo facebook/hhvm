@@ -20,4 +20,5 @@ itertools = "0.11.0"
 naming_special_names_rust = { version = "0.0.0", path = "../naming" }
 oxidized = { version = "0.0.0", path = "../oxidized" }
 relative_path = { version = "0.0.0", path = "../utils/rust/relative_path" }
+stack_limit = { version = "0.0.0", path = "../utils/stack_limit" }
 vec1 = { version = "1", features = ["serde"] }

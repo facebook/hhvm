@@ -1558,6 +1558,7 @@ dependencies = [
  "naming_special_names_rust",
  "oxidized",
  "relative_path",
+ "stack_limit",
  "vec1",
 ]
 

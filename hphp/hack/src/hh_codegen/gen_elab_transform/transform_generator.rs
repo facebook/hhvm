@@ -39,7 +39,7 @@ pub fn gen(ctx: &Context) -> TokenStream {
                 env: &Env,
                 pass: &mut (impl Pass + Clone),
             ) {
-                self.traverse(env, pass);
+                stack_limit::maybe_grow(|| self.traverse(env, pass));
             }
             #[inline(always)]
             fn traverse(
@@ -98,7 +98,7 @@ fn gen_transform_and_traverse(ctx: &Context, mut s: synstructure::Structure<'_>)
         &super::gen_pass_method_name(&ty_name, Direction::TopDown),
         &super::gen_pass_method_name(&ty_name, Direction::BottomUp),
         quote!(self),
-        quote!(self.traverse(env, pass)),
+        quote!(stack_limit::maybe_grow(|| self.traverse(env, pass))),
     );
     let traverse_body = gen_traverse_body(&ty_name, &s);
     let ty_name = quote::format_ident!("{}", ty_name);
@@ -158,7 +158,7 @@ fn gen_variant_traverse(ty_name: &str, v: &synstructure::VariantInfo<'_>) -> Tok
 }
 
 fn gen_fld_traverse(ty_name: &str, bi: &synstructure::BindingInfo<'_>) -> TokenStream {
-    let transform_bi = quote! { #bi.transform(env, pass) };
+    let transform_bi = quote! { #bi.transform(env, &mut pass.clone()) };
     if !contains_ocaml_attr(&bi.ast().attrs, "transform.explicit") {
         return transform_bi;
     }

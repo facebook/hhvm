@@ -1856,7 +1856,13 @@ private:
 
 std::unique_ptr<TypeParser>
 make_dwarf_type_parser(const std::string& filename, int num_threads) {
-  return std::make_unique<TypeParserImpl>(filename, num_threads);
+  // Support calling with main binary or dwp, but process main binary since
+  // TypeParser handles dwp automatically
+  auto main_binary = filename;
+  if (main_binary.substr(main_binary.size() - 4) == ".dwp") {
+    main_binary = main_binary.substr(0, main_binary.size() - 4);
+  }
+  return std::make_unique<TypeParserImpl>(main_binary, num_threads);
 }
 
 std::unique_ptr<Printer> make_dwarf_printer(const std::string& filename) {

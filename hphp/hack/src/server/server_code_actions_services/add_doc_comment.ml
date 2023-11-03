@@ -28,8 +28,7 @@ let to_refactor source_text ~path candidate =
   let edit = lazy (edit_of_candidate source_text ~path candidate) in
   Code_action_types.Refactor.{ title = "Add doc comment"; edit }
 
-let find_candidate pos _entry source_text _ctx =
-  let positioned_tree = PositionedTree.make source_text in
+let find_candidate pos source_text positioned_tree =
   let root = PositionedTree.root positioned_tree in
   let (line, start, _) = Pos.info_pos pos in
   let offset =
@@ -104,6 +103,7 @@ let find ~entry ~(range : Lsp.range) ctx =
   in
   let path = entry.Provider_context.path in
   let pos = Lsp_helpers.lsp_range_to_pos ~line_to_offset path range in
-  find_candidate pos entry source_text ctx
+  let positioned_tree = Ast_provider.compute_cst ~ctx ~entry in
+  find_candidate pos source_text positioned_tree
   |> Option.map ~f:(to_refactor source_text ~path)
   |> Option.to_list

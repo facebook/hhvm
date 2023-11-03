@@ -7585,6 +7585,7 @@ and dispatch_call
               UnsafeNonnullCast
           in
           let te = Aast.Hole (el, ty_from, ty_to, hole_source) in
+          let ty = Typing_defs.with_reason ty (Reason.Runsafe_cast p) in
           make_result env p te ty
       in
       let should_forget_fakes = false in

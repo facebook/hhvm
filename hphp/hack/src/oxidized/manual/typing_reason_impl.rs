@@ -97,7 +97,8 @@ impl Reason {
             | RcapturedLike(p)
             | RpessimisedInout(p)
             | RpessimisedReturn(p)
-            | RpessimisedProp(p) => Some(p),
+            | RpessimisedProp(p)
+            | RunsafeCast(p) => Some(p),
             RlostInfo(_, r, _)
             | Rinstantiate(_, _, r)
             | Rtypeconst(r, _, _, _)

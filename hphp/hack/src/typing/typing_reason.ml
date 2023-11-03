@@ -8,6 +8,7 @@
  *)
 
 open Hh_prelude
+module SN = Naming_special_names
 
 let strip_ns id =
   id |> Utils.strip_ns |> Hh_autoimport.strip_HH_namespace_if_autoimport
@@ -181,6 +182,7 @@ type _ t_ =
   | Rpessimised_inout : Pos_or_decl.t -> 'phase t_
   | Rpessimised_return : Pos_or_decl.t -> 'phase t_
   | Rpessimised_prop : Pos_or_decl.t -> 'phase t_
+  | Runsafe_cast : Pos.t -> locl_phase t_
 [@@deriving hash]
 
 let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
@@ -288,6 +290,7 @@ let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Rdynamic_partial_enforcement (p, _, _) -> p
   | Ropaque_type_from_module (p, _, _) -> p
   | Rmissing_class p -> Pos_or_decl.of_raw_pos p
+  | Runsafe_cast p -> Pos_or_decl.of_raw_pos p
 
 let to_constructor_string : type ph. ph t_ -> string = function
   | Rnone -> "Rnone"
@@ -386,6 +389,7 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Rpessimised_inout _ -> "Rpessimised_inout"
   | Rpessimised_return _ -> "Rpessimised_return"
   | Rpessimised_prop _ -> "Rpessimised_prop"
+  | Runsafe_cast _ -> "Runsafe_cast"
 
 let rec pp_t_ : type ph. _ -> ph t_ -> unit =
  fun fmt r ->
@@ -604,7 +608,8 @@ let rec pp_t_ : type ph. _ -> ph t_ -> unit =
       pp_t_ fmt r;
       comma ();
       pp_blame fmt b
-    | Rdynamic_coercion r -> pp_t_ fmt r);
+    | Rdynamic_coercion r -> pp_t_ fmt r
+    | Runsafe_cast p -> Pos.pp fmt p);
     Format.fprintf fmt "@])"
 
 and show_t_ : type ph. ph t_ -> string = (fun r -> Format.asprintf "%a" pp_t_ r)
@@ -1110,6 +1115,17 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
     :: to_string "The type originated from here" r_orig
   | Rmissing_class p ->
     [(Pos_or_decl.of_raw_pos p, prefix ^ " because class was missing")]
+  | Runsafe_cast p ->
+    let unsafe_cast =
+      Markdown_lite.md_codify @@ Utils.strip_ns SN.PseudoFunctions.unsafe_cast
+    in
+    [
+      ( Pos_or_decl.of_raw_pos p,
+        prefix
+        ^ " because the expression went through a "
+        ^ unsafe_cast
+        ^ ". The type might be a lie!" );
+    ]
 
 and to_pos : type ph. ph t_ -> Pos_or_decl.t =
  fun r ->
@@ -1370,6 +1386,7 @@ module Visitor = struct
         | Rpessimised_inout x -> Rpessimised_inout x
         | Rpessimised_return x -> Rpessimised_return x
         | Rpessimised_prop x -> Rpessimised_prop x
+        | Runsafe_cast x -> Runsafe_cast x
 
       method on_lazy l = l
     end

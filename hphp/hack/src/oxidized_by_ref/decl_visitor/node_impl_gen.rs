@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d4be8ff41c32503c8a651876480a2b9f>>
+// @generated SignedSource<<27ee044d8769c7c9e686c0d23729d434>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1132,6 +1132,7 @@ impl<'a> Node<'a> for T_<'a> {
             T_::RpessimisedInout(ref __binding_0) => __binding_0.accept(v),
             T_::RpessimisedReturn(ref __binding_0) => __binding_0.accept(v),
             T_::RpessimisedProp(ref __binding_0) => __binding_0.accept(v),
+            T_::RunsafeCast(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

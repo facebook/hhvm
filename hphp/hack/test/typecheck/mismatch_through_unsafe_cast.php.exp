@@ -1,0 +1,14 @@
+File "mismatch_through_unsafe_cast.php", line 5, characters 19-20:
+Invalid argument (Typing[4110])
+  File "mismatch_through_unsafe_cast.php", line 5, characters 13-16:
+  Expected `bool`
+  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
+    via this generic `T`
+  File "mismatch_through_unsafe_cast.php", line 4, characters 8-43:
+  But got `string` because the expression went through a `HH\FIXME\UNSAFE_CAST`. The type might be a lie!
+File "mismatch_through_unsafe_cast.php", line 5, characters 3-21:
+hh_expect type mismatch (Typing[4453])
+  File "mismatch_through_unsafe_cast.php", line 5, characters 13-16:
+  Expected `bool`
+  File "mismatch_through_unsafe_cast.php", line 4, characters 8-43:
+  But got `string` because the expression went through a `HH\FIXME\UNSAFE_CAST`. The type might be a lie!

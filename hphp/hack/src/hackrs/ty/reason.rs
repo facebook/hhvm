@@ -240,6 +240,7 @@ pub trait Reason:
                 OR::RopaqueTypeFromModule(&(pos, s, r)) => {
                     RI::RopaqueTypeFromModule(pos.into(), Symbol::new(s), r.into())
                 }
+                OR::RunsafeCast(pos) => RI::RunsafeCast(pos.into()),
                 OR::Rinvalid => RI::Rinvalid,
                 OR::RcapturedLike(pos) => RI::RcapturedLike(pos.into()),
                 OR::RpessimisedInout(pos) => RI::RpessimisedInout(pos.into()),
@@ -398,6 +399,7 @@ pub enum ReasonImpl<R, P> {
     RrigidTvarEscape(P, Symbol, Symbol, R),
     RopaqueTypeFromModule(P, Symbol, R),
     RmissingClass(P),
+    RunsafeCast(P),
     Rinvalid,
     RcapturedLike(P),
     RpessimisedInout(P),
@@ -649,6 +651,7 @@ impl<'a> ToOxidized<'a> for BReason {
                 r.to_oxidized(arena),
             ))),
             RI::RmissingClass(pos) => OR::RmissingClass(pos.to_oxidized(arena)),
+            RI::RunsafeCast(pos) => OR::RunsafeCast(pos.to_oxidized(arena)),
             RI::Rinvalid => OR::Rinvalid,
             RI::RcapturedLike(pos) => OR::RcapturedLike(pos.to_oxidized(arena)),
             RI::RpessimisedInout(pos) => OR::RpessimisedInout(pos.to_oxidized(arena)),

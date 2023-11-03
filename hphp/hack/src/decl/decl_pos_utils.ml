@@ -143,6 +143,7 @@ struct
     | Rpessimised_inout p -> Rpessimised_inout (pos_or_decl p)
     | Rpessimised_return p -> Rpessimised_return (pos_or_decl p)
     | Rpessimised_prop p -> Rpessimised_prop (pos_or_decl p)
+    | Runsafe_cast p -> Runsafe_cast (pos p)
 
   let rec ty t =
     let (p, x) = deref t in

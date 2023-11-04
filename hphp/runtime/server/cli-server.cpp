@@ -1824,11 +1824,11 @@ Optional<int> run_client(const char* sock_path,
   if (waitpid(pid, &status, options) != pid) {
     Logger::FError("Lost communication with child: {}",
                    folly::errnoStr(err ? err : errno));
-    exit(EXIT_FAILURE);
+    _Exit(EXIT_FAILURE);
   }
-  if (WIFEXITED(status))   exit(WEXITSTATUS(status));
+  if (WIFEXITED(status))   _Exit(WEXITSTATUS(status));
   if (WIFSIGNALED(status)) kill(getpid(), WTERMSIG(status));
-  exit(EXIT_FAILURE);
+  _Exit(EXIT_FAILURE);
 }
 
 void moveToBackground(int count) {
@@ -1848,6 +1848,10 @@ void moveToBackground(int count) {
   }
 
   if (pid != 0) {
+    // Ensure that the foreground thread is shutdown in the event that the
+    // background thread terminates without sending an exit message.
+    std::thread([pid] { waitAndExit(pid, 0, 0); }).detach();
+
     int ret = -1;
     close(foreground_pipe);
     while (count--) {
@@ -1857,7 +1861,7 @@ void moveToBackground(int count) {
       default: break;
       }
     }
-    exit(ret);
+    _Exit(ret);
   }
 
   close(background_pipe);

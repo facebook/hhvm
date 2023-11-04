@@ -19,6 +19,7 @@
 #include <proxygen/lib/http/HTTPHeaderSize.h>
 #include <proxygen/lib/http/codec/HTTP2Codec.h>
 #include <proxygen/lib/http/codec/HTTPChecks.h>
+#include <proxygen/lib/http/codec/HeadersRateLimitFilter.h>
 #include <proxygen/lib/http/session/HTTPSessionController.h>
 #include <proxygen/lib/http/session/HTTPSessionStats.h>
 #include <wangle/acceptor/ConnectionManager.h>
@@ -221,13 +222,16 @@ void HTTPSession::setupCodec() {
     // if we really support switching from spdy <-> h2, we need to update
     // existing flow control filter
   }
-  if (codec_->supportsParallelRequests() && !controlMessageRateLimitFilter_ &&
-      sock_ &&
+  if (codec_->supportsParallelRequests() && sock_ &&
       codec_->getTransportDirection() == TransportDirection::DOWNSTREAM) {
-    controlMessageRateLimitFilter_ = new ControlMessageRateLimitFilter(
-        &getEventBase()->timer(), sessionStats_);
-    codec_.addFilters(std::unique_ptr<ControlMessageRateLimitFilter>(
-        controlMessageRateLimitFilter_));
+    addRateLimitFilter(RateLimitFilter::Type::HEADERS);
+
+    if (!controlMessageRateLimitFilter_) {
+      controlMessageRateLimitFilter_ = new ControlMessageRateLimitFilter(
+          &getEventBase()->timer(), sessionStats_);
+      codec_.addFilters(std::unique_ptr<ControlMessageRateLimitFilter>(
+          controlMessageRateLimitFilter_));
+    }
   }
 
   codec_.setCallback(this);

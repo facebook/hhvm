@@ -3728,8 +3728,8 @@ TEST_F(HTTP2DownstreamSessionTest, TestPriorityFCBlocked) {
 }
 
 TEST_F(HTTP2DownstreamSessionTest, TestHeadersRateLimitExceeded) {
-  httpSession_->setControlMessageRateLimitParams(
-      1000, 1000, 100, seconds(0), seconds(0), seconds(0));
+  httpSession_->setRateLimitParams(
+      RateLimitFilter::Type::HEADERS, 100, std::chrono::seconds(0));
 
   std::vector<std::unique_ptr<testing::StrictMock<MockHTTPHandler>>> handlers;
   for (int i = 0; i < 100; i++) {
@@ -3780,7 +3780,7 @@ TEST_F(HTTP2DownstreamSessionTest, TestControlMsgResetRateLimitTouched) {
 
   auto streamid = clientCodec_->createStream();
 
-  httpSession_->setControlMessageRateLimitParams(10, 100, 100, milliseconds(0));
+  httpSession_->setControlMessageRateLimitParams(10, 100, milliseconds(0));
 
   // Send 97 PRIORITY, 1 SETTINGS, and 2 PING frames. This doesn't exceed the
   // limit of 10.
@@ -3821,7 +3821,7 @@ TEST_F(HTTP2DownstreamSessionTest, TestControlMsgResetRateLimitTouched) {
 }
 
 TEST_F(HTTP2DownstreamSessionTest, DirectErrorHandlingLimitTouched) {
-  httpSession_->setControlMessageRateLimitParams(100, 10, 100, milliseconds(0));
+  httpSession_->setControlMessageRateLimitParams(100, 10, milliseconds(0));
 
   // Send 50 messages, each of which cause direct error handling. Since
   // this doesn't exceed the limit, this should not cause the connection
@@ -3853,7 +3853,7 @@ TEST_F(HTTP2DownstreamSessionTest, DirectErrorHandlingLimitTouched) {
 }
 
 TEST_F(HTTP2DownstreamSessionTest, DirectErrorHandlingLimitExceeded) {
-  httpSession_->setControlMessageRateLimitParams(100, 10, 100, milliseconds(0));
+  httpSession_->setControlMessageRateLimitParams(100, 10, milliseconds(0));
 
   // Send eleven messages, each of which causes direct error handling. Since
   // this exceeds the limit, the connection should be dropped.

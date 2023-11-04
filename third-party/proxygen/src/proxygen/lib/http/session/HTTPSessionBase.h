@@ -177,13 +177,10 @@ class HTTPSessionBase : public wangle::ManagedConnection {
       uint32_t maxControlMsgsPerInterval = kDefaultMaxControlMsgsPerInterval,
       uint32_t maxDirectErrorHandlingPerInterval =
           kDefaultMaxDirectErrorHandlingPerInterval,
-      uint32_t maxHeadersPerInterval = kDefaultMaxHeadersPerInterval,
       std::chrono::milliseconds controlMsgIntervalDuration =
           kDefaultControlMsgDuration,
       std::chrono::milliseconds directErrorHandlingIntervalDuration =
-          kDefaultDirectErrorHandlingDuration,
-      std::chrono::milliseconds headersIntervalDuration =
-          kDefaultHeadersDuration);
+          kDefaultDirectErrorHandlingDuration);
 
   void setRateLimitParams(RateLimitFilter::Type type,
                           uint32_t maxEventsPerInterval,

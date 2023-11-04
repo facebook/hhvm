@@ -75,10 +75,8 @@ void HTTPSessionBase::setSessionStats(HTTPSessionStats* stats) {
 void HTTPSessionBase::setControlMessageRateLimitParams(
     uint32_t maxControlMsgsPerInterval,
     uint32_t maxDirectErrorHandlingPerInterval,
-    uint32_t maxHeadersPerInterval,
     std::chrono::milliseconds controlMsgIntervalDuration,
-    std::chrono::milliseconds directErrorHandlingIntervalDuration,
-    std::chrono::milliseconds headersIntervalDuration) {
+    std::chrono::milliseconds directErrorHandlingIntervalDuration) {
 
   if (maxControlMsgsPerInterval < kMaxControlMsgsPerIntervalLowerBound) {
     XLOG_EVERY_MS(WARNING, 60000)
@@ -95,20 +93,12 @@ void HTTPSessionBase::setControlMessageRateLimitParams(
         kMaxDirectErrorHandlingPerIntervalLowerBound;
   }
 
-  if (maxHeadersPerInterval < kMaxHeadersPerIntervalLowerBound) {
-    XLOG_EVERY_MS(WARNING, 60000)
-        << "Invalid maxHeadersPerInterval: " << maxHeadersPerInterval;
-    maxHeadersPerInterval = kMaxHeadersPerIntervalLowerBound;
-  }
-
   if (controlMessageRateLimitFilter_) {
     controlMessageRateLimitFilter_->setParams(
         maxControlMsgsPerInterval,
         maxDirectErrorHandlingPerInterval,
-        maxHeadersPerInterval,
         controlMsgIntervalDuration,
-        directErrorHandlingIntervalDuration,
-        headersIntervalDuration);
+        directErrorHandlingIntervalDuration);
   }
 }
 
@@ -121,6 +111,14 @@ void HTTPSessionBase::setRateLimitParams(
       << "Out of bounds access to rate limit filter array";
   RateLimitFilter* rateLimitFilter = rateLimitFilters_.at(typeIndex);
   if (rateLimitFilter) {
+    uint32_t maxEventsPerIntervalLowerBound =
+        rateLimitFilter->getMaxEventsPerInvervalLowerBound();
+    if (maxEventsPerInterval < maxEventsPerIntervalLowerBound) {
+      LOG(WARNING) << "Invalid maxEventsPerInterval for event "
+                   << RateLimitFilter::toStr(type) << ": "
+                   << maxEventsPerInterval;
+      maxEventsPerInterval = maxEventsPerIntervalLowerBound;
+    }
     rateLimitFilter->setParams(maxEventsPerInterval, intervalDuration);
   }
 }

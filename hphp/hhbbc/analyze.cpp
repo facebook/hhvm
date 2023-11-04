@@ -335,7 +335,18 @@ FuncAnalysis do_analyze_collect(const IIndex& index,
   Trace::Bump bumper3{Trace::hhbbc_index, bump};
 
   if (knownArgs) {
-    FTRACE(2, "{:.^70}\n", "Inline Interp");
+    using namespace folly::gen;
+    FTRACE(
+      2,
+      "{:.^70}\n",
+      folly::sformat(
+        "Inline Interp (context: {}, args: {})",
+        show(knownArgs->context),
+        from(knownArgs->args)
+          | map([] (const Type& t) { return show(t); })
+          | unsplit<std::string>(",")
+      )
+    );
   }
   SCOPE_EXIT {
     if (knownArgs) {

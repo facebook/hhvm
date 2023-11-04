@@ -50,6 +50,9 @@ namespace HPHP::HHBBC {
 
 namespace {
 
+// Truncate stringization of ArrLikeVals above this size.
+constexpr size_t maxArrLikeValSize = 1000;
+
 std::string indent(int level, const std::string& s) {
   // Whee; make as many std::string copies as possible.
   auto const space = std::string(level, ' ');
@@ -712,7 +715,18 @@ std::string show(const Type& t) {
       );
     case DataTag::ArrLikeVal:
       return impl(
-        BArrLikeN, folly::sformat("~{}", array_string(t.m_data.aval))
+        BArrLikeN,
+        folly::sformat(
+          "~{}",
+          [&] {
+            auto s = array_string(t.m_data.aval);
+            if (s.size() > maxArrLikeValSize) {
+              s.resize(maxArrLikeValSize);
+              s += "...(truncated)";
+            }
+            return s;
+          }()
+        )
       );
     case DataTag::Str:
       return impl(BStr, folly::sformat("={}", escaped_string(t.m_data.sval)));

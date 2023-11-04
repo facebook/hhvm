@@ -138,7 +138,17 @@ module.exports = {
         // Experimental features:
         {
           Experimental: [
-            'features/patch',
+            {
+              type: 'category',
+              label: 'Patch',
+              link: {
+                type: 'doc',
+                id: 'features/patch/patch',
+              },
+              items: [
+                ...fbInternalOnly(['fb/features/patch-compat']),
+              ],
+            },
             'features/schema',
             ...fbInternalOnly(['fb/features/metadata']),
           ],

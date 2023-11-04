@@ -50,7 +50,7 @@ struct MyStruct {
 };
 ```
 
-Then you can use `MyStructPatch` to access the underlying [StructPatch](../../ref/cpp/class/apache/thrift/op/detail/StructPatch). e.g.,
+Then you can use `MyStructPatch` to access the underlying [StructPatch](../../../ref/cpp/class/apache/thrift/op/detail/StructPatch). e.g.,
 
 ```
 // In C++ file
@@ -68,7 +68,7 @@ patch.apply(s);
 EXPECT_EQ(s.field(), "(hi)");
 ```
 
-Here `patch.patch<ident::field>()` is a [StringPatch](../../ref/cpp/class/apache/thrift/op/detail/StringPatch). It’s worth noting that `patch` method will ensure the existence of the field. If field doesn’t exist, it will be set to intrinsic default first, e.g.,
+Here `patch.patch<ident::field>()` is a [StringPatch](../../../ref/cpp/class/apache/thrift/op/detail/StringPatch). It’s worth noting that `patch` method will ensure the existence of the field. If field doesn’t exist, it will be set to intrinsic default first, e.g.,
 
 ```
 s.clear();
@@ -126,7 +126,7 @@ NOTE: Due to implementation limitation, you cannot include MyStructPatch in the 
 
 ### Value Patches
 
-Besides StringPatch, there are [other types of Patch](../../cpp_api_toc). One example would be [MapPatch](../../ref/cpp/class/apache/thrift/op/detail/MapPatch). Consider the following thrift struct.
+Besides StringPatch, there are [other types of Patch](../../../cpp_api_toc). One example would be [MapPatch](../../../ref/cpp/class/apache/thrift/op/detail/MapPatch). Consider the following thrift struct.
 
 
 ```
@@ -205,4 +205,4 @@ EXPECT_EQ(dynamicStruct[FieldId{1}].as_string(), "(hi)");
 
 ```
 
-You can find all dynamic patch APIs [here](../../ref/cpp/file/thrift/lib/cpp2/protocol/Patch.h).
+You can find all dynamic patch APIs [here](../../../ref/cpp/file/thrift/lib/cpp2/protocol/Patch.h).

@@ -6,6 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <proxygen/lib/http/codec/HeadersRateLimitFilter.h>
 #include <proxygen/lib/http/codec/RateLimitFilter.h>
 
 namespace proxygen {
@@ -26,12 +27,10 @@ std::string_view RateLimitFilter::toStr(Type type) {
 }
 
 std::unique_ptr<RateLimitFilter> RateLimitFilter::createRateLimitFilter(
-    Type type,
-    folly::HHWheelTimer* /* timer */,
-    HTTPSessionStats* /* httpSessionStats */) {
+    Type type, folly::HHWheelTimer* timer, HTTPSessionStats* httpSessionStats) {
   switch (type) {
     case Type::HEADERS:
-      return nullptr;
+      return std::make_unique<HeadersRateLimitFilter>(timer, httpSessionStats);
     case Type::MISC_CONTROL_MSGS:
       return nullptr;
     case Type::RSTS:

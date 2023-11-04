@@ -182,6 +182,11 @@ void HTTPUpstreamSession::attachThreadLocals(
   if (controlMessageRateLimitFilter_) {
     controlMessageRateLimitFilter_->attachThreadLocals(&eventBase->timer());
   }
+  for (auto* rateLimitFilter : rateLimitFilters_) {
+    if (rateLimitFilter) {
+      rateLimitFilter->attachThreadLocals(&eventBase->timer());
+    }
+  }
   wheelTimer_ = wheelTimer;
   setController(controller);
   setSessionStats(stats);
@@ -218,6 +223,11 @@ void HTTPUpstreamSession::detachThreadLocals(bool detachSSLContext) {
   txnEgressQueue_.detachThreadLocals();
   if (controlMessageRateLimitFilter_) {
     controlMessageRateLimitFilter_->detachThreadLocals();
+  }
+  for (auto* rateLimitFilter : rateLimitFilters_) {
+    if (rateLimitFilter) {
+      rateLimitFilter->detachThreadLocals();
+    }
   }
   setController(nullptr);
   setSessionStats(nullptr);

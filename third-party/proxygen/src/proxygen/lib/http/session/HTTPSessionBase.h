@@ -14,6 +14,7 @@
 #include <folly/io/async/SSLContext.h>
 #include <proxygen/lib/http/codec/ControlMessageRateLimitFilter.h>
 #include <proxygen/lib/http/codec/HTTPCodecFilter.h>
+#include <proxygen/lib/http/codec/RateLimitFilter.h>
 #include <proxygen/lib/http/observer/HTTPSessionObserverContainer.h>
 #include <proxygen/lib/http/observer/HTTPSessionObserverInterface.h>
 #include <proxygen/lib/http/session/HTTPSessionActivityTracker.h>
@@ -184,6 +185,10 @@ class HTTPSessionBase : public wangle::ManagedConnection {
       std::chrono::milliseconds headersIntervalDuration =
           kDefaultHeadersDuration);
 
+  void setRateLimitParams(RateLimitFilter::Type type,
+                          uint32_t maxEventsPerInterval,
+                          std::chrono::milliseconds intervalDuration);
+
   InfoCallback* getInfoCallback() const {
     return infoCallback_;
   }
@@ -253,6 +258,20 @@ class HTTPSessionBase : public wangle::ManagedConnection {
   template <typename Filter, typename... Args>
   void addCodecFilter(Args&&... args) {
     codec_.add<Filter>(std::forward<Args>(args)...);
+  }
+
+  void addRateLimitFilter(RateLimitFilter::Type type) {
+    CHECK_LT(folly::to_underlying(type),
+             folly::to_underlying(RateLimitFilter::Type::MAX))
+        << "Received a rate limit type that exceeded the specified maximum";
+    if (!rateLimitFilters_[folly::to_underlying(type)]) {
+      auto filter = RateLimitFilter::createRateLimitFilter(
+          type, &getEventBase()->timer(), sessionStats_);
+      CHECK(filter) << "Unable to construct a rate limit filter of type "
+                    << RateLimitFilter::toStr(type);
+      rateLimitFilters_[folly::to_underlying(type)] = filter.get();
+      codec_.addFilters(std::move(filter));
+    }
   }
 
   virtual CodecProtocol getCodecProtocol() const {
@@ -773,10 +792,13 @@ class HTTPSessionBase : public wangle::ManagedConnection {
    */
   ControlMessageRateLimitFilter* controlMessageRateLimitFilter_{nullptr};
 
+  std::array<RateLimitFilter*, folly::to_underlying(RateLimitFilter::Type::MAX)>
+      rateLimitFilters_{};
+
  private:
-  // Underlying controller_ is marked as private so that callers must utilize
-  // getController/setController protected methods.  This ensures we have a
-  // single path to update controller_
+  // Underlying controller_ is marked as private so that callers must
+  // utilize getController/setController protected methods.  This ensures we
+  // have a single path to update controller_
   HTTPSessionController* controller_{nullptr};
 
   // private ManagedConnection methods

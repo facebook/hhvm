@@ -299,6 +299,12 @@ void HTTPSession::setSessionStats(HTTPSessionStats* stats) {
   if (controlMessageRateLimitFilter_) {
     controlMessageRateLimitFilter_->setSessionStats(stats);
   }
+
+  for (auto* rateLimitFilter : rateLimitFilters_) {
+    if (rateLimitFilter) {
+      rateLimitFilter->setSessionStats(stats);
+    }
+  }
 }
 
 void HTTPSession::setFlowControl(size_t initialReceiveWindow,

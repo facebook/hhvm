@@ -134,6 +134,7 @@ add_library(
     http/codec/HTTPParallelCodec.cpp
     http/codec/HTTPSettings.cpp
     http/codec/TransportDirection.cpp
+    http/codec/RateLimitFilter.cpp
     http/connpool/ServerIdleSessionController.cpp
     http/connpool/SessionHolder.cpp
     http/connpool/SessionPool.cpp

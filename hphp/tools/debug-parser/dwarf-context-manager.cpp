@@ -55,10 +55,9 @@ DWARFContextManager::DWARFContextManager(std::string filename) {
 
 void DWARFContextManager::loadUnits() {
   // Only create the type signature index if the TU index doesn't already exist
-  auto createIndex = !(dwoContext_ && dwoContext_->getTUIndex());
+  const auto createIndex = !(dwoContext_ && dwoContext_->getTUIndex());
 
-  auto unitIter = dwoContext_ ? dwoContext_->dwo_units() : dwarfContext_->normal_units();
-  for (auto& dwarfUnit : unitIter) {
+  const auto processUnit = [&](const std::unique_ptr<llvm::DWARFUnit>& dwarfUnit, bool isInfo) {
     // Pre-load type units to speed up lookups
     if (dwarfUnit->isTypeUnit() || dwoContext_ == nullptr) {
       dwarfUnit->getNonSkeletonUnitDIE(false);
@@ -66,32 +65,46 @@ void DWARFContextManager::loadUnits() {
 
     // Store type unit signatures in a lookup table when TU index doesn't exist
     if (dwarfUnit->isTypeUnit() && createIndex) {
-      const uint64_t typeSignature = cast_or_null<llvm::DWARFTypeUnit>(dwarfUnit.get())->getTypeHash();
-      const uint64_t typeOffset = cast_or_null<llvm::DWARFTypeUnit>(dwarfUnit.get())->getTypeOffset();
+      const uint64_t typeSignature = cast_or_null<llvm::DWARFTypeUnit>(
+        dwarfUnit.get())->getTypeHash();
+      const uint64_t typeOffset = cast_or_null<llvm::DWARFTypeUnit>(
+        dwarfUnit.get())->getTypeOffset();
       sig8Map_.emplace(
         typeSignature,
-        getGlobalOffset(dwarfUnit->getOffset() + typeOffset)
+        getGlobalOffset(dwarfUnit->getOffset() + typeOffset, isInfo)
       );
     }
 
-  }
+    (isInfo ? infoUnits_ : typeUnits_).push_back(dwarfUnit.get());
+
+    return true;
+  };
+
+  forEachSectionUnit(processUnit, true);
+  forEachSectionUnit(processUnit, false);
 }
 
-llvm::DWARFUnit* DWARFContextManager::findUnitForOffset(uint64_t offset) const {
-  auto const& unitVector = dwoContext_ ?
-    dwoContext_->getDWOUnitsVector() :
-    dwarfContext_->getNormalUnitsVector();
+llvm::DWARFUnit* DWARFContextManager::findUnitForGlobalOffset(GlobalOff globalOff) const {
+  auto& units = globalOff.isInfo() ? infoUnits_ : typeUnits_;
 
-  return unitVector.getUnitForOffset(offset);
+  auto it = std::upper_bound(units.begin(), units.end(), globalOff.offset(),
+    [](uint64_t lhs, const llvm::DWARFUnit* rhs) {
+      return lhs < rhs->getNextUnitOffset();
+    }
+  );
+
+  // We always expect to find the unit for a given offset
+  always_assert(it != units.end() && (*it)->getOffset() <= globalOff.offset());
+  return *it;
 }
 
-llvm::DWARFDie DWARFContextManager::getDieAtOffset(uint64_t dieOffset) const {
-  // Load the die from the corresponding dwarf unit. This could be made faster
-  // by using extractFast(), but then additional state would need to be
-  // maintained for dies, walking children, etc.
-  auto dwarfUnit = findUnitForOffset(dieOffset);
-  const auto die = dwarfUnit->getDIEForOffset(dieOffset);
-  return die;
+DieContext DWARFContextManager::getDieContextAtGlobalOffset(GlobalOff globalOff) const {
+  auto dwarfUnit = findUnitForGlobalOffset(globalOff);
+
+  return {
+    .die = dwarfUnit->getDIEForOffset(globalOff.offset()),
+    .isInfo = globalOff.isInfo()
+  };
 }
 
 // Specifically do not resolve DW_AT_specification or DW_AT_abstract_origin to
@@ -106,11 +119,11 @@ std::string DWARFContextManager::getDIEName(llvm::DWARFDie die) const {
   return "";
 }
 
-GlobalOff DWARFContextManager::getGlobalOffset(uint64_t offset) const {
+GlobalOff DWARFContextManager::getGlobalOffset(uint64_t offset, bool isInfo) const {
   // Treat all offsets as info units, this can be cleaned up as we only need
   // offsets in one file at a time (main binary _or_ dwp)
   const auto hasDwp = dwoContext_ != nullptr;
-  return GlobalOff{offset, true, hasDwp};
+  return GlobalOff{offset, isInfo, hasDwp};
 }
 
 GlobalOff DWARFContextManager::getTypeUnitOffset(uint64_t sig8) const {
@@ -118,7 +131,7 @@ GlobalOff DWARFContextManager::getTypeUnitOffset(uint64_t sig8) const {
   if (dwoContext_ && dwoContext_->getTUIndex()) {
     llvm::DWARFTypeUnit* tu = dwoContext_->getTypeUnitForHash(5, sig8, true);
     if (tu) {
-      return getGlobalOffset(tu->getOffset() + tu->getTypeOffset());
+      return getGlobalOffset(tu->getOffset() + tu->getTypeOffset(), true);
     }
   }
 

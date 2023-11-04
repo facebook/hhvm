@@ -13,6 +13,17 @@
 
 namespace debug_parser {
 
+/*
+* A wrapper around the llvm die that contains metadata to make certain lookups
+* more efficient. Specifically llvm doesn't track which section
+* (.debug_info, .debug_types) a DIE was defined in. This class provides that
+* information so lookups can hit the correct section.
+*/
+struct DieContext {
+  llvm::DWARFDie die;
+  bool isInfo;
+};
+
 /**
 * This class manages the lifetime of an llvm DWARFContext.
 */
@@ -34,10 +45,13 @@ public:
   // Provided for backwards compatibility, llvm's `getShortName` will resolve
   // DW_AT_specification or DW_AT_abstract_origin which is not what we want.
   std::string getDIEName(llvm::DWARFDie die) const;
-  llvm::DWARFDie getDieAtOffset(uint64_t dieOffset) const;
-  GlobalOff getGlobalOffset(uint64_t offset) const;
+  GlobalOff getGlobalOffset(uint64_t offset, bool isInfo) const;
 
   GlobalOff getTypeUnitOffset(uint64_t sig8) const;
+
+  llvm::DWARFUnit* findUnitForGlobalOffset(GlobalOff globalOff) const;
+
+  DieContext getDieContextAtGlobalOffset(GlobalOff globalOff) const;
 
 private:
   std::unique_ptr<llvm::MemoryBuffer> buffer_;
@@ -54,12 +68,18 @@ private:
   // split dwarf we can use `.debug_tu_index`.
   folly::F14FastMap<uint64_t, GlobalOff> sig8Map_;
 
+  std::vector<llvm::DWARFUnit*> infoUnits_;
+  std::vector<llvm::DWARFUnit*> typeUnits_;
+
+  /**
+  * Iterate over all .debug_info/.debug_types units, calling `f()` on each.
+  * Iteration is stopped early if any of the calls return false.
+  */
+  template <typename F> void forEachSectionUnit(F &&f, bool isInfo) const;
+
   // Supplementary function to load units into the unit vector and populate sig8
   // mapping for non-split dwarf usecases.
   void loadUnits();
-
-  // Lookup the the unit that contains the given offset
-  llvm::DWARFUnit* findUnitForOffset(uint64_t offset) const;
 };
 
 template <typename F>
@@ -79,9 +99,27 @@ void DWARFContextManager::forEachDwoUnit(F &&f) const {
 
 template <typename F>
 void DWARFContextManager::forEachUnit(F &&f) const {
-  auto unitIter = dwoContext_ ? dwoContext_->dwo_units() : dwarfContext_->normal_units();
-  for (const auto& unit : unitIter) {
-    if (!f(unit)) return;
+  auto stopped = false;
+  forEachSectionUnit(
+    [&](auto& dwarfUnit, auto isInfo) {
+      if (!f(dwarfUnit, isInfo)) {
+        stopped = true;
+        return false;
+      }
+      return true;
+    },
+    /*isInfo=*/true);
+  if (stopped) return;
+  forEachSectionUnit(f, /*isInfo=*/false);
+}
+
+template <typename F>
+void DWARFContextManager::forEachSectionUnit(F &&f, bool isInfo) const {
+  const auto units = dwoContext_ ?
+    (isInfo ? dwoContext_->dwo_info_section_units() : dwoContext_->dwo_types_section_units()) :
+    (isInfo ? dwarfContext_->info_section_units() : dwarfContext_->types_section_units());
+  for (const auto& unit : units) {
+    if (!f(unit, isInfo)) return;
   }
 }
 

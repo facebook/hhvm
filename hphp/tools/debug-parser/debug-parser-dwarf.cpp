@@ -218,32 +218,32 @@ private:
   // invoked from multiple threads, they are static and take all their state
   // explicitly as parameters.
   static void genNames(Env& env,
-                       const llvm::DWARFDie& die,
+                       const DieContext& dieContext,
                        Scope& scope,
                        std::vector<GlobalOff>* template_params = nullptr);
 
   static HPHP::Optional<uintptr_t> interpretLocAddress(const DWARFContextManager& dwarfContext,
-                                                       const llvm::DWARFDie& die,
+                                                       const DieContext& dieContext,
                                                        llvm::DWARFAttribute attr);
   static HPHP::Optional<GlobalOff> parseSpecification(const DWARFContextManager& dwarfContext,
-                                                      const llvm::DWARFDie& die,
+                                                      const DieContext& dieContext,
                                                       bool first,
                                                       StaticSpec& spec);
   void fixTemplateLinkage();
 
   // Functions used after state is built. These are not thread-safe.
-  Object genObject(const llvm::DWARFDie& die,
+  Object genObject(const DieContext& dieContext,
                    ObjectTypeName name,
                    ObjectTypeKey key);
-  Type genType(const llvm::DWARFDie& die);
-  Object::Member genMember(const llvm::DWARFDie& die,
+  Type genType(const DieContext& dieContext);
+  Object::Member genMember(const DieContext& dieContext,
                            const ObjectTypeName& parent_name);
-  Object::Function genFunction(const llvm::DWARFDie& die);
-  Object::Base genBase(const llvm::DWARFDie& die, const ObjectTypeName& parent_name);
-  Object::TemplateParam genTemplateParam(const llvm::DWARFDie& die);
+  Object::Function genFunction(const DieContext& dieContext);
+  Object::Base genBase(const DieContext& dieContext, const ObjectTypeName& parent_name);
+  Object::TemplateParam genTemplateParam(const DieContext& dieContext);
   HPHP::Optional<size_t> determineArrayBound(const llvm::DWARFDie& die);
 
-  void fillFuncArgs(const llvm::DWARFDie& die, FuncType& func);
+  void fillFuncArgs(const DieContext& dieContext, FuncType& func);
 
   // Map a given offset to the state block which contains state for that offset
   // (see below).
@@ -356,14 +356,14 @@ TypeParserImpl::TypeParserImpl(const std::string& filename, int num_threads)
   };
 
   // Thread worker. We'll end up with a state block for each one of these.
-  struct Worker : HPHP::JobQueueWorker<llvm::DWARFUnit&, Context*> {
+  struct Worker : HPHP::JobQueueWorker<GlobalOff, Context*> {
     Env env;
 
     // Remember each offset we processed so we can record it the global state
     // map when we finish.
     std::vector<GlobalOff> offsets;
 
-    void doJob(llvm::DWARFUnit& dwarfUnit) override {
+    void doJob(GlobalOff globalOff) override {
       // Process a compilation unit at the given offset.
       try {
         // We're going to use it so let's mark this worker active.
@@ -372,14 +372,14 @@ TypeParserImpl::TypeParserImpl(const std::string& filename, int num_threads)
           env.state = std::make_unique<StateBlock>();
         }
 
+        auto dwarfUnit = env.dwarfContext->findUnitForGlobalOffset(globalOff);
         // Force load the unit which will be further processed in this worker
-        auto unitDie = dwarfUnit.getUnitDIE(/*ExtractUnitDIEOnly=*/false);
-        auto offset = env.dwarfContext->getGlobalOffset(dwarfUnit.getOffset());
-        offsets.emplace_back(offset);
+        auto unitDie = dwarfUnit->getUnitDIE(/*ExtractUnitDIEOnly=*/false);
+        offsets.emplace_back(globalOff);
 
         // Do the actual processing, adding to the state block:
-        Scope scope{offset};
-        genNames(env, unitDie, scope);
+        Scope scope{globalOff};
+        genNames(env, {unitDie, globalOff.isInfo()}, scope);
 
         auto const remap = [&] (GlobalOff o) {
           auto const it = env.local_mappings.find(o);
@@ -477,20 +477,23 @@ TypeParserImpl::TypeParserImpl(const std::string& filename, int num_threads)
   HPHP::JobQueueDispatcher<Worker> dispatcher{
     num_threads, num_threads, 0, false, &context
   };
-  dispatcher.start();
 
-  size_t num_units = 0;
+  size_t infoUnits = 0;
+  size_t typeUnits = 0;
   FTRACE(1, "Adding units to dispatcher...\n");
-  m_dwarfContext.forEachUnit([&](const std::unique_ptr<llvm::DWARFUnit>& unit){
+
+  m_dwarfContext.forEachUnit([&](const std::unique_ptr<llvm::DWARFUnit>& unit, bool isInfo){
     // getNonSkeletonUnitDIE in general is not thread safe, so call it here and
     // then parse the unit in the worker thread.
     auto unitDie = unit->getNonSkeletonUnitDIE(/*ExtractUnitDIEOnly=*/true);
-    dispatcher.enqueue(*unitDie.getDwarfUnit());
-    ++num_units;
+    dispatcher.enqueue(m_dwarfContext.getGlobalOffset(unitDie.getOffset(), isInfo));
+    isInfo ? ++infoUnits : ++typeUnits;
     return true;
   });
 
-  FTRACE(1, "... {} units added.\n", num_units);
+  FTRACE(1, "... {} info units added.\n", infoUnits);
+  FTRACE(1, "... {} type units added.\n", typeUnits);
+  dispatcher.start();
   FTRACE(1, "Waiting for dispatcher...\n");
   dispatcher.stop();
 
@@ -656,9 +659,8 @@ Object TypeParserImpl::getObject(ObjectTypeKey key) {
   }
 
   auto const offset = GlobalOff::fromRaw(key.object_id);
-  const auto die = m_dwarfContext.getDieAtOffset(offset.offset());
-  auto obj = genObject(die, state.all_objs[iter->second].name, key);
-  return obj;
+  auto dieContext = m_dwarfContext.getDieContextAtGlobalOffset(offset);
+  return genObject(dieContext, state.all_objs[iter->second].name, key);
 }
 
 // For static members, determine how that member's address can be
@@ -666,7 +668,7 @@ Object TypeParserImpl::getObject(ObjectTypeKey key) {
 // support constant addresses right now.
 HPHP::Optional<uintptr_t>
 TypeParserImpl::interpretLocAddress(const DWARFContextManager& dwarfContext,
-                                    const llvm::DWARFDie& die,
+                                    const DieContext& dieContext,
                                     llvm::DWARFAttribute attr) {
   const auto form = attr.Value.getForm();
   if (form != llvm::dwarf::DW_FORM_exprloc) return std::nullopt;
@@ -674,14 +676,14 @@ TypeParserImpl::interpretLocAddress(const DWARFContextManager& dwarfContext,
   llvm::DataExtractor extractor(
     *attr.Value.getAsBlock(),
     dwarfContext.getDWARFContext()->isLittleEndian(),
-    die.getDwarfUnit()->getAddressByteSize()
+    dieContext.die.getDwarfUnit()->getAddressByteSize()
   );
 
   if (extractor.size() != 1) return std::nullopt;
 
   llvm::DWARFExpression expression(
     extractor,
-    die.getDwarfUnit()->getAddressByteSize()
+    dieContext.die.getDwarfUnit()->getAddressByteSize()
   );
 
   const auto& ex = *expression.begin();
@@ -691,22 +693,23 @@ TypeParserImpl::interpretLocAddress(const DWARFContextManager& dwarfContext,
 
 HPHP::Optional<GlobalOff>
 TypeParserImpl::parseSpecification(const DWARFContextManager& dwarfContext,
-                                   const llvm::DWARFDie& die,
+                                   const DieContext& dieContext,
                                    bool first,
                                    StaticSpec &spec) {
   HPHP::Optional<GlobalOff> offset;
   bool is_inline = false;
-  for (const auto& attr : die.attributes()) {
+  for (const auto& attr : dieContext.die.attributes()) {
     switch (attr.Attr) {
       case llvm::dwarf::DW_AT_abstract_origin: {
         const auto attrOffset = *attr.Value.getAsReference();
-        const auto die2 = dwarfContext.getDieAtOffset(attrOffset);
-        offset = parseSpecification(dwarfContext, die2, false, spec);
+        const auto globalOff = dwarfContext.getGlobalOffset(attrOffset, dieContext.isInfo);
+        const auto die2Context = dwarfContext.getDieContextAtGlobalOffset(globalOff);
+        offset = parseSpecification(dwarfContext, die2Context, false, spec);
         break;
       }
       case llvm::dwarf::DW_AT_specification: {
         const auto attrOffset = attr.Value.getAsReference().value();
-        offset = dwarfContext.getGlobalOffset(attrOffset);
+        offset = dwarfContext.getGlobalOffset(attrOffset, dieContext.isInfo);
         break;
       }
       case llvm::dwarf::DW_AT_linkage_name: {
@@ -718,7 +721,7 @@ TypeParserImpl::parseSpecification(const DWARFContextManager& dwarfContext,
       }
       case llvm::dwarf::DW_AT_location: {
         if (spec.address == StaticSpec::kNoAddress) {
-          if (auto const address = interpretLocAddress(dwarfContext, die, attr)) {
+          if (auto const address = interpretLocAddress(dwarfContext, dieContext, attr)) {
             spec.address = *address;
           }
         }
@@ -763,19 +766,19 @@ TypeParserImpl::parseSpecification(const DWARFContextManager& dwarfContext,
  * filled with any template parameters in the child DIE.
  */
 void TypeParserImpl::genNames(Env& env,
-                              const llvm::DWARFDie& die,
+                              const DieContext& dieContext,
                               Scope& scope,
                               std::vector<GlobalOff>* template_params) {
   auto& dwarfContext = *env.dwarfContext;
   auto& state = *env.state;
 
   const auto recurse = [&](std::vector<GlobalOff>* params = nullptr){
-    for (const auto& child : die.children()) {
-      genNames(env, child, scope, params);
+    for (const auto& child : dieContext.die.children()) {
+      genNames(env, {child, dieContext.isInfo}, scope, params);
     }
   };
 
-  auto tag = die.getTag();
+  auto tag = dieContext.die.getTag();
   switch (tag) {
     case llvm::dwarf::DW_TAG_base_type:
     case llvm::dwarf::DW_TAG_union_type:
@@ -799,14 +802,14 @@ void TypeParserImpl::genNames(Env& env,
 
       // Determine the base name, whether this type was unnamed, and whether
       // this is an incomplete type or not from the DIE's attributes.
-      auto get_info = [&](llvm::DWARFDie cur,
+      auto get_info = [&](DieContext curContext,
                           bool updateOffsets) ->
         std::tuple<std::string, bool, bool> {
         std::string name;
         std::string linkage_name;
         auto incomplete = false;
 
-      for (const auto& attr : cur.attributes()) {
+      for (const auto& attr : curContext.die.attributes()) {
         switch(attr.Attr) {
           case llvm::dwarf::DW_AT_name:
             name = attr.Value.getAsCString().get();
@@ -828,7 +831,7 @@ void TypeParserImpl::genNames(Env& env,
             // definition's name (this feels a little backwards,
             // but its how dwarf works).
             if (updateOffsets) {
-              declarationOffset = dwarfContext.getGlobalOffset(*attr.Value.getAsReference());
+              declarationOffset = dwarfContext.getGlobalOffset(*attr.Value.getAsReference(), curContext.isInfo);
             }
             break;
           case llvm::dwarf::DW_AT_signature: {
@@ -866,9 +869,9 @@ void TypeParserImpl::genNames(Env& env,
         // Try the first named member
         auto const first_member = [&](const char* type, auto member_type) {
           std::string first_member;
-          for (const auto& child : cur.children()) {
+          for (const auto& child : curContext.die.children()) {
             if (child.getTag() == member_type) {
-              first_member = dwarfContext.getDIEName(die);
+              first_member = dwarfContext.getDIEName(dieContext.die);
             }
             if (!first_member.empty()) break;
           }
@@ -928,9 +931,9 @@ void TypeParserImpl::genNames(Env& env,
         );
       };
 
-      const auto info = get_info(die, /*updateOffsets=*/true);
+      const auto info = get_info(dieContext, /*updateOffsets=*/true);
 
-      auto offset = dwarfContext.getGlobalOffset(die.getOffset());
+      auto offset = dwarfContext.getGlobalOffset(dieContext.die.getOffset(), dieContext.isInfo);
       if (definitionOffset) {
         // This is a declaration which refers to the definition via
         // DW_AT_signature. We'll see one of these for a class in the
@@ -950,24 +953,24 @@ void TypeParserImpl::genNames(Env& env,
         env.local_mappings.emplace(offset, *definitionOffset);
 
         folly::F14FastMap<std::string, GlobalOff> map;
-        for (const auto& child : die.children()) {
+        for (const auto& child : dieContext.die.children()) {
           if (child.getTag() == llvm::dwarf::DW_TAG_member) {
             auto name = dwarfContext.getDIEName(child);
             map.emplace(
               std::move(name),
-              dwarfContext.getGlobalOffset(child.getOffset())
+              dwarfContext.getGlobalOffset(child.getOffset(), dieContext.isInfo)
             );
           }
         }
         if (!map.empty()) {
-          const auto orig = dwarfContext.getDieAtOffset(definitionOffset->offset());
-          for (const auto& child : orig.children()) {
+          const auto orig = dwarfContext.getDieContextAtGlobalOffset(*definitionOffset);
+          for (const auto& child : orig.die.children()) {
             auto const name = dwarfContext.getDIEName(child);
             auto it = map.find(name);
             if (it != map.end()) {
               env.local_mappings.emplace(
                 it->second,
-                dwarfContext.getGlobalOffset(child.getOffset())
+                dwarfContext.getGlobalOffset(child.getOffset(), definitionOffset->isInfo())
               );
             }
           }
@@ -984,8 +987,8 @@ void TypeParserImpl::genNames(Env& env,
           scope.pushType(std::get<0>(info), offset);
       } else {
         // Push the name of the definition, not of the declaration
-        const auto def = dwarfContext.getDieAtOffset(definitionOffset->offset());
-        const auto info_def = get_info(def, /*updateOffsets=*/false);
+        const auto defContext = dwarfContext.getDieContextAtGlobalOffset(*definitionOffset);
+        const auto info_def = get_info(defContext, /*updateOffsets=*/false);
         std::get<1>(info_def) ?
           scope.pushUnnamedType(std::get<0>(info_def), offset) :
           scope.pushType(std::get<0>(info_def), offset);
@@ -1061,7 +1064,7 @@ void TypeParserImpl::genNames(Env& env,
       // Record the namespace in the scope and recurse. If this is an unnamed
       // namespace, that means any type found in child DIEs will have internal
       // linkage.
-      auto const name = die.getShortName() ? std::string(die.getShortName()) : "";
+      auto const name = dieContext.die.getShortName() ? std::string(dieContext.die.getShortName()) : "";
       name.empty() ?
         scope.pushUnnamedNamespace() :
         scope.pushNamespace(std::move(name));
@@ -1079,11 +1082,11 @@ void TypeParserImpl::genNames(Env& env,
 
       // Neither GCC nor Clang record a name for a variable which is a static
       // definition, so ignore any that do have a name. This speeds things up.
-      const auto name = dwarfContext.getDIEName(die);
+      const auto name = dwarfContext.getDIEName(dieContext.die);
       if (!name.empty()) break;
 
       StaticSpec spec;
-      if (auto off = parseSpecification(dwarfContext, die, true, spec)) {
+      if (auto off = parseSpecification(dwarfContext, dieContext, true, spec)) {
         env.raw_static_definitions.emplace_back(*off, spec);
       }
       // Note that we don't recurse into any child DIEs here. There shouldn't be
@@ -1094,11 +1097,11 @@ void TypeParserImpl::genNames(Env& env,
       // For the same reason we care about llvm::dwarf::DW_TAG_variables, we examine
       // llvm::dwarf::DW_TAG_subprogram as well. Certain interesting aspects of a static
       // function are only present in its definition.
-      auto const name = dwarfContext.getDIEName(die);
+      auto const name = dwarfContext.getDIEName(dieContext.die);
       if (!name.empty()) break;
 
       StaticSpec spec;
-      if (auto off = parseSpecification(dwarfContext, die, true, spec)) {
+      if (auto off = parseSpecification(dwarfContext, dieContext, true, spec)) {
         env.raw_static_definitions.emplace_back(*off, spec);
       }
 
@@ -1117,13 +1120,13 @@ void TypeParserImpl::genNames(Env& env,
       // vector with the template parameters. Don't recurse because there
       // shouldn't be anything interesting in the children.
       if (template_params) {
-        for (const auto& attr : die.attributes()) {
+        for (const auto& attr : dieContext.die.attributes()) {
           if (attr.Attr == llvm::dwarf::DW_AT_type) {
-            auto offset = dwarfContext.getGlobalOffset(attr.Value.getAsReference().value());
+            auto offset = dwarfContext.getGlobalOffset(attr.Value.getAsReference().value(), dieContext.isInfo);
             // Check this type to see if it is a declaration and use the
             // real type instead
-            const auto typeDie = dwarfContext.getDieAtOffset(offset.offset());
-            for (const auto& attr : typeDie.attributes()) {
+            const auto typeDieContext = dwarfContext.getDieContextAtGlobalOffset(offset);
+            for (const auto& attr : typeDieContext.die.attributes()) {
               if (attr.Attr == llvm::dwarf::DW_AT_signature &&
                   attr.Value.getForm() == llvm::dwarf::DW_FORM_ref_sig8) {
                 const auto sig8 = *attr.Value.getAsReference();
@@ -1148,9 +1151,12 @@ void TypeParserImpl::genNames(Env& env,
  * Given the DIE representing an object type, its name, and its key, return the
  * detailed specification of the object.
  */
-Object TypeParserImpl::genObject(const llvm::DWARFDie& die,
+Object TypeParserImpl::genObject(const DieContext& dieContext,
                                  ObjectTypeName name,
                                  ObjectTypeKey key) {
+  const auto& die = dieContext.die;
+  const auto& isInfo = dieContext.isInfo;
+
   const auto kind = [&]{
     switch (die.getTag()) {
       case llvm::dwarf::DW_TAG_structure_type: return Object::Kind::k_class;
@@ -1189,8 +1195,8 @@ Object TypeParserImpl::genObject(const llvm::DWARFDie& die,
   }
 
   if (definition_offset) {
-    const auto die2 = m_dwarfContext.getDieAtOffset(definition_offset->offset());
-    return genObject(die2, name, key);
+    const auto die2Context = m_dwarfContext.getDieContextAtGlobalOffset(*definition_offset);
+    return genObject(die2Context, name, key);
   }
 
   // No size was provided. This is expected for incomplete types or the strange
@@ -1215,10 +1221,10 @@ Object TypeParserImpl::genObject(const llvm::DWARFDie& die,
   for (const auto& child : die.children()) {
     switch (child.getTag()) {
       case llvm::dwarf::DW_TAG_inheritance:
-        obj.bases.emplace_back(genBase(child, obj.name));
+        obj.bases.emplace_back(genBase({child, isInfo}, obj.name));
         break;
       case llvm::dwarf::DW_TAG_member:
-        obj.members.emplace_back(genMember(child, obj.name));
+        obj.members.emplace_back(genMember({child, isInfo}, obj.name));
         if (obj.name.linkage != ObjectTypeName::Linkage::external) {
           // Clang gives linkage names to things that don't actually have
           // linkage. Don't let any members have linkage names if the object
@@ -1227,7 +1233,7 @@ Object TypeParserImpl::genObject(const llvm::DWARFDie& die,
         }
         break;
       case llvm::dwarf::DW_TAG_template_type_parameter:
-        obj.template_params.emplace_back(genTemplateParam(child));
+        obj.template_params.emplace_back(genTemplateParam({child, isInfo}));
         break;
       case llvm::dwarf::DW_TAG_GNU_template_parameter_pack:
         // Flatten parameter packs as if they were just a normally provided
@@ -1236,13 +1242,13 @@ Object TypeParserImpl::genObject(const llvm::DWARFDie& die,
           if (template_die.getTag() ==
               llvm::dwarf::DW_TAG_template_type_parameter) {
             obj.template_params.emplace_back(
-              genTemplateParam(template_die)
+              genTemplateParam({template_die, isInfo})
             );
           }
         }
         break;
       case llvm::dwarf::DW_TAG_subprogram:
-        obj.functions.emplace_back(genFunction(child));
+        obj.functions.emplace_back(genFunction({child, isInfo}));
         if (obj.name.linkage != ObjectTypeName::Linkage::external) {
           // Clang gives linkage names to things that don't actually have
           // linkage. Don't let any functions have linkage names if the object
@@ -1283,7 +1289,7 @@ Object TypeParserImpl::genObject(const llvm::DWARFDie& die,
  * Given a DIE representing an arbitrary type, return its equivalent Type. This
  * can involve chasing a chain of such type DIEs.
  */
-Type TypeParserImpl::genType(const llvm::DWARFDie& die) {
+Type TypeParserImpl::genType(const DieContext& dieContext) {
   // Offset of a different type this type refers to. If not present, that type
   // is implicitly "void".
   HPHP::Optional<GlobalOff> type_offset;
@@ -1295,13 +1301,16 @@ Type TypeParserImpl::genType(const llvm::DWARFDie& die) {
   // via a DW_AT_signature.
   HPHP::Optional<GlobalOff> definition_offset;
 
-  for (const auto& attr : die.attributes()) {
+  const auto& die = dieContext.die;
+  const auto isInfo = dieContext.isInfo;
+
+  for (const auto& attr : dieContext.die.attributes()) {
     switch (attr.Attr) {
       case llvm::dwarf::DW_AT_type:
-        type_offset = m_dwarfContext.getGlobalOffset(attr.Value.getAsReference().value());
+        type_offset = m_dwarfContext.getGlobalOffset(attr.Value.getAsReference().value(), isInfo);
         break;
       case llvm::dwarf::DW_AT_containing_type:
-        containing_type_offset = m_dwarfContext.getGlobalOffset(attr.Value.getAsReference().value());
+        containing_type_offset = m_dwarfContext.getGlobalOffset(attr.Value.getAsReference().value(), isInfo);
         break;
       case llvm::dwarf::DW_AT_signature: {
         const auto sig8 = *attr.Value.getAsReference();
@@ -1314,8 +1323,8 @@ Type TypeParserImpl::genType(const llvm::DWARFDie& die) {
   }
 
   const auto recurse = [&](GlobalOff offset) {
-    const auto die2 = m_dwarfContext.getDieAtOffset(offset.offset());
-    return genType(die2);
+    const auto die2Context = m_dwarfContext.getDieContextAtGlobalOffset(offset);
+    return genType(die2Context);
   };
 
   // Pointers to member functions aren't represented in DWARF. Instead the
@@ -1329,7 +1338,7 @@ Type TypeParserImpl::genType(const llvm::DWARFDie& die) {
     case llvm::dwarf::DW_TAG_enumeration_type:
     case llvm::dwarf::DW_TAG_unspecified_type: {
       if (definition_offset) return recurse(*definition_offset);
-      auto offset = m_dwarfContext.getGlobalOffset(die.getOffset());
+      auto offset = m_dwarfContext.getGlobalOffset(die.getOffset(), isInfo);
       auto const& state = stateForOffset(offset);
       auto iter = state.obj_offsets.find(offset);
       if (iter == state.obj_offsets.end()) {
@@ -1391,7 +1400,7 @@ Type TypeParserImpl::genType(const llvm::DWARFDie& die) {
       return type_offset ? recurse(*type_offset) : VoidType{};
     case llvm::dwarf::DW_TAG_subroutine_type: {
       FuncType func{type_offset ? recurse(*type_offset) : VoidType{}};
-      fillFuncArgs(die, func);
+      fillFuncArgs({die, isInfo}, func);
       return std::move(func);
     }
     case llvm::dwarf::DW_TAG_ptr_to_member_type: {
@@ -1433,7 +1442,7 @@ Type TypeParserImpl::genType(const llvm::DWARFDie& die) {
   }
 }
 
-Object::Member TypeParserImpl::genMember(const llvm::DWARFDie& die,
+Object::Member TypeParserImpl::genMember(const DieContext& dieContext,
                                          const ObjectTypeName& parent_name) {
   std::string name;
   std::string linkage_name;
@@ -1442,7 +1451,7 @@ Object::Member TypeParserImpl::genMember(const llvm::DWARFDie& die,
   HPHP::Optional<uintptr_t> address;
   bool is_static = false;
 
-  for (const auto& attr : die.attributes()) {
+  for (const auto& attr : dieContext.die.attributes()) {
     switch (attr.Attr) {
       case llvm::dwarf::DW_AT_name:
         name = std::string(attr.Value.getAsCString().get());
@@ -1451,13 +1460,13 @@ Object::Member TypeParserImpl::genMember(const llvm::DWARFDie& die,
         linkage_name = std::string(attr.Value.getAsCString().get());
         break;
       case llvm::dwarf::DW_AT_location:
-        address = interpretLocAddress(m_dwarfContext, die, attr);
+        address = interpretLocAddress(m_dwarfContext, dieContext, attr);
         break;
       case llvm::dwarf::DW_AT_data_member_location:
         offset = *attr.Value.getAsUnsignedConstant();
         break;
       case llvm::dwarf::DW_AT_type:
-        die_offset = m_dwarfContext.getGlobalOffset(*attr.Value.getAsReference());
+        die_offset = m_dwarfContext.getGlobalOffset(*attr.Value.getAsReference(), dieContext.isInfo);
         break;
       case llvm::dwarf::DW_AT_declaration:
         is_static = *attr.Value.getAsUnsignedConstant() != 0;
@@ -1475,7 +1484,7 @@ Object::Member TypeParserImpl::genMember(const llvm::DWARFDie& die,
         "in object type '{}' at offset {}",
         name,
         parent_name.name,
-        die.getOffset()
+        dieContext.die.getOffset()
       )
     };
   }
@@ -1484,7 +1493,7 @@ Object::Member TypeParserImpl::genMember(const llvm::DWARFDie& die,
     // If this is a static member, look up any definitions which refer to this
     // member, and pull any additional information out of it.
     // auto const static_offset = m_dwarf.getDIEOffset(die);
-    auto const static_offset = m_dwarfContext.getGlobalOffset(die.getOffset());
+    auto const static_offset = m_dwarfContext.getGlobalOffset(dieContext.die.getOffset(), dieContext.isInfo);
     auto const& state = stateForOffset(static_offset);
     auto const range = state.static_definitions.equal_range(static_offset);
 
@@ -1498,8 +1507,8 @@ Object::Member TypeParserImpl::genMember(const llvm::DWARFDie& die,
     }
   }
 
-  const auto die2 = m_dwarfContext.getDieAtOffset(die_offset->offset());
-  auto type = genType(die2);
+  const auto die2Context = m_dwarfContext.getDieContextAtGlobalOffset(*die_offset);
+  auto type = genType(die2Context);
 
   if (name.empty()) {
     name = is_static
@@ -1516,21 +1525,22 @@ Object::Member TypeParserImpl::genMember(const llvm::DWARFDie& die,
   };
 }
 
-Object::Function TypeParserImpl::genFunction(const llvm::DWARFDie& die) {
+Object::Function TypeParserImpl::genFunction(const DieContext& dieContext) {
   std::string name;
   Type ret_type{VoidType{}};
   std::string linkage_name;
   bool is_virtual = false;
   bool is_member = false;
 
-  for (const auto& attr : die.attributes()) {
+  for (const auto& attr : dieContext.die.attributes()) {
     switch (attr.Attr) {
       case llvm::dwarf::DW_AT_name:
         name = std::string(attr.Value.getAsCString().get());
         break;
       case llvm::dwarf::DW_AT_type: {
-        const auto tyDie = m_dwarfContext.getDieAtOffset(*attr.Value.getAsReference());
-        ret_type = genType(tyDie);
+        const auto globalOff = m_dwarfContext.getGlobalOffset(*attr.Value.getAsReference(), dieContext.isInfo);
+        const auto tyDieContext = m_dwarfContext.getDieContextAtGlobalOffset(globalOff);
+        ret_type = genType(tyDieContext);
         break;
       }
       case llvm::dwarf::DW_AT_linkage_name:
@@ -1564,7 +1574,7 @@ Object::Function TypeParserImpl::genFunction(const llvm::DWARFDie& die) {
    * function.
    */
   std::vector<Type> arg_types;
-  for (const auto& child : die.children()) {
+  for (const auto& child : dieContext.die.children()) {
     if (child.getTag() != llvm::dwarf::DW_TAG_formal_parameter) {
       continue;
     }
@@ -1575,7 +1585,8 @@ Object::Function TypeParserImpl::genFunction(const llvm::DWARFDie& die) {
     for (const auto& attr : child.attributes()) {
       switch (attr.Attr) {
         case llvm::dwarf::DW_AT_type: {
-          const auto ty_die = m_dwarfContext.getDieAtOffset(*attr.Value.getAsReference());
+          const auto globalOff = m_dwarfContext.getGlobalOffset(*attr.Value.getAsReference(), dieContext.isInfo);
+          const auto ty_die = m_dwarfContext.getDieContextAtGlobalOffset(globalOff);
           arg_type = genType(ty_die);
           break;
         }
@@ -1599,7 +1610,7 @@ Object::Function TypeParserImpl::genFunction(const llvm::DWARFDie& die) {
 
   // Similar to static variables, find any definitions which refer to this
   // function in order to extract linkage information.
-  auto const offset = m_dwarfContext.getGlobalOffset(die.getOffset());
+  auto const offset = m_dwarfContext.getGlobalOffset(dieContext.die.getOffset(), dieContext.isInfo);
   auto const& state = stateForOffset(offset);
   auto range = state.static_definitions.equal_range(offset);
   for (auto const& elm : range) {
@@ -1625,20 +1636,20 @@ Object::Function TypeParserImpl::genFunction(const llvm::DWARFDie& die) {
   };
 }
 
-Object::Base TypeParserImpl::genBase(const llvm::DWARFDie& die,
+Object::Base TypeParserImpl::genBase(const DieContext& dieContext,
                                      const ObjectTypeName& parent_name) {
   std::string name;
   HPHP::Optional<std::size_t> offset;
   HPHP::Optional<GlobalOff> die_offset;
   bool is_virtual = false;
 
-  for (const auto& attr : die.attributes()) {
+  for (const auto& attr : dieContext.die.attributes()) {
     switch (attr.Attr) {
       case llvm::dwarf::DW_AT_name:
         name = std::string(attr.Value.getAsCString().get());
         break;
       case llvm::dwarf::DW_AT_type:
-        die_offset = m_dwarfContext.getGlobalOffset(*attr.Value.getAsReference());
+        die_offset = m_dwarfContext.getGlobalOffset(*attr.Value.getAsReference(), dieContext.isInfo);
         break;
       case llvm::dwarf::DW_AT_virtuality:
         is_virtual = *attr.Value.getAsUnsignedConstant() != llvm::dwarf::DW_VIRTUALITY_none;
@@ -1651,7 +1662,7 @@ Object::Base TypeParserImpl::genBase(const llvm::DWARFDie& die,
   if (!is_virtual) {
     offset = 0;
 
-    for (const auto& attr : die.attributes()) {
+    for (const auto& attr : dieContext.die.attributes()) {
       switch (attr.Attr) {
         case llvm::dwarf::DW_AT_data_member_location:
           offset = *attr.Value.getAsUnsignedConstant();
@@ -1669,13 +1680,13 @@ Object::Base TypeParserImpl::genBase(const llvm::DWARFDie& die,
         "type information at offset {}",
         name,
         parent_name.name,
-        die.getOffset()
+        dieContext.die.getOffset()
       )
     };
   }
 
-  const auto die2 = m_dwarfContext.getDieAtOffset(die_offset.value().offset());
-  auto type = genType(die2);
+  const auto die2Context = m_dwarfContext.getDieContextAtGlobalOffset(*die_offset);
+  auto type = genType(die2Context);
 
   if (auto obj = type.asObject()) {
     // Base class better be an actual class!
@@ -1688,20 +1699,20 @@ Object::Base TypeParserImpl::genBase(const llvm::DWARFDie& die,
         name,
         parent_name.name,
         type.toString(),
-        die.getOffset()
+        dieContext.die.getOffset()
       )
     };
   }
 }
 
-Object::TemplateParam TypeParserImpl::genTemplateParam(const llvm::DWARFDie& die) {
+Object::TemplateParam TypeParserImpl::genTemplateParam(const DieContext& dieContext) {
   HPHP::Optional<GlobalOff> die_offset;
 
-  for (const auto& attr : die.attributes()) {
+  for (const auto& attr : dieContext.die.attributes()) {
     switch (attr.Attr) {
       case llvm::dwarf::DW_AT_type: {
         const auto off = *attr.Value.getAsReference();
-        die_offset = m_dwarfContext.getGlobalOffset(off);
+        die_offset = m_dwarfContext.getGlobalOffset(off, dieContext.isInfo);
         break;
       }
       default:
@@ -1711,7 +1722,7 @@ Object::TemplateParam TypeParserImpl::genTemplateParam(const llvm::DWARFDie& die
 
   return Object::TemplateParam{
     die_offset ?
-      genType(m_dwarfContext.getDieAtOffset(die_offset.value().offset())) :
+      genType(m_dwarfContext.getDieContextAtGlobalOffset(*die_offset)) :
       VoidType{}
   };
 }
@@ -1746,8 +1757,8 @@ TypeParserImpl::determineArrayBound(const llvm::DWARFDie& die) {
   return bound;
 }
 
-void TypeParserImpl::fillFuncArgs(const llvm::DWARFDie& die, FuncType& func) {
-  for (const auto& child : die.children()) {
+void TypeParserImpl::fillFuncArgs(const DieContext& dieContext, FuncType& func) {
+  for (const auto& child : dieContext.die.children()) {
     switch (child.getTag()) {
       case llvm::dwarf::DW_TAG_formal_parameter: {
         HPHP::Optional<GlobalOff> type_offset;
@@ -1755,7 +1766,7 @@ void TypeParserImpl::fillFuncArgs(const llvm::DWARFDie& die, FuncType& func) {
         for (const auto& attr : child.attributes()) {
           switch (attr.Attr) {
             case llvm::dwarf::DW_AT_type:
-              type_offset = m_dwarfContext.getGlobalOffset(attr.Value.getAsReference().value());
+              type_offset = m_dwarfContext.getGlobalOffset(attr.Value.getAsReference().value(), dieContext.isInfo);
               break;
             default:
               break;
@@ -1766,13 +1777,13 @@ void TypeParserImpl::fillFuncArgs(const llvm::DWARFDie& die, FuncType& func) {
           throw Exception{
             folly::sformat(
               "Encountered function at offset {} taking a void parameter",
-              die.getOffset()
+              dieContext.die.getOffset()
             )
           };
         }
 
-        const auto typeDie = m_dwarfContext.getDieAtOffset(type_offset->offset());
-        func.args.push_back(genType(typeDie));
+        const auto typeDieContext = m_dwarfContext.getDieContextAtGlobalOffset(*type_offset);
+        func.args.push_back(genType(typeDieContext));
         break;
       }
       default:

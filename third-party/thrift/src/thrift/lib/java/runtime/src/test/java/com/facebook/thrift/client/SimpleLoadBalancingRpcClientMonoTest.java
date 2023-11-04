@@ -48,8 +48,8 @@ public class SimpleLoadBalancingRpcClientMonoTest {
     clients[2] = Mono.just(Mockito.mock(RpcClient.class));
 
     SimpleLoadBalancingRpcClientMono mono = new SimpleLoadBalancingRpcClientMono(clients);
-    RpcClient client1 = mono.subscriberContext(ctx -> ctx.put(STICKY_HASH_KEY, 12345)).block();
-    RpcClient client2 = mono.subscriberContext(ctx -> ctx.put(STICKY_HASH_KEY, 12345)).block();
+    RpcClient client1 = mono.contextWrite(ctx -> ctx.put(STICKY_HASH_KEY, 12345)).block();
+    RpcClient client2 = mono.contextWrite(ctx -> ctx.put(STICKY_HASH_KEY, 12345)).block();
     Assert.assertEquals(client1, client2);
   }
 }

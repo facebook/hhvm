@@ -263,15 +263,10 @@ class ExceptionMessage:
     thrift_struct_annotations: __T.Dict[str, str]
 
     def __init__(
-        self,
-        field: __T.Optional[str] = ...
+        self
     ) -> None:
         ...
 
-    @__property__
-    def field(self) -> str: ...
-    @field.setter
-    def field(self, value: __T.Optional[str]) -> None: ...
 
 
     def isUnion(self) -> bool: ...

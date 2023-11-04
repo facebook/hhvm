@@ -654,7 +654,10 @@ class ExceptionWithStructuredAnnotation(TException):
     oprot.writeStructEnd()
 
   def __str__(self):
-    return repr(self)
+    if self.message_field:
+      return self.message_field
+    else:
+      return repr(self)
 
   def __repr__(self):
     L = []

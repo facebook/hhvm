@@ -811,10 +811,14 @@ class py3_mstch_struct : public mstch_struct {
   }
 
   mstch::node hasExceptionMessage() {
-    return struct_->has_annotation("message");
+    return !!dynamic_cast<const t_exception&>(*struct_).get_message_field();
   }
 
-  mstch::node exceptionMessage() { return struct_->get_annotation("message"); }
+  mstch::node exceptionMessage() {
+    const auto* message_field =
+        dynamic_cast<const t_exception&>(*struct_).get_message_field();
+    return message_field ? message_field->name() : "";
+  }
 
   mstch::node py3_fields() { return make_mstch_fields(py3_fields_); }
 

@@ -1145,6 +1145,7 @@ class FOLLY_EXPORT ExceptionWithStructuredAnnotation : public virtual apache::th
  public:
 
   ExceptionWithStructuredAnnotation();
+  explicit ExceptionWithStructuredAnnotation(std::string __message);
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -1287,7 +1288,7 @@ class FOLLY_EXPORT ExceptionWithStructuredAnnotation : public virtual apache::th
   uint32_t write(Protocol_* prot_) const;
 
   const char* what() const noexcept override {
-    return "::cpp2::ExceptionWithStructuredAnnotation";
+    return __fbthrift_field_message_field.c_str();
   }
 
  private:

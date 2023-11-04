@@ -621,14 +621,17 @@ class ExceptionWithStructuredAnnotation extends \TException implements \IThriftS
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[
-        '\facebook\thrift\annotation\ExceptionMessage' => \facebook\thrift\annotation\ExceptionMessage::fromShape(
-          shape(
-            "field" => "message_field",
-          )
-        ),
-      ],
+      'struct' => dict[],
       'fields' => dict[
+        'message_field' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\ExceptionMessage' => \facebook\thrift\annotation\ExceptionMessage::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }

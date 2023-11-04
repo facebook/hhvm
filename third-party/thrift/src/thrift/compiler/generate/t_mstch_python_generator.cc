@@ -706,9 +706,14 @@ class python_mstch_struct : public mstch_struct {
   }
 
   mstch::node has_exception_message() {
-    return struct_->has_annotation("message");
+    return !!dynamic_cast<const t_exception&>(*struct_).get_message_field();
   }
-  mstch::node exception_message() { return struct_->get_annotation("message"); }
+
+  mstch::node exception_message() {
+    const auto* message_field =
+        dynamic_cast<const t_exception&>(*struct_).get_message_field();
+    return message_field ? message_field->name() : "";
+  }
 
   mstch::node adapter() {
     return adapter_node(adapter_annotation_, nullptr, context_, pos_);

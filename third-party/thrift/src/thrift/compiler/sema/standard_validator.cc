@@ -782,38 +782,41 @@ void validate_function_priority_annotation(
   }
 }
 
-void validate_exception_php_annotations(
+void validate_exception_message_annotation(
     diagnostic_context& ctx, const t_exception& node) {
-  constexpr std::string_view annotations[] = {"message", "code"};
-  for (const auto& annotation : annotations) {
-    if (node.has_annotation({annotation}) &&
-        node.get_field_by_name(annotation) &&
-        node.get_annotation({annotation}) != annotation) {
-      ctx.warning(
-          "Some generators (e.g. PHP) will ignore annotation '{}' as it is "
-          "also used as field",
-          annotation);
-    }
-  }
-
   // Check that value of "message" annotation is
   // - a valid member of struct
   // - of type STRING
+  const t_field* field = nullptr;
+  for (const auto& f : node.fields()) {
+    if (f.find_structured_annotation_or_null(kExceptionMessageUri)) {
+      ctx.check(!field, f, "Duplicate message annotation.");
+      field = &f;
+    }
+  }
   if (node.has_annotation("message")) {
+    ctx.check(!field, "Duplicate message annotation.");
     const std::string& v = node.get_annotation("message");
-    const auto* field = node.get_field_by_name(v);
-    if (field == nullptr) {
-      ctx.error(
-          "member specified as exception 'message' should be a valid "
-          "struct member, '{}' in '{}' is not",
-          v,
-          node.name());
-    } else if (!field->get_type()->is_string_or_binary()) {
-      ctx.error(
-          "member specified as exception 'message' should be of type "
-          "STRING, '{}' in '{}' is not",
-          v,
-          node.name());
+    field = node.get_field_by_name(v);
+    ctx.check(
+        field,
+        "member specified as exception 'message' should be a valid "
+        "struct member, '{}' in '{}' is not",
+        v,
+        node.name());
+  }
+  if (field) {
+    ctx.check(
+        field->get_type()->is_string_or_binary(),
+        "member specified as exception 'message' should be of type "
+        "STRING, '{}' in '{}' is not",
+        field->name(),
+        node.name());
+
+    if (field->name() != "message" && node.get_field_by_name("message")) {
+      ctx.warning(
+          "Some generators (e.g. PHP) will ignore annotation 'message' as it is "
+          "also used as field");
     }
   }
 }
@@ -1138,7 +1141,7 @@ ast_validator standard_validator() {
   validator.add_structured_definition_visitor(
       &validate_reserved_ids_structured);
   validator.add_union_visitor(&validate_union_field_attributes);
-  validator.add_exception_visitor(&validate_exception_php_annotations);
+  validator.add_exception_visitor(&validate_exception_message_annotation);
   validator.add_field_visitor(&validate_field_id);
   validator.add_field_visitor(&validate_mixin_field_attributes);
   validator.add_field_visitor(&validate_boxed_field_attributes);

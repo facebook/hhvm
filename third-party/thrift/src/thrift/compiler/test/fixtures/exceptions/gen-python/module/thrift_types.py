@@ -304,6 +304,13 @@ class ExceptionWithStructuredAnnotation(metaclass=_fbthrift_python_exceptions.Ge
     def __get_metadata__():
         return _fbthrift_metadata__exception_ExceptionWithStructuredAnnotation()
 
+
+    def __str__(self):
+        field = self.message_field
+        if field is None:
+            return str(field)
+        return field
+
     def _to_python(self):
         return self
 

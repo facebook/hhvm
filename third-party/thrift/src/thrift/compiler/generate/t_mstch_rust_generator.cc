@@ -1188,16 +1188,20 @@ class rust_mstch_struct : public mstch_struct {
     return struct_->get_annotation("rust.derive");
   }
   mstch::node has_exception_message() {
-    return struct_->has_annotation("message");
+    return !!dynamic_cast<const t_exception&>(*struct_).get_message_field();
   }
   mstch::node is_exception_message_optional() {
-    if (!struct_->has_annotation("message")) {
-      return nullptr;
+    if (const auto* message_field =
+            dynamic_cast<const t_exception&>(*struct_).get_message_field()) {
+      return message_field->get_req() == t_field::e_req::optional;
     }
-    return struct_->get_field_by_name(struct_->get_annotation("message"))
-               ->get_req() == t_field::e_req::optional;
+    return {};
   }
-  mstch::node exception_message() { return struct_->get_annotation("message"); }
+  mstch::node exception_message() {
+    const auto* message_field =
+        dynamic_cast<const t_exception&>(*struct_).get_message_field();
+    return message_field ? message_field->name() : "";
+  }
   mstch::node rust_serde() { return rust_serde_enabled(options_, *struct_); }
   mstch::node has_adapter() {
     // Structs cannot have transitive types, so we ignore the transitive type

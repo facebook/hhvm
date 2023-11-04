@@ -41,8 +41,8 @@ exception ExceptionWithPrimitiveField {
   2: i32 error_code;
 } (message = "message")
 
-@thrift.ExceptionMessage{field = "message_field"}
 exception ExceptionWithStructuredAnnotation {
+  @thrift.ExceptionMessage
   1: string message_field;
   2: i32 error_code;
 }

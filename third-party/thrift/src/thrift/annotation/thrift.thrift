@@ -128,17 +128,10 @@ struct SerializeInFieldIdOrder {}
 struct BitmaskEnum {}
 
 /**
- * Specifies the field where the exception message is stored. The field
- * is used to generate an additional method to get it.
+ * Specifies the field where the exception message is stored.
  */
-// TODO(afuller): Consider allowing this annotation to be placed on the field
-// itself, so the annotation can be used (transitively), without specifying an
-// explicit name. Also, maybe move to api.thrift.
-@scope.Exception
-@Experimental // TODO: Support in C++, Python, Java.
-struct ExceptionMessage {
-  1: string field;
-}
+@scope.Field
+struct ExceptionMessage {}
 
 /**
  * Generates a const of type schema. Struct containing the schema of the

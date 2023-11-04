@@ -729,8 +729,7 @@ class BitmaskEnum implements \IThriftSyncStruct, \IThriftStructMetadata {
 }
 
 /**
- * Specifies the field where the exception message is stored. The field
- * is used to generate an additional method to get it.
+ * Specifies the field where the exception message is stored.
  *
  * Original thrift struct:-
  * ExceptionMessage
@@ -740,28 +739,16 @@ class ExceptionMessage implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
-    1 => shape(
-      'var' => 'field',
-      'type' => \TType::STRING,
-    ),
   ];
   const dict<string, int> FIELDMAP = dict[
-    'field' => 1,
   ];
 
   const type TConstructorShape = shape(
-    ?'field' => ?string,
   );
 
-  const int STRUCTURAL_ID = 6158382972310209096;
-  /**
-   * Original thrift field:-
-   * 1: string field
-   */
-  public string $field;
+  const int STRUCTURAL_ID = 957977401221134810;
 
-  public function __construct(?string $field = null)[] {
-    $this->field = $field ?? '';
+  public function __construct()[] {
   }
 
   public static function withDefaultValues()[]: this {
@@ -770,7 +757,6 @@ class ExceptionMessage implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   public static function fromShape(self::TConstructorShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'field'),
     );
   }
 
@@ -785,19 +771,6 @@ class ExceptionMessage implements \IThriftSyncStruct, \IThriftStructMetadata {
     return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "thrift.ExceptionMessage",
-        "fields" => vec[
-          \tmeta_ThriftField::fromShape(
-            shape(
-              "id" => 1,
-              "type" => \tmeta_ThriftType::fromShape(
-                shape(
-                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
-                )
-              ),
-              "name" => "field",
-            )
-          ),
-        ],
         "is_union" => false,
       )
     );
@@ -806,11 +779,7 @@ class ExceptionMessage implements \IThriftSyncStruct, \IThriftStructMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\facebook\thrift\annotation\Exception' => \facebook\thrift\annotation\Exception::fromShape(
-          shape(
-          )
-        ),
-        '\facebook\thrift\annotation\Experimental' => \facebook\thrift\annotation\Experimental::fromShape(
+        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::fromShape(
           shape(
           )
         ),

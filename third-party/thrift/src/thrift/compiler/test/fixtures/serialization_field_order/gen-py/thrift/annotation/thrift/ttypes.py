@@ -881,17 +881,12 @@ class BitmaskEnum:
 
 class ExceptionMessage:
   r"""
-  Specifies the field where the exception message is stored. The field
-  is used to generate an additional method to get it.
-  
-  Attributes:
-   - field
+  Specifies the field where the exception message is stored.
   """
 
   thrift_spec = None
   thrift_field_annotations = None
   thrift_struct_annotations = None
-  __init__ = None
   @staticmethod
   def isUnion():
     return False
@@ -908,11 +903,6 @@ class ExceptionMessage:
       (fname, ftype, fid) = iprot.readFieldBegin()
       if ftype == TType.STOP:
         break
-      if fid == 1:
-        if ftype == TType.STRING:
-          self.field = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-        else:
-          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -926,10 +916,6 @@ class ExceptionMessage:
       oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
       return
     oprot.writeStructBegin('ExceptionMessage')
-    if self.field != None:
-      oprot.writeFieldBegin('field', TType.STRING, 1)
-      oprot.writeString(self.field.encode('utf-8')) if UTF8STRINGS and not isinstance(self.field, bytes) else oprot.writeString(self.field)
-      oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
 
@@ -945,16 +931,10 @@ class ExceptionMessage:
     json_obj = json
     if is_text:
       json_obj = loads(json)
-    if 'field' in json_obj and json_obj['field'] is not None:
-      self.field = json_obj['field']
 
   def __repr__(self):
     L = []
     padding = ' ' * 4
-    if self.field is not None:
-      value = pprint.pformat(self.field, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    field=%s' % (value))
     return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
 
   def __eq__(self, other):
@@ -968,7 +948,6 @@ class ExceptionMessage:
 
   def __dir__(self):
     return (
-      'field',
     )
 
   __hash__ = object.__hash__
@@ -1290,25 +1269,12 @@ BitmaskEnum.thrift_field_annotations = {
 
 all_structs.append(ExceptionMessage)
 ExceptionMessage.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
-  (1, TType.STRING, 'field', True, None, 2, ), # 1
 )))
 
 ExceptionMessage.thrift_struct_annotations = {
 }
 ExceptionMessage.thrift_field_annotations = {
 }
-
-def ExceptionMessage__init__(self, field=None,):
-  self.field = field
-
-ExceptionMessage.__init__ = ExceptionMessage__init__
-
-def ExceptionMessage__setstate__(self, state):
-  state.setdefault('field', None)
-  self.__dict__ = state
-
-ExceptionMessage.__getstate__ = lambda self: self.__dict__.copy()
-ExceptionMessage.__setstate__ = ExceptionMessage__setstate__
 
 all_structs.append(GenerateRuntimeSchema)
 GenerateRuntimeSchema.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((

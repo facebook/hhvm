@@ -176,7 +176,7 @@ impl ::std::error::Error for ExceptionWithStructuredAnnotation {}
 
 impl ::std::fmt::Display for ExceptionWithStructuredAnnotation {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-        write!(f, "{:?}", self)
+        write!(f, "ExceptionWithStructuredAnnotation: {}", self.message_field)
     }
 }
 
@@ -790,16 +790,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for ExceptionWithStructuredAnnotati
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
-        if type_id == ::std::any::TypeId::of::<thrift::types::ExceptionMessage>() {
-            let mut tmp = Some(thrift::types::ExceptionMessage {
-                field: "message_field".to_owned(),
-                ..::std::default::Default::default()
-            });
-            let r: &mut dyn ::std::any::Any = &mut tmp;
-            let r: &mut Option<T> = r.downcast_mut().unwrap();
-            return r.take();
-        }
-
         None
     }
 
@@ -810,6 +800,15 @@ impl ::fbthrift::metadata::ThriftAnnotations for ExceptionWithStructuredAnnotati
         #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
+
+                if type_id == ::std::any::TypeId::of::<thrift::types::ExceptionMessage>() {
+                    let mut tmp = Some(thrift::types::ExceptionMessage {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             2 => {
             },

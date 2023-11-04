@@ -84,16 +84,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetIsUnion(false),
     metadata.NewThriftStruct().
     SetName("thrift.ExceptionMessage").
-    SetIsUnion(false).
-    SetFields(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("field").
-    SetIsOptional(false).
-    SetType(premadeThriftType_string),
-        },
-    ),
+    SetIsUnion(false),
     metadata.NewThriftStruct().
     SetName("thrift.GenerateRuntimeSchema").
     SetIsUnion(false).

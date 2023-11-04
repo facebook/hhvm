@@ -229,43 +229,28 @@
       }
     },
     "ExceptionMessage" : {
-      "lineno" : 137,
+      "lineno" : 133,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
-        "scope.Exception" : {  },
-        "Experimental" : {  }
+        "scope.Field" : {  }
       },
       "fields" : {
-        "field" : {
-          "type_enum" : "STRING",
-          "spec_args" : null,
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 140,
-              "column" : 3
-            },
-            "end" : {
-              "line" : 140,
-              "column" : 19
-            }
-          }
-        }
+
       },
       "source_range" : {
         "begin" : {
-          "line" : 137,
+          "line" : 133,
           "column" : 1
         },
         "end" : {
-          "line" : 141,
-          "column" : 2
+          "line" : 134,
+          "column" : 27
         }
       }
     },
     "GenerateRuntimeSchema" : {
-      "lineno" : 148,
+      "lineno" : 141,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -283,11 +268,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 155,
+              "line" : 148,
               "column" : 3
             },
             "end" : {
-              "line" : 155,
+              "line" : 148,
               "column" : 18
             }
           }
@@ -295,17 +280,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 148,
+          "line" : 141,
           "column" : 1
         },
         "end" : {
-          "line" : 156,
+          "line" : 149,
           "column" : 2
         }
       }
     },
     "InternBox" : {
-      "lineno" : 162,
+      "lineno" : 155,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -317,11 +302,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 162,
+          "line" : 155,
           "column" : 1
         },
         "end" : {
-          "line" : 164,
+          "line" : 157,
           "column" : 20
         }
       }

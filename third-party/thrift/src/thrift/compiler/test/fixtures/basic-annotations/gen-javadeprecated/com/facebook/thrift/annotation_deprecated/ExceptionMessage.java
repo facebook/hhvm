@@ -24,25 +24,16 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 /**
- * Specifies the field where the exception message is stored. The field
- * is used to generate an additional method to get it.
+ * Specifies the field where the exception message is stored.
  */
 @SuppressWarnings({ "unused", "serial" })
 public class ExceptionMessage implements TBase, java.io.Serializable, Cloneable, Comparable<ExceptionMessage> {
   private static final TStruct STRUCT_DESC = new TStruct("ExceptionMessage");
-  private static final TField FIELD_FIELD_DESC = new TField("field", TType.STRING, (short)1);
-
-  public String field;
-  public static final int FIELD = 1;
-
-  // isset id assignments
 
   public static final Map<Integer, FieldMetaData> metaDataMap;
 
   static {
     Map<Integer, FieldMetaData> tmpMetaDataMap = new HashMap<Integer, FieldMetaData>();
-    tmpMetaDataMap.put(FIELD, new FieldMetaData("field", TFieldRequirementType.DEFAULT, 
-        new FieldValueMetaData(TType.STRING)));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
   }
 
@@ -53,26 +44,13 @@ public class ExceptionMessage implements TBase, java.io.Serializable, Cloneable,
   public ExceptionMessage() {
   }
 
-  public ExceptionMessage(
-      String field) {
-    this();
-    this.field = field;
-  }
-
   public static class Builder {
-    private String field;
 
     public Builder() {
     }
 
-    public Builder setField(final String field) {
-      this.field = field;
-      return this;
-    }
-
     public ExceptionMessage build() {
       ExceptionMessage result = new ExceptionMessage();
-      result.setField(this.field);
       return result;
     }
   }
@@ -85,49 +63,14 @@ public class ExceptionMessage implements TBase, java.io.Serializable, Cloneable,
    * Performs a deep copy on <i>other</i>.
    */
   public ExceptionMessage(ExceptionMessage other) {
-    if (other.isSetField()) {
-      this.field = TBaseHelper.deepCopy(other.field);
-    }
   }
 
   public ExceptionMessage deepCopy() {
     return new ExceptionMessage(this);
   }
 
-  public String getField() {
-    return this.field;
-  }
-
-  public ExceptionMessage setField(String field) {
-    this.field = field;
-    return this;
-  }
-
-  public void unsetField() {
-    this.field = null;
-  }
-
-  // Returns true if field field is set (has been assigned a value) and false otherwise
-  public boolean isSetField() {
-    return this.field != null;
-  }
-
-  public void setFieldIsSet(boolean __value) {
-    if (!__value) {
-      this.field = null;
-    }
-  }
-
   public void setFieldValue(int fieldID, Object __value) {
     switch (fieldID) {
-    case FIELD:
-      if (__value == null) {
-        unsetField();
-      } else {
-        setField((String)__value);
-      }
-      break;
-
     default:
       throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
     }
@@ -135,9 +78,6 @@ public class ExceptionMessage implements TBase, java.io.Serializable, Cloneable,
 
   public Object getFieldValue(int fieldID) {
     switch (fieldID) {
-    case FIELD:
-      return getField();
-
     default:
       throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
     }
@@ -153,14 +93,12 @@ public class ExceptionMessage implements TBase, java.io.Serializable, Cloneable,
       return false;
     ExceptionMessage that = (ExceptionMessage)_that;
 
-    if (!TBaseHelper.equalsNobinary(this.isSetField(), that.isSetField(), this.field, that.field)) { return false; }
-
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {field});
+    return Arrays.deepHashCode(new Object[] {});
   }
 
   @Override
@@ -175,14 +113,6 @@ public class ExceptionMessage implements TBase, java.io.Serializable, Cloneable,
     }
     int lastComparison = 0;
 
-    lastComparison = Boolean.valueOf(isSetField()).compareTo(other.isSetField());
-    if (lastComparison != 0) {
-      return lastComparison;
-    }
-    lastComparison = TBaseHelper.compareTo(field, other.field);
-    if (lastComparison != 0) { 
-      return lastComparison;
-    }
     return 0;
   }
 
@@ -197,13 +127,6 @@ public class ExceptionMessage implements TBase, java.io.Serializable, Cloneable,
       }
       switch (__field.id)
       {
-        case FIELD:
-          if (__field.type == TType.STRING) {
-            this.field = iprot.readString();
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
         default:
           TProtocolUtil.skip(iprot, __field.type);
           break;
@@ -221,11 +144,6 @@ public class ExceptionMessage implements TBase, java.io.Serializable, Cloneable,
     validate();
 
     oprot.writeStructBegin(STRUCT_DESC);
-    if (this.field != null) {
-      oprot.writeFieldBegin(FIELD_FIELD_DESC);
-      oprot.writeString(this.field);
-      oprot.writeFieldEnd();
-    }
     oprot.writeFieldStop();
     oprot.writeStructEnd();
   }
@@ -246,16 +164,6 @@ public class ExceptionMessage implements TBase, java.io.Serializable, Cloneable,
     sb.append(newLine);
     boolean first = true;
 
-    sb.append(indentStr);
-    sb.append("field");
-    sb.append(space);
-    sb.append(":").append(space);
-    if (this.getField() == null) {
-      sb.append("null");
-    } else {
-      sb.append(TBaseHelper.toString(this.getField(), indent + 1, prettyPrint));
-    }
-    first = false;
     sb.append(newLine + TBaseHelper.reduceIndent(indentStr));
     sb.append(")");
     return sb.toString();

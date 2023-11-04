@@ -143,6 +143,7 @@ def _fbthrift_gen_metadata_exception_ExceptionWithStructuredAnnotation(metadata_
         return metadata_struct
     fields = [
         _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="message_field", is_optional=False, structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.ExceptionMessage"), fields= {  }),
         ]),
         _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE), name="error_code", is_optional=False, structured_annotations=[
         ]),
@@ -150,7 +151,6 @@ def _fbthrift_gen_metadata_exception_ExceptionWithStructuredAnnotation(metadata_
     struct_dict = dict(metadata_struct.exceptions)
     struct_dict[qualified_name] = _fbthrift_metadata.ThriftException(name=qualified_name, fields=fields,
         structured_annotations=[
-            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.ExceptionMessage"), fields= { "field": _fbthrift_metadata.ThriftConstValue(cv_string="message_field"),  }),
         ])
     new_struct = metadata_struct(exceptions=struct_dict)
 

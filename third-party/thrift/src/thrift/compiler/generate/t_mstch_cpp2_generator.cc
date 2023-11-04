@@ -1361,20 +1361,17 @@ class cpp_mstch_struct : public mstch_struct {
   }
   mstch::node message() {
     if (!struct_->is_exception()) {
-      return mstch::node();
+      return {};
     }
-
-    const auto& message = struct_->get_annotation("message");
-
-    if (message == "") {
-      return message;
+    const auto* message_field =
+        dynamic_cast<const t_exception&>(*struct_).get_message_field();
+    if (!message_field) {
+      return {};
     }
-
     if (!should_mangle_field_storage_name_in_struct(*struct_)) {
-      return message;
+      return message_field->name();
     }
-
-    return mangle_field_name(message);
+    return mangle_field_name(message_field->name());
   }
   mstch::node cpp_allocator() {
     return struct_->get_annotation("cpp.allocator");

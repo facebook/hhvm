@@ -1717,9 +1717,10 @@ void t_py_generator::generate_py_struct_definition(
   // #5882
   if (is_exception) {
     out << indent() << "def __str__(self):" << endl;
-    if (const auto* msg = tstruct->find_annotation_or_null("message")) {
-      out << indent() << "  if self." << *msg << ":" << endl
-          << indent() << "    return self." << *msg << endl
+    if (const auto* message_field =
+            dynamic_cast<const t_exception&>(*tstruct).get_message_field()) {
+      out << indent() << "  if self." << message_field->name() << ":" << endl
+          << indent() << "    return self." << message_field->name() << endl
           << indent() << "  else:" << endl
           << indent() << "    return repr(self)" << endl;
     } else {

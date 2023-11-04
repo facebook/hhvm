@@ -872,20 +872,6 @@ class t_hack_generator : public t_concat_generator {
         nullptr;
   }
 
-  std::string find_exception_message(const t_structured* tstruct) {
-    const auto& value = tstruct->get_annotation("message");
-    if (value != "") {
-      return value;
-    }
-    const auto annotation =
-        tstruct->find_structured_annotation_or_null(kExceptionMessageUri);
-    if (annotation != nullptr) {
-      return annotation->get_value_from_structured_annotation("field")
-          .get_string();
-    }
-    return "";
-  }
-
   std::string php_namespace(const t_program* p) const {
     std::string php_ns = p->get_namespace("php");
     if (!php_ns.empty()) {
@@ -4418,12 +4404,12 @@ void t_hack_generator::generate_php_struct_methods(
     generate_php_union_methods(out, tstruct, struct_hack_name_with_ns);
   }
   if (type == ThriftStructType::EXCEPTION) {
-    const auto value = find_exception_message(tstruct);
-    if (value != "" && value != "message") {
-      const auto* message_field = tstruct->get_field_by_name(value);
+    const auto* message_field =
+        dynamic_cast<const t_exception&>(*tstruct).get_message_field();
+    if (message_field && message_field->name() != "message") {
       if (const auto field_wrapper = find_hack_wrapper(*message_field)) {
         throw std::runtime_error(
-            tstruct->name() + "::" + value +
+            tstruct->name() + "::" + message_field->name() +
             " has a wrapped type. FieldWrapper annotation is not allowed for "
             "base exception properties.");
       }

@@ -568,6 +568,10 @@ ExceptionWithStructuredAnnotation::ExceptionWithStructuredAnnotation() :
       __fbthrift_field_error_code() {
 }
 
+ExceptionWithStructuredAnnotation::ExceptionWithStructuredAnnotation(std::string __message) : ExceptionWithStructuredAnnotation() {
+  __fbthrift_field_message_field = std::move(__message);
+}
+
 
 ExceptionWithStructuredAnnotation::~ExceptionWithStructuredAnnotation() {}
 

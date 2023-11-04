@@ -88,9 +88,6 @@ template<>
 inline void reset_field<::facebook::thrift::annotation::ExceptionMessage>(
     ::facebook::thrift::annotation::ExceptionMessage& obj, uint16_t index) {
   switch (index) {
-    case 0:
-      obj.field_ref().copy_from(default_inst<::facebook::thrift::annotation::ExceptionMessage>().field_ref());
-      return;
   }
 }
 

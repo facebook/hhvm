@@ -685,7 +685,10 @@ cdef class ExceptionWithStructuredAnnotation(thrift.py3.exceptions.GeneratedErro
         return super().__repr__()
 
     def __str__(ExceptionWithStructuredAnnotation self):
-        return super().__str__()
+        field = self.message_field
+        if field is None:
+            return str(field)
+        return field
 
 
     def __copy__(ExceptionWithStructuredAnnotation self):

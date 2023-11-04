@@ -583,14 +583,9 @@ class mstch_java_struct : public mstch_struct {
         struct_, kJavaAnnotationUri, "java_annotation");
   }
   mstch::node exception_message() {
-    const auto& field_name_to_use = struct_->get_annotation("message");
-    if (const auto* field = struct_->get_field_by_name(field_name_to_use)) {
-      return get_java_swift_name(field);
-    }
-
-    throw std::runtime_error{
-        "The exception message field '" + field_name_to_use +
-        "' is not found in " + struct_->get_name() + "!"};
+    const auto* message_field =
+        dynamic_cast<const t_exception&>(*struct_).get_message_field();
+    return get_java_swift_name(message_field);
   }
   // we can only override Throwable's getMessage() if:
   //  1 - there is provided 'message' annotation

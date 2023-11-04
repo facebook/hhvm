@@ -1050,62 +1050,12 @@ func (x *BitmaskEnum) String() string {
 }
 
 type ExceptionMessage struct {
-    Field string `thrift:"field,1" json:"field" db:"field"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &ExceptionMessage{}
 
 func NewExceptionMessage() *ExceptionMessage {
-    return (&ExceptionMessage{}).
-        SetFieldNonCompat("")
-}
-
-func (x *ExceptionMessage) GetFieldNonCompat() string {
-    return x.Field
-}
-
-func (x *ExceptionMessage) GetField() string {
-    return x.Field
-}
-
-func (x *ExceptionMessage) SetFieldNonCompat(value string) *ExceptionMessage {
-    x.Field = value
-    return x
-}
-
-func (x *ExceptionMessage) SetField(value string) *ExceptionMessage {
-    x.Field = value
-    return x
-}
-
-func (x *ExceptionMessage) writeField1(p thrift.Protocol) error {  // Field
-    if err := p.WriteFieldBegin("field", thrift.STRING, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetFieldNonCompat()
-    if err := p.WriteString(item); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *ExceptionMessage) readField1(p thrift.Protocol) error {  // Field
-    result, err := p.ReadString()
-if err != nil {
-    return err
-}
-
-    x.SetFieldNonCompat(result)
-    return nil
-}
-
-func (x *ExceptionMessage) toString1() string {  // Field
-    return fmt.Sprintf("%v", x.GetFieldNonCompat())
+    return (&ExceptionMessage{})
 }
 
 
@@ -1125,13 +1075,6 @@ func NewExceptionMessageBuilder() *ExceptionMessageBuilder {
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewExceptionMessage().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *ExceptionMessageBuilder) Field(value string) *ExceptionMessageBuilder {
-    x.obj.Field = value
-    return x
-}
-
-// Deprecated: Use "New" constructor and setters to build your structs.
-// e.g NewExceptionMessage().Set<FieldNameFoo>().Set<FieldNameBar>()
 func (x *ExceptionMessageBuilder) Emit() *ExceptionMessage {
     var objCopy ExceptionMessage = *x.obj
     return &objCopy
@@ -1140,10 +1083,6 @@ func (x *ExceptionMessageBuilder) Emit() *ExceptionMessage {
 func (x *ExceptionMessage) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("ExceptionMessage"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
-    }
-
-    if err := x.writeField1(p); err != nil {
-        return err
     }
 
     if err := p.WriteFieldStop(); err != nil {
@@ -1172,10 +1111,6 @@ func (x *ExceptionMessage) Read(p thrift.Protocol) error {
         }
 
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // field
-            if err := x.readField1(p); err != nil {
-                return err
-            }
         default:
             if err := p.Skip(wireType); err != nil {
                 return err
@@ -1202,7 +1137,6 @@ func (x *ExceptionMessage) String() string {
     var sb strings.Builder
 
     sb.WriteString("ExceptionMessage({")
-    sb.WriteString(fmt.Sprintf("Field:%s", x.toString1()))
     sb.WriteString("})")
 
     return sb.String()

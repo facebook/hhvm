@@ -260,35 +260,19 @@
       "ExceptionMessage" : {
         "name" : "ExceptionMessage",
         "structured_annotations": {
-          "scope.Exception" : {
+          "scope.Field" : {
         "type" : {
   "type" : "struct",
-  "name" : "Exception",
+  "name" : "Field",
   "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
-          "thrift.Experimental" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Experimental"
 },
         "value" : {}
       }
         },
-        "docstring" : "Specifies the field where the exception message is stored. The field\nis used to generate an additional method to get it.\n",
-        "fields" : {
-          "field" : {
-            "name" : "field",
-            "key" : 1,
-            "lineno" : 140,
-            "required" : "opt-in-req-out",
-            "type" : "string"
-                  }
-        },
+        "docstring" : "Specifies the field where the exception message is stored.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 137
+        "lineno" : 133
       },
       "GenerateRuntimeSchema" : {
         "name" : "GenerateRuntimeSchema",
@@ -346,14 +330,14 @@
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 155,
+            "lineno" : 148,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 148
+        "lineno" : 141
       },
       "InternBox" : {
         "name" : "InternBox",
@@ -377,7 +361,7 @@
         "docstring" : "Indicates that a field's value should never be stored on the stack, and that\nidentical values can be shared in immutable contexts.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 162
+        "lineno" : 155
       }
       },
   "source_path" : "thrift/annotation/thrift",

@@ -201,7 +201,8 @@ public class ReactorNettyTransportTest {
 
     Flux.range(0, 1024)
         .flatMap(
-            v -> Mono.fromRunnable(() -> check(payloads)).subscribeOn(Schedulers.elastic()), 12)
+            v -> Mono.fromRunnable(() -> check(payloads)).subscribeOn(Schedulers.boundedElastic()),
+            12)
         .blockLast();
   }
 

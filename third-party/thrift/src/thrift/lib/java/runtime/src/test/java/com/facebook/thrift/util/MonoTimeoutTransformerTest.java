@@ -141,7 +141,7 @@ public class MonoTimeoutTransformerTest {
   @Test
   public void testShouldTimeOutWithInfiniteStream() {
     Mono<Long> infinite =
-        Flux.interval(Duration.ofMillis(1), Schedulers.elastic())
+        Flux.interval(Duration.ofMillis(1), Schedulers.boundedElastic())
             .ignoreElements()
             .transform(
                 new MonoTimeoutTransformer<>(

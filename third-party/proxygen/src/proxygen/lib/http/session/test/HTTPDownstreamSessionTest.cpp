@@ -18,6 +18,7 @@
 #include <folly/io/async/TimeoutManager.h>
 #include <folly/io/async/test/MockAsyncTransport.h>
 #include <folly/portability/GTest.h>
+#include <proxygen/lib/http/codec/DirectErrorsRateLimitFilter.h>
 #include <proxygen/lib/http/codec/HTTPCodecFactory.h>
 #include <proxygen/lib/http/codec/test/TestUtils.h>
 #include <proxygen/lib/http/observer/HTTPSessionObserverInterface.h>
@@ -3780,7 +3781,7 @@ TEST_F(HTTP2DownstreamSessionTest, TestControlMsgResetRateLimitTouched) {
 
   auto streamid = clientCodec_->createStream();
 
-  httpSession_->setControlMessageRateLimitParams(10, 100, milliseconds(0));
+  httpSession_->setControlMessageRateLimitParams(10, milliseconds(0));
 
   // Send 97 PRIORITY, 1 SETTINGS, and 2 PING frames. This doesn't exceed the
   // limit of 10.
@@ -3821,12 +3822,16 @@ TEST_F(HTTP2DownstreamSessionTest, TestControlMsgResetRateLimitTouched) {
 }
 
 TEST_F(HTTP2DownstreamSessionTest, DirectErrorHandlingLimitTouched) {
-  httpSession_->setControlMessageRateLimitParams(100, 10, milliseconds(0));
+  httpSession_->setRateLimitParams(RateLimitFilter::Type::DIRECT_ERROR_HANDLING,
+                                   10,
+                                   std::chrono::milliseconds(0));
 
   // Send 50 messages, each of which cause direct error handling. Since
   // this doesn't exceed the limit, this should not cause the connection
   // to be dropped.
-  for (uint32_t i = 0; i < kMaxDirectErrorHandlingPerIntervalLowerBound; i++) {
+  for (uint32_t i = 0;
+       i < DirectErrorsRateLimitFilter::kMaxEventsPerIntervalLowerBound;
+       i++) {
     auto req = getGetRequest();
     // Invalid method, causes the error to be handled directly
     req.setMethod("11111111");
@@ -3853,11 +3858,14 @@ TEST_F(HTTP2DownstreamSessionTest, DirectErrorHandlingLimitTouched) {
 }
 
 TEST_F(HTTP2DownstreamSessionTest, DirectErrorHandlingLimitExceeded) {
-  httpSession_->setControlMessageRateLimitParams(100, 10, milliseconds(0));
+  httpSession_->setRateLimitParams(RateLimitFilter::Type::DIRECT_ERROR_HANDLING,
+                                   10,
+                                   std::chrono::milliseconds(0));
 
   // Send eleven messages, each of which causes direct error handling. Since
   // this exceeds the limit, the connection should be dropped.
-  for (uint32_t i = 0; i < kMaxDirectErrorHandlingPerIntervalLowerBound + 1;
+  for (uint32_t i = 0;
+       i < DirectErrorsRateLimitFilter::kMaxEventsPerIntervalLowerBound + 1;
        i++) {
     auto req = getGetRequest();
     // Invalid method, causes the error to be handled directly

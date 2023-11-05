@@ -20,13 +20,8 @@ constexpr uint32_t kDefaultMaxControlMsgsPerInterval = 50000;
 constexpr uint32_t kMaxControlMsgsPerIntervalLowerBound = 100;
 constexpr std::chrono::milliseconds kDefaultControlMsgDuration{100};
 
-constexpr uint32_t kDefaultMaxDirectErrorHandlingPerInterval = 100;
-constexpr uint32_t kMaxDirectErrorHandlingPerIntervalLowerBound = 50;
-constexpr std::chrono::milliseconds kDefaultDirectErrorHandlingDuration{100};
-
 enum RateLimitTarget {
   CONTROL_MSGS,
-  DIRECT_ERROR_HANDLING,
 };
 
 /**
@@ -46,9 +41,6 @@ class ControlMessageRateLimitFilter : public PassThroughHTTPCodecFilter {
       : resetControlMessages_(numControlMsgsInCurrentInterval_,
                               RateLimitTarget::CONTROL_MSGS,
                               httpSessionStats),
-        resetDirectErrors_(numDirectErrorHandlingInCurrentInterval_,
-                           RateLimitTarget::DIRECT_ERROR_HANDLING,
-                           httpSessionStats),
         timer_(timer),
         httpSessionStats_(httpSessionStats) {
   }
@@ -58,15 +50,10 @@ class ControlMessageRateLimitFilter : public PassThroughHTTPCodecFilter {
     resetControlMessages_.httpSessionStats = httpSessionStats;
   }
 
-  void setParams(
-      uint32_t maxControlMsgsPerInterval,
-      uint32_t maxDirectErrorHandlingPerInterval,
-      std::chrono::milliseconds controlMsgIntervalDuration,
-      std::chrono::milliseconds directErrorHandlingIntervalDuration) {
+  void setParams(uint32_t maxControlMsgsPerInterval,
+                 std::chrono::milliseconds controlMsgIntervalDuration) {
     maxControlMsgsPerInterval_ = maxControlMsgsPerInterval;
-    maxDirectErrorHandlingPerInterval_ = maxDirectErrorHandlingPerInterval;
     controlMsgIntervalDuration_ = controlMsgIntervalDuration;
-    directErrorHandlingIntervalDuration_ = directErrorHandlingIntervalDuration;
   }
 
   // Filter functions
@@ -98,28 +85,15 @@ class ControlMessageRateLimitFilter : public PassThroughHTTPCodecFilter {
     }
   }
 
-  void onError(HTTPCodec::StreamID streamID,
-               const HTTPException& error,
-               bool newTxn) override {
-    // We only rate limit stream errors with no codec status code.
-    // These may trigger a direct HTTP response.
-    if (streamID == 0 || error.hasCodecStatusCode() ||
-        !incrementDirectErrorHandlingInCurInterval()) {
-      callback_->onError(streamID, error, newTxn);
-    }
-  }
-
   void attachThreadLocals(folly::HHWheelTimer* timer) {
     timer_ = timer;
   }
 
   void detachThreadLocals() {
     resetControlMessages_.cancelTimeout();
-    resetDirectErrors_.cancelTimeout();
     timer_ = nullptr;
     // Free pass when switching threads
     numControlMsgsInCurrentInterval_ = 0;
-    numDirectErrorHandlingInCurrentInterval_ = 0;
   }
 
  private:
@@ -152,31 +126,6 @@ class ControlMessageRateLimitFilter : public PassThroughHTTPCodecFilter {
     return false;
   }
 
-  bool incrementDirectErrorHandlingInCurInterval() {
-    if (numDirectErrorHandlingInCurrentInterval_ == 0) {
-      // The first control message (or first after a reset) schedules the next
-      // reset timer
-      CHECK(timer_);
-      timer_->scheduleTimeout(&resetDirectErrors_,
-                              directErrorHandlingIntervalDuration_);
-    }
-
-    if (++numDirectErrorHandlingInCurrentInterval_ >
-        maxDirectErrorHandlingPerInterval_) {
-      HTTPException ex(
-          HTTPException::Direction::INGRESS_AND_EGRESS,
-          folly::to<std::string>(
-              "dropping connection due to too many newly created txns  when "
-              "directly handling errors, num direct error handling cases = ",
-              numDirectErrorHandlingInCurrentInterval_));
-      ex.setProxygenError(kErrorDropped);
-      callback_->onError(0, ex, true);
-      return true;
-    }
-
-    return false;
-  }
-
   class ResetCounterTimeout : public folly::HHWheelTimer::Callback {
    public:
     explicit ResetCounterTimeout(uint32_t& counterIn,
@@ -192,9 +141,6 @@ class ControlMessageRateLimitFilter : public PassThroughHTTPCodecFilter {
         switch (rateLimitTarget) {
           case RateLimitTarget::CONTROL_MSGS:
             httpSessionStats->recordControlMsgsInInterval(counter);
-            break;
-          case RateLimitTarget::DIRECT_ERROR_HANDLING:
-            // No stats for this one
             break;
         }
       }
@@ -216,17 +162,10 @@ class ControlMessageRateLimitFilter : public PassThroughHTTPCodecFilter {
   uint32_t numControlMsgsInCurrentInterval_{0};
   uint32_t maxControlMsgsPerInterval_{kDefaultMaxControlMsgsPerInterval};
 
-  uint32_t numDirectErrorHandlingInCurrentInterval_{0};
-  uint32_t maxDirectErrorHandlingPerInterval_{
-      kDefaultMaxDirectErrorHandlingPerInterval};
-
   std::chrono::milliseconds controlMsgIntervalDuration_{
       kDefaultControlMsgDuration};
-  std::chrono::milliseconds directErrorHandlingIntervalDuration_{
-      kDefaultDirectErrorHandlingDuration};
 
   ResetCounterTimeout resetControlMessages_;
-  ResetCounterTimeout resetDirectErrors_;
   folly::HHWheelTimer* timer_{nullptr};
   HTTPSessionStats* httpSessionStats_{nullptr};
 };

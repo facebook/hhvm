@@ -17,6 +17,7 @@
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/tracing/ScopedTraceSection.h>
 #include <proxygen/lib/http/HTTPHeaderSize.h>
+#include <proxygen/lib/http/codec/DirectErrorsRateLimitFilter.h>
 #include <proxygen/lib/http/codec/HTTP2Codec.h>
 #include <proxygen/lib/http/codec/HTTPChecks.h>
 #include <proxygen/lib/http/codec/HeadersRateLimitFilter.h>
@@ -225,6 +226,7 @@ void HTTPSession::setupCodec() {
   if (codec_->supportsParallelRequests() && sock_ &&
       codec_->getTransportDirection() == TransportDirection::DOWNSTREAM) {
     addRateLimitFilter(RateLimitFilter::Type::HEADERS);
+    addRateLimitFilter(RateLimitFilter::Type::DIRECT_ERROR_HANDLING);
 
     if (!controlMessageRateLimitFilter_) {
       controlMessageRateLimitFilter_ = new ControlMessageRateLimitFilter(

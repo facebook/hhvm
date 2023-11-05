@@ -6,6 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <proxygen/lib/http/codec/ControlMessageRateLimitFilter.h>
 #include <proxygen/lib/http/codec/DirectErrorsRateLimitFilter.h>
 #include <proxygen/lib/http/codec/HeadersRateLimitFilter.h>
 #include <proxygen/lib/http/codec/RateLimitFilter.h>
@@ -33,7 +34,8 @@ std::unique_ptr<RateLimitFilter> RateLimitFilter::createRateLimitFilter(
     case Type::HEADERS:
       return std::make_unique<HeadersRateLimitFilter>(timer, httpSessionStats);
     case Type::MISC_CONTROL_MSGS:
-      return nullptr;
+      return std::make_unique<ControlMessageRateLimitFilter>(timer,
+                                                             httpSessionStats);
     case Type::RSTS:
       return nullptr;
     case Type::DIRECT_ERROR_HANDLING:

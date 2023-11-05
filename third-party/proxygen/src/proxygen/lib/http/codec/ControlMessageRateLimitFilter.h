@@ -8,166 +8,91 @@
 
 #pragma once
 
-#include <folly/io/async/HHWheelTimer.h>
 #include <proxygen/lib/http/codec/HTTP2Framer.h>
-#include <proxygen/lib/http/codec/HTTPCodecFilter.h>
-#include <proxygen/lib/http/session/HTTPSessionStats.h>
+#include <proxygen/lib/http/codec/RateLimitFilter.h>
 
 namespace proxygen {
 
-// These constants define the rate at which we limit certain events.
-constexpr uint32_t kDefaultMaxControlMsgsPerInterval = 50000;
-constexpr uint32_t kMaxControlMsgsPerIntervalLowerBound = 100;
-constexpr std::chrono::milliseconds kDefaultControlMsgDuration{100};
-
-enum RateLimitTarget {
-  CONTROL_MSGS,
-};
-
-/**
- * This class implements the rate limiting logic for control messages and
- * stream errors (that might produce HTTP error pages).  If a rate limit is
- * exeeded, the callback is converted to a session level error with
- * ProxygenError = kErrorDropped.  This is a signal to the codec callback that
- * the codec would like the connection dropped.
- *
- * TODO: Refactor this into separate filters, or group related parameters
- * into structs.
- */
-class ControlMessageRateLimitFilter : public PassThroughHTTPCodecFilter {
+class ControlMessageRateLimitFilter : public RateLimitFilter {
  public:
+  static const uint32_t kDefaultMaxEventsPerInterval = 50000;
+  static const uint32_t kMaxEventsPerIntervalLowerBound = 100;
+  static constexpr std::chrono::milliseconds kDefaultTimeoutDuration{100};
+
   explicit ControlMessageRateLimitFilter(folly::HHWheelTimer* timer,
                                          HTTPSessionStats* httpSessionStats)
-      : resetControlMessages_(numControlMsgsInCurrentInterval_,
-                              RateLimitTarget::CONTROL_MSGS,
-                              httpSessionStats),
-        timer_(timer),
-        httpSessionStats_(httpSessionStats) {
+      : RateLimitFilter(timer, httpSessionStats) {
+    maxEventsInInterval_ = kDefaultMaxEventsPerInterval;
+    timeoutDuration_ = kDefaultTimeoutDuration;
   }
 
-  void setSessionStats(HTTPSessionStats* httpSessionStats) {
-    httpSessionStats_ = httpSessionStats;
-    resetControlMessages_.httpSessionStats = httpSessionStats;
-  }
-
-  void setParams(uint32_t maxControlMsgsPerInterval,
-                 std::chrono::milliseconds controlMsgIntervalDuration) {
-    maxControlMsgsPerInterval_ = maxControlMsgsPerInterval;
-    controlMsgIntervalDuration_ = controlMsgIntervalDuration;
-  }
-
-  // Filter functions
   void onAbort(HTTPCodec::StreamID streamID, ErrorCode code) override {
-    if (!incrementNumControlMsgsInCurInterval(http2::FrameType::RST_STREAM)) {
+    if (!incrementNumEventsInCurrentInterval()) {
       callback_->onAbort(streamID, code);
+    } else {
+      sendErrorCallback(http2::FrameType::RST_STREAM);
     }
   }
   void onPingRequest(uint64_t data) override {
-    if (!incrementNumControlMsgsInCurInterval(http2::FrameType::PING)) {
+    if (!incrementNumEventsInCurrentInterval()) {
       callback_->onPingRequest(data);
+    } else {
+      sendErrorCallback(http2::FrameType::PING);
     }
   }
   void onSettings(const SettingsList& settings) override {
-    if (!incrementNumControlMsgsInCurInterval(http2::FrameType::SETTINGS)) {
+    if (!incrementNumEventsInCurrentInterval()) {
       callback_->onSettings(settings);
+    } else {
+      sendErrorCallback(http2::FrameType::SETTINGS);
     }
   }
   void onPriority(HTTPCodec::StreamID streamID,
                   const HTTPMessage::HTTP2Priority& pri) override {
-    if (!incrementNumControlMsgsInCurInterval(http2::FrameType::PRIORITY)) {
+    if (!incrementNumEventsInCurrentInterval()) {
       callback_->onPriority(streamID, pri);
+    } else {
+      sendErrorCallback(http2::FrameType::PRIORITY);
     }
   }
 
   void onPriority(StreamID streamID, const HTTPPriority& pri) override {
-    if (!incrementNumControlMsgsInCurInterval(http2::FrameType::PRIORITY)) {
+    if (!incrementNumEventsInCurrentInterval()) {
       callback_->onPriority(streamID, pri);
+    } else {
+      sendErrorCallback(http2::FrameType::PRIORITY);
     }
   }
 
-  void attachThreadLocals(folly::HHWheelTimer* timer) {
-    timer_ = timer;
+  void recordNumEventsInCurrentInterval(uint32_t numEvents) override {
+    if (httpSessionStats_) {
+      httpSessionStats_->recordControlMsgsInInterval(numEvents);
+    }
   }
 
-  void detachThreadLocals() {
-    resetControlMessages_.cancelTimeout();
-    timer_ = nullptr;
-    // Free pass when switching threads
-    numControlMsgsInCurrentInterval_ = 0;
+  void recordRateLimitBreached() override {
+    if (httpSessionStats_) {
+      httpSessionStats_->recordControlMsgRateLimited();
+    }
+  }
+
+  uint32_t getMaxEventsPerInvervalLowerBound() const override {
+    return kMaxEventsPerIntervalLowerBound;
   }
 
  private:
-  bool incrementNumControlMsgsInCurInterval(http2::FrameType frameType) {
-    if (numControlMsgsInCurrentInterval_ == 0) {
-      // The first control message (or first after a reset) schedules the next
-      // reset timer
-      CHECK(timer_);
-      timer_->scheduleTimeout(&resetControlMessages_,
-                              controlMsgIntervalDuration_);
-    }
-
-    if (++numControlMsgsInCurrentInterval_ > maxControlMsgsPerInterval_) {
-      if (httpSessionStats_) {
-        httpSessionStats_->recordControlMsgRateLimited();
-      }
-      HTTPException ex(
-          HTTPException::Direction::INGRESS_AND_EGRESS,
-          folly::to<std::string>(
-              "dropping connection due to too many control messages, num "
-              "control messages = ",
-              numControlMsgsInCurrentInterval_,
-              ", most recent frame type = ",
-              getFrameTypeString(frameType)));
-      ex.setProxygenError(kErrorDropped);
-      callback_->onError(0, ex, true);
-      return true;
-    }
-
-    return false;
+  void sendErrorCallback(http2::FrameType frameType) {
+    HTTPException ex(
+        HTTPException::Direction::INGRESS_AND_EGRESS,
+        folly::to<std::string>(
+            "dropping connection due to too many control messages, num "
+            "control messages = ",
+            numEventsInCurrentInterval_,
+            ", most recent frame type = ",
+            getFrameTypeString(frameType)));
+    ex.setProxygenError(kErrorDropped);
+    callback_->onError(0, ex, true);
   }
-
-  class ResetCounterTimeout : public folly::HHWheelTimer::Callback {
-   public:
-    explicit ResetCounterTimeout(uint32_t& counterIn,
-                                 RateLimitTarget rateLimitTargetIn,
-                                 HTTPSessionStats* httpSessionStatsIn = nullptr)
-        : counter(counterIn),
-          rateLimitTarget(rateLimitTargetIn),
-          httpSessionStats(httpSessionStatsIn) {
-    }
-
-    void timeoutExpired() noexcept override {
-      if (counter > 0 && httpSessionStats) {
-        switch (rateLimitTarget) {
-          case RateLimitTarget::CONTROL_MSGS:
-            httpSessionStats->recordControlMsgsInInterval(counter);
-            break;
-        }
-      }
-      counter = 0;
-    }
-    void callbackCanceled() noexcept override {
-    }
-
-    uint32_t& counter;
-    RateLimitTarget rateLimitTarget;
-    HTTPSessionStats* httpSessionStats{nullptr};
-  };
-
-  /**
-   * The two variables below keep track of the number of Control messages,
-   * and the number of error handling events that are handled by a newly
-   * created transaction handler seen in the current interval, respectively.
-   */
-  uint32_t numControlMsgsInCurrentInterval_{0};
-  uint32_t maxControlMsgsPerInterval_{kDefaultMaxControlMsgsPerInterval};
-
-  std::chrono::milliseconds controlMsgIntervalDuration_{
-      kDefaultControlMsgDuration};
-
-  ResetCounterTimeout resetControlMessages_;
-  folly::HHWheelTimer* timer_{nullptr};
-  HTTPSessionStats* httpSessionStats_{nullptr};
 };
 
 } // namespace proxygen

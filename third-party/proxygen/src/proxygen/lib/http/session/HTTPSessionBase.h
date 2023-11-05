@@ -173,11 +173,6 @@ class HTTPSessionBase : public wangle::ManagedConnection {
     infoCallback_ = callback;
   }
 
-  void setControlMessageRateLimitParams(
-      uint32_t maxControlMsgsPerInterval = kDefaultMaxControlMsgsPerInterval,
-      std::chrono::milliseconds controlMsgIntervalDuration =
-          kDefaultControlMsgDuration);
-
   void setRateLimitParams(RateLimitFilter::Type type,
                           uint32_t maxEventsPerInterval,
                           std::chrono::milliseconds intervalDuration);
@@ -777,13 +772,6 @@ class HTTPSessionBase : public wangle::ManagedConnection {
   bool setIngressTimeoutAfterEom_{false};
 
   std::unique_ptr<HTTPSessionActivityTracker> httpSessionActivityTracker_;
-
-  /**
-   * Used to rate limit:
-   * 1. Control Messages (pings, settings, priorities, resets)
-   * 2. Errors that lead to a direct response being sent to the client
-   */
-  ControlMessageRateLimitFilter* controlMessageRateLimitFilter_{nullptr};
 
   std::array<RateLimitFilter*, folly::to_underlying(RateLimitFilter::Type::MAX)>
       rateLimitFilters_{};

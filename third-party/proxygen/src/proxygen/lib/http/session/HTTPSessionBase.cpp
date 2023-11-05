@@ -72,22 +72,6 @@ void HTTPSessionBase::setSessionStats(HTTPSessionStats* stats) {
   }
 }
 
-void HTTPSessionBase::setControlMessageRateLimitParams(
-    uint32_t maxControlMsgsPerInterval,
-    std::chrono::milliseconds controlMsgIntervalDuration) {
-
-  if (maxControlMsgsPerInterval < kMaxControlMsgsPerIntervalLowerBound) {
-    XLOG_EVERY_MS(WARNING, 60000)
-        << "Invalid maxControlMsgsPerInterval: " << maxControlMsgsPerInterval;
-    maxControlMsgsPerInterval = kMaxControlMsgsPerIntervalLowerBound;
-  }
-
-  if (controlMessageRateLimitFilter_) {
-    controlMessageRateLimitFilter_->setParams(maxControlMsgsPerInterval,
-                                              controlMsgIntervalDuration);
-  }
-}
-
 void HTTPSessionBase::setRateLimitParams(
     RateLimitFilter::Type type,
     uint32_t maxEventsPerInterval,

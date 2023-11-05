@@ -227,13 +227,7 @@ void HTTPSession::setupCodec() {
       codec_->getTransportDirection() == TransportDirection::DOWNSTREAM) {
     addRateLimitFilter(RateLimitFilter::Type::HEADERS);
     addRateLimitFilter(RateLimitFilter::Type::DIRECT_ERROR_HANDLING);
-
-    if (!controlMessageRateLimitFilter_) {
-      controlMessageRateLimitFilter_ = new ControlMessageRateLimitFilter(
-          &getEventBase()->timer(), sessionStats_);
-      codec_.addFilters(std::unique_ptr<ControlMessageRateLimitFilter>(
-          controlMessageRateLimitFilter_));
-    }
+    addRateLimitFilter(RateLimitFilter::Type::MISC_CONTROL_MSGS);
   }
 
   codec_.setCallback(this);
@@ -301,9 +295,6 @@ void HTTPSession::setSessionStats(HTTPSessionStats* stats) {
   HTTPSessionBase::setSessionStats(stats);
   if (byteEventTracker_) {
     byteEventTracker_->setTTLBAStats(stats);
-  }
-  if (controlMessageRateLimitFilter_) {
-    controlMessageRateLimitFilter_->setSessionStats(stats);
   }
 
   for (auto* rateLimitFilter : rateLimitFilters_) {

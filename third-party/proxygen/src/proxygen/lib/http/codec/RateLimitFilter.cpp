@@ -10,6 +10,7 @@
 #include <proxygen/lib/http/codec/DirectErrorsRateLimitFilter.h>
 #include <proxygen/lib/http/codec/HeadersRateLimitFilter.h>
 #include <proxygen/lib/http/codec/RateLimitFilter.h>
+#include <proxygen/lib/http/codec/ResetsRateLimitFilter.h>
 
 namespace proxygen {
 
@@ -37,7 +38,7 @@ std::unique_ptr<RateLimitFilter> RateLimitFilter::createRateLimitFilter(
       return std::make_unique<ControlMessageRateLimitFilter>(timer,
                                                              httpSessionStats);
     case Type::RSTS:
-      return nullptr;
+      return std::make_unique<ResetsRateLimitFilter>(timer, httpSessionStats);
     case Type::DIRECT_ERROR_HANDLING:
       return std::make_unique<DirectErrorsRateLimitFilter>(timer,
                                                            httpSessionStats);

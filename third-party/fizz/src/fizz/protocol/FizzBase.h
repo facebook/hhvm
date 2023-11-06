@@ -16,11 +16,12 @@ namespace fizz {
 
 namespace detail {
 
-#define FIZZ_PENDING_EVENT(F, ...) \
-  F(AppWrite, __VA_ARGS__)         \
-  F(EarlyAppWrite, __VA_ARGS__)    \
-  F(AppClose, __VA_ARGS__)         \
-  F(WriteNewSessionTicket, __VA_ARGS__)
+#define FIZZ_PENDING_EVENT(F, ...)      \
+  F(AppWrite, __VA_ARGS__)              \
+  F(EarlyAppWrite, __VA_ARGS__)         \
+  F(AppClose, __VA_ARGS__)              \
+  F(WriteNewSessionTicket, __VA_ARGS__) \
+  F(KeyUpdateInitiation, __VA_ARGS__)
 
 // `fizz::detail::PendingEvent` is declared here, rather than
 // being declared as a private struct within `fizz::FizzBase` in order to
@@ -62,6 +63,11 @@ class FizzBase {
    * Server only: Called to write new session ticket to client.
    */
   void writeNewSessionTicket(WriteNewSessionTicket writeNewSessionTicket);
+
+  /**
+   * Called to initiate a key update.
+   */
+  void initiateKeyUpdate(KeyUpdateInitiation keyUpdateInitiation);
 
   /**
    * Called to write application data.

@@ -17,6 +17,13 @@ void FizzBase<Derived, ActionMoveVisitor, StateMachine>::writeNewSessionTicket(
 }
 
 template <typename Derived, typename ActionMoveVisitor, typename StateMachine>
+void FizzBase<Derived, ActionMoveVisitor, StateMachine>::initiateKeyUpdate(
+    KeyUpdateInitiation kui) {
+  pendingEvents_.push_back(std::move(kui));
+  processPendingEvents();
+}
+
+template <typename Derived, typename ActionMoveVisitor, typename StateMachine>
 void FizzBase<Derived, ActionMoveVisitor, StateMachine>::appWrite(AppWrite w) {
   pendingEvents_.push_back(std::move(w));
   processPendingEvents();
@@ -81,6 +88,7 @@ void FizzBase<Derived, ActionMoveVisitor, StateMachine>::moveToErrorState(
         break;
       case detail::PendingEvent::Type::AppClose_E:
       case detail::PendingEvent::Type::WriteNewSessionTicket_E:
+      case detail::PendingEvent::Type::KeyUpdateInitiation_E:
         break;
     }
   }
@@ -181,6 +189,10 @@ void FizzBase<Derived, ActionMoveVisitor, StateMachine>::
           } else {
             actions.emplace(machine_.processAppCloseImmediate(state_));
           }
+          break;
+        case detail::PendingEvent::Type::KeyUpdateInitiation_E:
+          actions.emplace(machine_.processKeyUpdateInitiation(
+              state_, std::move(*event.asKeyUpdateInitiation())));
           break;
       }
     } else {

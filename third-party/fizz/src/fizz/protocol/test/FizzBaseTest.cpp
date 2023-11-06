@@ -97,6 +97,15 @@ class TestStateMachine {
       WriteNewSessionTicket ticket) {
     return processWriteNewSessionTicket_(state, ticket);
   }
+  MOCK_METHOD(
+      Future<Actions>,
+      processKeyUpdateInitiation_,
+      (const State&, KeyUpdateInitiation&));
+  Future<Actions> processKeyUpdateInitiation(
+      const State& state,
+      KeyUpdateInitiation kui) {
+    return processKeyUpdateInitiation_(state, kui);
+  }
   MOCK_METHOD(Future<Actions>, processAppWrite_, (const State&, AppWrite&));
   MOCK_METHOD(
       Future<Actions>,
@@ -290,6 +299,30 @@ TEST_F(FizzBaseTest, TestWriteMulti) {
       }));
   EXPECT_CALL(testFizz_->visitor_, a2());
   testFizz_->appWrite(appWrite("write2"));
+}
+
+TEST_F(FizzBaseTest, TestInitiateKeyUpdate) {
+  EXPECT_CALL(*TestStateMachine::instance, processAppWrite_(_, _))
+      .WillOnce(InvokeWithoutArgs([]() {
+        Actions actions;
+        actions.push_back(A1());
+        return actions;
+      }));
+  bool inCallback = false;
+  EXPECT_CALL(testFizz_->visitor_, a1())
+      .WillOnce(InvokeWithoutArgs([this, &inCallback] {
+        inCallback = true;
+        SCOPE_EXIT {
+          inCallback = false;
+        };
+        testFizz_->initiateKeyUpdate(KeyUpdateInitiation());
+      }));
+  EXPECT_CALL(*TestStateMachine::instance, processKeyUpdateInitiation_(_, _))
+      .WillOnce(InvokeWithoutArgs([&inCallback]() {
+        EXPECT_FALSE(inCallback);
+        return Actions();
+      }));
+  testFizz_->appWrite(AppWrite());
 }
 
 TEST_F(FizzBaseTest, TestAppClose) {

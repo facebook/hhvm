@@ -43,11 +43,6 @@ class FizzServer : public FizzBase<
       const Buf& context,
       uint16_t length) const;
 
-  /**
-   * Initialize a key update.
-   */
-  void initiateKeyUpdate(KeyUpdateInitiation keyUpdateInitiation);
-
  protected:
   void visitActions(typename SM::CompletedActions& actions) override;
 

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <folly/experimental/TestUtil.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/test/AsyncSSLSocketTest.h>
 #include <folly/portability/GMock.h>
@@ -25,6 +26,7 @@
 using namespace folly;
 using namespace wangle;
 using namespace testing;
+using folly::test::find_resource;
 
 class TestConnection : public wangle::ManagedConnection {
  public:
@@ -119,11 +121,13 @@ class AcceptorTest : public ::testing::TestWithParam<TestSSLConfig> {
     TestSSLConfig testConfig = GetParam();
     if (testConfig == TestSSLConfig::SSL) {
       sslContext->loadCertKeyPairFromFiles(
-          folly::test::kTestCert, folly::test::kTestKey);
+          find_resource(folly::test::kTestCert).c_str(),
+          find_resource(folly::test::kTestKey).c_str());
     } else if (testConfig == TestSSLConfig::SSL_MULTI_CA) {
       // Use a different cert.
       sslContext->loadCertKeyPairFromFiles(
-          folly::test::kClientTestCert, folly::test::kClientTestKey);
+          find_resource(folly::test::kClientTestCert).c_str(),
+          find_resource(folly::test::kClientTestKey).c_str());
     }
     sslContext->setOptions(SSL_OP_NO_TICKET);
     sslContext->ciphers("ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
@@ -134,12 +138,15 @@ class AcceptorTest : public ::testing::TestWithParam<TestSSLConfig> {
     wangle::SSLContextConfig sslCtxConfig;
     TestSSLConfig testConfig = GetParam();
     sslCtxConfig.setCertificate(
-        folly::test::kTestCert, folly::test::kTestKey, "");
+        find_resource(folly::test::kTestCert).string(),
+        find_resource(folly::test::kTestKey).string(),
+        "");
     if (testConfig == TestSSLConfig::SSL_MULTI_CA) {
       sslCtxConfig.clientCAFiles = std::vector<std::string>{
-          folly::test::kTestCA, folly::test::kClientTestCA};
+          find_resource(folly::test::kTestCA).string(),
+          find_resource(folly::test::kClientTestCA).string()};
     } else {
-      sslCtxConfig.clientCAFile = folly::test::kTestCA;
+      sslCtxConfig.clientCAFile = find_resource(folly::test::kTestCA).string();
     }
     sslCtxConfig.sessionContext = "AcceptorTest";
     sslCtxConfig.isDefault = true;

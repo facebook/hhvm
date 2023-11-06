@@ -17,6 +17,7 @@
 #include <folly/portability/GTest.h>
 
 #include <folly/SocketAddress.h>
+#include <folly/experimental/TestUtil.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
@@ -44,6 +45,7 @@ using namespace apache::thrift::async;
 using namespace apache::thrift::transport;
 using folly::IOBuf;
 using folly::IOBufQueue;
+using folly::test::find_resource;
 using std::make_unique;
 using std::unique_ptr;
 
@@ -228,8 +230,8 @@ class SocketPairTest {
     clientCtx->ciphers("ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
 
     serverCtx->ciphers("ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
-    serverCtx->loadCertificate(folly::test::kTestCert);
-    serverCtx->loadPrivateKey(folly::test::kTestKey);
+    serverCtx->loadCertificate(find_resource(folly::test::kTestCert).c_str());
+    serverCtx->loadPrivateKey(find_resource(folly::test::kTestKey).c_str());
   }
 
   int getFd0() { return socket0_->getNetworkSocket().toFd(); }

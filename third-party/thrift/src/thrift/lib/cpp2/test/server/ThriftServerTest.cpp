@@ -37,6 +37,7 @@
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/executors/GlobalExecutor.h>
 #include <folly/executors/MeteredExecutor.h>
+#include <folly/experimental/TestUtil.h>
 #include <folly/experimental/coro/Baton.h>
 #include <folly/experimental/coro/Sleep.h>
 #include <folly/experimental/observer/SimpleObservable.h>
@@ -90,6 +91,7 @@ using namespace apache::thrift::async;
 using namespace apache::thrift::transport;
 using namespace apache::thrift::concurrency;
 using namespace std::literals;
+using folly::test::find_resource;
 using std::string;
 
 THRIFT_FLAG_DECLARE_bool(server_rocket_upgrade_enabled);
@@ -1777,9 +1779,11 @@ TEST_P(HeaderOrRocket, ConnectionIdleTimeoutTestSSL) {
         server.setIdleTimeout(std::chrono::milliseconds(20));
         auto sslConfig = std::make_shared<wangle::SSLContextConfig>();
         sslConfig->setCertificate(
-            folly::test::kTestCert, folly::test::kTestKey, "");
-        sslConfig->clientCAFiles =
-            std::vector<std::string>{folly::test::kTestCA};
+            find_resource(folly::test::kTestCert).string(),
+            find_resource(folly::test::kTestKey).string(),
+            "");
+        sslConfig->clientCAFiles = std::vector<std::string>{
+            find_resource(folly::test::kTestCA).string()};
         sslConfig->sessionContext = "ThriftServerTest";
         sslConfig->setNextProtocols({"rs"});
         server.setSSLConfig(std::move(sslConfig));
@@ -2772,17 +2776,21 @@ TEST(ThriftServer, ClientIdentityHook) {
 namespace {
 void setupServerSSL(ThriftServer& server) {
   auto sslConfig = std::make_shared<wangle::SSLContextConfig>();
-  sslConfig->setCertificate(folly::test::kTestCert, folly::test::kTestKey, "");
-  sslConfig->clientCAFiles = std::vector<std::string>{folly::test::kTestCA};
+  sslConfig->setCertificate(
+      find_resource(folly::test::kTestCert).string(),
+      find_resource(folly::test::kTestKey).string(),
+      "");
+  sslConfig->clientCAFiles =
+      std::vector<std::string>{find_resource(folly::test::kTestCA).string()};
   sslConfig->sessionContext = "ThriftServerTest";
   server.setSSLConfig(std::move(sslConfig));
 }
 
 std::shared_ptr<folly::SSLContext> makeClientSslContext() {
   auto ctx = std::make_shared<folly::SSLContext>();
-  ctx->loadCertificate(folly::test::kTestCert);
-  ctx->loadPrivateKey(folly::test::kTestKey);
-  ctx->loadTrustedCertificates(folly::test::kTestCA);
+  ctx->loadCertificate(find_resource(folly::test::kTestCert).c_str());
+  ctx->loadPrivateKey(find_resource(folly::test::kTestKey).c_str());
+  ctx->loadTrustedCertificates(find_resource(folly::test::kTestCA).c_str());
   ctx->authenticate(
       true /* verify server cert */, false /* don't verify server name */);
   ctx->setVerificationOption(folly::SSLContext::SSLVerifyPeerEnum::VERIFY);
@@ -2967,7 +2975,10 @@ TEST(ThriftServer, StopTLSDowngrade) {
   server->setSSLPolicy(SSLPolicy::REQUIRED);
   auto sslConfig = std::make_shared<wangle::SSLContextConfig>();
   sslConfig->setNextProtocols({"rs"});
-  sslConfig->setCertificate(folly::test::kTestCert, folly::test::kTestKey, "");
+  sslConfig->setCertificate(
+      find_resource(folly::test::kTestCert).string(),
+      find_resource(folly::test::kTestKey).string(),
+      "");
   sslConfig->clientVerification =
       folly::SSLContext::VerifyClientCertificate::DO_NOT_REQUEST;
   server->setSSLConfig(std::move(sslConfig));
@@ -3483,8 +3494,12 @@ TEST(ThriftServer, HeaderToRocketUpgradeOverTLS13) {
   server->setSSLPolicy(SSLPolicy::REQUIRED);
 
   auto sslConfig = std::make_shared<wangle::SSLContextConfig>();
-  sslConfig->setCertificate(folly::test::kTestCert, folly::test::kTestKey, "");
-  sslConfig->clientCAFiles = std::vector<std::string>{folly::test::kTestCA};
+  sslConfig->setCertificate(
+      find_resource(folly::test::kTestCert).string(),
+      find_resource(folly::test::kTestKey).string(),
+      "");
+  sslConfig->clientCAFiles =
+      std::vector<std::string>{find_resource(folly::test::kTestCA).string()};
   sslConfig->sessionContext = "ThriftServerTest";
   sslConfig->setNextProtocols(**ThriftServer::defaultNextProtocols());
 
@@ -3545,15 +3560,16 @@ static std::shared_ptr<quic::QuicClientTransport> makeQuicClient(
   auto ctx = std::make_shared<fizz::client::FizzClientContext>();
   ctx->setSupportedAlpns({"rs"});
   auto verifier = fizz::DefaultCertificateVerifier::createFromCAFiles(
-      fizz::VerificationContext::Client, {folly::test::kTestCA});
+      fizz::VerificationContext::Client,
+      {find_resource(folly::test::kTestCA).string()});
 
   {
     // set up fizz client cert
     std::string certData;
-    folly::readFile(folly::test::kTestCert, certData);
+    folly::readFile(find_resource(folly::test::kTestCert).c_str(), certData);
 
     std::string keyData;
-    folly::readFile(folly::test::kTestKey, keyData);
+    folly::readFile(find_resource(folly::test::kTestKey).c_str(), keyData);
 
     if (!certData.empty() && !keyData.empty()) {
       auto cert = fizz::CertUtils::makeSelfCert(
@@ -3589,8 +3605,12 @@ TEST(ThriftServer, RocketOverQuic) {
   server->setSSLPolicy(SSLPolicy::REQUIRED);
 
   auto sslConfig = std::make_shared<wangle::SSLContextConfig>();
-  sslConfig->setCertificate(folly::test::kTestCert, folly::test::kTestKey, "");
-  sslConfig->clientCAFiles = std::vector<std::string>{folly::test::kTestCA};
+  sslConfig->setCertificate(
+      find_resource(folly::test::kTestCert).string(),
+      find_resource(folly::test::kTestKey).string(),
+      "");
+  sslConfig->clientCAFiles =
+      std::vector<std::string>{find_resource(folly::test::kTestCA).string()};
   sslConfig->sessionContext = "ThriftServerTest";
   sslConfig->setNextProtocols({"rs"});
   server->setSSLConfig(std::move(sslConfig));
@@ -3618,8 +3638,12 @@ TEST(ThriftServer, AlpnNotAllowMismatch) {
   server->setSSLPolicy(SSLPolicy::REQUIRED);
 
   auto sslConfig = std::make_shared<wangle::SSLContextConfig>();
-  sslConfig->setCertificate(folly::test::kTestCert, folly::test::kTestKey, "");
-  sslConfig->clientCAFiles = std::vector<std::string>{folly::test::kTestCA};
+  sslConfig->setCertificate(
+      find_resource(folly::test::kTestCert).string(),
+      find_resource(folly::test::kTestKey).string(),
+      "");
+  sslConfig->clientCAFiles =
+      std::vector<std::string>{find_resource(folly::test::kTestCA).string()};
   sslConfig->sessionContext = "ThriftServerTest";
   sslConfig->setNextProtocols({"rs"});
   server->setSSLConfig(std::move(sslConfig));

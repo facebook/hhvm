@@ -20,6 +20,7 @@
 #include <atomic>
 
 #include <folly/executors/GlobalExecutor.h>
+#include <folly/experimental/TestUtil.h>
 
 #include <folly/Memory.h>
 #include <folly/experimental/coro/BlockingWait.h>
@@ -44,6 +45,7 @@ using namespace std;
 using namespace folly;
 using namespace apache::thrift;
 using namespace apache::thrift::util::cpp2;
+using folly::test::find_resource;
 
 class SimpleServiceImpl
     : public virtual apache::thrift::ServiceHandler<SimpleService> {
@@ -129,9 +131,11 @@ TEST(ScopedServerInterfaceThread, newClientWithSSLPolicyREQUIRED) {
         // server TLS setup
         auto sslConfig = std::make_shared<wangle::SSLContextConfig>();
         sslConfig->setCertificate(
-            folly::test::kTestCert, folly::test::kTestKey, "");
-        sslConfig->clientCAFiles =
-            std::vector<std::string>{folly::test::kTestCA};
+            find_resource(folly::test::kTestCert).string(),
+            find_resource(folly::test::kTestKey).string(),
+            "");
+        sslConfig->clientCAFiles = std::vector<std::string>{
+            find_resource(folly::test::kTestCA).string()};
         sslConfig->sessionContext = "ThriftServerTest";
         sslConfig->setNextProtocols(
             **apache::thrift::ThriftServer::defaultNextProtocols());

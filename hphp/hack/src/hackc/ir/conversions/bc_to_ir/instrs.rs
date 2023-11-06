@@ -944,11 +944,15 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
             Action::Terminal(Terminator::Fatal(s1, subop1, ctx.loc))
         }
 
-        Opcode::ThrowAsTypeStructException => {
+        Opcode::ThrowAsTypeStructException(kind) => {
             let s2 = ctx.pop();
             let s1 = ctx.pop();
             ctx.stack_clear();
-            Action::Terminal(Terminator::ThrowAsTypeStructException([s1, s2], ctx.loc))
+            Action::Terminal(Terminator::ThrowAsTypeStructException(
+                [s1, s2],
+                kind,
+                ctx.loc,
+            ))
         }
 
         Opcode::Dict(name) => {

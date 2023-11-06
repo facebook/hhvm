@@ -181,6 +181,9 @@ inline const char* prettytype(TypeStructResolveOp) {
 inline const char* prettytype(TypeStructEnforceKind) {
   return "TypeStructEnforceKind";
 }
+inline const char* prettytype(AsTypeStructExceptionKind) {
+  return "AsTypeStructExceptionKind";
+}
 inline const char* prettytype(ReadonlyOp) { return "ReadonlyOp"; }
 inline const char* prettytype(ContCheckOp) { return "ContCheckOp"; }
 inline const char* prettytype(SpecialClsRef) { return "SpecialClsRef"; }
@@ -1682,7 +1685,7 @@ OPTBLD_INLINE void iopIsTypeStructC(TypeStructResolveOp op, TypeStructEnforceKin
   vmStack().replaceC<KindOfBoolean>(b);
 }
 
-OPTBLD_INLINE void iopThrowAsTypeStructException() {
+OPTBLD_INLINE void iopThrowAsTypeStructException(AsTypeStructExceptionKind kind) {
   auto const c = vmStack().indC(1);
   auto const ts =
     maybeResolveAndErrorOnTypeStructure(TypeStructResolveOp::Resolve, false);

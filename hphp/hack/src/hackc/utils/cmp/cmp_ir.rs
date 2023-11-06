@@ -1348,7 +1348,7 @@ fn cmp_instr_terminator(
                 | (Terminator::RetCSuspended(_, _), _)
                 | (Terminator::RetM(_, _), _)
                 | (Terminator::Throw(_, _), _)
-                | (Terminator::ThrowAsTypeStructException(_, _), _)
+                | (Terminator::ThrowAsTypeStructException(_, _, _), _)
                 | (Terminator::Unreachable, _) => {}
 
             // these should never happen

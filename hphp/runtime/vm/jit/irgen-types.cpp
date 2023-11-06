@@ -289,7 +289,7 @@ void verifyTypeImpl(IRGS& env,
 
       case AnnotAction::WarnClassname:
         assertx(val->type() <= TCls || val->type() <= TLazyCls);
-        gen(env, 
+        gen(env,
             RaiseNotice,
             SampleRateData { RO::EvalClassnameNoticesSampleRate },
             cns(env, s_CLASS_TO_CLASSNAME.get()));
@@ -1330,7 +1330,7 @@ void emitIsTypeStructC(IRGS& env, TypeStructResolveOp op, TypeStructEnforceKind 
   ));
 }
 
-void emitThrowAsTypeStructException(IRGS& env) {
+void emitThrowAsTypeStructException(IRGS& env, AsTypeStructExceptionKind kind) {
   auto const arr = topC(env);
   auto const c = topC(env, BCSPRelOffset { 1 });
   auto const tsAndBlock = [&]() -> std::pair<SSATmp*, Block*> {

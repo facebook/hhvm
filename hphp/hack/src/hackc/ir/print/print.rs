@@ -2147,12 +2147,17 @@ fn print_terminator(
         Terminator::Throw(vid, _) => {
             write!(w, "throw {}", FmtVid(func, *vid, verbose, strings))?;
         }
-        Terminator::ThrowAsTypeStructException(ops, _) => {
+        Terminator::ThrowAsTypeStructException(ops, kind, _) => {
             write!(
                 w,
-                "throw_as_type_struct_exception {}, {}",
+                "throw_as_type_struct_exception {}, {}, {}",
                 FmtVid(func, ops[0], verbose, strings),
-                FmtVid(func, ops[1], verbose, strings)
+                FmtVid(func, ops[1], verbose, strings),
+                match *kind {
+                    AsTypeStructExceptionKind::Error => "error",
+                    AsTypeStructExceptionKind::Typehint => "typehint",
+                    _ => panic!("bad AsTypeStructExceptionKind value"),
+                },
             )?;
         }
         Terminator::Unreachable => write!(w, "unreachable")?,

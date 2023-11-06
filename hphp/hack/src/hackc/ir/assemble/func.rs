@@ -69,6 +69,7 @@ use crate::parse::is_block;
 use crate::parse::is_int;
 use crate::parse::is_lid;
 use crate::parse::is_vid;
+use crate::parse::parse_as_type_struct_exception_kind;
 use crate::parse::parse_attr;
 use crate::parse::parse_attribute;
 use crate::parse::parse_bare_this_op;
@@ -1425,7 +1426,7 @@ impl FunctionParser<'_, '_> {
             "sub" => I::Hhbc(H::Sub(self.vid2(tok)?, loc)),
             "this" => I::Hhbc(H::This(loc)),
             "throw" => I::Terminator(T::Throw(self.vid(tok)?, loc)),
-            "throw_as_type_struct_exception" => I::Terminator(T::ThrowAsTypeStructException(self.vid2(tok)?, loc)),
+            "throw_as_type_struct_exception" => parse_instr!(tok, I::Terminator(T::ThrowAsTypeStructException([p0, p1], p2, loc)), <p0:self.vid>"," <p1:self.vid>"," <p2:parse_as_type_struct_exception_kind>),
             "throw_nonexhaustive_switch" => I::Hhbc(H::ThrowNonExhaustiveSwitch(loc)),
             "unset" => self.parse_unset(tok, loc)?,
             "unsetm" => self.parse_member_op(tok, mnemonic, loc)?,

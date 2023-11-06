@@ -954,6 +954,12 @@ static const char* TypeStructEnforceKind_names[] = {
 #undef KIND
 };
 
+static const char* AsTypeStructExceptionKind_names[] = {
+#define KIND(x) #x,
+  AS_TYPE_STRUCT_EXCEPTION_KINDS
+#undef KIND
+};
+
 static const char* MOpMode_names[] = {
 #define MODE(x) #x,
   M_OP_MODES
@@ -1053,6 +1059,8 @@ X(TypeStructResolveOp,
                   static_cast<int>(TypeStructResolveOp::Resolve))
 X(TypeStructEnforceKind,
                   static_cast<int>(TypeStructEnforceKind::Deep))
+X(AsTypeStructExceptionKind,
+                  static_cast<int>(AsTypeStructExceptionKind::Error))
 X(MOpMode,        static_cast<int>(MOpMode::None))
 X(ContCheckOp,    static_cast<int>(ContCheckOp::IgnoreStarted))
 X(SpecialClsRef,  static_cast<int>(SpecialClsRef::SelfCls))

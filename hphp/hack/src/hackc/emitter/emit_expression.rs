@@ -19,6 +19,7 @@ use error::Result;
 use ffi::Slice;
 use ffi::Str;
 use hash::HashSet;
+use hhbc::AsTypeStructExceptionKind;
 use hhbc::BareThisOp;
 use hhbc::CollectionType;
 use hhbc::FCallArgs;
@@ -5074,7 +5075,7 @@ fn emit_as<'a, 'arena, 'decl>(
                     InstrSeq::gather(vec![
                         instr::push_l(arg_local),
                         instr::push_l(type_struct_local),
-                        instr::throw_as_type_struct_exception(),
+                        instr::throw_as_type_struct_exception(AsTypeStructExceptionKind::Typehint),
                     ])
                 },
             ])

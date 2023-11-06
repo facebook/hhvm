@@ -287,7 +287,7 @@ fn is_cow_instr(instr: &NodeInstr<'_>) -> bool {
             | Opcode::SSwitch { .. }
             | Opcode::Switch(..)
             | Opcode::Throw
-            | Opcode::ThrowAsTypeStructException
+            | Opcode::ThrowAsTypeStructException(_)
             | Opcode::ThrowNonExhaustiveSwitch,
         ) => false,
 

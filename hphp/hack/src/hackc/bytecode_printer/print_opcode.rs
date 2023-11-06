@@ -11,6 +11,7 @@ use std::io::Write;
 use ffi::Str;
 use hash::HashSet;
 use hhbc::AdataId;
+use hhbc::AsTypeStructExceptionKind;
 use hhbc::BareThisOp;
 use hhbc::ClassName;
 use hhbc::CollectionType;
@@ -194,6 +195,10 @@ print_with_debug!(print_special_cls_ref, SpecialClsRef);
 print_with_debug!(print_switch_kind, SwitchKind);
 print_with_debug!(print_type_struct_resolve_op, TypeStructResolveOp);
 print_with_debug!(print_type_struct_enforce_kind, TypeStructEnforceKind);
+print_with_debug!(
+    print_as_type_struct_exception_kind,
+    AsTypeStructExceptionKind
+);
 
 fn print_adata_id(w: &mut dyn Write, id: &AdataId<'_>) -> Result<()> {
     w.write_all(b"@")?;

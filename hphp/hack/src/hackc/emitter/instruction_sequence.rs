@@ -165,6 +165,7 @@ pub mod instr {
     use ffi::Slice;
     use ffi::Str;
     use hhbc::AdataId;
+    use hhbc::AsTypeStructExceptionKind;
     use hhbc::BareThisOp;
     use hhbc::ClassName;
     use hhbc::CollectionType;

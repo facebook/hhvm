@@ -1117,8 +1117,8 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
             Terminator::Throw(_src, _) => {
                 self.push_opcode(Opcode::Throw);
             }
-            Terminator::ThrowAsTypeStructException(..) => {
-                self.push_opcode(Opcode::ThrowAsTypeStructException);
+            Terminator::ThrowAsTypeStructException(_, kind, _) => {
+                self.push_opcode(Opcode::ThrowAsTypeStructException(kind));
             }
             Terminator::Unreachable => panic!("shouldn't be trying to emit unreachable"),
         };

@@ -1516,7 +1516,7 @@ fn is_checkpoint_instr(instr: &NodeInstr<'_>) -> bool {
             | Opcode::Sub
             | Opcode::Switch(..)
             | Opcode::Throw
-            | Opcode::ThrowAsTypeStructException
+            | Opcode::ThrowAsTypeStructException(_)
             | Opcode::ThrowNonExhaustiveSwitch
             | Opcode::UGetCUNop
             | Opcode::UnsetG
@@ -1672,7 +1672,6 @@ fn clean_opcode<'arena>(opcode: &Opcode<'arena>) -> Opcode<'arena> {
         | Opcode::Sub
         | Opcode::This
         | Opcode::Throw
-        | Opcode::ThrowAsTypeStructException
         | Opcode::ThrowNonExhaustiveSwitch
         | Opcode::True
         | Opcode::UGetCUNop
@@ -1721,6 +1720,7 @@ fn clean_opcode<'arena>(opcode: &Opcode<'arena>) -> Opcode<'arena> {
         | Opcode::Int(_)
         | Opcode::IsTypeC(_)
         | Opcode::IsTypeStructC(_, _)
+        | Opcode::ThrowAsTypeStructException(_)
         | Opcode::IterFree(_)
         | Opcode::LazyClass(_)
         | Opcode::NewCol(_)

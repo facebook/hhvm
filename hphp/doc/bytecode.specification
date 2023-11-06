@@ -1142,11 +1142,12 @@ IsTypeStructC <type struct resolve op>  [C C]  ->  [C:Bool]
   If the type struct resolve op is DontResolve and the given type structure is
   unresolved, then this instruction raises an error.
 
-ThrowAsTypeStructException [C C]  ->  []
+ThrowAsTypeStructException <as exception kind> [C C]  ->  []
 
   Throws a user catchable type assertion exception that indicates what the
   given type of $2 is, what the expected type is (given on $1) and which key
-  it failed at, if applicable.
+  it failed at, if applicable. If the exception kind is Error, then throw
+  a recoverable error. If it is Typehint raise a TypehintViolationException.
 
 CombineAndResolveTypeStruct <num type structures> [C..C] -> [C]
 

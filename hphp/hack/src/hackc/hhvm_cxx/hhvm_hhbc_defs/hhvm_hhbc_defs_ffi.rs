@@ -115,6 +115,13 @@ pub mod ffi {
 
     #[repr(u8)]
     #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
+    enum AsTypeStructExceptionKind {
+        Error,
+        Typehint,
+    }
+
+    #[repr(u8)]
+    #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum IsLogAsDynamicCallOp {
         LogAsDynamicCall,
         DontLogAsDynamicCall,
@@ -242,6 +249,7 @@ pub mod ffi {
         type SwitchKind;
         type TypeStructResolveOp;
         type TypeStructEnforceKind;
+        type AsTypeStructExceptionKind;
         fn fcall_flags_to_string_ffi(flags: FCallArgsFlags) -> String;
     }
 }

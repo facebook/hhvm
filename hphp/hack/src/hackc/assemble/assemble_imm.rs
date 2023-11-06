@@ -177,6 +177,14 @@ assemble_imm_for_enum!(
 );
 
 assemble_imm_for_enum!(
+    hhbc::AsTypeStructExceptionKind,
+    [
+        AsTypeStructExceptionKind::Error,
+        AsTypeStructExceptionKind::Typehint
+    ]
+);
+
+assemble_imm_for_enum!(
     hhbc::ContCheckOp,
     [ContCheckOp::IgnoreStarted, ContCheckOp::CheckStarted,]
 );

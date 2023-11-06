@@ -482,6 +482,7 @@ const char* subopToName(QueryMOp);
 const char* subopToName(SetRangeOp);
 const char* subopToName(TypeStructResolveOp);
 const char* subopToName(TypeStructEnforceKind);
+const char* subopToName(AsTypeStructExceptionKind);
 const char* subopToName(ContCheckOp);
 const char* subopToName(SpecialClsRef);
 const char* subopToName(IsLogAsDynamicCallOp);

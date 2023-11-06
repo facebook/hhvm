@@ -376,7 +376,7 @@ where
             | Opcode::String(..)
             | Opcode::Sub
             | Opcode::This
-            | Opcode::ThrowAsTypeStructException
+            | Opcode::ThrowAsTypeStructException(..)
             | Opcode::ThrowNonExhaustiveSwitch
             | Opcode::Throw
             | Opcode::True

@@ -47,6 +47,7 @@ pub mod unit;
 
 // Re-export some types in from hhbc so users of `ir` don't have to figure out
 // which random stuff to get from `ir` and which to get elsewhere.
+pub use hhbc::AsTypeStructExceptionKind;
 pub use hhbc::BareThisOp;
 pub use hhbc::CcParam;
 pub use hhbc::ClassName;

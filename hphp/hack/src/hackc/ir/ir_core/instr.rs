@@ -9,6 +9,7 @@ use newtype::newtype_int;
 use smallvec::SmallVec;
 use strum::Display;
 
+use crate::AsTypeStructExceptionKind;
 use crate::BareThisOp;
 use crate::BlockId;
 use crate::ClassId;
@@ -194,7 +195,7 @@ pub enum Terminator {
         loc: LocId,
     },
     Throw(ValueId, LocId),
-    ThrowAsTypeStructException([ValueId; 2], LocId),
+    ThrowAsTypeStructException([ValueId; 2], AsTypeStructExceptionKind, LocId),
     Unreachable,
 }
 

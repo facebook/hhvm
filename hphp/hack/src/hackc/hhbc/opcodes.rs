@@ -9,6 +9,7 @@ use ffi::Str;
 use serde::Serialize;
 
 use crate::AdataId;
+use crate::AsTypeStructExceptionKind;
 use crate::BareThisOp;
 use crate::ClassName;
 use crate::CollectionType;

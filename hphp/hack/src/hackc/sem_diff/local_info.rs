@@ -244,7 +244,7 @@ impl LocalInfo {
             | Opcode::Switch(..)
             | Opcode::This
             | Opcode::Throw
-            | Opcode::ThrowAsTypeStructException
+            | Opcode::ThrowAsTypeStructException(_)
             | Opcode::ThrowNonExhaustiveSwitch
             | Opcode::True
             | Opcode::UGetCUNop

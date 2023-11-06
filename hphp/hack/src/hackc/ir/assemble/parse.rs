@@ -10,6 +10,7 @@ use bumpalo::Bump;
 use ffi::Str;
 use ir_core::func::DefaultValue;
 use ir_core::ArrayKey;
+use ir_core::AsTypeStructExceptionKind;
 use ir_core::Attr;
 use ir_core::Attribute;
 use ir_core::BareThisOp;
@@ -760,6 +761,17 @@ pub(crate) fn parse_type_struct_enforce_kind(
     })
 }
 
+pub(crate) fn parse_as_type_struct_exception_kind(
+    tokenizer: &mut Tokenizer<'_>,
+) -> Result<AsTypeStructExceptionKind> {
+    parse_enum(tokenizer, "AsTypeStructExceptionKind", |id| {
+        Some(match id {
+            "error" => AsTypeStructExceptionKind::Error,
+            "typehint" => AsTypeStructExceptionKind::Typehint,
+            _ => return None,
+        })
+    })
+}
 pub(crate) fn parse_typed_value(tokenizer: &mut Tokenizer<'_>) -> Result<TypedValue> {
     let t = tokenizer.expect_any_token()?;
     Ok(match t {

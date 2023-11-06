@@ -124,6 +124,16 @@ enum class TypeStructEnforceKind : uint8_t {
 #undef KIND
 };
 
+#define AS_TYPE_STRUCT_EXCEPTION_KINDS \
+  KIND(Error)                           \
+  KIND(Typehint)
+
+enum class AsTypeStructExceptionKind : uint8_t {
+#define KIND(name) name,
+  AS_TYPE_STRUCT_EXCEPTION_KINDS
+#undef KIND
+};
+
 #define IS_LOG_AS_DYNAMIC_CALL_OPS                  \
   IS_LOG_AS_DYNAMIC_CALL_OP(LogAsDynamicCall)       \
   IS_LOG_AS_DYNAMIC_CALL_OP(DontLogAsDynamicCall)

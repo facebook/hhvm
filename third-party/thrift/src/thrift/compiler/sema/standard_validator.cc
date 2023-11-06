@@ -21,6 +21,7 @@
 #include <string>
 #include <unordered_map>
 
+#include <boost/algorithm/string/split.hpp>
 #include <fmt/ranges.h>
 
 #include <thrift/compiler/ast/name_index.h>
@@ -702,23 +703,6 @@ void validate_java_wrapper_and_adapter_annotation(
       node, kJavaAdapterUri, kJavaWrapperUri, "@java.Adapter", "@java.Wrapper");
 }
 
-void validate_box_annotation(
-    diagnostic_context& ctx, const t_structured& node) {
-  if (node.generated()) {
-    return;
-  }
-
-  for (const auto& field : node.fields()) {
-    if (field.has_annotation({"cpp.box", "thrift.box"})) {
-      ctx.warning(
-          field,
-          "cpp.box and thrift.box are deprecated. Please use @thrift.Box "
-          "annotation instead in `{}`.",
-          field.name());
-    }
-  }
-}
-
 void validate_ref_unique_and_box_annotation(
     diagnostic_context& ctx, const t_field& node) {
   const t_const* adapter_annotation =
@@ -1121,6 +1105,52 @@ struct ValidateAnnotationPositions {
   }
 };
 
+void deprecate_annotations(diagnostic_context& ctx, const t_named& node) {
+  // cpp[2].ref[_type] are handled in dedicated validators.
+  static std::map<std::string, std::string> deprecations = {
+      {"cpp.type", kCppTypeUri},
+      {"cpp2.type", kCppTypeUri},
+      {"cpp.template", kCppTypeUri},
+      {"cpp2.template", kCppTypeUri},
+      {"cpp.box", kBoxUri},
+      {"thrift.box", kBoxUri},
+      {"hack.attributes", kHackAttributeUri},
+      {"py3.hidden", kPythonPy3HiddenUri},
+      {"py3.name", kPythonNameUri},
+      {"py3.flags", kPythonFlagsUri},
+      {"java.switch.mutable", kJavaMutableUri},
+      {"java.swift.annotations", kJavaAnnotationUri},
+      {"go.name", kGoNameUri},
+      {"go.tag", kGoTagUri},
+      {"cpp.coroutine", "Nothing, it's on by default"},
+  };
+
+  for (const auto& [k, v] : node.annotations()) {
+    if (deprecations.count(k)) {
+      std::vector<std::string> parts;
+      boost::split(parts, deprecations.at(k), [](char c) { return c == '/'; });
+      std::string replacement;
+      if (parts.size() == 1) {
+        replacement = parts[0];
+      } else if (parts.size() == 4) {
+        replacement = fmt::format("@thrift.{}", parts[3]);
+      } else {
+        assert(parts.size() == 5);
+        replacement = fmt::format("@{}.{}", parts[3], parts[4]);
+      }
+
+      if (node.find_structured_annotation_or_null(deprecations.at(k).c_str())) {
+        ctx.error("Duplicate annotations {} and {}.", k, replacement);
+      } else {
+        ctx.warning(
+            "The annotation {} is deprecated. Please use {} instead.",
+            k,
+            replacement);
+      }
+    }
+  }
+}
+
 } // namespace
 
 ast_validator standard_validator() {
@@ -1137,7 +1167,6 @@ ast_validator standard_validator() {
   validator.add_structured_definition_visitor(&validate_field_names_uniqueness);
   validator.add_structured_definition_visitor(
       &validate_compatibility_with_lazy_field);
-  validator.add_structured_definition_visitor(&validate_box_annotation);
   validator.add_structured_definition_visitor(
       &validate_reserved_ids_structured);
   validator.add_union_visitor(&validate_union_field_attributes);
@@ -1175,6 +1204,7 @@ ast_validator standard_validator() {
       &validate_java_wrapper_and_adapter_annotation);
   validator.add_definition_visitor(&limit_terse_write_on_experimental_mode);
   validator.add_definition_visitor(&validate_custom_cpp_type_annotations);
+  validator.add_definition_visitor(&deprecate_annotations);
 
   validator.add_typedef_visitor([](auto& ctx, const auto& node) {
     validate_cpp_type_annotation(ctx, node);

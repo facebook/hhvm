@@ -773,9 +773,9 @@ class CompilerFailureTest(unittest.TestCase):
         self.assertEqual(
             err,
             textwrap.dedent(
-                "[WARNING:foo.thrift:14] cpp.box and thrift.box are deprecated. Please use @thrift.Box annotation instead in `field`.\n"
                 "[ERROR:foo.thrift:14] The `@thrift.Box` annotation cannot be combined with the other reference annotations."
                 " Only annotate a single reference annotations from `field`.\n"
+                "[WARNING:foo.thrift:14] The annotation thrift.box is deprecated. Please use @thrift.Box instead.\n"
                 "[ERROR:foo.thrift:15] The `@thrift.InternBox` annotation cannot be combined with the other reference annotations."
                 " Only annotate a single reference annotations from `field2`.\n"
                 "[ERROR:foo.thrift:15] The `@thrift.InternBox` annotation can only be used with a struct field.\n"
@@ -810,8 +810,8 @@ class CompilerFailureTest(unittest.TestCase):
         self.assertEqual(
             err,
             textwrap.dedent(
-                "[WARNING:foo.thrift:4] cpp.box and thrift.box are deprecated. Please use @thrift.Box annotation instead in `field`.\n"
                 "[ERROR:foo.thrift:4] The `thrift.box` annotation can only be used with optional fields. Make sure `field` is optional.\n"
+                "[WARNING:foo.thrift:4] The annotation cpp.box is deprecated. Please use @thrift.Box instead.\n"
                 "[ERROR:foo.thrift:5] The `thrift.box` annotation can only be used with optional fields. Make sure `field2` is optional.\n"
             ),
         )
@@ -1068,30 +1068,6 @@ class CompilerFailureTest(unittest.TestCase):
                 [WARNING:foo.thrift:19] cpp.ref_type = `unique`, cpp2.ref_type = `unique` are deprecated. Please use @thrift.Box annotation instead in `field7`.
                 [WARNING:foo.thrift:25] cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box annotation instead in `field10`.
                 [WARNING:foo.thrift:27] cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box annotation instead in `field11`.
-                """
-            ),
-        )
-
-    def test_boxed(self):
-        write_file(
-            "foo.thrift",
-            textwrap.dedent(
-                """\
-                struct A {
-                    1: optional i64 field (cpp.box)
-                }
-                """
-            ),
-        )
-
-        ret, out, err = self.run_thrift("foo.thrift")
-
-        self.assertEqual(ret, 0)
-        self.assertEqual(
-            "\n" + err,
-            textwrap.dedent(
-                """
-                [WARNING:foo.thrift:2] cpp.box and thrift.box are deprecated. Please use @thrift.Box annotation instead in `field`.
                 """
             ),
         )
@@ -1587,8 +1563,11 @@ class CompilerFailureTest(unittest.TestCase):
         self.assertEqual(
             err,
             "[ERROR:foo.thrift:6] Definition `A` cannot have both cpp.type/cpp.template and @cpp.Adapter annotations\n"
+            "[WARNING:foo.thrift:6] The annotation cpp.type is deprecated. Please use @cpp.Type instead.\n"
             "[ERROR:foo.thrift:12] Definition `field` cannot have both cpp.type/cpp.template and @cpp.Adapter annotations\n"
-            "[ERROR:foo.thrift:3] Definition `Bar1` cannot have both cpp.type/cpp.template and @cpp.Adapter annotations\n",
+            "[WARNING:foo.thrift:12] The annotation cpp.type is deprecated. Please use @cpp.Type instead.\n"
+            "[ERROR:foo.thrift:3] Definition `Bar1` cannot have both cpp.type/cpp.template and @cpp.Adapter annotations\n"
+            "[WARNING:foo.thrift:3] The annotation cpp.type is deprecated. Please use @cpp.Type instead.\n",
         )
 
     def test_nonexist_type_in_variable(self):

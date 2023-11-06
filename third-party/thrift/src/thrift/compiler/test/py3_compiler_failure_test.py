@@ -50,6 +50,8 @@ class CompilerFailureTest(unittest.TestCase):
     def _expected_enum_value_name_err(self, *args):
         errors = [
             "[WARNING:] Could not load Thrift standard libraries: Could not find include file thrift/lib/thrift/schema.thrift\n"
+            "[WARNING:foo.thrift:4] The annotation py3.name is deprecated. Please use @python.Name instead.\n"
+            "[WARNING:foo.thrift:8] The annotation py3.name is deprecated. Please use @python.Name instead.\n"
         ] + [
             (
                 f"[ERROR:foo.thrift:{lineno}] "

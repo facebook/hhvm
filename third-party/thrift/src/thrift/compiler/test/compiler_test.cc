@@ -620,3 +620,16 @@ TEST(CompilerTest, interactions_as_first_response_type) {
     }
   )");
 }
+
+TEST(CompilerTest, deprecated_annotations) {
+  check_compile(R"(
+    include "thrift/annotation/hack.thrift"
+
+    @hack.Attributes{attributes=[]} # expected-error: Duplicate annotations hack.attributes and @hack.Attributes.
+    struct A {
+        1: optional i64 field (cpp.box) # expected-warning: The annotation cpp.box is deprecated. Please use @thrift.Box instead.
+        2: i64 with (py3.name = "w", go.name = "w") # expected-warning: The annotation py3.name is deprecated. Please use @python.Name instead.
+        # expected-warning@-1: The annotation go.name is deprecated. Please use @go.Name instead.
+    } (hack.attributes = "")
+  )");
+}

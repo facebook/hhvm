@@ -259,6 +259,8 @@ type t = {
       (** POC: @catg, add sandcastle info to Scuba samples. *)
   autocomplete_cache: bool;
       (** POC: @mckenzie, add 2 character cache for autocomplete lookup. *)
+  lsp_pull_diagnostics: bool;
+      (** POC: @ljw - if true, uses the new LSP pull diagnostics model *)
 }
 
 let default =
@@ -350,6 +352,7 @@ let default =
     dump_tast_hashes = false;
     log_events_with_sandcastle_info = false;
     autocomplete_cache = false;
+    lsp_pull_diagnostics = false;
   }
 
 let system_config_path =
@@ -1062,6 +1065,9 @@ let load_
   let autocomplete_cache =
     bool_ "autocomplete_cache" ~default:default.autocomplete_cache config
   in
+  let lsp_pull_diagnostics =
+    bool_ "lsp_pull_diagnostics" ~default:default.lsp_pull_diagnostics config
+  in
   let zstd_decompress_by_file =
     bool_
       "zstd_decompress_by_file"
@@ -1178,6 +1184,7 @@ let load_
     dump_tast_hashes;
     log_events_with_sandcastle_info;
     autocomplete_cache;
+    lsp_pull_diagnostics;
   }
 
 (** Loads the config from [path]. Uses JustKnobs and ExperimentsConfig to override.
@@ -1233,4 +1240,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       autocomplete_cache = options.autocomplete_cache;
       zstd_decompress_by_file =
         GlobalOptions.(options.saved_state.loading.zstd_decompress_by_file);
+      lsp_pull_diagnostics = options.lsp_pull_diagnostics;
     }

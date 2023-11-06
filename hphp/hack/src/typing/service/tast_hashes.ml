@@ -74,17 +74,10 @@ let error_while_hashing
   in
   { tast_hashes; error_hashes = ISet.empty }
 
-let empty : t = Relative_path.Map.empty
-
-let add m ~key ~data =
-  match data with
-  | None -> m
-  | Some data -> Relative_path.Map.add m ~key ~data
-
 let is_enabled tcopt = TypecheckerOptions.dump_tast_hashes tcopt
 
 let map ctx path tasts errors : t =
-  let data =
+  let file_info =
     Timeout.with_timeout
       ~timeout:10
       ~on_timeout:(fun _timings -> error_while_hashing tasts)
@@ -102,7 +95,7 @@ let map ctx path tasts errors : t =
         in
         { tast_hashes; error_hashes })
   in
-  add empty ~key:path ~data:(Some data)
+  Relative_path.Map.singleton path file_info
 
 let reduce (xs : t) (ys : t) : t =
   Relative_path.Map.union

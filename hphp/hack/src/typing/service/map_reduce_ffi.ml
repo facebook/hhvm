@@ -11,9 +11,16 @@
 (** Auxiliary type used for communicating map-reduce data across FFI boundaries. *)
 type t = {
   tast_hashes: Tast_hashes.t option; [@yojson.option]
+  tast_collector: Tast_collector.t option; [@yojson.option]
   type_counter: Type_counter.t option; [@yojson.option]
   reason_collector: Reason_collector.t option; [@yojson.option]
 }
 [@@deriving yojson_of]
 
-let empty = { tast_hashes = None; type_counter = None; reason_collector = None }
+let empty =
+  {
+    tast_hashes = None;
+    tast_collector = None;
+    type_counter = None;
+    reason_collector = None;
+  }

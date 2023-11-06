@@ -119,7 +119,12 @@ let derive_copy ty = Convert_type.is_copy (Rust_type.rust_simple_type ty)
 
 let derive_default (ty : label) =
   List.mem
-    ["tast_hashes::ByNames"; "tast_hashes::FileInfo"]
+    [
+      "map_reduce_ffi::MapReduceFfi";
+      "tast_collector::ByNames";
+      "tast_hashes::ByNames";
+      "tast_hashes::FileInfo";
+    ]
     ty
     ~equal:String.equal
 

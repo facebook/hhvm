@@ -250,7 +250,9 @@ type t = {
   ide_naming_table_update_threshold: int;
       (** POC: @nzthomas, if clientIDEDaemon is loading a naming table from disk instead of Manifold, set a globalrev distance threshold *)
   dump_tast_hashes: bool;
-      (** Dump tast hashes into /tmp/hh_server/tast_hashes*)
+      (** Dump tast hashes into /tmp/hh_server/tast_hashes *)
+  dump_tasts: string list;
+      (** List of files whose TASTs to be dumped in /tmp/hh_server/tasts. *)
   use_compressed_dep_graph: bool;
       (** POC: @bobren, use new fancy compressed dep graph that is 25% the size of the old one *)
   use_old_decls_from_cas: bool;
@@ -350,6 +352,7 @@ let default =
     ide_load_naming_table_on_disk = true;
     ide_naming_table_update_threshold = 1000;
     dump_tast_hashes = false;
+    dump_tasts = [];
     log_events_with_sandcastle_info = false;
     autocomplete_cache = false;
     lsp_pull_diagnostics = false;
@@ -1056,6 +1059,12 @@ let load_
   let dump_tast_hashes =
     bool_ "dump_tast_hashes" ~default:default.dump_tast_hashes config
   in
+  let dump_tasts =
+    let path_opt = string_opt "dump_tasts" config in
+    match path_opt with
+    | None -> default.dump_tasts
+    | Some path -> In_channel.read_lines path
+  in
   let log_events_with_sandcastle_info =
     bool_
       "log_events_with_sandcastle_info"
@@ -1182,6 +1191,7 @@ let load_
     ide_load_naming_table_on_disk;
     ide_naming_table_update_threshold;
     dump_tast_hashes;
+    dump_tasts;
     log_events_with_sandcastle_info;
     autocomplete_cache;
     lsp_pull_diagnostics;

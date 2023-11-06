@@ -78,9 +78,9 @@ type saved_env = {
 
 type program = (ty, saved_env) Aast.program [@@deriving show]
 
-type def = (ty, saved_env) Aast.def [@@deriving hash]
+type def = (ty, saved_env) Aast.def [@@deriving hash, show]
 
-type def_with_dynamic = def Tast_with_dynamic.t [@@deriving hash]
+type def_with_dynamic = def Tast_with_dynamic.t [@@deriving hash, show]
 
 type expr = (ty, saved_env) Aast.expr
 

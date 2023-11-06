@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6bf0dd898077c6dfecea7453eab76a5b>>
+// @generated SignedSource<<9d5d1969947730f1a0255b18571ff834>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -109,10 +109,10 @@ pub struct SavedEnv {
 #[rust_to_ocaml(attr = "deriving show")]
 pub type Program = aast::Program<Ty, SavedEnv>;
 
-#[rust_to_ocaml(attr = "deriving hash")]
+#[rust_to_ocaml(attr = "deriving (hash, show)")]
 pub type Def = aast::Def<Ty, SavedEnv>;
 
-#[rust_to_ocaml(attr = "deriving hash")]
+#[rust_to_ocaml(attr = "deriving (hash, show)")]
 pub type DefWithDynamic = tast_with_dynamic::TastWithDynamic<Def>;
 
 pub type Expr = aast::Expr<Ty, SavedEnv>;

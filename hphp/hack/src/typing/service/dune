@@ -11,6 +11,19 @@
  (preprocess (pps ppx_yojson_conv)))
 
 (library
+ (name tast_collector)
+ (wrapped false)
+ (modules
+  tast_collector)
+ (libraries
+  core
+  relative_path
+  provider_context
+  tast_env
+  typing_ast)
+ (preprocess (pps ppx_deriving.std ppx_yojson_conv)))
+
+(library
  (name type_counter)
  (wrapped false)
  (modules type_counter)
@@ -41,6 +54,7 @@
    map_reduce_ffi)
  (libraries
   reason_collector
+  tast_collector
   tast_hashes
   type_counter)
  (preprocess (pps ppx_yojson_conv)))
@@ -55,6 +69,7 @@
   collections
   map_reduce_ffi
   relative_path
+  tast_collector
   tast_hashes
   typing_ast)
  (preprocess (pps ppx_deriving.std)))

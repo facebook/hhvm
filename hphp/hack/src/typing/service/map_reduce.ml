@@ -33,6 +33,7 @@ end
    guide you. *)
 type map_reducer =
   | TastHashes
+  | TastCollector
   | TypeCounter
   | ReasonCollector
 [@@deriving eq, ord, show, enum]
@@ -42,6 +43,7 @@ type map_reducer =
 (** Link each map-reducer to the type of its data. *)
 type _ map_reducer_type =
   | TypeForTastHashes : Tast_hashes.t map_reducer_type
+  | TypeForTastCollector : Tast_collector.t map_reducer_type
   | TypeForTypeCounter : Type_counter.t map_reducer_type
   | TypeForReasonCollector : Reason_collector.t map_reducer_type
 
@@ -54,6 +56,7 @@ type any_map_reducer_type =
 Needs an entry when adding a map-reducer. *)
 let type_for : map_reducer -> any_map_reducer_type = function
   | TastHashes -> TypeForAny TypeForTastHashes
+  | TastCollector -> TypeForAny TypeForTastCollector
   | TypeCounter -> TypeForAny TypeForTypeCounter
   | ReasonCollector -> TypeForAny TypeForReasonCollector
 
@@ -65,6 +68,7 @@ let implementation_for (type t) (mr : t map_reducer_type) :
     (module MapReducer with type t = t) =
   match mr with
   | TypeForTastHashes -> (module Tast_hashes)
+  | TypeForTastCollector -> (module Tast_collector)
   | TypeForTypeCounter -> (module Type_counter)
   | TypeForReasonCollector -> (module Reason_collector)
 
@@ -91,6 +95,8 @@ let refine_map_reducer_result
   match (x, y) with
   | (TypeForTastHashes, TypeForTastHashes) -> Some (xv, yv)
   | (TypeForTastHashes, _) -> None
+  | (TypeForTastCollector, TypeForTastCollector) -> Some (xv, yv)
+  | (TypeForTastCollector, _) -> None
   | (TypeForTypeCounter, TypeForTypeCounter) -> Some (xv, yv)
   | (TypeForTypeCounter, _) -> None
   | (TypeForReasonCollector, TypeForReasonCollector) -> Some (xv, yv)
@@ -164,6 +170,8 @@ let to_ffi xs =
     match v with
     | MapReducerResult (TypeForTastHashes, tast_hashes) ->
       { s with tast_hashes = Some tast_hashes }
+    | MapReducerResult (TypeForTastCollector, tast_collector) ->
+      { s with tast_collector = Some tast_collector }
     | MapReducerResult (TypeForTypeCounter, type_counter) ->
       { s with type_counter = Some type_counter }
     | MapReducerResult (TypeForReasonCollector, reason_collector) ->
@@ -172,13 +180,19 @@ let to_ffi xs =
   MRMap.fold f xs Map_reduce_ffi.empty
 
 let of_ffi s =
-  let Map_reduce_ffi.{ tast_hashes; type_counter; reason_collector } = s in
+  let Map_reduce_ffi.
+        { tast_hashes; tast_collector; type_counter; reason_collector } =
+    s
+  in
   let elems =
     List.filter_map
       ~f:Fn.id
       [
         Option.map tast_hashes ~f:(fun tast_hashes ->
             (TastHashes, MapReducerResult (TypeForTastHashes, tast_hashes)));
+        Option.map tast_collector ~f:(fun tast_collector ->
+            ( TastCollector,
+              MapReducerResult (TypeForTastCollector, tast_collector) ));
         Option.map type_counter ~f:(fun type_counter ->
             (TypeCounter, MapReducerResult (TypeForTypeCounter, type_counter)));
         Option.map reason_collector ~f:(fun reason_collector ->

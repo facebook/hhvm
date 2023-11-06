@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4c7863fcd5ef8e867140b36a066467a4>>
+// @generated SignedSource<<57b0e2014de5a91485c556361c3f264e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -18,7 +18,9 @@ use serde::Serialize;
 #[allow(unused_imports)]
 use crate::*;
 
-/// Auxiliary type used for communicating map-reduce data across FFI boundaries.
+#[rust_to_ocaml(attr = "deriving yojson_of")]
+pub type Tast = String;
+
 #[derive(
     Clone,
     Debug,
@@ -37,13 +39,13 @@ use crate::*;
 )]
 #[rust_to_ocaml(attr = "deriving yojson_of")]
 #[repr(C)]
-pub struct MapReduceFfi {
-    #[rust_to_ocaml(attr = "yojson.option")]
-    pub tast_hashes: Option<tast_hashes::TastHashes>,
-    #[rust_to_ocaml(attr = "yojson.option")]
-    pub tast_collector: Option<tast_collector::TastCollector>,
-    #[rust_to_ocaml(attr = "yojson.option")]
-    pub type_counter: Option<type_counter::TypeCounter>,
-    #[rust_to_ocaml(attr = "yojson.option")]
-    pub reason_collector: Option<reason_collector::ReasonCollector>,
+pub struct ByNames {
+    pub fun_tasts: s_map::SMap<Tast>,
+    pub class_tasts: s_map::SMap<Tast>,
+    pub typedef_tasts: s_map::SMap<Tast>,
+    pub gconst_tasts: s_map::SMap<Tast>,
+    pub module_tasts: s_map::SMap<Tast>,
 }
+
+#[rust_to_ocaml(attr = "deriving yojson_of")]
+pub type TastCollector = relative_path::map::Map<ByNames>;

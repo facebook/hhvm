@@ -140,6 +140,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_load_hack_64_distc_saved_state: false,
     tco_rust_elab: false,
     dump_tast_hashes: false,
+    dump_tasts: vec![],
     po_disallow_direct_superglobals_refs: false,
 };
 

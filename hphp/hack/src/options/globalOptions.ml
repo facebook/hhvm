@@ -189,6 +189,7 @@ type t = {
   po_disallow_static_constants_in_default_func_args: bool;
   tco_rust_elab: bool;
   dump_tast_hashes: bool;
+  dump_tasts: string list;
   tco_autocomplete_mode: bool;
   tco_package_info: PackageInfo.t;
   po_unwrap_concurrent: bool;
@@ -318,6 +319,7 @@ let default =
     po_disallow_static_constants_in_default_func_args = false;
     tco_rust_elab = false;
     dump_tast_hashes = false;
+    dump_tasts = [];
     tco_autocomplete_mode = false;
     tco_package_info = PackageInfo.empty;
     po_unwrap_concurrent = false;
@@ -445,6 +447,7 @@ let set
     ?po_disallow_static_constants_in_default_func_args
     ?tco_rust_elab
     ?dump_tast_hashes
+    ?dump_tasts
     ?tco_autocomplete_mode
     ?tco_package_info
     ?po_unwrap_concurrent
@@ -774,6 +777,7 @@ let set
         options.po_disallow_static_constants_in_default_func_args;
     tco_rust_elab = setting tco_rust_elab options.tco_rust_elab;
     dump_tast_hashes = setting dump_tast_hashes options.dump_tast_hashes;
+    dump_tasts = setting dump_tasts options.dump_tasts;
     tco_autocomplete_mode =
       setting tco_autocomplete_mode options.tco_autocomplete_mode;
     tco_package_info = setting tco_package_info options.tco_package_info;

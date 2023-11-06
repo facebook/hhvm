@@ -6,6 +6,9 @@ mod local_config;
 
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
+use std::fs::File;
+use std::io::BufRead;
+use std::io::BufReader;
 use std::path::Path;
 use std::path::PathBuf;
 use std::str::FromStr;
@@ -229,7 +232,17 @@ impl HhConfig {
         go.tco_custom_error_config = custom_error_config;
         go.dump_tast_hashes = match hh_conf.get_str("dump_tast_hashes") {
             Some("true") => true,
-            _ => false,
+            Some(_) | None => false,
+        };
+        go.dump_tasts = match hh_conf.get_str("dump_tasts") {
+            None => vec![],
+            Some(path) => {
+                let path = PathBuf::from(path);
+                let file = File::open(&path).with_context(|| path.to_string_lossy().to_string())?;
+                BufReader::new(file)
+                    .lines()
+                    .collect::<std::io::Result<_>>()?
+            }
         };
         // If there are errors, ignore them for the tcopt, the parser errors will be caught and
         // sent separately.

@@ -290,6 +290,8 @@ type t = {
   tco_rust_elab: bool;
       (** Use the Rust implementation of naming elaboration and NAST checks. *)
   dump_tast_hashes: bool;  (** Dump tast hashes in /tmp/hh_server/tast_hashes *)
+  dump_tasts: string list;
+      (** List of paths whose TASTs to be dumped in /tmp/hh_server/tasts *)
   tco_autocomplete_mode: bool;  (** Are we running in autocomplete mode ? *)
   tco_package_info: PackageInfo.t;
       (** Information used to determine which package a module belongs to during typechecking. *)
@@ -422,6 +424,7 @@ val set :
   ?po_disallow_static_constants_in_default_func_args:bool ->
   ?tco_rust_elab:bool ->
   ?dump_tast_hashes:bool ->
+  ?dump_tasts:string list ->
   ?tco_autocomplete_mode:bool ->
   ?tco_package_info:PackageInfo.t ->
   ?po_unwrap_concurrent:bool ->

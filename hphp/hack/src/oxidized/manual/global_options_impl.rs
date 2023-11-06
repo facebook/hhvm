@@ -154,6 +154,7 @@ impl Default for GlobalOptions {
             po_disallow_static_constants_in_default_func_args: false,
             tco_rust_elab: false,
             dump_tast_hashes: false,
+            dump_tasts: vec![],
             tco_autocomplete_mode: false,
             tco_package_info: PackageInfo::default(),
             po_unwrap_concurrent: false,

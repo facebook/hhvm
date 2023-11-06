@@ -284,6 +284,8 @@ let locl_cache_node_threshold t = t.GlobalOptions.tco_locl_cache_node_threshold
 
 let dump_tast_hashes t = t.GlobalOptions.dump_tast_hashes
 
+let dump_tasts t = t.GlobalOptions.dump_tasts
+
 let tco_autocomplete_mode t = t.GlobalOptions.tco_autocomplete_mode
 
 let set_tco_autocomplete_mode t =

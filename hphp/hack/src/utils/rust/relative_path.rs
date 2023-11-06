@@ -96,10 +96,12 @@ impl RelativePath {
         self.path().extension() == Some(s.as_ref().as_os_str())
     }
 
+    /// The relative path compared to the prefix
     pub fn path(&self) -> &Path {
         self.path.as_deref().unwrap_or(Path::new(""))
     }
 
+    /// The relative path compared to the prefix as a string
     pub fn path_str(&self) -> &str {
         self.path().to_str().unwrap()
     }

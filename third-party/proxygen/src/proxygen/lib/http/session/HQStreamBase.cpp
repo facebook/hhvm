@@ -103,4 +103,4 @@ size_t HQStreamBase::generateStreamPreface() {
   CHECK(!res.hasError());
   return res.value();
 }
-}; // namespace proxygen
+} // namespace proxygen

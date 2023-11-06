@@ -91,4 +91,4 @@ class H3DatagramAsyncSocketTest : public testing::Test {
   proxygen::H3DatagramAsyncSocket::Options options_;
   char buf_[kMaxDatagramSize];
 };
-}; // namespace proxygen
+} // namespace proxygen

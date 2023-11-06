@@ -21,6 +21,7 @@
 #include <proxygen/lib/http/codec/HTTP2Codec.h>
 #include <proxygen/lib/http/codec/HTTPChecks.h>
 #include <proxygen/lib/http/codec/HeadersRateLimitFilter.h>
+#include <proxygen/lib/http/codec/ResetsRateLimitFilter.h>
 #include <proxygen/lib/http/session/HTTPSessionController.h>
 #include <proxygen/lib/http/session/HTTPSessionStats.h>
 #include <wangle/acceptor/ConnectionManager.h>
@@ -228,6 +229,7 @@ void HTTPSession::setupCodec() {
     addRateLimitFilter(RateLimitFilter::Type::HEADERS);
     addRateLimitFilter(RateLimitFilter::Type::DIRECT_ERROR_HANDLING);
     addRateLimitFilter(RateLimitFilter::Type::MISC_CONTROL_MSGS);
+    addRateLimitFilter(RateLimitFilter::Type::RSTS);
   }
 
   codec_.setCallback(this);

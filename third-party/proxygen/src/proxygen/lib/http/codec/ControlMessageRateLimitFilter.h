@@ -26,13 +26,6 @@ class ControlMessageRateLimitFilter : public RateLimitFilter {
     timeoutDuration_ = kDefaultTimeoutDuration;
   }
 
-  void onAbort(HTTPCodec::StreamID streamID, ErrorCode code) override {
-    if (!incrementNumEventsInCurrentInterval()) {
-      callback_->onAbort(streamID, code);
-    } else {
-      sendErrorCallback(http2::FrameType::RST_STREAM);
-    }
-  }
   void onPingRequest(uint64_t data) override {
     if (!incrementNumEventsInCurrentInterval()) {
       callback_->onPingRequest(data);

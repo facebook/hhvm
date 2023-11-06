@@ -1259,7 +1259,7 @@ void Func::ensureDebuggerIntrSetLinkBound() const {
   if (!shared()->m_funcHasDebuggerIntr.bound()) {
     shared()->m_funcHasDebuggerIntr.bind(
       rds::Mode::Normal,
-      rds::LinkName{"FunctionDebuggerIntr", fullName()}
+      rds::LinkName{"FunctionDebuggerIntr", name()}
     );
   }
 }

@@ -143,7 +143,7 @@ class DatagramClient
   std::array<char, kMaxReadBufferSize> buf_;
   bool closing_{false};
 };
-} // namespace
+}; // namespace
 
 int main(int argc, char* argv[]) {
 #if FOLLY_HAVE_LIBGFLAGS

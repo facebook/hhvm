@@ -192,4 +192,4 @@ void SlidingBloomReplayCache::timeoutExpired() noexcept {
   scheduleTimeout(bucketWidthInMs_.count());
 }
 } // namespace server
-} // namespace fizz
+}; // namespace fizz

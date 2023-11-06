@@ -791,7 +791,7 @@ class LayoutRoot : public FieldCycleHolder {
   size_t cursor_;
   std::unordered_map<uintptr_t, std::shared_ptr<FieldBase>> sharedFields_;
   std::unordered_map<uintptr_t, LayoutPosition> positions_;
-} // namespace frozen
+}; // namespace frozen
 
 /**
  * LayoutException is thrown if freezing is attempted without a sufficient

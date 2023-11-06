@@ -1778,6 +1778,6 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
   folly::SocketAddress peerAddress_;
   std::shared_ptr<proxygen::MockAsyncTransportCertificate> mockCertificate{
       std::make_shared<proxygen::MockAsyncTransportCertificate>()};
-} // namespace quic
+}; // namespace quic
 
 } // namespace quic

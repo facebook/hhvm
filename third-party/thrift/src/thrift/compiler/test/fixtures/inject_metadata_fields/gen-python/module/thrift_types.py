@@ -24,6 +24,7 @@ class Fields(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -64,6 +65,7 @@ class FieldsInjectedToEmptyStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -104,6 +106,7 @@ class FieldsInjectedToStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             1,  # id
@@ -112,6 +115,7 @@ class FieldsInjectedToStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -152,6 +156,7 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_types.StructMe
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             -1101,  # id
@@ -160,6 +165,7 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_types.StructMe
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             -1100,  # id
@@ -168,6 +174,7 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_types.StructMe
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             1,  # id
@@ -176,6 +183,7 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_types.StructMe
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 

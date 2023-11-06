@@ -22,6 +22,7 @@ class Fiery(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -69,6 +70,7 @@ class Serious(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -116,6 +118,7 @@ class ComplexFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -124,6 +127,7 @@ class ComplexFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -171,6 +175,7 @@ class CustomFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -179,6 +184,7 @@ class CustomFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta)
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -226,6 +232,7 @@ class ExceptionWithPrimitiveField(metaclass=_fbthrift_python_exceptions.Generate
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -234,6 +241,7 @@ class ExceptionWithPrimitiveField(metaclass=_fbthrift_python_exceptions.Generate
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
     )
 
@@ -281,6 +289,7 @@ class ExceptionWithStructuredAnnotation(metaclass=_fbthrift_python_exceptions.Ge
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -289,6 +298,7 @@ class ExceptionWithStructuredAnnotation(metaclass=_fbthrift_python_exceptions.Ge
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
     )
 
@@ -417,6 +427,7 @@ class _fbthrift_Raiser_doRaise_result(metaclass=_fbthrift_python_types.StructMet
             lambda: _fbthrift_python_types.StructTypeInfo(Banal),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -425,6 +436,7 @@ class _fbthrift_Raiser_doRaise_result(metaclass=_fbthrift_python_types.StructMet
             lambda: _fbthrift_python_types.StructTypeInfo(Fiery),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             3,  # id
@@ -433,6 +445,7 @@ class _fbthrift_Raiser_doRaise_result(metaclass=_fbthrift_python_types.StructMet
             lambda: _fbthrift_python_types.StructTypeInfo(Serious),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -451,6 +464,7 @@ class _fbthrift_Raiser_get200_result(metaclass=_fbthrift_python_types.StructMeta
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -469,6 +483,7 @@ class _fbthrift_Raiser_get500_result(metaclass=_fbthrift_python_types.StructMeta
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             1,  # id
@@ -477,6 +492,7 @@ class _fbthrift_Raiser_get500_result(metaclass=_fbthrift_python_types.StructMeta
             lambda: _fbthrift_python_types.StructTypeInfo(Fiery),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -485,6 +501,7 @@ class _fbthrift_Raiser_get500_result(metaclass=_fbthrift_python_types.StructMeta
             lambda: _fbthrift_python_types.StructTypeInfo(Banal),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             3,  # id
@@ -493,6 +510,7 @@ class _fbthrift_Raiser_get500_result(metaclass=_fbthrift_python_types.StructMeta
             lambda: _fbthrift_python_types.StructTypeInfo(Serious),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 

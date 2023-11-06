@@ -36,6 +36,7 @@ class _fbthrift_ExtendTestService_check_args(metaclass=_fbthrift_python_types.St
             lambda: _fbthrift_python_types.StructTypeInfo(python_module_root.my.namespacing.test.hsmodule.thrift_types.HsFoo),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -49,6 +50,7 @@ class _fbthrift_ExtendTestService_check_result(metaclass=_fbthrift_python_types.
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 

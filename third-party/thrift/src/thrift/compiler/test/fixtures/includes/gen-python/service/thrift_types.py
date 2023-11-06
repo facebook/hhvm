@@ -43,6 +43,7 @@ class _fbthrift_MyService_query_args(metaclass=_fbthrift_python_types.StructMeta
             lambda: _fbthrift_python_types.StructTypeInfo(module.thrift_types.MyStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -51,6 +52,7 @@ class _fbthrift_MyService_query_args(metaclass=_fbthrift_python_types.StructMeta
             lambda: _fbthrift_python_types.StructTypeInfo(includes.thrift_types.Included),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -69,6 +71,7 @@ class _fbthrift_MyService_has_arg_docs_args(metaclass=_fbthrift_python_types.Str
             lambda: _fbthrift_python_types.StructTypeInfo(module.thrift_types.MyStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -77,6 +80,7 @@ class _fbthrift_MyService_has_arg_docs_args(metaclass=_fbthrift_python_types.Str
             lambda: _fbthrift_python_types.StructTypeInfo(includes.thrift_types.Included),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 

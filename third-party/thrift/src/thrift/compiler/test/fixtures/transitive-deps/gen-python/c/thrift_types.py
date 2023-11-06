@@ -22,6 +22,7 @@ class C(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
     )
 

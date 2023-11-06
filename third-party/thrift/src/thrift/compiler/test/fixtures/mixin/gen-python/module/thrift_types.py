@@ -22,6 +22,7 @@ class Mixin1(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -62,6 +63,7 @@ class Mixin2(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(Mixin1),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -70,6 +72,7 @@ class Mixin2(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -110,6 +113,7 @@ class Mixin3Base(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -150,6 +154,7 @@ class Foo(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -158,6 +163,7 @@ class Foo(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(Mixin2),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             3,  # id
@@ -166,6 +172,7 @@ class Foo(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(Mixin3Base),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 

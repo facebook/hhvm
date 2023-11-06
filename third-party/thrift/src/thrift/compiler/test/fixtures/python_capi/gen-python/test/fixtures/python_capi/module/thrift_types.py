@@ -32,6 +32,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             2,  # id
@@ -40,6 +41,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             3,  # id
@@ -48,6 +50,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataItem),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             4,  # id
@@ -56,6 +59,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             5,  # id
@@ -64,6 +68,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             6,  # id
@@ -72,6 +77,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_float),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             7,  # id
@@ -80,6 +86,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_binary, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             8,  # id
@@ -88,6 +95,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -128,6 +136,7 @@ class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -200,6 +209,7 @@ class DoubledPair(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -208,6 +218,7 @@ class DoubledPair(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
     )
 
@@ -248,6 +259,7 @@ class StringPair(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -256,6 +268,7 @@ class StringPair(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -328,6 +341,7 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             2,  # id
@@ -336,6 +350,7 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_byte,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             3,  # id
@@ -344,6 +359,7 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_i16,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             5,  # id
@@ -352,6 +368,7 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             7,  # id
@@ -360,6 +377,7 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             8,  # id
@@ -368,6 +386,7 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_float,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             9,  # id
@@ -376,6 +395,7 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_double,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             12,  # id
@@ -384,6 +404,7 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             13,  # id
@@ -392,6 +413,7 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_binary,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             14,  # id
@@ -400,6 +422,7 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             15,  # id
@@ -408,6 +431,7 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             18,  # id
@@ -416,6 +440,7 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(MyStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             19,  # id
@@ -424,6 +449,7 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(EmptyStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             20,  # id
@@ -432,6 +458,7 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_binary,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             21,  # id
@@ -440,6 +467,7 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             22,  # id
@@ -448,6 +476,7 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(test.fixtures.python_capi.thrift_dep.thrift_types.SomeError),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -488,6 +517,7 @@ class AdaptedFields(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             2,  # id
@@ -496,6 +526,7 @@ class AdaptedFields(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             3,  # id
@@ -504,6 +535,7 @@ class AdaptedFields(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i64),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             4,  # id
@@ -512,6 +544,7 @@ class AdaptedFields(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
     )
 
@@ -552,6 +585,7 @@ class ListStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_bool),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -560,6 +594,7 @@ class ListStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i64),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             3,  # id
@@ -568,6 +603,7 @@ class ListStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             4,  # id
@@ -576,6 +612,7 @@ class ListStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_binary),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             5,  # id
@@ -584,6 +621,7 @@ class ListStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i64),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             6,  # id
@@ -592,6 +630,7 @@ class ListStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_double)),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             7,  # id
@@ -600,6 +639,7 @@ class ListStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_byte)),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             8,  # id
@@ -608,6 +648,7 @@ class ListStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_byte))),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             9,  # id
@@ -616,6 +657,7 @@ class ListStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_iobuf),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -656,6 +698,7 @@ class SetStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.EnumTypeInfo(MyEnum)),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -664,6 +707,7 @@ class SetStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             3,  # id
@@ -672,6 +716,7 @@ class SetStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_binary),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             4,  # id
@@ -680,6 +725,7 @@ class SetStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_binary),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             5,  # id
@@ -688,6 +734,7 @@ class SetStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i64),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             6,  # id
@@ -696,6 +743,7 @@ class SetStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_byte),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             7,  # id
@@ -704,6 +752,7 @@ class SetStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i64)),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -744,6 +793,7 @@ class MapStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.EnumTypeInfo(MyEnum), _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -752,6 +802,7 @@ class MapStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             3,  # id
@@ -760,6 +811,7 @@ class MapStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_binary, _fbthrift_python_types.StructTypeInfo(PrimitiveStruct)),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             4,  # id
@@ -768,6 +820,7 @@ class MapStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_double),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             5,  # id
@@ -776,6 +829,7 @@ class MapStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i64, _fbthrift_python_types.typeinfo_float),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             6,  # id
@@ -784,6 +838,7 @@ class MapStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i64)),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             7,  # id
@@ -792,6 +847,7 @@ class MapStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i64)),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             8,  # id
@@ -800,6 +856,7 @@ class MapStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_double)),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             9,  # id
@@ -808,6 +865,7 @@ class MapStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_binary, _fbthrift_python_types.typeinfo_iobuf),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             10,  # id
@@ -816,6 +874,7 @@ class MapStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i64, _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i64)),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -856,6 +915,7 @@ class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             2,  # id
@@ -864,6 +924,7 @@ class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.EnumTypeInfo(AnnoyingEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             3,  # id
@@ -872,6 +933,7 @@ class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(PrimitiveStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             4,  # id
@@ -880,6 +942,7 @@ class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(ListStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             5,  # id
@@ -888,6 +951,7 @@ class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.EnumTypeInfo(test.fixtures.python_capi.thrift_dep.thrift_types.DepEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             6,  # id
@@ -896,6 +960,7 @@ class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(test.fixtures.python_capi.thrift_dep.thrift_types.DepStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             7,  # id
@@ -904,6 +969,7 @@ class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.StructTypeInfo(test.fixtures.python_capi.thrift_dep.thrift_types.DepStruct)),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             8,  # id
@@ -912,6 +978,7 @@ class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(test.fixtures.python_capi.serialized_dep.thrift_types.SerializedStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             9,  # id
@@ -920,6 +987,7 @@ class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(test.fixtures.python_capi.serialized_dep.thrift_types.SerializedUnion),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             10,  # id
@@ -928,6 +996,7 @@ class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(test.fixtures.python_capi.serialized_dep.thrift_types.SerializedError),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -968,6 +1037,7 @@ class Onion(metaclass=_fbthrift_python_types.UnionMeta):
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             2,  # id
@@ -976,6 +1046,7 @@ class Onion(metaclass=_fbthrift_python_types.UnionMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(PrimitiveStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             4,  # id
@@ -984,6 +1055,7 @@ class Onion(metaclass=_fbthrift_python_types.UnionMeta):
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             6,  # id
@@ -992,6 +1064,7 @@ class Onion(metaclass=_fbthrift_python_types.UnionMeta):
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i64),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             8,  # id
@@ -1000,6 +1073,7 @@ class Onion(metaclass=_fbthrift_python_types.UnionMeta):
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_double),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             9,  # id
@@ -1008,6 +1082,7 @@ class Onion(metaclass=_fbthrift_python_types.UnionMeta):
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_binary, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             10,  # id
@@ -1016,6 +1091,7 @@ class Onion(metaclass=_fbthrift_python_types.UnionMeta):
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
     )
 
@@ -1056,6 +1132,7 @@ class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(MyStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -1064,6 +1141,7 @@ class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             3,  # id
@@ -1072,6 +1150,7 @@ class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructFieldPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             5,  # id
@@ -1080,6 +1159,7 @@ class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructEnsureStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             6,  # id
@@ -1088,6 +1168,7 @@ class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructFieldPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             7,  # id
@@ -1096,6 +1177,7 @@ class MyStructPatch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -1136,6 +1218,7 @@ class MyStructField4Patch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             2,  # id
@@ -1144,6 +1227,7 @@ class MyStructField4Patch(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
     )
 
@@ -1184,6 +1268,7 @@ class MyStructField6Patch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_float),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -1192,6 +1277,7 @@ class MyStructField6Patch(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             8,  # id
@@ -1200,6 +1286,7 @@ class MyStructField6Patch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_float),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             9,  # id
@@ -1208,6 +1295,7 @@ class MyStructField6Patch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_float),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -1248,6 +1336,7 @@ class MyStructField7Patch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_binary, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -1256,6 +1345,7 @@ class MyStructField7Patch(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             3,  # id
@@ -1264,6 +1354,7 @@ class MyStructField7Patch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_binary, _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.StringPatch)),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             5,  # id
@@ -1272,6 +1363,7 @@ class MyStructField7Patch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_binary, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             6,  # id
@@ -1280,6 +1372,7 @@ class MyStructField7Patch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_binary, _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.StringPatch)),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             7,  # id
@@ -1288,6 +1381,7 @@ class MyStructField7Patch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_binary),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             9,  # id
@@ -1296,6 +1390,7 @@ class MyStructField7Patch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_binary, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -1336,6 +1431,7 @@ class MyStructField8Patch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -1344,6 +1440,7 @@ class MyStructField8Patch(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             7,  # id
@@ -1352,6 +1449,7 @@ class MyStructField8Patch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             8,  # id
@@ -1360,6 +1458,7 @@ class MyStructField8Patch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -1400,6 +1499,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I64Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -1408,6 +1508,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.StringPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             3,  # id
@@ -1416,6 +1517,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataItemPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             4,  # id
@@ -1424,6 +1526,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructField4Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             5,  # id
@@ -1432,6 +1535,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.BoolPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             6,  # id
@@ -1440,6 +1544,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructField6Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             7,  # id
@@ -1448,6 +1553,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructField7Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             8,  # id
@@ -1456,6 +1562,7 @@ class MyStructFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(MyStructField8Patch),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -1496,6 +1603,7 @@ class MyStructEnsureStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             2,  # id
@@ -1504,6 +1612,7 @@ class MyStructEnsureStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             3,  # id
@@ -1512,6 +1621,7 @@ class MyStructEnsureStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataItem),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             4,  # id
@@ -1520,6 +1630,7 @@ class MyStructEnsureStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             5,  # id
@@ -1528,6 +1639,7 @@ class MyStructEnsureStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             6,  # id
@@ -1536,6 +1648,7 @@ class MyStructEnsureStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_float),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             7,  # id
@@ -1544,6 +1657,7 @@ class MyStructEnsureStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_binary, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             8,  # id
@@ -1552,6 +1666,7 @@ class MyStructEnsureStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -1592,6 +1707,7 @@ class MyDataItemPatch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataItem),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -1600,6 +1716,7 @@ class MyDataItemPatch(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_bool,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             3,  # id
@@ -1608,6 +1725,7 @@ class MyDataItemPatch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataItemFieldPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             5,  # id
@@ -1616,6 +1734,7 @@ class MyDataItemPatch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataItemEnsureStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             6,  # id
@@ -1624,6 +1743,7 @@ class MyDataItemPatch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(MyDataItemFieldPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             7,  # id
@@ -1632,6 +1752,7 @@ class MyDataItemPatch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i16),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -1672,6 +1793,7 @@ class MyDataItemFieldPatch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.StringPatch),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -1712,6 +1834,7 @@ class MyDataItemEnsureStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 

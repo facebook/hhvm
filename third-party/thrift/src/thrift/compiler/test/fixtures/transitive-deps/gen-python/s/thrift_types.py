@@ -43,6 +43,7 @@ class _fbthrift_TestService_test_result(metaclass=_fbthrift_python_types.StructM
             lambda: _fbthrift_python_types.StructTypeInfo(c.thrift_types.E),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 

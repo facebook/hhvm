@@ -29,6 +29,7 @@ class {{> types/function_args_type}}(metaclass=_fbthrift_python_types.StructMeta
             {{#field:type}}{{^type:base?}}lambda: {{/type:base?}}{{ >types/typeinfo }}{{/field:type}},  # typeinfo
             None,  # default value
             {{> fields/adapter_info }},  # adapter info
+            {{> fields/is_primitive }}, # field type is primitive
         ),
         {{/function:args}}
     )
@@ -46,6 +47,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result(metaclass=_fbthrift_py
             {{^type:base?}}lambda: {{/type:base?}}{{ >types/typeinfo }},  # typeinfo
             None,  # default value
             {{> fields/adapter_info }},  # adapter info
+            {{> fields/is_primitive }}, # field type is primitive
         ),
         {{/type:void?}}
         {{/function:regular_response_type}}
@@ -57,6 +59,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result(metaclass=_fbthrift_py
             {{#field:type}}{{^type:base?}}lambda: {{/type:base?}}{{ >types/typeinfo }}{{/field:type}},  # typeinfo
             None,  # default value
             {{> fields/adapter_info }},  # adapter info
+            {{> fields/is_primitive }}, # field type is primitive
         ),
         {{/function:exceptions}}
     )
@@ -74,6 +77,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_stream(metaclass=_fbth
             {{^type:base?}}lambda: {{/type:base?}}{{ >types/typeinfo }},  # typeinfo
             None,  # default value
             {{> fields/adapter_info }},  # adapter info
+            {{> fields/is_primitive }}, # field type is primitive
         ),
         {{/function:stream_elem_type}}
         {{#function:stream_exceptions}}
@@ -84,6 +88,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_stream(metaclass=_fbth
             {{#field:type}}{{^type:base?}}lambda: {{/type:base?}}{{ >types/typeinfo }}{{/field:type}},  # typeinfo
             None,  # default value
             {{> fields/adapter_info }},  # adapter info
+            {{> fields/is_primitive }}, # field type is primitive
         ),
         {{/function:stream_exceptions}}
     )

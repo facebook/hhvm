@@ -22,6 +22,7 @@ class Foo(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
     )
 
@@ -78,6 +79,7 @@ class _fbthrift_TestService_init_args(metaclass=_fbthrift_python_types.StructMet
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
     )
 
@@ -91,6 +93,7 @@ class _fbthrift_TestService_init_result(metaclass=_fbthrift_python_types.StructM
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 

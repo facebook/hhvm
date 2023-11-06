@@ -22,6 +22,7 @@ class ComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             2,  # id
@@ -30,6 +31,7 @@ class ComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i64),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             3,  # id
@@ -38,6 +40,7 @@ class ComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             5,  # id
@@ -46,6 +49,7 @@ class ComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             9,  # id
@@ -54,6 +58,7 @@ class ComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i16, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             14,  # id
@@ -62,6 +67,7 @@ class ComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -102,6 +108,7 @@ class ListUnion(metaclass=_fbthrift_python_types.UnionMeta):
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i64),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             3,  # id
@@ -110,6 +117,7 @@ class ListUnion(metaclass=_fbthrift_python_types.UnionMeta):
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -150,6 +158,7 @@ class DataUnion(metaclass=_fbthrift_python_types.UnionMeta):
             _fbthrift_python_types.typeinfo_binary,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             2,  # id
@@ -158,6 +167,7 @@ class DataUnion(metaclass=_fbthrift_python_types.UnionMeta):
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -198,6 +208,7 @@ class Val(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -206,6 +217,7 @@ class Val(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             9,  # id
@@ -214,6 +226,7 @@ class Val(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i16, _fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -254,6 +267,7 @@ class ValUnion(metaclass=_fbthrift_python_types.UnionMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(Val),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -262,6 +276,7 @@ class ValUnion(metaclass=_fbthrift_python_types.UnionMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(Val),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -302,6 +317,7 @@ class VirtualComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -310,6 +326,7 @@ class VirtualComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
             _fbthrift_python_types.typeinfo_string,  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -350,6 +367,7 @@ class NonCopyableStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             None,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
     )
 
@@ -390,6 +408,7 @@ class NonCopyableUnion(metaclass=_fbthrift_python_types.UnionMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(NonCopyableStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 

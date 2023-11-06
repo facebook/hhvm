@@ -24,6 +24,7 @@ class Included(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             0,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
         (
             2,  # id
@@ -32,6 +33,7 @@ class Included(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(transitive.thrift_types.Foo),  # typeinfo
             lambda: transitive.thrift_types.Foo(a=2),  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 

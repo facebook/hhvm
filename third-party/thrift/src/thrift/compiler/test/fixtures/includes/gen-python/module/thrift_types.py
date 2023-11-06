@@ -24,6 +24,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(includes.thrift_types.Included),  # typeinfo
             lambda: includes.thrift_types.Included(MyIntField=2, MyTransitiveField=transitive.thrift_types.Foo(a=2)),  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -32,6 +33,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.StructTypeInfo(includes.thrift_types.Included),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             3,  # id
@@ -40,6 +42,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_i64,  # typeinfo
             42,  # default value
             None,  # adapter info
+            True, # field type is primitive
         ),
     )
 

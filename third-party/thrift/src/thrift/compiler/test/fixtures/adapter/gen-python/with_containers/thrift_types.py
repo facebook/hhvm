@@ -23,6 +23,7 @@ class _fbthrift_unadapted_AnnotationWithContainers(metaclass=_fbthrift_python_ty
             lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_string),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -31,6 +32,7 @@ class _fbthrift_unadapted_AnnotationWithContainers(metaclass=_fbthrift_python_ty
             lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32),  # typeinfo
             None,  # default value
             None,  # adapter info
+            False, # field type is primitive
         ),
     )
 
@@ -74,6 +76,7 @@ class _fbthrift_unadapted_MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.typeinfo_i32,  # typeinfo
             None,  # default value
             (my.Adapter, lambda: _fbthrift_unadapted_AnnotationWithContainers(names=_fbthrift_python_types.List(_fbthrift_python_types.typeinfo_string, ("bar", "baz", )), counts=_fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32, {"c": 3}))),  # adapter info
+            True, # field type is primitive
         ),
     )
 

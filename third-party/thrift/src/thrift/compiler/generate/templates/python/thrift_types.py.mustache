@@ -51,6 +51,7 @@ class {{> structs/unadapted_name}}(metaclass={{!
             {{#field:user_default_value}}{{#field:type}}{{^type:base?}}lambda: {{/type:base?}}{{/field:type}}{{> types/constant_value }}{{/field:user_default_value}}{{!
             }}{{^field:user_default_value}}None{{/field:user_default_value}},  # default value
             {{> fields/adapter_info }},  # adapter info
+            {{> fields/is_primitive }}, # field type is primitive
         ),
         {{/struct:fields_ordered_by_id}}
     )

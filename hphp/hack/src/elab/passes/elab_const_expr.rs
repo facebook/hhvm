@@ -109,7 +109,10 @@ impl Pass for ElabConstExprPass {
                 Expr_::ClassConst(_) => Continue(()),
 
                 // -- conditionally valid --------------------------------------
-                Expr_::As(box (_, Hint(_, box hint_), _)) => match hint_ {
+                Expr_::As(box nast::As_ {
+                    hint: Hint(_, box hint_),
+                    ..
+                }) => match hint_ {
                     // NB we can perform this top-down since the all valid hints
                     // are already in canonical
                     // TODO[mjt] another example of inconsistency around error positions

@@ -401,7 +401,12 @@ impl<'decl> Infer<'decl> {
                 let (e, _e_ty, ctx) = self.infer_expr(e, ctx, next_where);
                 (Is(box_tup!(e, hint.clone())), Tyx::Todo, ctx)
             }
-            As(box (e, hint, is_nullable)) => {
+            As(box ast::As_ {
+                expr: e,
+                hint,
+                is_nullable,
+                enforce_deep,
+            }) => {
                 let (e, _e_ty, mut ctx) = self.infer_expr(e, ctx, next_where);
                 match &e {
                     ast::Expr(_, _, ast::Expr_::Lvar(box ast::Lid(_, (_, var)))) => {
@@ -413,7 +418,16 @@ impl<'decl> Infer<'decl> {
                     }
                     _ => (),
                 }
-                (As(box_tup!(e, hint.clone(), *is_nullable)), Tyx::Todo, ctx)
+                (
+                    As(Box::new(ast::As_ {
+                        expr: e,
+                        hint: hint.clone(),
+                        is_nullable: *is_nullable,
+                        enforce_deep: *enforce_deep,
+                    })),
+                    Tyx::Todo,
+                    ctx,
+                )
             }
             Upcast(box (e, hint)) => {
                 let (e, _e_ty, ctx) = self.infer_expr(e, ctx, next_where);

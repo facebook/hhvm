@@ -841,7 +841,8 @@ module Visitor_DEPRECATED = struct
         | Pipe (id, e1, e2) -> this#on_pipe acc id e1 e2
         | Eif (e1, e2, e3) -> this#on_eif acc e1 e2 e3
         | Is (e, h) -> this#on_is acc e h
-        | As (e, h, b) -> this#on_as acc e h b
+        | As { expr; hint; is_nullable; enforce_deep = _ } ->
+          this#on_as acc expr hint is_nullable
         | Upcast (e, h) -> this#on_upcast acc e h
         | New (cid, _, el, unpacked_element, _) ->
           this#on_new acc cid el unpacked_element

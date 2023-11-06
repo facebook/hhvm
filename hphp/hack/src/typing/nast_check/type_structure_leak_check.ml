@@ -18,7 +18,8 @@ let visitor =
       let ancestor =
         match expr with
         | Is (_, _h) -> Some "an is-expression"
-        | As (_, _h, _) -> Some "an as-expression"
+        | As { expr = _; hint = _; is_nullable = _; enforce_deep = _ } ->
+          Some "an as-expression"
         | _ -> ancestor
       in
       super#on_expr (env, ancestor) e

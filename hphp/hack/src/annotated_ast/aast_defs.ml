@@ -396,6 +396,13 @@ and ('ex, 'en) expression_tree = {
        *     Code`${ $x |> foo($$) }` // None *)
 }
 
+and ('ex, 'en) as_ = {
+  expr: ('ex, 'en) expr;
+  hint: hint;
+  is_nullable: bool;
+  enforce_deep: bool;
+}
+
 and ('ex, 'en) expr_ =
   | Null
       (** Null literal.
@@ -661,7 +668,7 @@ and ('ex, 'en) expr_ =
       (** Is operator.
        *
        *     $foo is SomeType *)
-  | As of ('ex, 'en) expr * hint * (* is nullable *) bool
+  | As of ('ex, 'en) as_
       (** As operator.
        *
        *     $foo as int

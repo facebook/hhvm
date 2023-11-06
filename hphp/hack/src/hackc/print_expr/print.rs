@@ -582,10 +582,15 @@ fn print_expr(
             w.write_all(b" is ")?;
             print_hint(w, true, &i.1)
         }
-        Expr_::As(a) => {
-            print_expr(ctx, w, env, &a.0)?;
-            w.write_all(if a.2 { b" ?as " } else { b" as " })?;
-            print_hint(w, true, &a.1)
+        Expr_::As(box ast::As_ {
+            expr,
+            hint,
+            is_nullable,
+            enforce_deep: _,
+        }) => {
+            print_expr(ctx, w, env, expr)?;
+            w.write_all(if *is_nullable { b" ?as " } else { b" as " })?;
+            print_hint(w, true, hint)
         }
         Expr_::Varray(va) => print_expr_varray(ctx, w, env, &va.1),
         Expr_::Darray(da) => print_expr_darray(ctx, w, env, print_expr, &da.1),
@@ -752,10 +757,10 @@ fn print_xml(
     write!(w, "new {}", mangle(id.into()))?;
     write::paren(w, |w| {
         write::wrap_by_(w, "darray[", "]", |w| {
-            write::concat_by(w, ", ", attrs, |w, attr| print_xhp_attr(ctx, w, &env, attr))
+            write::concat_by(w, ", ", attrs, |w, attr| print_xhp_attr(ctx, w, env, attr))
         })?;
         w.write_all(b", ")?;
-        print_expr_varray(ctx, w, &env, children)?;
+        print_expr_varray(ctx, w, env, children)?;
         w.write_all(b", __FILE__, __LINE__")
     })
 }

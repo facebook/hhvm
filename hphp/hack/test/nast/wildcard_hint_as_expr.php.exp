@@ -57,7 +57,10 @@
                 ((), [9:3-22],
                  (Binop
                     { bop = (Eq None); lhs = ((), [9:3-5], (Lplaceholder [9:3-5]));
-                      rhs = ((), [9:8-22], (As (((), [9:8-10], (Lvar ([9:8-10], $x))), ([9:14-22], (Happly (([9:14-19], "\\BBBBB"), [([9:20-21], Hwildcard)]))), false))) }))))
+                      rhs =
+                      ((), [9:8-22],
+                       (As { expr = ((), [9:8-10], (Lvar ([9:8-10], $x))); hint = ([9:14-22], (Happly (([9:14-19], "\\BBBBB"), [([9:20-21], Hwildcard)]))); is_nullable = false; enforce_deep = true }))
+                      }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

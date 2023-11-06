@@ -78,7 +78,7 @@ and check_await_usage expr =
     | ReadonlyExpr expr
     | Cast (_, expr)
     | Is (expr, _)
-    | As (expr, _, _)
+    | As { expr; _ }
     | Upcast (expr, _)
     | Import (_, expr)
     | Hole (expr, _, _, _)

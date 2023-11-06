@@ -208,7 +208,9 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         //
         As(a) => {
             // Readonlyness of inner expression
-            let (exp, hint, _) = &**a;
+            let aast::As_ {
+                expr: exp, hint, ..
+            } = &**a;
             let hint_ = &*hint.1;
             match hint_ {
                 // Primitives are always mutable

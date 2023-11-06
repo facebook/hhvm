@@ -76,7 +76,15 @@ let handler =
           hint_ty
           ~always_subtype:(Lints_errors.is_always_true ~check_status)
           ~never_subtype:(Lints_errors.is_always_false ~check_status)
-      | (_, p, As ((lhs_ty, lhs_pos, lhs_expr), hint, false)) ->
+      | ( _,
+          p,
+          As
+            {
+              expr = (lhs_ty, lhs_pos, lhs_expr);
+              hint;
+              is_nullable = false;
+              enforce_deep = _;
+            } ) ->
         let (env, hint_ty) = Env.localize_hint_for_refinement env hint in
         let can_be_captured = Aast_utils.can_be_captured lhs_expr in
         let always_subtype p =

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8f90f081c28763ba5924735ea4370fee>>
+// @generated SignedSource<<1455577cccff83e3d1bd49f487173571>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -599,6 +599,37 @@ impl Transform for ExpressionTree {
                     __binding_3.transform(env, &mut pass.clone())
                 }
                 { __binding_4.transform(env, &mut pass.clone()) }
+            }
+        }
+    }
+}
+impl Transform for As_ {
+    fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        let mut in_pass = pass.clone();
+        if let Break(..) = pass.on_ty_as__top_down(env, self) {
+            return;
+        }
+        stack_limit::maybe_grow(|| self.traverse(env, pass));
+        in_pass.on_ty_as__bottom_up(env, self);
+    }
+    fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        match self {
+            As_ {
+                expr: ref mut __binding_0,
+                hint: ref mut __binding_1,
+                is_nullable: ref mut __binding_2,
+                enforce_deep: ref mut __binding_3,
+            } => {
+                {
+                    __binding_0.transform(env, &mut pass.clone())
+                }
+                {
+                    __binding_1.transform(env, &mut pass.clone())
+                }
+                {
+                    __binding_2.transform(env, &mut pass.clone())
+                }
+                { __binding_3.transform(env, &mut pass.clone()) }
             }
         }
     }

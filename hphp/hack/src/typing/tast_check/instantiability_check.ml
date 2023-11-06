@@ -200,6 +200,6 @@ let handler =
     method! at_expr env (_, _, e) =
       match e with
       | Is (_, h) -> check_hint env h
-      | As (_, h, _) -> check_hint env h
+      | As { hint = h; _ } -> check_hint env h
       | _ -> ()
   end

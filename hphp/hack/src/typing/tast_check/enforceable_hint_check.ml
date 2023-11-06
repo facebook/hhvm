@@ -31,6 +31,6 @@ let handler =
       in
       match e with
       | Is (_, hint) -> validate hint `is
-      | As (_, hint, _) -> validate hint `as_
+      | As { hint; _ } -> validate hint `as_
       | _ -> ()
   end

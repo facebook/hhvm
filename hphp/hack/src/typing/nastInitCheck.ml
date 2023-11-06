@@ -595,7 +595,7 @@ and expr_ env acc p e =
     let acc = expr acc e2 in
     expr acc e3
   | Is (e, _) -> expr acc e
-  | As (e, _, _) -> expr acc e
+  | As { expr = e; hint = _; is_nullable = _; enforce_deep = _ } -> expr acc e
   | Upcast (e, _) -> expr acc e
   | Efun { ef_fun = f; _ }
   | Lfun (f, _) ->

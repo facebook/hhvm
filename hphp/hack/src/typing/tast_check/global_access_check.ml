@@ -728,7 +728,7 @@ let rec get_data_srcs_from_expr env ctx (tp, _, te) =
       | Some e -> get_data_srcs_from_expr env ctx e
       | None -> DataSourceSet.empty)
       (get_data_srcs_from_expr env ctx e2)
-  | As (e, _, _) -> get_data_srcs_from_expr env ctx e
+  | As { expr = e; _ } -> get_data_srcs_from_expr env ctx e
   | Upcast (e, _) -> get_data_srcs_from_expr env ctx e
   | Pair (_, e1, e2) ->
     DataSourceSet.union

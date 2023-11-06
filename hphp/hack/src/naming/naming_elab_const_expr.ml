@@ -73,7 +73,9 @@ let on_expr_top_down
     (* -- Conditionally valid ----------------------------------------------- *)
     (* NB we can perform this top-down since the all valid hints are already in
        canonical *)
-    | Aast.(As (_, (_, hint_), _)) -> begin
+    | Aast.(
+        As { expr = _; hint = (_, hint_); is_nullable = _; enforce_deep = _ })
+      -> begin
       match hint_ with
       | Aast.(Happly ((pos, _), _)) ->
         on_error (Err.naming @@ Naming_error.Illegal_constant pos);

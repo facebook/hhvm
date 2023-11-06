@@ -204,7 +204,12 @@ impl TypedLocal {
         if self.should_elab {
             let mut init_expr = Expr((), Pos::NONE, Expr_::Null);
             std::mem::swap(rhs, &mut init_expr);
-            let as_expr_ = Expr_::As(Box::new((init_expr, hint, false)));
+            let as_expr_ = Expr_::As(Box::new(nast::As_ {
+                expr: init_expr,
+                hint,
+                is_nullable: false,
+                enforce_deep: false,
+            }));
             let as_expr = Expr((), pos.clone(), as_expr_);
             *rhs = as_expr;
         }
@@ -349,7 +354,7 @@ impl TypedLocal {
     // Replaces definitely unenforceable parts of the hint with _
     // This is not the definitive version of enforcement, it needs to be consistent
     // with the bytecode that we are using for enforcement, because we might have a type
-    // t whose definition we don't know, and that could be, for example a shape or vector
+    // whose definition we don't know, and that could be, for example a shape or vector
     // or some other type with particular shallow runtime enforcement semantics.
     fn simplify_hint(&self, hint: &mut Hint) {
         let Hint(pos, box hint_) = hint;
@@ -805,6 +810,19 @@ mod tests {
 
     use super::*;
 
+    struct FixAs {}
+
+    impl<'a> VisitorMut<'a> for FixAs {
+        type Params = AstParams<Env, ()>;
+        fn object(&mut self) -> &mut dyn VisitorMut<'a, Params = Self::Params> {
+            self
+        }
+        fn visit_as_(&mut self, _: &mut Env, elem: &mut nast::As_) -> Result<(), ()> {
+            elem.enforce_deep = false;
+            Ok(())
+        }
+    }
+
     fn mk_lid(name: &str) -> LocalId {
         (0, name.to_string())
     }
@@ -818,10 +836,13 @@ mod tests {
     }
 
     fn build_program(stmts: Vec<Stmt>) -> Program {
-        nast::Program(vec![Def::Stmt(Box::new(Stmt(
+        let mut p = nast::Program(vec![Def::Stmt(Box::new(Stmt(
             Pos::NONE,
             Stmt_::Block(Box::new((None, Block(stmts)))),
-        )))])
+        )))]);
+        let mut f = FixAs {};
+        let _ = f.visit_program(&mut Env::default(), &mut p);
+        p
     }
 
     #[test]

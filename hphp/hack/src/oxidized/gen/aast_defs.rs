@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<34638860dcb63b4ee1df85a950a2cede>>
+// @generated SignedSource<<188507383c9d3f24311f2e9cf5e4de77>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -714,6 +714,29 @@ pub struct ExpressionTree<Ex, En> {
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[repr(C)]
+pub struct As_<Ex, En> {
+    pub expr: Expr<Ex, En>,
+    pub hint: Hint,
+    pub is_nullable: bool,
+    pub enforce_deep: bool,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum Expr_<Ex, En> {
     /// Null literal.
@@ -994,8 +1017,7 @@ pub enum Expr_<Ex, En> {
     ///
     ///     $foo as int
     ///     $foo ?as int
-    #[rust_to_ocaml(inline_tuple)]
-    As(Box<(Expr<Ex, En>, Hint, bool)>),
+    As(Box<As_<Ex, En>>),
     /// Upcast operator.
     ///
     ///     $foo : int

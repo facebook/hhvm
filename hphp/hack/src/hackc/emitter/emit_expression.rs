@@ -474,7 +474,7 @@ pub fn emit_expr<'a, 'arena, 'decl>(
             Expr_::Binop(_) => emit_binop(emitter, env, pos, expression),
             Expr_::Pipe(e) => emit_pipe(emitter, env, e),
             Expr_::Is(is_expr) => emit_is_expr(emitter, env, pos, is_expr),
-            Expr_::As(e) => emit_as(emitter, env, pos, e),
+            Expr_::As(box e) => emit_as(emitter, env, pos, e),
             Expr_::Upcast(e) => emit_expr(emitter, env, &e.0),
             Expr_::Cast(e) => emit_cast(emitter, env, pos, &(e.0).1, &e.1),
             Expr_::Eif(e) => emit_conditional_expr(emitter, env, pos, &e.0, e.1.as_ref(), &e.2),
@@ -5035,12 +5035,18 @@ fn emit_as<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    (expr, h, is_nullable): &(ast::Expr, aast_defs::Hint, bool),
+    as_: &ast::As_,
 ) -> Result<InstrSeq<'arena>> {
+    let ast::As_ {
+        expr,
+        hint,
+        is_nullable,
+        enforce_deep: _,
+    } = as_;
     e.local_scope(|e| {
         let arg_local = e.local_gen_mut().get_unnamed();
         let type_struct_local = e.local_gen_mut().get_unnamed();
-        let (ts_instrs, is_static) = emit_reified_arg(e, env, pos, true, h)?;
+        let (ts_instrs, is_static) = emit_reified_arg(e, env, pos, true, hint)?;
         let then_label = e.label_gen_mut().next_regular();
         let done_label = e.label_gen_mut().next_regular();
         let main_block = |ts_instrs, resolve| {
@@ -5077,7 +5083,7 @@ fn emit_as<'a, 'arena, 'decl>(
                     &[],
                     &IndexSet::new(),
                     TypeRefinementInHint::Disallowed,
-                    h,
+                    hint,
                 )?,
                 TypeStructResolveOp::Resolve,
             )

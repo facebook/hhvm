@@ -39,8 +39,10 @@ Errors:
            [([7:3-22],
              (Expr
                 ((nothing), [7:3-21],
-                 (As (((int), [7:3-4], (Int "3")),
-                    ([7:8-21], (Happly (([7:8-9], "\\A"), [([7:10-11], Hwildcard); ([7:13-20], (Happly (([7:13-14], "\\A"), [([7:15-16], Hwildcard); ([7:18-19], Hwildcard)])))]))), false)))))
+                 (As
+                    { expr = ((int), [7:3-4], (Int "3"));
+                      hint = ([7:8-21], (Happly (([7:8-9], "\\A"), [([7:10-11], Hwildcard); ([7:13-20], (Happly (([7:13-14], "\\A"), [([7:15-16], Hwildcard); ([7:18-19], Hwildcard)])))])));
+                      is_nullable = false; enforce_deep = true }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([6:10-11], "__SupportDynamicType"); ua_params = [] }]; 

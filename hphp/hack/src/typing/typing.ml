@@ -5160,7 +5160,7 @@ and expr_
   | Is (e, hint) ->
     let (env, te, _) = expr env e in
     make_result env p (Aast.Is (te, hint)) (MakeType.bool (Reason.Rwitness p))
-  | As (e, hint, is_nullable) ->
+  | As { expr = e; hint; is_nullable; enforce_deep } ->
     let refine_type env lpos lty rty =
       let reason = Reason.Ras lpos in
       let (env, rty) = Env.expand_type env rty in
@@ -5237,7 +5237,11 @@ and expr_
           ((env, None), ty)
     in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt2;
-    make_result env p (Aast.As (te, hint, is_nullable)) hint_ty
+    make_result
+      env
+      p
+      (Aast.As { expr = te; hint; is_nullable; enforce_deep })
+      hint_ty
   | Upcast (e, hint) ->
     let (env, te, expr_ty) = expr env e in
     let ((env, ty_err_opt), hint_ty) =

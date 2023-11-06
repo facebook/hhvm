@@ -155,7 +155,7 @@ let visitor =
       | Is (e, (_, Hprim Tnull)) ->
         this#on_expr (env, disallow_due_to_cast_with_explicit_nullcheck) e
       | Is (e, hint)
-      | As (e, hint, _) ->
+      | As { expr = e; hint; is_nullable = _; enforce_deep = _ } ->
         let hint_ty = Env.hint_to_ty env hint in
         let (env, hint_ty) =
           Env.localize_no_subst env ~ignore_errors:true hint_ty

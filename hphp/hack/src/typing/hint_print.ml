@@ -424,11 +424,11 @@ and pp_expr_ ppf = function
     Fmt.(pair ~sep:(const string " is ") pp_expr @@ pp_hint ~is_ctx:false)
       ppf
       (expr, hint)
-  | Aast.As (expr, hint, false) ->
+  | Aast.As Aast.{ expr; hint; is_nullable = false; enforce_deep = _ } ->
     Fmt.(pair ~sep:(const string " as ") pp_expr @@ pp_hint ~is_ctx:false)
       ppf
       (expr, hint)
-  | Aast.As (expr, hint, true) ->
+  | Aast.As Aast.{ expr; hint; is_nullable = true; enforce_deep = _ } ->
     Fmt.(pair ~sep:(const string " ?as ") pp_expr @@ pp_hint ~is_ctx:false)
       ppf
       (expr, hint)

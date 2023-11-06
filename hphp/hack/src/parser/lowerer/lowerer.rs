@@ -2291,12 +2291,15 @@ fn p_is_expr<'a>(left: S<'a>, right: S<'a>, env: &mut Env<'a>) -> Result<Expr_> 
     Ok(Expr_::mk_is(p_expr(left, env)?, p_hint(right, env)?))
 }
 
-fn p_as_expr<'a>(left: S<'a>, right: S<'a>, env: &mut Env<'a>, nullable: bool) -> Result<Expr_> {
-    Ok(Expr_::mk_as(
-        p_expr(left, env)?,
-        p_hint(right, env)?,
-        nullable,
-    ))
+fn p_as_expr<'a>(left: S<'a>, right: S<'a>, env: &mut Env<'a>, is_nullable: bool) -> Result<Expr_> {
+    let expr = p_expr(left, env)?;
+    let hint = p_hint(right, env)?;
+    Ok(Expr_::mk_as(oxidized::nast::As_ {
+        expr,
+        hint,
+        is_nullable,
+        enforce_deep: true,
+    }))
 }
 
 fn p_upcast_expr<'a>(left: S<'a>, right: S<'a>, env: &mut Env<'a>) -> Result<Expr_> {

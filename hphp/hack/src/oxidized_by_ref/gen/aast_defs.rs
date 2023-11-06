@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<97fad9f13e746665dd16d6c4dc7ebc8b>>
+// @generated SignedSource<<54dad998c25772bd04a639b666e10bfb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -872,6 +872,36 @@ arena_deserializer::impl_deserialize_in_arena!(ExpressionTree<'arena, Ex, En>);
 
 #[derive(
     Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[serde(bound(
+    deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
+))]
+#[rust_to_ocaml(and)]
+#[repr(C)]
+pub struct As_<'a, Ex, En> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub expr: &'a Expr<'a, Ex, En>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub hint: &'a Hint<'a>,
+    pub is_nullable: bool,
+    pub enforce_deep: bool,
+}
+impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for As_<'a, Ex, En> {}
+arena_deserializer::impl_deserialize_in_arena!(As_<'arena, Ex, En>);
+
+#[derive(
+    Clone,
     Copy,
     Debug,
     Deserialize,
@@ -1227,8 +1257,7 @@ pub enum Expr_<'a, Ex, En> {
     ///     $foo as int
     ///     $foo ?as int
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(inline_tuple)]
-    As(&'a (&'a Expr<'a, Ex, En>, &'a Hint<'a>, bool)),
+    As(&'a As_<'a, Ex, En>),
     /// Upcast operator.
     ///
     ///     $foo : int

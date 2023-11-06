@@ -258,7 +258,8 @@ let rec expr_
     let (env, else_entity) = expr_ upcasted_info env else_expr in
     join env cond_entity else_entity
   | A.Await e -> expr_ upcasted_info env e
-  | A.As (e, _ty, _) -> expr_ upcasted_info env e
+  | A.As Aast.{ expr = e; hint = _ty; is_nullable = _; enforce_deep = _ } ->
+    expr_ upcasted_info env e
   | A.Is (e, _ty) ->
     (* `is` expressions always evaluate to bools, so we discard the entity. *)
     let (env, _) = expr_ upcasted_info env e in

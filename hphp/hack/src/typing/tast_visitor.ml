@@ -62,9 +62,9 @@ class virtual iter =
       let env = Env.set_allow_wildcards env in
       super#on_Is env e h
 
-    method! on_As env e h =
+    method! on_As env e =
       let env = Env.set_allow_wildcards env in
-      super#on_As env e h
+      super#on_As env e
 
     method! on_expression_tree
         env
@@ -151,9 +151,9 @@ class virtual ['state] iter_with_state =
       let env = Env.set_allow_wildcards env in
       super#on_Is (env, state) e h
 
-    method! on_As (env, state) e h =
+    method! on_As (env, state) e =
       let env = Env.set_allow_wildcards env in
-      super#on_As (env, state) e h
+      super#on_As (env, state) e
 
     method! on_expression_tree
         (env, state)
@@ -233,9 +233,9 @@ class virtual ['a] reduce =
       let env = Env.set_allow_wildcards env in
       super#on_Is env e h
 
-    method! on_As env e h =
+    method! on_As env e =
       let env = Env.set_allow_wildcards env in
-      super#on_As env e h
+      super#on_As env e
 
     method! on_expression_tree
         env
@@ -329,9 +329,9 @@ class virtual map =
       let env = Env.set_allow_wildcards env in
       super#on_Is env e h
 
-    method! on_As env e h =
+    method! on_As env e =
       let env = Env.set_allow_wildcards env in
-      super#on_As env e h
+      super#on_As env e
 
     method! on_expression_tree
         env
@@ -431,9 +431,9 @@ class virtual endo =
       let env = Env.set_allow_wildcards env in
       super#on_Is env e h
 
-    method! on_As env e h =
+    method! on_As env e =
       let env = Env.set_allow_wildcards env in
-      super#on_As env e h
+      super#on_As env e
 
     method! on_expression_tree
         env

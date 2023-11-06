@@ -37,7 +37,10 @@ Errors:
                 ((), [5:3-16],
                  (Binop
                     { bop = (Eq None); lhs = ((), [5:3-5], (Lplaceholder [5:3-5]));
-                      rhs = ((), [5:8-16], (As (((), [5:8-10], (Lvar ([5:8-10], $x))), ([5:14-16], (Hlike ([5:15-16], (Happly (([5:15-16], "\\C"), []))))), false))) }))));
+                      rhs =
+                      ((), [5:8-16],
+                       (As { expr = ((), [5:8-10], (Lvar ([5:8-10], $x))); hint = ([5:14-16], (Hlike ([5:15-16], (Happly (([5:15-16], "\\C"), []))))); is_nullable = false; enforce_deep = true }))
+                      }))));
              ([6:3-16], (Return (Some ((), [6:10-15], False))))]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

@@ -369,8 +369,8 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
             Expr_::ClassConst(x) => class_const_to_typed_value(emitter, scope, &x.0, &x.1),
 
             Expr_::ClassGet(_) => Err(Error::UserDefinedConstant),
-            ast::Expr_::As(x) if (x.1).1.is_hlike() => {
-                expr_to_typed_value_(emitter, scope, &x.0, allow_maps)
+            ast::Expr_::As(x) if x.hint.is_hlike() => {
+                expr_to_typed_value_(emitter, scope, &x.expr, allow_maps)
             }
             Expr_::Upcast(e) => expr_to_typed_value(emitter, scope, &e.0),
             _ => Err(Error::NotLiteral),

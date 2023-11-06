@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4330aeb6ec53a46a95fb8d9f6b96c001>>
+// @generated SignedSource<<4a55ea60533f7f0e2dd6bd686ba41a59>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1113,8 +1113,8 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_is(p0: Expr<Ex, En>, p1: Hint) -> Self {
         Expr_::Is(Box::new((p0, p1)))
     }
-    pub fn mk_as(p0: Expr<Ex, En>, p1: Hint, p2: bool) -> Self {
-        Expr_::As(Box::new((p0, p1, p2)))
+    pub fn mk_as(p0: As_<Ex, En>) -> Self {
+        Expr_::As(Box::new(p0))
     }
     pub fn mk_upcast(p0: Expr<Ex, En>, p1: Hint) -> Self {
         Expr_::Upcast(Box::new((p0, p1)))
@@ -1705,9 +1705,9 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_as(&self) -> Option<(&Expr<Ex, En>, &Hint, &bool)> {
+    pub fn as_as(&self) -> Option<&As_<Ex, En>> {
         match self {
-            Expr_::As(p0) => Some((&p0.0, &p0.1, &p0.2)),
+            Expr_::As(p0) => Some(&p0),
             _ => None,
         }
     }
@@ -2051,9 +2051,9 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_as_mut(&mut self) -> Option<(&mut Expr<Ex, En>, &mut Hint, &mut bool)> {
+    pub fn as_as_mut(&mut self) -> Option<&mut As_<Ex, En>> {
         match self {
-            Expr_::As(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
+            Expr_::As(p0) => Some(p0.as_mut()),
             _ => None,
         }
     }
@@ -2390,9 +2390,9 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_as_into(self) -> Option<(Expr<Ex, En>, Hint, bool)> {
+    pub fn as_as_into(self) -> Option<As_<Ex, En>> {
         match self {
-            Expr_::As(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
+            Expr_::As(p0) => Some(*p0),
             _ => None,
         }
     }

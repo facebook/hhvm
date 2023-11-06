@@ -573,7 +573,7 @@ let expr tenv ((), _p, e) =
         et_dollardollar_pos = _;
       }
   | Is (_, h)
-  | As (_, h, _)
+  | As { expr = _; hint = h; is_nullable = _; enforce_deep = _ }
   | Upcast (_, h)
   | Cast (h, _) ->
     hint tenv h

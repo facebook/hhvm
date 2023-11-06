@@ -236,5 +236,4 @@ val no_auto_likes_for_fun : Shallow_decl_defs.fun_decl -> bool
 
 val get_package_info : t -> PackageInfo.t
 
-(** Set the type checker options to track autocomplete mode *)
-val set_autocomplete_mode : t -> t
+val with_tcopt_for_autocomplete : t -> t

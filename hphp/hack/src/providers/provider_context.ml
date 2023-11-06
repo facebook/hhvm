@@ -293,6 +293,10 @@ let implicit_sdt_for_fun ctx fe =
 
 let no_auto_likes_for_fun fe = fe.Typing_defs.fe_no_auto_likes
 
-let set_autocomplete_mode t =
-  let tcopt = TypecheckerOptions.set_tco_autocomplete_mode t.tcopt in
+let with_tcopt_for_autocomplete t =
+  let tcopt =
+    t.tcopt
+    |> TypecheckerOptions.set_tco_autocomplete_mode
+    |> TypecheckerOptions.set_skip_check_under_dynamic
+  in
   { t with tcopt }

@@ -164,6 +164,9 @@ let enable_no_auto_dynamic t = t.GlobalOptions.tco_enable_no_auto_dynamic
 
 let skip_check_under_dynamic t = t.GlobalOptions.tco_skip_check_under_dynamic
 
+let set_skip_check_under_dynamic t =
+  GlobalOptions.{ t with tco_skip_check_under_dynamic = true }
+
 let interpret_soft_types_as_like_types t =
   t.GlobalOptions.po_interpret_soft_types_as_like_types
 

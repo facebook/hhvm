@@ -114,8 +114,8 @@ let go_at_auto332_ctx
     ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context)
     ~(naming_table : Naming_table.t) :
     AutocompleteTypes.autocomplete_item list Utils.With_complete_flag.t =
-  (* Be sure to set this option on all entry points of this file *)
-  let ctx = Provider_context.set_autocomplete_mode ctx in
+  (* Be sure to fix tcopt on all entry points of this file *)
+  let ctx = Provider_context.with_tcopt_for_autocomplete ctx in
   AutocompleteService.go_ctx
     ~ctx
     ~entry
@@ -132,8 +132,8 @@ let go_ctx
     ~(is_manually_invoked : bool)
     ~(line : int)
     ~(column : int) : AutocompleteTypes.ide_result =
-  (* Be sure to set this option on all entry points of this file *)
-  let ctx = Provider_context.set_autocomplete_mode ctx in
+  (* Be sure to fix tcopt on all entry points of this file *)
+  let ctx = Provider_context.with_tcopt_for_autocomplete ctx in
   let open File_content in
   (* We have to edit the file content to add the text AUTO332.
      TODO: Switch to FFP Autocomplete to avoid doing this file edit *)

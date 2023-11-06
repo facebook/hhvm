@@ -35,11 +35,15 @@ class ResetsRateLimitFilter : public RateLimitFilter {
   }
 
   void recordNumEventsInCurrentInterval(uint32_t numEvents) override {
-    // TODO: Add stats for number of resets in the current interval
+    if (httpSessionStats_) {
+      httpSessionStats_->recordResetsInInterval(numEvents);
+    }
   }
 
   void recordRateLimitBreached() override {
-    // TODO: Add stats for number of resets in the current interval
+    if (httpSessionStats_) {
+      httpSessionStats_->recordResetsRateLimited();
+    }
   }
 
   uint32_t getMaxEventsPerInvervalLowerBound() const override {

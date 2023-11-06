@@ -46,6 +46,8 @@ class TLHTTPSessionStats : public HTTPSessionStats {
   void recordControlMsgRateLimited() noexcept override;
   void recordHeadersInInterval(int64_t quantity) noexcept override;
   void recordHeadersRateLimited() noexcept override;
+  void recordResetsInInterval(int64_t quantity) noexcept override;
+  void recordResetsRateLimited() noexcept override;
 
   BaseStats::TLCounter txnsOpen;
   BaseStats::TLCounter pendingBufferedReadBytes;
@@ -71,10 +73,12 @@ class TLHTTPSessionStats : public HTTPSessionStats {
   BaseStats::TLTimeseries ttbtxExceedLimit;
   BaseStats::TLTimeseries ctrlMsgsRateLimited;
   BaseStats::TLTimeseries headersRateLimited;
+  BaseStats::TLTimeseries resetsRateLimited;
   BaseStats::TLHistogram txnsPerSession;
   BaseStats::TLHistogram sessionIdleTime;
   BaseStats::TLHistogram ctrlMsgsInInterval;
   BaseStats::TLHistogram headersInInterval;
+  BaseStats::TLHistogram resetsInInterval;
 };
 
 } // namespace proxygen

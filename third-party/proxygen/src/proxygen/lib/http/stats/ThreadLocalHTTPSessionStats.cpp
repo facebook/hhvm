@@ -41,6 +41,7 @@ TLHTTPSessionStats::TLHTTPSessionStats(const std::string& prefix)
                           facebook::fb303::SUM),
       headersRateLimited(prefix + "_headers_rate_limited",
                          facebook::fb303::SUM),
+      resetsRateLimited(prefix + "_resets_rate_limited", facebook::fb303::SUM),
       txnsPerSession(prefix + "_txn_per_session",
                      1,
                      0,
@@ -75,7 +76,18 @@ TLHTTPSessionStats::TLHTTPSessionStats(const std::string& prefix)
           facebook::fb303::AVG,
           50,
           99,
-          100) {
+          100),
+      resetsInInterval(prefix + "_resets_in_interval",
+                       1 /* bucketWidth */,
+                       0 /* min */,
+                       200 /* max, keep in sync with
+                              RestsRateLimitFilter::kDefaultMaxEventsPerInterval
+                            */
+                       ,
+                       facebook::fb303::AVG,
+                       50,
+                       99,
+                       100) {
 }
 
 void TLHTTPSessionStats::recordTransactionOpened() noexcept {
@@ -189,6 +201,14 @@ void TLHTTPSessionStats::recordHeadersInInterval(int64_t quantity) noexcept {
 
 void TLHTTPSessionStats::recordHeadersRateLimited() noexcept {
   headersRateLimited.add(1);
+}
+
+void TLHTTPSessionStats::recordResetsInInterval(int64_t quantity) noexcept {
+  resetsInInterval.add(quantity);
+}
+
+void TLHTTPSessionStats::recordResetsRateLimited() noexcept {
+  resetsRateLimited.add(1);
 }
 
 } // namespace proxygen

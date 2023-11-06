@@ -5041,7 +5041,7 @@ fn emit_as<'a, 'arena, 'decl>(
         expr,
         hint,
         is_nullable,
-        enforce_deep: _,
+        enforce_deep,
     } = as_;
     e.local_scope(|e| {
         let arg_local = e.local_gen_mut().get_unnamed();
@@ -5049,19 +5049,22 @@ fn emit_as<'a, 'arena, 'decl>(
         let (ts_instrs, is_static) = emit_reified_arg(e, env, pos, true, hint)?;
         let then_label = e.label_gen_mut().next_regular();
         let done_label = e.label_gen_mut().next_regular();
+        let enforcement = if *enforce_deep {
+            hhbc::TypeStructEnforceKind::Deep
+        } else {
+            hhbc::TypeStructEnforceKind::Shallow
+        };
         let main_block = |ts_instrs, resolve| {
             InstrSeq::gather(vec![
                 ts_instrs,
                 instr::set_l(type_struct_local),
                 match resolve {
-                    TypeStructResolveOp::Resolve => instr::is_type_struct_c(
-                        hhbc::TypeStructResolveOp::Resolve,
-                        hhbc::TypeStructEnforceKind::Deep,
-                    ),
-                    TypeStructResolveOp::DontResolve => instr::is_type_struct_c(
-                        hhbc::TypeStructResolveOp::DontResolve,
-                        hhbc::TypeStructEnforceKind::Deep,
-                    ),
+                    TypeStructResolveOp::Resolve => {
+                        instr::is_type_struct_c(hhbc::TypeStructResolveOp::Resolve, enforcement)
+                    }
+                    TypeStructResolveOp::DontResolve => {
+                        instr::is_type_struct_c(hhbc::TypeStructResolveOp::DontResolve, enforcement)
+                    }
                     _ => panic!("Enum value does not match one of listed variants"),
                 },
                 instr::jmp_nz(then_label),

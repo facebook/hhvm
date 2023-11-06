@@ -226,6 +226,16 @@ let client_lsp_method_exception
     ~source:_ =
   ()
 
+let client_lsp_recheck
+    ~root:_
+    ~path:_
+    ~trigger_method:_
+    ~result_count:_
+    ~activity_id:_
+    ~start_queue_time:_
+    ~start_handle_time:_ =
+  ()
+
 let serverless_ide_bug ~message:_ ~data:_ = ()
 
 let client_lsp_exception ~root:_ ~message:_ ~data_opt:_ ~source:_ = ()

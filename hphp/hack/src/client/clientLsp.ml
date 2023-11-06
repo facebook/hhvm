@@ -180,13 +180,27 @@ module Run_env = struct
 
   type t = {
     editor_open_files: Lsp.TextDocumentItem.t UriMap.t;
+    uris_that_need_check: errors_trigger UriMap.t;
+        (** files which we believe should have their errors rechecked, maybe
+        because they had a didOpen/didChange, maybe because a file on disk
+        changed. We'll recheck them once the queue is empty. Most recent
+        triggering request goes at the front of the list. *)
     uris_with_unsaved_changes: UriSet.t;
-        (** see comment in get_uris_with_unsaved_changes *)
+        (** files which have received didOpen but not didClose.
+        This isn't needed for correctness; only for validation...
+        validation that error squiggles from clientIdeDaemon are the
+        same *for unmodified files* as what hh_server's errors.bin says. *)
     uris_with_standalone_diagnostics: (float * errors_from) UriMap.t;
-        (** these are diagnostics which arrived from serverless-ide or shelling out to hh check,
-        each with a timestamp of when they were discovered. The timestamp lets us calculate
-        for instance whether a diagnostic discovered by clientIdeDaemon is more recent
-        than one discovered by hh check. *)
+        (** these are diagnostics which arrived from serverless-ide or by tailing hh_server's
+        errors.bin file, each with a timestamp of when they were discovered.
+        THis isnt needed for correctness; only for validation...
+        It's used during validating error squiggles from clientIdeDaemon vs errors.bin,
+        using the timestamp to let us calculate whether a diagnostic discovered by
+        clientIdeDaemon is more recent than one read from errors.bin.
+        (It's also used if we fail to read a new errors.bin file to at least clean up
+        after ourselves by deleting all the diagnostics we read from the previous one.
+        And similarly to clean up if we get a shutdown request. We'd be fine without
+        these two forms of clean up. *)
     current_hh_shell: current_hh_shell option;
         (** If a shell-out to "hh --ide-find-refs" or similar is currently underway.
         Invariant: if this is Some, then...
@@ -359,6 +373,9 @@ type event =
       Handled in [handle_shell_out_complete].
       Invariant: if we have one of these events, then we must eventually produce
       an LSP response for it. *)
+  | Deferred_check
+      (** If there had been a didOpen/didChange without a subsequent didClose,
+      and no other events are pending, we will recompute squiggles for it. *)
   | Tick
       (** Once a second, if no other events are pending, we synthesize a Tick
       event. Handled in [handle_tick]. It does things like see if there's a new
@@ -398,6 +415,7 @@ let event_to_string (event : event) : string =
       (ServerProgress.show_errors_file_error e)
       log_message
   | Shell_out_complete _ -> "Shell_out_complete"
+  | Deferred_check -> Printf.sprintf "Deferred_check"
 
 let is_tick (event : event) : bool =
   match event with
@@ -406,7 +424,8 @@ let is_tick (event : event) : bool =
   | Refs_file _
   | Shell_out_complete _
   | Client_message _
-  | Daemon_notification _ ->
+  | Daemon_notification _
+  | Deferred_check ->
     false
 
 (* Here are some exit points. *)
@@ -669,14 +688,27 @@ let get_client_message_source
     (ide_service : ClientIdeService.t ref)
     (q_opt : ServerProgress.ErrorsRead.read_result Lwt_stream.t option)
     (refs_q_opt :
-      FindRefsWireFormat.half_open_one_based list Lwt_stream.t option) :
+      FindRefsWireFormat.half_open_one_based list Lwt_stream.t option)
+    (uris_need_check : bool) :
     [ `From_client
     | `From_ide_service of event
     | `From_q of ServerProgress.ErrorsRead.read_result option
     | `From_refs_q of FindRefsWireFormat.half_open_one_based list option
+    | `From_uris_that_need_check
     | `No_source
     ]
     Lwt.t =
+  (* This code embodies the following rules:
+     1. If something is available from the client, then pick it
+     2. Otherwise if client/ide_service/errors-q/refs-q is available right away then pick one arbitrarily
+     3. Otherwise if there's a uri-that-needs-check then pick it
+     4. Otherwise wait at most 1 second for any of the above
+     5. Otherwise return an idle [Tick].
+
+     Alas Lwt.pick doesn't let us prioritize amongst the items we're awaiting.
+     So we do it a bit hacky, using "0.01 seconds" as an artificial delay
+     to make file-that-needs-check be avoided if anything else is available immediately. *)
+  let delay_to_force_lower_priority = 0.01 in
   if Option.value_map client ~default:false ~f:Jsonrpc.has_message then
     Lwt.return `From_client
   else
@@ -693,7 +725,15 @@ let get_client_message_source
         @ Option.value_map q_opt ~default:[] ~f:(fun q ->
               [Lwt_stream.get q |> Lwt.map (fun item -> `From_q item)])
         @ Option.value_map refs_q_opt ~default:[] ~f:(fun q ->
-              [Lwt_stream.get q |> Lwt.map (fun item -> `From_refs_q item)]))
+              [Lwt_stream.get q |> Lwt.map (fun item -> `From_refs_q item)])
+        @
+        if uris_need_check then
+          [
+            (let%lwt () = Lwt_unix.sleep delay_to_force_lower_priority in
+             Lwt.return `From_uris_that_need_check);
+          ]
+        else
+          [])
     in
     Lwt.return message_source
 
@@ -794,8 +834,19 @@ let get_next_event
         Some q
       | _ -> None
     in
+    let uris_need_check =
+      match !state with
+      | Running Run_env.{ uris_that_need_check; _ } ->
+        not (UriMap.is_empty uris_that_need_check)
+      | _ -> false
+    in
     let%lwt message_source =
-      get_client_message_source client ide_service q_opt refs_q_opt
+      get_client_message_source
+        client
+        ide_service
+        q_opt
+        refs_q_opt
+        uris_need_check
     in
     (match message_source with
     | `From_client ->
@@ -804,7 +855,8 @@ let get_next_event
     | `From_ide_service message -> Lwt.return message
     | `From_q message -> Lwt.return (Errors_file message)
     | `From_refs_q message -> Lwt.return (Refs_file message)
-    | `No_source -> Lwt.return Tick)
+    | `No_source -> Lwt.return Tick
+    | `From_uris_that_need_check -> Lwt.return Deferred_check)
 
 type powered_by =
   | Hh_server
@@ -1654,7 +1706,8 @@ let log_response_if_necessary
     | Tick
     | Daemon_notification _
     | Errors_file _
-    | Refs_file _ ->
+    | Refs_file _
+    | Deferred_check ->
       None
   in
   match to_log with
@@ -3380,6 +3433,71 @@ let validate_error_complete_TEMPORARY (lenv : Run_env.t) ~(start_time : float) :
   in
   { lenv with Run_env.uris_with_standalone_diagnostics }
 
+(** This reports on every live-squiggle-recheck that we attempt.
+An Ok [result] means the recheck succeeded and we published diagnostics;
+Error means the recheck was cancelled. *)
+let report_recheck_telemetry
+    ~(trigger : errors_trigger)
+    ~(ref_unblocked_time : float ref)
+    (uri : DocumentUri.t)
+    (result : (Errors.finalized_error list, unit) Result.t) : unit =
+  let (result, result_count) =
+    match result with
+    | Ok errors when List.is_empty errors -> ("publishedEmpty", Some 0)
+    | Ok errors -> ("publishedErrors", Some (List.length errors))
+    | Error () -> ("cancelled", None)
+  in
+  let notification =
+    TelemetryNotification
+      ( {
+          LogMessage.type_ = MessageType.InfoMessage;
+          message = "timing info for file check";
+        },
+        [
+          ("telemetryKind", Hh_json.string_ "timingForCheck");
+          ("checkScope", Hh_json.string_ "file");
+          ("uri", Hh_json.string_ (string_of_uri uri));
+          ("checkResult", Hh_json.string_ result);
+        ]
+        @
+        match trigger with
+        | Initialize_trigger -> [("triggerKind", Hh_json.string_ "init")]
+        | Message_trigger { message; metadata } ->
+          [
+            ("triggerKind", Hh_json.string_ "message");
+            ( "durationMs",
+              Hh_json.int_
+                (int_of_float
+                   Float.((Unix.gettimeofday () -. metadata.timestamp) * 1000.0))
+            );
+            ( "triggerMessage",
+              Hh_json.JSON_Object
+                [
+                  ( "method",
+                    Hh_json.string_ (Lsp_fmt.message_name_to_string message) );
+                  ("activityId", Hh_json.string_ metadata.activity_id);
+                ] );
+          ] )
+  in
+  let (trigger_method, timestamp, activity_id) =
+    match trigger with
+    | Initialize_trigger -> ("[init]", None, None)
+    | Message_trigger { metadata; message } ->
+      ( Lsp_fmt.message_name_to_string message,
+        Some metadata.timestamp,
+        Some metadata.activity_id )
+  in
+  notify_jsonrpc ~powered_by:Serverless_ide notification;
+  HackEventLogger.client_lsp_recheck
+    ~root:!env.root
+    ~path:(lsp_uri_to_path uri |> Relative_path.create_detect_prefix)
+    ~trigger_method
+    ~result_count
+    ~activity_id
+    ~start_queue_time:timestamp
+    ~start_handle_time:!ref_unblocked_time;
+  ()
+
 (** This function shold be called anytime we've recomputed live squiggles
 (e.g. upon didChange, codeAction, didClose). It (1) sends publishDiagnostics
 as necessary, (2) sends an LSP telemetry/event to say what it has done. *)
@@ -3387,7 +3505,8 @@ let publish_and_report_after_recomputing_live_squiggles
     (state : state)
     (file_path : Path.t)
     (errors : Errors.finalized_error list)
-    ~(trigger : errors_trigger) : state =
+    ~(trigger : errors_trigger)
+    ~(ref_unblocked_time : float ref) : state =
   match state with
   | Pre_init -> failwith "how we got errors before initialize?"
   | Post_shutdown -> state (* no-op *)
@@ -3395,7 +3514,6 @@ let publish_and_report_after_recomputing_live_squiggles
     let file_path = Path.to_string file_path in
     let uri = path_string_to_lsp_uri file_path ~default_path:file_path in
     let uris = lenv.Run_env.uris_with_standalone_diagnostics in
-    let previously_had_diagnostics = UriMap.mem uri uris in
     let uris_with_standalone_diagnostics =
       if List.is_empty errors then
         UriMap.remove uri uris
@@ -3409,47 +3527,7 @@ let publish_and_report_after_recomputing_live_squiggles
     let params = hack_errors_to_lsp_diagnostic file_path errors in
     let notification = PublishDiagnosticsNotification params in
     notify_jsonrpc ~powered_by:Serverless_ide notification;
-
-    (* We'll also send a telemetry/event that describes when+why this was sent *)
-    let telemetry_notification =
-      TelemetryNotification
-        ( {
-            LogMessage.type_ = MessageType.InfoMessage;
-            message = "timing info for file check";
-          },
-          [
-            ("telemetryKind", Hh_json.string_ "timingForCheck");
-            ("checkScope", Hh_json.string_ "file");
-            ("uri", Hh_json.string_ (File_url.create file_path));
-            ( "diagnostics_exist_before",
-              Hh_json.bool_ previously_had_diagnostics );
-            ("diagnostics_exist_now", Hh_json.bool_ (not (List.is_empty errors)));
-            ("diagnostics_published", Hh_json.bool_ true);
-          ]
-          @
-          match trigger with
-          | Initialize_trigger -> [("triggerKind", Hh_json.string_ "init")]
-          | Message_trigger { message; metadata } ->
-            [
-              ("triggerKind", Hh_json.string_ "message");
-              ( "duration_ms",
-                Hh_json.int_
-                  (int_of_float
-                     Float.(
-                       (Unix.gettimeofday () -. metadata.timestamp) * 1000.0))
-              );
-              ( "triggerMessage",
-                Hh_json.JSON_Object
-                  [
-                    ( "method",
-                      Hh_json.string_ (Lsp_fmt.message_name_to_string message)
-                    );
-                    ("activity_id", Hh_json.string_ metadata.activity_id);
-                  ] );
-            ] )
-    in
-
-    notify_jsonrpc ~powered_by:Serverless_ide telemetry_notification;
+    report_recheck_telemetry ~trigger ~ref_unblocked_time uri (Ok errors);
 
     let new_state =
       Running { lenv with Run_env.uris_with_standalone_diagnostics }
@@ -4046,20 +4124,38 @@ let cancel_if_has_pending_cancel_request
     else
       ()
 
-(** Sends the file to [ide_service], which will respond by registering this file
-as one of the "open files" (hence with persistent cached TAST until such time as
-it receives Did_close).
+(** The function [send_file_to_ide_and_get_errors_if_needed] currently
+plays two different roles:
+1. when a didChange/didOpen event arrives, it either eagerly recomputes
+squiggles, or it defers them until we become idle (based on the flag
+lsp_pull_diagnostics).
+2. when we become idle, it discharges any of that deferred work
+by recomputing squiggles.
 
-We ask it to calculate that TAST and send us back errors which we then publish.
-Unless there are subsequent didChange events for this uri already in the queue
-(e.g. because the user is typing). In this case we don't ask for TAST/errors;
-the work can be deferred until that next didChange. *)
+It's ugly that the function has all these mixed roles. Once we
+roll out lsp_pull_diagnostics to 100%, then we can separate
+the two roles and clean up the code. Until then, this type
+lets us distinguish the two roles. *)
+type when_to_get_errors =
+  | Get_errors_if_not_pull_diagnostics_and_no_subsequent_didChange
+  | Get_errors_always_because_discharging_uri_that_needs_check
+
+(** Under [lsp_pull_diagnostics], this function is called upon didOpen/didChange
+to stick a uri into the [uris_that_need_check] queue, and is called a second
+time upon idle to discharge those uris by sending them to [ide_service] to
+recomputing errors and publishing them.
+
+Not under [lsp_pull_diagnostics], this function is called upon didOpen/didChange
+where it eagerly sends them to [ide_service] to recompute errors and publishing them.
+In this case, as a shortcut, if we're asked to act on a didChange but there's a
+subsequent didChange in the queue, then we avoid acting on the first one. *)
 let send_file_to_ide_and_get_errors_if_needed
     ~client
     ~ide_service
     ~state
     ~uri
     ~file_contents
+    ~(when_to_get_errors : when_to_get_errors)
     ~(trigger : errors_trigger)
     ~ref_unblocked_time : state Lwt.t =
   let file_path = uri |> lsp_uri_to_path |> Path.make in
@@ -4085,7 +4181,11 @@ let send_file_to_ide_and_get_errors_if_needed
         | _ -> false)
   in
   let should_calculate_errors =
-    Option.is_none subsequent_didchange_for_this_uri
+    match when_to_get_errors with
+    | Get_errors_always_because_discharging_uri_that_needs_check -> true
+    | Get_errors_if_not_pull_diagnostics_and_no_subsequent_didChange ->
+      Option.is_none subsequent_didchange_for_this_uri
+      && not !env.local_config.ServerLocalConfig.lsp_pull_diagnostics
   in
   let tracking_id =
     match trigger with
@@ -4110,6 +4210,29 @@ let send_file_to_ide_and_get_errors_if_needed
         file_path
         errors
         ~trigger
+        ~ref_unblocked_time
+  in
+  let new_state =
+    match (when_to_get_errors, new_state) with
+    | ( Get_errors_if_not_pull_diagnostics_and_no_subsequent_didChange,
+        Running renv )
+      when !env.local_config.ServerLocalConfig.lsp_pull_diagnostics ->
+      let uris_that_need_check = renv.Run_env.uris_that_need_check in
+      Option.iter
+        (UriMap.find_opt uri uris_that_need_check)
+        ~f:(fun prev_trigger ->
+          (* We had a previous trigger to typecheck the file and then a new trigger arrived.
+             How to report on the previous attempt? ... as cancelled, just like the rest of LSP does it. *)
+          report_recheck_telemetry
+            ~trigger:prev_trigger
+            ~ref_unblocked_time
+            uri
+            (Error ()));
+      let uris_that_need_check = UriMap.add uri trigger uris_that_need_check in
+      Running Run_env.{ renv with uris_that_need_check }
+    | (Get_errors_if_not_pull_diagnostics_and_no_subsequent_didChange, _)
+    | (Get_errors_always_because_discharging_uri_that_needs_check, _) ->
+      new_state
   in
   Lwt.return new_state
 
@@ -4148,15 +4271,16 @@ let handle_editor_buffer_message
         ~state
         ~uri
         ~file_contents
+        ~when_to_get_errors:
+          Get_errors_if_not_pull_diagnostics_and_no_subsequent_didChange
         ~trigger:(Message_trigger { metadata; message })
         ~ref_unblocked_time
     in
     state := new_state;
     Lwt.return_unit
   | NotificationMessage (DidCloseNotification params) ->
-    let file_path =
-      uri_to_path params.DidClose.textDocument.TextDocumentIdentifier.uri
-    in
+    let uri = params.DidClose.textDocument.TextDocumentIdentifier.uri in
+    let file_path = uri_to_path uri in
     let%lwt errors =
       ide_rpc
         ide_service
@@ -4169,7 +4293,24 @@ let handle_editor_buffer_message
         !state
         file_path
         errors
-        ~trigger:(Message_trigger { message; metadata });
+        ~trigger:(Message_trigger { message; metadata })
+        ~ref_unblocked_time;
+    begin
+      match !state with
+      | Running renv ->
+        let uris_that_need_check = renv.Run_env.uris_that_need_check in
+        Option.iter
+          (UriMap.find_opt uri uris_that_need_check)
+          ~f:(fun prev_trigger ->
+            report_recheck_telemetry
+              ~trigger:prev_trigger
+              ~ref_unblocked_time
+              uri
+              (Error ()));
+        let uris_that_need_check = UriMap.remove uri uris_that_need_check in
+        state := Running Run_env.{ renv with uris_that_need_check }
+      | _ -> ()
+    end;
     Lwt.return_unit
   | _ ->
     (* Don't handle other events for now. When we show typechecking errors for
@@ -4308,6 +4449,7 @@ let handle_client_message
         Running
           {
             Run_env.editor_open_files = UriMap.empty;
+            uris_that_need_check = UriMap.empty;
             uris_with_unsaved_changes = UriSet.empty;
             uris_with_standalone_diagnostics = UriMap.empty;
             current_hh_shell = None;
@@ -4578,7 +4720,7 @@ let handle_client_message
       in
       Lwt.return_some (make_result_telemetry result_count)
     (* textDocument/codeAction request *)
-    | (_, RequestMessage (id, CodeActionRequest params)) ->
+    | (Running renv, RequestMessage (id, CodeActionRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt (result, file_path, errors_opt) =
         do_codeAction
@@ -4595,6 +4737,19 @@ let handle_client_message
       begin
         match errors_opt with
         | None -> ()
+        | Some _errors
+          when !env.local_config.ServerLocalConfig.lsp_pull_diagnostics ->
+          let uri =
+            params.CodeActionRequest.textDocument.TextDocumentIdentifier.uri
+          in
+          let uris_that_need_check = renv.Run_env.uris_that_need_check in
+          let uris_that_need_check =
+            UriMap.add
+              uri
+              (Message_trigger { message; metadata })
+              uris_that_need_check
+          in
+          state := Running { renv with Run_env.uris_that_need_check }
         | Some errors ->
           state :=
             publish_and_report_after_recomputing_live_squiggles
@@ -4602,6 +4757,7 @@ let handle_client_message
               file_path
               errors
               ~trigger:(Message_trigger { message; metadata })
+              ~ref_unblocked_time
       end;
       Lwt.return_some (make_result_telemetry (List.length result))
     (* codeAction/resolve request *)
@@ -4741,6 +4897,8 @@ let handle_daemon_notification
               ~state
               ~uri
               ~file_contents
+              ~when_to_get_errors:
+                Get_errors_if_not_pull_diagnostics_and_no_subsequent_didChange
               ~trigger:Initialize_trigger
               ~ref_unblocked_time
           in
@@ -4755,8 +4913,43 @@ let handle_daemon_notification
     let%lwt () = announce_ide_failure error_data in
     Lwt.return_none
 
-(** Called once a second but only when there are no pending messages from client,
-hh_server, or clientIdeDaemon. *)
+let handle_deferred_check
+    ~(state : state ref)
+    ~(client : Jsonrpc.t)
+    ~(ide_service : ClientIdeService.t ref)
+    ~(ref_unblocked_time : float ref) : result_telemetry option Lwt.t =
+  match !state with
+  | Pre_init
+  | Post_shutdown ->
+    Lwt.return_none
+  | Running renv ->
+    let uris_that_need_check = renv.Run_env.uris_that_need_check in
+    let (uri, trigger) = UriMap.choose uris_that_need_check in
+    let uris_that_need_check = UriMap.remove uri uris_that_need_check in
+    state := Running Run_env.{ renv with uris_that_need_check };
+    let editor_open_files =
+      match get_editor_open_files !state with
+      | Some files -> files
+      | None -> UriMap.empty
+    in
+    let file_contents = get_document_contents editor_open_files uri in
+    let%lwt new_state =
+      send_file_to_ide_and_get_errors_if_needed
+        ~client
+        ~ide_service
+        ~state
+        ~uri
+        ~file_contents
+        ~when_to_get_errors:
+          Get_errors_always_because_discharging_uri_that_needs_check
+        ~trigger
+        ~ref_unblocked_time
+    in
+    state := new_state;
+    Lwt.return_none
+
+(** Called once a second but only when there are no pending messages from client
+or clientIdeDaemon *)
 let handle_tick ~(state : state ref) : result_telemetry option Lwt.t =
   EventLogger.recheck_disk_files ();
   HackEventLogger.Memory.profile_if_needed ();
@@ -4876,11 +5069,14 @@ let main (args : args) ~(init_id : string) ~(local_config : ServerLocalConfig.t)
              and stored it within the arguments here to [Shell_out_complete]. *)
           handle_shell_out_complete result triggering_request shellable_type
         | Tick -> handle_tick ~state
+        | Deferred_check ->
+          handle_deferred_check ~state ~client ~ide_service ~ref_unblocked_time
       in
       (* for LSP requests and notifications, we keep a log of what+when we responded.
          INVARIANT: every LSP request gets either a response logged here,
          or an error logged by one of the handlers below. *)
       log_response_if_necessary event result_telemetry_opt !ref_unblocked_time;
+
       Lwt.return_unit
     with
     | Client_fatal_connection_exception { Marshal_tools.stack; message } ->

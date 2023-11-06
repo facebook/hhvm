@@ -39,6 +39,8 @@ TLHTTPSessionStats::TLHTTPSessionStats(const std::string& prefix)
       ttbtxExceedLimit(prefix + "_ttbtx_exceed_limit", facebook::fb303::SUM),
       ctrlMsgsRateLimited(prefix + "_ctrl_msgs_rate_limited",
                           facebook::fb303::SUM),
+      headersRateLimited(prefix + "_headers_rate_limited",
+                         facebook::fb303::SUM),
       txnsPerSession(prefix + "_txn_per_session",
                      1,
                      0,
@@ -61,6 +63,15 @@ TLHTTPSessionStats::TLHTTPSessionStats(const std::string& prefix)
           1 /* bucketWidth */,
           0 /* min */,
           500 /* max, keep in sync with kDefaultMaxControlMsgsPerInterval */,
+          facebook::fb303::AVG,
+          50,
+          99,
+          100),
+      headersInInterval(
+          prefix + "_headers_in_interval",
+          1 /* bucketWidth */,
+          0 /* min */,
+          500 /* max, keep in sync with kDefaultMaxHeadersMsgsPerInterval */,
           facebook::fb303::AVG,
           50,
           99,
@@ -170,6 +181,14 @@ void TLHTTPSessionStats::recordControlMsgsInInterval(
 
 void TLHTTPSessionStats::recordControlMsgRateLimited() noexcept {
   ctrlMsgsRateLimited.add(1);
+}
+
+void TLHTTPSessionStats::recordHeadersInInterval(int64_t quantity) noexcept {
+  headersInInterval.add(quantity);
+}
+
+void TLHTTPSessionStats::recordHeadersRateLimited() noexcept {
+  headersRateLimited.add(1);
 }
 
 } // namespace proxygen

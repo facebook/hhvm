@@ -2931,7 +2931,7 @@ TEST_F(HTTP2UpstreamSessionTest, AttachDetach) {
     httpSession_->detachThreadLocals();
     httpSession_->attachThreadLocals(
         &base, nullptr, timerInstance, nullptr, fn, nullptr, nullptr);
-    EXPECT_EQ(filterCount, 3);
+    EXPECT_EQ(filterCount, 2);
     filterCount = 0;
     base.loopOnce();
   }
@@ -2997,7 +2997,7 @@ TEST_F(HTTP2UpstreamSessionTest, DetachFlowControlTimeout) {
     httpSession_->detachThreadLocals();
     httpSession_->attachThreadLocals(
         &base, nullptr, timerInstance, nullptr, fn, nullptr, nullptr);
-    EXPECT_EQ(filterCount, 3);
+    EXPECT_EQ(filterCount, 2);
     filterCount = 0;
     base.loopOnce();
   }

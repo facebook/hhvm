@@ -222,7 +222,8 @@ void HTTPSession::setupCodec() {
     // existing flow control filter
   }
   if (codec_->supportsParallelRequests() && !controlMessageRateLimitFilter_ &&
-      sock_) {
+      sock_ &&
+      codec_->getTransportDirection() == TransportDirection::DOWNSTREAM) {
     controlMessageRateLimitFilter_ = new ControlMessageRateLimitFilter(
         &getEventBase()->timer(), sessionStats_);
     codec_.addFilters(std::unique_ptr<ControlMessageRateLimitFilter>(

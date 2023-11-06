@@ -96,7 +96,7 @@ class HTTPDownstreamTest : public testing::Test {
 
     httpSession_->setFlowControl(
         flowControl[0], flowControl[1], flowControl[2]);
-    httpSession_->setEgressSettings({{SettingsId::MAX_CONCURRENT_STREAMS, 80},
+    httpSession_->setEgressSettings({{SettingsId::MAX_CONCURRENT_STREAMS, 200},
                                      {SettingsId::HEADER_TABLE_SIZE, 5555},
                                      {SettingsId::ENABLE_PUSH, 1},
                                      {SettingsId::ENABLE_EX_HEADERS, 1}});
@@ -3727,6 +3727,30 @@ TEST_F(HTTP2DownstreamSessionTest, TestPriorityFCBlocked) {
   this->eventBase_.loop();
 }
 
+TEST_F(HTTP2DownstreamSessionTest, TestHeadersRateLimitExceeded) {
+  httpSession_->setControlMessageRateLimitParams(
+      1000, 1000, 100, seconds(0), seconds(0), seconds(0));
+
+  std::vector<std::unique_ptr<testing::StrictMock<MockHTTPHandler>>> handlers;
+  for (int i = 0; i < 100; i++) {
+    auto handler = addSimpleStrictHandler();
+    auto rawHandler = handler.get();
+    handlers.push_back(std::move(handler));
+    rawHandler->expectHeaders();
+    rawHandler->expectEOM(
+        [rawHandler] { rawHandler->sendReplyWithBody(200, 100); });
+    sendRequest();
+  }
+  // Straw that breaks the camel's back
+  sendRequest();
+  for (int i = 0; i < 100; i++) {
+    handlers[i]->expectGoaway();
+    handlers[i]->expectDetachTransaction();
+  }
+  expectDetachSession();
+  flushRequestsAndLoopN(2);
+}
+
 TEST_F(HTTP2DownstreamSessionTest, TestControlMsgRateLimitExceeded) {
   auto streamid = clientCodec_->createStream();
 
@@ -3756,7 +3780,7 @@ TEST_F(HTTP2DownstreamSessionTest, TestControlMsgResetRateLimitTouched) {
 
   auto streamid = clientCodec_->createStream();
 
-  httpSession_->setControlMessageRateLimitParams(100, 100, milliseconds(0));
+  httpSession_->setControlMessageRateLimitParams(10, 100, 100, milliseconds(0));
 
   // Send 97 PRIORITY, 1 SETTINGS, and 2 PING frames. This doesn't exceed the
   // limit of 10.
@@ -3797,7 +3821,7 @@ TEST_F(HTTP2DownstreamSessionTest, TestControlMsgResetRateLimitTouched) {
 }
 
 TEST_F(HTTP2DownstreamSessionTest, DirectErrorHandlingLimitTouched) {
-  httpSession_->setControlMessageRateLimitParams(100, 50, milliseconds(0));
+  httpSession_->setControlMessageRateLimitParams(100, 10, 100, milliseconds(0));
 
   // Send 50 messages, each of which cause direct error handling. Since
   // this doesn't exceed the limit, this should not cause the connection
@@ -3829,7 +3853,7 @@ TEST_F(HTTP2DownstreamSessionTest, DirectErrorHandlingLimitTouched) {
 }
 
 TEST_F(HTTP2DownstreamSessionTest, DirectErrorHandlingLimitExceeded) {
-  httpSession_->setControlMessageRateLimitParams(100, 50, milliseconds(0));
+  httpSession_->setControlMessageRateLimitParams(100, 10, 100, milliseconds(0));
 
   // Send eleven messages, each of which causes direct error handling. Since
   // this exceeds the limit, the connection should be dropped.

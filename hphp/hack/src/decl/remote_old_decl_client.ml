@@ -156,24 +156,24 @@ let fetch_old_decls_via_file_hashes
 let fetch_old_decls ~(ctx : Provider_context.t) (names : string list) :
     Shallow_decl_defs.shallow_class option SMap.t =
   let db_path_opt = Utils.db_path_of_ctx ~ctx in
-  let start_t = Unix.gettimeofday () in
-  let old_decls =
-    match db_path_opt with
-    | None -> SMap.empty
-    | Some db_path ->
+  match db_path_opt with
+  | None -> SMap.empty
+  | Some db_path ->
+    let decl_hashes =
+      List.filter_map
+        ~f:(fun name -> Utils.name_to_decl_hash_opt ~name ~db_path)
+        names
+    in
+    let start_t = Unix.gettimeofday () in
+    let old_decls =
       let use_old_decls_from_cas =
         TypecheckerOptions.use_old_decls_from_cas
           (Provider_context.get_tcopt ctx)
       in
       Hh_logger.log "Using old decls from CAS? %b" use_old_decls_from_cas;
-      (match use_old_decls_from_cas with
+      match use_old_decls_from_cas with
       | true -> fetch_old_decls_via_file_hashes ~ctx ~db_path names
       | false ->
-        let decl_hashes =
-          List.filter_map
-            ~f:(fun name -> Utils.name_to_decl_hash_opt ~name ~db_path)
-            names
-        in
         (match decl_hashes with
         | [] -> SMap.empty
         | _ ->
@@ -225,17 +225,17 @@ let fetch_old_decls ~(ctx : Provider_context.t) (names : string list) :
                     acc)
                 decl_blobs
             in
-            decls)))
-  in
-  let names_length = List.length names in
-  let telemetry =
-    Telemetry.create ()
-    |> Telemetry.int_ ~key:"to_fetch" ~value:names_length
-    |> Telemetry.int_ ~key:"fetched" ~value:(SMap.cardinal old_decls)
-  in
-  HackEventLogger.remote_old_decl_end telemetry start_t;
-  Hh_logger.log
-    "Fetched %d/%d decls remotely"
-    (SMap.cardinal old_decls)
-    names_length;
-  old_decls
+            decls))
+    in
+    let to_fetch = List.length decl_hashes in
+    let telemetry =
+      Telemetry.create ()
+      |> Telemetry.int_ ~key:"to_fetch" ~value:to_fetch
+      |> Telemetry.int_ ~key:"fetched" ~value:(SMap.cardinal old_decls)
+    in
+    HackEventLogger.remote_old_decl_end telemetry start_t;
+    Hh_logger.log
+      "Fetched %d/%d decls remotely"
+      (SMap.cardinal old_decls)
+      to_fetch;
+    old_decls

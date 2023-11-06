@@ -1,5 +1,4 @@
-$_SERVER['REQUEST_TIME']: %d
-$_SERVER['REQUEST_TIME_FLOAT']: %f
+$_SERVER['REQUEST_TIME_NS']: %d
 time(): %d
 microtime(true): %f
 created in %f ms

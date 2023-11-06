@@ -235,9 +235,6 @@ const StaticString
   s_HHVM("HHVM"),
   s_HHVM_JIT("HHVM_JIT"),
   s_HHVM_ARCH("HHVM_ARCH"),
-  s_REQUEST_START_TIME("REQUEST_START_TIME"),
-  s_REQUEST_TIME("REQUEST_TIME"),
-  s_REQUEST_TIME_FLOAT("REQUEST_TIME_FLOAT"),
   s_REQUEST_TIME_NS("REQUEST_TIME_NS"),
   s_DOCUMENT_ROOT("DOCUMENT_ROOT"),
   s_SCRIPT_FILENAME("SCRIPT_FILENAME"),
@@ -665,12 +662,6 @@ void handle_destructor_exception(const char* situation) {
 void init_server_request_time(Array& server) {
   auto const nowNs = std::chrono::nanoseconds(
     std::chrono::system_clock::now().time_since_epoch()).count();
-  auto const nowS = nowNs / 1000000000;
-  auto const nowF = nowNs / 1000000000.0;
-
-  server.set(s_REQUEST_START_TIME, nowS);
-  server.set(s_REQUEST_TIME, nowS);
-  server.set(s_REQUEST_TIME_FLOAT, nowF);
   server.set(s_REQUEST_TIME_NS, nowNs);
 }
 

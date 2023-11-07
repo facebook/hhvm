@@ -80,10 +80,6 @@ DEFINE_bool(early_data, false, "Whether to use 0-rtt");
 DEFINE_uint32(quic_batching_mode,
               static_cast<uint32_t>(quic::QuicBatchingMode::BATCHING_MODE_NONE),
               "QUIC batching mode");
-DEFINE_bool(quic_use_thread_local_batching, false, "Use thread local batching");
-DEFINE_uint32(quic_thread_local_delay_us,
-              1000,
-              "Thread local delay in microseconds");
 DEFINE_uint32(quic_batch_size,
               quic::kDefaultQuicMaxBatchSize,
               "Maximum number of packets that can be batched in Quic");
@@ -230,10 +226,6 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
   }
   hqParams.transportSettings.batchingMode =
       quic::getQuicBatchingMode(FLAGS_quic_batching_mode);
-  hqParams.transportSettings.useThreadLocalBatching =
-      FLAGS_quic_use_thread_local_batching;
-  hqParams.transportSettings.threadLocalDelay =
-      std::chrono::microseconds(FLAGS_quic_thread_local_delay_us);
   hqParams.transportSettings.maxBatchSize = FLAGS_quic_batch_size;
   if (hqUberParams.mode == HQMode::CLIENT) {
     // There is no good reason to keep the socket around for a drain period for

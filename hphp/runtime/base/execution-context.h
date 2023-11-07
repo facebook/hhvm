@@ -68,7 +68,6 @@ struct VMState {
   ActRec* jitCalledFrame;
   jit::TCA jitReturnAddr;
   Either<ObjectData*, Exception*> exn;
-  bool unwinderSideEnter;
 };
 
 enum class InclOpFlags {

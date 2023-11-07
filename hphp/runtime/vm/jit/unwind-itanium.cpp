@@ -127,8 +127,7 @@ TCA lookup_catch_trace(TCA rip) {
  * Look up the catch trace for the return address in `ctx', and install it by
  * updating the unwind RDS info, as well as the IP in `ctx'.
  */
-void install_catch_trace(_Unwind_Context* ctx, TCA rip,
-                         bool do_side_exit, TypedValue unwinder_tv) {
+void install_catch_trace(_Unwind_Context* ctx, TCA rip) {
   auto catchTrace = lookup_catch_trace(rip);
   if (!catchTrace) {
     FTRACE(1, "no catch trace entry for ip {}; installing default catch trace "
@@ -139,24 +138,7 @@ void install_catch_trace(_Unwind_Context* ctx, TCA rip,
 
   FTRACE(1, "installing catch trace {} for call {} with tv {}, "
          "returning _URC_INSTALL_CONTEXT\n",
-         catchTrace, rip, unwinder_tv.pretty());
-
-  // If the catch trace isn't going to finish by calling
-  // __cxxabiv1::__cxa_rethrow, we consume the exception here.
-  //
-  // In theory, the unwind API will let us set registers in the frame before
-  // executing our landing pad. In practice, trying to use their recommended
-  // scratch registers results in a SEGV inside _Unwind_SetGR, so we pass
-  // things to the handler using the RDS. This also simplifies the handler code
-  // because it doesn't have to worry about saving its arguments somewhere
-  // while executing the exit trace.
-  if (do_side_exit) {
-    __cxxabiv1::__cxa_end_catch();
-    g_unwind_rds->exn = nullptr;
-    g_unwind_rds->tv = unwinder_tv;
-  }
-  g_unwind_rds->doSideExit = do_side_exit;
-
+         catchTrace, rip, g_unwind_rds->tv.pretty());
   _Unwind_SetIP(ctx, (uint64_t)catchTrace);
   regState() = VMRegState::DIRTY;
 }
@@ -247,11 +229,32 @@ tc_unwind_personality(int version,
           (g_unwind_rds->exn.isNull() && ism));
   g_unwind_rds->isFirstFrame = true;
 
-  auto const tv = ism ? ism->tv() : TypedValue{};
+  // In theory, the unwind API will let us set registers in the frame before
+  // executing our landing pad. In practice, trying to use their recommended
+  // scratch registers results in a SEGV inside _Unwind_SetGR, so we pass
+  // things to the handler using the RDS. This also simplifies the handler code
+  // because it doesn't have to worry about saving its arguments somewhere
+  // while executing the exit trace.
+  g_unwind_rds->doSideExit = ism;
+  g_unwind_rds->tv = ism ? ism->tv() : TypedValue{};
+
+  if (ism) {
+    // If the catch trace is going to side exit, we won't have an opportunity
+    // to consume the exception later, so consume it here.
+    assertx(lookup_catch_trace(ip));
+    __cxxabiv1::__cxa_end_catch();
+  } else if (g_unwind_rds->exn.left()) {
+    // We consume Hack exceptions early and convert them to the situation
+    // equivalent to a side entry. This unifies the logic for both situations
+    // and gives us flexibility to handle Hack exceptions from catch blocks.
+    g_unwind_rds->exn.left()->incRefCount();
+    __cxxabiv1::__cxa_end_catch();
+  }
+
 
   // If we have a catch trace at the IP in the frame given by `context',
   // install it otherwise install the default catch trace.
-  install_catch_trace(context, ip, bool(ism), tv);
+  install_catch_trace(context, ip);
   return _URC_INSTALL_CONTEXT;
 }
 
@@ -287,10 +290,9 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp, bool teardown) {
         auto phpException = g_unwind_rds->exn.left();
         auto const result = unwindVM(g_unwind_rds->exn, sfp, teardown);
         if (!(result & UnwindReachedGoal)) {
-          if (!g_unwind_rds->sideEnter) __cxxabiv1::__cxa_end_catch();
-          else if (phpException)        phpException->decReleaseCheck();
+          assertx(phpException);
+          phpException->decReleaseCheck();
           g_unwind_rds->doSideExit = true;
-          g_unwind_rds->sideEnter = false;
 
           if (result & UnwindFSWH) {
             auto const vmfp_ = vmfp();
@@ -319,22 +321,14 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp, bool teardown) {
     if (savedRip == tc::ustubs().callToExit) {
       // If we're the top VM frame, there's nothing we need to do; we can just
       // let the native C++ unwinder take over.
-      if (g_unwind_rds->sideEnter) {
-        ITRACE(1, "top VM frame, sideEnter is set, enter itanium unwinder "
-                  "by throwing\n");
-        // Looks like we got here having skipped itanium unwinder, lets enter
-        g_unwind_rds->sideEnter = false;
-        // We can only side enter with a PHP exception
-        assertx(g_unwind_rds->exn.left());
+      if (g_unwind_rds->exn.left()) {
+        ITRACE(1, "top VM frame, Hack exception, enter itanium unwinder "
+                  "by throwing it\n");
         return {tc::ustubs().throwExceptionWhileUnwinding, sfp};
       }
-      ITRACE(1, "top VM frame, passing back to _Unwind_Resume\n");
 
-      switch (arch()) {
-        case Arch::ARM:
-        case Arch::X64:
-          return {nullptr, sfp};
-      }
+      ITRACE(1, "top VM frame, passing back to _Unwind_Resume\n");
+      return {nullptr, sfp};
     }
 
     auto catchTrace = lookup_catch_trace(savedRip);

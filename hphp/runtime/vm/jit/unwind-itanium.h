@@ -59,11 +59,6 @@ struct UnwindRDS {
    * to somewhere else in the TC, rather than resuming the unwind process. */
   bool doSideExit;
 
-  /* Indicates that we entered tc_unwind_resume directly rather than through
-   * itanium ABI
-   */
-  bool sideEnter;
-
   /* Indicates whether this is the first frame the unwinder will unwind
    */
   bool isFirstFrame;
@@ -82,7 +77,6 @@ IMPLEMENT_OFF(Exn, exn)
 IMPLEMENT_OFF(FSWH, fswh)
 IMPLEMENT_OFF(TV, tv)
 IMPLEMENT_OFF(SideExit, doSideExit)
-IMPLEMENT_OFF(SideEnter, sideEnter)
 IMPLEMENT_OFF(SavedRip, savedRip)
 #undef IMPLEMENT_OFF
 

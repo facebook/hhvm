@@ -137,7 +137,6 @@ void cgEnterTCUnwind(IRLS& env, const IRInstruction* inst) {
 
   markRDSAccess(v, g_unwind_rds.handle());
   markRDSAccess(v, g_unwind_rds.handle());
-  v << storebi{1, rvmtl()[unwinderSideEnterOff()]};
   v << store{exn, rvmtl()[unwinderExnOff()]};
 
   auto const target = [&] {

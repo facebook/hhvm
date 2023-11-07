@@ -1,0 +1,173 @@
+FileDecls Instance (should be yes):Yes
+FileDecls Error (should have error):: File contained first-pass parse errors
+FileDecls Error (should be empty):
+Has class MyClass (should be yes):Yes
+Has class NoClass (should be no):No
+File: dict [
+  'attributes' => 
+  vec [
+    dict [
+      'name' => 'MyClass',
+      'kind' => 'class',
+      'is_strict' => true,
+      'attributes' => 
+      vec [
+        dict [
+          'name' => 'MyAttribute',
+          'args' => 
+          vec [
+            'a',
+            'b',
+          ],
+        ],
+      ],
+      'methods' => 
+      vec [
+        dict [
+          'name' => 'genOtherMethod',
+          'signature_type' => '(function<T>(): HH\\Awaitable<T>)',
+          'visibility' => 'public',
+          'signature' => 
+          dict [
+            'return_type' => 'HH\\Awaitable<T>',
+            'tparams' => 
+            vec [
+              dict [
+                'name' => 'T',
+                'variance' => 'invariant',
+                'reified' => 'erased',
+              ],
+            ],
+            'is_soft_return_type' => true,
+            'implicit_params' => '&()',
+            'is_async' => true,
+          ],
+        ],
+      ],
+      'static_methods' => 
+      vec [
+        dict [
+          'name' => 'MyMethod',
+          'signature_type' => '(function(inout MySimpleTypeAlias $arg): void)',
+          'visibility' => 'protected',
+          'attributes' => 
+          vec [
+            dict [
+              'name' => '__Deprecated',
+              'args' => 
+              vec [
+                'Some Message',
+                '10000',
+              ],
+            ],
+          ],
+          'signature' => 
+          dict [
+            'return_type' => 'void',
+            'is_soft_return_type' => true,
+            'params' => 
+            vec [
+              dict [
+                'name' => '$arg',
+                'type' => 'MySimpleTypeAlias',
+                'is_soft_type' => true,
+                'is_inout' => true,
+              ],
+            ],
+          ],
+          'is_final' => true,
+        ],
+      ],
+      'typeconsts' => 
+      vec [
+        dict [
+          'name' => 'MyTypeAlias',
+          'kind' => 'HH\\dict<string, MyClass>',
+        ],
+        dict [
+          'name' => 'MySimpleTypeAlias',
+          'kind' => '?int',
+        ],
+      ],
+      'consts' => 
+      vec [
+        dict [
+          'name' => 'MY_CONSTANT',
+          'type' => 'string',
+        ],
+      ],
+      'props' => 
+      vec [
+        dict [
+          'name' => 'myInstanceField',
+          'type' => 'bool',
+          'visibility' => 'private',
+        ],
+      ],
+      'static_props' => 
+      vec [
+        dict [
+          'name' => '$myStaticField',
+          'type' => 'int',
+          'visibility' => 'private',
+        ],
+      ],
+    ],
+    dict [
+      'name' => 'MyAttribute',
+      'kind' => 'class',
+      'is_final' => true,
+      'is_strict' => true,
+      'implements' => 
+      vec [
+        'HH\\ClassAttribute',
+        'HH\\MethodAttribute',
+        'HH\\TypeAliasAttribute',
+        'HH\\EnumAttribute',
+        'HH\\FunctionAttribute',
+        'HH\\EnumClassAttribute',
+        'HH\\ModuleAttribute',
+        'IndexableClassAttributeN<string>',
+      ],
+      'constructor' => 
+      dict [
+        'name' => '__construct',
+        'signature_type' => '(function(string $first, string $remainder): void)',
+        'visibility' => 'public',
+        'signature' => 
+        dict [
+          'return_type' => 'void',
+          'is_soft_return_type' => true,
+          'params' => 
+          vec [
+            dict [
+              'name' => '$first',
+              'type' => 'string',
+              'is_soft_type' => true,
+            ],
+            dict [
+              'name' => '$remainder',
+              'type' => 'string',
+              'is_soft_type' => true,
+            ],
+          ],
+          'implicit_params' => '&()',
+          'is_variadic' => true,
+        ],
+      ],
+    ],
+  ],
+  'is_strict' => true,
+]
+
+Some constants:
+vec(5) {
+  string(9) "protected"
+  string(9) "covariant"
+  string(6) "erased"
+  string(13) "constraint_as"
+  string(5) "class"
+}
+
+FileDecls Error (should be empty):
+Has typedef InlineSeeMoreToFBECheckerInput (should be yes):Yes

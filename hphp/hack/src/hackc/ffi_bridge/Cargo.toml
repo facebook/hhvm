@@ -20,12 +20,16 @@ direct_decl_parser = { version = "0.0.0", path = "../../parser/api/cargo/direct_
 facts = { version = "0.0.0", path = "../facts/cargo/facts_rust" }
 hash = { version = "0.0.0", path = "../../utils/hash" }
 hhbc = { version = "0.0.0", path = "../hhbc/cargo/hhbc" }
+hhbc_string_utils = { version = "0.0.0", path = "../utils/cargo/hhbc_string_utils" }
 libc = "0.2.139"
 options = { version = "0.0.0", path = "../compile/cargo/options" }
+oxidized = { version = "0.0.0", path = "../../oxidized" }
+oxidized_by_ref = { version = "0.0.0", path = "../../oxidized_by_ref" }
 parser_core_types = { version = "0.0.0", path = "../../parser/cargo/core_types" }
 relative_path = { version = "0.0.0", path = "../../utils/rust/relative_path" }
 sha1 = "0.10.5"
 thiserror = "1.0.43"
+ty = { version = "0.0.0", path = "../../hackrs/ty/cargo/ty" }
 
 [build-dependencies]
 cxx-build = "1.0.100"

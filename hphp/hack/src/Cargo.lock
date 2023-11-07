@@ -876,12 +876,16 @@ dependencies = [
  "facts",
  "hash",
  "hhbc",
+ "hhbc_string_utils",
  "libc",
  "options",
+ "oxidized",
+ "oxidized_by_ref",
  "parser_core_types",
  "relative_path",
  "sha1",
  "thiserror",
+ "ty",
 ]
 
 [[package]]

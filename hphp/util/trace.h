@@ -104,6 +104,7 @@ namespace Trace {
       TM(debugger)      \
       TM(debuggerflow)  \
       TM(debuginfo)     \
+      TM(decl)         \
       TM(decreftype)    \
       TM(disas)         \
       TM(dispatchBB)    \

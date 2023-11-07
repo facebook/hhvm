@@ -28,8 +28,9 @@ pub fn textual_writer(
     path: &Path,
     unit: ir::Unit<'_>,
     no_builtins: bool,
+    hide_static_coeffects: bool,
 ) -> Result<()> {
-    let mut txf = TextualFile::new(w, Arc::clone(&unit.strings));
+    let mut txf = TextualFile::new(w, Arc::clone(&unit.strings), hide_static_coeffects);
 
     let escaped_path = escaper::escape(path.display().to_string());
     txf.write_comment(&format!("{UNIT_START_MARKER} {escaped_path}"))?;

@@ -1,4 +1,4 @@
-// RUN: %hackc compile-infer --fail-fast %s | FileCheck %s
+// RUN: %hackc compile-infer --hide-static-coeffects --fail-fast %s | FileCheck %s
 
 class C {
   // TEST-CHECK-BAL: define C.memometh_inst

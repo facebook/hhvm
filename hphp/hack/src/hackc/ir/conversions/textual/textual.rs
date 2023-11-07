@@ -40,6 +40,7 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 
 pub(crate) struct TextualFile<'a> {
     w: &'a mut dyn std::io::Write,
+    pub(crate) hide_static_coeffects: bool,
     strings: Arc<StringInterner>,
     pub(crate) internal_functions: HashSet<FunctionName>,
     pub(crate) called_functions: HashSet<FunctionName>,
@@ -49,9 +50,14 @@ pub(crate) struct TextualFile<'a> {
 }
 
 impl<'a> TextualFile<'a> {
-    pub(crate) fn new(w: &'a mut dyn std::io::Write, strings: Arc<StringInterner>) -> Self {
+    pub(crate) fn new(
+        w: &'a mut dyn std::io::Write,
+        strings: Arc<StringInterner>,
+        hide_static_coeffects: bool,
+    ) -> Self {
         TextualFile {
             w,
+            hide_static_coeffects,
             strings,
             internal_functions: Default::default(),
             called_functions: Default::default(),
@@ -127,6 +133,7 @@ impl TextualFile<'_> {
         name: &FunctionName,
         loc: Option<&SrcLoc>,
         attributes: &FuncAttributes,
+        coeffects: &Vec<ir::Ctx>,
         params: &[Param<'_>],
         ret_ty: &Return<'_>,
         locals: &[(LocalId, &Ty)],
@@ -152,6 +159,16 @@ impl TextualFile<'_> {
 
         if attributes.is_curry {
             write!(self.w, ".curry ")?;
+        }
+
+        if !self.hide_static_coeffects && !coeffects.is_empty() {
+            write!(self.w, ".static_coeffects = ")?;
+            let mut sep = "";
+            for ctx in coeffects.iter() {
+                write!(self.w, "{}\"{}\"", sep, ctx)?;
+                sep = ", ";
+            }
+            write!(self.w, " ")?;
         }
 
         write!(self.w, "{}(", name.display(&self.strings))?;
@@ -352,41 +369,50 @@ impl TextualFile<'_> {
             is_curry: true,
             is_final: true,
         };
-        self.define_function(&method, None, &attrs, &params, &ret_ty, &[], |fb| {
-            let this_id = fb.txf.strings.intern_str(THIS_NAME);
-            let this = fb.load(&this_ty_ptr, Expr::deref(LocalId::Named(this_id)))?;
+        self.define_function(
+            &method,
+            None,
+            &attrs,
+            &vec![],
+            &params,
+            &ret_ty,
+            &[],
+            |fb| {
+                let this_id = fb.txf.strings.intern_str(THIS_NAME);
+                let this = fb.load(&this_ty_ptr, Expr::deref(LocalId::Named(this_id)))?;
 
-            let mut args = Vec::new();
+                let mut args = Vec::new();
 
-            for (idx, ty) in curry.arg_tys.iter().enumerate() {
-                let field = FieldName::raw(format!("arg{idx}"));
-                let arg = fb.load(ty, Expr::field(this, this_ty.clone(), field))?;
-                args.push(arg);
-            }
+                for (idx, ty) in curry.arg_tys.iter().enumerate() {
+                    let field = FieldName::raw(format!("arg{idx}"));
+                    let arg = fb.load(ty, Expr::field(this, this_ty.clone(), field))?;
+                    args.push(arg);
+                }
 
-            let varargs_id = fb.txf.strings.intern_str(VARARGS_NAME);
-            let varargs = fb.load(&args_ty, Expr::deref(LocalId::Named(varargs_id)))?;
-            args.push(hack::call_builtin(fb, hack::Builtin::SilSplat, [varargs])?);
+                let varargs_id = fb.txf.strings.intern_str(VARARGS_NAME);
+                let varargs = fb.load(&args_ty, Expr::deref(LocalId::Named(varargs_id)))?;
+                args.push(hack::call_builtin(fb, hack::Builtin::SilSplat, [varargs])?);
 
-            let result = if curry.virtual_call {
-                let captured_this_ty = match &curry.name {
-                    FunctionName::Method(captured_this_ty, _) => captured_this_ty,
-                    _ => {
-                        unreachable!();
-                    }
+                let result = if curry.virtual_call {
+                    let captured_this_ty = match &curry.name {
+                        FunctionName::Method(captured_this_ty, _) => captured_this_ty,
+                        _ => {
+                            unreachable!();
+                        }
+                    };
+                    let captured_this = fb.load(
+                        &Ty::named_type_ptr(captured_this_ty.clone()),
+                        Expr::field(this, this_ty.clone(), FieldName::raw("this")),
+                    )?;
+                    fb.call_virtual(&curry.name, captured_this.into(), args)?
+                } else {
+                    fb.call_static(&curry.name, Expr::null(), args)?
                 };
-                let captured_this = fb.load(
-                    &Ty::named_type_ptr(captured_this_ty.clone()),
-                    Expr::field(this, this_ty.clone(), FieldName::raw("this")),
-                )?;
-                fb.call_virtual(&curry.name, captured_this.into(), args)?
-            } else {
-                fb.call_static(&curry.name, Expr::null(), args)?
-            };
 
-            fb.ret(result)?;
-            Ok(())
-        })?;
+                fb.ret(result)?;
+                Ok(())
+            },
+        )?;
 
         Ok(())
     }

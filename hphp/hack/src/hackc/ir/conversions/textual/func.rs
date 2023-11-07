@@ -350,10 +350,15 @@ fn write_func(
         is_final: func_info.attrs().is_final(),
     };
 
+    // TODO(aorenste) move of `func` occurs in the lambda below, so I clone it to
+    // pass it to `write_instance_stub`. Might not be necessary to pass it there.
+    let coeffects = func.coeffects.static_coeffects.clone();
+
     txf.define_function(
         &name,
         Some(&span),
         &attributes,
+        &coeffects,
         &tx_params,
         &ret_ty,
         &locals,
@@ -387,7 +392,7 @@ fn write_func(
             ),
             FunctionName::Method(..) | FunctionName::Unmangled(..),
         ) => {
-            write_instance_stub(txf, unit_state, mi, &tx_params, &ret_ty, &span)?;
+            write_instance_stub(txf, unit_state, mi, &coeffects, &tx_params, &ret_ty, &span)?;
         }
         _ => {}
     }
@@ -444,6 +449,7 @@ fn write_instance_stub(
     txf: &mut TextualFile<'_>,
     unit_state: &mut UnitState,
     method_info: &MethodInfo<'_>,
+    coeffects: &Vec<ir::Ctx>,
     tx_params: &[textual::Param<'_>],
     ret_ty: &textual::Return<'_>,
     span: &ir::SrcLoc,
@@ -465,6 +471,7 @@ fn write_instance_stub(
         &name_str,
         Some(span),
         &attributes,
+        coeffects,
         &tx_params,
         ret_ty,
         &locals,

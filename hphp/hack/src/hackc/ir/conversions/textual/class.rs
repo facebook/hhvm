@@ -265,10 +265,13 @@ impl ClassState<'_, '_, '_> {
         }];
         let attributes = textual::FuncAttributes::default();
 
+        let coeffects = vec![]; // TODO(aorenste) is there any coeffects info around ?
+
         self.txf.define_function(
             &name,
             Some(&self.class.src_loc),
             &attributes,
+            &coeffects,
             &params,
             &ty,
             &[],

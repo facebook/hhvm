@@ -56,6 +56,11 @@ pub struct Opts {
     /// simplifies the analysis.
     #[clap(long)]
     keep_memo: bool,
+
+    /// Control the output of coeffects in textual files. This option can be set to hide the coeffects
+    /// information and ease human reading of textual code.
+    #[clap(long)]
+    hide_static_coeffects: bool,
 }
 
 pub fn run(mut opts: Opts) -> Result<()> {
@@ -105,7 +110,13 @@ fn convert_single_file(path: &Path, opts: &Opts) -> Result<Vec<u8>> {
         let pre_alloc = bumpalo::Bump::default();
         build_ir(&pre_alloc, path, &content, opts).and_then(|unit| {
             let mut output = Vec::new();
-            textual::textual_writer(&mut output, path, unit, opts.no_builtins)?;
+            textual::textual_writer(
+                &mut output,
+                path,
+                unit,
+                opts.no_builtins,
+                opts.hide_static_coeffects,
+            )?;
             Ok(output)
         })
     };

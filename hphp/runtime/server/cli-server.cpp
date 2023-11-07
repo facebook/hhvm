@@ -881,8 +881,7 @@ Array init_cli_globals(int argc, char** argv,
     }
   }
 
-  init_command_line_globals(argc, argv, envp, envVariables,
-                            serverVariables);
+  init_command_line_globals(argc, argv, envp, serverVariables, envVariables);
 
   return retEnv;
 }

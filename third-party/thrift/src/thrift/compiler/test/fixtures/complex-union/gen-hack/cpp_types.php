@@ -1935,3 +1935,85 @@ class GenerateTypedInterceptor implements \IThriftSyncStruct, \IThriftStructMeta
 
 }
 
+/**
+ * Causes C++ handler code to run inline on the EventBase thread.
+ * Disables overload protection, use with caution.
+ * Cannot be applied to individual functions in interactions.
+ *
+ * Original thrift struct:-
+ * ProcessInEbThreadUnsafe
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/cpp/ProcessInEbThreadUnsafe'))>>
+class ProcessInEbThreadUnsafe implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'ProcessInEbThreadUnsafe';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "cpp.ProcessInEbThreadUnsafe",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\TFunction' => \facebook\thrift\annotation\TFunction::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\Interaction' => \facebook\thrift\annotation\Interaction::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+  }
+
+}
+

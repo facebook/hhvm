@@ -634,6 +634,28 @@
           "column" : 35
         }
       }
+    },
+    "ProcessInEbThreadUnsafe" : {
+      "lineno" : 295,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Function" : {  },
+        "scope.Interaction" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 295,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 297,
+          "column" : 34
+        }
+      }
     }
   }
 }

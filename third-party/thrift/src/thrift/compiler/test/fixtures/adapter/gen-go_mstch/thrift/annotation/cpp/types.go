@@ -2653,6 +2653,99 @@ func (x *GenerateTypedInterceptor) String() string {
     return sb.String()
 }
 
+type ProcessInEbThreadUnsafe struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &ProcessInEbThreadUnsafe{}
+
+func NewProcessInEbThreadUnsafe() *ProcessInEbThreadUnsafe {
+    return (&ProcessInEbThreadUnsafe{})
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewProcessInEbThreadUnsafe().Set<FieldNameFoo>().Set<FieldNameBar>()
+type ProcessInEbThreadUnsafeBuilder struct {
+    obj *ProcessInEbThreadUnsafe
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewProcessInEbThreadUnsafe().Set<FieldNameFoo>().Set<FieldNameBar>()
+func NewProcessInEbThreadUnsafeBuilder() *ProcessInEbThreadUnsafeBuilder {
+    return &ProcessInEbThreadUnsafeBuilder{
+        obj: NewProcessInEbThreadUnsafe(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewProcessInEbThreadUnsafe().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *ProcessInEbThreadUnsafeBuilder) Emit() *ProcessInEbThreadUnsafe {
+    var objCopy ProcessInEbThreadUnsafe = *x.obj
+    return &objCopy
+}
+
+func (x *ProcessInEbThreadUnsafe) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("ProcessInEbThreadUnsafe"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *ProcessInEbThreadUnsafe) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *ProcessInEbThreadUnsafe) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("ProcessInEbThreadUnsafe({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
 	  RegisterType(name string, initializer func() any)
@@ -2674,6 +2767,7 @@ func RegisterTypes(registry interface {
     registry.RegisterType("facebook.com/thrift/annotation/cpp/Frozen2Exclude", func() any { return NewFrozen2Exclude() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/Frozen2RequiresCompleteContainerParams", func() any { return NewFrozen2RequiresCompleteContainerParams() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/GenerateTypedInterceptor", func() any { return NewGenerateTypedInterceptor() })
+    registry.RegisterType("facebook.com/thrift/annotation/cpp/ProcessInEbThreadUnsafe", func() any { return NewProcessInEbThreadUnsafe() })
 
     registry.RegisterType("facebook.com/thrift/annotation/cpp/RefType", func() any { return RefType(0) })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/EnumUnderlyingType", func() any { return EnumUnderlyingType(0) })

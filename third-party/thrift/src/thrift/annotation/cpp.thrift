@@ -286,3 +286,12 @@ struct Frozen2RequiresCompleteContainerParams {}
 @scope.Interaction
 @scope.Function
 struct GenerateTypedInterceptor {}
+
+/**
+ * Causes C++ handler code to run inline on the EventBase thread.
+ * Disables overload protection, use with caution.
+ * Cannot be applied to individual functions in interactions.
+ */
+@scope.Function
+@scope.Interaction
+struct ProcessInEbThreadUnsafe {}

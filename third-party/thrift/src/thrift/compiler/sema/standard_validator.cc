@@ -814,6 +814,24 @@ void validate_interaction_nesting(
   }
 }
 
+void validate_interaction_annotations(
+    diagnostic_context& ctx, const t_interaction& node) {
+  for (auto* func : node.get_functions()) {
+    ctx.check(
+        !func->has_annotation("thread") &&
+            !func->find_structured_annotation_or_null(kCppProcessInEbThreadUri),
+        "Interaction methods cannot be individually annotated with "
+        "thread='eb'. Use process_in_event_base on the interaction instead.");
+  }
+  if (node.has_annotation("process_in_event_base") ||
+      node.find_structured_annotation_or_null(kCppProcessInEbThreadUri)) {
+    ctx.check(
+        !node.has_annotation("serial") &&
+            !node.find_structured_annotation_or_null(kSerialUri),
+        "EB interactions are already serial");
+  }
+}
+
 void validate_cpp_field_interceptor_annotation(
     diagnostic_context& ctx, const t_field& field) {
   if (const t_const* annot =
@@ -1160,6 +1178,7 @@ ast_validator standard_validator() {
   validator.add_service_visitor(
       &validate_extends_service_function_name_uniqueness);
   validator.add_interaction_visitor(&validate_interaction_nesting);
+  validator.add_interaction_visitor(&validate_interaction_annotations);
   validator.add_throws_visitor(&validate_throws_exceptions);
   validator.add_function_visitor(&validate_function_priority_annotation);
   validator.add_function_visitor(ValidateAnnotationPositions{});

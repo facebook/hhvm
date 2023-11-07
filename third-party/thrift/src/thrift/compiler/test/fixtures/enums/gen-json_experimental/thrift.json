@@ -362,6 +362,23 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 155
+      },
+      "Serial" : {
+        "name" : "Serial",
+        "structured_annotations": {
+          "scope.Interaction" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Interaction",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "docstring" : "Indicates that an interaction's methods should be processed sequentially.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 162
       }
       },
   "source_path" : "thrift/annotation/thrift",

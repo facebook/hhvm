@@ -36,11 +36,6 @@ class t_program;
 class t_interaction : public t_service {
  public:
   using t_service::t_service;
-
-  // TODO(afuller): Remove everything below this comment. It is only provided
-  // for backwards compatibility.
- public:
-  bool is_serial() const { return has_annotation("serial"); }
 };
 
 } // namespace compiler

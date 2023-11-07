@@ -100,6 +100,9 @@ var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("thrift.InternBox").
     SetIsUnion(false),
+    metadata.NewThriftStruct().
+    SetName("thrift.Serial").
+    SetIsUnion(false),
 }
 
 var exceptionMetadatas = []*metadata.ThriftException{

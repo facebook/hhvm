@@ -128,27 +128,6 @@ static void match_annotation_types_with_const_values(
   }
 }
 
-// TODO(afuller): Instead of mutating the AST, readers should look for
-// the interaction level annotation and the validation logic should be moved to
-// a standard validator.
-void propagate_process_in_event_base_annotation(
-    diagnostic_context& ctx, mutator_context&, t_interaction& node) {
-  for (auto* func : node.get_functions()) {
-    func->set_is_interaction_member();
-    ctx.check(
-        !func->has_annotation("thread"),
-        "Interaction methods cannot be individually annotated with "
-        "thread='eb'. Use process_in_event_base on the interaction instead.");
-  }
-  if (node.has_annotation("process_in_event_base")) {
-    ctx.check(
-        !node.has_annotation("serial"), "EB interactions are already serial");
-    for (auto* func : node.get_functions()) {
-      func->set_annotation("thread", "eb");
-    }
-  }
-}
-
 // Only an unqualified field is eligible for terse write.
 void mutate_terse_write_annotation_structured(
     diagnostic_context& ctx, mutator_context&, t_structured& node) {
@@ -450,8 +429,6 @@ ast_mutators standard_mutators() {
     initial.add_typedef_visitor([](auto& ctx, auto& mCtx, auto& node) {
       lower_type_annotations(ctx, mCtx, node);
     });
-    initial.add_interaction_visitor(
-        &propagate_process_in_event_base_annotation);
     initial.add_function_visitor(&normalize_return_type);
     initial.add_definition_visitor(&set_generated);
   }

@@ -562,6 +562,31 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 285
+      },
+      "ProcessInEbThreadUnsafe" : {
+        "name" : "ProcessInEbThreadUnsafe",
+        "structured_annotations": {
+          "scope.Function" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Function",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Interaction" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Interaction",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "docstring" : "Causes C++ handler code to run inline on the EventBase thread.\nDisables overload protection, use with caution.\nCannot be applied to individual functions in interactions.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 295
       }
       },
   "source_path" : "thrift/annotation/cpp",

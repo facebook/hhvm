@@ -1394,6 +1394,99 @@ func (x *InternBox) String() string {
     return sb.String()
 }
 
+type Serial struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &Serial{}
+
+func NewSerial() *Serial {
+    return (&Serial{})
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewSerial().Set<FieldNameFoo>().Set<FieldNameBar>()
+type SerialBuilder struct {
+    obj *Serial
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewSerial().Set<FieldNameFoo>().Set<FieldNameBar>()
+func NewSerialBuilder() *SerialBuilder {
+    return &SerialBuilder{
+        obj: NewSerial(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewSerial().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *SerialBuilder) Emit() *Serial {
+    var objCopy Serial = *x.obj
+    return &objCopy
+}
+
+func (x *Serial) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("Serial"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Serial) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *Serial) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Serial({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
 	  RegisterType(name string, initializer func() any)
@@ -1409,5 +1502,6 @@ func RegisterTypes(registry interface {
     registry.RegisterType("facebook.com/thrift/annotation/ExceptionMessage", func() any { return NewExceptionMessage() })
     registry.RegisterType("facebook.com/thrift/annotation/GenerateRuntimeSchema", func() any { return NewGenerateRuntimeSchema() })
     registry.RegisterType("facebook.com/thrift/annotation/InternBox", func() any { return NewInternBox() })
+    registry.RegisterType("facebook.com/thrift/annotation/Serial", func() any { return NewSerial() })
 
 }

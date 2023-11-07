@@ -856,7 +856,12 @@ class cpp_mstch_function : public mstch_function {
         });
   }
   mstch::node event_based() {
-    return function_->get_annotation("thread") == "eb";
+    return function_->get_annotation("thread") == "eb" ||
+        function_->find_structured_annotation_or_null(
+            kCppProcessInEbThreadUri) ||
+        interface_->find_annotation_or_null("process_in_event_base") ||
+        interface_->find_structured_annotation_or_null(
+            kCppProcessInEbThreadUri);
   }
   mstch::node cpp_name() { return cpp2::get_name(function_); }
   mstch::node cpp_return_type() {

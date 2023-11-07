@@ -262,6 +262,24 @@
           "column" : 20
         }
       }
+    },
+    "Serial" : {
+      "lineno" : 162,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 162,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 163,
+          "column" : 17
+        }
+      }
     }
   }
 }

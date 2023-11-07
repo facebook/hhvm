@@ -155,3 +155,9 @@ struct GenerateRuntimeSchema {
 @scope.Field
 @Experimental
 struct InternBox {}
+
+/**
+ * Indicates that an interaction's methods should be processed sequentially.
+ */
+@scope.Interaction
+struct Serial {}

@@ -48,6 +48,7 @@ inline constexpr auto kTerseWriteUri =
     "facebook.com/thrift/annotation/TerseWrite";
 inline constexpr auto kTransitiveUri =
     "facebook.com/thrift/annotation/Transitive";
+inline constexpr auto kSerialUri = "facebook.com/thrift/annotation/Serial";
 
 // scope
 inline constexpr auto kScopeProgramUri =
@@ -101,6 +102,8 @@ inline constexpr auto kCppFrozen2ExcludeUri =
     "facebook.com/thrift/annotation/cpp/Frozen2Exclude";
 inline constexpr auto kCppTypeUri = "facebook.com/thrift/annotation/cpp/Type";
 inline constexpr auto kCppNameUri = "facebook.com/thrift/annotation/cpp/Name";
+inline constexpr auto kCppProcessInEbThreadUri =
+    "facebook.com/thrift/annotation/cpp/ProcessInEbThreadUnsafe";
 
 // java
 inline constexpr auto kJavaMutableUri =

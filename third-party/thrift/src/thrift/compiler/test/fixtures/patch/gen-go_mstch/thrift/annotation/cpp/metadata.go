@@ -184,6 +184,9 @@ var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("cpp.GenerateTypedInterceptor").
     SetIsUnion(false),
+    metadata.NewThriftStruct().
+    SetName("cpp.ProcessInEbThreadUnsafe").
+    SetIsUnion(false),
 }
 
 var exceptionMetadatas = []*metadata.ThriftException{

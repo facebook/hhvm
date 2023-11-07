@@ -24,6 +24,7 @@ namespace annotation {
   ::apache::thrift::detail::md::StructMetadata<ExceptionMessage>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<GenerateRuntimeSchema>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<InternBox>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<Serial>::gen(metadata);
   return metadata;
 }
 } // namespace facebook

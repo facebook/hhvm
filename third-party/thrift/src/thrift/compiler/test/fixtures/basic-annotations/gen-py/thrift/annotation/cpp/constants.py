@@ -17,5 +17,5 @@ if sys.version_info[0] >= 3:
   long = int
 
 
-from .ttypes import UTF8STRINGS, RefType, EnumUnderlyingType, Type, Ref, Name, Lazy, DisableLazyChecksum, Adapter, PackIsset, MinimizePadding, TriviallyRelocatable, ScopedEnumAsUnionType, StrongType, FieldInterceptor, UseOpEncode, EnumType, Frozen2Exclude, Frozen2RequiresCompleteContainerParams, GenerateTypedInterceptor
+from .ttypes import UTF8STRINGS, RefType, EnumUnderlyingType, Type, Ref, Name, Lazy, DisableLazyChecksum, Adapter, PackIsset, MinimizePadding, TriviallyRelocatable, ScopedEnumAsUnionType, StrongType, FieldInterceptor, UseOpEncode, EnumType, Frozen2Exclude, Frozen2RequiresCompleteContainerParams, GenerateTypedInterceptor, ProcessInEbThreadUnsafe
 

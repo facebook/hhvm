@@ -833,6 +833,24 @@ impl ::fbthrift::metadata::ThriftAnnotations for SecretStruct {
             1 => {
             },
             2 => {
+
+                if type_id == ::std::any::TypeId::of::<thrift::types::DeprecatedUnvalidatedAnnotations>() {
+                    let mut tmp = Some(thrift::types::DeprecatedUnvalidatedAnnotations {
+                        items: {
+                            let mut map = ::std::collections::BTreeMap::new();
+                            map.insert("java.sensitive".to_owned(), "1".to_owned());
+                            map
+                        },
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if let Some(r) = <thrift::types::DeprecatedUnvalidatedAnnotations as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
             },
             _ => {}
         }

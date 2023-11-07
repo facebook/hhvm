@@ -199,7 +199,6 @@ cdef class MyServiceInterface(
         return "module.MyService"
 
 cdef object _MyServicePrioParent_annotations = _py_types.MappingProxyType({
-    """priority""": """HIGH""",
 })
 
 

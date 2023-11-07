@@ -221,6 +221,27 @@ void set_generated(diagnostic_context&, mutator_context&, t_named& node) {
   }
 }
 
+void lower_deprecated_annotations(
+    diagnostic_context& ctx, mutator_context&, t_named& node) {
+  if (auto cnst = node.find_structured_annotation_or_null(
+          kDeprecatedUnvalidatedAnnotationsUri)) {
+    ctx.check(
+        node.annotations().empty(),
+        "Cannot combine @thrift.DeprecatedUnvalidatedAnnotations with legacy annotation syntax.");
+    auto val = cnst->get_value_from_structured_annotation_or_null("items");
+    if (!val || val->get_map().empty()) {
+      ctx.error(
+          "Must specify at least one item in @thrift.DeprecatedUnvalidatedAnnotations.");
+      return;
+    }
+    deprecated_annotation_map map;
+    for (auto& [k, v] : val->get_map()) {
+      map[k->get_string()] = {{}, v->get_string()};
+    }
+    node.reset_annotations(std::move(map));
+  }
+}
+
 void normalize_return_type(
     diagnostic_context& ctx, mutator_context&, t_function& node) {
   if (!node.has_return_type()) {
@@ -431,6 +452,7 @@ ast_mutators standard_mutators() {
     });
     initial.add_function_visitor(&normalize_return_type);
     initial.add_definition_visitor(&set_generated);
+    initial.add_definition_visitor(&lower_deprecated_annotations);
   }
 
   {

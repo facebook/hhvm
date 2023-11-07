@@ -86,9 +86,10 @@ service MyService {
 }
 
 service MyServicePrioParent {
-  void ping() (priority = 'IMPORTANT');
+  @thrift.Priority{level = thrift.RpcPriority.IMPORTANT}
+  void ping();
   void pong() (priority = 'HIGH_IMPORTANT');
-} (priority = 'HIGH')
+}
 
 service MyServicePrioChild extends MyServicePrioParent {
   void pang() (priority = 'BEST_EFFORT');
@@ -96,7 +97,8 @@ service MyServicePrioChild extends MyServicePrioParent {
 
 struct SecretStruct {
   1: i64 id;
-  2: string password (java.sensitive);
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"java.sensitive": "1"}}
+  2: string password;
 }
 
 interaction BadInteraction {

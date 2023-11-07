@@ -176,18 +176,28 @@
       },
       "Name" : {
         "name" : "Name",
+        "structured_annotations": {
+          "scope.Definition" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Definition",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
         "fields" : {
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 93,
+            "lineno" : 94,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
           "reason" : {
             "name" : "reason",
             "key" : 2,
-            "lineno" : 94,
+            "lineno" : 95,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
@@ -212,7 +222,7 @@
           "attributes" : {
             "name" : "attributes",
             "key" : 1,
-            "lineno" : 100,
+            "lineno" : 101,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "list",
@@ -222,7 +232,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 98
+        "lineno" : 99
       },
       "StructTrait" : {
         "name" : "StructTrait",
@@ -256,14 +266,14 @@
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 108,
+            "lineno" : 109,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 104
+        "lineno" : 105
       },
       "Attributes" : {
         "name" : "Attributes",
@@ -271,7 +281,7 @@
           "attributes" : {
             "name" : "attributes",
             "key" : 1,
-            "lineno" : 113,
+            "lineno" : 114,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "list",
@@ -281,7 +291,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 112
+        "lineno" : 113
       },
       "StructAsTrait" : {
         "name" : "StructAsTrait",
@@ -313,7 +323,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 116
+        "lineno" : 117
       },
       "ModuleInternal" : {
         "name" : "ModuleInternal",
@@ -377,7 +387,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 122
+        "lineno" : 123
       }
       },
   "source_path" : "thrift/annotation/hack",

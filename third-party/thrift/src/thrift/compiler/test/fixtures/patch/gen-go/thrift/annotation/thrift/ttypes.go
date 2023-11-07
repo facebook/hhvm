@@ -21,6 +21,63 @@ var _ = context.Background
 
 var GoUnusedProtection__ int;
 
+type RpcPriority int64
+const (
+  RpcPriority_HIGH_IMPORTANT RpcPriority = 0
+  RpcPriority_HIGH RpcPriority = 1
+  RpcPriority_IMPORTANT RpcPriority = 2
+  RpcPriority_NORMAL RpcPriority = 3
+  RpcPriority_BEST_EFFORT RpcPriority = 4
+)
+
+var RpcPriorityToName = map[RpcPriority]string {
+  RpcPriority_HIGH_IMPORTANT: "HIGH_IMPORTANT",
+  RpcPriority_HIGH: "HIGH",
+  RpcPriority_IMPORTANT: "IMPORTANT",
+  RpcPriority_NORMAL: "NORMAL",
+  RpcPriority_BEST_EFFORT: "BEST_EFFORT",
+}
+
+var RpcPriorityToValue = map[string]RpcPriority {
+  "HIGH_IMPORTANT": RpcPriority_HIGH_IMPORTANT,
+  "HIGH": RpcPriority_HIGH,
+  "IMPORTANT": RpcPriority_IMPORTANT,
+  "NORMAL": RpcPriority_NORMAL,
+  "BEST_EFFORT": RpcPriority_BEST_EFFORT,
+}
+
+var RpcPriorityNames = []string {
+  "HIGH_IMPORTANT",
+  "HIGH",
+  "IMPORTANT",
+  "NORMAL",
+  "BEST_EFFORT",
+}
+
+var RpcPriorityValues = []RpcPriority {
+  RpcPriority_HIGH_IMPORTANT,
+  RpcPriority_HIGH,
+  RpcPriority_IMPORTANT,
+  RpcPriority_NORMAL,
+  RpcPriority_BEST_EFFORT,
+}
+
+func (p RpcPriority) String() string {
+  if v, ok := RpcPriorityToName[p]; ok {
+    return v
+  }
+  return "<UNSET>"
+}
+
+func RpcPriorityFromString(s string) (RpcPriority, error) {
+  if v, ok := RpcPriorityToValue[s]; ok {
+    return v, nil
+  }
+  return RpcPriority(0), fmt.Errorf("not a valid RpcPriority string")
+}
+
+func RpcPriorityPtr(v RpcPriority) *RpcPriority { return &v }
+
 // Indicates a definition/feature should only be used with permission, may
 // only work in specific contexts, and may change in incompatible ways without
 // notice.
@@ -704,6 +761,7 @@ func (p *SerializeInFieldIdOrder) String() string {
 }
 
 // Indicates an enum is a bitmask and should support bit-wise operators.
+// Currently generates additional code in C++ and Hack.
 type BitmaskEnum struct {
 }
 
@@ -1081,5 +1139,374 @@ func (p *Serial) String() string {
   }
 
   return fmt.Sprintf("Serial({})")
+}
+
+// Changes the URI of this definition away from the default-generated one.
+// 
+// Attributes:
+//  - Value
+type Uri struct {
+  Value string `thrift:"value,1" db:"value" json:"value"`
+}
+
+func NewUri() *Uri {
+  return &Uri{}
+}
+
+
+func (p *Uri) GetValue() string {
+  return p.Value
+}
+type UriBuilder struct {
+  obj *Uri
+}
+
+func NewUriBuilder() *UriBuilder{
+  return &UriBuilder{
+    obj: NewUri(),
+  }
+}
+
+func (p UriBuilder) Emit() *Uri{
+  return &Uri{
+    Value: p.obj.Value,
+  }
+}
+
+func (u *UriBuilder) Value(value string) *UriBuilder {
+  u.obj.Value = value
+  return u
+}
+
+func (u *Uri) SetValue(value string) *Uri {
+  u.Value = value
+  return u
+}
+
+func (p *Uri) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *Uri)  ReadField1(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadString(); err != nil {
+    return thrift.PrependError("error reading field 1: ", err)
+  } else {
+    p.Value = v
+  }
+  return nil
+}
+
+func (p *Uri) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("Uri"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *Uri) writeField1(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("value", thrift.STRING, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:value: ", p), err) }
+  if err := oprot.WriteString(string(p.Value)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.value (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:value: ", p), err) }
+  return err
+}
+
+func (p *Uri) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  valueVal := fmt.Sprintf("%v", p.Value)
+  return fmt.Sprintf("Uri({Value:%s})", valueVal)
+}
+
+// Changes the priority of this function (default NORMAL).
+// 
+// Attributes:
+//  - Level
+type Priority struct {
+  Level RpcPriority `thrift:"level,1" db:"level" json:"level"`
+}
+
+func NewPriority() *Priority {
+  return &Priority{}
+}
+
+
+func (p *Priority) GetLevel() RpcPriority {
+  return p.Level
+}
+type PriorityBuilder struct {
+  obj *Priority
+}
+
+func NewPriorityBuilder() *PriorityBuilder{
+  return &PriorityBuilder{
+    obj: NewPriority(),
+  }
+}
+
+func (p PriorityBuilder) Emit() *Priority{
+  return &Priority{
+    Level: p.obj.Level,
+  }
+}
+
+func (p *PriorityBuilder) Level(level RpcPriority) *PriorityBuilder {
+  p.obj.Level = level
+  return p
+}
+
+func (p *Priority) SetLevel(level RpcPriority) *Priority {
+  p.Level = level
+  return p
+}
+
+func (p *Priority) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *Priority)  ReadField1(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadI32(); err != nil {
+    return thrift.PrependError("error reading field 1: ", err)
+  } else {
+    temp := RpcPriority(v)
+    p.Level = temp
+  }
+  return nil
+}
+
+func (p *Priority) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("Priority"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *Priority) writeField1(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("level", thrift.I32, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:level: ", p), err) }
+  if err := oprot.WriteI32(int32(p.Level)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.level (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:level: ", p), err) }
+  return err
+}
+
+func (p *Priority) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  levelVal := fmt.Sprintf("%v", p.Level)
+  return fmt.Sprintf("Priority({Level:%s})", levelVal)
+}
+
+// Applies unstructured annotations to a definition.
+// 
+// Attributes:
+//  - Items
+type DeprecatedUnvalidatedAnnotations struct {
+  Items map[string]string `thrift:"items,1" db:"items" json:"items"`
+}
+
+func NewDeprecatedUnvalidatedAnnotations() *DeprecatedUnvalidatedAnnotations {
+  return &DeprecatedUnvalidatedAnnotations{}
+}
+
+
+func (p *DeprecatedUnvalidatedAnnotations) GetItems() map[string]string {
+  return p.Items
+}
+type DeprecatedUnvalidatedAnnotationsBuilder struct {
+  obj *DeprecatedUnvalidatedAnnotations
+}
+
+func NewDeprecatedUnvalidatedAnnotationsBuilder() *DeprecatedUnvalidatedAnnotationsBuilder{
+  return &DeprecatedUnvalidatedAnnotationsBuilder{
+    obj: NewDeprecatedUnvalidatedAnnotations(),
+  }
+}
+
+func (p DeprecatedUnvalidatedAnnotationsBuilder) Emit() *DeprecatedUnvalidatedAnnotations{
+  return &DeprecatedUnvalidatedAnnotations{
+    Items: p.obj.Items,
+  }
+}
+
+func (d *DeprecatedUnvalidatedAnnotationsBuilder) Items(items map[string]string) *DeprecatedUnvalidatedAnnotationsBuilder {
+  d.obj.Items = items
+  return d
+}
+
+func (d *DeprecatedUnvalidatedAnnotations) SetItems(items map[string]string) *DeprecatedUnvalidatedAnnotations {
+  d.Items = items
+  return d
+}
+
+func (p *DeprecatedUnvalidatedAnnotations) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *DeprecatedUnvalidatedAnnotations)  ReadField1(iprot thrift.Protocol) error {
+  _, _, size, err := iprot.ReadMapBegin()
+  if err != nil {
+    return thrift.PrependError("error reading map begin: ", err)
+  }
+  tMap := make(map[string]string, size)
+  p.Items =  tMap
+  for i := 0; i < size; i ++ {
+    var _key3 string
+    if v, err := iprot.ReadString(); err != nil {
+      return thrift.PrependError("error reading field 0: ", err)
+    } else {
+      _key3 = v
+    }
+    var _val4 string
+    if v, err := iprot.ReadString(); err != nil {
+      return thrift.PrependError("error reading field 0: ", err)
+    } else {
+      _val4 = v
+    }
+    p.Items[_key3] = _val4
+  }
+  if err := iprot.ReadMapEnd(); err != nil {
+    return thrift.PrependError("error reading map end: ", err)
+  }
+  return nil
+}
+
+func (p *DeprecatedUnvalidatedAnnotations) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("DeprecatedUnvalidatedAnnotations"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *DeprecatedUnvalidatedAnnotations) writeField1(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("items", thrift.MAP, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:items: ", p), err) }
+  if err := oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Items)); err != nil {
+    return thrift.PrependError("error writing map begin: ", err)
+  }
+  for k, v := range p.Items {
+    if err := oprot.WriteString(string(k)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err) }
+    if err := oprot.WriteString(string(v)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err) }
+  }
+  if err := oprot.WriteMapEnd(); err != nil {
+    return thrift.PrependError("error writing map end: ", err)
+  }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:items: ", p), err) }
+  return err
+}
+
+func (p *DeprecatedUnvalidatedAnnotations) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  itemsVal := fmt.Sprintf("%v", p.Items)
+  return fmt.Sprintf("DeprecatedUnvalidatedAnnotations({Items:%s})", itemsVal)
 }
 

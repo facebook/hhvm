@@ -3780,6 +3780,11 @@ string t_py_generator::type_to_spec_args(const t_type* ttype) {
 std::string t_py_generator::get_priority(
     const t_named* obj, const std::string& def) {
   if (obj) {
+    if (auto* val = obj->find_structured_annotation_or_null(kPriorityUri)) {
+      return val->get_value_from_structured_annotation("level")
+          .get_enum_value()
+          ->name();
+    }
     return obj->get_annotation("priority", &def);
   }
   return def;

@@ -463,7 +463,6 @@ cdef class MyService(thrift.py3.client.Client):
         return "module.MyService"
 
 cdef object _MyServicePrioParent_annotations = _py_types.MappingProxyType({
-    """priority""": """HIGH""",
 })
 
 

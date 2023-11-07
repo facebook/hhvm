@@ -658,7 +658,12 @@ class Name implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[],
+      'struct' => dict[
+        '\facebook\thrift\annotation\Definition' => \facebook\thrift\annotation\Definition::fromShape(
+          shape(
+          )
+        ),
+      ],
       'fields' => dict[
       ],
     );

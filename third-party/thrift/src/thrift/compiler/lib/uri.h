@@ -49,6 +49,10 @@ inline constexpr auto kTerseWriteUri =
 inline constexpr auto kTransitiveUri =
     "facebook.com/thrift/annotation/Transitive";
 inline constexpr auto kSerialUri = "facebook.com/thrift/annotation/Serial";
+inline constexpr auto kUriUri = "facebook.com/thrift/annotation/Uri";
+inline constexpr auto kPriorityUri = "facebook.com/thrift/annotation/Priority";
+inline constexpr auto kDeprecatedUnvalidatedAnnotationsUri =
+    "facebook.com/thrift/annotation/DeprecatedUnvalidatedAnnotations";
 
 // scope
 inline constexpr auto kScopeProgramUri =

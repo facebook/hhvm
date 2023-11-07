@@ -6,6 +6,28 @@
       "path" : "thrift/annotation/scope.thrift"
     }
   },
+  "enumerations" : {
+    "RpcPriority" : {
+      "lineno" : 180,
+      "constants" : {
+        "HIGH_IMPORTANT" : 0,
+        "HIGH" : 1,
+        "IMPORTANT" : 2,
+        "NORMAL" : 3,
+        "BEST_EFFORT" : 4
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 180,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 186,
+          "column" : 2
+        }
+      }
+    }
+  },
   "structs" : {
     "Experimental" : {
       "lineno" : 32,
@@ -207,19 +229,18 @@
       }
     },
     "BitmaskEnum" : {
-      "lineno" : 126,
+      "lineno" : 127,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
-        "scope.Enum" : {  },
-        "Experimental" : {  }
+        "scope.Enum" : {  }
       },
       "fields" : {
 
       },
       "source_range" : {
         "begin" : {
-          "line" : 126,
+          "line" : 127,
           "column" : 1
         },
         "end" : {
@@ -329,6 +350,111 @@
         "end" : {
           "line" : 163,
           "column" : 17
+        }
+      }
+    },
+    "Uri" : {
+      "lineno" : 168,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Definition" : {  }
+      },
+      "fields" : {
+        "value" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 170,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 170,
+              "column" : 19
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 168,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 171,
+          "column" : 2
+        }
+      }
+    },
+    "Priority" : {
+      "lineno" : 176,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Function" : {  }
+      },
+      "fields" : {
+        "level" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "RpcPriority",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 178,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 178,
+              "column" : 24
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 176,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 179,
+          "column" : 2
+        }
+      }
+    },
+    "DeprecatedUnvalidatedAnnotations" : {
+      "lineno" : 191,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Definition" : {  }
+      },
+      "fields" : {
+        "items" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "STRING", "spec_args" : null} } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 193,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 193,
+              "column" : 32
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 191,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 194,
+          "column" : 2
         }
       }
     }

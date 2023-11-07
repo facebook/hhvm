@@ -122,9 +122,9 @@ struct SerializeInFieldIdOrder {}
 
 /**
  * Indicates an enum is a bitmask and should support bit-wise operators.
+ * Currently generates additional code in C++ and Hack.
  */
 @scope.Enum
-@Experimental // TODO: Support in C++, Python, Java.
 struct BitmaskEnum {}
 
 /**
@@ -161,3 +161,34 @@ struct InternBox {}
  */
 @scope.Interaction
 struct Serial {}
+
+/**
+ * Changes the URI of this definition away from the default-generated one.
+ */
+@scope.Definition
+struct Uri {
+  1: string value;
+}
+
+/**
+ * Changes the priority of this function (default NORMAL).
+ */
+@scope.Function
+struct Priority {
+  1: RpcPriority level;
+}
+enum RpcPriority {
+  HIGH_IMPORTANT = 0,
+  HIGH = 1,
+  IMPORTANT = 2,
+  NORMAL = 3,
+  BEST_EFFORT = 4,
+}
+
+/**
+* Applies unstructured annotations to a definition.
+*/
+@scope.Definition
+struct DeprecatedUnvalidatedAnnotations {
+  1: map<string, string> items;
+}

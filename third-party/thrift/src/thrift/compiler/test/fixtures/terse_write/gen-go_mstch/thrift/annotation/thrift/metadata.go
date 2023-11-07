@@ -32,6 +32,15 @@ var (
     premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
             )
+    premadeThriftType_thrift_RpcPriority = metadata.NewThriftType().SetTEnum(
+        metadata.NewThriftEnumType().
+    SetName("thrift.RpcPriority"),
+    )
+    premadeThriftType_map_string_string = metadata.NewThriftType().SetTMap(
+        metadata.NewThriftMapType().
+            SetKeyType(premadeThriftType_string).
+            SetValueType(premadeThriftType_string),
+            )
 )
 
 var structMetadatas = []*metadata.ThriftStruct{
@@ -103,12 +112,59 @@ var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("thrift.Serial").
     SetIsUnion(false),
+    metadata.NewThriftStruct().
+    SetName("thrift.Uri").
+    SetIsUnion(false).
+    SetFields(
+        []*metadata.ThriftField{
+            metadata.NewThriftField().
+    SetId(1).
+    SetName("value").
+    SetIsOptional(false).
+    SetType(premadeThriftType_string),
+        },
+    ),
+    metadata.NewThriftStruct().
+    SetName("thrift.Priority").
+    SetIsUnion(false).
+    SetFields(
+        []*metadata.ThriftField{
+            metadata.NewThriftField().
+    SetId(1).
+    SetName("level").
+    SetIsOptional(false).
+    SetType(premadeThriftType_thrift_RpcPriority),
+        },
+    ),
+    metadata.NewThriftStruct().
+    SetName("thrift.DeprecatedUnvalidatedAnnotations").
+    SetIsUnion(false).
+    SetFields(
+        []*metadata.ThriftField{
+            metadata.NewThriftField().
+    SetId(1).
+    SetName("items").
+    SetIsOptional(false).
+    SetType(premadeThriftType_map_string_string),
+        },
+    ),
 }
 
 var exceptionMetadatas = []*metadata.ThriftException{
 }
 
 var enumMetadatas = []*metadata.ThriftEnum{
+    metadata.NewThriftEnum().
+    SetName("thrift.RpcPriority").
+    SetElements(
+        map[int32]string{
+            0: "HIGH_IMPORTANT",
+            1: "HIGH",
+            2: "IMPORTANT",
+            3: "NORMAL",
+            4: "BEST_EFFORT",
+        },
+    ),
 }
 
 var serviceMetadatas = []*metadata.ThriftService{

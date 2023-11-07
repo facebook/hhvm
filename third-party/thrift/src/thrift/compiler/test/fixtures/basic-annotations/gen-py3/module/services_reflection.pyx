@@ -164,7 +164,7 @@ cdef __InterfaceSpec get_reflection__MyServicePrioParent(bint for_clients):
     cdef __InterfaceSpec spec = __InterfaceSpec._fbthrift_create(
         name="MyServicePrioParent",
         annotations={
-            """priority""": """HIGH""",        },
+        },
     )
     spec.add_method(
         __MethodSpec._fbthrift_create(
@@ -176,7 +176,7 @@ cdef __InterfaceSpec get_reflection__MyServicePrioParent(bint for_clients):
             exceptions=(
             ),
             annotations={
-                """priority""": """IMPORTANT""",            },
+            },
         )
     )
     spec.add_method(

@@ -670,6 +670,12 @@ class mstch_function : public mstch_base {
     return has_args_() ? std::string(", ") : std::string();
   }
   mstch::node priority() {
+    if (auto* val =
+            function_->find_structured_annotation_or_null(kPriorityUri)) {
+      return val->get_value_from_structured_annotation("level")
+          .get_enum_value()
+          ->name();
+    }
     return function_->get_annotation("priority", "NORMAL");
   }
   mstch::node annotations() { return mstch_base::annotations(function_); }

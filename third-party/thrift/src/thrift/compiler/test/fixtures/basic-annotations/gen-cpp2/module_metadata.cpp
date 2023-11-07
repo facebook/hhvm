@@ -156,7 +156,7 @@ StructMetadata<::cpp2::SecretStruct>::gen(ThriftMetadata& metadata) {
   static const auto* const
   module_SecretStruct_fields = new std::array<EncodedThriftField, 2>{{
     {1, "id", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "password", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
+    {2, "password", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{*cvStruct("thrift.DeprecatedUnvalidatedAnnotations", {{"items", cvMap({cvPair(cvString("java.sensitive"), cvString("1"))})}}).cv_struct_ref(), }},
   }};
   for (const auto& f : *module_SecretStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -333,6 +333,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioParen
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   func.is_oneway() = false;
+  func.structured_annotations()->push_back(*cvStruct("thrift.Priority", {{"level", cvInteger(2)}}).cv_struct_ref());
   service.functions()->push_back(std::move(func));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>>::gen_pong(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {

@@ -861,6 +861,18 @@ class SecretStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'password' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\DeprecatedUnvalidatedAnnotations' => \facebook\thrift\annotation\DeprecatedUnvalidatedAnnotations::fromShape(
+              shape(
+                "items" => dict[
+                  "java.sensitive" => "1",
+                ],
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }

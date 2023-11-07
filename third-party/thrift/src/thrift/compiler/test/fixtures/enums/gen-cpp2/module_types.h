@@ -124,7 +124,38 @@ enum class MyBitmaskEnum2 {
   FOUR = 4,
 };
 
+inline constexpr MyBitmaskEnum2 operator&(MyBitmaskEnum2 a, MyBitmaskEnum2 b) {
+  using E = MyBitmaskEnum2;
+  using U = std::underlying_type_t<E>;
+  return static_cast<E>(static_cast<U>(a) & static_cast<U>(b));
+}
+inline constexpr MyBitmaskEnum2& operator&=(MyBitmaskEnum2& a, MyBitmaskEnum2 b) {
+  return a = a & b;
+}
 
+inline constexpr MyBitmaskEnum2 operator|(MyBitmaskEnum2 a, MyBitmaskEnum2 b) {
+  using E = MyBitmaskEnum2;
+  using U = std::underlying_type_t<E>;
+  return static_cast<E>(static_cast<U>(a) | static_cast<U>(b));
+}
+inline constexpr MyBitmaskEnum2& operator|=(MyBitmaskEnum2& a, MyBitmaskEnum2 b) {
+  return a = a | b;
+}
+
+inline constexpr MyBitmaskEnum2 operator^(MyBitmaskEnum2 a, MyBitmaskEnum2 b) {
+  using E = MyBitmaskEnum2;
+  using U = std::underlying_type_t<E>;
+  return static_cast<E>(static_cast<U>(a) ^ static_cast<U>(b));
+}
+inline constexpr MyBitmaskEnum2& operator^=(MyBitmaskEnum2& a, MyBitmaskEnum2 b) {
+  return a = a ^ b;
+}
+
+inline constexpr MyBitmaskEnum2 operator~(MyBitmaskEnum2 a) {
+  using E = MyBitmaskEnum2;
+  using U = std::underlying_type_t<E>;
+  return static_cast<E>(~static_cast<U>(a));
+}
 
 }}} // test::fixtures::enums
 

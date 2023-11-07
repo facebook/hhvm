@@ -35,7 +35,10 @@ void t_program::add_definition(std::unique_ptr<t_named> definition) {
 
   if (!definition->explicit_uri()) {
     // Resolve Thrift URI.
-    if (auto* uri = definition->find_annotation_or_null("thrift.uri")) {
+    if (auto* cnst = definition->find_structured_annotation_or_null(kUriUri)) {
+      auto* val = cnst->get_value_from_structured_annotation_or_null("value");
+      definition->set_uri(val ? val->get_string() : "");
+    } else if (auto* uri = definition->find_annotation_or_null("thrift.uri")) {
       definition->set_uri(*uri); // Explicit from annotation.
     } else { // Inherit from package.
       definition->set_uri(

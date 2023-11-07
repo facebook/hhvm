@@ -16,6 +16,76 @@ var _ = strings.Split
 var _ = thrift.ZERO
 
 
+type RpcPriority int32
+
+const (
+    RpcPriority_HIGH_IMPORTANT RpcPriority = 0
+    RpcPriority_HIGH RpcPriority = 1
+    RpcPriority_IMPORTANT RpcPriority = 2
+    RpcPriority_NORMAL RpcPriority = 3
+    RpcPriority_BEST_EFFORT RpcPriority = 4
+)
+
+// Enum value maps for RpcPriority
+var (
+    RpcPriorityToName = map[RpcPriority]string {
+        RpcPriority_HIGH_IMPORTANT: "HIGH_IMPORTANT",
+        RpcPriority_HIGH: "HIGH",
+        RpcPriority_IMPORTANT: "IMPORTANT",
+        RpcPriority_NORMAL: "NORMAL",
+        RpcPriority_BEST_EFFORT: "BEST_EFFORT",
+    }
+
+    RpcPriorityToValue = map[string]RpcPriority {
+        "HIGH_IMPORTANT": RpcPriority_HIGH_IMPORTANT,
+        "HIGH": RpcPriority_HIGH,
+        "IMPORTANT": RpcPriority_IMPORTANT,
+        "NORMAL": RpcPriority_NORMAL,
+        "BEST_EFFORT": RpcPriority_BEST_EFFORT,
+    }
+
+    RpcPriorityNames = []string{
+        "HIGH_IMPORTANT",
+        "HIGH",
+        "IMPORTANT",
+        "NORMAL",
+        "BEST_EFFORT",
+    }
+
+    RpcPriorityValues = []RpcPriority{
+        RpcPriority_HIGH_IMPORTANT,
+        RpcPriority_HIGH,
+        RpcPriority_IMPORTANT,
+        RpcPriority_NORMAL,
+        RpcPriority_BEST_EFFORT,
+    }
+)
+
+func (x RpcPriority) String() string {
+    if v, ok := RpcPriorityToName[x]; ok {
+        return v
+    }
+    return "<UNSET>"
+}
+
+func (x RpcPriority) Ptr() *RpcPriority {
+    return &x
+}
+
+// Deprecated: Use RpcPriorityToValue instead (e.g. `x, ok := RpcPriorityToValue["name"]`).
+func RpcPriorityFromString(s string) (RpcPriority, error) {
+    if v, ok := RpcPriorityToValue[s]; ok {
+        return v, nil
+    }
+    return RpcPriority(0), fmt.Errorf("not a valid RpcPriority string")
+}
+
+// Deprecated: Use RpcPriority.Ptr() instead.
+func RpcPriorityPtr(v RpcPriority) *RpcPriority {
+    return &v
+}
+
+
 type Experimental struct {
 }
 // Compile time interface enforcer
@@ -1487,6 +1557,538 @@ func (x *Serial) String() string {
     return sb.String()
 }
 
+type Uri struct {
+    Value string `thrift:"value,1" json:"value" db:"value"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &Uri{}
+
+func NewUri() *Uri {
+    return (&Uri{}).
+        SetValueNonCompat("")
+}
+
+func (x *Uri) GetValueNonCompat() string {
+    return x.Value
+}
+
+func (x *Uri) GetValue() string {
+    return x.Value
+}
+
+func (x *Uri) SetValueNonCompat(value string) *Uri {
+    x.Value = value
+    return x
+}
+
+func (x *Uri) SetValue(value string) *Uri {
+    x.Value = value
+    return x
+}
+
+func (x *Uri) writeField1(p thrift.Protocol) error {  // Value
+    if err := p.WriteFieldBegin("value", thrift.STRING, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetValueNonCompat()
+    if err := p.WriteString(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Uri) readField1(p thrift.Protocol) error {  // Value
+    result, err := p.ReadString()
+if err != nil {
+    return err
+}
+
+    x.SetValueNonCompat(result)
+    return nil
+}
+
+func (x *Uri) toString1() string {  // Value
+    return fmt.Sprintf("%v", x.GetValueNonCompat())
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewUri().Set<FieldNameFoo>().Set<FieldNameBar>()
+type UriBuilder struct {
+    obj *Uri
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewUri().Set<FieldNameFoo>().Set<FieldNameBar>()
+func NewUriBuilder() *UriBuilder {
+    return &UriBuilder{
+        obj: NewUri(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewUri().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *UriBuilder) Value(value string) *UriBuilder {
+    x.obj.Value = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewUri().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *UriBuilder) Emit() *Uri {
+    var objCopy Uri = *x.obj
+    return &objCopy
+}
+
+func (x *Uri) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("Uri"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Uri) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // value
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *Uri) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Uri({")
+    sb.WriteString(fmt.Sprintf("Value:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
+type Priority struct {
+    Level RpcPriority `thrift:"level,1" json:"level" db:"level"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &Priority{}
+
+func NewPriority() *Priority {
+    return (&Priority{}).
+        SetLevelNonCompat(0)
+}
+
+func (x *Priority) GetLevelNonCompat() RpcPriority {
+    return x.Level
+}
+
+func (x *Priority) GetLevel() RpcPriority {
+    return x.Level
+}
+
+func (x *Priority) SetLevelNonCompat(value RpcPriority) *Priority {
+    x.Level = value
+    return x
+}
+
+func (x *Priority) SetLevel(value RpcPriority) *Priority {
+    x.Level = value
+    return x
+}
+
+func (x *Priority) writeField1(p thrift.Protocol) error {  // Level
+    if err := p.WriteFieldBegin("level", thrift.I32, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetLevelNonCompat()
+    if err := p.WriteI32(int32(item)); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Priority) readField1(p thrift.Protocol) error {  // Level
+    enumResult, err := p.ReadI32()
+if err != nil {
+    return err
+}
+result := RpcPriority(enumResult)
+
+    x.SetLevelNonCompat(result)
+    return nil
+}
+
+func (x *Priority) toString1() string {  // Level
+    return fmt.Sprintf("%v", x.GetLevelNonCompat())
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewPriority().Set<FieldNameFoo>().Set<FieldNameBar>()
+type PriorityBuilder struct {
+    obj *Priority
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewPriority().Set<FieldNameFoo>().Set<FieldNameBar>()
+func NewPriorityBuilder() *PriorityBuilder {
+    return &PriorityBuilder{
+        obj: NewPriority(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewPriority().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *PriorityBuilder) Level(value RpcPriority) *PriorityBuilder {
+    x.obj.Level = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewPriority().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *PriorityBuilder) Emit() *Priority {
+    var objCopy Priority = *x.obj
+    return &objCopy
+}
+
+func (x *Priority) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("Priority"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Priority) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I32)):  // level
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *Priority) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("Priority({")
+    sb.WriteString(fmt.Sprintf("Level:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
+type DeprecatedUnvalidatedAnnotations struct {
+    Items map[string]string `thrift:"items,1" json:"items" db:"items"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &DeprecatedUnvalidatedAnnotations{}
+
+func NewDeprecatedUnvalidatedAnnotations() *DeprecatedUnvalidatedAnnotations {
+    return (&DeprecatedUnvalidatedAnnotations{}).
+        SetItemsNonCompat(make(map[string]string))
+}
+
+func (x *DeprecatedUnvalidatedAnnotations) GetItemsNonCompat() map[string]string {
+    return x.Items
+}
+
+func (x *DeprecatedUnvalidatedAnnotations) GetItems() map[string]string {
+    if !x.IsSetItems() {
+        return make(map[string]string)
+    }
+
+    return x.Items
+}
+
+func (x *DeprecatedUnvalidatedAnnotations) SetItemsNonCompat(value map[string]string) *DeprecatedUnvalidatedAnnotations {
+    x.Items = value
+    return x
+}
+
+func (x *DeprecatedUnvalidatedAnnotations) SetItems(value map[string]string) *DeprecatedUnvalidatedAnnotations {
+    x.Items = value
+    return x
+}
+
+func (x *DeprecatedUnvalidatedAnnotations) IsSetItems() bool {
+    return x != nil && x.Items != nil
+}
+
+func (x *DeprecatedUnvalidatedAnnotations) writeField1(p thrift.Protocol) error {  // Items
+    if err := p.WriteFieldBegin("items", thrift.MAP, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetItemsNonCompat()
+    if err := p.WriteMapBegin(thrift.STRING, thrift.STRING, len(item)); err != nil {
+    return thrift.PrependError("error writing map begin: ", err)
+}
+for k, v := range item {
+    {
+        item := k
+        if err := p.WriteString(item); err != nil {
+    return err
+}
+    }
+
+    {
+        item := v
+        if err := p.WriteString(item); err != nil {
+    return err
+}
+    }
+}
+if err := p.WriteMapEnd(); err != nil {
+    return thrift.PrependError("error writing map end: ", err)
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *DeprecatedUnvalidatedAnnotations) readField1(p thrift.Protocol) error {  // Items
+    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
+if err != nil {
+    return thrift.PrependError("error reading map begin: ", err)
+}
+
+mapResult := make(map[string]string, size)
+for i := 0; i < size; i++ {
+    var key string
+    {
+        result, err := p.ReadString()
+if err != nil {
+    return err
+}
+        key = result
+    }
+
+    var value string
+    {
+        result, err := p.ReadString()
+if err != nil {
+    return err
+}
+        value = result
+    }
+
+    mapResult[key] = value
+}
+
+if err := p.ReadMapEnd(); err != nil {
+    return thrift.PrependError("error reading map end: ", err)
+}
+result := mapResult
+
+    x.SetItemsNonCompat(result)
+    return nil
+}
+
+func (x *DeprecatedUnvalidatedAnnotations) toString1() string {  // Items
+    return fmt.Sprintf("%v", x.GetItemsNonCompat())
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewDeprecatedUnvalidatedAnnotations().Set<FieldNameFoo>().Set<FieldNameBar>()
+type DeprecatedUnvalidatedAnnotationsBuilder struct {
+    obj *DeprecatedUnvalidatedAnnotations
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewDeprecatedUnvalidatedAnnotations().Set<FieldNameFoo>().Set<FieldNameBar>()
+func NewDeprecatedUnvalidatedAnnotationsBuilder() *DeprecatedUnvalidatedAnnotationsBuilder {
+    return &DeprecatedUnvalidatedAnnotationsBuilder{
+        obj: NewDeprecatedUnvalidatedAnnotations(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewDeprecatedUnvalidatedAnnotations().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *DeprecatedUnvalidatedAnnotationsBuilder) Items(value map[string]string) *DeprecatedUnvalidatedAnnotationsBuilder {
+    x.obj.Items = value
+    return x
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewDeprecatedUnvalidatedAnnotations().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *DeprecatedUnvalidatedAnnotationsBuilder) Emit() *DeprecatedUnvalidatedAnnotations {
+    var objCopy DeprecatedUnvalidatedAnnotations = *x.obj
+    return &objCopy
+}
+
+func (x *DeprecatedUnvalidatedAnnotations) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("DeprecatedUnvalidatedAnnotations"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *DeprecatedUnvalidatedAnnotations) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.MAP)):  // items
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *DeprecatedUnvalidatedAnnotations) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("DeprecatedUnvalidatedAnnotations({")
+    sb.WriteString(fmt.Sprintf("Items:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
 	  RegisterType(name string, initializer func() any)
@@ -1503,5 +2105,9 @@ func RegisterTypes(registry interface {
     registry.RegisterType("facebook.com/thrift/annotation/GenerateRuntimeSchema", func() any { return NewGenerateRuntimeSchema() })
     registry.RegisterType("facebook.com/thrift/annotation/InternBox", func() any { return NewInternBox() })
     registry.RegisterType("facebook.com/thrift/annotation/Serial", func() any { return NewSerial() })
+    registry.RegisterType("facebook.com/thrift/annotation/Uri", func() any { return NewUri() })
+    registry.RegisterType("facebook.com/thrift/annotation/Priority", func() any { return NewPriority() })
+    registry.RegisterType("facebook.com/thrift/annotation/DeprecatedUnvalidatedAnnotations", func() any { return NewDeprecatedUnvalidatedAnnotations() })
 
+    registry.RegisterType("facebook.com/thrift/annotation/RpcPriority", func() any { return RpcPriority(0) })
 }

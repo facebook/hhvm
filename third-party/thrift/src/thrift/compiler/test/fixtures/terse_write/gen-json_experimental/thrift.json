@@ -17,6 +17,41 @@
     "path": "thrift/annotation",
     "filename": "thrift"
   },
+
+  "enumerations" :
+  {
+      "RpcPriority" : {
+        "name" : "RpcPriority",
+        "constants" : {
+          "HIGH_IMPORTANT" : {
+            "name" : "HIGH_IMPORTANT",
+            "lineno" : 181,
+            "value" : 0
+          },
+          "HIGH" : {
+            "name" : "HIGH",
+            "lineno" : 182,
+            "value" : 1
+          },
+          "IMPORTANT" : {
+            "name" : "IMPORTANT",
+            "lineno" : 183,
+            "value" : 2
+          },
+          "NORMAL" : {
+            "name" : "NORMAL",
+            "lineno" : 184,
+            "value" : 3
+          },
+          "BEST_EFFORT" : {
+            "name" : "BEST_EFFORT",
+            "lineno" : 185,
+            "value" : 4
+          }
+        },
+        "lineno" : 180
+      }
+      },
   "structs" :
   {
       "Experimental" : {
@@ -243,19 +278,12 @@
   "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
-      },
-          "thrift.Experimental" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Experimental"
-},
-        "value" : {}
       }
         },
-        "docstring" : "Indicates an enum is a bitmask and should support bit-wise operators.\n",
+        "docstring" : "Indicates an enum is a bitmask and should support bit-wise operators.\nCurrently generates additional code in C++ and Hack.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 126
+        "lineno" : 127
       },
       "ExceptionMessage" : {
         "name" : "ExceptionMessage",
@@ -379,6 +407,91 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 162
+      },
+      "Uri" : {
+        "name" : "Uri",
+        "structured_annotations": {
+          "scope.Definition" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Definition",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "docstring" : "Changes the URI of this definition away from the default-generated one.\n",
+        "fields" : {
+          "value" : {
+            "name" : "value",
+            "key" : 1,
+            "lineno" : 170,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 168
+      },
+      "Priority" : {
+        "name" : "Priority",
+        "structured_annotations": {
+          "scope.Function" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Function",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "docstring" : "Changes the priority of this function (default NORMAL).\n",
+        "fields" : {
+          "level" : {
+            "name" : "level",
+            "key" : 1,
+            "lineno" : 178,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "enum",
+  "name" : "RpcPriority"
+}
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 176
+      },
+      "DeprecatedUnvalidatedAnnotations" : {
+        "name" : "DeprecatedUnvalidatedAnnotations",
+        "structured_annotations": {
+          "scope.Definition" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Definition",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "docstring" : "Applies unstructured annotations to a definition.\n",
+        "fields" : {
+          "items" : {
+            "name" : "items",
+            "key" : 1,
+            "lineno" : 193,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "map",
+  "key_type" : "string",
+  "value_type" : "string"
+}
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 191
       }
       },
   "source_path" : "thrift/annotation/thrift",

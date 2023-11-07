@@ -834,6 +834,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for ReservedKeyword {
             return r.take();
         }
 
+        if let Some(r) = <hack::types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return Some(r);
+        }
+
         None
     }
 
@@ -854,6 +858,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for ReservedKeyword {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
+                }
+
+                if let Some(r) = <hack::types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
                 }
             },
             _ => {}
@@ -959,6 +967,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for UnionToBeRenamed {
             return r.take();
         }
 
+        if let Some(r) = <hack::types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return Some(r);
+        }
+
         None
     }
 
@@ -979,6 +991,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for UnionToBeRenamed {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
+                }
+
+                if let Some(r) = <hack::types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
                 }
             },
             _ => {}

@@ -40,7 +40,30 @@ def __EXPAND_THRIFT_SPEC(spec):
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'Experimental', 'ReserveIds', 'RequiresBackwardCompatibility', 'TerseWrite', 'Box', 'Mixin', 'SerializeInFieldIdOrder', 'BitmaskEnum', 'ExceptionMessage', 'GenerateRuntimeSchema', 'InternBox', 'Serial']
+__all__ = ['UTF8STRINGS', 'RpcPriority', 'Experimental', 'ReserveIds', 'RequiresBackwardCompatibility', 'TerseWrite', 'Box', 'Mixin', 'SerializeInFieldIdOrder', 'BitmaskEnum', 'ExceptionMessage', 'GenerateRuntimeSchema', 'InternBox', 'Serial', 'Uri', 'Priority', 'DeprecatedUnvalidatedAnnotations']
+
+class RpcPriority:
+  HIGH_IMPORTANT = 0
+  HIGH = 1
+  IMPORTANT = 2
+  NORMAL = 3
+  BEST_EFFORT = 4
+
+  _VALUES_TO_NAMES = {
+    0: "HIGH_IMPORTANT",
+    1: "HIGH",
+    2: "IMPORTANT",
+    3: "NORMAL",
+    4: "BEST_EFFORT",
+  }
+
+  _NAMES_TO_VALUES = {
+    "HIGH_IMPORTANT": 0,
+    "HIGH": 1,
+    "IMPORTANT": 2,
+    "NORMAL": 3,
+    "BEST_EFFORT": 4,
+  }
 
 class Experimental:
   r"""
@@ -682,6 +705,7 @@ class SerializeInFieldIdOrder:
 class BitmaskEnum:
   r"""
   Indicates an enum is a bitmask and should support bit-wise operators.
+  Currently generates additional code in C++ and Hack.
   """
 
   thrift_spec = None
@@ -1075,6 +1099,301 @@ class Serial:
   def _to_py_deprecated(self):
     return self
 
+class Uri:
+  r"""
+  Changes the URI of this definition away from the default-generated one.
+  
+  Attributes:
+   - value
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRING:
+          self.value = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('Uri')
+    if self.value != None:
+      oprot.writeFieldBegin('value', TType.STRING, 1)
+      oprot.writeString(self.value.encode('utf-8')) if UTF8STRINGS and not isinstance(self.value, bytes) else oprot.writeString(self.value)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.value is not None:
+      value = pprint.pformat(self.value, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    value=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'value',
+    )
+
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.annotation.thrift.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.Uri, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.annotation.thrift.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.Uri, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class Priority:
+  r"""
+  Changes the priority of this function (default NORMAL).
+  
+  Attributes:
+   - level
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I32:
+          self.level = iprot.readI32()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('Priority')
+    if self.level != None:
+      oprot.writeFieldBegin('level', TType.I32, 1)
+      oprot.writeI32(self.level)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.level is not None:
+      value = pprint.pformat(self.level, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    level=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'level',
+    )
+
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.annotation.thrift.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.Priority, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.annotation.thrift.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.Priority, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class DeprecatedUnvalidatedAnnotations:
+  r"""
+  Applies unstructured annotations to a definition.
+  
+  Attributes:
+   - items
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.MAP:
+          self.items = {}
+          (_ktype20, _vtype21, _size19 ) = iprot.readMapBegin() 
+          if _size19 >= 0:
+            for _i23 in range(_size19):
+              _key24 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val25 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.items[_key24] = _val25
+          else: 
+            while iprot.peekMap():
+              _key26 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val27 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.items[_key26] = _val27
+          iprot.readMapEnd()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('DeprecatedUnvalidatedAnnotations')
+    if self.items != None:
+      oprot.writeFieldBegin('items', TType.MAP, 1)
+      oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.items))
+      for kiter28,viter29 in self.items.items():
+        oprot.writeString(kiter28.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter28, bytes) else oprot.writeString(kiter28)
+        oprot.writeString(viter29.encode('utf-8')) if UTF8STRINGS and not isinstance(viter29, bytes) else oprot.writeString(viter29)
+      oprot.writeMapEnd()
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.items is not None:
+      value = pprint.pformat(self.items, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    items=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'items',
+    )
+
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.annotation.thrift.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.DeprecatedUnvalidatedAnnotations, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.annotation.thrift.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.DeprecatedUnvalidatedAnnotations, self)
+
+  def _to_py_deprecated(self):
+    return self
+
 all_structs.append(Experimental)
 Experimental.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 )))
@@ -1224,6 +1543,72 @@ Serial.thrift_struct_annotations = {
 }
 Serial.thrift_field_annotations = {
 }
+
+all_structs.append(Uri)
+Uri.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+  (1, TType.STRING, 'value', True, None, 2, ), # 1
+)))
+
+Uri.thrift_struct_annotations = {
+}
+Uri.thrift_field_annotations = {
+}
+
+def Uri__init__(self, value=None,):
+  self.value = value
+
+Uri.__init__ = Uri__init__
+
+def Uri__setstate__(self, state):
+  state.setdefault('value', None)
+  self.__dict__ = state
+
+Uri.__getstate__ = lambda self: self.__dict__.copy()
+Uri.__setstate__ = Uri__setstate__
+
+all_structs.append(Priority)
+Priority.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+  (1, TType.I32, 'level', RpcPriority, None, 2, ), # 1
+)))
+
+Priority.thrift_struct_annotations = {
+}
+Priority.thrift_field_annotations = {
+}
+
+def Priority__init__(self, level=None,):
+  self.level = level
+
+Priority.__init__ = Priority__init__
+
+def Priority__setstate__(self, state):
+  state.setdefault('level', None)
+  self.__dict__ = state
+
+Priority.__getstate__ = lambda self: self.__dict__.copy()
+Priority.__setstate__ = Priority__setstate__
+
+all_structs.append(DeprecatedUnvalidatedAnnotations)
+DeprecatedUnvalidatedAnnotations.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+  (1, TType.MAP, 'items', (TType.STRING,True,TType.STRING,True), None, 2, ), # 1
+)))
+
+DeprecatedUnvalidatedAnnotations.thrift_struct_annotations = {
+}
+DeprecatedUnvalidatedAnnotations.thrift_field_annotations = {
+}
+
+def DeprecatedUnvalidatedAnnotations__init__(self, items=None,):
+  self.items = items
+
+DeprecatedUnvalidatedAnnotations.__init__ = DeprecatedUnvalidatedAnnotations__init__
+
+def DeprecatedUnvalidatedAnnotations__setstate__(self, state):
+  state.setdefault('items', None)
+  self.__dict__ = state
+
+DeprecatedUnvalidatedAnnotations.__getstate__ = lambda self: self.__dict__.copy()
+DeprecatedUnvalidatedAnnotations.__setstate__ = DeprecatedUnvalidatedAnnotations__setstate__
 
 fix_spec(all_structs)
 del all_structs

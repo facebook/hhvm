@@ -13,6 +13,7 @@ namespace annotation {
 ::apache::thrift::metadata::ThriftMetadata thrift_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
+  ::apache::thrift::detail::md::EnumMetadata<RpcPriority>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Experimental>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<ReserveIds>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<RequiresBackwardCompatibility>::gen(metadata);
@@ -25,6 +26,9 @@ namespace annotation {
   ::apache::thrift::detail::md::StructMetadata<GenerateRuntimeSchema>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<InternBox>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Serial>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<Uri>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<Priority>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<DeprecatedUnvalidatedAnnotations>::gen(metadata);
   return metadata;
 }
 } // namespace facebook

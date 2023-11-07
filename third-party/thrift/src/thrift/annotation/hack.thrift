@@ -89,6 +89,7 @@ struct SkipCodegen {
 // conflict errors in Hack codegen.
 // For ex: reserved keywords in Hack language, symbols with similar names from
 // other files in Hack
+@scope.Definition
 struct Name {
   1: string name;
   2: string reason;

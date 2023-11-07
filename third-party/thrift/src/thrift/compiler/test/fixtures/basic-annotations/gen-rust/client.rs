@@ -1269,7 +1269,6 @@ pub struct make_MyServicePrioParent;
 /// # };
 /// ```
 impl dyn MyServicePrioParent {
-    pub const priority: &'static ::std::primitive::str = "HIGH";
     pub fn new<P, T>(
         protocol: P,
         transport: T,

@@ -31,19 +31,12 @@ namespace compiler {
 
 namespace {
 
-const t_type* resolve_type(const t_type* type) {
-  while (type->is_typedef()) {
-    type = dynamic_cast<const t_typedef*>(type)->get_type();
-  }
-  return type;
-}
-
 void match_type_with_const_value(
     diagnostic_context& ctx,
     const t_program& program,
     const t_type* long_type,
     t_const_value* value) {
-  const t_type* type = resolve_type(long_type);
+  const t_type* type = long_type->get_true_type();
   value->set_ttype(t_type_ref::from_req_ptr(type));
   if (type->is_list()) {
     auto* elem_type = dynamic_cast<const t_list*>(type)->get_elem_type();
@@ -95,8 +88,9 @@ void match_type_with_const_value(
         constant = program.scope()->find_constant(full_str);
       }
       if (!constant) {
-        throw std::runtime_error(
-            std::string("type error: no matching constant: ") + str);
+        ctx.error("type error: no matching constant: {}", str);
+        value->assign(t_const_value());
+        return;
       }
       std::unique_ptr<t_const_value> value_copy = constant->value()->clone();
       value->assign(std::move(*value_copy));

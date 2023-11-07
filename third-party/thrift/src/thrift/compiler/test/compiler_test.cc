@@ -633,3 +633,13 @@ TEST(CompilerTest, deprecated_annotations) {
     } (hack.attributes = "")
   )");
 }
+
+TEST(CompilerTest, invalid_enum_constant) {
+  check_compile(R"(
+    enum E {}
+    const list<E> c = [nonexistant.Value]; # expected-error: type error: no matching constant: nonexistant.Value
+    # expected-error@-1: type error: const `c<elem>` was declared as enum.
+    # expected-warning@-2: The identifier 'nonexistant.Value' is not defined yet. Constants and enums should be defined before using them as default values.
+    # expected-warning@-3: type error: const `c<elem>` was declared as enum `E` with a value not of that enum.
+  )");
+}

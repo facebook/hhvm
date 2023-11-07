@@ -31,7 +31,7 @@
 namespace apache {
 namespace thrift {
 namespace compiler {
-namespace detail {
+namespace {
 
 bool is_valid_custom_default_integer(
     const t_base_type* type, const t_const_value* value) {
@@ -56,7 +56,14 @@ bool is_valid_custom_default_float(const t_const_value* value) {
       value->get_double() <= std::numeric_limits<float>::max();
 }
 
-} // namespace detail
+template <typename T>
+bool is_valid_custom_default_float_with_integer_value(
+    const t_const_value* value) {
+  return value->get_integer() ==
+      static_cast<int64_t>(static_cast<T>(value->get_integer()));
+}
+
+} // namespace
 
 namespace {
 
@@ -169,25 +176,23 @@ class const_checker {
       case t_base_type::type::t_i16:
       case t_base_type::type::t_i32:
         if (value->get_type() == t_const_value::CV_INTEGER &&
-            !detail::is_valid_custom_default_integer(type, value)) {
+            !is_valid_custom_default_integer(type, value)) {
           report_value_mistmatch();
         }
         break;
       case t_base_type::type::t_float:
         if (value->get_type() == t_const_value::CV_DOUBLE &&
-            !detail::is_valid_custom_default_float(value)) {
+            !is_valid_custom_default_float(value)) {
           report_value_mistmatch();
         }
         if (value->get_type() == t_const_value::CV_INTEGER &&
-            !detail::is_valid_custom_default_float_with_integer_value<float>(
-                value)) {
+            !is_valid_custom_default_float_with_integer_value<float>(value)) {
           report_value_precision();
         }
         break;
       case t_base_type::type::t_double:
         if (value->get_type() == t_const_value::CV_INTEGER &&
-            !detail::is_valid_custom_default_float_with_integer_value<double>(
-                value)) {
+            !is_valid_custom_default_float_with_integer_value<double>(value)) {
           report_value_precision();
         }
         break;

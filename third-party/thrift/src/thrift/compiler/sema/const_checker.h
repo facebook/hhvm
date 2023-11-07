@@ -27,22 +27,6 @@ class t_base_type;
 class t_named;
 class t_type;
 
-namespace detail {
-
-bool is_valid_custom_default_integer(
-    const t_base_type* type, const t_const_value* value);
-
-bool is_valid_custom_default_float(const t_const_value* value);
-
-template <typename T>
-bool is_valid_custom_default_float_with_integer_value(
-    const t_const_value* value) {
-  return value->get_integer() ==
-      static_cast<int64_t>(static_cast<T>(value->get_integer()));
-}
-
-} // namespace detail
-
 // (ffrancet) I managed to trace this comment all the way back to 2008 when
 // thrift was migrated to the fbcode repo. True piece of history here
 /**

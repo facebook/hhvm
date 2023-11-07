@@ -1121,10 +1121,7 @@ void optimizeCatchBlocks(const BlockList& blocks,
   FTRACE(1, "OptimizeCatchBlocks:vvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(1, "OptimizeCatchBlocks:^^^^^^^^^^^^^^^^^^^^\n"); };
   for (auto block : blocks) {
-    if (block->back().is(EndCatch) &&
-        block->back().extra<EndCatch>()->mode !=
-          EndCatchData::CatchMode::SideExit &&
-        block->front().is(BeginCatch)) {
+    if (block->back().is(EndCatch) && block->front().is(BeginCatch)) {
       processCatchBlock(unit, state, block, uses, rcInsts);
     }
   }

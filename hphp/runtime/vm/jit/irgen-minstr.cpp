@@ -1106,54 +1106,34 @@ SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
 }
 
 Block* makeCatchSet(IRGS& env, uint32_t nDiscard) {
-  auto block = defBlock(env, Block::Hint::Unused);
+  return create_catch_block(env, [&]{
+    ifElse(
+      env,
+      [&] (Block* taken) {
+        gen(env, UnwindCheckSideExit, taken, fp(env), sp(env));
+      },
+      [&] {
+        // Side-exit from a catch block due to an InvalidSetMException.
+        hint(env, Block::Hint::Unused);
 
-  BlockPusher bp(*env.irb, makeMarker(env, curSrcKey(env)), block);
-  gen(env, BeginCatch);
+        // For consistency with the interpreter, decref the rhs before we decref
+        // the stack inputs, and decref the ratchet storage after the stack
+        // inputs.
+        popDecRef(env, DecRefProfileId::Default, DataTypeGeneric);
+        for (int i = 0; i < nDiscard; ++i) {
+          popDecRef(env, static_cast<DecRefProfileId>(i), DataTypeGeneric);
+        }
+        auto const val = gen(env, LdUnwinderValue, TCell);
+        push(env, val);
 
-  ifThen(
-    env,
-    [&] (Block* taken) {
-      gen(env, UnwindCheckSideExit, taken, fp(env), sp(env));
-    },
-    [&] {
-      assertx(!env.irb->fs().stublogue());
-      hint(env, Block::Hint::Unused);
-      if (spillInlinedFrames(env)) {
-        gen(env, StVMFP, fp(env));
-        gen(env, StVMPC, cns(env, uintptr_t(curSrcKey(env).pc())));
-        gen(env, StVMReturnAddr, cns(env, 0));
+        // The minstr is done here, so we want to drop a FinishMemberOp to kill off
+        // stores to MIState.
+        gen(env, FinishMemberOp);
+
+        gen(env, Jmp, makeExit(env, nextSrcKey(env)));
       }
-
-      auto const data = EndCatchData {
-        spOffBCFromIRSP(env),
-        EndCatchData::CatchMode::SideExit,
-        EndCatchData::FrameMode::Phplogue,
-        EndCatchData::Teardown::Full,
-        EndCatchData::VMSPSyncMode::DoNotSync
-      };
-      gen(env, EndCatch, data, fp(env), sp(env));
-    }
-  );
-
-  // Fallthrough from here on is side-exiting due to an InvalidSetMException.
-  hint(env, Block::Hint::Unused);
-
-  // For consistency with the interpreter, decref the rhs before we decref the
-  // stack inputs, and decref the ratchet storage after the stack inputs.
-  popDecRef(env, DecRefProfileId::Default, DataTypeGeneric);
-  for (int i = 0; i < nDiscard; ++i) {
-    popDecRef(env, static_cast<DecRefProfileId>(i), DataTypeGeneric);
-  }
-  auto const val = gen(env, LdUnwinderValue, TCell);
-  push(env, val);
-
-  // The minstr is done here, so we want to drop a FinishMemberOp to kill off
-  // stores to MIState.
-  gen(env, FinishMemberOp);
-
-  gen(env, Jmp, makeExit(env, nextSrcKey(env)));
-  return block;
+    );
+  });
 }
 
 SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, ReadonlyOp op) {

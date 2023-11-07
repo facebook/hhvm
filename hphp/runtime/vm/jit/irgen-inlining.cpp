@@ -688,12 +688,8 @@ void sideExitFromInlined(IRGS& env, SSATmp* target) {
 
 bool endCatchFromInlined(IRGS& env, EndCatchData::CatchMode mode) {
   assertx(isInlining(env));
-
-  if (mode != EndCatchData::CatchMode::UnwindOnly &&
-      mode != EndCatchData::CatchMode::LocalsDecRefd) {
-    // We do not support other modes (CatchMode::SideExit).
-    return false;
-  }
+  assertx(mode == EndCatchData::CatchMode::UnwindOnly ||
+          mode == EndCatchData::CatchMode::LocalsDecRefd);
 
   if (findCatchHandler(curFunc(env), bcOff(env)) != kInvalidOffset) {
     // We are not exiting the frame, as the current opcode has a catch handler.

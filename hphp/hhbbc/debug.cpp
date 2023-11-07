@@ -88,6 +88,10 @@ void dump_class_state(std::ostream& out,
     if (attrs & AttrDeepInit) out << " (deep-init)";
   };
 
+  if (auto const s = index.lookup_iface_vtable_slot(c); s != kInvalidSlot) {
+    out << clsName << " vtable slot #" << s << '\n';
+  }
+
   if (is_closure(*c)) {
     auto const invoke = find_method(c, s_invoke.get());
     auto const useVars = index.lookup_closure_use_vars(invoke);

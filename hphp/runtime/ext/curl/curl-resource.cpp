@@ -20,12 +20,6 @@
 #include <curl/multi.h>
 #include <folly/portability/OpenSSL.h>
 
-#if (LIBCURL_VERSION_NUM >= 0x074600) && (OPENSSL_VERSION_NUMBER >= 0x10101000L)
-#define CERT_CACHE_SUPPORTED 1
-#else
-#undef CERT_CACHE_SUPPORTED
-#endif
-
 #define PHP_CURL_STDOUT 0
 #define PHP_CURL_FILE   1
 #define PHP_CURL_USER   2
@@ -1373,12 +1367,11 @@ int CurlResource::curl_progress(void* p,
 }
 
 namespace {
-hphp_fast_map<String, X509_STORE*, hphp_string_hash, hphp_string_same> s_certCache;
+hphp_fast_string_map<X509_STORE*> s_certCache;
 folly::SharedMutex s_mutex;
 }
 
 bool CurlResource::useCertCache() const {
-#ifdef CERT_CACHE_SUPPORTED
   auto const isNonEmpty = [&](int64_t option) {
     if (!m_opts.exists(option)) return false;
     Variant untyped_value = m_opts[option];
@@ -1399,13 +1392,9 @@ bool CurlResource::useCertCache() const {
   }
 
   return true;
-#else
-  return false;
-#endif
 }
 
 String CurlResource::cainfo(bool proxy) const {
-#ifdef CERT_CACHE_SUPPORTED
   auto const option = proxy ? CURLOPT_PROXY_CAINFO : CURLOPT_CAINFO;
 
   static auto const defaultCainfoData = [&] () -> StringData* {
@@ -1424,9 +1413,6 @@ String CurlResource::cainfo(bool proxy) const {
   if (string_value.empty()) return defaultCainfo;
 
   return string_value;
-#else
-  return String{};
-#endif
 }
 
 CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
@@ -1446,10 +1432,9 @@ CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
     return CURLE_FAILED_INIT;
   }
 
-#ifdef CERT_CACHE_SUPPORTED
   // Load the CA from the cache.
   if (cp->useCertCache()) {
-    auto const cainfo = cp->cainfo(false);
+    auto const cainfo = cp->cainfo(false).toCppString();
     if (!cainfo.empty()) {
       auto const store = [&] () -> X509_STORE* {
         {
@@ -1502,6 +1487,7 @@ CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
         folly::SharedMutex::WriteHolder lock(s_mutex);
         auto const iter = s_certCache.find(cainfo);
         if (iter != s_certCache.end()) {
+          // Lost the race to parse & insert the cached item.
           X509_STORE_free(store);
           return iter->second;
         } else {
@@ -1513,7 +1499,6 @@ CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
       SSL_CTX_set1_cert_store(ctx, store);
     }
   }
-#endif
 
   // Override cipher specs if necessary.
   if (cp->m_opts.exists(int64_t(CURLOPT_FB_TLS_CIPHER_SPEC))) {

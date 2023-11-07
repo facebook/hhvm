@@ -145,8 +145,8 @@ class TestFramingHandler : public FramingHandler {
     unique_ptr<IOBuf> framing;
 
     if (buf->headroom() > 4) {
-      framing = std::move(buf);
       buf->prepend(4);
+      framing = std::move(buf);
     } else {
       framing = IOBuf::create(4);
       framing->append(4);

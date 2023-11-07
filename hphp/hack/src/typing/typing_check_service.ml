@@ -1102,7 +1102,6 @@ let go_with_interrupt
         (Telemetry.create ()
         |> Telemetry.bool_ ~key:"will_use_distc" ~value:will_use_distc);
     if will_use_distc then (
-      let start_time = Unix.gettimeofday () in
       (* TODO(ljw): time_first_error isn't properly calculated in this path *)
       (* distc doesn't yet give any profiling_info about how its workers fared *)
       let profiling_info = Telemetry.create () in
@@ -1130,31 +1129,7 @@ let go_with_interrupt
         HackEventLogger.invariant_violation_bug
           "Unexpected hh_distc error"
           ~data:msg;
-        if check_info.log_errors then
-          ServerProgress.ErrorsWrite.telemetry
-            (Telemetry.create ()
-            |> Telemetry.bool_ ~key:"process_in_parallel" ~value:true);
-        let distc_fallback_info =
-          Telemetry.create ()
-          |> Telemetry.string_ ~key:"distc_error" ~value:msg
-          |> Telemetry.duration ~key:"distc_duration" ~start_time
-        in
-        let telemetry =
-          telemetry
-          |> Telemetry.object_
-               ~key:"distc_fallback_info"
-               ~value:distc_fallback_info
-        in
-        process_in_parallel
-          ctx
-          workers
-          telemetry
-          fnl
-          ~interrupt
-          ~memory_cap
-          ~longlived_workers
-          ~check_info
-          ~typecheck_info
+        failwith (Printf.sprintf "Distc failed with: %s" msg)
     ) else (
       if check_info.log_errors then
         ServerProgress.ErrorsWrite.telemetry

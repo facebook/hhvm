@@ -58,7 +58,7 @@ class Sha256Hasher {
 
   void finalize() {
     result_.emplace();
-    folly::MutableByteRange r(result_.value().begin(), result_.value().end());
+    folly::MutableByteRange r(result_.value().data(), result_.value().size());
     hash_.hash_final(r);
   }
 

@@ -69,7 +69,9 @@ let on_expr_top_down
     (* -- Markers ----------------------------------------------------------- *)
     | Aast.(Invalid _ | Hole _) -> (ctx, Ok expr)
     (* -- Handled bottom up ------------------------------------------------- *)
-    | Aast.(Class_const _) -> (ctx, Ok expr)
+    | Aast.(Nameof _)
+    | Aast.(Class_const _) ->
+      (ctx, Ok expr)
     (* -- Conditionally valid ----------------------------------------------- *)
     (* NB we can perform this top-down since the all valid hints are already in
        canonical *)
@@ -136,7 +138,7 @@ let on_expr_top_down
         ( This | Lvar _ | Lplaceholder _ | Array_get _ | Await _ | Cast _
         | Class_get _ | Clone _ | Dollardollar _ | ET_Splice _ | Efun _
         | EnumClassLabel _ | ExpressionTree _ | Is _ | Lfun _ | List _
-        | Method_caller _ | New _ | Obj_get _ | Pair _ | Pipe _ | Nameof _
+        | Method_caller _ | New _ | Obj_get _ | Pair _ | Pipe _
         | PrefixedString _ | ReadonlyExpr _ | String2 _ | Yield _ | Xml _ )) ->
       on_error (Err.naming @@ Naming_error.Illegal_constant pos);
       (ctx, Error (Err.invalid_expr expr))

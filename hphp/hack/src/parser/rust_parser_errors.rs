@@ -4622,6 +4622,21 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 if is_good_scope_resolution_qualifier(&x.qualifier, static_allowed)
                     && is_good_scope_resolution_name(&x.name)
                     && !is_parent_class_access(&x.qualifier, &x.name) => {}
+            NameofExpression(x) => match x.target.children {
+                // Match behavior for ScopeResolution expression when rhs is ::class
+                Token(t) => {
+                    // The parser does a weird clone fork to separate a name-token of "parent" vs.
+                    // a token kind of parent when the following token is a :: for scope resolution
+                    // I want to leave nameof flexible to have arbitrary expressions, so these are
+                    // always name tokens.
+                    let txt = self.token_text(&t);
+                    if txt == sn::classes::PARENT || (!static_allowed && txt == sn::classes::STATIC)
+                    {
+                        default(self)
+                    }
+                }
+                _ => default(self),
+            },
             FunctionCallExpression(x) => {
                 let mut check_receiver_and_arguments = |receiver| {
                     if is_whitelisted_function(self, receiver) {

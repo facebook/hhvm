@@ -1,0 +1,12 @@
+File "constexpr.php", line 10, characters 21-33:
+Expected constant expression for initializer (Parsing[1002])
+File "constexpr.php", line 11, characters 21-33:
+Expected constant expression for initializer (Parsing[1002])
+File "constexpr.php", line 12, characters 24-36:
+Expected constant expression for initializer (Parsing[1002])
+File "constexpr.php", line 13, characters 24-36:
+Expected constant expression for initializer (Parsing[1002])
+File "constexpr.php", line 12, characters 24-36:
+Illegal constant value (Naming[2023])
+File "constexpr.php", line 13, characters 24-36:
+Illegal constant value (Naming[2023])

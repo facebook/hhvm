@@ -379,12 +379,6 @@ type _ t =
   | IDE_RENAME_BY_SYMBOL :
       Find_refs.action * string * Relative_path.t SymbolDefinition.t
       -> Rename.ide_result_or_retry t
-  | CODEMOD_SDT :
-      string
-      -> (ServerRenameTypes.patch list
-         * string list
-         * [ `ClassLike | `Function ])
-         t
   | DUMP_SYMBOL_INFO : string list -> Symbol_info_service.result t
   | REMOVE_DEAD_FIXMES :
       int list

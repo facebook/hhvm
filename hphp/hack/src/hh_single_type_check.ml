@@ -69,7 +69,6 @@ type mode =
   | Refactor_sound_dynamic of string * string * string
   | RemoveDeadUnsafeCasts
   | CountImpreciseTypes
-  | SDT_analysis of string
   | Get_type_hierarchy
   | Map_reduce_mode
 
@@ -83,7 +82,6 @@ type options = {
   tcopt: GlobalOptions.t;
   batch_mode: bool;
   out_extension: string;
-  verbosity: int;
   should_print_position: bool;
   custom_hhi_path: string option;
   profile_type_check_multi: int option;
@@ -271,7 +269,6 @@ let parse_options () =
   let keep_user_attributes = ref false in
   let disable_xhp_children_declarations = ref false in
   let enable_xhp_class_modifier = ref false in
-  let verbosity = ref 0 in
   let disable_hh_ignore_error = ref 0 in
   let is_systemlib = ref false in
   let enable_higher_kinded_types = ref false in
@@ -651,9 +648,6 @@ let parse_options () =
         Arg.Set enable_xhp_class_modifier,
         " Enable the XHP class modifier, xhp class name {} will define an xhp class."
       );
-      ( "--verbose",
-        Arg.Int (fun v -> verbosity := v),
-        " Verbosity as an integer." );
       ( "--disable-hh-ignore-error",
         Arg.Int (( := ) disable_hh_ignore_error),
         " Forbid HH_IGNORE_ERROR comments as an alternative to HH_FIXME, or treat them as normal comments."
@@ -795,12 +789,6 @@ let parse_options () =
       ( "--count-imprecise-types",
         Arg.Unit (fun () -> set_mode CountImpreciseTypes ()),
         " Counts the number of mixed, dynamic, and nonnull types in a file" );
-      ( "--sdt-analysis",
-        Arg.String
-          (fun command ->
-            batch_mode := true;
-            set_mode (SDT_analysis command) ()),
-        " Analyses to support Sound Dynamic rollout" );
       ( "--packages-config-path",
         Arg.String (fun s -> packages_config_path := Some s),
         " Config file for a list of package definitions" );
@@ -1058,7 +1046,6 @@ let parse_options () =
       tcopt;
       batch_mode = !batch_mode;
       out_extension = !out_extension;
-      verbosity = !verbosity;
       should_print_position = !print_position;
       custom_hhi_path = !custom_hhi_path;
       profile_type_check_multi = !profile_type_check_multi;
@@ -1828,8 +1815,7 @@ let handle_mode
     dbg_deps
     ~should_print_position
     ~profile_type_check_multi
-    ~memtrace
-    ~verbosity =
+    ~memtrace =
   let expect_single_file () : Relative_path.t =
     match filenames with
     | [x] -> x
@@ -1852,16 +1838,6 @@ let handle_mode
       ~do_:(Refactor_sd.do_ element_name)
       "Sound Dynamic"
       opts
-      ctx
-      error_format
-      ~iter_over_files
-      ~profile_type_check_multi
-      ~memtrace
-  | SDT_analysis command ->
-    handle_constraint_mode
-      ~do_:(Sdt_analysis.do_ ~command ~on_bad_command:die ~verbosity)
-      "SDT"
-      ()
       ctx
       error_format
       ~iter_over_files
@@ -2471,7 +2447,6 @@ let decl_and_run_mode
       max_errors;
       batch_mode;
       out_extension;
-      verbosity;
       should_print_position;
       custom_hhi_path;
       profile_type_check_multi;
@@ -2662,7 +2637,6 @@ let decl_and_run_mode
     ~should_print_position
     ~profile_type_check_multi
     ~memtrace
-    ~verbosity
 
 let main_hack opts (root : Path.t) (sharedmem_config : SharedMem.config) : unit
     =

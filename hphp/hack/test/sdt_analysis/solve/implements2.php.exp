@@ -1,3 +1,0 @@
-=== SDT analysis results for implements2.php
-{"entry_kind":"stats","id_cnt":2,"nadable_cnt":2,"syntactically_nadable_cnt":2}
-{"entry_kind":"add_no_auto_dynamic_attr","items":[{"kind":"((Cclass Concrete))","path":"implements2.php","sid":"\\C"},{"kind":"(Cinterface)","path":"implements2.php","sid":"\\I"}]}

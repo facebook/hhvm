@@ -854,26 +854,6 @@ let main_internal
           go ()
     in
     go ()
-  | MODE_CODEMOD_SDT
-      { csdt_path_to_jsonl; csdt_strategy; csdt_log_remotely; csdt_tag } ->
-    let status_cmd = Rpc.STATUS { max_errors = args.max_errors } in
-    let get_error_count () =
-      let%lwt (status, telemetry) = rpc args status_cmd in
-      let error_count =
-        status.ServerCommandTypes.Server_status.error_list |> List.length
-      in
-      Lwt.return (error_count, telemetry)
-    in
-    let get_patches codemod_line = rpc args (Rpc.CODEMOD_SDT codemod_line) in
-
-    Sdt_analysis.ClientCheck.apply_all
-      ~get_error_count
-      ~get_patches
-      ~apply_patches
-      ~path_to_jsonl:csdt_path_to_jsonl
-      ~strategy:csdt_strategy
-      ~log_remotely:csdt_log_remotely
-      ~tag:csdt_tag
   | MODE_REWRITE_DECLARATIONS ->
     DeclarationsRewriter.start ();
     Lwt.return (Exit_status.No_error, Telemetry.create ())

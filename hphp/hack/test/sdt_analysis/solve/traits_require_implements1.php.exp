@@ -1,3 +1,0 @@
-=== SDT analysis results for traits_require_implements1.php
-{"entry_kind":"stats","id_cnt":4,"nadable_cnt":1,"syntactically_nadable_cnt":4}
-{"entry_kind":"add_no_auto_dynamic_attr","items":[{"kind":"function","path":"traits_require_implements1.php","sid":"\\foo"}]}

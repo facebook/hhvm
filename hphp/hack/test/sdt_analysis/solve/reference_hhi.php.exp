@@ -1,4 +1,0 @@
-=== SDT analysis results for reference_hhi.php
-{"entry_kind":"stats","id_cnt":4,"nadable_cnt":2,"syntactically_nadable_cnt":3}
-{"entry_kind":"add_no_auto_dynamic_attr","items":[{"kind":"function","path":"reference_hhi.php","sid":"\\main"}]}
-{"entry_kind":"add_no_auto_dynamic_attr","items":[{"kind":"((Cclass Concrete))","path":"reference_hhi.php","sid":"\\B"},{"kind":"()","path":null,"sid":"\\ClassFromHhi2"}]}

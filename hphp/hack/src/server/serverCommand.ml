@@ -22,8 +22,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | STATUS _ -> true
   | LIST_FILES_WITH_ERRORS
   | REMOVE_DEAD_FIXMES _
-  | REMOVE_DEAD_UNSAFE_CASTS
-  | CODEMOD_SDT _ ->
+  | REMOVE_DEAD_UNSAFE_CASTS ->
     true (* need same information as STATUS *)
   | REWRITE_LAMBDA_PARAMETERS _ -> true
   (* Finding references/implementations uses global dependency table *)

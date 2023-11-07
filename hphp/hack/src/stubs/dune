@@ -197,8 +197,3 @@
  (modules file_scuba_logger_ffi_externs)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
-
-(library
- (name sdt_analysis_remote_logging_stubs)
- (wrapped false)
- (modules sdt_analysis_remote_logging))

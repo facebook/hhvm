@@ -1,5 +1,0 @@
-=== SDT analysis results for multiple_hierarchies.php
-{"entry_kind":"stats","id_cnt":4,"nadable_cnt":4,"syntactically_nadable_cnt":4}
-{"entry_kind":"add_no_auto_dynamic_attr","items":[{"kind":"((Cclass Concrete))","path":"multiple_hierarchies.php","sid":"\\E"}]}
-{"entry_kind":"add_no_auto_dynamic_attr","items":[{"kind":"((Cclass Concrete))","path":"multiple_hierarchies.php","sid":"\\C"},{"kind":"(Cinterface)","path":"multiple_hierarchies.php","sid":"\\I"}]}
-{"entry_kind":"add_no_auto_dynamic_attr","items":[{"kind":"((Cclass Concrete))","path":"multiple_hierarchies.php","sid":"\\D"},{"kind":"(Cinterface)","path":"multiple_hierarchies.php","sid":"\\I"}]}

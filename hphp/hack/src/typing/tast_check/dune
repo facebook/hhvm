@@ -6,7 +6,6 @@
   tany_logger
   core_kernel
   nast
-  sdt_analysis
   remove_dead_unsafe_casts
   tast_env
   typing_deps

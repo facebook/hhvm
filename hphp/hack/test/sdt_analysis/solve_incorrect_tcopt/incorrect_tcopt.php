@@ -1,3 +1,0 @@
-<?hh
-
-function foo(): void {}

@@ -294,9 +294,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         with
         | Error e -> (env, Done (Error e))
         | Ok r -> map_env r ~f:(fun x -> Ok x))
-  | CODEMOD_SDT codemod_line ->
-    let patches = Sdt_analysis.patches_of_codemod_line codemod_line in
-    (env, patches)
   | REMOVE_DEAD_FIXMES codes ->
     if genv.ServerEnv.options |> ServerArgs.no_load then (
       HackEventLogger.check_response

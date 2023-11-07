@@ -34,7 +34,6 @@
   rust_provider_backend_stubs
   refactor_sd
   remove_dead_unsafe_casts
-  sdt_analysis
   server_env
   server_env_build
   server_code_actions_services

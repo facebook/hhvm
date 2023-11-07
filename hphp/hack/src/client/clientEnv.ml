@@ -15,12 +15,6 @@ type rename_mode =
 
 type client_mode =
   | MODE_XHP_AUTOCOMPLETE_SNIPPET of string
-  | MODE_CODEMOD_SDT of {
-      csdt_path_to_jsonl: string;
-      csdt_strategy: [ `CodemodSdtCumulative | `CodemodSdtIndependent ];
-      csdt_log_remotely: bool;
-      csdt_tag: string;
-    }
   | MODE_CST_SEARCH of string list option
   | MODE_DUMP_SYMBOL_INFO of string
   | MODE_EXTRACT_STANDALONE of string

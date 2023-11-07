@@ -1,6 +1,0 @@
-=== SDT analysis results for incorrect_tcopt.php
-sdt analysis can only be used with certain options.
-    If running with hh_single_type_check, pass flags `--implicit-pess.
-    If running with hh, pass these flags or set the corresponding .hhconfig options:
-        --config enable_sound_dynamic_type=true \
-        --config everything_sdt=true \

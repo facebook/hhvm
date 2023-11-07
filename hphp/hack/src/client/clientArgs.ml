@@ -216,37 +216,6 @@ let parse_check_args cmd ~from_default =
       ( "--autostart-server",
         Arg.Bool (( := ) autostart),
         " automatically start hh_server if it's not running (default: true)" );
-      ( "--codemod-sdt",
-        (let path_to_jsonl = ref "" in
-         let log_remotely = ref false in
-         let tag = ref "" in
-         Arg.Tuple
-           [
-             Arg.String (( := ) path_to_jsonl);
-             Arg.Bool (( := ) log_remotely);
-             (* arbitrary description used to distinguish this run *)
-             Arg.String (( := ) tag);
-             Arg.String
-               (fun raw_strategy ->
-                 let strategy =
-                   match raw_strategy with
-                   | "cumulative-groups" -> `CodemodSdtCumulative
-                   | "independent-groups" -> `CodemodSdtIndependent
-                   | s ->
-                     raise
-                     @@ Arg.Bad
-                          (Format.sprintf "invalid --codemod-sdt mode: %s" s)
-                 in
-                 set_mode
-                 @@ MODE_CODEMOD_SDT
-                      {
-                        csdt_path_to_jsonl = !path_to_jsonl;
-                        csdt_strategy = strategy;
-                        csdt_log_remotely = !log_remotely;
-                        csdt_tag = !tag;
-                      });
-           ]),
-        "apply codemod for adding <<__NoAutoDynamic>>" );
       Common_argspecs.config config;
       ( "--cst-search",
         Arg.Unit (fun () -> set_mode (MODE_CST_SEARCH None)),

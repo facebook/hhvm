@@ -13,7 +13,7 @@ function hash(
   string $algo,
   string $data,
   bool $raw_output = false,
-): HH\FIXME\MISSING_RETURN_TYPE;
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function hash_algos()[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -23,7 +23,7 @@ function hash_init(
   string $key = "",
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function hash_copy(resource $algo): HH\FIXME\MISSING_RETURN_TYPE {}
+function hash_copy(resource $algo)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function hash_equals(
   string $known_string,

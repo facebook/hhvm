@@ -43,6 +43,7 @@
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/server/ServerConfigs.h>
 #include <thrift/lib/cpp2/transport/core/RequestStateMachine.h>
+#include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
 #include <thrift/lib/cpp2/transport/core/ThriftChannelIf.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -243,8 +244,38 @@ class ThriftRequestCore : public ResponseChannelRequest {
   void sendErrorWrapped(folly::exception_wrapper ew, std::string exCode) final {
     if (exCode == kConnectionClosingErrorCode) {
       closeConnection(std::move(ew));
+      return;
+    }
+    if (exCode == kAppClientErrorCode || exCode == kAppServerErrorCode) {
+      auto setUserExceptionHeaders = [&](std::string uex, std::string uexw) {
+        auto header = getRequestContext()->getHeader();
+        header->setHeader(
+            std::string(apache::thrift::detail::kHeaderUex), std::move(uex));
+        // In the case of an exception path
+        // (i.e. MESSAGE_TYPE::T_EXCEPTION), the 'uexw' value isn't used for
+        // 'exception_what' in the response exception metadata. Instead, the
+        // message from the actual exception object is used.
+        header->setHeader(
+            std::string(apache::thrift::detail::kHeaderUexw), std::move(uexw));
+      };
+      ew.handle(
+          [&](const AppClientException& ace) {
+            setUserExceptionHeaders(ace.name(), ace.getMessage());
+          },
+          [&](const AppServerException& ase) {
+            setUserExceptionHeaders(ase.name(), ase.getMessage());
+          },
+          [&](...) {
+            setUserExceptionHeaders(
+                ew.class_name().toStdString(), ew.what().toStdString());
+          });
     }
 
+    // 1) AppClientException and AppServerException are the child class of
+    // TApplicationException; 2) The TApplicationExceptionType in
+    // AppClientException or AppServerException is the default value UNKNOWN. So
+    // we can simply pass down the excetpion `ew`, no need to re-create a
+    // TApplicationException object here.
     if (tryCancel()) {
       cancelTimeout();
       sendErrorWrappedInternal(

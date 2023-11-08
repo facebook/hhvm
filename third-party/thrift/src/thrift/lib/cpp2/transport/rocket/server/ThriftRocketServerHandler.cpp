@@ -569,16 +569,14 @@ void ThriftRocketServerHandler::handleRequestCommon(
     folly::variant_match(
         preprocessResult,
         [&](AppClientException& ace) {
-          handleAppError(
-              std::move(request), ace.name(), ace.getMessage(), true);
+          handleAppError(std::move(request), ace);
+        },
+        [&](const AppServerException& ase) {
+          handleAppError(std::move(request), ase);
         },
         [&](AppOverloadedException& aoe) {
           handleRequestOverloadedServer(
               std::move(request), kAppOverloadedErrorCode, aoe.getMessage());
-        },
-        [&](const AppServerException& ase) {
-          handleAppError(
-              std::move(request), ase.name(), ase.getMessage(), false);
         },
         [](std::monostate&) { folly::assume_unreachable(); });
 
@@ -695,19 +693,20 @@ void ThriftRocketServerHandler::handleRequestOverloadedServer(
 
 void ThriftRocketServerHandler::handleAppError(
     ThriftRequestCoreUniquePtr request,
-    const std::string& name,
-    const std::string& message,
-    bool isClientError) {
+    const PreprocessResult& appErrorResult) {
   if (auto* observer = serverConfigs_->getObserver()) {
     observer->taskKilled();
   }
-  auto header = request->getRequestContext()->getHeader();
-  header->setHeader(std::string(apache::thrift::detail::kHeaderUex), name);
-  header->setHeader(std::string(apache::thrift::detail::kHeaderUexw), message);
-  request->sendErrorWrapped(
-      folly::make_exception_wrapper<TApplicationException>(
-          TApplicationException::UNKNOWN, std::move(message)),
-      isClientError ? kAppClientErrorCode : kAppServerErrorCode);
+
+  folly::variant_match(
+      appErrorResult,
+      [&](const AppClientException& ace) {
+        request->sendErrorWrapped(ace, kAppClientErrorCode);
+      },
+      [&](const AppServerException& ase) {
+        request->sendErrorWrapped(ase, kAppServerErrorCode);
+      },
+      [&](const auto&) { folly::assume_unreachable(); });
 }
 
 void ThriftRocketServerHandler::handleServerNotReady(

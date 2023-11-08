@@ -140,9 +140,7 @@ class ThriftRocketServerHandler : public RocketServerHandler {
       const std::string& errorMessage);
   FOLLY_NOINLINE void handleAppError(
       ThriftRequestCoreUniquePtr request,
-      const std::string& name,
-      const std::string& message,
-      bool isClientError);
+      const PreprocessResult& appErrorResult);
   FOLLY_NOINLINE void handleDecompressionFailure(
       ThriftRequestCoreUniquePtr request, std::string&& reason);
   FOLLY_NOINLINE void handleServerNotReady(ThriftRequestCoreUniquePtr request);

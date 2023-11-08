@@ -43,8 +43,8 @@ class MyStruct_Builder(thrift.py3.builder.StructBuilder):
     MyBinaryField3: _typing.Optional[bytes]
     MyBinaryListField4: _typing.Optional[list]
     MyMapEnumAndInt: _typing.Optional[dict]
-    MyCustomField: _typing.Optional[bytes]
-    MyOptCustomField: _typing.Optional[bytes]
+    MyCustomField: _typing.Optional[_fbthrift_iobuf.IOBuf]
+    MyOptCustomField: _typing.Optional[_fbthrift_iobuf.IOBuf]
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
 
@@ -84,7 +84,7 @@ class ComplexUnion_Builder(thrift.py3.builder.StructBuilder):
     ref_field: _typing.Any
     ref_field2: _typing.Any
     excp_field: _typing.Any
-    MyCustomField: _typing.Optional[bytes]
+    MyCustomField: _typing.Optional[_fbthrift_iobuf.IOBuf]
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
 
@@ -105,8 +105,8 @@ class AnException_Builder(thrift.py3.builder.StructBuilder):
     a_union_list: _typing.Optional[list]
     union_typedef: _typing.Optional[set]
     a_union_typedef_list: _typing.Optional[list]
-    MyCustomField: _typing.Optional[bytes]
-    MyOptCustomField: _typing.Optional[bytes]
+    MyCustomField: _typing.Optional[_fbthrift_iobuf.IOBuf]
+    MyOptCustomField: _typing.Optional[_fbthrift_iobuf.IOBuf]
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
 

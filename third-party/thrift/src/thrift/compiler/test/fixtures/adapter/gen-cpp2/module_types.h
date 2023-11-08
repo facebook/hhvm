@@ -2462,7 +2462,8 @@ typedef ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::Templa
 typedef ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::TemplatedTestAdapter, double> AdaptedDouble;
 typedef ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::TemplatedTestAdapter, ::std::string> AdaptedString;
 typedef ::facebook::thrift::test::AdaptedBool DoubleTypedefBool;
-typedef ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::CustomProtocolAdapter, ::folly::IOBuf> CustomProtocolType;
+typedef ::folly::IOBuf IOBuf;
+typedef ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::CustomProtocolAdapter, ::facebook::thrift::test::IOBuf> CustomProtocolType;
 typedef ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::IndirectionAdapter<::apache::thrift::test::IndirectionString>, ::std::string> IndirectionString;
 typedef ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::StaticCastAdapter<::apache::thrift::test::basic::AdaptedEnum, ::apache::thrift::test::basic::ThriftAdaptedEnum>, ::facebook::thrift::test::ThriftAdaptedEnum> AdaptedEnum;
 

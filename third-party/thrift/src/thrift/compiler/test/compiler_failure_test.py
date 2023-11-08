@@ -1536,40 +1536,6 @@ class CompilerFailureTest(unittest.TestCase):
             "[ERROR:foo.thrift:10] `@cpp.EnumType` cannot be used without `type` specified in `MyEnum1`.\n",
         )
 
-    def test_cpp_adapter_compatibility(self):
-        write_file(
-            "foo.thrift",
-            textwrap.dedent(
-                """\
-                include "thrift/annotation/cpp.thrift"
-
-                @cpp.Adapter{name="Adapter"}
-                typedef i32 Bar1 (cpp.type = "std::uint32_t")
-
-                @cpp.Adapter{name="Adapter"}
-                struct A {
-                    1: i32 field;
-                } (cpp.type = "CustomA")
-
-                struct B {
-                    @cpp.Adapter{name="Adapter"}
-                    1: i32 field (cpp.type = "std::uint32_t");
-                }
-                """
-            ),
-        )
-        ret, out, err = self.run_thrift("foo.thrift")
-        self.assertEqual(ret, 1)
-        self.assertEqual(
-            err,
-            "[ERROR:foo.thrift:6] Definition `A` cannot have both cpp.type/cpp.template and @cpp.Adapter annotations\n"
-            "[WARNING:foo.thrift:6] The annotation cpp.type is deprecated. Please use @cpp.Type instead.\n"
-            "[ERROR:foo.thrift:12] Definition `field` cannot have both cpp.type/cpp.template and @cpp.Adapter annotations\n"
-            "[WARNING:foo.thrift:12] The annotation cpp.type is deprecated. Please use @cpp.Type instead.\n"
-            "[ERROR:foo.thrift:3] Definition `Bar1` cannot have both cpp.type/cpp.template and @cpp.Adapter annotations\n"
-            "[WARNING:foo.thrift:3] The annotation cpp.type is deprecated. Please use @cpp.Type instead.\n",
-        )
-
     def test_nonexist_type_in_variable(self):
         write_file("foo.thrift", 'const map<i8, string> foo = {1: "str"}')
         ret, out, err = self.run_thrift("foo.thrift")

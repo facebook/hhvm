@@ -168,9 +168,9 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
 
     MyMapEnumAndInt: Final[_typing.Mapping[MyEnumA, str]] = ...
 
-    MyCustomField: Final[bytes] = ...
+    MyCustomField: Final[_fbthrift_iobuf.IOBuf] = ...
 
-    MyOptCustomField: Final[_typing.Optional[bytes]] = ...
+    MyOptCustomField: Final[_typing.Optional[_fbthrift_iobuf.IOBuf]] = ...
 
     def __init__(
         self, *,
@@ -183,8 +183,8 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
         MyBinaryField3: _typing.Optional[bytes]=None,
         MyBinaryListField4: _typing.Optional[_typing.Sequence[bytes]]=None,
         MyMapEnumAndInt: _typing.Optional[_typing.Mapping[MyEnumA, str]]=None,
-        MyCustomField: _typing.Optional[bytes]=None,
-        MyOptCustomField: _typing.Optional[bytes]=None
+        MyCustomField: _typing.Optional[_fbthrift_iobuf.IOBuf]=None,
+        MyOptCustomField: _typing.Optional[_fbthrift_iobuf.IOBuf]=None
     ) -> None: ...
 
     def __call__(
@@ -198,8 +198,8 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
         MyBinaryField3: _typing.Union[bytes, '__NotSet', None]=NOTSET,
         MyBinaryListField4: _typing.Union[_typing.Sequence[bytes], '__NotSet', None]=NOTSET,
         MyMapEnumAndInt: _typing.Union[_typing.Mapping[MyEnumA, str], '__NotSet', None]=NOTSET,
-        MyCustomField: _typing.Union[bytes, '__NotSet', None]=NOTSET,
-        MyOptCustomField: _typing.Union[bytes, '__NotSet', None]=NOTSET
+        MyCustomField: _typing.Union[_fbthrift_iobuf.IOBuf, '__NotSet', None]=NOTSET,
+        MyOptCustomField: _typing.Union[_fbthrift_iobuf.IOBuf, '__NotSet', None]=NOTSET
     ) -> MyStruct: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['MyStruct'], bytes]]: ...
@@ -257,7 +257,7 @@ class SimpleUnion(thrift.py3.types.Union, _typing.Hashable):
     def _to_py3(self) -> SimpleUnion: ...
     def _to_py_deprecated(self) -> "module.ttypes.SimpleUnion": ...   # type: ignore
 
-_ComplexUnionValueType = _typing.Union[None, int, int, str, str, int, int, float, bool, _typing.Sequence[int], _typing.AbstractSet[int], _typing.Mapping[str, int], _typing.Mapping[str, int], MyEnumA, _typing.Sequence[MyEnumA], MyStruct, _typing.AbstractSet[MyStruct], SimpleUnion, SimpleUnion, _typing.Sequence[SimpleUnion], _typing.AbstractSet[SimpleUnion], _typing.Sequence[_typing.AbstractSet[SimpleUnion]], bytes, bytes, _typing.Sequence[bytes], MyStruct, MyStruct, AnException, bytes]
+_ComplexUnionValueType = _typing.Union[None, int, int, str, str, int, int, float, bool, _typing.Sequence[int], _typing.AbstractSet[int], _typing.Mapping[str, int], _typing.Mapping[str, int], MyEnumA, _typing.Sequence[MyEnumA], MyStruct, _typing.AbstractSet[MyStruct], SimpleUnion, SimpleUnion, _typing.Sequence[SimpleUnion], _typing.AbstractSet[SimpleUnion], _typing.Sequence[_typing.AbstractSet[SimpleUnion]], bytes, bytes, _typing.Sequence[bytes], MyStruct, MyStruct, AnException, _fbthrift_iobuf.IOBuf]
 
 class ComplexUnion(thrift.py3.types.Union, _typing.Hashable):
     class __fbthrift_IsSet:
@@ -343,7 +343,7 @@ class ComplexUnion(thrift.py3.types.Union, _typing.Hashable):
 
     excp_field: Final[AnException] = ...
 
-    MyCustomField: Final[bytes] = ...
+    MyCustomField: Final[_fbthrift_iobuf.IOBuf] = ...
 
     def __init__(
         self, *,
@@ -374,7 +374,7 @@ class ComplexUnion(thrift.py3.types.Union, _typing.Hashable):
         ref_field: _typing.Optional[MyStruct]=None,
         ref_field2: _typing.Optional[MyStruct]=None,
         excp_field: _typing.Optional[AnException]=None,
-        MyCustomField: _typing.Optional[bytes]=None
+        MyCustomField: _typing.Optional[_fbthrift_iobuf.IOBuf]=None
     ) -> None: ...
 
     def __hash__(self) -> int: ...
@@ -478,9 +478,9 @@ class AnException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
 
     a_union_typedef_list: Final[_typing.Sequence[_typing.AbstractSet[SimpleUnion]]] = ...
 
-    MyCustomField: Final[bytes] = ...
+    MyCustomField: Final[_fbthrift_iobuf.IOBuf] = ...
 
-    MyOptCustomField: Final[_typing.Optional[bytes]] = ...
+    MyOptCustomField: Final[_typing.Optional[_fbthrift_iobuf.IOBuf]] = ...
 
     def __init__(
         self, *,
@@ -499,8 +499,8 @@ class AnException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
         a_union_list: _typing.Optional[_typing.Sequence[SimpleUnion]]=None,
         union_typedef: _typing.Optional[_typing.AbstractSet[SimpleUnion]]=None,
         a_union_typedef_list: _typing.Optional[_typing.Sequence[_typing.AbstractSet[SimpleUnion]]]=None,
-        MyCustomField: _typing.Optional[bytes]=None,
-        MyOptCustomField: _typing.Optional[bytes]=None
+        MyCustomField: _typing.Optional[_fbthrift_iobuf.IOBuf]=None,
+        MyOptCustomField: _typing.Optional[_fbthrift_iobuf.IOBuf]=None
     ) -> None: ...
 
     def __hash__(self) -> int: ...

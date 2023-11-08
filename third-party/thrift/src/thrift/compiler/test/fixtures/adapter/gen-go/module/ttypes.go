@@ -203,7 +203,11 @@ type DoubleTypedefBool = AdaptedBool
 
 func DoubleTypedefBoolPtr(v DoubleTypedefBool) *DoubleTypedefBool { return &v }
 
-type CustomProtocolType = []byte
+type IOBuf = []byte
+
+func IOBufPtr(v IOBuf) *IOBuf { return &v }
+
+type CustomProtocolType = IOBuf
 
 func CustomProtocolTypePtr(v CustomProtocolType) *CustomProtocolType { return &v }
 

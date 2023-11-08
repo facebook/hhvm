@@ -643,3 +643,25 @@ TEST(CompilerTest, invalid_enum_constant) {
     # expected-warning@-3: type error: const `c<elem>` was declared as enum `E` with a value not of that enum.
   )");
 }
+
+TEST(CompilerTest, cpp_type_compatibility) {
+  check_compile(R"(
+    include "thrift/annotation/cpp.thrift"
+
+    @cpp.Adapter{name="Adapter"} # expected-error: Definition `Bar1` cannot have both cpp.type/cpp.template and @cpp.Adapter annotations
+    typedef i32 Bar1 (cpp.type = "std::uint32_t") # expected-warning@-1: The annotation cpp.type is deprecated. Please use @cpp.Type instead.
+
+    @cpp.Adapter{name="Adapter"} # expected-error: Definition `A` cannot have both cpp.type/cpp.template and @cpp.Adapter annotations
+    struct A {
+      1: i32 field;
+    } (cpp.type = "CustomA") # expected-warning@-3: The annotation cpp.type is deprecated. Please use @cpp.Type instead.
+
+    struct B {
+      @cpp.Adapter{name="Adapter"} # expected-warning: At most one of @cpp.Type/@cpp.Adapter/cpp.type/cpp.template can be specified on a definition.
+      1: i32 (cpp.type = "std::uint32_t") field; # expected-warning@-1: The cpp.type/cpp.template annotations are deprecated, use @cpp.Type instead
+      @cpp.Adapter{name="Adapter"} # expected-warning: At most one of @cpp.Type/@cpp.Adapter/cpp.type/cpp.template can be specified on a definition.
+      @cpp.Type{name="std::uint32_t"}
+      2: i32 field2;
+    }
+  )");
+}

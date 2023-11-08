@@ -2962,10 +2962,10 @@ template uint32_t AllRequiredNoExceptMoveCtrStruct::serializedSizeZC<>(apache::t
 
 namespace some { namespace valid { namespace ns { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::CustomProtocolAdapter, 10, ::folly::IOBuf, ::some::valid::ns::MyStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::CustomProtocolAdapter, 11, ::folly::IOBuf, ::some::valid::ns::MyStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::CustomProtocolAdapter, 27, ::folly::IOBuf, ::some::valid::ns::ComplexUnion>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::CustomProtocolAdapter, 20, ::folly::IOBuf, ::some::valid::ns::AnException>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::CustomProtocolAdapter, 21, ::folly::IOBuf, ::some::valid::ns::AnException>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::CustomProtocolAdapter, 10, ::some::valid::ns::IOBuf, ::some::valid::ns::MyStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::CustomProtocolAdapter, 11, ::some::valid::ns::IOBuf, ::some::valid::ns::MyStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::CustomProtocolAdapter, 27, ::some::valid::ns::IOBuf, ::some::valid::ns::ComplexUnion>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::CustomProtocolAdapter, 20, ::some::valid::ns::IOBuf, ::some::valid::ns::AnException>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::CustomProtocolAdapter, 21, ::some::valid::ns::IOBuf, ::some::valid::ns::AnException>();
 }
 }}}} // some::valid::ns

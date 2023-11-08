@@ -1009,16 +1009,77 @@ void validate_reserved_ids_enum(diagnostic_context& ctx, const t_enum& node) {
   reserved_ids_checker(ctx).check(node);
 }
 
+bool owns_annotations(const t_type* type) {
+  if (type->annotations().empty()) {
+    return false;
+  }
+  if (dynamic_cast<const t_container*>(type)) {
+    return true;
+  }
+  if (dynamic_cast<const t_base_type*>(type)) {
+    return true;
+  }
+  if (auto t = dynamic_cast<const t_typedef*>(type)) {
+    return t->typedef_kind() != t_typedef::kind::defined;
+  }
+  return false;
+}
+bool owns_annotations(t_type_ref type) {
+  return owns_annotations(type.get_type());
+}
+
 void validate_custom_cpp_type_annotations(
     diagnostic_context& ctx, const t_named& node) {
   const bool hasAdapter =
       node.find_structured_annotation_or_null(kCppAdapterUri);
-  const bool hasCppType = node.has_annotation(
+  bool hasCppType = node.has_annotation(
       {"cpp.type", "cpp2.type", "cpp.template", "cpp2.template"});
+  const bool hasStructuredCppType =
+      node.find_structured_annotation_or_null(kCppTypeUri);
+
   ctx.check(
       !(hasCppType && hasAdapter),
       "Definition `{}` cannot have both cpp.type/cpp.template and @cpp.Adapter annotations",
       node.name());
+
+  // Excludes annotations that result from annotation lowering.
+  auto has_real_annotation = [](const auto& node) {
+    if (!owns_annotations(node.type())) {
+      return false;
+    }
+    std::set<std::string> names{
+        "cpp.type", "cpp2.type", "cpp.template", "cpp2.template"};
+    for (const auto& [k, v] : node.type().get_type()->annotations()) {
+      if (names.count(k) && v.src_range.begin != source_location{}) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  bool hasUnnamedCppType = false;
+  if (auto f = dynamic_cast<const t_field*>(&node)) {
+    if (has_real_annotation(*f)) {
+      hasUnnamedCppType = true;
+    }
+  } else if (auto f = dynamic_cast<const t_typedef*>(&node)) {
+    if (f->typedef_kind() == t_typedef::kind::defined &&
+        has_real_annotation(*f)) {
+      hasUnnamedCppType = true;
+    }
+  }
+  if (hasUnnamedCppType) {
+    ctx.warning(
+        "The cpp.type/cpp.template annotations are deprecated, use @cpp.Type instead");
+  }
+  if (hasAdapter && (hasUnnamedCppType || hasStructuredCppType)) {
+    // TODO (T169470476): make this an error
+    ctx.warning(
+        "At most one of @cpp.Type/@cpp.Adapter/cpp.type/cpp.template can be specified on a definition.");
+  }
+  ctx.check(
+      hasCppType + hasStructuredCppType + hasUnnamedCppType <= 1,
+      "Duplicate cpp.Type annotation");
 }
 
 template <typename Node>
@@ -1043,29 +1104,9 @@ void validate_cpp_type_annotation(diagnostic_context& ctx, const Node& node) {
   }
 }
 
-bool owns_annotations_type(const t_type* type) {
-  if (type->annotations().empty()) {
-    return false;
-  }
-  if (dynamic_cast<const t_container*>(type)) {
-    return true;
-  }
-  if (dynamic_cast<const t_base_type*>(type)) {
-    return true;
-  }
-  if (auto t = dynamic_cast<const t_typedef*>(type)) {
-    return t->typedef_kind() != t_typedef::kind::defined;
-  }
-  return false;
-}
-
-bool owns_annotations(t_type_ref type) {
-  return owns_annotations_type(type.get_type());
-}
-
 struct ValidateAnnotationPositions {
   void operator()(diagnostic_context& ctx, const t_const& node) {
-    if (owns_annotations_type(node.type())) {
+    if (owns_annotations(node.type())) {
       err(ctx);
     }
   }
@@ -1201,9 +1242,7 @@ ast_validator standard_validator() {
   validator.add_field_visitor(&validate_java_field_adapter_annotation);
   validator.add_field_visitor(&validate_cpp_field_interceptor_annotation);
   validator.add_field_visitor(&validate_required_field);
-  validator.add_field_visitor([](auto& ctx, const auto& node) {
-    validate_cpp_type_annotation(ctx, node);
-  });
+  validator.add_field_visitor(&validate_cpp_type_annotation<t_field>);
 
   validator.add_enum_visitor(&validate_enum_value_name_uniqueness);
   validator.add_enum_visitor(&validate_enum_value_uniqueness);
@@ -1225,9 +1264,7 @@ ast_validator standard_validator() {
   validator.add_definition_visitor(&validate_custom_cpp_type_annotations);
   validator.add_definition_visitor(&deprecate_annotations);
 
-  validator.add_typedef_visitor([](auto& ctx, const auto& node) {
-    validate_cpp_type_annotation(ctx, node);
-  });
+  validator.add_typedef_visitor(&validate_cpp_type_annotation<t_typedef>);
   validator.add_container_visitor(ValidateAnnotationPositions());
   validator.add_enum_visitor(&validate_cpp_enum_type);
   validator.add_const_visitor(&validate_const_type_and_value);

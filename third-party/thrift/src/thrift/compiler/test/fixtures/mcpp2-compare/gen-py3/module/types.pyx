@@ -838,7 +838,9 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
     cdef inline MyCustomField_impl(self):
 
-        return (<const char*>deref(self._cpp_obj).MyCustomField_ref().value().data())[:deref(self._cpp_obj).MyCustomField_ref().value().size()]
+        if self.__fbthrift_cached_MyCustomField is None:
+            self.__fbthrift_cached_MyCustomField = _fbthrift_iobuf.IOBuf.create(ptr_address(deref(self._cpp_obj).MyCustomField_ref().ref()), self)
+        return self.__fbthrift_cached_MyCustomField
 
     @property
     def MyCustomField(self):
@@ -848,7 +850,9 @@ cdef class MyStruct(thrift.py3.types.Struct):
         if not deref(self._cpp_obj).MyOptCustomField_ref().has_value():
             return None
 
-        return (<const char*>deref(self._cpp_obj).MyOptCustomField_ref().value_unchecked().data())[:deref(self._cpp_obj).MyOptCustomField_ref().value_unchecked().size()]
+        if self.__fbthrift_cached_MyOptCustomField is None:
+            self.__fbthrift_cached_MyOptCustomField = _fbthrift_iobuf.IOBuf.create(ptr_address(deref(self._cpp_obj).MyOptCustomField_ref().ref_unchecked()), self)
+        return self.__fbthrift_cached_MyOptCustomField
 
     @property
     def MyOptCustomField(self):
@@ -1127,7 +1131,7 @@ cdef class ComplexUnion(thrift.py3.types.Union):
         MyStruct ref_field=None,
         MyStruct ref_field2=None,
         AnException excp_field=None,
-        bytes MyCustomField=None
+        _fbthrift_iobuf.IOBuf MyCustomField=None
     ):
         if intValue is not None:
             if not isinstance(intValue, int):
@@ -1268,7 +1272,7 @@ cdef class ComplexUnion(thrift.py3.types.Union):
             return ComplexUnion(ref_field2=value)
         if isinstance(value, AnException):
             return ComplexUnion(excp_field=value)
-        if isinstance(value, bytes):
+        if isinstance(value, _fbthrift_iobuf.IOBuf):
             return ComplexUnion(MyCustomField=value)
         if isinstance(value, (float, int)):
             try:
@@ -1308,7 +1312,7 @@ cdef class ComplexUnion(thrift.py3.types.Union):
         MyStruct ref_field,
         MyStruct ref_field2,
         AnException excp_field,
-        bytes MyCustomField
+        _fbthrift_iobuf.IOBuf MyCustomField
     ) except *:
         cdef unique_ptr[cComplexUnion] c_inst = make_unique[cComplexUnion]()
         cdef bint any_set = False
@@ -1450,7 +1454,7 @@ cdef class ComplexUnion(thrift.py3.types.Union):
         if MyCustomField is not None:
             if any_set:
                 raise TypeError("At most one field may be set when initializing a union")
-            deref(c_inst).set_MyCustomField(MyCustomField)
+            deref(c_inst).set_MyCustomField(deref((<_fbthrift_iobuf.IOBuf?>MyCustomField)._this)) 
             any_set = True
         # in C++ you don't have to call move(), but this doesn't translate
         # into a C++ return statement, so you do here
@@ -1701,7 +1705,7 @@ cdef class ComplexUnion(thrift.py3.types.Union):
         elif type == 26:
             self.value = AnException._fbthrift_create(make_shared[cAnException](deref(self._cpp_obj).get_excp_field()))
         elif type == 27:
-            self.value = deref(self._cpp_obj).get_MyCustomField()
+            self.value =  _fbthrift_iobuf.from_unique_ptr(deref(self._cpp_obj).get_MyCustomField().clone())
 
     def __copy__(ComplexUnion self):
         cdef shared_ptr[cComplexUnion] cpp_obj = make_shared[cComplexUnion](
@@ -1953,7 +1957,9 @@ cdef class AnException(thrift.py3.exceptions.GeneratedError):
 
     cdef inline MyCustomField_impl(self):
 
-        return (<const char*>deref(self._cpp_obj).MyCustomField_ref().value().data())[:deref(self._cpp_obj).MyCustomField_ref().value().size()]
+        if self.__fbthrift_cached_MyCustomField is None:
+            self.__fbthrift_cached_MyCustomField = _fbthrift_iobuf.IOBuf.create(ptr_address(deref(self._cpp_obj).MyCustomField_ref().ref()), self)
+        return self.__fbthrift_cached_MyCustomField
 
     @property
     def MyCustomField(self):
@@ -1963,7 +1969,9 @@ cdef class AnException(thrift.py3.exceptions.GeneratedError):
         if not deref(self._cpp_obj).MyOptCustomField_ref().has_value():
             return None
 
-        return (<const char*>deref(self._cpp_obj).MyOptCustomField_ref().value_unchecked().data())[:deref(self._cpp_obj).MyOptCustomField_ref().value_unchecked().size()]
+        if self.__fbthrift_cached_MyOptCustomField is None:
+            self.__fbthrift_cached_MyOptCustomField = _fbthrift_iobuf.IOBuf.create(ptr_address(deref(self._cpp_obj).MyOptCustomField_ref().ref_unchecked()), self)
+        return self.__fbthrift_cached_MyOptCustomField
 
     @property
     def MyOptCustomField(self):

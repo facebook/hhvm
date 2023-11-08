@@ -94,10 +94,15 @@ var (
             SetName("module.DurationMs").
             SetUnderlyingType(premadeThriftType_i64),
             )
+    premadeThriftType_module_IOBuf = metadata.NewThriftType().SetTTypedef(
+        metadata.NewThriftTypedefType().
+            SetName("module.IOBuf").
+            SetUnderlyingType(premadeThriftType_binary),
+            )
     premadeThriftType_module_CustomProtocolType = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
             SetName("module.CustomProtocolType").
-            SetUnderlyingType(premadeThriftType_binary),
+            SetUnderlyingType(premadeThriftType_module_IOBuf),
             )
     premadeThriftType_module_IndirectionString = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().

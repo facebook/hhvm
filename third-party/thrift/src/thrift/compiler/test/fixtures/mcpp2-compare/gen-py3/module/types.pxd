@@ -202,8 +202,6 @@ cdef extern from * nogil:
         bint empty()
 
 cdef extern from *:
-    ctypedef bstring _folly_IOBuf "::folly::IOBuf"
-cdef extern from *:
     ctypedef double Bar "Bar"
 cdef extern from *:
     ctypedef cint32_t Baz "Baz"
@@ -463,8 +461,8 @@ cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/src/gen-cpp2/modul
         __required_field_ref[string] MyBinaryField3_ref "MyBinaryField3_ref" ()
         __field_ref[vector[string]] MyBinaryListField4_ref "MyBinaryListField4_ref" ()
         __field_ref[cmap[cMyEnumA,string]] MyMapEnumAndInt_ref "MyMapEnumAndInt_ref" ()
-        __field_ref[_folly_IOBuf] MyCustomField_ref "MyCustomField_ref" ()
-        __optional_field_ref[_folly_IOBuf] MyOptCustomField_ref "MyOptCustomField_ref" ()
+        __field_ref[_fbthrift_iobuf.cIOBuf] MyCustomField_ref "MyCustomField_ref" ()
+        __optional_field_ref[_fbthrift_iobuf.cIOBuf] MyOptCustomField_ref "MyOptCustomField_ref" ()
 
     cdef enum cSimpleUnion__type "::some::valid::ns::SimpleUnion::Type":
         cSimpleUnion__type___EMPTY__ "::some::valid::ns::SimpleUnion::Type::__EMPTY__",
@@ -581,8 +579,8 @@ cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/src/gen-cpp2/modul
         shared_ptr[const cMyStruct]& set_ref_field2 "set_ref_field2" (const cMyStruct&)
         const cAnException& get_excp_field "get_excp_field" () const
         cAnException& set_excp_field "set_excp_field" (const cAnException&)
-        const _folly_IOBuf& get_MyCustomField "get_MyCustomField" () const
-        _folly_IOBuf& set_MyCustomField "set_MyCustomField" (const _folly_IOBuf&)
+        const _fbthrift_iobuf.cIOBuf& get_MyCustomField "get_MyCustomField" () const
+        _fbthrift_iobuf.cIOBuf& set_MyCustomField "set_MyCustomField" (const _fbthrift_iobuf.cIOBuf&)
 
 
     cdef cppclass cAnException "::some::valid::ns::AnException"(cTException):
@@ -609,8 +607,8 @@ cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/src/gen-cpp2/modul
         __field_ref[vector[cSimpleUnion]] a_union_list_ref "a_union_list_ref" ()
         __field_ref[cset[cSimpleUnion]] union_typedef_ref "union_typedef_ref" ()
         __field_ref[vector[cset[cSimpleUnion]]] a_union_typedef_list_ref "a_union_typedef_list_ref" ()
-        __field_ref[_folly_IOBuf] MyCustomField_ref "MyCustomField_ref" ()
-        __optional_field_ref[_folly_IOBuf] MyOptCustomField_ref "MyOptCustomField_ref" ()
+        __field_ref[_fbthrift_iobuf.cIOBuf] MyCustomField_ref "MyCustomField_ref" ()
+        __optional_field_ref[_fbthrift_iobuf.cIOBuf] MyOptCustomField_ref "MyOptCustomField_ref" ()
 
 
     cdef cppclass cAnotherException "::some::valid::ns::AnotherException"(cTException):
@@ -849,6 +847,8 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef inline object MyOptCustomField_impl(self)
     cdef List__binary __fbthrift_cached_MyBinaryListField4
     cdef Map__MyEnumA_string __fbthrift_cached_MyMapEnumAndInt
+    cdef _fbthrift_iobuf.IOBuf __fbthrift_cached_MyCustomField
+    cdef _fbthrift_iobuf.IOBuf __fbthrift_cached_MyOptCustomField
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cMyStruct])
@@ -917,7 +917,7 @@ cdef class ComplexUnion(thrift.py3.types.Union):
         MyStruct ref_field,
         MyStruct ref_field2,
         AnException excp_field,
-        bytes MyCustomField
+        _fbthrift_iobuf.IOBuf MyCustomField
     ) except *
 
     @staticmethod
@@ -956,6 +956,8 @@ cdef class AnException(thrift.py3.exceptions.GeneratedError):
     cdef List__SimpleUnion __fbthrift_cached_a_union_list
     cdef Set__SimpleUnion __fbthrift_cached_union_typedef
     cdef List__Set__SimpleUnion __fbthrift_cached_a_union_typedef_list
+    cdef _fbthrift_iobuf.IOBuf __fbthrift_cached_MyCustomField
+    cdef _fbthrift_iobuf.IOBuf __fbthrift_cached_MyOptCustomField
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cAnException])

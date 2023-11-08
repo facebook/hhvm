@@ -22,9 +22,8 @@ namespace cpp2 some.valid.ns
 
 typedef includes.AStruct AStruct
 
-@cpp.Type{name = "::folly::IOBuf"}
 @cpp.Adapter{name = '::CustomProtocolAdapter'}
-typedef binary CustomProtocolType
+typedef IOBuf CustomProtocolType
 
 // Generate base consts
 const bool aBool = true;

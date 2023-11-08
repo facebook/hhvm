@@ -1466,6 +1466,7 @@ AdaptedLong = int
 AdaptedDouble = float
 AdaptedString = str
 DoubleTypedefBool = bool
+IOBuf = bytes
 CustomProtocolType = bytes
 IndirectionString = str
 AdaptedEnum = ThriftAdaptedEnum

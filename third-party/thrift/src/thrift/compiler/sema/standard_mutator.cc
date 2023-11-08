@@ -438,12 +438,8 @@ ast_mutators standard_mutators() {
   ast_mutators mutators;
   {
     auto& initial = mutators[standard_mutator_stage::initial];
-    initial.add_field_visitor([](auto& ctx, auto& mCtx, auto& node) {
-      lower_type_annotations(ctx, mCtx, node);
-    });
-    initial.add_typedef_visitor([](auto& ctx, auto& mCtx, auto& node) {
-      lower_type_annotations(ctx, mCtx, node);
-    });
+    initial.add_field_visitor(&lower_type_annotations<t_field>);
+    initial.add_typedef_visitor(&lower_type_annotations<t_typedef>);
     initial.add_function_visitor(&normalize_return_type);
     initial.add_definition_visitor(&set_generated);
     initial.add_definition_visitor(&lower_deprecated_annotations);

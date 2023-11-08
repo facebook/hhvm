@@ -4058,7 +4058,7 @@ FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter, 1, ::facebook::thrift::test::A, ::facebook::thrift::test::B>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter2, 2, ::std::set<::std::string>, ::facebook::thrift::test::MyStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::AdaptTestMsAdapter, 1, ::std::int64_t, ::facebook::thrift::test::AdaptTestStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::CustomProtocolAdapter, 2, ::folly::IOBuf, ::facebook::thrift::test::AdaptTestStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::CustomProtocolAdapter, 2, ::facebook::thrift::test::IOBuf, ::facebook::thrift::test::AdaptTestStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::AdaptTestMsAdapter, 3, ::std::int64_t, ::facebook::thrift::test::AdaptTestStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::AdapterWithContext, 4, ::std::int64_t, ::facebook::thrift::test::AdaptTestStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::IndirectionAdapter<::apache::thrift::test::IndirectionString>, 6, ::std::string, ::facebook::thrift::test::AdaptTestStruct>();
@@ -4089,7 +4089,7 @@ FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 21, ::std::map<::std::int64_t, ::std::int64_t>, ::facebook::thrift::test::AdaptTemplatedTestStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 22, bool, ::facebook::thrift::test::AdaptTemplatedTestStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::AdaptTestMsAdapter, 1, ::std::int64_t, ::facebook::thrift::test::ThriftAdaptTestUnion>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::CustomProtocolAdapter, 2, ::folly::IOBuf, ::facebook::thrift::test::ThriftAdaptTestUnion>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::CustomProtocolAdapter, 2, ::facebook::thrift::test::IOBuf, ::facebook::thrift::test::ThriftAdaptTestUnion>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 1, ::facebook::thrift::test::ThriftAdaptedStruct, ::facebook::thrift::test::StructFieldAdaptedStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 2, ::facebook::thrift::test::ThriftAdaptedStruct, ::facebook::thrift::test::StructFieldAdaptedStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 3, ::facebook::thrift::test::detail::DirectlyAdaptedStruct, ::facebook::thrift::test::StructFieldAdaptedStruct>();

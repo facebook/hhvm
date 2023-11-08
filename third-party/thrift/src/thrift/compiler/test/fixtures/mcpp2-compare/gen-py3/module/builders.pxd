@@ -37,8 +37,8 @@ cdef class MyStruct_Builder(thrift.py3.builder.StructBuilder):
     cdef public bytes MyBinaryField3
     cdef public list MyBinaryListField4
     cdef public dict MyMapEnumAndInt
-    cdef public bytes MyCustomField
-    cdef public bytes MyOptCustomField
+    cdef public _fbthrift_iobuf.IOBuf MyCustomField
+    cdef public _fbthrift_iobuf.IOBuf MyOptCustomField
 
 
 cdef class SimpleUnion_Builder(thrift.py3.builder.StructBuilder):
@@ -74,7 +74,7 @@ cdef class ComplexUnion_Builder(thrift.py3.builder.StructBuilder):
     cdef public object ref_field
     cdef public object ref_field2
     cdef public object excp_field
-    cdef public bytes MyCustomField
+    cdef public _fbthrift_iobuf.IOBuf MyCustomField
 
 
 cdef class AnException_Builder(thrift.py3.builder.StructBuilder):
@@ -93,8 +93,8 @@ cdef class AnException_Builder(thrift.py3.builder.StructBuilder):
     cdef public list a_union_list
     cdef public set union_typedef
     cdef public list a_union_typedef_list
-    cdef public bytes MyCustomField
-    cdef public bytes MyOptCustomField
+    cdef public _fbthrift_iobuf.IOBuf MyCustomField
+    cdef public _fbthrift_iobuf.IOBuf MyOptCustomField
 
 
 cdef class AnotherException_Builder(thrift.py3.builder.StructBuilder):

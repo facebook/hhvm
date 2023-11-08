@@ -603,14 +603,41 @@ if err != nil {
     return decodeResult, decodeErr
 }
 
-type CustomProtocolType = []byte
+type IOBuf = []byte
 
-func NewCustomProtocolType() CustomProtocolType {
+func NewIOBuf() IOBuf {
     return []byte("")
 }
 
-func WriteCustomProtocolType(item CustomProtocolType, p thrift.Protocol) error {
+func WriteIOBuf(item IOBuf, p thrift.Protocol) error {
     if err := p.WriteBinary(item); err != nil {
+    return err
+}
+    return nil
+}
+
+func ReadIOBuf(p thrift.Protocol) (IOBuf, error) {
+    var decodeResult IOBuf
+    decodeErr := func() error {
+        result, err := p.ReadBinary()
+if err != nil {
+    return err
+}
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
+}
+
+type CustomProtocolType = IOBuf
+
+func NewCustomProtocolType() CustomProtocolType {
+    return NewIOBuf()
+}
+
+func WriteCustomProtocolType(item CustomProtocolType, p thrift.Protocol) error {
+    err := WriteIOBuf(item, p)
+if err != nil {
     return err
 }
     return nil
@@ -619,7 +646,7 @@ func WriteCustomProtocolType(item CustomProtocolType, p thrift.Protocol) error {
 func ReadCustomProtocolType(p thrift.Protocol) (CustomProtocolType, error) {
     var decodeResult CustomProtocolType
     decodeErr := func() error {
-        result, err := p.ReadBinary()
+        result, err := ReadIOBuf(p)
 if err != nil {
     return err
 }

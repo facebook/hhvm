@@ -96,7 +96,8 @@ type AdaptedLong = int;
 type AdaptedDouble = float;
 type AdaptedString = string;
 type DoubleTypedefBool = \facebook\thrift\test\AdaptedBool;
-type CustomProtocolType = string;
+type IOBuf = string;
+type CustomProtocolType = \facebook\thrift\test\IOBuf;
 type IndirectionString = string;
 type AdaptedEnum = \facebook\thrift\test\ThriftAdaptedEnum;
 type AdaptedTypedef = \facebook\thrift\test\AdaptedStruct;
@@ -4088,7 +4089,16 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
                       "name" => "module.CustomProtocolType",
                       "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BINARY_TYPE,
+                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                            shape(
+                              "name" => "module.IOBuf",
+                              "underlyingType" => \tmeta_ThriftType::fromShape(
+                                shape(
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BINARY_TYPE,
+                                )
+                              ),
+                            )
+                          ),
                         )
                       ),
                     )
@@ -6004,7 +6014,16 @@ class AdaptTestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
                       "name" => "module.CustomProtocolType",
                       "underlyingType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BINARY_TYPE,
+                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                            shape(
+                              "name" => "module.IOBuf",
+                              "underlyingType" => \tmeta_ThriftType::fromShape(
+                                shape(
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BINARY_TYPE,
+                                )
+                              ),
+                            )
+                          ),
                         )
                       ),
                     )

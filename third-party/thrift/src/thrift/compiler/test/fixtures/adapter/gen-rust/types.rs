@@ -50,7 +50,9 @@ pub type AdaptedString = ::std::string::String;
 
 pub type DoubleTypedefBool = crate::types::AdaptedBool;
 
-pub type CustomProtocolType = ::std::vec::Vec<::std::primitive::u8>;
+pub type IOBuf = ::std::vec::Vec<::std::primitive::u8>;
+
+pub type CustomProtocolType = crate::types::IOBuf;
 
 pub type IndirectionString = ::std::string::String;
 

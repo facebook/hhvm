@@ -1092,7 +1092,8 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 typedef ::a::different::ns::AStruct AStruct;
-typedef ::apache::thrift::adapt_detail::adapted_t<::CustomProtocolAdapter, ::folly::IOBuf> CustomProtocolType;
+typedef folly::IOBuf IOBuf;
+typedef ::apache::thrift::adapt_detail::adapted_t<::CustomProtocolAdapter, ::some::valid::ns::IOBuf> CustomProtocolType;
 typedef ::std::int32_t simpleTypeDef;
 typedef ::std::map<::std::int16_t, ::std::string> containerTypeDef;
 typedef ::std::vector<::std::map<::std::int16_t, ::std::string>> complexContainerTypeDef;
@@ -1114,7 +1115,6 @@ typedef std::list<::std::int32_t> std_list;
 typedef std::deque<::std::string> std_deque;
 typedef folly::sorted_vector_set<::std::string> folly_set;
 typedef folly::sorted_vector_map<::std::int64_t, ::std::string> folly_map;
-typedef folly::IOBuf IOBuf;
 typedef std::unique_ptr<folly::IOBuf> IOBufPtr;
 
 class Empty final  {
@@ -1538,8 +1538,8 @@ class MyStruct final  {
     ::apache::thrift::type::binary_t,
     ::apache::thrift::type::list<::apache::thrift::type::binary_t>,
     ::apache::thrift::type::map<::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>, ::apache::thrift::type::string_t>,
-    ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>,
-    ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>
+    ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<folly::IOBuf, ::apache::thrift::type::binary_t>>,
+    ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<folly::IOBuf, ::apache::thrift::type::binary_t>>
   >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 11;
@@ -2566,8 +2566,8 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
     ::apache::thrift::type::list<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>,
     ::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>,
     ::apache::thrift::type::list<::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>,
-    ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>,
-    ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>
+    ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<folly::IOBuf, ::apache::thrift::type::binary_t>>,
+    ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<folly::IOBuf, ::apache::thrift::type::binary_t>>
   >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 17;
@@ -3592,7 +3592,7 @@ class ComplexUnion final  {
     ::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>,
     ::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>,
     ::apache::thrift::type::exception_t<::some::valid::ns::AnException>,
-    ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>
+    ::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<folly::IOBuf, ::apache::thrift::type::binary_t>>
   >;
 
   static constexpr std::size_t __fbthrift_field_size_v = 28;

@@ -1164,7 +1164,7 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us, const ch
   });
 
   auto const teardownEnter = vwrap(cb, data, [&] (Vout& v) {
-    v << copy{v.cns(true), rarg(1)};
+    v << copy{v.cns(1LL), rarg(1)};
     v << fallthru{vm_regs_no_sp() | rarg(1)};
   });
 
@@ -1185,10 +1185,24 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us, const ch
     );
   });
 
+  us.endCatchTeardownThisSyncVMSP = vwrap(cb, data, [&] (Vout& v) {
+    storeVmsp(v);
+    v << fallthru{vm_regs_no_sp()};
+  });
+
   us.endCatchTeardownThisHelper = vwrap(cb, data, meta, [&] (Vout& v) {
     auto const thiz = v.makeReg();
     v << load{rvmfp()[AROFF(m_thisUnsafe)], thiz};
     emitDecRefWorkObj(v, thiz, TRAP_REASON);
+    if (debug) {
+      emitImmStoreq(v, ActRec::kTrashedThisSlot, rvmfp()[AROFF(m_thisUnsafe)]);
+    }
+    v << copy{v.cns(0LL), rarg(1)};
+    v << jmpi{body, vm_regs_no_sp() | rarg(1)};
+  });
+
+  us.endCatchSkipTeardownSyncVMSP = vwrap(cb, data, [&] (Vout& v) {
+    storeVmsp(v);
     v << fallthru{vm_regs_no_sp()};
   });
 
@@ -1196,7 +1210,7 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us, const ch
     if (debug) {
       emitImmStoreq(v, ActRec::kTrashedThisSlot, rvmfp()[AROFF(m_thisUnsafe)]);
     }
-    v << copy{v.cns(false), rarg(1)};
+    v << copy{v.cns(0LL), rarg(1)};
     v << jmpi{body, vm_regs_no_sp() | rarg(1)};
   });
 

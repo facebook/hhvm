@@ -60,7 +60,7 @@ void cgEndCatch(IRLS& env, const IRInstruction* inst) {
   auto const data = inst->extra<EndCatch>();
   if (data->stublogue == EndCatchData::FrameMode::Stublogue) {
     assertx(data->teardown == EndCatchData::Teardown::NA);
-    assertx(data->syncVMSP == EndCatchData::VMSPSyncMode::NA);
+    assertx(data->vmspOffset == std::nullopt);
     assertx(inst->marker().prologue());
 
     // The caller is allowed to optimize away writes to the space reserved for
@@ -81,33 +81,36 @@ void cgEndCatch(IRLS& env, const IRInstruction* inst) {
     return;
   }
 
+  auto const syncVMSP = [&](TCA helper) -> TCA {
+    auto const ssp = v.makeReg();
+    auto const sp = srcLoc(env, inst, 1).reg();
+    auto const offset = data->offset.offset;
+    v << lea{sp[cellsToBytes(offset)], ssp};
+    v << syncvmsp{ssp};
+    return helper;
+  };
+
+  auto const doSync = !data->vmspOffset.has_value()
+    || data->vmspOffset.value().offset != data->offset.offset;
   auto const helper = [&]() -> TCA {
     switch (data->teardown) {
       case EndCatchData::Teardown::None:
-        assertx(data->syncVMSP == EndCatchData::VMSPSyncMode::DoNotSync);
-        return tc::ustubs().endCatchSkipTeardownHelper;
+        return doSync
+          ? syncVMSP(tc::ustubs().endCatchSkipTeardownSyncVMSP)
+          : tc::ustubs().endCatchSkipTeardownHelper;
       case EndCatchData::Teardown::OnlyThis:
-        assertx(data->syncVMSP == EndCatchData::VMSPSyncMode::DoNotSync);
-        return tc::ustubs().endCatchTeardownThisHelper;
+        return doSync
+          ? syncVMSP(tc::ustubs().endCatchTeardownThisSyncVMSP)
+          : tc::ustubs().endCatchTeardownThisHelper;
       case EndCatchData::Teardown::Full:
-        return data->syncVMSP == EndCatchData::VMSPSyncMode::Sync
-          ? tc::ustubs().endCatchSyncVMSPHelper
+        return doSync
+          ? syncVMSP(tc::ustubs().endCatchSyncVMSPHelper)
           : tc::ustubs().endCatchHelper;
       case EndCatchData::Teardown::NA:
         always_assert(false && "Stublogue should not be emitting vasm");
     }
     not_reached();
   }();
-
-  if (data->syncVMSP == EndCatchData::VMSPSyncMode::Sync) {
-    auto const ssp = v.makeReg();
-    auto const sp = srcLoc(env, inst, 1).reg();
-    auto const offset = data->offset.offset;
-    v << lea{sp[cellsToBytes(offset)], ssp};
-    v << syncvmsp{ssp};
-    v << jmpi{helper, vm_regs_with_sp()};
-    return;
-  }
 
   v << jmpi{helper, vm_regs_no_sp()};
 }

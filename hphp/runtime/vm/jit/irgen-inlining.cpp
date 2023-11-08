@@ -601,9 +601,8 @@ void implEndCatchBlock(IRGS& env, const RegionDesc& calleeRegion) {
     EndCatchData::CatchMode::UnwindOnly,
     EndCatchData::FrameMode::Phplogue,
     EndCatchData::Teardown::Full,
-    /* Tell unwinder to first sync the VM stack pointer since we have popped
-     * items off the stack */
-    EndCatchData::VMSPSyncMode::Sync
+    //  vmspOffset is unknown at this point as there can be multiple BeginCatches
+    std::nullopt
   };
   gen(env, EndCatch, data, fp(env), sp(env));
 }

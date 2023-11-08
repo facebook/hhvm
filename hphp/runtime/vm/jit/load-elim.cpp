@@ -1171,17 +1171,6 @@ void optimize_end_catch(Global& env, IRInstruction& inst,
   }
 
   auto const newOffset = original->offset + numStackElems;
-  auto const bcSP = env.unit.gen(
-    LoadBCSP,
-    inst.bcctx(),
-    IRSPRelOffsetData { newOffset },
-    inst.src(1)
-  );
-  auto const syncSP = env.unit.gen(
-    StVMSP,
-    inst.bcctx(),
-    bcSP->dst()
-  );
   auto const teardownMode =
     original->mode != EndCatchData::CatchMode::LocalsDecRefd &&
     inst.func()->hasThisInBody()
@@ -1192,11 +1181,8 @@ void optimize_end_catch(Global& env, IRInstruction& inst,
     original->mode,
     original->stublogue,
     teardownMode,
-    EndCatchData::VMSPSyncMode::Sync
+    original->vmspOffset
   };
-  auto iter = block->iteratorTo(&inst)--;
-  block->insert(iter++, bcSP);
-  block->insert(iter++, syncSP);
   env.unit.replace(&inst, EndCatch, data, inst.src(0), inst.src(1));
   env.stackTeardownsOptimized++;
 }

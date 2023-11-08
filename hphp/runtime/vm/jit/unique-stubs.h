@@ -407,7 +407,9 @@ struct UniqueStubs {
    */
   TCA resumeCPPUnwind;
   TCA endCatchSyncVMSPHelper;
+  TCA endCatchSkipTeardownSyncVMSP;
   TCA endCatchSkipTeardownHelper;
+  TCA endCatchTeardownThisSyncVMSP;
   TCA endCatchTeardownThisHelper;
   TCA endCatchHelper;
   TCA endCatchHelperPast;

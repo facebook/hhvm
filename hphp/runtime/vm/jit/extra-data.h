@@ -2649,30 +2649,15 @@ struct EndCatchData : IRExtraData {
   };
   enum class FrameMode { Phplogue, Stublogue };
   enum class Teardown  { NA, None, Full, OnlyThis };
-  enum class VMSPSyncMode {NA, Sync, DoNotSync};
-
   explicit EndCatchData(IRSPRelOffset offset, CatchMode mode,
-                        FrameMode stublogue, Teardown teardown,
-                        VMSPSyncMode syncVMSP)
-    : offset{offset}
+      FrameMode stublogue, Teardown teardown,
+      Optional<IRSPRelOffset> vmspOffset
+  ) : offset{offset}
     , mode{mode}
     , stublogue{stublogue}
     , teardown{teardown}
-    , syncVMSP{syncVMSP}
+    , vmspOffset{vmspOffset}
     {}
-
-  std::string syncVMSPToString(VMSPSyncMode mode) const {
-    switch (mode) {
-      case VMSPSyncMode::NA:
-        return "NA";
-      case VMSPSyncMode::Sync:
-        return "Sync";
-      case VMSPSyncMode::DoNotSync:
-        return "DoNotSync";
-      default:
-        always_assert(false);
-    }
-  }
 
   std::string show() const {
     return folly::to<std::string>(
@@ -2682,7 +2667,7 @@ struct EndCatchData : IRExtraData {
       teardown == Teardown::NA ? "NA" :
         teardown == Teardown::None ? "None" :
           teardown == Teardown::Full ? "Full" : "OnlyThis", ",",
-      syncVMSPToString(syncVMSP)
+      "vmspOffset", vmspOffset.has_value() ? folly::to<std::string>(vmspOffset.value().offset) : "nullptr"
     );
   }
 
@@ -2692,20 +2677,20 @@ struct EndCatchData : IRExtraData {
       std::hash<CatchMode>()(mode),
       std::hash<FrameMode>()(stublogue),
       std::hash<Teardown>()(teardown),
-      std::hash<VMSPSyncMode>()(syncVMSP)
+      std::hash<int32_t>()(vmspOffset.has_value() ? vmspOffset.value().offset : 0)
     );
   }
 
   bool equals(const EndCatchData& o) const {
-    return offset == o.offset && mode == o.mode && stublogue == o.stublogue &&
-           teardown == o.teardown && syncVMSP == o.syncVMSP;
+    return offset == o.offset && mode == o.mode && stublogue == o.stublogue
+      && teardown == o.teardown && vmspOffset == o.vmspOffset;
   }
 
   IRSPRelOffset offset;
   CatchMode mode;
   FrameMode stublogue;
   Teardown teardown;
-  VMSPSyncMode syncVMSP;
+  Optional<IRSPRelOffset> vmspOffset;
 };
 
 struct EnterTCUnwindData : IRExtraData {

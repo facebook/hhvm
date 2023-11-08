@@ -879,7 +879,7 @@ Block* create_catch_block(
       EndCatchData::CatchMode::UnwindOnly,
       EndCatchData::FrameMode::Stublogue,
       EndCatchData::Teardown::NA,
-      EndCatchData::VMSPSyncMode::NA
+      std::nullopt
     };
     gen(env, EndCatch, data, fp(env), sp(env));
     return catchBlock;
@@ -904,12 +904,13 @@ Block* create_catch_block(
   auto const teardown = mode == EndCatchData::CatchMode::LocalsDecRefd
     ? EndCatchData::Teardown::None
     : EndCatchData::Teardown::Full;
+  auto const offset = spOffBCFromIRSP(env);
   auto const data = EndCatchData {
-    spOffBCFromIRSP(env),
+    offset,
     mode,
     EndCatchData::FrameMode::Phplogue,
     teardown,
-    EndCatchData::VMSPSyncMode::DoNotSync
+    offset
   };
   gen(env, EndCatch, data, fp(env), sp(env));
   return catchBlock;

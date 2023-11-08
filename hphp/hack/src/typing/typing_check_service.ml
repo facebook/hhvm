@@ -1035,7 +1035,7 @@ let go_with_interrupt
     ~(interrupt : 'a MultiThreadedCall.interrupt_config)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
-    ~(use_hh_distc_instead_of_hulk : bool)
+    ~(use_distc : bool)
     ~(hh_distc_fanout_threshold : int option)
     ~(check_info : check_info) : (_ * result) job_result =
   let typecheck_info =
@@ -1094,7 +1094,7 @@ let go_with_interrupt
   let (typing_result, telemetry, env, cancelled_fnl_and_reason, time_first_error)
       =
     let will_use_distc =
-      use_hh_distc_instead_of_hulk
+      use_distc
       && BigList.length fnl > Option.value_exn hh_distc_fanout_threshold
     in
     if check_info.log_errors then
@@ -1167,7 +1167,7 @@ let go
     ~(root : Path.t option)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
-    ~(use_hh_distc_instead_of_hulk : bool)
+    ~(use_distc : bool)
     ~(hh_distc_fanout_threshold : int option)
     ~(check_info : check_info) : result =
   let interrupt = MultiThreadedCall.no_interrupt () in
@@ -1181,7 +1181,7 @@ let go
       ~interrupt
       ~memory_cap
       ~longlived_workers
-      ~use_hh_distc_instead_of_hulk
+      ~use_distc
       ~hh_distc_fanout_threshold
       ~check_info
   in

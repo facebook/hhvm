@@ -41,7 +41,7 @@ val go :
   root:Path.t option ->
   memory_cap:int option ->
   longlived_workers:bool ->
-  use_hh_distc_instead_of_hulk:bool ->
+  use_distc:bool ->
   hh_distc_fanout_threshold:int option ->
   check_info:Typing_service_types.check_info ->
   result
@@ -57,7 +57,7 @@ val go_with_interrupt :
   interrupt:'env MultiWorker.interrupt_config ->
   memory_cap:int option ->
   longlived_workers:bool ->
-  use_hh_distc_instead_of_hulk:bool ->
+  use_distc:bool ->
   hh_distc_fanout_threshold:int option ->
   check_info:Typing_service_types.check_info ->
   ('env * result) job_result

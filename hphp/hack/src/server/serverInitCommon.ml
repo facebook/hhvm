@@ -216,9 +216,7 @@ let defer_or_do_type_check
       let longlived_workers =
         genv.local_config.ServerLocalConfig.longlived_workers
       in
-      let use_hh_distc_instead_of_hulk =
-        genv.local_config.ServerLocalConfig.use_hh_distc_instead_of_hulk
-      in
+      let use_distc = genv.local_config.ServerLocalConfig.use_distc in
       let hh_distc_fanout_threshold =
         Some genv.local_config.ServerLocalConfig.hh_distc_fanout_threshold
       in
@@ -233,7 +231,7 @@ let defer_or_do_type_check
         ~root
         ~memory_cap
         ~longlived_workers
-        ~use_hh_distc_instead_of_hulk
+        ~use_distc
         ~hh_distc_fanout_threshold
         ~check_info:
           (ServerCheckUtils.get_check_info

@@ -91,7 +91,7 @@ let test () =
       ~interrupt
       ~memory_cap:None
       ~longlived_workers:false
-      ~use_hh_distc_instead_of_hulk:false
+      ~use_distc:false
       ~hh_distc_fanout_threshold:None
       ~check_info
   in

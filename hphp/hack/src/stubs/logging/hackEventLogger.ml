@@ -60,7 +60,7 @@ type rollout_flags = {
   load_state_natively_v4: bool;
   use_server_revision_tracker_v2: bool;
   rust_provider_backend: bool;
-  use_hh_distc_instead_of_hulk: bool;
+  use_distc: bool;
   consume_streaming_errors: bool;
   hh_distc_fanout_threshold: int;
   rust_elab: bool;

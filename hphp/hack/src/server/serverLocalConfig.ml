@@ -241,8 +241,7 @@ type t = {
   use_type_alias_heap: bool;  (** optimize type alias expansions *)
   use_server_revision_tracker_v2: bool;
       (** control serverRevisionTracker.ml watchman subscription event tracking *)
-  use_hh_distc_instead_of_hulk: bool;
-      (** use hh_distc instead of hulk for remote typechecking *)
+  use_distc: bool;  (** use hh_distc instead of hulk for remote typechecking *)
   hh_distc_fanout_threshold: int;
       (** POC: @bobren - fanout threshold where we trigger hh_distc *)
   ide_load_naming_table_on_disk: bool;
@@ -345,7 +344,7 @@ let default =
     disable_naming_table_fallback_loading = false;
     use_type_alias_heap = false;
     use_server_revision_tracker_v2 = false;
-    use_hh_distc_instead_of_hulk = true;
+    use_distc = true;
     use_compressed_dep_graph = true;
     use_old_decls_from_cas = false;
     hh_distc_fanout_threshold = 250_000;
@@ -1016,10 +1015,10 @@ let load_
       ~current_version
       config
   in
-  let use_hh_distc_instead_of_hulk =
+  let use_distc =
     bool_if_min_version
-      "use_hh_distc_instead_of_hulk"
-      ~default:default.use_hh_distc_instead_of_hulk
+      "use_distc"
+      ~default:default.use_distc
       ~current_version
       config
   in
@@ -1184,7 +1183,7 @@ let load_
     disable_naming_table_fallback_loading;
     use_type_alias_heap;
     use_server_revision_tracker_v2;
-    use_hh_distc_instead_of_hulk;
+    use_distc;
     use_compressed_dep_graph;
     use_old_decls_from_cas;
     hh_distc_fanout_threshold;
@@ -1237,7 +1236,7 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       load_state_natively_v4 = options.load_state_natively;
       use_server_revision_tracker_v2 = options.use_server_revision_tracker_v2;
       rust_provider_backend = options.rust_provider_backend;
-      use_hh_distc_instead_of_hulk = options.use_hh_distc_instead_of_hulk;
+      use_distc = options.use_distc;
       use_compressed_dep_graph = options.use_compressed_dep_graph;
       use_old_decls_from_cas = options.use_old_decls_from_cas;
       consume_streaming_errors = options.consume_streaming_errors;

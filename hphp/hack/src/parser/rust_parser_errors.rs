@@ -142,7 +142,7 @@ impl UnstableFeatures {
             UnstableFeatures::PipeAwait => Unstable,
             UnstableFeatures::MatchStatements => Unstable,
             UnstableFeatures::StrictSwitch => Unstable,
-            UnstableFeatures::NameofClass => Preview,
+            UnstableFeatures::NameofClass => OngoingRelease,
             UnstableFeatures::ClassType => Unstable,
         }
     }

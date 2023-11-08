@@ -1,7 +1,5 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('nameof_class')>>
-
 namespace HH {
 
 namespace ImplicitContext {

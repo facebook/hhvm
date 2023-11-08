@@ -1,7 +1,5 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('nameof_class')>>
-
 class A {}
 class C extends A {
   public function f(

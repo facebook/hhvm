@@ -1,5 +1,5 @@
 
-Warning: Failed to eval default value of C::f()'s $s3 argument for reflection, assigning NULL instead in %s/nameof/reflection.php on line 24
+Warning: Failed to eval default value of C::f()'s $s3 argument for reflection, assigning NULL instead in %s/nameof/reflection.php on line 22
 s1 => "C" = string(1) "C"
 t1 => "C" = string(1) "C"
 s2 => "C" = string(1) "C"

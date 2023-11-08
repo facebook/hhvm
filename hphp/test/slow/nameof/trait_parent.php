@@ -1,7 +1,5 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('nameof_class')>>
-
 trait T {
   public static function test(): void {
     var_dump(nameof parent);

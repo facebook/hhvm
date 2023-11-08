@@ -1,1 +1,1 @@
-Fatal error: Cannot access parent:: when current class scope has no parent in %s/test/slow/nameof/parent_undefined.php on line 7
+Fatal error: Cannot access parent:: when current class scope has no parent in %s/test/slow/nameof/parent_undefined.php on line 5

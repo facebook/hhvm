@@ -306,10 +306,7 @@ class PythonAsyncProcessor : public apache::thrift::GeneratedAsyncProcessorBase,
   }
 
   // Dud method for GeneratedAsyncProcessor
-  const char* getServiceName() override {
-    LOG(WARNING) << "PythonAsyncProcessor::getServiceName called unexpectedly";
-    return "PythonService";
-  }
+  const char* getServiceName() override { return serviceName_.c_str(); }
 
   // Dud method for ServerInterface
   std::string_view getGeneratedName() const override {

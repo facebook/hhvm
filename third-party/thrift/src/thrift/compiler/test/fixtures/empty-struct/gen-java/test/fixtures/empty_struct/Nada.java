@@ -21,6 +21,9 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 @ThriftUnion("Nada")
 public final class Nada implements com.facebook.thrift.payload.ThriftSerializable {
     
+    private static final boolean allowNullFieldValues =
+        System.getProperty("thrift.union.allow-null-field-values", "false").equalsIgnoreCase("true");
+
     private static final TStruct STRUCT_DESC = new TStruct("Nada");
     private static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
@@ -116,7 +119,12 @@ public final class Nada implements com.facebook.thrift.payload.ThriftSerializabl
 
     public void write0(TProtocol oprot) throws TException {
       if (this.id != 0 && this.value == null ){
-         return;
+        if(allowNullFieldValues) {
+          // Warning: this path will generate corrupt serialized data!
+          return;
+        } else {
+          throw new TProtocolException("Cannot write a Union with marked-as-set but null value!");
+        }
       }
       oprot.writeStructBegin(STRUCT_DESC);
       switch (this.id) {

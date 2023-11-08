@@ -21,6 +21,9 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 @ThriftUnion("Baz")
 public final class Baz implements com.facebook.thrift.payload.ThriftSerializable {
     
+    private static final boolean allowNullFieldValues =
+        System.getProperty("thrift.union.allow-null-field-values", "false").equalsIgnoreCase("true");
+
     private static final TStruct STRUCT_DESC = new TStruct("Baz");
     private static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
@@ -118,6 +121,9 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
     @ThriftConstructor
     @Deprecated
     public Baz(final Set<String> setField) {
+        if (!Baz.allowNullFieldValues && setField == null) {
+            throw new TProtocolException("Cannot initialize Union field 'Baz.setField' with null value!");
+        }
         this.value = setField;
         this.id = 4;
     }
@@ -125,6 +131,9 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
     @ThriftConstructor
     @Deprecated
     public Baz(final Map<String, List<String>> mapField) {
+        if (!Baz.allowNullFieldValues && mapField == null) {
+            throw new TProtocolException("Cannot initialize Union field 'Baz.mapField' with null value!");
+        }
         this.value = mapField;
         this.id = 6;
     }
@@ -132,6 +141,9 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
     @ThriftConstructor
     @Deprecated
     public Baz(final byte[] binaryField) {
+        if (!Baz.allowNullFieldValues && binaryField == null) {
+            throw new TProtocolException("Cannot initialize Union field 'Baz.binaryField' with null value!");
+        }
         this.value = binaryField;
         this.id = 8;
     }
@@ -152,6 +164,9 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
     
     public static Baz fromSetField(final Set<String> setField) {
         Baz res = new Baz();
+        if (!Baz.allowNullFieldValues && setField == null) {
+            throw new TProtocolException("Cannot initialize Union field 'Baz.setField' with null value!");
+        }
         res.value = setField;
         res.id = 4;
         return res;
@@ -159,6 +174,9 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
     
     public static Baz fromMapField(final Map<String, List<String>> mapField) {
         Baz res = new Baz();
+        if (!Baz.allowNullFieldValues && mapField == null) {
+            throw new TProtocolException("Cannot initialize Union field 'Baz.mapField' with null value!");
+        }
         res.value = mapField;
         res.id = 6;
         return res;
@@ -166,6 +184,9 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
     
     public static Baz fromBinaryField(final byte[] binaryField) {
         Baz res = new Baz();
+        if (!Baz.allowNullFieldValues && binaryField == null) {
+            throw new TProtocolException("Cannot initialize Union field 'Baz.binaryField' with null value!");
+        }
         res.value = binaryField;
         res.id = 8;
         return res;
@@ -319,7 +340,12 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
 
     public void write0(TProtocol oprot) throws TException {
       if (this.id != 0 && this.value == null ){
-         return;
+        if(allowNullFieldValues) {
+          // Warning: this path will generate corrupt serialized data!
+          return;
+        } else {
+          throw new TProtocolException("Cannot write a Union with marked-as-set but null value!");
+        }
       }
       oprot.writeStructBegin(STRUCT_DESC);
       switch (this.id) {

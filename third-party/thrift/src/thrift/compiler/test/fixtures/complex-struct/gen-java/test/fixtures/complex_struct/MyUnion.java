@@ -21,6 +21,9 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 @ThriftUnion("MyUnion")
 public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializable {
     
+    private static final boolean allowNullFieldValues =
+        System.getProperty("thrift.union.allow-null-field-values", "false").equalsIgnoreCase("true");
+
     private static final TStruct STRUCT_DESC = new TStruct("MyUnion");
     private static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
@@ -117,6 +120,9 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     @ThriftConstructor
     @Deprecated
     public MyUnion(final test.fixtures.complex_struct.MyEnum myEnum) {
+        if (!MyUnion.allowNullFieldValues && myEnum == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnion.myEnum' with null value!");
+        }
         this.value = myEnum;
         this.id = 1;
     }
@@ -124,6 +130,9 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     @ThriftConstructor
     @Deprecated
     public MyUnion(final test.fixtures.complex_struct.MyStruct myStruct) {
+        if (!MyUnion.allowNullFieldValues && myStruct == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnion.myStruct' with null value!");
+        }
         this.value = myStruct;
         this.id = 2;
     }
@@ -131,6 +140,9 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     @ThriftConstructor
     @Deprecated
     public MyUnion(final test.fixtures.complex_struct.MyDataItem myDataItem) {
+        if (!MyUnion.allowNullFieldValues && myDataItem == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnion.myDataItem' with null value!");
+        }
         this.value = myDataItem;
         this.id = 3;
     }
@@ -138,6 +150,9 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     @ThriftConstructor
     @Deprecated
     public MyUnion(final test.fixtures.complex_struct.ComplexNestedStruct complexNestedStruct) {
+        if (!MyUnion.allowNullFieldValues && complexNestedStruct == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnion.complexNestedStruct' with null value!");
+        }
         this.value = complexNestedStruct;
         this.id = 4;
     }
@@ -158,6 +173,9 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     
     public static MyUnion fromMyEnum(final test.fixtures.complex_struct.MyEnum myEnum) {
         MyUnion res = new MyUnion();
+        if (!MyUnion.allowNullFieldValues && myEnum == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnion.myEnum' with null value!");
+        }
         res.value = myEnum;
         res.id = 1;
         return res;
@@ -165,6 +183,9 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     
     public static MyUnion fromMyStruct(final test.fixtures.complex_struct.MyStruct myStruct) {
         MyUnion res = new MyUnion();
+        if (!MyUnion.allowNullFieldValues && myStruct == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnion.myStruct' with null value!");
+        }
         res.value = myStruct;
         res.id = 2;
         return res;
@@ -172,6 +193,9 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     
     public static MyUnion fromMyDataItem(final test.fixtures.complex_struct.MyDataItem myDataItem) {
         MyUnion res = new MyUnion();
+        if (!MyUnion.allowNullFieldValues && myDataItem == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnion.myDataItem' with null value!");
+        }
         res.value = myDataItem;
         res.id = 3;
         return res;
@@ -179,6 +203,9 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     
     public static MyUnion fromComplexNestedStruct(final test.fixtures.complex_struct.ComplexNestedStruct complexNestedStruct) {
         MyUnion res = new MyUnion();
+        if (!MyUnion.allowNullFieldValues && complexNestedStruct == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnion.complexNestedStruct' with null value!");
+        }
         res.value = complexNestedStruct;
         res.id = 4;
         return res;
@@ -356,7 +383,12 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
 
     public void write0(TProtocol oprot) throws TException {
       if (this.id != 0 && this.value == null ){
-         return;
+        if(allowNullFieldValues) {
+          // Warning: this path will generate corrupt serialized data!
+          return;
+        } else {
+          throw new TProtocolException("Cannot write a Union with marked-as-set but null value!");
+        }
       }
       oprot.writeStructBegin(STRUCT_DESC);
       switch (this.id) {

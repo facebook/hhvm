@@ -21,6 +21,9 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 @ThriftUnion("VirtualComplexUnion")
 public final class VirtualComplexUnion implements com.facebook.thrift.payload.ThriftSerializable {
     
+    private static final boolean allowNullFieldValues =
+        System.getProperty("thrift.union.allow-null-field-values", "false").equalsIgnoreCase("true");
+
     private static final TStruct STRUCT_DESC = new TStruct("VirtualComplexUnion");
     private static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
@@ -80,6 +83,9 @@ public final class VirtualComplexUnion implements com.facebook.thrift.payload.Th
     
     public static VirtualComplexUnion fromThingOne(final String thingOne) {
         VirtualComplexUnion res = new VirtualComplexUnion();
+        if (!VirtualComplexUnion.allowNullFieldValues && thingOne == null) {
+            throw new TProtocolException("Cannot initialize Union field 'VirtualComplexUnion.thingOne' with null value!");
+        }
         res.value = thingOne;
         res.id = 1;
         return res;
@@ -87,6 +93,9 @@ public final class VirtualComplexUnion implements com.facebook.thrift.payload.Th
     
     public static VirtualComplexUnion fromThingTwo(final String thingTwo) {
         VirtualComplexUnion res = new VirtualComplexUnion();
+        if (!VirtualComplexUnion.allowNullFieldValues && thingTwo == null) {
+            throw new TProtocolException("Cannot initialize Union field 'VirtualComplexUnion.thingTwo' with null value!");
+        }
         res.value = thingTwo;
         res.id = 2;
         return res;
@@ -194,7 +203,12 @@ public final class VirtualComplexUnion implements com.facebook.thrift.payload.Th
 
     public void write0(TProtocol oprot) throws TException {
       if (this.id != 0 && this.value == null ){
-         return;
+        if(allowNullFieldValues) {
+          // Warning: this path will generate corrupt serialized data!
+          return;
+        } else {
+          throw new TProtocolException("Cannot write a Union with marked-as-set but null value!");
+        }
       }
       oprot.writeStructBegin(STRUCT_DESC);
       switch (this.id) {

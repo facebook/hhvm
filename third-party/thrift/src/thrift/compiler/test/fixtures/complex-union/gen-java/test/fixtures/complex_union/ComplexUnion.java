@@ -21,6 +21,9 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 @ThriftUnion("ComplexUnion")
 public final class ComplexUnion implements com.facebook.thrift.payload.ThriftSerializable {
     
+    private static final boolean allowNullFieldValues =
+        System.getProperty("thrift.union.allow-null-field-values", "false").equalsIgnoreCase("true");
+
     private static final TStruct STRUCT_DESC = new TStruct("ComplexUnion");
     private static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
@@ -123,6 +126,9 @@ public final class ComplexUnion implements com.facebook.thrift.payload.ThriftSer
     
     public static ComplexUnion fromStringValue(final String stringValue) {
         ComplexUnion res = new ComplexUnion();
+        if (!ComplexUnion.allowNullFieldValues && stringValue == null) {
+            throw new TProtocolException("Cannot initialize Union field 'ComplexUnion.stringValue' with null value!");
+        }
         res.value = stringValue;
         res.id = 5;
         return res;
@@ -130,6 +136,9 @@ public final class ComplexUnion implements com.facebook.thrift.payload.ThriftSer
     
     public static ComplexUnion fromIntListValue(final List<Long> intListValue) {
         ComplexUnion res = new ComplexUnion();
+        if (!ComplexUnion.allowNullFieldValues && intListValue == null) {
+            throw new TProtocolException("Cannot initialize Union field 'ComplexUnion.intListValue' with null value!");
+        }
         res.value = intListValue;
         res.id = 2;
         return res;
@@ -137,6 +146,9 @@ public final class ComplexUnion implements com.facebook.thrift.payload.ThriftSer
     
     public static ComplexUnion fromStringListValue(final List<String> stringListValue) {
         ComplexUnion res = new ComplexUnion();
+        if (!ComplexUnion.allowNullFieldValues && stringListValue == null) {
+            throw new TProtocolException("Cannot initialize Union field 'ComplexUnion.stringListValue' with null value!");
+        }
         res.value = stringListValue;
         res.id = 3;
         return res;
@@ -144,6 +156,9 @@ public final class ComplexUnion implements com.facebook.thrift.payload.ThriftSer
     
     public static ComplexUnion fromTypedefValue(final Map<Short, String> typedefValue) {
         ComplexUnion res = new ComplexUnion();
+        if (!ComplexUnion.allowNullFieldValues && typedefValue == null) {
+            throw new TProtocolException("Cannot initialize Union field 'ComplexUnion.typedefValue' with null value!");
+        }
         res.value = typedefValue;
         res.id = 9;
         return res;
@@ -151,6 +166,9 @@ public final class ComplexUnion implements com.facebook.thrift.payload.ThriftSer
     
     public static ComplexUnion fromStringRef(final String stringRef) {
         ComplexUnion res = new ComplexUnion();
+        if (!ComplexUnion.allowNullFieldValues && stringRef == null) {
+            throw new TProtocolException("Cannot initialize Union field 'ComplexUnion.stringRef' with null value!");
+        }
         res.value = stringRef;
         res.id = 14;
         return res;
@@ -350,7 +368,12 @@ public final class ComplexUnion implements com.facebook.thrift.payload.ThriftSer
 
     public void write0(TProtocol oprot) throws TException {
       if (this.id != 0 && this.value == null ){
-         return;
+        if(allowNullFieldValues) {
+          // Warning: this path will generate corrupt serialized data!
+          return;
+        } else {
+          throw new TProtocolException("Cannot write a Union with marked-as-set but null value!");
+        }
       }
       oprot.writeStructBegin(STRUCT_DESC);
       switch (this.id) {

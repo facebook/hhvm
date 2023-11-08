@@ -21,6 +21,9 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 @ThriftUnion("union2")
 public final class Union2 implements com.facebook.thrift.payload.ThriftSerializable {
     
+    private static final boolean allowNullFieldValues =
+        System.getProperty("thrift.union.allow-null-field-values", "false").equalsIgnoreCase("true");
+
     private static final TStruct STRUCT_DESC = new TStruct("union2");
     private static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
@@ -113,6 +116,9 @@ public final class Union2 implements com.facebook.thrift.payload.ThriftSerializa
     @ThriftConstructor
     @Deprecated
     public Union2(final test.fixtures.constants.Struct1 s) {
+        if (!Union2.allowNullFieldValues && s == null) {
+            throw new TProtocolException("Cannot initialize Union field 'Union2.s' with null value!");
+        }
         this.value = s;
         this.id = 3;
     }
@@ -120,6 +126,9 @@ public final class Union2 implements com.facebook.thrift.payload.ThriftSerializa
     @ThriftConstructor
     @Deprecated
     public Union2(final test.fixtures.constants.Union1 u) {
+        if (!Union2.allowNullFieldValues && u == null) {
+            throw new TProtocolException("Cannot initialize Union field 'Union2.u' with null value!");
+        }
         this.value = u;
         this.id = 4;
     }
@@ -140,6 +149,9 @@ public final class Union2 implements com.facebook.thrift.payload.ThriftSerializa
     
     public static Union2 fromS(final test.fixtures.constants.Struct1 s) {
         Union2 res = new Union2();
+        if (!Union2.allowNullFieldValues && s == null) {
+            throw new TProtocolException("Cannot initialize Union field 'Union2.s' with null value!");
+        }
         res.value = s;
         res.id = 3;
         return res;
@@ -147,6 +159,9 @@ public final class Union2 implements com.facebook.thrift.payload.ThriftSerializa
     
     public static Union2 fromU(final test.fixtures.constants.Union1 u) {
         Union2 res = new Union2();
+        if (!Union2.allowNullFieldValues && u == null) {
+            throw new TProtocolException("Cannot initialize Union field 'Union2.u' with null value!");
+        }
         res.value = u;
         res.id = 4;
         return res;
@@ -276,7 +291,12 @@ public final class Union2 implements com.facebook.thrift.payload.ThriftSerializa
 
     public void write0(TProtocol oprot) throws TException {
       if (this.id != 0 && this.value == null ){
-         return;
+        if(allowNullFieldValues) {
+          // Warning: this path will generate corrupt serialized data!
+          return;
+        } else {
+          throw new TProtocolException("Cannot write a Union with marked-as-set but null value!");
+        }
       }
       oprot.writeStructBegin(STRUCT_DESC);
       switch (this.id) {

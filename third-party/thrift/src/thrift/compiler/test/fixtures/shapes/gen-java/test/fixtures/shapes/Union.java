@@ -21,6 +21,9 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 @ThriftUnion("Union")
 public final class Union implements com.facebook.thrift.payload.ThriftSerializable {
     
+    private static final boolean allowNullFieldValues =
+        System.getProperty("thrift.union.allow-null-field-values", "false").equalsIgnoreCase("true");
+
     private static final TStruct STRUCT_DESC = new TStruct("Union");
     private static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
@@ -88,6 +91,9 @@ public final class Union implements com.facebook.thrift.payload.ThriftSerializab
     @ThriftConstructor
     @Deprecated
     public Union(final String stringValue) {
+        if (!Union.allowNullFieldValues && stringValue == null) {
+            throw new TProtocolException("Cannot initialize Union field 'Union.stringValue' with null value!");
+        }
         this.value = stringValue;
         this.id = 5;
     }
@@ -101,6 +107,9 @@ public final class Union implements com.facebook.thrift.payload.ThriftSerializab
     
     public static Union fromStringValue(final String stringValue) {
         Union res = new Union();
+        if (!Union.allowNullFieldValues && stringValue == null) {
+            throw new TProtocolException("Cannot initialize Union field 'Union.stringValue' with null value!");
+        }
         res.value = stringValue;
         res.id = 5;
         return res;
@@ -196,7 +205,12 @@ public final class Union implements com.facebook.thrift.payload.ThriftSerializab
 
     public void write0(TProtocol oprot) throws TException {
       if (this.id != 0 && this.value == null ){
-         return;
+        if(allowNullFieldValues) {
+          // Warning: this path will generate corrupt serialized data!
+          return;
+        } else {
+          throw new TProtocolException("Cannot write a Union with marked-as-set but null value!");
+        }
       }
       oprot.writeStructBegin(STRUCT_DESC);
       switch (this.id) {

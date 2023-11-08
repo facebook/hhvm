@@ -21,6 +21,9 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 @ThriftUnion("DataUnion")
 public final class DataUnion implements com.facebook.thrift.payload.ThriftSerializable {
     
+    private static final boolean allowNullFieldValues =
+        System.getProperty("thrift.union.allow-null-field-values", "false").equalsIgnoreCase("true");
+
     private static final TStruct STRUCT_DESC = new TStruct("DataUnion");
     private static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
@@ -81,6 +84,9 @@ public final class DataUnion implements com.facebook.thrift.payload.ThriftSerial
     @ThriftConstructor
     @Deprecated
     public DataUnion(final byte[] binaryData) {
+        if (!DataUnion.allowNullFieldValues && binaryData == null) {
+            throw new TProtocolException("Cannot initialize Union field 'DataUnion.binaryData' with null value!");
+        }
         this.value = binaryData;
         this.id = 1;
     }
@@ -88,12 +94,18 @@ public final class DataUnion implements com.facebook.thrift.payload.ThriftSerial
     @ThriftConstructor
     @Deprecated
     public DataUnion(final String stringData) {
+        if (!DataUnion.allowNullFieldValues && stringData == null) {
+            throw new TProtocolException("Cannot initialize Union field 'DataUnion.stringData' with null value!");
+        }
         this.value = stringData;
         this.id = 2;
     }
     
     public static DataUnion fromBinaryData(final byte[] binaryData) {
         DataUnion res = new DataUnion();
+        if (!DataUnion.allowNullFieldValues && binaryData == null) {
+            throw new TProtocolException("Cannot initialize Union field 'DataUnion.binaryData' with null value!");
+        }
         res.value = binaryData;
         res.id = 1;
         return res;
@@ -101,6 +113,9 @@ public final class DataUnion implements com.facebook.thrift.payload.ThriftSerial
     
     public static DataUnion fromStringData(final String stringData) {
         DataUnion res = new DataUnion();
+        if (!DataUnion.allowNullFieldValues && stringData == null) {
+            throw new TProtocolException("Cannot initialize Union field 'DataUnion.stringData' with null value!");
+        }
         res.value = stringData;
         res.id = 2;
         return res;
@@ -196,7 +211,12 @@ public final class DataUnion implements com.facebook.thrift.payload.ThriftSerial
 
     public void write0(TProtocol oprot) throws TException {
       if (this.id != 0 && this.value == null ){
-         return;
+        if(allowNullFieldValues) {
+          // Warning: this path will generate corrupt serialized data!
+          return;
+        } else {
+          throw new TProtocolException("Cannot write a Union with marked-as-set but null value!");
+        }
       }
       oprot.writeStructBegin(STRUCT_DESC);
       switch (this.id) {

@@ -21,6 +21,9 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 @ThriftUnion("ListUnion")
 public final class ListUnion implements com.facebook.thrift.payload.ThriftSerializable {
     
+    private static final boolean allowNullFieldValues =
+        System.getProperty("thrift.union.allow-null-field-values", "false").equalsIgnoreCase("true");
+
     private static final TStruct STRUCT_DESC = new TStruct("ListUnion");
     private static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
@@ -80,6 +83,9 @@ public final class ListUnion implements com.facebook.thrift.payload.ThriftSerial
     
     public static ListUnion fromIntListValue(final List<Long> intListValue) {
         ListUnion res = new ListUnion();
+        if (!ListUnion.allowNullFieldValues && intListValue == null) {
+            throw new TProtocolException("Cannot initialize Union field 'ListUnion.intListValue' with null value!");
+        }
         res.value = intListValue;
         res.id = 2;
         return res;
@@ -87,6 +93,9 @@ public final class ListUnion implements com.facebook.thrift.payload.ThriftSerial
     
     public static ListUnion fromStringListValue(final List<String> stringListValue) {
         ListUnion res = new ListUnion();
+        if (!ListUnion.allowNullFieldValues && stringListValue == null) {
+            throw new TProtocolException("Cannot initialize Union field 'ListUnion.stringListValue' with null value!");
+        }
         res.value = stringListValue;
         res.id = 3;
         return res;
@@ -194,7 +203,12 @@ public final class ListUnion implements com.facebook.thrift.payload.ThriftSerial
 
     public void write0(TProtocol oprot) throws TException {
       if (this.id != 0 && this.value == null ){
-         return;
+        if(allowNullFieldValues) {
+          // Warning: this path will generate corrupt serialized data!
+          return;
+        } else {
+          throw new TProtocolException("Cannot write a Union with marked-as-set but null value!");
+        }
       }
       oprot.writeStructBegin(STRUCT_DESC);
       switch (this.id) {

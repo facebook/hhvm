@@ -21,6 +21,9 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 @ThriftUnion("MyUnion")
 public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializable {
     
+    private static final boolean allowNullFieldValues =
+        System.getProperty("thrift.union.allow-null-field-values", "false").equalsIgnoreCase("true");
+
     private static final TStruct STRUCT_DESC = new TStruct("MyUnion");
     private static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
@@ -88,6 +91,9 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     @ThriftConstructor
     @Deprecated
     public MyUnion(final String aString) {
+        if (!MyUnion.allowNullFieldValues && aString == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnion.aString' with null value!");
+        }
         this.value = aString;
         this.id = 2;
     }
@@ -101,6 +107,9 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     
     public static MyUnion fromAString(final String aString) {
         MyUnion res = new MyUnion();
+        if (!MyUnion.allowNullFieldValues && aString == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnion.aString' with null value!");
+        }
         res.value = aString;
         res.id = 2;
         return res;
@@ -196,7 +205,12 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
 
     public void write0(TProtocol oprot) throws TException {
       if (this.id != 0 && this.value == null ){
-         return;
+        if(allowNullFieldValues) {
+          // Warning: this path will generate corrupt serialized data!
+          return;
+        } else {
+          throw new TProtocolException("Cannot write a Union with marked-as-set but null value!");
+        }
       }
       oprot.writeStructBegin(STRUCT_DESC);
       switch (this.id) {

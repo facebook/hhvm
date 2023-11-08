@@ -24,6 +24,11 @@ public {{struct:javaCapitalName}}() {
 @ThriftConstructor
 @Deprecated
 public {{struct:javaCapitalName}}(final {{> FieldType}} {{field:javaName}}) {
+    {{^field:optional?}}{{^field:required?}}{{^field:isPrimitive?}}
+    if (!{{struct:javaCapitalName}}.allowNullFieldValues && {{field:javaName}} == null) {
+        throw new TProtocolException("Cannot initialize Union field '{{struct:javaCapitalName}}.{{field:javaName}}' with null value!");
+    }
+    {{/field:isPrimitive?}}{{/field:required?}}{{/field:optional?}}
     this.value = {{field:javaName}};
     this.id = {{field:key}};
 }
@@ -33,6 +38,11 @@ public {{struct:javaCapitalName}}(final {{> FieldType}} {{field:javaName}}) {
 
 public static {{struct:javaCapitalName}} from{{field:javaCapitalName}}(final {{> FieldType}} {{field:javaName}}) {
     {{struct:javaCapitalName}} res = new {{struct:javaCapitalName}}();
+    {{^field:optional?}}{{^field:required?}}{{^field:isPrimitive?}}
+    if (!{{struct:javaCapitalName}}.allowNullFieldValues && {{field:javaName}} == null) {
+        throw new TProtocolException("Cannot initialize Union field '{{struct:javaCapitalName}}.{{field:javaName}}' with null value!");
+    }
+    {{/field:isPrimitive?}}{{/field:required?}}{{/field:optional?}}
     res.value = {{field:javaName}};
     res.id = {{field:key}};
     return res;

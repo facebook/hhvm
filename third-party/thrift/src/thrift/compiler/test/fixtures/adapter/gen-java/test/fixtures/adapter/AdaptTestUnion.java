@@ -21,6 +21,9 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 @ThriftUnion("AdaptTestUnion")
 public final class AdaptTestUnion implements com.facebook.thrift.payload.ThriftSerializable {
     
+    private static final boolean allowNullFieldValues =
+        System.getProperty("thrift.union.allow-null-field-values", "false").equalsIgnoreCase("true");
+
     private static final TStruct STRUCT_DESC = new TStruct("AdaptTestUnion");
     private static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
@@ -91,6 +94,9 @@ public final class AdaptTestUnion implements com.facebook.thrift.payload.ThriftS
     @ThriftConstructor
     @Deprecated
     public AdaptTestUnion(final byte[] custom) {
+        if (!AdaptTestUnion.allowNullFieldValues && custom == null) {
+            throw new TProtocolException("Cannot initialize Union field 'AdaptTestUnion.custom' with null value!");
+        }
         this.value = custom;
         this.id = 2;
     }
@@ -104,6 +110,9 @@ public final class AdaptTestUnion implements com.facebook.thrift.payload.ThriftS
     
     public static AdaptTestUnion fromCustom(final byte[] custom) {
         AdaptTestUnion res = new AdaptTestUnion();
+        if (!AdaptTestUnion.allowNullFieldValues && custom == null) {
+            throw new TProtocolException("Cannot initialize Union field 'AdaptTestUnion.custom' with null value!");
+        }
         res.value = custom;
         res.id = 2;
         return res;
@@ -199,7 +208,12 @@ public final class AdaptTestUnion implements com.facebook.thrift.payload.ThriftS
 
     public void write0(TProtocol oprot) throws TException {
       if (this.id != 0 && this.value == null ){
-         return;
+        if(allowNullFieldValues) {
+          // Warning: this path will generate corrupt serialized data!
+          return;
+        } else {
+          throw new TProtocolException("Cannot write a Union with marked-as-set but null value!");
+        }
       }
       oprot.writeStructBegin(STRUCT_DESC);
       switch (this.id) {

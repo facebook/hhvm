@@ -21,6 +21,9 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 @ThriftUnion("MyUnion")
 public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializable {
     
+    private static final boolean allowNullFieldValues =
+        System.getProperty("thrift.union.allow-null-field-values", "false").equalsIgnoreCase("true");
+
     private static final TStruct STRUCT_DESC = new TStruct("MyUnion");
     private static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
@@ -241,6 +244,9 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     @ThriftConstructor
     @Deprecated
     public MyUnion(final String stringField) {
+        if (!MyUnion.allowNullFieldValues && stringField == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnion.stringField' with null value!");
+        }
         this.value = stringField;
         this.id = 8;
     }
@@ -248,6 +254,9 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     @ThriftConstructor
     @Deprecated
     public MyUnion(final byte[] binaryField) {
+        if (!MyUnion.allowNullFieldValues && binaryField == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnion.binaryField' with null value!");
+        }
         this.value = binaryField;
         this.id = 9;
     }
@@ -255,6 +264,9 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     @ThriftConstructor
     @Deprecated
     public MyUnion(final com.facebook.thrift.test.terse_write.MyEnum enumField) {
+        if (!MyUnion.allowNullFieldValues && enumField == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnion.enumField' with null value!");
+        }
         this.value = enumField;
         this.id = 10;
     }
@@ -262,6 +274,9 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     @ThriftConstructor
     @Deprecated
     public MyUnion(final List<Short> listField) {
+        if (!MyUnion.allowNullFieldValues && listField == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnion.listField' with null value!");
+        }
         this.value = listField;
         this.id = 11;
     }
@@ -269,6 +284,9 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     @ThriftConstructor
     @Deprecated
     public MyUnion(final Set<Short> setField) {
+        if (!MyUnion.allowNullFieldValues && setField == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnion.setField' with null value!");
+        }
         this.value = setField;
         this.id = 12;
     }
@@ -276,6 +294,9 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     @ThriftConstructor
     @Deprecated
     public MyUnion(final Map<Short, Short> mapField) {
+        if (!MyUnion.allowNullFieldValues && mapField == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnion.mapField' with null value!");
+        }
         this.value = mapField;
         this.id = 13;
     }
@@ -283,6 +304,9 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     @ThriftConstructor
     @Deprecated
     public MyUnion(final com.facebook.thrift.test.terse_write.MyStruct structField) {
+        if (!MyUnion.allowNullFieldValues && structField == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnion.structField' with null value!");
+        }
         this.value = structField;
         this.id = 14;
     }
@@ -338,6 +362,9 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     
     public static MyUnion fromStringField(final String stringField) {
         MyUnion res = new MyUnion();
+        if (!MyUnion.allowNullFieldValues && stringField == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnion.stringField' with null value!");
+        }
         res.value = stringField;
         res.id = 8;
         return res;
@@ -345,6 +372,9 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     
     public static MyUnion fromBinaryField(final byte[] binaryField) {
         MyUnion res = new MyUnion();
+        if (!MyUnion.allowNullFieldValues && binaryField == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnion.binaryField' with null value!");
+        }
         res.value = binaryField;
         res.id = 9;
         return res;
@@ -352,6 +382,9 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     
     public static MyUnion fromEnumField(final com.facebook.thrift.test.terse_write.MyEnum enumField) {
         MyUnion res = new MyUnion();
+        if (!MyUnion.allowNullFieldValues && enumField == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnion.enumField' with null value!");
+        }
         res.value = enumField;
         res.id = 10;
         return res;
@@ -359,6 +392,9 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     
     public static MyUnion fromListField(final List<Short> listField) {
         MyUnion res = new MyUnion();
+        if (!MyUnion.allowNullFieldValues && listField == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnion.listField' with null value!");
+        }
         res.value = listField;
         res.id = 11;
         return res;
@@ -366,6 +402,9 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     
     public static MyUnion fromSetField(final Set<Short> setField) {
         MyUnion res = new MyUnion();
+        if (!MyUnion.allowNullFieldValues && setField == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnion.setField' with null value!");
+        }
         res.value = setField;
         res.id = 12;
         return res;
@@ -373,6 +412,9 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     
     public static MyUnion fromMapField(final Map<Short, Short> mapField) {
         MyUnion res = new MyUnion();
+        if (!MyUnion.allowNullFieldValues && mapField == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnion.mapField' with null value!");
+        }
         res.value = mapField;
         res.id = 13;
         return res;
@@ -380,6 +422,9 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
     
     public static MyUnion fromStructField(final com.facebook.thrift.test.terse_write.MyStruct structField) {
         MyUnion res = new MyUnion();
+        if (!MyUnion.allowNullFieldValues && structField == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnion.structField' with null value!");
+        }
         res.value = structField;
         res.id = 14;
         return res;
@@ -679,7 +724,12 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
 
     public void write0(TProtocol oprot) throws TException {
       if (this.id != 0 && this.value == null ){
-         return;
+        if(allowNullFieldValues) {
+          // Warning: this path will generate corrupt serialized data!
+          return;
+        } else {
+          throw new TProtocolException("Cannot write a Union with marked-as-set but null value!");
+        }
       }
       oprot.writeStructBegin(STRUCT_DESC);
       switch (this.id) {

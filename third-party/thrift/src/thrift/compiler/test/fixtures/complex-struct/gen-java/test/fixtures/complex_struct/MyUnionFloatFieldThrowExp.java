@@ -21,6 +21,9 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 @ThriftUnion("MyUnionFloatFieldThrowExp")
 public final class MyUnionFloatFieldThrowExp implements com.facebook.thrift.payload.ThriftSerializable {
     
+    private static final boolean allowNullFieldValues =
+        System.getProperty("thrift.union.allow-null-field-values", "false").equalsIgnoreCase("true");
+
     private static final TStruct STRUCT_DESC = new TStruct("MyUnionFloatFieldThrowExp");
     private static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
@@ -99,6 +102,9 @@ public final class MyUnionFloatFieldThrowExp implements com.facebook.thrift.payl
     @ThriftConstructor
     @Deprecated
     public MyUnionFloatFieldThrowExp(final test.fixtures.complex_struct.MyEnum myEnum) {
+        if (!MyUnionFloatFieldThrowExp.allowNullFieldValues && myEnum == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnionFloatFieldThrowExp.myEnum' with null value!");
+        }
         this.value = myEnum;
         this.id = 1;
     }
@@ -106,6 +112,9 @@ public final class MyUnionFloatFieldThrowExp implements com.facebook.thrift.payl
     @ThriftConstructor
     @Deprecated
     public MyUnionFloatFieldThrowExp(final List<List<Float>> setFloat) {
+        if (!MyUnionFloatFieldThrowExp.allowNullFieldValues && setFloat == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnionFloatFieldThrowExp.setFloat' with null value!");
+        }
         this.value = setFloat;
         this.id = 2;
     }
@@ -113,6 +122,9 @@ public final class MyUnionFloatFieldThrowExp implements com.facebook.thrift.payl
     @ThriftConstructor
     @Deprecated
     public MyUnionFloatFieldThrowExp(final test.fixtures.complex_struct.MyDataItem myDataItem) {
+        if (!MyUnionFloatFieldThrowExp.allowNullFieldValues && myDataItem == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnionFloatFieldThrowExp.myDataItem' with null value!");
+        }
         this.value = myDataItem;
         this.id = 3;
     }
@@ -120,12 +132,18 @@ public final class MyUnionFloatFieldThrowExp implements com.facebook.thrift.payl
     @ThriftConstructor
     @Deprecated
     public MyUnionFloatFieldThrowExp(final test.fixtures.complex_struct.ComplexNestedStruct complexNestedStruct) {
+        if (!MyUnionFloatFieldThrowExp.allowNullFieldValues && complexNestedStruct == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnionFloatFieldThrowExp.complexNestedStruct' with null value!");
+        }
         this.value = complexNestedStruct;
         this.id = 4;
     }
     
     public static MyUnionFloatFieldThrowExp fromMyEnum(final test.fixtures.complex_struct.MyEnum myEnum) {
         MyUnionFloatFieldThrowExp res = new MyUnionFloatFieldThrowExp();
+        if (!MyUnionFloatFieldThrowExp.allowNullFieldValues && myEnum == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnionFloatFieldThrowExp.myEnum' with null value!");
+        }
         res.value = myEnum;
         res.id = 1;
         return res;
@@ -133,6 +151,9 @@ public final class MyUnionFloatFieldThrowExp implements com.facebook.thrift.payl
     
     public static MyUnionFloatFieldThrowExp fromSetFloat(final List<List<Float>> setFloat) {
         MyUnionFloatFieldThrowExp res = new MyUnionFloatFieldThrowExp();
+        if (!MyUnionFloatFieldThrowExp.allowNullFieldValues && setFloat == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnionFloatFieldThrowExp.setFloat' with null value!");
+        }
         res.value = setFloat;
         res.id = 2;
         return res;
@@ -140,6 +161,9 @@ public final class MyUnionFloatFieldThrowExp implements com.facebook.thrift.payl
     
     public static MyUnionFloatFieldThrowExp fromMyDataItem(final test.fixtures.complex_struct.MyDataItem myDataItem) {
         MyUnionFloatFieldThrowExp res = new MyUnionFloatFieldThrowExp();
+        if (!MyUnionFloatFieldThrowExp.allowNullFieldValues && myDataItem == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnionFloatFieldThrowExp.myDataItem' with null value!");
+        }
         res.value = myDataItem;
         res.id = 3;
         return res;
@@ -147,6 +171,9 @@ public final class MyUnionFloatFieldThrowExp implements com.facebook.thrift.payl
     
     public static MyUnionFloatFieldThrowExp fromComplexNestedStruct(final test.fixtures.complex_struct.ComplexNestedStruct complexNestedStruct) {
         MyUnionFloatFieldThrowExp res = new MyUnionFloatFieldThrowExp();
+        if (!MyUnionFloatFieldThrowExp.allowNullFieldValues && complexNestedStruct == null) {
+            throw new TProtocolException("Cannot initialize Union field 'MyUnionFloatFieldThrowExp.complexNestedStruct' with null value!");
+        }
         res.value = complexNestedStruct;
         res.id = 4;
         return res;
@@ -276,7 +303,12 @@ public final class MyUnionFloatFieldThrowExp implements com.facebook.thrift.payl
 
     public void write0(TProtocol oprot) throws TException {
       if (this.id != 0 && this.value == null ){
-         return;
+        if(allowNullFieldValues) {
+          // Warning: this path will generate corrupt serialized data!
+          return;
+        } else {
+          throw new TProtocolException("Cannot write a Union with marked-as-set but null value!");
+        }
       }
       oprot.writeStructBegin(STRUCT_DESC);
       switch (this.id) {

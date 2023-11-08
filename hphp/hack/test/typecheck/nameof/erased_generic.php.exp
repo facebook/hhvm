@@ -1,0 +1,6 @@
+File "erased_generic.php", line 5, characters 3-10:
+Cannot use unstable feature: `nameof_class` (Parsing[1002])
+File "erased_generic.php", line 5, characters 10-10:
+`nameof` cannot be used with a generic type (Parsing[1002])
+File "erased_generic.php", line 5, characters 10-10:
+Erased generics can only be used in type hints because they do not exist at runtime. (Typing[4124])

@@ -2477,11 +2477,20 @@ fn p_nameof<'a>(
 ) -> Result<Expr_> {
     let target = p_expr(&p.target, env)?;
     match &target.2 {
-        Expr_::Id(_) => Ok(Expr_::mk_nameof(ast::ClassId(
-            (),
-            target.1.clone(),
-            ast::ClassId_::CIexpr(target),
-        ))),
+        Expr_::Id(id) => {
+            if env.get_reification(id.name()).is_some() {
+                raise_parsing_error(
+                    &p.target,
+                    env,
+                    "`nameof` cannot be used with a generic type",
+                );
+            }
+            Ok(Expr_::mk_nameof(ast::ClassId(
+                (),
+                target.1.clone(),
+                ast::ClassId_::CIexpr(target),
+            )))
+        }
         _ => Err(Error::ParsingError {
             message: String::from("`nameof` can only be used with a class"),
             pos: p_pos(&p.target, env),

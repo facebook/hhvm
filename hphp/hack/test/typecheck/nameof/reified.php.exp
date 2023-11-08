@@ -1,0 +1,6 @@
+File "reified.php", line 8, characters 24-24:
+`nameof` cannot be used with a generic type (Parsing[1002])
+File "reified.php", line 13, characters 26-27:
+`nameof` cannot be used with a generic type (Parsing[1002])
+File "reified.php", line 16, characters 26-27:
+`nameof` cannot be used with a generic type (Parsing[1002])

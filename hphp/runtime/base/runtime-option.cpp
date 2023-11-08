@@ -518,15 +518,21 @@ std::string getCacheBreakerSchemaHash(std::string_view root,
       ? flags.cacheKeySha1().toString()
       : flags.getFactsCacheBreaker();
 
-  if (RO::ServerExecutionMode()) {
-    Logger::FInfo("Native Facts DB cache breaker:\n"
-                  " Version: {}\n"
-                  " Root: {}\n"
-                  " RepoOpts hash: {}",
-                  Facts::kSchemaVersion,
-                  root,
-                  optsHash);
+  auto const logStr = folly::sformat(
+    "Native Facts DB cache breaker:\n"
+    " Version: {}\n"
+    " Root: {}\n"
+    " RepoOpts hash: {}",
+    Facts::kSchemaVersion,
+    root,
+    optsHash
+  );
+  if (RO::ServerExecutionMode() && !is_cli_server_mode()) {
+    Logger::FInfo(logStr);
+  } else {
+    Logger::FVerbose(logStr);
   }
+
   std::string rootHash = string_sha1(root);
   optsHash.resize(10);
   rootHash.resize(10);

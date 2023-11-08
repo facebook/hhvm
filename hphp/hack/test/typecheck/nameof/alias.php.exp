@@ -1,0 +1,8 @@
+File "alias.php", line 9, characters 10-10:
+Expected a `class` but got a type alias. (Naming[2052])
+  File "alias.php", line 6, characters 6-6:
+  Alias definition is here.
+File "alias.php", line 10, characters 10-10:
+Expected a `class` but got a type alias. (Naming[2052])
+  File "alias.php", line 7, characters 6-6:
+  Alias definition is here.

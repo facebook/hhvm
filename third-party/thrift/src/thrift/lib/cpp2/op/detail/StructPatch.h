@@ -28,9 +28,6 @@
 
 namespace apache {
 namespace thrift {
-namespace ident {
-struct remove;
-}
 namespace op {
 namespace detail {
 
@@ -449,14 +446,15 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
 
   template <class Protocol>
   uint32_t encode(Protocol& prot) const {
+    // PatchOp::Remove
+    using PatchOpRemoveId = field_id<7>;
     uint32_t s = 0;
     s += prot.writeStructBegin(op::get_class_name_v<Patch>.data());
     const auto remove = removedFields();
     op::for_each_field_id<Patch>([&](auto id) {
       using Id = decltype(id);
       using Tag = op::get_type_tag<Patch, Id>;
-      constexpr bool isRemoveField =
-          std::is_same<get_ident<Patch, Id>, ident::remove>::value;
+      constexpr bool isRemoveField = std::is_same<Id, PatchOpRemoveId>::value;
 
       auto&& field = op::get<Id>(data_);
 

@@ -294,7 +294,7 @@ function map_with_key<Tk as arraykey, Tv1, Tv2>(
  *  - keys are the result of calling `$key_func` on the original value.
  * In the case of duplicate keys, later values will overwrite the previous ones.
  *
- * Time complexity: O(n * (f1 + f2), where f1 is the complexity of `$value_func`
+ * Time complexity: O(n * (f1 + f2)), where f1 is the complexity of `$value_func`
  * and f2 is the complexity of `$key_func`
  * Space complexity: O(n)
  */

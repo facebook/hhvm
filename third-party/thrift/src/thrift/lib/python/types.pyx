@@ -171,18 +171,6 @@ typeinfo_iobuf = IOBufTypeInfo.create(iobufTypeInfo)
 StructOrError = cython.fused_type(Struct, GeneratedError)
 
 
-cdef inline isPrimitiveType(t):
-    return (t is typeinfo_bool) or (
-        t is typeinfo_byte) or (
-        t is typeinfo_i16) or (
-        t is typeinfo_i32) or (
-        t is typeinfo_i64) or (
-        t is typeinfo_double) or (
-        t is typeinfo_float) or (
-        t is typeinfo_binary) or (
-        t is typeinfo_iobuf)
-
-
 cdef class StructInfo:
     def __cinit__(self, name, fields):
         self.fields = fields
@@ -239,7 +227,7 @@ cdef class UnionInfo:
 
     cdef void fill(self) except *:
         cdef cDynamicStructInfo* info_ptr = self.cpp_obj.get()
-        for idx, (id, qualifier, name, type_info, _, adapter_info, *_) in enumerate(self.fields):
+        for idx, (id, qualifier, name, type_info, _, adapter_info, _) in enumerate(self.fields):
             # type_info can be a lambda function so types with dependencies
             # won't need to be defined in order
             if callable(type_info):
@@ -870,7 +858,8 @@ class StructMeta(type):
         slots = []
         for i, f in enumerate(fields):
             slots.append(f[2])
-            if f[5] is not None or not isPrimitiveType(f[3]):
+            # if adapter info or not primitive type
+            if f[5] is not None or not f[6]:
                 non_primitive_types.append((i, f[2]))
             else:
                 primitive_types.append((i, f[2], f[3]))

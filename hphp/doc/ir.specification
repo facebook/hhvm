@@ -3582,7 +3582,7 @@ fields of that struct for holding intermediate values.
 
 18. Exception/unwinding support
 
-| BeginCatch, ND, NA, NF
+| BeginCatch, DParam(Obj|Nullptr), NA, PRc
 
   Marks the beginning of a catch region. Exact behavior is implementation and
   architecture specific.

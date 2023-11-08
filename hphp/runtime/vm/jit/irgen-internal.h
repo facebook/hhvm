@@ -867,7 +867,8 @@ Block* create_catch_block(
   env.irb->fs().setBCSPOff(exnState.syncedSpLevel - offsetToAdjustSPForCall);
   updateMarker(env);
 
-  gen(env, BeginCatch);
+  auto const ty = Type::SubObj(SystemLib::getThrowableClass()) | TNullptr;
+  gen(env, BeginCatch, ty);
   body();
 
   // Stublogues lack proper frames and need special configuration.

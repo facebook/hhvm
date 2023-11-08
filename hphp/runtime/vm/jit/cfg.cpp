@@ -155,9 +155,9 @@ bool splitCriticalEdges(IRUnit& unit) {
   });
 
   for (auto b : newCatches) {
-    auto bc = b->next()->begin();
-    assertx(bc->is(BeginCatch));
-    b->prepend(unit.gen(BeginCatch, bc->bcctx()));
+    auto const& bc = b->next()->front();
+    assertx(bc.is(BeginCatch));
+    b->prepend(unit.clone(&bc, bc.dst()));
   }
 
   for (auto b : oldCatches) {

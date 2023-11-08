@@ -140,6 +140,8 @@ void install_catch_trace(_Unwind_Context* ctx, TCA rip) {
          "returning _URC_INSTALL_CONTEXT\n",
          catchTrace, rip, g_unwind_rds->tv.pretty());
   _Unwind_SetIP(ctx, (uint64_t)catchTrace);
+  _Unwind_SetGR(ctx, __builtin_eh_return_data_regno(0),
+                (uintptr_t)g_unwind_rds->exn.left());
   regState() = VMRegState::DIRTY;
 }
 
@@ -305,7 +307,7 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp, bool teardown) {
                 : tc::ustubs().unwinderAsyncNullRet;
               ITRACE(1, "tc_unwind_resume returning to {} with fp {}\n",
                         tc::ustubs().describe(ret), sfp);
-              return {ret, sfp};
+              return {sfp, ret};
             }
             // we haven't fully unwound but we need to resume execution since
             // we have a FSWH on our hand
@@ -313,7 +315,7 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp, bool teardown) {
           }
           regState() = VMRegState::DIRTY;
           FTRACE(1, "Resuming from resumeHelper with fp {}\n", fp);
-          return {tc::ustubs().resumeHelperFromInterp, fp};
+          return {fp, tc::ustubs().resumeHelperFromInterp};
         }
       }
     }
@@ -324,11 +326,11 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp, bool teardown) {
       if (g_unwind_rds->exn.left()) {
         ITRACE(1, "top VM frame, Hack exception, enter itanium unwinder "
                   "by throwing it\n");
-        return {tc::ustubs().throwExceptionWhileUnwinding, sfp};
+        return {sfp, tc::ustubs().throwExceptionWhileUnwinding};
       }
 
       ITRACE(1, "top VM frame, passing back to _Unwind_Resume\n");
-      return {nullptr, sfp};
+      return {sfp, nullptr};
     }
 
     auto catchTrace = lookup_catch_trace(savedRip);
@@ -340,7 +342,8 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp, bool teardown) {
     if (catchTrace) {
       ITRACE(1, "tc_unwind_resume returning catch trace {} with fp: {}\n",
              catchTrace, fp);
-      return {catchTrace, fp};
+      regState() = VMRegState::DIRTY;
+      return {fp, catchTrace};
     }
 
     ITRACE(1, "No catch trace entry for {}; continuing\n",
@@ -361,7 +364,8 @@ TCUnwindInfo tc_unwind_resume_stublogue(ActRec* fp, TCA savedRip) {
     ITRACE(1,
            "tc_unwind_resume_stublogue returning catch trace {} with fp: {}\n",
            catchTrace, fp);
-    return {catchTrace, fp};
+    regState() = VMRegState::DIRTY;
+    return {fp, catchTrace};
   }
 
   // The caller of this stublogue doesn't have a catch trace. Continue with

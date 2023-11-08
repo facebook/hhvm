@@ -47,10 +47,12 @@ TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgBeginCatch(IRLS& env, const IRInstruction* /*inst*/) {
+void cgBeginCatch(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
+  auto const dst = dstLoc(env, inst, 0).reg();
 
   v << landingpad{};
+  v << copy{rret(0), dst};
   emitIncStat(v, Stats::TC_CatchTrace);
 }
 

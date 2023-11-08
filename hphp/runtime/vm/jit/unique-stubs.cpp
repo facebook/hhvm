@@ -1127,6 +1127,31 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us, const cha
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+void emitHandleTCUnwindResumeReturn(Vout& v, UniqueStubs& us) {
+  v << copy{rret(0), rvmfp()};
+
+  auto const sf = v.makeReg();
+  v << testq{rret(1), rret(1), sf};
+  ifThenElse(
+    v, CC_Z, sf,
+    [&] (Vout& v) { v << jmpi{us.resumeCPPUnwind}; },
+    [&] (Vout& v) {
+      // rret(0) = g_unwind_rds->exn.left()
+      auto const exc = v.makeReg();
+      auto const sf2 = v.makeReg();
+      v << load{rvmtl()[unwinderExnOff()], exc};
+      v << testqi{1, exc, sf2};
+      v << cmovq{CC_NZ, sf2, exc, v.cns(0), rret(0)};
+
+      v << jmpr{rret(1), vm_regs_with_sp() | rret(0)};
+    }
+  );
+}
+
+}
+
 TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us, const char* /*name*/) {
   alignCacheLine(cb);
 
@@ -1174,15 +1199,7 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us, const ch
     // in the second.
     v << copy{rvmfp(), rarg(0)};
     v << call{TCA(tc_unwind_resume), arg_regs(2)};
-    v << copy{rret(1), rvmfp()};
-
-    auto const sf = v.makeReg();
-    v << testq{rret(0), rret(0), sf};
-    ifThenElse(
-      v, CC_Z, sf,
-      [&] (Vout& v) { v << jmpi{us.resumeCPPUnwind}; },
-      [&] (Vout& v) { v << jmpr{rret(0), vm_regs_with_sp()}; }
-    );
+    emitHandleTCUnwindResumeReturn(v, us);
   });
 
   us.endCatchTeardownThisSyncVMSP = vwrap(cb, data, [&] (Vout& v) {
@@ -1237,15 +1254,7 @@ TCA emitEndCatchStublogueHelpers(CodeBlock& cb, DataBlock& data,
     v << copy{rvmfp(), rarg(0)};
     v << stubunwind{rarg(1)};
     v << call{TCA(tc_unwind_resume_stublogue), arg_regs(2)};
-    v << copy{rret(1), rvmfp()};
-
-    auto const sf = v.makeReg();
-    v << testq{rret(0), rret(0), sf};
-    ifThenElse(
-      v, CC_Z, sf,
-      [&] (Vout& v) { v << jmpi{us.resumeCPPUnwind}; },
-      [&] (Vout& v) { v << jmpr{rret(0), vm_regs_no_sp()}; }
-    );
+    emitHandleTCUnwindResumeReturn(v, us);
   });
 
   // Unused.

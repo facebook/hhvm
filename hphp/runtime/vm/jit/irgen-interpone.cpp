@@ -305,6 +305,12 @@ void interpOne(IRGS& env,
                int popped,
                int pushed,
                InterpOneData& idata) {
+  if (isInlining(env)) {
+    // Interp not supported in inlined context, so side exit.
+    gen(env, Jmp, makeExit(env));
+    return;
+  }
+
   auto const func = curFunc(env);
   auto const op = func->getOp(bcOff(env));
 
@@ -312,8 +318,6 @@ void interpOne(IRGS& env,
   idata.cellsPopped = popped;
   idata.cellsPushed = pushed;
   idata.opcode = op;
-
-  spillInlinedFrames(env);
 
   auto const cf = opcodeChangesPC(idata.opcode);
   gen(
@@ -324,18 +328,6 @@ void interpOne(IRGS& env,
     sp(env),
     fp(env)
   );
-
-  if (!cf && isInlining(env)) {
-    // Can't continue due to spilled frames.
-    assertx(!nextSrcKey(env).funcEntry());
-    auto const rbjData = ReqBindJmpData {
-      nextSrcKey(env),
-      spOffBCFromStackBase(env),
-      spOffBCFromIRSP(env),
-      false /* popFrame */
-    };
-    gen(env, ReqBindJmp, rbjData, sp(env), fp(env));
-  }
 }
 
 //////////////////////////////////////////////////////////////////////

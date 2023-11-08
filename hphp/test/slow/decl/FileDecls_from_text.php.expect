@@ -1,6 +1,6 @@
 FileDecls Instance (should be yes):Yes
 FileDecls Error (should have error):: File contained first-pass parse errors
-FileDecls Error (should be empty):
+FileDecls Error (should be null):null
 Has class MyClass (should be yes):Yes
 Has class NoClass (should be no):No
 File: dict [
@@ -169,5 +169,5 @@ vec(5) {
   string(5) "class"
 }
 
-FileDecls Error (should be empty):
+FileDecls Error (should be null):null
 Has typedef InlineSeeMoreToFBECheckerInput (should be yes):Yes

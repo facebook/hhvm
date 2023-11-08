@@ -650,9 +650,9 @@ Object HHVM_STATIC_METHOD(FileDecls, parseText, const String& text) {
  * Returns a non empty string if the instance is in an erroneous state.
  * This can happen if parsing failed.
  */
-static String HHVM_METHOD(FileDecls, getError) {
+static Variant HHVM_METHOD(FileDecls, getError) {
   auto data = Native::data<FileDecls>(this_);
-  return data->error;
+  return data->error.empty() ? init_null_variant : data->error;
 }
 
 /*
@@ -684,13 +684,13 @@ static Array HHVM_METHOD(FileDecls, getClasses) {
 }
 static Variant HHVM_METHOD(FileDecls, getClass, const String& name) {
   if (name.empty()) {
-    return Variant(Variant::NullInit());
+    return init_null_variant;
   }
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   auto const decls = hackc::get_class(*data->declsHolder.value(), rust::String{name.data()});
   return decls.vec.empty()
-    ? Variant(Variant::NullInit())
+    ? init_null_variant
     : populateClass(decls.vec[0]);
 }
 static Array HHVM_METHOD(FileDecls, getFileAttributes) {
@@ -700,13 +700,13 @@ static Array HHVM_METHOD(FileDecls, getFileAttributes) {
 }
 static Variant HHVM_METHOD(FileDecls, getFileAttribute, const String& name) {
   if (name.empty()) {
-    return Variant(Variant::NullInit());
+    return init_null_variant;
   }
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   auto const decls = hackc::get_file_attribute(*data->declsHolder.value(), rust::String{name.data()});
   return decls.vec.empty()
-    ? Variant(Variant::NullInit())
+    ? init_null_variant
     : populateAttributes(decls.vec)[0];
 }
 static Array HHVM_METHOD(FileDecls, getFileConsts) {
@@ -716,13 +716,13 @@ static Array HHVM_METHOD(FileDecls, getFileConsts) {
 }
 static Variant HHVM_METHOD(FileDecls, getFileConst, const String& name) {
   if (name.empty()) {
-    return Variant(Variant::NullInit());
+    return init_null_variant;
   }
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   auto const decls = hackc::get_file_const(*data->declsHolder.value(), rust::String{name.data()});
     return decls.vec.empty()
-    ? Variant(Variant::NullInit())
+    ? init_null_variant
     : populateFileConsts(decls.vec)[0];
 }
 static Array HHVM_METHOD(FileDecls, getFileFuncs) {
@@ -732,13 +732,13 @@ static Array HHVM_METHOD(FileDecls, getFileFuncs) {
 }
 static Variant HHVM_METHOD(FileDecls, getFileFunc, const String& name) {
   if (name.empty()) {
-    return Variant(Variant::NullInit());
+    return init_null_variant;
   }
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   auto const decls = hackc::get_file_func(*data->declsHolder.value(), rust::String{name.data()});
   return decls.vec.empty()
-    ? Variant(Variant::NullInit())
+    ? init_null_variant
     : populateFileFuncs(decls.vec)[0];
 }
 static Array HHVM_METHOD(FileDecls, getFileModules) {
@@ -748,13 +748,13 @@ static Array HHVM_METHOD(FileDecls, getFileModules) {
 }
 static Variant HHVM_METHOD(FileDecls, getFileModule, const String& name) {
   if (name.empty()) {
-    return Variant(Variant::NullInit());
+    return init_null_variant;
   }
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   auto const decls = hackc::get_file_module(*data->declsHolder.value(), rust::String{name.data()});
   return decls.vec.empty()
-    ? Variant(Variant::NullInit())
+    ? init_null_variant
     : populateModules(decls.vec)[0];
 }
 static Array HHVM_METHOD(FileDecls, getFileTypedefs) {
@@ -764,13 +764,13 @@ static Array HHVM_METHOD(FileDecls, getFileTypedefs) {
 }
 static Variant HHVM_METHOD(FileDecls, getFileTypedef, const String& name) {
   if (name.empty()) {
-    return Variant(Variant::NullInit());
+    return init_null_variant;
   }
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   auto const decls = hackc::get_file_typedef(*data->declsHolder.value(), rust::String{name.data()});
   return decls.vec.empty()
-    ? Variant(Variant::NullInit())
+    ? init_null_variant
     : populateTypedefs(decls.vec)[0];
 }
 static Array HHVM_METHOD(FileDecls, getMethods, const String& kls) {
@@ -780,13 +780,13 @@ static Array HHVM_METHOD(FileDecls, getMethods, const String& kls) {
 }
 static Variant HHVM_METHOD(FileDecls, getMethod, const String& kls, const String& name) {
   if (name.empty()) {
-    return Variant(Variant::NullInit());
+    return init_null_variant;
   }
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   auto const decls = hackc::get_class_method(*data->declsHolder.value(), rust::String{kls.data()}, rust::String{name.data()});
   return decls.vec.empty()
-    ? Variant(Variant::NullInit())
+    ? init_null_variant
     : populateMethods(decls.vec)[0];
 }
 static Array HHVM_METHOD(FileDecls, getStaticMethods, const String& kls) {
@@ -796,13 +796,13 @@ static Array HHVM_METHOD(FileDecls, getStaticMethods, const String& kls) {
 }
 static Variant HHVM_METHOD(FileDecls, getStaticMethod, const String& kls, const String& name) {
   if (name.empty()) {
-    return Variant(Variant::NullInit());
+    return init_null_variant;
   }
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   auto const decls = hackc::get_class_smethod(*data->declsHolder.value(), rust::String{kls.data()}, rust::String{name.data()});
   return decls.vec.empty()
-    ? Variant(Variant::NullInit())
+    ? init_null_variant
     : populateMethods(decls.vec)[0];
 }
 static Array HHVM_METHOD(FileDecls, getConsts, const String& kls) {
@@ -812,13 +812,13 @@ static Array HHVM_METHOD(FileDecls, getConsts, const String& kls) {
 }
 static Variant HHVM_METHOD(FileDecls, getConst, const String& kls, const String& name) {
   if (name.empty()) {
-    return Variant(Variant::NullInit());
+    return init_null_variant;
   }
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   auto const decls = hackc::get_class_const(*data->declsHolder.value(), rust::String{kls.data()}, rust::String{name.data()});
   return decls.vec.empty()
-    ? Variant(Variant::NullInit())
+    ? init_null_variant
     : populateConstants(decls.vec)[0];
 }
 static Array HHVM_METHOD(FileDecls, getTypeconsts, const String& kls) {
@@ -828,13 +828,13 @@ static Array HHVM_METHOD(FileDecls, getTypeconsts, const String& kls) {
 }
 static Variant HHVM_METHOD(FileDecls, getTypeconst, const String& kls, const String& name) {
   if (name.empty()) {
-    return Variant(Variant::NullInit());
+    return init_null_variant;
   }
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   auto const decls = hackc::get_class_typeconst(*data->declsHolder.value(), rust::String{kls.data()}, rust::String{name.data()});
   return decls.vec.empty()
-    ? Variant(Variant::NullInit())
+    ? init_null_variant
     : populateTypeConstants(decls.vec)[0];
 }
 static Array HHVM_METHOD(FileDecls, getProps, const String& kls) {
@@ -844,13 +844,13 @@ static Array HHVM_METHOD(FileDecls, getProps, const String& kls) {
 }
 static Variant HHVM_METHOD(FileDecls, getProp, const String& kls, const String& name) {
   if (name.empty()) {
-    return Variant(Variant::NullInit());
+    return init_null_variant;
   }
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   auto const decls = hackc::get_class_prop(*data->declsHolder.value(), rust::String{kls.data()}, rust::String{name.data()});
   return decls.vec.empty()
-    ? Variant(Variant::NullInit())
+    ? init_null_variant
     : populateProps(decls.vec)[0];
 }
 static Array HHVM_METHOD(FileDecls, getStaticProps, const String& kls) {
@@ -860,7 +860,7 @@ static Array HHVM_METHOD(FileDecls, getStaticProps, const String& kls) {
 }
 static Variant HHVM_METHOD(FileDecls, getStaticProp, const String& kls, const String& name) {
   if (name.empty()) {
-    return Variant(Variant::NullInit());
+    return init_null_variant;
   }
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
@@ -874,7 +874,7 @@ static Variant HHVM_METHOD(FileDecls, getStaticProp, const String& kls, const St
 
   auto const decls = hackc::get_class_sprop(*data->declsHolder.value(), rust::String{kls.data()}, rust::String{norm_name.data()});
   return decls.vec.empty()
-    ? Variant(Variant::NullInit())
+    ? init_null_variant
     : populateProps(decls.vec)[0];
 }
 static Array HHVM_METHOD(FileDecls, getAttributes, const String& kls) {
@@ -884,13 +884,13 @@ static Array HHVM_METHOD(FileDecls, getAttributes, const String& kls) {
 }
 static Variant HHVM_METHOD(FileDecls, getAttribute, const String& kls, const String& name) {
   if (name.empty()) {
-    return Variant(Variant::NullInit());
+    return init_null_variant;
   }
   auto data = Native::data<FileDecls>(this_);
   data->validateState();
   auto const decls = hackc::get_class_attribute(*data->declsHolder.value(), rust::String{kls.data()}, rust::String{name.data()});
   return decls.vec.empty()
-    ? Variant(Variant::NullInit())
+    ? init_null_variant
     : populateAttributes(decls.vec)[0];
 }
 

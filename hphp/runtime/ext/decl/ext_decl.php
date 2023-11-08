@@ -1,6 +1,6 @@
 <?hh
 
-type TypeName = string;
+type TypeExpr = string;
 
 // Use constants TYPE_CONSTRAINT_KIND_*
 // constraint_as, constraint_eq, constraint_super
@@ -55,12 +55,12 @@ type ExtDeclAttribute= shape(
 
 type ExtDeclTypeConstraint = shape(
   'kind' => TypeConstraintKind,
-  'type' => TypeName,
+  'type' => TypeExpr,
 );
 
 type ExtDeclFileConst = shape(
   'name' => string,
-  'type' => TypeName,
+  'type' => TypeExpr,
 );
 
 type ExtDeclModule = shape(
@@ -70,14 +70,14 @@ type ExtDeclModule = shape(
 );
 
 type ExtDeclEnumType = shape(
-  'base' => TypeName,
-  ?'constraint' => TypeName,
-  ?'includes' => vec<TypeName>
+  'base' => TypeExpr,
+  ?'constraint' => TypeExpr,
+  ?'includes' => vec<TypeExpr>
 );
 
 type ExtDeclTypeConst = shape(
   'name' => string,
-  'kind' => TypeName,
+  'kind' => TypeExpr,
   ?'is_ctx' => bool,
   ?'is_enforceable' => bool,
   ?'is_refiable' => bool,
@@ -85,12 +85,12 @@ type ExtDeclTypeConst = shape(
 
 type ExtDeclTypedef = shape(
   'name' => string,
-  'type' => TypeName,
+  'type' => TypeExpr,
   'visibility' => TypedefVisibility,
   ?'module' => string,
   ?'tparams' => vec<ExtDeclTParam>,
-  ?'as_constraint' => TypeName,
-  ?'super_constraint' => TypeName,
+  ?'as_constraint' => TypeExpr,
+  ?'super_constraint' => TypeExpr,
   ?'is_ctx' => bool,
   ?'is_internal' => bool,
   ?'docs_url' => bool,
@@ -99,7 +99,7 @@ type ExtDeclTypedef = shape(
 
 type ExtDeclClassConst = shape(
   'name' => string,
-  'type' => TypeName,
+  'type' => TypeExpr,
   ?'is_abstract' => bool,
 );
 
@@ -116,7 +116,7 @@ type ExtDeclTParam = shape(
 
 type ExtDeclProp = shape(
   'name' => string,
-  'type' => TypeName,
+  'type' => TypeExpr,
   'visibility' => Visibility,
   ?'is_abstract' => bool,
   ?'is_const' => bool,
@@ -131,7 +131,7 @@ type ExtDeclProp = shape(
 
 type ExtDeclMethodParam = shape(
   'name' => string,
-  'type' => TypeName,
+  'type' => TypeExpr,
   ?'is_soft_type' => bool,
   ?'is_accept_disposable' => bool,
   ?'is_inout' => bool,
@@ -142,7 +142,7 @@ type ExtDeclMethodParam = shape(
 );
 
 type ExtDeclSignature = shape(
-  'return_type' => TypeName,
+  'return_type' => TypeExpr,
   ?'tparams' => vec<ExtDeclTParam>,
   ?'where_constraints' => vec<ExtDeclTypeConstraint>,
   ?'is_soft_return_type' => bool,
@@ -165,7 +165,7 @@ type ExtDeclSignature = shape(
 type ExtDeclMethod = shape(
   'name' => string,
   'visibility' => Visibility,
-  'signature_type' => TypeName,
+  'signature_type' => TypeExpr,
   ?'signature' => ExtDeclSignature,
   ?'attributes' => vec<ExtDeclAttribute>,
   ?'is_abstract' => bool,
@@ -178,7 +178,7 @@ type ExtDeclMethod = shape(
 
 type ExtDeclFileFunc = shape(
   'name' => string,
-  'signature_type' => TypeName,
+  'signature_type' => TypeExpr,
   ?'module' => string,
   ?'is_internal' => bool,
   ?'is_php_std_lib' => bool,
@@ -201,18 +201,18 @@ type ExtDeclClass = shape(
   ?'is_strict' => bool,
   ?'is_support_dynamic_type' => bool,
 
-  ?'extends' => vec<TypeName>,
-  ?'uses' => vec<TypeName>,
-  ?'implements' => vec<TypeName>,
-  ?'require_extends' => vec<TypeName>,
-  ?'require_implements' => vec<TypeName>,
-  ?'require_class' => vec<TypeName>,
+  ?'extends' => vec<TypeExpr>,
+  ?'uses' => vec<TypeExpr>,
+  ?'implements' => vec<TypeExpr>,
+  ?'require_extends' => vec<TypeExpr>,
+  ?'require_implements' => vec<TypeExpr>,
+  ?'require_class' => vec<TypeExpr>,
 
   // XHP related
   ?'is_xhp' => bool,
   ?'has_xhp' => bool,
   ?'is_xhp_marked_empty' => bool,
-  ?'xhp_attr_uses' => vec<TypeName>,
+  ?'xhp_attr_uses' => vec<TypeExpr>,
 
   // Complex types
   ?'attributes' => vec<ExtDeclAttribute>,
@@ -249,96 +249,274 @@ final class FileDecls {
   // The access to this class is via static methods.
   private function __construct()[] {}
 
+  /*
+   * Parse arbitrary text without any caching. For source code
+   * parsing, please use the parsePath method instead.
+   *
+   * @param string $text - the contents of the file to parse
+   * @return FileDecls - a queryable instance for the parsed data
+   */
   <<__Native>>
   public static function parseText(string $text)[]: FileDecls;
 
+  /*
+   * Parse a source file. May use cached data.
+   *
+   * @param string $path - the relative path of the file to parse
+   * @return FileDecls - a queryable instance for the parsed data
+   */
   <<__Native>>
   public static function parsePath(string $path)[]: FileDecls;
 
+  /*
+   * If there has been any error in parsing, the instance will throw
+   * on query operations. This method checks the error state.
+   *
+   * @return string - the erroneous state or null if no errors
+   */
   <<__Native>>
-  public function getError()[]: string;
+  public function getError()[]: ?string;
 
+  /*
+   * Checks the declaration for any class or typedef with the given name.
+   *
+   * @param string $name - the class or type name with or without the
+   *                       global namespace prefix
+   * @return bool - true if the class or typedef with that name exists
+   */
   <<__Native>>
   public function hasType(string $name)[]: bool;
 
+  /*
+   * Query the content for all the information.
+   *
+   * @return ExtDeclFile - A non nullable whole file shape
+   */
   <<__Native>>
   public function getFile()[]: ?ExtDeclFile;
 
+  /*
+   * Query the content for all classes.
+   *
+   * @return vec<ExtDeclClass> - Array of all classes in the content
+   */
   <<__Native>>
   public function getClasses()[]: vec<ExtDeclClass>;
 
+  /*
+   * Query the content for a specific class.
+   *
+   * @param string $name - the class name with or without the global
+   *                       namespace prefix
+   * @return ?ExtDeclClass - The class shape or null if not found
+   */
   <<__Native>>
   public function getClass(string $name)[]: ?ExtDeclClass;
 
+  /*
+   * Query the content for all the top level file attributes.
+   *
+   * @return vec<ExtDeclAttribute> - Array of the file attributes
+   */
   <<__Native>>
   public function getFileAttributes()[]: vec<ExtDeclAttribute>;
 
+  /*
+   * Query the content for a specific top level file attribute.
+   *
+   * @param string $name - the attribute name with or without the global
+   *                       namespace prefix
+   * @return ?ExtDeclAttribute - The file attribute or null if not found
+   */
   <<__Native>>
   public function getFileAttribute(string $name)[]: ?ExtDeclAttribute;
 
+  /*
+   * Query the content for all the top level consts.
+   *
+   * @return vec<ExtDeclFileConst> - Array of the consts
+   */
   <<__Native>>
   public function getFileConsts()[]: vec<ExtDeclFileConst>;
 
+  /*
+   * Query the content a specific top level const.
+   *
+   * @param string $name - the const name
+   * @return ?ExtDeclFileConst - The const or null if not found
+   */
   <<__Native>>
   public function getFileConst(string $name)[]: ?ExtDeclFileConst;
 
+  /*
+   * Query the content for all the top level functions.
+   *
+   * @return vec<ExtDeclFileFunc> - Array of the functions
+   */
   <<__Native>>
   public function getFileFuncs()[]: vec<ExtDeclFileFunc>;
 
+  /*
+   * Query the content for a specific top level function.
+   *
+   * @param string $name - the function name
+   * @return ?ExtDeclFileFunc - The function or null if not found
+   */
   <<__Native>>
   public function getFileFunc(string $name)[]: ?ExtDeclFileFunc;
 
+  /*
+   * Query the content for all the module definitions.
+   *
+   * @return vec<ExtDeclModule> - Array of the modules
+   */
   <<__Native>>
   public function getFileModules()[]: vec<ExtDeclModule>;
 
+  /*
+   * Query the content for a specific module definition.
+   *
+   * @param string $name - the module name
+   * @return ?ExtDeclModule - The module or null if not found
+   */
   <<__Native>>
   public function getFileModule(string $name)[]: ?ExtDeclModule;
 
+  /*
+   * Query the content for all the top level type definitions.
+   *
+   * @return vec<ExtDeclTypedef> - Array of the type definitions
+   */
   <<__Native>>
   public function getFileTypedefs()[]: vec<ExtDeclTypedef>;
 
+  /*
+   * Query the content for a specific top level type definition.
+   *
+   * @param string $name - the typedef name
+   * @return ?ExtDeclTypedef - The type definition or null if not found
+   */
   <<__Native>>
   public function getFileTypedef(string $name)[]: ?ExtDeclTypedef;
 
+  /*
+   * Query the content for all the methods of a specific class.
+   *
+   * @return vec<ExtDeclMethod> - Array of the methods
+   */
   <<__Native>>
   public function getMethods(string $kls)[]: vec<ExtDeclMethod>;
 
+  /*
+   * Query the content for a specific method of a specific class.
+   *
+   * @param string $name - the method name
+   * @return ?ExtDeclMethod - The method or null if not found
+   */
   <<__Native>>
   public function getMethod(string $kls, string $name)[]: ?ExtDeclMethod;
 
+  /*
+   * Query the content for all the static methods of a specific class.
+   *
+   * @return vec<ExtDeclMethod> - Array of the static methods
+   */
   <<__Native>>
   public function getStaticMethods(string $kls)[]: vec<ExtDeclMethod>;
 
+  /*
+   * Query the content for a specific static method of a specific class.
+   *
+   * @param string $name - the static method name
+   * @return ?ExtDeclMethod - The static method or null if not found
+   */
   <<__Native>>
   public function getStaticMethod(string $kls, string $name)[]: ?ExtDeclMethod;
 
+  /*
+   * Query the content for all the consts of a specific class.
+   *
+   * @return vec<ExtDeclClassConst> - Array of the class constants
+   */
   <<__Native>>
   public function getConsts(string $kls)[]: vec<ExtDeclClassConst>;
 
+  /*
+   * Query the content for a specific const of a specific class.
+   *
+   * @param string $name - the class const name
+   * @return ?ExtDeclClassConst - The class constant or null if not found
+   */
   <<__Native>>
   public function getConst(string $kls, string $name)[]: ?ExtDeclClassConst;
 
+  /*
+   * Query the content for all the type constants of a specific class.
+   *
+   * @return vec<ExtDeclTypeConst> - Array of the class type constants
+   */
   <<__Native>>
   public function getTypeconsts(string $kls)[]: vec<ExtDeclTypeConst>;
 
+  /*
+   * Query the content for a specific type constant of a specific class.
+   *
+   * @param string $name - the class type const name
+   * @return ?ExtDeclTypeConst - The class type constant or null if not found
+   */
   <<__Native>>
   public function getTypeconst(string $kls, string $name)[]: ?ExtDeclTypeConst;
 
+  /*
+   * Query the content for all the properties of a specific class.
+   *
+   * @return vec<ExtDeclProp> - Array of the class properties
+   */
   <<__Native>>
   public function getProps(string $kls)[]: vec<ExtDeclProp>;
 
+  /*
+   * Query the content for a specific property of a specific class.
+   *
+   * @param string $name - the class property name without the dollar sign
+   * @return ?ExtDeclProp - The class property or null if not found
+   */
   <<__Native>>
   public function getProp(string $kls, string $name)[]: ?ExtDeclProp;
 
+  /*
+   * Query the content for all the static properties of a specific class.
+   *
+   * @return vec<ExtDeclProp> - Array of the class static properties
+   */
   <<__Native>>
   public function getStaticProps(string $kls)[]: vec<ExtDeclProp>;
 
+  /*
+   * Query the content for a specific static property of a specific class.
+   *
+   * @param string $name - the class static property name with or without
+   *                       the dollar sign
+   * @return ?ExtDeclProp - The class static property or null if not found
+   */
   <<__Native>>
   public function getStaticProp(string $kls, string $name)[]: ?ExtDeclProp;
 
+  /*
+   * Query the content for all the attributes of a specific class.
+   *
+   * @return vec<ExtDeclAttribute> - Array of the class attributes
+   */
   <<__Native>>
   public function getAttributes(string $kls)[]: vec<ExtDeclAttribute>;
 
+  /*
+   * Query the content for a specific attribute of a specific class.
+   *
+   * @param string $name - the attribute name with or without the global
+   *                       namespace prefix
+   * @return ?ExtDeclAttribute - The class attribute or null if not found
+   */
   <<__Native>>
   public function getAttribute(string $kls, string $name)[]: ?ExtDeclAttribute;
 

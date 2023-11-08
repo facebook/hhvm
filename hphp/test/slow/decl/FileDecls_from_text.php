@@ -49,7 +49,7 @@ function main(): void {
   }
   ');
 
-  echo "FileDecls Error (should be empty):".$instance->getError()."\n";
+  echo "FileDecls Error (should be null):".($instance->getError()??'null')."\n";
   echo "Has class MyClass (should be yes):".($instance->hasType('MyClass') ? "Yes\n" : "No\n");
   echo "Has class NoClass (should be no):".($instance->hasType('NoClass') ? "Yes\n" : "No\n");
 
@@ -70,6 +70,6 @@ function main(): void {
     'ad_impression' => ?AdImpression,
   );
   ");
-  echo "FileDecls Error (should be empty):".$instance->getError()."\n";
+  echo "FileDecls Error (should be null):".($instance->getError()??'null')."\n";
   echo "Has typedef InlineSeeMoreToFBECheckerInput (should be yes):".($instance->hasType('InlineSeeMoreToFBECheckerInput') ? "Yes\n" : "No\n");
 }

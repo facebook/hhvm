@@ -1981,6 +1981,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SetOpTV:
   case OutlineSetOp:
   case ThrowAsTypeStructException:
+  case ThrowAsTypeStructError:
   case PropTypeRedefineCheck: // Can raise and autoload
   case PropTypeValid: // Can raise and autoload
   case HandleRequestSurprise:

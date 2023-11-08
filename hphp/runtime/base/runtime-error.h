@@ -130,7 +130,7 @@ void raise_hack_strict(HackStrictOption option, const char *ini_setting,
  * raise_reified_typehint_error flavor also takes a warn flag that demotes the
  * error to a warning for reified generics migrations purposes
  */
-void raise_typehint_error(const std::string& msg);
+[[noreturn]] void raise_typehint_error(const std::string& msg);
 void raise_typehint_error_without_first_frame(const std::string& msg);
 void raise_reified_typehint_error(const std::string& msg, bool warn);
 

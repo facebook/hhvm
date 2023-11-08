@@ -132,7 +132,8 @@ bool checkTypeStructureMatchesTV(const Array& ts, TypedValue c1, bool& warn);
 [[noreturn]] void throwTypeStructureDoesNotMatchTVException(
   std::string& givenType,
   std::string& expectedType,
-  std::string& errorKey
+  std::string& errorKey,
+  bool throwFatal
 );
 
 /*
@@ -141,4 +142,3 @@ bool checkTypeStructureMatchesTV(const Array& ts, TypedValue c1, bool& warn);
 bool doesTypeStructureContainTUnresolved(const ArrayData* ts);
 
 }
-

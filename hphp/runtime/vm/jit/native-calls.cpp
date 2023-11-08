@@ -231,7 +231,7 @@ static CallMap s_callMap {
     {ThrowUninitLoc,     throwUndefVariable, DNone, SSync, {{SSA, 0}}},
     {RaiseError,         raise_error_sd, DNone, SSync, {{SSA, 0}}},
     {RaiseWarning,       raiseWarning, DNone, SSync, {{SSA, 0}}},
-    {RaiseNotice,        raiseNotice, DNone, SSync, 
+    {RaiseNotice,        raiseNotice, DNone, SSync,
                          {extra(&SampleRateData::sampleRate), {SSA, 0}}},
     {ThrowCannotModifyReadonlyCollection,
                          throw_cannot_modify_readonly_collection, DNone, SSync,
@@ -438,6 +438,8 @@ static CallMap s_callMap {
     {IsTypeStructShallow, isTypeStructShallowHelper, DSSA, SSync,
                     {{SSA, 0}, {TV, 1}, {extra(&RDSHandleData::handle)}}},
     {ThrowAsTypeStructException, throwAsTypeStructExceptionHelper, DNone, SSync,
+                                   {{SSA, 0}, {TV, 1}}},
+    {ThrowAsTypeStructError, throwAsTypeStructErrorHelper, DNone, SSync,
                                    {{SSA, 0}, {TV, 1}}},
 
     /* surprise flag support */

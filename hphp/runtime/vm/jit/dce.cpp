@@ -723,6 +723,7 @@ bool canDCE(const IRInstruction& inst) {
   case MemoSetInstanceValue:
   case MemoSetInstanceCache:
   case ThrowAsTypeStructException:
+  case ThrowAsTypeStructError:
   case RecordReifiedGenericsAndGetTSList:
   case ResolveTypeStruct:
   case CheckRDSInitialized:

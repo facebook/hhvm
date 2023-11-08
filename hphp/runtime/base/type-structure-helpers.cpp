@@ -1146,7 +1146,8 @@ template Array resolveAndVerifyTypeStructure<false>(
 void throwTypeStructureDoesNotMatchTVException(
   std::string& givenType,
   std::string& expectedType,
-  std::string& errorKey
+  std::string& errorKey,
+  bool raiseError
 ) {
   assertx(!givenType.empty());
   assertx(!expectedType.empty());
@@ -1157,7 +1158,11 @@ void throwTypeStructureDoesNotMatchTVException(
     error = folly::sformat("Expected {} at {}, got {}",
       expectedType, errorKey, givenType);
   }
-  SystemLib::throwTypeAssertionExceptionObject(error);
+  if (raiseError) {
+    raise_typehint_error(error);
+  } else {
+    SystemLib::throwTypeAssertionExceptionObject(error);
+  }
 }
 
 bool doesTypeStructureContainTUnresolved(const ArrayData* ts) {

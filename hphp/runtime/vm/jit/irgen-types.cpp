@@ -1349,7 +1349,11 @@ void emitThrowAsTypeStructException(IRGS& env, AsTypeStructExceptionKind kind) {
     return {ts, nullptr};
   }();
   // No need to decref inputs as this instruction will throw
-  gen(env, ThrowAsTypeStructException, tsAndBlock.second, tsAndBlock.first, c);
+  if (kind == AsTypeStructExceptionKind::Error) {
+    gen(env, ThrowAsTypeStructError, tsAndBlock.second, tsAndBlock.first, c);
+  } else {
+    gen(env, ThrowAsTypeStructException, tsAndBlock.second, tsAndBlock.first, c);
+  }
 }
 
 void emitRecordReifiedGeneric(IRGS& env) {

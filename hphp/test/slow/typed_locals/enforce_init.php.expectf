@@ -1,3 +1,1 @@
-Fatal error: Uncaught exception 'TypeAssertionException' with message 'Expected string, got int' in %s/hphp/test/slow/typed_locals/enforce_init.php:6
-Stack trace:
-#0 {main}
+Catchable fatal error: Expected string, got int in %s/hphp/test/slow/typed_locals/enforce_init.php on line 6

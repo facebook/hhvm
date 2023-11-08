@@ -1693,8 +1693,17 @@ OPTBLD_INLINE void iopThrowAsTypeStructException(AsTypeStructExceptionKind kind)
   if (!checkTypeStructureMatchesTV(ts, *c,
                                    givenType, expectedType, errorKey)) {
     vmStack().popC(); // pop c
+    bool raiseError = false;
+    switch(kind) {
+      case AsTypeStructExceptionKind::Error:
+        raiseError = true;
+        break;
+      case AsTypeStructExceptionKind::Typehint:
+        raiseError = false;
+        break;
+    }
     throwTypeStructureDoesNotMatchTVException(
-      givenType, expectedType, errorKey);
+      givenType, expectedType, errorKey, raiseError);
   }
   always_assert(false && "Invalid bytecode sequence: Instruction must throw");
 }

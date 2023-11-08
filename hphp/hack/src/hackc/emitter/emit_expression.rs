@@ -5050,10 +5050,16 @@ fn emit_as<'a, 'arena, 'decl>(
         let (ts_instrs, is_static) = emit_reified_arg(e, env, pos, true, hint)?;
         let then_label = e.label_gen_mut().next_regular();
         let done_label = e.label_gen_mut().next_regular();
-        let enforcement = if *enforce_deep {
-            hhbc::TypeStructEnforceKind::Deep
+        let (enforcement, exception) = if *enforce_deep {
+            (
+                hhbc::TypeStructEnforceKind::Deep,
+                AsTypeStructExceptionKind::Typehint,
+            )
         } else {
-            hhbc::TypeStructEnforceKind::Shallow
+            (
+                hhbc::TypeStructEnforceKind::Shallow,
+                AsTypeStructExceptionKind::Error,
+            )
         };
         let main_block = |ts_instrs, resolve| {
             InstrSeq::gather(vec![
@@ -5075,7 +5081,7 @@ fn emit_as<'a, 'arena, 'decl>(
                     InstrSeq::gather(vec![
                         instr::push_l(arg_local),
                         instr::push_l(type_struct_local),
-                        instr::throw_as_type_struct_exception(AsTypeStructExceptionKind::Typehint),
+                        instr::throw_as_type_struct_exception(exception),
                     ])
                 },
             ])

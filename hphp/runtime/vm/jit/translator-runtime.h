@@ -181,6 +181,7 @@ bool isTypeStructHelper(ArrayData*, TypedValue, rds::Handle);
 bool isTypeStructShallowHelper(ArrayData*, TypedValue, rds::Handle);
 void profileIsTypeStructHelper(ArrayData*, IsTypeStructProfile*);
 [[noreturn]] void throwAsTypeStructExceptionHelper(ArrayData*, TypedValue);
+[[noreturn]] void throwAsTypeStructErrorHelper(ArrayData*, TypedValue);
 ArrayData* errorOnIsAsExpressionInvalidTypesHelper(ArrayData*);
 
 void profileCoeffectFunParamHelper(TypedValue, CoeffectFunParamProfile*);

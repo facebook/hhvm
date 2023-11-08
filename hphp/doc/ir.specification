@@ -697,7 +697,13 @@ To string conversions:
 
 | ThrowAsTypeStructException, ND, S(Dict) S(Cell), LA|T
 
-  Throws an exception indicating why S1 does not match the type structure of a
+  Throws an TypehintViolationException indicating why S1 does not match the type structure of a
+  defined type in S0 or why S1 is not a subtype of S0. The input type structure
+  (S0) must be resolved.
+
+| ThrowAsTypeStructError, ND, S(Dict) S(Cell), LA|T
+
+  Throws a recoverable error indicating why S1 does not match the type structure of a
   defined type in S0 or why S1 is not a subtype of S0. The input type structure
   (S0) must be resolved.
 

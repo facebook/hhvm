@@ -6,6 +6,4 @@ vec(2) {
   int(1)
 }
 
-Fatal error: Uncaught exception 'TypeAssertionException' with message 'Expected HH\vec<_>, got HH\dict' in %s/hphp/test/slow/typed_locals/enforce_vec.php:11
-Stack trace:
-#0 {main}
+Catchable fatal error: Expected HH\vec<_>, got HH\dict in %s/hphp/test/slow/typed_locals/enforce_vec.php on line 11

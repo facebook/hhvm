@@ -601,7 +601,18 @@ void throwAsTypeStructExceptionHelper(ArrayData* a, TypedValue c) {
   if (!checkTypeStructureMatchesTV(ts, c, givenType, expectedType,
                                      errorKey)) {
     throwTypeStructureDoesNotMatchTVException(
-      givenType, expectedType, errorKey);
+      givenType, expectedType, errorKey, false);
+  }
+  always_assert(false && "Invalid bytecode sequence: Instruction must throw");
+}
+
+void throwAsTypeStructErrorHelper(ArrayData* a, TypedValue c) {
+  std::string givenType, expectedType, errorKey;
+  auto const ts = ArrNR(a);
+  if (!checkTypeStructureMatchesTV(ts, c, givenType, expectedType,
+                                     errorKey)) {
+    throwTypeStructureDoesNotMatchTVException(
+      givenType, expectedType, errorKey, true);
   }
   always_assert(false && "Invalid bytecode sequence: Instruction must throw");
 }

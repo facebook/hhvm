@@ -420,6 +420,7 @@ bool opcodeMayRaise(Opcode opc) {
   case SuspendHookCreateCont:
   case SuspendHookYield:
   case ThrowAsTypeStructException:
+  case ThrowAsTypeStructError:
   case ThrowArrayIndexException:
   case ThrowArrayKeyException:
   case ThrowCallReifiedFunctionWithoutGenerics:

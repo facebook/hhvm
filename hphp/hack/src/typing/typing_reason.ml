@@ -179,9 +179,9 @@ type _ t_ =
   | Rmissing_class : Pos.t -> locl_phase t_
   | Rinvalid : 'phase t_
   | Rcaptured_like : Pos.t -> locl_phase t_
-  | Rpessimised_inout : Pos_or_decl.t -> 'phase t_
-  | Rpessimised_return : Pos_or_decl.t -> 'phase t_
-  | Rpessimised_prop : Pos_or_decl.t -> 'phase t_
+  | Rpessimised_inout : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
+  | Rpessimised_return : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
+  | Rpessimised_prop : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
   | Runsafe_cast : Pos.t -> locl_phase t_
 [@@deriving hash]
 

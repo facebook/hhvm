@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9d5d1969947730f1a0255b18571ff834>>
+// @generated SignedSource<<3c15f7b78d4b889f6d402fbf3956ec34>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -23,6 +23,7 @@ pub use typing_defs::ValKind;
 #[allow(unused_imports)]
 use crate::*;
 
+#[rust_to_ocaml(attr = "deriving show")]
 pub type DeclTy = typing_defs::Ty;
 
 #[derive(

@@ -32,7 +32,7 @@ let allow_errors_in_default_path = ref true
 type finalized_error = (Pos.absolute, Pos.absolute) User_error.t
 [@@deriving eq, ord, show]
 
-type error = (Pos.t, Pos_or_decl.t) User_error.t
+type error = (Pos.t, (Pos_or_decl.t[@hash.ignore])) User_error.t
 [@@deriving eq, hash, ord, show]
 
 type per_file_errors = error list

@@ -33,7 +33,7 @@ let tparam_info_size tpinfo =
   TySet.cardinal tpinfo.lower_bounds + TySet.cardinal tpinfo.upper_bounds
 
 type t = {
-  tparams: (Pos_or_decl.t * tparam_info) SMap.t;
+  tparams: ((Pos_or_decl.t[@hash.ignore]) * tparam_info) SMap.t;
       (** The position indicates where the type parameter was defined.
           It may be Pos.none if the type parameter denotes a fresh type variable
           (i.e., without a source location that defines it) *)

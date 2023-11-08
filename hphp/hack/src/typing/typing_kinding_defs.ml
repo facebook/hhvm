@@ -16,7 +16,7 @@ type kind = {
   parameters: named_kind list;
 }
 
-and named_kind = pos_id * kind [@@deriving hash, show]
+and named_kind = Typing_defs.pos_id * kind [@@deriving hash, show]
 
 let dummy_name = (Pos_or_decl.none, "")
 

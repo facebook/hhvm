@@ -6,7 +6,7 @@
  *
  *)
 
-type t = Pos.t [@@deriving eq, hash, ord, show]
+type t = Pos.t [@@deriving eq, ord, show]
 
 module Map = Pos.Map
 

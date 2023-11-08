@@ -20,21 +20,13 @@ open Hh_prelude
  * that omits type inference artefacts such as type variables and lambda
  * identifiers.
  *)
-type ty = Typing_defs.locl_ty [@@deriving hash]
+type ty = Typing_defs.locl_ty [@@deriving hash, show]
 
 type possibly_enforced_ty = Typing_defs.locl_possibly_enforced_ty
 
-type decl_ty = Typing_defs.decl_ty
+type decl_ty = Typing_defs.decl_ty [@@deriving show]
 
 type val_kind = Typing_defs.val_kind
-
-let pp_ty = Typing_defs.pp_locl_ty
-
-let show_ty = Typing_defs.show_locl_ty
-
-let pp_decl_ty = Typing_defs.pp_decl_ty
-
-let show_decl_ty = Typing_defs.show_decl_ty
 
 (* Contains information about a specific function that we
     a) want to make available to TAST checks

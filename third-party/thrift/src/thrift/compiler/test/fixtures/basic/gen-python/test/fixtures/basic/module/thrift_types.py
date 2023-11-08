@@ -49,7 +49,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
-            True, # field type is primitive
+            False, # field type is primitive
         ),
         (
             5,  # id
@@ -167,7 +167,7 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
-            True, # field type is primitive
+            False, # field type is primitive
         ),
         (
             2,  # id

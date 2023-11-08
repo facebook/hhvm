@@ -307,7 +307,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
-            True, # field type is primitive
+            False, # field type is primitive
         ),
         (
             -22,  # id
@@ -424,7 +424,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
-            True, # field type is primitive
+            False, # field type is primitive
         ),
         (
             -9,  # id
@@ -1422,7 +1422,7 @@ class MyStructField10Patch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
-            True, # field type is primitive
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -1472,7 +1472,7 @@ class MyStructField23Patch(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
-            True, # field type is primitive
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -2421,7 +2421,7 @@ class MyStructEnsureStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
-            True, # field type is primitive
+            False, # field type is primitive
         ),
         (
             -22,  # id
@@ -2538,7 +2538,7 @@ class MyStructEnsureStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
-            True, # field type is primitive
+            False, # field type is primitive
         ),
         (
             -9,  # id

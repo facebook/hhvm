@@ -283,7 +283,7 @@ class MyStructWithForwardRefEnum(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.EnumTypeInfo(MyForwardRefEnum),  # typeinfo
             lambda: MyForwardRefEnum.NONZERO,  # default value
             None,  # adapter info
-            True, # field type is primitive
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -292,7 +292,7 @@ class MyStructWithForwardRefEnum(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.EnumTypeInfo(MyForwardRefEnum),  # typeinfo
             lambda: MyForwardRefEnum.NONZERO,  # default value
             None,  # adapter info
-            True, # field type is primitive
+            False, # field type is primitive
         ),
     )
 

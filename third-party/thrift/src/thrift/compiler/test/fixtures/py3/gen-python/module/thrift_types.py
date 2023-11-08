@@ -387,7 +387,7 @@ class ComplexStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.EnumTypeInfo(AnEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
-            True, # field type is primitive
+            False, # field type is primitive
         ),
         (
             6,  # id
@@ -1467,7 +1467,7 @@ class _fbthrift_SimpleService_set_enum_args(metaclass=_fbthrift_python_types.Str
             lambda: _fbthrift_python_types.EnumTypeInfo(AnEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
-            True, # field type is primitive
+            False, # field type is primitive
         ),
     )
 

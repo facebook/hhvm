@@ -22,7 +22,7 @@ class SomeStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.EnumTypeInfo(Metasyntactic),  # typeinfo
             lambda: Metasyntactic.FOO,  # default value
             None,  # adapter info
-            True, # field type is primitive
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -31,7 +31,7 @@ class SomeStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.EnumTypeInfo(Metasyntactic),  # typeinfo
             lambda: Metasyntactic.BAR,  # default value
             None,  # adapter info
-            True, # field type is primitive
+            False, # field type is primitive
         ),
         (
             3,  # id
@@ -40,7 +40,7 @@ class SomeStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.EnumTypeInfo(Metasyntactic),  # typeinfo
             lambda: _fbthrift_python_types.BadEnum(Metasyntactic, -1),  # default value
             None,  # adapter info
-            True, # field type is primitive
+            False, # field type is primitive
         ),
         (
             4,  # id
@@ -90,7 +90,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum2),  # typeinfo
             lambda: _fbthrift_python_types.BadEnum(MyEnum2, 3),  # default value
             None,  # adapter info
-            True, # field type is primitive
+            False, # field type is primitive
         ),
         (
             2,  # id
@@ -99,7 +99,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum3),  # typeinfo
             lambda: _fbthrift_python_types.BadEnum(MyEnum3, -3),  # default value
             None,  # adapter info
-            True, # field type is primitive
+            False, # field type is primitive
         ),
         (
             4,  # id
@@ -108,7 +108,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum1),  # typeinfo
             lambda: MyEnum1.ME1_1,  # default value
             None,  # adapter info
-            True, # field type is primitive
+            False, # field type is primitive
         ),
         (
             6,  # id
@@ -117,7 +117,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.EnumTypeInfo(MyEnum1),  # typeinfo
             lambda: MyEnum1.ME1_1,  # default value
             None,  # adapter info
-            True, # field type is primitive
+            False, # field type is primitive
         ),
     )
 

@@ -24,6 +24,31 @@
 #include <wangle/ssl/TLSTicketKeyManager.h>
 #include <wangle/ssl/test/MockSSLStats.h>
 
+#if defined(WANGLE_USE_FOLLY_TESTUTIL)
+#include <folly/experimental/TestUtil.h>
+#include <folly/io/async/test/TestSSLServer.h>
+
+namespace {
+std::string get_resource(const char* res) {
+  return folly::test::find_resource(res).string();
+}
+} // namespace
+
+using folly::test::kTestCA;
+using folly::test::kTestCert;
+using folly::test::kTestKey;
+#else
+namespace {
+std::string get_resource(const char* res) {
+  return res;
+}
+
+const char* kTestCert = "folly/io/async/test/certs/tests-cert.pem";
+const char* kTestKey = "folly/io/async/test/certs/tests-key.pem";
+const char* kTestCA = "folly/io/async/test/certs/ca-cert.pem";
+} // namespace
+#endif
+
 using ::testing::InSequence;
 using wangle::MockSSLStats;
 
@@ -167,8 +192,8 @@ TEST(
   // The OpenSSL bug occurs with TLS 1.3 PSKs only, SSLContext should enable
   // TLS 1.3 by default.
   auto serverCtx = std::make_shared<folly::SSLContext>();
-  serverCtx->loadCertificate("folly/io/async/test/certs/tests-cert.pem");
-  serverCtx->loadPrivateKey("folly/io/async/test/certs/tests-key.pem");
+  serverCtx->loadCertificate(get_resource(kTestCert).c_str());
+  serverCtx->loadPrivateKey(get_resource(kTestKey).c_str());
 
   // don't configure any seeds
   auto ticketHandler = std::make_unique<wangle::TLSTicketKeyManager>();
@@ -185,7 +210,7 @@ TEST(
   auto clientCtx = std::make_shared<folly::SSLContext>();
   clientCtx->setVerificationOption(
       folly::SSLContext::VerifyServerCertificate::IF_PRESENTED);
-  clientCtx->loadTrustedCertificates("folly/io/async/test/certs/ca-cert.pem");
+  clientCtx->loadTrustedCertificates(get_resource(kTestCA).c_str());
 
   TestConnectCallback connectCallback;
   // connect and grab the session (ticket)

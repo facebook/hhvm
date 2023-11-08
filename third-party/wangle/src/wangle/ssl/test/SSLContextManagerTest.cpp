@@ -24,6 +24,31 @@
 #include <wangle/ssl/ServerSSLContext.h>
 #include <wangle/ssl/TLSTicketKeyManager.h>
 
+#if defined(WANGLE_USE_FOLLY_TESTUTIL)
+#include <folly/experimental/TestUtil.h>
+#include <folly/io/async/test/TestSSLServer.h>
+
+namespace {
+std::string get_resource(const char* res) {
+  return folly::test::find_resource(res).string();
+}
+} // namespace
+
+using folly::test::kClientTestCert;
+using folly::test::kClientTestChain;
+using folly::test::kTestCert;
+#else
+namespace {
+std::string get_resource(const char* res) {
+  return res;
+}
+} // namespace
+
+const char* kClientTestChain = "folly/io/async/test/certs/client_chain.pem";
+const char* kClientTestCert = "folly/io/async/test/certs/client_cert.pem";
+const char* kTestCert = "folly/io/async/test/certs/tests-cert.pem";
+#endif
+
 using std::shared_ptr;
 using namespace folly;
 
@@ -582,7 +607,7 @@ TEST(SSLContextManagerTest, TestAlpnNotAllowMismatch) {
 TEST(SSLContextManagerTest, TestSingleClientCAFileSet) {
   SSLContextManagerForTest sslCtxMgr(
       "vip_ssl_context_manager_test_", getSettings(), nullptr);
-  const std::string clientCAFile = "folly/io/async/test/certs/client_chain.pem";
+  const std::string clientCAFile = get_resource(kClientTestChain);
 
   SSLContextConfig ctxConfig;
   ctxConfig.clientCAFile = clientCAFile;
@@ -622,8 +647,7 @@ TEST(SSLContextManagerTest, TestMultipleClientCAsSet) {
   SSLContextManagerForTest sslCtxMgr(
       "vip_ssl_context_manager_test_", getSettings(), nullptr);
   const std::vector<std::string> clientCAFiles{
-      "folly/io/async/test/certs/client_cert.pem",
-      "folly/io/async/test/certs/tests-cert.pem"};
+      get_resource(kClientTestCert), get_resource(kTestCert)};
 
   SSLContextConfig ctxConfig;
   ctxConfig.clientCAFiles = clientCAFiles;

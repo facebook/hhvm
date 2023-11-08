@@ -182,7 +182,7 @@ Instruction set
   If S0 is not a null pointer, branch to block B. This is used to check the
   return value of a native helper that returns a potentially null StringData*.
 
-| AssertType<T>, DRefineS(0), S(Cell,Mem), P
+| AssertType<T>, DRefineS(0), S(Cell|Nullptr,Mem), P
 
   Assert that the type of S0 is T, copying it to D.
 

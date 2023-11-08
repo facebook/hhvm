@@ -136,12 +136,13 @@ function fcall_nullsafe(?C $c): void {
 // CHECK: #b1:
 // CHECK:   n2: *HackMixed = load &$x
 // CHECK:   store &$0 <- n2: *HackMixed
-// CHECK:   n3 = n2.?.__invoke($builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
+// CHECK:   n3: *HackMixed = load &$0
+// CHECK:   n4 = n3.?.__invoke($builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
 // CHECK:   jmp b3
 // CHECK:   .handlers b2
-// CHECK: #b2(n4: *HackMixed):
+// CHECK: #b2(n5: *HackMixed):
 // CHECK:   store &$0 <- null: *HackMixed
-// CHECK:   n5 = $builtins.hhbc_throw(n4)
+// CHECK:   n6 = $builtins.hhbc_throw(n5)
 // CHECK:   unreachable
 // CHECK: #b3:
 // CHECK:   store &$0 <- null: *HackMixed
@@ -162,12 +163,13 @@ function fcall_class_meth(): void {
 // CHECK: #b1:
 // CHECK:   n1: *HackMixed = load &$x
 // CHECK:   store &$0 <- n1: *HackMixed
-// CHECK:   n2 = n1.?.__invoke($builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
+// CHECK:   n2: *HackMixed = load &$0
+// CHECK:   n3 = n2.?.__invoke($builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
 // CHECK:   jmp b3
 // CHECK:   .handlers b2
-// CHECK: #b2(n3: *HackMixed):
+// CHECK: #b2(n4: *HackMixed):
 // CHECK:   store &$0 <- null: *HackMixed
-// CHECK:   n4 = $builtins.hhbc_throw(n3)
+// CHECK:   n5 = $builtins.hhbc_throw(n4)
 // CHECK:   unreachable
 // CHECK: #b3:
 // CHECK:   store &$0 <- null: *HackMixed
@@ -184,8 +186,9 @@ function fcall_func_invoke(): void {
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hhbc_new_vec($builtins.hack_int(2), $builtins.hack_int(3), $builtins.hack_int(4))
 // CHECK:   store &$x <- n0: *HackMixed
-// CHECK:   n1 = $builtins.__sil_splat(n0)
-// CHECK:   n2 = $root.f(null, $builtins.hack_int(1), n1)
+// CHECK:   n1: *HackMixed = load &$x
+// CHECK:   n2 = $builtins.__sil_splat(n1)
+// CHECK:   n3 = $root.f(null, $builtins.hack_int(1), n2)
 // CHECK:   ret null
 // CHECK: }
 function fcall_splat(): void {
@@ -205,12 +208,13 @@ function fcall_splat(): void {
 // CHECK:   n1: *HackMixed = load &$x
 // CHECK:   store &$0 <- n1: *HackMixed
 // CHECK:   n2: *HackMixed = load &$b
-// CHECK:   n3 = n1.?.__invoke(n2, $builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
+// CHECK:   n3: *HackMixed = load &$0
+// CHECK:   n4 = n3.?.__invoke(n2, $builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
 // CHECK:   jmp b3
 // CHECK:   .handlers b2
-// CHECK: #b2(n4: *HackMixed):
+// CHECK: #b2(n5: *HackMixed):
 // CHECK:   store &$0 <- null: *HackMixed
-// CHECK:   n5 = $builtins.hhbc_throw(n4)
+// CHECK:   n6 = $builtins.hhbc_throw(n5)
 // CHECK:   unreachable
 // CHECK: #b3:
 // CHECK:   store &$0 <- null: *HackMixed
@@ -230,7 +234,8 @@ function fcall_meth_caller(C $b): void {
 // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(101), $builtins.hack_string("classname"), $builtins.hack_string("HH\\classname"))
 // CHECK:   n1: *HackMixed = load &$a
 // CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
-// CHECK:   n3 = n1.?.static_fcall_self()
+// CHECK:   n3: *HackMixed = load &$a
+// CHECK:   n4 = n3.?.static_fcall_self()
 // CHECK:   ret null
 // CHECK: }
 function fcall_cls_method(classname<D> $a): void {

@@ -1,4 +1,7 @@
-// RUN: %hackc compile-infer --fail-fast %s | FileCheck %s
+// RUN: %hackc compile-infer --enable-var-cache --fail-fast %s | FileCheck %s
+// TODO(aorenste) the update.py script failed to update this file so I opted
+// it out by adding the --enable-var-cache flag. We should remove it at some
+// point
 
 // Naming of following functions:
 //   nr = non-reified

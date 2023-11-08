@@ -8,7 +8,8 @@
 // CHECK:   n1 = __sil_allocate(<Closure$closure1>)
 // CHECK:   n2 = Closure$closure1.__construct(n1, n0)
 // CHECK:   store &$y <- n1: *HackMixed
-// CHECK:   ret n1
+// CHECK:   n3: *HackMixed = load &$y
+// CHECK:   ret n3
 // CHECK: }
 
 // TEST-CHECK-BAL: define Closure$closure1.__construct
@@ -27,8 +28,9 @@
 // CHECK:   n0: *HackMixed = load &$this
 // CHECK:   n1: *HackMixed = load n0.?.x
 // CHECK:   store &$x <- n1: *HackMixed
-// CHECK:   n2 = $builtins.hhbc_print(n1)
-// CHECK:   ret n2
+// CHECK:   n2: *HackMixed = load &$x
+// CHECK:   n3 = $builtins.hhbc_print(n2)
+// CHECK:   ret n3
 // CHECK: }
 
 function closure1(string $x): mixed {

@@ -155,7 +155,8 @@ function check_is_class(mixed $a): bool {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &global::_SERVER
 // CHECK:   store &$global_server <- n0: *HackMixed
-// CHECK:   n1 = $root.sink(null, n0)
+// CHECK:   n1: *HackMixed = load &$global_server
+// CHECK:   n2 = $root.sink(null, n1)
 // CHECK:   ret null
 // CHECK: }
 function check_global(): void {

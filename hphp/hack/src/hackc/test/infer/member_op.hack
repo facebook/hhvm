@@ -10,10 +10,11 @@ class D {
   // CHECK: #b0:
   // CHECK:   n0: *HackMixed = load &$this
   // CHECK:   n1 = $builtins.hhbc_check_this(n0)
-  // CHECK:   n2: *HackMixed = load n0.?.foo
-  // CHECK:   n3 = $builtins.hhbc_is_type_int(n2)
-  // CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
-  // CHECK:   ret n2
+  // CHECK:   n2: *HackMixed = load &$this
+  // CHECK:   n3: *HackMixed = load n2.?.foo
+  // CHECK:   n4 = $builtins.hhbc_is_type_int(n3)
+  // CHECK:   n5 = $builtins.hhbc_verify_type_pred(n3, n4)
+  // CHECK:   ret n3
   // CHECK: }
   public function mop_baseh_querym_pt(): int {
     return $this->foo;
@@ -69,10 +70,11 @@ function mop_basegc_querym_ec(): int {
 // CHECK:   n1: *HackMixed = load &$a
 // CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
 // CHECK:   n3 = $builtins.hack_int(5)
-// CHECK:   n4 = $builtins.hack_array_get(n1, n3)
-// CHECK:   n5 = $builtins.hhbc_is_type_int(n4)
-// CHECK:   n6 = $builtins.hhbc_verify_type_pred(n4, n5)
-// CHECK:   ret n4
+// CHECK:   n4: *HackMixed = load &$a
+// CHECK:   n5 = $builtins.hack_array_get(n4, n3)
+// CHECK:   n6 = $builtins.hhbc_is_type_int(n5)
+// CHECK:   n7 = $builtins.hhbc_verify_type_pred(n5, n6)
+// CHECK:   ret n5
 // CHECK: }
 function mop_basel_querym_ei(vec<int> $a): int {
   return $a[5];
@@ -85,11 +87,12 @@ function mop_basel_querym_ei(vec<int> $a): int {
 // CHECK:   n1: *HackMixed = load &$a
 // CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
 // CHECK:   n3 = $builtins.hack_int(5)
-// CHECK:   n4 = $builtins.hack_array_get(n1, n3)
-// CHECK:   n5 = $builtins.hhbc_is_type_null(n4)
-// CHECK:   n6 = $builtins.hhbc_is_type_bool(n5)
-// CHECK:   n7 = $builtins.hhbc_verify_type_pred(n5, n6)
-// CHECK:   ret n5
+// CHECK:   n4: *HackMixed = load &$a
+// CHECK:   n5 = $builtins.hack_array_get(n4, n3)
+// CHECK:   n6 = $builtins.hhbc_is_type_null(n5)
+// CHECK:   n7 = $builtins.hhbc_is_type_bool(n6)
+// CHECK:   n8 = $builtins.hhbc_verify_type_pred(n6, n7)
+// CHECK:   ret n6
 // CHECK: }
 function mop_basel_querym_ei_isset(vec<int> $a): bool {
   return isset($a[5]);
@@ -134,10 +137,11 @@ function mop_basel_querym_pl(C $a): int {
 // CHECK:   n1: *HackMixed = load &$a
 // CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
 // CHECK:   n3: *HackMixed = load &$b
-// CHECK:   n4 = $builtins.hack_array_get(n1, n3)
-// CHECK:   n5 = $builtins.hhbc_is_type_int(n4)
-// CHECK:   n6 = $builtins.hhbc_verify_type_pred(n4, n5)
-// CHECK:   ret n4
+// CHECK:   n4: *HackMixed = load &$a
+// CHECK:   n5 = $builtins.hack_array_get(n4, n3)
+// CHECK:   n6 = $builtins.hhbc_is_type_int(n5)
+// CHECK:   n7 = $builtins.hhbc_verify_type_pred(n5, n6)
+// CHECK:   ret n5
 // CHECK: }
 function mop_basel_querym_el(vec<int> $a, int $b): int {
   return $a[$b];
@@ -150,10 +154,11 @@ function mop_basel_querym_el(vec<int> $a, int $b): int {
 // CHECK:   n1: *HackMixed = load &$a
 // CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
 // CHECK:   n3 = $builtins.hack_string("hello")
-// CHECK:   n4 = $builtins.hack_array_get(n1, n3)
-// CHECK:   n5 = $builtins.hhbc_is_type_int(n4)
-// CHECK:   n6 = $builtins.hhbc_verify_type_pred(n4, n5)
-// CHECK:   ret n4
+// CHECK:   n4: *HackMixed = load &$a
+// CHECK:   n5 = $builtins.hack_array_get(n4, n3)
+// CHECK:   n6 = $builtins.hhbc_is_type_int(n5)
+// CHECK:   n7 = $builtins.hhbc_verify_type_pred(n5, n6)
+// CHECK:   ret n5
 // CHECK: }
 function mop_basel_querym_et(dict<string, int> $a): int {
   return $a["hello"];
@@ -201,8 +206,9 @@ function mop_basel_querym_qt(?C $a): ?int {
 // CHECK:   n1: *HackMixed = load &$a
 // CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
 // CHECK:   n3 = $builtins.hack_int(5)
-// CHECK:   n4 = $builtins.hack_array_cow_append(n1, n3)
-// CHECK:   store &$a <- n4: *HackMixed
+// CHECK:   n4: *HackMixed = load &$a
+// CHECK:   n5 = $builtins.hack_array_cow_append(n4, n3)
+// CHECK:   store &$a <- n5: *HackMixed
 // CHECK:   ret null
 // CHECK: }
 function mop_basel_setm_w(vec<int> $a): void {
@@ -216,13 +222,15 @@ function mop_basel_setm_w(vec<int> $a): void {
 // CHECK:   n1: *HackMixed = load &$a
 // CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
 // CHECK:   n3 = $builtins.hack_int(3)
-// CHECK:   n4 = $builtins.hack_array_get(n1, n3)
-// CHECK:   n5 = $builtins.hhbc_add(n4, $builtins.hack_int(1))
-// CHECK:   n6 = $builtins.hack_array_cow_set(n1, n3, n5)
-// CHECK:   store &$a <- n6: *HackMixed
-// CHECK:   n7 = $builtins.hhbc_is_type_int(n4)
-// CHECK:   n8 = $builtins.hhbc_verify_type_pred(n4, n7)
-// CHECK:   ret n4
+// CHECK:   n4: *HackMixed = load &$a
+// CHECK:   n5 = $builtins.hack_array_get(n4, n3)
+// CHECK:   n6 = $builtins.hhbc_add(n5, $builtins.hack_int(1))
+// CHECK:   n7: *HackMixed = load &$a
+// CHECK:   n8 = $builtins.hack_array_cow_set(n7, n3, n6)
+// CHECK:   store &$a <- n8: *HackMixed
+// CHECK:   n9 = $builtins.hhbc_is_type_int(n5)
+// CHECK:   n10 = $builtins.hhbc_verify_type_pred(n5, n9)
+// CHECK:   ret n5
 // CHECK: }
 function mop_basel_incdec_ei(vec<int> $a): int {
   /* HH_FIXME[1002] Assignment as expression */
@@ -236,8 +244,9 @@ function mop_basel_incdec_ei(vec<int> $a): int {
 // CHECK:   n1: *HackMixed = load &$a
 // CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
 // CHECK:   n3 = $builtins.hack_int(5)
-// CHECK:   n4 = $builtins.hack_array_cow_unset(n1, n3)
-// CHECK:   store &$a <- n4: *HackMixed
+// CHECK:   n4: *HackMixed = load &$a
+// CHECK:   n5 = $builtins.hack_array_cow_unset(n4, n3)
+// CHECK:   store &$a <- n5: *HackMixed
 // CHECK:   ret null
 // CHECK: }
 function mop_basel_unset_ei(dict<int, int> $a): void {

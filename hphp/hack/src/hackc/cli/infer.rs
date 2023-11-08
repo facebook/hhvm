@@ -61,6 +61,10 @@ pub struct Opts {
     /// information and ease human reading of textual code.
     #[clap(long)]
     hide_static_coeffects: bool,
+
+    /// Enable an optimization to enable a simple detector to look for and eliminate redundant loads as we emit textual.
+    #[clap(long)]
+    enable_var_cache: bool,
 }
 
 pub fn run(mut opts: Opts) -> Result<()> {
@@ -116,6 +120,7 @@ fn convert_single_file(path: &Path, opts: &Opts) -> Result<Vec<u8>> {
                 unit,
                 opts.no_builtins,
                 opts.hide_static_coeffects,
+                opts.enable_var_cache,
             )?;
             Ok(output)
         })

@@ -258,7 +258,7 @@ impl InferOpts {
 
         let (result, textual_t) = Timing::time(path, || {
             let mut out = Vec::new();
-            textual::textual_writer(&mut out, path, ir, false, false)
+            textual::textual_writer(&mut out, path, ir, false, false, false)
         });
 
         let total_t = compile_profile.codegen_t

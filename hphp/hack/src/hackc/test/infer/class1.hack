@@ -25,11 +25,13 @@ class D extends C { }
 // CHECK: #b0:
 // CHECK:   n0: *E = load &$this
 // CHECK:   n1 = D._86pinit(n0)
-// CHECK:   n2 = null
-// CHECK:   store n0.?.prop <- n2: *HackMixed
-// CHECK:   n3 = __sil_lazy_class_initialize(<C>)
-// CHECK:   n4 = $builtins.hack_field_get(n3, "A")
-// CHECK:   store n0.?.prop <- n4: *HackMixed
+// CHECK:   n2: *HackMixed = load &$this
+// CHECK:   n3 = null
+// CHECK:   store n2.?.prop <- n3: *HackMixed
+// CHECK:   n4 = __sil_lazy_class_initialize(<C>)
+// CHECK:   n5 = $builtins.hack_field_get(n4, "A")
+// CHECK:   n6: *HackMixed = load &$this
+// CHECK:   store n6.?.prop <- n5: *HackMixed
 // CHECK:   ret null
 // CHECK: }
 

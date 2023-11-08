@@ -11,9 +11,10 @@
 // CHECK:   n2 = __sil_allocate(<Closure$basic1232>)
 // CHECK:   n3 = Closure$basic1232.__construct(n2, n0, n1)
 // CHECK:   store &$0 <- n2: *HackMixed
-// CHECK:   n4 = n2.?.__invoke()
+// CHECK:   n4: *HackMixed = load &$0
+// CHECK:   n5 = n4.?.__invoke()
 // CHECK:   store &$0 <- null: *HackMixed
-// CHECK:   ret n4
+// CHECK:   ret n5
 // CHECK: }
 
 // TEST-CHECK-BAL: define Closure$basic1232.__construct
@@ -23,7 +24,8 @@
 // CHECK:   n1: *HackMixed = load &$this
 // CHECK:   store n1.?.b <- n0: *HackMixed
 // CHECK:   n2: *HackMixed = load &_0splice0
-// CHECK:   store n1.?._0splice0 <- n2: *HackMixed
+// CHECK:   n3: *HackMixed = load &$this
+// CHECK:   store n3.?._0splice0 <- n2: *HackMixed
 // CHECK:   ret null
 // CHECK: }
 function basic1(A $b): mixed {

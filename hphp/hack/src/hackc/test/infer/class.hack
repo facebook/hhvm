@@ -28,15 +28,19 @@
 // CHECK:   n0: *HackMixed = load &$this
 // CHECK:   n1 = $builtins.hack_int(42)
 // CHECK:   store n0.?.prop1 <- n1: *HackMixed
-// CHECK:   n2 = $builtins.hack_string("hello")
-// CHECK:   store n0.?.prop2 <- n2: *HackMixed
-// CHECK:   n3 = null
-// CHECK:   store n0.?.prop5 <- n3: *HackMixed
-// CHECK:   n4 = $builtins.hack_int(2)
-// CHECK:   store n0.?.type_ <- n4: *HackMixed
-// CHECK:   n5 = __sil_lazy_class_initialize(<D>)
-// CHECK:   n6 = $builtins.hack_field_get(n5, "C")
-// CHECK:   store n0.?.prop5 <- n6: *HackMixed
+// CHECK:   n2: *HackMixed = load &$this
+// CHECK:   n3 = $builtins.hack_string("hello")
+// CHECK:   store n2.?.prop2 <- n3: *HackMixed
+// CHECK:   n4: *HackMixed = load &$this
+// CHECK:   n5 = null
+// CHECK:   store n4.?.prop5 <- n5: *HackMixed
+// CHECK:   n6: *HackMixed = load &$this
+// CHECK:   n7 = $builtins.hack_int(2)
+// CHECK:   store n6.?.type_ <- n7: *HackMixed
+// CHECK:   n8 = __sil_lazy_class_initialize(<D>)
+// CHECK:   n9 = $builtins.hack_field_get(n8, "C")
+// CHECK:   n10: *HackMixed = load &$this
+// CHECK:   store n10.?.prop5 <- n9: *HackMixed
 // CHECK:   ret null
 // CHECK: }
 
@@ -80,28 +84,31 @@ class C {
   // CHECK:   n0: *C = load &$this
   // CHECK:   n1 = $builtins.hack_get_static_class(n0)
   // CHECK:   store &$0 <- n1: *HackMixed
-  // CHECK:   n2 = $builtins.hack_get_static_class(n0)
-  // CHECK:   n3 = n2.?.__factory()
-  // CHECK:   store &$2 <- n3: *HackMixed
+  // CHECK:   n2: *C = load &$this
+  // CHECK:   n3 = $builtins.hack_get_static_class(n2)
+  // CHECK:   n4 = n3.?.__factory()
+  // CHECK:   store &$2 <- n4: *HackMixed
+  // CHECK:   n5: *HackMixed = load &$0
   // CHECK:   jmp b1
   // CHECK: #b1:
-  // CHECK:   n4: *HackMixed = load &$0
-  // CHECK:   n5: *HackMixed = load &$2
+  // CHECK:   n6: *HackMixed = load &$0
+  // CHECK:   n7: *HackMixed = load &$0
+  // CHECK:   n8: *HackMixed = load &$2
   // CHECK:   jmp b3
   // CHECK:   .handlers b2
-  // CHECK: #b2(n6: *HackMixed):
+  // CHECK: #b2(n9: *HackMixed):
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n7 = $builtins.hhbc_throw(n6)
+  // CHECK:   n10 = $builtins.hhbc_throw(n9)
   // CHECK:   unreachable
   // CHECK: #b3:
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n8 = n5.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
-  // CHECK:   n9 = $builtins.hhbc_lock_obj(n5)
-  // CHECK:   store &$a <- n5: *HackMixed
+  // CHECK:   n11 = n8.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
+  // CHECK:   n12 = $builtins.hhbc_lock_obj(n8)
+  // CHECK:   store &$a <- n8: *HackMixed
   // CHECK:   ret null
   // CHECK: }
   public function cons_static(): void {
@@ -118,25 +125,26 @@ class C {
   // CHECK:   n2 = __sil_allocate(<C>)
   // CHECK:   n3 = C._86pinit(n2)
   // CHECK:   store &$2 <- n2: *HackMixed
+  // CHECK:   n4: *HackMixed = load &$0
   // CHECK:   jmp b1
   // CHECK: #b1:
-  // CHECK:   n4: *HackMixed = load &$0
-  // CHECK:   n5: *HackMixed = load &$2
+  // CHECK:   n5: *HackMixed = load &$0
+  // CHECK:   n6: *HackMixed = load &$2
   // CHECK:   jmp b3
   // CHECK:   .handlers b2
-  // CHECK: #b2(n6: *HackMixed):
+  // CHECK: #b2(n7: *HackMixed):
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n7 = $builtins.hhbc_throw(n6)
+  // CHECK:   n8 = $builtins.hhbc_throw(n7)
   // CHECK:   unreachable
   // CHECK: #b3:
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n8 = n5.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
-  // CHECK:   n9 = $builtins.hhbc_lock_obj(n5)
-  // CHECK:   store &$a <- n5: *HackMixed
+  // CHECK:   n9 = n6.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
+  // CHECK:   n10 = $builtins.hhbc_lock_obj(n6)
+  // CHECK:   store &$a <- n6: *HackMixed
   // CHECK:   ret null
   // CHECK: }
   public function cons_self(): void {
@@ -153,25 +161,26 @@ class C {
   // CHECK:   n2 = __sil_allocate(<C>)
   // CHECK:   n3 = C._86pinit(n2)
   // CHECK:   store &$2 <- n2: *HackMixed
+  // CHECK:   n4: *HackMixed = load &$0
   // CHECK:   jmp b1
   // CHECK: #b1:
-  // CHECK:   n4: *HackMixed = load &$0
-  // CHECK:   n5: *HackMixed = load &$2
+  // CHECK:   n5: *HackMixed = load &$0
+  // CHECK:   n6: *HackMixed = load &$2
   // CHECK:   jmp b3
   // CHECK:   .handlers b2
-  // CHECK: #b2(n6: *HackMixed):
+  // CHECK: #b2(n7: *HackMixed):
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n7 = $builtins.hhbc_throw(n6)
+  // CHECK:   n8 = $builtins.hhbc_throw(n7)
   // CHECK:   unreachable
   // CHECK: #b3:
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n8 = n5.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
-  // CHECK:   n9 = $builtins.hhbc_lock_obj(n5)
-  // CHECK:   store &$a <- n5: *HackMixed
+  // CHECK:   n9 = n6.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
+  // CHECK:   n10 = $builtins.hhbc_lock_obj(n6)
+  // CHECK:   store &$a <- n6: *HackMixed
   // CHECK:   ret null
   // CHECK: }
   public function cons_inst(): void {
@@ -315,7 +324,8 @@ trait T3 {
   // CHECK: #b0:
   // CHECK:   n0: *T3 = load &$this
   // CHECK:   n1 = __self__.f(n0)
-  // CHECK:   n2 = __self__.g(n0)
+  // CHECK:   n2: *T3 = load &$this
+  // CHECK:   n3 = __self__.g(n2)
   // CHECK:   ret null
   // CHECK: }
   public function trait_self_caller(): void {

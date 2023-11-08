@@ -42,6 +42,7 @@ pub(crate) struct TextualFile<'a> {
     w: &'a mut dyn std::io::Write,
     pub(crate) hide_static_coeffects: bool,
     strings: Arc<StringInterner>,
+    pub(crate) enable_var_cache: bool,
     pub(crate) internal_functions: HashSet<FunctionName>,
     pub(crate) called_functions: HashSet<FunctionName>,
     pub(crate) internal_globals: HashMap<GlobalName, Ty>,
@@ -54,11 +55,13 @@ impl<'a> TextualFile<'a> {
         w: &'a mut dyn std::io::Write,
         strings: Arc<StringInterner>,
         hide_static_coeffects: bool,
+        enable_var_cache: bool,
     ) -> Self {
         TextualFile {
             w,
             hide_static_coeffects,
             strings,
+            enable_var_cache,
             internal_functions: Default::default(),
             called_functions: Default::default(),
             internal_globals: Default::default(),
@@ -211,11 +214,17 @@ impl TextualFile<'_> {
             writeln!(self.w)?;
         }
 
+        let cache: Box<dyn VarCache> = if self.enable_var_cache {
+            Box::<HashMapVarCache>::default()
+        } else {
+            Box::<NoVarCache>::default()
+        };
+
         let mut writer = FuncBuilder {
             cur_loc: loc.cloned(),
             next_id: Sid::from_usize(0),
             txf: self,
-            cache: VarCache::default(),
+            cache,
         };
 
         writer.write_label(BlockId::from_usize(0), &[])?;
@@ -961,7 +970,7 @@ pub(crate) struct FuncBuilder<'a, 'b> {
     cur_loc: Option<SrcLoc>,
     next_id: Sid,
     pub(crate) txf: &'a mut TextualFile<'b>,
-    cache: VarCache,
+    cache: Box<dyn VarCache>,
 }
 
 impl FuncBuilder<'_, '_> {
@@ -1406,12 +1415,40 @@ trait ExprWriter {
     }
 }
 
+trait VarCache {
+    fn clear(&mut self);
+
+    fn load(&mut self, src: &Expr, sid: Sid);
+
+    fn clear_expr(&mut self, target: &Expr);
+
+    fn store(&mut self, target: &Expr, value: Expr);
+
+    fn lookup(&self, expr: &Expr) -> Option<Sid>;
+}
+
 #[derive(Default, Debug)]
-struct VarCache {
+struct NoVarCache;
+impl VarCache for NoVarCache {
+    fn clear(&mut self) {}
+
+    fn load(&mut self, _src: &Expr, _sid: Sid) {}
+
+    fn clear_expr(&mut self, _target: &Expr) {}
+
+    fn store(&mut self, _target: &Expr, _value: Expr) {}
+
+    fn lookup(&self, _expr: &Expr) -> Option<Sid> {
+        None
+    }
+}
+
+#[derive(Default, Debug)]
+struct HashMapVarCache {
     cache: HashMap<VarName, Sid>,
 }
 
-impl VarCache {
+impl VarCache for HashMapVarCache {
     fn clear(&mut self) {
         self.cache.clear();
     }

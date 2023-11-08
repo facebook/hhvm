@@ -1,0 +1,12 @@
+FunctionCredential
+  INSERT FunctionCredential
+  class
+function222
+  INSERT function222()
+  (function(): void)
+function_exists
+  INSERT function_exists(${1:\$function_name})
+  (function(string $function_name, bool $autoload = _): bool)
+function
+  INSERT function
+  keyword

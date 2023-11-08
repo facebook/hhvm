@@ -1,0 +1,18 @@
+BadFunctionCallException
+  INSERT BadFunctionCallException
+  class
+BadMethodCallException
+  INSERT BadMethodCallException
+  class
+base64_decode
+  INSERT base64_decode(${1:\$data})
+  (function(string $data, bool $strict = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+base64_encode
+  INSERT base64_encode(${1:\$data})
+  (function(string $data): string)
+base_convert
+  INSERT base_convert(${1:\$number}, ${2:\$frombase}, ${3:\$tobase})
+  (function(HH\FIXME\MISSING_PARAM_TYPE $number, int $frombase, int $tobase): ~HH\FIXME\MISSING_RETURN_TYPE)
+basename
+  INSERT basename(${1:\$path})
+  (function(string $path, string $suffix = _): ~HH\FIXME\MISSING_RETURN_TYPE)

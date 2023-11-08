@@ -1,3 +1,303 @@
+fb_compact_unserialize
+  INSERT fb_compact_unserialize(${1:\$thing}, ${2:\$success}, ${3:\$errcode})
+  (function(HH\FIXME\MISSING_PARAM_TYPE $thing, inout ~?bool $success, inout ~?int $errcode): ~HH\FIXME\MISSING_RETURN_TYPE)
+fb_disable_code_coverage
+  INSERT fb_disable_code_coverage()
+  (function(): ~HH\FIXME\MISSING_RETURN_TYPE)
+fb_double_metaphone
+  INSERT fb_double_metaphone(${1:\$word})
+  (function(string $word): string)
+fb_enable_code_coverage
+  INSERT fb_enable_code_coverage()
+  (function(): ~HH\FIXME\MISSING_RETURN_TYPE)
+fb_fbid_in_oid_range
+  INSERT fb_fbid_in_oid_range(${1:\$fbid})
+  (function(mixed $fbid): bool)
+fb_fbid_in_rid_range
+  INSERT fb_fbid_in_rid_range(${1:\$fbid})
+  (function(mixed $fbid): bool)
+fb_fbid_in_uid_range
+  INSERT fb_fbid_in_uid_range(${1:\$fbid})
+  (function(mixed $fbid): bool)
+fb_fbid_is_valid
+  INSERT fb_fbid_is_valid(${1:\$fbid})
+  (function(mixed $fbid): bool)
+fb_folly_varint_decode
+  INSERT fb_folly_varint_decode(${1:\$encoded}, ${2:\$size})
+  (function(string $encoded, inout ~HH\FIXME\MISSING_PARAM_TYPE $size): int)
+fb_folly_varint_decode_group
+  INSERT fb_folly_varint_decode_group(${1:\$encoded}, ${2:\$count}, ${3:\$size})
+  (function(string $encoded, int $count, inout ~HH\FIXME\MISSING_PARAM_TYPE $size): ~Vector<int>)
+fb_folly_varint_encode
+  INSERT fb_folly_varint_encode(${1:\$value})
+  (function(int $value): string)
+fb_folly_varint_encode_group
+  INSERT fb_folly_varint_encode_group(${1:\$values})
+  (function(ConstVector<int> $values): string)
+fb_gen_user_func
+  INSERT fb_gen_user_func(${1:\$initialDoc}, ${2:\$function})
+  (function(string $initialDoc, mixed $function, mixed $func_args...): ~Awaitable<dynamic>)
+fb_get_cert_token
+  INSERT fb_get_cert_token(${1:\$proxies}, ${2:\$grants}, ${3:\$min_expiration_time})
+  (function(vec<mixed> $proxies, vec<mixed> $grants, int $min_expiration_time, string $pem_private_key = _, string $pem_certificate = _): string)
+fb_get_client_identities
+  INSERT fb_get_client_identities()
+  (function(): ~vec<shape('id_data' => string, 'id_type' => string)>)
+fb_get_code_coverage
+  INSERT fb_get_code_coverage(${1:\$flush})
+  (function(bool $flush): ~HH\FIXME\MISSING_RETURN_TYPE)
+fb_get_enum_names
+  INSERT fb_get_enum_names(${1:\$class}, ${2:\$recurse})
+  (function(string $class, bool $recurse): ~dict<arraykey, mixed>)
+fb_get_enum_values
+  INSERT fb_get_enum_values(${1:\$class}, ${2:\$recurse})
+  (function(string $class, bool $recurse): ~dict<arraykey, mixed>)
+fb_get_hash_and_shard
+  INSERT fb_get_hash_and_shard(${1:\$tohash}, ${2:\$type})
+  (function(string $tohash, int $type, int $custom_ring = _): ~dict<string, mixed>)
+fb_get_hashout_config
+  INSERT fb_get_hashout_config(${1:\$type})
+  (function(int $type): ~dict<arraykey, mixed>)
+fb_get_last_flush_size
+  INSERT fb_get_last_flush_size()
+  (function(): ~HH\FIXME\MISSING_RETURN_TYPE)
+fb_get_sandbox_cat
+  INSERT fb_get_sandbox_cat()
+  (function(): ?string)
+fb_get_sandbox_owners
+  INSERT fb_get_sandbox_owners()
+  (function(): ~vec<shape('id_data' => string, 'id_type' => string)>)
+fb_id_to_db
+  INSERT fb_id_to_db(${1:\$fbid})
+  (function(mixed $fbid): mixed)
+fb_init_scribe_extension
+  INSERT fb_init_scribe_extension()
+  (function(): void)
+fb_intercept2
+  INSERT fb_intercept2(${1:\$name}, ${2:\$handler})
+  (function(string $name, HH\FIXME\MISSING_PARAM_TYPE $handler): ~HH\FIXME\MISSING_RETURN_TYPE)
+fb_output_compression
+  INSERT fb_output_compression(${1:\$new_value})
+  (function(bool $new_value): ~HH\FIXME\MISSING_RETURN_TYPE)
+fb_proxy_cert_token
+  INSERT fb_proxy_cert_token(${1:\$target_tier}, ${2:\$proxy_tier}, ${3:\$overrides})
+  (function(string $target_tier, string $proxy_tier, dict<arraykey, mixed> $overrides): string)
+fb_rename_function
+  INSERT fb_rename_function(${1:\$orig_func_name}, ${2:\$new_func_name})
+  (function(string $orig_func_name, string $new_func_name): ~HH\FIXME\MISSING_RETURN_TYPE)
+fb_scribe_fetch_graphapi_category_meta
+  INSERT fb_scribe_fetch_graphapi_category_meta(${1:\$category}, ${2:\$appId})
+  (function(string $category, string $appId): string)
+fb_scribe_genWrite
+  INSERT fb_scribe_genWrite(${1:\$category}, ${2:\$message}, ${3:\$timeoutMs}, ${4:\$bucket})
+  (function(string $category, string $message, int $timeoutMs, int $bucket): ~Awaitable<int>)
+fb_scribe_gen_write_message
+  INSERT fb_scribe_gen_write_message(${1:\$category}, ${2:\$message}, ${3:\$metadata}, ${4:\$timeoutMs})
+  (function(string $category, string $message, string $metadata, int $timeoutMs): ~Awaitable<int>)
+fb_scribe_offer
+  INSERT fb_scribe_offer(${1:\$category}, ${2:\$message}, ${3:\$bucket}, ${4:\$secureThrift})
+  (function(string $category, string $message, int $bucket, bool $secureThrift): int)
+fb_scribe_offer_message
+  INSERT fb_scribe_offer_message(${1:\$category}, ${2:\$message}, ${3:\$metadata}, ${4:\$secureThrift})
+  (function(string $category, string $message, string $metadata, bool $secureThrift): int)
+fb_serialize
+  INSERT fb_serialize(${1:\$thing})
+  (function(HH\FIXME\MISSING_PARAM_TYPE $thing, int $options = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+fb_set_exit_callback
+  INSERT fb_set_exit_callback(${1:\$function})
+  (function(HH\FIXME\MISSING_PARAM_TYPE $function): ~HH\FIXME\MISSING_RETURN_TYPE)
+fb_set_post_autoload_handler
+  INSERT fb_set_post_autoload_handler(${1:\$onPostAutoloadFunc})
+  (function((function(HH\Facts\SymbolKind, string): ~void) $onPostAutoloadFunc): void)
+fb_setprofile
+  INSERT fb_setprofile(${1:\$callback})
+  (function(HH\FIXME\MISSING_PARAM_TYPE $callback, int $flags = _, vec<string> $functions = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+fb_unserialize
+  INSERT fb_unserialize(${1:\$thing}, ${2:\$success})
+  (function(HH\FIXME\MISSING_PARAM_TYPE $thing, inout ~?bool $success, int $options = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+fb_utf8_strlen
+  INSERT fb_utf8_strlen(${1:\$input})
+  (function(string $input): ~HH\FIXME\MISSING_RETURN_TYPE)
+fb_utf8_substr
+  INSERT fb_utf8_substr(${1:\$str}, ${2:\$start})
+  (function(string $str, int $start, int $length = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+fb_utf8ize
+  INSERT fb_utf8ize(${1:\$input})
+  (function(inout ~string $input): ~HH\FIXME\MISSING_RETURN_TYPE)
+fb_verify_cert_token
+  INSERT fb_verify_cert_token(${1:\$token}, ${2:\$proxy}, ${3:\$destination}, ${4:\$action})
+  (function(string $token, mixed $proxy, mixed $destination, string $action, string $pem_certificate = _): ~vec<mixed>)
+fclose
+  INSERT fclose(${1:\$handle})
+  (function(resource $handle): ~HH\FIXME\MISSING_RETURN_TYPE)
+feof
+  INSERT feof(${1:\$handle})
+  (function(resource $handle): ~HH\FIXME\MISSING_RETURN_TYPE)
+fflush
+  INSERT fflush(${1:\$handle})
+  (function(resource $handle): ~HH\FIXME\MISSING_RETURN_TYPE)
+fgetc
+  INSERT fgetc(${1:\$handle})
+  (function(resource $handle): ~HH\FIXME\MISSING_RETURN_TYPE)
+fgetcsv
+  INSERT fgetcsv(${1:\$handle})
+  (function(resource $handle, int $length = _, string $delimiter = _, string $enclosure = _, string $escape_char = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+fgets
+  INSERT fgets(${1:\$handle})
+  (function(resource $handle, int $length = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+fgetss
+  INSERT fgetss(${1:\$handle})
+  (function(resource $handle, int $length = _, string $allowable_tags = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+file
+  INSERT file(${1:\$filename})
+  (function(string $filename, int $flags = _, HH\FIXME\MISSING_PARAM_TYPE $context = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+file_exists
+  INSERT file_exists(${1:\$filename})
+  (function(string $filename): ~HH\FIXME\MISSING_RETURN_TYPE)
+file_get_contents
+  INSERT file_get_contents(${1:\$filename})
+  (function(string $filename, bool $use_include_path = _, HH\FIXME\MISSING_PARAM_TYPE $context = _, int $offset = _, int $maxlen = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+file_put_contents
+  INSERT file_put_contents(${1:\$filename}, ${2:\$data})
+  (function(string $filename, HH\FIXME\MISSING_PARAM_TYPE $data, int $flags = _, HH\FIXME\MISSING_PARAM_TYPE $context = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+fileatime
+  INSERT fileatime(${1:\$filename})
+  (function(string $filename): ~HH\FIXME\MISSING_RETURN_TYPE)
+filectime
+  INSERT filectime(${1:\$filename})
+  (function(string $filename): ~HH\FIXME\MISSING_RETURN_TYPE)
+filegroup
+  INSERT filegroup(${1:\$filename})
+  (function(string $filename): ~HH\FIXME\MISSING_RETURN_TYPE)
+fileinode
+  INSERT fileinode(${1:\$filename})
+  (function(string $filename): ~HH\FIXME\MISSING_RETURN_TYPE)
+filemtime
+  INSERT filemtime(${1:\$filename})
+  (function(string $filename): ~HH\FIXME\MISSING_RETURN_TYPE)
+fileowner
+  INSERT fileowner(${1:\$filename})
+  (function(string $filename): ~HH\FIXME\MISSING_RETURN_TYPE)
+fileperms
+  INSERT fileperms(${1:\$filename})
+  (function(string $filename): ~HH\FIXME\MISSING_RETURN_TYPE)
+filesize
+  INSERT filesize(${1:\$filename})
+  (function(string $filename): ~HH\FIXME\MISSING_RETURN_TYPE)
+filetype
+  INSERT filetype(${1:\$filename})
+  (function(string $filename): ~HH\FIXME\MISSING_RETURN_TYPE)
+filter_has_var
+  INSERT filter_has_var(${1:\$type}, ${2:\$variable_name})
+  (function(int $type, string $variable_name): bool)
+filter_id
+  INSERT filter_id(${1:\$name})
+  (function(string $name): ~HH\FIXME\MISSING_RETURN_TYPE)
+filter_input
+  INSERT filter_input(${1:\$type}, ${2:\$variable_name})
+  (function(int $type, string $variable_name, int $filter = _, mixed $options = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+filter_input_array
+  INSERT filter_input_array(${1:\$type})
+  (function(int $type, mixed $definition = _, bool $add_empty = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+filter_list
+  INSERT filter_list()
+  (function(): ~vec<string>)
+filter_var
+  INSERT filter_var(${1:\$value})
+  (function(mixed $value, int $filter = _, mixed $options = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+filter_var_array
+  INSERT filter_var_array(${1:\$data})
+  (function(Container<mixed> $data, mixed $definition = _, bool $add_empty = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+finfo
+  INSERT finfo
+  class
+finfo_buffer
+  INSERT finfo_buffer(${1:\$finfo}, ${2:\$string})
+  (function(resource $finfo, HH\FIXME\MISSING_PARAM_TYPE $string, int $options = _, HH\FIXME\MISSING_PARAM_TYPE $context = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+finfo_close
+  INSERT finfo_close(${1:\$finfo})
+  (function(resource $finfo): ~HH\FIXME\MISSING_RETURN_TYPE)
+finfo_file
+  INSERT finfo_file(${1:\$finfo}, ${2:\$file_name})
+  (function(resource $finfo, HH\FIXME\MISSING_PARAM_TYPE $file_name, int $options = _, HH\FIXME\MISSING_PARAM_TYPE $context = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+finfo_open
+  INSERT finfo_open()
+  (function(int $options = _, HH\FIXME\MISSING_PARAM_TYPE $magic_file = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+finfo_set_flags
+  INSERT finfo_set_flags(${1:\$finfo}, ${2:\$options})
+  (function(resource $finfo, int $options): ~HH\FIXME\MISSING_RETURN_TYPE)
+flatbuffer_encode
+  INSERT flatbuffer_encode(${1:\$json_string}, ${2:\$idl_string})
+  (function(string $json_string, string $idl_string): ?string)
+floatval
+  INSERT floatval(${1:\$v})
+  (function(HH\FIXME\MISSING_PARAM_TYPE $v): float)
+flock
+  INSERT flock(${1:\$handle}, ${2:\$operation}, ${3:\$wouldblock})
+  (function(resource $handle, int $operation, inout ~HH\FIXME\MISSING_PARAM_TYPE $wouldblock): ~HH\FIXME\MISSING_RETURN_TYPE)
+floor
+  INSERT floor(${1:\$value})
+  (function(HH\FIXME\MISSING_PARAM_TYPE $value): float)
+flush
+  INSERT flush()
+  (function(): ~HH\FIXME\MISSING_RETURN_TYPE)
+fmod
+  INSERT fmod(${1:\$x}, ${2:\$y})
+  (function(float $x, float $y): ~HH\FIXME\MISSING_RETURN_TYPE)
+fnmatch
+  INSERT fnmatch(${1:\$pattern}, ${2:\$filename})
+  (function(string $pattern, string $filename, int $flags = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+fopen
+  INSERT fopen(${1:\$filename}, ${2:\$mode})
+  (function(string $filename, string $mode, bool $use_include_path = _, HH\FIXME\MISSING_PARAM_TYPE $context = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+fpassthru
+  INSERT fpassthru(${1:\$handle})
+  (function(resource $handle): ~HH\FIXME\MISSING_RETURN_TYPE)
+fprintf
+  INSERT fprintf(${1:\$handle}, ${2:\$format})
+  (function(resource $handle, string $format, HH\FIXME\MISSING_PARAM_TYPE $args...): ~HH\FIXME\MISSING_RETURN_TYPE)
+fputcsv
+  INSERT fputcsv(${1:\$handle}, ${2:\$fields})
+  (function(resource $handle, HH\FIXME\MISSING_PARAM_TYPE $fields, string $delimiter = _, string $enclosure = _, string $escape_char = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+fputs
+  INSERT fputs(${1:\$handle}, ${2:\$data})
+  (function(resource $handle, string $data, int $length = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+fread
+  INSERT fread(${1:\$handle}, ${2:\$length})
+  (function(resource $handle, int $length): ~HH\FIXME\MISSING_RETURN_TYPE)
+fscanf
+  INSERT fscanf(${1:\$handle}, ${2:\$format})
+  (function(resource $handle, string $format): ~HH\FIXME\MISSING_RETURN_TYPE)
+fseek
+  INSERT fseek(${1:\$handle}, ${2:\$offset})
+  (function(resource $handle, int $offset, int $whence = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+fsockopen
+  INSERT fsockopen(${1:\$hostname}, ${2:\$port}, ${3:\$errnum}, ${4:\$errstr})
+  (function(string $hostname, int $port, inout ~HH\FIXME\MISSING_PARAM_TYPE $errnum, inout ~HH\FIXME\MISSING_PARAM_TYPE $errstr, float $timeout = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+fstat
+  INSERT fstat(${1:\$handle})
+  (function(resource $handle): ~HH\FIXME\MISSING_RETURN_TYPE)
+ftell
+  INSERT ftell(${1:\$handle})
+  (function(resource $handle): ~HH\FIXME\MISSING_RETURN_TYPE)
+ftok
+  INSERT ftok(${1:\$pathname}, ${2:\$proj})
+  (function(string $pathname, string $proj): ~HH\FIXME\MISSING_RETURN_TYPE)
+ftruncate
+  INSERT ftruncate(${1:\$handle}, ${2:\$size})
+  (function(resource $handle, int $size): ~HH\FIXME\MISSING_RETURN_TYPE)
+function_exists
+  INSERT function_exists(${1:\$function_name})
+  (function(string $function_name, bool $autoload = _): bool)
+furchash_hphp_ext
+  INSERT furchash_hphp_ext(${1:\$key}, ${2:\$len}, ${3:\$nPart})
+  (function(string $key, int $len, int $nPart): ~HH\FIXME\MISSING_RETURN_TYPE)
+furchash_hphp_ext_supported
+  INSERT furchash_hphp_ext_supported()
+  (function(): ~HH\FIXME\MISSING_RETURN_TYPE)
+fwrite
+  INSERT fwrite(${1:\$handle}, ${2:\$data})
+  (function(resource $handle, string $data, int $length = _): ~HH\FIXME\MISSING_RETURN_TYPE)
 function
   INSERT function
   keyword

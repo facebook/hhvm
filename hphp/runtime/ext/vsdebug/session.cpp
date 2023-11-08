@@ -383,6 +383,8 @@ unsigned int DebuggerSession::generateOrReuseVariableId(
   // IDs are stable for variants that contain objects or arrays, based on the
   // address of the object to which they point.
   DebuggerRequestInfo* ri = m_debugger->getRequestInfo();
+  if (!ri) throw DebuggerCommandException("Client disconnected");
+
   const auto options = m_debugger->getDebuggerOptions();
 
   void* key = nullptr;

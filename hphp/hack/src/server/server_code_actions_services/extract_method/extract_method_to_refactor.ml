@@ -259,11 +259,11 @@ let method_call_string_of_candidate
       as_string
       comment_and_whitespace
 
-let edit_of_candidate
+let edits_of_candidate
     ~source_text
     ~path
     (T.{ method_pos; params; return; pos; placeholder_name; _ } as candidate) :
-    Lsp.WorkspaceEdit.t =
+    Code_action_types.edits =
   let type_assoc_list_of map =
     map
     |> String.Map.to_alist ~key_order:`Increasing
@@ -277,32 +277,17 @@ let edit_of_candidate
     let call_string =
       method_call_string_of_candidate ~params ~return ~snippet candidate
     in
-    {
-      Lsp.TextEdit.range =
-        Lsp_helpers.hack_pos_to_lsp_range ~equal:Relative_path.equal pos;
-      newText = call_string;
-    }
+    { Code_action_types.pos; text = call_string }
   in
   let change_add_method =
-    let line = (fst @@ Pos.line_column method_pos) - 1 in
-    let character = 0 in
+    let pos = method_pos |> Pos.set_col_start 0 |> Pos.shrink_to_start in
     let method_string =
       method_string_of_candidate ~source_text ~params ~return ~snippet candidate
     in
-    Lsp.
-      {
-        Lsp.TextEdit.range =
-          { start = { line; character }; end_ = { line; character } };
-        newText = method_string;
-      }
+    Code_action_types.{ pos; text = method_string }
   in
-  let changes =
-    Lsp.DocumentUri.Map.singleton
-      (Lsp_helpers.path_to_lsp_uri path)
-      [change_add_method; change_add_call]
-  in
-  Lsp.WorkspaceEdit.{ changes }
+  Relative_path.Map.singleton path [change_add_method; change_add_call]
 
 let of_candidate ~source_text ~path candidate =
-  let edit = lazy (edit_of_candidate ~source_text ~path candidate) in
-  Code_action_types.Refactor.{ title = "Extract into method"; edit }
+  let edits = lazy (edits_of_candidate ~source_text ~path candidate) in
+  Code_action_types.Refactor.{ title = "Extract into method"; edits }

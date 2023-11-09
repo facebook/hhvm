@@ -15,6 +15,8 @@ open Hh_prelude
   from before "codeAction/resolve" was introduced.
 
   See [CodeAction.edit_or_command] in lsp.ml for more on the code action flow.
+
+  TODO(T168350458): remove all uses of types from `Lsp` from this library and instead use internal types
 *)
 type resolvable_command_or_action =
   Lsp.WorkspaceEdit.t Lazy.t Lsp.CodeAction.command_or_action_
@@ -47,17 +49,44 @@ let remove_snippets Lsp.WorkspaceEdit.{ changes } =
   in
   Lsp.WorkspaceEdit.{ changes }
 
+let workspace_edit_of_code_action_edits
+    (code_action_edit_map : Code_action_types.edits) : Lsp.WorkspaceEdit.t =
+  let changes : Lsp.TextEdit.t list Lsp.DocumentUri.Map.t =
+    code_action_edit_map
+    |> Relative_path.Map.to_seq
+    |> Seq.map (fun (path, code_action_edits) ->
+           let uri = Lsp_helpers.path_to_lsp_uri path in
+           let lsp_edits =
+             List.map
+               code_action_edits
+               ~f:(fun Code_action_types.{ pos; text } ->
+                 let range =
+                   Lsp_helpers.hack_pos_to_lsp_range
+                     ~equal:Relative_path.equal
+                     pos
+                 in
+                 Lsp.TextEdit.{ range; newText = text })
+           in
+           (uri, lsp_edits))
+    |> Lsp.DocumentUri.Map.of_seq
+  in
+  Lsp.WorkspaceEdit.{ changes }
+
 let find
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(range : Lsp.range) : resolvable_command_or_action list =
-  let to_action ~title ~edit ~kind =
+  let to_action
+      ~title (lazy_code_action_edits : Code_action_types.edits Lazy.t) ~kind =
+    let workspace_edit =
+      Lazy.map lazy_code_action_edits ~f:workspace_edit_of_code_action_edits
+    in
     Lsp.CodeAction.Action
       {
         Lsp.CodeAction.title;
         kind;
         diagnostics = [];
-        action = Lsp.CodeAction.UnresolvedEdit edit;
+        action = Lsp.CodeAction.UnresolvedEdit workspace_edit;
       }
   in
   let pos =
@@ -70,13 +99,13 @@ let find
   in
   let quickfixes =
     Quickfixes.find ~ctx ~entry pos
-    |> List.map ~f:(fun Code_action_types.Quickfix.{ title; edit } ->
-           to_action ~title ~edit ~kind:Lsp.CodeActionKind.quickfix)
+    |> List.map ~f:(fun Code_action_types.Quickfix.{ title; edits } ->
+           to_action ~title edits ~kind:Lsp.CodeActionKind.quickfix)
   in
   let refactors =
     Refactors.find ~entry pos ctx
-    |> List.map ~f:(fun Code_action_types.Refactor.{ title; edit } ->
-           to_action ~title ~edit ~kind:Lsp.CodeActionKind.refactor)
+    |> List.map ~f:(fun Code_action_types.Refactor.{ title; edits } ->
+           to_action ~title edits ~kind:Lsp.CodeActionKind.refactor)
   in
   quickfixes @ refactors
 

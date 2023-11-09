@@ -186,29 +186,20 @@ let visitor ~(cursor : Pos.t) =
   end
 
 let edit_of_candidate
-    ~path ~source_text Candidate.{ insertion_index; positions; pos } =
+    ~path ~source_text Candidate.{ insertion_index; positions; pos } :
+    Code_action_types.edits =
   let text =
     positions
     |> List.map ~f:(Full_fidelity_source_text.sub_of_pos source_text)
     |> list_flip ~insertion_index
     |> String.concat ~sep:", "
   in
-  let change =
-    Lsp.
-      {
-        TextEdit.range =
-          Lsp_helpers.hack_pos_to_lsp_range ~equal:Relative_path.equal pos;
-        newText = text;
-      }
-  in
-  let changes =
-    Lsp.DocumentUri.Map.singleton (Lsp_helpers.path_to_lsp_uri path) [change]
-  in
-  Lsp.WorkspaceEdit.{ changes }
+  let change = Code_action_types.{ pos; text } in
+  Relative_path.Map.singleton path [change]
 
 let refactor_of_candidate ~path ~source_text candidate =
-  let edit = lazy (edit_of_candidate ~path ~source_text candidate) in
-  Code_action_types.Refactor.{ title = "Flip around comma"; edit }
+  let edits = lazy (edit_of_candidate ~path ~source_text candidate) in
+  Code_action_types.Refactor.{ title = "Flip around comma"; edits }
 
 let find ~entry pos ctx =
   if Pos.length pos = 0 then

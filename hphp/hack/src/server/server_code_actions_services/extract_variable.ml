@@ -153,35 +153,26 @@ let placeholder_name_of_n (n : int) = Format.sprintf "$${0:placeholder%d}" n
 let refactor_of_candidate ~source_text ~path { stmt_pos; pos; placeholder_n } =
   let placeholder = placeholder_name_of_n placeholder_n in
   let exp_string = Full_fidelity_source_text.sub_of_pos source_text pos in
-  let change_expression =
-    Lsp.TextEdit.
-      {
-        range = Lsp_helpers.hack_pos_to_lsp_range ~equal:Relative_path.equal pos;
-        newText = placeholder;
-      }
-  in
+  let change_expression = Code_action_types.{ pos; text = placeholder } in
   let change_add_assignment =
-    let (line, character) =
-      Pos.line_column stmt_pos |> Tuple2.map_fst ~f:(( + ) (-1))
+    let indent =
+      let (_, character) = Pos.line_column stmt_pos in
+      String.make character ' '
     in
-    let indent = String.make character ' ' in
-    Lsp.
+    let pos = Pos.shrink_to_start stmt_pos in
+    Code_action_types.
       {
-        TextEdit.range =
-          { start = { line; character }; end_ = { line; character } };
-        newText = Printf.sprintf "%s = %s;\n%s" placeholder exp_string indent;
+        pos;
+        text = Printf.sprintf "%s = %s;\n%s" placeholder exp_string indent;
       }
   in
-  let edit =
+  let edits =
     lazy
-      (let changes =
-         Lsp.DocumentUri.Map.singleton
-           (Lsp_helpers.path_to_lsp_uri path)
-           [change_add_assignment; change_expression]
-       in
-       Lsp.WorkspaceEdit.{ changes })
+      (Relative_path.Map.singleton
+         path
+         [change_add_assignment; change_expression])
   in
-  Code_action_types.Refactor.{ title = "Extract into variable"; edit }
+  Code_action_types.Refactor.{ title = "Extract into variable"; edits }
 
 let find ~entry selection ctx =
   let path = entry.Provider_context.path in

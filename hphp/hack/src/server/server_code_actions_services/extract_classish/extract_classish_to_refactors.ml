@@ -65,41 +65,35 @@ let format_classish path ~(body : string) : string =
   |> fun x -> x ^ "\n\n"
 
 (** Create text edit for "interface Placeholder_ { .... }" *)
-let extracted_classish_text_edit source_text path candidate : Lsp.TextEdit.t =
-  let range_of_extracted =
+let extracted_classish_text_edit source_text path candidate :
+    Code_action_types.edit =
+  let pos_of_extracted =
     Pos.shrink_to_start candidate.T.class_.Aast_defs.c_span
-    |> Lsp_helpers.hack_pos_to_lsp_range ~equal:Relative_path.equal
   in
+
   let body = interface_body_of_methods source_text candidate in
   let text = format_classish path ~body in
-  Lsp.TextEdit.{ range = range_of_extracted; newText = text }
+  Code_action_types.{ pos = pos_of_extracted; text }
 
 (** Generate text edit like: "extends Placeholder_" *)
-let update_implements_text_edit class_ : Lsp.TextEdit.t =
+let update_implements_text_edit class_ : Code_action_types.edit =
   match List.last class_.Aast.c_implements with
   | Some (pos, _) ->
-    let range =
-      pos
-      |> Pos.shrink_to_end
-      |> Lsp_helpers.hack_pos_to_lsp_range ~equal:Relative_path.equal
-    in
+    let pos = Pos.shrink_to_end pos in
     let text = Printf.sprintf ", %s" placeholder_name in
-    Lsp.TextEdit.{ range; newText = text }
+    Code_action_types.{ pos; text }
   | None ->
-    let range =
+    let pos =
       let extends_pos_opt =
         class_.Aast.c_extends |> List.hd |> Option.map ~f:fst
       in
       let c_name_pos = class_.Aast.c_name |> fst in
-      extends_pos_opt
-      |> Option.value ~default:c_name_pos
-      |> Pos.shrink_to_end
-      |> Lsp_helpers.hack_pos_to_lsp_range ~equal:Relative_path.equal
+      extends_pos_opt |> Option.value ~default:c_name_pos |> Pos.shrink_to_end
     in
     let text = Printf.sprintf "\n  implements %s" placeholder_name in
-    Lsp.TextEdit.{ range; newText = text }
+    Code_action_types.{ pos; text }
 
-let edit_of_candidate source_text path candidate : Lsp.WorkspaceEdit.t =
+let edits_of_candidate source_text path candidate : Code_action_types.edits =
   let edits =
     let extracted_edit =
       extracted_classish_text_edit source_text path candidate
@@ -107,14 +101,11 @@ let edit_of_candidate source_text path candidate : Lsp.WorkspaceEdit.t =
     let reference_edit = update_implements_text_edit candidate.T.class_ in
     [reference_edit; extracted_edit]
   in
-  let changes =
-    Lsp.DocumentUri.Map.singleton (Lsp_helpers.path_to_lsp_uri path) edits
-  in
-  Lsp.WorkspaceEdit.{ changes }
+  Relative_path.Map.singleton path edits
 
 let to_refactor source_text path candidate : Code_action_types.Refactor.t =
-  let edit = lazy (edit_of_candidate source_text path candidate) in
-  Code_action_types.Refactor.{ title = "Extract interface"; edit }
+  let edits = lazy (edits_of_candidate source_text path candidate) in
+  Code_action_types.Refactor.{ title = "Extract interface"; edits }
 
 let to_refactors (source_text : Full_fidelity_source_text.t) path candidate :
     Code_action_types.Refactor.t list =

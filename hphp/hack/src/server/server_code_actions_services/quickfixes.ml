@@ -8,27 +8,19 @@
 open Hh_prelude
 
 let text_edits (classish_starts : Pos.t SMap.t) (quickfix : Pos.t Quickfix.t) :
-    Lsp.TextEdit.t list =
+    Code_action_types.edit list =
   let edits = Quickfix.get_edits ~classish_starts quickfix in
-  List.map edits ~f:(fun (new_text, pos) ->
-      let range =
-        Lsp_helpers.hack_pos_to_lsp_range ~equal:Relative_path.equal pos
-      in
-      { Lsp.TextEdit.range; newText = new_text })
+  List.map edits ~f:(fun (text, pos) -> Code_action_types.{ pos; text })
 
 let convert_quickfix
     path (classish_starts : Pos.t SMap.t) (quickfix : Pos.t Quickfix.t) :
     Code_action_types.Quickfix.t =
-  let edit =
+  let edits =
     lazy
-      (let changes =
-         Lsp.DocumentUri.Map.singleton
-           (Lsp_helpers.path_to_lsp_uri path)
-           (text_edits classish_starts quickfix)
-       in
-       Lsp.WorkspaceEdit.{ changes })
+      (Relative_path.Map.singleton path (text_edits classish_starts quickfix))
   in
-  Code_action_types.Quickfix.{ title = Quickfix.get_title quickfix; edit }
+
+  Code_action_types.Quickfix.{ title = Quickfix.get_title quickfix; edits }
 
 let errors_to_quickfixes
     (errors : Errors.t)

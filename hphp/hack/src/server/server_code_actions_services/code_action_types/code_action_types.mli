@@ -5,25 +5,32 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-(** Internal representation of code actions for refactoring *)
+(** Internal representations for code actions for refactoring *)
+type edit = {
+  pos: Pos.t;
+  text: string;
+}
+
+type edits = edit list Relative_path.Map.t
+
 module Refactor : sig
   type t = {
     title: string;
-    edit: Lsp.WorkspaceEdit.t Lazy.t;
+    edits: edits Lazy.t;
   }
 
   type find =
     entry:Provider_context.entry -> Pos.t -> Provider_context.t -> t list
 end
 
-(** Internal representation of code actions for quickfixes.
+(** Internal representation for code actions for quickfixes.
   * Note that we do not include diagnostics.
   * We can tell LSP which error this fixed, but we'd have to
   * recompute the diagnostic from the error and there's no clear benefit *)
 module Quickfix : sig
   type t = {
     title: string;
-    edit: Lsp.WorkspaceEdit.t Lazy.t;
+    edits: edits Lazy.t;
   }
 end
 

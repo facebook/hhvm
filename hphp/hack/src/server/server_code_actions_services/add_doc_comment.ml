@@ -2,31 +2,30 @@ open Hh_prelude
 module PositionedTree =
   Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
 
-let edit_of_candidate source_text ~path candidate : Lsp.WorkspaceEdit.t =
-  (*TODO*)
-  let _ = (path, candidate, source_text) in
-  let (line, character_plus_1) =
+let edits_of_candidate ~path ~line_to_offset candidate : Code_action_types.edits
+    =
+  let (line_minus_1, character_plus_1) =
     Full_fidelity_positioned_syntax.leading_start_position candidate
   in
+  let line = line_minus_1 + 1 in
   let character = character_plus_1 - 1 in
-  (* let sub_of_pos = Full_fidelity_source_text.sub_of_pos source_text in *)
   let edit =
-    let range =
-      Lsp.{ start = { line; character }; end_ = { line; character } }
-    in
-    Lsp.TextEdit.{ range; newText = {|/**
+    let text = {|/**
  * ${0:}
  */
-|} }
+|} in
+    let pos =
+      let offset = line_to_offset line in
+      let pos_start = (line, offset, offset + character) in
+      Pos.make_from_lnum_bol_offset ~pos_file:path ~pos_start ~pos_end:pos_start
+    in
+    Code_action_types.{ pos; text }
   in
-  let changes =
-    Lsp.DocumentUri.Map.singleton (Lsp_helpers.path_to_lsp_uri path) [edit]
-  in
-  Lsp.WorkspaceEdit.{ changes }
+  Relative_path.Map.singleton path [edit]
 
-let to_refactor source_text ~path candidate =
-  let edit = lazy (edit_of_candidate source_text ~path candidate) in
-  Code_action_types.Refactor.{ title = "Add doc comment"; edit }
+let to_refactor ~line_to_offset ~path candidate =
+  let edits = lazy (edits_of_candidate ~path ~line_to_offset candidate) in
+  Code_action_types.Refactor.{ title = "Add doc comment"; edits }
 
 let find_candidate pos source_text positioned_tree =
   let root = PositionedTree.root positioned_tree in
@@ -98,8 +97,11 @@ let find_candidate pos source_text positioned_tree =
 
 let find ~entry pos ctx =
   let source_text = Ast_provider.compute_source_text ~entry in
+  let line_to_offset line =
+    Full_fidelity_source_text.position_to_offset source_text (line, 0)
+  in
   let path = entry.Provider_context.path in
   let positioned_tree = Ast_provider.compute_cst ~ctx ~entry in
   find_candidate pos source_text positioned_tree
-  |> Option.map ~f:(to_refactor source_text ~path)
+  |> Option.map ~f:(to_refactor ~path ~line_to_offset)
   |> Option.to_list

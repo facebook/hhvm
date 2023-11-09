@@ -1,7 +1,6 @@
 (library
  (name code_action_types)
  (libraries
-  lsp
   tast_env
   provider_context
   ))

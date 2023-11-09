@@ -7,14 +7,6 @@
  *)
 open Hh_prelude
 
-let to_range (pos : Pos.t) : Lsp.range =
-  let (first_line, first_col) = Pos.line_column pos in
-  let (last_line, last_col) = Pos.end_line_column pos in
-  {
-    Lsp.start = { Lsp.line = first_line - 1; character = first_col };
-    end_ = { Lsp.line = last_line - 1; character = last_col };
-  }
-
 let stub_method_action
     ~(is_static : bool)
     (class_name : string)
@@ -86,25 +78,19 @@ let override_method_refactorings_at ~start_line ~start_col =
       List.concat meth_actions @ acc
   end
 
-let text_edits (classish_starts : Pos.t SMap.t) (quickfix : Pos.t Quickfix.t) :
-    Lsp.TextEdit.t list =
+let to_edits (classish_starts : Pos.t SMap.t) (quickfix : Pos.t Quickfix.t) :
+    Code_action_types.edit list =
   let edits = Quickfix.get_edits ~classish_starts quickfix in
-  List.map edits ~f:(fun (new_text, pos) ->
-      { Lsp.TextEdit.range = to_range pos; newText = new_text })
+  List.map edits ~f:(fun (text, pos) -> Code_action_types.{ pos; text })
 
 let refactor_action
     path (classish_starts : Pos.t SMap.t) (quickfix : Pos.t Quickfix.t) :
     Code_action_types.Refactor.t =
-  let edit =
-    lazy
-      (let changes =
-         Lsp.DocumentUri.Map.singleton
-           (Lsp_helpers.path_to_lsp_uri path)
-           (text_edits classish_starts quickfix)
-       in
-       Lsp.WorkspaceEdit.{ changes })
+  let edits =
+    lazy (Relative_path.Map.singleton path (to_edits classish_starts quickfix))
   in
-  Code_action_types.Refactor.{ title = Quickfix.get_title quickfix; edit }
+
+  Code_action_types.Refactor.{ title = Quickfix.get_title quickfix; edits }
 
 let find ~entry pos ctx =
   let (start_line, start_col) = Pos.line_column pos in

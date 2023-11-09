@@ -256,20 +256,31 @@ let visitor ~(selection : Pos.t) =
       | _ -> super#on_expr env expr
   end
 
-let edit_of_candidate ~path ~source_text { def; use_pos; _ } :
-    Lsp.WorkspaceEdit.t =
+let start_of_next_line source_text path pos : Pos.t =
+  let pos_end =
+    let (orig_end_line, _) = Pos.end_line_column pos in
+    let end_line = orig_end_line + 1 in
+    let end_line_offset =
+      Full_fidelity_source_text.position_to_offset source_text (end_line, 0)
+    in
+    (end_line, end_line_offset, end_line_offset)
+  in
+  Pos.make_from_lnum_bol_offset
+    ~pos_file:path
+    ~pos_start:(Pos.line_beg_offset pos)
+    ~pos_end
+
+let edits_of_candidate ~path ~source_text { def; use_pos; _ } :
+    Code_action_types.edits =
   let change_replace_def =
     let pos = remove_leading_whitespace ~source_text def.def_pos in
-    let range =
-      Lsp_helpers.hack_pos_to_lsp_range ~equal:Relative_path.equal pos
-    in
-    let range =
+    let pos =
       if next_char_is_newline ~source_text def.def_pos then
-        Lsp.{ range with end_ = { line = range.end_.line + 1; character = 0 } }
+        start_of_next_line source_text path pos
       else
-        range
+        pos
     in
-    Lsp.{ TextEdit.range; newText = "" }
+    Code_action_types.{ pos; text = "" }
   in
   let change_replace_use =
     let text =
@@ -281,25 +292,15 @@ let edit_of_candidate ~path ~source_text { def; use_pos; _ } :
       else
         text
     in
-    Lsp.
-      {
-        TextEdit.range =
-          Lsp_helpers.hack_pos_to_lsp_range ~equal:Relative_path.equal use_pos;
-        newText = text;
-      }
+    Code_action_types.{ pos = use_pos; text }
   in
 
-  let changes =
-    Lsp.DocumentUri.Map.singleton
-      (Lsp_helpers.path_to_lsp_uri path)
-      [change_replace_def; change_replace_use]
-  in
-  Lsp.WorkspaceEdit.{ changes }
+  Relative_path.Map.singleton path [change_replace_def; change_replace_use]
 
 let refactor_of_candidate ~path ~source_text candidate =
-  let edit = lazy (edit_of_candidate ~path ~source_text candidate) in
+  let edits = lazy (edits_of_candidate ~path ~source_text candidate) in
   Code_action_types.Refactor.
-    { title = Printf.sprintf "Inline variable %s" candidate.name; edit }
+    { title = Printf.sprintf "Inline variable %s" candidate.name; edits }
 
 let find ~entry selection ctx =
   let source_text = Ast_provider.compute_source_text ~entry in

@@ -19,9 +19,6 @@ let pos_of_block block =
   let pos = Pos.merge hd_pos last_pos in
   Option.some_if (Pos.length pos > 0) pos
 
-let to_lsp_range pos =
-  Lsp_helpers.hack_pos_to_lsp_range ~equal:Relative_path.equal pos
-
 (** Pair arguments and parameters *)
 let calc_pre_assignments_text ~source_text ~call_arg_positions ~param_names :
     string =
@@ -63,7 +60,7 @@ let strip_leading_spaces ~source_text pos : Pos.t =
  * *)
 let edit_inline_and_return_var_of_candidate
     path ~source_text (T.{ caller; callee; call } as candidate) :
-    Lsp.TextEdit.t * string =
+    Code_action_types.edit * string =
   let used_vars = String.Set.of_list caller.T.var_names in
   let r = Inline_method_rename.create ~used_vars in
   let (r, param_names) =
@@ -78,21 +75,19 @@ let edit_inline_and_return_var_of_candidate
   let (r, body) = calc_body_text r path ~source_text candidate in
   (* Gives the correct `return_var` because `Inline_method_rename.rename` is idempotent *)
   let (_r, return_var) = Inline_method_rename.rename r return_var_raw_name in
-  let range =
-    let pre_call_pos = Pos.shrink_to_start call.T.call_stmt_pos in
-    to_lsp_range pre_call_pos
-  in
+  let pos = Pos.shrink_to_start call.T.call_stmt_pos in
   let start_indent_amount = snd @@ Pos.line_column call.T.call_stmt_pos in
   let text =
     assignments_before_body ^ body
     |> Inline_method_rewrite_block.format_block ~start_indent_amount path
     |> String.lstrip
   in
-  ({ Lsp.TextEdit.range; newText = text }, return_var)
+  (Code_action_types.{ pos; text }, return_var)
 
 (** Replace the call with a variable (`return_var`) and adjust *)
 let edit_replace_call_of_candidate
-    ~source_text ~(return_var : string) T.{ call; callee; _ } =
+    ~source_text ~(return_var : string) T.{ call; callee; _ } :
+    Code_action_types.edit =
   if callee.T.has_void_return then
     let strip_trailing_semicolon p =
       let semicolon_pos = Pos.shrink_to_end p in
@@ -108,28 +103,26 @@ let edit_replace_call_of_candidate
       else
         p
     in
-    let range =
+    let pos =
       call.T.call_pos
       |> strip_trailing_semicolon
       |> strip_leading_spaces ~source_text
-      |> to_lsp_range
     in
-    Lsp.{ TextEdit.range; newText = "" }
+    Code_action_types.{ pos; text = "" }
   else
-    let range = to_lsp_range call.T.call_pos in
-    { Lsp.TextEdit.range; newText = return_var }
+    let pos = call.T.call_pos in
+    Code_action_types.{ pos; text = return_var }
 
 (** Remove the inlined method *)
-let edit_remove_method_of_candidate ~source_text candidate : Lsp.TextEdit.t =
-  let text = "" in
-  let range =
-    T.(candidate.callee.method_pos)
-    |> strip_leading_spaces ~source_text
-    |> to_lsp_range
+let edit_remove_method_of_candidate ~source_text candidate :
+    Code_action_types.edit =
+  let pos =
+    T.(candidate.callee.method_pos) |> strip_leading_spaces ~source_text
   in
-  { Lsp.TextEdit.range; newText = text }
+  let text = "" in
+  Code_action_types.{ pos; text }
 
-let edit_of_candidate ~source_text ~path candidate : Lsp.WorkspaceEdit.t =
+let edits_of_candidate ~source_text ~path candidate : Code_action_types.edits =
   let edit_remove_method =
     edit_remove_method_of_candidate ~source_text candidate
   in
@@ -139,13 +132,10 @@ let edit_of_candidate ~source_text ~path candidate : Lsp.WorkspaceEdit.t =
   let edit_replace_call =
     edit_replace_call_of_candidate ~source_text ~return_var candidate
   in
-  let changes =
-    Lsp.DocumentUri.Map.singleton
-      (Lsp_helpers.path_to_lsp_uri path)
-      [edit_remove_method; edit_inline; edit_replace_call]
-  in
-  Lsp.WorkspaceEdit.{ changes }
+  Relative_path.Map.singleton
+    path
+    [edit_remove_method; edit_inline; edit_replace_call]
 
 let to_refactor ~source_text ~path candidate =
-  let edit = lazy (edit_of_candidate ~source_text ~path candidate) in
-  Code_action_types.Refactor.{ title = "Inline method"; edit }
+  let edits = lazy (edits_of_candidate ~source_text ~path candidate) in
+  Code_action_types.Refactor.{ title = "Inline method"; edits }

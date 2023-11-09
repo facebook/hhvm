@@ -122,46 +122,36 @@ let snippet_for_decl_of : string -> string =
 
 let snippet_for_use = "T${0:placeholder_}"
 
-let range_of_container_pos container_pos : Lsp.range =
-  let pos = Pos.shrink_to_start container_pos in
-  Lsp_helpers.hack_pos_to_lsp_range ~equal:Relative_path.equal pos
-
-let edit_of_candidate source_text ~path candidate : Lsp.WorkspaceEdit.t =
+let edits_of_candidate source_text ~path candidate : Code_action_types.edits =
   let sub_of_pos = Full_fidelity_source_text.sub_of_pos source_text in
   let edits =
     match candidate with
     | Of_expr { shape_ty_string; expr_container_pos } ->
-      let range = range_of_container_pos expr_container_pos in
+      let pos = Pos.shrink_to_start expr_container_pos in
       let text =
         snippet_for_decl_of
           (Code_action_types.Type_string.to_string shape_ty_string)
       in
-      [Lsp.TextEdit.{ range; newText = text }]
+      [Code_action_types.{ pos; text }]
     | Of_hint { hint_container_pos; hint_pos } ->
       let decl_edit =
-        let range = range_of_container_pos hint_container_pos in
+        let pos = Pos.shrink_to_start hint_container_pos in
         let text =
           let ty_text = sub_of_pos hint_pos in
           snippet_for_decl_of ty_text
         in
-        Lsp.TextEdit.{ range; newText = text }
+        Code_action_types.{ pos; text }
       in
       let use_edit =
-        let range =
-          Lsp_helpers.hack_pos_to_lsp_range ~equal:Relative_path.equal hint_pos
-        in
-        Lsp.TextEdit.{ range; newText = snippet_for_use }
+        Code_action_types.{ pos = hint_pos; text = snippet_for_use }
       in
       [decl_edit; use_edit]
   in
-  let changes =
-    Lsp.DocumentUri.Map.singleton (Lsp_helpers.path_to_lsp_uri path) edits
-  in
-  Lsp.WorkspaceEdit.{ changes }
+  Relative_path.Map.singleton path edits
 
 let to_refactor source_text ~path candidate =
-  let edit = lazy (edit_of_candidate source_text ~path candidate) in
-  Code_action_types.Refactor.{ title = title_of_candidate candidate; edit }
+  let edits = lazy (edits_of_candidate source_text ~path candidate) in
+  Code_action_types.Refactor.{ title = title_of_candidate candidate; edits }
 
 let find ~entry selection ctx =
   let source_text = Ast_provider.compute_source_text ~entry in

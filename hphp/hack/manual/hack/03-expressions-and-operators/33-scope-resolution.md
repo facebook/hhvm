@@ -92,8 +92,8 @@ function demo(): void {
 ```
 
 The value of a scope-resolution expression ending in `::class` is a string containing the fully qualified name of the current
-class, which for a static qualifier, means the current class context.  A variable name followed by `::` and a name results in a
-constant whose value has the [`classname` type](../built-in-types/classname.md) for the variable name's type.  For example:
+class, which for a static qualifier, means the current class context.  A class identifier followed by `::class` results in a
+constant whose value has the [`classname` type](../built-in-types/classname.md) parameterized by the class.  For example:
 
 ```Hack
 namespace NS_cn;

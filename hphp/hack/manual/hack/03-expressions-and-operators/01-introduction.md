@@ -23,6 +23,7 @@ When combined, operators evaluate according to their associativity. For more inf
 * [Access Static Properties and Methods](/hack/expressions-and-operators/scope-resolution) (`::`)
 * [Access XHP Attributes](/hack/expressions-and-operators/XHP-attribute-selection) (`->:`)
 * [Create an Object](/hack/expressions-and-operators/new) (`new`)
+* [Get the name of a class](/hack/expressions-and-operators/nameof) (`nameof`)
 
 ## Built-in Type Operators
 * [Cast/Convert Types](/hack/expressions-and-operators/casting) (`(int)`, `(string)`, and more)

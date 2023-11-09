@@ -1,27 +1,35 @@
 File "stack_overflow_array.php", line 25, characters 3-13:
   dict<int, (bool | dict<string, dict<int, dict<(string | _ | _ | _), (_ | _ | _ | (nonnull & (_ | _)) | dict<nothing, nothing>)>>>)>
 File "stack_overflow_array.php", line 15, characters 3-13:
-This is not an object of type `KeyedContainer`, this is a bool (Typing[4324])
+This is not an object of type `KeyedContainer`, this is a bool or an object of type dict<nothing, nothing> (Typing[4324])
   File "stack_overflow_array.php", line 12, characters 17-21:
   Definition is here
 File "stack_overflow_array.php", line 16, characters 3-13:
-This is not an object of type `KeyedContainer`, this is a bool (Typing[4324])
+This is not an object of type `KeyedContainer`, this is a bool or an object of type dict<string, ((_ & nonnull) | dict<nothing, nothing>)> (Typing[4324])
   File "stack_overflow_array.php", line 12, characters 17-21:
   Definition is here
 File "stack_overflow_array.php", line 17, characters 3-13:
-This is not an object of type `KeyedContainer`, this is a bool (Typing[4324])
+This is not an object of type `KeyedContainer`, this is a bool or an object of type dict<string, dict<int, ((_ & nonnull) | dict<nothing, nothing>)>> (Typing[4324])
+  File "stack_overflow_array.php", line 12, characters 17-21:
+  Definition is here
+File "stack_overflow_array.php", line 17, characters 3-13:
+This is not an object of type `KeyedContainer`, this is a bool or an object of type dict<string, dict<int, dict<nothing, nothing>>> (Typing[4324])
   File "stack_overflow_array.php", line 12, characters 17-21:
   Definition is here
 File "stack_overflow_array.php", line 20, characters 3-13:
-This is not an object of type `KeyedContainer`, this is a bool (Typing[4324])
+This is not an object of type `KeyedContainer`, this is a bool or an object of type dict<string, dict<int, dict<(string | _), (_ | (_ & nonnull) | dict<nothing, nothing>)>>> (Typing[4324])
   File "stack_overflow_array.php", line 12, characters 17-21:
   Definition is here
 File "stack_overflow_array.php", line 21, characters 3-13:
-This is not an object of type `KeyedContainer`, this is a bool (Typing[4324])
+This is not an object of type `KeyedContainer`, this is a bool or an object of type dict<string, ((nonnull & _) | dict<int, dict<(string | _), (_ | (_ & nonnull) | dict<nothing, nothing>)>>)> (Typing[4324])
   File "stack_overflow_array.php", line 12, characters 17-21:
   Definition is here
 File "stack_overflow_array.php", line 22, characters 3-13:
-This is not an object of type `KeyedContainer`, this is a bool (Typing[4324])
+This is not an object of type `KeyedContainer`, this is a bool or an object of type dict<string, dict<int, ((_ & nonnull) | dict<(string | _), (_ | (_ & nonnull) | dict<nothing, nothing>)>)>> (Typing[4324])
+  File "stack_overflow_array.php", line 12, characters 17-21:
+  Definition is here
+File "stack_overflow_array.php", line 22, characters 3-13:
+This is not an object of type `KeyedContainer`, this is a bool or an object of type dict<string, dict<int, ((dict<_, _> & nonnull) | dict<(string | _), (_ | (_ & nonnull) | dict<nothing, nothing>)>)>> (Typing[4324])
   File "stack_overflow_array.php", line 12, characters 17-21:
   Definition is here
 File "stack_overflow_array.php", line 15, characters 3-26:

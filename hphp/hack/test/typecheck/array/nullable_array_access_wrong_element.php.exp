@@ -1,0 +1,10 @@
+File "nullable_array_access_wrong_element.php", line 5, characters 10-15:
+You are trying to access an element of this container but the container could be `null`.  (Typing[4063])
+  File "nullable_array_access_wrong_element.php", line 4, characters 17-26:
+  This is what makes me believe it can be `null`.
+File "nullable_array_access_wrong_element.php", line 5, characters 10-15:
+Invalid return type (Typing[4110])
+  File "nullable_array_access_wrong_element.php", line 4, characters 33-37:
+  Expected `float`
+  File "nullable_array_access_wrong_element.php", line 4, characters 22-25:
+  But got `bool`

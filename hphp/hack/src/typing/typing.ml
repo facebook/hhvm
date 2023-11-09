@@ -4639,6 +4639,7 @@ and expr_
     let (_, p1, _) = e1 in
     let (env, (ty, arr_ty_mismatch_opt, key_ty_mismatch_opt)) =
       Typing_array_access.array_get
+        ~expr_ty:ty1
         ~array_pos:p1
         ~expr_pos:p
         ?lhs_of_null_coalesce

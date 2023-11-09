@@ -1,4 +1,4 @@
 File "is_vector_access.php", line 7, characters 10-16:
 This is not an object of type `KeyedContainer`, this is a value of generic type Tv#2 (Typing[4324])
-  File "interfaces.hhi", line 92, characters 66-67:
+  File "is_vector_access.php", line 6, characters 12-13:
   Definition is here

@@ -77,6 +77,6 @@ Invalid argument (Typing[4110])
 File "supportdyn.bad.php", line 14, characters 9-11:
 Expected an object convertible to string but got a value of type supportdyn<nonnull> (Typing[4318])
 File "supportdyn.bad.php", line 7, characters 3-8:
-This is not an object of type `KeyedContainer`, this is a nonnull value (Typing[4324])
-  File "supportdyn.bad.php", line 6, characters 26-32:
+This is not an object of type `KeyedContainer`, this is a value of type supportdyn<nonnull> (Typing[4324])
+  File "supportdyn.bad.php", line 6, characters 15-33:
   Definition is here

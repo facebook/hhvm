@@ -19,7 +19,7 @@
           [([5:3-10],
             (Expr
                ((nothing), [5:3-9],
-                (Array_get (((mixed), [5:3-6], (Hole (((mixed), [5:3-6], (Lvar ([5:3-6], $xs))), (mixed), (KeyedContainer<int, nothing>), Typing))), (Some ((int), [5:7-8], (Int "0"))))))))
+                (Array_get (((nonnull), [5:3-6], (Hole (((mixed), [5:3-6], (Lvar ([5:3-6], $xs))), (nonnull), (KeyedContainer<int, nothing>), Typing))), (Some ((int), [5:7-8], (Int "0"))))))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-34], "__SupportDynamicType"); ua_params = [] }]; 

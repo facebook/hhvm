@@ -314,7 +314,9 @@ let pessimised_tup_assign p env arg_ty =
 let rec array_get
     ~array_pos
     ~expr_pos
+    ~expr_ty
     ?(lhs_of_null_coalesce = false)
+    ?(ignore_error = false)
     is_lvalue
     env
     ty1
@@ -354,44 +356,12 @@ let rec array_get
                  { pos = expr_pos; name; decl_pos = Reason.to_pos r })
       in
 
-      let nullable_container_get env ty_actual ty =
+      let nullable_container_get env ty =
         if
-          lhs_of_null_coalesce
-          || Tast.is_under_dynamic_assumptions env.Typing_env_types.checked
-          (* Normally, we would not allow indexing into a nullable container,
-             however, because the pattern shows up so frequently, we are allowing
-             indexing into a nullable container as long as it is on the lhs of a
-             null coalesce *)
+          (not lhs_of_null_coalesce)
+          && not
+               (Tast.is_under_dynamic_assumptions env.Typing_env_types.checked)
         then
-          array_get
-            ~array_pos
-            ~expr_pos
-            ~lhs_of_null_coalesce
-            is_lvalue
-            env
-            ty
-            e2
-            ty2
-        else
-          let arraykey = MakeType.arraykey Reason.none in
-          let mixed = MakeType.mixed Reason.none in
-          (* If our non-null type, ty, is a subtype of `KeyedContainer`
-             use it in the hole, otherwise suggest KeyedContainer *)
-          let (env, ty_expected) =
-            if
-              SubType.is_sub_type
-                env
-                ty
-                (MakeType.keyed_container Reason.none arraykey mixed)
-            then
-              (env, ty)
-            else
-              let nothing = MakeType.nothing Reason.none in
-              let (env, ty2) =
-                Typing_intersection.intersect env ~r:Reason.Rnone arraykey ty2
-              in
-              (env, MakeType.keyed_container Reason.none ty2 nothing)
-          in
           Typing_error_utils.add_typing_error
             ~env
             Typing_error.(
@@ -405,8 +375,17 @@ let rec array_get
                             "This is what makes me believe it can be `null`."
                             r);
                    });
-          let (env, ty) = err_witness env expr_pos in
-          (env, (ty, Some (ty_actual, ty_expected), None))
+        array_get
+          ~expr_ty
+          ~array_pos
+          ~expr_pos
+          ~lhs_of_null_coalesce
+          ~ignore_error:(not lhs_of_null_coalesce)
+          is_lvalue
+          env
+          ty
+          e2
+          ty2
       in
       let type_index env p ty_have ty_expect reason =
         Typing_log.(
@@ -741,7 +720,7 @@ let rec array_get
         end
       | Toption ty ->
         let (env, (ty, err_opt_arr, err_opt_idx)) =
-          nullable_container_get env ty1 ty
+          nullable_container_get env ty
         in
         let err_res_arr =
           Option.value_map
@@ -762,7 +741,7 @@ let rec array_get
         else
           let ty = MakeType.nothing Reason.Rnone in
           let (env, (ty, err_opt_arr, err_opt_idx)) =
-            nullable_container_get env ty1 ty
+            nullable_container_get env ty
           in
           let err_res_arr =
             Option.value_map
@@ -806,6 +785,7 @@ let rec array_get
             array_get
               ~array_pos
               ~expr_pos
+              ~expr_ty
               ~lhs_of_null_coalesce
               is_lvalue
               env
@@ -827,7 +807,7 @@ let rec array_get
           in
           (env, (ty, err_res_arr, err_res_idx))
         | _ ->
-          error_array env expr_pos ty1;
+          if not ignore_error then error_array env expr_pos expr_ty;
           let (env, res_ty) = err_witness env expr_pos in
           let ty_nothing = MakeType.nothing Reason.none in
           let (env, ty_key) =
@@ -852,7 +832,7 @@ let rec array_get
       | Tintersection _
       | Taccess _
       | Tneg _ ->
-        error_array env expr_pos ty1;
+        if not ignore_error then error_array env expr_pos expr_ty;
         let (env, res_ty) = err_witness env expr_pos in
         let ty_nothing = MakeType.nothing Reason.none in
         let (env, ty_key) =

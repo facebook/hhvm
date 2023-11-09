@@ -34,7 +34,7 @@ Errors:
           [([4:3-9],
             (Expr
                ((nothing), [4:3-8],
-                (Array_get (((mixed), [4:3-5], (Hole (((mixed), [4:3-5], (Lvar ([4:3-5], $m))), (mixed), (KeyedContainer<int, nothing>), Typing))), (Some ((int), [4:6-7], (Int "0"))))))));
+                (Array_get (((nonnull), [4:3-5], (Hole (((mixed), [4:3-5], (Lvar ([4:3-5], $m))), (nonnull), (KeyedContainer<int, nothing>), Typing))), (Some ((int), [4:6-7], (Int "0"))))))));
             ([5:3-9],
              (Expr
                 ((nothing), [5:3-8],
@@ -42,7 +42,7 @@ Errors:
             ([6:3-9],
              (Expr
                 ((nothing), [6:3-8],
-                 (Array_get (((mixed), [6:3-5], (Hole (((T), [6:3-5], (Lvar ([6:3-5], $t))), (mixed), (KeyedContainer<int, nothing>), Typing))), (Some ((int), [6:6-7], (Int "0"))))))))
+                 (Array_get (((nonnull), [6:3-5], (Hole (((T), [6:3-5], (Lvar ([6:3-5], $t))), (nonnull), (KeyedContainer<int, nothing>), Typing))), (Some ((int), [6:6-7], (Int "0"))))))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-11], "__SupportDynamicType"); ua_params = [] }]; 

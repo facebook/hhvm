@@ -36,21 +36,21 @@ Errors:
           [([4:3-12],
             (Expr
                ((nothing), [4:3-11],
-                (Array_get (((mixed), [4:3-5], (Hole (((mixed), [4:3-5], (Lvar ([4:3-5], $m))), (mixed), (KeyedContainer<nothing, nothing>), Typing))), (Some ((bool), [4:6-10], True)))))));
+                (Array_get (((nonnull), [4:3-5], (Hole (((mixed), [4:3-5], (Lvar ([4:3-5], $m))), (nonnull), (KeyedContainer<nothing, nothing>), Typing))), (Some ((bool), [4:6-10], True)))))));
             ([5:3-10],
              (Expr
                 ((nothing), [5:3-9],
-                 (Array_get (((mixed), [5:3-5], (Hole (((mixed), [5:3-5], (Lvar ([5:3-5], $m))), (mixed), (KeyedContainer<(arraykey & T), nothing>), Typing))),
+                 (Array_get (((nonnull), [5:3-5], (Hole (((mixed), [5:3-5], (Lvar ([5:3-5], $m))), (nonnull), (KeyedContainer<(T & arraykey), nothing>), Typing))),
                     (Some ((T), [5:6-8], (Lvar ([5:6-8], $t)))))))));
             ([6:3-10],
              (Expr
                 ((nothing), [6:3-9],
-                 (Array_get (((mixed), [6:3-5], (Hole (((mixed), [6:3-5], (Lvar ([6:3-5], $m))), (mixed), (KeyedContainer<arraykey, nothing>), Typing))),
+                 (Array_get (((nonnull), [6:3-5], (Hole (((mixed), [6:3-5], (Lvar ([6:3-5], $m))), (nonnull), (KeyedContainer<arraykey, nothing>), Typing))),
                     (Some ((nonnull), [6:6-8], (Lvar ([6:6-8], $n)))))))));
             ([7:3-10],
              (Expr
                 ((nothing), [7:3-9],
-                 (Array_get (((mixed), [7:3-5], (Hole (((mixed), [7:3-5], (Lvar ([7:3-5], $m))), (mixed), (KeyedContainer<arraykey, nothing>), Typing))),
+                 (Array_get (((nonnull), [7:3-5], (Hole (((mixed), [7:3-5], (Lvar ([7:3-5], $m))), (nonnull), (KeyedContainer<arraykey, nothing>), Typing))),
                     (Some ((mixed), [7:6-8], (Lvar ([7:6-8], $m)))))))))
             ]
           };

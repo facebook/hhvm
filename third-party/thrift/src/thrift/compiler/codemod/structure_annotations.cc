@@ -68,6 +68,10 @@ class structure_annotations {
             fm_.add_include("thrift/annotation/cpp.thrift");
           }
         }
+        if (name == "cpp.ref" || name == "cpp2.ref" || name == "cpp.ref_type" ||
+            name == "cpp2.ref_type") {
+          to_remove.emplace_back(name, data);
+        }
       }
 
       if (!to_remove.empty() &&
@@ -153,6 +157,115 @@ class structure_annotations {
         }
       }
 
+      // thrift
+      if (name == "thrift.uri") {
+        to_remove.emplace_back(name, data);
+        if (!node.find_structured_annotation_or_null(kUriUri)) {
+          to_add.insert(
+              fmt::format("@thrift.Uri{{value = \"{}\"}}", data.value));
+          fm_.add_include("thrift/annotation/thrift.thrift");
+        }
+      }
+      if (name == "priority") {
+        if (!dynamic_cast<const t_function*>(&node)) {
+          // pydeprecated consumes this annotation on services as well
+          continue;
+        }
+        to_remove.emplace_back(name, data);
+        if (!node.find_structured_annotation_or_null(kPriorityUri) &&
+            std::set<std::string>({"HIGH_IMPORTANT",
+                                   "HIGH",
+                                   "IMPORTANT",
+                                   "NORMAL",
+                                   "BEST_EFFORT"})
+                .contains(data.value)) {
+          to_add.insert(fmt::format(
+              "@thrift.Priority{{level = thrift.RpcPriority.{}}}", data.value));
+          fm_.add_include("thrift/annotation/thrift.thrift");
+        }
+      }
+      if (name == "serial") {
+        to_remove.emplace_back(name, data);
+        if (!node.find_structured_annotation_or_null(kSerialUri)) {
+          to_add.insert("@thrift.Serial");
+          fm_.add_include("thrift/annotation/thrift.thrift");
+        }
+      }
+
+      // cpp
+      if (name == "cpp.coroutine") {
+        to_remove.emplace_back(name, data);
+      }
+      if (name == "cpp.minimize_padding") {
+        to_remove.emplace_back(name, data);
+        if (!node.find_structured_annotation_or_null(kCppMinimizePaddingUri)) {
+          to_add.insert("@cpp.MinimizePadding");
+          fm_.add_include("thrift/annotation/cpp.thrift");
+        }
+      }
+      if (name == "cpp.enum_type" || name == "cpp2.enum_type") {
+        to_remove.emplace_back(name, data);
+        if (!node.find_structured_annotation_or_null(kCppEnumTypeUri)) {
+          std::string_view value = data.value;
+          if (value.substr(0, 2) == "::") {
+            value = value.substr(2);
+          }
+          if (value.substr(0, 5) == "std::") {
+            value = value.substr(5);
+          }
+          std::string type;
+          if (value == "int8_t" || value == "char") {
+            type = "I8";
+          } else if (value == "uint8_t" || value == "unsigned char") {
+            type = "U8";
+          } else if (value == "int16_t" || value == "short") {
+            type = "I16";
+          } else if (value == "uint16_t" || value == "unsigned short") {
+            type = "U16";
+          } else if (
+              value == "uint32_t" || value == "unsigned long" ||
+              value == "unsigned" || value == "uint") {
+            type = "U32";
+          } else {
+            continue;
+          }
+          to_add.insert(fmt::format(
+              "@cpp.EnumType{{type = cpp.EnumUnderlyingType.{}}}", type));
+          fm_.add_include("thrift/annotation/cpp.thrift");
+        }
+      }
+      if (name == "cpp.declare_bitwise_ops" ||
+          name == "cpp2.declare_bitwise_ops" || name == "bitmask") {
+        to_remove.emplace_back(name, data);
+        if (!node.find_structured_annotation_or_null(kBitmaskEnum)) {
+          to_add.insert("@thrift.BitmaskEnum");
+          fm_.add_include("thrift/annotation/thrift.thrift");
+        }
+      }
+      if (name == "cpp.mixin") {
+        to_remove.emplace_back(name, data);
+        if (!node.find_structured_annotation_or_null(kMixinUri)) {
+          to_add.insert("@thrift.Mixin");
+          fm_.add_include("thrift/annotation/thrift.thrift");
+        }
+      }
+      if (name == "cpp.experimental.lazy") {
+        to_remove.emplace_back(name, data);
+        if (!node.find_structured_annotation_or_null(kCppLazyUri)) {
+          to_add.insert("@cpp.Lazy");
+          fm_.add_include("thrift/annotation/cpp.thrift");
+        }
+      }
+      if (name == "thread" || name == "process_in_event_base") {
+        to_remove.emplace_back(name, data);
+        if (!node.find_structured_annotation_or_null(
+                kCppProcessInEbThreadUri) &&
+            (name != "thread" || data.value == "eb")) {
+          to_add.insert("@cpp.ProcessInEbThreadUnsafe");
+          fm_.add_include("thrift/annotation/cpp.thrift");
+        }
+      }
+
       // hack
       if (name == "hack.attributes") {
         const char* pos = sm_.get_text(data.src_range.begin);
@@ -195,6 +308,28 @@ class structure_annotations {
           to_add.insert(fmt::format(
               "@hack.Attributes{{attributes = [{}]}}", fmt::join(attrs, ", ")));
           fm_.add_include("thrift/annotation/hack.thrift");
+        }
+      }
+      if (name == "hack.name") {
+        to_remove.emplace_back(name, data);
+        to_add.insert(fmt::format("@hack.Name{{name = \"{}\"}}", data.value));
+        fm_.add_include("thrift/annotation/hack.thrift");
+      }
+      if (name == "code") {
+        to_remove.emplace_back(name, data);
+      }
+      if (name == "message") {
+        to_remove.emplace_back(name, data);
+        if (auto field =
+                dynamic_cast<const t_structured&>(node).get_field_by_name(
+                    data.value);
+            field &&
+            !node.find_structured_annotation_or_null(kExceptionMessageUri)) {
+          fm_.add(
+              {field->src_range().begin.offset(),
+               field->src_range().begin.offset(),
+               "@thrift.ExceptionMessage\n"});
+          fm_.add_include("thrift/annotation/thrift.thrift");
         }
       }
 

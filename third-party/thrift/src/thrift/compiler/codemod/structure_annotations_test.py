@@ -40,16 +40,7 @@ class HoistAnnotatedTypes(unittest.TestCase):
             "foo.thrift",
             textwrap.dedent(
                 """\
-                typedef i32 foo (cpp.type = "foo")
-                typedef i32 (cpp.type = "bar") bar
-
-                struct S {
-                    1: i32 (cpp.type = "baz") baz;
-                    2: i32 qux (cpp.type = "oops!");
-                    3: foo noAdd;
-                    4: i32 (cpp.template = "oops!") notContainer;
-                    5: UnknownType (cpp.type = "foo") unknown;
-                }
+                struct S {} (thrift.uri = "facebook.com/bar/S")
 
                 """
             ),
@@ -62,22 +53,10 @@ class HoistAnnotatedTypes(unittest.TestCase):
             self.trim(read_file("foo.thrift")),
             self.trim(
                 """\
-                include "thrift/annotation/cpp.thrift"
+                include "thrift/annotation/thrift.thrift"
 
-                @cpp.Type{name = "foo"}
-                typedef i32 foo
-                @cpp.Type{name = "bar"}
-                typedef i32  bar
-
-                struct S {
-                    @cpp.Type{name = "baz"}
-                    1: i32  baz;
-                    2: i32 qux ;
-                    3: foo noAdd;
-                    4: i32  notContainer;
-                    @cpp.Type{name = "foo"}
-                    5: UnknownType  unknown;
-                }
+                @thrift.Uri{value = "facebook.com/bar/S"}
+                struct S {}
                 """
             ),
         )
@@ -171,24 +150,130 @@ class HoistAnnotatedTypes(unittest.TestCase):
             ),
         )
 
+    def test_cpp(self):
+        write_file(
+            "foo.thrift",
+            textwrap.dedent(
+                """\
+                typedef i32 foo (cpp.type = "foo")
+                typedef i32 (cpp.type = "bar") bar
+
+                struct S {
+                    1: i32 (cpp.type = "baz") baz;
+                    2: i32 qux (cpp.type = "oops!");
+                    3: foo noAdd;
+                    4: i32 (cpp.template = "oops!") notContainer;
+                    5: UnknownType (cpp.type = "foo") unknown;
+                }
+
+                struct S {
+                    1: M mixin (cpp.mixin, cpp.experimental.lazy);
+                } (cpp.minimize_padding)
+                struct M {}
+
+                enum E8 {} (cpp.enum_type="char")
+                enum E16 {} (cpp.enum_type="int16_t")
+                enum E32 {} (cpp.enum_type="int")
+                enum U8 {} (cpp.enum_type="std::uint8_t")
+                enum U16 {} (cpp.enum_type="unsigned short")
+                enum U32 {} (cpp.enum_type="::std::uint32_t", cpp.declare_bitwise_ops)
+
+                interaction I {} (process_in_event_base)
+                interaction J {} (serial)
+                service S {
+                    void f() (thread = "eb", priority = "HIGH")
+                    void j() (thread = "tm", priority = "ZUCK-LEVEL")
+                } (priority = "BEST_EFFORT")
+
+                """
+            ),
+        )
+
+        binary = pkg_resources.resource_filename(__name__, "codemod")
+        run_binary(binary, "foo.thrift")
+
+        self.assertEqual(
+            self.trim(read_file("foo.thrift")),
+            self.trim(
+                """\
+                include "thrift/annotation/cpp.thrift"
+
+                include "thrift/annotation/thrift.thrift"
+
+                @cpp.Type{name = "foo"}
+                typedef i32 foo
+                @cpp.Type{name = "bar"}
+                typedef i32  bar
+
+                struct S {
+                    @cpp.Type{name = "baz"}
+                    1: i32  baz;
+                    2: i32 qux ;
+                    3: foo noAdd;
+                    4: i32  notContainer;
+                    @cpp.Type{name = "foo"}
+                    5: UnknownType  unknown;
+                }
+
+                @cpp.MinimizePadding
+                struct S {
+                    @cpp.Lazy
+                    @thrift.Mixin
+                    1: M mixin ;
+                }
+                struct M {}
+
+                @cpp.EnumType{type = cpp.EnumUnderlyingType.I8}
+                enum E8 {}
+                @cpp.EnumType{type = cpp.EnumUnderlyingType.I16}
+                enum E16 {}
+                enum E32 {}
+                @cpp.EnumType{type = cpp.EnumUnderlyingType.U8}
+                enum U8 {}
+                @cpp.EnumType{type = cpp.EnumUnderlyingType.U16}
+                enum U16 {}
+                @cpp.EnumType{type = cpp.EnumUnderlyingType.U32}
+                @thrift.BitmaskEnum
+                enum U32 {}
+
+                @cpp.ProcessInEbThreadUnsafe
+                interaction I {}
+                @thrift.Serial
+                interaction J {}
+                service S {
+                    @cpp.ProcessInEbThreadUnsafe
+                    @thrift.Priority{level = thrift.RpcPriority.HIGH}
+                    void f()
+                    void j()
+                } (priority = "BEST_EFFORT")
+                """
+            ),
+        )
+
     def test_hack(self):
         write_file(
             "foo.thrift",
             textwrap.dedent(
                 """\
-                enum E {} (hack.attributes="JSEnum, GraphQLEnum('SRTJobTypeEnum', 'Auto-generated from PHP enum SRTJobType.'), GraphQLLegacyNamingScheme, Oncalls('srt_core'), WarehouseEnum(shape('hive_enum_map' => true))")
+                enum E {} (bitmask, hack.attributes="JSEnum, GraphQLEnum('SRTJobTypeEnum', 'Auto-generated from PHP enum SRTJobType.'), GraphQLLegacyNamingScheme, Oncalls('srt_core'), WarehouseEnum(shape('hive_enum_map' => true))")
                 struct F {} (
-  hack.attributes = '\\GraphQLEnum("InstagramRingType", "Identifier for the type of ring overlaid on a user\\x27s profile icon"), \\Oncalls("ig_rc_de")',
-)
-struct G {} (
-  hack.attributes = "
-  JSEnum,
-  GraphQLLegacyNamingScheme, GraphQLEnum(
-    'ServiceTagCategory',
-    'The possible category types that a Service Tag can belong to',
-  )
+                    hack.name = "F1",
+                    hack.attributes = '\\GraphQLEnum("InstagramRingType", "Identifier for the type of ring overlaid on a user\\x27s profile icon"), \\Oncalls("ig_rc_de")',
+                )
+                struct G {} (
+                hack.attributes = "
+                JSEnum,
+                GraphQLLegacyNamingScheme, GraphQLEnum(
+                    'ServiceTagCategory',
+                    'The possible category types that a Service Tag can belong to',
+                )
 ",
-)
+                )
+
+                exception X {
+                    1: string m;
+                    2: i32 c;
+                } (message="m", code="c")
 
                 """
             ),
@@ -203,15 +288,25 @@ struct G {} (
                 """\
                 include "thrift/annotation/hack.thrift"
 
+                include "thrift/annotation/thrift.thrift"
+
                 @hack.Attributes{attributes = ["JSEnum", "GraphQLEnum('SRTJobTypeEnum', 'Auto-generated from PHP enum SRTJobType.')", "GraphQLLegacyNamingScheme", "Oncalls('srt_core')", "WarehouseEnum(shape('hive_enum_map' => true))"]}
+                @thrift.BitmaskEnum
                 enum E {}
                 @hack.Attributes{attributes = ['\\GraphQLEnum("InstagramRingType", "Identifier for the type of ring overlaid on a user\\x27s profile icon")', '\\Oncalls("ig_rc_de")']}
+                @hack.Name{name = "F1"}
                 struct F {}
                 @hack.Attributes{attributes = ["JSEnum", "GraphQLLegacyNamingScheme", "GraphQLEnum(
                 'ServiceTagCategory',
                 'The possible category types that a Service Tag can belong to',
                 )"]}
                 struct G {}
+
+                exception X {
+                    @thrift.ExceptionMessage
+                    1: string m;
+                    2: i32 c;
+                }
                 """
             ),
         )

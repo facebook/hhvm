@@ -312,6 +312,21 @@ struct FOLLY_EXPORT AppOverloadedException : TApplicationException {
   std::string name_;
 };
 
+/*
+ * @AppQuotaExceededError
+ * An error Thrift application can return from preprocess callback.
+ * Indicates the client is overbooked for quota and is rejecting the request
+ * before processing starts.
+ */
+struct FOLLY_EXPORT AppQuotaExceededException : TApplicationException {
+  AppQuotaExceededException(
+      const std::string& tenantId, const std::string& methodName)
+      : TApplicationException(fmt::format(
+            "Tenant {} has exceeded the quota for method {}.",
+            tenantId,
+            methodName)) {}
+};
+
 } // namespace thrift
 } // namespace apache
 

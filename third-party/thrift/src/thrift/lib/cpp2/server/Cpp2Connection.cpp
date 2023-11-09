@@ -518,6 +518,13 @@ void Cpp2Connection::requestReceived(
               kAppOverloadedErrorCode,
               aoe.getMessage().c_str());
         },
+        [&](AppQuotaExceededException& aqe) {
+          killRequest(
+              std::move(hreq),
+              TApplicationException::TENANT_QUOTA_EXCEEDED,
+              kTenantQuotaExceededErrorCode,
+              aqe.getMessage().c_str());
+        },
         [&](AppServerException& ase) {
           handleAppError(std::move(hreq), ase.name(), ase.getMessage(), false);
         },

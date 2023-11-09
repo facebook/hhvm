@@ -38,7 +38,8 @@ using PreprocessResult = std::variant<
     std::monostate, // Allow request through
     AppClientException,
     AppServerException,
-    AppOverloadedException>;
+    AppOverloadedException,
+    AppQuotaExceededException>;
 
 class Cpp2ConnContext;
 class Cpp2RequestContext;

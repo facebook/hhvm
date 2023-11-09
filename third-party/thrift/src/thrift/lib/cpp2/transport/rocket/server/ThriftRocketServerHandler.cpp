@@ -578,6 +578,12 @@ void ThriftRocketServerHandler::handleRequestCommon(
           handleRequestOverloadedServer(
               std::move(request), kAppOverloadedErrorCode, aoe.getMessage());
         },
+        [&](AppQuotaExceededException& aqe) {
+          handleQuotaExceededException(
+              std::move(request),
+              kTenantQuotaExceededErrorCode,
+              aqe.getMessage());
+        },
         [](std::monostate&) { folly::assume_unreachable(); });
 
     return;
@@ -689,6 +695,19 @@ void ThriftRocketServerHandler::handleRequestOverloadedServer(
   if (request->includeInRecentRequests()) {
     requestsRegistry_->getRequestCounter().incrementOverloadCount();
   }
+}
+
+void ThriftRocketServerHandler::handleQuotaExceededException(
+    ThriftRequestCoreUniquePtr request,
+    const std::string& errorCode,
+    const std::string& errorMessage) {
+  if (auto* observer = serverConfigs_->getObserver()) {
+    observer->taskKilled();
+  }
+  request->sendErrorWrapped(
+      folly::make_exception_wrapper<TApplicationException>(
+          TApplicationException::TENANT_QUOTA_EXCEEDED, errorMessage),
+      errorCode);
 }
 
 void ThriftRocketServerHandler::handleAppError(

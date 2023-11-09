@@ -26,6 +26,9 @@ struct struct_with_included_indirections {
   4: fatal_reflection_indirection.HasAResult result;
 
   // XXX: string type can not be included with cpp.indirection
-  @cpp.Type{name = "::reflection_indirection::CppHasAPhrase"}
-  5: string (cpp.indirection) phrase;
+  5: string_2083 phrase;
 }
+
+// The following were automatically generated and may benefit from renaming.
+@cpp.Type{name = "::reflection_indirection::CppHasAPhrase"}
+typedef string (cpp.indirection = "1") string_2083

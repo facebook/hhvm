@@ -14,10 +14,7 @@ module Refactor = struct
   }
 
   type find =
-    entry:Provider_context.entry ->
-    range:Lsp.range ->
-    Provider_context.t ->
-    t list
+    entry:Provider_context.entry -> Pos.t -> Provider_context.t -> t list
 end
 
 module Quickfix = struct

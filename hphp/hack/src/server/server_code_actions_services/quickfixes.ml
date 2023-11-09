@@ -44,7 +44,7 @@ let errors_to_quickfixes
   let quickfixes = List.bind ~f:User_error.quickfixes errors_here in
   List.map quickfixes ~f:(convert_quickfix path classish_starts)
 
-let find ~ctx ~entry ~(range : Lsp.range) : Code_action_types.Quickfix.t list =
+let find ~ctx ~entry pos : Code_action_types.Quickfix.t list =
   let cst = Ast_provider.compute_cst ~ctx ~entry in
   let tree = Provider_context.PositionedSyntaxTree.root cst in
 
@@ -59,11 +59,4 @@ let find ~ctx ~entry ~(range : Lsp.range) : Code_action_types.Quickfix.t list =
     Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry
   in
   let path = entry.Provider_context.path in
-  let selection =
-    let source_text = Ast_provider.compute_source_text ~entry in
-    let line_to_offset line =
-      Full_fidelity_source_text.position_to_offset source_text (line, 0)
-    in
-    Lsp_helpers.lsp_range_to_pos ~line_to_offset path range
-  in
-  errors_to_quickfixes errors path classish_starts selection
+  errors_to_quickfixes errors path classish_starts pos

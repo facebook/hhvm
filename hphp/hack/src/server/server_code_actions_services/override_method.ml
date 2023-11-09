@@ -106,8 +106,8 @@ let refactor_action
   in
   Code_action_types.Refactor.{ title = Quickfix.get_title quickfix; edit }
 
-let find ~entry ~(range : Lsp.range) ctx =
-  let Lsp.{ start = { line = start_line; character = start_col }; _ } = range in
+let find ~entry pos ctx =
+  let (start_line, start_col) = Pos.line_column pos in
   let cst = Ast_provider.compute_cst ~ctx ~entry in
   let tree = Provider_context.PositionedSyntaxTree.root cst in
   let path = entry.Provider_context.path in

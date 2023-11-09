@@ -42,9 +42,6 @@ val lsp_range_to_fc : Lsp.range -> File_content.range
 val lsp_range_to_pos :
   line_to_offset:(int -> int) -> Relative_path.t -> Lsp.range -> Pos.t
 
-(** The range spans more than 0 chars, such as when the user clicks and drags. *)
-val lsp_range_is_selection : Lsp.range -> bool
-
 val lsp_edit_to_fc :
   Lsp.DidChange.textDocumentContentChangeEvent -> File_content.text_edit
 

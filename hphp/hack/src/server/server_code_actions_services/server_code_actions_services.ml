@@ -60,13 +60,21 @@ let find
         action = Lsp.CodeAction.UnresolvedEdit edit;
       }
   in
+  let pos =
+    let source_text = Ast_provider.compute_source_text ~entry in
+    let line_to_offset line =
+      Full_fidelity_source_text.position_to_offset source_text (line, 0)
+    in
+    let path = entry.Provider_context.path in
+    Lsp_helpers.lsp_range_to_pos ~line_to_offset path range
+  in
   let quickfixes =
-    Quickfixes.find ~ctx ~entry ~range
+    Quickfixes.find ~ctx ~entry pos
     |> List.map ~f:(fun Code_action_types.Quickfix.{ title; edit } ->
            to_action ~title ~edit ~kind:Lsp.CodeActionKind.quickfix)
   in
   let refactors =
-    Refactors.find ~entry ~range ctx
+    Refactors.find ~entry pos ctx
     |> List.map ~f:(fun Code_action_types.Refactor.{ title; edit } ->
            to_action ~title ~edit ~kind:Lsp.CodeActionKind.refactor)
   in

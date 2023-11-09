@@ -96,13 +96,9 @@ let find_candidate pos source_text positioned_tree =
     None
   | _ -> None
 
-let find ~entry ~(range : Lsp.range) ctx =
+let find ~entry pos ctx =
   let source_text = Ast_provider.compute_source_text ~entry in
-  let line_to_offset line =
-    Full_fidelity_source_text.position_to_offset source_text (line, 0)
-  in
   let path = entry.Provider_context.path in
-  let pos = Lsp_helpers.lsp_range_to_pos ~line_to_offset path range in
   let positioned_tree = Ast_provider.compute_cst ~ctx ~entry in
   find_candidate pos source_text positioned_tree
   |> Option.map ~f:(to_refactor source_text ~path)

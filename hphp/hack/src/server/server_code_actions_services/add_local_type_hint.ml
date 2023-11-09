@@ -137,16 +137,11 @@ let has_typed_local_variables_enabled root_node =
   in
   aux [[root_node]]
 
-let find ~entry ~(range : Lsp.range) ctx =
-  let source_text = Ast_provider.compute_source_text ~entry in
+let find ~entry selection ctx =
   let cst = Ast_provider.compute_cst ~ctx ~entry in
   let root_node = Provider_context.PositionedSyntaxTree.root cst in
   if has_typed_local_variables_enabled root_node then
-    let line_to_offset line =
-      Full_fidelity_source_text.position_to_offset source_text (line, 0)
-    in
     let path = entry.Provider_context.path in
-    let selection = Lsp_helpers.lsp_range_to_pos ~line_to_offset path range in
     find_candidate ~selection ~entry ctx
     |> Option.map ~f:(to_refactor ~path)
     |> Option.to_list

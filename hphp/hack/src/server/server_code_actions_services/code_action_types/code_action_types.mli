@@ -13,10 +13,7 @@ module Refactor : sig
   }
 
   type find =
-    entry:Provider_context.entry ->
-    range:Lsp.range ->
-    Provider_context.t ->
-    t list
+    entry:Provider_context.entry -> Pos.t -> Provider_context.t -> t list
 end
 
 (** Internal representation of code actions for quickfixes.

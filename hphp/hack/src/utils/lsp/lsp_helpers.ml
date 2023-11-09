@@ -82,11 +82,6 @@ let lsp_range_to_pos ~line_to_offset path (range : Lsp.range) : Pos.t =
     ~pos_start:(triple_of_endpoint range.Lsp.start)
     ~pos_end:(triple_of_endpoint range.Lsp.end_)
 
-let lsp_range_is_selection (range : Lsp.range) =
-  range.start.line < range.end_.line
-  || range.start.line = range.end_.line
-     && range.start.character < range.end_.character
-
 let lsp_edit_to_fc (edit : Lsp.DidChange.textDocumentContentChangeEvent) :
     File_content.text_edit =
   {

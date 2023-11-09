@@ -314,7 +314,7 @@ Array populateTypeConstants(
 /*
  * Maps the rust properties to their hack shape equivalent
  */
-Array populateProps(const rust::Vec<::HPHP::hackc::ExtDeclProp>& props) {
+Array populateProps(const rust::Vec<hackc::ExtDeclProp>& props) {
   if (props.empty()) {
     return empty_vec_array();
   }
@@ -342,8 +342,7 @@ Array populateProps(const rust::Vec<::HPHP::hackc::ExtDeclProp>& props) {
 /*
  * Maps the rust methods to their hack shape equivalent
  */
-Array populateMethodParams(
-    const rust::Vec<::HPHP::hackc::ExtDeclMethodParam>& params) {
+Array populateMethodParams(const rust::Vec<hackc::ExtDeclMethodParam>& params) {
   if (params.empty()) {
     return empty_vec_array();
   }
@@ -368,8 +367,7 @@ Array populateMethodParams(
 /*
  * Maps the rust method signatures (TFun) to their hack shape equivalent
  */
-Array populateSignature(
-    const rust::Vec<::HPHP::hackc::ExtDeclSignature>& sigs) {
+Array populateSignature(const rust::Vec<hackc::ExtDeclSignature>& sigs) {
   for (auto const& sig : sigs) {
     // There would always be at most one here
     Array info = Array::CreateDict();
@@ -408,7 +406,7 @@ Array populateSignature(
 /*
  * Maps the rust methods to their hack shape equivalent
  */
-Array populateMethods(const rust::Vec<::HPHP::hackc::ExtDeclMethod>& meths) {
+Array populateMethods(const rust::Vec<hackc::ExtDeclMethod>& meths) {
   if (meths.empty()) {
     return empty_vec_array();
   }
@@ -490,7 +488,7 @@ Array populateClass(const hackc::ExtDeclClass& kls) {
 /*
  * Maps the rust classes to their hack shape equivalent
  */
-Array populateClasses(const rust::Vec<::HPHP::hackc::ExtDeclClass>& classes) {
+Array populateClasses(const rust::Vec<hackc::ExtDeclClass>& classes) {
   if (classes.empty()) {
     return empty_vec_array();
   }
@@ -505,8 +503,7 @@ Array populateClasses(const rust::Vec<::HPHP::hackc::ExtDeclClass>& classes) {
 /*
  * Maps the rust file consts to their hack shape equivalent
  */
-Array populateFileConsts(
-    const rust::Vec<::HPHP::hackc::ExtDeclFileConst>& consts) {
+Array populateFileConsts(const rust::Vec<hackc::ExtDeclFileConst>& consts) {
   if (consts.empty()) {
     return empty_vec_array();
   }
@@ -524,7 +521,7 @@ Array populateFileConsts(
 /*
  * Maps the rust functions to their hack shape equivalent
  */
-Array populateFileFuncs(const rust::Vec<::HPHP::hackc::ExtDeclFileFunc>& funs) {
+Array populateFileFuncs(const rust::Vec<hackc::ExtDeclFileFunc>& funs) {
   if (funs.empty()) {
     return empty_vec_array();
   }
@@ -549,7 +546,7 @@ Array populateFileFuncs(const rust::Vec<::HPHP::hackc::ExtDeclFileFunc>& funs) {
 /*
  * Maps the rust module definitions to their hack shape equivalent
  */
-Array populateModules(const rust::Vec<::HPHP::hackc::ExtDeclModule>& modules) {
+Array populateModules(const rust::Vec<hackc::ExtDeclModule>& modules) {
   if (modules.empty()) {
     return empty_vec_array();
   }
@@ -568,8 +565,7 @@ Array populateModules(const rust::Vec<::HPHP::hackc::ExtDeclModule>& modules) {
 /*
  * Maps the rust type definitions to their hack shape equivalent
  */
-Array populateTypedefs(
-    const rust::Vec<::HPHP::hackc::ExtDeclTypeDef>& typedefs) {
+Array populateTypedefs(const rust::Vec<hackc::ExtDeclTypeDef>& typedefs) {
   if (typedefs.empty()) {
     return empty_vec_array();
   }
@@ -596,7 +592,7 @@ Array populateTypedefs(
 /*
  * Maps the rust file to its hack shape equivalent
  */
-Array populateFile(const ::HPHP::hackc::ExtDeclFile& file) {
+Array populateFile(const hackc::ExtDeclFile& file) {
   Array info = Array::CreateDict();
   maybeSet(info, file.typedefs, s_attributes, populateTypedefs);
   maybeSet(info, file.functions, s_attributes, populateFileFuncs);

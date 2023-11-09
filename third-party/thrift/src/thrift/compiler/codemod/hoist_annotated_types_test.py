@@ -42,6 +42,9 @@ class HoistAnnotatedTypes(unittest.TestCase):
                 struct A {
                     1: string template;
                 }
+                struct Type {
+                    1: string template;
+                } (thrift.uri = "facebook.com/thrift/annotation/cpp/Type")
 
                 struct S {
                     1: list<S (annotated)> (annotated) foo;
@@ -53,6 +56,8 @@ class HoistAnnotatedTypes(unittest.TestCase):
                     6: S (annotated) withStructured;
                     @A{template = "folly::F14FastMap"}
                     7: map<S, float> (annotated) containerWithStructured;
+                    @foo.Type{template = "std::vector"}
+                    8: list<S> (annotated) containerWithCppType;
                 }
 
                 service X {
@@ -78,6 +83,9 @@ class HoistAnnotatedTypes(unittest.TestCase):
                 struct A {
                     1: string template;
                 }
+                struct Type {
+                    1: string template;
+                } (thrift.uri = "facebook.com/thrift/annotation/cpp/Type")
 
                 struct S {
                     1: list_S_5175 foo;
@@ -89,6 +97,7 @@ class HoistAnnotatedTypes(unittest.TestCase):
                     6: S_866 withStructured;
                     @A{template = "folly::F14FastMap"}
                     7: map_S_float_4022 containerWithStructured;
+                    8: list_S_3800 containerWithCppType;
                 }
 
                 service X {
@@ -104,6 +113,8 @@ class HoistAnnotatedTypes(unittest.TestCase):
                 typedef S (moar_annotated = "1") S_8730
                 typedef i16 (annotated = "1") i16_2065
                 typedef i32 (cpp.type = "uint32_t") i32_7683
+                @foo.Type{template = "std::vector"}
+                typedef list<S> (annotated = "1") list_S_3800
                 typedef list<S_866> (annotated = "1") list_S_5175
                 typedef map<i32, fooMap> (annotated = "1") map_i32_fooMap_1878
                 typedef set<i16_2065> (annotated = "1") set_i16_5922

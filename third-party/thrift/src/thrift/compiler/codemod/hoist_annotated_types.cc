@@ -56,7 +56,8 @@ class hoist_annotated_types {
     auto len = sm_.get_file(prog_.path())->text.size() - 1;
     std::vector<std::string> typedefs;
     for (const auto& [k, v] : typedefs_) {
-      typedefs.push_back(fmt::format("typedef {} {}", v.name, k));
+      typedefs.push_back(
+          fmt::format("{}typedef {} {}", v.structured, v.type, k));
     }
     fm_.add(
         {len,
@@ -231,6 +232,22 @@ class hoist_annotated_types {
       while (type_end_offset < old_content.size() &&
              old_content[type_end_offset++] != ')') {
       }
+      if (auto annot = f.find_structured_annotation_or_null(kCppTypeUri)) {
+        // Store this structured annotation in the unstructured map, where
+        // render_type separates it back out.
+        auto begin = annot->src_range().begin.offset();
+        auto end = annot->src_range().end.offset();
+        const_cast<t_type&>(*type).set_annotation(
+            std::string(old_content.substr(begin, end - begin)));
+        if (old_content[end] == '\n') {
+          end++;
+        }
+        while (::isspace(old_content[begin - 1]) &&
+               old_content[begin - 1] != '\n') {
+          --begin;
+        }
+        fm_.add({begin, end, ""});
+      }
       fm_.add(
           {type_begin_offset,
            type_end_offset,
@@ -261,7 +278,7 @@ class hoist_annotated_types {
     }
     auto name = name_typedef(type);
     if (typedefs_.count(name)) {
-      assert(typedefs_[name].name == render_type(type));
+      assert(typedefs_[name].type == render_type(type));
     } else if (
         auto existing = prog_.scope()->find_type(prog_.scope_name(name))) {
       if (existing->get_true_type()->get_full_name() !=
@@ -274,7 +291,13 @@ class hoist_annotated_types {
       }
     } else {
       auto typedf = std::make_unique<t_typedef>(&prog_, name, type);
-      typedefs_[name] = {render_type(type), typedf.get()};
+      std::string structured;
+      for (const auto& [k, v] : type->annotations()) {
+        if (k[0] == '@') {
+          structured = fmt::format("{}{}\n", structured, k);
+        }
+      }
+      typedefs_[name] = {render_type(type), typedf.get(), structured};
       prog_.add_def(std::move(typedf));
     }
     return name;
@@ -312,7 +335,11 @@ class hoist_annotated_types {
       return name;
     }
     std::vector<std::string> annotations;
+    std::string structured;
     for (const auto& [k, v] : type->annotations()) {
+      if (k[0] == '@') {
+        continue;
+      }
       annotations.push_back(fmt::format("{} = \"{}\"", k, v.value));
     }
     assert(!annotations.empty());
@@ -321,8 +348,9 @@ class hoist_annotated_types {
 
  private:
   struct Typedef {
-    std::string name;
+    std::string type;
     t_typedef* ptr;
+    std::string structured = "";
   };
   std::map<std::string, Typedef> typedefs_;
   codemod::file_manager fm_;

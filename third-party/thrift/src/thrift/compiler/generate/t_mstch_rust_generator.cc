@@ -170,13 +170,21 @@ FieldKind field_kind(const t_named& node) {
   return FieldKind::Inline;
 }
 
+// Why does this behave differently for typedefs of containers and typedefs of
+// binary? Yes.
+auto get_type_annotation(const t_type* type) {
+  return type->get_true_type()->is_container()
+      ? t_typedef::get_first_annotation(type, {"rust.type"})
+      : type->get_annotation("rust.type");
+}
+
 // For example `set<Value> (rust.type = "indexmap::IndexSet")` or `map<string,
 // Value> (rust.type = "indexmap::IndexMap")`. Unlike for standard library
 // collections, serialization impls for these types are not provided in the
 // fbthrift Rust runtime library and instead that logic will need to be emitted
 // into the generated crate.
 bool has_nonstandard_type_annotation(const t_type* type) {
-  return type->get_annotation("rust.type").find("::") != string::npos;
+  return get_type_annotation(type).find("::") != string::npos;
 }
 
 void parse_include_srcs(
@@ -1358,7 +1366,7 @@ class rust_mstch_type : public mstch_type {
     return get_import_name(type_->program(), options_);
   }
   mstch::node rust_type() {
-    const std::string& rust_type = type_->get_annotation("rust.type");
+    auto rust_type = get_type_annotation(type_);
     if (!rust_type.empty() && rust_type.find("::") == std::string::npos) {
       return "fbthrift::builtin_types::" + rust_type;
     }

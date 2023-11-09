@@ -23,6 +23,12 @@ include "thrift/lib/thrift/any.thrift"
 @thrift.Experimental
 package "facebook.com/thrift/test/adapter"
 
+@java.Adapter{
+  adapterClassName = "com.facebook.thrift.any.AnyAdapter",
+  typeClassName = "com.facebook.thrift.any.Any",
+}
+typedef any.Any Any
+
 enum TestEnum {
   ZERO = 0,
   ONE = 1,
@@ -311,8 +317,8 @@ struct TestStruct {
   502: list<set<i32>> doubleAdaptedList2_field;
   503: list<binary> doubleAdaptedList3_field;
   504: map<i32, binary> doubleAdaptedMap1_field;
-  506: list<any.Any> anyList_field;
-  507: map<i32, list<any.Any>> anyMap_field;
+  506: list<Any> anyList_field;
+  507: map<i32, list<Any>> anyMap_field;
   508: list<InnerUnion> unionList_field;
   509: list<InnerException> exceptionList_field;
   @thrift.TerseWrite
@@ -499,8 +505,8 @@ struct AdaptedTestStruct {
     typeClassName = 'com.facebook.thrift.adapter.test.Wrapped<com.facebook.thrift.adapter.test.Wrapped<List<String>>>',
   }
   505: doubleAdaptedIntList doubleAdaptedIntList2_field;
-  506: list<any.Any> anyList_field;
-  507: map<i32, list<any.Any>> anyMap_field;
+  506: list<Any> anyList_field;
+  507: map<i32, list<Any>> anyMap_field;
   508: list<myUnion> unionList_field;
   509: list<myException> exceptionList_field;
   @thrift.TerseWrite
@@ -618,8 +624,8 @@ union TestUnion {
   502: list<set<i32>> doubleAdaptedList2_field;
   503: list<binary> doubleAdaptedList3_field;
   504: map<i32, binary> doubleAdaptedMap1_field;
-  506: list<any.Any> anyList_field;
-  507: map<i32, list<any.Any>> anyMap_field;
+  506: list<Any> anyList_field;
+  507: map<i32, list<Any>> anyMap_field;
   508: list<InnerUnion> unionList_field;
   509: list<InnerException> exceptionList_field;
 }
@@ -772,8 +778,8 @@ union AdaptedTestUnion {
     typeClassName = 'com.facebook.thrift.adapter.test.Wrapped<com.facebook.thrift.adapter.test.Wrapped<List<String>>>',
   }
   505: doubleAdaptedIntList doubleAdaptedIntList2_field;
-  506: list<any.Any> anyList_field;
-  507: map<i32, list<any.Any>> anyMap_field;
+  506: list<Any> anyList_field;
+  507: map<i32, list<Any>> anyMap_field;
   508: list<myUnion> unionList_field;
   509: list<myException> exceptionList_field;
   510: list<adaptedLong> terseAdaptedLongList_field;
@@ -958,8 +964,8 @@ safe permanent client exception AdaptedTestException {
     typeClassName = 'com.facebook.thrift.adapter.test.Wrapped<com.facebook.thrift.adapter.test.Wrapped<List<String>>>',
   }
   505: doubleAdaptedIntList doubleAdaptedIntList2_field;
-  506: list<any.Any> anyList_field;
-  507: map<i32, list<any.Any>> anyMap_field;
+  506: list<Any> anyList_field;
+  507: map<i32, list<Any>> anyMap_field;
   508: list<myUnion> unionList_field;
   509: list<myException> exceptionList_field;
   @thrift.TerseWrite

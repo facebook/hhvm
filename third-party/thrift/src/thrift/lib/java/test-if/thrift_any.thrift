@@ -21,26 +21,38 @@ package "test.dev/thrift/lib/java/test/thrift/any"
 
 namespace java.swift com.facebook.thrift.test.thrift.any
 
+@java.Adapter{
+  adapterClassName = "com.facebook.thrift.any.AnyAdapter",
+  typeClassName = "com.facebook.thrift.any.Any",
+}
+typedef any.Any Any
+
+@java.Adapter{
+  adapterClassName = "com.facebook.thrift.any.SemiAnyAdapter",
+  typeClassName = "com.facebook.thrift.any.SemiAny",
+}
+typedef any.SemiAny SemiAny
+
 struct TestStruct {
   1: i32 inf_field;
   2: bool bool_field;
   3: list<i32> list_field;
-  10: any.Any any_field;
-  11: any.SemiAny semiany_field;
+  10: Any any_field;
+  11: SemiAny semiany_field;
 }
 
 safe permanent client exception TestException {
   1: i32 inf_field;
   2: bool bool_field;
-  10: any.Any any_field;
-  11: any.SemiAny semiany_field;
+  10: Any any_field;
+  11: SemiAny semiany_field;
 }
 
 union TestUnion {
   1: i32 inf_field;
   2: bool bool_field;
-  10: any.Any any_field;
-  11: any.SemiAny semiany_field;
+  10: Any any_field;
+  11: SemiAny semiany_field;
 }
 
 enum TestEnum {
@@ -70,7 +82,7 @@ struct Rectangle {
   2: i32 len;
   3: i32 width;
   4: Position position;
-  5: any.Any canvas;
+  5: Any canvas;
 }
 
 struct Image {

@@ -22,6 +22,12 @@ package "test.dev/thrift/lib/java/test/wrapper"
 
 namespace java.swift com.facebook.thrift.test.wrapper
 
+@java.Adapter{
+  adapterClassName = "com.facebook.thrift.any.AnyAdapter",
+  typeClassName = "com.facebook.thrift.any.Any",
+}
+typedef any.Any Any
+
 struct TestStruct {
   1001: i32 context;
   3: bool wrappedBoolean_field;
@@ -32,7 +38,7 @@ struct TestStruct {
   13: i32 wrappedSingleAdaptedInt_field;
   14: list<i32> listAdaptedInt_field;
   15: map<i32, map<i16, list<i16>>> nestedAdapted_field;
-  16: list<any.Any> anyList_field;
+  16: list<Any> anyList_field;
   17: list<i32> wrappedDoubleAdaptedIntList_field;
 }
 
@@ -123,7 +129,7 @@ struct WrappedTestStruct {
     wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<List<com.facebook.thrift.any.Any>>",
     typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<List<com.facebook.thrift.any.Any>>",
   }
-  16: list<any.Any> anyList_field;
+  16: list<Any> anyList_field;
 
   @java.Wrapper{
     wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<com.facebook.thrift.adapter.test.Wrapped<List<String>>>",
@@ -194,7 +200,7 @@ struct TerseWrappedTestStruct {
     wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<List<com.facebook.thrift.any.Any>>",
     typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<List<com.facebook.thrift.any.Any>>",
   }
-  16: list<any.Any> anyList_field;
+  16: list<Any> anyList_field;
 
   @java.Wrapper{
     wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<com.facebook.thrift.adapter.test.Wrapped<List<String>>>",
@@ -267,7 +273,7 @@ struct MutableTerseWrappedTestStruct {
     wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<List<com.facebook.thrift.any.Any>>",
     typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<List<com.facebook.thrift.any.Any>>",
   }
-  16: list<any.Any> anyList_field;
+  16: list<Any> anyList_field;
 
   @java.Wrapper{
     wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<com.facebook.thrift.adapter.test.Wrapped<List<String>>>",
@@ -339,7 +345,7 @@ safe permanent client exception WrappedTestException {
     wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<List<com.facebook.thrift.any.Any>>",
     typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<List<com.facebook.thrift.any.Any>>",
   }
-  16: list<any.Any> anyList_field;
+  16: list<Any> anyList_field;
 
   @java.Wrapper{
     wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<com.facebook.thrift.adapter.test.Wrapped<List<String>>>",

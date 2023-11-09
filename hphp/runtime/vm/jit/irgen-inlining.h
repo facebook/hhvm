@@ -52,7 +52,7 @@ void sideExitFromInlined(IRGS&, SSATmp* target);
 /*
  * Emit an EndCatch equivalent from an inlined function.
  */
-bool endCatchFromInlined(IRGS&, EndCatchData::CatchMode mode);
+bool endCatchFromInlined(IRGS&, EndCatchData::CatchMode mode, SSATmp* exc);
 
 /*
  * Make sure all inlined frames are written on the stack and a part of the FP

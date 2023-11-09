@@ -868,7 +868,7 @@ Block* create_catch_block(
   updateMarker(env);
 
   auto const ty = Type::SubObj(SystemLib::getThrowableClass()) | TNullptr;
-  gen(env, BeginCatch, ty);
+  auto const exc = gen(env, BeginCatch, ty);
   body();
 
   // Stublogues lack proper frames and need special configuration.
@@ -893,7 +893,7 @@ Block* create_catch_block(
   // If we are unwinding from an inlined function, try a special logic that
   // may eliminate the need to spill the current frame.
   if (isInlining(env)) {
-    if (endCatchFromInlined(env, mode)) return catchBlock;
+    if (endCatchFromInlined(env, mode, exc)) return catchBlock;
   }
 
   if (spillInlinedFrames(env)) {

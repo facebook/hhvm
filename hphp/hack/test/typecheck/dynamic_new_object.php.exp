@@ -1,2 +1,8 @@
 File "dynamic_new_object.php", line 6, characters 12-15:
 Was expecting a class, but got a string (Typing[4026])
+File "dynamic_new_object.php", line 7, characters 13-14:
+Invalid argument (Typing[4110])
+  File "dynamic_new_object.php", line 3, characters 20-22:
+  Expected `int`
+  File "dynamic_new_object.php", line 6, characters 12-15:
+  But got `dynamic`, the result of constructing an object with a `dynamic` type

@@ -18,13 +18,13 @@
         { fb_ast =
           [([5:2-25],
             (Expr
-               ((nothing), [5:2-24],
+               ((dynamic), [5:2-24],
                 (Binop
-                   { bop = (Eq None); lhs = ((nothing), [5:2-4], (Lvar ([5:2-4], $x)));
+                   { bop = (Eq None); lhs = ((dynamic), [5:2-4], (Lvar ([5:2-4], $x)));
                      rhs =
-                     ((nothing), [5:7-24],
-                      (New (((nothing), [5:11-22], (CIexpr ((int), [5:11-22], (Hole (((int), [5:11-22], (Lvar ([5:11-22], $class_name))), (int), (classname<nothing>), Typing))))), 
-                         [], [], None, (nothing))))
+                     ((dynamic), [5:7-24],
+                      (New (((dynamic), [5:11-22], (CIexpr ((int), [5:11-22], (Hole (((int), [5:11-22], (Lvar ([5:11-22], $class_name))), (int), (classname<nothing>), Typing))))), 
+                         [], [], None, (dynamic))))
                      }))))
             ]
           };

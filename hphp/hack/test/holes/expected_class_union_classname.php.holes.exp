@@ -37,17 +37,17 @@ Errors:
          { fb_ast =
            [([6:2-25],
              (Expr
-                ((<expr#1> as C), [6:2-24],
+                ((~<expr#1> as C), [6:2-24],
                  (Binop
-                    { bop = (Eq None); lhs = ((<expr#1> as C), [6:2-4], (Lvar ([6:2-4], $x)));
+                    { bop = (Eq None); lhs = ((~<expr#1> as C), [6:2-4], (Lvar ([6:2-4], $x)));
                       rhs =
-                      ((<expr#1> as C), [6:7-24],
+                      ((~<expr#1> as C), [6:7-24],
                        (New (
-                          (((nothing | C)), [6:11-22],
+                          ((~C), [6:11-22],
                            (CIexpr
                               (((int | classname<C>)), [6:11-22],
                                (Hole ((((int | classname<C>)), [6:11-22], (Lvar ([6:11-22], $class_name))), ((int | classname<C>)), ((classname<nothing> | classname<C>)), Typing))))),
-                          [], [], None, ((function(): void)))))
+                          [], [], None, (~(function(): void)))))
                       }))))
              ]
            };

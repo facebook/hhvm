@@ -7693,7 +7693,8 @@ and dispatch_call
           let result = class_const ~incl_tc:true env p (cid, (p, cst)) in
           let () =
             match result with
-            | (_, (ty, _, _), _) when TUtils.is_tyvar_error env ty ->
+            | (_, (ty, _, _), _)
+              when TUtils.is_tyvar_error env ty || is_dynamic ty ->
               Typing_error_utils.add_typing_error
                 ~env
                 Typing_error.(
@@ -8970,7 +8971,7 @@ and class_expr
       (* We allow a call through a string in dynamic check mode, as string <:D dynamic *)
       | (r, Tprim Tstring) when Tast.is_under_dynamic_assumptions env.checked ->
         ((env, None), (MakeType.dynamic r, Ok (MakeType.dynamic r)))
-      | ( _,
+      | ( r,
           ( Tany _ | Tnonnull | Tvec_or_dict _ | Toption _ | Tprim _ | Tfun _
           | Ttuple _ | Tnewtype _ | Tdependent _ | Tshape _ | Taccess _ | Tneg _
             ) ) ->
@@ -8987,7 +8988,12 @@ and class_expr
                    })
         in
         let ty_nothing = MakeType.nothing Reason.none in
-        let (env, ty) = Env.fresh_type_error env p in
+        let (env, ty) =
+          if TCO.enable_sound_dynamic (Env.get_tcopt env) then
+            (env, MakeType.dynamic r)
+          else
+            Env.fresh_type_error env p
+        in
         let ty_expect = MakeType.classname Reason.none [ty_nothing] in
         ( (env, Option.merge ty_err1 ty_err2 ~f:Typing_error.both),
           (ty, Error (base_ty, ty_expect)) )

@@ -20,17 +20,17 @@ Errors:
         { fb_ast =
           [([5:3-20],
             (Expr
-               ((nothing), [5:3-19],
+               ((dynamic), [5:3-19],
                 (Binop
-                   { bop = (Eq None); lhs = ((nothing), [5:3-5], (Lvar ([5:3-5], $x)));
+                   { bop = (Eq None); lhs = ((dynamic), [5:3-5], (Lvar ([5:3-5], $x)));
                      rhs =
-                     ((nothing), [5:8-19],
+                     ((dynamic), [5:8-19],
                       (New (
-                         ((nothing), [5:12-17],
+                         ((dynamic), [5:12-17],
                           (CIexpr ((classname<_>), [5:12-17], (Hole (((classname<_>), [5:12-17], (Lvar ([5:12-17], $yolo))), (classname<_>), (classname<classname<nothing>>), Typing))))),
-                         [], [], None, (nothing))))
+                         [], [], None, (dynamic))))
                      }))));
-            ([7:3-9], (Expr ((nothing), [7:3-8], (Array_get (((nothing), [7:3-5], (Lvar ([7:3-5], $x))), (Some ((int), [7:6-7], (Int "1"))))))))]
+            ([7:3-9], (Expr ((dynamic), [7:3-8], (Array_get (((dynamic), [7:3-5], (Lvar ([7:3-5], $x))), (Some ((int), [7:6-7], (Int "1"))))))))]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([4:10-34], "__SupportDynamicType"); ua_params = [] }]; 
         f_external = false; f_doc_comment = None };

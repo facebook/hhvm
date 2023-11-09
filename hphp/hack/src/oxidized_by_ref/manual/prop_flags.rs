@@ -39,6 +39,9 @@ impl PropFlags {
     pub fn needs_init(&self) -> bool {
         self.contains(Self::NEEDS_INIT)
     }
+    pub fn is_php_std_lib(&self) -> bool {
+        self.contains(Self::PHP_STD_LIB)
+    }
     pub fn is_lsb(&self) -> bool {
         self.contains(Self::LSB)
     }

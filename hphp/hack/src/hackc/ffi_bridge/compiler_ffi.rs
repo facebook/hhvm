@@ -259,7 +259,15 @@ pub mod compile_ffi {
         name: String,
         type_: String,
         visibility: String,
-        flags: u16,
+        is_abstract: bool,
+        is_const: bool,
+        is_lateinit: bool,
+        is_readonly: bool,
+        needs_init: bool,
+        is_php_std_lib: bool,
+        is_lsb: bool,
+        is_safe_global_variable: bool,
+        no_auto_likes: bool,
     }
 
     #[derive(Debug, PartialEq)]

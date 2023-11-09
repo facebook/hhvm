@@ -325,15 +325,15 @@ Array populateProps(const rust::Vec<hackc::ExtDeclProp>& props) {
     info.set(s_name, rustToString(prop.name));
     info.set(s_type, rustToString(prop.type_));
     info.set(s_visibility, rustToString(prop.visibility));
-    maybeFlag(info, prop.flags, s_is_abstract, 1u << 0);
-    maybeFlag(info, prop.flags, s_is_const, 1 << 1);
-    maybeFlag(info, prop.flags, s_is_lateinit, 1 << 2);
-    maybeFlag(info, prop.flags, s_is_lsb, 1 << 3);
-    maybeFlag(info, prop.flags, s_is_needs_init, 1 << 4);
-    maybeFlag(info, prop.flags, s_is_php_std_lib, 1 << 5);
-    maybeFlag(info, prop.flags, s_is_readonly, 1 << 6);
-    maybeFlag(info, prop.flags, s_is_safe_global_variable, 1 << 7);
-    maybeFlag(info, prop.flags, s_is_no_auto_likes, 1 << 8);
+    maybeSetBool(info, prop.is_abstract, s_is_abstract);
+    maybeSetBool(info, prop.is_const, s_is_const);
+    maybeSetBool(info, prop.is_lateinit, s_is_lateinit);
+    maybeSetBool(info, prop.is_lsb, s_is_lsb);
+    maybeSetBool(info, prop.needs_init, s_is_needs_init);
+    maybeSetBool(info, prop.is_php_std_lib, s_is_php_std_lib);
+    maybeSetBool(info, prop.is_readonly, s_is_readonly);
+    maybeSetBool(info, prop.is_safe_global_variable, s_is_safe_global_variable);
+    maybeSetBool(info, prop.no_auto_likes, s_is_no_auto_likes);
     arr.append(info);
   }
   return arr;

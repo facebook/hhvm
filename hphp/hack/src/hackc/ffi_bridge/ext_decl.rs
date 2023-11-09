@@ -291,7 +291,15 @@ fn get_props(props: &[&ShallowProp<'_>], name: &str) -> Vec<ExtDeclProp> {
             name: prop.name.1.to_string(),
             visibility: enum_visibility(prop.visibility),
             type_: extract_type_name(prop.type_),
-            flags: prop.flags.bits(),
+            is_abstract: prop.flags.is_abstract(),
+            is_const: prop.flags.is_const(),
+            is_lateinit: prop.flags.is_lateinit(),
+            is_readonly: prop.flags.is_readonly(),
+            needs_init: prop.flags.needs_init(),
+            is_php_std_lib: prop.flags.is_php_std_lib(),
+            is_lsb: prop.flags.is_lsb(),
+            is_safe_global_variable: prop.flags.is_safe_global_variable(),
+            no_auto_likes: prop.flags.no_auto_likes(),
             // prop.xhp_attr - not supported yet
         })
         .collect()

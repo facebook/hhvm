@@ -354,7 +354,7 @@ static SpawnResult spawn_win32(const std::vector<std::string>& daemon_argv) {
 
   ChildProcess::Options opts;
   opts.setFlags(POSIX_SPAWN_SETPGROUP);
-  opts.open(STDIN_FILENO, "/dev/null", O_RDONLY, 0666);
+  opts.nullStdin();
   opts.open(
       STDOUT_FILENO,
       logging::log_name.c_str(),

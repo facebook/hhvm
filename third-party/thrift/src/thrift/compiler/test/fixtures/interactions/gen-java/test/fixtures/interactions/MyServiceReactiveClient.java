@@ -329,7 +329,7 @@ public class MyServiceReactiveClient
     @java.lang.Override
     public reactor.core.publisher.Mono<ResponseWrapper<Integer>> frobnicateWrapper(RpcOptions rpcOptions)  {
       return _rpcClient
-        .subscriberContext(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
+        .contextWrite(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
         .flatMap(_rpc -> getHeaders(rpcOptions).flatMap(headers -> {
           String interactionName = "MyInteraction.frobnicate";
           org.apache.thrift.RequestRpcMetadata.Builder _metadataBuilder = new org.apache.thrift.RequestRpcMetadata.Builder()
@@ -391,7 +391,7 @@ public class MyServiceReactiveClient
     @java.lang.Override
     public reactor.core.publisher.Mono<ResponseWrapper<Void>> pingWrapper(RpcOptions rpcOptions)  {
       return _rpcClient
-        .subscriberContext(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
+        .contextWrite(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
         .flatMap(_rpc -> getHeaders(rpcOptions).flatMap(headers -> {
           String interactionName = "MyInteraction.ping";
           org.apache.thrift.RequestRpcMetadata.Builder _metadataBuilder = new org.apache.thrift.RequestRpcMetadata.Builder()
@@ -445,7 +445,7 @@ public class MyServiceReactiveClient
     @java.lang.Override
     public reactor.core.publisher.Flux<com.facebook.thrift.client.ResponseWrapper<Boolean>> truthifyWrapper( final com.facebook.thrift.client.RpcOptions rpcOptions) {
       return _rpcClient
-        .subscriberContext(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
+        .contextWrite(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
         .flatMapMany(_rpc -> getHeaders(rpcOptions).flatMapMany(headers -> {
           String interactionName = "MyInteraction.truthify";
           org.apache.thrift.RequestRpcMetadata.Builder _metadataBuilder = new org.apache.thrift.RequestRpcMetadata.Builder()
@@ -501,7 +501,7 @@ public class MyServiceReactiveClient
       com.facebook.thrift.client.ThriftClientStatsHolder.getThriftClientStats().interactionDisposed("MyInteraction");
       _activeInteractions.remove(interactionId);
       _rpcClient
-        .subscriberContext(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
+        .contextWrite(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
         .flatMap(_rpc -> {
           InteractionTerminate term = new InteractionTerminate.Builder().setInteractionId(interactionId).build();
           ClientPushMetadata metadata = ClientPushMetadata.fromInteractionTerminate(term);
@@ -550,7 +550,7 @@ public class MyServiceReactiveClient
     @java.lang.Override
     public reactor.core.publisher.Mono<ResponseWrapper<Integer>> frobnicateWrapper(RpcOptions rpcOptions)  {
       return _rpcClient
-        .subscriberContext(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
+        .contextWrite(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
         .flatMap(_rpc -> getHeaders(rpcOptions).flatMap(headers -> {
           String interactionName = "MyInteractionFast.frobnicate";
           org.apache.thrift.RequestRpcMetadata.Builder _metadataBuilder = new org.apache.thrift.RequestRpcMetadata.Builder()
@@ -612,7 +612,7 @@ public class MyServiceReactiveClient
     @java.lang.Override
     public reactor.core.publisher.Mono<ResponseWrapper<Void>> pingWrapper(RpcOptions rpcOptions)  {
       return _rpcClient
-        .subscriberContext(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
+        .contextWrite(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
         .flatMap(_rpc -> getHeaders(rpcOptions).flatMap(headers -> {
           String interactionName = "MyInteractionFast.ping";
           org.apache.thrift.RequestRpcMetadata.Builder _metadataBuilder = new org.apache.thrift.RequestRpcMetadata.Builder()
@@ -666,7 +666,7 @@ public class MyServiceReactiveClient
     @java.lang.Override
     public reactor.core.publisher.Flux<com.facebook.thrift.client.ResponseWrapper<Boolean>> truthifyWrapper( final com.facebook.thrift.client.RpcOptions rpcOptions) {
       return _rpcClient
-        .subscriberContext(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
+        .contextWrite(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
         .flatMapMany(_rpc -> getHeaders(rpcOptions).flatMapMany(headers -> {
           String interactionName = "MyInteractionFast.truthify";
           org.apache.thrift.RequestRpcMetadata.Builder _metadataBuilder = new org.apache.thrift.RequestRpcMetadata.Builder()
@@ -722,7 +722,7 @@ public class MyServiceReactiveClient
       com.facebook.thrift.client.ThriftClientStatsHolder.getThriftClientStats().interactionDisposed("MyInteractionFast");
       _activeInteractions.remove(interactionId);
       _rpcClient
-        .subscriberContext(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
+        .contextWrite(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
         .flatMap(_rpc -> {
           InteractionTerminate term = new InteractionTerminate.Builder().setInteractionId(interactionId).build();
           ClientPushMetadata metadata = ClientPushMetadata.fromInteractionTerminate(term);
@@ -770,7 +770,7 @@ public class MyServiceReactiveClient
     @java.lang.Override
     public reactor.core.publisher.Mono<ResponseWrapper<Void>> frobnicateWrapper(RpcOptions rpcOptions)  {
       return _rpcClient
-        .subscriberContext(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
+        .contextWrite(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
         .flatMap(_rpc -> getHeaders(rpcOptions).flatMap(headers -> {
           String interactionName = "SerialInteraction.frobnicate";
           org.apache.thrift.RequestRpcMetadata.Builder _metadataBuilder = new org.apache.thrift.RequestRpcMetadata.Builder()
@@ -812,7 +812,7 @@ public class MyServiceReactiveClient
       com.facebook.thrift.client.ThriftClientStatsHolder.getThriftClientStats().interactionDisposed("SerialInteraction");
       _activeInteractions.remove(interactionId);
       _rpcClient
-        .subscriberContext(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
+        .contextWrite(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
         .flatMap(_rpc -> {
           InteractionTerminate term = new InteractionTerminate.Builder().setInteractionId(interactionId).build();
           ClientPushMetadata metadata = ClientPushMetadata.fromInteractionTerminate(term);

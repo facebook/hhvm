@@ -153,7 +153,7 @@ public class BadServiceReactiveClient
     @java.lang.Override
     public reactor.core.publisher.Mono<ResponseWrapper<Void>> fooWrapper(RpcOptions rpcOptions)  {
       return _rpcClient
-        .subscriberContext(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
+        .contextWrite(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
         .flatMap(_rpc -> getHeaders(rpcOptions).flatMap(headers -> {
           String interactionName = "BadInteraction.foo";
           org.apache.thrift.RequestRpcMetadata.Builder _metadataBuilder = new org.apache.thrift.RequestRpcMetadata.Builder()
@@ -195,7 +195,7 @@ public class BadServiceReactiveClient
       com.facebook.thrift.client.ThriftClientStatsHolder.getThriftClientStats().interactionDisposed("BadInteraction");
       _activeInteractions.remove(interactionId);
       _rpcClient
-        .subscriberContext(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
+        .contextWrite(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
         .flatMap(_rpc -> {
           InteractionTerminate term = new InteractionTerminate.Builder().setInteractionId(interactionId).build();
           ClientPushMetadata metadata = ClientPushMetadata.fromInteractionTerminate(term);

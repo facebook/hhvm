@@ -481,7 +481,7 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
     @java.lang.Override
     public reactor.core.publisher.Mono<ResponseWrapper<{{#function:return_type}}{{> BoxedType}}{{/function:return_type}}>> {{function:javaName}}Wrapper({{#function:args}}final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}, {{/function:args}}RpcOptions rpcOptions)  {
       return _rpcClient
-        .subscriberContext(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
+        .contextWrite(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
         .flatMap(_rpc -> getHeaders(rpcOptions).flatMap(headers -> {
           String interactionName = "{{service:name}}.{{function:name}}";
           org.apache.thrift.RequestRpcMetadata.Builder _metadataBuilder = new org.apache.thrift.RequestRpcMetadata.Builder()
@@ -560,7 +560,7 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
     @java.lang.Override
     public reactor.core.publisher.Flux<com.facebook.thrift.client.ResponseWrapper<{{#function:return_type}}{{> StreamReturnType}}{{/function:return_type}}>> {{function:javaName}}Wrapper({{#function:args}}final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}, {{/function:args}} final com.facebook.thrift.client.RpcOptions rpcOptions) {
       return _rpcClient
-        .subscriberContext(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
+        .contextWrite(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
         .flatMapMany(_rpc -> getHeaders(rpcOptions).flatMapMany(headers -> {
           String interactionName = "{{service:name}}.{{function:name}}";
           org.apache.thrift.RequestRpcMetadata.Builder _metadataBuilder = new org.apache.thrift.RequestRpcMetadata.Builder()
@@ -618,7 +618,7 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
       com.facebook.thrift.client.ThriftClientStatsHolder.getThriftClientStats().interactionDisposed("{{service:name}}");
       _activeInteractions.remove(interactionId);
       _rpcClient
-        .subscriberContext(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
+        .contextWrite(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
         .flatMap(_rpc -> {
           InteractionTerminate term = new InteractionTerminate.Builder().setInteractionId(interactionId).build();
           ClientPushMetadata metadata = ClientPushMetadata.fromInteractionTerminate(term);

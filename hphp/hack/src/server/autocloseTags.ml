@@ -40,7 +40,7 @@ let all_tags (tree : FFP.t) : AutocloseTag.result list =
             } ->
           let insert_text =
             Format.sprintf
-              "</%s>"
+              "$0</%s>"
               (Full_fidelity_positioned_syntax.text xhp_open_name)
           in
           AutocloseTag.

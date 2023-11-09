@@ -20,8 +20,8 @@ function test0(): void {
 "
 
 let check_identify_foo_response = function
-  | Some close_tag -> Test.assertEqual close_tag "</xhp:foo>"
-  | None -> Test.fail "Expected to insert the close tag </xhp:foo>"
+  | Some close_tag -> Test.assertEqual close_tag "$0</xhp:foo>"
+  | None -> Test.fail "Expected to insert the close tag $0</xhp:foo>"
 
 let test () =
   Test.Client.with_env ~custom_config:None @@ fun env ->

@@ -21,7 +21,15 @@ struct Request {
 }
 
 @cpp.GenerateTypedInterceptor
+interaction MyInteraction {
+  i32 getId(i32 field);
+  void echo();
+  string getRandomData(Request req);
+}
+
+@cpp.GenerateTypedInterceptor
 service MyService {
+  MyInteraction, i32 initializeInteraction(i32 field);
   void echo();
   string getRandomData(Request req);
   i32 getId(i32 field);

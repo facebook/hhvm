@@ -51,6 +51,21 @@ StructMetadata<::cpp2::Request>::gen(ThriftMetadata& metadata) {
   return res.first->second;
 }
 
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_initializeInteraction(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+  ::apache::thrift::metadata::ThriftFunction func;
+  func.name() = "initializeInteraction";
+  auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
+  func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  ::apache::thrift::metadata::ThriftField module_MyService_initializeInteraction_field__1;
+  module_MyService_initializeInteraction_field__1.id() = -1;
+  module_MyService_initializeInteraction_field__1.name() = "field";
+  module_MyService_initializeInteraction_field__1.is_optional() = false;
+  auto module_MyService_initializeInteraction_field__1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
+  module_MyService_initializeInteraction_field__1_type->writeAndGenType(*module_MyService_initializeInteraction_field__1.type(), metadata);
+  func.arguments()->push_back(std::move(module_MyService_initializeInteraction_field__1));
+  func.is_oneway() = false;
+  service.functions()->push_back(std::move(func));
+}
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_echo(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "echo";
@@ -119,6 +134,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   ::apache::thrift::metadata::ThriftService module_MyService;
   module_MyService.name() = "module.MyService";
   static const ThriftFunctionGenerator functions[] = {
+    ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_initializeInteraction,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_echo,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_getRandomData,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_getId,

@@ -10,6 +10,8 @@
 
 #include "thrift/compiler/test/fixtures/typed-interceptor/gen-cpp2/MyServiceAsyncClient.h"
 #include "thrift/compiler/test/fixtures/typed-interceptor/gen-cpp2/module_types.h"
+#include <thrift/lib/cpp2/async/ServerStream.h>
+#include <thrift/lib/cpp2/async/Sink.h>
 
 namespace folly {
   class IOBuf;
@@ -53,7 +55,62 @@ class ServiceHandler<::cpp2::MyService> : public apache::thrift::ServerInterface
   size_t getNumTypedInterceptors() const final;
   std::vector<std::unique_ptr<TypedInterceptor<::cpp2::MyService>>> __fbthrift_typedInterceptors_;
  public:
+class MyInteractionServiceInfoHolder : public apache::thrift::ServiceInfoHolder {
+  public:
+   apache::thrift::ServiceRequestInfoMap const& requestInfoMap() const override;
+   static apache::thrift::ServiceRequestInfoMap staticRequestInfoMap();
+};
 
+class MyInteractionIf : public apache::thrift::Tile, public apache::thrift::ServerInterface {
+ public:
+  std::string_view getGeneratedName() const override { return "MyInteraction"; }
+
+  typedef ::cpp2::MyServiceAsyncProcessor ProcessorType;
+  virtual ~MyInteractionIf() = default;
+  std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override {
+    std::terminate();
+  }
+  CreateMethodMetadataResult createMethodMetadata() override {
+    std::terminate();
+  }
+  virtual ::std::int32_t sync_getId(::std::int32_t /*field*/);
+  [[deprecated("Use sync_getId instead")]] virtual ::std::int32_t getId(::std::int32_t /*field*/);
+  virtual folly::SemiFuture<::std::int32_t> semifuture_getId(::std::int32_t p_field);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::std::int32_t> co_getId(::std::int32_t p_field);
+  virtual folly::coro::Task<::std::int32_t> co_getId(apache::thrift::RequestParams params, ::std::int32_t p_field);
+#endif
+  virtual void async_tm_getId(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback, ::std::int32_t p_field);
+  virtual void sync_echo();
+  [[deprecated("Use sync_echo instead")]] virtual void echo();
+  virtual folly::SemiFuture<folly::Unit> semifuture_echo();
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<void> co_echo();
+  virtual folly::coro::Task<void> co_echo(apache::thrift::RequestParams params);
+#endif
+  virtual void async_tm_echo(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
+  virtual void sync_getRandomData(::std::string& /*_return*/, std::unique_ptr<::cpp2::Request> /*req*/);
+  [[deprecated("Use sync_getRandomData instead")]] virtual void getRandomData(::std::string& /*_return*/, std::unique_ptr<::cpp2::Request> /*req*/);
+  virtual folly::SemiFuture<std::unique_ptr<::std::string>> semifuture_getRandomData(std::unique_ptr<::cpp2::Request> p_req);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<std::unique_ptr<::std::string>> co_getRandomData(std::unique_ptr<::cpp2::Request> p_req);
+  virtual folly::coro::Task<std::unique_ptr<::std::string>> co_getRandomData(apache::thrift::RequestParams params, std::unique_ptr<::cpp2::Request> p_req);
+#endif
+  virtual void async_tm_getRandomData(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback, std::unique_ptr<::cpp2::Request> p_req);
+ private:
+  std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_getId{apache::thrift::detail::si::InvocationType::AsyncTm};
+  std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_echo{apache::thrift::detail::si::InvocationType::AsyncTm};
+  std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_getRandomData{apache::thrift::detail::si::InvocationType::AsyncTm};
+};
+  virtual apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf, ::std::int32_t> sync_initializeInteraction(::std::int32_t /*field*/);
+  [[deprecated("Use sync_initializeInteraction instead")]] virtual apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf, ::std::int32_t> initializeInteraction(::std::int32_t /*field*/);
+  virtual folly::Future<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf, ::std::int32_t>> future_initializeInteraction(::std::int32_t p_field);
+  virtual folly::SemiFuture<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf, ::std::int32_t>> semifuture_initializeInteraction(::std::int32_t p_field);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf, ::std::int32_t>> co_initializeInteraction(::std::int32_t p_field);
+  virtual folly::coro::Task<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf, ::std::int32_t>> co_initializeInteraction(apache::thrift::RequestParams params, ::std::int32_t p_field);
+#endif
+  virtual void async_tm_initializeInteraction(std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf, ::std::int32_t>>> callback, ::std::int32_t p_field);
   virtual void sync_echo();
   [[deprecated("Use sync_echo instead")]] virtual void echo();
   virtual folly::Future<folly::Unit> future_echo();
@@ -84,6 +141,7 @@ class ServiceHandler<::cpp2::MyService> : public apache::thrift::ServerInterface
   virtual void async_eb_ping_eb(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, std::unique_ptr<::cpp2::Request> p_req);
  private:
   static ::cpp2::MyServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
+  std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_initializeInteraction{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_echo{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_getRandomData{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_getId{apache::thrift::detail::si::InvocationType::AsyncTm};
@@ -98,6 +156,7 @@ namespace apache::thrift {
 template <>
 class TypedInterceptor<::cpp2::MyService> : public apache::thrift::TypedInterceptorBase {
  public:
+  virtual InterceptedData before_initializeInteraction(const ::std::int32_t& /*p_field*/);
   virtual InterceptedData before_echo();
   virtual InterceptedData before_getRandomData(const ::cpp2::Request& /*p_req*/);
   virtual InterceptedData before_getId(const ::std::int32_t& /*p_field*/);
@@ -126,10 +185,23 @@ class MyServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor
  public:
   using ProcessFuncs = GeneratedAsyncProcessorBase::ProcessFuncs<MyServiceAsyncProcessor>;
   using ProcessMap = GeneratedAsyncProcessorBase::ProcessMap<ProcessFuncs>;
+  using InteractionConstructor = GeneratedAsyncProcessorBase::InteractionConstructor<MyServiceAsyncProcessor>;
+  using InteractionConstructorMap = GeneratedAsyncProcessorBase::InteractionConstructorMap<InteractionConstructor>;
   static const MyServiceAsyncProcessor::ProcessMap& getOwnProcessMap();
+  static const MyServiceAsyncProcessor::InteractionConstructorMap& getInteractionConstructorMap();
+  std::unique_ptr<apache::thrift::Tile> createInteractionImpl(const std::string& name) override;
  private:
   static const MyServiceAsyncProcessor::ProcessMap kOwnProcessMap_;
+  static const MyServiceAsyncProcessor::InteractionConstructorMap interactionConstructorMap_;
  private:
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void setUpAndProcess_initializeInteraction(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void executeRequest_initializeInteraction(apache::thrift::ServerRequest&& serverRequest);
+  template <class ProtocolIn_, class ProtocolOut_>
+  static apache::thrift::SerializedResponse return_initializeInteraction(apache::thrift::ContextStack* ctx, ::std::int32_t const& _return);
+  template <class ProtocolIn_, class ProtocolOut_>
+  static void throw_wrapped_initializeInteraction(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
   template <typename ProtocolIn_, typename ProtocolOut_>
   void setUpAndProcess_echo(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
   template <typename ProtocolIn_, typename ProtocolOut_>
@@ -162,6 +234,30 @@ class MyServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor
   static apache::thrift::SerializedResponse return_ping_eb(apache::thrift::ContextStack* ctx);
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_ping_eb(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void setUpAndProcess_MyInteraction_getId(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void executeRequest_MyInteraction_getId(apache::thrift::ServerRequest&& serverRequest);
+  template <class ProtocolIn_, class ProtocolOut_>
+  static apache::thrift::SerializedResponse return_MyInteraction_getId(apache::thrift::ContextStack* ctx, ::std::int32_t const& _return);
+  template <class ProtocolIn_, class ProtocolOut_>
+  static void throw_wrapped_MyInteraction_getId(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void setUpAndProcess_MyInteraction_echo(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void executeRequest_MyInteraction_echo(apache::thrift::ServerRequest&& serverRequest);
+  template <class ProtocolIn_, class ProtocolOut_>
+  static apache::thrift::SerializedResponse return_MyInteraction_echo(apache::thrift::ContextStack* ctx);
+  template <class ProtocolIn_, class ProtocolOut_>
+  static void throw_wrapped_MyInteraction_echo(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void setUpAndProcess_MyInteraction_getRandomData(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void executeRequest_MyInteraction_getRandomData(apache::thrift::ServerRequest&& serverRequest);
+  template <class ProtocolIn_, class ProtocolOut_>
+  static apache::thrift::SerializedResponse return_MyInteraction_getRandomData(apache::thrift::ContextStack* ctx, ::std::string const& _return);
+  template <class ProtocolIn_, class ProtocolOut_>
+  static void throw_wrapped_MyInteraction_getRandomData(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
  public:
   MyServiceAsyncProcessor(::apache::thrift::ServiceHandler<::cpp2::MyService>* iface) :
       iface_(iface) {}

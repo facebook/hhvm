@@ -35,6 +35,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>> {
   template <typename T>
   friend class ServiceMetadata;
 
+  static void gen_initializeInteraction(ThriftMetadata& metadata, ThriftService& context);
   static void gen_echo(ThriftMetadata& metadata, ThriftService& context);
   static void gen_getRandomData(ThriftMetadata& metadata, ThriftService& context);
   static void gen_getId(ThriftMetadata& metadata, ThriftService& context);

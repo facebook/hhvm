@@ -13,7 +13,7 @@ path = "../../bench/bench.rs"
 aast_parser = { version = "0.0.0", path = "../aast_parser" }
 ast_and_decl_parser = { version = "0.0.0", path = "../ast_and_decl_parser" }
 bumpalo = { version = "3.11.1", features = ["collections"] }
-clap = { version = "4.3.5", features = ["derive", "env", "string", "unicode", "wrap_help"] }
+clap = { version = "4.4.7", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 criterion = "=0.3.1"
 cst_and_decl_parser = { version = "0.0.0", path = "../../api/cargo/cst_and_decl_parser" }
 direct_decl_parser = { version = "0.0.0", path = "../../api/cargo/direct_decl_parser" }

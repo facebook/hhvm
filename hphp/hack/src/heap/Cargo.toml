@@ -11,6 +11,6 @@ path = "dump_saved_state_depgraph.rs"
 test = false
 
 [dependencies]
-clap = { version = "4.3.5", features = ["derive", "env", "string", "unicode", "wrap_help"] }
+clap = { version = "4.4.7", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 depgraph_reader = { version = "0.0.0", path = "../depgraph/cargo/depgraph_reader" }
 indicatif = { version = "0.17.6", features = ["improved_unicode", "rayon", "tokio"] }

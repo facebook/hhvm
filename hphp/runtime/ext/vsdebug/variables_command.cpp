@@ -673,25 +673,25 @@ const char* VariablesCommand::getTypeName(const Variant& variable) {
     case KindOfPersistentString:
     case KindOfString:
     case KindOfResource:
+    case KindOfRFunc:
+    case KindOfRClsMeth:
+    case KindOfFunc:
+    case KindOfClass:
+    case KindOfClsMeth:
+    case KindOfLazyClass:
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfEnumClassLabel:
       return getDataTypeString(variable.getType()).data();
 
     case KindOfObject:
       return variable.asCObjRef()->getClassName().c_str();
-
-    default:
-      VSDebugLogger::Log(
-        VSDebugLogger::LogLevelError,
-        "Unknown type %d for variable!",
-        (int)variable.getType()
-      );
-      return "UNKNOWN TYPE";
   }
+  not_reached();
 }
 
 const VariablesCommand::VariableValue VariablesCommand::getVariableValue(
@@ -725,7 +725,6 @@ const VariablesCommand::VariableValue VariablesCommand::getVariableValue(
       return VariableValue{dblString};
     }
 
-    case KindOfLazyClass:
     case KindOfPersistentString:
     case KindOfString: {
       std::string value {variable.asCStrRef().toCppString()};
@@ -761,9 +760,19 @@ const VariablesCommand::VariableValue VariablesCommand::getVariableValue(
     case KindOfObject:
       return getObjectSummary(session, debugger, requestId, variable.asCObjRef());
 
-    default:
-      return VariableValue{"Unexpected variable type"};
+    case KindOfFunc:
+    case KindOfRFunc:
+    case KindOfClsMeth:
+    case KindOfRClsMeth:
+    case KindOfClass:
+    case KindOfLazyClass:
+    case KindOfEnumClassLabel: {
+      VariableSerializer vs(VariableSerializer::Type::DebuggerDump, 0, 2);
+      std::string s = vs.serialize(variable, true).data();
+      return VariableValue{s};
+    }
   }
+  not_reached();
 }
 
 const VariablesCommand::VariableValue VariablesCommand::getObjectSummary(

@@ -158,25 +158,39 @@ Array populateStringArray(const rust::Vec<rust::String>& vec) {
   return arr;
 }
 
-#define MAYBE_SET(fval, fname, fn) \
-  if (!fval.empty()) {             \
-    info.set(fname, fn(fval));     \
+template <typename T, typename F>
+void maybeSet(Array& info, const T& fval, const StaticString& fname, F fn) {
+  if (!fval.empty()) {
+    info.set(fname, fn(fval));
   }
+}
 
-#define MAYBE_SET_FIRST(fval, fname, fn) \
-  if (!fval.empty()) {                   \
-    info.set(fname, fn(fval)[0]);        \
+template <typename T, typename F>
+void maybeSetFirst(
+    Array& info,
+    const T& fval,
+    const StaticString& fname,
+    F fn) {
+  if (!fval.empty()) {
+    info.set(fname, fn(fval)[0]);
   }
+}
 
-#define MAYBE_SET_BOOL(fval, fname) \
-  if (fval) {                       \
-    info.set(fname, fval);          \
+void maybeSetBool(Array& info, bool fval, const StaticString& fname) {
+  if (fval) {
+    info.set(fname, true);
   }
+}
 
-#define MAYBE_FLAG(fval, fname, flag) \
-  if ((fval & flag) != 0) {           \
-    info.set(fname, true);            \
+void maybeFlag(
+    Array& info,
+    unsigned fval,
+    const StaticString& fname,
+    unsigned flag) {
+  if ((fval & flag) != 0) {
+    info.set(fname, true);
   }
+}
 
 /*
  * Maps the rust type constraints to their hack shape equivalent
@@ -210,7 +224,7 @@ Array populateEnumType(const rust::Vec<hackc::ExtDeclEnumType>& entypes) {
     Array info = Array::CreateDict();
     info.set(s_base, rustToString(et.base));
     info.set(s_constraint, rustToString(et.constraint));
-    MAYBE_SET(et.includes, s_includes, populateStringArray)
+    maybeSet(info, et.includes, s_includes, populateStringArray);
     arr.append(info);
   }
   return arr;
@@ -228,7 +242,7 @@ Array populateAttributes(const rust::Vec<hackc::ExtDeclAttribute>& attrs) {
   for (auto const& attr : attrs) {
     Array info = Array::CreateDict();
     info.set(s_name, rustToString(attr.name));
-    MAYBE_SET(attr.args, s_args, populateStringArray)
+    maybeSet(info, attr.args, s_args, populateStringArray);
     arr.append(info);
   }
   return arr;
@@ -248,9 +262,9 @@ Array populateTParams(const rust::Vec<hackc::ExtDeclTparam>& tparams) {
     info.set(s_name, rustToString(tp.name));
     info.set(s_variance, rustToString(tp.variance));
     info.set(s_reified, rustToString(tp.reified));
-    MAYBE_SET(tp.user_attributes, s_attributes, populateAttributes)
-    MAYBE_SET(tp.tparams, s_tparams, populateTParams)
-    MAYBE_SET(tp.constraints, s_constraints, populateTypeConstraints)
+    maybeSet(info, tp.user_attributes, s_attributes, populateAttributes);
+    maybeSet(info, tp.tparams, s_tparams, populateTParams);
+    maybeSet(info, tp.constraints, s_constraints, populateTypeConstraints);
     arr.append(info);
   }
   return arr;
@@ -269,7 +283,7 @@ Array populateConstants(const rust::Vec<hackc::ExtDeclClassConst>& consts) {
     Array info = Array::CreateDict();
     info.set(s_name, rustToString(c.name));
     info.set(s_type, rustToString(c.type_));
-    MAYBE_SET_BOOL(c.is_abstract, s_is_abstract)
+    maybeSetBool(info, c.is_abstract, s_is_abstract);
     arr.append(info);
   }
   return arr;
@@ -289,9 +303,9 @@ Array populateTypeConstants(
     Array info = Array::CreateDict();
     info.set(s_name, rustToString(tc.name));
     info.set(s_kind, rustToString(tc.kind));
-    MAYBE_SET_BOOL(tc.is_ctx, s_is_ctx)
-    MAYBE_SET_BOOL(tc.enforceable, s_is_enforceable)
-    MAYBE_SET_BOOL(tc.reifiable, s_is_reifiable)
+    maybeSetBool(info, tc.is_ctx, s_is_ctx);
+    maybeSetBool(info, tc.enforceable, s_is_enforceable);
+    maybeSetBool(info, tc.reifiable, s_is_reifiable);
     arr.append(info);
   }
   return arr;
@@ -311,15 +325,15 @@ Array populateProps(const rust::Vec<::HPHP::hackc::ExtDeclProp>& props) {
     info.set(s_name, rustToString(prop.name));
     info.set(s_type, rustToString(prop.type_));
     info.set(s_visibility, rustToString(prop.visibility));
-    MAYBE_FLAG(prop.flags, s_is_abstract, 1 << 0)
-    MAYBE_FLAG(prop.flags, s_is_const, 1 << 1)
-    MAYBE_FLAG(prop.flags, s_is_lateinit, 1 << 2)
-    MAYBE_FLAG(prop.flags, s_is_lsb, 1 << 3)
-    MAYBE_FLAG(prop.flags, s_is_needs_init, 1 << 4)
-    MAYBE_FLAG(prop.flags, s_is_php_std_lib, 1 << 5)
-    MAYBE_FLAG(prop.flags, s_is_readonly, 1 << 6)
-    MAYBE_FLAG(prop.flags, s_is_safe_global_variable, 1 << 7)
-    MAYBE_FLAG(prop.flags, s_is_no_auto_likes, 1 << 8)
+    maybeFlag(info, prop.flags, s_is_abstract, 1u << 0);
+    maybeFlag(info, prop.flags, s_is_const, 1 << 1);
+    maybeFlag(info, prop.flags, s_is_lateinit, 1 << 2);
+    maybeFlag(info, prop.flags, s_is_lsb, 1 << 3);
+    maybeFlag(info, prop.flags, s_is_needs_init, 1 << 4);
+    maybeFlag(info, prop.flags, s_is_php_std_lib, 1 << 5);
+    maybeFlag(info, prop.flags, s_is_readonly, 1 << 6);
+    maybeFlag(info, prop.flags, s_is_safe_global_variable, 1 << 7);
+    maybeFlag(info, prop.flags, s_is_no_auto_likes, 1 << 8);
     arr.append(info);
   }
   return arr;
@@ -339,13 +353,13 @@ Array populateMethodParams(
     Array info = Array::CreateDict();
     info.set(s_name, rustToString(param.name));
     info.set(s_type, rustToString(param.type_));
-    MAYBE_SET_BOOL(!param.enforced_type, s_is_soft_type)
-    MAYBE_FLAG(param.flags, s_is_accept_disposable, 1 << 0)
-    MAYBE_FLAG(param.flags, s_is_inout, 1 << 1)
-    MAYBE_FLAG(param.flags, s_has_default, 1 << 2)
-    MAYBE_FLAG(param.flags, s_is_ifc_external, 1 << 3)
-    MAYBE_FLAG(param.flags, s_is_ifc_can_call, 1 << 4)
-    MAYBE_FLAG(param.flags, s_is_readonly, 1 << 8)
+    maybeSetBool(info, !param.enforced_type, s_is_soft_type);
+    maybeFlag(info, param.flags, s_is_accept_disposable, 1 << 0);
+    maybeFlag(info, param.flags, s_is_inout, 1 << 1);
+    maybeFlag(info, param.flags, s_has_default, 1 << 2);
+    maybeFlag(info, param.flags, s_is_ifc_external, 1 << 3);
+    maybeFlag(info, param.flags, s_is_ifc_can_call, 1 << 4);
+    maybeFlag(info, param.flags, s_is_readonly, 1 << 8);
     arr.append(info);
   }
   return arr;
@@ -361,24 +375,27 @@ Array populateSignature(
     Array info = Array::CreateDict();
 
     info.set(s_return_type, rustToString(sig.return_type));
-    MAYBE_SET(sig.tparams, s_tparams, populateTParams)
-    MAYBE_SET(
-        sig.where_constraints, s_where_constraints, populateTypeConstraints)
-    MAYBE_SET_BOOL(!sig.return_enforced, s_is_soft_return_type)
-    MAYBE_SET(sig.params, s_params, populateMethodParams)
-    MAYBE_SET(sig.implicit_params, s_implicit_params, rustToString)
-    MAYBE_SET(sig.cross_package, s_cross_package, rustToString)
-    MAYBE_FLAG(sig.flags, s_is_return_disposable, 1 << 0)
-    MAYBE_FLAG(sig.flags, s_is_coroutine, 1 << 3)
-    MAYBE_FLAG(sig.flags, s_is_async, 1 << 4)
-    MAYBE_FLAG(sig.flags, s_is_generator, 1 << 5)
-    MAYBE_FLAG(sig.flags, s_is_instantiated_targs, 1 << 8)
-    MAYBE_FLAG(sig.flags, s_is_function_pointer, 1 << 9)
-    MAYBE_FLAG(sig.flags, s_is_returns_readonly, 1 << 10)
-    MAYBE_FLAG(sig.flags, s_is_readonly_this, 1 << 11)
-    MAYBE_FLAG(sig.flags, s_is_support_dynamic_type, 1 << 12)
-    MAYBE_FLAG(sig.flags, s_is_memoized, 1 << 13)
-    MAYBE_FLAG(sig.flags, s_is_variadic, 1 << 14)
+    maybeSet(info, sig.tparams, s_tparams, populateTParams);
+    maybeSet(
+        info,
+        sig.where_constraints,
+        s_where_constraints,
+        populateTypeConstraints);
+    maybeSetBool(info, !sig.return_enforced, s_is_soft_return_type);
+    maybeSet(info, sig.params, s_params, populateMethodParams);
+    maybeSet(info, sig.implicit_params, s_implicit_params, rustToString);
+    maybeSet(info, sig.cross_package, s_cross_package, rustToString);
+    maybeFlag(info, sig.flags, s_is_return_disposable, 1 << 0);
+    maybeFlag(info, sig.flags, s_is_coroutine, 1 << 3);
+    maybeFlag(info, sig.flags, s_is_async, 1 << 4);
+    maybeFlag(info, sig.flags, s_is_generator, 1 << 5);
+    maybeFlag(info, sig.flags, s_is_instantiated_targs, 1 << 8);
+    maybeFlag(info, sig.flags, s_is_function_pointer, 1 << 9);
+    maybeFlag(info, sig.flags, s_is_returns_readonly, 1 << 10);
+    maybeFlag(info, sig.flags, s_is_readonly_this, 1 << 11);
+    maybeFlag(info, sig.flags, s_is_support_dynamic_type, 1 << 12);
+    maybeFlag(info, sig.flags, s_is_memoized, 1 << 13);
+    maybeFlag(info, sig.flags, s_is_variadic, 1 << 14);
 
     Array arr = Array::CreateVec();
     arr.append(info);
@@ -402,14 +419,14 @@ Array populateMethods(const rust::Vec<::HPHP::hackc::ExtDeclMethod>& meths) {
     info.set(s_name, rustToString(meth.name));
     info.set(s_signature_type, rustToString(meth.type_));
     info.set(s_visibility, rustToString(meth.visibility));
-    MAYBE_SET(meth.attributes, s_attributes, populateAttributes)
-    MAYBE_SET_FIRST(meth.signature, s_signature, populateSignature)
-    MAYBE_FLAG(meth.flags, s_is_abstract, 1 << 0)
-    MAYBE_FLAG(meth.flags, s_is_final, 1 << 1)
-    MAYBE_FLAG(meth.flags, s_is_override, 1 << 2)
-    MAYBE_FLAG(meth.flags, s_is_dyncall, 1 << 3)
-    MAYBE_FLAG(meth.flags, s_is_php_std_lib, 1 << 4)
-    MAYBE_FLAG(meth.flags, s_is_support_dynamic_type, 1 << 5)
+    maybeSet(info, meth.attributes, s_attributes, populateAttributes);
+    maybeSetFirst(info, meth.signature, s_signature, populateSignature);
+    maybeFlag(info, meth.flags, s_is_abstract, 1 << 0);
+    maybeFlag(info, meth.flags, s_is_final, 1 << 1);
+    maybeFlag(info, meth.flags, s_is_override, 1 << 2);
+    maybeFlag(info, meth.flags, s_is_dyncall, 1 << 3);
+    maybeFlag(info, meth.flags, s_is_php_std_lib, 1 << 4);
+    maybeFlag(info, meth.flags, s_is_support_dynamic_type, 1 << 5);
     arr.append(info);
   }
   return arr;
@@ -426,40 +443,45 @@ Array populateClass(const hackc::ExtDeclClass& kls) {
   // class / interface / trait / enum / enum_class
   info.set(s_kind, rustToString(kls.kind));
 
-  MAYBE_SET(kls.module, s_module, rustToString)
-  MAYBE_SET(kls.docs_url, s_docs_url, rustToString)
+  maybeSet(info, kls.module, s_module, rustToString);
+  maybeSet(info, kls.docs_url, s_docs_url, rustToString);
 
-  MAYBE_SET_BOOL(kls.final_, s_is_final)
-  MAYBE_SET_BOOL(kls.abstract_, s_is_abstract)
-  MAYBE_SET_BOOL(kls.internal, s_is_internal)
-  MAYBE_SET_BOOL(kls.is_strict, s_is_strict)
-  MAYBE_SET_BOOL(kls.support_dynamic_type, s_is_support_dynamic_type)
+  maybeSetBool(info, kls.final_, s_is_final);
+  maybeSetBool(info, kls.abstract_, s_is_abstract);
+  maybeSetBool(info, kls.internal, s_is_internal);
+  maybeSetBool(info, kls.is_strict, s_is_strict);
+  maybeSetBool(info, kls.support_dynamic_type, s_is_support_dynamic_type);
 
-  MAYBE_SET(kls.extends, s_extends, populateStringArray)
-  MAYBE_SET(kls.uses, s_uses, populateStringArray)
-  MAYBE_SET(kls.implements, s_implements, populateStringArray)
-  MAYBE_SET(kls.require_extends, s_require_extends, populateStringArray)
-  MAYBE_SET(kls.require_implements, s_require_implements, populateStringArray)
-  MAYBE_SET(kls.require_class, s_require_class, populateStringArray)
+  maybeSet(info, kls.extends, s_extends, populateStringArray);
+  maybeSet(info, kls.uses, s_uses, populateStringArray);
+  maybeSet(info, kls.implements, s_implements, populateStringArray);
+  maybeSet(info, kls.require_extends, s_require_extends, populateStringArray);
+  maybeSet(
+      info, kls.require_implements, s_require_implements, populateStringArray);
+  maybeSet(info, kls.require_class, s_require_class, populateStringArray);
 
   // XHP related
-  MAYBE_SET_BOOL(kls.is_xhp, s_is_xhp)
-  MAYBE_SET_BOOL(kls.has_xhp_keyword, s_has_xhp)
-  MAYBE_SET_BOOL(kls.xhp_marked_empty, s_is_xhp_marked_empty)
-  MAYBE_SET(kls.xhp_attr_uses, s_xhp_attr_uses, populateStringArray)
+  maybeSetBool(info, kls.is_xhp, s_is_xhp);
+  maybeSetBool(info, kls.has_xhp_keyword, s_has_xhp);
+  maybeSetBool(info, kls.xhp_marked_empty, s_is_xhp_marked_empty);
+  maybeSet(info, kls.xhp_attr_uses, s_xhp_attr_uses, populateStringArray);
 
   // Complex Types
-  MAYBE_SET(kls.user_attributes, s_attributes, populateAttributes)
-  MAYBE_SET(kls.methods, s_methods, populateMethods)
-  MAYBE_SET(kls.static_methods, s_static_methods, populateMethods)
-  MAYBE_SET_FIRST(kls.constructor, s_constructor, populateMethods)
-  MAYBE_SET(kls.typeconsts, s_typeconsts, populateTypeConstants)
-  MAYBE_SET(kls.consts, s_consts, populateConstants)
-  MAYBE_SET(kls.where_constraints, s_where_constraints, populateTypeConstraints)
-  MAYBE_SET(kls.tparams, s_tparams, populateTParams)
-  MAYBE_SET_FIRST(kls.enum_type, s_enum_type, populateEnumType)
-  MAYBE_SET(kls.props, s_props, populateProps)
-  MAYBE_SET(kls.sprops, s_sprops, populateProps)
+  maybeSet(info, kls.user_attributes, s_attributes, populateAttributes);
+  maybeSet(info, kls.methods, s_methods, populateMethods);
+  maybeSet(info, kls.static_methods, s_static_methods, populateMethods);
+  maybeSetFirst(info, kls.constructor, s_constructor, populateMethods);
+  maybeSet(info, kls.typeconsts, s_typeconsts, populateTypeConstants);
+  maybeSet(info, kls.consts, s_consts, populateConstants);
+  maybeSet(
+      info,
+      kls.where_constraints,
+      s_where_constraints,
+      populateTypeConstraints);
+  maybeSet(info, kls.tparams, s_tparams, populateTParams);
+  maybeSetFirst(info, kls.enum_type, s_enum_type, populateEnumType);
+  maybeSet(info, kls.props, s_props, populateProps);
+  maybeSet(info, kls.sprops, s_sprops, populateProps);
 
   return info;
 }
@@ -512,13 +534,13 @@ Array populateFileFuncs(const rust::Vec<::HPHP::hackc::ExtDeclFileFunc>& funs) {
     Array info = Array::CreateDict();
     info.set(s_name, rustToString(fun.name));
     info.set(s_signature_type, rustToString(fun.type_));
-    MAYBE_SET(fun.module, s_module, rustToString)
-    MAYBE_SET_BOOL(fun.internal, s_is_internal)
-    MAYBE_SET_BOOL(fun.php_std_lib, s_is_php_std_lib)
-    MAYBE_SET_BOOL(fun.support_dynamic_type, s_is_support_dynamic_type)
-    MAYBE_SET_BOOL(fun.no_auto_dynamic, s_is_no_dynamic)
-    MAYBE_SET_BOOL(fun.no_auto_likes, s_is_no_auto_likes)
-    MAYBE_SET_FIRST(fun.signature, s_signature, populateSignature)
+    maybeSet(info, fun.module, s_module, rustToString);
+    maybeSetBool(info, fun.internal, s_is_internal);
+    maybeSetBool(info, fun.php_std_lib, s_is_php_std_lib);
+    maybeSetBool(info, fun.support_dynamic_type, s_is_support_dynamic_type);
+    maybeSetBool(info, fun.no_auto_dynamic, s_is_no_dynamic);
+    maybeSetBool(info, fun.no_auto_likes, s_is_no_auto_likes);
+    maybeSetFirst(info, fun.signature, s_signature, populateSignature);
     arr.append(info);
   }
   return arr;
@@ -536,8 +558,8 @@ Array populateModules(const rust::Vec<::HPHP::hackc::ExtDeclModule>& modules) {
   for (auto const& module : modules) {
     Array info = Array::CreateDict();
     info.set(s_name, rustToString(module.name));
-    MAYBE_SET(module.imports, s_imports, populateStringArray)
-    MAYBE_SET(module.exports, s_exports, populateStringArray)
+    maybeSet(info, module.imports, s_imports, populateStringArray);
+    maybeSet(info, module.exports, s_exports, populateStringArray);
     arr.append(info);
   }
   return arr;
@@ -558,14 +580,14 @@ Array populateTypedefs(
     info.set(s_name, rustToString(td.name));
     info.set(s_type, rustToString(td.type_));
     info.set(s_visibility, rustToString(td.visibility));
-    MAYBE_SET(td.module, s_module, rustToString)
-    MAYBE_SET(td.tparams, s_tparams, populateTParams)
-    MAYBE_SET(td.as_constraint, s_as_constraint, rustToString)
-    MAYBE_SET(td.super_constraint, s_super_constraint, rustToString)
-    MAYBE_SET_BOOL(td.is_ctx, s_is_ctx)
-    MAYBE_SET_BOOL(td.internal, s_is_internal)
-    MAYBE_SET(td.docs_url, s_docs_url, rustToString)
-    MAYBE_SET(td.attributes, s_attributes, populateAttributes)
+    maybeSet(info, td.module, s_module, rustToString);
+    maybeSet(info, td.tparams, s_tparams, populateTParams);
+    maybeSet(info, td.as_constraint, s_as_constraint, rustToString);
+    maybeSet(info, td.super_constraint, s_super_constraint, rustToString);
+    maybeSetBool(info, td.is_ctx, s_is_ctx);
+    maybeSetBool(info, td.internal, s_is_internal);
+    maybeSet(info, td.docs_url, s_docs_url, rustToString);
+    maybeSet(info, td.attributes, s_attributes, populateAttributes);
     arr.append(info);
   }
   return arr;
@@ -576,17 +598,17 @@ Array populateTypedefs(
  */
 Array populateFile(const ::HPHP::hackc::ExtDeclFile& file) {
   Array info = Array::CreateDict();
-  MAYBE_SET(file.typedefs, s_attributes, populateTypedefs)
-  MAYBE_SET(file.functions, s_attributes, populateFileFuncs)
-  MAYBE_SET(file.constants, s_attributes, populateFileConsts)
-  MAYBE_SET(file.file_attributes, s_attributes, populateAttributes)
-  MAYBE_SET(file.modules, s_attributes, populateModules)
-  MAYBE_SET(file.classes, s_attributes, populateClasses)
-  MAYBE_SET_BOOL(
-      file.disable_xhp_element_mangling, s_disable_xhp_element_mangling)
-  MAYBE_SET_BOOL(
-      file.has_first_pass_parse_errors, s_has_first_pass_parse_errors)
-  MAYBE_SET_BOOL(file.is_strict, s_is_strict)
+  maybeSet(info, file.typedefs, s_attributes, populateTypedefs);
+  maybeSet(info, file.functions, s_attributes, populateFileFuncs);
+  maybeSet(info, file.constants, s_attributes, populateFileConsts);
+  maybeSet(info, file.file_attributes, s_attributes, populateAttributes);
+  maybeSet(info, file.modules, s_attributes, populateModules);
+  maybeSet(info, file.classes, s_attributes, populateClasses);
+  maybeSetBool(
+      info, file.disable_xhp_element_mangling, s_disable_xhp_element_mangling);
+  maybeSetBool(
+      info, file.has_first_pass_parse_errors, s_has_first_pass_parse_errors);
+  maybeSetBool(info, file.is_strict, s_is_strict);
   return info;
 }
 

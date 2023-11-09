@@ -971,6 +971,11 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
     return thriftConfig_.getIdleTimeout();
   }
 
+  /** Don't use: Set maximum number of milliseconds connection can live. Most
+   * likely you want to use setIdleTimeout instead..
+   *
+   *  @param timeout number of milliseconds.
+   */
   void setConnectionAgeTimeout(std::chrono::milliseconds timeout) {
     thriftConfig_.setConnectionAgeTimeout(
         std::move(timeout), AttributeSource::OVERRIDE);

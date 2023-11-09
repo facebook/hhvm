@@ -42,8 +42,16 @@ class ServiceHandler<::cpp2::MyService> : public apache::thrift::ServerInterface
   typedef ::cpp2::MyServiceAsyncProcessor ProcessorType;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;
   CreateMethodMetadataResult createMethodMetadata() override;
+  const std::vector<std::unique_ptr<TypedInterceptor<::cpp2::MyService>>>& getTypedInterceptors() const {
+    return __fbthrift_typedInterceptors_;
+  }
+  void addTypedInterceptor(std::unique_ptr<TypedInterceptor<::cpp2::MyService>> typedInterceptor) {
+    __fbthrift_typedInterceptors_.push_back(std::move(typedInterceptor));
+  }
  private:
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
+  size_t getNumTypedInterceptors() const final;
+  std::vector<std::unique_ptr<TypedInterceptor<::cpp2::MyService>>> __fbthrift_typedInterceptors_;
  public:
 
   virtual void sync_echo();
@@ -86,6 +94,17 @@ class ServiceHandler<::cpp2::MyService> : public apache::thrift::ServerInterface
 namespace cpp2 {
 using MyServiceSvIf [[deprecated("Use apache::thrift::ServiceHandler<MyService> instead")]] = ::apache::thrift::ServiceHandler<MyService>;
 } // cpp2
+namespace apache::thrift {
+template <>
+class TypedInterceptor<::cpp2::MyService> : public apache::thrift::TypedInterceptorBase {
+ public:
+  virtual InterceptedData before_echo();
+  virtual InterceptedData before_getRandomData(const ::cpp2::Request& /*p_req*/);
+  virtual InterceptedData before_getId(const ::std::int32_t& /*p_field*/);
+  virtual InterceptedData before_ping_eb(const ::cpp2::Request& /*p_req*/);
+};
+} // namespace apache::thrift
+
 namespace cpp2 {
 class MyServiceSvNull : public ::apache::thrift::ServiceHandler<MyService> {
  public:

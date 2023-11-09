@@ -14,20 +14,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><% > service_h/service_interface%><%!
-
-%><%#service:cpp_typed_interceptor?%>
-
-<% > service_h/service_typed_interceptor%>
-
-<%/service:cpp_typed_interceptor?%>
-
-<% > common/namespace_cpp2_begin%>
-
-<% > service_h/service_null%>
-
-
-<% > service_h/async_processor%>
-
-
-<% > common/namespace_cpp2_end%>
+%><%#function:args%><%#field:type%><%!
+  %>const <%type:cpp_type%>& /*p_<%field:cpp_name%>*/<%^last?%>, <%/last?%><%!
+%><%/field:type%><%/function:args%>

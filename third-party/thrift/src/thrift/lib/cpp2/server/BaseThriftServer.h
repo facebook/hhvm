@@ -1078,6 +1078,11 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
     return ServerConfigs::getRequestExecutionScope(ctx, defaultPriority);
   }
 
+  size_t getNumTypedInterceptors() const final {
+    return applicationServerInterface_
+        ? applicationServerInterface_->getNumTypedInterceptors()
+        : 0;
+  }
   /**
    * Sets the interface that will be used for monitoring connections only.
    */

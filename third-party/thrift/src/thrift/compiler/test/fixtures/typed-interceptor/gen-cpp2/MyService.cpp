@@ -19,6 +19,10 @@ apache::thrift::ServiceHandler<::cpp2::MyService>::CreateMethodMetadataResult ap
 }
 
 
+size_t apache::thrift::ServiceHandler<::cpp2::MyService>::getNumTypedInterceptors() const {
+    return __fbthrift_typedInterceptors_.size();
+}
+
 std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> apache::thrift::ServiceHandler<::cpp2::MyService>::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();
 }
@@ -358,6 +362,20 @@ determineInvocationType:
 
 void apache::thrift::ServiceHandler<::cpp2::MyService>::async_eb_ping_eb(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, std::unique_ptr<::cpp2::Request> /*req*/) {
   callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("ping_eb"));
+}
+
+
+apache::thrift::InterceptedData apache::thrift::TypedInterceptor<::cpp2::MyService>::before_echo() {
+  return InterceptedData::make<std::monostate>();
+}
+apache::thrift::InterceptedData apache::thrift::TypedInterceptor<::cpp2::MyService>::before_getRandomData(const ::cpp2::Request& /*p_req*/) {
+  return InterceptedData::make<std::monostate>();
+}
+apache::thrift::InterceptedData apache::thrift::TypedInterceptor<::cpp2::MyService>::before_getId(const ::std::int32_t& /*p_field*/) {
+  return InterceptedData::make<std::monostate>();
+}
+apache::thrift::InterceptedData apache::thrift::TypedInterceptor<::cpp2::MyService>::before_ping_eb(const ::cpp2::Request& /*p_req*/) {
+  return InterceptedData::make<std::monostate>();
 }
 
 

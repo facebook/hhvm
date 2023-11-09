@@ -45,8 +45,20 @@ class ServiceHandler<<%service:qualified_name%>> : <%#service:extends%>virtual p
   std::optional<std::vector<apache::thrift::type::Schema>> getServiceMetadataV1() override;
   #endif
   <%/service:has_service_schema%>
+  <%#service:cpp_typed_interceptor?%>
+  const std::vector<std::unique_ptr<TypedInterceptor<<%service:qualified_name%>>>>& getTypedInterceptors() const {
+    return __fbthrift_typedInterceptors_;
+  }
+  void addTypedInterceptor(std::unique_ptr<TypedInterceptor<<%service:qualified_name%>>> typedInterceptor) {
+    __fbthrift_typedInterceptors_.push_back(std::move(typedInterceptor));
+  }
+  <%/service:cpp_typed_interceptor?%>
  private:
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
+  <%#service:cpp_typed_interceptor?%>
+  size_t getNumTypedInterceptors() const final;
+  std::vector<std::unique_ptr<TypedInterceptor<<%service:qualified_name%>>>> __fbthrift_typedInterceptors_;
+  <%/service:cpp_typed_interceptor?%>
  public:
 <%#service:interactions%>
 <% > service_h/interaction_service_interface%>

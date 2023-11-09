@@ -14,20 +14,12 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><% > service_h/service_interface%><%!
-
-%><%#service:cpp_typed_interceptor?%>
-
-<% > service_h/service_typed_interceptor%>
-
-<%/service:cpp_typed_interceptor?%>
-
-<% > common/namespace_cpp2_begin%>
-
-<% > service_h/service_null%>
-
-
-<% > service_h/async_processor%>
-
-
-<% > common/namespace_cpp2_end%>
+%>namespace apache::thrift {
+template <>
+class TypedInterceptor<<%service:qualified_name%>> : public apache::thrift::TypedInterceptorBase {
+ public:
+ <%#service:functions%><%#function:cpp_typed_interceptor?%>
+  virtual InterceptedData before_<%function:cpp_name%>(<% > service_common/function_param_list_interceptor%>);
+ <%/function:cpp_typed_interceptor?%><%/service:functions%>
+};
+} // namespace apache::thrift

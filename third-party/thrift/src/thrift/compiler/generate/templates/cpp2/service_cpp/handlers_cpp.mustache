@@ -31,6 +31,12 @@ std::optional<std::vector<apache::thrift::type::Schema>> <% > service_common/ser
 #endif
 <%/service:has_service_schema%>
 
+<%#service:cpp_typed_interceptor?%>
+size_t <% > service_common/service_class_name%>::getNumTypedInterceptors() const {
+    return __fbthrift_typedInterceptors_.size();
+}
+
+<%/service:cpp_typed_interceptor?%>
 std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> <% > service_common/service_class_name%>::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();
 }
@@ -41,6 +47,11 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 
 <% > service_cpp/service_interface_impl%>
 
+<%#service:cpp_typed_interceptor?%>
+
+<% > service_cpp/service_typed_interceptor_impl%>
+
+<%/service:cpp_typed_interceptor?%>
 <%#service:interactions%>
 <% > service_cpp/service_interface_impl%>
 <%/service:interactions%>

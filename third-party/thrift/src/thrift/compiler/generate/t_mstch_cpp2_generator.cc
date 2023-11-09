@@ -678,7 +678,7 @@ class cpp_mstch_service : public mstch_service {
              &cpp_mstch_service::service_schema_name},
             {"service:has_service_schema",
              &cpp_mstch_service::has_service_schema},
-            {"service:typed_interceptor?",
+            {"service:cpp_typed_interceptor?",
              &cpp_mstch_service::generate_typed_interceptor},
             {"service:reduced_client?", &cpp_mstch_service::reduced_client},
         });
@@ -848,7 +848,7 @@ class cpp_mstch_function : public mstch_function {
             {"function:stack_arguments?", &cpp_mstch_function::stack_arguments},
             {"function:created_interaction",
              &cpp_mstch_function::created_interaction},
-            {"function:typed_interceptor?",
+            {"function:cpp_typed_interceptor?",
              &cpp_mstch_function::generate_typed_interceptor},
             {"function:sync_returns_by_outparam?",
              &cpp_mstch_function::sync_returns_by_outparam},
@@ -882,12 +882,13 @@ class cpp_mstch_function : public mstch_function {
         !function_->interaction() && !function_->sink_or_stream();
   }
   mstch::node generate_typed_interceptor() {
-    // If the function is part of a service that has the annotation, then
-    // generate a typed interceptor for it.
-    return function_->find_structured_annotation_or_null(
-               kCppGenerateTypedInterceptor) ||
-        interface_->find_structured_annotation_or_null(
-            kCppGenerateTypedInterceptor);
+    // Functions that are an interaction constructor, don't create an RPC. hence
+    // we don't generate interceptors for them.
+    return !function_->is_interaction_constructor() &&
+        (function_->find_structured_annotation_or_null(
+             kCppGenerateTypedInterceptor) ||
+         interface_->find_structured_annotation_or_null(
+             kCppGenerateTypedInterceptor));
   }
 
   mstch::node prefixed_name() {

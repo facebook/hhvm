@@ -1120,6 +1120,11 @@ let handle_request
           ServerTypeHierarchy.go_quarantined ~ctx ~entry ~line ~column)
     in
     (Initialized istate, Ok results)
+  (* AutoClose *)
+  | (Initialized istate, AutoClose (document, { line; column })) ->
+    let (istate, ctx, entry, _) = update_file_ctx istate document in
+    let close_tag = AutocloseTags.go_xhp_close_tag ~ctx ~entry ~line ~column in
+    (Initialized istate, Ok close_tag)
   (* Code actions (refactorings, quickfixes) *)
   | (Initialized istate, Code_action (document, range)) ->
     let (istate, ctx, entry, published_errors_ref) =

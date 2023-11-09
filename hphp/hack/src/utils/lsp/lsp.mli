@@ -1099,6 +1099,12 @@ module SignatureHelp : sig
   }
 end
 
+module AutoCloseJsx : sig
+  type params = TextDocumentPositionParams.t
+
+  and result = string option
+end
+
 (** Workspace TypeHierarchy request, method="textDocument/typeHierarchy" *)
 module TypeHierarchy : sig
   type params = TextDocumentPositionParams.t
@@ -1284,6 +1290,7 @@ type lsp_request =
   | DocumentCodeLensRequest of DocumentCodeLens.params
   | SignatureHelpRequest of SignatureHelp.params
   | TypeHierarchyRequest of TypeHierarchy.params
+  | AutoCloseRequest of AutoCloseJsx.params
   | HackTestStartServerRequestFB
   | HackTestStopServerRequestFB
   | HackTestShutdownServerlessRequestFB
@@ -1319,6 +1326,7 @@ type lsp_result =
   | DocumentCodeLensResult of DocumentCodeLens.result
   | SignatureHelpResult of SignatureHelp.result
   | TypeHierarchyResult of TypeHierarchy.result
+  | AutoCloseResult of AutoCloseJsx.result
   | HackTestStartServerResultFB
   | HackTestStopServerResultFB
   | HackTestShutdownServerlessResultFB

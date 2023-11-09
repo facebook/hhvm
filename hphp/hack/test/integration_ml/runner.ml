@@ -12,6 +12,7 @@ let tests =
   [
     ("ide/added_parent", run Test_added_parent_ide.test);
     ("ide/auto_ns_aliasing", run Test_auto_ns_aliasing.test);
+    ("ide/autoclose_xhp", run Test_autoclose_xhp.test);
     ("ide/diagnostics_in_closed_file", run Test_diagnostics_in_closed_file.test);
     ("ide/error_pos", run Test_error_pos.test);
     ("ide/failed_naming", run Test_failed_naming_ide.test);

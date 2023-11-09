@@ -418,6 +418,14 @@ let print_signatureHelp (r : SignatureHelp.result) : json =
 let parse_typeHierarchy (params : json option) : TypeHierarchy.params =
   parse_textDocumentPositionParams params
 
+let parse_AutoClose (params : json option) : AutoCloseJsx.params =
+  parse_textDocumentPositionParams params
+
+let print_AutoClose (r : AutoCloseJsx.result) : json =
+  match r with
+  | None -> Hh_json.JSON_Null
+  | Some r -> Hh_json.JSON_String r
+
 let print_typeHierarchy (r : TypeHierarchy.result) : json =
   TypeHierarchy.(
     let print_member_entry (entry : TypeHierarchy.memberEntry) =
@@ -1424,6 +1432,8 @@ let get_uri_opt (m : lsp_message) : Lsp.DocumentUri.t option =
     Some p.TextDocumentPositionParams.textDocument.uri
   | RequestMessage (_, TypeHierarchyRequest p) ->
     Some p.TextDocumentPositionParams.textDocument.uri
+  | RequestMessage (_, AutoCloseRequest p) ->
+    Some p.TextDocumentPositionParams.textDocument.uri
   | NotificationMessage (PublishDiagnosticsNotification p) ->
     Some p.PublishDiagnostics.uri
   | NotificationMessage (DidOpenNotification p) ->
@@ -1498,6 +1508,7 @@ let request_name_to_string (request : lsp_request) : string =
   | DocumentCodeLensRequest _ -> "textDocument/codeLens"
   | SignatureHelpRequest _ -> "textDocument/signatureHelp"
   | TypeHierarchyRequest _ -> "textDocument/typeHierarchy"
+  | AutoCloseRequest _ -> "flow/autoCloseJsx"
   | HackTestStartServerRequestFB -> "$test/startHhServer"
   | HackTestStopServerRequestFB -> "$test/stopHhServer"
   | HackTestShutdownServerlessRequestFB -> "$test/shutdownServerlessIde"
@@ -1534,6 +1545,7 @@ let result_name_to_string (result : lsp_result) : string =
   | DocumentCodeLensResult _ -> "textDocument/codeLens"
   | SignatureHelpResult _ -> "textDocument/signatureHelp"
   | TypeHierarchyResult _ -> "textDocument/typeHierarchy"
+  | AutoCloseResult _ -> "flow/autoCloseJsx"
   | HackTestStartServerResultFB -> "$test/startHhServer"
   | HackTestStopServerResultFB -> "$test/stopHhServer"
   | HackTestShutdownServerlessResultFB -> "$test/shutdownServerlessIde"
@@ -1634,6 +1646,7 @@ let parse_lsp_request (method_ : string) (params : json option) : lsp_request =
     SignatureHelpRequest (parse_signatureHelp params)
   | "textDocument/typeHierarchy" ->
     TypeHierarchyRequest (parse_typeHierarchy params)
+  | "flow/autoCloseJsx" -> AutoCloseRequest (parse_AutoClose params)
   | "textDocument/codeLens" ->
     DocumentCodeLensRequest (parse_documentCodeLens params)
   | "telemetry/rage" -> RageRequestFB
@@ -1704,6 +1717,7 @@ let parse_lsp_result (request : lsp_request) (result : json) : lsp_result =
   | DocumentCodeLensRequest _
   | SignatureHelpRequest _
   | TypeHierarchyRequest _
+  | AutoCloseRequest _
   | HackTestStartServerRequestFB
   | HackTestStopServerRequestFB
   | HackTestShutdownServerlessRequestFB
@@ -1778,6 +1792,7 @@ let print_lsp_request (id : lsp_id) (request : lsp_request) : json =
     | DocumentCodeLensRequest _
     | SignatureHelpRequest _
     | TypeHierarchyRequest _
+    | AutoCloseRequest _
     | HackTestStartServerRequestFB
     | HackTestStopServerRequestFB
     | HackTestShutdownServerlessRequestFB
@@ -1825,6 +1840,7 @@ let print_lsp_response (id : lsp_id) (result : lsp_result) : json =
     | DocumentCodeLensResult r -> print_documentCodeLens r
     | SignatureHelpResult r -> print_signatureHelp r
     | TypeHierarchyResult r -> print_typeHierarchy r
+    | AutoCloseResult r -> print_AutoClose r
     | HackTestStartServerResultFB -> JSON_Null
     | HackTestStopServerResultFB -> JSON_Null
     | HackTestShutdownServerlessResultFB -> JSON_Null

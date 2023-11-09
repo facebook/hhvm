@@ -3214,6 +3214,22 @@ let hack_type_hierarchy_to_lsp
   | None -> None
   | Some h -> Some (hack_hierarchy_entry_to_Lsp h)
 
+let do_autoclose
+    (ide_service : ClientIdeService.t ref)
+    (tracking_id : string)
+    (ref_unblocked_time : float ref)
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
+    (params : AutoCloseJsx.params) : AutoCloseJsx.result Lwt.t =
+  let (document, location) = get_document_location editor_open_files params in
+  let%lwt result =
+    ide_rpc
+      ide_service
+      ~tracking_id
+      ~ref_unblocked_time
+      (ClientIdeMessage.AutoClose (document, location))
+  in
+  Lwt.return result
+
 let do_typeHierarchy
     (ide_service : ClientIdeService.t ref)
     (tracking_id : string)
@@ -4849,6 +4865,20 @@ let handle_client_message
         | None -> 0
         | Some _result -> 1
       in
+      Lwt.return_some (make_result_telemetry result_count)
+    (* autoclose request *)
+    | (_, RequestMessage (id, AutoCloseRequest params)) ->
+      let%lwt () = cancel_if_stale client timestamp short_timeout in
+      let%lwt result =
+        do_autoclose
+          ide_service
+          tracking_id
+          ref_unblocked_time
+          editor_open_files
+          params
+      in
+      respond_jsonrpc ~powered_by:Serverless_ide id (AutoCloseResult result);
+      let result_count = Option.length result in
       Lwt.return_some (make_result_telemetry result_count)
     (* unhandled *)
     | (Running _, _) ->

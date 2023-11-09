@@ -4,6 +4,7 @@
  (modules
   test_added_parent_ide
   test_auto_ns_aliasing
+  test_autoclose_xhp
   test_diagnostics_in_closed_file
   test_error_pos
   test_failed_naming_ide
@@ -25,6 +26,12 @@
  (deps ../test_all.exe)
  (action
   (run ../test_all.exe ide/identify_symbol)))
+
+(rule
+ (alias autoclose_xhp)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/autoclose_xhp)))
 
 (rule
  (alias ide_file_sync)
@@ -127,4 +134,5 @@
   (alias remove_parent)
   (alias failed_naming)
   (alias unsaved_changes)
+  (alias autoclose_xhp)
   (alias error_pos)))

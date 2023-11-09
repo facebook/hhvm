@@ -929,6 +929,14 @@ module TypeHierarchy = struct
   type result = hierarchyEntry option
 end
 
+(** Auto close tag request, method="flow/autoCloseJsx"
+    This is a non-standard LSP extension. *)
+module AutoCloseJsx = struct
+  type params = TextDocumentPositionParams.t
+
+  and result = string option
+end
+
 (* Workspace Rename request, method="textDocument/rename" *)
 module Rename = struct
   type params = renameParams
@@ -1074,6 +1082,7 @@ type lsp_request =
   | DocumentCodeLensRequest of DocumentCodeLens.params
   | SignatureHelpRequest of SignatureHelp.params
   | TypeHierarchyRequest of TypeHierarchy.params
+  | AutoCloseRequest of AutoCloseJsx.params
   | HackTestStartServerRequestFB
   | HackTestStopServerRequestFB
   | HackTestShutdownServerlessRequestFB
@@ -1109,6 +1118,7 @@ type lsp_result =
   | DocumentCodeLensResult of DocumentCodeLens.result
   | SignatureHelpResult of SignatureHelp.result
   | TypeHierarchyResult of TypeHierarchy.result
+  | AutoCloseResult of AutoCloseJsx.result
   | HackTestStartServerResultFB
   | HackTestStopServerResultFB
   | HackTestShutdownServerlessResultFB
@@ -1207,3 +1217,4 @@ let lsp_result_to_log_string = function
   | WillSaveWaitUntilResult _ -> "WillSaveWaitUntilResult"
   | ErrorResult _ -> "ErrorResult"
   | TypeHierarchyResult _ -> "TypeHierarchyResult"
+  | AutoCloseResult _ -> "AutoCloseResult"

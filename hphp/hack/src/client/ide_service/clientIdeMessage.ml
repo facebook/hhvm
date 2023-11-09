@@ -185,6 +185,7 @@ type _ t =
       -> Lsp.CodeActionResolve.result t
   | Type_Hierarchy : document * location -> ServerTypeHierarchyTypes.result t
       (** Handles "textDocument/typeHierarchy" LSP messages *)
+  | AutoClose : document * location -> string option t
 
 let t_to_string : type a. a t -> string = function
   | Initialize_from_saved_state _ -> "Initialize_from_saved_state"
@@ -246,6 +247,8 @@ let t_to_string : type a. a t -> string = function
     Printf.sprintf "Rename(%s)" (Path.to_string file_path)
   | Type_Hierarchy ({ file_path; _ }, _) ->
     Printf.sprintf "Type_Hierarchy(%s)" (Path.to_string file_path)
+  | AutoClose ({ file_path; _ }, _) ->
+    Printf.sprintf "AutoClose(%s)" (Path.to_string file_path)
 
 type 'a tracked_t = {
   tracking_id: string;

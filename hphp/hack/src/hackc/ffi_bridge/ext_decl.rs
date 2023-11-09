@@ -29,31 +29,21 @@ use oxidized_by_ref::typing_defs_core::UserAttributeParam;
 use ty::reason::BReason;
 
 use crate::compile_ffi::ExtDeclAttribute;
-use crate::compile_ffi::ExtDeclAttributeVec;
 use crate::compile_ffi::ExtDeclClass;
 use crate::compile_ffi::ExtDeclClassConst;
-use crate::compile_ffi::ExtDeclClassConstVec;
 use crate::compile_ffi::ExtDeclClassTypeConst;
-use crate::compile_ffi::ExtDeclClassTypeConstVec;
-use crate::compile_ffi::ExtDeclClassVec;
 use crate::compile_ffi::ExtDeclEnumType;
 use crate::compile_ffi::ExtDeclFile;
 use crate::compile_ffi::ExtDeclFileConst;
-use crate::compile_ffi::ExtDeclFileConstVec;
 use crate::compile_ffi::ExtDeclFileFunc;
-use crate::compile_ffi::ExtDeclFileFuncVec;
 use crate::compile_ffi::ExtDeclMethod;
 use crate::compile_ffi::ExtDeclMethodParam;
-use crate::compile_ffi::ExtDeclMethodVec;
 use crate::compile_ffi::ExtDeclModule;
-use crate::compile_ffi::ExtDeclModuleVec;
 use crate::compile_ffi::ExtDeclProp;
-use crate::compile_ffi::ExtDeclPropVec;
 use crate::compile_ffi::ExtDeclSignature;
 use crate::compile_ffi::ExtDeclTparam;
 use crate::compile_ffi::ExtDeclTypeConstraint;
 use crate::compile_ffi::ExtDeclTypeDef;
-use crate::compile_ffi::ExtDeclTypeDefVec;
 
 fn find_class<'a>(parsed_file: &ParsedFile<'a>, symbol: &str) -> Option<&'a ShallowClass<'a>> {
     let input_symbol_formatted = symbol.starts_with('\\');
@@ -69,14 +59,12 @@ fn find_class<'a>(parsed_file: &ParsedFile<'a>, symbol: &str) -> Option<&'a Shal
         .map(|(_, shallow_class)| shallow_class)
 }
 
-pub fn get_file_attributes(parsed_file: &ParsedFile<'_>, name: &str) -> ExtDeclAttributeVec {
-    ExtDeclAttributeVec {
-        vec: get_attributes(parsed_file.file_attributes, name),
-    }
+pub fn get_file_attributes(parsed_file: &ParsedFile<'_>, name: &str) -> Vec<ExtDeclAttribute> {
+    get_attributes(parsed_file.file_attributes, name)
 }
 
-pub fn get_file_consts(parsed_file: &ParsedFile<'_>, name: &str) -> ExtDeclFileConstVec {
-    let consts = parsed_file
+pub fn get_file_consts(parsed_file: &ParsedFile<'_>, name: &str) -> Vec<ExtDeclFileConst> {
+    parsed_file
         .decls
         .consts()
         .filter(|(cname, _)| name.is_empty() || name == strip_global_ns(cname))
@@ -84,12 +72,11 @@ pub fn get_file_consts(parsed_file: &ParsedFile<'_>, name: &str) -> ExtDeclFileC
             name: fmt_type(cname),
             type_: extract_type_name(decl.type_),
         })
-        .collect();
-    ExtDeclFileConstVec { vec: consts }
+        .collect()
 }
 
-pub fn get_file_funcs(parsed_file: &ParsedFile<'_>, name: &str) -> ExtDeclFileFuncVec {
-    let funs = parsed_file
+pub fn get_file_funcs(parsed_file: &ParsedFile<'_>, name: &str) -> Vec<ExtDeclFileFunc> {
+    parsed_file
         .decls
         .funs()
         .filter(|(cname, _)| name.is_empty() || name == strip_global_ns(cname))
@@ -104,12 +91,11 @@ pub fn get_file_funcs(parsed_file: &ParsedFile<'_>, name: &str) -> ExtDeclFileFu
             no_auto_likes: decl.no_auto_likes,
             signature: get_signature(decl.type_.1),
         })
-        .collect();
-    ExtDeclFileFuncVec { vec: funs }
+        .collect()
 }
 
-pub fn get_file_modules(parsed_file: &ParsedFile<'_>, name: &str) -> ExtDeclModuleVec {
-    let modules = parsed_file
+pub fn get_file_modules(parsed_file: &ParsedFile<'_>, name: &str) -> Vec<ExtDeclModule> {
+    parsed_file
         .decls
         .modules()
         .filter(|(cname, _)| name.is_empty() || cname == &name)
@@ -118,12 +104,11 @@ pub fn get_file_modules(parsed_file: &ParsedFile<'_>, name: &str) -> ExtDeclModu
             exports: extract_module_refs(decl.exports),
             imports: extract_module_refs(decl.imports),
         })
-        .collect();
-    ExtDeclModuleVec { vec: modules }
+        .collect()
 }
 
-pub fn get_file_typedefs(parsed_file: &ParsedFile<'_>, name: &str) -> ExtDeclTypeDefVec {
-    let consts = parsed_file
+pub fn get_file_typedefs(parsed_file: &ParsedFile<'_>, name: &str) -> Vec<ExtDeclTypeDef> {
+    parsed_file
         .decls
         .typedefs()
         .filter(|(cname, _)| name.is_empty() || name == strip_global_ns(cname))
@@ -140,8 +125,7 @@ pub fn get_file_typedefs(parsed_file: &ParsedFile<'_>, name: &str) -> ExtDeclTyp
             internal: decl.internal,
             docs_url: str_or_empty(decl.docs_url),
         })
-        .collect();
-    ExtDeclTypeDefVec { vec: consts }
+        .collect()
 }
 
 pub fn get_file(parsed_file: &ParsedFile<'_>) -> ExtDeclFile {
@@ -149,98 +133,98 @@ pub fn get_file(parsed_file: &ParsedFile<'_>) -> ExtDeclFile {
         disable_xhp_element_mangling: parsed_file.disable_xhp_element_mangling,
         has_first_pass_parse_errors: parsed_file.has_first_pass_parse_errors,
         is_strict: parsed_file.mode.is_some_and(|x| x == Mode::Mstrict),
-        typedefs: get_file_typedefs(parsed_file, "").vec,
-        functions: get_file_funcs(parsed_file, "").vec,
-        constants: get_file_consts(parsed_file, "").vec,
-        file_attributes: get_file_attributes(parsed_file, "").vec,
-        modules: get_file_modules(parsed_file, "").vec,
-        classes: get_classes(parsed_file).vec,
+        typedefs: get_file_typedefs(parsed_file, ""),
+        functions: get_file_funcs(parsed_file, ""),
+        constants: get_file_consts(parsed_file, ""),
+        file_attributes: get_file_attributes(parsed_file, ""),
+        modules: get_file_modules(parsed_file, ""),
+        classes: get_classes(parsed_file),
     }
 }
 
 //pub fn get_method(parsed_file: &ParsedFile<'_>, name: &str) -> Option<ExtDeclClass>
-pub fn get_class_methods(parsed_file: &ParsedFile<'_>, kls: &str, name: &str) -> ExtDeclMethodVec {
+pub fn get_class_methods(
+    parsed_file: &ParsedFile<'_>,
+    kls: &str,
+    name: &str,
+) -> Vec<ExtDeclMethod> {
     let class_opt = find_class(parsed_file, kls);
-    let vec = match class_opt {
+    match class_opt {
         Some(cls) => get_methods(cls.methods, name),
         None => Vec::new(),
-    };
-    ExtDeclMethodVec { vec }
+    }
 }
 
-pub fn get_class_smethods(parsed_file: &ParsedFile<'_>, kls: &str, name: &str) -> ExtDeclMethodVec {
+pub fn get_class_smethods(
+    parsed_file: &ParsedFile<'_>,
+    kls: &str,
+    name: &str,
+) -> Vec<ExtDeclMethod> {
     let class_opt = find_class(parsed_file, kls);
-    let vec = match class_opt {
+    match class_opt {
         Some(cls) => get_methods(cls.static_methods, name),
         None => Vec::new(),
-    };
-    ExtDeclMethodVec { vec }
+    }
 }
 
 pub fn get_class_consts(
     parsed_file: &ParsedFile<'_>,
     kls: &str,
     name: &str,
-) -> ExtDeclClassConstVec {
+) -> Vec<ExtDeclClassConst> {
     let class_opt = find_class(parsed_file, kls);
-    let vec = match class_opt {
+    match class_opt {
         Some(cls) => get_consts(cls.consts, name),
         None => Vec::new(),
-    };
-    ExtDeclClassConstVec { vec }
+    }
 }
 
 pub fn get_class_typeconsts(
     parsed_file: &ParsedFile<'_>,
     kls: &str,
     name: &str,
-) -> ExtDeclClassTypeConstVec {
+) -> Vec<ExtDeclClassTypeConst> {
     let class_opt = find_class(parsed_file, kls);
-    let vec = match class_opt {
+    match class_opt {
         Some(cls) => get_typeconsts(cls.typeconsts, name),
         None => Vec::new(),
-    };
-    ExtDeclClassTypeConstVec { vec }
+    }
 }
 
-pub fn get_class_props(parsed_file: &ParsedFile<'_>, kls: &str, name: &str) -> ExtDeclPropVec {
+pub fn get_class_props(parsed_file: &ParsedFile<'_>, kls: &str, name: &str) -> Vec<ExtDeclProp> {
     let class_opt = find_class(parsed_file, kls);
-    let vec = match class_opt {
+    match class_opt {
         Some(cls) => get_props(cls.props, name),
         None => Vec::new(),
-    };
-    ExtDeclPropVec { vec }
+    }
 }
 
-pub fn get_class_sprops(parsed_file: &ParsedFile<'_>, kls: &str, name: &str) -> ExtDeclPropVec {
+pub fn get_class_sprops(parsed_file: &ParsedFile<'_>, kls: &str, name: &str) -> Vec<ExtDeclProp> {
     let class_opt = find_class(parsed_file, kls);
-    let vec = match class_opt {
+    match class_opt {
         Some(cls) => get_props(cls.sprops, name),
         None => Vec::new(),
-    };
-    ExtDeclPropVec { vec }
+    }
 }
 
 pub fn get_class_attributes(
     parsed_file: &ParsedFile<'_>,
     kls: &str,
     name: &str,
-) -> ExtDeclAttributeVec {
+) -> Vec<ExtDeclAttribute> {
     let class_opt = find_class(parsed_file, kls);
-    let vec = match class_opt {
+    match class_opt {
         Some(cls) => get_attributes(cls.user_attributes, name),
         None => Vec::new(),
-    };
-    ExtDeclAttributeVec { vec }
+    }
 }
 
-pub fn get_classes(parsed_file: &ParsedFile<'_>) -> ExtDeclClassVec {
-    let classes = parsed_file
+pub fn get_classes(parsed_file: &ParsedFile<'_>) -> Vec<ExtDeclClass> {
+    parsed_file
         .decls
         .classes()
         .map(|(_kls, decl)| get_class_impl(decl))
-        .collect();
-    ExtDeclClassVec { vec: classes }
+        .collect()
 }
 
 pub fn get_class(parsed_file: &ParsedFile<'_>, name: &str) -> Option<ExtDeclClass> {

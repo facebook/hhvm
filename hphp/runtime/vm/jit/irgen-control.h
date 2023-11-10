@@ -17,6 +17,8 @@
 
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/srckey.h"
+#include "hphp/runtime/vm/jit/extra-data.h"
+#include "hphp/runtime/vm/jit/ssa-tmp.h"
 
 namespace HPHP::jit {
 
@@ -46,6 +48,16 @@ void surpriseCheckWithTarget(IRGS&, Offset);
 void jmpImpl(IRGS&, Offset);
 void jmpImpl(IRGS&, SrcKey);
 void implCondJmp(IRGS&, Offset taken, bool negate, SSATmp*);
+
+/*
+ * Route exception `exc' to the appropriate handler. C++ exceptions are
+ * represented by TNullptr and must be ultimately handled by EndCatch, which
+ * gives control back to the unwinder. Otherwise `exc' will contain an object
+ * implementing the Throwable interface. Hack exceptions might be routed
+ * directly to the appropriate handlers.
+ */
+void emitHandleException(IRGS& env, EndCatchData::CatchMode mode, SSATmp* exc,
+                         Optional<IRSPRelOffset> vmspOffset);
 
 //////////////////////////////////////////////////////////////////////
 

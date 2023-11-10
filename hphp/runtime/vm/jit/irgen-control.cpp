@@ -296,6 +296,54 @@ void emitSelect(IRGS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
+void emitHandleException(IRGS& env, EndCatchData::CatchMode mode, SSATmp* exc,
+                         Optional<IRSPRelOffset> vmspOffset) {
+  // Stublogues lack proper frames and need special configuration.
+  if (env.irb->fs().stublogue()) {
+    assertx(!isInlining(env));
+    assertx(mode == EndCatchData::CatchMode::UnwindOnly);
+    auto const data = EndCatchData {
+      spOffBCFromIRSP(env),
+      EndCatchData::CatchMode::UnwindOnly,
+      EndCatchData::FrameMode::Stublogue,
+      EndCatchData::Teardown::NA,
+      std::nullopt
+    };
+    gen(env, EndCatch, data, fp(env), sp(env));
+    return;
+  }
+
+  // Teardown::None can't be used without an empty stack.
+  assertx(IMPLIES(mode == EndCatchData::CatchMode::LocalsDecRefd,
+                  spOffBCFromStackBase(env) == spOffEmpty(env)));
+
+  // If we are unwinding from an inlined function, try a special logic that
+  // may eliminate the need to spill the current frame.
+  if (isInlining(env)) {
+    if (endCatchFromInlined(env, mode, exc)) return;
+  }
+
+  if (spillInlinedFrames(env)) {
+    gen(env, StVMFP, fp(env));
+    gen(env, StVMPC, cns(env, uintptr_t(curSrcKey(env).pc())));
+    gen(env, StVMReturnAddr, cns(env, 0));
+  }
+
+  auto const teardown = mode == EndCatchData::CatchMode::LocalsDecRefd
+    ? EndCatchData::Teardown::None
+    : EndCatchData::Teardown::Full;
+  auto const data = EndCatchData {
+    spOffBCFromIRSP(env),
+    mode,
+    EndCatchData::FrameMode::Phplogue,
+    teardown,
+    vmspOffset
+  };
+  gen(env, EndCatch, data, fp(env), sp(env));
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void emitThrow(IRGS& env) {
   auto const stackEmpty = spOffBCFromStackBase(env) == spOffEmpty(env) + 1;
   auto const offset = findCatchHandler(curFunc(env), bcOff(env));

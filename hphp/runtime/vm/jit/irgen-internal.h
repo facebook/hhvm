@@ -26,7 +26,7 @@
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/decref-profile.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
-#include "hphp/runtime/vm/jit/irgen-inlining.h"
+#include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
@@ -869,51 +869,12 @@ Block* makeCatchBlock(
 
   auto const ty = Type::SubObj(SystemLib::getThrowableClass()) | TNullptr;
   auto const exc = gen(env, BeginCatch, ty);
+  // VMSP is always synced at BeginCatch
+  auto const vmspOffset = spOffBCFromIRSP(env);
+
   body();
 
-  // Stublogues lack proper frames and need special configuration.
-  if (env.irb->fs().stublogue()) {
-    assertx(!isInlining(env));
-    assertx(mode == EndCatchData::CatchMode::UnwindOnly);
-    auto const data = EndCatchData {
-      spOffBCFromIRSP(env),
-      EndCatchData::CatchMode::UnwindOnly,
-      EndCatchData::FrameMode::Stublogue,
-      EndCatchData::Teardown::NA,
-      std::nullopt
-    };
-    gen(env, EndCatch, data, fp(env), sp(env));
-    return catchBlock;
-  }
-
-  // Teardown::None can't be used without an empty stack.
-  assertx(IMPLIES(mode == EndCatchData::CatchMode::LocalsDecRefd,
-                  spOffBCFromStackBase(env) == spOffEmpty(env)));
-
-  // If we are unwinding from an inlined function, try a special logic that
-  // may eliminate the need to spill the current frame.
-  if (isInlining(env)) {
-    if (endCatchFromInlined(env, mode, exc)) return catchBlock;
-  }
-
-  if (spillInlinedFrames(env)) {
-    gen(env, StVMFP, fp(env));
-    gen(env, StVMPC, cns(env, uintptr_t(curSrcKey(env).pc())));
-    gen(env, StVMReturnAddr, cns(env, 0));
-  }
-
-  auto const teardown = mode == EndCatchData::CatchMode::LocalsDecRefd
-    ? EndCatchData::Teardown::None
-    : EndCatchData::Teardown::Full;
-  auto const offset = spOffBCFromIRSP(env);
-  auto const data = EndCatchData {
-    offset,
-    mode,
-    EndCatchData::FrameMode::Phplogue,
-    teardown,
-    offset
-  };
-  gen(env, EndCatch, data, fp(env), sp(env));
+  emitHandleException(env, mode, exc, vmspOffset);
   return catchBlock;
 }
 

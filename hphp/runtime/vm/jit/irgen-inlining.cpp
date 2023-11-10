@@ -593,28 +593,9 @@ void implEndCatchBlock(IRGS& env, const RegionDesc& calleeRegion) {
   auto const inlineFrame = implInlineReturn(env);
   SCOPE_EXIT { pushInlineFrame(env, inlineFrame); };
 
-  // If the caller is inlined as well, try to use shared EndCatch of its caller.
-  if (isInlining(env)) {
-    if (endCatchFromInlined(env, EndCatchData::CatchMode::UnwindOnly, exc)) {
-      return;
-    }
-
-    if (spillInlinedFrames(env)) {
-      gen(env, StVMFP, fp(env));
-      gen(env, StVMPC, cns(env, uintptr_t(curSrcKey(env).pc())));
-      gen(env, StVMReturnAddr, cns(env, 0));
-    }
-  }
-
-  auto const data = EndCatchData {
-    spOffBCFromIRSP(env),
-    EndCatchData::CatchMode::UnwindOnly,
-    EndCatchData::FrameMode::Phplogue,
-    EndCatchData::Teardown::Full,
-    //  vmspOffset is unknown at this point as there can be multiple BeginCatches
-    std::nullopt
-  };
-  gen(env, EndCatch, data, fp(env), sp(env));
+  // vmspOffset is unknown at this point due to multiple BeginCatches
+  emitHandleException(
+    env, EndCatchData::CatchMode::UnwindOnly, exc, std::nullopt);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

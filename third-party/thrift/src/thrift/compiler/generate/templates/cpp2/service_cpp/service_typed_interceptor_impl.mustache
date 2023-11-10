@@ -16,7 +16,7 @@
 
 %>
 <%#service:functions%><%#function:cpp_typed_interceptor?%>
-apache::thrift::InterceptedData apache::thrift::TypedInterceptor<<%service:parent_service_qualified_name%>>::before_<%function:cpp_name%>(<% > service_common/function_param_list_interceptor%>) {
+apache::thrift::InterceptedData apache::thrift::TypedInterceptor<<%service:parent_service_qualified_name%>>::before_<%function:prefixed_name%>(<% > service_common/function_param_list_interceptor%>) {
   return InterceptedData::make<std::monostate>();
 }
 <%/function:cpp_typed_interceptor?%><%/service:functions%>

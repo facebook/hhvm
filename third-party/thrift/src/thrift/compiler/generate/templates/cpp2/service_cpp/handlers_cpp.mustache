@@ -54,6 +54,11 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 <%/service:cpp_typed_interceptor?%>
 <%#service:interactions%>
 <% > service_cpp/service_interface_impl%>
+<%#service:cpp_typed_interceptor?%>
+
+<% > service_cpp/service_typed_interceptor_impl%>
+
+<%/service:cpp_typed_interceptor?%>
 <%/service:interactions%>
 
 <% > common/namespace_cpp2_begin%>

@@ -161,6 +161,11 @@ class TypedInterceptor<::cpp2::MyService> : public apache::thrift::TypedIntercep
   virtual InterceptedData before_getRandomData(const ::cpp2::Request& /*p_req*/);
   virtual InterceptedData before_getId(const ::std::int32_t& /*p_field*/);
   virtual InterceptedData before_ping_eb(const ::cpp2::Request& /*p_req*/);
+  
+  virtual InterceptedData before_MyInteraction_getId(const ::std::int32_t& /*p_field*/);
+  virtual InterceptedData before_MyInteraction_echo();
+  virtual InterceptedData before_MyInteraction_getRandomData(const ::cpp2::Request& /*p_req*/);
+  
 };
 } // namespace apache::thrift
 

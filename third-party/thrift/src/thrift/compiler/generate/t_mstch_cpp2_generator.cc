@@ -791,6 +791,12 @@ class cpp_mstch_service : public mstch_service {
         return true;
       }
     }
+    for (const auto* interaction : interactions_) {
+      if (interaction->find_structured_annotation_or_null(
+              kCppGenerateTypedInterceptor)) {
+        return true;
+      }
+    }
     return false;
   }
 

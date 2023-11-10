@@ -784,6 +784,17 @@ determineInvocationType:
   }
 }
 
+apache::thrift::InterceptedData apache::thrift::TypedInterceptor<::cpp2::MyService>::before_MyInteraction_getId(const ::std::int32_t& /*p_field*/) {
+  return InterceptedData::make<std::monostate>();
+}
+apache::thrift::InterceptedData apache::thrift::TypedInterceptor<::cpp2::MyService>::before_MyInteraction_echo() {
+  return InterceptedData::make<std::monostate>();
+}
+apache::thrift::InterceptedData apache::thrift::TypedInterceptor<::cpp2::MyService>::before_MyInteraction_getRandomData(const ::cpp2::Request& /*p_req*/) {
+  return InterceptedData::make<std::monostate>();
+}
+
+
 namespace cpp2 {
 
 void MyServiceSvNull::echo() {

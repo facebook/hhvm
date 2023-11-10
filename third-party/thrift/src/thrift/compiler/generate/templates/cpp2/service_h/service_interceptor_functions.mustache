@@ -14,15 +14,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%>namespace apache::thrift {
-template <>
-class TypedInterceptor<<%service:qualified_name%>> : public apache::thrift::TypedInterceptorBase {
- public:
-  <% > service_h/service_interceptor_functions%>
-
-  <%#service:interactions%>
-  <% > service_h/service_interceptor_functions%>
-
-  <%/service:interactions%>
-};
-} // namespace apache::thrift
+%><%#service:functions%><%#function:cpp_typed_interceptor?%>
+virtual InterceptedData before_<%function:prefixed_name%>(<% > service_common/function_param_list_interceptor%>);
+<%/function:cpp_typed_interceptor?%><%/service:functions%>

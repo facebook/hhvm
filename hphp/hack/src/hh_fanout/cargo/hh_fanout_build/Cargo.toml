@@ -18,7 +18,7 @@ depgraph_compress = { version = "0.0.0", path = "../../../depgraph/depgraph_comp
 depgraph_reader = { version = "0.0.0", path = "../../../depgraph/cargo/depgraph_reader" }
 depgraph_writer = { version = "0.0.0", path = "../../../depgraph/cargo/depgraph_writer" }
 hash = { version = "0.0.0", path = "../../../utils/hash" }
-libc = "0.2.139"
+libc = "0.2.149"
 log = { version = "0.4.17", features = ["kv_unstable", "kv_unstable_std"] }
 memmap2 = "0.5.10"
 newtype = { version = "0.0.0", path = "../../../utils/newtype" }

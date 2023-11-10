@@ -10,7 +10,7 @@ path = "shmrs.rs"
 
 [dependencies]
 hashbrown = { version = "0.12.3", features = ["nightly", "raw", "serde"] }
-libc = "0.2.139"
+libc = "0.2.149"
 nohash-hasher = "0.2"
 static_assertions = "1.1.0"
 

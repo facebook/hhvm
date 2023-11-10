@@ -11,4 +11,4 @@ test = false
 doctest = false
 
 [dependencies]
-libc = "0.2.139"
+libc = "0.2.149"

@@ -9,4 +9,4 @@ edition = "2021"
 path = "../../profile.rs"
 
 [dependencies]
-libc = "0.2.139"
+libc = "0.2.149"

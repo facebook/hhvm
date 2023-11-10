@@ -18,6 +18,8 @@ namespace java com.facebook.thrift.java.test
 namespace java.swift com.facebook.thrift.javaswift.test
 namespace android com.facebook.thrift.android.test
 
+include "thrift/annotation/java.thrift"
+
 typedef map<i32, i64> (
   java.swift.type = "it.unimi.dsi.fastutil.ints.Int2LongArrayMap",
 ) FMap
@@ -32,10 +34,11 @@ struct MySensitiveStruct {
   2: string password (java.sensitive);
 }
 
+@java.Mutable
 struct MySimpleBean {
   1: i64 id;
   2: string name;
-} (java.swift.mutable = "true")
+}
 
 union MySimpleUnion {
   1: i64 caseOne;
@@ -191,13 +194,9 @@ struct MyOptioalStruct {
 }
 
 struct TypeRemapped {
-  1: map<i64, string> (
-    java.swift.type = "it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String>",
-  ) lsMap;
-  2: map<i32, FMap> (
-    java.swift.type = "it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap<it.unimi.dsi.fastutil.ints.Int2LongArrayMap>",
-  ) ioMap;
-  4: binary (java.swift.type = "java.nio.ByteBuffer") byteBufferForBinary;
+  1: map_i64_string_6611 lsMap;
+  2: map_i32_FMap_3815 ioMap;
+  4: binary_9731 byteBufferForBinary;
   5: binary byteArrayForBinary;
   6: list<FMap> myListOfFMaps;
 }
@@ -227,6 +226,7 @@ struct StructWithAllTypes {
   15: MySimpleUnion myUnion;
 }
 
+@java.Mutable
 struct StructMutable {
   1: i16 myInt16 = 42;
   2: i32 myInt32 = 422;
@@ -235,7 +235,7 @@ struct StructMutable {
   5: bool myBool = true;
   6: double myDouble = 42.42;
   7: set<string> mySet = ["foo", "bar", "baz"];
-} (java.swift.mutable = "true")
+}
 
 struct StructWithMaps {
   1: map<string, string> stringstrings;
@@ -278,3 +278,12 @@ struct StringAndList {
   1: string myString;
   2: list<i32> myInts;
 }
+
+// The following were automatically generated and may benefit from renaming.
+typedef binary (java.swift.type = "java.nio.ByteBuffer") binary_9731
+typedef map<i32, FMap> (
+  java.swift.type = "it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap<it.unimi.dsi.fastutil.ints.Int2LongArrayMap>",
+) map_i32_FMap_3815
+typedef map<i64, string> (
+  java.swift.type = "it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String>",
+) map_i64_string_6611

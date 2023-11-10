@@ -55,7 +55,7 @@
         "renameProvider": true,
         "implementationProvider": true,
         "rageProvider": true,
-        "experimental": {"snippetTextEdit": true}
+        "experimental": {"snippetTextEdit": true, "autoCloseJsx": true}
       }
     }
   },

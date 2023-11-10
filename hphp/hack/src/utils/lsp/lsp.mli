@@ -356,6 +356,7 @@ module Initialize : sig
     type t = {
       snippetTextEdit: bool;
           (** see ClientExperimentalCapabilities.snippetTextEdit *)
+      autoCloseJsx: bool;
     }
   end
 
@@ -365,6 +366,7 @@ module Initialize : sig
           (** A client that supports this capability accepts snippet text edits like `${0:foo}`.
        * https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#snippet_syntax
        **)
+      autoCloseJsx: bool;
     }
   end
 

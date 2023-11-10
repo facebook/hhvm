@@ -3976,7 +3976,9 @@ let do_initialize ~initialize_params : Initialize.result =
             !env.local_config.ServerLocalConfig.go_to_implementation;
           rageProviderFB = true;
           server_experimental =
-            Some ServerExperimentalCapabilities.{ snippetTextEdit = true };
+            Some
+              ServerExperimentalCapabilities.
+                { snippetTextEdit = true; autoCloseJsx = true };
         };
     }
 

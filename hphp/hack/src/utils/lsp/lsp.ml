@@ -274,11 +274,17 @@ module Initialize = struct
   end
 
   module ServerExperimentalCapabilities = struct
-    type t = { snippetTextEdit: bool }
+    type t = {
+      snippetTextEdit: bool;
+      autoCloseJsx: bool;
+    }
   end
 
   module ClientExperimentalCapabilities = struct
-    type t = { snippetTextEdit: bool }
+    type t = {
+      snippetTextEdit: bool;
+      autoCloseJsx: bool;
+    }
   end
 
   type params = {

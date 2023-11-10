@@ -1211,7 +1211,10 @@ let parse_initialize (params : json option) : Initialize.params =
       }
     and parse_client_experimental json =
       ClientExperimentalCapabilities.
-        { snippetTextEdit = Jget.bool_d json "snippetTextEdit" ~default:false }
+        {
+          snippetTextEdit = Jget.bool_d json "snippetTextEdit" ~default:false;
+          autoCloseJsx = Jget.bool_d json "autoCloseJsx" ~default:false;
+        }
     in
     parse_initialize params)
 
@@ -1327,6 +1330,10 @@ let print_initialize (r : Initialize.result) : json =
                           JSON_Bool
                             experimental_capabilities
                               .ServerExperimentalCapabilities.snippetTextEdit );
+                        ( "autoCloseJsx",
+                          JSON_Bool
+                            experimental_capabilities
+                              .ServerExperimentalCapabilities.autoCloseJsx );
                       ]) );
             ] );
       ])

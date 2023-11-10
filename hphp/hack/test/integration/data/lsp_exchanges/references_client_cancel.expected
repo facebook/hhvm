@@ -56,7 +56,8 @@
         "implementationProvider": true,
         "rageProvider": true,
         "experimental": {
-          "snippetTextEdit": true
+          "snippetTextEdit": true,
+          "autoCloseJsx": true
         }
       }
     }

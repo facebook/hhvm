@@ -854,23 +854,6 @@ let first_n_distinct_error_codes ~(n : int) (t : t) : error_code list =
 let choose_code_opt (t : t) : int option =
   drop_fixmed_errors_in_files t |> first_n_distinct_error_codes ~n:1 |> List.hd
 
-let per_file_telemetry (relative_path, errors) =
-  let update m error =
-    Int.Map.update
-      m
-      (User_error.get_code error)
-      ~f:(Option.value_map ~default:0 ~f:(( + ) 1))
-  in
-  let value =
-    Hh_json.JSON_Object
-      (List.map ~f:(fun (code, count) ->
-           (Int.to_string code, Hh_json.int_ count))
-      @@ Int.Map.to_alist
-      @@ List.fold errors ~init:Int.Map.empty ~f:update)
-  in
-  let key = Relative_path.to_absolute relative_path in
-  (key, value)
-
 let as_telemetry : t -> Telemetry.t =
  fun errors ->
   Telemetry.create ()
@@ -881,11 +864,6 @@ let as_telemetry : t -> Telemetry.t =
          (first_n_distinct_error_codes
             ~n:5
             (drop_fixmed_errors_in_files errors))
-  |> Telemetry.json_
-       ~key:"by_file"
-       ~value:
-         (Hh_json.JSON_Object
-            (List.map ~f:per_file_telemetry (Relative_path.Map.bindings errors)))
 
 (*****************************************************************************)
 (* Error code printing. *)

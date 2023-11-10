@@ -665,3 +665,44 @@ TEST(CompilerTest, cpp_type_compatibility) {
     }
   )");
 }
+
+TEST(CompilerTest, duplicate_method_name_base_base) {
+  std::map<std::string, std::string> name_contents_map;
+  name_contents_map["foo.thrift"] = R"(
+    service MySBB {
+      void lol();
+    }
+  )";
+
+  name_contents_map["bar.thrift"] = R"(
+    include "foo.thrift"
+
+    service MySB extends foo.MySBB {
+      void meh();
+    }
+  )";
+
+  name_contents_map["baz.thrift"] = R"(
+    include "bar.thrift"
+
+    service MyS extends bar.MySB {
+      void lol(); # expected-error: Function `MyS.lol` redefines `foo.MySBB.lol`.
+      void meh(); # expected-error: Function `MyS.meh` redefines `bar.MySB.meh`.
+    }
+  )";
+
+  check_compile(name_contents_map, "baz.thrift");
+}
+
+TEST(CompilerTest, circular_include_dependencies) {
+  std::map<std::string, std::string> name_contents_map;
+  name_contents_map["foo.thrift"] = R"(
+    include "bar.thrift"
+  )";
+  name_contents_map["bar.thrift"] = R"(
+    include "foo.thrift"
+      # expected-error@-1: Circular dependency found: file `foo.thrift` is already parsed.
+  )";
+
+  check_compile(name_contents_map, "foo.thrift");
+}

@@ -174,6 +174,11 @@ source_manager::path_or_error source_manager::find_include_file(
     return source_manager::path_or_error{
         std::in_place_index<0>, std::move(path)};
   };
+
+  if (file_source_map_.find(filename) != file_source_map_.end()) {
+    return found(filename);
+  }
+
   // Absolute path? Just try that.
   boost::filesystem::path path(filename);
   if (path.has_root_directory()) {

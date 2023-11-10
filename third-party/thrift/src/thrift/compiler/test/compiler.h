@@ -16,12 +16,18 @@
 
 #pragma once
 
+#include <map>
 #include <string>
 #include <vector>
 
 namespace apache::thrift::compiler::test {
 
-void check_compile(const std::string& source);
-void check_compile(const std::string& source, std::vector<std::string> args);
+void check_compile(
+    const std::string& source,
+    std::vector<std::string> args = std::vector<std::string>());
+void check_compile(
+    const std::map<std::string, std::string>& name_contents_map,
+    const std::string& file_name,
+    std::vector<std::string> args = std::vector<std::string>());
 
 } // namespace apache::thrift::compiler::test

@@ -109,18 +109,27 @@ std::vector<diagnostic> extract_expected_diagnostics(
   return result;
 }
 
-void check_compile(const std::string& source, std::vector<std::string> args) {
-  const std::string TEST_FILE_NAME = "test.thrift";
+void check_compile(
+    const std::map<std::string, std::string>& name_contents_map,
+    const std::string& file_name,
+    std::vector<std::string> args) {
   source_manager smgr;
   temp_dir tmp_dir;
-  smgr.add_virtual_file(TEST_FILE_NAME, source);
+  std::vector<diagnostic> expected_diagnostics;
 
-  std::vector<diagnostic> extracted_diagnostics =
-      extract_expected_diagnostics(source, TEST_FILE_NAME);
+  for (const auto& entry : name_contents_map) {
+    smgr.add_virtual_file(entry.first, entry.second);
+    std::vector<diagnostic> extracted_diagnostics =
+        extract_expected_diagnostics(entry.second, entry.first);
+    expected_diagnostics.insert(
+        expected_diagnostics.end(),
+        extracted_diagnostics.begin(),
+        extracted_diagnostics.end());
+  }
   compile_retcode expected_ret_code =
       std::any_of(
-          extracted_diagnostics.begin(),
-          extracted_diagnostics.end(),
+          expected_diagnostics.begin(),
+          expected_diagnostics.end(),
           [](const auto& diag) {
             return diag.level() == diagnostic_level::error;
           })
@@ -136,20 +145,22 @@ void check_compile(const std::string& source, std::vector<std::string> args) {
     args.emplace_back("-I"); // include directory
     args.emplace_back(includes);
   }
-  args.emplace_back(TEST_FILE_NAME); // input file name
+  args.emplace_back(file_name); // input file name
 
   compile_result result = compile(args, smgr);
   EXPECT_EQ(expected_ret_code, result.retcode);
+  std::vector<diagnostic> result_diagnostics = result.detail.diagnostics();
+  std::sort(result_diagnostics.begin(), result_diagnostics.end());
+  std::sort(expected_diagnostics.begin(), expected_diagnostics.end());
 
-  auto diagnostics = result.detail.diagnostics();
-  std::sort(diagnostics.begin(), diagnostics.end());
-  std::sort(extracted_diagnostics.begin(), extracted_diagnostics.end());
-  EXPECT_THAT(diagnostics, ::testing::ContainerEq(extracted_diagnostics));
+  EXPECT_THAT(result_diagnostics, ::testing::ContainerEq(expected_diagnostics));
 }
 
-void check_compile(const std::string& source) {
-  std::vector<std::string> args;
-  check_compile(source, args);
+void check_compile(const std::string& source, std::vector<std::string> args) {
+  const std::string TEST_FILE_NAME = "test.thrift";
+  std::map<std::string, std::string> file_contents_map{
+      {TEST_FILE_NAME, source}};
+  check_compile(file_contents_map, TEST_FILE_NAME, std::move(args));
 }
 
 } // namespace apache::thrift::compiler::test

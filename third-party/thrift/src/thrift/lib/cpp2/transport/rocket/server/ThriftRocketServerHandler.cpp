@@ -422,15 +422,12 @@ void ThriftRocketServerHandler::handleRequestCommon(
       if (auto* observer = serverConfigs_->getObserver()) {
         observer->taskKilled();
       }
-      makeActiveRequest(
-          std::move(metadata),
-          std::move(debugPayload),
-          createDefaultRequestContext())
-          ->sendErrorWrapped(
-              folly::make_exception_wrapper<TApplicationException>(
-                  TApplicationException::UNKNOWN,
-                  tryFds.exception().what().toStdString()),
-              kRequestParsingErrorCode);
+      handleRequestWithFdsExtractionFailure(
+          makeActiveRequest(
+              std::move(metadata),
+              std::move(debugPayload),
+              createDefaultRequestContext()),
+          tryFds.exception().what().toStdString());
       return;
     }
   }
@@ -726,6 +723,18 @@ void ThriftRocketServerHandler::handleAppError(
         request->sendErrorWrapped(ase, kAppServerErrorCode);
       },
       [&](const auto&) { folly::assume_unreachable(); });
+}
+
+void ThriftRocketServerHandler::handleRequestWithFdsExtractionFailure(
+    ThriftRequestCoreUniquePtr request, std::string&& errorMessage) {
+  if (auto* observer = serverConfigs_->getObserver()) {
+    observer->taskKilled();
+  }
+  request->sendErrorWrapped(
+      folly::make_exception_wrapper<TApplicationException>(
+          TApplicationException::UNKNOWN, std::move(errorMessage)),
+      kRequestParsingErrorCode);
+  return;
 }
 
 void ThriftRocketServerHandler::handleServerNotReady(

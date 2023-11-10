@@ -62,7 +62,7 @@ private:
 struct StructSpec {
   FixedVector<FieldSpec> fields;
   const Func* withDefaultValuesFunc;
-  const Func* clearTerseFieldsFunc;
+  Optional<const Func*> clearTerseFieldsFunc;
 
   Object newObject(Class* cls) const;
   void clearTerseFields(Class* cls, const Object& obj) const;

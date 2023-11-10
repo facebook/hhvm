@@ -1,0 +1,12 @@
+object(TestStructWithClearTerseFields) (2) {
+  ["anInt1"]=>
+  int(3)
+  ["anInt2"]=>
+  NULL
+}
+object(TestStructWithoutClearTerseFields) (2) {
+  ["anInt1"]=>
+  int(3)
+  ["anInt2"]=>
+  int(2)
+}

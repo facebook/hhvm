@@ -153,11 +153,9 @@ const StaticString s_clearTerseFields("clearTerseFields");
 
 const Func* lookupClearTerseFieldsFunc(const Class* cls) {
   auto const func = cls->lookupMethod(s_clearTerseFields.get());
+  // We only add the function if it actually do something
   if (func == nullptr) {
-    thrift_error(
-      folly::sformat("Method {}::clearTerseFields() not found", cls->name()),
-      ERR_INVALID_DATA
-    );
+    return nullptr;
   }
   if (func->isStatic()) {
     thrift_error(
@@ -221,8 +219,10 @@ StructSpec compileSpec(const Array& spec, const Class* cls) {
   auto const withDefaultValuesFunc = cls != nullptr && cls->isPersistent()
     ? lookupWithDefaultValuesFunc(cls) : nullptr;
 
-  auto const clearTerseFieldsFunc = cls != nullptr && cls->isPersistent()
-    ? lookupClearTerseFieldsFunc(cls) : nullptr;
+  Optional<const Func*> clearTerseFieldsFunc;
+  if (cls != nullptr && cls->isPersistent()) {
+    clearTerseFieldsFunc = { lookupClearTerseFieldsFunc(cls) };
+  }
 
   return StructSpec{HPHP::FixedVector(std::move(temp)), withDefaultValuesFunc, clearTerseFieldsFunc};
 }
@@ -344,8 +344,13 @@ Object StructSpec::newObject(Class* cls) const {
 }
 
 void StructSpec::clearTerseFields(Class* cls, const Object& obj) const {
-  auto const func = clearTerseFieldsFunc != nullptr
-    ? clearTerseFieldsFunc : lookupClearTerseFieldsFunc(cls);
+  auto const func = [&]{
+    if (clearTerseFieldsFunc) {
+      return *clearTerseFieldsFunc;
+    }
+    return lookupClearTerseFieldsFunc(cls);
+  }();
+  if (func == nullptr) return;
   g_context->invokeFuncFew(
     func, obj.get(), 0, nullptr, RuntimeCoeffects::write_props());
 }

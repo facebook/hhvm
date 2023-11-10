@@ -240,9 +240,18 @@ let set_rust_backend backend : unit =
   Rust_provider_backend.set backend;
   backend_ref := Rust_provider_backend backend
 
-let make_decl_store_from_local_memory
-    ({ decl_cache; folded_class_cache; _ } : local_memory) :
-    Decl_store.decl_store =
+let make_decl_store_from_local_memory ({ folded_class_cache; _ } : local_memory)
+    : Decl_store.decl_store =
+  (* The decl APIs are a bewildering mess!
+     1. [add_class] and [get_class] are how the class folder stores its stuff.
+     2. shallow classes are retrieved and stored via the Shallow_decl_provider
+     3. [add_tyepdef] and similar are not used for local backend;
+     these are instead provided by Decl_provider directly.
+     4. [add_method] and similar are caches used by the class folder for member caches.
+     They're disabled for local-memory backend.
+     I think it would have been better to disable those caches with [TypecheckerOptions.populate_member_heaps],
+     but instead we're disabling them here by making cache writes be a no-op.
+  *)
   {
     Decl_store.add_class =
       (fun k v ->
@@ -256,45 +265,14 @@ let make_decl_store_from_local_memory
           folded_class_cache
           ~key:(Folded_class_cache_entry.Folded_class_decl k)
           ~default:(fun _ -> None));
-    add_typedef =
-      (fun k v ->
-        Decl_cache.add
-          decl_cache
-          ~key:(Decl_cache_entry.Typedef_decl k)
-          ~value:v);
-    get_typedef =
-      (fun k ->
-        Decl_cache.find_or_add
-          decl_cache
-          ~key:(Decl_cache_entry.Typedef_decl k)
-          ~default:(fun _ -> None));
-    add_module =
-      (fun k v ->
-        Decl_cache.add decl_cache ~key:(Decl_cache_entry.Module_decl k) ~value:v);
-    get_module =
-      (fun k ->
-        Decl_cache.find_or_add
-          decl_cache
-          ~key:(Decl_cache_entry.Module_decl k)
-          ~default:(fun _ -> None));
-    add_fun =
-      (fun k v ->
-        Decl_cache.add decl_cache ~key:(Decl_cache_entry.Fun_decl k) ~value:v);
-    get_fun =
-      (fun k ->
-        Decl_cache.find_or_add
-          decl_cache
-          ~key:(Decl_cache_entry.Fun_decl k)
-          ~default:(fun _ -> None));
-    add_gconst =
-      (fun k v ->
-        Decl_cache.add decl_cache ~key:(Decl_cache_entry.Gconst_decl k) ~value:v);
-    get_gconst =
-      (fun k ->
-        Decl_cache.find_or_add
-          decl_cache
-          ~key:(Decl_cache_entry.Gconst_decl k)
-          ~default:(fun _ -> None));
+    add_typedef = (fun _ -> failwith "unreachable:add_typedef");
+    get_typedef = (fun _ -> failwith "unreachable:get_typedef");
+    add_module = (fun _ -> failwith "unreachable:add_module");
+    get_module = (fun _ -> failwith "unreachable:get_module");
+    add_fun = (fun _ -> failwith "unreachable:add_fun");
+    get_fun = (fun _ -> failwith "unreachable:get_fun");
+    add_gconst = (fun _ -> failwith "unreachable:add_gconst");
+    get_gconst = (fun _ -> failwith "unreachable:get_gconst");
     add_method = (fun _ _ -> ());
     get_method = (fun _ -> None);
     add_static_method = (fun _ _ -> ());

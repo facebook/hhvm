@@ -64,6 +64,11 @@ struct gen_params {
   std::vector<std::string> targets;
   std::string out_path;
   bool add_gen_dir = true;
+
+  // If true, code generation will be skipped (regardless of other parameters).
+  // This is useful, for example, to parse and validate source Thrift IDL
+  // without a particular target language in mind.
+  bool skip_gen = false;
 };
 
 /**
@@ -106,7 +111,18 @@ void usage() {
       "  --gen STR   Generate code with a dynamically-registered generator.\n"
       "              STR has the form language[:key1=val1[,key2,[key3=val3]]].\n"
       "              Keys and values are options passed to the generator.\n"
-      "              Many options will not require values.\n");
+      "              Many options will not require values.\n"
+      "              This option (--gen) can be specified multiple times (eg.\n"
+      "              to generate multiple languages), but must not be\n"
+      "              specified if --skip-gen is also specified (see below).\n");
+  fprintf(
+      stderr,
+      "  --skip-gen  Skip code generation. This is useful, for example, to\n"
+      "              parse and validate Thrift IDL without generating code\n"
+      "              for any particular language. If this is specified, --gen\n"
+      "              must be omitted.\n"
+      "              If --skip-gen is specified, no --gen argument may be\n"
+      "              given (see above).\n");
   fprintf(
       stderr,
       "  --record-genfiles FILE\n"
@@ -132,6 +148,121 @@ bool isPathSeparator(const char& c) {
 #endif
 }
 
+/**
+ * Grabs the next argument, if possible.
+ *
+ * On success (i.e., if there is an argument after the current arg_i),
+ * returns a pointer to that argument and increments arg_i (which then
+ * corresponds to the returned argument).
+ *
+ * Otherwise, if no next argument is available, prints an error message to
+ * stderr and returns nullptr.
+ *
+ * @param arg_name Human readable description of the next (expected) argument,
+ *        for logging purposes only.
+ */
+const std::string* consume_next_arg(
+    const char* arg_name,
+    const std::vector<std::string>& arguments,
+    size_t& arg_i) {
+  // Note: The input filename must be the last argument.
+  if (arg_i + 2 >= arguments.size()) {
+    fprintf(
+        stderr,
+        "!!! Missing %s between %s and '%s'\n\n",
+        arg_name,
+        arguments[arg_i].c_str(),
+        arguments[arg_i + 1].c_str());
+    usage();
+    return nullptr;
+  }
+  return &arguments[++arg_i];
+}
+
+/**
+ * Attempts to parse and return a flag name from the given argument (removing up
+ * to two leading '-' characters), otherwise prints an error message and returns
+ * the empty string.
+ *
+ * eg:
+ *
+ * If `argument == "--foo"`, returns "foo"
+ * If `argument == "-bar"`, returns "bar"
+ * If `argument == "foo"`, `argument == "-"` or `argument == "--"`:
+ *      prints error and returns empty string.
+ */
+std::string parse_flag(const std::string& argument) {
+  if (argument.size() < 2 || argument[0] != '-' || (argument == "--")) {
+    fprintf(stderr, "!!! Expected flag, got: %s\n\n", argument.c_str());
+    usage();
+    return {};
+  }
+
+  // argument starts with "-" and is at least 2 chars long.
+
+  if (argument[1] == '-') {
+    // argument starts with "--"
+    return argument.substr(2);
+  }
+
+  return argument.substr(1);
+}
+
+/**
+ * Returns true iff the given parameters are valid.
+ *
+ * Otherwise, prints error messages (to stderr) and returns false.
+ */
+bool validate_params(const gen_params& gparams) {
+  // 1. Check target generators
+  // Generation must either be explicitly disabled (via --skip-gen) or some
+  // generators must be specified (via --gen), but not both!
+  const bool has_targets = !gparams.targets.empty();
+  const bool skip_gen = gparams.skip_gen;
+  if (has_targets && skip_gen) {
+    fprintf(stderr, "!!! Cannot specify both --skip-gen and --gen.\n\n");
+    usage();
+    return false;
+  }
+  if (!has_targets && !skip_gen) {
+    fprintf(
+        stderr,
+        "!!! No output language(s) specified: need --gen or --skip-gen.\n\n");
+    usage();
+    return false;
+  }
+  // Exactly one of skip_gen and has_targets is true => valid.
+
+  // 2. Check output path (if any)
+  const std::string& out_path = gparams.out_path;
+  if (!out_path.empty()) {
+    if (!gparams.add_gen_dir) {
+      // Invoker specified `-out blah`. We are supposed to output directly
+      // into blah, e.g. `blah/Foo.java`. Make the directory if necessary,
+      // just like how for `-o blah` we make `blah/gen-java`
+      boost::system::error_code errc;
+      boost::filesystem::create_directory(out_path, errc);
+      if (errc) {
+        fprintf(
+            stderr,
+            "Could not create output directory: %s (error: %s)\n",
+            out_path.c_str(),
+            errc.message().c_str());
+        return false;
+      }
+    }
+    if (!boost::filesystem::is_directory(out_path)) {
+      fprintf(
+          stderr,
+          "Output path %s is unusable or not a directory\n",
+          out_path.c_str());
+      return false;
+    }
+  }
+
+  return true;
+}
+
 // Returns the input file name if successful, otherwise returns an empty
 // string.
 std::string parse_args(
@@ -146,39 +277,25 @@ std::string parse_args(
     return {};
   }
 
-  // A helper that grabs the next argument, if possible.
-  // Outputs an error and returns nullptr if not.
   size_t arg_i = 1; // Skip the binary name.
+
+  // Convenient closure to call consume_next_arg() without repeating local
+  // variables.
   auto consume_arg = [&](const char* arg_name) -> const std::string* {
-    // Note: The input filename must be the last argument.
-    if (arg_i + 2 >= arguments.size()) {
-      fprintf(
-          stderr,
-          "!!! Missing %s between %s and '%s'\n",
-          arg_name,
-          arguments[arg_i].c_str(),
-          arguments[arg_i + 1].c_str());
-      usage();
-      return nullptr;
-    }
-    return &arguments[++arg_i];
+    return consume_next_arg(arg_name, arguments, arg_i);
   };
 
   // Hacky parameter handling... I didn't feel like using a library sorry!
-  bool nowarn =
-      false; // Guard so --nowarn and --legacy-strict are order agnostic.
+
+  // Guard so --nowarn and --legacy-strict are order agnostic.
+  bool nowarn = false;
+
   for (; arg_i < arguments.size() - 1;
        ++arg_i) { // Last argument is the src file.
     // Parse flag.
-    std::string flag;
-    if (arguments[arg_i].size() < 2 || arguments[arg_i][0] != '-') {
-      fprintf(stderr, "!!! Expected flag, got: %s\n", arguments[arg_i].c_str());
-      usage();
+    const std::string flag = parse_flag(arguments[arg_i]);
+    if (flag.empty()) {
       return {};
-    } else if (arguments[arg_i][1] == '-') {
-      flag = arguments[arg_i].substr(2);
-    } else {
-      flag = arguments[arg_i].substr(1);
     }
 
     // Interpret flag.
@@ -203,29 +320,38 @@ std::string parse_args(
     } else if (flag == "allow-64bit-consts") {
       pparams.allow_64bit_consts = true;
     } else if (flag == "record-genfiles") {
-      auto* arg = consume_arg("genfile file specification");
+      const std::string* arg = consume_arg("genfile file specification");
       if (arg == nullptr) {
         return {};
       }
       gparams.genfile = *arg;
     } else if (flag == "gen") {
-      auto* arg = consume_arg("generator specification");
+      const std::string* arg = consume_arg("generator specification");
       if (arg == nullptr) {
         return {};
       }
       gparams.targets.push_back(*arg);
+    } else if (flag == "skip-gen") {
+      gparams.skip_gen = true;
     } else if (flag == "I") {
-      auto* arg = consume_arg("include directory");
+      const std::string* arg = consume_arg("include directory");
       if (arg == nullptr) {
         return {};
       }
       // An argument of "-I\ asdf" is invalid and has unknown results
       pparams.incl_searchpath.push_back(*arg);
     } else if (flag == "o" || flag == "out") {
-      auto* arg = consume_arg("output directory");
+      const std::string* arg = consume_arg("output directory");
       if (arg == nullptr) {
         return {};
       }
+
+      if (!gparams.out_path.empty()) {
+        fprintf(stderr, "!!! Cannot specify both -o and --out.\n\n");
+        usage();
+        return {};
+      }
+
       std::string out_path = *arg;
       bool add_gen_dir = (flag == "o");
 
@@ -237,32 +363,11 @@ std::string parse_args(
         }
       }
 
-      if (!add_gen_dir) {
-        // Invoker specified `-out blah`. We are supposed to output directly
-        // into blah, e.g. `blah/Foo.java`. Make the directory if necessary,
-        // just like how for `-o blah` we make `o/gen-java`
-        boost::system::error_code errc;
-        boost::filesystem::create_directory(out_path, errc);
-        if (errc) {
-          fprintf(
-              stderr,
-              "Output path %s is unusable or not a directory\n",
-              out_path.c_str());
-          return {};
-        }
-      }
-      if (!boost::filesystem::is_directory(out_path)) {
-        fprintf(
-            stderr,
-            "Output path %s is unusable or not a directory\n",
-            out_path.c_str());
-        return {};
-      }
       gparams.out_path = std::move(out_path);
       gparams.add_gen_dir = add_gen_dir;
     } else {
       fprintf(
-          stderr, "!!! Unrecognized option: %s\n", arguments[arg_i].c_str());
+          stderr, "!!! Unrecognized option: %s\n\n", arguments[arg_i].c_str());
       usage();
       return {};
     }
@@ -275,10 +380,7 @@ std::string parse_args(
         pparams.incl_searchpath.end(), components.begin(), components.end());
   }
 
-  // You gotta generate something!
-  if (gparams.targets.empty()) {
-    fprintf(stderr, "!!! No output language(s) specified\n\n");
-    usage();
+  if (!validate_params(gparams)) {
     return {};
   }
 
@@ -720,6 +822,11 @@ compile_result compile(
   std::unique_ptr<t_program_bundle> program_bundle =
       parse_and_mutate(source_mgr, ctx, input_filename, pparams, gparams);
   if (program_bundle == nullptr) {
+    return result;
+  }
+
+  if (gparams.skip_gen) {
+    result.retcode = compile_retcode::success;
     return result;
   }
 

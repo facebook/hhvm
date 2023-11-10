@@ -42,6 +42,6 @@ function main(): void {
 ```
 
 The type of a `nameof Target` expression is
-[`classname<Target>`](/built-in-types/classname).
+[`classname<Target>`](/hack/built-in-types/classname).
 [Reified generics](/hack/reified-generics/reified-generics) and
 [type aliases](/hack/types/type-aliases) are not supported targets for `nameof`.

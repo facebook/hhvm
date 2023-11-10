@@ -706,3 +706,231 @@ TEST(CompilerTest, circular_include_dependencies) {
 
   check_compile(name_contents_map, "foo.thrift");
 }
+
+TEST(CompilerTest, mixins_and_refs) {
+  check_compile(R"(
+    struct C {
+      1: i32 f1 (cpp.mixin);
+        # expected-error@-1: Mixin field `f1` type must be a struct or union. Found `i32`.
+    }
+
+    struct D { 1: i32 i }
+    union E {
+      1: D a (cpp.mixin);
+        # expected-error@-1: Union `E` cannot contain mixin field `a`.
+    }
+
+    struct F {
+      1: optional D a (cpp.mixin);
+        # expected-error@-1: Mixin field `a` cannot be optional.
+    }
+
+)");
+}
+
+TEST(CompilerTest, bitpack_with_tablebased_seriliazation) {
+  check_compile(
+      R"(
+    include "thrift/annotation/cpp.thrift"
+    struct A { 1: i32 i }
+    @cpp.PackIsset
+      # expected-error@-1: Tablebased serialization is incompatible with isset bitpacking for struct `D`
+    struct D { 1: i32 i }
+  )",
+      {"--gen", "mstch_cpp2:json,tablebased"});
+}
+
+TEST(CompilerTest, structured_annotations_uniqueness) {
+  std::map<std::string, std::string> name_contents_map;
+  name_contents_map["foo.thrift"] = R"( struct Foo {} )";
+  name_contents_map["bar.thrift"] = R"(
+    include "foo.thrift"
+    struct Foo {
+        1: i32 count;
+    }
+
+    # TODO(afuller): Fix t_scope to not include the locally defined Foo as
+    # `foo.Foo`, which override the included foo.Foo definition.
+
+    @foo.Foo
+    @Foo{count=1}
+    @Foo{count=2}
+     # expected-error@-1: Structured annotation `Foo` is already defined for `Annotated`.
+    typedef i32 Annotated
+)";
+  check_compile(name_contents_map, "bar.thrift");
+}
+
+TEST(CompilerTest, structured_annotations_type_resolved) {
+  check_compile(R"(
+    struct Annotation {
+        1: i32 count;
+        2: TooForward forward;
+    }
+
+    @Annotation{count=1, forward=TooForward{name="abc"}}
+      # expected-error@-1: The type 'TooForward' is not defined yet. Types must be defined before the usage in constant values.
+    struct Annotated {
+        1: string name;
+    }
+
+    struct TooForward {
+      1: string name;
+    }
+)");
+}
+
+TEST(CompilerTest, structured_ref) {
+  check_compile(R"(
+    include "thrift/annotation/cpp.thrift"
+
+    struct Foo {
+      1: optional Foo field1 (cpp.ref);
+        # expected-warning@-1: cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box annotation instead in `field1`.
+
+      @cpp.Ref{type = cpp.RefType.Unique}
+        # expected-warning@-1: @cpp.Ref{type = cpp.RefType.Unique} is deprecated. Please use @thrift.Box annotation instead in `field2`.
+      2: optional Foo field2;
+
+      @cpp.Ref{type = cpp.RefType.Unique}
+        # expected-error@-1: The @cpp.Ref annotation cannot be combined with the `cpp.ref` or `cpp.ref_type` annotations. Remove one of the annotations from `field3`.
+        # expected-warning@-2: cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box annotation instead in `field3`.
+        # expected-warning@-3: @cpp.Ref{type = cpp.RefType.Unique} is deprecated. Please use @thrift.Box annotation instead in `field3`.
+      3: optional Foo field3 (cpp.ref);
+
+      @cpp.Ref{type = cpp.RefType.Unique}
+      @cpp.Ref{type = cpp.RefType.Unique}
+        # expected-warning@-2: @cpp.Ref{type = cpp.RefType.Unique} is deprecated. Please use @thrift.Box annotation instead in `field4`.
+        # expected-error@-2: Structured annotation `Ref` is already defined for `field4`.
+      4: optional Foo field4;
+    }
+  )");
+}
+
+TEST(CompilerTest, unstructured_and_structured_adapter) {
+  check_compile(R"(
+    include "thrift/annotation/cpp.thrift"
+    include "thrift/annotation/hack.thrift"
+
+    typedef i64 MyI64 (cpp.adapter="MyAdapter", hack.adapter="MyAdapter")
+
+    struct MyStruct {
+        @cpp.Adapter{name="MyAdapter"}
+        # expected-error@-1: `@cpp.Adapter` cannot be combined with `cpp.adapter` in `my_field`.
+        # expected-error@-2: `@hack.Adapter` cannot be combined with `hack.adapter` in `my_field`.
+        @hack.Adapter{name="MyAdapter"}
+        1: MyI64 my_field;
+        @cpp.Adapter{} # expected-error: key `name` not found.
+        @hack.Adapter{name="MyAdapter"}
+        2: i64 my_field2;
+        @cpp.Adapter{name="MyAdapter"}
+          # expected-error@-1: cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box annotation instead in `my_field3` with @cpp.Adapter.
+        @hack.Adapter{name="MyAdapter"}
+        3: optional i64 my_field3 (cpp.ref);
+        @cpp.Adapter{name="MyAdapter"}
+          # expected-error@-1: cpp.ref_type = `unique`, cpp2.ref_type = `unique` are deprecated. Please use @thrift.Box annotation instead in `my_field4` with @cpp.Adapter.
+        @hack.Adapter{name="MyAdapter"}
+        4: optional i64 my_field4 (cpp.ref_type = "unique");
+        @cpp.Adapter{name="MyAdapter"}
+          # expected-error@-1: @cpp.Ref{type = cpp.RefType.Unique} is deprecated. Please use @thrift.Box annotation instead in `my_field5` with @cpp.Adapter.
+        @hack.Adapter{name="MyAdapter"}
+        @cpp.Ref{type = cpp.RefType.Unique}
+        5: optional i64 my_field5;
+    }
+)");
+}
+
+TEST(CompilerTest, typedef_adapter) {
+  check_compile(R"(
+    include "thrift/annotation/cpp.thrift"
+    include "thrift/annotation/hack.thrift"
+
+    @cpp.Adapter{}
+      # expected-error@-1: key `name` not found.
+      # expected-error@-2: key `name` not found.
+    @hack.Adapter{}
+    typedef i32 MyI32
+
+    @cpp.Adapter{name="MyAdapter"}
+    @hack.Adapter{name="MyAdapter"}
+    typedef i64 MyI64
+
+    @cpp.Adapter{name="MyAdapter"}
+      # expected-error@-1: The `@cpp.Adapter` annotation cannot be annotated more than once in all typedef levels in `DoubleMyI64`.
+      # expected-error@-2: The `@hack.Adapter` annotation cannot be annotated more than once in all typedef levels in `DoubleMyI64`.
+    @hack.Adapter{name="MyAdapter"}
+    typedef MyI64 DoubleMyI64
+
+    struct MyStruct {
+        1: MyI64 my_field;
+        2: MyI64 (cpp.adapter="MyAdapter", hack.adapter="MyAdapter") my_field1;
+          # expected-error@-1: `@cpp.Adapter` cannot be combined with `cpp.adapter` in `my_field1`.
+          # expected-error@-2: `@hack.Adapter` cannot be combined with `hack.adapter` in `my_field1`.
+        3: MyI64 my_field2 (cpp.adapter="MyAdapter", hack.adapter="MyAdapter");
+    }
+
+    @cpp.Adapter{name="MyAdapter"}
+    struct Adapted {}
+
+    @cpp.Adapter{name="MyAdapter"}
+      # expected-error@-1: The `@cpp.Adapter` annotation cannot be annotated more than once in all typedef levels in `DoubleAdapted`.
+    typedef Adapted DoubleAdapted
+  )");
+}
+
+TEST(CompilerTest, hack_wrapper_adapter) {
+  check_compile(R"(
+    include "thrift/annotation/hack.thrift"
+
+    @hack.Adapter{name = "\MyAdapter1"}
+    typedef i64 i64Adapted
+
+    @hack.Wrapper{name = "\MyTypeIntWrapper"}
+    typedef i64 i64WithWrapper
+
+    @hack.Wrapper{name = "\MyTypeIntWrapper"}
+    @hack.Adapter{name = "\MyAdapter1"}
+    typedef i64 i64Wrapped_andAdapted
+
+    @hack.Wrapper{name = "\MyTypeIntWrapper"}
+    typedef i64Adapted i64Wrapped_andAdapted_2
+
+    typedef list<i64Wrapped_andAdapted> list_of_i64Wrapped_andAdapted
+
+    @hack.Adapter{name = "\MyAdapter1"}
+      # expected-error@-1: `@hack.Adapter` on `adapted_list_of_i64Wrapped_andAdapted` cannot be combined with `@hack.Wrapper` on `i64Wrapped_andAdapted`.
+    typedef list<i64Wrapped_andAdapted> adapted_list_of_i64Wrapped_andAdapted
+
+    typedef StructWithWrapper structWithWrapper_typedf
+
+    @hack.Adapter{name = "\MyAdapter1"}
+      # expected-error@-1: `@hack.Adapter` on `adapted_structWithWrapper_typedf` cannot be combined with `@hack.Wrapper` on `StructWithWrapper`.
+    typedef StructWithWrapper adapted_structWithWrapper_typedf
+
+    @hack.Wrapper{name = "\MyStructWrapper"}
+    struct StructWithWrapper {
+    1: i64 int_field;
+    }
+
+    @hack.Wrapper{name = "\MyStructWrapper"}
+    struct MyNestedStruct {
+    @hack.FieldWrapper{name = "\MyFieldWrapper"}
+    1: i64WithWrapper double_wrapped_field;
+    @hack.FieldWrapper{name = "\MyFieldWrapper"}
+      # expected-error@-1: `@hack.Adapter` on `double_wrapped_and_adapted_field` cannot be combined with `@hack.Wrapper` on `i64WithWrapper`.
+    @hack.Adapter{name = "\MyFieldAdapter"}
+    2: i64WithWrapper double_wrapped_and_adapted_field;
+    @hack.FieldWrapper{name = "\MyFieldWrapper"}
+    3: StructWithWrapper double_wrapped_struct;
+    @hack.FieldWrapper{name = "\MyFieldWrapper"}
+    4: map<string, StructWithWrapper> wrapped_map_of_string_to_StructWithWrapper;
+    @hack.Adapter{name = "\MyFieldAdapter"}
+      # expected-error@-1: `@hack.Adapter` on `adapted_map_of_string_to_StructWithWrapper` cannot be combined with `@hack.Wrapper` on `StructWithWrapper`.
+    5: map<string, StructWithWrapper> adapted_map_of_string_to_StructWithWrapper;
+    @hack.FieldWrapper{name = "\MyFieldWrapper"}
+      # expected-error@-1: `@hack.Adapter` on `adapted_double_wrapped_struct` cannot be combined with `@hack.Wrapper` on `StructWithWrapper`.
+    @hack.Adapter{name = "\MyFieldAdapter"}
+    6: StructWithWrapper adapted_double_wrapped_struct;
+    }
+  )");
+}

@@ -26,5 +26,6 @@ cpp_include "folly/io/IOBuf.h"
 typedef binary IOBuf
 
 service ZeroCopyService extends fb303.FacebookService {
-  IOBuf echo(1: IOBuf data) (thread = "eb");
+  @cpp.ProcessInEbThreadUnsafe
+  IOBuf echo(1: IOBuf data);
 }

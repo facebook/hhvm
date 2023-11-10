@@ -16,6 +16,8 @@
 
 namespace py thrift.util.test_service
 
+include "thrift/annotation/thrift.thrift"
+
 exception UserException1 {
   1: string message;
 }
@@ -38,13 +40,17 @@ service TestService {
 }
 
 service PriorityService {
-  bool bestEffort() (priority = 'BEST_EFFORT');
-  bool normal() (priority = 'NORMAL');
-  bool important() (priority = 'IMPORTANT');
+  @thrift.Priority{level = thrift.RpcPriority.BEST_EFFORT}
+  bool bestEffort();
+  @thrift.Priority{level = thrift.RpcPriority.NORMAL}
+  bool normal();
+  @thrift.Priority{level = thrift.RpcPriority.IMPORTANT}
+  bool important();
   bool unspecified();
 } (priority = 'HIGH')
 
 service SubPriorityService extends PriorityService {
   bool child_unspecified();
-  bool child_highImportant() (priority = 'HIGH_IMPORTANT');
+  @thrift.Priority{level = thrift.RpcPriority.HIGH_IMPORTANT}
+  bool child_highImportant();
 }

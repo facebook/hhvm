@@ -15,13 +15,15 @@
  */
 
 include "thrift/lib/py/util/tests/parent.thrift"
+include "thrift/annotation/thrift.thrift"
 
 namespace py thrift.test.child
 
 exception ChildError {
+  @thrift.ExceptionMessage
   1: required string message;
   2: optional i32 errorCode;
-} (message = 'message')
+}
 
 struct SomeStruct {
   1: string data;

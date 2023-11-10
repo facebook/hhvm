@@ -26,14 +26,19 @@ from apache.thrift.ast.thrift_types import Ast
 from apache.thrift.type.schema.thrift_types import ReturnType
 from apache.thrift.type.standard.thrift_types import TypeName, TypeUri
 
-# @manual=//thrift/compiler/test:compiler_failure_test-library
-from thrift.compiler.test.compiler_failure_test import write_file
 from thrift.python.serializer import deserialize
 
 file_manager = ExitStack()
 thrift2ast = str(
     file_manager.enter_context(resources.path(__package__, "thrift2ast")).absolute()
 )
+
+
+def write_file(path, content):
+    if d := os.path.dirname(path):
+        os.makedirs(d)
+    with open(path, "w") as f:
+        f.write(content)
 
 
 class AstGeneratorTest(unittest.TestCase):

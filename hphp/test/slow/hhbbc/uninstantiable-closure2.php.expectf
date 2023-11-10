@@ -1,0 +1,1 @@
+Fatal error: B cannot include A - it is not an enum class in %s/uninstantiable-closure2.php on line 7

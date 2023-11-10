@@ -145,9 +145,7 @@ module.exports = {
                 type: 'doc',
                 id: 'features/patch/patch',
               },
-              items: [
-                ...fbInternalOnly(['fb/features/patch-compat']),
-              ],
+              items: [...fbInternalOnly(['fb/features/patch-compat'])],
             },
             'features/schema',
             ...fbInternalOnly(['fb/features/metadata']),
@@ -456,6 +454,7 @@ module.exports = {
             },
             items: [
               'fb/troubleshooting/dogpiles/index',
+              'fb/troubleshooting/dogpiles/io',
               'fb/troubleshooting/dogpiles/server_overload',
               'fb/troubleshooting/dogpiles/development',
             ],

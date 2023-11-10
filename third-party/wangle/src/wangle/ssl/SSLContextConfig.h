@@ -149,6 +149,9 @@ struct SSLContextConfig {
   // Load cert-key pairs corresponding to these domains
   std::vector<std::string> domains;
 
+  // If true, the certs for this domain is signed by our internal CA
+  bool isProdCASigned{false};
+
   // A namespace to use for sessions generated from this context so that
   // they will not be shared between other sessions generated from the
   // same context. If not specified the vip name will be used by default

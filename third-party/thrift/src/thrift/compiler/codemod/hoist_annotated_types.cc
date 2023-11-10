@@ -232,6 +232,8 @@ class hoist_annotated_types {
       while (type_end_offset < old_content.size() &&
              old_content[type_end_offset++] != ')') {
       }
+      // @cpp.Type interacts with some other annotations, so have to move it
+      // when extracting a typedef.
       if (auto annot = f.find_structured_annotation_or_null(kCppTypeUri)) {
         // Store this structured annotation in the unstructured map, where
         // render_type separates it back out.
@@ -338,6 +340,7 @@ class hoist_annotated_types {
     std::string structured;
     for (const auto& [k, v] : type->annotations()) {
       if (k[0] == '@') {
+        // handled in maybe_create_typedef
         continue;
       }
       annotations.push_back(fmt::format("{} = \"{}\"", k, v.value));

@@ -30,30 +30,26 @@ exception Ex {}
 service Coroutine {
   SumResponse computeSumNoCoro(1: SumRequest request);
 
-  SumResponse computeSum(1: SumRequest request) (cpp.coroutine);
-  i32 computeSumPrimitive(1: i32 x, 2: i32 y) (cpp.coroutine);
+  SumResponse computeSum(1: SumRequest request);
+  i32 computeSumPrimitive(1: i32 x, 2: i32 y);
 
-  void computeSumVoid(1: i32 x, 2: i32 y) (cpp.coroutine);
+  void computeSumVoid(1: i32 x, 2: i32 y);
 
-  SumResponse computeSumUnimplemented(1: SumRequest request) (cpp.coroutine);
-  i32 computeSumUnimplementedPrimitive(1: i32 x, 2: i32 y) (cpp.coroutine);
+  SumResponse computeSumUnimplemented(1: SumRequest request);
+  i32 computeSumUnimplementedPrimitive(1: i32 x, 2: i32 y);
 
-  SumResponse computeSumThrows(1: SumRequest request) (cpp.coroutine);
-  i32 computeSumThrowsPrimitive(1: i32 x, 2: i32 y) (cpp.coroutine);
+  SumResponse computeSumThrows(1: SumRequest request);
+  i32 computeSumThrowsPrimitive(1: i32 x, 2: i32 y);
 
-  i32 noParameters() (cpp.coroutine);
+  i32 noParameters();
 
-  SumResponse implementedWithFutures() (cpp.coroutine);
-  i32 implementedWithFuturesPrimitive() (cpp.coroutine);
+  SumResponse implementedWithFutures();
+  i32 implementedWithFuturesPrimitive();
 
-  i32 takesRequestParams() (cpp.coroutine);
+  i32 takesRequestParams();
 
-  oneway void onewayRequest(1: i32 x) (cpp.coroutine);
+  oneway void onewayRequest(1: i32 x);
 
-  SumResponse computeSumThrowsUserEx(1: SumRequest request) throws (1: Ex e) (
-    cpp.coroutine,
-  );
-  i32 computeSumThrowsUserExPrimitive(1: i32 x, 2: i32 y) throws (1: Ex e) (
-    cpp.coroutine,
-  );
+  SumResponse computeSumThrowsUserEx(1: SumRequest request) throws (1: Ex e);
+  i32 computeSumThrowsUserExPrimitive(1: i32 x, 2: i32 y) throws (1: Ex e);
 }

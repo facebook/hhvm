@@ -25,7 +25,7 @@ service SimpleService {
 
   oneway void lob();
 
-  stream<i64> emptyStreamSlow(1: i64 sleepMs) (cpp.coroutine);
+  stream<i64> emptyStreamSlow(1: i64 sleepMs);
 
   sink<i64, bool> slowReturnSink(1: i64 sleepMs);
 

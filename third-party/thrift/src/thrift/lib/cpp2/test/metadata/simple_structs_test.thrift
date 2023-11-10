@@ -16,9 +16,12 @@
 
 namespace cpp2 metadata.test.simple_structs
 
+include "thrift/annotation/cpp.thrift"
+
 struct Nat {
   1: string data = "";
-  2: optional Nat next (cpp2.ref = "true");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: optional Nat next;
 }
 
 typedef Nat NatTypedef

@@ -16,7 +16,10 @@
 
 namespace cpp2 apache.thrift.test
 
+include "thrift/annotation/cpp.thrift"
+
 service HandlerGeneric {
-  string get_string() (cpp.coroutine);
-  string get_string_eb() (thread = "eb");
+  string get_string();
+  @cpp.ProcessInEbThreadUnsafe
+  string get_string_eb();
 }

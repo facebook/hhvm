@@ -17,6 +17,7 @@
 include "thrift/annotation/thrift.thrift"
 // @lint-ignore THRIFTCHECKS used by GenerateRuntimeSchema
 include "thrift/lib/thrift/schema.thrift"
+include "thrift/annotation/cpp.thrift"
 
 namespace cpp2 apache.thrift.test
 
@@ -41,7 +42,8 @@ service DummyMonitor {
 }
 
 service DummyStatus {
-  i64 getStatus() (thread = 'eb');
+  @cpp.ProcessInEbThreadUnsafe
+  i64 getStatus();
 }
 
 service DummyControl {

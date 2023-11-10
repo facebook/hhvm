@@ -81,10 +81,13 @@ service StreamService {
 
   stream<i32> requestWithBlob(1: binary_9305 val);
 
-  stream<i32> leakCallback() (thread = "eb");
+  @cpp.ProcessInEbThreadUnsafe
+  stream<i32> leakCallback();
 
-  i32, stream<i32> orderRequestStream() (thread = "eb");
-  i32 orderRequestResponse() (thread = "eb");
+  @cpp.ProcessInEbThreadUnsafe
+  i32, stream<i32> orderRequestStream();
+  @cpp.ProcessInEbThreadUnsafe
+  i32 orderRequestResponse();
 
   stream<i32> leakPublisherCheck();
 }

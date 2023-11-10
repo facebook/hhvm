@@ -16,7 +16,10 @@
 
 namespace cpp2 apache.thrift.test
 
+include "thrift/annotation/cpp.thrift"
+
 service UnimplementedMethod {
   void tm();
-  void eb() (thread = 'eb');
+  @cpp.ProcessInEbThreadUnsafe
+  void eb();
 }

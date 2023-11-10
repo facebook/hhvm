@@ -17,6 +17,7 @@
 namespace cpp2 apache.thrift.test
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 
 struct TestStruct {
   1: string s;
@@ -35,7 +36,8 @@ struct TestStructIOBuf {
 
 struct TestStructRecursive {
   6: string tag;
-  99: optional TestStructRecursive cdr (cpp.ref = 'true');
+  @cpp.Ref{type = cpp.RefType.Unique}
+  99: optional TestStructRecursive cdr;
 }
 
 @cpp.Type{name = "uint8_t"}
@@ -75,9 +77,10 @@ service TestService {
   string echoRequest(1: string req);
   i32 echoInt(1: i32 req);
   string serializationTest(1: bool inEventBase);
-  string eventBaseAsync() (thread = 'eb');
+  @cpp.ProcessInEbThreadUnsafe
+  string eventBaseAsync();
   void notCalledBack();
-  void voidResponse() (cpp.coroutine);
+  void voidResponse();
   i32 processHeader();
   IOBufPtr echoIOBuf(1: IOBuf buf);
   oneway void noResponseIOBuf(1: IOBuf buf);
@@ -85,7 +88,9 @@ service TestService {
   void throwsHandlerException();
   stream<i32> range(1: i32 from, 2: i32 to);
   bool, stream<i32> rangeWithResponse(1: i32 from, 2: i32 to);
-  void priorityHigh() (priority = "HIGH");
-  void priorityBestEffort() (priority = "BEST_EFFORT", cpp.coroutine);
-  sink<i32, i32> sumSink() (cpp.coroutine);
+  @thrift.Priority{level = thrift.RpcPriority.HIGH}
+  void priorityHigh();
+  @thrift.Priority{level = thrift.RpcPriority.BEST_EFFORT}
+  void priorityBestEffort();
+  sink<i32, i32> sumSink();
 }

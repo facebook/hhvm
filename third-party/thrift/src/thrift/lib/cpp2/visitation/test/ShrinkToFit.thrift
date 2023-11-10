@@ -38,13 +38,14 @@ struct Fields {
   4: list<list<StructWithListField>> nestedStructListField;
   5: map<i32, list<StructWithListField>> nestedStructListMapField;
 
-  6: list<i32> listFieldRef (cpp.ref, cpp.ref_type = "shared");
-  7: StructWithListField structFieldRef (cpp.ref, cpp.ref_type = "shared");
-  8: optional list<i32> optListFieldRef (cpp.ref, cpp.ref_type = "shared");
-  9: optional StructWithListField optStructFieldRef (
-    cpp.ref,
-    cpp.ref_type = "shared",
-  );
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  6: list<i32> listFieldRef;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  7: StructWithListField structFieldRef;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  8: optional list<i32> optListFieldRef;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  9: optional StructWithListField optStructFieldRef;
   @thrift.Box
   10: optional list<i32> listFieldBoxRef;
   @thrift.Box

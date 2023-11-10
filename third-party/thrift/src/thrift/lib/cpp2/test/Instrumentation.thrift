@@ -22,17 +22,15 @@ include "thrift/annotation/cpp.thrift"
 typedef binary IOBuf
 
 service DebugTestService {
-  string echo(1: string s) (cpp.coroutine);
+  string echo(1: string s);
 }
 
 service InstrumentationTestService {
-  void sendRequest() (cpp.coroutine);
-  stream<i32> sendStreamingRequest() (cpp.coroutine);
-  IOBuf sendPayload(1: i32 id, 2: string str) (cpp.coroutine);
-  void wait(1: i32 value, 2: bool busyWait, 3: bool setShallowRC) (
-    cpp.coroutine,
-  );
+  void sendRequest();
+  stream<i32> sendStreamingRequest();
+  IOBuf sendPayload(1: i32 id, 2: string str);
+  void wait(1: i32 value, 2: bool busyWait, 3: bool setShallowRC);
   void runCallback();
   void runCallback2();
-  void noop() (cpp.coroutine);
+  void noop();
 }

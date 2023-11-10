@@ -123,9 +123,12 @@ union TestUnion {
   4: map<i32, i64> aMap;
   5: set<string> aSet;
   6: Member aStruct;
-  7: Pet1 aPet1 (cpp.ref_type = "shared");
-  8: Tiny aTiny (cpp2.ref_type = "unique");
-  9: Place aPlace (cpp2.ref = "true");
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  7: Pet1 aPet1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  8: Tiny aTiny;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  9: Place aPlace;
 }
 
 union TestUnion2 {
@@ -134,9 +137,12 @@ union TestUnion2 {
   4: map<i32, i64> aMap;
   5: set<string> aSet;
   6: Member aStruct;
-  7: Pet1 aPet1 (cpp.ref_type = "shared");
-  8: Tiny aTiny (cpp2.ref_type = "unique");
-  9: Place aPlace (cpp2.ref = "true");
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  7: Pet1 aPet1;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  8: Tiny aTiny;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  9: Place aPlace;
   10: i32 anotherInt;
 }
 

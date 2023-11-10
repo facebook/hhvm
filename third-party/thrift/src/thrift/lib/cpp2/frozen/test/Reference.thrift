@@ -25,15 +25,24 @@ struct Person {
 }
 
 struct SimpleRef {
-  1: Person c2s (cpp2.ref_type = "shared");
-  2: Person c2u (cpp2.ref_type = "unique");
-  3: Person c1r (cpp.ref = "true");
-  4: Person c2r (cpp2.ref = "true");
-  9: Person c2sc (cpp2.ref_type = "shared_const");
-  5: optional Person c2s_opt (cpp2.ref_type = "shared");
-  6: optional Person c2u_opt (cpp2.ref_type = "unique");
-  7: optional Person c1r_opt (cpp.ref = "true");
-  8: optional Person c2r_opt (cpp2.ref = "true");
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: Person c2s;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: Person c2u;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  3: Person c1r;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  4: Person c2r;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  9: Person c2sc;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  5: optional Person c2s_opt;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  6: optional Person c2u_opt;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  7: optional Person c1r_opt;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  8: optional Person c2r_opt;
 }
 
 struct SimpleBoxed {
@@ -43,8 +52,10 @@ struct SimpleBoxed {
 
 struct Node {
   1: i64 id;
-  2: optional Node left (cpp.ref = "true");
-  3: optional Node right (cpp.ref = "true");
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: optional Node left;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  3: optional Node right;
   4: string content;
 }
 
@@ -58,13 +69,16 @@ struct BoxedNode {
 }
 
 struct SharedRef {
-  1: Person p1 (cpp2.ref_type = "shared");
-  2: Person p2 (cpp2.ref_type = "shared");
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: Person p1;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: Person p2;
   5: i64 id;
 }
 
 struct SharedRef2 {
-  2: Person p2 (cpp2.ref_type = "shared");
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: Person p2;
   5: i64 id;
 }
 

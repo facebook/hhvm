@@ -25,15 +25,15 @@ stateful client exception DoubleKill {}
 safe permanent client exception TripleKill {}
 
 service Bug {
-  void fun1() throws (1: Start s) (cpp.coroutine);
+  void fun1() throws (1: Start s);
 
-  void fun2() throws (1: FirstBlood f) (cpp.coroutine);
+  void fun2() throws (1: FirstBlood f);
 
-  void fun3() throws (1: DoubleKill d) (cpp.coroutine);
+  void fun3() throws (1: DoubleKill d);
 
-  void fun4() throws (1: TripleKill t) (cpp.coroutine);
+  void fun4() throws (1: TripleKill t);
 
-  void fun5() throws (1: TripleKill t) (cpp.coroutine);
+  void fun5() throws (1: TripleKill t);
 
-  void fun6() throws (1: TripleKill t) (cpp.coroutine);
+  void fun6() throws (1: TripleKill t);
 }

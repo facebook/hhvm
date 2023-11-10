@@ -16,12 +16,15 @@
 
 namespace cpp2 apache.thrift.test
 
+include "thrift/annotation/cpp.thrift"
+
 service TestServiceStack {
   string sendResponse(1: i64 size);
   oneway void noResponse(1: i64 size);
   string echoRequest(1: string req);
   string serializationTest(1: bool inEventBase);
-  string eventBaseAsync() (thread = 'eb');
+  @cpp.ProcessInEbThreadUnsafe
+  string eventBaseAsync();
   void notCalledBack();
   void voidResponse();
 }

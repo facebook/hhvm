@@ -16,6 +16,10 @@
 
 namespace cpp2 apache.thrift.test
 
+include "thrift/annotation/cpp.thrift"
+
+include "thrift/annotation/thrift.thrift"
+
 struct Point {
   1: i32 x;
   2: i32 y;
@@ -29,19 +33,21 @@ interaction Addition {
   oneway void noop();
 }
 
+@cpp.ProcessInEbThreadUnsafe
 interaction AdditionFast {
   void accumulatePrimitive(1: i32 a);
   void accumulatePoint(1: Point a);
   i32 getPrimitive();
   Point getPoint();
   oneway void noop();
-} (process_in_event_base)
+}
 
+@thrift.Serial
 interaction SerialAddition {
   void accumulatePrimitive(1: i32 a);
   i32 getPrimitive();
   stream<i32> waitForCancel();
-} (serial)
+}
 
 service Calculator {
   performs Addition;
@@ -53,7 +59,8 @@ service Calculator {
   Addition, i32 initializedAddition(1: i32 a);
   Addition, string stringifiedAddition(1: i32 a);
   AdditionFast fastAddition();
-  AdditionFast veryFastAddition() (thread = 'eb');
+  @cpp.ProcessInEbThreadUnsafe
+  AdditionFast veryFastAddition();
 }
 
 interaction Streaming {

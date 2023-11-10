@@ -48,6 +48,16 @@ const string TYPEDEF_VISIBILITY_OPAQUE = 'opaque';
 const string TYPEDEF_VISIBILITY_OPAQUE_MODULE = 'opaque_module';
 const string TYPEDEF_VISIBILITY_CASE_TYPE = 'case_type';
 
+/*
+ * In all the following ExtDecl* shapes, all the boolean values
+ * will only show up if their value is true. In a similar way all
+ * the other optional fields default to null or empty string.
+ *
+ * The reason is perf: There are a lot of fields and the non-default
+ * values are sparse. Adding a lot of fields to each shape in the
+ * runtime would add a cost that we could otherwise avoid.
+ */
+
 type ExtDeclAttribute= shape(
   'name' => string,
   ?'args' => vec<string>,

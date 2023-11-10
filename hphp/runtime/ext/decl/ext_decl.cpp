@@ -15,6 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/decl-provider.h"
@@ -151,11 +152,11 @@ Array populateStringArray(const rust::Vec<rust::String>& vec) {
     return empty_vec_array();
   }
 
-  Array arr = Array::CreateVec();
+  VecInit arr{vec.size()};
   for (auto const& str : vec) {
     arr.append(String(str.data(), str.size(), CopyStringMode::CopyString));
   }
-  return arr;
+  return arr.toArray();
 }
 
 template <typename T, typename F>
@@ -201,14 +202,14 @@ Array populateTypeConstraints(
     return empty_vec_array();
   }
 
-  Array arr = Array::CreateVec();
+  VecInit arr{constraints.size()};
   for (auto const& c : constraints) {
     Array info = Array::CreateDict();
     info.set(s_kind, rustToString(c.kind));
     info.set(s_type, rustToString(c.type_));
     arr.append(info);
   }
-  return arr;
+  return arr.toArray();
 }
 
 /*
@@ -219,7 +220,7 @@ Array populateEnumType(const rust::Vec<hackc::ExtDeclEnumType>& entypes) {
     return empty_vec_array();
   }
 
-  Array arr = Array::CreateVec();
+  VecInit arr{entypes.size()};
   for (auto const& et : entypes) {
     Array info = Array::CreateDict();
     info.set(s_base, rustToString(et.base));
@@ -227,7 +228,7 @@ Array populateEnumType(const rust::Vec<hackc::ExtDeclEnumType>& entypes) {
     maybeSet(info, et.includes, s_includes, populateStringArray);
     arr.append(info);
   }
-  return arr;
+  return arr.toArray();
 }
 
 /*
@@ -238,14 +239,14 @@ Array populateAttributes(const rust::Vec<hackc::ExtDeclAttribute>& attrs) {
     return empty_vec_array();
   }
 
-  Array arr = Array::CreateVec();
+  VecInit arr{attrs.size()};
   for (auto const& attr : attrs) {
     Array info = Array::CreateDict();
     info.set(s_name, rustToString(attr.name));
     maybeSet(info, attr.args, s_args, populateStringArray);
     arr.append(info);
   }
-  return arr;
+  return arr.toArray();
 }
 
 /*
@@ -256,7 +257,7 @@ Array populateTParams(const rust::Vec<hackc::ExtDeclTparam>& tparams) {
     return empty_vec_array();
   }
 
-  Array arr = Array::CreateVec();
+  VecInit arr{tparams.size()};
   for (auto const& tp : tparams) {
     Array info = Array::CreateDict();
     info.set(s_name, rustToString(tp.name));
@@ -267,7 +268,7 @@ Array populateTParams(const rust::Vec<hackc::ExtDeclTparam>& tparams) {
     maybeSet(info, tp.constraints, s_constraints, populateTypeConstraints);
     arr.append(info);
   }
-  return arr;
+  return arr.toArray();
 }
 
 /*
@@ -278,7 +279,7 @@ Array populateConstants(const rust::Vec<hackc::ExtDeclClassConst>& consts) {
     return empty_vec_array();
   }
 
-  Array arr = Array::CreateVec();
+  VecInit arr{consts.size()};
   for (auto const& c : consts) {
     Array info = Array::CreateDict();
     info.set(s_name, rustToString(c.name));
@@ -286,7 +287,7 @@ Array populateConstants(const rust::Vec<hackc::ExtDeclClassConst>& consts) {
     maybeSetBool(info, c.is_abstract, s_is_abstract);
     arr.append(info);
   }
-  return arr;
+  return arr.toArray();
 }
 
 /*
@@ -298,7 +299,7 @@ Array populateTypeConstants(
     return empty_vec_array();
   }
 
-  Array arr = Array::CreateVec();
+  VecInit arr{typeconsts.size()};
   for (auto const& tc : typeconsts) {
     Array info = Array::CreateDict();
     info.set(s_name, rustToString(tc.name));
@@ -308,7 +309,7 @@ Array populateTypeConstants(
     maybeSetBool(info, tc.reifiable, s_is_reifiable);
     arr.append(info);
   }
-  return arr;
+  return arr.toArray();
 }
 
 /*
@@ -319,7 +320,7 @@ Array populateProps(const rust::Vec<hackc::ExtDeclProp>& props) {
     return empty_vec_array();
   }
 
-  Array arr = Array::CreateVec();
+  VecInit arr{props.size()};
   for (auto const& prop : props) {
     Array info = Array::CreateDict();
     info.set(s_name, rustToString(prop.name));
@@ -336,7 +337,7 @@ Array populateProps(const rust::Vec<hackc::ExtDeclProp>& props) {
     maybeSetBool(info, prop.no_auto_likes, s_is_no_auto_likes);
     arr.append(info);
   }
-  return arr;
+  return arr.toArray();
 }
 
 /*
@@ -347,7 +348,7 @@ Array populateMethodParams(const rust::Vec<hackc::ExtDeclMethodParam>& params) {
     return empty_vec_array();
   }
 
-  Array arr = Array::CreateVec();
+  VecInit arr{params.size()};
   for (auto const& param : params) {
     Array info = Array::CreateDict();
     info.set(s_name, rustToString(param.name));
@@ -361,7 +362,7 @@ Array populateMethodParams(const rust::Vec<hackc::ExtDeclMethodParam>& params) {
     maybeFlag(info, param.flags, s_is_readonly, 1 << 8);
     arr.append(info);
   }
-  return arr;
+  return arr.toArray();
 }
 
 /*
@@ -411,7 +412,7 @@ Array populateMethods(const rust::Vec<hackc::ExtDeclMethod>& meths) {
     return empty_vec_array();
   }
 
-  Array arr = Array::CreateVec();
+  VecInit arr{meths.size()};
   for (auto const& meth : meths) {
     Array info = Array::CreateDict();
     info.set(s_name, rustToString(meth.name));
@@ -427,7 +428,7 @@ Array populateMethods(const rust::Vec<hackc::ExtDeclMethod>& meths) {
     maybeFlag(info, meth.flags, s_is_support_dynamic_type, 1 << 5);
     arr.append(info);
   }
-  return arr;
+  return arr.toArray();
 }
 
 /*
@@ -493,11 +494,11 @@ Array populateClasses(const rust::Vec<hackc::ExtDeclClass>& classes) {
     return empty_vec_array();
   }
 
-  Array arr = Array::CreateVec();
+  VecInit arr{classes.size()};
   for (auto const& kls : classes) {
     arr.append(populateClass(kls));
   }
-  return arr;
+  return arr.toArray();
 }
 
 /*
@@ -508,14 +509,14 @@ Array populateFileConsts(const rust::Vec<hackc::ExtDeclFileConst>& consts) {
     return empty_vec_array();
   }
 
-  Array arr = Array::CreateVec();
+  VecInit arr{consts.size()};
   for (auto const& c : consts) {
     Array info = Array::CreateDict();
     info.set(s_name, rustToString(c.name));
     info.set(s_type, rustToString(c.type_));
     arr.append(info);
   }
-  return arr;
+  return arr.toArray();
 }
 
 /*
@@ -526,7 +527,7 @@ Array populateFileFuncs(const rust::Vec<hackc::ExtDeclFileFunc>& funs) {
     return empty_vec_array();
   }
 
-  Array arr = Array::CreateVec();
+  VecInit arr{funs.size()};
   for (auto const& fun : funs) {
     Array info = Array::CreateDict();
     info.set(s_name, rustToString(fun.name));
@@ -540,7 +541,7 @@ Array populateFileFuncs(const rust::Vec<hackc::ExtDeclFileFunc>& funs) {
     maybeSetFirst(info, fun.signature, s_signature, populateSignature);
     arr.append(info);
   }
-  return arr;
+  return arr.toArray();
 }
 
 /*
@@ -551,7 +552,7 @@ Array populateModules(const rust::Vec<hackc::ExtDeclModule>& modules) {
     return empty_vec_array();
   }
 
-  Array arr = Array::CreateVec();
+  VecInit arr{modules.size()};
   for (auto const& module : modules) {
     Array info = Array::CreateDict();
     info.set(s_name, rustToString(module.name));
@@ -559,7 +560,7 @@ Array populateModules(const rust::Vec<hackc::ExtDeclModule>& modules) {
     maybeSet(info, module.exports, s_exports, populateStringArray);
     arr.append(info);
   }
-  return arr;
+  return arr.toArray();
 }
 
 /*
@@ -570,7 +571,7 @@ Array populateTypedefs(const rust::Vec<hackc::ExtDeclTypeDef>& typedefs) {
     return empty_vec_array();
   }
 
-  Array arr = Array::CreateVec();
+  VecInit arr{typedefs.size()};
   for (auto const& td : typedefs) {
     Array info = Array::CreateDict();
     info.set(s_name, rustToString(td.name));
@@ -586,7 +587,7 @@ Array populateTypedefs(const rust::Vec<hackc::ExtDeclTypeDef>& typedefs) {
     maybeSet(info, td.attributes, s_attributes, populateAttributes);
     arr.append(info);
   }
-  return arr;
+  return arr.toArray();
 }
 
 /*

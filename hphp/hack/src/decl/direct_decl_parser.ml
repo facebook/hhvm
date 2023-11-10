@@ -38,8 +38,6 @@ external parse_and_hash_decls :
   string ->
   parsed_file_with_hashes = "hh_parse_and_hash_decls_ffi"
 
-external decls_hash : decls -> Int64.t = "decls_hash"
-
 (* NB: Must be manually kept in sync with Rust function
    `hackrs_provider_backend::FileInfo::from::<ParsedFileWithHashes>` *)
 let decls_to_fileinfo fn (parsed_file : parsed_file_with_hashes) =

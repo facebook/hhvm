@@ -65,12 +65,12 @@ impl<'a> IntoIterator for ParsedFile<'a> {
 pub struct ParsedFileWithHashes<'a> {
     pub mode: Option<file_info::Mode>,
 
-    /// `file_decls_hash` is computed before php stdlib decls and duplicates
-    /// are removed, as is computed over the decls in reverse lexical order
+    /// `file_decls_hash` is a position *insensitive* decl hash, computed before php stdlib decls
+    /// and duplicates are removed, and is computed over the decls in reverse lexical order
     /// (the hash is order-sensitive)
     pub file_decls_hash: hh24_types::FileDeclsHash,
 
-    /// Decls along with a position insensitive hash. Internally they're stored in reverse
+    /// Decls along with a position *sensitive* hash. Internally they're stored in reverse
     /// lexical order. The choice of what to go into this list (remove dupes? remove php_stdlib
     /// in hhi files? transform class decls by removing php_stdlib members?) is determined
     /// by how it was constructed. The field is private: the only way to access it
@@ -101,6 +101,7 @@ impl<'a> ParsedFileWithHashes<'a> {
                         None => return None,
                     }
                 }
+                // following is a position-sensitive hash
                 let hash = hh24_types::DeclHash::from_u64(hh_hash::hash(&decl));
                 Some((name, decl, hash))
             })

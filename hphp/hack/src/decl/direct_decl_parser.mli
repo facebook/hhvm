@@ -17,8 +17,9 @@ type parsed_file = {
 
 type parsed_file_with_hashes = {
   pfh_mode: FileInfo.mode option;
-  pfh_hash: Int64.t;
+  pfh_hash: Int64.t;  (** position insensitive hash of all decls in the file *)
   pfh_decls: (string * Shallow_decl_defs.decl * Int64.t) list;
+      (** (name, decl, position-sensitive hash of this decl) *)
 }
 
 (** NOTE: this doesn't respect deregister_php_lib, and has decls in reverse lexical order. *)
@@ -32,8 +33,6 @@ val parse_and_hash_decls :
   Relative_path.t ->
   string ->
   parsed_file_with_hashes
-
-val decls_hash : decls -> Int64.t
 
 (** NOTE: this takes input in reverse-lexical-order, and emits FileInfo.t in forward lexical order *)
 val decls_to_fileinfo : Relative_path.t -> parsed_file_with_hashes -> FileInfo.t

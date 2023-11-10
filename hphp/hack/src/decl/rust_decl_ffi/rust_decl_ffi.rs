@@ -11,9 +11,7 @@ use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep_caml_builtins::Int64;
 use ocamlrep_ocamlpool::ocaml_ffi;
 use ocamlrep_ocamlpool::ocaml_ffi_arena_result;
-use ocamlrep_ocamlpool::ocaml_ffi_with_arena;
 use oxidized::decl_parser_options::DeclParserOptions;
-use oxidized_by_ref::direct_decl_parser::Decls;
 use oxidized_by_ref::direct_decl_parser::ParsedFile;
 use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes;
 use parser_core_types::indexed_source_text::IndexedSourceText;
@@ -90,12 +88,6 @@ ocaml_ffi_arena_result! {
         let parsed_file = direct_decl_parser::parse_decls_for_typechecking(&opts, filename, text, arena);
         let with_hashes = ParsedFileWithHashes::new(parsed_file, deregister_php_stdlib_if_hhi, prefix, arena);
         with_hashes.into()
-    }
-}
-
-ocaml_ffi_with_arena! {
-    fn decls_hash<'a>(arena: &'a Bump, decls: Decls<'a>) -> Int64 {
-        Int64(hh_hash::position_insensitive_hash(&decls) as i64)
     }
 }
 

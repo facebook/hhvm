@@ -45,6 +45,7 @@
 #include <thrift/lib/cpp2/server/AdaptiveConcurrency.h>
 #include <thrift/lib/cpp2/server/CPUConcurrencyController.h>
 #include <thrift/lib/cpp2/server/ControlServerInterface.h>
+#include <thrift/lib/cpp2/server/InterceptorData.h>
 #include <thrift/lib/cpp2/server/MonitoringServerInterface.h>
 #include <thrift/lib/cpp2/server/ResourcePool.h>
 #include <thrift/lib/cpp2/server/ResourcePoolSet.h>
@@ -105,7 +106,12 @@ namespace detail {
  * Gets the server's ThriftServerConfig which contains all the static and
  * dynamic Server Attributes
  */
-inline ThriftServerConfig& getThriftServerConfig(BaseThriftServer&);
+ThriftServerConfig& getThriftServerConfig(BaseThriftServer&);
+
+/**
+ * Gets the server's InterceptorData. Should only be used for tests.
+ */
+const InterceptorData& getInterceptorData(BaseThriftServer&);
 } // namespace detail
 
 /**
@@ -306,9 +312,11 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   std::vector<std::shared_ptr<server::TServerEventHandler>> eventHandlers_;
 
   friend ThriftServerConfig& detail::getThriftServerConfig(BaseThriftServer&);
+  friend const InterceptorData& detail::getInterceptorData(BaseThriftServer&);
 
  protected:
   ThriftServerConfig thriftConfig_;
+  InterceptorData interceptorData_;
 
   /**
    * In cases where multiple services are running in the same process, this
@@ -1648,6 +1656,9 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
 namespace detail {
 inline ThriftServerConfig& getThriftServerConfig(BaseThriftServer& server) {
   return server.thriftConfig_;
+}
+inline const InterceptorData& getInterceptorData(BaseThriftServer& server) {
+  return server.interceptorData_;
 }
 } // namespace detail
 

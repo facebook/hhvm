@@ -1484,6 +1484,7 @@ bool simplify(Env& env, const cmovq& inst, Vlabel b, size_t i) {
  *  loadzlq{s, tmp}; movtql{tmp, d} -> loadl{s, d}
  */
 bool simplify_load_jmpr(Env& env, const load& load, Vlabel b, size_t i) {
+  if (arch() == Arch::ARM) return false;
   if (env.use_counts[load.d] != 1) return false;
   auto const& code = env.unit.blocks[b].code;
   if (i + 1 >= code.size()) return false;

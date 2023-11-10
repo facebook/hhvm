@@ -1275,7 +1275,7 @@ void emitIsTypeStructC(IRGS& env, TypeStructResolveOp op, TypeStructEnforceKind 
   }
   popC(env);
   auto block = opcodeMayRaise(IsTypeStruct) && shouldDecRef
-    ? create_catch_block(env, [&]{
+    ? makeCatchBlock(env, [&]{
         decRef(env, tc, DecRefProfileId::IsTypeStructCTc);
       })
     : nullptr;
@@ -1341,8 +1341,7 @@ void emitThrowAsTypeStructException(IRGS& env, AsTypeStructExceptionKind kind) {
         staticallyResolveTypeStructure(env, ts, partial, invalidType);
       if (!ts->same(maybe_resolved)) {
         auto const inputTS = cns(env, maybe_resolved);
-        return {inputTS, create_catch_block(
-            env, [&]{ decRef(env, inputTS); })};
+        return {inputTS, makeCatchBlock(env, [&]{ decRef(env, inputTS); })};
       }
     }
     auto const ts = resolveTypeStructImpl(env, true, false, 1, true);

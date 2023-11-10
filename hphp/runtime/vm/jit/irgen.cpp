@@ -148,8 +148,8 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
       }
       return EndCatchData::CatchMode::UnwindOnly;
     }();
-    inst->setTaken(create_catch_block(env, []{}, catchMode,
-                                      offsetToAdjustSPForCall));
+    inst->setTaken(
+      makeCatchBlock(env, []{}, catchMode, offsetToAdjustSPForCall));
   }
 
   if (inst->mayRaiseError()) {

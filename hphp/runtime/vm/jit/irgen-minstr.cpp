@@ -1106,7 +1106,7 @@ SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
 }
 
 Block* makeCatchSet(IRGS& env, uint32_t nDiscard) {
-  return create_catch_block(env, [&]{
+  return makeCatchBlock(env, [&]{
     ifElse(
       env,
       [&] (Block* taken) {

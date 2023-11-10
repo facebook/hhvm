@@ -855,7 +855,7 @@ inline void decRefThis(IRGS& env) {
  * Creates a catch block and calls body immediately as the catch block begins
  */
 template<class Body>
-Block* create_catch_block(
+Block* makeCatchBlock(
     IRGS& env, Body body,
     EndCatchData::CatchMode mode = EndCatchData::CatchMode::UnwindOnly,
     int32_t offsetToAdjustSPForCall = 0) {

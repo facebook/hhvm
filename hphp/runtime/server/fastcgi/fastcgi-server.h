@@ -141,6 +141,10 @@ struct FastCGIServer : public Server,
   // Callback for FastCGIAcceptor that terminates the server
   void onConnectionsDrained();
 
+  DispatcherStats getDispatcherStats() override {
+    return m_dispatcher.getDispatcherStats();
+  }
+
 private:
   // Priority of requests to dispatcher thread; currently we only use normal
   // priority

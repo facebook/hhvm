@@ -200,6 +200,7 @@ namespace Trace {
       TM(taint)         \
       TM(targetcache)   \
       TM(tcspace)       \
+      TM(thread_tune)   \
       TM(trans)         \
       TM(treadmill)     \
       TM(txdeps)        \

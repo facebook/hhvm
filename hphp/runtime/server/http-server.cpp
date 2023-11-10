@@ -186,17 +186,19 @@ HttpServer::HttpServer() {
   m_counterCallback.init(
     [this](std::map<std::string, int64_t>& counters) {
       counters["ev_connections"] = m_pageServer->getLibEventConnectionCount();
-      counters["inflight_requests"] = m_pageServer->getActiveWorker();
-      auto queued_requests = m_pageServer->getQueuedJobs();
-      counters["queued_requests"] = queued_requests;
-      counters["queued_requests_high"] =
-        queued_requests > RuntimeOption::ServerHighQueueingThreshold;
       auto const sat_requests = getSatelliteRequestCount();
       counters["satellite_inflight_requests"] = sat_requests.first;
       counters["satellite_queued_requests"] = sat_requests.second;
       auto const uptime = HHVM_FN(server_uptime)();
       counters["uptime"] = uptime;
       counters["stopping_soon"] = HHVM_FN(server_is_prepared_to_stop)();
+
+      auto const dispatcherStats = m_pageServer->getDispatcherStats();
+      counters["inflight_requests"] = dispatcherStats.activeThreads;
+      auto queued_requests = dispatcherStats.queuedJobCount;
+      counters["queued_requests"] = queued_requests;
+      counters["queued_requests_high"] =
+        queued_requests > RuntimeOption::ServerHighQueueingThreshold;
 
       // Temporary counter that is available only during a short uptime window.
       if (uptime > RO::EvalMemTrackStart && uptime < RO::EvalMemTrackEnd) {

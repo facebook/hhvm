@@ -20,6 +20,7 @@
 #include "hphp/runtime/server/proxygen/proxygen-transport.h"
 #include "hphp/runtime/server/server-worker.h"
 #include "hphp/runtime/server/server.h"
+#include "hphp/util/job-queue.h"
 #include <proxygen/lib/http/session/HTTPSessionAcceptor.h>
 #include <proxygen/lib/services/WorkerThread.h>
 #include <wangle/ssl/SSLContextConfig.h>
@@ -181,6 +182,8 @@ struct ProxygenServer : Server,
   int onTakeoverRequest(TakeoverAgent::RequestType type) override;
 
   void takeoverAborted() override;
+
+  DispatcherStats getDispatcherStats() override;
 
   // Methods invoked by ProxygenTransport, virtual for mocking
   virtual void onRequest(std::shared_ptr<ProxygenTransport> transport);

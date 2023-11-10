@@ -96,6 +96,15 @@ namespace detail {
 struct NoDropCachePolicy { static void dropCache() {} };
 }
 
+struct DispatcherStats {
+  // Maximum number of threads that can be used by the dispatcher
+  size_t maxThreads = 0;
+  // Number of workers that are actively processing jobs
+  size_t activeThreads = 0;
+  // Number of jobs that are currently in the queue
+  size_t queuedJobCount = 0;
+};
+
 /**
  * A job queue that's suitable for multiple threads to work on.
  */
@@ -806,6 +815,16 @@ struct JobQueueDispatcher : IHostHealthObserver {
     }
     m_stoppedWorkers.insert(m_workers.begin() + mtc, m_workers.end());
     m_workers.resize(mtc);
+  }
+
+  DispatcherStats getDispatcherStats() {
+    DispatcherStats stats;
+
+    stats.maxThreads = getMaxThreadCount();
+    stats.activeThreads = getActiveWorker();
+    stats.queuedJobCount = getQueuedJobs();
+
+    return stats;
   }
 
   /////////////////////////////////////////////////////////////////////////////

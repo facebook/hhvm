@@ -28,6 +28,7 @@
 #include "hphp/runtime/server/transport.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/health-monitor-types.h"
+#include "hphp/util/job-queue.h"
 #include "hphp/util/lock.h"
 
 /**
@@ -318,6 +319,8 @@ public:
   virtual bool enableSSLWithPlainText() {
     return false;
   }
+
+  virtual DispatcherStats getDispatcherStats() = 0;
 
 protected:
   std::string m_address;

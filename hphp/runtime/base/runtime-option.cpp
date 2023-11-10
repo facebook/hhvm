@@ -1310,6 +1310,9 @@ std::string RuntimeOption::Fb303ServerIP;
 int RuntimeOption::Fb303ServerThreadStackSizeMb = 8;
 int RuntimeOption::Fb303ServerWorkerThreads = 1;
 int RuntimeOption::Fb303ServerPoolThreads = 1;
+
+double RuntimeOption::ThreadTuneAdjustmentPct = 0;
+double RuntimeOption::ThreadTuneStepPct = 5;
 #endif
 
 double RuntimeOption::XenonPeriodSeconds = 0.0;
@@ -2836,6 +2839,9 @@ void RuntimeOption::Load(
                  "Fb303Server.WorkerThreads", 1);
     Config::Bind(Fb303ServerPoolThreads, ini, config, "Fb303Server.PoolThreads",
                  1);
+
+    Config::Bind(ThreadTuneAdjustmentPct, ini, config, "ThreadTuneAdjustmentPct", ThreadTuneAdjustmentPct);
+    Config::Bind(ThreadTuneStepPct, ini, config, "ThreadTuneStepPct", ThreadTuneStepPct);
   }
 #endif
 

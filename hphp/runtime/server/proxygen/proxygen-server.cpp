@@ -316,6 +316,10 @@ void ProxygenServer::takeoverAborted() {
   m_httpServerSocket.reset();
 }
 
+DispatcherStats ProxygenServer::getDispatcherStats() {
+  return m_dispatcher.getDispatcherStats();
+}
+
 void ProxygenServer::addTakeoverListener(TakeoverListener* listener) {
   if (m_takeover_agent) {
     m_takeover_agent->addTakeoverListener(listener);

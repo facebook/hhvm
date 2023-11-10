@@ -1637,6 +1637,14 @@ public:
   static int Fb303ServerThreadStackSizeMb;
   static int Fb303ServerWorkerThreads;
   static int Fb303ServerPoolThreads;
+
+  // Experimental thread tuning options, allows threads to be adjusted by
+  // thread controller (host stats monitor). Maximum adjustment is defined by
+  // the `ThreadTuneAdjustmentPct` of the configured thread count, and the step
+  // size is defined by `ThreadTuneStepPct`. Thread tuning is turned off when
+  // `ThreadTuneAdjustmentPct` is set to 0 (default).
+  static double ThreadTuneAdjustmentPct;
+  static double ThreadTuneStepPct;
 #endif
 
   // Xenon options

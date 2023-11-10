@@ -411,42 +411,57 @@ let module_def ctx md =
 
 let nast_to_tast ~(do_tast_checks : bool) ctx nast :
     Tast.program Tast_with_dynamic.t =
-  let convert_def = function
+  let convert_def ((stmts_env, tast_defs) as acc) = function
     (* Sometimes typing will just return `None` but that should only be the case
      * if an error had already been registered e.g. in naming
      *)
     | Fun f -> begin
       match fun_def ctx f with
-      | Some fs -> Some (Tast_with_dynamic.map ~f:(fun f -> Aast.Fun f) fs)
-      | None -> None
+      | Some fs ->
+        ( stmts_env,
+          Tast_with_dynamic.map ~f:(fun f -> Aast.Fun f) fs :: tast_defs )
+      | None -> acc
     end
     | Constant gc ->
-      Some
+      ( stmts_env,
         (Tast_with_dynamic.mk_without_dynamic
         @@ Aast.Constant (gconst_def ctx gc))
+        :: tast_defs )
     | Typedef td ->
-      Some
+      ( stmts_env,
         (Tast_with_dynamic.mk_without_dynamic
         @@ Aast.Typedef (typedef_def ctx td))
+        :: tast_defs )
     | Class c -> begin
       match class_def ctx c with
-      | Some cs -> Some (Tast_with_dynamic.map ~f:(fun c -> Aast.Class c) cs)
-      | None -> None
+      | Some cs ->
+        ( stmts_env,
+          Tast_with_dynamic.map ~f:(fun c -> Aast.Class c) cs :: tast_defs )
+      | None -> acc
     end
-    (* We don't typecheck top level statements:
+    (* Top-level statements are technically not supported:
      * https://docs.hhvm.com/hack/unsupported/top-level
-     * so just create the minimal env for us to construct a Stmt.
-     *)
+     * However, it is convenient to write them in notebooks. *)
     | Stmt s ->
-      let env = Typing_env_types.empty ctx Relative_path.default ~droot:None in
-      Some
-        (Tast_with_dynamic.mk_without_dynamic
-        @@ Aast.Stmt (snd (Typing.stmt env s)))
+      let (stmts_env, stmt_) = Typing.stmt stmts_env s in
+      (* we accumulate an environment for top-level statements so the following will be
+         typed as expected, which is important for notebooks:
+          ```
+          $x = new Foo();
+          $y = $x->bar();
+          ```
+      *)
+      ( stmts_env,
+        (Tast_with_dynamic.mk_without_dynamic @@ Aast.Stmt stmt_) :: tast_defs
+      )
     | Module md ->
-      Some
+      ( stmts_env,
         (Tast_with_dynamic.mk_without_dynamic @@ Aast.Module (module_def ctx md))
+        :: tast_defs )
     | SetModule sm ->
-      Some (Tast_with_dynamic.mk_without_dynamic @@ Aast.SetModule sm)
+      ( stmts_env,
+        (Tast_with_dynamic.mk_without_dynamic @@ Aast.SetModule sm) :: tast_defs
+      )
     | Namespace _
     | NamespaceUse _
     | SetNamespaceEnv _
@@ -455,7 +470,13 @@ let nast_to_tast ~(do_tast_checks : bool) ctx nast :
         "Invalid nodes in NAST. These nodes should be removed during naming."
   in
   if do_tast_checks then Nast_check.program ctx nast;
-  let tast = List.filter_map nast ~f:convert_def |> Tast_with_dynamic.collect in
+  let env = Typing_env_types.empty ctx Relative_path.default ~droot:None in
+  let tast =
+    List.fold nast ~init:(env, []) ~f:convert_def
+    |> snd
+    |> List.rev
+    |> Tast_with_dynamic.collect
+  in
   (* We only do TAST checks for non-dynamic components *)
   if do_tast_checks then
     Tast_check.program ctx tast.Tast_with_dynamic.under_normal_assumptions;

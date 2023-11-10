@@ -258,8 +258,6 @@ type t = {
       (** POC: @bobren, use old decls from CAS instead of memcache/manifold *)
   log_events_with_sandcastle_info: bool;
       (** POC: @catg, add sandcastle info to Scuba samples. *)
-  autocomplete_cache: bool;
-      (** POC: @mckenzie, add 2 character cache for autocomplete lookup. *)
   lsp_pull_diagnostics: bool;
       (** POC: @ljw - if true, uses the new LSP pull diagnostics model *)
 }
@@ -353,7 +351,6 @@ let default =
     dump_tast_hashes = false;
     dump_tasts = [];
     log_events_with_sandcastle_info = false;
-    autocomplete_cache = false;
     lsp_pull_diagnostics = false;
   }
 
@@ -1070,9 +1067,6 @@ let load_
       ~default:default.log_events_with_sandcastle_info
       config
   in
-  let autocomplete_cache =
-    bool_ "autocomplete_cache" ~default:default.autocomplete_cache config
-  in
   let lsp_pull_diagnostics =
     bool_ "lsp_pull_diagnostics" ~default:default.lsp_pull_diagnostics config
   in
@@ -1192,7 +1186,6 @@ let load_
     dump_tast_hashes;
     dump_tasts;
     log_events_with_sandcastle_info;
-    autocomplete_cache;
     lsp_pull_diagnostics;
   }
 
@@ -1246,7 +1239,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       ide_naming_table_update_threshold =
         options.ide_naming_table_update_threshold;
       saved_state_rollouts = options.saved_state.GlobalOptions.rollouts;
-      autocomplete_cache = options.autocomplete_cache;
       zstd_decompress_by_file =
         GlobalOptions.(options.saved_state.loading.zstd_decompress_by_file);
       lsp_pull_diagnostics = options.lsp_pull_diagnostics;

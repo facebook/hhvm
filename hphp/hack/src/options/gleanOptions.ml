@@ -16,6 +16,4 @@ type t = GlobalOptions.t [@@deriving show]
 
 let reponame t = t.GlobalOptions.glean_reponame
 
-let autocomplete_cache t = t.GlobalOptions.autocomplete_cache
-
 let default = GlobalOptions.default

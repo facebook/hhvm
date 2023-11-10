@@ -25,7 +25,6 @@ let initialize
       sie_quiet_mode = quiet;
       sie_namespace_map = namespace_map;
       glean_reponame = GleanOptions.reponame gleanopt;
-      autocomplete_cache = GleanOptions.autocomplete_cache gleanopt;
     }
   in
   (* Basic initialization *)

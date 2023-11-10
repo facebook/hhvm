@@ -154,8 +154,6 @@ type t = {
   tco_check_attribute_locations: bool;
   glean_reponame: string;
       (** Reponame used for glean connection, default to "www.autocomplete" *)
-  autocomplete_cache: bool;
-      (** Path prefix to use for files relative to the repository root when writing symbol info to JSON *)
   symbol_write_index_inherited_members: bool;
   symbol_write_ownership: bool;
       (** Index inherited members information from folded decls *)
@@ -359,7 +357,6 @@ val set :
   ?po_parser_errors_only:bool ->
   ?tco_check_attribute_locations:bool ->
   ?glean_reponame:string ->
-  ?autocomplete_cache:bool ->
   ?symbol_write_index_inherited_members:bool ->
   ?symbol_write_ownership:bool ->
   ?symbol_write_root_path:string ->

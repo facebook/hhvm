@@ -16,14 +16,21 @@
 
 namespace cpp2 apache.thrift.test
 
+include "thrift/annotation/cpp.thrift"
+
+include "thrift/annotation/thrift.thrift"
+
 struct Inner {
   1: optional i32 field;
 }
 
 struct Outer {
-  1: Inner foo (cpp.experimental.lazy);
+  @cpp.Lazy
+  1: Inner foo;
 }
 
 struct OuterWithMixin {
-  1: Inner foo (cpp.experimental.lazy, cpp.mixin);
+  @cpp.Lazy
+  @thrift.Mixin
+  1: Inner foo;
 }

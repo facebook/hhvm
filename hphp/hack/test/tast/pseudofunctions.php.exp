@@ -49,9 +49,20 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
-           [([9:3-15], (Expr ((void), [9:3-15], (Call { func = ((_), [9:3-7], (Id ([9:3-7], "echo"))); targs = []; args = [(Pnormal, ((string), [9:8-13], (String "foo")))]; unpacked_arg = None }))));
+           [([9:3-15],
+             (Expr
+                ((void), [9:3-15],
+                 (Call
+                    { func = (((function(readonly arraykey $args...)[HH\Capabilities\IO]: void)), [9:3-7], (Id ([9:3-7], "echo"))); 
+                      targs = []; args = [(Pnormal, ((string), [9:8-13], (String "foo")))]; 
+                      unpacked_arg = None }))));
              ([10:3-16],
-              (Expr ((void), [10:3-15], (Call { func = ((_), [10:3-15], (Id ([10:3-15], "echo"))); targs = []; args = [(Pnormal, ((string), [10:9-14], (String "foo")))]; unpacked_arg = None }))));
+              (Expr
+                 ((void), [10:3-15],
+                  (Call
+                     { func = (((function(readonly arraykey $args...)[HH\Capabilities\IO]: void)), [10:3-15], (Id ([10:3-15], "echo"))); 
+                       targs = []; args = [(Pnormal, ((string), [10:9-14], (String "foo")))]; 
+                       unpacked_arg = None }))));
              ([12:3-10], (Expr (((readonly function(C $c): void)), [12:3-9], (FunctionPointer ((FP_id ([12:3-7], "\\test")), [])))));
              ([13:3-18], (Expr (((readonly function(): void)), [13:3-17], (FunctionPointer ((FP_class_const (((C), [13:3-4], (CI ([13:3-4], "\\C"))), ([13:6-15], "staticFoo"))), [])))));
              ([14:3-40], (Expr (((function(C): void)), [14:3-39], (Method_caller (([14:15-16], "\\C"), ([14:25-38], "instanceFoo"))))));

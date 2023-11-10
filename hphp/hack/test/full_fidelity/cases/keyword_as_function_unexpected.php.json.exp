@@ -1406,20 +1406,17 @@
             }
           },
           "function_name":{
-            "kind":"error",
-            "error_error":{
-              "kind":"token",
-              "token":{
-                "kind":"echo",
-                "text":"echo",
-                "offset":324,
-                "leading_width":0,
-                "width":4,
-                "trailing_width":0,
-                "leading":[],
-                "trailing":[],
-                "line_number":18
-              }
+            "kind":"token",
+            "token":{
+              "kind":"name",
+              "text":"echo",
+              "offset":324,
+              "leading_width":0,
+              "width":4,
+              "trailing_width":0,
+              "leading":[],
+              "trailing":[],
+              "line_number":18
             }
           },
           "function_left_paren":{

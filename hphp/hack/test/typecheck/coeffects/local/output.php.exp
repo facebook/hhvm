@@ -1,14 +1,20 @@
 File "output.php", line 3, characters 20-38:
 Direct references to coeffects namespaces are not allowed (Parsing[1002])
 File "output.php", line 9, characters 3-6:
-`echo` or `print` builtin requires the capability IO, which is not provided by the context. (Typing[4401])
+This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "output.php", line 8, characters 23-24:
-  The local (enclosing) context provides the capability set {}
+  From this declaration, the context of this function body provides the capability set {}
+  File "pseudofunctions.hhi", line 44, characters 12-15:
+  But the function being called requires the capability IO
 File "output.php", line 10, characters 3-6:
-`echo` or `print` builtin requires the capability IO, which is not provided by the context. (Typing[4401])
+This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "output.php", line 8, characters 23-24:
-  The local (enclosing) context provides the capability set {}
+  From this declaration, the context of this function body provides the capability set {}
+  File "pseudofunctions.hhi", line 44, characters 12-15:
+  But the function being called requires the capability IO
 File "output.php", line 14, characters 3-6:
-`echo` or `print` builtin requires the capability IO, which is not provided by the context. (Typing[4401])
+This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "output.php", line 13, characters 24-34:
-  The local (enclosing) context provides the capability WriteProperty
+  From this declaration, the context of this function body provides the capability WriteProperty
+  File "pseudofunctions.hhi", line 44, characters 12-15:
+  But the function being called requires the capability IO

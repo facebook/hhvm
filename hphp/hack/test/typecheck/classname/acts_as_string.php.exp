@@ -1,8 +1,8 @@
 File "acts_as_string.php", line 11, characters 3-13:
   classname<exact Tr>
 File "acts_as_string.php", line 30, characters 8-9:
-Invalid `echo`/`print` argument (Typing[4438])
-  File "acts_as_string.php", line 30, characters 3-6:
-  Expected `arraykey`
+Invalid argument (Typing[4110])
+  File "pseudofunctions.hhi", line 44, characters 29-33:
+  Expected `arraykey` (variadic argument)
   File "acts_as_string.php", line 29, characters 26-34:
   But got `Stringish`

@@ -1252,7 +1252,14 @@ let check_class_get
  * environment and localise it with the input type parameters.
  *)
 let fun_type_of_id env x tal el =
-  match Env.get_fun env (snd x) with
+  let (is_echo, lookup_id) =
+    (* Strip namespace *)
+    if String.equal (snd x) SN.SpecialFunctions.echo then
+      (true, SN.PseudoFunctions.echo)
+    else
+      (false, snd x)
+  in
+  match Env.get_fun env lookup_id with
   | None ->
     let (env, _, ty) = unbound_name env x ((), Pos.none, Aast.Null) in
     (env, ty, [])
@@ -1298,6 +1305,35 @@ let fun_type_of_id env x tal el =
             env
             ft)
       in
+      (* Replace default coeffect by [io] for type of echo
+       * (we don't want to make io generally available through hhi)
+       * and mark varargs parameter as readonly
+       * (this is normally rejected by the parser)
+       *)
+      let ft =
+        if is_echo then
+          {
+            ft with
+            ft_implicit_params =
+              {
+                capability =
+                  CapTy
+                    (MakeType.capability
+                       (Reason.Rwitness_from_decl fd.fe_pos)
+                       SN.Capabilities.io);
+              };
+            ft_params =
+              List.map ft.ft_params ~f:(fun fp ->
+                  {
+                    fp with
+                    fp_flags =
+                      Typing_defs_flags.FunParam.set_readonly true fp.fp_flags;
+                  });
+          }
+        else
+          ft
+      in
+
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt2;
       let fty =
         Typing_dynamic.maybe_wrap_with_supportdyn
@@ -4862,19 +4898,8 @@ end = struct
     let make_call env func targs args unpacked_arg ty =
       make_result env p (Aast.Call { func; targs; args; unpacked_arg }) ty
     in
-    (* TODO: Avoid Tany annotations in TAST by eliminating `make_call_special` *)
-    let make_call_special env id tel ty =
-      make_call
-        env
-        (Tast.make_typed_expr fpos (TUtils.mk_tany env fpos) (Aast.Id id))
-        []
-        tel
-        None
-        ty
-    in
     (* For special functions and pseudofunctions with a definition in an HHI
-     * file. It is preferred over [make_call_special] because it does not generate
-     * [TAny] for the function type of the call.
+     * file.
      *)
     let make_call_special_from_def env id tel ty_ =
       let (env, fty, tal) = fun_type_of_id env id explicit_targs el in
@@ -4987,51 +5012,6 @@ end = struct
     | Id ((pos, x) as id) when SN.StdlibFunctions.needs_special_dispatch x ->
     begin
       match x with
-      (* Special function [echo]. *)
-      | echo when String.equal echo SN.SpecialFunctions.echo ->
-        (* TODO(tany): TODO(T92020097):
-         * Add [function print(arraykey ...$args)[io]: void] to an HHI file and
-         * remove special casing of [echo] and [print].
-         *)
-        let env = Typing_local_ops.enforce_io pos env in
-        let (env, tel, _) =
-          argument_list_exprs (expr ~accept_using_var:true) env el
-        in
-        let arraykey_ty = MakeType.arraykey (Reason.Rwitness pos) in
-        let like_ak_ty =
-          MakeType.union
-            (Reason.Rwitness pos)
-            [MakeType.dynamic (Reason.Rwitness pos); arraykey_ty]
-        in
-        let ((env, ty_errs), rev_tel) =
-          List.fold
-            tel
-            ~init:((env, []), [])
-            ~f:(fun ((env, ty_errs), tel) (pk, ((ty, pos, _) as te)) ->
-              let (env, ty_err_opt) =
-                SubType.sub_type env ty like_ak_ty
-                @@ Some
-                     (Typing_error.Reasons_callback.invalid_echo_argument_at
-                        pos)
-              in
-              let ty_mismatch_opt =
-                mk_ty_mismatch_opt ty arraykey_ty ty_err_opt
-              in
-              let ty_errs =
-                Option.value_map
-                  ~default:ty_errs
-                  ~f:(fun e -> e :: ty_errs)
-                  ty_err_opt
-              in
-              ( (env, ty_errs),
-                (pk, hole_on_ty_mismatch ~ty_mismatch_opt te) :: tel ))
-        in
-        let tel = List.rev rev_tel in
-        let should_forget_fakes = false in
-        let ty_err_opt = Typing_error.multiple_opt ty_errs in
-        Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-        ( make_call_special env id tel (MakeType.void (Reason.Rwitness pos)),
-          should_forget_fakes )
       (* `unsafe_cast` *)
       | unsafe_cast
         when String.equal unsafe_cast SN.PseudoFunctions.unsafe_cast

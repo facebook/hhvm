@@ -32,6 +32,16 @@ namespace {
    * is disallowed by Hack.
    */
   function unset(mixed $x)[]: void;
+
+  /**
+   * Psuedo-function for echo.
+   *
+   * Note that echo is not a real function. It's a language construct.
+   *
+   * This just stores the signature of the pseudo-function.
+   */
+  <<__SupportDynamicType>>
+  function echo(arraykey ...$args): void;
 }
 
 namespace HH {

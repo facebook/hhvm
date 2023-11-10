@@ -1,3 +1,10 @@
+Errors:
+  [5:8-10] Invalid argument
+  [44:29-34] Expected `arraykey` (variadic argument)
+  [3:28-33] But got `mixed`
+  [7:8-10] Invalid argument
+  [44:29-34] Expected `arraykey` (variadic argument)
+  [3:38-42] But got `bool`
 [(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -24,14 +31,14 @@
             (Expr
                ((void), [5:3-12],
                 (Call
-                   { func = ((_), [5:3-7], (Id ([5:3-7], "echo"))); targs = [];
-                     args = [(Pnormal, ((mixed), [5:8-10], (Hole (((mixed), [5:8-10], (Lvar ([5:8-10], $x))), (mixed), (arraykey), Typing))))]; 
+                   { func = (((function(readonly arraykey $args...)[HH\Capabilities\IO]: void)), [5:3-7], (Id ([5:3-7], "echo"))); 
+                     targs = []; args = [(Pnormal, ((mixed), [5:8-10], (Hole (((mixed), [5:8-10], (Lvar ([5:8-10], $x))), (mixed), (arraykey), Typing))))]; 
                      unpacked_arg = None }))));
             ([7:3-12],
              (Expr
                 ((void), [7:3-12],
                  (Call
-                    { func = ((_), [7:3-7], (Id ([7:3-7], "echo"))); 
+                    { func = (((function(readonly arraykey $args...)[HH\Capabilities\IO]: void)), [7:3-7], (Id ([7:3-7], "echo"))); 
                       targs = []; args = [(Pnormal, ((bool), [7:8-10], (Hole (((bool), [7:8-10], (Lvar ([7:8-10], $y))), (bool), (arraykey), Typing))))]; 
                       unpacked_arg = None }))))
             ]

@@ -1957,7 +1957,7 @@ where
                 let pos = self.pos();
                 self.sc_mut().make_missing(pos)
             }
-            TokenKind::Isset | TokenKind::Unset | TokenKind::Empty => {
+            TokenKind::Isset | TokenKind::Unset | TokenKind::Echo | TokenKind::Empty => {
                 // We need to parse those as names as they are defined in hhi
                 let token = self.next_token_as_name();
                 self.sc_mut().make_token(token)

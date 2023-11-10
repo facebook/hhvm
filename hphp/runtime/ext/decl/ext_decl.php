@@ -146,8 +146,6 @@ type ExtDeclMethodParam = shape(
   ?'is_accept_disposable' => bool,
   ?'is_inout' => bool,
   ?'has_default' => bool,
-  ?'is_ifc_external' => bool,
-  ?'is_ifc_can_call' => bool,
   ?'is_readonly' => bool,
 );
 

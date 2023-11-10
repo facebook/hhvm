@@ -33,6 +33,9 @@ impl MethodFlags {
     pub fn is_override(&self) -> bool {
         self.contains(Self::OVERRIDE)
     }
+    pub fn is_php_std_lib(&self) -> bool {
+        self.contains(Self::PHP_STD_LIB)
+    }
     pub fn supports_dynamic_type(&self) -> bool {
         self.contains(Self::SUPPORT_DYNAMIC_TYPE)
     }

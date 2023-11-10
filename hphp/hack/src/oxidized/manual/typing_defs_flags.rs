@@ -244,6 +244,42 @@ impl<'de> serde::Deserialize<'de> for ClassEltFlags {
     }
 }
 
+impl FunTypeFlags {
+    pub fn return_disposable(&self) -> bool {
+        self.contains(Self::RETURN_DISPOSABLE)
+    }
+    pub fn is_coroutine(&self) -> bool {
+        self.contains(Self::IS_COROUTINE)
+    }
+    pub fn is_async(&self) -> bool {
+        self.contains(Self::ASYNC)
+    }
+    pub fn is_generator(&self) -> bool {
+        self.contains(Self::GENERATOR)
+    }
+    pub fn instantiated_targs(&self) -> bool {
+        self.contains(Self::INSTANTIATED_TARGS)
+    }
+    pub fn is_function_pointer(&self) -> bool {
+        self.contains(Self::IS_FUNCTION_POINTER)
+    }
+    pub fn returns_readonly(&self) -> bool {
+        self.contains(Self::RETURNS_READONLY)
+    }
+    pub fn readonly_this(&self) -> bool {
+        self.contains(Self::READONLY_THIS)
+    }
+    pub fn support_dynamic_type(&self) -> bool {
+        self.contains(Self::SUPPORT_DYNAMIC_TYPE)
+    }
+    pub fn is_memoized(&self) -> bool {
+        self.contains(Self::IS_MEMOIZED)
+    }
+    pub fn variadic(&self) -> bool {
+        self.contains(Self::VARIADIC)
+    }
+}
+
 impl ocamlrep::ToOcamlRep for FunTypeFlags {
     fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, _alloc: &'a A) -> ocamlrep::Value<'a> {
         ocamlrep::Value::int(self.bits() as isize)
@@ -299,6 +335,21 @@ impl<'de> serde::Deserialize<'de> for FunTypeFlags {
             }
         }
         deserializer.deserialize_u16(Visitor)
+    }
+}
+
+impl FunParamFlags {
+    pub fn accepts_disposable(&self) -> bool {
+        self.contains(Self::ACCEPT_DISPOSABLE)
+    }
+    pub fn is_inout(&self) -> bool {
+        self.contains(Self::INOUT)
+    }
+    pub fn has_default(&self) -> bool {
+        self.contains(Self::HAS_DEFAULT)
+    }
+    pub fn is_readonly(&self) -> bool {
+        self.contains(Self::READONLY)
     }
 }
 

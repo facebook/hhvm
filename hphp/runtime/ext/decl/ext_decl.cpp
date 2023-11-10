@@ -107,8 +107,6 @@ const StaticString s_is_variadic("is_variadic");
 const StaticString s_is_accept_disposable("is_accept_disposable");
 const StaticString s_is_inout("is_inout");
 const StaticString s_has_default("has_default");
-const StaticString s_is_ifc_external("is_ifc_external");
-const StaticString s_is_ifc_can_call("is_ifc_can_call");
 const StaticString s_is_readonly("is_readonly");
 const StaticString s_is_const("is_const");
 const StaticString s_is_lateinit("is_lateinit");
@@ -179,16 +177,6 @@ void maybeSetFirst(
 
 void maybeSetBool(Array& info, bool fval, const StaticString& fname) {
   if (fval) {
-    info.set(fname, true);
-  }
-}
-
-void maybeFlag(
-    Array& info,
-    unsigned fval,
-    const StaticString& fname,
-    unsigned flag) {
-  if ((fval & flag) != 0) {
     info.set(fname, true);
   }
 }
@@ -354,12 +342,10 @@ Array populateMethodParams(const rust::Vec<hackc::ExtDeclMethodParam>& params) {
     info.set(s_name, rustToString(param.name));
     info.set(s_type, rustToString(param.type_));
     maybeSetBool(info, !param.enforced_type, s_is_soft_type);
-    maybeFlag(info, param.flags, s_is_accept_disposable, 1 << 0);
-    maybeFlag(info, param.flags, s_is_inout, 1 << 1);
-    maybeFlag(info, param.flags, s_has_default, 1 << 2);
-    maybeFlag(info, param.flags, s_is_ifc_external, 1 << 3);
-    maybeFlag(info, param.flags, s_is_ifc_can_call, 1 << 4);
-    maybeFlag(info, param.flags, s_is_readonly, 1 << 8);
+    maybeSetBool(info, param.accept_disposable, s_is_accept_disposable);
+    maybeSetBool(info, param.is_inout, s_is_inout);
+    maybeSetBool(info, param.has_default, s_has_default);
+    maybeSetBool(info, param.is_readonly, s_is_readonly);
     arr.append(info);
   }
   return arr.toArray();
@@ -384,17 +370,17 @@ Array populateSignature(const rust::Vec<hackc::ExtDeclSignature>& sigs) {
     maybeSet(info, sig.params, s_params, populateMethodParams);
     maybeSet(info, sig.implicit_params, s_implicit_params, rustToString);
     maybeSet(info, sig.cross_package, s_cross_package, rustToString);
-    maybeFlag(info, sig.flags, s_is_return_disposable, 1 << 0);
-    maybeFlag(info, sig.flags, s_is_coroutine, 1 << 3);
-    maybeFlag(info, sig.flags, s_is_async, 1 << 4);
-    maybeFlag(info, sig.flags, s_is_generator, 1 << 5);
-    maybeFlag(info, sig.flags, s_is_instantiated_targs, 1 << 8);
-    maybeFlag(info, sig.flags, s_is_function_pointer, 1 << 9);
-    maybeFlag(info, sig.flags, s_is_returns_readonly, 1 << 10);
-    maybeFlag(info, sig.flags, s_is_readonly_this, 1 << 11);
-    maybeFlag(info, sig.flags, s_is_support_dynamic_type, 1 << 12);
-    maybeFlag(info, sig.flags, s_is_memoized, 1 << 13);
-    maybeFlag(info, sig.flags, s_is_variadic, 1 << 14);
+    maybeSetBool(info, sig.return_disposable, s_is_return_disposable);
+    maybeSetBool(info, sig.is_coroutine, s_is_coroutine);
+    maybeSetBool(info, sig.is_async, s_is_async);
+    maybeSetBool(info, sig.is_generator, s_is_generator);
+    maybeSetBool(info, sig.instantiated_targs, s_is_instantiated_targs);
+    maybeSetBool(info, sig.is_function_pointer, s_is_function_pointer);
+    maybeSetBool(info, sig.returns_readonly, s_is_returns_readonly);
+    maybeSetBool(info, sig.readonly_this, s_is_readonly_this);
+    maybeSetBool(info, sig.support_dynamic_type, s_is_support_dynamic_type);
+    maybeSetBool(info, sig.is_memoized, s_is_memoized);
+    maybeSetBool(info, sig.variadic, s_is_variadic);
 
     Array arr = Array::CreateVec();
     arr.append(info);
@@ -420,12 +406,12 @@ Array populateMethods(const rust::Vec<hackc::ExtDeclMethod>& meths) {
     info.set(s_visibility, rustToString(meth.visibility));
     maybeSet(info, meth.attributes, s_attributes, populateAttributes);
     maybeSetFirst(info, meth.signature, s_signature, populateSignature);
-    maybeFlag(info, meth.flags, s_is_abstract, 1 << 0);
-    maybeFlag(info, meth.flags, s_is_final, 1 << 1);
-    maybeFlag(info, meth.flags, s_is_override, 1 << 2);
-    maybeFlag(info, meth.flags, s_is_dyncall, 1 << 3);
-    maybeFlag(info, meth.flags, s_is_php_std_lib, 1 << 4);
-    maybeFlag(info, meth.flags, s_is_support_dynamic_type, 1 << 5);
+    maybeSetBool(info, meth.is_abstract, s_is_abstract);
+    maybeSetBool(info, meth.is_final, s_is_final);
+    maybeSetBool(info, meth.is_override, s_is_override);
+    maybeSetBool(info, meth.is_dynamicallycallable, s_is_dyncall);
+    maybeSetBool(info, meth.is_php_std_lib, s_is_php_std_lib);
+    maybeSetBool(info, meth.supports_dynamic_type, s_is_support_dynamic_type);
     arr.append(info);
   }
   return arr.toArray();

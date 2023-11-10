@@ -282,6 +282,20 @@ fn get_class_impl(class: &ShallowClass<'_>) -> ExtDeclClass {
         */
     }
 }
+fn get_method_params(params: &FunParams<'_>) -> Vec<ExtDeclMethodParam> {
+    params
+        .iter()
+        .map(|p| ExtDeclMethodParam {
+            name: str_or_empty(p.name),
+            type_: extract_type_name(p.type_.type_),
+            enforced_type: p.type_.enforced == Enforcement::Enforced,
+            accept_disposable: p.flags.accepts_disposable(),
+            is_inout: p.flags.is_inout(),
+            has_default: p.flags.has_default(),
+            is_readonly: p.flags.is_readonly(),
+        })
+        .collect()
+}
 
 fn get_props(props: &[&ShallowProp<'_>], name: &str) -> Vec<ExtDeclProp> {
     props
@@ -305,18 +319,6 @@ fn get_props(props: &[&ShallowProp<'_>], name: &str) -> Vec<ExtDeclProp> {
         .collect()
 }
 
-fn get_method_params(params: &FunParams<'_>) -> Vec<ExtDeclMethodParam> {
-    params
-        .iter()
-        .map(|p| ExtDeclMethodParam {
-            name: str_or_empty(p.name),
-            type_: extract_type_name(p.type_.type_),
-            enforced_type: p.type_.enforced == Enforcement::Enforced,
-            flags: p.flags.bits(),
-        })
-        .collect()
-}
-
 fn get_method_opt(method: Option<&ShallowMethod<'_>>) -> Vec<ExtDeclMethod> {
     match method {
         Some(method) => vec![get_method(method)],
@@ -330,8 +332,13 @@ fn get_method(meth: &ShallowMethod<'_>) -> ExtDeclMethod {
         type_: extract_type_name(meth.type_),
         visibility: enum_visibility(meth.visibility),
         attributes: get_attributes(meth.attributes, ""),
-        flags: meth.flags.bits(),
         signature: get_signature(meth.type_.1),
+        is_abstract: meth.flags.is_abstract(),
+        is_final: meth.flags.is_final(),
+        is_dynamicallycallable: meth.flags.is_dynamicallycallable(),
+        is_override: meth.flags.is_override(),
+        is_php_std_lib: meth.flags.is_php_std_lib(),
+        supports_dynamic_type: meth.flags.supports_dynamic_type(),
     }
 }
 
@@ -480,10 +487,20 @@ fn get_signature(ty: Ty_<'_>) -> Vec<ExtDeclSignature> {
                 where_constraints: get_where_contraints(ft.where_constraints),
                 return_type: extract_type_name(ft.ret.type_),
                 return_enforced: ft.ret.enforced == Enforcement::Enforced,
-                flags: ft.flags.bits(),
                 params: get_method_params(ft.params),
                 implicit_params,
                 cross_package: str_or_empty(ft.cross_package),
+                return_disposable: ft.flags.return_disposable(),
+                is_coroutine: ft.flags.is_coroutine(),
+                is_async: ft.flags.is_async(),
+                is_generator: ft.flags.is_generator(),
+                instantiated_targs: ft.flags.instantiated_targs(),
+                is_function_pointer: ft.flags.is_function_pointer(),
+                returns_readonly: ft.flags.returns_readonly(),
+                readonly_this: ft.flags.readonly_this(),
+                support_dynamic_type: ft.flags.support_dynamic_type(),
+                is_memoized: ft.flags.is_memoized(),
+                variadic: ft.flags.variadic(),
             }]
         }
         _ => Vec::new(),

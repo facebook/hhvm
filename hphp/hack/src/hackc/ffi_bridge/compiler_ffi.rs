@@ -146,8 +146,11 @@ pub mod compile_ffi {
     pub struct ExtDeclMethodParam {
         name: String,
         type_: String,
-        flags: u16,
         enforced_type: bool,
+        accept_disposable: bool,
+        is_inout: bool,
+        has_default: bool,
+        is_readonly: bool,
     }
 
     #[derive(Debug, PartialEq)]
@@ -156,10 +159,20 @@ pub mod compile_ffi {
         where_constraints: Vec<ExtDeclTypeConstraint>,
         return_type: String,
         return_enforced: bool,
-        flags: u16,
         params: Vec<ExtDeclMethodParam>,
         implicit_params: String,
         cross_package: String,
+        return_disposable: bool,
+        is_coroutine: bool,
+        is_async: bool,
+        is_generator: bool,
+        instantiated_targs: bool,
+        is_function_pointer: bool,
+        returns_readonly: bool,
+        readonly_this: bool,
+        support_dynamic_type: bool,
+        is_memoized: bool,
+        variadic: bool,
     }
 
     #[derive(Debug, PartialEq)]
@@ -175,7 +188,12 @@ pub mod compile_ffi {
         visibility: String,
 
         // The source is MethodFlags(u8 enum) in method_flags.rs
-        flags: u8,
+        is_abstract: bool,
+        is_final: bool,
+        is_dynamicallycallable: bool,
+        is_override: bool,
+        is_php_std_lib: bool,
+        supports_dynamic_type: bool,
     }
 
     #[derive(Debug, PartialEq)]

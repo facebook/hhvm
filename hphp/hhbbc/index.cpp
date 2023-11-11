@@ -7574,10 +7574,6 @@ struct FlattenJob {
       }()
     );
 
-    for (auto const& cls : uninstantiable.vals) {
-      always_assert(index.m_uninstantiable.emplace(cls->name).second);
-    }
-
     std::vector<std::unique_ptr<php::Class>> newClosures;
     newClosures.reserve(worklist.size());
 
@@ -7666,32 +7662,19 @@ struct FlattenJob {
       outMethods.vals.emplace_back(std::move(methods));
     };
 
-    // If a closure's context is uninstantiable, then so is the
-    // closure.
-    auto const isContextInstantiable = [&] (const php::Class& cls) {
-      if (!cls.closureContextCls) return true;
-      if (index.uninstantiable(cls.closureContextCls)) {
-        always_assert(!index.m_classInfos.count(cls.closureContextCls));
-        return false;
-      }
-      return true;
-    };
-
     // Do the processing which relies on a fully accessible
     // LocalIndex
 
     ISStringToOneT<InterfaceConflicts> ifaceConflicts;
     for (auto& cls : classes.vals) {
       auto const cinfoIt = index.m_classInfos.find(cls->name);
-      if (cinfoIt == end(index.m_classInfos) || !isContextInstantiable(*cls)) {
+      if (cinfoIt == end(index.m_classInfos)) {
         ITRACE(
           4, "{} discovered to be not instantiable, instead "
           "creating MethodsWithoutCInfo for it\n",
           cls->name
         );
-        always_assert(
-          IMPLIES(!cls->closureContextCls, index.uninstantiable(cls->name))
-        );
+        always_assert(index.uninstantiable(cls->name));
         makeMethodsWithoutCInfo(*cls);
         continue;
       }
@@ -7790,7 +7773,7 @@ struct FlattenJob {
     for (auto& cls : classes.vals) {
       auto const name = cls->name;
       auto const cinfoIt = index.m_classInfos.find(name);
-      if (cinfoIt == end(index.m_classInfos) || !isContextInstantiable(*cls)) {
+      if (cinfoIt == end(index.m_classInfos)) {
         assertx(outMeta.uninstantiable.count(name));
         continue;
       }
@@ -10391,6 +10374,21 @@ flatten_classes_assign(IndexFlattenMetadata& meta) {
 
         for (auto const d : deps)       onDep(d);
         for (auto const clo : closures) onDep(clo);
+
+        if (out.instantiable) return out;
+        // If a class is not instantiable, then any of the closures
+        // which have it as a context are not either. Remove them as
+        // deps.
+        folly::erase_if(
+          out.deps,
+          [&] (SString d) {
+            auto const cloMeta = folly::get_ptr(meta.cls, d);
+            return
+              cloMeta &&
+              cloMeta->closureContext &&
+              cloMeta->closureContext->isame(cls);
+          }
+        );
         return out;
       }
     );

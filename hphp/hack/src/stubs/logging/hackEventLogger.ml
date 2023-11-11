@@ -197,6 +197,8 @@ let client_check_bad_exit _ _ ~init_proc_stack:_ ~spinner:_ = ()
 
 let client_check_errors_file_restarted _ = ()
 
+let client_lsp_start ~init_proc_stack:_ ~hhconfig_version_and_switch:_ = ()
+
 let client_lsp_method_handled
     ~root:_
     ~method_:_

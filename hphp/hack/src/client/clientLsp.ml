@@ -4993,8 +4993,11 @@ let handle_tick ~(state : state ref) : result_telemetry option Lwt.t =
     ~terminate_on_failure:false;
   Lwt.return_none
 
-let main (args : args) ~(init_id : string) ~(local_config : ServerLocalConfig.t)
-    : Exit_status.t Lwt.t =
+let main
+    (args : args)
+    ~(init_id : string)
+    ~(local_config : ServerLocalConfig.t)
+    ~(init_proc_stack : string list option) : Exit_status.t Lwt.t =
   Printexc.record_backtrace true;
 
   let root = args.root_from_cli in
@@ -5029,6 +5032,7 @@ let main (args : args) ~(init_id : string) ~(local_config : ServerLocalConfig.t)
   let%lwt version = read_hhconfig_version root in
   let%lwt hhconfig_version_and_switch = read_hhconfig_version_and_switch root in
   HackEventLogger.set_hhconfig_version (Some (String_utils.lstrip version "^"));
+  HackEventLogger.client_lsp_start ~init_proc_stack ~hhconfig_version_and_switch;
 
   env := { args; hhconfig_version_and_switch; root; local_config };
 

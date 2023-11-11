@@ -31,4 +31,5 @@ val main :
   args ->
   init_id:string ->
   local_config:ServerLocalConfig.t ->
+  init_proc_stack:string list option ->
   Exit_status.t Lwt.t

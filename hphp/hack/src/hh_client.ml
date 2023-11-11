@@ -135,21 +135,24 @@ let () =
 
   init_event_logger root command ~init_id ~from config local_config;
 
+  let init_proc_stack =
+    match (from, local_config) with
+    | ("", _)
+    | ( _,
+        Some
+          {
+            ServerLocalConfig.log_init_proc_stack_also_on_absent_from = true;
+            _;
+          } ) ->
+      Some init_proc_stack
+    | _ -> None
+  in
+
   try
     let exit_status =
       match command with
       | ClientCommand.CCheck check_env ->
         let local_config = Option.value_exn local_config in
-        let init_proc_stack =
-          if
-            String.is_empty from
-            || local_config
-                 .ServerLocalConfig.log_init_proc_stack_also_on_absent_from
-          then
-            Some init_proc_stack
-          else
-            None
-        in
         ClientCheck.main check_env local_config ~init_proc_stack
         (* never returns; does [Exit.exit] itself *)
       | ClientCommand.CStart env ->
@@ -161,7 +164,7 @@ let () =
       | ClientCommand.CLsp args ->
         let local_config = Option.value_exn local_config in
         Lwt_utils.run_main (fun () ->
-            ClientLsp.main args ~init_id ~local_config)
+            ClientLsp.main args ~init_id ~local_config ~init_proc_stack)
       | ClientCommand.CRage env ->
         Lwt_utils.run_main (fun () ->
             ClientRage.main env (Option.value_exn local_config))

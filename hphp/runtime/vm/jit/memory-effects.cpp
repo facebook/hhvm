@@ -472,20 +472,50 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     );
 
   case EndCatch: {
-    auto const stack_kills = stack_below(inst.extra<EndCatch>()->offset);
+    auto const data = inst.extra<EndCatch>();
+    auto const stack_kills = stack_below(data->offset);
+
+    auto const numLocals = inst.func()->numLocals();
+    auto const local_kills = [&]() {
+      if ((data->teardown == EndCatchData::Teardown::OnlyThis
+          || data->teardown == EndCatchData::Teardown::None)
+          && numLocals > 0
+      ) {
+        return static_cast<AliasClass>(
+            ALocal {inst.src(0), AliasIdSet::IdRange(0, numLocals)}
+        );
+      }
+      return AEmpty;
+    }();
+    auto const ctx = data->teardown == EndCatchData::Teardown::None
+      ? AFContext{inst.src(0)}
+      : AEmpty;
+
     return ExitEffects {
       AUnknown,
       stack_kills | AMIStateAny,
-      AEmpty
+      *local_kills.precise_union(ctx)
     };
   }
 
   case EnterTCUnwind: {
-    auto const stack_kills = stack_below(inst.extra<EnterTCUnwind>()->offset);
+    auto const data = inst.extra<EnterTCUnwind>();
+    auto const stack_kills = stack_below(data->offset);
+
+    auto const numLocals = inst.func()->numLocals();
+    auto const local_kills = [&](){
+      if (!data->teardown && numLocals > 0) {
+        return static_cast<AliasClass>(
+            ALocal {inst.marker().fixupFP(), AliasIdSet::IdRange(0, numLocals)}
+        );
+      }
+      return AEmpty;
+    }();
+
     return ExitEffects {
       AUnknown,
       stack_kills | AMIStateAny,
-      AEmpty
+      local_kills
     };
   }
 

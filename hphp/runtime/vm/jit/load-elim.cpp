@@ -292,8 +292,17 @@ struct FRemovable {};
 struct FJmpNext {};
 struct FJmpTaken {};
 
+/*
+ * The instruction can be turned into specialized frame teardown instructions
+ * followed by an EndCatch or an EnterTCUnwind that will omit the teardown
+ */
+struct FFrameTeardown {
+  int32_t numStackElems;
+  CompactVector<std::pair<uint32_t, Type>> elems;
+};
+
 using Flags = boost::variant<FNone,FRedundant,FReducible,FRefinableLoad,
-                             FRemovable,FJmpNext,FJmpTaken>;
+                             FRemovable,FJmpNext,FJmpTaken,FFrameTeardown>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -699,7 +708,7 @@ void check_decref_eligible(
   AliasClass acls) {
     auto const meta = env.global.ainfo.find(canonicalize(acls));
     auto const tloc = find_tracked(env, meta);
-    FTRACE(5, "    {}: {}\n", index, tloc ? show(*tloc) : "x");
+    FTRACE(5, "    {}: {}\n", index, tloc ? show(*tloc) : "nullptr");
     if (!tloc) {
       elems.push_back({index, TCell});
     } else if (tloc->knownType.maybe(TCounted)) {
@@ -708,6 +717,110 @@ void check_decref_eligible(
       elems.push_back({index, type});
     }
   };
+
+Flags handle_end_catch(Local& env, const IRInstruction& inst) {
+  if (env.global.unit.context().kind != TransKind::Optimize
+      || !RuntimeOption::EvalHHIRLoadEnableTeardownOpts
+      || inst.marker().sk().prologue()
+  ) {
+    return FNone{};
+  }
+
+  assertx(inst.op() == EndCatch);
+  auto const isFuncEntry = inst.marker().sk().funcEntry();
+  auto const isCallOpCode = [&]() {
+      // Get all the preds for this block.
+      for (auto const& pred : inst.block()->preds()) {
+        if (pred.inst()->op() == Call) {
+          return true;
+        }
+      }
+      return false;
+  }();
+  auto const data = inst.extra<EndCatchData>();
+  if (data->teardown != EndCatchData::Teardown::Full
+      || inst.func()->isCPPBuiltin()
+      || isCallOpCode
+      || (!isFuncEntry && findCatchHandler(inst.func(), inst.marker().bcOff()) != kInvalidOffset)
+  ) {
+    FTRACE(5, "      non-reducible EndCatch {}\n", inst.toString());
+    return FNone{};
+  }
+
+  assertx(data->stublogue != EndCatchData::FrameMode::Stublogue);
+  auto const numLocals = inst.func()->numLocals();
+  auto const numStackElems = inst.marker().bcSPOff() - SBInvOffset{0};
+
+  FTRACE(4, "      optimizing EndCatch {}, num locals {}, num stack {}\n{}\n",
+    inst.func()->fullName()->data(), numLocals, numStackElems,
+    inst.marker().show());
+
+  CompactVector<std::pair<uint32_t, Type>> elems;
+
+  // If locals are decreffed, we shouldn't decref them again. This also implies
+  // that there are no stack elements.
+  if (data->mode != EndCatchData::CatchMode::LocalsDecRefd) {
+    for (uint32_t i = 0; i < numLocals; ++i) {
+      check_decref_eligible(
+        env,
+        elems,
+        i,
+        AliasClass { ALocal { inst.marker().fp(), i }});
+    }
+
+    // Iterate from higher addresses to lower so that tracing prints them in
+    // the memory layout order
+    for (int32_t i = numStackElems - 1; i >= 0; --i) {
+      auto const astk_ = AStack::at(data->offset + i);
+      check_decref_eligible(
+        env,
+        elems,
+        numLocals + numStackElems - 1 - i,
+        AliasClass { astk_ });
+    }
+  }
+
+  if (elems.size() > RuntimeOption::EvalHHIRLoadStackTeardownMaxDecrefs) {
+    FTRACE(2, "      handle_end_catch: refusing -- too many decrefs {}\n",
+           elems.size());
+    return FNone{};
+  }
+
+  return FFrameTeardown { numStackElems, std::move(elems) };
+}
+
+Flags handle_enter_tc_unwind(Local& env, const IRInstruction& inst) {
+  if (env.global.unit.context().kind != TransKind::Optimize
+      || !RuntimeOption::EvalHHIRLoadEnableTeardownOpts) {
+    return FNone{};
+  }
+  assertx(inst.op() == EnterTCUnwind);
+  auto const data = inst.extra<EnterTCUnwind>();
+  if (!data->teardown || inst.func()->isCPPBuiltin()) {
+    FTRACE(2, "      non-reducible EnterTCUnwind\n");
+    return FNone{};
+  }
+  auto const numLocals = inst.func()->numLocals();
+
+  FTRACE(2, "      reducible EnterTCUnwind\n");
+  CompactVector<std::pair<uint32_t, Type>> locals;
+
+  for (uint32_t i = 0; i < numLocals; ++i) {
+    check_decref_eligible(
+      env,
+      locals,
+      i,
+      AliasClass { ALocal { inst.marker().fp(), i }});
+  }
+
+  if (locals.size() > RuntimeOption::EvalHHIRLoadThrowMaxDecrefs) {
+    FTRACE(2, "      handle_enter_tc_unwind: refusing -- too many decrefs {}\n",
+           locals.size());
+    return FNone{};
+  }
+
+  return FFrameTeardown { 0, std::move(locals) };
+}
 
 void refine_value(Local& env, SSATmp* newVal, SSATmp* oldVal) {
   bitset_for_each_set(
@@ -834,9 +947,12 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
     effects,
     [&] (const IrrelevantEffects&) {},
     [&] (const UnknownEffects&)    { clear_everything(env); },
-    [&] (const ExitEffects&)       { clear_everything(env); },
+    [&] (const ExitEffects&)       {
+      if (inst.op() == EndCatch) flags = handle_end_catch(env, inst);
+      if (inst.op() == EnterTCUnwind) flags = handle_enter_tc_unwind(env, inst);
+      clear_everything(env);
+    },
     [&] (const ReturnEffects&)     {},
-
     [&] (const PureStore& m)       { flags = store(env, m.dst, m.value); },
     [&] (const PureLoad& m)        { flags = load(env, inst, m.src); },
 
@@ -1132,12 +1248,11 @@ void refine_load(Global& env,
 void optimize_end_catch(Global& env, IRInstruction& inst,
                         int32_t numStackElems,
                         CompactVector<std::pair<uint32_t, Type>>& elems) {
-  FTRACE(3, "Optimizing EndCatch\n{}\nNumStackElems: {}\n",
-            inst.marker().show(), numStackElems);
-
   auto const numLocals = inst.func()->numLocals();
-  auto const block = inst.block();
+  FTRACE(3, "Optimizing EndCatch {}, NumStackElems: {}\n",
+      inst.marker().show(), numStackElems);
 
+  auto const block = inst.block();
   auto add = [&](IRInstruction* loadInst, int locId = -1) {
     block->insert(block->iteratorTo(&inst), loadInst);
     auto const decref =
@@ -1184,7 +1299,34 @@ void optimize_end_catch(Global& env, IRInstruction& inst,
     original->vmspOffset
   };
   env.unit.replace(&inst, EndCatch, data, inst.src(0), inst.src(1));
-  env.stackTeardownsOptimized++;
+  ++env.stackTeardownsOptimized;
+}
+
+void optimize_enter_tc_unwind(
+  Global& env,
+  IRInstruction& inst,
+  CompactVector<std::pair<uint32_t, Type>>& locals) {
+  FTRACE(3, "Optimizing EnterTCUnwind\n{}\n", inst.marker().show());
+
+  auto const block = inst.block();
+  auto const extra = inst.extra<EnterTCUnwind>();
+  assertx(extra->teardown);
+
+  for (auto local : locals) {
+    int locId = local.first;
+    auto const type = local.second;
+    FTRACE(5, "    Emitting decref for LocalId {}\n", locId);
+    auto const loadInst =
+      env.unit.gen(LdLoc, inst.bcctx(), type,
+                   LocalId{(uint32_t)locId}, inst.marker().fixupFP());
+    block->insert(block->iteratorTo(&inst), loadInst);
+    auto const decref =
+      env.unit.gen(DecRef, inst.bcctx(), DecRefData{locId}, loadInst->dst());
+    block->insert(block->iteratorTo(&inst), decref);
+  }
+  auto const etcData = EnterTCUnwindData {extra->offset, false};
+  env.unit.replace(&inst, EnterTCUnwind, etcData, inst.src(0));
+  ++env.stackTeardownsOptimized;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1264,6 +1406,19 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags,
       FTRACE(2, "      unnecessary\n");
       env.unit.replace(&inst, Jmp, inst.taken());
       ++env.jumpsRemoved;
+    },
+
+    [&] (FFrameTeardown f) {
+      FTRACE(2, "      frame teardown\n");
+      if (inst.op() == EndCatch) {
+        DEBUG_ONLY auto const data = inst.extra<EndCatchData>();
+        assertx(data->teardown == EndCatchData::Teardown::Full);
+        assertx(data->stublogue == EndCatchData::FrameMode::Phplogue);
+        optimize_end_catch(env, inst, f.numStackElems, f.elems);
+        return;
+      }
+      assertx(inst.op() == EnterTCUnwind && f.numStackElems == 0);
+      optimize_enter_tc_unwind(env, inst, f.elems);
     }
   );
 

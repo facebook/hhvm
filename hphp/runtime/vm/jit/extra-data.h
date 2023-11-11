@@ -2652,7 +2652,8 @@ struct EndCatchData : IRExtraData {
   explicit EndCatchData(IRSPRelOffset offset, CatchMode mode,
       FrameMode stublogue, Teardown teardown,
       Optional<IRSPRelOffset> vmspOffset
-  ) : offset{offset}
+  )
+    : offset{offset}
     , mode{mode}
     , stublogue{stublogue}
     , teardown{teardown}
@@ -2664,10 +2665,11 @@ struct EndCatchData : IRExtraData {
       "IRSPOff ", offset.offset, ",",
       mode == CatchMode::UnwindOnly ? "UnwindOnly" : "LocalsDecRefd", ",",
       stublogue == FrameMode::Stublogue ? "Stublogue" : "Phplogue", ",",
-      teardown == Teardown::NA ? "NA" :
+      "Teardown ", teardown == Teardown::NA ? "NA" :
         teardown == Teardown::None ? "None" :
           teardown == Teardown::Full ? "Full" : "OnlyThis", ",",
-      "vmspOffset", vmspOffset.has_value() ? folly::to<std::string>(vmspOffset.value().offset) : "nullptr"
+      "VmspOffset IRSPOff ", vmspOffset.has_value()
+          ? folly::to<std::string>(vmspOffset.value().offset) : "nullptr"
     );
   }
 
@@ -2677,7 +2679,9 @@ struct EndCatchData : IRExtraData {
       std::hash<CatchMode>()(mode),
       std::hash<FrameMode>()(stublogue),
       std::hash<Teardown>()(teardown),
-      std::hash<int32_t>()(vmspOffset.has_value() ? vmspOffset.value().offset : 0)
+      std::hash<int32_t>()(
+        vmspOffset.has_value() ? vmspOffset.value().offset : 0
+      )
     );
   }
 

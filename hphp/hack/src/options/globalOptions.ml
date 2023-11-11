@@ -35,7 +35,7 @@ let default_saved_state_loading =
     saved_state_manifold_api_key = None;
     log_saved_state_age_and_distance = false;
     use_manifold_cython_client = false;
-    zstd_decompress_by_file = false;
+    zstd_decompress_by_file = true;
   }
 
 type saved_state = {

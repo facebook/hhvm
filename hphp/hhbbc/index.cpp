@@ -7574,6 +7574,10 @@ struct FlattenJob {
       }()
     );
 
+    for (auto const& cls : uninstantiable.vals) {
+      always_assert(index.m_uninstantiable.emplace(cls->name).second);
+    }
+
     std::vector<std::unique_ptr<php::Class>> newClosures;
     newClosures.reserve(worklist.size());
 
@@ -7662,19 +7666,32 @@ struct FlattenJob {
       outMethods.vals.emplace_back(std::move(methods));
     };
 
+    // If a closure's context is uninstantiable, then so is the
+    // closure.
+    auto const isContextInstantiable = [&] (const php::Class& cls) {
+      if (!cls.closureContextCls) return true;
+      if (index.uninstantiable(cls.closureContextCls)) {
+        always_assert(!index.m_classInfos.count(cls.closureContextCls));
+        return false;
+      }
+      return true;
+    };
+
     // Do the processing which relies on a fully accessible
     // LocalIndex
 
     ISStringToOneT<InterfaceConflicts> ifaceConflicts;
     for (auto& cls : classes.vals) {
       auto const cinfoIt = index.m_classInfos.find(cls->name);
-      if (cinfoIt == end(index.m_classInfos)) {
+      if (cinfoIt == end(index.m_classInfos) || !isContextInstantiable(*cls)) {
         ITRACE(
           4, "{} discovered to be not instantiable, instead "
           "creating MethodsWithoutCInfo for it\n",
           cls->name
         );
-        always_assert(index.uninstantiable(cls->name));
+        always_assert(
+          IMPLIES(!cls->closureContextCls, index.uninstantiable(cls->name))
+        );
         makeMethodsWithoutCInfo(*cls);
         continue;
       }
@@ -7773,7 +7790,7 @@ struct FlattenJob {
     for (auto& cls : classes.vals) {
       auto const name = cls->name;
       auto const cinfoIt = index.m_classInfos.find(name);
-      if (cinfoIt == end(index.m_classInfos)) {
+      if (cinfoIt == end(index.m_classInfos) || !isContextInstantiable(*cls)) {
         assertx(outMeta.uninstantiable.count(name));
         continue;
       }
@@ -10063,7 +10080,7 @@ struct IndexFlattenMetadata {
     size_t idx; // Index into allCls vector
     bool isClosure{false};
     bool uninstantiable{false};
-    SString closureContext;
+    SString closureContext{nullptr};
   };
   ISStringToOneT<ClassMeta> cls;
   // All classes to be flattened
@@ -10374,25 +10391,39 @@ flatten_classes_assign(IndexFlattenMetadata& meta) {
 
         for (auto const d : deps)       onDep(d);
         for (auto const clo : closures) onDep(clo);
-
-        if (out.instantiable) return out;
-        // If a class is not instantiable, then any of the closures
-        // which have it as a context are not either. Remove them as
-        // deps.
-        folly::erase_if(
-          out.deps,
-          [&] (SString d) {
-            auto const cloMeta = folly::get_ptr(meta.cls, d);
-            return
-              cloMeta &&
-              cloMeta->closureContext &&
-              cloMeta->closureContext->isame(cls);
-          }
-        );
         return out;
       }
     );
   };
+
+  // If a closure's context class is not uninstantiable, then the
+  // closure is likewise not instantiable. Calculate it here (we
+  // cannot do it in findAllDeps because it creates a circular
+  // dependency between the closure and the context class).
+  parallel::for_each(
+    meta.allCls,
+    [&] (SString cls) {
+      auto& clsMeta = meta.cls.at(cls);
+      if (!clsMeta.closureContext) return;
+      ISStringSet visited;
+      auto const& lookup =
+        findAllDeps(clsMeta.closureContext, visited, findAllDeps);
+      if (!lookup.instantiable) {
+        if (!clsMeta.uninstantiable) {
+          FTRACE(
+            4,
+            "{} is not instantiable because the "
+            "closure context {} is not instantiable\n",
+            cls, clsMeta.closureContext
+          );
+        }
+        clsMeta.uninstantiable = true;
+      }
+    }
+  );
+  // Reset the lookup results so that further lookups will correctly
+  // incorporate non-instantiable closures.
+  parallel::for_each(allDeps, [] (LockFreeLazy<DepLookup>& l) { l.reset(); });
 
   constexpr size_t kBucketSize = 2000;
   constexpr size_t kMaxBucketSize = 30000;

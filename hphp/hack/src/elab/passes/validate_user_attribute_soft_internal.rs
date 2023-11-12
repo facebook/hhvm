@@ -55,14 +55,15 @@ impl Pass for ValidateUserAttributeSoftInternalPass {
 }
 
 fn check_soft_internal(is_internal: bool, user_attrs: &[UserAttribute], env: &Env) {
-    if !is_internal && let Some(ua) = user_attrs
+    if !is_internal
+        && let Some(ua) = user_attrs
             .iter()
             .find(|ua| ua.name.name() == sn::user_attributes::SOFT_INTERNAL)
-        {
-            env.emit_error(
-                NastCheckError::SoftInternalWithoutInternal(ua.name.pos().clone()),
-            )
-        }
+    {
+        env.emit_error(NastCheckError::SoftInternalWithoutInternal(
+            ua.name.pos().clone(),
+        ))
+    }
 }
 
 fn check_soft_internal_on_param(

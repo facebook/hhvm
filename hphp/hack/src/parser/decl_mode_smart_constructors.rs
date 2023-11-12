@@ -126,7 +126,6 @@ impl<'s, 'a, T, V, TF>
     for DeclModeSmartConstructors<'s, 'a, Syntax<'a, T, V>, T, V, TF>
 where
     TF: TokenFactory<Token = SyntaxToken<'s, 'a, T, V>>,
-
     T: LexableToken + Copy,
     V: SyntaxValueType<T> + Clone,
     Syntax<'a, T, V>: SyntaxType<State<'s, 'a, Syntax<'a, T, V>>>,

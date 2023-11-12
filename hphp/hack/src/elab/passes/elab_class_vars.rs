@@ -45,8 +45,12 @@ impl Pass for ElabClassVarsPass {
             }
             // For instance props only, add CONST user attr const is the class is has it
             if !var.is_static {
-                if let Some(ua) = const_user_attr_opt &&
-                !var.user_attributes.iter().any(|ua| ua.name.1 == sn::user_attributes::CONST) {
+                if let Some(ua) = const_user_attr_opt
+                    && !var
+                        .user_attributes
+                        .iter()
+                        .any(|ua| ua.name.1 == sn::user_attributes::CONST)
+                {
                     var.user_attributes.push(UserAttribute {
                         name: ua.name.clone(),
                         params: vec![],

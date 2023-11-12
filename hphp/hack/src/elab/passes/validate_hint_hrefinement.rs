@@ -27,12 +27,13 @@ impl Pass for ValidateHintHrefinementPass {
     }
 
     fn on_ty_hint_bottom_up(&mut self, env: &Env, elem: &mut Hint) -> ControlFlow<()> {
-        if let Some(ctxt) = self.context &&
-            matches!(&*elem.1, Hint_::Hrefinement(..)) {
-                env.emit_error(NastCheckError::RefinementInTypestruct {
-                    pos: elem.0.clone(),
-                    kind: ctxt.to_string(),
-                })
+        if let Some(ctxt) = self.context
+            && matches!(&*elem.1, Hint_::Hrefinement(..))
+        {
+            env.emit_error(NastCheckError::RefinementInTypestruct {
+                pos: elem.0.clone(),
+                kind: ctxt.to_string(),
+            })
         }
         Continue(())
     }

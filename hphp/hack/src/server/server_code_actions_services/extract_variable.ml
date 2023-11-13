@@ -124,22 +124,26 @@ functions and methods such that
 the function body contains the selected range *)
 let top_visitor (selection : Pos.t) ~source_text =
   let should_traverse outer = Pos.contains outer selection in
-  object
+  object (self)
     inherit [candidate option] Tast_visitor.reduce
 
     method zero = None
 
     method plus = Option.first_some
 
+    method! on_def env =
+      function
+      | Aast.Fun fun_def when should_traverse Aast.(fun_def.fd_fun.f_span) ->
+        (positions_visitor selection ~source_text)#on_fun_def env fun_def
+      | Aast.Class class_def when should_traverse Aast.(class_def.c_span) ->
+        self#on_class_ env class_def
+      | Aast.Stmt stmt when should_traverse (fst stmt) ->
+        (positions_visitor selection ~source_text)#on_stmt env stmt
+      | _ -> None
+
     method! on_method_ env meth =
       if should_traverse meth.Aast.m_span then
         (positions_visitor selection ~source_text)#on_method_ env meth
-      else
-        None
-
-    method! on_fun_def env fun_def =
-      if should_traverse Aast.(fun_def.fd_fun.f_span) then
-        (positions_visitor selection ~source_text)#on_fun_def env fun_def
       else
         None
   end

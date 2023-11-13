@@ -1,0 +1,34 @@
+Code actions available:
+------------------------------------------
+Extract into variable (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"$${0:placeholder0} = 300 + 500;\n",
+          "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
+        },
+        {
+          "newText":"$${0:placeholder0}",
+          "range":{"end":{"character":29,"line":3},"start":{"character":20,"line":3}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Extract into variable"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+
+$${0:placeholder0} = 300 + 500;
+$x = /*range-start*/$${0:placeholder0}/*range-end*/;
+

@@ -279,19 +279,6 @@ Adds a `std::hash` and `std::equal_to` specialization for the Thrift struct. You
 
 This is used in SMC to support a custom processor which caches response and uses the parameter annotated with `cpp.cache` as the key.
 
-#### cpp.coroutine
-
-* Where to use: method
-* Value: none
-* Example:
-
-```
-service MyService {
-  void m1() (cpp.coroutine);
-}
-```
-
-Enable coroutine generation. See [[Thrift/ImplementingAServer/]] for more information.
 
 #### priority
 

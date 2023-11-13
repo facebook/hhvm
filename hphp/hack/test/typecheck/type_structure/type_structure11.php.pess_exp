@@ -1,7 +1,0 @@
-File "type_structure11.php.pess", line 18, characters 10-23:
-Method  `test` in class `C` is not dynamically callable. (Typing[4150])
-  File "type_structure11.php.pess", line 18, characters 10-23:
-  The two arguments to `type_structure()` must be:
- - first: `ValidClassname::class` or an object of that class
- - second: a single-quoted string literal containing the name of a type constant of that class
-Could not resolve the type constant

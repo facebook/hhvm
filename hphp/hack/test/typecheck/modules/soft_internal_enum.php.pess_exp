@@ -1,4 +1,0 @@
-File "soft_internal_enum.php.pess--def.php", line 3, characters 1-16:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
-File "soft_internal_enum.php.pess--def.php", line 3, characters 2-2:
-An expression is expected here. (Parsing[1002])

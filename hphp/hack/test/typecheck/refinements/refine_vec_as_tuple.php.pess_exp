@@ -1,8 +1,0 @@
-File "refine_vec_as_tuple.php.pess", line 11, characters 19-20:
-Function  `main` is not dynamically callable. (Typing[4110])
-  File "refine_vec_as_tuple.php.pess", line 11, characters 19-20:
-  Invalid argument
-  File "refine_vec_as_tuple.php.pess", line 5, characters 27-34:
-  Expected `arraykey`
-  File "refine_vec_as_tuple.php.pess", line 9, characters 20-24:
-  But got `nonnull`

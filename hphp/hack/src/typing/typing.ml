@@ -2378,12 +2378,12 @@ let is_lvalue = function
 module rec Expr : sig
   val expr :
     ?expected:ExpectedTy.t ->
-    ?is_attribute_param:bool ->
     ?in_await:locl_phase Reason.t_ ->
     accept_using_var:bool ->
     check_defined:bool ->
     is_using_clause:bool ->
     valkind:valkind ->
+    is_attribute_param:bool ->
     env ->
     Nast.expr ->
     env * Tast.expr * locl_ty
@@ -2394,22 +2394,22 @@ module rec Expr : sig
   val raw_expr :
     ?expected:ExpectedTy.t ->
     ?lhs_of_null_coalesce:bool ->
-    ?is_attribute_param:bool ->
     ?in_await:locl_phase Reason.t_ ->
     accept_using_var:bool ->
     check_defined:bool ->
     is_using_clause:bool ->
     valkind:valkind ->
+    is_attribute_param:bool ->
     env ->
     Nast.expr ->
     env * Tast.expr * locl_ty
 
   val exprs :
     ?expected:ExpectedTy.t ->
-    ?is_attribute_param:bool ->
     accept_using_var:bool ->
     check_defined:bool ->
     valkind:valkind ->
+    is_attribute_param:bool ->
     env ->
     Nast.expr list ->
     env * Tast.expr list * locl_phase Typing_defs_core.ty list
@@ -2503,12 +2503,12 @@ end = struct
 
   let rec expr
       ?(expected : ExpectedTy.t option)
-      ?(is_attribute_param = false)
       ?in_await
       ~accept_using_var
       ~check_defined
       ~is_using_clause
       ~valkind
+      ~is_attribute_param
       env
       ((_, p, _) as e) =
     try
@@ -2560,6 +2560,7 @@ end = struct
         ~check_defined:true
         ~is_using_clause:false
         ~valkind:Other
+        ~is_attribute_param:false
       |> triple_to_pair
     in
     (env, te, ty)
@@ -2567,12 +2568,12 @@ end = struct
   and raw_expr
       ?(expected : ExpectedTy.t option)
       ?lhs_of_null_coalesce
-      ?(is_attribute_param = false)
       ?in_await
       ~accept_using_var
       ~check_defined
       ~is_using_clause
       ~valkind
+      ~is_attribute_param
       env
       e =
     let (_, p, _) = e in
@@ -2595,6 +2596,7 @@ end = struct
       ~check_defined:false
       ~accept_using_var:false
       ~is_using_clause:false
+      ~is_attribute_param:false
       env
       e
 
@@ -2616,6 +2618,7 @@ end = struct
         ~check_defined:true
         ~is_using_clause:false
         ~valkind:Other
+        ~is_attribute_param:false
         env
         c
     in
@@ -2637,6 +2640,7 @@ end = struct
             ~check_defined:true
             ~is_using_clause:false
             ~valkind:Other
+            ~is_attribute_param:false
             env
             e1
         in
@@ -2653,6 +2657,7 @@ end = struct
         ~check_defined:true
         ~is_using_clause:false
         ~valkind:Other
+        ~is_attribute_param:false
         env
         e2
     in
@@ -2663,10 +2668,10 @@ end = struct
 
   and exprs
       ?(expected : ExpectedTy.t option)
-      ?(is_attribute_param = false)
       ~accept_using_var
       ~check_defined
       ~valkind
+      ~is_attribute_param
       env
       el =
     match el with
@@ -2715,23 +2720,30 @@ end = struct
           ~check_defined:true
           ~is_using_clause:false
           ~valkind:Other
+          ~is_attribute_param:false
           env
           e
       in
       let (env, tel, tyl) = exprs_expected (pos, ur, expected_tyl) env el in
       (env, te :: tel, ty :: tyl)
     | (el, []) ->
-      exprs ~accept_using_var:false ~check_defined:true ~valkind:Other env el
+      exprs
+        ~accept_using_var:false
+        ~check_defined:true
+        ~valkind:Other
+        ~is_attribute_param:false
+        env
+        el
 
   and expr_
       ?(expected : ExpectedTy.t option)
-      ?(is_attribute_param = false)
       ?lhs_of_null_coalesce
       ?in_await
       ~accept_using_var
       ~check_defined
       ~is_using_clause
       ~valkind
+      ~is_attribute_param
       env
       ((_, p, e) as outer) =
     let env = Env.open_tyvars env p in
@@ -2995,6 +3007,7 @@ end = struct
         ?lhs_of_null_coalesce
         ?in_await
         ~valkind
+        ~is_attribute_param:false
         ~check_defined
         env
         e
@@ -4695,6 +4708,7 @@ end = struct
         ~check_defined:true
         ~is_using_clause:false
         ~valkind:Other
+        ~is_attribute_param:false
         env
         e
     in
@@ -4934,7 +4948,8 @@ end = struct
                ~accept_using_var:false
                ~check_defined:true
                ~is_using_clause:false
-               ~valkind:Other)
+               ~valkind:Other
+               ~is_attribute_param:false)
             env
             el
         in
@@ -4948,6 +4963,7 @@ end = struct
                 ~check_defined:true
                 ~is_using_clause:false
                 ~valkind:Other
+                ~is_attribute_param:false
                 env
                 unpacked_element
             in
@@ -4988,6 +5004,7 @@ end = struct
         ~check_defined:true
         ~is_using_clause:false
         ~valkind:Other
+        ~is_attribute_param:false
         env
         x
     in
@@ -5323,6 +5340,7 @@ end = struct
               ~check_defined:true
               ~is_using_clause:false
               ~valkind:Other
+              ~is_attribute_param:false
               env
               original_expr
           | _ ->
@@ -5372,7 +5390,8 @@ end = struct
                ~accept_using_var:true
                ~check_defined:false
                ~is_using_clause:false
-               ~valkind:Other)
+               ~valkind:Other
+               ~is_attribute_param:false)
             env
             el
         in
@@ -5394,7 +5413,8 @@ end = struct
                ~accept_using_var:false
                ~check_defined:true
                ~is_using_clause:false
-               ~valkind:Other)
+               ~valkind:Other
+               ~is_attribute_param:false)
             env
             el
         in
@@ -5415,6 +5435,7 @@ end = struct
                 ~check_defined:true
                 ~is_using_clause:false
                 ~valkind:Other
+                ~is_attribute_param:false
                 env
                 ea
             in
@@ -5572,6 +5593,7 @@ end = struct
                     ~check_defined:true
                     ~is_using_clause:false
                     ~valkind:Other
+                    ~is_attribute_param:false
                     env
                     shape
                 in
@@ -5679,6 +5701,7 @@ end = struct
           ~check_defined:true
           ~is_using_clause:false
           ~valkind:Other
+          ~is_attribute_param:false
           env
           e1
       in
@@ -5748,6 +5771,7 @@ end = struct
           ~check_defined:true
           ~is_using_clause:false
           ~valkind:Other
+          ~is_attribute_param:false
           env
           receiver
       in
@@ -5889,6 +5913,7 @@ end = struct
           ~check_defined:true
           ~is_using_clause:false
           ~valkind:Other
+          ~is_attribute_param:false
           env
           e
       in
@@ -5956,7 +5981,8 @@ end = struct
              ~accept_using_var:false
              ~check_defined:true
              ~is_using_clause:false
-             ~valkind:Other)
+             ~valkind:Other
+             ~is_attribute_param:false)
           env
           el
       in
@@ -6232,6 +6258,7 @@ end = struct
                       ~check_defined:true
                       ~is_using_clause:false
                       ~valkind:Other
+                      ~is_attribute_param:false
                       env
                       elt
                 in
@@ -6284,6 +6311,7 @@ end = struct
                     ~check_defined:true
                     ~is_using_clause:false
                     ~valkind:Other
+                    ~is_attribute_param:false
                     env
                     elt
                 in
@@ -6535,6 +6563,7 @@ end = struct
                     ~check_defined:true
                     ~is_using_clause:false
                     ~valkind:Other
+                    ~is_attribute_param:false
                     ?expected
                     env
                     e
@@ -6558,6 +6587,7 @@ end = struct
                   ~check_defined:true
                   ~is_using_clause:false
                   ~valkind:Other
+                  ~is_attribute_param:false
                   env
                   e
               in
@@ -6748,6 +6778,7 @@ end = struct
                   ~check_defined:true
                   ~is_using_clause:false
                   ~valkind:Other
+                  ~is_attribute_param:false
                   env
                   e
               in
@@ -6894,7 +6925,8 @@ end = struct
                  ~accept_using_var:true
                  ~check_defined:true
                  ~is_using_clause:false
-                 ~valkind:Other)
+                 ~valkind:Other
+                 ~is_attribute_param:false)
               env
               el
           in
@@ -6907,6 +6939,7 @@ end = struct
                   ~check_defined:true
                   ~is_using_clause:false
                   ~valkind:Other
+                  ~is_attribute_param:false
                   env
                   unpacked
               in
@@ -7081,6 +7114,7 @@ end = struct
           ~check_defined:true
           ~is_using_clause:false
           ~valkind:Other
+          ~is_attribute_param:false
           env
           e
       in
@@ -7196,6 +7230,7 @@ end = struct
           ~check_defined:true
           ~is_using_clause:false
           ~valkind:Other
+          ~is_attribute_param:false
           env
           (Tast.to_nast_expr e2)
       in
@@ -7234,6 +7269,7 @@ end = struct
                 ~check_defined:true
                 ~is_using_clause:false
                 ~valkind:Other
+                ~is_attribute_param:false
                 env
                 (Tast.to_nast_expr e2)
             in
@@ -7313,6 +7349,7 @@ end = struct
               ~check_defined:true
               ~is_using_clause:false
               ~valkind:Other
+              ~is_attribute_param:false
               env
               x
           in
@@ -7407,6 +7444,7 @@ end = struct
           ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Lvalue_subexpr
+          ~is_attribute_param:false
           env
           e1
       in
@@ -7430,6 +7468,7 @@ end = struct
         ~check_defined:true
         ~is_using_clause:false
         ~valkind:Other
+        ~is_attribute_param:false
         env
         e1
 end
@@ -7537,6 +7576,7 @@ end = struct
           ~check_defined:true
           ~is_using_clause:false
           ~valkind:Other
+          ~is_attribute_param:false
           env
           e
       in
@@ -7557,6 +7597,7 @@ end = struct
           ~check_defined:true
           ~is_using_clause:false
           ~valkind:Other
+          ~is_attribute_param:false
           env
           e
       in
@@ -7655,6 +7696,7 @@ end = struct
           ~accept_using_var:false
           ~check_defined:true
           ~valkind:Other
+          ~is_attribute_param:false
           ?expected
           env
           e
@@ -7706,6 +7748,7 @@ end = struct
                       ~check_defined:true
                       ~is_using_clause:false
                       ~valkind:Other
+                      ~is_attribute_param:false
                       env
                       e
                   in
@@ -7726,6 +7769,7 @@ end = struct
                 ~check_defined:true
                 ~is_using_clause:false
                 ~valkind:Other
+                ~is_attribute_param:false
                 env
                 e
             in
@@ -7759,6 +7803,7 @@ end = struct
                       ~check_defined:true
                       ~is_using_clause:false
                       ~valkind:Other
+                      ~is_attribute_param:false
                       env
                       e
                   in
@@ -7784,6 +7829,7 @@ end = struct
                 ~check_defined:true
                 ~is_using_clause:false
                 ~valkind:Other
+                ~is_attribute_param:false
                 env
                 e
             in
@@ -7839,6 +7885,7 @@ end = struct
                 ~accept_using_var:false
                 ~check_defined:true
                 ~valkind:Other
+                ~is_attribute_param:false
                 env
                 e1
             in
@@ -7856,6 +7903,7 @@ end = struct
                       ~check_defined:true
                       ~is_using_clause:false
                       ~valkind:Other
+                      ~is_attribute_param:false
                       env
                       e2
                   in
@@ -7875,6 +7923,7 @@ end = struct
                       ~accept_using_var:false
                       ~check_defined:true
                       ~valkind:Other
+                      ~is_attribute_param:false
                       env
                       e3
                   in
@@ -7895,6 +7944,7 @@ end = struct
                 ~check_defined:true
                 ~is_using_clause:false
                 ~valkind:Other
+                ~is_attribute_param:false
                 env
                 e2
             in
@@ -7917,6 +7967,7 @@ end = struct
           ~check_defined:true
           ~is_using_clause:false
           ~valkind:Other
+          ~is_attribute_param:false
           env
           e
       in
@@ -7944,6 +7995,7 @@ end = struct
           ~check_defined:true
           ~is_using_clause:false
           ~valkind:Other
+          ~is_attribute_param:false
           env
           e1
       in
@@ -7998,6 +8050,7 @@ end = struct
               ~check_defined:true
               ~is_using_clause:false
               ~valkind:Other
+              ~is_attribute_param:false
               env
               e
           in
@@ -8044,6 +8097,7 @@ end = struct
           ~check_defined:true
           ~is_using_clause:false
           ~valkind:Other
+          ~is_attribute_param:false
           env
           e
       in
@@ -8079,6 +8133,7 @@ end = struct
               ~check_defined:true
               ~is_using_clause:false
               ~valkind:Other
+              ~is_attribute_param:false
               env
               exp
           in
@@ -8241,6 +8296,7 @@ end = struct
               ~check_defined:true
               ~is_using_clause:false
               ~valkind:Other
+              ~is_attribute_param:false
               env
               e
           in
@@ -8402,6 +8458,7 @@ end = struct
             ~check_defined:true
             ~is_using_clause:false
             ~valkind:Other
+            ~is_attribute_param:false
             env
             e
           |> triple_to_pair
@@ -8616,6 +8673,7 @@ end = struct
           ~check_defined:true
           ~is_using_clause:false
           ~valkind:Other
+          ~is_attribute_param:false
           env
           default
       in
@@ -9681,6 +9739,7 @@ end = struct
           ~check_defined:true
           ~is_using_clause:false
           ~valkind:Other
+          ~is_attribute_param:false
           env
           e
       in
@@ -10005,6 +10064,7 @@ end = struct
           ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
+          ~is_attribute_param:false
           env
           e1
       in
@@ -10016,7 +10076,8 @@ end = struct
              ?expected
              ~accept_using_var:false
              ~is_using_clause:false
-             ~valkind:Other)
+             ~valkind:Other
+             ~is_attribute_param:false)
           env
           e2
       in
@@ -10080,7 +10141,8 @@ end = struct
             (raw_expr
                ~accept_using_var:false
                ~is_using_clause:false
-               ~valkind:Other)
+               ~valkind:Other
+               ~is_attribute_param:false)
             env
             e2
         in
@@ -10103,6 +10165,7 @@ end = struct
           ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
+          ~is_attribute_param:false
           env
           e1
       in
@@ -10110,7 +10173,11 @@ end = struct
       let (env, _) = Expr.condition env c te1 in
       let (env, te2, _) =
         check_e2
-          (expr ~accept_using_var:false ~is_using_clause:false ~valkind:Other)
+          (expr
+             ~accept_using_var:false
+             ~is_using_clause:false
+             ~valkind:Other
+             ~is_attribute_param:false)
           env
           e2
       in
@@ -10126,6 +10193,7 @@ end = struct
           ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
+          ~is_attribute_param:false
           env
           e1
       in
@@ -10134,7 +10202,8 @@ end = struct
           (raw_expr
              ~accept_using_var:false
              ~is_using_clause:false
-             ~valkind:Other)
+             ~valkind:Other
+             ~is_attribute_param:false)
           env
           e2
       in
@@ -10251,6 +10320,7 @@ end = struct
             ~check_defined:true
             ~is_using_clause:false
             ~valkind:Other
+            ~is_attribute_param:false
             env
             et_virtualized_expr)
     in
@@ -10294,6 +10364,7 @@ end = struct
         ~check_defined:true
         ~is_using_clause:false
         ~valkind:Other
+        ~is_attribute_param:false
         env
         runtime_expr
     in
@@ -10330,6 +10401,7 @@ end = struct
           ~check_defined:true
           ~is_using_clause:false
           ~valkind:Other
+          ~is_attribute_param:false
           env
           ve
       in
@@ -10341,6 +10413,7 @@ end = struct
           ~check_defined:true
           ~is_using_clause:false
           ~valkind:Other
+          ~is_attribute_param:false
           env
           ke
       in
@@ -10350,6 +10423,7 @@ end = struct
           ~check_defined:true
           ~is_using_clause:false
           ~valkind:Other
+          ~is_attribute_param:false
           env
           ve
       in
@@ -10386,6 +10460,7 @@ end = struct
           ~check_defined:true
           ~is_using_clause:false
           ~valkind:Other
+          ~is_attribute_param:false
           env
           call_get_attr
       in
@@ -10407,6 +10482,7 @@ end = struct
         ~check_defined:true
         ~is_using_clause:false
         ~valkind:Other
+        ~is_attribute_param:false
         env
         valexpr
     in
@@ -10451,6 +10527,7 @@ end = struct
         ~check_defined:true
         ~is_using_clause:false
         ~valkind:Other
+        ~is_attribute_param:false
         env
         valexpr
     in
@@ -10595,6 +10672,7 @@ end = struct
           ~accept_using_var:false
           ~check_defined:true
           ~valkind:Other
+          ~is_attribute_param:false
           env
           e
       in
@@ -10628,6 +10706,7 @@ end = struct
           ~accept_using_var:false
           ~check_defined:true
           ~valkind:Other
+          ~is_attribute_param:false
           env
           using_clause
       in
@@ -10803,6 +10882,7 @@ end = struct
             ~check_defined:true
             ~is_using_clause:false
             ~valkind:Other
+            ~is_attribute_param:false
             env
             obj
         in
@@ -10945,6 +11025,7 @@ end = struct
             ~check_defined:true
             ~is_using_clause:false
             ~valkind:Other
+            ~is_attribute_param:false
             env
             e
         in
@@ -11716,6 +11797,7 @@ let expr ?expected env e =
         ~check_defined:true
         ~is_using_clause:false
         ~valkind:Other
+        ~is_attribute_param:false
         env
         e)
 

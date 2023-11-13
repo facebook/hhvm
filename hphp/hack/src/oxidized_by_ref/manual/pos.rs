@@ -346,6 +346,7 @@ impl std::fmt::Debug for Pos<'_> {
             start: &P,
             end: &P,
         ) -> std::fmt::Result {
+            write!(f, "{}", file)?;
             let (start_line, start_col, _) = start.line_column_beg();
             let (end_line, end_col, _) = end.line_column_beg();
             // Use a format string rather than Formatter::debug_tuple to prevent
@@ -355,23 +356,18 @@ impl std::fmt::Debug for Pos<'_> {
             // positions. Depends upon RelativePath's implementation of Display
             // also being single-line.
             if start_line == end_line {
-                write!(
-                    f,
-                    "Pos({}, {}:{}-{})",
-                    &file, &start_line, &start_col, &end_col,
-                )
+                write!(f, "({}:{}-{})", start_line, start_col, end_col)
             } else {
-                write!(
-                    f,
-                    "Pos({}, {}:{}-{}:{})",
-                    &file, &start_line, &start_col, &end_line, &end_col,
-                )
+                write!(f, "({}:{}-{}:{})", start_line, start_col, end_line, end_col)
             }
         }
         match &self.0 {
             Small { file, start, end } => do_fmt(f, file, start, end),
             Large { file, start, end } => do_fmt(f, file, *start, *end),
             Tiny { file, span } => {
+                if self.is_none() {
+                    return write!(f, "Pos::NONE");
+                }
                 let PosSpanRaw { start, end } = span.to_raw_span();
                 do_fmt(f, file, &start, &end)
             }
@@ -400,6 +396,9 @@ impl std::fmt::Display for Pos<'_> {
             Small { file, start, end } => do_fmt(f, file, start, end),
             Large { file, start, end } => do_fmt(f, file, *start, *end),
             Tiny { file, span } => {
+                if self.is_none() {
+                    return write!(f, "Pos::NONE");
+                }
                 let PosSpanRaw { start, end } = span.to_raw_span();
                 do_fmt(f, file, start, end)
             }

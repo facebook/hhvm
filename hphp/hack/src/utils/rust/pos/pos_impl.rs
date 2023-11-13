@@ -345,6 +345,12 @@ impl std::fmt::Display for Pos {
             write!(f, "{}", file)?;
             let (start_line, start_col, _) = start.line_column_beg();
             let (end_line, end_col, _) = end.line_column_beg();
+            // Use a format string rather than Formatter::debug_tuple to prevent
+            // adding line breaks. Positions occur very frequently in ASTs and
+            // types, so the Debug implementation of those data structures is
+            // more readable if we minimize the vertical space taken up by
+            // positions. Depends upon RelativePath's implementation of Display
+            // also being single-line.
             if start_line == end_line {
                 write!(f, "({}:{}-{})", start_line, start_col, end_col)
             } else {

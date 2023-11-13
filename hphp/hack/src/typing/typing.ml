@@ -2378,12 +2378,12 @@ let is_lvalue = function
 module rec Expr : sig
   val expr :
     ?expected:ExpectedTy.t ->
-    ?in_await:locl_phase Reason.t_ ->
     accept_using_var:bool ->
     check_defined:bool ->
     is_using_clause:bool ->
     valkind:valkind ->
     is_attribute_param:bool ->
+    in_await:locl_phase Reason.t_ option ->
     env ->
     Nast.expr ->
     env * Tast.expr * locl_ty
@@ -2394,12 +2394,12 @@ module rec Expr : sig
   val raw_expr :
     ?expected:ExpectedTy.t ->
     ?lhs_of_null_coalesce:bool ->
-    ?in_await:locl_phase Reason.t_ ->
     accept_using_var:bool ->
     check_defined:bool ->
     is_using_clause:bool ->
     valkind:valkind ->
     is_attribute_param:bool ->
+    in_await:locl_phase Reason.t_ option ->
     env ->
     Nast.expr ->
     env * Tast.expr * locl_ty
@@ -2421,7 +2421,7 @@ module rec Expr : sig
   val call :
     expected:ExpectedTy.t option ->
     ?nullsafe:pos option ->
-    ?in_await:locl_phase Reason.t_ ->
+    in_await:locl_phase Reason.t_ option ->
     ?dynamic_func:dyn_func_kind ->
     expr_pos:pos ->
     recv_pos:pos ->
@@ -2503,12 +2503,12 @@ end = struct
 
   let rec expr
       ?(expected : ExpectedTy.t option)
-      ?in_await
       ~accept_using_var
       ~check_defined
       ~is_using_clause
       ~valkind
       ~is_attribute_param
+      ~(in_await : locl_phase Reason.t_ option)
       env
       ((_, p, _) as e) =
     try
@@ -2533,7 +2533,7 @@ end = struct
         ~valkind
         ~check_defined
         ~is_attribute_param
-        ?in_await
+        ~in_await
         ?expected
         env
         e
@@ -2561,6 +2561,7 @@ end = struct
         ~is_using_clause:false
         ~valkind:Other
         ~is_attribute_param:false
+        ~in_await:None
       |> triple_to_pair
     in
     (env, te, ty)
@@ -2568,12 +2569,12 @@ end = struct
   and raw_expr
       ?(expected : ExpectedTy.t option)
       ?lhs_of_null_coalesce
-      ?in_await
       ~accept_using_var
       ~check_defined
       ~is_using_clause
       ~valkind
       ~is_attribute_param
+      ~in_await
       env
       e =
     let (_, p, _) = e in
@@ -2583,10 +2584,10 @@ end = struct
       ~is_using_clause
       ?expected
       ?lhs_of_null_coalesce
-      ?in_await
       ~valkind
       ~check_defined
       ~is_attribute_param
+      ~in_await
       env
       e
 
@@ -2597,6 +2598,7 @@ end = struct
       ~accept_using_var:false
       ~is_using_clause:false
       ~is_attribute_param:false
+      ~in_await:None
       env
       e
 
@@ -2611,7 +2613,7 @@ end = struct
   (* $x ?? 0 is handled similarly to $x ?: 0, except that the latter will also
    * look for sketchy null checks in the condition. *)
   (* TODO TAST: type refinement should be made explicit in the typed AST *)
-  and eif env ~(expected : ExpectedTy.t option) ?in_await p c e1 e2 =
+  and eif env ~(expected : ExpectedTy.t option) ~in_await p c e1 e2 =
     let (env, tc, tyc) =
       raw_expr
         ~accept_using_var:false
@@ -2619,6 +2621,7 @@ end = struct
         ~is_using_clause:false
         ~valkind:Other
         ~is_attribute_param:false
+        ~in_await:None
         env
         c
     in
@@ -2635,12 +2638,12 @@ end = struct
         let (env, te1, ty1) =
           expr
             ?expected
-            ?in_await
             ~accept_using_var:false
             ~check_defined:true
             ~is_using_clause:false
             ~valkind:Other
             ~is_attribute_param:false
+            ~in_await
             env
             e1
         in
@@ -2652,12 +2655,12 @@ end = struct
     let (env, te2, ty2) =
       expr
         ?expected
-        ?in_await
         ~accept_using_var:false
         ~check_defined:true
         ~is_using_clause:false
         ~valkind:Other
         ~is_attribute_param:false
+        ~in_await
         env
         e2
     in
@@ -2685,6 +2688,7 @@ end = struct
           ~check_defined
           ~is_attribute_param
           ~is_using_clause:false
+          ~in_await:None
           env
           e
       in
@@ -2721,6 +2725,7 @@ end = struct
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
+          ~in_await:None
           env
           e
       in
@@ -2738,12 +2743,12 @@ end = struct
   and expr_
       ?(expected : ExpectedTy.t option)
       ?lhs_of_null_coalesce
-      ?in_await
       ~accept_using_var
       ~check_defined
       ~is_using_clause
       ~valkind
       ~is_attribute_param
+      ~in_await
       env
       ((_, p, e) as outer) =
     let env = Env.open_tyvars env p in
@@ -3005,7 +3010,7 @@ end = struct
         ~accept_using_var
         ~is_using_clause
         ?lhs_of_null_coalesce
-        ?in_await
+        ~in_await
         ~valkind
         ~is_attribute_param:false
         ~check_defined
@@ -3215,6 +3220,7 @@ end = struct
           ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
+          ~in_await:None
           env
           e
       in
@@ -3239,7 +3245,15 @@ end = struct
       in
       Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
       let (env, (_tel, _typed_unpack_element, _ty, _should_forget_fakes)) =
-        call ~expected:None ~expr_pos:p ~recv_pos:p env tfty [] None
+        call
+          ~expected:None
+          ~expr_pos:p
+          ~recv_pos:p
+          ~in_await:None
+          env
+          tfty
+          []
+          None
       in
       make_result env p (Aast.Clone te) ty
     | This ->
@@ -3293,6 +3307,7 @@ end = struct
             ~accept_using_var:false
             ~is_using_clause:false
             ~valkind:Other
+            ~in_await:None
             env
             e
         in
@@ -3637,6 +3652,7 @@ end = struct
           ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
+          ~in_await:None
           env
           e2
       in
@@ -3673,7 +3689,8 @@ end = struct
              ~is_attribute_param
              ~accept_using_var:true
              ~is_using_clause:false
-             ~valkind:Other)
+             ~valkind:Other
+             ~in_await:None)
           env
           args
       in
@@ -3726,7 +3743,7 @@ end = struct
           ~is_using_clause
           ~expected
           ~valkind
-          ?in_await
+          ~in_await
           p
           env
           e
@@ -3742,7 +3759,7 @@ end = struct
           ~is_using_clause
           ~expected
           ~valkind
-          ?in_await
+          ~in_await
           p
           env
           func
@@ -3793,6 +3810,7 @@ end = struct
           ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
+          ~in_await:None
           env
           e1
       in
@@ -3814,6 +3832,7 @@ end = struct
           ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
+          ~in_await:None
           env
           e2
       in
@@ -3840,6 +3859,7 @@ end = struct
           ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
+          ~in_await:None
           env
           e
       in
@@ -3847,7 +3867,7 @@ end = struct
       let (env, tuop, ty) = Typing_arithmetic.unop p env uop te ty in
       let env = Typing_local_ops.check_assignment env te in
       (env, tuop, ty)
-    | Eif (c, e1, e2) -> eif env ~expected ?in_await p c e1 e2
+    | Eif (c, e1, e2) -> eif env ~expected ~in_await p c e1 e2
     | Class_const ((_, p, CI sid), pstr)
       when String.equal (snd pstr) "class" && Env.is_typedef env (snd sid) ->
     begin
@@ -3909,6 +3929,7 @@ end = struct
           ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
+          ~in_await:None
           env
           local
       in
@@ -3948,6 +3969,7 @@ end = struct
           ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
+          ~in_await:None
           env
           m
       in
@@ -3977,6 +3999,7 @@ end = struct
           ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
+          ~in_await:None
           env
           local
       in
@@ -3988,6 +4011,7 @@ end = struct
           ~accept_using_var:true
           ~is_using_clause:false
           ~valkind:Other
+          ~in_await:None
           env
           e
       in
@@ -4007,6 +4031,7 @@ end = struct
           ~accept_using_var:true
           ~is_using_clause:false
           ~valkind:Other
+          ~in_await:None
           env
           e1
       in
@@ -4091,6 +4116,7 @@ end = struct
           ~accept_using_var:true
           ~is_using_clause:false
           ~valkind:Other
+          ~in_await:None
           env
           e1
       in
@@ -4113,6 +4139,7 @@ end = struct
           ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
+          ~in_await:None
           env
           e2
       in
@@ -4197,7 +4224,7 @@ end = struct
           ~check_defined
           ~is_attribute_param
           ~is_using_clause
-          ~in_await:(Reason.Rwitness p)
+          ~in_await:(Some (Reason.Rwitness p))
           ~accept_using_var:false
           ~valkind:Other
           env
@@ -4214,6 +4241,7 @@ end = struct
           ~is_using_clause
           ~accept_using_var:false
           ~valkind:Other
+          ~in_await:None
           env
           e
       in
@@ -4256,10 +4284,10 @@ end = struct
         expr
           ~check_defined
           ~is_attribute_param
-          ?in_await
           ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
+          ~in_await
           env
           e
       in
@@ -4299,6 +4327,7 @@ end = struct
           ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
+          ~in_await:None
           env
           e
       in
@@ -4323,6 +4352,7 @@ end = struct
           ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
+          ~in_await:None
           env
           e
       in
@@ -4402,6 +4432,7 @@ end = struct
           ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
+          ~in_await:None
           env
           e
       in
@@ -4454,6 +4485,7 @@ end = struct
           ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
+          ~in_await:None
           env
           new_exp
       in
@@ -4502,6 +4534,7 @@ end = struct
             ~accept_using_var:false
             ~is_using_clause:false
             ~valkind:Other
+            ~in_await:None
             env
             e
         in
@@ -4709,6 +4742,7 @@ end = struct
         ~is_using_clause:false
         ~valkind:Other
         ~is_attribute_param:false
+        ~in_await:None
         env
         e
     in
@@ -4949,7 +4983,8 @@ end = struct
                ~check_defined:true
                ~is_using_clause:false
                ~valkind:Other
-               ~is_attribute_param:false)
+               ~is_attribute_param:false
+               ~in_await:None)
             env
             el
         in
@@ -4964,6 +4999,7 @@ end = struct
                 ~is_using_clause:false
                 ~valkind:Other
                 ~is_attribute_param:false
+                ~in_await:None
                 env
                 unpacked_element
             in
@@ -5005,6 +5041,7 @@ end = struct
         ~is_using_clause:false
         ~valkind:Other
         ~is_attribute_param:false
+        ~in_await:None
         env
         x
     in
@@ -5202,7 +5239,7 @@ end = struct
       ~(expected : ExpectedTy.t option)
       ~is_using_clause
       ~valkind
-      ?in_await
+      ~in_await
       p
       env
       ((_, fpos, fun_expr) as e : Nast.expr)
@@ -5245,6 +5282,7 @@ end = struct
           ~expected
           ~expr_pos:p
           ~recv_pos:(fst id)
+          ~in_await:None
           env
           fty
           el
@@ -5309,7 +5347,15 @@ end = struct
       Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
       check_disposable_in_return env fty;
       let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
-        call ~expected ~expr_pos:p ~recv_pos:fpos env fty el unpacked_element
+        call
+          ~expected
+          ~expr_pos:p
+          ~recv_pos:fpos
+          ~in_await:None
+          env
+          fty
+          el
+          unpacked_element
       in
       let (env, te) =
         TUtils.make_simplify_typed_expr
@@ -5341,6 +5387,7 @@ end = struct
               ~is_using_clause:false
               ~valkind:Other
               ~is_attribute_param:false
+              ~in_await:None
               env
               original_expr
           | _ ->
@@ -5352,6 +5399,7 @@ end = struct
                 ~expected
                 ~expr_pos:p
                 ~recv_pos:fpos
+                ~in_await:None
                 env
                 fty
                 el
@@ -5391,7 +5439,8 @@ end = struct
                ~check_defined:false
                ~is_using_clause:false
                ~valkind:Other
-               ~is_attribute_param:false)
+               ~is_attribute_param:false
+               ~in_await:None)
             env
             el
         in
@@ -5414,7 +5463,8 @@ end = struct
                ~check_defined:true
                ~is_using_clause:false
                ~valkind:Other
-               ~is_attribute_param:false)
+               ~is_attribute_param:false
+               ~in_await:None)
             env
             el
         in
@@ -5436,6 +5486,7 @@ end = struct
                 ~is_using_clause:false
                 ~valkind:Other
                 ~is_attribute_param:false
+                ~in_await:None
                 env
                 ea
             in
@@ -5594,6 +5645,7 @@ end = struct
                     ~is_using_clause:false
                     ~valkind:Other
                     ~is_attribute_param:false
+                    ~in_await:None
                     env
                     shape
                 in
@@ -5670,7 +5722,7 @@ end = struct
           ~expected
           ~is_using_clause
           ~valkind
-          ?in_await
+          ~in_await
           p
           env
           r
@@ -5702,6 +5754,7 @@ end = struct
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
+          ~in_await:None
           env
           e1
       in
@@ -5737,6 +5790,7 @@ end = struct
           ~expected
           ~expr_pos:p
           ~recv_pos:pos_id
+          ~in_await:None
           env
           tfty
           el
@@ -5772,6 +5826,7 @@ end = struct
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
+          ~in_await:None
           env
           receiver
       in
@@ -5855,7 +5910,7 @@ end = struct
         call
           ~nullsafe
           ~expected
-          ?in_await
+          ~in_await
           ~expr_pos:p
           ~recv_pos:fpos
           env
@@ -5914,6 +5969,7 @@ end = struct
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
+          ~in_await:None
           env
           e
       in
@@ -5926,7 +5982,15 @@ end = struct
       in
       check_disposable_in_return env fty;
       let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
-        call ~expected ~expr_pos:p ~recv_pos:fpos env fty el unpacked_element
+        call
+          ~expected
+          ~expr_pos:p
+          ~recv_pos:fpos
+          ~in_await:None
+          env
+          fty
+          el
+          unpacked_element
       in
       let result =
         make_call
@@ -5982,7 +6046,8 @@ end = struct
              ~check_defined:true
              ~is_using_clause:false
              ~valkind:Other
-             ~is_attribute_param:false)
+             ~is_attribute_param:false
+             ~in_await:None)
           env
           el
       in
@@ -6089,6 +6154,7 @@ end = struct
           ~expected:None
           ~expr_pos:p
           ~recv_pos:cid_pos
+          ~in_await:None
           env
           m
           el
@@ -6124,7 +6190,7 @@ end = struct
   and call
       ~(expected : ExpectedTy.t option)
       ?(nullsafe : Pos.t option = None)
-      ?in_await
+      ~(in_await : locl_phase Reason.t_ option)
       ?(dynamic_func : dyn_func_kind option)
       ~(expr_pos : Pos.t)
       ~(recv_pos : Pos.t)
@@ -6206,7 +6272,7 @@ end = struct
         call
           ~expected
           ~nullsafe
-          ?in_await
+          ~in_await
           ?dynamic_func:(to_like_function dynamic_func)
           ~expr_pos
           ~recv_pos
@@ -6259,6 +6325,7 @@ end = struct
                       ~is_using_clause:false
                       ~valkind:Other
                       ~is_attribute_param:false
+                      ~in_await:None
                       env
                       elt
                 in
@@ -6312,6 +6379,7 @@ end = struct
                     ~is_using_clause:false
                     ~valkind:Other
                     ~is_attribute_param:false
+                    ~in_await:None
                     env
                     elt
                 in
@@ -6347,7 +6415,7 @@ end = struct
           call
             ~expected
             ~nullsafe
-            ?in_await
+            ~in_await
             ?dynamic_func
             ~expr_pos
             ~recv_pos
@@ -6361,7 +6429,7 @@ end = struct
                 call
                   ~expected
                   ~nullsafe
-                  ?in_await
+                  ~in_await
                   ?dynamic_func
                   ~expr_pos
                   ~recv_pos
@@ -6389,7 +6457,7 @@ end = struct
                 call
                   ~expected
                   ~nullsafe
-                  ?in_await
+                  ~in_await
                   ?dynamic_func
                   ~expr_pos
                   ~recv_pos
@@ -6564,6 +6632,7 @@ end = struct
                     ~is_using_clause:false
                     ~valkind:Other
                     ~is_attribute_param:false
+                    ~in_await:None
                     ?expected
                     env
                     e
@@ -6588,6 +6657,7 @@ end = struct
                   ~is_using_clause:false
                   ~valkind:Other
                   ~is_attribute_param:false
+                  ~in_await:None
                   env
                   e
               in
@@ -6779,6 +6849,7 @@ end = struct
                   ~is_using_clause:false
                   ~valkind:Other
                   ~is_attribute_param:false
+                  ~in_await:None
                   env
                   e
               in
@@ -6926,7 +6997,8 @@ end = struct
                  ~check_defined:true
                  ~is_using_clause:false
                  ~valkind:Other
-                 ~is_attribute_param:false)
+                 ~is_attribute_param:false
+                 ~in_await:None)
               env
               el
           in
@@ -6940,6 +7012,7 @@ end = struct
                   ~is_using_clause:false
                   ~valkind:Other
                   ~is_attribute_param:false
+                  ~in_await:None
                   env
                   unpacked
               in
@@ -7069,7 +7142,7 @@ end = struct
               call
                 ~expected
                 ~nullsafe
-                ?in_await
+                ~in_await
                 ?dynamic_func
                 ~expr_pos
                 ~recv_pos
@@ -7081,7 +7154,7 @@ end = struct
               call
                 ~expected
                 ~nullsafe
-                ?in_await
+                ~in_await
                 ?dynamic_func:(Some Supportdyn_function)
                 ~expr_pos
                 ~recv_pos
@@ -7115,6 +7188,7 @@ end = struct
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
+          ~in_await:None
           env
           e
       in
@@ -7231,6 +7305,7 @@ end = struct
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
+          ~in_await:None
           env
           (Tast.to_nast_expr e2)
       in
@@ -7270,6 +7345,7 @@ end = struct
                 ~is_using_clause:false
                 ~valkind:Other
                 ~is_attribute_param:false
+                ~in_await:None
                 env
                 (Tast.to_nast_expr e2)
             in
@@ -7350,6 +7426,7 @@ end = struct
               ~is_using_clause:false
               ~valkind:Other
               ~is_attribute_param:false
+              ~in_await:None
               env
               x
           in
@@ -7413,6 +7490,7 @@ end = struct
         ~expected:None
         ~expr_pos:p
         ~recv_pos:cid_pos
+        ~in_await:None
         env
         fty
         el
@@ -7445,6 +7523,7 @@ end = struct
           ~is_using_clause:false
           ~valkind:Lvalue_subexpr
           ~is_attribute_param:false
+          ~in_await:None
           env
           e1
       in
@@ -7469,6 +7548,7 @@ end = struct
         ~is_using_clause:false
         ~valkind:Other
         ~is_attribute_param:false
+        ~in_await:None
         env
         e1
 end
@@ -7577,6 +7657,7 @@ end = struct
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
+          ~in_await:None
           env
           e
       in
@@ -7598,6 +7679,7 @@ end = struct
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
+          ~in_await:None
           env
           e
       in
@@ -7697,6 +7779,7 @@ end = struct
           ~check_defined:true
           ~valkind:Other
           ~is_attribute_param:false
+          ~in_await:None
           ?expected
           env
           e
@@ -7749,6 +7832,7 @@ end = struct
                       ~is_using_clause:false
                       ~valkind:Other
                       ~is_attribute_param:false
+                      ~in_await:None
                       env
                       e
                   in
@@ -7770,6 +7854,7 @@ end = struct
                 ~is_using_clause:false
                 ~valkind:Other
                 ~is_attribute_param:false
+                ~in_await:None
                 env
                 e
             in
@@ -7804,6 +7889,7 @@ end = struct
                       ~is_using_clause:false
                       ~valkind:Other
                       ~is_attribute_param:false
+                      ~in_await:None
                       env
                       e
                   in
@@ -7830,6 +7916,7 @@ end = struct
                 ~is_using_clause:false
                 ~valkind:Other
                 ~is_attribute_param:false
+                ~in_await:None
                 env
                 e
             in
@@ -7904,6 +7991,7 @@ end = struct
                       ~is_using_clause:false
                       ~valkind:Other
                       ~is_attribute_param:false
+                      ~in_await:None
                       env
                       e2
                   in
@@ -7945,6 +8033,7 @@ end = struct
                 ~is_using_clause:false
                 ~valkind:Other
                 ~is_attribute_param:false
+                ~in_await:None
                 env
                 e2
             in
@@ -7968,6 +8057,7 @@ end = struct
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
+          ~in_await:None
           env
           e
       in
@@ -7996,6 +8086,7 @@ end = struct
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
+          ~in_await:None
           env
           e1
       in
@@ -8051,6 +8142,7 @@ end = struct
               ~is_using_clause:false
               ~valkind:Other
               ~is_attribute_param:false
+              ~in_await:None
               env
               e
           in
@@ -8098,6 +8190,7 @@ end = struct
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
+          ~in_await:None
           env
           e
       in
@@ -8134,6 +8227,7 @@ end = struct
               ~is_using_clause:false
               ~valkind:Other
               ~is_attribute_param:false
+              ~in_await:None
               env
               exp
           in
@@ -8297,6 +8391,7 @@ end = struct
               ~is_using_clause:false
               ~valkind:Other
               ~is_attribute_param:false
+              ~in_await:None
               env
               e
           in
@@ -8459,6 +8554,7 @@ end = struct
             ~is_using_clause:false
             ~valkind:Other
             ~is_attribute_param:false
+            ~in_await:None
             env
             e
           |> triple_to_pair
@@ -8674,6 +8770,7 @@ end = struct
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
+          ~in_await:None
           env
           default
       in
@@ -9473,6 +9570,7 @@ end = struct
               ~valkind:Other
               env
               ~is_attribute_param:true
+              ~in_await:None
               e
           in
           (env, te))
@@ -9740,6 +9838,7 @@ end = struct
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
+          ~in_await:None
           env
           e
       in
@@ -10065,6 +10164,7 @@ end = struct
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
+          ~in_await:None
           env
           e1
       in
@@ -10077,7 +10177,8 @@ end = struct
              ~accept_using_var:false
              ~is_using_clause:false
              ~valkind:Other
-             ~is_attribute_param:false)
+             ~is_attribute_param:false
+             ~in_await:None)
           env
           e2
       in
@@ -10142,7 +10243,8 @@ end = struct
                ~accept_using_var:false
                ~is_using_clause:false
                ~valkind:Other
-               ~is_attribute_param:false)
+               ~is_attribute_param:false
+               ~in_await:None)
             env
             e2
         in
@@ -10166,6 +10268,7 @@ end = struct
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
+          ~in_await:None
           env
           e1
       in
@@ -10177,7 +10280,8 @@ end = struct
              ~accept_using_var:false
              ~is_using_clause:false
              ~valkind:Other
-             ~is_attribute_param:false)
+             ~is_attribute_param:false
+             ~in_await:None)
           env
           e2
       in
@@ -10194,6 +10298,7 @@ end = struct
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
+          ~in_await:None
           env
           e1
       in
@@ -10203,7 +10308,8 @@ end = struct
              ~accept_using_var:false
              ~is_using_clause:false
              ~valkind:Other
-             ~is_attribute_param:false)
+             ~is_attribute_param:false
+             ~in_await:None)
           env
           e2
       in
@@ -10321,6 +10427,7 @@ end = struct
             ~is_using_clause:false
             ~valkind:Other
             ~is_attribute_param:false
+            ~in_await:None
             env
             et_virtualized_expr)
     in
@@ -10365,6 +10472,7 @@ end = struct
         ~is_using_clause:false
         ~valkind:Other
         ~is_attribute_param:false
+        ~in_await:None
         env
         runtime_expr
     in
@@ -10402,6 +10510,7 @@ end = struct
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
+          ~in_await:None
           env
           ve
       in
@@ -10414,6 +10523,7 @@ end = struct
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
+          ~in_await:None
           env
           ke
       in
@@ -10424,6 +10534,7 @@ end = struct
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
+          ~in_await:None
           env
           ve
       in
@@ -10461,6 +10572,7 @@ end = struct
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
+          ~in_await:None
           env
           call_get_attr
       in
@@ -10483,6 +10595,7 @@ end = struct
         ~is_using_clause:false
         ~valkind:Other
         ~is_attribute_param:false
+        ~in_await:None
         env
         valexpr
     in
@@ -10528,6 +10641,7 @@ end = struct
         ~is_using_clause:false
         ~valkind:Other
         ~is_attribute_param:false
+        ~in_await:None
         env
         valexpr
     in
@@ -10648,7 +10762,15 @@ end = struct
     in
     Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
     let (env, (_tel, _typed_unpack_element, _ty, _should_forget_fakes)) =
-      Expr.call ~expected:None ~expr_pos:p ~recv_pos:obj_pos env tfty [] None
+      Expr.call
+        ~expected:None
+        ~expr_pos:p
+        ~recv_pos:obj_pos
+        ~in_await:None
+        env
+        tfty
+        []
+        None
     in
     env
 
@@ -10673,6 +10795,7 @@ end = struct
           ~check_defined:true
           ~valkind:Other
           ~is_attribute_param:false
+          ~in_await:None
           env
           e
       in
@@ -10707,6 +10830,7 @@ end = struct
           ~check_defined:true
           ~valkind:Other
           ~is_attribute_param:false
+          ~in_await:None
           env
           using_clause
       in
@@ -10883,6 +11007,7 @@ end = struct
             ~is_using_clause:false
             ~valkind:Other
             ~is_attribute_param:false
+            ~in_await:None
             env
             obj
         in
@@ -11026,6 +11151,7 @@ end = struct
             ~is_using_clause:false
             ~valkind:Other
             ~is_attribute_param:false
+            ~in_await:None
             env
             e
         in
@@ -11765,7 +11891,7 @@ let call
   Expr.call
     ~expected
     ?nullsafe
-    ?in_await
+    ~in_await
     ?dynamic_func
     ~expr_pos
     ~recv_pos
@@ -11798,6 +11924,7 @@ let expr ?expected env e =
         ~is_using_clause:false
         ~valkind:Other
         ~is_attribute_param:false
+        ~in_await:None
         env
         e)
 

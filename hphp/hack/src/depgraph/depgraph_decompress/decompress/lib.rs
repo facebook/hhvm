@@ -345,6 +345,10 @@ pub fn decompress(in_path: &Path, out_path: &Path) -> std::io::Result<()> {
     let in_mmap = unsafe { memmap2::Mmap::map(&in_file) }?;
     drop(in_file);
 
+    // We're going to read the entire file, so clue in the OS. We occasionally
+    // see pathologically slow decompress times without this, so we're hoping this helps.
+    let _ = in_mmap.advise(memmap2::Advice::WillNeed);
+
     let in_bytes = in_mmap.deref();
     if in_bytes.len() < IN_HEADER_SIZE {
         return Err(std::io::Error::new(

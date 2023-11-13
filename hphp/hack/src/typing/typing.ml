@@ -2686,9 +2686,6 @@ end = struct
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
       (env, te, ty))
     @@
-    let expr = expr ~check_defined ~is_attribute_param in
-    let exprs = exprs ~check_defined ~is_attribute_param in
-    let raw_expr = raw_expr ~check_defined ~is_attribute_param in
     (*
      * Given an expected type for elements (as extracted from a parameter or return hint,
      * or explicit type argument), a list of expressions, and a function that infers
@@ -3144,7 +3141,7 @@ end = struct
       let pairs = List.zip_exn tkl tvl in
       make_result env p (make_expr th pairs) (make_ty k v)
     | Clone e ->
-      let (env, te, ty) = expr env e in
+      let (env, te, ty) = expr ~check_defined ~is_attribute_param env e in
       (* Clone only works on objects; anything else fatals at runtime.
        * Constructing a call `e`->__clone() checks that `e` is an object and
        * checks coeffects on __clone *)
@@ -3213,7 +3210,7 @@ end = struct
           "String prefixes other than `re` are not yet supported.";
         expr_error env p outer
       ) else
-        let (env, te, ty) = expr env e in
+        let (env, te, ty) = expr ~check_defined ~is_attribute_param env e in
         let (_, pe, expr_) = e in
         let env = Typing_substring.sub_string pe env ty in
         (match expr_ with
@@ -3446,7 +3443,7 @@ end = struct
         match expected with
         | Some (pos, ur, _, _, Ttuple expected_tyl) ->
           exprs_expected (pos, ur, expected_tyl) env el
-        | _ -> exprs env el
+        | _ -> exprs ~check_defined ~is_attribute_param env el
       in
       let ty = MakeType.tuple (Reason.Rwitness p) tyl in
       make_result env p (Aast.Tuple tel) ty
@@ -3463,7 +3460,7 @@ end = struct
           (match expected with
           | Some (pos, ur, _, _, Ttuple expected_tyl) ->
             exprs_expected (pos, ur, expected_tyl) env el
-          | _ -> exprs env el)
+          | _ -> exprs ~check_defined ~is_attribute_param env el)
       in
       let ty = MakeType.tuple (Reason.Rwitness p) tyl in
       make_result env p (Aast.List tel) ty
@@ -3534,7 +3531,7 @@ end = struct
       let (env, te1, ty1) =
         update_array_type ?lhs_of_null_coalesce p env e1 valkind
       in
-      let (env, te2, ty2) = expr env e2 in
+      let (env, te2, ty2) = expr ~check_defined ~is_attribute_param env e2 in
       let env = might_throw ~join_pos:p env in
       let is_lvalue = is_lvalue valkind in
       let (_, p1, _) = e1 in
@@ -3562,7 +3559,10 @@ end = struct
         { func = (_, pos_id, Id (_, s)) as e; targs; args; unpacked_arg = None }
       when Hash_set.mem typing_env_pseudofunctions s ->
       let (env, _tel, tys) =
-        argument_list_exprs (expr ~accept_using_var:true) env args
+        argument_list_exprs
+          (expr ~check_defined ~is_attribute_param ~accept_using_var:true)
+          env
+          args
       in
       let env =
         if String.equal s SN.PseudoFunctions.hh_expect then
@@ -3673,7 +3673,7 @@ end = struct
        * The possibility of e2 changing the types of locals in E means that E
        * can evolve, and so we need to restore $$ to its original state.
        *)
-      let (env, te1, ty1) = expr env e1 in
+      let (env, te1, ty1) = expr ~check_defined ~is_attribute_param env e1 in
       let dd_var = Local_id.make_unscoped SN.SpecialIdents.dollardollar in
       let dd_old_ty =
         if Env.is_local_present env dd_var then
@@ -3685,7 +3685,7 @@ end = struct
       let env =
         Env.set_local ~is_defined:true ~bound_ty:None env dd_var ty1 Pos.none
       in
-      let (env, te2, ty2) = expr env e2 in
+      let (env, te2, ty2) = expr ~check_defined ~is_attribute_param env e2 in
       let env =
         match dd_old_ty with
         | None -> Env.unset_local env dd_var
@@ -3702,7 +3702,7 @@ end = struct
       let (env, te, ty) = make_result env p (Aast.Pipe (e0, te1, te2)) ty2 in
       (env, te, ty)
     | Unop (uop, e) ->
-      let (env, te, ty) = raw_expr env e in
+      let (env, te, ty) = raw_expr ~check_defined ~is_attribute_param env e in
       let env = might_throw ~join_pos:p env in
       let (env, tuop, ty) = Typing_arithmetic.unop p env uop te ty in
       let env = Typing_local_ops.check_assignment env te in
@@ -3762,7 +3762,7 @@ end = struct
       when Env.FakeMembers.is_valid_static env cid_ (snd mid) ->
       let (env, local) = Env.FakeMembers.make_static env cid_ (snd mid) p in
       let local = ((), p, Lvar (p, local)) in
-      let (env, _, ty) = expr env local in
+      let (env, _, ty) = expr ~check_defined ~is_attribute_param env local in
       let (env, _tal, te, _) = Class_id.class_expr env [] cid in
       make_result env p (Aast.Class_get (te, Aast.CGstring mid, Is_prop)) ty
     (* Statically-known static property access e.g. Foo::$x *)
@@ -3792,7 +3792,7 @@ end = struct
     | Class_get (cid, CGexpr m, prop_or_method) ->
       let (env, _tal, te, cty) = Class_id.class_expr env [] cid in
       (* Match Obj_get dynamic instance property access behavior *)
-      let (env, tm, _) = expr env m in
+      let (env, tm, _) = expr ~check_defined ~is_attribute_param env m in
       let (env, ty) =
         if
           TUtils.is_dynamic env cty
@@ -3812,9 +3812,11 @@ end = struct
       let env = might_throw ~join_pos:p env in
       let (env, local) = Env.FakeMembers.make env e y p in
       let local = ((), p, Lvar (p, local)) in
-      let (env, _, ty) = expr env local in
+      let (env, _, ty) = expr ~check_defined ~is_attribute_param env local in
       let env = Xhp_attribute.xhp_check_get_attribute p env e y nf in
-      let (env, t_lhs, _) = expr ~accept_using_var:true env e in
+      let (env, t_lhs, _) =
+        expr ~check_defined ~is_attribute_param ~accept_using_var:true env e
+      in
       let (env, t_rhs) =
         TUtils.make_simplify_typed_expr env pid ty (Aast.Id (py, y))
       in
@@ -3824,7 +3826,9 @@ end = struct
       let env =
         Xhp_attribute.xhp_check_get_attribute p env e1 (snd m) nullflavor
       in
-      let (env, te1, ty1) = expr ~accept_using_var:true env e1 in
+      let (env, te1, ty1) =
+        expr ~check_defined ~is_attribute_param ~accept_using_var:true env e1
+      in
       let env = might_throw ~join_pos:p env in
       (* We typecheck Obj_get by checking whether it is a subtype of
          Thas_member(m, #1) where #1 is a fresh type variable. *)
@@ -3899,7 +3903,9 @@ end = struct
         result_ty
     (* Dynamic instance property access e.g. $x->$f *)
     | Obj_get (e1, e2, nullflavor, prop_or_method) ->
-      let (env, te1, ty1) = expr ~accept_using_var:true env e1 in
+      let (env, te1, ty1) =
+        expr ~check_defined ~is_attribute_param ~accept_using_var:true env e1
+      in
       let (env, ty_err_opt) =
         (* Under Sound Dynamic, check that e1 supports dynamic *)
         Typing_coercion.coerce_type
@@ -3912,7 +3918,7 @@ end = struct
           Typing_error.Callback.unify_error
       in
       Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
-      let (env, te2, _) = expr env e2 in
+      let (env, te2, _) = expr ~check_defined ~is_attribute_param env e2 in
       let (env, ty) = (env, MakeType.dynamic (Reason.Rdynamic_prop p)) in
       let (_, pos, te2) = te2 in
       let env = might_throw ~join_pos:p env in
@@ -3990,13 +3996,21 @@ end = struct
       let env = might_throw ~join_pos:p env in
       (* Await is permitted in a using clause e.g. using (await make_handle()) *)
       let (env, te, rty) =
-        expr ~is_using_clause ~in_await:(Reason.Rwitness p) env e
+        expr
+          ~check_defined
+          ~is_attribute_param
+          ~is_using_clause
+          ~in_await:(Reason.Rwitness p)
+          env
+          e
       in
       let (env, ty) = Async.overload_extract_from_awaitable env ~p rty in
       make_result env p (Aast.Await te) ty
     | ReadonlyExpr e ->
       let env = Env.set_readonly env true in
-      let (env, te, rty) = expr ~is_using_clause env e in
+      let (env, te, rty) =
+        expr ~check_defined ~is_attribute_param ~is_using_clause env e
+      in
       make_result env p (Aast.ReadonlyExpr te) rty
     | New (((_, pos, _) as cid), explicit_targs, el, unpacked_element, ()) ->
       let env = might_throw ~join_pos:p env in
@@ -4032,7 +4046,9 @@ end = struct
         (Aast.New (tc, tal, List.map ~f:snd tel, typed_unpack_element, ctor_fty))
         ty
     | Cast (hint, e) ->
-      let (env, te, ty2) = expr ?in_await env e in
+      let (env, te, ty2) =
+        expr ~check_defined ~is_attribute_param ?in_await env e
+      in
       let env = might_throw ~join_pos:p env in
       let (env, ty_err_opt1) =
         if
@@ -4062,7 +4078,7 @@ end = struct
       make_result env p (Aast.Cast (hint, te)) ty
     | ExpressionTree et -> Expression_tree.expression_tree env p et
     | Is (e, hint) ->
-      let (env, te, _) = expr env e in
+      let (env, te, _) = expr ~check_defined ~is_attribute_param env e in
       make_result env p (Aast.Is (te, hint)) (MakeType.bool (Reason.Rwitness p))
     | As { expr = e; hint; is_nullable; enforce_deep } ->
       let refine_type env lpos lty rty =
@@ -4077,7 +4093,7 @@ end = struct
           lty
           rty
       in
-      let (env, te, expr_ty) = expr env e in
+      let (env, te, expr_ty) = expr ~check_defined ~is_attribute_param env e in
       let env = might_throw ~join_pos:p env in
       let ((env, ty_err_opt1), hint_ty) =
         Phase.localize_hint_for_refinement env hint
@@ -4147,7 +4163,7 @@ end = struct
         (Aast.As { expr = te; hint; is_nullable; enforce_deep })
         hint_ty
     | Upcast (e, hint) ->
-      let (env, te, expr_ty) = expr env e in
+      let (env, te, expr_ty) = expr ~check_defined ~is_attribute_param env e in
       let ((env, ty_err_opt), hint_ty) =
         Phase.localize_hint_no_subst env ~ignore_errors:false hint
       in
@@ -4190,8 +4206,9 @@ end = struct
          *   );
          *)
         let new_exp = Typing_xhp.rewrite_xml_into_new p sid attrl el in
-        expr ?expected env new_exp
+        expr ~check_defined ~is_attribute_param ?expected env new_exp
       in
+
       let tchildren =
         match te with
         | ( _,
@@ -4228,7 +4245,9 @@ end = struct
       | Some _ -> make_result env p txml obj)
     | Shape fdm ->
       let expr_helper ?expected env (k, e) =
-        let (env, et, ty) = expr ?expected env e in
+        let (env, et, ty) =
+          expr ~check_defined ~is_attribute_param ?expected env e
+        in
         (env, (k, et, ty))
       in
       let (env, tfdm) =

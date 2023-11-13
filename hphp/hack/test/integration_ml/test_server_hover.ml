@@ -53,20 +53,20 @@ abstract class ClassMembers {
 //         ^30:12
     await ClassMembers::genLotsOfModifiers();
 //        ^32:11        ^32:25
-    $this->calculateDistance(5, -6, 12, 1);
+    $this->calculateDistance(5.0, -6.0, 12.0, 1.0);
 //                         ^34:28
   }
 
   /** Another method doc block */
   public function calculateDistance(
-    int $originalPositionX,
-    int $finalPositionX,
-    int $originalPositionY,
-    int $finalPositionY,
-  ): int {
+    float $originalPositionX,
+    float $finalPositionX,
+    float $originalPositionY,
+    float $finalPositionY,
+  ): float {
     return sqrt(
-      pow($originalPositionX - $finalPositionX, 2) +
-        pow($originalPositionY - $finalPositionY, 2),
+      (float)pow($originalPositionX - $finalPositionX, 2) +
+        (float)pow($originalPositionY - $finalPositionY, 2),
     );
   }
 }
@@ -156,11 +156,11 @@ let class_members_cases =
           snippet =
             "// Defined in ClassMembers\n"
             ^ "public function calculateDistance(\n"
-            ^ "  int $originalPositionX,\n"
-            ^ "  int $finalPositionX,\n"
-            ^ "  int $originalPositionY,\n"
-            ^ "  int $finalPositionY\n"
-            ^ "): int";
+            ^ "  float $originalPositionX,\n"
+            ^ "  float $finalPositionX,\n"
+            ^ "  float $originalPositionY,\n"
+            ^ "  float $finalPositionY\n"
+            ^ "): float";
           addendum = ["Another method doc block"];
           pos = pos_at (34, 12) (34, 28);
         };

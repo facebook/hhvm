@@ -32,7 +32,7 @@ const float M_LNPI;
 const float M_EULER;
 
 <<__PHPStdLib>>
-function pi()[]: HH\FIXME\MISSING_RETURN_TYPE;
+function pi()[]: float;
 <<__PHPStdLib>>
 function min(
   HH\FIXME\MISSING_PARAM_TYPE $value,
@@ -48,9 +48,9 @@ function abs(
   HH\FIXME\MISSING_PARAM_TYPE $number,
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function is_finite(float $val)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function is_finite(float $val)[]: bool;
 <<__PHPStdLib>>
-function is_infinite(float $val)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function is_infinite(float $val)[]: bool;
 <<__PHPStdLib>>
 function is_nan(float $val)[]: bool;
 <<__PHPStdLib>>
@@ -97,51 +97,51 @@ function base_convert(
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function pow(
-  HH\FIXME\MISSING_PARAM_TYPE $base,
-  HH\FIXME\MISSING_PARAM_TYPE $exp,
-)[]: HH\FIXME\MISSING_RETURN_TYPE;
+  num $base,
+  num $exp,
+)[]: dynamic;
 <<__PHPStdLib>>
-function exp(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function exp(float $arg)[]: float;
 <<__PHPStdLib>>
-function expm1(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function expm1(float $arg)[]: float;
 <<__PHPStdLib>>
-function log10(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function log10(float $arg)[]: float;
 <<__PHPStdLib>>
-function log1p(float $number)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function log1p(float $number)[]: float;
 <<__PHPStdLib>>
-function log(float $arg, float $base = 0.0)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function log(float $arg, float $base = 0.0)[]: float;
 <<__PHPStdLib>>
-function cos(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function cos(float $arg)[]: float;
 <<__PHPStdLib>>
-function cosh(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function cosh(float $arg)[]: float;
 <<__PHPStdLib>>
-function sin(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function sin(float $arg)[]: float;
 <<__PHPStdLib>>
-function sinh(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function sinh(float $arg)[]: float;
 <<__PHPStdLib>>
-function tan(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function tan(float $arg)[]: float;
 <<__PHPStdLib>>
-function tanh(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function tanh(float $arg)[]: float;
 <<__PHPStdLib>>
-function acos(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function acos(float $arg)[]: float;
 <<__PHPStdLib>>
-function acosh(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function acosh(float $arg)[]: float;
 <<__PHPStdLib>>
-function asin(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function asin(float $arg)[]: float;
 <<__PHPStdLib>>
-function asinh(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function asinh(float $arg)[]: float;
 <<__PHPStdLib>>
-function atan(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function atan(float $arg)[]: float;
 <<__PHPStdLib>>
-function atanh(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function atanh(float $arg)[]: float;
 <<__PHPStdLib>>
-function atan2(float $y, float $x)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function atan2(float $y, float $x)[]: float;
 <<__PHPStdLib>>
-function hypot(float $x, float $y)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function hypot(float $x, float $y)[]: float;
 <<__PHPStdLib>>
-function fmod(float $x, float $y)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function fmod(float $x, float $y)[]: float;
 <<__PHPStdLib>>
-function sqrt(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function sqrt(float $arg)[]: float;
 <<__PHPStdLib>>
 function getrandmax()[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>

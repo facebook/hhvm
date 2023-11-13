@@ -289,8 +289,8 @@ function base_convert(mixed $number, int $frombase, int $tobase)[]: mixed;
  * Returns base raised to the power of exp. Warning  In PHP 4.0.6 and earlier
  *   pow() always returned a float, and did not issue warnings.
  *
- * @param mixed $base - The base to use
- * @param mixed $exp - The exponent
+ * @param num $base - The base to use
+ * @param num $exp - The exponent
  *
  * @return mixed - base raised to the power of exp. If the result can be
  *   represented as integer it will be returned as type integer, else it will be
@@ -299,7 +299,7 @@ function base_convert(mixed $number, int $frombase, int $tobase)[]: mixed;
  *
  */
 <<__IsFoldable, __Native>>
-function pow(mixed $base, mixed $exp)[]: mixed;
+function pow(num $base, num $exp)[]: mixed;
 
 /**
  * Returns e raised to the power of arg.  'e' is the base of the natural

@@ -4,7 +4,7 @@ class C {
   public function __construct(private dict<int, mixed> $dict) {}
 
   // TEST-CHECK-BAL: define C.test1
-  // CHECK: define C.test1($this: *C, $idx: *HackInt) : *HackMixed {
+  // CHECK: define C.test1($this: *C, $idx: *HackInt) : .this *HackMixed {
   // CHECK: #b0:
   // CHECK:   n0: *HackMixed = load &$this
   // CHECK:   n1 = $builtins.hhbc_check_this(n0)

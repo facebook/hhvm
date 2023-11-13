@@ -126,6 +126,13 @@ impl BaseType {
             BaseType::Void => f.write_str("Void"),
         }
     }
+
+    pub fn is_this(&self) -> bool {
+        match self {
+            BaseType::This => true,
+            _ => false,
+        }
+    }
 }
 
 /// A basic type that is enforced by the underlying Hack runtime.
@@ -183,6 +190,10 @@ impl EnforceableType {
             check(TypeConstraintFlags::UpperBound, "upper_bound")?;
         }
         f.write_str(" }")
+    }
+
+    pub fn is_this(&self) -> bool {
+        self.ty.is_this()
     }
 }
 

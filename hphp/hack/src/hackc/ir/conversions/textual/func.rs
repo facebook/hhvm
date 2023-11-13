@@ -97,6 +97,9 @@ fn compute_func_ty<'a>(
     if is_awaitable {
         add_attr(attr, ".awaitable")
     }
+    if ty.enforced.is_this() {
+        add_attr(attr, ".this")
+    }
     let is_typevar = ty
         .enforced
         .modifiers

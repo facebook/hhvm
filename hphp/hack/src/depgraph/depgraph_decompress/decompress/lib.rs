@@ -271,7 +271,10 @@ fn write_edge_lists(
     alignment_shift: u8,
 ) -> std::io::Result<()> {
     let file = OpenOptions::new().append(true).open(path)?;
-    let mut buf = BufWriter::new(file);
+
+    // We use a large buffer to see if it helps with some pathological
+    // decompression speed behavior we're seeing.
+    let mut buf = BufWriter::with_capacity(1024 * 1024, file);
 
     // Current byte offset into the `edge_lists` section of the file.
     let mut offset = 0u64;

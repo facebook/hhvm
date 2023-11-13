@@ -156,7 +156,7 @@ function memofunc(int $a, int $b)[]: int {
 // CHECK: define $root.memofunc$memoize_impl($this: *void, $a: *HackInt, $b: *HackInt) : *HackInt {
 
 // TEST-CHECK-BAL: define .async $root.memo_async_func
-// CHECK: define .async $root.memo_async_func($this: *void, $a: *HackInt, $b: *HackInt) : *HackInt {
+// CHECK: define .async $root.memo_async_func($this: *void, $a: *HackInt, $b: *HackInt) : .awaitable *HackInt {
 // CHECK: local memocache::_$root_2ememo__async__func: *void, $0: *void, $1: *void
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$a
@@ -191,4 +191,4 @@ async function memo_async_func(int $a, int $b)[]: Awaitable<int> {
 }
 
 // TEST-CHECK-1: define .async $root.memo_async_func$memoize_impl
-// CHECK: define .async $root.memo_async_func$memoize_impl($this: *void, $a: *HackInt, $b: *HackInt) : *HackInt {
+// CHECK: define .async $root.memo_async_func$memoize_impl($this: *void, $a: *HackInt, $b: *HackInt) : .awaitable *HackInt {

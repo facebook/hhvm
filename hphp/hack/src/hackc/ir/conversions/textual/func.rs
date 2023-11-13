@@ -88,6 +88,15 @@ fn compute_func_ty<'a>(
     ty: &ir::TypeInfo,
     unit_state: &UnitState,
 ) -> textual::Ty {
+    let is_awaitable = ty.user_type.is_some_and(|s| {
+        unit_state
+            .strings
+            .lookup_bstr(s)
+            .starts_with("HH\\Awaitable<".as_bytes())
+    });
+    if is_awaitable {
+        add_attr(attr, ".awaitable")
+    }
     let is_typevar = ty
         .enforced
         .modifiers

@@ -64,7 +64,7 @@ function memofunc(int $a, int $b)[]: int {
 }
 
 // TEST-CHECK-BAL: define .async $root.memo_async_func
-// CHECK: define .async $root.memo_async_func($this: *void, $a: *HackInt, $b: *HackInt) : *HackInt {
+// CHECK: define .async $root.memo_async_func($this: *void, $a: *HackInt, $b: *HackInt) : .awaitable *HackInt {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$b
 // CHECK:   n1: *HackMixed = load &$a

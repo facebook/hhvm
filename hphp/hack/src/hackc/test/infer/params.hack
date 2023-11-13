@@ -77,7 +77,7 @@ function externalClassParam(bool $a, External $b): External {
 }
 
 // TEST-CHECK-BAL: define .async $root.genericParams
-// CHECK: define .async $root.genericParams($this: *void, $a: *HackString, $b: *InternalGeneric) : *HackInt {
+// CHECK: define .async $root.genericParams($this: *void, $a: *HackString, $b: *InternalGeneric) : .awaitable *HackInt {
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(101), $builtins.hack_string("classname"), $builtins.hack_string("InternalGeneric"), $builtins.hack_string("generic_types"), $builtins.hhbc_new_vec($builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(4))))
 // CHECK:   n1: *HackMixed = load &$b
@@ -123,7 +123,7 @@ function genericRet<T>(T $a): T {
 }
 
 // TEST-CHECK-BAL: define .async $root.genericAsyncRet
-// CHECK: define .async $root.genericAsyncRet($this: *void, $a: .typevar="T" *HackMixed) : .typevar="T" *HackMixed {
+// CHECK: define .async $root.genericAsyncRet($this: *void, $a: .typevar="T" *HackMixed) : .awaitable .typevar="T" *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$a
 // CHECK:   ret n0

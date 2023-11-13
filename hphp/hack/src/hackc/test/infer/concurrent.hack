@@ -22,7 +22,7 @@ namespace Concurrent {
   }
 
   // TEST-CHECK-BAL: define .async $root.Concurrent::genTest1
-  // CHECK: define .async $root.Concurrent::genTest1($this: *void) : *HackString {
+  // CHECK: define .async $root.Concurrent::genTest1($this: *void) : .awaitable *HackString {
   // CHECK: local $f1: *void, $f2: *void
   // CHECK: #b0:
   // CHECK:   n0 = $root.Concurrent::genGetInt(null)
@@ -51,7 +51,7 @@ namespace Concurrent {
   }
 
   // TEST-CHECK-BAL: define .async $root.Concurrent::genTest2
-  // CHECK: define .async $root.Concurrent::genTest2($this: *void) : *HackMixed {
+  // CHECK: define .async $root.Concurrent::genTest2($this: *void) : .awaitable *HackMixed {
   // CHECK: #b0:
   // CHECK:   n0 = $root.Concurrent::genVoid1(null)
   // CHECK:   n1 = $builtins.hhbc_await(n0)
@@ -67,7 +67,7 @@ namespace Concurrent {
   }
 
   // TEST-CHECK-BAL: define .async $root.Concurrent::genTest3
-  // CHECK: define .async $root.Concurrent::genTest3($this: *void) : *HackInt {
+  // CHECK: define .async $root.Concurrent::genTest3($this: *void) : .awaitable *HackInt {
   // CHECK: local $x: *void, $y: *void, $z: *void, $0: *void
   // CHECK: #b0:
   // CHECK:   n0 = $root.Concurrent::genGetVecInt(null)
@@ -117,7 +117,7 @@ namespace Concurrent {
   }
 
   // TEST-CHECK-BAL: define .async $root.Concurrent::genTest4
-  // CHECK: define .async $root.Concurrent::genTest4($this: *void) : *HackString {
+  // CHECK: define .async $root.Concurrent::genTest4($this: *void) : .awaitable *HackString {
   // CHECK: local $x: *void, $y: *void, $0: *void
   // CHECK: #b0:
   // CHECK:   n0 = $root.Concurrent::genGetInt(null)

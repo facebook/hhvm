@@ -7,17 +7,17 @@ File "bad_type_structure_nullable.php", line 6, characters 3-22:
 File "bad_type_structure_nullable.php", line 7, characters 3-26:
   bool
 File "bad_type_structure_nullable.php", line 10, characters 3-27:
-  _
+  nothing
 File "bad_type_structure_nullable.php", line 11, characters 3-28:
-  _
+  nothing
 File "bad_type_structure_nullable.php", line 12, characters 3-24:
-  _
+  nothing
 File "bad_type_structure_nullable.php", line 13, characters 3-29:
-  _
+  nothing
 File "bad_type_structure_nullable.php", line 14, characters 3-29:
-  _
+  nothing
 File "bad_type_structure_nullable.php", line 15, characters 3-31:
-  _
+  nothing
 File "bad_type_structure_nullable.php", line 18, characters 3-22:
   TypeStructureKind
 File "bad_type_structure_nullable.php", line 22, characters 3-22:
@@ -29,15 +29,15 @@ File "bad_type_structure_nullable.php", line 24, characters 3-22:
 File "bad_type_structure_nullable.php", line 25, characters 3-26:
   bool
 File "bad_type_structure_nullable.php", line 28, characters 3-27:
-  _
+  nothing
 File "bad_type_structure_nullable.php", line 29, characters 3-28:
-  _
+  nothing
 File "bad_type_structure_nullable.php", line 30, characters 3-24:
-  _
+  nothing
 File "bad_type_structure_nullable.php", line 31, characters 3-29:
-  _
+  nothing
 File "bad_type_structure_nullable.php", line 32, characters 3-29:
-  _
+  nothing
 File "bad_type_structure_nullable.php", line 33, characters 3-31:
   ?vec<mixed>
 File "bad_type_structure_nullable.php", line 36, characters 3-22:

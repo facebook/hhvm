@@ -646,7 +646,7 @@ let rec array_get
                    });
           let (env, ty) = err_witness env p in
           (env, (ty, dflt_arr_res, Error (ty2, MakeType.int Reason.none))))
-      | Tshape { s_fields = fdm; _ } ->
+      | Tshape { s_fields = fdm; s_unknown_value; _ } ->
         let (_, p, _) = e2 in
         begin
           let (fld_opt, ty_err_opt) =
@@ -690,8 +690,8 @@ let rec array_get
                            name = TUtils.get_printable_shape_field_name field;
                            decl_pos = Reason.to_pos r;
                          });
-                let (env, ty) = err_witness env p in
-                (env, (ty, dflt_arr_res, Ok ty2))
+                (* Even though this is an error, we can produce a sound type for the field *)
+                (env, (s_unknown_value, dflt_arr_res, Ok ty2))
               | Some { sft_optional; sft_ty } ->
                 if sft_optional then (
                   let declared_field =

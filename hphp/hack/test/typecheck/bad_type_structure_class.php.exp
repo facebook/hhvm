@@ -9,15 +9,15 @@ File "bad_type_structure_class.php", line 9, characters 3-27:
 File "bad_type_structure_class.php", line 10, characters 3-31:
   (TypeStructure<int>)
 File "bad_type_structure_class.php", line 13, characters 3-26:
-  _
+  nothing
 File "bad_type_structure_class.php", line 14, characters 3-28:
-  _
+  nothing
 File "bad_type_structure_class.php", line 15, characters 3-24:
-  _
+  nothing
 File "bad_type_structure_class.php", line 16, characters 3-29:
-  _
+  nothing
 File "bad_type_structure_class.php", line 17, characters 3-29:
-  _
+  nothing
 File "bad_type_structure_class.php", line 20, characters 3-22:
   TypeStructureKind
 File "bad_type_structure_class.php", line 24, characters 3-22:
@@ -31,15 +31,15 @@ File "bad_type_structure_class.php", line 27, characters 3-27:
 File "bad_type_structure_class.php", line 28, characters 3-31:
   ?vec<mixed>
 File "bad_type_structure_class.php", line 31, characters 3-26:
-  _
+  nothing
 File "bad_type_structure_class.php", line 32, characters 3-28:
-  _
+  nothing
 File "bad_type_structure_class.php", line 33, characters 3-24:
-  _
+  nothing
 File "bad_type_structure_class.php", line 34, characters 3-29:
-  _
+  nothing
 File "bad_type_structure_class.php", line 35, characters 3-29:
-  _
+  nothing
 File "bad_type_structure_class.php", line 38, characters 3-22:
   TypeStructureKind
 File "bad_type_structure_class.php", line 13, characters 15-24:

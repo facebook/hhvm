@@ -90,13 +90,10 @@ fn register_dep_graph_delta_files(all_paths: &[PathBuf], edges: &mut Edges) -> i
             let mmap = {
                 let file = File::open(path)?;
                 let mmap = unsafe { memmap2::Mmap::map(&file)? };
-                unsafe {
-                    libc::madvise(
-                        mmap.as_ptr() as *mut libc::c_void,
-                        mmap.len(),
-                        libc::MADV_WILLNEED,
-                    )
-                };
+
+                // Prefetch the file. We don't care if this fails, it's just an optimization.
+                let _ = mmap.advise(memmap2::Advice::WillNeed);
+
                 mmap
             };
 

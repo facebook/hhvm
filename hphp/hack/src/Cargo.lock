@@ -2453,7 +2453,6 @@ dependencies = [
  "depgraph_reader",
  "depgraph_writer",
  "hash",
- "libc",
  "log",
  "memmap2",
  "newtype",

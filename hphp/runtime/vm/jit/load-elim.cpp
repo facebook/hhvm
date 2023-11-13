@@ -728,19 +728,20 @@ Flags handle_end_catch(Local& env, const IRInstruction& inst) {
 
   assertx(inst.op() == EndCatch);
   auto const isFuncEntry = inst.marker().sk().funcEntry();
-  auto const isCallOpCode = [&]() {
-      // Get all the preds for this block.
-      for (auto const& pred : inst.block()->preds()) {
-        if (pred.inst()->op() == Call) {
-          return true;
-        }
+  auto const isUnsupportedOpcode = [&]() {
+    // Get all the preds for this block.
+    for (auto const& pred : inst.block()->preds()) {
+      // These opcodes enter catch traces with incorrectly set vmsp.
+      if (pred.inst()->is(Call, InterpOne, InterpOneCF)) {
+        return true;
       }
-      return false;
+    }
+    return false;
   }();
   auto const data = inst.extra<EndCatchData>();
   if (data->teardown != EndCatchData::Teardown::Full
       || inst.func()->isCPPBuiltin()
-      || isCallOpCode
+      || isUnsupportedOpcode
       || (!isFuncEntry && findCatchHandler(inst.func(), inst.marker().bcOff()) != kInvalidOffset)
   ) {
     FTRACE(5, "      non-reducible EndCatch {}\n", inst.toString());

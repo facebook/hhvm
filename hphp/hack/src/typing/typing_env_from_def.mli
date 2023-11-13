@@ -14,6 +14,12 @@ val fun_env :
   ('a, 'b) Aast.fun_def ->
   Typing_env_types.env
 
+val stmt_env :
+  ?origin:Decl_counters.origin ->
+  Provider_context.t ->
+  ('a, 'b) Aast.stmt ->
+  Typing_env_types.env
+
 val class_env :
   ?origin:Decl_counters.origin ->
   Provider_context.t ->

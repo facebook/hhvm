@@ -5984,6 +5984,106 @@ function unsaved_bar(): string { return "hello"; }
         )
         self.run_spec(spec, variables)
 
+    def test_squiggle_sequence(self) -> None:
+        """This tests that diagnostics come at the right time"""
+        variables = self.write_hhconf_and_naming_table()
+        squiggle_sequence_uri = self.repo_file_uri("squiggle_sequence.php")
+        variables.update({"squiggle_sequence_uri": squiggle_sequence_uri})
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("test_squiggle_sequence"),
+            )
+            .write_to_disk(
+                uri="${squiggle_sequence_uri}",
+                contents="<?hh\nfunction squiggle_sequence_foo(): void {\n\n}\n",
+                notify=False,
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${squiggle_sequence_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "<?hh\nfunction squiggle_sequence_foo(): void {\n\n}\n",
+                    }
+                },
+            )
+            .request(
+                line=line(),
+                method="textDocument/codeAction",
+                params={
+                    "textDocument": {"uri": "${squiggle_sequence_uri}"},
+                    "range": {
+                        "start": {"line": 2, "character": 0},
+                        "end": {"line": 2, "character": 0},
+                    },
+                    "context": {"diagnostics": []},
+                },
+                result=[],
+                powered_by="serverless_ide",
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${squiggle_sequence_uri}",
+                    "diagnostics": [],
+                },
+            )
+            .notification(
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${squiggle_sequence_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 2, "character": 0},
+                                "end": {"line": 2, "character": 0},
+                            },
+                            "text": "squiggle_sequence_f",
+                        }
+                    ],
+                },
+            )
+            .request(
+                line=line(),
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${squiggle_sequence_uri}"},
+                    "position": {"line": 2, "character": 11},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [],
+                },
+                powered_by="serverless_ide",
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${squiggle_sequence_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 2, "character": 19},
+                                "end": {"line": 3, "character": 0},
+                            },
+                            "severity": 1,
+                            "code": 1002,
+                            "source": "Hack",
+                            "message": "A semicolon ; is expected here.",
+                            "relatedInformation": [],
+                            "relatedLocations": [],
+                        }
+                    ],
+                },
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables)
+
     def test_parsing_squiggles_priority(self) -> None:
         """This tests that parsing squiggles suppress typing squiggles from clientIdeDaemon"""
         variables = self.write_hhconf_and_naming_table()

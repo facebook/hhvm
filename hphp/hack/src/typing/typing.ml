@@ -2380,10 +2380,10 @@ module rec Expr : sig
     ?expected:ExpectedTy.t ->
     ?is_using_clause:bool ->
     ?valkind:valkind ->
-    ?check_defined:bool ->
     ?is_attribute_param:bool ->
     ?in_await:locl_phase Reason.t_ ->
     accept_using_var:bool ->
+    check_defined:bool ->
     env ->
     Nast.expr ->
     env * Tast.expr * locl_ty
@@ -2396,10 +2396,10 @@ module rec Expr : sig
     ?expected:ExpectedTy.t ->
     ?lhs_of_null_coalesce:bool ->
     ?valkind:valkind ->
-    ?check_defined:bool ->
     ?is_attribute_param:bool ->
     ?in_await:locl_phase Reason.t_ ->
     accept_using_var:bool ->
+    check_defined:bool ->
     env ->
     Nast.expr ->
     env * Tast.expr * locl_ty
@@ -2407,9 +2407,9 @@ module rec Expr : sig
   val exprs :
     ?expected:ExpectedTy.t ->
     ?valkind:valkind ->
-    ?check_defined:bool ->
     ?is_attribute_param:bool ->
     accept_using_var:bool ->
+    check_defined:bool ->
     env ->
     Nast.expr list ->
     env * Tast.expr list * locl_phase Typing_defs_core.ty list
@@ -2505,10 +2505,10 @@ end = struct
       ?(expected : ExpectedTy.t option)
       ?(is_using_clause = false)
       ?(valkind = Other)
-      ?(check_defined = true)
       ?(is_attribute_param = false)
       ?in_await
       ~accept_using_var
+      ~check_defined
       env
       ((_, p, _) as e) =
     try
@@ -2552,7 +2552,8 @@ end = struct
     let pure = MakeType.mixed (Reason.Rwitness p) in
     let (env, (te, ty)) =
       with_special_coeffects env pure pure @@ fun env ->
-      expr env e ?expected ~accept_using_var:false |> triple_to_pair
+      expr env e ?expected ~accept_using_var:false ~check_defined:true
+      |> triple_to_pair
     in
     (env, te, ty)
 
@@ -2561,10 +2562,10 @@ end = struct
       ?(expected : ExpectedTy.t option)
       ?lhs_of_null_coalesce
       ?(valkind = Other)
-      ?(check_defined = true)
       ?(is_attribute_param = false)
       ?in_await
       ~accept_using_var
+      ~check_defined
       env
       e =
     let (_, p, _) = e in
@@ -2596,7 +2597,9 @@ end = struct
    * look for sketchy null checks in the condition. *)
   (* TODO TAST: type refinement should be made explicit in the typed AST *)
   and eif env ~(expected : ExpectedTy.t option) ?in_await p c e1 e2 =
-    let (env, tc, tyc) = raw_expr ~accept_using_var:false env c in
+    let (env, tc, tyc) =
+      raw_expr ~accept_using_var:false ~check_defined:true env c
+    in
     let parent_lenv = env.lenv in
     let (env, _) = condition env true tc in
     let (env, te1, ty1) =
@@ -2608,7 +2611,13 @@ end = struct
         (env, None, ty)
       | Some e1 ->
         let (env, te1, ty1) =
-          expr ?expected ?in_await ~accept_using_var:false env e1
+          expr
+            ?expected
+            ?in_await
+            ~accept_using_var:false
+            ~check_defined:true
+            env
+            e1
         in
         (env, Some te1, ty1)
     in
@@ -2616,7 +2625,13 @@ end = struct
     let env = { env with lenv = parent_lenv } in
     let (env, _) = condition env false tc in
     let (env, te2, ty2) =
-      expr ?expected ?in_await ~accept_using_var:false env e2
+      expr
+        ?expected
+        ?in_await
+        ~accept_using_var:false
+        ~check_defined:true
+        env
+        e2
     in
     let lenv2 = env.lenv in
     let env = LEnv.union_lenvs ~join_pos:p env parent_lenv lenv1 lenv2 in
@@ -2626,9 +2641,9 @@ end = struct
   and exprs
       ?(expected : ExpectedTy.t option)
       ?(valkind = Other)
-      ?(check_defined = true)
       ?(is_attribute_param = false)
       ~accept_using_var
+      ~check_defined
       env
       el =
     match el with
@@ -2669,10 +2684,12 @@ end = struct
     | ([], _) -> (env, [], [])
     | (e :: el, expected_ty :: expected_tyl) ->
       let expected = ExpectedTy.make pos ur expected_ty in
-      let (env, te, ty) = expr ~expected ~accept_using_var:false env e in
+      let (env, te, ty) =
+        expr ~expected ~accept_using_var:false ~check_defined:true env e
+      in
       let (env, tel, tyl) = exprs_expected (pos, ur, expected_tyl) env el in
       (env, te :: tel, ty :: tyl)
-    | (el, []) -> exprs ~accept_using_var:false env el
+    | (el, []) -> exprs ~accept_using_var:false ~check_defined:true env el
 
   and expr_
       ?(expected : ExpectedTy.t option)
@@ -2680,8 +2697,8 @@ end = struct
       ?(is_attribute_param = false)
       ?lhs_of_null_coalesce
       ?in_await
-      ~accept_using_var
       ~(valkind : valkind)
+      ~accept_using_var
       ~check_defined
       env
       ((_, p, e) as outer) =
@@ -4528,7 +4545,9 @@ end = struct
          Cls.get_docs_url cls)
     in
 
-    let (env, te, ty) = expr env e ~accept_using_var:false in
+    let (env, te, ty) =
+      expr env e ~accept_using_var:false ~check_defined:true
+    in
     let (env, ty_visitor) = Env.fresh_type env p in
     let (env, ty_res) = Env.fresh_type env p in
     let (env, ty_infer) = Env.fresh_type env p in
@@ -4760,14 +4779,21 @@ end = struct
       match class_types_and_ctor_types with
       | [] ->
         let (env, tel, _) =
-          argument_list_exprs (expr ~accept_using_var:false) env el
+          argument_list_exprs
+            (expr ~accept_using_var:false ~check_defined:true)
+            env
+            el
         in
         let (env, typed_unpack_element, _) =
           match unpacked_element with
           | None -> (env, None, MakeType.nothing Reason.Rnone)
           | Some unpacked_element ->
             let (env, e, ty) =
-              expr ~accept_using_var:false env unpacked_element
+              expr
+                ~accept_using_var:false
+                ~check_defined:true
+                env
+                unpacked_element
             in
             (env, Some e, ty)
         in
@@ -4799,7 +4825,9 @@ end = struct
       should_forget_fakes )
 
   and array_value ~(expected : ExpectedTy.t option) env x =
-    let (env, te, ty) = expr ?expected ~accept_using_var:false env x in
+    let (env, te, ty) =
+      expr ?expected ~accept_using_var:false ~check_defined:true env x
+    in
     (env, (te, ty))
 
   and arraykey_value
@@ -5127,7 +5155,7 @@ end = struct
           match el with
           | [(Ast_defs.Pnormal, original_expr)]
             when TCO.ignore_unsafe_cast (Env.get_tcopt env) ->
-            expr ~accept_using_var:false env original_expr
+            expr ~accept_using_var:false ~check_defined:true env original_expr
           | _ ->
             (* first type the `unsafe_cast` as a call, handling arity errors *)
             let (env, fty, tal) = fun_type_of_id env id explicit_targs el in
@@ -5188,7 +5216,10 @@ end = struct
       (* Special function `unset` *)
       | unset when String.equal unset SN.PseudoFunctions.unset ->
         let (env, tel, _) =
-          argument_list_exprs (expr ~accept_using_var:false) env el
+          argument_list_exprs
+            (expr ~accept_using_var:false ~check_defined:true)
+            env
+            el
         in
         if Option.is_some unpacked_element then
           Typing_error_utils.add_typing_error
@@ -5201,7 +5232,9 @@ end = struct
         let (env, ty_err_opt) =
           match (el, unpacked_element) with
           | ([(Ast_defs.Pnormal, (_, _, Array_get (ea, Some _)))], None) ->
-            let (env, _te, ty) = expr ~accept_using_var:false env ea in
+            let (env, _te, ty) =
+              expr ~accept_using_var:false ~check_defined:true env ea
+            in
             let r = Reason.Rwitness p in
             let tmixed = MakeType.mixed r in
             let super =
@@ -5351,7 +5384,7 @@ end = struct
                    which defeats the purpose of this extra-logical function.
                 *)
                 let (env, _te, shape_ty) =
-                  expr ~accept_using_var:false env shape
+                  expr ~accept_using_var:false ~check_defined:true env shape
                 in
                 let (env, shape_ty) =
                   Typing_shapes.remove_key p env shape_ty field
@@ -5451,7 +5484,9 @@ end = struct
     (* Call instance method *)
     | Obj_get (e1, (_, pos_id, Id m), nullflavor, Is_method)
       when not (TCO.method_call_inference (Env.get_tcopt env)) ->
-      let (env, te1, ty1) = expr ~accept_using_var:true env e1 in
+      let (env, te1, ty1) =
+        expr ~accept_using_var:true ~check_defined:true env e1
+      in
       let nullsafe =
         match nullflavor with
         | OG_nullthrows -> None
@@ -5513,7 +5548,7 @@ end = struct
           where #1 is a fresh type variable.
         *****)
       let (env, typed_receiver, receiver_ty) =
-        expr ~accept_using_var:true env receiver
+        expr ~accept_using_var:true ~check_defined:true env receiver
       in
       let env = might_throw ~join_pos:p env in
       let nullsafe =
@@ -5647,7 +5682,9 @@ end = struct
     (* Function invocation *)
     | Id id -> dispatch_id env id
     | _ ->
-      let (env, te, fty) = expr ~accept_using_var:false env e in
+      let (env, te, fty) =
+        expr ~accept_using_var:false ~check_defined:true env e
+      in
       let ((env, ty_err_opt1), fty) =
         Typing_solver.expand_type_and_solve
           ~description_of_expected:"a function value"
@@ -5707,7 +5744,10 @@ end = struct
           ~env
           Typing_error.(primary @@ Primary.Constructor_no_args p);
       let (env, tel, _tyl) =
-        argument_list_exprs (expr ~accept_using_var:false) env el
+        argument_list_exprs
+          (expr ~accept_using_var:false ~check_defined:true)
+          env
+          el
       in
       let should_forget_fakes = true in
       (* Construct a default __construct type *)
@@ -5978,6 +6018,7 @@ end = struct
                     expr
                       ~expected:expected_arg_ty
                       ~accept_using_var:false
+                      ~check_defined:true
                       env
                       elt
                 in
@@ -6024,7 +6065,9 @@ end = struct
           in
           let (env, tel) =
             List.map_env env el ~f:(fun env (pk, elt) ->
-                let (env, te, _ty) = expr ~accept_using_var:false env elt in
+                let (env, te, _ty) =
+                  expr ~accept_using_var:false ~check_defined:true env elt
+                in
                 let env =
                   match pk with
                   | Ast_defs.Pinout _ ->
@@ -6270,6 +6313,7 @@ end = struct
                   in
                   expr
                     ~accept_using_var:(get_fp_accept_disposable param)
+                    ~check_defined:true
                     ?expected
                     env
                     e
@@ -6287,7 +6331,9 @@ end = struct
                 Some (hole_on_ty_mismatch ~ty_mismatch_opt te, ty),
                 used_dynamic )
             | None ->
-              let (env, te, ty) = expr ~accept_using_var:false env e in
+              let (env, te, ty) =
+                expr ~accept_using_var:false ~check_defined:true env e
+              in
               (env, Some (te, ty), false)
           in
           let set_tyvar_variance_from_lambda_param env opt_param =
@@ -6469,7 +6515,9 @@ end = struct
                            d_kind = SplatUnpack;
                          } ))
               in
-              let (env, te, ty) = expr ~accept_using_var:false env e in
+              let (env, te, ty) =
+                expr ~accept_using_var:false ~check_defined:true env e
+              in
               (* Populate the type variables from the expression in the splat *)
               let (env, ty_err_opt) =
                 Type.sub_type_i
@@ -6608,13 +6656,16 @@ end = struct
             suitable function type from the arguments and invoking subtyping.
           *)
           let (env, typed_el, type_of_el) =
-            argument_list_exprs (expr ~accept_using_var:true) env el
+            argument_list_exprs
+              (expr ~accept_using_var:true ~check_defined:true)
+              env
+              el
           in
           let (env, typed_unpacked_element, type_of_unpacked_element) =
             match unpacked_element with
             | Some unpacked ->
               let (env, typed_unpacked, type_of_unpacked) =
-                expr ~accept_using_var:true env unpacked
+                expr ~accept_using_var:true ~check_defined:true env unpacked
               in
               (env, Some typed_unpacked, Some type_of_unpacked)
             | None -> (env, None, None)
@@ -6781,7 +6832,9 @@ end = struct
      * be actually unpacked. *)
     | None -> (env, None)
     | Some e ->
-      let (env, _, ety) = expr ~accept_using_var:false env e in
+      let (env, _, ety) =
+        expr ~accept_using_var:false ~check_defined:true env e
+      in
       let (_, p, _) = e in
       let (env, ty) = Env.fresh_type env p in
       let destructure_ty =
@@ -6889,7 +6942,11 @@ end = struct
        * We essentially redo what has been undone in the
        * `Binop (Ampamp|Barbar)` case of `expr` *)
       let (env, _, _) =
-        expr ~accept_using_var:false env (Tast.to_nast_expr e2)
+        expr
+          ~accept_using_var:false
+          ~check_defined:true
+          env
+          (Tast.to_nast_expr e2)
       in
       let (env, { lset = lset2; pkgs = pkgs2 }) = condition env tparamet e2 in
       let lset = Local_id.Set.union lset1 lset2 in
@@ -6921,7 +6978,11 @@ end = struct
                cond2 which we must account for. Again we redo what has been undone in
                the `Binop (Ampamp|Barbar)` case of `expr` *)
             let (env, _, _) =
-              expr ~accept_using_var:false env (Tast.to_nast_expr e2)
+              expr
+                ~accept_using_var:false
+                ~check_defined:true
+                env
+                (Tast.to_nast_expr e2)
             in
             condition env tparamet e2)
       in
@@ -6993,7 +7054,9 @@ end = struct
   and string2 env idl =
     let (env, tel) =
       List.fold_left idl ~init:(env, []) ~f:(fun (env, tel) x ->
-          let (env, te, ty) = expr ~accept_using_var:false env x in
+          let (env, te, ty) =
+            expr ~accept_using_var:false ~check_defined:true env x
+          in
           let (_, p, _) = x in
           if TCO.enable_strict_string_concat_interp (Env.get_tcopt env) then (
             let r = Reason.Rinterp_operand p in
@@ -7100,7 +7163,13 @@ end = struct
         (env, te1, ty1)
       | _ -> (env, te1, ty1)
     end
-    | Other -> raw_expr ?lhs_of_null_coalesce ~accept_using_var:false env e1
+    | Other ->
+      raw_expr
+        ?lhs_of_null_coalesce
+        ~accept_using_var:false
+        ~check_defined:true
+        env
+        e1
 end
 
 and Stmt : sig
@@ -7200,7 +7269,9 @@ end = struct
       let env = LEnv.move_and_merge_next_in_cont ~join_pos:pos env C.Exit in
       (env, Aast.Yield_break)
     | Expr e ->
-      let (env, te, _) = Expr.expr ~accept_using_var:false env e in
+      let (env, te, _) =
+        Expr.expr ~accept_using_var:false ~check_defined:true env e
+      in
       let env =
         if TFTerm.typed_expression_exits te then
           LEnv.move_and_merge_next_in_cont env ~join_pos:pos C.Exit
@@ -7212,7 +7283,9 @@ end = struct
       let assert_refinement_env =
         assert_env_blk ~pos ~at:`Start Aast.Refinement
       in
-      let (env, te, _) = Expr.expr ~accept_using_var:false env e in
+      let (env, te, _) =
+        Expr.expr ~accept_using_var:false ~check_defined:true env e
+      in
       let (env, tb1, tb2) =
         branch
           ~join_pos:pos
@@ -7306,6 +7379,7 @@ end = struct
         Expr.expr
           ~is_using_clause:return_disposable
           ~accept_using_var:false
+          ~check_defined:true
           ?expected
           env
           e
@@ -7351,7 +7425,9 @@ end = struct
                   in
                   (* The following is necessary in case there is an assignment in the
                    * expression *)
-                  let (env, te, _) = Expr.expr ~accept_using_var:false env e in
+                  let (env, te, _) =
+                    Expr.expr ~accept_using_var:false ~check_defined:true env e
+                  in
                   let (env, { pkgs; _ }) = Expr.condition env true te in
                   Env.with_packages env pkgs @@ fun env ->
                   let env =
@@ -7363,7 +7439,9 @@ end = struct
             let env =
               LEnv.update_next_from_conts ~join_pos:pos env [C.Continue; C.Next]
             in
-            let (env, te, _) = Expr.expr ~accept_using_var:false env e in
+            let (env, te, _) =
+              Expr.expr ~accept_using_var:false ~check_defined:true env e
+            in
             let (env, _) = Expr.condition env false te in
             let env =
               LEnv.update_next_from_conts ~join_pos:pos env [C.Break; C.Next]
@@ -7388,7 +7466,9 @@ end = struct
                   let join_map = annot_map env in
                   (* The following is necessary in case there is an assignment in the
                    * expression *)
-                  let (env, te, _) = Expr.expr ~accept_using_var:false env e in
+                  let (env, te, _) =
+                    Expr.expr ~accept_using_var:false ~check_defined:true env e
+                  in
                   let (env, { lset; pkgs }) = Expr.condition env true te in
                   Env.with_packages env pkgs @@ fun env ->
                   let refinement_map = refinement_annot_map env lset in
@@ -7405,7 +7485,9 @@ end = struct
             let env =
               LEnv.update_next_from_conts ~join_pos:pos env [C.Continue; C.Next]
             in
-            let (env, te, _) = Expr.expr ~accept_using_var:false env e in
+            let (env, te, _) =
+              Expr.expr ~accept_using_var:false ~check_defined:true env e
+            in
             let (env, { lset; _ }) = Expr.condition env false te in
             let refinement_map_at_exit = refinement_annot_map env lset in
             let env =
@@ -7453,7 +7535,9 @@ end = struct
             (* For loops leak their initializer, but nothing that's defined in the
                body
             *)
-            let (env, te1, _) = Expr.exprs ~accept_using_var:false env e1 in
+            let (env, te1, _) =
+              Expr.exprs ~accept_using_var:false ~check_defined:true env e1
+            in
             (* initializer *)
             let env =
               LEnv.save_and_merge_next_in_cont ~join_pos:pos env C.Continue
@@ -7463,7 +7547,7 @@ end = struct
                   (* The following is necessary in case there is an assignment in the
                    * expression *)
                   let (env, te2, _) =
-                    Expr.expr ~accept_using_var:false env e2
+                    Expr.expr ~accept_using_var:false ~check_defined:true env e2
                   in
                   let (env, { lset; pkgs }) = Expr.condition env true te2 in
                   Env.with_packages env pkgs @@ fun env ->
@@ -7477,7 +7561,11 @@ end = struct
                   in
                   let join_map = annot_map env in
                   let (env, te3, _) =
-                    Expr.exprs ~accept_using_var:false env e3
+                    Expr.exprs
+                      ~accept_using_var:false
+                      ~check_defined:true
+                      env
+                      e3
                   in
 
                   (* Export the join and refinement environments *)
@@ -7490,7 +7578,9 @@ end = struct
             let env =
               LEnv.update_next_from_conts ~join_pos:pos env [C.Continue; C.Next]
             in
-            let (env, te2, _) = Expr.expr ~accept_using_var:false env e2 in
+            let (env, te2, _) =
+              Expr.expr ~accept_using_var:false ~check_defined:true env e2
+            in
             let (env, { lset; _ }) = Expr.condition env false te2 in
             let refinement_map_at_exit = refinement_annot_map env lset in
             let env =
@@ -7504,7 +7594,9 @@ end = struct
       in
       (env, for_st)
     | Switch (((_, pos, _) as e), cl, dfl) ->
-      let (env, te, ty) = Expr.expr ~accept_using_var:false env e in
+      let (env, te, ty) =
+        Expr.expr ~accept_using_var:false ~check_defined:true env e
+      in
       (* NB: A 'continue' inside a 'switch' block is equivalent to a 'break'.
        * See the note in
        * http://php.net/manual/en/control-structures.continue.php *)
@@ -7523,7 +7615,9 @@ end = struct
       (env, Aast.Switch (te, tcl, tdfl))
     | Foreach (e1, e2, b) ->
       (* It's safe to do foreach over a disposable, as no leaking is possible *)
-      let (env, te1, ty1) = Expr.expr ~accept_using_var:true env e1 in
+      let (env, te1, ty1) =
+        Expr.expr ~accept_using_var:true ~check_defined:true env e1
+      in
       let (env, (te1, te2, tb)) =
         LEnv.stash_and_do env [C.Continue; C.Break] (fun env ->
             let env =
@@ -7569,7 +7663,9 @@ end = struct
         | ( _pos,
             ( Expr ((), _, Binop { bop = Ast_defs.Eq _; lhs = _; rhs = e })
             | Expr (((), _, _) as e) ) ) ->
-          let (env, te, ty) = Expr.expr ~accept_using_var:false env e in
+          let (env, te, ty) =
+            Expr.expr ~accept_using_var:false ~check_defined:true env e
+          in
           (env, Some (te, ty))
         | _ -> (env, None)
       in
@@ -7607,7 +7703,9 @@ end = struct
       (env, Aast.Concurrent b)
     | Throw e ->
       let (_, p, _) = e in
-      let (env, te, ty) = Expr.expr ~accept_using_var:false env e in
+      let (env, te, ty) =
+        Expr.expr ~accept_using_var:false ~check_defined:true env e
+      in
       let (env, ty_err_opt) = coerce_to_throwable p env ty in
       Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
       let env = move_and_merge_next_in_catch ~join_pos:pos env in
@@ -7634,7 +7732,9 @@ end = struct
         | None ->
           (false, env, None, Typing_make_type.nothing (Reason.Rwitness p))
         | Some exp ->
-          let (env, te, ety) = Expr.expr ~accept_using_var:false env exp in
+          let (env, te, ety) =
+            Expr.expr ~accept_using_var:false ~check_defined:true env exp
+          in
           (true, env, Some te, ety)
       in
       let env = set_valid_rvalue ~is_defined p env lvar (Some hty) ety in
@@ -7788,7 +7888,9 @@ end = struct
         | [] -> (env, [])
         | (((_, pos, _) as e), b) :: rl ->
           let env = initialize_next_cont env in
-          let (env, te, _) = Expr.expr ~accept_using_var:false env e in
+          let (env, te, _) =
+            Expr.expr ~accept_using_var:false ~check_defined:true env e
+          in
           let (env, tb) = block env b in
           let last = List.is_empty rl && Option.is_none dfl in
           let next_pos =
@@ -7941,7 +8043,8 @@ end = struct
               pure
           in
           with_special_coeffects env cap pure @@ fun env ->
-          Expr.expr ?expected ~accept_using_var:false env e |> triple_to_pair
+          Expr.expr ?expected ~accept_using_var:false ~check_defined:true env e
+          |> triple_to_pair
         in
         Typing_sequencing.sequence_check_expr e;
         let (env, ty1) =
@@ -8147,7 +8250,9 @@ end = struct
       let (env, _) = bind_param env (None, param) in
       env
     | Some default ->
-      let (env, _te, ty) = Expr.expr ~accept_using_var:false env default in
+      let (env, _te, ty) =
+        Expr.expr ~accept_using_var:false ~check_defined:true env default
+      in
       Typing_sequencing.sequence_check_expr default;
       let (env, _) = bind_param env (Some ty, param) in
       env
@@ -8937,7 +9042,12 @@ end = struct
     let (env, typed_ua_params) =
       List.map_env env ua_params ~f:(fun env e ->
           let (env, te, _) =
-            Expr.expr ~accept_using_var:false env ~is_attribute_param:true e
+            Expr.expr
+              ~accept_using_var:false
+              ~check_defined:true
+              env
+              ~is_attribute_param:true
+              e
           in
           (env, te))
     in
@@ -9197,7 +9307,9 @@ end = struct
           make_result env tal (Aast.CI c) ty)
     end
     | CIexpr ((_, p, _) as e) ->
-      let (env, te, ty) = Expr.expr ~accept_using_var:false env e in
+      let (env, te, ty) =
+        Expr.expr ~accept_using_var:false ~check_defined:true env e
+      in
       let fold_errs errs =
         let rec aux = function
           | (Ok xs, Ok x :: rest) -> aux (Ok (x :: xs), rest)
@@ -9716,7 +9828,11 @@ end = struct
     *)
     let (env, t_virtualized_expr, ty_virtual) =
       Env.with_inside_expr_tree env et_hint (fun env ->
-          Expr.expr ~accept_using_var:false env et_virtualized_expr)
+          Expr.expr
+            ~accept_using_var:false
+            ~check_defined:true
+            env
+            et_virtualized_expr)
     in
 
     (* If the virtualized expression type is pessimised, we should strip off likes.
@@ -9753,7 +9869,7 @@ end = struct
       maketree_with_type_param env p et_runtime_expr ty_virtual
     in
     let (env, t_runtime_expr, ty_runtime_expr) =
-      Expr.expr ~accept_using_var:false env runtime_expr
+      Expr.expr ~accept_using_var:false ~check_defined:true env runtime_expr
     in
 
     make_result
@@ -9782,11 +9898,17 @@ and Afield : sig
 end = struct
   let array_field env = function
     | AFvalue ve ->
-      let (env, tve, tv) = Expr.expr ~accept_using_var:false env ve in
+      let (env, tve, tv) =
+        Expr.expr ~accept_using_var:false ~check_defined:true env ve
+      in
       (env, (Aast.AFvalue tve, None, tv))
     | AFkvalue (ke, ve) ->
-      let (env, tke, tk) = Expr.expr ~accept_using_var:false env ke in
-      let (env, tve, tv) = Expr.expr ~accept_using_var:false env ve in
+      let (env, tke, tk) =
+        Expr.expr ~accept_using_var:false ~check_defined:true env ke
+      in
+      let (env, tve, tv) =
+        Expr.expr ~accept_using_var:false ~check_defined:true env ve
+      in
       (env, (Aast.AFkvalue (tke, tve), Some tk, tv))
 end
 
@@ -9814,7 +9936,9 @@ end = struct
       let call_get_attr =
         Typing_xhp.rewrite_attribute_access_into_call pos base_expr null_flavour
       in
-      let (env, _, _) = Expr.expr ~accept_using_var:false env call_get_attr in
+      let (env, _, _) =
+        Expr.expr ~accept_using_var:false ~check_defined:true env call_get_attr
+      in
       (* Snap the local env back to avoid manipualting refinements twice. *)
       { env with lenv = base_lenv }
     else
@@ -9827,7 +9951,9 @@ end = struct
   *)
   let xhp_spread_attribute env c_onto valexpr sid obj =
     let (_, p, _) = valexpr in
-    let (env, te, valty) = Expr.expr ~accept_using_var:false env valexpr in
+    let (env, te, valty) =
+      Expr.expr ~accept_using_var:false ~check_defined:true env valexpr
+    in
     let ((env, xhp_req_err_opt), attr_ptys) =
       match c_onto with
       | None -> ((env, None), [])
@@ -9863,7 +9989,9 @@ end = struct
   *)
   let xhp_simple_attribute env id valexpr sid obj =
     let (_, p, _) = valexpr in
-    let (env, te, valty) = Expr.expr ~accept_using_var:false env valexpr in
+    let (env, te, valty) =
+      Expr.expr ~accept_using_var:false ~check_defined:true env valexpr
+    in
     (* This converts the attribute name to a member name. *)
     let name = ":" ^ snd id in
     let attr_pty = ((fst id, name), (p, valty)) in
@@ -10000,7 +10128,12 @@ end = struct
     | Binop { bop = Ast_defs.Eq None; lhs = (_, lvar_pos, Lvar lvar); rhs = e }
       ->
       let (env, te, ty) =
-        Expr.expr ~is_using_clause:true ~accept_using_var:false env e
+        Expr.expr
+          ~is_using_clause:true
+          ~accept_using_var:false
+          ~check_defined:true
+          env
+          e
       in
       let env = has_dispose_method env has_await pos e ty in
       let env =
@@ -10027,7 +10160,12 @@ end = struct
     (* Arbitrary expression. This will be assigned to a temporary *)
     | _ ->
       let (env, typed_using_clause, ty) =
-        Expr.expr ~is_using_clause:true ~accept_using_var:false env using_clause
+        Expr.expr
+          ~is_using_clause:true
+          ~accept_using_var:false
+          ~check_defined:true
+          env
+          using_clause
       in
       let env = has_dispose_method env has_await pos using_clause ty in
       (env, (typed_using_clause, []))
@@ -10195,7 +10333,9 @@ end = struct
           | OG_nullthrows -> None
           | OG_nullsafe -> Some (Reason.Rnullsafe_op pobj)
         in
-        let (env, tobj, obj_ty) = Expr.expr ~accept_using_var:true env obj in
+        let (env, tobj, obj_ty) =
+          Expr.expr ~accept_using_var:true ~check_defined:true env obj
+        in
         let env = might_throw ~join_pos:p env in
         let (_, p1, _) = obj in
         let ( (env, ty_err_opt),
@@ -10329,7 +10469,9 @@ end = struct
         Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
         (env, te, ty, val_ty_mismatch_opt)
       | (_, pos, Array_get (e1, Some e)) ->
-        let (env, te, ty) = Expr.expr ~accept_using_var:false env e in
+        let (env, te, ty) =
+          Expr.expr ~accept_using_var:false ~check_defined:true env e
+        in
         let parent_lenv = env.lenv in
         let (env, te1, ty1) = Expr.update_array_type pos env e1 Lvalue in
         let env = might_throw ~join_pos:p env in
@@ -11092,7 +11234,7 @@ let file_attributes env file_attrs =
 
 let expr ?expected env e =
   Env.with_origin2 env Decl_counters.Body (fun env ->
-      Expr.expr ?expected ~accept_using_var:false env e)
+      Expr.expr ?expected ~accept_using_var:false ~check_defined:true env e)
 
 let expr_with_pure_coeffects ?expected env e =
   Env.with_origin2 env Decl_counters.Body (fun env ->

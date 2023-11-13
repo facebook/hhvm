@@ -588,11 +588,14 @@ class mstch_java_struct : public mstch_struct {
     return get_java_swift_name(message_field);
   }
   // we can only override Throwable's getMessage() if:
-  //  1 - there is provided 'message' annotation
-  //  2 - there is no struct field named 'message'
-  //      (since it will generate getMessage() as well)
+  // 1 - there is either provided `'message'` annotation or
+  //  `@thrift.ErrorMessage` annotation.
+  // 2 - there is no struct field named 'message' (since it
+  //  will generate `getMessage()` method)
   mstch::node needs_exception_message() {
-    return struct_->is_exception() && struct_->has_annotation("message") &&
+    return struct_->is_exception() &&
+        dynamic_cast<const t_exception&>(*struct_).get_message_field() !=
+        nullptr &&
         struct_->get_field_by_name("message") == nullptr;
   }
 };

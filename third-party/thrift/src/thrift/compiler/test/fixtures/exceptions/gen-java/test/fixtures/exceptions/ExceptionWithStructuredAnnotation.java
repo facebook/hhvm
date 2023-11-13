@@ -103,7 +103,11 @@ public final class ExceptionWithStructuredAnnotation extends org.apache.thrift.T
     
     @com.facebook.swift.codec.ThriftField(value=2, name="error_code", requiredness=Requiredness.NONE)
     public int getErrorCode() { return errorCode; }
-    
+        
+    @java.lang.Override
+    public String getMessage() {
+      return messageField;
+    }
     
     public static com.facebook.thrift.payload.Reader<ExceptionWithStructuredAnnotation> asReader() {
       return ExceptionWithStructuredAnnotation::read0;

@@ -719,19 +719,6 @@ and default_subtype
             ->
             valid env
           | _ -> default ~sub_supportdyn env)
-      (* Special case if Tany is in an intersection on the left:
-       *   t1 & ... & _ & ... & tn <: u
-       * simplifies to
-       *   _ <: u
-       *)
-      | (r, Tintersection tyl) when List.exists tyl ~f:is_any ->
-        simplify_subtype_i
-          ~this_ty
-          ~sub_supportdyn:None
-          ~subtype_env
-          (LoclType (mk (r, Typing_defs.make_tany ())))
-          ty_super
-          env
       | (r_sub, Tintersection tyl) ->
         (* A & B <: C iif A <: C | !B *)
         (match find_type_with_exact_negation env tyl with
@@ -1335,10 +1322,6 @@ and simplify_subtype_i
                    || String.equal x SN.Collections.cConstVector ->
               env |> destructure_array ~sub_supportdyn elt_type
             | (_, Tdynamic) -> env |> destructure_dynamic ty_sub
-            (* TODO: should remove these any cases *)
-            | (r, Tany _) ->
-              let any = mk (r, Typing_defs.make_tany ()) in
-              env |> destructure_array ~sub_supportdyn any
             | (_, (Tunion _ | Tintersection _ | Tgeneric _ | Tvar _)) ->
               (* TODO(T69551141) handle type arguments of Tgeneric? *)
               default_subtype env

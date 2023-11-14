@@ -10155,8 +10155,6 @@ end = struct
     | _ -> None
 
   let check_binop ~check_defined ?expected env outer p bop e1 e2 =
-    let expr = Expr.expr ~check_defined in
-    let raw_expr = Expr.raw_expr ~check_defined in
     let check_e2 checker env e2 =
       match e2 with
       | Either.First expr -> checker env expr
@@ -10165,9 +10163,10 @@ end = struct
     match bop with
     | Ast_defs.QuestionQuestion ->
       let (env, te1, ty1) =
-        raw_expr
+        Expr.raw_expr
           ~lhs_of_null_coalesce:true
           ~accept_using_var:false
+          ~check_defined
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
@@ -10179,9 +10178,10 @@ end = struct
       let lenv1 = env.lenv in
       let (env, te2, ty2) =
         check_e2
-          (expr
+          (Expr.expr
              ?expected
              ~accept_using_var:false
+             ~check_defined
              ~is_using_clause:false
              ~valkind:Other
              ~is_attribute_param:false
@@ -10246,8 +10246,9 @@ end = struct
       | None ->
         let (env, te2, ty2) =
           check_e2
-            (raw_expr
+            (Expr.raw_expr
                ~accept_using_var:false
+               ~check_defined
                ~is_using_clause:false
                ~valkind:Other
                ~is_attribute_param:false
@@ -10271,8 +10272,9 @@ end = struct
     | Ast_defs.Barbar ->
       let c = Ast_defs.(equal_bop bop Ampamp) in
       let (env, te1, _) =
-        expr
+        Expr.expr
           ~accept_using_var:false
+          ~check_defined
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
@@ -10284,8 +10286,9 @@ end = struct
       let (env, _) = Expr.condition env c te1 in
       let (env, te2, _) =
         check_e2
-          (expr
+          (Expr.expr
              ~accept_using_var:false
+             ~check_defined
              ~is_using_clause:false
              ~valkind:Other
              ~is_attribute_param:false
@@ -10301,8 +10304,9 @@ end = struct
         (MakeType.bool (Reason.Rlogic_ret p))
     | _ ->
       let (env, te1, ty1) =
-        raw_expr
+        Expr.raw_expr
           ~accept_using_var:false
+          ~check_defined
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
@@ -10313,8 +10317,9 @@ end = struct
       in
       let (env, te2, ty2) =
         check_e2
-          (raw_expr
+          (Expr.raw_expr
              ~accept_using_var:false
+             ~check_defined
              ~is_using_clause:false
              ~valkind:Other
              ~is_attribute_param:false

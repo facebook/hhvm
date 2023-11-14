@@ -2431,8 +2431,17 @@ module rec Expr : sig
 
   val lvalue : env -> Nast.expr -> env * Tast.expr * locl_ty
 
+  (** Build an environment for the true or false branch of
+  conditional statements. *)
   val condition : env -> bool -> Tast.expr -> env * branch_info
 
+  (** Typechecks a call.
+  Returns in this order the typed expressions for the arguments, for the
+  variadic arguments, the return type, and a boolean indicating whether fake
+  members should be forgotten. If dynamic_func is not None, then we are trying
+  to call the function with dynamic arguments using the fact that is is a SDT
+  function. That is, we have already ruled out trying to call it with just its
+  declared type. *)
   val call :
     expected:ExpectedTy.t option ->
     ?nullsafe:pos option ->
@@ -6024,14 +6033,6 @@ end = struct
       env
     | _ -> env
 
-  (** Typechecks a call.
- * Returns in this order the typed expressions for the arguments, for the
- * variadic arguments, the return type, and a boolean indicating whether fake
- * members should be forgotten. If dynamic_func is not None, then we are trying
- * to call the function with dynamic arguments using the fact that is is a SDT
- * function. That is, we have already ruled out trying to call it with just its
- * declared type.
- *)
   and call
       ~(expected : ExpectedTy.t option)
       ?(nullsafe : Pos.t option = None)
@@ -7036,10 +7037,6 @@ end = struct
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
     env
 
-  (**
- * Build an environment for the true or false branch of
- * conditional statements.
- *)
   and condition env tparamet ((ty, p, e) as te : Tast.expr) =
     match e with
     | Aast.Hole (e, _, _, _) -> condition env tparamet e

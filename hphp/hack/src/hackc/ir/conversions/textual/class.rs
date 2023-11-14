@@ -227,8 +227,15 @@ impl ClassState<'_, '_, '_> {
             } else {
                 let mut parameters = Vec::new();
                 for arg in &attribute.arguments {
-                    textual_todo! {
-                        parameters.push(format!("TODO: {arg:?}"));
+                    match arg.get_string() {
+                        Some(sid) => {
+                            parameters.push(self.unit_state.strings.lookup_bstr(sid).to_string())
+                        }
+                        _ => {
+                            textual_todo! {
+                                parameters.push(format!("TODO: {arg:?}"));
+                            }
+                        }
                     }
                 }
                 tx_attributes.push(FieldAttribute::Parameterized { name, parameters });

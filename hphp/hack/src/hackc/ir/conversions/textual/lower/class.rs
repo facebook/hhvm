@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use ir::instr;
+// use ir::print::print;
 use ir::Attr;
 use ir::Attribute;
 use ir::BaseType;
@@ -23,6 +24,7 @@ use ir::StringInterner;
 use ir::TypeConstant;
 use ir::TypeConstraintFlags;
 use ir::TypeInfo;
+use ir::TypedValue;
 use ir::Visibility;
 use log::trace;
 
@@ -31,6 +33,69 @@ use crate::class::IsStatic;
 /// This indicates a static property that started life as a class constant.
 pub(crate) const INFER_CONSTANT: &str = "constant";
 pub(crate) const INFER_TYPE_CONSTANT: &str = "type_constant";
+
+fn typed_value_into_string(tv: &TypedValue, strings: &Arc<StringInterner>) -> Option<String> {
+    let ostr = tv
+        .get_string()
+        .map(|sid| strings.lookup_bstr(sid).to_string());
+    trace!("tv {:?} -> {:?}", tv, ostr);
+    ostr
+}
+
+fn typed_value_into_strings(tv: &TypedValue, strings: &Arc<StringInterner>) -> Option<Vec<String>> {
+    let ovs = if let TypedValue::Vec(tvs) = tv {
+        tvs.iter()
+            .map(|tv| typed_value_into_string(tv, strings))
+            .collect()
+    } else {
+        None
+    };
+    trace!("tvs {:?} -> {:?}", tv, ovs);
+    ovs
+}
+
+fn compute_tc_attribute(typed_value: &TypedValue, strings: &Arc<StringInterner>) -> Option<String> {
+    match typed_value {
+        TypedValue::Dict(dict) => {
+            let kind_key = ir::ArrayKey::String(strings.intern_str("kind"));
+            dict.get(&kind_key)
+                .and_then(|tv| tv.get_int())
+                .and_then(|i| {
+                    // TODO(dpichardie) Incomplete support for type constant definitions.
+                    // One should add T_int, T_bool, ...
+                    let unresolved: i64 = ir::TypeStructureKind::T_unresolved.into();
+                    let type_access: i64 = ir::TypeStructureKind::T_typeaccess.into();
+                    if i == unresolved {
+                        let class_name = ir::ArrayKey::String(strings.intern_str("classname"));
+                        dict.get(&class_name)
+                            .and_then(|cn| typed_value_into_string(cn, strings))
+                    } else if i == type_access {
+                        let root_name = ir::ArrayKey::String(strings.intern_str("root_name"));
+                        let access_list = ir::ArrayKey::String(strings.intern_str("access_list"));
+                        let root_name = dict
+                            .get(&root_name)
+                            .and_then(|rn| typed_value_into_string(rn, strings));
+                        let access_list = dict
+                            .get(&access_list)
+                            .and_then(|al| typed_value_into_strings(al, strings));
+                        match (root_name, access_list) {
+                            (Some(root), Some(access)) => {
+                                if access.is_empty() {
+                                    Some(root)
+                                } else {
+                                    Some(format!("{}::{}", root, access.join("::")))
+                                }
+                            }
+                            (_, _) => None,
+                        }
+                    } else {
+                        None
+                    }
+                })
+        }
+        _ => None,
+    }
+}
 
 pub(crate) fn lower_class<'a>(mut class: Class<'a>, strings: Arc<StringInterner>) -> Class<'a> {
     if !class.ctx_constants.is_empty() {
@@ -127,10 +192,19 @@ pub(crate) fn lower_class<'a>(mut class: Class<'a>, strings: Arc<StringInterner>
             is_abstract,
         } = tc;
         let name = PropId::from_bytes(&name, &strings);
+        let arguments: Vec<TypedValue> = initializer
+            .as_ref()
+            .and_then(|init| compute_tc_attribute(init, &strings))
+            .map(|s| {
+                let sid = strings.intern_str(s.clone());
+                TypedValue::String(sid)
+            })
+            .into_iter()
+            .collect();
         // Mark the property as originally being a type constant.
         let attributes = vec![Attribute {
             name: ClassId::from_str(INFER_TYPE_CONSTANT, &strings),
-            arguments: Vec::new(),
+            arguments,
         }];
         let mut modifiers = TypeConstraintFlags::TypeConstant;
         if is_abstract {

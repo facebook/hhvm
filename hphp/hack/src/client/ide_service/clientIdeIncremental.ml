@@ -72,27 +72,17 @@ module Batch = struct
       (Relative_path.Set.cardinal changes)
       (Relative_path.Set.choose_opt changes
       |> Option.value_map ~default:"[none]" ~f:Relative_path.suffix);
-    Relative_path.Set.filter changes ~f:(fun path ->
-        not @@ should_update_changed_file path)
-    |> Relative_path.Set.iter ~f:(fun ignored_path ->
-           log
-             "Ignored change to file %s"
-             (Relative_path.to_absolute ignored_path));
+    let popt = Provider_context.get_popt ctx in
+    (* Do a fast parallel decl-parse of all changes *)
+    let start_time = Unix.gettimeofday () in
     (* NOTE: our batch index/file info computation expects only files relative to root. *)
-    let batch_index_benchmark_start = Unix.gettimeofday () in
-    let index_result =
-      let changes_to_update =
-        Relative_path.Set.filter changes ~f:should_update_changed_file
-      in
-      compute_file_info_batch_root_relative_paths_only
-        (Provider_context.get_popt ctx)
-        (Relative_path.Set.elements changes_to_update)
+    let parse_results =
+      Relative_path.Set.filter changes ~f:should_update_changed_file
+      |> Relative_path.Set.elements
+      |> compute_file_info_batch_root_relative_paths_only popt
     in
-    log
-      "Batch index completed in %f seconds"
-      (Unix.gettimeofday () -. batch_index_benchmark_start);
     let changed_file_infos =
-      List.map index_result ~f:(fun (path, new_file_info_with_addendum) ->
+      List.map parse_results ~f:(fun (path, new_file_info_with_addendum) ->
           let old_file_info = Naming_table.get_file_info naming_table path in
           {
             path;
@@ -101,7 +91,7 @@ module Batch = struct
           })
     in
     (* update the reverse-naming-table, which is mutable storage owned by backend *)
-    let update_reverse_naming_table_benchmark_start = Unix.gettimeofday () in
+    let t_update_reverse_nt = Unix.gettimeofday () in
     List.iter
       changed_file_infos
       ~f:(fun { path; new_file_info; old_file_info } ->
@@ -110,12 +100,9 @@ module Batch = struct
           ~path
           ~old_file_info
           ~new_file_info);
-    log
-      "Updated reverse naming table in %f seconds"
-      (Unix.gettimeofday () -. update_reverse_naming_table_benchmark_start);
     (* update the forward-naming-table (file -> symbols) *)
     (* remove old, then add new *)
-    let update_forward_naming_table_benchmark_start = Unix.gettimeofday () in
+    let t_update_forward_nt = Unix.gettimeofday () in
     let naming_table =
       List.fold_left
         changed_file_infos
@@ -126,52 +113,57 @@ module Batch = struct
           | Some _ -> Naming_table.remove naming_table path)
     in
     (* update new *)
+    let paths_with_new_file_info =
+      List.filter_map changed_file_infos ~f:(fun { path; new_file_info; _ } ->
+          Option.map new_file_info ~f:(fun new_file_info ->
+              (path, new_file_info)))
+    in
     let naming_table =
-      let paths_with_new_file_info =
-        List.filter_map changed_file_infos ~f:(fun { path; new_file_info; _ } ->
-            Option.map new_file_info ~f:(fun new_file_info ->
-                (path, new_file_info)))
-      in
       Naming_table.update_many
         naming_table
         (paths_with_new_file_info |> Relative_path.Map.of_list)
     in
-    log
-      "Updated forward naming table in %f seconds"
-      (Unix.gettimeofday () -. update_forward_naming_table_benchmark_start);
     (* update search index *)
     (* remove paths without new file info *)
-    let removing_search_index_files_benchmark_start = Unix.gettimeofday () in
+    let t_si = Unix.gettimeofday () in
+    let paths_without_new_file_info =
+      List.filter changed_file_infos ~f:(fun { new_file_info; _ } ->
+          Option.is_none new_file_info)
+      |> List.map ~f:(fun { path; _ } -> path)
+      |> Relative_path.Set.of_list
+    in
     let sienv =
-      let paths_without_new_file_info =
-        List.filter changed_file_infos ~f:(fun { new_file_info; _ } ->
-            Option.is_none new_file_info)
-        |> List.map ~f:(fun { path; _ } -> path)
-        |> Relative_path.Set.of_list
-      in
       SymbolIndexCore.remove_files ~sienv ~paths:paths_without_new_file_info
     in
-    log
-      "Removed files from search index in %f seconds"
-      (Unix.gettimeofday () -. removing_search_index_files_benchmark_start);
     (* now update paths with new file info *)
-    let updating_search_index_new_files_benchmark_start =
-      Unix.gettimeofday ()
+    let get_addenda_opt (path, new_file_info_with_addenda_opt) =
+      Option.map
+        new_file_info_with_addenda_opt
+        ~f:(fun (_new_file_info, addenda) ->
+          (path, addenda, SearchUtils.TypeChecker))
     in
+    let paths_with_addenda = List.filter_map parse_results ~f:get_addenda_opt in
     let sienv =
-      let get_addenda_opt (path, new_file_info_with_addenda_opt) =
-        Option.map
-          new_file_info_with_addenda_opt
-          ~f:(fun (_new_file_info, addenda) ->
-            (path, addenda, SearchUtils.TypeChecker))
-      in
-      let paths_with_addenda =
-        List.filter_map index_result ~f:get_addenda_opt
-      in
       SymbolIndexCore.update_from_addenda ~sienv ~paths_with_addenda
     in
-    log
-      "Update search index with new files in %f seconds"
-      (Unix.gettimeofday () -. updating_search_index_new_files_benchmark_start);
+
+    let end_time = Unix.gettimeofday () in
+    let telemetry =
+      Telemetry.create ()
+      |> Telemetry.duration
+           ~key:"parse_duration"
+           ~start_time
+           ~end_time:t_update_reverse_nt
+      |> Telemetry.duration
+           ~key:"update_reverse_nt_duration"
+           ~start_time:t_update_reverse_nt
+           ~end_time:t_update_forward_nt
+      |> Telemetry.duration
+           ~key:"update_forward_nt_duration"
+           ~start_time:t_update_forward_nt
+           ~end_time:t_si
+      |> Telemetry.duration ~key:"update_si_duration" ~start_time:t_si ~end_time
+    in
+    log "Update_naming_tables_and_si: %s" (Telemetry.to_string telemetry);
     { naming_table; sienv; changes = changed_file_infos }
 end

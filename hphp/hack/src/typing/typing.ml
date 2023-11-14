@@ -2381,12 +2381,19 @@ module rec Expr : sig
   module Context : sig
     type t = {
       is_using_clause: bool;
+          (** Set to [true] when the subexpression we are typing occurs inside a [using_stmt]. *)
       valkind: Valkind.t;
+          (** Indicates whether the subexpression we are typing appears in lvalue top-level, lvalue subexpression or another position *)
       is_attribute_param: bool;
+          (** Set to [true] when the subexpression we are typing occurs inside a [user_attribute]. *)
       in_await: locl_phase Reason.t_ option;
+          (** Set to [Some] when the subexpression we are typing occurs inside an [Await] expression. *)
       lhs_of_null_coalesce: bool;
+          (** Set to [true] when the subexpression we are typing occurs on the left-hand-side of a [binop] with the [QuestionQuestion] (coalesce) binary operator *)
       accept_using_var: bool;
+          (** Set to [true] when the subexpression we are typing is either a function/method argument, the receiver of a property access or instance method invocation or the scrutinee in a [foreach] statment. When set, [This] and [Lvar] expressions will be checked against in-scope using vars to ensure they don't escape *)
       check_defined: bool;
+          (** Set to [false] when the subexpression is a lvalue we are defining. When true, we raise an error if [Lvar] or [This] expressions are not bound in the environment. *)
     }
 
     val default : t

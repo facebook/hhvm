@@ -62,7 +62,7 @@ ocaml_ffi! {
         filenames: Vec<(RelativePath, Option<Option<Vec<u8>>>)>,
     ) -> Vec<(RelativePath, Option<(FileInfo, Vec<SiAddendum>)>)> {
         let filenames_and_contents = par_read_file_root_only(&root, filenames).unwrap_ocaml();
-        let filenames_and_contents: Vec<_> = filenames_and_contents
+        filenames_and_contents
             .into_par_iter()
             .map(|(relpath, contents)| {
                 let contents = match contents {
@@ -91,11 +91,7 @@ ocaml_ffi! {
 
                 (relpath, Some((file_info, addenda)))
             })
-            .collect();
-        filenames_and_contents.into_iter().map(|(relpath, contents)| {
-            (relpath, contents.map(|(with_hashes, addenda)| {
-                (with_hashes.into(), addenda)}))
-            }).collect()
+            .collect()
     }
 }
 

@@ -78,6 +78,98 @@ pub enum NameType {
 impl TrivialDrop for NameType {}
 arena_deserializer::impl_deserialize_in_arena!(NameType);
 
+/// And here's a version with more detail and still less structure! This
+/// one is good for members as well as top-level symbols. It's used to get
+/// a bit more out of direct-decl-parse, used to populate the search indexer
+/// (e.g. the icon that apepars in autocomplete suggestions).
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep,
+)]
+#[rust_to_ocaml(attr = "deriving (eq, (show { with_path = false }))")]
+#[repr(u8)]
+pub enum SiKind {
+    #[rust_to_ocaml(name = "SI_Class")]
+    SIClass,
+    #[rust_to_ocaml(name = "SI_Interface")]
+    SIInterface,
+    #[rust_to_ocaml(name = "SI_Enum")]
+    SIEnum,
+    #[rust_to_ocaml(name = "SI_Trait")]
+    SITrait,
+    #[rust_to_ocaml(name = "SI_Unknown")]
+    SIUnknown,
+    #[rust_to_ocaml(name = "SI_Mixed")]
+    SIMixed,
+    #[rust_to_ocaml(name = "SI_Function")]
+    SIFunction,
+    #[rust_to_ocaml(name = "SI_Typedef")]
+    SITypedef,
+    #[rust_to_ocaml(name = "SI_GlobalConstant")]
+    SIGlobalConstant,
+    #[rust_to_ocaml(name = "SI_XHP")]
+    SIXHP,
+    #[rust_to_ocaml(name = "SI_Namespace")]
+    SINamespace,
+    #[rust_to_ocaml(name = "SI_ClassMethod")]
+    SIClassMethod,
+    #[rust_to_ocaml(name = "SI_Literal")]
+    SILiteral,
+    #[rust_to_ocaml(name = "SI_ClassConstant")]
+    SIClassConstant,
+    #[rust_to_ocaml(name = "SI_Property")]
+    SIProperty,
+    #[rust_to_ocaml(name = "SI_LocalVariable")]
+    SILocalVariable,
+    #[rust_to_ocaml(name = "SI_Keyword")]
+    SIKeyword,
+    #[rust_to_ocaml(name = "SI_Constructor")]
+    SIConstructor,
+}
+impl TrivialDrop for SiKind {}
+arena_deserializer::impl_deserialize_in_arena!(SiKind);
+
+/// Yet more details. The "is_abstract" and "is_final" are used e.g. for autocomplete
+/// items and to determine whether a type can be suggested e.g. for "$x = new |".
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep,
+)]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "sia_")]
+#[repr(C)]
+pub struct SiAddendum {
+    /// This is expected not to contain the leading namespace backslash! See [Utils.strip_ns].
+    pub name: String,
+    pub kind: SiKind,
+    pub is_abstract: bool,
+    pub is_final: bool,
+}
+
 /// We define two types of positions establishing the location of a given name:
 /// a Full position contains the exact position of a name in a file, and a
 /// File position contains just the file and the type of toplevel entity,

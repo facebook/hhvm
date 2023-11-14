@@ -9,7 +9,7 @@ use std::sync::Mutex;
 use std::time::Instant;
 
 use ocamlrep_custom::Custom;
-use oxidized::search_types::SiAddendum;
+use oxidized::file_info::SiAddendum;
 use relative_path::RelativePath;
 use unwrap_ocaml::UnwrapOcaml;
 

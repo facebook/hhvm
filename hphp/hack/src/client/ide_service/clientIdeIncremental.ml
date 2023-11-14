@@ -21,7 +21,7 @@ module Batch = struct
     bool ->
     Path.t ->
     (Relative_path.t * string option option) list ->
-    (Relative_path.t * (FileInfo.t * SearchTypes.si_addendum list) option) list
+    (Relative_path.t * (FileInfo.t * FileInfo.si_addendum list) option) list
     = "batch_index_hackrs_ffi_root_relative_paths_only"
 
   type changed_file_info = {
@@ -39,8 +39,7 @@ module Batch = struct
   (** For each path, direct decl parse to compute the names and positions in the file. If the file at the path doesn't exist, return [None]. *)
   let compute_file_info_batch_root_relative_paths_only
       (popt : ParserOptions.t) (paths : Relative_path.t list) :
-      (Relative_path.t * (FileInfo.t * SearchTypes.si_addendum list) option)
-      list =
+      (Relative_path.t * (FileInfo.t * FileInfo.si_addendum list) option) list =
     let paths =
       if Disk.is_real_disk then
         List.map paths ~f:(fun path -> (path, None))

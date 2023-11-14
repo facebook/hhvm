@@ -63,7 +63,7 @@ let find_matching_symbols
     ~(query_text : string)
     ~(max_results : int)
     ~(context : autocomplete_type)
-    ~(kind_filter : si_kind option) :
+    ~(kind_filter : FileInfo.si_kind option) :
     SearchTypes.si_item list * SearchTypes.si_complete =
   let is_complete = ref SearchTypes.Complete in
   (*
@@ -74,7 +74,7 @@ let find_matching_symbols
     ( [
         {
           si_name = "Yes_hh_server_is_alive";
-          si_kind = SI_Unknown;
+          si_kind = FileInfo.SI_Unknown;
           si_file = SI_Filehash "0";
           si_fullname = "";
         };
@@ -96,7 +96,7 @@ let find_matching_symbols
               Some
                 {
                   si_name = alias;
-                  si_kind = SI_Namespace;
+                  si_kind = FileInfo.SI_Namespace;
                   si_file = SI_Filehash "0";
                   si_fullname = map;
                 }

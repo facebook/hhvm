@@ -60,6 +60,42 @@ type name_type =
   | Module [@value 5]
 [@@deriving eq, show { with_path = false }, enum, ord]
 
+(** And here's a version with more detail and still less structure! This
+one is good for members as well as top-level symbols. It's used to get
+a bit more out of direct-decl-parse, used to populate the search indexer
+(e.g. the icon that apepars in autocomplete suggestions). *)
+type si_kind =
+  | SI_Class
+  | SI_Interface
+  | SI_Enum
+  | SI_Trait
+  | SI_Unknown
+  | SI_Mixed
+  | SI_Function
+  | SI_Typedef
+  | SI_GlobalConstant
+  | SI_XHP
+  | SI_Namespace
+  | SI_ClassMethod
+  | SI_Literal
+  | SI_ClassConstant
+  | SI_Property
+  | SI_LocalVariable
+  | SI_Keyword
+  | SI_Constructor
+[@@deriving eq, show { with_path = false }]
+
+(** Yet more details. The "is_abstract" and "is_final" are used e.g. for autocomplete
+items and to determine whether a type can be suggested e.g. for "$x = new |". *)
+type si_addendum = {
+  sia_name: string;
+      (** This is expected not to contain the leading namespace backslash! See [Utils.strip_ns]. *)
+  sia_kind: si_kind;
+  sia_is_abstract: bool;
+  sia_is_final: bool;
+}
+[@@deriving show]
+
 (** We define two types of positions establishing the location of a given name:
  * a Full position contains the exact position of a name in a file, and a
  * File position contains just the file and the type of toplevel entity,

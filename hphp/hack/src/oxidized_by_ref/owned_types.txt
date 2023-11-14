@@ -4,6 +4,7 @@ decl_defs::CollectionStyle
 decl_defs::ConsistentKind
 decl_defs::SourceType
 decl_defs::XhpAttr
+file_info::SiKind
 ident::Ident
 lazy::Lazy
 method_flags::MethodFlags

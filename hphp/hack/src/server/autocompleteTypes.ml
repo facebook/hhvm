@@ -26,7 +26,7 @@ type autocomplete_item = {
   res_filter_text: string option;
   res_additional_edits: (string * Ide_api_types.range) list;
   res_fullname: string;
-  res_kind: SearchTypes.si_kind;
+  res_kind: FileInfo.si_kind;
   res_documentation: string option;
 }
 

@@ -14,7 +14,7 @@ use file_info::Id;
 use ocamlrep_caml_builtins::Int64;
 use ocamlrep_ocamlpool::ocaml_ffi;
 use oxidized::decl_parser_options::DeclParserOptions;
-use oxidized::search_types::SiAddendum;
+use oxidized::file_info::SiAddendum;
 use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes;
 use rayon::prelude::*;
 use relative_path::RelativePath;

@@ -33,7 +33,7 @@ let query_class_methods
                   {
                     name;
                     pos = Pos.to_absolute pos;
-                    result_type = SearchTypes.SI_ClassMethod;
+                    result_type = FileInfo.SI_ClassMethod;
                   }
             else
               None)

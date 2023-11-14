@@ -8,8 +8,8 @@ use std::path::PathBuf;
 
 use files_to_ignore::FilesToIgnore;
 use oxidized::decl_parser_options::DeclParserOptions;
+use oxidized::file_info::SiAddendum;
 use oxidized::parser_options::ParserOptions;
-use oxidized::search_types::SiAddendum;
 use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes;
 use rayon::prelude::*;
 use relative_path::RelativePath;

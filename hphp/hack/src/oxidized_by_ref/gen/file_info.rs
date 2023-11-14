@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fb5ff079a89c68380480970d4f614b8b>>
+// @generated SignedSource<<cd131bd25a174898d7259cb82a644f0f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,6 +11,7 @@
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
+use ocamlrep::FromOcamlRep;
 use ocamlrep::FromOcamlRepIn;
 use ocamlrep::ToOcamlRep;
 use ocamlrep_caml_builtins::Int64;
@@ -22,6 +23,101 @@ use serde::Serialize;
 
 #[allow(unused_imports)]
 use crate::*;
+
+/// And here's a version with more detail and still less structure! This
+/// one is good for members as well as top-level symbols. It's used to get
+/// a bit more out of direct-decl-parse, used to populate the search indexer
+/// (e.g. the icon that apepars in autocomplete suggestions).
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, (show { with_path = false }))")]
+#[repr(u8)]
+pub enum SiKind {
+    #[rust_to_ocaml(name = "SI_Class")]
+    SIClass,
+    #[rust_to_ocaml(name = "SI_Interface")]
+    SIInterface,
+    #[rust_to_ocaml(name = "SI_Enum")]
+    SIEnum,
+    #[rust_to_ocaml(name = "SI_Trait")]
+    SITrait,
+    #[rust_to_ocaml(name = "SI_Unknown")]
+    SIUnknown,
+    #[rust_to_ocaml(name = "SI_Mixed")]
+    SIMixed,
+    #[rust_to_ocaml(name = "SI_Function")]
+    SIFunction,
+    #[rust_to_ocaml(name = "SI_Typedef")]
+    SITypedef,
+    #[rust_to_ocaml(name = "SI_GlobalConstant")]
+    SIGlobalConstant,
+    #[rust_to_ocaml(name = "SI_XHP")]
+    SIXHP,
+    #[rust_to_ocaml(name = "SI_Namespace")]
+    SINamespace,
+    #[rust_to_ocaml(name = "SI_ClassMethod")]
+    SIClassMethod,
+    #[rust_to_ocaml(name = "SI_Literal")]
+    SILiteral,
+    #[rust_to_ocaml(name = "SI_ClassConstant")]
+    SIClassConstant,
+    #[rust_to_ocaml(name = "SI_Property")]
+    SIProperty,
+    #[rust_to_ocaml(name = "SI_LocalVariable")]
+    SILocalVariable,
+    #[rust_to_ocaml(name = "SI_Keyword")]
+    SIKeyword,
+    #[rust_to_ocaml(name = "SI_Constructor")]
+    SIConstructor,
+}
+impl TrivialDrop for SiKind {}
+arena_deserializer::impl_deserialize_in_arena!(SiKind);
+
+/// Yet more details. The "is_abstract" and "is_final" are used e.g. for autocomplete
+/// items and to determine whether a type can be suggested e.g. for "$x = new |".
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "sia_")]
+#[repr(C)]
+pub struct SiAddendum<'a> {
+    /// This is expected not to contain the leading namespace backslash! See [Utils.strip_ns].
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub name: &'a str,
+    pub kind: SiKind,
+    pub is_abstract: bool,
+    pub is_final: bool,
+}
+impl<'a> TrivialDrop for SiAddendum<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(SiAddendum<'arena>);
 
 /// We define two types of positions establishing the location of a given name:
 /// a Full position contains the exact position of a name in a file, and a

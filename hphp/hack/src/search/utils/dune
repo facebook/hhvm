@@ -10,6 +10,6 @@
  (name search_types)
  (modules searchTypes)
  (wrapped false)
- (libraries relative_path)
+ (libraries file_info relative_path)
  (preprocess
   (pps ppx_deriving.std)))

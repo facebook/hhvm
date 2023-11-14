@@ -10,7 +10,7 @@ open Hh_prelude
 
 type build_progress
 
-type si_addenda = (Relative_path.t * SearchTypes.si_addendum list) list
+type si_addenda = (Relative_path.t * FileInfo.si_addendum list) list
 
 type build_result = {
   exit_status: int;
@@ -29,7 +29,7 @@ external build :
    represented by exceptions. *)
 external poll_exn :
   build_progress ->
-  (int * (Relative_path.t * SearchTypes.si_addendum list) list * float) option
+  (int * (Relative_path.t * FileInfo.si_addendum list) list * float) option
   = "naming_table_builder_ffi_poll"
 
 let build ~(www : Path.t) ~(custom_hhi_path : Path.t) ~(output : Path.t) :

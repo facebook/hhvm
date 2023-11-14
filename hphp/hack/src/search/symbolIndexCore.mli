@@ -13,14 +13,13 @@ val log_symbol_index_search :
   query_text:string ->
   max_results:int ->
   results:int ->
-  kind_filter:SearchTypes.si_kind option ->
+  kind_filter:FileInfo.si_kind option ->
   start_time:float ->
   caller:string ->
   unit
 
 type paths_with_addenda =
-  (Relative_path.t * SearchTypes.si_addendum list * SearchUtils.file_source)
-  list
+  (Relative_path.t * FileInfo.si_addendum list * SearchUtils.file_source) list
 
 (* FASTER: update from addenda directly *)
 val update_from_addenda :
@@ -36,7 +35,7 @@ val remove_files :
 val get_position_for_symbol :
   Provider_context.t ->
   string ->
-  SearchTypes.si_kind ->
+  FileInfo.si_kind ->
   (Relative_path.t * int * int) option
 
 (* Take an item and produce a position, or none if it cannot be found *)

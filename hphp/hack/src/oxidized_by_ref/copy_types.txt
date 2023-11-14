@@ -56,6 +56,7 @@ errors::FilesT
 errors::FileT
 error_message::Elem
 file_info::Pos
+file_info::SiKind
 i_map::IMap
 i_set::ISet
 ident::Ident
@@ -114,6 +115,7 @@ oxidized::ast_defs::Visibility
 oxidized::decl_defs::SourceType
 oxidized::file_info::Mode
 oxidized::file_info::NameType
+oxidized::file_info::SiKind
 oxidized::naming_types::KindOfType
 oxidized::naming_types::NameKind
 oxidized::typing_defs::ClassConstKind

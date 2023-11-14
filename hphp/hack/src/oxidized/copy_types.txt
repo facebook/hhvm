@@ -82,11 +82,11 @@ patt_error::Callback
 patt_error::ReasonsCallback
 file_info::Mode
 file_info::NameType
+file_info::SiKind
 map_reduce_ffi::MapReducer
 naming_types::KindOfType
 naming_types::NameKind
 saved_state_rollouts::Flag
-search_types::SiKind
 search_types::AutocompleteType
 search_types::SiComplete
 tast::CheckStatus

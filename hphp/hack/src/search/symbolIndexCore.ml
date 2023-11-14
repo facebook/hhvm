@@ -17,7 +17,7 @@ let log_symbol_index_search
     ~(query_text : string)
     ~(max_results : int)
     ~(results : int)
-    ~(kind_filter : si_kind option)
+    ~(kind_filter : FileInfo.si_kind option)
     ~(start_time : float)
     ~(caller : string) : unit =
   (* In quiet mode we don't log anything to either scuba or console *)
@@ -31,7 +31,7 @@ let log_symbol_index_search
     let kind_filter_str =
       match kind_filter with
       | None -> "None"
-      | Some kind -> show_si_kind kind
+      | Some kind -> FileInfo.show_si_kind kind
     in
     let search_provider = descriptive_name_of_provider sienv.sie_provider in
     (* Send information to remote logging system *)
@@ -52,8 +52,7 @@ let log_symbol_index_search
       ~search_provider
 
 type paths_with_addenda =
-  (Relative_path.t * SearchTypes.si_addendum list * SearchUtils.file_source)
-  list
+  (Relative_path.t * FileInfo.si_addendum list * SearchUtils.file_source) list
 
 let update_from_addenda
     ~(sienv : si_env) ~(paths_with_addenda : paths_with_addenda) : si_env =
@@ -89,7 +88,7 @@ let remove_files ~(sienv : SearchUtils.si_env) ~(paths : Relative_path.Set.t) :
 
 (* Fetch best available position information for a symbol *)
 let get_position_for_symbol
-    (ctx : Provider_context.t) (symbol : string) (kind : si_kind) :
+    (ctx : Provider_context.t) (symbol : string) (kind : FileInfo.si_kind) :
     (Relative_path.t * int * int) option =
   (* Symbols can only be found if they are properly namespaced.
    * Even XHP classes must start with a backslash. *)
@@ -105,6 +104,7 @@ let get_position_for_symbol
         let (line, col, _) = Pos.info_pos pos in
         (relpath, line, col))
   in
+  let open FileInfo in
   match kind with
   | SI_XHP
   | SI_Interface

@@ -27,7 +27,7 @@ end
 module Completion_resolve = struct
   type request = {
     fullname: string;
-    kind: SearchTypes.si_kind;
+    kind: FileInfo.si_kind;
   }
 
   type result = {
@@ -117,7 +117,7 @@ type _ t =
       -> AutocompleteTypes.ide_result t
       (** Handles "textDocument/completion" LSP messages *)
   | Completion_resolve_location :
-      Path.t * fullname * location * SearchTypes.si_kind
+      Path.t * fullname * location * FileInfo.si_kind
       -> Completion_resolve.result t
       (** "completionItem/resolve" LSP messages - if we have file/line/column.
       The scenario is that VSCode requests textDocument/completion in A.PHP line 5 col 6,

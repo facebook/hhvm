@@ -34,17 +34,17 @@ let get_tombstone (path : Relative_path.t) : int64 =
 let update_file_from_addenda
     ~(sienv : si_env)
     ~(path : Relative_path.t)
-    ~(addenda : SearchTypes.si_addendum list) : si_env =
+    ~(addenda : FileInfo.si_addendum list) : si_env =
   let tombstone = get_tombstone path in
   let filepath = Relative_path.suffix path in
   let contents : SearchUtils.si_capture =
     List.map addenda ~f:(fun addendum ->
         {
-          sif_name = addendum.sia_name;
-          sif_kind = addendum.sia_kind;
+          sif_name = addendum.FileInfo.sia_name;
+          sif_kind = addendum.FileInfo.sia_kind;
           sif_filepath = filepath;
-          sif_is_abstract = addendum.sia_is_abstract;
-          sif_is_final = addendum.sia_is_final;
+          sif_is_abstract = addendum.FileInfo.sia_is_abstract;
+          sif_is_final = addendum.FileInfo.sia_is_final;
         })
   in
   {
@@ -78,7 +78,7 @@ let search_local_symbols
     ~(query_text : string)
     ~(max_results : int)
     ~(context : autocomplete_type)
-    ~(kind_filter : si_kind option) : si_item list =
+    ~(kind_filter : FileInfo.si_kind option) : si_item list =
   (* case insensitive search, must include namespace, escaped for regex *)
   let query_text_regex_case_insensitive =
     Str.regexp_case_fold (Str.quote query_text)
@@ -88,7 +88,7 @@ let search_local_symbols
       ~(acc : si_item list)
       ~(symbol : si_fullitem)
       ~(context : autocomplete_type)
-      ~(kind_filter : si_kind option)
+      ~(kind_filter : FileInfo.si_kind option)
       ~(path : Relative_path.t) : si_item list =
     let is_valid_match =
       match (context, kind_filter) with
@@ -101,7 +101,7 @@ let search_local_symbols
       | (Acid, _) -> SearchTypes.valid_for_acid symbol.SearchUtils.sif_kind
       | (Actrait_only, _) -> is_si_trait symbol.sif_kind
       | (Ac_workspace_symbol, Some kind_match) ->
-        equal_si_kind symbol.sif_kind kind_match
+        FileInfo.equal_si_kind symbol.sif_kind kind_match
       | (Ac_workspace_symbol, None) -> true
     in
     if

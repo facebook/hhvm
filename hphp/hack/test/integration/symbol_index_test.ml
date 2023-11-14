@@ -45,13 +45,13 @@ let assert_ns_matches (expected_ns : string) (actual : SearchTypes.si_item list)
 
 let assert_autocomplete
     ~(query_text : string)
-    ~(kind : si_kind)
+    ~(kind : FileInfo.si_kind)
     ~(expected : int)
     ~(sienv_ref : si_env ref) : unit =
   let context =
     match kind with
-    | SI_Interface
-    | SI_Enum ->
+    | FileInfo.SI_Interface
+    | FileInfo.SI_Enum ->
       Actype
       (* the `Acid` context rules out interfaces+enums, so we pick one that allows them *)
     | _ -> Acid
@@ -138,40 +138,44 @@ let test_builder_names (harness : Test_harness.t) : bool =
   let sienv_ref = ref sienv in
 
   (* Assert that we can capture all kinds of symbols *)
-  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv_ref;
+  assert_autocomplete
+    ~query_text:"UsesA"
+    ~kind:FileInfo.SI_Class
+    ~expected:1
+    ~sienv_ref;
   assert_autocomplete
     ~query_text:"NoBigTrait"
-    ~kind:SI_Trait
+    ~kind:FileInfo.SI_Trait
     ~expected:1
     ~sienv_ref;
   assert_autocomplete
     ~query_text:"some_long_function_name"
-    ~kind:SI_Function
+    ~kind:FileInfo.SI_Function
     ~expected:1
     ~sienv_ref;
   assert_autocomplete
     ~query_text:"ClassToBeIdentified"
-    ~kind:SI_Class
+    ~kind:FileInfo.SI_Class
     ~expected:1
     ~sienv_ref;
   assert_autocomplete
     ~query_text:"CONST_SOME_COOL_VALUE"
-    ~kind:SI_GlobalConstant
+    ~kind:FileInfo.SI_GlobalConstant
     ~expected:1
     ~sienv_ref;
   assert_autocomplete
     ~query_text:"IMyFooInterface"
-    ~kind:SI_Interface
+    ~kind:FileInfo.SI_Interface
     ~expected:1
     ~sienv_ref;
   assert_autocomplete
     ~query_text:"SomeTypeAlias"
-    ~kind:SI_Typedef
+    ~kind:FileInfo.SI_Typedef
     ~expected:1
     ~sienv_ref;
   assert_autocomplete
     ~query_text:"FbidMapField"
-    ~kind:SI_Enum
+    ~kind:FileInfo.SI_Enum
     ~expected:1
     ~sienv_ref;
 
@@ -181,7 +185,7 @@ let test_builder_names (harness : Test_harness.t) : bool =
    * text for XHP class autocomplete. *)
   assert_autocomplete
     ~query_text:":xhp:helloworld"
-    ~kind:SI_Class
+    ~kind:FileInfo.SI_Class
     ~expected:1
     ~sienv_ref;
 
@@ -215,7 +219,7 @@ let test_docblock_finder (harness : Test_harness.t) : bool =
       ~entry
       ~line:6
       ~column:7
-      ~kind:SI_Trait
+      ~kind:FileInfo.SI_Trait
   in
   assert_docblock_markdown
     [DocblockService.Markdown "This is a docblock for NoBigTrait"]

@@ -37,4 +37,4 @@ val parse_and_hash_decls :
 (** NOTE: this takes input in reverse-lexical-order, and emits FileInfo.t in forward lexical order *)
 val decls_to_fileinfo : Relative_path.t -> parsed_file_with_hashes -> FileInfo.t
 
-val decls_to_addenda : parsed_file_with_hashes -> SearchTypes.si_addendum list
+val decls_to_addenda : parsed_file_with_hashes -> FileInfo.si_addendum list

@@ -395,7 +395,7 @@ let do_glean_symbol_searches
       (string
       * string
       * SearchTypes.autocomplete_type
-      * SearchTypes.si_kind option)
+      * FileInfo.si_kind option)
       list) : unit =
   let handle =
     if dry_run then
@@ -420,10 +420,7 @@ let do_glean_symbol_searches
           "%s [%s,%s]"
           query_text
           (SearchTypes.show_autocomplete_type context)
-          (Option.value_map
-             kind_filter
-             ~default:"*"
-             ~f:SearchTypes.show_si_kind)
+          (Option.value_map kind_filter ~default:"*" ~f:FileInfo.show_si_kind)
       in
       if show_query_text then
         Printf.printf "query_text:\n%s\n\n" query_text_for_show;
@@ -448,7 +445,7 @@ let do_glean_symbol_searches
             in
             Printf.printf
               "[%s] %s - %s\n%!"
-              (SearchTypes.show_si_kind si_kind)
+              (FileInfo.show_si_kind si_kind)
               si_name
               file);
         Printf.printf
@@ -676,7 +673,7 @@ let handle_search ctx sienv ~glean_only ~dry_run filename =
             Printf.printf
               "  %s:%s - %s:%d:%d-%d\n%!"
               name
-              (SearchTypes.show_si_kind result_type)
+              (FileInfo.show_si_kind result_type)
               filename
               line
               start_

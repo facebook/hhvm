@@ -7,12 +7,11 @@
  *
  *)
 open Reordered_argument_collections
-open SearchTypes
 
 type mock_on_find =
   query_text:string ->
   context:SearchTypes.autocomplete_type ->
-  kind_filter:SearchTypes.si_kind option ->
+  kind_filter:FileInfo.si_kind option ->
   SearchTypes.si_item list
 
 (* Known search providers *)
@@ -60,24 +59,25 @@ type ('a, 'b) term = {
 let to_absolute t = { t with pos = Pos.to_absolute t.pos }
 
 let is_si_class = function
-  | SI_Class -> true
+  | FileInfo.SI_Class -> true
   | _ -> false
 
 let is_si_trait = function
-  | SI_Trait -> true
+  | FileInfo.SI_Trait -> true
   | _ -> false
 
 (* Individual result object as known by the autocomplete system *)
-type symbol = (Pos.absolute, si_kind) term
+type symbol = (Pos.absolute, FileInfo.si_kind) term
 
 (* Used by some legacy APIs *)
-type legacy_symbol = (FileInfo.pos, si_kind) term
+type legacy_symbol = (FileInfo.pos, FileInfo.si_kind) term
 
 (* Collected results as known by the autocomplete system *)
 type result = symbol list
 
 (* Determine the best "ty" string for an item *)
-let kind_to_string (kind : si_kind) : string =
+let kind_to_string (kind : FileInfo.si_kind) : string =
+  let open FileInfo in
   match kind with
   | SI_Class -> "class"
   | SI_Interface -> "interface"
@@ -99,7 +99,8 @@ let kind_to_string (kind : si_kind) : string =
   | SI_Constructor -> "constructor"
 
 (* Sigh, yet another string to enum conversion *)
-let string_to_kind (type_ : string) : si_kind option =
+let string_to_kind (type_ : string) : FileInfo.si_kind option =
+  let open FileInfo in
   match type_ with
   | "class" -> Some SI_Class
   | "interface" -> Some SI_Interface
@@ -130,7 +131,7 @@ let string_to_kind (type_ : string) : si_kind option =
 type si_fullitem = {
   (* NOTE: this is expected to have its leading backslash stripped. See [Utils.strip_ns] *)
   sif_name: string;
-  sif_kind: si_kind;
+  sif_kind: FileInfo.si_kind;
   sif_filepath: string;
   sif_is_abstract: bool;
   sif_is_final: bool;

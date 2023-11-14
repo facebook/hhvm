@@ -14,7 +14,7 @@ val count_local_fileinfos : sienv:SearchUtils.si_env -> int
 val update_file_from_addenda :
   sienv:SearchUtils.si_env ->
   path:Relative_path.t ->
-  addenda:SearchTypes.si_addendum list ->
+  addenda:FileInfo.si_addendum list ->
   SearchUtils.si_env
 
 (* Returns an updated env clearing out tracked information for a file *)
@@ -27,7 +27,7 @@ val search_local_symbols :
   query_text:string ->
   max_results:int ->
   context:SearchTypes.autocomplete_type ->
-  kind_filter:SearchTypes.si_kind option ->
+  kind_filter:FileInfo.si_kind option ->
   SearchTypes.si_item list
 
 (* Filter out anything that's been removed locally *)

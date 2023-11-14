@@ -40,7 +40,7 @@ let go
     match Str.split_delim re_colon_colon query_text with
     | [class_name_query; method_query] ->
       (* Fixup the kind filter *)
-      let kind_filter = Some SearchTypes.SI_Class in
+      let kind_filter = Some FileInfo.SI_Class in
       (* Get the class with the most similar name to `class_name_query` *)
       let (candidates, _is_complete) =
         SymbolIndex.find_matching_symbols

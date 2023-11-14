@@ -2216,7 +2216,7 @@ OPTBLD_INLINE void iopThrow(PC&) {
     walkStack([&] (const BTFrame& f) {
       auto const func = f.func();
       if (!func->isBuiltin() &&
-          findCatchHandler(func, f.bcOff()) != kInvalidOffset) {
+          findExceptionHandler(func, f.bcOff()) != kInvalidOffset) {
         markFunctionWithDebuggerIntr(func);
       }
     });

@@ -742,7 +742,7 @@ Flags handle_end_catch(Local& env, const IRInstruction& inst) {
   if (data->teardown != EndCatchData::Teardown::Full
       || inst.func()->isCPPBuiltin()
       || isUnsupportedOpcode
-      || (!isFuncEntry && findCatchHandler(inst.func(), inst.marker().bcOff()) != kInvalidOffset)
+      || (!isFuncEntry && findExceptionHandler(inst.func(), inst.marker().bcOff()) != kInvalidOffset)
   ) {
     FTRACE(5, "      non-reducible EndCatch {}\n", inst.toString());
     return FNone{};

@@ -346,7 +346,7 @@ void emitHandleException(IRGS& env, EndCatchData::CatchMode mode, SSATmp* exc,
 
 void emitThrow(IRGS& env) {
   auto const stackEmpty = spOffBCFromStackBase(env) == spOffEmpty(env) + 1;
-  auto const offset = findCatchHandler(curFunc(env), bcOff(env));
+  auto const offset = findExceptionHandler(curFunc(env), bcOff(env));
   auto const srcTy = topC(env)->type();
   auto const maybeThrowable =
     srcTy.maybe(Type::SubObj(SystemLib::getExceptionClass())) ||

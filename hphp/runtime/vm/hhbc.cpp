@@ -392,7 +392,7 @@ OffsetSet instrSuccOffsets(PC opc, const Func* func) {
   }
 
   if (op == Op::Await || op == Op::Throw) {
-    auto const target = findCatchHandler(func, opc - bcStart);
+    auto const target = findExceptionHandler(func, opc - bcStart);
     if (target != kInvalidOffset) offsetsSet.emplace(target);
   }
 

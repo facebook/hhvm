@@ -51,10 +51,10 @@ constexpr UnwinderResult operator|(UnwinderResult a, UnwinderResult b) {
 void lockObjectWhileUnwinding(PC pc, Stack& stack);
 
 /*
- * Find a catch exception handler for a given raise location if the handler was
+ * Find an exception handler for a given raise location if the handler was
  * found or kInvalidOffset.
  */
-Offset findCatchHandler(const Func* func, Offset raiseOffset);
+Offset findExceptionHandler(const Func* func, Offset raiseOffset);
 
 /*
  * Unwind the exception.

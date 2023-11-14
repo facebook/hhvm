@@ -68,9 +68,9 @@ bool isTailAwait(const IRGS& env, std::vector<Type>& locals) {
     FTRACE(2, "  Function has metadata: {}\n", s_86productAttributionData.get()->data());
     return false;
   }
-  auto const offset = findCatchHandler(func, bcOff(env));
+  auto const offset = findExceptionHandler(func, bcOff(env));
   if (offset != kInvalidOffset) {
-    FTRACE(2, "  Found catch block at offset: {}\n", offset);
+    FTRACE(2, "  Found exception handler at offset: {}\n", offset);
     return false;
   }
 
@@ -489,7 +489,7 @@ void implAwaitFailed(IRGS& env, SSATmp* child, Block* exit) {
     return;
   }
 
-  auto const offset = findCatchHandler(curFunc(env), bcOff(env));
+  auto const offset = findExceptionHandler(curFunc(env), bcOff(env));
   auto const exception = gen(env, LdWHResult, TObj, child);
   popC(env);
   gen(env, IncRef, exception);

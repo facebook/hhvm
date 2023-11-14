@@ -681,7 +681,7 @@ bool endCatchFromInlined(IRGS& env, EndCatchData::CatchMode mode, SSATmp* exc) {
   assertx(mode == EndCatchData::CatchMode::UnwindOnly ||
           mode == EndCatchData::CatchMode::LocalsDecRefd);
 
-  if (findCatchHandler(curFunc(env), bcOff(env)) != kInvalidOffset) {
+  if (findExceptionHandler(curFunc(env), bcOff(env)) != kInvalidOffset) {
     // We are not exiting the frame, as the current opcode has a catch handler.
     // Use the standard EndCatch logic that will have to spill the frame.
     return false;

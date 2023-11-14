@@ -342,6 +342,18 @@ void conjureBeginInlining(IRGS& env,
     return t.admitsSingleVal() ? cns(env, t) : gen(env, Conjure, t);
   };
 
+  // thisType is the context type inside the closure, but beginInlining()'s ctx
+  // is a context given to the prologue.
+  always_assert(thisType != TBottom);
+  auto const ctx = callee->isClosureBody()
+    ? conjure(Type::ExactObj(callee->implCls()))
+    : conjure(thisType);
+
+  // Push $this object to the lockable position.
+  if (callee->cls() && callee->cls()->getCtor() == callee) {
+    push(env, ctx);
+  }
+
   // Push space for out parameters
   for (auto i = 0; i < callee->numInOutParams(); i++) {
     push(env, cns(env, TUninit));
@@ -355,13 +367,6 @@ void conjureBeginInlining(IRGS& env,
   // beginInlining() assumes synced state.
   updateMarker(env);
   env.irb->exceptionStackBoundary();
-
-  // thisType is the context type inside the closure, but beginInlining()'s ctx
-  // is a context given to the prologue.
-  always_assert(thisType != TBottom);
-  auto const ctx = callee->isClosureBody()
-    ? conjure(Type::ExactObj(callee->implCls()))
-    : conjure(thisType);
 
   beginInlining(env, entry, ctx, kInvalidOffset /* asyncEagerOffset */,
                 9 /* cost */, genCalleeFP(env, callee));
@@ -592,6 +597,8 @@ void implEndCatchBlock(IRGS& env, const RegionDesc& calleeRegion) {
 
   auto const inlineFrame = implInlineReturn(env);
   SCOPE_EXIT { pushInlineFrame(env, inlineFrame); };
+
+  emitLockObjOnFrameUnwind(env, curSrcKey(env).pc());
 
   // vmspOffset is unknown at this point due to multiple BeginCatches
   emitHandleException(

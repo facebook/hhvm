@@ -42,6 +42,12 @@ struct IRGS;
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Lock the object on top of the stack if we just unwound a constructor
+ * frame called using FCallCtor with the LockWhileUnwinding flag.
+ */
+void emitLockObjOnFrameUnwind(IRGS& env, PC pc);
+
 Type callReturnType(const Func* callee);
 Type awaitedCallReturnType(const Func* callee);
 Type callOutType(const Func* callee, uint32_t index);

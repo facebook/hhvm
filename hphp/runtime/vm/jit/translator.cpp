@@ -788,6 +788,11 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, SBInvOffset bcSPOff) {
 
     switch (ni.op()) {
       case Op::FCallCtor:
+        inputs.emplace_back(Location::Stack { stackOff-- });
+        if (fca.lockWhileUnwinding()) {
+          inputs.emplace_back(Location::Stack { stackOff-- });
+        }
+        break;
       case Op::FCallObjMethod:
       case Op::FCallObjMethodD:
         inputs.emplace_back(Location::Stack { stackOff-- });

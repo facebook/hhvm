@@ -1599,6 +1599,16 @@ void emitFCallCtor(IRGS& env, FCallArgs fca, const StringData* clsHint) {
   prepareAndCallProfiled(env, callee, fca, obj, false, false);
 }
 
+void emitLockObjOnFrameUnwind(IRGS& env, PC pc) {
+  auto const op = decode_op(pc);
+  if (LIKELY(op != OpFCallCtor)) return;
+  auto fca = decodeFCallArgs(op, pc, nullptr /* StringDecoder */);
+  if (!fca.lockWhileUnwinding()) return;
+
+  auto const obj = gen(env, AssertType, TObj, topC(env));
+  gen(env, LockObj, obj);
+}
+
 void emitLockObj(IRGS& env) {
   auto obj = topC(env);
   if (!obj->isA(TObj)) PUNT(LockObj-NonObj);

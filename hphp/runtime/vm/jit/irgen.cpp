@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/dce.h"
+#include "hphp/runtime/vm/jit/irgen-call.h"
 #include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
@@ -138,6 +139,10 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
           return 0;
       }
     }();
+    auto const body = [&]() {
+      if (!inst->is(Call, CallFuncEntry, InlineSideExit)) return;
+      emitLockObjOnFrameUnwind(env, inst->marker().sk().pc());
+    };
     auto const catchMode = [&]() {
       if (inst->is(ReturnHook,
                    SuspendHookAwaitEF,
@@ -149,7 +154,7 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
       return EndCatchData::CatchMode::UnwindOnly;
     }();
     inst->setTaken(
-      makeCatchBlock(env, []{}, catchMode, offsetToAdjustSPForCall));
+      makeCatchBlock(env, body, catchMode, offsetToAdjustSPForCall));
   }
 
   if (inst->mayRaiseError()) {

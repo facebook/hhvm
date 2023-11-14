@@ -229,7 +229,6 @@ tc_unwind_personality(int version,
            g_unwind_rds->exn.left()->kindIsValid()) ||
           g_unwind_rds->exn.right() ||
           (g_unwind_rds->exn.isNull() && ism));
-  g_unwind_rds->isFirstFrame = true;
 
   // In theory, the unwind API will let us set registers in the frame before
   // executing our landing pad. In practice, trying to use their recommended
@@ -277,10 +276,6 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp, bool teardown) {
     auto savedRip = reinterpret_cast<TCA>(fp->m_savedRip);
 
     regState() = VMRegState::CLEAN;
-    if (!g_unwind_rds->exn.isNull() && !g_unwind_rds->isFirstFrame) {
-      lockObjectWhileUnwinding(vmpc(), vmStack());
-    }
-    g_unwind_rds->isFirstFrame = false;
 
     if (isVMFrame(fp)) {
       ITRACE(2, "fp {} {}, sfp {} {}\n",

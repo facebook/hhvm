@@ -59,10 +59,6 @@ struct UnwindRDS {
    * to somewhere else in the TC, rather than resuming the unwind process. */
   bool doSideExit;
 
-  /* Indicates whether this is the first frame the unwinder will unwind
-   */
-  bool isFirstFrame;
-
   /* The instruction pointer that async functions will use to return to
    */
   TCA savedRip;

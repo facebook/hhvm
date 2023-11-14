@@ -2378,15 +2378,6 @@ module Valkind = struct
 end
 
 module rec Expr : sig
-  module Config : sig
-    type t = {
-      accept_using_var: bool;
-      check_defined: bool;
-    }
-
-    val default : t
-  end
-
   module Context : sig
     type t = {
       is_using_clause: bool;
@@ -2394,6 +2385,8 @@ module rec Expr : sig
       is_attribute_param: bool;
       in_await: locl_phase Reason.t_ option;
       lhs_of_null_coalesce: bool;
+      accept_using_var: bool;
+      check_defined: bool;
     }
 
     val default : t
@@ -2401,7 +2394,6 @@ module rec Expr : sig
 
   val expr :
     expected:ExpectedTy.t option ->
-    config:Config.t ->
     ctxt:Context.t ->
     env ->
     Nast.expr ->
@@ -2415,7 +2407,6 @@ module rec Expr : sig
 
   val raw_expr :
     expected:ExpectedTy.t option ->
-    config:Config.t ->
     ctxt:Context.t ->
     env ->
     Nast.expr ->
@@ -2423,7 +2414,6 @@ module rec Expr : sig
 
   val exprs :
     expected:ExpectedTy.t option ->
-    config:Config.t ->
     ctxt:Context.t ->
     env ->
     Nast.expr list ->
@@ -2493,15 +2483,6 @@ module rec Expr : sig
     Valkind.t ->
     env * Tast.expr * locl_ty
 end = struct
-  module Config = struct
-    type t = {
-      accept_using_var: bool;
-      check_defined: bool;
-    }
-
-    let default = { accept_using_var = false; check_defined = true }
-  end
-
   module Context = struct
     type t = {
       is_using_clause: bool;
@@ -2509,6 +2490,8 @@ end = struct
       is_attribute_param: bool;
       in_await: locl_phase Reason.t_ option;
       lhs_of_null_coalesce: bool;
+      accept_using_var: bool;
+      check_defined: bool;
     }
 
     let default =
@@ -2518,6 +2501,8 @@ end = struct
         is_attribute_param = false;
         in_await = None;
         lhs_of_null_coalesce = false;
+        accept_using_var = false;
+        check_defined = true;
       }
   end
 
@@ -2553,8 +2538,7 @@ end = struct
         (env2, err2, true)
     end
 
-  let rec expr
-      ~(expected : ExpectedTy.t option) ~config ~ctxt env ((_, p, _) as e) =
+  let rec expr ~(expected : ExpectedTy.t option) ~ctxt env ((_, p, _) as e) =
     try
       begin
         match expected with
@@ -2573,7 +2557,6 @@ end = struct
       end;
       raw_expr
         ~expected
-        ~config
         ~ctxt:Context.{ ctxt with lhs_of_null_coalesce = false }
         env
         e
@@ -2592,21 +2575,26 @@ end = struct
     let pure = MakeType.mixed (Reason.Rwitness p) in
     let (env, (te, ty)) =
       with_special_coeffects env pure pure @@ fun env ->
-      expr env e ~expected ~config:Config.default ~ctxt:Context.default
-      |> triple_to_pair
+      expr env e ~expected ~ctxt:Context.default |> triple_to_pair
     in
     (env, te, ty)
 
-  and raw_expr ~expected ~config ~ctxt env e =
+  and raw_expr ~expected ~ctxt env e =
     let (_, p, _) = e in
     debug_last_pos := p;
-    expr_ ~expected ~config ~ctxt env e
+    expr_ ~expected ~ctxt env e
 
   and lvalue env e =
     expr_
       ~expected:None
-      ~config:Config.{ check_defined = false; accept_using_var = false }
-      ~ctxt:Context.{ default with valkind = Valkind.Lvalue }
+      ~ctxt:
+        Context.
+          {
+            default with
+            valkind = Valkind.Lvalue;
+            check_defined = false;
+            accept_using_var = false;
+          }
       env
       e
 
@@ -2622,9 +2610,7 @@ end = struct
    * look for sketchy null checks in the condition. *)
   (* TODO TAST: type refinement should be made explicit in the typed AST *)
   and eif env ~(expected : ExpectedTy.t option) ~in_await p c e1 e2 =
-    let (env, tc, tyc) =
-      raw_expr ~expected:None ~config:Config.default ~ctxt:Context.default env c
-    in
+    let (env, tc, tyc) = raw_expr ~expected:None ~ctxt:Context.default env c in
     let parent_lenv = env.lenv in
     let (env, _) = condition env true tc in
     let (env, te1, ty1) =
@@ -2636,12 +2622,7 @@ end = struct
         (env, None, ty)
       | Some e1 ->
         let (env, te1, ty1) =
-          expr
-            ~expected
-            ~config:Config.default
-            ~ctxt:Context.{ default with in_await }
-            env
-            e1
+          expr ~expected ~ctxt:Context.{ default with in_await } env e1
         in
         (env, Some te1, ty1)
     in
@@ -2649,31 +2630,25 @@ end = struct
     let env = { env with lenv = parent_lenv } in
     let (env, _) = condition env false tc in
     let (env, te2, ty2) =
-      expr
-        ~expected
-        ~config:Config.default
-        ~ctxt:Context.{ default with in_await }
-        env
-        e2
+      expr ~expected ~ctxt:Context.{ default with in_await } env e2
     in
     let lenv2 = env.lenv in
     let env = LEnv.union_lenvs ~join_pos:p env parent_lenv lenv1 lenv2 in
     let (env, ty) = Union.union ~approx_cancel_neg:true env ty1 ty2 in
     make_result env p (Aast.Eif (tc, te1, te2)) ty
 
-  and exprs ~expected ~config ~ctxt env el =
+  and exprs ~expected ~ctxt env el =
     match el with
     | [] -> (env, [], [])
     | e :: el ->
       let (env, te, ty) =
         expr
           ~expected
-          ~config
           ~ctxt:Context.{ ctxt with is_using_clause = false; in_await = None }
           env
           e
       in
-      let (env, tel, tyl) = exprs ~expected ~config ~ctxt env el in
+      let (env, tel, tyl) = exprs ~expected ~ctxt env el in
       (env, te :: tel, ty :: tyl)
 
   and argument_list_exprs expr_cb env el =
@@ -2689,15 +2664,12 @@ end = struct
     | ([], _) -> (env, [], [])
     | (e :: el, expected_ty :: expected_tyl) ->
       let expected = Some (ExpectedTy.make pos ur expected_ty) in
-      let (env, te, ty) =
-        expr ~expected ~config:Config.default ~ctxt:Context.default env e
-      in
+      let (env, te, ty) = expr ~expected ~ctxt:Context.default env e in
       let (env, tel, tyl) = exprs_expected (pos, ur, expected_tyl) env el in
       (env, te :: tel, ty :: tyl)
-    | (el, []) ->
-      exprs ~expected:None ~config:Config.default ~ctxt:Context.default env el
+    | (el, []) -> exprs ~expected:None ~ctxt:Context.default env el
 
-  and expr_ ~expected ~config ~ctxt env ((_, p, e) as outer) =
+  and expr_ ~expected ~ctxt env ((_, p, e) as outer) =
     let env = Env.open_tyvars env p in
     (fun (env, te, ty) ->
       let (env, ty_err_opt) = Typing_solver.close_tyvars_and_solve env in
@@ -2954,7 +2926,6 @@ end = struct
     | Hole (e, _, _, _) ->
       expr_
         ~expected
-        ~config
         ~ctxt:Context.{ ctxt with is_attribute_param = false }
         env
         e
@@ -3158,10 +3129,14 @@ end = struct
       let (env, te, ty) =
         expr
           ~expected:None
-          ~config:Config.{ config with accept_using_var = false }
           ~ctxt:
             Context.
-              { default with is_attribute_param = ctxt.is_attribute_param }
+              {
+                default with
+                is_attribute_param = ctxt.is_attribute_param;
+                accept_using_var = false;
+                check_defined = ctxt.check_defined;
+              }
           env
           e
       in
@@ -3206,9 +3181,9 @@ end = struct
         Typing_error_utils.add_typing_error
           ~env
           Typing_error.(expr_tree @@ Primary.Expr_tree.This_var_in_expr_tree p);
-      if not config.Config.accept_using_var then check_escaping_var env (p, this);
+      if not ctxt.Context.accept_using_var then check_escaping_var env (p, this);
       let ty =
-        if config.Config.check_defined then
+        if ctxt.Context.check_defined then
           Env.get_local_check_defined env (p, this)
         else
           Env.get_local env this
@@ -3244,10 +3219,14 @@ end = struct
         let (env, te, ty) =
           expr
             ~expected:None
-            ~config:Config.{ config with accept_using_var = false }
             ~ctxt:
               Context.
-                { default with is_attribute_param = ctxt.is_attribute_param }
+                {
+                  default with
+                  is_attribute_param = ctxt.is_attribute_param;
+                  accept_using_var = false;
+                  check_defined = ctxt.check_defined;
+                }
             env
             e
         in
@@ -3467,9 +3446,9 @@ end = struct
       let env = might_throw ~join_pos:p env in
       make_result env p (Aast.Dollardollar id) ty.Typing_local_types.ty
     | Lvar ((_, x) as id) ->
-      if not config.Config.accept_using_var then check_escaping_var env id;
+      if not ctxt.Context.accept_using_var then check_escaping_var env id;
       let ty =
-        if config.Config.check_defined then
+        if ctxt.Context.check_defined then
           Env.get_local_check_defined env id
         else
           Env.get_local env x
@@ -3486,10 +3465,14 @@ end = struct
         | _ ->
           exprs
             ~expected:None
-            ~config:Config.{ config with accept_using_var = false }
             ~ctxt:
               Context.
-                { default with is_attribute_param = ctxt.is_attribute_param }
+                {
+                  default with
+                  is_attribute_param = ctxt.is_attribute_param;
+                  accept_using_var = false;
+                  check_defined = ctxt.check_defined;
+                }
             env
             el
       in
@@ -3511,10 +3494,14 @@ end = struct
           | _ ->
             exprs
               ~expected:None
-              ~config:Config.{ config with accept_using_var = false }
               ~ctxt:
                 Context.
-                  { default with is_attribute_param = ctxt.is_attribute_param }
+                  {
+                    default with
+                    is_attribute_param = ctxt.is_attribute_param;
+                    accept_using_var = false;
+                    check_defined = ctxt.check_defined;
+                  }
               env
               el)
       in
@@ -3600,8 +3587,14 @@ end = struct
       let (env, te2, ty2) =
         expr
           ~expected:None
-          ~config:Config.{ config with accept_using_var = false }
-          ~ctxt:Context.{ default with is_attribute_param }
+          ~ctxt:
+            Context.
+              {
+                default with
+                is_attribute_param;
+                accept_using_var = false;
+                check_defined = ctxt.check_defined;
+              }
           env
           e2
       in
@@ -3635,10 +3628,14 @@ end = struct
         argument_list_exprs
           (expr
              ~expected:None
-             ~config:Config.{ config with accept_using_var = true }
              ~ctxt:
                Context.
-                 { default with is_attribute_param = ctxt.is_attribute_param })
+                 {
+                   default with
+                   is_attribute_param = ctxt.is_attribute_param;
+                   accept_using_var = true;
+                   check_defined = ctxt.check_defined;
+                 })
           env
           args
       in
@@ -3711,7 +3708,7 @@ end = struct
       make_result env p e fty
     | Binop { bop; lhs = e1; rhs = e2 } ->
       Binop.check_binop
-        ~check_defined:config.Config.check_defined
+        ~check_defined:ctxt.Context.check_defined
         ~expected
         env
         outer
@@ -3734,10 +3731,14 @@ end = struct
       let (env, te1, ty1) =
         expr
           ~expected:None
-          ~config:Config.{ config with accept_using_var = false }
           ~ctxt:
             Context.
-              { default with is_attribute_param = ctxt.is_attribute_param }
+              {
+                default with
+                is_attribute_param = ctxt.is_attribute_param;
+                accept_using_var = false;
+                check_defined = ctxt.check_defined;
+              }
           env
           e1
       in
@@ -3755,10 +3756,14 @@ end = struct
       let (env, te2, ty2) =
         expr
           ~expected:None
-          ~config:Config.{ config with accept_using_var = false }
           ~ctxt:
             Context.
-              { default with is_attribute_param = ctxt.is_attribute_param }
+              {
+                default with
+                is_attribute_param = ctxt.is_attribute_param;
+                accept_using_var = false;
+                check_defined = ctxt.check_defined;
+              }
           env
           e2
       in
@@ -3781,10 +3786,14 @@ end = struct
       let (env, te, ty) =
         raw_expr
           ~expected:None
-          ~config:Config.{ config with accept_using_var = false }
           ~ctxt:
             Context.
-              { default with is_attribute_param = ctxt.is_attribute_param }
+              {
+                default with
+                is_attribute_param = ctxt.is_attribute_param;
+                accept_using_var = false;
+                check_defined = ctxt.check_defined;
+              }
           env
           e
       in
@@ -3856,10 +3865,14 @@ end = struct
       let (env, _, ty) =
         expr
           ~expected:None
-          ~config:Config.{ config with accept_using_var = false }
           ~ctxt:
             Context.
-              { default with is_attribute_param = ctxt.is_attribute_param }
+              {
+                default with
+                is_attribute_param = ctxt.is_attribute_param;
+                accept_using_var = false;
+                check_defined = ctxt.check_defined;
+              }
           env
           local
       in
@@ -3895,10 +3908,14 @@ end = struct
       let (env, tm, _) =
         expr
           ~expected:None
-          ~config:Config.{ config with accept_using_var = false }
           ~ctxt:
             Context.
-              { default with is_attribute_param = ctxt.is_attribute_param }
+              {
+                default with
+                is_attribute_param = ctxt.is_attribute_param;
+                accept_using_var = false;
+                check_defined = ctxt.check_defined;
+              }
           env
           m
       in
@@ -3924,10 +3941,14 @@ end = struct
       let (env, _, ty) =
         expr
           ~expected:None
-          ~config:Config.{ config with accept_using_var = false }
           ~ctxt:
             Context.
-              { default with is_attribute_param = ctxt.is_attribute_param }
+              {
+                default with
+                is_attribute_param = ctxt.is_attribute_param;
+                accept_using_var = false;
+                check_defined = ctxt.check_defined;
+              }
           env
           local
       in
@@ -3935,10 +3956,14 @@ end = struct
       let (env, t_lhs, _) =
         expr
           ~expected:None
-          ~config:Config.{ config with accept_using_var = true }
           ~ctxt:
             Context.
-              { default with is_attribute_param = ctxt.is_attribute_param }
+              {
+                default with
+                is_attribute_param = ctxt.is_attribute_param;
+                accept_using_var = true;
+                check_defined = ctxt.check_defined;
+              }
           env
           e
       in
@@ -3954,10 +3979,14 @@ end = struct
       let (env, te1, ty1) =
         expr
           ~expected:None
-          ~config:Config.{ config with accept_using_var = true }
           ~ctxt:
             Context.
-              { default with is_attribute_param = ctxt.is_attribute_param }
+              {
+                default with
+                is_attribute_param = ctxt.is_attribute_param;
+                accept_using_var = true;
+                check_defined = ctxt.check_defined;
+              }
           env
           e1
       in
@@ -4038,10 +4067,14 @@ end = struct
       let (env, te1, ty1) =
         expr
           ~expected:None
-          ~config:Config.{ config with accept_using_var = true }
           ~ctxt:
             Context.
-              { default with is_attribute_param = ctxt.is_attribute_param }
+              {
+                default with
+                is_attribute_param = ctxt.is_attribute_param;
+                accept_using_var = true;
+                check_defined = ctxt.check_defined;
+              }
           env
           e1
       in
@@ -4060,10 +4093,14 @@ end = struct
       let (env, te2, _) =
         expr
           ~expected:None
-          ~config:Config.{ config with accept_using_var = false }
           ~ctxt:
             Context.
-              { default with is_attribute_param = ctxt.is_attribute_param }
+              {
+                default with
+                is_attribute_param = ctxt.is_attribute_param;
+                accept_using_var = false;
+                check_defined = ctxt.check_defined;
+              }
           env
           e2
       in
@@ -4146,7 +4183,6 @@ end = struct
       let (env, te, rty) =
         expr
           ~expected:None
-          ~config:Config.{ config with accept_using_var = false }
           ~ctxt:
             Context.
               {
@@ -4154,6 +4190,8 @@ end = struct
                 is_attribute_param = ctxt.is_attribute_param;
                 is_using_clause = ctxt.is_using_clause;
                 in_await = Some (Reason.Rwitness p);
+                accept_using_var = false;
+                check_defined = ctxt.check_defined;
               }
           env
           e
@@ -4165,13 +4203,14 @@ end = struct
       let (env, te, rty) =
         expr
           ~expected:None
-          ~config:Config.{ config with accept_using_var = false }
           ~ctxt:
             Context.
               {
                 default with
                 is_attribute_param = ctxt.is_attribute_param;
                 is_using_clause = ctxt.is_using_clause;
+                accept_using_var = false;
+                check_defined = ctxt.check_defined;
               }
           env
           e
@@ -4214,13 +4253,14 @@ end = struct
       let (env, te, ty2) =
         expr
           ~expected:None
-          ~config:Config.{ config with accept_using_var = false }
           ~ctxt:
             Context.
               {
                 default with
                 is_attribute_param = ctxt.is_attribute_param;
                 in_await = ctxt.in_await;
+                accept_using_var = false;
+                check_defined = ctxt.check_defined;
               }
           env
           e
@@ -4257,10 +4297,14 @@ end = struct
       let (env, te, _) =
         expr
           ~expected:None
-          ~config:Config.{ config with accept_using_var = false }
           ~ctxt:
             Context.
-              { default with is_attribute_param = ctxt.is_attribute_param }
+              {
+                default with
+                is_attribute_param = ctxt.is_attribute_param;
+                accept_using_var = false;
+                check_defined = ctxt.check_defined;
+              }
           env
           e
       in
@@ -4281,10 +4325,14 @@ end = struct
       let (env, te, expr_ty) =
         expr
           ~expected:None
-          ~config:Config.{ config with accept_using_var = false }
           ~ctxt:
             Context.
-              { default with is_attribute_param = ctxt.is_attribute_param }
+              {
+                default with
+                is_attribute_param = ctxt.is_attribute_param;
+                accept_using_var = false;
+                check_defined = ctxt.check_defined;
+              }
           env
           e
       in
@@ -4360,10 +4408,14 @@ end = struct
       let (env, te, expr_ty) =
         expr
           ~expected:None
-          ~config:Config.{ config with accept_using_var = false }
           ~ctxt:
             Context.
-              { default with is_attribute_param = ctxt.is_attribute_param }
+              {
+                default with
+                is_attribute_param = ctxt.is_attribute_param;
+                accept_using_var = false;
+                check_defined = ctxt.check_defined;
+              }
           env
           e
       in
@@ -4411,10 +4463,14 @@ end = struct
         let new_exp = Typing_xhp.rewrite_xml_into_new p sid attrl el in
         expr
           ~expected
-          ~config:Config.{ config with accept_using_var = false }
           ~ctxt:
             Context.
-              { default with is_attribute_param = ctxt.is_attribute_param }
+              {
+                default with
+                is_attribute_param = ctxt.is_attribute_param;
+                accept_using_var = false;
+                check_defined = ctxt.check_defined;
+              }
           env
           new_exp
       in
@@ -4458,10 +4514,14 @@ end = struct
         let (env, et, ty) =
           expr
             ~expected
-            ~config:Config.{ config with accept_using_var = false }
             ~ctxt:
               Context.
-                { default with is_attribute_param = ctxt.is_attribute_param }
+                {
+                  default with
+                  is_attribute_param = ctxt.is_attribute_param;
+                  accept_using_var = false;
+                  check_defined = ctxt.check_defined;
+                }
             env
             e
         in
@@ -4662,9 +4722,7 @@ end = struct
          Cls.get_docs_url cls)
     in
 
-    let (env, te, ty) =
-      expr ~expected:None ~config:Config.default ~ctxt:Context.default env e
-    in
+    let (env, te, ty) = expr ~expected:None ~ctxt:Context.default env e in
     let (env, ty_visitor) = Env.fresh_type env p in
     let (env, ty_res) = Env.fresh_type env p in
     let (env, ty_infer) = Env.fresh_type env p in
@@ -4896,22 +4954,14 @@ end = struct
       match class_types_and_ctor_types with
       | [] ->
         let (env, tel, _) =
-          argument_list_exprs
-            (expr ~expected:None ~config:Config.default ~ctxt:Context.default)
-            env
-            el
+          argument_list_exprs (expr ~expected:None ~ctxt:Context.default) env el
         in
         let (env, typed_unpack_element, _) =
           match unpacked_element with
           | None -> (env, None, MakeType.nothing Reason.Rnone)
           | Some unpacked_element ->
             let (env, e, ty) =
-              expr
-                ~expected:None
-                ~config:Config.default
-                ~ctxt:Context.default
-                env
-                unpacked_element
+              expr ~expected:None ~ctxt:Context.default env unpacked_element
             in
             (env, Some e, ty)
         in
@@ -4943,9 +4993,7 @@ end = struct
       should_forget_fakes )
 
   and array_value ~(expected : ExpectedTy.t option) env x =
-    let (env, te, ty) =
-      expr ~expected ~config:Config.default ~ctxt:Context.default env x
-    in
+    let (env, te, ty) = expr ~expected ~ctxt:Context.default env x in
     (env, (te, ty))
 
   and arraykey_value
@@ -5283,12 +5331,7 @@ end = struct
           match el with
           | [(Ast_defs.Pnormal, original_expr)]
             when TCO.ignore_unsafe_cast (Env.get_tcopt env) ->
-            expr
-              ~expected:None
-              ~config:Config.default
-              ~ctxt:Context.default
-              env
-              original_expr
+            expr ~expected:None ~ctxt:Context.default env original_expr
           | _ ->
             (* first type the `unsafe_cast` as a call, handling arity errors *)
             let (env, fty, tal) = fun_type_of_id env id explicit_targs el in
@@ -5335,8 +5378,13 @@ end = struct
           argument_list_exprs
             (expr
                ~expected:None
-               ~config:Config.{ accept_using_var = true; check_defined = false }
-               ~ctxt:Context.default)
+               ~ctxt:
+                 Context.
+                   {
+                     default with
+                     accept_using_var = true;
+                     check_defined = false;
+                   })
             env
             el
         in
@@ -5353,10 +5401,7 @@ end = struct
       (* Special function `unset` *)
       | unset when String.equal unset SN.PseudoFunctions.unset ->
         let (env, tel, _) =
-          argument_list_exprs
-            (expr ~expected:None ~config:Config.default ~ctxt:Context.default)
-            env
-            el
+          argument_list_exprs (expr ~expected:None ~ctxt:Context.default) env el
         in
         if Option.is_some unpacked_element then
           Typing_error_utils.add_typing_error
@@ -5370,12 +5415,7 @@ end = struct
           match (el, unpacked_element) with
           | ([(Ast_defs.Pnormal, (_, _, Array_get (ea, Some _)))], None) ->
             let (env, _te, ty) =
-              expr
-                ~expected:None
-                ~config:Config.default
-                ~ctxt:Context.default
-                env
-                ea
+              expr ~expected:None ~ctxt:Context.default env ea
             in
             let r = Reason.Rwitness p in
             let tmixed = MakeType.mixed r in
@@ -5526,12 +5566,7 @@ end = struct
                    which defeats the purpose of this extra-logical function.
                 *)
                 let (env, _te, shape_ty) =
-                  expr
-                    ~expected:None
-                    ~config:Config.default
-                    ~ctxt:Context.default
-                    env
-                    shape
+                  expr ~expected:None ~ctxt:Context.default env shape
                 in
                 let (env, shape_ty) =
                   Typing_shapes.remove_key p env shape_ty field
@@ -5624,8 +5659,7 @@ end = struct
       let (env, te1, ty1) =
         expr
           ~expected:None
-          ~config:Config.{ default with accept_using_var = true }
-          ~ctxt:Context.default
+          ~ctxt:Context.{ default with accept_using_var = true }
           env
           e1
       in
@@ -5693,8 +5727,7 @@ end = struct
       let (env, typed_receiver, receiver_ty) =
         expr
           ~expected:None
-          ~config:Config.{ default with accept_using_var = true }
-          ~ctxt:Context.default
+          ~ctxt:Context.{ default with accept_using_var = true }
           env
           receiver
       in
@@ -5830,9 +5863,7 @@ end = struct
     (* Function invocation *)
     | Id id -> dispatch_id env id
     | _ ->
-      let (env, te, fty) =
-        expr ~expected:None ~config:Config.default ~ctxt:Context.default env e
-      in
+      let (env, te, fty) = expr ~expected:None ~ctxt:Context.default env e in
       let ((env, ty_err_opt1), fty) =
         Typing_solver.expand_type_and_solve
           ~description_of_expected:"a function value"
@@ -5900,10 +5931,7 @@ end = struct
           ~env
           Typing_error.(primary @@ Primary.Constructor_no_args p);
       let (env, tel, _tyl) =
-        argument_list_exprs
-          (expr ~expected:None ~config:Config.default ~ctxt:Context.default)
-          env
-          el
+        argument_list_exprs (expr ~expected:None ~ctxt:Context.default) env el
       in
       let should_forget_fakes = true in
       (* Construct a default __construct type *)
@@ -6166,7 +6194,6 @@ end = struct
                   | _ ->
                     expr
                       ~expected:(Some expected_arg_ty)
-                      ~config:Config.default
                       ~ctxt:Context.default
                       env
                       elt
@@ -6215,12 +6242,7 @@ end = struct
           let (env, tel) =
             List.map_env env el ~f:(fun env (pk, elt) ->
                 let (env, te, _ty) =
-                  expr
-                    ~expected:None
-                    ~config:Config.default
-                    ~ctxt:Context.default
-                    env
-                    elt
+                  expr ~expected:None ~ctxt:Context.default env elt
                 in
                 let env =
                   match pk with
@@ -6467,13 +6489,12 @@ end = struct
                   in
                   expr
                     ~expected
-                    ~config:
-                      Config.
+                    ~ctxt:
+                      Context.
                         {
                           default with
                           accept_using_var = get_fp_accept_disposable param;
                         }
-                    ~ctxt:Context.default
                     env
                     e
               in
@@ -6491,12 +6512,7 @@ end = struct
                 used_dynamic )
             | None ->
               let (env, te, ty) =
-                expr
-                  ~expected:None
-                  ~config:Config.default
-                  ~ctxt:Context.default
-                  env
-                  e
+                expr ~expected:None ~ctxt:Context.default env e
               in
               (env, Some (te, ty), false)
           in
@@ -6680,12 +6696,7 @@ end = struct
                          } ))
               in
               let (env, te, ty) =
-                expr
-                  ~expected:None
-                  ~config:Config.default
-                  ~ctxt:Context.default
-                  env
-                  e
+                expr ~expected:None ~ctxt:Context.default env e
               in
               (* Populate the type variables from the expression in the splat *)
               let (env, ty_err_opt) =
@@ -6828,8 +6839,7 @@ end = struct
             argument_list_exprs
               (expr
                  ~expected:None
-                 ~config:Config.{ default with accept_using_var = true }
-                 ~ctxt:Context.default)
+                 ~ctxt:Context.{ default with accept_using_var = true })
               env
               el
           in
@@ -6839,8 +6849,7 @@ end = struct
               let (env, typed_unpacked, type_of_unpacked) =
                 expr
                   ~expected:None
-                  ~config:Config.{ default with accept_using_var = true }
-                  ~ctxt:Context.default
+                  ~ctxt:Context.{ default with accept_using_var = true }
                   env
                   unpacked
               in
@@ -7009,9 +7018,7 @@ end = struct
      * be actually unpacked. *)
     | None -> (env, None)
     | Some e ->
-      let (env, _, ety) =
-        expr ~expected:None ~config:Config.default ~ctxt:Context.default env e
-      in
+      let (env, _, ety) = expr ~expected:None ~ctxt:Context.default env e in
       let (_, p, _) = e in
       let (env, ty) = Env.fresh_type env p in
       let destructure_ty =
@@ -7115,12 +7122,7 @@ end = struct
        * We essentially redo what has been undone in the
        * `Binop (Ampamp|Barbar)` case of `expr` *)
       let (env, _, _) =
-        expr
-          ~expected:None
-          ~config:Config.default
-          ~ctxt:Context.default
-          env
-          (Tast.to_nast_expr e2)
+        expr ~expected:None ~ctxt:Context.default env (Tast.to_nast_expr e2)
       in
       let (env, { lset = lset2; pkgs = pkgs2 }) = condition env tparamet e2 in
       let lset = Local_id.Set.union lset1 lset2 in
@@ -7154,7 +7156,6 @@ end = struct
             let (env, _, _) =
               expr
                 ~expected:None
-                ~config:Config.default
                 ~ctxt:Context.default
                 env
                 (Tast.to_nast_expr e2)
@@ -7229,14 +7230,7 @@ end = struct
   and string2 env idl =
     let (env, tel) =
       List.fold_left idl ~init:(env, []) ~f:(fun (env, tel) x ->
-          let (env, te, ty) =
-            expr
-              ~expected:None
-              ~config:Config.default
-              ~ctxt:Context.default
-              env
-              x
-          in
+          let (env, te, ty) = expr ~expected:None ~ctxt:Context.default env x in
           let (_, p, _) = x in
           if TCO.enable_strict_string_concat_interp (Env.get_tcopt env) then (
             let r = Reason.Rinterp_operand p in
@@ -7326,7 +7320,6 @@ end = struct
       let (env, te1, ty1) =
         raw_expr
           ~expected:None
-          ~config:Config.default
           ~ctxt:Context.{ default with valkind = Valkind.Lvalue_subexpr }
           env
           e1
@@ -7347,7 +7340,6 @@ end = struct
     | Valkind.Other ->
       raw_expr
         ~expected:None
-        ~config:Config.default
         ~ctxt:Context.{ default with lhs_of_null_coalesce }
         env
         e1
@@ -7451,12 +7443,7 @@ end = struct
       (env, Aast.Yield_break)
     | Expr e ->
       let (env, te, _) =
-        Expr.expr
-          ~expected:None
-          ~config:Expr.Config.default
-          ~ctxt:Expr.Context.default
-          env
-          e
+        Expr.expr ~expected:None ~ctxt:Expr.Context.default env e
       in
       let env =
         if TFTerm.typed_expression_exits te then
@@ -7470,12 +7457,7 @@ end = struct
         assert_env_blk ~pos ~at:`Start Aast.Refinement
       in
       let (env, te, _) =
-        Expr.expr
-          ~expected:None
-          ~config:Expr.Config.default
-          ~ctxt:Expr.Context.default
-          env
-          e
+        Expr.expr ~expected:None ~ctxt:Expr.Context.default env e
       in
       let (env, tb1, tb2) =
         branch
@@ -7569,7 +7551,6 @@ end = struct
       let (env, te, rty) =
         Expr.expr
           ~expected
-          ~config:Expr.Config.default
           ~ctxt:
             Expr.Context.{ default with is_using_clause = return_disposable }
           env
@@ -7617,12 +7598,7 @@ end = struct
                   (* The following is necessary in case there is an assignment in the
                    * expression *)
                   let (env, te, _) =
-                    Expr.expr
-                      ~expected:None
-                      ~config:Expr.Config.default
-                      ~ctxt:Expr.Context.default
-                      env
-                      e
+                    Expr.expr ~expected:None ~ctxt:Expr.Context.default env e
                   in
                   let (env, { pkgs; _ }) = Expr.condition env true te in
                   Env.with_packages env pkgs @@ fun env ->
@@ -7636,12 +7612,7 @@ end = struct
               LEnv.update_next_from_conts ~join_pos:pos env [C.Continue; C.Next]
             in
             let (env, te, _) =
-              Expr.expr
-                ~expected:None
-                ~config:Expr.Config.default
-                ~ctxt:Expr.Context.default
-                env
-                e
+              Expr.expr ~expected:None ~ctxt:Expr.Context.default env e
             in
             let (env, _) = Expr.condition env false te in
             let env =
@@ -7668,12 +7639,7 @@ end = struct
                   (* The following is necessary in case there is an assignment in the
                    * expression *)
                   let (env, te, _) =
-                    Expr.expr
-                      ~expected:None
-                      ~config:Expr.Config.default
-                      ~ctxt:Expr.Context.default
-                      env
-                      e
+                    Expr.expr ~expected:None ~ctxt:Expr.Context.default env e
                   in
                   let (env, { lset; pkgs }) = Expr.condition env true te in
                   Env.with_packages env pkgs @@ fun env ->
@@ -7692,12 +7658,7 @@ end = struct
               LEnv.update_next_from_conts ~join_pos:pos env [C.Continue; C.Next]
             in
             let (env, te, _) =
-              Expr.expr
-                ~expected:None
-                ~config:Expr.Config.default
-                ~ctxt:Expr.Context.default
-                env
-                e
+              Expr.expr ~expected:None ~ctxt:Expr.Context.default env e
             in
             let (env, { lset; _ }) = Expr.condition env false te in
             let refinement_map_at_exit = refinement_annot_map env lset in
@@ -7747,12 +7708,7 @@ end = struct
                body
             *)
             let (env, te1, _) =
-              Expr.exprs
-                ~expected:None
-                ~config:Expr.Config.default
-                ~ctxt:Expr.Context.default
-                env
-                e1
+              Expr.exprs ~expected:None ~ctxt:Expr.Context.default env e1
             in
             (* initializer *)
             let env =
@@ -7763,12 +7719,7 @@ end = struct
                   (* The following is necessary in case there is an assignment in the
                    * expression *)
                   let (env, te2, _) =
-                    Expr.expr
-                      ~expected:None
-                      ~config:Expr.Config.default
-                      ~ctxt:Expr.Context.default
-                      env
-                      e2
+                    Expr.expr ~expected:None ~ctxt:Expr.Context.default env e2
                   in
                   let (env, { lset; pkgs }) = Expr.condition env true te2 in
                   Env.with_packages env pkgs @@ fun env ->
@@ -7782,12 +7733,7 @@ end = struct
                   in
                   let join_map = annot_map env in
                   let (env, te3, _) =
-                    Expr.exprs
-                      ~expected:None
-                      ~config:Expr.Config.default
-                      ~ctxt:Expr.Context.default
-                      env
-                      e3
+                    Expr.exprs ~expected:None ~ctxt:Expr.Context.default env e3
                   in
 
                   (* Export the join and refinement environments *)
@@ -7801,12 +7747,7 @@ end = struct
               LEnv.update_next_from_conts ~join_pos:pos env [C.Continue; C.Next]
             in
             let (env, te2, _) =
-              Expr.expr
-                ~expected:None
-                ~config:Expr.Config.default
-                ~ctxt:Expr.Context.default
-                env
-                e2
+              Expr.expr ~expected:None ~ctxt:Expr.Context.default env e2
             in
             let (env, { lset; _ }) = Expr.condition env false te2 in
             let refinement_map_at_exit = refinement_annot_map env lset in
@@ -7822,12 +7763,7 @@ end = struct
       (env, for_st)
     | Switch (((_, pos, _) as e), cl, dfl) ->
       let (env, te, ty) =
-        Expr.expr
-          ~expected:None
-          ~config:Expr.Config.default
-          ~ctxt:Expr.Context.default
-          env
-          e
+        Expr.expr ~expected:None ~ctxt:Expr.Context.default env e
       in
       (* NB: A 'continue' inside a 'switch' block is equivalent to a 'break'.
        * See the note in
@@ -7850,8 +7786,7 @@ end = struct
       let (env, te1, ty1) =
         Expr.expr
           ~expected:None
-          ~config:Expr.Config.{ default with accept_using_var = true }
-          ~ctxt:Expr.Context.default
+          ~ctxt:Expr.Context.{ default with accept_using_var = true }
           env
           e1
       in
@@ -7901,12 +7836,7 @@ end = struct
             ( Expr ((), _, Binop { bop = Ast_defs.Eq _; lhs = _; rhs = e })
             | Expr (((), _, _) as e) ) ) ->
           let (env, te, ty) =
-            Expr.expr
-              ~expected:None
-              ~config:Expr.Config.default
-              ~ctxt:Expr.Context.default
-              env
-              e
+            Expr.expr ~expected:None ~ctxt:Expr.Context.default env e
           in
           (env, Some (te, ty))
         | _ -> (env, None)
@@ -7947,12 +7877,7 @@ end = struct
     | Throw e ->
       let (_, p, _) = e in
       let (env, te, ty) =
-        Expr.expr
-          ~expected:None
-          ~config:Expr.Config.default
-          ~ctxt:Expr.Context.default
-          env
-          e
+        Expr.expr ~expected:None ~ctxt:Expr.Context.default env e
       in
       let (env, ty_err_opt) = coerce_to_throwable p env ty in
       Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
@@ -7981,12 +7906,7 @@ end = struct
           (false, env, None, Typing_make_type.nothing (Reason.Rwitness p))
         | Some exp ->
           let (env, te, ety) =
-            Expr.expr
-              ~expected:None
-              ~config:Expr.Config.default
-              ~ctxt:Expr.Context.default
-              env
-              exp
+            Expr.expr ~expected:None ~ctxt:Expr.Context.default env exp
           in
           (true, env, Some te, ety)
       in
@@ -8142,12 +8062,7 @@ end = struct
         | (((_, pos, _) as e), b) :: rl ->
           let env = initialize_next_cont env in
           let (env, te, _) =
-            Expr.expr
-              ~expected:None
-              ~config:Expr.Config.default
-              ~ctxt:Expr.Context.default
-              env
-              e
+            Expr.expr ~expected:None ~ctxt:Expr.Context.default env e
           in
           let (env, tb) = block env b in
           let last = List.is_empty rl && Option.is_none dfl in
@@ -8301,13 +8216,7 @@ end = struct
               pure
           in
           with_special_coeffects env cap pure @@ fun env ->
-          Expr.expr
-            ~expected
-            ~config:Expr.Config.default
-            ~ctxt:Expr.Context.default
-            env
-            e
-          |> triple_to_pair
+          Expr.expr ~expected ~ctxt:Expr.Context.default env e |> triple_to_pair
         in
         Typing_sequencing.sequence_check_expr e;
         let (env, ty1) =
@@ -8514,12 +8423,7 @@ end = struct
       env
     | Some default ->
       let (env, _te, ty) =
-        Expr.expr
-          ~expected:None
-          ~config:Expr.Config.default
-          ~ctxt:Expr.Context.default
-          env
-          default
+        Expr.expr ~expected:None ~ctxt:Expr.Context.default env default
       in
       Typing_sequencing.sequence_check_expr default;
       let (env, _) = bind_param env (Some ty, param) in
@@ -9312,7 +9216,6 @@ end = struct
           let (env, te, _) =
             Expr.expr
               ~expected:None
-              ~config:Expr.Config.default
               ~ctxt:Expr.Context.{ default with is_attribute_param = true }
               env
               e
@@ -9576,12 +9479,7 @@ end = struct
     end
     | CIexpr ((_, p, _) as e) ->
       let (env, te, ty) =
-        Expr.expr
-          ~expected:None
-          ~config:Expr.Config.default
-          ~ctxt:Expr.Context.default
-          env
-          e
+        Expr.expr ~expected:None ~ctxt:Expr.Context.default env e
       in
       let fold_errs errs =
         let rec aux = function
@@ -9899,8 +9797,9 @@ end = struct
       let (env, te1, ty1) =
         Expr.raw_expr
           ~expected:None
-          ~config:Expr.Config.{ default with check_defined }
-          ~ctxt:Expr.Context.{ default with lhs_of_null_coalesce = true }
+          ~ctxt:
+            Expr.Context.
+              { default with lhs_of_null_coalesce = true; check_defined }
           env
           e1
       in
@@ -9910,8 +9809,7 @@ end = struct
         check_e2
           (Expr.expr
              ~expected
-             ~config:Expr.Config.{ default with check_defined }
-             ~ctxt:Expr.Context.default)
+             ~ctxt:Expr.Context.{ default with check_defined })
           env
           e2
       in
@@ -9974,8 +9872,7 @@ end = struct
           check_e2
             (Expr.raw_expr
                ~expected:None
-               ~config:Expr.Config.{ default with check_defined }
-               ~ctxt:Expr.Context.default)
+               ~ctxt:Expr.Context.{ default with check_defined })
             env
             e2
         in
@@ -9996,8 +9893,7 @@ end = struct
       let (env, te1, _) =
         Expr.expr
           ~expected:None
-          ~config:Expr.Config.{ default with check_defined }
-          ~ctxt:Expr.Context.default
+          ~ctxt:Expr.Context.{ default with check_defined }
           env
           e1
       in
@@ -10007,8 +9903,7 @@ end = struct
         check_e2
           (Expr.expr
              ~expected:None
-             ~config:Expr.Config.{ default with check_defined }
-             ~ctxt:Expr.Context.default)
+             ~ctxt:Expr.Context.{ default with check_defined })
           env
           e2
       in
@@ -10022,8 +9917,7 @@ end = struct
       let (env, te1, ty1) =
         Expr.raw_expr
           ~expected:None
-          ~config:Expr.Config.{ default with check_defined }
-          ~ctxt:Expr.Context.default
+          ~ctxt:Expr.Context.{ default with check_defined }
           env
           e1
       in
@@ -10031,8 +9925,7 @@ end = struct
         check_e2
           (Expr.raw_expr
              ~expected:None
-             ~config:Expr.Config.{ default with check_defined }
-             ~ctxt:Expr.Context.default)
+             ~ctxt:Expr.Context.{ default with check_defined })
           env
           e2
       in
@@ -10146,7 +10039,6 @@ end = struct
       Env.with_inside_expr_tree env et_hint (fun env ->
           Expr.expr
             ~expected:None
-            ~config:Expr.Config.default
             ~ctxt:Expr.Context.default
             env
             et_virtualized_expr)
@@ -10186,12 +10078,7 @@ end = struct
       maketree_with_type_param env p et_runtime_expr ty_virtual
     in
     let (env, t_runtime_expr, ty_runtime_expr) =
-      Expr.expr
-        ~expected:None
-        ~config:Expr.Config.default
-        ~ctxt:Expr.Context.default
-        env
-        runtime_expr
+      Expr.expr ~expected:None ~ctxt:Expr.Context.default env runtime_expr
     in
 
     make_result
@@ -10221,30 +10108,15 @@ end = struct
   let array_field env = function
     | AFvalue ve ->
       let (env, tve, tv) =
-        Expr.expr
-          ~expected:None
-          ~config:Expr.Config.default
-          ~ctxt:Expr.Context.default
-          env
-          ve
+        Expr.expr ~expected:None ~ctxt:Expr.Context.default env ve
       in
       (env, (Aast.AFvalue tve, None, tv))
     | AFkvalue (ke, ve) ->
       let (env, tke, tk) =
-        Expr.expr
-          ~expected:None
-          ~config:Expr.Config.default
-          ~ctxt:Expr.Context.default
-          env
-          ke
+        Expr.expr ~expected:None ~ctxt:Expr.Context.default env ke
       in
       let (env, tve, tv) =
-        Expr.expr
-          ~expected:None
-          ~config:Expr.Config.default
-          ~ctxt:Expr.Context.default
-          env
-          ve
+        Expr.expr ~expected:None ~ctxt:Expr.Context.default env ve
       in
       (env, (Aast.AFkvalue (tke, tve), Some tk, tv))
 end
@@ -10274,12 +10146,7 @@ end = struct
         Typing_xhp.rewrite_attribute_access_into_call pos base_expr null_flavour
       in
       let (env, _, _) =
-        Expr.expr
-          ~expected:None
-          ~config:Expr.Config.default
-          ~ctxt:Expr.Context.default
-          env
-          call_get_attr
+        Expr.expr ~expected:None ~ctxt:Expr.Context.default env call_get_attr
       in
       (* Snap the local env back to avoid manipualting refinements twice. *)
       { env with lenv = base_lenv }
@@ -10294,12 +10161,7 @@ end = struct
   let xhp_spread_attribute env c_onto valexpr sid obj =
     let (_, p, _) = valexpr in
     let (env, te, valty) =
-      Expr.expr
-        ~expected:None
-        ~config:Expr.Config.default
-        ~ctxt:Expr.Context.default
-        env
-        valexpr
+      Expr.expr ~expected:None ~ctxt:Expr.Context.default env valexpr
     in
     let ((env, xhp_req_err_opt), attr_ptys) =
       match c_onto with
@@ -10337,12 +10199,7 @@ end = struct
   let xhp_simple_attribute env id valexpr sid obj =
     let (_, p, _) = valexpr in
     let (env, te, valty) =
-      Expr.expr
-        ~expected:None
-        ~config:Expr.Config.default
-        ~ctxt:Expr.Context.default
-        env
-        valexpr
+      Expr.expr ~expected:None ~ctxt:Expr.Context.default env valexpr
     in
     (* This converts the attribute name to a member name. *)
     let name = ":" ^ snd id in
@@ -10490,7 +10347,6 @@ end = struct
       let (env, te, ty) =
         Expr.expr
           ~expected:None
-          ~config:Expr.Config.default
           ~ctxt:Expr.Context.{ default with is_using_clause = true }
           env
           e
@@ -10522,7 +10378,6 @@ end = struct
       let (env, typed_using_clause, ty) =
         Expr.expr
           ~expected:None
-          ~config:Expr.Config.default
           ~ctxt:Expr.Context.{ default with is_using_clause = true }
           env
           using_clause
@@ -10696,8 +10551,7 @@ end = struct
         let (env, tobj, obj_ty) =
           Expr.expr
             ~expected:None
-            ~config:Expr.Config.{ default with accept_using_var = true }
-            ~ctxt:Expr.Context.default
+            ~ctxt:Expr.Context.{ default with accept_using_var = true }
             env
             obj
         in
@@ -10842,12 +10696,7 @@ end = struct
         (env, te, ty, val_ty_mismatch_opt)
       | (_, pos, Array_get (e1, Some e)) ->
         let (env, te, ty) =
-          Expr.expr
-            ~expected:None
-            ~config:Expr.Config.default
-            ~ctxt:Expr.Context.default
-            env
-            e
+          Expr.expr ~expected:None ~ctxt:Expr.Context.default env e
         in
         let parent_lenv = env.lenv in
         let (env, te1, ty1) =
@@ -11618,12 +11467,7 @@ let file_attributes env file_attrs =
 
 let expr ?expected env e =
   Env.with_origin2 env Decl_counters.Body (fun env ->
-      Expr.expr
-        ~expected
-        ~config:Expr.Config.default
-        ~ctxt:Expr.Context.default
-        env
-        e)
+      Expr.expr ~expected ~ctxt:Expr.Context.default env e)
 
 let expr_with_pure_coeffects ?expected env e =
   Env.with_origin2 env Decl_counters.Body (fun env ->

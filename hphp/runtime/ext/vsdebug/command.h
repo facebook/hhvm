@@ -126,6 +126,8 @@ struct VSCommand {
 
   static const folly::dynamic getDebuggerCapabilities();
 
+  static const folly::dynamic s_emptyArgs;
+
 protected:
 
   // Implemented by subclasses of this object.
@@ -140,8 +142,6 @@ protected:
   Debugger* const m_debugger;
 
   VSCommand(Debugger* debugger, folly::dynamic message);
-
-  static const folly::dynamic s_emptyArgs;
 };
 
 // Common implementation for all the subcommands of VSCommand so we don't have

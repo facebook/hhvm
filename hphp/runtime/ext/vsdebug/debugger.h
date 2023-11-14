@@ -572,6 +572,8 @@ private:
     const int line
   );
 
+  void setClientIdFromCommand(VSCommand* command);
+
   // Returns the request info for the dummy, if one exists or nullptr
   // if there is no client connected.
   DebuggerRequestInfo* getDummyRequestInfo();

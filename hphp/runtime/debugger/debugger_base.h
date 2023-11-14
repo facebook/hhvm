@@ -233,8 +233,9 @@ struct DebuggerUsageLogger {
   virtual void setClientInfo(const std::string& /*username*/, uid_t /*uid*/,
                              pid_t /*clientPid*/) {}
   virtual void
-  log(const std::string& /*mode*/, const std::string& /*sandboxId*/,
-      const std::string& /*cmd*/, const std::string& /*data*/) {}
+  log(const std::string& /*clientId*/, const std::string& /*mode*/,
+      const std::string& /*sandboxId*/, const std::string& /*cmd*/,
+      const std::string& /*data*/) {}
 };
 
 ///////////////////////////////////////////////////////////////////////////////

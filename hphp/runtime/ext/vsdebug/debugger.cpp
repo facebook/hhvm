@@ -1152,6 +1152,11 @@ bool Debugger::executeClientCommand(
       m_pendingEventMessages.clear();
     };
 
+    std::string cmd = command->commandName();
+    if (cmd == "InitializeCommand") {
+      setClientIdFromCommand(command);
+    }
+
     // Log command if logging is enabled.
     logClientCommand(command);
 
@@ -1360,6 +1365,15 @@ void Debugger::dispatchCommandToRequest(
   }
 }
 
+void Debugger::setClientIdFromCommand(VSCommand* command) {
+  always_assert(m_session);
+  const folly::dynamic& message = command->getMessage();
+  const folly::dynamic& args =
+    VSCommand::tryGetObject(message, "arguments", VSCommand::s_emptyArgs);
+  auto clientId = VSCommand::tryGetString(args, "clientID", "unknown");
+  m_session->setClientId(clientId);
+}
+
 void Debugger::logClientCommand(
   VSCommand* command
 ) {
@@ -1375,6 +1389,7 @@ void Debugger::logClientCommand(
   // interesting from a security perspective.
   if (cmd == "CompletionsCommand" ||
       cmd == "ContinueCommand" ||
+      cmd == "ResolveBreakpointsCommand" ||
       cmd == "StackTraceCommand" ||
       cmd == "ThreadsCommand") {
     return;
@@ -1393,7 +1408,7 @@ void Debugger::logClientCommand(
     const std::string mode = RuntimeOption::ServerExecutionMode()
       ? "vsdebug-webserver"
       : "vsdebug-script";
-    logger->log(mode, sandboxId, cmd, data);
+    logger->log(m_session->getClientId(), mode, sandboxId, cmd, data);
     VSDebugLogger::Log(
       VSDebugLogger::LogLevelVerbose,
       "Logging client command: %s: %s\n",

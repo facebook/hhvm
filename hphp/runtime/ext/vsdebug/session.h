@@ -90,6 +90,9 @@ struct DebuggerSession final {
 
   std::string getDebuggerSessionAuth();
 
+  void setClientId(const std::string& clientId) { m_clientId = clientId; }
+  std::string getClientId() const { return m_clientId; }
+
   static constexpr int kCachedVariableKeyAll = -1;
   static constexpr int kCachedVariableKeyServerConsts = 1;
   static constexpr int kCachedVariableKeyUserConsts = 2;
@@ -141,6 +144,8 @@ private:
 
   std::string m_sandboxUser;
   std::string m_sandboxName;
+
+  std::string m_clientId;
 };
 
 }

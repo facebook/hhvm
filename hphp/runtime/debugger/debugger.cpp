@@ -660,7 +660,7 @@ void Debugger::InitUsageLogging() {
 
 void Debugger::UsageLog(const std::string &mode, const std::string &sandboxId,
                         const std::string &cmd, const std::string &data) {
-  if (get().m_usageLogger) get().m_usageLogger->log(mode, sandboxId,
+  if (get().m_usageLogger) get().m_usageLogger->log("hphpd", mode, sandboxId,
                                                     cmd, data);
 }
 

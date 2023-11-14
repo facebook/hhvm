@@ -5220,6 +5220,7 @@ dependencies = [
  "log",
  "naming_special_names_rust",
  "newtype",
+ "regex",
  "strum",
  "textual_macros",
 ]

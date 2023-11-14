@@ -19,5 +19,6 @@ itertools = "0.11.0"
 log = { version = "0.4.17", features = ["kv_unstable", "kv_unstable_std"] }
 naming_special_names_rust = { version = "0.0.0", path = "../../../../../../naming" }
 newtype = { version = "0.0.0", path = "../../../../../../utils/newtype" }
+regex = "1.9.2"
 strum = { version = "0.24", features = ["derive"] }
 textual_macros = { version = "0.0.0", path = "../macros" }

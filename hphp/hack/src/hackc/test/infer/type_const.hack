@@ -36,7 +36,7 @@ class D extends C {
   );
 
   // TEST-CHECK-BAL: define D$static.check3
-  // CHECK: define D$static.check3($this: *D$static, $shape: *HackMixed) : *void {
+  // CHECK: define D$static.check3($this: *D$static, $shape: .const_type="self::TMyShape" *HackMixed) : *void {
   // CHECK: #b0:
   // CHECK:   ret null
   // CHECK: }
@@ -61,7 +61,7 @@ function check1(mixed $a): bool {
 
 
 // TEST-CHECK-BAL: define $root.check2
-// CHECK: define $root.check2($this: *void) : *HackMixed {
+// CHECK: define $root.check2($this: *void) : .const_type="D::TMyShape" *HackMixed {
 // CHECK: local $0: *void, $1: *void
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_new_dict()

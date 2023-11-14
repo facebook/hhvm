@@ -2376,10 +2376,18 @@ let is_lvalue = function
     false
 
 module rec Expr : sig
+  module Config : sig
+    type t = {
+      accept_using_var: bool;
+      check_defined: bool;
+    }
+
+    val default : t
+  end
+
   val expr :
     ?expected:ExpectedTy.t ->
-    accept_using_var:bool ->
-    check_defined:bool ->
+    config:Config.t ->
     is_using_clause:bool ->
     valkind:valkind ->
     is_attribute_param:bool ->
@@ -2393,8 +2401,7 @@ module rec Expr : sig
 
   val raw_expr :
     ?expected:ExpectedTy.t ->
-    accept_using_var:bool ->
-    check_defined:bool ->
+    config:Config.t ->
     is_using_clause:bool ->
     valkind:valkind ->
     is_attribute_param:bool ->
@@ -2406,8 +2413,7 @@ module rec Expr : sig
 
   val exprs :
     ?expected:ExpectedTy.t ->
-    accept_using_var:bool ->
-    check_defined:bool ->
+    config:Config.t ->
     valkind:valkind ->
     is_attribute_param:bool ->
     env ->
@@ -2469,6 +2475,15 @@ module rec Expr : sig
     valkind ->
     env * Tast.expr * locl_ty
 end = struct
+  module Config = struct
+    type t = {
+      accept_using_var: bool;
+      check_defined: bool;
+    }
+
+    let default = { accept_using_var = false; check_defined = true }
+  end
+
   let coerce_nonlike_and_like
       ~coerce_for_op ~coerce env pos reason ty ety ety_like =
     let (env1, err1) =
@@ -2503,8 +2518,7 @@ end = struct
 
   let rec expr
       ?(expected : ExpectedTy.t option)
-      ~accept_using_var
-      ~check_defined
+      ~config
       ~is_using_clause
       ~valkind
       ~is_attribute_param
@@ -2528,10 +2542,9 @@ end = struct
                   ]))
       end;
       raw_expr
-        ~accept_using_var
+        ~config
         ~is_using_clause
         ~valkind
-        ~check_defined
         ~is_attribute_param
         ~in_await
         ~lhs_of_null_coalesce:false
@@ -2557,8 +2570,7 @@ end = struct
         env
         e
         ?expected
-        ~accept_using_var:false
-        ~check_defined:true
+        ~config:Config.default
         ~is_using_clause:false
         ~valkind:Other
         ~is_attribute_param:false
@@ -2569,8 +2581,7 @@ end = struct
 
   and raw_expr
       ?(expected : ExpectedTy.t option)
-      ~accept_using_var
-      ~check_defined
+      ~config
       ~is_using_clause
       ~valkind
       ~is_attribute_param
@@ -2581,11 +2592,10 @@ end = struct
     let (_, p, _) = e in
     debug_last_pos := p;
     expr_
-      ~accept_using_var
-      ~is_using_clause
       ?expected
+      ~config
+      ~is_using_clause
       ~valkind
-      ~check_defined
       ~is_attribute_param
       ~in_await
       ~lhs_of_null_coalesce
@@ -2594,9 +2604,8 @@ end = struct
 
   and lvalue env e =
     expr_
+      ~config:Config.{ check_defined = false; accept_using_var = false }
       ~valkind:Lvalue
-      ~check_defined:false
-      ~accept_using_var:false
       ~is_using_clause:false
       ~is_attribute_param:false
       ~in_await:None
@@ -2618,8 +2627,7 @@ end = struct
   and eif env ~(expected : ExpectedTy.t option) ~in_await p c e1 e2 =
     let (env, tc, tyc) =
       raw_expr
-        ~accept_using_var:false
-        ~check_defined:true
+        ~config:Config.default
         ~is_using_clause:false
         ~valkind:Other
         ~is_attribute_param:false
@@ -2641,8 +2649,7 @@ end = struct
         let (env, te1, ty1) =
           expr
             ?expected
-            ~accept_using_var:false
-            ~check_defined:true
+            ~config:Config.default
             ~is_using_clause:false
             ~valkind:Other
             ~is_attribute_param:false
@@ -2658,8 +2665,7 @@ end = struct
     let (env, te2, ty2) =
       expr
         ?expected
-        ~accept_using_var:false
-        ~check_defined:true
+        ~config:Config.default
         ~is_using_clause:false
         ~valkind:Other
         ~is_attribute_param:false
@@ -2674,8 +2680,7 @@ end = struct
 
   and exprs
       ?(expected : ExpectedTy.t option)
-      ~accept_using_var
-      ~check_defined
+      ~config
       ~valkind
       ~is_attribute_param
       env
@@ -2685,10 +2690,9 @@ end = struct
     | e :: el ->
       let (env, te, ty) =
         expr
-          ~accept_using_var
           ?expected
+          ~config
           ~valkind
-          ~check_defined
           ~is_attribute_param
           ~is_using_clause:false
           ~in_await:None
@@ -2696,14 +2700,7 @@ end = struct
           e
       in
       let (env, tel, tyl) =
-        exprs
-          ~accept_using_var
-          ?expected
-          ~valkind
-          ~check_defined
-          ~is_attribute_param
-          env
-          el
+        exprs ?expected ~config ~valkind ~is_attribute_param env el
       in
       (env, te :: tel, ty :: tyl)
 
@@ -2723,8 +2720,7 @@ end = struct
       let (env, te, ty) =
         expr
           ~expected
-          ~accept_using_var:false
-          ~check_defined:true
+          ~config:Config.default
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
@@ -2736,8 +2732,7 @@ end = struct
       (env, te :: tel, ty :: tyl)
     | (el, []) ->
       exprs
-        ~accept_using_var:false
-        ~check_defined:true
+        ~config:Config.default
         ~valkind:Other
         ~is_attribute_param:false
         env
@@ -2745,8 +2740,7 @@ end = struct
 
   and expr_
       ?(expected : ExpectedTy.t option)
-      ~accept_using_var
-      ~check_defined
+      ~config
       ~is_using_clause
       ~valkind
       ~is_attribute_param
@@ -3010,12 +3004,11 @@ end = struct
     | Hole (e, _, _, _) ->
       expr_
         ?expected
-        ~accept_using_var
+        ~config
         ~is_using_clause
         ~in_await
         ~valkind
         ~is_attribute_param:false
-        ~check_defined
         ~lhs_of_null_coalesce
         env
         e
@@ -3218,9 +3211,8 @@ end = struct
     | Clone e ->
       let (env, te, ty) =
         expr
-          ~check_defined
+          ~config:Config.{ config with accept_using_var = false }
           ~is_attribute_param
-          ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
           ~in_await:None
@@ -3268,9 +3260,9 @@ end = struct
         Typing_error_utils.add_typing_error
           ~env
           Typing_error.(expr_tree @@ Primary.Expr_tree.This_var_in_expr_tree p);
-      if not accept_using_var then check_escaping_var env (p, this);
+      if not config.Config.accept_using_var then check_escaping_var env (p, this);
       let ty =
-        if check_defined then
+        if config.Config.check_defined then
           Env.get_local_check_defined env (p, this)
         else
           Env.get_local env this
@@ -3305,9 +3297,8 @@ end = struct
       ) else
         let (env, te, ty) =
           expr
-            ~check_defined
+            ~config:Config.{ config with accept_using_var = false }
             ~is_attribute_param
-            ~accept_using_var:false
             ~is_using_clause:false
             ~valkind:Other
             ~in_await:None
@@ -3530,9 +3521,9 @@ end = struct
       let env = might_throw ~join_pos:p env in
       make_result env p (Aast.Dollardollar id) ty.Typing_local_types.ty
     | Lvar ((_, x) as id) ->
-      if not accept_using_var then check_escaping_var env id;
+      if not config.Config.accept_using_var then check_escaping_var env id;
       let ty =
-        if check_defined then
+        if config.Config.check_defined then
           Env.get_local_check_defined env id
         else
           Env.get_local env x
@@ -3548,9 +3539,8 @@ end = struct
           exprs_expected (pos, ur, expected_tyl) env el
         | _ ->
           exprs
-            ~check_defined
+            ~config:Config.{ config with accept_using_var = false }
             ~is_attribute_param
-            ~accept_using_var:false
             ~valkind:Other
             env
             el
@@ -3572,9 +3562,8 @@ end = struct
             exprs_expected (pos, ur, expected_tyl) env el
           | _ ->
             exprs
-              ~check_defined
+              ~config:Config.{ config with accept_using_var = false }
               ~is_attribute_param
-              ~accept_using_var:false
               ~valkind:Other
               env
               el)
@@ -3652,9 +3641,8 @@ end = struct
       in
       let (env, te2, ty2) =
         expr
-          ~check_defined
+          ~config:Config.{ config with accept_using_var = false }
           ~is_attribute_param
-          ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
           ~in_await:None
@@ -3690,9 +3678,8 @@ end = struct
       let (env, _tel, tys) =
         argument_list_exprs
           (expr
-             ~check_defined
+             ~config:Config.{ config with accept_using_var = true }
              ~is_attribute_param
-             ~accept_using_var:true
              ~is_using_clause:false
              ~valkind:Other
              ~in_await:None)
@@ -3788,7 +3775,7 @@ end = struct
       make_result env p e fty
     | Binop { bop; lhs = e1; rhs = e2 } ->
       Binop.check_binop
-        ~check_defined
+        ~check_defined:config.Config.check_defined
         ?expected
         env
         outer
@@ -3810,9 +3797,8 @@ end = struct
        *)
       let (env, te1, ty1) =
         expr
-          ~check_defined
+          ~config:Config.{ config with accept_using_var = false }
           ~is_attribute_param
-          ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
           ~in_await:None
@@ -3832,9 +3818,8 @@ end = struct
       in
       let (env, te2, ty2) =
         expr
-          ~check_defined
+          ~config:Config.{ config with accept_using_var = false }
           ~is_attribute_param
-          ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
           ~in_await:None
@@ -3859,9 +3844,8 @@ end = struct
     | Unop (uop, e) ->
       let (env, te, ty) =
         raw_expr
-          ~check_defined
+          ~config:Config.{ config with accept_using_var = false }
           ~is_attribute_param
-          ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
           ~in_await:None
@@ -3930,9 +3914,8 @@ end = struct
       let local = ((), p, Lvar (p, local)) in
       let (env, _, ty) =
         expr
-          ~check_defined
+          ~config:Config.{ config with accept_using_var = false }
           ~is_attribute_param
-          ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
           ~in_await:None
@@ -3970,9 +3953,8 @@ end = struct
       (* Match Obj_get dynamic instance property access behavior *)
       let (env, tm, _) =
         expr
-          ~check_defined
+          ~config:Config.{ config with accept_using_var = false }
           ~is_attribute_param
-          ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
           ~in_await:None
@@ -4000,9 +3982,8 @@ end = struct
       let local = ((), p, Lvar (p, local)) in
       let (env, _, ty) =
         expr
-          ~check_defined
+          ~config:Config.{ config with accept_using_var = false }
           ~is_attribute_param
-          ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
           ~in_await:None
@@ -4012,9 +3993,8 @@ end = struct
       let env = Xhp_attribute.xhp_check_get_attribute p env e y nf in
       let (env, t_lhs, _) =
         expr
-          ~check_defined
+          ~config:Config.{ config with accept_using_var = true }
           ~is_attribute_param
-          ~accept_using_var:true
           ~is_using_clause:false
           ~valkind:Other
           ~in_await:None
@@ -4032,9 +4012,8 @@ end = struct
       in
       let (env, te1, ty1) =
         expr
-          ~check_defined
+          ~config:Config.{ config with accept_using_var = true }
           ~is_attribute_param
-          ~accept_using_var:true
           ~is_using_clause:false
           ~valkind:Other
           ~in_await:None
@@ -4117,9 +4096,8 @@ end = struct
     | Obj_get (e1, e2, nullflavor, prop_or_method) ->
       let (env, te1, ty1) =
         expr
-          ~check_defined
+          ~config:Config.{ config with accept_using_var = true }
           ~is_attribute_param
-          ~accept_using_var:true
           ~is_using_clause:false
           ~valkind:Other
           ~in_await:None
@@ -4140,9 +4118,8 @@ end = struct
       Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
       let (env, te2, _) =
         expr
-          ~check_defined
+          ~config:Config.{ config with accept_using_var = false }
           ~is_attribute_param
-          ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
           ~in_await:None
@@ -4227,11 +4204,10 @@ end = struct
       (* Await is permitted in a using clause e.g. using (await make_handle()) *)
       let (env, te, rty) =
         expr
-          ~check_defined
+          ~config:Config.{ config with accept_using_var = false }
           ~is_attribute_param
           ~is_using_clause
           ~in_await:(Some (Reason.Rwitness p))
-          ~accept_using_var:false
           ~valkind:Other
           env
           e
@@ -4242,10 +4218,9 @@ end = struct
       let env = Env.set_readonly env true in
       let (env, te, rty) =
         expr
-          ~check_defined
+          ~config:Config.{ config with accept_using_var = false }
           ~is_attribute_param
           ~is_using_clause
-          ~accept_using_var:false
           ~valkind:Other
           ~in_await:None
           env
@@ -4288,9 +4263,8 @@ end = struct
     | Cast (hint, e) ->
       let (env, te, ty2) =
         expr
-          ~check_defined
+          ~config:Config.{ config with accept_using_var = false }
           ~is_attribute_param
-          ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
           ~in_await
@@ -4328,9 +4302,8 @@ end = struct
     | Is (e, hint) ->
       let (env, te, _) =
         expr
-          ~check_defined
+          ~config:Config.{ config with accept_using_var = false }
           ~is_attribute_param
-          ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
           ~in_await:None
@@ -4353,9 +4326,8 @@ end = struct
       in
       let (env, te, expr_ty) =
         expr
-          ~check_defined
+          ~config:Config.{ config with accept_using_var = false }
           ~is_attribute_param
-          ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
           ~in_await:None
@@ -4433,9 +4405,8 @@ end = struct
     | Upcast (e, hint) ->
       let (env, te, expr_ty) =
         expr
-          ~check_defined
+          ~config:Config.{ config with accept_using_var = false }
           ~is_attribute_param
-          ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
           ~in_await:None
@@ -4485,10 +4456,9 @@ end = struct
          *)
         let new_exp = Typing_xhp.rewrite_xml_into_new p sid attrl el in
         expr
-          ~check_defined
+          ~config:Config.{ config with accept_using_var = false }
           ~is_attribute_param
           ?expected
-          ~accept_using_var:false
           ~is_using_clause:false
           ~valkind:Other
           ~in_await:None
@@ -4534,10 +4504,9 @@ end = struct
       let expr_helper ?expected env (k, e) =
         let (env, et, ty) =
           expr
-            ~check_defined
-            ~is_attribute_param
             ?expected
-            ~accept_using_var:false
+            ~config:Config.{ config with accept_using_var = false }
+            ~is_attribute_param
             ~is_using_clause:false
             ~valkind:Other
             ~in_await:None
@@ -4743,8 +4712,7 @@ end = struct
 
     let (env, te, ty) =
       expr
-        ~accept_using_var:false
-        ~check_defined:true
+        ~config:Config.default
         ~is_using_clause:false
         ~valkind:Other
         ~is_attribute_param:false
@@ -4985,8 +4953,7 @@ end = struct
         let (env, tel, _) =
           argument_list_exprs
             (expr
-               ~accept_using_var:false
-               ~check_defined:true
+               ~config:Config.default
                ~is_using_clause:false
                ~valkind:Other
                ~is_attribute_param:false
@@ -5000,8 +4967,7 @@ end = struct
           | Some unpacked_element ->
             let (env, e, ty) =
               expr
-                ~accept_using_var:false
-                ~check_defined:true
+                ~config:Config.default
                 ~is_using_clause:false
                 ~valkind:Other
                 ~is_attribute_param:false
@@ -5042,8 +5008,7 @@ end = struct
     let (env, te, ty) =
       expr
         ?expected
-        ~accept_using_var:false
-        ~check_defined:true
+        ~config:Config.default
         ~is_using_clause:false
         ~valkind:Other
         ~is_attribute_param:false
@@ -5388,8 +5353,7 @@ end = struct
           | [(Ast_defs.Pnormal, original_expr)]
             when TCO.ignore_unsafe_cast (Env.get_tcopt env) ->
             expr
-              ~accept_using_var:false
-              ~check_defined:true
+              ~config:Config.default
               ~is_using_clause:false
               ~valkind:Other
               ~is_attribute_param:false
@@ -5441,8 +5405,7 @@ end = struct
         let (env, tel, _) =
           argument_list_exprs
             (expr
-               ~accept_using_var:true
-               ~check_defined:false
+               ~config:Config.{ accept_using_var = true; check_defined = false }
                ~is_using_clause:false
                ~valkind:Other
                ~is_attribute_param:false
@@ -5465,8 +5428,7 @@ end = struct
         let (env, tel, _) =
           argument_list_exprs
             (expr
-               ~accept_using_var:false
-               ~check_defined:true
+               ~config:Config.default
                ~is_using_clause:false
                ~valkind:Other
                ~is_attribute_param:false
@@ -5487,8 +5449,7 @@ end = struct
           | ([(Ast_defs.Pnormal, (_, _, Array_get (ea, Some _)))], None) ->
             let (env, _te, ty) =
               expr
-                ~accept_using_var:false
-                ~check_defined:true
+                ~config:Config.default
                 ~is_using_clause:false
                 ~valkind:Other
                 ~is_attribute_param:false
@@ -5646,8 +5607,7 @@ end = struct
                 *)
                 let (env, _te, shape_ty) =
                   expr
-                    ~accept_using_var:false
-                    ~check_defined:true
+                    ~config:Config.default
                     ~is_using_clause:false
                     ~valkind:Other
                     ~is_attribute_param:false
@@ -5755,8 +5715,7 @@ end = struct
       when not (TCO.method_call_inference (Env.get_tcopt env)) ->
       let (env, te1, ty1) =
         expr
-          ~accept_using_var:true
-          ~check_defined:true
+          ~config:Config.{ default with accept_using_var = true }
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
@@ -5827,8 +5786,7 @@ end = struct
         *****)
       let (env, typed_receiver, receiver_ty) =
         expr
-          ~accept_using_var:true
-          ~check_defined:true
+          ~config:Config.{ default with accept_using_var = true }
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
@@ -5970,8 +5928,7 @@ end = struct
     | _ ->
       let (env, te, fty) =
         expr
-          ~accept_using_var:false
-          ~check_defined:true
+          ~config:Config.default
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
@@ -6048,8 +6005,7 @@ end = struct
       let (env, tel, _tyl) =
         argument_list_exprs
           (expr
-             ~accept_using_var:false
-             ~check_defined:true
+             ~config:Config.default
              ~is_using_clause:false
              ~valkind:Other
              ~is_attribute_param:false
@@ -6326,8 +6282,7 @@ end = struct
                   | _ ->
                     expr
                       ~expected:expected_arg_ty
-                      ~accept_using_var:false
-                      ~check_defined:true
+                      ~config:Config.default
                       ~is_using_clause:false
                       ~valkind:Other
                       ~is_attribute_param:false
@@ -6380,8 +6335,7 @@ end = struct
             List.map_env env el ~f:(fun env (pk, elt) ->
                 let (env, te, _ty) =
                   expr
-                    ~accept_using_var:false
-                    ~check_defined:true
+                    ~config:Config.default
                     ~is_using_clause:false
                     ~valkind:Other
                     ~is_attribute_param:false
@@ -6633,8 +6587,12 @@ end = struct
                       }
                   in
                   expr
-                    ~accept_using_var:(get_fp_accept_disposable param)
-                    ~check_defined:true
+                    ~config:
+                      Config.
+                        {
+                          default with
+                          accept_using_var = get_fp_accept_disposable param;
+                        }
                     ~is_using_clause:false
                     ~valkind:Other
                     ~is_attribute_param:false
@@ -6658,8 +6616,7 @@ end = struct
             | None ->
               let (env, te, ty) =
                 expr
-                  ~accept_using_var:false
-                  ~check_defined:true
+                  ~config:Config.default
                   ~is_using_clause:false
                   ~valkind:Other
                   ~is_attribute_param:false
@@ -6850,8 +6807,7 @@ end = struct
               in
               let (env, te, ty) =
                 expr
-                  ~accept_using_var:false
-                  ~check_defined:true
+                  ~config:Config.default
                   ~is_using_clause:false
                   ~valkind:Other
                   ~is_attribute_param:false
@@ -6999,8 +6955,7 @@ end = struct
           let (env, typed_el, type_of_el) =
             argument_list_exprs
               (expr
-                 ~accept_using_var:true
-                 ~check_defined:true
+                 ~config:Config.{ default with accept_using_var = true }
                  ~is_using_clause:false
                  ~valkind:Other
                  ~is_attribute_param:false
@@ -7013,8 +6968,7 @@ end = struct
             | Some unpacked ->
               let (env, typed_unpacked, type_of_unpacked) =
                 expr
-                  ~accept_using_var:true
-                  ~check_defined:true
+                  ~config:Config.{ default with accept_using_var = true }
                   ~is_using_clause:false
                   ~valkind:Other
                   ~is_attribute_param:false
@@ -7189,8 +7143,7 @@ end = struct
     | Some e ->
       let (env, _, ety) =
         expr
-          ~accept_using_var:false
-          ~check_defined:true
+          ~config:Config.default
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
@@ -7306,8 +7259,7 @@ end = struct
        * `Binop (Ampamp|Barbar)` case of `expr` *)
       let (env, _, _) =
         expr
-          ~accept_using_var:false
-          ~check_defined:true
+          ~config:Config.default
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
@@ -7346,8 +7298,7 @@ end = struct
                the `Binop (Ampamp|Barbar)` case of `expr` *)
             let (env, _, _) =
               expr
-                ~accept_using_var:false
-                ~check_defined:true
+                ~config:Config.default
                 ~is_using_clause:false
                 ~valkind:Other
                 ~is_attribute_param:false
@@ -7427,8 +7378,7 @@ end = struct
       List.fold_left idl ~init:(env, []) ~f:(fun (env, tel) x ->
           let (env, te, ty) =
             expr
-              ~accept_using_var:false
-              ~check_defined:true
+              ~config:Config.default
               ~is_using_clause:false
               ~valkind:Other
               ~is_attribute_param:false
@@ -7524,8 +7474,7 @@ end = struct
     | Lvalue_subexpr -> begin
       let (env, te1, ty1) =
         raw_expr
-          ~check_defined:true
-          ~accept_using_var:false
+          ~config:Config.default
           ~is_using_clause:false
           ~valkind:Lvalue_subexpr
           ~is_attribute_param:false
@@ -7549,8 +7498,7 @@ end = struct
     end
     | Other ->
       raw_expr
-        ~accept_using_var:false
-        ~check_defined:true
+        ~config:Config.default
         ~is_using_clause:false
         ~valkind:Other
         ~is_attribute_param:false
@@ -7659,8 +7607,7 @@ end = struct
     | Expr e ->
       let (env, te, _) =
         Expr.expr
-          ~accept_using_var:false
-          ~check_defined:true
+          ~config:Expr.Config.default
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
@@ -7681,8 +7628,7 @@ end = struct
       in
       let (env, te, _) =
         Expr.expr
-          ~accept_using_var:false
-          ~check_defined:true
+          ~config:Expr.Config.default
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
@@ -7781,9 +7727,8 @@ end = struct
       if return_disposable then enforce_return_disposable env e;
       let (env, te, rty) =
         Expr.expr
+          ~config:Expr.Config.default
           ~is_using_clause:return_disposable
-          ~accept_using_var:false
-          ~check_defined:true
           ~valkind:Other
           ~is_attribute_param:false
           ~in_await:None
@@ -7834,8 +7779,7 @@ end = struct
                    * expression *)
                   let (env, te, _) =
                     Expr.expr
-                      ~accept_using_var:false
-                      ~check_defined:true
+                      ~config:Expr.Config.default
                       ~is_using_clause:false
                       ~valkind:Other
                       ~is_attribute_param:false
@@ -7856,8 +7800,7 @@ end = struct
             in
             let (env, te, _) =
               Expr.expr
-                ~accept_using_var:false
-                ~check_defined:true
+                ~config:Expr.Config.default
                 ~is_using_clause:false
                 ~valkind:Other
                 ~is_attribute_param:false
@@ -7891,8 +7834,7 @@ end = struct
                    * expression *)
                   let (env, te, _) =
                     Expr.expr
-                      ~accept_using_var:false
-                      ~check_defined:true
+                      ~config:Expr.Config.default
                       ~is_using_clause:false
                       ~valkind:Other
                       ~is_attribute_param:false
@@ -7918,8 +7860,7 @@ end = struct
             in
             let (env, te, _) =
               Expr.expr
-                ~accept_using_var:false
-                ~check_defined:true
+                ~config:Expr.Config.default
                 ~is_using_clause:false
                 ~valkind:Other
                 ~is_attribute_param:false
@@ -7976,8 +7917,7 @@ end = struct
             *)
             let (env, te1, _) =
               Expr.exprs
-                ~accept_using_var:false
-                ~check_defined:true
+                ~config:Expr.Config.default
                 ~valkind:Other
                 ~is_attribute_param:false
                 env
@@ -7993,8 +7933,7 @@ end = struct
                    * expression *)
                   let (env, te2, _) =
                     Expr.expr
-                      ~accept_using_var:false
-                      ~check_defined:true
+                      ~config:Expr.Config.default
                       ~is_using_clause:false
                       ~valkind:Other
                       ~is_attribute_param:false
@@ -8015,8 +7954,7 @@ end = struct
                   let join_map = annot_map env in
                   let (env, te3, _) =
                     Expr.exprs
-                      ~accept_using_var:false
-                      ~check_defined:true
+                      ~config:Expr.Config.default
                       ~valkind:Other
                       ~is_attribute_param:false
                       env
@@ -8035,8 +7973,7 @@ end = struct
             in
             let (env, te2, _) =
               Expr.expr
-                ~accept_using_var:false
-                ~check_defined:true
+                ~config:Expr.Config.default
                 ~is_using_clause:false
                 ~valkind:Other
                 ~is_attribute_param:false
@@ -8059,8 +7996,7 @@ end = struct
     | Switch (((_, pos, _) as e), cl, dfl) ->
       let (env, te, ty) =
         Expr.expr
-          ~accept_using_var:false
-          ~check_defined:true
+          ~config:Expr.Config.default
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
@@ -8088,8 +8024,7 @@ end = struct
       (* It's safe to do foreach over a disposable, as no leaking is possible *)
       let (env, te1, ty1) =
         Expr.expr
-          ~accept_using_var:true
-          ~check_defined:true
+          ~config:Expr.Config.{ default with accept_using_var = true }
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
@@ -8144,8 +8079,7 @@ end = struct
             | Expr (((), _, _) as e) ) ) ->
           let (env, te, ty) =
             Expr.expr
-              ~accept_using_var:false
-              ~check_defined:true
+              ~config:Expr.Config.default
               ~is_using_clause:false
               ~valkind:Other
               ~is_attribute_param:false
@@ -8192,8 +8126,7 @@ end = struct
       let (_, p, _) = e in
       let (env, te, ty) =
         Expr.expr
-          ~accept_using_var:false
-          ~check_defined:true
+          ~config:Expr.Config.default
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
@@ -8229,8 +8162,7 @@ end = struct
         | Some exp ->
           let (env, te, ety) =
             Expr.expr
-              ~accept_using_var:false
-              ~check_defined:true
+              ~config:Expr.Config.default
               ~is_using_clause:false
               ~valkind:Other
               ~is_attribute_param:false
@@ -8393,8 +8325,7 @@ end = struct
           let env = initialize_next_cont env in
           let (env, te, _) =
             Expr.expr
-              ~accept_using_var:false
-              ~check_defined:true
+              ~config:Expr.Config.default
               ~is_using_clause:false
               ~valkind:Other
               ~is_attribute_param:false
@@ -8556,8 +8487,7 @@ end = struct
           with_special_coeffects env cap pure @@ fun env ->
           Expr.expr
             ?expected
-            ~accept_using_var:false
-            ~check_defined:true
+            ~config:Expr.Config.default
             ~is_using_clause:false
             ~valkind:Other
             ~is_attribute_param:false
@@ -8772,8 +8702,7 @@ end = struct
     | Some default ->
       let (env, _te, ty) =
         Expr.expr
-          ~accept_using_var:false
-          ~check_defined:true
+          ~config:Expr.Config.default
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
@@ -9571,8 +9500,7 @@ end = struct
       List.map_env env ua_params ~f:(fun env e ->
           let (env, te, _) =
             Expr.expr
-              ~accept_using_var:false
-              ~check_defined:true
+              ~config:Expr.Config.default
               ~is_using_clause:false
               ~valkind:Other
               env
@@ -9840,8 +9768,7 @@ end = struct
     | CIexpr ((_, p, _) as e) ->
       let (env, te, ty) =
         Expr.expr
-          ~accept_using_var:false
-          ~check_defined:true
+          ~config:Expr.Config.default
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
@@ -10165,8 +10092,7 @@ end = struct
       let (env, te1, ty1) =
         Expr.raw_expr
           ~lhs_of_null_coalesce:true
-          ~accept_using_var:false
-          ~check_defined
+          ~config:Expr.Config.{ default with check_defined }
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
@@ -10180,8 +10106,7 @@ end = struct
         check_e2
           (Expr.expr
              ?expected
-             ~accept_using_var:false
-             ~check_defined
+             ~config:Expr.Config.{ default with check_defined }
              ~is_using_clause:false
              ~valkind:Other
              ~is_attribute_param:false
@@ -10247,8 +10172,7 @@ end = struct
         let (env, te2, ty2) =
           check_e2
             (Expr.raw_expr
-               ~accept_using_var:false
-               ~check_defined
+               ~config:Expr.Config.{ default with check_defined }
                ~is_using_clause:false
                ~valkind:Other
                ~is_attribute_param:false
@@ -10273,8 +10197,7 @@ end = struct
       let c = Ast_defs.(equal_bop bop Ampamp) in
       let (env, te1, _) =
         Expr.expr
-          ~accept_using_var:false
-          ~check_defined
+          ~config:Expr.Config.{ default with check_defined }
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
@@ -10287,8 +10210,7 @@ end = struct
       let (env, te2, _) =
         check_e2
           (Expr.expr
-             ~accept_using_var:false
-             ~check_defined
+             ~config:Expr.Config.{ default with check_defined }
              ~is_using_clause:false
              ~valkind:Other
              ~is_attribute_param:false
@@ -10305,8 +10227,7 @@ end = struct
     | _ ->
       let (env, te1, ty1) =
         Expr.raw_expr
-          ~accept_using_var:false
-          ~check_defined
+          ~config:Expr.Config.{ default with check_defined }
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
@@ -10318,8 +10239,7 @@ end = struct
       let (env, te2, ty2) =
         check_e2
           (Expr.raw_expr
-             ~accept_using_var:false
-             ~check_defined
+             ~config:Expr.Config.{ default with check_defined }
              ~is_using_clause:false
              ~valkind:Other
              ~is_attribute_param:false
@@ -10437,8 +10357,7 @@ end = struct
     let (env, t_virtualized_expr, ty_virtual) =
       Env.with_inside_expr_tree env et_hint (fun env ->
           Expr.expr
-            ~accept_using_var:false
-            ~check_defined:true
+            ~config:Expr.Config.default
             ~is_using_clause:false
             ~valkind:Other
             ~is_attribute_param:false
@@ -10482,8 +10401,7 @@ end = struct
     in
     let (env, t_runtime_expr, ty_runtime_expr) =
       Expr.expr
-        ~accept_using_var:false
-        ~check_defined:true
+        ~config:Expr.Config.default
         ~is_using_clause:false
         ~valkind:Other
         ~is_attribute_param:false
@@ -10520,8 +10438,7 @@ end = struct
     | AFvalue ve ->
       let (env, tve, tv) =
         Expr.expr
-          ~accept_using_var:false
-          ~check_defined:true
+          ~config:Expr.Config.default
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
@@ -10533,8 +10450,7 @@ end = struct
     | AFkvalue (ke, ve) ->
       let (env, tke, tk) =
         Expr.expr
-          ~accept_using_var:false
-          ~check_defined:true
+          ~config:Expr.Config.default
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
@@ -10544,8 +10460,7 @@ end = struct
       in
       let (env, tve, tv) =
         Expr.expr
-          ~accept_using_var:false
-          ~check_defined:true
+          ~config:Expr.Config.default
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
@@ -10582,8 +10497,7 @@ end = struct
       in
       let (env, _, _) =
         Expr.expr
-          ~accept_using_var:false
-          ~check_defined:true
+          ~config:Expr.Config.default
           ~is_using_clause:false
           ~valkind:Other
           ~is_attribute_param:false
@@ -10605,8 +10519,7 @@ end = struct
     let (_, p, _) = valexpr in
     let (env, te, valty) =
       Expr.expr
-        ~accept_using_var:false
-        ~check_defined:true
+        ~config:Expr.Config.default
         ~is_using_clause:false
         ~valkind:Other
         ~is_attribute_param:false
@@ -10651,8 +10564,7 @@ end = struct
     let (_, p, _) = valexpr in
     let (env, te, valty) =
       Expr.expr
-        ~accept_using_var:false
-        ~check_defined:true
+        ~config:Expr.Config.default
         ~is_using_clause:false
         ~valkind:Other
         ~is_attribute_param:false
@@ -10805,9 +10717,8 @@ end = struct
       ->
       let (env, te, ty) =
         Expr.expr
+          ~config:Expr.Config.default
           ~is_using_clause:true
-          ~accept_using_var:false
-          ~check_defined:true
           ~valkind:Other
           ~is_attribute_param:false
           ~in_await:None
@@ -10840,9 +10751,8 @@ end = struct
     | _ ->
       let (env, typed_using_clause, ty) =
         Expr.expr
+          ~config:Expr.Config.default
           ~is_using_clause:true
-          ~accept_using_var:false
-          ~check_defined:true
           ~valkind:Other
           ~is_attribute_param:false
           ~in_await:None
@@ -11017,8 +10927,7 @@ end = struct
         in
         let (env, tobj, obj_ty) =
           Expr.expr
-            ~accept_using_var:true
-            ~check_defined:true
+            ~config:Expr.Config.{ default with accept_using_var = true }
             ~is_using_clause:false
             ~valkind:Other
             ~is_attribute_param:false
@@ -11163,8 +11072,7 @@ end = struct
       | (_, pos, Array_get (e1, Some e)) ->
         let (env, te, ty) =
           Expr.expr
-            ~accept_using_var:false
-            ~check_defined:true
+            ~config:Expr.Config.default
             ~is_using_clause:false
             ~valkind:Other
             ~is_attribute_param:false
@@ -11938,8 +11846,7 @@ let expr ?expected env e =
   Env.with_origin2 env Decl_counters.Body (fun env ->
       Expr.expr
         ?expected
-        ~accept_using_var:false
-        ~check_defined:true
+        ~config:Expr.Config.default
         ~is_using_clause:false
         ~valkind:Other
         ~is_attribute_param:false

@@ -22,7 +22,7 @@ fbthrift_test_if__types = { package = "fbthrift_test_if_types", path = "types" }
 futures = { version = "0.3.28", features = ["async-await", "compat"] }
 ref-cast = "1.0.18"
 thiserror = "1.0.43"
-tracing = "0.1.35"
+tracing = "0.1.40"
 tracing-futures = { version = "0.2.5", features = ["futures-03"] }
 
 [build-dependencies]

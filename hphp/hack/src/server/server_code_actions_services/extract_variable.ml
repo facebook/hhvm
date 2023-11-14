@@ -31,7 +31,8 @@ let might_be_expression_lambda ~f_body:Aast.{ fb_ast } ~pos ~source_text =
       true
   | _ -> false
 
-let positions_visitor (selection : Pos.t) ~source_text =
+let visitor (selection : Pos.t) ~source_text =
+  let should_traverse outer = Pos.contains outer selection in
   let stmt_pos = ref Pos.none in
   let expression_lambda_pos = ref None in
   let placeholder_n = ref 0 in
@@ -46,15 +47,27 @@ let positions_visitor (selection : Pos.t) ~source_text =
             Pos.(contains candidate.pos p || contains p candidate.pos)))
   in
 
-  object
+  object (self)
     inherit [candidate option] Tast_visitor.reduce as super
 
     method zero = None
 
     method plus = Option.first_some
 
+    method! on_def env =
+      function
+      | Aast.Fun fun_def when should_traverse Aast.(fun_def.fd_fun.f_span) ->
+        self#on_fun_def env fun_def
+      | Aast.Class class_def when should_traverse Aast.(class_def.c_span) ->
+        self#on_class_ env class_def
+      | Aast.Stmt stmt when should_traverse (fst stmt) -> self#on_stmt env stmt
+      | _ -> None
+
     method! on_method_ env meth =
-      ensure_selection_common_root @@ super#on_method_ env meth
+      if should_traverse meth.Aast.m_span then
+        ensure_selection_common_root @@ super#on_method_ env meth
+      else
+        None
 
     method! on_fun_def env fd =
       ensure_selection_common_root @@ super#on_fun_def env fd
@@ -119,35 +132,6 @@ let positions_visitor (selection : Pos.t) ~source_text =
           super#on_expr env expr
   end
 
-(** ensures that `positions_visitor` only traverses
-functions and methods such that
-the function body contains the selected range *)
-let top_visitor (selection : Pos.t) ~source_text =
-  let should_traverse outer = Pos.contains outer selection in
-  object (self)
-    inherit [candidate option] Tast_visitor.reduce
-
-    method zero = None
-
-    method plus = Option.first_some
-
-    method! on_def env =
-      function
-      | Aast.Fun fun_def when should_traverse Aast.(fun_def.fd_fun.f_span) ->
-        (positions_visitor selection ~source_text)#on_fun_def env fun_def
-      | Aast.Class class_def when should_traverse Aast.(class_def.c_span) ->
-        self#on_class_ env class_def
-      | Aast.Stmt stmt when should_traverse (fst stmt) ->
-        (positions_visitor selection ~source_text)#on_stmt env stmt
-      | _ -> None
-
-    method! on_method_ env meth =
-      if should_traverse meth.Aast.m_span then
-        (positions_visitor selection ~source_text)#on_method_ env meth
-      else
-        None
-  end
-
 (** Generate a snippet from the placeholder number.
 This relies on a nonstandard LSP extension recognized by the client:
 https://fburl.com/code/0vzkqds8. We can implement non-hackily if LSP is updated:
@@ -184,7 +168,7 @@ let find ~entry selection ctx =
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
-  (top_visitor selection ~source_text)#go
+  (visitor selection ~source_text)#go
     ctx
     tast.Tast_with_dynamic.under_normal_assumptions
   |> Option.map ~f:(refactor_of_candidate ~source_text ~path)

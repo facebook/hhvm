@@ -184,4 +184,6 @@ type change = {
       (** [old_file_info] is None if the file didn't previously exist *)
   new_file_info: t option;
       (** [new_file_info] is None if the file has been deleted *)
+  new_pfh_hash: pfh_hash option;
+      (** [new_pfh_hash] is None if the file has been deleted *)
 }

@@ -284,6 +284,7 @@ pub struct Change {
     pub path: relative_path::RelativePath,
     pub old_file_info: Option<FileInfo>,
     pub new_file_info: Option<FileInfo>,
+    pub new_pfh_hash: Option<PfhHash>,
 }
 
 /// The simplified record used after parsing.

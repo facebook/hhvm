@@ -164,6 +164,7 @@ type change = {
   path: Relative_path.t;
   old_file_info: t option;
   new_file_info: t option;
+  new_pfh_hash: pfh_hash option;
 }
 
 (*****************************************************************************)

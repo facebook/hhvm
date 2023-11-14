@@ -60,7 +60,7 @@ ocaml_ffi! {
         deregister_php_stdlib_if_hhi: bool,
         root: PathBuf,
         filenames: Vec<(RelativePath, Option<Option<Vec<u8>>>)>,
-    ) -> Vec<(RelativePath, Option<(FileInfo, Vec<SiAddendum>)>)> {
+    ) -> Vec<(RelativePath, Option<(FileInfo, Int64, Vec<SiAddendum>)>)> {
         let filenames_and_contents = par_read_file_root_only(&root, filenames).unwrap_ocaml();
         filenames_and_contents
             .into_par_iter()
@@ -87,9 +87,10 @@ ocaml_ffi! {
                 );
 
                 let addenda = si_addendum::get_si_addenda(&with_hashes);
+                let file_decls_hash = Int64(with_hashes.file_decls_hash.as_u64() as i64);
                 let file_info = parsed_file_to_file_info(with_hashes);
 
-                (relpath, Some((file_info, addenda)))
+                (relpath, Some((file_info, file_decls_hash, addenda)))
             })
             .collect()
     }

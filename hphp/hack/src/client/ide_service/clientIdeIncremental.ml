@@ -21,8 +21,9 @@ module Batch = struct
     bool ->
     Path.t ->
     (Relative_path.t * string option option) list ->
-    (Relative_path.t * (FileInfo.t * FileInfo.si_addendum list) option) list
-    = "batch_index_hackrs_ffi_root_relative_paths_only"
+    (Relative_path.t
+    * (FileInfo.t * FileInfo.pfh_hash * FileInfo.si_addendum list) option)
+    list = "batch_index_hackrs_ffi_root_relative_paths_only"
 
   type update_result = {
     naming_table: Naming_table.t;
@@ -33,7 +34,9 @@ module Batch = struct
   (** For each path, direct decl parse to compute the names and positions in the file. If the file at the path doesn't exist, return [None]. *)
   let compute_file_info_batch_root_relative_paths_only
       (popt : ParserOptions.t) (paths : Relative_path.t list) :
-      (Relative_path.t * (FileInfo.t * FileInfo.si_addendum list) option) list =
+      (Relative_path.t
+      * (FileInfo.t * FileInfo.pfh_hash * FileInfo.si_addendum list) option)
+      list =
     let paths =
       if Disk.is_real_disk then
         List.map paths ~f:(fun path -> (path, None))
@@ -75,11 +78,12 @@ module Batch = struct
       |> compute_file_info_batch_root_relative_paths_only popt
     in
     let changed_file_infos =
-      List.map parse_results ~f:(fun (path, new_file_info_with_addendum) ->
+      List.map parse_results ~f:(fun (path, new_info) ->
           let old_file_info = Naming_table.get_file_info naming_table path in
           {
             FileInfo.path;
-            new_file_info = Option.map new_file_info_with_addendum ~f:fst;
+            new_file_info = Option.map new_info ~f:(fun (fi, _, _) -> fi);
+            new_pfh_hash = Option.map new_info ~f:(fun (_, hash, _) -> hash);
             old_file_info;
           })
     in
@@ -87,7 +91,7 @@ module Batch = struct
     let t_update_reverse_nt = Unix.gettimeofday () in
     List.iter
       changed_file_infos
-      ~f:(fun { FileInfo.path; new_file_info; old_file_info } ->
+      ~f:(fun { FileInfo.path; new_file_info; old_file_info; _ } ->
         Naming_provider.update
           ~backend:(Provider_context.get_backend ctx)
           ~path
@@ -134,7 +138,7 @@ module Batch = struct
     let get_addenda_opt (path, new_file_info_with_addenda_opt) =
       Option.map
         new_file_info_with_addenda_opt
-        ~f:(fun (_new_file_info, addenda) ->
+        ~f:(fun (_new_file_info, _pfh_hash, addenda) ->
           (path, addenda, SearchUtils.TypeChecker))
     in
     let paths_with_addenda = List.filter_map parse_results ~f:get_addenda_opt in

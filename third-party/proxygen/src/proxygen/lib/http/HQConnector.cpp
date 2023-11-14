@@ -79,6 +79,9 @@ void HQConnector::connect(
   quicClient->setCongestionControllerFactory(
       std::make_shared<quic::DefaultCongestionControllerFactory>());
   quicClient->setTransportStatsCallback(std::move(quicTransportStatsCallback));
+
+  // Always use connected UDP sockets
+  transportSettings_.connectUDP = true;
   quicClient->setTransportSettings(transportSettings_);
   quicClient->setQLogger(std::move(qLogger));
   quicClient->setLoopDetectorCallback(std::move(quicLoopDetectorCallback));

@@ -351,7 +351,7 @@ let default =
     dump_tast_hashes = false;
     dump_tasts = [];
     log_events_with_sandcastle_info = false;
-    lsp_pull_diagnostics = false;
+    lsp_pull_diagnostics = true;
   }
 
 let system_config_path =

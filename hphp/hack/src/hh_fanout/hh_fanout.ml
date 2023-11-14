@@ -190,8 +190,8 @@ let load_saved_state ~(env : env) : saved_state_result Lwt.t =
       setup_result.ctx
       (Path.to_string naming_table_path)
   in
-  let ClientIdeIncremental.Batch.{ naming_table; sienv = _; changes = _ } =
-    ClientIdeIncremental.Batch.update_naming_tables_and_si
+  let ClientIdeIncremental.{ naming_table; sienv = _; changes = _ } =
+    ClientIdeIncremental.update_naming_tables_and_si
       ~ctx:setup_result.ctx
       ~naming_table
       ~sienv:SearchUtils.quiet_si_env

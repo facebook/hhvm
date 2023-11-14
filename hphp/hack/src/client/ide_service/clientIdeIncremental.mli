@@ -7,14 +7,13 @@
  *
  *)
 
-module Batch : sig
-  type update_result = {
-    naming_table: Naming_table.t;
-    sienv: SearchUtils.si_env;
-    changes: FileInfo.change list;
-  }
+type update_result = {
+  naming_table: Naming_table.t;
+  sienv: SearchUtils.si_env;
+  changes: FileInfo.change list;
+}
 
-  (** Updates the reverse-naming-table (which is inside ctx for the local
+(** Updates the reverse-naming-table (which is inside ctx for the local
   memory backend, and is a sharedmem heap for the sharedmem backend).
   Returns an updated forward-naming-table in 'naming_table', and updated
   symbol-search index in 'sienv'. It does this by by parsing the file at
@@ -26,10 +25,9 @@ module Batch : sig
   and those that fail FindUtils.path_filter.
 
   IO: this function uses File_provider to read the file. *)
-  val update_naming_tables_and_si :
-    ctx:Provider_context.t ->
-    naming_table:Naming_table.t ->
-    sienv:SearchUtils.si_env ->
-    changes:Relative_path.Set.t ->
-    update_result
-end
+val update_naming_tables_and_si :
+  ctx:Provider_context.t ->
+  naming_table:Naming_table.t ->
+  sienv:SearchUtils.si_env ->
+  changes:Relative_path.Set.t ->
+  update_result

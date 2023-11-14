@@ -260,8 +260,8 @@ let batch_update_naming_table_and_invalidate_caches
     ~(open_files :
        (Provider_context.entry * Errors.t option ref) Relative_path.Map.t)
     (changes : Relative_path.Set.t) : Naming_table.t * SearchUtils.si_env =
-  let ClientIdeIncremental.Batch.{ changes; naming_table; sienv } =
-    ClientIdeIncremental.Batch.update_naming_tables_and_si
+  let ClientIdeIncremental.{ changes; naming_table; sienv } =
+    ClientIdeIncremental.update_naming_tables_and_si
       ~ctx
       ~naming_table
       ~sienv

@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/java.thrift"
 include "thrift/annotation/thrift.thrift"
 
 namespace java.swift test.fixtures.refs
@@ -77,7 +78,8 @@ struct StructWithUnion {
 }
 
 struct RecursiveStruct {
-  1: optional list<RecursiveStruct> mes (swift.recursive_reference = "true");
+  @java.Recursive
+  1: optional list<RecursiveStruct> mes;
 }
 
 struct StructWithContainers {

@@ -1359,6 +1359,15 @@ impl ::fbthrift::metadata::ThriftAnnotations for RecursiveStruct {
         #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
+
+                if type_id == ::std::any::TypeId::of::<java::types::Recursive>() {
+                    let mut tmp = Some(java::types::Recursive {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }

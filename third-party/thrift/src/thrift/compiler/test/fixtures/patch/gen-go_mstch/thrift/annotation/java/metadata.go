@@ -72,6 +72,9 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetType(premadeThriftType_string),
         },
     ),
+    metadata.NewThriftStruct().
+    SetName("java.Recursive").
+    SetIsUnion(false),
 }
 
 var exceptionMetadatas = []*metadata.ThriftException{

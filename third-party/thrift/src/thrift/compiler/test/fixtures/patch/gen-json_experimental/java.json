@@ -187,6 +187,22 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 61
+      },
+      "Recursive" : {
+        "name" : "Recursive",
+        "structured_annotations": {
+          "scope.Field" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Field",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 70
       }
       },
   "source_path" : "thrift/annotation/java",

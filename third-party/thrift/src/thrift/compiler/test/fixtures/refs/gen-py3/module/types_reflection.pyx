@@ -334,7 +334,7 @@ cdef __StructSpec get_reflection__RecursiveStruct():
             qualifier=__Qualifier.OPTIONAL,
             default=None,
             annotations={
-                """swift.recursive_reference""": """true""",            },
+            },
         ),
     )
     return spec

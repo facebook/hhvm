@@ -114,6 +114,8 @@ inline constexpr auto kJavaMutableUri =
     "facebook.com/thrift/annotation/java/Mutable";
 inline constexpr auto kJavaAnnotationUri =
     "facebook.com/thrift/annotation/java/Annotation";
+inline constexpr auto kJavaRecursiveUri =
+    "facebook.com/thrift/annotation/java/Recursive";
 inline constexpr auto kJavaAdapterUri =
     "facebook.com/thrift/annotation/java/Adapter";
 inline constexpr auto kJavaWrapperUri =

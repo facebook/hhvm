@@ -972,7 +972,8 @@ class mstch_java_field : public mstch_field {
   }
   mstch::node java_default_value() { return default_value_for_field(field_); }
   mstch::node is_recursive_reference() {
-    return field_->get_annotation("swift.recursive_reference") == "true";
+    return field_->get_annotation("swift.recursive_reference") == "true" ||
+        field_->find_structured_annotation_or_null(kJavaRecursiveUri);
   }
   mstch::node is_negative_id() { return field_->get_key() < 0; }
   std::string default_value_for_field(const t_field* field) {

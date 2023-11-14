@@ -53,8 +53,8 @@ function UNSAFE_NONNULL_CAST<T as nonnull>(
   ?\HH\FormatString<nothing> $msg = null,
 )[]: T;
 
-/* Acts as Tany under current semantics, and T under sound dynamic */
-type TANY_MARKER<+T> = T;
+
+
 /* Acts as T under current semantics, and ~T under sound dynamic */
 type POISON_MARKER<+T> = T;
 
@@ -64,7 +64,7 @@ type POISON_MARKER<+T> = T;
  * We haven't written the type for every property in the codebase yet.
  * Properties which are missing their types have this placeholder instead.
  */
-type MISSING_PROP_TYPE = TANY_MARKER<dynamic>;
+type MISSING_PROP_TYPE = dynamic;
 
 /**
  * We haven't written the type for every parameter to every function in the
@@ -78,4 +78,4 @@ type MISSING_PARAM_TYPE = mixed;
  * Functions which are still missing return types have this placeholder
  * instead.
  */
-type MISSING_RETURN_TYPE = TANY_MARKER<dynamic>;
+type MISSING_RETURN_TYPE = dynamic;

@@ -345,7 +345,6 @@ trait CoercionsTestUtils {
       'set s2' => $s2,
       'set s3' => $s3,
 
-
       'map m1' => $m1,
       'map m2' => $m2,
       'map m3' => $m3,
@@ -407,7 +406,7 @@ class CoercionsTestDateTime1 implements \DateTimeInterface {
   public function __construct(int $timestamp) {
     $this->timestamp = $timestamp;
   }
-  public function getTimestamp()[]: mixed {
+  public function getTimestamp()[]: int {
     if ($this->timestamp <= 0) {
       throw new \Exception('sneaky');
     }
@@ -416,7 +415,9 @@ class CoercionsTestDateTime1 implements \DateTimeInterface {
   public function diff(mixed $dt, mixed $absolute = null): void {}
   public function format(mixed $format): void {}
   public function getTimezone(): void {}
-  public function getOffset(): void {}
+  public function getOffset(): int {
+    return 0;
+  }
 }
 
 class CoercionsTestDateTime2 implements \DateTimeInterface {
@@ -426,7 +427,9 @@ class CoercionsTestDateTime2 implements \DateTimeInterface {
   public function diff(mixed $dt, mixed $absolute = null): void {}
   public function format(mixed $format): void {}
   public function getTimezone(): void {}
-  public function getOffset(): void {}
+  public function getOffset(): int {
+    return 0;
+  }
 }
 
 function CoercionsTest_foo(): void {}

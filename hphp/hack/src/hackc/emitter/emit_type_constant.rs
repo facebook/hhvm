@@ -311,7 +311,6 @@ fn hint_to_type_constant_list<'arena>(
                         h,
                     );
                 }
-                [_h] if name == typehints::TANY_MARKER => <&[Hint]>::default(),
                 _ => hints,
             };
             let (classname, s_res) = resolve_classname(alloc, tparams, name.to_owned());

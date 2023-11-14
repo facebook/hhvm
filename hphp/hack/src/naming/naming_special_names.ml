@@ -1148,8 +1148,6 @@ module HH = struct
   let contains_key = "\\HH\\Lib\\C\\contains_key"
 
   module FIXME = struct
-    let tTanyMarker = "\\HH\\FIXME\\TANY_MARKER"
-
     let tPoisonMarker = "\\HH\\FIXME\\POISON_MARKER"
   end
 end

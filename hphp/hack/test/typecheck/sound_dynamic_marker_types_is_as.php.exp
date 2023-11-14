@@ -1,8 +1,4 @@
-File "sound_dynamic_marker_types_is_as.php", line 4, characters 8-32:
+File "sound_dynamic_marker_types_is_as.php", line 4, characters 8-37:
 Invalid `as` expression hint (Typing[4195])
-  File "sound_dynamic_marker_types_is_as.php", line 4, characters 8-32:
-  The `as` operator cannot be used with a type with generics, because generics are erased at runtime
-File "sound_dynamic_marker_types_is_as.php", line 5, characters 8-37:
-Invalid `as` expression hint (Typing[4195])
-  File "sound_dynamic_marker_types_is_as.php", line 5, characters 8-37:
+  File "sound_dynamic_marker_types_is_as.php", line 4, characters 8-37:
   The `as` operator cannot be used with a type with generics, because generics are erased at runtime

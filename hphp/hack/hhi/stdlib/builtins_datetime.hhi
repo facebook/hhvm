@@ -270,8 +270,8 @@ interface DateTimeInterface {
     bool $absolute = false,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function format(string $format): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getOffset(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getTimestamp()[]: HH\FIXME\MISSING_RETURN_TYPE;
+  public function getOffset(): HH\FIXME\POISON_MARKER<int>;
+  public function getTimestamp()[]: HH\FIXME\POISON_MARKER<int>;
   public function getTimezone(): HH\FIXME\MISSING_RETURN_TYPE;
 }
 

@@ -1,9 +1,3 @@
-File "marker_types.good.php", line 9, characters 3-16:
-  int
-File "marker_types.good.php", line 10, characters 3-18:
+File "marker_types.good.php", line 6, characters 3-18:
   ~string
-File "marker_types.good.php", line 11, characters 3-21:
-  vec<float>
-File "marker_types.good.php", line 12, characters 3-26:
-  vec<~float>
 No errors

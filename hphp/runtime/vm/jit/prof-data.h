@@ -432,6 +432,8 @@ struct ProfData {
     assertx(!previousValue);
     m_optimizedFuncCount.fetch_add(1, std::memory_order_relaxed);
     s_optimized_funcs_counter->increment();
+    // reset the counter for live translations.
+    func->resetJitReqCount();
   }
   void unsetOptimized(FuncId funcId) {
     auto func = Func::fromFuncId(funcId);

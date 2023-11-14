@@ -33,6 +33,7 @@
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
 
+#include "hphp/util/atomic.h"
 #include "hphp/util/check-size.h"
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/low-ptr.h"
@@ -1079,6 +1080,13 @@ public:
    */
   void resetPrologue(int numParams);
 
+  /*
+   * Bump/reset JIT request count, which counts the number of times the function
+   * is being considered for compilation.
+   */
+  uint8_t incJitReqCount() const;
+  void resetJitReqCount() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // Pretty printer.                                                    [const]
 
@@ -1763,7 +1771,14 @@ private:
   bool m_shouldSampleJit : 1;
   bool m_hasForeignThis : 1;
   bool m_registeredInDataMap : 1;
-  // 3 free bits + 1 free byte
+  // 3 free bits, and there are some more in AtomicFlags.
+
+  // Number of times the function has been considered in `shouldTranslate()`
+  // when Eval.JitLiveThreshold or Eval.JitProfileThreshold is set. The counter
+  // is reset after PGO, so count for live translation only increases when
+  // optimized code doesn't cover the function sufficiently.
+  mutable CopyableAtomic<uint8_t> m_jitReqCount{0};
+
   RuntimeCoeffects m_requiredCoeffects{RuntimeCoeffects::none()};
   int16_t m_maxStackCells{0};
   Unit* const m_unit;

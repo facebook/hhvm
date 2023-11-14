@@ -838,6 +838,23 @@ inline void Func::setPrologue(int index, unsigned char* tca) {
   m_prologueTable[index] = tca;
 }
 
+inline uint8_t Func::incJitReqCount() const {
+  auto curr = m_jitReqCount.load(std::memory_order_acquire);
+  do {
+    // Saturate
+    if (curr >= std::numeric_limits<uint8_t>::max()) return curr;
+    if (m_jitReqCount.compare_exchange_weak(curr, curr + 1,
+                                            std::memory_order_acq_rel)) {
+      return curr;
+    }
+  } while (true);
+  not_reached();
+}
+
+inline void Func::resetJitReqCount() const {
+  m_jitReqCount.store(0, std::memory_order_release);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Other methods.
 

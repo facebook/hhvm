@@ -50,8 +50,6 @@
 #include "hphp/util/rds-local.h"
 #include "hphp/util/trace.h"
 
-#include <tbb/concurrent_hash_map.h>
-
 #include <atomic>
 
 extern "C" _Unwind_Reason_Code
@@ -140,11 +138,6 @@ bool canTranslate() {
     RuntimeOption::EvalJitGlobalTranslationLimit;
 }
 
-using FuncCounterMap = tbb::concurrent_hash_map<FuncId, uint32_t,
-                                                FuncIdHashCompare>;
-static FuncCounterMap s_func_counters;
-
-
 static RDS_LOCAL_NO_CHECK(bool, s_jittingTimeLimitExceeded);
 
 TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
@@ -212,14 +205,10 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
   auto const isProf = kind == TransKind::Profile ||
                       kind == TransKind::ProfPrologue;
   if (isLive || isProf) {
-    {
-      FuncCounterMap::accessor acc;
-      if (!s_func_counters.insert(acc, {func->getFuncId(), 1})) ++acc->second;
-      auto const funcThreshold = isLive ? RuntimeOption::EvalJitLiveThreshold
-                                        : RuntimeOption::EvalJitProfileThreshold;
-      if (acc->second < funcThreshold) {
-        return TranslationResult::Scope::Transient;
-      }
+    auto const funcThreshold = isLive ? RO::EvalJitLiveThreshold
+                                      : RO::EvalJitProfileThreshold;
+    if (func->incJitReqCount() < funcThreshold) {
+      return TranslationResult::Scope::Transient;
     }
   }
 

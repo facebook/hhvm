@@ -230,12 +230,20 @@ class DestinationRoute {
     if (bucketIdOptional.has_value()) {
       bucketId = *bucketIdOptional;
     }
+    std::optional<Request> newReq;
+    folly::StringPiece strippedRoutingPrefix;
+    if (!keepRoutingPrefix_ && !req.key_ref()->routingPrefix().empty()) {
+      newReq.emplace(req);
+      newReq->key_ref()->stripRoutingPrefix();
+      strippedRoutingPrefix = req.key_ref()->routingPrefix();
+    }
+    const auto& reqToSend = newReq ? *newReq : req;
     RpcStatsContext rpcContext;
     ctx.onBeforeRequestSent(
         poolName_,
         *destination_->accessPoint(),
-        folly::StringPiece(),
-        req,
+        strippedRoutingPrefix,
+        reqToSend,
         fiber_local<RouterInfo>::getRequestClass(),
         now,
         bucketId);
@@ -243,8 +251,8 @@ class DestinationRoute {
         poolName_,
         std::optional<size_t>(indexInPool_),
         *destination_->accessPoint(),
-        folly::StringPiece(),
-        req,
+        strippedRoutingPrefix,
+        reqToSend,
         reply,
         fiber_local<RouterInfo>::getRequestClass(),
         now,

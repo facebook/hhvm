@@ -139,7 +139,7 @@ impl UnstableFeatures {
             UnstableFeatures::CaseTypes => Preview,
             UnstableFeatures::ModuleLevelTraits => Preview,
             UnstableFeatures::TypedLocalVariables => Unstable,
-            UnstableFeatures::PipeAwait => Unstable,
+            UnstableFeatures::PipeAwait => Preview,
             UnstableFeatures::MatchStatements => Unstable,
             UnstableFeatures::StrictSwitch => Unstable,
             UnstableFeatures::NameofClass => OngoingRelease,

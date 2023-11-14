@@ -380,19 +380,19 @@ let test_xhp_name_mangling ~(sqlite : bool) () =
 
 let tests =
   [
-    (* ("test_unsaved_symbol_change_mem", test_unsaved_symbol_change ~sqlite:false); *)
-    (* ( "test_unsaved_symbol_change_sqlite",
-       test_unsaved_symbol_change ~sqlite:true ); *)
-    (* ("test_canon_names_in_entries", test_canon_names_in_entries); *)
+    ("test_unsaved_symbol_change_mem", test_unsaved_symbol_change ~sqlite:false);
+    ( "test_unsaved_symbol_change_sqlite",
+      test_unsaved_symbol_change ~sqlite:true );
+    ("test_canon_names_in_entries", test_canon_names_in_entries);
     ("test_dupe_then_delete_dupe_mem", test_dupe_then_delete_dupe ~sqlite:false);
-    (* -- ( "test_dupe_then_delete_dupe_sqlite",
-       test_dupe_then_delete_dupe ~sqlite:true ); *)
-    (* -- ( "test_dupe_then_delete_original_mem",
-       test_dupe_then_delete_original ~sqlite:false ); *)
-    (* -- ( "test_dupe_then_delete_original_sqlite",
-       test_dupe_then_delete_original ~sqlite:true ); *)
-    (* -- ("test_xhp_name_mangling_mem", test_xhp_name_mangling ~sqlite:false); *)
-    (* -- ("test_xhp_name_mangling_sqlite", test_xhp_name_mangling ~sqlite:true); *)
+    ( "test_dupe_then_delete_dupe_sqlite",
+      test_dupe_then_delete_dupe ~sqlite:true );
+    ( "test_dupe_then_delete_original_mem",
+      test_dupe_then_delete_original ~sqlite:false );
+    ( "test_dupe_then_delete_original_sqlite",
+      test_dupe_then_delete_original ~sqlite:true );
+    ("test_xhp_name_mangling_mem", test_xhp_name_mangling ~sqlite:false);
+    ("test_xhp_name_mangling_sqlite", test_xhp_name_mangling ~sqlite:true);
   ]
 
 let () =

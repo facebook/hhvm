@@ -259,24 +259,21 @@ let batch_update_naming_table_and_invalidate_caches
     ~(local_memory : Provider_backend.local_memory)
     ~(open_files :
        (Provider_context.entry * Errors.t option ref) Relative_path.Map.t)
-    (changes : Relative_path.Set.t) : ClientIdeIncremental.Batch.update_result =
-  let ({ ClientIdeIncremental.Batch.changes = changes_results; _ } as
-      update_naming_table_result) =
+    (changes : Relative_path.Set.t) : Naming_table.t * SearchUtils.si_env =
+  let ClientIdeIncremental.Batch.{ changes; naming_table; sienv } =
     ClientIdeIncremental.Batch.update_naming_tables_and_si
       ~ctx
       ~naming_table
       ~sienv
       ~changes
   in
-  List.iter
-    changes_results
-    ~f:(fun { ClientIdeIncremental.Batch.old_file_info; _ } ->
+  List.iter changes ~f:(fun { FileInfo.old_file_info; _ } ->
       Option.iter
         old_file_info
         ~f:(Provider_utils.invalidate_local_decl_caches_for_file local_memory));
   Relative_path.Map.iter open_files ~f:(fun _path (entry, _) ->
       Provider_utils.invalidate_tast_cache_of_entry entry);
-  update_naming_table_result
+  (naming_table, sienv)
 
 (** An empty ctx with no entries *)
 let make_empty_ctx (common : common_state) : Provider_context.t =
@@ -396,7 +393,7 @@ let initialize2
         (Relative_path.Set.of_list changed_files)
       |> Relative_path.Set.filter ~f:FindUtils.path_filter
     in
-    let ClientIdeIncremental.Batch.{ naming_table; sienv; changes = _changes } =
+    let (naming_table, sienv) =
       batch_update_naming_table_and_invalidate_caches
         ~ctx:(make_empty_ctx dstate.dcommon)
         ~naming_table
@@ -675,7 +672,7 @@ let handle_request
     in
     (During_init { dstate with changed_files_to_process }, Ok ())
   | (Initialized istate, Did_change_watched_files changes) ->
-    let ClientIdeIncremental.Batch.{ naming_table; sienv; changes = _changes } =
+    let (naming_table, sienv) =
       batch_update_naming_table_and_invalidate_caches
         ~ctx:(make_empty_ctx istate.icommon)
         ~naming_table:istate.naming_table
@@ -1402,7 +1399,7 @@ module Test = struct
       (Relative_path.Set.elements changes
       |> List.map ~f:Relative_path.suffix
       |> String.concat ~sep:" ");
-    let ClientIdeIncremental.Batch.{ naming_table; sienv; changes = _changes } =
+    let (naming_table, sienv) =
       batch_update_naming_table_and_invalidate_caches
         ~ctx:(make_empty_ctx istate.icommon)
         ~naming_table:istate.naming_table

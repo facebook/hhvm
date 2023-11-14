@@ -24,16 +24,10 @@ module Batch = struct
     (Relative_path.t * (FileInfo.t * FileInfo.si_addendum list) option) list
     = "batch_index_hackrs_ffi_root_relative_paths_only"
 
-  type changed_file_info = {
-    path: Relative_path.t;
-    old_file_info: FileInfo.t option;
-    new_file_info: FileInfo.t option;
-  }
-
   type update_result = {
     naming_table: Naming_table.t;
     sienv: SearchUtils.si_env;
-    changes: changed_file_info list;
+    changes: FileInfo.change list;
   }
 
   (** For each path, direct decl parse to compute the names and positions in the file. If the file at the path doesn't exist, return [None]. *)
@@ -84,7 +78,7 @@ module Batch = struct
       List.map parse_results ~f:(fun (path, new_file_info_with_addendum) ->
           let old_file_info = Naming_table.get_file_info naming_table path in
           {
-            path;
+            FileInfo.path;
             new_file_info = Option.map new_file_info_with_addendum ~f:fst;
             old_file_info;
           })
@@ -93,7 +87,7 @@ module Batch = struct
     let t_update_reverse_nt = Unix.gettimeofday () in
     List.iter
       changed_file_infos
-      ~f:(fun { path; new_file_info; old_file_info } ->
+      ~f:(fun { FileInfo.path; new_file_info; old_file_info } ->
         Naming_provider.update
           ~backend:(Provider_context.get_backend ctx)
           ~path
@@ -106,14 +100,16 @@ module Batch = struct
       List.fold_left
         changed_file_infos
         ~init:naming_table
-        ~f:(fun naming_table { path; old_file_info; _ } ->
+        ~f:(fun naming_table { FileInfo.path; old_file_info; _ } ->
           match old_file_info with
           | None -> naming_table
           | Some _ -> Naming_table.remove naming_table path)
     in
     (* update new *)
     let paths_with_new_file_info =
-      List.filter_map changed_file_infos ~f:(fun { path; new_file_info; _ } ->
+      List.filter_map
+        changed_file_infos
+        ~f:(fun { FileInfo.path; new_file_info; _ } ->
           Option.map new_file_info ~f:(fun new_file_info ->
               (path, new_file_info)))
     in
@@ -126,9 +122,9 @@ module Batch = struct
     (* remove paths without new file info *)
     let t_si = Unix.gettimeofday () in
     let paths_without_new_file_info =
-      List.filter changed_file_infos ~f:(fun { new_file_info; _ } ->
+      List.filter changed_file_infos ~f:(fun { FileInfo.new_file_info; _ } ->
           Option.is_none new_file_info)
-      |> List.map ~f:(fun { path; _ } -> path)
+      |> List.map ~f:(fun { FileInfo.path; _ } -> path)
       |> Relative_path.Set.of_list
     in
     let sienv =

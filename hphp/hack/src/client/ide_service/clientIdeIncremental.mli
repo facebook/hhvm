@@ -8,16 +8,10 @@
  *)
 
 module Batch : sig
-  type changed_file_info = {
-    path: Relative_path.t;
-    old_file_info: FileInfo.t option;
-    new_file_info: FileInfo.t option;
-  }
-
   type update_result = {
     naming_table: Naming_table.t;
     sienv: SearchUtils.si_env;
-    changes: changed_file_info list;
+    changes: FileInfo.change list;
   }
 
   (** Updates the reverse-naming-table (which is inside ctx for the local

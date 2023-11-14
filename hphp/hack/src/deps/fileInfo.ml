@@ -158,6 +158,14 @@ let get_pos_filename = function
   | Full p -> Pos.filename p
   | File (_, fn) -> fn
 
+type pfh_hash = Int64.t
+
+type change = {
+  path: Relative_path.t;
+  old_file_info: t option;
+  new_file_info: t option;
+}
+
 (*****************************************************************************)
 (* The simplified record used after parsing. *)
 (*****************************************************************************)

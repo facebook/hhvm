@@ -263,6 +263,29 @@ pub struct FileInfo {
     pub comments: Option<Vec<(pos::Pos, Comment)>>,
 }
 
+pub type PfhHash = Int64;
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep,
+)]
+#[repr(C)]
+pub struct Change {
+    pub path: relative_path::RelativePath,
+    pub old_file_info: Option<FileInfo>,
+    pub new_file_info: Option<FileInfo>,
+}
+
 /// The simplified record used after parsing.
 #[derive(
     Clone,

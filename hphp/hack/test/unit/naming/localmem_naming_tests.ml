@@ -364,7 +364,7 @@ let test_xhp_name_mangling ~(sqlite : bool) () =
   in
   let new_file_info =
     match changes with
-    | [{ ClientIdeIncremental.Batch.new_file_info; _ }] -> new_file_info
+    | [{ FileInfo.new_file_info; _ }] -> new_file_info
     | _ -> failwith "expected one change"
   in
 

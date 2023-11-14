@@ -177,6 +177,7 @@ end = struct
     | "typing_defs_core::ConstraintType" when is_by_ref ->
       ["Eq"; "PartialEq"; "Ord"; "PartialOrd"]
     | "typing_defs_core::TshapeFieldName" when is_by_ref -> ["Debug"]
+    | "file_info::Change" -> ["EqModuloPos"]
     | _ -> []
 
   let skip_list_for_trait trait =

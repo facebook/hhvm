@@ -2393,13 +2393,13 @@ module rec Expr : sig
 
   val raw_expr :
     ?expected:ExpectedTy.t ->
-    ?lhs_of_null_coalesce:bool ->
     accept_using_var:bool ->
     check_defined:bool ->
     is_using_clause:bool ->
     valkind:valkind ->
     is_attribute_param:bool ->
     in_await:locl_phase Reason.t_ option ->
+    lhs_of_null_coalesce:bool ->
     env ->
     Nast.expr ->
     env * Tast.expr * locl_ty
@@ -2462,7 +2462,7 @@ module rec Expr : sig
     env
 
   val update_array_type :
-    ?lhs_of_null_coalesce:is_variadic ->
+    lhs_of_null_coalesce:bool ->
     pos ->
     env ->
     Nast.expr ->
@@ -2534,6 +2534,7 @@ end = struct
         ~check_defined
         ~is_attribute_param
         ~in_await
+        ~lhs_of_null_coalesce:false
         ?expected
         env
         e
@@ -2568,13 +2569,13 @@ end = struct
 
   and raw_expr
       ?(expected : ExpectedTy.t option)
-      ?lhs_of_null_coalesce
       ~accept_using_var
       ~check_defined
       ~is_using_clause
       ~valkind
       ~is_attribute_param
       ~in_await
+      ~lhs_of_null_coalesce
       env
       e =
     let (_, p, _) = e in
@@ -2583,11 +2584,11 @@ end = struct
       ~accept_using_var
       ~is_using_clause
       ?expected
-      ?lhs_of_null_coalesce
       ~valkind
       ~check_defined
       ~is_attribute_param
       ~in_await
+      ~lhs_of_null_coalesce
       env
       e
 
@@ -2599,6 +2600,7 @@ end = struct
       ~is_using_clause:false
       ~is_attribute_param:false
       ~in_await:None
+      ~lhs_of_null_coalesce:false
       env
       e
 
@@ -2622,6 +2624,7 @@ end = struct
         ~valkind:Other
         ~is_attribute_param:false
         ~in_await:None
+        ~lhs_of_null_coalesce:false
         env
         c
     in
@@ -2742,13 +2745,13 @@ end = struct
 
   and expr_
       ?(expected : ExpectedTy.t option)
-      ?lhs_of_null_coalesce
       ~accept_using_var
       ~check_defined
       ~is_using_clause
       ~valkind
       ~is_attribute_param
       ~in_await
+      ~lhs_of_null_coalesce
       env
       ((_, p, e) as outer) =
     let env = Env.open_tyvars env p in
@@ -3009,11 +3012,11 @@ end = struct
         ?expected
         ~accept_using_var
         ~is_using_clause
-        ?lhs_of_null_coalesce
         ~in_await
         ~valkind
         ~is_attribute_param:false
         ~check_defined
+        ~lhs_of_null_coalesce
         env
         e
     | Invalid expr_opt ->
@@ -3635,7 +3638,9 @@ end = struct
       let te2 = List.hd_exn tel2 in
       make_result env p (Aast.Pair (th, te1, te2)) ty
     | Array_get (e, None) ->
-      let (env, te, _) = update_array_type p env e valkind in
+      let (env, te, _) =
+        update_array_type p env e valkind ~lhs_of_null_coalesce:false
+      in
       let env = might_throw ~join_pos:p env in
       (* NAST check reports an error if [] is used for reading in an
            lvalue context. *)
@@ -3643,7 +3648,7 @@ end = struct
       make_result env p (Aast.Array_get (te, None)) ty
     | Array_get (e1, Some e2) ->
       let (env, te1, ty1) =
-        update_array_type ?lhs_of_null_coalesce p env e1 valkind
+        update_array_type ~lhs_of_null_coalesce p env e1 valkind
       in
       let (env, te2, ty2) =
         expr
@@ -3664,7 +3669,7 @@ end = struct
           ~expr_ty:ty1
           ~array_pos:p1
           ~expr_pos:p
-          ?lhs_of_null_coalesce
+          ~lhs_of_null_coalesce
           is_lvalue
           env
           ty1
@@ -3860,6 +3865,7 @@ end = struct
           ~is_using_clause:false
           ~valkind:Other
           ~in_await:None
+          ~lhs_of_null_coalesce:false
           env
           e
       in
@@ -7512,7 +7518,7 @@ end = struct
     in
     (make_call env te tal tel typed_unpack_element ty, should_forget_fakes)
 
-  and update_array_type ?lhs_of_null_coalesce p env e1 valkind =
+  and update_array_type ~lhs_of_null_coalesce p env e1 valkind =
     match valkind with
     | Lvalue
     | Lvalue_subexpr -> begin
@@ -7524,6 +7530,7 @@ end = struct
           ~valkind:Lvalue_subexpr
           ~is_attribute_param:false
           ~in_await:None
+          ~lhs_of_null_coalesce:false
           env
           e1
       in
@@ -7542,13 +7549,13 @@ end = struct
     end
     | Other ->
       raw_expr
-        ?lhs_of_null_coalesce
         ~accept_using_var:false
         ~check_defined:true
         ~is_using_clause:false
         ~valkind:Other
         ~is_attribute_param:false
         ~in_await:None
+        ~lhs_of_null_coalesce
         env
         e1
 end
@@ -10244,7 +10251,8 @@ end = struct
                ~is_using_clause:false
                ~valkind:Other
                ~is_attribute_param:false
-               ~in_await:None)
+               ~in_await:None
+               ~lhs_of_null_coalesce:false)
             env
             e2
         in
@@ -10299,6 +10307,7 @@ end = struct
           ~valkind:Other
           ~is_attribute_param:false
           ~in_await:None
+          ~lhs_of_null_coalesce:false
           env
           e1
       in
@@ -10309,7 +10318,8 @@ end = struct
              ~is_using_clause:false
              ~valkind:Other
              ~is_attribute_param:false
-             ~in_await:None)
+             ~in_await:None
+             ~lhs_of_null_coalesce:false)
           env
           e2
       in
@@ -11110,7 +11120,9 @@ end = struct
         (env, te1, ty2, ty_mismatch)
       | (_, pos, Array_get (e1, None)) ->
         let parent_lenv = env.lenv in
-        let (env, te1, ty1) = Expr.update_array_type pos env e1 Lvalue in
+        let (env, te1, ty1) =
+          Expr.update_array_type pos env e1 Lvalue ~lhs_of_null_coalesce:false
+        in
         let (_, p1, _) = e1 in
         let (env, (ty1', arr_ty_mismatch_opt, val_ty_mismatch_opt)) =
           Typing_array_access.assign_array_append
@@ -11156,7 +11168,9 @@ end = struct
             e
         in
         let parent_lenv = env.lenv in
-        let (env, te1, ty1) = Expr.update_array_type pos env e1 Lvalue in
+        let (env, te1, ty1) =
+          Expr.update_array_type pos env e1 Lvalue ~lhs_of_null_coalesce:false
+        in
         let env = might_throw ~join_pos:p env in
         let (_, p1, _) = e1 in
         let ( env,

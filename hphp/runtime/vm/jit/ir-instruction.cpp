@@ -299,9 +299,11 @@ Type allocObjReturn(const IRInstruction* inst) {
       return Type::ExactObj(inst->extra<NewInstanceRaw>()->cls);
 
     case AllocObj:
-      return inst->src(0)->hasConstVal()
-        ? Type::ExactObj(inst->src(0)->clsVal())
-        : TObj;
+      if (auto spec = inst->src(0)->type().clsSpec()) {
+        auto const cls = spec.cls();
+        return spec.exact() ? Type::ExactObj(cls) : Type::SubObj(cls);
+      }
+      return TObj;
 
     case CreateGen:
       return Type::ExactObj(Generator::classof());

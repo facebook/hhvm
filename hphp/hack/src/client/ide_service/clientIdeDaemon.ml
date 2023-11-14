@@ -267,12 +267,11 @@ let batch_update_naming_table_and_invalidate_caches
       ~sienv
       ~changes
   in
-  List.iter changes ~f:(fun { FileInfo.old_file_info; _ } ->
-      Option.iter
-        old_file_info
-        ~f:(Provider_utils.invalidate_local_decl_caches_for_file local_memory));
-  Relative_path.Map.iter open_files ~f:(fun _path (entry, _) ->
-      Provider_utils.invalidate_tast_cache_of_entry entry);
+  Provider_utils.invalidate_upon_change
+    ~ctx
+    ~local_memory
+    ~changes
+    ~entries:(Relative_path.Map.map open_files ~f:fst);
   (naming_table, sienv)
 
 (** An empty ctx with no entries *)

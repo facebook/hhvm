@@ -77,6 +77,20 @@ let invalidate_local_decl_caches_for_entries
   in
   Relative_path.Map.iter entries ~f:invalidate_for_entry
 
+let invalidate_upon_change
+    ~(ctx : Provider_context.t)
+    ~(local_memory : Provider_backend.local_memory)
+    ~(changes : FileInfo.change list)
+    ~(entries : Provider_context.entries) : unit =
+  ignore ctx;
+  List.iter changes ~f:(fun { FileInfo.old_file_info; _ } ->
+      Option.iter
+        old_file_info
+        ~f:(invalidate_local_decl_caches_for_file local_memory));
+  Relative_path.Map.iter entries ~f:(fun _path entry ->
+      invalidate_tast_cache_of_entry entry);
+  ()
+
 let ctx_from_server_env (env : ServerEnv.env) : Provider_context.t =
   (* TODO: backend should be stored in [env]. *)
   Provider_context.empty_for_tool

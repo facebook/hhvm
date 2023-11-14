@@ -725,7 +725,7 @@ const StaticString
   s_usec("usec");
 
 Variant HHVM_FUNCTION(socket_get_option,
-                      const Resource& socket,
+                      const OptResource& socket,
                       int64_t level,
                       int64_t optname) {
   auto sock = cast<Socket>(socket);
@@ -780,7 +780,7 @@ Variant HHVM_FUNCTION(socket_get_option,
 }
 
 bool HHVM_FUNCTION(socket_getpeername,
-                   const Resource& socket,
+                   const OptResource& socket,
                    Variant& address,
                    Variant& port) {
   auto sock = cast<Socket>(socket);
@@ -800,7 +800,7 @@ bool HHVM_FUNCTION(socket_getpeername,
 }
 
 bool HHVM_FUNCTION(socket_getsockname,
-                   const Resource& socket,
+                   const OptResource& socket,
                    Variant& address,
                    Variant& port) {
   auto sock = cast<Socket>(socket);
@@ -820,17 +820,17 @@ bool HHVM_FUNCTION(socket_getsockname,
 }
 
 bool HHVM_FUNCTION(socket_set_block,
-                   const Resource& socket) {
+                   const OptResource& socket) {
   return cast<Socket>(socket)->setBlocking(true);
 }
 
 bool HHVM_FUNCTION(socket_set_nonblock,
-                   const Resource& socket) {
+                   const OptResource& socket) {
   return cast<Socket>(socket)->setBlocking(false);
 }
 
 bool HHVM_FUNCTION(socket_set_option,
-                   const Resource& socket,
+                   const OptResource& socket,
                    int64_t level,
                    int64_t optname,
                    const Variant& optval) {
@@ -906,7 +906,7 @@ bool HHVM_FUNCTION(socket_set_option,
 }
 
 bool HHVM_FUNCTION(socket_connect,
-                   const Resource& socket,
+                   const OptResource& socket,
                    const String& address,
                    int64_t port /* = 0 */) {
   auto sock = cast<Socket>(socket);
@@ -945,7 +945,7 @@ bool HHVM_FUNCTION(socket_connect,
 }
 
 bool HHVM_FUNCTION(socket_bind,
-                   const Resource& socket,
+                   const OptResource& socket,
                    const String& address,
                    int64_t port /* = 0 */) {
   auto sock = cast<Socket>(socket);
@@ -971,7 +971,7 @@ bool HHVM_FUNCTION(socket_bind,
 }
 
 bool HHVM_FUNCTION(socket_listen,
-                   const Resource& socket,
+                   const OptResource& socket,
                    int64_t backlog /* = 0 */) {
   auto sock = cast<Socket>(socket);
   if (listen(sock->fd(), backlog) != 0) {
@@ -1130,7 +1130,7 @@ Variant socket_server_impl(
 }
 
 Variant HHVM_FUNCTION(socket_accept,
-                      const Resource& socket) {
+                      const OptResource& socket) {
   auto sock = cast<Socket>(socket);
   struct sockaddr sa;
   socklen_t salen = sizeof(sa);
@@ -1144,7 +1144,7 @@ Variant HHVM_FUNCTION(socket_accept,
 }
 
 Variant HHVM_FUNCTION(socket_read,
-                      const Resource& socket,
+                      const OptResource& socket,
                       int64_t length,
                       int64_t type /* = 0 */) {
   if (length <= 0) {
@@ -1178,7 +1178,7 @@ Variant HHVM_FUNCTION(socket_read,
 }
 
 Variant HHVM_FUNCTION(socket_write,
-                      const Resource& socket,
+                      const OptResource& socket,
                       const String& buffer,
                       int64_t length /* = 0 */) {
   auto sock = cast<Socket>(socket);
@@ -1195,7 +1195,7 @@ Variant HHVM_FUNCTION(socket_write,
 }
 
 Variant HHVM_FUNCTION(socket_send,
-                      const Resource& socket,
+                      const OptResource& socket,
                       const String& buf,
                       int64_t len,
                       int64_t flags) {
@@ -1213,7 +1213,7 @@ Variant HHVM_FUNCTION(socket_send,
 }
 
 Variant HHVM_FUNCTION(socket_sendto,
-                      const Resource& socket,
+                      const OptResource& socket,
                       const String& buf,
                       int64_t len,
                       int64_t flags,
@@ -1296,7 +1296,7 @@ Variant HHVM_FUNCTION(socket_sendto,
 }
 
 Variant HHVM_FUNCTION(socket_recv,
-                      const Resource& socket,
+                      const OptResource& socket,
                       Variant& buf,
                       int64_t len,
                       int64_t flags) {
@@ -1323,7 +1323,7 @@ Variant HHVM_FUNCTION(socket_recv,
 }
 
 Variant HHVM_FUNCTION(socket_recvfrom,
-                      const Resource& socket,
+                      const OptResource& socket,
                       Variant& buf,
                       int64_t len,
                       int64_t flags,
@@ -1435,7 +1435,7 @@ Variant HHVM_FUNCTION(socket_recvfrom,
 }
 
 bool HHVM_FUNCTION(socket_shutdown,
-                   const Resource& socket,
+                   const OptResource& socket,
                    int64_t how /* = 0 */) {
   /* For some operations that are conceptually a socket operation
    * (eg fopen('http://...)) we actually complete it and store the result in
@@ -1453,8 +1453,7 @@ bool HHVM_FUNCTION(socket_shutdown,
   return true;
 }
 
-void HHVM_FUNCTION(socket_close,
-                   const Resource& socket) {
+void HHVM_FUNCTION(socket_close, const OptResource& socket) {
   cast<Socket>(socket)->close();
 }
 

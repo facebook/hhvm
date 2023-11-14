@@ -658,7 +658,7 @@ bool checkTypeStructureMatchesTVImpl(
 
     case TypeStructure::Kind::T_resource:
       return isResourceType(type) &&
-             !reinterpret_cast<const Resource*>(&data.pres)->isInvalid();
+             !reinterpret_cast<const OptResource*>(&data.pres)->isInvalid();
 
     case TypeStructure::Kind::T_darray:
       return isOrAsOp ? is_dict(&c1) : is_vec(&c1) || is_dict(&c1);

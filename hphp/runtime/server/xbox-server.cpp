@@ -248,7 +248,7 @@ IMPLEMENT_RESOURCE_ALLOCATION(XboxTask)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Resource XboxServer::TaskStart(const String& msg,
+OptResource XboxServer::TaskStart(const String& msg,
                                const String& reqInitDoc /* = "" */,
   ServerTaskEvent<XboxServer, XboxTransport> *event /* = nullptr */) {
   static auto xboxOverflowCounter =
@@ -282,7 +282,7 @@ Resource XboxServer::TaskStart(const String& msg,
       assertx(s_dispatcher);
       s_dispatcher->enqueue(job);
 
-      return Resource(std::move(task));
+      return OptResource(std::move(task));
     }
   }
 
@@ -301,14 +301,14 @@ Resource XboxServer::TaskStart(const String& msg,
   }
 
   throw_exception(SystemLib::AllocExceptionObject(errMsg));
-  return Resource();
+  return OptResource();
 }
 
-bool XboxServer::TaskStatus(const Resource& task) {
+bool XboxServer::TaskStatus(const OptResource& task) {
   return cast<XboxTask>(task)->getJob()->isDone();
 }
 
-int XboxServer::TaskResult(const Resource& task, int timeout_ms, Variant *ret) {
+int XboxServer::TaskResult(const OptResource& task, int timeout_ms, Variant *ret) {
   return TaskResult(cast<XboxTask>(task)->getJob(), timeout_ms, ret);
 }
 

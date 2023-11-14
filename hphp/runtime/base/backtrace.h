@@ -38,7 +38,6 @@ struct Array;
 struct BTFrame;
 struct Class;
 struct Func;
-struct Resource;
 struct StructuredLogEntry;
 struct VMParserFrame;
 struct c_ResumableWaitHandle;

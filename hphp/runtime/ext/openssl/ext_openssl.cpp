@@ -1888,7 +1888,7 @@ static void add_bignum_as_string(Array &arr,
   arr.set(key, std::move(str));
 }
 
-Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
+Array HHVM_FUNCTION(openssl_pkey_get_details, const OptResource& key) {
   EVP_PKEY *pkey = cast<Key>(key)->m_key;
   BIO *out = BIO_new(BIO_s_mem());
   PEM_write_bio_PUBKEY(out, pkey);
@@ -2036,7 +2036,7 @@ Variant HHVM_FUNCTION(openssl_pkey_new,
   std::vector<String> strings;
   if (php_openssl_parse_config(&req, configargs.toArray(), strings) &&
       req.generatePrivateKey()) {
-    return Resource(req::make<Key>(req.priv_key));
+    return OptResource(req::make<Key>(req.priv_key));
   } else {
     return false;
   }

@@ -141,7 +141,7 @@ def pp_LowPtr(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
 #------------------------------------------------------------------------------
 # Resource
 
-@format("^HPHP::Resource$", regex=True)
+@format("^HPHP::OptResource$", regex=True)
 def pp_Resource(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
     val = utils.rawptr(utils.get(val_obj, "m_res"))
     return utils.pretty_resource_header(val)

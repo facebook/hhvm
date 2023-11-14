@@ -54,7 +54,7 @@ static Variant HHVM_METHOD(DirectoryIterator, hh_readdir) {
       s_dirName.get(), path.asTypedValue());
   }
 
-  return HHVM_FN(readdir)(Resource(dir));
+  return HHVM_FN(readdir)(OptResource(dir));
 }
 
 static int64_t HHVM_METHOD(GlobIterator, count) {

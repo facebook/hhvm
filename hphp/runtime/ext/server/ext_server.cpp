@@ -51,7 +51,7 @@ bool HHVM_FUNCTION(pagelet_server_is_enabled) {
 
 const StaticString s_Host("Host");
 
-Resource HHVM_FUNCTION(pagelet_server_task_start,
+OptResource HHVM_FUNCTION(pagelet_server_task_start,
                        const String& url,
                        const Array& headers /* = null_array */,
                        const String& post_data /* = null_string */,
@@ -81,12 +81,12 @@ Resource HHVM_FUNCTION(pagelet_server_task_start,
 }
 
 int64_t HHVM_FUNCTION(pagelet_server_task_status,
-                      const Resource& task) {
+                      const OptResource& task) {
   return PageletServer::TaskStatus(task);
 }
 
 String HHVM_FUNCTION(pagelet_server_task_result,
-                     const Resource& task,
+                     const OptResource& task,
                      Array& headers,
                      int64_t& code,
                      int64_t timeout_ms /* = 0 */) {
@@ -129,18 +129,18 @@ bool HHVM_FUNCTION(pagelet_server_is_done) {
 ///////////////////////////////////////////////////////////////////////////////
 // xbox
 
-Resource HHVM_FUNCTION(xbox_task_start,
+OptResource HHVM_FUNCTION(xbox_task_start,
                        const String& message) {
   return XboxServer::TaskStart(message);
 }
 
 bool HHVM_FUNCTION(xbox_task_status,
-                   const Resource& task) {
+                   const OptResource& task) {
   return XboxServer::TaskStatus(task);
 }
 
 int64_t HHVM_FUNCTION(xbox_task_result,
-                      const Resource& task,
+                      const OptResource& task,
                       int64_t timeout_ms,
                       Variant& ret) {
   auto result = XboxServer::TaskResult(task, timeout_ms, &ret);

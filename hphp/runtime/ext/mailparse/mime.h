@@ -54,7 +54,7 @@ public:
                   bool isfile);
   Array getPartData();
   Array getStructure();
-  Resource findByName(const char *name);
+  OptResource findByName(const char *name);
 
   bool isVersion1();
   int filter(int c);

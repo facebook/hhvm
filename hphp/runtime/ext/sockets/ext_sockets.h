@@ -28,20 +28,20 @@ bool socket_create_pair_impl(int64_t domain, int64_t type, int64_t protocol, Var
                              bool asStream);
 
 bool HHVM_FUNCTION(socket_getpeername,
-                   const Resource& socket,
+                   const OptResource& socket,
                    Variant& address,
                    Variant& port);
 bool HHVM_FUNCTION(socket_getsockname,
-                   const Resource& socket,
+                   const OptResource& socket,
                    Variant& address,
                    Variant& port);
 bool HHVM_FUNCTION(socket_set_option,
-                   const Resource& socket,
+                   const OptResource& socket,
                    int64_t level,
                    int64_t optname,
                    const Variant& optval);
 bool HHVM_FUNCTION(socket_connect,
-                   const Resource& socket,
+                   const OptResource& socket,
                    const String& address,
                    int64_t port = 0);
 Variant HHVM_FUNCTION(socket_select,
@@ -51,21 +51,21 @@ Variant HHVM_FUNCTION(socket_select,
                       const Variant& vtv_sec,
                       int64_t tv_usec = 0);
 Variant HHVM_FUNCTION(socket_sendto,
-                      const Resource& socket,
+                      const OptResource& socket,
                       const String& buf,
                       int64_t  len,
                       int64_t flags,
                       const String& addr,
                       int64_t port = -1);
 Variant HHVM_FUNCTION(socket_recvfrom,
-                      const Resource& socket,
+                      const OptResource& socket,
                       Variant& buf,
                       int64_t len,
                       int64_t flags,
                       Variant& name,
                       Variant& port);
 bool HHVM_FUNCTION(socket_shutdown,
-                   const Resource& socket,
+                   const OptResource& socket,
                    int64_t how = 0);
 Variant HHVM_FUNCTION(getaddrinfo,
                       const String& host,

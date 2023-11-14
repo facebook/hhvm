@@ -165,8 +165,8 @@ void takeString(String UNUSED v) { return; }
 void takePtrToString(String* UNUSED v) { return; }
 void takeStaticString(StaticString UNUSED v) { return; }
 void takeStrNR(StrNR UNUSED v) { return; }
-void takeResource(Resource UNUSED v) { return; }
-void takePtrToResource(Resource* UNUSED v) { return; }
+void takeResource(OptResource UNUSED v) { return; }
+void takePtrToResource(OptResource* UNUSED v) { return; }
 void takeObject(Object UNUSED v) { return; }
 void takeReqPtr(req::ptr<ObjectData> UNUSED v) { return; }
 void takeOptional(Optional<String> UNUSED v) { return; }
@@ -193,7 +193,7 @@ void buildOtherValues() {
   Array keyset = make_keyset_array(1, "cats", 2, 3, "cats", 2, 3, "dogs", 42);
   auto sd = StringData::MakeStatic("hello");
   auto s = String("hello");
-  auto rsc = Resource(req::make<DummyResource>());
+  auto rsc = OptResource(req::make<DummyResource>());
   auto cls = TestObject->getVMClass();
   auto lp = LowPtr(cls);
   auto func = cls->getCtor();

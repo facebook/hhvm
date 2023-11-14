@@ -443,7 +443,7 @@ void PageletServer::Stop() {
   }
 }
 
-Resource PageletServer::TaskStart(
+OptResource PageletServer::TaskStart(
   const String& url, const Array& headers,
   const String& remote_host,
   const String& post_data /* = null_string */,
@@ -460,13 +460,13 @@ Resource PageletServer::TaskStart(
   {
     Lock l(s_dispatchMutex);
     if (!s_dispatcher) {
-      return Resource();
+      return OptResource();
     }
     if (RuntimeOption::PageletServerQueueLimit > 0) {
       auto num_queued_jobs = s_dispatcher->getQueuedJobs();
       if (num_queued_jobs > RuntimeOption::PageletServerQueueLimit) {
         pageletOverflowCounter->addValue(1);
-        return Resource();
+        return OptResource();
       }
       if (num_queued_jobs > 0) {
         pageletQueuedCounter->addValue(1);
@@ -488,12 +488,12 @@ Resource PageletServer::TaskStart(
 
     s_dispatcher->enqueue(job);
     g_context->incrPageletTasksStarted();
-    return Resource(std::move(task));
+    return OptResource(std::move(task));
   }
-  return Resource();
+  return OptResource();
 }
 
-int64_t PageletServer::TaskStatus(const Resource& task) {
+int64_t PageletServer::TaskStatus(const OptResource& task) {
   PageletTransport *job = cast<PageletTask>(task)->getJob();
   if (!job->isPipelineEmpty()) {
     return PAGELET_READY;
@@ -504,13 +504,13 @@ int64_t PageletServer::TaskStatus(const Resource& task) {
   return PAGELET_NOT_READY;
 }
 
-String PageletServer::TaskResult(const Resource& task, Array &headers, int &code,
+String PageletServer::TaskResult(const OptResource& task, Array &headers, int &code,
                                  int64_t timeout_ms) {
   auto ptask = cast<PageletTask>(task);
   return ptask->getJob()->getResults(headers, code, timeout_ms);
 }
 
-Array PageletServer::AsyncTaskResult(const Resource& task) {
+Array PageletServer::AsyncTaskResult(const OptResource& task) {
   auto ptask = cast<PageletTask>(task);
   return ptask->getJob()->getAsyncResults(true);
 }

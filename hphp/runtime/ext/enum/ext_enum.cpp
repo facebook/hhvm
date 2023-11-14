@@ -143,13 +143,13 @@ static Variant HHVM_STATIC_METHOD(BuiltinEnum, coerce, const Variant &value) {
   return res;
 }
 
-Resource HHVM_FUNCTION(create_opaque_value_internal, int64_t id,
-                                                     const Variant& val) {
-  return Resource(req::make<OpaqueResource>(id, val));
+OptResource HHVM_FUNCTION(create_opaque_value_internal, int64_t id,
+                          const Variant& val) {
+  return OptResource(req::make<OpaqueResource>(id, val));
 }
 
 Variant HHVM_FUNCTION(unwrap_opaque_value, int64_t id,
-                                           const Resource& res) {
+                      const OptResource& res) {
   if (!res->instanceof<OpaqueResource>()) {
     SystemLib::throwInvalidArgumentExceptionObject("Invalid OpaqueValue");
   }

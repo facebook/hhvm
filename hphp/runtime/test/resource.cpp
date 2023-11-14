@@ -26,7 +26,7 @@ TEST(Resource, Refcounts) {
   {
     auto ptr = req::make<DummyResource>();
     EXPECT_TRUE(ptr->hasExactlyOneRef());
-    Resource r(std::move(ptr));
+    OptResource r(std::move(ptr));
     EXPECT_TRUE(r->hasExactlyOneRef());
   }
 
@@ -34,7 +34,7 @@ TEST(Resource, Refcounts) {
     auto ptr = req::make<DummyResource>();
     EXPECT_TRUE(ptr->hasExactlyOneRef());
     {
-      Resource r(ptr);
+      OptResource r(ptr);
       EXPECT_TRUE(ptr->hasMultipleRefs()); // count==2
       EXPECT_TRUE(r->hasMultipleRefs());
     }
@@ -45,12 +45,12 @@ TEST(Resource, Refcounts) {
 TEST(Resource, Casts) {
   // Test cast operations
   {
-    EXPECT_FALSE(isa<DummyResource>(Resource()));
-    EXPECT_TRUE(isa_or_null<DummyResource>(Resource()));
+    EXPECT_FALSE(isa<DummyResource>(OptResource()));
+    EXPECT_TRUE(isa_or_null<DummyResource>(OptResource()));
 
     auto dummy = req::make<DummyResource>();
-    Resource res(dummy);
-    Resource empty;
+    OptResource res(dummy);
+    OptResource empty;
     EXPECT_TRUE(isa<DummyResource>(res));
     EXPECT_TRUE(isa_or_null<DummyResource>(res));
 

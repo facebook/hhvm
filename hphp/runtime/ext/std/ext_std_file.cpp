@@ -330,8 +330,7 @@ Variant HHVM_FUNCTION(popen,
   return Variant(std::move(file));
 }
 
-bool HHVM_FUNCTION(fclose,
-                   const Resource& handle) {
+bool HHVM_FUNCTION(fclose, const OptResource& handle) {
   CHECK_HANDLE(handle, f);
   return CHECK_ERROR(f->close());
 }
@@ -345,21 +344,19 @@ Variant HHVM_FUNCTION(pclose,
 }
 
 Variant HHVM_FUNCTION(fseek,
-                      const Resource& handle,
+                      const OptResource& handle,
                       int64_t offset,
                       int64_t whence /* = SEEK_SET */) {
   CHECK_HANDLE(handle, f);
   return CHECK_ERROR(f->seek(offset, whence)) ? 0 : -1;
 }
 
-bool HHVM_FUNCTION(rewind,
-                   const Resource& handle) {
+bool HHVM_FUNCTION(rewind, const OptResource& handle) {
   CHECK_HANDLE(handle, f);
   return CHECK_ERROR(f->rewind());
 }
 
-Variant HHVM_FUNCTION(ftell,
-                      const Resource& handle) {
+Variant HHVM_FUNCTION(ftell, const OptResource& handle) {
   CHECK_HANDLE(handle, f);
   int64_t ret = f->tell();
   if (!CHECK_ERROR(ret != -1)) {
@@ -368,14 +365,12 @@ Variant HHVM_FUNCTION(ftell,
   return ret;
 }
 
-bool HHVM_FUNCTION(feof,
-                   const Resource& handle) {
+bool HHVM_FUNCTION(feof, const OptResource& handle) {
   CHECK_HANDLE(handle, f);
   return f->eof();
 }
 
-Variant HHVM_FUNCTION(fstat,
-                      const Resource& handle) {
+Variant HHVM_FUNCTION(fstat, const OptResource& handle) {
   CHECK_HANDLE(handle, f);
   struct stat sb;
   if (!CHECK_ERROR(f->stat(&sb)))
@@ -384,7 +379,7 @@ Variant HHVM_FUNCTION(fstat,
 }
 
 Variant HHVM_FUNCTION(fread,
-                      const Resource& handle,
+                      const OptResource& handle,
                       int64_t length) {
   CHECK_HANDLE(handle, f);
   if (length < 1) {
@@ -396,8 +391,7 @@ Variant HHVM_FUNCTION(fread,
   return f->read(length);
 }
 
-Variant HHVM_FUNCTION(fgetc,
-                      const Resource& handle) {
+Variant HHVM_FUNCTION(fgetc, const OptResource& handle) {
   CHECK_HANDLE(handle, f);
   int result = f->getc();
   if (result == EOF) {
@@ -407,7 +401,7 @@ Variant HHVM_FUNCTION(fgetc,
 }
 
 Variant HHVM_FUNCTION(fgets,
-                      const Resource& handle,
+                      const OptResource& handle,
                       int64_t length /* = 0 */) {
   if (length < 0) {
     raise_invalid_argument_warning("length (negative): %" PRId64, length);
@@ -422,7 +416,7 @@ Variant HHVM_FUNCTION(fgets,
 }
 
 Variant HHVM_FUNCTION(fgetss,
-                      const Resource& handle,
+                      const OptResource& handle,
                       int64_t length /* = 0 */,
                       const String& allowable_tags /* = null_string */) {
   Variant ret = HHVM_FN(fgets)(handle, length);
@@ -433,7 +427,7 @@ Variant HHVM_FUNCTION(fgetss,
 }
 
 Variant HHVM_FUNCTION(fscanf,
-                      const Resource& handle,
+                      const OptResource& handle,
                       const String& format) {
   CHECK_HANDLE(handle, f);
   String line = f->readLine();
@@ -443,14 +437,13 @@ Variant HHVM_FUNCTION(fscanf,
   return HHVM_FN(sscanf)(line, format);
 }
 
-Variant HHVM_FUNCTION(fpassthru,
-                      const Resource& handle) {
+Variant HHVM_FUNCTION(fpassthru, const OptResource& handle) {
   CHECK_HANDLE(handle, f);
   return f->print();
 }
 
 Variant HHVM_FUNCTION(fwrite,
-                      const Resource& handle,
+                      const OptResource& handle,
                       const String& data,
                       int64_t length /* = 0 */) {
   CHECK_HANDLE(handle, f);
@@ -464,7 +457,7 @@ Variant HHVM_FUNCTION(fwrite,
 }
 
 Variant HHVM_FUNCTION(fputs,
-                      const Resource& handle,
+                      const OptResource& handle,
                       const String& data,
                       int64_t length /* = 0 */) {
   CHECK_HANDLE(handle, f);
@@ -481,7 +474,7 @@ Variant HHVM_FUNCTION(fprintf,
     raise_param_type_warning("fprintf", 1, "resource", *handle.asTypedValue());
     return false;
   }
-  const Resource res = handle.toResource();
+  const OptResource res = handle.toResource();
   CHECK_HANDLE(res, f);
   return f->printf(format, args);
 }
@@ -495,13 +488,13 @@ Variant HHVM_FUNCTION(vfprintf,
 }
 
 bool HHVM_FUNCTION(fflush,
-                   const Resource& handle) {
+                   const OptResource& handle) {
   CHECK_HANDLE(handle, f);
   return CHECK_ERROR(f->flush());
 }
 
 bool HHVM_FUNCTION(ftruncate,
-                   const Resource& handle,
+                   const OptResource& handle,
                    int64_t size) {
   CHECK_HANDLE(handle, f);
   return CHECK_ERROR(f->truncate(size));
@@ -510,7 +503,7 @@ bool HHVM_FUNCTION(ftruncate,
 static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
 
 bool HHVM_FUNCTION(flock,
-                   const Resource& handle,
+                   const OptResource& handle,
                    int64_t operation,
                    bool& wouldblock) {
   CHECK_HANDLE(handle, f);
@@ -538,7 +531,7 @@ bool HHVM_FUNCTION(flock,
   char NAME ## _char = NAME.charAt(0);                  \
 
 Variant HHVM_FUNCTION(fputcsv,
-                      const Resource& handle,
+                      const OptResource& handle,
                       const Array& fields,
                       const String& delimiter /* = "," */,
                       const String& enclosure /* = "\"" */,
@@ -552,7 +545,7 @@ Variant HHVM_FUNCTION(fputcsv,
 }
 
 Variant HHVM_FUNCTION(fgetcsv,
-                      const Resource& handle,
+                      const OptResource& handle,
                       int64_t length /* = 0 */,
                       const String& delimiter /* = "," */,
                       const String& enclosure /* = "\"" */,
@@ -1974,7 +1967,7 @@ const StaticString
   s_handle("handle"),
   s_path("path");
 
-req::ptr<Directory> get_dir(const Resource& dir_handle) {
+req::ptr<Directory> get_dir(const OptResource& dir_handle) {
   if (dir_handle.isNull()) {
     auto defaultDir = s_directory_data->defaultDirectory;
     if (!defaultDir) {
@@ -2031,7 +2024,7 @@ Variant HHVM_FUNCTION(dir,
 
 Variant HHVM_FUNCTION(readdir,
                       const Variant& dir_handle /* = null */) {
-  const Resource& res_dir_handle = dir_handle.isNull()
+  const OptResource& res_dir_handle = dir_handle.isNull()
                                  ? null_resource
                                  : dir_handle.toResource();
   auto dir = get_dir(res_dir_handle);
@@ -2043,7 +2036,7 @@ Variant HHVM_FUNCTION(readdir,
 
 void HHVM_FUNCTION(rewinddir,
                    const Variant& dir_handle /* = null */) {
-  const Resource& res_dir_handle = dir_handle.isNull()
+  const OptResource& res_dir_handle = dir_handle.isNull()
                                  ? null_resource
                                  : dir_handle.toResource();
   auto dir = get_dir(res_dir_handle);
@@ -2094,7 +2087,7 @@ HHVM_FUNCTION(scandir, const String& directory, bool descending /* = false */,
 
 void HHVM_FUNCTION(closedir,
                    const Variant& dir_handle /* = null */) {
-  const Resource& res_dir_handle = dir_handle.isNull()
+  const OptResource& res_dir_handle = dir_handle.isNull()
                                  ? null_resource
                                  : dir_handle.toResource();
   auto d = get_dir(res_dir_handle);
@@ -2110,7 +2103,7 @@ void HHVM_FUNCTION(closedir,
 namespace {
 template<typename T>
 Variant try_stdio(T f) {
-  return is_any_cli_mode() ? f().asCResRef() : Resource();
+  return is_any_cli_mode() ? f().asCResRef() : OptResource();
 }
 
 Variant HHVM_FUNCTION(try_stdin) {

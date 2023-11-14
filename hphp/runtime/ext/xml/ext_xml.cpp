@@ -696,7 +696,7 @@ static void xml_set_handler(Variant * handler, const Variant& data) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Resource HHVM_FUNCTION(xml_parser_create,
+OptResource HHVM_FUNCTION(xml_parser_create,
                        const Variant& encoding /* = uninit_variant */) {
   const String& strEncoding = encoding.isNull()
                             ? null_string
@@ -704,7 +704,7 @@ Resource HHVM_FUNCTION(xml_parser_create,
   return php_xml_parser_create_impl(strEncoding, null_string, 0).toResource();
 }
 
-Resource HHVM_FUNCTION(xml_parser_create_ns,
+OptResource HHVM_FUNCTION(xml_parser_create_ns,
                        const Variant& encoding /* = uninit_variant */,
                        const Variant& separator /* = uninit_variant */) {
   const String& strEncoding = encoding.isNull()
@@ -717,7 +717,7 @@ Resource HHVM_FUNCTION(xml_parser_create_ns,
 }
 
 bool HHVM_FUNCTION(xml_parser_free,
-                   const Resource& parser) {
+                   const OptResource& parser) {
   auto p = cast<XmlParser>(parser);
   if (p->isparsing == 1) {
     raise_warning("Parser cannot be freed while it is parsing.");
@@ -728,7 +728,7 @@ bool HHVM_FUNCTION(xml_parser_free,
 }
 
 int64_t HHVM_FUNCTION(xml_parse,
-                      const Resource& parser,
+                      const OptResource& parser,
                       const String& data,
                       bool is_final /* = true */) {
   // XML_Parse can reenter the VM, and it will do so after we've lost
@@ -746,7 +746,7 @@ int64_t HHVM_FUNCTION(xml_parse,
 }
 
 int64_t HHVM_FUNCTION(xml_parse_into_struct,
-                      const Resource& parser,
+                      const OptResource& parser,
                       const String& data,
                       Array& values,
                       Array& index) {
@@ -776,7 +776,7 @@ int64_t HHVM_FUNCTION(xml_parse_into_struct,
 }
 
 Variant HHVM_FUNCTION(xml_parser_get_option,
-                      const Resource& parser,
+                      const OptResource& parser,
                       int64_t option) {
   auto p = cast<XmlParser>(parser);
   switch (option) {
@@ -792,7 +792,7 @@ Variant HHVM_FUNCTION(xml_parser_get_option,
 }
 
 bool HHVM_FUNCTION(xml_parser_set_option,
-                   const Resource& parser,
+                   const OptResource& parser,
                    int64_t option,
                    const Variant& value) {
   auto p = cast<XmlParser>(parser);
@@ -825,7 +825,7 @@ bool HHVM_FUNCTION(xml_parser_set_option,
 }
 
 bool HHVM_FUNCTION(xml_set_character_data_handler,
-                   const Resource& parser,
+                   const OptResource& parser,
                    const Variant& handler) {
   auto p = cast<XmlParser>(parser);
   xml_set_handler(&p->characterDataHandler, handler);
@@ -834,7 +834,7 @@ bool HHVM_FUNCTION(xml_set_character_data_handler,
 }
 
 bool HHVM_FUNCTION(xml_set_default_handler,
-                   const Resource& parser,
+                   const OptResource& parser,
                    const Variant& handler) {
   auto p = cast<XmlParser>(parser);
   xml_set_handler(&p->defaultHandler, handler);
@@ -843,7 +843,7 @@ bool HHVM_FUNCTION(xml_set_default_handler,
 }
 
 bool HHVM_FUNCTION(xml_set_element_handler,
-                   const Resource& parser,
+                   const OptResource& parser,
                    const Variant& start_element_handler,
                    const Variant& end_element_handler) {
   auto p = cast<XmlParser>(parser);
@@ -855,7 +855,7 @@ bool HHVM_FUNCTION(xml_set_element_handler,
 }
 
 bool HHVM_FUNCTION(xml_set_processing_instruction_handler,
-                   const Resource& parser,
+                   const OptResource& parser,
                    const Variant& handler) {
   auto p = cast<XmlParser>(parser);
   xml_set_handler(&p->processingInstructionHandler, handler);
@@ -865,7 +865,7 @@ bool HHVM_FUNCTION(xml_set_processing_instruction_handler,
 }
 
 bool HHVM_FUNCTION(xml_set_start_namespace_decl_handler,
-                   const Resource& parser,
+                   const OptResource& parser,
                    const Variant& handler) {
   auto p = cast<XmlParser>(parser);
   xml_set_handler(&p->startNamespaceDeclHandler, handler);
@@ -874,7 +874,7 @@ bool HHVM_FUNCTION(xml_set_start_namespace_decl_handler,
 }
 
 bool HHVM_FUNCTION(xml_set_end_namespace_decl_handler,
-                   const Resource& parser,
+                   const OptResource& parser,
                    const Variant& handler) {
   auto p = cast<XmlParser>(parser);
   xml_set_handler(&p->endNamespaceDeclHandler, handler);
@@ -883,7 +883,7 @@ bool HHVM_FUNCTION(xml_set_end_namespace_decl_handler,
 }
 
 bool HHVM_FUNCTION(xml_set_unparsed_entity_decl_handler,
-                   const Resource& parser,
+                   const OptResource& parser,
                    const Variant& handler) {
   auto p = cast<XmlParser>(parser);
   xml_set_handler(&p->unparsedEntityDeclHandler, handler);
@@ -892,7 +892,7 @@ bool HHVM_FUNCTION(xml_set_unparsed_entity_decl_handler,
 }
 
 bool HHVM_FUNCTION(xml_set_external_entity_ref_handler,
-                   const Resource& parser,
+                   const OptResource& parser,
                    const Variant& handler) {
   auto p = cast<XmlParser>(parser);
   xml_set_handler(&p->externalEntityRefHandler, handler);
@@ -901,7 +901,7 @@ bool HHVM_FUNCTION(xml_set_external_entity_ref_handler,
 }
 
 bool HHVM_FUNCTION(xml_set_notation_decl_handler,
-                   const Resource& parser,
+                   const OptResource& parser,
                    const Variant& handler) {
   auto p = cast<XmlParser>(parser);
   xml_set_handler(&p->notationDeclHandler, handler);
@@ -910,7 +910,7 @@ bool HHVM_FUNCTION(xml_set_notation_decl_handler,
 }
 
 bool HHVM_FUNCTION(xml_set_object,
-                   const Resource& parser,
+                   const OptResource& parser,
                    const Variant& object) {
   auto p = cast<XmlParser>(parser);
   p->object = object;
@@ -918,25 +918,25 @@ bool HHVM_FUNCTION(xml_set_object,
 }
 
 int64_t HHVM_FUNCTION(xml_get_current_byte_index,
-                      const Resource& parser) {
+                      const OptResource& parser) {
   auto p = cast<XmlParser>(parser);
   return XML_GetCurrentByteIndex(p->parser);
 }
 
 int64_t HHVM_FUNCTION(xml_get_current_column_number,
-                      const Resource& parser) {
+                      const OptResource& parser) {
   auto p = cast<XmlParser>(parser);
   return XML_GetCurrentColumnNumber(p->parser);
 }
 
 int64_t HHVM_FUNCTION(xml_get_current_line_number,
-                      const Resource& parser) {
+                      const OptResource& parser) {
   auto p = cast<XmlParser>(parser);
   return XML_GetCurrentLineNumber(p->parser);
 }
 
 int64_t HHVM_FUNCTION(xml_get_error_code,
-                      const Resource& parser) {
+                      const OptResource& parser) {
   auto p = cast<XmlParser>(parser);
   return XML_GetErrorCode(p->parser);
 }

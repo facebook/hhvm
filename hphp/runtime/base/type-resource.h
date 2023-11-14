@@ -28,8 +28,9 @@ namespace HPHP {
 
 /**
  * Resource type wrapping around ResourceData to implement reference count.
+ * May be null; corresponds to the hack type `?resource`.
  */
-struct Resource {
+struct OptResource {
 private:
   using Ptr = req::ptr<ResourceHdr>;
   using NoIncRef = Ptr::NoIncRef;
@@ -37,7 +38,7 @@ private:
   Ptr m_res;
 
 public:
-  Resource() {}
+  OptResource() {}
 
   void reset(ResourceData* res = nullptr) {
     m_res.reset(safehdr(res));
@@ -61,48 +62,49 @@ public:
   /**
    * Constructors
    */
-  explicit Resource(ResourceData *data)
+  explicit OptResource(ResourceData *data)
     : m_res(safehdr(data)) {}
-  explicit Resource(ResourceHdr *hdr)
+  explicit OptResource(ResourceHdr *hdr)
     : m_res(hdr) {}
 
-  /* implicit */ Resource(const Resource& src) : m_res(src.m_res) { }
+  /* implicit */ OptResource(const OptResource& src)
+    : m_res(src.m_res) { }
 
   template <typename T> // T must extend ResourceData
-  explicit Resource(req::ptr<T>&& src)
+  explicit OptResource(req::ptr<T>&& src)
   : m_res(safehdr(src.detach()), NoIncRef{})
   {}
 
   template <typename T> // T must extend resourceData
-  explicit Resource(const req::ptr<T>& src)
+  explicit OptResource(const req::ptr<T>& src)
   : m_res(safehdr(src.get())) // causes incref
   {}
 
   // Move ctor
-  Resource(Resource&& src) noexcept : m_res(std::move(src.m_res)) { }
+  OptResource(OptResource&& src) noexcept : m_res(std::move(src.m_res)) { }
 
   // Regular assign
-  Resource& operator=(const Resource& src) {
+  OptResource& operator=(const OptResource& src) {
     m_res = src.m_res;
     return *this;
   }
   template <typename T>
-  Resource& operator=(const req::ptr<T>& src) {
+  OptResource& operator=(const req::ptr<T>& src) {
     m_res = src;
     return *this;
   }
   // Move assign
-  Resource& operator=(Resource&& src) {
+  OptResource& operator=(OptResource&& src) {
     m_res = std::move(src.m_res);
     return *this;
   }
   template <typename T>
-  Resource& operator=(req::ptr<T>&& src) {
+  OptResource& operator=(req::ptr<T>&& src) {
     m_res = std::move(src);
     return *this;
   }
 
-  ~Resource();
+  ~OptResource();
 
   /**
    * Informational
@@ -138,7 +140,7 @@ private:
   friend typename std::enable_if<
     std::is_base_of<ResourceData,T>::value,
     ResourceData*
-  >::type deref(const Resource& r) {
+  >::type deref(const OptResource& r) {
     return safedata(r.m_res.get());
   }
 
@@ -146,14 +148,14 @@ private:
   friend typename std::enable_if<
     std::is_base_of<ResourceData,T>::value,
     ResourceData*
-  >::type detach(Resource&& r) {
+  >::type detach(OptResource&& r) {
     return safedata(r.m_res.detach());
   }
 
   static void compileTimeAssertions();
 };
 
-extern const Resource null_resource;
+extern const OptResource null_resource;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

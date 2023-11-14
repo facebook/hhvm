@@ -190,7 +190,7 @@ static Variant php_mcrypt_do_crypt(const String& cipher, const String& key,
   return s;
 }
 
-static req::ptr<MCrypt> get_valid_mcrypt_resource(const Resource& td) {
+static req::ptr<MCrypt> get_valid_mcrypt_resource(const OptResource& td) {
   auto pm = dyn_cast_or_null<MCrypt>(td);
 
   if (pm == nullptr || pm->isInvalid()) {
@@ -201,7 +201,7 @@ static req::ptr<MCrypt> get_valid_mcrypt_resource(const Resource& td) {
   return pm;
 }
 
-static Variant mcrypt_generic(const Resource& td, const String& data,
+static Variant mcrypt_generic(const OptResource& td, const String& data,
                               bool dencrypt) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
@@ -264,7 +264,7 @@ Variant HHVM_FUNCTION(mcrypt_module_open, const String& algorithm,
   return Variant(req::make<MCrypt>(td));
 }
 
-bool HHVM_FUNCTION(mcrypt_module_close, const Resource& td) {
+bool HHVM_FUNCTION(mcrypt_module_close, const OptResource& td) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
     return false;
@@ -528,7 +528,7 @@ Variant HHVM_FUNCTION(mcrypt_get_key_size, const String& cipher,
   return ret;
 }
 
-Variant HHVM_FUNCTION(mcrypt_enc_get_algorithms_name, const Resource& td) {
+Variant HHVM_FUNCTION(mcrypt_enc_get_algorithms_name, const OptResource& td) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
     return false;
@@ -540,7 +540,7 @@ Variant HHVM_FUNCTION(mcrypt_enc_get_algorithms_name, const Resource& td) {
   return ret;
 }
 
-Variant HHVM_FUNCTION(mcrypt_enc_get_block_size, const Resource& td) {
+Variant HHVM_FUNCTION(mcrypt_enc_get_block_size, const OptResource& td) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
     return false;
@@ -549,7 +549,7 @@ Variant HHVM_FUNCTION(mcrypt_enc_get_block_size, const Resource& td) {
   return mcrypt_enc_get_block_size(pm->m_td);
 }
 
-Variant HHVM_FUNCTION(mcrypt_enc_get_iv_size, const Resource& td) {
+Variant HHVM_FUNCTION(mcrypt_enc_get_iv_size, const OptResource& td) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
     return false;
@@ -558,7 +558,7 @@ Variant HHVM_FUNCTION(mcrypt_enc_get_iv_size, const Resource& td) {
   return mcrypt_enc_get_iv_size(pm->m_td);
 }
 
-Variant HHVM_FUNCTION(mcrypt_enc_get_key_size, const Resource& td) {
+Variant HHVM_FUNCTION(mcrypt_enc_get_key_size, const OptResource& td) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
     return false;
@@ -567,7 +567,7 @@ Variant HHVM_FUNCTION(mcrypt_enc_get_key_size, const Resource& td) {
   return mcrypt_enc_get_key_size(pm->m_td);
 }
 
-Variant HHVM_FUNCTION(mcrypt_enc_get_modes_name, const Resource& td) {
+Variant HHVM_FUNCTION(mcrypt_enc_get_modes_name, const OptResource& td) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
     return false;
@@ -579,7 +579,7 @@ Variant HHVM_FUNCTION(mcrypt_enc_get_modes_name, const Resource& td) {
   return ret;
 }
 
-Variant HHVM_FUNCTION(mcrypt_enc_get_supported_key_sizes, const Resource& td) {
+Variant HHVM_FUNCTION(mcrypt_enc_get_supported_key_sizes, const OptResource& td) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
     return false;
@@ -597,7 +597,7 @@ Variant HHVM_FUNCTION(mcrypt_enc_get_supported_key_sizes, const Resource& td) {
   return ret;
 }
 
-bool HHVM_FUNCTION(mcrypt_enc_is_block_algorithm_mode, const Resource& td) {
+bool HHVM_FUNCTION(mcrypt_enc_is_block_algorithm_mode, const OptResource& td) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
     return false;
@@ -606,7 +606,7 @@ bool HHVM_FUNCTION(mcrypt_enc_is_block_algorithm_mode, const Resource& td) {
   return mcrypt_enc_is_block_algorithm_mode(pm->m_td) == 1;
 }
 
-bool HHVM_FUNCTION(mcrypt_enc_is_block_algorithm, const Resource& td) {
+bool HHVM_FUNCTION(mcrypt_enc_is_block_algorithm, const OptResource& td) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
     return false;
@@ -615,7 +615,7 @@ bool HHVM_FUNCTION(mcrypt_enc_is_block_algorithm, const Resource& td) {
   return mcrypt_enc_is_block_algorithm(pm->m_td) == 1;
 }
 
-bool HHVM_FUNCTION(mcrypt_enc_is_block_mode, const Resource& td) {
+bool HHVM_FUNCTION(mcrypt_enc_is_block_mode, const OptResource& td) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
     return false;
@@ -624,7 +624,7 @@ bool HHVM_FUNCTION(mcrypt_enc_is_block_mode, const Resource& td) {
   return mcrypt_enc_is_block_mode(pm->m_td) == 1;
 }
 
-Variant HHVM_FUNCTION(mcrypt_enc_self_test, const Resource& td) {
+Variant HHVM_FUNCTION(mcrypt_enc_self_test, const OptResource& td) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
     return false;
@@ -633,7 +633,7 @@ Variant HHVM_FUNCTION(mcrypt_enc_self_test, const Resource& td) {
   return mcrypt_enc_self_test(pm->m_td);
 }
 
-Variant HHVM_FUNCTION(mcrypt_generic_init, const Resource& td,
+Variant HHVM_FUNCTION(mcrypt_generic_init, const OptResource& td,
                                            const String& key,
                                            const String& iv) {
   auto pm = get_valid_mcrypt_resource(td);
@@ -698,16 +698,16 @@ Variant HHVM_FUNCTION(mcrypt_generic_init, const Resource& td,
   return result;
 }
 
-Variant HHVM_FUNCTION(mcrypt_generic, const Resource& td, const String& data) {
+Variant HHVM_FUNCTION(mcrypt_generic, const OptResource& td, const String& data) {
   return mcrypt_generic(td, data, false);
 }
 
-Variant HHVM_FUNCTION(mdecrypt_generic, const Resource& td,
+Variant HHVM_FUNCTION(mdecrypt_generic, const OptResource& td,
                                         const String& data) {
   return mcrypt_generic(td, data, true);
 }
 
-bool HHVM_FUNCTION(mcrypt_generic_deinit, const Resource& td) {
+bool HHVM_FUNCTION(mcrypt_generic_deinit, const OptResource& td) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
     return false;
@@ -721,7 +721,7 @@ bool HHVM_FUNCTION(mcrypt_generic_deinit, const Resource& td) {
   return true;
 }
 
-bool HHVM_FUNCTION(mcrypt_generic_end, const Resource& td) {
+bool HHVM_FUNCTION(mcrypt_generic_end, const OptResource& td) {
   return HHVM_FUNCTION(mcrypt_generic_deinit, td);
 }
 

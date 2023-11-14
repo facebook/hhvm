@@ -112,7 +112,7 @@ bool HHVM_FUNCTION(msg_queue_exists,
 }
 
 bool HHVM_FUNCTION(msg_remove_queue,
-                   const Resource& queue) {
+                   const OptResource& queue) {
   auto q = cast<MessageQueue>(queue);
   if (!q) {
     raise_warning("Invalid message queue was specified");
@@ -135,7 +135,7 @@ const StaticString
   s_msg_lrpid("msg_lrpid");
 
 bool HHVM_FUNCTION(msg_set_queue,
-                   const Resource& queue,
+                   const OptResource& queue,
                    const Array& data) {
   auto q = cast<MessageQueue>(queue);
   if (!q) {
@@ -162,7 +162,7 @@ bool HHVM_FUNCTION(msg_set_queue,
 }
 
 Array HHVM_FUNCTION(msg_stat_queue,
-                    const Resource& queue) {
+                    const OptResource& queue) {
   auto q = cast<MessageQueue>(queue);
   if (!q) {
     raise_warning("Invalid message queue was specified");
@@ -189,7 +189,7 @@ Array HHVM_FUNCTION(msg_stat_queue,
 }
 
 bool HHVM_FUNCTION(msg_send,
-                   const Resource& queue,
+                   const OptResource& queue,
                    int64_t msgtype,
                    const Variant& message,
                    bool serialize,
@@ -226,7 +226,7 @@ bool HHVM_FUNCTION(msg_send,
 }
 
 bool HHVM_FUNCTION(msg_receive,
-                   const Resource& queue,
+                   const OptResource& queue,
                    int64_t desiredmsgtype,
                    int64_t& msgtype,
                    int64_t maxsize,
@@ -414,13 +414,13 @@ struct Semaphore : SweepableResourceData {
 IMPLEMENT_RESOURCE_ALLOCATION(Semaphore)
 
 bool HHVM_FUNCTION(sem_acquire,
-                   const Resource& sem_identifier,
+                   const OptResource& sem_identifier,
                    bool nowait /* = false */) {
   return cast<Semaphore>(sem_identifier)->op(true, nowait);
 }
 
 bool HHVM_FUNCTION(sem_release,
-                   const Resource& sem_identifier) {
+                   const OptResource& sem_identifier) {
   return cast<Semaphore>(sem_identifier)->op(false);
 }
 
@@ -513,7 +513,7 @@ Variant HHVM_FUNCTION(sem_get,
   sem_ptr->pid = HHVM_FN(posix_getpid)();
   sem_ptr->count = 0;
   sem_ptr->auto_release = auto_release;
-  return Resource(sem_ptr);
+  return OptResource(sem_ptr);
 }
 
 /**
@@ -521,7 +521,7 @@ Variant HHVM_FUNCTION(sem_get,
  * Fri Mar 16 00:50:13 EST 2001
  */
 bool HHVM_FUNCTION(sem_remove,
-                   const Resource& sem_identifier) {
+                   const OptResource& sem_identifier) {
   auto sem_ptr = cast<Semaphore>(sem_identifier);
 
   union semun un;

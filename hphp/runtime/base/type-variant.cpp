@@ -565,7 +565,7 @@ Array Variant::toPHPArrayHelper() const {
   not_reached();
 }
 
-Resource Variant::toResourceHelper() const {
+OptResource Variant::toResourceHelper() const {
   switch (m_type) {
     case KindOfUninit:
     case KindOfNull:
@@ -588,10 +588,10 @@ Resource Variant::toResourceHelper() const {
     case KindOfClsMeth:
     case KindOfRClsMeth:
     case KindOfEnumClassLabel:
-      return Resource(req::make<DummyResource>());
+      return OptResource(req::make<DummyResource>());
 
     case KindOfResource:
-      return Resource{m_data.pres};
+      return OptResource{m_data.pres};
   }
   not_reached();
 }

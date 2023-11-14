@@ -1401,11 +1401,11 @@ Variant HHVM_FUNCTION(fb_call_user_func_array_async, const String& initialDoc,
   return XboxServer::TaskStart(internal_serialize(msg), initialDoc);
 }
 
-Variant HHVM_FUNCTION(fb_check_user_func_async, const Resource& handle) {
+Variant HHVM_FUNCTION(fb_check_user_func_async, const OptResource& handle) {
   return XboxServer::TaskStatus(handle);
 }
 
-Variant HHVM_FUNCTION(fb_end_user_func_async, const Resource& handle) {
+Variant HHVM_FUNCTION(fb_end_user_func_async, const OptResource& handle) {
   Variant ret;
   int code = XboxServer::TaskResult(handle, 0, &ret);
   if (code != 200) {

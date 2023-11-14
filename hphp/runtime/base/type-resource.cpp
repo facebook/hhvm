@@ -22,22 +22,22 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-extern const Resource null_resource = Resource();
+extern const OptResource null_resource = OptResource();
 
-Resource::~Resource() {
+OptResource::~OptResource() {
   // force it out of line
 }
 
-String Resource::toString() const {
+String OptResource::toString() const {
   return m_res ? m_res->data()->o_toString() : String();
 }
 
-Array Resource::toArray() const {
+Array OptResource::toArray() const {
   return m_res ? m_res->data()->o_toArray() : Array();
 }
 
-void Resource::compileTimeAssertions() {
-  static_assert(sizeof(Resource) == sizeof(req::ptr<ResourceHdr>), "");
+void OptResource::compileTimeAssertions() {
+  static_assert(sizeof(OptResource) == sizeof(req::ptr<ResourceHdr>), "");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

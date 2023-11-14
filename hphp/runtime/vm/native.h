@@ -233,7 +233,7 @@ void coerceFCallArgsFromLocals(const ActRec* fp,
   X(Object,     const Object&,        Object)         \
   X(String,     const String&,        String)         \
   X(Array,      const Array&,         Array)          \
-  X(Resource,   const Resource&,      Resource)       \
+  X(Resource,   const OptResource&,   OptResource)    \
   X(Func,       Func*,                Func*)          \
   X(Class,      const Class*,         const Class*)   \
   X(ClsMeth,    ClsMethDataRef,       ClsMethDataRef) \
@@ -251,7 +251,7 @@ void coerceFCallArgsFromLocals(const ActRec* fp,
   X(ObjectIO,   Object&,              Object&)        \
   X(StringIO,   String&,              String&)        \
   X(ArrayIO,    Array&,               Array&)         \
-  X(ResourceIO, Resource&,            Resource&)      \
+  X(ResourceIO, OptResource&,         OptResource&)   \
   X(FuncIO,     Func*&,               Func*&)         \
   X(ClassIO,    Class*&,              Class*&)        \
   X(ClsMethIO,  ClsMethDataRef&,      ClsMethDataRef&)\

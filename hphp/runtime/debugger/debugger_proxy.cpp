@@ -488,7 +488,7 @@ void DebuggerProxy::pollSignal() {
 // Grab the ip address and port of the client that is connected to this proxy.
 bool DebuggerProxy::getClientConnectionInfo(Variant& address,
                                             Variant& port) {
-  Resource s(m_thrift.getSocket().get());
+  OptResource s(m_thrift.getSocket().get());
   return HHVM_FN(socket_getpeername)(s, address, port);
 }
 

@@ -688,7 +688,7 @@ bool DebuggerClient::tryConnect(const std::string &host, int port,
       port
     );
     sock->unregister();
-    if (HHVM_FN(socket_connect)(Resource(sock), String(host), port)) {
+    if (HHVM_FN(socket_connect)(OptResource(sock), String(host), port)) {
       if (clearmachines) {
         for (unsigned int i = 0; i < m_machines.size(); i++) {
           if (m_machines[i] == m_machine) {

@@ -264,7 +264,7 @@ void Replayer::nativeArg(const String& recordedArg, int arg) {
 template<>
 void Replayer::nativeArg(const String& recordedArg,
     const req::ptr<StreamContext>& arg) {
-  nativeArg<const Variant&>(recordedArg, Resource{arg});
+  nativeArg<const Variant&>(recordedArg, OptResource{arg});
 }
 
 template<>
@@ -384,8 +384,8 @@ void Replayer::nativeArg(const String& recordedArg, ObjectArg arg) {
 }
 
 template<>
-void Replayer::nativeArg(const String& recordedArg, const Resource& arg) {
-  const_cast<Resource&>(arg) = unserialize<Resource>(recordedArg);
+void Replayer::nativeArg(const String& recordedArg, const OptResource& arg) {
+  const_cast<OptResource&>(arg) = unserialize<OptResource>(recordedArg);
 }
 
 template<>

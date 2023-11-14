@@ -44,10 +44,10 @@ public:
   /**
    * Local tasklet for parallel processing.
    */
-  static Resource TaskStart(const String& msg, const String& reqInitDoc = "",
+  static OptResource TaskStart(const String& msg, const String& reqInitDoc = "",
       ServerTaskEvent<XboxServer, XboxTransport> *event = nullptr);
-  static bool TaskStatus(const Resource& task);
-  static int TaskResult(const Resource& task, int timeout_ms, Variant *ret);
+  static bool TaskStatus(const OptResource& task);
+  static int TaskResult(const OptResource& task, int timeout_ms, Variant *ret);
   static int TaskResult(XboxTransport* const job, int timeout_ms, Variant *ret);
 
   static int GetActiveWorkers();

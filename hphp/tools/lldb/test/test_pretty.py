@@ -189,16 +189,16 @@ class PrettyPrintOtherValuesTestCase(base.TestHHVMTypesBinary):
             expected_output = '(HPHP::StrNR) v = "hello"'
             self.assertEqual(output.strip(), expected_output)
 
-        with self.subTest("Resource"):
+        with self.subTest("OptResource"):
             self.run_until_breakpoint("takeResource")
             _, output = self.run_commands(["frame variable v"])
-            expected_output = r"\(HPHP::Resource\) v = \(hdr = 0x.*, data = 0x.*\)"
+            expected_output = r"\(HPHP::OptResource\) v = \(hdr = 0x.*, data = 0x.*\)"
             self.assertRegex(output.strip(), expected_output)
 
-        with self.subTest("Resource *"):
+        with self.subTest("OptResource *"):
             self.run_until_breakpoint("takePtrToResource")
             _, output = self.run_commands(["frame variable v"])
-            expected_output = r"\(HPHP::Resource \*\) v = 0x.* \(hdr = 0x.*, data = 0x.*\)"
+            expected_output = r"\(HPHP::OptResource \*\) v = 0x.* \(hdr = 0x.*, data = 0x.*\)"
             self.assertRegex(output.strip(), expected_output)
 
         with self.subTest("Object"):

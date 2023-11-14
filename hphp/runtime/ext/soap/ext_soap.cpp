@@ -1826,7 +1826,7 @@ static void send_soap_server_fault(
   output_xml_header(SOAP_GLOBAL(soap_version));
 
   Array headers;
-  if (hdr) headers.append(Resource(hdr));
+  if (hdr) headers.append(OptResource(hdr));
   xmlDocPtr doc_return = serialize_response_call
     (function, nullptr, nullptr, fault, headers, SOAP_GLOBAL(soap_version));
 

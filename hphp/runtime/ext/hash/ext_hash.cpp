@@ -185,7 +185,7 @@ IMPLEMENT_RESOURCE_ALLOCATION(HashContext)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static req::ptr<HashContext> get_valid_hash_context_resource(const Resource& context,
+static req::ptr<HashContext> get_valid_hash_context_resource(const OptResource& context,
                                                              const char* func_name) {
   auto hash = dyn_cast_or_null<HashContext>(context);
   if (hash == nullptr || hash->isInvalid()) {
@@ -340,7 +340,7 @@ Variant HHVM_FUNCTION(hash_init, const String& algo,
   return Variant(std::move(hash));
 }
 
-bool HHVM_FUNCTION(hash_update, const Resource& context, const String& data) {
+bool HHVM_FUNCTION(hash_update, const OptResource& context, const String& data) {
   auto hash = get_valid_hash_context_resource(context, __FUNCTION__);
   if (!hash) {
     return false;
@@ -350,7 +350,7 @@ bool HHVM_FUNCTION(hash_update, const Resource& context, const String& data) {
   return true;
 }
 
-Variant HHVM_FUNCTION(hash_final, const Resource& context,
+Variant HHVM_FUNCTION(hash_final, const OptResource& context,
                                  bool raw_output /* = false */) {
   auto hash = get_valid_hash_context_resource(context, __FUNCTION__);
   if (!hash) {
@@ -374,12 +374,12 @@ Variant HHVM_FUNCTION(hash_final, const Resource& context,
   return HHVM_FN(bin2hex)(raw);
 }
 
-Variant HHVM_FUNCTION(hash_copy, const Resource& context) {
+Variant HHVM_FUNCTION(hash_copy, const OptResource& context) {
   auto oldhash = get_valid_hash_context_resource(context, __FUNCTION__);
   if (!oldhash) {
     return false;
   }
-  return Resource(req::make<HashContext>(std::move(oldhash)));
+  return OptResource(req::make<HashContext>(std::move(oldhash)));
 }
 
 /**

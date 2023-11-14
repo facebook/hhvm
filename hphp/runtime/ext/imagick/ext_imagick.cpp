@@ -147,7 +147,7 @@ void imagickWriteOp(MagickWand* wand,
 }
 
 ALWAYS_INLINE
-FILE* getFILE(const Resource& res, bool isWrite) {
+FILE* getFILE(const OptResource& res, bool isWrite) {
   auto f = dyn_cast_or_null<File>(res);
   if (f == nullptr || f->isClosed()) {
     IMAGICK_THROW("Invalid stream resource");
@@ -171,7 +171,7 @@ FILE* getFILE(const Resource& res, bool isWrite) {
 }
 
 void imagickReadOp(MagickWand* wand,
-                   const Resource& res,
+                   const OptResource& res,
                    const ImagickHandleOp& op) {
   auto fp = getFILE(res, false);
   auto status = op(wand, fp);
@@ -182,7 +182,7 @@ void imagickReadOp(MagickWand* wand,
 }
 
 void imagickWriteOp(MagickWand* wand,
-                    const Resource& res,
+                    const OptResource& res,
                     const String& format,
                     const ImagickHandleOp& op) {
   auto fp = getFILE(res, true);

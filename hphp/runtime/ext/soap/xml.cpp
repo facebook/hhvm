@@ -87,7 +87,7 @@ xmlDocPtr soap_xmlParseFile(const char *filename) {
                   s_http, make_dict_array(s_timeout, 1000)));
     auto file = File::Open(filename, "rb", 0, cast_or_null<StreamContext>(cxt));
     if (file) {
-      content = HHVM_FN(stream_get_contents)(Resource(file));
+      content = HHVM_FN(stream_get_contents)(OptResource(file));
       if (!same(content, false)) {
         HHVM_FN(apc_store)(cache_key, content);
       }

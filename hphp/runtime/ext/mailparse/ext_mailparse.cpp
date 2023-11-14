@@ -24,7 +24,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static req::ptr<File> get_valid_file_resource(const Resource& fp) {
+static req::ptr<File> get_valid_file_resource(const OptResource& fp) {
   auto f = dyn_cast_or_null<File>(fp);
   if (f == nullptr || f->isClosed()) {
     raise_warning("Not a valid stream resource");
@@ -35,11 +35,11 @@ static req::ptr<File> get_valid_file_resource(const Resource& fp) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Resource HHVM_FUNCTION(mailparse_msg_create) {
-  return Resource(req::make<MimePart>());
+OptResource HHVM_FUNCTION(mailparse_msg_create) {
+  return OptResource(req::make<MimePart>());
 }
 
-bool HHVM_FUNCTION(mailparse_msg_free, const Resource& /*mimemail*/) {
+bool HHVM_FUNCTION(mailparse_msg_free, const OptResource& /*mimemail*/) {
   return true;
 }
 
@@ -60,13 +60,13 @@ Variant HHVM_FUNCTION(mailparse_msg_parse_file, const String& filename) {
 }
 
 bool HHVM_FUNCTION(mailparse_msg_parse,
-                   const Resource& mimemail,
+                   const OptResource& mimemail,
                    const String& data) {
   return cast<MimePart>(mimemail)->parse(data.data(), data.size());
 }
 
 Variant HHVM_FUNCTION(mailparse_msg_extract_part_file,
-                      const Resource& mimemail,
+                      const OptResource& mimemail,
                       const Variant& filename,
                       const Variant& callbackfunc /* = "" */) {
   return cast<MimePart>(mimemail)->
@@ -75,7 +75,7 @@ Variant HHVM_FUNCTION(mailparse_msg_extract_part_file,
 }
 
 Variant HHVM_FUNCTION(mailparse_msg_extract_whole_part_file,
-                      const Resource& mimemail,
+                      const OptResource& mimemail,
                       const Variant& filename,
                       const Variant& callbackfunc /* = "" */) {
   return cast<MimePart>(mimemail)->
@@ -83,7 +83,7 @@ Variant HHVM_FUNCTION(mailparse_msg_extract_whole_part_file,
 }
 
 Variant HHVM_FUNCTION(mailparse_msg_extract_part,
-                      const Resource& mimemail,
+                      const OptResource& mimemail,
                       const Variant& msgbody,
                       const Variant& callbackfunc /* = "" */) {
   return cast<MimePart>(mimemail)->
@@ -91,14 +91,14 @@ Variant HHVM_FUNCTION(mailparse_msg_extract_part,
             MimePart::Decode8Bit | MimePart::DecodeNoHeaders, false);
 }
 
-Array HHVM_FUNCTION(mailparse_msg_get_part_data, const Resource& mimemail) {
+Array HHVM_FUNCTION(mailparse_msg_get_part_data, const OptResource& mimemail) {
   return cast<MimePart>(mimemail)->getPartData();
 }
 
 Variant HHVM_FUNCTION(mailparse_msg_get_part,
-                      const Resource& mimemail,
+                      const OptResource& mimemail,
                       const String& mimesection) {
-  Resource part =
+  OptResource part =
     cast<MimePart>(mimemail)->findByName(mimesection.c_str());
   if (part.isNull()) {
     raise_warning("cannot find section %s in message", mimesection.data());
@@ -107,7 +107,7 @@ Variant HHVM_FUNCTION(mailparse_msg_get_part,
   return part;
 }
 
-Array HHVM_FUNCTION(mailparse_msg_get_structure, const Resource& mimemail) {
+Array HHVM_FUNCTION(mailparse_msg_get_structure, const OptResource& mimemail) {
   return cast<MimePart>(mimemail)->getStructure();
 }
 
@@ -151,8 +151,8 @@ static int mailparse_stream_flush(void *stream) {
 }
 
 bool HHVM_FUNCTION(mailparse_stream_encode,
-                   const Resource& sourcefp,
-                   const Resource& destfp,
+                   const OptResource& sourcefp,
+                   const OptResource& destfp,
                    const String& encoding) {
   auto srcstream = get_valid_file_resource(sourcefp);
   if (!srcstream) {
@@ -272,7 +272,7 @@ const StaticString
   s_filename("filename"),
   s_origfilename("origfilename");
 
-Variant HHVM_FUNCTION(mailparse_uudecode_all, const Resource& fp) {
+Variant HHVM_FUNCTION(mailparse_uudecode_all, const OptResource& fp) {
   auto instream = get_valid_file_resource(fp);
   if (!instream) {
     return false;
@@ -342,7 +342,7 @@ Variant HHVM_FUNCTION(mailparse_uudecode_all, const Resource& fp) {
 }
 
 Variant HHVM_FUNCTION(mailparse_determine_best_xfer_encoding,
-                      const Resource& fp) {
+                      const OptResource& fp) {
   auto stream = get_valid_file_resource(fp);
   if (!stream) {
     return false;

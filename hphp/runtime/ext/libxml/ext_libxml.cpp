@@ -715,7 +715,7 @@ bool HHVM_FUNCTION(libxml_disable_entity_loader, bool disable /* = true */) {
   return old;
 }
 
-void HHVM_FUNCTION(libxml_set_streams_context, const Resource & context) {
+void HHVM_FUNCTION(libxml_set_streams_context, const OptResource & context) {
   rl_libxml_request_data->m_streams_context =
     dyn_cast_or_null<StreamContext>(context);
 }

@@ -424,12 +424,12 @@ bool MimePart::findPart(Enumerator *id, void *ptr) {
   return true;
 }
 
-Resource MimePart::findByName(const char *name) {
+OptResource MimePart::findByName(const char *name) {
   struct find_part_struct find;
   find.searchfor = name;
   find.foundpart = NULL;
   enumerateParts(&MimePart::findPart, &find);
-  return Resource{find.foundpart};
+  return OptResource{find.foundpart};
 }
 
 static int filter_into_work_buffer(int c, void *dat) {
@@ -646,7 +646,7 @@ req::ptr<MimePart> MimePart::createChild(int startpos, bool inherit) {
   m_parsedata.lastpart = child;
   child->m_parent = this;
 
-  m_children.append(Resource(child));
+  m_children.append(OptResource(child));
   child->m_startpos = child->m_endpos = child->m_bodystart =
     child->m_bodyend = startpos;
 

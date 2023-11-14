@@ -431,14 +431,14 @@ static Variant HHVM_FUNCTION(mysql_list_processes,
 ///////////////////////////////////////////////////////////////////////////////
 // row operations
 
-static bool HHVM_FUNCTION(mysql_data_seek, const Resource& result, int64_t row) {
+static bool HHVM_FUNCTION(mysql_data_seek, const OptResource& result, int64_t row) {
   auto res = php_mysql_extract_result(result);
   if (res == nullptr) return false;
 
   return res->seekRow(row);
 }
 
-static Variant HHVM_FUNCTION(mysql_fetch_array, const Resource& result,
+static Variant HHVM_FUNCTION(mysql_fetch_array, const OptResource& result,
                                          int64_t result_type /* = 3 */) {
   return php_mysql_fetch_hash(result, result_type);
 }
@@ -448,7 +448,7 @@ static Variant HHVM_FUNCTION(mysql_fetch_object,
                       const String& class_name /* = "stdClass" */,
                       const Variant& params /* = null */) {
 
-  Resource result = var_result.isResource() ? var_result.toResource()
+  OptResource result = var_result.isResource() ? var_result.toResource()
                                             : null_resource;
   Variant properties = php_mysql_fetch_hash(result, PHP_MYSQL_ASSOC);
   if (!same(properties, false)) {
@@ -475,7 +475,7 @@ static Variant HHVM_FUNCTION(mysql_fetch_object,
   return false;
 }
 
-Variant HHVM_FUNCTION(mysql_fetch_lengths, const Resource& result) {
+Variant HHVM_FUNCTION(mysql_fetch_lengths, const OptResource& result) {
   auto res = php_mysql_extract_result(result);
   if (res == nullptr) return false;
 
@@ -510,7 +510,7 @@ Variant HHVM_FUNCTION(mysql_fetch_lengths, const Resource& result) {
   return ret;
 }
 
-static Variant HHVM_FUNCTION(mysql_result, const Resource& result, int64_t row,
+static Variant HHVM_FUNCTION(mysql_result, const OptResource& result, int64_t row,
                                     const Variant& field /* = 0 */) {
   auto res = php_mysql_extract_result(result);
   if (res == nullptr) return false;
@@ -601,7 +601,7 @@ static Variant HHVM_FUNCTION(mysql_result, const Resource& result, int64_t row,
 ///////////////////////////////////////////////////////////////////////////////
 // result functions
 
-Variant HHVM_FUNCTION(mysql_num_fields, const Resource& result) {
+Variant HHVM_FUNCTION(mysql_num_fields, const OptResource& result) {
   auto res = php_mysql_extract_result(result);
   if (res) {
     return res->getFieldCount();
@@ -609,7 +609,7 @@ Variant HHVM_FUNCTION(mysql_num_fields, const Resource& result) {
   return false;
 }
 
-Variant HHVM_FUNCTION(mysql_num_rows, const Resource& result) {
+Variant HHVM_FUNCTION(mysql_num_rows, const OptResource& result) {
   auto res = php_mysql_extract_result(result);
   if (res) {
     return res->getRowCount();
@@ -617,7 +617,7 @@ Variant HHVM_FUNCTION(mysql_num_rows, const Resource& result) {
   return false;
 }
 
-static bool HHVM_FUNCTION(mysql_free_result, const Resource& result) {
+static bool HHVM_FUNCTION(mysql_free_result, const OptResource& result) {
   auto res = php_mysql_extract_result(result);
   if (res) {
     res->close();
@@ -647,7 +647,7 @@ StaticString
   s_zerofill("zerofill");
 }
 
-static Variant HHVM_FUNCTION(mysql_fetch_field, const Resource& result,
+static Variant HHVM_FUNCTION(mysql_fetch_field, const OptResource& result,
                                          int64_t field /* = -1 */) {
   auto res = php_mysql_extract_result(result);
   if (res == nullptr) return false;
@@ -675,29 +675,29 @@ static Variant HHVM_FUNCTION(mysql_fetch_field, const Resource& result,
   return ObjectData::FromArray(props.create());
 }
 
-static bool HHVM_FUNCTION(mysql_field_seek, const Resource& result, int64_t field) {
+static bool HHVM_FUNCTION(mysql_field_seek, const OptResource& result, int64_t field) {
   auto res = php_mysql_extract_result(result);
   if (res == nullptr) return false;
   return res->seekField(field);
 }
 
-static Variant HHVM_FUNCTION(mysql_field_name, const Resource& result,
+static Variant HHVM_FUNCTION(mysql_field_name, const OptResource& result,
                                                int64_t field) {
   return php_mysql_field_info(result, field, PHP_MYSQL_FIELD_NAME);
 }
-static Variant HHVM_FUNCTION(mysql_field_table, const Resource& result,
+static Variant HHVM_FUNCTION(mysql_field_table, const OptResource& result,
                                                 int64_t field) {
   return php_mysql_field_info(result, field, PHP_MYSQL_FIELD_TABLE);
 }
-static Variant HHVM_FUNCTION(mysql_field_len, const Resource& result,
+static Variant HHVM_FUNCTION(mysql_field_len, const OptResource& result,
                                               int64_t field) {
   return php_mysql_field_info(result, field, PHP_MYSQL_FIELD_LEN);
 }
-static Variant HHVM_FUNCTION(mysql_field_type, const Resource& result,
+static Variant HHVM_FUNCTION(mysql_field_type, const OptResource& result,
                                                int64_t field) {
   return php_mysql_field_info(result, field, PHP_MYSQL_FIELD_TYPE);
 }
-static Variant HHVM_FUNCTION(mysql_field_flags, const Resource& result,
+static Variant HHVM_FUNCTION(mysql_field_flags, const OptResource& result,
                                                 int64_t field) {
   return php_mysql_field_info(result, field, PHP_MYSQL_FIELD_FLAGS);
 }

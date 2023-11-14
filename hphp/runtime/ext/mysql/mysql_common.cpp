@@ -415,7 +415,7 @@ req::ptr<MySQLResult> php_mysql_extract_result_helper(const T& result) {
 
 }
 
-req::ptr<MySQLResult> php_mysql_extract_result(const Resource& result) {
+req::ptr<MySQLResult> php_mysql_extract_result(const OptResource& result) {
   return php_mysql_extract_result_helper(result);
 }
 
@@ -469,7 +469,7 @@ const char *php_mysql_get_field_name(int field_type) {
   return "unknown";
 }
 
-Variant php_mysql_field_info(const Resource& result, int field,
+Variant php_mysql_field_info(const OptResource& result, int field,
                              int entry_type) {
   auto res = php_mysql_extract_result(result);
   if (!res) return false;
@@ -1353,7 +1353,7 @@ Variant php_mysql_do_query_and_get_result(const String& query, const Variant& li
 ///////////////////////////////////////////////////////////////////////////////
 // row operations
 
-Variant php_mysql_fetch_hash(const Resource& result, int result_type) {
+Variant php_mysql_fetch_hash(const OptResource& result, int result_type) {
   if ((result_type & PHP_MYSQL_BOTH) == 0) {
     raise_invalid_argument_warning("result_type: %d", result_type);
     return false;

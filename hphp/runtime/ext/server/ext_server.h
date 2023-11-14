@@ -30,25 +30,25 @@ enum PageletStatusType {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Resource HHVM_FUNCTION(pagelet_server_task_start,
+OptResource HHVM_FUNCTION(pagelet_server_task_start,
                        const String& url,
                        const Array& headers = null_array,
                        const String& post_data = null_string,
                        const Array& files = null_array,
                        int64_t timeout_seconds = 0);
 int64_t HHVM_FUNCTION(pagelet_server_task_status,
-                      const Resource& task);
+                      const OptResource& task);
 String HHVM_FUNCTION(pagelet_server_task_result,
-                     const Resource& task,
+                     const OptResource& task,
                      Array& headers,
                      int64_t& code,
                      int64_t timeout_ms);
-Resource HHVM_FUNCTION(xbox_task_start,
+OptResource HHVM_FUNCTION(xbox_task_start,
                        const String& message);
 bool HHVM_FUNCTION(xbox_task_status,
-                   const Resource& task);
+                   const OptResource& task);
 int64_t HHVM_FUNCTION(xbox_task_result,
-                      const Resource& task,
+                      const OptResource& task,
                       int64_t timeout_ms,
                       Variant& ret);
 bool HHVM_FUNCTION(server_is_stopping);

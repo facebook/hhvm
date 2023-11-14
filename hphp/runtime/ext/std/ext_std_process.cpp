@@ -497,24 +497,24 @@ public:
 
   /* clean up all the child ends and then open streams on the parent
    * ends, where appropriate */
-  Resource dupParent() {
+  OptResource dupParent() {
     closeFd(childend);
     childend = defaultFd;
 
     if ((mode & ~DESC_PARENT_MODE_WRITE) == DESC_PIPE) {
 #ifdef _WIN32
-      return Resource(
+      return OptResource(
         req::make<PlainFile>(_open_osfhandle((intptr_t)parentend, mode_flags),
           true));
 #else
       /* mark the descriptor close-on-exec, so that it won't be inherited
          by potential other children */
       fcntl(parentend, F_SETFD, FD_CLOEXEC);
-      return Resource(req::make<PlainFile>(parentend, true));
+      return OptResource(req::make<PlainFile>(parentend, true));
 #endif
     }
 
-    return Resource();
+    return OptResource();
   }
 };
 
@@ -620,7 +620,7 @@ static Variant post_proc_open(const String& cmd, Array& pipes,
   pipes = Array::CreateDict();
 
   for (auto& item : items) {
-    Resource f = item.dupParent();
+    OptResource f = item.dupParent();
     if (!f.isNull()) {
       proc->pipes.append(f);
       pipes.set(item.index, f);
@@ -895,7 +895,7 @@ HHVM_FUNCTION(proc_open, const String& cmd, const Array& descriptorspec,
 }
 
 bool HHVM_FUNCTION(proc_terminate,
-                   const Resource& process,
+                   const OptResource& process,
                    int64_t signal /* = SIGTERM */) {
 #ifdef _WIN32
   // 255 is what PHP sends, so we do the same.
@@ -906,7 +906,7 @@ bool HHVM_FUNCTION(proc_terminate,
 }
 
 int64_t HHVM_FUNCTION(proc_close,
-                      const Resource& process) {
+                      const OptResource& process) {
   return cast<ChildProcess>(process)->close();
 }
 
@@ -921,7 +921,7 @@ const StaticString
   s_stopsig("stopsig");
 
 Array HHVM_FUNCTION(proc_get_status,
-                    const Resource& process) {
+                    const OptResource& process) {
   auto proc = cast<ChildProcess>(process);
 
   errno = 0;

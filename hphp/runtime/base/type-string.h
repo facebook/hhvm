@@ -344,28 +344,28 @@ public:
   bool same (const String& v2) const;
   bool same (const Array& v2) const = delete;
   bool same (const Object& v2) const = delete;
-  bool same (const Resource& v2) const = delete;
+  bool same (const OptResource& v2) const = delete;
 
   bool equal(const char* v2) const = delete;
   bool equal(const StringData *v2) const;
   bool equal(const String& v2) const;
   bool equal(const Array& v2) const = delete;
   bool equal(const Object& v2) const = delete;
-  bool equal(const Resource& v2) const = delete;
+  bool equal(const OptResource& v2) const = delete;
 
   bool less (const char* v2) const = delete;
   bool less (const StringData *v2) const;
   bool less (const String& v2) const;
   bool less (const Array& v2) const = delete;
   bool less (const Object& v2) const = delete;
-  bool less (const Resource& v2) const = delete;
+  bool less (const OptResource& v2) const = delete;
 
   bool more (const char* v2) const = delete;
   bool more (const StringData *v2) const;
   bool more (const String& v2) const;
   bool more (const Array& v2) const = delete;
   bool more (const Object& v2) const = delete;
-  bool more (const Resource& v2) const = delete;
+  bool more (const OptResource& v2) const = delete;
 
   int compare(const char* v2) const;
   int compare(const String& v2) const;

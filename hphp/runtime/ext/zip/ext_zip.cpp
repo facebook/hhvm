@@ -1342,7 +1342,7 @@ static bool HHVM_METHOD(ZipArchive, unchangeName, const String& name) {
 //////////////////////////////////////////////////////////////////////////////
 // functions
 
-static Variant HHVM_FUNCTION(zip_close, const Resource& zip) {
+static Variant HHVM_FUNCTION(zip_close, const OptResource& zip) {
   auto zipDir = cast<ZipDirectory>(zip);
 
   FAIL_IF_INVALID_ZIPDIRECTORY(zip_close, zipDir);
@@ -1352,7 +1352,7 @@ static Variant HHVM_FUNCTION(zip_close, const Resource& zip) {
   return init_null();
 }
 
-static bool HHVM_FUNCTION(zip_entry_close, const Resource& zip_entry) {
+static bool HHVM_FUNCTION(zip_entry_close, const OptResource& zip_entry) {
   auto zipEntry = cast<ZipEntry>(zip_entry);
 
   FAIL_IF_INVALID_ZIPENTRY(zip_entry_close, zipEntry);
@@ -1360,7 +1360,7 @@ static bool HHVM_FUNCTION(zip_entry_close, const Resource& zip_entry) {
   return zipEntry->close();
 }
 
-static Variant HHVM_FUNCTION(zip_entry_compressedsize, const Resource& zip_entry) {
+static Variant HHVM_FUNCTION(zip_entry_compressedsize, const OptResource& zip_entry) {
   auto zipEntry = cast<ZipEntry>(zip_entry);
 
   FAIL_IF_INVALID_ZIPENTRY(zip_entry_compressedsize, zipEntry);
@@ -1368,7 +1368,7 @@ static Variant HHVM_FUNCTION(zip_entry_compressedsize, const Resource& zip_entry
   return zipEntry->getCompressedSize();
 }
 
-static Variant HHVM_FUNCTION(zip_entry_compressionmethod, const Resource& zip_entry) {
+static Variant HHVM_FUNCTION(zip_entry_compressionmethod, const OptResource& zip_entry) {
   auto zipEntry = cast<ZipEntry>(zip_entry);
 
   FAIL_IF_INVALID_ZIPENTRY(zip_entry_compressionmethod, zipEntry);
@@ -1376,7 +1376,7 @@ static Variant HHVM_FUNCTION(zip_entry_compressionmethod, const Resource& zip_en
   return zipEntry->getCompressionMethod();
 }
 
-static Variant HHVM_FUNCTION(zip_entry_filesize, const Resource& zip_entry) {
+static Variant HHVM_FUNCTION(zip_entry_filesize, const OptResource& zip_entry) {
   auto zipEntry = cast<ZipEntry>(zip_entry);
 
   FAIL_IF_INVALID_ZIPENTRY(zip_entry_filesize, zipEntry);
@@ -1384,7 +1384,7 @@ static Variant HHVM_FUNCTION(zip_entry_filesize, const Resource& zip_entry) {
   return zipEntry->getSize();
 }
 
-static Variant HHVM_FUNCTION(zip_entry_name, const Resource& zip_entry) {
+static Variant HHVM_FUNCTION(zip_entry_name, const OptResource& zip_entry) {
   auto zipEntry = cast<ZipEntry>(zip_entry);
 
   FAIL_IF_INVALID_ZIPENTRY(zip_entry_name, zipEntry);
@@ -1392,8 +1392,8 @@ static Variant HHVM_FUNCTION(zip_entry_name, const Resource& zip_entry) {
   return zipEntry->getName();
 }
 
-static bool HHVM_FUNCTION(zip_entry_open, const Resource& zip,
-                          const Resource& zip_entry, const String& /*mode*/) {
+static bool HHVM_FUNCTION(zip_entry_open, const OptResource& zip,
+                          const OptResource& zip_entry, const String& /*mode*/) {
   auto zipDir   = cast<ZipDirectory>(zip);
   auto zipEntry = cast<ZipEntry>(zip_entry);
 
@@ -1404,7 +1404,7 @@ static bool HHVM_FUNCTION(zip_entry_open, const Resource& zip,
   return true;
 }
 
-static Variant HHVM_FUNCTION(zip_entry_read, const Resource& zip_entry,
+static Variant HHVM_FUNCTION(zip_entry_read, const OptResource& zip_entry,
                              int64_t length) {
   auto zipEntry = cast<ZipEntry>(zip_entry);
 
@@ -1425,7 +1425,7 @@ static Variant HHVM_FUNCTION(zip_open, const String& filename) {
   return Variant(req::make<ZipDirectory>(z));
 }
 
-static Variant HHVM_FUNCTION(zip_read, const Resource& zip) {
+static Variant HHVM_FUNCTION(zip_read, const OptResource& zip) {
   auto zipDir = cast<ZipDirectory>(zip);
 
   FAIL_IF_INVALID_ZIPDIRECTORY(zip_read, zipDir);

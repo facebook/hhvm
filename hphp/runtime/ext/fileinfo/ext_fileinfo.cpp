@@ -71,12 +71,12 @@ static Variant HHVM_FUNCTION(finfo_open,
   return Variant(req::make<FileinfoResource>(magic));
 }
 
-static bool HHVM_FUNCTION(finfo_close, const Resource& finfo) {
+static bool HHVM_FUNCTION(finfo_close, const OptResource& finfo) {
   cast<FileinfoResource>(finfo)->close();
   return true;
 }
 
-static bool HHVM_FUNCTION(finfo_set_flags, const Resource& finfo, int64_t options) {
+static bool HHVM_FUNCTION(finfo_set_flags, const OptResource& finfo, int64_t options) {
   auto magic = cast<FileinfoResource>(finfo)->getMagic();
   if (magic_setflags(magic, options) == -1) {
     raise_warning(
@@ -95,7 +95,7 @@ static bool HHVM_FUNCTION(finfo_set_flags, const Resource& finfo, int64_t option
 #define FILEINFO_MODE_FILE 2
 
 static Variant
-php_finfo_get_type(const Resource& object, const Variant& what, int64_t options,
+php_finfo_get_type(const OptResource& object, const Variant& what, int64_t options,
                    const Variant& /*context*/, int mode, int mimetype_emu) {
   String ret_val;
   String buffer;
@@ -208,7 +208,7 @@ clean:
 }
 
 static String HHVM_FUNCTION(finfo_buffer,
-    const Resource& finfo, const Variant& string,
+    const OptResource& finfo, const Variant& string,
     int64_t options, const Variant& context) {
 
   String s;
@@ -221,7 +221,7 @@ static String HHVM_FUNCTION(finfo_buffer,
 }
 
 static String HHVM_FUNCTION(finfo_file,
-    const Resource& finfo, const Variant& file_name,
+    const OptResource& finfo, const Variant& file_name,
     int64_t options, const Variant& context) {
 
   String fn;
@@ -235,7 +235,7 @@ static String HHVM_FUNCTION(finfo_file,
 
 static String HHVM_FUNCTION(mime_content_type, const Variant& filename) {
   return php_finfo_get_type(
-    Resource{}, filename, 0, uninit_null(), -1, 1
+    OptResource{}, filename, 0, uninit_null(), -1, 1
   ).toString();
 }
 

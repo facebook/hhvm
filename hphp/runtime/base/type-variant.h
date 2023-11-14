@@ -208,12 +208,12 @@ struct variant_ref : variant_ref_detail::base<false> {
   void set(const StaticString & v) noexcept;
   void set(const Array& v) noexcept { set(v.get()); }
   void set(const Object& v) noexcept { set(v.get()); }
-  void set(const Resource& v) noexcept { set(v.hdr()); }
+  void set(const OptResource& v) noexcept { set(v.hdr()); }
 
   void set(String&& v) noexcept { steal(v.detach()); }
   void set(Array&& v) noexcept { steal(v.detach()); }
   void set(Object&& v) noexcept { steal(v.detach()); }
-  void set(Resource&& v) noexcept { steal(v.detachHdr()); }
+  void set(OptResource&& v) noexcept { steal(v.detachHdr()); }
 
   template<typename T>
   void set(const req::ptr<T> &v) noexcept {
@@ -337,7 +337,7 @@ struct Variant : private TypedValue {
   /* implicit */ Variant(const String& v) noexcept : Variant(v.get()) {}
   /* implicit */ Variant(const Array& v) noexcept : Variant(v.get()) { }
   /* implicit */ Variant(const Object& v) noexcept : Variant(v.get()) {}
-  /* implicit */ Variant(const Resource& v) noexcept
+  /* implicit */ Variant(const OptResource& v) noexcept
   : Variant(v.hdr()) {}
 
   /* implicit */ Variant(Class* v) {
@@ -541,7 +541,7 @@ struct Variant : private TypedValue {
   }
 
   // Move ctor for resources
-  /* implicit */ Variant(Resource&& v) noexcept {
+  /* implicit */ Variant(OptResource&& v) noexcept {
     auto hdr = v.hdr();
     if (hdr) {
       m_type = KindOfResource;
@@ -724,20 +724,20 @@ struct Variant : private TypedValue {
     return *reinterpret_cast<Object*>(&m_data.pobj);
   }
 
-  ALWAYS_INLINE const Resource& asCResRef() const {
+  ALWAYS_INLINE const OptResource& asCResRef() const {
     assertx(m_type == KindOfResource && m_data.pres);
-    return *reinterpret_cast<const Resource*>(&m_data.pres);
+    return *reinterpret_cast<const OptResource*>(&m_data.pres);
   }
 
-  ALWAYS_INLINE const Resource& toCResRef() const {
+  ALWAYS_INLINE const OptResource& toCResRef() const {
     assertx(is(KindOfResource));
     assertx(m_data.pres);
-    return *reinterpret_cast<const Resource*>(&m_data.pres);
+    return *reinterpret_cast<const OptResource*>(&m_data.pres);
   }
 
-  ALWAYS_INLINE Resource & asResRef() {
+  ALWAYS_INLINE OptResource & asResRef() {
     assertx(m_type == KindOfResource && m_data.pres);
-    return *reinterpret_cast<Resource*>(&m_data.pres);
+    return *reinterpret_cast<OptResource*>(&m_data.pres);
   }
 
   /**
@@ -988,8 +988,8 @@ struct Variant : private TypedValue {
     if (isObjectType(m_type)) return Object{m_data.pobj};
     return Object::attach(tvCastToObjectData(*this));
   }
-  Resource toResource() const {
-    if (m_type == KindOfResource) return Resource{m_data.pres};
+  OptResource toResource() const {
+    if (m_type == KindOfResource) return OptResource{m_data.pres};
     return toResourceHelper();
   }
 
@@ -1287,12 +1287,12 @@ struct Variant : private TypedValue {
   void set(const StaticString & v) noexcept;
   void set(const Array& v) noexcept { set(v.get()); }
   void set(const Object& v) noexcept { set(v.get()); }
-  void set(const Resource& v) noexcept { set(v.hdr()); }
+  void set(const OptResource& v) noexcept { set(v.hdr()); }
 
   void set(String&& v) noexcept { steal(v.detach()); }
   void set(Array&& v) noexcept { steal(v.detach()); }
   void set(Object&& v) noexcept { steal(v.detach()); }
-  void set(Resource&& v) noexcept { steal(v.detachHdr()); }
+  void set(OptResource&& v) noexcept { steal(v.detachHdr()); }
 
   template<typename T>
   void set(const req::ptr<T> &v) noexcept {
@@ -1314,7 +1314,7 @@ private:
   bool   toBooleanHelper() const;
   int64_t  toInt64Helper(int base = 10) const;
   Array  toPHPArrayHelper() const;
-  Resource toResourceHelper() const;
+  OptResource toResourceHelper() const;
 };
 
 Variant operator+(const Variant & lhs, const Variant & rhs) = delete;

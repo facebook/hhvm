@@ -206,7 +206,7 @@ class ObjectPrinter(ReqPtrPrinter):
 
 
 class ResourcePrinter(ReqPtrPrinter):
-    RECOGNIZE = '^HPHP::Resource$'
+    RECOGNIZE = '^HPHP::OptResource$'
 
     def __init__(self, val):
         super(ResourcePrinter, self).__init__(val['m_res'])

@@ -136,7 +136,7 @@ String serialize(folly::dynamic value) {
 
 template<>
 String serialize(req::ptr<Directory> value) {
-  return serialize<Variant>(value ? Resource{value} : init_null());
+  return serialize<Variant>(value ? OptResource{value} : init_null());
 }
 
 template<>
@@ -154,7 +154,7 @@ String serialize(req::ptr<File> value) {
 
 template<>
 String serialize(req::ptr<StreamContext> value) {
-  return serialize<Variant>(value ? Resource{value} : init_null());
+  return serialize<Variant>(value ? OptResource{value} : init_null());
 }
 
 template<>
@@ -225,7 +225,7 @@ String serialize(Optional<AutoloadMap::FileResult> value) {
 }
 
 template<>
-String serialize(Resource value) {
+String serialize(OptResource value) {
   return serialize<Variant>(value);
 }
 
@@ -375,7 +375,7 @@ Optional<AutoloadMap::FileResult> unserialize(
 }
 
 template<>
-Resource unserialize(const String& recordedValue) {
+OptResource unserialize(const String& recordedValue) {
   const auto variant{unserialize<Variant>(recordedValue)};
   always_assert_flog(variant.isResource(), "{}", recordedValue);
   return variant.asCResRef();

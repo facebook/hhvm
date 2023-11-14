@@ -75,15 +75,15 @@ static BZ2StreamWrapper s_bzip2_stream_wrapper;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool HHVM_FUNCTION(bzclose, const Resource& bz) {
+bool HHVM_FUNCTION(bzclose, const OptResource& bz) {
   return HHVM_FN(fclose)(bz);
 }
 
-Variant HHVM_FUNCTION(bzread, const Resource& bz, int64_t length /* = 1024 */) {
+Variant HHVM_FUNCTION(bzread, const OptResource& bz, int64_t length /* = 1024 */) {
   return HHVM_FN(fread)(bz, length);
 }
 
-Variant HHVM_FUNCTION(bzwrite, const Resource& bz, const String& data,
+Variant HHVM_FUNCTION(bzwrite, const OptResource& bz, const String& data,
                                int64_t length /* = 0 */) {
   return HHVM_FN(fwrite)(bz, data, length);
 }
@@ -156,22 +156,22 @@ Variant HHVM_FUNCTION(bzopen, const Variant& filename, const String& mode) {
   return Variant(std::move(bz));
 }
 
-bool HHVM_FUNCTION(bzflush, const Resource& bz) {
+bool HHVM_FUNCTION(bzflush, const OptResource& bz) {
   CHECK_BZFILE(bz, f);
   return f->flush();
 }
 
-Variant HHVM_FUNCTION(bzerrstr, const Resource& bz) {
+Variant HHVM_FUNCTION(bzerrstr, const OptResource& bz) {
   CHECK_BZFILE(bz, f);
   return f->errstr();
 }
 
-Variant HHVM_FUNCTION(bzerror, const Resource& bz) {
+Variant HHVM_FUNCTION(bzerror, const OptResource& bz) {
   CHECK_BZFILE(bz, f);
   return f->error();
 }
 
-Variant HHVM_FUNCTION(bzerrno, const Resource& bz) {
+Variant HHVM_FUNCTION(bzerrno, const OptResource& bz) {
   CHECK_BZFILE(bz, f);
   return f->errnu();
 }

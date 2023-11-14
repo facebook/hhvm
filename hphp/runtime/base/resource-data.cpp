@@ -59,7 +59,7 @@ String ResourceData::o_toString() const {
 }
 
 Array ResourceData::o_toArray() const {
-  return make_vec_array(Variant(Resource(const_cast<ResourceData*>(this))));
+  return make_vec_array(Variant(OptResource(const_cast<ResourceData*>(this))));
 }
 
 const StaticString s_Unknown("Unknown");

@@ -1376,7 +1376,7 @@ static int php_get_xbm(const req::ptr<File>& stream, struct gfxinfo **result) {
   if (!stream->rewind()) {
     return 0;
   }
-  while (!(fline = HHVM_FN(fgets)(Resource(stream), 0).toString()).empty()) {
+  while (!(fline = HHVM_FN(fgets)(OptResource(stream), 0).toString()).empty()) {
     iname = (char *)IM_MALLOC(fline.size() + 1);
     CHECK_ALLOC_R(iname, (fline.size() + 1), 0);
     if (sscanf(fline.c_str(), "#define %s %d", iname, &value) == 2) {
@@ -1721,7 +1721,7 @@ const StaticString
   s_linespacing("linespacing");
 
 
-gdImagePtr get_valid_image_resource(const Resource& image) {
+gdImagePtr get_valid_image_resource(const OptResource& image) {
   auto img_res = dyn_cast_or_null<Image>(image);
   if (!img_res || !img_res->get()) {
     raise_warning("supplied resource is not a valid Image resource");
@@ -1890,7 +1890,7 @@ static void _php_image_output_ctxfree(struct gdIOCtx *ctx) {
     IM_FREE(ctx);
   }
 }
-static bool _php_image_output_ctx(const Resource& image, const String& filename,
+static bool _php_image_output_ctx(const OptResource& image, const String& filename,
                                   int quality, int basefilter, int image_type,
                                   char* /*tn*/, void (*func_p)()) {
   gdImagePtr im = get_valid_image_resource(image);
@@ -2178,7 +2178,7 @@ static bool _php_image_convert(const String& f_org, const String& f_dest,
 
 // For quality and type, -1 means that the argument does not exist
 static bool
-_php_image_output(const Resource& image, const String& filename, int quality,
+_php_image_output(const OptResource& image, const String& filename, int quality,
                   int type, int image_type, char* /*tn*/, void (*func_p)()) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -2561,7 +2561,7 @@ static void php_gdimagecharup(gdImagePtr im, gdFontPtr f, int x, int y,
  * arg = 2  ImageString
  * arg = 3  ImageStringUp
  */
-static bool php_imagechar(const Resource& image, int size, int x, int y,
+static bool php_imagechar(const OptResource& image, int size, int x, int y,
                           const String& c, int color, int mode) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -2599,7 +2599,7 @@ static bool php_imagechar(const Resource& image, int size, int x, int y,
 
 /* arg = 0  normal polygon
    arg = 1  filled polygon */
-static bool php_imagepolygon(const Resource& image,
+static bool php_imagepolygon(const OptResource& image,
                              const Array& points, int num_points,
                              int color, int filled) {
   gdImagePtr im = get_valid_image_resource(image);
@@ -2772,7 +2772,7 @@ static Variant php_imagettftext_common(int mode, int extended,
     str = arg4.toString();
     extrainfo = arg5;
   } else {
-    Resource image = arg1.toResource();
+    OptResource image = arg1.toResource();
     ptsize = arg2.toDouble();
     angle = arg3.toDouble();
     x = arg4.toInt64();
@@ -2898,7 +2898,7 @@ Variant HHVM_FUNCTION(imageloadfont, const String& /*file*/) {
   // https://github.com/php/php-src/commit/9a60aed6d1925c98b1b40c19b40f5b4b65baa
 }
 
-bool HHVM_FUNCTION(imagesetstyle, const Resource& image, const Array& style) {
+bool HHVM_FUNCTION(imagesetstyle, const OptResource& image, const Array& style) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   int *stylearr;
@@ -2921,7 +2921,7 @@ const StaticString
   s_width("width"),
   s_height("height");
 
-Variant HHVM_FUNCTION(imagecrop, const Resource& image, const Array& rect) {
+Variant HHVM_FUNCTION(imagecrop, const OptResource& image, const Array& rect) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   gdImagePtr imcropped = nullptr;
@@ -2960,7 +2960,7 @@ Variant HHVM_FUNCTION(imagecrop, const Resource& image, const Array& rect) {
 }
 
 Variant HHVM_FUNCTION(imagecropauto,
-                      const Resource& image,
+                      const OptResource& image,
                       int64_t mode /* = -1 */,
                       double threshold /* = 0.5f */,
                       int64_t color /* = -1 */) {
@@ -3013,13 +3013,13 @@ Variant HHVM_FUNCTION(imagecreatetruecolor, int64_t width, int64_t height) {
   return Variant(req::make<Image>(im));
 }
 
-bool HHVM_FUNCTION(imageistruecolor, const Resource& image) {
+bool HHVM_FUNCTION(imageistruecolor, const OptResource& image) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   return im->trueColor;
 }
 
-Variant HHVM_FUNCTION(imagetruecolortopalette, const Resource& image,
+Variant HHVM_FUNCTION(imagetruecolortopalette, const OptResource& image,
     bool dither, int64_t ncolors) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3032,8 +3032,8 @@ Variant HHVM_FUNCTION(imagetruecolortopalette, const Resource& image,
   return true;
 }
 
-Variant HHVM_FUNCTION(imagecolormatch, const Resource& image1,
-                                       const Resource& image2) {
+Variant HHVM_FUNCTION(imagecolormatch, const OptResource& image1,
+                                       const OptResource& image2) {
   gdImagePtr im1 = get_valid_image_resource(image1);
   if (!im1) return false;
   gdImagePtr im2 = get_valid_image_resource(image2);
@@ -3060,14 +3060,14 @@ Variant HHVM_FUNCTION(imagecolormatch, const Resource& image1,
 }
 
 bool HHVM_FUNCTION(imagesetthickness,
-    const Resource& image, int64_t thickness) {
+    const OptResource& image, int64_t thickness) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   gdImageSetThickness(im, thickness);
   return true;
 }
 
-bool HHVM_FUNCTION(imagefilledellipse, const Resource& image,
+bool HHVM_FUNCTION(imagefilledellipse, const OptResource& image,
     int64_t cx, int64_t cy, int64_t width, int64_t height, int64_t color) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3075,7 +3075,7 @@ bool HHVM_FUNCTION(imagefilledellipse, const Resource& image,
   return true;
 }
 
-bool HHVM_FUNCTION(imagefilledarc, const Resource& image,
+bool HHVM_FUNCTION(imagefilledarc, const OptResource& image,
     int64_t cx, int64_t cy, int64_t width, int64_t height,
     int64_t start, int64_t end, int64_t color, int64_t style) {
   gdImagePtr im = get_valid_image_resource(image);
@@ -3087,7 +3087,7 @@ bool HHVM_FUNCTION(imagefilledarc, const Resource& image,
 }
 
 Variant HHVM_FUNCTION(imageaffine,
-                      const Resource& image,
+                      const OptResource& image,
                       const Array& affine /* = Array() */,
                       const Array& clip /* = Array() */) {
   gdImagePtr src = get_valid_image_resource(image);
@@ -3276,7 +3276,7 @@ Variant HHVM_FUNCTION(imageaffinematrixget,
   return ret;
 }
 
-bool HHVM_FUNCTION(imagealphablending, const Resource& image,
+bool HHVM_FUNCTION(imagealphablending, const OptResource& image,
                                        bool blendmode) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3284,14 +3284,14 @@ bool HHVM_FUNCTION(imagealphablending, const Resource& image,
   return true;
 }
 
-bool HHVM_FUNCTION(imagesavealpha, const Resource& image, bool saveflag) {
+bool HHVM_FUNCTION(imagesavealpha, const OptResource& image, bool saveflag) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   gdImageSaveAlpha(im, saveflag);
   return true;
 }
 
-bool HHVM_FUNCTION(imagelayereffect, const Resource& image, int64_t effect) {
+bool HHVM_FUNCTION(imagelayereffect, const OptResource& image, int64_t effect) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   gdImageAlphaBlending(im, effect);
@@ -3299,7 +3299,7 @@ bool HHVM_FUNCTION(imagelayereffect, const Resource& image, int64_t effect) {
 }
 
 Variant HHVM_FUNCTION(imagecolorallocatealpha,
-    const Resource& image,
+    const OptResource& image,
     int64_t red, int64_t green, int64_t blue, int64_t alpha) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3310,7 +3310,7 @@ Variant HHVM_FUNCTION(imagecolorallocatealpha,
   return ct;
 }
 
-Variant HHVM_FUNCTION(imagecolorresolvealpha, const Resource& image,
+Variant HHVM_FUNCTION(imagecolorresolvealpha, const OptResource& image,
     int64_t red, int64_t green, int64_t blue, int64_t alpha) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3318,14 +3318,14 @@ Variant HHVM_FUNCTION(imagecolorresolvealpha, const Resource& image,
 }
 
 Variant HHVM_FUNCTION(imagecolorclosestalpha,
-    const Resource& image,
+    const OptResource& image,
     int64_t red, int64_t green, int64_t blue, int64_t alpha) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   return gdImageColorClosestAlpha(im, red, green, blue, alpha);
 }
 
-Variant HHVM_FUNCTION(imagecolorexactalpha, const Resource& image,
+Variant HHVM_FUNCTION(imagecolorexactalpha, const OptResource& image,
     int64_t red, int64_t green, int64_t blue, int64_t alpha) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3333,7 +3333,7 @@ Variant HHVM_FUNCTION(imagecolorexactalpha, const Resource& image,
 }
 
 bool HHVM_FUNCTION(imagecopyresampled,
-    const Resource& dst_im, const Resource& src_im,
+    const OptResource& dst_im, const OptResource& src_im,
     int64_t dst_x, int64_t dst_y, int64_t src_x, int64_t src_y,
     int64_t dst_w, int64_t dst_h, int64_t src_w, int64_t src_h) {
   gdImagePtr im_src = get_valid_image_resource(src_im);
@@ -3346,7 +3346,7 @@ bool HHVM_FUNCTION(imagecopyresampled,
 }
 
 Variant
-HHVM_FUNCTION(imagerotate, const Resource& source_image, double angle,
+HHVM_FUNCTION(imagerotate, const OptResource& source_image, double angle,
               int64_t bgd_color, int64_t /*ignore_transparent*/ /* = 0 */) {
   gdImagePtr im_src = get_valid_image_resource(source_image);
   if (!im_src) return false;
@@ -3355,7 +3355,7 @@ HHVM_FUNCTION(imagerotate, const Resource& source_image, double angle,
   return Variant(req::make<Image>(im_dst));
 }
 
-bool HHVM_FUNCTION(imagesettile, const Resource& image, const Resource& tile) {
+bool HHVM_FUNCTION(imagesettile, const OptResource& image, const OptResource& tile) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   gdImagePtr til = get_valid_image_resource(tile);
@@ -3366,7 +3366,7 @@ bool HHVM_FUNCTION(imagesettile, const Resource& image, const Resource& tile) {
 }
 
 bool HHVM_FUNCTION(imagesetbrush,
-    const Resource& image, const Resource& brush) {
+    const OptResource& image, const OptResource& brush) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   gdImagePtr tile = get_valid_image_resource(brush);
@@ -3378,7 +3378,7 @@ bool HHVM_FUNCTION(imagesetbrush,
 }
 
 bool HHVM_FUNCTION(imagesetinterpolation,
-    const Resource& image, int64_t method /*=GD_BILINEAR_FIXED*/) {
+    const OptResource& image, int64_t method /*=GD_BILINEAR_FIXED*/) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   if (method == -1) method = GD_BILINEAR_FIXED;
@@ -3554,14 +3554,14 @@ Variant HHVM_FUNCTION(imagecreatefromgd2part,
   return Variant(req::make<Image>(im));
 }
 
-bool HHVM_FUNCTION(imagegif, const Resource& image,
+bool HHVM_FUNCTION(imagegif, const OptResource& image,
     const String& filename /* = null_string */) {
   return _php_image_output_ctx(image, filename, -1, -1,
                                PHP_GDIMG_TYPE_GIF, "GIF",
                                (void (*)())gdImageGifCtx);
 }
 
-bool HHVM_FUNCTION(imagepng, const Resource& image,
+bool HHVM_FUNCTION(imagepng, const OptResource& image,
     const String& filename /* = null_string */,
     int64_t quality /* = -1 */, int64_t filters /* = -1 */) {
   return _php_image_output_ctx(image, filename, quality, filters,
@@ -3569,14 +3569,14 @@ bool HHVM_FUNCTION(imagepng, const Resource& image,
                                (void (*)())gdImagePngCtxEx);
 }
 
-bool HHVM_FUNCTION(imagejpeg, const Resource& image,
+bool HHVM_FUNCTION(imagejpeg, const OptResource& image,
     const String& filename /* = null_string */, int64_t quality /* = -1 */) {
   return _php_image_output_ctx(image, filename, quality, -1,
                                PHP_GDIMG_TYPE_JPG, "JPEG",
                                (void (*)())gdImageJpegCtx);
 }
 
-bool HHVM_FUNCTION(imagewbmp, const Resource& image,
+bool HHVM_FUNCTION(imagewbmp, const OptResource& image,
     const String& filename /* = null_string */,
     int64_t foreground /* = -1 */) {
   return _php_image_output_ctx(image, filename, foreground, -1,
@@ -3584,13 +3584,13 @@ bool HHVM_FUNCTION(imagewbmp, const Resource& image,
                                (void (*)())gdImageWBMPCtx);
 }
 
-bool HHVM_FUNCTION(imagegd, const Resource& image,
+bool HHVM_FUNCTION(imagegd, const OptResource& image,
     const String& filename /* = null_string */) {
   return _php_image_output(image, filename, -1, -1, PHP_GDIMG_TYPE_GD, "GD",
                            (void (*)())gdImageGd);
 }
 
-bool HHVM_FUNCTION(imagegd2, const Resource& image,
+bool HHVM_FUNCTION(imagegd2, const OptResource& image,
     const String& filename /* = null_string */,
     int64_t chunk_size /* = 0 */, int64_t type /* = 0 */) {
   return _php_image_output(image, filename, chunk_size, type,
@@ -3598,7 +3598,7 @@ bool HHVM_FUNCTION(imagegd2, const Resource& image,
                            (void (*)())gdImageGd2);
 }
 
-bool HHVM_FUNCTION(imagedestroy, const Resource& image) {
+bool HHVM_FUNCTION(imagedestroy, const OptResource& image) {
   auto img_res = cast<Image>(image);
   gdImagePtr im = img_res->get();
   if (!im) return false;
@@ -3607,7 +3607,7 @@ bool HHVM_FUNCTION(imagedestroy, const Resource& image) {
 }
 
 Variant HHVM_FUNCTION(imagecolorallocate,
-    const Resource& image,
+    const OptResource& image,
     int64_t red, int64_t green, int64_t blue) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3619,8 +3619,8 @@ Variant HHVM_FUNCTION(imagecolorallocate,
 }
 
 Variant HHVM_FUNCTION(imagepalettecopy,
-    const Resource& dst,
-    const Resource& src) {
+    const OptResource& dst,
+    const OptResource& src) {
   gdImagePtr dstim = cast<Image>(dst)->get();
   gdImagePtr srcim = cast<Image>(src)->get();
   if (!dstim || !srcim)
@@ -3630,7 +3630,7 @@ Variant HHVM_FUNCTION(imagepalettecopy,
 }
 
 Variant HHVM_FUNCTION(imagecolorat,
-    const Resource& image, int64_t x, int64_t y) {
+    const OptResource& image, int64_t x, int64_t y) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   if (gdImageTrueColor(im)) {
@@ -3651,20 +3651,20 @@ Variant HHVM_FUNCTION(imagecolorat,
 }
 
 Variant HHVM_FUNCTION(imagecolorclosest,
-    const Resource& image, int64_t red, int64_t green, int64_t blue) {
+    const OptResource& image, int64_t red, int64_t green, int64_t blue) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   return gdImageColorClosest(im, red, green, blue);
 }
 
-Variant HHVM_FUNCTION(imagecolorclosesthwb, const Resource& image,
+Variant HHVM_FUNCTION(imagecolorclosesthwb, const OptResource& image,
     int64_t red, int64_t green, int64_t blue) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   return gdImageColorClosestHWB(im, red, green, blue);
 }
 
-bool HHVM_FUNCTION(imagecolordeallocate, const Resource& image,
+bool HHVM_FUNCTION(imagecolordeallocate, const OptResource& image,
                                          int64_t color) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3681,21 +3681,21 @@ bool HHVM_FUNCTION(imagecolordeallocate, const Resource& image,
   }
 }
 
-Variant HHVM_FUNCTION(imagecolorresolve, const Resource& image,
+Variant HHVM_FUNCTION(imagecolorresolve, const OptResource& image,
     int64_t red, int64_t green, int64_t blue) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   return gdImageColorResolve(im, red, green, blue);
 }
 
-Variant HHVM_FUNCTION(imagecolorexact, const Resource& image,
+Variant HHVM_FUNCTION(imagecolorexact, const OptResource& image,
     int64_t red, int64_t green, int64_t blue) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   return gdImageColorExact(im, red, green, blue);
 }
 
-Variant HHVM_FUNCTION(imagecolorset, const Resource& image,
+Variant HHVM_FUNCTION(imagecolorset, const OptResource& image,
     int64_t index, int64_t red, int64_t green, int64_t blue) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3715,7 +3715,7 @@ const StaticString
   s_blue("blue"),
   s_alpha("alpha");
 
-Variant HHVM_FUNCTION(imagecolorsforindex, const Resource& image,
+Variant HHVM_FUNCTION(imagecolorsforindex, const OptResource& image,
                                            int64_t index) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3732,7 +3732,7 @@ Variant HHVM_FUNCTION(imagecolorsforindex, const Resource& image,
   return false;
 }
 
-bool HHVM_FUNCTION(imagegammacorrect, const Resource& image,
+bool HHVM_FUNCTION(imagegammacorrect, const OptResource& image,
     double inputgamma, double outputgamma) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3769,7 +3769,7 @@ bool HHVM_FUNCTION(imagegammacorrect, const Resource& image,
   return true;
 }
 
-bool HHVM_FUNCTION(imagesetpixel, const Resource& image,
+bool HHVM_FUNCTION(imagesetpixel, const OptResource& image,
     int64_t x, int64_t y, int64_t color) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3777,7 +3777,7 @@ bool HHVM_FUNCTION(imagesetpixel, const Resource& image,
   return true;
 }
 
-bool HHVM_FUNCTION(imageline, const Resource& image,
+bool HHVM_FUNCTION(imageline, const OptResource& image,
     int64_t x1, int64_t y1, int64_t x2, int64_t y2, int64_t color) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3787,7 +3787,7 @@ bool HHVM_FUNCTION(imageline, const Resource& image,
 }
 
 bool HHVM_FUNCTION(imagedashedline,
-    const Resource& image,
+    const OptResource& image,
     int64_t x1, int64_t y1, int64_t x2, int64_t y2, int64_t color) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3795,7 +3795,7 @@ bool HHVM_FUNCTION(imagedashedline,
   return true;
 }
 
-bool HHVM_FUNCTION(imagerectangle, const Resource& image,
+bool HHVM_FUNCTION(imagerectangle, const OptResource& image,
     int64_t x1, int64_t y1, int64_t x2, int64_t y2, int64_t color) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3803,7 +3803,7 @@ bool HHVM_FUNCTION(imagerectangle, const Resource& image,
   return true;
 }
 
-bool HHVM_FUNCTION(imagefilledrectangle, const Resource& image,
+bool HHVM_FUNCTION(imagefilledrectangle, const OptResource& image,
     int64_t x1, int64_t y1, int64_t x2, int64_t y2, int64_t color) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3811,7 +3811,7 @@ bool HHVM_FUNCTION(imagefilledrectangle, const Resource& image,
   return true;
 }
 
-bool HHVM_FUNCTION(imagearc, const Resource& image,
+bool HHVM_FUNCTION(imagearc, const OptResource& image,
     int64_t cx, int64_t cy, int64_t width, int64_t height,
     int64_t start, int64_t end, int64_t color) {
   gdImagePtr im = get_valid_image_resource(image);
@@ -3823,7 +3823,7 @@ bool HHVM_FUNCTION(imagearc, const Resource& image,
   return true;
 }
 
-bool HHVM_FUNCTION(imageellipse, const Resource& image,
+bool HHVM_FUNCTION(imageellipse, const OptResource& image,
     int64_t cx, int64_t cy, int64_t width, int64_t height, int64_t color) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3832,7 +3832,7 @@ bool HHVM_FUNCTION(imageellipse, const Resource& image,
   return true;
 }
 
-bool HHVM_FUNCTION(imagefilltoborder, const Resource& image,
+bool HHVM_FUNCTION(imagefilltoborder, const OptResource& image,
     int64_t x, int64_t y, int64_t border, int64_t color) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3840,7 +3840,7 @@ bool HHVM_FUNCTION(imagefilltoborder, const Resource& image,
   return true;
 }
 
-bool HHVM_FUNCTION(imagefill, const Resource& image,
+bool HHVM_FUNCTION(imagefill, const OptResource& image,
     int64_t x, int64_t y, int64_t color) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3848,13 +3848,13 @@ bool HHVM_FUNCTION(imagefill, const Resource& image,
   return true;
 }
 
-Variant HHVM_FUNCTION(imagecolorstotal, const Resource& image) {
+Variant HHVM_FUNCTION(imagecolorstotal, const OptResource& image) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   return (gdImageColorsTotal(im));
 }
 
-Variant HHVM_FUNCTION(imagecolortransparent, const Resource& image,
+Variant HHVM_FUNCTION(imagecolortransparent, const OptResource& image,
                                              int64_t color /* = -1 */) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3865,7 +3865,7 @@ Variant HHVM_FUNCTION(imagecolortransparent, const Resource& image,
   return gdImageGetTransparent(im);
 }
 
-TypedValue HHVM_FUNCTION(imageinterlace, const Resource& image,
+TypedValue HHVM_FUNCTION(imageinterlace, const OptResource& image,
                          TypedValue interlace /* = 0 */) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return make_tv<KindOfBoolean>(false);
@@ -3876,12 +3876,12 @@ TypedValue HHVM_FUNCTION(imageinterlace, const Resource& image,
   return make_tv<KindOfInt64>(gdImageGetInterlaced(im));
 }
 
-bool HHVM_FUNCTION(imagepolygon, const Resource& image,
+bool HHVM_FUNCTION(imagepolygon, const OptResource& image,
     const Array& points, int64_t num_points, int64_t color) {
   return php_imagepolygon(image, points, num_points, color, 0);
 }
 
-bool HHVM_FUNCTION(imagefilledpolygon, const Resource& image,
+bool HHVM_FUNCTION(imagefilledpolygon, const OptResource& image,
     const Array& points, int64_t num_points, int64_t color) {
   return php_imagepolygon(image, points, num_points, color, 1);
 }
@@ -3894,31 +3894,31 @@ int64_t HHVM_FUNCTION(imagefontheight, int64_t font) {
   return php_imagefontsize(font, 1);
 }
 
-bool HHVM_FUNCTION(imagechar, const Resource& image,
+bool HHVM_FUNCTION(imagechar, const OptResource& image,
     int64_t font, int64_t x, int64_t y,
     const String& c, int64_t color) {
   return php_imagechar(image, font, x, y, c, color, 0);
 }
 
-bool HHVM_FUNCTION(imagecharup, const Resource& image,
+bool HHVM_FUNCTION(imagecharup, const OptResource& image,
     int64_t font, int64_t x, int64_t y,
     const String& c, int64_t color) {
   return php_imagechar(image, font, x, y, c, color, 1);
 }
 
-bool HHVM_FUNCTION(imagestring, const Resource& image,
+bool HHVM_FUNCTION(imagestring, const OptResource& image,
     int64_t font, int64_t x, int64_t y,
     const String& str, int64_t color) {
   return php_imagechar(image, font, x, y, str, color, 2);
 }
 
-bool HHVM_FUNCTION(imagestringup, const Resource& image,
+bool HHVM_FUNCTION(imagestringup, const OptResource& image,
     int64_t font, int64_t x, int64_t y,
     const String& str, int64_t color) {
   return php_imagechar(image, font, x, y, str, color, 3);
 }
 
-bool HHVM_FUNCTION(imagecopy, const Resource& dst_im, const Resource& src_im,
+bool HHVM_FUNCTION(imagecopy, const OptResource& dst_im, const OptResource& src_im,
     int64_t dst_x, int64_t dst_y,
     int64_t src_x, int64_t src_y, int64_t src_w, int64_t src_h) {
   gdImagePtr im_src = cast<Image>(src_im)->get();
@@ -3929,8 +3929,8 @@ bool HHVM_FUNCTION(imagecopy, const Resource& dst_im, const Resource& src_im,
   return true;
 }
 
-bool HHVM_FUNCTION(imagecopymerge, const Resource& dst_im,
-    const Resource& src_im,
+bool HHVM_FUNCTION(imagecopymerge, const OptResource& dst_im,
+    const OptResource& src_im,
     int64_t dst_x, int64_t dst_y, int64_t src_x, int64_t src_y,
     int64_t src_w, int64_t src_h, int64_t pct) {
   gdImagePtr im_src = cast<Image>(src_im)->get();
@@ -3942,8 +3942,8 @@ bool HHVM_FUNCTION(imagecopymerge, const Resource& dst_im,
   return true;
 }
 
-bool HHVM_FUNCTION(imagecopymergegray, const Resource& dst_im,
-    const Resource& src_im,
+bool HHVM_FUNCTION(imagecopymergegray, const OptResource& dst_im,
+    const OptResource& src_im,
     int64_t dst_x, int64_t dst_y,
     int64_t src_x, int64_t src_y,
     int64_t src_w, int64_t src_h, int64_t pct) {
@@ -3956,8 +3956,8 @@ bool HHVM_FUNCTION(imagecopymergegray, const Resource& dst_im,
   return true;
 }
 
-bool HHVM_FUNCTION(imagecopyresized, const Resource& dst_im,
-    const Resource& src_im,
+bool HHVM_FUNCTION(imagecopyresized, const OptResource& dst_im,
+    const OptResource& src_im,
     int64_t dst_x, int64_t dst_y, int64_t src_x, int64_t src_y,
     int64_t dst_w, int64_t dst_h, int64_t src_w, int64_t src_h) {
   gdImagePtr im_src = cast<Image>(src_im)->get();
@@ -3974,13 +3974,13 @@ bool HHVM_FUNCTION(imagecopyresized, const Resource& dst_im,
   return true;
 }
 
-Variant HHVM_FUNCTION(imagesx, const Resource& image) {
+Variant HHVM_FUNCTION(imagesx, const OptResource& image) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   return gdImageSX(im);
 }
 
-Variant HHVM_FUNCTION(imagesy, const Resource& image) {
+Variant HHVM_FUNCTION(imagesy, const OptResource& image) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   return gdImageSY(im);
@@ -3994,7 +3994,7 @@ Variant HHVM_FUNCTION(imageftbbox, double size, double angle,
 }
 
 Variant HHVM_FUNCTION(imagefttext,
-    const Resource& image,
+    const OptResource& image,
     const Variant& size, const Variant& angle,
     int64_t x, int64_t y, int64_t col,
     const String& font_file, const String& text,
@@ -4009,7 +4009,7 @@ Variant HHVM_FUNCTION(imagettfbbox, double size, double angle,
                                  size, angle, fontfile, text);
 }
 
-Variant HHVM_FUNCTION(imagettftext, const Resource& image,
+Variant HHVM_FUNCTION(imagettftext, const OptResource& image,
     const Variant& size, const Variant& angle,
     int64_t x, int64_t y, int64_t color,
     const String& fontfile, const String& text) {
@@ -4018,7 +4018,7 @@ Variant HHVM_FUNCTION(imagettftext, const Resource& image,
                                  x, y, color, fontfile, text);
 }
 
-bool HHVM_FUNCTION(image2wbmp, const Resource& image,
+bool HHVM_FUNCTION(image2wbmp, const OptResource& image,
                    const String& filename /* = null_string */,
                    int64_t threshold /* = -1 */) {
   return _php_image_output(image, filename, threshold, -1,
@@ -4038,7 +4038,7 @@ bool HHVM_FUNCTION(png2wbmp, const String& pngname, const String& wbmpname,
                             threshold, PHP_GDIMG_TYPE_PNG);
 }
 
-bool HHVM_FUNCTION(imagefilter, const Resource& res,
+bool HHVM_FUNCTION(imagefilter, const OptResource& res,
     int64_t filtertype,
     const Variant& arg1 /*=0*/, const Variant& arg2 /*=0*/,
     const Variant& arg3 /*=0*/, const Variant& arg4 /*=0*/) {
@@ -4081,7 +4081,7 @@ bool HHVM_FUNCTION(imagefilter, const Resource& res,
   return false;
 }
 
-bool HHVM_FUNCTION(imageflip, const Resource& image, int64_t mode /* = -1 */) {
+bool HHVM_FUNCTION(imageflip, const OptResource& image, int64_t mode /* = -1 */) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   if (mode == -1) mode = GD_FLIP_HORINZONTAL;
@@ -4170,7 +4170,7 @@ static int hphp_gdImageConvolution(gdImagePtr src, float filter[3][3],
   return 1;
 }
 
-bool HHVM_FUNCTION(imageconvolution, const Resource& image,
+bool HHVM_FUNCTION(imageconvolution, const OptResource& image,
     const Array& matrix, double div, double offset) {
   gdImagePtr im_src = cast<Image>(image)->get();
   if (!im_src) return false;
@@ -4208,14 +4208,14 @@ bool HHVM_FUNCTION(imageconvolution, const Resource& image,
   }
 }
 
-bool HHVM_FUNCTION(imageantialias, const Resource& image, bool on) {
+bool HHVM_FUNCTION(imageantialias, const OptResource& image, bool on) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   SetAntiAliased(im, on);
   return true;
 }
 
-Variant HHVM_FUNCTION(imagescale, const Resource& image, int64_t newwidth,
+Variant HHVM_FUNCTION(imagescale, const OptResource& image, int64_t newwidth,
   int64_t newheight /* =-1 */, int64_t method /*=GD_BILINEAR_FIXED*/) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -4361,7 +4361,7 @@ Variant HHVM_FUNCTION(iptcembed, const String& iptcdata,
   }
 
   if (spool < 2) {
-    auto stat = HHVM_FN(fstat)(Resource(file));
+    auto stat = HHVM_FN(fstat)(OptResource(file));
     // TODO(t7561579) until we can properly handle non-file streams here, don't
     // pretend we can and crash.
     if (!stat.isArray()) {

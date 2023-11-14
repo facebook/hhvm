@@ -136,13 +136,13 @@ Variant HHVM_FUNCTION(stream_context_create,
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant HHVM_FUNCTION(stream_copy_to_stream,
-                      const Resource& source,
-                      const Resource& dest,
+                      const OptResource& source,
+                      const OptResource& dest,
                       int64_t maxlength = -1,
                       int64_t offset = 0);
 
 Variant HHVM_FUNCTION(stream_get_contents,
-                      const Resource& handle,
+                      const OptResource& handle,
                       int64_t maxlen = -1,
                       int64_t offset = -1);
 

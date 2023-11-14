@@ -75,36 +75,29 @@ Variant HHVM_FUNCTION(fopen,
                       const String& mode,
                       bool use_include_path = false,
                       const Variant& context = uninit_null());
-bool HHVM_FUNCTION(fclose,
-                   const Resource& handle);
+bool HHVM_FUNCTION(fclose, const OptResource& handle);
 Variant HHVM_FUNCTION(fseek,
-                      const Resource& handle,
+                      const OptResource& handle,
                       int64_t offset,
                       int64_t whence = SEEK_SET);
-bool HHVM_FUNCTION(rewind,
-                   const Resource& handle);
-Variant HHVM_FUNCTION(ftell,
-                      const Resource& handle);
-bool HHVM_FUNCTION(feof,
-                   const Resource& handle);
-Variant HHVM_FUNCTION(fstat,
-                      const Resource& handle);
+bool HHVM_FUNCTION(rewind, const OptResource& handle);
+Variant HHVM_FUNCTION(ftell, const OptResource& handle);
+bool HHVM_FUNCTION(feof, const OptResource& handle);
+Variant HHVM_FUNCTION(fstat, const OptResource& handle);
 Variant HHVM_FUNCTION(fread,
-                      const Resource& handle,
+                      const OptResource& handle,
                       int64_t length);
-Variant HHVM_FUNCTION(fgetc,
-                      const Resource& handle);
+Variant HHVM_FUNCTION(fgetc, const OptResource& handle);
 Variant HHVM_FUNCTION(fgets,
-                      const Resource& handle,
+                      const OptResource& handle,
                       int64_t length = 0);
 Variant HHVM_FUNCTION(fgetss,
-                      const Resource& handle,
+                      const OptResource& handle,
                       int64_t length = 0,
                       const String& allowable_tags = null_string);
-Variant HHVM_FUNCTION(fpassthru,
-                      const Resource& handle);
+Variant HHVM_FUNCTION(fpassthru, const OptResource& handle);
 Variant HHVM_FUNCTION(fwrite,
-                      const Resource& handle,
+                      const OptResource& handle,
                       const String& data,
                       int64_t length = 0);
 

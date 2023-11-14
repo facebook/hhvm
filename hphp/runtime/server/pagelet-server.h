@@ -41,7 +41,7 @@ struct PageletServer {
    * Create a task. This returns a task handle, or null object
    * if there are no worker threads.
    */
-  static Resource TaskStart(
+  static OptResource TaskStart(
     const String& url, const Array& headers,
     const String& remote_host,
     const String& post_data = null_string,
@@ -54,13 +54,13 @@ struct PageletServer {
    * Query if a task is finished. This is non-blocking and can be called as
    * many times as desired.
    */
-  static int64_t TaskStatus(const Resource& task);
+  static int64_t TaskStatus(const OptResource& task);
 
   /**
    * Get results of a task. This is blocking until task is finished or times
    * out. The status code is set to -1 in the event of a timeout.
    */
-  static String TaskResult(const Resource& task,
+  static String TaskResult(const OptResource& task,
                            Array &headers,
                            int &code,
                            int64_t timeout_ms);
@@ -71,7 +71,7 @@ struct PageletServer {
    * - a WaitHandle representing the future results (or null if finished)
    * - the status code
    */
-  static Array AsyncTaskResult(const Resource& task);
+  static Array AsyncTaskResult(const OptResource& task);
 
   /**
    * Add a piece of response to the pipeline.

@@ -301,39 +301,39 @@ Variant HHVM_FUNCTION(gzopen, const String& filename, const String& mode,
   return Variant(std::move(file));
 }
 
-bool HHVM_FUNCTION(gzclose, const Resource& zp) {
+bool HHVM_FUNCTION(gzclose, const OptResource& zp) {
   return HHVM_FN(fclose)(zp);
 }
-Variant HHVM_FUNCTION(gzread, const Resource& zp, int64_t length /* = 0 */) {
+Variant HHVM_FUNCTION(gzread, const OptResource& zp, int64_t length /* = 0 */) {
   return HHVM_FN(fread)(zp, length);
 }
-Variant HHVM_FUNCTION(gzseek, const Resource& zp, int64_t offset,
+Variant HHVM_FUNCTION(gzseek, const OptResource& zp, int64_t offset,
                               int64_t whence /* = SEEK_SET */) {
   return HHVM_FN(fseek)(zp, offset, whence);
 }
-Variant HHVM_FUNCTION(gztell, const Resource& zp) {
+Variant HHVM_FUNCTION(gztell, const OptResource& zp) {
   return HHVM_FN(ftell)(zp);
 }
-bool HHVM_FUNCTION(gzeof, const Resource& zp) {
+bool HHVM_FUNCTION(gzeof, const OptResource& zp) {
   return HHVM_FN(feof)(zp);
 }
-bool HHVM_FUNCTION(gzrewind, const Resource& zp) {
+bool HHVM_FUNCTION(gzrewind, const OptResource& zp) {
   return HHVM_FN(rewind)(zp);
 }
-Variant HHVM_FUNCTION(gzgetc, const Resource& zp) {
+Variant HHVM_FUNCTION(gzgetc, const OptResource& zp) {
   return HHVM_FN(fgetc)(zp);
 }
-Variant HHVM_FUNCTION(gzgets, const Resource& zp, int64_t length /* = 0 */) {
+Variant HHVM_FUNCTION(gzgets, const OptResource& zp, int64_t length /* = 0 */) {
   return HHVM_FN(fgets)(zp, length);
 }
-Variant HHVM_FUNCTION(gzgetss, const Resource& zp, int64_t length /* = 0 */,
+Variant HHVM_FUNCTION(gzgetss, const OptResource& zp, int64_t length /* = 0 */,
                             const String& allowable_tags /* = null_string */) {
   return HHVM_FN(fgetss)(zp, length, allowable_tags);
 }
-Variant HHVM_FUNCTION(gzpassthru, const Resource& zp) {
+Variant HHVM_FUNCTION(gzpassthru, const OptResource& zp) {
   return HHVM_FN(fpassthru)(zp);
 }
-Variant HHVM_FUNCTION(gzwrite, const Resource& zp, const String& str,
+Variant HHVM_FUNCTION(gzwrite, const OptResource& zp, const String& str,
                                int64_t length /* = 0 */) {
   return HHVM_FN(fwrite)(zp, str, length);
 }

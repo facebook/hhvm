@@ -142,7 +142,7 @@ namespace {
 
 using HeapGraphContextPtr = req::ptr<HeapGraphContext>;
 static HeapGraphContextPtr get_valid_heapgraph_context_resource(
-  const Resource& resource,
+  const OptResource& resource,
   const char* func_name
 ) {
   auto hgcontext = dyn_cast_or_null<HeapGraphContext>(resource);
@@ -414,7 +414,7 @@ std::vector<int> toBoundIntVector(const Array& arr, int64_t max) {
 ///////////////////////////////////////////////////////////////////////////////
 // Exports
 
-Resource HHVM_FUNCTION(heapgraph_create, void) {
+OptResource HHVM_FUNCTION(heapgraph_create, void) {
   HeapGraph hg = makeHeapGraph();
   std::vector<CapturedNode> cnodes;
   std::vector<CapturedPtr> cptrs;
@@ -443,11 +443,11 @@ Resource HHVM_FUNCTION(heapgraph_create, void) {
   auto hgcontext = req::make<HeapGraphContext>(std::move(hg));
   std::swap(hgcontext->cnodes, cnodes);
   std::swap(hgcontext->cptrs, cptrs);
-  return Resource(hgcontext);
+  return OptResource(hgcontext);
 }
 
 void HHVM_FUNCTION(heapgraph_foreach_node,
-  const Resource& resource,
+  const OptResource& resource,
   const Variant& callback
 ) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
@@ -459,7 +459,7 @@ void HHVM_FUNCTION(heapgraph_foreach_node,
 }
 
 void HHVM_FUNCTION(heapgraph_foreach_edge,
-  const Resource& resource,
+  const OptResource& resource,
   const Variant& callback
 ) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
@@ -471,7 +471,7 @@ void HHVM_FUNCTION(heapgraph_foreach_edge,
 }
 
 void HHVM_FUNCTION(heapgraph_foreach_root,
-  const Resource& resource,
+  const OptResource& resource,
   const Variant& callback
 ) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
@@ -483,7 +483,7 @@ void HHVM_FUNCTION(heapgraph_foreach_root,
 }
 
 void HHVM_FUNCTION(heapgraph_foreach_root_node,
-  const Resource& resource,
+  const OptResource& resource,
   const Variant& callback
 ) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
@@ -495,7 +495,7 @@ void HHVM_FUNCTION(heapgraph_foreach_root_node,
 }
 
 void HHVM_FUNCTION(heapgraph_dfs_nodes,
-  const Resource& resource,
+  const OptResource& resource,
   const Array& roots_arr,
   const Array& skips_arr,
   const Variant& callback
@@ -512,7 +512,7 @@ void HHVM_FUNCTION(heapgraph_dfs_nodes,
 }
 
 void HHVM_FUNCTION(heapgraph_dfs_edges,
-  const Resource& resource,
+  const OptResource& resource,
   const Array& roots_arr,
   const Array& skips_arr,
   const Variant& callback
@@ -529,14 +529,14 @@ void HHVM_FUNCTION(heapgraph_dfs_edges,
   });
 }
 
-Array HHVM_FUNCTION(heapgraph_edge, const Resource& resource, int64_t index) {
+Array HHVM_FUNCTION(heapgraph_edge, const OptResource& resource, int64_t index) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
   if (!hgptr) return Array::CreateDict();
   if (size_t(index) >= hgptr->hg.ptrs.size()) return Array::CreateDict();
   return createPhpEdge(hgptr, index);
 }
 
-Array HHVM_FUNCTION(heapgraph_node, const Resource& resource, int64_t index) {
+Array HHVM_FUNCTION(heapgraph_node, const OptResource& resource, int64_t index) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
   if (!hgptr) return Array::CreateDict();
   if (size_t(index) >= hgptr->hg.nodes.size()) return Array::CreateDict();
@@ -544,7 +544,7 @@ Array HHVM_FUNCTION(heapgraph_node, const Resource& resource, int64_t index) {
 }
 
 Array HHVM_FUNCTION(heapgraph_node_out_edges,
-  const Resource& resource,
+  const OptResource& resource,
   int64_t index
 ) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
@@ -560,7 +560,7 @@ Array HHVM_FUNCTION(heapgraph_node_out_edges,
 }
 
 Array HHVM_FUNCTION(heapgraph_node_in_edges,
-  const Resource& resource,
+  const OptResource& resource,
   int64_t index
 ) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
@@ -575,7 +575,7 @@ Array HHVM_FUNCTION(heapgraph_node_in_edges,
   return result.toArray();
 }
 
-Array HHVM_FUNCTION(heapgraph_stats, const Resource& resource) {
+Array HHVM_FUNCTION(heapgraph_stats, const OptResource& resource) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
   if (!hgptr) return Array::CreateDict();
   auto result = make_dict_array(

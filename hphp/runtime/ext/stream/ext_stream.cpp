@@ -80,7 +80,7 @@ Variant HHVM_FUNCTION(stream_context_create,
 }
 
 Variant HHVM_FUNCTION(stream_context_get_options,
-                      const Resource& stream_or_context) {
+                      const OptResource& stream_or_context) {
   auto context = get_stream_context(stream_or_context);
   if (!context) {
     raise_warning("Invalid stream/context parameter");
@@ -155,7 +155,7 @@ Variant HHVM_FUNCTION(stream_context_set_default,
 }
 
 Variant HHVM_FUNCTION(stream_context_get_params,
-                      const Resource& stream_or_context) {
+                      const OptResource& stream_or_context) {
   auto context = get_stream_context(stream_or_context);
   if (!context) {
     raise_warning("Invalid stream/context parameter");
@@ -165,7 +165,7 @@ Variant HHVM_FUNCTION(stream_context_get_params,
 }
 
 bool HHVM_FUNCTION(stream_context_set_params,
-                   const Resource& stream_or_context,
+                   const OptResource& stream_or_context,
                    const Array& params) {
   auto context = get_stream_context(stream_or_context);
   if (!context || !StreamContext::validateParams(params)) {
@@ -177,8 +177,8 @@ bool HHVM_FUNCTION(stream_context_set_params,
 }
 
 Variant HHVM_FUNCTION(stream_copy_to_stream,
-                      const Resource& source,
-                      const Resource& dest,
+                      const OptResource& source,
+                      const OptResource& dest,
                       int64_t maxlength /* = -1 */,
                       int64_t offset /* = 0 */) {
   if (maxlength == 0) return 0;
@@ -226,7 +226,7 @@ Variant HHVM_FUNCTION(stream_copy_to_stream,
 }
 
 Variant HHVM_FUNCTION(stream_get_contents,
-                      const Resource& handle,
+                      const OptResource& handle,
                       int64_t maxlen /* = -1 */,
                       int64_t offset /* = -1 */) {
   if (maxlen < -1) {
@@ -263,7 +263,7 @@ Variant HHVM_FUNCTION(stream_get_contents,
 }
 
 Variant HHVM_FUNCTION(stream_get_line,
-                      const Resource& handle,
+                      const OptResource& handle,
                       int64_t length /* = 0 */,
                       const Variant& ending /* = uninit_variant */) {
   const String& strEnding = ending.isNull() ? null_string : ending.toString();
@@ -271,7 +271,7 @@ Variant HHVM_FUNCTION(stream_get_line,
 }
 
 Variant HHVM_FUNCTION(stream_get_meta_data,
-                      const Resource& stream) {
+                      const OptResource& stream) {
   if (auto f = dyn_cast_or_null<File>(stream)) {
     if (!f->isClosed()) return f->getMetaData();
   }
@@ -310,14 +310,14 @@ Variant HHVM_FUNCTION(stream_select,
 }
 
 Object HHVM_FUNCTION(stream_await,
-                     const Resource& stream,
+                     const OptResource& stream,
                      int64_t events,
                      double timeout /*= 0.0 */) {
   return cast<File>(stream)->await((uint16_t)events, timeout);
 }
 
 bool HHVM_FUNCTION(stream_set_blocking,
-                   const Resource& stream,
+                   const OptResource& stream,
                    bool mode) {
   if (isa<File>(stream)) {
     return cast<File>(stream)->setBlocking(mode);
@@ -327,7 +327,7 @@ bool HHVM_FUNCTION(stream_set_blocking,
 }
 
 int64_t HHVM_FUNCTION(stream_set_read_buffer,
-                      const Resource& stream,
+                      const OptResource& stream,
                       int64_t buffer) {
   if (buffer < 0) return -1;
   if (isa<File>(stream)) {
@@ -352,7 +352,7 @@ int64_t HHVM_FUNCTION(stream_set_read_buffer,
 }
 
 Variant HHVM_FUNCTION(stream_set_chunk_size,
-                      const Resource& stream,
+                      const OptResource& stream,
                       int64_t chunk_size) {
   if (isa<File>(stream) && chunk_size > 0) {
     auto file = cast<File>(stream);
@@ -370,7 +370,7 @@ const StaticString
   s_notification("notification");
 
 bool HHVM_FUNCTION(stream_set_timeout,
-                   const Resource& stream,
+                   const OptResource& stream,
                    int64_t seconds,
                    int64_t microseconds /* = 0 */) {
   if (isa<Socket>(stream)) {
@@ -386,7 +386,7 @@ bool HHVM_FUNCTION(stream_set_timeout,
 }
 
 int64_t HHVM_FUNCTION(stream_set_write_buffer,
-                      const Resource& stream,
+                      const OptResource& stream,
                       int64_t buffer) {
   if (buffer < 0) return -1;
   auto plain_file = dyn_cast<PlainFile>(stream);
@@ -407,7 +407,7 @@ int64_t HHVM_FUNCTION(stream_set_write_buffer,
 }
 
 int64_t HHVM_FUNCTION(set_file_buffer,
-                      const Resource& stream,
+                      const OptResource& stream,
                       int64_t buffer) {
   return HHVM_FN(stream_set_write_buffer)(stream, buffer);
 }
@@ -441,7 +441,7 @@ bool HHVM_FUNCTION(stream_is_local,
 // stream socket functions
 
 static Variant socket_accept_impl(
-  const Resource& socket,
+  const OptResource& socket,
   struct sockaddr *addr,
   socklen_t *addrlen
 ) {
@@ -528,7 +528,7 @@ static String get_sockaddr_name(struct sockaddr *sa, socklen_t sl) {
 }
 
 Variant HHVM_FUNCTION(stream_socket_accept,
-                      const Resource& server_socket,
+                      const OptResource& server_socket,
                       double timeout,
                       Variant& peername) {
   auto sock = cast<Socket>(server_socket);
@@ -583,7 +583,7 @@ Variant HHVM_FUNCTION(stream_socket_client,
 }
 
 bool HHVM_FUNCTION(stream_socket_enable_crypto,
-                   const Resource& socket,
+                   const OptResource& socket,
                    bool enable,
                    int64_t cryptotype,
                    const Variant& sessionstream) {
@@ -628,7 +628,7 @@ bool HHVM_FUNCTION(stream_socket_enable_crypto,
 }
 
 Variant HHVM_FUNCTION(stream_socket_get_name,
-                      const Resource& handle,
+                      const OptResource& handle,
                       bool want_peer) {
   Variant address, port;
   bool ret;
@@ -657,7 +657,7 @@ Variant HHVM_FUNCTION(stream_socket_pair,
 }
 
 Variant HHVM_FUNCTION(stream_socket_recvfrom,
-                      const Resource& socket,
+                      const OptResource& socket,
                       int64_t length,
                       int64_t flags,
                       Variant& address) {
@@ -677,7 +677,7 @@ Variant HHVM_FUNCTION(stream_socket_recvfrom,
 }
 
 Variant HHVM_FUNCTION(stream_socket_sendto,
-                      const Resource& socket,
+                      const OptResource& socket,
                       const String& data,
                       int64_t flags /* = 0 */,
                       const Variant& address /* = uninit_variant */) {
@@ -700,7 +700,7 @@ Variant HHVM_FUNCTION(stream_socket_sendto,
 }
 
 bool HHVM_FUNCTION(stream_socket_shutdown,
-                   const Resource& stream,
+                   const OptResource& stream,
                    int64_t how) {
   return HHVM_FN(socket_shutdown)(stream, how);
 }
@@ -710,7 +710,7 @@ req::ptr<StreamContext> get_stream_context(const Variant& stream_or_context) {
   if (!stream_or_context.isResource()) {
     return nullptr;
   }
-  const Resource& resource = stream_or_context.asCResRef();
+  const OptResource& resource = stream_or_context.asCResRef();
   auto context = dyn_cast_or_null<StreamContext>(resource);
   if (context) return context;
   auto file = dyn_cast_or_null<File>(resource);

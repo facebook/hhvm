@@ -741,7 +741,7 @@ static Variant HHVM_FUNCTION(imap_binary, const String& str) {
   return ret;
 }
 
-static Variant HHVM_FUNCTION(imap_body, const Resource& imap_stream,
+static Variant HHVM_FUNCTION(imap_body, const OptResource& imap_stream,
                              int64_t msg_number, int64_t options /* = 0 */) {
   if (options && ((options & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
     raise_warning("invalid value for the options parameter");
@@ -774,7 +774,7 @@ static Variant HHVM_FUNCTION(imap_body, const Resource& imap_stream,
   }
 }
 
-static Variant HHVM_FUNCTION(imap_bodystruct, const Resource& imap_stream,
+static Variant HHVM_FUNCTION(imap_bodystruct, const OptResource& imap_stream,
                              int64_t msg_number, const String& section) {
   auto obj = cast<ImapStream>(imap_stream);
   if (!obj->checkMsgNumber(msg_number)) {
@@ -790,7 +790,7 @@ static Variant HHVM_FUNCTION(imap_bodystruct, const Resource& imap_stream,
   return _php_imap_body(body, false);
 }
 
-static Variant HHVM_FUNCTION(imap_check, const Resource& imap_stream) {
+static Variant HHVM_FUNCTION(imap_check, const OptResource& imap_stream) {
   auto obj = cast<ImapStream>(imap_stream);
   if (mail_ping(obj->m_stream) == NIL) {
     return false;
@@ -809,7 +809,7 @@ static Variant HHVM_FUNCTION(imap_check, const Resource& imap_stream) {
   return false;
 }
 
-static bool HHVM_FUNCTION(imap_clearflag_full, const Resource& imap_stream,
+static bool HHVM_FUNCTION(imap_clearflag_full, const OptResource& imap_stream,
                           const String& sequence, const String& flag,
                           int64_t options /* = 0 */) {
   auto obj = cast<ImapStream>(imap_stream);
@@ -818,7 +818,7 @@ static bool HHVM_FUNCTION(imap_clearflag_full, const Resource& imap_stream,
   return true;
 }
 
-static bool HHVM_FUNCTION(imap_close, const Resource& imap_stream,
+static bool HHVM_FUNCTION(imap_close, const OptResource& imap_stream,
                           int64_t flag /* = 0 */) {
   auto obj = cast<ImapStream>(imap_stream);
   if (flag) {
@@ -833,7 +833,7 @@ static bool HHVM_FUNCTION(imap_close, const Resource& imap_stream,
   return true;
 }
 
-static bool HHVM_FUNCTION(imap_createmailbox, const Resource& imap_stream,
+static bool HHVM_FUNCTION(imap_createmailbox, const OptResource& imap_stream,
                           const String& mailbox) {
   auto obj = cast<ImapStream>(imap_stream);
   if (mail_create(obj->m_stream, (char *)mailbox.data()) == T) {
@@ -843,7 +843,7 @@ static bool HHVM_FUNCTION(imap_createmailbox, const Resource& imap_stream,
   }
 }
 
-static bool HHVM_FUNCTION(imap_delete, const Resource& imap_stream,
+static bool HHVM_FUNCTION(imap_delete, const OptResource& imap_stream,
                           const String& msg_number, int64_t options /* = 0 */) {
   auto obj = cast<ImapStream>(imap_stream);
   mail_setflag_full(obj->m_stream, (char *)msg_number.data(),
@@ -852,7 +852,7 @@ static bool HHVM_FUNCTION(imap_delete, const Resource& imap_stream,
   return true;
 }
 
-static bool HHVM_FUNCTION(imap_deletemailbox, const Resource& imap_stream,
+static bool HHVM_FUNCTION(imap_deletemailbox, const OptResource& imap_stream,
                           const String& mailbox) {
   auto obj = cast<ImapStream>(imap_stream);
   if (mail_delete(obj->m_stream, (char *)mailbox.data()) == T) {
@@ -877,13 +877,13 @@ static Variant HHVM_FUNCTION(imap_errors, ) {
   return ret;
 }
 
-static bool HHVM_FUNCTION(imap_expunge, const Resource& imap_stream) {
+static bool HHVM_FUNCTION(imap_expunge, const OptResource& imap_stream) {
   auto obj = cast<ImapStream>(imap_stream);
   mail_expunge(obj->m_stream);
   return true;
 }
 
-static Variant HHVM_FUNCTION(imap_fetch_overview, const Resource& imap_stream,
+static Variant HHVM_FUNCTION(imap_fetch_overview, const OptResource& imap_stream,
                              const String& sequence,
                              int64_t options /* = 0 */) {
   if (options && options != FT_UID) {
@@ -947,7 +947,7 @@ static Variant HHVM_FUNCTION(imap_fetch_overview, const Resource& imap_stream,
   return ret;
 }
 
-static Variant HHVM_FUNCTION(imap_fetchbody, const Resource& imap_stream,
+static Variant HHVM_FUNCTION(imap_fetchbody, const OptResource& imap_stream,
                              int64_t msg_number, const String& section,
                              int64_t options /* = 0 */) {
   if (options && ((options & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
@@ -976,7 +976,7 @@ static Variant HHVM_FUNCTION(imap_fetchbody, const Resource& imap_stream,
   return String(body, len, CopyString);
 }
 
-static Variant HHVM_FUNCTION(imap_fetchheader, const Resource& imap_stream,
+static Variant HHVM_FUNCTION(imap_fetchheader, const OptResource& imap_stream,
                              int64_t msg_number, int64_t options /* = 0 */) {
   if (options && ((options & ~(FT_UID|FT_INTERNAL|FT_PREFETCHTEXT)) != 0)) {
     Logger::Warning("invalid value for the options parameter");
@@ -1002,7 +1002,7 @@ static Variant HHVM_FUNCTION(imap_fetchheader, const Resource& imap_stream,
                                       (options ? options : NIL)), CopyString);
 }
 
-static Variant HHVM_FUNCTION(imap_fetchstructure, const Resource& imap_stream,
+static Variant HHVM_FUNCTION(imap_fetchstructure, const OptResource& imap_stream,
                              int64_t msg_number, int64_t options /* = 0 */) {
   if (options && ((options & ~FT_UID) != 0)) {
     raise_warning("invalid value for the options parameter");
@@ -1041,7 +1041,7 @@ static Variant HHVM_FUNCTION(imap_fetchstructure, const Resource& imap_stream,
   return _php_imap_body(body, true);
 }
 
-static bool HHVM_FUNCTION(imap_gc, const Resource& imap_stream,
+static bool HHVM_FUNCTION(imap_gc, const OptResource& imap_stream,
                           int64_t caches) {
   if (caches && ((caches & ~(GC_TEXTS | GC_ELT | GC_ENV)) != 0)) {
     raise_warning("invalid value for the caches parameter");
@@ -1054,7 +1054,7 @@ static bool HHVM_FUNCTION(imap_gc, const Resource& imap_stream,
 }
 
 static Variant
-HHVM_FUNCTION(imap_headerinfo, const Resource& imap_stream, int64_t msg_number,
+HHVM_FUNCTION(imap_headerinfo, const OptResource& imap_stream, int64_t msg_number,
               int64_t fromlength /* = 0 */, int64_t subjectlength /* = 0 */,
               const String& /*defaulthost*/ /* = "" */) {
   auto obj = cast<ImapStream>(imap_stream);
@@ -1115,7 +1115,7 @@ HHVM_FUNCTION(imap_headerinfo, const Resource& imap_stream, int64_t msg_number,
   return ObjectData::FromArray(props.detach());
 }
 
-static Variant HHVM_FUNCTION(imap_header, const Resource& imap_stream,
+static Variant HHVM_FUNCTION(imap_header, const OptResource& imap_stream,
                              int64_t msg_number, int64_t fromlength /* = 0 */,
                              int64_t subjectlength /* = 0 */,
                              const String& defaulthost /* = "" */) {
@@ -1136,7 +1136,7 @@ static Variant HHVM_FUNCTION(imap_last_error, ) {
   return init_null();
 }
 
-static Variant HHVM_FUNCTION(imap_list, const Resource& imap_stream,
+static Variant HHVM_FUNCTION(imap_list, const OptResource& imap_stream,
                              const String& ref, const String& pattern) {
   auto obj = cast<ImapStream>(imap_stream);
 
@@ -1158,12 +1158,12 @@ static Variant HHVM_FUNCTION(imap_list, const Resource& imap_stream,
   return ret;
 }
 
-static Variant HHVM_FUNCTION(imap_listmailbox, const Resource& imap_stream,
+static Variant HHVM_FUNCTION(imap_listmailbox, const OptResource& imap_stream,
                              const String& ref, const String& pattern) {
   return HHVM_FN(imap_list)(imap_stream, ref, pattern);
 }
 
-static bool HHVM_FUNCTION(imap_mail_copy, const Resource& imap_stream,
+static bool HHVM_FUNCTION(imap_mail_copy, const OptResource& imap_stream,
                           const String& msglist, const String& mailbox,
                           int64_t options /* = 0 */) {
   auto obj = cast<ImapStream>(imap_stream);
@@ -1175,7 +1175,7 @@ static bool HHVM_FUNCTION(imap_mail_copy, const Resource& imap_stream,
   }
 }
 
-static bool HHVM_FUNCTION(imap_mail_move, const Resource& imap_stream,
+static bool HHVM_FUNCTION(imap_mail_move, const OptResource& imap_stream,
                           const String& msglist, const String& mailbox,
                           int64_t options /* = 0 */) {
   auto obj = cast<ImapStream>(imap_stream);
@@ -1240,7 +1240,7 @@ static bool HHVM_FUNCTION(imap_mail, const String& to, const String& subject,
   }
 }
 
-static Variant HHVM_FUNCTION(imap_mailboxmsginfo, const Resource& imap_stream) {
+static Variant HHVM_FUNCTION(imap_mailboxmsginfo, const OptResource& imap_stream) {
   auto obj = cast<ImapStream>(imap_stream);
 
   int64_t unreadmsg = 0, deletedmsg = 0, msize = 0;
@@ -1274,17 +1274,17 @@ static Variant HHVM_FUNCTION(imap_mailboxmsginfo, const Resource& imap_stream) {
   return ObjectData::FromArray(props.create());
 }
 
-static Variant HHVM_FUNCTION(imap_msgno, const Resource& imap_stream,
+static Variant HHVM_FUNCTION(imap_msgno, const OptResource& imap_stream,
                              int64_t uid) {
   auto obj = cast<ImapStream>(imap_stream);
   return (int64_t)mail_msgno(obj->m_stream, uid);
 }
 
-static Variant HHVM_FUNCTION(imap_num_msg, const Resource& imap_stream) {
+static Variant HHVM_FUNCTION(imap_num_msg, const OptResource& imap_stream) {
   return (int64_t)cast<ImapStream>(imap_stream)->m_stream->nmsgs;
 }
 
-static Variant HHVM_FUNCTION(imap_num_recent, const Resource& imap_stream) {
+static Variant HHVM_FUNCTION(imap_num_recent, const OptResource& imap_stream) {
   auto obj = cast<ImapStream>(imap_stream);
   return (int64_t)obj->m_stream->recent;
 }
@@ -1326,7 +1326,7 @@ static Variant HHVM_FUNCTION(imap_open, const String& mailbox,
                  stream, (options & PHP_EXPUNGE) ? CL_EXPUNGE : NIL));
 }
 
-static bool HHVM_FUNCTION(imap_ping, const Resource& imap_stream) {
+static bool HHVM_FUNCTION(imap_ping, const OptResource& imap_stream) {
   auto obj = cast<ImapStream>(imap_stream);
   return mail_ping(obj->m_stream);
 }
@@ -1345,7 +1345,7 @@ static Variant HHVM_FUNCTION(imap_qprint, const String& str) {
   return ret;
 }
 
-static bool HHVM_FUNCTION(imap_renamemailbox, const Resource& imap_stream,
+static bool HHVM_FUNCTION(imap_renamemailbox, const OptResource& imap_stream,
                           const String& old_mbox, const String& new_mbox) {
   auto obj = cast<ImapStream>(imap_stream);
   if (mail_rename(obj->m_stream, (char *)old_mbox.data(),
@@ -1356,7 +1356,7 @@ static bool HHVM_FUNCTION(imap_renamemailbox, const Resource& imap_stream,
   }
 }
 
-static bool HHVM_FUNCTION(imap_reopen, const Resource& imap_stream,
+static bool HHVM_FUNCTION(imap_reopen, const OptResource& imap_stream,
                           const String& mailbox, int64_t options /* = 0 */,
                           int64_t retries /* = 0 */) {
   auto obj = cast<ImapStream>(imap_stream);
@@ -1384,7 +1384,7 @@ static bool HHVM_FUNCTION(imap_reopen, const Resource& imap_stream,
   return true;
 }
 
-static Variant HHVM_FUNCTION(imap_search, const Resource& imap_stream,
+static Variant HHVM_FUNCTION(imap_search, const OptResource& imap_stream,
                              const String& criteria, int64_t options /* = 0 */,
                              const String& charset /* = "" */) {
   auto obj = cast<ImapStream>(imap_stream);
@@ -1418,7 +1418,7 @@ static Variant HHVM_FUNCTION(imap_search, const Resource& imap_stream,
   return ret;
 }
 
-static bool HHVM_FUNCTION(imap_setflag_full, const Resource& imap_stream,
+static bool HHVM_FUNCTION(imap_setflag_full, const OptResource& imap_stream,
                           const String& sequence, const String& flag,
                          int64_t options /* = 0 */) {
   auto obj = cast<ImapStream>(imap_stream);
@@ -1427,7 +1427,7 @@ static bool HHVM_FUNCTION(imap_setflag_full, const Resource& imap_stream,
   return true;
 }
 
-static Variant HHVM_FUNCTION(imap_status, const Resource& imap_stream,
+static Variant HHVM_FUNCTION(imap_status, const OptResource& imap_stream,
                              const String& mailbox, int64_t options /* = 0 */) {
   auto obj = cast<ImapStream>(imap_stream);
 
@@ -1455,7 +1455,7 @@ static Variant HHVM_FUNCTION(imap_status, const Resource& imap_stream,
   return ObjectData::FromArray(props.create());
 }
 
-static bool HHVM_FUNCTION(imap_subscribe, const Resource& imap_stream,
+static bool HHVM_FUNCTION(imap_subscribe, const OptResource& imap_stream,
                           const String& mailbox) {
   auto obj = cast<ImapStream>(imap_stream);
   if (mail_subscribe(obj->m_stream, (char *)mailbox.data()) == T) {
@@ -1511,7 +1511,7 @@ static Variant HHVM_FUNCTION(imap_timeout, int64_t timeout_type,
   return false;
 }
 
-static Variant HHVM_FUNCTION(imap_uid, const Resource& imap_stream,
+static Variant HHVM_FUNCTION(imap_uid, const OptResource& imap_stream,
                              int64_t msg_number) {
   auto obj = cast<ImapStream>(imap_stream);
   if (!obj->checkMsgNumber(msg_number)) {
@@ -1520,7 +1520,7 @@ static Variant HHVM_FUNCTION(imap_uid, const Resource& imap_stream,
   return (int64_t)mail_uid(obj->m_stream, msg_number);
 }
 
-static bool HHVM_FUNCTION(imap_undelete, const Resource& imap_stream,
+static bool HHVM_FUNCTION(imap_undelete, const OptResource& imap_stream,
                           const String& msg_number, int64_t flags /* = 0 */) {
   auto obj = cast<ImapStream>(imap_stream);
   mail_clearflag_full(obj->m_stream, (char *)msg_number.data(),
@@ -1528,7 +1528,7 @@ static bool HHVM_FUNCTION(imap_undelete, const Resource& imap_stream,
   return true;
 }
 
-static bool HHVM_FUNCTION(imap_unsubscribe, const Resource& imap_stream,
+static bool HHVM_FUNCTION(imap_unsubscribe, const OptResource& imap_stream,
                           const String& mailbox) {
   auto obj = cast<ImapStream>(imap_stream);
   if (mail_unsubscribe(obj->m_stream, (char *)mailbox.data()) == T) {

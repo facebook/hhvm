@@ -71,7 +71,7 @@ String HHVM_FUNCTION(gettype, const Variant& v) {
   return getDataTypeString(v.getType());
 }
 
-String HHVM_FUNCTION(get_resource_type, const Resource& handle) {
+String HHVM_FUNCTION(get_resource_type, const OptResource& handle) {
   return handle->o_getResourceName();
 }
 

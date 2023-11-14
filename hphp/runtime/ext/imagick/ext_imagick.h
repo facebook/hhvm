@@ -266,11 +266,11 @@ void imagickWriteOp(MagickWand* wand,
                     const ImagickFileOp& op);
 
 void imagickReadOp(MagickWand* wand,
-                   const Resource& res,
+                   const OptResource& res,
                    const ImagickHandleOp& op);
 
 void imagickWriteOp(MagickWand* wand,
-                    const Resource& res,
+                    const OptResource& res,
                     const String& format,
                     const ImagickHandleOp& op);
 

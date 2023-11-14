@@ -398,7 +398,7 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 // helper
 
-req::ptr<MySQLResult> php_mysql_extract_result(const Resource& result);
+req::ptr<MySQLResult> php_mysql_extract_result(const OptResource& result);
 req::ptr<MySQLResult> php_mysql_extract_result(const Variant& result);
 
 
@@ -409,7 +409,7 @@ enum MySQLFieldEntryType { NAME, TABLE, LEN, TYPE, FLAGS };
 #define PHP_MYSQL_FIELD_TYPE  4
 #define PHP_MYSQL_FIELD_FLAGS 5
 
-Variant php_mysql_field_info(const Resource& result, int field, int entry_type);
+Variant php_mysql_field_info(const OptResource& result, int field, int entry_type);
 Variant php_mysql_do_connect_on_link(
     std::shared_ptr<MySQL> mySQL,
     String server,
@@ -461,7 +461,7 @@ Variant php_mysql_do_query_and_get_result(
 #define PHP_MYSQL_NUM    1 << 1
 #define PHP_MYSQL_BOTH   (PHP_MYSQL_ASSOC|PHP_MYSQL_NUM)
 
-Variant php_mysql_fetch_hash(const Resource& result, int result_type);
+Variant php_mysql_fetch_hash(const OptResource& result, int result_type);
 
 Variant mysql_makevalue(const String& data, MYSQL_FIELD *mysql_field);
 Variant mysql_makevalue(const String& data, enum_field_types field_type);

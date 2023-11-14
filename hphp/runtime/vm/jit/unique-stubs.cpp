@@ -1290,6 +1290,10 @@ namespace {
 
 [[noreturn]] static void throw_exception_while_unwinding() {
   assert_native_stack_aligned();
+  if (auto const pendingException = RI().m_pendingException) {
+    RI().m_pendingException = nullptr;
+    pendingException->throwException();
+  }
   assertx(g_unwind_rds->exn.left());
   throw req::root<Object>(Object::attach(g_unwind_rds->exn.left()));
 }

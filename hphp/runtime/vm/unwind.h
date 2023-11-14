@@ -29,18 +29,17 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-enum UnwinderResult {
-   UnwindNone        = 0,
+enum class UnwinderResult {
+   None,
    // Unwound an async function and placed the exception inside a failed static
    // wait handle
-   UnwindFSWH        = (1u << 0),
+   FSWH,
    // Unwound until the given fp, i.e. did not reach the end of the vm nesting
-   UnwindReachedGoal = (1u << 1),
+   ReachedGoal,
+   // Unwound until the given fp, but there is a pending C++ exception that
+   // should replace the current Hack exception
+   ReplaceWithPendingException,
 };
-
-constexpr UnwinderResult operator|(UnwinderResult a, UnwinderResult b) {
-   return UnwinderResult((int)a | (int)b);
-}
 
 //////////////////////////////////////////////////////////////////////
 

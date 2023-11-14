@@ -1,8 +1,4 @@
 Warning: AsyncFunctionWaitHandle fail callback raised a fatal error: %|{Maximum execution time of 6 seconds exceeded|entire web request took longer than 6 seconds and timed out}
  in %s/async/fail_callback_timeout.php on line 9
 
-Fatal error: Uncaught exception 'Exception' with message 'x' in %s/async/fail_callback_timeout.php:9
-Stack trace:
-#0 (): heh()
-#1 %s/async/fail_callback_timeout.php(16): HH\Asio\join()
-%a {main}
+Fatal error: %s 6 seconds %s in %s/async/fail_callback_timeout.php on line 4

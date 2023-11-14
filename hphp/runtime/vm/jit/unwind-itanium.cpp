@@ -286,12 +286,20 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp, bool teardown) {
       if (!g_unwind_rds->exn.isNull()) {
         auto phpException = g_unwind_rds->exn.left();
         auto const result = unwindVM(g_unwind_rds->exn, sfp, teardown);
-        if (!(result & UnwindReachedGoal)) {
+        if (result == UnwinderResult::ReplaceWithPendingException) {
+          ITRACE(1, "tc_unwind_resume: replacing Hack exception with a pending "
+                    "C++ exception\n");
+          assertx(phpException);
+          decRefObj(phpException);
+          assertx(RI().m_pendingException != nullptr);
+          return {sfp, tc::ustubs().throwExceptionWhileUnwinding};
+        }
+        if (result != UnwinderResult::ReachedGoal) {
           assertx(phpException);
           phpException->decReleaseCheck();
           g_unwind_rds->doSideExit = true;
 
-          if (result & UnwindFSWH) {
+          if (result == UnwinderResult::FSWH) {
             auto const vmfp_ = vmfp();
             if (!vmfp_ || vmfp_ == sfp) {
               g_unwind_rds->savedRip = savedRip;
@@ -312,6 +320,9 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp, bool teardown) {
           FTRACE(1, "Resuming from resumeHelper with fp {}\n", fp);
           return {fp, tc::ustubs().resumeHelperFromInterp};
         }
+        // If we were handling a Hack exception, unwindVM() may have reentered
+        // VM via EventHook::FunctionUnwind and corrupted our state.
+        if (phpException) g_unwind_rds->exn = phpException;
       }
     }
 

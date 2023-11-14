@@ -406,7 +406,7 @@ UnwinderResult unwindVM(Either<ObjectData*, Exception*> exception,
         vmStack().pushObjectNoRc(phpException);
         pc = func->at(eh->m_handler);
         DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
-        return UnwindNone;
+        return UnwinderResult::None;
       }
     }
 
@@ -414,16 +414,32 @@ UnwinderResult unwindVM(Either<ObjectData*, Exception*> exception,
     auto const jit = fpToUnwind != nullptr && fpToUnwind == fp->m_sfp;
     phpException = tearDownFrame(fp, stack, pc, phpException, jit, teardown);
 
-    // If we entered from the JIT and this is the last iteration, we can't
-    // trust the PC since catch traces for inlined frames may add more
-    // frames on vmfp()'s rbp chain which might have resulted in us incorrectly
-    // calculating the PC.
+    if (exception.left() != nullptr && RI().m_pendingException != nullptr) {
+      // EventHook::FunctionUnwind might have generated a pending C++ exception.
+      // If we are unwinding a Hack exception, replace it with the C++ one.
+      ITRACE(1,
+             "unwind: replacing Hack exception {} with a pending C++ "
+             "exception {}\n",
+             describeEx(exception),
+             describeEx(RI().m_pendingException));
+      if (fpToUnwind) {
+        assertx(!fp || fp == fpToUnwind);
+        return UnwinderResult::ReplaceWithPendingException;
+      }
 
-    if (exception.left() != phpException) {
+      if (phpException) decRefObj(phpException);
+      phpException = nullptr;
+      exception = RI().m_pendingException;
+      RI().m_pendingException = nullptr;
+    } else if (exception.left() != phpException) {
+      // If we entered from the JIT and this is the last iteration, we can't
+      // trust the PC since catch traces for inlined frames may add more
+      // frames on vmfp()'s rbp chain which might have resulted in us incorrectly
+      // calculating the PC.
       assertx(phpException == nullptr);
       if (fp && !jit) pc = skipCall(pc);
       ITRACE(1, "Returning with exception == null\n");
-      return UnwindFSWH;
+      return UnwinderResult::FSWH;
     }
 
     if (!fp || (fpToUnwind && fp == fpToUnwind)) break;
@@ -434,7 +450,7 @@ UnwinderResult unwindVM(Either<ObjectData*, Exception*> exception,
     assertx(fpToUnwind && (phpException || exception.right()));
     ITRACE(1, "Reached {}\n", fpToUnwind);
     if (phpException) phpException->decRefCount();
-    return UnwindReachedGoal;
+    return UnwinderResult::ReachedGoal;
   }
 
   ITRACE(1, "unwind: reached the end of this nesting's ActRec chain\n");

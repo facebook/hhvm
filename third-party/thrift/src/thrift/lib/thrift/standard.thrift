@@ -16,6 +16,7 @@
 
 include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/java.thrift"
+include "thrift/annotation/cpp.thrift"
 
 cpp_include "<folly/io/IOBuf.h>"
 cpp_include "<folly/FBString.h>"
@@ -43,11 +44,12 @@ enum Void {
  *
  * Each language can map this type into a customized memory efficient object.
  */
+@cpp.Type{name = "folly::fbstring"}
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.common.UnpooledByteBufTypeAdapter",
   typeClassName = "io.netty.buffer.ByteBuf",
 }
-typedef binary (cpp.type = "folly::fbstring") ByteString
+typedef binary ByteString
 
 /**
  * Typedef for binary data.
@@ -55,11 +57,12 @@ typedef binary (cpp.type = "folly::fbstring") ByteString
  * Each language can map this type into a customized memory efficient object.
  * May be used for zero-copy slice of data.
  */
+@cpp.Type{name = "folly::IOBuf"}
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.common.UnpooledByteBufTypeAdapter",
   typeClassName = "io.netty.buffer.ByteBuf",
 }
-typedef binary (cpp.type = "folly::IOBuf") ByteBuffer
+typedef binary ByteBuffer
 
 /**
  * A (scheme-less) URI.

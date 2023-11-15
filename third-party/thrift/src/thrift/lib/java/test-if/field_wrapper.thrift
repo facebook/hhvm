@@ -209,6 +209,7 @@ struct TerseWrappedTestStruct {
   17: doubleAdaptedIntList wrappedDoubleAdaptedIntList_field;
 }
 
+@java.Mutable
 @thrift.Experimental
 @thrift.TerseWrite
 struct MutableTerseWrappedTestStruct {
@@ -280,7 +281,7 @@ struct MutableTerseWrappedTestStruct {
     typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<com.facebook.thrift.adapter.test.Wrapped<List<String>>>",
   }
   17: doubleAdaptedIntList wrappedDoubleAdaptedIntList_field;
-} (java.swift.mutable = "true")
+}
 
 safe permanent client exception WrappedTestException {
   1001: i32 context;

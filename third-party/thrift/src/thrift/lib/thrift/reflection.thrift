@@ -27,6 +27,8 @@ namespace cpp2 apache.thrift.reflection
 // IMPORTANT!
 // These values must be exactly the same as those defined in
 // thrift/compiler/parse/t_type.h
+include "thrift/annotation/cpp.thrift"
+
 enum Type {
   TYPE_VOID = 0,
   TYPE_STRING = 1,
@@ -50,24 +52,25 @@ struct StructField {
   1: bool isRequired;
   2: i64 type;
   3: string name;
-  4: optional map<string, string> (
-    cpp.template = "std::unordered_map",
-  ) annotations;
+  @cpp.Type{template = "std::unordered_map"}
+  4: optional map<string, string> annotations;
   5: i16 order; // lexical order of this field, 0-based
 }
 
 struct DataType {
   1: string name;
-  2: optional map<i16, StructField> (
-    cpp.template = "std::unordered_map",
-  ) fields;
+  @cpp.Type{template = "std::unordered_map"}
+  2: optional map<i16, StructField> fields;
   3: optional i64 mapKeyType;
   4: optional i64 valueType;
-  5: optional map<string, i32> (cpp.template = "std::unordered_map") enumValues;
+  @cpp.Type{template = "std::unordered_map"}
+  5: optional map<string, i32> enumValues;
 }
 
 struct Schema {
-  1: map<i64, DataType> (cpp.template = "std::unordered_map") dataTypes;
+  @cpp.Type{template = "std::unordered_map"}
+  1: map<i64, DataType> dataTypes;
   // name to type
-  2: map<string, i64> (cpp.template = "std::unordered_map") names;
+  @cpp.Type{template = "std::unordered_map"}
+  2: map<string, i64> names;
 }

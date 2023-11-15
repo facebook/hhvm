@@ -20,6 +20,7 @@ include "thrift/lib/thrift/id.thrift"
 include "thrift/lib/thrift/protocol_detail.thrift"
 include "thrift/lib/thrift/type.thrift"
 include "thrift/lib/thrift/standard.thrift"
+include "thrift/annotation/python.thrift"
 
 cpp_include "folly/container/F14Map.h"
 cpp_include "thrift/lib/thrift/detail/id.h"
@@ -39,6 +40,7 @@ typedef protocol_detail.Object Object (thrift.uri = "")
 typedef protocol_detail.Value Value (thrift.uri = "")
 
 // Represents serialized data of unmasked fields.
+@python.Py3Hidden
 union MaskedData {
   1: id.ValueId full;
   // TODO(dokwon): Migrate to @thrift.Box after resolving incomplete type.
@@ -48,18 +50,20 @@ union MaskedData {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.Type{template = "folly::F14VectorMap"}
   3: map<id.ValueId, MaskedData> values;
-} (py3.hidden)
+}
 
+@python.Py3Hidden
 struct EncodedValue {
   1: type.BaseType wireType;
   2: standard.ByteBuffer data;
-} (py3.hidden)
+}
 
 // MaskedData uses ValueId to get encodedValues and map keys from the lists.
+@python.Py3Hidden
 @cpp.UseOpEncode
 struct MaskedProtocolData {
   1: type.Protocol protocol;
   2: MaskedData data;
   3: list<EncodedValue> values;
   4: list<Value> keys;
-} (py3.hidden)
+}

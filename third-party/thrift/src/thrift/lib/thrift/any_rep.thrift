@@ -17,6 +17,7 @@
 include "thrift/annotation/thrift.thrift"
 include "thrift/lib/thrift/type.thrift"
 include "thrift/lib/thrift/standard.thrift"
+include "thrift/annotation/python.thrift"
 
 /**
  * The **underlying representations** for Thrift: Any.
@@ -45,14 +46,16 @@ struct AnyStruct {
    *
    * Must not be empty.
    */
-  1: type.Type type (py3.hidden);
+  @python.Py3Hidden
+  1: type.Type type;
 
   /**
    * The protocol used to encode `data`.
    *
    * Must not be empty.
    */
-  2: type.Protocol protocol (py3.hidden);
+  @python.Py3Hidden
+  2: type.Protocol protocol;
 
   /** The encoded data. */
   3: standard.ByteBuffer data;
@@ -65,10 +68,12 @@ struct AnyStruct {
  */
 struct SemiAnyStruct {
   /** The type stored in `data`, if known. */
-  1: type.Type type (py3.hidden);
+  @python.Py3Hidden
+  1: type.Type type;
 
   /** The protocol used to encode `data`, if known. */
-  2: type.Protocol protocol (py3.hidden);
+  @python.Py3Hidden
+  2: type.Protocol protocol;
 
   /** The encoded data. */
   3: standard.ByteBuffer data;

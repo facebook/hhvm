@@ -29,12 +29,14 @@ namespace py3 thrift.lib.thrift
 namespace go thrift.lib.thrift.rpcmetadata
 
 include "thrift/annotation/thrift.thrift"
+include "thrift/annotation/cpp.thrift"
 
 cpp_include "thrift/lib/cpp2/util/ManagedStringView.h"
 cpp_include "thrift/lib/thrift/RpcMetadata_extra.h"
 cpp_include "folly/container/F14Map.h"
 
-typedef binary (cpp2.type = "std::unique_ptr<folly::IOBuf>") IOBufPtr
+@cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
+typedef binary IOBufPtr
 
 enum ProtocolId {
   // The values must match those in thrift/lib/cpp/protocol/TProtocolTypes.h
@@ -112,14 +114,14 @@ struct CompressionConfig {
 struct NegotiationParameters {
   // nth (zero-based) least significant bit set if CompressionAlgorithm = n + 1
   // is accepted. For example, 0b10 means ZSTD is accepted.
-  1: optional i64 (cpp.type = "std::uint64_t") compressionAlgos;
+  @cpp.Type{name = "std::uint64_t"}
+  1: optional i64 compressionAlgos;
   2: optional bool useStopTLS;
 }
 
 // String type optimized for generated code
-typedef string (
-  cpp.type = "::apache::thrift::ManagedStringViewWithConversions",
-) ManagedStringViewField
+@cpp.Type{name = "::apache::thrift::ManagedStringViewWithConversions"}
+typedef string ManagedStringViewField
 
 struct InteractionCreate {
   // Client chosen interaction id. Interaction id MAY be reused after the
@@ -169,14 +171,14 @@ struct RequestRpcMetadata {
   7: optional RpcPriority priority;
   // Arbitrary metadata that MAY be used by application or Thrift extensions.
   // MAY be set.
-  8: optional map<string, string> (
-    cpp.template = "folly::F14NodeMap",
-  ) otherMetadata;
+  @cpp.Type{template = "folly::F14NodeMap"}
+  8: optional map<string, string> otherMetadata;
   // 9: Deprecated
   // 10: Deprecated
   // The CRC32C of the uncompressed request payload. MAY be set. SHOULD be
   // validated if set.
-  11: optional i32 (cpp.type = "std::uint32_t") crc32c;
+  @cpp.Type{name = "std::uint32_t"}
+  11: optional i32 crc32c;
   // 12: Deprecated
   // The name of the load metric that should be queried as part of this
   // request. MAY be set. If set, load field SHOULD be set in response
@@ -283,14 +285,14 @@ struct ResponseRpcMetadata {
   // 2: Deprecated
   // Arbitrary metadata that MAY be used by application or Thrift extensions.
   // MAY be set.
-  3: optional map<string, string> (
-    cpp.template = "folly::F14NodeMap",
-  ) otherMetadata;
+  @cpp.Type{template = "folly::F14NodeMap"}
+  3: optional map<string, string> otherMetadata;
   // Server load. SHOULD be set iff loadMetric was set in RequestRpcMetadata
   4: optional i64 load;
   // The CRC32C of the uncompressed response payload. MAY be set. SHOULD be
   // validated if set.
-  5: optional i32 (cpp.type = "std::uint32_t") crc32c;
+  @cpp.Type{name = "std::uint32_t"}
+  5: optional i32 crc32c;
   // The compression algorithm that was used to compress response payload. MUST
   // be set iff response payload is compressed. SHOULD match the algorithm set
   // in compressionConfig in RequestRpcMetadata
@@ -403,9 +405,8 @@ struct StreamPayloadMetadata {
   1: optional CompressionAlgorithm compression;
   // Arbitrary metadata that MAY be used by application or Thrift extensions.
   // MAY be set.
-  2: optional map<string, string_4852> (
-    cpp.template = "folly::F14NodeMap",
-  ) otherMetadata;
+  @cpp.Type{template = "folly::F14NodeMap"}
+  2: optional map<string, string_4852> otherMetadata;
   // Metadata describing the type of stream payload. MUST be set for protocol
   // version 8+.
   3: optional PayloadMetadata payloadMetadata;
@@ -430,15 +431,13 @@ const i64 kRocketProtocolKey = 0xf09f9a80;
 struct ClientMetadata {
   1: optional string agent;
   2: optional string hostname;
-  3: optional map<string, string> (
-    cpp.template = "folly::F14NodeMap",
-  ) otherMetadata;
+  @cpp.Type{template = "folly::F14NodeMap"}
+  3: optional map<string, string> otherMetadata;
 }
 
 struct RequestSetupMetadata {
-  1: optional map<string, binary> (
-    cpp.template = "apache::thrift::MetadataOpaqueMap",
-  ) opaque;
+  @cpp.Type{template = "apache::thrift::MetadataOpaqueMap"}
+  1: optional map<string, binary> opaque;
   // Indicates interface kind that MUST be used by this connection. If not set
   // or if server doesn't support requested interface kind, USER interface kind
   // SHOULD be used. MAY be set.
@@ -487,9 +486,8 @@ struct TransportMetadataPush {
   // client has received the response from the server for the setup frame. Thus
   // dynamic information such as the result of the TLS handshake can also be
   // added to this metadata map.
-  1: optional map<string, string> (
-    cpp.template = "folly::F14NodeMap",
-  ) transportMetadata;
+  @cpp.Type{template = "folly::F14NodeMap"}
+  1: optional map<string, string> transportMetadata;
 }
 
 enum DrainCompleteCode {
@@ -523,9 +521,8 @@ union ClientPushMetadata {
 struct HeadersPayloadContent {
   // Arbitrary metadata that MAY be used by application or Thrift extensions.
   // MAY be set.
-  1: optional map<string, string_4852> (
-    cpp.template = "folly::F14NodeMap",
-  ) otherMetadata;
+  @cpp.Type{template = "folly::F14NodeMap"}
+  1: optional map<string, string_4852> otherMetadata;
 }
 
 struct HeadersPayloadMetadata {

@@ -26,6 +26,8 @@ namespace go thrift.lib.thrift.metadata
 /*
  * Keep synced with : thrift/compiler/generate/t_hack_generator.cc
  */
+include "thrift/annotation/cpp.thrift"
+
 enum ThriftPrimitiveType {
   THRIFT_BOOL_TYPE = 1,
   THRIFT_BYTE_TYPE = 2,
@@ -60,33 +62,26 @@ struct ThriftConstStruct {
 }
 
 struct ThriftListType {
+  @cpp.Ref{type = cpp.RefType.Unique}
   1: optional ThriftType valueType (
-    cpp.ref = "true",
-    cpp2.ref = "true",
     rust.box,
     swift.recursive_reference = "true",
   );
 }
 
 struct ThriftSetType {
+  @cpp.Ref{type = cpp.RefType.Unique}
   1: optional ThriftType valueType (
-    cpp.ref = "true",
-    cpp2.ref = "true",
     rust.box,
     swift.recursive_reference = "true",
   );
 }
 
 struct ThriftMapType {
-  1: optional ThriftType keyType (
-    cpp.ref = "true",
-    cpp2.ref = "true",
-    rust.box,
-    swift.recursive_reference = "true",
-  );
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: optional ThriftType keyType (rust.box, swift.recursive_reference = "true");
+  @cpp.Ref{type = cpp.RefType.Unique}
   2: optional ThriftType valueType (
-    cpp.ref = "true",
-    cpp2.ref = "true",
     rust.box,
     swift.recursive_reference = "true",
   );
@@ -106,9 +101,8 @@ struct ThriftUnionType {
 
 struct ThriftTypedefType {
   1: string name;
+  @cpp.Ref{type = cpp.RefType.Unique}
   2: optional ThriftType underlyingType (
-    cpp.ref = "true",
-    cpp2.ref = "true",
     rust.box,
     swift.recursive_reference = "true",
   );
@@ -116,36 +110,31 @@ struct ThriftTypedefType {
 }
 
 struct ThriftStreamType {
+  @cpp.Ref{type = cpp.RefType.Unique}
   1: optional ThriftType elemType (
-    cpp.ref = "true",
-    cpp2.ref = "true",
     rust.box,
     swift.recursive_reference = "true",
   );
+  @cpp.Ref{type = cpp.RefType.Unique}
   2: optional ThriftType initialResponseType (
-    cpp.ref = "true",
-    cpp2.ref = "true",
     rust.box,
     swift.recursive_reference = "true",
   );
 }
 
 struct ThriftSinkType {
+  @cpp.Ref{type = cpp.RefType.Unique}
   1: optional ThriftType elemType (
-    cpp.ref = "true",
-    cpp2.ref = "true",
     rust.box,
     swift.recursive_reference = "true",
   );
+  @cpp.Ref{type = cpp.RefType.Unique}
   2: optional ThriftType finalResponseType (
-    cpp.ref = "true",
-    cpp2.ref = "true",
     rust.box,
     swift.recursive_reference = "true",
   );
+  @cpp.Ref{type = cpp.RefType.Unique}
   3: optional ThriftType initialResponseType (
-    cpp.ref = "true",
-    cpp2.ref = "true",
     rust.box,
     swift.recursive_reference = "true",
   );

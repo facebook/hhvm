@@ -18,6 +18,8 @@ cpp_include "folly/sorted_vector_types.h"
 
 namespace cpp2 apache.thrift.frozen.schema
 
+include "thrift/annotation/cpp.thrift"
+
 struct Field {
   // layout id, indexes into layouts
   1: i16 layoutId;
@@ -30,7 +32,8 @@ struct Field {
 struct Layout {
   1: i32 size = 0;
   2: i16 bits = 0;
-  3: map<i16, Field> (cpp.template = "folly::sorted_vector_map") fields;
+  @cpp.Type{template = "folly::sorted_vector_map"}
+  3: map<i16, Field> fields;
   4: string typeName;
 }
 
@@ -42,6 +45,7 @@ struct Schema {
   4: i32 fileVersion = 0;
   // Field type names may not change unless relaxTypeChecks is set.
   1: bool relaxTypeChecks = 0;
-  2: map<i16, Layout> (cpp.template = "folly::sorted_vector_map") layouts;
+  @cpp.Type{template = "folly::sorted_vector_map"}
+  2: map<i16, Layout> layouts;
   3: i16 rootLayout = 0;
 }

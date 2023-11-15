@@ -25,6 +25,8 @@ namespace go thrift.lib.thrift.dynamic
 
 cpp_include "thrift/lib/thrift/SerializableDynamic.h"
 
+include "thrift/annotation/cpp.thrift"
+
 union Dynamic {
   1: bool boolean (java.swift.name = "_boolean");
   2: i64 integer;
@@ -34,4 +36,5 @@ union Dynamic {
   6: map<string, Dynamic> object;
 }
 
-typedef Dynamic (cpp.type = "::apache::thrift::SerializableDynamic") DynamicType
+@cpp.Type{name = "::apache::thrift::SerializableDynamic"}
+typedef Dynamic DynamicType

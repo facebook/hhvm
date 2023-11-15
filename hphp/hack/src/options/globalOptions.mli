@@ -299,6 +299,8 @@ type t = {
       (** Instrument the existing exhaustivity lint (for strict switch statements) *)
   po_disallow_direct_superglobals_refs: bool;
       (** block accessing superglobals via their variable names *)
+  tco_sticky_quarantine: bool;
+      (** Controls behavior of [Provider_utils.respect_but_quarantine_unsaved_changes] *)
 }
 [@@deriving eq, show]
 
@@ -427,6 +429,7 @@ val set :
   ?po_unwrap_concurrent:bool ->
   ?tco_log_exhaustivity_check:bool ->
   ?po_disallow_direct_superglobals_refs:bool ->
+  ?tco_sticky_quarantine:bool ->
   t ->
   t
 

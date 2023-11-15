@@ -294,3 +294,5 @@ let set_tco_autocomplete_mode t =
 let package_info t = t.GlobalOptions.tco_package_info
 
 let tco_log_exhaustivity_check t = t.GlobalOptions.tco_log_exhaustivity_check
+
+let tco_sticky_quarantine t = t.GlobalOptions.tco_sticky_quarantine

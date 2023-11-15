@@ -194,6 +194,7 @@ type t = {
   po_unwrap_concurrent: bool;
   tco_log_exhaustivity_check: bool;
   po_disallow_direct_superglobals_refs: bool;
+  tco_sticky_quarantine: bool;
 }
 [@@deriving eq, show]
 
@@ -323,6 +324,7 @@ let default =
     po_unwrap_concurrent = false;
     tco_log_exhaustivity_check = false;
     po_disallow_direct_superglobals_refs = false;
+    tco_sticky_quarantine = false;
   }
 
 let set
@@ -450,6 +452,7 @@ let set
     ?po_unwrap_concurrent
     ?tco_log_exhaustivity_check
     ?po_disallow_direct_superglobals_refs
+    ?tco_sticky_quarantine
     options =
   let setting setting option =
     match setting with
@@ -785,6 +788,8 @@ let set
       setting
         po_disallow_direct_superglobals_refs
         options.po_disallow_direct_superglobals_refs;
+    tco_sticky_quarantine =
+      setting tco_sticky_quarantine options.tco_sticky_quarantine;
   }
 
 let so_naming_sqlite_path t = t.so_naming_sqlite_path

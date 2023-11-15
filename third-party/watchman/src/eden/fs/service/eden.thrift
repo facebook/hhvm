@@ -422,9 +422,7 @@ union FileAttributeDataOrErrorV2 {
  * in a certain directory.
  */
 union DirListAttributeDataOrError {
-  1: map<PathString, FileAttributeDataOrErrorV2> (
-    rust.type = "sorted_vector_map::SortedVectorMap",
-  ) dirListAttributeData;
+  1: map_PathString_FileAttributeDataOrErrorV2_3516 dirListAttributeData;
   2: EdenError error;
 }
 
@@ -2373,3 +2371,8 @@ service EdenService extends fb303_core.BaseService {
     1: EdenError ex,
   );
 }
+
+// The following were automatically generated and may benefit from renaming.
+typedef map<PathString, FileAttributeDataOrErrorV2> (
+  rust.type = "sorted_vector_map::SortedVectorMap",
+) map_PathString_FileAttributeDataOrErrorV2_3516

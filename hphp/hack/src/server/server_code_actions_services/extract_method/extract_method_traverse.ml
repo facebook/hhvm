@@ -336,35 +336,37 @@ See [selection region]
 - Pass information [positions_visitor] needs
  *)
 let top_visitor ~(selection : Pos.t) =
-  object
+  object (self)
     inherit [_] Tast_visitor.reduce
 
     method zero = None
 
     method plus = Option.first_some
 
+    method! on_def env =
+      function
+      | Aast.Class class_ when Pos.contains class_.Aast.c_span selection ->
+        self#on_class_ env class_
+      | _ -> None
+
     method! on_class_ env class_ =
-      let open Aast in
-      if Pos.contains class_.c_span selection then
-        let methods = class_.c_methods in
-        let method_names =
-          methods
-          |> List.map ~f:(fun { m_name; _ } -> snd m_name)
-          |> String.Set.of_list
-        in
+      let methods = class_.Aast.c_methods in
+      let method_names =
         methods
-        |> List.find ~f:(fun { m_span; _ } -> Pos.contains m_span selection)
-        |> Option.bind ~f:(fun meth ->
-               let visitor =
-                 positions_visitor
-                   selection
-                   ~method_pos:meth.Aast.m_span
-                   ~method_is_static:meth.Aast.m_static
-                   ~method_names
-               in
-               visitor#on_method_ env meth)
-      else
-        None
+        |> List.map ~f:(fun Aast.{ m_name; _ } -> snd m_name)
+        |> String.Set.of_list
+      in
+      methods
+      |> List.find ~f:(fun Aast.{ m_span; _ } -> Pos.contains m_span selection)
+      |> Option.bind ~f:(fun meth ->
+             let visitor =
+               positions_visitor
+                 selection
+                 ~method_pos:meth.Aast.m_span
+                 ~method_is_static:meth.Aast.m_static
+                 ~method_names
+             in
+             visitor#on_method_ env meth)
   end
 
 let find_candidate ~selection ~entry ctx =

@@ -75,33 +75,29 @@ struct Foo {
   @hack.Adapter{name = '\\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter1'}
   @rust.Adapter{name = "::my::Adapter1"}
-  1: i32 (py.adapter = 'my.Adapter1') intField;
+  1: i32_5137 intField;
   @hack.Adapter{name = '\\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter1'}
   @rust.Adapter{name = "::my::Adapter1"}
-  2: optional i32 (py.adapter = 'my.Adapter1') optionalIntField;
+  2: optional i32_5137 optionalIntField;
   @hack.Adapter{name = '\\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter1'}
   @rust.Adapter{name = "::my::Adapter1"}
-  3: i32 (py.adapter = 'my.Adapter1') intFieldWithDefault = 13;
+  3: i32_5137 intFieldWithDefault = 13;
   4: SetWithAdapter setField;
   5: optional SetWithAdapter optionalSetField;
   @hack.Adapter{name = '\\Adapter3'}
   @cpp.Adapter{name = '::my::Adapter3'}
   @rust.Adapter{name = "::my::Adapter3"}
-  6: map<string, ListWithElemAdapter_withAdapter_2312> (
-    py.adapter = 'my.Adapter3',
-  ) mapField;
+  6: map_string_ListWithElemAdapter_withAdapter_8454 mapField;
   @hack.Adapter{name = '\\Adapter3'}
   @cpp.Adapter{name = '::my::Adapter3'}
   @rust.Adapter{name = "::my::Adapter3"}
-  7: optional map<string, ListWithElemAdapter_withAdapter_2312> (
-    py.adapter = 'my.Adapter3',
-  ) optionalMapField;
+  7: optional map_string_ListWithElemAdapter_withAdapter_8454 optionalMapField;
   @hack.Adapter{name = '\\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter3'}
   @rust.Adapter{name = "::my::Adapter3"}
-  8: binary (py.adapter = 'my.Adapter1') binaryField;
+  8: binary_5673 binaryField;
   9: MyI64 longField;
   @cpp.Adapter{name = "::my::Adapter2"}
   @python.Adapter{name = "my.Adapter3", typeHint = "my.AdaptedType3[]"}
@@ -116,18 +112,16 @@ union Baz {
   @hack.Adapter{name = '\\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter1'}
   @rust.Adapter{name = "::my::Adapter1"}
-  1: i32 (py.adapter = 'my.Adapter1') intField;
+  1: i32_5137 intField;
   4: SetWithAdapter setField;
   @hack.Adapter{name = '\\Adapter3'}
   @cpp.Adapter{name = '::my::Adapter3'}
   @rust.Adapter{name = "::my::Adapter3"}
-  6: map<string, ListWithElemAdapter_withAdapter_2312> (
-    py.adapter = 'my.Adapter3',
-  ) mapField;
+  6: map_string_ListWithElemAdapter_withAdapter_8454 mapField;
   @hack.Adapter{name = '\\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter1'}
   @rust.Adapter{name = "::my::Adapter1"}
-  8: binary (py.adapter = 'my.Adapter1') binaryField;
+  8: binary_5673 binaryField;
   9: MyI64 longField;
 }
 
@@ -139,18 +133,18 @@ typedef Foo FooWithAdapter
 struct Bar {
   @hack.Adapter{name = '\\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter1', adaptedType = '::my::Cpp::Type1'}
-  1: Foo (py.adapter = '::my.Adapter1') structField;
+  1: Foo_6868 structField;
   @hack.Adapter{name = '\\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter1'}
-  2: optional Foo (py.adapter = 'my.Adapter1') optionalStructField;
+  2: optional Foo_3943 optionalStructField;
   3: list<FooWithAdapter_9317> structListField;
   4: optional list<FooWithAdapter_9317> optionalStructListField;
   @hack.Adapter{name = '\\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter1'}
-  5: Baz (py.adapter = 'my.Adapter1') unionField;
+  5: Baz_7352 unionField;
   @hack.Adapter{name = '\\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter1'}
-  6: optional Baz (py.adapter = 'my.Adapter1') optionalUnionField;
+  6: optional Baz_7352 optionalUnionField;
   7: DirectlyAdapted adaptedStructField;
 }
 
@@ -504,3 +498,13 @@ typedef ListWithElemAdapter_withAdapter (
 ) ListWithElemAdapter_withAdapter_2312
 typedef MyI32 (py.adapter = "my.Adapter1") MyI32_4873
 typedef StringWithAdapter (py.adapter = "my.Adapter2") StringWithAdapter_7208
+
+// The following were automatically generated and may benefit from renaming.
+typedef Baz (py.adapter = "my.Adapter1") Baz_7352
+typedef Foo (py.adapter = "my.Adapter1") Foo_3943
+typedef Foo (py.adapter = "::my.Adapter1") Foo_6868
+typedef binary (py.adapter = "my.Adapter1") binary_5673
+typedef i32 (py.adapter = "my.Adapter1") i32_5137
+typedef map<string, ListWithElemAdapter_withAdapter_2312> (
+  py.adapter = "my.Adapter3",
+) map_string_ListWithElemAdapter_withAdapter_8454

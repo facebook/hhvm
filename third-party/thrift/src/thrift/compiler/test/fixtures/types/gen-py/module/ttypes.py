@@ -42,7 +42,7 @@ def __EXPAND_THRIFT_SPEC(spec):
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'has_bitwise_ops', 'is_unscoped', 'MyForwardRefEnum', 'empty_struct', 'decorated_struct', 'ContainerStruct', 'CppTypeStruct', 'VirtualStruct', 'MyStructWithForwardRefEnum', 'TrivialNumeric', 'TrivialNestedWithDefault', 'ComplexString', 'ComplexNestedWithDefault', 'MinPadding', 'MinPaddingWithCustomType', 'MyStruct', 'MyDataItem', 'Renaming', 'AnnotatedTypes', 'ForwardUsageRoot', 'ForwardUsageStruct', 'ForwardUsageByRef', 'IncompleteMap', 'IncompleteMapDep', 'CompleteMap', 'CompleteMapDep', 'IncompleteList', 'IncompleteListDep', 'CompleteList', 'CompleteListDep', 'AdaptedList', 'AdaptedListDep', 'DependentAdaptedList', 'DependentAdaptedListDep', 'AllocatorAware', 'AllocatorAware2', 'TypedefStruct', 'StructWithDoubleUnderscores', 'TBinary', 'IntTypedef', 'UintTypedef']
+__all__ = ['UTF8STRINGS', 'has_bitwise_ops', 'is_unscoped', 'MyForwardRefEnum', 'empty_struct', 'decorated_struct', 'ContainerStruct', 'CppTypeStruct', 'VirtualStruct', 'MyStructWithForwardRefEnum', 'TrivialNumeric', 'TrivialNestedWithDefault', 'ComplexString', 'ComplexNestedWithDefault', 'MinPadding', 'MinPaddingWithCustomType', 'MyStruct', 'MyDataItem', 'Renaming', 'AnnotatedTypes', 'ForwardUsageRoot', 'ForwardUsageStruct', 'ForwardUsageByRef', 'IncompleteMap', 'IncompleteMapDep', 'CompleteMap', 'CompleteMapDep', 'IncompleteList', 'IncompleteListDep', 'CompleteList', 'CompleteListDep', 'AdaptedList', 'AdaptedListDep', 'DependentAdaptedList', 'DependentAdaptedListDep', 'AllocatorAware', 'AllocatorAware2', 'TypedefStruct', 'StructWithDoubleUnderscores', 'TBinary', 'IntTypedef', 'UintTypedef', 'SomeListOfTypeMap_2468', 'TBinary_8623', 'i32_9314', 'list_i32_9187', 'map_i32_i32_9565', 'map_i32_string_1261', 'set_i32_7070', 'set_i32_7194', 'string_5252']
 
 class has_bitwise_ops:
   none = 0
@@ -4005,6 +4005,15 @@ class StructWithDoubleUnderscores:
 TBinary = UnimplementedTypedef()
 IntTypedef = UnimplementedTypedef()
 UintTypedef = IntTypedef
+SomeListOfTypeMap_2468 = included.ttypes.SomeListOfTypeMap
+TBinary_8623 = TBinary
+i32_9314 = UnimplementedTypedef()
+list_i32_9187 = UnimplementedTypedef()
+map_i32_i32_9565 = UnimplementedTypedef()
+map_i32_string_1261 = UnimplementedTypedef()
+set_i32_7070 = UnimplementedTypedef()
+set_i32_7194 = UnimplementedTypedef()
+string_5252 = UnimplementedTypedef()
 all_structs.append(empty_struct)
 empty_struct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 )))

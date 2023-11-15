@@ -186,7 +186,7 @@ class ContainerStruct_struct_traits {
   struct __fbthrift_member_fieldF {
     using owner = ::apache::thrift::fixtures::types::ContainerStruct;
     using name = __fbthrift_strings_module::__fbthrift_hash_68f4d40289380c5c6536b552d834e0a1e0df88fddcd39d4a6d7f3a0b1cf22012;
-    using type = folly::sorted_vector_set<::std::int32_t>;
+    using type = ::apache::thrift::fixtures::types::set_i32_7194;
     using tag = ::apache::thrift::ident::fieldF;
     static constexpr ::apache::thrift::field_id_t id = 6;
     static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
@@ -198,7 +198,7 @@ class ContainerStruct_struct_traits {
   struct __fbthrift_member_fieldG {
     using owner = ::apache::thrift::fixtures::types::ContainerStruct;
     using name = __fbthrift_strings_module::__fbthrift_hash_4c4f1be7384da0ab8e9483a59b7018f4671e228da38fa30ee8eabe777bc24cda;
-    using type = folly::sorted_vector_map<::std::int32_t, ::std::string>;
+    using type = ::apache::thrift::fixtures::types::map_i32_string_1261;
     using tag = ::apache::thrift::ident::fieldG;
     static constexpr ::apache::thrift::field_id_t id = 7;
     static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
@@ -1035,7 +1035,7 @@ class AnnotatedTypes_struct_traits {
   struct __fbthrift_member_binary_field {
     using owner = ::apache::thrift::fixtures::types::AnnotatedTypes;
     using name = __fbthrift_strings_module::__fbthrift_hash_a3d53ffeeecb838901452e3279a13dcce02e91865d83cb64d8f3e5ed8c18bf03;
-    using type = ::apache::thrift::fixtures::types::TBinary;
+    using type = ::apache::thrift::fixtures::types::TBinary_8623;
     using tag = ::apache::thrift::ident::binary_field;
     static constexpr ::apache::thrift::field_id_t id = 1;
     static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
@@ -1047,7 +1047,7 @@ class AnnotatedTypes_struct_traits {
   struct __fbthrift_member_list_field {
     using owner = ::apache::thrift::fixtures::types::AnnotatedTypes;
     using name = __fbthrift_strings_module::__fbthrift_hash_ea7bd83abd8b7b855031fc7f4e0e961fe4c408203a46f5126d609632ddf0c641;
-    using type = ::apache::thrift::fixtures::types::SomeListOfTypeMap;
+    using type = ::apache::thrift::fixtures::types::SomeListOfTypeMap_2468;
     using tag = ::apache::thrift::ident::list_field;
     static constexpr ::apache::thrift::field_id_t id = 2;
     static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
@@ -1695,7 +1695,7 @@ class AllocatorAware_struct_traits {
   struct __fbthrift_member_aa_list {
     using owner = ::apache::thrift::fixtures::types::AllocatorAware;
     using name = __fbthrift_strings_module::__fbthrift_hash_880a35405ed995030f9d4b4939e636855aa93e6e6173fe61bd40adec636dec29;
-    using type = ::std::vector<::std::int32_t>;
+    using type = ::apache::thrift::fixtures::types::list_i32_9187;
     using tag = ::apache::thrift::ident::aa_list;
     static constexpr ::apache::thrift::field_id_t id = 1;
     static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
@@ -1707,7 +1707,7 @@ class AllocatorAware_struct_traits {
   struct __fbthrift_member_aa_set {
     using owner = ::apache::thrift::fixtures::types::AllocatorAware;
     using name = __fbthrift_strings_module::__fbthrift_hash_bfaf0acc93bb6b488b6a5a8d0bcc12a66bdac79da50021adc4da36e22a6af810;
-    using type = ::std::set<::std::int32_t>;
+    using type = ::apache::thrift::fixtures::types::set_i32_7070;
     using tag = ::apache::thrift::ident::aa_set;
     static constexpr ::apache::thrift::field_id_t id = 2;
     static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
@@ -1719,7 +1719,7 @@ class AllocatorAware_struct_traits {
   struct __fbthrift_member_aa_map {
     using owner = ::apache::thrift::fixtures::types::AllocatorAware;
     using name = __fbthrift_strings_module::__fbthrift_hash_4b52fb402e58543eb406111961ce4b6760c045edd3af4068b93a1ff7ac4ccfc1;
-    using type = ::std::map<::std::int32_t, ::std::int32_t>;
+    using type = ::apache::thrift::fixtures::types::map_i32_i32_9565;
     using tag = ::apache::thrift::ident::aa_map;
     static constexpr ::apache::thrift::field_id_t id = 3;
     static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
@@ -1731,7 +1731,7 @@ class AllocatorAware_struct_traits {
   struct __fbthrift_member_aa_string {
     using owner = ::apache::thrift::fixtures::types::AllocatorAware;
     using name = __fbthrift_strings_module::__fbthrift_hash_f119bbf23aedae2e52bbe52603d5596f495df52e77522ef10e4e47e6cef18e97;
-    using type = ::std::string;
+    using type = ::apache::thrift::fixtures::types::string_5252;
     using tag = ::apache::thrift::ident::aa_string;
     static constexpr ::apache::thrift::field_id_t id = 4;
     static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
@@ -1755,7 +1755,7 @@ class AllocatorAware_struct_traits {
   struct __fbthrift_member_aa_unique {
     using owner = ::apache::thrift::fixtures::types::AllocatorAware;
     using name = __fbthrift_strings_module::__fbthrift_hash_55c08bd2971fde106159fb69085c6e57b77b291d5ac214f1479c0b4f41107cf1;
-    using type = ::std::int32_t;
+    using type = ::apache::thrift::fixtures::types::i32_9314;
     using tag = ::apache::thrift::ident::aa_unique;
     static constexpr ::apache::thrift::field_id_t id = 6;
     static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
@@ -1767,7 +1767,7 @@ class AllocatorAware_struct_traits {
   struct __fbthrift_member_aa_shared {
     using owner = ::apache::thrift::fixtures::types::AllocatorAware;
     using name = __fbthrift_strings_module::__fbthrift_hash_c9fa85c7498e0de702c747ccbfa86a6946006c87e0d3a64b9156945848027d08;
-    using type = ::std::int32_t;
+    using type = ::apache::thrift::fixtures::types::i32_9314;
     using tag = ::apache::thrift::ident::aa_shared;
     static constexpr ::apache::thrift::field_id_t id = 7;
     static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;

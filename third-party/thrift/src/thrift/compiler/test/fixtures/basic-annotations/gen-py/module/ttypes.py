@@ -44,7 +44,7 @@ def __EXPAND_THRIFT_SPEC(spec):
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'MyEnum', 'MyStructNestedAnnotation', 'MyUnion', 'MyException', 'MyStruct', 'SecretStruct', 'AwesomeStruct', 'FantasticStruct']
+__all__ = ['UTF8STRINGS', 'MyEnum', 'MyStructNestedAnnotation', 'MyUnion', 'MyException', 'MyStruct', 'SecretStruct', 'AwesomeStruct', 'FantasticStruct', 'list_string_6884']
 
 class MyEnum:
   MyValue1 = 0
@@ -741,6 +741,7 @@ class SecretStruct:
 
 AwesomeStruct = MyStruct
 FantasticStruct = MyStruct
+list_string_6884 = UnimplementedTypedef()
 all_structs.append(MyStructNestedAnnotation)
 MyStructNestedAnnotation.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'name', True, None, 2, ), # 1

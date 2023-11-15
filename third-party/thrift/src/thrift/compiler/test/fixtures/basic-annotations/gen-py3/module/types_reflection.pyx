@@ -88,3 +88,9 @@ cdef __StructSpec get_reflection__SecretStruct():
         ),
     )
     return spec
+cdef __ListSpec get_reflection__std_deque_std_string__List__string():
+    return __ListSpec._fbthrift_create(
+        value=str,
+        kind=__NumberType.NOT_A_NUMBER,
+    )
+

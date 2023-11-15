@@ -874,6 +874,15 @@ class StructWithDoubleUnderscores(_fbthrift_python_types.Struct, _fbthrift_compa
 TBinary = bytes
 IntTypedef = int
 UintTypedef = int
+SomeListOfTypeMap_2468 = _typing.List[_typing.Mapping[int, str]]
+TBinary_8623 = bytes
+i32_9314 = int
+list_i32_9187 = _typing.List[int]
+map_i32_i32_9565 = _typing.Dict[int, int]
+map_i32_string_1261 = _typing.Dict[int, str]
+set_i32_7070 = _typing.Set[int]
+set_i32_7194 = _typing.Set[int]
+string_5252 = str
 
 
 class _fbthrift_SomeService_bounce_map_args(_fbthrift_python_types.Struct):

@@ -51,7 +51,7 @@ struct MyStruct {
   5: string annotation_with_trailing_comma (custom = 'test');
   6: string empty_annotations ();
   7: MyEnum my_enum;
-  8: list<string> (cpp.type = "std::deque<std::string>") cpp_type_annotation;
+  8: list_string_6884 cpp_type_annotation;
   9: MyUnion my_union;
 } (
   cpp.name = "YourStruct",
@@ -116,3 +116,6 @@ service FooBarBazService {
   void bar() (go.name = 'BarNonStructured');
   void baz();
 }
+
+// The following were automatically generated and may benefit from renaming.
+typedef list<string> (cpp.type = "std::deque<std::string>") list_string_6884

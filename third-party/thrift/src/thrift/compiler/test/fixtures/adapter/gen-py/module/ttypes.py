@@ -47,7 +47,7 @@ def __EXPAND_THRIFT_SPEC(spec):
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'Color', 'ThriftAdaptedEnum', 'MyAnnotation', 'Foo', 'Baz', 'Bar', 'DirectlyAdapted', 'IndependentDirectlyAdapted', 'StructWithFieldAdapter', 'TerseAdaptedFields', 'B', 'A', 'Config', 'MyStruct', 'AdaptTestStruct', 'AdaptTemplatedTestStruct', 'AdaptTemplatedNestedTestStruct', 'AdaptTestUnion', 'AdaptedStruct', 'DirectlyAdaptedStruct', 'StructFieldAdaptedStruct', 'CircularAdaptee', 'CircularStruct', 'ReorderedStruct', 'DeclaredAfterStruct', 'RenamedStruct', 'SameNamespaceStruct', 'HeapAllocated', 'MoveOnly', 'AlsoMoveOnly', 'ApplyAdapter', 'TransitiveAdapted', 'CountingStruct', 'Person', 'Person2', 'SetWithAdapter', 'StringWithAdapter', 'ListWithElemAdapter', 'ListWithElemAdapter_withAdapter', 'MyI64', 'DoubleTypedefI64', 'MyI32', 'FooWithAdapter', 'StructWithAdapter', 'UnionWithAdapter', 'AdaptedA', 'DurationMs', 'AdaptedBool', 'AdaptedByte', 'AdaptedShort', 'AdaptedInteger', 'AdaptedLong', 'AdaptedDouble', 'AdaptedString', 'DoubleTypedefBool', 'IOBuf', 'CustomProtocolType', 'IndirectionString', 'AdaptedEnum', 'AdaptedTypedef', 'TypedefOfDirect', 'AdaptedCircularAdaptee', 'CountingInt', 'FooWithAdapter_9317', 'ListWithElemAdapter_withAdapter_2312', 'MyI32_4873', 'StringWithAdapter_7208']
+__all__ = ['UTF8STRINGS', 'Color', 'ThriftAdaptedEnum', 'MyAnnotation', 'Foo', 'Baz', 'Bar', 'DirectlyAdapted', 'IndependentDirectlyAdapted', 'StructWithFieldAdapter', 'TerseAdaptedFields', 'B', 'A', 'Config', 'MyStruct', 'AdaptTestStruct', 'AdaptTemplatedTestStruct', 'AdaptTemplatedNestedTestStruct', 'AdaptTestUnion', 'AdaptedStruct', 'DirectlyAdaptedStruct', 'StructFieldAdaptedStruct', 'CircularAdaptee', 'CircularStruct', 'ReorderedStruct', 'DeclaredAfterStruct', 'RenamedStruct', 'SameNamespaceStruct', 'HeapAllocated', 'MoveOnly', 'AlsoMoveOnly', 'ApplyAdapter', 'TransitiveAdapted', 'CountingStruct', 'Person', 'Person2', 'SetWithAdapter', 'StringWithAdapter', 'ListWithElemAdapter', 'ListWithElemAdapter_withAdapter', 'MyI64', 'DoubleTypedefI64', 'MyI32', 'FooWithAdapter', 'StructWithAdapter', 'UnionWithAdapter', 'AdaptedA', 'DurationMs', 'AdaptedBool', 'AdaptedByte', 'AdaptedShort', 'AdaptedInteger', 'AdaptedLong', 'AdaptedDouble', 'AdaptedString', 'DoubleTypedefBool', 'IOBuf', 'CustomProtocolType', 'IndirectionString', 'AdaptedEnum', 'AdaptedTypedef', 'TypedefOfDirect', 'AdaptedCircularAdaptee', 'CountingInt', 'FooWithAdapter_9317', 'ListWithElemAdapter_withAdapter_2312', 'MyI32_4873', 'StringWithAdapter_7208', 'Baz_7352', 'Foo_3943', 'Foo_6868', 'binary_5673', 'i32_5137', 'map_string_ListWithElemAdapter_withAdapter_8454']
 
 class Color:
   UNKNOWN = 0
@@ -5117,6 +5117,12 @@ FooWithAdapter_9317 = my.Adapter1.Type
 ListWithElemAdapter_withAdapter_2312 = ListWithElemAdapter_withAdapter
 MyI32_4873 = MyI32
 StringWithAdapter_7208 = StringWithAdapter
+Baz_7352 = my.Adapter1.Type
+Foo_3943 = my.Adapter1.Type
+Foo_6868 = ::my.Adapter1.Type
+binary_5673 = UnimplementedTypedef()
+i32_5137 = UnimplementedTypedef()
+map_string_ListWithElemAdapter_withAdapter_8454 = UnimplementedTypedef()
 all_structs.append(MyAnnotation)
 MyAnnotation.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'signature', True, None, 2, ), # 1
@@ -5166,6 +5172,8 @@ Foo.thrift_field_annotations = {
 def Foo__init__(self, intField=None, optionalIntField=None, intFieldWithDefault=Foo.thrift_spec[3][4], setField=None, optionalSetField=None, mapField=None, optionalMapField=None, binaryField=None, longField=None, adaptedLongField=None, doubleAdaptedField=None,):
   self.intField = intField
   self.optionalIntField = optionalIntField
+  if intFieldWithDefault is self.thrift_spec[3][4]:
+    intFieldWithDefault = 13
   self.intFieldWithDefault = intFieldWithDefault
   self.setField = setField
   self.optionalSetField = optionalSetField

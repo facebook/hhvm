@@ -110,6 +110,21 @@
           "column" : 63
         }
       }
+    },
+    "list_string_6884" : {
+      "lineno" : 121,
+      "type_enum" : "LIST",
+      "spec_args" : { "type_enum" : "STRING", "spec_args" : null} ,
+      "source_range" : {
+        "begin" : {
+          "line" : 121,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 121,
+          "column" : 77
+        }
+      }
     }
   },
   "structs" : {
@@ -477,7 +492,7 @@
             },
             "end" : {
               "line" : 54,
-              "column" : 78
+              "column" : 43
             }
           }
         },

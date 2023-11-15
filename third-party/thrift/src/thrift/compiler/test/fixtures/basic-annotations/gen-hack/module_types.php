@@ -424,7 +424,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     ?'my_union' => ?MyUnion::TShape,
     ...
   );
-  const int STRUCTURAL_ID = 8440300490729065437;
+  const int STRUCTURAL_ID = 8696670302801378076;
   /**
    * Original thrift field:-
    * 2: i64 major
@@ -462,7 +462,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   public ?MyEnum $my_enum;
   /**
    * Original thrift field:-
-   * 8: list<string> cpp_type_annotation
+   * 8: module.list_string_6884 cpp_type_annotation
    */
   public Vector<string> $cpp_type_annotation;
   /**
@@ -599,11 +599,29 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
               "id" => 8,
               "type" => tmeta_ThriftType::fromShape(
                 shape(
-                  "t_list" => tmeta_ThriftListType::fromShape(
+                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
                     shape(
-                      "valueType" => tmeta_ThriftType::fromShape(
+                      "name" => "module.list_string_6884",
+                      "underlyingType" => tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                          "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                            shape(
+                              "name" => "module.list_string_6884",
+                              "underlyingType" => tmeta_ThriftType::fromShape(
+                                shape(
+                                  "t_list" => tmeta_ThriftListType::fromShape(
+                                    shape(
+                                      "valueType" => tmeta_ThriftType::fromShape(
+                                        shape(
+                                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                        )
+                                      ),
+                                    )
+                                  ),
+                                )
+                              ),
+                            )
+                          ),
                         )
                       ),
                     )

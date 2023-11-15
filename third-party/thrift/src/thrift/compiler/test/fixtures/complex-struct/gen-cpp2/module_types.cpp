@@ -861,7 +861,7 @@ defaultStruct::defaultStruct() :
   ::apache::thrift::detail::make_structured_constant<::cpp2::SimpleStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::age>(static_cast<::std::int64_t>(12)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::name>(apache::thrift::StringTraits<std::string>::fromStringLiteral("Robin")))}},
   {static_cast<::std::int32_t>(5), std::initializer_list<::cpp2::SimpleStruct>{::apache::thrift::detail::make_structured_constant<::cpp2::SimpleStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::age>(static_cast<::std::int64_t>(12)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::name>(apache::thrift::StringTraits<std::string>::fromStringLiteral("RatMan"))),
   ::apache::thrift::detail::make_structured_constant<::cpp2::SimpleStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::age>(static_cast<::std::int64_t>(6)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::name>(apache::thrift::StringTraits<std::string>::fromStringLiteral("Catman")))}}}),
-      __fbthrift_field_mapJavaTypeDFset(std::initializer_list<::std::map<::std::int64_t, ::std::string>::value_type>{{static_cast<::std::int64_t>(15), apache::thrift::StringTraits<std::string>::fromStringLiteral("a_value")},
+      __fbthrift_field_mapJavaTypeDFset(std::initializer_list<::cpp2::map_i64_string_5732::value_type>{{static_cast<::std::int64_t>(15), apache::thrift::StringTraits<std::string>::fromStringLiteral("a_value")},
   {static_cast<::std::int64_t>(2), apache::thrift::StringTraits<std::string>::fromStringLiteral("b_value")}}),
       __fbthrift_field_enumMapDFset(std::initializer_list<::std::map<::std::string, ::std::map<::std::int32_t, ::cpp2::MyEnum>>::value_type>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("SANDY BRIDGE"), std::initializer_list<::std::map<::std::int32_t, ::cpp2::MyEnum>::value_type>{{static_cast<::std::int32_t>(16),  ::cpp2::MyEnum::MyValue1},
   {static_cast<::std::int32_t>(144),  ::cpp2::MyEnum::MyValue1}}},
@@ -929,7 +929,7 @@ defaultStruct& defaultStruct::operator=(FOLLY_MAYBE_UNUSED defaultStruct&& other
 }
 
 
-defaultStruct::defaultStruct(apache::thrift::FragileConstructor, ::std::int64_t myLongDFset__arg, ::std::int64_t myLongDF__arg, ::std::int32_t portDFset__arg, ::std::int32_t portNum__arg, ::std::string myBinaryDFset__arg, ::std::string myBinary__arg, ::std::int8_t myByteDFSet__arg, ::std::int8_t myByte__arg, double myDoubleDFset__arg, double myDoubleDFZero__arg, double myDouble__arg, ::std::map<::std::int32_t, ::std::string> field3__arg, ::std::vector<::cpp2::MyEnum> myList__arg, ::std::set<::std::string> mySet__arg, ::cpp2::SimpleStruct simpleStruct__arg, ::std::vector<::cpp2::SimpleStruct> listStructDFset__arg, ::cpp2::MyUnion myUnion__arg, ::std::vector<::cpp2::MyUnion> listUnionDFset__arg, ::std::map<::std::int32_t, ::std::vector<::cpp2::SimpleStruct>> mapNestlistStructDfSet__arg, ::std::map<::std::int64_t, ::std::string> mapJavaTypeDFset__arg, ::std::map<::std::int64_t, ::std::int32_t> emptyMap__arg, ::std::map<::std::string, ::std::map<::std::int32_t, ::cpp2::MyEnum>> enumMapDFset__arg) :
+defaultStruct::defaultStruct(apache::thrift::FragileConstructor, ::std::int64_t myLongDFset__arg, ::std::int64_t myLongDF__arg, ::std::int32_t portDFset__arg, ::std::int32_t portNum__arg, ::std::string myBinaryDFset__arg, ::std::string myBinary__arg, ::std::int8_t myByteDFSet__arg, ::std::int8_t myByte__arg, double myDoubleDFset__arg, double myDoubleDFZero__arg, double myDouble__arg, ::std::map<::std::int32_t, ::std::string> field3__arg, ::std::vector<::cpp2::MyEnum> myList__arg, ::std::set<::std::string> mySet__arg, ::cpp2::SimpleStruct simpleStruct__arg, ::std::vector<::cpp2::SimpleStruct> listStructDFset__arg, ::cpp2::MyUnion myUnion__arg, ::std::vector<::cpp2::MyUnion> listUnionDFset__arg, ::std::map<::std::int32_t, ::std::vector<::cpp2::SimpleStruct>> mapNestlistStructDfSet__arg, ::cpp2::map_i64_string_5732 mapJavaTypeDFset__arg, ::std::map<::std::int64_t, ::std::int32_t> emptyMap__arg, ::std::map<::std::string, ::std::map<::std::int32_t, ::cpp2::MyEnum>> enumMapDFset__arg) :
     __fbthrift_field_myLongDFset(std::move(myLongDFset__arg)),
     __fbthrift_field_myLongDF(std::move(myLongDF__arg)),
     __fbthrift_field_portDFset(std::move(portDFset__arg)),
@@ -1083,11 +1083,11 @@ const ::std::map<::std::int32_t, ::std::vector<::cpp2::SimpleStruct>>& defaultSt
   return std::move(__fbthrift_field_mapNestlistStructDfSet);
 }
 
-const ::std::map<::std::int64_t, ::std::string>& defaultStruct::get_mapJavaTypeDFset() const& {
+const ::cpp2::map_i64_string_5732& defaultStruct::get_mapJavaTypeDFset() const& {
   return __fbthrift_field_mapJavaTypeDFset;
 }
 
-::std::map<::std::int64_t, ::std::string> defaultStruct::get_mapJavaTypeDFset() && {
+::cpp2::map_i64_string_5732 defaultStruct::get_mapJavaTypeDFset() && {
   return std::move(__fbthrift_field_mapJavaTypeDFset);
 }
 
@@ -2096,7 +2096,7 @@ TypeRemapped& TypeRemapped::operator=(FOLLY_MAYBE_UNUSED TypeRemapped&& other) n
 }
 
 
-TypeRemapped::TypeRemapped(apache::thrift::FragileConstructor, ::std::map<::std::int64_t, ::std::string> lsMap__arg, ::std::map<::std::int32_t, ::cpp2::FMap> ioMap__arg, ::std::int32_t BigInteger__arg, ::std::string binaryTestBuffer__arg) :
+TypeRemapped::TypeRemapped(apache::thrift::FragileConstructor, ::cpp2::map_i64_string_5732 lsMap__arg, ::cpp2::map_i32_FMap_6797 ioMap__arg, ::cpp2::i32_1194 BigInteger__arg, ::cpp2::binary_4918 binaryTestBuffer__arg) :
     __fbthrift_field_lsMap(std::move(lsMap__arg)),
     __fbthrift_field_ioMap(std::move(ioMap__arg)),
     __fbthrift_field_BigInteger(std::move(BigInteger__arg)),
@@ -2112,7 +2112,7 @@ void TypeRemapped::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_lsMap.clear();
   this->__fbthrift_field_ioMap.clear();
-  this->__fbthrift_field_BigInteger = ::std::int32_t();
+  this->__fbthrift_field_BigInteger = ::cpp2::i32_1194();
   this->__fbthrift_field_binaryTestBuffer = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
   __isset = {};
 }
@@ -2132,19 +2132,19 @@ bool TypeRemapped::operator<(FOLLY_MAYBE_UNUSED const TypeRemapped& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-const ::std::map<::std::int64_t, ::std::string>& TypeRemapped::get_lsMap() const& {
+const ::cpp2::map_i64_string_5732& TypeRemapped::get_lsMap() const& {
   return __fbthrift_field_lsMap;
 }
 
-::std::map<::std::int64_t, ::std::string> TypeRemapped::get_lsMap() && {
+::cpp2::map_i64_string_5732 TypeRemapped::get_lsMap() && {
   return std::move(__fbthrift_field_lsMap);
 }
 
-const ::std::map<::std::int32_t, ::cpp2::FMap>& TypeRemapped::get_ioMap() const& {
+const ::cpp2::map_i32_FMap_6797& TypeRemapped::get_ioMap() const& {
   return __fbthrift_field_ioMap;
 }
 
-::std::map<::std::int32_t, ::cpp2::FMap> TypeRemapped::get_ioMap() && {
+::cpp2::map_i32_FMap_6797 TypeRemapped::get_ioMap() && {
   return std::move(__fbthrift_field_ioMap);
 }
 
@@ -2519,7 +2519,7 @@ complexException& complexException::operator=(FOLLY_MAYBE_UNUSED complexExceptio
 }
 
 
-complexException::complexException(apache::thrift::FragileConstructor, ::std::string message__arg, ::std::vector<::std::string> listStrings__arg, ::cpp2::MyEnum errorEnum__arg, ::cpp2::MyUnion unionError__arg, ::cpp2::MyStruct structError__arg, ::std::map<::std::int64_t, ::std::string> lsMap__arg) :
+complexException::complexException(apache::thrift::FragileConstructor, ::std::string message__arg, ::std::vector<::std::string> listStrings__arg, ::cpp2::MyEnum errorEnum__arg, ::cpp2::MyUnion unionError__arg, ::cpp2::MyStruct structError__arg, ::cpp2::map_i64_string_5732 lsMap__arg) :
     __fbthrift_field_message(std::move(message__arg)),
     __fbthrift_field_listStrings(std::move(listStrings__arg)),
     __fbthrift_field_errorEnum(std::move(errorEnum__arg)),
@@ -2585,11 +2585,11 @@ const ::cpp2::MyStruct& complexException::get_structError() const& {
   return std::move(__fbthrift_field_structError);
 }
 
-const ::std::map<::std::int64_t, ::std::string>& complexException::get_lsMap() const& {
+const ::cpp2::map_i64_string_5732& complexException::get_lsMap() const& {
   return __fbthrift_field_lsMap;
 }
 
-::std::map<::std::int64_t, ::std::string> complexException::get_lsMap() && {
+::cpp2::map_i64_string_5732 complexException::get_lsMap() && {
   return std::move(__fbthrift_field_lsMap);
 }
 

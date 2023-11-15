@@ -38,10 +38,8 @@ struct ContainerStruct {
   4: list<i32> fieldD;
   @cpp.Type{template = "folly::small_vector"}
   5: list<i32> fieldE;
-  @cpp.Type{template = "folly::sorted_vector_set"}
-  6: set<i32> (rust.type = "sorted_vector_map::SortedVectorSet") fieldF;
-  @cpp.Type{template = "folly::sorted_vector_map"}
-  7: map<i32, string> (rust.type = "sorted_vector_map::SortedVectorMap") fieldG;
+  6: set_i32_7194 fieldF;
+  7: map_i32_string_1261 fieldG;
   8: included.SomeMap fieldH;
 }
 
@@ -137,8 +135,8 @@ struct Renaming {
 } (cpp.name = "Renamed")
 
 struct AnnotatedTypes {
-  1: TBinary (noop_annotation) binary_field;
-  2: included.SomeListOfTypeMap (noop_annotation) list_field;
+  1: TBinary_8623 binary_field;
+  2: SomeListOfTypeMap_2468 list_field;
 }
 
 # Validates that C++ codegen performes appropriate topological sorting of
@@ -207,15 +205,15 @@ struct DependentAdaptedListDep {
 
 # Allocator-aware struct with allocator-aware fields
 struct AllocatorAware {
-  1: list<i32> (cpp.use_allocator) aa_list;
-  2: set<i32> (cpp.use_allocator) aa_set;
-  3: map<i32, i32> (cpp.use_allocator) aa_map;
-  4: string (cpp.use_allocator) aa_string;
+  1: list_i32_9187 aa_list;
+  2: set_i32_7070 aa_set;
+  3: map_i32_i32_9565 aa_map;
+  4: string_5252 aa_string;
   5: i32 not_a_container;
   @cpp.Ref{type = cpp.RefType.Unique}
-  6: i32 (cpp.use_allocator) aa_unique;
+  6: i32_9314 aa_unique;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
-  7: i32 (cpp.use_allocator) aa_shared;
+  7: i32_9314 aa_shared;
 } (cpp.allocator = "some_allocator")
 
 # Allocator-aware struct with no allocator-aware fields
@@ -238,3 +236,20 @@ struct TypedefStruct {
 struct StructWithDoubleUnderscores {
   1: i32 __field;
 }
+
+// The following were automatically generated and may benefit from renaming.
+typedef included.SomeListOfTypeMap (
+  noop_annotation = "1",
+) SomeListOfTypeMap_2468
+typedef TBinary (noop_annotation = "1") TBinary_8623
+typedef i32 (cpp.use_allocator = "1") i32_9314
+typedef list<i32> (cpp.use_allocator = "1") list_i32_9187
+typedef map<i32, i32> (cpp.use_allocator = "1") map_i32_i32_9565
+@cpp.Type{template = "folly::sorted_vector_map"}
+typedef map<i32, string> (
+  rust.type = "sorted_vector_map::SortedVectorMap",
+) map_i32_string_1261
+typedef set<i32> (cpp.use_allocator = "1") set_i32_7070
+@cpp.Type{template = "folly::sorted_vector_set"}
+typedef set<i32> (rust.type = "sorted_vector_map::SortedVectorSet") set_i32_7194
+typedef string (cpp.use_allocator = "1") string_5252

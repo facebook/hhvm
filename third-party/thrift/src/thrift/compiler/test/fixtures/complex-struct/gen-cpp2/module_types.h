@@ -652,6 +652,10 @@ typedef ::std::map<::std::int16_t, ::std::string> mapTypedef;
 typedef ::std::vector<double> listTypedef;
 typedef float floatTypedef;
 typedef ::std::map<::std::int32_t, ::std::int64_t> FMap;
+typedef ::std::string binary_4918;
+typedef ::std::int32_t i32_1194;
+typedef ::std::map<::std::int32_t, ::cpp2::FMap> map_i32_FMap_6797;
+typedef ::std::map<::std::int64_t, ::std::string> map_i64_string_5732;
 
 class MyStructFloatFieldThrowExp final  {
  private:
@@ -4843,7 +4847,7 @@ class defaultStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  defaultStruct(apache::thrift::FragileConstructor, ::std::int64_t myLongDFset__arg, ::std::int64_t myLongDF__arg, ::std::int32_t portDFset__arg, ::std::int32_t portNum__arg, ::std::string myBinaryDFset__arg, ::std::string myBinary__arg, ::std::int8_t myByteDFSet__arg, ::std::int8_t myByte__arg, double myDoubleDFset__arg, double myDoubleDFZero__arg, double myDouble__arg, ::std::map<::std::int32_t, ::std::string> field3__arg, ::std::vector<::cpp2::MyEnum> myList__arg, ::std::set<::std::string> mySet__arg, ::cpp2::SimpleStruct simpleStruct__arg, ::std::vector<::cpp2::SimpleStruct> listStructDFset__arg, ::cpp2::MyUnion myUnion__arg, ::std::vector<::cpp2::MyUnion> listUnionDFset__arg, ::std::map<::std::int32_t, ::std::vector<::cpp2::SimpleStruct>> mapNestlistStructDfSet__arg, ::std::map<::std::int64_t, ::std::string> mapJavaTypeDFset__arg, ::std::map<::std::int64_t, ::std::int32_t> emptyMap__arg, ::std::map<::std::string, ::std::map<::std::int32_t, ::cpp2::MyEnum>> enumMapDFset__arg);
+  defaultStruct(apache::thrift::FragileConstructor, ::std::int64_t myLongDFset__arg, ::std::int64_t myLongDF__arg, ::std::int32_t portDFset__arg, ::std::int32_t portNum__arg, ::std::string myBinaryDFset__arg, ::std::string myBinary__arg, ::std::int8_t myByteDFSet__arg, ::std::int8_t myByte__arg, double myDoubleDFset__arg, double myDoubleDFZero__arg, double myDouble__arg, ::std::map<::std::int32_t, ::std::string> field3__arg, ::std::vector<::cpp2::MyEnum> myList__arg, ::std::set<::std::string> mySet__arg, ::cpp2::SimpleStruct simpleStruct__arg, ::std::vector<::cpp2::SimpleStruct> listStructDFset__arg, ::cpp2::MyUnion myUnion__arg, ::std::vector<::cpp2::MyUnion> listUnionDFset__arg, ::std::map<::std::int32_t, ::std::vector<::cpp2::SimpleStruct>> mapNestlistStructDfSet__arg, ::cpp2::map_i64_string_5732 mapJavaTypeDFset__arg, ::std::map<::std::int64_t, ::std::int32_t> emptyMap__arg, ::std::map<::std::string, ::std::map<::std::int32_t, ::cpp2::MyEnum>> enumMapDFset__arg);
 
   defaultStruct(defaultStruct&&) noexcept;
 
@@ -4894,7 +4898,7 @@ class defaultStruct final  {
  private:
   ::std::map<::std::int32_t, ::std::vector<::cpp2::SimpleStruct>> __fbthrift_field_mapNestlistStructDfSet;
  private:
-  ::std::map<::std::int64_t, ::std::string> __fbthrift_field_mapJavaTypeDFset;
+  ::cpp2::map_i64_string_5732 __fbthrift_field_mapJavaTypeDFset;
  private:
   ::std::map<::std::int64_t, ::std::int32_t> __fbthrift_field_emptyMap;
  private:
@@ -5667,42 +5671,42 @@ class defaultStruct final  {
     return {static_cast<T&&>(this->__fbthrift_field_mapNestlistStructDfSet), __isset.at(18), __isset.bit(18)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int64_t, ::std::string>>
+  template <typename..., typename T = ::cpp2::map_i64_string_5732>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> mapJavaTypeDFset_ref() const& {
     return {this->__fbthrift_field_mapJavaTypeDFset, __isset.at(19), __isset.bit(19)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int64_t, ::std::string>>
+  template <typename..., typename T = ::cpp2::map_i64_string_5732>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> mapJavaTypeDFset_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_mapJavaTypeDFset), __isset.at(19), __isset.bit(19)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int64_t, ::std::string>>
+  template <typename..., typename T = ::cpp2::map_i64_string_5732>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> mapJavaTypeDFset_ref() & {
     return {this->__fbthrift_field_mapJavaTypeDFset, __isset.at(19), __isset.bit(19)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int64_t, ::std::string>>
+  template <typename..., typename T = ::cpp2::map_i64_string_5732>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> mapJavaTypeDFset_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_mapJavaTypeDFset), __isset.at(19), __isset.bit(19)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int64_t, ::std::string>>
+  template <typename..., typename T = ::cpp2::map_i64_string_5732>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> mapJavaTypeDFset() const& {
     return {this->__fbthrift_field_mapJavaTypeDFset, __isset.at(19), __isset.bit(19)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int64_t, ::std::string>>
+  template <typename..., typename T = ::cpp2::map_i64_string_5732>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> mapJavaTypeDFset() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_mapJavaTypeDFset), __isset.at(19), __isset.bit(19)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int64_t, ::std::string>>
+  template <typename..., typename T = ::cpp2::map_i64_string_5732>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> mapJavaTypeDFset() & {
     return {this->__fbthrift_field_mapJavaTypeDFset, __isset.at(19), __isset.bit(19)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int64_t, ::std::string>>
+  template <typename..., typename T = ::cpp2::map_i64_string_5732>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> mapJavaTypeDFset() && {
     return {static_cast<T&&>(this->__fbthrift_field_mapJavaTypeDFset), __isset.at(19), __isset.bit(19)};
   }
@@ -5978,12 +5982,12 @@ class defaultStruct final  {
     mapNestlistStructDfSet_ref() = std::forward<T_defaultStruct_mapNestlistStructDfSet_struct_setter>(mapNestlistStructDfSet_);
     return __fbthrift_field_mapNestlistStructDfSet;
   }
-  const ::std::map<::std::int64_t, ::std::string>& get_mapJavaTypeDFset() const&;
-  ::std::map<::std::int64_t, ::std::string> get_mapJavaTypeDFset() &&;
+  const ::cpp2::map_i64_string_5732& get_mapJavaTypeDFset() const&;
+  ::cpp2::map_i64_string_5732 get_mapJavaTypeDFset() &&;
 
-  template <typename T_defaultStruct_mapJavaTypeDFset_struct_setter = ::std::map<::std::int64_t, ::std::string>>
+  template <typename T_defaultStruct_mapJavaTypeDFset_struct_setter = ::cpp2::map_i64_string_5732>
   [[deprecated("Use `FOO.mapJavaTypeDFset_ref() = BAR;` instead of `FOO.set_mapJavaTypeDFset(BAR);`")]]
-  ::std::map<::std::int64_t, ::std::string>& set_mapJavaTypeDFset(T_defaultStruct_mapJavaTypeDFset_struct_setter&& mapJavaTypeDFset_) {
+  ::cpp2::map_i64_string_5732& set_mapJavaTypeDFset(T_defaultStruct_mapJavaTypeDFset_struct_setter&& mapJavaTypeDFset_) {
     mapJavaTypeDFset_ref() = std::forward<T_defaultStruct_mapJavaTypeDFset_struct_setter>(mapJavaTypeDFset_);
     return __fbthrift_field_mapJavaTypeDFset;
   }
@@ -7173,7 +7177,7 @@ class TypeRemapped final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  TypeRemapped(apache::thrift::FragileConstructor, ::std::map<::std::int64_t, ::std::string> lsMap__arg, ::std::map<::std::int32_t, ::cpp2::FMap> ioMap__arg, ::std::int32_t BigInteger__arg, ::std::string binaryTestBuffer__arg);
+  TypeRemapped(apache::thrift::FragileConstructor, ::cpp2::map_i64_string_5732 lsMap__arg, ::cpp2::map_i32_FMap_6797 ioMap__arg, ::cpp2::i32_1194 BigInteger__arg, ::cpp2::binary_4918 binaryTestBuffer__arg);
 
   TypeRemapped(TypeRemapped&&) noexcept;
 
@@ -7186,13 +7190,13 @@ class TypeRemapped final  {
   ~TypeRemapped();
 
  private:
-  ::std::map<::std::int64_t, ::std::string> __fbthrift_field_lsMap;
+  ::cpp2::map_i64_string_5732 __fbthrift_field_lsMap;
  private:
-  ::std::map<::std::int32_t, ::cpp2::FMap> __fbthrift_field_ioMap;
+  ::cpp2::map_i32_FMap_6797 __fbthrift_field_ioMap;
  private:
-  ::std::int32_t __fbthrift_field_BigInteger;
+  ::cpp2::i32_1194 __fbthrift_field_BigInteger;
  private:
-  ::std::string __fbthrift_field_binaryTestBuffer;
+  ::cpp2::binary_4918 __fbthrift_field_binaryTestBuffer;
  private:
   apache::thrift::detail::isset_bitset<4, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
@@ -7201,205 +7205,205 @@ class TypeRemapped final  {
   bool operator==(const TypeRemapped&) const;
   bool operator<(const TypeRemapped&) const;
 
-  template <typename..., typename T = ::std::map<::std::int64_t, ::std::string>>
+  template <typename..., typename T = ::cpp2::map_i64_string_5732>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> lsMap_ref() const& {
     return {this->__fbthrift_field_lsMap, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int64_t, ::std::string>>
+  template <typename..., typename T = ::cpp2::map_i64_string_5732>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> lsMap_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_lsMap), __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int64_t, ::std::string>>
+  template <typename..., typename T = ::cpp2::map_i64_string_5732>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> lsMap_ref() & {
     return {this->__fbthrift_field_lsMap, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int64_t, ::std::string>>
+  template <typename..., typename T = ::cpp2::map_i64_string_5732>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> lsMap_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_lsMap), __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int64_t, ::std::string>>
+  template <typename..., typename T = ::cpp2::map_i64_string_5732>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> lsMap() const& {
     return {this->__fbthrift_field_lsMap, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int64_t, ::std::string>>
+  template <typename..., typename T = ::cpp2::map_i64_string_5732>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> lsMap() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_lsMap), __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int64_t, ::std::string>>
+  template <typename..., typename T = ::cpp2::map_i64_string_5732>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> lsMap() & {
     return {this->__fbthrift_field_lsMap, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int64_t, ::std::string>>
+  template <typename..., typename T = ::cpp2::map_i64_string_5732>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> lsMap() && {
     return {static_cast<T&&>(this->__fbthrift_field_lsMap), __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int32_t, ::cpp2::FMap>>
+  template <typename..., typename T = ::cpp2::map_i32_FMap_6797>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> ioMap_ref() const& {
     return {this->__fbthrift_field_ioMap, __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int32_t, ::cpp2::FMap>>
+  template <typename..., typename T = ::cpp2::map_i32_FMap_6797>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> ioMap_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_ioMap), __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int32_t, ::cpp2::FMap>>
+  template <typename..., typename T = ::cpp2::map_i32_FMap_6797>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> ioMap_ref() & {
     return {this->__fbthrift_field_ioMap, __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int32_t, ::cpp2::FMap>>
+  template <typename..., typename T = ::cpp2::map_i32_FMap_6797>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> ioMap_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_ioMap), __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int32_t, ::cpp2::FMap>>
+  template <typename..., typename T = ::cpp2::map_i32_FMap_6797>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> ioMap() const& {
     return {this->__fbthrift_field_ioMap, __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int32_t, ::cpp2::FMap>>
+  template <typename..., typename T = ::cpp2::map_i32_FMap_6797>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> ioMap() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_ioMap), __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int32_t, ::cpp2::FMap>>
+  template <typename..., typename T = ::cpp2::map_i32_FMap_6797>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> ioMap() & {
     return {this->__fbthrift_field_ioMap, __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int32_t, ::cpp2::FMap>>
+  template <typename..., typename T = ::cpp2::map_i32_FMap_6797>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> ioMap() && {
     return {static_cast<T&&>(this->__fbthrift_field_ioMap), __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::std::int32_t>
+  template <typename..., typename T = ::cpp2::i32_1194>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> BigInteger_ref() const& {
     return {this->__fbthrift_field_BigInteger, __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::std::int32_t>
+  template <typename..., typename T = ::cpp2::i32_1194>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> BigInteger_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_BigInteger), __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::std::int32_t>
+  template <typename..., typename T = ::cpp2::i32_1194>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> BigInteger_ref() & {
     return {this->__fbthrift_field_BigInteger, __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::std::int32_t>
+  template <typename..., typename T = ::cpp2::i32_1194>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> BigInteger_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_BigInteger), __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::std::int32_t>
+  template <typename..., typename T = ::cpp2::i32_1194>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> BigInteger() const& {
     return {this->__fbthrift_field_BigInteger, __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::std::int32_t>
+  template <typename..., typename T = ::cpp2::i32_1194>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> BigInteger() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_BigInteger), __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::std::int32_t>
+  template <typename..., typename T = ::cpp2::i32_1194>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> BigInteger() & {
     return {this->__fbthrift_field_BigInteger, __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::std::int32_t>
+  template <typename..., typename T = ::cpp2::i32_1194>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> BigInteger() && {
     return {static_cast<T&&>(this->__fbthrift_field_BigInteger), __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::std::string>
+  template <typename..., typename T = ::cpp2::binary_4918>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> binaryTestBuffer_ref() const& {
     return {this->__fbthrift_field_binaryTestBuffer, __isset.at(3), __isset.bit(3)};
   }
 
-  template <typename..., typename T = ::std::string>
+  template <typename..., typename T = ::cpp2::binary_4918>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> binaryTestBuffer_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_binaryTestBuffer), __isset.at(3), __isset.bit(3)};
   }
 
-  template <typename..., typename T = ::std::string>
+  template <typename..., typename T = ::cpp2::binary_4918>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> binaryTestBuffer_ref() & {
     return {this->__fbthrift_field_binaryTestBuffer, __isset.at(3), __isset.bit(3)};
   }
 
-  template <typename..., typename T = ::std::string>
+  template <typename..., typename T = ::cpp2::binary_4918>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> binaryTestBuffer_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_binaryTestBuffer), __isset.at(3), __isset.bit(3)};
   }
 
-  template <typename..., typename T = ::std::string>
+  template <typename..., typename T = ::cpp2::binary_4918>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> binaryTestBuffer() const& {
     return {this->__fbthrift_field_binaryTestBuffer, __isset.at(3), __isset.bit(3)};
   }
 
-  template <typename..., typename T = ::std::string>
+  template <typename..., typename T = ::cpp2::binary_4918>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> binaryTestBuffer() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_binaryTestBuffer), __isset.at(3), __isset.bit(3)};
   }
 
-  template <typename..., typename T = ::std::string>
+  template <typename..., typename T = ::cpp2::binary_4918>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> binaryTestBuffer() & {
     return {this->__fbthrift_field_binaryTestBuffer, __isset.at(3), __isset.bit(3)};
   }
 
-  template <typename..., typename T = ::std::string>
+  template <typename..., typename T = ::cpp2::binary_4918>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> binaryTestBuffer() && {
     return {static_cast<T&&>(this->__fbthrift_field_binaryTestBuffer), __isset.at(3), __isset.bit(3)};
   }
-  const ::std::map<::std::int64_t, ::std::string>& get_lsMap() const&;
-  ::std::map<::std::int64_t, ::std::string> get_lsMap() &&;
+  const ::cpp2::map_i64_string_5732& get_lsMap() const&;
+  ::cpp2::map_i64_string_5732 get_lsMap() &&;
 
-  template <typename T_TypeRemapped_lsMap_struct_setter = ::std::map<::std::int64_t, ::std::string>>
+  template <typename T_TypeRemapped_lsMap_struct_setter = ::cpp2::map_i64_string_5732>
   [[deprecated("Use `FOO.lsMap_ref() = BAR;` instead of `FOO.set_lsMap(BAR);`")]]
-  ::std::map<::std::int64_t, ::std::string>& set_lsMap(T_TypeRemapped_lsMap_struct_setter&& lsMap_) {
+  ::cpp2::map_i64_string_5732& set_lsMap(T_TypeRemapped_lsMap_struct_setter&& lsMap_) {
     lsMap_ref() = std::forward<T_TypeRemapped_lsMap_struct_setter>(lsMap_);
     return __fbthrift_field_lsMap;
   }
-  const ::std::map<::std::int32_t, ::cpp2::FMap>& get_ioMap() const&;
-  ::std::map<::std::int32_t, ::cpp2::FMap> get_ioMap() &&;
+  const ::cpp2::map_i32_FMap_6797& get_ioMap() const&;
+  ::cpp2::map_i32_FMap_6797 get_ioMap() &&;
 
-  template <typename T_TypeRemapped_ioMap_struct_setter = ::std::map<::std::int32_t, ::cpp2::FMap>>
+  template <typename T_TypeRemapped_ioMap_struct_setter = ::cpp2::map_i32_FMap_6797>
   [[deprecated("Use `FOO.ioMap_ref() = BAR;` instead of `FOO.set_ioMap(BAR);`")]]
-  ::std::map<::std::int32_t, ::cpp2::FMap>& set_ioMap(T_TypeRemapped_ioMap_struct_setter&& ioMap_) {
+  ::cpp2::map_i32_FMap_6797& set_ioMap(T_TypeRemapped_ioMap_struct_setter&& ioMap_) {
     ioMap_ref() = std::forward<T_TypeRemapped_ioMap_struct_setter>(ioMap_);
     return __fbthrift_field_ioMap;
   }
 
-  ::std::int32_t get_BigInteger() const {
+  ::cpp2::i32_1194 get_BigInteger() const {
     return __fbthrift_field_BigInteger;
   }
 
   [[deprecated("Use `FOO.BigInteger_ref() = BAR;` instead of `FOO.set_BigInteger(BAR);`")]]
-  ::std::int32_t& set_BigInteger(::std::int32_t BigInteger_) {
+  ::cpp2::i32_1194& set_BigInteger(::cpp2::i32_1194 BigInteger_) {
     BigInteger_ref() = BigInteger_;
     return __fbthrift_field_BigInteger;
   }
 
-  const ::std::string& get_binaryTestBuffer() const& {
+  const ::cpp2::binary_4918& get_binaryTestBuffer() const& {
     return __fbthrift_field_binaryTestBuffer;
   }
 
-  ::std::string get_binaryTestBuffer() && {
+  ::cpp2::binary_4918 get_binaryTestBuffer() && {
     return std::move(__fbthrift_field_binaryTestBuffer);
   }
 
-  template <typename T_TypeRemapped_binaryTestBuffer_struct_setter = ::std::string>
+  template <typename T_TypeRemapped_binaryTestBuffer_struct_setter = ::cpp2::binary_4918>
   [[deprecated("Use `FOO.binaryTestBuffer_ref() = BAR;` instead of `FOO.set_binaryTestBuffer(BAR);`")]]
-  ::std::string& set_binaryTestBuffer(T_TypeRemapped_binaryTestBuffer_struct_setter&& binaryTestBuffer_) {
+  ::cpp2::binary_4918& set_binaryTestBuffer(T_TypeRemapped_binaryTestBuffer_struct_setter&& binaryTestBuffer_) {
     binaryTestBuffer_ref() = std::forward<T_TypeRemapped_binaryTestBuffer_struct_setter>(binaryTestBuffer_);
     return __fbthrift_field_binaryTestBuffer;
   }
@@ -8040,7 +8044,7 @@ class FOLLY_EXPORT complexException : public virtual apache::thrift::TException 
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  complexException(apache::thrift::FragileConstructor, ::std::string message__arg, ::std::vector<::std::string> listStrings__arg, ::cpp2::MyEnum errorEnum__arg, ::cpp2::MyUnion unionError__arg, ::cpp2::MyStruct structError__arg, ::std::map<::std::int64_t, ::std::string> lsMap__arg);
+  complexException(apache::thrift::FragileConstructor, ::std::string message__arg, ::std::vector<::std::string> listStrings__arg, ::cpp2::MyEnum errorEnum__arg, ::cpp2::MyUnion unionError__arg, ::cpp2::MyStruct structError__arg, ::cpp2::map_i64_string_5732 lsMap__arg);
 
   complexException(complexException&&) noexcept;
 
@@ -8063,7 +8067,7 @@ class FOLLY_EXPORT complexException : public virtual apache::thrift::TException 
  private:
   ::cpp2::MyStruct __fbthrift_field_structError;
  private:
-  ::std::map<::std::int64_t, ::std::string> __fbthrift_field_lsMap;
+  ::cpp2::map_i64_string_5732 __fbthrift_field_lsMap;
  private:
   apache::thrift::detail::isset_bitset<6, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
@@ -8272,42 +8276,42 @@ class FOLLY_EXPORT complexException : public virtual apache::thrift::TException 
     return {static_cast<T&&>(this->__fbthrift_field_structError), __isset.at(4), __isset.bit(4)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int64_t, ::std::string>>
+  template <typename..., typename T = ::cpp2::map_i64_string_5732>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> lsMap_ref() const& {
     return {this->__fbthrift_field_lsMap, __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int64_t, ::std::string>>
+  template <typename..., typename T = ::cpp2::map_i64_string_5732>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> lsMap_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_lsMap), __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int64_t, ::std::string>>
+  template <typename..., typename T = ::cpp2::map_i64_string_5732>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> lsMap_ref() & {
     return {this->__fbthrift_field_lsMap, __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int64_t, ::std::string>>
+  template <typename..., typename T = ::cpp2::map_i64_string_5732>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> lsMap_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_lsMap), __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int64_t, ::std::string>>
+  template <typename..., typename T = ::cpp2::map_i64_string_5732>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> lsMap() const& {
     return {this->__fbthrift_field_lsMap, __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int64_t, ::std::string>>
+  template <typename..., typename T = ::cpp2::map_i64_string_5732>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> lsMap() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_lsMap), __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int64_t, ::std::string>>
+  template <typename..., typename T = ::cpp2::map_i64_string_5732>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> lsMap() & {
     return {this->__fbthrift_field_lsMap, __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int64_t, ::std::string>>
+  template <typename..., typename T = ::cpp2::map_i64_string_5732>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> lsMap() && {
     return {static_cast<T&&>(this->__fbthrift_field_lsMap), __isset.at(5), __isset.bit(5)};
   }
@@ -8364,12 +8368,12 @@ class FOLLY_EXPORT complexException : public virtual apache::thrift::TException 
     structError_ref() = std::forward<T_complexException_structError_struct_setter>(structError_);
     return __fbthrift_field_structError;
   }
-  const ::std::map<::std::int64_t, ::std::string>& get_lsMap() const&;
-  ::std::map<::std::int64_t, ::std::string> get_lsMap() &&;
+  const ::cpp2::map_i64_string_5732& get_lsMap() const&;
+  ::cpp2::map_i64_string_5732 get_lsMap() &&;
 
-  template <typename T_complexException_lsMap_struct_setter = ::std::map<::std::int64_t, ::std::string>>
+  template <typename T_complexException_lsMap_struct_setter = ::cpp2::map_i64_string_5732>
   [[deprecated("Use `FOO.lsMap_ref() = BAR;` instead of `FOO.set_lsMap(BAR);`")]]
-  ::std::map<::std::int64_t, ::std::string>& set_lsMap(T_complexException_lsMap_struct_setter&& lsMap_) {
+  ::cpp2::map_i64_string_5732& set_lsMap(T_complexException_lsMap_struct_setter&& lsMap_) {
     lsMap_ref() = std::forward<T_complexException_lsMap_struct_setter>(lsMap_);
     return __fbthrift_field_lsMap;
   }

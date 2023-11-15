@@ -14,6 +14,24 @@ pub type IntTypedef = ::std::primitive::i32;
 
 pub type UintTypedef = crate::types::IntTypedef;
 
+pub type SomeListOfTypeMap_2468 = included::types::SomeListOfTypeMap;
+
+pub type TBinary_8623 = crate::types::TBinary;
+
+pub type i32_9314 = ::std::primitive::i32;
+
+pub type list_i32_9187 = ::std::vec::Vec<::std::primitive::i32>;
+
+pub type map_i32_i32_9565 = ::std::collections::BTreeMap<::std::primitive::i32, ::std::primitive::i32>;
+
+pub type map_i32_string_1261 = ::sorted_vector_map::SortedVectorMap<::std::primitive::i32, ::std::string::String>;
+
+pub type set_i32_7070 = ::std::collections::BTreeSet<::std::primitive::i32>;
+
+pub type set_i32_7194 = ::sorted_vector_map::SortedVectorSet<::std::primitive::i32>;
+
+pub type string_5252 = ::std::string::String;
+
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct empty_struct {
     // This field forces `..Default::default()` when instantiating this
@@ -42,8 +60,8 @@ pub struct ContainerStruct {
     pub fieldC: ::std::vec::Vec<::std::primitive::i32>,
     pub fieldD: ::std::vec::Vec<::std::primitive::i32>,
     pub fieldE: ::std::vec::Vec<::std::primitive::i32>,
-    pub fieldF: ::sorted_vector_map::SortedVectorSet<::std::primitive::i32>,
-    pub fieldG: ::sorted_vector_map::SortedVectorMap<::std::primitive::i32, ::std::string::String>,
+    pub fieldF: crate::types::set_i32_7194,
+    pub fieldG: crate::types::map_i32_string_1261,
     pub fieldH: included::types::SomeMap,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
@@ -202,8 +220,8 @@ pub struct Renaming {
 
 #[derive(Clone, PartialEq)]
 pub struct AnnotatedTypes {
-    pub binary_field: crate::types::TBinary,
-    pub list_field: included::types::SomeListOfTypeMap,
+    pub binary_field: crate::types::TBinary_8623,
+    pub list_field: crate::types::SomeListOfTypeMap_2468,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -376,13 +394,13 @@ pub struct DependentAdaptedListDep {
 
 #[derive(Clone, PartialEq)]
 pub struct AllocatorAware {
-    pub aa_list: ::std::vec::Vec<::std::primitive::i32>,
-    pub aa_set: ::std::collections::BTreeSet<::std::primitive::i32>,
-    pub aa_map: ::std::collections::BTreeMap<::std::primitive::i32, ::std::primitive::i32>,
-    pub aa_string: ::std::string::String,
+    pub aa_list: crate::types::list_i32_9187,
+    pub aa_set: crate::types::set_i32_7070,
+    pub aa_map: crate::types::map_i32_i32_9565,
+    pub aa_string: crate::types::string_5252,
     pub not_a_container: ::std::primitive::i32,
-    pub aa_unique: ::std::primitive::i32,
-    pub aa_shared: ::std::primitive::i32,
+    pub aa_unique: crate::types::i32_9314,
+    pub aa_shared: crate::types::i32_9314,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -1190,30 +1208,8 @@ impl ::fbthrift::metadata::ThriftAnnotations for ContainerStruct {
                 }
             },
             6 => {
-
-                if type_id == ::std::any::TypeId::of::<cpp::types::Type>() {
-                    let mut tmp = Some(cpp::types::Type {
-                        name: ::std::default::Default::default(),
-                        template: "folly::sorted_vector_set".to_owned(),
-                        ..::std::default::Default::default()
-                    });
-                    let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
-                    return r.take();
-                }
             },
             7 => {
-
-                if type_id == ::std::any::TypeId::of::<cpp::types::Type>() {
-                    let mut tmp = Some(cpp::types::Type {
-                        name: ::std::default::Default::default(),
-                        template: "folly::sorted_vector_map".to_owned(),
-                        ..::std::default::Default::default()
-                    });
-                    let r: &mut dyn ::std::any::Any = &mut tmp;
-                    let r: &mut Option<T> = r.downcast_mut().unwrap();
-                    return r.take();
-                }
             },
             8 => {
             },
@@ -4951,7 +4947,7 @@ pub(crate) mod r#impl {
     {
         fn read(p: &mut P) -> ::anyhow::Result<Self> {
             let (_key_ty, _val_ty, len) = p.read_map_begin()?;
-            let mut map = <::sorted_vector_map::SortedVectorMap<::std::primitive::i32, ::std::string::String>>::with_capacity(len.unwrap_or_default());
+            let mut map = <crate::types::map_i32_string_1261>::with_capacity(len.unwrap_or_default());
 
             if let Some(0) = len {
                 return Ok(LocalImpl(map));
@@ -5002,7 +4998,7 @@ pub(crate) mod r#impl {
     {
         fn read(p: &mut P) -> ::anyhow::Result<Self> {
             let (_elem_ty, len) = p.read_set_begin()?;
-            let mut set = <::sorted_vector_map::SortedVectorSet<::std::primitive::i32>>::with_capacity(len.unwrap_or_default());
+            let mut set = <crate::types::set_i32_7194>::with_capacity(len.unwrap_or_default());
 
             if let Some(0) = len {
                 return Ok(LocalImpl(set));

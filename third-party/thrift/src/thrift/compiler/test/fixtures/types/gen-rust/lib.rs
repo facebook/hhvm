@@ -69,7 +69,7 @@ pub(crate) mod r#impl {
     {
         fn read(p: &mut P) -> ::anyhow::Result<Self> {
             let (_key_ty, _val_ty, len) = p.read_map_begin()?;
-            let mut map = <::sorted_vector_map::SortedVectorMap<::std::primitive::i32, ::std::string::String>>::with_capacity(len.unwrap_or_default());
+            let mut map = <crate::types::map_i32_string_1261>::with_capacity(len.unwrap_or_default());
 
             if let Some(0) = len {
                 return Ok(LocalImpl(map));
@@ -120,7 +120,7 @@ pub(crate) mod r#impl {
     {
         fn read(p: &mut P) -> ::anyhow::Result<Self> {
             let (_elem_ty, len) = p.read_set_begin()?;
-            let mut set = <::sorted_vector_map::SortedVectorSet<::std::primitive::i32>>::with_capacity(len.unwrap_or_default());
+            let mut set = <crate::types::set_i32_7194>::with_capacity(len.unwrap_or_default());
 
             if let Some(0) = len {
                 return Ok(LocalImpl(set));

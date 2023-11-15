@@ -114,9 +114,7 @@ struct defaultStruct {
     2: [{"age": 28, "name": "BatMan"}, {"age": 12, "name": "Robin"}],
     5: [{"age": 12, "name": "RatMan"}, {"age": 6, "name": "Catman"}],
   };
-  21: map<i64, string> (
-    java.swift.type = "it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String>",
-  ) mapJavaTypeDFset = {15: 'a_value', 2: 'b_value'};
+  21: map_i64_string_5732 mapJavaTypeDFset = {15: 'a_value', 2: 'b_value'};
   22: map<i64, i32> emptyMap = {};
   23: map<string, map<i32, MyEnum>> enumMapDFset = {
     "SANDY BRIDGE": {16: MyEnum.MyValue1, 144: MyEnum.MyValue1},
@@ -179,14 +177,10 @@ struct ComplexNestedStruct {
 }
 
 struct TypeRemapped {
-  1: map<i64, string> (
-    java.swift.type = "it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String>",
-  ) lsMap;
-  2: map<i32, FMap> (
-    java.swift.type = "it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap<it.unimi.dsi.fastutil.ints.Int2LongArrayMap>",
-  ) ioMap;
-  3: i32 (java.swift.type = "java.math.BigInteger") BigInteger;
-  4: binary (java.swift.type = "java.nio.ByteBuffer") binaryTestBuffer;
+  1: map_i64_string_5732 lsMap;
+  2: map_i32_FMap_6797 ioMap;
+  3: i32_1194 BigInteger;
+  4: binary_4918 binaryTestBuffer;
 }
 
 exception emptyXcep {}
@@ -207,7 +201,15 @@ exception complexException {
   3: MyEnum errorEnum;
   4: optional MyUnion unionError;
   5: MyStruct structError;
-  6: map<i64, string> (
-    java.swift.type = "it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String>",
-  ) lsMap;
+  6: map_i64_string_5732 lsMap;
 }
+
+// The following were automatically generated and may benefit from renaming.
+typedef binary (java.swift.type = "java.nio.ByteBuffer") binary_4918
+typedef i32 (java.swift.type = "java.math.BigInteger") i32_1194
+typedef map<i32, FMap> (
+  java.swift.type = "it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap<it.unimi.dsi.fastutil.ints.Int2LongArrayMap>",
+) map_i32_FMap_6797
+typedef map<i64, string> (
+  java.swift.type = "it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String>",
+) map_i64_string_5732

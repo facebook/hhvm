@@ -31,9 +31,14 @@ typedef binary BytesType (rust.newtype, rust.type = "Bytes")
 struct MyStruct {
   1: MapType the_map;
   2: BinType the_bin;
-  3: binary (rust.type = "smallvec::SmallVec<[u8; 32]>") inline_bin;
+  3: binary_8247 inline_bin;
   4: BytesType the_bytes;
-  5: binary (rust.type = "Bytes") inline_bytes;
+  5: binary_9564 inline_bytes;
   6: Double floaty;
-  7: double (rust.type = "OrderedFloat<f64>") doublefloaty;
+  7: double_8056 doublefloaty;
 } (rust.ord)
+
+// The following were automatically generated and may benefit from renaming.
+typedef binary (rust.type = "smallvec::SmallVec<[u8; 32]>") binary_8247
+typedef binary (rust.type = "Bytes") binary_9564
+typedef double (rust.type = "OrderedFloat<f64>") double_8056

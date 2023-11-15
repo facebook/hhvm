@@ -398,7 +398,7 @@ YourStruct& YourStruct::operator=(FOLLY_MAYBE_UNUSED YourStruct&& other) noexcep
 }
 
 
-YourStruct::YourStruct(apache::thrift::FragileConstructor, ::std::int64_t majorVer__arg, ::std::string package__arg, ::std::string annotation_with_quote__arg, ::std::string class___arg, ::std::string annotation_with_trailing_comma__arg, ::std::string empty_annotations__arg, ::cpp2::YourEnum my_enum__arg, std::deque<std::string> cpp_type_annotation__arg, ::cpp2::YourUnion my_union__arg) :
+YourStruct::YourStruct(apache::thrift::FragileConstructor, ::std::int64_t majorVer__arg, ::std::string package__arg, ::std::string annotation_with_quote__arg, ::std::string class___arg, ::std::string annotation_with_trailing_comma__arg, ::std::string empty_annotations__arg, ::cpp2::YourEnum my_enum__arg, ::cpp2::list_string_6884 cpp_type_annotation__arg, ::cpp2::YourUnion my_union__arg) :
     __fbthrift_field_majorVer(std::move(majorVer__arg)),
     __fbthrift_field_package(std::move(package__arg)),
     __fbthrift_field_annotation_with_quote(std::move(annotation_with_quote__arg)),
@@ -449,11 +449,11 @@ bool YourStruct::operator<(FOLLY_MAYBE_UNUSED const YourStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-const std::deque<std::string>& YourStruct::get_cpp_type_annotation() const& {
+const ::cpp2::list_string_6884& YourStruct::get_cpp_type_annotation() const& {
   return __fbthrift_field_cpp_type_annotation;
 }
 
-std::deque<std::string> YourStruct::get_cpp_type_annotation() && {
+::cpp2::list_string_6884 YourStruct::get_cpp_type_annotation() && {
   return std::move(__fbthrift_field_cpp_type_annotation);
 }
 

@@ -46,10 +46,8 @@ struct MyMutableStruct {
 }
 
 struct MyMapping {
-  1: map<i64, string> (java.swift.type = "com.foo.FastLongStringMap") lsMap;
-  2: map<i32, FMap> (
-    java.swift.type = "com.foo.FastIntObjectMap<com.foo.FastIntLongMap>",
-  ) ioMap;
+  1: map_i64_string_9739 lsMap;
+  2: map_i32_FMap_5221 ioMap;
   3: map<string, string_6863> binaryMap;
   4: map<string, binary> regularBinary;
 }
@@ -61,3 +59,11 @@ struct BinaryMapping {
 
 // The following were automatically generated and may benefit from renaming.
 typedef string (java.swift.binary_string = "1") string_6863
+
+// The following were automatically generated and may benefit from renaming.
+typedef map<i32, FMap> (
+  java.swift.type = "com.foo.FastIntObjectMap<com.foo.FastIntLongMap>",
+) map_i32_FMap_5221
+typedef map<i64, string> (
+  java.swift.type = "com.foo.FastLongStringMap",
+) map_i64_string_9739

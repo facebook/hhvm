@@ -97,6 +97,421 @@ if err != nil {
     return decodeResult, decodeErr
 }
 
+type SomeListOfTypeMap_2468 = included.SomeListOfTypeMap
+
+func NewSomeListOfTypeMap_2468() SomeListOfTypeMap_2468 {
+    return included.NewSomeListOfTypeMap()
+}
+
+func WriteSomeListOfTypeMap_2468(item SomeListOfTypeMap_2468, p thrift.Protocol) error {
+    err := included.WriteSomeListOfTypeMap(item, p)
+if err != nil {
+    return err
+}
+    return nil
+}
+
+func ReadSomeListOfTypeMap_2468(p thrift.Protocol) (SomeListOfTypeMap_2468, error) {
+    var decodeResult SomeListOfTypeMap_2468
+    decodeErr := func() error {
+        result, err := included.ReadSomeListOfTypeMap(p)
+if err != nil {
+    return err
+}
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
+}
+
+type TBinary_8623 = TBinary
+
+func NewTBinary_8623() TBinary_8623 {
+    return NewTBinary()
+}
+
+func WriteTBinary_8623(item TBinary_8623, p thrift.Protocol) error {
+    err := WriteTBinary(item, p)
+if err != nil {
+    return err
+}
+    return nil
+}
+
+func ReadTBinary_8623(p thrift.Protocol) (TBinary_8623, error) {
+    var decodeResult TBinary_8623
+    decodeErr := func() error {
+        result, err := ReadTBinary(p)
+if err != nil {
+    return err
+}
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
+}
+
+type I32_9314 = int32
+
+func NewI32_9314() I32_9314 {
+    return 0
+}
+
+func WriteI32_9314(item I32_9314, p thrift.Protocol) error {
+    if err := p.WriteI32(item); err != nil {
+    return err
+}
+    return nil
+}
+
+func ReadI32_9314(p thrift.Protocol) (I32_9314, error) {
+    var decodeResult I32_9314
+    decodeErr := func() error {
+        result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
+}
+
+type ListI32_9187 = []int32
+
+func NewListI32_9187() ListI32_9187 {
+    return make([]int32, 0)
+}
+
+func WriteListI32_9187(item ListI32_9187, p thrift.Protocol) error {
+    if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
+    return thrift.PrependError("error writing list begin: ", err)
+}
+for _, v := range item {
+    {
+        item := v
+        if err := p.WriteI32(item); err != nil {
+    return err
+}
+    }
+}
+if err := p.WriteListEnd(); err != nil {
+    return thrift.PrependError("error writing list end: ", err)
+}
+    return nil
+}
+
+func ReadListI32_9187(p thrift.Protocol) (ListI32_9187, error) {
+    var decodeResult ListI32_9187
+    decodeErr := func() error {
+        _ /* elemType */, size, err := p.ReadListBegin()
+if err != nil {
+    return thrift.PrependError("error reading list begin: ", err)
+}
+
+listResult := make([]int32, 0, size)
+for i := 0; i < size; i++ {
+    var elem int32
+    {
+        result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+        elem = result
+    }
+    listResult = append(listResult, elem)
+}
+
+if err := p.ReadListEnd(); err != nil {
+    return thrift.PrependError("error reading list end: ", err)
+}
+result := listResult
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
+}
+
+type MapI32I32_9565 = map[int32]int32
+
+func NewMapI32I32_9565() MapI32I32_9565 {
+    return make(map[int32]int32)
+}
+
+func WriteMapI32I32_9565(item MapI32I32_9565, p thrift.Protocol) error {
+    if err := p.WriteMapBegin(thrift.I32, thrift.I32, len(item)); err != nil {
+    return thrift.PrependError("error writing map begin: ", err)
+}
+for k, v := range item {
+    {
+        item := k
+        if err := p.WriteI32(item); err != nil {
+    return err
+}
+    }
+
+    {
+        item := v
+        if err := p.WriteI32(item); err != nil {
+    return err
+}
+    }
+}
+if err := p.WriteMapEnd(); err != nil {
+    return thrift.PrependError("error writing map end: ", err)
+}
+    return nil
+}
+
+func ReadMapI32I32_9565(p thrift.Protocol) (MapI32I32_9565, error) {
+    var decodeResult MapI32I32_9565
+    decodeErr := func() error {
+        _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
+if err != nil {
+    return thrift.PrependError("error reading map begin: ", err)
+}
+
+mapResult := make(map[int32]int32, size)
+for i := 0; i < size; i++ {
+    var key int32
+    {
+        result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+        key = result
+    }
+
+    var value int32
+    {
+        result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+        value = result
+    }
+
+    mapResult[key] = value
+}
+
+if err := p.ReadMapEnd(); err != nil {
+    return thrift.PrependError("error reading map end: ", err)
+}
+result := mapResult
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
+}
+
+type MapI32String_1261 = map[int32]string
+
+func NewMapI32String_1261() MapI32String_1261 {
+    return make(map[int32]string)
+}
+
+func WriteMapI32String_1261(item MapI32String_1261, p thrift.Protocol) error {
+    if err := p.WriteMapBegin(thrift.I32, thrift.STRING, len(item)); err != nil {
+    return thrift.PrependError("error writing map begin: ", err)
+}
+for k, v := range item {
+    {
+        item := k
+        if err := p.WriteI32(item); err != nil {
+    return err
+}
+    }
+
+    {
+        item := v
+        if err := p.WriteString(item); err != nil {
+    return err
+}
+    }
+}
+if err := p.WriteMapEnd(); err != nil {
+    return thrift.PrependError("error writing map end: ", err)
+}
+    return nil
+}
+
+func ReadMapI32String_1261(p thrift.Protocol) (MapI32String_1261, error) {
+    var decodeResult MapI32String_1261
+    decodeErr := func() error {
+        _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
+if err != nil {
+    return thrift.PrependError("error reading map begin: ", err)
+}
+
+mapResult := make(map[int32]string, size)
+for i := 0; i < size; i++ {
+    var key int32
+    {
+        result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+        key = result
+    }
+
+    var value string
+    {
+        result, err := p.ReadString()
+if err != nil {
+    return err
+}
+        value = result
+    }
+
+    mapResult[key] = value
+}
+
+if err := p.ReadMapEnd(); err != nil {
+    return thrift.PrependError("error reading map end: ", err)
+}
+result := mapResult
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
+}
+
+type SetI32_7070 = []int32
+
+func NewSetI32_7070() SetI32_7070 {
+    return make([]int32, 0)
+}
+
+func WriteSetI32_7070(item SetI32_7070, p thrift.Protocol) error {
+    if err := p.WriteSetBegin(thrift.I32, len(item)); err != nil {
+    return thrift.PrependError("error writing set begin: ", err)
+}
+for _, v := range item {
+    {
+        item := v
+        if err := p.WriteI32(item); err != nil {
+    return err
+}
+    }
+}
+if err := p.WriteSetEnd(); err != nil {
+    return thrift.PrependError("error writing set end: ", err)
+}
+    return nil
+}
+
+func ReadSetI32_7070(p thrift.Protocol) (SetI32_7070, error) {
+    var decodeResult SetI32_7070
+    decodeErr := func() error {
+        _ /* elemType */, size, err := p.ReadSetBegin()
+if err != nil {
+    return thrift.PrependError("error reading set begin: ", err)
+}
+
+setResult := make([]int32, 0, size)
+for i := 0; i < size; i++ {
+    var elem int32
+    {
+        result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+        elem = result
+    }
+    setResult = append(setResult, elem)
+}
+
+if err := p.ReadSetEnd(); err != nil {
+    return thrift.PrependError("error reading set end: ", err)
+}
+result := setResult
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
+}
+
+type SetI32_7194 = []int32
+
+func NewSetI32_7194() SetI32_7194 {
+    return make([]int32, 0)
+}
+
+func WriteSetI32_7194(item SetI32_7194, p thrift.Protocol) error {
+    if err := p.WriteSetBegin(thrift.I32, len(item)); err != nil {
+    return thrift.PrependError("error writing set begin: ", err)
+}
+for _, v := range item {
+    {
+        item := v
+        if err := p.WriteI32(item); err != nil {
+    return err
+}
+    }
+}
+if err := p.WriteSetEnd(); err != nil {
+    return thrift.PrependError("error writing set end: ", err)
+}
+    return nil
+}
+
+func ReadSetI32_7194(p thrift.Protocol) (SetI32_7194, error) {
+    var decodeResult SetI32_7194
+    decodeErr := func() error {
+        _ /* elemType */, size, err := p.ReadSetBegin()
+if err != nil {
+    return thrift.PrependError("error reading set begin: ", err)
+}
+
+setResult := make([]int32, 0, size)
+for i := 0; i < size; i++ {
+    var elem int32
+    {
+        result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+        elem = result
+    }
+    setResult = append(setResult, elem)
+}
+
+if err := p.ReadSetEnd(); err != nil {
+    return thrift.PrependError("error reading set end: ", err)
+}
+result := setResult
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
+}
+
+type String_5252 = string
+
+func NewString_5252() String_5252 {
+    return ""
+}
+
+func WriteString_5252(item String_5252, p thrift.Protocol) error {
+    if err := p.WriteString(item); err != nil {
+    return err
+}
+    return nil
+}
+
+func ReadString_5252(p thrift.Protocol) (String_5252, error) {
+    var decodeResult String_5252
+    decodeErr := func() error {
+        result, err := p.ReadString()
+if err != nil {
+    return err
+}
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
+}
+
 type HasBitwiseOps int32
 
 const (
@@ -534,8 +949,8 @@ type ContainerStruct struct {
     FieldC []int32 `thrift:"fieldC,3" json:"fieldC" db:"fieldC"`
     FieldD []int32 `thrift:"fieldD,4" json:"fieldD" db:"fieldD"`
     FieldE []int32 `thrift:"fieldE,5" json:"fieldE" db:"fieldE"`
-    FieldF []int32 `thrift:"fieldF,6" json:"fieldF" db:"fieldF"`
-    FieldG map[int32]string `thrift:"fieldG,7" json:"fieldG" db:"fieldG"`
+    FieldF SetI32_7194 `thrift:"fieldF,6" json:"fieldF" db:"fieldF"`
+    FieldG MapI32String_1261 `thrift:"fieldG,7" json:"fieldG" db:"fieldG"`
     FieldH included.SomeMap `thrift:"fieldH,8" json:"fieldH" db:"fieldH"`
     FieldA []int32 `thrift:"fieldA,12" json:"fieldA" db:"fieldA"`
 }
@@ -548,8 +963,8 @@ func NewContainerStruct() *ContainerStruct {
         SetFieldCNonCompat(make([]int32, 0)).
         SetFieldDNonCompat(make([]int32, 0)).
         SetFieldENonCompat(make([]int32, 0)).
-        SetFieldFNonCompat(make([]int32, 0)).
-        SetFieldGNonCompat(make(map[int32]string)).
+        SetFieldFNonCompat(NewSetI32_7194()).
+        SetFieldGNonCompat(NewMapI32String_1261()).
         SetFieldHNonCompat(included.NewSomeMap()).
         SetFieldANonCompat(make([]int32, 0))
 }
@@ -602,25 +1017,25 @@ func (x *ContainerStruct) GetFieldE() []int32 {
     return x.FieldE
 }
 
-func (x *ContainerStruct) GetFieldFNonCompat() []int32 {
+func (x *ContainerStruct) GetFieldFNonCompat() SetI32_7194 {
     return x.FieldF
 }
 
-func (x *ContainerStruct) GetFieldF() []int32 {
+func (x *ContainerStruct) GetFieldF() SetI32_7194 {
     if !x.IsSetFieldF() {
-        return make([]int32, 0)
+        return NewSetI32_7194()
     }
 
     return x.FieldF
 }
 
-func (x *ContainerStruct) GetFieldGNonCompat() map[int32]string {
+func (x *ContainerStruct) GetFieldGNonCompat() MapI32String_1261 {
     return x.FieldG
 }
 
-func (x *ContainerStruct) GetFieldG() map[int32]string {
+func (x *ContainerStruct) GetFieldG() MapI32String_1261 {
     if !x.IsSetFieldG() {
-        return make(map[int32]string)
+        return NewMapI32String_1261()
     }
 
     return x.FieldG
@@ -690,22 +1105,22 @@ func (x *ContainerStruct) SetFieldE(value []int32) *ContainerStruct {
     return x
 }
 
-func (x *ContainerStruct) SetFieldFNonCompat(value []int32) *ContainerStruct {
+func (x *ContainerStruct) SetFieldFNonCompat(value SetI32_7194) *ContainerStruct {
     x.FieldF = value
     return x
 }
 
-func (x *ContainerStruct) SetFieldF(value []int32) *ContainerStruct {
+func (x *ContainerStruct) SetFieldF(value SetI32_7194) *ContainerStruct {
     x.FieldF = value
     return x
 }
 
-func (x *ContainerStruct) SetFieldGNonCompat(value map[int32]string) *ContainerStruct {
+func (x *ContainerStruct) SetFieldGNonCompat(value MapI32String_1261) *ContainerStruct {
     x.FieldG = value
     return x
 }
 
-func (x *ContainerStruct) SetFieldG(value map[int32]string) *ContainerStruct {
+func (x *ContainerStruct) SetFieldG(value MapI32String_1261) *ContainerStruct {
     x.FieldG = value
     return x
 }
@@ -876,19 +1291,9 @@ func (x *ContainerStruct) writeField6(p thrift.Protocol) error {  // FieldF
     }
 
     item := x.GetFieldFNonCompat()
-    if err := p.WriteSetBegin(thrift.I32, len(item)); err != nil {
-    return thrift.PrependError("error writing set begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteI32(item); err != nil {
+    err := WriteSetI32_7194(item, p)
+if err != nil {
     return err
-}
-    }
-}
-if err := p.WriteSetEnd(); err != nil {
-    return thrift.PrependError("error writing set end: ", err)
 }
 
     if err := p.WriteFieldEnd(); err != nil {
@@ -903,26 +1308,9 @@ func (x *ContainerStruct) writeField7(p thrift.Protocol) error {  // FieldG
     }
 
     item := x.GetFieldGNonCompat()
-    if err := p.WriteMapBegin(thrift.I32, thrift.STRING, len(item)); err != nil {
-    return thrift.PrependError("error writing map begin: ", err)
-}
-for k, v := range item {
-    {
-        item := k
-        if err := p.WriteI32(item); err != nil {
+    err := WriteMapI32String_1261(item, p)
+if err != nil {
     return err
-}
-    }
-
-    {
-        item := v
-        if err := p.WriteString(item); err != nil {
-    return err
-}
-    }
-}
-if err := p.WriteMapEnd(); err != nil {
-    return thrift.PrependError("error writing map end: ", err)
 }
 
     if err := p.WriteFieldEnd(); err != nil {
@@ -1088,66 +1476,20 @@ result := listResult
 }
 
 func (x *ContainerStruct) readField6(p thrift.Protocol) error {  // FieldF
-    _ /* elemType */, size, err := p.ReadSetBegin()
-if err != nil {
-    return thrift.PrependError("error reading set begin: ", err)
-}
-
-setResult := make([]int32, 0, size)
-for i := 0; i < size; i++ {
-    var elem int32
-    {
-        result, err := p.ReadI32()
+    result, err := ReadSetI32_7194(p)
 if err != nil {
     return err
 }
-        elem = result
-    }
-    setResult = append(setResult, elem)
-}
-
-if err := p.ReadSetEnd(); err != nil {
-    return thrift.PrependError("error reading set end: ", err)
-}
-result := setResult
 
     x.SetFieldFNonCompat(result)
     return nil
 }
 
 func (x *ContainerStruct) readField7(p thrift.Protocol) error {  // FieldG
-    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
-if err != nil {
-    return thrift.PrependError("error reading map begin: ", err)
-}
-
-mapResult := make(map[int32]string, size)
-for i := 0; i < size; i++ {
-    var key int32
-    {
-        result, err := p.ReadI32()
+    result, err := ReadMapI32String_1261(p)
 if err != nil {
     return err
 }
-        key = result
-    }
-
-    var value string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        value = result
-    }
-
-    mapResult[key] = value
-}
-
-if err := p.ReadMapEnd(); err != nil {
-    return thrift.PrependError("error reading map end: ", err)
-}
-result := mapResult
 
     x.SetFieldGNonCompat(result)
     return nil
@@ -1268,14 +1610,14 @@ func (x *ContainerStructBuilder) FieldE(value []int32) *ContainerStructBuilder {
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewContainerStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *ContainerStructBuilder) FieldF(value []int32) *ContainerStructBuilder {
+func (x *ContainerStructBuilder) FieldF(value SetI32_7194) *ContainerStructBuilder {
     x.obj.FieldF = value
     return x
 }
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewContainerStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *ContainerStructBuilder) FieldG(value map[int32]string) *ContainerStructBuilder {
+func (x *ContainerStructBuilder) FieldG(value MapI32String_1261) *ContainerStructBuilder {
     x.obj.FieldG = value
     return x
 }
@@ -4510,58 +4852,58 @@ func (x *Renaming) String() string {
 }
 
 type AnnotatedTypes struct {
-    BinaryField TBinary `thrift:"binary_field,1" json:"binary_field" db:"binary_field"`
-    ListField included.SomeListOfTypeMap `thrift:"list_field,2" json:"list_field" db:"list_field"`
+    BinaryField TBinary_8623 `thrift:"binary_field,1" json:"binary_field" db:"binary_field"`
+    ListField SomeListOfTypeMap_2468 `thrift:"list_field,2" json:"list_field" db:"list_field"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &AnnotatedTypes{}
 
 func NewAnnotatedTypes() *AnnotatedTypes {
     return (&AnnotatedTypes{}).
-        SetBinaryFieldNonCompat(NewTBinary()).
-        SetListFieldNonCompat(included.NewSomeListOfTypeMap())
+        SetBinaryFieldNonCompat(NewTBinary_8623()).
+        SetListFieldNonCompat(NewSomeListOfTypeMap_2468())
 }
 
-func (x *AnnotatedTypes) GetBinaryFieldNonCompat() TBinary {
+func (x *AnnotatedTypes) GetBinaryFieldNonCompat() TBinary_8623 {
     return x.BinaryField
 }
 
-func (x *AnnotatedTypes) GetBinaryField() TBinary {
+func (x *AnnotatedTypes) GetBinaryField() TBinary_8623 {
     if !x.IsSetBinaryField() {
-        return NewTBinary()
+        return NewTBinary_8623()
     }
 
     return x.BinaryField
 }
 
-func (x *AnnotatedTypes) GetListFieldNonCompat() included.SomeListOfTypeMap {
+func (x *AnnotatedTypes) GetListFieldNonCompat() SomeListOfTypeMap_2468 {
     return x.ListField
 }
 
-func (x *AnnotatedTypes) GetListField() included.SomeListOfTypeMap {
+func (x *AnnotatedTypes) GetListField() SomeListOfTypeMap_2468 {
     if !x.IsSetListField() {
-        return included.NewSomeListOfTypeMap()
+        return NewSomeListOfTypeMap_2468()
     }
 
     return x.ListField
 }
 
-func (x *AnnotatedTypes) SetBinaryFieldNonCompat(value TBinary) *AnnotatedTypes {
+func (x *AnnotatedTypes) SetBinaryFieldNonCompat(value TBinary_8623) *AnnotatedTypes {
     x.BinaryField = value
     return x
 }
 
-func (x *AnnotatedTypes) SetBinaryField(value TBinary) *AnnotatedTypes {
+func (x *AnnotatedTypes) SetBinaryField(value TBinary_8623) *AnnotatedTypes {
     x.BinaryField = value
     return x
 }
 
-func (x *AnnotatedTypes) SetListFieldNonCompat(value included.SomeListOfTypeMap) *AnnotatedTypes {
+func (x *AnnotatedTypes) SetListFieldNonCompat(value SomeListOfTypeMap_2468) *AnnotatedTypes {
     x.ListField = value
     return x
 }
 
-func (x *AnnotatedTypes) SetListField(value included.SomeListOfTypeMap) *AnnotatedTypes {
+func (x *AnnotatedTypes) SetListField(value SomeListOfTypeMap_2468) *AnnotatedTypes {
     x.ListField = value
     return x
 }
@@ -4580,7 +4922,7 @@ func (x *AnnotatedTypes) writeField1(p thrift.Protocol) error {  // BinaryField
     }
 
     item := x.GetBinaryFieldNonCompat()
-    err := WriteTBinary(item, p)
+    err := WriteTBinary_8623(item, p)
 if err != nil {
     return err
 }
@@ -4597,7 +4939,7 @@ func (x *AnnotatedTypes) writeField2(p thrift.Protocol) error {  // ListField
     }
 
     item := x.GetListFieldNonCompat()
-    err := included.WriteSomeListOfTypeMap(item, p)
+    err := WriteSomeListOfTypeMap_2468(item, p)
 if err != nil {
     return err
 }
@@ -4609,7 +4951,7 @@ if err != nil {
 }
 
 func (x *AnnotatedTypes) readField1(p thrift.Protocol) error {  // BinaryField
-    result, err := ReadTBinary(p)
+    result, err := ReadTBinary_8623(p)
 if err != nil {
     return err
 }
@@ -4619,7 +4961,7 @@ if err != nil {
 }
 
 func (x *AnnotatedTypes) readField2(p thrift.Protocol) error {  // ListField
-    result, err := included.ReadSomeListOfTypeMap(p)
+    result, err := ReadSomeListOfTypeMap_2468(p)
 if err != nil {
     return err
 }
@@ -4653,14 +4995,14 @@ func NewAnnotatedTypesBuilder() *AnnotatedTypesBuilder {
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewAnnotatedTypes().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *AnnotatedTypesBuilder) BinaryField(value TBinary) *AnnotatedTypesBuilder {
+func (x *AnnotatedTypesBuilder) BinaryField(value TBinary_8623) *AnnotatedTypesBuilder {
     x.obj.BinaryField = value
     return x
 }
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewAnnotatedTypes().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *AnnotatedTypesBuilder) ListField(value included.SomeListOfTypeMap) *AnnotatedTypesBuilder {
+func (x *AnnotatedTypesBuilder) ListField(value SomeListOfTypeMap_2468) *AnnotatedTypesBuilder {
     x.obj.ListField = value
     return x
 }
@@ -7336,69 +7678,69 @@ func (x *DependentAdaptedListDep) String() string {
 }
 
 type AllocatorAware struct {
-    AaList []int32 `thrift:"aa_list,1" json:"aa_list" db:"aa_list"`
-    AaSet []int32 `thrift:"aa_set,2" json:"aa_set" db:"aa_set"`
-    AaMap map[int32]int32 `thrift:"aa_map,3" json:"aa_map" db:"aa_map"`
-    AaString string `thrift:"aa_string,4" json:"aa_string" db:"aa_string"`
+    AaList ListI32_9187 `thrift:"aa_list,1" json:"aa_list" db:"aa_list"`
+    AaSet SetI32_7070 `thrift:"aa_set,2" json:"aa_set" db:"aa_set"`
+    AaMap MapI32I32_9565 `thrift:"aa_map,3" json:"aa_map" db:"aa_map"`
+    AaString String_5252 `thrift:"aa_string,4" json:"aa_string" db:"aa_string"`
     NotAContainer int32 `thrift:"not_a_container,5" json:"not_a_container" db:"not_a_container"`
-    AaUnique int32 `thrift:"aa_unique,6" json:"aa_unique" db:"aa_unique"`
-    AaShared int32 `thrift:"aa_shared,7" json:"aa_shared" db:"aa_shared"`
+    AaUnique I32_9314 `thrift:"aa_unique,6" json:"aa_unique" db:"aa_unique"`
+    AaShared I32_9314 `thrift:"aa_shared,7" json:"aa_shared" db:"aa_shared"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &AllocatorAware{}
 
 func NewAllocatorAware() *AllocatorAware {
     return (&AllocatorAware{}).
-        SetAaListNonCompat(make([]int32, 0)).
-        SetAaSetNonCompat(make([]int32, 0)).
-        SetAaMapNonCompat(make(map[int32]int32)).
-        SetAaStringNonCompat("").
+        SetAaListNonCompat(NewListI32_9187()).
+        SetAaSetNonCompat(NewSetI32_7070()).
+        SetAaMapNonCompat(NewMapI32I32_9565()).
+        SetAaStringNonCompat(NewString_5252()).
         SetNotAContainerNonCompat(0).
-        SetAaUniqueNonCompat(0).
-        SetAaSharedNonCompat(0)
+        SetAaUniqueNonCompat(NewI32_9314()).
+        SetAaSharedNonCompat(NewI32_9314())
 }
 
-func (x *AllocatorAware) GetAaListNonCompat() []int32 {
+func (x *AllocatorAware) GetAaListNonCompat() ListI32_9187 {
     return x.AaList
 }
 
-func (x *AllocatorAware) GetAaList() []int32 {
+func (x *AllocatorAware) GetAaList() ListI32_9187 {
     if !x.IsSetAaList() {
-        return make([]int32, 0)
+        return NewListI32_9187()
     }
 
     return x.AaList
 }
 
-func (x *AllocatorAware) GetAaSetNonCompat() []int32 {
+func (x *AllocatorAware) GetAaSetNonCompat() SetI32_7070 {
     return x.AaSet
 }
 
-func (x *AllocatorAware) GetAaSet() []int32 {
+func (x *AllocatorAware) GetAaSet() SetI32_7070 {
     if !x.IsSetAaSet() {
-        return make([]int32, 0)
+        return NewSetI32_7070()
     }
 
     return x.AaSet
 }
 
-func (x *AllocatorAware) GetAaMapNonCompat() map[int32]int32 {
+func (x *AllocatorAware) GetAaMapNonCompat() MapI32I32_9565 {
     return x.AaMap
 }
 
-func (x *AllocatorAware) GetAaMap() map[int32]int32 {
+func (x *AllocatorAware) GetAaMap() MapI32I32_9565 {
     if !x.IsSetAaMap() {
-        return make(map[int32]int32)
+        return NewMapI32I32_9565()
     }
 
     return x.AaMap
 }
 
-func (x *AllocatorAware) GetAaStringNonCompat() string {
+func (x *AllocatorAware) GetAaStringNonCompat() String_5252 {
     return x.AaString
 }
 
-func (x *AllocatorAware) GetAaString() string {
+func (x *AllocatorAware) GetAaString() String_5252 {
     return x.AaString
 }
 
@@ -7410,58 +7752,58 @@ func (x *AllocatorAware) GetNotAContainer() int32 {
     return x.NotAContainer
 }
 
-func (x *AllocatorAware) GetAaUniqueNonCompat() int32 {
+func (x *AllocatorAware) GetAaUniqueNonCompat() I32_9314 {
     return x.AaUnique
 }
 
-func (x *AllocatorAware) GetAaUnique() int32 {
+func (x *AllocatorAware) GetAaUnique() I32_9314 {
     return x.AaUnique
 }
 
-func (x *AllocatorAware) GetAaSharedNonCompat() int32 {
+func (x *AllocatorAware) GetAaSharedNonCompat() I32_9314 {
     return x.AaShared
 }
 
-func (x *AllocatorAware) GetAaShared() int32 {
+func (x *AllocatorAware) GetAaShared() I32_9314 {
     return x.AaShared
 }
 
-func (x *AllocatorAware) SetAaListNonCompat(value []int32) *AllocatorAware {
+func (x *AllocatorAware) SetAaListNonCompat(value ListI32_9187) *AllocatorAware {
     x.AaList = value
     return x
 }
 
-func (x *AllocatorAware) SetAaList(value []int32) *AllocatorAware {
+func (x *AllocatorAware) SetAaList(value ListI32_9187) *AllocatorAware {
     x.AaList = value
     return x
 }
 
-func (x *AllocatorAware) SetAaSetNonCompat(value []int32) *AllocatorAware {
+func (x *AllocatorAware) SetAaSetNonCompat(value SetI32_7070) *AllocatorAware {
     x.AaSet = value
     return x
 }
 
-func (x *AllocatorAware) SetAaSet(value []int32) *AllocatorAware {
+func (x *AllocatorAware) SetAaSet(value SetI32_7070) *AllocatorAware {
     x.AaSet = value
     return x
 }
 
-func (x *AllocatorAware) SetAaMapNonCompat(value map[int32]int32) *AllocatorAware {
+func (x *AllocatorAware) SetAaMapNonCompat(value MapI32I32_9565) *AllocatorAware {
     x.AaMap = value
     return x
 }
 
-func (x *AllocatorAware) SetAaMap(value map[int32]int32) *AllocatorAware {
+func (x *AllocatorAware) SetAaMap(value MapI32I32_9565) *AllocatorAware {
     x.AaMap = value
     return x
 }
 
-func (x *AllocatorAware) SetAaStringNonCompat(value string) *AllocatorAware {
+func (x *AllocatorAware) SetAaStringNonCompat(value String_5252) *AllocatorAware {
     x.AaString = value
     return x
 }
 
-func (x *AllocatorAware) SetAaString(value string) *AllocatorAware {
+func (x *AllocatorAware) SetAaString(value String_5252) *AllocatorAware {
     x.AaString = value
     return x
 }
@@ -7476,22 +7818,22 @@ func (x *AllocatorAware) SetNotAContainer(value int32) *AllocatorAware {
     return x
 }
 
-func (x *AllocatorAware) SetAaUniqueNonCompat(value int32) *AllocatorAware {
+func (x *AllocatorAware) SetAaUniqueNonCompat(value I32_9314) *AllocatorAware {
     x.AaUnique = value
     return x
 }
 
-func (x *AllocatorAware) SetAaUnique(value int32) *AllocatorAware {
+func (x *AllocatorAware) SetAaUnique(value I32_9314) *AllocatorAware {
     x.AaUnique = value
     return x
 }
 
-func (x *AllocatorAware) SetAaSharedNonCompat(value int32) *AllocatorAware {
+func (x *AllocatorAware) SetAaSharedNonCompat(value I32_9314) *AllocatorAware {
     x.AaShared = value
     return x
 }
 
-func (x *AllocatorAware) SetAaShared(value int32) *AllocatorAware {
+func (x *AllocatorAware) SetAaShared(value I32_9314) *AllocatorAware {
     x.AaShared = value
     return x
 }
@@ -7514,19 +7856,9 @@ func (x *AllocatorAware) writeField1(p thrift.Protocol) error {  // AaList
     }
 
     item := x.GetAaListNonCompat()
-    if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
-    return thrift.PrependError("error writing list begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteI32(item); err != nil {
+    err := WriteListI32_9187(item, p)
+if err != nil {
     return err
-}
-    }
-}
-if err := p.WriteListEnd(); err != nil {
-    return thrift.PrependError("error writing list end: ", err)
 }
 
     if err := p.WriteFieldEnd(); err != nil {
@@ -7541,19 +7873,9 @@ func (x *AllocatorAware) writeField2(p thrift.Protocol) error {  // AaSet
     }
 
     item := x.GetAaSetNonCompat()
-    if err := p.WriteSetBegin(thrift.I32, len(item)); err != nil {
-    return thrift.PrependError("error writing set begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteI32(item); err != nil {
+    err := WriteSetI32_7070(item, p)
+if err != nil {
     return err
-}
-    }
-}
-if err := p.WriteSetEnd(); err != nil {
-    return thrift.PrependError("error writing set end: ", err)
 }
 
     if err := p.WriteFieldEnd(); err != nil {
@@ -7568,26 +7890,9 @@ func (x *AllocatorAware) writeField3(p thrift.Protocol) error {  // AaMap
     }
 
     item := x.GetAaMapNonCompat()
-    if err := p.WriteMapBegin(thrift.I32, thrift.I32, len(item)); err != nil {
-    return thrift.PrependError("error writing map begin: ", err)
-}
-for k, v := range item {
-    {
-        item := k
-        if err := p.WriteI32(item); err != nil {
+    err := WriteMapI32I32_9565(item, p)
+if err != nil {
     return err
-}
-    }
-
-    {
-        item := v
-        if err := p.WriteI32(item); err != nil {
-    return err
-}
-    }
-}
-if err := p.WriteMapEnd(); err != nil {
-    return thrift.PrependError("error writing map end: ", err)
 }
 
     if err := p.WriteFieldEnd(); err != nil {
@@ -7602,7 +7907,8 @@ func (x *AllocatorAware) writeField4(p thrift.Protocol) error {  // AaString
     }
 
     item := x.GetAaStringNonCompat()
-    if err := p.WriteString(item); err != nil {
+    err := WriteString_5252(item, p)
+if err != nil {
     return err
 }
 
@@ -7634,7 +7940,8 @@ func (x *AllocatorAware) writeField6(p thrift.Protocol) error {  // AaUnique
     }
 
     item := x.GetAaUniqueNonCompat()
-    if err := p.WriteI32(item); err != nil {
+    err := WriteI32_9314(item, p)
+if err != nil {
     return err
 }
 
@@ -7650,7 +7957,8 @@ func (x *AllocatorAware) writeField7(p thrift.Protocol) error {  // AaShared
     }
 
     item := x.GetAaSharedNonCompat()
-    if err := p.WriteI32(item); err != nil {
+    err := WriteI32_9314(item, p)
+if err != nil {
     return err
 }
 
@@ -7661,101 +7969,37 @@ func (x *AllocatorAware) writeField7(p thrift.Protocol) error {  // AaShared
 }
 
 func (x *AllocatorAware) readField1(p thrift.Protocol) error {  // AaList
-    _ /* elemType */, size, err := p.ReadListBegin()
-if err != nil {
-    return thrift.PrependError("error reading list begin: ", err)
-}
-
-listResult := make([]int32, 0, size)
-for i := 0; i < size; i++ {
-    var elem int32
-    {
-        result, err := p.ReadI32()
+    result, err := ReadListI32_9187(p)
 if err != nil {
     return err
 }
-        elem = result
-    }
-    listResult = append(listResult, elem)
-}
-
-if err := p.ReadListEnd(); err != nil {
-    return thrift.PrependError("error reading list end: ", err)
-}
-result := listResult
 
     x.SetAaListNonCompat(result)
     return nil
 }
 
 func (x *AllocatorAware) readField2(p thrift.Protocol) error {  // AaSet
-    _ /* elemType */, size, err := p.ReadSetBegin()
-if err != nil {
-    return thrift.PrependError("error reading set begin: ", err)
-}
-
-setResult := make([]int32, 0, size)
-for i := 0; i < size; i++ {
-    var elem int32
-    {
-        result, err := p.ReadI32()
+    result, err := ReadSetI32_7070(p)
 if err != nil {
     return err
 }
-        elem = result
-    }
-    setResult = append(setResult, elem)
-}
-
-if err := p.ReadSetEnd(); err != nil {
-    return thrift.PrependError("error reading set end: ", err)
-}
-result := setResult
 
     x.SetAaSetNonCompat(result)
     return nil
 }
 
 func (x *AllocatorAware) readField3(p thrift.Protocol) error {  // AaMap
-    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
-if err != nil {
-    return thrift.PrependError("error reading map begin: ", err)
-}
-
-mapResult := make(map[int32]int32, size)
-for i := 0; i < size; i++ {
-    var key int32
-    {
-        result, err := p.ReadI32()
+    result, err := ReadMapI32I32_9565(p)
 if err != nil {
     return err
 }
-        key = result
-    }
-
-    var value int32
-    {
-        result, err := p.ReadI32()
-if err != nil {
-    return err
-}
-        value = result
-    }
-
-    mapResult[key] = value
-}
-
-if err := p.ReadMapEnd(); err != nil {
-    return thrift.PrependError("error reading map end: ", err)
-}
-result := mapResult
 
     x.SetAaMapNonCompat(result)
     return nil
 }
 
 func (x *AllocatorAware) readField4(p thrift.Protocol) error {  // AaString
-    result, err := p.ReadString()
+    result, err := ReadString_5252(p)
 if err != nil {
     return err
 }
@@ -7775,7 +8019,7 @@ if err != nil {
 }
 
 func (x *AllocatorAware) readField6(p thrift.Protocol) error {  // AaUnique
-    result, err := p.ReadI32()
+    result, err := ReadI32_9314(p)
 if err != nil {
     return err
 }
@@ -7785,7 +8029,7 @@ if err != nil {
 }
 
 func (x *AllocatorAware) readField7(p thrift.Protocol) error {  // AaShared
-    result, err := p.ReadI32()
+    result, err := ReadI32_9314(p)
 if err != nil {
     return err
 }
@@ -7839,28 +8083,28 @@ func NewAllocatorAwareBuilder() *AllocatorAwareBuilder {
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewAllocatorAware().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *AllocatorAwareBuilder) AaList(value []int32) *AllocatorAwareBuilder {
+func (x *AllocatorAwareBuilder) AaList(value ListI32_9187) *AllocatorAwareBuilder {
     x.obj.AaList = value
     return x
 }
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewAllocatorAware().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *AllocatorAwareBuilder) AaSet(value []int32) *AllocatorAwareBuilder {
+func (x *AllocatorAwareBuilder) AaSet(value SetI32_7070) *AllocatorAwareBuilder {
     x.obj.AaSet = value
     return x
 }
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewAllocatorAware().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *AllocatorAwareBuilder) AaMap(value map[int32]int32) *AllocatorAwareBuilder {
+func (x *AllocatorAwareBuilder) AaMap(value MapI32I32_9565) *AllocatorAwareBuilder {
     x.obj.AaMap = value
     return x
 }
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewAllocatorAware().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *AllocatorAwareBuilder) AaString(value string) *AllocatorAwareBuilder {
+func (x *AllocatorAwareBuilder) AaString(value String_5252) *AllocatorAwareBuilder {
     x.obj.AaString = value
     return x
 }
@@ -7874,14 +8118,14 @@ func (x *AllocatorAwareBuilder) NotAContainer(value int32) *AllocatorAwareBuilde
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewAllocatorAware().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *AllocatorAwareBuilder) AaUnique(value int32) *AllocatorAwareBuilder {
+func (x *AllocatorAwareBuilder) AaUnique(value I32_9314) *AllocatorAwareBuilder {
     x.obj.AaUnique = value
     return x
 }
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewAllocatorAware().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *AllocatorAwareBuilder) AaShared(value int32) *AllocatorAwareBuilder {
+func (x *AllocatorAwareBuilder) AaShared(value I32_9314) *AllocatorAwareBuilder {
     x.obj.AaShared = value
     return x
 }

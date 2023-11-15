@@ -74,6 +74,18 @@ pub type MyI32_4873 = crate::types::MyI32;
 
 pub type StringWithAdapter_7208 = crate::types::StringWithAdapter;
 
+pub type Baz_7352 = crate::types::Baz;
+
+pub type Foo_3943 = crate::types::Foo;
+
+pub type Foo_6868 = crate::types::Foo;
+
+pub type binary_5673 = ::std::vec::Vec<::std::primitive::u8>;
+
+pub type i32_5137 = ::std::primitive::i32;
+
+pub type map_string_ListWithElemAdapter_withAdapter_8454 = ::std::collections::BTreeMap<::std::string::String, crate::types::ListWithElemAdapter_withAdapter_2312>;
+
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MyAnnotation {
     pub signature: ::std::string::String,
@@ -119,12 +131,12 @@ pub enum Baz {
 
 #[derive(Clone, PartialEq)]
 pub struct Bar {
-    pub structField: crate::types::Foo,
-    pub optionalStructField: ::std::option::Option<crate::types::Foo>,
+    pub structField: crate::types::Foo_6868,
+    pub optionalStructField: ::std::option::Option<crate::types::Foo_3943>,
     pub structListField: <::fbthrift::adapter::ListMapAdapter<crate::types::adapters::FooWithAdapter> as ::fbthrift::adapter::ThriftAdapter>::AdaptedType,
     pub optionalStructListField: ::std::option::Option<<::fbthrift::adapter::ListMapAdapter<crate::types::adapters::FooWithAdapter> as ::fbthrift::adapter::ThriftAdapter>::AdaptedType>,
-    pub unionField: crate::types::Baz,
-    pub optionalUnionField: ::std::option::Option<crate::types::Baz>,
+    pub unionField: crate::types::Baz_7352,
+    pub optionalUnionField: ::std::option::Option<crate::types::Baz_7352>,
     pub adaptedStructField: crate::types::DirectlyAdapted,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to

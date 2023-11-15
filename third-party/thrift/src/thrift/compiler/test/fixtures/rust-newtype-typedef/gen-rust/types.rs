@@ -19,15 +19,21 @@ pub type Double = ::fbthrift::builtin_types::OrderedFloat<f64>;
 #[derive(Default, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct BytesType(pub ::fbthrift::builtin_types::Bytes);
 
+pub type binary_8247 = ::smallvec::SmallVec<[u8; 32]>;
+
+pub type binary_9564 = ::fbthrift::builtin_types::Bytes;
+
+pub type double_8056 = ::fbthrift::builtin_types::OrderedFloat<f64>;
+
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MyStruct {
     pub the_map: crate::types::MapType,
     pub the_bin: crate::types::BinType,
-    pub inline_bin: ::smallvec::SmallVec<[u8; 32]>,
+    pub inline_bin: crate::types::binary_8247,
     pub the_bytes: crate::types::BytesType,
-    pub inline_bytes: ::fbthrift::builtin_types::Bytes,
+    pub inline_bytes: crate::types::binary_9564,
     pub floaty: crate::types::Double,
-    pub doublefloaty: ::fbthrift::builtin_types::OrderedFloat<f64>,
+    pub doublefloaty: crate::types::double_8056,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -152,7 +158,7 @@ where
         ::fbthrift::Serialize::write(&self.the_bin, p);
         p.write_field_end();
         p.write_field_begin("inline_bin", ::fbthrift::TType::String, 3);
-        crate::r#impl::write(&self.inline_bin, p);
+        ::fbthrift::Serialize::write(&self.inline_bin, p);
         p.write_field_end();
         p.write_field_begin("the_bytes", ::fbthrift::TType::String, 4);
         ::fbthrift::Serialize::write(&self.the_bytes, p);
@@ -199,7 +205,7 @@ where
                 (::fbthrift::TType::Stop, _) => break,
                 (::fbthrift::TType::Map, 1) => field_the_map = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::String, 2) => field_the_bin = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::String, 3) => field_inline_bin = ::std::option::Option::Some(crate::r#impl::read(p)?),
+                (::fbthrift::TType::String, 3) => field_inline_bin = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::String, 4) => field_the_bytes = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::String, 5) => field_inline_bytes = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Double, 6) => field_floaty = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
@@ -316,36 +322,6 @@ pub(crate) mod r#impl {
     impl ::fbthrift::binary_type::BinaryType for LocalImpl<::smallvec::SmallVec<[u8; 16]>> {
         fn with_capacity(capacity: usize) -> Self {
             LocalImpl(<::smallvec::SmallVec<[u8; 16]>>::with_capacity(capacity))
-        }
-        fn extend_from_slice(&mut self, other: &[u8]) {
-            self.0.extend_from_slice(other)
-        }
-        fn from_vec(vec: ::std::vec::Vec<u8>) -> Self {
-            LocalImpl(::std::convert::Into::into(vec))
-        }
-    }
-
-    impl<P> ::fbthrift::Serialize<P> for LocalImpl<::smallvec::SmallVec<[u8; 32]>>
-    where
-        P: ::fbthrift::ProtocolWriter,
-    {
-        fn write(&self, p: &mut P) {
-            self.0.as_slice().write(p)
-        }
-    }
-
-    impl<P> ::fbthrift::Deserialize<P> for LocalImpl<::smallvec::SmallVec<[u8; 32]>>
-    where
-        P: ::fbthrift::ProtocolReader,
-    {
-        fn read(p: &mut P) -> ::anyhow::Result<Self> {
-            p.read_binary()
-        }
-    }
-
-    impl ::fbthrift::binary_type::BinaryType for LocalImpl<::smallvec::SmallVec<[u8; 32]>> {
-        fn with_capacity(capacity: usize) -> Self {
-            LocalImpl(<::smallvec::SmallVec<[u8; 32]>>::with_capacity(capacity))
         }
         fn extend_from_slice(&mut self, other: &[u8]) {
             self.0.extend_from_slice(other)

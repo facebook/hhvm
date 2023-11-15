@@ -1570,3 +1570,7 @@ mapTypedef = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typein
 listTypedef = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.typeinfo_double)
 floatTypedef = float
 FMap = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i64)
+binary_4918 = bytes
+i32_1194 = int
+map_i32_FMap_6797 = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i64))
+map_i64_string_5732 = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i64, _fbthrift_python_types.typeinfo_string)

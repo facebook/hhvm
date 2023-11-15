@@ -924,6 +924,212 @@ if err != nil {
     return decodeResult, decodeErr
 }
 
+type Baz_7352 = Baz
+
+func NewBaz_7352() *Baz_7352 {
+    return NewBaz()
+}
+
+func WriteBaz_7352(item *Baz_7352, p thrift.Protocol) error {
+    if err := item.Write(p); err != nil {
+    return err
+}
+    return nil
+}
+
+func ReadBaz_7352(p thrift.Protocol) (Baz_7352, error) {
+    var decodeResult Baz_7352
+    decodeErr := func() error {
+        result := *NewBaz()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
+}
+
+type Foo_3943 = Foo
+
+func NewFoo_3943() *Foo_3943 {
+    return NewFoo()
+}
+
+func WriteFoo_3943(item *Foo_3943, p thrift.Protocol) error {
+    if err := item.Write(p); err != nil {
+    return err
+}
+    return nil
+}
+
+func ReadFoo_3943(p thrift.Protocol) (Foo_3943, error) {
+    var decodeResult Foo_3943
+    decodeErr := func() error {
+        result := *NewFoo()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
+}
+
+type Foo_6868 = Foo
+
+func NewFoo_6868() *Foo_6868 {
+    return NewFoo()
+}
+
+func WriteFoo_6868(item *Foo_6868, p thrift.Protocol) error {
+    if err := item.Write(p); err != nil {
+    return err
+}
+    return nil
+}
+
+func ReadFoo_6868(p thrift.Protocol) (Foo_6868, error) {
+    var decodeResult Foo_6868
+    decodeErr := func() error {
+        result := *NewFoo()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
+}
+
+type Binary_5673 = []byte
+
+func NewBinary_5673() Binary_5673 {
+    return []byte("")
+}
+
+func WriteBinary_5673(item Binary_5673, p thrift.Protocol) error {
+    if err := p.WriteBinary(item); err != nil {
+    return err
+}
+    return nil
+}
+
+func ReadBinary_5673(p thrift.Protocol) (Binary_5673, error) {
+    var decodeResult Binary_5673
+    decodeErr := func() error {
+        result, err := p.ReadBinary()
+if err != nil {
+    return err
+}
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
+}
+
+type I32_5137 = int32
+
+func NewI32_5137() I32_5137 {
+    return 0
+}
+
+func WriteI32_5137(item I32_5137, p thrift.Protocol) error {
+    if err := p.WriteI32(item); err != nil {
+    return err
+}
+    return nil
+}
+
+func ReadI32_5137(p thrift.Protocol) (I32_5137, error) {
+    var decodeResult I32_5137
+    decodeErr := func() error {
+        result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
+}
+
+type MapString_ListWithElemAdapterWithAdapter_8454 = map[string]ListWithElemAdapterWithAdapter_2312
+
+func NewMapString_ListWithElemAdapterWithAdapter_8454() MapString_ListWithElemAdapterWithAdapter_8454 {
+    return make(map[string]ListWithElemAdapterWithAdapter_2312)
+}
+
+func WriteMapString_ListWithElemAdapterWithAdapter_8454(item MapString_ListWithElemAdapterWithAdapter_8454, p thrift.Protocol) error {
+    if err := p.WriteMapBegin(thrift.STRING, thrift.LIST, len(item)); err != nil {
+    return thrift.PrependError("error writing map begin: ", err)
+}
+for k, v := range item {
+    {
+        item := k
+        if err := p.WriteString(item); err != nil {
+    return err
+}
+    }
+
+    {
+        item := v
+        err := WriteListWithElemAdapterWithAdapter_2312(item, p)
+if err != nil {
+    return err
+}
+    }
+}
+if err := p.WriteMapEnd(); err != nil {
+    return thrift.PrependError("error writing map end: ", err)
+}
+    return nil
+}
+
+func ReadMapString_ListWithElemAdapterWithAdapter_8454(p thrift.Protocol) (MapString_ListWithElemAdapterWithAdapter_8454, error) {
+    var decodeResult MapString_ListWithElemAdapterWithAdapter_8454
+    decodeErr := func() error {
+        _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
+if err != nil {
+    return thrift.PrependError("error reading map begin: ", err)
+}
+
+mapResult := make(map[string]ListWithElemAdapterWithAdapter_2312, size)
+for i := 0; i < size; i++ {
+    var key string
+    {
+        result, err := p.ReadString()
+if err != nil {
+    return err
+}
+        key = result
+    }
+
+    var value ListWithElemAdapterWithAdapter_2312
+    {
+        result, err := ReadListWithElemAdapterWithAdapter_2312(p)
+if err != nil {
+    return err
+}
+        value = result
+    }
+
+    mapResult[key] = value
+}
+
+if err := p.ReadMapEnd(); err != nil {
+    return thrift.PrependError("error reading map end: ", err)
+}
+result := mapResult
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
+}
+
 type Color int32
 
 const (
@@ -1273,14 +1479,14 @@ func (x *MyAnnotation) String() string {
 }
 
 type Foo struct {
-    IntField int32 `thrift:"intField,1" json:"intField" db:"intField"`
-    OptionalIntField *int32 `thrift:"optionalIntField,2,optional" json:"optionalIntField,omitempty" db:"optionalIntField"`
-    IntFieldWithDefault int32 `thrift:"intFieldWithDefault,3" json:"intFieldWithDefault" db:"intFieldWithDefault"`
+    IntField I32_5137 `thrift:"intField,1" json:"intField" db:"intField"`
+    OptionalIntField *I32_5137 `thrift:"optionalIntField,2,optional" json:"optionalIntField,omitempty" db:"optionalIntField"`
+    IntFieldWithDefault I32_5137 `thrift:"intFieldWithDefault,3" json:"intFieldWithDefault" db:"intFieldWithDefault"`
     SetField SetWithAdapter `thrift:"setField,4" json:"setField" db:"setField"`
     OptionalSetField SetWithAdapter `thrift:"optionalSetField,5,optional" json:"optionalSetField,omitempty" db:"optionalSetField"`
-    MapField map[string]ListWithElemAdapterWithAdapter_2312 `thrift:"mapField,6" json:"mapField" db:"mapField"`
-    OptionalMapField map[string]ListWithElemAdapterWithAdapter_2312 `thrift:"optionalMapField,7,optional" json:"optionalMapField,omitempty" db:"optionalMapField"`
-    BinaryField []byte `thrift:"binaryField,8" json:"binaryField" db:"binaryField"`
+    MapField MapString_ListWithElemAdapterWithAdapter_8454 `thrift:"mapField,6" json:"mapField" db:"mapField"`
+    OptionalMapField MapString_ListWithElemAdapterWithAdapter_8454 `thrift:"optionalMapField,7,optional" json:"optionalMapField,omitempty" db:"optionalMapField"`
+    BinaryField Binary_5673 `thrift:"binaryField,8" json:"binaryField" db:"binaryField"`
     LongField MyI64 `thrift:"longField,9" json:"longField" db:"longField"`
     AdaptedLongField MyI64 `thrift:"adaptedLongField,10" json:"adaptedLongField" db:"adaptedLongField"`
     DoubleAdaptedField DoubleTypedefI64 `thrift:"doubleAdaptedField,11" json:"doubleAdaptedField" db:"doubleAdaptedField"`
@@ -1290,41 +1496,41 @@ var _ thrift.Struct = &Foo{}
 
 func NewFoo() *Foo {
     return (&Foo{}).
-        SetIntFieldNonCompat(0).
+        SetIntFieldNonCompat(NewI32_5137()).
         SetIntFieldWithDefaultNonCompat(13).
         SetSetFieldNonCompat(NewSetWithAdapter()).
-        SetMapFieldNonCompat(make(map[string]ListWithElemAdapterWithAdapter_2312)).
-        SetBinaryFieldNonCompat([]byte("")).
+        SetMapFieldNonCompat(NewMapString_ListWithElemAdapterWithAdapter_8454()).
+        SetBinaryFieldNonCompat(NewBinary_5673()).
         SetLongFieldNonCompat(NewMyI64()).
         SetAdaptedLongFieldNonCompat(NewMyI64()).
         SetDoubleAdaptedFieldNonCompat(NewDoubleTypedefI64())
 }
 
-func (x *Foo) GetIntFieldNonCompat() int32 {
+func (x *Foo) GetIntFieldNonCompat() I32_5137 {
     return x.IntField
 }
 
-func (x *Foo) GetIntField() int32 {
+func (x *Foo) GetIntField() I32_5137 {
     return x.IntField
 }
 
-func (x *Foo) GetOptionalIntFieldNonCompat() *int32 {
+func (x *Foo) GetOptionalIntFieldNonCompat() *I32_5137 {
     return x.OptionalIntField
 }
 
-func (x *Foo) GetOptionalIntField() int32 {
+func (x *Foo) GetOptionalIntField() I32_5137 {
     if !x.IsSetOptionalIntField() {
-        return 0
+        return NewI32_5137()
     }
 
     return *x.OptionalIntField
 }
 
-func (x *Foo) GetIntFieldWithDefaultNonCompat() int32 {
+func (x *Foo) GetIntFieldWithDefaultNonCompat() I32_5137 {
     return x.IntFieldWithDefault
 }
 
-func (x *Foo) GetIntFieldWithDefault() int32 {
+func (x *Foo) GetIntFieldWithDefault() I32_5137 {
     return x.IntFieldWithDefault
 }
 
@@ -1352,37 +1558,37 @@ func (x *Foo) GetOptionalSetField() SetWithAdapter {
     return x.OptionalSetField
 }
 
-func (x *Foo) GetMapFieldNonCompat() map[string]ListWithElemAdapterWithAdapter_2312 {
+func (x *Foo) GetMapFieldNonCompat() MapString_ListWithElemAdapterWithAdapter_8454 {
     return x.MapField
 }
 
-func (x *Foo) GetMapField() map[string]ListWithElemAdapterWithAdapter_2312 {
+func (x *Foo) GetMapField() MapString_ListWithElemAdapterWithAdapter_8454 {
     if !x.IsSetMapField() {
-        return make(map[string]ListWithElemAdapterWithAdapter_2312)
+        return NewMapString_ListWithElemAdapterWithAdapter_8454()
     }
 
     return x.MapField
 }
 
-func (x *Foo) GetOptionalMapFieldNonCompat() map[string]ListWithElemAdapterWithAdapter_2312 {
+func (x *Foo) GetOptionalMapFieldNonCompat() MapString_ListWithElemAdapterWithAdapter_8454 {
     return x.OptionalMapField
 }
 
-func (x *Foo) GetOptionalMapField() map[string]ListWithElemAdapterWithAdapter_2312 {
+func (x *Foo) GetOptionalMapField() MapString_ListWithElemAdapterWithAdapter_8454 {
     if !x.IsSetOptionalMapField() {
-        return make(map[string]ListWithElemAdapterWithAdapter_2312)
+        return NewMapString_ListWithElemAdapterWithAdapter_8454()
     }
 
     return x.OptionalMapField
 }
 
-func (x *Foo) GetBinaryFieldNonCompat() []byte {
+func (x *Foo) GetBinaryFieldNonCompat() Binary_5673 {
     return x.BinaryField
 }
 
-func (x *Foo) GetBinaryField() []byte {
+func (x *Foo) GetBinaryField() Binary_5673 {
     if !x.IsSetBinaryField() {
-        return []byte("")
+        return NewBinary_5673()
     }
 
     return x.BinaryField
@@ -1412,32 +1618,32 @@ func (x *Foo) GetDoubleAdaptedField() DoubleTypedefI64 {
     return x.DoubleAdaptedField
 }
 
-func (x *Foo) SetIntFieldNonCompat(value int32) *Foo {
+func (x *Foo) SetIntFieldNonCompat(value I32_5137) *Foo {
     x.IntField = value
     return x
 }
 
-func (x *Foo) SetIntField(value int32) *Foo {
+func (x *Foo) SetIntField(value I32_5137) *Foo {
     x.IntField = value
     return x
 }
 
-func (x *Foo) SetOptionalIntFieldNonCompat(value int32) *Foo {
+func (x *Foo) SetOptionalIntFieldNonCompat(value I32_5137) *Foo {
     x.OptionalIntField = &value
     return x
 }
 
-func (x *Foo) SetOptionalIntField(value *int32) *Foo {
+func (x *Foo) SetOptionalIntField(value *I32_5137) *Foo {
     x.OptionalIntField = value
     return x
 }
 
-func (x *Foo) SetIntFieldWithDefaultNonCompat(value int32) *Foo {
+func (x *Foo) SetIntFieldWithDefaultNonCompat(value I32_5137) *Foo {
     x.IntFieldWithDefault = value
     return x
 }
 
-func (x *Foo) SetIntFieldWithDefault(value int32) *Foo {
+func (x *Foo) SetIntFieldWithDefault(value I32_5137) *Foo {
     x.IntFieldWithDefault = value
     return x
 }
@@ -1462,32 +1668,32 @@ func (x *Foo) SetOptionalSetField(value SetWithAdapter) *Foo {
     return x
 }
 
-func (x *Foo) SetMapFieldNonCompat(value map[string]ListWithElemAdapterWithAdapter_2312) *Foo {
+func (x *Foo) SetMapFieldNonCompat(value MapString_ListWithElemAdapterWithAdapter_8454) *Foo {
     x.MapField = value
     return x
 }
 
-func (x *Foo) SetMapField(value map[string]ListWithElemAdapterWithAdapter_2312) *Foo {
+func (x *Foo) SetMapField(value MapString_ListWithElemAdapterWithAdapter_8454) *Foo {
     x.MapField = value
     return x
 }
 
-func (x *Foo) SetOptionalMapFieldNonCompat(value map[string]ListWithElemAdapterWithAdapter_2312) *Foo {
+func (x *Foo) SetOptionalMapFieldNonCompat(value MapString_ListWithElemAdapterWithAdapter_8454) *Foo {
     x.OptionalMapField = value
     return x
 }
 
-func (x *Foo) SetOptionalMapField(value map[string]ListWithElemAdapterWithAdapter_2312) *Foo {
+func (x *Foo) SetOptionalMapField(value MapString_ListWithElemAdapterWithAdapter_8454) *Foo {
     x.OptionalMapField = value
     return x
 }
 
-func (x *Foo) SetBinaryFieldNonCompat(value []byte) *Foo {
+func (x *Foo) SetBinaryFieldNonCompat(value Binary_5673) *Foo {
     x.BinaryField = value
     return x
 }
 
-func (x *Foo) SetBinaryField(value []byte) *Foo {
+func (x *Foo) SetBinaryField(value Binary_5673) *Foo {
     x.BinaryField = value
     return x
 }
@@ -1552,7 +1758,8 @@ func (x *Foo) writeField1(p thrift.Protocol) error {  // IntField
     }
 
     item := x.GetIntFieldNonCompat()
-    if err := p.WriteI32(item); err != nil {
+    err := WriteI32_5137(item, p)
+if err != nil {
     return err
 }
 
@@ -1572,7 +1779,8 @@ func (x *Foo) writeField2(p thrift.Protocol) error {  // OptionalIntField
     }
 
     item := *x.GetOptionalIntFieldNonCompat()
-    if err := p.WriteI32(item); err != nil {
+    err := WriteI32_5137(item, p)
+if err != nil {
     return err
 }
 
@@ -1588,7 +1796,8 @@ func (x *Foo) writeField3(p thrift.Protocol) error {  // IntFieldWithDefault
     }
 
     item := x.GetIntFieldWithDefaultNonCompat()
-    if err := p.WriteI32(item); err != nil {
+    err := WriteI32_5137(item, p)
+if err != nil {
     return err
 }
 
@@ -1642,27 +1851,9 @@ func (x *Foo) writeField6(p thrift.Protocol) error {  // MapField
     }
 
     item := x.GetMapFieldNonCompat()
-    if err := p.WriteMapBegin(thrift.STRING, thrift.LIST, len(item)); err != nil {
-    return thrift.PrependError("error writing map begin: ", err)
-}
-for k, v := range item {
-    {
-        item := k
-        if err := p.WriteString(item); err != nil {
-    return err
-}
-    }
-
-    {
-        item := v
-        err := WriteListWithElemAdapterWithAdapter_2312(item, p)
+    err := WriteMapString_ListWithElemAdapterWithAdapter_8454(item, p)
 if err != nil {
     return err
-}
-    }
-}
-if err := p.WriteMapEnd(); err != nil {
-    return thrift.PrependError("error writing map end: ", err)
 }
 
     if err := p.WriteFieldEnd(); err != nil {
@@ -1681,27 +1872,9 @@ func (x *Foo) writeField7(p thrift.Protocol) error {  // OptionalMapField
     }
 
     item := x.GetOptionalMapFieldNonCompat()
-    if err := p.WriteMapBegin(thrift.STRING, thrift.LIST, len(item)); err != nil {
-    return thrift.PrependError("error writing map begin: ", err)
-}
-for k, v := range item {
-    {
-        item := k
-        if err := p.WriteString(item); err != nil {
-    return err
-}
-    }
-
-    {
-        item := v
-        err := WriteListWithElemAdapterWithAdapter_2312(item, p)
+    err := WriteMapString_ListWithElemAdapterWithAdapter_8454(item, p)
 if err != nil {
     return err
-}
-    }
-}
-if err := p.WriteMapEnd(); err != nil {
-    return thrift.PrependError("error writing map end: ", err)
 }
 
     if err := p.WriteFieldEnd(); err != nil {
@@ -1716,7 +1889,8 @@ func (x *Foo) writeField8(p thrift.Protocol) error {  // BinaryField
     }
 
     item := x.GetBinaryFieldNonCompat()
-    if err := p.WriteBinary(item); err != nil {
+    err := WriteBinary_5673(item, p)
+if err != nil {
     return err
 }
 
@@ -1778,7 +1952,7 @@ if err != nil {
 }
 
 func (x *Foo) readField1(p thrift.Protocol) error {  // IntField
-    result, err := p.ReadI32()
+    result, err := ReadI32_5137(p)
 if err != nil {
     return err
 }
@@ -1788,7 +1962,7 @@ if err != nil {
 }
 
 func (x *Foo) readField2(p thrift.Protocol) error {  // OptionalIntField
-    result, err := p.ReadI32()
+    result, err := ReadI32_5137(p)
 if err != nil {
     return err
 }
@@ -1798,7 +1972,7 @@ if err != nil {
 }
 
 func (x *Foo) readField3(p thrift.Protocol) error {  // IntFieldWithDefault
-    result, err := p.ReadI32()
+    result, err := ReadI32_5137(p)
 if err != nil {
     return err
 }
@@ -1828,83 +2002,27 @@ if err != nil {
 }
 
 func (x *Foo) readField6(p thrift.Protocol) error {  // MapField
-    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
-if err != nil {
-    return thrift.PrependError("error reading map begin: ", err)
-}
-
-mapResult := make(map[string]ListWithElemAdapterWithAdapter_2312, size)
-for i := 0; i < size; i++ {
-    var key string
-    {
-        result, err := p.ReadString()
+    result, err := ReadMapString_ListWithElemAdapterWithAdapter_8454(p)
 if err != nil {
     return err
 }
-        key = result
-    }
-
-    var value ListWithElemAdapterWithAdapter_2312
-    {
-        result, err := ReadListWithElemAdapterWithAdapter_2312(p)
-if err != nil {
-    return err
-}
-        value = result
-    }
-
-    mapResult[key] = value
-}
-
-if err := p.ReadMapEnd(); err != nil {
-    return thrift.PrependError("error reading map end: ", err)
-}
-result := mapResult
 
     x.SetMapFieldNonCompat(result)
     return nil
 }
 
 func (x *Foo) readField7(p thrift.Protocol) error {  // OptionalMapField
-    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
-if err != nil {
-    return thrift.PrependError("error reading map begin: ", err)
-}
-
-mapResult := make(map[string]ListWithElemAdapterWithAdapter_2312, size)
-for i := 0; i < size; i++ {
-    var key string
-    {
-        result, err := p.ReadString()
+    result, err := ReadMapString_ListWithElemAdapterWithAdapter_8454(p)
 if err != nil {
     return err
 }
-        key = result
-    }
-
-    var value ListWithElemAdapterWithAdapter_2312
-    {
-        result, err := ReadListWithElemAdapterWithAdapter_2312(p)
-if err != nil {
-    return err
-}
-        value = result
-    }
-
-    mapResult[key] = value
-}
-
-if err := p.ReadMapEnd(); err != nil {
-    return thrift.PrependError("error reading map end: ", err)
-}
-result := mapResult
 
     x.SetOptionalMapFieldNonCompat(result)
     return nil
 }
 
 func (x *Foo) readField8(p thrift.Protocol) error {  // BinaryField
-    result, err := p.ReadBinary()
+    result, err := ReadBinary_5673(p)
 if err != nil {
     return err
 }
@@ -2008,21 +2126,21 @@ func NewFooBuilder() *FooBuilder {
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewFoo().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *FooBuilder) IntField(value int32) *FooBuilder {
+func (x *FooBuilder) IntField(value I32_5137) *FooBuilder {
     x.obj.IntField = value
     return x
 }
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewFoo().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *FooBuilder) OptionalIntField(value *int32) *FooBuilder {
+func (x *FooBuilder) OptionalIntField(value *I32_5137) *FooBuilder {
     x.obj.OptionalIntField = value
     return x
 }
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewFoo().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *FooBuilder) IntFieldWithDefault(value int32) *FooBuilder {
+func (x *FooBuilder) IntFieldWithDefault(value I32_5137) *FooBuilder {
     x.obj.IntFieldWithDefault = value
     return x
 }
@@ -2043,21 +2161,21 @@ func (x *FooBuilder) OptionalSetField(value SetWithAdapter) *FooBuilder {
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewFoo().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *FooBuilder) MapField(value map[string]ListWithElemAdapterWithAdapter_2312) *FooBuilder {
+func (x *FooBuilder) MapField(value MapString_ListWithElemAdapterWithAdapter_8454) *FooBuilder {
     x.obj.MapField = value
     return x
 }
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewFoo().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *FooBuilder) OptionalMapField(value map[string]ListWithElemAdapterWithAdapter_2312) *FooBuilder {
+func (x *FooBuilder) OptionalMapField(value MapString_ListWithElemAdapterWithAdapter_8454) *FooBuilder {
     x.obj.OptionalMapField = value
     return x
 }
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewFoo().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *FooBuilder) BinaryField(value []byte) *FooBuilder {
+func (x *FooBuilder) BinaryField(value Binary_5673) *FooBuilder {
     x.obj.BinaryField = value
     return x
 }
@@ -2252,10 +2370,10 @@ func (x *Foo) String() string {
 }
 
 type Baz struct {
-    IntField *int32 `thrift:"intField,1" json:"intField,omitempty" db:"intField"`
+    IntField *I32_5137 `thrift:"intField,1" json:"intField,omitempty" db:"intField"`
     SetField SetWithAdapter `thrift:"setField,4" json:"setField,omitempty" db:"setField"`
-    MapField map[string]ListWithElemAdapterWithAdapter_2312 `thrift:"mapField,6" json:"mapField,omitempty" db:"mapField"`
-    BinaryField []byte `thrift:"binaryField,8" json:"binaryField,omitempty" db:"binaryField"`
+    MapField MapString_ListWithElemAdapterWithAdapter_8454 `thrift:"mapField,6" json:"mapField,omitempty" db:"mapField"`
+    BinaryField Binary_5673 `thrift:"binaryField,8" json:"binaryField,omitempty" db:"binaryField"`
     LongField *MyI64 `thrift:"longField,9" json:"longField,omitempty" db:"longField"`
 }
 // Compile time interface enforcer
@@ -2265,13 +2383,13 @@ func NewBaz() *Baz {
     return (&Baz{})
 }
 
-func (x *Baz) GetIntFieldNonCompat() *int32 {
+func (x *Baz) GetIntFieldNonCompat() *I32_5137 {
     return x.IntField
 }
 
-func (x *Baz) GetIntField() int32 {
+func (x *Baz) GetIntField() I32_5137 {
     if !x.IsSetIntField() {
-        return 0
+        return NewI32_5137()
     }
 
     return *x.IntField
@@ -2289,25 +2407,25 @@ func (x *Baz) GetSetField() SetWithAdapter {
     return x.SetField
 }
 
-func (x *Baz) GetMapFieldNonCompat() map[string]ListWithElemAdapterWithAdapter_2312 {
+func (x *Baz) GetMapFieldNonCompat() MapString_ListWithElemAdapterWithAdapter_8454 {
     return x.MapField
 }
 
-func (x *Baz) GetMapField() map[string]ListWithElemAdapterWithAdapter_2312 {
+func (x *Baz) GetMapField() MapString_ListWithElemAdapterWithAdapter_8454 {
     if !x.IsSetMapField() {
-        return make(map[string]ListWithElemAdapterWithAdapter_2312)
+        return NewMapString_ListWithElemAdapterWithAdapter_8454()
     }
 
     return x.MapField
 }
 
-func (x *Baz) GetBinaryFieldNonCompat() []byte {
+func (x *Baz) GetBinaryFieldNonCompat() Binary_5673 {
     return x.BinaryField
 }
 
-func (x *Baz) GetBinaryField() []byte {
+func (x *Baz) GetBinaryField() Binary_5673 {
     if !x.IsSetBinaryField() {
-        return []byte("")
+        return NewBinary_5673()
     }
 
     return x.BinaryField
@@ -2325,12 +2443,12 @@ func (x *Baz) GetLongField() MyI64 {
     return *x.LongField
 }
 
-func (x *Baz) SetIntFieldNonCompat(value int32) *Baz {
+func (x *Baz) SetIntFieldNonCompat(value I32_5137) *Baz {
     x.IntField = &value
     return x
 }
 
-func (x *Baz) SetIntField(value *int32) *Baz {
+func (x *Baz) SetIntField(value *I32_5137) *Baz {
     x.IntField = value
     return x
 }
@@ -2345,22 +2463,22 @@ func (x *Baz) SetSetField(value SetWithAdapter) *Baz {
     return x
 }
 
-func (x *Baz) SetMapFieldNonCompat(value map[string]ListWithElemAdapterWithAdapter_2312) *Baz {
+func (x *Baz) SetMapFieldNonCompat(value MapString_ListWithElemAdapterWithAdapter_8454) *Baz {
     x.MapField = value
     return x
 }
 
-func (x *Baz) SetMapField(value map[string]ListWithElemAdapterWithAdapter_2312) *Baz {
+func (x *Baz) SetMapField(value MapString_ListWithElemAdapterWithAdapter_8454) *Baz {
     x.MapField = value
     return x
 }
 
-func (x *Baz) SetBinaryFieldNonCompat(value []byte) *Baz {
+func (x *Baz) SetBinaryFieldNonCompat(value Binary_5673) *Baz {
     x.BinaryField = value
     return x
 }
 
-func (x *Baz) SetBinaryField(value []byte) *Baz {
+func (x *Baz) SetBinaryField(value Binary_5673) *Baz {
     x.BinaryField = value
     return x
 }
@@ -2405,7 +2523,8 @@ func (x *Baz) writeField1(p thrift.Protocol) error {  // IntField
     }
 
     item := *x.GetIntFieldNonCompat()
-    if err := p.WriteI32(item); err != nil {
+    err := WriteI32_5137(item, p)
+if err != nil {
     return err
 }
 
@@ -2446,27 +2565,9 @@ func (x *Baz) writeField6(p thrift.Protocol) error {  // MapField
     }
 
     item := x.GetMapFieldNonCompat()
-    if err := p.WriteMapBegin(thrift.STRING, thrift.LIST, len(item)); err != nil {
-    return thrift.PrependError("error writing map begin: ", err)
-}
-for k, v := range item {
-    {
-        item := k
-        if err := p.WriteString(item); err != nil {
-    return err
-}
-    }
-
-    {
-        item := v
-        err := WriteListWithElemAdapterWithAdapter_2312(item, p)
+    err := WriteMapString_ListWithElemAdapterWithAdapter_8454(item, p)
 if err != nil {
     return err
-}
-    }
-}
-if err := p.WriteMapEnd(); err != nil {
-    return thrift.PrependError("error writing map end: ", err)
 }
 
     if err := p.WriteFieldEnd(); err != nil {
@@ -2485,7 +2586,8 @@ func (x *Baz) writeField8(p thrift.Protocol) error {  // BinaryField
     }
 
     item := x.GetBinaryFieldNonCompat()
-    if err := p.WriteBinary(item); err != nil {
+    err := WriteBinary_5673(item, p)
+if err != nil {
     return err
 }
 
@@ -2517,7 +2619,7 @@ if err != nil {
 }
 
 func (x *Baz) readField1(p thrift.Protocol) error {  // IntField
-    result, err := p.ReadI32()
+    result, err := ReadI32_5137(p)
 if err != nil {
     return err
 }
@@ -2537,45 +2639,17 @@ if err != nil {
 }
 
 func (x *Baz) readField6(p thrift.Protocol) error {  // MapField
-    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
-if err != nil {
-    return thrift.PrependError("error reading map begin: ", err)
-}
-
-mapResult := make(map[string]ListWithElemAdapterWithAdapter_2312, size)
-for i := 0; i < size; i++ {
-    var key string
-    {
-        result, err := p.ReadString()
+    result, err := ReadMapString_ListWithElemAdapterWithAdapter_8454(p)
 if err != nil {
     return err
 }
-        key = result
-    }
-
-    var value ListWithElemAdapterWithAdapter_2312
-    {
-        result, err := ReadListWithElemAdapterWithAdapter_2312(p)
-if err != nil {
-    return err
-}
-        value = result
-    }
-
-    mapResult[key] = value
-}
-
-if err := p.ReadMapEnd(); err != nil {
-    return thrift.PrependError("error reading map end: ", err)
-}
-result := mapResult
 
     x.SetMapFieldNonCompat(result)
     return nil
 }
 
 func (x *Baz) readField8(p thrift.Protocol) error {  // BinaryField
-    result, err := p.ReadBinary()
+    result, err := ReadBinary_5673(p)
 if err != nil {
     return err
 }
@@ -2663,7 +2737,7 @@ func NewBazBuilder() *BazBuilder {
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewBaz().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *BazBuilder) IntField(value *int32) *BazBuilder {
+func (x *BazBuilder) IntField(value *I32_5137) *BazBuilder {
     x.obj.IntField = value
     return x
 }
@@ -2677,14 +2751,14 @@ func (x *BazBuilder) SetField(value SetWithAdapter) *BazBuilder {
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewBaz().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *BazBuilder) MapField(value map[string]ListWithElemAdapterWithAdapter_2312) *BazBuilder {
+func (x *BazBuilder) MapField(value MapString_ListWithElemAdapterWithAdapter_8454) *BazBuilder {
     x.obj.MapField = value
     return x
 }
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewBaz().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *BazBuilder) BinaryField(value []byte) *BazBuilder {
+func (x *BazBuilder) BinaryField(value Binary_5673) *BazBuilder {
     x.obj.BinaryField = value
     return x
 }
@@ -2814,12 +2888,12 @@ func (x *Baz) String() string {
 }
 
 type Bar struct {
-    StructField *Foo `thrift:"structField,1" json:"structField" db:"structField"`
-    OptionalStructField *Foo `thrift:"optionalStructField,2,optional" json:"optionalStructField,omitempty" db:"optionalStructField"`
+    StructField *Foo_6868 `thrift:"structField,1" json:"structField" db:"structField"`
+    OptionalStructField *Foo_3943 `thrift:"optionalStructField,2,optional" json:"optionalStructField,omitempty" db:"optionalStructField"`
     StructListField []*FooWithAdapter_9317 `thrift:"structListField,3" json:"structListField" db:"structListField"`
     OptionalStructListField []*FooWithAdapter_9317 `thrift:"optionalStructListField,4,optional" json:"optionalStructListField,omitempty" db:"optionalStructListField"`
-    UnionField *Baz `thrift:"unionField,5" json:"unionField" db:"unionField"`
-    OptionalUnionField *Baz `thrift:"optionalUnionField,6,optional" json:"optionalUnionField,omitempty" db:"optionalUnionField"`
+    UnionField *Baz_7352 `thrift:"unionField,5" json:"unionField" db:"unionField"`
+    OptionalUnionField *Baz_7352 `thrift:"optionalUnionField,6,optional" json:"optionalUnionField,omitempty" db:"optionalUnionField"`
     AdaptedStructField *DirectlyAdapted `thrift:"adaptedStructField,7" json:"adaptedStructField" db:"adaptedStructField"`
 }
 // Compile time interface enforcer
@@ -2827,17 +2901,17 @@ var _ thrift.Struct = &Bar{}
 
 func NewBar() *Bar {
     return (&Bar{}).
-        SetStructFieldNonCompat(*NewFoo()).
+        SetStructFieldNonCompat(*NewFoo_6868()).
         SetStructListFieldNonCompat(make([]*FooWithAdapter_9317, 0)).
-        SetUnionFieldNonCompat(*NewBaz()).
+        SetUnionFieldNonCompat(*NewBaz_7352()).
         SetAdaptedStructFieldNonCompat(*NewDirectlyAdapted())
 }
 
-func (x *Bar) GetStructFieldNonCompat() *Foo {
+func (x *Bar) GetStructFieldNonCompat() *Foo_6868 {
     return x.StructField
 }
 
-func (x *Bar) GetStructField() *Foo {
+func (x *Bar) GetStructField() *Foo_6868 {
     if !x.IsSetStructField() {
         return nil
     }
@@ -2845,11 +2919,11 @@ func (x *Bar) GetStructField() *Foo {
     return x.StructField
 }
 
-func (x *Bar) GetOptionalStructFieldNonCompat() *Foo {
+func (x *Bar) GetOptionalStructFieldNonCompat() *Foo_3943 {
     return x.OptionalStructField
 }
 
-func (x *Bar) GetOptionalStructField() *Foo {
+func (x *Bar) GetOptionalStructField() *Foo_3943 {
     if !x.IsSetOptionalStructField() {
         return nil
     }
@@ -2881,11 +2955,11 @@ func (x *Bar) GetOptionalStructListField() []*FooWithAdapter_9317 {
     return x.OptionalStructListField
 }
 
-func (x *Bar) GetUnionFieldNonCompat() *Baz {
+func (x *Bar) GetUnionFieldNonCompat() *Baz_7352 {
     return x.UnionField
 }
 
-func (x *Bar) GetUnionField() *Baz {
+func (x *Bar) GetUnionField() *Baz_7352 {
     if !x.IsSetUnionField() {
         return nil
     }
@@ -2893,11 +2967,11 @@ func (x *Bar) GetUnionField() *Baz {
     return x.UnionField
 }
 
-func (x *Bar) GetOptionalUnionFieldNonCompat() *Baz {
+func (x *Bar) GetOptionalUnionFieldNonCompat() *Baz_7352 {
     return x.OptionalUnionField
 }
 
-func (x *Bar) GetOptionalUnionField() *Baz {
+func (x *Bar) GetOptionalUnionField() *Baz_7352 {
     if !x.IsSetOptionalUnionField() {
         return nil
     }
@@ -2917,22 +2991,22 @@ func (x *Bar) GetAdaptedStructField() *DirectlyAdapted {
     return x.AdaptedStructField
 }
 
-func (x *Bar) SetStructFieldNonCompat(value Foo) *Bar {
+func (x *Bar) SetStructFieldNonCompat(value Foo_6868) *Bar {
     x.StructField = &value
     return x
 }
 
-func (x *Bar) SetStructField(value *Foo) *Bar {
+func (x *Bar) SetStructField(value *Foo_6868) *Bar {
     x.StructField = value
     return x
 }
 
-func (x *Bar) SetOptionalStructFieldNonCompat(value Foo) *Bar {
+func (x *Bar) SetOptionalStructFieldNonCompat(value Foo_3943) *Bar {
     x.OptionalStructField = &value
     return x
 }
 
-func (x *Bar) SetOptionalStructField(value *Foo) *Bar {
+func (x *Bar) SetOptionalStructField(value *Foo_3943) *Bar {
     x.OptionalStructField = value
     return x
 }
@@ -2957,22 +3031,22 @@ func (x *Bar) SetOptionalStructListField(value []*FooWithAdapter_9317) *Bar {
     return x
 }
 
-func (x *Bar) SetUnionFieldNonCompat(value Baz) *Bar {
+func (x *Bar) SetUnionFieldNonCompat(value Baz_7352) *Bar {
     x.UnionField = &value
     return x
 }
 
-func (x *Bar) SetUnionField(value *Baz) *Bar {
+func (x *Bar) SetUnionField(value *Baz_7352) *Bar {
     x.UnionField = value
     return x
 }
 
-func (x *Bar) SetOptionalUnionFieldNonCompat(value Baz) *Bar {
+func (x *Bar) SetOptionalUnionFieldNonCompat(value Baz_7352) *Bar {
     x.OptionalUnionField = &value
     return x
 }
 
-func (x *Bar) SetOptionalUnionField(value *Baz) *Bar {
+func (x *Bar) SetOptionalUnionField(value *Baz_7352) *Bar {
     x.OptionalUnionField = value
     return x
 }
@@ -3025,7 +3099,8 @@ func (x *Bar) writeField1(p thrift.Protocol) error {  // StructField
     }
 
     item := x.GetStructFieldNonCompat()
-    if err := item.Write(p); err != nil {
+    err := WriteFoo_6868(item, p)
+if err != nil {
     return err
 }
 
@@ -3045,7 +3120,8 @@ func (x *Bar) writeField2(p thrift.Protocol) error {  // OptionalStructField
     }
 
     item := x.GetOptionalStructFieldNonCompat()
-    if err := item.Write(p); err != nil {
+    err := WriteFoo_3943(item, p)
+if err != nil {
     return err
 }
 
@@ -3125,7 +3201,8 @@ func (x *Bar) writeField5(p thrift.Protocol) error {  // UnionField
     }
 
     item := x.GetUnionFieldNonCompat()
-    if err := item.Write(p); err != nil {
+    err := WriteBaz_7352(item, p)
+if err != nil {
     return err
 }
 
@@ -3145,7 +3222,8 @@ func (x *Bar) writeField6(p thrift.Protocol) error {  // OptionalUnionField
     }
 
     item := x.GetOptionalUnionFieldNonCompat()
-    if err := item.Write(p); err != nil {
+    err := WriteBaz_7352(item, p)
+if err != nil {
     return err
 }
 
@@ -3176,8 +3254,7 @@ func (x *Bar) writeField7(p thrift.Protocol) error {  // AdaptedStructField
 }
 
 func (x *Bar) readField1(p thrift.Protocol) error {  // StructField
-    result := *NewFoo()
-err := result.Read(p)
+    result, err := ReadFoo_6868(p)
 if err != nil {
     return err
 }
@@ -3187,8 +3264,7 @@ if err != nil {
 }
 
 func (x *Bar) readField2(p thrift.Protocol) error {  // OptionalStructField
-    result := *NewFoo()
-err := result.Read(p)
+    result, err := ReadFoo_3943(p)
 if err != nil {
     return err
 }
@@ -3254,8 +3330,7 @@ result := listResult
 }
 
 func (x *Bar) readField5(p thrift.Protocol) error {  // UnionField
-    result := *NewBaz()
-err := result.Read(p)
+    result, err := ReadBaz_7352(p)
 if err != nil {
     return err
 }
@@ -3265,8 +3340,7 @@ if err != nil {
 }
 
 func (x *Bar) readField6(p thrift.Protocol) error {  // OptionalUnionField
-    result := *NewBaz()
-err := result.Read(p)
+    result, err := ReadBaz_7352(p)
 if err != nil {
     return err
 }
@@ -3315,33 +3389,33 @@ func (x *Bar) toString7() string {  // AdaptedStructField
 }
 
 // Deprecated: Use NewBar().GetStructField() instead.
-func (x *Bar) DefaultGetStructField() *Foo {
+func (x *Bar) DefaultGetStructField() *Foo_6868 {
     if !x.IsSetStructField() {
-        return NewFoo()
+        return NewFoo_6868()
     }
     return x.StructField
 }
 
 // Deprecated: Use NewBar().GetOptionalStructField() instead.
-func (x *Bar) DefaultGetOptionalStructField() *Foo {
+func (x *Bar) DefaultGetOptionalStructField() *Foo_3943 {
     if !x.IsSetOptionalStructField() {
-        return NewFoo()
+        return NewFoo_3943()
     }
     return x.OptionalStructField
 }
 
 // Deprecated: Use NewBar().GetUnionField() instead.
-func (x *Bar) DefaultGetUnionField() *Baz {
+func (x *Bar) DefaultGetUnionField() *Baz_7352 {
     if !x.IsSetUnionField() {
-        return NewBaz()
+        return NewBaz_7352()
     }
     return x.UnionField
 }
 
 // Deprecated: Use NewBar().GetOptionalUnionField() instead.
-func (x *Bar) DefaultGetOptionalUnionField() *Baz {
+func (x *Bar) DefaultGetOptionalUnionField() *Baz_7352 {
     if !x.IsSetOptionalUnionField() {
-        return NewBaz()
+        return NewBaz_7352()
     }
     return x.OptionalUnionField
 }
@@ -3371,14 +3445,14 @@ func NewBarBuilder() *BarBuilder {
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewBar().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *BarBuilder) StructField(value *Foo) *BarBuilder {
+func (x *BarBuilder) StructField(value *Foo_6868) *BarBuilder {
     x.obj.StructField = value
     return x
 }
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewBar().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *BarBuilder) OptionalStructField(value *Foo) *BarBuilder {
+func (x *BarBuilder) OptionalStructField(value *Foo_3943) *BarBuilder {
     x.obj.OptionalStructField = value
     return x
 }
@@ -3399,14 +3473,14 @@ func (x *BarBuilder) OptionalStructListField(value []*FooWithAdapter_9317) *BarB
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewBar().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *BarBuilder) UnionField(value *Baz) *BarBuilder {
+func (x *BarBuilder) UnionField(value *Baz_7352) *BarBuilder {
     x.obj.UnionField = value
     return x
 }
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewBar().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *BarBuilder) OptionalUnionField(value *Baz) *BarBuilder {
+func (x *BarBuilder) OptionalUnionField(value *Baz_7352) *BarBuilder {
     x.obj.OptionalUnionField = value
     return x
 }

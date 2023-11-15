@@ -228,7 +228,7 @@ Foo& Foo::operator=(const Foo& other) {
 Foo::Foo() :
       __fbthrift_field_intField(),
       __fbthrift_field_optionalIntField(),
-      __fbthrift_field_intFieldWithDefault(::apache::thrift::adapt_detail::fromThriftField<::my::Adapter1, 3>(::std::int32_t(static_cast<::std::int32_t>(13)), *this)),
+      __fbthrift_field_intFieldWithDefault(::apache::thrift::adapt_detail::fromThriftField<::my::Adapter1, 3>(::facebook::thrift::test::i32_5137(static_cast<::facebook::thrift::test::i32_5137>(13)), *this)),
       __fbthrift_field_longField(),
       __fbthrift_field_adaptedLongField(),
       __fbthrift_field_doubleAdaptedField() {
@@ -291,7 +291,7 @@ Foo& Foo::operator=(FOLLY_MAYBE_UNUSED Foo&& other) noexcept {
 }
 
 
-Foo::Foo(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, Foo> intField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, Foo> optionalIntField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, Foo> intFieldWithDefault__arg, ::facebook::thrift::test::SetWithAdapter setField__arg, ::facebook::thrift::test::SetWithAdapter optionalSetField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter_2312>, Foo> mapField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 7, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter_2312>, Foo> optionalMapField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 8, ::std::string, Foo> binaryField__arg, ::facebook::thrift::test::MyI64 longField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo> adaptedLongField__arg, ::facebook::thrift::test::DoubleTypedefI64 doubleAdaptedField__arg) :
+Foo::Foo(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::facebook::thrift::test::i32_5137, Foo> intField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::facebook::thrift::test::i32_5137, Foo> optionalIntField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::facebook::thrift::test::i32_5137, Foo> intFieldWithDefault__arg, ::facebook::thrift::test::SetWithAdapter setField__arg, ::facebook::thrift::test::SetWithAdapter optionalSetField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::facebook::thrift::test::map_string_ListWithElemAdapter_withAdapter_8454, Foo> mapField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 7, ::facebook::thrift::test::map_string_ListWithElemAdapter_withAdapter_8454, Foo> optionalMapField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 8, ::facebook::thrift::test::binary_5673, Foo> binaryField__arg, ::facebook::thrift::test::MyI64 longField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo> adaptedLongField__arg, ::facebook::thrift::test::DoubleTypedefI64 doubleAdaptedField__arg) :
     __fbthrift_field_intField(std::move(intField__arg)),
     __fbthrift_field_optionalIntField(std::move(optionalIntField__arg)),
     __fbthrift_field_intFieldWithDefault(std::move(intFieldWithDefault__arg)),
@@ -592,7 +592,7 @@ Bar& Bar::operator=(FOLLY_MAYBE_UNUSED Bar&& other) noexcept {
 }
 
 
-Bar::Bar(apache::thrift::FragileConstructor, ::my::Cpp::Type1 structField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::facebook::thrift::test::Foo, Bar> optionalStructField__arg, ::std::vector<::facebook::thrift::test::FooWithAdapter_9317> structListField__arg, ::std::vector<::facebook::thrift::test::FooWithAdapter_9317> optionalStructListField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 5, ::facebook::thrift::test::Baz, Bar> unionField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 6, ::facebook::thrift::test::Baz, Bar> optionalUnionField__arg, ::facebook::thrift::test::DirectlyAdapted adaptedStructField__arg) :
+Bar::Bar(apache::thrift::FragileConstructor, ::my::Cpp::Type1 structField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::facebook::thrift::test::Foo_3943, Bar> optionalStructField__arg, ::std::vector<::facebook::thrift::test::FooWithAdapter_9317> structListField__arg, ::std::vector<::facebook::thrift::test::FooWithAdapter_9317> optionalStructListField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 5, ::facebook::thrift::test::Baz_7352, Bar> unionField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 6, ::facebook::thrift::test::Baz_7352, Bar> optionalUnionField__arg, ::facebook::thrift::test::DirectlyAdapted adaptedStructField__arg) :
     __fbthrift_field_structField(std::move(structField__arg)),
     __fbthrift_field_optionalStructField(std::move(optionalStructField__arg)),
     __fbthrift_field_structListField(std::move(structListField__arg)),
@@ -684,25 +684,25 @@ static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         Bar,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::Foo>,
+        ::facebook::thrift::test::Foo_6868>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         Bar,
         ::apache::thrift::type_class::structure,
-        ::facebook::thrift::test::Foo>,
+        ::facebook::thrift::test::Foo_3943>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         Bar,
         ::apache::thrift::type_class::variant,
-        ::facebook::thrift::test::Baz>,
+        ::facebook::thrift::test::Baz_7352>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
         Bar,
         ::apache::thrift::type_class::variant,
-        ::facebook::thrift::test::Baz>,
+        ::facebook::thrift::test::Baz_7352>,
     "inconsistent use of json option");
 static_assert(
     ::apache::thrift::detail::st::gen_check_json<
@@ -4027,26 +4027,26 @@ template uint32_t Person2::serializedSizeZC<>(apache::thrift::CompactProtocolWri
 
 namespace facebook { namespace thrift { namespace test { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::std::int32_t, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 2, ::std::int32_t, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 3, ::std::int32_t, ::facebook::thrift::test::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::facebook::thrift::test::i32_5137, ::facebook::thrift::test::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 2, ::facebook::thrift::test::i32_5137, ::facebook::thrift::test::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 3, ::facebook::thrift::test::i32_5137, ::facebook::thrift::test::Foo>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter2, 4, ::std::set<::std::string>, ::facebook::thrift::test::Foo>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter2, 5, ::std::set<::std::string>, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter>, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter3, 7, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter>, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter3, 8, ::std::string, ::facebook::thrift::test::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter3, 6, ::facebook::thrift::test::map_string_ListWithElemAdapter_withAdapter_8454, ::facebook::thrift::test::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter3, 7, ::facebook::thrift::test::map_string_ListWithElemAdapter_withAdapter_8454, ::facebook::thrift::test::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter3, 8, ::facebook::thrift::test::binary_5673, ::facebook::thrift::test::Foo>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 9, ::std::int64_t, ::facebook::thrift::test::Foo>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter2, 10, ::std::int64_t, ::facebook::thrift::test::Foo>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 11, ::std::int64_t, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::std::int32_t, ::facebook::thrift::test::Baz>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::facebook::thrift::test::i32_5137, ::facebook::thrift::test::Baz>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter2, 4, ::std::set<::std::string>, ::facebook::thrift::test::Baz>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter>, ::facebook::thrift::test::Baz>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 8, ::std::string, ::facebook::thrift::test::Baz>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter3, 6, ::facebook::thrift::test::map_string_ListWithElemAdapter_withAdapter_8454, ::facebook::thrift::test::Baz>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 8, ::facebook::thrift::test::binary_5673, ::facebook::thrift::test::Baz>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 9, ::std::int64_t, ::facebook::thrift::test::Baz>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::facebook::thrift::test::Foo, ::facebook::thrift::test::Bar>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 2, ::facebook::thrift::test::Foo, ::facebook::thrift::test::Bar>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 5, ::facebook::thrift::test::Baz, ::facebook::thrift::test::Bar>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 6, ::facebook::thrift::test::Baz, ::facebook::thrift::test::Bar>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::facebook::thrift::test::Foo_6868, ::facebook::thrift::test::Bar>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 2, ::facebook::thrift::test::Foo_3943, ::facebook::thrift::test::Bar>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 5, ::facebook::thrift::test::Baz_7352, ::facebook::thrift::test::Bar>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 6, ::facebook::thrift::test::Baz_7352, ::facebook::thrift::test::Bar>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter, 7, ::facebook::thrift::test::detail::DirectlyAdapted, ::facebook::thrift::test::Bar>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::std::int32_t, ::facebook::thrift::test::StructWithFieldAdapter>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 2, ::std::int32_t, ::facebook::thrift::test::StructWithFieldAdapter>();

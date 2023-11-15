@@ -626,3 +626,7 @@ mapTypedef = _typing.Dict[int, str]
 listTypedef = _typing.List[float]
 floatTypedef = float
 FMap = _typing.Dict[int, int]
+binary_4918 = bytes
+i32_1194 = int
+map_i32_FMap_6797 = _typing.Dict[int, _typing.Mapping[int, int]]
+map_i64_string_5732 = _typing.Dict[int, str]

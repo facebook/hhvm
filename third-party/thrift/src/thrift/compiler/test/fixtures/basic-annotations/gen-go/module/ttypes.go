@@ -80,6 +80,10 @@ func FantasticStructPtr(v FantasticStruct) *FantasticStruct { return &v }
 
 func NewFantasticStruct() *FantasticStruct { return NewMyStruct() }
 
+type ListString_6884 = []string
+
+func ListString_6884Ptr(v ListString_6884) *ListString_6884 { return &v }
+
 // Attributes:
 //  - Name
 type MyStructNestedAnnotation struct {

@@ -314,7 +314,7 @@ ContainerStruct& ContainerStruct::operator=(FOLLY_MAYBE_UNUSED ContainerStruct&&
 }
 
 
-ContainerStruct::ContainerStruct(apache::thrift::FragileConstructor, ::std::vector<::std::int32_t> fieldA__arg, std::list<::std::int32_t> fieldB__arg, std::deque<::std::int32_t> fieldC__arg, folly::fbvector<::std::int32_t> fieldD__arg, folly::small_vector<::std::int32_t> fieldE__arg, folly::sorted_vector_set<::std::int32_t> fieldF__arg, folly::sorted_vector_map<::std::int32_t, ::std::string> fieldG__arg, ::apache::thrift::fixtures::types::SomeMap fieldH__arg) :
+ContainerStruct::ContainerStruct(apache::thrift::FragileConstructor, ::std::vector<::std::int32_t> fieldA__arg, std::list<::std::int32_t> fieldB__arg, std::deque<::std::int32_t> fieldC__arg, folly::fbvector<::std::int32_t> fieldD__arg, folly::small_vector<::std::int32_t> fieldE__arg, ::apache::thrift::fixtures::types::set_i32_7194 fieldF__arg, ::apache::thrift::fixtures::types::map_i32_string_1261 fieldG__arg, ::apache::thrift::fixtures::types::SomeMap fieldH__arg) :
     __fbthrift_field_fieldA(std::move(fieldA__arg)),
     __fbthrift_field_fieldB(std::move(fieldB__arg)),
     __fbthrift_field_fieldC(std::move(fieldC__arg)),
@@ -402,19 +402,19 @@ folly::small_vector<::std::int32_t> ContainerStruct::get_fieldE() && {
   return std::move(__fbthrift_field_fieldE);
 }
 
-const folly::sorted_vector_set<::std::int32_t>& ContainerStruct::get_fieldF() const& {
+const ::apache::thrift::fixtures::types::set_i32_7194& ContainerStruct::get_fieldF() const& {
   return __fbthrift_field_fieldF;
 }
 
-folly::sorted_vector_set<::std::int32_t> ContainerStruct::get_fieldF() && {
+::apache::thrift::fixtures::types::set_i32_7194 ContainerStruct::get_fieldF() && {
   return std::move(__fbthrift_field_fieldF);
 }
 
-const folly::sorted_vector_map<::std::int32_t, ::std::string>& ContainerStruct::get_fieldG() const& {
+const ::apache::thrift::fixtures::types::map_i32_string_1261& ContainerStruct::get_fieldG() const& {
   return __fbthrift_field_fieldG;
 }
 
-folly::sorted_vector_map<::std::int32_t, ::std::string> ContainerStruct::get_fieldG() && {
+::apache::thrift::fixtures::types::map_i32_string_1261 ContainerStruct::get_fieldG() && {
   return std::move(__fbthrift_field_fieldG);
 }
 
@@ -1761,7 +1761,7 @@ AnnotatedTypes& AnnotatedTypes::operator=(FOLLY_MAYBE_UNUSED AnnotatedTypes&& ot
 }
 
 
-AnnotatedTypes::AnnotatedTypes(apache::thrift::FragileConstructor, ::apache::thrift::fixtures::types::TBinary binary_field__arg, ::apache::thrift::fixtures::types::SomeListOfTypeMap list_field__arg) :
+AnnotatedTypes::AnnotatedTypes(apache::thrift::FragileConstructor, ::apache::thrift::fixtures::types::TBinary_8623 binary_field__arg, ::apache::thrift::fixtures::types::SomeListOfTypeMap_2468 list_field__arg) :
     __fbthrift_field_binary_field(std::move(binary_field__arg)),
     __fbthrift_field_list_field(std::move(list_field__arg)) {
   __isset.set(folly::index_constant<0>(), true);
@@ -1791,11 +1791,11 @@ bool AnnotatedTypes::operator<(FOLLY_MAYBE_UNUSED const AnnotatedTypes& rhs) con
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-const ::apache::thrift::fixtures::types::SomeListOfTypeMap& AnnotatedTypes::get_list_field() const& {
+const ::apache::thrift::fixtures::types::SomeListOfTypeMap_2468& AnnotatedTypes::get_list_field() const& {
   return __fbthrift_field_list_field;
 }
 
-::apache::thrift::fixtures::types::SomeListOfTypeMap AnnotatedTypes::get_list_field() && {
+::apache::thrift::fixtures::types::SomeListOfTypeMap_2468 AnnotatedTypes::get_list_field() && {
   return std::move(__fbthrift_field_list_field);
 }
 
@@ -3404,8 +3404,8 @@ AllocatorAware::AllocatorAware() :
     __fbthrift_field_aa_map(__fbthrift_alloc),
     __fbthrift_field_aa_string(__fbthrift_alloc),
     __fbthrift_field_not_a_container(),
-    __fbthrift_field_aa_unique(folly::allocate_unique<::std::int32_t>(__fbthrift_alloc)),
-    __fbthrift_field_aa_shared(std::allocate_shared<::std::int32_t>(__fbthrift_alloc)) {
+    __fbthrift_field_aa_unique(folly::allocate_unique<::apache::thrift::fixtures::types::i32_9314>(__fbthrift_alloc)),
+    __fbthrift_field_aa_shared(std::allocate_shared<::apache::thrift::fixtures::types::i32_9314>(__fbthrift_alloc)) {
 }
 
 
@@ -3437,7 +3437,7 @@ AllocatorAware& AllocatorAware::operator=(FOLLY_MAYBE_UNUSED AllocatorAware&& ot
 }
 
 
-AllocatorAware::AllocatorAware(apache::thrift::FragileConstructor, ::std::vector<::std::int32_t> aa_list__arg, ::std::set<::std::int32_t> aa_set__arg, ::std::map<::std::int32_t, ::std::int32_t> aa_map__arg, ::std::string aa_string__arg, ::std::int32_t not_a_container__arg, ::std::unique_ptr<::std::int32_t> aa_unique__arg, ::std::shared_ptr<::std::int32_t> aa_shared__arg) :
+AllocatorAware::AllocatorAware(apache::thrift::FragileConstructor, ::apache::thrift::fixtures::types::list_i32_9187 aa_list__arg, ::apache::thrift::fixtures::types::set_i32_7070 aa_set__arg, ::apache::thrift::fixtures::types::map_i32_i32_9565 aa_map__arg, ::apache::thrift::fixtures::types::string_5252 aa_string__arg, ::std::int32_t not_a_container__arg, ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314> aa_unique__arg, ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314> aa_shared__arg) :
     __fbthrift_field_aa_list(std::move(aa_list__arg)),
     __fbthrift_field_aa_set(std::move(aa_set__arg)),
     __fbthrift_field_aa_map(std::move(aa_map__arg)),
@@ -3460,8 +3460,8 @@ void AllocatorAware::__fbthrift_clear() {
   this->__fbthrift_field_aa_map.clear();
   this->__fbthrift_field_aa_string = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
   this->__fbthrift_field_not_a_container = ::std::int32_t();
-  this->__fbthrift_field_aa_unique = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::int32_t>>(this->get_allocator());
-  this->__fbthrift_field_aa_shared = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::std::int32_t>>(this->get_allocator());
+  this->__fbthrift_field_aa_unique = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>>(this->get_allocator());
+  this->__fbthrift_field_aa_shared = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>>(this->get_allocator());
   __isset = {};
 }
 
@@ -3480,27 +3480,27 @@ bool AllocatorAware::operator<(FOLLY_MAYBE_UNUSED const AllocatorAware& rhs) con
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-const ::std::vector<::std::int32_t>& AllocatorAware::get_aa_list() const& {
+const ::apache::thrift::fixtures::types::list_i32_9187& AllocatorAware::get_aa_list() const& {
   return __fbthrift_field_aa_list;
 }
 
-::std::vector<::std::int32_t> AllocatorAware::get_aa_list() && {
+::apache::thrift::fixtures::types::list_i32_9187 AllocatorAware::get_aa_list() && {
   return std::move(__fbthrift_field_aa_list);
 }
 
-const ::std::set<::std::int32_t>& AllocatorAware::get_aa_set() const& {
+const ::apache::thrift::fixtures::types::set_i32_7070& AllocatorAware::get_aa_set() const& {
   return __fbthrift_field_aa_set;
 }
 
-::std::set<::std::int32_t> AllocatorAware::get_aa_set() && {
+::apache::thrift::fixtures::types::set_i32_7070 AllocatorAware::get_aa_set() && {
   return std::move(__fbthrift_field_aa_set);
 }
 
-const ::std::map<::std::int32_t, ::std::int32_t>& AllocatorAware::get_aa_map() const& {
+const ::apache::thrift::fixtures::types::map_i32_i32_9565& AllocatorAware::get_aa_map() const& {
   return __fbthrift_field_aa_map;
 }
 
-::std::map<::std::int32_t, ::std::int32_t> AllocatorAware::get_aa_map() && {
+::apache::thrift::fixtures::types::map_i32_i32_9565 AllocatorAware::get_aa_map() && {
   return std::move(__fbthrift_field_aa_map);
 }
 

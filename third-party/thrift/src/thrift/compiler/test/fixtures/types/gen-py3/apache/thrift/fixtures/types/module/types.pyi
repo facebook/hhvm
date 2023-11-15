@@ -1479,3 +1479,12 @@ class Map__i32_i32(_typing.Mapping[int, int], _typing.Hashable):
 TBinary = bytes
 IntTypedef = int
 UintTypedef = int
+SomeListOfTypeMap_2468 = List__std_unordered_map__Map__i32_string
+TBinary_8623 = bytes
+i32_9314 = int
+list_i32_9187 = List__i32
+map_i32_i32_9565 = Map__i32_i32
+map_i32_string_1261 = folly_sorted_vector_map__Map__i32_string
+set_i32_7070 = Set__i32
+set_i32_7194 = folly_sorted_vector_set__Set__i32
+string_5252 = str

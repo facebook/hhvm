@@ -196,7 +196,7 @@ StructMetadata<::cpp2::defaultStruct>::gen(ThriftMetadata& metadata) {
     {18, "myUnion", false, std::make_unique<Typedef>("module.MyUnion", std::make_unique<Union<::cpp2::MyUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
     {19, "listUnionDFset", false, std::make_unique<List>(std::make_unique<Typedef>("module.MyUnion", std::make_unique<Union<::cpp2::MyUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{})), std::vector<ThriftConstStruct>{}},
     {20, "mapNestlistStructDfSet", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<List>(std::make_unique<Struct<::cpp2::SimpleStruct>>("module.SimpleStruct"))), std::vector<ThriftConstStruct>{}},
-    {21, "mapJavaTypeDFset", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}},
+    {21, "mapJavaTypeDFset", false, std::make_unique<Typedef>("module.map_i64_string_5732", std::make_unique<Typedef>("module.map_i64_string_5732", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
     {22, "emptyMap", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{}},
     {23, "enumMapDFset", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Enum<::cpp2::MyEnum>>("module.MyEnum"))), std::vector<ThriftConstStruct>{}},
   }};
@@ -362,10 +362,10 @@ StructMetadata<::cpp2::TypeRemapped>::gen(ThriftMetadata& metadata) {
   module_TypeRemapped.is_union() = false;
   static const auto* const
   module_TypeRemapped_fields = new std::array<EncodedThriftField, 4>{{
-    {1, "lsMap", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}},
-    {2, "ioMap", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Typedef>("module.FMap", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{})), std::vector<ThriftConstStruct>{}},
-    {3, "BigInteger", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-    {4, "binaryTestBuffer", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}},
+    {1, "lsMap", false, std::make_unique<Typedef>("module.map_i64_string_5732", std::make_unique<Typedef>("module.map_i64_string_5732", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
+    {2, "ioMap", false, std::make_unique<Typedef>("module.map_i32_FMap_6797", std::make_unique<Typedef>("module.map_i32_FMap_6797", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Typedef>("module.FMap", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{})), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
+    {3, "BigInteger", false, std::make_unique<Typedef>("module.i32_1194", std::make_unique<Typedef>("module.i32_1194", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
+    {4, "binaryTestBuffer", false, std::make_unique<Typedef>("module.binary_4918", std::make_unique<Typedef>("module.binary_4918", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_TypeRemapped_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -455,7 +455,7 @@ StructMetadata<::cpp2::complexException>::gen(ThriftMetadata& metadata) {
     {3, "errorEnum", false, std::make_unique<Enum<::cpp2::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{}},
     {4, "unionError", true, std::make_unique<Union<::cpp2::MyUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{}},
     {5, "structError", false, std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct"), std::vector<ThriftConstStruct>{}},
-    {6, "lsMap", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}},
+    {6, "lsMap", false, std::make_unique<Typedef>("module.map_i64_string_5732", std::make_unique<Typedef>("module.map_i64_string_5732", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_complexException_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -533,7 +533,7 @@ void ExceptionMetadata<::cpp2::complexException>::gen(ThriftMetadata& metadata) 
     {3, "errorEnum", false, std::make_unique<Enum<::cpp2::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{}},
     {4, "unionError", true, std::make_unique<Union<::cpp2::MyUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{}},
     {5, "structError", false, std::make_unique<Struct<::cpp2::MyStruct>>("module.MyStruct"), std::vector<ThriftConstStruct>{}},
-    {6, "lsMap", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}},
+    {6, "lsMap", false, std::make_unique<Typedef>("module.map_i64_string_5732", std::make_unique<Typedef>("module.map_i64_string_5732", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_complexException_fields) {
     ::apache::thrift::metadata::ThriftField field;

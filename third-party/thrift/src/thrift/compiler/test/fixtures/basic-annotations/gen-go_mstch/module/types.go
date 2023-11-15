@@ -70,6 +70,61 @@ if err != nil {
     return decodeResult, decodeErr
 }
 
+type ListString_6884 = []string
+
+func NewListString_6884() ListString_6884 {
+    return make([]string, 0)
+}
+
+func WriteListString_6884(item ListString_6884, p thrift.Protocol) error {
+    if err := p.WriteListBegin(thrift.STRING, len(item)); err != nil {
+    return thrift.PrependError("error writing list begin: ", err)
+}
+for _, v := range item {
+    {
+        item := v
+        if err := p.WriteString(item); err != nil {
+    return err
+}
+    }
+}
+if err := p.WriteListEnd(); err != nil {
+    return thrift.PrependError("error writing list end: ", err)
+}
+    return nil
+}
+
+func ReadListString_6884(p thrift.Protocol) (ListString_6884, error) {
+    var decodeResult ListString_6884
+    decodeErr := func() error {
+        _ /* elemType */, size, err := p.ReadListBegin()
+if err != nil {
+    return thrift.PrependError("error reading list begin: ", err)
+}
+
+listResult := make([]string, 0, size)
+for i := 0; i < size; i++ {
+    var elem string
+    {
+        result, err := p.ReadString()
+if err != nil {
+    return err
+}
+        elem = result
+    }
+    listResult = append(listResult, elem)
+}
+
+if err := p.ReadListEnd(); err != nil {
+    return thrift.PrependError("error reading list end: ", err)
+}
+result := listResult
+        decodeResult = result
+        return nil
+    }()
+    return decodeResult, decodeErr
+}
+
 type MyEnum int32
 
 const (
@@ -498,7 +553,7 @@ type MyStruct struct {
     AnnotationWithTrailingComma string `thrift:"annotation_with_trailing_comma,5" json:"annotation_with_trailing_comma" db:"annotation_with_trailing_comma"`
     EmptyAnnotations string `thrift:"empty_annotations,6" json:"empty_annotations" db:"empty_annotations"`
     MyEnum MyEnum `thrift:"my_enum,7" json:"my_enum" db:"my_enum"`
-    CppTypeAnnotation []string `thrift:"cpp_type_annotation,8" json:"cpp_type_annotation" db:"cpp_type_annotation"`
+    CppTypeAnnotation ListString_6884 `thrift:"cpp_type_annotation,8" json:"cpp_type_annotation" db:"cpp_type_annotation"`
     MyUnion *MyUnion `thrift:"my_union,9" json:"my_union" db:"my_union"`
 }
 // Compile time interface enforcer
@@ -513,7 +568,7 @@ func NewMyStruct() *MyStruct {
         SetAnnotationWithTrailingCommaNonCompat("").
         SetEmptyAnnotationsNonCompat("").
         SetMyEnumNonCompat(0).
-        SetCppTypeAnnotationNonCompat(make([]string, 0)).
+        SetCppTypeAnnotationNonCompat(NewListString_6884()).
         SetMyUnionNonCompat(*NewMyUnion())
 }
 
@@ -573,13 +628,13 @@ func (x *MyStruct) GetMyEnum() MyEnum {
     return x.MyEnum
 }
 
-func (x *MyStruct) GetCppTypeAnnotationNonCompat() []string {
+func (x *MyStruct) GetCppTypeAnnotationNonCompat() ListString_6884 {
     return x.CppTypeAnnotation
 }
 
-func (x *MyStruct) GetCppTypeAnnotation() []string {
+func (x *MyStruct) GetCppTypeAnnotation() ListString_6884 {
     if !x.IsSetCppTypeAnnotation() {
-        return make([]string, 0)
+        return NewListString_6884()
     }
 
     return x.CppTypeAnnotation
@@ -667,12 +722,12 @@ func (x *MyStruct) SetMyEnum(value MyEnum) *MyStruct {
     return x
 }
 
-func (x *MyStruct) SetCppTypeAnnotationNonCompat(value []string) *MyStruct {
+func (x *MyStruct) SetCppTypeAnnotationNonCompat(value ListString_6884) *MyStruct {
     x.CppTypeAnnotation = value
     return x
 }
 
-func (x *MyStruct) SetCppTypeAnnotation(value []string) *MyStruct {
+func (x *MyStruct) SetCppTypeAnnotation(value ListString_6884) *MyStruct {
     x.CppTypeAnnotation = value
     return x
 }
@@ -813,19 +868,9 @@ func (x *MyStruct) writeField8(p thrift.Protocol) error {  // CppTypeAnnotation
     }
 
     item := x.GetCppTypeAnnotationNonCompat()
-    if err := p.WriteListBegin(thrift.STRING, len(item)); err != nil {
-    return thrift.PrependError("error writing list begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteString(item); err != nil {
+    err := WriteListString_6884(item, p)
+if err != nil {
     return err
-}
-    }
-}
-if err := p.WriteListEnd(); err != nil {
-    return thrift.PrependError("error writing list end: ", err)
 }
 
     if err := p.WriteFieldEnd(); err != nil {
@@ -926,28 +971,10 @@ result := MyEnum(enumResult)
 }
 
 func (x *MyStruct) readField8(p thrift.Protocol) error {  // CppTypeAnnotation
-    _ /* elemType */, size, err := p.ReadListBegin()
-if err != nil {
-    return thrift.PrependError("error reading list begin: ", err)
-}
-
-listResult := make([]string, 0, size)
-for i := 0; i < size; i++ {
-    var elem string
-    {
-        result, err := p.ReadString()
+    result, err := ReadListString_6884(p)
 if err != nil {
     return err
 }
-        elem = result
-    }
-    listResult = append(listResult, elem)
-}
-
-if err := p.ReadListEnd(); err != nil {
-    return thrift.PrependError("error reading list end: ", err)
-}
-result := listResult
 
     x.SetCppTypeAnnotationNonCompat(result)
     return nil
@@ -1074,7 +1101,7 @@ func (x *MyStructBuilder) MyEnum(value MyEnum) *MyStructBuilder {
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) CppTypeAnnotation(value []string) *MyStructBuilder {
+func (x *MyStructBuilder) CppTypeAnnotation(value ListString_6884) *MyStructBuilder {
     x.obj.CppTypeAnnotation = value
     return x
 }

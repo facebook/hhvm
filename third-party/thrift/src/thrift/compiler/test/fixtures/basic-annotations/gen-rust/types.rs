@@ -14,6 +14,8 @@ pub type AwesomeStruct = crate::types::MyStruct;
 
 pub type FantasticStruct = crate::types::MyStruct;
 
+pub type list_string_6884 = ::std::vec::Vec<::std::string::String>;
+
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MyStructNestedAnnotation {
     pub name: ::std::string::String,
@@ -66,7 +68,7 @@ pub struct MyStruct {
     pub annotation_with_trailing_comma: ::std::string::String,
     pub empty_annotations: ::std::string::String,
     pub my_enum: crate::types::MyEnum,
-    pub cpp_type_annotation: ::std::vec::Vec<::std::string::String>,
+    pub cpp_type_annotation: crate::types::list_string_6884,
     pub my_union: crate::types::MyUnion,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to

@@ -321,6 +321,7 @@ unsigned long YourUnion::read(Protocol_* iprot) {
 
 using YourUnion = ::apache::thrift::adapt_detail::adapted_t<::StaticCast, ::cpp2::detail::YourUnion>;
 
+typedef std::deque<std::string> list_string_6884;
 
 namespace detail {
 class YourStruct final  {
@@ -392,7 +393,7 @@ class YourStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  YourStruct(apache::thrift::FragileConstructor, ::std::int64_t majorVer__arg, ::std::string package__arg, ::std::string annotation_with_quote__arg, ::std::string class___arg, ::std::string annotation_with_trailing_comma__arg, ::std::string empty_annotations__arg, ::cpp2::YourEnum my_enum__arg, std::deque<std::string> cpp_type_annotation__arg, ::cpp2::YourUnion my_union__arg);
+  YourStruct(apache::thrift::FragileConstructor, ::std::int64_t majorVer__arg, ::std::string package__arg, ::std::string annotation_with_quote__arg, ::std::string class___arg, ::std::string annotation_with_trailing_comma__arg, ::std::string empty_annotations__arg, ::cpp2::YourEnum my_enum__arg, ::cpp2::list_string_6884 cpp_type_annotation__arg, ::cpp2::YourUnion my_union__arg);
 
   YourStruct(YourStruct&&) noexcept;
   YourStruct(const YourStruct& src);
@@ -418,7 +419,7 @@ class YourStruct final  {
  private:
   ::cpp2::YourEnum __fbthrift_field_my_enum;
  private:
-  std::deque<std::string> __fbthrift_field_cpp_type_annotation;
+  ::cpp2::list_string_6884 __fbthrift_field_cpp_type_annotation;
  private:
   ::cpp2::YourUnion __fbthrift_field_my_union;
  private:
@@ -709,42 +710,42 @@ class YourStruct final  {
     return {static_cast<T&&>(this->__fbthrift_field_my_enum), __isset.at(6), __isset.bit(6)};
   }
 
-  template <typename..., typename T = std::deque<std::string>>
+  template <typename..., typename T = ::cpp2::list_string_6884>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> cpp_type_annotation_ref() const& {
     return {this->__fbthrift_field_cpp_type_annotation, __isset.at(7), __isset.bit(7)};
   }
 
-  template <typename..., typename T = std::deque<std::string>>
+  template <typename..., typename T = ::cpp2::list_string_6884>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> cpp_type_annotation_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_cpp_type_annotation), __isset.at(7), __isset.bit(7)};
   }
 
-  template <typename..., typename T = std::deque<std::string>>
+  template <typename..., typename T = ::cpp2::list_string_6884>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> cpp_type_annotation_ref() & {
     return {this->__fbthrift_field_cpp_type_annotation, __isset.at(7), __isset.bit(7)};
   }
 
-  template <typename..., typename T = std::deque<std::string>>
+  template <typename..., typename T = ::cpp2::list_string_6884>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> cpp_type_annotation_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_cpp_type_annotation), __isset.at(7), __isset.bit(7)};
   }
 
-  template <typename..., typename T = std::deque<std::string>>
+  template <typename..., typename T = ::cpp2::list_string_6884>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> cpp_type_annotation() const& {
     return {this->__fbthrift_field_cpp_type_annotation, __isset.at(7), __isset.bit(7)};
   }
 
-  template <typename..., typename T = std::deque<std::string>>
+  template <typename..., typename T = ::cpp2::list_string_6884>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> cpp_type_annotation() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_cpp_type_annotation), __isset.at(7), __isset.bit(7)};
   }
 
-  template <typename..., typename T = std::deque<std::string>>
+  template <typename..., typename T = ::cpp2::list_string_6884>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> cpp_type_annotation() & {
     return {this->__fbthrift_field_cpp_type_annotation, __isset.at(7), __isset.bit(7)};
   }
 
-  template <typename..., typename T = std::deque<std::string>>
+  template <typename..., typename T = ::cpp2::list_string_6884>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> cpp_type_annotation() && {
     return {static_cast<T&&>(this->__fbthrift_field_cpp_type_annotation), __isset.at(7), __isset.bit(7)};
   }
@@ -883,12 +884,12 @@ class YourStruct final  {
     my_enum_ref() = my_enum_;
     return __fbthrift_field_my_enum;
   }
-  const std::deque<std::string>& get_cpp_type_annotation() const&;
-  std::deque<std::string> get_cpp_type_annotation() &&;
+  const ::cpp2::list_string_6884& get_cpp_type_annotation() const&;
+  ::cpp2::list_string_6884 get_cpp_type_annotation() &&;
 
-  template <typename T_YourStruct_cpp_type_annotation_struct_setter = std::deque<std::string>>
+  template <typename T_YourStruct_cpp_type_annotation_struct_setter = ::cpp2::list_string_6884>
   [[deprecated("Use `FOO.cpp_type_annotation_ref() = BAR;` instead of `FOO.set_cpp_type_annotation(BAR);`")]]
-  std::deque<std::string>& set_cpp_type_annotation(T_YourStruct_cpp_type_annotation_struct_setter&& cpp_type_annotation_) {
+  ::cpp2::list_string_6884& set_cpp_type_annotation(T_YourStruct_cpp_type_annotation_struct_setter&& cpp_type_annotation_) {
     cpp_type_annotation_ref() = std::forward<T_YourStruct_cpp_type_annotation_struct_setter>(cpp_type_annotation_);
     return __fbthrift_field_cpp_type_annotation;
   }

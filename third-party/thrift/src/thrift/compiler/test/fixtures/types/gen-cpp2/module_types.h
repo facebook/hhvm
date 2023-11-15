@@ -560,6 +560,15 @@ using ::apache::thrift::detail::operator>=;
 typedef ::std::string TBinary;
 typedef ::std::int32_t IntTypedef;
 typedef std::uint32_t UintTypedef;
+typedef ::apache::thrift::fixtures::types::SomeListOfTypeMap SomeListOfTypeMap_2468;
+typedef ::apache::thrift::fixtures::types::TBinary TBinary_8623;
+typedef ::std::int32_t i32_9314;
+typedef ::std::vector<::std::int32_t> list_i32_9187;
+typedef ::std::map<::std::int32_t, ::std::int32_t> map_i32_i32_9565;
+typedef folly::sorted_vector_map<::std::int32_t, ::std::string> map_i32_string_1261;
+typedef ::std::set<::std::int32_t> set_i32_7070;
+typedef folly::sorted_vector_set<::std::int32_t> set_i32_7194;
+typedef ::std::string string_5252;
 
 class empty_struct final  {
  private:
@@ -875,7 +884,7 @@ class ContainerStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  ContainerStruct(apache::thrift::FragileConstructor, ::std::vector<::std::int32_t> fieldA__arg, std::list<::std::int32_t> fieldB__arg, std::deque<::std::int32_t> fieldC__arg, folly::fbvector<::std::int32_t> fieldD__arg, folly::small_vector<::std::int32_t> fieldE__arg, folly::sorted_vector_set<::std::int32_t> fieldF__arg, folly::sorted_vector_map<::std::int32_t, ::std::string> fieldG__arg, ::apache::thrift::fixtures::types::SomeMap fieldH__arg);
+  ContainerStruct(apache::thrift::FragileConstructor, ::std::vector<::std::int32_t> fieldA__arg, std::list<::std::int32_t> fieldB__arg, std::deque<::std::int32_t> fieldC__arg, folly::fbvector<::std::int32_t> fieldD__arg, folly::small_vector<::std::int32_t> fieldE__arg, ::apache::thrift::fixtures::types::set_i32_7194 fieldF__arg, ::apache::thrift::fixtures::types::map_i32_string_1261 fieldG__arg, ::apache::thrift::fixtures::types::SomeMap fieldH__arg);
 
   ContainerStruct(ContainerStruct&&) noexcept;
 
@@ -898,9 +907,9 @@ class ContainerStruct final  {
  private:
   folly::small_vector<::std::int32_t> __fbthrift_field_fieldE;
  private:
-  folly::sorted_vector_set<::std::int32_t> __fbthrift_field_fieldF;
+  ::apache::thrift::fixtures::types::set_i32_7194 __fbthrift_field_fieldF;
  private:
-  folly::sorted_vector_map<::std::int32_t, ::std::string> __fbthrift_field_fieldG;
+  ::apache::thrift::fixtures::types::map_i32_string_1261 __fbthrift_field_fieldG;
  private:
   ::apache::thrift::fixtures::types::SomeMap __fbthrift_field_fieldH;
  private:
@@ -1111,82 +1120,82 @@ class ContainerStruct final  {
     return {static_cast<T&&>(this->__fbthrift_field_fieldE), __isset.at(4), __isset.bit(4)};
   }
 
-  template <typename..., typename T = folly::sorted_vector_set<::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::set_i32_7194>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> fieldF_ref() const& {
     return {this->__fbthrift_field_fieldF, __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = folly::sorted_vector_set<::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::set_i32_7194>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> fieldF_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_fieldF), __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = folly::sorted_vector_set<::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::set_i32_7194>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> fieldF_ref() & {
     return {this->__fbthrift_field_fieldF, __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = folly::sorted_vector_set<::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::set_i32_7194>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> fieldF_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_fieldF), __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = folly::sorted_vector_set<::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::set_i32_7194>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> fieldF() const& {
     return {this->__fbthrift_field_fieldF, __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = folly::sorted_vector_set<::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::set_i32_7194>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> fieldF() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_fieldF), __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = folly::sorted_vector_set<::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::set_i32_7194>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> fieldF() & {
     return {this->__fbthrift_field_fieldF, __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = folly::sorted_vector_set<::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::set_i32_7194>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> fieldF() && {
     return {static_cast<T&&>(this->__fbthrift_field_fieldF), __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = folly::sorted_vector_map<::std::int32_t, ::std::string>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::map_i32_string_1261>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> fieldG_ref() const& {
     return {this->__fbthrift_field_fieldG, __isset.at(6), __isset.bit(6)};
   }
 
-  template <typename..., typename T = folly::sorted_vector_map<::std::int32_t, ::std::string>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::map_i32_string_1261>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> fieldG_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_fieldG), __isset.at(6), __isset.bit(6)};
   }
 
-  template <typename..., typename T = folly::sorted_vector_map<::std::int32_t, ::std::string>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::map_i32_string_1261>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> fieldG_ref() & {
     return {this->__fbthrift_field_fieldG, __isset.at(6), __isset.bit(6)};
   }
 
-  template <typename..., typename T = folly::sorted_vector_map<::std::int32_t, ::std::string>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::map_i32_string_1261>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> fieldG_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_fieldG), __isset.at(6), __isset.bit(6)};
   }
 
-  template <typename..., typename T = folly::sorted_vector_map<::std::int32_t, ::std::string>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::map_i32_string_1261>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> fieldG() const& {
     return {this->__fbthrift_field_fieldG, __isset.at(6), __isset.bit(6)};
   }
 
-  template <typename..., typename T = folly::sorted_vector_map<::std::int32_t, ::std::string>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::map_i32_string_1261>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> fieldG() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_fieldG), __isset.at(6), __isset.bit(6)};
   }
 
-  template <typename..., typename T = folly::sorted_vector_map<::std::int32_t, ::std::string>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::map_i32_string_1261>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> fieldG() & {
     return {this->__fbthrift_field_fieldG, __isset.at(6), __isset.bit(6)};
   }
 
-  template <typename..., typename T = folly::sorted_vector_map<::std::int32_t, ::std::string>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::map_i32_string_1261>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> fieldG() && {
     return {static_cast<T&&>(this->__fbthrift_field_fieldG), __isset.at(6), __isset.bit(6)};
   }
@@ -1275,21 +1284,21 @@ class ContainerStruct final  {
     fieldE_ref() = std::forward<T_ContainerStruct_fieldE_struct_setter>(fieldE_);
     return __fbthrift_field_fieldE;
   }
-  const folly::sorted_vector_set<::std::int32_t>& get_fieldF() const&;
-  folly::sorted_vector_set<::std::int32_t> get_fieldF() &&;
+  const ::apache::thrift::fixtures::types::set_i32_7194& get_fieldF() const&;
+  ::apache::thrift::fixtures::types::set_i32_7194 get_fieldF() &&;
 
-  template <typename T_ContainerStruct_fieldF_struct_setter = folly::sorted_vector_set<::std::int32_t>>
+  template <typename T_ContainerStruct_fieldF_struct_setter = ::apache::thrift::fixtures::types::set_i32_7194>
   [[deprecated("Use `FOO.fieldF_ref() = BAR;` instead of `FOO.set_fieldF(BAR);`")]]
-  folly::sorted_vector_set<::std::int32_t>& set_fieldF(T_ContainerStruct_fieldF_struct_setter&& fieldF_) {
+  ::apache::thrift::fixtures::types::set_i32_7194& set_fieldF(T_ContainerStruct_fieldF_struct_setter&& fieldF_) {
     fieldF_ref() = std::forward<T_ContainerStruct_fieldF_struct_setter>(fieldF_);
     return __fbthrift_field_fieldF;
   }
-  const folly::sorted_vector_map<::std::int32_t, ::std::string>& get_fieldG() const&;
-  folly::sorted_vector_map<::std::int32_t, ::std::string> get_fieldG() &&;
+  const ::apache::thrift::fixtures::types::map_i32_string_1261& get_fieldG() const&;
+  ::apache::thrift::fixtures::types::map_i32_string_1261 get_fieldG() &&;
 
-  template <typename T_ContainerStruct_fieldG_struct_setter = folly::sorted_vector_map<::std::int32_t, ::std::string>>
+  template <typename T_ContainerStruct_fieldG_struct_setter = ::apache::thrift::fixtures::types::map_i32_string_1261>
   [[deprecated("Use `FOO.fieldG_ref() = BAR;` instead of `FOO.set_fieldG(BAR);`")]]
-  folly::sorted_vector_map<::std::int32_t, ::std::string>& set_fieldG(T_ContainerStruct_fieldG_struct_setter&& fieldG_) {
+  ::apache::thrift::fixtures::types::map_i32_string_1261& set_fieldG(T_ContainerStruct_fieldG_struct_setter&& fieldG_) {
     fieldG_ref() = std::forward<T_ContainerStruct_fieldG_struct_setter>(fieldG_);
     return __fbthrift_field_fieldG;
   }
@@ -3982,7 +3991,7 @@ class AnnotatedTypes final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  AnnotatedTypes(apache::thrift::FragileConstructor, ::apache::thrift::fixtures::types::TBinary binary_field__arg, ::apache::thrift::fixtures::types::SomeListOfTypeMap list_field__arg);
+  AnnotatedTypes(apache::thrift::FragileConstructor, ::apache::thrift::fixtures::types::TBinary_8623 binary_field__arg, ::apache::thrift::fixtures::types::SomeListOfTypeMap_2468 list_field__arg);
 
   AnnotatedTypes(AnnotatedTypes&&) noexcept;
 
@@ -3995,9 +4004,9 @@ class AnnotatedTypes final  {
   ~AnnotatedTypes();
 
  private:
-  ::apache::thrift::fixtures::types::TBinary __fbthrift_field_binary_field;
+  ::apache::thrift::fixtures::types::TBinary_8623 __fbthrift_field_binary_field;
  private:
-  ::apache::thrift::fixtures::types::SomeListOfTypeMap __fbthrift_field_list_field;
+  ::apache::thrift::fixtures::types::SomeListOfTypeMap_2468 __fbthrift_field_list_field;
  private:
   apache::thrift::detail::isset_bitset<2, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
@@ -4006,106 +4015,106 @@ class AnnotatedTypes final  {
   bool operator==(const AnnotatedTypes&) const;
   bool operator<(const AnnotatedTypes&) const;
 
-  template <typename..., typename T = ::apache::thrift::fixtures::types::TBinary>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::TBinary_8623>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> binary_field_ref() const& {
     return {this->__fbthrift_field_binary_field, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::fixtures::types::TBinary>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::TBinary_8623>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> binary_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_binary_field), __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::fixtures::types::TBinary>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::TBinary_8623>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> binary_field_ref() & {
     return {this->__fbthrift_field_binary_field, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::fixtures::types::TBinary>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::TBinary_8623>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> binary_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_binary_field), __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::fixtures::types::TBinary>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::TBinary_8623>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> binary_field() const& {
     return {this->__fbthrift_field_binary_field, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::fixtures::types::TBinary>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::TBinary_8623>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> binary_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_binary_field), __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::fixtures::types::TBinary>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::TBinary_8623>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> binary_field() & {
     return {this->__fbthrift_field_binary_field, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::fixtures::types::TBinary>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::TBinary_8623>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> binary_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_binary_field), __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::fixtures::types::SomeListOfTypeMap>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::SomeListOfTypeMap_2468>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> list_field_ref() const& {
     return {this->__fbthrift_field_list_field, __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::apache::thrift::fixtures::types::SomeListOfTypeMap>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::SomeListOfTypeMap_2468>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> list_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_list_field), __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::apache::thrift::fixtures::types::SomeListOfTypeMap>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::SomeListOfTypeMap_2468>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> list_field_ref() & {
     return {this->__fbthrift_field_list_field, __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::apache::thrift::fixtures::types::SomeListOfTypeMap>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::SomeListOfTypeMap_2468>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> list_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_list_field), __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::apache::thrift::fixtures::types::SomeListOfTypeMap>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::SomeListOfTypeMap_2468>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> list_field() const& {
     return {this->__fbthrift_field_list_field, __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::apache::thrift::fixtures::types::SomeListOfTypeMap>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::SomeListOfTypeMap_2468>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> list_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_list_field), __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::apache::thrift::fixtures::types::SomeListOfTypeMap>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::SomeListOfTypeMap_2468>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> list_field() & {
     return {this->__fbthrift_field_list_field, __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::apache::thrift::fixtures::types::SomeListOfTypeMap>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::SomeListOfTypeMap_2468>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> list_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_list_field), __isset.at(1), __isset.bit(1)};
   }
 
-  const ::apache::thrift::fixtures::types::TBinary& get_binary_field() const& {
+  const ::apache::thrift::fixtures::types::TBinary_8623& get_binary_field() const& {
     return __fbthrift_field_binary_field;
   }
 
-  ::apache::thrift::fixtures::types::TBinary get_binary_field() && {
+  ::apache::thrift::fixtures::types::TBinary_8623 get_binary_field() && {
     return std::move(__fbthrift_field_binary_field);
   }
 
-  template <typename T_AnnotatedTypes_binary_field_struct_setter = ::apache::thrift::fixtures::types::TBinary>
+  template <typename T_AnnotatedTypes_binary_field_struct_setter = ::apache::thrift::fixtures::types::TBinary_8623>
   [[deprecated("Use `FOO.binary_field_ref() = BAR;` instead of `FOO.set_binary_field(BAR);`")]]
-  ::apache::thrift::fixtures::types::TBinary& set_binary_field(T_AnnotatedTypes_binary_field_struct_setter&& binary_field_) {
+  ::apache::thrift::fixtures::types::TBinary_8623& set_binary_field(T_AnnotatedTypes_binary_field_struct_setter&& binary_field_) {
     binary_field_ref() = std::forward<T_AnnotatedTypes_binary_field_struct_setter>(binary_field_);
     return __fbthrift_field_binary_field;
   }
-  const ::apache::thrift::fixtures::types::SomeListOfTypeMap& get_list_field() const&;
-  ::apache::thrift::fixtures::types::SomeListOfTypeMap get_list_field() &&;
+  const ::apache::thrift::fixtures::types::SomeListOfTypeMap_2468& get_list_field() const&;
+  ::apache::thrift::fixtures::types::SomeListOfTypeMap_2468 get_list_field() &&;
 
-  template <typename T_AnnotatedTypes_list_field_struct_setter = ::apache::thrift::fixtures::types::SomeListOfTypeMap>
+  template <typename T_AnnotatedTypes_list_field_struct_setter = ::apache::thrift::fixtures::types::SomeListOfTypeMap_2468>
   [[deprecated("Use `FOO.list_field_ref() = BAR;` instead of `FOO.set_list_field(BAR);`")]]
-  ::apache::thrift::fixtures::types::SomeListOfTypeMap& set_list_field(T_AnnotatedTypes_list_field_struct_setter&& list_field_) {
+  ::apache::thrift::fixtures::types::SomeListOfTypeMap_2468& set_list_field(T_AnnotatedTypes_list_field_struct_setter&& list_field_) {
     list_field_ref() = std::forward<T_AnnotatedTypes_list_field_struct_setter>(list_field_);
     return __fbthrift_field_list_field;
   }
@@ -6229,7 +6238,7 @@ class AllocatorAware final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  AllocatorAware(apache::thrift::FragileConstructor, ::std::vector<::std::int32_t> aa_list__arg, ::std::set<::std::int32_t> aa_set__arg, ::std::map<::std::int32_t, ::std::int32_t> aa_map__arg, ::std::string aa_string__arg, ::std::int32_t not_a_container__arg, ::std::unique_ptr<::std::int32_t> aa_unique__arg, ::std::shared_ptr<::std::int32_t> aa_shared__arg);
+  AllocatorAware(apache::thrift::FragileConstructor, ::apache::thrift::fixtures::types::list_i32_9187 aa_list__arg, ::apache::thrift::fixtures::types::set_i32_7070 aa_set__arg, ::apache::thrift::fixtures::types::map_i32_i32_9565 aa_map__arg, ::apache::thrift::fixtures::types::string_5252 aa_string__arg, ::std::int32_t not_a_container__arg, ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314> aa_unique__arg, ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314> aa_shared__arg);
 
   AllocatorAware(AllocatorAware&&) noexcept;
   AllocatorAware(const AllocatorAware& src);
@@ -6241,8 +6250,8 @@ class AllocatorAware final  {
     __fbthrift_field_aa_map(alloc),
     __fbthrift_field_aa_string(alloc),
     __fbthrift_field_not_a_container(),
-    __fbthrift_field_aa_unique(folly::allocate_unique<::std::int32_t>(alloc)),
-    __fbthrift_field_aa_shared(std::allocate_shared<::std::int32_t>(alloc)) {}
+    __fbthrift_field_aa_unique(folly::allocate_unique<::apache::thrift::fixtures::types::i32_9314>(alloc)),
+    __fbthrift_field_aa_shared(std::allocate_shared<::apache::thrift::fixtures::types::i32_9314>(alloc)) {}
 
   explicit AllocatorAware(const AllocatorAware& other, const allocator_type& alloc) :
     __fbthrift_alloc(alloc),
@@ -6251,8 +6260,8 @@ class AllocatorAware final  {
     __fbthrift_field_aa_map(other.__fbthrift_field_aa_map, alloc),
     __fbthrift_field_aa_string(other.__fbthrift_field_aa_string, alloc),
     __fbthrift_field_not_a_container(other.__fbthrift_field_not_a_container),
-    __fbthrift_field_aa_unique(folly::allocate_unique<::std::int32_t>(alloc, *other.__fbthrift_field_aa_unique)),
-    __fbthrift_field_aa_shared(std::allocate_shared<::std::int32_t>(alloc, *other.__fbthrift_field_aa_shared)),
+    __fbthrift_field_aa_unique(folly::allocate_unique<::apache::thrift::fixtures::types::i32_9314>(alloc, *other.__fbthrift_field_aa_unique)),
+    __fbthrift_field_aa_shared(std::allocate_shared<::apache::thrift::fixtures::types::i32_9314>(alloc, *other.__fbthrift_field_aa_shared)),
     __isset(other.__isset) {}
 
   explicit AllocatorAware(AllocatorAware&& other, const allocator_type& alloc) :
@@ -6262,8 +6271,8 @@ class AllocatorAware final  {
     __fbthrift_field_aa_map(std::move(other.__fbthrift_field_aa_map), alloc),
     __fbthrift_field_aa_string(std::move(other.__fbthrift_field_aa_string), alloc),
     __fbthrift_field_not_a_container(std::move(other.__fbthrift_field_not_a_container)),
-    __fbthrift_field_aa_unique(folly::allocate_unique<::std::int32_t>(alloc, std::move(*other.__fbthrift_field_aa_unique))),
-    __fbthrift_field_aa_shared(std::allocate_shared<::std::int32_t>(alloc, std::move(*other.__fbthrift_field_aa_shared))),
+    __fbthrift_field_aa_unique(folly::allocate_unique<::apache::thrift::fixtures::types::i32_9314>(alloc, std::move(*other.__fbthrift_field_aa_unique))),
+    __fbthrift_field_aa_shared(std::allocate_shared<::apache::thrift::fixtures::types::i32_9314>(alloc, std::move(*other.__fbthrift_field_aa_shared))),
     __isset(other.__isset) {}
 
   AllocatorAware& operator=(AllocatorAware&&) noexcept;
@@ -6272,19 +6281,19 @@ class AllocatorAware final  {
   ~AllocatorAware();
 
  private:
-  ::std::vector<::std::int32_t> __fbthrift_field_aa_list;
+  ::apache::thrift::fixtures::types::list_i32_9187 __fbthrift_field_aa_list;
  private:
-  ::std::set<::std::int32_t> __fbthrift_field_aa_set;
+  ::apache::thrift::fixtures::types::set_i32_7070 __fbthrift_field_aa_set;
  private:
-  ::std::map<::std::int32_t, ::std::int32_t> __fbthrift_field_aa_map;
+  ::apache::thrift::fixtures::types::map_i32_i32_9565 __fbthrift_field_aa_map;
  private:
-  ::std::string __fbthrift_field_aa_string;
+  ::apache::thrift::fixtures::types::string_5252 __fbthrift_field_aa_string;
  private:
   ::std::int32_t __fbthrift_field_not_a_container;
  private:
-  ::std::unique_ptr<::std::int32_t> __fbthrift_field_aa_unique;
+  ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314> __fbthrift_field_aa_unique;
  private:
-  ::std::shared_ptr<::std::int32_t> __fbthrift_field_aa_shared;
+  ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314> __fbthrift_field_aa_shared;
  private:
   apache::thrift::detail::isset_bitset<5, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
@@ -6293,162 +6302,162 @@ class AllocatorAware final  {
   bool operator==(const AllocatorAware&) const;
   bool operator<(const AllocatorAware&) const;
 
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::list_i32_9187>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> aa_list_ref() const& {
     return {this->__fbthrift_field_aa_list, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::list_i32_9187>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> aa_list_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_aa_list), __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::list_i32_9187>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> aa_list_ref() & {
     return {this->__fbthrift_field_aa_list, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::list_i32_9187>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> aa_list_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_aa_list), __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::list_i32_9187>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> aa_list() const& {
     return {this->__fbthrift_field_aa_list, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::list_i32_9187>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> aa_list() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_aa_list), __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::list_i32_9187>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> aa_list() & {
     return {this->__fbthrift_field_aa_list, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::std::vector<::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::list_i32_9187>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> aa_list() && {
     return {static_cast<T&&>(this->__fbthrift_field_aa_list), __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::std::set<::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::set_i32_7070>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> aa_set_ref() const& {
     return {this->__fbthrift_field_aa_set, __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::std::set<::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::set_i32_7070>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> aa_set_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_aa_set), __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::std::set<::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::set_i32_7070>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> aa_set_ref() & {
     return {this->__fbthrift_field_aa_set, __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::std::set<::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::set_i32_7070>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> aa_set_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_aa_set), __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::std::set<::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::set_i32_7070>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> aa_set() const& {
     return {this->__fbthrift_field_aa_set, __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::std::set<::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::set_i32_7070>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> aa_set() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_aa_set), __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::std::set<::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::set_i32_7070>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> aa_set() & {
     return {this->__fbthrift_field_aa_set, __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::std::set<::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::set_i32_7070>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> aa_set() && {
     return {static_cast<T&&>(this->__fbthrift_field_aa_set), __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int32_t, ::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::map_i32_i32_9565>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> aa_map_ref() const& {
     return {this->__fbthrift_field_aa_map, __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int32_t, ::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::map_i32_i32_9565>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> aa_map_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_aa_map), __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int32_t, ::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::map_i32_i32_9565>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> aa_map_ref() & {
     return {this->__fbthrift_field_aa_map, __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int32_t, ::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::map_i32_i32_9565>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> aa_map_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_aa_map), __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int32_t, ::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::map_i32_i32_9565>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> aa_map() const& {
     return {this->__fbthrift_field_aa_map, __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int32_t, ::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::map_i32_i32_9565>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> aa_map() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_aa_map), __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int32_t, ::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::map_i32_i32_9565>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> aa_map() & {
     return {this->__fbthrift_field_aa_map, __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::std::map<::std::int32_t, ::std::int32_t>>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::map_i32_i32_9565>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> aa_map() && {
     return {static_cast<T&&>(this->__fbthrift_field_aa_map), __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::std::string>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::string_5252>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> aa_string_ref() const& {
     return {this->__fbthrift_field_aa_string, __isset.at(3), __isset.bit(3)};
   }
 
-  template <typename..., typename T = ::std::string>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::string_5252>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> aa_string_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_aa_string), __isset.at(3), __isset.bit(3)};
   }
 
-  template <typename..., typename T = ::std::string>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::string_5252>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> aa_string_ref() & {
     return {this->__fbthrift_field_aa_string, __isset.at(3), __isset.bit(3)};
   }
 
-  template <typename..., typename T = ::std::string>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::string_5252>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> aa_string_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_aa_string), __isset.at(3), __isset.bit(3)};
   }
 
-  template <typename..., typename T = ::std::string>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::string_5252>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> aa_string() const& {
     return {this->__fbthrift_field_aa_string, __isset.at(3), __isset.bit(3)};
   }
 
-  template <typename..., typename T = ::std::string>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::string_5252>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> aa_string() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_aa_string), __isset.at(3), __isset.bit(3)};
   }
 
-  template <typename..., typename T = ::std::string>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::string_5252>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> aa_string() & {
     return {this->__fbthrift_field_aa_string, __isset.at(3), __isset.bit(3)};
   }
 
-  template <typename..., typename T = ::std::string>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::string_5252>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> aa_string() && {
     return {static_cast<T&&>(this->__fbthrift_field_aa_string), __isset.at(3), __isset.bit(3)};
   }
@@ -6492,123 +6501,123 @@ class AllocatorAware final  {
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> not_a_container() && {
     return {static_cast<T&&>(this->__fbthrift_field_not_a_container), __isset.at(4), __isset.bit(4)};
   }
-  template <typename ..., typename T = ::std::unique_ptr<::std::int32_t>>
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>>
   FOLLY_ERASE T& aa_unique_ref() & {
     return __fbthrift_field_aa_unique;
   }
 
-  template <typename ..., typename T = ::std::unique_ptr<::std::int32_t>>
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>>
   FOLLY_ERASE const T& aa_unique_ref() const& {
     return __fbthrift_field_aa_unique;
   }
 
-  template <typename ..., typename T = ::std::unique_ptr<::std::int32_t>>
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>>
   FOLLY_ERASE T&& aa_unique_ref() && {
     return static_cast<T&&>(__fbthrift_field_aa_unique);
   }
 
-  template <typename ..., typename T = ::std::unique_ptr<::std::int32_t>>
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>>
   FOLLY_ERASE const T&& aa_unique_ref() const&& {
     return static_cast<const T&&>(__fbthrift_field_aa_unique);
   }
 
-  template <typename ..., typename T = ::std::unique_ptr<::std::int32_t>>
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>>
   FOLLY_ERASE T& aa_unique() & {
     return __fbthrift_field_aa_unique;
   }
 
-  template <typename ..., typename T = ::std::unique_ptr<::std::int32_t>>
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>>
   FOLLY_ERASE const T& aa_unique() const& {
     return __fbthrift_field_aa_unique;
   }
 
-  template <typename ..., typename T = ::std::unique_ptr<::std::int32_t>>
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>>
   FOLLY_ERASE T&& aa_unique() && {
     return static_cast<T&&>(__fbthrift_field_aa_unique);
   }
 
-  template <typename ..., typename T = ::std::unique_ptr<::std::int32_t>>
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::i32_9314>>
   FOLLY_ERASE const T&& aa_unique() const&& {
     return static_cast<const T&&>(__fbthrift_field_aa_unique);
   }
-  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  template <typename ..., typename T = ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>>
   FOLLY_ERASE T& aa_shared_ref() & {
     return __fbthrift_field_aa_shared;
   }
 
-  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  template <typename ..., typename T = ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>>
   FOLLY_ERASE const T& aa_shared_ref() const& {
     return __fbthrift_field_aa_shared;
   }
 
-  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  template <typename ..., typename T = ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>>
   FOLLY_ERASE T&& aa_shared_ref() && {
     return static_cast<T&&>(__fbthrift_field_aa_shared);
   }
 
-  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  template <typename ..., typename T = ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>>
   FOLLY_ERASE const T&& aa_shared_ref() const&& {
     return static_cast<const T&&>(__fbthrift_field_aa_shared);
   }
 
-  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  template <typename ..., typename T = ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>>
   FOLLY_ERASE T& aa_shared() & {
     return __fbthrift_field_aa_shared;
   }
 
-  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  template <typename ..., typename T = ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>>
   FOLLY_ERASE const T& aa_shared() const& {
     return __fbthrift_field_aa_shared;
   }
 
-  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  template <typename ..., typename T = ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>>
   FOLLY_ERASE T&& aa_shared() && {
     return static_cast<T&&>(__fbthrift_field_aa_shared);
   }
 
-  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  template <typename ..., typename T = ::std::shared_ptr<::apache::thrift::fixtures::types::i32_9314>>
   FOLLY_ERASE const T&& aa_shared() const&& {
     return static_cast<const T&&>(__fbthrift_field_aa_shared);
   }
-  const ::std::vector<::std::int32_t>& get_aa_list() const&;
-  ::std::vector<::std::int32_t> get_aa_list() &&;
+  const ::apache::thrift::fixtures::types::list_i32_9187& get_aa_list() const&;
+  ::apache::thrift::fixtures::types::list_i32_9187 get_aa_list() &&;
 
-  template <typename T_AllocatorAware_aa_list_struct_setter = ::std::vector<::std::int32_t>>
+  template <typename T_AllocatorAware_aa_list_struct_setter = ::apache::thrift::fixtures::types::list_i32_9187>
   [[deprecated("Use `FOO.aa_list_ref() = BAR;` instead of `FOO.set_aa_list(BAR);`")]]
-  ::std::vector<::std::int32_t>& set_aa_list(T_AllocatorAware_aa_list_struct_setter&& aa_list_) {
+  ::apache::thrift::fixtures::types::list_i32_9187& set_aa_list(T_AllocatorAware_aa_list_struct_setter&& aa_list_) {
     aa_list_ref() = std::forward<T_AllocatorAware_aa_list_struct_setter>(aa_list_);
     return __fbthrift_field_aa_list;
   }
-  const ::std::set<::std::int32_t>& get_aa_set() const&;
-  ::std::set<::std::int32_t> get_aa_set() &&;
+  const ::apache::thrift::fixtures::types::set_i32_7070& get_aa_set() const&;
+  ::apache::thrift::fixtures::types::set_i32_7070 get_aa_set() &&;
 
-  template <typename T_AllocatorAware_aa_set_struct_setter = ::std::set<::std::int32_t>>
+  template <typename T_AllocatorAware_aa_set_struct_setter = ::apache::thrift::fixtures::types::set_i32_7070>
   [[deprecated("Use `FOO.aa_set_ref() = BAR;` instead of `FOO.set_aa_set(BAR);`")]]
-  ::std::set<::std::int32_t>& set_aa_set(T_AllocatorAware_aa_set_struct_setter&& aa_set_) {
+  ::apache::thrift::fixtures::types::set_i32_7070& set_aa_set(T_AllocatorAware_aa_set_struct_setter&& aa_set_) {
     aa_set_ref() = std::forward<T_AllocatorAware_aa_set_struct_setter>(aa_set_);
     return __fbthrift_field_aa_set;
   }
-  const ::std::map<::std::int32_t, ::std::int32_t>& get_aa_map() const&;
-  ::std::map<::std::int32_t, ::std::int32_t> get_aa_map() &&;
+  const ::apache::thrift::fixtures::types::map_i32_i32_9565& get_aa_map() const&;
+  ::apache::thrift::fixtures::types::map_i32_i32_9565 get_aa_map() &&;
 
-  template <typename T_AllocatorAware_aa_map_struct_setter = ::std::map<::std::int32_t, ::std::int32_t>>
+  template <typename T_AllocatorAware_aa_map_struct_setter = ::apache::thrift::fixtures::types::map_i32_i32_9565>
   [[deprecated("Use `FOO.aa_map_ref() = BAR;` instead of `FOO.set_aa_map(BAR);`")]]
-  ::std::map<::std::int32_t, ::std::int32_t>& set_aa_map(T_AllocatorAware_aa_map_struct_setter&& aa_map_) {
+  ::apache::thrift::fixtures::types::map_i32_i32_9565& set_aa_map(T_AllocatorAware_aa_map_struct_setter&& aa_map_) {
     aa_map_ref() = std::forward<T_AllocatorAware_aa_map_struct_setter>(aa_map_);
     return __fbthrift_field_aa_map;
   }
 
-  const ::std::string& get_aa_string() const& {
+  const ::apache::thrift::fixtures::types::string_5252& get_aa_string() const& {
     return __fbthrift_field_aa_string;
   }
 
-  ::std::string get_aa_string() && {
+  ::apache::thrift::fixtures::types::string_5252 get_aa_string() && {
     return std::move(__fbthrift_field_aa_string);
   }
 
-  template <typename T_AllocatorAware_aa_string_struct_setter = ::std::string>
+  template <typename T_AllocatorAware_aa_string_struct_setter = ::apache::thrift::fixtures::types::string_5252>
   [[deprecated("Use `FOO.aa_string_ref() = BAR;` instead of `FOO.set_aa_string(BAR);`")]]
-  ::std::string& set_aa_string(T_AllocatorAware_aa_string_struct_setter&& aa_string_) {
+  ::apache::thrift::fixtures::types::string_5252& set_aa_string(T_AllocatorAware_aa_string_struct_setter&& aa_string_) {
     aa_string_ref() = std::forward<T_AllocatorAware_aa_string_struct_setter>(aa_string_);
     return __fbthrift_field_aa_string;
   }

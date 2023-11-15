@@ -452,8 +452,8 @@ _readField_my_enum:
 _readField_cpp_type_annotation:
   {
     _readState.beforeSubobject(iprot);
-    this->__fbthrift_field_cpp_type_annotation = std::deque<std::string>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::string>, std::deque<std::string>>::readWithContext(*iprot, this->__fbthrift_field_cpp_type_annotation, _readState);
+    this->__fbthrift_field_cpp_type_annotation = ::cpp2::list_string_6884();
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::string>, ::cpp2::list_string_6884>::readWithContext(*iprot, this->__fbthrift_field_cpp_type_annotation, _readState);
     _readState.afterSubobject(iprot);
     
   }
@@ -615,7 +615,7 @@ uint32_t YourStruct::serializedSize(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("cpp_type_annotation", apache::thrift::protocol::T_LIST, 8);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::string>, std::deque<std::string>>::serializedSize<false>(*prot_, this->__fbthrift_field_cpp_type_annotation);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::string>, ::cpp2::list_string_6884>::serializedSize<false>(*prot_, this->__fbthrift_field_cpp_type_annotation);
   }
   {
     xfer += prot_->serializedFieldSize("my_union", apache::thrift::protocol::T_STRUCT, 9);
@@ -659,7 +659,7 @@ uint32_t YourStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("cpp_type_annotation", apache::thrift::protocol::T_LIST, 8);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::string>, std::deque<std::string>>::serializedSize<false>(*prot_, this->__fbthrift_field_cpp_type_annotation);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::string>, ::cpp2::list_string_6884>::serializedSize<false>(*prot_, this->__fbthrift_field_cpp_type_annotation);
   }
   {
     xfer += prot_->serializedFieldSize("my_union", apache::thrift::protocol::T_STRUCT, 9);
@@ -727,7 +727,7 @@ uint32_t YourStruct::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 7;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 8, kPrevFieldId>(*prot_, "cpp_type_annotation", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::string>, std::deque<std::string>>::write(*prot_, this->__fbthrift_field_cpp_type_annotation);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::string>, ::cpp2::list_string_6884>::write(*prot_, this->__fbthrift_field_cpp_type_annotation);
     xfer += prot_->writeFieldEnd();
   }
   {

@@ -124,7 +124,7 @@ StructMetadata<::cpp2::detail::YourStruct>::gen(ThriftMetadata& metadata) {
     {5, "annotation_with_trailing_comma", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
     {6, "empty_annotations", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
     {7, "my_enum", false, std::make_unique<Enum<::cpp2::YourEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{}},
-    {8, "cpp_type_annotation", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}},
+    {8, "cpp_type_annotation", false, std::make_unique<Typedef>("module.list_string_6884", std::make_unique<Typedef>("module.list_string_6884", std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
     {9, "my_union", false, std::make_unique<Union<::cpp2::detail::YourUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_MyStruct_fields) {

@@ -177,6 +177,42 @@ type UintTypedef = IntTypedef
 
 func UintTypedefPtr(v UintTypedef) *UintTypedef { return &v }
 
+type SomeListOfTypeMap_2468 = included0.SomeListOfTypeMap
+
+func SomeListOfTypeMap_2468Ptr(v SomeListOfTypeMap_2468) *SomeListOfTypeMap_2468 { return &v }
+
+type TBinary_8623 = TBinary
+
+func TBinary_8623Ptr(v TBinary_8623) *TBinary_8623 { return &v }
+
+type I32_9314 = int32
+
+func I32_9314Ptr(v I32_9314) *I32_9314 { return &v }
+
+type ListI32_9187 = []int32
+
+func ListI32_9187Ptr(v ListI32_9187) *ListI32_9187 { return &v }
+
+type MapI32I32_9565 = map[int32]int32
+
+func MapI32I32_9565Ptr(v MapI32I32_9565) *MapI32I32_9565 { return &v }
+
+type MapI32String_1261 = map[int32]string
+
+func MapI32String_1261Ptr(v MapI32String_1261) *MapI32String_1261 { return &v }
+
+type SetI32_7070 = []int32
+
+func SetI32_7070Ptr(v SetI32_7070) *SetI32_7070 { return &v }
+
+type SetI32_7194 = []int32
+
+func SetI32_7194Ptr(v SetI32_7194) *SetI32_7194 { return &v }
+
+type String_5252 = string
+
+func String_5252Ptr(v String_5252) *String_5252 { return &v }
+
 type EmptyStruct struct {
 }
 
@@ -3061,8 +3097,8 @@ func (p *Renaming) String() string {
 //  - BinaryField
 //  - ListField
 type AnnotatedTypes struct {
-  BinaryField TBinary `thrift:"binary_field,1" db:"binary_field" json:"binary_field"`
-  ListField included0.SomeListOfTypeMap `thrift:"list_field,2" db:"list_field" json:"list_field"`
+  BinaryField []byte `thrift:"binary_field,1" db:"binary_field" json:"binary_field"`
+  ListField []included0.SomeMap `thrift:"list_field,2" db:"list_field" json:"list_field"`
 }
 
 func NewAnnotatedTypes() *AnnotatedTypes {
@@ -3070,11 +3106,11 @@ func NewAnnotatedTypes() *AnnotatedTypes {
 }
 
 
-func (p *AnnotatedTypes) GetBinaryField() TBinary {
+func (p *AnnotatedTypes) GetBinaryField() []byte {
   return p.BinaryField
 }
 
-func (p *AnnotatedTypes) GetListField() included0.SomeListOfTypeMap {
+func (p *AnnotatedTypes) GetListField() []included0.SomeMap {
   return p.ListField
 }
 type AnnotatedTypesBuilder struct {
@@ -3094,22 +3130,22 @@ func (p AnnotatedTypesBuilder) Emit() *AnnotatedTypes{
   }
 }
 
-func (a *AnnotatedTypesBuilder) BinaryField(binaryField TBinary) *AnnotatedTypesBuilder {
+func (a *AnnotatedTypesBuilder) BinaryField(binaryField []byte) *AnnotatedTypesBuilder {
   a.obj.BinaryField = binaryField
   return a
 }
 
-func (a *AnnotatedTypesBuilder) ListField(listField included0.SomeListOfTypeMap) *AnnotatedTypesBuilder {
+func (a *AnnotatedTypesBuilder) ListField(listField []included0.SomeMap) *AnnotatedTypesBuilder {
   a.obj.ListField = listField
   return a
 }
 
-func (a *AnnotatedTypes) SetBinaryField(binaryField TBinary) *AnnotatedTypes {
+func (a *AnnotatedTypes) SetBinaryField(binaryField []byte) *AnnotatedTypes {
   a.BinaryField = binaryField
   return a
 }
 
-func (a *AnnotatedTypes) SetListField(listField included0.SomeListOfTypeMap) *AnnotatedTypes {
+func (a *AnnotatedTypes) SetListField(listField []included0.SomeMap) *AnnotatedTypes {
   a.ListField = listField
   return a
 }
@@ -3154,7 +3190,7 @@ func (p *AnnotatedTypes)  ReadField1(iprot thrift.Protocol) error {
   if v, err := iprot.ReadBinary(); err != nil {
     return thrift.PrependError("error reading field 1: ", err)
   } else {
-    temp := TBinary(v)
+    temp := TBinary_8623(v)
     p.BinaryField = temp
   }
   return nil
@@ -3165,7 +3201,7 @@ func (p *AnnotatedTypes)  ReadField2(iprot thrift.Protocol) error {
   if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
   }
-  tSlice := make(included0.SomeListOfTypeMap, 0, size)
+  tSlice := make([]included0.SomeMap, 0, size)
   p.ListField =  tSlice
   for i := 0; i < size; i ++ {
     _, _, size, err := iprot.ReadMapBegin()
@@ -5351,7 +5387,8 @@ func (p *AllocatorAware)  ReadField4(iprot thrift.Protocol) error {
   if v, err := iprot.ReadString(); err != nil {
     return thrift.PrependError("error reading field 4: ", err)
   } else {
-    p.AaString = v
+    temp := String_5252(v)
+    p.AaString = temp
   }
   return nil
 }
@@ -5369,7 +5406,8 @@ func (p *AllocatorAware)  ReadField6(iprot thrift.Protocol) error {
   if v, err := iprot.ReadI32(); err != nil {
     return thrift.PrependError("error reading field 6: ", err)
   } else {
-    p.AaUnique = &v
+    temp := I32_9314(v)
+    p.AaUnique = &temp
   }
   return nil
 }
@@ -5378,7 +5416,8 @@ func (p *AllocatorAware)  ReadField7(iprot thrift.Protocol) error {
   if v, err := iprot.ReadI32(); err != nil {
     return thrift.PrependError("error reading field 7: ", err)
   } else {
-    p.AaShared = &v
+    temp := I32_9314(v)
+    p.AaShared = &temp
   }
   return nil
 }

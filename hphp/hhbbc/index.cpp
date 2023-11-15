@@ -11868,7 +11868,7 @@ protected:
 
   // Create a Data representing the single ClassInfo or split with the
   // name "clsname".
-  static Data build_data(LocalIndex& index, SString clsname, SString top) {
+  static Data build_data(LocalIndex& index, SString clsname) {
     // Does this name represent a class?
     if (auto const cinfo = folly::get_default(index.classInfos, clsname)) {
       // It's a class. We need to build a Data from what's in the
@@ -11961,6 +11961,130 @@ protected:
     return split->data;
   }
 
+  static void update_data(Data& data, Data childData) {
+    // Combine MethInfos for each method name:
+    folly::erase_if(
+      data.methods,
+      [&] (std::pair<const SString, Data::MethInfo>& p) {
+        auto const name = p.first;
+        auto& info = p.second;
+
+        if (auto const childInfo =
+            folly::get_ptr(childData.methods, name)) {
+          // There's a MethInfo with that name in the
+          // child. "Promote" the MethRefs if they're in a superior
+          // status in the child.
+          for (auto const& meth : childInfo->regularMeths) {
+            if (info.regularMeths.count(meth)) continue;
+            info.regularMeths.emplace(meth);
+            info.nonRegularPrivateMeths.erase(meth);
+            info.nonRegularMeths.erase(meth);
+          }
+          for (auto const& meth : childInfo->nonRegularPrivateMeths) {
+            if (info.regularMeths.count(meth) ||
+                info.nonRegularPrivateMeths.count(meth)) {
+              continue;
+            }
+            info.nonRegularPrivateMeths.emplace(meth);
+            info.nonRegularMeths.erase(meth);
+          }
+          for (auto const& meth : childInfo->nonRegularMeths) {
+            if (info.regularMeths.count(meth) ||
+                info.nonRegularPrivateMeths.count(meth) ||
+                info.nonRegularMeths.count(meth)) {
+              continue;
+            }
+            info.nonRegularMeths.emplace(meth);
+          }
+          info.complete &= childInfo->complete;
+          if (childData.hasRegularClassFull) {
+            info.regularComplete &= childInfo->regularComplete;
+            info.privateAncestor |= childInfo->privateAncestor;
+          } else {
+            assertx(childInfo->regularComplete);
+            assertx(!childInfo->privateAncestor);
+          }
+
+          if (childInfo->allStatic) {
+            if (!info.allStatic) {
+              info.allStatic = std::move(*childInfo->allStatic);
+            } else {
+              *info.allStatic |= *childInfo->allStatic;
+            }
+          }
+          if (childInfo->regularStatic) {
+            if (!info.regularStatic) {
+              info.regularStatic = std::move(*childInfo->regularStatic);
+            } else {
+              *info.regularStatic |= *childInfo->regularStatic;
+            }
+          }
+
+          return false;
+        }
+
+        // There's no MethInfo with that name in the child. We might
+        // still want to keep the MethInfo because it will be needed
+        // for expanding abstract class/interface method
+        // families. If the child has a regular class, we can remove
+        // it (it won't be part of the expansion).
+        return
+          childData.hasRegularClass ||
+          !info.regularComplete ||
+          info.privateAncestor ||
+          is_special_method_name(name) ||
+          name == s_construct.get();
+      }
+    );
+
+    // Since we drop non-matching method names only if the class has
+    // a regular class, it introduces an ordering dependency. If the
+    // first class we encounter has a regular class, everything
+    // works fine. However, if the first class we encounter does not
+    // have a regular class, the Data will have its methods. If we
+    // eventually process a class which does have a regular class,
+    // we'll never process it's non-matching methods (because we
+    // iterate over data.methods). They won't end up in data.methods
+    // whereas they would if a class with regular class was
+    // processed first. Detect this condition and manually add such
+    // methods to data.methods.
+    if (!data.hasRegularClass && childData.hasRegularClass) {
+      for (auto& [name, info] : childData.methods) {
+        if (!info.regularComplete || info.privateAncestor) continue;
+        if (is_special_method_name(name)) continue;
+        if (name == s_construct.get()) continue;
+        if (data.methods.count(name)) continue;
+        auto& newInfo = data.methods[name];
+        newInfo.regularMeths = std::move(info.regularMeths);
+        newInfo.nonRegularPrivateMeths =
+          std::move(info.nonRegularPrivateMeths);
+        newInfo.nonRegularMeths = std::move(info.nonRegularMeths);
+        newInfo.allStatic = std::move(info.allStatic);
+        newInfo.regularStatic = std::move(info.regularStatic);
+        newInfo.complete = false;
+        newInfo.regularComplete = true;
+        newInfo.privateAncestor = false;
+      }
+    }
+
+    data.propsWithImplicitNullable.insert(
+      begin(childData.propsWithImplicitNullable),
+      end(childData.propsWithImplicitNullable)
+    );
+
+    data.mockedClasses.insert(
+      begin(childData.mockedClasses),
+      end(childData.mockedClasses)
+    );
+
+    // The rest are booleans which can just be unioned together.
+    data.hasConstProp |= childData.hasConstProp;
+    data.hasReifiedGeneric |= childData.hasReifiedGeneric;
+    data.isSubMocked |= childData.isSubMocked;
+    data.hasRegularClass |= childData.hasRegularClass;
+    data.hasRegularClassFull |= childData.hasRegularClassFull;
+  }
+
   // Obtain a Data for the given class/split named "top".
   static Data aggregate_data(LocalIndex& index, SString top) {
     auto const& children = [&] () -> const ISStringSet& {
@@ -11976,7 +12100,7 @@ protected:
     Data data;
     auto first = true;
     for (auto const child : children) {
-      auto childData = build_data(index, child, top);
+      auto childData = build_data(index, child);
 
       // The first Data has nothing to union with, so just use it as
       // is.
@@ -11985,128 +12109,7 @@ protected:
         first = false;
         continue;
       }
-
-      // Combine MethInfos for each method name:
-      folly::erase_if(
-        data.methods,
-        [&] (std::pair<const SString, Data::MethInfo>& p) {
-          auto const name = p.first;
-          auto& info = p.second;
-
-          if (auto const childInfo =
-              folly::get_ptr(childData.methods, name)) {
-            // There's a MethInfo with that name in the
-            // child. "Promote" the MethRefs if they're in a superior
-            // status in the child.
-            for (auto const& meth : childInfo->regularMeths) {
-              if (info.regularMeths.count(meth)) continue;
-              info.regularMeths.emplace(meth);
-              info.nonRegularPrivateMeths.erase(meth);
-              info.nonRegularMeths.erase(meth);
-            }
-            for (auto const& meth : childInfo->nonRegularPrivateMeths) {
-              if (info.regularMeths.count(meth) ||
-                  info.nonRegularPrivateMeths.count(meth)) {
-                continue;
-              }
-              info.nonRegularPrivateMeths.emplace(meth);
-              info.nonRegularMeths.erase(meth);
-            }
-            for (auto const& meth : childInfo->nonRegularMeths) {
-              if (info.regularMeths.count(meth) ||
-                  info.nonRegularPrivateMeths.count(meth) ||
-                  info.nonRegularMeths.count(meth)) {
-                continue;
-              }
-              info.nonRegularMeths.emplace(meth);
-            }
-            info.complete &= childInfo->complete;
-            if (childData.hasRegularClassFull) {
-              info.regularComplete &= childInfo->regularComplete;
-              info.privateAncestor |= childInfo->privateAncestor;
-            } else {
-              assertx(childInfo->regularComplete);
-              assertx(!childInfo->privateAncestor);
-            }
-
-            if (childInfo->allStatic) {
-              if (!info.allStatic) {
-                info.allStatic = std::move(*childInfo->allStatic);
-              } else {
-                *info.allStatic |= *childInfo->allStatic;
-              }
-            }
-            if (childInfo->regularStatic) {
-              if (!info.regularStatic) {
-                info.regularStatic = std::move(*childInfo->regularStatic);
-              } else {
-                *info.regularStatic |= *childInfo->regularStatic;
-              }
-            }
-
-            return false;
-          }
-
-          // There's no MethInfo with that name in the child. We might
-          // still want to keep the MethInfo because it will be needed
-          // for expanding abstract class/interface method
-          // families. If the child has a regular class, we can remove
-          // it (it won't be part of the expansion).
-          return
-            childData.hasRegularClass ||
-            !info.regularComplete ||
-            info.privateAncestor ||
-            is_special_method_name(name) ||
-            name == s_construct.get();
-        }
-      );
-
-      // Since we drop non-matching method names only if the class has
-      // a regular class, it introduces an ordering dependency. If the
-      // first class we encounter has a regular class, everything
-      // works fine. However, if the first class we encounter does not
-      // have a regular class, the Data will have its methods. If we
-      // eventually process a class which does have a regular class,
-      // we'll never process it's non-matching methods (because we
-      // iterate over data.methods). They won't end up in data.methods
-      // whereas they would if a class with regular class was
-      // processed first. Detect this condition and manually add such
-      // methods to data.methods.
-      if (!data.hasRegularClass && childData.hasRegularClass) {
-        for (auto& [name, info] : childData.methods) {
-          if (!info.regularComplete || info.privateAncestor) continue;
-          if (is_special_method_name(name)) continue;
-          if (name == s_construct.get()) continue;
-          if (data.methods.count(name)) continue;
-          auto& newInfo = data.methods[name];
-          newInfo.regularMeths = std::move(info.regularMeths);
-          newInfo.nonRegularPrivateMeths =
-            std::move(info.nonRegularPrivateMeths);
-          newInfo.nonRegularMeths = std::move(info.nonRegularMeths);
-          newInfo.allStatic = std::move(info.allStatic);
-          newInfo.regularStatic = std::move(info.regularStatic);
-          newInfo.complete = false;
-          newInfo.regularComplete = true;
-          newInfo.privateAncestor = false;
-        }
-      }
-
-      data.propsWithImplicitNullable.insert(
-        begin(childData.propsWithImplicitNullable),
-        end(childData.propsWithImplicitNullable)
-      );
-
-      data.mockedClasses.insert(
-        begin(childData.mockedClasses),
-        end(childData.mockedClasses)
-      );
-
-      // The rest are booleans which can just be unioned together.
-      data.hasConstProp |= childData.hasConstProp;
-      data.hasReifiedGeneric |= childData.hasReifiedGeneric;
-      data.isSubMocked |= childData.isSubMocked;
-      data.hasRegularClass |= childData.hasRegularClass;
-      data.hasRegularClassFull |= childData.hasRegularClassFull;
+      update_data(data, std::move(childData));
     }
 
     index.children.erase(top);

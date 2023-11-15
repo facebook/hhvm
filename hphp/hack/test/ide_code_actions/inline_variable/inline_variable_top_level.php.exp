@@ -1,0 +1,32 @@
+Code actions available:
+------------------------------------------
+Inline variable $the_variable (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"",
+          "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":2}}
+        },
+        {
+          "newText":"(300 * 400)",
+          "range":{"end":{"character":33,"line":3},"start":{"character":20,"line":3}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Inline variable $the_variable"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+$x = /*range-start*/(300 * 400)/*range-end*/ + 1;
+

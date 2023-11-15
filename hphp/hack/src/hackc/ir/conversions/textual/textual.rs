@@ -94,6 +94,10 @@ impl TextualFile<'_> {
             write!(self.w, ".async ")?;
         }
 
+        if attributes.is_abstract {
+            write!(self.w, ".abstract ")?;
+        }
+
         write!(self.w, "{}(", name.display(&self.strings))?;
 
         // TODO: For now textual can't handle a mix of types with a trailing
@@ -158,6 +162,10 @@ impl TextualFile<'_> {
 
         if attributes.is_async {
             write!(self.w, ".async ")?;
+        }
+
+        if attributes.is_abstract {
+            write!(self.w, ".abstract ")?;
         }
 
         if attributes.is_curry {
@@ -377,6 +385,7 @@ impl TextualFile<'_> {
             is_async: false,
             is_curry: true,
             is_final: true,
+            is_abstract: false,
         };
         self.define_function(
             &method,
@@ -553,6 +562,7 @@ pub(crate) struct FuncAttributes {
     pub is_async: bool,
     pub is_curry: bool,
     pub is_final: bool,
+    pub is_abstract: bool,
 }
 
 #[derive(Debug, Hash, PartialEq, Eq)]

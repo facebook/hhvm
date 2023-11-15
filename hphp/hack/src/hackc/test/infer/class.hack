@@ -244,12 +244,12 @@ class C {
 }
 
 abstract class AbstractClass {
-  // TEST-CHECK-BAL: declare AbstractClass$static.abs_static_func
-  // CHECK: declare AbstractClass$static.abs_static_func(*AbstractClass$static, *HackInt, *HackFloat): *HackString
+  // TEST-CHECK-BAL: declare .abstract AbstractClass$static.abs_static_func
+  // CHECK: declare .abstract AbstractClass$static.abs_static_func(*AbstractClass$static, *HackInt, *HackFloat): *HackString
   public static abstract function abs_static_func(int $a, float $b): string;
 
-  // TEST-CHECK-BAL: declare AbstractClass.abs_func
-  // CHECK: declare AbstractClass.abs_func(*AbstractClass, *HackInt, *HackFloat): *HackString
+  // TEST-CHECK-BAL: declare .abstract AbstractClass.abs_func
+  // CHECK: declare .abstract AbstractClass.abs_func(*AbstractClass, *HackInt, *HackFloat): *HackString
   public abstract function abs_func(int $a, float $b): string;
 }
 

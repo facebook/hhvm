@@ -393,6 +393,7 @@ fn write_func(
         is_async: func_info.is_async(),
         is_curry: false,
         is_final: func_info.attrs().is_final(),
+        is_abstract: func_info.attrs().is_abstract(),
     };
 
     // TODO(aorenste) move of `func` occurs in the lambda below, so I clone it to
@@ -480,6 +481,7 @@ pub(crate) fn write_func_decl(
         is_async: func_info.is_async(),
         is_final: func_info.attrs().is_final(),
         is_curry: false,
+        is_abstract: func_info.attrs().is_abstract(),
     };
 
     txf.declare_function(&name, &attributes, &param_tys, &ret_ty)?;

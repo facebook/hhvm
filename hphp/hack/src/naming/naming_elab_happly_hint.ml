@@ -148,40 +148,6 @@ let canonical_tycon typarams (pos, name) =
   else
     Tycon (pos, name)
 
-(* TODO[mjt] should we really be special casing `darray`? *)
-let canonicalise_darray hint_pos pos hints =
-  match hints with
-  | []
-  | [_] ->
-    let err =
-      Some (Err.naming @@ Naming_error.Too_few_type_arguments hint_pos)
-    in
-    let any = (pos, Aast.Hany) in
-    Ok ((hint_pos, Aast.Happly ((pos, SN.Collections.cDict), [any; any])), err)
-  | [key_hint; val_hint] ->
-    Ok
-      ( ( hint_pos,
-          Aast.Happly ((pos, SN.Collections.cDict), [key_hint; val_hint]) ),
-        None )
-  | _ ->
-    let err = Err.naming @@ Naming_error.Too_many_type_arguments hint_pos in
-    Error ((hint_pos, Aast.Hany), err)
-
-(* TODO[mjt] should we really be special casing `varray`? *)
-let canonicalise_varray hint_pos pos hints =
-  match hints with
-  | [] ->
-    let err =
-      Some (Err.naming @@ Naming_error.Too_few_type_arguments hint_pos)
-    in
-    let any = (pos, Aast.Hany) in
-    Ok ((hint_pos, Aast.Happly ((pos, SN.Collections.cVec), [any])), err)
-  | [val_hint] ->
-    Ok ((hint_pos, Aast.Happly ((pos, SN.Collections.cVec), [val_hint])), None)
-  | _ ->
-    let err = Err.naming @@ Naming_error.Too_many_type_arguments hint_pos in
-    Error ((hint_pos, Aast.Hany), err)
-
 (* TODO[mjt] should we really be special casing `vec_or_dict` both in
    its representation and error handling? *)
 let canonicalise_vec_or_dict hint_pos pos hints =
@@ -244,8 +210,10 @@ let canonicalize_happly tparams hint_pos tycon hints =
       Ok
         ( (hint_pos, Aast.(Hprim Tstring)),
           Some (Err.naming @@ Naming_error.Classname_param pos) ))
-  | Darray pos -> canonicalise_darray hint_pos pos hints
-  | Varray pos -> canonicalise_varray hint_pos pos hints
+  | Darray pos ->
+    Ok ((hint_pos, Aast.Happly ((pos, SN.Collections.cDict), hints)), None)
+  | Varray pos ->
+    Ok ((hint_pos, Aast.Happly ((pos, SN.Collections.cVec), hints)), None)
   | Vec_or_dict pos -> canonicalise_vec_or_dict hint_pos pos hints
   (* The type constructors canonical representation is `Happly` *)
   | Tycon (pos, tycon) ->

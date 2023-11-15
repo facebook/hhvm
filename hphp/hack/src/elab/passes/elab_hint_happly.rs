@@ -193,40 +193,13 @@ fn canonical_happly(
             let err = NamingError::PrimitiveTopLevel(id.0.clone());
             Break((Some(hint_), err))
         }
-        // TODO[mjt] we should not be assuming knowledge about the arity of
-        // type constructors during elaboration
-        CanonResult::Darray if hints.len() == 2 => {
-            id.1 = sn::collections::DICT.to_string();
-            Continue((None, None))
-        }
-        CanonResult::Darray if hints.len() < 2 => {
-            id.1 = sn::collections::DICT.to_string();
-            hints.clear();
-            hints.push(Hint(id.0.clone(), Box::new(Hint_::Hany)));
-            hints.push(Hint(id.0.clone(), Box::new(Hint_::Hany)));
-            let err = NamingError::TooFewTypeArguments(hint_pos.clone());
-            Continue((None, Some(err)))
-        }
         CanonResult::Darray => {
-            let hint_ = Hint_::Hany;
-            let err = NamingError::TooManyTypeArguments(hint_pos.clone());
-            Break((Some(hint_), err))
-        }
-        CanonResult::Varray if hints.len() == 1 => {
-            id.1 = sn::collections::VEC.to_string();
+            id.1 = sn::collections::DICT.to_string();
             Continue((None, None))
-        }
-        CanonResult::Varray if hints.is_empty() => {
-            id.1 = sn::collections::VEC.to_string();
-            hints.clear();
-            hints.push(Hint(id.0.clone(), Box::new(Hint_::Hany)));
-            let err = NamingError::TooFewTypeArguments(hint_pos.clone());
-            Continue((None, Some(err)))
         }
         CanonResult::Varray => {
-            let hint_ = Hint_::Hany;
-            let err = NamingError::TooManyTypeArguments(hint_pos.clone());
-            Break((Some(hint_), err))
+            id.1 = sn::collections::VEC.to_string();
+            Continue((None, None))
         }
         CanonResult::VecOrDict if hints.len() > 2 => {
             let hint_ = Hint_::Hany;

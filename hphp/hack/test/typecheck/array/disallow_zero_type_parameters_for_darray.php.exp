@@ -1,2 +1,4 @@
 File "disallow_zero_type_parameters_for_darray.php", line 3, characters 18-23:
-Too few type arguments for this type (Naming[2071])
+Wrong number of type arguments (expected 2, got 0) (Typing[4101])
+  File "hackarray.hhi", line 32, characters 24-27:
+  Definition is here

@@ -1,5 +1,3 @@
-Errors:
-  [3:31-37] Too few type arguments for this type
 [(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -10,7 +8,7 @@ Errors:
       { f_span = [3:1-50]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((), (Some ([3:43-47], (Hprim Tvoid))));
         f_params =
-        [{ param_annotation = (); param_type_hint = ((), (Some ([3:31-37], (Happly (([3:31-37], "\\HH\\vec"), [([3:31-37], Hany)]))))); 
+        [{ param_annotation = (); param_type_hint = ((), (Some ([3:31-37], (Happly (([3:31-37], "\\HH\\vec"), []))))); 
            param_is_variadic = false; param_pos = [3:38-40]; param_name = "$x"; 
            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }

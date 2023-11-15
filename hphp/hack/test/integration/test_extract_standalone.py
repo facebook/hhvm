@@ -198,7 +198,6 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\with_contra_tparam",
             "\\WithLateInit::getCount",
             "\\TFlobby::g",
-            "\\with_omitted_generics",
             "\\:foo::render",
             "\\with_unsafe_type_hh_fixme",
             "\\with_reified_generics",

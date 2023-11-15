@@ -440,8 +440,6 @@ val collect_enum_class_upper_bounds :
 
 val default_fun_param : ?pos:Pos_or_decl.t -> 'a -> 'a Typing_defs.fun_param
 
-val tany : Typing_env_types.env -> Typing_defs.locl_phase Typing_defs.ty_
-
 val mk_tany :
   Typing_env_types.env -> Pos.t -> Typing_reason.locl_phase Typing_defs.ty
 

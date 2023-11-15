@@ -767,7 +767,10 @@ and localize_class_instantiation ~ety_env env r sid tyargs class_info =
                   apply_reasons ~on_error
                   @@ Secondary.Cyclic_enum_constraint pos)
         in
-        ((env, ty_err_opt), mk (r, TUtils.tany env))
+        let (env, ty) =
+          Env.fresh_type_error env (Pos_or_decl.unsafe_to_raw_pos pos)
+        in
+        ((env, ty_err_opt), ty)
       | None ->
         if Ast_defs.is_c_enum_class (Cls.kind class_info) then
           (* Enum classes no longer has the ambiguity between the type of
@@ -878,9 +881,9 @@ and localize_with_kind
         if Env.is_typedef_visible env ~name typedef then
           ((env, None), mk (r, Tunapplied_alias name))
         else
-          (* The bound is unused until the newtype is fully applied, thus supplying dummy Tany *)
-          ( (env, None),
-            mk (r, Tnewtype (name, [], mk (Reason.none, make_tany ()))) )
+          (* The bound is unused until the newtype is fully applied *)
+          let (env, ty) = Env.fresh_type_error env Pos.none in
+          ((env, None), mk (r, Tnewtype (name, [], ty)))
       | None ->
         (* We are expected to localize a higher-kinded type, but are given an unknown class name.
               Not much we can do. *)

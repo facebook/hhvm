@@ -99,12 +99,30 @@ struct CompactVector : private std::allocator_traits<Alloc>::template rebind_all
   void resize(size_type sz, const value_type& value);
   void shrink_to_fit();
 
+  // Return the element at index, if index < size. Otherwise resize
+  // the vector to index and return the (default-constructed) element.
+  T& ensure(size_t index) {
+    if (index >= size()) resize(index+1);
+    return *get(index);
+  }
+  T& ensure(size_t index, const value_type& d) {
+    if (index >= size()) resize(index+1, d);
+    return *get(index);
+  }
+
   T& operator[](size_type index) { return *get(index); }
   const T& operator[](size_type index) const { return *get(index); }
   T& front() { return *get(0); }
   const T& front() const { return *get(0); }
   T& back() { return *get(m_data->m_len - 1); }
   const T& back() const { return *get(m_data->m_len - 1); }
+
+  // Return the element at index, if index < size. Otherwise return
+  // the default value provided.
+  T get_default(size_t index, const value_type& d) const {
+    if (index < size()) return *get(index);
+    return d;
+  }
 
   void reserve(size_type sz);
 private:
@@ -286,7 +304,7 @@ bool CompactVector<T, A>::resize_helper(size_type sz) {
   auto const old_size = size();
   if (sz == old_size) return true;
   if (sz > old_size) {
-    reserve_impl(sz);
+    reserve(sz);
     return false;
   }
   auto elm = get(sz);

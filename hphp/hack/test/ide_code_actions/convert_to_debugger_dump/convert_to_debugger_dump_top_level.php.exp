@@ -1,0 +1,32 @@
+Code actions available:
+------------------------------------------
+convert to 'debugger_dump' (CodeActionKind: quickfix) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"debugger_dump(",
+          "range":{"end":{"character":16,"line":2},"start":{"character":0,"line":2}}
+        },
+        {
+          "newText":")",
+          "range":{"end":{"character":31,"line":2},"start":{"character":31,"line":2}}
+        }
+      ]
+    }
+  },
+  "kind":"quickfix",
+  "title":"convert to 'debugger_dump'"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+debugger_dump($x/*range-end*/);
+

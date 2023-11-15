@@ -1,5 +1,0 @@
-Code actions available:
-------------------------------------------
-convert to 'debugger_dump' (CodeActionKind: quickfix)
-
-No code action titles match prefix: convert to 'var_dump'

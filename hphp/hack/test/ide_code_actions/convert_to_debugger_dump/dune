@@ -14,7 +14,7 @@
    --program
    %{exe:../../../src/hh_single_type_check.exe}
    --flags
-   --ide-code-actions "convert to 'var_dump'")))
+   --ide-code-actions "convert to 'debugger_dump'")))
 
 (alias
  (name runtest)

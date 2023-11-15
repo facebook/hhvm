@@ -131,6 +131,13 @@ class structure_annotations {
           fm_.add_include("thrift/annotation/thrift.thrift");
         }
       }
+      if (name == "cpp.name") {
+        to_remove.emplace_back(name, data);
+        if (!node.find_structured_annotation_or_null(kCppNameUri)) {
+          to_add.insert(fmt::format("@cpp.Name{{value = \"{}\"}}", data.value));
+          fm_.add_include("thrift/annotation/cpp.thrift");
+        }
+      }
       if (name == "cpp.ref_type" || name == "cpp2.ref_type") {
         to_remove.emplace_back(name, data);
         if (is_field &&

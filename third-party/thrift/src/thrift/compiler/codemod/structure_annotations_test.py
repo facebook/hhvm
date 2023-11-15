@@ -156,7 +156,7 @@ class HoistAnnotatedTypes(unittest.TestCase):
             textwrap.dedent(
                 """\
                 typedef i32 foo (cpp.type = "foo")
-                typedef i32 (cpp.type = "bar") bar
+                typedef i32 (cpp.type = "bar") bar (cpp.name = "bars")
 
                 struct S {
                     1: i32 (cpp.type = "baz") baz;
@@ -202,6 +202,7 @@ class HoistAnnotatedTypes(unittest.TestCase):
 
                 @cpp.Type{name = "foo"}
                 typedef i32 foo
+                @cpp.Name{value = "bars"}
                 @cpp.Type{name = "bar"}
                 typedef i32  bar
 

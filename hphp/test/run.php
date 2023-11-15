@@ -655,7 +655,7 @@ function find_tests(
   }
   $files = vec[];
   foreach ($ft as $file) {
-    if (!@stat($file)) {
+    if (!stat($file)) {
       error("Not valid file or directory: '$file'");
     }
     $file = preg_replace(',//+,', '/', realpath($file));
@@ -915,7 +915,10 @@ function hhvm_cmd_impl(
 
       // Create a temporary directory for the recording
       $record_dir = Status::getTestWorkingDir($test_run) . 'record';
-      @mkdir($record_dir, 0777, true);
+      try {
+        mkdir($record_dir, 0777, true);
+      }
+      catch (ErrorException $_) {}
 
       // Create the record command
       $args[] = '-vEval.RecordReplay=true';
@@ -1238,7 +1241,7 @@ function exec_with_timeout(string $cmd,
       ($end - $now) * 1000000,
       $status['running'] ? 5000000 : 0
     );
-    $available = @stream_select(
+    $available = stream_select(
       inout $read,
       inout $write,
       inout $except,
@@ -1263,8 +1266,8 @@ function exec_with_timeout(string $cmd,
       }
     }
   }
-  @fclose($pipes[1]);
-  @fclose($pipes[2]);
+  fclose($pipes[1]);
+  fclose($pipes[2]);
 
   $timedout = false;
   while ($status['running']) {
@@ -1277,7 +1280,7 @@ function exec_with_timeout(string $cmd,
       $ignore2 = 0;
       // We've timed out. Kill the command and any children it might
       // have created.
-      @exec(
+      exec(
         'pkill --signal 9 -P ' . $status['pid'] . ' 2> /dev/null',
         inout $ignore1,
         inout $ignore2
@@ -1308,7 +1311,7 @@ function exec_with_timeout(string $cmd,
 
   $pid = $status['pid'];
   $stack_file = Status::getWorkingDir(). "/stacktrace.$pid.log";
-  $stack = @file_get_contents($stack_file);
+  $stack = file_get_contents($stack_file);
 
   if ($stack) {
     $error .= "\nstdout:\n$before_dump\nstderr:\n$stderr";
@@ -1636,7 +1639,7 @@ final class Status {
 
   public static function diffForTest(string $test): string {
     $path = self::getTestWorkingDir($test) . '/diff';
-    $diff = @file_get_contents($path);
+    $diff = file_get_contents($path);
     return $diff === false ? '' : $diff;
   }
 
@@ -1653,7 +1656,7 @@ final class Status {
   }
 
   private static function removeDirectory(string $dir): void {
-    $files = @scandir($dir);
+    $files = scandir($dir);
     if ($files === false) return;
     foreach ($files as $file) {
       if ($file === '.' || $file === '..') continue;
@@ -1661,10 +1664,10 @@ final class Status {
       if (is_dir($path)) {
         self::removeDirectory($path);
       } else {
-        @unlink($path);
+        unlink($path);
       }
     }
-    @rmdir($dir);
+    rmdir($dir);
   }
 
   // This is similar to removeDirectory but it only removes empty
@@ -3030,8 +3033,8 @@ function count_array_diff(
 
     for ($ofs1 = $idx1 + 1; $ofs1 < $cnt1 && $st > 0; $ofs1++) {
       $st--;
-      $eq = @count_array_diff($ar1, $ar2, $ofs1, $idx2, $cnt1,
-                              $cnt2, $st, $cmp);
+      $eq = count_array_diff($ar1, $ar2, $ofs1, $idx2, $cnt1,
+                             $cnt2, $st, $cmp);
 
       if ($eq > $eq1) {
         $eq1 = $eq;
@@ -3043,8 +3046,8 @@ function count_array_diff(
 
     for ($ofs2 = $idx2 + 1; $ofs2 < $cnt2 && $st > 0; $ofs2++) {
       $st--;
-      $eq = @count_array_diff($ar1, $ar2, $idx1, $ofs2, $cnt1,
-                              $cnt2, $st, $cmp);
+      $eq = count_array_diff($ar1, $ar2, $idx1, $ofs2, $cnt1,
+                             $cnt2, $st, $cmp);
       if ($eq > $eq2) {
         $eq2 = $eq;
       }
@@ -3066,8 +3069,8 @@ function generate_array_diff(
   vec<string> $w,
   (function(string, string): bool) $cmp
 ): vec<string> {
-  $idx1 = 0; $cnt1 = @count($ar1);
-  $idx2 = 0; $cnt2 = @count($ar2);
+  $idx1 = 0; $cnt1 = count($ar1);
+  $idx2 = 0; $cnt2 = count($ar2);
   $old1 = dict[];
   $old2 = dict[];
 
@@ -3077,10 +3080,10 @@ function generate_array_diff(
       $idx2++;
       continue;
     } else {
-      $c1 = @count_array_diff($ar1, $ar2, $idx1+1, $idx2, $cnt1,
-                              $cnt2, 10, $cmp);
-      $c2 = @count_array_diff($ar1, $ar2, $idx1, $idx2+1, $cnt1,
-                              $cnt2, 10, $cmp);
+      $c1 = count_array_diff($ar1, $ar2, $idx1+1, $idx2, $cnt1,
+                             $cnt2, 10, $cmp);
+      $c2 = count_array_diff($ar1, $ar2, $idx1, $idx2+1, $cnt1,
+                             $cnt2, 10, $cmp);
 
       if ($c1 > $c2) {
         $old1[$idx1+1] = sprintf("%03d- ", $idx1+1) . $w[$idx1];
@@ -3787,7 +3790,7 @@ function print_success(
     print_ship();
   }
   if ($options->failure_file is nonnull) {
-    @unlink($options->failure_file);
+    unlink($options->failure_file);
   }
   if ($options->verbose) {
     print_commands($tests, $options);
@@ -3872,7 +3875,12 @@ function print_failure(
 
 function port_is_listening(int $port): bool {
   $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-  return @socket_connect($socket, 'localhost', $port);
+  try {
+    return socket_connect($socket, 'localhost', $port);
+  }
+  catch (ErrorException $_) {
+    return false;
+  }
 }
 
 function find_open_port(): int {

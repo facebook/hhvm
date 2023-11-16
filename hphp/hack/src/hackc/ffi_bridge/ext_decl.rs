@@ -356,13 +356,10 @@ fn get_typeconsts(typeconsts: &[&ShallowTypeconst<'_>], name: &str) -> Vec<ExtDe
         .filter(|tc| name.is_empty() || tc.name.1 == name)
         .map(|tc| {
             let kind = match &tc.kind {
-                Typeconst::TCAbstract(AbstractTypeconst { default, .. }) => {
-                    if default.is_none() {
-                        String::new()
-                    } else {
-                        extract_type_name(default.unwrap())
-                    }
-                }
+                Typeconst::TCAbstract(AbstractTypeconst { default, .. }) => match default {
+                    None => String::new(),
+                    Some(d) => extract_type_name(d),
+                },
                 Typeconst::TCConcrete(ConcreteTypeconst { tc_type, .. }) => {
                     extract_type_name(tc_type)
                 }
@@ -421,9 +418,7 @@ fn get_typed_params(arr: &[&Tparam<'_>]) -> Vec<ExtDeclTparam> {
             variance: enum_variance(t.variance),
             name: fmt_type(t.name.1),
             tparams: get_typed_params(t.tparams),
-            constraints: t
-                .constraints
-                .iter()
+            constraints: (t.constraints.iter())
                 .map(|c| ExtDeclTypeConstraint {
                     kind: enum_constraint_kind(c.0),
                     type_: extract_type_name(c.1),
@@ -446,9 +441,7 @@ fn get_attributes(arr: &[&UserAttribute<'_>], name: &str) -> Vec<ExtDeclAttribut
         })
         .map(|t| ExtDeclAttribute {
             name: fmt_type(t.name.1),
-            args: t
-                .params
-                .iter()
+            args: (t.params.iter())
                 .map(|arg| match arg {
                     UserAttributeParam::Classname(cn) => fmt_type(cn),
                     UserAttributeParam::String(s) => s.to_string(),
@@ -461,17 +454,17 @@ fn get_attributes(arr: &[&UserAttribute<'_>], name: &str) -> Vec<ExtDeclAttribut
 }
 
 fn extract_module_refs(refs: Option<&[ModuleReference<'_>]>) -> Vec<String> {
-    if refs.is_none() {
-        return vec![];
+    match refs {
+        Some(refs) => refs
+            .iter()
+            .map(|mref| match mref {
+                ModuleReference::MRGlobal => String::new(),
+                ModuleReference::MRPrefix(m) => m.to_string(),
+                ModuleReference::MRExact(m) => m.to_string(),
+            })
+            .collect(),
+        None => vec![],
     }
-    refs.unwrap()
-        .iter()
-        .map(|mref| match mref {
-            ModuleReference::MRGlobal => String::new(),
-            ModuleReference::MRPrefix(m) => m.to_string(),
-            ModuleReference::MRExact(m) => m.to_string(),
-        })
-        .collect()
 }
 
 fn get_signature(ty: Ty_<'_>) -> Vec<ExtDeclSignature> {

@@ -202,17 +202,13 @@ fn canonical_happly(
             Continue((None, None))
         }
         CanonResult::VecOrDict if hints.len() > 2 => {
-            let hint_ = Hint_::Hany;
             let err = NamingError::TooManyTypeArguments(hint_pos.clone());
-            Break((Some(hint_), err))
+            Continue((None, Some(err)))
         }
         CanonResult::VecOrDict => match hints.pop() {
             None => {
-                let mut pos_canon = Pos::NONE;
-                std::mem::swap(&mut id.0, &mut pos_canon);
-                let hint_ = Hint_::HvecOrDict(None, Hint(pos_canon.clone(), Box::new(Hint_::Hany)));
-                let err = NamingError::TooFewTypeArguments(pos_canon);
-                Continue((Some(hint_), Some(err)))
+                let err = NamingError::TooFewTypeArguments(hint_pos.clone());
+                Continue((None, Some(err)))
             }
             Some(hint2) => {
                 if let Some(hint1) = hints.pop() {
@@ -405,31 +401,6 @@ mod tests {
             Hint_::HvecOrDict(None, h) => {
                 let Hint(_, h_) = h as &Hint;
                 matches!(**h_, Hint_::Hnothing)
-            }
-            _ => false,
-        })
-    }
-
-    #[test]
-    fn test_vec_or_dict_zero_tyargs() {
-        let env = Env::default();
-
-        let mut pass = ElabHintHapplyPass::default();
-
-        let mut elem = Hint(
-            Pos::NONE,
-            Box::new(Hint_::Happly(
-                Id(Pos::NONE, sn::typehints::VEC_OR_DICT.to_string()),
-                vec![],
-            )),
-        );
-
-        elem.transform(&env, &mut pass);
-        let Hint(_, hint_) = elem;
-        assert!(match &*hint_ {
-            Hint_::HvecOrDict(None, h) => {
-                let Hint(_, h_) = h as &Hint;
-                matches!(**h_, Hint_::Hany)
             }
             _ => false,
         })

@@ -72,7 +72,7 @@ type canon_result =
   | Typaram of string
   | Varray of Pos.t
   | Darray of Pos.t
-  | Vec_or_dict of Pos.t
+  | Vec_or_dict of Pos.t * string
   | CanonErr of Naming_error.t
 
 (* A number of hints are represented by `Happly` after lowering; we elaborate
@@ -99,7 +99,7 @@ let canonical_tycon typarams (pos, name) =
       equal name SN.Typehints.varray_or_darray
       || equal name SN.Typehints.vec_or_dict)
   then
-    Vec_or_dict pos
+    Vec_or_dict (pos, name)
   else if String.equal name SN.Typehints.void then
     Concrete (pos, Aast.(Hprim Tvoid))
   else if String.equal name SN.Typehints.noreturn then
@@ -150,20 +150,19 @@ let canonical_tycon typarams (pos, name) =
 
 (* TODO[mjt] should we really be special casing `vec_or_dict` both in
    its representation and error handling? *)
-let canonicalise_vec_or_dict hint_pos pos hints =
+let canonicalise_vec_or_dict tycon hint_pos pos hints =
   match hints with
   | [] ->
-    let err =
-      Some (Err.naming @@ Naming_error.Too_few_type_arguments hint_pos)
-    in
-    let any = (pos, Aast.Hany) in
-    Ok ((hint_pos, Aast.Hvec_or_dict (None, any)), err)
+    let err = Some (Err.naming @@ Naming_error.Too_few_type_arguments hint_pos)
+    and hint_ = Aast.Happly ((pos, tycon), hints) in
+    Ok ((hint_pos, hint_), err)
   | [val_hint] -> Ok ((hint_pos, Aast.Hvec_or_dict (None, val_hint)), None)
   | [key_hint; val_hint] ->
     Ok ((hint_pos, Aast.Hvec_or_dict (Some key_hint, val_hint)), None)
   | _ ->
-    let err = Err.naming @@ Naming_error.Too_many_type_arguments hint_pos in
-    Error ((hint_pos, Aast.Hany), err)
+    let err = Some (Err.naming @@ Naming_error.Too_many_type_arguments hint_pos)
+    and hint_ = Aast.Happly ((pos, tycon), hints) in
+    Ok ((hint_pos, hint_), err)
 
 (* After lowering many hints are represented as `Happly(...,...)`. Here
    we canonicalise the representation of type constructor then handle
@@ -214,7 +213,8 @@ let canonicalize_happly tparams hint_pos tycon hints =
     Ok ((hint_pos, Aast.Happly ((pos, SN.Collections.cDict), hints)), None)
   | Varray pos ->
     Ok ((hint_pos, Aast.Happly ((pos, SN.Collections.cVec), hints)), None)
-  | Vec_or_dict pos -> canonicalise_vec_or_dict hint_pos pos hints
+  | Vec_or_dict (pos, tycon) ->
+    canonicalise_vec_or_dict tycon hint_pos pos hints
   (* The type constructors canonical representation is `Happly` *)
   | Tycon (pos, tycon) ->
     let hint_ = Aast.Happly ((pos, tycon), hints) in

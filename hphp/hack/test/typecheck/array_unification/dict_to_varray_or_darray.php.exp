@@ -1,2 +1,10 @@
 File "dict_to_varray_or_darray.php", line 11, characters 35-50:
+Unbound name: `varray_or_darray` (Naming[2049])
+File "dict_to_varray_or_darray.php", line 11, characters 35-50:
 Too few type arguments for this type (Naming[2071])
+File "dict_to_varray_or_darray.php", line 12, characters 10-11:
+Invalid return type (Typing[4110])
+  File "dict_to_varray_or_darray.php", line 11, characters 35-50:
+  Expected `varray_or_darray`
+  File "dict_to_varray_or_darray.php", line 11, characters 12-28:
+  But got `dict<string, int>`

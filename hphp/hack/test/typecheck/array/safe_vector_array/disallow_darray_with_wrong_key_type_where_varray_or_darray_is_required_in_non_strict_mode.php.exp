@@ -1,4 +1,6 @@
 File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required_in_non_strict_mode.php", line 6, characters 54-69:
+Unbound name: `varray_or_darray` (Naming[2049])
+File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required_in_non_strict_mode.php", line 6, characters 54-69:
 Too few type arguments for this type (Naming[2071])
 File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required_in_non_strict_mode.php", line 8, characters 19-22:
 Was expecting a return type hint (Typing[4030])

@@ -1,2 +1,10 @@
 File "varray_to_vec_or_dict.php", line 11, characters 29-39:
+Unbound name: `vec_or_dict` (Naming[2049])
+File "varray_to_vec_or_dict.php", line 11, characters 29-39:
 Too few type arguments for this type (Naming[2071])
+File "varray_to_vec_or_dict.php", line 12, characters 10-11:
+Invalid return type (Typing[4110])
+  File "varray_to_vec_or_dict.php", line 11, characters 29-39:
+  Expected `vec_or_dict`
+  File "varray_to_vec_or_dict.php", line 11, characters 12-22:
+  But got `vec<int>`

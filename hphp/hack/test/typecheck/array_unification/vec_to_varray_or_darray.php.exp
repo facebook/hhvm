@@ -1,2 +1,10 @@
 File "vec_to_varray_or_darray.php", line 11, characters 26-41:
+Unbound name: `varray_or_darray` (Naming[2049])
+File "vec_to_varray_or_darray.php", line 11, characters 26-41:
 Too few type arguments for this type (Naming[2071])
+File "vec_to_varray_or_darray.php", line 12, characters 10-11:
+Invalid return type (Typing[4110])
+  File "vec_to_varray_or_darray.php", line 11, characters 26-41:
+  Expected `varray_or_darray`
+  File "vec_to_varray_or_darray.php", line 11, characters 12-19:
+  But got `vec<int>`

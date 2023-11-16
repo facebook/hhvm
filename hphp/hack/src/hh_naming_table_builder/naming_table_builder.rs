@@ -165,12 +165,7 @@ pub fn build_naming_table_ide(
         .collect::<anyhow::Result<_>>()?;
     let (summaries, addenda): (Vec<_>, Vec<_>) = parse_results.into_iter().unzip();
 
-    let save_result = names::Names::build_from_iterator(output, summaries.into_iter())?;
-
-    if !save_result.collisions.is_empty() {
-        // TODO(toyang): should we allow collisions at this point? I'm not sure if a duplicate naming error should be reported here vs. somewhere else.
-        return Ok((ExitStatus::SqlAssertionFailure, addenda));
-    }
+    let _save_result = names::Names::build_from_iterator(output, summaries.into_iter())?;
 
     Ok((ExitStatus::NoError, addenda))
 }

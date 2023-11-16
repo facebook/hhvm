@@ -2439,7 +2439,6 @@ module rec Expr : sig
     env * Tast.expr * locl_ty
 
   val exprs :
-    expected:ExpectedTy.t option ->
     ctxt:Context.t ->
     env ->
     Nast.expr list ->
@@ -2663,18 +2662,18 @@ end = struct
     let (env, ty) = Union.union ~approx_cancel_neg:true env ty1 ty2 in
     make_result env p (Aast.Eif (tc, te1, te2)) ty
 
-  and exprs ~expected ~ctxt env el =
+  and exprs ~ctxt env el =
     match el with
     | [] -> (env, [], [])
     | e :: el ->
       let (env, te, ty) =
         expr
-          ~expected
+          ~expected:None
           ~ctxt:Context.{ ctxt with is_using_clause = false; in_await = None }
           env
           e
       in
-      let (env, tel, tyl) = exprs ~expected ~ctxt env el in
+      let (env, tel, tyl) = exprs ~ctxt env el in
       (env, te :: tel, ty :: tyl)
 
   and argument_list_exprs expr_cb env el =
@@ -2693,7 +2692,7 @@ end = struct
       let (env, te, ty) = expr ~expected ~ctxt:Context.default env e in
       let (env, tel, tyl) = exprs_expected (pos, ur, expected_tyl) env el in
       (env, te :: tel, ty :: tyl)
-    | (el, []) -> exprs ~expected:None ~ctxt:Context.default env el
+    | (el, []) -> exprs ~ctxt:Context.default env el
 
   and expr_ ~expected ~ctxt env ((_, p, e) as outer) =
     let env = Env.open_tyvars env p in
@@ -3502,7 +3501,6 @@ end = struct
           exprs_expected (pos, ur, expected_tyl) env el
         | _ ->
           exprs
-            ~expected:None
             ~ctxt:
               Context.
                 {
@@ -3535,7 +3533,6 @@ end = struct
             exprs_expected (pos, ur, expected_tyl) env el
           | _ ->
             exprs
-              ~expected:None
               ~ctxt:
                 Context.
                   {
@@ -7750,9 +7747,7 @@ end = struct
             (* For loops leak their initializer, but nothing that's defined in the
                body
             *)
-            let (env, te1, _) =
-              Expr.exprs ~expected:None ~ctxt:Expr.Context.default env e1
-            in
+            let (env, te1, _) = Expr.exprs ~ctxt:Expr.Context.default env e1 in
             (* initializer *)
             let env =
               LEnv.save_and_merge_next_in_cont ~join_pos:pos env C.Continue
@@ -7776,7 +7771,7 @@ end = struct
                   in
                   let join_map = annot_map env in
                   let (env, te3, _) =
-                    Expr.exprs ~expected:None ~ctxt:Expr.Context.default env e3
+                    Expr.exprs ~ctxt:Expr.Context.default env e3
                   in
 
                   (* Export the join and refinement environments *)

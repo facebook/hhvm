@@ -800,7 +800,7 @@ void ThriftServer::setupThreadManager() {
       }
     } else {
       auto explanation = fmt::format(
-          "thrift flag: {}, enable gflag: {}, dsiable gflag: {}",
+          "thrift flag: {}, enable gflag: {}, disable gflag: {}",
           THRIFT_FLAG(experimental_use_resource_pools),
           FLAGS_thrift_experimental_use_resource_pools,
           FLAGS_thrift_disable_resource_pools);

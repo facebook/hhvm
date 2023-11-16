@@ -1,6 +1,5 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('nameof_class')>>
 function expect_string(string $s): void {}
 class C {}
 function f<reify T as C>(): void {

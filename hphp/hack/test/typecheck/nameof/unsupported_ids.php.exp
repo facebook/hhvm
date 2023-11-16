@@ -1,4 +1,4 @@
-File "unsupported_ids.php", line 9, characters 10-10:
+File "unsupported_ids.php", line 7, characters 10-10:
 Unbound name: `C` (an object type) (Naming[2049])
-File "unsupported_ids.php", line 10, characters 10-10:
+File "unsupported_ids.php", line 8, characters 10-10:
 Unbound name: `d` (an object type) (Naming[2049])

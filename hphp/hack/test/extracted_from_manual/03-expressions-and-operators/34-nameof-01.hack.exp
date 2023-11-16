@@ -1,4 +1,1 @@
-File "34-nameof-01.hack", line 6, characters 19-26:
-Cannot use unstable feature: `nameof_class` (Parsing[1002])
-File "34-nameof-01.hack", line 8, characters 8-15:
-Cannot use unstable feature: `nameof_class` (Parsing[1002])
+No errors

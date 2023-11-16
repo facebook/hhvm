@@ -109,7 +109,6 @@ pub enum UnstableFeatures {
     PipeAwait,
     MatchStatements,
     StrictSwitch,
-    NameofClass,
     ClassType,
 }
 impl UnstableFeatures {
@@ -142,7 +141,6 @@ impl UnstableFeatures {
             UnstableFeatures::PipeAwait => Preview,
             UnstableFeatures::MatchStatements => Unstable,
             UnstableFeatures::StrictSwitch => Unstable,
-            UnstableFeatures::NameofClass => OngoingRelease,
             UnstableFeatures::ClassType => Unstable,
         }
     }
@@ -5460,9 +5458,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             }
             PackageExpression(_) => {
                 self.check_can_use_feature(node, &UnstableFeatures::Package);
-            }
-            NameofExpression(_) => {
-                self.check_can_use_feature(node, &UnstableFeatures::NameofClass);
             }
             ClassArgsTypeSpecifier(_) => {
                 self.check_can_use_feature(node, &UnstableFeatures::ClassType);

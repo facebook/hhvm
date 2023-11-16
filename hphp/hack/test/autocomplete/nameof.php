@@ -1,7 +1,5 @@
 <?hh
 
-<<file::__EnableUnstableFeatures('nameof_class')>>
-
 class Bears {}
 abstract class Bearing {}
 interface Bearer {}

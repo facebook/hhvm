@@ -206,6 +206,107 @@ let pack_errs pos ty subtyping_errs =
 
 let triple_to_pair (env, te, ty) = (env, (te, ty))
 
+module Env_help : sig
+  (** Caller will be looking for a particular form of expected type
+    e.g. a function type (when checking lambdas) or tuple type (when checking
+    tuples). First expand the expected type and elide single union; also
+    strip nullables, so ?t becomes t, as context will always accept a t if a ?t
+    is expected.
+
+    If strip_supportdyn is true, then we are expecting a function or shape type for the expected type,
+    and we should decompose supportdyn<t>, and like-push, and return true to
+    indicate that the type supports dynamic.
+
+    Note: we currently do not generally expand ?t into (null | t), so ~?t is (dynamic | Toption t). *)
+  val expand_expected_opt :
+    strip_supportdyn:bool ->
+    pessimisable_builtin:bool ->
+    env ->
+    ExpectedTy.t option ->
+    env * (pos * Reason.ureason * bool * locl_ty * locl_phase ty_) option
+end = struct
+  let unbox ~strip_supportdyn ~pessimisable_builtin env ty =
+    let rec aux ~under_supportdyn env ty =
+      let (env, ty) = Env.expand_type env ty in
+      match TUtils.try_strip_dynamic env ty with
+      | Some stripped_ty ->
+        (* We've got a type ty = ~stripped_ty so under Sound Dynamic we need to
+         * account for like-pushing: the rule (shown here for vec)
+         *     t <:D dynamic
+         *     ----------------------
+         *     vec<~t> <: ~vec<t>
+         * So if expected type is ~vec<t> then we can actually ask for vec<~t>
+         * which is more generous.
+         *)
+        if TCO.enable_sound_dynamic env.genv.tcopt then begin
+          let (env, opt_ty) =
+            if
+              (not strip_supportdyn)
+              && TCO.enable_sound_dynamic (Env.get_tcopt env)
+              && pessimisable_builtin
+            then
+              (env, None)
+            else
+              Typing_dynamic.try_push_like env stripped_ty
+          in
+          match opt_ty with
+          | None -> aux ~under_supportdyn env stripped_ty
+          | Some rty ->
+            (* We can only apply like-pushing if the type actually supports dynamic.
+             * We know this if we've gone under a supportdyn, *OR* if the type is
+             * known to be a dynamic-aware subtype of dynamic. The latter might fail
+             * if it's yet to be resolved i.e. a type variable, in which case we just
+             * remove the expected type.
+             *)
+            if under_supportdyn || TUtils.is_supportdyn env rty then
+              aux ~under_supportdyn:true env rty
+            else
+              (env, None)
+        end else
+          aux ~under_supportdyn env stripped_ty
+      | None -> begin
+        match get_node ty with
+        | Tunion [ty] -> aux ~under_supportdyn env ty
+        | Toption ty -> aux ~under_supportdyn env ty
+        | Tnewtype (name, [ty], _) when String.equal name SN.Classes.cSupportDyn
+          ->
+          let (env, result) = aux ~under_supportdyn:true env ty in
+          begin
+            match result with
+            | None -> (env, None)
+            | Some (ty, _) -> (env, Some (ty, true))
+          end
+        | _ -> (env, Some (ty, false))
+      end
+    in
+    aux ~under_supportdyn:false env ty
+
+  let expand_expected_and_get_node
+      ~strip_supportdyn
+      ~pessimisable_builtin
+      env
+      ExpectedTy.{ pos = p; reason = ur; ty = { et_type = ty; _ }; _ } =
+    let (env, res) = unbox ~strip_supportdyn ~pessimisable_builtin env ty in
+    match res with
+    | None -> (env, None)
+    | Some (uty, supportdyn) ->
+      if supportdyn && not strip_supportdyn then
+        (env, None)
+      else
+        (env, Some (p, ur, supportdyn, uty, get_node uty))
+
+  let expand_expected_opt
+      ~strip_supportdyn ~pessimisable_builtin env expected_ty_opt =
+    Option.value_map
+      expected_ty_opt
+      ~default:(env, None)
+      ~f:
+        (expand_expected_and_get_node
+           ~strip_supportdyn
+           ~pessimisable_builtin
+           env)
+end
+
 let with_special_coeffects env cap_ty unsafe_cap_ty f =
   let init =
     Option.map (Env.next_cont_opt env) ~f:(fun next_cont ->
@@ -947,88 +1048,6 @@ let requires_consistent_construct = function
   | CIparent -> false
   | CIself -> false
   | CI _ -> false
-
-(* Caller will be looking for a particular form of expected type
- * e.g. a function type (when checking lambdas) or tuple type (when checking
- * tuples). First expand the expected type and elide single union; also
- * strip nullables, so ?t becomes t, as context will always accept a t if a ?t
- * is expected.
- *
- * If strip_supportdyn is true, then we are expecting a function or shape type for the expected type,
- * and we should decompose supportdyn<t>, and like-push, and return true to
- * indicate that the type supports dynamic.
- *
- * Note: we currently do not generally expand ?t into (null | t), so ~?t is (dynamic | Toption t).
- *)
-let expand_expected_and_get_node
-    ?(strip_supportdyn = false)
-    ~pessimisable_builtin
-    env
-    (expected : ExpectedTy.t option) =
-  let rec unbox ~under_supportdyn env ty =
-    let (env, ty) = Env.expand_type env ty in
-    match TUtils.try_strip_dynamic env ty with
-    | Some stripped_ty ->
-      (* We've got a type ty = ~stripped_ty so under Sound Dynamic we need to
-       * account for like-pushing: the rule (shown here for vec)
-       *     t <:D dynamic
-       *     ----------------------
-       *     vec<~t> <: ~vec<t>
-       * So if expected type is ~vec<t> then we can actually ask for vec<~t>
-       * which is more generous.
-       *)
-      if TCO.enable_sound_dynamic env.genv.tcopt then begin
-        let (env, opt_ty) =
-          if
-            (not strip_supportdyn)
-            && TCO.enable_sound_dynamic (Env.get_tcopt env)
-            && pessimisable_builtin
-          then
-            (env, None)
-          else
-            Typing_dynamic.try_push_like env stripped_ty
-        in
-        match opt_ty with
-        | None -> unbox ~under_supportdyn env stripped_ty
-        | Some rty ->
-          (* We can only apply like-pushing if the type actually supports dynamic.
-           * We know this if we've gone under a supportdyn, *OR* if the type is
-           * known to be a dynamic-aware subtype of dynamic. The latter might fail
-           * if it's yet to be resolved i.e. a type variable, in which case we just
-           * remove the expected type.
-           *)
-          if under_supportdyn || TUtils.is_supportdyn env rty then
-            unbox ~under_supportdyn:true env rty
-          else
-            (env, None)
-      end else
-        unbox ~under_supportdyn env stripped_ty
-    | None -> begin
-      match get_node ty with
-      | Tunion [ty] -> unbox ~under_supportdyn env ty
-      | Toption ty -> unbox ~under_supportdyn env ty
-      | Tnewtype (name, [ty], _) when String.equal name SN.Classes.cSupportDyn
-        ->
-        let (env, result) = unbox ~under_supportdyn:true env ty in
-        begin
-          match result with
-          | None -> (env, None)
-          | Some (ty, _) -> (env, Some (ty, true))
-        end
-      | _ -> (env, Some (ty, false))
-    end
-  in
-  match expected with
-  | None -> (env, None)
-  | Some ExpectedTy.{ pos = p; reason = ur; ty = { et_type = ty; _ }; _ } ->
-    let (env, res) = unbox ~under_supportdyn:false env ty in
-    (match res with
-    | None -> (env, None)
-    | Some (uty, supportdyn) ->
-      if supportdyn && not strip_supportdyn then
-        (env, None)
-      else
-        (env, Some (p, ur, supportdyn, uty, get_node uty)))
 
 let uninstantiable_error env reason_pos cid c_tc_pos c_name c_usage_pos c_ty =
   let reason_ty_opt =
@@ -3026,7 +3045,11 @@ end = struct
           (env, Some tv_expected, Some tv)
         | None -> begin
           match
-            expand_expected_and_get_node ~pessimisable_builtin env expected
+            Env_help.expand_expected_opt
+              ~strip_supportdyn:false
+              ~pessimisable_builtin
+              env
+              expected
           with
           | (env, Some (pos, ur, _, ety, _)) -> begin
             match get_expected_kind ety with
@@ -3089,7 +3112,11 @@ end = struct
         | _ -> begin
           (* no explicit typehint, fallback to supplied expect *)
           match
-            expand_expected_and_get_node ~pessimisable_builtin env expected
+            Env_help.expand_expected_opt
+              ~strip_supportdyn:false
+              ~pessimisable_builtin
+              env
+              expected
           with
           | (env, Some (pos, reason, _, ety, _)) -> begin
             match get_expected_kind ety with
@@ -3463,7 +3490,11 @@ end = struct
       make_result env p (Aast.Lvar id) ty.Typing_local_types.ty
     | Tuple el ->
       let (env, expected) =
-        expand_expected_and_get_node ~pessimisable_builtin:false env expected
+        Env_help.expand_expected_opt
+          ~strip_supportdyn:false
+          ~pessimisable_builtin:false
+          env
+          expected
       in
       let (env, tel, tyl) =
         match expected with
@@ -3493,7 +3524,11 @@ end = struct
           lvalues env el
         | Valkind.Other ->
           let (env, expected) =
-            expand_expected_and_get_node ~pessimisable_builtin:true env expected
+            Env_help.expand_expected_opt
+              ~strip_supportdyn:false
+              ~pessimisable_builtin:true
+              env
+              expected
           in
           (match expected with
           | Some (pos, ur, _, _, Ttuple expected_tyl) ->
@@ -3526,7 +3561,8 @@ end = struct
         | None ->
           (* Use expected type to determine expected element types *)
           (match
-             expand_expected_and_get_node
+             Env_help.expand_expected_opt
+               ~strip_supportdyn:false
                ~pessimisable_builtin:false
                env
                expected
@@ -4536,9 +4572,9 @@ end = struct
       in
       let (env, tfdm) =
         match
-          expand_expected_and_get_node
-            ~pessimisable_builtin:false
+          Env_help.expand_expected_opt
             ~strip_supportdyn:true
+            ~pessimisable_builtin:false
             env
             expected
         with
@@ -9034,7 +9070,7 @@ end = struct
       (env, tefun, ty)
     in
     let (env, eexpected) =
-      expand_expected_and_get_node
+      Env_help.expand_expected_opt
         ~strip_supportdyn:true
         ~pessimisable_builtin:true
         env

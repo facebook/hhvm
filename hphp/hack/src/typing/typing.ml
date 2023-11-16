@@ -2438,10 +2438,10 @@ module rec Expr : sig
     Nast.expr ->
     env * Tast.expr * locl_ty
 
-  val exprs :
-    ctxt:Context.t ->
-    env ->
+  val infer_exprs :
     Nast.expr list ->
+    ctxt:Context.t ->
+    env:env ->
     env * Tast.expr list * locl_phase Typing_defs_core.ty list
 
   val lvalue : env -> Nast.expr -> env * Tast.expr * locl_ty
@@ -2662,7 +2662,7 @@ end = struct
     let (env, ty) = Union.union ~approx_cancel_neg:true env ty1 ty2 in
     make_result env p (Aast.Eif (tc, te1, te2)) ty
 
-  and exprs ~ctxt env el =
+  and infer_exprs el ~ctxt ~env =
     match el with
     | [] -> (env, [], [])
     | e :: el ->
@@ -2673,8 +2673,19 @@ end = struct
           env
           e
       in
-      let (env, tel, tyl) = exprs ~ctxt env el in
+      let (env, tel, tyl) = infer_exprs el ~ctxt ~env in
       (env, te :: tel, ty :: tyl)
+
+  and check_exprs el ~env ~expected_tys =
+    match (el, expected_tys) with
+    | ([], _) -> (env, [], [])
+    | (e :: el, expected_ty :: expected_tys) ->
+      let (env, te, ty) =
+        expr ~expected:(Some expected_ty) ~ctxt:Context.default env e
+      in
+      let (env, tel, tyl) = check_exprs el ~env ~expected_tys in
+      (env, te :: tel, ty :: tyl)
+    | (el, []) -> infer_exprs el ~ctxt:Context.default ~env
 
   and argument_list_exprs expr_cb env el =
     match el with
@@ -2683,16 +2694,6 @@ end = struct
       let (env, te, ty) = expr_cb env e in
       let (env, tel, tyl) = argument_list_exprs expr_cb env el in
       (env, (pk, te) :: tel, ty :: tyl)
-
-  and exprs_expected (pos, ur, expected_tyl) env el =
-    match (el, expected_tyl) with
-    | ([], _) -> (env, [], [])
-    | (e :: el, expected_ty :: expected_tyl) ->
-      let expected = Some (ExpectedTy.make pos ur expected_ty) in
-      let (env, te, ty) = expr ~expected ~ctxt:Context.default env e in
-      let (env, tel, tyl) = exprs_expected (pos, ur, expected_tyl) env el in
-      (env, te :: tel, ty :: tyl)
-    | (el, []) -> exprs ~ctxt:Context.default env el
 
   and expr_ ~expected ~ctxt env ((_, p, e) as outer) =
     let env = Env.open_tyvars env p in
@@ -3498,9 +3499,13 @@ end = struct
       let (env, tel, tyl) =
         match expected with
         | Some (pos, ur, _, _, Ttuple expected_tyl) ->
-          exprs_expected (pos, ur, expected_tyl) env el
+          let expected_tys =
+            List.map expected_tyl ~f:(ExpectedTy.make pos ur)
+          in
+          check_exprs el ~env ~expected_tys
         | _ ->
-          exprs
+          infer_exprs
+            el
             ~ctxt:
               Context.
                 {
@@ -3509,8 +3514,7 @@ end = struct
                   accept_using_var = false;
                   check_defined = ctxt.check_defined;
                 }
-            env
-            el
+            ~env
       in
       let ty = MakeType.tuple (Reason.Rwitness p) tyl in
       make_result env p (Aast.Tuple tel) ty
@@ -3530,9 +3534,13 @@ end = struct
           in
           (match expected with
           | Some (pos, ur, _, _, Ttuple expected_tyl) ->
-            exprs_expected (pos, ur, expected_tyl) env el
+            let expected_tys =
+              List.map expected_tyl ~f:(ExpectedTy.make pos ur)
+            in
+            check_exprs el ~env ~expected_tys
           | _ ->
-            exprs
+            infer_exprs
+              el
               ~ctxt:
                 Context.
                   {
@@ -3541,8 +3549,7 @@ end = struct
                     accept_using_var = false;
                     check_defined = ctxt.check_defined;
                   }
-              env
-              el)
+              ~env)
       in
       let ty = MakeType.tuple (Reason.Rwitness p) tyl in
       make_result env p (Aast.List tel) ty
@@ -7747,7 +7754,9 @@ end = struct
             (* For loops leak their initializer, but nothing that's defined in the
                body
             *)
-            let (env, te1, _) = Expr.exprs ~ctxt:Expr.Context.default env e1 in
+            let (env, te1, _) =
+              Expr.infer_exprs e1 ~ctxt:Expr.Context.default ~env
+            in
             (* initializer *)
             let env =
               LEnv.save_and_merge_next_in_cont ~join_pos:pos env C.Continue
@@ -7771,7 +7780,7 @@ end = struct
                   in
                   let join_map = annot_map env in
                   let (env, te3, _) =
-                    Expr.exprs ~ctxt:Expr.Context.default env e3
+                    Expr.infer_exprs e3 ~ctxt:Expr.Context.default ~env
                   in
 
                   (* Export the join and refinement environments *)

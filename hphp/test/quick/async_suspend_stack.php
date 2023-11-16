@@ -2,7 +2,7 @@
 
 function bar($a) :mixed{
   var_dump(__METHOD__);
-  @fb_enable_code_coverage();
+  fb_enable_code_coverage();
 }
 
 async function gen($a) :Awaitable<mixed>{

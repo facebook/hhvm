@@ -6,4 +6,4 @@
  *
  *)
 
-let find ~selection:_ ~entry:_ _ _ = []
+let find _ _ _ _ _ = []

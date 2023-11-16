@@ -18,7 +18,7 @@ type selection_kind =
   | SelectionKindStatement
 
 type candidate = {
-  pos: Pos.t;
+  pos: Pos.t;  (** Position for selected statement(s) or expression *)
   placeholder_name: string;
   selection_kind: selection_kind;
   params: var_tys;

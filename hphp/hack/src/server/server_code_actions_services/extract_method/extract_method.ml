@@ -17,7 +17,7 @@ let find ~entry pos ctx : Code_action_types.Refactor.t list =
         Extract_method_to_refactor.of_candidate ~source_text ~path candidate
       in
       let refactors_from_plugins : Code_action_types.Refactor.t list =
-        Extract_method_plugins.find ~selection:pos ~entry ctx candidate
+        Extract_method_plugins.find ctx entry path pos candidate
       in
       refactors_from_plugins @ [refactor]
     | None -> []

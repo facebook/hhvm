@@ -6,6 +6,12 @@ function try_unlink(string $s): void {
   }
 }
 
+function try_readfile(string $s): void {
+  if (is_readable($s)) {
+    readfile($s);
+  }
+}
+
 abstract final class ServerUtilServerTests {
   public static $LOG_ROOT;
   public static $DOC_ROOT;
@@ -57,31 +63,31 @@ function dumpLogFilesToStdoutAndDie() {
   sleep(1);
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_test$test_run_id.log'");
-  readfile("{$LOG_ROOT}_test$test_run_id.log");
+  try_readfile("{$LOG_ROOT}_test$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_test_server$test_run_id.log'");
-  readfile("{$LOG_ROOT}_test_server$test_run_id.log");
+  try_readfile("{$LOG_ROOT}_test_server$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_test_server_stdout$test_run_id.log'");
-  readfile("{$LOG_ROOT}_test_server_stdout$test_run_id.log");
+  try_readfile("{$LOG_ROOT}_test_server_stdout$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_test_server_stderr$test_run_id.log'");
-  readfile("{$LOG_ROOT}_test_server_stderr$test_run_id.log");
+  try_readfile("{$LOG_ROOT}_test_server_stderr$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_test_client$test_run_id.log'");
-  readfile("{$LOG_ROOT}_test_client$test_run_id.log");
+  try_readfile("{$LOG_ROOT}_test_client$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_test_sandbox_access.log'");
-  readfile("{$LOG_ROOT}_test_sandbox_access.log");
+  try_readfile("{$LOG_ROOT}_test_sandbox_access.log");
   echo "\n";
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_curl$test_run_id.log'");
-  readfile("{$LOG_ROOT}_curl$test_run_id.log");
+  try_readfile("{$LOG_ROOT}_curl$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
 

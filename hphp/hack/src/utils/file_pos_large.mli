@@ -22,13 +22,7 @@ type t = {
   pos_offset: int;
       (** character offset from the beginning of the file. Starts at 0. *)
 }
-[@@deriving eq, hash]
-
-val pp : Format.formatter -> t -> unit
-
-val show : t -> string
-
-val compare : t -> t -> int
+[@@deriving eq, hash, ord, show]
 
 val dummy : t
 

@@ -22,10 +22,7 @@ let pp fmt pos =
   Format.pp_print_string fmt ":";
   Format.pp_print_int fmt (pos.pos_offset - pos.pos_bol + 1)
 
-let show : t -> string =
- fun pos ->
-  pp Format.str_formatter pos;
-  Format.flush_str_formatter ()
+let show pos = Format.asprintf "%a" pp pos
 
 let compare : t -> t -> int = compare
 

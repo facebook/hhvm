@@ -218,8 +218,4 @@ let pp fmt span =
     Format.pp_print_int fmt (end_column span + 1)
   )
 
-let show : t -> string =
- fun p ->
-  let buffer = Buffer.create 255 in
-  pp (Format.formatter_of_buffer buffer) p;
-  Buffer.contents buffer
+let show pos = Format.asprintf "%a" pp pos

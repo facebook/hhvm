@@ -75,7 +75,7 @@ let set_path_prefix prefix v =
 
 type t = prefix * string [@@deriving eq, hash, show, ord, sexp_of, yojson]
 
-type relative_path = t [@@deriving hash]
+type relative_path = t
 
 let prefix (p : t) = fst p
 

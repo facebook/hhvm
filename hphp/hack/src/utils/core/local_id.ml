@@ -10,7 +10,7 @@
 open Hh_prelude
 
 module S = struct
-  type t = int * string [@@deriving ord, hash, eq]
+  type t = int * string [@@deriving ord, hash, eq, show]
 
   let compare = compare
 end
@@ -25,8 +25,12 @@ let next () =
 
 let to_string x = snd x
 
-let pp : Format.formatter -> int * string -> unit =
- (fun fmt x -> Format.pp_print_string fmt (to_string x))
+let pp fmt x =
+  let (i, name) = x in
+  if Int.equal i 0 then
+    Format.pp_print_string fmt name
+  else
+    S.pp fmt x
 
 let to_int x = fst x
 

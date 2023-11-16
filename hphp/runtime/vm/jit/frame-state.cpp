@@ -157,6 +157,9 @@ bool merge_into(FrameState& dst, const FrameState& src) {
   // We must always have the same stublogue mode.
   always_assert(dst.stublogue == src.stublogue);
 
+  // We must always have the same original ctx.
+  always_assert(dst.origCtxType == src.origCtxType);
+
   changed |= merge_value_and_type(
     dst.ctx, src.ctx,
     dst.ctxType, src.ctxType
@@ -309,6 +312,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
       if (frame.fpValue != fp) continue;
       frame.ctx = ctx;
       frame.ctxType = ctx->type();
+      frame.origCtxType = ctx->type();
     }
   };
 
@@ -992,6 +996,7 @@ void FrameStateMgr::clearForUnprocessedPred() {
   }
 
   // These values must go toward their conservative state.
+  clearCtx();
   clearLocals();
   clearMInstr();
 }
@@ -2027,6 +2032,12 @@ void FrameStateMgr::refineMBaseValue(SSATmp* oldVal, SSATmp* newVal) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void FrameStateMgr::clearCtx() {
+  ITRACE(2, "clearCtx\n");
+  cur().ctx = nullptr;
+  cur().ctxType = cur().origCtxType;
+}
 
 void FrameStateMgr::clearLocals() {
   ITRACE(2, "clearLocals\n");

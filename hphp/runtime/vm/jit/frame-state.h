@@ -186,10 +186,13 @@ struct FrameState {
   bool stublogue{false};
 
   /*
-   * ctx tracks the current ActRec's this/ctx field
+   * ctx tracks the current ActRec's this/ctx field, origCtxType is the type of
+   * the original non-refined ctx.
    */
   SSATmp* ctx{nullptr};
   Type ctxType{TObj|TCls};
+  Type origCtxType{TObj|TCls};
+
 
   /*
    * stackModified is reset to false by exceptionStackBoundary() and set to
@@ -537,6 +540,7 @@ private:
   /*
    * Local state update helpers.
    */
+  void clearCtx();
   void clearLocals();
 
   /*

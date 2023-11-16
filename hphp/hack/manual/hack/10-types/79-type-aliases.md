@@ -14,8 +14,7 @@ A type alias can include [Generics](/hack/generics/introduction) as parameters.
 
 ## Using `type`
 An alias created using `type` (such as `Complex` above) is a *transparent type alias*. For a given type, that type and all transparent aliases
-to that type are all the same type and can be freely interchanged. There are no restrictions on where a transparent type alias can be defined,
-or which source code can access its underlying implementation.
+to that type are all the same type and can be freely interchanged. `type` declarations are top-level declarations.
 
 ## Using `newtype`
 An alias created using `newtype` (such as `Point` above) is an *opaque type alias*. In the absence of a type-constraint (see `Counter`

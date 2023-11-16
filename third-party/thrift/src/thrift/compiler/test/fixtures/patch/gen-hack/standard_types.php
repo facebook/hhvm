@@ -350,6 +350,11 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
         'typeHashPrefixSha2_256' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
+              shape(
+                "name" => "folly::fbstring",
+              )
+            ),
             '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
               shape(
                 "adapterClassName" => "com.facebook.thrift.adapter.common.UnpooledByteBufTypeAdapter",

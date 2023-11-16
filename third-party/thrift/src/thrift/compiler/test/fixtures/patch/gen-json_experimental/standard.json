@@ -3,7 +3,8 @@
   "thrift_module" : "standard",
   "includes": {
     "thrift": "thrift/annotation/thrift.thrift",
-    "java": "thrift/annotation/java.thrift"
+    "java": "thrift/annotation/java.thrift",
+    "cpp": "thrift/annotation/cpp.thrift"
   },
   "namespaces": {
     "cpp2": "apache.thrift.type",
@@ -28,19 +29,19 @@
         "name": "ByteString",
         "type": "binary",
         "is_exception": false,
-        "lineno": 46
+        "lineno": 47
       },
       "ByteBuffer": {
         "name": "ByteBuffer",
         "type": "binary",
         "is_exception": false,
-        "lineno": 58
+        "lineno": 60
       },
       "Uri": {
         "name": "Uri",
         "type": "string",
         "is_exception": false,
-        "lineno": 72
+        "lineno": 75
       }
   },
   "enumerations" :
@@ -50,43 +51,43 @@
         "constants" : {
           "Unused" : {
             "name" : "Unused",
-            "lineno" : 38,
+            "lineno" : 39,
             "value" : 0
           }
         },
-        "lineno" : 37
+        "lineno" : 38
       },
       "StandardProtocol" : {
         "name" : "StandardProtocol",
         "constants" : {
           "Custom" : {
             "name" : "Custom",
-            "lineno" : 141,
+            "lineno" : 144,
             "value" : 0
           },
           "Binary" : {
             "name" : "Binary",
-            "lineno" : 144,
+            "lineno" : 147,
             "value" : 1
           },
           "Compact" : {
             "name" : "Compact",
-            "lineno" : 145,
+            "lineno" : 148,
             "value" : 2
           },
           "Json" : {
             "name" : "Json",
-            "lineno" : 148,
+            "lineno" : 151,
             "value" : 3
           },
           "SimpleJson" : {
             "name" : "SimpleJson",
-            "lineno" : 149,
+            "lineno" : 152,
             "value" : 4
           }
         },
         "docstring" : "The standard Thrift protocols.\n",
-        "lineno" : 140
+        "lineno" : 143
       }
       },
   "structs" :
@@ -99,7 +100,7 @@
             "name" : "uri",
             "docstring" : "The unique Thrift URI for this type.\n",
             "key" : 1,
-            "lineno" : 78,
+            "lineno" : 81,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
@@ -107,7 +108,7 @@
             "name" : "typeHashPrefixSha2_256",
             "docstring" : "A prefix of the SHA2-256 hash of the URI.\n",
             "key" : 2,
-            "lineno" : 80,
+            "lineno" : 83,
             "required" : "opt-in-req-out",
             "type" : "binary"
                   },
@@ -115,14 +116,14 @@
             "name" : "scopedName",
             "docstring" : "The (potentially not unique) scoped name of this type.\nFormat is `filename.typename`, e.g. `standard.TypeUri`.\nThis is a fallback for types that do not have URIs yet.\nMust be prepared for the active field to switch to `uri` as package statements are rolled out!\n",
             "key" : 3,
-            "lineno" : 87,
+            "lineno" : 90,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : true,
-        "lineno" : 76
+        "lineno" : 79
       },
       "TypeName" : {
         "name" : "TypeName",
@@ -132,7 +133,7 @@
             "name" : "boolType",
             "docstring" : "True(1) or False(0)\n",
             "key" : 1,
-            "lineno" : 93,
+            "lineno" : 96,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -143,7 +144,7 @@
             "name" : "byteType",
             "docstring" : "8-bit signed integer\n",
             "key" : 2,
-            "lineno" : 96,
+            "lineno" : 99,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -154,7 +155,7 @@
             "name" : "i16Type",
             "docstring" : "16-bit signed integer\n",
             "key" : 3,
-            "lineno" : 99,
+            "lineno" : 102,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -165,7 +166,7 @@
             "name" : "i32Type",
             "docstring" : "32-bit signed integer\n",
             "key" : 4,
-            "lineno" : 102,
+            "lineno" : 105,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -176,7 +177,7 @@
             "name" : "i64Type",
             "docstring" : "64-bit signed integer\n",
             "key" : 5,
-            "lineno" : 105,
+            "lineno" : 108,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -187,7 +188,7 @@
             "name" : "floatType",
             "docstring" : "32-bit floating point\n",
             "key" : 6,
-            "lineno" : 108,
+            "lineno" : 111,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -198,7 +199,7 @@
             "name" : "doubleType",
             "docstring" : "64-bit floating point\n",
             "key" : 7,
-            "lineno" : 111,
+            "lineno" : 114,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -209,7 +210,7 @@
             "name" : "stringType",
             "docstring" : "UTF-8 encoded string\n",
             "key" : 8,
-            "lineno" : 114,
+            "lineno" : 117,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -220,7 +221,7 @@
             "name" : "binaryType",
             "docstring" : "Arbitrary byte string\n",
             "key" : 9,
-            "lineno" : 117,
+            "lineno" : 120,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -231,7 +232,7 @@
             "name" : "enumType",
             "docstring" : "32-bit signed integer, with named values.\n",
             "key" : 10,
-            "lineno" : 120,
+            "lineno" : 123,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -242,7 +243,7 @@
             "name" : "typedefType",
             "docstring" : "`typedef` definition\n",
             "key" : 17,
-            "lineno" : 123,
+            "lineno" : 126,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -253,7 +254,7 @@
             "name" : "structType",
             "docstring" : "`struct` definition\n",
             "key" : 11,
-            "lineno" : 125,
+            "lineno" : 128,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -264,7 +265,7 @@
             "name" : "unionType",
             "docstring" : "`union` definition\n",
             "key" : 12,
-            "lineno" : 127,
+            "lineno" : 130,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -275,7 +276,7 @@
             "name" : "exceptionType",
             "docstring" : "`exception` definition\n",
             "key" : 13,
-            "lineno" : 129,
+            "lineno" : 132,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -286,7 +287,7 @@
             "name" : "listType",
             "docstring" : "`list<V>` definition\n",
             "key" : 14,
-            "lineno" : 132,
+            "lineno" : 135,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -297,7 +298,7 @@
             "name" : "setType",
             "docstring" : "`set<K>` definition\n",
             "key" : 15,
-            "lineno" : 134,
+            "lineno" : 137,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -308,7 +309,7 @@
             "name" : "mapType",
             "docstring" : "`map<K, V>` definition\n",
             "key" : 16,
-            "lineno" : 136,
+            "lineno" : 139,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -318,7 +319,7 @@
         },
         "is_exception" : false,
         "is_union" : true,
-        "lineno" : 91
+        "lineno" : 94
       }
       },
   "source_path" : "thrift/lib/thrift/standard",

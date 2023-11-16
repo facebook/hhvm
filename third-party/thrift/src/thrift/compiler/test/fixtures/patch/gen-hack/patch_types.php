@@ -2157,6 +2157,11 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
         'assign' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
+              shape(
+                "name" => "folly::IOBuf",
+              )
+            ),
             '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
               shape(
                 "adapterClassName" => "com.facebook.thrift.adapter.common.UnpooledByteBufTypeAdapter",
@@ -2168,6 +2173,11 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
         'prepend' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
+              shape(
+                "name" => "folly::IOBuf",
+              )
+            ),
             '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
               shape(
                 "adapterClassName" => "com.facebook.thrift.adapter.common.UnpooledByteBufTypeAdapter",
@@ -2179,6 +2189,11 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
         'append' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
+              shape(
+                "name" => "folly::IOBuf",
+              )
+            ),
             '\facebook\thrift\annotation\java\Adapter' => \facebook\thrift\annotation\java\Adapter::fromShape(
               shape(
                 "adapterClassName" => "com.facebook.thrift.adapter.common.UnpooledByteBufTypeAdapter",

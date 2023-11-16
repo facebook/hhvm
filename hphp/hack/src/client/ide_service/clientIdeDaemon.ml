@@ -1334,6 +1334,8 @@ let daemon_main
   in
   HackEventLogger.serverless_ide_init ~init_id:daemon_init_id;
 
+  Typing_log.out_channel := stderr;
+  (* where 'hh_show' goes *)
   if args.ClientIdeMessage.verbose_to_stderr then
     Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Debug
   else

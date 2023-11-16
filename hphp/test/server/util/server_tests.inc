@@ -1,5 +1,10 @@
 <?hh
 
+function try_unlink(string $s): void {
+  if (file_exists($s)) {
+    unlink($s);
+  }
+}
 
 abstract final class ServerUtilServerTests {
   public static $LOG_ROOT;
@@ -52,35 +57,35 @@ function dumpLogFilesToStdoutAndDie() {
   sleep(1);
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_test$test_run_id.log'");
-  @readfile("{$LOG_ROOT}_test$test_run_id.log");
+  readfile("{$LOG_ROOT}_test$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_test_server$test_run_id.log'");
-  @readfile("{$LOG_ROOT}_test_server$test_run_id.log");
+  readfile("{$LOG_ROOT}_test_server$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_test_server_stdout$test_run_id.log'");
-  @readfile("{$LOG_ROOT}_test_server_stdout$test_run_id.log");
+  readfile("{$LOG_ROOT}_test_server_stdout$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_test_server_stderr$test_run_id.log'");
-  @readfile("{$LOG_ROOT}_test_server_stderr$test_run_id.log");
+  readfile("{$LOG_ROOT}_test_server_stderr$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_test_client$test_run_id.log'");
-  @readfile("{$LOG_ROOT}_test_client$test_run_id.log");
+  readfile("{$LOG_ROOT}_test_client$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_test_sandbox_access.log'");
-  @readfile("{$LOG_ROOT}_test_sandbox_access.log");
+  readfile("{$LOG_ROOT}_test_sandbox_access.log");
   echo "\n";
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_curl$test_run_id.log'");
-  @readfile("{$LOG_ROOT}_curl$test_run_id.log");
+  readfile("{$LOG_ROOT}_curl$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
 
-  $log_data = @file_get_contents("{$LOG_ROOT}_test_server$test_run_id.log");
+  $log_data = file_get_contents("{$LOG_ROOT}_test_server$test_run_id.log");
   $hits = null;
   if (
     $log_data !== false &&
@@ -153,8 +158,11 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
       register_shutdown_function(
          function() {
            foreach (ServerUtilServerTests::$repo_builds as $dir) {
-             @unlink($dir . "/hhvm.hhbc");
-             @rmdir($dir);
+             try_unlink($dir . "/hhvm.hhbc");
+             $contents = scandir($dir);
+             if (HH\Lib\C\is_empty($contents)) {
+               rmdir($dir);
+             }
            }
          }
        );
@@ -294,18 +302,18 @@ function stopServer($adminPort, $serverProc) {
   }
   proc_close($serverProc);
 
-  @unlink("{$LOG_ROOT}_test$test_run_id.log");
-  @unlink("{$LOG_ROOT}_test_server$test_run_id.log");
-  @unlink("{$LOG_ROOT}_test_server_stderr$test_run_id.log");
-  @unlink("{$LOG_ROOT}_test_server_stdout$test_run_id.log");
-  @unlink("{$LOG_ROOT}_test_client$test_run_id.log");
-  @unlink("{$LOG_ROOT}_client$test_run_id.hhbc");
-  @unlink("{$LOG_ROOT}_curl$test_run_id.log");
-  @unlink("{$LOG_ROOT}_access_log$test_run_id.log");
+  try_unlink("{$LOG_ROOT}_test$test_run_id.log");
+  try_unlink("{$LOG_ROOT}_test_server$test_run_id.log");
+  try_unlink("{$LOG_ROOT}_test_server_stderr$test_run_id.log");
+  try_unlink("{$LOG_ROOT}_test_server_stdout$test_run_id.log");
+  try_unlink("{$LOG_ROOT}_test_client$test_run_id.log");
+  try_unlink("{$LOG_ROOT}_client$test_run_id.hhbc");
+  try_unlink("{$LOG_ROOT}_curl$test_run_id.log");
+  try_unlink("{$LOG_ROOT}_access_log$test_run_id.log");
 
   $next_instance_id = ServerUtilServerTests::$next_instance_id;
   for ($instance_id = 0; $instance_id < $next_instance_id; $instance_id++) {
-    @unlink("{$LOG_ROOT}_server{$test_run_id}_{$instance_id}.hhbc");
+    try_unlink("{$LOG_ROOT}_server{$test_run_id}_{$instance_id}.hhbc");
   }
 }
 

@@ -2666,13 +2666,7 @@ end = struct
     match el with
     | [] -> (env, [], [])
     | e :: el ->
-      let (env, te, ty) =
-        expr
-          ~expected:None
-          ~ctxt:Context.{ ctxt with is_using_clause = false; in_await = None }
-          env
-          e
-      in
+      let (env, te, ty) = expr ~expected:None ~ctxt env e in
       let (env, tel, tyl) = infer_exprs el ~ctxt ~env in
       (env, te :: tel, ty :: tyl)
 

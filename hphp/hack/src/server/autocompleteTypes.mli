@@ -39,6 +39,8 @@ type autocomplete_item = {
   res_kind: FileInfo.si_kind;
   (* documentation (in markdown); if absent, then it will be resolved on-demand later *)
   res_documentation: string option;
+  (* res_sortText is the string used to compare or order for autocomplete results  *)
+  res_sortText: string option;
 }
 
 (* The type returned to the client *)

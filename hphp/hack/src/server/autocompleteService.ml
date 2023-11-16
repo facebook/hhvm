@@ -365,6 +365,7 @@ let autocomplete_shape_key autocomplete_context env fields id =
             res_documentation = None;
             res_filter_text = None;
             res_additional_edits = [];
+            res_sortText = None;
           }
         in
         add_res complete
@@ -407,6 +408,7 @@ let autocomplete_member ~is_static autocomplete_context env class_ cid id =
           res_documentation = None;
           res_filter_text = None;
           res_additional_edits = [];
+          res_sortText = None;
         }
       in
       add_res complete
@@ -517,6 +519,7 @@ let autocomplete_xhp_attributes env class_ cid id attrs =
               res_documentation = None;
               res_filter_text = None;
               res_additional_edits = [];
+              res_sortText = None;
             }
           in
           add_res complete)
@@ -551,6 +554,7 @@ let autocomplete_xhp_bool_value attr_ty id_id env =
           res_documentation = None;
           res_filter_text = None;
           res_additional_edits = [];
+          res_sortText = None;
         }
       in
 
@@ -607,6 +611,7 @@ let autocomplete_xhp_enum_attribute_value attr_name ty id_id env cls =
           res_documentation = None;
           res_filter_text = None;
           res_additional_edits = [];
+          res_sortText = None;
         }
       in
       add_res complete
@@ -687,6 +692,7 @@ let autocomplete_xhp_enum_class_value attr_ty id_id env =
                       res_documentation = None;
                       res_filter_text = None;
                       res_additional_edits = [];
+                      res_sortText = None;
                     }
                   in
                   add_res complete))
@@ -873,6 +879,7 @@ let autocomplete_hack_fake_arrow
             res_kind = kind;
             res_documentation = None;
             res_additional_edits;
+            res_sortText = None;
           }
         in
         add_res complete)
@@ -968,6 +975,7 @@ let autocomplete_enum_class_label env opt_cname pos_labelname expected_ty =
             res_documentation = None;
             res_filter_text = None;
             res_additional_edits = [];
+            res_sortText = None;
           }
         in
         add_res complete)
@@ -1087,6 +1095,7 @@ let autocomplete_class_type_const env ((_, h) : Aast.hint) (ids : sid list) :
                 res_documentation = None;
                 res_filter_text = None;
                 res_additional_edits = [];
+                res_sortText = None;
               }
             in
             add_res complete)
@@ -1137,6 +1146,7 @@ let autocomplete_shape_literal_in_call
         res_documentation = None;
         res_filter_text = None;
         res_additional_edits = [];
+        res_sortText = None;
       }
     in
     add_res complete
@@ -1192,6 +1202,7 @@ let add_builtin_attribute_result replace_pos ~doc ~name : unit =
       res_documentation = Some doc;
       res_filter_text = None;
       res_additional_edits = [];
+      res_sortText = None;
     }
   in
   add_res complete
@@ -1249,6 +1260,7 @@ let autocomplete_overriding_method env m : unit =
               res_documentation = None;
               res_filter_text = None;
               res_additional_edits = [];
+              res_sortText = None;
             }
           in
           add_res complete)
@@ -1320,6 +1332,7 @@ let add_enum_const_result env pos replace_pos prefix const_name =
       res_documentation = None;
       res_filter_text = None;
       res_additional_edits = [];
+      res_sortText = None;
     }
   in
   add_res complete
@@ -1563,6 +1576,7 @@ let find_global_results
             res_documentation = None;
             res_filter_text = None;
             res_additional_edits = [];
+            res_sortText = None;
           }
         in
         add_res complete);
@@ -1595,6 +1609,7 @@ let find_global_results
                  res_documentation = Some documentation;
                  res_filter_text = None;
                  res_additional_edits = [];
+                 res_sortText = None;
                })
 
 let complete_xhp_tag
@@ -1649,6 +1664,7 @@ let complete_xhp_tag
           res_documentation = None;
           res_filter_text = None;
           res_additional_edits = [];
+          res_sortText = None;
         }
       in
       add_res complete);
@@ -1750,6 +1766,7 @@ let compute_complete_local env ctx tast =
             res_documentation = None;
             res_filter_text = None;
             res_additional_edits = [];
+            res_sortText = None;
           }
         in
         add_res complete)
@@ -2053,6 +2070,7 @@ let complete_keywords_at possible_keywords text pos : unit =
                res_documentation = None;
                res_filter_text = None;
                res_additional_edits = [];
+               res_sortText = None;
              }
            in
            add_res complete)

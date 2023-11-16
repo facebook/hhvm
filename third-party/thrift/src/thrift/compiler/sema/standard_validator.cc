@@ -1182,6 +1182,23 @@ void deprecate_annotations(diagnostic_context& ctx, const t_named& node) {
       {"go.name", kGoNameUri},
       {"go.tag", kGoTagUri},
       {"cpp.coroutine", "Nothing, it's on by default"},
+      {"cpp.name", kCppNameUri},
+      {"code", "Nothing, it is a no-op"},
+      {"message", kExceptionMessageUri},
+      {"cpp.minimize_padding", kCppMinimizePaddingUri},
+      {"cpp.enum_type", kCppEnumTypeUri},
+      {"cpp2.enum_type", kCppEnumTypeUri},
+      {"cpp.experimental.lazy", kCppLazyUri},
+      {"cpp.mixin", kMixinUri},
+      {"bitmask", kBitmaskEnumUri},
+      {"cpp.declare_bitwise_ops", kBitmaskEnumUri},
+      {"cpp2.declare_bitwise_ops", kBitmaskEnumUri},
+      {"thread", kCppProcessInEbThreadUri},
+      {"process_in_event_base", kCppProcessInEbThreadUri},
+      {"hack.name", kHackNameUri},
+      {"thrift.uri", kUriUri},
+      {"serial", kSerialUri},
+      {"priority", kPriorityUri},
   };
 
   for (const auto& [k, v] : node.annotations()) {

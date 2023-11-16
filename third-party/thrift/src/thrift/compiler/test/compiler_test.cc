@@ -89,7 +89,7 @@ TEST(CompilerTest, zero_as_field_id_neg_keys) {
 
 TEST(CompilerTest, no_field_id) {
   check_compile(R"(
-    struct Experimental {} (thrift.uri = "facebook.com/thrift/annotation/Experimental")
+    struct Experimental {} (thrift.uri = "facebook.com/thrift/annotation/Experimental") # expected-warning: The annotation thrift.uri is deprecated. Please use @thrift.Uri instead.
     struct Foo {
       @Experimental
       i32 field2; # expected-warning@-1: No field id specified for `field2`, resulting protocol may have conflicts or not be backwards compatible!
@@ -549,15 +549,15 @@ TEST(CompilerTest, mixin_field_name_uniqueness) {
     struct A { 1: i32 i; }
     struct B { 2: i64 i; }
     struct C {
-      1: A a (cpp.mixin);
+      1: A a (cpp.mixin); # expected-warning: The annotation cpp.mixin is deprecated. Please use @thrift.Mixin instead.
       2: B b (cpp.mixin); # expected-error: Field `B.i` and `A.i` can not have same name in `C`.
-    }
+    } # expected-warning@-1: The annotation cpp.mixin is deprecated. Please use @thrift.Mixin instead.
   )");
   check_compile(R"(
     struct A { 1: i32 i; }
 
     struct C {
-      1: A a (cpp.mixin);
+      1: A a (cpp.mixin); # expected-warning: The annotation cpp.mixin is deprecated. Please use @thrift.Mixin instead.
       2: i64 i; # expected-error: Field `C.i` and `A.i` can not have same name in `C`.
     }
   )");
@@ -710,18 +710,18 @@ TEST(CompilerTest, circular_include_dependencies) {
 TEST(CompilerTest, mixins_and_refs) {
   check_compile(R"(
     struct C {
-      1: i32 f1 (cpp.mixin);
+      1: i32 f1 (cpp.mixin); # expected-warning: The annotation cpp.mixin is deprecated. Please use @thrift.Mixin instead.
         # expected-error@-1: Mixin field `f1` type must be a struct or union. Found `i32`.
     }
 
     struct D { 1: i32 i }
     union E {
-      1: D a (cpp.mixin);
+      1: D a (cpp.mixin); # expected-warning: The annotation cpp.mixin is deprecated. Please use @thrift.Mixin instead.
         # expected-error@-1: Union `E` cannot contain mixin field `a`.
     }
 
     struct F {
-      1: optional D a (cpp.mixin);
+      1: optional D a (cpp.mixin); # expected-warning: The annotation cpp.mixin is deprecated. Please use @thrift.Mixin instead.
         # expected-error@-1: Mixin field `a` cannot be optional.
     }
 
@@ -1025,9 +1025,9 @@ TEST(CompilerTest, non_beneficial_lazy_fields) {
       R"(
     typedef double FP
     struct A {
-      1: i32 field (cpp.experimental.lazy);
+      1: i32 field (cpp.experimental.lazy); # expected-warning: The annotation cpp.experimental.lazy is deprecated. Please use @cpp.Lazy instead.
         # expected-error@-1: Integral field `field` can not be marked as lazy, since doing so won't bring any benefit.
-      2: FP field2 (cpp.experimental.lazy);
+      2: FP field2 (cpp.experimental.lazy); # expected-warning: The annotation cpp.experimental.lazy is deprecated. Please use @cpp.Lazy instead.
         # expected-error@-1: Floating point field `field2` can not be marked as lazy, since doing so won't bring any benefit.
     }
   )");
@@ -1195,7 +1195,7 @@ TEST(CompilerTest, annotation_scopes) {
 TEST(CompilerTest, lazy_struct_compatibility) {
   check_compile(R"(
     struct Foo { # expected-error: cpp.methods is incompatible with lazy deserialization in struct `Foo`
-      1: list<i32> field (cpp.experimental.lazy)
+      1: list<i32> field (cpp.experimental.lazy) # expected-warning: The annotation cpp.experimental.lazy is deprecated. Please use @cpp.Lazy instead.
     } (cpp.methods = "")
   )");
 }
@@ -1227,12 +1227,12 @@ TEST(CompilerTest, thrift_uri_uniqueness) {
     include "file1.thrift"
     include "file2.thrift"
     struct Bar2 {
-    } (thrift.uri = "facebook.com/thrift/annotation/Bar")
+    } (thrift.uri = "facebook.com/thrift/annotation/Bar") # expected-warning@-1: The annotation thrift.uri is deprecated. Please use @thrift.Uri instead.
       # expected-error@-2: Thrift URI `facebook.com/thrift/annotation/Bar` is already defined for `Bar2`.
     struct Baz1 {
-    } (thrift.uri = "facebook.com/thrift/annotation/Baz")
+    } (thrift.uri = "facebook.com/thrift/annotation/Baz") # expected-warning@-1: The annotation thrift.uri is deprecated. Please use @thrift.Uri instead.
     struct Baz2 {
-    } (thrift.uri = "facebook.com/thrift/annotation/Baz")
+    } (thrift.uri = "facebook.com/thrift/annotation/Baz") # expected-warning@-1: The annotation thrift.uri is deprecated. Please use @thrift.Uri instead.
       # expected-error@-2: Thrift URI `facebook.com/thrift/annotation/Baz` is already defined for `Baz2`.
   )";
   check_compile(name_contents_map, "main.thrift");

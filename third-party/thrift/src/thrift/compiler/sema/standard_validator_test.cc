@@ -76,6 +76,9 @@ class StandardValidatorTest : public ::testing::Test {
   diagnostic warning(int lineno, const std::string& msg) {
     return {diagnostic_level::warning, msg, "/path/to/file.thrift", lineno};
   }
+  diagnostic warning(const std::string& msg) {
+    return {diagnostic_level::warning, msg, "", 0};
+  }
 
   source_manager source_mgr;
   source_location loc;
@@ -136,7 +139,15 @@ TEST_F(StandardValidatorTest, BadPriority) {
           error(
               "Bad priority 'bad3'. Choose one of [\"HIGH_IMPORTANT\", \"HIGH\", \"IMPORTANT\", \"NORMAL\", \"BEST_EFFORT\"]."),
           error(
-              "Bad priority 'bad4'. Choose one of [\"HIGH_IMPORTANT\", \"HIGH\", \"IMPORTANT\", \"NORMAL\", \"BEST_EFFORT\"].")));
+              "Bad priority 'bad4'. Choose one of [\"HIGH_IMPORTANT\", \"HIGH\", \"IMPORTANT\", \"NORMAL\", \"BEST_EFFORT\"]."),
+          warning(
+              "The annotation priority is deprecated. Please use @thrift.Priority instead."),
+          warning(
+              "The annotation priority is deprecated. Please use @thrift.Priority instead."),
+          warning(
+              "The annotation priority is deprecated. Please use @thrift.Priority instead."),
+          warning(
+              "The annotation priority is deprecated. Please use @thrift.Priority instead.")));
 }
 
 TEST_F(StandardValidatorTest, ReapeatedNamesInService) {
@@ -323,7 +334,10 @@ TEST_F(StandardValidatorTest, UnionFieldAttributes) {
               "Unions cannot contain qualified fields. Remove `optional` qualifier from field `op`."),
           warning(2, "Required field is deprecated: `req`."),
           // Fields with cpp.mixing have errors.
-          error(5, "Union `Union` cannot contain mixin field `mixin`.")));
+          error(5, "Union `Union` cannot contain mixin field `mixin`."),
+          warning(
+              5,
+              "The annotation cpp.mixin is deprecated. Please use @thrift.Mixin instead.")));
 }
 
 TEST_F(StandardValidatorTest, FieldId) {

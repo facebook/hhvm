@@ -678,7 +678,7 @@ class t_hack_generator : public t_concat_generator {
 
   bool is_bitmask_enum(const t_enum* tenum) {
     return tenum->has_annotation("bitmask") ||
-        tenum->find_structured_annotation_or_null(kBitmaskEnum) != nullptr;
+        tenum->find_structured_annotation_or_null(kBitmaskEnumUri) != nullptr;
   }
 
   boost::optional<std::string> find_hack_adapter(const t_type* type) {

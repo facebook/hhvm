@@ -244,7 +244,7 @@ class structure_annotations {
       if (name == "cpp.declare_bitwise_ops" ||
           name == "cpp2.declare_bitwise_ops" || name == "bitmask") {
         to_remove.emplace_back(name, data);
-        if (!node.find_structured_annotation_or_null(kBitmaskEnum)) {
+        if (!node.find_structured_annotation_or_null(kBitmaskEnumUri)) {
           to_add.insert("@thrift.BitmaskEnum");
           fm_.add_include("thrift/annotation/thrift.thrift");
         }

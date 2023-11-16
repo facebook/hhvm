@@ -21,7 +21,7 @@ namespace thrift {
 namespace compiler {
 
 // thrift
-inline constexpr auto kBitmaskEnum =
+inline constexpr auto kBitmaskEnumUri =
     "facebook.com/thrift/annotation/BitmaskEnum";
 inline constexpr auto kBoxUri = "facebook.com/thrift/annotation/Box";
 inline constexpr auto kInternBoxUri =

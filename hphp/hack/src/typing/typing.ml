@@ -2670,14 +2670,12 @@ end = struct
       let (env, tel, tyl) = infer_exprs el ~ctxt ~env in
       (env, te :: tel, ty :: tyl)
 
-  and check_exprs el ~env ~expected_tys =
+  and check_exprs el ~ctxt ~env ~expected_tys =
     match (el, expected_tys) with
     | ([], _) -> (env, [], [])
     | (e :: el, expected_ty :: expected_tys) ->
-      let (env, te, ty) =
-        expr ~expected:(Some expected_ty) ~ctxt:Context.default env e
-      in
-      let (env, tel, tyl) = check_exprs el ~env ~expected_tys in
+      let (env, te, ty) = expr ~expected:(Some expected_ty) ~ctxt env e in
+      let (env, tel, tyl) = check_exprs el ~ctxt ~env ~expected_tys in
       (env, te :: tel, ty :: tyl)
     | (el, []) -> infer_exprs el ~ctxt:Context.default ~env
 
@@ -3496,7 +3494,7 @@ end = struct
           let expected_tys =
             List.map expected_tyl ~f:(ExpectedTy.make pos ur)
           in
-          check_exprs el ~env ~expected_tys
+          check_exprs el ~ctxt ~env ~expected_tys
         | _ ->
           infer_exprs
             el
@@ -3531,7 +3529,7 @@ end = struct
             let expected_tys =
               List.map expected_tyl ~f:(ExpectedTy.make pos ur)
             in
-            check_exprs el ~env ~expected_tys
+            check_exprs el ~ctxt ~env ~expected_tys
           | _ ->
             infer_exprs
               el

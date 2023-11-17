@@ -14,17 +14,10 @@ class Foo {
     $y?->$x;
     (null as ?Bar)?->$x;
 
-    // Lvar on dynamic or any shouldn't error.
-    $this->tany()->$x;
-    $this->tany()->$x = 1;
-    $this->tany()->$x();
-    $this->tany()?->$x;
+    // Lvar on dynamic shouldn't error.
     $d->$x;
     $d?->$x;
     $d->$x = 1;
     $d->$x();
   }
-
-  /* HH_FIXME[4030] */
-  public function tany() {}
 }

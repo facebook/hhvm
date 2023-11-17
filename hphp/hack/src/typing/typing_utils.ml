@@ -663,27 +663,6 @@ let class_is_final_and_invariant class_ty =
          | _ -> false)
 
 (*****************************************************************************)
-(* Check if a type is not fully constrained *)
-(*****************************************************************************)
-
-module HasTany : sig
-  val check : locl_ty -> bool
-
-  val check_why : locl_ty -> Reason.t option
-end = struct
-  let visitor =
-    object (_this)
-      inherit [Reason.t option] Type_visitor.locl_type_visitor
-
-      method! on_tany _ r = Some r
-    end
-
-  let check_why ty = visitor#on_type None ty
-
-  let check ty = Option.is_some (check_why ty)
-end
-
-(*****************************************************************************)
 (* Function parameters *)
 (*****************************************************************************)
 

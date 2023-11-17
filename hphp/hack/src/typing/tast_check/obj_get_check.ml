@@ -33,11 +33,7 @@ let handler =
         when Tast_env.is_sub_type_for_union
                env
                ty
-               (MakeType.dynamic Reason.none)
-             || Tast_env.is_sub_type_for_union
-                  env
-                  ty
-                  (mk (Reason.none, Typing_defs.make_tany ())) ->
+               (MakeType.dynamic Reason.none) ->
         (* TODO akenn: do we need to detect error tyvar too? *)
         ()
       | (_, _, Obj_get (_, (_, pos, Lvar (lvar_pos, lvar_lid)), _, _)) ->

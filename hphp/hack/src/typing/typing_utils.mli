@@ -107,12 +107,6 @@ val try_unwrap_class_type :
 
 val class_is_final_and_invariant : Decl_provider.Class.t -> bool
 
-module HasTany : sig
-  val check : Typing_defs.locl_ty -> bool
-
-  val check_why : Typing_defs.locl_ty -> Typing_reason.t option
-end
-
 type localize_no_subst =
   Typing_env_types.env ->
   ignore_errors:bool ->

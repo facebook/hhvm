@@ -11284,6 +11284,8 @@ struct BuildSubclassListJob {
       }
     }
 
+    index.aggregateData.reserve(index.top.size());
+
     OutputMeta meta;
 
     // Mark all of the classes (including leafs) as being complete
@@ -11469,11 +11471,14 @@ protected:
     // calculate data for).
     ISStringSet top;
 
+    // Aggregated data for an input
+    ISStringToOneT<Data> aggregateData;
+
     // Mapping of input ClassInfos/splits to all of their subclasses
     // present in this Job. Some of the children may be splits, which
     // means some subset of the children were processed in another
     // Job.
-    ISStringToOneT<ISStringSet> children;
+    ISStringToOneT<std::vector<SString>> children;
 
     // The leafs in this job. This isn't necessarily an actual leaf,
     // but one whose children haven't been provided in this job
@@ -11664,12 +11669,13 @@ protected:
     return entries;
   }
 
-  // From the information present in the inputs, calculate a mapping
+    // From the information present in the inputs, calculate a mapping
   // of classes and splits to their children (which can be other
   // classes or split nodes). This is not just direct children, but
   // all transitive subclasses.
   static void build_children(LocalIndex& index,
                              const std::vector<EdgeToSplit>& edges) {
+    ISStringToOneT<ISStringSet> children;
     // First record direct children. This can be inferred from the
     // parents of all present ClassInfos:
 
@@ -11683,7 +11689,7 @@ protected:
       // Due to how work is divided, a class might have parents not
       // present in this job. Ignore those.
       if (!index.classInfos.count(parent)) return;
-      index.children[parent].emplace(child->name);
+      children[parent].emplace(child->name);
       // If you're a parent, you're not a leaf.
       index.leafs.erase(parent);
     };
@@ -11706,7 +11712,7 @@ protected:
       };
       assertx(index.classInfos.count(edge.cls));
       assertx(index.splits.count(edge.split));
-      index.children[edge.cls].emplace(edge.split);
+      children[edge.cls].emplace(edge.split);
     }
 
     // Every "top" ClassInfo also has itself as a subclass (this
@@ -11716,41 +11722,56 @@ protected:
       if (auto const split = folly::get_default(index.splits, name, nullptr)) {
         // Copy the children list out of the split and add it to the
         // map.
-        auto& children = index.children[name];
+        auto& c = children[name];
         for (auto const child : split->children) {
           assertx(index.classInfos.count(child) ||
                   index.splits.count(child));
-          children.emplace(child);
+          c.emplace(child);
         }
         split->children.clear();
       } else {
-        index.children[name].emplace(name);
+        children[name].emplace(name);
       }
     }
 
     // For every ClassInfo and split, we now know the direct
     // children. Iterate and find all transitive children.
-    for (auto& [_, children] : index.children) {
-      auto newChildren1 = children;
-      ISStringSet newChildren2;
+    for (auto& [_, transitiveChildren] : children) {
+      auto toExplore = transitiveChildren;
+      ISStringSet toExploreNext;
 
-      while (!newChildren1.empty()) {
-        newChildren2.clear();
-        for (auto const child : newChildren1) {
-          auto const it = index.children.find(child);
-          // May not exist in index.children if processed in earlier round.
-          if (it == end(index.children)) continue;
+      while (!toExplore.empty()) {
+        toExploreNext.clear();
+        for (auto const child : toExplore) {
+          auto const it = children.find(child);
+          // May not exist in children if processed in earlier round.
+          if (it == end(children)) continue;
           for (auto const c : it->second) {
-            if (children.count(c)) continue;
-            newChildren2.emplace(c);
+            if (transitiveChildren.count(c)) continue;
+            toExploreNext.emplace(c);
           }
         }
 
-        std::swap(newChildren1, newChildren2);
-        for (auto const child : newChildren1) {
-          children.emplace(child);
+        std::swap(toExplore, toExploreNext);
+        for (auto const child : toExplore) {
+          transitiveChildren.emplace(child);
         }
       }
+    }
+
+    for (auto const& [name, transitiveChildren] : children) {
+      std::vector<SString> sorted{begin(transitiveChildren), end(transitiveChildren)};
+      std::sort(
+        begin(sorted), end(sorted),
+        [&] (SString a, SString b) {
+          auto const t1 = index.top.contains(a);
+          auto const t2 = index.top.contains(b);
+          // Top classes come first
+          if (t1 != t2) return t2 < t1;
+          return string_data_lti{}(a, b);
+        }
+      );
+      index.children[name] = std::move(sorted);
     }
   }
 
@@ -12086,24 +12107,46 @@ protected:
   }
 
   // Obtain a Data for the given class/split named "top".
-  static Data aggregate_data(LocalIndex& index, SString top) {
-    auto const& children = [&] () -> const ISStringSet& {
+  // @param calculatedAcc: an accumulator passed in to track nodes we process
+  // while processing children recursively
+  static Data aggregate_data(LocalIndex& index,
+                             SString top,
+                             ISStringSet& calculatedAcc) {
+    assertx(index.top.contains(top));
+
+    auto const& children = [&] (SString top) -> const std::vector<SString>& {
       auto const it = index.children.find(top);
       always_assert(it != end(index.children));
+      assertx(!it->second.empty());
       return it->second;
-    }();
-    assertx(!children.empty());
+    };
+
+    auto const it = index.aggregateData.find(top);
+    if (it != end(index.aggregateData)) {
+      for (auto const child : children(top)) calculatedAcc.emplace(child);
+      return it->second;
+    }
+
+    Data data;
+    auto first = true;
+    // Set of children calculated for current top to ensure we don't duplicate work.
+    ISStringSet calculatedForTop;
 
     // For each child of the class/split (for classes this includes
     // the top class itself), we create a Data, then union it together
     // with the rest.
-    Data data;
-    auto first = true;
-    for (auto const child : children) {
-      auto childData = build_data(index, child);
+    for (auto const child : children(top)) {
+      if (calculatedForTop.contains(child)) continue;
+      auto childData = [&]() {
+        if (index.top.contains(child) && !child->isame(top)) {
+          return aggregate_data(index, child, calculatedForTop);
+        } else {
+          calculatedForTop.emplace(child);
+          return build_data(index, child);
+        }
+      }();
 
-      // The first Data has nothing to union with, so just use it as
-      // is.
+      // The first Data has nothing to union with, so just use it as is.
       if (first) {
         data = std::move(childData);
         first = false;
@@ -12112,8 +12155,15 @@ protected:
       update_data(data, std::move(childData));
     }
 
-    index.children.erase(top);
+    for (auto const cls : calculatedForTop) calculatedAcc.emplace(cls);
+    always_assert(index.aggregateData.emplace(top, data).second);
     return data;
+  }
+
+   // Obtain a Data for the given class/split named "top".
+  static Data aggregate_data(LocalIndex& index, SString top) {
+    ISStringSet calculated;
+    return aggregate_data(index, top, calculated);
   }
 
   // Create (or re-use an existing) FuncFamily for the given MethInfo.

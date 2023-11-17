@@ -7,76 +7,40 @@
  *)
 open Hh_prelude
 
-let invalidate_tast_cache_of_entry (entry : Provider_context.entry) : unit =
-  entry.Provider_context.tast <- None;
-  entry.Provider_context.all_errors <- None;
-  ()
-
-let invalidate_local_decl_caches_for_file
+let invalidate_shallow_and_some_folded_decls
     (local_memory : Provider_backend.local_memory) (file_info : FileInfo.t) :
     unit =
-  let {
-    Provider_backend.shallow_decl_cache;
-    folded_class_cache;
-    decl_cache;
-    decls_reflect_this_file = _;
-    reverse_naming_table_delta = _;
-    fixmes = _;
-    naming_db_path_ref = _;
-  } =
-    local_memory
-  in
   let open FileInfo in
   let open Provider_backend in
-  (* Consideration: would it have been better to decl-diff, detect
-     when the shallow-decls are unchanged if so then avoid invalidating all
-     the folded-decls and TASTs? Maybe. That would be better in the case of
-     one file change, but worse in the case of 5000 file changes. *)
-
-  (* Shallow decl cache: we only need clear the ones affected *)
-  List.iter file_info.classes ~f:(fun (_, name, _) ->
-      Shallow_decl_cache.remove
-        shallow_decl_cache
-        ~key:(Shallow_decl_cache_entry.Shallow_class_decl name));
-
-  (* Decl cache: we don't track fine-grained dependencies, and therefore we
-     should be evicting everything.
-
-     It might be possible to do decl-diffing on shallow-decls and if they're
-     unchanged, then avoid invalidating the folded decls. That would be better
-     in the case of just one disk file change notification, but worse in the
-     case of 5000 since it'd require getting shallow-decls on all of them just
-     to compare, even if they weren't actually needed.
-
-     I tried evicting everything but it was far too slow. That will need to be
-     fixed. But for now, let's settle for evicting decls which we know are
-     affected. This way at least the user has a fallback of opening relevant
-     files in the IDE to get their relevant decls correct. *)
   let open Provider_backend.Decl_cache_entry in
   List.iter file_info.consts ~f:(fun (_, name, _) ->
-      Decl_cache.remove decl_cache ~key:(Gconst_decl name));
+      Decl_cache.remove local_memory.decl_cache ~key:(Gconst_decl name));
   List.iter file_info.funs ~f:(fun (_, name, _) ->
-      Decl_cache.remove decl_cache ~key:(Fun_decl name));
+      Decl_cache.remove local_memory.decl_cache ~key:(Fun_decl name));
   List.iter file_info.typedefs ~f:(fun (_, name, _) ->
-      Decl_cache.remove decl_cache ~key:(Typedef_decl name));
+      Decl_cache.remove local_memory.decl_cache ~key:(Typedef_decl name));
+  List.iter file_info.modules ~f:(fun (_, name, _) ->
+      Decl_cache.remove local_memory.decl_cache ~key:(Module_decl name));
   List.iter file_info.classes ~f:(fun (_, name, _) ->
-      Decl_cache.remove decl_cache ~key:(Class_decl name);
+      Shallow_decl_cache.remove
+        local_memory.shallow_decl_cache
+        ~key:(Shallow_decl_cache_entry.Shallow_class_decl name);
+      Decl_cache.remove local_memory.decl_cache ~key:(Class_decl name);
       Folded_class_cache.remove
-        folded_class_cache
+        local_memory.folded_class_cache
         ~key:(Folded_class_cache_entry.Folded_class_decl name));
   ()
 
-let invalidate_local_decl_caches_for_entries
+let invalidate_named_shallow_and_some_folded_decls_for_entry
     (local_memory : Provider_backend.local_memory)
     (entries : Provider_context.entries) : unit =
-  let invalidate_for_entry _path entry =
-    match entry.Provider_context.parser_return with
-    | None -> () (* hasn't been parsed, hence nothing to invalidate *)
-    | Some { Parser_return.ast; _ } ->
-      let file_info = Nast.get_def_names ast in
-      invalidate_local_decl_caches_for_file local_memory file_info
-  in
-  Relative_path.Map.iter entries ~f:invalidate_for_entry
+  Relative_path.Map.iter entries ~f:(fun _path entry ->
+      match entry.Provider_context.parser_return with
+      | None -> () (* hasn't been parsed, hence nothing to invalidate *)
+      | Some { Parser_return.ast; _ } ->
+        let file_info = Nast.get_def_names ast in
+        invalidate_shallow_and_some_folded_decls local_memory file_info);
+  ()
 
 let invalidate_upon_change
     ~(ctx : Provider_context.t)
@@ -89,7 +53,8 @@ let invalidate_upon_change
   in
   (* Invalidate all TASTs, since we don't know which are valid *)
   Relative_path.Map.iter entries ~f:(fun _path entry ->
-      invalidate_tast_cache_of_entry entry);
+      entry.Provider_context.tast <- None;
+      entry.Provider_context.all_errors <- None);
 
   (* We also have to invalidate shallow and folded decls.
      I'm rolling out a new feature called "sticky_quarantine"
@@ -153,7 +118,7 @@ let invalidate_upon_change
     List.iter changes ~f:(fun { FileInfo.old_file_info; _ } ->
         Option.iter
           old_file_info
-          ~f:(invalidate_local_decl_caches_for_file local_memory));
+          ~f:(invalidate_shallow_and_some_folded_decls local_memory));
     ()
   end
 
@@ -174,7 +139,7 @@ let update_sticky_quarantine ctx local_memory =
     match !(local_memory.decls_reflect_this_file) with
     | None -> ()
     | Some (_path, file_info, _pfh_hash) ->
-      invalidate_local_decl_caches_for_file local_memory file_info;
+      invalidate_shallow_and_some_folded_decls local_memory file_info;
       local_memory.decls_reflect_this_file := None;
       ()
   in
@@ -283,7 +248,7 @@ let respect_but_quarantine_unsaved_changes
            by removing affected decls -- remember the invariant is that "all decls present in the cache
            reflect truth ..." hence if we remove a decl then it trivially satisfies the invariant! *)
         if Option.is_none !(local.Provider_backend.decls_reflect_this_file) then
-          invalidate_local_decl_caches_for_entries
+          invalidate_named_shallow_and_some_folded_decls_for_entry
             local
             (Provider_context.get_entries ctx)
       | _ -> ()
@@ -320,7 +285,7 @@ let respect_but_quarantine_unsaved_changes
         SharedMem.invalidate_local_caches ()
       | Provider_backend.Local_memory local ->
         if Option.is_none !(local.Provider_backend.decls_reflect_this_file) then
-          invalidate_local_decl_caches_for_entries
+          invalidate_named_shallow_and_some_folded_decls_for_entry
             local
             (Provider_context.get_entries ctx)
       | _ -> ()

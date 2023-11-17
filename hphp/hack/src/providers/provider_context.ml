@@ -230,6 +230,7 @@ let get_telemetry (t : t) : Telemetry.t =
         Provider_backend.shallow_decl_cache;
         decl_cache;
         folded_class_cache;
+        decls_reflect_this_file;
         reverse_naming_table_delta;
         fixmes;
         naming_db_path_ref = _;
@@ -237,6 +238,18 @@ let get_telemetry (t : t) : Telemetry.t =
     let open Provider_backend in
     telemetry
     |> Decl_cache.get_telemetry decl_cache ~key:"decl_cache"
+    |> (fun telemetry ->
+         match !decls_reflect_this_file with
+         | None -> telemetry
+         | Some (path, file_info, pfh_hash) ->
+           let value =
+             Printf.sprintf
+               "%s [%s] #%s"
+               (Relative_path.suffix path)
+               (FileInfo.to_string file_info)
+               (Int64.Hex.to_string pfh_hash)
+           in
+           Telemetry.string_ ~key:"decls_for_file" ~value telemetry)
     |> Shallow_decl_cache.get_telemetry
          shallow_decl_cache
          ~key:"shallow_decl_cache"
@@ -256,6 +269,7 @@ let reset_telemetry (t : t) : unit =
         Provider_backend.shallow_decl_cache;
         decl_cache;
         folded_class_cache;
+        decls_reflect_this_file = _;
         reverse_naming_table_delta = _;
         fixmes = _;
         naming_db_path_ref = _;

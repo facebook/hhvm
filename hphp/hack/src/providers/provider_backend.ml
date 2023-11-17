@@ -197,6 +197,8 @@ type local_memory = {
   shallow_decl_cache: Shallow_decl_cache.t;
   folded_class_cache: Folded_class_cache.t;
   decl_cache: Decl_cache.t;
+  decls_reflect_this_file:
+    (Relative_path.t * FileInfo.t * FileInfo.pfh_hash) option ref;
   reverse_naming_table_delta: Reverse_naming_table_delta.t;
   fixmes: Fixmes.t;
   naming_db_path_ref: Naming_sqlite.db_path option ref;
@@ -317,6 +319,7 @@ let set_local_memory_backend_internal
       folded_class_cache = Folded_class_cache.make ~max_size:max_num_decls;
       shallow_decl_cache =
         Shallow_decl_cache.make ~max_size:max_num_shallow_decls;
+      decls_reflect_this_file = ref None;
       reverse_naming_table_delta = Reverse_naming_table_delta.make ();
       fixmes = empty_fixmes;
       naming_db_path_ref = ref None;

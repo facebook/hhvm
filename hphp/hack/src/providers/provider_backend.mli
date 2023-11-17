@@ -169,6 +169,15 @@ type local_memory = {
       (** This contains top-level decls: functions, classish types, type aliases, global constants, etc.
         The classes in this cache correspond to Decl_provider.Cache used when we use the shared memory backend.
         The other top-level definitions correspond to Decl_heap.Typedefs/GConsts/Modules/etc. *)
+  decls_reflect_this_file:
+    (Relative_path.t * FileInfo.t * FileInfo.pfh_hash) option ref;
+      (** Invariant: all decls in local_memory reflect the content of files as they
+      are on disk, with the sole exception of [decls_reflect_this_file]: if this
+      is Some, then decls reflect this file's string content rather than its disk
+      content. (This is a special-case optimization, since the IDE typically typically
+      handles an LSP request where it needs decls to reflect unsaved content of the
+      active editor buffer, and then the very next LSP request is usually for the
+      same editor buffer with same or similar content). *)
   reverse_naming_table_delta: Reverse_naming_table_delta.t;
       (** A map from symbol-name to pos. (1) It's used as a slowly updated
           authoritative place to look for symbols that have changed on disk since

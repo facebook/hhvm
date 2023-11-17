@@ -19,6 +19,7 @@ let invalidate_local_decl_caches_for_file
     Provider_backend.shallow_decl_cache;
     folded_class_cache;
     decl_cache;
+    decls_reflect_this_file = _;
     reverse_naming_table_delta = _;
     fixmes = _;
     naming_db_path_ref = _;
@@ -82,14 +83,136 @@ let invalidate_upon_change
     ~(local_memory : Provider_backend.local_memory)
     ~(changes : FileInfo.change list)
     ~(entries : Provider_context.entries) : unit =
-  ignore ctx;
-  List.iter changes ~f:(fun { FileInfo.old_file_info; _ } ->
-      Option.iter
-        old_file_info
-        ~f:(invalidate_local_decl_caches_for_file local_memory));
+  let open Provider_backend in
+  let sticky_quarantine =
+    Provider_context.get_tcopt ctx |> TypecheckerOptions.tco_sticky_quarantine
+  in
+  (* Invalidate all TASTs, since we don't know which are valid *)
   Relative_path.Map.iter entries ~f:(fun _path entry ->
       invalidate_tast_cache_of_entry entry);
-  ()
+
+  (* We also have to invalidate shallow and folded decls.
+     I'm rolling out a new feature called "sticky_quarantine"
+     which makes some scenarios faster, but at the cost of being
+     more exposed to flaws in this [invalidate_upon_change] method.
+
+     Specifically: prior to sticky_quarantine, we'd redecl a file's
+     shallow and folded decls every single time we entered quarantine,
+     and this masked flaws in the invalidation we do here and now
+     upon file change. But with sticky_quarantine, we only redecl
+     a file's decls if the pfh_hash has changed, so it no longer
+     masks the flaws in [invalidate_upon_change].
+
+     Therefore: if sticky_quarantine, then we'll do the right thing
+     upon file change, trusting that the cost of doing the right thing
+     is compensated by the increased speed of the common case.
+     But if not sticky_quarantine, then we'll stick with the existing
+     flawed-but-papered-over behavior. *)
+  if sticky_quarantine then begin
+    (* Invalidate all folded decls; we could do something more targeted to
+       only invalidate the ones affected by [changed_symbols] but that'd take work. *)
+    Decl_cache.clear local_memory.decl_cache;
+    Folded_class_cache.clear local_memory.folded_class_cache;
+    (* Invalidate only the shallow decls listed *)
+    let changes =
+      List.fold changes ~init:[] ~f:(fun acc change ->
+          Option.to_list change.FileInfo.old_file_info
+          @ Option.to_list change.FileInfo.new_file_info
+          @ acc)
+    in
+    List.iter changes ~f:(fun file_info ->
+        let FileInfo.
+              {
+                classes;
+                consts;
+                funs;
+                typedefs;
+                modules;
+                hash = _;
+                file_mode = _;
+                comments = _;
+              } =
+          file_info
+        in
+        let open Provider_backend.Shallow_decl_cache_entry in
+        let open Provider_backend.Decl_cache_entry in
+        List.iter classes ~f:(fun (_, name, _) ->
+            Shallow_decl_cache.remove
+              local_memory.shallow_decl_cache
+              ~key:(Shallow_class_decl name));
+        List.iter consts ~f:(fun (_, name, _) ->
+            Decl_cache.remove local_memory.decl_cache ~key:(Gconst_decl name));
+        List.iter funs ~f:(fun (_, name, _) ->
+            Decl_cache.remove local_memory.decl_cache ~key:(Fun_decl name));
+        List.iter typedefs ~f:(fun (_, name, _) ->
+            Decl_cache.remove local_memory.decl_cache ~key:(Typedef_decl name));
+        List.iter modules ~f:(fun (_, name, _) ->
+            Decl_cache.remove local_memory.decl_cache ~key:(Module_decl name));
+        ())
+  end else begin
+    List.iter changes ~f:(fun { FileInfo.old_file_info; _ } ->
+        Option.iter
+          old_file_info
+          ~f:(invalidate_local_decl_caches_for_file local_memory));
+    ()
+  end
+
+(** This function will leave with either [local.decls_reflect_this_file] reflecting
+the current contents of [ctx.entries] if there's a single entry in there, or None.
+It will also preserve the invariant that all decls in [local] reflect the truth of
+[local.decls_reflect_this_file] if present, and disk-content otherwise.
+
+That's a precise way of saying that this function will
+1. if there's a single entry in [Provider_context.entries] and agrees with [decls_reflect_this_file] then it's a no-op
+2. otherwise, it invalidates any decls associated with the old [decls_reflect_this_file],
+sets [decls_reflect_this_file] to the new entry, and invaldiates any decls associated with the new.
+*)
+let update_sticky_quarantine ctx local_memory =
+  let open Provider_backend in
+  (* helper to reset [decls_reflect_this_file] *)
+  let reset () =
+    match !(local_memory.decls_reflect_this_file) with
+    | None -> ()
+    | Some (_path, file_info, _pfh_hash) ->
+      invalidate_local_decl_caches_for_file local_memory file_info;
+      local_memory.decls_reflect_this_file := None;
+      ()
+  in
+
+  let entries = Provider_context.get_entries ctx in
+  if Relative_path.Map.cardinal entries <> 1 then begin
+    (* if there isn't a single entry in [ctx.entries] then all we can do is reset [decls_reflect_this_file] *)
+    reset ();
+    ()
+  end else begin
+    let (path, entry) = Relative_path.Map.choose entries in
+    match
+      ( Direct_decl_utils.direct_decl_parse ctx entry.Provider_context.path,
+        !(local_memory.decls_reflect_this_file) )
+    with
+    | ( Some { Direct_decl_parser.pfh_hash; _ },
+        Some (path2, _file_info2, pfh_hash2) )
+      when Relative_path.equal path path2 && Int64.equal pfh_hash pfh_hash2 ->
+      (* hurrah! we can re-use the existing [decls_reflect_this_file]! *)
+      ()
+    | (None, _) ->
+      (* if the new file is absent *)
+      reset ();
+      ()
+    | (Some parsed_file, _) ->
+      (* if we're going to replace [decls_reflect_this_file] with the new entry *)
+      reset ();
+      (* This sticks all shallow decls from the file into local_memory cache.
+         Might as well; we have them in hand already. *)
+      Direct_decl_utils.cache_decls
+        ctx
+        path
+        parsed_file.Direct_decl_parser.pfh_decls;
+      let file_info = Direct_decl_parser.decls_to_fileinfo path parsed_file in
+      local_memory.decls_reflect_this_file :=
+        Some (path, file_info, parsed_file.Direct_decl_parser.pfh_hash);
+      ()
+  end
 
 let ctx_from_server_env (env : ServerEnv.env) : Provider_context.t =
   (* TODO: backend should be stored in [env]. *)
@@ -103,7 +226,22 @@ let respect_but_quarantine_unsaved_changes
     ~(ctx : Provider_context.t) ~(f : unit -> 'a) : 'a =
   let backend_pushed = ref false in
   let quarantine_set = ref false in
-  (* This function will (1) enter quarantine, (2) do the callback "f",
+  let sticky_quarantine =
+    Provider_context.get_tcopt ctx |> TypecheckerOptions.tco_sticky_quarantine
+  in
+  (* Normally we satisfy the invariant that "every shallow+folded decl present in the
+     provider-backend reflects truth as it is on disk". The definition of quarantine is
+     that "during quarantine, every decl present reflects truth as it is in ctx.entries for those
+     files that have entries, and the previous truth for all others."
+
+     The feature "sticky_quarantine" is used only for the local backend. It uses a different
+     invariant: "every decl present in the local backend reflects truth as it is in [decls_reflect_this_file]
+     for the file mentioned there if any, and reflects truth as it is on disk for all other files".
+     And during quarantine, again truth from ctx.entries overrides that previous truth.
+     (Note that if ctx.entries agrees with [decls_reflect_this_file], then entering and leaving
+     quarantine is a no-op!)
+
+     This function will (1) enter quarantine, (2) do the callback "f",
      (3) leave quarantine. If an exception arises during step (1,2) then nevertheless
      we guarantee that quarantine is safely left. If an exception arises during
      step (3) then we'll raise an exception but the program state has become unstable... *)
@@ -138,9 +276,16 @@ let respect_but_quarantine_unsaved_changes
                 ~entry
             in
             ());
-        invalidate_local_decl_caches_for_entries
-          local
-          (Provider_context.get_entries ctx)
+        if sticky_quarantine then update_sticky_quarantine ctx local;
+        (* The method [update_sticky_quarantine] is guaranteed to leave [decls_reflect_this_file]
+           to be Some only if it is identical to ctx.entries; in this case we satisfy the
+           invariant already. But in case of None, we'll ensure the invariant here
+           by removing affected decls -- remember the invariant is that "all decls present in the cache
+           reflect truth ..." hence if we remove a decl then it trivially satisfies the invariant! *)
+        if Option.is_none !(local.Provider_backend.decls_reflect_this_file) then
+          invalidate_local_decl_caches_for_entries
+            local
+            (Provider_context.get_entries ctx)
       | _ -> ()
     end;
     backend_pushed := true;
@@ -174,9 +319,10 @@ let respect_but_quarantine_unsaved_changes
         SharedMem.set_allow_hashtable_writes_by_current_process true;
         SharedMem.invalidate_local_caches ()
       | Provider_backend.Local_memory local ->
-        invalidate_local_decl_caches_for_entries
-          local
-          (Provider_context.get_entries ctx)
+        if Option.is_none !(local.Provider_backend.decls_reflect_this_file) then
+          invalidate_local_decl_caches_for_entries
+            local
+            (Provider_context.get_entries ctx)
       | _ -> ()
   in
   let (_errors, result) =

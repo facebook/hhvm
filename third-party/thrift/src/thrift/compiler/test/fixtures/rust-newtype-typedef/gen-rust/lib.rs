@@ -36,6 +36,36 @@ pub(crate) mod r#impl {
         ::std::result::Result::Ok(value.0)
     }
 
+    impl<P> ::fbthrift::Serialize<P> for LocalImpl<::smallvec::SmallVec<[u8; 32]>>
+    where
+        P: ::fbthrift::ProtocolWriter,
+    {
+        fn write(&self, p: &mut P) {
+            self.0.as_slice().write(p)
+        }
+    }
+
+    impl<P> ::fbthrift::Deserialize<P> for LocalImpl<::smallvec::SmallVec<[u8; 32]>>
+    where
+        P: ::fbthrift::ProtocolReader,
+    {
+        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+            p.read_binary()
+        }
+    }
+
+    impl ::fbthrift::binary_type::BinaryType for LocalImpl<::smallvec::SmallVec<[u8; 32]>> {
+        fn with_capacity(capacity: usize) -> Self {
+            LocalImpl(<::smallvec::SmallVec<[u8; 32]>>::with_capacity(capacity))
+        }
+        fn extend_from_slice(&mut self, other: &[u8]) {
+            self.0.extend_from_slice(other)
+        }
+        fn from_vec(vec: ::std::vec::Vec<u8>) -> Self {
+            LocalImpl(::std::convert::Into::into(vec))
+        }
+    }
+
     impl<P> ::fbthrift::Serialize<P> for LocalImpl<::smallvec::SmallVec<[u8; 16]>>
     where
         P: ::fbthrift::ProtocolWriter,

@@ -24,21 +24,21 @@ struct WrapString {
 
 struct NonstandardCollectionTypes {
   10: set<string> defaultset;
-  11: set<string> (rust.type = "BTreeSet") btreeset;
-  12: set<string> (rust.type = "HashSet") hashset;
-  13: set<string> (rust.type = "indexmap::IndexSet") indexset_a;
-  14: set<string> (rust.type = "indexmap::IndexSet") indexset_b;
-  15: set<i64> (rust.type = "indexmap::IndexSet") indexset_c;
+  11: set_string_9948 btreeset;
+  12: set_string_3129 hashset;
+  13: set_string_8508 indexset_a;
+  14: set_string_8508 indexset_b;
+  15: set_i64_4482 indexset_c;
 
   20: map<string, string> defaultmap;
-  21: map<string, string> (rust.type = "BTreeMap") btreemap;
-  22: map<string, string> (rust.type = "HashMap") hashmap;
-  23: map<string, string> (rust.type = "indexmap::IndexMap") indexmap_a;
-  24: map<string, string> (rust.type = "indexmap::IndexMap") indexmap_b;
-  25: map<string, i64> (rust.type = "indexmap::IndexMap") indexmap_c;
+  21: map_string_string_4844 btreemap;
+  22: map_string_string_2454 hashmap;
+  23: map_string_string_4179 indexmap_a;
+  24: map_string_string_4179 indexmap_b;
+  25: map_string_i64_1188 indexmap_c;
 
-  30: binary (rust.type = "smallvec::SmallVec<[u8; 32]>") bin_smallvec;
-  31: binary (rust.type = "Bytes") bin_bytes;
+  30: binary_459 bin_smallvec;
+  31: binary_1562 bin_bytes;
 }
 
 enum TestEnum {
@@ -59,5 +59,19 @@ struct TestSkipV2 {
 }
 
 struct TestBytesShared {
-  1: binary (rust.type = "Bytes") b;
+  1: binary_1562 b;
 }
+
+// The following were automatically generated and may benefit from renaming.
+typedef binary (rust.type = "Bytes") binary_1562
+typedef binary (rust.type = "smallvec::SmallVec<[u8; 32]>") binary_459
+typedef map<string, i64> (rust.type = "indexmap::IndexMap") map_string_i64_1188
+typedef map<string, string> (rust.type = "HashMap") map_string_string_2454
+typedef map<string, string> (
+  rust.type = "indexmap::IndexMap",
+) map_string_string_4179
+typedef map<string, string> (rust.type = "BTreeMap") map_string_string_4844
+typedef set<i64> (rust.type = "indexmap::IndexSet") set_i64_4482
+typedef set<string> (rust.type = "HashSet") set_string_3129
+typedef set<string> (rust.type = "indexmap::IndexSet") set_string_8508
+typedef set<string> (rust.type = "BTreeSet") set_string_9948

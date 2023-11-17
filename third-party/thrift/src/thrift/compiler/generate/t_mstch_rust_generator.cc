@@ -170,12 +170,8 @@ FieldKind field_kind(const t_named& node) {
   return FieldKind::Inline;
 }
 
-// Why does this behave differently for typedefs of containers and typedefs of
-// binary? Yes.
 auto get_type_annotation(const t_type* type) {
-  return type->get_true_type()->is_container()
-      ? t_typedef::get_first_annotation(type, {"rust.type"})
-      : type->get_annotation("rust.type");
+  return t_typedef::get_first_annotation(type, {"rust.type"});
 }
 
 // For example `set<Value> (rust.type = "indexmap::IndexSet")` or `map<string,
@@ -654,7 +650,9 @@ class rust_mstch_program : public mstch_program {
     std::set<const t_type*, rust_type_less> nonstandard_types;
     foreach_type([&](const t_type* type) {
       if (has_nonstandard_type_annotation(type)) {
-        nonstandard_types.insert(type);
+        if (get_type_annotation(type) != "bytes::Bytes") {
+          nonstandard_types.insert(type);
+        }
       }
     });
     std::vector<const t_type*> elements(
@@ -1373,8 +1371,10 @@ class rust_mstch_type : public mstch_type {
     return rust_type;
   }
   mstch::node rust_nonstandard() {
-    return has_nonstandard_type_annotation(type_) &&
-        !(type_->is_typedef() && type_->has_annotation("rust.newtype"));
+    return (
+        has_nonstandard_type_annotation(type_) &&
+        !(get_type_annotation(type_) == "bytes::Bytes") &&
+        !(type_->is_typedef() && type_->has_annotation("rust.newtype")));
   }
   mstch::node adapter() {
     return adapter_node(nullptr, type_, false, context_, pos_, options_);

@@ -51,76 +51,98 @@ let invalidate_upon_change
   let sticky_quarantine =
     Provider_context.get_tcopt ctx |> TypecheckerOptions.tco_sticky_quarantine
   in
-  (* Invalidate all TASTs, since we don't know which are valid *)
-  Relative_path.Map.iter entries ~f:(fun _path entry ->
-      entry.Provider_context.tast <- None;
-      entry.Provider_context.all_errors <- None);
 
-  (* We also have to invalidate shallow and folded decls.
-     I'm rolling out a new feature called "sticky_quarantine"
-     which makes some scenarios faster, but at the cost of being
-     more exposed to flaws in this [invalidate_upon_change] method.
-
-     Specifically: prior to sticky_quarantine, we'd redecl a file's
-     shallow and folded decls every single time we entered quarantine,
-     and this masked flaws in the invalidation we do here and now
-     upon file change. But with sticky_quarantine, we only redecl
-     a file's decls if the pfh_hash has changed, so it no longer
-     masks the flaws in [invalidate_upon_change].
-
-     Therefore: if sticky_quarantine, then we'll do the right thing
-     upon file change, trusting that the cost of doing the right thing
-     is compensated by the increased speed of the common case.
-     But if not sticky_quarantine, then we'll stick with the existing
-     flawed-but-papered-over behavior. *)
-  if sticky_quarantine then begin
-    (* Invalidate all folded decls; we could do something more targeted to
-       only invalidate the ones affected by [changed_symbols] but that'd take work. *)
-    Decl_cache.clear local_memory.decl_cache;
-    Folded_class_cache.clear local_memory.folded_class_cache;
-    (* Invalidate only the shallow decls listed *)
-    let changes =
-      List.fold changes ~init:[] ~f:(fun acc change ->
-          Option.to_list change.FileInfo.old_file_info
-          @ Option.to_list change.FileInfo.new_file_info
-          @ acc)
-    in
-    List.iter changes ~f:(fun file_info ->
-        let FileInfo.
-              {
-                classes;
-                consts;
-                funs;
-                typedefs;
-                modules;
-                hash = _;
-                file_mode = _;
-                comments = _;
-              } =
-          file_info
-        in
-        let open Provider_backend.Shallow_decl_cache_entry in
-        let open Provider_backend.Decl_cache_entry in
-        List.iter classes ~f:(fun (_, name, _) ->
-            Shallow_decl_cache.remove
-              local_memory.shallow_decl_cache
-              ~key:(Shallow_class_decl name));
-        List.iter consts ~f:(fun (_, name, _) ->
-            Decl_cache.remove local_memory.decl_cache ~key:(Gconst_decl name));
-        List.iter funs ~f:(fun (_, name, _) ->
-            Decl_cache.remove local_memory.decl_cache ~key:(Fun_decl name));
-        List.iter typedefs ~f:(fun (_, name, _) ->
-            Decl_cache.remove local_memory.decl_cache ~key:(Typedef_decl name));
-        List.iter modules ~f:(fun (_, name, _) ->
-            Decl_cache.remove local_memory.decl_cache ~key:(Module_decl name));
-        ())
-  end else begin
-    List.iter changes ~f:(fun { FileInfo.old_file_info; _ } ->
-        Option.iter
-          old_file_info
-          ~f:(invalidate_shallow_and_some_folded_decls local_memory));
+  (* In the common scenario where a user has been working on a file and saves it,
+     then [decls_reflect_this_file] will have the exact same pfh_hash
+     as what we just read from disk and we can skip any invalidation! *)
+  match (changes, !(local_memory.decls_reflect_this_file)) with
+  | ([], _) -> ()
+  | ( [FileInfo.{ path; new_pfh_hash = Some pfh_hash; _ }],
+      Some (path2, _, pfh_hash2) )
+    when Relative_path.equal path path2 && Int64.equal pfh_hash pfh_hash2 ->
     ()
-  end
+  | _ ->
+    (* Otherwise, given the disk change, we have to restore the invariant
+       that "local_memory decls if present reflect truth as of decls_reflect_this_file
+       and all other files as they are on disk". Note that invalidating decls
+       will always work towards restoring that invariant! *)
+
+    (* In addition to decls, we also have derived facts in the form of TASTs.
+       We'll invalidate them all since we don't know which are affected. *)
+    Relative_path.Map.iter entries ~f:(fun _path entry ->
+        entry.Provider_context.tast <- None;
+        entry.Provider_context.all_errors <- None);
+
+    (* We also have to invalidate shallow and folded decls.
+       I'm rolling out a new feature called "sticky_quarantine"
+       which makes some scenarios faster, but at the cost of being
+       more exposed to flaws in this [invalidate_upon_change] method.
+
+       Specifically: prior to sticky_quarantine, we'd redecl a file's
+       shallow and folded decls every single time we entered quarantine,
+       and this masked flaws in the invalidation we do here and now
+       upon file change. But with sticky_quarantine, we only redecl
+       a file's decls if the pfh_hash has changed, so it no longer
+       masks the flaws in [invalidate_upon_change].
+
+       Therefore: if sticky_quarantine, then we'll do the right thing
+       upon file change, trusting that the cost of doing the right thing
+       is compensated by the increased speed of the common case.
+       But if not sticky_quarantine, then we'll stick with the existing
+       flawed-but-papered-over behavior. *)
+    if sticky_quarantine then begin
+      (* Invalidate all folded decls; we could do something more targeted to
+         only invalidate the ones affected by [changed_symbols] but that'd take work. *)
+      Decl_cache.clear local_memory.decl_cache;
+      Folded_class_cache.clear local_memory.folded_class_cache;
+      (* Invalidate only the shallow decls listed, both old and new.
+         Why invalidate old decls? because e.g. if you delete a decl then
+         it must be removed from cache.
+         Why invalidate new decls? because e.g. if we already had in cache
+         a decl for Foo, but a new file exists which also contains Foo
+         and is the winner, then we have to remove the old decl from cache. *)
+      let changes =
+        List.fold changes ~init:[] ~f:(fun acc change ->
+            Option.to_list change.FileInfo.old_file_info
+            @ Option.to_list change.FileInfo.new_file_info
+            @ acc)
+      in
+      List.iter changes ~f:(fun file_info ->
+          let open Provider_backend.Shallow_decl_cache_entry in
+          let open Provider_backend.Decl_cache_entry in
+          let FileInfo.
+                {
+                  classes;
+                  consts;
+                  funs;
+                  typedefs;
+                  modules;
+                  hash = _;
+                  file_mode = _;
+                  comments = _;
+                } =
+            file_info
+          in
+          List.iter classes ~f:(fun (_, name, _) ->
+              Shallow_decl_cache.remove
+                local_memory.shallow_decl_cache
+                ~key:(Shallow_class_decl name));
+          List.iter consts ~f:(fun (_, name, _) ->
+              Decl_cache.remove local_memory.decl_cache ~key:(Gconst_decl name));
+          List.iter funs ~f:(fun (_, name, _) ->
+              Decl_cache.remove local_memory.decl_cache ~key:(Fun_decl name));
+          List.iter typedefs ~f:(fun (_, name, _) ->
+              Decl_cache.remove local_memory.decl_cache ~key:(Typedef_decl name));
+          List.iter modules ~f:(fun (_, name, _) ->
+              Decl_cache.remove local_memory.decl_cache ~key:(Module_decl name));
+          ())
+    end else begin
+      List.iter changes ~f:(fun { FileInfo.old_file_info; _ } ->
+          Option.iter
+            old_file_info
+            ~f:(invalidate_shallow_and_some_folded_decls local_memory));
+      ()
+    end
 
 (** This function will leave with either [local.decls_reflect_this_file] reflecting
 the current contents of [ctx.entries] if there's a single entry in there, or None.

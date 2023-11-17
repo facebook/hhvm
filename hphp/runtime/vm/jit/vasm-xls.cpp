@@ -1147,6 +1147,7 @@ void addPhiGroupMember(const jit::vector<Variable*>& variables,
 
   auto const var = variables[r];
   assertx(var != nullptr);
+  assertx(!var->fixed());
 
   auto const ivl = var->ivl();
   auto& u = pos == var->def_pos
@@ -1265,7 +1266,7 @@ analyzePhiHints(const Vunit& unit, const VxlsContext& ctx,
       // corresponding phi def variable (allocating a new group if the def
       // variable has not already been assigned one).
       for (size_t i = 0, n = uses.size(); i < n; ++i) {
-        if (is_fixed(defs[i])) continue;
+        if (is_fixed(defs[i]) || is_fixed(uses[i])) continue;
 
         auto const pgid = def_phi_group(defs[i], true);
         addPhiGroupMember(variables, phi_groups,

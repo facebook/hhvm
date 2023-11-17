@@ -280,7 +280,7 @@ TEST(DistributionRouteTest, broadcastDeleteDisabledRpc) {
   EXPECT_TRUE(srHandleVec[0]->saw_keys.empty());
   // spooled to axon:
   EXPECT_EQ(tmp.bucketId, 1234);
-  EXPECT_TRUE(tmp.region.empty());
+  EXPECT_EQ(tmp.region, "DistributionRoute");
   EXPECT_EQ(tmp.pool, "testPool");
   auto req = apache::thrift::CompactSerializer::deserialize<McDeleteRequest>(
       tmp.serialized);
@@ -344,7 +344,7 @@ TEST(DistributionRouteTest, broadcastDeleteEnabledRpc) {
   EXPECT_EQ("delete", srHandleVec[0]->sawOperations[0]);
   // spooled to axon:
   EXPECT_EQ(tmp.bucketId, 1234);
-  EXPECT_TRUE(tmp.region.empty());
+  EXPECT_EQ(tmp.region, "DistributionRoute");
   EXPECT_EQ(tmp.pool, "testPool");
   auto req = apache::thrift::CompactSerializer::deserialize<McDeleteRequest>(
       tmp.serialized);
@@ -409,7 +409,7 @@ TEST(DistributionRouteTest, broadcastSpooledDelete) {
   EXPECT_TRUE(srHandleVec[0]->saw_keys.empty());
   // spooled to axon:
   EXPECT_EQ(tmp.bucketId, 1234);
-  EXPECT_TRUE(tmp.region.empty());
+  EXPECT_EQ(tmp.region, "DistributionRoute");
   EXPECT_EQ(tmp.pool, "testPool");
   auto req = apache::thrift::CompactSerializer::deserialize<McDeleteRequest>(
       tmp.serialized);

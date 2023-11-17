@@ -25,7 +25,8 @@ FOLLY_NOINLINE bool spoolAxonProxy(
     const memcache::McDeleteRequest& req,
     const std::shared_ptr<AxonContext>& axonCtx,
     uint64_t bucketId,
-    std::optional<std::string> targetRegion) {
+    std::optional<std::string> targetRegion,
+    std::optional<std::string> message) {
   std::optional<std::string> region;
   // if targetRegion has value, it's either x-region broadcast or directed
   // delete. For broadcast it will be an empty string, for x-region directed -
@@ -47,20 +48,21 @@ FOLLY_NOINLINE bool spoolAxonProxy(
     pool.emplace(axonCtx->poolFilter);
   }
   // Run off fiber to save fiber stack for serialization
-  auto kvPairs = folly::fibers::runInMainContext([&req, &region, &pool]() {
-    auto finalReq =
-        req.attributes_ref()->find(memcache::kMcDeleteReqAttrSource) ==
-            req.attributes_ref()->cend()
-        ? std::move(addDeleteRequestSource(
-              req, memcache::McDeleteRequestSource::FAILED_INVALIDATION))
-        : req;
-    finalReq.key_ref()->stripRoutingPrefix();
-    auto serialized = invalidation::McInvalidationKvPairs::serialize<
-                          memcache::McDeleteRequest>(finalReq)
-                          .template to<std::string>();
-    return invalidation::McInvalidationKvPairs::createAxonKvPairs(
-        serialized, std::move(region), std::move(pool));
-  });
+  auto kvPairs =
+      folly::fibers::runInMainContext([&req, &region, &pool, &message]() {
+        auto finalReq =
+            req.attributes_ref()->find(memcache::kMcDeleteReqAttrSource) ==
+                req.attributes_ref()->cend()
+            ? std::move(addDeleteRequestSource(
+                  req, memcache::McDeleteRequestSource::FAILED_INVALIDATION))
+            : req;
+        finalReq.key_ref()->stripRoutingPrefix();
+        auto serialized = invalidation::McInvalidationKvPairs::serialize<
+                              memcache::McDeleteRequest>(finalReq)
+                              .template to<std::string>();
+        return invalidation::McInvalidationKvPairs::createAxonKvPairs(
+            serialized, std::move(region), std::move(pool), std::move(message));
+      });
   return axonCtx->writeProxyFn(bucketId, std::move(kvPairs));
 }
 

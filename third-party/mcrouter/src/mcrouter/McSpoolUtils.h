@@ -43,7 +43,8 @@ FOLLY_NOINLINE bool spoolAxonProxy(
     const memcache::McDeleteRequest& req,
     const std::shared_ptr<AxonContext>& axonCtx,
     uint64_t bucketId,
-    std::optional<std::string> targetRegion = std::nullopt);
+    std::optional<std::string> targetRegion = std::nullopt,
+    std::optional<std::string> message = std::nullopt);
 
 FOLLY_NOINLINE bool spoolAsynclog(
     ProxyBase* proxy,

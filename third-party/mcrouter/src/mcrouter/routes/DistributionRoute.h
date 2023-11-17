@@ -27,6 +27,7 @@ struct DistributionRouteSettings {
 };
 
 constexpr std::string_view kAsynclogDistributionEndpoint = "0.0.0.0";
+constexpr folly::StringPiece kBroadcastRolloutMessage = "DistributionRoute";
 
 /**
  * The route handle is used to route cross-region requests via DL
@@ -100,7 +101,12 @@ class DistributionRoute {
     auto finalReq = addDeleteRequestSource(req, source);
     finalReq.bucketId_ref() = fmt::to_string(*bucketId);
     auto axonLogRes = spoolAxonProxy(
-        finalReq, axonCtx, *bucketId, std::move(*distributionRegion));
+        finalReq,
+        axonCtx,
+        *bucketId,
+        std::move(
+            distributionRegion.value().empty() ? kBroadcastRolloutMessage.str()
+                                               : *distributionRegion));
     if (axonLogRes) {
       proxy.stats().increment(distribution_axon_write_success_stat);
     }

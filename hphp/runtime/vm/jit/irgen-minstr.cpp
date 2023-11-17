@@ -1114,6 +1114,7 @@ Block* makeCatchSet(IRGS& env, uint32_t nDiscard) {
       },
       [&] {
         // Side-exit from a catch block due to an InvalidSetMException.
+        // Note: MIState was already killed by BeginCatch.
         hint(env, Block::Hint::Unused);
 
         // For consistency with the interpreter, decref the rhs before we decref
@@ -1123,13 +1124,7 @@ Block* makeCatchSet(IRGS& env, uint32_t nDiscard) {
         for (int i = 0; i < nDiscard; ++i) {
           popDecRef(env, static_cast<DecRefProfileId>(i), DataTypeGeneric);
         }
-        auto const val = gen(env, LdUnwinderValue, TCell);
-        push(env, val);
-
-        // The minstr is done here, so we want to drop a FinishMemberOp to kill off
-        // stores to MIState.
-        gen(env, FinishMemberOp);
-
+        push(env, gen(env, LdUnwinderValue, TCell));
         gen(env, Jmp, makeExit(env, nextSrcKey(env)));
       }
     );

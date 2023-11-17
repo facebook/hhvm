@@ -570,7 +570,7 @@ void visit(Local& env, IRInstruction& inst) {
     mayStore(env, l.dst);
   };
 
-  if (inst.is(BeginCatch)) {
+  auto const doBeginCatch = [&] {
     // The unwinder fixes up the VMRegs before entering a catch trace, so we
     // must account for these effects. Otherwise, store-elim may sink sync
     // operations across the catch trace boundary.
@@ -584,8 +584,7 @@ void visit(Local& env, IRInstruction& inst) {
     doMustStore(AVMSP);
     doMustStore(AVMPC);
     doMustStore(AVMRetAddr);
-    return;
-  }
+  };
 
   match<void>(
     effects,
@@ -636,6 +635,8 @@ void visit(Local& env, IRInstruction& inst) {
       mayStore(env, l.stores);
       mayStore(env, l.inout);
       kill(env, l.kills);
+
+      if (inst.is(BeginCatch)) doBeginCatch();
     },
 
     [&] (const ReturnEffects& l) {

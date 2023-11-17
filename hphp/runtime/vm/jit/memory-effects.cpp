@@ -391,8 +391,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case JmpExit:
     return ExitEffects {
       *AUnknown.exclude_vm_reg(),
-      *stack_below(inst.extra<JmpExit>()->offset).
-        precise_union(AMIStateAny),
+      stack_below(inst.extra<JmpExit>()->offset),
       AEmpty
     };
 
@@ -493,7 +492,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
     return ExitEffects {
       AUnknown,
-      stack_kills | AMIStateAny,
+      stack_kills,
       *local_kills.precise_union(ctx)
     };
   }
@@ -1855,7 +1854,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AEmpty, AEmpty);
 
   case BeginCatch:
-    return may_load_store(AEmpty, AVMRegAny | AVMRegState);
+    return may_load_store_kill(AEmpty, AVMRegAny | AVMRegState, AMIStateAny);
 
   case LogArrayReach:
   case LogGuardFailure:

@@ -619,8 +619,8 @@ class rust_mstch_program : public mstch_program {
     // Sort/deduplicate by value of `rust.type` annotation.
     struct rust_type_less {
       bool operator()(const t_type* lhs, const t_type* rhs) const {
-        auto& lhs_annotation = lhs->get_annotation("rust.type");
-        auto& rhs_annotation = rhs->get_annotation("rust.type");
+        auto lhs_annotation = get_type_annotation(lhs);
+        auto rhs_annotation = get_type_annotation(rhs);
         if (lhs_annotation != rhs_annotation) {
           return lhs_annotation < rhs_annotation;
         }

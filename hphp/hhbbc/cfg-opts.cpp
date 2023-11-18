@@ -37,6 +37,43 @@ static bool is_dead(const php::Block* blk) {
   return blk->dead;
 }
 
+namespace {
+
+/*
+ * Remove exception handlers that has no effect, either because they just
+ * immediately rethrow the received exception, or they only unset locals
+ * before rethrowing at the top level, which is redundant with the unwinder.
+ */
+void remove_unnecessary_exception_handlers(const FuncAnalysis& ainfo,
+                                           php::WideFunc& func) {
+  auto& blocks = func.blocks();
+  auto remap = std::vector<Optional<std::tuple<BlockId, ExnNodeId>>>(
+    blocks.size(), std::nullopt);
+
+  // Visit exception handlers before the blocks using them.
+  for (auto it = ainfo.rpoBlocks.rbegin(); it != ainfo.rpoBlocks.rend(); ++it) {
+    auto& blk = blocks[*it];
+
+    // Apply the remap if this block handles exceptions with a remapped
+    // exception handler.
+    if (blk->throwExit != NoBlockId) {
+      if (auto const r = remap[blk->throwExit]) {
+        auto const mblk = blk.mutate();
+        std::tie(mblk->throwExit, mblk->exnNodeId) = *r;
+      }
+    }
+
+    // If this block looks like an exception handler that can be optimized away,
+    // add it to the remap.
+    if (is_single_throw(*blk) ||
+        (blk->throwExit == NoBlockId && is_unsetl_throw(*blk))) {
+      remap[*it] = std::make_tuple(blk->throwExit, blk->exnNodeId);
+    }
+  }
+}
+
+}
+
 void remove_unreachable_blocks(const FuncAnalysis& ainfo, php::WideFunc& func) {
   auto done_header = false;
   auto header = [&] {
@@ -72,20 +109,7 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo, php::WideFunc& func) {
     blk->exnNodeId = NoExnNodeId;
   }
 
-  // If we throw and end up in a block which will just immediately
-  // rethrow, we can instead jump to that block instead (this is
-  // basically jump threading for exceptions).
-  for (auto const bid : func.blockRange()) {
-    auto& cblk = blocks[bid];
-    auto const nextCatch =
-      next_catch_block(func, cblk->throwExit, cblk->exnNodeId);
-    if (nextCatch.first != cblk->throwExit ||
-        nextCatch.second != cblk->exnNodeId) {
-      auto const blk = cblk.mutate();
-      blk->throwExit = nextCatch.first;
-      blk->exnNodeId = nextCatch.second;
-    }
-  }
+  remove_unnecessary_exception_handlers(ainfo, func);
 
   auto reachable = [&](BlockId id) {
     if (id == NoBlockId) return false;

@@ -42,7 +42,7 @@ TEST(City, structured_metadata) {
       get_struct_metadata<::metadata::test::simple_structs::City>();
 
   const metadata::ThriftConstStruct& struct_annotation =
-      metadata.structured_annotations_ref()->at(0);
+      metadata.structured_annotations()->at(0);
   EXPECT_EQ(
       struct_annotation.type_ref()->name_ref(), "simple_structs_test.Nat");
   const metadata::ThriftConstValue& value =
@@ -50,7 +50,7 @@ TEST(City, structured_metadata) {
   EXPECT_EQ(value.cv_string_ref(), "struct");
 
   const metadata::ThriftField& field = metadata.fields_ref()->at(0);
-  const auto field_annotation = field.structured_annotations_ref()->at(0);
+  const auto field_annotation = field.structured_annotations()->at(0);
   EXPECT_EQ(field_annotation.type_ref()->name_ref(), "simple_structs_test.Map");
   auto field_value = field_annotation.fields_ref()->at("value");
   for (auto kv : *field_value.cv_map_ref()) {

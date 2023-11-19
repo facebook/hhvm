@@ -34,7 +34,7 @@ namespace op {
 /// * copy(src.shared_ptr_ref(), dst.shared_ptr_ref())
 ///   // If src is nullptr, it sets dst to nullptr, otherwise shares the
 ///   pointer.
-FOLLY_INLINE_VARIABLE constexpr detail::Copy copy{};
+inline constexpr detail::Copy copy{};
 
 } // namespace op
 } // namespace thrift

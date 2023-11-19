@@ -58,7 +58,7 @@ struct thru_field_ref_fn {
     return static_cast<T&&>(ref);
   }
 };
-FOLLY_INLINE_VARIABLE constexpr thru_field_ref_fn thru_field_ref{};
+inline constexpr thru_field_ref_fn thru_field_ref{};
 
 template <typename Tag>
 struct invoke_reffer_thru {

@@ -40,55 +40,50 @@ class terse_field_ref;
 
 namespace detail {
 template <class T>
-FOLLY_INLINE_VARIABLE constexpr bool is_field_ref_v = false;
+inline constexpr bool is_field_ref_v = false;
 template <class T>
-FOLLY_INLINE_VARIABLE constexpr bool is_field_ref_v<field_ref<T>> = true;
+inline constexpr bool is_field_ref_v<field_ref<T>> = true;
 template <class T>
-FOLLY_INLINE_VARIABLE constexpr bool is_optional_field_ref_v = false;
+inline constexpr bool is_optional_field_ref_v = false;
 template <class T>
-FOLLY_INLINE_VARIABLE constexpr bool
-    is_optional_field_ref_v<optional_field_ref<T>> = true;
+inline constexpr bool is_optional_field_ref_v<optional_field_ref<T>> = true;
 template <class T>
-FOLLY_INLINE_VARIABLE constexpr bool is_required_field_ref_v = false;
+inline constexpr bool is_required_field_ref_v = false;
 template <class T>
-FOLLY_INLINE_VARIABLE constexpr bool
-    is_required_field_ref_v<required_field_ref<T>> = true;
+inline constexpr bool is_required_field_ref_v<required_field_ref<T>> = true;
 template <class T>
-FOLLY_INLINE_VARIABLE constexpr bool is_optional_boxed_field_ref_v = false;
+inline constexpr bool is_optional_boxed_field_ref_v = false;
 template <class T>
-FOLLY_INLINE_VARIABLE constexpr bool
+inline constexpr bool
     is_optional_boxed_field_ref_v<optional_boxed_field_ref<T>> = true;
 template <class T>
-FOLLY_INLINE_VARIABLE constexpr bool is_union_field_ref_v = false;
+inline constexpr bool is_union_field_ref_v = false;
 template <class T>
-FOLLY_INLINE_VARIABLE constexpr bool is_union_field_ref_v<union_field_ref<T>> =
+inline constexpr bool is_union_field_ref_v<union_field_ref<T>> = true;
+template <class T>
+inline constexpr bool is_intern_boxed_field_ref_v = false;
+template <class T>
+inline constexpr bool is_intern_boxed_field_ref_v<intern_boxed_field_ref<T>> =
     true;
 template <class T>
-FOLLY_INLINE_VARIABLE constexpr bool is_intern_boxed_field_ref_v = false;
+inline constexpr bool is_terse_intern_boxed_field_ref_v = false;
 template <class T>
-FOLLY_INLINE_VARIABLE constexpr bool
-    is_intern_boxed_field_ref_v<intern_boxed_field_ref<T>> = true;
-template <class T>
-FOLLY_INLINE_VARIABLE constexpr bool is_terse_intern_boxed_field_ref_v = false;
-template <class T>
-FOLLY_INLINE_VARIABLE constexpr bool
+inline constexpr bool
     is_terse_intern_boxed_field_ref_v<terse_intern_boxed_field_ref<T>> = true;
 template <class T>
-FOLLY_INLINE_VARIABLE constexpr bool is_terse_field_ref_v = false;
+inline constexpr bool is_terse_field_ref_v = false;
 template <class T>
-FOLLY_INLINE_VARIABLE constexpr bool is_terse_field_ref_v<terse_field_ref<T>> =
-    true;
+inline constexpr bool is_terse_field_ref_v<terse_field_ref<T>> = true;
 template <class T>
-FOLLY_INLINE_VARIABLE constexpr bool is_unique_ptr_v = false;
+inline constexpr bool is_unique_ptr_v = false;
 template <class T, class D>
-FOLLY_INLINE_VARIABLE constexpr bool is_unique_ptr_v<std::unique_ptr<T, D>> =
-    true;
+inline constexpr bool is_unique_ptr_v<std::unique_ptr<T, D>> = true;
 template <class T>
-FOLLY_INLINE_VARIABLE constexpr bool is_shared_ptr_v = false;
+inline constexpr bool is_shared_ptr_v = false;
 template <class T>
-FOLLY_INLINE_VARIABLE constexpr bool is_shared_ptr_v<std::shared_ptr<T>> = true;
+inline constexpr bool is_shared_ptr_v<std::shared_ptr<T>> = true;
 template <class T>
-FOLLY_INLINE_VARIABLE constexpr bool is_shared_or_unique_ptr_v =
+inline constexpr bool is_shared_or_unique_ptr_v =
     is_unique_ptr_v<T> || is_shared_ptr_v<T>;
 
 } // namespace detail

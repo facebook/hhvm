@@ -179,7 +179,7 @@ class shrink_to_fit_fn {
 // 'shrink_to_fit' method and squeezes all the unnecessary memory usage.
 // Also, note that this is an expensive operation, and if reallocation occurs,
 // it will invalidate all iterators and references to the elements.
-FOLLY_INLINE_VARIABLE constexpr detail::shrink_to_fit_fn shrink_to_fit{};
+inline constexpr detail::shrink_to_fit_fn shrink_to_fit{};
 
 } // namespace thrift
 } // namespace apache

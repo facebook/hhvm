@@ -52,7 +52,7 @@ struct StandardProtocolHelper<CompactProtocolWriter> {
 };
 
 template <typename T>
-FOLLY_INLINE_VARIABLE constexpr StandardProtocol get_standard_protocol =
+inline constexpr StandardProtocol get_standard_protocol =
     StandardProtocolHelper<T>::value;
 
 } // namespace detail

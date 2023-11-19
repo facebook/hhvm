@@ -129,7 +129,7 @@ struct protocol_type_<indirection_tag<IndirectedTypeClass, Indirection>> {
 //  A trait variable and type to map from type-class and type to values of type
 //  enum TType.
 template <typename TypeClass, typename Type>
-FOLLY_INLINE_VARIABLE constexpr protocol::TType protocol_type_v =
+inline constexpr protocol::TType protocol_type_v =
     ::apache::thrift::detail::protocol_type_<TypeClass>::template apply<Type>;
 template <typename TypeClass, typename Type>
 struct protocol_type //
@@ -221,7 +221,7 @@ struct fixed_cost_skip_<type_class::map<KeyTypeClass, MappedTypeClass>> {
 //  list elements do not have fixed size. And it is not cheap to skip under
 //  SimpleJson Protocol since the list header does not include the list length.
 template <class Protocol, class TypeClass, class Type>
-FOLLY_INLINE_VARIABLE constexpr bool fixed_cost_skip_v =
+inline constexpr bool fixed_cost_skip_v =
     ::apache::thrift::detail::fixed_cost_skip_<
         TypeClass>::template apply<Protocol, Type>;
 

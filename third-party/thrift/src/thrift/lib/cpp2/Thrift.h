@@ -44,7 +44,7 @@ struct invoke_reffer;
 template <typename Tag>
 using access_field_fn = detail::invoke_reffer<Tag>;
 template <typename Tag>
-FOLLY_INLINE_VARIABLE constexpr access_field_fn<Tag> access_field{};
+inline constexpr access_field_fn<Tag> access_field{};
 
 enum FragileConstructor {
   FRAGILE,
@@ -181,17 +181,16 @@ struct IsThriftUnion<T, folly::void_t<typename T::__fbthrift_cpp2_type>>
 // before deserialization so that it only clears out terse fields in a terse
 // struct.
 using clear_terse_fields_fn = private_access::clear_terse_fields_fn;
-FOLLY_INLINE_VARIABLE static constexpr clear_terse_fields_fn
-    clear_terse_fields{};
+inline static constexpr clear_terse_fields_fn clear_terse_fields{};
 
 } // namespace st
 } // namespace detail
 
 using clear_fn = detail::st::private_access::clear_fn;
-FOLLY_INLINE_VARIABLE constexpr clear_fn clear{};
+inline constexpr clear_fn clear{};
 
 using empty_fn = detail::st::private_access::empty_fn;
-FOLLY_INLINE_VARIABLE static constexpr empty_fn empty{};
+inline static constexpr empty_fn empty{};
 
 // TODO(dokwon): Add apache::thrift::uri support for generated enum types.
 template <typename T>
@@ -321,7 +320,7 @@ struct apply_indirection_fn {
 };
 } // namespace detail
 
-FOLLY_INLINE_VARIABLE constexpr detail::apply_indirection_fn apply_indirection;
+inline constexpr detail::apply_indirection_fn apply_indirection;
 
 class ExceptionMetadataOverrideBase {
  public:

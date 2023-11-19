@@ -150,15 +150,15 @@ deserialize_key_val_into_map(
 }
 
 template <typename Void, typename T>
-FOLLY_INLINE_VARIABLE constexpr bool sorted_unique_constructible_ = false;
+inline constexpr bool sorted_unique_constructible_ = false;
 template <typename T>
-FOLLY_INLINE_VARIABLE constexpr bool sorted_unique_constructible_<
+inline constexpr bool sorted_unique_constructible_<
     folly::void_t<
         decltype(T(folly::sorted_unique, typename T::container_type())),
         decltype(T(typename T::container_type()))>,
     T> = true;
 template <typename T>
-FOLLY_INLINE_VARIABLE constexpr bool sorted_unique_constructible_v =
+inline constexpr bool sorted_unique_constructible_v =
     sorted_unique_constructible_<void, T>;
 
 FOLLY_CREATE_MEMBER_INVOKER(emplace_hint_invoker, emplace_hint);

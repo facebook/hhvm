@@ -152,7 +152,7 @@ using less_than_t = decltype(LessThan<LTag, RTag>{}(
 
 // If the give tags are comparable using LessThan.
 template <typename LTag, typename RTag = LTag>
-FOLLY_INLINE_VARIABLE constexpr bool less_than_comparable_v =
+inline constexpr bool less_than_comparable_v =
     folly::is_detected_v<less_than_t, LTag, RTag>;
 
 // Resolves to R, if the two tags can be used together in LessThan.
@@ -219,7 +219,7 @@ using compare_with_t = decltype(CompareWith<LTag, RTag>{}(
 
 // If the give tags are comparable.
 template <typename LTag, typename RTag = LTag>
-FOLLY_INLINE_VARIABLE constexpr bool comparable_v =
+inline constexpr bool comparable_v =
     folly::is_detected_v<compare_with_t, LTag, RTag>;
 
 // Resolves to R, if the two tags *can* be used together in CompareWith.

@@ -34,10 +34,10 @@ namespace util {
 
 /// Return whether EnumType is a thrift defined enum type
 template <typename EnumType, typename = void>
-FOLLY_INLINE_VARIABLE constexpr bool is_thrift_enum_v = false;
+inline constexpr bool is_thrift_enum_v = false;
 
 template <typename EnumType>
-FOLLY_INLINE_VARIABLE constexpr bool is_thrift_enum_v<
+inline constexpr bool is_thrift_enum_v<
     EnumType,
     folly::void_t<decltype(TEnumTraits<EnumType>::size)>> = true;
 

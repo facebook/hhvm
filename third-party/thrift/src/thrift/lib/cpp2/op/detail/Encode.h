@@ -42,13 +42,12 @@ namespace op {
 namespace detail {
 
 template <typename T, typename Tag>
-FOLLY_INLINE_VARIABLE constexpr bool kIsStrongType =
+inline constexpr bool kIsStrongType =
     std::is_enum<folly::remove_cvref_t<T>>::value&&
         type::is_a_v<Tag, type::integral_c>;
 
 template <typename T, typename Tag>
-FOLLY_INLINE_VARIABLE constexpr bool kIsIntegral =
-    type::is_a_v<Tag, type::integral_c>;
+inline constexpr bool kIsIntegral = type::is_a_v<Tag, type::integral_c>;
 
 using apache::thrift::protocol::TType;
 
@@ -129,7 +128,7 @@ struct TypeTagToTType<type::cpp_type<T, Tag>> {
 };
 
 template <typename Tag>
-FOLLY_INLINE_VARIABLE constexpr apache::thrift::protocol::TType typeTagToTType =
+inline constexpr apache::thrift::protocol::TType typeTagToTType =
     detail::TypeTagToTType<Tag>::value;
 
 template <bool, typename>
@@ -487,7 +486,7 @@ struct ShouldWrite {
 };
 
 template <class Tag>
-FOLLY_INLINE_VARIABLE constexpr ShouldWrite<Tag> should_write{};
+inline constexpr ShouldWrite<Tag> should_write{};
 
 template <typename T>
 struct StructEncode {

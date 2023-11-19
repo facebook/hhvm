@@ -201,7 +201,7 @@ FOLLY_ERASE bool enum_find_value(
 template <typename TypeClass>
 struct copy_field_fn;
 template <typename TypeClass>
-FOLLY_INLINE_VARIABLE constexpr copy_field_fn<TypeClass> copy_field{};
+inline constexpr copy_field_fn<TypeClass> copy_field{};
 
 template <typename>
 struct copy_field_rec {

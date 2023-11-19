@@ -25,20 +25,19 @@ namespace op {
 /// Returns the serialized size of the avlue using the type tag.
 /// For example: serialized_size<false, type::int16_t>(prot, 1);
 template <bool ZeroCopy, typename Tag>
-FOLLY_INLINE_VARIABLE constexpr detail::SerializedSize<ZeroCopy, Tag>
-    serialized_size{};
+inline constexpr detail::SerializedSize<ZeroCopy, Tag> serialized_size{};
 
 /// Encodes the given value to the given protocol using the type tag.
 /// This handles adapted type.
 /// For example: encode<type::int16_t>(prot, 1);
 template <typename Tag>
-FOLLY_INLINE_VARIABLE constexpr detail::Encode<Tag> encode{};
+inline constexpr detail::Encode<Tag> encode{};
 
 /// Decodes the value from the given protocol using the type tag.
 /// This handles adapted type.
 /// For example: decode<type::int16_t>(prot, i); // decode to variable i
 template <typename Tag>
-FOLLY_INLINE_VARIABLE constexpr detail::Decode<Tag> decode{};
+inline constexpr detail::Decode<Tag> decode{};
 
 } // namespace op
 } // namespace thrift

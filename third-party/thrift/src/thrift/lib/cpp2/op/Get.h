@@ -31,8 +31,7 @@ namespace op {
 
 /// Resolves to the number of definitions contained in Thrift class
 template <typename T>
-FOLLY_INLINE_VARIABLE constexpr std::size_t size_v =
-    detail::pa::__fbthrift_field_size_v<T>;
+inline constexpr std::size_t size_v = detail::pa::__fbthrift_field_size_v<T>;
 
 template <typename T, typename Id>
 using get_ordinal =
@@ -44,8 +43,7 @@ using get_ordinal =
 ///   // Resolves to ordinal at which the field "foo" was defined in MyS.
 ///
 template <typename T, typename Id>
-FOLLY_INLINE_VARIABLE constexpr type::Ordinal get_ordinal_v =
-    get_ordinal<T, Id>::value;
+inline constexpr type::Ordinal get_ordinal_v = get_ordinal<T, Id>::value;
 
 /// Calls the given function with ordinal<1> to ordinal<N>.
 template <typename T, typename F>
@@ -78,8 +76,7 @@ using get_field_id = folly::conditional_t<
 /// * using FieldId = get_field_id<MyS, ident::foo>
 ///   // Resolves to field id assigned to the field "foo" in MyS.
 template <typename T, typename Id>
-FOLLY_INLINE_VARIABLE constexpr FieldId get_field_id_v =
-    get_field_id<T, Id>::value;
+inline constexpr FieldId get_field_id_v = get_field_id<T, Id>::value;
 
 /// Calls the given function with each field_id<{id}> in Thrift class.
 template <typename T, typename F>
@@ -136,7 +133,7 @@ using get_native_type = type::native_type<get_field_tag<T, Id>>;
 ///   // Returns the thrift field name associated with field 7 in MyStruct.
 ///
 template <typename T, typename Id>
-FOLLY_INLINE_VARIABLE const folly::StringPiece get_name_v =
+inline const folly::StringPiece get_name_v =
     detail::pa::__fbthrift_get_field_name<T, get_ordinal<T, Id>>();
 
 /// Gets the thrift class name, for example:
@@ -144,7 +141,7 @@ FOLLY_INLINE_VARIABLE const folly::StringPiece get_name_v =
 /// * op::get_class_name_v<MyStruct> == "MyStruct"
 ///
 template <typename T>
-FOLLY_INLINE_VARIABLE const folly::StringPiece get_class_name_v =
+inline const folly::StringPiece get_class_name_v =
     detail::pa::__fbthrift_get_class_name<T>();
 
 /// Gets the Thrift field, for example:
@@ -152,7 +149,7 @@ FOLLY_INLINE_VARIABLE const folly::StringPiece get_class_name_v =
 ///   op::get<type::field_id<7>>(myStruct) = 4;
 ///
 template <typename Id = void, typename T = void>
-FOLLY_INLINE_VARIABLE constexpr detail::Get<Id, T> get = {};
+inline constexpr detail::Get<Id, T> get = {};
 
 /// Returns pointer to the value from the given field.
 /// Returns nullptr if it doesn't have a value.
@@ -163,7 +160,7 @@ FOLLY_INLINE_VARIABLE constexpr detail::Get<Id, T> get = {};
 ///   // returns *foo.smart_ptr_ref()
 /// * get_value_or_null(foo.optional_ref())
 ///   // returns nullptr if optional field doesn't have a value.
-FOLLY_INLINE_VARIABLE constexpr detail::GetValueOrNull getValueOrNull;
+inline constexpr detail::GetValueOrNull getValueOrNull;
 
 /// Gets the field ref type of Thrift field, for example:
 ///
@@ -342,7 +339,7 @@ class InvokeByFieldId {
 /// `invoke_by_field_id<T>(id, folly::overload(f...))`.
 /// WARNING: inline expansion will always be applied to the call sites.
 template <typename T>
-FOLLY_INLINE_VARIABLE constexpr detail::InvokeByFieldId<T> invoke_by_field_id{};
+inline constexpr detail::InvokeByFieldId<T> invoke_by_field_id{};
 
 } // namespace op
 } // namespace thrift

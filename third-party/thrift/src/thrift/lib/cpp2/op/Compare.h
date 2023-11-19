@@ -36,9 +36,7 @@ struct EqualTo : detail::EqualTo<LTag, RTag> {};
 /// * equal<float_t>(NaN, NaN) -> false
 /// * equal<list<double_t>>([NaN, 0.0], [NaN, -0.0]) -> false
 template <typename LTagOrT = void, typename RTagOrT = LTagOrT>
-FOLLY_INLINE_VARIABLE constexpr EqualTo<
-    type::infer_tag<LTagOrT>,
-    type::infer_tag<RTagOrT>>
+inline constexpr EqualTo<type::infer_tag<LTagOrT>, type::infer_tag<RTagOrT>>
     equal{};
 
 template <typename Tag = void>
@@ -53,8 +51,7 @@ struct IdenticalTo : detail::IdenticalTo<Tag> {};
 /// * identical<float_t>(NaN, NaN) -> true
 /// * identical<list<double_t>>([NaN, 0.0], [NaN, -0.0]) -> false
 template <typename TagOrT = void>
-FOLLY_INLINE_VARIABLE constexpr IdenticalTo<type::infer_tag<TagOrT>>
-    identical{};
+inline constexpr IdenticalTo<type::infer_tag<TagOrT>> identical{};
 
 template <typename LTag = void, typename RTag = LTag>
 struct Less : detail::LessThan<LTag, RTag> {};
@@ -67,9 +64,7 @@ struct Less : detail::LessThan<LTag, RTag> {};
 /// * less<double_t>(0.0, -0.0) -> false
 /// * less<float_t>(NaN, NaN) -> false
 template <typename LTagOrT = void, typename RTagOrT = LTagOrT>
-FOLLY_INLINE_VARIABLE constexpr Less<
-    type::infer_tag<LTagOrT>,
-    type::infer_tag<RTagOrT>>
+inline constexpr Less<type::infer_tag<LTagOrT>, type::infer_tag<RTagOrT>>
     less{};
 
 /// Compares two Thrift values, returning the associated folly::ordering value.
@@ -79,7 +74,7 @@ FOLLY_INLINE_VARIABLE constexpr Less<
 /// * less<double_t>(0.0, -0.0) -> folly::ordering::eq
 /// * compare<string_t>("aa", "a") -> folly::ordering::gt
 template <typename LTagOrT = void, typename RTagOrT = LTagOrT>
-FOLLY_INLINE_VARIABLE constexpr detail::
+inline constexpr detail::
     CompareWith<type::infer_tag<LTagOrT>, type::infer_tag<RTagOrT>>
         compare{};
 

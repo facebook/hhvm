@@ -244,28 +244,25 @@ template <typename Tag, typename Context>
 struct is_thrift_type_tag<field<Tag, Context>> : std::true_type {};
 
 template <typename V1, typename V2>
-FOLLY_INLINE_VARIABLE constexpr bool is_a_v<list<V1>, list<V2>> =
-    is_a_v<V1, V2>;
+inline constexpr bool is_a_v<list<V1>, list<V2>> = is_a_v<V1, V2>;
 template <typename K1, typename K2>
-FOLLY_INLINE_VARIABLE constexpr bool is_a_v<set<K1>, set<K2>> = is_a_v<K1, K2>;
+inline constexpr bool is_a_v<set<K1>, set<K2>> = is_a_v<K1, K2>;
 
 template <typename K1, typename V1, typename K2, typename V2>
-FOLLY_INLINE_VARIABLE constexpr bool is_a_v<map<K1, V1>, map<K2, V2>> =
+inline constexpr bool is_a_v<map<K1, V1>, map<K2, V2>> =
     is_a_v<K1, K2>&& is_a_v<V1, V2>;
 
 template <typename A, typename Tag, typename CTag>
-FOLLY_INLINE_VARIABLE constexpr bool is_a_v<adapted<A, Tag>, CTag> =
-    is_a_v<Tag, CTag>;
+inline constexpr bool is_a_v<adapted<A, Tag>, CTag> = is_a_v<Tag, CTag>;
 template <typename A, typename Tag, typename CTag>
-FOLLY_INLINE_VARIABLE constexpr bool is_a_v<adapted<A, Tag>, adapted<A, CTag>> =
+inline constexpr bool is_a_v<adapted<A, Tag>, adapted<A, CTag>> =
     is_a_v<Tag, CTag>;
 
 template <typename T, typename Tag, typename CTag>
-FOLLY_INLINE_VARIABLE constexpr bool is_a_v<cpp_type<T, Tag>, CTag> =
-    is_a_v<Tag, CTag>;
+inline constexpr bool is_a_v<cpp_type<T, Tag>, CTag> = is_a_v<Tag, CTag>;
 template <typename T, typename Tag, typename CTag>
-FOLLY_INLINE_VARIABLE constexpr bool
-    is_a_v<cpp_type<T, Tag>, cpp_type<T, CTag>> = is_a_v<Tag, CTag>;
+inline constexpr bool is_a_v<cpp_type<T, Tag>, cpp_type<T, CTag>> =
+    is_a_v<Tag, CTag>;
 
 } // namespace type
 } // namespace thrift

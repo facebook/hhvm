@@ -53,7 +53,7 @@ struct ApplyPatch {
  * @param patch Object
  * @param value to be patched
  */
-FOLLY_INLINE_VARIABLE constexpr detail::ApplyPatch applyPatch{};
+inline constexpr detail::ApplyPatch applyPatch{};
 
 struct ExtractedMasks {
   Mask read; // read mask from patch

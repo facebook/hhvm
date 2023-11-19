@@ -297,7 +297,7 @@ class FindOrdinal<T, folly::tag_t<Args...>> {
 };
 
 template <class T, class List>
-FOLLY_INLINE_VARIABLE constexpr type::Ordinal FindOrdinalInUniqueTypes =
+inline constexpr type::Ordinal FindOrdinalInUniqueTypes =
     FindOrdinal<T, List>::value;
 
 #if defined(__clang__) && \
@@ -399,7 +399,7 @@ struct FindOrdinalInUniqueTypesImpl<T, FBTHRIFT_PARAMS, Args...>
 #undef FBTHRIFT_LOOKUP_SIZE
 
 template <class T, class... Args>
-FOLLY_INLINE_VARIABLE constexpr type::Ordinal
+inline constexpr type::Ordinal
     FindOrdinalInUniqueTypes<T, folly::tag_t<Args...>> =
         FindOrdinalInUniqueTypesImpl<T, Args...>::value;
 #endif

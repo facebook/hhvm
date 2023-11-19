@@ -35,14 +35,14 @@ namespace op {
 /// * create<field_t<FieldId, adapted<FieldAdapter, type::i32_t>>>(Struct)
 ///    -> AdaptedWithContext<int32_t>{};
 template <typename Tag>
-FOLLY_INLINE_VARIABLE constexpr detail::Create<Tag> create{};
+inline constexpr detail::Create<Tag> create{};
 
 /// Ensures the given field. If the field doesn't exist, emplaces the field.
 /// For example:
 /// * ensure<field_tag>(foo)
 ///   // calls foo.field_ref().ensure()
 template <typename Id = void, typename Tag = void>
-FOLLY_INLINE_VARIABLE constexpr detail::Ensure<Id, Tag> ensure{};
+inline constexpr detail::Ensure<Id, Tag> ensure{};
 
 } // namespace op
 } // namespace thrift

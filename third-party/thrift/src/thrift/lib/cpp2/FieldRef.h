@@ -817,17 +817,16 @@ bool operator!=(std::nullopt_t, const optional_field_ref<T>& a) {
 namespace detail {
 
 template <typename T>
-FOLLY_INLINE_VARIABLE constexpr bool is_boxed_value_ptr_v = false;
+inline constexpr bool is_boxed_value_ptr_v = false;
 
 template <typename T>
-FOLLY_INLINE_VARIABLE constexpr bool is_boxed_value_ptr_v<boxed_value_ptr<T>> =
-    true;
+inline constexpr bool is_boxed_value_ptr_v<boxed_value_ptr<T>> = true;
 
 template <typename T>
-FOLLY_INLINE_VARIABLE constexpr bool is_boxed_value_v = false;
+inline constexpr bool is_boxed_value_v = false;
 
 template <typename T>
-FOLLY_INLINE_VARIABLE constexpr bool is_boxed_value_v<boxed_value<T>> = true;
+inline constexpr bool is_boxed_value_v<boxed_value<T>> = true;
 
 template <typename From, typename To>
 using copy_reference_t = std::conditional_t<
@@ -1945,14 +1944,14 @@ struct union_field_ref_owner_vtable_impl {
 };
 
 template <typename T>
-FOLLY_INLINE_VARIABLE constexpr union_field_ref_owner_vtable //
+inline constexpr union_field_ref_owner_vtable //
     union_field_ref_owner_vtable_for{nullptr};
 template <typename T>
-FOLLY_INLINE_VARIABLE constexpr union_field_ref_owner_vtable //
+inline constexpr union_field_ref_owner_vtable //
     union_field_ref_owner_vtable_for<T&>{
         &union_field_ref_owner_vtable_impl::reset<T>};
 template <typename T>
-FOLLY_INLINE_VARIABLE constexpr union_field_ref_owner_vtable //
+inline constexpr union_field_ref_owner_vtable //
     union_field_ref_owner_vtable_for<const T&>{nullptr};
 
 } // namespace detail

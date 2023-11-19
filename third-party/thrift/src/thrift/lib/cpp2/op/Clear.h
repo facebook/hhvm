@@ -39,7 +39,7 @@ namespace op {
 /// * isEmpty<set<i32_t>>({}) -> true
 /// * isEmpty<set<i32_t>>({0}) -> false
 template <typename Tag = void>
-FOLLY_INLINE_VARIABLE constexpr detail::IsEmpty<Tag> isEmpty{};
+inline constexpr detail::IsEmpty<Tag> isEmpty{};
 
 /// Returns the default for the given type.
 ///
@@ -50,8 +50,7 @@ FOLLY_INLINE_VARIABLE constexpr detail::IsEmpty<Tag> isEmpty{};
 /// * getDefault<type::string_t>() -> ""
 /// * getDefault<int32_t>() -> 0
 template <typename TagOrT>
-FOLLY_INLINE_VARIABLE constexpr detail::GetDefault<type::infer_tag<TagOrT>>
-    getDefault{};
+inline constexpr detail::GetDefault<type::infer_tag<TagOrT>> getDefault{};
 
 /// Returns the 'intrinsic' default for the given type.
 ///
@@ -62,8 +61,7 @@ FOLLY_INLINE_VARIABLE constexpr detail::GetDefault<type::infer_tag<TagOrT>>
 /// * getIntrinsicDefault<type::string_t>() -> ""
 /// * getIntrinsicDefault<int32_t>() -> 0
 template <typename TagOrT>
-FOLLY_INLINE_VARIABLE constexpr detail::GetIntrinsicDefault<
-    type::infer_tag<TagOrT>>
+inline constexpr detail::GetIntrinsicDefault<type::infer_tag<TagOrT>>
     getIntrinsicDefault{};
 
 /// Clears the given value, leaving it equal to its intrinsic default.
@@ -73,7 +71,7 @@ FOLLY_INLINE_VARIABLE constexpr detail::GetIntrinsicDefault<
 /// * clear<set<i32_t>>(myIntSet) // calls myIntSet.clear()
 /// * clear<ident::foo>(myStruct) // calls myStruct.foo().reset()
 template <typename TagOrId = void, typename PTag = void>
-FOLLY_INLINE_VARIABLE constexpr detail::Clear<TagOrId, PTag> clear{};
+inline constexpr detail::Clear<TagOrId, PTag> clear{};
 
 /// Clears the given field, setting the field to initial state.
 ///
@@ -85,7 +83,7 @@ FOLLY_INLINE_VARIABLE constexpr detail::Clear<TagOrId, PTag> clear{};
 ///
 // TODO(afuller): Migrate all usage to op::clear<Id>(struct) and remove.
 template <typename Tag>
-FOLLY_INLINE_VARIABLE constexpr detail::ClearField<Tag> clear_field{};
+inline constexpr detail::ClearField<Tag> clear_field{};
 
 } // namespace op
 } // namespace thrift

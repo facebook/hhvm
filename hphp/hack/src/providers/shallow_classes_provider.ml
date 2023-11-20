@@ -5,9 +5,3 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-
-let local_changes_push_sharedmem_stack () : unit =
-  Shallow_classes_heap.Classes.LocalChanges.push_stack ()
-
-let local_changes_pop_sharedmem_stack () : unit =
-  Shallow_classes_heap.Classes.LocalChanges.pop_stack ()

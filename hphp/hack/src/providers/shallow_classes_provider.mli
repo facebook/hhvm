@@ -5,7 +5,3 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-
-val local_changes_push_sharedmem_stack : unit -> unit
-
-val local_changes_pop_sharedmem_stack : unit -> unit

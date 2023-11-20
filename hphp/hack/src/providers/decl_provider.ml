@@ -341,9 +341,11 @@ let is_this_def_the_winner ctx name_type (pos, name) =
       | Some winner_pos -> Loser_to winner_pos))
 
 let local_changes_push_sharedmem_stack () =
+  Shallow_classes_heap.Classes.LocalChanges.push_stack ();
   Decl_store.((get ()).push_local_changes ())
 
 let local_changes_pop_sharedmem_stack () =
+  Shallow_classes_heap.Classes.LocalChanges.pop_stack ();
   Decl_store.((get ()).pop_local_changes ())
 
 let declare_folded_class_in_file_FOR_TESTS_ONLY ctx cid =

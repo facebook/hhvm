@@ -307,7 +307,6 @@ let[@warning "-21"] remove_old_defs (* -21 for dune stubs *)
 (** Remove provided defs from the heap of current decls.
     For classes, it removes both shallow and folded classes. *)
 let[@warning "-21"] remove_defs (* -21 for dune stubs *)
-    (ctx : Provider_context.t)
     ({ FileInfo.n_funs; n_classes; n_types; n_consts; n_modules } as names)
     (elems : Decl_class_elements.t SMap.t)
     ~(collect_garbage : bool) : unit =
@@ -318,7 +317,7 @@ let[@warning "-21"] remove_defs (* -21 for dune stubs *)
     Decl_heap.Funs.remove_batch n_funs;
     Decl_class_elements.remove_all elems;
     Decl_heap.Classes.remove_batch n_classes;
-    Shallow_classes_provider.remove_batch ctx n_classes;
+    Shallow_classes_heap.Classes.remove_batch n_classes;
     Decl_heap.Typedefs.remove_batch n_types;
     Decl_heap.GConsts.remove_batch n_consts;
     Decl_heap.Modules.remove_batch n_modules;
@@ -618,7 +617,7 @@ let oldify_type_decl
     FileInfo.
       { empty_names with n_classes = SSet.diff dependent_classes all_classes }
   in
-  remove_defs ctx dependent_classes SMap.empty ~collect_garbage
+  remove_defs dependent_classes SMap.empty ~collect_garbage
 
 let remove_old_defs
     (ctx : Provider_context.t)

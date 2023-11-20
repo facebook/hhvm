@@ -77,43 +77,6 @@ let get (ctx : Provider_context.t) (name : string) : shallow_class option =
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_class decl name
 
-let get_batch (ctx : Provider_context.t) (names : SSet.t) :
-    shallow_class option SMap.t =
-  match Provider_context.get_backend ctx with
-  | Provider_backend.Pessimised_shared_memory _
-  | Provider_backend.Analysis ->
-    failwith "invalid"
-  | Provider_backend.Rust_provider_backend be ->
-    SSet.fold
-      (fun name acc ->
-        SMap.add
-          name
-          (Rust_provider_backend.Decl.get_shallow_class
-             be
-             (Naming_provider.rust_backend_ctx_proxy ctx)
-             name)
-          acc)
-      names
-      SMap.empty
-  | Provider_backend.Shared_memory ->
-    Shallow_classes_heap.Classes.get_batch names
-  | Provider_backend.Local_memory _ ->
-    failwith "get_batch not implemented for Local_memory"
-  | Provider_backend.Decl_service _ ->
-    failwith "get_batch not implemented for Decl_service"
-
-let remove_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
-  match Provider_context.get_backend ctx with
-  | Provider_backend.Pessimised_shared_memory _ -> failwith "invalid"
-  | Provider_backend.Analysis
-  | Provider_backend.Rust_provider_backend _
-  | Provider_backend.Shared_memory ->
-    Shallow_classes_heap.Classes.remove_batch names
-  | Provider_backend.Local_memory _ ->
-    failwith "remove_batch not implemented for Local_memory"
-  | Provider_backend.Decl_service _ ->
-    failwith "remove_batch not implemented for Decl_service"
-
 let local_changes_push_sharedmem_stack () : unit =
   Shallow_classes_heap.Classes.LocalChanges.push_stack ()
 

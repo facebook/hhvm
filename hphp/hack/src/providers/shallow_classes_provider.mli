@@ -13,10 +13,6 @@ present in the cache. Otherwise, compute it, store it in the cache, and
 return it. *)
 val get : Provider_context.t -> string -> shallow_class option
 
-val get_batch : Provider_context.t -> SSet.t -> shallow_class option SMap.t
-
-val remove_batch : Provider_context.t -> SSet.t -> unit
-
 val local_changes_push_sharedmem_stack : unit -> unit
 
 val local_changes_pop_sharedmem_stack : unit -> unit

@@ -69,8 +69,4 @@ val get_dependent_classes :
 
 (** Test-only *)
 val remove_defs :
-  Provider_context.t ->
-  FileInfo.names ->
-  Decl_class_elements.t SMap.t ->
-  collect_garbage:bool ->
-  unit
+  FileInfo.names -> Decl_class_elements.t SMap.t -> collect_garbage:bool -> unit

@@ -43,7 +43,8 @@ let compute_class_diffs
       possibly_changed_classes
   in
   let new_classes =
-    Shallow_classes_provider.get_batch ctx possibly_changed_classes
+    SSet.fold possibly_changed_classes ~init:SMap.empty ~f:(fun name acc ->
+        SMap.add acc ~key:name ~data:(Shallow_classes_provider.get ctx name))
   in
   let package_info = Provider_context.get_package_info ctx in
   SSet.fold possibly_changed_classes ~init:[] ~f:(fun cid acc ->

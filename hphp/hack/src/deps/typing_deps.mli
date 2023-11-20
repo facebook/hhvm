@@ -231,13 +231,6 @@ val dep_edges_make : unit -> dep_edges
   or write those edges to disk. *)
 val flush_ideps_batch : Mode.t -> dep_edges
 
-(** Re-architecture-specific (should only be used with
-  `Typing_deps_mode.HhFanoutRustMode`). Flush remaining buffered discovered
-  edges by committing them via hh_fanout. Also flushes human readable dep maps
-  to disk, if provided.
-*)
-val hh_fanout_flush_ideps : Mode.t -> unit
-
 val merge_dep_edges : dep_edges -> dep_edges -> dep_edges
 
 (** Register the provided dep edges in the dep table delta in [typing_deps.rs] *)

@@ -205,10 +205,6 @@ type t =
   | Shared_memory  (** Used by hh_server and hh_single_type_check *)
   | Pessimised_shared_memory of pessimisation_info
   | Local_memory of local_memory  (** Used by serverless IDE *)
-  | Decl_service of {
-      decl: Decl_service_client.t;
-      fixmes: Fixmes.t;
-    }  (** Used by the hh_server rearchitecture (hh_decl/hh_worker) *)
   | Rust_provider_backend of Rust_provider_backend.t
       (** For the Rust port of Provider_backend and decl-folding logic (rupro/hackrs) *)
   | Analysis
@@ -230,9 +226,6 @@ which reflects the status quo ante, a max size of 140mb in bytes rather than
 a max number. This will be removed shortly. *)
 val set_local_memory_backend :
   max_num_decls:int -> max_num_shallow_decls:int -> unit
-
-val set_decl_service_backend :
-  Decl_service_client.t -> TypecheckerOptions.t -> unit
 
 val get : unit -> t
 

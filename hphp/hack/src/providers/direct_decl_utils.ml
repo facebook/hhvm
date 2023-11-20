@@ -158,9 +158,6 @@ let cache_decls ctx file decls =
               ~default:(fun () -> Some decl)
           in
           ())
-  | Provider_backend.Decl_service _ ->
-    failwith
-      "Direct_decl_utils.cache_file_decls not implemented for Decl_service"
 
 let get_file_contents ~ignore_file_content_caches ctx filename =
   let from_entries =

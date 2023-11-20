@@ -9,7 +9,6 @@ use std::io::Write;
 use dep_graph_with_delta::LockedDepgraphWithDelta;
 pub use depgraph_reader::Dep;
 use hash::HashSet;
-use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::FromError;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
@@ -63,9 +62,6 @@ pub enum TypingDepsMode {
         // This is unused.
         human_readable_dep_map_dir: Option<String>,
     },
-    /// Mode that keeps track of edges via hh_fanout's Rust API. We include this
-    /// here to match the OCaml version of `TypingDepsMode`, but this is unused.
-    HhFanoutRustMode { hh_fanout: UnsafeOcamlPtr },
 }
 
 /// A raw OCaml pointer to the dependency mode.

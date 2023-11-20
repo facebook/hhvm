@@ -48,8 +48,6 @@ let get_naming_db_path (backend : Provider_backend.t) :
   | (Provider_backend.Local_memory { Provider_backend.naming_db_path_ref; _ }, _)
     ->
     !naming_db_path_ref
-  | (Provider_backend.Decl_service _, _) ->
-    failwith "decl provider doesn't expose naming db path"
 
 let set_naming_db_path
     (backend : Provider_backend.t)
@@ -68,5 +66,3 @@ let set_naming_db_path
     naming_db_path_cache := `Shmem_cached_path naming_db_path
   | Provider_backend.Local_memory { Provider_backend.naming_db_path_ref; _ } ->
     naming_db_path_ref := naming_db_path
-  | Provider_backend.Decl_service _ ->
-    failwith "decl provider doesn't expose naming db path"

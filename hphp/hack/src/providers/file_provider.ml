@@ -57,9 +57,7 @@ let get_contents ?(force_read_disk = false) fn =
       Some contents)
   | Provider_backend.Rust_provider_backend backend ->
     Some (Rust_provider_backend.File.get_contents backend fn)
-  | Provider_backend.Local_memory _
-  | Provider_backend.Decl_service _ ->
-    read_file_contents_from_disk fn
+  | Provider_backend.Local_memory _ -> read_file_contents_from_disk fn
 
 let provide_file_for_tests fn contents =
   match Provider_backend.get () with
@@ -69,10 +67,9 @@ let provide_file_for_tests fn contents =
     FileHeap.replace_nonatomic fn contents
   | Provider_backend.Rust_provider_backend backend ->
     Rust_provider_backend.File.provide_file_for_tests backend fn contents
-  | Provider_backend.Local_memory _
-  | Provider_backend.Decl_service _ ->
+  | Provider_backend.Local_memory _ ->
     failwith
-      "File_provider.provide_file_for_tests not supported with local/decl memory provider"
+      "File_provider.provide_file_for_tests not supported with local memory provider"
 
 let remove_batch paths =
   match Provider_backend.get () with
@@ -82,10 +79,9 @@ let remove_batch paths =
     FileHeap.remove_batch paths
   | Provider_backend.Rust_provider_backend backend ->
     Rust_provider_backend.File.remove_batch backend paths
-  | Provider_backend.Local_memory _
-  | Provider_backend.Decl_service _ ->
+  | Provider_backend.Local_memory _ ->
     failwith
-      "File_provider.remove_batch not supported with local/decl memory provider"
+      "File_provider.remove_batch not supported with local memory provider"
 
 let local_changes_push_sharedmem_stack () = FileHeap.LocalChanges.push_stack ()
 

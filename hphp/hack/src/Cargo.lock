@@ -2494,16 +2494,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "hh_fanout_rust_ffi"
-version = "0.0.0"
-dependencies = [
- "dep",
- "hh24_types",
- "ocamlrep_custom",
- "ocamlrep_ocamlpool",
-]
-
-[[package]]
 name = "hh_hash"
 version = "0.0.0"
 dependencies = [

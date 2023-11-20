@@ -254,13 +254,6 @@ let get_ast_with_error ~(full : bool) ctx path =
     (* We never cache ASTs for this provider. There'd be no use. *)
     (* The only valuable caching is to cache decls. *)
     parse_from_disk_no_caching ~apply_file_filter:false
-  | (_, Provider_backend.Decl_service _) ->
-    (* Decl service based checks are supposed to cache ASTs inside Provider_context.entries. *)
-    (* This entries cache supports IDE scenarios of files locally modified in editor, which *)
-    (* also makes it not performant enough on critical bulk checking path. *)
-    (* Caching current AST locally makes it possible to avoid entries overhead, while not *)
-    (* reparsing the file over and over. *)
-    get_from_local_cache ~full ctx path
 
 let get_ast ~(full : bool) ctx path = get_ast_with_error ~full ctx path |> snd
 
@@ -350,9 +343,7 @@ let provide_ast_hint
   | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Shared_memory ->
     ParserHeap.write_around path (program, parse_type)
-  | Provider_backend.Local_memory _
-  | Provider_backend.Decl_service _ ->
-    ()
+  | Provider_backend.Local_memory _ -> ()
 
 let remove_batch paths = ParserHeap.remove_batch paths
 

@@ -104,8 +104,6 @@ let get_fun_without_pessimise (ctx : Provider_context.t) (fun_name : string) :
             fun_name
             Shallow_decl_defs.to_fun_decl_opt
         | None -> None)
-  | Provider_backend.Decl_service { decl; _ } ->
-    Decl_service_client.rpc_get_fun decl fun_name
   | Provider_backend.Rust_provider_backend backend ->
     Rust_provider_backend.Decl.get_fun
       backend
@@ -169,8 +167,6 @@ let get_typedef_without_pessimise
             typedef_name
             Shallow_decl_defs.to_typedef_decl_opt
         | None -> None)
-  | Provider_backend.Decl_service { decl; _ } ->
-    Decl_service_client.rpc_get_typedef decl typedef_name
   | Provider_backend.Rust_provider_backend backend ->
     Rust_provider_backend.Decl.get_typedef
       backend
@@ -233,8 +229,6 @@ let get_gconst (ctx : Provider_context.t) (gconst_name : string) :
             gconst_name
             Shallow_decl_defs.to_const_decl_opt
         | None -> None)
-  | Provider_backend.Decl_service { decl; _ } ->
-    Decl_service_client.rpc_get_gconst decl gconst_name
   | Provider_backend.Rust_provider_backend backend ->
     Rust_provider_backend.Decl.get_gconst
       backend
@@ -265,8 +259,6 @@ let get_module (ctx : Provider_context.t) (module_name : string) :
       decl_cache
       ~key:(Provider_backend.Decl_cache_entry.Module_decl module_name)
       ~default:fetch_from_backing_store
-  | Provider_backend.Decl_service { decl; _ } ->
-    Decl_service_client.rpc_get_module decl module_name
   | Provider_backend.Rust_provider_backend backend ->
     Rust_provider_backend.Decl.get_module
       backend
@@ -319,5 +311,3 @@ let get_shallow_class (ctx : Provider_context.t) (name : string) :
         | None -> None
         | Some path ->
           shallow_find_in_direct_decl_parse ~fill_caches:true ctx path name)
-  | Provider_backend.Decl_service { decl; _ } ->
-    Decl_service_client.rpc_get_class decl name

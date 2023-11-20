@@ -3,7 +3,6 @@
  (modules provider_backend)
  (libraries
   collections
-  decl_service_client
   decl_store
   direct_decl_parser
   rust_provider_backend_stubs
@@ -77,7 +76,6 @@
   decl_counters
   decl_class
   decl_enforceability
-  decl_service_client
   direct_decl_utils
   provider_backend
   rust_provider_backend_stubs
@@ -139,7 +137,6 @@
  (modules old_shallow_classes_provider)
  (libraries
   bloom_filter
-  decl_service_client
   direct_decl_utils
   provider_backend
   provider_context

@@ -47,8 +47,6 @@ let get_old_batch (ctx : Provider_context.t) ~during_init (names : SSet.t) :
     fetch_missing_old_classes_remotely ctx ~during_init old_classes
   | Provider_backend.Local_memory _ ->
     failwith "get_old_batch not implemented for Local_memory"
-  | Provider_backend.Decl_service _ ->
-    failwith "get_old_batch not implemented for Decl_service"
 
 let oldify_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   match Provider_context.get_backend ctx with
@@ -60,8 +58,6 @@ let oldify_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
     Shallow_classes_heap.Classes.oldify_batch names
   | Provider_backend.Local_memory _ ->
     failwith "oldify_batch not implemented for Local_memory"
-  | Provider_backend.Decl_service _ ->
-    failwith "oldify_batch not implemented for Decl_service"
 
 let remove_old_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   match Provider_context.get_backend ctx with
@@ -73,5 +69,3 @@ let remove_old_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
     Shallow_classes_heap.Classes.remove_old_batch names
   | Provider_backend.Local_memory _ ->
     failwith "remove_old_batch not implemented for Local_memory"
-  | Provider_backend.Decl_service _ ->
-    failwith "remove_old_batch not implemented for Decl_service"

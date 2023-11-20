@@ -25,7 +25,6 @@
   file_info
   heap_shared_mem
   heap_shared_mem_hash
-  hh_fanout_rust_ffi_externs
   hh_json
   logging
   relative_path
@@ -65,28 +64,3 @@
  (locks /cargo)
  (action
   (run %{workspace_root}/hack/scripts/invoke_cargo.sh deps_rust_ffi deps_rust_ffi)))
-
-(library
- (name hh_fanout_rust_ffi_externs)
- (wrapped false)
- (modules hh_fanout_rust_ffi_externs)
- (libraries
-  hh_fanout_rust_ffi
-  file_scuba_logger_ffi_externs))
-
-(library
- (name hh_fanout_rust_ffi)
- (wrapped false)
- (modules)
- (foreign_archives hh_fanout_rust_ffi))
-
-(rule
- (targets libhh_fanout_rust_ffi.a)
- (deps
-  (source_tree %{workspace_root}/hack/src))
- (locks /cargo)
- (action
-  (run
-   %{workspace_root}/hack/scripts/invoke_cargo.sh
-   hh_fanout_rust_ffi
-   hh_fanout_rust_ffi)))

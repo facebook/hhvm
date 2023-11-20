@@ -84,13 +84,6 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
- (name decl_service_client)
- (wrapped false)
- (modules decl_service_client)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
-
-(library
   (name remote_old_decls_ffi)
   (wrapped false)
   (modules

@@ -161,8 +161,6 @@ let dump_dep_graph_64bit ~mode ~db_name ~incremental_info_file =
     match mode with
     | Typing_deps_mode.InMemoryMode base_dep_graph -> base_dep_graph
     | Typing_deps_mode.SaveToDiskMode { graph; _ } -> graph
-    | Typing_deps_mode.HhFanoutRustMode _ ->
-      failwith "HhFanoutRustMode is not supported in SaveStateService"
   in
   let () =
     let open Hh_json in
@@ -189,8 +187,6 @@ let save_state (env : ServerEnv.env) (output_filename : string) :
     | Typing_deps_mode.InMemoryMode _
     | Typing_deps_mode.SaveToDiskMode _ ->
       output_filename ^ "_64bit_dep_graph.delta"
-    | Typing_deps_mode.HhFanoutRustMode _ ->
-      "HhFanoutRustMode is not supported in SaveStateService"
   in
   let () =
     if Sys.file_exists output_filename then
@@ -233,8 +229,6 @@ let save_state (env : ServerEnv.env) (output_filename : string) :
     | Some dir ->
       Hh_logger.warn "saveStateService: human readable dep map dir: %s" dir);
     { dep_table_edges_added = 0 }
-  | Typing_deps_mode.HhFanoutRustMode _ ->
-    failwith "HhFanoutRustMode is not supported in SaveStateService"
 
 let go_naming (naming_table : Naming_table.t) (output_filename : string) :
     (save_naming_result, string) result =

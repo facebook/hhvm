@@ -12,10 +12,6 @@ open Reordered_argument_collections
 let db_path_of_ctx (ctx : Provider_context.t) : Naming_sqlite.db_path option =
   ctx |> Provider_context.get_backend |> Db_path_provider.get_naming_db_path
 
-let not_implemented (backend : Provider_backend.t) =
-  failwith
-    ("not implemented for backend: " ^ Provider_backend.t_to_string backend)
-
 let attach_name_type_to_tuple (name_type, path) =
   (FileInfo.File (name_type, path), name_type)
 
@@ -273,16 +269,11 @@ let get_const_pos (ctx : Provider_context.t) (name : string) :
             ~fallback:(fun db_path ->
               Naming_sqlite.get_const_path_by_name db_path name
               |> Option.map ~f:(fun path -> (FileInfo.Const, path)))
-          >>| attach_name_type_to_tuple
-        | Provider_backend.Decl_service { decl; _ } ->
-          Decl_service_client.Slow.rpc_get_gconst_path decl name)
+          >>| attach_name_type_to_tuple)
     >>| remove_name_type
 
 let const_exists (ctx : Provider_context.t) (name : string) : bool =
-  match Provider_context.get_backend ctx with
-  | Provider_backend.Decl_service { decl; _ } ->
-    Decl_service_client.rpc_get_gconst decl name |> Option.is_some
-  | _ -> get_const_pos ctx name |> Option.is_some
+  get_const_pos ctx name |> Option.is_some
 
 let get_const_path (ctx : Provider_context.t) (name : string) :
     Relative_path.t option =
@@ -303,7 +294,6 @@ let add_const
     let data = Pos ((FileInfo.Const, FileInfo.get_pos_filename pos), []) in
     reverse_naming_table_delta.consts :=
       SMap.add !(reverse_naming_table_delta.consts) ~key:name ~data
-  | Provider_backend.Decl_service _ as backend -> not_implemented backend
 
 let remove_const_batch (backend : Provider_backend.t) (names : string list) :
     unit =
@@ -324,7 +314,6 @@ let remove_const_batch (backend : Provider_backend.t) (names : string list) :
         names
         ~init:!(reverse_naming_table_delta.consts)
         ~f:(fun acc name -> SMap.add acc ~key:name ~data:Deleted)
-  | Provider_backend.Decl_service _ as backend -> not_implemented backend
 
 let get_fun_pos (ctx : Provider_context.t) (name : string) : FileInfo.pos option
     =
@@ -358,16 +347,11 @@ let get_fun_pos (ctx : Provider_context.t) (name : string) : FileInfo.pos option
             ~fallback:(fun db_path ->
               Naming_sqlite.get_fun_path_by_name db_path name
               |> Option.map ~f:(fun path -> (FileInfo.Fun, path)))
-          >>| attach_name_type_to_tuple
-        | Provider_backend.Decl_service { decl; _ } ->
-          Decl_service_client.Slow.rpc_get_fun_path decl name)
+          >>| attach_name_type_to_tuple)
     >>| remove_name_type
 
 let fun_exists (ctx : Provider_context.t) (name : string) : bool =
-  match Provider_context.get_backend ctx with
-  | Provider_backend.Decl_service { decl; _ } ->
-    Decl_service_client.rpc_get_fun decl name |> Option.is_some
-  | _ -> get_fun_pos ctx name |> Option.is_some
+  get_fun_pos ctx name |> Option.is_some
 
 let get_fun_path (ctx : Provider_context.t) (name : string) :
     Relative_path.t option =
@@ -415,9 +399,7 @@ let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
         if is_path_in_ctx ~ctx path then
           None
         else
-          compute_fun_canon_name ctx path name
-      | Provider_backend.Decl_service { decl; _ } ->
-        Decl_service_client.Slow.rpc_get_fun_canon_name decl name))
+          compute_fun_canon_name ctx path name))
 
 let add_fun (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos)
     : unit =
@@ -439,11 +421,6 @@ let add_fun (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos)
         !(reverse_naming_table_delta.funs_canon_key)
         ~key:(Naming_sqlite.to_canon_name_key name)
         ~data
-  | Provider_backend.Decl_service _ ->
-    (* Do nothing. All naming table updates are expected to have happened
-       already--we should have sent a control request to the decl service asking
-       it to update in response to the list of changed files. *)
-    ()
 
 let remove_fun_batch (backend : Provider_backend.t) (names : string list) : unit
     =
@@ -470,9 +447,6 @@ let remove_fun_batch (backend : Provider_backend.t) (names : string list) : unit
         ~init:!(reverse_naming_table_delta.funs_canon_key)
         ~f:(fun acc name ->
           SMap.add acc ~key:(Naming_sqlite.to_canon_name_key name) ~data:Deleted)
-  | Provider_backend.Decl_service _ as backend ->
-    (* Removing cache items is not the responsibility of hh_worker. *)
-    not_implemented backend
 
 let add_type
     (backend : Provider_backend.t)
@@ -499,9 +473,6 @@ let add_type
         !(reverse_naming_table_delta.types_canon_key)
         ~key:(Naming_sqlite.to_canon_name_key name)
         ~data
-  | Provider_backend.Decl_service _ ->
-    (* Do nothing. Naming table updates should be done already. *)
-    ()
 
 let remove_type_batch (backend : Provider_backend.t) (names : string list) :
     unit =
@@ -528,9 +499,6 @@ let remove_type_batch (backend : Provider_backend.t) (names : string list) :
         ~init:!(reverse_naming_table_delta.types_canon_key)
         ~f:(fun acc name ->
           SMap.add acc ~key:(Naming_sqlite.to_canon_name_key name) ~data:Deleted)
-  | Provider_backend.Decl_service _ as backend ->
-    (* Removing cache items is not the responsibility of hh_worker. *)
-    not_implemented backend
 
 let get_type_pos_and_kind (ctx : Provider_context.t) (name : string) :
     (FileInfo.pos * Naming_types.kind_of_type) option =
@@ -566,9 +534,7 @@ let get_type_pos_and_kind (ctx : Provider_context.t) (name : string) :
               |> Option.map ~f:(fun (path, kind) ->
                      (kind_to_name_type kind, path)))
           >>| fun (name_type, path) ->
-          (FileInfo.File (name_type, path), name_type)
-        | Provider_backend.Decl_service { decl; _ } ->
-          Decl_service_client.Slow.rpc_get_type_path decl name)
+          (FileInfo.File (name_type, path), name_type))
     >>| fun (pos, name_type) -> (pos, name_type_to_kind name_type)
 
 let get_type_pos (ctx : Provider_context.t) (name : string) :
@@ -591,13 +557,9 @@ let get_type_path_and_kind (ctx : Provider_context.t) (name : string) :
 
 let get_type_kind (ctx : Provider_context.t) (name : string) :
     Naming_types.kind_of_type option =
-  match Provider_context.get_backend ctx with
-  | Provider_backend.Decl_service { decl; _ } ->
-    Decl_service_client.rpc_get_type_kind decl name
-  | _ ->
-    (match get_type_pos_and_kind ctx name with
-    | Some (_pos, kind) -> Some kind
-    | None -> None)
+  match get_type_pos_and_kind ctx name with
+  | Some (_pos, kind) -> Some kind
+  | None -> None
 
 let get_type_canon_name (ctx : Provider_context.t) (name : string) :
     string option =
@@ -642,9 +604,7 @@ let get_type_canon_name (ctx : Provider_context.t) (name : string) :
         if is_path_in_ctx ~ctx path then
           None
         else
-          compute_type_canon_name ctx path (name_type_to_kind name_type) name
-      | Provider_backend.Decl_service { decl; _ } ->
-        Decl_service_client.Slow.rpc_get_type_canon_name decl name))
+          compute_type_canon_name ctx path (name_type_to_kind name_type) name))
 
 let get_class_path (ctx : Provider_context.t) (name : string) :
     Relative_path.t option =
@@ -662,15 +622,11 @@ let get_typedef_path (ctx : Provider_context.t) (name : string) :
     Relative_path.t option =
   (* This function is used even for code that typechecks clean, in order to judge
      whether an opaque typedef is visible (which it is only in the file being typechecked *)
-  match Provider_context.get_backend ctx with
-  | Provider_backend.Decl_service { decl; _ } ->
-    Decl_service_client.Positioned.rpc_get_typedef_path decl name
-  | _ ->
-    (match get_type_path_and_kind ctx name with
-    | Some (fn, Naming_types.TTypedef) -> Some fn
-    | Some (_, Naming_types.TClass)
-    | None ->
-      None)
+  match get_type_path_and_kind ctx name with
+  | Some (fn, Naming_types.TTypedef) -> Some fn
+  | Some (_, Naming_types.TClass)
+  | None ->
+    None
 
 let add_typedef
     (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos) : unit =
@@ -708,9 +664,7 @@ let get_module_pos (ctx : Provider_context.t) (name : string) :
             ~fallback:(fun db_path ->
               Naming_sqlite.get_module_path_by_name db_path name
               |> Option.map ~f:(fun path -> (FileInfo.Module, path)))
-          >>| attach_name_type_to_tuple
-        | Provider_backend.Decl_service { decl; _ } ->
-          Decl_service_client.Slow.rpc_get_module_path decl name)
+          >>| attach_name_type_to_tuple)
     >>| remove_name_type
 
 let get_module_path (ctx : Provider_context.t) (name : string) :
@@ -721,10 +675,7 @@ let module_exists (ctx : Provider_context.t) (name : string) : bool =
   if String.equal name Naming_special_names.Modules.default then
     true
   else
-    match Provider_context.get_backend ctx with
-    | Provider_backend.Decl_service { decl; _ } ->
-      Decl_service_client.rpc_get_module decl name |> Option.is_some
-    | _ -> get_module_pos ctx name |> Option.is_some
+    get_module_pos ctx name |> Option.is_some
 
 let add_module backend name pos =
   match backend with
@@ -740,7 +691,6 @@ let add_module backend name pos =
     let data = Pos ((FileInfo.Module, FileInfo.get_pos_filename pos), []) in
     reverse_naming_table_delta.modules :=
       SMap.add !(reverse_naming_table_delta.modules) ~key:name ~data
-  | Provider_backend.Decl_service _ as backend -> not_implemented backend
 
 let remove_module_batch backend names =
   match backend with
@@ -760,9 +710,6 @@ let remove_module_batch backend names =
         names
         ~init:!(reverse_naming_table_delta.modules)
         ~f:(fun acc name -> SMap.add acc ~key:name ~data:Deleted)
-  | Provider_backend.Decl_service _ as backend ->
-    (* Removing cache items is not the responsibility of hh_worker. *)
-    not_implemented backend
 
 let resolve_position : Provider_context.t -> Pos_or_decl.t -> Pos.t =
  fun ctx pos ->
@@ -936,7 +883,6 @@ let update
   let open FileInfo in
   let strip_positions symbols = List.map symbols ~f:(fun (_, x, _) -> x) in
   match backend with
-  | Provider_backend.Decl_service _ -> not_implemented backend
   | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Rust_provider_backend _
   | Provider_backend.Pessimised_shared_memory _

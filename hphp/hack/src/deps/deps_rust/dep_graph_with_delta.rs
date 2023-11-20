@@ -324,11 +324,6 @@ impl DepGraphWithDelta<DepGraph> {
                     .map_err(|err| format!("could not open dep graph file: {:?}", err))?;
                 Ok(Some(depgraph))
             }
-            TypingDepsMode::HhFanoutRustMode { hh_fanout: _ } => {
-                // HhFanoutRustMode doesn't load the dep graph this way.
-                // This path shouldn't be reached.
-                unimplemented!()
-            }
         }
     }
 }

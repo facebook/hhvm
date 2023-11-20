@@ -208,10 +208,6 @@ type t =
   | Shared_memory
   | Pessimised_shared_memory of pessimisation_info
   | Local_memory of local_memory
-  | Decl_service of {
-      decl: Decl_service_client.t;
-      fixmes: Fixmes.t;
-    }
   | Rust_provider_backend of Rust_provider_backend.t
   | Analysis
 
@@ -220,7 +216,6 @@ let t_to_string (t : t) : string =
   | Shared_memory -> "Shared_memory"
   | Pessimised_shared_memory _ -> "Pessimised_shared_memory"
   | Local_memory _ -> "Local_memory"
-  | Decl_service _ -> "Decl_service"
   | Rust_provider_backend _ -> "Rust_provider_backend"
   | Analysis -> "Analysis"
 
@@ -344,56 +339,6 @@ let set_local_memory_backend_with_defaults_for_test () : unit =
     ~max_num_decls:5000
     ~max_num_shallow_decls:(140 * 1024 * 1024)
 
-let make_decl_store_from_decl_service
-    (decl : Decl_service_client.t) (tcopts : TypecheckerOptions.t) :
-    Decl_store.decl_store =
-  assert (not (TypecheckerOptions.populate_member_heaps tcopts));
-  Decl_store.
-    {
-      (* Decl_service must only be used without member heaps.
-         Therefore, add_prop,static_prop,method,static_method_constructor will never be called.
-         And the corresponding get_ methods will always return None, to indicate that the caller
-         in decl_folded_class.ml will have to retrieve the information from a shallow decl. *)
-      add_prop = (fun _ _ -> failwith "decl_service.add_prop");
-      get_prop = (fun _ -> None);
-      add_static_prop = (fun _ _ -> failwith "decl_service.add_static_prop");
-      get_static_prop = (fun _ -> None);
-      add_method = (fun _ _ -> failwith "decl_service.add_method");
-      get_method = (fun _ -> None);
-      add_static_method = (fun _ _ -> failwith "decl_service.add_static_method");
-      get_static_method = (fun _ -> None);
-      add_constructor = (fun _ _ -> failwith "decl_service.add_constructor");
-      get_constructor = (fun _ -> None);
-      (* Local_changes is a concept used by hh_server to deliver typechecks for
-         unsaved files. It is not supported by the decl-service. *)
-      pop_local_changes = (fun () -> failwith "decl_service.pop_local_changes");
-      push_local_changes = (fun () -> failwith "push_local_changes");
-      (* The {add,get}_{fun,typedef,gconst,module} part of Decl_store API aren't used at all.
-         Instead, when Decl_provider wants one of these things, it calls directly into other APIs in this module.
-         In case you're wondering why "get_shallow_class" isn't also here? Well, it's called by Shallow_classes_provider
-         and it doesn't use the Decl_store API at all; it calls other functions in this current module too. *)
-      get_fun = (fun _ -> failwith "decl_service.get_fun");
-      add_fun = (fun _ _ -> failwith "decl_service.add_fun");
-      get_typedef = (fun _ -> failwith "decl_service.get_typedef");
-      add_typedef = (fun _ _ -> failwith "decl_service.add_typedef");
-      get_gconst = (fun _ -> failwith "decl_service.get_gconst");
-      add_gconst = (fun _ _ -> failwith "decl_service.add_gconst");
-      get_module = (fun _ -> failwith "decl_service.get_module");
-      add_module = (fun _ _ -> failwith "decl_service.add_module");
-      (* The {get,add}_class API is used by decl_folded_class.ml in its folding work, invoked by Decl_provider.
-         These two functions deal with folded decls by the way, not shallow.
-         Anyway, our implementation of "get_class" and "add_class" is to use our process-local cache,
-         and also pass through to hh_decl where needed. *)
-      get_class = Decl_service_client.rpc_get_folded_class decl;
-      add_class = Decl_service_client.rpc_store_folded_class decl;
-    }
-
-let set_decl_service_backend
-    (decl : Decl_service_client.t) (tcopt : TypecheckerOptions.t) : unit =
-  backend_ref := Decl_service { decl; fixmes = empty_fixmes };
-  Decl_store.set (make_decl_store_from_decl_service decl tcopt);
-  ()
-
 let get () : t = !backend_ref
 
 let supports_eviction (t : t) : bool =
@@ -402,7 +347,6 @@ let supports_eviction (t : t) : bool =
   | Analysis ->
     false
   | Local_memory _
-  | Decl_service _
   | Rust_provider_backend _
   | Shared_memory ->
     true

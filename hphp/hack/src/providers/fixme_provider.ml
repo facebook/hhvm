@@ -68,8 +68,7 @@ let get_fixmes filename =
     (match HH_FIXMES.get filename with
     | None -> DECL_HH_FIXMES.get filename
     | Some x -> Some x)
-  | Provider_backend.Local_memory { Provider_backend.fixmes; _ }
-  | Provider_backend.Decl_service { fixmes; _ } ->
+  | Provider_backend.Local_memory { Provider_backend.fixmes; _ } ->
     (match Fixme_store.get fixmes.hh_fixmes filename with
     | None -> Fixme_store.get fixmes.decl_hh_fixmes filename
     | Some x -> Some x)
@@ -81,8 +80,7 @@ let get_hh_fixmes filename =
   | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Shared_memory ->
     HH_FIXMES.get filename
-  | Provider_backend.Local_memory { Provider_backend.fixmes; _ }
-  | Provider_backend.Decl_service { fixmes; _ } ->
+  | Provider_backend.Local_memory { Provider_backend.fixmes; _ } ->
     Fixme_store.get fixmes.hh_fixmes filename
 
 let get_decl_hh_fixmes filename =
@@ -92,8 +90,7 @@ let get_decl_hh_fixmes filename =
   | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Shared_memory ->
     DECL_HH_FIXMES.get filename
-  | Provider_backend.Local_memory { Provider_backend.fixmes; _ }
-  | Provider_backend.Decl_service { fixmes; _ } ->
+  | Provider_backend.Local_memory { Provider_backend.fixmes; _ } ->
     Fixme_store.get fixmes.decl_hh_fixmes filename
 
 let get_disallowed_fixmes filename =
@@ -103,8 +100,7 @@ let get_disallowed_fixmes filename =
   | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Shared_memory ->
     DISALLOWED_FIXMES.get filename
-  | Provider_backend.Local_memory { Provider_backend.fixmes; _ }
-  | Provider_backend.Decl_service { fixmes; _ } ->
+  | Provider_backend.Local_memory { Provider_backend.fixmes; _ } ->
     Fixme_store.get fixmes.disallowed_fixmes filename
 
 let provide_hh_fixmes filename fixme_map =
@@ -115,8 +111,7 @@ let provide_hh_fixmes filename fixme_map =
     | Provider_backend.Pessimised_shared_memory _
     | Provider_backend.Shared_memory ->
       HH_FIXMES.add filename fixme_map
-    | Provider_backend.Local_memory { Provider_backend.fixmes; _ }
-    | Provider_backend.Decl_service { fixmes; _ } ->
+    | Provider_backend.Local_memory { Provider_backend.fixmes; _ } ->
       Fixme_store.add fixmes.hh_fixmes filename fixme_map
 
 let provide_decl_hh_fixmes filename fixme_map =
@@ -127,8 +122,7 @@ let provide_decl_hh_fixmes filename fixme_map =
     | Provider_backend.Pessimised_shared_memory _
     | Provider_backend.Shared_memory ->
       DECL_HH_FIXMES.add filename fixme_map
-    | Provider_backend.Local_memory { Provider_backend.fixmes; _ }
-    | Provider_backend.Decl_service { fixmes; _ } ->
+    | Provider_backend.Local_memory { Provider_backend.fixmes; _ } ->
       Fixme_store.add fixmes.decl_hh_fixmes filename fixme_map
 
 let provide_disallowed_fixmes filename fixme_map =
@@ -139,8 +133,7 @@ let provide_disallowed_fixmes filename fixme_map =
     | Provider_backend.Pessimised_shared_memory _
     | Provider_backend.Shared_memory ->
       DISALLOWED_FIXMES.add filename fixme_map
-    | Provider_backend.Local_memory { Provider_backend.fixmes; _ }
-    | Provider_backend.Decl_service { fixmes; _ } ->
+    | Provider_backend.Local_memory { Provider_backend.fixmes; _ } ->
       Fixme_store.add fixmes.disallowed_fixmes filename fixme_map
 
 let remove_batch paths =
@@ -152,8 +145,7 @@ let remove_batch paths =
     HH_FIXMES.remove_batch paths;
     DECL_HH_FIXMES.remove_batch paths;
     DISALLOWED_FIXMES.remove_batch paths
-  | Provider_backend.Local_memory { Provider_backend.fixmes; _ }
-  | Provider_backend.Decl_service { fixmes; _ } ->
+  | Provider_backend.Local_memory { Provider_backend.fixmes; _ } ->
     Fixme_store.remove_batch fixmes.hh_fixmes paths;
     Fixme_store.remove_batch fixmes.decl_hh_fixmes paths;
     Fixme_store.remove_batch fixmes.disallowed_fixmes paths
@@ -261,7 +253,6 @@ let is_disallowed pos code =
       DISALLOWED_FIXMES.get filename
     | Provider_backend.Local_memory { Provider_backend.fixmes; _ } ->
       Fixme_store.get fixmes.disallowed_fixmes filename
-    | Provider_backend.Decl_service _ -> None
   in
   fixme_map_opt
   |> Option.value ~default:IMap.empty

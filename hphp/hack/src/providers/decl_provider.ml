@@ -97,8 +97,7 @@ let get_class
     | None -> None
     | Some v -> Some (counter, v, Some ctx)
   end
-  | Provider_backend.Shared_memory
-  | Provider_backend.Decl_service _ -> begin
+  | Provider_backend.Shared_memory -> begin
     match
       lookup_or_populate_class_cache class_name (fun class_name ->
           Typing_classes_heap.get ctx class_name declare_folded_class)

@@ -625,9 +625,7 @@ module SaveHumanReadableDepMap : sig
 end = struct
   let should_save mode =
     match mode with
-    | SaveToDiskMode { human_readable_dep_map_dir = Some _; _ }
-    | HhFanoutRustMode { human_readable_dep_map_dir = Some _; _ } ->
-      true
+    | SaveToDiskMode { human_readable_dep_map_dir = Some _; _ } -> true
     | _ -> false
 
   let human_readable_dep_map_channel_ref : Out_channel.t option ref = ref None
@@ -637,9 +635,7 @@ end = struct
     | None ->
       let directory =
         match mode with
-        | SaveToDiskMode { human_readable_dep_map_dir = Some d; _ }
-        | HhFanoutRustMode { human_readable_dep_map_dir = Some d; _ } ->
-          d
+        | SaveToDiskMode { human_readable_dep_map_dir = Some d; _ } -> d
         | _ -> failwith "programming error: no human_readable_dep_map_dir"
       in
       let () =
@@ -798,58 +794,6 @@ end = struct
     hh_save_custom_dep_graph_save_delta source dest
 end
 
-module HhFanout : sig
-  val add_idep :
-    Mode.t -> Dep.dependent Dep.variant -> Dep.dependency Dep.variant -> unit
-
-  val flush_edges : Hh_fanout_rust_ffi_externs.hh_fanout_rust_ffi -> unit
-end = struct
-  (* The list is of (dependency, dependent). This was moved from `hh_fanout_rust_ffi_externs` so that it could have access to `Dep.t` *)
-  external commit_edges :
-    Hh_fanout_rust_ffi_externs.hh_fanout_rust_ffi ->
-    (Dep.t * Dep.t) list ->
-    unit = "hh_fanout_ffi_add_idep_batch"
-
-  let discovered_deps_batch : (dep_edge, unit) Hashtbl.t = Hashtbl.create 1000
-
-  let flush_edges hh_fanout_ffi =
-    let edges =
-      Hashtbl.fold
-        begin
-          fun { idependent; idependency } () acc ->
-            (idependency, idependent) :: acc
-        end
-        discovered_deps_batch
-        []
-    in
-    commit_edges hh_fanout_ffi edges;
-    Hashtbl.clear discovered_deps_batch
-
-  let add_idep mode dependent dependency =
-    let hh_fanout_ffi =
-      (* TODO(toyang): ideally, this function would only take hh_fanout_ffi
-         instead of doing this match. For now, we keep this consistent with the
-         other `add_idep`s. *)
-      match mode with
-      | HhFanoutRustMode { hh_fanout; _ } -> hh_fanout
-      | _ -> failwith "programming error: wrong mode"
-    in
-    let idependent = Dep.make dependent in
-    let idependency = Dep.make dependency in
-    if idependent = idependency then
-      ()
-    else (
-      Caml.Hashtbl.iter (fun _ f -> f dependent dependency) dependency_callbacks;
-      if !trace then begin
-        Hashtbl.replace discovered_deps_batch { idependent; idependency } ();
-        if Hashtbl.length discovered_deps_batch >= 1000 then
-          flush_edges hh_fanout_ffi
-      end;
-      SaveHumanReadableDepMap.add mode (dependent, idependent);
-      SaveHumanReadableDepMap.add mode (dependency, idependency)
-    )
-end
-
 (** Registers Rust custom types with the OCaml runtime, supporting deserialization *)
 let () = CustomGraph.hh_custom_dep_graph_register_custom_types ()
 
@@ -918,7 +862,6 @@ module Telemetry = struct
     match mode with
     | InMemoryMode _ -> Some (CustomGraph.dep_graph_delta_num_edges ())
     | SaveToDiskMode _ -> None
-    | HhFanoutRustMode _ -> None
 end
 
 type dep_edges = DepEdgeSet.t option
@@ -936,14 +879,11 @@ let allow_dependency_table_reads mode flag =
   | InMemoryMode _
   | SaveToDiskMode _ ->
     CustomGraph.allow_dependency_table_reads flag
-    (* TODO(toyang): I don't think the re-architecture will have similar staleness issues. *)
-  | HhFanoutRustMode _ -> true
 
 let add_idep mode dependent dependency =
   match mode with
   | InMemoryMode _ -> CustomGraph.add_idep mode dependent dependency
   | SaveToDiskMode _ -> SaveCustomGraph.add_idep mode dependent dependency
-  | HhFanoutRustMode _ -> HhFanout.add_idep mode dependent dependency
 
 let replace mode =
   match mode with
@@ -967,15 +907,6 @@ let flush_ideps_batch mode : dep_edges =
     SaveCustomGraph.filter_discovered_deps_batch ~flush:true mode;
     SaveHumanReadableDepMap.export_to_disk ~flush:true mode;
     None
-  (* This function is used by  *)
-  | HhFanoutRustMode _ -> failwith "HhFanoutRustMode not supported"
-
-let hh_fanout_flush_ideps mode : unit =
-  match mode with
-  | HhFanoutRustMode { hh_fanout; _ } ->
-    HhFanout.flush_edges hh_fanout;
-    SaveHumanReadableDepMap.export_to_disk ~flush:true mode
-  | _ -> failwith "should only be called in HhFanoutRustMode"
 
 let merge_dep_edges (x : dep_edges) (y : dep_edges) : dep_edges =
   match (x, y) with
@@ -992,8 +923,6 @@ let remove_edges mode edges =
   | InMemoryMode _
   | SaveToDiskMode _ ->
     CustomGraph.remove_edges edges
-  | HhFanoutRustMode _ ->
-    failwith "remove_edges not supported for HhFanoutRustMode"
 
 let remove_declared_tags mode deps =
   let edges =
@@ -1008,23 +937,17 @@ let save_discovered_edges mode ~dest ~reset_state_after_saving =
   | InMemoryMode _ -> CustomGraph.save_delta dest reset_state_after_saving
   | SaveToDiskMode _ ->
     failwith "save_discovered_edges not supported for SaveToDiskMode"
-  | HhFanoutRustMode _ ->
-    failwith "save_discovered_edges not supported for HhFanoutRustMode"
 
 let load_discovered_edges mode source =
   match mode with
   | InMemoryMode _ -> CustomGraph.load_delta mode source
   | SaveToDiskMode _ -> SaveCustomGraph.save_delta mode ~source
-  | HhFanoutRustMode _ ->
-    failwith "load_discovered_edges not supported for HhFanoutRustMode"
 
 let get_ideps_from_hash mode hash =
   match mode with
   | InMemoryMode _
   | SaveToDiskMode _ ->
     CustomGraph.get_ideps_from_hash mode hash
-  | HhFanoutRustMode _ ->
-    failwith "get_ideps_from_hash not supported for HhFanoutRustMode"
 
 let get_ideps mode dependency = get_ideps_from_hash mode (Dep.make dependency)
 

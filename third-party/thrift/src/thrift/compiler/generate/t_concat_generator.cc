@@ -60,13 +60,6 @@ void t_concat_generator::generate_program() {
     generate_typedef(ttypedef);
   }
 
-  // Validate unions
-  for (const t_structured* object : structured_definitions) {
-    if (object->is_union()) {
-      validate_union_members(dynamic_cast<const t_union&>(*object));
-    }
-  }
-
   // Generate constants
   auto consts = program_->consts();
   generate_consts(consts);
@@ -169,17 +162,6 @@ std::string t_concat_generator::generate_structural_id(
   snprintf(structural_id, sizeof(structural_id), "%" PRIu64, hash);
 
   return structural_id;
-}
-
-void t_concat_generator::validate_union_members(const t_union& union_node) {
-  for (const auto& field : union_node.fields()) {
-    if (field.get_req() == t_field::e_req::required ||
-        field.get_req() == t_field::e_req::optional) {
-      throw std::runtime_error(
-          "compiler error: Union field " + union_node.get_name() + "." +
-          field.name() + " cannot be required or optional");
-    }
-  }
 }
 
 } // namespace compiler

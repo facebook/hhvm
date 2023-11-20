@@ -341,9 +341,6 @@ class t_concat_generator : public t_generator {
         " */\n";
   }
 
- private:
-  void validate_union_members(const t_union& union_node);
-
  protected:
   /**
    * Quick accessor for formatted service name that is currently being

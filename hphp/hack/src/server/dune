@@ -497,7 +497,6 @@
   lsp
   procs_entry_point
   security_stubs
-  shallow_classes_provider
   old_shallow_classes_provider
   direct_decl_parser
   direct_decl_utils

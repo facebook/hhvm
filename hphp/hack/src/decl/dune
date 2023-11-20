@@ -50,7 +50,6 @@
   naming_heap
   procs_procs
   shallow_class_diff
-  shallow_classes_provider
   shallow_decl_defs
   typing_defs)
  (preprocess
@@ -94,7 +93,6 @@
   decl_utils
   naming
   procs_procs
-  shallow_classes_provider
   shallow_decl_defs
   typing_defs
   typing_pessimisation_deps)
@@ -161,7 +159,7 @@
 (library
   (name decl_enforceability)
   (modules decl_enforceability)
-  (libraries decl_env shallow_classes_provider decl_provider_internals naming_provider))
+  (libraries decl_env decl_provider_internals naming_provider))
 
 (library
  (name decl_enum)

@@ -81,7 +81,6 @@
   direct_decl_utils
   provider_backend
   rust_provider_backend_stubs
-  shallow_classes_provider
   shallow_decl_defs
   decl_provider_internals
   typing_heap)
@@ -132,21 +131,6 @@
   counters
   typechecker_options
   typing)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
- (name shallow_classes_provider)
- (modules shallow_classes_provider)
- (libraries
-  bloom_filter
-  decl_service_client
-  direct_decl_utils
-  provider_backend
-  provider_context
-  remote_old_decl_client
-  rust_provider_backend_stubs
-  shallow_classes_heap)
  (preprocess
   (pps ppx_deriving.std)))
 

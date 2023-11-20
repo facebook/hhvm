@@ -28,8 +28,8 @@ let find_in_direct_decl_parse ~cache_results ctx filename name extract_decl_opt
           extract_decl_opt decl
         | _ -> None)
 
-let get_typedef (ctx : Provider_context.t) (typedef_name : type_key) :
-    typedef_decl option =
+let get_typedef_WARNING_ONLY_FOR_SHMEM
+    (ctx : Provider_context.t) (typedef_name : type_key) : typedef_decl option =
   match Decl_store.((get ()).get_typedef typedef_name) with
   | Some c -> Some c
   | None ->

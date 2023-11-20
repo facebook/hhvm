@@ -253,7 +253,7 @@ let get_typedef
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> Decl_store.((get ()).get_typedef typedef_name)
   | Provider_backend.Shared_memory ->
-    Typedef_provider.get_typedef ctx typedef_name
+    Typedef_provider.get_typedef_WARNING_ONLY_FOR_SHMEM ctx typedef_name
   | Provider_backend.Pessimised_shared_memory info ->
     (match Decl_store.((get ()).get_typedef typedef_name) with
     | Some c -> Some c

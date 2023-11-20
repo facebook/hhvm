@@ -337,6 +337,7 @@
  (libraries
   classDiff
   decl_defs
+  decl_provider
   fanout
   naming_provider
   shallow_decl_defs

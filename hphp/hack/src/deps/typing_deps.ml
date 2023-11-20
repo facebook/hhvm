@@ -87,6 +87,7 @@ module Dep = struct
       | Constructor
       | Const of string
       | All
+    [@@deriving show]
 
     let method_ name = Method name
 

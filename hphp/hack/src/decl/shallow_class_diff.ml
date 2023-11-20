@@ -523,6 +523,74 @@ let type_name ty =
   let (_, (_, name), tparams) = Decl_utils.unwrap_class_type ty in
   (name, tparams)
 
+(** A bag of strings.
+  A bag is a set where elements can appear multiple times *)
+module Bag : sig
+  type t
+
+  val remove : string -> t -> t
+
+  val mem : string -> t -> bool
+
+  val of_list : string list -> t
+end = struct
+  type t = int SMap.t
+
+  let empty = SMap.empty
+
+  let add s t =
+    let v = SMap.find_opt t s |> Option.value ~default:0 in
+    SMap.add ~key:s ~data:(v + 1) t
+
+  let remove s t =
+    match SMap.find_opt t s with
+    | None -> t
+    | Some v ->
+      if Int.equal v 1 then
+        SMap.remove t s
+      else
+        SMap.add ~key:s ~data:(v - 1) t
+
+  let mem s t = SMap.mem t s
+
+  let of_list l = List.fold l ~init:empty ~f:(fun bag x -> add x bag)
+end
+
+exception Found_swap
+
+(** The order has changed if there exists x and y
+  such that x comes before y in [l1],
+  but y comes before x in [l2],
+  i.e. if there exists two elements which are in both lists
+  and have been swapped. *)
+let order_has_changed l1 l2 =
+  let rec go l1 l2 l1_bag l2_bag =
+    match l1 with
+    | [] -> false
+    | x1 :: l1 ->
+      (match l2 with
+      | [] -> false
+      | l2 ->
+        let l1_bag = Bag.remove x1 l1_bag in
+        if Bag.mem x1 l2_bag then
+          find_swap l1 l2 l1_bag l2_bag x1
+        else
+          go l1 l2 l1_bag l2_bag)
+  and find_swap l1 l2 l1_bag l2_bag x1 =
+    match l2 with
+    | x2 :: l2 ->
+      let l2_bag = Bag.remove x2 l2_bag in
+      if String.equal x2 x1 then
+        go l1 l2 l1_bag l2_bag
+      else if Bag.mem x2 l1_bag then
+        raise Found_swap
+      else
+        find_swap l1 l2 l1_bag l2_bag x1
+    | [] -> failwith "We should have found x1 in l2 before this happens."
+  in
+  try go l1 l2 (Bag.of_list l1) (Bag.of_list l2) with
+  | Found_swap -> true
+
 let diff_value_lists values1 values2 ~equal ~get_name_value ~diff =
   if List.equal equal values1 values2 then
     None
@@ -532,11 +600,7 @@ let diff_value_lists values1 values2 ~equal ~get_name_value ~diff =
        let values2 = List.map ~f:get_name_value values2 in
        {
          NamedItemsListChange.order_change =
-           not
-           @@ List.equal
-                String.equal
-                (List.map ~f:fst values1)
-                (List.map ~f:fst values2);
+           order_has_changed (List.map ~f:fst values1) (List.map ~f:fst values2);
          per_name_changes =
            SMap.merge
              (SMap.of_list values1)

@@ -26,6 +26,23 @@ let include_fanout_of_dep (mode : Mode.t) (dep : Dep.t) (deps : DepSet.t) :
   let fanout = Typing_deps.get_ideps_from_hash mode dep in
   DepSet.union fanout deps
 
+let acc_member_fanout ctx class_dep member change fanout_acc =
+  match change with
+  | Private_change_not_in_trait -> fanout_acc
+  | Added
+  | Removed
+  | Changed_inheritance
+  | Modified ->
+    Typing_deps.get_member_fanout
+      (Provider_context.get_deps_mode ctx)
+      ~class_dep
+      member
+      fanout_acc
+
+let acc_member_fanouts ctx class_dep make_member changes fanout_acc =
+  SMap.fold changes ~init:fanout_acc ~f:(fun name change fanout_acc ->
+      acc_member_fanout ctx class_dep (make_member name) change fanout_acc)
+
 let get_minor_change_fanout
     ~(ctx : Provider_context.t)
     (class_dep : Dep.t)
@@ -33,22 +50,9 @@ let get_minor_change_fanout
   let { consts; typeconsts; props; sprops; methods; smethods; constructor } =
     member_diff
   in
-  let acc_fanout member change fanout_acc =
-    match change with
-    | Private_change_not_in_trait -> fanout_acc
-    | Added
-    | Removed
-    | Changed_inheritance
-    | Modified ->
-      Typing_deps.get_member_fanout
-        (Provider_context.get_deps_mode ctx)
-        ~class_dep
-        member
-        fanout_acc
-  in
+  let acc_fanout = acc_member_fanout ctx class_dep in
   let acc_fanouts make_member changes fanout_acc =
-    SMap.fold changes ~init:fanout_acc ~f:(fun name change fanout_acc ->
-        acc_fanout (make_member name) change fanout_acc)
+    acc_member_fanouts ctx class_dep make_member changes fanout_acc
   in
   let fanout_acc =
     DepSet.singleton class_dep
@@ -167,11 +171,215 @@ let get_maximum_fanout (ctx : Provider_context.t) (class_dep : Dep.t) : DepSet.t
   let mode = Provider_context.get_deps_mode ctx in
   Typing_deps.add_all_deps mode @@ DepSet.singleton class_dep
 
+(** Get the fanout of an added parent. *)
+let get_added_parent_fanout
+    ctx class_dep classish_kind added_parent_name deps_acc =
+  (* This function is based on reasoning about how basic decl facts are altered
+   * by adding a parent.
+   * The kinds of facts we consider are:
+   * - subtyping relationships: t1 <: t2
+   * - member types: X::m : t
+   * Adding a parent Y to a type X should:
+   * - Add new subtyping relationships, but not remove any.
+   *   And therefore there should be no new subtyping errors.
+   * - For each member m in Y, possibly change the type of X::m.
+   *   The fanout should therefore include the fanout of X::m.
+   *
+   * So conclusion: fanout = union over m in Y of fanout(X::m)
+   * Which is what this function implements *)
+  match Decl_provider.get_class ctx added_parent_name with
+  | None -> deps_acc
+  | Some (cls : Decl_provider.class_decl) ->
+    let acc_fanout member = acc_member_fanout ctx class_dep member Added in
+    let acc_fanouts make_member members =
+      acc_member_fanouts
+        ctx
+        class_dep
+        make_member
+        (List.map members ~f:(fun m -> (fst m, Added)) |> SMap.of_list)
+    in
+    let consts =
+      Decl_provider.Class.consts cls
+      |> List.filter ~f:(fun (name, _) ->
+             not @@ String.equal name Naming_special_names.Members.mClass)
+    in
+    let deps_acc =
+      deps_acc
+      |> acc_fanouts Dep.Member.method_ (Decl_provider.Class.methods cls)
+      |> acc_fanouts Dep.Member.smethod (Decl_provider.Class.smethods cls)
+      |> acc_fanouts Dep.Member.prop (Decl_provider.Class.props cls)
+      |> acc_fanouts Dep.Member.sprop (Decl_provider.Class.sprops cls)
+      |> acc_fanouts Dep.Member.const consts
+      |> acc_fanouts Dep.Member.const (Decl_provider.Class.typeconsts cls)
+    in
+    let deps_acc =
+      let (construct, _consistent_kind) = Decl_provider.Class.construct cls in
+      Option.fold construct ~init:deps_acc ~f:(fun deps_acc _construct ->
+          acc_fanout Dep.Member.constructor deps_acc)
+    in
+    let deps_acc =
+      if Ast_defs.is_c_enum classish_kind && (not @@ List.is_empty consts) then
+        acc_fanout Dep.Member.all deps_acc
+      else
+        deps_acc
+    in
+    deps_acc
+
+let get_added_parents_fanout
+    ctx class_dep classish_kind added_parents member_diff =
+  let deps = get_minor_change_fanout ~ctx class_dep member_diff in
+  let deps =
+    SSet.fold
+      added_parents
+      ~init:deps
+      ~f:(get_added_parent_fanout ctx class_dep classish_kind)
+  in
+  deps
+
+exception Do_max_fanout
+
+let get_parent_changes_fanout
+    ctx
+    class_dep
+    classish_kind
+    (parent_changes : ClassDiff.parent_changes)
+    (member_diff : ClassDiff.member_diff) =
+  let {
+    ClassDiff.extends_changes;
+    implements_changes;
+    req_extends_changes;
+    req_implements_changes;
+    req_class_changes;
+    uses_changes;
+    xhp_attr_changes;
+  } =
+    parent_changes
+  in
+  try
+    (* If any parent was modified or removed, then some subtyping relationships are invalidated
+     * and we must return max fanout.
+     * Otherwise if we're only dealing with added parents, we can calculate a smaller fanout.
+     * Let's detect removed/modified parents sooner rather than later, by going over the list
+     * once first, and collect all the added parents at the same occasion. *)
+    let added_parents =
+      List.fold
+        [
+          extends_changes;
+          implements_changes;
+          req_extends_changes;
+          req_implements_changes;
+          req_class_changes;
+          uses_changes;
+          xhp_attr_changes;
+        ]
+        ~init:SSet.empty
+        ~f:(fun added_parents changes ->
+          Option.fold
+            changes
+            ~init:added_parents
+            ~f:(fun added_parents (change : _ ClassDiff.NamedItemsListChange.t)
+               ->
+              let {
+                ClassDiff.NamedItemsListChange.per_name_changes;
+                order_change;
+              } =
+                change
+              in
+              if order_change then
+                (* Any change order can invalidate subtyping relationships
+                 * Due to the way we handle multiple instantiation inheritence. *)
+                raise Do_max_fanout
+              else
+                SMap.fold
+                  per_name_changes
+                  ~init:added_parents
+                  ~f:(fun name change added_parents ->
+                    match change with
+                    | ClassDiff.ValueChange.(Modified _ | Removed) ->
+                      raise Do_max_fanout
+                    | ClassDiff.ValueChange.Added -> SSet.add added_parents name)))
+    in
+    get_added_parents_fanout
+      ctx
+      class_dep
+      classish_kind
+      added_parents
+      member_diff
+  with
+  | Do_max_fanout -> get_maximum_fanout ctx class_dep
+
+let get_shell_change_fanout
+    ctx
+    class_dep
+    (shell_change : ClassDiff.class_shell_change)
+    (member_diff : ClassDiff.member_diff) =
+  let {
+    ClassDiff.classish_kind;
+    parent_changes;
+    type_parameters_change;
+    kind_change;
+    final_change;
+    abstract_change;
+    is_xhp_change;
+    internal_change;
+    has_xhp_keyword_change;
+    support_dynamic_type_change;
+    module_change;
+    xhp_enum_values_change;
+    user_attributes_changes;
+    enum_type_change;
+  } =
+    shell_change
+  in
+  if
+    Option.is_some type_parameters_change
+    || Option.is_some kind_change
+    || Option.is_some final_change
+    || Option.is_some abstract_change
+    || Option.is_some is_xhp_change
+    || Option.is_some internal_change
+    || Option.is_some has_xhp_keyword_change
+    || Option.is_some support_dynamic_type_change
+    || Option.is_some module_change
+    || xhp_enum_values_change
+    || Option.is_some user_attributes_changes
+    || Option.is_some enum_type_change
+  then
+    get_maximum_fanout ctx class_dep
+  else
+    match parent_changes with
+    | Some parent_changes ->
+      get_parent_changes_fanout
+        ctx
+        class_dep
+        classish_kind
+        parent_changes
+        member_diff
+    | None ->
+      (* If we get here, we have a major change but don't know what caused it.
+       * Let's play safe and return maximum fanout.
+       * This case would be observable in our telemetry anyway. *)
+      get_maximum_fanout ctx class_dep
+
+let get_major_change_fanout ctx class_dep (change : ClassDiff.MajorChange.t) =
+  match change with
+  | ClassDiff.MajorChange.(Added | Removed | Unknown) ->
+    get_maximum_fanout ctx class_dep
+  | ClassDiff.MajorChange.Modified (shell_change, member_diff) ->
+    get_shell_change_fanout ctx class_dep shell_change member_diff
+
 let get_fanout ~(ctx : Provider_context.t) (class_name, diff) : DepSet.t =
   let class_dep = Dep.make (Dep.Type class_name) in
   match diff with
   | Unchanged -> DepSet.make ()
-  | Major_change _major_change -> get_maximum_fanout ctx class_dep
+  | Major_change change ->
+    if
+      TypecheckerOptions.optimized_parent_fanout
+        (Provider_context.get_tcopt ctx)
+    then
+      get_major_change_fanout ctx class_dep change
+    else
+      get_maximum_fanout ctx class_dep
   | Minor_change minor_change ->
     if
       TypecheckerOptions.optimized_member_fanout

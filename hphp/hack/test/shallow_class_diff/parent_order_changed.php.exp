@@ -1,11 +1,12 @@
-C: (Major_change
+A: (Major_change
       (Modified (
          { classish_kind = (Cclass Concrete);
            parent_changes =
            (Some { extends_changes = None;
                    implements_changes =
-                   (Some { per_name_changes = { "\\I" -> Added };
-                           order_change = false });
+                   (Some { per_name_changes =
+                           { "\\K" -> Removed; "\\L" -> Added };
+                           order_change = true });
                    req_extends_changes = None; req_implements_changes = None;
                    req_class_changes = None; uses_changes = None;
                    xhp_attr_changes = None });
@@ -16,3 +17,8 @@ C: (Major_change
            xhp_enum_values_change = false; user_attributes_changes = None;
            enum_type_change = None },
          {})))
+I: Unchanged
+J: Unchanged
+K: Unchanged
+L: Unchanged
+M: Unchanged

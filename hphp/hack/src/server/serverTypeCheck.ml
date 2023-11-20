@@ -303,6 +303,7 @@ type redecl_result = {
   old_decl_missing_count: int;
 }
 
+(** Oldify defs and compute files to recheck. *)
 let do_redecl
     (genv : genv)
     (env : env)

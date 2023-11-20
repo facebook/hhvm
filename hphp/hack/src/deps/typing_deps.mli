@@ -89,7 +89,7 @@ module Dep : sig
   val dep_kind_of_variant : 'a variant -> dep_kind
 
   module Member : sig
-    type t
+    type t [@@deriving show]
 
     val method_ : string -> t
 

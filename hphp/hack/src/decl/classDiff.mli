@@ -40,6 +40,11 @@ module NamedItemsListChange : sig
   type 'change t = {
     per_name_changes: 'change ValueChange.t SMap.t;
     order_change: bool;
+        (** The order has changed if there exists x and y
+            such that x comes before y in the list pre-change,
+            but y comes before x in the list post-change,
+            i.e. if there exists two elements which are in both lists
+            and have been swapped. *)
   }
   [@@deriving eq, show]
 end

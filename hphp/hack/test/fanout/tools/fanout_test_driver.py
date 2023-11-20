@@ -41,9 +41,11 @@ DEFAULT_HH_SERVER_FLAGS: List[str] = [
     "--config",
     "disable_xhp_element_mangling=false",
     "--config",
+    "fetch_remote_old_decls=false",
+    "--config",
     "ss_force=prod_with_flag_on:optimized_member_fanout",
     "--config",
-    "fetch_remote_old_decls=false",
+    "ss_force=prod_with_flag_on:optimized_parent_fanout",
 ]
 
 

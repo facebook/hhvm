@@ -5,7 +5,7 @@ C: (Major_change
            (Some { extends_changes = None;
                    implements_changes =
                    (Some { per_name_changes = { "\\I" -> Removed };
-                           order_change = true });
+                           order_change = false });
                    req_extends_changes = None; req_implements_changes = None;
                    req_class_changes = None; uses_changes = None;
                    xhp_attr_changes = None });

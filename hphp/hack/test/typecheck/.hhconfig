@@ -1,0 +1,26 @@
+# a reasonable set of options, based on a snapshot from WWW of November 2023
+
+enable_experimental_tc_features = case_sensitive_inheritance
+deregister_php_stdlib = true
+enable_xhp_class_modifier = false
+disable_xhp_element_mangling = false
+disable_xhp_children_declarations = false
+disallow_invalid_arraykey = true
+check_xhp_attribute = true
+disallow_silence = true
+check_redundant_generics = true
+disallow_func_ptrs_in_constants = true
+enable_strict_string_concat_interp = true
+math_new_code = true
+explicit_consistent_constructors = 1
+enable_strict_const_semantics = 4
+require_types_tco_require_types_class_consts = 1
+strict_wellformedness = 2
+disable_hh_ignore_error = 2
+const_default_func_args = true
+const_default_lambda_args = true
+disallow_direct_superglobals_refs = true
+allowed_files_for_module_declarations = *
+expression_tree_virtualize_functions = true
+enable_sound_dynamic_type = true
+everything_sdt = true

@@ -7,10 +7,6 @@
  *)
 open Hh_prelude
 
-type type_key = string
-
-type typedef_decl = Typing_defs.typedef_type
-
 let find_in_direct_decl_parse ~cache_results ctx filename name extract_decl_opt
     =
   let parse_result =
@@ -28,8 +24,73 @@ let find_in_direct_decl_parse ~cache_results ctx filename name extract_decl_opt
           extract_decl_opt decl
         | _ -> None)
 
+let get_fun_without_pessimise (ctx : Provider_context.t) (fun_name : string) :
+    Typing_defs.fun_elt option =
+  let open Option.Let_syntax in
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Analysis -> Decl_store.((get ()).get_fun fun_name)
+  | Provider_backend.Pessimised_shared_memory info ->
+    (match Decl_store.((get ()).get_fun fun_name) with
+    | Some c -> Some c
+    | None ->
+      (match Naming_provider.get_fun_path ctx fun_name with
+      | Some filename ->
+        let* original_ft =
+          find_in_direct_decl_parse
+            ~cache_results:false
+            ctx
+            filename
+            fun_name
+            Shallow_decl_defs.to_fun_decl_opt
+        in
+        let ft =
+          info.Provider_backend.pessimise_fun
+            filename
+            ~name:fun_name
+            original_ft
+        in
+        if info.Provider_backend.store_pessimised_result then
+          Decl_store.((get ()).add_fun) fun_name ft;
+        Some ft
+      | None -> None))
+  | Provider_backend.Shared_memory ->
+    (match Decl_store.((get ()).get_fun fun_name) with
+    | Some c -> Some c
+    | None ->
+      (match Naming_provider.get_fun_path ctx fun_name with
+      | Some filename ->
+        find_in_direct_decl_parse
+          ~cache_results:true
+          ctx
+          filename
+          fun_name
+          Shallow_decl_defs.to_fun_decl_opt
+      | None -> None))
+  | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
+    Provider_backend.Decl_cache.find_or_add
+      decl_cache
+      ~key:(Provider_backend.Decl_cache_entry.Fun_decl fun_name)
+      ~default:(fun () ->
+        match Naming_provider.get_fun_path ctx fun_name with
+        | Some filename ->
+          find_in_direct_decl_parse
+            ~cache_results:true
+            ctx
+            filename
+            fun_name
+            Shallow_decl_defs.to_fun_decl_opt
+        | None -> None)
+  | Provider_backend.Decl_service { decl; _ } ->
+    Decl_service_client.rpc_get_fun decl fun_name
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.Decl.get_fun
+      backend
+      (Naming_provider.rust_backend_ctx_proxy ctx)
+      fun_name
+
 let get_typedef_WARNING_ONLY_FOR_SHMEM
-    (ctx : Provider_context.t) (typedef_name : type_key) : typedef_decl option =
+    (ctx : Provider_context.t) (typedef_name : string) :
+    Typing_defs.typedef_type option =
   match Decl_store.((get ()).get_typedef typedef_name) with
   | Some c -> Some c
   | None ->
@@ -42,3 +103,153 @@ let get_typedef_WARNING_ONLY_FOR_SHMEM
         typedef_name
         Shallow_decl_defs.to_typedef_decl_opt
     | None -> None)
+
+let get_typedef_without_pessimise
+    (ctx : Provider_context.t) (typedef_name : string) :
+    Typing_defs.typedef_type option =
+  let open Option.Let_syntax in
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Analysis -> Decl_store.((get ()).get_typedef typedef_name)
+  | Provider_backend.Shared_memory ->
+    get_typedef_WARNING_ONLY_FOR_SHMEM ctx typedef_name
+  | Provider_backend.Pessimised_shared_memory info ->
+    (match Decl_store.((get ()).get_typedef typedef_name) with
+    | Some c -> Some c
+    | None ->
+      (match Naming_provider.get_typedef_path ctx typedef_name with
+      | Some filename ->
+        let* original_typedef =
+          find_in_direct_decl_parse
+            ~cache_results:false
+            ctx
+            filename
+            typedef_name
+            Shallow_decl_defs.to_typedef_decl_opt
+        in
+        let typedef =
+          info.Provider_backend.pessimise_typedef
+            filename
+            ~name:typedef_name
+            original_typedef
+        in
+        if info.Provider_backend.store_pessimised_result then
+          Decl_store.((get ()).add_typedef) typedef_name typedef;
+        Some typedef
+      | None -> None))
+  | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
+    Provider_backend.Decl_cache.find_or_add
+      decl_cache
+      ~key:(Provider_backend.Decl_cache_entry.Typedef_decl typedef_name)
+      ~default:(fun () ->
+        match Naming_provider.get_typedef_path ctx typedef_name with
+        | Some filename ->
+          find_in_direct_decl_parse
+            ~cache_results:true
+            ctx
+            filename
+            typedef_name
+            Shallow_decl_defs.to_typedef_decl_opt
+        | None -> None)
+  | Provider_backend.Decl_service { decl; _ } ->
+    Decl_service_client.rpc_get_typedef decl typedef_name
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.Decl.get_typedef
+      backend
+      (Naming_provider.rust_backend_ctx_proxy ctx)
+      typedef_name
+
+let get_gconst (ctx : Provider_context.t) (gconst_name : string) :
+    Typing_defs.const_decl option =
+  let open Option.Let_syntax in
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Analysis -> Decl_store.((get ()).get_gconst gconst_name)
+  | Provider_backend.Pessimised_shared_memory info ->
+    (match Decl_store.((get ()).get_gconst gconst_name) with
+    | Some c -> Some c
+    | None ->
+      (match Naming_provider.get_const_path ctx gconst_name with
+      | Some filename ->
+        let* original_gconst =
+          find_in_direct_decl_parse
+            ~cache_results:false
+            ctx
+            filename
+            gconst_name
+            Shallow_decl_defs.to_const_decl_opt
+        in
+        let gconst =
+          info.Provider_backend.pessimise_gconst
+            filename
+            ~name:gconst_name
+            original_gconst
+        in
+        (if info.Provider_backend.store_pessimised_result then
+          Decl_store.((get ()).add_gconst gconst_name gconst));
+        Some gconst
+      | None -> None))
+  | Provider_backend.Shared_memory ->
+    (match Decl_store.((get ()).get_gconst gconst_name) with
+    | Some c -> Some c
+    | None ->
+      (match Naming_provider.get_const_path ctx gconst_name with
+      | Some filename ->
+        find_in_direct_decl_parse
+          ~cache_results:true
+          ctx
+          filename
+          gconst_name
+          Shallow_decl_defs.to_const_decl_opt
+      | None -> None))
+  | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
+    Provider_backend.Decl_cache.find_or_add
+      decl_cache
+      ~key:(Provider_backend.Decl_cache_entry.Gconst_decl gconst_name)
+      ~default:(fun () ->
+        match Naming_provider.get_const_path ctx gconst_name with
+        | Some filename ->
+          find_in_direct_decl_parse
+            ~cache_results:true
+            ctx
+            filename
+            gconst_name
+            Shallow_decl_defs.to_const_decl_opt
+        | None -> None)
+  | Provider_backend.Decl_service { decl; _ } ->
+    Decl_service_client.rpc_get_gconst decl gconst_name
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.Decl.get_gconst
+      backend
+      (Naming_provider.rust_backend_ctx_proxy ctx)
+      gconst_name
+
+let get_module (ctx : Provider_context.t) (module_name : string) :
+    Typing_defs.module_def_type option =
+  let fetch_from_backing_store () =
+    Naming_provider.get_module_path ctx module_name
+    |> Option.bind ~f:(fun filename ->
+           find_in_direct_decl_parse
+             ~cache_results:true
+             ctx
+             filename
+             module_name
+             Shallow_decl_defs.to_module_decl_opt)
+  in
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Analysis -> Decl_store.((get ()).get_module module_name)
+  | Provider_backend.Pessimised_shared_memory _
+  | Provider_backend.Shared_memory ->
+    (match Decl_store.((get ()).get_module module_name) with
+    | Some m -> Some m
+    | None -> fetch_from_backing_store ())
+  | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
+    Provider_backend.Decl_cache.find_or_add
+      decl_cache
+      ~key:(Provider_backend.Decl_cache_entry.Module_decl module_name)
+      ~default:fetch_from_backing_store
+  | Provider_backend.Decl_service { decl; _ } ->
+    Decl_service_client.rpc_get_module decl module_name
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.Decl.get_module
+      backend
+      (Naming_provider.rust_backend_ctx_proxy ctx)
+      module_name

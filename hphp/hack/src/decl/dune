@@ -161,7 +161,7 @@
 (library
   (name decl_enforceability)
   (modules decl_enforceability)
-  (libraries decl_env shallow_classes_provider typedef_provider naming_provider))
+  (libraries decl_env shallow_classes_provider decl_provider_internals naming_provider))
 
 (library
  (name decl_enum)

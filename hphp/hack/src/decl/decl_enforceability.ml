@@ -30,7 +30,7 @@ let get_class_or_typedef ctx x =
     (* Following code is wrong since we get called in non-SHMEM paths!
        notably including rust-provider which is what hh_server uses,
        and local-mem which is what IDE uses. *)
-    match Typedef_provider.get_typedef_WARNING_ONLY_FOR_SHMEM ctx x with
+    match Decl_provider_internals.get_typedef_WARNING_ONLY_FOR_SHMEM ctx x with
     | None -> None
     | Some td -> Some (TypedefResult td)
   else
@@ -474,7 +474,7 @@ module ShallowContextAccess :
 
   let get_class_or_typedef = get_class_or_typedef
 
-  let get_typedef = Typedef_provider.get_typedef_WARNING_ONLY_FOR_SHMEM
+  let get_typedef = Decl_provider_internals.get_typedef_WARNING_ONLY_FOR_SHMEM
 
   let get_class = Shallow_classes_provider.get
 

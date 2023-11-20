@@ -27,7 +27,8 @@ type gconst_decl = Typing_defs.const_decl
 
 type module_decl = Typing_defs.module_def_type
 
-let find_in_direct_decl_parse = Typedef_provider.find_in_direct_decl_parse
+let find_in_direct_decl_parse =
+  Decl_provider_internals.find_in_direct_decl_parse
 
 (** This cache caches the result of full class computations
       (the class merged with all its inherited members.)  *)
@@ -253,7 +254,7 @@ let get_typedef
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> Decl_store.((get ()).get_typedef typedef_name)
   | Provider_backend.Shared_memory ->
-    Typedef_provider.get_typedef_WARNING_ONLY_FOR_SHMEM ctx typedef_name
+    Decl_provider_internals.get_typedef_WARNING_ONLY_FOR_SHMEM ctx typedef_name
   | Provider_backend.Pessimised_shared_memory info ->
     (match Decl_store.((get ()).get_typedef typedef_name) with
     | Some c -> Some c

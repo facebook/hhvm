@@ -83,7 +83,7 @@
   rust_provider_backend_stubs
   shallow_classes_provider
   shallow_decl_defs
-  typedef_provider
+  decl_provider_internals
   typing_heap)
  (preprocess
   (pps ppx_deriving.std)))
@@ -219,8 +219,8 @@
   (pps ppx_deriving.std)))
 
 (library
- (name typedef_provider)
- (modules typedef_provider)
+ (name decl_provider_internals)
+ (modules decl_provider_internals)
  (libraries
   decl_counters
   decl_nast

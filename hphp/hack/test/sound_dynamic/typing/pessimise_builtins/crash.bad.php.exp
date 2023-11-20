@@ -1,6 +1,6 @@
 File "crash.bad.php", line 20, characters 11-13:
 Invalid argument (Typing[4110])
-  File "Shapes.hhi", line 41, characters 19-24:
+  File "Shapes.hhi", line 42, characters 19-24:
   Expected `shape(?'a' => _, ...)`
   File "crash.bad.php", line 13, characters 15-17:
   But got `string`
@@ -10,7 +10,7 @@ You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
   The type of the field `a` in this shape doesn't allow any values
   File "crash.bad.php", line 12, characters 35-37:
   It is nothing because type parameter `Tv` of `idx` could not be determined. Please add explicit type parameters to the invocation of `idx`
-  File "Shapes.hhi", line 41, characters 19-24:
+  File "Shapes.hhi", line 42, characters 19-24:
     via this generic `Tv`
 File "crash.bad.php", line 13, characters 43-45:
 You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
@@ -18,5 +18,5 @@ You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
   The type of the field `b` in this shape doesn't allow any values
   File "crash.bad.php", line 13, characters 35-37:
   It is nothing because type parameter `Tv` of `idx` could not be determined. Please add explicit type parameters to the invocation of `idx`
-  File "Shapes.hhi", line 41, characters 19-24:
+  File "Shapes.hhi", line 42, characters 19-24:
     via this generic `Tv`

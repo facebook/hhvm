@@ -2,7 +2,7 @@ File "shape_key_exists6.php", line 6, characters 10-48:
 Invalid return type (Typing[4110])
   File "shape_key_exists6.php", line 5, characters 18-23:
   Expected `string`
-  File "Shapes.hhi", line 54, characters 10-13:
+  File "Shapes.hhi", line 55, characters 10-13:
   But got `bool`
 File "shape_key_exists6.php", line 6, characters 10-48:
 This `Shapes::keyExists()` check is always true (Typing[4249])

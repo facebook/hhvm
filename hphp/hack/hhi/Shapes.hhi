@@ -21,6 +21,7 @@ namespace HH {
      * * `Shapes::idx(shape('x' => 123), 'x') // 123`
      * * `Shapes::idx(shape('x' => 123), 'y') // null`
      * * `Shapes::idx(shape('x' => 123), 'y', 456) // 456`
+     * * `Shapes::idx(shape('x' => null), 'x', 789) // null - the default value is only if the key is missing, not if its value is null`
      *
      * * `Shapes::idx(null, 'y', 456) // 456`
      *

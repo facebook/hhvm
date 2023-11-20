@@ -2,11 +2,11 @@ File "shape_idx_nullable_field_return.php", line 5, characters 10-29:
 Invalid return type (Typing[4110])
   File "shape_idx_nullable_field_return.php", line 4, characters 66-68:
   Expected `int`
-  File "Shapes.hhi", line 44, characters 10-11:
+  File "Shapes.hhi", line 45, characters 10-11:
   But got `?_`
 File "shape_idx_nullable_field_return.php", line 5, characters 10-29:
 Invalid return type (Typing[4110])
   File "shape_idx_nullable_field_return.php", line 4, characters 66-68:
   Expected `int`
-  File "Shapes.hhi", line 44, characters 10-11:
+  File "Shapes.hhi", line 45, characters 10-11:
   But got `?int`

@@ -9,7 +9,7 @@ The two arguments to `type_structure()` must be:
 Could not resolve the type constant (Typing[4150])
 File "pseudofunction_with_signature.php", line 8, characters 15-22:
 Unexpected `inout` annotation for argument (Typing[4183])
-  File "Shapes.hhi", line 41, characters 19-24:
+  File "Shapes.hhi", line 42, characters 19-24:
   This is a normal parameter (does not have `inout`)
 File "pseudofunction_with_signature.php", line 10, characters 16-23:
 Unexpected `inout` annotation for argument (Typing[4183])

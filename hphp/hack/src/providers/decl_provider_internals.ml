@@ -88,22 +88,6 @@ let get_fun_without_pessimise (ctx : Provider_context.t) (fun_name : string) :
       (Naming_provider.rust_backend_ctx_proxy ctx)
       fun_name
 
-let get_typedef_WARNING_ONLY_FOR_SHMEM
-    (ctx : Provider_context.t) (typedef_name : string) :
-    Typing_defs.typedef_type option =
-  match Decl_store.((get ()).get_typedef typedef_name) with
-  | Some c -> Some c
-  | None ->
-    (match Naming_provider.get_typedef_path ctx typedef_name with
-    | Some filename ->
-      find_in_direct_decl_parse
-        ~cache_results:true
-        ctx
-        filename
-        typedef_name
-        Shallow_decl_defs.to_typedef_decl_opt
-    | None -> None)
-
 let get_typedef_without_pessimise
     (ctx : Provider_context.t) (typedef_name : string) :
     Typing_defs.typedef_type option =
@@ -111,7 +95,18 @@ let get_typedef_without_pessimise
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> Decl_store.((get ()).get_typedef typedef_name)
   | Provider_backend.Shared_memory ->
-    get_typedef_WARNING_ONLY_FOR_SHMEM ctx typedef_name
+    (match Decl_store.((get ()).get_typedef typedef_name) with
+    | Some c -> Some c
+    | None ->
+      (match Naming_provider.get_typedef_path ctx typedef_name with
+      | Some filename ->
+        find_in_direct_decl_parse
+          ~cache_results:true
+          ctx
+          filename
+          typedef_name
+          Shallow_decl_defs.to_typedef_decl_opt
+      | None -> None))
   | Provider_backend.Pessimised_shared_memory info ->
     (match Decl_store.((get ()).get_typedef typedef_name) with
     | Some c -> Some c

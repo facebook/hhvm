@@ -17,9 +17,6 @@ val find_in_direct_decl_parse :
 val get_fun_without_pessimise :
   Provider_context.t -> string -> Typing_defs.fun_elt option
 
-val get_typedef_WARNING_ONLY_FOR_SHMEM :
-  Provider_context.t -> string -> Typing_defs.typedef_type option
-
 val get_typedef_without_pessimise :
   Provider_context.t -> string -> Typing_defs.typedef_type option
 

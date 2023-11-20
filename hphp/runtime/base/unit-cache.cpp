@@ -1706,11 +1706,8 @@ Unit* lookupUnit(const StringData* path, const RepoUnitInfo* info,
            FileLoadFlags::kDup};
       }
     }
-    if (RuntimeOption::EnableVSDebugger || RuntimeOption::EnableHphpdDebugger) {
-      eContext->m_loadedUnits.emplace(
-        getFilePathForUnit(cunit.unit), cunit.unit);
-      DEBUGGER_ATTACHED_ONLY(phpDebuggerFileLoadHook(cunit.unit));
-    }
+    eContext->m_loadedUnits.emplace(cunit.unit);
+    DEBUGGER_ATTACHED_ONLY(phpDebuggerFileLoadHook(cunit.unit));
   }
 
   lookupTimer.stop();

@@ -19,16 +19,14 @@
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/unit-cache.h"
-#include "hphp/runtime/base/watchman-connection.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
-#include "hphp/runtime/ext/vsdebug/debugger-request-info.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/util/process.h"
 #include "hphp/util/timer.h"
 
-#include <folly/dynamic.h>
+#include <filesystem>
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -68,8 +66,6 @@ bool Debugger::getDebuggerOption(const HPHP::String& option) {
     return options.disableStdoutRedirection;
   } else if (optionStr == "disablejit") {
     return options.disableJit;
-  } else if (optionStr == "warnonfilechange") {
-    return options.warnOnFileChange;
   } else {
     raise_error("getDebuggerOption: Unknown option specified");
   }
@@ -98,8 +94,6 @@ void Debugger::setDebuggerOption(const HPHP::String& option, bool value) {
     options.disableStdoutRedirection = value;
   } else if (optionStr == "disablejit") {
     options.disableJit = value;
-  } else if (optionStr == "warnonfilechange") {
-    options.warnOnFileChange = value;
   } else {
     raise_error("setDebuggerOption: Unknown option specified");
   }
@@ -121,8 +115,7 @@ void Debugger::setDebuggerOptions(DebuggerOptions options) {
       "disablePostDummyEvalHelper: %s\n"
       "maxReturnedStringLength: %d\n"
       "disableStdoutRedirection: %s\n"
-      "disableJit: %s\n"
-      "warnOnFileChange: %s\n",
+      "disableJit: %s\n",
     options.showDummyOnAsyncPause ? "YES" : "NO",
     options.warnOnInterceptedFunctions ? "YES" : "NO",
     options.notifyOnBpCalibration ? "YES" : "NO",
@@ -130,58 +123,8 @@ void Debugger::setDebuggerOptions(DebuggerOptions options) {
     options.disablePostDummyEvalHelper ? "YES" : "NO",
     options.maxReturnedStringLength,
     options.disableStdoutRedirection ? "YES" : "NO",
-    options.disableJit ? "YES" : "NO",
-    options.warnOnFileChange ? "YES" : "NO"
+    options.disableJit ? "YES" : "NO"
   );
-}
-
-void Debugger::initWatchmanClient() {
-  assertx(getDebuggerOptions().warnOnFileChange);
-  m_watchmanClient =
-    get_watchman_client(SourceRootInfo::GetCurrentSourceRoot());
-}
-
-std::shared_ptr<Watchman> Debugger::getWatchmanClient() const {
-  return m_watchmanClient;
-}
-
-void Debugger::checkForFileChanges(DebuggerRequestInfo* ri) {
-  if (!m_watchmanClient || !getDebuggerOptions().warnOnFileChange) return;
-  auto& loadedFiles = g_context->m_loadedUnits;
-  if (!ri->m_lastClock || loadedFiles.empty()) {
-    auto clock = m_watchmanClient->getClock().getTry();
-    if (clock.hasException()) return;
-    ri->m_lastClock = *clock;
-  } else {
-    folly::dynamic queryObj =
-      folly::dynamic::object("fields",  folly::dynamic::array("name"));
-    queryObj["since"] = *ri->m_lastClock;
-    auto const& res = m_watchmanClient->query(queryObj).getTry();
-    if (res.hasException()) return;
-    folly::dynamic validRes = *res;
-    ri->m_lastClock = validRes["clock"].asString();
-    std::vector<std::string> changedFiles;
-    for (auto const& file : validRes["files"]) {
-      auto fullPath =
-        SourceRootInfo::GetCurrentSourceRoot().native() + file;
-      auto canonicalPath = realpathLibc(fullPath.c_str());
-      if (loadedFiles.find(canonicalPath) != loadedFiles.end()) {
-        changedFiles.push_back(canonicalPath);
-      }
-    }
-    if (!changedFiles.empty()) {
-      std::string msg =
-        "Following files have changed since last loaded by the REPL:\n";
-      for (auto s : changedFiles) {
-        msg += s + '\n';
-      }
-      msg += "Reload the debugger to reload the modified files.\n";
-      msg += "Run hphp_debugger_set_option('warnOnFileChange', false) "
-             "to disable this message.\n";
-
-      sendUserMessage(msg.c_str(), DebugTransport::OutputLevelInfo);
-    }
-  }
 }
 
 void Debugger::runSessionCleanupThread() {
@@ -1664,8 +1607,10 @@ void Debugger::tryInstallBreakpoints(DebuggerRequestInfo* ri) {
   // after this will be added to the map by onCompilationUnitLoaded().
   if (!ri->m_flags.compilationUnitsMapped) {
     ri->m_flags.compilationUnitsMapped = true;
-    bpInfo->m_loadedUnits.insert(
-      begin(g_context->m_loadedUnits), end(g_context->m_loadedUnits));
+    for (auto const u : g_context->m_loadedUnits) {
+      const std::string filePath = getFilePathForUnit(u);
+      bpInfo->m_loadedUnits[filePath] = u;
+    }
   }
 
   // For any breakpoints that are pending for this request, try to resolve
@@ -2285,30 +2230,6 @@ bool Debugger::onHardBreak() {
   return true;
 }
 
-bool Debugger::isStepInProgress(DebuggerRequestInfo* requestInfo) {
-  return requestInfo->m_stepReason != nullptr ||
-         (!requestInfo->m_runToLocationInfo.path.empty() &&
-          requestInfo->m_runToLocationInfo.line > 0) ||
-          requestInfo->m_evaluateCommandDepth > 0;
-}
-
-void Debugger::clearStepOperation(DebuggerRequestInfo* requestInfo) {
-  if (isStepInProgress(requestInfo)) {
-    phpDebuggerContinue();
-    requestInfo->m_stepReason = nullptr;
-    requestInfo->m_runToLocationInfo.path.clear();
-    requestInfo->m_nextFilterInfo.clear();
-  }
-}
-
-void Debugger::updateUnresolvedBpFlag(DebuggerRequestInfo* ri) {
-  ri->m_flags.unresolvedBps =
-    !ri->m_breakpointInfo->m_unresolvedBreakpoints.empty() ||
-    !ri->m_breakpointInfo->m_pendingBreakpoints.empty() ||
-    ri->m_breakpointInfo->m_hasExceptionBreakpoint;
-  std::atomic_thread_fence(std::memory_order_release);
-}
-
 void Debugger::onAsyncBreak() {
   Lock lock(m_lock);
 
@@ -2375,6 +2296,13 @@ void Debugger::onError(DebuggerRequestInfo* requestInfo,
   }
 
   onExceptionBreakpointHit(requestInfo, phpError, message);
+}
+
+std::string Debugger::getFilePathForUnit(const HPHP::Unit* compilationUnit) {
+  const auto path =
+    HPHP::String(const_cast<StringData*>(compilationUnit->filepath()));
+  const auto translatedPath = File::TranslatePath(path).toCppString();
+  return realpathLibc(translatedPath.c_str());
 }
 
 std::string Debugger::getStopReasonForBp(
@@ -2486,17 +2414,5 @@ SilentEvaluationContext::~SilentEvaluationContext() {
   m_sb.clear();
 }
 
-DebuggerNoBreakContext::DebuggerNoBreakContext(Debugger* debugger) {
-  m_requestInfo = debugger->getRequestInfo();
-  m_prevDoNotBreak = m_requestInfo->m_flags.doNotBreak;
-  m_requestInfo->m_flags.doNotBreak = true;
-  m_prevDbgNoBreak = g_context->m_dbgNoBreak;
-  g_context->m_dbgNoBreak = true;
-}
-
-DebuggerNoBreakContext::~DebuggerNoBreakContext() {
-  m_requestInfo->m_flags.doNotBreak = m_prevDoNotBreak;
-  g_context->m_dbgNoBreak = m_prevDbgNoBreak;
-}
 }
 }

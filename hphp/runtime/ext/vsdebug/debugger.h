@@ -36,9 +36,6 @@
 #include "hphp/util/process.h"
 
 namespace HPHP {
-
-class Watchman;
-
 namespace VSDEBUG {
 
 #define VSDEBUG_NAME "vsdebug"
@@ -49,7 +46,6 @@ struct DebugTransport;
 struct DebuggerSession;
 struct Breakpoint;
 struct Debugger;
-struct DebuggerRequestInfo;
 
 enum ProgramState {
   LoaderBreakpoint,
@@ -84,6 +80,69 @@ struct StepNextFilterInfo {
   const Unit* stepStartUnit {nullptr};
   int skipLine0 {0};
   int skipLine1 {0};
+};
+
+// Structure to represent the state of a single request.
+struct DebuggerRequestInfo {
+
+  // Request flags are read by the debugger hook prior to acquiring
+  // the debugger lock, so we can short-circuit and avoid calling
+  // into the debugger in certain cases.
+  union {
+    struct {
+      uint32_t memoryLimitRemoved : 1;
+      uint32_t compilationUnitsMapped : 1;
+      uint32_t doNotBreak : 1;
+      uint32_t outputHooked : 1;
+      uint32_t requestUrlInitialized : 1;
+      uint32_t terminateRequest : 1;
+      uint32_t unresolvedBps : 1;
+      uint32_t alive : 1;
+      uint32_t unused : 24;
+    } m_flags;
+    uint32_t m_allFlags;
+  };
+
+  const char* m_stepReason {nullptr};
+  CommandQueue m_commandQueue;
+  RequestBreakpointInfo* m_breakpointInfo {nullptr};
+
+  // Object IDs sent to the debugger client.
+  std::unordered_map<int, unsigned int> m_scopeIds;
+  std::unordered_map<void*, unsigned int> m_objectIds;
+  std::unordered_map<unsigned int, ServerObject*> m_serverObjects;
+
+  // Compilation units produced by debugger evaluations for this
+  // request - to be cleaned up when the request exits.
+  std::vector<std::unique_ptr<HPHP::Unit>> m_evaluationUnits;
+
+  struct {
+    std::string path {""};
+    int line {0};
+  } m_runToLocationInfo;
+
+  // Info for allowing us to step over multi-line statements without hitting
+  // the statement multiple times.
+  std::vector<StepNextFilterInfo> m_nextFilterInfo;
+
+  // Number of evaluation frames on this request's stack right now.
+  int m_evaluateCommandDepth {0};
+
+  // Number of recursive calls into processCommandsQueue for this request
+  // right now.
+  int m_pauseRecurseCount {0};
+
+  // Number of times this request has entered the command queue since starting.
+  unsigned int m_totalPauseCount {0};
+
+  // Non-TLS copy of the request's URL to display in the client. Each request
+  // has this string in its ExecutionContext, but since that is thread-local,
+  // we cannot get at that copy when responding to a ThreadsRequest from the
+  // debugger client, so the debugger needs a copy.
+  std::string m_requestUrl {""};
+
+  // Did this request hit any breakpoint? Valid only for non-repl requests.
+  bool m_firstBpHit {false};
 };
 
 // An exception to be thrown when a message from the client cannot be processed.
@@ -154,9 +213,6 @@ struct DebuggerOptions {
 
   // Disable JIT when debugger is attached
   bool disableJit;
-
-  // Warn if any files loaded by the REPL request change
-  bool warnOnFileChange;
 };
 
 struct ClientInfo {
@@ -366,11 +422,23 @@ struct Debugger final {
   bool onHardBreak();
 
   // Checks if we are stepping for a particular request.
-  static bool isStepInProgress(DebuggerRequestInfo* requestInfo);
+  static bool isStepInProgress(DebuggerRequestInfo* requestInfo) {
+    return requestInfo->m_stepReason != nullptr ||
+           (!requestInfo->m_runToLocationInfo.path.empty() &&
+            requestInfo->m_runToLocationInfo.line > 0) ||
+            requestInfo->m_evaluateCommandDepth > 0;
+  }
 
   // Clears the state filters for a step operation on the specified request
   // thread, if any step is currently in progress.
-  static void clearStepOperation(DebuggerRequestInfo* requestInfo);
+  static void clearStepOperation(DebuggerRequestInfo* requestInfo) {
+    if (isStepInProgress(requestInfo)) {
+      phpDebuggerContinue();
+      requestInfo->m_stepReason = nullptr;
+      requestInfo->m_runToLocationInfo.path.clear();
+      requestInfo->m_nextFilterInfo.clear();
+    }
+  }
 
   // Adjusts a breakpoints source line based on the source mapping table in
   // the specified compilation unit in which the breakpoint is being installed.
@@ -455,10 +523,6 @@ struct Debugger final {
     return m_debuggerOptions;
   }
 
-  void initWatchmanClient();
-  std::shared_ptr<Watchman> getWatchmanClient() const;
-  void checkForFileChanges(DebuggerRequestInfo*);
-
 private:
 
   // Cleans up server objects for a request.
@@ -530,7 +594,13 @@ private:
   // or unresolved breakpoints, so that the hook can skip calling into the
   // debugger (and acquiring the debugger lock) every time a new func or
   // compilation unit is defined if there are no unresolved breakpoints.
-  static inline void updateUnresolvedBpFlag(DebuggerRequestInfo* ri);
+  static inline void updateUnresolvedBpFlag(DebuggerRequestInfo* ri) {
+    ri->m_flags.unresolvedBps =
+      !ri->m_breakpointInfo->m_unresolvedBreakpoints.empty() ||
+      !ri->m_breakpointInfo->m_pendingBreakpoints.empty() ||
+      ri->m_breakpointInfo->m_hasExceptionBreakpoint;
+    std::atomic_thread_fence(std::memory_order_release);
+  }
 
   // Notifies all threads that they need to switch to interpreted mode so we
   // can interrupt them.
@@ -564,6 +634,9 @@ private:
     ErrorNoClient
   };
   PrepareToPauseResult prepareToPauseTarget(DebuggerRequestInfo* requestInfo);
+
+  // Normalizes the file path for a compilation unit.
+  static std::string getFilePathForUnit(const HPHP::Unit* compilationUnit);
 
   // Returns a stop reason string for a breakpoint.
   static std::string getStopReasonForBp(
@@ -666,9 +739,6 @@ private:
   DebuggerStdoutHook m_stdoutHook {DebuggerStdoutHook(this)};
   DebuggerStderrHook m_stderrHook {DebuggerStderrHook(this)};
 
-  // Watchman client for detecting file changes in REPL request.
-  std::shared_ptr<Watchman> m_watchmanClient {nullptr};
-
   static constexpr char* InternalErrorMsg =
     "An internal error occurred while processing a debugger command.";
 };
@@ -711,8 +781,18 @@ struct DebuggerNoBreakContext {
   bool m_prevDbgNoBreak;
   DebuggerRequestInfo* m_requestInfo;
 
-  DebuggerNoBreakContext(Debugger* debugger);
-  ~DebuggerNoBreakContext();
+  DebuggerNoBreakContext(Debugger* debugger) {
+    m_requestInfo = debugger->getRequestInfo();
+    m_prevDoNotBreak = m_requestInfo->m_flags.doNotBreak;
+    m_requestInfo->m_flags.doNotBreak = true;
+    m_prevDbgNoBreak = g_context->m_dbgNoBreak;
+    g_context->m_dbgNoBreak = true;
+  }
+
+  ~DebuggerNoBreakContext() {
+    m_requestInfo->m_flags.doNotBreak = m_prevDoNotBreak;
+    g_context->m_dbgNoBreak = m_prevDbgNoBreak;
+  }
 };
 
 }

@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
-#include "hphp/runtime/ext/vsdebug/debugger-request-info.h"
 
 namespace HPHP {
 namespace VSDEBUG {

@@ -58,6 +58,7 @@ pub struct HhConfig {
     pub hh_distc_should_disable_trace_store: bool,
     pub naming_table_compression_level: usize,
     pub naming_table_compression_threads: usize,
+    pub eden_fetch_parallelism: usize,
 }
 
 impl HhConfig {
@@ -445,6 +446,9 @@ impl HhConfig {
                 }
                 "disallow_direct_superglobals_refs" => {
                     go.po_disallow_direct_superglobals_refs = parse_json(&value)?;
+                }
+                "eden_fetch_parallelism" => {
+                    c.eden_fetch_parallelism = parse_json(&value)?;
                 }
                 _ => c.unknown.push((key, value)),
             }

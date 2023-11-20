@@ -293,8 +293,6 @@ let load_config config options =
     ?po_disallow_toplevel_requires:
       (bool_opt "disallow_toplevel_requires" config)
     ?po_allowed_decl_fixme_codes:(prepare_allowed_decl_fixme_codes config)
-    ?po_allow_new_attribute_syntax:
-      (bool_opt "allow_new_attribute_syntax" config)
     ?po_disable_legacy_attribute_syntax:
       (bool_opt "disable_legacy_attribute_syntax" config)
     ?tco_const_attribute:(bool_opt "const_attribute" config)

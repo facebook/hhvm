@@ -136,7 +136,6 @@ type t = {
       (** Disable legacy soft typehint syntax (@int) and only allow the __Soft attribute. *)
   po_allowed_decl_fixme_codes: ISet.t;
       (** Set of error codes disallowed in decl positions *)
-  po_allow_new_attribute_syntax: bool;  (** Enable @ attribute syntax *)
   tco_const_static_props: bool;  (** Enable const static properties *)
   po_disable_legacy_attribute_syntax: bool;
       (** Disable <<...>> attribute syntax *)
@@ -348,7 +347,6 @@ val set :
   ?po_enable_class_level_where_clauses:bool ->
   ?po_disable_legacy_soft_typehints:bool ->
   ?po_allowed_decl_fixme_codes:ISet.t ->
-  ?po_allow_new_attribute_syntax:bool ->
   ?tco_const_static_props:bool ->
   ?po_disable_legacy_attribute_syntax:bool ->
   ?tco_const_attribute:bool ->

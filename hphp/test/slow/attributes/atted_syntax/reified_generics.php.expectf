@@ -1,1 +1,0 @@
-Catchable fatal error: Argument 1 passed to f() must be an instance of C<int>, C<string> given in %s/test/slow/attributes/atted_syntax/reified_generics.php on line 9

@@ -80,7 +80,6 @@ impl Default for GlobalOptions {
             po_enable_class_level_where_clauses: false,
             po_disable_legacy_soft_typehints: true,
             po_allowed_decl_fixme_codes: i_set::ISet::new(),
-            po_allow_new_attribute_syntax: false,
             tco_const_static_props: false,
             po_disable_legacy_attribute_syntax: false,
             tco_const_attribute: false,

@@ -208,7 +208,6 @@ impl Opts {
             auto_namespace_map: compile::auto_namespace_map().collect(),
             disable_xhp_element_mangling: false,
             interpret_soft_types_as_like_types: true,
-            allow_new_attribute_syntax: true,
             enable_xhp_class_modifier: false,
             php5_compat_mode: true,
             hhvm_compat_mode: true,

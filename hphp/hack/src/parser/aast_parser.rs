@@ -283,7 +283,6 @@ impl<'src> AastParser {
             codegen: env.codegen,
             hhvm_compat_mode: env.codegen,
             php5_compat_mode: env.php5_compat_mode,
-            allow_new_attribute_syntax: env.parser_options.po_allow_new_attribute_syntax,
             enable_xhp_class_modifier: env.parser_options.po_enable_xhp_class_modifier,
             disable_xhp_element_mangling: env.parser_options.po_disable_xhp_element_mangling,
             disable_xhp_children_declarations: env

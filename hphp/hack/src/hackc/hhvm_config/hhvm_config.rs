@@ -103,12 +103,6 @@ pub fn parser_options(config: &HhvmConfig) -> Result<ParserOptions> {
         "Hack.Lang.AbstractStaticProps",
     )?;
 
-    // TODO: I'm pretty sure allow_new_attribute_syntax is dead and we can kill this option
-    init(
-        &mut flags.po_allow_new_attribute_syntax,
-        "hack.lang.allow_new_attribute_syntax",
-    )?;
-
     // Both hdf and ini versions are being used
     init(
         &mut flags.po_allow_unstable_features,

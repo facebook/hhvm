@@ -326,7 +326,6 @@ ParserEnv RepoOptionsFlags::getParserEnvironment() const {
       true // codegen
     , true  // hhvm_compat_mode
     , true  // php5_compat_mode
-    , AllowNewAttributeSyntax
     , EnableXHPClassModifier
     , DisableXHPElementMangling
     , false // disable_xhp_children_declarations
@@ -346,7 +345,6 @@ void RepoOptionsFlags::initDeclConfig(hackc::DeclParserConfig& config) const {
   }
   config.disable_xhp_element_mangling = DisableXHPElementMangling;
   config.interpret_soft_types_as_like_types = true;
-  config.allow_new_attribute_syntax = AllowNewAttributeSyntax;
   config.enable_xhp_class_modifier = EnableXHPClassModifier;
   config.php5_compat_mode = true;
   config.hhvm_compat_mode = true;
@@ -363,7 +361,6 @@ void RepoOptionsFlags::initHhbcFlags(hackc::HhbcFlags& flags) const {
 
 void RepoOptionsFlags::initParserFlags(hackc::ParserFlags& flags) const {
   flags.abstract_static_props = AbstractStaticProps;
-  flags.allow_new_attribute_syntax = AllowNewAttributeSyntax;
   flags.allow_unstable_features = AllowUnstableFeatures;
   flags.const_default_func_args = ConstDefaultFuncArgs;
   flags.const_static_props = ConstStaticProps;

@@ -34,7 +34,6 @@ type t = {
   disable_lval_as_an_expression: bool;
   enable_class_level_where_clauses: bool;
   disable_legacy_soft_typehints: bool;
-  allow_new_attribute_syntax: bool;
   disable_legacy_attribute_syntax: bool;
   const_default_func_args: bool;
   const_default_lambda_args: bool;
@@ -75,7 +74,6 @@ let make
     disable_lval_as_an_expression
     enable_class_level_where_clauses
     disable_legacy_soft_typehints
-    allow_new_attribute_syntax
     disable_legacy_attribute_syntax
     const_default_func_args
     const_default_lambda_args
@@ -114,7 +112,6 @@ let make
     disable_lval_as_an_expression;
     enable_class_level_where_clauses;
     disable_legacy_soft_typehints;
-    allow_new_attribute_syntax;
     disable_legacy_attribute_syntax;
     const_default_func_args;
     const_default_lambda_args;
@@ -174,7 +171,6 @@ let parse_args () =
   let push_file file = files := file :: !files in
   let enable_class_level_where_clauses = ref false in
   let disable_legacy_soft_typehints = ref false in
-  let allow_new_attribute_syntax = ref false in
   let disable_legacy_attribute_syntax = ref false in
   let const_default_func_args = ref false in
   let const_default_lambda_args = ref false in
@@ -282,9 +278,6 @@ No errors are filtered out."
         Arg.Set disable_legacy_soft_typehints,
         "Disables the legacy @ syntax for soft typehints (use __Soft instead)"
       );
-      ( "--allow-new-attribute-syntax",
-        Arg.Set allow_new_attribute_syntax,
-        "Allow the new @ attribute syntax (disables legacy soft typehints)" );
       ( "--disable-legacy-attribute-syntax",
         Arg.Set disable_legacy_attribute_syntax,
         "Disable the legacy <<...>> user attribute syntax" );
@@ -377,7 +370,6 @@ No errors are filtered out."
     !disable_lval_as_an_expression
     !enable_class_level_where_clauses
     !disable_legacy_soft_typehints
-    !allow_new_attribute_syntax
     !disable_legacy_attribute_syntax
     !const_default_func_args
     !const_default_lambda_args
@@ -412,11 +404,6 @@ let to_parser_options args =
     ParserOptions.with_disable_legacy_soft_typehints
       popt
       args.disable_legacy_soft_typehints
-  in
-  let popt =
-    ParserOptions.with_allow_new_attribute_syntax
-      popt
-      args.allow_new_attribute_syntax
   in
   let popt =
     ParserOptions.with_disable_legacy_attribute_syntax
@@ -471,7 +458,6 @@ let to_parser_env args ~leak_rust_tree ~mode =
   Full_fidelity_parser_env.make
     ~disable_lval_as_an_expression:args.disable_lval_as_an_expression
     ~disable_legacy_soft_typehints:args.disable_legacy_soft_typehints
-    ~allow_new_attribute_syntax:args.allow_new_attribute_syntax
     ~disable_legacy_attribute_syntax:args.disable_legacy_attribute_syntax
     ~leak_rust_tree
     ?mode

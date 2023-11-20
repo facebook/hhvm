@@ -10,7 +10,6 @@ type t = {
   auto_namespace_map: (string * string) list;
   disable_xhp_element_mangling: bool;
   interpret_soft_types_as_like_types: bool;
-  allow_new_attribute_syntax: bool;
   enable_xhp_class_modifier: bool;
   everything_sdt: bool;
   php5_compat_mode: bool;
@@ -26,7 +25,6 @@ let from_parser_options popt =
     disable_xhp_element_mangling = popt.po_disable_xhp_element_mangling;
     interpret_soft_types_as_like_types =
       popt.po_interpret_soft_types_as_like_types;
-    allow_new_attribute_syntax = popt.po_allow_new_attribute_syntax;
     enable_xhp_class_modifier = popt.po_enable_xhp_class_modifier;
     everything_sdt = popt.tco_everything_sdt;
     php5_compat_mode = false;

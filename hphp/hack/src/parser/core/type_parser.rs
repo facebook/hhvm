@@ -165,7 +165,6 @@ where
         // a simple type specifier here.
         let mut parser1 = self.clone();
         let token = parser1.next_xhp_class_name_or_other_token();
-        let new_attr_syntax = self.env.allow_new_attribute_syntax;
         let type_spec = match token.kind() {
             | TokenKind::Var if allow_var => {
                 self.continue_from(parser1);
@@ -217,8 +216,7 @@ where
             | TokenKind::Shape => self.parse_shape_specifier(),
             | TokenKind::Question => self.parse_nullable_type_specifier(),
             | TokenKind::Tilde => self.parse_like_type_specifier(),
-            | TokenKind::At if !new_attr_syntax => self.parse_soft_type_specifier(),
-            | TokenKind::At if new_attr_syntax => self.parse_attributized_specifier(),
+            | TokenKind::At => self.parse_soft_type_specifier(),
             | TokenKind::LessThanLessThan if allow_attr => self.parse_attributized_specifier(),
             | TokenKind::Class => self.parse_class_args_type_specifier(),
             | TokenKind::Classname => self.parse_classname_type_specifier(),

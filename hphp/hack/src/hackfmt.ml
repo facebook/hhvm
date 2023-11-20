@@ -109,8 +109,6 @@ let read_hhconfig path =
     Full_fidelity_parser_env.make
       ?enable_xhp_class_modifier:
         (Config_file.Getters.bool_opt "enable_xhp_class_modifier" config)
-      ?allow_new_attribute_syntax:
-        (Config_file.Getters.bool_opt "allow_new_attribute_syntax" config)
       () )
 
 let opt_default opt def =

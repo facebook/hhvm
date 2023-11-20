@@ -353,7 +353,6 @@ where
     fn parse_term(&mut self) -> S::Output {
         let mut parser1 = self.clone();
         let token = parser1.next_xhp_class_name_or_other_token();
-        let allow_new_attr = self.env.allow_new_attribute_syntax;
         match token.kind() {
             TokenKind::DecimalLiteral
             | TokenKind::OctalLiteral
@@ -405,8 +404,7 @@ where
             | TokenKind::Readonly
             | TokenKind::Clone
             | TokenKind::Print => self.parse_prefix_unary_expression(),
-            // Allow error suppression prefix when not using new attributes
-            TokenKind::At if !allow_new_attr => self.parse_prefix_unary_expression(),
+            TokenKind::At => self.parse_prefix_unary_expression(),
             TokenKind::LeftParen => self.parse_cast_or_parenthesized_or_lambda_expression(),
             TokenKind::LessThan => {
                 self.continue_from(parser1);
@@ -431,7 +429,6 @@ where
             TokenKind::LessThanLessThan | TokenKind::Async => {
                 self.parse_anon_or_lambda_or_awaitable()
             }
-            TokenKind::At if allow_new_attr => self.parse_anon_or_lambda_or_awaitable(),
             TokenKind::Include
             | TokenKind::Include_once
             | TokenKind::Require

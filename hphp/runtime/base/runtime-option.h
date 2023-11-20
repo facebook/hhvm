@@ -108,7 +108,6 @@ struct RepoOptionsFlags {
   P(bool,           UVS,                              s_PHP7_master)  \
   P(bool,           LTRAssign,                        s_PHP7_master)  \
   H(bool,           DisableLvalAsAnExpression,        false)          \
-  H(bool,           AllowNewAttributeSyntax,          false)          \
   H(bool,           ConstDefaultFuncArgs,             false)          \
   H(bool,           ConstStaticProps,                 false)          \
   H(bool,           AbstractStaticProps,              false)          \

@@ -9,7 +9,6 @@ pub struct ParserEnv {
     pub codegen: bool,
     pub hhvm_compat_mode: bool,
     pub php5_compat_mode: bool,
-    pub allow_new_attribute_syntax: bool,
     pub enable_xhp_class_modifier: bool,
     pub disable_xhp_element_mangling: bool,
     pub disable_xhp_children_declarations: bool,

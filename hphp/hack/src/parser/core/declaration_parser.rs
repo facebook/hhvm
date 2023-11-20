@@ -1984,39 +1984,12 @@ where
 
     pub fn parse_attribute_specification_opt(&mut self) -> S::Output {
         match self.peek_token_kind() {
-            TokenKind::At if self.env.allow_new_attribute_syntax => {
-                self.parse_new_attribute_specification_opt()
-            }
             TokenKind::LessThanLessThan => self.parse_old_attribute_specification_opt(),
             _ => {
                 let pos = self.pos();
                 self.sc_mut().make_missing(pos)
             }
         }
-    }
-
-    fn parse_new_attribute_specification_opt(&mut self) -> S::Output {
-        let attributes = self.parse_list_while(
-            |p: &mut Self| p.parse_new_attribute(),
-            |p: &Self| p.peek_token_kind() == TokenKind::At,
-        );
-        self.sc_mut().make_attribute_specification(attributes)
-    }
-
-    fn parse_new_attribute(&mut self) -> S::Output {
-        let at = self.assert_token(TokenKind::At);
-        let token = self.peek_token();
-        let constructor_call = match token.kind() {
-            TokenKind::Name => self.with_expression_parser(|p: &mut ExpressionParser<'a, S>| {
-                p.parse_constructor_call()
-            }),
-            _ => {
-                self.with_error(Errors::expected_user_attribute, Vec::new());
-                let pos = self.pos();
-                self.sc_mut().make_missing(pos)
-            }
-        };
-        self.sc_mut().make_attribute(at, constructor_call)
     }
 
     // Parses modifiers and passes them into the parse methods for the
@@ -2288,10 +2261,6 @@ where
             | TokenKind::Async
             | TokenKind::Final
             | TokenKind::LessThanLessThan => {
-                let attr = self.parse_attribute_specification_opt();
-                self.parse_methodish_or_property_or_const_or_type_const(attr)
-            }
-            TokenKind::At if self.env.allow_new_attribute_syntax => {
                 let attr = self.parse_attribute_specification_opt();
                 self.parse_methodish_or_property_or_const_or_type_const(attr)
             }
@@ -2732,9 +2701,6 @@ where
             }
             TokenKind::Internal => self.parse_toplevel_with_attributes_or_visibility(),
             TokenKind::Public => self.parse_toplevel_with_attributes_or_visibility(),
-            TokenKind::At if self.env.allow_new_attribute_syntax => {
-                self.parse_toplevel_with_attributes_or_visibility()
-            }
             TokenKind::LessThanLessThan => match parser1.peek_token_kind() {
                 TokenKind::File
                     if parser1.peek_token_kind_with_lookahead(1) == TokenKind::Colon =>

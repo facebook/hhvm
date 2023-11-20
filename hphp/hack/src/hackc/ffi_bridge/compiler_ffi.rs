@@ -90,7 +90,6 @@ pub mod compile_ffi {
 
     struct ParserFlags {
         abstract_static_props: bool,
-        allow_new_attribute_syntax: bool,
         allow_unstable_features: bool,
         const_default_func_args: bool,
         const_static_props: bool,
@@ -108,7 +107,6 @@ pub mod compile_ffi {
         aliased_namespaces: Vec<StringMapEntry>,
         disable_xhp_element_mangling: bool,
         interpret_soft_types_as_like_types: bool,
-        allow_new_attribute_syntax: bool,
         enable_xhp_class_modifier: bool,
         php5_compat_mode: bool,
         hhvm_compat_mode: bool,
@@ -494,7 +492,6 @@ impl compile_ffi::NativeEnv {
                         .map(|e| (e.key.clone(), e.value.clone()))
                         .collect(),
                     po_abstract_static_props: self.parser_flags.abstract_static_props,
-                    po_allow_new_attribute_syntax: self.parser_flags.allow_new_attribute_syntax,
                     po_allow_unstable_features: self.parser_flags.allow_unstable_features,
                     po_const_default_func_args: self.parser_flags.const_default_func_args,
                     tco_const_static_props: self.parser_flags.const_static_props,
@@ -623,7 +620,6 @@ pub fn parse_decls(
             .collect(),
         disable_xhp_element_mangling: config.disable_xhp_element_mangling,
         interpret_soft_types_as_like_types: config.interpret_soft_types_as_like_types,
-        allow_new_attribute_syntax: config.allow_new_attribute_syntax,
         enable_xhp_class_modifier: config.enable_xhp_class_modifier,
         php5_compat_mode: config.php5_compat_mode,
         hhvm_compat_mode: config.hhvm_compat_mode,

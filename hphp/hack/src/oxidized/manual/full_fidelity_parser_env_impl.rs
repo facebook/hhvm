@@ -13,7 +13,6 @@ impl From<FullFidelityParserEnv> for ParserEnv {
             hhvm_compat_mode: env.hhvm_compat_mode,
             php5_compat_mode: env.php5_compat_mode,
             codegen: env.codegen,
-            allow_new_attribute_syntax: env.allow_new_attribute_syntax,
             enable_xhp_class_modifier: env.enable_xhp_class_modifier,
             disable_xhp_element_mangling: env.disable_xhp_element_mangling,
             disable_xhp_children_declarations: env.disable_xhp_children_declarations,

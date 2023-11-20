@@ -58,12 +58,6 @@ let with_disable_legacy_soft_typehints po b =
 
 let allowed_decl_fixme_codes po = po.GlobalOptions.po_allowed_decl_fixme_codes
 
-let allow_new_attribute_syntax po =
-  po.GlobalOptions.po_allow_new_attribute_syntax
-
-let with_allow_new_attribute_syntax po b =
-  { po with GlobalOptions.po_allow_new_attribute_syntax = b }
-
 let disable_legacy_attribute_syntax po =
   po.GlobalOptions.po_disable_legacy_attribute_syntax
 
@@ -146,7 +140,6 @@ let make
     ~disable_lval_as_an_expression
     ~enable_class_level_where_clauses
     ~disable_legacy_soft_typehints
-    ~allow_new_attribute_syntax
     ~disable_legacy_attribute_syntax
     ~const_default_func_args
     ~const_default_lambda_args
@@ -170,7 +163,6 @@ let make
       po_disable_lval_as_an_expression = disable_lval_as_an_expression;
       po_enable_class_level_where_clauses = enable_class_level_where_clauses;
       po_disable_legacy_soft_typehints = disable_legacy_soft_typehints;
-      po_allow_new_attribute_syntax = allow_new_attribute_syntax;
       po_disable_legacy_attribute_syntax = disable_legacy_attribute_syntax;
       po_const_default_func_args = const_default_func_args;
       po_const_default_lambda_args = const_default_lambda_args;

@@ -252,7 +252,6 @@ let parse_options () =
   let enable_supportdyn_hint = ref false in
   let enable_class_level_where_clauses = ref false in
   let disable_legacy_soft_typehints = ref false in
-  let allow_new_attribute_syntax = ref false in
   let allow_toplevel_requires = ref false in
   let const_static_props = ref false in
   let disable_legacy_attribute_syntax = ref false in
@@ -594,9 +593,6 @@ let parse_options () =
         Arg.Set disable_legacy_soft_typehints,
         " Disables the legacy @ syntax for soft typehints (use __Soft instead)"
       );
-      ( "--allow-new-attribute-syntax",
-        Arg.Set allow_new_attribute_syntax,
-        " Allow the new @ attribute syntax (disables legacy soft typehints)" );
       ( "--allow-toplevel-requires",
         Arg.Set allow_toplevel_requires,
         " Allow `require()` and similar at the top-level" );
@@ -906,7 +902,6 @@ let parse_options () =
       ~log_levels:!log_levels
       ~po_enable_class_level_where_clauses:!enable_class_level_where_clauses
       ~po_disable_legacy_soft_typehints:!disable_legacy_soft_typehints
-      ~po_allow_new_attribute_syntax:!allow_new_attribute_syntax
       ~po_disallow_toplevel_requires:(not !allow_toplevel_requires)
       ~tco_const_static_props:!const_static_props
       ~po_disable_legacy_attribute_syntax:!disable_legacy_attribute_syntax

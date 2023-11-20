@@ -31,7 +31,7 @@ let get_class_or_typedef ctx x =
     | None -> None
     | Some td -> Some (TypedefResult td)
   else
-    match Shallow_classes_provider.get_shallow_class ctx x with
+    match Decl_provider_internals.get_shallow_class ctx x with
     | None -> None
     | Some cd -> Some (ClassResult cd)
 
@@ -51,7 +51,7 @@ let get_typeconst_type ctx c id =
   let class_type_to_shallow_class cty =
     match get_node cty with
     | Tapply ((_, class_name), _) ->
-      Shallow_classes_provider.get_shallow_class ctx class_name
+      Decl_provider_internals.get_shallow_class ctx class_name
     | _ -> None
   in
   (* Find the first concrete definition of id in the list. If there is none, return
@@ -474,7 +474,7 @@ module ShallowContextAccess :
 
   let get_typedef = Decl_provider_internals.get_typedef_without_pessimise
 
-  let get_class = Shallow_classes_provider.get_shallow_class
+  let get_class = Decl_provider_internals.get_shallow_class
 
   let get_typeconst_type = get_typeconst_type
 

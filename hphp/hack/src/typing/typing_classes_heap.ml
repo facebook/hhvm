@@ -435,7 +435,7 @@ module ApiEager = struct
       ApiLazy.get_any_method ~is_static cls method_name
     in
     let (cls, _members) = t in
-    Shallow_classes_provider.get_shallow_class ctx cls.Decl_defs.dc_name
+    Decl_provider_internals.get_shallow_class ctx cls.Decl_defs.dc_name
     >>= Decl_inherit.find_overridden_method ~get_method
 end
 

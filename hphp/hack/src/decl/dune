@@ -180,7 +180,7 @@
 (library
  (name decl_export)
  (modules decl_export)
- (libraries decl decl_defs decl_store naming naming_heap utils_core)
+ (libraries decl decl_defs decl_store decl_provider naming naming_heap utils_core)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -254,6 +254,7 @@
   decl
   decl_class_elements
   decl_compare
+  decl_provider
   heap_global_storage
   naming
   procs_procs
@@ -368,7 +369,7 @@
   package_info
   shallow_class_diff
   shallow_class_fanout
-  shallow_classes_provider
+  decl_provider
   old_shallow_classes_provider
   shallow_decl_defs
   typing_defs)

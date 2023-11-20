@@ -24,3 +24,6 @@ val get_gconst : Provider_context.t -> string -> Typing_defs.const_decl option
 
 val get_module :
   Provider_context.t -> string -> Typing_defs.module_def_type option
+
+val get_shallow_class :
+  Provider_context.t -> string -> Shallow_decl_defs.shallow_class option

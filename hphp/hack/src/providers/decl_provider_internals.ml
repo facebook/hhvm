@@ -9,6 +9,7 @@ open Hh_prelude
 
 let find_in_direct_decl_parse ~cache_results ctx filename name extract_decl_opt
     =
+  (* TODO(ljw): unify this with shallow_find_in_direct_decl_parse *)
   let parse_result =
     if cache_results then
       Direct_decl_utils.direct_decl_parse_and_cache ctx filename
@@ -23,6 +24,29 @@ let find_in_direct_decl_parse ~cache_results ctx filename name extract_decl_opt
         | (decl_name, decl, _) when String.equal decl_name name ->
           extract_decl_opt decl
         | _ -> None)
+
+let shallow_find_in_direct_decl_parse ~fill_caches ctx path name =
+  let direct_decl_parse_and_cache ctx filename name =
+    match Direct_decl_utils.direct_decl_parse_and_cache ctx filename with
+    | None -> Decl_defs.raise_decl_not_found (Some filename) name
+    | Some parsed_file -> parsed_file.Direct_decl_utils.pfh_decls
+  in
+  let direct_decl_parse_parse ctx filename name =
+    match Direct_decl_utils.direct_decl_parse ctx filename with
+    | None -> Decl_defs.raise_decl_not_found (Some filename) name
+    | Some parsed_file -> parsed_file.Direct_decl_utils.pfh_decls
+  in
+  let f =
+    if fill_caches then
+      direct_decl_parse_and_cache
+    else
+      direct_decl_parse_parse
+  in
+  f ctx path name
+  |> List.find_map ~f:(function
+         | (n, Shallow_decl_defs.Class decl, _) when String.equal name n ->
+           Some decl
+         | _ -> None)
 
 let get_fun_without_pessimise (ctx : Provider_context.t) (fun_name : string) :
     Typing_defs.fun_elt option =
@@ -248,3 +272,52 @@ let get_module (ctx : Provider_context.t) (module_name : string) :
       backend
       (Naming_provider.rust_backend_ctx_proxy ctx)
       module_name
+
+let get_shallow_class (ctx : Provider_context.t) (name : string) :
+    Shallow_decl_defs.shallow_class option =
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Analysis ->
+    (match Shallow_classes_heap.Classes.get name with
+    | Some _ as decl_opt -> decl_opt
+    | None -> failwith (Printf.sprintf "failed to get shallow class %S" name))
+  | Provider_backend.Rust_provider_backend backend ->
+    Rust_provider_backend.Decl.get_shallow_class
+      backend
+      (Naming_provider.rust_backend_ctx_proxy ctx)
+      name
+  | Provider_backend.Pessimised_shared_memory info ->
+    (match Shallow_classes_heap.Classes.get name with
+    | Some _ as decl_opt -> decl_opt
+    | None ->
+      (match Naming_provider.get_class_path ctx name with
+      | None -> None
+      | Some path ->
+        let open Option.Let_syntax in
+        let* original_sc =
+          shallow_find_in_direct_decl_parse ~fill_caches:false ctx path name
+        in
+        let sc =
+          info.Provider_backend.pessimise_shallow_class path ~name original_sc
+        in
+        if info.Provider_backend.store_pessimised_result then
+          Shallow_classes_heap.Classes.add name sc;
+        Some sc))
+  | Provider_backend.Shared_memory ->
+    (match Shallow_classes_heap.Classes.get name with
+    | Some _ as decl_opt -> decl_opt
+    | None ->
+      (match Naming_provider.get_class_path ctx name with
+      | None -> None
+      | Some path ->
+        shallow_find_in_direct_decl_parse ~fill_caches:true ctx path name))
+  | Provider_backend.Local_memory { Provider_backend.shallow_decl_cache; _ } ->
+    Provider_backend.Shallow_decl_cache.find_or_add
+      shallow_decl_cache
+      ~key:(Provider_backend.Shallow_decl_cache_entry.Shallow_class_decl name)
+      ~default:(fun () ->
+        match Naming_provider.get_class_path ctx name with
+        | None -> None
+        | Some path ->
+          shallow_find_in_direct_decl_parse ~fill_caches:true ctx path name)
+  | Provider_backend.Decl_service { decl; _ } ->
+    Decl_service_client.rpc_get_class decl name

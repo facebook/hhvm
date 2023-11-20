@@ -420,7 +420,7 @@ let constructor_decl_lazy
     ~(sh : SharedMem.uses) (ctx : Provider_context.t) ~(elt_origin : string) :
     (Typing_defs.fun_elt, lazy_member_lookup_error) result =
   let SharedMem.Uses = sh in
-  match Shallow_classes_provider.get_shallow_class ctx elt_origin with
+  match Decl_provider_internals.get_shallow_class ctx elt_origin with
   | None -> Error LMLEShallowClassNotFound
   | Some class_ ->
     (match class_.sc_constructor with
@@ -538,7 +538,7 @@ let prop_decl_lazy
     ~(sp_name : string) : (Typing_defs.decl_ty, lazy_member_lookup_error) result
     =
   let SharedMem.Uses = sh in
-  match Shallow_classes_provider.get_shallow_class ctx elt_origin with
+  match Decl_provider_internals.get_shallow_class ctx elt_origin with
   | None -> Error LMLEShallowClassNotFound
   | Some class_ ->
     (match
@@ -598,7 +598,7 @@ let static_prop_decl_lazy
     ~(sp_name : string) : (Typing_defs.decl_ty, lazy_member_lookup_error) result
     =
   let SharedMem.Uses = sh in
-  match Shallow_classes_provider.get_shallow_class ctx elt_origin with
+  match Decl_provider_internals.get_shallow_class ctx elt_origin with
   | None -> Error LMLEShallowClassNotFound
   | Some class_ ->
     (match
@@ -833,7 +833,7 @@ let method_decl_lazy
     ~(sm_name : string) : (Typing_defs.fun_elt, lazy_member_lookup_error) result
     =
   let SharedMem.Uses = sh in
-  match Shallow_classes_provider.get_shallow_class ctx elt_origin with
+  match Decl_provider_internals.get_shallow_class ctx elt_origin with
   | None -> Error LMLEShallowClassNotFound
   | Some class_ ->
     let methods =
@@ -908,7 +908,7 @@ and class_decl_if_missing
   | Some decl -> Some (decl, None)
   | None ->
     (match
-       Shallow_classes_provider.get_shallow_class class_env.ctx class_name
+       Decl_provider_internals.get_shallow_class class_env.ctx class_name
      with
     | None -> None
     | Some shallow_class ->

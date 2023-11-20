@@ -227,7 +227,7 @@ let collect_shallow_decls ctx workers classnames =
      we won't look for ancestors. *)
   let job (init : 'a SMap.t) (classnames : string list) : 'a SMap.t =
     List.fold classnames ~init ~f:(fun acc cid ->
-        match Shallow_classes_provider.get_shallow_class ctx cid with
+        match Decl_provider.get_shallow_class ctx cid with
         | None ->
           Hh_logger.log "Missing requested shallow class %s" cid;
           acc

@@ -177,6 +177,9 @@ let get_fun ?tracing_info ctx name =
   Decl_provider_internals.get_fun_without_pessimise ctx name
   |> Option.map ~f:(maybe_pessimise_fun_decl ctx)
 
+let get_shallow_class ctx name =
+  Decl_provider_internals.get_shallow_class ctx name
+
 let get_typedef ?tracing_info ctx name =
   Decl_counters.count_decl Decl_counters.Typedef ?tracing_info name
   @@ fun _counter ->

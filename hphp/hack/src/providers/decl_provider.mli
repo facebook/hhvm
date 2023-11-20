@@ -42,6 +42,12 @@ val get_class :
   type_key ->
   class_decl option
 
+(** Return the shallow declaration of the class with the given name if it is
+present in the cache. Otherwise, compute it, store it in the cache, and
+return it. *)
+val get_shallow_class :
+  Provider_context.t -> string -> Shallow_decl_defs.shallow_class option
+
 val get_typedef :
   ?tracing_info:Decl_counters.tracing_info ->
   Provider_context.t ->

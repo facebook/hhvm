@@ -126,7 +126,7 @@ let log_changes (changes : (string * ClassDiff.t) list) : unit =
   else
     Hh_logger.log "Computing fanout from %d changed classes" change_count;
   let max = 1000 in
-  Hh_logger.log_lazy ~category:"fanout"
+  Hh_logger.log_lazy
   @@ lazy
        Hh_json.(
          json_to_multiline

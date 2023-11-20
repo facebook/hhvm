@@ -35,32 +35,6 @@ class HoistAnnotatedTypes(unittest.TestCase):
     def trim(self, s):
         return "\n".join([line.strip() for line in s.splitlines()])
 
-    def test_basic_replace(self):
-        write_file(
-            "foo.thrift",
-            textwrap.dedent(
-                """\
-                struct S {} (thrift.uri = "facebook.com/bar/S")
-
-                """
-            ),
-        )
-
-        binary = pkg_resources.resource_filename(__name__, "codemod")
-        run_binary(binary, "foo.thrift")
-
-        self.assertEqual(
-            self.trim(read_file("foo.thrift")),
-            self.trim(
-                """\
-                include "thrift/annotation/thrift.thrift"
-
-                @thrift.Uri{value = "facebook.com/bar/S"}
-                struct S {}
-                """
-            ),
-        )
-
     def test_existing_include(self):
         write_file(
             "foo.thrift",

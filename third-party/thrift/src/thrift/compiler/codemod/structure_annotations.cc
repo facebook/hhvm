@@ -165,14 +165,6 @@ class structure_annotations {
       }
 
       // thrift
-      if (name == "thrift.uri") {
-        to_remove.emplace_back(name, data);
-        if (!node.find_structured_annotation_or_null(kUriUri)) {
-          to_add.insert(
-              fmt::format("@thrift.Uri{{value = \"{}\"}}", data.value));
-          fm_.add_include("thrift/annotation/thrift.thrift");
-        }
-      }
       if (name == "priority") {
         if (!dynamic_cast<const t_function*>(&node)) {
           // pydeprecated consumes this annotation on services as well

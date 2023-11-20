@@ -74,7 +74,7 @@ The key algorithms which read from these data-structures are:
    and store the answer back in reverse-delta-and-cache. But if the answer
    to that fallback was a file in ctx, then it will say that the symbol's
    not defined.
-3. Shallow_classes_provider.get_* will look it up in shallow-decl-cache, and otherwise
+3. Shallow_classes_provider.get_shallow_class_* will look it up in shallow-decl-cache, and otherwise
    will ask Naming_provider and Ast_provider for the AST, will compute shallow decl,
    and will store it in shallow-decl-cache
 4. Decl_provider.get_* will look it up in folded-decl-cache, computing it if

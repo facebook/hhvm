@@ -19,7 +19,8 @@ let direct_decl_parse_and_cache ctx filename name =
   | None -> Decl_defs.raise_decl_not_found (Some filename) name
   | Some parsed_file -> parsed_file.Direct_decl_utils.pfh_decls
 
-let get (ctx : Provider_context.t) (name : string) : shallow_class option =
+let get_shallow_class (ctx : Provider_context.t) (name : string) :
+    shallow_class option =
   let find_in_direct_decl_parse ~fill_caches path =
     let f =
       if fill_caches then

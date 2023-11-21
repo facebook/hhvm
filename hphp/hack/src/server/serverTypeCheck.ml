@@ -307,6 +307,7 @@ type redecl_result = {
 let do_redecl
     (genv : genv)
     (env : env)
+    ~(reparsed : Relative_path.Set.t)
     ~(defs_per_file : FileInfo.names Relative_path.Map.t)
     ~(naming_table : Naming_table.t)
     ~(cgroup_steps : CgroupProfiler.step_group) : redecl_result =
@@ -328,7 +329,17 @@ let do_redecl
       ~previously_oldified_defs:FileInfo.empty_names
       ~defs:defs_per_file
   in
-  let to_recheck = ServerFanout.resolve_files ctx env fanout in
+  let to_recheck =
+    Relative_path.Set.union
+      (ServerFanout.resolve_files ctx env fanout)
+      (* We want to also recheck files that have typing errors referring to files that were
+       * reparsed, since positions in those errors can be now stale. *)
+      (get_files_with_stale_errors
+         ~reparsed
+         ~filter:None
+         ~errors:env.errorl
+         ~ctx)
+  in
   {
     changed = fanout.Fanout.changed;
     to_recheck;
@@ -641,8 +652,9 @@ let type_check_core genv env start_time ~check_reason cgroup_steps =
   (* Compute fanout. Here we compare the old and new versions of
      the declarations defined in all changed files, and collect the set of
      files which need to be re-typechecked as a consequence of those changes. *)
+  let reparsed = files_to_parse in
   let { changed; to_recheck; to_recheck_deps; old_decl_missing_count } =
-    do_redecl genv env ~defs_per_file ~naming_table ~cgroup_steps
+    do_redecl genv env ~reparsed ~defs_per_file ~naming_table ~cgroup_steps
   in
   let telemetry =
     telemetry
@@ -753,7 +765,6 @@ let type_check_core genv env start_time ~check_reason cgroup_steps =
      changes. For a lazy check, typecheck only the affected files which are
      open in the IDE, leaving other affected files to be lazily checked later.
      In either case, don't attempt to typecheck files with parse errors. *)
-  let reparsed = files_to_parse in
   let enable_type_check_filter_files =
     genv.ServerEnv.local_config.ServerLocalConfig.enable_type_check_filter_files
   in
@@ -766,14 +777,6 @@ let type_check_core genv env start_time ~check_reason cgroup_steps =
     else
       to_recheck
   in
-  (* Besides the files that actually changed, we want to also recheck
-   * those that have typing errors referring to files that were
-   * reparsed, since positions in those errors can be now stale.
-   *)
-  let stale_errors =
-    get_files_with_stale_errors ~reparsed ~filter:None ~errors:env.errorl ~ctx
-  in
-  let to_recheck = Relative_path.Set.union stale_errors to_recheck in
   let to_recheck = Relative_path.Set.union env.needs_recheck to_recheck in
   let to_recheck =
     Relative_path.Set.union

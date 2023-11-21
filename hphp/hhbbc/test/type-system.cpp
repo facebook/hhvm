@@ -753,7 +753,7 @@ Index make_index() {
     );
   }
 
-  return Index{
+  Index index{
     std::move(indexInput),
     HHBBC::Config::get(RepoGlobalData{}),
     std::move(executor),
@@ -762,6 +762,8 @@ Index make_index() {
         std::unique_ptr<Client>) {},
     nullptr
   };
+  index.make_local();
+  return index;
 }
 
 //////////////////////////////////////////////////////////////////////

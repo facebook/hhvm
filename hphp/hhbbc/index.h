@@ -998,6 +998,11 @@ struct Index {
         StructuredLogEntry*);
   ~Index();
 
+  Index(const Index&) = delete;
+  Index(Index&&);
+  Index& operator=(const Index&) = delete;
+  Index& operator=(Index&&);
+
   /*
    * The index operates in two modes: frozen, and unfrozen.
    *
@@ -1040,9 +1045,23 @@ struct Index {
   void cleanup_post_emit();
 
   /*
+   * Prepare the index for local execution. This marks the boundary
+   * between running in extern-worker and running in the "classic"
+   * way.
+   */
+  void make_local();
+
+  /*
    * Access the StructuredLogEntry that the Index is using (if any).
    */
   StructuredLogEntry* sample() const;
+
+  /*
+   * Obtain the extern-worker related state that the Index used.
+   */
+  TicketExecutor& executor() const;
+  extern_worker::Client& client() const;
+  const CoroAsyncValue<extern_worker::Ref<Config>>& configRef() const;
 
   /*
    * The names of all classes which has a 86*init function.
@@ -1534,9 +1553,6 @@ struct Index {
                                   DependencyContextSet&);
 
   struct IndexData;
-private:
-  Index(const Index&) = delete;
-  Index& operator=(Index&&) = delete;
 
 private:
   friend struct AnalysisScheduler;
@@ -1549,7 +1565,7 @@ private:
   res::Func rfunc_from_dcls(const DCls&, SString, const P&, const G&) const;
 
 private:
-  std::unique_ptr<IndexData> const m_data;
+  std::unique_ptr<IndexData> m_data;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -2221,6 +2237,10 @@ struct AnalysisIndex {
                 VU<php::Unit>,
                 AnalysisInput::Meta);
   ~AnalysisIndex();
+
+  // Must be called in the worker's init() and fini() functions.
+  static void start();
+  static void stop();
 
   void freeze();
 

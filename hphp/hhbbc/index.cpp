@@ -16519,13 +16519,14 @@ Index::Index(Input input,
   init_types(*m_data, std::move(initTypesMeta));
   compute_iface_vtables(*m_data, std::move(ifaceConflicts));
   check_invariants(*m_data);
-  make_local(*m_data);
-  check_local_invariants(*m_data);
 }
 
 // Defined here so IndexData is a complete type for the unique_ptr
 // destructor.
-Index::~Index() {}
+Index::~Index() = default;
+
+Index::Index(Index&&) = default;
+Index& Index::operator=(Index&&) = default;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -16539,12 +16540,33 @@ StructuredLogEntry* Index::sample() const {
 
 //////////////////////////////////////////////////////////////////////
 
+TicketExecutor& Index::executor() const {
+  return *m_data->executor;
+}
+
+Client& Index::client() const {
+  return *m_data->client;
+}
+
+const CoroAsyncValue<Ref<Config>>& Index::configRef() const {
+  return *m_data->configRef;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 const ISStringSet& Index::classes_with_86inits() const {
   return m_data->classesWith86Inits;
 }
 
 const ISStringSet& Index::constant_init_funcs() const {
   return m_data->constantInitFuncs;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void Index::make_local() {
+  HHBBC::make_local(*m_data);
+  check_local_invariants(*m_data);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -20270,6 +20292,9 @@ AnalysisIndex::AnalysisIndex(
 AnalysisIndex::~AnalysisIndex() {
   ClassGraph::clearAnalysisIndex();
 }
+
+void AnalysisIndex::start() { ClassGraph::init(); }
+void AnalysisIndex::stop()  { ClassGraph::destroy(); }
 
 void AnalysisIndex::push_context(const Context& ctx) {
   m_data->contexts.emplace_back(ctx);

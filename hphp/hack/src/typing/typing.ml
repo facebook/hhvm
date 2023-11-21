@@ -2464,13 +2464,6 @@ module rec Expr : sig
     Nast.expr ->
     env * Tast.expr * locl_ty
 
-  val raw_expr :
-    expected:ExpectedTy.t option ->
-    ctxt:Context.t ->
-    env ->
-    Nast.expr ->
-    env * Tast.expr * locl_ty
-
   val infer_exprs :
     Nast.expr list ->
     ctxt:Context.t ->
@@ -2613,11 +2606,9 @@ end = struct
                         [Log_type ("expected_ty", ty)] );
                   ]))
       end;
-      raw_expr
-        ~expected
-        ~ctxt:Context.{ ctxt with lhs_of_null_coalesce = false }
-        env
-        e
+      let (_, p, _) = e in
+      debug_last_pos := p;
+      expr_ ~expected ~ctxt env e
     with
     | Inf.InconsistentTypeVarState _ as exn ->
       (* we don't want to catch unwanted exceptions here, eg Timeouts *)
@@ -2636,11 +2627,6 @@ end = struct
       expr env e ~expected ~ctxt:Context.default |> triple_to_pair
     in
     (env, te, ty)
-
-  and raw_expr ~expected ~ctxt env e =
-    let (_, p, _) = e in
-    debug_last_pos := p;
-    expr_ ~expected ~ctxt env e
 
   and lvalue env e =
     expr_
@@ -2668,7 +2654,7 @@ end = struct
    * look for sketchy null checks in the condition. *)
   (* TODO TAST: type refinement should be made explicit in the typed AST *)
   and eif env ~(expected : ExpectedTy.t option) ~in_await p c e1 e2 =
-    let (env, tc, tyc) = raw_expr ~expected:None ~ctxt:Context.default env c in
+    let (env, tc, tyc) = expr ~expected:None ~ctxt:Context.default env c in
     let parent_lenv = env.lenv in
     let (env, _) = condition env true tc in
     let (env, te1, ty1) =
@@ -3856,7 +3842,7 @@ end = struct
       (env, te, ty)
     | Unop (uop, e) ->
       let (env, te, ty) =
-        raw_expr
+        expr
           ~expected:None
           ~ctxt:
             Context.
@@ -7390,7 +7376,7 @@ end = struct
     | Valkind.Lvalue
     | Valkind.Lvalue_subexpr -> begin
       let (env, te1, ty1) =
-        raw_expr
+        expr
           ~expected:None
           ~ctxt:Context.{ default with valkind = Valkind.Lvalue_subexpr }
           env
@@ -7410,7 +7396,7 @@ end = struct
       | _ -> (env, te1, ty1)
     end
     | Valkind.Other ->
-      raw_expr
+      expr
         ~expected:None
         ~ctxt:Context.{ default with lhs_of_null_coalesce }
         env
@@ -10035,7 +10021,7 @@ end = struct
     match bop with
     | Ast_defs.QuestionQuestion ->
       let (env, te1, ty1) =
-        Expr.raw_expr
+        Expr.expr
           ~expected:None
           ~ctxt:
             Expr.Context.
@@ -10110,7 +10096,7 @@ end = struct
       | None ->
         let (env, te2, ty2) =
           check_e2
-            (Expr.raw_expr
+            (Expr.expr
                ~expected:None
                ~ctxt:Expr.Context.{ default with check_defined })
             env
@@ -10155,7 +10141,7 @@ end = struct
         (MakeType.bool (Reason.Rlogic_ret p))
     | _ ->
       let (env, te1, ty1) =
-        Expr.raw_expr
+        Expr.expr
           ~expected:None
           ~ctxt:Expr.Context.{ default with check_defined }
           env
@@ -10163,7 +10149,7 @@ end = struct
       in
       let (env, te2, ty2) =
         check_e2
-          (Expr.raw_expr
+          (Expr.expr
              ~expected:None
              ~ctxt:Expr.Context.{ default with check_defined })
           env

@@ -6,6 +6,9 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+(* TODO(T170647909): In preparation to upgrading to ppx_yojson_conv.v0.16.X.
+         Remove the suppress warning when the upgrade is done. *)
+[@@@warning "-66"]
 
 open Core
 include WrappedMap.Make (StringKey)
@@ -18,6 +21,3 @@ let show pp_data x = Format.asprintf "%a" (pp pp_data) x
 let hash_fold_t x = make_hash_fold_t hash_fold_string x
 
 let yojson_of_t x = make_yojson_of_t (fun x -> x) x
-
-(* Avoids warning 66 about unused open Ppx_yojson_conv_lib.Yojson_conv.Primitives *)
-let _ = yojson_of_unit

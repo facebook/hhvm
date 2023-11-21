@@ -315,8 +315,8 @@ let exec_no_chdir
       env;
       stack =
         Utils.Callstack
-          (Caml.Printexc.get_callstack 100
-          |> Caml.Printexc.raw_backtrace_to_string);
+          (Stdlib.Printexc.get_callstack 100
+          |> Stdlib.Printexc.raw_backtrace_to_string);
     }
   in
   let args = Array.of_list (prog :: args) in
@@ -378,8 +378,8 @@ let run_entry
       env;
       stack =
         Utils.Callstack
-          (Caml.Printexc.get_callstack 100
-          |> Caml.Printexc.raw_backtrace_to_string);
+          (Stdlib.Printexc.get_callstack 100
+          |> Stdlib.Printexc.raw_backtrace_to_string);
     }
   in
   let ({ Daemon.pid; _ } as daemon) =

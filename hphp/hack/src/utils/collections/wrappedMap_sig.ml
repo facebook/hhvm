@@ -6,14 +6,14 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+(* TODO(T170647909): In preparation to upgrading to ppx_yojson_conv.v0.16.X.
+         Remove the suppress warning when the upgrade is done. *)
+[@@@warning "-66"]
 
 open Core
 
-(* Avoids warning 66 about unused open Ppx_yojson_conv_lib.Yojson_conv.Primitives *)
-let _ = yojson_of_unit
-
 module type S = sig
-  include Caml.Map.S
+  include Stdlib.Map.S
 
   val add : ?combine:('a -> 'a -> 'a) -> key -> 'a -> 'a t -> 'a t
 

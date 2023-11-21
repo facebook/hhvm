@@ -38,7 +38,7 @@ let is_begin_manual_section_tag text =
     let (_ : int) = Str.search_forward begin_manual_section_regexp text 0 in
     true
   with
-  | Caml.Not_found -> false
+  | Stdlib.Not_found -> false
 
 let is_end_manual_section_tag text = String.equal text end_manual_section_tag
 

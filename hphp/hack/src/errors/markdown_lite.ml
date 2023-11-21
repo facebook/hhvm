@@ -20,7 +20,7 @@ module DelimiterKind = struct
   let compare = compare_delimiter
 end
 
-module DelimiterSet = Caml.Set.Make (DelimiterKind)
+module DelimiterSet = Stdlib.Set.Make (DelimiterKind)
 
 type tagged_char = DelimiterSet.t * char
 

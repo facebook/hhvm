@@ -20,7 +20,7 @@ module Ty_ = struct
   let compare r1 r2 = Typing_defs.compare_locl_ty r1 r2
 end
 
-include Caml.Set.Make (Ty_)
+include Stdlib.Set.Make (Ty_)
 
 let pp fmt t =
   Format.fprintf fmt "@[<hv 2>{";

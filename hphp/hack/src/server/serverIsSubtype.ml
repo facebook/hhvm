@@ -278,7 +278,7 @@ let check workers str env =
     let result_alist = result_alist @ error_alist in
     let result_map_by_i = Int.Map.of_alist_exn result_alist in
     let result_list =
-      List.mapi json_l ~f:(fun i _ -> Int.Map.find_exn result_map_by_i i)
+      List.mapi json_l ~f:(fun i _ -> Map.find_exn result_map_by_i i)
     in
     let json_result_list =
       List.map result_list ~f:(fun res ->

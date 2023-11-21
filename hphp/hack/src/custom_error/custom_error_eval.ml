@@ -158,12 +158,12 @@ let split_fields flds =
       match k with
       | Ty.TSFclass_const ((_, cls_nm), (_, cnst_nm)) ->
         ( str_map,
-          String.Map.add_exn ~key:(cls_nm ^ "::" ^ cnst_nm) ~data:ty cconst_map,
+          Map.add_exn ~key:(cls_nm ^ "::" ^ cnst_nm) ~data:ty cconst_map,
           int_map )
       | Ty.TSFlit_str (_, nm) ->
-        (String.Map.add_exn ~key:nm ~data:ty str_map, cconst_map, int_map)
+        (Map.add_exn ~key:nm ~data:ty str_map, cconst_map, int_map)
       | Ty.TSFlit_int (_, n) ->
-        (str_map, cconst_map, String.Map.add_exn ~key:n ~data:ty int_map))
+        (str_map, cconst_map, Map.add_exn ~key:n ~data:ty int_map))
     ~init:(String.Map.empty, String.Map.empty, String.Map.empty)
   @@ Ty.TShapeMap.elements flds
 

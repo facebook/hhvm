@@ -13,15 +13,15 @@ open Aast
  * a const and type const with the same name
  *)
 let error_if_repeated_name member_or_const =
-  let seen = Caml.Hashtbl.create 0 in
+  let seen = Stdlib.Hashtbl.create 0 in
   List.iter member_or_const ~f:(fun (pos, name) ->
-      match Caml.Hashtbl.find_opt seen name with
+      match Stdlib.Hashtbl.find_opt seen name with
       | Some p' ->
         Errors.add_error
           Naming_error.(
             to_user_error
             @@ Error_name_already_bound { pos; name; prev_pos = p' })
-      | None -> Caml.Hashtbl.replace seen name pos)
+      | None -> Stdlib.Hashtbl.replace seen name pos)
 
 let handler =
   object

@@ -7,9 +7,14 @@
  *
  *)
 
+(* TODO(T170647909): In preparation to upgrading to ppx_yojson_conv.v0.16.X.
+         Remove the suppress warning when the upgrade is done. *)
+[@@@warning "-66"]
+
 open Hh_prelude
 open Reordered_argument_collections
 open Utils
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
 type prefix =
   | Root
@@ -135,7 +140,7 @@ let to_tmp (_, rest) = (Tmp, rest)
 let to_root (_, rest) = (Root, rest)
 
 module Set = struct
-  include Reordered_argument_set (Caml.Set.Make (S))
+  include Reordered_argument_set (Stdlib.Set.Make (S))
 
   let pp_limit ?(max_items = None) fmt x =
     Format.fprintf fmt "@[<2>{";

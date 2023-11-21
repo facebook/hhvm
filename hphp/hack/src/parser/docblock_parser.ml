@@ -32,7 +32,7 @@ let parse_documentation_attributes (documentation_lines : string list) :
     List.fold
       ~init:([], None)
       ~f:(fun (documentation_attributes, current_attribute) line ->
-        let trimmed_line = Caml.String.trim line in
+        let trimmed_line = Stdlib.String.trim line in
         if Str.string_match (Str.regexp "@.*") trimmed_line 0 then
           (* new attribute *)
           match current_attribute with

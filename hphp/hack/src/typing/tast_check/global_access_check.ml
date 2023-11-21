@@ -47,7 +47,7 @@ type global_access_pattern =
   | NoPattern (* No pattern above is recognized *)
 [@@deriving ord, show { with_path = false }]
 
-module GlobalAccessPatternSet = Caml.Set.Make (struct
+module GlobalAccessPatternSet = Stdlib.Set.Make (struct
   type t = global_access_pattern
 
   let compare = compare_global_access_pattern
@@ -74,7 +74,7 @@ let raise_global_access_error
   let patterns_str =
     String.concat
       ~sep:","
-      (Caml.List.filter_map
+      (Stdlib.List.filter_map
          print_pattern
          (GlobalAccessPatternSet.elements patterns))
   in
@@ -105,7 +105,7 @@ type data_source =
   | Unknown (* Other sources that have not been identified yet *)
 [@@deriving ord, show]
 
-module DataSourceSet = Caml.Set.Make (struct
+module DataSourceSet = Stdlib.Set.Make (struct
   type t = data_source
 
   let compare = compare_data_source
@@ -688,7 +688,7 @@ let rec get_data_srcs_from_expr env ctx (tp, _, te) =
            or it starts with "SV_" (i.e. it's a site var). *)
         let is_class_safe =
           SSet.mem class_name safe_class_ids
-          || Caml.String.starts_with ~prefix:"\\SV_" class_name
+          || Stdlib.String.starts_with ~prefix:"\\SV_" class_name
         in
         if is_class_safe then
           DataSourceSet.singleton NonSensitive

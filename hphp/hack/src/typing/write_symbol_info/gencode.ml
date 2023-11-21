@@ -46,7 +46,7 @@ let search_and_update t text pos =
     update_fields t text;
     (true, found_pos)
   with
-  | Caml.Not_found -> (false, 0)
+  | Stdlib.Not_found -> (false, 0)
 
 let get_gencode_status text =
   let t =

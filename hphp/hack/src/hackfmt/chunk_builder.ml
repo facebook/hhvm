@@ -37,7 +37,7 @@ let is_doc_string_close = function
 
 let builder =
   object (this)
-    val open_spans = Caml.Stack.create ()
+    val open_spans = Stdlib.Stack.create ()
 
     val mutable env = Env.default
 
@@ -82,7 +82,7 @@ let builder =
      *)
     method private reset new_env =
       env <- new_env;
-      Caml.Stack.clear open_spans;
+      Stdlib.Stack.clear open_spans;
       rules <- [];
       lazy_rules <- ISet.empty;
       chunks <- [];
@@ -152,7 +152,7 @@ let builder =
         next_lazy_rules <- ISet.empty;
 
         for _ = 1 to num_pending_spans do
-          Caml.Stack.push (open_span (List.length chunks - 1)) open_spans
+          Stdlib.Stack.push (open_span (List.length chunks - 1)) open_spans
         done;
         num_pending_spans <- 0;
 
@@ -332,7 +332,7 @@ let builder =
       num_pending_spans <-
         (match num_pending_spans with
         | 0 ->
-          let os = Caml.Stack.pop open_spans in
+          let os = Stdlib.Stack.pop open_spans in
           let (sa, span) = Span_allocator.make_span span_alloc in
           span_alloc <- sa;
           let r_chunks = List.rev chunks in

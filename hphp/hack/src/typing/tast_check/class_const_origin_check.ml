@@ -16,7 +16,7 @@ module StringPair = struct
   type t = string * string [@@deriving ord, eq]
 end
 
-module SPSet = Caml.Set.Make (StringPair)
+module SPSet = Stdlib.Set.Make (StringPair)
 
 (* Check that a constant does not depend on itself when initialized.
  * The cycle can span multiple classes. We're using the decl info

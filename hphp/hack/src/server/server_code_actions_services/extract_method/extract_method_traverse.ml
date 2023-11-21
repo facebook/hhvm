@@ -3,7 +3,7 @@ module T = Extract_method_types
 
 let rec calc_placeholder_name taken_names n =
   let placeholder = "method" ^ string_of_int n in
-  if String.Set.mem taken_names placeholder then
+  if Set.mem taken_names placeholder then
     calc_placeholder_name taken_names (n + 1)
   else
     placeholder
@@ -20,11 +20,11 @@ module Scopes = struct
 
   let set_defined t var_name =
     match t with
-    | hd :: tl -> String.Set.add hd var_name :: tl
+    | hd :: tl -> Set.add hd var_name :: tl
     | [] -> [String.Set.singleton var_name]
 
   let is_defined t var_name =
-    List.exists t ~f:(fun vars -> String.Set.mem vars var_name)
+    List.exists t ~f:(fun vars -> Set.mem vars var_name)
 end
 
 (**
@@ -59,13 +59,12 @@ module Region = struct
 
   let free { referenced; defined; _ } =
     referenced
-    |> String.Map.filter_keys ~f:(fun key ->
-           (Fn.non @@ Scopes.is_defined defined) key)
+    |> Map.filter_keys ~f:(fun key -> (Fn.non @@ Scopes.is_defined defined) key)
 
   let used_from ~(defined_in : t) ~(referenced_from : t) =
     referenced_from
     |> free
-    |> String.Map.filter_keys ~f:(Scopes.is_defined defined_in.defined)
+    |> Map.filter_keys ~f:(Scopes.is_defined defined_in.defined)
 end
 
 let plus_candidate (a : T.candidate option) (b : T.candidate option) =
@@ -94,12 +93,12 @@ let plus_candidate (a : T.candidate option) (b : T.candidate option) =
              pre-selection region and used in the selection region.
              If the same variable has two different types then something weird is happening. Just use b's type.
           *)
-          params = String.Map.merge_skewed a.params b.params ~combine:use_first;
+          params = Map.merge_skewed a.params b.params ~combine:use_first;
           (* `return` is calculated based on variables that are defined in the
              selection region and used in the post-selection region.
              If the same variable has two different types, then something weird is happening. Just use b's type.
           *)
-          return = String.Map.merge_skewed a.return b.return ~combine:use_first;
+          return = Map.merge_skewed a.return b.return ~combine:use_first;
         }
   | _ -> Option.first_some a b
 
@@ -311,7 +310,7 @@ See [selection region]
                 {
                   !region with
                   referenced =
-                    String.Map.set ~key:name ~data:ty_string !region.referenced;
+                    Map.set ~key:name ~data:ty_string !region.referenced;
                 });
           super#on_expr env expr
         | Aast.Yield af ->

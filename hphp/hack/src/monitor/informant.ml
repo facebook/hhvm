@@ -48,27 +48,27 @@ module Revision_map = struct
    * given HG Revision.
    *)
   type t = {
-    global_rev_queries: (Hg.Rev.t, Hg.global_rev Future.t) Caml.Hashtbl.t;
+    global_rev_queries: (Hg.Rev.t, Hg.global_rev Future.t) Stdlib.Hashtbl.t;
   }
 
-  let create () = { global_rev_queries = Caml.Hashtbl.create 200 }
+  let create () = { global_rev_queries = Stdlib.Hashtbl.create 200 }
 
   let add_query ~hg_rev root t =
     (* Don't add if we already have an entry for this. *)
-    if not (Caml.Hashtbl.mem t.global_rev_queries hg_rev) then
+    if not (Stdlib.Hashtbl.mem t.global_rev_queries hg_rev) then
       let future =
         Hg.get_closest_global_ancestor hg_rev (Path.to_string root)
       in
-      Caml.Hashtbl.add t.global_rev_queries hg_rev future
+      Stdlib.Hashtbl.add t.global_rev_queries hg_rev future
 
   let find_global_rev hg_rev t =
-    let future = Caml.Hashtbl.find t.global_rev_queries hg_rev in
+    let future = Stdlib.Hashtbl.find t.global_rev_queries hg_rev in
     match Future.check_status future with
     | Future.In_progress { age } when Float.(age > 60.0) ->
       (* Fail if lookup up global rev number takes more than 60 s.
        * Delete the query so we can retry again if we encounter this hg_rev
        * again. Return fake "0" global rev number. *)
-      let () = Caml.Hashtbl.remove t.global_rev_queries hg_rev in
+      let () = Stdlib.Hashtbl.remove t.global_rev_queries hg_rev in
       Some 0
     | Future.In_progress _ -> None
     | Future.Complete_with_result result ->

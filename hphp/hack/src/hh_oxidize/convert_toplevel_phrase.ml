@@ -53,6 +53,7 @@ let module_blacklist =
     "hh_prelude";
     "naming_special_names";
     "pp_type";
+    "ppx_yojson_conv_lib::yojson_conv::primitives";
     "reordered_argument_collections";
     "sexplib::std";
     "string_utils";

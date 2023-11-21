@@ -11,7 +11,7 @@ open Hh_prelude
 module SN = Naming_special_names
 open ServerCommandTypes.Symbol_info_service
 
-module Result_set = Caml.Set.Make (struct
+module Result_set = Stdlib.Set.Make (struct
   type t = ServerCommandTypes.Symbol_info_service.symbol_fun_call
 
   let compare a b =

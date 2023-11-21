@@ -29,7 +29,7 @@ end
 
 module CCRSet : sig
   include module type of struct
-    include Caml.Set.Make (CCR)
+    include Stdlib.Set.Make (CCR)
   end
 
   type t_as_list = CCR.t list [@@deriving show]

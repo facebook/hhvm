@@ -730,4 +730,4 @@ module AbsolutePosMap = WrappedMap.Make (struct
   let compare = compare_absolute
 end)
 
-module Set = Caml.Set.Make (Pos)
+module Set = Stdlib.Set.Make (Pos)

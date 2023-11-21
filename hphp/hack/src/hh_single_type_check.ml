@@ -2425,7 +2425,7 @@ let handle_mode
       List.fold mapped ~init:Map_reduce.empty ~f:Map_reduce.reduce
     in
     let json = Map_reduce_ffi.yojson_of_t (Map_reduce.to_ffi reduced) in
-    Yojson.Safe.pretty_to_channel Caml.stdout json
+    Yojson.Safe.pretty_to_channel Stdlib.stdout json
 
 (*****************************************************************************)
 (* Main entry point *)

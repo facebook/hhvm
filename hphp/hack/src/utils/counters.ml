@@ -39,7 +39,7 @@ module Category = struct
     | None -> raise WrongEnum
 end
 
-module CategorySet = Caml.Set.Make (Category)
+module CategorySet = Stdlib.Set.Make (Category)
 
 type time_in_sec = float
 

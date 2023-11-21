@@ -24,7 +24,7 @@ external open_tmpfile :
 
 let get_env name =
   try Some (Sys.getenv name) with
-  | Caml.Not_found -> None
+  | Stdlib.Not_found -> None
 
 let getenv_user () =
   let user_var =
@@ -141,7 +141,7 @@ let cat_no_fail filename =
   let len = Int64.to_int @@ In_channel.length ic in
   let len = Option.value_exn len in
   let buf = Buffer.create len in
-  Caml.Buffer.add_channel buf ic len;
+  Stdlib.Buffer.add_channel buf ic len;
   let content = Buffer.contents buf in
   close_in_no_fail filename ic;
   content
@@ -154,7 +154,7 @@ let string_contains str substring =
   (* regexp_string matches only this string and nothing else. *)
   let re = Str.regexp_string substring in
   try Str.search_forward re str 0 >= 0 with
-  | Caml.Not_found -> false
+  | Stdlib.Not_found -> false
 
 let exec_read cmd =
   let ic = Unix.open_process_in cmd in
@@ -299,7 +299,7 @@ let expanduser path =
         end
         | unixname ->
           (try (Unix.getpwnam unixname).Unix.pw_dir with
-          | Caml.Not_found -> Str.matched_string s)
+          | Stdlib.Not_found -> Str.matched_string s)
     end
     path
 
@@ -717,7 +717,7 @@ let find_oom_in_dmesg_output pid name lines =
         let pid_s = Str.matched_group 2 line in
         String.equal pid_s pid
       with
-      | Caml.Not_found -> false)
+      | Stdlib.Not_found -> false)
 
 let check_dmesg_for_oom pid name =
   let dmesg = exec_read_lines ~reverse:true "dmesg" in

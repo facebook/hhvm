@@ -136,7 +136,7 @@ module TShapeMap = struct
   let hash_fold_t x = make_hash_fold_t TShapeField.hash_fold_t x
 end
 
-module TShapeSet = Caml.Set.Make (TShapeField)
+module TShapeSet = Stdlib.Set.Make (TShapeField)
 
 type param_mode =
   | FPnormal

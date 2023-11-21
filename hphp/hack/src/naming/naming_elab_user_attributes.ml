@@ -10,9 +10,9 @@ open Aast
 
 let on_user_attributes on_error us ~ctx =
   (* Complain on duplicates, e.g. <<Foo, Bar, Foo>>. *)
-  let seen = Caml.Hashtbl.create 0 in
+  let seen = Stdlib.Hashtbl.create 0 in
   let dedup (attrs, err_acc) (Aast.{ ua_name = (pos, attr_name); _ } as attr) =
-    match Caml.Hashtbl.find_opt seen attr_name with
+    match Stdlib.Hashtbl.find_opt seen attr_name with
     | Some prev_pos ->
       let err =
         Naming_phase_error.naming
@@ -20,7 +20,7 @@ let on_user_attributes on_error us ~ctx =
       in
       (attrs, err :: err_acc)
     | _ ->
-      Caml.Hashtbl.add seen attr_name pos;
+      Stdlib.Hashtbl.add seen attr_name pos;
       (attr :: attrs, err_acc)
   in
   let (us, errs) =

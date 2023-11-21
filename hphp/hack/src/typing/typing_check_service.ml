@@ -505,7 +505,9 @@ let load_and_process_workitems
     ~(typecheck_info : HackEventLogger.ProfileTypeCheck.typecheck_info) :
     typing_result * TypingProgress.t =
   Option.iter check_info.memtrace_dir ~f:(fun temp_dir ->
-      let file = Caml.Filename.temp_file ~temp_dir "memtrace.worker." ".ctf" in
+      let file =
+        Stdlib.Filename.temp_file ~temp_dir "memtrace.worker." ".ctf"
+      in
       Daemon.start_memtracing file);
   (* When the type-checking worker receives SIGUSR1, display a position which
      corresponds approximately with the function/expression being checked. *)

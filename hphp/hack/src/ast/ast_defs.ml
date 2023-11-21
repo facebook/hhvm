@@ -370,4 +370,4 @@ module ShapeMap = struct
     make_pp pp_shape_field_name pp_val fmt map
 end
 
-module ShapeSet = Caml.Set.Make (ShapeField)
+module ShapeSet = Stdlib.Set.Make (ShapeField)

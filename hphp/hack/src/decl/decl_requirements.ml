@@ -146,16 +146,16 @@ let naive_dedup req_extends =
         let hl = List.map hl ~f:Decl_pos_utils.NormalizeSig.ty in
         begin
           try
-            let hl' = String.Table.find_exn h name in
+            let hl' = Hashtbl.find_exn h name in
             if not (List.equal equal_decl_ty hl hl') then
               raise Exit
             else
               None
           with
           | Exit
-          | Caml.Not_found
+          | Stdlib.Not_found
           | Not_found_s _ ->
-            String.Table.set h ~key:name ~data:hl;
+            Hashtbl.set h ~key:name ~data:hl;
             Some (parent_pos, ty)
         end
       | _ -> Some (parent_pos, ty))

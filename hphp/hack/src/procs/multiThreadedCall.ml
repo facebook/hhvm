@@ -21,7 +21,7 @@ let coalesced_failures_to_string failures =
     (String.concat ~sep:", " failure_strings)
 
 let () =
-  Caml.Printexc.register_printer @@ function
+  Stdlib.Printexc.register_printer @@ function
   | Coalesced_failures failures -> Some (coalesced_failures_to_string failures)
   | _ -> None
 

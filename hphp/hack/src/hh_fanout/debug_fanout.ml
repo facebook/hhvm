@@ -71,8 +71,7 @@ let result_to_json (result : result) : Hh_json.json =
           |> List.map ~f:(fun dep -> Hh_json.JSON_String dep)) );
       ( "relevant_dep_edges",
         Hh_json.JSON_Array
-          (DepEdgeSet.elements relevant_dep_edges
-          |> List.map ~f:dep_edge_to_json) );
+          (Set.elements relevant_dep_edges |> List.map ~f:dep_edge_to_json) );
     ]
 
 let calculate_dep_edges

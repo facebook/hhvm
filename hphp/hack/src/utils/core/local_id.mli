@@ -49,7 +49,7 @@ val make : int -> string -> t
 
 val tmp : unit -> t
 
-module Set : module type of Caml.Set.Make (S)
+module Set : module type of Stdlib.Set.Make (S)
 
 module Map : sig
   include module type of WrappedMap.Make (S)

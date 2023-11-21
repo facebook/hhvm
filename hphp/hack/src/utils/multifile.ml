@@ -94,7 +94,7 @@ let file_to_file_list file =
     let dir = Str.matched_group 1 first_line in
     let file_name =
       try Str.matched_group 3 first_line with
-      | Caml.Not_found -> abs_fn
+      | Stdlib.Not_found -> abs_fn
     in
     let file =
       Relative_path.create Relative_path.Dummy (join_path dir file_name)

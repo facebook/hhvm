@@ -68,7 +68,7 @@ module CCR = struct
 end
 
 module CCRSet = struct
-  include Caml.Set.Make (CCR)
+  include Stdlib.Set.Make (CCR)
 
   type t_as_list = CCR.t list [@@deriving show]
 

@@ -1167,8 +1167,8 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
 
   (* The OCaml default is 500, but we care about minimizing the memory
    * overhead *)
-  let gc_control = Caml.Gc.get () in
-  Caml.Gc.set { gc_control with Caml.Gc.max_overhead = 200 };
+  let gc_control = Stdlib.Gc.get () in
+  Stdlib.Gc.set { gc_control with Stdlib.Gc.max_overhead = 200 };
   let { ServerLocalConfig.cpu_priority; io_priority; enable_on_nfs; _ } =
     local_config
   in

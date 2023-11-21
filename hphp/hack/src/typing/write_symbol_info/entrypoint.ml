@@ -29,7 +29,7 @@ module JobReturn = struct
   let merge t1 t2 =
     {
       elapsed = t1.elapsed +. t2.elapsed;
-      hashes = Md5.Set.union t1.hashes t2.hashes;
+      hashes = Set.union t1.hashes t2.hashes;
       reindexed = SSet.union t1.reindexed t2.reindexed;
       referenced = SSet.union t1.referenced t2.referenced;
     }
@@ -51,7 +51,7 @@ let write_file referenced output_file =
 
 let write_facts_file out_dir num_tasts json_chunks =
   let (_out_file, channel) =
-    Caml.Filename.open_temp_file
+    Stdlib.Filename.open_temp_file
       ~temp_dir:out_dir
       "glean_symbol_info_chunk_"
       ".json"
@@ -71,7 +71,7 @@ let write_facts_file out_dir num_tasts json_chunks =
    - the namespace aliases defined in .hhconfig *)
 let gen_global_facts ns ~ownership ~shard_name all_hashes =
   let fa = Fact_acc.init ~ownership in
-  let list_hashes = Md5.Set.to_list all_hashes in
+  let list_hashes = Set.to_list all_hashes in
   if ownership then Fact_acc.set_ownership_unit fa (Some ".hhconfig");
   List.fold ns ~init:fa ~f:(fun fa (from, to_) ->
       Add_fact.global_namespace_alias fa ~from ~to_ |> snd)

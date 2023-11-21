@@ -110,7 +110,7 @@ module TShapeMap : sig
   val map_and_rekey : 'a t -> (key -> key) -> ('a -> 'b) -> 'b t
 end
 
-module TShapeSet : Caml.Set.S with type elt = TShapeField.t
+module TShapeSet : Stdlib.Set.S with type elt = TShapeField.t
 
 type param_mode =
   | FPnormal

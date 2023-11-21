@@ -25,7 +25,7 @@ module Ty_ = struct
     | (ConstraintType _, LoclType _) -> -1
 end
 
-include Caml.Set.Make (Ty_)
+include Stdlib.Set.Make (Ty_)
 
 let fold_map set ~init:acc ~f =
   fold

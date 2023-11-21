@@ -67,7 +67,7 @@ let find_candidate ~(cursor : Pos.t) ~entry ctx : T.candidate option =
 
   let method_info_update method_name ~f =
     method_infos :=
-      String.Map.update !method_infos method_name ~f:(fun v ->
+      Map.update !method_infos method_name ~f:(fun v ->
           (* method_infos map is guaranteed to have all method names in it
              since we traverse methods after adding them to the map *)
           f @@ Option.value_exn v)
@@ -106,10 +106,8 @@ let find_candidate ~(cursor : Pos.t) ~entry ctx : T.candidate option =
           let (_, expr_pos, expr_) = expr in
           let on_call ~call_id_pos ~callee_name ~param_kind_arg_pairs =
             method_use_counts :=
-              String.Map.update
-                !method_use_counts
-                callee_name
-                ~f:(fun count_opt -> 1 + Option.value count_opt ~default:0);
+              Map.update !method_use_counts callee_name ~f:(fun count_opt ->
+                  1 + Option.value count_opt ~default:0);
             if Pos.contains call_id_pos cursor then
               let call_arg_positions =
                 List.map param_kind_arg_pairs ~f:(fun (_, (_, arg_pos, _)) ->
@@ -192,16 +190,16 @@ let find_candidate ~(cursor : Pos.t) ~entry ctx : T.candidate option =
             return_cnt;
             _;
           } as callee) =
-    String.Map.find !method_infos call.T.callee_name
+    Map.find !method_infos call.T.callee_name
   in
-  let* caller = String.Map.find !method_infos call.T.caller_name in
+  let* caller = Map.find !method_infos call.T.caller_name in
   let is_inlineable =
     let has_ok_returns =
       return_cnt = 0 || (return_cnt = 1 && last_stmt_is_return)
     in
     has_ok_returns && is_private && all_params_are_normal && has_ok_returns
   in
-  let* called_count = String.Map.find !method_use_counts call.T.callee_name in
+  let* called_count = Map.find !method_use_counts call.T.callee_name in
   if called_count = 1 && is_inlineable then
     Some T.{ call; callee; caller }
   else

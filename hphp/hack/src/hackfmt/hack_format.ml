@@ -3799,7 +3799,7 @@ and is_ignore_comment trivia =
   (* We don't format the node after a comment containing "hackfmt-ignore". *)
   | TriviaKind.(DelimitedComment | SingleLineComment) -> begin
     try Str.search_forward ignore_re (Trivia.text trivia) 0 >= 0 with
-    | Caml.Not_found -> false
+    | Stdlib.Not_found -> false
   end
   | _ -> false
 

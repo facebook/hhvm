@@ -5,8 +5,12 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+(* TODO(T170647909): In preparation to upgrading to ppx_yojson_conv.v0.16.X.
+         Remove the suppress warning when the upgrade is done. *)
+[@@@warning "-66"]
 
 open Core
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
 type tast = string [@@deriving yojson_of]
 

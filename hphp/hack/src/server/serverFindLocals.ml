@@ -9,7 +9,7 @@
 
 open Hh_prelude
 open Aast
-module PosSet = Caml.Set.Make (Pos)
+module PosSet = Stdlib.Set.Make (Pos)
 
 module LocalPositions = struct
   (**

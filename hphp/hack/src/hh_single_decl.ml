@@ -313,7 +313,7 @@ let name_and_then_print_name_results ctx files ~decl_make_env =
            them both so as to exercise any differences between the two! *)
         ast_to_toplevels ast @ decls_to_toplevels decls)
     |> List.concat
-    |> Caml.List.sort_uniq compare_toplevels
+    |> Stdlib.List.sort_uniq compare_toplevels
   in
   List.iter names ~f:(fun (name_type, id) ->
       let path = Pos.filename (fst id) in

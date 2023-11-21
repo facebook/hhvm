@@ -385,7 +385,7 @@ let pretty ~(name : string) (diff : t) : string =
     diff;
   let diffstr = Buffer.contents buf in
   (* indentation hack *)
-  Printf.sprintf "  %s" (Caml.String.trim diffstr)
+  Printf.sprintf "  %s" (Stdlib.String.trim diffstr)
 
 module ClassShellChangeCategory = struct
   module ListChange = struct

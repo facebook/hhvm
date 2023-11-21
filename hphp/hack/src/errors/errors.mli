@@ -26,9 +26,9 @@ type t [@@deriving eq, show]
 
 val iter : t -> f:(error -> unit) -> unit
 
-module ErrorSet : Caml.Set.S with type elt := error
+module ErrorSet : Stdlib.Set.S with type elt := error
 
-module FinalizedErrorSet : Caml.Set.S with type elt := finalized_error
+module FinalizedErrorSet : Stdlib.Set.S with type elt := finalized_error
 
 (** [t] is an efficient for use inside hh_server or other places that compute errors,
 which also supports incremental updates based on file.

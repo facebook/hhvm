@@ -176,7 +176,7 @@ end = struct
   let get_context () =
     let entry =
       try Unix.getenv "HH_SERVER_DAEMON" with
-      | Caml.Not_found -> raise Context_not_found
+      | Stdlib.Not_found -> raise Context_not_found
     in
     if String.equal entry "" then raise Context_not_found;
     let (in_handle, out_handle, param) =

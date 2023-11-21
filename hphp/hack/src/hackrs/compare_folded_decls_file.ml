@@ -78,8 +78,8 @@ let direct_decl_parse ctx fn text =
 let print_diff ~expected_name ~actual_name ~expected_contents ~actual_contents =
   Tempfile.with_real_tempdir @@ fun dir ->
   let temp_dir = Path.to_string dir in
-  let expected = Caml.Filename.temp_file ~temp_dir "expected" ".txt" in
-  let actual = Caml.Filename.temp_file ~temp_dir "actual" ".txt" in
+  let expected = Stdlib.Filename.temp_file ~temp_dir "expected" ".txt" in
+  let actual = Stdlib.Filename.temp_file ~temp_dir "actual" ".txt" in
   Disk.write_file ~file:expected ~contents:(expected_contents ^ "\n");
   Disk.write_file ~file:actual ~contents:(actual_contents ^ "\n");
   Ppxlib_print_diff.print

@@ -16,19 +16,19 @@ let create ~used_vars = { used_vars; old_to_new = String.Map.empty }
 
 let rename ({ used_vars; old_to_new } as t) old_var : t * string =
   let rec next_var (s : string) : string =
-    if String.Set.mem used_vars s then
+    if Set.mem used_vars s then
       next_var (s ^ "_")
     else
       s
   in
-  match String.Map.find old_to_new old_var with
+  match Map.find old_to_new old_var with
   | Some new_var -> (t, new_var)
   | None ->
     let new_var = next_var old_var in
     let t =
       {
-        used_vars = String.Set.add used_vars new_var;
-        old_to_new = String.Map.update old_to_new old_var ~f:(Fn.const new_var);
+        used_vars = Set.add used_vars new_var;
+        old_to_new = Map.update old_to_new old_var ~f:(Fn.const new_var);
       }
     in
     (t, new_var)

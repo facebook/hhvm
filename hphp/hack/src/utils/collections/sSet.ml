@@ -6,8 +6,12 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+(* TODO(T170647909): In preparation to upgrading to ppx_yojson_conv.v0.16.X.
+         Remove the suppress warning when the upgrade is done. *)
+[@@@warning "-66"]
 
 include Set.Make (StringKey)
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
 let pp_limit ?(max_elts = None) fmt sset =
   Format.fprintf fmt "@[<2>{";

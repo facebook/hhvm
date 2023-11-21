@@ -29,28 +29,28 @@ let dedup_decls decls =
       match decl with
       | (name, Class _)
       | (name, Typedef _) ->
-        if String.Table.mem seen_types name then
+        if Hashtbl.mem seen_types name then
           false
         else
-          let () = String.Table.add_exn seen_types ~key:name ~data:() in
+          let () = Hashtbl.add_exn seen_types ~key:name ~data:() in
           true
       | (name, Fun _) ->
-        if String.Table.mem seen_funs name then
+        if Hashtbl.mem seen_funs name then
           false
         else
-          let () = String.Table.add_exn seen_funs ~key:name ~data:() in
+          let () = Hashtbl.add_exn seen_funs ~key:name ~data:() in
           true
       | (name, Const _) ->
-        if String.Table.mem seen_consts name then
+        if Hashtbl.mem seen_consts name then
           false
         else
-          let () = String.Table.add_exn seen_consts ~key:name ~data:() in
+          let () = Hashtbl.add_exn seen_consts ~key:name ~data:() in
           true
       | (name, Module _) ->
-        if String.Table.mem seen_modules name then
+        if Hashtbl.mem seen_modules name then
           false
         else
-          let () = String.Table.add_exn seen_modules ~key:name ~data:() in
+          let () = Hashtbl.add_exn seen_modules ~key:name ~data:() in
           true)
 
 (* If a symbol was also declared in another file, and that file was determined

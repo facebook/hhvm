@@ -20,7 +20,7 @@ let call_handler ~path fa_ref (pos_map : Xrefs.pos_map) =
         let arg =
           match exp with
           | Aast.String s
-            when String.for_all ~f:(fun c -> Caml.Char.code c < 127) s ->
+            when String.for_all ~f:(fun c -> Stdlib.Char.code c < 127) s ->
             (* TODO make this more general *)
             Some Argument.(Lit (StringLiteral.Key s))
           | Aast.Id (id_pos, _)

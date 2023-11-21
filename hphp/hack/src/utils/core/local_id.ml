@@ -52,7 +52,7 @@ let tmp () =
   let res = next () in
   (res, "__tmp" ^ string_of_int res)
 
-module Set = Caml.Set.Make (S)
+module Set = Stdlib.Set.Make (S)
 
 module Map = struct
   include WrappedMap.Make (S)

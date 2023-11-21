@@ -6,6 +6,9 @@
  *
  *)
 
+(* TODO: investigate this warning 40 and how to fix it correctly *)
+[@@@warning "-40"]
+
 open Hh_prelude
 module Error_code = Error_codes.Typing
 

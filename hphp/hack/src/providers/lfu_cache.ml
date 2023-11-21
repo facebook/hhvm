@@ -23,7 +23,7 @@ module type Entry = sig
   val key_to_log_string : 'a key -> string
 end
 
-module RevIMap = Caml.Map.Make (struct
+module RevIMap = Stdlib.Map.Make (struct
   type t = int
 
   let compare a b = Int.compare b a

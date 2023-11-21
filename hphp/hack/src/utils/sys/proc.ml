@@ -88,11 +88,11 @@ let get_proc_stack
     ?(max_depth : int = -1) ?(max_length : int = Int.max_value) (pid : int) :
     string list =
   let prepare_cmdline (cmdline : string) : string =
-    let cmdline = Caml.String.trim cmdline in
+    let cmdline = Stdlib.String.trim cmdline in
     if max_length >= String.length cmdline then
       cmdline
     else
-      Caml.String.trim (String.sub cmdline ~pos:0 ~len:max_length) ^ "..."
+      Stdlib.String.trim (String.sub cmdline ~pos:0 ~len:max_length) ^ "..."
   in
   (* We could have max_depth as optional, but then everybody would have to pass in None *)
   (* let max_depth = match max_depth with | None -> -1 | Some max_depth -> max_depth in *)

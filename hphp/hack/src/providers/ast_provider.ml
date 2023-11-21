@@ -302,8 +302,8 @@ let find_module_impl def =
   | _ -> None
 
 let iequal name =
-  let name = Caml.String.lowercase_ascii name in
-  (fun s -> String.equal name (Caml.String.lowercase_ascii s))
+  let name = Stdlib.String.lowercase_ascii name in
+  (fun s -> String.equal name (Stdlib.String.lowercase_ascii s))
 
 let find_class_in_file ~(full : bool) ctx file_name name =
   get_def ~full ctx file_name find_class_impl (String.equal name)

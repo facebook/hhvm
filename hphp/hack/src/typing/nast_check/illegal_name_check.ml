@@ -14,14 +14,14 @@ open Nast_check_env
 module SN = Naming_special_names
 
 let is_magic =
-  let h = Caml.Hashtbl.create 23 in
-  let a x = Caml.Hashtbl.add h x true in
+  let h = Stdlib.Hashtbl.create 23 in
+  let a x = Stdlib.Hashtbl.add h x true in
   let _ =
     SSet.iter
       (fun m -> if String.( <> ) m SN.Members.__toString then a m)
       SN.Members.as_set
   in
-  (fun (_, s) -> Caml.Hashtbl.mem h s)
+  (fun (_, s) -> Stdlib.Hashtbl.mem h s)
 
 (* Class consts and typeconsts cannot be named "class" *)
 let error_if_is_named_class (pos, name) =

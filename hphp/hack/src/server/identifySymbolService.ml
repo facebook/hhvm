@@ -13,7 +13,7 @@ open Typing_defs
 module SN = Naming_special_names
 module FFP = Full_fidelity_positioned_syntax
 
-module Result_set = Caml.Set.Make (struct
+module Result_set = Stdlib.Set.Make (struct
   type t = Relative_path.t SymbolOccurrence.t
 
   let compare : t -> t -> int = SymbolOccurrence.compare Relative_path.compare

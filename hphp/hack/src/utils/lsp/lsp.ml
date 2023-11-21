@@ -223,7 +223,7 @@ module CodeActionKind = struct
 
   let kind_of_string : string -> t =
    fun s ->
-    match Caml.String.split_on_char '.' s with
+    match Stdlib.String.split_on_char '.' s with
     | [] -> failwith "split_on_char does not return an empty list"
     | k :: ks -> (k, ks)
 
@@ -1176,7 +1176,7 @@ module IdKey = struct
     | (StringId _, NumberId _) -> 1
 end
 
-module IdSet = Caml.Set.Make (IdKey)
+module IdSet = Stdlib.Set.Make (IdKey)
 module IdMap = WrappedMap.Make (IdKey)
 
 module UriKey = struct
@@ -1185,7 +1185,7 @@ module UriKey = struct
   let compare (DocumentUri.Uri x) (DocumentUri.Uri y) = String.compare x y
 end
 
-module UriSet = Caml.Set.Make (UriKey)
+module UriSet = Stdlib.Set.Make (UriKey)
 module UriMap = WrappedMap.Make (UriKey)
 
 let lsp_result_to_log_string = function

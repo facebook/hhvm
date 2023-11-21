@@ -266,7 +266,7 @@ let edits_of_candidate
     Code_action_types.edits =
   let type_assoc_list_of map =
     map
-    |> String.Map.to_alist ~key_order:`Increasing
+    |> Map.to_alist ~key_order:`Increasing
     |> List.dedup_and_sort ~compare:(fun (s1, _) (s2, _) ->
            String.compare s1 s2)
   in

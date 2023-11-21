@@ -28,7 +28,7 @@ let catch_and_classify_exceptions : 'x 'b. ('x -> 'b) -> 'x -> 'b =
     Hh_logger.log "Decl_not_found %s" x;
     Exit.exit Exit_status.Decl_not_found
   | Not_found_s _
-  | Caml.Not_found ->
+  | Stdlib.Not_found ->
     Exit.exit Exit_status.Worker_not_found_exception
 
 let make ~longlived_workers ~nbr_procs gc_control heap_handle ~logging_init =

@@ -109,14 +109,14 @@ let convert_single_file env filename regen_command =
 
 let parse_types_file filename =
   let lines = ref [] in
-  let ic = Caml.open_in filename in
+  let ic = Stdlib.open_in filename in
   (try
      while true do
-       lines := Caml.input_line ic :: !lines
+       lines := Stdlib.input_line ic :: !lines
      done;
-     Caml.close_in ic
+     Stdlib.close_in ic
    with
-  | End_of_file -> Caml.close_in ic);
+  | End_of_file -> Stdlib.close_in ic);
   List.filter_map !lines ~f:(fun name ->
       (* Ignore comments beginning with '#' *)
       let name =

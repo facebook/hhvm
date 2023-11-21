@@ -85,7 +85,7 @@ let make_relative_path ~prefix_int ~suffix =
   in
   Relative_path.create prefix full_suffix
 
-let to_canon_name_key = Caml.String.lowercase_ascii
+let to_canon_name_key = Stdlib.String.lowercase_ascii
 
 let fold_sqlite stmt ~f ~init =
   let rec helper acc =
@@ -1036,7 +1036,7 @@ let get_itype_path_by_name (db_path : db_path) name =
   SymbolTable.get
     db
     stmt_cache
-    (Typing_deps.Dep.Type (Caml.String.lowercase_ascii name)
+    (Typing_deps.Dep.Type (Stdlib.String.lowercase_ascii name)
     |> Typing_deps.Dep.make)
     SymbolTable.get_sqlite_case_insensitive
   |> get_type_wrapper
@@ -1055,7 +1055,7 @@ let get_ifun_path_by_name (db_path : db_path) name =
   SymbolTable.get
     db
     stmt_cache
-    (Typing_deps.Dep.Fun (Caml.String.lowercase_ascii name)
+    (Typing_deps.Dep.Fun (Stdlib.String.lowercase_ascii name)
     |> Typing_deps.Dep.make)
     SymbolTable.get_sqlite_case_insensitive
   |> get_fun_wrapper

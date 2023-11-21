@@ -6,16 +6,16 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+(* TODO(T170647909): In preparation to upgrading to ppx_yojson_conv.v0.16.X.
+         Remove the suppress warning when the upgrade is done. *)
+[@@@warning "-66"]
 
 open Core
 
-(* Avoids warning 66 about unused open Ppx_yojson_conv_lib.Yojson_conv.Primitives *)
-let _ = yojson_of_unit
-
 module type S = WrappedMap_sig.S
 
-module Make (Ord : Caml.Map.OrderedType) : S with type key = Ord.t = struct
-  include Caml.Map.Make (Ord)
+module Make (Ord : Stdlib.Map.OrderedType) : S with type key = Ord.t = struct
+  include Stdlib.Map.Make (Ord)
 
   let union ?combine x y =
     let combine =

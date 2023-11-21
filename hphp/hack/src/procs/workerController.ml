@@ -62,7 +62,7 @@ let failure_to_string f =
   | Worker_quit s -> Printf.sprintf "(Worker_quit %s)" (status_string s)
 
 let () =
-  Caml.Printexc.register_printer @@ function
+  Stdlib.Printexc.register_printer @@ function
   | Worker_failed_to_send_job (Other_send_job_failure exn) ->
     Some (Printf.sprintf "Other_send_job_failure: %s" (Exn.to_string exn))
   | Worker_failed_to_send_job (Worker_already_exited status) ->

@@ -37,17 +37,17 @@ let read ~path : t =
         |> Base64.decode_exn
         |> String.sub ~pos:0 ~len:16)
     with
-    | Caml.End_of_file -> None
+    | Stdlib.End_of_file -> None
   in
   let rec loop set =
     match next_md5 () with
     | None -> set
-    | Some md5 -> loop (String.Set.add set md5)
+    | Some md5 -> loop (Set.add set md5)
   in
   let set = loop String.Set.empty in
   In_channel.close channel;
-  let res = String.concat (String.Set.to_list set) in
-  Hh_logger.log "Sym table has %d element" (String.Set.length set / 16);
+  let res = String.concat (Set.to_list set) in
+  Hh_logger.log "Sym table has %d element" (Set.length set / 16);
   if String.length res = 0 then failwith "Hash table is empty";
   if not (String.length res mod 16 = 0) then
     failwith "Hash table has incorrect format";

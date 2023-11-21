@@ -404,10 +404,10 @@ end
 let trace = ref true
 
 (** List of callbacks, called when discovering dependency edges *)
-let dependency_callbacks = Caml.Hashtbl.create 0
+let dependency_callbacks = Stdlib.Hashtbl.create 0
 
 let add_dependency_callback ~name cb =
-  Caml.Hashtbl.replace dependency_callbacks name cb
+  Stdlib.Hashtbl.replace dependency_callbacks name cb
 
 (** Set of dependencies used for the custom system
 
@@ -479,7 +479,7 @@ type dep_edge = {
   idependency: Dep.t;  (** The node the dependent depends upon *)
 }
 
-module DepEdgeSet = Caml.Set.Make (struct
+module DepEdgeSet = Stdlib.Set.Make (struct
   type t = dep_edge
 
   let compare x y =
@@ -610,7 +610,9 @@ module CustomGraph = struct
     if idependent = idependency then
       ()
     else (
-      Caml.Hashtbl.iter (fun _ f -> f dependent dependency) dependency_callbacks;
+      Stdlib.Hashtbl.iter
+        (fun _ f -> f dependent dependency)
+        dependency_callbacks;
       if !trace then begin
         Hashtbl.replace discovered_deps_batch { idependent; idependency } ();
         if Hashtbl.length discovered_deps_batch >= 1000 then
@@ -800,7 +802,9 @@ end = struct
     if idependent = idependency then
       ()
     else (
-      Caml.Hashtbl.iter (fun _ f -> f dependent dependency) dependency_callbacks;
+      Stdlib.Hashtbl.iter
+        (fun _ f -> f dependent dependency)
+        dependency_callbacks;
       if !trace then begin
         Hashtbl.replace discovered_deps_batch { idependent; idependency } ();
         if Hashtbl.length discovered_deps_batch >= 1000 then

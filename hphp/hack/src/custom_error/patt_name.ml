@@ -5,7 +5,8 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-[@@@warning "-66"]
+(* TODO: investigate this warning 40 and how to fix it correctly *)
+[@@@warning "-66-40"]
 
 open Core
 

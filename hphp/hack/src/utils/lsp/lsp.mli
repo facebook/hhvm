@@ -1377,7 +1377,7 @@ module IdKey : sig
 end
 
 module IdSet : sig
-  include module type of Caml.Set.Make (IdKey)
+  include module type of Stdlib.Set.Make (IdKey)
 end
 
 module IdMap : sig
@@ -1391,7 +1391,7 @@ module UriKey : sig
 end
 
 module UriSet : sig
-  include module type of Caml.Set.Make (UriKey)
+  include module type of Stdlib.Set.Make (UriKey)
 end
 
 module UriMap : sig

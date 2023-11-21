@@ -32,5 +32,5 @@ let escape_char = function
 
 let escape ?(f = escape_char) s =
   let buf = Buffer.create (String.length s) in
-  Caml.String.iter (fun c -> Buffer.add_string buf @@ f c) s;
+  Stdlib.String.iter (fun c -> Buffer.add_string buf @@ f c) s;
   Buffer.contents buf

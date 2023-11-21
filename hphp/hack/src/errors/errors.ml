@@ -93,13 +93,13 @@ module Error = struct
   type t = error [@@deriving ord]
 end
 
-module ErrorSet = Caml.Set.Make (Error)
+module ErrorSet = Stdlib.Set.Make (Error)
 
 module FinalizedError = struct
   type t = finalized_error [@@deriving ord]
 end
 
-module FinalizedErrorSet = Caml.Set.Make (FinalizedError)
+module FinalizedErrorSet = Stdlib.Set.Make (FinalizedError)
 
 let drop_fixmed_errors (errs : ('a, 'b) User_error.t list) :
     ('a, 'b) User_error.t list =
@@ -270,7 +270,8 @@ let lazy_decl_error_logging error error_map to_absolute to_string =
   Printf.eprintf "%s" "Callstack:\n";
   Printf.eprintf
     "%s"
-    (Caml.Printexc.raw_backtrace_to_string (Caml.Printexc.get_callstack 500));
+    (Stdlib.Printexc.raw_backtrace_to_string
+       (Stdlib.Printexc.get_callstack 500));
 
   (* Exit with special error code so we can see the log after *)
   Exit.exit Exit_status.Lazy_decl_bug
@@ -442,17 +443,17 @@ let combining_sort (xs : 'a list) ~(f : 'a -> string) : _ list =
     match xs with
     | x :: xs ->
       let key = f x in
-      (match String.Map.find grouped key with
+      (match Map.find grouped key with
       | Some members ->
-        let grouped = String.Map.set grouped ~key ~data:(members @ [x]) in
+        let grouped = Map.set grouped ~key ~data:(members @ [x]) in
         build_map xs grouped keys
       | None ->
-        let grouped = String.Map.set grouped ~key ~data:[x] in
+        let grouped = Map.set grouped ~key ~data:[x] in
         build_map xs grouped (key :: keys))
     | [] -> (grouped, keys)
   in
   let (grouped, keys) = build_map xs String.Map.empty [] in
-  List.concat_map (List.rev keys) ~f:(fun fn -> String.Map.find_exn grouped fn)
+  List.concat_map (List.rev keys) ~f:(fun fn -> Map.find_exn grouped fn)
 
 (* E.g. "10 errors found." *)
 let format_summary format ~displayed_count ~dropped_count ~max_errors :

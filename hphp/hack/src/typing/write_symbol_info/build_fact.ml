@@ -97,9 +97,9 @@ let type_param ctx source_text tp =
 
 let generic_xrefs (sym_pos : (XRefTarget.t * Util.pos list) Seq.t) =
   let xrefs =
-    Caml.Seq.fold_left
+    Stdlib.Seq.fold_left
       (fun acc (target, pos_list) ->
-        let sorted_pos = Caml.List.sort_uniq Util.compare_pos pos_list in
+        let sorted_pos = Stdlib.List.sort_uniq Util.compare_pos pos_list in
         let (rev_byte_spans, _) =
           List.fold
             sorted_pos
@@ -128,10 +128,10 @@ let xrefs (fact_map : Xrefs.fact_map) =
     in
     (target, util_pos_list)
   in
-  let sym_pos = Fact_id.Map.to_seq fact_map |> Caml.Seq.map f in
+  let sym_pos = Fact_id.Map.to_seq fact_map |> Stdlib.Seq.map f in
   generic_xrefs sym_pos
 
-let hint_xrefs sym_pos = Caml.List.to_seq sym_pos |> generic_xrefs
+let hint_xrefs sym_pos = Stdlib.List.to_seq sym_pos |> generic_xrefs
 
 let module_membership decl_id ~internal =
   ModuleMembership.{ declaration = ModuleDeclaration.Id decl_id; internal }

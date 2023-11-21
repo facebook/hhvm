@@ -143,7 +143,7 @@ end
 
 module ParentClassEltSet =
   Reordered_argument_collections.Reordered_argument_set
-    (Caml.Set.Make (ParentClassElt))
+    (Stdlib.Set.Make (ParentClassElt))
 
 module ParentClassConst = struct
   type t = {
@@ -157,7 +157,7 @@ module ParentClassConst = struct
     String.compare left.cc_origin right.cc_origin
 end
 
-module ParentClassConstSet = Caml.Set.Make (ParentClassConst)
+module ParentClassConstSet = Stdlib.Set.Make (ParentClassConst)
 
 module ParentTypeConst = struct
   type t = {
@@ -171,7 +171,7 @@ module ParentTypeConst = struct
     String.compare left.ttc_origin right.ttc_origin
 end
 
-module ParentTypeConstSet = Caml.Set.Make (ParentTypeConst)
+module ParentTypeConstSet = Stdlib.Set.Make (ParentTypeConst)
 
 let constructor_is_consistent kind =
   match kind with

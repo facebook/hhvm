@@ -101,7 +101,7 @@ let make_unenforced ty =
   | Enforced ty -> Unenforced (Some ty)
   | Unenforced _ -> ty
 
-module VisitedSet = Caml.Set.Make (struct
+module VisitedSet = Stdlib.Set.Make (struct
   type t = string * string
 
   let compare (s1, r1) (s2, r2) =

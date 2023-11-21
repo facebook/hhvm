@@ -5,6 +5,9 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+(* TODO: investigate this warning 40 and how to fix it correctly *)
+[@@@warning "-40"]
+
 open Core
 
 type t =

@@ -6,6 +6,9 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+(* TODO(T170647909): In preparation to upgrading to ppx_yojson_conv.v0.16.X.
+         Remove the suppress warning when the upgrade is done. *)
+[@@@warning "-66"]
 
 type 'a t = {
   incoming: 'a list;
@@ -14,9 +17,6 @@ type 'a t = {
 }
 
 exception Empty
-
-(* Avoids warning 66 about unused open Ppx_yojson_conv_lib.Yojson_conv.Primitives *)
-let _ = yojson_of_unit
 
 let empty = { incoming = []; outgoing = []; length = 0 }
 

@@ -2562,7 +2562,7 @@ let do_findReferences
         params.FindReferences.partialResultToken
         ~f:(fun partial_result_token ->
           let file =
-            Caml.Filename.temp_file
+            Stdlib.Filename.temp_file
               ~temp_dir:(ServerFiles.get_tmp ())
               (Printf.sprintf "find_refs_stream_%d_pid" (Unix.getpid ()))
               ".jsonl"

@@ -114,4 +114,4 @@ let path_of_slash_escaped_string str =
   consume 0;
   make (Buffer.contents buf)
 
-module Set = Reordered_argument_set (Caml.Set.Make (S))
+module Set = Reordered_argument_set (Stdlib.Set.Make (S))

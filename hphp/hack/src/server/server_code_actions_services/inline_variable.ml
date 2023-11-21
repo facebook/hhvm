@@ -118,18 +118,18 @@ end = struct
     begin
       let vars_in_selection =
         infos
-        |> String.Map.filter ~f:(fun info ->
+        |> Map.filter ~f:(fun info ->
                match use_pos_of_info info with
                | Some use_pos -> Pos.contains use_pos selection
                | None -> false)
-        |> String.Map.to_alist
+        |> Map.to_alist
       in
       match vars_in_selection with
       | [(name, Used_once { def; use_pos })] ->
         let dep_may_have_changed =
           def.def_deps
-          |> String.Set.exists ~f:(fun dep ->
-                 String.Map.find infos dep
+          |> Set.exists ~f:(fun dep ->
+                 Map.find infos dep
                  |> Option.exists ~f:(fun dep_info ->
                         match use_pos_of_info dep_info with
                         | Some use_pos ->
@@ -145,27 +145,27 @@ end = struct
     end
 
   let add_def { referenced; infos } ~name ~def =
-    let infos = String.Map.set infos ~key:name ~data:(Used_never def) in
+    let infos = Map.set infos ~key:name ~data:(Used_never def) in
     { referenced; infos }
 
   let add_use { referenced; infos } ~name ~use_pos =
     let infos =
-      String.Map.update infos name ~f:(function
+      Map.update infos name ~f:(function
           | None -> Used_undefined use_pos
           | Some (Used_never def) -> Used_once { use_pos; def }
           | Some (Used_once _ | Used_undefined _ | Ineligible) -> Ineligible)
     in
-    let referenced = String.Set.add referenced name in
+    let referenced = Set.add referenced name in
     { referenced; infos }
 
   let mark_ineligible { referenced; infos } ~name =
-    let infos = String.Map.set infos ~key:name ~data:Ineligible in
+    let infos = Map.set infos ~key:name ~data:Ineligible in
     { referenced; infos }
 
   let merge
       { referenced = _; infos = infos1 } { referenced = _; infos = infos2 } =
     let infos =
-      String.Map.merge_skewed infos1 infos2 ~combine:(fun ~key:_ v1 v2 ->
+      Map.merge_skewed infos1 infos2 ~combine:(fun ~key:_ v1 v2 ->
           match (v1, v2) with
           | (Used_never def, Used_undefined use_pos) ->
             (*

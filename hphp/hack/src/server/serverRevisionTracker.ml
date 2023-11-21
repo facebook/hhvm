@@ -56,7 +56,7 @@ type tracker_state = {
        *)
   pending_queries: Hg.Rev.t Queue.t;
       (** Keys from mergebase_queries that contain futures that were not resolved yet *)
-  mergebase_queries: (Hg.Rev.t, Hg.global_rev Future.t) Caml.Hashtbl.t;
+  mergebase_queries: (Hg.Rev.t, Hg.global_rev Future.t) Stdlib.Hashtbl.t;
 }
 
 type state_handler = {
@@ -85,7 +85,7 @@ let tracker_state =
     current_mergebase = None;
     did_change_mergebase = false;
     pending_queries = Queue.create ();
-    mergebase_queries = Caml.Hashtbl.create 200;
+    mergebase_queries = Stdlib.Hashtbl.create 200;
   }
 
 let initialize mergebase =
@@ -94,14 +94,14 @@ let initialize mergebase =
   tracker_state.current_mergebase <- Some mergebase
 
 let add_query ~(hg_rev : Hg.Rev.t) root =
-  if Caml.Hashtbl.mem tracker_state.mergebase_queries hg_rev then
+  if Stdlib.Hashtbl.mem tracker_state.mergebase_queries hg_rev then
     ()
   else (
     Hh_logger.log
       "ServerRevisionTracker: Seen new HG revision: %s"
       (Hg.Rev.to_string hg_rev);
     let future = Hg.get_closest_global_ancestor hg_rev (Path.to_string root) in
-    Caml.Hashtbl.add tracker_state.mergebase_queries hg_rev future;
+    Stdlib.Hashtbl.add tracker_state.mergebase_queries hg_rev future;
     Queue.enqueue tracker_state.pending_queries hg_rev
   )
 
@@ -304,7 +304,7 @@ let check_blocking () =
             let elapsed_t = current_t -. start_t in
             let timeout = max 0 (int_of_float (30.0 -. elapsed_t)) in
             let future =
-              Caml.Hashtbl.find tracker_state.mergebase_queries hg_rev
+              Stdlib.Hashtbl.find tracker_state.mergebase_queries hg_rev
             in
             check_query future ~timeout ~current_t
         end
@@ -328,7 +328,7 @@ let rec check_non_blocking ~is_full_check_done =
     )
   ) else
     let hg_rev = Queue.peek_exn tracker_state.pending_queries in
-    let future = Caml.Hashtbl.find tracker_state.mergebase_queries hg_rev in
+    let future = Stdlib.Hashtbl.find tracker_state.mergebase_queries hg_rev in
     if Future.is_ready future then (
       let (_ : Hg.Rev.t) = Queue.dequeue_exn tracker_state.pending_queries in
       check_query future ~timeout:30 ~current_t:(Unix.gettimeofday ());

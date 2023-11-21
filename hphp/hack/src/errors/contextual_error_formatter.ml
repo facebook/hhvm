@@ -121,10 +121,8 @@ let col_widths (msgs : Pos.absolute Message.t list) : int Core.String.Map.t =
   let longest_lines =
     List.fold msgs ~init:String.Map.empty ~f:(fun acc msg ->
         let filename = Pos.filename (Message.get_message_pos msg) in
-        let current_max =
-          Option.value (String.Map.find acc filename) ~default:0
-        in
-        String.Map.set
+        let current_max = Option.value (Map.find acc filename) ~default:0 in
+        Map.set
           acc
           ~key:filename
           ~data:(max current_max (Pos.line (Message.get_message_pos msg))))
@@ -172,7 +170,7 @@ let format_error (error : Errors.finalized_error) : string =
       let pos = Message.get_message_pos msg in
       let filename = Pos.filename pos in
       let line = Pos.line pos in
-      let col_width = String.Map.find col_widths filename in
+      let col_width = Map.find col_widths filename in
       let (pretty_ctx, pretty_msg) =
         format_message (Message.get_message_str msg) pos ~is_first ~col_width
       in

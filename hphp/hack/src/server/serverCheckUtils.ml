@@ -174,7 +174,7 @@ let user_filter_should_type_check
   let matches_any regexes =
     List.exists regexes ~f:(fun re ->
         try Str.search_forward re suffix 0 >= 0 with
-        | Caml.Not_found -> false)
+        | Stdlib.Not_found -> false)
   in
   match user_filter with
   | UserFilterInclude regexes -> matches_any regexes

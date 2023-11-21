@@ -39,7 +39,7 @@ module type I = sig
 end
 
 module type Set = sig
-  include Caml.Set.S
+  include Stdlib.Set.S
 
   val pp : Format.formatter -> t -> unit
 
@@ -86,7 +86,7 @@ module I_Impl = struct
 
   let canonical (t : t) : s = t
 
-  let of_string (t : string) : t = Caml.String.lowercase_ascii t
+  let of_string (t : string) : t = Stdlib.String.lowercase_ascii t
 
   let to_string_TRANSITIONAL (t : t) : string = t
 
@@ -95,7 +95,7 @@ end
 
 (** [Set_Impl] implements an opaque set, via a SSet *)
 module Set_Impl = struct
-  include Caml.Set.Make (StringKey)
+  include Stdlib.Set.Make (StringKey)
 
   let pp (fmt : Format.formatter) (t : t) =
     Format.fprintf fmt "@[<2>{";

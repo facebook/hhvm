@@ -13,7 +13,7 @@ type t = int ref
 module Ident = struct
   type t = int [@@deriving ord, eq, hash, show]
 
-  module Map = Caml.Map.Make (Int)
+  module Map = Stdlib.Map.Make (Int)
 
   let immutable_mask = 1 lsl 62
 

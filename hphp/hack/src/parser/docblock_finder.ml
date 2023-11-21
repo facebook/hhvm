@@ -104,7 +104,7 @@ let tidy_delimited_comment comment =
     match lines with
     | []
     | [_] ->
-      Caml.String.trim
+      Stdlib.String.trim
     | _hd :: tail ->
       let get_whitespace_count x = String_utils.index_not_opt x " " in
       let counts = List.filter_map ~f:get_whitespace_count tail in
@@ -129,7 +129,7 @@ let find_docblock (finder : finder) (last_line : int) (line : int) :
     if is_line_comment then
       match merge_line_comments finder comment_index last_line line [] with
       | [] -> None
-      | lines -> Some (Caml.String.trim (String.concat ~sep:"" lines))
+      | lines -> Some (Stdlib.String.trim (String.concat ~sep:"" lines))
     else if comment_line > last_line && comment_line >= line - 2 then
       Some ("/*" ^ str ^ "*/")
     else
@@ -145,7 +145,7 @@ let find_inline_comment (finder : finder) (line : int) : string option =
     in
     if comment_line = line then
       if is_line_comment then
-        Some (Caml.String.trim ("//" ^ str))
+        Some (Stdlib.String.trim ("//" ^ str))
       else
         Some ("/*" ^ str ^ "*/")
     else
@@ -200,7 +200,7 @@ let get_single_lines_docblock (node : Syntax.t) : string option =
       (comment_lines
       |> List.map ~f:(Str.replace_first line_comment_prefix "")
       |> String.concat ~sep:"\n"
-      |> Caml.String.trim)
+      |> Stdlib.String.trim)
 
 (**
  * Extract a /* ... */ comment docblock that is before this node,

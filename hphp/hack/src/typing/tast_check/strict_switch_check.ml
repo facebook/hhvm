@@ -5,6 +5,8 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+(* TODO: investigate this warning 40 and how to fix it correctly *)
+[@@@warning "-40"]
 
 open Hh_prelude
 open Aast
@@ -34,10 +36,7 @@ module EnumInfo = struct
       [
         ("enum", Hh_json.string_ @@ Utils.strip_ns name);
         ( "values",
-          consts
-          |> EnumConstSet.to_list
-          |> take 10
-          |> Hh_json.array_ Hh_json.string_ );
+          consts |> Set.to_list |> take 10 |> Hh_json.array_ Hh_json.string_ );
         ("decl_pos", Pos_or_decl.json decl_pos);
       ]
 
@@ -217,8 +216,8 @@ module ValueSet = struct
   let symbolic_union_list set_list =
     (* so big_union [ { AllEnums } , { Enum i1 } , { Enum i2 } ] = { AllEnums } *)
     let res = union_list set_list in
-    if mem res Value.AllEnums then
-      filter res ~f:(fun v -> not @@ Value.is_enum v)
+    if Set.mem res Value.AllEnums then
+      Set.filter res ~f:(fun v -> not @@ Value.is_enum v)
     else
       res
 
@@ -226,19 +225,19 @@ module ValueSet = struct
      the type simplification should mean that types are disjunctive-normal form,
      and so both sets should usually just be singletons. *)
   let symbolic_inter value_set1 value_set2 =
-    fold_right value_set1 ~init:empty ~f:(fun v1 acc ->
-        fold_right value_set2 ~init:acc ~f:(fun v2 acc ->
-            Option.value_map (Value.inter v1 v2) ~default:acc ~f:(add acc)))
+    Set.fold_right value_set1 ~init:empty ~f:(fun v1 acc ->
+        Set.fold_right value_set2 ~init:acc ~f:(fun v2 acc ->
+            Option.value_map (Value.inter v1 v2) ~default:acc ~f:(Set.add acc)))
 
   let symbolic_inter_list value_sets =
     List.fold_right ~init:universe ~f:symbolic_inter value_sets
 
-  let non_symbolic_diff = diff
+  let non_symbolic_diff = Set.diff
 
   let symbolic_diff value_set1 value_set2 =
     let add_if_mem1 res ~elem =
-      if mem value_set1 elem then
-        add res elem
+      if Set.mem value_set1 elem then
+        Set.add res elem
       else
         res
     in
@@ -285,7 +284,7 @@ let rec symbolic_dnf_values env ty : ValueSet.t =
        (ty <: nonnull && nonnull <: ty) but for now it's not clear if it affects
        expressivity in a tangible way. *)
     | Tnonnull -> ValueSet.universe
-    | _ -> ValueSet.(add (symbolic_dnf_values env ty) Value.Null)
+    | _ -> Set.add (symbolic_dnf_values env ty) Value.Null
   end
   | Tneg (Neg_prim prim) ->
     ValueSet.(symbolic_diff universe (prim_to_values prim))
@@ -314,7 +313,7 @@ let rec symbolic_dnf_values env ty : ValueSet.t =
               interface
           in
           let info = EnumInfo.of_decl class_decl ~filter ~name in
-          if EnumConstSet.is_empty info.EnumInfo.consts then
+          if Set.is_empty info.EnumInfo.consts then
             ValueSet.singleton Value.Unsupported
           else
             ValueSet.singleton (Value.Enum info))
@@ -337,7 +336,7 @@ let partition_cases env (cases : (ast_case * _) list) values =
   let partitions : (Value.t, _ * case list) Hashtbl.t =
     let tbl = Hashtbl.create (module Value) in
 
-    ValueSet.iter values ~f:(fun key ->
+    Set.iter values ~f:(fun key ->
         Option.iter (Value.if_missing key) ~f:(fun if_missing ->
             Hashtbl.add_exn tbl ~key ~data:(if_missing, [])));
     tbl
@@ -394,7 +393,7 @@ let get_missing_cases env partitions =
              | _ -> assert false)
     in
     (* This only applies to Enum Classes *)
-    (match EnumConstSet.(diff given_cases consts |> to_list) with
+    (match Set.diff given_cases consts |> Set.to_list with
     | [] -> ()
     | _ :: _ as redundant ->
       List.iter redundant ~f:(fun label ->
@@ -404,7 +403,7 @@ let get_missing_cases env partitions =
               @@ EnumErr.Enum_class_label_member_mismatch
                    { label; expected_ty_msg_opt = None; pos })));
     (* This applies to Enum and Enum Classes *)
-    match EnumConstSet.(diff consts given_cases |> to_list) with
+    match Set.diff consts given_cases |> Set.to_list with
     | [] -> None
     | _ :: _ as missing ->
       Some
@@ -529,7 +528,7 @@ let add_default_if_needed values missing_cases =
   (* write `exists ~f:(fun x -> not @@ finite_or_dynamic x)` instead of
      `forall ~f:finite` to ensure set is non-empty *)
   if
-    ValueSet.exists values ~f:(fun x -> not @@ Value.finite_or_dynamic x)
+    Set.exists values ~f:(fun x -> not @@ Value.finite_or_dynamic x)
     || ValueSet.equal just_dyn values
   then
     None :: List.map ~f:Option.some missing_cases
@@ -569,7 +568,7 @@ let check_exhaustiveness env pos ty cases opt_default =
   if TypecheckerOptions.tco_log_exhaustivity_check tcopt then
     let fields =
       [
-        ("values", values |> ValueSet.to_list |> Hh_json.array_ Value.to_json);
+        ("values", values |> Set.to_list |> Hh_json.array_ Value.to_json);
         ("switch_pos", Pos.(pos |> to_absolute |> json));
       ]
     in

@@ -18,7 +18,7 @@ end
 
 (* A set that treats blame as metadata *)
 module BlameSet = struct
-  include Caml.Set.Make (S)
+  include Stdlib.Set.Make (S)
 
   let find_opt lid blame_set =
     filter (fun (lid', _) -> Local_id.equal lid lid') blame_set |> choose_opt

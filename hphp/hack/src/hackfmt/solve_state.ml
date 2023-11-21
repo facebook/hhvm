@@ -304,7 +304,7 @@ let is_overlapping s1 s2 =
 
 let compare_rule_sets s1 s2 =
   let bound_rule_ids =
-    Caml.List.sort_uniq Int.compare @@ IMap.keys s1.rbm @ IMap.keys s2.rbm
+    Stdlib.List.sort_uniq Int.compare @@ IMap.keys s1.rbm @ IMap.keys s2.rbm
   in
   let is_split rule_id state =
     IMap.find_opt rule_id state.rbm |> Option.value ~default:false

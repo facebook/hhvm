@@ -22,7 +22,7 @@ module S = ServerRxApiShared
 module SN = Naming_special_names
 open SymbolOccurrence
 
-module Results = Caml.Set.Make (struct
+module Results = Stdlib.Set.Make (struct
   type t = Relative_path.t SymbolOccurrence.t
 
   let compare = SymbolOccurrence.compare Relative_path.compare

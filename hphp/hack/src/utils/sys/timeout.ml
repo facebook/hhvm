@@ -33,7 +33,7 @@ exception
   }
 
 let () =
-  Caml.Printexc.register_printer (fun exn ->
+  Stdlib.Printexc.register_printer (fun exn ->
       match exn with
       | Timeout t ->
         Some

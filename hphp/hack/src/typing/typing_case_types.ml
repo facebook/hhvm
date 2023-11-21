@@ -454,10 +454,8 @@ module DataType = struct
     let to_datatypes ~trail (env : env) cls : 'phase t =
       if SSet.mem cls special_interfaces then
         let tags =
-          String.Table.find_or_add
-            special_interface_cache
-            cls
-            ~default:(fun () -> special_interface_to_datatypes env cls)
+          Hashtbl.find_or_add special_interface_cache cls ~default:(fun () ->
+              special_interface_to_datatypes env cls)
         in
         let set1 =
           Set.of_list

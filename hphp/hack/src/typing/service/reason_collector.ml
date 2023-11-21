@@ -6,8 +6,13 @@
  *
  *)
 
+(* TODO(T170647909): In preparation to upgrading to ppx_yojson_conv.v0.16.X.
+         Remove the suppress warning when the upgrade is done. *)
+[@@@warning "-66"]
+
 open Hh_prelude
 module Reason = Typing_reason
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
 type entity =
   | Class of string

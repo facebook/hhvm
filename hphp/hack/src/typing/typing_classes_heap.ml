@@ -270,14 +270,14 @@ module ApiLazy = struct
   let get_prop (decl, t, ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Get_prop id) @@ fun () ->
     let (c, members) = t in
-    match String.Table.find members.props id with
+    match Hashtbl.find members.props id with
     | Some _ as elt_opt -> elt_opt
     | None ->
       (match SMap.find_opt id c.Decl_defs.dc_props with
       | None -> None
       | Some elt ->
         let elt = Decl_class.lookup_property_type_lazy ctx c id elt in
-        String.Table.add_exn members.props ~key:id ~data:elt;
+        Hashtbl.add_exn members.props ~key:id ~data:elt;
         Some elt)
 
   let has_prop (decl, t, _ctx) id =
@@ -288,14 +288,14 @@ module ApiLazy = struct
   let get_sprop (decl, t, ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Get_sprop id) @@ fun () ->
     let (c, members) = t in
-    match String.Table.find members.static_props id with
+    match Hashtbl.find members.static_props id with
     | Some _ as elt_opt -> elt_opt
     | None ->
       (match SMap.find_opt id c.Decl_defs.dc_sprops with
       | None -> None
       | Some elt ->
         let elt = Decl_class.lookup_static_property_type_lazy ctx c id elt in
-        String.Table.add_exn members.static_props ~key:id ~data:elt;
+        Hashtbl.add_exn members.static_props ~key:id ~data:elt;
         Some elt)
 
   let has_sprop (decl, t, _ctx) id =
@@ -306,14 +306,14 @@ module ApiLazy = struct
   let get_method (decl, t, ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Get_method id) @@ fun () ->
     let (c, members) = t in
-    match String.Table.find members.methods id with
+    match Hashtbl.find members.methods id with
     | Some _ as elt_opt -> elt_opt
     | None ->
       (match SMap.find_opt id c.Decl_defs.dc_methods with
       | None -> None
       | Some elt ->
         let elt = Decl_class.lookup_method_type_lazy ctx c id elt in
-        String.Table.add_exn members.methods ~key:id ~data:elt;
+        Hashtbl.add_exn members.methods ~key:id ~data:elt;
         Some elt)
 
   let has_method (decl, t, _ctx) id =
@@ -324,14 +324,14 @@ module ApiLazy = struct
   let get_smethod (decl, t, ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Get_smethod id) @@ fun () ->
     let (c, members) = t in
-    match String.Table.find members.static_methods id with
+    match Hashtbl.find members.static_methods id with
     | Some _ as elt_opt -> elt_opt
     | None ->
       (match SMap.find_opt id c.Decl_defs.dc_smethods with
       | None -> None
       | Some elt ->
         let elt = Decl_class.lookup_static_method_type_lazy ctx c id elt in
-        String.Table.add_exn members.static_methods ~key:id ~data:elt;
+        Hashtbl.add_exn members.static_methods ~key:id ~data:elt;
         Some elt)
 
   let has_smethod (decl, t, _ctx) id =

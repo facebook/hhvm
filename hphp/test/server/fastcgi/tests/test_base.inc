@@ -57,7 +57,10 @@ function fastcgi_request($host, $port, $path, $post = darray[], $headers = darra
     $args['SCRIPT_NAME'] = $path;
     $args['DOCUMENT_ROOT'] = $doc_root;
 
-    @$result = $client->request($args, $content);
+    $error = error_reporting();
+    error_reporting(0);
+    $result = $client->request($args, $content);
+    error_reporting($error);
 
     $pos = strpos($result, "\r\n\r\n");
     if ($pos !== false) {

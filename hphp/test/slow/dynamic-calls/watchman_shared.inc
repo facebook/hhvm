@@ -55,7 +55,10 @@ async function run_tests(): Awaitable<void> {
   require_once realpath(__DIR__.'/../ext_watchman/wminst.inc');
   $seed = get_seed();
   $tmpdir = tempnam(sys_get_temp_dir(), 'wmt');
-  @unlink($tmpdir);
+  $error = error_reporting();
+  error_reporting(0);
+  unlink($tmpdir);
+  error_reporting($error);
   if (!mkdir($tmpdir)) {
     throw new Exception("failed creating dir '$tmpdir'");
   }

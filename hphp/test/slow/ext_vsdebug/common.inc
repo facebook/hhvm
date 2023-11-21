@@ -359,10 +359,13 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = varr
   while ($client === false) {
     $errno = null;
     $errorMessage = null;
+    $error = error_reporting();
     try {
-      $client = @stream_socket_client($uri, inout $errno, inout $errorMessage);
+      error_reporting(0);
+      $client = stream_socket_client($uri, inout $errno, inout $errorMessage);
     } catch (Exception $e) {
     }
+    error_reporting($error);
     if ($client === false && $tries > 5) {
       proc_terminate($process, 9);
       proc_close($process);

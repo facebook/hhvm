@@ -72,7 +72,10 @@ class WatchmanInstance {
       }
       $errno = null;
       $errstr = null;
-      $this->sock = @fsockopen('unix://' . $sockname, -1, inout $errno, inout $errstr);
+      $error = error_reporting();
+      error_reporting(0);
+      $this->sock = fsockopen('unix://' . $sockname, -1, inout $errno, inout $errstr);
+      error_reporting($error);
       if ($this->sock) {
         break;
       }

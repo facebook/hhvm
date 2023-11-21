@@ -714,8 +714,9 @@ TypeParserImpl::parseSpecification(const DWARFContextManager& dwarfContext,
       }
       case llvm::dwarf::DW_AT_linkage_name: {
         if (spec.linkage_name.empty()) {
-          auto const linkage_name = std::string(attr.Value.getAsCString().get());
-          spec.linkage_name = linkage_name;
+          if (auto val = llvm::dwarf::toString(attr.Value)) {
+            spec.linkage_name = *val;
+          }
         }
         break;
       }
@@ -812,10 +813,14 @@ void TypeParserImpl::genNames(Env& env,
       for (const auto& attr : curContext.die.attributes()) {
         switch(attr.Attr) {
           case llvm::dwarf::DW_AT_name:
-            name = attr.Value.getAsCString().get();
+            if (auto val = llvm::dwarf::toString(attr.Value)) {
+              name = *val;
+            }
             break;
           case llvm::dwarf::DW_AT_linkage_name:
-            linkage_name = attr.Value.getAsCString().get();
+            if (auto val = llvm::dwarf::toString(attr.Value)) {
+              linkage_name = *val;
+            }
             break;
           case llvm::dwarf::DW_AT_declaration:
             incomplete = *attr.Value.getAsUnsignedConstant() != 0;
@@ -1454,10 +1459,14 @@ Object::Member TypeParserImpl::genMember(const DieContext& dieContext,
   for (const auto& attr : dieContext.die.attributes()) {
     switch (attr.Attr) {
       case llvm::dwarf::DW_AT_name:
-        name = std::string(attr.Value.getAsCString().get());
+        if (auto val = llvm::dwarf::toString(attr.Value)) {
+          name = *val;
+        }
         break;
       case llvm::dwarf::DW_AT_linkage_name:
-        linkage_name = std::string(attr.Value.getAsCString().get());
+        if (auto val = llvm::dwarf::toString(attr.Value)) {
+          linkage_name = *val;
+        }
         break;
       case llvm::dwarf::DW_AT_location:
         address = interpretLocAddress(m_dwarfContext, dieContext, attr);
@@ -1535,7 +1544,9 @@ Object::Function TypeParserImpl::genFunction(const DieContext& dieContext) {
   for (const auto& attr : dieContext.die.attributes()) {
     switch (attr.Attr) {
       case llvm::dwarf::DW_AT_name:
-        name = std::string(attr.Value.getAsCString().get());
+        if (auto val = llvm::dwarf::toString(attr.Value)) {
+          name = *val;
+        }
         break;
       case llvm::dwarf::DW_AT_type: {
         const auto globalOff = m_dwarfContext.getGlobalOffset(*attr.Value.getAsReference(), dieContext.isInfo);
@@ -1544,7 +1555,9 @@ Object::Function TypeParserImpl::genFunction(const DieContext& dieContext) {
         break;
       }
       case llvm::dwarf::DW_AT_linkage_name:
-        linkage_name = std::string(attr.Value.getAsCString().get());
+        if (auto val = llvm::dwarf::toString(attr.Value)) {
+          linkage_name = *val;
+        }
         break;
       case llvm::dwarf::DW_AT_virtuality:
         is_virtual = *attr.Value.getAsUnsignedConstant() != llvm::dwarf::DW_VIRTUALITY_none;
@@ -1646,7 +1659,9 @@ Object::Base TypeParserImpl::genBase(const DieContext& dieContext,
   for (const auto& attr : dieContext.die.attributes()) {
     switch (attr.Attr) {
       case llvm::dwarf::DW_AT_name:
-        name = std::string(attr.Value.getAsCString().get());
+        if (auto val = llvm::dwarf::toString(attr.Value)) {
+          name = *val;
+        }
         break;
       case llvm::dwarf::DW_AT_type:
         die_offset = m_dwarfContext.getGlobalOffset(*attr.Value.getAsReference(), dieContext.isInfo);

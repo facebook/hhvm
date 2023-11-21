@@ -112,7 +112,9 @@ DieContext DWARFContextManager::getDieContextAtGlobalOffset(GlobalOff globalOff)
 std::string DWARFContextManager::getDIEName(llvm::DWARFDie die) const {
   for (const auto& attr : die.attributes()) {
     if (attr.Attr == llvm::dwarf::DW_AT_name) {
-      return attr.Value.getAsCString().get();
+      if (auto val = llvm::dwarf::toString(attr.Value)) {
+        return *val;
+      }
     }
   }
 

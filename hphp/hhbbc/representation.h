@@ -273,13 +273,14 @@ struct FuncBase {
 };
 
 /*
- * Representation of a function, class method, or pseudomain function.
+ * Representation of a function or class method.
  */
 struct Func : FuncBase {
   /*
-   * An index, so we can lookup auxiliary structures efficiently
-   */
-  uint32_t idx;
+  * An index, so we can lookup auxiliary structures efficiently. This
+  * field is not serialized and its meaning is context dependent.
+  */
+  uint32_t idx{std::numeric_limits<uint32_t>::max()};
 
   /*
    * If this function is a method, it's index in the owning Class'
@@ -459,8 +460,10 @@ struct Func : FuncBase {
  */
 struct FuncBytecode {
   FuncBytecode() = default;
-  explicit FuncBytecode(CompressedBytecodePtr bc) : bc{std::move(bc)} {}
+  FuncBytecode(SString name, CompressedBytecodePtr bc)
+    : name{name}, bc{std::move(bc)} {}
 
+  LSString name;
   CompressedBytecodePtr bc;
 
   /*
@@ -590,6 +593,14 @@ struct Class : ClassBase {
   LSString closureContextCls;
 
   /*
+   * If this class represents a closure defined in a top level
+   * function (not a method), this points to the name of that
+   * function. Nullptr otherwise. (For closures defined within
+  * classes, use closureContextCls).
+   */
+  LSString closureDeclFunc;
+
+  /*
    * Names of inherited interfaces.
    */
   CompactVector<LowStringPtr> interfaceNames;
@@ -650,6 +661,9 @@ struct Class : ClassBase {
 };
 
 struct ClassBytecode {
+  ClassBytecode() = default;
+  explicit ClassBytecode(SString cls) : cls{cls} {}
+  SString cls;
   CompactVector<FuncBytecode> methodBCs;
   template <typename SerDe> void serde(SerDe&);
 };
@@ -757,7 +771,19 @@ bool check(const Program&);
 
 //////////////////////////////////////////////////////////////////////
 
+using FuncOrCls = Either<const php::Func*, const php::Class*>;
+
+struct FuncOrClsHasher {
+  size_t operator()(FuncOrCls f) const { return f.toOpaque(); }
+};
+
+std::string show(FuncOrCls);
+
+//////////////////////////////////////////////////////////////////////
+
 }
+
+//////////////////////////////////////////////////////////////////////
 
 MAKE_COPY_PTR_BLOB_SERDE_HELPER(HHBBC::php::Block)
 MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::Unit)

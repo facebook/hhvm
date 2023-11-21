@@ -700,10 +700,11 @@ Index make_index() {
     auto const name = c->name;
     auto deps = Index::Input::makeDeps(*c);
     auto const isClosure = is_closure(*c);
+    auto const unit = c->unit;
 
     auto bytecode = std::make_unique<php::ClassBytecode>();
     for (auto& meth : c->methods) {
-      bytecode->methodBCs.emplace_back(std::move(meth->rawBlocks));
+      bytecode->methodBCs.emplace_back(meth->name, std::move(meth->rawBlocks));
     }
 
     auto stored = coro::blockingWait(client->store(std::move(c)));
@@ -715,7 +716,10 @@ Index make_index() {
         name,
         std::move(deps),
         nullptr,
-        isClosure
+        unit,
+        isClosure,
+        false,
+        false
       }
     );
     indexInput.classBC.emplace_back(
@@ -727,15 +731,17 @@ Index make_index() {
   }
   for (auto& f : parse.funcs) {
     auto const name = f->name;
+    auto const unit = f->unit;
     auto bytecode =
-      std::make_unique<php::FuncBytecode>(std::move(f->rawBlocks));
+      std::make_unique<php::FuncBytecode>(f->name, std::move(f->rawBlocks));
     auto stored = coro::blockingWait(client->store(std::move(f)));
     auto storedBC = coro::blockingWait(client->store(std::move(bytecode)));
     indexInput.funcs.emplace_back(
       Index::Input::FuncMeta{
         std::move(stored),
         name,
-        nullptr
+        unit,
+        false
       }
     );
     indexInput.funcBC.emplace_back(

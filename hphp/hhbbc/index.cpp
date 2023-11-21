@@ -121,10 +121,6 @@ static_assert(CheckSize<RepoAuthType, 8>(), "");
 
 //////////////////////////////////////////////////////////////////////
 
-template<typename T> using UniquePtrRef = Ref<std::unique_ptr<T>>;
-
-//////////////////////////////////////////////////////////////////////
-
 Dep operator|(Dep a, Dep b) {
   return static_cast<Dep>(
     static_cast<uintptr_t>(a) | static_cast<uintptr_t>(b)
@@ -163,52 +159,6 @@ struct PublicSPropEntry {
 };
 
 //////////////////////////////////////////////////////////////////////
-
-/*
- * Represents a method, without requiring an explicit pointer to a
- * php::Func (so can be used across remote workers).
- */
-struct MethRef {
-  MethRef() = default;
-  explicit MethRef(const php::Func& f)
-    : cls{f.cls->name}, idx{f.clsIdx} {}
-  MethRef(SString cls, uint32_t idx)
-    : cls{cls}, idx{idx} {}
-
-  SString cls{nullptr};
-  // Index in the class' methods table.
-  uint32_t idx{std::numeric_limits<uint32_t>::max()};
-
-  bool operator==(const MethRef& o) const {
-    return cls->isame(o.cls) && idx == o.idx;
-  }
-  bool operator!=(const MethRef& o) const {
-    return !(*this == o);
-  }
-  bool operator<(const MethRef& o) const {
-    // The ordering for MethRef is arbitrary. Compare by idx and then
-    // by the class name's hash to avoid having to do the more
-    // expensive string comparison.
-    if (idx != o.idx) return idx < o.idx;
-    auto const hash1 = cls->hash();
-    auto const hash2 = o.cls->hash();
-    if (hash1 != hash2) return hash1 < hash2;
-    return string_data_lti{}(cls, o.cls);
-  }
-
-  struct Hash {
-    size_t operator()(const MethRef& m) const {
-      return folly::hash::hash_combine(m.cls->hash(), m.idx);
-    }
-  };
-
-  template <typename SerDe> void serde(SerDe& sd) {
-    sd(cls)(idx);
-  }
-};
-
-using MethRefSet = hphp_fast_set<MethRef, MethRef::Hash>;
-
 /*
  * Entries in the ClassInfo method table need to track some additional
  * information.
@@ -464,10 +414,6 @@ struct FuncInfo2 {
 
 //////////////////////////////////////////////////////////////////////
 
-namespace {
-
-//////////////////////////////////////////////////////////////////////
-
 /*
  * FuncInfos2 for the methods of a class which does not have a
  * ClassInfo2 (because it's uninstantiable). Even if a class doesn't
@@ -487,32 +433,8 @@ struct MethodsWithoutCInfo {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Known information about a particular constant:
- *  - if system is true, it's a system constant and other definitions
- *    will be ignored.
- *  - for non-system constants, if func is non-null it's the unique
- *    pseudomain defining the constant; otherwise there was more than
- *    one definition, or a non-pseudomain definition, and the type will
- *    be TInitCell
- *  - readonly is true if we've only seen uses of the constant, and no
- *    definitions (this could change during the first pass, but not after
- *    that).
- */
-
-struct ConstInfo {
-  const php::Func* func;
-  Type                          type;
-  bool                          system;
-  bool                          readonly;
-};
-
 using FuncFamily       = res::Func::FuncFamily;
 using FuncInfo         = res::Func::FuncInfo;
-
-//////////////////////////////////////////////////////////////////////
-
-}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -3767,19 +3689,6 @@ struct ClassInfo2 {
   const php::Class* cls{nullptr};
 
   /*
-   * Represents a class constant, pointing to where the constant was
-   * originally declared (the class name and it's position in the
-   * class' constant table).
-   */
-  struct ConstIndex {
-    SString cls;
-    uint32_t idx;
-    template <typename SerDe> void serde(SerDe& sd) {
-      sd(cls)(idx);
-    }
-  };
-
-  /*
    * A (case-sensitive) map from class constant name to the ConstIndex
    * representing the constant. This map is flattened across the
    * inheritance hierarchy.
@@ -5115,6 +5024,24 @@ struct Index::IndexData {
   // func family with that id.
   hphp_fast_map<FuncFamily2::Id, Ref<FuncFamilyGroup>> funcFamilyRefs;
 
+  // Maps classes and functions to the names of closures defined
+  // within.
+  ISStringToOneT<ISStringSet> classToClosures;
+  ISStringToOneT<ISStringSet> funcToClosures;
+
+  // Maps entities to the unit they were declared in.
+  ISStringToOneT<SString> classToUnit;
+  ISStringToOneT<SString> funcToUnit;
+  ISStringToOneT<SString> typeAliasToUnit;
+  // If bool is true, then the constant is "dynamic" and has an
+  // associated 86cinit function.
+  SStringToOneT<std::pair<SString, bool>> constantToUnit;
+
+  // All the classes that have a 86*init function.
+  ISStringSet classesWith86Inits;
+  // All the 86cinit functions for "dynamic" top-level constants.
+  ISStringSet constantInitFuncs;
+
   std::unique_ptr<php::Program> program;
 
   ISStringToOneT<php::Class*>      classes;
@@ -5267,7 +5194,7 @@ struct Index::IndexData {
    * frozen (during the final optimization pass), calls to
    * lookup_return_type with a CallContext can't look at the bytecode
    * bodies of functions other than the calling function.  So we need
-   * to know what we determined the last time we were alloewd to do
+   * to know what we determined the last time we were allowed to do
    * that so we can return it again.
    */
   ContextRetTyMap contextualReturnTypes{};
@@ -5275,7 +5202,299 @@ struct Index::IndexData {
 
 //////////////////////////////////////////////////////////////////////
 
+namespace { struct DepTracker; };
+
+struct AnalysisIndex::IndexData {
+  IndexData(AnalysisIndex& index,
+            AnalysisWorklist& worklist)
+    : index{index}
+    , worklist{worklist}
+    , deps{std::make_unique<DepTracker>(*this)} {}
+
+  IndexData(const IndexData&) = delete;
+  IndexData& operator=(const IndexData&) = delete;
+
+  AnalysisIndex& index;
+  AnalysisWorklist& worklist;
+  std::unique_ptr<DepTracker> deps;
+
+  ISStringToOneT<std::unique_ptr<php::Class>> classes;
+
+  ISStringToOneT<std::unique_ptr<php::Func>> funcs;
+
+  SStringToOneT<php::Constant*> constants;
+
+  // AnalysisIndex maintains a stack of the contexts being analyzed
+  // (we can have multiple because of inline interp).
+  std::vector<Context> contexts;
+};
+
+//////////////////////////////////////////////////////////////////////
+
 namespace {
+
+//////////////////////////////////////////////////////////////////////
+
+// Obtain the current (most recently pushed) context. This corresponds
+// to the context currently being analyzed.
+const Context& current_context(const AnalysisIndex::IndexData& index) {
+  always_assert_flog(
+    !index.contexts.empty(),
+    "Accessing current context without any contexts active"
+  );
+  return index.contexts.back();
+}
+
+// Obtain the context to use for the purposes of dependency
+// tracking. This is the first context pushed. This differs from
+// current_context() because of inline interp. If we're inline
+// interp-ing a function, we still want to attribute the dependencies
+// to the context which started the inline interp.
+const Context& context_for_deps(const AnalysisIndex::IndexData& index) {
+  always_assert_flog(
+    !index.contexts.empty(),
+    "Accessing dependency context without any contexts active"
+  );
+  return index.contexts.front();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+// Record the dependencies of all classes and functions being
+// processed with an AnalysisIndex. These dependencies will ultimately
+// be reported back to the master AnalysisScheduler, but will also
+// drive the worklist on the local analysis job.
+struct DepTracker {
+  explicit DepTracker(const AnalysisIndex::IndexData& index)
+    : index{index} {}
+
+  using Type = AnalysisDeps::Type;
+  using Func = AnalysisDeps::Func;
+  using Class = AnalysisDeps::Class;
+  using Constant = AnalysisDeps::Constant;
+  using TypeAlias = AnalysisDeps::TypeAlias;
+
+  // Register dependencies on various entities to the current
+  // dependency context.
+
+  void add(Class c) {
+    auto const fc = context();
+    if (deps[fc].add(c)) {
+      FTRACE(2, "{} now depends on class {}\n", HHBBC::show(fc), c.name);
+    }
+    // Class either exists or not and won't change within the job, so
+    // nothing to record for worklist.
+  }
+
+  void add(const php::Func& f, Type t = Type::None) {
+    auto const fc = context();
+    if (auto const added = deps[fc].add(f, t)) {
+      FTRACE(
+        2, "{} now depends on {}{} {}\n",
+        HHBBC::show(fc), displayAdded(added),
+        f.cls ? "method" : "func",
+        func_fullname(f)
+      );
+    }
+    // Record dependency for worklist if anything can change within
+    // the job.
+    t &= AnalysisDeps::kValidForChanges;
+    if (t == Type::None) return;
+    funcs[&f][fc] |= t;
+  }
+
+  void add(MethRef m, Type t = Type::None) {
+    auto const fc = context();
+    if (auto const added = deps[fc].add(m, t)) {
+      FTRACE(2, "{} now depends on {}method {}\n",
+             HHBBC::show(fc), displayAdded(added), display(m));
+    }
+    // Record dependency for worklist if anything can change within
+    // the job.
+    t &= AnalysisDeps::kValidForChanges;
+    if (t == Type::None) return;
+    if (auto const p = from(m)) funcs[p][fc] |= t;
+  }
+
+  void add(Func f, Type t = Type::None) {
+    auto const fc = context();
+    if (auto const added = deps[fc].add(f, t)) {
+      FTRACE(2, "{} now depends on {}func {}\n",
+             HHBBC::show(fc), displayAdded(added), f.name);
+    }
+    // Record dependency for worklist if anything can change within
+    // the job.
+    t &= AnalysisDeps::kValidForChanges;
+    if (t == Type::None) return;
+    if (auto const p = folly::get_ptr(index.funcs, f.name)) {
+      funcs[p->get()][fc] |= t;
+    }
+  }
+
+  void add(ConstIndex cns) {
+    auto const fc = context();
+    if (deps[fc].add(cns)) {
+      FTRACE(2, "{} now depends on class constant {}\n",
+             HHBBC::show(fc), display(cns));
+    }
+    if (auto const p = from(cns)) clsConstants[p].emplace(fc);
+  }
+
+  void add(Constant cns) {
+    auto const fc = context();
+    if (deps[fc].add(cns)) {
+      FTRACE(2, "{} now depends on constant {}\n", HHBBC::show(fc), cns.name);
+    }
+    if (auto const p = folly::get_default(index.constants, cns.name)) {
+      constants[p].emplace(fc);
+    }
+  }
+
+  void add(TypeAlias typeAlias) {
+    auto const fc = context();
+    if (!deps[fc].add(typeAlias)) return;
+    FTRACE(2, "{} now depends on type-alias {}\n",
+           HHBBC::show(fc), typeAlias.name);
+  }
+
+  // Mark that the given entity has changed in some way. This not only
+  // results in the change being reported back to the
+  // AnalysisScheduler, but will reschedule any work locally which has
+  // a dependency.
+
+  void update(const php::Func& f, Type t) {
+    if (t == Type::None) return;
+    assertx(AnalysisDeps::isValidForChanges(t));
+    FTRACE(
+      2, "{} {} {} changed, scheduling\n",
+      f.cls ? "method" : "func",
+      func_fullname(f),
+      show(t)
+    );
+    changes.changed(f, t);
+    schedule(folly::get_ptr(funcs, &f), t);
+  }
+
+  void update(const php::Const& cns, ConstIndex idx) {
+    FTRACE(2, "constant {}::{} changed, scheduling\n", idx.cls, cns.name);
+    changes.changed(idx);
+    schedule(folly::get_ptr(clsConstants, &cns));
+  }
+
+  void update(const php::Constant& cns) {
+    FTRACE(2, "constant {} changed, scheduling\n", cns.name);
+    changes.changed(cns);
+    schedule(folly::get_ptr(constants, &cns));
+  }
+
+  void remove(FuncOrCls fc) {
+    deps.erase(fc);
+  }
+
+  AnalysisDeps take(FuncOrCls fc) {
+    auto it = deps.find(fc);
+    if (it == end(deps)) return AnalysisDeps{};
+    return std::move(it->second);
+  }
+
+  AnalysisChangeSet takeChanges() {
+    return std::move(changes);
+  }
+
+private:
+
+  // Return appropriate entity to attribute the dependency to. If
+  // we're analyzing a function within a class, use the class. If it's
+  // a top-level function, use that.
+  FuncOrCls context() const {
+    auto const& ctx = context_for_deps(index);
+    if (ctx.cls) return ctx.cls;
+    assertx(ctx.func);
+    return ctx.func;
+  }
+
+  const php::Func* from(MethRef m) const {
+    if (auto const cls = folly::get_ptr(index.classes, m.cls)) {
+      assertx(m.idx < cls->get()->methods.size());
+      return cls->get()->methods[m.idx].get();
+    }
+    return nullptr;
+  }
+
+  const php::Const* from(ConstIndex cns) const {
+    if (auto const cls = folly::get_ptr(index.classes, cns.cls)) {
+      assertx(cns.idx < cls->get()->constants.size());
+      return &cls->get()->constants[cns.idx];
+    }
+    return nullptr;
+  }
+
+  std::string display(MethRef m) const {
+    if (auto const p = from(m)) return func_fullname(*p);
+    return show(m);
+  }
+
+  std::string display(ConstIndex cns) const {
+    if (auto const p = from(cns)) {
+      return folly::sformat("{}::{}", p->cls, p->name);
+    }
+    return show(cns);
+  }
+
+  static std::string displayAdded(Type t) {
+    auto out = show(t - Type::Meta);
+    if (!out.empty()) folly::format(&out, " of ");
+    return out;
+  }
+
+  using FuncOrClsSet =
+    hphp_fast_set<FuncOrCls, FuncOrClsHasher>;
+  using FuncOrClsToType =
+    hphp_fast_map<FuncOrCls, Type, FuncOrClsHasher>;
+
+  void schedule(const FuncOrClsSet* fcs) {
+   if (!fcs || fcs->empty()) return;
+    TinyVector<FuncOrCls, 4> v;
+    v.insert(begin(*fcs), end(*fcs));
+    addToWorklist(v);
+  }
+
+  void schedule(const FuncOrClsToType* fcs, Type t) {
+    assertx(!(t & Type::Meta));
+    if (!fcs || fcs->empty()) return;
+    TinyVector<FuncOrCls, 4> v;
+    for (auto const [fc, t2] : *fcs) {
+      if (t & t2) v.emplace_back(fc);
+    }
+    addToWorklist(v);
+  }
+
+  void addToWorklist(TinyVector<FuncOrCls, 4>& fcs) {
+    if (fcs.empty()) return;
+    std::sort(
+      fcs.begin(), fcs.end(),
+      [] (FuncOrCls fc1, FuncOrCls fc2) {
+        if (auto const f1 = fc1.left()) {
+          auto const f2 = fc2.left();
+          return !f2 || string_data_lti{}(f1->name, f2->name);
+        }
+        auto const c1 = fc1.right();
+        auto const c2 = fc2.right();
+        return c2 && string_data_lti{}(c1->name, c2->name);
+      }
+    );
+    Trace::Indent _;
+    for (auto const fc : fcs) index.worklist.schedule(fc);
+  }
+
+  const AnalysisIndex::IndexData& index;
+  AnalysisChangeSet changes;
+  hphp_fast_map<FuncOrCls, AnalysisDeps, FuncOrClsHasher> deps;
+
+  hphp_fast_map<const php::Func*, FuncOrClsToType> funcs;
+  hphp_fast_map<const php::Const*, FuncOrClsSet> clsConstants;
+  hphp_fast_map<const php::Constant*, FuncOrClsSet> constants;
+};
 
 //////////////////////////////////////////////////////////////////////
 
@@ -7462,6 +7681,9 @@ struct FlattenJob {
     std::vector<Parents> parents;
     // Classes which are interfaces.
     ISStringSet interfaces;
+    // Classes which have 86init functions. A class can gain a 86init
+    // from flattening even if it didn't have it before.
+    ISStringSet with86init;
     // The types used by the type-constraints of input classes and
     // functions.
     std::vector<ISStringSet> classTypeUses;
@@ -7473,6 +7695,7 @@ struct FlattenJob {
         (newClosures)
         (parents)
         (interfaces, string_data_lti{})
+        (with86init, string_data_lti{})
         (classTypeUses, string_data_lti{})
         (funcTypeUses, string_data_lti{})
         (interfaceConflicts)
@@ -7879,9 +8102,13 @@ struct FlattenJob {
     outBytecode.vals.reserve(outClasses.vals.size());
     for (auto& cls : outClasses.vals) {
       auto bytecode = std::make_unique<php::ClassBytecode>();
+      bytecode->cls = cls->name;
       bytecode->methodBCs.reserve(cls->methods.size());
       for (auto& method : cls->methods) {
-        bytecode->methodBCs.emplace_back(std::move(method->rawBlocks));
+        bytecode->methodBCs.emplace_back(
+          method->name,
+          std::move(method->rawBlocks)
+        );
       }
       outBytecode.vals.emplace_back(std::move(bytecode));
     }
@@ -8025,7 +8252,7 @@ private:
       return meth(mte.meth());
     }
 
-    const php::Const& cns(const ClassInfo2::ConstIndex& idx) const {
+    const php::Const& cns(const ConstIndex& idx) const {
       auto const& c = cls(idx.cls);
       assertx(idx.idx < c.constants.size());
       return c.constants[idx.idx];
@@ -8719,7 +8946,7 @@ private:
         auto const added = add_constant(
           index, cinfo, state,
           cls.constants[idx].name,
-          ClassInfo2::ConstIndex { cls.name, idx },
+          ConstIndex { cls.name, idx },
           false
         );
         if (!added) return false;
@@ -8856,7 +9083,7 @@ private:
                            ClassInfo2& cinfo,
                            State& state,
                            SString name,
-                           const ClassInfo2::ConstIndex& cnsIdx,
+                           const ConstIndex& cnsIdx,
                            bool fromTrait) {
     auto [it, emplaced] = cinfo.clsConstants.emplace(name, cnsIdx);
     if (emplaced) {
@@ -9276,7 +9503,6 @@ private:
 
     for (size_t i = 0, numMeths = clone->methods.size(); i < numMeths; ++i) {
       auto meth = std::move(clone->methods[i]);
-      meth->idx = 0; // Set later
       meth->cls = clone.get();
       assertx(meth->clsIdx == i);
       if (!meth->originalFilename) meth->originalFilename = meth->unit;
@@ -9361,7 +9587,6 @@ private:
     cloned->name = name;
     cloned->attrs = attrs;
     if (!internal) cloned->attrs |= AttrTrait;
-    cloned->idx = 0; // Set later
     cloned->cls = const_cast<php::Class*>(&dstCls);
     cloned->unit = dstCls.unit;
 
@@ -10530,8 +10755,6 @@ struct SubclassMetadata {
 // flattening classes and added to when building subclasses.
 struct InitTypesMetadata {
   struct ClsMeta {
-    // Closures of the class
-    ISStringSet closures;
     // Dependencies of the class. A dependency is a class in a
     // property/param/return type-hint.
     ISStringSet deps;
@@ -10571,6 +10794,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     SString closureContext;
     ISStringSet typeUses;
     bool isInterface{false};
+    bool has86init{false};
     CompactVector<SString> parents;
   };
   struct FuncUpdate {
@@ -10740,7 +10964,8 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
           nullptr,
           flattenMeta.closureContext,
           std::move(clsMeta.classTypeUses[outputIdx]),
-          (bool)clsMeta.interfaces.count(name)
+          (bool)clsMeta.interfaces.count(name),
+          (bool)clsMeta.with86init.count(name)
         }
       );
 
@@ -10906,10 +11131,24 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
             auto u = boost::get<ClassUpdate>(&update);
             if (!u || !u->unitToAddTo) continue;
             initTypesMeta.fixups[u->unitToAddTo].addClass.emplace_back(u->name);
+            always_assert(
+              index.classToUnit.emplace(u->name, u->unitToAddTo).second
+            );
           }
         }
         for (auto& [unit, deletions] : meta.unitDeletions) {
           initTypesMeta.fixups[unit].removeFunc = std::move(deletions);
+        }
+      },
+      [&] {
+        // A class which didn't have an 86*init function previously
+        // can gain one due to trait flattening. Update that here.
+        for (auto const& updates : allUpdates) {
+          for (auto const& update : updates) {
+            auto u = boost::get<ClassUpdate>(&update);
+            if (!u || !u->has86init) continue;
+            index.classesWith86Inits.emplace(u->name);
+          }
         }
       },
       [&] {
@@ -10980,7 +11219,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
               } else {
                 auto& meta = initTypesMeta.classes[u->closureContext];
                 meta.deps.insert(begin(u->typeUses), end(u->typeUses));
-                meta.closures.emplace(u->name);
+                index.classToClosures[u->closureContext].emplace(u->name);
               }
             } else if (auto const u = boost::get<FuncUpdate>(&update)) {
               auto& meta = initTypesMeta.funcs[u->name];
@@ -13069,6 +13308,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
 
     out.buckets.emplace_back();
     for (auto const& w : work) {
+      assertx(w.uninstantiable.empty());
       out.buckets.back().emplace_back();
       auto& bucket = out.buckets.back().back();
       // Separate out any of the "roots" which are actually leafs.
@@ -13971,12 +14211,14 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
     classNames.reserve(work.size());
 
     for (auto const w : work) {
-      if (auto const cls = folly::get_ptr(meta.classes, w)) {
+      if (meta.classes.count(w)) {
         always_assert(roots.emplace(w).second);
         classNames.emplace_back(w);
-        for (auto const clo : cls->closures) {
-          always_assert(roots.emplace(clo).second);
-          classNames.emplace_back(clo);
+        if (auto const closures = folly::get_ptr(index.classToClosures, w)) {
+          for (auto const clo : *closures) {
+            always_assert(roots.emplace(clo).second);
+            classNames.emplace_back(clo);
+          }
         }
       }
       if (meta.funcs.count(w)) funcNames.emplace_back(w);
@@ -14001,9 +14243,11 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
       if (auto const cls = folly::get_ptr(meta.classes, w)) {
         classes.emplace_back(index.classRefs.at(w));
         cinfos.emplace_back(index.classInfoRefs.at(w));
-        for (auto const clo : cls->closures) {
-          classes.emplace_back(index.classRefs.at(clo));
-          cinfos.emplace_back(index.classInfoRefs.at(clo));
+        if (auto const closures = folly::get_ptr(index.classToClosures, w)) {
+          for (auto const clo : *closures) {
+            classes.emplace_back(index.classRefs.at(clo));
+            cinfos.emplace_back(index.classInfoRefs.at(clo));
+          }
         }
         for (auto const d : cls->deps) addDep(d, true);
         for (auto const d : cls->candidateRegOnlyEquivs) addDep(d, false);
@@ -14282,8 +14526,17 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
 Index::Input::UnitMeta make_native_unit_meta(IndexData& index) {
   auto unit = make_native_unit();
   auto const name = unit->filename;
+
+  std::vector<std::pair<SString, bool>> constants;
+  constants.reserve(unit->constants.size());
+  for (auto const& cns : unit->constants) {
+    constants.emplace_back(cns->name, type(cns->val) == KindOfUninit);
+  }
+
   auto unitRef = coro::blockingWait(index.client->store(std::move(unit)));
-  return Index::Input::UnitMeta { std::move(unitRef), name };
+  Index::Input::UnitMeta meta{ std::move(unitRef), name };
+  meta.constants = std::move(constants);
+  return meta;
 }
 
 // Set up the async state, populate the (initial) table of
@@ -14333,11 +14586,15 @@ IndexFlattenMetadata make_remote(IndexData& index,
 
     for (auto& typeMapping : unit.typeMappings) {
       auto const name = typeMapping.name;
+      auto const isTypeAlias = typeMapping.isTypeAlias;
       always_assert_flog(
         flattenMeta.typeMappings.emplace(name, std::move(typeMapping)).second,
         "Duplicate type-mapping: {}",
         name
       );
+      if (isTypeAlias) {
+        always_assert(index.typeAliasToUnit.emplace(name, unit.name).second);
+      }
     }
 
     always_assert_flog(
@@ -14345,7 +14602,19 @@ IndexFlattenMetadata make_remote(IndexData& index,
       "Duplicate unit: {}",
       unit.name
     );
+
+    for (auto const& [cnsName, hasInit] : unit.constants) {
+      always_assert_flog(
+        index.constantToUnit.emplace(
+          cnsName,
+          std::make_pair(unit.name, hasInit)
+        ).second,
+        "Duplicate constant: {}",
+        cnsName
+      );
+    }
   }
+
   for (auto& cls : input.classes) {
     FTRACE(5, "class {} -> {}\n", cls.name, cls.cls.id().toString());
     always_assert_flog(
@@ -14353,17 +14622,27 @@ IndexFlattenMetadata make_remote(IndexData& index,
       "Duplicate class: {}",
       cls.name
     );
+    always_assert(index.classToUnit.emplace(cls.name, cls.unit).second);
 
     auto& meta = flattenMeta.cls[cls.name];
     if (cls.closureContext) {
-      flattenMeta.cls[cls.closureContext].closures.emplace_back(cls.name);
-      meta.closureContext = cls.closureContext;
+      assertx(cls.isClosure);
+      if (!cls.closureDeclInFunc) {
+        flattenMeta.cls[cls.closureContext].closures.emplace_back(cls.name);
+        index.classToClosures[cls.closureContext].emplace(cls.name);
+        meta.closureContext = cls.closureContext;
+      } else {
+        index.funcToClosures[cls.closureContext].emplace(cls.name);
+        meta.closureContext = nullptr;
+      }
     }
     meta.isClosure = cls.isClosure;
     meta.deps.insert(begin(cls.dependencies), end(cls.dependencies));
     meta.unresolvedTypes = std::move(cls.unresolvedTypes);
     meta.idx = flattenMeta.allCls.size();
     flattenMeta.allCls.emplace_back(cls.name);
+
+    if (cls.has86init) index.classesWith86Inits.emplace(cls.name);
 
     if (cls.typeMapping) {
       auto const name = cls.typeMapping->name;
@@ -14376,6 +14655,7 @@ IndexFlattenMetadata make_remote(IndexData& index,
       );
     }
   }
+
   // Funcs have an additional wrinkle, however. A func might be a meth
   // caller. Meth callers are special in that they might be present
   // (with the same name) in multiple units. However only one "wins"
@@ -14385,36 +14665,35 @@ IndexFlattenMetadata make_remote(IndexData& index,
   for (auto& func : input.funcs) {
     FTRACE(5, "func {} -> {}\n", func.name, func.func.id().toString());
 
-    if (func.methCallerUnit) {
+    if (func.methCaller) {
       // If this meth caller a duplicate of one we've already seen?
       auto const [existing, emplaced] =
-        methCallerUnits.emplace(func.name, func.methCallerUnit);
+        methCallerUnits.emplace(func.name, func.unit);
       if (!emplaced) {
         // It is. The duplicate shouldn't be in the same unit,
         // however.
         always_assert_flog(
-          existing->second != func.methCallerUnit,
+          existing->second != func.unit,
           "Duplicate meth-caller {} in same unit {}",
           func.name,
-          func.methCallerUnit
+          func.unit
         );
         // The winner is the one with the unit with the "lesser"
         // name. This is completely arbitrary.
-        if (string_data_lt{}(func.methCallerUnit, existing->second)) {
+        if (string_data_lt{}(func.unit, existing->second)) {
           // This one wins. Schedule the older entry for deletion and
           // take over it's position in the map.
           FTRACE(
             4, "  meth caller {} from unit {} taking priority over unit {}",
-            func.name, func.methCallerUnit, existing->second
+            func.name, func.unit, existing->second
           );
           flattenMeta.unitDeletions[existing->second].emplace_back(func.name);
-          existing->second = func.methCallerUnit;
+          existing->second = func.unit;
           index.funcRefs.at(func.name) = std::move(func.func);
+          index.funcToUnit.at(func.name) = func.unit;
         } else {
           // This one loses. Schedule it for deletion.
-          flattenMeta.unitDeletions[func.methCallerUnit].emplace_back(
-            func.name
-          );
+          flattenMeta.unitDeletions[func.unit].emplace_back(func.name);
         }
         continue;
       }
@@ -14427,6 +14706,11 @@ IndexFlattenMetadata make_remote(IndexData& index,
       "Duplicate func: {}",
       func.name
     );
+
+    index.funcToUnit.emplace(func.name, func.unit);
+    if (Constant::nameFromFuncName(func.name)) {
+      index.constantInitFuncs.emplace(func.name);
+    }
 
     auto& meta = flattenMeta.func[func.name];
     meta.unresolvedTypes = std::move(func.unresolvedTypes);
@@ -14458,7 +14742,7 @@ IndexFlattenMetadata make_remote(IndexData& index,
       bc.name
     );
 
-    if (bc.methCallerUnit) {
+    if (bc.methCaller) {
       // Only record this bytecode if it's associated meth-caller was
       // kept.
       auto const it = methCallerUnits.find(bc.name);
@@ -14469,12 +14753,12 @@ IndexFlattenMetadata make_remote(IndexData& index,
         bc.name
       );
       auto const unit = it->second;
-      if (bc.methCallerUnit != unit) {
+      if (bc.unit != unit) {
         FTRACE(
           4,
           "Bytecode for meth-caller func {} in unit {} "
           "skipped because the meth-caller was dropped\n",
-          bc.name, bc.methCallerUnit
+          bc.name, bc.unit
         );
         continue;
       }
@@ -14492,6 +14776,20 @@ IndexFlattenMetadata make_remote(IndexData& index,
       "Duplicate func bytecode: {}",
       bc.name
     );
+  }
+
+  if (debug) {
+    for (auto const& [cns, unitAndInit] : index.constantToUnit) {
+      if (!unitAndInit.second) continue;
+      if (is_native_unit(unitAndInit.first)) continue;
+      auto const initName = Constant::funcNameFromName(cns);
+      always_assert_flog(
+        index.funcRefs.count(initName) > 0,
+        "Constant {} is marked as having initialization func {}, "
+        "but it does not exist",
+        cns, initName
+      );
+    }
   }
 
   return flattenMeta;
@@ -15033,7 +15331,7 @@ void make_class_infos_local(
       cinfo->methodFamiliesAux.shrink_to_fit();
 
       if (!rcinfo->extraMethods.empty()) {
-        // This is rare. Only happens with unflattened traits, so we
+        // This is rare. Only happens with unflattened traits, so
         // taking a lock here is fine.
         std::lock_guard<std::mutex> _{extraMethodLock};
         auto& extra = index.classExtraMethodMap[cinfo->cls];
@@ -15189,6 +15487,15 @@ void make_local(IndexData& index) {
   trace_time tracer("make local", index.sample);
 
   using namespace folly::gen;
+
+  // These aren't needed below so we can free them immediately.
+  decltype(index.classToClosures){}.swap(index.classToClosures);
+  decltype(index.funcToClosures){}.swap(index.funcToClosures);
+  decltype(index.classesWith86Inits){}.swap(index.classesWith86Inits);
+  decltype(index.classToUnit){}.swap(index.classToUnit);
+  decltype(index.funcToUnit){}.swap(index.funcToUnit);
+  decltype(index.constantToUnit){}.swap(index.constantToUnit);
+  decltype(index.constantInitFuncs){}.swap(index.constantInitFuncs);
 
   // Unlike other cases, we want to bound each bucket to roughly the
   // same total byte size (since ultimately we're going to download
@@ -15709,6 +16016,16 @@ const php::Program& Index::program() const {
 
 StructuredLogEntry* Index::sample() const {
   return m_data->sample;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+const ISStringSet& Index::classes_with_86inits() const {
+  return m_data->classesWith86Inits;
+}
+
+const ISStringSet& Index::constant_init_funcs() const {
+  return m_data->constantInitFuncs;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -18169,6 +18486,1031 @@ void Index::cleanup_post_emit() {
 void Index::thaw() {
   m_data->frozen = false;
 }
+
+//////////////////////////////////////////////////////////////////////
+
+FuncOrCls AnalysisWorklist::next() {
+  if (list.empty()) return FuncOrCls{};
+  auto n = list.front();
+  in.erase(n);
+  list.pop_front();
+  return n;
+}
+
+void AnalysisWorklist::schedule(FuncOrCls fc) {
+  if (!in.emplace(fc).second) return;
+  ITRACE(2, "scheduling {} onto worklist\n", show(fc));
+  list.emplace_back(fc);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+bool AnalysisDeps::add(Class c) {
+  return classes.emplace(c.name).second;
+}
+
+bool AnalysisDeps::add(ConstIndex cns) {
+  // Dependency on class constant implies a dependency on the class as
+  // well.
+  add(Class { cns.cls });
+  return clsConstants.emplace(cns).second;
+}
+
+bool AnalysisDeps::add(Constant cns) {
+  // Dependency on top-level constant implies a dependency on the
+  // 86cinit initialized as well (which may not even exist).
+  add(Func { HPHP::Constant::funcNameFromName(cns.name) }, Type::Meta);
+  return constants.emplace(cns.name).second;
+}
+
+bool AnalysisDeps::add(TypeAlias typeAlias) {
+  return typeAliases.emplace(typeAlias.name).second;
+}
+
+AnalysisDeps::Type AnalysisDeps::add(const php::Func& f, Type t) {
+  return f.cls
+    ? add(MethRef { f }, t)
+    : add(Func { f.name }, t);
+}
+
+AnalysisDeps::Type AnalysisDeps::add(MethRef m, Type t) {
+  add(Class { m.cls });
+  return merge(methods[m], t | Type::Meta);
+}
+
+AnalysisDeps::Type AnalysisDeps::add(Func f, Type t) {
+  return merge(funcs[f.name], t | Type::Meta);
+}
+
+AnalysisDeps::Type AnalysisDeps::merge(Type& o, Type n) {
+  auto const added = n - o;
+  o |= n;
+  return added;
+}
+
+AnalysisDeps& AnalysisDeps::operator|=(const AnalysisDeps& o) {
+  for (auto const [name, type] : o.funcs) funcs[name] |= type;
+  for (auto const& [meth, type] : o.methods) methods[meth] |= type;
+  classes.insert(begin(o.classes), end(o.classes));
+  clsConstants.insert(begin(o.clsConstants), end(o.clsConstants));
+  constants.insert(begin(o.constants), end(o.constants));
+  typeAliases.insert(begin(o.typeAliases), end(o.typeAliases));
+  return *this;
+}
+
+std::string show(AnalysisDeps::Type t) {
+  using T = AnalysisDeps::Type;
+  std::string out;
+  auto const add = [&] (const char* s) {
+    folly::format(&out, "{}{}", out.empty() ? "" : ",", s);
+  };
+  if (t & T::Meta)          add("meta");
+  if (t & T::RetType)       add("return type");
+  if (t & T::ScalarRetType) add("scalar return type");
+  if (t & T::RetParam)      add("returned param");
+  if (t & T::UnusedParams)  add("unused params");
+  if (t & T::Bytecode)      add("bytecode");
+  return out;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void AnalysisChangeSet::changed(ConstIndex idx) {
+  clsConstants.emplace(idx);
+}
+
+void AnalysisChangeSet::changed(const php::Constant& c) {
+  constants.emplace(c.name);
+}
+
+void AnalysisChangeSet::changed(const php::Func& f, Type t) {
+  assertx(AnalysisDeps::isValidForChanges(t));
+  if (f.cls) {
+    methods[MethRef { f }] |= t;
+  } else {
+    funcs[f.name] |= t;
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+template <typename V, typename H, typename E, typename C>
+std::vector<SString>
+map_to_sorted_key_vec(const hphp_fast_map<SString, V, H, E>& m,
+                      const C& c) {
+  std::vector<SString> keys;
+  keys.reserve(m.size());
+  for (auto const& [k, _] : m) keys.emplace_back(k);
+  std::sort(begin(keys), end(keys), c);
+  return keys;
+}
+
+template <typename V, typename H, typename E, typename C>
+std::vector<V> map_to_sorted_vec(const hphp_fast_map<SString, V, H, E>& m,
+                                 const C& c) {
+  auto const keys = map_to_sorted_key_vec(m, c);
+  std::vector<V> out;
+  out.reserve(keys.size());
+  for (auto const k : keys) out.emplace_back(m.at(k));
+  return out;
+}
+
+}
+
+std::vector<SString> AnalysisInput::classNames() const {
+  return map_to_sorted_key_vec(classes, string_data_lti{});
+}
+
+std::vector<SString> AnalysisInput::funcNames() const {
+  return map_to_sorted_key_vec(funcs, string_data_lti{});
+}
+
+std::vector<SString> AnalysisInput::unitNames() const {
+  return map_to_sorted_key_vec(units, string_data_lt{});
+}
+
+std::vector<SString> AnalysisInput::cinfoNames() const {
+  using namespace folly::gen;
+  return from(classNames())
+    | filter([&] (SString n) { return (bool)cinfos.count(n); })
+    | as<std::vector>();
+}
+
+std::vector<SString> AnalysisInput::minfoNames() const {
+  using namespace folly::gen;
+  return from(classNames())
+    | filter([&] (SString n) { return (bool)minfos.count(n); })
+    | as<std::vector>();
+}
+
+AnalysisInput::Tuple AnalysisInput::toTuple(Ref<Meta> meta) const {
+  return Tuple{
+    map_to_sorted_vec(classes, string_data_lti{}),
+    map_to_sorted_vec(funcs, string_data_lti{}),
+    map_to_sorted_vec(units, string_data_lt{}),
+    map_to_sorted_vec(classBC, string_data_lti{}),
+    map_to_sorted_vec(funcBC, string_data_lti{}),
+    map_to_sorted_vec(cinfos, string_data_lti{}),
+    map_to_sorted_vec(finfos, string_data_lti{}),
+    map_to_sorted_vec(minfos, string_data_lti{}),
+    map_to_sorted_vec(depClasses, string_data_lti{}),
+    map_to_sorted_vec(depFuncs, string_data_lti{}),
+    map_to_sorted_vec(depUnits, string_data_lt{}),
+    std::move(meta)
+  };
+}
+
+//////////////////////////////////////////////////////////////////////
+
+AnalysisScheduler::AnalysisScheduler(Index& index) : index{index} {}
+
+void AnalysisScheduler::registerClass(SString name) {
+  FTRACE(5, "AnalysisScheduler: registering class {}\n", name);
+  always_assert(classState.try_emplace(name).second);
+  classesToSchedule.emplace(name);
+  classNames.emplace_back(name);
+}
+
+void AnalysisScheduler::registerFunc(SString name) {
+  FTRACE(5, "AnalysisScheduler: registering func {}\n", name);
+  always_assert(funcState.try_emplace(name).second);
+  funcsToSchedule.emplace(name);
+  funcNames.emplace_back(name);
+  // If this func is a 86cinit, then register the associated constant
+  // as well.
+  if (auto const cns = Constant::nameFromFuncName(name)) {
+    FTRACE(5, "AnalysisScheduler: registering constant {}\n", cns);
+    always_assert(cnsChanged.try_emplace(cns).second);
+  }
+}
+
+// Called when an analysis job reports back its changes. This makes
+// any dependencies affected by the change eligible to run in the next
+// analysis round. ChangeGroup is all the things in the same job (used
+// for sanity checking).
+void AnalysisScheduler::recordChanges(const AnalysisChangeSet& changed,
+                                      const ChangeGroup& group) {
+  for (auto const [name, type] : changed.funcs) {
+    FTRACE(4, "AnalysisScheduler: func {} changed ({})\n", name, show(type));
+    auto state = folly::get_ptr(funcState, name);
+    always_assert_flog(
+      state,
+      "Trying to mark un-tracked func {} changed",
+      name
+    );
+    always_assert_flog(
+      group.funcs.count(name),
+      "Trying to mark func {} as changed from wrong shard",
+      name
+    );
+    assertx(AnalysisDeps::isValidForChanges(type));
+    assertx(state->changed == Type::None);
+    state->changed = type;
+  }
+
+  for (auto const [meth, type] : changed.methods) {
+    FTRACE(4, "AnalysisScheduler: method {} changed ({})\n",
+           show(meth), show(type));
+    auto state = folly::get_ptr(classState, meth.cls);
+    always_assert_flog(
+      state,
+      "Trying to mark method for un-tracked class {} changed",
+      meth.cls
+    );
+    always_assert_flog(
+      group.classes.count(meth.cls),
+      "Trying to mark method for class {} as changed from wrong shard",
+      meth.cls
+    );
+    assertx(AnalysisDeps::isValidForChanges(type));
+    auto& t = state->methodChanges.ensure(meth.idx);
+    assertx(t == Type::None);
+    t = type;
+  }
+
+  for (auto const cns : changed.clsConstants) {
+    FTRACE(4, "AnalysisScheduler: class constant {} changed\n", show(cns));
+    auto state = folly::get_ptr(classState, cns.cls);
+    always_assert_flog(
+      state,
+      "Trying to mark method for un-tracked class {} changed",
+      cns.cls
+    );
+    always_assert_flog(
+      group.classes.count(cns.cls),
+      "Trying to mark constant for class {} as changed from wrong shard",
+      cns.cls
+    );
+    if (cns.idx >= state->cnsChanges.size()) {
+      state->cnsChanges.resize(cns.idx+1);
+    }
+    assertx(!state->cnsChanges[cns.idx]);
+    state->cnsChanges[cns.idx] = true;
+  }
+
+  for (auto const name : changed.constants) {
+    FTRACE(4, "AnalysisScheduler: constant {} changed\n", name);
+    auto state = folly::get_ptr(cnsChanged, name);
+    always_assert_flog(
+      state,
+      "Trying to mark un-tracked constant {} changed",
+      name
+    );
+    auto const unit = folly::get_ptr(index.m_data->constantToUnit, name);
+    always_assert_flog(
+      unit && group.units.count(unit->first),
+      "Trying to mark constant {} as changed from wrong shard",
+      name
+    );
+    assertx(!state->load(std::memory_order_acquire));
+    state->store(true, std::memory_order_release);
+  }
+}
+
+// Update the dependencies stored in the scheduler to take into
+// account the new set of dependencies reported by an analysis job.
+void AnalysisScheduler::updateDepState(AnalysisOutput& output, ChangeGroup g) {
+  // Every entity in the same analysis job will share the same
+  // ChangeGroup, so use a std::shared_ptr here so we can share it
+  // among all of them.
+  auto const group = std::make_shared<ChangeGroup>(std::move(g));
+
+  auto const update = [&] (DepState& state, AnalysisDeps d) {
+    assertx(!state.group);
+    assertx(!state.newDeps);
+    state.newDeps.emplace(std::move(d));
+    state.group = group;
+  };
+
+  for (size_t i = 0, size = output.classNames.size(); i < size; ++i) {
+    auto const name = output.classNames[i];
+    auto it = classState.find(name);
+    always_assert_flog(
+      it != end(classState),
+      "Trying to set deps for un-tracked class {}",
+      name
+    );
+    update(it->second.depState, std::move(output.meta.classDeps[i]));
+  }
+  for (size_t i = 0, size = output.funcNames.size(); i < size; ++i) {
+    auto const name = output.funcNames[i];
+    auto it = funcState.find(name);
+    always_assert_flog(
+      it != end(funcState),
+      "Trying to set deps for un-tracked func {}",
+      name
+    );
+    update(it->second.depState, std::move(output.meta.funcDeps[i]));
+  }
+}
+
+// Record the output of an analys job. This means updating the various
+// Refs to their new versions, recording new dependencies, and
+// recording what has changed (to schedule the next round).
+void AnalysisScheduler::record(AnalysisOutput output) {
+  auto const numClasses = output.classNames.size();
+  auto const numCInfos = output.cinfoNames.size();
+  auto const numMInfos = output.minfoNames.size();
+  auto const numFuncs = output.funcNames.size();
+  auto const numUnits = output.unitNames.size();
+  assertx(numClasses == output.classes.size());
+  assertx(numClasses == output.clsBC.size());
+  assertx(numCInfos == output.cinfos.size());
+  assertx(numMInfos == output.minfos.size());
+  assertx(numClasses == output.meta.classDeps.size());
+  assertx(numFuncs == output.funcs.size());
+  assertx(numFuncs == output.funcBC.size());
+  assertx(numFuncs == output.finfos.size());
+  assertx(numFuncs == output.meta.funcDeps.size());
+  assertx(numUnits == output.units.size());
+
+  // Update Ref mappings:
+
+  for (size_t i = 0; i < numUnits; ++i) {
+    auto const name = output.unitNames[i];
+    index.m_data->unitRefs.at(name) = std::move(output.units[i]);
+  }
+
+  for (size_t i = 0; i < numClasses; ++i) {
+    auto const name = output.classNames[i];
+    index.m_data->classRefs.at(name) = std::move(output.classes[i]);
+    index.m_data->classBytecodeRefs.at(name) = std::move(output.clsBC[i]);
+  }
+  for (size_t i = 0; i < numCInfos; ++i) {
+    auto const name = output.cinfoNames[i];
+    index.m_data->classInfoRefs.at(name) =
+      output.cinfos[i].cast<std::unique_ptr<ClassInfo2>>();
+  }
+  for (size_t i = 0; i < numMInfos; ++i) {
+    auto const name = output.minfoNames[i];
+    index.m_data->uninstantiableClsMethRefs.at(name) =
+      output.minfos[i].cast<std::unique_ptr<MethodsWithoutCInfo>>();
+  }
+  for (size_t i = 0; i < numFuncs; ++i) {
+    auto const name = output.funcNames[i];
+    index.m_data->funcRefs.at(name) = std::move(output.funcs[i]);
+    index.m_data->funcBytecodeRefs.at(name) = std::move(output.funcBC[i]);
+    index.m_data->funcInfoRefs.at(name) =
+      output.finfos[i].cast<std::unique_ptr<FuncInfo2>>();
+  }
+
+  // ChangeGroup represents all entities in a particular analysis job.
+  ChangeGroup group;
+  group.classes.insert(begin(output.classNames), end(output.classNames));
+  group.funcs.insert(begin(output.funcNames), end(output.funcNames));
+  group.units.insert(begin(output.unitNames), end(output.unitNames));
+
+  recordChanges(output.meta.changed, group);
+  updateDepState(output, std::move(group));
+
+  // If the analysis job optimized away any 86cinit functions, record
+  // that here so they can be later removed from our tables.
+  if (!output.meta.removedFuncs.empty()) {
+    // This is relatively rare, so a lock is fine.
+    std::lock_guard<std::mutex> _{funcsToRemoveLock};
+    funcsToRemove.insert(
+      begin(output.meta.removedFuncs),
+      end(output.meta.removedFuncs)
+    );
+  }
+}
+
+// Remove metadata for any 86cinit function that an analysis job
+// optimized away. This must be done *after* calculating the next
+// round of work.
+void AnalysisScheduler::removeFuncs() {
+  if (funcsToRemove.empty()) return;
+  for (auto const name : funcsToRemove) {
+    FTRACE(4, "AnalysisScheduler: removing function {}\n", name);
+    always_assert(index.m_data->funcRefs.erase(name));
+    always_assert(index.m_data->funcBytecodeRefs.erase(name));
+    always_assert(index.m_data->funcInfoRefs.erase(name));
+    always_assert(index.m_data->funcToUnit.erase(name));
+    always_assert(!funcsToSchedule.count(name));
+    always_assert(funcState.erase(name));
+    if (auto const cns = Constant::nameFromFuncName(name)) {
+      always_assert(index.m_data->constantInitFuncs.erase(name));
+      always_assert(cnsChanged.erase(cns));
+      index.m_data->constantToUnit.at(cns).second = false;
+    }
+  }
+  funcNames.erase(
+    std::remove_if(
+      begin(funcNames), end(funcNames),
+      [&] (SString name) { return funcsToRemove.count(name); }
+    ),
+    end(funcNames)
+  );
+  funcsToRemove.clear();
+}
+
+// Calculate any classes or functions which should be scheduled to be
+// analyzed in the next round.
+void AnalysisScheduler::findToSchedule() {
+  static const AnalysisDeps empty;
+
+  auto const checkChanged = [&] (Type old, Type nue, Type changed) {
+    auto const added = nue - old;
+    if (added != Type::None) return added;
+    return changed & nue;
+  };
+
+  // Check if the given entity (class or function) needs to run again
+  // due to one of its dependencies changing (or if it previously
+  // registered a new dependency).
+  auto const check = [&] (SString name, DepState& d) {
+    SCOPE_EXIT {
+      if (d.newDeps) {
+        d.deps = std::move(d.newDeps);
+        d.newDeps.reset();
+      }
+      d.group.reset();
+    };
+
+    // The algorithm for these are all similar: Compare the old
+    // dependencies with the new dependencies. If the dependency is
+    // new, or if it's not the same as the old, check the
+    // ClassGroup. If they're in the same ClassGroup, ignore it (this
+    // entity already incorporated the change inside the analysis
+    // job). Otherwise schedule this class or func to run.
+
+    auto const& old = d.deps.has_value() ? *d.deps : empty;
+    auto const& nue = d.newDeps.has_value() ? *d.newDeps : old;
+
+    for (auto const [meth, newT] : nue.methods) {
+      auto const state = folly::get_ptr(classState, meth.cls);
+      if (!state) {
+        auto const changed = checkChanged(
+          folly::get_default(old.methods, meth, Type::None) |
+          (old.classes.count(meth.cls) ? Type::Meta : Type::None),
+          newT,
+          Type::None
+        );
+        if (changed != Type::None) {
+          FTRACE(
+            4, "AnalysisScheduler: {} new/changed dependency on method {} ({}),"
+            " scheduling\n",
+            name, show(meth), show(changed)
+          );
+          return true;
+        }
+        continue;
+      }
+      if (d.group && d.group->classes.count(meth.cls)) {
+        FTRACE(
+          5, "AnalysisScheduler: ignoring method dependency {} -> {}\n",
+          name, show(meth)
+        );
+        continue;
+      }
+      auto const changed = checkChanged(
+        folly::get_default(old.methods, meth, Type::None) |
+        (old.classes.count(meth.cls) ? Type::Meta : Type::None),
+        newT,
+        state->methodChanges.get_default(meth.idx, Type::None)
+      );
+      if (changed != Type::None) {
+        FTRACE(
+          4, "AnalysisScheduler: {} new/changed dependency on method {} ({}), "
+          "scheduling\n",
+          name, show(meth), show(changed)
+        );
+        return true;
+      }
+    }
+
+    for (auto const cls : nue.classes) {
+      if (!classState.count(cls)) {
+        if (!old.classes.count(cls)) {
+          FTRACE(
+            4, "AnalysisScheduler: new class dependency {} -> {}\n",
+            name, cls
+          );
+          return true;
+        }
+        continue;
+      }
+      if (d.group && d.group->classes.count(cls)) {
+        FTRACE(
+          5, "AnalysisScheduler: ignoring class dependency {} -> {}\n",
+          name, cls
+        );
+        continue;
+      }
+      if (!old.classes.count(cls)) {
+        FTRACE(
+          4, "AnalysisScheduler: new class dependency {} -> {}\n",
+          name, cls
+        );
+        return true;
+      }
+    }
+
+    for (auto const [func, newT] : nue.funcs) {
+      auto const state = folly::get_ptr(funcState, func);
+      if (!state) {
+        auto const changed = checkChanged(
+          folly::get_default(old.funcs, func, Type::None),
+          newT,
+          Type::None
+        );
+        if (changed != Type::None) {
+          FTRACE(
+            4, "AnalysisScheduler: {} new/changed dependency on func {} ({}), "
+            "scheduling\n",
+            name, func, show(changed)
+          );
+          return true;
+        }
+        continue;
+      }
+      if (d.group && d.group->funcs.count(func)) {
+        FTRACE(
+          5, "AnalysisScheduler: ignoring func dependency {} -> {}\n",
+          name, func
+        );
+        continue;
+      }
+      auto const changed = checkChanged(
+        folly::get_default(old.funcs, func, Type::None),
+        newT,
+        state->changed
+      );
+      if (changed != Type::None) {
+        FTRACE(
+          4, "AnalysisScheduler: {} new/changed dependency on func {} ({}), "
+          "scheduling\n",
+          name, func, show(changed)
+        );
+        return true;
+      }
+    }
+
+    for (auto const cns : nue.clsConstants) {
+      auto const state = folly::get_ptr(classState, cns.cls);
+      if (!state) {
+        if (!old.clsConstants.count(cns) && !old.classes.count(cns.cls)) {
+          FTRACE(
+            4, "AnalysisScheduler: new class constant dependency {} -> {}\n",
+            name, show(cns)
+          );
+          return true;
+        }
+        continue;
+      }
+      if (d.group && d.group->classes.count(cns.cls)) {
+        FTRACE(
+          5, "AnalysisScheduler: ignoring class constant dependency {} -> {}\n",
+          name, show(cns)
+        );
+        continue;
+      }
+      if (!old.clsConstants.count(cns) && !old.classes.count(cns.cls)) {
+        FTRACE(
+          4, "AnalysisScheduler: new class constant dependency {} -> {}\n",
+          name, show(cns)
+        );
+        return true;
+      }
+      if (cns.idx < state->cnsChanges.size() && state->cnsChanges[cns.idx]) {
+        FTRACE(
+          4, "AnalysisScheduler: {} depends on changed class constant {}, "
+          "scheduling\n",
+          name, show(cns)
+        );
+        return true;
+      }
+    }
+
+    for (auto const cns : nue.constants) {
+      auto const changed = folly::get_ptr(cnsChanged, cns);
+      if (!changed) {
+        if (!old.constants.count(cns) &&
+            !old.funcs.count(Constant::funcNameFromName(cns))) {
+          FTRACE(
+            4, "AnalysisScheduler: new constant dependency {} -> {}\n",
+            name, cns
+          );
+          return true;
+        }
+        continue;
+      }
+      auto const unit = folly::get_ptr(index.m_data->constantToUnit, cns);
+      assertx(unit != nullptr);
+      if (d.group && d.group->units.count(unit->first)) {
+        FTRACE(
+          5, "AnalysisScheduler: ignoring constant dependency {} -> {}\n",
+          name, cns
+        );
+        continue;
+      }
+      if (!old.constants.count(cns) &&
+          !old.funcs.count(Constant::funcNameFromName(cns))) {
+        FTRACE(
+          4, "AnalysisScheduler: new constant dependency {} -> {}\n",
+          name, cns
+        );
+        return true;
+      }
+      if (changed->load(std::memory_order_acquire)) {
+        FTRACE(
+          4, "AnalysisScheduler: {} depends on changed constant {}, "
+          "scheduling\n",
+          name, cns
+        );
+        return true;
+      }
+    }
+
+    for (auto const typeAlias : nue.typeAliases) {
+      auto const unit =
+        folly::get_default(index.m_data->typeAliasToUnit, typeAlias);
+      if (unit && d.group && d.group->units.count(unit)) {
+        FTRACE(
+          5, "AnalysisScheduler: ignoring type-alias dependency {} -> {}\n",
+          name, typeAlias
+        );
+        continue;
+      }
+      if (!old.typeAliases.count(typeAlias)) {
+        FTRACE(
+          4, "AnalysisScheduler: new type-alias dependency {} -> {}\n",
+          name, typeAlias
+        );
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  // The return type for these lambdas should be bool, but parallel
+  // doesn't handle a bool return type properly (because it tries to
+  // form pointers to elements of std::vector<bool>), so force it to
+  // be larger.
+  auto const classBits = parallel::map(
+    classNames,
+    [&] (SString name) -> uint8_t {
+      return check(name, classState.at(name).depState);
+    }
+  );
+  auto const funcBits = parallel::map(
+    funcNames,
+    [&] (SString name) -> uint8_t {
+      return check(name, funcState.at(name).depState);
+    }
+  );
+
+  // Turn the "bits" into names.
+  for (size_t i = 0, size = classNames.size(); i < size; ++i) {
+    if (classBits[i]) classesToSchedule.emplace(classNames[i]);
+  }
+  for (size_t i = 0, size = funcNames.size(); i < size; ++i) {
+    if (funcBits[i]) funcsToSchedule.emplace(funcNames[i]);
+  }
+}
+
+// Reset any recorded changes from analysis jobs, in preparation for
+// another round.
+void AnalysisScheduler::resetChanges() {
+  parallel::for_each(
+    classNames,
+    [&] (SString name) {
+      auto& state = classState.at(name);
+      std::fill(
+        begin(state.methodChanges),
+        end(state.methodChanges),
+        Type::None
+      );
+      state.cnsChanges.reset();
+    }
+  );
+  parallel::for_each(
+    funcNames,
+    [&] (SString name) {
+      funcState.at(name).changed = Type::None;
+      if (auto const cns = Constant::nameFromFuncName(name)) {
+        cnsChanged.at(cns).store(false, std::memory_order_release);
+      }
+    }
+  );
+}
+
+// Called when all analysis jobs are finished. "Finalize" the changes
+// and determine what should run in the next analysis round.
+void AnalysisScheduler::recordingDone() {
+  findToSchedule();
+  removeFuncs();
+  resetChanges();
+}
+
+void AnalysisScheduler::addClassToInput(SString name,
+                                        AnalysisInput& input) const {
+  input.classes.emplace(name, index.m_data->classRefs.at(name));
+  input.classBC.emplace(name, index.m_data->classBytecodeRefs.at(name));
+  if (auto const ref = folly::get_ptr(index.m_data->classInfoRefs, name)) {
+    input.cinfos.emplace(name, ref->cast<AnalysisIndexCInfo>());
+  } else if (auto const ref =
+             folly::get_ptr(index.m_data->uninstantiableClsMethRefs, name)) {
+    input.minfos.emplace(name, ref->cast<AnalysisIndexMInfo>());
+    input.meta.badClasses.emplace(name);
+  } else {
+    input.meta.badClasses.emplace(name);
+  }
+  if (!input.m_key) input.m_key = name;
+}
+
+void AnalysisScheduler::addFuncToInput(SString name,
+                                       AnalysisInput& input) const {
+  input.funcs.emplace(name, index.m_data->funcRefs.at(name));
+  input.funcBC.emplace(name, index.m_data->funcBytecodeRefs.at(name));
+  input.finfos.emplace(
+    name,
+    index.m_data->funcInfoRefs.at(name).cast<AnalysisIndexFInfo>()
+  );
+  if (!input.m_key) input.m_key = name;
+}
+
+void AnalysisScheduler::addUnitToInput(SString name,
+                                       AnalysisInput& input) const {
+  input.units.emplace(name, index.m_data->unitRefs.at(name));
+  if (!input.m_key) input.m_key = name;
+}
+
+void AnalysisScheduler::addDepClassToInput(SString cls,
+                                           SString depSrc,
+                                           bool addBytecode,
+                                           AnalysisInput& input) const {
+  if (input.classes.count(cls)) return;
+
+  auto const badClass = [&] {
+    if (input.meta.badClasses.emplace(cls).second) {
+      FTRACE(4, "AnalysisScheduler: adding bad class {} to {} dep inputs\n",
+             cls, depSrc);
+    }
+  };
+
+  auto const clsRef = folly::get_ptr(index.m_data->classRefs, cls);
+  if (!clsRef) return badClass();
+
+  if (!input.depClasses.emplace(cls, *clsRef).second) {
+    // If we already added the class and don't need to add the
+    // bytecode, nothing more to do.
+    if (!addBytecode) return;
+  } else {
+    FTRACE(
+      4, "AnalysisScheduler: adding class {} to {} dep inputs\n",
+      cls, depSrc
+    );
+  }
+
+  if (auto const r = folly::get_ptr(index.m_data->classInfoRefs, cls)) {
+    input.cinfos.emplace(cls, r->cast<AnalysisIndexCInfo>());
+  } else if (auto const r =
+             folly::get_ptr(index.m_data->uninstantiableClsMethRefs, cls)) {
+    input.minfos.emplace(cls, r->cast<AnalysisIndexMInfo>());
+    badClass();
+  } else {
+    badClass();
+  }
+
+  if (addBytecode) {
+    if (input.classBC.emplace(cls,
+                              index.m_data->classBytecodeRefs.at(cls)).second) {
+      FTRACE(
+        4, "AnalysisScheduler: adding class {} bytecode to {} dep inputs\n",
+        cls, depSrc
+      );
+    }
+  }
+
+  addDepUnitToInput(index.m_data->classToUnit.at(cls), depSrc, input);
+
+  auto const& closures = folly::get_default(index.m_data->classToClosures, cls);
+  for (auto const clo : closures) {
+    addDepClassToInput(clo, depSrc, addBytecode, input);
+  }
+}
+
+void AnalysisScheduler::addDepFuncToInput(SString func,
+                                          SString depSrc,
+                                          Type type,
+                                          AnalysisInput& input) const {
+  assertx(type != Type::None);
+  if (input.funcs.count(func)) return;
+
+  auto const funcRef = folly::get_ptr(index.m_data->funcRefs, func);
+  if (!funcRef) {
+    if (input.meta.badFuncs.emplace(func).second) {
+      FTRACE(4, "AnalysisScheduler: adding bad func {} to {} dep inputs\n",
+             func, depSrc);
+    }
+    return;
+  }
+
+  if (!input.depFuncs.emplace(func, *funcRef).second) {
+    // If we already added the func and don't need to add the
+    // bytecode, nothing more to do.
+    if (!(type & Type::Bytecode)) return;
+  } else {
+    FTRACE(
+      4, "AnalysisScheduler: adding func {} to {} dep inputs\n",
+      func, depSrc
+    );
+  }
+
+  input.finfos.emplace(
+    func,
+    index.m_data->funcInfoRefs.at(func).cast<AnalysisIndexFInfo>()
+  );
+
+  if (type & Type::Bytecode) {
+    if (input.funcBC.emplace(func,
+                             index.m_data->funcBytecodeRefs.at(func)).second) {
+      FTRACE(
+        4, "AnalysisScheduler: adding func {} bytecode to {} dep inputs\n",
+        func, depSrc
+      );
+    }
+  }
+
+  addDepUnitToInput(index.m_data->funcToUnit.at(func), depSrc, input);
+
+  auto const& closures = folly::get_default(index.m_data->funcToClosures, func);
+  for (auto const clo : closures) {
+    addDepClassToInput(clo, depSrc, type & Type::Bytecode, input);
+  }
+}
+
+void AnalysisScheduler::addDepConstantToInput(SString cns,
+                                              SString depSrc,
+                                              AnalysisInput& input) const {
+  auto const unit = folly::get_ptr(index.m_data->constantToUnit, cns);
+  if (!unit) {
+    if (input.meta.badConstants.emplace(cns).second) {
+      FTRACE(4, "AnalysisScheduler: adding bad constant {} to {} dep inputs\n",
+             cns, depSrc);
+    }
+    return;
+  }
+
+  addDepUnitToInput(unit->first, depSrc, input);
+  if (!unit->second || is_native_unit(unit->first)) return;
+
+  auto const initName = Constant::funcNameFromName(cns);
+  always_assert_flog(
+    index.m_data->funcRefs.count(initName),
+    "Constant {} is missing expected initialization function {}",
+    cns, initName
+  );
+
+  addDepFuncToInput(initName, depSrc, Type::Meta, input);
+}
+
+void AnalysisScheduler::addDepUnitToInput(SString unit,
+                                          SString depSrc,
+                                          AnalysisInput& input) const {
+  if (input.units.count(unit)) return;
+  if (!input.depUnits.emplace(unit, index.m_data->unitRefs.at(unit)).second) {
+    return;
+  }
+  FTRACE(4, "AnalysisScheduler: adding unit {} to {} dep inputs\n",
+         unit, depSrc);
+}
+
+void AnalysisScheduler::addDepTypeAliasToInput(SString typeAlias,
+                                               SString depSrc,
+                                               AnalysisInput& input) const {
+  auto const unit =
+    folly::get_default(index.m_data->typeAliasToUnit, typeAlias);
+  if (!unit) {
+    if (input.meta.badTypeAliases.emplace(typeAlias).second) {
+      FTRACE(4, "AnalysisScheduler: adding bad type-alias {} to {} dep inputs\n",
+             typeAlias, depSrc);
+    }
+    return;
+  }
+  addDepUnitToInput(unit, depSrc, input);
+}
+
+// For every input in the AnalysisInput, add any associated
+// dependencies for those inputs.
+void AnalysisScheduler::addDepsToInput(AnalysisInput& input) const {
+  auto const add = [&] (SString n,
+                        const DepState& depState,
+                        SString unit,
+                        const ISStringSet& closures) {
+    for (auto const clo : closures) {
+      addDepClassToInput(clo, n, true, input);
+    }
+    addDepUnitToInput(unit, n, input);
+    if (!depState.deps.has_value()) return;
+    auto const& d = *depState.deps;
+    for (auto const cls : d.classes) {
+      addDepClassToInput(cls, n, false, input);
+    }
+    for (auto const [meth, type] : d.methods) {
+      if (type != Type::None) {
+        addDepClassToInput(
+          meth.cls,
+          n,
+          type & Type::Bytecode,
+          input
+        );
+      }
+    }
+    for (auto const [func, type] : d.funcs) {
+      if (type != Type::None) addDepFuncToInput(func, n, type, input);
+    }
+    for (auto const cns : d.clsConstants) {
+      addDepClassToInput(cns.cls, n, false, input);
+    }
+    for (auto const cns : d.constants) {
+      addDepConstantToInput(cns, n, input);
+    }
+    for (auto const typeAlias : d.typeAliases) {
+      addDepTypeAliasToInput(typeAlias, n, input);
+    }
+  };
+  for (auto const& [name, _] : input.classes) {
+    add(
+      name,
+      classState.at(name).depState,
+      index.m_data->classToUnit.at(name),
+      folly::get_default(index.m_data->classToClosures, name)
+    );
+  }
+  for (auto const& [name, _] : input.funcs) {
+    add(
+      name,
+      funcState.at(name).depState,
+      index.m_data->funcToUnit.at(name),
+      folly::get_default(index.m_data->funcToClosures, name)
+    );
+  }
+}
+
+// Group the work that needs to run into buckets of the given size.
+std::vector<AnalysisInput> AnalysisScheduler::schedule(size_t bucketSize) {
+  FTRACE(2, "AnalysisScheduler: scheduling {} items into buckets of size {}\n",
+         workItems(), bucketSize);
+
+  std::vector<SString> items{
+    begin(classesToSchedule),
+    end(classesToSchedule)
+  };
+
+  SStringToOneT<ISStringSet> unitsToFuncs;
+  for (auto const func : funcsToSchedule) {
+    if (Constant::nameFromFuncName(func)) {
+      auto const unit = index.m_data->funcToUnit.at(func);
+      if (auto funcs = folly::get_ptr(unitsToFuncs, unit)) {
+        funcs->emplace(func);
+      } else {
+        items.emplace_back(unit);
+        unitsToFuncs[unit].emplace(func);
+      }
+    } else {
+      items.emplace_back(func);
+    }
+  }
+  if (items.empty()) return {};
+
+  // Turn the buckets of names into buckets of AnalysisInput.
+  auto const inputs = parallel::map(
+    consistently_bucketize(items, bucketSize),
+    [&] (const std::vector<SString>& bucket) {
+      AnalysisInput input;
+      // Add all the inputs. These are the items which will actually
+      // be processed in the job.
+      for (auto const item : bucket) {
+        if (classesToSchedule.count(item)) addClassToInput(item, input);
+        if (funcsToSchedule.count(item))   addFuncToInput(item, input);
+        if (auto const funcs = folly::get_ptr(unitsToFuncs, item)) {
+          for (auto const f : *funcs) addFuncToInput(f, input);
+          addUnitToInput(item, input);
+        }
+      }
+      // Add any dependencies for the above inputs. These won't be
+      // processed in the job, but they're needed to process the above
+      // inputs.
+      addDepsToInput(input);
+      return input;
+    }
+  );
+
+  classesToSchedule.clear();
+  funcsToSchedule.clear();
+  FTRACE(2, "AnalysisScheduler: scheduled {} buckets\n", inputs.size());
+  return inputs;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+AnalysisIndex::AnalysisIndex() = default;
+AnalysisIndex::~AnalysisIndex() = default;
 
 //////////////////////////////////////////////////////////////////////
 

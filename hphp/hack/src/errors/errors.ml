@@ -821,13 +821,13 @@ let fold_errors_in
   | None -> init
   | Some errors -> List.fold_right errors ~init ~f
 
-(* Get paths that have errors which haven't been HH_FIXME'd. *)
+(** Get paths that have errors which haven't been HH_FIXME'd. *)
 let get_failed_files (err : t) =
   let err = drop_fixmed_errors_in_files err in
   files_t_fold err ~init:Relative_path.Set.empty ~f:(fun source _ acc ->
       Relative_path.Set.add acc source)
 
-(* Count errors which haven't been HH_FIXME'd. *)
+(** Count errors which haven't been HH_FIXME'd. *)
 let error_count : t -> int =
  fun errors ->
   Relative_path.Map.fold errors ~init:0 ~f:(fun _path errors count ->

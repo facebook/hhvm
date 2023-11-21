@@ -10,6 +10,18 @@ open Hh_prelude
 
 type options = { debug: bool }
 
+module Symbol = struct
+  type t = Typing_deps.Dep.dependency Typing_deps.Dep.variant
+
+  let compare x y = Typing_deps.Dep.compare_variant x y
+end
+
+module SymbolMap = WrappedMap.Make (Symbol)
+module SymbolSet = Caml.Set.Make (Symbol)
+
+(** A bidirectional map between file paths and symbol names *)
+type naming_table = Naming_table.t * Relative_path.t SymbolMap.t
+
 let deps_mode = Typing_deps_mode.InMemoryMode None
 
 let tcopt =
@@ -44,7 +56,7 @@ let parse_defs (ctx : Provider_context.t) (files : Relative_path.t list) :
     ~trace:false
     ~cache_decls:
       (* Not caching here, otherwise oldification done in redo_type_decl will
-         * oldify the new version (and override the real old versions*)
+       * oldify the new version (and override the real old versions *)
       false
     workers
     ~get_next:(fun () ->
@@ -55,18 +67,58 @@ let parse_defs (ctx : Provider_context.t) (files : Relative_path.t list) :
         Bucket.Job files
       ))
 
+let update_reverse_naming_table
+    ctx (defs_per_file : FileInfo.t Relative_path.Map.t) symbols_to_files :
+    Relative_path.t SymbolMap.t =
+  Relative_path.Map.fold
+    defs_per_file
+    ~init:symbols_to_files
+    ~f:(fun file file_info symbols_to_files ->
+      Naming_global.ndecl_file_skip_if_already_bound ctx file file_info;
+      let {
+        FileInfo.hash = _;
+        file_mode = _;
+        funs;
+        classes;
+        typedefs;
+        consts;
+        modules;
+        comments = _;
+      } =
+        file_info
+      in
+      let add_symbols names make_dep symbols_to_files =
+        List.fold
+          names
+          ~init:symbols_to_files
+          ~f:(fun symbols_to_files (_, name, _) ->
+            SymbolMap.add (make_dep name) file symbols_to_files)
+      in
+      symbols_to_files
+      |> add_symbols funs (fun name -> Typing_deps.Dep.Fun name)
+      |> add_symbols classes (fun name -> Typing_deps.Dep.Type name)
+      |> add_symbols typedefs (fun name -> Typing_deps.Dep.Type name)
+      |> add_symbols consts (fun name -> Typing_deps.Dep.GConstName name)
+      |> add_symbols modules (fun name -> Typing_deps.Dep.Module name))
+
+let make_reverse_naming_table ctx defs_per_file =
+  update_reverse_naming_table ctx defs_per_file SymbolMap.empty
+
 let redecl_make_new_naming_table
     (ctx : Provider_context.t)
     options
-    (old_naming_table : Naming_table.t)
-    (files_with_changes : Relative_path.t list) : Naming_table.t =
+    ((old_naming_table, old_symbols_to_files) : naming_table)
+    (files_with_changes : Relative_path.t list) : naming_table =
   let defs_per_file_parsed = parse_defs ctx files_with_changes in
   let new_naming_table =
     Naming_table.update_many old_naming_table defs_per_file_parsed
   in
+  let symbols_to_files =
+    update_reverse_naming_table ctx defs_per_file_parsed old_symbols_to_files
+  in
   if options.debug then
     Printf.printf "%s\n" (Naming_table.show new_naming_table);
-  new_naming_table
+  (new_naming_table, symbols_to_files)
 
 let get_old_and_new_defs
     options
@@ -103,18 +155,29 @@ let get_old_and_new_defs
 let get_symbols_for_deps
     (deps : Typing_deps.DepSet.t)
     (dep_to_symbol_map : _ Typing_deps.Dep.variant Typing_deps.DepMap.t) :
-    SSet.t =
-  Typing_deps.DepSet.fold deps ~init:SSet.empty ~f:(fun dep acc ->
+    SymbolSet.t =
+  Typing_deps.DepSet.fold deps ~init:SymbolSet.empty ~f:(fun dep acc ->
       let symbol =
         match Typing_deps.DepMap.find_opt dep dep_to_symbol_map with
-        | None -> Typing_deps.Dep.to_hex_string dep
-        | Some variant -> Typing_deps.Dep.variant_to_string variant
+        | None -> Typing_deps.Dep.Type (Typing_deps.Dep.to_hex_string dep)
+        | Some variant -> variant
       in
-      SSet.add symbol acc)
+      SymbolSet.add symbol acc)
 
-let compute_fanout ctx options (old_and_new_defs : Naming_table.defs_per_file) :
-    Typing_deps.DepSet.t =
-  let { Decl_redecl_service.fanout = { Fanout.to_recheck; changed }; _ } =
+let get_files_for_symbols
+    (symbols : SymbolSet.t) (symbols_to_files : Relative_path.t SymbolMap.t) :
+    Relative_path.Set.t =
+  SymbolSet.fold
+    (fun symbol files ->
+      match SymbolMap.find_opt symbol symbols_to_files with
+      | None -> files
+      | Some file -> Relative_path.Set.add files file)
+    symbols
+    Relative_path.Set.empty
+
+let compute_fanout ctx (old_and_new_defs : Naming_table.defs_per_file) :
+    Fanout.t =
+  let { Decl_redecl_service.fanout; _ } =
     Decl_redecl_service.redo_type_decl
       ctx
       ~during_init:false
@@ -124,22 +187,31 @@ let compute_fanout ctx options (old_and_new_defs : Naming_table.defs_per_file) :
       ~previously_oldified_defs:FileInfo.empty_names
       ~defs:old_and_new_defs
   in
-  if options.debug then (
-    Printf.printf "Hashes of changed:%s\n" (Typing_deps.DepSet.show changed);
-    Printf.printf "Hashes to recheck:%s\n" (Typing_deps.DepSet.show to_recheck)
-  );
-  to_recheck
+  fanout
 
-let update_naming_table_and_compute_fanout
+let print_fanout (symbols, files) =
+  SymbolSet.iter
+    (fun symbol ->
+      Printf.printf "%s\n" (Typing_deps.Dep.variant_to_string symbol))
+    symbols;
+  Relative_path.Set.iter files ~f:(fun file ->
+      Printf.printf
+        "%s\n"
+        (Relative_path.suffix file
+        |> Str.split (Str.regexp "--")
+        |> List.last_exn));
+  Printf.printf "\n";
+  ()
+
+let compute_fanout_and_resolve_deps
     (ctx : Provider_context.t)
     (options : options)
     files_with_changes
-    old_naming_table
+    files_with_errors
+    (old_naming_table, old_symbols_to_files)
+    (new_naming_table, new_symbols_to_files)
     (dep_to_symbol_map : _ Typing_deps.Dep.variant Typing_deps.DepMap.t) :
-    SSet.t =
-  let new_naming_table =
-    redecl_make_new_naming_table ctx options old_naming_table files_with_changes
-  in
+    Relative_path.Set.t =
   let old_and_new_defs =
     get_old_and_new_defs
       options
@@ -147,16 +219,49 @@ let update_naming_table_and_compute_fanout
       old_naming_table
       new_naming_table
   in
-  let to_recheck = compute_fanout ctx options old_and_new_defs in
-  let to_recheck = get_symbols_for_deps to_recheck dep_to_symbol_map in
-  to_recheck
+  let { Fanout.changed; to_recheck; to_recheck_if_errors } =
+    compute_fanout ctx old_and_new_defs
+  in
+  if options.debug then (
+    Printf.printf "Hashes of changed:%s\n" (Typing_deps.DepSet.show changed);
+    Printf.printf "Hashes to recheck:%s\n" (Typing_deps.DepSet.show to_recheck);
+    Printf.printf
+      "Hashes to recheck if errors:%s\n"
+      (Typing_deps.DepSet.show to_recheck_if_errors);
+    ()
+  );
+  let to_recheck_symbols = get_symbols_for_deps to_recheck dep_to_symbol_map in
+  let to_recheck_if_errors_symbols =
+    get_symbols_for_deps to_recheck_if_errors dep_to_symbol_map
+  in
+  let to_recheck =
+    (* We need to look up symbols in the new table, in case a symbol has moved
+     * to a different file.
+     * If a symbol is not found in the new table, well it's just been deleted and
+     * does not need recheck. *)
+    get_files_for_symbols to_recheck_symbols new_symbols_to_files
+  in
+  let to_recheck_files_due_to_errors =
+    let files_to_recheck_if_errors =
+      get_files_for_symbols to_recheck_if_errors_symbols old_symbols_to_files
+    in
+    Relative_path.Set.inter files_to_recheck_if_errors files_with_errors
+  in
+  let fanout =
+    Relative_path.Set.union to_recheck to_recheck_files_due_to_errors
+  in
+  print_fanout (to_recheck_symbols, to_recheck_files_due_to_errors);
+  fanout
 
 module FileSystem = struct
+  (** Add files using the file provider abstraction. *)
   let provide_files_before (files : Multifile.repo) : Relative_path.t list =
     File_provider.local_changes_push_sharedmem_stack ();
     Relative_path.Map.iter files ~f:File_provider.provide_file_for_tests;
     Relative_path.Map.keys files
 
+  (** Update files using the file provider abstraction.
+    Update only files which have changed. *)
   let provide_files_after (files : Multifile.repo) : Relative_path.t list =
     Relative_path.Map.fold
       files
@@ -174,11 +279,6 @@ module FileSystem = struct
         ) else
           changed_files)
 end
-
-let print_fanout fanout =
-  SSet.iter (Printf.printf "%s\n") fanout;
-  Printf.printf "\n";
-  ()
 
 let init_paths (hhi_root : Path.t) : unit =
   (* dummy path, not actually used *)
@@ -255,45 +355,46 @@ let commit_dep_edges () : unit =
   Typing_deps.flush_ideps_batch deps_mode
   |> Typing_deps.register_discovered_dep_edges
 
-let make_reverse_naming_table
-    ctx (defs_per_file : FileInfo.t Relative_path.Map.t) : unit =
-  Relative_path.Map.iter defs_per_file ~f:(fun file file_info ->
-      Naming_global.ndecl_file_skip_if_already_bound ctx file file_info)
-
 (** Build and return the naming table and build the reverse naming table as a side-effect. *)
 let make_naming_table
-    ctx options (defs_per_file : FileInfo.t Relative_path.Map.t) :
-    Naming_table.t =
+    ctx options (defs_per_file : FileInfo.t Relative_path.Map.t) : naming_table
+    =
   let naming_table = Naming_table.create defs_per_file in
   if options.debug then Printf.printf "%s\n" @@ Naming_table.show naming_table;
-  make_reverse_naming_table ctx defs_per_file;
-  naming_table
+  let symbol_to_file_map = make_reverse_naming_table ctx defs_per_file in
+  (naming_table, symbol_to_file_map)
 
 (** Type check given files. Create the dependency graph as a side effect. *)
-let type_check_make_depgraph ctx options (files : Relative_path.t list) : unit =
-  List.iter files ~f:(fun file ->
-      let full_ast = Ast_provider.get_ast ctx file ~full:true in
-      let (_ : Errors.t * Tast.by_names) =
-        Typing_check_job.calc_errors_and_tast ctx file ~full_ast
-      in
-      ());
+let type_check_make_depgraph ctx options (files : Relative_path.Set.t) :
+    Errors.t =
+  let errors =
+    Relative_path.Set.fold files ~init:Errors.empty ~f:(fun file errors_acc ->
+        let full_ast = Ast_provider.get_ast ctx file ~full:true in
+        let (errors, _tasts) =
+          Typing_check_job.calc_errors_and_tast ctx file ~full_ast
+        in
+        Errors.merge errors_acc errors)
+  in
   if options.debug then Typing_deps.dump_current_edge_buffer_in_memory_mode ();
   commit_dep_edges ();
-  ()
+  errors
 
 (** Build the naming table and typecheck the base file to create the depgraph.
   Only the naming table is returned. The reverse naming table and depgraph are
   produced as side effects. *)
 let process_pre_changes ctx options (files : Relative_path.t list) :
-    Naming_table.t =
+    Errors.t * naming_table =
   (* TODO builtins and hhi stuff *)
   let defs_per_file = parse_defs ctx files in
   let naming_table = make_naming_table ctx options defs_per_file in
-  type_check_make_depgraph ctx options files;
-  naming_table
+  let errors =
+    type_check_make_depgraph ctx options (Relative_path.Set.of_list files)
+  in
+  (errors, naming_table)
 
-(** Process changed files by making those files available in the typechecker as a side effect
-  and returning the list of changed files. *)
+(** Process changed files and return the list of files with changes:
+  - make those files available to the typecheck via the file provider
+  - clear the AST provider caches *)
 let process_changed_files options (repo : Multifile.repo) : Relative_path.t list
     =
   let files_with_changes = FileSystem.provide_files_after repo in
@@ -317,24 +418,36 @@ let go (test_file : string) options =
   let ctx = init hhi_root in
   let { Multifile.States.base; changes } = Multifile.States.parse test_file in
   let files = FileSystem.provide_files_before base in
-  let naming_table = process_pre_changes ctx options files in
-  let _end_repo =
-    List.fold changes ~init:base ~f:(fun repo repo_change ->
+  let (errors, naming_table) = process_pre_changes ctx options files in
+  let (_end_repo, _end_naming_table, _files_with_errors) =
+    List.fold
+      changes
+      ~init:(base, naming_table, Errors.get_failed_files errors)
+      ~f:(fun (repo, naming_table, files_with_errors) repo_change ->
         let repo = Multifile.States.apply_repo_change repo repo_change in
         let files_with_changes = process_changed_files options repo in
         let dep_to_symbol_map =
           make_dep_to_symbol_map ctx options files_with_changes
         in
+        let new_naming_table =
+          redecl_make_new_naming_table
+            ctx
+            options
+            naming_table
+            files_with_changes
+        in
         let fanout =
-          update_naming_table_and_compute_fanout
+          compute_fanout_and_resolve_deps
             ctx
             options
             files_with_changes
+            files_with_errors
             naming_table
+            new_naming_table
             dep_to_symbol_map
         in
-        print_fanout fanout;
-        repo)
+        let errors = type_check_make_depgraph ctx options fanout in
+        (repo, new_naming_table, Errors.get_failed_files errors))
   in
   ()
 

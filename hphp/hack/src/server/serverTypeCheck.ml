@@ -317,10 +317,7 @@ let do_redecl
   in
   let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
   let ctx = Provider_utils.ctx_from_server_env env in
-  let {
-    Decl_redecl_service.old_decl_missing_count;
-    fanout = { Fanout.changed; to_recheck = to_recheck_deps };
-  } =
+  let { Decl_redecl_service.old_decl_missing_count; fanout } =
     CgroupProfiler.step_start_end cgroup_steps "redecl" @@ fun _cgroup_step ->
     Decl_redecl_service.redo_type_decl
       ~bucket_size
@@ -331,9 +328,13 @@ let do_redecl
       ~previously_oldified_defs:FileInfo.empty_names
       ~defs:defs_per_file
   in
-  ServerProgress.with_message "resolving files" @@ fun () ->
-  let to_recheck = Naming_provider.get_files ctx to_recheck_deps in
-  { changed; to_recheck; to_recheck_deps; old_decl_missing_count }
+  let to_recheck = ServerFanout.resolve_files ctx env fanout in
+  {
+    changed = fanout.Fanout.changed;
+    to_recheck;
+    to_recheck_deps = fanout.Fanout.to_recheck;
+    old_decl_missing_count;
+  }
 
 type type_checking_result = {
   env: ServerEnv.env;

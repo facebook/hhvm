@@ -616,7 +616,7 @@ let get_files_to_recheck
     genv.workers
     get_old_and_new_classes
     ~defs:dirty_names;
-  let { Decl_redecl_service.fanout = { Fanout.to_recheck; _ }; _ } =
+  let { Decl_redecl_service.fanout; _ } =
     Decl_redecl_service.redo_type_decl
       ~bucket_size
       ctx
@@ -627,11 +627,8 @@ let get_files_to_recheck
       ~defs:defs_per_file_to_redeclare
   in
   Decl_redecl_service.remove_old_defs ctx ~bucket_size genv.workers dirty_names;
-  let files_to_recheck =
-    ServerProgress.with_message "resolving files" @@ fun () ->
-    Naming_provider.get_files ctx to_recheck
-  in
-  log_fanout_information to_recheck files_to_recheck;
+  let files_to_recheck = ServerFanout.resolve_files ctx env fanout in
+  log_fanout_information fanout.Fanout.to_recheck files_to_recheck;
   files_to_recheck
 
 (** We start off with a list of files that have changed since the state was

@@ -187,6 +187,7 @@ val fold_errors_in :
   f:(error -> 'a -> 'a) ->
   'a
 
+(** Get paths that have errors which haven't been HH_FIXME'd. *)
 val get_failed_files : t -> Relative_path.Set.t
 
 val as_telemetry : t -> Telemetry.t

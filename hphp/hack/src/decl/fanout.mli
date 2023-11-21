@@ -22,6 +22,8 @@ type t = {
           hashes--we cannot precisely reproduce the set of symbols which need
           rechecking. Instead, Typing_deps maintains a mapping from symbol hash
           to filename (exposed via Typing_deps.get_files). *)
+  to_recheck_if_errors: Typing_deps.DepSet.t;
+      (** Additional deps to recheck if their files previously had errors. *)
 }
 
 val empty : t
@@ -33,3 +35,6 @@ val add_fanout_of :
   Typing_deps.Dep.dependency Typing_deps.Dep.variant ->
   t ->
   t
+
+(** Cardinal of deps to recheck. Ignore deps to recheck if they had errors *)
+val cardinal : t -> int

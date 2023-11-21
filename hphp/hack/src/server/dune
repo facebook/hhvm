@@ -449,6 +449,19 @@
   (copy# facebook/serverInvalidateUnits.ml serverInvalidateUnits.fb.ml)))
 
 (library
+ (name server_fanout)
+ (wrapped false)
+ (modules
+  serverFanout)
+ (libraries
+  fanout
+  naming_provider
+  provider_context
+  relative_path
+  server_env
+  server_progress))
+
+(library
  (name server)
  (wrapped false)
  (modules
@@ -504,6 +517,7 @@
   server_code_actions_services
   server_docblock_at
   server_env
+  server_fanout
   server_find_refs
   server_hover
   server_infer_type
@@ -576,6 +590,7 @@
     security_stubs
     server
     server_env_build
+    server_fanout
     server_call_hierarchy
     server_go_to
     server_highlight_refs

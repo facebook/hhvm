@@ -1524,3 +1524,5 @@ FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter, 3, ::std::int32_t, ::facebook::thrift::test::terse_write::AdaptedFields>();
 }
 }}}}} // facebook::thrift::test::terse_write
+namespace apache::thrift::detail::annotation {
+}

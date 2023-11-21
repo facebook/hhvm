@@ -3088,3 +3088,5 @@ namespace test_cpp2 { namespace cpp_reflection { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
 }
 }}} // test_cpp2::cpp_reflection
+namespace apache::thrift::detail::annotation {
+}

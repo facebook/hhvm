@@ -602,3 +602,5 @@ FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateAdapter<::StaticCast, ::cpp2::detail::YourStruct>();
 }
 }} // cpp2
+namespace apache::thrift::detail::annotation {
+}

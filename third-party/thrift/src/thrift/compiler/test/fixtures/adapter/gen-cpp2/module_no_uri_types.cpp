@@ -108,3 +108,5 @@ FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::std::string, ::cpp2::RefUnion>();
 }
 }} // cpp2
+namespace apache::thrift::detail::annotation {
+}

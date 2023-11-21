@@ -98,3 +98,5 @@ namespace test { namespace namespace_from_package_without_module_name { namespac
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
 }
 }}} // test::namespace_from_package_without_module_name
+namespace apache::thrift::detail::annotation {
+}

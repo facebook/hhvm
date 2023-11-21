@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/cpp.thrift"
+
 cpp_include "<list>"
 
 typedef list<i32> (cpp.template = "std::list") int_linked_list
@@ -35,3 +37,31 @@ typedef list<double_7102> tiny_float_list
 
 // The following were automatically generated and may benefit from renaming.
 typedef double (cpp.fixed_point = "16") double_7102
+
+@cpp.RuntimeAnnotation
+@scope.Field
+struct Oncall {
+  1: string name;
+}
+
+@cpp.RuntimeAnnotation
+@scope.Struct
+@scope.Field
+struct Doc {
+  1: string text;
+}
+
+@cpp.RuntimeAnnotation
+@scope.Field
+struct Sensitive {}
+
+@scope.Field
+struct Other {}
+
+@Doc{text = "I am a struct"}
+struct MyStruct {
+  @Oncall{name = "thrift"}
+  @Sensitive
+  @Other
+  1: string field;
+}

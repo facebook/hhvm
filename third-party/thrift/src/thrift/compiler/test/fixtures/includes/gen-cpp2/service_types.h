@@ -18,6 +18,9 @@
 // BEGIN forward_declare
 
 // END forward_declare
+namespace apache::thrift::detail::annotation {
+} // namespace apache::thrift::detail::annotation
+
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {

@@ -2458,3 +2458,5 @@ FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 2, ::cpp2::MyField, ::cpp2::AdaptedStructWithTerseInternBox>();
 }
 }} // cpp2
+namespace apache::thrift::detail::annotation {
+}

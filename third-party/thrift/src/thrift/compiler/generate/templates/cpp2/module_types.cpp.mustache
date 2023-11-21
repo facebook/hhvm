@@ -300,3 +300,33 @@ const ::apache::thrift::detail::TypeInfo TypeToInfo<
 <%/program:split_structs%>
 }}} // namespace apache::thrift::detail
 <%/program:tablebased?%>
+namespace apache::thrift::detail::annotation {
+<%#program:structs%>
+<%#struct:has_field_with_runtime_annotation?%>
+template<> const std::vector<std::any>& field_annotation_values<<%struct:cpp_fullname%>>(FieldId id) {
+  switch (id) {
+<%#struct:fields%>
+  case FieldId{<%field:key%>}: {
+    static const folly::Indestructible<std::vector<std::any>> ret = [] {
+      std::vector<std::any> values;
+<%#field:structured_annotations%>
+<%#structured_annotation:const%>
+<%#constant:cpp_runtime_annotation?%>
+<%#constant:type%><%#constant:value%><%#constant:field%>
+      values.emplace_back(<% > common/iterate_const_values%>);
+<%/constant:field%><%/constant:value%><%/constant:type%>
+<%/constant:cpp_runtime_annotation?%>
+<%/structured_annotation:const%>
+<%/field:structured_annotations%>
+      return values;
+    }();
+    return *ret;
+  }
+<%/struct:fields%>
+  };
+
+  folly::assume_unreachable();
+}
+<%/struct:has_field_with_runtime_annotation?%>
+<%/program:structs%>
+}

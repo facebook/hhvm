@@ -3848,3 +3848,5 @@ FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter, 3, ::std::int16_t, ::apache::thrift::fixtures::types::MinPaddingWithCustomType>();
 }
 }}}}} // apache::thrift::fixtures::types
+namespace apache::thrift::detail::annotation {
+}

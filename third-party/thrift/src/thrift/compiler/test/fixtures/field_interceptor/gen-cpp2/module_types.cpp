@@ -145,3 +145,5 @@ namespace facebook { namespace thrift { namespace test { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
 }
 }}}} // facebook::thrift::test
+namespace apache::thrift::detail::annotation {
+}

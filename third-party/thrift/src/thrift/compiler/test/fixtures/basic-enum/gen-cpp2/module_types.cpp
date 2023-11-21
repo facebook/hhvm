@@ -155,3 +155,5 @@ namespace test { namespace fixtures { namespace enumstrict { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
 }
 }}}} // test::fixtures::enumstrict
+namespace apache::thrift::detail::annotation {
+}

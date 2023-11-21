@@ -193,3 +193,5 @@ namespace facebook { namespace ns { namespace qwerty { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
 }
 }}}} // facebook::ns::qwerty
+namespace apache::thrift::detail::annotation {
+}

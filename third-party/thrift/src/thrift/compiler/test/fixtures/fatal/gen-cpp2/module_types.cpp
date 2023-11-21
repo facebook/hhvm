@@ -3276,3 +3276,5 @@ FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::std::int32_t, ::test_cpp2::cpp_reflection::UnionWithTypedefFieldAdapter>();
 }
 }}} // test_cpp2::cpp_reflection
+namespace apache::thrift::detail::annotation {
+}

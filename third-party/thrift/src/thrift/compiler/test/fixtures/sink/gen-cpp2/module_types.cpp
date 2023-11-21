@@ -696,3 +696,5 @@ namespace cpp2 { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
 }
 }} // cpp2
+namespace apache::thrift::detail::annotation {
+}

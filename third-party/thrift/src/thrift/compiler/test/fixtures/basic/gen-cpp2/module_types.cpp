@@ -597,3 +597,5 @@ namespace test { namespace fixtures { namespace basic { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
 }
 }}}} // test::fixtures::basic
+namespace apache::thrift::detail::annotation {
+}

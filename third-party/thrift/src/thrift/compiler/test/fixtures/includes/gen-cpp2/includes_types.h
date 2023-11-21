@@ -38,6 +38,9 @@ namespace cpp2 {
 class Included;
 } // cpp2
 // END forward_declare
+namespace apache::thrift::detail::annotation {
+} // namespace apache::thrift::detail::annotation
+
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace cpp2 {
@@ -56,6 +59,7 @@ class Included final  {
 
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static const folly::StringPiece __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<

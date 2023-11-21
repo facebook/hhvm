@@ -2969,3 +2969,5 @@ FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::CustomProtocolAdapter, 21, ::some::valid::ns::IOBuf, ::some::valid::ns::AnException>();
 }
 }}}} // some::valid::ns
+namespace apache::thrift::detail::annotation {
+}

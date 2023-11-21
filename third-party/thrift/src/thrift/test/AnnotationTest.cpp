@@ -17,9 +17,24 @@
 #include <folly/portability/GTest.h>
 #include <thrift/test/gen-cpp2/AnnotationTest_types.h>
 
+using namespace apache::thrift;
+
 TEST(AnnotationTest, Cpp2MethodsAnnotation) {
   cpp2::foo foo;
   // this method was defined in cpp2.methods, so if we can compile this call,
   // the annotation worked.
   foo.manuallyDefinedDummyMethod();
+}
+
+TEST(AnnotationTest, GetAnnotationValue) {
+  using namespace cpp2;
+  Oncall expected;
+  expected.name() = "thrift";
+  EXPECT_EQ((get_field_annotation<Oncall, MyStruct, ident::field>()), expected);
+
+  // `Sensitive` annotation exists on MyStruct.field
+  EXPECT_TRUE((has_field_annotation<Sensitive, MyStruct, ident::field>()));
+
+  // `Doc` annotation does not exist on MyStruct.field
+  EXPECT_FALSE((has_field_annotation<Doc, MyStruct, ident::field>()));
 }

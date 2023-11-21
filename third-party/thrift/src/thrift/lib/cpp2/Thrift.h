@@ -92,6 +92,10 @@ struct struct_private_access {
   __fbthrift_cpp2_gen_json();
 
   template <typename T>
+  static folly::bool_constant<T::__fbthrift_cpp2_is_runtime_annotation> //
+  __fbthrift_cpp2_is_runtime_annotation();
+
+  template <typename T>
   static const char* __fbthrift_thrift_uri() {
     return T::__fbthrift_thrift_uri();
   }

@@ -3757,3 +3757,5 @@ FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>, 1, ::apache::thrift::op::StringPatchStruct, ::test::fixtures::python_capi::MyDataItemFieldPatchStruct>();
 }
 }}}} // test::fixtures::python_capi
+namespace apache::thrift::detail::annotation {
+}

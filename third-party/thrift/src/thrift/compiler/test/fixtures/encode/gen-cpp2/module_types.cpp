@@ -621,3 +621,5 @@ FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::FieldAdapter, 12, ::std::vector<::facebook::thrift::test::Foo>, ::facebook::thrift::test::OpEncodeStruct>();
 }
 }}}} // facebook::thrift::test
+namespace apache::thrift::detail::annotation {
+}

@@ -1104,3 +1104,5 @@ FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateAdapter<Adapter, ::py3::simple::detail::AdaptedUnion>();
 }
 }}} // py3::simple
+namespace apache::thrift::detail::annotation {
+}

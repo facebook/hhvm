@@ -694,3 +694,5 @@ namespace facebook { namespace thrift { namespace test { namespace terse_write {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
 }
 }}}}}} // facebook::thrift::test::terse_write::deprecated
+namespace apache::thrift::detail::annotation {
+}

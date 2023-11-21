@@ -252,3 +252,5 @@ namespace module2 { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
 }
 }} // module2
+namespace apache::thrift::detail::annotation {
+}

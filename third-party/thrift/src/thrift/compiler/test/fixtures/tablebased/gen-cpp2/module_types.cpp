@@ -683,3 +683,5 @@ const ::apache::thrift::detail::TypeInfo TypeToInfo<
   /* .typeExt */ &::test::fixtures::tablebased::__fbthrift_struct_info_ExampleUnion,
 };
 }}} // namespace apache::thrift::detail
+namespace apache::thrift::detail::annotation {
+}

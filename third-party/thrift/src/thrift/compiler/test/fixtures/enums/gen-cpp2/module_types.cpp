@@ -373,3 +373,5 @@ namespace test { namespace fixtures { namespace enums { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
 }
 }}}} // test::fixtures::enums
+namespace apache::thrift::detail::annotation {
+}

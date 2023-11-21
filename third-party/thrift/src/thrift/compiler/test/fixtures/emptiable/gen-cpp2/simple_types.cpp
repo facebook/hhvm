@@ -787,3 +787,5 @@ namespace apache { namespace thrift { namespace test { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
 }
 }}}} // apache::thrift::test
+namespace apache::thrift::detail::annotation {
+}

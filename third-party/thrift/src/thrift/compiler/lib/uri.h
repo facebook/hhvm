@@ -104,6 +104,8 @@ inline constexpr auto kCppUseOpEncodeUri =
     "facebook.com/thrift/annotation/cpp/UseOpEncode";
 inline constexpr auto kCppFrozen2ExcludeUri =
     "facebook.com/thrift/annotation/cpp/Frozen2Exclude";
+inline constexpr auto kCppRuntimeAnnotation =
+    "facebook.com/thrift/annotation/cpp/RuntimeAnnotation";
 inline constexpr auto kCppTypeUri = "facebook.com/thrift/annotation/cpp/Type";
 inline constexpr auto kCppNameUri = "facebook.com/thrift/annotation/cpp/Name";
 inline constexpr auto kCppProcessInEbThreadUri =

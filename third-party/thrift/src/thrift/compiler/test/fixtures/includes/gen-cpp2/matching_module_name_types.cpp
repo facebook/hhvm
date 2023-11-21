@@ -108,3 +108,5 @@ namespace matching_module_name { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
 }
 }} // matching_module_name
+namespace apache::thrift::detail::annotation {
+}

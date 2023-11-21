@@ -251,3 +251,5 @@ namespace extra { namespace svc { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
 }
 }}} // extra::svc
+namespace apache::thrift::detail::annotation {
+}

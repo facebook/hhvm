@@ -220,3 +220,5 @@ namespace a { namespace different { namespace ns { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
 }
 }}}} // a::different::ns
+namespace apache::thrift::detail::annotation {
+}

@@ -58,6 +58,23 @@ APACHE_THRIFT_DEFINE_ACCESSOR(<%field:cpp_name%>);
 
 <% > module_types_h/forward_declare%>
 
+namespace apache::thrift::detail::annotation {
+<%#program:structs%>
+<%#struct:has_field_with_runtime_annotation?%>
+template<>
+const std::vector<std::any>& field_annotation_values<<%struct:cpp_fullname%>>(FieldId);
+<%#struct:fields%>
+<%#field:cpp_has_runtime_annotation?%>
+template<>
+struct field_annotation_types<<%struct:cpp_fullname%>, ident::<%field:cpp_name%>> {
+  using type = folly::tag_t<void<%#field:structured_annotations%><%#structured_annotation:const%><%#constant:cpp_runtime_annotation?%>, <%constant:cpp_type%><%/constant:cpp_runtime_annotation?%><%/structured_annotation:const%><%/field:structured_annotations%>>;
+};
+<%/field:cpp_has_runtime_annotation?%>
+<%/struct:fields%>
+<%/struct:has_field_with_runtime_annotation?%>
+<%/program:structs%>
+} // namespace apache::thrift::detail::annotation
+
 <% > module_types_h/hash_and_equal_to%>
 
 <% > common/namespace_cpp2_begin%>
@@ -93,6 +110,7 @@ class <%#struct:exception?%>FOLLY_EXPORT <%/struct:exception?%><%struct:cpp_unde
 
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = <%program:json?%>;
+  static constexpr bool __fbthrift_cpp2_is_runtime_annotation = <%struct:cpp_runtime_annotation?%>;
   <%#struct:thrift_uri%>
   static const char* __fbthrift_thrift_uri();
   <%/struct:thrift_uri%>

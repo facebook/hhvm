@@ -98,3 +98,5 @@ namespace test { namespace namespace_from_package { namespace module { namespace
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
 }
 }}}} // test::namespace_from_package::module
+namespace apache::thrift::detail::annotation {
+}

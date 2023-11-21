@@ -483,3 +483,5 @@ namespace some { namespace ns { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
 }
 }}} // some::ns
+namespace apache::thrift::detail::annotation {
+}

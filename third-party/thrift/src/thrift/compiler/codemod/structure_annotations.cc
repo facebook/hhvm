@@ -234,11 +234,13 @@ class structure_annotations {
         }
       }
       if (name == "cpp.declare_bitwise_ops" ||
-          name == "cpp2.declare_bitwise_ops" || name == "bitmask") {
-        to_remove.emplace_back(name, data);
-        if (!node.find_structured_annotation_or_null(kBitmaskEnumUri)) {
-          to_add.insert("@thrift.BitmaskEnum");
-          fm_.add_include("thrift/annotation/thrift.thrift");
+          name == "cpp2.declare_bitwise_ops") {
+        // This annotation is a subset of @thrift.BitmaskEnum, which carries
+        // additional restrictions. We can't turn this into that but we can use
+        // it if already present to remove this.
+        if (node.find_structured_annotation_or_null(kBitmaskEnumUri) ||
+            node.has_annotation("bitmask")) {
+          to_remove.emplace_back(name, data);
         }
       }
       if (name == "cpp.mixin") {
@@ -328,6 +330,13 @@ class structure_annotations {
               {field->src_range().begin.offset(),
                field->src_range().begin.offset(),
                "@thrift.ExceptionMessage\n"});
+          fm_.add_include("thrift/annotation/thrift.thrift");
+        }
+      }
+      if (name == "bitmask") {
+        to_remove.emplace_back(name, data);
+        if (!node.find_structured_annotation_or_null(kBitmaskEnumUri)) {
+          to_add.insert("@thrift.BitmaskEnum");
           fm_.add_include("thrift/annotation/thrift.thrift");
         }
       }

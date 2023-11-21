@@ -208,8 +208,7 @@ class HoistAnnotatedTypes(unittest.TestCase):
                 @cpp.EnumType{type = cpp.EnumUnderlyingType.U16}
                 enum U16 {}
                 @cpp.EnumType{type = cpp.EnumUnderlyingType.U32}
-                @thrift.BitmaskEnum
-                enum U32 {}
+                enum U32 {} (cpp.declare_bitwise_ops)
 
                 @cpp.ProcessInEbThreadUnsafe
                 interaction I {}
@@ -230,7 +229,7 @@ class HoistAnnotatedTypes(unittest.TestCase):
             "foo.thrift",
             textwrap.dedent(
                 """\
-                enum E {} (bitmask, hack.attributes="JSEnum, GraphQLEnum('SRTJobTypeEnum', 'Auto-generated from PHP enum SRTJobType.'), GraphQLLegacyNamingScheme, Oncalls('srt_core'), WarehouseEnum(shape('hive_enum_map' => true))")
+                enum E {} (bitmask, cpp.declare_bitwise_ops, hack.attributes="JSEnum, GraphQLEnum('SRTJobTypeEnum', 'Auto-generated from PHP enum SRTJobType.'), GraphQLLegacyNamingScheme, Oncalls('srt_core'), WarehouseEnum(shape('hive_enum_map' => true))")
                 struct F {} (
                     hack.name = "F1",
                     hack.attributes = '\\GraphQLEnum("InstagramRingType", "Identifier for the type of ring overlaid on a user\\x27s profile icon"), \\Oncalls("ig_rc_de")',

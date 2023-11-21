@@ -1,0 +1,2 @@
+File "nonexhaustive_with_explicit_dynamic.php", line 7, characters 3-52:
+This match statement is not exhaustive: there is no arm matching values of type `~float` (Typing[4478])

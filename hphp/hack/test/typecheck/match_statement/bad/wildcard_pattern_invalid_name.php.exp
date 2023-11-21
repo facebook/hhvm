@@ -1,0 +1,2 @@
+File "wildcard_pattern_invalid_name.php", line 7, characters 5-10:
+Wildcard patterns must begin with the `_` character. To bind a variable, use a `$` character (`$unused`). (Parsing[1002])

@@ -1,0 +1,10 @@
+File "constructor_pattern.php", line 7, characters 5-11:
+Destructuring values in patterns is not yet supported. (Parsing[1002])
+File "constructor_pattern.php", line 7, characters 5-11:
+Wildcard patterns must begin with the `_` character. To bind a variable, use a `$` character (`$Some`). (Parsing[1002])
+File "constructor_pattern.php", line 8, characters 5-8:
+Wildcard patterns must begin with the `_` character. To bind a variable, use a `$` character (`$None`). (Parsing[1002])
+File "constructor_pattern.php", line 5, characters 12-17:
+Unbound name: `Option` (Naming[2049])
+File "constructor_pattern.php", line 6, characters 3-75:
+This expression has type `Option<int>`, which is not supported in match statements (Typing[4479])

@@ -1,0 +1,24 @@
+File "unsupported_scrutinee_types.php", line 23, characters 3-28:
+This expression has type `mixed`, which is not supported in match statements (Typing[4479])
+File "unsupported_scrutinee_types.php", line 24, characters 3-30:
+This expression has type `nonnull`, which is not supported in match statements (Typing[4479])
+File "unsupported_scrutinee_types.php", line 25, characters 3-29:
+This expression has type `Terased`, which is not supported in match statements (Typing[4479])
+File "unsupported_scrutinee_types.php", line 26, characters 3-30:
+This expression has type `Treified`, which is not supported in match statements (Typing[4479])
+File "unsupported_scrutinee_types.php", line 27, characters 3-30:
+This expression has type `Tbounded`, which is not supported in match statements (Typing[4479])
+File "unsupported_scrutinee_types.php", line 28, characters 3-26:
+This expression has type `vec<int>`, which is not supported in match statements (Typing[4479])
+File "unsupported_scrutinee_types.php", line 29, characters 3-27:
+This expression has type `dict<arraykey, int>`, which is not supported in match statements (Typing[4479])
+File "unsupported_scrutinee_types.php", line 30, characters 3-32:
+This expression has type `Container<int>`, which is not supported in match statements (Typing[4479])
+File "unsupported_scrutinee_types.php", line 31, characters 3-31:
+This expression has type `(function(int): int)`, which is not supported in match statements (Typing[4479])
+File "unsupported_scrutinee_types.php", line 32, characters 3-28:
+This expression has type `(int, int)`, which is not supported in match statements (Typing[4479])
+File "unsupported_scrutinee_types.php", line 33, characters 3-28:
+This expression has type `shape('x' => int)`, which is not supported in match statements (Typing[4479])
+File "unsupported_scrutinee_types.php", line 34, characters 3-43:
+This expression has type `(int | vec<int>)`, which is not supported in match statements because it contains the type `vec<int>` (Typing[4479])

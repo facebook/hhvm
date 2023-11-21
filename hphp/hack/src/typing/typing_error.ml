@@ -1311,6 +1311,15 @@ module Primary = struct
         member_name: string;
         kind: [ `meth | `prop ];
       }
+    | Match_not_exhaustive of {
+        pos: Pos.t;
+        ty_not_covered: string Lazy.t;
+      }
+    | Match_on_unsupported_type of {
+        pos: Pos.t;
+        expr_ty: string Lazy.t;
+        unsupported_tys: string Lazy.t list;
+      }
   [@@deriving show]
 end
 

@@ -172,6 +172,7 @@ type _ t_ =
   | Rpessimised_return : Pos_or_decl.t -> 'phase t_
   | Rpessimised_prop : Pos_or_decl.t -> 'phase t_
   | Runsafe_cast : Pos.t -> locl_phase t_
+  | Rpattern : Pos.t -> locl_phase t_
 [@@deriving hash, show]
 
 type t = locl_phase t_ [@@deriving show]

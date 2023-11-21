@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c1c8f22336bbcc5985ae7d197d747160>>
+// @generated SignedSource<<370f96cf9948d010e11e34f209a080d1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -430,6 +430,8 @@ pub enum T_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Runsafe_cast")]
     RunsafeCast(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Rpattern(&'a pos::Pos<'a>),
 }
 impl<'a> TrivialDrop for T_<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(T_<'arena>);

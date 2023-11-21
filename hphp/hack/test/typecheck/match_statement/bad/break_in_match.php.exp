@@ -1,0 +1,6 @@
+File "break_in_match.php", line 19, characters 10-11:
+Invalid return type (Typing[4110])
+  File "break_in_match.php", line 10, characters 24-26:
+  Expected `int`
+  File "break_in_match.php", line 11, characters 8-11:
+  But got `?int`

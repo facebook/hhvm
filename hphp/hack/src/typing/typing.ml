@@ -2063,7 +2063,35 @@ let ish_weakening env hint hint_ty =
     end
   | _ -> hint_ty
 
-let refine_for_is ~hint_first env tparamet ivar reason hint =
+let refine_for_hint
+    ~hint_first ~expr_pos ~refinement_reason env tparamet ty hint =
+  let ((env, ty_err_opt), hint_ty) =
+    Phase.localize_hint_for_refinement env hint
+  in
+  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+  let hint_ty = strip_supportdyn hint_ty in
+  let hint_ty =
+    if Env.get_tcopt env |> TCO.pessimise_builtins then
+      ish_weakening env hint hint_ty
+    else
+      hint_ty
+  in
+  let (env, hint_ty) =
+    if not tparamet then
+      Inter.negate_type env refinement_reason hint_ty ~approx:TUtils.ApproxUp
+    else
+      (env, hint_ty)
+  in
+  refine_and_simplify_intersection
+    ~hint_first
+    env
+    (fst hint)
+    refinement_reason
+    expr_pos
+    ty
+    hint_ty
+
+let refine_for_is ~hint_first env tparamet ivar refinement_reason hint =
   let (env, lset) =
     match snd hint with
     | Aast.Hnonnull -> condition_nullity ~nonnull:tparamet env ivar
@@ -2075,37 +2103,42 @@ let refine_for_is ~hint_first env tparamet ivar reason hint =
   in
   match locl with
   | Some locl_ivar ->
-    let ((env, ty_err_opt), hint_ty) =
-      Phase.localize_hint_for_refinement env hint
-    in
-    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-    let hint_ty = strip_supportdyn hint_ty in
-    let hint_ty =
-      if Env.get_tcopt env |> TCO.pessimise_builtins then
-        ish_weakening env hint hint_ty
-      else
-        hint_ty
-    in
-    let (env, hint_ty) =
-      if not tparamet then
-        Inter.negate_type env reason hint_ty ~approx:TUtils.ApproxUp
-      else
-        (env, hint_ty)
-    in
     let (env, refined_ty) =
-      refine_and_simplify_intersection
+      refine_for_hint
         ~hint_first
+        ~expr_pos:(fst locl_ivar)
+        ~refinement_reason
         env
-        (fst hint)
-        reason
-        (fst locl_ivar)
+        tparamet
         (fst3 ivar)
-        hint_ty
+        hint
     in
-    let bound_ty = get_bound_ty_for_lvar env ivar in
+    let (_, local_id) = locl_ivar in
+    let bound_ty =
+      (Typing_env.get_local env local_id).Typing_local_types.bound_ty
+    in
     ( set_local ~is_defined:true ~bound_ty env locl_ivar refined_ty,
-      Local_id.Set.singleton (snd locl_ivar) )
+      Local_id.Set.singleton local_id )
   | None -> (env, lset)
+
+let refine_for_pattern ~expr_pos env tparamet ty = function
+  | Aast.PVar { pv_pos = p; pv_id = _ } ->
+    if tparamet then
+      (env, None)
+    else
+      (env, Some (MakeType.nothing (Reason.Rpattern p)))
+  | Aast.PRefinement { pr_pos = p; pr_id = _; pr_hint = h } ->
+    let (env, refined_ty) =
+      refine_for_hint
+        ~hint_first:false
+        ~expr_pos
+        ~refinement_reason:(Reason.Rpattern p)
+        env
+        tparamet
+        ty
+        h
+    in
+    (env, Some refined_ty)
 
 let refine_for_equality pos env te ty =
   let (env, locl) =
@@ -7820,6 +7853,48 @@ end = struct
             (env, (te, tcl, tdfl)))
       in
       (env, Aast.Switch (te, tcl, tdfl))
+    | Match { sm_expr; sm_arms } ->
+      let (env, te, ty) =
+        Expr.expr ~expected:None ~ctxt:Expr.Context.default env sm_expr
+      in
+      let (env, local_opt) = make_a_local_of ~include_this:true env sm_expr in
+      let (env, tal) =
+        let match_arms (env : env) lid =
+          stmt_match_arm_list pos lid ~expr_ty:ty env sm_arms
+        in
+        match local_opt with
+        | None ->
+          (* If we are matching on an expr that isn't a local, we create a temporary local *)
+          let local_id = Local_id.tmp () in
+          let (_, pos, _) = sm_expr in
+          let env =
+            Env.set_local
+              ~is_defined:true
+              ~bound_ty:(Some ty)
+              env
+              local_id
+              ty
+              pos
+          in
+          let (env, tal) = match_arms env (snd3 sm_expr, local_id) in
+          (Env.unset_local env local_id, tal)
+        | Some lid ->
+          let bound_ty = get_bound_ty_for_lvar env sm_expr in
+          let (env, tal) = match_arms env lid in
+          let local = Env.get_local env (snd lid) in
+          let (env, new_ty) =
+            Env.expand_type env Typing_local_types.(local.ty)
+          in
+          (* TODO: remove this dirty hack after D50270756 lands *)
+          let env =
+            if is_union new_ty then
+              set_local ~is_defined:true ~bound_ty env lid ty
+            else
+              env
+          in
+          (env, tal)
+      in
+      (env, Aast.Match { sm_expr = te; sm_arms = tal })
     | Foreach (e1, e2, b) ->
       (* It's safe to do foreach over a disposable, as no leaking is possible *)
       let (env, te1, ty1) =
@@ -7951,7 +8026,6 @@ end = struct
       in
       let env = set_valid_rvalue ~is_defined p env lvar (Some hty) ety in
       (env, Aast.Declare_local ((p, lvar), hint, te))
-    | Match _ -> failwith "TODO(jakebailey): match statements"
     | Awaitall _
     | Block _
     | Markup _ ->
@@ -8140,6 +8214,133 @@ end = struct
         (env, Some (pos, tb))
     in
     (env, tcl, tdfl)
+
+  and stmt_match_arm_list pos locl_var ~expr_ty env al =
+    let has_wildcard =
+      List.exists al ~f:(fun { sma_pat; _ } ->
+          match sma_pat with
+          | Aast.PVar _ -> true
+          | _ -> false)
+    in
+    (* We need to solve type variables in order to ensure that the type is one
+       we support in match *)
+    let ((env, ty_err_opt), expr_ty) =
+      if has_wildcard then
+        ((env, None), expr_ty)
+      else
+        Typing_solver.expand_type_and_solve
+          env
+          ~description_of_expected:"a value"
+          pos
+          expr_ty
+    in
+    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+    (* Error if the type is one we don't support. We currently support case types,
+       null, bool, int, float, string, dynamic, and unions thereof. *)
+    let rec find_unsupported_tys env acc ty =
+      let (env, ty) = Env.expand_type env ty in
+      match get_node ty with
+      | Tprim (Tnull | Tbool | Tint | Tfloat | Tstring | Tnum | Tarraykey) ->
+        (env, acc)
+      | Tdynamic -> (env, acc)
+      | Tunion tyl ->
+        List.fold_left_env env tyl ~init:acc ~f:find_unsupported_tys
+      | Tnewtype (name, _, _) -> begin
+        match Env.get_typedef env name with
+        | Some { td_vis = Aast.CaseType; _ } -> (env, acc)
+        | _ -> (env, ty :: acc)
+      end
+      | _ -> (env, ty :: acc)
+    in
+    let (env, unsupported_tys) = find_unsupported_tys env [] expr_ty in
+    let ty_was_allowed = List.is_empty unsupported_tys in
+    (if not ty_was_allowed then
+      let expr_ty = lazy (Typing_print.full_strip_ns env expr_ty) in
+      let unsupported_tys =
+        List.map unsupported_tys ~f:(fun ty ->
+            lazy (Typing_print.full_strip_ns env ty))
+      in
+      Typing_error_utils.add_typing_error
+        ~env
+        Typing_error.(
+          primary
+          @@ Primary.Match_on_unsupported_type { pos; expr_ty; unsupported_tys }));
+    let refine_for_pattern = refine_for_pattern ~expr_pos:(fst locl_var) in
+    let refine_for_prev_patterns env prev_patterns =
+      List.fold_left_env
+        env
+        prev_patterns
+        ~init:expr_ty
+        ~f:(fun env ty pattern ->
+          let (env, refined_ty) = refine_for_pattern env false ty pattern in
+          (env, Option.value refined_ty ~default:ty))
+    in
+    let arm_condition env prev_patterns pat =
+      let ((env, refined_ty), next_patterns) =
+        match pat with
+        | Aast.PVar _ ->
+          let (env, refined_ty) = refine_for_prev_patterns env prev_patterns in
+          ( ( env,
+              if phys_equal expr_ty refined_ty then
+                None
+              else
+                Some refined_ty ),
+            (* Since we consumed the previous patterns we don't need to include them *)
+            [pat] )
+        | _ -> (refine_for_pattern env true expr_ty pat, pat :: prev_patterns)
+      in
+      match refined_ty with
+      | None -> (env, Local_id.Set.empty, next_patterns)
+      | Some ty ->
+        (* We set the bound to the original type of the expression because we don't
+           want to allow assignments to an unrelated type. *)
+        ( set_local ~is_defined:true ~bound_ty:(Some expr_ty) env locl_var ty,
+          Local_id.Set.singleton (snd locl_var),
+          next_patterns )
+    in
+    let parent_lenv = env.lenv in
+    let rec branch_arms env ~prev_patterns ~lenvs = function
+      | { sma_pat; sma_body } :: al ->
+        let env = { env with lenv = parent_lenv } in
+        let (env, lset, prev_patterns) =
+          arm_condition env prev_patterns sma_pat
+        in
+        let refinement_map = refinement_annot_map env lset in
+        let (env, sma_body) = block env sma_body in
+        let sma_body =
+          assert_env_blk ~pos ~at:`Start Aast.Refinement refinement_map sma_body
+        in
+        let (env, acc) =
+          branch_arms env ~prev_patterns ~lenvs:(env.lenv :: lenvs) al
+        in
+        (env, { sma_pat; sma_body } :: acc)
+      | [] ->
+        let (env, ty) = refine_for_prev_patterns env prev_patterns in
+        (* If the type is not one we support in match, we can't usefully check for
+           exhaustiveness and we've already emitted an error, so don't check for
+           exhaustiveness. *)
+        let env =
+          if not ty_was_allowed then
+            env
+          else begin
+            let lnothing =
+              MakeType.locl_like Reason.none (MakeType.nothing Reason.none)
+            in
+            let ty_not_covered = lazy (Typing_print.full_strip_ns env ty) in
+            let (env, err_opt) =
+              SubType.sub_type_or_fail env ty lnothing
+              @@ Some
+                   Typing_error.(
+                     primary
+                     @@ Primary.Match_not_exhaustive { pos; ty_not_covered })
+            in
+            Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err_opt;
+            env
+          end
+        in
+        (LEnv.union_lenv_list env ~join_pos:pos parent_lenv lenvs, [])
+    in
+    branch_arms env ~prev_patterns:[] ~lenvs:[] al
 
   and catch catchctx env (sid, exn_lvar, b) =
     let env = LEnv.replace_cont env C.Next catchctx in

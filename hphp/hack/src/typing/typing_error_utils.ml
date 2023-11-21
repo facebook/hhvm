@@ -4286,6 +4286,37 @@ module Eval_primary = struct
       lazy [],
       [] )
 
+  let match_not_exhaustive pos ty =
+    let backticks ty = "`" ^ ty ^ "`" in
+    ( Error_code.MatchNotExhaustive,
+      lazy
+        ( pos,
+          "This match statement is not exhaustive: there is no arm matching values of type "
+          ^ backticks ty ),
+      lazy [],
+      [] )
+
+  let match_on_unsupported_type pos expr_ty unsupported_tys =
+    let backticks ty = "`" ^ ty ^ "`" in
+    ( Error_code.MatchOnUnsupportedType,
+      lazy
+        ( pos,
+          "This expression has type "
+          ^ backticks expr_ty
+          ^ ", which is not supported in match statements"
+          ^
+          match unsupported_tys with
+          | [] -> ""
+          | [ty] when String.equal ty expr_ty -> ""
+          | [ty] -> " because it contains the type " ^ backticks ty
+          | _ ->
+            " because it contains the following types: "
+            ^ (unsupported_tys
+              |> List.map ~f:backticks
+              |> String.concat ~sep:", ") ),
+      lazy [],
+      [] )
+
   let to_error t ~env =
     let open Typing_error.Primary in
     match t with
@@ -4841,6 +4872,13 @@ module Eval_primary = struct
         ~actual_ty:(Lazy.force actual_ty)
     | Call_lvalue pos -> call_lvalue pos
     | Unsafe_cast_await pos -> unsafe_cast_await pos
+    | Match_not_exhaustive { pos; ty_not_covered } ->
+      match_not_exhaustive pos (Lazy.force ty_not_covered)
+    | Match_on_unsupported_type { pos; expr_ty; unsupported_tys } ->
+      match_on_unsupported_type
+        pos
+        (Lazy.force expr_ty)
+        (List.map unsupported_tys ~f:Lazy.force)
 end
 
 module rec Eval_error : sig

@@ -1,0 +1,2 @@
+File "nonexhaustive.php", line 11, characters 3-43:
+This match statement is not exhaustive: there is no arm matching values of type `B` (Typing[4478])

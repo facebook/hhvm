@@ -183,6 +183,7 @@ type _ t_ =
   | Rpessimised_return : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
   | Rpessimised_prop : (Pos_or_decl.t[@hash.ignore]) -> 'phase t_
   | Runsafe_cast : Pos.t -> locl_phase t_
+  | Rpattern : Pos.t -> locl_phase t_
 [@@deriving hash]
 
 let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
@@ -275,7 +276,8 @@ let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Ret_boolean p
   | Rconcat_operand p
   | Rinterp_operand p
-  | Rrigid_tvar_escape (p, _, _, _) ->
+  | Rrigid_tvar_escape (p, _, _, _)
+  | Rpattern p ->
     Pos_or_decl.of_raw_pos p
   | Rinvariant_generic (r, _)
   | Rcontravariant_generic (r, _)
@@ -390,6 +392,7 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Rpessimised_return _ -> "Rpessimised_return"
   | Rpessimised_prop _ -> "Rpessimised_prop"
   | Runsafe_cast _ -> "Runsafe_cast"
+  | Rpattern _ -> "Rpattern"
 
 let rec pp_t_ : type ph. _ -> ph t_ -> unit =
  fun fmt r ->
@@ -550,7 +553,8 @@ let rec pp_t_ : type ph. _ -> ph t_ -> unit =
     | Rinterp_operand p
     | Rmissing_class p
     | Rwitness p
-    | Rcaptured_like p ->
+    | Rcaptured_like p
+    | Rpattern p ->
       Pos.pp fmt p
     | Runset_field (p, s)
     | Rshape (p, s)
@@ -1126,6 +1130,8 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
         ^ unsafe_cast
         ^ ". The type might be a lie!" );
     ]
+  | Rpattern p ->
+    [(Pos_or_decl.of_raw_pos p, prefix ^ " because of this pattern")]
 
 and to_pos : type ph. ph t_ -> Pos_or_decl.t =
  fun r ->
@@ -1387,6 +1393,7 @@ module Visitor = struct
         | Rpessimised_return x -> Rpessimised_return x
         | Rpessimised_prop x -> Rpessimised_prop x
         | Runsafe_cast x -> Runsafe_cast x
+        | Rpattern x -> Rpattern x
 
       method on_lazy l = l
     end

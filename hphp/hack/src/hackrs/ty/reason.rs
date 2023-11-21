@@ -246,6 +246,7 @@ pub trait Reason:
                 OR::RpessimisedInout(pos) => RI::RpessimisedInout(pos.into()),
                 OR::RpessimisedReturn(pos) => RI::RpessimisedReturn(pos.into()),
                 OR::RpessimisedProp(pos) => RI::RpessimisedProp(pos.into()),
+                OR::Rpattern(pos) => RI::Rpattern(pos.into()),
             }
         })
     }
@@ -405,6 +406,7 @@ pub enum ReasonImpl<R, P> {
     RpessimisedInout(P),
     RpessimisedReturn(P),
     RpessimisedProp(P),
+    Rpattern(P),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -657,6 +659,7 @@ impl<'a> ToOxidized<'a> for BReason {
             RI::RpessimisedInout(pos) => OR::RpessimisedInout(pos.to_oxidized(arena)),
             RI::RpessimisedReturn(pos) => OR::RpessimisedReturn(pos.to_oxidized(arena)),
             RI::RpessimisedProp(pos) => OR::RpessimisedProp(pos.to_oxidized(arena)),
+            RI::Rpattern(pos) => OR::Rpattern(pos.to_oxidized(arena)),
         }
     }
 }

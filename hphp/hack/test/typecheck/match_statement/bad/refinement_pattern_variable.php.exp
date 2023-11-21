@@ -1,0 +1,6 @@
+File "refinement_pattern_variable.php", line 7, characters 5-11:
+Binding a variable in a pattern is not yet supported. (Parsing[1002])
+File "refinement_pattern_variable.php", line 7, characters 26-27:
+Variable `$i` is undefined, or not always defined. (Naming[2050])
+  File "refinement_pattern_variable.php", line 6, characters 10-11:
+  Did you mean `$v` instead?

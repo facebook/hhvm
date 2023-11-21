@@ -350,6 +350,7 @@ and stmt env acc st =
   let block = block env in
   let catch = catch env in
   let case = case env in
+  let stmt_match_arm = stmt_match_arm env in
   let default_case = default_case env in
   match snd st with
   | Expr (* only in top level!*)
@@ -408,6 +409,11 @@ and stmt env acc st =
     let c = S.inter_list cl in
     let c = Option.fold ~init:c ~f:S.inter cdfl in
     S.union acc c
+  | Match { sm_expr; sm_arms } ->
+    let acc = expr acc sm_expr in
+    let arms = List.map sm_arms ~f:(stmt_match_arm acc) in
+    let c = S.inter_list arms in
+    S.union acc c
   | Foreach (e, _, _) ->
     let acc = expr acc e in
     acc
@@ -426,7 +432,6 @@ and stmt env acc st =
   | Block (_, b) -> block acc b
   | Markup _ -> acc
   | AssertEnv _ -> acc
-  | Match _ -> failwith "TODO(jakebailey): match statements"
 
 and toplevel env acc l =
   try List.fold_left ~f:(stmt env) ~init:acc l with
@@ -629,6 +634,8 @@ and expr_ env acc p e =
 and case env acc ((_, b) : (_, _) Aast.case) = block env acc b
 
 and case_has_body ((_, b) : (_, _) Aast.case) = not (List.is_empty b)
+
+and stmt_match_arm env acc { sma_pat = _; sma_body } = block env acc sma_body
 
 and default_case env acc ((_, b) : (_, _) Aast.default_case) = block env acc b
 

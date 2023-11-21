@@ -92,6 +92,9 @@ let on_hint on_error hint ~ctx =
       (ctx, Ok (pos, Aast.Herr))
   | _ -> (ctx, Ok hint)
 
+let on_ty_pat_refinement pr ~ctx =
+  (Env.set_allow_wildcard ctx ~allow_wildcard:true, Ok pr)
+
 let pass on_error =
   let id = Aast.Pass.identity () in
   Naming_phase_pass.top_down
@@ -104,4 +107,5 @@ let pass on_error =
         on_ty_context = Some (fun elem ~ctx -> on_context on_error elem ~ctx);
         on_ty_hint_ = Some on_hint_;
         on_ty_hint = Some (fun elem ~ctx -> on_hint on_error elem ~ctx);
+        on_ty_pat_refinement = Some on_ty_pat_refinement;
       }

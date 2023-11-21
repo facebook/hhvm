@@ -762,6 +762,8 @@ module Typing = struct
     | IllegalCaseTypeVariants [@value 4475]
     | StaticCallOnTraitRequireClass [@value 4476]
     | WrongUseKind [@value 4477]
+    | MatchNotExhaustive [@value 4478]
+    | MatchOnUnsupportedType [@value 4479]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

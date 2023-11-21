@@ -77,6 +77,15 @@ impl Pass for ElabHintWildcardPass {
         Continue(())
     }
 
+    fn on_ty_pat_refinement_top_down(
+        &mut self,
+        _: &Env,
+        _: &mut nast::PatRefinement,
+    ) -> ControlFlow<()> {
+        self.allow_wildcard = true;
+        Continue(())
+    }
+
     fn on_ty_targ_top_down(&mut self, _: &Env, _: &mut nast::Targ) -> ControlFlow<()> {
         self.allow_wildcard = true;
         self.incr_depth();

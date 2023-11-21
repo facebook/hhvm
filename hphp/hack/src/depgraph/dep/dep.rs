@@ -33,6 +33,7 @@ impl Dep {
         (self.0 & 1) != 0
     }
 
+    // Return the 'Extends' dep for a class from its 'Type' dep
     pub fn class_to_extends(self) -> Option<Self> {
         if !self.is_class() {
             None
@@ -41,12 +42,18 @@ impl Dep {
         }
     }
 
+    // Return the 'RequireExtends' dep for a class from its 'Type' dep
     pub fn class_to_require_extends(self) -> Self {
         Dep(typing_deps_hash::hash2(
             DepType::RequireExtends,
             self.0,
             &[],
         ))
+    }
+
+    // Return the 'NotSubtype' dep for a class from its 'Type' dep
+    pub fn class_to_not_subtype(self) -> Self {
+        Dep(typing_deps_hash::hash2(DepType::NotSubtype, self.0, &[]))
     }
 
     /// The `Declares` special dep, used to mark declared members.

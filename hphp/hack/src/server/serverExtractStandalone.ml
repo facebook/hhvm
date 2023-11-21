@@ -290,7 +290,8 @@ end = struct
       | Constructor cls
       | AllMembers cls
       | Extends cls
-      | RequireExtends cls ->
+      | RequireExtends cls
+      | NotSubtype cls ->
         Some cls
       | Module md -> Some md
       | Fun _
@@ -312,7 +313,8 @@ end = struct
     | Constructor name
     | AllMembers name
     | Extends name
-    | RequireExtends name ->
+    | RequireExtends name
+    | NotSubtype name ->
       Decl.get_class_or_typedef_pos ctx name
     | GConst name
     | GConstName name ->
@@ -2055,6 +2057,7 @@ end = struct
       | AllMembers _
       | Extends _
       | RequireExtends _
+      | NotSubtype _
       (* TODO(T108206307) *)
       | Module _
       | Declares ->

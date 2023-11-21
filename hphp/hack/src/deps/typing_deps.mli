@@ -29,18 +29,27 @@ module Dep : sig
   type _ variant =
     | GConst : string -> 'a variant
         (** Represents a global constant depending on something, or something
-        depending on a global constant. *)
+          depending on a global constant. *)
     | Fun : string -> 'a variant
         (** Represents either a global function depending on something, or
-        something depending on a global function. *)
+          something depending on a global function. *)
     | Type : string -> 'a variant
         (** Represents either a class/typedef/recorddef/trait/interface depending on something,
-        or something depending on one. *)
+          or something depending on one. *)
     | Extends : string -> dependency variant
         (** Represents another class depending on a class via an
-        inheritance-like mechanism (`extends`, `implements`, `use`, `require
-        extends`, `require implements`, etc.) *)
+          inheritance-like mechanism (`extends`, `implements`, `use`, `require
+          extends`, `require implements`, etc.) *)
     | RequireExtends : string -> dependency variant
+        (** Whenever a type A has `require extends B` or `require implements B`
+          or `require class B`, we add an edge from `RequireExtends B` to `Type A` *)
+    | NotSubtype : string -> dependency variant
+        (** Whenever we use the fact that 'A is not a subtype of X' to conclude that
+          a def F typechecks, we add an edge from `NotSubtype A` to the variant for F.
+          For example, this can happen if we conclude that F typechecks based on
+          concluding that A and X are disjoint and therefore a refinement branch is dead code.
+          Adding a parent to A can invalidate any fact like 'A is not a subtype of X',
+          so these edges will be typically followed when adding parents to types. *)
     | Const : string * string -> dependency variant
         (** Represents something depending on a class constant. *)
     | Constructor : string -> dependency variant
@@ -55,14 +64,14 @@ module Dep : sig
         (** Represents something depending on a class's static method. *)
     | AllMembers : string -> dependency variant
         (** Represents something depending on all members of a class.
-        Particularly useful for switch exhaustiveness-checking. We establish
-        a dependency on all members of an enum in that case. *)
+          Particularly useful for switch exhaustiveness-checking. We establish
+          a dependency on all members of an enum in that case. *)
     | GConstName : string -> 'a variant
         (** Like [GConst], but used only in conservative redecl. May not be
-        necessary anymore. *)
+          necessary anymore. *)
     | Module : string -> 'a variant
         (** Represents a toplevel symbol being defined as a member of
-        this module *)
+          this module *)
     | Declares : 'a variant
         (** An edge `Method(c, m) -> Declares` means that class c declares m. *)
 
@@ -84,6 +93,7 @@ module Dep : sig
     | KGConstName
     | KModule
     | KDeclares
+    | KNotSubtype
   [@@deriving enum]
 
   val dep_kind_of_variant : 'a variant -> dep_kind
@@ -122,6 +132,7 @@ module Dep : sig
 
   val is_class : t -> bool
 
+  (** Return the 'Extends' and 'RequireExtends' deps for a class from its 'Type' dep  *)
   val extends_and_req_extends_of_class : t -> t * t
 
   val compare : t -> t -> int

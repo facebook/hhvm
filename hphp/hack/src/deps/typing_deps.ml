@@ -31,6 +31,7 @@ module Dep = struct
     | Type : string -> 'a variant
     | Extends : string -> dependency variant
     | RequireExtends : string -> dependency variant
+    | NotSubtype : string -> dependency variant
     | Const : string * string -> dependency variant
     | Constructor : string -> dependency variant
     | Prop : string * string -> dependency variant
@@ -57,6 +58,7 @@ module Dep = struct
     | AllMembers s -> AllMembers s
     | Extends s -> Extends s
     | RequireExtends s -> RequireExtends s
+    | NotSubtype s -> NotSubtype s
     | Declares -> Declares
 
   (** NOTE: keep in sync with `typing_deps_hash.rs`. *)
@@ -76,6 +78,7 @@ module Dep = struct
     | KGConstName [@value 12]
     | KModule [@value 13]
     | KDeclares [@value 14]
+    | KNotSubtype [@value 15]
   [@@deriving enum]
 
   module Member = struct
@@ -153,6 +156,7 @@ module Dep = struct
     | Type _ -> 2
     | Extends _ -> 3
     | RequireExtends _ -> 4
+    | NotSubtype _ -> 15
     | Const _ -> 5
     | Constructor _ -> 6
     | Prop _ -> 7
@@ -171,6 +175,7 @@ module Dep = struct
     | (Type x1, Type x2)
     | (Extends x1, Extends x2)
     | (RequireExtends x1, RequireExtends x2)
+    | (NotSubtype x1, NotSubtype x2)
     | (Constructor x1, Constructor x2)
     | (AllMembers x1, AllMembers x2)
     | (GConstName x1, GConstName x2) ->
@@ -187,9 +192,9 @@ module Dep = struct
         String.compare m1 m2
     | (Declares, Declares) -> 0
     | ( _,
-        ( GConst _ | Fun _ | Type _ | Extends _ | RequireExtends _ | Const _
-        | Constructor _ | Prop _ | SProp _ | Method _ | SMethod _ | AllMembers _
-        | GConstName _ | Module _ | Declares ) ) ->
+        ( GConst _ | Fun _ | Type _ | Extends _ | RequireExtends _
+        | NotSubtype _ | Const _ | Constructor _ | Prop _ | SProp _ | Method _
+        | SMethod _ | AllMembers _ | GConstName _ | Module _ | Declares ) ) ->
       ordinal_variant v1 - ordinal_variant v2
 
   let dep_kind_of_variant : type a. a variant -> dep_kind = function
@@ -206,6 +211,7 @@ module Dep = struct
     | AllMembers _ -> KAllMembers
     | Extends _ -> KExtends
     | RequireExtends _ -> KRequireExtends
+    | NotSubtype _ -> KNotSubtype
     | Module _ -> KModule
     | Declares -> KDeclares
 
@@ -213,10 +219,16 @@ module Dep = struct
     let (dep_kind, member_name) = Member.to_dep_kind_and_name member in
     hash2 (dep_kind_to_enum dep_kind) type_dep member_name
 
+  (** Return the 'Extends' dep for a class from its 'Type' dep  *)
   let extends_of_class class_dep = class_dep lxor 1
 
+  (** Return the 'RequireExtends' dep for a class from its 'Type' dep  *)
   let require_extends_of_class class_dep =
     hash2 (dep_kind_to_enum KRequireExtends) class_dep ""
+
+  (** Return the 'NotSubtype' dep for a class from its 'Type' dep  *)
+  let not_subtype_of_class class_dep =
+    hash2 (dep_kind_to_enum KNotSubtype) class_dep ""
 
   (* Keep in sync with the tags for `DepType` in `typing_deps_hash.rs`. *)
   let rec make : type a. a variant -> t = function
@@ -228,6 +240,7 @@ module Dep = struct
     | Type name1 -> hash1 (dep_kind_to_enum KType) name1
     | Extends name1 -> hash1 (dep_kind_to_enum KExtends) name1
     | RequireExtends name1 -> require_extends_of_class (make (Type name1))
+    | NotSubtype name1 -> not_subtype_of_class (make (Type name1))
     (* Deps on members *)
     | Constructor name1 ->
       make_member_dep_from_type_dep (make (Type name1)) Member.Constructor
@@ -266,7 +279,8 @@ module Dep = struct
     | Constructor s
     | AllMembers s
     | Extends s
-    | RequireExtends s ->
+    | RequireExtends s
+    | NotSubtype s ->
       Utils.strip_ns s
     | Module m -> m
     | Declares -> "__declares__"
@@ -280,6 +294,7 @@ module Dep = struct
     | AllMembers s
     | Extends s
     | RequireExtends s
+    | NotSubtype s
     | Module s
     | Type s
     | Fun s
@@ -301,6 +316,7 @@ module Dep = struct
     | AllMembers _
     | Extends _
     | RequireExtends _
+    | NotSubtype _
     | Module _
     | Type _
     | Fun _
@@ -318,6 +334,7 @@ module Dep = struct
     | Const (s, _)
     | Extends s
     | RequireExtends s
+    | NotSubtype s
     | AllMembers s
     | Constructor s
     | Prop (s, _)
@@ -359,6 +376,7 @@ module Dep = struct
       | AllMembers _ -> "AllMembers"
       | Extends _ -> "Extends"
       | RequireExtends _ -> "RequireExtends"
+      | NotSubtype _ -> "NotSubtype"
       | Module _ -> "Module"
       | Declares -> "Declares"
     in

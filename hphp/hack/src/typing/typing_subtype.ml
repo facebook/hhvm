@@ -278,6 +278,7 @@ let is_class_disjoint env c1 c2 =
         && (not (is_interface_or_trait c2_def))
         && (not (Cls.has_ancestor c2_def c1))
         && not (Cls.has_ancestor c1_def c2)
+      (* TODO(T162871485) add NotSubtype dep edges *)
     | _ ->
       (* This is a decl error that should have already been caught *)
       false

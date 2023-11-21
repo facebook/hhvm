@@ -29,6 +29,7 @@ pub enum DepType {
     GConstName = 12,
     Module = 13,
     Declares = 14,
+    NotSubtype = 15,
 }
 
 impl DepType {
@@ -53,6 +54,7 @@ impl DepType {
             12 => Some(DepType::GConstName),
             13 => Some(DepType::Module),
             14 => Some(DepType::Declares),
+            15 => Some(DepType::NotSubtype),
             _ => None,
         }
     }

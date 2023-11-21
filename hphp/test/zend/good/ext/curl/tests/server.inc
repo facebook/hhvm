@@ -38,8 +38,10 @@ function curl_cli_server_start() {
     $i = 0;
     $errno = null;
     $errstr = null;
+    $error = error_reporting();
+    error_reporting(0);
     while (($i++ < 30) &&
-           !($fp = @fsockopen(
+           !($fp = fsockopen(
                PHP_CURL_SERVER_HOSTNAME,
                PHP_CURL_SERVER_PORT,
                inout $errno,
@@ -48,6 +50,7 @@ function curl_cli_server_start() {
           ) {
         usleep(10000);
     }
+    error_reporting($error);
 
     if ($fp) {
         fclose($fp);

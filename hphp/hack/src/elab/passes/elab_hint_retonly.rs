@@ -18,20 +18,18 @@ pub struct ElabHintRetonlyPass {
 impl Pass for ElabHintRetonlyPass {
     fn on_ty_hint_top_down(&mut self, env: &Env, elem: &mut Hint) -> ControlFlow<()> {
         match elem {
-            Hint(pos, box hint_ @ Hint_::Hprim(Tprim::Tvoid)) if !self.allow_retonly => {
+            Hint(pos, box Hint_::Hprim(Tprim::Tvoid)) if !self.allow_retonly => {
                 env.emit_error(NamingError::ReturnOnlyTypehint {
                     pos: pos.clone(),
                     kind: ReturnOnlyHint::Hvoid,
                 });
-                *hint_ = Hint_::Herr;
                 Break(())
             }
-            Hint(pos, box hint_ @ Hint_::Hprim(Tprim::Tnoreturn)) if !self.allow_retonly => {
+            Hint(pos, box Hint_::Hprim(Tprim::Tnoreturn)) if !self.allow_retonly => {
                 env.emit_error(NamingError::ReturnOnlyTypehint {
                     pos: pos.clone(),
                     kind: ReturnOnlyHint::Hnoreturn,
                 });
-                *hint_ = Hint_::Herr;
                 Break(())
             }
             _ => Continue(()),
@@ -194,7 +192,6 @@ mod tests {
                 NamingError::ReturnOnlyTypehint { .. }
             ))
         ));
-        assert!(matches!(elem, Hint(_, box Hint_::Herr)))
     }
 
     #[test]
@@ -242,9 +239,5 @@ mod tests {
                 NamingError::ReturnOnlyTypehint { .. }
             ))
         ));
-        assert!(match elem.params.pop() {
-            Some(fp) => matches!(fp.type_hint, TypeHint(_, Some(Hint(_, box Hint_::Herr)))),
-            _ => false,
-        })
     }
 }

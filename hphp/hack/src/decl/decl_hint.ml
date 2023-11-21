@@ -97,8 +97,6 @@ and aast_tparam_to_decl_tparam env t =
   }
 
 and hint_ p env = function
-  | Hany -> Typing_defs.make_tany ()
-  | Herr -> Typing_defs.make_tany ()
   | Hmixed -> Tmixed
   | Hwildcard -> Twildcard
   | Hnonnull -> Tnonnull

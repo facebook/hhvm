@@ -25,9 +25,6 @@ let any_type_name = "ANY_TYPE"
 
 let rec pp_hint ~is_ctx ppf (pos, hint_) =
   match hint_ with
-  | Aast.Hany
-  | Aast.Herr ->
-    Fmt.string ppf any_type_name
   | Aast.Hthis -> Fmt.string ppf "this"
   | Aast.Hdynamic -> Fmt.string ppf "dynamic"
   | Aast.Hnothing -> Fmt.string ppf "nothing"

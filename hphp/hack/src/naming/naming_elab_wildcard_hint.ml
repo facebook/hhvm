@@ -76,7 +76,7 @@ let on_context on_error hint ~ctx =
   | (pos, Aast.Hwildcard) ->
     on_error
       (Naming_phase_error.naming @@ Naming_error.Invalid_wildcard_context pos);
-    (ctx, Error (pos, Aast.Herr))
+    (ctx, Error hint)
   | _ -> (ctx, Ok hint)
 
 let on_hint on_error hint ~ctx =
@@ -89,7 +89,7 @@ let on_hint on_error hint ~ctx =
         Naming_phase_error.naming @@ Naming_error.Wildcard_hint_disallowed pos
       in
       on_error err;
-      (ctx, Ok (pos, Aast.Herr))
+      (ctx, Error hint)
   | _ -> (ctx, Ok hint)
 
 let on_ty_pat_refinement pr ~ctx =

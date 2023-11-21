@@ -1,2 +1,6 @@
 File "invalid_hint_void.php", line 4, characters 9-12:
 You can only use the `void` type as the return type of a function or method (Naming[2063])
+File "invalid_hint_void.php", line 4, characters 9-12:
+Invalid `as` expression hint (Typing[4195])
+  File "invalid_hint_void.php", line 4, characters 9-12:
+  The `as` operator cannot be used with the `void` type

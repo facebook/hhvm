@@ -18,11 +18,6 @@ let on_expr_ on_error expr_ ~ctx =
              || equal tycon_nm SN.Collections.cVec) ->
       None
     | Aast.(Cast ((_, Aast.Hvec_or_dict (_, _)), _)) -> None
-    | Aast.(Cast ((_, Aast.Hany), _)) ->
-      (* We end up with a `Hany` when we have an arity error for dict/vec
-         - we don't error on this case to preserve behaviour
-      *)
-      None
     | Aast.(Cast ((pos, _), _)) ->
       Some (Naming_phase_error.naming @@ Naming_error.Object_cast pos)
     | _ -> None

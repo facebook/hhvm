@@ -6,3 +6,39 @@ File "valid_targ_wildcard_hint.php", line 9, characters 19-19:
 Wildcard typehints are not allowed in this position (Naming[2084])
 File "valid_targ_wildcard_hint.php", line 9, characters 30-30:
 Wildcard typehints are not allowed in this position (Naming[2084])
+File "valid_targ_wildcard_hint.php", line 6, characters 19-19:
+Invalid reified hint (Typing[4305])
+  File "valid_targ_wildcard_hint.php", line 6, characters 19-19:
+  This is a wildcard, it cannot be used as a reified type argument
+  File "valid_targ_wildcard_hint.php", line 4, characters 15-16:
+  `Tc` is reified
+File "valid_targ_wildcard_hint.php", line 7, characters 19-22:
+Invalid reified hint (Typing[4305])
+  File "valid_targ_wildcard_hint.php", line 7, characters 21-21:
+  This is a wildcard, it cannot be used as a reified type argument
+  File "valid_targ_wildcard_hint.php", line 4, characters 15-16:
+  `Tc` is reified
+File "valid_targ_wildcard_hint.php", line 7, characters 21-21:
+Invalid reified hint (Typing[4305])
+  File "valid_targ_wildcard_hint.php", line 7, characters 21-21:
+  This is a wildcard, it cannot be used as a reified type argument
+  File "valid_targ_wildcard_hint.php", line 4, characters 15-16:
+  `Tc` is reified
+File "valid_targ_wildcard_hint.php", line 9, characters 17-20:
+Invalid reified hint (Typing[4305])
+  File "valid_targ_wildcard_hint.php", line 9, characters 19-19:
+  This is a wildcard, it cannot be used as a reified type argument
+  File "valid_targ_wildcard_hint.php", line 4, characters 15-16:
+  `Tc` is reified
+File "valid_targ_wildcard_hint.php", line 9, characters 19-19:
+Invalid reified hint (Typing[4305])
+  File "valid_targ_wildcard_hint.php", line 9, characters 19-19:
+  This is a wildcard, it cannot be used as a reified type argument
+  File "valid_targ_wildcard_hint.php", line 4, characters 15-16:
+  `Tc` is reified
+File "valid_targ_wildcard_hint.php", line 9, characters 30-30:
+Invalid reified hint (Typing[4305])
+  File "valid_targ_wildcard_hint.php", line 9, characters 30-30:
+  This is a wildcard, it cannot be used as a reified type argument
+  File "valid_targ_wildcard_hint.php", line 4, characters 15-16:
+  `Tc` is reified

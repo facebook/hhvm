@@ -100,7 +100,6 @@ pub(crate) fn has_reified_type_constraint<'a, 'arena>(
         | Hint_::HfunContext(_)
         | Hint_::Hvar(_) => ReificationLevel::Not,
         // Not found in the original AST
-        Hint_::Herr | Hint_::Hany => panic!("Should be a naming error"),
         Hint_::Habstr(_, _) => panic!("TODO Unimplemented: Not in the original AST"),
     }
 }
@@ -132,9 +131,7 @@ fn remove_awaitable(aast::Hint(pos, hint): aast::Hint) -> aast::Hint {
         | Hint_::HfunContext(_)
         | Hint_::Hvar(_)
         | Hint_::Hwildcard => Hint(pos, hint),
-        Hint_::Herr
-        | Hint_::Hany
-        | Hint_::Hmixed
+        Hint_::Hmixed
         | Hint_::Hnonnull
         | Hint_::Habstr(_, _)
         | Hint_::HvecOrDict(_, _)
@@ -224,9 +221,7 @@ pub(crate) fn remove_erased_generics<'a, 'arena>(
             | h_ @ Hint_::Haccess(_, _)
             | h_ @ Hint_::Hrefinement(_, _)
             | h_ @ Hint_::Hwildcard => h_,
-            Hint_::Herr
-            | Hint_::Hany
-            | Hint_::Hmixed
+            Hint_::Hmixed
             | Hint_::Hnonnull
             | Hint_::Habstr(_, _)
             | Hint_::HvecOrDict(_, _)

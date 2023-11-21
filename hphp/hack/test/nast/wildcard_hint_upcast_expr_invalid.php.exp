@@ -77,7 +77,7 @@ Errors:
                 ((), [8:3-22],
                  (Binop
                     { bop = (Eq None); lhs = ((), [8:3-5], (Lplaceholder [8:3-5]));
-                      rhs = ((), [8:8-22], (Upcast (((), [8:8-10], (Lvar ([8:8-10], $x))), ([8:18-22], (Happly (([8:18-19], "\\B"), [([8:20-21], Herr)])))))) }))))
+                      rhs = ((), [8:8-22], (Upcast (((), [8:8-10], (Lvar ([8:8-10], $x))), ([8:18-22], (Happly (([8:18-19], "\\B"), [([8:20-21], Hwildcard)])))))) }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

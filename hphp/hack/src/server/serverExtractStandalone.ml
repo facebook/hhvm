@@ -456,8 +456,8 @@ end = struct
       | Aast_defs.Hfun hint_fun -> aux_fun acc hint_fun
       | Aast_defs.Hshape shape_info -> aux_shape acc shape_info
       | Aast_defs.(
-          ( Hany | Herr | Hmixed | Hwildcard | Hnonnull | Hprim _ | Hthis
-          | Hdynamic | Hnothing | Hfun_context _ | Hvar _ )) ->
+          ( Hmixed | Hwildcard | Hnonnull | Hprim _ | Hthis | Hdynamic
+          | Hnothing | Hfun_context _ | Hvar _ )) ->
         acc
     and auxs acc = function
       | [] -> acc
@@ -1169,8 +1169,6 @@ end = struct
         | Hclass_args _
         | Happly _
         (* non-denotable types *)
-        | Hany
-        | Herr
         | Hmixed
         | Hnonnull
         | Habstr _

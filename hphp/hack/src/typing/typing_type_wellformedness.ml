@@ -151,8 +151,6 @@ and hint_ ~in_signature env p h_ =
   let hint_opt env = Option.value_map ~f:(hint env) ~default:[] in
   let hints env xs = List.concat_map xs ~f:(hint env) in
   match h_ with
-  | Hany
-  | Herr
   | Hmixed
   | Hwildcard
   | Hnonnull

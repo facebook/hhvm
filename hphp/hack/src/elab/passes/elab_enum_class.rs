@@ -171,7 +171,7 @@ mod tests {
         let mut elem = make_enum_class_(
             ClassishKind::CenumClass(Abstraction::Concrete),
             Enum_ {
-                base: Hint(Pos::NONE, Box::new(Hint_::Herr)),
+                base: Hint(Pos::NONE, Box::new(Hint_::Hmixed)),
                 constraint: None,
                 includes: vec![],
             },
@@ -186,9 +186,9 @@ mod tests {
                     && bounds.pop().map_or(false, |Hint(_, hint_)| match *hint_ {
                         Hint_::Happly(Id(_, member_of), mut tparams) => {
                             (member_of == sn::classes::MEMBER_OF)
-                                && (tparams
-                                    .pop()
-                                    .map_or(false, |Hint(_, hint_)| matches!(*hint_, Hint_::Herr)))
+                                && (tparams.pop().map_or(false, |Hint(_, hint_)| {
+                                    matches!(*hint_, Hint_::Hmixed)
+                                }))
                                 && (tparams.pop().map_or(false, |Hint(_, hint_)| {
                                     matches!(*hint_, Hint_::Happly(..))
                                 }))
@@ -209,7 +209,7 @@ mod tests {
         let mut elem = make_enum_class_(
             ClassishKind::CenumClass(Abstraction::Abstract),
             Enum_ {
-                base: Hint(Pos::NONE, Box::new(Hint_::Herr)),
+                base: Hint(Pos::NONE, Box::new(Hint_::Hmixed)),
                 constraint: None,
                 includes: vec![],
             },
@@ -235,7 +235,7 @@ mod tests {
         let mut elem = make_enum_class_(
             ClassishKind::Cenum,
             Enum_ {
-                base: Hint(Pos::NONE, Box::new(Hint_::Herr)),
+                base: Hint(Pos::NONE, Box::new(Hint_::Hmixed)),
                 constraint: None,
                 includes: vec![],
             },

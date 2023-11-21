@@ -1,2 +1,6 @@
 File "invalid_hint_noreturn.php", line 4, characters 9-16:
 You can only use the `noreturn` type as the return type of a function or method (Naming[2063])
+File "invalid_hint_noreturn.php", line 4, characters 9-16:
+Invalid `as` expression hint (Typing[4195])
+  File "invalid_hint_noreturn.php", line 4, characters 9-16:
+  The `as` operator cannot be used with the `noreturn` type

@@ -26,7 +26,7 @@ Errors:
        { f_span = [5:1-63]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((), (Some ([5:56-60], (Hprim Tvoid))));
          f_params =
-         [{ param_annotation = (); param_type_hint = ((), (Some ([5:32-50], (Happly (([5:32-47], "\\WildcardTyparam"), [([5:48-49], Herr)]))))); 
+         [{ param_annotation = (); param_type_hint = ((), (Some ([5:32-50], (Happly (([5:32-47], "\\WildcardTyparam"), [([5:48-49], Hwildcard)]))))); 
             param_is_variadic = false; param_pos = [5:51-53]; param_name = "$x"; 
             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }

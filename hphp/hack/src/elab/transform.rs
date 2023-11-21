@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1455577cccff83e3d1bd49f487173571>>
+// @generated SignedSource<<b1b017e59ff9131e92b7a6345f64e399>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2303,8 +2303,6 @@ impl Transform for Hint_ {
                 }
                 { __binding_1.transform(env, &mut pass.clone()) }
             }
-            Hint_::Hany => {}
-            Hint_::Herr => {}
             Hint_::Hmixed => {}
             Hint_::Hwildcard => {}
             Hint_::Hnonnull => {}

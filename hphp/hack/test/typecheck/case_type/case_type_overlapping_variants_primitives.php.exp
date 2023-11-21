@@ -504,6 +504,12 @@ File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
 Invalid case type declaration. More than one variant of `NullData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 44, characters 5-9:
   This is the type `mixed`, which includes **the value null** because it is a nullable type
+  File "case_type_overlapping_variants_primitives.php", line 46, characters 5-8:
+  It overlaps with `void`, which also includes **the value null**
+File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
+Invalid case type declaration. More than one variant of `NullData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 44, characters 5-9:
+  This is the type `mixed`, which includes **the value null** because it is a nullable type
   File "case_type_overlapping_variants_primitives.php", line 47, characters 5-8:
   It overlaps with `null`, which also includes **the value null**
 File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
@@ -524,6 +530,12 @@ File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
 Invalid case type declaration. More than one variant of `NullData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 45, characters 5-9:
   This is the type `?bool`, which includes **the value null** because it is a nullable type
+  File "case_type_overlapping_variants_primitives.php", line 46, characters 5-8:
+  It overlaps with `void`, which also includes **the value null**
+File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
+Invalid case type declaration. More than one variant of `NullData` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_overlapping_variants_primitives.php", line 45, characters 5-9:
+  This is the type `?bool`, which includes **the value null** because it is a nullable type
   File "case_type_overlapping_variants_primitives.php", line 47, characters 5-8:
   It overlaps with `null`, which also includes **the value null**
 File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
@@ -537,25 +549,13 @@ Invalid case type declaration. More than one variant of `NullData` could contain
 File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
 Invalid case type declaration. More than one variant of `NullData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 46, characters 5-8:
-  This is the type `_`, which includes **booleans**
-  File "case_type_overlapping_variants_primitives.php", line 45, characters 5-9:
-  It overlaps with `?bool`, which also includes **booleans**
-File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
-Invalid case type declaration. More than one variant of `NullData` could contain values with the same runtime tag (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 46, characters 5-8:
-  This is the type `_`, which includes **dicts**
-  File "case_type_overlapping_variants_primitives.php", line 44, characters 5-9:
-  It overlaps with `mixed`, which also includes **dicts**
-File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
-Invalid case type declaration. More than one variant of `NullData` could contain values with the same runtime tag (Typing[4475])
-  File "case_type_overlapping_variants_primitives.php", line 46, characters 5-8:
-  This is the type `_`, which includes **the value null**
+  This is the type `void`, which includes **the value null**
   File "case_type_overlapping_variants_primitives.php", line 47, characters 5-8:
   It overlaps with `null`, which also includes **the value null**
 File "case_type_overlapping_variants_primitives.php", line 43, characters 11-18:
 Invalid case type declaration. More than one variant of `NullData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 46, characters 5-8:
-  This is the type `_`, which includes **the value null**
+  This is the type `void`, which includes **the value null**
   File "case_type_overlapping_variants_primitives.php", line 48, characters 5-5:
   It overlaps with `T`, which also includes **the value null**
   File "case_type_overlapping_variants_primitives.php", line 43, characters 25-28:

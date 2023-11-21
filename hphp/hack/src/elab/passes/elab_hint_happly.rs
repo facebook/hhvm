@@ -171,8 +171,7 @@ fn canonical_happly(
                 Continue((None, None))
             } else {
                 let err = NamingError::ThisNoArgument(hint_pos.clone());
-                let hint_ = Hint_::Herr;
-                Break((Some(hint_), err))
+                Break((None, err))
             }
         }
         CanonResult::Classname => {
@@ -189,9 +188,8 @@ fn canonical_happly(
             }
         }
         CanonResult::ErrPrimTopLevel => {
-            let hint_ = Hint_::Herr;
             let err = NamingError::PrimitiveTopLevel(id.0.clone());
-            Break((Some(hint_), err))
+            Break((None, err))
         }
         CanonResult::Darray => {
             id.1 = sn::collections::DICT.to_string();

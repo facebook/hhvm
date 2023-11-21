@@ -624,8 +624,6 @@ let rec hint : Env.t -> variance -> Aast_defs.hint -> unit =
       | x -> x
     in
     generic_ env.Env.env env.Env.tpenv variance name targs
-  | Hany
-  | Herr
   | Hmixed
   | Hwildcard
   | Hnonnull

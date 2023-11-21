@@ -14,6 +14,7 @@ use crate::prelude::*;
 pub struct ElabHintWildcardPass {
     depth: usize,
     allow_wildcard: bool,
+    in_context: bool,
 }
 
 impl ElabHintWildcardPass {
@@ -28,24 +29,24 @@ impl ElabHintWildcardPass {
 impl Pass for ElabHintWildcardPass {
     fn on_ty_hint_top_down(&mut self, env: &Env, elem: &mut Hint) -> ControlFlow<()> {
         let Hint(pos, box hint_) = elem;
-        //   Swap for `Herr`
-        let in_hint_ = std::mem::replace(hint_, Hint_::Herr);
-        match &in_hint_ {
+        match &hint_ {
             Hint_::Hwildcard => {
                 if self.allow_wildcard && self.depth >= 1 {
-                    // This is valid; restore the hint and continue
-                    *hint_ = in_hint_;
+                    // This is valid; continue
                     Continue(())
                 } else {
                     // Wildcard hints are disallowed here; add an error
-                    env.emit_error(NamingError::WildcardHintDisallowed(pos.clone()));
-                    //  We've already set the hint to `Herr` so just break
+                    let err = if self.in_context {
+                        NamingError::InvalidWildcardContext(pos.clone())
+                    } else {
+                        NamingError::WildcardHintDisallowed(pos.clone())
+                    };
+                    env.emit_error(err);
                     Break(())
                 }
             }
             _ => {
-                // This isn't a wildcard hint; restore the original hint and continue
-                *hint_ = in_hint_;
+                // This isn't a wildcard hint; continue
                 Continue(())
             }
         }
@@ -54,16 +55,8 @@ impl Pass for ElabHintWildcardPass {
     // Wildcard hints are _always_ disallowed in contexts
     // TODO: we define this on `context` in OCaml - we need a newtype
     // to do the same here
-    fn on_ty_contexts_top_down(&mut self, env: &Env, elem: &mut Contexts) -> ControlFlow<()> {
-        let Contexts(_, hints) = elem;
-        hints
-            .iter_mut()
-            .filter(|hint| is_wildcard(hint))
-            .for_each(|hint| {
-                let Hint(pos, box hint_) = hint;
-                env.emit_error(NamingError::InvalidWildcardContext(pos.clone()));
-                *hint_ = Hint_::Herr
-            });
+    fn on_ty_contexts_top_down(&mut self, _: &Env, _: &mut Contexts) -> ControlFlow<()> {
+        self.in_context = true;
         Continue(())
     }
 
@@ -118,13 +111,6 @@ impl Pass for ElabHintWildcardPass {
     }
 }
 
-fn is_wildcard(hint: &Hint) -> bool {
-    match hint {
-        Hint(_, box Hint_::Hwildcard) => true,
-        _ => false,
-    }
-}
-
 #[cfg(test)]
 mod tests {
 
@@ -135,6 +121,13 @@ mod tests {
 
     fn make_wildcard() -> Hint {
         Hint(Pos::default(), Box::new(Hint_::Hwildcard))
+    }
+
+    fn is_wildcard(hint: &Hint) -> bool {
+        match hint {
+            Hint(_, box Hint_::Hwildcard) => true,
+            _ => false,
+        }
     }
 
     // -- Wildcard hints in expressions ----------------------------------------
@@ -160,8 +153,6 @@ mod tests {
                 NamingError::WildcardHintDisallowed(_)
             ))
         ));
-
-        assert!(matches!(elem, Expr_::Is(box (_, Hint(_, box Hint_::Herr)))))
     }
 
     #[test]
@@ -208,11 +199,6 @@ mod tests {
                 NamingError::WildcardHintDisallowed(_)
             ))
         ));
-
-        assert!(matches!(
-            elem,
-            Expr_::Upcast(box (_, Hint(_, box Hint_::Herr)))
-        ))
     }
 
     // -- Wildcard hint in `Cast` expressions ----------------------------------
@@ -234,11 +220,6 @@ mod tests {
                 NamingError::WildcardHintDisallowed(_)
             ))
         ));
-
-        assert!(matches!(
-            elem,
-            Expr_::Cast(box (Hint(_, box Hint_::Herr), _))
-        ))
     }
 
     // -- Wildcard hints in `Contexts` -----------------------------------------
@@ -259,11 +240,6 @@ mod tests {
                 NamingError::InvalidWildcardContext(_)
             ))
         ));
-
-        let Contexts(_, mut hints) = elem;
-        let hint_opt = hints.pop();
-
-        assert!(matches!(hint_opt, Some(Hint(_, box Hint_::Herr))))
     }
 
     // -- Wildcard hints in `Targ`s --------------------------------------------

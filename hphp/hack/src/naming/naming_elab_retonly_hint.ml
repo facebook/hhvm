@@ -48,12 +48,12 @@ let on_hint on_error hint ~ctx =
     on_error
       (Naming_phase_error.naming
          Naming_error.(Return_only_typehint { pos; kind = Hvoid }));
-    (ctx, Error (pos, Aast.Herr))
+    (ctx, Error hint)
   | (pos, Aast.(Hprim Tnoreturn)) when not allow_retonly ->
     on_error
       (Naming_phase_error.naming
          Naming_error.(Return_only_typehint { pos; kind = Hnoreturn }));
-    (ctx, Error (pos, Aast.Herr))
+    (ctx, Error hint)
   | _ -> (ctx, Ok hint)
 
 let pass on_error =

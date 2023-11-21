@@ -1,4 +1,2 @@
 File "unsupported_this1.php", line 3, characters 23-26:
 The type `this` cannot be used as a constraint on a class generic, or as the type of a static member variable (Naming[2043])
-File "unsupported_this1.php", line 3, characters 23-26:
-Type access is only valid for a class, `self`, or `this` (Naming[2061])

@@ -424,8 +424,6 @@ impl TypedLocal {
             Hint_::Hnonnull | Hint_::Hprim(_) | Hint_::Hthis | Hint_::Hnothing | Hint_::Hmixed => {}
             // The following are unenforced, so we replace with a wildcard
             Hint_::Hfun(_)
-            | Hint_::Hany
-            | Hint_::Herr
             | Hint_::Hwildcard
             | Hint_::Hdynamic
             | Hint_::Hunion(_)

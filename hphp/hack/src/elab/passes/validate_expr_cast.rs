@@ -26,9 +26,6 @@ impl Pass for ValidateExprCastPass {
                 Continue(())
             }
             Expr_::Cast(box (Hint(_, box Hint_::HvecOrDict(_, _)), _)) => Continue(()),
-            // We end up with a `Hany` when we have an arity error for
-            // `dict`/`vec`--we don't error on this case to preserve behaviour.
-            Expr_::Cast(box (Hint(_, box Hint_::Hany), _)) => Continue(()),
             Expr_::Cast(box (Hint(p, _), _)) => {
                 env.emit_error(NamingError::ObjectCast(p.clone()));
                 Continue(())

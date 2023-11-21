@@ -11,7 +11,7 @@ Errors:
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((), (Some ([3:44-47], (Hprim Tint))));
         f_params =
-        [{ param_annotation = (); param_type_hint = ((), (Some ([3:34-38], Herr))); 
+        [{ param_annotation = (); param_type_hint = ((), (Some ([3:34-38], (Hprim Tvoid)))); 
            param_is_variadic = false; param_pos = [3:39-41]; param_name = "$x"; 
            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }
@@ -30,7 +30,7 @@ Errors:
        { f_span = [7:1-9:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((), (Some ([7:52-55], (Hprim Tint))));
          f_params =
-         [{ param_annotation = (); param_type_hint = ((), (Some ([7:38-46], Herr))); 
+         [{ param_annotation = (); param_type_hint = ((), (Some ([7:38-46], (Hprim Tnoreturn)))); 
             param_is_variadic = false; param_pos = [7:47-49]; param_name = "$x"; 
             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }

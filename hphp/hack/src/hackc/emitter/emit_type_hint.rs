@@ -151,11 +151,6 @@ pub fn fmt_hint<'arena>(
         Htuple(hints) => format!("({})", fmt_hints(alloc, tparams, hints)?),
         Hlike(t) => format!("~{}", fmt_hint(alloc, tparams, false, t)?),
         Hsoft(t) => format!("@{}", fmt_hint(alloc, tparams, false, t)?),
-        Herr | Hany => {
-            return Err(Error::unrecoverable(
-                "This should be an error caught in naming",
-            ));
-        }
         h => fmt_name_or_prim(alloc, tparams, hint_to_string(h)).into(),
     })
 }
@@ -197,7 +192,6 @@ fn can_be_nullable(hint: &Hint_) -> bool {
         Happly(Id(_, id), _) => {
             id != "\\HH\\dynamic" && id != "\\HH\\nonnull" && id != "\\HH\\mixed"
         }
-        Herr | Hany => panic!("This should be an error caught in naming"),
         _ => true,
     }
 }
@@ -229,11 +223,6 @@ fn hint_to_type_constraint<'arena>(
             TypeConstraintFlags::Soft | TypeConstraintFlags::ExtendedHint,
         )?,
         Hlike(h) => hint_to_type_constraint(alloc, kind, tparams, skipawaitable, h)?,
-        Herr | Hany => {
-            return Err(Error::unrecoverable(
-                "This should be an error caught in naming",
-            ));
-        }
         Hoption(t) => {
             if let Happly(Id(_, s), hs) = &*(t.1) {
                 if skipawaitable && is_awaitable(s) {
@@ -405,11 +394,6 @@ fn param_hint_to_type_info<'arena>(
                 && !tparams.contains(&s.as_str())
         }
         Habstr(s, hs) => hs.is_empty() && !tparams.contains(&s.as_str()),
-        Herr | Hany => {
-            return Err(Error::unrecoverable(
-                "Expected error on Tany in naming: param_hint_to_type_info",
-            ));
-        }
         _ => true,
     };
     let tc = hint_to_type_constraint(alloc, kind, tparams, skipawaitable, hint)?;

@@ -8,7 +8,7 @@ Errors:
       c_where_constraints = []; c_consts = []; c_typeconsts = [];
       c_vars =
       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; cv_readonly = false; 
-         cv_visibility = Public; cv_type = ((), (Some ([4:10-15], (Hoption ([4:11-15], Herr))))); 
+         cv_visibility = Public; cv_type = ((), (Some ([4:10-15], (Hoption ([4:11-15], Hthis))))); 
          cv_id = ([4:16-18], "x"); cv_expr = None; cv_user_attributes = []; 
          cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = true; 
          cv_span = [4:16-18] }

@@ -113,7 +113,7 @@ mod tests {
         };
         let mut elem = ShapeFieldInfo {
             optional: Default::default(),
-            hint: Hint(Pos::default(), Box::new(Hint_::Herr)),
+            hint: Hint(Pos::default(), Box::new(Hint_::Hmixed)),
             name: ShapeFieldName::SFclassConst(
                 Id(Pos::default(), sn::classes::SELF.to_string()),
                 (Pos::default(), String::default()),
@@ -170,7 +170,7 @@ mod tests {
         let mut pass = ElabShapeFieldNamePass::default();
         let mut elem = ShapeFieldInfo {
             optional: Default::default(),
-            hint: Hint(Pos::default(), Box::new(Hint_::Herr)),
+            hint: Hint(Pos::default(), Box::new(Hint_::Hmixed)),
             name: ShapeFieldName::SFclassConst(
                 Id(Pos::default(), sn::classes::SELF.to_string()),
                 (Pos::default(), String::default()),

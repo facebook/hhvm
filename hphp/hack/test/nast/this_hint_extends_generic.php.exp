@@ -20,7 +20,7 @@ Errors:
   (Class
      { c_span = [5:1-27]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
-       c_name = ([5:7-8], "\\C"); c_tparams = []; c_extends = [([5:17-24], (Happly (([5:17-18], "\\B"), [([5:19-23], Herr)])))]; 
+       c_name = ([5:7-8], "\\C"); c_tparams = []; c_extends = [([5:17-24], (Happly (([5:17-18], "\\B"), [([5:19-23], Hthis)])))]; 
        c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
        c_implements = []; c_where_constraints = []; c_consts = []; c_typeconsts = []; 
        c_vars = []; c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
@@ -49,7 +49,7 @@ Errors:
      { c_span = [11:1-37]; c_annotation = (); c_mode = Mstrict; c_final = true; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([11:13-14], "\\E"); c_tparams = [{ tp_variance = Covariant; tp_name = ([11:16-17], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
-       c_extends = [([11:27-34], (Happly (([11:27-28], "\\B"), [([11:29-33], Herr)])))]; 
+       c_extends = [([11:27-34], (Happly (([11:27-28], "\\B"), [([11:29-33], Hthis)])))]; 
        c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
        c_implements = []; c_where_constraints = []; c_consts = []; c_typeconsts = []; 
        c_vars = []; c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
@@ -64,7 +64,7 @@ Errors:
      { c_span = [14:1-37]; c_annotation = (); c_mode = Mstrict; c_final = true; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([14:13-14], "\\F"); c_tparams = [{ tp_variance = Contravariant; tp_name = ([14:16-17], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
-       c_extends = [([14:27-34], (Happly (([14:27-28], "\\B"), [([14:29-33], Herr)])))]; 
+       c_extends = [([14:27-34], (Happly (([14:27-28], "\\B"), [([14:29-33], Hthis)])))]; 
        c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
        c_implements = []; c_where_constraints = []; c_consts = []; c_typeconsts = []; 
        c_vars = []; c_methods = []; c_xhp_children = []; c_xhp_attrs = [];

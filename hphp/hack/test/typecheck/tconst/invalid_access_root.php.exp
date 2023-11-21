@@ -1,2 +1,8 @@
 File "invalid_access_root.php", line 5, characters 9-9:
 Type access is only valid for a class, `self`, or `this` (Naming[2061])
+File "invalid_access_root.php", line 5, characters 9-16:
+Invalid type hint (Typing[4062])
+  File "invalid_access_root.php", line 5, characters 12-16:
+  You are trying to access the type constant `Const` but this is a value of generic type T
+  File "invalid_access_root.php", line 5, characters 9-16:
+  Definition is here

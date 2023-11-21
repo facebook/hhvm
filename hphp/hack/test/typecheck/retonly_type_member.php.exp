@@ -4,3 +4,7 @@ File "retonly_type_member.php", line 6, characters 10-13:
 You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error 2063 in declarations (Naming[2063])
 File "retonly_type_member.php", line 8, characters 17-24:
 You can only use the `noreturn` type as the return type of a function or method (Naming[2063])
+File "retonly_type_member.php", line 8, characters 26-41:
+Please assign a value (Typing[4055])
+File "retonly_type_member.php", line 8, characters 26-41:
+You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error 4055 in declarations (Typing[4055])

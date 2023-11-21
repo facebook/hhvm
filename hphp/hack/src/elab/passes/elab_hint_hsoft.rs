@@ -5,7 +5,6 @@
 
 use nast::Hint;
 use nast::Hint_;
-use nast::Pos;
 
 use crate::prelude::*;
 
@@ -19,15 +18,13 @@ impl Pass for ElabHintHsoftPass {
             if env.soft_as_like() {
                 // Replace `Hsoft` with `Hlike` retaining the original position
                 // (pos, Hsoft(hint)) ==> (pos, Hlike(hint))
-                let herr = Hint(Pos::NONE, Box::new(Hint_::Herr));
-                let inner_hint = std::mem::replace(inner, herr);
-                **hint_ = Hint_::Hlike(inner_hint)
+                **hint_ = Hint_::Hlike(inner.clone())
             } else {
                 // Drop the surrounding `Hsoft` and use the inner Hint_
                 // whilst maintaining positions
                 // (pos, Hsoft(_, hint_)) ==> (pos, hint_)
                 let Hint(_, inner_hint_) = inner;
-                let herr_ = Hint_::Herr;
+                let herr_ = Hint_::Hmixed;
                 let inner_hint_ = std::mem::replace(inner_hint_ as &mut Hint_, herr_);
                 **hint_ = inner_hint_
             }

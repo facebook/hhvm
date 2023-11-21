@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<188507383c9d3f24311f2e9cf5e4de77>>
+// @generated SignedSource<<a5acbfda646680c21b151ecd8e921448>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2614,8 +2614,6 @@ pub enum Hint_ {
     Haccess(Hint, Vec<Sid>),
     Hsoft(Hint),
     Hrefinement(Hint, Vec<Refinement>),
-    Hany,
-    Herr,
     Hmixed,
     Hwildcard,
     Hnonnull,

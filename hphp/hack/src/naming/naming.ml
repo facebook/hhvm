@@ -115,16 +115,12 @@ let passes =
     (* Elaborate invariant calls to canonical representation *)
     Naming_elab_invariant.pass on_error;
     (* -- Mark invalid hints and expressions & miscellaneous validation --- *)
-    (* Replace invalid uses of `void` and `noreturn` with `Herr` *)
     Naming_elab_retonly_hint.pass on_error;
-    (* Replace invalid uses of wildcard hints with `Herr` *)
     Naming_elab_wildcard_hint.pass on_error;
     (* Replace uses to `self` in shape field names with referenced class *)
     Naming_elab_shape_field_name.top_down_pass;
     Naming_elab_shape_field_name.bottom_up_pass on_error;
-    (* Replace invalid uses of `this` hints with `Herr` *)
     Naming_elab_this_hint.pass on_error;
-    (* Replace invalid `Haccess` root hints with `Herr` *)
     Naming_elab_haccess_hint.pass on_error;
     (* Replace empty `Tuple`s with invalid expression marker *)
     Naming_elab_tuple.pass on_error;

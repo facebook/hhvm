@@ -1,2 +1,4 @@
 File "toplevel.php", line 4, characters 18-25:
 Primitive type annotations are always available and may no longer be referred to in the toplevel namespace. (Naming[2039])
+File "toplevel.php", line 4, characters 18-25:
+Unbound name: `nothing` (Naming[2049])

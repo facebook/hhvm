@@ -189,7 +189,7 @@ fn targ_from_collection_targs(
     if let Some(ctarg) = ctarg_opt {
         match ctarg {
             CollectionTarg::CollectionTV(tv) => {
-                let tv = std::mem::replace(tv, Targ((), Hint(Pos::NONE, Box::new(Hint_::Herr))));
+                let tv = std::mem::replace(tv, Targ((), Hint(Pos::NONE, Box::new(Hint_::Hmixed))));
                 Some(tv)
             }
             CollectionTarg::CollectionTKV(..) => {
@@ -211,8 +211,8 @@ fn targs_from_collection_targs(
     if let Some(ctarg) = ctarg_opt {
         match ctarg {
             CollectionTarg::CollectionTKV(tk, tv) => {
-                let tk = std::mem::replace(tk, Targ((), Hint(Pos::NONE, Box::new(Hint_::Herr))));
-                let tv = std::mem::replace(tv, Targ((), Hint(Pos::NONE, Box::new(Hint_::Herr))));
+                let tk = std::mem::replace(tk, Targ((), Hint(Pos::NONE, Box::new(Hint_::Hmixed))));
+                let tv = std::mem::replace(tv, Targ((), Hint(Pos::NONE, Box::new(Hint_::Hmixed))));
                 Some((tk, tv))
             }
             CollectionTarg::CollectionTV(..) => {

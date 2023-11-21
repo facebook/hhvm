@@ -1,12 +1,11 @@
 Errors:
   [3:14-18] The type `this` cannot be used as a constraint on a class generic, or as the type of a static member variable
   [7:23-27] The type `this` cannot be used as a constraint on a class generic, or as the type of a static member variable
-  [7:23-27] Type access is only valid for a class, `self`, or `this`
 [(Class
     { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
       c_name = ([3:7-8], "\\C");
-      c_tparams = [{ tp_variance = Invariant; tp_name = ([3:9-10], "T"); tp_parameters = []; tp_constraints = [(Constraint_as, ([3:14-18], Herr))]; tp_reified = Erased; tp_user_attributes = [] }];
+      c_tparams = [{ tp_variance = Invariant; tp_name = ([3:9-10], "T"); tp_parameters = []; tp_constraints = [(Constraint_as, ([3:14-18], Hthis))]; tp_reified = Erased; tp_user_attributes = [] }];
       c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; 
       c_reqs = []; c_implements = []; c_where_constraints = []; c_consts = []; 
       c_typeconsts = [];
@@ -31,7 +30,7 @@ Errors:
        c_name = ([7:16-17], "\\C");
        c_tparams =
        [{ tp_variance = Invariant; tp_name = ([7:18-19], "T"); tp_parameters = []; 
-          tp_constraints = [(Constraint_as, ([7:23-30], (Haccess (([7:23-27], Herr), [([7:29-30], "X")]))))]; 
+          tp_constraints = [(Constraint_as, ([7:23-30], (Haccess (([7:23-27], Hthis), [([7:29-30], "X")]))))]; 
           tp_reified = Erased; tp_user_attributes = [] }
          ];
        c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; 

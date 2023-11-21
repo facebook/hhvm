@@ -1284,8 +1284,6 @@ and hint_ =
   | Hsoft of hint
   | Hrefinement of hint * refinement list
   (* The following constructors don't exist in the AST hint type *)
-  | Hany
-  | Herr
   | Hmixed
   | Hwildcard
   | Hnonnull

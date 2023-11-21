@@ -33,7 +33,7 @@ Errors:
             param_is_variadic = false; param_pos = [7:30-32]; param_name = "$x"; 
             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None };
-           { param_annotation = (); param_type_hint = ((), (Some ([7:34-39], (Haccess (([7:34-35], Herr), [([7:37-39], "TA")]))))); 
+           { param_annotation = (); param_type_hint = ((), (Some ([7:34-39], (Haccess (([7:34-35], (Habstr ("T", []))), [([7:37-39], "TA")]))))); 
              param_is_variadic = false; param_pos = [7:40-42]; param_name = "$y"; 
              param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }

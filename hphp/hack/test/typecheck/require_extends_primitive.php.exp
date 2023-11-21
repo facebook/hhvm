@@ -1,6 +1,4 @@
 File "require_extends_primitive.php", line 8, characters 19-21:
 Primitive type annotations are always available and may no longer be referred to in the toplevel namespace. (Naming[2039])
 File "require_extends_primitive.php", line 8, characters 19-21:
-`This` is not a class. It is an invalid type hint. (NastCheck[3017])
-File "require_extends_primitive.php", line 8, characters 19-21:
-Was expecting a class or interface (Typing[4026])
+Unbound name: `int` (an object type) (Naming[2049])

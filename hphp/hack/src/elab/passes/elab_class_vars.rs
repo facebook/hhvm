@@ -121,25 +121,24 @@ fn class_var_of_xhp_attr(xhp_attr: XhpAttr, env: &Env) -> ClassVar {
     // - if we have `is_required` or `has_default` do nothing
     // - otherwise, wrap the hint in an `Hoption`
     if let Some(hint) = &mut hint_opt {
-        // Swap out the hint_
-        let hint_ = std::mem::replace(&mut *hint.1, Hint_::Herr);
-        match strip_like(&hint_) {
+        match strip_like(&hint.1) {
             // If we have an `Hoption` but `is_required` is true, raise an
-            // error and put back the `Hint_`
+            // error
             Hint_::Hoption(_) if is_required => {
                 let Id(_, attr_name) = &cv.id;
                 env.emit_error(NamingError::XhpOptionalRequiredAttr {
                     pos: hint.0.clone(),
                     attr_name: attr_name.clone(),
                 });
-                *hint.1 = hint_
             }
             // If the hint is `Hmixed` or we have either `is_required` or
             // `has_default`, just put back the `Hint_`
-            Hint_::Hmixed => *hint.1 = hint_,
-            _ if is_required || has_default => *hint.1 = hint_,
+            Hint_::Hmixed => (),
+            _ if is_required || has_default => (),
             // Otherwise, wrap the hint in `Hoption`
-            _ => *hint.1 = Hint_::Hoption(Hint(hint.0.clone(), Box::new(hint_))),
+            _ => {
+                *hint.1 = Hint_::Hoption(hint.clone());
+            }
         }
     }
 

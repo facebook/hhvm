@@ -10,7 +10,7 @@ Errors:
       { f_span = [3:1-47]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((), (Some ([3:40-44], (Hprim Tvoid))));
         f_params =
-        [{ param_annotation = (); param_type_hint = ((), (Some ([3:33-34], Herr))); 
+        [{ param_annotation = (); param_type_hint = ((), (Some ([3:33-34], Hwildcard))); 
            param_is_variadic = false; param_pos = [3:35-37]; param_name = "$x"; 
            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }

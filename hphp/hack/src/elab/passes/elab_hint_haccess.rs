@@ -72,7 +72,6 @@ impl Pass for ElabHintHaccessPass {
                     Continue(())
                 } else {
                     env.emit_error(NamingError::SelfOutsideClass(id.0.clone()));
-                    *elem.1 = Hint_::Herr;
                     Break(())
                 }
             }
@@ -84,7 +83,6 @@ impl Pass for ElabHintHaccessPass {
                     pos: id.pos().clone(),
                     id: Some(id.name().to_string()),
                 });
-                *elem.1 = Hint_::Herr;
                 Break(())
             }
 
@@ -100,7 +98,6 @@ impl Pass for ElabHintHaccessPass {
                     pos: elem.0.clone(),
                     id: None,
                 });
-                *elem.1 = Hint_::Herr;
                 Break(())
             }
         }
@@ -193,7 +190,7 @@ mod tests {
                     Pos::default(),
                     Box::new(Hint_::Happly(
                         Id(Pos::default(), sn::classes::SELF.to_string()),
-                        vec![Hint(Pos::default(), Box::new(Hint_::Herr))],
+                        vec![Hint(Pos::default(), Box::new(Hint_::Hmixed))],
                     )),
                 ),
                 vec![Id(Pos::default(), "T".to_string())],
@@ -235,10 +232,6 @@ mod tests {
             err_opt,
             Some(NamingPhaseError::Naming(NamingError::SelfOutsideClass(..)))
         ));
-        assert!(matches!(
-            elem,
-            Hint(_, box Hint_::Haccess(Hint(_, box Hint_::Herr), _))
-        ))
     }
     // -- type access through `this` -------------------------------------------
 
@@ -296,10 +289,6 @@ mod tests {
                 NamingError::InvalidTypeAccessRoot { .. }
             ))
         ));
-        assert!(matches!(
-            elem,
-            Hint(_, box Hint_::Haccess(Hint(_, box Hint_::Herr), _))
-        ))
     }
 
     // -- type access through type param ---------------------------------------
@@ -351,7 +340,7 @@ mod tests {
                 )),
             ),
             ConstraintKind::ConstraintSuper,
-            Hint(Pos::default(), Box::new(Hint_::Herr)),
+            Hint(Pos::default(), Box::new(Hint_::Hmixed)),
         );
         elem.transform(&env, &mut pass);
 
@@ -388,9 +377,5 @@ mod tests {
                 NamingError::InvalidTypeAccessRoot { .. }
             ))
         ));
-        assert!(matches!(
-            elem,
-            Hint(_, box Hint_::Haccess(Hint(_, box Hint_::Herr), _))
-        ))
     }
 }

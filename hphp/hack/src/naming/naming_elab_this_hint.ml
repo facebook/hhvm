@@ -211,7 +211,7 @@ let on_hint on_error hint ~ctx =
            in_extends = Env.in_extends ctx;
            in_req_extends = Env.in_req_extends ctx;
          };
-    (ctx, Ok (pos, Aast.Herr))
+    (ctx, Ok hint)
   | (_, Aast.Haccess _) ->
     let ctx =
       Env.set_is_top_level_haccess_root ~is_top_level_haccess_root:true ctx

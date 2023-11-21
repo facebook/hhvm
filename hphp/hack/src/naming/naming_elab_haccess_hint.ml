@@ -85,18 +85,16 @@ let on_hint on_error hint ~ctx =
         match Env.current_class ctx with
         | Some (cid, _, _) -> Ok (pos, Aast.Happly (cid, []))
         | _ ->
-          Error
-            ( (pos, Aast.Herr),
-              Err.naming @@ Naming_error.Self_outside_class tycon_pos )
+          Error (hint, Err.naming @@ Naming_error.Self_outside_class tycon_pos)
         (* TODO[mjt] is this ever exercised? The cases is handles appear to
            be a parse errors *)
       end
-      | (pos, Aast.Happly ((tycon_pos, tycon_name), _))
+      | (_, Aast.Happly ((tycon_pos, tycon_name), _))
         when String.(
                equal tycon_name SN.Classes.cStatic
                || equal tycon_name SN.Classes.cParent) ->
         Error
-          ( (pos, Aast.Herr),
+          ( hint,
             Err.naming
             @@ Naming_error.Invalid_type_access_root
                  { pos = tycon_pos; id = Some tycon_name } )
@@ -107,7 +105,7 @@ let on_hint on_error hint ~ctx =
       | (_, Aast.Hvar _) -> Ok hint
       | (pos, _) ->
         Error
-          ( (pos, Aast.Herr),
+          ( hint,
             Err.naming
             @@ Naming_error.Invalid_type_access_root { pos; id = None } )
     else

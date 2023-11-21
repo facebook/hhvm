@@ -170,7 +170,9 @@ let canonicalise_vec_or_dict tycon hint_pos pos hints =
 let canonicalize_happly tparams hint_pos tycon hints =
   match canonical_tycon tparams tycon with
   (* The hint was malformed *)
-  | CanonErr err -> Error ((hint_pos, Aast.Herr), Err.naming err)
+  | CanonErr err ->
+    let hint_ = Aast.Happly (tycon, hints) in
+    Error ((hint_pos, hint_), Err.naming err)
   (* The type constructors canonical representation is a concrete type *)
   | Concrete (pos, hint_) ->
     (* We can't represent a concrete type applied to other types

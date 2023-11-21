@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4a55ea60533f7f0e2dd6bd686ba41a59>>
+// @generated SignedSource<<4382f5f3a0b824bcb94c6f9d4eb745ab>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -3642,12 +3642,6 @@ impl Hint_ {
     pub fn mk_hrefinement(p0: Hint, p1: Vec<Refinement>) -> Self {
         Hint_::Hrefinement(p0, p1)
     }
-    pub fn mk_hany() -> Self {
-        Hint_::Hany
-    }
-    pub fn mk_herr() -> Self {
-        Hint_::Herr
-    }
     pub fn mk_hmixed() -> Self {
         Hint_::Hmixed
     }
@@ -3747,18 +3741,6 @@ impl Hint_ {
     pub fn is_hrefinement(&self) -> bool {
         match self {
             Hint_::Hrefinement(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_hany(&self) -> bool {
-        match self {
-            Hint_::Hany => true,
-            _ => false,
-        }
-    }
-    pub fn is_herr(&self) -> bool {
-        match self {
-            Hint_::Herr => true,
             _ => false,
         }
     }

@@ -6,7 +6,6 @@
  *
  *)
 
-(* Validates the hint at the root of a type access replacing it with `Herr` and
-   raising an error if it is invalid *)
+(* Validates the hint at the root of a type access raising an error if it is invalid *)
 val pass :
   (Naming_phase_error.t -> unit) -> Naming_phase_env.t Naming_phase_pass.t

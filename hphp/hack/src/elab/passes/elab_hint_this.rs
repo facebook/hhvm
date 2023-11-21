@@ -118,9 +118,7 @@ impl Pass for ElabHintThisPass {
         let Hint(pos, box hint_) = elem;
         match &hint_ {
             Hint_::Hthis if self.forbid_this() || self.forbid_in_extends() => {
-                // We have a `this` hint in a forbidden position; raise and error,
-                // leave the `Herr` and break
-                *hint_ = Hint_::Herr;
+                // We have a `this` hint in a forbidden position; raise an error
                 env.emit_error(NamingError::ThisTypeForbidden {
                     pos: pos.clone(),
                     in_extends: self.in_extends(),
@@ -481,14 +479,6 @@ mod tests {
             })) => in_extends && !in_req_extends,
             _ => false,
         });
-
-        assert!(match elem.extends.pop() {
-            Some(Hint(_, box Hint_::Happly(_, hints))) => match hints.as_slice() {
-                [Hint(_, box Hint_::Herr)] => true,
-                _ => false,
-            },
-            _ => false,
-        })
     }
 
     // -- `this` hint in require extends ---------------------------------------
@@ -536,14 +526,6 @@ mod tests {
             })) => !in_extends && in_req_extends,
             _ => false,
         });
-
-        assert!(match elem.reqs.pop() {
-            Some(ClassReq(Hint(_, box Hint_::Happly(_, hints)), _)) => match hints.as_slice() {
-                [Hint(_, box Hint_::Herr)] => true,
-                _ => false,
-            },
-            _ => false,
-        })
     }
 
     #[test]
@@ -583,11 +565,6 @@ mod tests {
             })) => !in_extends && in_req_extends,
             _ => false,
         });
-
-        assert!(matches!(
-            elem.reqs.pop(),
-            Some(ClassReq(Hint(_, box Hint_::Herr), _))
-        ));
     }
 
     // -- `this` in static class var -------------------------------------------
@@ -654,11 +631,5 @@ mod tests {
             })) => !in_extends && !in_req_extends,
             _ => false,
         });
-
-        let TypeHint(_, hint_opt) = elem.type_;
-        assert!(matches!(
-            hint_opt,
-            Some(Hint(_, box Hint_::Hoption(Hint(_, box Hint_::Herr))))
-        ));
     }
 }

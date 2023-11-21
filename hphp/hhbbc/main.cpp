@@ -161,6 +161,7 @@ void parse_options(int argc, char** argv) {
     ("extern-worker-throttle-retries",         po::value(&options.ExternWorkerThrottleRetries))
     ("extern-worker-throttle-base-wait-msecs", po::value(&options.ExternWorkerThrottleBaseWaitMSecs))
     ("extern-worker-force-subprocess",         po::value(&options.ExternWorkerForceSubprocess))
+    ("extern-worker-allow-fallback",           po::value(&options.ExternWorkerAllowFallback))
     ("extern-worker-use-exec-cache",           po::value(&options.ExternWorkerUseExecCache))
     ("extern-worker-cleanup",                  po::value(&options.ExternWorkerCleanup))
     ("extern-worker-use-rich-client",          po::value(&options.ExternWorkerUseRichClient))
@@ -475,7 +476,9 @@ extern_worker::Options make_extern_worker_options() {
     .setUseCase(options.ExternWorkerUseCase)
     .setUseSubprocess(options.ExternWorkerForceSubprocess
                       ? extern_worker::Options::UseSubprocess::Always
-                      : extern_worker::Options::UseSubprocess::Fallback)
+                      : options.ExternWorkerAllowFallback
+                        ? extern_worker::Options::UseSubprocess::Fallback
+                        : extern_worker::Options::UseSubprocess::Never)
     .setCacheExecs(options.ExternWorkerUseExecCache)
     .setCleanup(options.ExternWorkerCleanup)
     .setUseRichClient(options.ExternWorkerUseRichClient)
@@ -532,6 +535,7 @@ void compile_repo() {
   sample.setInt("use_zippy_rich_client", options.ExternWorkerUseZippyRichClient);
   sample.setInt("use_p2p", options.ExternWorkerUseP2P);
   sample.setInt("force_subprocess", options.ExternWorkerForceSubprocess);
+  sample.setInt("allow_fallback", options.ExternWorkerAllowFallback);
   sample.setInt("use_exec_cache", options.ExternWorkerUseExecCache);
   sample.setInt("timeout_secs", options.ExternWorkerTimeoutSecs);
   sample.setInt("cleanup", options.ExternWorkerCleanup);

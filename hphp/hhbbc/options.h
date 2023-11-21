@@ -143,6 +143,7 @@ struct Options {
   std::string ExternWorkerUseCase;
   std::string ExternWorkerWorkingDir;
   bool ExternWorkerForceSubprocess = false;
+  bool ExternWorkerAllowFallback = true;
   bool ExternWorkerUseExecCache = true;
   bool ExternWorkerCleanup = true;
   bool ExternWorkerUseRichClient = true;

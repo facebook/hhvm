@@ -66,6 +66,7 @@ bool Option::ForceEnableSymbolRefs = false;
 std::string Option::ExternWorkerUseCase;
 std::string Option::ExternWorkerFeaturesFile;
 bool Option::ExternWorkerForceSubprocess = false;
+bool Option::ExternWorkerAllowFallback = true;
 int Option::ExternWorkerTimeoutSecs = 0;
 bool Option::ExternWorkerUseExecCache = true;
 bool Option::ExternWorkerCleanup = true;
@@ -221,6 +222,8 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   // the builtin one.
   Config::Bind(ExternWorkerForceSubprocess, ini, config,
                "ExternWorker.ForceSubprocess", ExternWorkerForceSubprocess);
+  Config::Bind(ExternWorkerAllowFallback, ini, config,
+               "ExternWorker.AllowFallback", ExternWorkerAllowFallback);
   Config::Bind(ExternWorkerTimeoutSecs, ini, config, "ExternWorker.TimeoutSecs",
                ExternWorkerTimeoutSecs);
   Config::Bind(ExternWorkerUseExecCache, ini, config,

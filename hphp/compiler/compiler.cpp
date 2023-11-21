@@ -814,7 +814,9 @@ Options makeExternWorkerOptions(const CompilerOptions& po) {
     .setFeaturesFile(Option::ExternWorkerFeaturesFile)
     .setUseSubprocess(Option::ExternWorkerForceSubprocess
                       ? Options::UseSubprocess::Always
-                      : Options::UseSubprocess::Fallback)
+                      : Option::ExternWorkerAllowFallback
+                        ? Options::UseSubprocess::Fallback
+                        : Options::UseSubprocess::Never)
     .setCacheExecs(Option::ExternWorkerUseExecCache)
     .setCleanup(Option::ExternWorkerCleanup)
     .setUseEdenFS(RO::EvalUseEdenFS)

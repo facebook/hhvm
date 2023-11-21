@@ -124,7 +124,7 @@ class structure_annotations {
 
       // cpp ref
       bool is_field = dynamic_cast<const t_field*>(&node);
-      if (name == "cpp.box" || name == "thrift.box") {
+      if (name == "thrift.box") {
         to_remove.emplace_back(name, data);
         if (is_field && !std::exchange(has_cpp_ref, true)) {
           to_add.insert("@thrift.Box");

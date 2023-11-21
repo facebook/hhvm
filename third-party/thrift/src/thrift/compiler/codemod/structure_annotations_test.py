@@ -77,8 +77,7 @@ class HoistAnnotatedTypes(unittest.TestCase):
                     6: i32 shared (cpp.ref_type = "shared");
                     7: i32 shared_const (cpp.ref_type = "shared_const");
                     8: i32 shared_mutable (cpp.ref_type = "shared_mutable");
-                    9: i32 box (cpp.box);
-                    10: i32 box2 (thrift.box);
+                    10: i32 box (thrift.box);
                     11: i32 overwrite (cpp.ref, cpp.ref_type = "shared_const");
                 }
 
@@ -114,9 +113,7 @@ class HoistAnnotatedTypes(unittest.TestCase):
                     @cpp.Ref{type = cpp.RefType.SharedMutable}
                     8: i32 shared_mutable ;
                     @thrift.Box
-                    9: i32 box ;
-                    @thrift.Box
-                    10: i32 box2 ;
+                    10: i32 box ;
                     @cpp.Ref{type = cpp.RefType.Shared}
                     11: i32 overwrite ;
                 }

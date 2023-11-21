@@ -48,6 +48,7 @@ namespace HHBBC {
 //////////////////////////////////////////////////////////////////////
 
 struct Index;
+struct ClassInfo2;
 
 namespace php {
 
@@ -565,6 +566,12 @@ struct Class : ClassBase {
   LSString name;
   SrcInfo srcInfo;
   Attr attrs;
+
+  /*
+   * Pointer to the Class' associated ClassInfo2 (if any). Must be set
+   * manually.
+   */
+  ClassInfo2* cinfo{nullptr};
 
   /*
    * Which unit defined this class.

@@ -7363,7 +7363,7 @@ Type make_obj_for_testing(trep bits, res::Class cls,
   auto t = Type { bits, Type::topLegacyMarkForBits(bits) };
   auto const useSub = [&] {
     if (!canonicalize) return isSub;
-    if (!isSub) return !cls.resolved();
+    if (!isSub) return !cls.isComplete();
     return cls.couldBeOverriddenByRegular();
   }();
   construct(
@@ -7397,7 +7397,7 @@ Type make_cls_for_testing(trep bits, res::Class cls,
   auto t = Type { bits, Type::topLegacyMarkForBits(bits) };
   auto const useSub = [&] {
     if (!canonicalize) return isSub;
-    if (!isSub) return !cls.resolved();
+    if (!isSub) return !cls.isComplete();
     return nonReg ? cls.couldBeOverridden() : cls.couldBeOverriddenByRegular();
   }();
   construct(

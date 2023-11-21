@@ -56,6 +56,7 @@
 #include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/func-util.h"
+#include "hphp/hhbbc/optimize.h"
 #include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/options-util.h"
 #include "hphp/hhbbc/parallel.h"
@@ -89,6 +90,8 @@ namespace coro = folly::coro;
 
 struct ClassInfo;
 struct ClassInfo2;
+
+struct ClassGraphHasher;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -266,17 +269,17 @@ using ContextRetTyMap = tbb::concurrent_hash_map<
 
 //////////////////////////////////////////////////////////////////////
 
-template<class Filter>
-PropState make_unknown_propstate(const Index& index,
-                                 const php::Class* cls,
+template<typename Filter>
+PropState make_unknown_propstate(const IIndex& index,
+                                 const php::Class& cls,
                                  Filter filter) {
   auto ret = PropState{};
-  for (auto& prop : cls->properties) {
+  for (auto& prop : cls.properties) {
     if (filter(prop)) {
       auto& elem = ret[prop.name];
       elem.ty = adjust_type_for_prop(
-        IndexAdaptor { index },
-        *cls,
+        index,
+        cls,
         &prop.typeConstraint,
         TCell
       );
@@ -408,6 +411,44 @@ struct FuncInfo2 {
    * return (e.g. always throws).
    */
   Type returnTy = TInitCell;
+
+  /*
+   * If the function always returns the same parameter, this will be
+   * set to its id; otherwise it will be NoLocalId.
+  */
+  LocalId retParam{NoLocalId};
+
+  /*
+   * The number of times we've refined returnTy.
+   */
+  uint32_t returnRefinements{0};
+
+  /*
+   * Whether this function is effect-free.
+   */
+  bool effectFree{false};
+
+  /*
+   * Bitset representing which parameters definitely don't affect the
+   * result of the function, assuming it produces one. Note that
+   * the parameter type verification does not count as a use in this context.
+   */
+  std::bitset<64> unusedParams;
+
+  /*
+   * If we utilize a ClassGraph while resolving types, we store it
+   * here. This ensures that that ClassGraph will always be available
+   * again. This is only used for top-level functions. If this
+   * function is a method, it will instead be stored in the
+   * ClassInfo2.
+   *
+   * This is wrapped in a std::unique_ptr because needing this for a
+   * function is very rare and we want to avoid making FuncInfo2 any
+   * larger than necessary. It also helps solve a circular dependency
+   * between the types (since std::unique_ptr does not require a
+   * complete type at declaration).
+   */
+  std::unique_ptr<hphp_fast_set<ClassGraph, ClassGraphHasher>> auxClassGraphs;
 
   template <typename SerDe> void serde(SerDe&);
 };
@@ -1088,6 +1129,8 @@ struct ClassGraph {
   ClassInfo* cinfo() const;
   ClassInfo2* cinfo2() const;
 
+  // Return a class equivalent to this one without considering
+  // non-regular classes. This might be this class, or a subclass.
   ClassGraph withoutNonRegular() const;
 
   // Whether the class might be a regular or non-regular class. This
@@ -1171,6 +1214,9 @@ struct ClassGraph {
   // which this class is a direct child).
   std::vector<ClassGraph> directParents() const;
 
+  // Returns true if this class is a child of the other class.
+  bool isChildOf(ClassGraph) const;
+
   // Retrieve the set of classes which *might* be equivalent to this
   // class when ignoring non-regular classes. This does not include
   // subclasses of this class.
@@ -1185,6 +1231,12 @@ struct ClassGraph {
   bool exactCouldBeExact(ClassGraph, bool nonRegL, bool nonRegR) const;
   bool exactCouldBe(ClassGraph, bool nonRegL, bool nonRegR) const;
   bool subCouldBe(ClassGraph, bool nonRegL, bool nonRegR) const;
+
+  // "Ensures" that this ClassGraph will be present (with the
+  // requested information) for subsequent analysis rounds.
+  void ensure() const;
+  void ensureWithChildren() const;
+  void ensureCInfo() const;
 
   // Used when building ClassGraphs initially.
   void setClosureBase();
@@ -1208,6 +1260,9 @@ struct ClassGraph {
   // Retrieve a ClassGraph with the given name, asserting if one
   // doesn't exist.
   static ClassGraph get(SString);
+  // Retrieve a ClassGraph with the given name. If one doesn't already
+  // existing, one will be created as if by calling getMissing().
+  static ClassGraph getOrCreate(SString);
   // Retrieve a "missing" ClassGraph with the given name, asserting if
   // a non-missing one already exists. This is mainly used for tests.
   static ClassGraph getMissing(SString);
@@ -1224,12 +1279,19 @@ struct ClassGraph {
   // Called to clean up memory used by ClassGraph framework.
   static void destroy();
 
+  // Set/clear an AnalysisIndex to use for calls to ensure() (and
+  // family).
+  static void setAnalysisIndex(AnalysisIndex::IndexData&);
+  static void clearAnalysisIndex();
+
   template <typename SerDe, typename T> void serde(SerDe&, T);
 
   // When serializing multiple ClassGraphs, this can be declared
   // before serializing any of them, to allow for the serialization to
   // share common state and take up less space.
   struct ScopedSerdeState;
+
+  friend struct ClassGraphHasher;
 
 private:
   struct Node;
@@ -1269,6 +1331,8 @@ private:
   };
 
   std::vector<ClassGraph> directParents(Flags) const;
+
+  void storeAuxs(AnalysisIndex::IndexData&) const;
 
   static Table& table();
 
@@ -1358,6 +1422,12 @@ private:
 std::unique_ptr<ClassGraph::Table> ClassGraph::g_table{nullptr};
 __thread ClassGraph::SerdeState* ClassGraph::tl_serde_state{nullptr};
 
+struct ClassGraphHasher {
+  size_t operator()(ClassGraph g) const {
+    return pointer_hash<ClassGraph::Node>{}(g.this_);
+  }
+};
+
 // Node on the graph:
 struct ClassGraph::Node {
   // The flags are stored along with any ClassInfo to save memory.
@@ -1443,6 +1513,7 @@ struct ClassGraph::Table {
   // a subclass (which is common). Stored separately to save memory
   // since it's rare.
   hphp_fast_map<Node*, Node*> regOnlyEquivs;
+  AnalysisIndex::IndexData* index{nullptr};
   struct Locking {
     folly::SharedMutex table;
     std::array<std::mutex, 2048> nodes;
@@ -2033,13 +2104,17 @@ bool ClassGraph::operator<(ClassGraph h) const {
 ClassGraph ClassGraph::withoutNonRegular() const {
   assertx(!table().locking);
   assertx(this_);
-  if (this_->isMissing() || this_->isRegular()) return *this;
+  if (this_->isMissing() || this_->isRegular()) {
+    ensure();
+    return *this;
+  }
   return ClassGraph { this_->nonRegularInfo().regOnlyEquiv };
 }
 
 ClassGraph ClassGraph::base() const {
   assertx(!table().locking);
   assertx(this_);
+  ensure();
   if (this_->isMissing()) return ClassGraph { nullptr };
   for (auto const p : this_->parents) {
     if (p->isBase()) return ClassGraph { p };
@@ -2051,6 +2126,8 @@ ClassGraph ClassGraph::topBase() const {
   assertx(!table().locking);
   assertx(this_);
   assertx(!isMissing());
+
+  ensure();
 
   auto current = this_;
   auto last = this_;
@@ -2076,6 +2153,8 @@ std::vector<ClassGraph> ClassGraph::bases() const {
   assertx(!table().locking);
   assertx(this_);
   assertx(!isMissing());
+
+  ensure();
 
   std::vector<ClassGraph> out;
   auto current = this_;
@@ -2103,6 +2182,8 @@ std::vector<ClassGraph> ClassGraph::interfaces() const {
   assertx(this_);
   assertx(!isMissing());
 
+  ensure();
+
   std::vector<ClassGraph> out;
   forEachParent(
     *this_,
@@ -2120,6 +2201,8 @@ std::vector<ClassGraph> ClassGraph::children() const {
   assertx(this_);
   assertx(!isMissing());
   assertx(hasCompleteChildren());
+
+  ensureWithChildren();
 
   std::vector<ClassGraph> out;
   // If this_ is a trait, then forEachChild won't walk the list. Use
@@ -2143,6 +2226,8 @@ std::vector<ClassGraph> ClassGraph::directParents(Flags flags) const {
   assertx(this_);
   assertx(!isMissing());
 
+  ensure();
+
   std::vector<ClassGraph> out;
   out.reserve(this_->parents.size());
   for (auto const p : this_->parents) {
@@ -2158,11 +2243,27 @@ std::vector<ClassGraph> ClassGraph::directParents() const {
   assertx(this_);
   assertx(!isMissing());
 
+  ensure();
+
   std::vector<ClassGraph> out;
   out.reserve(this_->parents.size());
   for (auto const p : this_->parents) out.emplace_back(ClassGraph { p });
   std::sort(begin(out), end(out));
   return out;
+}
+
+bool ClassGraph::isChildOf(ClassGraph o) const {
+  assertx(!table().locking);
+  assertx(this_);
+  assertx(o.this_);
+  assertx(!this_->isMissing());
+  assertx(!o.this_->isMissing());
+  if (this_ == o.this_) return true;
+  ensure();
+  // Nothing is a child of a trait except itself and we know they're
+  // not equal.
+  if (o.this_->isTrait()) return false;
+  return findParent(*this_, *o.this_);
 }
 
 std::vector<ClassGraph> ClassGraph::candidateRegOnlyEquivs() const {
@@ -2242,6 +2343,7 @@ ClassGraph::Node::nonRegularInfo() {
   assertx(!table().locking);
   assertx(!isMissing());
   assertx(!isRegular());
+  ClassGraph{this}.ensureWithChildren();
   return nonRegInfo.get(
     [this] {
       auto info = std::make_unique<NonRegularInfo>();
@@ -2258,6 +2360,10 @@ bool ClassGraph::exactSubtypeOfExact(ClassGraph o,
   assertx(!table().locking);
   assertx(this_);
   assertx(o.this_);
+
+  ensure();
+  o.ensure();
+
   // Two exact classes are only subtypes of another if they're the
   // same. One additional complication is if the class isn't regular
   // and we're not considering non-regular classes. In that case, the
@@ -2286,6 +2392,10 @@ bool ClassGraph::exactSubtypeOf(ClassGraph o,
   assertx(!table().locking);
   assertx(this_);
   assertx(o.this_);
+
+  ensure();
+  o.ensure();
+
   // If we want to exclude non-regular classes on either side, and the
   // lhs is not regular, there's no subtype relation. If nonRegL is
   // false, then lhs is just a bottom (and bottom is a subtype of
@@ -2316,15 +2426,12 @@ bool ClassGraph::subSubtypeOf(ClassGraph o, bool nonRegL, bool nonRegR) const {
   assertx(this_);
   assertx(o.this_);
 
+  ensure();
+  o.ensure();
+
   if (nonRegL && !nonRegR) {
     if (this_->isMissing() || !this_->isRegular()) return false;
-    auto const action = forEachChild(
-      *this_,
-      [&] (Node& c) {
-        return c.isRegular() ? Action::Continue : Action::Stop;
-      }
-    );
-    if (action == Action::Stop) return false;
+    if (this_->hasNonRegularSubclass()) return false;
   }
 
   // If this_ must be part of the lhs, it's equivalent to
@@ -2353,6 +2460,10 @@ bool ClassGraph::exactCouldBeExact(ClassGraph o,
   assertx(!table().locking);
   assertx(this_);
   assertx(o.this_);
+
+  ensure();
+  o.ensure();
+
   // Two exact classes can only be each other if they're the same
   // class. The only complication is if the class isn't regular and
   // we're not considering non-regular classes. In that case, the
@@ -2367,6 +2478,10 @@ bool ClassGraph::exactCouldBe(ClassGraph o, bool nonRegL, bool nonRegR) const {
   assertx(!table().locking);
   assertx(this_);
   assertx(o.this_);
+
+  ensure();
+  o.ensure();
+
   // exactCouldBe is almost identical to exactSubtypeOf, except the
   // case of the lhs being bottom is treated differently (bottom in
   // exactSubtypeOf implies true, but here it implies false).
@@ -2394,6 +2509,9 @@ bool ClassGraph::subCouldBe(ClassGraph o, bool nonRegL, bool nonRegR) const {
   assertx(this_);
   assertx(o.this_);
 
+  ensure();
+  o.ensure();
+
   auto const regOnly = !nonRegL || !nonRegR;
 
   if (exactCouldBe(o, nonRegL, nonRegR) ||
@@ -2412,6 +2530,7 @@ bool ClassGraph::subCouldBe(ClassGraph o, bool nonRegL, bool nonRegR) const {
   auto right = o.this_;
   if (betterNode(right, left)) std::swap(left, right);
 
+  ClassGraph{left}.ensureWithChildren();
   if (!left->hasCompleteChildren()) return true;
 
   NodeSet visited;
@@ -2652,7 +2771,7 @@ ClassGraph::NodeVec ClassGraph::combine(const NodeVec& lhs,
 
   // Combine two sets, keeping only the nodes that are in both
   // sets. An empty set is equivalent to Top (not Bottom), thus
-  // everything in the othe other set goes in.
+  // everything in the other set goes in.
   NodeSet combined;
   auto const combine = [&] (const NodeSet& s1, const NodeSet& s2) {
     if (s1.empty()) {
@@ -2679,6 +2798,9 @@ ClassGraph::NodeVec ClassGraph::combine(const NodeVec& lhs,
    * individual classes pair-wise, then intersect them together.
    */
   auto const process = [&] (Node* l, Node* r) {
+    ClassGraph{l}.ensure();
+    ClassGraph{r}.ensure();
+
     // Order the l and r to cut down on the number of cases to deal
     // with below.
     auto const flip = [&] {
@@ -2757,6 +2879,7 @@ ClassGraph::NodeVec ClassGraph::intersect(const NodeVec& lhs,
   // calculated below. We leave them out to reduce the amount of work.
   NodeSet heads;
   for (auto const n : combined) {
+    ClassGraph{n}.ensure();
     if (n->isMissing()) {
       heads.emplace(n);
     } else if ((nonRegL && nonRegR) || n->isRegular()) {
@@ -2838,6 +2961,7 @@ ClassGraph::NodeVec ClassGraph::removeNonReg(const NodeVec& v) {
   NodeVec lhs;
   NodeVec rhs;
   for (auto const n : v) {
+    ClassGraph{n}.ensure();
     if (n->isMissing() || n->isRegular()) {
       lhs.emplace_back(n);
     } else if (auto const e = n->nonRegularInfo().regOnlyEquiv) {
@@ -2901,6 +3025,10 @@ void ClassGraph::enumerateIsectMembers(const NodeVec& nodes,
 
   if (nodes.empty()) return;
 
+  if (table().index) {
+    for (auto const n : nodes) ClassGraph{n}.ensure();
+  }
+
   // Find the "best" node to start with.
   auto head = *std::min_element(nodes.begin(), nodes.end(), betterNode);
   if (head->isMissing() || !head->hasCompleteChildren()) {
@@ -2915,6 +3043,7 @@ void ClassGraph::enumerateIsectMembers(const NodeVec& nodes,
 
   // Otherwise report Nodes which are children of all of the Nodes.
   auto const run = [&] (auto tracker) {
+    ClassGraph{head}.ensureWithChildren();
     forEachChild(
       *head,
       [&] (Node& c) {
@@ -2953,6 +3082,7 @@ ClassGraph::NodeVec ClassGraph::canonicalize(const NodeSet& nodes,
   auto heads = nodes;
   NodeSet visited;
   for (auto const n : nodes) {
+    ClassGraph{n}.ensure();
     if (!heads.count(n)) continue;
     if (n->isMissing()) continue;
     forEachParent(
@@ -3114,6 +3244,23 @@ ClassGraph ClassGraph::get(SString name) {
   return ClassGraph{ n };
 }
 
+ClassGraph ClassGraph::getOrCreate(SString name) {
+  assertx(!table().locking);
+
+  auto const& [n, emplaced] = table().nodes.try_emplace(name);
+  if (emplaced) {
+    assertx(!n->second.name);
+    assertx(n->second.flags() == FlagNone);
+    assertx(!n->second.cinfo());
+    assertx(!n->second.cinfo2());
+    n->second.name = name;
+    n->second.setFlags(FlagMissing);
+  } else {
+    assertx(n->second.name->isame(name));
+  }
+  return ClassGraph{ &n->second };
+}
+
 ClassGraph ClassGraph::getMissing(SString name) {
   assertx(!table().locking);
 
@@ -3149,6 +3296,7 @@ void ClassGraph::stopConcurrent() {
 }
 
 void ClassGraph::destroy() {
+  assertx(IMPLIES(g_table, !g_table->index));
   g_table.reset();
 }
 
@@ -3158,6 +3306,18 @@ ClassGraph::Table& ClassGraph::table() {
     "Attempting to access ClassGraph node table when one isn't active!"
   );
   return *g_table;
+}
+
+void ClassGraph::setAnalysisIndex(AnalysisIndex::IndexData& index) {
+  assertx(!table().locking);
+  assertx(!table().index);
+  table().index = &index;
+}
+
+void ClassGraph::clearAnalysisIndex() {
+  assertx(!table().locking);
+  assertx(table().index);
+  table().index = nullptr;
 }
 
 // Set the FlagComplete/FlagConservative and FlagRegSub/FlagNonRegSub
@@ -3272,16 +3432,15 @@ void ClassGraph::serdeImpl(SerDe& sd,
       // If this node isn't regular, and we've recorded an equivalent
       // node for it, make sure that the equivalent is
       // hasCompleteChildren(), as that's an invariant.
-      if (!this_->isRegular()) {
-        if (auto const equiv = sd.template make<const StringData*>()) {
-          auto const equivNode = &impl.get(equiv);
-          if (!equivNode->hasCompleteChildren()) {
-            assertx(!equivNode->isConservative());
-            setCompleteImpl(impl, *equivNode);
-            assertx(equivNode->hasCompleteChildren());
-          }
-          impl.setEquiv(*this_, *equivNode);
+      if (auto const equiv = sd.template make<const StringData*>()) {
+        auto const equivNode = &impl.get(equiv);
+        assertx(!equivNode->isRegular());
+        if (!equivNode->hasCompleteChildren()) {
+          assertx(!equivNode->isConservative());
+          setCompleteImpl(impl, *equivNode);
+          assertx(equivNode->hasCompleteChildren());
         }
+        impl.setEquiv(*this_, *equivNode);
       }
 
       if constexpr (!std::is_null_pointer_v<T>) {
@@ -3322,16 +3481,16 @@ void ClassGraph::serdeImpl(SerDe& sd,
 
       // If this Node isn't regular and has an equivalent node, record
       // that here.
-      if (!this_->isRegular()) {
+      if (!this_->isMissing() && !this_->isRegular()) {
         if (auto const e = folly::get_default(table().regOnlyEquivs, this_)) {
           assertx(e->hasCompleteChildren());
           sd(e->name);
         } else {
           sd((const StringData*)nullptr);
         }
+      } else {
+        sd((const StringData*)nullptr);
       }
-      // We record nothing for regular classes since they never have a
-      // (non-trivial) equivalent.
     } else {
       sd((const StringData*)nullptr);
     }
@@ -3424,7 +3583,7 @@ void ClassGraph::deserBlock(SerDe& sd, const Impl& impl) {
     assertx(!(flags & FlagConservative) ||
             ((node->flags() & ~(FlagChildren | FlagCInfo2))) == flags);
   } else if (!node->hasCompleteChildren()) {
-    impl.updateFlags(*node, flags);
+    impl.updateFlags(*node, flags, FlagMissing);
     if (node->isConservative()) {
       impl.lock(*node, [node=node] { node->children.clear(); });
     }
@@ -3506,7 +3665,24 @@ template <typename SerDe> void FuncInfo2::serde(SerDe& sd) {
   ClassGraph::ScopedSerdeState _2;
   sd(name)
     (returnTy)
+    (retParam)
+    (returnRefinements)
+    (effectFree)
+    (unusedParams)
     ;
+
+  if constexpr (SerDe::deserializing) {
+    bool present;
+    sd(present);
+    using T = decltype(auxClassGraphs)::element_type;
+    if (present) {
+      auxClassGraphs =
+        std::make_unique<T>(sd.template make<T>(std::less<>{}, nullptr));
+    }
+  } else {
+    sd((bool)auxClassGraphs);
+    if (auxClassGraphs) sd(*auxClassGraphs, std::less<>{}, nullptr);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -3696,6 +3872,12 @@ struct ClassInfo2 {
   SStringToOneT<ConstIndex> clsConstants;
 
   /*
+   * Inferred information about a class constant declared on this
+   * class (not flattened).
+   */
+  SStringToOneT<ClsConstInfo> clsConstantInfo;
+
+  /*
    * A list of extra properties supplied by this class's used traits.
    */
   CompactVector<php::Prop> traitProps;
@@ -3784,6 +3966,13 @@ struct ClassInfo2 {
   CompactVector<std::unique_ptr<FuncInfo2>> funcInfos;
 
   /*
+   * If we utilize a ClassGraph while resolving types, we store it
+   * here. This ensures that that ClassGraph will always be available
+   * again.
+   */
+  hphp_fast_set<ClassGraph, ClassGraphHasher> auxClassGraphs;
+
+  /*
    * Track if this class has a property which might redeclare a property in a
    * parent class with an inequivalent type-hint.
    */
@@ -3851,6 +4040,7 @@ struct ClassInfo2 {
     sd(name)
       (parent)
       (clsConstants, string_data_lt{})
+      (clsConstantInfo, string_data_lt{})
       (traitProps)
       (methods, string_data_lt{})
       (missingMethods, string_data_lt{})
@@ -3859,6 +4049,7 @@ struct ClassInfo2 {
       (closures)
       (methodFamilies, string_data_lt{})
       (funcInfos)
+      (auxClassGraphs, std::less<>{}, nullptr)
       (hasBadRedeclareProp)
       (hasBadInitialPropValues)
       (hasConstProp)
@@ -3959,8 +4150,10 @@ bool Class::mightContainNonRegular() const {
 
 bool Class::couldHaveMagicBool() const {
   auto const g = graph();
+  g.ensure();
   if (g.isMissing()) return true;
   if (!g.isInterface()) return has_magic_bool_conversion(g.topBase().name());
+  g.ensureWithChildren();
   if (!g.hasCompleteChildren()) return true;
   for (auto const c : g.children()) {
     if (has_magic_bool_conversion(c.topBase().name())) return true;
@@ -3969,6 +4162,7 @@ bool Class::couldHaveMagicBool() const {
 }
 
 bool Class::couldHaveMockedSubClass() const {
+  graph().ensureCInfo();
   if (auto const ci = cinfo()) {
     return ci->isSubMocked;
   } else if (auto const ci = cinfo2()) {
@@ -3979,6 +4173,7 @@ bool Class::couldHaveMockedSubClass() const {
 }
 
 bool Class::couldBeMocked() const {
+  graph().ensureCInfo();
   if (auto const ci = cinfo()) {
     return ci->isMocked;
   } else if (auto const ci = cinfo2()) {
@@ -3989,6 +4184,7 @@ bool Class::couldBeMocked() const {
 }
 
 bool Class::couldHaveReifiedGenerics() const {
+  graph().ensureCInfo();
   if (auto const ci = cinfo()) {
     return ci->cls->hasReifiedGenerics;
   } else if (auto const ci = cinfo2()) {
@@ -3999,6 +4195,7 @@ bool Class::couldHaveReifiedGenerics() const {
 }
 
 bool Class::mustHaveReifiedGenerics() const {
+  graph().ensureCInfo();
   if (auto const ci = cinfo()) {
     return ci->cls->hasReifiedGenerics;
   } else if (auto const ci = cinfo2()) {
@@ -4009,6 +4206,7 @@ bool Class::mustHaveReifiedGenerics() const {
 }
 
 bool Class::couldHaveReifiedParent() const {
+  graph().ensureCInfo();
   if (auto const ci = cinfo()) {
     return ci->hasReifiedParent;
   } else if (auto const ci = cinfo2()) {
@@ -4019,6 +4217,7 @@ bool Class::couldHaveReifiedParent() const {
 }
 
 bool Class::mustHaveReifiedParent() const {
+  graph().ensureCInfo();
   if (auto const ci = cinfo()) {
     return ci->hasReifiedParent;
   } else if (auto const ci = cinfo2()) {
@@ -4030,6 +4229,7 @@ bool Class::mustHaveReifiedParent() const {
 
 bool Class::mightCareAboutDynConstructs() const {
   if (!RuntimeOption::EvalForbidDynamicConstructs) return false;
+  graph().ensureCInfo();
   if (auto const ci = cinfo()) {
     return !(ci->cls->attrs & AttrDynamicallyConstructible);
   } else if (auto const ci = cinfo2()) {
@@ -4040,6 +4240,7 @@ bool Class::mightCareAboutDynConstructs() const {
 }
 
 bool Class::couldHaveConstProp() const {
+  graph().ensureCInfo();
   if (auto const ci = cinfo()) {
     return ci->hasConstProp;
   } else if (auto const ci = cinfo2()) {
@@ -4050,6 +4251,7 @@ bool Class::couldHaveConstProp() const {
 }
 
 bool Class::subCouldHaveConstProp() const {
+  graph().ensureCInfo();
   if (auto const ci = cinfo()) {
     return ci->subHasConstProp;
   } else if (auto const ci = cinfo2()) {
@@ -4067,11 +4269,8 @@ Optional<res::Class> Class::parent() const {
   }
 }
 
-bool Class::resolved() const {
-  return cinfo() || cinfo2();
-}
-
 const php::Class* Class::cls() const {
+  graph().ensureCInfo();
   if (auto const ci = cinfo()) {
     return ci->cls;
   } else if (auto const ci = cinfo2()) {
@@ -4094,6 +4293,7 @@ bool Class::isComplete() const {
 bool
 Class::forEachSubclass(const std::function<void(SString, Attr)>& f) const {
   auto const g = graph();
+  g.ensureWithChildren();
   if (g.isMissing() || !g.hasCompleteChildren()) return false;
   for (auto const c : g.children()) {
     auto const attrs = [&] {
@@ -4109,11 +4309,13 @@ Class::forEachSubclass(const std::function<void(SString, Attr)>& f) const {
 }
 
 std::string show(const Class& c) {
-  if (c.isComplete()) {
-    return c.graph().name()->toCppString();
-  } else {
+  if (!c.isComplete()) {
     return folly::sformat("\"{}\"", c.graph().name());
   }
+  if (!c.cinfo() && !c.cinfo2()) {
+    return folly::sformat("*{}", c.graph().name());
+  }
+  return c.graph().name()->toCppString();
 }
 
 // Call the given callable for every class which is a subclass of
@@ -4131,6 +4333,7 @@ void Class::visitEverySub(folly::Range<const Class*> classes,
                           const F& f) {
   if (classes.size() == 1) {
     auto const n = classes[0].graph().this_;
+    ClassGraph{n}.ensureWithChildren();
     if (n->isMissing() || !n->hasCompleteChildren()) {
       f(Class{ClassGraph{ n }});
       return;
@@ -4235,6 +4438,10 @@ Class Class::get(const ClassInfo& cinfo) {
 Class Class::get(const ClassInfo2& cinfo) {
   assertx(cinfo.classGraph);
   return Class{ cinfo.classGraph };
+}
+
+Class Class::getOrCreate(SString name) {
+  return Class{ ClassGraph::getOrCreate(name) };
 }
 
 Class Class::getUnresolved(SString name) {
@@ -5218,15 +5425,43 @@ struct AnalysisIndex::IndexData {
   AnalysisWorklist& worklist;
   std::unique_ptr<DepTracker> deps;
 
+  std::vector<SString> classNames;
+  std::vector<SString> funcNames;
+  std::vector<SString> unitNames;
+
   ISStringToOneT<std::unique_ptr<php::Class>> classes;
+  ISStringToOneT<std::unique_ptr<ClassInfo2>> cinfos;
+  ISStringToOneT<std::unique_ptr<MethodsWithoutCInfo>> minfos;
 
   ISStringToOneT<std::unique_ptr<php::Func>> funcs;
+  ISStringToOneT<std::unique_ptr<FuncInfo2>> finfos;
+
+  SStringToOneT<std::unique_ptr<php::Unit>> units;
 
   SStringToOneT<php::Constant*> constants;
+  ISStringToOneT<php::TypeAlias*> typeAliases;
+
+  std::vector<FuncInfo2*> finfosByIdx;
+
+  // Anything on these lists is known to definitely not exist.
+  ISStringSet badClasses;
+  ISStringSet badFuncs;
+  SStringSet badConstants;
+  ISStringSet badTypeAliases;
+
+  SStringSet dynamicConstants;
 
   // AnalysisIndex maintains a stack of the contexts being analyzed
   // (we can have multiple because of inline interp).
   std::vector<Context> contexts;
+
+  size_t foldableInterpNestingLevel{0};
+  size_t contextualInterpNestingLevel{0};
+
+  // Once the index is frozen, no further updates to it are allowed
+  // (will assert). We only gather dependencies when the index is
+  // frozen.
+  bool frozen{false};
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -5260,6 +5495,14 @@ const Context& context_for_deps(const AnalysisIndex::IndexData& index) {
 
 //////////////////////////////////////////////////////////////////////
 
+FuncOrCls fc_from_context(const Context& ctx) {
+  if (ctx.cls) return ctx.cls;
+  assertx(ctx.func);
+  return ctx.func;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 // Record the dependencies of all classes and functions being
 // processed with an AnalysisIndex. These dependencies will ultimately
 // be reported back to the master AnalysisScheduler, but will also
@@ -5278,8 +5521,10 @@ struct DepTracker {
   // dependency context.
 
   void add(Class c) {
+    if (!index.frozen) return;
     auto const fc = context();
-    if (deps[fc].add(c)) {
+    auto& d = deps[fc];
+    if (!(fc.right() && fc.right()->name->isame(c.name)) && d.add(c)) {
       FTRACE(2, "{} now depends on class {}\n", HHBBC::show(fc), c.name);
     }
     // Class either exists or not and won't change within the job, so
@@ -5288,69 +5533,83 @@ struct DepTracker {
 
   void add(const php::Func& f, Type t = Type::None) {
     auto const fc = context();
-    if (auto const added = deps[fc].add(f, t)) {
-      FTRACE(
-        2, "{} now depends on {}{} {}\n",
-        HHBBC::show(fc), displayAdded(added),
-        f.cls ? "method" : "func",
-        func_fullname(f)
-      );
+    if (index.frozen) {
+      if (auto const added = deps[fc].add(f, t)) {
+        FTRACE(
+          2, "{} now depends on {}{} {}\n",
+          HHBBC::show(fc), displayAdded(added),
+          f.cls ? "method" : "func",
+          func_fullname(f)
+        );
+      }
+    } else {
+      // Record dependency for worklist if anything can change within
+      // the job.
+      t &= AnalysisDeps::kValidForChanges;
+      if (t == Type::None) return;
+      funcs[&f][fc] |= t;
     }
-    // Record dependency for worklist if anything can change within
-    // the job.
-    t &= AnalysisDeps::kValidForChanges;
-    if (t == Type::None) return;
-    funcs[&f][fc] |= t;
   }
 
   void add(MethRef m, Type t = Type::None) {
     auto const fc = context();
-    if (auto const added = deps[fc].add(m, t)) {
-      FTRACE(2, "{} now depends on {}method {}\n",
-             HHBBC::show(fc), displayAdded(added), display(m));
+    if (index.frozen) {
+      if (auto const added = deps[fc].add(m, t)) {
+        FTRACE(2, "{} now depends on {}method {}\n",
+               HHBBC::show(fc), displayAdded(added), display(m));
+      }
+    } else {
+      // Record dependency for worklist if anything can change within
+      // the job.
+      t &= AnalysisDeps::kValidForChanges;
+      if (t == Type::None) return;
+      if (auto const p = from(m)) funcs[p][fc] |= t;
     }
-    // Record dependency for worklist if anything can change within
-    // the job.
-    t &= AnalysisDeps::kValidForChanges;
-    if (t == Type::None) return;
-    if (auto const p = from(m)) funcs[p][fc] |= t;
   }
 
   void add(Func f, Type t = Type::None) {
     auto const fc = context();
-    if (auto const added = deps[fc].add(f, t)) {
-      FTRACE(2, "{} now depends on {}func {}\n",
-             HHBBC::show(fc), displayAdded(added), f.name);
-    }
-    // Record dependency for worklist if anything can change within
-    // the job.
-    t &= AnalysisDeps::kValidForChanges;
-    if (t == Type::None) return;
-    if (auto const p = folly::get_ptr(index.funcs, f.name)) {
-      funcs[p->get()][fc] |= t;
+    if (index.frozen) {
+      if (auto const added = deps[fc].add(f, t)) {
+        FTRACE(2, "{} now depends on {}func {}\n",
+               HHBBC::show(fc), displayAdded(added), f.name);
+      }
+    } else {
+      // Record dependency for worklist if anything can change within
+      // the job.
+      t &= AnalysisDeps::kValidForChanges;
+      if (t == Type::None) return;
+      if (auto const p = folly::get_ptr(index.funcs, f.name)) {
+        funcs[p->get()][fc] |= t;
+      }
     }
   }
 
   void add(ConstIndex cns) {
     auto const fc = context();
-    if (deps[fc].add(cns)) {
-      FTRACE(2, "{} now depends on class constant {}\n",
-             HHBBC::show(fc), display(cns));
+    if (index.frozen) {
+      if (deps[fc].add(cns)) {
+        FTRACE(2, "{} now depends on class constant {}\n",
+               HHBBC::show(fc), display(cns));
+      }
+    } else if (auto const p = from(cns)) {
+      clsConstants[p].emplace(fc);
     }
-    if (auto const p = from(cns)) clsConstants[p].emplace(fc);
   }
 
   void add(Constant cns) {
     auto const fc = context();
-    if (deps[fc].add(cns)) {
-      FTRACE(2, "{} now depends on constant {}\n", HHBBC::show(fc), cns.name);
-    }
-    if (auto const p = folly::get_default(index.constants, cns.name)) {
+    if (index.frozen) {
+      if (deps[fc].add(cns)) {
+        FTRACE(2, "{} now depends on constant {}\n", HHBBC::show(fc), cns.name);
+      }
+    } else if (auto const p = folly::get_default(index.constants, cns.name)) {
       constants[p].emplace(fc);
     }
   }
 
   void add(TypeAlias typeAlias) {
+    if (!index.frozen) return;
     auto const fc = context();
     if (!deps[fc].add(typeAlias)) return;
     FTRACE(2, "{} now depends on type-alias {}\n",
@@ -5365,6 +5624,7 @@ struct DepTracker {
   void update(const php::Func& f, Type t) {
     if (t == Type::None) return;
     assertx(AnalysisDeps::isValidForChanges(t));
+    assertx(!index.frozen);
     FTRACE(
       2, "{} {} {} changed, scheduling\n",
       f.cls ? "method" : "func",
@@ -5376,19 +5636,17 @@ struct DepTracker {
   }
 
   void update(const php::Const& cns, ConstIndex idx) {
+    assertx(!index.frozen);
     FTRACE(2, "constant {}::{} changed, scheduling\n", idx.cls, cns.name);
     changes.changed(idx);
     schedule(folly::get_ptr(clsConstants, &cns));
   }
 
   void update(const php::Constant& cns) {
+    assertx(!index.frozen);
     FTRACE(2, "constant {} changed, scheduling\n", cns.name);
     changes.changed(cns);
     schedule(folly::get_ptr(constants, &cns));
-  }
-
-  void remove(FuncOrCls fc) {
-    deps.erase(fc);
   }
 
   AnalysisDeps take(FuncOrCls fc) {
@@ -5397,9 +5655,7 @@ struct DepTracker {
     return std::move(it->second);
   }
 
-  AnalysisChangeSet takeChanges() {
-    return std::move(changes);
-  }
+  AnalysisChangeSet& getChanges() { return changes; }
 
 private:
 
@@ -5580,16 +5836,101 @@ FuncInfo* func_info(IndexData& data, const php::Func* f) {
   return fi;
 }
 
+FuncInfo2& func_info(AnalysisIndex::IndexData& data, const php::Func& f) {
+  assertx(f.idx < data.finfosByIdx.size());
+  auto const fi = data.finfosByIdx[f.idx];
+  assertx(fi->func == &f);
+  return *fi;
+}
+
 //////////////////////////////////////////////////////////////////////
 
-// Obtain the php::Func* represented by a MethRef. Doesn't work inside
-// remote worker jobs.
+// Obtain the php::Func* represented by a MethRef.
 const php::Func* func_from_meth_ref(const IndexData& index,
                                     const MethRef& meth) {
   auto const cls = index.classes.at(meth.cls);
   assertx(meth.idx < cls->methods.size());
   return cls->methods[meth.idx].get();
 }
+
+const php::Func* func_from_meth_ref(const AnalysisIndex::IndexData& index,
+                                    const MethRef& meth) {
+  index.deps->add(AnalysisDeps::Class { meth.cls });
+  auto const cls = folly::get_ptr(index.classes, meth.cls);
+  if (!cls) {
+    always_assert_flog(
+      !index.badClasses.count(meth.cls),
+      "MethRef references non-existent class {}\n",
+      meth.cls
+    );
+    return nullptr;
+  }
+  assertx(meth.idx < cls->get()->methods.size());
+  return cls->get()->methods[meth.idx].get();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+// Defined here so that AnalysisIndex::IndexData is a complete type.
+
+void ClassGraph::storeAuxs(AnalysisIndex::IndexData& i) const {
+  // Get the current context and store this ClassGraph on it's aux
+  // list.
+  auto const fc = fc_from_context(context_for_deps(i));
+  if (auto const c = fc.right()) {
+    if (!c->cinfo || c->cinfo == cinfo2()) return;
+    if (!c->cinfo->auxClassGraphs.emplace(*this).second) return;
+    FTRACE(2, "{} now stores {} as an auxiliary ClassGraph\n", c->name, name());
+  } else if (auto const f = fc.left()) {
+    auto& fi = func_info(i, *f);
+    if (!fi.auxClassGraphs) {
+      using T = decltype(fi.auxClassGraphs)::element_type;
+      fi.auxClassGraphs = std::make_unique<T>();
+    }
+    if (!fi.auxClassGraphs->emplace(*this).second) return;
+    FTRACE(2, "{} now stores {} as an auxiliary ClassGraph\n", f->name, name());
+  }
+}
+
+// Ensure ClassGraph is not missing
+void ClassGraph::ensure() const {
+  assertx(this_);
+  auto const i = table().index;
+  if (!i || !i->frozen) return;
+  if (this_->isMissing()) {
+    i->deps->add(AnalysisDeps::Class { name() });
+  }
+  storeAuxs(*i);
+}
+
+// Ensure ClassGraph is not missing and has complete child
+// information.
+void ClassGraph::ensureWithChildren() const {
+  assertx(this_);
+  auto const i = table().index;
+  if (!i || !i->frozen) return;
+  if (this_->isMissing() ||
+      (!this_->hasCompleteChildren() && !this_->isConservative())) {
+    i->deps->add(AnalysisDeps::Class { name() });
+  }
+  storeAuxs(*i);
+}
+
+// Ensure ClassGraph is not missing and has an associated ClassInfo2
+// (strongest condition).
+void ClassGraph::ensureCInfo() const {
+  auto const i = table().index;
+  if (!i || !i->frozen) return;
+  i->deps->add(AnalysisDeps::Class { name() });
+}
+
+//////////////////////////////////////////////////////////////////////
+
+namespace {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -6688,14 +7029,14 @@ void check_local_invariants(const IndexData& data) {
 
 //////////////////////////////////////////////////////////////////////
 
-Type adjust_closure_context(const Index& index, const CallContext& ctx) {
+Type adjust_closure_context(const IIndex& index, const CallContext& ctx) {
   if (ctx.callee->cls && ctx.callee->cls->closureContextCls) {
     auto const withClosureContext = Context {
       ctx.callee->unit,
       ctx.callee,
       index.lookup_closure_context(*ctx.callee->cls)
     };
-    if (auto const s = selfCls(IndexAdaptor { index }, withClosureContext)) {
+    if (auto const s = selfCls(index, withClosureContext)) {
       return setctx(toobj(*s));
     }
     return TObj;
@@ -6711,7 +7052,10 @@ Index::ReturnType context_sensitive_return_type(IndexData& data,
   static __thread uint32_t interp_nesting_level;
   auto const finfo = func_info(data, callCtx.callee);
 
-  auto const adjustedCtx = adjust_closure_context(*data.m_index, callCtx);
+  auto const adjustedCtx = adjust_closure_context(
+    IndexAdaptor { *data.m_index },
+    callCtx
+  );
   returnType.t = return_with_context(std::move(returnType.t), adjustedCtx);
 
   auto const checkParam = [&] (int i) {
@@ -6824,6 +7168,149 @@ Index::ReturnType context_sensitive_return_type(IndexData& data,
   }
 
   return ret;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Index::ReturnType context_sensitive_return_type(AnalysisIndex::IndexData& data,
+                                                const CallContext& callCtx,
+                                                Index::ReturnType returnType) {
+  constexpr size_t maxNestingLevel = 2;
+
+  using R = Index::ReturnType;
+
+  auto const& func = *callCtx.callee;
+  auto const& finfo = func_info(data, func);
+
+  auto const& caller = *context_for_deps(data).func;
+
+  auto const adjustedCtx = adjust_closure_context(
+    AnalysisIndexAdaptor { data.index },
+    callCtx
+  );
+  returnType.t = return_with_context(std::move(returnType.t), adjustedCtx);
+
+  auto const checkParam = [&] (size_t i) {
+    auto const& constraint = func.params[i].typeConstraint;
+    if (constraint.hasConstraint() &&
+        !constraint.isTypeVar() &&
+        !constraint.isTypeConstant()) {
+      return callCtx.args[i].strictlyMoreRefined(
+        lookup_constraint(
+          AnalysisIndexAdaptor { data.index },
+          Context { func.unit, &func, func.cls },
+          constraint
+        ).upper
+      );
+    }
+    return callCtx.args[i].strictSubtypeOf(TInitCell);
+  };
+
+  // TODO(#3788877): more heuristics here would be useful.
+  auto const tryContextSensitive = [&] {
+    if (func.noContextSensitiveAnalysis ||
+        func.params.empty() ||
+        data.contextualInterpNestingLevel + 1 >= maxNestingLevel ||
+        returnType.t.is(BBottom)) {
+      return false;
+    }
+
+    data.deps->add(func, AnalysisDeps::RetParam);
+    if (finfo.retParam != NoLocalId &&
+        callCtx.args.size() > finfo.retParam &&
+        checkParam(finfo.retParam)) {
+      return true;
+    }
+
+    if (!options.ContextSensitiveInterp) return false;
+
+    auto const numParams = func.params.size();
+    if (callCtx.args.size() < numParams) return true;
+    for (size_t i = 0; i < numParams; ++i) {
+      if (checkParam(i)) return true;
+    }
+    return false;
+  }();
+
+  if (!tryContextSensitive) return returnType;
+
+  data.deps->add(func, AnalysisDeps::Bytecode);
+  if (!func.rawBlocks) {
+    ITRACE_MOD(
+      Trace::hhbbc, 4,
+      "Skipping inline interp of {} because bytecode not present\n",
+      func_fullname(func)
+    );
+    return R{ TInitCell, false };
+  }
+
+  auto contextType = [&] {
+    ++data.contextualInterpNestingLevel;
+    SCOPE_EXIT { --data.contextualInterpNestingLevel; };
+
+    auto const wf = php::WideFunc::cns(&func);
+    auto fa = analyze_func_inline(
+      AnalysisIndexAdaptor { data.index },
+      AnalysisContext {
+        func.unit,
+        wf,
+        func.cls,
+        &context_for_deps(data)
+      },
+      adjustedCtx,
+      callCtx.args
+    );
+    return R{
+      return_with_context(std::move(fa.inferredReturn), std::move(adjustedCtx)),
+      fa.effectFree
+    };
+  }();
+
+  if (!returnType.t.subtypeOf(BUnc)) {
+    // If the context insensitive return type could be non-static, staticness
+    // could be a result of temporary context sensitive bytecode optimizations.
+    contextType.t = loosen_staticness(std::move(contextType.t));
+  }
+
+  ITRACE_MOD(
+    Trace::hhbbc, 4,
+    "Context sensitive type: {}, context insensitive type: {}\n",
+    show(contextType.t), show(returnType.t)
+  );
+
+  auto const error_context = [&] {
+    using namespace folly::gen;
+    return folly::sformat(
+      "{} calling {} (context: {}, args: {})",
+      func_fullname(caller),
+      func_fullname(func),
+      show(callCtx.context),
+      from(callCtx.args)
+        | map([] (const Type& t) { return show(t); })
+        | unsplit<std::string>(",")
+    );
+  };
+
+  always_assert_flog(
+    contextType.t.subtypeOf(returnType.t),
+    "Context sensitive return type for {} is {} ",
+    "which is not at least as refined as context insensitive "
+    "return type {}\n",
+    error_context(),
+    show(contextType.t),
+    show(returnType.t)
+  );
+  always_assert_flog(
+    contextType.effectFree || !returnType.effectFree,
+    "Context sensitive effect-free for {} is {} ",
+    "which is not at least as refined as context insensitive "
+    "effect-free {}\n",
+    error_context(),
+    contextType.effectFree,
+    returnType.effectFree
+  );
+
+  return contextType;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -8012,6 +8499,16 @@ struct FlattenJob {
     // you're sure something hasn't been moved yet.
     for (auto& cls : classes.vals) {
       auto const name = cls->name;
+
+      // Check if this class has a 86*init function (it might have
+      // already or might have gained one from trait flattening).
+      auto const has86init =
+        std::any_of(
+          begin(cls->methods), end(cls->methods),
+          [] (auto const& m) { return is_86init_func(*m); }
+        );
+      if (has86init) outMeta.with86init.emplace(name);
+
       auto const cinfoIt = index.m_classInfos.find(name);
       if (cinfoIt == end(index.m_classInfos) || !isContextInstantiable(*cls)) {
         assertx(outMeta.uninstantiable.count(name));
@@ -14860,6 +15357,7 @@ struct AggregateJob {
       bundle.classes.emplace_back(std::move(c));
     }
     for (auto& c : classInfos.vals) {
+      c->auxClassGraphs.clear();
       bundle.classInfos.emplace_back(std::move(c));
     }
     for (auto& b : classBytecode.vals) {
@@ -14869,6 +15367,7 @@ struct AggregateJob {
       bundle.funcs.emplace_back(std::move(f));
     }
     for (auto& f : funcInfos.vals) {
+      f->auxClassGraphs.reset();
       bundle.funcInfos.emplace_back(std::move(f));
     }
     for (auto& b : funcBytecode.vals) {
@@ -14896,6 +15395,10 @@ void remote_func_info_to_local(IndexData& index,
   auto finfo = func_info(index, &func);
   assertx(finfo->returnTy.is(BInitCell));
   finfo->returnTy = std::move(rfinfo.returnTy);
+  finfo->returnRefinements = rfinfo.returnRefinements;
+  finfo->retParam = rfinfo.retParam;
+  finfo->effectFree = rfinfo.effectFree;
+  finfo->unusedParams = rfinfo.unusedParams;
 }
 
 // Convert the FuncInfo2s we loaded from extern-worker into their
@@ -15128,6 +15631,22 @@ void make_class_infos_local(
           ClassInfo::ConstIndex { it->second, cns.idx }
         );
       }
+
+      for (size_t i = 0, size = cinfo->cls->constants.size(); i < size; ++i) {
+        auto const& cns = cinfo->cls->constants[i];
+        if (cns.kind != ConstModifiers::Kind::Value) continue;
+        if (!cns.val.has_value())                    continue;
+        if (cns.val->m_type != KindOfUninit)         continue;
+        if (i >= cinfo->clsConstTypes.size()) {
+          cinfo->clsConstTypes.resize(i+1, ClsConstInfo { TInitCell, 0 });
+        }
+        cinfo->clsConstTypes[i] = folly::get_default(
+          rcinfo->clsConstantInfo,
+          cns.name,
+          ClsConstInfo { TInitCell, 0 }
+        );
+      }
+      cinfo->clsConstTypes.shrink_to_fit();
 
       {
         std::vector<std::pair<SString, MethTabEntry>> methods;
@@ -16302,10 +16821,29 @@ Optional<res::Class> Index::resolve_class(SString clsName) const {
   return res::Class::get(*it->second);
 }
 
+Optional<res::Class> Index::resolve_class(const php::Class& cls) const {
+  return resolve_class(cls.name);
+}
+
 const php::TypeAlias* Index::lookup_type_alias(SString name) const {
   auto const it = m_data->typeAliases.find(name);
   if (it == m_data->typeAliases.end()) return nullptr;
   return it->second;
+}
+
+Index::ClassOrTypeAlias Index::lookup_class_or_type_alias(SString name) const {
+  auto const rcls = resolve_class(name);
+  if (rcls) {
+    auto const cls = [&] () -> const php::Class* {
+      if (auto const ci = rcls->cinfo()) return ci->cls;
+      return m_data->classes.at(rcls->name());
+    }();
+    return ClassOrTypeAlias{cls, nullptr, true};
+  }
+  if (auto const ta = lookup_type_alias(name)) {
+    return ClassOrTypeAlias{nullptr, ta, true};
+  }
+  return ClassOrTypeAlias{nullptr, nullptr, false};
 }
 
 // Given a DCls, return the most specific res::Func for that DCls. For
@@ -17206,7 +17744,10 @@ Index::lookup_foldable_return_type(Context ctx,
 
   using R = ReturnType;
 
-  auto const ctxType = adjust_closure_context(*this, calleeCtx);
+  auto const ctxType = adjust_closure_context(
+    IndexAdaptor { *this },
+    calleeCtx
+  );
 
   // Don't fold functions when staticness mismatches
   if (!func->isClosureBody) {
@@ -17498,8 +18039,8 @@ Index::lookup_private_props(const php::Class* cls,
     return it->second;
   }
   return make_unknown_propstate(
-    *this,
-    cls,
+    IndexAdaptor { *this },
+    *cls,
     [&] (const php::Prop& prop) {
       return (prop.attrs & AttrPrivate) && !(prop.attrs & AttrStatic);
     }
@@ -17515,8 +18056,8 @@ Index::lookup_private_statics(const php::Class* cls,
     return it->second;
   }
   return make_unknown_propstate(
-    *this,
-    cls,
+    IndexAdaptor { *this },
+    *cls,
     [&] (const php::Prop& prop) {
       return (prop.attrs & AttrPrivate) && (prop.attrs & AttrStatic);
     }
@@ -19509,8 +20050,1474 @@ std::vector<AnalysisInput> AnalysisScheduler::schedule(size_t bucketSize) {
 
 //////////////////////////////////////////////////////////////////////
 
-AnalysisIndex::AnalysisIndex() = default;
-AnalysisIndex::~AnalysisIndex() = default;
+namespace {
+
+// If we optimized a top-level constant's value to a scalar, we no
+// longer need the associated 86cinit function. This fixes up the
+// metadata to remove it.
+ISStringSet strip_unneeded_constant_inits(AnalysisIndex::IndexData& index) {
+  ISStringSet stripped;
+  for (auto const name : index.funcNames) {
+    auto const cnsName = Constant::nameFromFuncName(name);
+    if (!cnsName) continue;
+    auto const it = index.constants.find(cnsName);
+    if (it == end(index.constants)) continue;
+    auto const& cns = *it->second;
+    if (type(cns.val) == KindOfUninit) continue;
+    stripped.emplace(name);
+  }
+  if (stripped.empty()) return stripped;
+
+  for (auto const name : stripped) {
+    index.deps->getChanges().remove(*index.funcs.at(name));
+    index.funcs.erase(name);
+    index.finfos.erase(name);
+  }
+
+  index.funcNames.erase(
+    std::remove_if(
+      begin(index.funcNames), end(index.funcNames),
+      [&] (SString f) { return stripped.count(f); }
+    ),
+    end(index.funcNames)
+  );
+
+  for (auto& [_, unit] : index.units) {
+    unit->funcs.erase(
+      std::remove_if(
+        begin(unit->funcs), end(unit->funcs),
+        [&] (SString f) { return stripped.count(f); }
+      ),
+      end(unit->funcs)
+    );
+  }
+
+  return stripped;
+}
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+AnalysisIndex::AnalysisIndex(
+  AnalysisWorklist& worklist,
+  VU<php::Class> classes,
+  VU<php::Func> funcs,
+  VU<php::Unit> units,
+  VU<php::ClassBytecode> clsBC,
+  VU<php::FuncBytecode> funcBC,
+  V<AnalysisIndexCInfo> cinfos,
+  V<AnalysisIndexFInfo> finfos,
+  V<AnalysisIndexMInfo> minfos,
+  VU<php::Class> depClasses,
+  VU<php::Func> depFuncs,
+  VU<php::Unit> depUnits,
+  AnalysisInput::Meta meta
+) : m_data{std::make_unique<IndexData>(*this, worklist)}
+{
+  m_data->badClasses = std::move(meta.badClasses);
+  m_data->badFuncs = std::move(meta.badFuncs);
+  m_data->badConstants = std::move(meta.badConstants);
+  m_data->badTypeAliases = std::move(meta.badTypeAliases);
+
+  ISStringSet depClassNames;
+  depClassNames.reserve(depClasses.size());
+
+  m_data->classNames.reserve(classes.size());
+  m_data->classes.reserve(classes.size() + depClasses.size());
+  for (auto& cls : classes) {
+    auto const name = cls->name;
+    always_assert(
+      m_data->classes.emplace(name, std::move(cls)).second
+    );
+    m_data->classNames.emplace_back(name);
+  }
+  for (auto& cls : depClasses) {
+    auto const name = cls->name;
+    always_assert(
+      m_data->classes.emplace(name, std::move(cls)).second
+    );
+    depClassNames.emplace(name);
+  }
+
+  ISStringSet depFuncNames;
+  depFuncNames.reserve(depFuncs.size());
+
+  m_data->funcNames.reserve(funcs.size());
+  m_data->funcs.reserve(funcs.size() + depFuncs.size());
+  for (auto& func : funcs) {
+    auto const name = func->name;
+    always_assert(
+      m_data->funcs.emplace(name, std::move(func)).second
+    );
+    m_data->funcNames.emplace_back(name);
+  }
+  for (auto& func : depFuncs) {
+    auto const name = func->name;
+    always_assert(
+      m_data->funcs.emplace(name, std::move(func)).second
+    );
+    depFuncNames.emplace(name);
+  }
+
+  auto const assignFInfoIdx = [&] (php::Func& func, FuncInfo2& finfo) {
+    always_assert(func.idx == std::numeric_limits<uint32_t>::max());
+    always_assert(!finfo.func);
+    finfo.func = &func;
+    func.idx = m_data->finfosByIdx.size();
+    m_data->finfosByIdx.emplace_back(&finfo);
+  };
+
+  m_data->cinfos.reserve(cinfos.size());
+  for (auto& wrapper : cinfos) {
+    auto cinfo = wrapper.ptr.release();
+    auto const name = cinfo->name;
+    auto& cls = m_data->classes.at(name);
+    always_assert(!cls->cinfo);
+    always_assert(!cinfo->cls);
+    cls->cinfo = cinfo;
+    cinfo->cls = cls.get();
+
+    auto const numMethods = cls->methods.size();
+    always_assert(cinfo->funcInfos.size() == numMethods);
+    for (size_t i = 0; i < numMethods; ++i) {
+      assignFInfoIdx(*cls->methods[i], *cinfo->funcInfos[i]);
+    }
+
+    always_assert(m_data->cinfos.emplace(name, cinfo).second);
+  }
+
+  m_data->finfos.reserve(finfos.size());
+  for (auto& wrapper : finfos) {
+    auto finfo = wrapper.ptr.release();
+    auto const name = finfo->name;
+    auto& func = m_data->funcs.at(name);
+    assignFInfoIdx(*func, *finfo);
+    always_assert(m_data->finfos.emplace(name, finfo).second);
+  }
+
+  m_data->minfos.reserve(minfos.size());
+  for (auto& wrapper : minfos) {
+    auto minfo = wrapper.ptr.release();
+    auto const name = minfo->cls;
+    auto& cls = m_data->classes.at(name);
+    always_assert(!cls->cinfo);
+    auto const numMethods = cls->methods.size();
+    always_assert(minfo->finfos.size() == numMethods);
+    for (size_t i = 0; i < numMethods; ++i) {
+      assignFInfoIdx(*cls->methods[i], *minfo->finfos[i]);
+    }
+    always_assert(m_data->minfos.emplace(name, minfo).second);
+  }
+
+  for (auto& bc : clsBC) {
+    auto& cls = m_data->classes.at(bc->cls);
+    always_assert(bc->methodBCs.size() == cls->methods.size());
+    for (size_t i = 0, size = bc->methodBCs.size(); i < size; ++i) {
+      always_assert(bc->methodBCs[i].name->isame(cls->methods[i]->name));
+      cls->methods[i]->rawBlocks = std::move(bc->methodBCs[i].bc);
+    }
+  }
+  for (auto& bc : funcBC) {
+    auto& func = m_data->funcs.at(bc->name);
+    func->rawBlocks = std::move(bc->bc);
+  }
+
+  m_data->unitNames.reserve(units.size());
+  m_data->units.reserve(units.size() + depUnits.size());
+
+  auto const addUnit = [&] (std::unique_ptr<php::Unit> unit) {
+    auto const isNative = is_native_unit(*unit);
+    for (auto& cns : unit->constants) {
+      always_assert(m_data->constants.emplace(cns->name, cns.get()).second);
+      assertx(!m_data->badConstants.count(cns->name));
+      if (isNative && type(cns->val) == KindOfUninit) {
+        m_data->dynamicConstants.emplace(cns->name);
+      }
+    }
+    for (auto& typeAlias : unit->typeAliases) {
+      always_assert(
+        m_data->typeAliases.emplace(typeAlias->name, typeAlias.get()).second
+      );
+      assertx(!m_data->badTypeAliases.count(typeAlias->name));
+    }
+    auto const name = unit->filename;
+    always_assert(m_data->units.emplace(name, std::move(unit)).second);
+  };
+  for (auto& unit : units) {
+    m_data->unitNames.emplace_back(unit->filename);
+    addUnit(std::move(unit));
+  }
+  for (auto& unit : depUnits) addUnit(std::move(unit));
+
+  for (auto const& [_, cls] : m_data->classes) {
+    if (!cls->cinfo) continue;
+    always_assert(cls.get() == cls->cinfo->cls);
+  }
+  for (auto& [_, cinfo]: m_data->cinfos) {
+    always_assert(cinfo->cls);
+    always_assert(cinfo.get() == cinfo->cls->cinfo);
+  }
+  for (size_t i = 0, size = m_data->finfosByIdx.size(); i < size; ++i) {
+    auto finfo = m_data->finfosByIdx[i];
+    always_assert(finfo->func);
+    always_assert(finfo->func->idx == i);
+  }
+
+  ClassGraph::setAnalysisIndex(*m_data);
+}
+
+AnalysisIndex::~AnalysisIndex() {
+  ClassGraph::clearAnalysisIndex();
+}
+
+void AnalysisIndex::push_context(const Context& ctx) {
+  m_data->contexts.emplace_back(ctx);
+}
+
+void AnalysisIndex::pop_context() {
+  assertx(!m_data->contexts.empty());
+  m_data->contexts.pop_back();
+}
+
+void AnalysisIndex::freeze() {
+  FTRACE(2, "Freezing index...\n");
+  assertx(!m_data->frozen);
+  m_data->frozen = true;
+}
+
+const php::Unit& AnalysisIndex::lookup_func_unit(const php::Func& f) const {
+  auto const it = m_data->units.find(f.unit);
+  always_assert_flog(
+    it != end(m_data->units),
+    "Attempting to access missing unit {} for func {}",
+    f.unit, func_fullname(f)
+  );
+  return *it->second;
+}
+
+const php::Unit& AnalysisIndex::lookup_class_unit(const php::Class& c) const {
+  auto const it = m_data->units.find(c.unit);
+  always_assert_flog(
+    it != end(m_data->units),
+    "Attempting to access missing unit {} for class {}",
+    c.unit, c.name
+  );
+  return *it->second;
+}
+
+const php::Class*
+AnalysisIndex::lookup_const_class(const php::Const& cns) const {
+  m_data->deps->add(AnalysisDeps::Class { cns.cls });
+  if (auto const c = folly::get_ptr(m_data->classes, cns.cls)) {
+    return c->get();
+  }
+  return nullptr;
+}
+
+const php::Class&
+AnalysisIndex::lookup_closure_context(const php::Class& cls) const {
+  always_assert_flog(
+    !cls.closureContextCls,
+    "AnalysisIndex does not yet support closure contexts (for {})",
+    cls.name
+  );
+  return cls;
+}
+
+res::Func AnalysisIndex::resolve_func(SString n) const {
+  n = normalizeNS(n);
+  m_data->deps->add(AnalysisDeps::Func { n });
+  if (auto const finfo = folly::get_ptr(m_data->finfos, n)) {
+    return res::Func { res::Func::Fun2 { finfo->get() } };
+  }
+  if (m_data->badFuncs.count(n)) {
+    return res::Func { res::Func::MissingFunc { n } };
+  }
+  return res::Func { res::Func::FuncName { n } };
+}
+
+Optional<res::Class> AnalysisIndex::resolve_class(SString n) const {
+  n = normalizeNS(n);
+  if (m_data->typeAliases.count(n)) {
+    // If it's a type-alias it's definitely not a class, so no need to
+    // go further.
+    m_data->deps->add(AnalysisDeps::TypeAlias { n });
+    return std::nullopt;
+  }
+  m_data->deps->add(AnalysisDeps::Class { n });
+  if (auto const cinfo = folly::get_ptr(m_data->cinfos, n)) {
+    return res::Class::get(*cinfo->get());
+  }
+  if (m_data->badClasses.count(n)) return std::nullopt;
+  return res::Class::getOrCreate(n);
+}
+
+Optional<res::Class> AnalysisIndex::resolve_class(const php::Class& cls) const {
+  m_data->deps->add(AnalysisDeps::Class { cls.name });
+  if (cls.cinfo) return res::Class::get(*cls.cinfo);
+  return std::nullopt;
+}
+
+res::Func AnalysisIndex::resolve_func_or_method(const php::Func& f) const {
+  m_data->deps->add(f);
+  if (!f.cls) return res::Func { res::Func::Fun2 { &func_info(*m_data, f) } };
+  return res::Func { res::Func::Method2 { &func_info(*m_data, f) } };
+}
+
+Type AnalysisIndex::lookup_constant(SString name) const {
+  m_data->deps->add(AnalysisDeps::Constant { name });
+
+  if (auto const cns = folly::get_default(m_data->constants, name, nullptr)) {
+    if (type(cns->val) != KindOfUninit) return from_cell(cns->val);
+    if (m_data->dynamicConstants.count(name)) return TInitCell;
+    auto const fname = Constant::funcNameFromName(name);
+    auto const fit = m_data->finfos.find(fname);
+    // We might have the unit present by chance, but without an
+    // explicit dependence on the constant, we might not have the init
+    // func present.
+    if (fit == end(m_data->finfos)) return TInitCell;
+    return unctx(fit->second->returnTy);
+  }
+  return m_data->badConstants.count(name) ? TBottom : TInitCell;
+}
+
+std::vector<std::pair<SString, ClsConstInfo>>
+AnalysisIndex::lookup_class_constants(const php::Class& cls) const {
+  std::vector<std::pair<SString, ClsConstInfo>> out;
+  out.reserve(cls.constants.size());
+  for (auto const& cns : cls.constants) {
+    if (cns.kind != ConstModifiers::Kind::Value) continue;
+    if (!cns.val) continue;
+    if (cns.val->m_type != KindOfUninit) {
+      out.emplace_back(cns.name, ClsConstInfo{ from_cell(*cns.val), 0 });
+    } else if (!cls.cinfo) {
+      out.emplace_back(cns.name, ClsConstInfo{ TInitCell, 0 });
+    } else {
+      out.emplace_back(
+        cns.name,
+        folly::get_default(
+          cls.cinfo->clsConstantInfo,
+          cns.name,
+          ClsConstInfo{ TInitCell, 0 }
+        )
+      );
+    }
+  }
+  return out;
+}
+
+ClsConstLookupResult
+AnalysisIndex::lookup_class_constant(const Type& cls,
+                                     const Type& name) const {
+  ITRACE(4, "lookup_class_constant: ({}) {}::{}\n",
+         show(current_context(*m_data)), show(cls), show(name));
+  Trace::Indent _;
+
+  using R = ClsConstLookupResult;
+
+  auto const conservative = [] {
+    ITRACE(4, "conservative\n");
+    return R{ TInitCell, TriBool::Maybe, true };
+  };
+
+  auto const notFound = [] {
+    ITRACE(4, "not found\n");
+    return R{ TBottom, TriBool::No, false };
+  };
+
+  if (!is_specialized_cls(cls)) return conservative();
+
+  // We could easily support the case where we don't know the constant
+  // name, but know the class (like we do for properties), by unioning
+  // together all possible constants. However it very rarely happens,
+  // but when it does, the set of constants to union together can be
+  // huge and it becomes very expensive.
+  if (!is_specialized_string(name)) return conservative();
+  auto const sname = sval_of(name);
+
+  auto const& dcls = dcls_of(cls);
+  if (dcls.isExact()) {
+    auto const rcls = dcls.cls();
+    m_data->deps->add(AnalysisDeps::Class { rcls.name() });
+
+    auto const cinfo = rcls.cinfo2();
+    if (!cinfo) return conservative();
+
+    ITRACE(4, "{}:\n", cinfo->name);
+    Trace::Indent _;
+
+    auto const idxIt = cinfo->clsConstants.find(sname);
+    if (idxIt == end(cinfo->clsConstants)) return notFound();
+    auto const& idx = idxIt->second;
+
+    assertx(!m_data->badClasses.count(idx.cls));
+
+    m_data->deps->add(AnalysisDeps::Class { idx.cls });
+    auto const cnsClsIt = m_data->classes.find(idx.cls);
+    if (cnsClsIt == end(m_data->classes)) return conservative();
+    auto const& cnsCls = cnsClsIt->second;
+
+    assertx(idx.idx < cnsCls->constants.size());
+    auto const& cns = cnsCls->constants[idx.idx];
+    if (cns.kind != ConstModifiers::Kind::Value || !cns.val.has_value()) {
+      return notFound();
+    }
+
+    auto const r = [&] {
+      if (type(*cns.val) != KindOfUninit) {
+        // Fully resolved constant with a known value. We don't need
+        // to register a dependency on the constant because the value
+        // will never change.
+        auto const mightThrow = bool(cinfo->cls->attrs & AttrInternal);
+        return R{ from_cell(*cns.val), TriBool::Yes, mightThrow };
+      }
+
+      ITRACE(4, "(dynamic)\n");
+      m_data->deps->add(idx);
+      if (!cnsCls->cinfo) return conservative();
+      auto const info =
+        folly::get_ptr(cnsCls->cinfo->clsConstantInfo, cns.name);
+      return R{
+        info ? info->type : TInitCell,
+        TriBool::Yes,
+        true
+      };
+    }();
+    ITRACE(4, "-> {}\n", show(r));
+    return r;
+  }
+
+  // Subclasses not yet implemented
+  return conservative();
+}
+
+ClsTypeConstLookupResult
+AnalysisIndex::lookup_class_type_constant(
+  const Type& cls,
+  const Type& name,
+  const Index::ClsTypeConstLookupResolver& resolver
+) const {
+  ITRACE(4, "lookup_class_type_constant: ({}) {}::{}\n",
+         show(current_context(*m_data)), show(cls), show(name));
+  Trace::Indent _;
+
+  using R = ClsTypeConstLookupResult;
+
+  auto const conservative = [] {
+    ITRACE(4, "conservative\n");
+    return R{
+      TypeStructureResolution { TSDictN, true },
+      TriBool::Maybe,
+      TriBool::Maybe
+    };
+  };
+
+  auto const notFound = [] {
+    ITRACE(4, "not found\n");
+    return R {
+      TypeStructureResolution { TBottom, false },
+      TriBool::No,
+      TriBool::No
+    };
+  };
+
+  // Unlike lookup_class_constant, we distinguish abstract from
+  // not-found, as the runtime sometimes treats them differently.
+  auto const abstract = [] {
+    ITRACE(4, "abstract\n");
+    return R {
+      TypeStructureResolution { TBottom, false },
+      TriBool::No,
+      TriBool::Yes
+    };
+  };
+
+  if (!is_specialized_cls(cls)) return conservative();
+
+  // As in lookup_class_constant, we could handle this, but it's not
+  // worth it.
+  if (!is_specialized_string(name)) return conservative();
+  auto const sname = sval_of(name);
+
+  auto const& dcls = dcls_of(cls);
+  if (dcls.isExact()) {
+    auto const rcls = dcls.cls();
+    m_data->deps->add(AnalysisDeps::Class { rcls.name() });
+
+    auto const cinfo = rcls.cinfo2();
+    if (!cinfo) return conservative();
+
+    ITRACE(4, "{}:\n", cinfo->name);
+    Trace::Indent _;
+
+    auto const idxIt = cinfo->clsConstants.find(sname);
+    if (idxIt == end(cinfo->clsConstants)) return notFound();
+    auto const& idx = idxIt->second;
+
+    assertx(!m_data->badClasses.count(idx.cls));
+
+    m_data->deps->add(AnalysisDeps::Class { idx.cls });
+    auto const cnsClsIt = m_data->classes.find(idx.cls);
+    if (cnsClsIt == end(m_data->classes)) return conservative();
+    auto const& cnsCls = cnsClsIt->second;
+
+    assertx(idx.idx < cnsCls->constants.size());
+    auto const& cns = cnsCls->constants[idx.idx];
+    if (cns.kind != ConstModifiers::Kind::Type) return notFound();
+    if (!cns.val.has_value()) return abstract();
+
+    assertx(tvIsDict(*cns.val));
+    ITRACE(4, "({}) {}\n", cns.cls, show(dict_val(val(*cns.val).parr)));
+
+    // If we've been given a resolver, use it. Otherwise resolve it in
+    // the normal way.
+    auto resolved = resolver
+      ? resolver(cns, *cinfo->cls)
+      : resolve_type_structure(
+        AnalysisIndexAdaptor { *this }, cns, *cinfo->cls
+      );
+
+    // The result of resolve_type_structure isn't, in general,
+    // static. However a type-constant will always be, so force that
+    // here.
+    assertx(resolved.type.is(BBottom) || resolved.type.couldBe(BUnc));
+    resolved.type &= TUnc;
+    auto const r = R{
+      std::move(resolved),
+      TriBool::Yes,
+      TriBool::No
+    };
+    ITRACE(4, "-> {}\n", show(r));
+    return r;
+  }
+
+  // Subclasses not yet implemented
+  return conservative();
+}
+
+PropState AnalysisIndex::lookup_private_props(const php::Class& cls) const {
+  // Private property tracking not yet implemented, so be
+  // conservative.
+  return make_unknown_propstate(
+    AnalysisIndexAdaptor { *this },
+    cls,
+    [&] (const php::Prop& prop) {
+      return (prop.attrs & AttrPrivate) && !(prop.attrs & AttrStatic);
+    }
+  );
+}
+
+PropState AnalysisIndex::lookup_private_statics(const php::Class& cls) const {
+  // Private static property tracking not yet implemented, so be
+  // conservative.
+  return make_unknown_propstate(
+    AnalysisIndexAdaptor { *this },
+    cls,
+    [&] (const php::Prop& prop) {
+      return (prop.attrs & AttrPrivate) && (prop.attrs & AttrStatic);
+    }
+  );
+}
+
+Index::ReturnType AnalysisIndex::lookup_return_type(MethodsInfo* methods,
+                                                    res::Func rfunc) const {
+  using R = Index::ReturnType;
+
+  auto const meth = [&] (const FuncInfo2& finfo) {
+    if (methods) {
+      if (auto ret = methods->lookupReturnType(*finfo.func)) {
+        return R{ unctx(std::move(ret->t)), ret->effectFree };
+      }
+    }
+    m_data->deps->add(*finfo.func, AnalysisDeps::Type::RetType);
+    return R{ unctx(finfo.returnTy), finfo.effectFree };
+  };
+
+  return match<R>(
+    rfunc.val,
+    [&] (res::Func::FuncName f) {
+      m_data->deps->add(
+        AnalysisDeps::Func { f.name },
+        AnalysisDeps::Type::RetType
+      );
+      return R{ TInitCell, false };
+    },
+    [&] (res::Func::MethodName m) {
+      // If we know the name of the class, we can register a
+      // dependency on it. If not, nothing we can do.
+      if (m.cls) m_data->deps->add(AnalysisDeps::Class { m.cls });
+      return R{ TInitCell, false };
+    },
+    [&] (res::Func::Fun)                -> R { always_assert(false); },
+    [&] (res::Func::Method)             -> R { always_assert(false); },
+    [&] (res::Func::MethodFamily)       -> R { always_assert(false); },
+    [&] (res::Func::MethodOrMissing)    -> R { always_assert(false); },
+    [&] (res::Func::MissingFunc)        { return R{ TBottom, false }; },
+    [&] (res::Func::MissingMethod)      { return R{ TBottom, false }; },
+    [&] (const res::Func::Isect&)       -> R { always_assert(false); },
+    [&] (res::Func::Fun2 f) {
+      m_data->deps->add(*f.finfo->func, AnalysisDeps::Type::RetType);
+      return R{ unctx(f.finfo->returnTy), f.finfo->effectFree };
+    },
+    [&] (res::Func::Method2 m)          { return meth(*m.finfo); },
+    [&] (res::Func::MethodFamily2)      -> R { always_assert(false); },
+    [&] (res::Func::MethodOrMissing2 m) { return meth(*m.finfo); },
+    [&] (const res::Func::Isect2&)      -> R { always_assert(false); }
+  );
+}
+
+Index::ReturnType
+AnalysisIndex::lookup_return_type(MethodsInfo* methods,
+                                  const CompactVector<Type>& args,
+                                  const Type& context,
+                                  res::Func rfunc) const {
+  using R = Index::ReturnType;
+
+  auto ty = lookup_return_type(methods, rfunc);
+
+  auto const contextual = [&] (const FuncInfo2& finfo) {
+    return context_sensitive_return_type(
+      *m_data,
+      { finfo.func, args, context },
+      std::move(ty)
+    );
+  };
+
+  return match<R>(
+    rfunc.val,
+    [&] (res::Func::FuncName)           { return ty; },
+    [&] (res::Func::MethodName)         { return ty; },
+    [&] (res::Func::Fun)                -> R { always_assert(false); },
+    [&] (res::Func::Method)             -> R { always_assert(false); },
+    [&] (res::Func::MethodFamily)       -> R { always_assert(false); },
+    [&] (res::Func::MethodOrMissing)    -> R { always_assert(false); },
+    [&] (res::Func::MissingFunc)        { return R{ TBottom, false }; },
+    [&] (res::Func::MissingMethod)      { return R{ TBottom, false }; },
+    [&] (const res::Func::Isect&)       -> R { always_assert(false); },
+    [&] (res::Func::Fun2 f)             { return contextual(*f.finfo); },
+    [&] (res::Func::Method2 m)          { return contextual(*m.finfo); },
+    [&] (res::Func::MethodFamily2)      -> R { always_assert(false); },
+    [&] (res::Func::MethodOrMissing2 m) { return contextual(*m.finfo); },
+    [&] (const res::Func::Isect2&)      -> R { always_assert(false); }
+  );
+}
+
+Index::ReturnType
+AnalysisIndex::lookup_foldable_return_type(const CallContext& calleeCtx) const {
+  constexpr size_t maxNestingLevel = 2;
+
+  using R = Index::ReturnType;
+
+  auto const& func = *calleeCtx.callee;
+  auto const ctxType =
+    adjust_closure_context(AnalysisIndexAdaptor { *this }, calleeCtx);
+
+  // Don't fold functions when staticness mismatches
+  if (!func.isClosureBody) {
+    if ((func.attrs & AttrStatic) && ctxType.couldBe(TObj)) {
+      return R{ TInitCell, false };
+    }
+    if (!(func.attrs & AttrStatic) && ctxType.couldBe(TCls)) {
+      return R{ TInitCell, false };
+    }
+  }
+
+  auto const& finfo = func_info(*m_data, func);
+  if (finfo.effectFree && is_scalar(finfo.returnTy)) {
+    return R{ finfo.returnTy, finfo.effectFree };
+  }
+
+  auto const& caller = *context_for_deps(*m_data).func;
+
+  m_data->deps->add(
+    func,
+    AnalysisDeps::Type::ScalarRetType |
+    AnalysisDeps::Type::Bytecode
+  );
+  if (m_data->foldableInterpNestingLevel > maxNestingLevel) {
+    return R{ TInitCell, false };
+  }
+
+  if (!func.rawBlocks) {
+    ITRACE_MOD(
+      Trace::hhbbc, 4,
+      "Skipping inline interp of {} because bytecode not present\n",
+      func_fullname(func)
+    );
+    return R{ TInitCell, false };
+  }
+
+  auto const contextualRet = [&] () -> Optional<Type> {
+    ++m_data->foldableInterpNestingLevel;
+    SCOPE_EXIT { --m_data->foldableInterpNestingLevel; };
+
+    auto const wf = php::WideFunc::cns(&func);
+    auto const fa = analyze_func_inline(
+      AnalysisIndexAdaptor { *this },
+      AnalysisContext {
+        func.unit,
+        wf,
+        func.cls,
+        &context_for_deps(*m_data)
+      },
+      ctxType,
+      calleeCtx.args,
+      nullptr,
+      CollectionOpts::EffectFreeOnly
+    );
+    if (!fa.effectFree) return std::nullopt;
+    return fa.inferredReturn;
+  }();
+
+  if (!contextualRet) {
+    ITRACE_MOD(
+      Trace::hhbbc, 4,
+      "Foldable inline analysis failed due to possible side-effects\n"
+    );
+    return R{ TInitCell, false };
+  }
+
+  ITRACE_MOD(
+    Trace::hhbbc, 4,
+    "Foldable return type: {}\n",
+    show(*contextualRet)
+  );
+
+  auto const error_context = [&] {
+    using namespace folly::gen;
+    return folly::sformat(
+      "{} calling {} (context: {}, args: {})",
+      func_fullname(caller),
+      func_fullname(func),
+      show(calleeCtx.context),
+      from(calleeCtx.args)
+        | map([] (const Type& t) { return show(t); })
+        | unsplit<std::string>(",")
+    );
+  };
+
+  always_assert_flog(
+    contextualRet->subtypeOf(finfo.returnTy),
+    "Context sensitive return type for {} is {} "
+    "which not at least as refined as context insensitive "
+    "return type {}\n",
+    error_context(),
+    show(*contextualRet),
+    show(finfo.returnTy)
+  );
+  if (!is_scalar(*contextualRet)) return R{ TInitCell, false };
+
+  return R{ *contextualRet, true };
+}
+
+std::pair<Index::ReturnType, size_t>
+AnalysisIndex::lookup_return_type_raw(const php::Func& f) const {
+  auto const& finfo = func_info(*m_data, f);
+  return std::make_pair(
+    Index::ReturnType{ finfo.returnTy, finfo.effectFree },
+    finfo.returnRefinements
+  );
+}
+
+bool AnalysisIndex::func_depends_on_arg(const php::Func& func,
+                                        size_t arg) const {
+  m_data->deps->add(func, AnalysisDeps::Type::UnusedParams);
+  auto const& finfo = func_info(*m_data, func);
+  return arg >= finfo.unusedParams.size() || !finfo.unusedParams.test(arg);
+}
+
+res::Func AnalysisIndex::resolve_method(const Type& thisType,
+                                        SString name) const {
+  assertx(thisType.subtypeOf(BCls) || thisType.subtypeOf(BObj));
+
+  using Func = res::Func;
+
+  auto const general = [&] (SString maybeCls) {
+    assertx(name != s_construct.get());
+    return Func { Func::MethodName { maybeCls, name } };
+  };
+
+  auto const isClass = thisType.subtypeOf(BCls);
+  if (name == s_construct.get()) {
+    if (isClass) {
+      return Func { Func::MethodName { nullptr, s_construct.get() } };
+    }
+    return resolve_ctor(thisType);
+  }
+
+  if (isClass) {
+    if (!is_specialized_cls(thisType)) return general(nullptr);
+  } else if (!is_specialized_obj(thisType)) {
+    return general(nullptr);
+  }
+
+  // Be pessimistic for intersections right now
+  auto const& dcls = isClass ? dcls_of(thisType) : dobj_of(thisType);
+  if (dcls.isIsect()) return general(dcls.smallestCls().name());
+
+  auto const rcls = dcls.cls();
+  m_data->deps->add(AnalysisDeps::Class { rcls.name() });
+
+  auto const cinfo = rcls.cinfo2();
+  if (!cinfo) return general(rcls.name());
+
+  auto const isExact = dcls.isExact();
+
+  auto const meth = folly::get_ptr(cinfo->methods, name);
+  if (!meth) {
+    // We don't store metadata for special methods, so be pessimistic
+    // (the lack of a method entry does not mean the call might fail
+    // at runtme).
+    if (is_special_method_name(name)) {
+      return Func { Func::MethodName { cinfo->name, name } };
+    }
+    // We're only considering this class, not it's subclasses. Since
+    // it doesn't exist here, the resolution will always fail.
+    if (isExact) {
+      return Func { Func::MissingMethod { cinfo->name, name } };
+    }
+    // The method isn't present on this class, but it might be in the
+    // subclasses. In most cases try a general lookup to get a
+    // slightly better type than nothing.
+    return general(cinfo->name);
+  }
+
+  m_data->deps->add(meth->meth());
+  auto const func = func_from_meth_ref(*m_data, meth->meth());
+  if (!func) return general(cinfo->name);
+
+  // We don't store method family information about special methods
+  // and they have special inheritance semantics.
+  if (is_special_method_name(name)) {
+    // If we know the class exactly, we can use ftarget.
+    if (isExact) {
+      return Func { Func::Method2 { &func_info(*m_data, *func) } };
+    }
+    // The method isn't overwritten, but they don't inherit, so it
+    // could be missing.
+    if (meth->attrs & AttrNoOverride) {
+      return Func { Func::MethodOrMissing2 { &func_info(*m_data, *func) } };
+    }
+    // Otherwise be pessimistic.
+    return Func { Func::MethodName { cinfo->name, name } };
+  }
+
+  // Private method handling: Private methods have special lookup
+  // rules. If we're in the context of a particular class, and that
+  // class defines a private method, an instance of the class will
+  // always call that private method (even if overridden) in that
+  // context.
+  assertx(cinfo->cls);
+  auto const& ctx = current_context(*m_data);
+  if (ctx.cls == cinfo->cls) {
+    // The context matches the current class. If we've looked up a
+    // private method (defined on this class), then that's what
+    // we'll call.
+    if ((meth->attrs & AttrPrivate) && meth->topLevel()) {
+      return Func { Func::Method2 { &func_info(*m_data, *func) } };
+    }
+  } else if ((meth->attrs & AttrPrivate) || meth->hasPrivateAncestor()) {
+    // Otherwise the context doesn't match the current class. If the
+    // looked up method is private, or has a private ancestor, there's
+    // a chance we'll call that method (or ancestor). Otherwise
+    // there's no private method in the inheritance tree we'll call.
+    auto conservative = false;
+    auto const ancestor = [&] () -> const php::Func* {
+      if (!ctx.cls) return nullptr;
+      m_data->deps->add(AnalysisDeps::Class { ctx.cls->name });
+      // Look up the ClassInfo corresponding to the context.
+      auto const ctxCInfo = ctx.cls->cinfo;
+      if (!ctxCInfo) return nullptr;
+      // Is this context a parent of our class?
+      if (!cinfo->classGraph.isChildOf(ctxCInfo->classGraph)) {
+        return nullptr;
+      }
+      // It is. See if it defines a private method.
+      auto const ctxMeth = folly::get_ptr(ctxCInfo->methods, name);
+      if (!ctxMeth) return nullptr;
+      // If it defines a private method, use it.
+      if ((ctxMeth->attrs & AttrPrivate) && ctxMeth->topLevel()) {
+        m_data->deps->add(ctxMeth->meth());
+        auto const ctxFunc = func_from_meth_ref(*m_data, ctxMeth->meth());
+        if (!ctxFunc) conservative = true;
+        return ctxFunc;
+      }
+      // Otherwise do normal lookup.
+      return nullptr;
+    }();
+    if (ancestor) {
+      return Func { Func::Method2 { &func_info(*m_data, *ancestor) } };
+    } else if (conservative) {
+      return Func { Func::MethodName { cinfo->name, name } };
+    }
+  }
+
+  // If we're only including regular subclasses, and this class itself
+  // isn't regular, the result may not necessarily include func.
+  if (!isClass && !is_regular_class(*cinfo->cls)) {
+    // We're not including this base class. If we're exactly this
+    // class, there's no method at all. It will always be missing.
+    if (isExact) {
+      return Func { Func::MissingMethod { cinfo->name, name } };
+    }
+    if (meth->noOverrideRegular()) {
+      // The method isn't overridden in a subclass, but we can't
+      // use the base class either. This leaves two cases. Either
+      // the method isn't overridden because there are no regular
+      // subclasses (in which case there's no resolution at all), or
+      // because there's regular subclasses, but they use the same
+      // method (in which case the result is just func).
+      if (!cinfo->classGraph.mightHaveRegularSubclass()) {
+        return Func { Func::MissingMethod { cinfo->name, name } };
+      }
+      return Func { Func::Method2 { &func_info(*m_data, *func) } };
+    }
+  } else if (isExact ||
+             meth->attrs & AttrNoOverride ||
+             (!isClass && meth->noOverrideRegular())) {
+    // Either we want all classes, or the base class is regular. If
+    // the method isn't overridden we know it must be just func (the
+    // override bits include it being missing in a subclass, so we
+    // know it cannot be missing either).
+    return Func { Func::Method2 { &func_info(*m_data, *func) } };
+  }
+
+  // Be pessimistic for the rest of cases
+  return general(cinfo->name);
+}
+
+res::Func AnalysisIndex::resolve_ctor(const Type& obj) const {
+  assertx(obj.subtypeOf(BObj));
+
+  using Func = res::Func;
+
+  // Can't say anything useful if we don't know the object type.
+  if (!is_specialized_obj(obj)) {
+    return Func { Func::MethodName { nullptr, s_construct.get() } };
+  }
+
+  auto const& dcls = dobj_of(obj);
+  // Non-exact case not yet implemented.
+  always_assert_flog(
+    dcls.isExact(),
+    "Encountered non-exact class in resolve_ctor: {}",
+    show(obj)
+  );
+
+  auto const rcls = dcls.cls();
+  m_data->deps->add(AnalysisDeps::Class { rcls.name() });
+
+  auto const cinfo = rcls.cinfo2();
+  if (!cinfo) {
+    return Func {
+      Func::MethodName { rcls.name(), s_construct.get() }
+    };
+  }
+
+  // See if this class has a ctor.
+  auto const meth = folly::get_ptr(cinfo->methods, s_construct.get());
+  if (!meth) {
+    // There's no ctor on this class. This doesn't mean the ctor won't
+    // exist at runtime, it might get the default ctor, so we have to
+    // be conservative.
+    return Func { Func::MethodName { cinfo->name, s_construct.get() } };
+  }
+  m_data->deps->add(meth->meth());
+
+  // We have a ctor, but it might be overridden in a subclass.
+  assertx(!(meth->attrs & AttrStatic));
+  auto const func = func_from_meth_ref(*m_data, meth->meth());
+  if (!func) {
+    // Relevant function doesn't exist on the AnalysisIndex. Be
+    // conservative.
+    return Func { Func::MethodName { cinfo->name, s_construct.get() } };
+  }
+  assertx(!(func->attrs & AttrStatic));
+
+  // If this class isn't regular, this resolution will always fail.
+  if (!is_regular_class(*cinfo->cls)) {
+    return Func { Func::MissingMethod { cinfo->name, s_construct.get() } };
+  }
+  return Func { Func::Method2 { &func_info(*m_data, *func) } };
+}
+
+std::pair<const php::TypeAlias*, bool>
+AnalysisIndex::lookup_type_alias(SString name) const {
+  if (m_data->classes.count(name)) {
+    // If it's a class, it's definitely not a type-alias so we don't
+    // need to go any further.
+    m_data->deps->add(AnalysisDeps::Class { name });
+    return std::make_pair(nullptr, false);
+  }
+  m_data->deps->add(AnalysisDeps::TypeAlias { name });
+  if (auto const ta = folly::get_default(m_data->typeAliases, name)) {
+    return std::make_pair(ta, true);
+  }
+  return std::make_pair(nullptr, !m_data->badTypeAliases.count(name));
+}
+
+Index::ClassOrTypeAlias
+AnalysisIndex::lookup_class_or_type_alias(SString n) const {
+  n = normalizeNS(n);
+  if (auto const cls = folly::get_ptr(m_data->classes, n)) {
+    m_data->deps->add(AnalysisDeps::Class { n });
+    return Index::ClassOrTypeAlias{cls->get(), nullptr, true};
+  }
+  if (auto const ta = folly::get_default(m_data->typeAliases, n)) {
+    m_data->deps->add(AnalysisDeps::TypeAlias { n });
+    return Index::ClassOrTypeAlias{nullptr, ta, true};
+  }
+
+  // It could be either, so register a dependency on both.
+  m_data->deps->add(AnalysisDeps::Class { n });
+  m_data->deps->add(AnalysisDeps::TypeAlias { n });
+
+  return Index::ClassOrTypeAlias{
+    nullptr,
+    nullptr,
+    !m_data->badClasses.count(n) ||
+    !m_data->badTypeAliases.count(n)
+  };
+}
+
+PropMergeResult AnalysisIndex::merge_static_type(
+    PublicSPropMutations& publicMutations,
+    PropertiesInfo& privateProps,
+    const Type& cls,
+    const Type& name,
+    const Type& val,
+    bool checkUB,
+    bool ignoreConst,
+    bool mustBeReadOnly) const {
+  // Not yet implemented
+  return PropMergeResult{ TInitCell, TriBool::Maybe };
+}
+
+void AnalysisIndex::refine_constants(const FuncAnalysisResult& fa) {
+  auto const& func = *fa.ctx.func;
+  if (func.cls) return;
+
+  auto const name = Constant::nameFromFuncName(func.name);
+  if (!name) return;
+
+  auto const cns = folly::get_default(m_data->constants, name);
+  always_assert_flog(
+    cns,
+    "Attempting to refine constant {} "
+    "which we don't have meta-data for",
+    name
+  );
+  auto const val = tv(fa.inferredReturn);
+  if (!val) {
+    always_assert_flog(
+      type(cns->val) == KindOfUninit,
+      "Constant value invariant violated in {}.\n"
+      "    Value went from {} to {}",
+      name,
+      show(from_cell(cns->val)),
+      show(fa.inferredReturn)
+    );
+    return;
+  }
+
+  if (type(cns->val) != KindOfUninit) {
+    always_assert_flog(
+      from_cell(cns->val) == fa.inferredReturn,
+      "Constant value invariant violated in {}.\n"
+      "    Value went from {} to {}",
+      name,
+      show(from_cell(cns->val)),
+      show(fa.inferredReturn)
+    );
+  } else {
+    always_assert_flog(
+      !m_data->frozen,
+      "Attempting to refine constant {} to {} when index is frozen",
+      name,
+      show(fa.inferredReturn)
+    );
+    cns->val = *val;
+    m_data->deps->update(*cns);
+  }
+}
+
+void AnalysisIndex::refine_class_constants(const FuncAnalysisResult& fa) {
+  auto const resolved = fa.resolvedInitializers.left();
+  if (!resolved || resolved->empty()) return;
+
+  assertx(fa.ctx.func->cls);
+  auto& constants = fa.ctx.func->cls->constants;
+
+  for (auto const& c : *resolved) {
+    assertx(c.first < constants.size());
+    auto& cns = constants[c.first];
+    assertx(cns.kind == ConstModifiers::Kind::Value);
+    always_assert(cns.val.has_value());
+    always_assert(type(*cns.val) == KindOfUninit);
+
+    auto cinfo = fa.ctx.func->cls->cinfo;
+    if (auto const val = tv(c.second.type)) {
+      assertx(type(*val) != KindOfUninit);
+      always_assert_flog(
+        !m_data->frozen,
+        "Attempting to refine class constant {}::{} to {} "
+        "when index is frozen",
+        fa.ctx.func->cls->name,
+        cns.name,
+        show(c.second.type)
+      );
+
+      cns.val = *val;
+      if (cinfo) cinfo->clsConstantInfo.erase(cns.name);
+      m_data->deps->update(
+        cns,
+        ConstIndex { fa.ctx.func->cls->name, c.first }
+      );
+    } else if (cinfo) {
+      auto const old = folly::get_default(
+        cinfo->clsConstantInfo,
+        cns.name,
+        ClsConstInfo{ TInitCell, 0 }
+      );
+
+      if (c.second.type.strictlyMoreRefined(old.type)) {
+        always_assert(c.second.refinements > old.refinements);
+        always_assert_flog(
+          !m_data->frozen,
+          "Attempting to refine class constant {}::{} to {} "
+          "when index is frozen",
+          cinfo->name,
+          cns.name,
+          show(c.second.type)
+        );
+        cinfo->clsConstantInfo.insert_or_assign(cns.name, c.second);
+        m_data->deps->update(cns, ConstIndex { cinfo->name, c.first });
+      } else {
+        always_assert_flog(
+          c.second.type.moreRefined(old.type),
+          "Class constant type invariant violated for {}::{}\n"
+          "    {} is not at least as refined as {}\n",
+          fa.ctx.func->cls->name,
+          cns.name,
+          show(c.second.type),
+          show(old.type)
+        );
+      }
+    }
+  }
+}
+
+void AnalysisIndex::refine_return_info(const FuncAnalysisResult& fa) {
+  auto const& func = *fa.ctx.func;
+  auto& finfo = func_info(*m_data, func);
+
+  auto const error_loc = [&] {
+    return folly::sformat("{} {}", func.unit, func_fullname(func));
+  };
+
+  auto changes = AnalysisDeps::Type::None;
+
+  if (finfo.retParam == NoLocalId) {
+    // This is just a heuristic; it doesn't mean that the value passed
+    // in was returned, but that the value of the parameter at the
+    // point of the RetC was returned. We use it to make (heuristic)
+    // decisions about whether to do inline interps, so we only allow
+    // it to change once. (otherwise later passes might not do the
+    // inline interp, and get worse results, which breaks
+    // monotonicity).
+    if (fa.retParam != NoLocalId) {
+      finfo.retParam = fa.retParam;
+      changes |= AnalysisDeps::Type::RetParam;
+    }
+  } else {
+    always_assert_flog(
+      finfo.retParam == fa.retParam,
+      "Index return param invariant violated in {}.\n"
+      "    Went from {} to {}\n",
+      finfo.retParam,
+      fa.retParam,
+      error_loc()
+    );
+  }
+
+  auto const unusedParams = ~fa.usedParams;
+  if (finfo.unusedParams != unusedParams) {
+    always_assert_flog(
+      (finfo.unusedParams | unusedParams) == unusedParams,
+      "Index unused params decreased in {}.\n",
+      error_loc()
+    );
+    finfo.unusedParams = unusedParams;
+    changes |= AnalysisDeps::Type::UnusedParams;
+  }
+
+  if (fa.inferredReturn.strictlyMoreRefined(finfo.returnTy)) {
+    if (finfo.returnRefinements < options.returnTypeRefineLimit) {
+      finfo.returnTy = fa.inferredReturn;
+      finfo.returnRefinements += fa.localReturnRefinements + 1;
+      if (finfo.returnRefinements > options.returnTypeRefineLimit) {
+        FTRACE(1, "maxed out return type refinements at {}\n", error_loc());
+      }
+      changes |= AnalysisDeps::Type::RetType;
+      if (is_scalar(finfo.returnTy)) {
+        changes |= AnalysisDeps::Type::ScalarRetType;
+      }
+    } else {
+      FTRACE(1, "maxed out return type refinements at {}\n", error_loc());
+    }
+  } else {
+    always_assert_flog(
+      fa.inferredReturn.moreRefined(finfo.returnTy),
+      "Index return type invariant violated in {}.\n"
+      "   {} is not at least as refined as {}\n",
+      error_loc(),
+      show(fa.inferredReturn),
+      show(finfo.returnTy)
+    );
+  }
+
+  always_assert_flog(
+    !finfo.effectFree || fa.effectFree,
+    "Index effect-free invariant violated in {}.\n"
+    "    Went from true to false\n",
+    error_loc()
+  );
+
+  if (finfo.effectFree != fa.effectFree) {
+    finfo.effectFree = fa.effectFree;
+    changes |= AnalysisDeps::Type::RetType;
+  }
+
+  always_assert_flog(
+    !m_data->frozen || changes == AnalysisDeps::Type::None,
+    "Attempting to refine return info for {} ({}) "
+    "when index is frozen",
+    error_loc(),
+    show(changes)
+  );
+
+  if (changes & AnalysisDeps::Type::RetType) {
+    if (auto const name = Constant::nameFromFuncName(func.name)) {
+      auto const cns = folly::get_default(m_data->constants, name, nullptr);
+      always_assert_flog(
+        cns,
+        "Attempting to update constant {} type, but constant is not present!",
+        name
+      );
+      m_data->deps->update(*cns);
+    }
+  }
+  m_data->deps->update(func, changes);
+}
+
+void AnalysisIndex::update_prop_initial_values(const FuncAnalysisResult& fa) {
+  auto const resolved = fa.resolvedInitializers.right();
+  if (!resolved || resolved->empty()) return;
+
+  assertx(fa.ctx.cls);
+  auto& props = const_cast<php::Class*>(fa.ctx.cls)->properties;
+
+  auto changed = false;
+  for (auto const& [idx, info] : *resolved) {
+    assertx(idx < props.size());
+    auto& prop = props[idx];
+
+    if (info.satisfies) {
+      if (!(prop.attrs & AttrInitialSatisfiesTC)) {
+        always_assert_flog(
+          !m_data->frozen,
+          "Attempting to update AttrInitialSatisfiesTC for {}::{} "
+          "when index is frozen",
+          fa.ctx.cls->name,
+          prop.name
+        );
+        attribute_setter(prop.attrs, true, AttrInitialSatisfiesTC);
+        changed = true;
+      }
+    } else {
+      always_assert_flog(
+        !(prop.attrs & AttrInitialSatisfiesTC),
+        "AttrInitialSatisfiesTC invariant violated for {}::{}\n"
+        "  Went from true to false",
+        fa.ctx.cls->name, prop.name
+      );
+    }
+
+    always_assert_flog(
+      IMPLIES(!(prop.attrs & AttrDeepInit), !info.deepInit),
+      "AttrDeepInit invariant violated for {}::{}\n"
+      "  Went from false to true",
+      fa.ctx.cls->name, prop.name
+    );
+    if (bool(prop.attrs & AttrDeepInit) != info.deepInit) {
+      always_assert_flog(
+        !m_data->frozen,
+        "Attempting to update AttrDeepInit for {}::{} "
+        "when index is frozen",
+        fa.ctx.cls->name,
+        prop.name
+      );
+      attribute_setter(prop.attrs, info.deepInit, AttrDeepInit);
+    }
+
+    if (type(info.val) != KindOfUninit) {
+      always_assert_flog(
+        !m_data->frozen,
+        "Attempting to update property initial value for {}::{} "
+        "to {} when index is frozen",
+        fa.ctx.cls->name,
+        prop.name,
+        show(from_cell(info.val))
+      );
+      always_assert_flog(
+        type(prop.val) == KindOfUninit ||
+        from_cell(prop.val) == from_cell(info.val),
+        "Property initial value invariant violated for {}::{}\n"
+        "  Value went from {} to {}",
+        fa.ctx.cls->name, prop.name,
+        show(from_cell(prop.val)), show(from_cell(info.val))
+      );
+      prop.val = info.val;
+    } else {
+      always_assert_flog(
+        type(prop.val) == KindOfUninit,
+        "Property initial value invariant violated for {}::{}\n"
+        " Value went from {} to not set",
+        fa.ctx.cls->name, prop.name,
+        show(from_cell(prop.val))
+      );
+    }
+  }
+  if (!changed) return;
+
+  auto const cinfo = fa.ctx.cls->cinfo;
+  if (!cinfo) return;
+
+  assertx(cinfo->hasBadInitialPropValues);
+  auto const noBad = std::all_of(
+    begin(props), end(props),
+    [] (const php::Prop& prop) {
+      return bool(prop.attrs & AttrInitialSatisfiesTC);
+    }
+  );
+
+  if (noBad) {
+    cinfo->hasBadInitialPropValues = false;
+  }
+}
+
+void AnalysisIndex::update_bytecode(FuncAnalysisResult& fa) {
+  auto func = php::WideFunc::mut(const_cast<php::Func*>(fa.ctx.func));
+  auto const update = HHBBC::update_bytecode(func, std::move(fa.blockUpdates));
+  if (update == UpdateBCResult::None) return;
+
+  always_assert_flog(
+    !m_data->frozen,
+    "Attempting to update bytecode for {} when index is frozen",
+    func_fullname(*fa.ctx.func)
+  );
+
+  if (update == UpdateBCResult::ChangedAnalyze ||
+      fa.ctx.func->name == s_86cinit.get()) {
+    ITRACE(2, "Updated bytecode for {} in a way that requires re-analysis\n",
+           func_fullname(*fa.ctx.func));
+    m_data->worklist.schedule(fc_from_context(fa.ctx));
+  }
+
+  m_data->deps->update(*fa.ctx.func, AnalysisDeps::Type::Bytecode);
+}
+
+// Finish using the AnalysisIndex and calculate the output to be
+// returned back from the job.
+AnalysisIndex::Output AnalysisIndex::finish() {
+  Variadic<std::unique_ptr<php::Class>> classes;
+  Variadic<std::unique_ptr<php::Func>> funcs;
+  Variadic<std::unique_ptr<php::Unit>> units;
+  Variadic<std::unique_ptr<php::ClassBytecode>> clsBC;
+  Variadic<std::unique_ptr<php::FuncBytecode>> funcBC;
+  Variadic<AnalysisIndexCInfo> cinfos;
+  Variadic<AnalysisIndexFInfo> finfos;
+  Variadic<AnalysisIndexMInfo> minfos;
+  AnalysisOutput::Meta meta;
+
+  assertx(m_data->frozen);
+
+  // Remove any 86cinits that are now unneeded.
+  meta.removedFuncs = strip_unneeded_constant_inits(*m_data);
+
+  classes.vals.reserve(m_data->classNames.size());
+  clsBC.vals.reserve(m_data->classNames.size());
+  cinfos.vals.reserve(m_data->classNames.size());
+  meta.classDeps.reserve(m_data->classNames.size());
+  for (auto const name : m_data->classNames) {
+    auto& cls = m_data->classes.at(name);
+
+    meta.classDeps.emplace_back(m_data->deps->take(cls.get()));
+
+    clsBC.vals.emplace_back(
+      std::make_unique<php::ClassBytecode>(cls->name)
+    );
+    auto& bc = *clsBC.vals.back();
+    for (auto& meth : cls->methods) {
+      bc.methodBCs.emplace_back(meth->name, std::move(meth->rawBlocks));
+    }
+
+    if (auto cinfo = folly::get_ptr(m_data->cinfos, name)) {
+      AnalysisIndexCInfo acinfo;
+      acinfo.ptr = decltype(acinfo.ptr){cinfo->release()};
+      cinfos.vals.emplace_back(std::move(acinfo));
+    } else if (auto minfo = folly::get_ptr(m_data->minfos, name)) {
+      AnalysisIndexMInfo aminfo;
+      aminfo.ptr = decltype(aminfo.ptr){minfo->release()};
+      minfos.vals.emplace_back(std::move(aminfo));
+    }
+
+    classes.vals.emplace_back(std::move(cls));
+  }
+
+  funcs.vals.reserve(m_data->funcNames.size());
+  funcBC.vals.reserve(m_data->funcNames.size());
+  finfos.vals.reserve(m_data->funcNames.size());
+  meta.funcDeps.reserve(m_data->funcNames.size());
+  for (auto const name : m_data->funcNames) {
+    assertx(!meta.removedFuncs.count(name));
+
+    auto& func = m_data->funcs.at(name);
+    auto& finfo = m_data->finfos.at(name);
+
+    meta.funcDeps.emplace_back(m_data->deps->take(func.get()));
+
+    funcBC.vals.emplace_back(
+      std::make_unique<php::FuncBytecode>(name, std::move(func->rawBlocks))
+    );
+    funcs.vals.emplace_back(std::move(func));
+
+    AnalysisIndexFInfo afinfo;
+    afinfo.ptr = decltype(afinfo.ptr){finfo.release()};
+    finfos.vals.emplace_back(std::move(afinfo));
+  }
+
+  units.vals.reserve(m_data->unitNames.size());
+  for (auto const name : m_data->unitNames) {
+    auto& unit = m_data->units.at(name);
+    units.vals.emplace_back(std::move(unit));
+  }
+
+  meta.changed = std::move(m_data->deps->getChanges());
+
+  return std::make_tuple(
+    std::move(classes),
+    std::move(funcs),
+    std::move(units),
+    std::move(clsBC),
+    std::move(funcBC),
+    std::move(cinfos),
+    std::move(finfos),
+    std::move(minfos),
+    std::move(meta)
+  );
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -19567,6 +21574,216 @@ void PublicSPropMutations::mergeUnknown(Context ctx) {
   );
   get().m_nothing_known = true;
 }
+
+//////////////////////////////////////////////////////////////////////
+
+#define UNIMPLEMENTED always_assert_flog(false, "{} not implemented for AnalysisIndex", __func__)
+
+void AnalysisIndexAdaptor::push_context(const Context& ctx) const {
+  index.push_context(ctx);
+}
+
+void AnalysisIndexAdaptor::pop_context() const {
+  index.pop_context();
+}
+
+const php::Unit* AnalysisIndexAdaptor::lookup_func_unit(const php::Func& func) const {
+  return &index.lookup_func_unit(func);
+}
+const php::Unit* AnalysisIndexAdaptor::lookup_class_unit(const php::Class& cls) const {
+  return &index.lookup_class_unit(cls);
+}
+const php::Class* AnalysisIndexAdaptor::lookup_const_class(const php::Const& cns) const {
+  return index.lookup_const_class(cns);
+}
+const php::Class* AnalysisIndexAdaptor::lookup_closure_context(const php::Class& cls) const {
+  return &index.lookup_closure_context(cls);
+}
+
+const CompactVector<const php::Class*>*
+AnalysisIndexAdaptor::lookup_closures(const php::Class*) const {
+  UNIMPLEMENTED;
+}
+
+const hphp_fast_set<const php::Func*>*
+AnalysisIndexAdaptor::lookup_extra_methods(const php::Class*) const {
+  UNIMPLEMENTED;
+}
+
+Optional<res::Class> AnalysisIndexAdaptor::resolve_class(SString n) const {
+  return index.resolve_class(n);
+}
+Optional<res::Class>
+AnalysisIndexAdaptor::resolve_class(const php::Class& c) const {
+  return index.resolve_class(c);
+}
+std::pair<const php::TypeAlias*, bool>
+AnalysisIndexAdaptor::lookup_type_alias(SString n) const {
+  return index.lookup_type_alias(n);
+}
+Index::ClassOrTypeAlias
+AnalysisIndexAdaptor::lookup_class_or_type_alias(SString n) const {
+  return index.lookup_class_or_type_alias(n);
+}
+
+res::Func AnalysisIndexAdaptor::resolve_func_or_method(const php::Func& f) const {
+  return index.resolve_func_or_method(f);
+}
+res::Func AnalysisIndexAdaptor::resolve_func(SString f) const {
+  return index.resolve_func(f);
+}
+res::Func AnalysisIndexAdaptor::resolve_method(Context,
+                                               const Type& t,
+                                               SString n) const {
+  return index.resolve_method(t, n);
+}
+res::Func AnalysisIndexAdaptor::resolve_ctor(const Type& obj) const {
+  return index.resolve_ctor(obj);
+}
+
+std::vector<std::pair<SString, ClsConstInfo>>
+AnalysisIndexAdaptor::lookup_class_constants(const php::Class& cls) const {
+  return index.lookup_class_constants(cls);
+}
+
+ClsConstLookupResult
+AnalysisIndexAdaptor::lookup_class_constant(Context,
+                                            const Type& cls,
+                                            const Type& name) const {
+  return index.lookup_class_constant(cls, name);
+}
+
+ClsTypeConstLookupResult
+AnalysisIndexAdaptor::lookup_class_type_constant(
+  const Type& cls,
+  const Type& name,
+  const Index::ClsTypeConstLookupResolver& resolver
+) const {
+  return index.lookup_class_type_constant(cls, name, resolver);
+}
+
+Type AnalysisIndexAdaptor::lookup_constant(Context, SString n) const {
+  return index.lookup_constant(n);
+}
+bool AnalysisIndexAdaptor::func_depends_on_arg(const php::Func* f,
+                                               size_t arg) const {
+  return index.func_depends_on_arg(*f, arg);
+}
+Index::ReturnType
+AnalysisIndexAdaptor::lookup_foldable_return_type(Context,
+                                                  const CallContext& callee) const {
+  return index.lookup_foldable_return_type(callee);
+}
+Index::ReturnType AnalysisIndexAdaptor::lookup_return_type(Context,
+                                                           MethodsInfo* methods,
+                                                           res::Func func,
+                                                           Dep) const {
+  return index.lookup_return_type(methods, func);
+}
+Index::ReturnType AnalysisIndexAdaptor::lookup_return_type(Context,
+                                                           MethodsInfo* methods,
+                                                           const CompactVector<Type>& args,
+                                                           const Type& context,
+                                                           res::Func func,
+                                                           Dep) const {
+  return index.lookup_return_type(methods, args, context, func);
+}
+
+std::pair<Index::ReturnType, size_t>
+AnalysisIndexAdaptor::lookup_return_type_raw(const php::Func* f) const {
+  return index.lookup_return_type_raw(*f);
+}
+CompactVector<Type>
+AnalysisIndexAdaptor::lookup_closure_use_vars(const php::Func*, bool) const {
+  UNIMPLEMENTED;
+}
+
+PropState AnalysisIndexAdaptor::lookup_private_props(const php::Class* cls,
+                                                     bool) const {
+  return index.lookup_private_props(*cls);
+}
+PropState AnalysisIndexAdaptor::lookup_private_statics(const php::Class* cls,
+                                                       bool) const {
+  return index.lookup_private_statics(*cls);
+}
+
+PropLookupResult AnalysisIndexAdaptor::lookup_static(Context,
+                                                     const PropertiesInfo&,
+                                                     const Type&,
+                                                     const Type& name) const {
+  // Not implemented yet, be conservative.
+
+  auto const sname = [&] () -> SString {
+    // Treat non-string names conservatively, but the caller should be
+    // checking this.
+    if (!is_specialized_string(name)) return nullptr;
+    return sval_of(name);
+  }();
+
+  return PropLookupResult{
+    TInitCell,
+    sname,
+    TriBool::Maybe,
+    TriBool::Maybe,
+    TriBool::Maybe,
+    TriBool::Maybe,
+    TriBool::Maybe,
+    true
+  };
+}
+
+Type AnalysisIndexAdaptor::lookup_public_prop(const Type&, const Type&) const {
+  return TInitCell;
+}
+
+PropMergeResult
+AnalysisIndexAdaptor::merge_static_type(Context,
+                                        PublicSPropMutations& publicMutations,
+                                        PropertiesInfo& privateProps,
+                                        const Type& cls,
+                                        const Type& name,
+                                        const Type& val,
+                                        bool checkUB,
+                                        bool ignoreConst,
+                                        bool mustBeReadOnly) const {
+  return index.merge_static_type(
+    publicMutations,
+    privateProps,
+    cls,
+    name,
+    val,
+    checkUB,
+    ignoreConst,
+    mustBeReadOnly
+  );
+}
+
+bool AnalysisIndexAdaptor::using_class_dependencies() const {
+  return false;
+}
+
+#undef UNIMPLEMENTED
+
+//////////////////////////////////////////////////////////////////////
+
+template <typename T>
+void AnalysisIndexParam<T>::Deleter::operator()(T* t) const {
+  delete t;
+}
+
+template <typename T>
+void AnalysisIndexParam<T>::serde(BlobEncoder& sd) const {
+  sd(ptr);
+}
+
+template <typename T>
+void AnalysisIndexParam<T>::serde(BlobDecoder& sd) {
+  sd(ptr);
+}
+
+template struct AnalysisIndexParam<ClassInfo2>;
+template struct AnalysisIndexParam<FuncInfo2>;
+template struct AnalysisIndexParam<MethodsWithoutCInfo>;
 
 //////////////////////////////////////////////////////////////////////
 

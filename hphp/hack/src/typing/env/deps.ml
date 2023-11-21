@@ -161,6 +161,12 @@ let make_depend_on_parent env ~skip_constructor_dep ~is_req name class_ =
     in
     add_dependency_edge env dep
 
+let add_not_subtype_dep env name =
+  if
+    TypecheckerOptions.optimized_parent_fanout Typing_env_types.(env.genv.tcopt)
+  then
+    add_dependency_edge env (Dep.NotSubtype name)
+
 let add_member_dep ~is_method ~is_static env (class_ : Cls.t) mid class_elt_opt
     =
   let add_dep cid =

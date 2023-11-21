@@ -272,6 +272,8 @@ val make_depend_on_current_module : Typing_env_types.env -> unit
 val mark_members_declared_in_depgraph :
   Typing_env_types.env -> Nast.class_ -> unit
 
+val add_not_subtype_dep : Typing_env_types.env -> string -> unit
+
 val get_internal : env -> bool
 
 val get_support_dynamic_type : env -> bool

@@ -48,6 +48,8 @@ val make_depend_on_parent :
   Decl_provider.Class.t option ->
   unit
 
+val add_not_subtype_dep : Typing_env_types.env -> string -> unit
+
 val mark_class_constant_declared :
   Typing_env_types.env -> string -> string -> unit
 

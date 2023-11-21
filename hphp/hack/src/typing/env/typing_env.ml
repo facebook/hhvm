@@ -884,6 +884,9 @@ let get_construct env class_ =
   Deps.make_depend_on_constructor env class_;
   Cls.construct class_
 
+let add_not_subtype_dep env type_name : unit =
+  Deps.add_not_subtype_dep env type_name
+
 let get_return env = env.genv.return
 
 let set_return env x =

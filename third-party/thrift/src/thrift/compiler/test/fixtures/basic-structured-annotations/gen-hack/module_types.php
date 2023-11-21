@@ -62,6 +62,71 @@ class MyEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
 
 /**
  * Original thrift struct:-
+ * runtime_annotation
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic-structured-annotations/runtime_annotation'))>>
+class runtime_annotation implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'runtime_annotation';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.runtime_annotation",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\cpp\RuntimeAnnotation' => \facebook\thrift\annotation\cpp\RuntimeAnnotation::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+/**
+ * Original thrift struct:-
  * structured_annotation_inline
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic-structured-annotations/structured_annotation_inline'))>>
@@ -815,6 +880,10 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
             "name" => "bac",
           )
         ),
+        '\test\fixtures\basic-structured-annotations\runtime_annotation' => \test\fixtures\basic-structured-annotations\runtime_annotation::fromShape(
+          shape(
+          )
+        ),
       ],
       'fields' => dict[
         'annotated_field' => shape(
@@ -823,6 +892,10 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
               shape(
                 "count" => 1,
                 "name" => "counter",
+              )
+            ),
+            '\test\fixtures\basic-structured-annotations\runtime_annotation' => \test\fixtures\basic-structured-annotations\runtime_annotation::fromShape(
+              shape(
               )
             ),
           ],

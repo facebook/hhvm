@@ -187,6 +187,9 @@ var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("cpp.ProcessInEbThreadUnsafe").
     SetIsUnion(false),
+    metadata.NewThriftStruct().
+    SetName("cpp.RuntimeAnnotation").
+    SetIsUnion(false),
 }
 
 var exceptionMetadatas = []*metadata.ThriftException{

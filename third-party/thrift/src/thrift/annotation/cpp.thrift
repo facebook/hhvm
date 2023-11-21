@@ -295,3 +295,9 @@ struct GenerateTypedInterceptor {}
 @scope.Function
 @scope.Interaction
 struct ProcessInEbThreadUnsafe {}
+
+/**
+ * Applies to structured annotation that need to be accessed in Runtime.
+ */
+@scope.Struct
+struct RuntimeAnnotation {}

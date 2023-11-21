@@ -577,6 +577,24 @@
           "column" : 34
         }
       }
+    },
+    "RuntimeAnnotation" : {
+      "lineno" : 302,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 302,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 303,
+          "column" : 28
+        }
+      }
     }
   }
 }

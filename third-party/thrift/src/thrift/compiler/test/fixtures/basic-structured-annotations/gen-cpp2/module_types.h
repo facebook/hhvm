@@ -155,6 +155,7 @@ template <> struct TEnumTraits<::test::fixtures::basic-structured-annotations::M
 // END declare_enums
 // BEGIN forward_declare
 namespace test { namespace fixtures { namespace basic-structured-annotations {
+class runtime_annotation;
 class structured_annotation_inline;
 class structured_annotation_with_default;
 class structured_annotation_recursive;
@@ -176,6 +177,98 @@ using ::apache::thrift::detail::operator>=;
 typedef ::std::string annotated_with_default_string;
 typedef ::std::string annotated_inline_string;
 typedef ::std::int64_t annotated_inline_i64;
+
+class runtime_annotation final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static const char* __fbthrift_thrift_uri();
+  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static const folly::StringPiece __fbthrift_get_class_name();
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+  >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+  >;
+
+  static constexpr std::size_t __fbthrift_field_size_v = 0;
+
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = runtime_annotation;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  runtime_annotation() {
+  }
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  runtime_annotation(apache::thrift::FragileConstructor);
+
+  runtime_annotation(runtime_annotation&&) = default;
+
+  runtime_annotation(const runtime_annotation&) = default;
+
+
+  runtime_annotation& operator=(runtime_annotation&&) = default;
+
+  runtime_annotation& operator=(const runtime_annotation&) = default;
+
+ public:
+
+  bool operator==(const runtime_annotation&) const;
+  bool operator<(const runtime_annotation&) const;
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<runtime_annotation>;
+  friend void swap(runtime_annotation& a, runtime_annotation& b);
+};
+
+template <class Protocol_>
+unsigned long runtime_annotation::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
 
 class structured_annotation_inline final  {
  private:

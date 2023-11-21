@@ -21,6 +21,9 @@ include "thrift/annotation/cpp.thrift"
 @included.structured_annotation_included{name = 'aba'}
 package "test.dev/fixtures/basic-structured-annotations"
 
+@cpp.RuntimeAnnotation
+struct runtime_annotation {}
+
 struct structured_annotation_inline {
   1: i64 count;
   2: string name = 'abacaba';
@@ -64,8 +67,10 @@ typedef i64 annotated_inline_i64
 }
 @included.structured_annotation_included{name = 'aba'}
 @namespaced.structured_annotation_with_namespace{name = 'bac'}
+@runtime_annotation
 struct MyStruct {
   @structured_annotation_inline{count = 1, name = 'counter'}
+  @runtime_annotation
   1: i64 annotated_field;
 
   2: annotated_inline_string annotated_type;

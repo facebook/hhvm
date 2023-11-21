@@ -33,6 +33,18 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic-structured-annotations::runtime_annotation>::name = "runtime_annotation";
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::test::fixtures::basic-structured-annotations::runtime_annotation>::fields_names = {{
+}};
+THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::test::fixtures::basic-structured-annotations::runtime_annotation>::fields_ids = {{
+}};
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::test::fixtures::basic-structured-annotations::runtime_annotation>::fields_types = {{
+}};
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::test::fixtures::basic-structured-annotations::runtime_annotation>::storage_names = {{
+}};
+THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::test::fixtures::basic-structured-annotations::runtime_annotation>::isset_indexes = {{
+}};
+
 THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_inline>::name = "structured_annotation_inline";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_inline>::fields_names = {{
   "count",

@@ -10,6 +10,7 @@
 
 // BEGIN forward_declare
 namespace test { namespace fixtures { namespace basic-structured-annotations {
+class runtime_annotation;
 class structured_annotation_inline;
 class structured_annotation_with_default;
 class structured_annotation_recursive;

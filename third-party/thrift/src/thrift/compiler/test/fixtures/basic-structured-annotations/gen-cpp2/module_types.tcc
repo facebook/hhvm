@@ -16,6 +16,13 @@ namespace thrift {
 namespace detail {
 
 template <>
+struct TccStructTraits<::test::fixtures::basic-structured-annotations::runtime_annotation> {
+  static void translateFieldName(
+      folly::StringPiece _fname,
+      int16_t& fid,
+      apache::thrift::protocol::TType& _ftype) noexcept;
+};
+template <>
 struct TccStructTraits<::test::fixtures::basic-structured-annotations::structured_annotation_inline> {
   static void translateFieldName(
       folly::StringPiece _fname,
@@ -77,6 +84,85 @@ struct TccStructTraits<::test::fixtures::basic-structured-annotations::MyUnion> 
 } // namespace apache
 
 namespace test { namespace fixtures { namespace basic-structured-annotations {
+
+template <class Protocol_>
+void runtime_annotation::readNoXfer(Protocol_* iprot) {
+  __fbthrift_clear_terse_fields();
+
+  apache::thrift::detail::ProtocolReaderStructReadState<Protocol_> _readState;
+
+  _readState.readStructBegin(iprot);
+
+  using apache::thrift::TProtocolException;
+
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          0,
+          0,
+          apache::thrift::protocol::T_STOP))) {
+    goto _loop;
+  }
+
+_end:
+  _readState.readStructEnd(iprot);
+
+  return;
+
+_loop:
+  _readState.afterAdvanceFailure(iprot);
+  if (_readState.atStop()) {
+    goto _end;
+  }
+  if (iprot->kUsesFieldNames()) {
+    _readState.template fillFieldTraitsFromName<apache::thrift::detail::TccStructTraits<runtime_annotation>>();
+  }
+
+  switch (_readState.fieldId) {
+    default:
+    {
+      _readState.skip(iprot);
+      _readState.readFieldEnd(iprot);
+      _readState.readFieldBeginNoInline(iprot);
+      goto _loop;
+    }
+  }
+}
+
+template <class Protocol_>
+uint32_t runtime_annotation::serializedSize(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("runtime_annotation");
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t runtime_annotation::serializedSizeZC(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("runtime_annotation");
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t runtime_annotation::write(Protocol_* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->writeStructBegin("runtime_annotation");
+  xfer += prot_->writeFieldStop();
+  xfer += prot_->writeStructEnd();
+  return xfer;
+}
+
+extern template void runtime_annotation::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+extern template uint32_t runtime_annotation::write<>(apache::thrift::BinaryProtocolWriter*) const;
+extern template uint32_t runtime_annotation::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t runtime_annotation::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template void runtime_annotation::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+extern template uint32_t runtime_annotation::write<>(apache::thrift::CompactProtocolWriter*) const;
+extern template uint32_t runtime_annotation::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+extern template uint32_t runtime_annotation::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
 
 template <class Protocol_>
 void structured_annotation_inline::readNoXfer(Protocol_* iprot) {

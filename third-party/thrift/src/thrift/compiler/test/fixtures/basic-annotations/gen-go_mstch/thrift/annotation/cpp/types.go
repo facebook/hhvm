@@ -2746,6 +2746,99 @@ func (x *ProcessInEbThreadUnsafe) String() string {
     return sb.String()
 }
 
+type RuntimeAnnotation struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &RuntimeAnnotation{}
+
+func NewRuntimeAnnotation() *RuntimeAnnotation {
+    return (&RuntimeAnnotation{})
+}
+
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewRuntimeAnnotation().Set<FieldNameFoo>().Set<FieldNameBar>()
+type RuntimeAnnotationBuilder struct {
+    obj *RuntimeAnnotation
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewRuntimeAnnotation().Set<FieldNameFoo>().Set<FieldNameBar>()
+func NewRuntimeAnnotationBuilder() *RuntimeAnnotationBuilder {
+    return &RuntimeAnnotationBuilder{
+        obj: NewRuntimeAnnotation(),
+    }
+}
+
+// Deprecated: Use "New" constructor and setters to build your structs.
+// e.g NewRuntimeAnnotation().Set<FieldNameFoo>().Set<FieldNameBar>()
+func (x *RuntimeAnnotationBuilder) Emit() *RuntimeAnnotation {
+    var objCopy RuntimeAnnotation = *x.obj
+    return &objCopy
+}
+
+func (x *RuntimeAnnotation) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("RuntimeAnnotation"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *RuntimeAnnotation) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        switch {
+        default:
+            if err := p.Skip(wireType); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *RuntimeAnnotation) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("RuntimeAnnotation({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
 	  RegisterType(name string, initializer func() any)
@@ -2768,6 +2861,7 @@ func RegisterTypes(registry interface {
     registry.RegisterType("facebook.com/thrift/annotation/cpp/Frozen2RequiresCompleteContainerParams", func() any { return NewFrozen2RequiresCompleteContainerParams() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/GenerateTypedInterceptor", func() any { return NewGenerateTypedInterceptor() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/ProcessInEbThreadUnsafe", func() any { return NewProcessInEbThreadUnsafe() })
+    registry.RegisterType("facebook.com/thrift/annotation/cpp/RuntimeAnnotation", func() any { return NewRuntimeAnnotation() })
 
     registry.RegisterType("facebook.com/thrift/annotation/cpp/RefType", func() any { return RefType(0) })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/EnumUnderlyingType", func() any { return EnumUnderlyingType(0) })

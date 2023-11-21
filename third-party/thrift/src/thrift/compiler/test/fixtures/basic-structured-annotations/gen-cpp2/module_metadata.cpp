@@ -40,6 +40,18 @@ void EnumMetadata<::test::fixtures::basic-structured-annotations::MyEnum>::gen(T
 }
 
 const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::test::fixtures::basic-structured-annotations::runtime_annotation>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.runtime_annotation", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_runtime_annotation = res.first->second;
+  module_runtime_annotation.name() = "module.runtime_annotation";
+  module_runtime_annotation.is_union() = false;
+  module_runtime_annotation.structured_annotations()->push_back(*cvStruct("cpp.RuntimeAnnotation", {}).cv_struct_ref());
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic-structured-annotations::structured_annotation_inline>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.structured_annotation_inline", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
@@ -174,7 +186,7 @@ StructMetadata<::test::fixtures::basic-structured-annotations::MyStruct>::gen(Th
   module_MyStruct.is_union() = false;
   static const auto* const
   module_MyStruct_fields = new std::array<EncodedThriftField, 4>{{
-    {1, "annotated_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{*cvStruct("module.structured_annotation_inline", {{"count", cvInteger(1)}, {"name", cvString("counter")}}).cv_struct_ref(), }},
+    {1, "annotated_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{*cvStruct("module.structured_annotation_inline", {{"count", cvInteger(1)}, {"name", cvString("counter")}}).cv_struct_ref(), *cvStruct("module.runtime_annotation", {}).cv_struct_ref(), }},
     {2, "annotated_type", false, std::make_unique<Typedef>("module.annotated_inline_string", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{*cvStruct("module.structured_annotation_inline", {{"count", cvInteger(1)}}).cv_struct_ref(), *cvStruct("module.structured_annotation_with_default", {{"name", cvString("abc")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
     {3, "annotated_recursive", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{*cvStruct("module.structured_annotation_recursive", {{"name", cvString("abc")}, {"recurse", cvStruct("module.structured_annotation_recursive", {{"name", cvString("cba")}})}, {"forward", cvStruct("module.structured_annotation_forward", {{"count", cvInteger(3)}})}}).cv_struct_ref(), }},
     {4, "annotated_nested", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{*cvStruct("module.structured_annotation_nested", {{"name", cvString("nesty")}}).cv_struct_ref(), }},
@@ -193,6 +205,7 @@ StructMetadata<::test::fixtures::basic-structured-annotations::MyStruct>::gen(Th
   module_MyStruct.structured_annotations()->push_back(*cvStruct("module.structured_annotation_nested", {{"name", cvString("nesty2")}, {"nest", cvStruct("module.structured_annotation_with_default", {{"name", cvString("dcdbdcdadcdbdcd")}})}}).cv_struct_ref());
   module_MyStruct.structured_annotations()->push_back(*cvStruct("included.structured_annotation_included", {{"name", cvString("aba")}}).cv_struct_ref());
   module_MyStruct.structured_annotations()->push_back(*cvStruct("namespaced.structured_annotation_with_namespace", {{"name", cvString("bac")}}).cv_struct_ref());
+  module_MyStruct.structured_annotations()->push_back(*cvStruct("module.runtime_annotation", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&

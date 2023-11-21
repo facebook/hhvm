@@ -35,6 +35,81 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::test::fixtures::basic-structured-annotations::runtime_annotation>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-structured-annotations::runtime_annotation>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace basic-structured-annotations {
+
+const char* runtime_annotation::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic-structured-annotations/runtime_annotation";
+}
+
+const folly::StringPiece runtime_annotation::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<runtime_annotation>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece runtime_annotation::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<runtime_annotation>::name;
+}
+
+
+runtime_annotation::runtime_annotation(apache::thrift::FragileConstructor) {}
+
+
+void runtime_annotation::__fbthrift_clear() {
+  // clear all fields
+}
+
+void runtime_annotation::__fbthrift_clear_terse_fields() {
+}
+
+bool runtime_annotation::__fbthrift_is_empty() const {
+  return true;
+}
+
+bool runtime_annotation::operator==(FOLLY_MAYBE_UNUSED const runtime_annotation& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+bool runtime_annotation::operator<(FOLLY_MAYBE_UNUSED const runtime_annotation& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED runtime_annotation& a, FOLLY_MAYBE_UNUSED runtime_annotation& b) {
+  using ::std::swap;
+}
+
+template void runtime_annotation::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t runtime_annotation::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t runtime_annotation::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t runtime_annotation::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void runtime_annotation::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t runtime_annotation::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t runtime_annotation::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t runtime_annotation::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}} // test::fixtures::basic-structured-annotations
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::test::fixtures::basic-structured-annotations::structured_annotation_inline>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,

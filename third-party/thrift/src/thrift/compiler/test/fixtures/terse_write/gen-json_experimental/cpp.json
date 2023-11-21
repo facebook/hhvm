@@ -587,6 +587,23 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 295
+      },
+      "RuntimeAnnotation" : {
+        "name" : "RuntimeAnnotation",
+        "structured_annotations": {
+          "scope.Struct" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Struct",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "docstring" : "Applies to structured annotation that need to be accessed in Runtime.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 302
       }
       },
   "source_path" : "thrift/annotation/cpp",

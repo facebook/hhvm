@@ -30,6 +30,11 @@ class EnumMetadata<::test::fixtures::basic-structured-annotations::MyEnum> {
   static void gen(ThriftMetadata& metadata);
 };
 template <>
+class StructMetadata<::test::fixtures::basic-structured-annotations::runtime_annotation> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
 class StructMetadata<::test::fixtures::basic-structured-annotations::structured_annotation_inline> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);

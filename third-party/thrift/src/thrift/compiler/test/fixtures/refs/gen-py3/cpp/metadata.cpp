@@ -34,6 +34,7 @@ namespace cpp {
   ::apache::thrift::detail::md::StructMetadata<Frozen2RequiresCompleteContainerParams>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<GenerateTypedInterceptor>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<ProcessInEbThreadUnsafe>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<RuntimeAnnotation>::gen(metadata);
   return metadata;
 }
 } // namespace facebook

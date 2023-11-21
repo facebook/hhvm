@@ -14,6 +14,13 @@ namespace thrift {
 namespace detail {
 
 template <>
+struct ForEachField<::test::fixtures::basic-structured-annotations::runtime_annotation> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  }
+};
+
+template <>
 struct ForEachField<::test::fixtures::basic-structured-annotations::structured_annotation_inline> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {

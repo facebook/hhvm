@@ -1980,6 +1980,7 @@ HTTPTransaction::TxnStreamReadHandle::dataAvailable(
     readPromise_.reset();
     if (eof) {
       txn_.wtIngressStreams_.erase(getID());
+      return Transport::FCState::UNBLOCKED;
     }
   } else {
     buf_.append(std::move(data));

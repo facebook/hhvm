@@ -241,6 +241,56 @@ impl<B: BaseDepgraphTrait> DepGraphWithDelta<B> {
         }
     }
 
+    /// Traverse descendants of `class_dep` via Extends / RequireExtends edges,
+    /// then follow any NotSubtype edge from these descendants and add these edges'
+    /// ends to the fanout.
+    pub fn get_not_subtype_fanout(&self, class_dep: Dep, fanout_acc: &mut HashTrieSet<Dep>) {
+        let mut queue = VecDeque::new();
+        let mut visited = HashSet::default();
+
+        self.visit_class_dep_for_not_subtype_fanout(
+            class_dep,
+            &mut visited,
+            &mut queue,
+            fanout_acc,
+        );
+
+        while let Some(class_dep) = queue.pop_front() {
+            self.visit_class_dep_for_not_subtype_fanout(
+                class_dep,
+                &mut visited,
+                &mut queue,
+                fanout_acc,
+            );
+        }
+    }
+
+    fn visit_class_dep_for_not_subtype_fanout(
+        &self,
+        class_dep: Dep,
+        visited: &mut HashSet<Dep>,
+        queue: &mut VecDeque<Dep>,
+        fanout_acc: &mut HashTrieSet<Dep>,
+    ) {
+        if !visited.insert(class_dep) {
+            return;
+        }
+        let not_subtype_dep = class_dep.class_to_not_subtype();
+        self.iter_dependents_with_duplicates(not_subtype_dep, |deps| {
+            for dep in deps {
+                fanout_acc.insert_mut(dep);
+            }
+        });
+        let extends_dep_for_class = class_dep.class_to_extends().unwrap();
+        self.iter_dependents_with_duplicates(extends_dep_for_class, |iter| {
+            iter.for_each(|dep| queue.push_back(dep));
+        });
+        let requires_extends_dep_for_class = class_dep.class_to_require_extends();
+        self.iter_dependents_with_duplicates(requires_extends_dep_for_class, |iter| {
+            iter.for_each(|dep| queue.push_back(dep));
+        });
+    }
+
     pub fn load_delta(&mut self, source: OsString) -> usize {
         let f = File::open(source).unwrap();
         let mut r = std::io::BufReader::new(f);

@@ -304,6 +304,8 @@ val add_all_deps : Mode.t -> DepSet.t -> DepSet.t
 val get_member_fanout :
   Mode.t -> class_dep:Dep.t -> Dep.Member.t -> DepSet.t -> DepSet.t
 
+val get_not_subtype_fanout : Mode.t -> class_dep:Dep.t -> DepSet.t -> DepSet.t
+
 module Telemetry : sig
   val depgraph_delta_num_edges : Mode.t -> int option
 end

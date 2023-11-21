@@ -202,7 +202,21 @@ let get_added_parent_fanout
    *   The fanout should therefore include the fanout of X::m.
    *
    * So conclusion: fanout = union over m in Y of fanout(X::m)
-   * Which is what this function implements *)
+   * Which is what this function implements
+   *
+   * Caveat:
+   * Some typing derivations actually use facts like
+   * 'A is not a subtype of B', for example when inferring that two types
+   * are disjoint and a refinement results in type 'nothing'.
+   * These basics facts may be invalidated by adding parents.
+   * To handle this case,
+   * - whenever we fact 'A is not a subtype of X' for any X,
+   *   we add a 'NotSubtype' edge from A.
+   * - when detecting an added parent to A, we gather descendants of
+   *   A via Extends / RequireExtends edges, then follow any NotSubtype
+   *   edge from these descendants and collect these edges' ends to add to
+   *   the fanout. (This is done by the call to get_not_subtype_fanout below)
+   *)
   match Decl_provider.get_class ctx added_parent_name with
   | None -> fanout_acc
   | Some (cls : Decl_provider.class_decl) ->
@@ -222,6 +236,9 @@ let get_added_parent_fanout
     in
     let deps_acc =
       to_recheck
+      |> Typing_deps.get_not_subtype_fanout
+           (Provider_context.get_deps_mode ctx)
+           ~class_dep
       |> acc_fanouts Dep.Member.method_ (Decl_provider.Class.methods cls)
       |> acc_fanouts Dep.Member.smethod (Decl_provider.Class.smethods cls)
       |> acc_fanouts Dep.Member.prop (Decl_provider.Class.props cls)

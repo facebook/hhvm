@@ -1,0 +1,12 @@
+File "multiple_instantiation_interface2.php", line 26, characters 17-18:
+Invalid argument (Typing[4110])
+  File "multiple_instantiation_interface2.php", line 26, characters 13-13:
+  Expected `A`
+  File "multiple_instantiation_interface2.php", line 15, characters 23-23:
+  But got `B`
+File "multiple_instantiation_interface2.php", line 28, characters 17-18:
+Invalid argument (Typing[4110])
+  File "multiple_instantiation_interface2.php", line 28, characters 13-13:
+  Expected `A`
+  File "multiple_instantiation_interface2.php", line 15, characters 23-23:
+  But got `B`

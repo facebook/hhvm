@@ -374,6 +374,8 @@ module UserAttributes = struct
 
   let uaStrictSwitch = "__StrictSwitch"
 
+  let uaAllowMultipleInstantiations = "__AllowMultipleInstantiations"
+
   type attr_info = {
     contexts: string list;
     doc: string;
@@ -384,6 +386,13 @@ module UserAttributes = struct
     AttributeKinds.(
       SMap.of_list
         [
+          ( uaAllowMultipleInstantiations,
+            {
+              contexts = [cls];
+              autocomplete = true;
+              doc =
+                "Allows implementing this interface with multiple instantiations, e.g. `implements I<int>, I<string>`";
+            } );
           ( uaOverride,
             {
               contexts = [mthd];

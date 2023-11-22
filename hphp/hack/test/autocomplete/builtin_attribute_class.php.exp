@@ -1,3 +1,7 @@
+__AllowMultipleInstantiations
+  INSERT __AllowMultipleInstantiations
+  built-in attribute
+  Allows implementing this interface with multiple instantiations, e.g. `implements I<int>, I<string>`
 __ConsistentConstruct
   INSERT __ConsistentConstruct
   built-in attribute

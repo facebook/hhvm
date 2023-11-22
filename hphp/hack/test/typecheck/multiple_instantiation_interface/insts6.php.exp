@@ -1,0 +1,4 @@
+File "insts6.php", line 13, characters 21-26:
+Interface `J` is used more than once in this declaration. (Typing[4377])
+  File "insts6.php", line 13, characters 29-29:
+  Here is another occurrence

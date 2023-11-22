@@ -174,8 +174,6 @@ bool check(const php::Class& c) {
   assertx(IMPLIES(c.closureContextCls, isClo));
   if (isClo) {
     assertx(c.methods.size() == 1 || c.methods.size() == 2);
-    assertx(IMPLIES(c.closureDeclFunc, isClo));
-    assertx(IMPLIES(c.closureDeclFunc, !c.closureContextCls));
     assertx(c.methods[0]->name == s_invoke.get());
     assertx(c.methods[0]->isClosureBody);
     assertx(c.methods.size() == 1);

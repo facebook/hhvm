@@ -700,11 +700,10 @@ Index make_index() {
     auto const name = c->name;
     auto deps = Index::Input::makeDeps(*c);
     auto const isClosure = is_closure(*c);
-    auto const unit = c->unit;
 
     auto bytecode = std::make_unique<php::ClassBytecode>();
     for (auto& meth : c->methods) {
-      bytecode->methodBCs.emplace_back(meth->name, std::move(meth->rawBlocks));
+      bytecode->methodBCs.emplace_back(std::move(meth->rawBlocks));
     }
 
     auto stored = coro::blockingWait(client->store(std::move(c)));
@@ -716,10 +715,7 @@ Index make_index() {
         name,
         std::move(deps),
         nullptr,
-        unit,
-        isClosure,
-        false,
-        false
+        isClosure
       }
     );
     indexInput.classBC.emplace_back(
@@ -731,17 +727,15 @@ Index make_index() {
   }
   for (auto& f : parse.funcs) {
     auto const name = f->name;
-    auto const unit = f->unit;
     auto bytecode =
-      std::make_unique<php::FuncBytecode>(f->name, std::move(f->rawBlocks));
+      std::make_unique<php::FuncBytecode>(std::move(f->rawBlocks));
     auto stored = coro::blockingWait(client->store(std::move(f)));
     auto storedBC = coro::blockingWait(client->store(std::move(bytecode)));
     indexInput.funcs.emplace_back(
       Index::Input::FuncMeta{
         std::move(stored),
         name,
-        unit,
-        false
+        nullptr
       }
     );
     indexInput.funcBC.emplace_back(
@@ -753,7 +747,7 @@ Index make_index() {
     );
   }
 
-  Index index{
+  return Index{
     std::move(indexInput),
     HHBBC::Config::get(RepoGlobalData{}),
     std::move(executor),
@@ -762,8 +756,6 @@ Index make_index() {
         std::unique_ptr<Client>) {},
     nullptr
   };
-  index.make_local();
-  return index;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -953,63 +945,63 @@ std::vector<Type> withData(const Index& index) {
   std::vector<Type> types;
 
   auto const clsA = index.resolve_class(s_A.get());
-  if (!clsA || !clsA->isComplete()) ADD_FAILURE();
+  if (!clsA || !clsA->resolved()) ADD_FAILURE();
   auto const clsAA = index.resolve_class(s_AA.get());
-  if (!clsAA || !clsAA->isComplete()) ADD_FAILURE();
+  if (!clsAA || !clsAA->resolved()) ADD_FAILURE();
   auto const clsAB = index.resolve_class(s_AB.get());
-  if (!clsAB || !clsAB->isComplete()) ADD_FAILURE();
+  if (!clsAB || !clsAB->resolved()) ADD_FAILURE();
 
   auto const clsIBase = index.resolve_class(s_IBase.get());
-  if (!clsIBase || !clsIBase->isComplete()) ADD_FAILURE();
+  if (!clsIBase || !clsIBase->resolved()) ADD_FAILURE();
   auto const clsIA = index.resolve_class(s_IA.get());
-  if (!clsIA || !clsIA->isComplete()) ADD_FAILURE();
+  if (!clsIA || !clsIA->resolved()) ADD_FAILURE();
   auto const clsIAA = index.resolve_class(s_IAA.get());
-  if (!clsIAA || !clsIAA->isComplete()) ADD_FAILURE();
+  if (!clsIAA || !clsIAA->resolved()) ADD_FAILURE();
   auto const clsIB = index.resolve_class(s_IB.get());
-  if (!clsIB || !clsIB->isComplete()) ADD_FAILURE();
+  if (!clsIB || !clsIB->resolved()) ADD_FAILURE();
 
   auto const clsI_A = index.resolve_class(s_I_A.get());
-  if (!clsI_A || !clsI_A->isComplete()) ADD_FAILURE();
+  if (!clsI_A || !clsI_A->resolved()) ADD_FAILURE();
   auto const clsI_B = index.resolve_class(s_I_B.get());
-  if (!clsI_B || !clsI_B->isComplete()) ADD_FAILURE();
+  if (!clsI_B || !clsI_B->resolved()) ADD_FAILURE();
   auto const clsI_C = index.resolve_class(s_I_C.get());
-  if (!clsI_C || !clsI_C->isComplete()) ADD_FAILURE();
+  if (!clsI_C || !clsI_C->resolved()) ADD_FAILURE();
   auto const clsI_D = index.resolve_class(s_I_D.get());
-  if (!clsI_D || !clsI_D->isComplete()) ADD_FAILURE();
+  if (!clsI_D || !clsI_D->resolved()) ADD_FAILURE();
   auto const clsI_E = index.resolve_class(s_I_E.get());
-  if (!clsI_E || !clsI_E->isComplete()) ADD_FAILURE();
+  if (!clsI_E || !clsI_E->resolved()) ADD_FAILURE();
   auto const clsI_F = index.resolve_class(s_I_F.get());
-  if (!clsI_F || !clsI_F->isComplete()) ADD_FAILURE();
+  if (!clsI_F || !clsI_F->resolved()) ADD_FAILURE();
   auto const clsI_G = index.resolve_class(s_I_G.get());
-  if (!clsI_G || !clsI_G->isComplete()) ADD_FAILURE();
+  if (!clsI_G || !clsI_G->resolved()) ADD_FAILURE();
   auto const clsI_H = index.resolve_class(s_I_H.get());
-  if (!clsI_H || !clsI_H->isComplete()) ADD_FAILURE();
+  if (!clsI_H || !clsI_H->resolved()) ADD_FAILURE();
   auto const clsI_I = index.resolve_class(s_I_I.get());
-  if (!clsI_I || !clsI_I->isComplete()) ADD_FAILURE();
+  if (!clsI_I || !clsI_I->resolved()) ADD_FAILURE();
   auto const clsI_J = index.resolve_class(s_I_J.get());
-  if (!clsI_J || !clsI_J->isComplete()) ADD_FAILURE();
+  if (!clsI_J || !clsI_J->resolved()) ADD_FAILURE();
   auto const clsI_K = index.resolve_class(s_I_K.get());
-  if (!clsI_K || !clsI_K->isComplete()) ADD_FAILURE();
+  if (!clsI_K || !clsI_K->resolved()) ADD_FAILURE();
 
   auto const clsX1 = index.resolve_class(s_X1.get());
-  if (!clsX1 || !clsX1->isComplete()) ADD_FAILURE();
+  if (!clsX1 || !clsX1->resolved()) ADD_FAILURE();
   auto const clsX2 = index.resolve_class(s_X2.get());
-  if (!clsX2 || !clsX2->isComplete()) ADD_FAILURE();
+  if (!clsX2 || !clsX2->resolved()) ADD_FAILURE();
   auto const clsX3 = index.resolve_class(s_X3.get());
-  if (!clsX3 || !clsX3->isComplete()) ADD_FAILURE();
+  if (!clsX3 || !clsX3->resolved()) ADD_FAILURE();
   auto const clsX4 = index.resolve_class(s_X4.get());
-  if (!clsX4 || !clsX4->isComplete()) ADD_FAILURE();
+  if (!clsX4 || !clsX4->resolved()) ADD_FAILURE();
   auto const clsX7 = index.resolve_class(s_X7.get());
-  if (!clsX7 || !clsX7->isComplete()) ADD_FAILURE();
+  if (!clsX7 || !clsX7->resolved()) ADD_FAILURE();
   auto const clsX11 = index.resolve_class(s_X11.get());
-  if (!clsX11 || !clsX11->isComplete()) ADD_FAILURE();
+  if (!clsX11 || !clsX11->resolved()) ADD_FAILURE();
   auto const clsX21 = index.resolve_class(s_X21.get());
-  if (!clsX21 || !clsX21->isComplete()) ADD_FAILURE();
+  if (!clsX21 || !clsX21->resolved()) ADD_FAILURE();
 
   auto const clsFoo1 = res::Class::getUnresolved(s_Foo1.get());
-  if (clsFoo1.isComplete()) ADD_FAILURE();
+  if (clsFoo1.resolved()) ADD_FAILURE();
   auto const clsFoo2 = res::Class::getUnresolved(s_Foo2.get());
-  if (clsFoo2.isComplete()) ADD_FAILURE();
+  if (clsFoo2.resolved()) ADD_FAILURE();
 
   auto const svec1 = static_vec(s_A.get(), s_B.get());
   auto const svec2 = static_vec(123, 456);
@@ -1092,7 +1084,7 @@ std::vector<Type> withData(const Index& index) {
 
       auto const dobj =
         dobj_of(make_specialized_wait_handle(b, TArrKey));
-      if (!dobj.cls().isComplete()) ADD_FAILURE();
+      if (!dobj.cls().resolved()) ADD_FAILURE();
       types.emplace_back(make_specialized_sub_object(b, dobj.cls()));
       types.emplace_back(make_specialized_exact_object(b, dobj.cls()));
 
@@ -1549,13 +1541,13 @@ std::vector<Type> specializedClasses(const Index& index) {
 #define X(name)                                                         \
   {                                                                     \
     auto const cls = index.resolve_class(s_##name.get());               \
-    if (!cls || !cls->isComplete()) ADD_FAILURE();                        \
+    if (!cls || !cls->resolved()) ADD_FAILURE();                        \
     addExactSub(*cls);                                                  \
   }
 #define Y(name)                                                         \
   {                                                                     \
     auto const cls = res::Class::getUnresolved(s_##name.get());        \
-    if (cls.isComplete()) ADD_FAILURE();                                  \
+    if (cls.resolved()) ADD_FAILURE();                                  \
     addExactSub(cls);                                                   \
   }
   TEST_CLASSES
@@ -1563,11 +1555,11 @@ std::vector<Type> specializedClasses(const Index& index) {
 #undef X
 
   auto const childClo1 = index.resolve_class(s_ChildClosure1.get());
-  if (!childClo1 || !childClo1->isComplete()) ADD_FAILURE();
+  if (!childClo1 || !childClo1->resolved()) ADD_FAILURE();
   auto const childClo2 = index.resolve_class(s_ChildClosure2.get());
-  if (!childClo2 || !childClo2->isComplete()) ADD_FAILURE();
+  if (!childClo2 || !childClo2->resolved()) ADD_FAILURE();
   auto const childClo3 = index.resolve_class(s_ChildClosure3.get());
-  if (!childClo3 || !childClo3->isComplete()) ADD_FAILURE();
+  if (!childClo3 || !childClo3->resolved()) ADD_FAILURE();
 
   addExactSub(*childClo1);
   addExactSub(*childClo2);
@@ -1838,8 +1830,8 @@ void test_basic_operators(const std::vector<Type>& types) {
       auto const& dcls1 = dcls_of(t1);
       auto const& dcls2 = dcls_of(t2);
       return
-        (!dcls1.isExact() || dcls1.cls().isComplete()) &&
-        (!dcls2.isExact() || dcls2.cls().isComplete());
+        (!dcls1.isExact() || dcls1.cls().resolved()) &&
+        (!dcls2.isExact() || dcls2.cls().resolved());
     }
     if (is_specialized_wait_handle(t1) && is_specialized_wait_handle(t2)) {
       return self(wait_handle_inner(t1), wait_handle_inner(t2), self);
@@ -1850,8 +1842,8 @@ void test_basic_operators(const std::vector<Type>& types) {
       auto const& dcls1 = dobj_of(t1);
       auto const& dcls2 = dobj_of(t2);
       return
-        (!dcls1.isExact() || dcls1.cls().isComplete()) &&
-        (!dcls2.isExact() || dcls2.cls().isComplete());
+        (!dcls1.isExact() || dcls1.cls().resolved()) &&
+        (!dcls2.isExact() || dcls2.cls().resolved());
     }
     return true;
   };
@@ -2038,11 +2030,11 @@ TEST(Type, Closure) {
   if (!closureCls || closureCls->hasCompleteChildren()) ADD_FAILURE();
 
   auto const childCls1 = index.resolve_class(s_ChildClosure1.get());
-  if (!childCls1 || !childCls1->isComplete()) ADD_FAILURE();
+  if (!childCls1 || !childCls1->resolved()) ADD_FAILURE();
   auto const childCls2 = index.resolve_class(s_ChildClosure2.get());
-  if (!childCls2 || !childCls2->isComplete()) ADD_FAILURE();
+  if (!childCls2 || !childCls2->resolved()) ADD_FAILURE();
   auto const childCls3 = index.resolve_class(s_ChildClosure3.get());
-  if (!childCls3 || !childCls3->isComplete()) ADD_FAILURE();
+  if (!childCls3 || !childCls3->resolved()) ADD_FAILURE();
 
   auto const closure = subObj(*closureCls);
   auto const child1 = objExact(*childCls1);
@@ -2452,7 +2444,7 @@ TEST(Type, Split) {
   EXPECT_EQ(split.second, TFalse);
 
   auto const clsA = index.resolve_class(s_A.get());
-  if (!clsA || !clsA->isComplete()) ADD_FAILURE();
+  if (!clsA || !clsA->resolved()) ADD_FAILURE();
 
   split = split_obj(Type{BObj|BInt});
   EXPECT_EQ(split.first, TObj);
@@ -2631,7 +2623,7 @@ TEST(Type, Remove) {
   EXPECT_EQ(remove_lazycls(union_of(TInt,lazyclsval(s_A))), TInt);
 
   auto const clsA = index.resolve_class(s_A.get());
-  if (!clsA || !clsA->isComplete()) ADD_FAILURE();
+  if (!clsA || !clsA->resolved()) ADD_FAILURE();
 
   EXPECT_EQ(remove_cls(TInt), TInt);
   EXPECT_EQ(remove_cls(TCls), TBottom);
@@ -2862,38 +2854,38 @@ TEST(Type, ObjToCls) {
   }
 
   auto const clsA = index.resolve_class(s_A.get());
-  if (!clsA || !clsA->isComplete()) ADD_FAILURE();
+  if (!clsA || !clsA->resolved()) ADD_FAILURE();
   auto const clsICanon1 = index.resolve_class(s_ICanon1.get());
-  if (!clsICanon1 || !clsICanon1->isComplete()) ADD_FAILURE();
+  if (!clsICanon1 || !clsICanon1->resolved()) ADD_FAILURE();
   auto const clsICanon5 = index.resolve_class(s_ICanon5.get());
-  if (!clsICanon5 || !clsICanon5->isComplete()) ADD_FAILURE();
+  if (!clsICanon5 || !clsICanon5->resolved()) ADD_FAILURE();
   auto const clsCanon3 = index.resolve_class(s_Canon3.get());
-  if (!clsCanon3 || !clsCanon3->isComplete()) ADD_FAILURE();
+  if (!clsCanon3 || !clsCanon3->resolved()) ADD_FAILURE();
   auto const clsT1 = index.resolve_class(s_T1.get());
-  if (!clsT1 || !clsT1->isComplete()) ADD_FAILURE();
+  if (!clsT1 || !clsT1->resolved()) ADD_FAILURE();
   auto const clsT4_C1 = index.resolve_class(s_T4_C1.get());
-  if (!clsT4_C1 || !clsT4_C1->isComplete()) ADD_FAILURE();
+  if (!clsT4_C1 || !clsT4_C1->resolved()) ADD_FAILURE();
   auto const clsICanon8 = index.resolve_class(s_ICanon8.get());
-  if (!clsICanon8 || !clsICanon8->isComplete()) ADD_FAILURE();
+  if (!clsICanon8 || !clsICanon8->resolved()) ADD_FAILURE();
   auto const clsAbs4 = index.resolve_class(s_Abs4.get());
-  if (!clsAbs4 || !clsAbs4->isComplete()) ADD_FAILURE();
+  if (!clsAbs4 || !clsAbs4->resolved()) ADD_FAILURE();
   auto const clsAbs5_P = index.resolve_class(s_Abs5_P.get());
-  if (!clsAbs5_P || !clsAbs5_P->isComplete()) ADD_FAILURE();
+  if (!clsAbs5_P || !clsAbs5_P->resolved()) ADD_FAILURE();
   auto const clsAbs6_P = index.resolve_class(s_Abs6_P.get());
-  if (!clsAbs6_P || !clsAbs6_P->isComplete()) ADD_FAILURE();
+  if (!clsAbs6_P || !clsAbs6_P->resolved()) ADD_FAILURE();
   auto const clsICanon11 = index.resolve_class(s_ICanon11.get());
-  if (!clsICanon11 || !clsICanon11->isComplete()) ADD_FAILURE();
+  if (!clsICanon11 || !clsICanon11->resolved()) ADD_FAILURE();
   auto const clsICanon12 = index.resolve_class(s_ICanon12.get());
-  if (!clsICanon12 || !clsICanon12->isComplete()) ADD_FAILURE();
+  if (!clsICanon12 || !clsICanon12->resolved()) ADD_FAILURE();
   auto const clsICanon13 = index.resolve_class(s_ICanon13.get());
-  if (!clsICanon13 || !clsICanon13->isComplete()) ADD_FAILURE();
+  if (!clsICanon13 || !clsICanon13->resolved()) ADD_FAILURE();
   auto const clsCanon10 = index.resolve_class(s_Canon10.get());
-  if (!clsCanon10 || !clsCanon10->isComplete()) ADD_FAILURE();
+  if (!clsCanon10 || !clsCanon10->resolved()) ADD_FAILURE();
 
   auto const clsFoo1 = res::Class::getUnresolved(s_Foo1.get());
-  if (clsFoo1.isComplete()) ADD_FAILURE();
+  if (clsFoo1.resolved()) ADD_FAILURE();
   auto const clsFoo2 = res::Class::getUnresolved(s_Foo2.get());
-  if (clsFoo2.isComplete()) ADD_FAILURE();
+  if (clsFoo2.resolved()) ADD_FAILURE();
 
   auto const awaitable = res::Class::get(s_Awaitable.get());
 
@@ -5073,7 +5065,7 @@ TEST(Type, Canonicalization) {
   if (!clsCanon14) ADD_FAILURE();
 
   auto const clsFoo1 = res::Class::getUnresolved(s_Foo1.get());
-  if (clsFoo1.isComplete()) ADD_FAILURE();
+  if (clsFoo1.resolved()) ADD_FAILURE();
 
   EXPECT_EQ(subObj(*clsICanon1), TBottom);
   EXPECT_EQ(objExact(*clsICanon1), TBottom);
@@ -7550,7 +7542,7 @@ TEST(Type, PromoteClassish) {
   auto const index = make_index();
 
   auto const clsA = index.resolve_class(s_A.get());
-  if (!clsA || !clsA->isComplete()) ADD_FAILURE();
+  if (!clsA || !clsA->resolved()) ADD_FAILURE();
 
   std::vector<std::pair<Type, Type>> tests{
     { TCls, TSStr },

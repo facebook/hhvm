@@ -389,15 +389,9 @@ Type name_to_cls_type(ResolveCtx& ctx, SString name) {
     }
   }
 
-  while (true) {
-    auto const lookup = ctx.index->lookup_class_or_type_alias(name);
-    if (lookup.cls) {
-      auto const rcls = ctx.index->resolve_class(*lookup.cls);
-      if (!rcls) return TBottom;
-      return clsExact(*rcls);
-    }
-    if (!lookup.typeAlias) return lookup.maybeExists ? TCls : TBottom;
-    auto const typeAlias = lookup.typeAlias;
+  if (auto const t = resolveStr(name); !t.is(BBottom)) return t;
+
+  while (auto const typeAlias = ctx.index->lookup_type_alias(name)) {
     assertx(typeAlias->typeStructure.exists(s_kind));
     if (!typeAlias->typeStructure.exists(s_classname)) return TBottom;
     auto const tv = typeAlias->typeStructure->get(s_classname);
@@ -405,7 +399,7 @@ Type name_to_cls_type(ResolveCtx& ctx, SString name) {
     name = val(tv).pstr;
   }
 
-  not_reached();
+  return resolveStr(name);
 }
 
 Resolution resolve(ResolveCtx&, SArray ts);
@@ -602,7 +596,6 @@ Resolution resolve_type_access_list(ResolveCtx& ctx,
         }
         ResolveCtx newCtx{ctx.ctx, ctx.index, ctx.cache};
         newCtx.selfCls = ctx.index->lookup_const_class(cns);
-        if (!newCtx.selfCls) return Resolution{ TDictN, true };
         newCtx.thisCls = &thiz;
         newCtx.generics = ctx.generics;
         return resolve(newCtx, val(*cns.val).parr);
@@ -734,30 +727,30 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
       if (!ctx.selfCls->parentName) return Resolution { TBottom, true };
       auto const rcls = ctx.index->resolve_class(ctx.selfCls->parentName);
       if (!rcls) return Resolution { TBottom, true };
-      if (auto const cls = rcls->cls()) {
-        return resolvedCls(cls->name, cls->attrs, false);
-      }
-      return Resolution{ TDictN, true };
+      if (!rcls->resolved()) return Resolution{ TDictN, true };
+      auto const cls = rcls->cls();
+      return resolvedCls(cls->name, cls->attrs, false);
     }
   }
 
-  auto const lookup = ctx.index->lookup_class_or_type_alias(clsName);
-  if (lookup.cls) {
-    return resolvedCls(lookup.cls->name, lookup.cls->attrs, false);
+  if (auto const rcls = ctx.index->resolve_class(clsName)) {
+    if (rcls->resolved()) {
+      auto const cls = rcls->cls();
+        return resolvedCls(cls->name, cls->attrs, false);
+    }
+    return Resolution{ TDictN, true };
   }
-  if (!lookup.typeAlias) {
-    return Resolution { lookup.maybeExists ? TDictN : TBottom, true };
-  }
-  auto const typeAlias = lookup.typeAlias;
+
+  auto const typeAlias = ctx.index->lookup_type_alias(clsName);
+  if (!typeAlias) return Resolution { TBottom, true };
   assertx(!typeAlias->typeStructure.empty());
   assertx(typeAlias->typeStructure.isDict());
 
   using TypevarTypes = std::vector<std::pair<std::string, Type>>;
 
-  auto const resolveTA =
-    [&, typeAlias=typeAlias] (const GenericsMap& g = {},
+  auto const resolveTA = [&] (const GenericsMap& g = {},
                               const TypevarTypes* typevarTypes = nullptr) {
-    auto b = [&, typeAlias=typeAlias] {
+    auto b = [&] {
       auto const& preresolved = typeAlias->resolvedTypeStructure;
       if (!preresolved.isNull()) {
         assertx(preresolved.isDict());
@@ -940,9 +933,6 @@ Resolution resolve_type_structure(const IIndex& index,
   ResolveCtx ctx{Context{}, &index, &cache};
   ctx.selfCls = index.lookup_const_class(cns);
   ctx.thisCls = &thiz;
-
-  // If the self class isn't present we need to be pessimistic.
-  if (!ctx.selfCls) return Resolution { TDictN, true };
   return resolveBespoke(ctx, val(*cns.val).parr);
 }
 

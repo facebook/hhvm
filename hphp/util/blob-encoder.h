@@ -207,13 +207,6 @@ struct BlobEncoder {
     encode(p.string());
   }
 
-  template<unsigned long N>
-  void encode(const std::bitset<N>& b) {
-    static_assert(N <= std::numeric_limits<unsigned long long>::digits,
-                  "SerDe of bitsets longer than 64-bits not yet supported");
-    encode(b.to_ullong());
-  }
-
   template<class T, typename... Extra>
   void encode(const Optional<T>& opt, const Extra&... extra) {
     auto const some = opt.has_value();
@@ -647,15 +640,6 @@ struct BlobDecoder {
     p = std::filesystem::path(std::move(s));
   }
 
-  template<unsigned long N>
-  void decode(std::bitset<N>& val) {
-    static_assert(N <= std::numeric_limits<unsigned long long>::digits,
-                  "SerDe of bitsets longer than 64-bits not yet supported");
-    unsigned long long v;
-    decode(v);
-    val = v;
-  }
-
   size_t peekStdStringSize() {
     auto const before = advanced();
     uint32_t sz;
@@ -1054,11 +1038,11 @@ namespace detail {
 // Helpers to stamp out BlobEncoderHelpers for unique_ptr and
 // copy_ptrs wrapping the above types.
 
-template <typename T, typename D> struct UPBlobImpl {
+template <typename T> struct UPBlobImpl {
   template <typename SerDe, typename... Extra>
-  static void serde(SerDe& sd, std::unique_ptr<T, D>& p, Extra... extra) {
+  static void serde(SerDe& sd, std::unique_ptr<T>& p, Extra... extra) {
     if constexpr (SerDe::deserializing) {
-      p = std::unique_ptr<T, D>(new T);
+      p = std::make_unique<T>();
     } else {
       assertx(p);
     }
@@ -1083,9 +1067,9 @@ template <typename T> struct CPBlobImpl {
 //////////////////////////////////////////////////////////////////////
 
 #define MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(T)                    \
-  template<typename D>                                          \
-  struct BlobEncoderHelper<std::unique_ptr<T, D>>               \
-    : public detail::UPBlobImpl<T, D> {};
+  template<>                                                    \
+  struct BlobEncoderHelper<std::unique_ptr<T>>                  \
+    : public detail::UPBlobImpl<T> {};
 
 #define MAKE_COPY_PTR_BLOB_SERDE_HELPER(T)                      \
   template<>                                                    \

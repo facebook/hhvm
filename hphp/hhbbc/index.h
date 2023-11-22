@@ -46,7 +46,6 @@ namespace HPHP::HHBBC {
 //////////////////////////////////////////////////////////////////////
 
 struct Index;
-struct AnalysisIndex;
 struct PublicSPropMutations;
 struct FuncAnalysisResult;
 struct Context;
@@ -262,103 +261,13 @@ std::string show(const ClsTypeConstLookupResult&);
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Represents a class constant, pointing to where the constant was
- * originally declared (the class name and it's position in the
- * class' constant table).
- */
-struct ConstIndex {
-  using Idx = uint32_t;
-
-  ConstIndex() = default;
-  ConstIndex(SString cls, Idx idx)
-    : cls{cls}, idx{idx} {}
-
-  SString cls;
-  Idx idx;
-
-  bool operator==(const ConstIndex& o) const {
-    return idx == o.idx && cls->isame(o.cls);
-  }
-  bool operator<(const ConstIndex& o) const {
-    if (idx != o.idx) return idx < o.idx;
-    return string_data_lti{}(cls, o.cls);
-  }
-
-  struct Hasher {
-    size_t operator()(const ConstIndex& idx) const {
-      return folly::hash::hash_combine(idx.cls->hash(), idx.idx);
-    }
-  };
-
-  template <typename SerDe> void serde(SerDe& sd) {
-    sd(cls)(idx);
-  }
-};
-
-std::string show(const ConstIndex&);
-
-//////////////////////////////////////////////////////////////////////
-
 // Inferred class constant type from a 86cinit.
 struct ClsConstInfo {
   Type type;
   size_t refinements = 0;
-  template <typename SerDe> void serde(SerDe& sd) {
-    sd(type)(refinements);
-  }
 };
 
-using ResolvedConstants =
-  CompactVector<std::pair<ConstIndex::Idx, ClsConstInfo>>;
-
-//////////////////////////////////////////////////////////////////////
-/*
- * Represents a method, without requiring an explicit pointer to a
- * php::Func (so can be used across remote workers).
- */
-struct MethRef {
-  MethRef() = default;
-  explicit MethRef(const php::Func& f)
-    : cls{f.cls->name}, idx{f.clsIdx} {}
-  MethRef(SString cls, uint32_t idx)
-    : cls{cls}, idx{idx} {}
-
-  SString cls{nullptr};
-  // Index in the class' methods table.
-  uint32_t idx{std::numeric_limits<uint32_t>::max()};
-
-  bool operator==(const MethRef& o) const {
-    return cls->isame(o.cls) && idx == o.idx;
-  }
-  bool operator!=(const MethRef& o) const {
-    return !(*this == o);
-  }
-  bool operator<(const MethRef& o) const {
-    // The ordering for MethRef is arbitrary. Compare by idx and then
-    // by the class name's hash to avoid having to do the more
-    // expensive string comparison.
-    if (idx != o.idx) return idx < o.idx;
-    auto const hash1 = cls->hash();
-    auto const hash2 = o.cls->hash();
-    if (hash1 != hash2) return hash1 < hash2;
-    return string_data_lti{}(cls, o.cls);
-  }
-
-  struct Hash {
-    size_t operator()(const MethRef& m) const {
-      return folly::hash::hash_combine(m.cls->hash(), m.idx);
-    }
-  };
-
-  template <typename SerDe> void serde(SerDe& sd) {
-    sd(cls)(idx);
-  }
-};
-
-using MethRefSet = hphp_fast_set<MethRef, MethRef::Hash>;
-
-std::string show(const MethRef&);
+using ResolvedConstants = CompactVector<std::pair<size_t, ClsConstInfo>>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -377,28 +286,6 @@ struct ClassInfo;
 struct ClassInfo2;
 struct FuncInfo2;
 struct FuncFamily2;
-struct MethodsWithoutCInfo;
-
-//////////////////////////////////////////////////////////////////////
-
-// Opaque input to an AnalysisIndex. Avoids exposing AnalysisIndex
-// internals to those who need to convey the data into a remote
-// worker.
-template <typename T> struct AnalysisIndexParam {
-  AnalysisIndexParam() = default;
-
-  void serde(BlobEncoder&) const;
-  void serde(BlobDecoder&);
-private:
-  struct Deleter { void operator()(T*) const; };
-  std::unique_ptr<T, Deleter> ptr;
-
-  friend struct ::HPHP::HHBBC::AnalysisIndex;
-};
-
-using AnalysisIndexCInfo = AnalysisIndexParam<ClassInfo2>;
-using AnalysisIndexFInfo = AnalysisIndexParam<FuncInfo2>;
-using AnalysisIndexMInfo = AnalysisIndexParam<MethodsWithoutCInfo>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -581,6 +468,11 @@ struct Class {
   Optional<Class> parent() const;
 
   /*
+   * Returns true if we have a ClassInfo for this Class.
+   */
+  bool resolved() const;
+
+  /*
    * Returns the php::Class for this Class if there is one, or
    * nullptr.
    */
@@ -661,22 +553,15 @@ struct Class {
   size_t hash() const { return toOpaque(); }
 
   /*
-   * Obtain with a given name or associated with the given ClassInfo
-   * (must already exist).
+   * Obtain with a given name or associated with the given ClassInfo.
    */
   static Class get(SString);
   static Class get(const ClassInfo&);
   static Class get(const ClassInfo2&);
 
   /*
-   * Obtain with a given name. If does not already exist, create an
-   * unresolved Class and return that.
-   */
-  static Class getOrCreate(SString);
-
-  /*
    * Make an unresolved Class representing the given name. The name
-   * cannot be an existing class.
+   * cannot be an existing class. Mainly meant for tests.
    */
   static Class getUnresolved(SString);
 
@@ -694,7 +579,6 @@ private:
   friend std::string show(const Class&);
 
   friend struct ::HPHP::HHBBC::Index;
-  friend struct ::HPHP::HHBBC::AnalysisIndex;
 
   struct Opaque { void* p; };
   Opaque opaque;
@@ -795,8 +679,6 @@ struct Func {
 
 private:
   friend struct ::HPHP::HHBBC::Index;
-  friend struct ::HPHP::HHBBC::AnalysisIndex;
-
   struct FuncName {
     SString name;
   };
@@ -897,7 +779,6 @@ struct TypeMapping {
   // first enum encountered when resolving a type-alias.
   LSString firstEnum;
   TypeConstraint value;
-  bool isTypeAlias;
 
   bool operator==(const TypeMapping& o) const {
     return name->isame(o.name);
@@ -907,7 +788,7 @@ struct TypeMapping {
   }
 
   template <typename SerDe> void serde(SerDe& sd) {
-    sd(name)(firstEnum)(value)(isTypeAlias);
+    sd(name)(firstEnum)(value);
   }
 };
 
@@ -938,12 +819,7 @@ struct Index {
       LSString name;
       std::vector<SString> dependencies;
       LSString closureContext;
-      LSString unit;
       bool isClosure;
-      // Whether this closure was declared inside a class or func
-      // (which determines the meaning of closureContext).
-      bool closureDeclInFunc;
-      bool has86init;
       // If this class is an enum, the type-mapping representing it's
       // base type.
       Optional<TypeMapping> typeMapping;
@@ -953,8 +829,7 @@ struct Index {
     struct FuncMeta {
       R<php::Func> func;
       LSString name;
-      LSString unit;
-      bool methCaller;
+      LSString methCallerUnit; // nullptr if not MethCaller
       std::vector<SString> unresolvedTypes;
     };
 
@@ -962,14 +837,12 @@ struct Index {
       R<php::Unit> unit;
       LSString name;
       std::vector<TypeMapping> typeMappings;
-      std::vector<std::pair<SString, bool>> constants;
     };
 
     struct FuncBytecodeMeta {
       R<php::FuncBytecode> bc;
       LSString name;
-      LSString unit;
-      bool methCaller;
+      LSString methCallerUnit; // nullptr if not associated with a MethCaller
     };
 
     struct ClassBytecodeMeta {
@@ -997,11 +870,6 @@ struct Index {
         DisposeCallback,
         StructuredLogEntry*);
   ~Index();
-
-  Index(const Index&) = delete;
-  Index(Index&&);
-  Index& operator=(const Index&) = delete;
-  Index& operator=(Index&&);
 
   /*
    * The index operates in two modes: frozen, and unfrozen.
@@ -1045,34 +913,9 @@ struct Index {
   void cleanup_post_emit();
 
   /*
-   * Prepare the index for local execution. This marks the boundary
-   * between running in extern-worker and running in the "classic"
-   * way.
-   */
-  void make_local();
-
-  /*
    * Access the StructuredLogEntry that the Index is using (if any).
    */
   StructuredLogEntry* sample() const;
-
-  /*
-   * Obtain the extern-worker related state that the Index used.
-   */
-  TicketExecutor& executor() const;
-  extern_worker::Client& client() const;
-  const CoroAsyncValue<extern_worker::Ref<Config>>& configRef() const;
-
-  /*
-   * The names of all classes which has a 86*init function.
-   */
-  const ISStringSet& classes_with_86inits() const;
-
-  /*
-   * The names of all top-level functions which are initializers for
-   * "dynamic" constants.
-   */
-  const ISStringSet& constant_init_funcs() const;
 
   /*
    * Access the php::Program this Index is analyzing.
@@ -1149,25 +992,12 @@ struct Index {
    * if the class is not definable.
    */
   Optional<res::Class> resolve_class(SString name) const;
-  Optional<res::Class> resolve_class(const php::Class&) const;
 
   /*
    * Find a type-alias with the given name. If a nullptr is returned,
    * then no type-alias exists with that name.
    */
   const php::TypeAlias* lookup_type_alias(SString name) const;
-
-  /*
-   * Find a class or a type-alias with the given name. This can be
-   * more efficient than doing two different lookups.
-   */
-  struct ClassOrTypeAlias {
-    // At most one of these will be non-null.
-    const php::Class* cls;
-    const php::TypeAlias* typeAlias;
-    bool maybeExists;
-  };
-  ClassOrTypeAlias lookup_class_or_type_alias(SString name) const;
 
   /*
    * Resolve the given php::Func, which can be a function or
@@ -1553,9 +1383,11 @@ struct Index {
                                   DependencyContextSet&);
 
   struct IndexData;
+private:
+  Index(const Index&) = delete;
+  Index& operator=(Index&&) = delete;
 
 private:
-  friend struct AnalysisScheduler;
   friend struct PublicSPropMutations;
 
   template <typename F>
@@ -1565,7 +1397,7 @@ private:
   res::Func rfunc_from_dcls(const DCls&, SString, const P&, const G&) const;
 
 private:
-  std::unique_ptr<IndexData> m_data;
+  std::unique_ptr<IndexData> const m_data;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -1594,12 +1426,8 @@ struct IIndex {
   lookup_extra_methods(const php::Class*) const = 0;
 
   virtual Optional<res::Class> resolve_class(SString) const = 0;
-  virtual Optional<res::Class> resolve_class(const php::Class&) const = 0;
 
-  virtual std::pair<const php::TypeAlias*, bool>
-  lookup_type_alias(SString) const = 0;
-
-  virtual Index::ClassOrTypeAlias lookup_class_or_type_alias(SString) const = 0;
+  virtual const php::TypeAlias* lookup_type_alias(SString) const = 0;
 
   virtual res::Func resolve_func_or_method(const php::Func&) const = 0;
 
@@ -1625,7 +1453,7 @@ struct IIndex {
 
   virtual Type lookup_constant(Context, SString) const = 0;
 
-  virtual bool func_depends_on_arg(const php::Func* func, size_t arg) const = 0;
+  virtual bool func_depends_on_arg(const php::Func* func, int arg) const = 0;
 
   virtual Index::ReturnType
   lookup_foldable_return_type(Context, const CallContext&) const = 0;
@@ -1674,23 +1502,6 @@ struct IIndex {
                     bool mustBeReadOnly = false) const = 0;
 
   virtual bool using_class_dependencies() const = 0;
-private:
-  virtual void push_context(const Context&) const = 0;
-  virtual void pop_context() const = 0;
-
-  friend struct ContextPusher;
-};
-
-//////////////////////////////////////////////////////////////////////
-
-// Push the given Context onto the Index's stack of Contexts, and
-// remove it automatically.
-struct ContextPusher {
-  ContextPusher(const IIndex& index, const Context& ctx) : index{index} {
-    index.push_context(ctx);
-  }
-  ~ContextPusher() { index.pop_context(); }
-  const IIndex& index;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -1722,17 +1533,8 @@ struct IndexAdaptor : public IIndex {
   Optional<res::Class> resolve_class(SString c) const override {
     return index.resolve_class(c);
   }
-  Optional<res::Class> resolve_class(const php::Class& c) const override {
-    return index.resolve_class(c);
-  }
-  std::pair<const php::TypeAlias*, bool>
-  lookup_type_alias(SString a) const override {
-    auto const ta = index.lookup_type_alias(a);
-    return std::make_pair(ta, (bool)ta);
-  }
-  Index::ClassOrTypeAlias
-  lookup_class_or_type_alias(SString name) const override {
-    return index.lookup_class_or_type_alias(name);
+  const php::TypeAlias* lookup_type_alias(SString a) const override {
+    return index.lookup_type_alias(a);
   }
   res::Func resolve_func_or_method(const php::Func& f) const override {
     return index.resolve_func_or_method(f);
@@ -1766,7 +1568,7 @@ struct IndexAdaptor : public IIndex {
   Type lookup_constant(Context c, SString s) const override {
     return index.lookup_constant(c, s);
   }
-  bool func_depends_on_arg(const php::Func* f, size_t p) const override {
+  bool func_depends_on_arg(const php::Func* f, int p) const override {
     return index.func_depends_on_arg(f, p);
   }
   Index::ReturnType
@@ -1832,599 +1634,7 @@ struct IndexAdaptor : public IIndex {
   }
 
 private:
-  void push_context(const Context&) const override {}
-  void pop_context() const override {}
-
   Index& index;
-};
-
-//////////////////////////////////////////////////////////////////////
-
-// Represents all of the things a class or func might depend up for
-// analysis. If any of these things change, the class or func will be
-// scheduled to be analyzed again.
-struct AnalysisDeps {
-  // Some dependencies (for example, functions) can have multiple
-  // "types" (IE, return-type, bytecode, etc). A class or func's
-  // dependency on a function will be some union of these types.
-  enum Type : uint8_t {
-    None          = 0,
-    // The existence of this thing and basic metadata and nothing
-    // more.
-    Meta          = (1 << 0),
-    // Return-type of function
-    RetType       = (1 << 1),
-    // Return-type of function but only if it becomes a scalar
-    ScalarRetType = (1 << 2),
-    // Whether any parameters are returned unchanged
-    RetParam      = (1 << 3),
-    // Whether any parameters are unused
-    UnusedParams  = (1 << 4),
-    // Bytecode of class or function
-    Bytecode      = (1 << 5),
-  };
-
-  // Some types can change as a result of analysis and hence can
-  // trigger reschedules. The only type right now that cannot change
-  // is "Meta" (since it represents the basic metadata of a class or
-  // function which doesn't change).
-  static constexpr Type kValidForChanges = static_cast<Type>(
-    Type::RetType |
-    Type::ScalarRetType |
-    Type::RetParam |
-    Type::UnusedParams |
-    Type::Bytecode
-  );
-
-  static constexpr bool isValidForChanges(Type t) {
-    return
-      t != Type::None &&
-      (t & kValidForChanges) == t;
-  }
-
-  // Add dependencies on various entities
-
-  struct Class { SString name; };
-  struct Func { SString name; };
-  struct Constant { SString name; };
-  struct TypeAlias { SString name; };
-
-  bool add(Class);
-
-  bool add(ConstIndex);
-  bool add(Constant);
-  bool add(TypeAlias);
-
-  Type add(const php::Func&, Type);
-  Type add(MethRef, Type);
-  Type add(Func, Type);
-
-  // Combine two sets of dependencies into one.
-  AnalysisDeps& operator|=(const AnalysisDeps&);
-
-  template <typename SerDe> void serde(SerDe& sd) {
-    sd(funcs, string_data_lti{})
-      (methods, std::less<>{})
-      (classes, string_data_lti{})
-      (clsConstants, std::less<>{})
-      (constants, string_data_lt{})
-      (typeAliases, string_data_lti{})
-      ;
-  }
-
-private:
-  ISStringToOneT<Type> funcs;
-  hphp_fast_map<MethRef, Type, MethRef::Hash> methods;
-
-  ISStringSet classes;
-  hphp_fast_set<ConstIndex, ConstIndex::Hasher> clsConstants;
-  SStringSet constants;
-  ISStringSet typeAliases;
-
-  static Type merge(Type&, Type);
-
-  friend struct AnalysisScheduler;
-};
-
-// Make Type enum behave like bitset.
-inline AnalysisDeps::Type operator|(AnalysisDeps::Type a,
-                                    AnalysisDeps::Type b) {
-  using T = std::underlying_type_t<AnalysisDeps::Type>;
-  return static_cast<AnalysisDeps::Type>(
-    static_cast<T>(a) | static_cast<T>(b)
-  );
-}
-inline AnalysisDeps::Type& operator|=(AnalysisDeps::Type& a,
-                                      AnalysisDeps::Type b) {
-  a = a | b;
-  return a;
-}
-inline AnalysisDeps::Type operator&(AnalysisDeps::Type a,
-                                    AnalysisDeps::Type b) {
-  using T = std::underlying_type_t<AnalysisDeps::Type>;
-  return static_cast<AnalysisDeps::Type>(
-    static_cast<T>(a) & static_cast<T>(b)
-  );
-}
-inline AnalysisDeps::Type& operator&=(AnalysisDeps::Type& a,
-                                      AnalysisDeps::Type b) {
-  a = a & b;
-  return a;
-}
-inline AnalysisDeps::Type operator-(AnalysisDeps::Type a,
-                                    AnalysisDeps::Type b) {
-  using T = std::underlying_type_t<AnalysisDeps::Type>;
-  return static_cast<AnalysisDeps::Type>(
-    static_cast<T>(a) & ~static_cast<T>(b)
-  );
-}
-
-std::string show(AnalysisDeps::Type);
-
-//////////////////////////////////////////////////////////////////////
-
-// Represents the changes made to a class or function during
-// analysis. This is the other side of AnalysisDeps. A function or
-// class marking a change in its AnalysisChangeSet will trigger other
-// classes or functions which have a dependency on the same type to be
-// re-analyzed.
-struct AnalysisChangeSet {
-  using Type = AnalysisDeps::Type;
-
-  void changed(ConstIndex);
-  void changed(const php::Constant&);
-  void changed(const php::Func&, Type);
-
-  void remove(const php::Func& f) { funcs.erase(f.name); }
-
-  template <typename SerDe> void serde(SerDe& sd) {
-    sd(funcs, string_data_lti{})
-      (methods, std::less<>{})
-      (constants, string_data_lt{})
-      (clsConstants, std::less<>{})
-      ;
-  }
-private:
-  ISStringToOneT<Type> funcs;
-  hphp_fast_map<MethRef, Type, MethRef::Hash> methods;
-  SStringSet constants;
-  hphp_fast_set<ConstIndex, ConstIndex::Hasher> clsConstants;
-
-  friend struct AnalysisScheduler;
-};
-
-//////////////////////////////////////////////////////////////////////
-
-// Wraps up all of the inputs to a particular analysis job without
-// exposing implementation details. These are produced from
-// AnalysisScheduler::schedule().
-struct AnalysisInput {
-  std::vector<SString> classNames() const;
-  std::vector<SString> funcNames() const;
-  std::vector<SString> unitNames() const;
-
-  std::vector<SString> cinfoNames() const;
-  std::vector<SString> minfoNames() const;
-
-  bool empty() const {
-    return classes.empty() && funcs.empty() && units.empty();
-  }
-  SString key() const { return m_key; }
-
-  struct Meta {
-    ISStringSet badClasses;
-    ISStringSet badFuncs;
-    SStringSet badConstants;
-    ISStringSet badTypeAliases;
-    template <typename SerDe> void serde(SerDe& sd) {
-      sd(badClasses, string_data_lti{})
-        (badFuncs, string_data_lti{})
-        (badConstants, string_data_lt{})
-        (badTypeAliases, string_data_lti{})
-        ;
-    }
-  };
-  Meta takeMeta() { return std::move(meta); }
-
-  // Produces input for the analysis job.
-  using Tuple = std::tuple<
-    UniquePtrRefVec<php::Class>,
-    UniquePtrRefVec<php::Func>,
-    UniquePtrRefVec<php::Unit>,
-    UniquePtrRefVec<php::ClassBytecode>,
-    UniquePtrRefVec<php::FuncBytecode>,
-    RefVec<AnalysisIndexCInfo>,
-    RefVec<AnalysisIndexFInfo>,
-    RefVec<AnalysisIndexMInfo>,
-    UniquePtrRefVec<php::Class>,
-    UniquePtrRefVec<php::Func>,
-    UniquePtrRefVec<php::Unit>,
-    extern_worker::Ref<Meta>
-  >;
-  Tuple toTuple(extern_worker::Ref<Meta>) const;
-private:
-  SString m_key{nullptr};
-
-  ISStringToOneT<UniquePtrRef<php::Class>> classes;
-  ISStringToOneT<UniquePtrRef<php::Func>> funcs;
-  SStringToOneT<UniquePtrRef<php::Unit>> units;
-
-  ISStringToOneT<UniquePtrRef<php::ClassBytecode>> classBC;
-  ISStringToOneT<UniquePtrRef<php::FuncBytecode>> funcBC;
-
-  ISStringToOneT<extern_worker::Ref<AnalysisIndexCInfo>> cinfos;
-  ISStringToOneT<extern_worker::Ref<AnalysisIndexFInfo>> finfos;
-  ISStringToOneT<extern_worker::Ref<AnalysisIndexMInfo>> minfos;
-
-  ISStringToOneT<UniquePtrRef<php::Class>> depClasses;
-  ISStringToOneT<UniquePtrRef<php::Func>> depFuncs;
-  SStringToOneT<UniquePtrRef<php::Unit>> depUnits;
-
-  Meta meta;
-
-  friend struct AnalysisScheduler;
-};
-
-//////////////////////////////////////////////////////////////////////
-
-// These represent the output of an analysis job without exposing
-// implementation details. This is consumed by
-// AnalysisScheduler::record().
-struct AnalysisOutput {
-  struct Meta {
-    std::vector<AnalysisDeps> funcDeps;
-    std::vector<AnalysisDeps> classDeps;
-    AnalysisChangeSet changed;
-    ISStringSet removedFuncs;
-    template <typename SerDe> void serde(SerDe& sd) {
-      ScopedStringDataIndexer _;
-      sd(funcDeps)
-        (classDeps)
-        (changed)
-        (removedFuncs, string_data_lti{})
-        ;
-    }
-  };
-
-  std::vector<SString> classNames;
-  std::vector<SString> cinfoNames;
-  std::vector<SString> minfoNames;
-
-  UniquePtrRefVec<php::Class> classes;
-  UniquePtrRefVec<php::ClassBytecode> clsBC;
-  RefVec<AnalysisIndexCInfo> cinfos;
-
-  std::vector<SString> funcNames;
-  UniquePtrRefVec<php::Func> funcs;
-  UniquePtrRefVec<php::FuncBytecode> funcBC;
-  RefVec<AnalysisIndexFInfo> finfos;
-
-  RefVec<AnalysisIndexMInfo> minfos;
-
-  std::vector<SString> unitNames;
-  UniquePtrRefVec<php::Unit> units;
-
-  Meta meta;
-};
-
-//////////////////////////////////////////////////////////////////////
-
-// Scheduler to coordinate analysis rounds. This encapsulates all of
-// the logic to track dependencies and changes in a way so that the
-// user doesn't need to know any implementation details.
-struct AnalysisScheduler {
-  explicit AnalysisScheduler(Index&);
-
-  // Register a class or function with the given name to be
-  // tracked. If a class or function isn't tracked, it won't be
-  // eligible for scheduling (though it still might be pulled in as a
-  // dependency).
-  void registerClass(SString);
-  void registerFunc(SString);
-
-  // Record the output of an analysis job. This can be called in a
-  // multi-threaded context.
-  void record(AnalysisOutput);
-
-  // Called when all analysis jobs for this round have finished. This
-  // calculates what has changed and what needs to be re-analyzed.
-  void recordingDone();
-
-  // Schedule the work that needs to run into buckets of (roughly) the
-  // given size.
-  std::vector<AnalysisInput> schedule(size_t bucketSize);
-
-  size_t workItems() const {
-    return classesToSchedule.size() + funcsToSchedule.size();
-  }
-
-private:
-  // A change group represents all the entities in a given analysis
-  // job. The idea is that if a dependency is in the same job as you,
-  // even if it changed, you don't need to be rescheduled (because you
-  // would have picked up the change locally).
-  struct ChangeGroup {
-    ISStringSet classes;
-    ISStringSet funcs;
-    SStringSet units;
-  };
-
-  using Type = AnalysisDeps::Type;
-
-  void removeFuncs();
-  void findToSchedule();
-  void resetChanges();
-
-  void recordChanges(const AnalysisChangeSet&, const ChangeGroup&);
-  void updateDepState(AnalysisOutput&, ChangeGroup);
-
-  void addClassToInput(SString, AnalysisInput&) const;
-  void addFuncToInput(SString, AnalysisInput&) const;
-  void addUnitToInput(SString, AnalysisInput&) const;
-  void addDepsToInput(AnalysisInput&) const;
-  void addDepConstantToInput(SString, SString, AnalysisInput&) const;
-  void addDepTypeAliasToInput(SString, SString, AnalysisInput&) const;
-  void addDepUnitToInput(SString, SString, AnalysisInput&) const;
-  void addDepClassToInput(SString, SString, bool, AnalysisInput&) const;
-  void addDepFuncToInput(SString, SString, Type, AnalysisInput&) const;
-
-  Index& index;
-
-  std::vector<SString> classNames;
-  std::vector<SString> funcNames;
-
-  struct DepState {
-    Optional<AnalysisDeps> deps;
-    Optional<AnalysisDeps> newDeps;
-    std::shared_ptr<ChangeGroup> group;
-  };
-
-  struct FuncState {
-    DepState depState;
-    Type changed{};
-  };
-  struct ClassState {
-    DepState depState;
-    CompactVector<Type> methodChanges;
-    boost::dynamic_bitset<> cnsChanges;
-  };
-
-  ISStringToOneT<FuncState> funcState;
-  ISStringToOneT<ClassState> classState;
-  SStringToOneNodeT<std::atomic<bool>> cnsChanged;
-
-  ISStringSet funcsToSchedule;
-  ISStringSet classesToSchedule;
-
-  ISStringSet funcsToRemove;
-  std::mutex funcsToRemoveLock;
-};
-
-//////////////////////////////////////////////////////////////////////
-
-// Worklist for handling dependencies within the same analysis job. If
-// a class or function updates something, if another class or function
-// within the same job has a dependency, that will be re-analyzed
-// within the same job. This speeds up convergence by avoiding another
-// whole roundtrip through the scheduler.
-struct AnalysisWorklist {
-  FuncOrCls next();
-
-  void schedule(FuncOrCls);
-private:
-  hphp_fast_set<FuncOrCls, FuncOrClsHasher> in;
-  std::deque<FuncOrCls> list;
-};
-
-//////////////////////////////////////////////////////////////////////
-
-// Equivalent of Index, but for an analysis job.
-struct AnalysisIndex {
-  template<typename T> using V = std::vector<T>;
-  template<typename T> using VU = V<std::unique_ptr<T>>;
-
-  AnalysisIndex(AnalysisWorklist&,
-                VU<php::Class>,
-                VU<php::Func>,
-                VU<php::Unit>,
-                VU<php::ClassBytecode>,
-                VU<php::FuncBytecode>,
-                V<AnalysisIndexCInfo>,
-                V<AnalysisIndexFInfo>,
-                V<AnalysisIndexMInfo>,
-                VU<php::Class>,
-                VU<php::Func>,
-                VU<php::Unit>,
-                AnalysisInput::Meta);
-  ~AnalysisIndex();
-
-  // Must be called in the worker's init() and fini() functions.
-  static void start();
-  static void stop();
-
-  void freeze();
-
-  const php::Unit& lookup_func_unit(const php::Func&) const;
-
-  const php::Unit& lookup_class_unit(const php::Class&) const;
-
-  const php::Class* lookup_const_class(const php::Const&) const;
-
-  const php::Class& lookup_closure_context(const php::Class&) const;
-
-  Optional<res::Class> resolve_class(SString) const;
-  Optional<res::Class> resolve_class(const php::Class&) const;
-
-  res::Class builtin_class(SString) const;
-
-  Type lookup_constant(SString) const;
-
-  std::vector<std::pair<SString, ClsConstInfo>>
-  lookup_class_constants(const php::Class&) const;
-
-  ClsConstLookupResult
-  lookup_class_constant(const Type&, const Type&) const;
-
-  ClsTypeConstLookupResult
-  lookup_class_type_constant(
-    const Type& cls,
-    const Type& name,
-    const Index::ClsTypeConstLookupResolver& resolver = {}) const;
-
-  PropState lookup_private_props(const php::Class&) const;
-  PropState lookup_private_statics(const php::Class&) const;
-
-  Index::ReturnType lookup_return_type(MethodsInfo*, res::Func) const;
-  Index::ReturnType lookup_return_type(MethodsInfo*,
-                                       const CompactVector<Type>&,
-                                       const Type&,
-                                       res::Func) const;
-  Index::ReturnType lookup_foldable_return_type(const CallContext&) const;
-
-  std::pair<Index::ReturnType, size_t>
-  lookup_return_type_raw(const php::Func& f) const;
-
-  bool func_depends_on_arg(const php::Func&, size_t) const;
-
-  res::Func resolve_func(SString) const;
-
-  res::Func resolve_method(const Type&, SString) const;
-  res::Func resolve_ctor(const Type&) const;
-  res::Func resolve_func_or_method(const php::Func&) const;
-
-  std::pair<const php::TypeAlias*, bool> lookup_type_alias(SString) const;
-
-  Index::ClassOrTypeAlias lookup_class_or_type_alias(SString) const;
-
-  PropMergeResult
-  merge_static_type(PublicSPropMutations&,
-                    PropertiesInfo&,
-                    const Type&,
-                    const Type&,
-                    const Type&,
-                    bool checkUB = false,
-                    bool ignoreConst = false,
-                    bool mustBeReadOnly = false) const;
-
-  void refine_constants(const FuncAnalysisResult&);
-  void refine_class_constants(const FuncAnalysisResult&);
-  void refine_return_info(const FuncAnalysisResult&);
-  void update_prop_initial_values(const FuncAnalysisResult&);
-  void update_bytecode(FuncAnalysisResult&);
-
-  using Output = extern_worker::Multi<
-    extern_worker::Variadic<std::unique_ptr<php::Class>>,
-    extern_worker::Variadic<std::unique_ptr<php::Func>>,
-    extern_worker::Variadic<std::unique_ptr<php::Unit>>,
-    extern_worker::Variadic<std::unique_ptr<php::ClassBytecode>>,
-    extern_worker::Variadic<std::unique_ptr<php::FuncBytecode>>,
-    extern_worker::Variadic<AnalysisIndexCInfo>,
-    extern_worker::Variadic<AnalysisIndexFInfo>,
-    extern_worker::Variadic<AnalysisIndexMInfo>,
-    AnalysisOutput::Meta
-  >;
-  Output finish();
-
-  struct IndexData;
-private:
-  std::unique_ptr<IndexData> const m_data;
-
-  void push_context(const Context&);
-  void pop_context();
-
-  friend struct AnalysisIndexAdaptor;
-};
-
-//////////////////////////////////////////////////////////////////////
-
-struct AnalysisIndexAdaptor : public IIndex {
-  explicit AnalysisIndexAdaptor(const AnalysisIndex& index)
-    : index{const_cast<AnalysisIndex&>(index)} {}
-
-  const php::Unit* lookup_func_unit(const php::Func&) const override;
-  const php::Unit* lookup_class_unit(const php::Class&) const override;
-  const php::Class* lookup_const_class(const php::Const&) const override;
-  const php::Class* lookup_closure_context(const php::Class&) const override;
-
-  const CompactVector<const php::Class*>*
-  lookup_closures(const php::Class*) const override;
-
-  const hphp_fast_set<const php::Func*>*
-  lookup_extra_methods(const php::Class*) const override;
-
-  Optional<res::Class> resolve_class(SString) const override;
-  Optional<res::Class> resolve_class(const php::Class&) const override;
-
-  std::pair<const php::TypeAlias*, bool>
-  lookup_type_alias(SString) const override;
-
-  Index::ClassOrTypeAlias lookup_class_or_type_alias(SString) const override;
-
-  res::Func resolve_func_or_method(const php::Func&) const override;
-  res::Func resolve_func(SString) const override;
-  res::Func resolve_method(Context, const Type&, SString) const override;
-  res::Func resolve_ctor(const Type&) const override;
-
-  std::vector<std::pair<SString, ClsConstInfo>>
-  lookup_class_constants(const php::Class&) const override;
-
-  ClsConstLookupResult lookup_class_constant(Context,
-                                             const Type&,
-                                             const Type&) const override;
-
-  ClsTypeConstLookupResult
-  lookup_class_type_constant(
-    const Type&,
-    const Type&,
-    const Index::ClsTypeConstLookupResolver& r = {}) const override;
-
-  Type lookup_constant(Context, SString) const override;
-  bool func_depends_on_arg(const php::Func*, size_t) const override;
-  Index::ReturnType
-  lookup_foldable_return_type(Context, const CallContext&) const override;
-  Index::ReturnType lookup_return_type(Context, MethodsInfo*, res::Func,
-                                       Dep d = Dep::ReturnTy) const override;
-  Index::ReturnType lookup_return_type(Context,
-                                       MethodsInfo*,
-                                       const CompactVector<Type>&,
-                                       const Type&,
-                                       res::Func,
-                                       Dep d = Dep::ReturnTy) const override;
-
-  std::pair<Index::ReturnType, size_t>
-  lookup_return_type_raw(const php::Func*) const override;
-
-  CompactVector<Type>
-  lookup_closure_use_vars(const php::Func*, bool m = false) const override;
-
-  PropState lookup_private_props(const php::Class*, bool m = false) const override;
-  PropState lookup_private_statics(const php::Class*, bool m = false) const override;
-
-  PropLookupResult lookup_static(Context,
-                                 const PropertiesInfo&,
-                                 const Type&,
-                                 const Type&) const override;
-
-  Type lookup_public_prop(const Type&, const Type&) const override;
-
-  PropMergeResult
-  merge_static_type(Context,
-                    PublicSPropMutations&,
-                    PropertiesInfo&,
-                    const Type&,
-                    const Type&,
-                    const Type&,
-                    bool checkUB = false,
-                    bool ignoreConst = false,
-                    bool mustBeReadOnly = false) const override;
-
-  bool using_class_dependencies() const override;
-
-private:
-  void push_context(const Context&) const override;
-  void pop_context() const override;
-
-  AnalysisIndex& index;
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -1390,10 +1390,9 @@ Class::PropValLookup Class::getSPropIgnoreLateInit(
   if (debug) {
     auto const& decl = m_staticProperties[lookup.slot];
     auto const lateInit = bool(decl.attrs & AttrLateInit);
-    always_assert_flog(
-      sProp && (sProp->m_type != KindOfUninit || lateInit),
-      "Static property initialization failed to initialize {}::{}",
-      name(), sPropName
+    always_assert(
+      sProp && (sProp->m_type != KindOfUninit || lateInit) &&
+      "Static property initialization failed to initialize a property."
     );
 
     if (sProp->m_type != KindOfUninit) {

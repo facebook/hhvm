@@ -41,14 +41,7 @@ using BlockUpdates = CompactVector<std::pair<BlockId, CompressedBlockUpdate>>;
  */
 void optimize_func(const Index&, FuncAnalysis&&, php::WideFunc&);
 
-enum class UpdateBCResult {
-  None, // No changes
-  Changed, // Changes
-  ChangedAnalyze // Changes, and should analyze this function again
-};
-UpdateBCResult update_bytecode(php::WideFunc&,
-                               BlockUpdates,
-                               FuncAnalysis* = nullptr);
+void update_bytecode(php::WideFunc&, BlockUpdates&&, FuncAnalysis* = nullptr);
 
 /*
  * Return a bytecode to generate the value in cell

@@ -825,62 +825,28 @@ void optimize_func(const Index& index, FuncAnalysis&& ainfo,
   do_optimize(index, std::move(ainfo), func);
 }
 
-UpdateBCResult update_bytecode(php::WideFunc& func,
-                               BlockUpdates blockUpdates,
-                               FuncAnalysis* ainfo) {
-  if (blockUpdates.empty()) return UpdateBCResult::None;
-
-  auto changed = UpdateBCResult::None;
-  auto const set_changed = [&] {
-    if (changed != UpdateBCResult::ChangedAnalyze) {
-      changed = UpdateBCResult::Changed;
-    }
-  };
-  auto const set_changed_analyze = [&] {
-    changed = UpdateBCResult::ChangedAnalyze;
-  };
-
+void update_bytecode(php::WideFunc& func, BlockUpdates&& blockUpdates,
+                     FuncAnalysis* ainfo) {
   for (auto& compressed : blockUpdates) {
     std::pair<BlockId, BlockUpdateInfo> ent;
     ent.first = compressed.first;
     compressed.second.expand(ent.second);
 
     auto blk = func.blocks()[ent.first].mutate();
-
-    auto const removing_fatal = [&] {
-      auto const& u = ent.second;
-      if (!u.replacedBcs.empty()) return false;
-      if (u.unchangedBcs + 3 != blk->hhbcs.size()) return false;
-      auto const& bc1 = blk->hhbcs[u.unchangedBcs];
-      auto const& bc2 = blk->hhbcs[u.unchangedBcs+1];
-      auto const& bc3 = blk->hhbcs[u.unchangedBcs+2];
-      if (bc1.op != Op::BreakTraceHint) return false;
-      if (bc2.op != Op::String) return false;
-      if (bc3.op != Op::Fatal) return false;
-      if (bc2.String.str1 != s_unreachable.get()) return false;
-      if (bc3.Fatal.subop1 != FatalOp::Runtime) return false;
-      assertx(instrFlags(bc3.op) & TF);
-      return true;
-    };
-
     auto const srcLoc = blk->hhbcs.front().srcLoc;
-
     if (!ent.second.unchangedBcs) {
-      if (!ent.second.replacedBcs.empty()) {
+      if (ent.second.replacedBcs.size()) {
         blk->hhbcs = std::move(ent.second.replacedBcs);
-        set_changed();
-      } else if (blk->hhbcs.size() != 1 || blk->hhbcs.front().op != Op::Nop) {
+      } else {
         blk->hhbcs = { bc_with_loc(blk->hhbcs.front().srcLoc, bc::Nop {}) };
-        set_changed_analyze();
       }
-    } else if (!removing_fatal()) {
+    } else {
       blk->hhbcs.erase(blk->hhbcs.begin() + ent.second.unchangedBcs,
                        blk->hhbcs.end());
       blk->hhbcs.reserve(blk->hhbcs.size() + ent.second.replacedBcs.size());
       for (auto& bc : ent.second.replacedBcs) {
         blk->hhbcs.push_back(std::move(bc));
       }
-      set_changed();
     }
     if (blk->hhbcs.empty()) {
       blk->hhbcs.push_back(bc_with_loc(srcLoc, bc::Nop {}));
@@ -892,22 +858,13 @@ UpdateBCResult update_bytecode(php::WideFunc& func,
       }
       return fatal_block;
     };
-    if (blk->fallthrough != ent.second.fallthrough) {
-      blk->fallthrough = ent.second.fallthrough;
-      set_changed();
-    }
-
+    blk->fallthrough = ent.second.fallthrough;
     auto hasCf = false;
-    forEachTakenEdge(
-      blk->hhbcs.back(),
-      [&] (BlockId& bid) {
-        hasCf = true;
-        if (bid == NoBlockId) {
-          set_changed();
-          bid = fatal();
-        }
-      }
-    );
+    forEachTakenEdge(blk->hhbcs.back(),
+                     [&] (BlockId& bid) {
+                       hasCf = true;
+                       if (bid == NoBlockId) bid = fatal();
+                     });
     if (blk->fallthrough == NoBlockId &&
         !(instrFlags(blk->hhbcs.back().op) & TF)) {
       if (hasCf) {
@@ -916,12 +873,10 @@ UpdateBCResult update_bytecode(php::WideFunc& func,
         blk->hhbcs.push_back(bc::BreakTraceHint {});
         blk->hhbcs.push_back(bc::String { s_unreachable.get() });
         blk->hhbcs.push_back(bc::Fatal { FatalOp::Runtime });
-        set_changed();
       }
     }
   }
-
-  return changed;
+  blockUpdates.clear();
 }
 
 //////////////////////////////////////////////////////////////////////

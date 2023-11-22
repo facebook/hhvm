@@ -2794,8 +2794,6 @@ bool Type::checkInvariants() const {
 
   SCOPE_ASSERT_DETAIL("checkInvariants") { return show(*this); };
 
-  constexpr const size_t kMaxArrayCheck = 100;
-
   // NB: Avoid performing operations which can trigger recursive
   // checkInvariants() calls, which can cause exponential time
   // blow-ups. Try to stick with bit manipulations and avoid more
@@ -2958,19 +2956,17 @@ bool Type::checkInvariants() const {
     assertx(!m_data.packed->elems.empty());
     assertx(couldBe(BArrLikeN));
     assertx(subtypeOf(BArrLikeN | kNonSupportBits));
-    if (m_data.packed->elems.size() <= kMaxArrayCheck) {
-      DEBUG_ONLY auto const vals = allowedValBits(bits(), true);
-      DEBUG_ONLY auto const isKeyset = subtypeAmong(BKeysetN, BArrLikeN);
-      DEBUG_ONLY auto const maybeKeyset = couldBe(BKeysetN);
-      DEBUG_ONLY auto idx = size_t{0};
-      for (DEBUG_ONLY auto const& v : m_data.packed->elems) {
-        assertx(!v.is(BBottom));
-        assertx(v.subtypeOf(vals.first));
-        assertx(v.couldBe(vals.second));
-        assertx(IMPLIES(isKeyset, v == ival(idx)));
-        assertx(IMPLIES(maybeKeyset, v.couldBe(ival(idx))));
-        ++idx;
-      }
+    DEBUG_ONLY auto const vals = allowedValBits(bits(), true);
+    DEBUG_ONLY auto const isKeyset = subtypeAmong(BKeysetN, BArrLikeN);
+    DEBUG_ONLY auto const maybeKeyset = couldBe(BKeysetN);
+    DEBUG_ONLY auto idx = size_t{0};
+    for (DEBUG_ONLY auto const& v : m_data.packed->elems) {
+      assertx(!v.is(BBottom));
+      assertx(v.subtypeOf(vals.first));
+      assertx(v.couldBe(vals.second));
+      assertx(IMPLIES(isKeyset, v == ival(idx)));
+      assertx(IMPLIES(maybeKeyset, v.couldBe(ival(idx))));
+      ++idx;
     }
     break;
   }
@@ -2986,29 +2982,27 @@ bool Type::checkInvariants() const {
     DEBUG_ONLY auto const isKeyset = subtypeAmong(BKeysetN, BArrLikeN);
     DEBUG_ONLY auto const maybeKeyset = couldBe(BKeysetN);
 
-    if (m_data.map->map.size() <= kMaxArrayCheck) {
-      DEBUG_ONLY auto idx = size_t{0};
-      DEBUG_ONLY auto packed = true;
-      for (DEBUG_ONLY auto const& kv : m_data.map->map) {
-        DEBUG_ONLY auto const keyType = map_key(kv.first, kv.second);
-        assertx(!kv.second.val.is(BBottom));
-        assertx(kv.second.val.subtypeOf(val.first));
-        assertx(kv.second.val.couldBe(val.second));
-        assertx(keyType.subtypeOf(key.first));
-        assertx(keyType.couldBe(key.second));
+    DEBUG_ONLY auto idx = size_t{0};
+    DEBUG_ONLY auto packed = true;
+    for (DEBUG_ONLY auto const& kv : m_data.map->map) {
+      DEBUG_ONLY auto const keyType = map_key(kv.first, kv.second);
+      assertx(!kv.second.val.is(BBottom));
+      assertx(kv.second.val.subtypeOf(val.first));
+      assertx(kv.second.val.couldBe(val.second));
+      assertx(keyType.subtypeOf(key.first));
+      assertx(keyType.couldBe(key.second));
 
-        if (packed) {
-          packed = isIntType(kv.first.m_type) && kv.first.m_data.num == idx;
-          ++idx;
-        }
-
-        assertx(IMPLIES(isKeyset, keyType == kv.second.val));
-        assertx(IMPLIES(maybeKeyset, keyType.couldBe(kv.second.val)));
+      if (packed) {
+        packed = isIntType(kv.first.m_type) && kv.first.m_data.num == idx;
+        ++idx;
       }
-      // Map shouldn't have packed-like keys. If it does, it should be Packed
-      // instead.
-      assertx(!packed);
+
+      assertx(IMPLIES(isKeyset, keyType == kv.second.val));
+      assertx(IMPLIES(maybeKeyset, keyType.couldBe(kv.second.val)));
     }
+    // Map shouldn't have packed-like keys. If it does, it should be Packed
+    // instead.
+    assertx(!packed);
 
     // Optional elements are either both Bottom or both not
     assertx(m_data.map->optKey.is(BBottom) ==
@@ -7369,7 +7363,7 @@ Type make_obj_for_testing(trep bits, res::Class cls,
   auto t = Type { bits, Type::topLegacyMarkForBits(bits) };
   auto const useSub = [&] {
     if (!canonicalize) return isSub;
-    if (!isSub) return !cls.isComplete();
+    if (!isSub) return !cls.resolved();
     return cls.couldBeOverriddenByRegular();
   }();
   construct(
@@ -7403,7 +7397,7 @@ Type make_cls_for_testing(trep bits, res::Class cls,
   auto t = Type { bits, Type::topLegacyMarkForBits(bits) };
   auto const useSub = [&] {
     if (!canonicalize) return isSub;
-    if (!isSub) return !cls.isComplete();
+    if (!isSub) return !cls.resolved();
     return nonReg ? cls.couldBeOverridden() : cls.couldBeOverriddenByRegular();
   }();
   construct(

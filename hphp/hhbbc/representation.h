@@ -48,7 +48,6 @@ namespace HHBBC {
 //////////////////////////////////////////////////////////////////////
 
 struct Index;
-struct ClassInfo2;
 
 namespace php {
 
@@ -274,14 +273,13 @@ struct FuncBase {
 };
 
 /*
- * Representation of a function or class method.
+ * Representation of a function, class method, or pseudomain function.
  */
 struct Func : FuncBase {
   /*
-  * An index, so we can lookup auxiliary structures efficiently. This
-  * field is not serialized and its meaning is context dependent.
-  */
-  uint32_t idx{std::numeric_limits<uint32_t>::max()};
+   * An index, so we can lookup auxiliary structures efficiently
+   */
+  uint32_t idx;
 
   /*
    * If this function is a method, it's index in the owning Class'
@@ -461,10 +459,8 @@ struct Func : FuncBase {
  */
 struct FuncBytecode {
   FuncBytecode() = default;
-  FuncBytecode(SString name, CompressedBytecodePtr bc)
-    : name{name}, bc{std::move(bc)} {}
+  explicit FuncBytecode(CompressedBytecodePtr bc) : bc{std::move(bc)} {}
 
-  LSString name;
   CompressedBytecodePtr bc;
 
   /*
@@ -568,12 +564,6 @@ struct Class : ClassBase {
   Attr attrs;
 
   /*
-   * Pointer to the Class' associated ClassInfo2 (if any). Must be set
-   * manually.
-   */
-  ClassInfo2* cinfo{nullptr};
-
-  /*
    * Which unit defined this class.
    */
   LSString unit;
@@ -598,14 +588,6 @@ struct Class : ClassBase {
    * (with regard to access checks, etc).
    */
   LSString closureContextCls;
-
-  /*
-   * If this class represents a closure defined in a top level
-   * function (not a method), this points to the name of that
-   * function. Nullptr otherwise. (For closures defined within
-  * classes, use closureContextCls).
-   */
-  LSString closureDeclFunc;
 
   /*
    * Names of inherited interfaces.
@@ -668,9 +650,6 @@ struct Class : ClassBase {
 };
 
 struct ClassBytecode {
-  ClassBytecode() = default;
-  explicit ClassBytecode(SString cls) : cls{cls} {}
-  SString cls;
   CompactVector<FuncBytecode> methodBCs;
   template <typename SerDe> void serde(SerDe&);
 };
@@ -778,19 +757,7 @@ bool check(const Program&);
 
 //////////////////////////////////////////////////////////////////////
 
-using FuncOrCls = Either<const php::Func*, const php::Class*>;
-
-struct FuncOrClsHasher {
-  size_t operator()(FuncOrCls f) const { return f.toOpaque(); }
-};
-
-std::string show(FuncOrCls);
-
-//////////////////////////////////////////////////////////////////////
-
 }
-
-//////////////////////////////////////////////////////////////////////
 
 MAKE_COPY_PTR_BLOB_SERDE_HELPER(HHBBC::php::Block)
 MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::Unit)

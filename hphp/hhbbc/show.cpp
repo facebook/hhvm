@@ -624,7 +624,12 @@ std::string show(const Type& t) {
     auto const showDCls = [&] (const DCls& dcls, bool isObj) {
       auto const lt = [&] {
         assertx(!dcls.isExact());
-        return !isObj && !dcls.containsNonRegular() ? "<-" : "<=";
+        if (!isObj && !dcls.containsNonRegular()) {
+          if (dcls.isIsect()) return "<!";
+          if (!dcls.cls().mightBeRegular()) return "<";
+          if (dcls.cls().mightContainNonRegular()) return "<!";
+        }
+        return "<=";
       };
 
       std::string ret;
@@ -780,28 +785,6 @@ std::string show(Context ctx) {
   }
   ret += ctx.func->name->toCppString();
   return ret;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-std::string show(const ConstIndex& idx) {
-  return folly::sformat("{}:{}", idx.cls, idx.idx);
-}
-
-std::string show(const MethRef& m) {
-  return folly::sformat("{}:{}", m.cls, m.idx);
-}
-
-//////////////////////////////////////////////////////////////////////
-
-std::string show(FuncOrCls fc) {
-  if (auto const f = fc.left()) {
-    return folly::sformat("func {}", f->name);
-  } else if (auto const c = fc.right()) {
-    return folly::sformat("class {}", c->name);
-  } else {
-    return "(null)";
-  }
 }
 
 //////////////////////////////////////////////////////////////////////

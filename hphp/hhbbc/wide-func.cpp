@@ -16,7 +16,6 @@
 #include "hphp/hhbbc/wide-func.h"
 
 #include "hphp/hhbbc/bc.h"
-#include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/interp.h"
 #include "hphp/util/trace.h"
 
@@ -482,35 +481,33 @@ bool checkBlockVecs(const Func& func, const BlockVec& a, const BlockVec& b) {
 
 //////////////////////////////////////////////////////////////////////
 
-WideFunc::WideFunc(const Func* func, bool mut, bool create)
-  : m_func(const_cast<Func*>(func))
-  , m_mut(mut)
-{
-  assertx(m_func);
-  FTRACE(2, "WideFunc::{}: {}\n",
-         m_mut ? "mut" : "cns",
-         func_fullname(*m_func));
-  if (mut && create && !m_func->rawBlocks) return;
-  always_assert_flog(
-    m_func->rawBlocks && !m_func->rawBlocks->empty(),
-    "Attempting to decompress empty bytecode for {}",
-    func_fullname(*m_func)
-  );
+WideFunc::WideFunc(const Func* func, bool mut)
+    : m_func(const_cast<Func*>(func)) , m_mut(mut) {
+  DEBUG_ONLY auto const cls = m_func ? m_func->cls : nullptr;
+  TRACE(2, "WideFunc::%s(0x%lx): %s%s%s\n", m_mut ? "mut" : "cns",
+        uintptr_t(m_func), cls ? m_func->cls->name->data() : "",
+        cls ? "::" : "", m_func ? m_func->name->data() : "NULL");
+  if (!m_func || !m_func->rawBlocks) return;
+  assertx(!m_func->rawBlocks->empty());
   auto pos = size_t{0};
   m_blocks = decodeBlockVec(*func->rawBlocks, pos);
   assertx(pos == func->rawBlocks->size());
 }
 
 WideFunc::~WideFunc() {
-  if (!m_func) return;
-  FTRACE(2, "~WideFunc::{}: {}\n",
-         m_mut ? "mut" : "cns",
-         func_fullname(*m_func));
+  DEBUG_ONLY auto const cls = m_func ? m_func->cls : nullptr;
+  TRACE(2, "~WideFunc::%s(0x%lx): %s%s%s\n", m_mut ? "mut" : "cns",
+        uintptr_t(m_func), cls ? m_func->cls->name->data() : "",
+        cls ? "::" : "", m_func ? m_func->name->data() : "NULL");
   if (!m_mut) return;
+  if (m_blocks.empty()) {
+    if (m_func) m_func->rawBlocks.reset();
+    return;
+  }
   auto buffer = Buffer{};
   encodeBlockVec(buffer, m_blocks);
   if (!m_func->rawBlocks || buffer != *m_func->rawBlocks) {
-    FTRACE(2, "~WideFunc::mut: updating blocks!\n");
+    TRACE(2, "~WideFunc::mut(0x%lx): updating blocks!\n", uintptr_t(m_func));
     m_func->rawBlocks.emplace(std::move(buffer));
   }
 }
@@ -520,6 +517,7 @@ void WideFunc::release() {
   m_mut = false;
   m_blocks.clear();
 }
+
 
 BlockVec WideFunc::uncompress(const CompressedBytecode& b) {
   auto pos = size_t{0};

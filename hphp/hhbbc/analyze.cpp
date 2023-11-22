@@ -542,7 +542,6 @@ FuncAnalysis do_analyze(const IIndex& index,
                         const KnownArgs* knownArgs = nullptr,
                         CollectionOpts opts = CollectionOpts{}) {
   auto const ctx = adjust_closure_context(index, inputCtx);
-  ContextPusher _{index, ctx};
 
   // If this isn't an 86cinit, or if we're inline interping, just do a
   // normal analyze.
@@ -821,8 +820,6 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
       is_systemlib_part(ctx.unit)};
     FTRACE(2, "{:#^70}\n", "Class");
   }
-
-  ContextPusher _{index, ctx};
 
   ClassAnalysis clsAnalysis(ctx);
   auto const associatedClosures = index.lookup_closures(ctx.cls);
@@ -1732,18 +1729,15 @@ Optional<Type> parentClsExact(const IIndex& index, const Context& ctx) {
 //////////////////////////////////////////////////////////////////////
 
 res::Class builtin_class(const IIndex& index, SString name) {
-  // A builtin class may not necessarily be resolved, but it must
-  // exist, and if it is resolved, must be AttrBuiltin.
   auto const rcls = index.resolve_class(name);
+  // Builtin classes should always be resolved, except for Closure,
+  // which are force to be unresolved.
   always_assert_flog(
-    rcls.has_value(),
-    "A builtin class ({}) does not exist",
-    name
-  );
-  always_assert_flog(
-    !rcls->cls() || rcls->cls()->attrs & AttrBuiltin,
-    "A builtin class ({}) resolved to non-builtin",
-    name
+    rcls.has_value() &&
+    (name->isame(s_Closure.get()) ||
+     (rcls->resolved() && (rcls->cls()->attrs & AttrBuiltin))),
+    "A builtin class ({}) failed to resolve",
+    name->data()
   );
   return *rcls;
 }

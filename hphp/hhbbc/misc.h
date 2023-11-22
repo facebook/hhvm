@@ -253,8 +253,6 @@ template<class T> using ISStringToOneConcurrentT =
   folly_concurrent_hash_map_simd<SString, T,
                                  string_data_hash, string_data_isame>;
 
-//////////////////////////////////////////////////////////////////////
-
 /*
  * Case sensitive static string set.
  */
@@ -263,31 +261,6 @@ using SStringSet = hphp_fast_set<SString>;
  * Case insensitive static string set.
  */
 using ISStringSet = hphp_fast_set<SString, string_data_hash, string_data_isame>;
-
-//////////////////////////////////////////////////////////////////////
-
-template<typename T>
-using ISStringToRef = ISStringToOneT<extern_worker::Ref<T>>;
-
-template<typename T>
-using SStringToRef = SStringToOneT<extern_worker::Ref<T>>;
-
-template<typename T>
-using RefVec = std::vector<extern_worker::Ref<T>>;
-
-//////////////////////////////////////////////////////////////////////
-
-template<typename T>
-using UniquePtrRef = extern_worker::Ref<std::unique_ptr<T>>;
-
-template<typename T>
-using ISStringToUniquePtrRef = ISStringToOneT<UniquePtrRef<T>>;
-
-template<typename T>
-using SStringToUniquePtrRef = SStringToOneT<UniquePtrRef<T>>;
-
-template<typename T>
-using UniquePtrRefVec = std::vector<UniquePtrRef<T>>;
 
 //////////////////////////////////////////////////////////////////////
 

@@ -55,13 +55,8 @@ struct WideFunc {
   WideFunc& operator=(WideFunc&&) = delete;
   WideFunc& operator=(const WideFunc&) = delete;
 
-  static WideFunc mut(Func* func) { return WideFunc(func, true, false); }
-  static WideFunc cns(const Func* func) {
-    return WideFunc(func, false, false);
-  }
-  static WideFunc create(Func& func) {
-    return WideFunc(&func, true, true);
-  }
+  static WideFunc mut(Func* func) { return WideFunc(func, true); }
+  static const WideFunc cns(const Func* func) { return WideFunc(func, false); }
 
   static BlockVec uncompress(const CompressedBytecode&);
   static CompressedBytecode compress(const BlockVec&);
@@ -85,7 +80,7 @@ struct WideFunc {
   void release();
 
 private:
-  WideFunc(const Func* func, bool mut, bool create);
+  WideFunc(const Func* func, bool mut);
 
   Func* m_func;
   BlockVec m_blocks;

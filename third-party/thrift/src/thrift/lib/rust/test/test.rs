@@ -37,6 +37,7 @@ use interface::TestSkipV1;
 use interface::TestSkipV2;
 use interface::TypedefNondefaultTypes_1;
 use interface::TypedefNondefaultTypes_2;
+use interface::TypedefNondefaultTypes_3;
 use interface::WrapBinary;
 use interface::WrapString;
 use smallvec::SmallVec;
@@ -79,6 +80,15 @@ fn test_typedef_non_default_types_2() {
         indexmap_c: IndexMap::new(),
         bin_smallvec: SmallVec::from(&b"smallvec"[..]),
         bin_bytes: Bytes::from(&b"bytes"[..]),
+        ..Default::default()
+    });
+}
+
+#[test]
+fn test_typedef_non_default_types_3() {
+    assert_round_trip(TypedefNondefaultTypes_3 {
+        bytes: SmallVec::from(&b"smallvec"[..]),
+        dict: make_indexmap(),
         ..Default::default()
     });
 }

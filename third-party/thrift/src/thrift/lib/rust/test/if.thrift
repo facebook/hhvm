@@ -68,6 +68,14 @@ struct TypedefNondefaultTypes_2 {
   31: binary_1563 bin_bytes;
 }
 
+// The field types are in terms of typedefs of form `typedef a b` but associated
+// with non-default types given by `rust.type` annotations attached to the type
+// alias in the field definition.
+struct TypedefNondefaultTypes_3 {
+  10: binary_t (rust.type = "smallvec::SmallVec<[u8; 32]>") bytes;
+  20: map_string_string_t (rust.type = "indexmap::IndexMap") dict;
+}
+
 enum TestEnum {
   FOO = 1,
   BAR = 2,
@@ -114,3 +122,6 @@ typedef set<i64> set_i64_4483 (rust.type = "indexmap::IndexSet")
 typedef set<string> set_string_3130 (rust.type = "HashSet")
 typedef set<string> set_string_8509 (rust.type = "indexmap::IndexSet")
 typedef set<string> set_string_9949 (rust.type = "BTreeSet")
+
+typedef binary binary_t
+typedef map<string, string> map_string_string_t

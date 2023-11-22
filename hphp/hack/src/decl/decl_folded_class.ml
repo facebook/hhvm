@@ -295,27 +295,28 @@ let get_sealed_whitelist (c : Shallow_decl_defs.shallow_class) : SSet.t option =
     in
     Some (SSet.of_list cn_params)
 
-let get_implements (env : Decl_env.env) parent_cache (ht : Typing_defs.decl_ty)
-    : Typing_defs.decl_ty SMap.t =
-  let (_r, (_p, c), paraml) = Decl_utils.unwrap_class_type ht in
+let get_instantiated_ancestors_and_self
+    (env : Decl_env.env) parent_cache (ht : Typing_defs.decl_ty) :
+    Typing_defs.decl_ty SMap.t =
+  let (_r, (_p, class_name), paraml) = Decl_utils.unwrap_class_type ht in
   let class_ =
     Decl_env.get_class_and_add_dep
       ~cache:parent_cache
       ~shmem_fallback:false
       ~fallback:Decl_env.no_fallback
       env
-      c
+      class_name
   in
   match class_ with
   | None ->
     (* The class lives in PHP land *)
-    SMap.singleton c ht
+    SMap.singleton class_name ht
   | Some class_ ->
     let subst = Inst.make_subst class_.dc_tparams paraml in
-    let sub_implements =
+    let instantiated_ancestors =
       SMap.map (fun ty -> Inst.instantiate subst ty) class_.dc_ancestors
     in
-    SMap.add c ht sub_implements
+    SMap.add class_name ht instantiated_ancestors
 
 let visibility
     (class_id : string)
@@ -1017,8 +1018,15 @@ and class_decl
       (ty :: impl, parents)
     | _ -> (impl, parents)
   in
-  let impl = List.map impl ~f:(get_implements env parents) in
-  let impl = List.fold_right impl ~f:(SMap.fold SMap.add) ~init:SMap.empty in
+  let impl =
+    List.map impl ~f:(get_instantiated_ancestors_and_self env parents)
+  in
+  let impl =
+    List.fold
+      impl
+      ~f:(SMap.union ~combine:(fun _ ty1 _ty2 -> Some ty1))
+      ~init:SMap.empty
+  in
   let (extends, xhp_attr_deps, decl_errors) =
     get_class_parents_and_traits env c parents decl_errors
   in

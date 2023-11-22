@@ -14,7 +14,6 @@
 #include "mcrouter/routes/BigValueRoute.h"
 #include "mcrouter/routes/LoggingRoute.h"
 #include "mcrouter/routes/McRouteHandleBuilder.h"
-#include "mcrouter/routes/RootRoute.h"
 
 namespace facebook {
 namespace memcache {
@@ -42,14 +41,12 @@ template <class RouterInfo>
 ProxyRoute<RouterInfo>::ProxyRoute(
     Proxy<RouterInfo>& proxy,
     const RouteSelectorMap<typename RouterInfo::RouteHandleIf>& routeSelectors,
-    bool enableDeleteDistribution,
-    bool enableCrossRegionDeleteRpc)
+    RootRouteRolloutOpts rolloutOpts)
     : proxy_(proxy),
       root_(makeRouteHandleWithInfo<RouterInfo, RootRoute>(
           proxy_,
           routeSelectors,
-          enableDeleteDistribution,
-          enableCrossRegionDeleteRpc)) {
+          rolloutOpts)) {
   if (proxy_.getRouterOptions().big_value_split_threshold != 0) {
     root_ = detail::wrapWithBigValueRoute<RouterInfo>(
         std::move(root_), proxy_.getRouterOptions());

@@ -20,6 +20,7 @@
 #include "mcrouter/lib/network/gen/MemcacheMessages.h"
 #include "mcrouter/lib/routes/AllSyncRoute.h"
 #include "mcrouter/routes/BigValueRouteIf.h"
+#include "mcrouter/routes/RootRoute.h"
 #include "mcrouter/routes/RouteSelectorMap.h"
 #include "mcrouter/stats.h"
 
@@ -44,8 +45,7 @@ class ProxyRoute {
       Proxy<RouterInfo>& proxy,
       const RouteSelectorMap<typename RouterInfo::RouteHandleIf>&
           routeSelectors,
-      bool enableDeleteDistribution = false,
-      bool enableCrossRegionDeleteRpc = true);
+      RootRouteRolloutOpts rolloutOpts);
 
   template <class Request>
   bool traverse(

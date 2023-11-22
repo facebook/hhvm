@@ -107,28 +107,29 @@ ProxyConfig<RouterInfo>::ProxyConfig(
     partialConfigs_ = provider.releasePartialConfigs();
   }
   accessPoints_ = provider.releaseAccessPoints();
-  bool enableCrossRegionDeleteRpc = true;
-  if (auto* jEnableCrossRegionDeleteRpc =
-          json.get_ptr("enable_cross_region_delete_rpc")) {
-    enableCrossRegionDeleteRpc = parseBool(
-        *jEnableCrossRegionDeleteRpc, "enable_cross_region_delete_rpc");
-  }
+  auto readBool = [&](std::string_view key, bool defaultValue) {
+    if (auto* j = json.get_ptr(key)) {
+      return parseBool(*j, key);
+    }
+    return defaultValue;
+  };
 
-  bool enableDeleteDistribution = false;
-  if (auto* jEnableDeleteDistribution =
-          json.get_ptr("enable_delete_distribution")) {
-    enableDeleteDistribution =
-        parseBool(*jEnableDeleteDistribution, "enable_delete_distribution");
-  }
+  bool enableCrossRegionDeleteRpc =
+      readBool("enable_cross_region_delete_rpc", true);
+  bool enableDeleteDistribution = readBool("enable_delete_distribution", false);
   checkLogic(
       enableDeleteDistribution || enableCrossRegionDeleteRpc,
       "ProxyConfig: cannot disable cross-region delete rpc if distribution is disabled");
 
+  bool enablePolicyMapV2 = readBool("enable_policy_map_v2", false);
+
   proxyRoute_ = std::make_shared<ProxyRoute<RouterInfo>>(
       proxy,
       routeSelectors,
-      enableDeleteDistribution,
-      enableCrossRegionDeleteRpc);
+      RootRouteRolloutOpts{
+          .enablePolicyMapV2 = enablePolicyMapV2,
+          .enableDeleteDistribution = enableDeleteDistribution,
+          .enableCrossRegionDeleteRpc = enableCrossRegionDeleteRpc});
   serviceInfo_ = std::make_shared<ServiceInfo<RouterInfo>>(proxy, *this);
 }
 

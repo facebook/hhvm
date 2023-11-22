@@ -76,10 +76,12 @@ class RootRouteTest : public ::testing::Test {
   RouteSelectorMap<typename MemcacheRouterInfo::RouteHandleIf> routeSelectors;
 };
 
+constexpr RootRouteRolloutOpts defaultOpts;
+
 TEST_F(RootRouteTest, NoRoutingPrefixGetRoutesToDefault) {
   mockFiberContext();
   auto proxy = &fiber_local<MemcacheRouterInfo>::getSharedCtx()->proxy();
-  RootRoute<MemcacheRouterInfo> rr{*proxy, getRouteSelectors()};
+  RootRoute<MemcacheRouterInfo> rr{*proxy, getRouteSelectors(), defaultOpts};
   auto reply = rr.route(McGetRequest("getReq"));
   EXPECT_FALSE(getTestHandle(0)->saw_keys.empty());
   EXPECT_TRUE(getTestHandle(1)->saw_keys.empty());
@@ -97,7 +99,7 @@ TEST_F(RootRouteTest, NoRoutingPrefixGetRoutesToDefault) {
 TEST_F(RootRouteTest, BroadcastPrefixGetRoutesToAll) {
   mockFiberContext();
   auto proxy = &fiber_local<MemcacheRouterInfo>::getSharedCtx()->proxy();
-  RootRoute<MemcacheRouterInfo> rr{*proxy, getRouteSelectors()};
+  RootRoute<MemcacheRouterInfo> rr{*proxy, getRouteSelectors(), defaultOpts};
   TestFiberManager<MemcacheRouterInfo> fm;
   fm.runAll({[&]() { rr.route(McGetRequest("/*/*/getReq")); }});
   EXPECT_FALSE(getTestHandle(0)->saw_keys.empty());
@@ -120,7 +122,7 @@ TEST_F(RootRouteTest, BroadcastPrefixGetRoutesToAll) {
 TEST_F(RootRouteTest, DirectedCrossRegionPrefixGetRoutesToOne) {
   mockFiberContext();
   auto proxy = &fiber_local<MemcacheRouterInfo>::getSharedCtx()->proxy();
-  RootRoute<MemcacheRouterInfo> rr{*proxy, getRouteSelectors()};
+  RootRoute<MemcacheRouterInfo> rr{*proxy, getRouteSelectors(), defaultOpts};
   TestFiberManager<MemcacheRouterInfo> fm;
   fm.runAll({[&]() { rr.route(McGetRequest("/virginia/c/getReq")); }});
   EXPECT_TRUE(getTestHandle(0)->saw_keys.empty());
@@ -139,7 +141,7 @@ TEST_F(RootRouteTest, DirectedCrossRegionPrefixGetRoutesToOne) {
 TEST_F(RootRouteTest, NoRoutingPrefixSetRoutesToDefault) {
   mockFiberContext();
   auto proxy = &fiber_local<MemcacheRouterInfo>::getSharedCtx()->proxy();
-  RootRoute<MemcacheRouterInfo> rr{*proxy, getRouteSelectors()};
+  RootRoute<MemcacheRouterInfo> rr{*proxy, getRouteSelectors(), defaultOpts};
   auto reply = rr.route(McSetRequest("setReq"));
   EXPECT_FALSE(getTestHandle(0)->saw_keys.empty());
   EXPECT_TRUE(getTestHandle(1)->saw_keys.empty());
@@ -157,7 +159,7 @@ TEST_F(RootRouteTest, NoRoutingPrefixSetRoutesToDefault) {
 TEST_F(RootRouteTest, BroadcastPrefixSetRoutesToAll) {
   mockFiberContext();
   auto proxy = &fiber_local<MemcacheRouterInfo>::getSharedCtx()->proxy();
-  RootRoute<MemcacheRouterInfo> rr{*proxy, getRouteSelectors()};
+  RootRoute<MemcacheRouterInfo> rr{*proxy, getRouteSelectors(), defaultOpts};
   TestFiberManager<MemcacheRouterInfo> fm;
   fm.runAll({[&]() { rr.route(McSetRequest("/*/*/setReq")); }});
   EXPECT_FALSE(getTestHandle(0)->saw_keys.empty());
@@ -180,7 +182,7 @@ TEST_F(RootRouteTest, BroadcastPrefixSetRoutesToAll) {
 TEST_F(RootRouteTest, DirectedCrossRegionPrefixSetRoutesToOne) {
   mockFiberContext();
   auto proxy = &fiber_local<MemcacheRouterInfo>::getSharedCtx()->proxy();
-  RootRoute<MemcacheRouterInfo> rr{*proxy, getRouteSelectors()};
+  RootRoute<MemcacheRouterInfo> rr{*proxy, getRouteSelectors(), defaultOpts};
   TestFiberManager<MemcacheRouterInfo> fm;
   fm.runAll({[&]() { rr.route(McSetRequest("/virginia/c/setReq")); }});
   EXPECT_TRUE(getTestHandle(0)->saw_keys.empty());
@@ -199,7 +201,7 @@ TEST_F(RootRouteTest, DirectedCrossRegionPrefixSetRoutesToOne) {
 TEST_F(RootRouteTest, NoRoutingPrefixDeleteRoutesToDefault) {
   mockFiberContext();
   auto proxy = &fiber_local<MemcacheRouterInfo>::getSharedCtx()->proxy();
-  RootRoute<MemcacheRouterInfo> rr{*proxy, getRouteSelectors()};
+  RootRoute<MemcacheRouterInfo> rr{*proxy, getRouteSelectors(), defaultOpts};
   auto reply = rr.route(McDeleteRequest("delReq"));
   EXPECT_FALSE(getTestHandle(0)->saw_keys.empty());
   EXPECT_TRUE(getTestHandle(1)->saw_keys.empty());
@@ -217,7 +219,7 @@ TEST_F(RootRouteTest, NoRoutingPrefixDeleteRoutesToDefault) {
 TEST_F(RootRouteTest, BroadcastPrefixDeleteRoutesToAll) {
   mockFiberContext();
   auto proxy = &fiber_local<MemcacheRouterInfo>::getSharedCtx()->proxy();
-  RootRoute<MemcacheRouterInfo> rr{*proxy, getRouteSelectors()};
+  RootRoute<MemcacheRouterInfo> rr{*proxy, getRouteSelectors(), defaultOpts};
   TestFiberManager<MemcacheRouterInfo> fm;
   fm.runAll({[&]() { rr.route(McDeleteRequest("/*/*/delReq")); }});
   EXPECT_FALSE(getTestHandle(0)->saw_keys.empty());
@@ -240,7 +242,7 @@ TEST_F(RootRouteTest, BroadcastPrefixDeleteRoutesToAll) {
 TEST_F(RootRouteTest, DirectedCrossRegionPrefixDeleteRoutesToOne) {
   mockFiberContext();
   auto proxy = &fiber_local<MemcacheRouterInfo>::getSharedCtx()->proxy();
-  RootRoute<MemcacheRouterInfo> rr{*proxy, getRouteSelectors()};
+  RootRoute<MemcacheRouterInfo> rr{*proxy, getRouteSelectors(), defaultOpts};
   TestFiberManager<MemcacheRouterInfo> fm;
   fm.runAll({[&]() { rr.route(McDeleteRequest("/virginia/c/delReq")); }});
   EXPECT_TRUE(getTestHandle(0)->saw_keys.empty());
@@ -262,8 +264,11 @@ TEST_F(RootRouteTest, NoRoutingPrefixDeleteWithDistributionOnRoutesToDefault) {
   RootRoute<MemcacheRouterInfo> rr{
       *proxy,
       getRouteSelectors(),
-      /*enableDeleteDistribution*/ true,
-      /*enableBroadcastDeleteRpc*/ true};
+      RootRouteRolloutOpts{
+          .enablePolicyMapV2 = true,
+          .enableDeleteDistribution = true,
+          .enableCrossRegionDeleteRpc = true,
+      }};
   auto reply = rr.route(McDeleteRequest("delReq"));
   EXPECT_FALSE(getTestHandle(0)->saw_keys.empty());
   EXPECT_TRUE(getTestHandle(1)->saw_keys.empty());
@@ -284,8 +289,11 @@ TEST_F(RootRouteTest, BroadcastPrefixDeleteWithDistributionOnRoutesToAll) {
   RootRoute<MemcacheRouterInfo> rr{
       *proxy,
       getRouteSelectors(),
-      /*enableDeleteDistribution*/ true,
-      /*enableBroadcastDeleteRpc*/ true};
+      RootRouteRolloutOpts{
+          .enablePolicyMapV2 = true,
+          .enableDeleteDistribution = true,
+          .enableCrossRegionDeleteRpc = true,
+      }};
   TestFiberManager<MemcacheRouterInfo> fm;
   fm.runAll({[&]() { rr.route(McDeleteRequest("/*/*/delReq")); }});
   EXPECT_FALSE(getTestHandle(0)->saw_keys.empty());
@@ -314,8 +322,11 @@ TEST_F(
   RootRoute<MemcacheRouterInfo> rr{
       *proxy,
       getRouteSelectors(),
-      /*enableDeleteDistribution*/ true,
-      /*enableBroadcastDeleteRpc*/ true};
+      RootRouteRolloutOpts{
+          .enablePolicyMapV2 = true,
+          .enableDeleteDistribution = true,
+          .enableCrossRegionDeleteRpc = true,
+      }};
   TestFiberManager<MemcacheRouterInfo> fm;
   fm.runAll({[&]() { rr.route(McDeleteRequest("/virginia/c/delReq")); }});
   EXPECT_FALSE(getTestHandle(0)->saw_keys.empty());
@@ -341,8 +352,11 @@ TEST_F(
   RootRoute<MemcacheRouterInfo> rr{
       *proxy,
       getRouteSelectors(),
-      /*enableDeleteDistribution*/ true,
-      /*enableBroadcastDeleteRpc*/ false};
+      RootRouteRolloutOpts{
+          .enablePolicyMapV2 = true,
+          .enableDeleteDistribution = true,
+          .enableCrossRegionDeleteRpc = false,
+      }};
   TestFiberManager<MemcacheRouterInfo> fm;
   fm.runAll({[&]() { rr.route(McDeleteRequest("/*/*/delReq")); }});
   EXPECT_FALSE(getTestHandle(0)->saw_keys.empty());
@@ -366,8 +380,11 @@ TEST_F(
   RootRoute<MemcacheRouterInfo> rr{
       *proxy,
       getRouteSelectors(),
-      /*enableDeleteDistribution*/ true,
-      /*enableBroadcastDeleteRpc*/ false};
+      RootRouteRolloutOpts{
+          .enablePolicyMapV2 = true,
+          .enableDeleteDistribution = true,
+          .enableCrossRegionDeleteRpc = false,
+      }};
   TestFiberManager<MemcacheRouterInfo> fm;
   fm.runAll({[&]() { rr.route(McDeleteRequest("/virginia/c/delReq")); }});
   EXPECT_FALSE(getTestHandle(0)->saw_keys.empty());

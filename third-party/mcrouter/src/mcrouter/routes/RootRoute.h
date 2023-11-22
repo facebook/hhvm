@@ -26,6 +26,12 @@ namespace facebook {
 namespace memcache {
 namespace mcrouter {
 
+struct RootRouteRolloutOpts {
+  bool enablePolicyMapV2 = false;
+  bool enableDeleteDistribution = false;
+  bool enableCrossRegionDeleteRpc = true;
+};
+
 template <class RouterInfo>
 class RootRoute {
  public:
@@ -37,17 +43,16 @@ class RootRoute {
       ProxyBase& proxy,
       const RouteSelectorMap<typename RouterInfo::RouteHandleIf>&
           routeSelectors,
-      bool enableDeleteDistribution = false,
-      bool enableCrossRegionDeleteRpc = true)
+      RootRouteRolloutOpts rolloutOpts)
       : opts_(proxy.getRouterOptions()),
         rhMap_(
             routeSelectors,
             opts_.default_route,
             opts_.send_invalid_route_to_default,
-            opts_.enable_route_policy_v2),
+            rolloutOpts.enablePolicyMapV2),
         defaultRoute_(opts_.default_route),
-        enableDeleteDistribution_(enableDeleteDistribution),
-        enableCrossRegionDeleteRpc_(enableCrossRegionDeleteRpc) {}
+        enableDeleteDistribution_(rolloutOpts.enableDeleteDistribution),
+        enableCrossRegionDeleteRpc_(rolloutOpts.enableCrossRegionDeleteRpc) {}
 
   template <class Request>
   bool traverse(

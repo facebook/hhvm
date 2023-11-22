@@ -29,11 +29,11 @@ pub type double_8056 = ::fbthrift::builtin_types::OrderedFloat<f64>;
 pub struct MyStruct {
     pub the_map: crate::types::MapType,
     pub the_bin: crate::types::BinType,
-    pub inline_bin: crate::types::binary_8247,
+    pub inline_bin: ::smallvec::SmallVec<[u8; 32]>,
     pub the_bytes: crate::types::BytesType,
-    pub inline_bytes: crate::types::binary_9564,
-    pub floaty: crate::types::Double,
-    pub doublefloaty: crate::types::double_8056,
+    pub inline_bytes: ::fbthrift::builtin_types::Bytes,
+    pub floaty: ::fbthrift::builtin_types::OrderedFloat<f64>,
+    pub doublefloaty: ::fbthrift::builtin_types::OrderedFloat<f64>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation

@@ -170,8 +170,12 @@ FieldKind field_kind(const t_named& node) {
   return FieldKind::Inline;
 }
 
-auto get_type_annotation(const t_type* type) {
+std::string get_type_annotation(const t_type* type) {
   return t_typedef::get_first_annotation(type, {"rust.type"});
+}
+
+bool has_type_annotation(const t_type* type) {
+  return !get_type_annotation(type).empty();
 }
 
 // For example `set<Value> (rust.type = "indexmap::IndexSet")` or `map<string,
@@ -1347,6 +1351,7 @@ class rust_mstch_type : public mstch_type {
             {"type:rust_name_snake", &rust_mstch_type::rust_name_snake},
             {"type:package", &rust_mstch_type::rust_package},
             {"type:rust", &rust_mstch_type::rust_type},
+            {"type:type_annotation?", &rust_mstch_type::rust_type_annotation},
             {"type:nonstandard?", &rust_mstch_type::rust_nonstandard},
             {"type:has_adapter?", &rust_mstch_type::adapter},
         });
@@ -1369,6 +1374,10 @@ class rust_mstch_type : public mstch_type {
       return "fbthrift::builtin_types::" + rust_type;
     }
     return rust_type;
+  }
+  mstch::node rust_type_annotation() {
+    return has_type_annotation(type_) &&
+        !(type_->is_typedef() && type_->has_annotation("rust.newtype"));
   }
   mstch::node rust_nonstandard() {
     return (

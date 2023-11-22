@@ -30,19 +30,41 @@ use fbthrift::Serialize;
 use fbthrift::ThriftEnum;
 use indexmap::IndexMap;
 use indexmap::IndexSet;
-use interface::NonstandardCollectionTypes;
 use interface::TestBytesShared;
 use interface::TestEnum;
 use interface::TestEnumEmpty;
 use interface::TestSkipV1;
 use interface::TestSkipV2;
+use interface::TypedefNondefaultTypes_1;
+use interface::TypedefNondefaultTypes_2;
 use interface::WrapBinary;
 use interface::WrapString;
 use smallvec::SmallVec;
 
 #[test]
-fn test_nonstandard_collection_types() {
-    assert_round_trip(NonstandardCollectionTypes {
+fn test_typedef_nondefault_types_1() {
+    assert_round_trip(TypedefNondefaultTypes_1 {
+        defaultset: make_btreeset(),
+        btreeset: make_btreeset(),
+        hashset: make_hashset(),
+        indexset_a: make_indexset(),
+        indexset_b: make_indexset(),
+        indexset_c: IndexSet::new(),
+        defaultmap: make_btreemap(),
+        btreemap: make_btreemap(),
+        hashmap: make_hashmap(),
+        indexmap_a: make_indexmap(),
+        indexmap_b: make_indexmap(),
+        indexmap_c: IndexMap::new(),
+        bin_smallvec: SmallVec::from(&b"smallvec"[..]),
+        bin_bytes: Bytes::from(&b"bytes"[..]),
+        ..Default::default()
+    });
+}
+
+#[test]
+fn test_typedef_non_default_types_2() {
+    assert_round_trip(TypedefNondefaultTypes_2 {
         defaultset: make_btreeset(),
         btreeset: make_btreeset(),
         hashset: make_hashset(),

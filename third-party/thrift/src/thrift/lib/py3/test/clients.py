@@ -69,9 +69,14 @@ class ClientTests(unittest.TestCase):
         client = TestingService()
         # This should not raise an exception
         with self.assertRaises(asyncio.InvalidStateError):
+            # pyre-fixme[1001]: `client.complex_action($parameter$first = "foo",
+            #  $parameter$second = "bar", $parameter$third = 9, $parameter$fourth =
+            #  "baz")` is never awaited.
             client.complex_action(first="foo", second="bar", third=9, fourth="baz")
 
         with self.assertRaises(asyncio.InvalidStateError):
+            # pyre-fixme[1001]: `client.complex_action("foo", "bar", 9, "baz")` is
+            #  never awaited.
             client.complex_action("foo", "bar", 9, "baz")
 
     def test_none_arguments(self) -> None:
@@ -79,26 +84,33 @@ class ClientTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             # missing argument
             # pyre-fixme[20]: Argument `what` expected.
+            # pyre-fixme[1001]: `client.take_it_easy(9)` is never awaited.
             client.take_it_easy(9)
         with self.assertRaises(TypeError):
             # Should be an easy type
             # pyre-fixme[6]: Expected `easy` for 2nd param but got `None`.
+            # pyre-fixme[1001]: `client.take_it_easy(9, None)` is never awaited.
             client.take_it_easy(9, None)
         with self.assertRaises(TypeError):
             # Should not be None
             # pyre-fixme[6]: Expected `Sequence[int]` for 1st param but got `None`.
+            # pyre-fixme[1001]: `client.takes_a_list(None)` is never awaited.
             client.takes_a_list(None)
         with self.assertRaises(TypeError):
             # Should be a bool
             # pyre-fixme[6]: Expected `bool` for 1st param but got `None`.
+            # pyre-fixme[1001]: `client.invert(None)` is never awaited.
             client.invert(None)
         with self.assertRaises(TypeError):
             # None is not a Color
             # pyre-fixme[6]: Expected `Color` for 1st param but got `None`.
+            # pyre-fixme[1001]: `client.pick_a_color(None)` is never awaited.
             client.pick_a_color(None)
         with self.assertRaises(TypeError):
             # None is not an int
             # pyre-fixme[6]: Expected `int` for 1st param but got `None`.
+            # pyre-fixme[1001]: `client.take_it_easy(None, testing.types.easy())` is
+            #  never awaited.
             client.take_it_easy(None, easy())
 
     def test_bad_unix_domain_socket_raises_TransportError_on_connection(self) -> None:
@@ -151,9 +163,12 @@ class ClientTests(unittest.TestCase):
         client = TestingService()
 
         with self.assertRaises(asyncio.InvalidStateError):
+            # pyre-fixme[1001]: `client.takes_a_list([1, 2, 3])` is never awaited.
             client.takes_a_list([1, 2, 3])
 
         with self.assertRaises(asyncio.InvalidStateError):
+            # pyre-fixme[1001]: `client.takes_a_list(testing.types.I32List([1, 2,
+            #  3]))` is never awaited.
             client.takes_a_list(I32List([1, 2, 3]))
 
         loop = asyncio.get_event_loop()
@@ -170,6 +185,8 @@ class ClientTests(unittest.TestCase):
         client = TestingService()
         with self.assertRaises(TypeError):
             # pyre-fixme[6]: Expected `str` for 1st param but got `bytes`.
+            # pyre-fixme[1001]: `client.complex_action(b"foo", "bar", "nine",
+            #  $parameter$fourth = "baz")` is never awaited.
             client.complex_action(b"foo", "bar", "nine", fourth="baz")
 
     def test_rpc_enum_args(self) -> None:

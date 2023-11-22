@@ -444,13 +444,6 @@ void __fbthrift_check_whether_type_is_ident_via_adl(T&&);
 
 namespace apache::thrift::detail::annotation {
 
-template <class Struct, class Ident>
-struct field_annotation_types {
-  // @lint-ignore CLANGTIDY bugprone-sizeof-expression
-  static_assert(sizeof(Struct) >= 0, "Struct must be a complete type");
-  using type = folly::tag_t<void>;
-};
-
 inline const std::vector<std::any>& empty_annotations() {
   static const folly::Indestructible<std::vector<std::any>> ret;
   return *ret;
@@ -463,52 +456,33 @@ const std::vector<std::any>& field_annotation_values(FieldId) {
   return empty_annotations();
 }
 
-// Whether the list contains certain value
-template <class T, class U>
-inline constexpr std::enable_if_t<sizeof(T) < 0>
-    contains; // @lint-ignore CLANGTIDY bugprone-sizeof-expression
-
-template <class... Args, class T>
-inline constexpr bool contains<folly::tag_t<void, Args...>, T> =
-    (std::is_same_v<Args, T> || ...);
-
 template <class T>
 inline constexpr bool is_runtime_annotation =
     decltype(detail::st::struct_private_access::
                  __fbthrift_cpp2_is_runtime_annotation<T>())::value;
-
-template <class Annotation, class Struct, class Ident>
-inline constexpr bool has_field_annotation_impl =
-    contains<typename field_annotation_types<Struct, Ident>::type, Annotation>;
 } // namespace apache::thrift::detail::annotation
 
 namespace apache::thrift {
 
 template <class Annotation, class Struct, class Ident>
-bool has_field_annotation() {
-  using detail::annotation::has_field_annotation_impl;
-  using detail::annotation::is_runtime_annotation;
-  static_assert(is_runtime_annotation<Annotation>);
-  return has_field_annotation_impl<Annotation, Struct, Ident>;
-}
-
-template <class Annotation, class Struct, class Ident>
-const Annotation& get_field_annotation() {
+const Annotation* get_field_annotation() {
   using detail::annotation::field_annotation_values;
-  using detail::annotation::has_field_annotation_impl;
   using detail::annotation::is_runtime_annotation;
-  static_assert(is_runtime_annotation<Annotation>);
-  static_assert(has_field_annotation_impl<Annotation, Struct, Ident>);
+  static_assert(
+      is_runtime_annotation<Annotation>,
+      "Annotation is not annotated with @cpp.RuntimeAnnotation.");
+  static_assert(
+      op::get_ordinal<Struct, Ident>::value != static_cast<FieldOrdinal>(0),
+      "Ident not found in Struct.");
 
-  static const Annotation& ret = [] {
-    // TODO(ytj): get the index from the tag
+  static const Annotation* ret = []() -> const Annotation* {
     for (const std::any& v : field_annotation_values<Struct>(
              op::get_field_id<Struct, Ident>::value)) {
-      if (auto p = std::any_cast<Annotation>(&v)) {
-        return *p;
+      if (auto* p = std::any_cast<Annotation>(&v)) {
+        return p;
       }
     }
-    folly::assume_unreachable();
+    return nullptr;
   }();
 
   return ret;

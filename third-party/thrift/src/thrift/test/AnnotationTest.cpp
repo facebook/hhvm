@@ -30,11 +30,17 @@ TEST(AnnotationTest, GetAnnotationValue) {
   using namespace cpp2;
   Oncall expected;
   expected.name() = "thrift";
-  EXPECT_EQ((get_field_annotation<Oncall, MyStruct, ident::field>()), expected);
+
+  // Checking whether a field has a given annotation. If so, use it.
+  if (auto* oncall = get_field_annotation<Oncall, MyStruct, ident::field>()) {
+    EXPECT_EQ(*oncall, expected);
+  } else {
+    ADD_FAILURE();
+  }
 
   // `Sensitive` annotation exists on MyStruct.field
-  EXPECT_TRUE((has_field_annotation<Sensitive, MyStruct, ident::field>()));
+  EXPECT_TRUE((get_field_annotation<Sensitive, MyStruct, ident::field>()));
 
   // `Doc` annotation does not exist on MyStruct.field
-  EXPECT_FALSE((has_field_annotation<Doc, MyStruct, ident::field>()));
+  EXPECT_FALSE((get_field_annotation<Doc, MyStruct, ident::field>()));
 }

@@ -169,10 +169,6 @@ class MyUnion;
 namespace apache::thrift::detail::annotation {
 template<>
 const std::vector<std::any>& field_annotation_values<::test::fixtures::basic-structured-annotations::MyStruct>(FieldId);
-template<>
-struct field_annotation_types<::test::fixtures::basic-structured-annotations::MyStruct, ident::annotated_field> {
-  using type = folly::tag_t<void, ::test::fixtures::basic-structured-annotations::runtime_annotation>;
-};
 } // namespace apache::thrift::detail::annotation
 
 // BEGIN hash_and_equal_to

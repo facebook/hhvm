@@ -301,7 +301,7 @@ const ::apache::thrift::detail::TypeInfo TypeToInfo<
 }}} // namespace apache::thrift::detail
 <%/program:tablebased?%>
 namespace apache::thrift::detail::annotation {
-<%#program:structs%>
+<%#program:split_structs%>
 <%#struct:has_field_with_runtime_annotation?%>
 template<> const std::vector<std::any>& field_annotation_values<<%struct:cpp_fullname%>>(FieldId id) {
   switch (id) {
@@ -328,5 +328,5 @@ template<> const std::vector<std::any>& field_annotation_values<<%struct:cpp_ful
   folly::assume_unreachable();
 }
 <%/struct:has_field_with_runtime_annotation?%>
-<%/program:structs%>
+<%/program:split_structs%>
 }

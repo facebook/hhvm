@@ -141,6 +141,13 @@ class AeadTicketCipherTest : public Test {
       policy_.setHandshakeValidity(*handshakeValidity);
     }
   }
+
+  static ResumptionState makeState(
+      std::chrono::system_clock::time_point handshakeTime) {
+    ResumptionState state;
+    state.handshakeTime = handshakeTime;
+    return state;
+  }
 };
 
 TEST_F(AeadTicketCipherTest, TestEncryptNoTicketSecrets) {
@@ -178,9 +185,7 @@ TEST_F(AeadTicketCipherTest, TestHandshakeExpiration) {
         res.handshakeTime = time;
         return res;
       }));
-  ResumptionState state;
-  state.handshakeTime = time;
-  auto result = cipher_.encrypt(std::move(state)).get();
+  auto result = cipher_.encrypt(makeState(time)).get();
   EXPECT_TRUE(result.has_value());
   EXPECT_TRUE(IOBufEqualTo()(result->first, toIOBuf(ticket1)));
   EXPECT_EQ(result->second, std::chrono::seconds(2));
@@ -209,9 +214,7 @@ TEST_F(AeadTicketCipherTest, TestTicketLifetime) {
 
   // At handshake time, expect ticket validity.
   EXPECT_CALL(*clock_, getCurrentTime()).WillOnce(Return(time));
-  ResumptionState state;
-  state.handshakeTime = time;
-  auto result = cipher_.encrypt(std::move(state)).get();
+  auto result = cipher_.encrypt(makeState(time)).get();
   EXPECT_TRUE(result.has_value());
   EXPECT_TRUE(IOBufEqualTo()(result->first, toIOBuf(ticket1)));
   EXPECT_EQ(result->second, std::chrono::seconds(2));
@@ -219,7 +222,7 @@ TEST_F(AeadTicketCipherTest, TestTicketLifetime) {
   // At 3 seconds in, expect 1 second (remaining handshake validity)
   EXPECT_CALL(*clock_, getCurrentTime())
       .WillOnce(Return(time + std::chrono::seconds(3)));
-  auto result2 = cipher_.encrypt(std::move(state)).get();
+  auto result2 = cipher_.encrypt(makeState(time)).get();
   EXPECT_TRUE(result2.has_value());
   EXPECT_TRUE(IOBufEqualTo()(result2->first, toIOBuf(ticket1)));
   EXPECT_EQ(result2->second, std::chrono::seconds(1));
@@ -227,7 +230,7 @@ TEST_F(AeadTicketCipherTest, TestTicketLifetime) {
   // 5 seconds in, no longer valid. Expect none.
   EXPECT_CALL(*clock_, getCurrentTime())
       .WillOnce(Return(time + std::chrono::seconds(5)));
-  auto result3 = cipher_.encrypt(std::move(state)).get();
+  auto result3 = cipher_.encrypt(makeState(time)).get();
   EXPECT_FALSE(result3.has_value());
 }
 
@@ -238,9 +241,8 @@ TEST_F(AeadTicketCipherTest, TestEncryptExpiredHandshakeTicket) {
   auto time = std::chrono::system_clock::now();
   EXPECT_CALL(*clock_, getCurrentTime()).WillOnce(Return(time));
 
-  ResumptionState state;
-  state.handshakeTime = time - std::chrono::seconds(5);
-  auto result = cipher_.encrypt(std::move(state)).get();
+  auto result =
+      cipher_.encrypt(makeState(time - std::chrono::seconds(5))).get();
   EXPECT_FALSE(result.has_value());
 }
 
@@ -254,11 +256,10 @@ TEST_F(AeadTicketCipherTest, TestEncryptTicketFromFuture) {
   EXPECT_CALL(codec_, _encode(_)).WillOnce(InvokeWithoutArgs([]() {
     return IOBuf::copyBuffer("encodedticket");
   }));
-  ResumptionState state;
   // Ticket was created in the future. Validity period should be equal
   // to maximum (as we can't be sure how old it really is)
-  state.handshakeTime = time + std::chrono::seconds(5);
-  auto result = cipher_.encrypt(std::move(state)).get();
+  auto result =
+      cipher_.encrypt(makeState(time + std::chrono::seconds(5))).get();
   EXPECT_TRUE(result.has_value());
   EXPECT_TRUE(IOBufEqualTo()(result->first, toIOBuf(ticket1)));
   EXPECT_EQ(result->second, std::chrono::seconds(2));

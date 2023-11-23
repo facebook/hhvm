@@ -6,10 +6,6 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-(* TODO(T170647909): In preparation to upgrading to ppx_yojson_conv.v0.16.X.
-         Remove the suppress warning when the upgrade is done. *)
-[@@@warning "-66"]
-
 include WrappedMap.Make (IntKey)
 
 let pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit =

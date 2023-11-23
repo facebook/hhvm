@@ -18,11 +18,11 @@ module ASet = ApproxSet.Make (struct
     let open ApproxSet.Set_relation in
     if Char.Set.equal set1 set2 then
       Equal
-    else if Char.Set.is_subset set1 ~of_:set2 then
+    else if Set.is_subset set1 ~of_:set2 then
       Subset
-    else if Char.Set.is_subset set2 ~of_:set1 then
+    else if Set.is_subset set2 ~of_:set1 then
       Superset
-    else if Char.Set.are_disjoint set1 set2 then
+    else if Set.are_disjoint set1 set2 then
       Disjoint
     else
       Unknown
@@ -99,9 +99,9 @@ let test_complex _ =
   let set = (abc ||| def) --- (ab &&& de) --- (bc ||| ab --- def) in
   let result = is_sat @@ ASet.disjoint () a set in
 
-  let ( ||| ) set1 set2 = Char.Set.union set1 set2 in
-  let ( &&& ) set1 set2 = Char.Set.inter set1 set2 in
-  let ( --- ) set1 set2 = Char.Set.diff set1 set2 in
+  let ( ||| ) set1 set2 = Set.union set1 set2 in
+  let ( &&& ) set1 set2 = Set.inter set1 set2 in
+  let ( --- ) set1 set2 = Set.diff set1 set2 in
   let abc = Char.Set.of_list ['a'; 'b'; 'c'] in
   let def = Char.Set.of_list ['d'; 'e'; 'f'] in
   let ab = Char.Set.of_list ['a'; 'b'] in
@@ -110,7 +110,7 @@ let test_complex _ =
   let a = Char.Set.singleton 'a' in
 
   let set = (abc ||| def) --- (ab &&& de) --- (bc ||| ab --- def) in
-  let expected = Char.Set.are_disjoint a set in
+  let expected = Set.are_disjoint a set in
 
   assert_equal
     ~msg:"Expect same result as performing same operation on a Char.Set"

@@ -77,7 +77,7 @@ let get_recording_path harness =
         ( Path.make (Str.matched_group 1 logs),
           Path.make (Str.matched_group 2 logs) )
     with
-    | Caml.Not_found ->
+    | Stdlib.Not_found ->
       Printf.eprintf "recorder path or lock file not found\n%!";
       Printf.eprintf "See also server logs: %s\n%!" logs;
       None)

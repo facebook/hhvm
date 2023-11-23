@@ -53,12 +53,12 @@ let interrupt_handler fd acc =
   (try
      while true do
        let (ready, _, _) = Unix.select [fd] [] [] 0.0 in
-       if List.is_empty ready then raise Caml.Not_found;
+       if List.is_empty ready then raise Stdlib.Not_found;
        let read = Unix.read fd exclamation_mark 0 1 in
        assert (read = 1 && String.equal (Bytes.to_string exclamation_mark) "!")
      done
    with
-  | Caml.Not_found -> ());
+  | Stdlib.Not_found -> ());
   ( acc,
     MultiThreadedCall.Cancel
       {

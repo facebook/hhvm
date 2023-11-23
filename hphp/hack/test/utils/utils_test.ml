@@ -77,7 +77,7 @@ let assert_throws : 'a 'b. ('b -> 'a) -> 'b -> string -> string -> unit =
       let _ = f arg in
       "[no exception]"
     with
-    | e -> Caml.Printexc.to_string e
+    | e -> Stdlib.Printexc.to_string e
   in
   if not (String.is_substring ~substring:exp e) then begin
     Printf.eprintf "%s.\nExpected it to throw '%s' but got '%s'\n" message exp e;

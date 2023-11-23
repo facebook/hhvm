@@ -6,7 +6,7 @@
  *
  *)
 (* TODO: investigate this warning 40 and how to fix it correctly *)
-[@@@warning "-66-40"]
+[@@@warning "-40"]
 
 open Core
 

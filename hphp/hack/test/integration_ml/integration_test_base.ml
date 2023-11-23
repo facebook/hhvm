@@ -175,7 +175,7 @@ let prepend_root x = root ^ x
 
 let fail x =
   print_endline x;
-  Caml.Printexc.(get_callstack 100 |> print_raw_backtrace stderr);
+  Stdlib.Printexc.(get_callstack 100 |> print_raw_backtrace stderr);
   raise Integration_test_failure
 
 (******************************************************************************(

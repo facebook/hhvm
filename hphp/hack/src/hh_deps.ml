@@ -24,12 +24,12 @@ let children_files (file_list : String.t list) =
       if Path.is_directory (Path.make child) then
         children_files_inner acc child (Sys.readdir child |> Array.to_list)
       else
-        StringSet.add acc child
+        Set.add acc child
     in
     List.fold file_list ~init:acc ~f:on_child
   in
   let file_set = children_files_inner StringSet.empty "" file_list in
-  StringSet.to_list file_set
+  Set.to_list file_set
 
 let json_array_of_json_strings (l_in : String.t list) =
   let add_json_string acc s = Hh_json.JSON_String s :: acc in

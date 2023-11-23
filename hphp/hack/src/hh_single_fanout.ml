@@ -17,7 +17,7 @@ module Symbol = struct
 end
 
 module SymbolMap = WrappedMap.Make (Symbol)
-module SymbolSet = Caml.Set.Make (Symbol)
+module SymbolSet = Stdlib.Set.Make (Symbol)
 
 (** A bidirectional map between file paths and symbol names *)
 type naming_table = Naming_table.t * Relative_path.t SymbolMap.t

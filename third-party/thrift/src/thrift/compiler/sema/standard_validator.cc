@@ -50,9 +50,6 @@ namespace thrift {
 namespace compiler {
 
 namespace {
-constexpr auto kCppUnstructuredAdapter = "cpp.adapter";
-constexpr auto kHackUnstructuredAdapter = "hack.adapter";
-
 const t_structured* get_mixin_type(const t_field& field) {
   if (cpp2::is_mixin(field)) {
     return dynamic_cast<const t_structured*>(field.type()->get_true_type());
@@ -129,8 +126,6 @@ class redef_checker {
       }
     }
   }
-  void check(std::string&&, const t_named&, const t_node&) = delete;
-  void check(std::string_view, t_named&&, const t_node&) = delete;
 
   // Helpers for the common case where the names are from child t_nameds of
   // the parent.
@@ -142,7 +137,6 @@ class redef_checker {
           diags_, kind_, child.name(), parent_, child, *existing);
     }
   }
-  void check(t_named&& child) = delete;
 
   template <typename Cs>
   void check_all(const Cs& children) {
@@ -196,17 +190,10 @@ class adapter_or_wrapper_checker {
     }
   }
 
-  void check(
-      const t_named&& node,
-      const char* structured_adapter_annotation,
-      const char* structured_adapter_annotation_error_name) = delete;
-
   // Do not allow composing structured annotation on field/typedef
-  // and unstructured annotation on typedef/type
   void check(
       const t_field& field,
       const char* structured_adapter_annotation,
-      const char* unstructured_adapter_annotation,
       const char* structured_adapter_annotation_error_name,
       bool disallow_structured_annotations_on_both_field_and_typedef) {
     if (!field.type().resolved()) {
@@ -228,25 +215,7 @@ class adapter_or_wrapper_checker {
           structured_adapter_annotation_error_name,
           field.name());
     }
-
-    if (structured_annotation_on_typedef || structured_annotation_on_field) {
-      if (t_typedef::get_first_annotation_or_null(
-              type, {unstructured_adapter_annotation})) {
-        ctx_.error(
-            "`{}` cannot be combined with `{}` in `{}`.",
-            structured_adapter_annotation_error_name,
-            unstructured_adapter_annotation,
-            field.name());
-      }
-    }
   }
-
-  void check(
-      const t_field&& field,
-      const char* structured_adapter_annotation,
-      const char* unstructured_adapter_annotation,
-      const char* structured_adapter_annotation_error_name,
-      bool disallow_structured_annotations_on_both_field_and_typedef) = delete;
 
   // If a type is wrapped itself or is a container of wrapped types, then it
   // cannot be adapted
@@ -308,12 +277,6 @@ class adapter_or_wrapper_checker {
           typedef_name);
     }
   }
-
-  void check(
-      const t_named&& node,
-      const char* structured_adapter_annotation,
-      const char* unstructured_adapter_annotation,
-      const char* structured_adapter_annotation_error_name) = delete;
 
  private:
   diagnostic_context& ctx_;
@@ -866,7 +829,6 @@ void validate_cpp_field_adapter_annotation(
   adapter_or_wrapper_checker(ctx).check(
       field,
       kCppAdapterUri,
-      kCppUnstructuredAdapter,
       "@cpp.Adapter",
       false /* disallow_structured_annotations_on_both_field_and_typedef */);
 }
@@ -876,7 +838,6 @@ void validate_hack_field_adapter_annotation(
   adapter_or_wrapper_checker(ctx).check(
       field,
       kHackAdapterUri,
-      kHackUnstructuredAdapter,
       "@hack.Adapter",
       true /* disallow_structured_annotations_on_both_field_and_typedef */);
 }
@@ -885,7 +846,6 @@ void validate_java_field_adapter_annotation(
     diagnostic_context& ctx, const t_field& field) {
   adapter_or_wrapper_checker(ctx).check(
       field,
-      kJavaAdapterUri,
       kJavaAdapterUri,
       "@java.Adapter",
       false /* disallow_structured_annotations_on_both_field_and_typedef */);

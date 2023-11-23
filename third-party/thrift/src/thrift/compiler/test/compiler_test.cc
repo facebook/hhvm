@@ -812,14 +812,7 @@ TEST(CompilerTest, unstructured_and_structured_adapter) {
     include "thrift/annotation/cpp.thrift"
     include "thrift/annotation/hack.thrift"
 
-    typedef i64 MyI64 (cpp.adapter="MyAdapter", hack.adapter="MyAdapter")
-
     struct MyStruct {
-        @cpp.Adapter{name="MyAdapter"}
-        # expected-error@-1: `@cpp.Adapter` cannot be combined with `cpp.adapter` in `my_field`.
-        # expected-error@-2: `@hack.Adapter` cannot be combined with `hack.adapter` in `my_field`.
-        @hack.Adapter{name="MyAdapter"}
-        1: MyI64 my_field;
         @cpp.Adapter{} # expected-error: key `name` not found.
         @hack.Adapter{name="MyAdapter"}
         2: i64 my_field2;
@@ -860,14 +853,6 @@ TEST(CompilerTest, typedef_adapter) {
       # expected-error@-2: The `@hack.Adapter` annotation cannot be annotated more than once in all typedef levels in `DoubleMyI64`.
     @hack.Adapter{name="MyAdapter"}
     typedef MyI64 DoubleMyI64
-
-    struct MyStruct {
-        1: MyI64 my_field;
-        2: MyI64 (cpp.adapter="MyAdapter", hack.adapter="MyAdapter") my_field1;
-          # expected-error@-1: `@cpp.Adapter` cannot be combined with `cpp.adapter` in `my_field1`.
-          # expected-error@-2: `@hack.Adapter` cannot be combined with `hack.adapter` in `my_field1`.
-        3: MyI64 my_field2 (cpp.adapter="MyAdapter", hack.adapter="MyAdapter");
-    }
 
     @cpp.Adapter{name="MyAdapter"}
     struct Adapted {}

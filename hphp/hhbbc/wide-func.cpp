@@ -422,7 +422,7 @@ BlockVec decodeBlockVec(const Buffer& buffer, size_t& pos) {
       decode<ExnNodeId>(buffer, pos) + NoExnNodeId,
       decode<BlockId>(buffer, pos) + NoBlockId,
       decode<BlockId>(buffer, pos) + NoBlockId,
-      decode<uint8_t>(buffer, pos)
+      {decode<uint8_t>(buffer, pos)}
     };
     block.emplace(std::move(tmp));
   }

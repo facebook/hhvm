@@ -31,8 +31,8 @@ namespace HPHP {
 
 // Code should not use the values of these TypedValues, so we set them to
 // unusual values that may (and, indeed, have) caught logic errors.
-const TypedValue immutable_null_base{0xdeadbeef, KindOfNull};
-const TypedValue immutable_uninit_base{0xfacade, KindOfUninit};
+const TypedValue immutable_null_base{{0xdeadbeef}, KindOfNull};
+const TypedValue immutable_uninit_base{{0xfacade}, KindOfUninit};
 
 std::string TypedValue::pretty() const {
   char buf[20];

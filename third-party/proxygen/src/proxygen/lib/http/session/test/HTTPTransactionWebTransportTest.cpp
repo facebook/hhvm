@@ -47,6 +47,14 @@ class HTTPTransactionWebTransportTest : public testing::Test {
     req.setURL("/webtransport");
     req.getHeaders().set(HTTP_HEADER_HOST, "www.facebook.com");
     txn_->sendHeaders(req);
+    auto resp = std::make_unique<HTTPMessage>();
+    resp->setHTTPVersion(1, 1);
+    resp->setStatusCode(200);
+    if (withHandler) {
+      handler_.expectHeaders();
+    }
+    txn_->onIngressHeadersComplete(std::move(resp));
+
     wt_ = txn_->getWebTransport();
     EXPECT_NE(wt_, nullptr);
   }
@@ -89,10 +97,12 @@ class HTTPTransactionWebTransportTest : public testing::Test {
                                              HTTPCodec::StreamID(1),
                                              0,
                                              transport_,
-                                             txnEgressQueue_);
+                                             txnEgressQueue_,
+                                             &evb_.timer());
     return *txn_;
   }
   WebTransport* wt_{nullptr};
+  folly::EventBase evb_;
 };
 
 TEST_F(HTTPTransactionWebTransportTest, CreateStreams) {
@@ -436,6 +446,33 @@ TEST_F(HTTPTransactionWebTransportTest, SendDatagram) {
       .WillOnce(Return(1200));
   EXPECT_CALL(transport_, sendDatagram(_)).WillOnce(Return(true));
   EXPECT_TRUE(wt_->sendDatagram(makeBuf(100)));
+}
+
+TEST_F(HTTPTransactionWebTransportTest, RefreshTimeout) {
+  txn_->setIdleTimeout(std::chrono::milliseconds(100));
+  evb_.runAfterDelay(
+      [this] {
+        WebTransport::StreamReadHandle* readHandle{nullptr};
+        EXPECT_CALL(handler_, onWebTransportUniStream(_, _))
+            .WillOnce(SaveArg<1>(&readHandle));
+
+        txn_->onWebTransportUniStream(0);
+        EXPECT_NE(readHandle, nullptr);
+      },
+      50);
+  evb_.runAfterDelay(
+      [this] {
+        EXPECT_CALL(transport_,
+                    stopReadingWebTransportIngress(
+                        0, std::numeric_limits<uint32_t>::max()))
+            .WillOnce(Return(folly::unit));
+        handler_.expectEOM();
+        txn_->onIngressEOM();
+        EXPECT_CALL(transport_, sendEOM(txn_.get(), nullptr));
+        wt_->closeSession();
+      },
+      150);
+  evb_.loop();
 }
 
 } // namespace proxygen::test

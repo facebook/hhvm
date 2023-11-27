@@ -1499,6 +1499,7 @@ folly::Expected<HTTPTransaction::Transport::FCState, WebTransport::ErrorCode>
 HTTPTransaction::sendWebTransportStreamData(HTTPCodec::StreamID id,
                                             std::unique_ptr<folly::IOBuf> data,
                                             bool eof) {
+  refreshTimeout();
   auto res = transport_.sendWebTransportStreamData(id, std::move(data), eof);
   if (eof || res.hasError()) {
     wtEgressStreams_.erase(id);
@@ -1903,6 +1904,7 @@ void HTTPTransaction::onWebTransportBidiStream(HTTPCodec::StreamID id) {
     transport_.stopReadingWebTransportIngress(id, WebTransport::kInternalError);
     return;
   }
+  refreshTimeout();
   auto ingRes = wtIngressStreams_.emplace(std::piecewise_construct,
                                           std::forward_as_tuple(id),
                                           std::forward_as_tuple(*this, id));
@@ -1922,6 +1924,7 @@ void HTTPTransaction::onWebTransportUniStream(HTTPCodec::StreamID id) {
     transport_.stopReadingWebTransportIngress(id, WebTransport::kInternalError);
     return;
   }
+  refreshTimeout();
   auto ingRes = wtIngressStreams_.emplace(std::piecewise_construct,
                                           std::forward_as_tuple(id),
                                           std::forward_as_tuple(*this, id));
@@ -2005,6 +2008,7 @@ void HTTPTransaction::TxnStreamReadHandle::error(uint32_t error) {
 
 void HTTPTransaction::onWebTransportStreamIngress(
     HTTPCodec::StreamID id, std::unique_ptr<folly::IOBuf> data, bool eof) {
+  refreshTimeout();
   auto ingressStreamIt = wtIngressStreams_.find(id);
   CHECK(ingressStreamIt != wtIngressStreams_.end());
   auto fcState = ingressStreamIt->second.dataAvailable(std::move(data), eof);

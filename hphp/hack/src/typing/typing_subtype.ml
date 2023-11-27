@@ -553,7 +553,6 @@ let add_obj_get_quickfixes
       match obj_pos_opt with
       | Some obj_pos ->
         let (obj_pos_start_line, _) = Pos.line_column obj_pos in
-        (* let (obj_pos_end_line, obj_pos_end_column) = Pos.end_line_column obj_pos in *)
         let (rhs_pos_start_line, rhs_pos_start_column) = Pos.line_column pos in
         (*
         heuristic: if the lhs and rhs of the Objget are on the same line, then we assume they are

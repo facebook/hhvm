@@ -103,7 +103,6 @@ let test_ok () =
   let (upward_fd_1, downward_fd_1) =
     Unix.socketpair Unix.PF_UNIX Unix.SOCK_STREAM 0
   in
-  (*let upward_fd_1, downward_fd_1 = Unix.pipe () in*)
   let child_1_pid = Unix.fork () in
   if child_1_pid = -1 then (
     Printf.eprintf "Owner: Error forking child 1. Exiting with code 1\n";

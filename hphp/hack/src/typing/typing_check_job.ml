@@ -100,7 +100,6 @@ let calc_errors_and_tast ctx ?(drop_fixmed = true) fn ~full_ast :
       (type def res)
       (typecheck : Provider_context.t -> full_ast:def -> res option)
       (defs : (FileInfo.id * def) list) : res SMap.t =
-    (* List.map defs ~f:snd |> List.filter_map ~f:(fun full_ast -> f ctx ~full_ast) *)
     List.fold defs ~init:SMap.empty ~f:(fun acc (id, full_ast) ->
         typecheck ctx ~full_ast
         |> Option.fold ~init:acc ~f:(fun acc tast ->

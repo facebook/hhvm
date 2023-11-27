@@ -1,8 +1,0 @@
-<?hh
-
-function recursive_function(int $n): int {
-  if ($n <= 0) {
-    return 0;
-  }
-  return $n + recursive_function($n - 1);
-}

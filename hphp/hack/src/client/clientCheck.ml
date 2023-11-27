@@ -362,20 +362,6 @@ let main_internal
         Lwt.return (Exit_status.No_error, Telemetry.create ())
       | Error _msg -> raise Exit_status.(Exit_with Input_error)
     end
-  | MODE_EXTRACT_STANDALONE name ->
-    let open ServerCommandTypes.Extract_standalone in
-    let target =
-      parse_name_or_member_id
-        ~name_and_member_action:(fun class_name method_name ->
-          Method (class_name, method_name))
-        ~name_only_action:(fun fun_name -> Function fun_name)
-        name
-    in
-    let%lwt (pretty_printed_dependencies, telemetry) =
-      rpc args @@ Rpc.EXTRACT_STANDALONE target
-    in
-    print_endline pretty_printed_dependencies;
-    Lwt.return (Exit_status.No_error, telemetry)
   | MODE_IDENTIFY_SYMBOL arg ->
     if not args.output_json then begin
       Printf.eprintf "Must use --json\n%!";

@@ -1,9 +1,0 @@
-<?hh
-
-class WithTypeConstant {
-  const type T = string;
-}
-
-class WithTypeConstantParamConstraint<T as \WithTypeConstant::T> {
-  public function foo(): void {}
-}

@@ -295,13 +295,6 @@ module Go_to_type_definition = struct
   type result = (Pos.absolute * string) list
 end
 
-module Extract_standalone = struct
-  type target =
-    | Function of string
-    | Method of string * string
-  [@@deriving show]
-end
-
 module Tast_hole = struct
   type filter =
     | Typing
@@ -408,7 +401,6 @@ type _ t =
   | LIST_FILES_WITH_ERRORS : string list t
   | FILE_DEPENDENTS : string list -> string list t
   | IDENTIFY_TYPES : labelled_file * int * int -> (Pos.absolute * string) list t
-  | EXTRACT_STANDALONE : Extract_standalone.target -> string t
   | VERBOSE : bool -> unit t
   | DEPS_OUT_BATCH : (string * int * int) list -> string list t
   | DEPS_IN_BATCH :

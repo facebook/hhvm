@@ -380,9 +380,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       ServerTypeDefinition.go_quarantined ~ctx ~entry ~line ~column
     in
     (env, result)
-  | EXTRACT_STANDALONE target ->
-    let ctx = Provider_utils.ctx_from_server_env env in
-    (env, ServerExtractStandalone.go ctx target)
   | VERBOSE verbose ->
     if verbose then
       Hh_logger.Level.set_min_level Hh_logger.Level.Debug

@@ -1,9 +1,0 @@
-<?hh
-
-function generic_with_bound<T as arraykey>(T $x): \HH\keyset<T> {
-  throw new \Exception();
-}
-
-function with_generics_with_bounds(int $x): keyset<int> {
-  return generic_with_bound($x);
-}

@@ -1,9 +1,0 @@
-<?hh
-
-class SimpleClass {
-  public function coarse_grained_dependency(): void {
-    throw new \Exception();
-  }
-
-  public function simple_method(): void {}
-}

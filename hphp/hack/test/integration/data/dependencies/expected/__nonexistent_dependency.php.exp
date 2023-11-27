@@ -1,3 +1,0 @@
-<?hh
-
-function nonexistent_dependency(BogusType $arg): void {}

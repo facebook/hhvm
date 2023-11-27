@@ -1,9 +1,0 @@
-<?hh
-
-class ImplementsBuiltin implements \StringishObject {
-  public function __toString(): string {
-    throw new \Exception();
-  }
-}
-
-function does_not_use_class_methods(ImplementsBuiltin $arg): void {}

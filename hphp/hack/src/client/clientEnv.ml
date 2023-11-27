@@ -17,7 +17,6 @@ type client_mode =
   | MODE_XHP_AUTOCOMPLETE_SNIPPET of string
   | MODE_CST_SEARCH of string list option
   | MODE_DUMP_SYMBOL_INFO of string
-  | MODE_EXTRACT_STANDALONE of string
   | MODE_FIND_CLASS_REFS of string
   | MODE_FIND_REFS of string
   | MODE_FORMAT of int * int

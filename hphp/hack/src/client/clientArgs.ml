@@ -293,10 +293,6 @@ let parse_check_args cmd ~from_default =
             | _ -> print_string "Warning: unrecognized error format.\n"),
         "<raw|context|highlighted|plain> Error formatting style; (default: highlighted)"
       );
-      ( "--extract-standalone",
-        Arg.String (fun name -> set_mode (MODE_EXTRACT_STANDALONE name)),
-        " extract a given function / method together with its dependencies as a standalone file. Usage: --extract-standalone Classname::methodName or function_name"
-      );
       ( "--file-dependents",
         Arg.Unit
           (fun () ->

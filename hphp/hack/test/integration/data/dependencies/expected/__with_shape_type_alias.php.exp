@@ -1,9 +1,0 @@
-<?hh
-
-class WithConst {
-  const string CSTRING = "";
-}
-
-type SomeShape = shape(\WithConst::CSTRING => mixed);
-
-function with_shape_type_alias(SomeShape $_): void {}

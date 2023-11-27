@@ -25,6 +25,7 @@ namespace StaticService {
  */
 
 void StaticHandler::onRequest(std::unique_ptr<HTTPMessage> headers) noexcept {
+  error_ = false;
   if (headers->getMethod() != HTTPMethod::GET) {
     ResponseBuilder(downstream_)
         .status(400, "Bad method")
@@ -76,13 +77,18 @@ void StaticHandler::readFile(folly::EventBase* evb) {
       // done
       file_.reset();
       VLOG(4) << "Read EOF";
-      evb->runInEventBaseThread(
-          [this] { ResponseBuilder(downstream_).sendWithEOM(); });
+      evb->runInEventBaseThread([this] {
+        if (!error_) {
+          ResponseBuilder(downstream_).sendWithEOM();
+        }
+      });
       break;
     } else {
       buf.postallocate(rc);
       evb->runInEventBaseThread([this, body = buf.move()]() mutable {
-        ResponseBuilder(downstream_).body(std::move(body)).send();
+        if (!error_) {
+          ResponseBuilder(downstream_).body(std::move(body)).send();
+        }
       });
     }
   }
@@ -136,6 +142,7 @@ void StaticHandler::requestComplete() noexcept {
 }
 
 void StaticHandler::onError(ProxygenError /*err*/) noexcept {
+  error_ = true;
   finished_ = true;
   paused_ = true;
   checkForCompletion();

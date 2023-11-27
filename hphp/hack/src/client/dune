@@ -40,13 +40,6 @@
   (pps lwt_ppx ppx_deriving.std ppx_variants_conv)))
 
 (library
- (name client_log_command)
- (modules clientLogCommand)
- (libraries sys_utils)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
-
-(library
  (name client_get_definition)
  (wrapped false)
  (modules clientGetDefinition)

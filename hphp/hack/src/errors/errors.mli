@@ -190,7 +190,7 @@ val fold_errors_in :
 (** Get paths that have errors which haven't been HH_FIXME'd. *)
 val get_failed_files : t -> Relative_path.Set.t
 
-val as_telemetry : t -> Telemetry.t
+val as_telemetry_summary : t -> Telemetry.t
 
 val choose_code_opt : t -> int option
 

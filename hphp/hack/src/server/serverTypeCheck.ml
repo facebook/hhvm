@@ -987,7 +987,9 @@ let type_check_core genv env start_time ~check_reason cgroup_steps =
 
   let telemetry =
     telemetry
-    |> Telemetry.object_ ~key:"errors" ~value:(Errors.as_telemetry env.errorl)
+    |> Telemetry.object_
+         ~key:"errors"
+         ~value:(Errors.as_telemetry_summary env.errorl)
     |> Telemetry.object_
          ~key:"repo_states"
          ~value:(Watchman.RepoStates.get_as_telemetry ())

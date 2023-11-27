@@ -531,7 +531,9 @@ let idle_if_no_client env waiting_client =
 let log_recheck_end (stats : ServerEnv.RecheckLoopStats.t) ~errors =
   let telemetry =
     ServerEnv.RecheckLoopStats.to_user_telemetry stats
-    |> Telemetry.object_ ~key:"errors" ~value:(Errors.as_telemetry errors)
+    |> Telemetry.object_
+         ~key:"errors"
+         ~value:(Errors.as_telemetry_summary errors)
   in
   let {
     RecheckLoopStats.duration;

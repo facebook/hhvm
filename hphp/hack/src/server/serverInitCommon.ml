@@ -135,7 +135,9 @@ let log_type_check_end
          ~value:(ServerEnv.Init_telemetry.get init_telemetry)
     |> Telemetry.object_ ~key:"typecheck" ~value:typecheck_telemetry
     |> Telemetry.object_ ~key:"hash" ~value:hash_telemetry
-    |> Telemetry.object_ ~key:"errors" ~value:(Errors.as_telemetry env.errorl)
+    |> Telemetry.object_
+         ~key:"errors"
+         ~value:(Errors.as_telemetry_summary env.errorl)
     |> Telemetry.object_
          ~key:"repo_states"
          ~value:(Watchman.RepoStates.get_as_telemetry ())

@@ -855,7 +855,7 @@ let first_n_distinct_error_codes ~(n : int) (t : t) : error_code list =
 let choose_code_opt (t : t) : int option =
   drop_fixmed_errors_in_files t |> first_n_distinct_error_codes ~n:1 |> List.hd
 
-let as_telemetry : t -> Telemetry.t =
+let as_telemetry_summary : t -> Telemetry.t =
  fun errors ->
   Telemetry.create ()
   |> Telemetry.int_ ~key:"count" ~value:(error_count errors)

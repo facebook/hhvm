@@ -610,7 +610,7 @@ let get_files_to_recheck
       ~f:(fun _ -> FileInfo.merge_names)
   in
   let ctx = Provider_utils.ctx_from_server_env env in
-  Decl_redecl_service.oldify_type_decl
+  Decl_redecl_service.oldify_decls_and_remove_descendants
     ctx
     ~bucket_size
     genv.workers

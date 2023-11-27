@@ -42,7 +42,7 @@ let test () =
       SSet.of_list @@ List.map info.FileInfo.classes ~f:(fun (_, x, _) -> x)
   in
   let dependent_classes =
-    Decl_redecl_service.get_dependent_classes
+    Decl_redecl_service.get_descendant_classes
       ctx
       None
       ~bucket_size:1

@@ -1356,7 +1356,7 @@ let test_decl_compare ctx filenames builtins files_contents files_info =
         SSet.of_list @@ List.map info.FileInfo.classes ~f:(fun (_, x, _) -> x)
     in
     (* We need to oldify, not remove, for ClassEltDiff to work *)
-    Decl_redecl_service.oldify_type_decl
+    Decl_redecl_service.oldify_decls_and_remove_descendants
       ctx
       None
       get_classes

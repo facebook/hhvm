@@ -261,10 +261,10 @@ let parallel_redecl_compare_and_get_fanout
 (* Code invalidating the heap *)
 (*****************************************************************************)
 
-(** Oldify provided defs.
+(** Oldify provided defs and elements (a.k.a. members).
     This is equivalent to moving a the decls for those defs to some heap of old decls,
     i.e. they will only be retrievable when querying old values.
-    For classes, it oldifies both shallow and folded classes. *)
+    For classes, it oldifies both shallow and folded classes *)
 let[@warning "-21"] oldify_defs (* -21 for dune stubs *)
     (ctx : Provider_context.t)
     ({ FileInfo.n_funs; n_classes; n_types; n_consts; n_modules } as names)
@@ -304,11 +304,13 @@ let[@warning "-21"] remove_old_defs (* -21 for dune stubs *)
     SharedMem.GC.collect `gentle;
     ()
 
-(** Remove provided defs from the heap of current decls.
-    For classes, it removes both shallow and folded classes. *)
+(** Remove provided defs and elements from the heap of current decls.
+    For classes, it removes both shallow and folded classes.
+
+    @param elems  elements, a.k.a. members, to remove *)
 let[@warning "-21"] remove_defs (* -21 for dune stubs *)
     ({ FileInfo.n_funs; n_classes; n_types; n_consts; n_modules } as names)
-    (elems : Decl_class_elements.t SMap.t)
+    ~(elems : Decl_class_elements.t SMap.t)
     ~(collect_garbage : bool) : unit =
   match Provider_backend.get () with
   | Provider_backend.Rust_provider_backend be ->
@@ -324,13 +326,16 @@ let[@warning "-21"] remove_defs (* -21 for dune stubs *)
     if collect_garbage then SharedMem.GC.collect `gentle;
     ()
 
-let is_dependent_class_of_any classes (c : string) : bool =
+(** [is_descendant_of_any_of classes c] returns whether
+    class [c] is a member of or is a descendant of
+    any of the [classes]. *)
+let is_descendant_of_any_of classes (c : string) : bool =
   if SSet.mem classes c then
     true
   else
     match Decl_heap.Classes.get c with
     | None -> false
-    (* it might be a dependent class, but we are only doing this
+    (* it might be a descendant class, but we are only doing this
      * check for the purpose of invalidating things from the heap
      * - if it's already not there, then we don't care. *)
     | Some c ->
@@ -340,44 +345,51 @@ let is_dependent_class_of_any classes (c : string) : bool =
       || intersection_nonempty c.Decl_defs.dc_xhp_attr_deps classes
       || intersection_nonempty c.Decl_defs.dc_req_ancestors_extends classes
 
-let get_maybe_dependent_classes
+(** [add_classes_in_files get_classes files classes_acc]
+    adds to [classes_acc] the classes in [files],
+    obtained with [get_classes file] for [file] in [files] *)
+let add_classes_in_files
     (get_classes : Relative_path.t -> SSet.t)
-    (classes : SSet.t)
-    (files : Relative_path.Set.t) : string list =
-  Relative_path.Set.fold files ~init:classes ~f:(fun x acc ->
-      SSet.union acc @@ get_classes x)
-  |> SSet.elements
+    (files : Relative_path.Set.t)
+    (classes_acc : SSet.t) : SSet.t =
+  Relative_path.Set.fold files ~init:classes_acc ~f:(fun fn acc ->
+      SSet.union acc @@ get_classes fn)
 
-let get_dependent_classes_files (ctx : Provider_context.t) (classes : SSet.t) :
+(** Return the files containing all descendants of provided classes *)
+let get_files_of_descendants (ctx : Provider_context.t) (class_names : SSet.t) :
     Relative_path.Set.t =
-  let mode = Provider_context.get_deps_mode ctx in
-  let visited = VisitedSet.make () in
   SSet.fold
-    classes
+    class_names
     ~init:Typing_deps.(DepSet.make ())
     ~f:(fun c acc ->
-      let source_class = Dep.make (Dep.Type c) in
-      Typing_deps.get_extend_deps ~mode ~visited ~source_class ~acc)
+      Typing_deps.get_extend_deps
+        ~mode:(Provider_context.get_deps_mode ctx)
+        ~visited:(VisitedSet.make ())
+        ~source_class:(Dep.make (Dep.Type c))
+        ~acc)
   |> Naming_provider.get_files ctx
 
-let filter_dependent_classes
-    (classes : SSet.t) (maybe_dependent_classes : string list) : string list =
-  List.filter maybe_dependent_classes ~f:(is_dependent_class_of_any classes)
+(** [filter_descendant_classes classes ~maybe_descendant_classes]
+    filters [maybe_descendant_classes] to keep only those which are
+    a descendant or a class in [classes], or a member of [classes]. *)
+let filter_descendant_classes
+    (classes : SSet.t) ~(maybe_descendant_classes : string list) : string list =
+  List.filter maybe_descendant_classes ~f:(is_descendant_of_any_of classes)
 
 module ClassSetStore = GlobalStorage.Make (struct
   type t = SSet.t
 end)
 
-let load_and_filter_dependent_classes (maybe_dependent_classes : string list) :
-    string list * int =
+let load_and_filter_descendant_classes (maybe_descendant_classes : string list)
+    : string list * int =
   let classes = ClassSetStore.load () in
-  ( filter_dependent_classes classes maybe_dependent_classes,
-    List.length maybe_dependent_classes )
+  ( filter_descendant_classes classes ~maybe_descendant_classes,
+    List.length maybe_descendant_classes )
 
-let merge_dependent_classes
+let merge_descendant_classes
     classes_initial_count
     classes_filtered_count
-    (dependent_classes, filtered)
+    (descendant_classes, filtered)
     acc =
   classes_filtered_count := !classes_filtered_count + filtered;
   ServerProgress.write_percentage
@@ -386,22 +398,22 @@ let merge_dependent_classes
     ~total_count:classes_initial_count
     ~unit:"classes"
     ~extra:None;
-  dependent_classes @ acc
+  descendant_classes @ acc
 
-let filter_dependent_classes_parallel
+let filter_descendant_classes_parallel
     (workers : MultiWorker.worker list option)
     ~(bucket_size : int)
     (classes : SSet.t)
-    (maybe_dependent_classes : string list) : string list =
-  let classes_initial_count = List.length maybe_dependent_classes in
+    (maybe_descendant_classes : string list) : string list =
+  let classes_initial_count = List.length maybe_descendant_classes in
   if classes_initial_count < 10 then
-    filter_dependent_classes classes maybe_dependent_classes
+    filter_descendant_classes classes ~maybe_descendant_classes
   else
     ServerProgress.with_frame @@ fun () ->
     ClassSetStore.store classes;
     let classes_filtered_count = ref 0 in
     let t = Unix.gettimeofday () in
-    Hh_logger.log ~lvl "Filtering %d dependent classes" classes_initial_count;
+    Hh_logger.log ~lvl "Filtering %d descendant classes" classes_initial_count;
     ServerProgress.write_percentage
       ~operation:"filtering"
       ~done_count:!classes_filtered_count
@@ -411,31 +423,34 @@ let filter_dependent_classes_parallel
     let res =
       MultiWorker.call
         workers
-        ~job:(fun _ c -> load_and_filter_dependent_classes c)
+        ~job:(fun _ c -> load_and_filter_descendant_classes c)
         ~merge:
-          (merge_dependent_classes classes_initial_count classes_filtered_count)
+          (merge_descendant_classes
+             classes_initial_count
+             classes_filtered_count)
         ~neutral:[]
         ~next:
           (MultiWorker.next
              ~max_size:bucket_size
              workers
-             maybe_dependent_classes)
+             maybe_descendant_classes)
     in
     let (_t : float) =
-      Hh_logger.log_duration ~lvl "Finished filtering dependent classes" t
+      Hh_logger.log_duration ~lvl "Finished filtering descendant classes" t
     in
     ClassSetStore.clear ();
     res
 
-let get_dependent_classes
+let get_descendant_classes
     (ctx : Provider_context.t)
     (workers : MultiWorker.worker list option)
     ~(bucket_size : int)
     (get_classes : Relative_path.t -> SSet.t)
     (classes : SSet.t) : SSet.t =
-  get_dependent_classes_files ctx classes
-  |> get_maybe_dependent_classes get_classes classes
-  |> filter_dependent_classes_parallel workers ~bucket_size classes
+  let files_of_descendants = get_files_of_descendants ctx classes in
+  add_classes_in_files get_classes files_of_descendants classes
+  |> SSet.elements
+  |> filter_descendant_classes_parallel workers ~bucket_size classes
   |> SSet.of_list
 
 let merge_elements
@@ -594,30 +609,31 @@ let redo_type_decl
   { fanout; old_decl_missing_count }
 
 (** Mark all provided [defs] as old, as long as they were not previously
-oldified. *)
-let oldify_type_decl
+    oldified.
+    For classes, also remove all descendants, since we oldified and therefore
+    removed their elements/members. *)
+let oldify_decls_and_remove_descendants
     (ctx : Provider_context.t)
     ?(collect_garbage = true)
     (workers : MultiWorker.worker list option)
     (get_classes : Relative_path.t -> SSet.t)
     ~(bucket_size : int)
     ~(defs : FileInfo.names) : unit =
-  let get_elems = get_elems workers ~bucket_size in
-  let current_elems = get_elems defs ~old:false in
-  oldify_defs ctx defs current_elems ~collect_garbage;
+  let elems = get_elems workers ~bucket_size defs ~old:false in
+  oldify_defs ctx defs elems ~collect_garbage;
 
   (* Oldifying/removing classes also affects their elements
    * (see Decl_class_elements), which might be shared with other classes. We
    * need to remove all of them too to avoid dangling references *)
   let all_classes = defs.FileInfo.n_classes in
-  let dependent_classes =
-    get_dependent_classes ctx workers get_classes ~bucket_size all_classes
+  let descendant_classes =
+    get_descendant_classes ctx workers get_classes ~bucket_size all_classes
   in
-  let dependent_classes =
+  let descendant_classes =
     FileInfo.
-      { empty_names with n_classes = SSet.diff dependent_classes all_classes }
+      { empty_names with n_classes = SSet.diff descendant_classes all_classes }
   in
-  remove_defs dependent_classes SMap.empty ~collect_garbage
+  remove_defs descendant_classes ~elems:SMap.empty ~collect_garbage
 
 let remove_old_defs
     (ctx : Provider_context.t)

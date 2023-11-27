@@ -37,7 +37,7 @@ the decl heaps.
 
 Typically, there are only any [previously_oldified_defs] during two-phase
 redeclaration. *)
-val oldify_type_decl :
+val oldify_decls_and_remove_descendants :
   Provider_context.t ->
   ?collect_garbage:bool ->
   MultiWorker.worker list option ->
@@ -59,7 +59,7 @@ val remove_old_defs :
   elements (see Decl_class_elements).
   Not for general use case since it doesn't use lazy decl and makes sense only
   in a very particular use case of invalidate_type_decl. *)
-val get_dependent_classes :
+val get_descendant_classes :
   Provider_context.t ->
   MultiWorker.worker list option ->
   bucket_size:int ->
@@ -69,4 +69,7 @@ val get_dependent_classes :
 
 (** Test-only *)
 val remove_defs :
-  FileInfo.names -> Decl_class_elements.t SMap.t -> collect_garbage:bool -> unit
+  FileInfo.names ->
+  elems:Decl_class_elements.t SMap.t ->
+  collect_garbage:bool ->
+  unit

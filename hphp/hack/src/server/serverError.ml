@@ -34,7 +34,9 @@ let get_error_list_json
   let (error_list, did_pass) =
     match error_list with
     | [] -> ([], true)
-    | error_list -> (List.map ~f:User_error.to_json error_list, false)
+    | error_list ->
+      ( List.map ~f:(User_error.to_json ~filename_to_string:Fn.id) error_list,
+        false )
   in
   let (properties : (string * Hh_json.json) list) =
     [

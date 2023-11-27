@@ -130,7 +130,7 @@ let to_string
       Buffer.add_string buf msg);
   Buffer.contents buf
 
-let to_json error =
+let to_json ~filename_to_string error =
   let (error_code, msgl) = (get_code error, to_list error) in
   let elts =
     List.map msgl ~f:(fun (p, w) ->
@@ -138,7 +138,7 @@ let to_json error =
         Hh_json.JSON_Object
           [
             ("descr", Hh_json.JSON_String w);
-            ("path", Hh_json.JSON_String (Pos.filename p));
+            ("path", Hh_json.JSON_String (Pos.filename p |> filename_to_string));
             ("line", Hh_json.int_ line);
             ("start", Hh_json.int_ scol);
             ("end", Hh_json.int_ ecol);

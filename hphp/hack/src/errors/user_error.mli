@@ -49,4 +49,7 @@ val error_code_to_string : int -> string
 
 val to_string : bool -> (Pos.absolute, Pos.absolute) t -> string
 
-val to_json : (Pos.absolute, Pos.absolute) t -> Hh_json.json
+val to_json :
+  filename_to_string:('a -> string) ->
+  ('a Pos.pos, 'a Pos.pos) t ->
+  Hh_json.json

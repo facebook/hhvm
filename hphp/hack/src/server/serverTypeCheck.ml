@@ -116,35 +116,21 @@ let remove_decls env defs_per_file_parsed =
           ~consts:(List.map consts ~f:snd)
           ~modules:(List.map modules ~f:snd))
 
-(* If the only things that would change about file analysis are positions,
- * we're not going to recheck it, and positions in its error list might
- * become stale. Look if any of those positions refer to files that have
- * actually changed and add them to files to recheck. *)
-let get_files_with_stale_errors
-    ~(* Set of files that were reparsed (so their ASTs and positions
-      * in them could have changed. *)
-     reparsed
-    ~(* A subset of files which errors we want to update, or None if we want
-      * to update entire error list. *)
-     filter
-    ~(* Current global error list *)
-     errors
-    ~ctx =
-  let fold =
-    match filter with
-    | None ->
-      fun init f ->
-        (* Looking at global files *)
-        Errors.fold_errors errors ~init ~f:(fun source error acc ->
-            f source error acc)
-    | Some files ->
-      fun init f ->
-        (* Looking only at subset of files *)
-        Relative_path.Set.fold files ~init ~f:(fun file acc ->
-            Errors.fold_errors_in errors ~file ~init:acc ~f:(fun error acc ->
-                f file error acc))
-  in
-  fold Relative_path.Set.empty (fun source error acc ->
+(** If the only things that would change about file analysis are positions,
+    we're not going to recheck it, and positions in its error list might
+    become stale. Look if any of those positions refer to files that have
+    actually changed and add them to files to recheck.
+
+  @param reparsed   Set of files that were reparsed (so their ASTs and positions
+                    in them could have changed.
+
+  @param errors     Current global error list
+*)
+let get_files_with_stale_errors ~reparsed ~errors ~ctx =
+  Errors.fold_errors
+    errors
+    ~init:Relative_path.Set.empty
+    ~f:(fun source error acc ->
       if
         List.exists (User_error.to_list_ error) ~f:(fun e ->
             Relative_path.Set.mem
@@ -334,11 +320,7 @@ let do_redecl
       (ServerFanout.resolve_files ctx env fanout)
       (* We want to also recheck files that have typing errors referring to files that were
        * reparsed, since positions in those errors can be now stale. *)
-      (get_files_with_stale_errors
-         ~reparsed
-         ~filter:None
-         ~errors:env.errorl
-         ~ctx)
+      (get_files_with_stale_errors ~reparsed ~errors:env.errorl ~ctx)
   in
   {
     changed = fanout.Fanout.changed;

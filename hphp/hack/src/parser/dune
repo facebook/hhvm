@@ -113,7 +113,6 @@
   full_fidelity_syntax_tree
   full_fidelity_syntax_type
   full_fidelity_trivia_kind
-  lambda_analyzer
   lexable_trivia_sig
   lexable_token_sig
   lexable_positioned_token_sig

@@ -1033,6 +1033,13 @@ let type_check_core genv env start_time ~check_reason cgroup_steps =
     Telemetry.duration telemetry ~key:"stop_typing_service" ~start_time
   in
 
+  (* We create an ID for the TYPE_CHECK_END event so we can join the server
+     events table with the errors table *)
+  let type_check_end_id = Random.bits () in
+  let telemetry =
+    Telemetry.int_ telemetry ~key:"type_check_end_id" ~value:type_check_end_id
+  in
+
   (* CAUTION! Lots of alerts/dashboards depend on this event, particularly start_t  *)
   HackEventLogger.type_check_end
     (Some telemetry)
@@ -1042,6 +1049,9 @@ let type_check_core genv env start_time ~check_reason cgroup_steps =
     ~experiments:genv.local_config.ServerLocalConfig.experiments
     ~desc:"serverTypeCheck"
     ~start_t:type_check_start_t;
+  HackEventLogger.TypingErrors.log_errors
+    ~type_check_end_id
+    ~data:(Errors.as_telemetry ~limit:1000 env.errorl);
   ( env,
     {
       CheckStats.reparse_count;

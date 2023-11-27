@@ -192,6 +192,13 @@ val get_failed_files : t -> Relative_path.Set.t
 
 val as_telemetry_summary : t -> Telemetry.t
 
+(** Get a [Telemetry.t] representation of errors.
+
+Does not include fixme'd errors.
+
+[limit] parameter to avoid blowing up our systems. *)
+val as_telemetry : limit:int -> t -> Telemetry.t
+
 val choose_code_opt : t -> int option
 
 val compare : error -> error -> int

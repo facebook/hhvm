@@ -48,6 +48,14 @@ let to_absolute { code; claim; reasons; quickfixes; custom_msgs; is_fixmed } =
   let quickfixes = List.map quickfixes ~f:Quickfix.to_absolute in
   { code; claim; reasons; quickfixes; custom_msgs; is_fixmed }
 
+let to_relative { code; claim; reasons; quickfixes; custom_msgs; is_fixmed } :
+    (Pos.t, Pos.t) t =
+  let claim = (fst claim, snd claim) in
+  let reasons =
+    List.map reasons ~f:(fun (p, s) -> (p |> Pos_or_decl.unsafe_to_raw_pos, s))
+  in
+  { code; claim; reasons; quickfixes; custom_msgs; is_fixmed }
+
 let make_absolute code = function
   | [] -> failwith "an error must have at least one message"
   | claim :: reasons ->

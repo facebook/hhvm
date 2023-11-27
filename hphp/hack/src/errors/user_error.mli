@@ -38,6 +38,8 @@ val get_messages : ('a, 'a) t -> 'a Message.t list
 
 val to_absolute : (Pos.t, Pos_or_decl.t) t -> (Pos.absolute, Pos.absolute) t
 
+val to_relative : (Pos.t, Pos_or_decl.t) t -> (Pos.t, Pos.t) t
+
 val make_absolute : int -> 'a Message.t list -> ('a, 'a) t
 
 val to_absolute_for_test :

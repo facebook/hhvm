@@ -866,6 +866,58 @@ let as_telemetry_summary : t -> Telemetry.t =
             ~n:5
             (drop_fixmed_errors_in_files errors))
 
+let as_telemetry ~limit (errors : t) : Telemetry.t =
+  let errors = drop_fixmed_errors_in_files errors in
+  let total_count = error_count errors in
+  let (errors, _, is_truncated) =
+    Relative_path.Map.fold
+      errors
+      ~init:(Relative_path.Map.empty, 0, false)
+      ~f:(fun
+           path
+           file_errors
+           ((errors_acc, errors_acc_count, is_truncated) as acc)
+         ->
+        if is_truncated then
+          acc
+        else
+          let file_errors_count = List.length file_errors in
+          let remaining_capacity = limit - errors_acc_count in
+          let is_truncated = remaining_capacity < file_errors_count in
+          let (file_errors, file_errors_count) =
+            if is_truncated then
+              (List.take file_errors remaining_capacity, limit)
+            else
+              (file_errors, file_errors_count)
+          in
+          ( Relative_path.Map.add errors_acc ~key:path ~data:file_errors,
+            errors_acc_count + file_errors_count,
+            is_truncated ))
+  in
+  (* Convert to Scuba loggable data *)
+  let error_to_telemetry (e : error) : Telemetry.t =
+    let e = User_error.to_relative e in
+    Telemetry.create ()
+    |> Telemetry.int_ ~key:"error_code" ~value:(User_error.get_code e)
+    |> Telemetry.json_
+         ~key:"error_json"
+         ~value:(User_error.to_json ~filename_to_string:Relative_path.suffix e)
+  in
+  let by_file =
+    List.fold
+      (Relative_path.Map.bindings errors)
+      ~init:(Telemetry.create ())
+      ~f:(fun t (path, errors) ->
+        Telemetry.object_list
+          t
+          ~key:(Relative_path.suffix path)
+          ~value:(List.map errors ~f:error_to_telemetry))
+  in
+  Telemetry.create ()
+  |> Telemetry.int_ ~key:"total_count" ~value:total_count
+  |> Telemetry.bool_ ~key:"is_truncated" ~value:is_truncated
+  |> Telemetry.object_ ~key:"by_file" ~value:by_file
+
 (*****************************************************************************)
 (* Error code printing. *)
 (*****************************************************************************)

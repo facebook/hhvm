@@ -1,0 +1,3 @@
+(3,20)-(3,20) The `default` module name cannot appear in a compound module name.
+(5,16)-(5,16) The `default` module name cannot appear in a compound module name.
+(7,16)-(7,16) The `default` module name cannot appear in a compound module name.

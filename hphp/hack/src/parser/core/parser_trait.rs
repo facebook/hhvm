@@ -624,32 +624,60 @@ where
 
     fn require_qualified_module_name(&mut self) -> S::Output {
         let mut parts = vec![];
+
         let next_token_kind = self.peek_token_kind();
-        // The default module name is allowed with no dots. It's also defined already in modules.hhi,
-        // so user code won't be able to define it.
-        if next_token_kind == TokenKind::Default {
-            let name = self.require_name_allow_all_keywords();
+        let (name, root_is_default) =
+            // The default module name is allowed with no dots. It's also defined already in modules.hhi,
+            // so user code won't be able to define it.
+            if next_token_kind == TokenKind::Default {
+                (self.require_name_allow_all_keywords(), true)
+            } else {
+                (self.require_name_allow_non_reserved(), false)
+            };
+
+        let dot = self.optional_token(TokenKind::Dot);
+        let dot_is_missing = dot.is_missing();
+
+        if !(name.is_missing()) {
+            parts.push(self.sc_mut().make_list_item(name, dot));
+        }
+
+        if dot_is_missing {
             let pos = self.pos();
-            let missing = self.sc_mut().make_missing(pos);
-            parts.push(self.sc_mut().make_list_item(name, missing));
-        } else {
-            loop {
-                let name = self.require_name_allow_non_reserved();
+            let list_node = self.sc_mut().make_list(parts, pos);
+            return self.sc_mut().make_module_name(list_node);
+        }
 
-                if name.is_missing() {
-                    break;
-                }
+        if root_is_default {
+            self.with_error(Errors::error1068, Vec::new());
+        }
 
-                let dot = self.optional_token(TokenKind::Dot);
-                let dot_is_missing = dot.is_missing();
+        loop {
+            let next_token_kind = self.peek_token_kind();
+            let name =
+                // The default module name is allowed with no dots. It's also defined already in modules.hhi,
+                // so user code won't be able to define it.
+                if next_token_kind == TokenKind::Default {
+                    self.with_error(Errors::error1068, Vec::new());
+                    self.require_name_allow_all_keywords()
+                } else {
+                    self.require_name_allow_non_reserved()
+                };
 
-                parts.push(self.sc_mut().make_list_item(name, dot));
+            if name.is_missing() {
+                break;
+            }
 
-                if dot_is_missing {
-                    break;
-                }
+            let dot = self.optional_token(TokenKind::Dot);
+            let dot_is_missing = dot.is_missing();
+
+            parts.push(self.sc_mut().make_list_item(name, dot));
+
+            if dot_is_missing {
+                break;
             }
         }
+
         let pos = self.pos();
         let list_node = self.sc_mut().make_list(parts, pos);
         self.sc_mut().make_module_name(list_node)

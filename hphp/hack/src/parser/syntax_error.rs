@@ -217,6 +217,8 @@ pub const error1064: Error = Cow::Borrowed("XHP children declarations are no lon
 pub const error1065: Error = Cow::Borrowed("A backtick ``` is expected here.");
 pub const error1066: Error = Cow::Borrowed("Only one 'exports to' is allowed.");
 pub const error1067: Error = Cow::Borrowed("Only one 'imports from' is allowed.");
+pub const error1068: Error =
+    Cow::Borrowed("The `default` module name cannot appear in a compound module name.");
 pub const error2001: Error = Cow::Borrowed("A type annotation is required in `strict` mode.");
 pub const error2003: Error =
     Cow::Borrowed("A `case` statement may only appear directly inside a `switch`.");

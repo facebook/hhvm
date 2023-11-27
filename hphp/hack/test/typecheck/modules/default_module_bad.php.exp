@@ -1,14 +1,2 @@
-File "default_module_bad.php--modules.php", line 4, characters 19-19:
-A left brace `{` is expected here. (Parsing[1002])
-File "default_module_bad.php--modules.php", line 4, characters 19-19:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
-File "default_module_bad.php--modules.php", line 4, characters 20-25:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
-File "default_module_bad.php--modules.php", line 4, characters 12-18:
-Name already bound: `default` (Naming[2012])
-  File "modules.hhi", line 5, characters 12-18:
-  Previous definition is here
-  File "default_module_bad.php--modules.php", line 4, characters 12-18:
-  This appears to be defined in an hhi file included in your project root. The hhi files for the standard library are now a part of the typechecker and must be removed from your project. Typically, you can do this by deleting the "hhi" directory you copied into your project when first starting with Hack.
-File "default_module_bad.php--modules.php", line 4, characters 20-22:
-Unexpected collection type `foo` (Naming[2013])
+File "default_module_bad.php--modules.php", line 4, characters 20-20:
+The `default` module name cannot appear in a compound module name. (Parsing[1002])

@@ -30,7 +30,7 @@ module GEnv : sig
   val gconst_pos : Provider_context.t -> string -> Pos.t option
 end
 
-(* Removing declarations *)
+(** Removing defs from reverse naming table *)
 val remove_decls :
   backend:Provider_backend.t ->
   funs:string list ->

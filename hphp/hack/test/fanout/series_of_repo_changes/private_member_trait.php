@@ -2,9 +2,7 @@
 <?hh
 
 trait A {
-  private function f(): void {
-    echo "from A\n";
-  }
+  private function f(): void {}
 
   public function main(): void {
     $this->f();
@@ -17,9 +15,7 @@ trait A {
 class B {
   use A;
 
-  public function f(): void {
-    echo "from B\n";
-  }
+  public function f(): void {}
 }
 
 //// main.php
@@ -38,9 +34,7 @@ function main(): void {
 <?hh
 
 trait A {
-  private function f(string $_): void {
-    echo "from A\n";
-  }
+  private function f(string $_): void {}
 
   public function main(): void {
     $this->f("");

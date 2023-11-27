@@ -87,11 +87,9 @@ let add_old_decls old_naming_table defs_per_file =
       end
     ~init:defs_per_file
 
-(*****************************************************************************)
-(* Removes the names that were defined in the files *)
-(*****************************************************************************)
-
-let remove_decls env defs_per_file_parsed =
+(** Removes the names that were defined in the files from the reverse naming table *)
+let remove_defs_from_reverse_naming_table
+    env (defs_per_file_parsed : _ Relative_path.Map.t) =
   Relative_path.Map.iter defs_per_file_parsed ~f:(fun fn _ ->
       match Naming_table.get_file_info env.naming_table fn with
       | None -> ()
@@ -115,31 +113,6 @@ let remove_decls env defs_per_file_parsed =
           ~typedefs:(List.map typedefs ~f:snd)
           ~consts:(List.map consts ~f:snd)
           ~modules:(List.map modules ~f:snd))
-
-(** If the only things that would change about file analysis are positions,
-    we're not going to recheck it, and positions in its error list might
-    become stale. Look if any of those positions refer to files that have
-    actually changed and add them to files to recheck.
-
-  @param reparsed   Set of files that were reparsed (so their ASTs and positions
-                    in them could have changed.
-
-  @param errors     Current global error list
-*)
-let get_files_with_stale_errors ~reparsed ~errors ~ctx =
-  Errors.fold_errors
-    errors
-    ~init:Relative_path.Set.empty
-    ~f:(fun source error acc ->
-      if
-        List.exists (User_error.to_list_ error) ~f:(fun e ->
-            Relative_path.Set.mem
-              reparsed
-              (fst e |> Naming_provider.resolve_position ctx |> Pos.filename))
-      then
-        Relative_path.Set.add acc source
-      else
-        acc)
 
 (*****************************************************************************)
 (* Parses the set of modified files *)
@@ -248,8 +221,8 @@ let do_naming
   let start_t = Unix.gettimeofday () in
   let count = Relative_path.Map.cardinal defs_per_file_parsed in
   CgroupProfiler.step_start_end cgroup_steps "naming" @@ fun _cgroup_step ->
-  (* Update name->filename reverse naming table (global, mutable) *)
-  remove_decls env defs_per_file_parsed;
+  remove_defs_from_reverse_naming_table env defs_per_file_parsed;
+
   let failed_naming =
     Relative_path.Map.fold
       defs_per_file_parsed
@@ -316,11 +289,12 @@ let do_redecl
       ~defs:defs_per_file
   in
   let to_recheck =
-    Relative_path.Set.union
-      (ServerFanout.resolve_files ctx env fanout)
-      (* We want to also recheck files that have typing errors referring to files that were
-       * reparsed, since positions in those errors can be now stale. *)
-      (get_files_with_stale_errors ~reparsed ~errors:env.errorl ~ctx)
+    ServerFanout.get_files_to_recheck
+      ctx
+      env
+      fanout
+      ~reparsed
+      ~errors:env.errorl
   in
   {
     changed = fanout.Fanout.changed;

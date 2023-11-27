@@ -331,9 +331,7 @@ module Env = struct
       (p :: current_file_symbols_acc, is_okay_acc)
 end
 
-(*****************************************************************************)
-(* Updating the environment *)
-(*****************************************************************************)
+(** Remove defs from reverse naming table *)
 let remove_decls ~backend ~funs ~classes ~typedefs ~consts ~modules =
   Naming_provider.remove_type_batch backend (typedefs @ classes);
   Naming_provider.remove_fun_batch backend funs;

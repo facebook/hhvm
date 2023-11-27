@@ -2,9 +2,7 @@
 <?hh
 
 class A {
-  private function f(): void {
-    echo "from A\n";
-  }
+  private function f(): void {}
 
   public function main(): void {
     $this->f();
@@ -16,7 +14,6 @@ class A {
 
 class B extends A {
   public function f(int $x): int {
-    echo "from B\n";
     return $x + 1;
   }
 }
@@ -42,9 +39,7 @@ function main(): void {
 <?hh
 
 class A {
-  private function f(string $_): void {
-    echo "from A\n";
-  }
+  private function f(string $_): void {}
 
   public function main(): void {
     $this->f("");

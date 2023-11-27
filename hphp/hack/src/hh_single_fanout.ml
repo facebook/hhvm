@@ -207,7 +207,7 @@ let compute_fanout_and_resolve_deps
     (ctx : Provider_context.t)
     (options : options)
     files_with_changes
-    files_with_errors
+    (errors : Errors.t)
     (old_naming_table, old_symbols_to_files)
     (new_naming_table, new_symbols_to_files)
     (dep_to_symbol_map : _ Typing_deps.Dep.variant Typing_deps.DepMap.t) :
@@ -245,7 +245,12 @@ let compute_fanout_and_resolve_deps
     let files_to_recheck_if_errors =
       get_files_for_symbols to_recheck_if_errors_symbols old_symbols_to_files
     in
+    let files_with_errors = Errors.get_failed_files errors in
     Relative_path.Set.inter files_to_recheck_if_errors files_with_errors
+    |> ServerFanout.add_files_with_stale_errors
+         ctx
+         ~reparsed:(Relative_path.Set.of_list files_with_changes)
+         errors
   in
   let fanout =
     Relative_path.Set.union to_recheck to_recheck_files_due_to_errors
@@ -419,11 +424,11 @@ let go (test_file : string) options =
   let { Multifile.States.base; changes } = Multifile.States.parse test_file in
   let files = FileSystem.provide_files_before base in
   let (errors, naming_table) = process_pre_changes ctx options files in
-  let (_end_repo, _end_naming_table, _files_with_errors) =
+  let (_end_repo, _end_naming_table, _errors) =
     List.fold
       changes
-      ~init:(base, naming_table, Errors.get_failed_files errors)
-      ~f:(fun (repo, naming_table, files_with_errors) repo_change ->
+      ~init:(base, naming_table, errors)
+      ~f:(fun (repo, naming_table, errors) repo_change ->
         let repo = Multifile.States.apply_repo_change repo repo_change in
         let files_with_changes = process_changed_files options repo in
         let dep_to_symbol_map =
@@ -441,13 +446,13 @@ let go (test_file : string) options =
             ctx
             options
             files_with_changes
-            files_with_errors
+            errors
             naming_table
             new_naming_table
             dep_to_symbol_map
         in
         let errors = type_check_make_depgraph ctx options fanout in
-        (repo, new_naming_table, Errors.get_failed_files errors))
+        (repo, new_naming_table, errors))
   in
   ()
 

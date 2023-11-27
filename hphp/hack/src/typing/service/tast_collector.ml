@@ -5,6 +5,10 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+
+(* silence "unused open! Ppx_yojson_conv_lib.Yojson_conv.Primitives" *)
+[@@@warning "-66"]
+
 open Core
 open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 

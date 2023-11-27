@@ -5,4 +5,6 @@
  (preprocess
   (pps
    ppx_hash
-   ppx_yojson_conv)))
+   ppx_yojson_conv))
+ ; silence "unused open! Ppx_yojson_conv_lib.Yojson_conv.Primitives"
+ (flags (:standard -w -66)))

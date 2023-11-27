@@ -83,6 +83,9 @@ void HQConnector::connect(
   // Always use connected UDP sockets
   transportSettings_.connectUDP = true;
   quicClient->setTransportSettings(transportSettings_);
+  if (!quicVersions_.empty()) {
+    quicClient->setSupportedVersions(quicVersions_);
+  }
   quicClient->setQLogger(std::move(qLogger));
   quicClient->setLoopDetectorCallback(std::move(quicLoopDetectorCallback));
   quicClient->setSocketOptions(socketOptions);

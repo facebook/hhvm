@@ -49,6 +49,10 @@ class HQConnector : public HQSession::ConnectCallback {
   }
 
   void setTransportSettings(quic::TransportSettings transportSettings);
+  void setSupportedQuicVersions(
+      const std::vector<quic::QuicVersion>& versions) {
+    quicVersions_ = versions;
+  }
   void setH3Settings(SettingsList settings) {
     h3Settings_ = std::move(settings);
   }
@@ -88,6 +92,7 @@ class HQConnector : public HQSession::ConnectCallback {
   TimePoint connectStart_;
   HQUpstreamSession* session_{nullptr};
   quic::TransportSettings transportSettings_;
+  std::vector<quic::QuicVersion> quicVersions_;
   folly::Optional<SettingsList> h3Settings_;
   std::shared_ptr<quic::QuicPskCache> quicPskCache_;
   bool useConnectionEndWithErrorCallback_{false};

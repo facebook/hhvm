@@ -11,3 +11,5 @@ val elab_fun_def : (unit, unit) Aast.fun_def -> (unit, unit) Aast.fun_def
 val elab_class : (unit, unit) Aast.class_ -> (unit, unit) Aast.class_
 
 val elab_program : (unit, unit) Aast.program -> (unit, unit) Aast.program
+
+val elab_stmt : (unit, unit) Aast.stmt -> (unit, unit) Aast.stmt

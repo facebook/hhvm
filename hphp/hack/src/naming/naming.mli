@@ -27,4 +27,6 @@ val global_const : Provider_context.t -> Nast.gconst -> Nast.gconst
 
 val module_ : Provider_context.t -> Nast.module_def -> Nast.module_def
 
+val stmt : Provider_context.t -> Nast.stmt -> Nast.stmt
+
 val invalid_expr_ : ('ex, 'en) Aast.expr option -> ('ex, 'en) Aast.expr_

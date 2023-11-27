@@ -69,4 +69,14 @@ ocamlrep_ocamlpool::ocaml_ffi! {
         let errs = elab::elaborate_typedef(&tco, &path, &mut td);
         (td, errs)
     }
+
+    fn hh_elab_stmt(
+        tco: TypecheckerOptions,
+        path: RelativePath,
+        stmt: ast::Stmt,
+    ) -> (nast::Stmt, Vec<NamingPhaseError>) {
+        let mut stmt = stmt;
+        let errs = elab::elaborate_stmt(&tco, &path, &mut stmt);
+        (stmt, errs)
+    }
 }

@@ -194,6 +194,7 @@ type defs = {
   typedefs: (FileInfo.id * typedef) list;
   constants: (FileInfo.id * gconst) list;
   modules: (FileInfo.id * module_def) list;
+  stmts: (FileInfo.id * stmt) list;
 }
 
 (* Given a Nast.program, give me the list of entities it defines *)
@@ -204,42 +205,52 @@ let get_defs (ast : program) : defs =
    * with the larger line number is a duplicate. *)
   let to_id (a, b) = (a, b, None) in
   (* TODO(hgoldstein): Just have this return four values, not five *)
-  let rec get_defs ast acc =
-    List.fold_right ast ~init:acc ~f:(fun def acc ->
+  let rec get_defs ast (acc : defs * int) =
+    List.fold_right ast ~init:acc ~f:(fun def (defs, stmt_count) ->
         Aast.(
           match def with
           | Fun f ->
             let f = (FileInfo.pos_full (to_id f.fd_name), f) in
-            { acc with funs = f :: acc.funs }
+            ({ defs with funs = f :: defs.funs }, stmt_count)
           | Class c ->
             let c = (FileInfo.pos_full (to_id c.c_name), c) in
-            { acc with classes = c :: acc.classes }
+            ({ defs with classes = c :: defs.classes }, stmt_count)
           | Typedef t ->
             let t = (FileInfo.pos_full (to_id t.t_name), t) in
-            { acc with typedefs = t :: acc.typedefs }
+            ({ defs with typedefs = t :: defs.typedefs }, stmt_count)
           | Constant cst ->
             let cst = (FileInfo.pos_full (to_id cst.cst_name), cst) in
-            { acc with constants = cst :: acc.constants }
+            ({ defs with constants = cst :: defs.constants }, stmt_count)
           | Module md ->
             let md = (FileInfo.pos_full (to_id md.md_name), md) in
-            { acc with modules = md :: acc.modules }
-          | Namespace (_, defs) -> get_defs defs acc
+            ({ defs with modules = md :: defs.modules }, stmt_count)
+          | Stmt st ->
+            let pos = fst st in
+            let id = "#stmt_" ^ string_of_int stmt_count in
+            let st = (FileInfo.pos_full (pos, id, None), st) in
+            ({ defs with stmts = st :: defs.stmts }, stmt_count + 1)
+          | Namespace (_, ds) -> get_defs ds (defs, stmt_count)
           | NamespaceUse _
           | SetNamespaceEnv _
           | SetModule _ ->
-            acc
-          (* toplevel statements are ignored *)
-          | FileAttributes _
-          | Stmt _ ->
-            acc))
+            (defs, stmt_count)
+          | FileAttributes _ -> (defs, stmt_count)))
   in
   let acc =
-    { funs = []; classes = []; typedefs = []; constants = []; modules = [] }
+    ( {
+        funs = [];
+        classes = [];
+        typedefs = [];
+        constants = [];
+        modules = [];
+        stmts = [];
+      },
+      0 )
   in
-  get_defs ast acc
+  fst @@ get_defs ast acc
 
 let get_def_names ast : FileInfo.t =
-  let { funs; classes; typedefs; constants; modules } = get_defs ast in
+  let { funs; classes; typedefs; constants; modules; _ } = get_defs ast in
   FileInfo.
     {
       empty_t with

@@ -22,3 +22,4 @@ val mk_visitor :
   * ('ctx -> (unit, unit) module_def -> (unit, unit) module_def)
   * ('ctx -> (unit, unit) gconst -> (unit, unit) gconst)
   * ('ctx -> (unit, unit) typedef -> (unit, unit) typedef)
+  * ('ctx -> (unit, unit) stmt -> (unit, unit) stmt)

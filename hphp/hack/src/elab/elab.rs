@@ -184,6 +184,23 @@ pub fn elaborate_typedef(
     elaborate_for_typechecking(env, t)
 }
 
+pub fn elaborate_stmt(
+    tco: &TypecheckerOptions,
+    path: &RelativePath,
+    t: &mut nast::Stmt,
+) -> Vec<NamingPhaseError> {
+    elaborate_namespaces_visitor::elaborate_stmt(ns_env(tco), t);
+    let mut env = make_env(tco, path);
+    elaborate_common(&env, t);
+    if tco.po_codegen {
+        return env.into_errors();
+    }
+    lambda_captures::elaborate_stmt(&mut env, t);
+    typed_local::elaborate_stmt(&mut env, t, false);
+    lift_await::elaborate_stmt(&mut env, t, false);
+    elaborate_for_typechecking(env, t)
+}
+
 fn ns_env(tco: &TypecheckerOptions) -> Arc<namespace_env::Env> {
     Arc::new(namespace_env::Env::empty(
         tco.po_auto_namespace_map.clone(),

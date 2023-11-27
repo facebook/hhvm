@@ -93,7 +93,7 @@ let check_module (ctx : Provider_context.t) ~(full_ast : Nast.module_def) :
 
 let calc_errors_and_tast ctx ?(drop_fixmed = true) fn ~full_ast :
     Errors.t * Tast.by_names =
-  let { Nast.funs; classes; typedefs; constants; modules } =
+  let { Nast.funs; classes; typedefs; constants; modules; stmts } =
     Nast.get_defs full_ast
   in
   let calc_tast
@@ -114,6 +114,9 @@ let calc_errors_and_tast ctx ?(drop_fixmed = true) fn ~full_ast :
       let typedef_tasts = calc_tast check_typedef typedefs in
       let gconst_tasts = calc_tast check_const constants in
       let module_tasts = calc_tast check_module modules in
+      (* For now we only want to elaborate/validate top-level statements to
+         generate errors but not typecheck *)
+      let _stmts = List.map ~f:(fun (_, stmt) -> Naming.stmt ctx stmt) stmts in
       { Tast.fun_tasts; class_tasts; typedef_tasts; gconst_tasts; module_tasts })
 
 let calc_errors_and_tast_for

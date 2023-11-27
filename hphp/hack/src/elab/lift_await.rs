@@ -970,6 +970,14 @@ pub fn elaborate_class_(env: &mut Env, c: &mut nast::Class_, for_codegen: bool) 
     la.visit_class_(env, c).unwrap();
 }
 
+pub fn elaborate_stmt(env: &mut Env, t: &mut nast::Stmt, for_codegen: bool) {
+    let mut la = LiftAwait {
+        for_codegen,
+        ..Default::default()
+    };
+    la.visit_stmt(env, t).unwrap();
+}
+
 #[cfg(test)]
 mod tests {
     use hack_macros::hack_expr;

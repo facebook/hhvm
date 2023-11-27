@@ -191,6 +191,8 @@ let elab_fun_def elem = elab visitor#on_fun_def elem
 
 let elab_typedef elem = elab visitor#on_typedef elem
 
+let elab_stmt elem = elab visitor#on_stmt elem
+
 let elab_module_def elem = elab visitor#on_module_def elem
 
 let elab_gconst elem = elab visitor#on_gconst elem

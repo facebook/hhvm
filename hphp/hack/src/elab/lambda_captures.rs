@@ -219,3 +219,7 @@ pub fn elaborate_gconst(env: &mut Env, cst: &mut nast::Gconst) {
 pub fn elaborate_typedef(env: &mut Env, td: &mut nast::Typedef) {
     Visitor::default().visit_typedef(env, td).unwrap();
 }
+
+pub fn elaborate_stmt(env: &mut Env, stmt: &mut nast::Stmt) {
+    Visitor::default().visit_stmt(env, stmt).unwrap();
+}

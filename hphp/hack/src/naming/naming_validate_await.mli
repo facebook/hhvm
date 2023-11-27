@@ -14,3 +14,6 @@ val validate_class :
 
 val validate_program :
   (Naming_phase_error.t -> unit) -> (unit, unit) Aast.program -> unit
+
+val validate_stmt :
+  (Naming_phase_error.t -> unit) -> (unit, unit) Aast.stmt -> unit

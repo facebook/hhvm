@@ -342,3 +342,5 @@ let validate_fun_def on_error elem = visitor#on_fun_def on_error elem
 let validate_class on_error elem = visitor#on_class_ on_error elem
 
 let validate_program on_error elem = visitor#on_program on_error elem
+
+let validate_stmt on_error elem = visitor#on_stmt on_error elem

@@ -17,3 +17,5 @@ val elaborate_module_def : (unit, unit) Aast.module_def -> Nast.module_def
 val elaborate_gconst : (unit, unit) Aast.gconst -> Nast.gconst
 
 val elaborate_typedef : (unit, unit) Aast.typedef -> Nast.typedef
+
+val elaborate_stmt : (unit, unit) Aast.stmt -> Nast.stmt

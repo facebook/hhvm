@@ -171,7 +171,8 @@ let ( elab_core_program,
       elab_core_fun_def,
       elab_core_module_def,
       elab_core_gconst,
-      elab_core_typedef ) =
+      elab_core_typedef,
+      elab_core_stmt ) =
   Naming_phase_pass.mk_visitor passes
 
 let elab_elem
@@ -239,6 +240,12 @@ module Rust_elab_core = struct
     (unit, unit) Aast.typedef ->
     Nast.typedef * Naming_phase_error.t list = "hh_elab_typedef"
 
+  external elab_stmt :
+    TypecheckerOptions.t ->
+    Relative_path.t ->
+    (unit, unit) Aast.stmt ->
+    Nast.stmt * Naming_phase_error.t list = "hh_elab_stmt"
+
   let add_errors elab_x tcopt filename x =
     let (x, errs) = elab_x tcopt filename x in
     errs
@@ -257,6 +264,8 @@ module Rust_elab_core = struct
   let elab_gconst = add_errors elab_gconst
 
   let elab_typedef = add_errors elab_typedef
+
+  let elab_stmt = add_errors elab_stmt
 end
 
 let program ctx program =
@@ -372,3 +381,22 @@ let typedef ctx td =
       ~validate_await
       ~elab_core
       td
+
+let stmt ctx stmt =
+  let tcopt = Provider_context.get_tcopt ctx in
+  let filename = Pos.filename (fst stmt) in
+  if TypecheckerOptions.rust_elab tcopt then
+    Rust_elab_core.elab_stmt tcopt filename stmt
+  else
+    let elab_ns = Naming_elaborate_namespaces_endo.elaborate_stmt
+    and elab_capture = Naming_captures.elab_stmt
+    and elab_typed_locals = Naming_typed_locals.elab_stmt
+    and validate_await = Naming_validate_await.validate_stmt on_error
+    and elab_core = elab_core_stmt (mk_env filename tcopt) in
+    elab_elem
+      ~elab_ns
+      ~elab_capture
+      ~elab_typed_locals
+      ~validate_await
+      ~elab_core
+      stmt

@@ -799,6 +799,14 @@ pub fn elaborate_class_(env: &mut Env, c: &mut nast::Class_, should_elab: bool) 
     tl.visit_class_(env, c).unwrap();
 }
 
+pub fn elaborate_stmt(env: &mut Env, t: &mut nast::Stmt, should_elab: bool) {
+    let mut tl = TypedLocal {
+        should_elab,
+        ..Default::default()
+    };
+    tl.visit_stmt(env, t).unwrap();
+}
+
 #[cfg(test)]
 mod tests {
 

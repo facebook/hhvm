@@ -30,4 +30,5 @@ let mk_visitor passes =
       (fun ctx elem -> transform_ty_fun_def elem ~ctx ~top_down ~bottom_up),
       (fun ctx elem -> transform_ty_module_def elem ~ctx ~top_down ~bottom_up),
       (fun ctx elem -> transform_ty_gconst elem ~ctx ~top_down ~bottom_up),
-      (fun ctx elem -> transform_ty_typedef elem ~ctx ~top_down ~bottom_up) )
+      (fun ctx elem -> transform_ty_typedef elem ~ctx ~top_down ~bottom_up),
+      (fun ctx elem -> transform_ty_stmt elem ~ctx ~top_down ~bottom_up) )

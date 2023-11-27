@@ -560,3 +560,9 @@ pub fn elaborate_typedef(e: std::sync::Arc<namespace_env::Env>, td: &mut Typedef
     let mut visitor = ElaborateNamespacesVisitor {};
     visitor.visit_typedef(&mut env, td).unwrap();
 }
+
+pub fn elaborate_stmt(e: std::sync::Arc<namespace_env::Env>, stmt: &mut Stmt) {
+    let mut env = Env::make(e);
+    let mut visitor = ElaborateNamespacesVisitor {};
+    visitor.visit_stmt(&mut env, stmt).unwrap();
+}

@@ -324,3 +324,5 @@ let elab_fun_def elem = visitor#on_fun_def empty elem
 let elab_class elem = visitor#on_class_ empty elem
 
 let elab_program elem = visitor#on_program empty elem
+
+let elab_stmt elem = visitor#on_stmt empty elem

@@ -479,3 +479,6 @@ let elaborate_gconst cst =
 
 let elaborate_typedef td =
   elaborate_namespaces#on_typedef (make_env td.Aast.t_namespace) td
+
+let elaborate_stmt stmt =
+  elaborate_namespaces#on_stmt (make_env Namespace_env.empty_with_default) stmt

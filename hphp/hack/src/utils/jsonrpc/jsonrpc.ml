@@ -282,6 +282,35 @@ let find_already_queued_message ~(f : timestamped_json -> bool) (t : t) :
     ~init:None
     t.messages
 
+let await_until_found
+    (t : t)
+    ~(predicate : timestamped_json -> bool)
+    ~(cancellation_token : unit Lwt.t) : timestamped_json option Lwt.t =
+  match find_already_queued_message ~f:predicate t with
+  | Some message -> Lwt.return_some message
+  | None ->
+    let rec loop () : timestamped_json option Lwt.t =
+      let%lwt () =
+        Lwt.pick
+          [
+            Lwt_unix.wait_read (Lwt_unix.of_unix_file_descr t.daemon_in_fd);
+            cancellation_token;
+          ]
+      in
+      let was_cancelled = not (Lwt.is_sleeping cancellation_token) in
+      if was_cancelled then
+        Lwt.return_none
+      else
+        match%lwt read_single_message_into_queue_wait t with
+        | Timestamped_json message when predicate message ->
+          Lwt.return_some message
+        | Timestamped_json _ -> loop ()
+        | Fatal_exception _
+        | Recoverable_exception _ ->
+          Lwt.return_none
+    in
+    loop ()
+
 let get_message (t : t) =
   (* Read one in a blocking manner to ensure that we have one. *)
   let%lwt () =

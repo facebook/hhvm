@@ -1225,12 +1225,28 @@ let handle_one_message_exn
     failwith ("Unexpected GotNamingTable in " ^ state_to_log_string state)
   | (_, Some (ClientRequest { ClientIdeMessage.tracking_id; message })) ->
     let unblocked_time = Unix.gettimeofday () in
+    (* Our caller has an exception handler which logs the exception.
+       But we instead must fulfil our contract of responding to the client,
+       even if we have an exception. Hence we need our own handler here. *)
     let (state, response) =
       try handle_request message_queue state tracking_id message with
+      | WorkerCancel.Worker_should_exit as exn ->
+        let e = Exception.wrap exn in
+        (* When is this exception raised? several places during Typing_toplevel
+           inner-loops call [WorkerCancel.raise_if_stop_requested]. So: it will
+           be raised during [Tast_provider.compute_tast*] shortly after
+           ClientLsp has called [WorkerCancel.stop_workers], which it does
+           if it sees $/cancelRequest LSP notification on the incoming queue. *)
+        let stack = Exception.get_backtrace_string e |> Exception.clean_stack in
+        let lsp_error =
+          {
+            Lsp.Error.code = Lsp.Error.RequestCancelled;
+            message = Exception.get_ctor_string e;
+            data = Some (Hh_json.JSON_Object [("stack", Hh_json.string_ stack)]);
+          }
+        in
+        (state, Error lsp_error)
       | exn ->
-        (* Our caller has an exception handler which logs the exception.
-           But we instead must fulfil our contract of responding to the client,
-           even if we have an exception. Hence we need our own handler here. *)
         let e = Exception.wrap exn in
         let reason = ClientIdeUtils.make_rich_error "handle_request" ~e in
         (state, Error (ClientIdeUtils.to_lsp_error reason))

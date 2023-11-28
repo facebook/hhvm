@@ -1552,7 +1552,7 @@ let background_status_refresher (ide_service : ClientIdeService.t ref) : unit =
   let _future = loop () in
   ()
 
-(** A thin wrapper around ClientIdeMessage which turns errors into exceptions *)
+(** A thin wrapper around ClientIdeMessage which turns errors into exceptions. *)
 let ide_rpc
     (ide_service : ClientIdeService.t ref)
     ~(tracking_id : string)
@@ -4104,35 +4104,48 @@ let cancel_if_stale (client : Jsonrpc.t) (timestamp : float) (timeout : float) :
   else
     Lwt.return_unit
 
-(** This is called before we even start processing a message. Its purpose:
-if the Jsonrpc queue has already previously read off stdin a cancellation
-request for the message we're about to handle, then throw an exception.
-There are races, e.g. we might start handling this request because we haven't
-yet gotten around to reading a cancellation message off stdin. But
-that's inevitable. Think of this only as best-effort. *)
+let assert_workers_are_not_stopped () =
+  if WorkerCancel.is_stop_requested () then begin
+    HackEventLogger.invariant_violation_bug
+      "ClientLsp workers are stopped but shouldn't be";
+    WorkerCancel.resume_workers ()
+  end;
+  ()
+
+(** This predicate will return true if and only if the second parameter
+is a $/cancelRequest notification for LSP request [message]. *)
+let is_cancellation_of_request ~message { Jsonrpc.json; _ } : bool =
+  match message with
+  | ResponseMessage _
+  | NotificationMessage _ ->
+    false
+  | RequestMessage (id, _request) ->
+    let module M = struct
+      exception Is_response
+    end in
+    (try
+       let peek = Lsp_fmt.parse_lsp json (fun _ -> raise M.Is_response) in
+       match peek with
+       | NotificationMessage
+           (CancelRequestNotification { Lsp.CancelRequest.id = peek_id }) ->
+         Lsp.IdKey.compare id peek_id = 0
+       | _ -> false
+     with
+    | M.Is_response -> false)
+
+(** LEGACY FUNCTION, to be deleted once we roll out lsp_cancellation *)
 let cancel_if_has_pending_cancel_request
     (client : Jsonrpc.t) (message : lsp_message) : unit =
   match message with
   | ResponseMessage _ -> ()
   | NotificationMessage _ -> ()
-  | RequestMessage (id, _request) ->
+  | RequestMessage _ ->
     (* Scan the queue for any pending (future) cancellation messages that are requesting
        cancellation of the same id as our current request *)
     let pending_cancel_request_opt =
-      Jsonrpc.find_already_queued_message client ~f:(fun { Jsonrpc.json; _ } ->
-          try
-            let peek =
-              Lsp_fmt.parse_lsp json (fun _ ->
-                  failwith "not resolving responses")
-            in
-            match peek with
-            | NotificationMessage
-                (CancelRequestNotification { Lsp.CancelRequest.id = peek_id })
-              ->
-              Lsp.IdKey.compare id peek_id = 0
-            | _ -> false
-          with
-          | _ -> false)
+      Jsonrpc.find_already_queued_message
+        client
+        ~f:(is_cancellation_of_request ~message)
     in
     (* If there is a future cancellation request, we won't even embark upon this message *)
     if Option.is_some pending_cancel_request_opt then
@@ -4145,6 +4158,72 @@ let cancel_if_has_pending_cancel_request
            })
     else
       ()
+
+(** This will run [f] but wrap it up in a way that respects cancellation:
+1. If there's already a cancellation request for [message] in the queue, then we'll
+just raise [RequestCancelled] Lsp exception immediately.
+2. Otherwise, we'll await the callback [f], but if a cancellation request arrives
+in the queue while awaiting then we'll use [WorkerCancel.stop_workers] to cooperatively
+request it to finish.
+
+INVARIANT: only one concurrent caller should invoke this function. (why? because
+our cancellation mechanism [WorkerCancel.stop_workers] is a single bit, hence unable
+to know which of multiple concurrent calls should be stopped). If this requirement
+is violated, (1) we might end up cancelling the wrong thing, (2) we'll log
+invariant_violation_bugs in [ide_rpc], here, and other places that call
+[assert_workers_are_not_stopped]. It's easy to see how our caller upholds
+the invariant -- we have only a single caller, the main ClientLsp message-loop,
+which isn't concurrent with itself.
+
+INVARIANT: This function assumes the invariant that workers are not stopped
+prior to entering this function, and restores the invariant upon exiting.
+(Again, this would go wrong in the presence of multiple concurrent callers). *)
+let respect_cancellation
+    (client : Jsonrpc.t) ~(predicate : Jsonrpc.timestamped_json -> bool) ~f =
+  assert_workers_are_not_stopped ();
+  (* Explanation: this statement embodies the invariant that workers are not
+     stopped prior to entering. This function is the only place in the code which
+     can stop workers, and it unstops workers in its [~finally] clause. Because
+     of the invariant that no one will call this function concurrently with itself,
+     we don't run into problems. *)
+  let (cancellation_token, cancellation_source) = Lwt.wait () in
+  (* Following promise will be fulfilled immediately if cancellation is already in the queue;
+     otherwise will be fulfilled when it eventually arrives, or with [None] if [cancellation_token]
+     is completed first or if there's a stream error *)
+  let promise =
+    Jsonrpc.await_until_found client ~predicate ~cancellation_token
+  in
+  (* If there was already a cancel request in the queue, we'll skip all processing right now! *)
+  if not (Lwt.is_sleeping promise) then begin
+    raise
+      (Error.LspException
+         {
+           Error.code = Error.RequestCancelled;
+           message = "request cancelled";
+           data = None;
+         })
+  end;
+  (* Otherwise, cancellation will cooperatively request clientIdeDaemon to stop *)
+  let promise =
+    Lwt.map
+      (fun cancel_notification_opt ->
+        match cancel_notification_opt with
+        | None -> ()
+        | Some { Jsonrpc.timestamp; _ } ->
+          Hh_logger.log
+            "acting upon cancellation at %s"
+            (Utils.timestring timestamp);
+          WorkerCancel.stop_workers ())
+      promise
+  in
+  let%lwt result =
+    Lwt_utils.try_finally ~f ~finally:(fun () ->
+        ensure_cancelled cancellation_source;
+        let%lwt () = promise in
+        WorkerCancel.resume_workers ();
+        Lwt.return_unit)
+  in
+  Lwt.return result
 
 (** This function is called upon didOpen/didChange
 to stick a uri into the [uris_that_need_check] queue. *)
@@ -4285,7 +4364,7 @@ let set_verbose_to_file
   in
   Lwt.return_unit
 
-(* Process and respond to a message from VSCode, and update [state] accordingly. *)
+(** Process and respond to a message from VSCode, and update [state] accordingly. *)
 let handle_client_message
     ~(state : state ref)
     ~(client : Jsonrpc.t)
@@ -4293,7 +4372,6 @@ let handle_client_message
     ~(metadata : incoming_metadata)
     ~(message : lsp_message)
     ~(ref_unblocked_time : float ref) : result_telemetry option Lwt.t =
-  cancel_if_has_pending_cancel_request client message;
   let%lwt result_telemetry_opt =
     (* make sure to wrap any exceptions below in the promise *)
     let tracking_id = metadata.tracking_id in
@@ -4995,6 +5073,10 @@ let main
    * clientLsp message-loop or hh_server, and can start actually handling.
    * Everything that blocks will update this variable. *)
   let process_next_event () : unit Lwt.t =
+    assert_workers_are_not_stopped ();
+    (* This assertion is satisfied because the only place that stops workers is inside
+       [respect_cancellation], but its ~finally clause guarantees that it unstops workers
+       before it completes i.e. before we continue this [process_next_event] loop. *)
     try%lwt
       let%lwt () =
         match !deferred_action with
@@ -5020,13 +5102,32 @@ let main
       let%lwt result_telemetry_opt =
         match event with
         | Client_message (metadata, message) ->
-          handle_client_message
-            ~state
-            ~client
-            ~ide_service
-            ~metadata
-            ~message
-            ~ref_unblocked_time
+          if !env.local_config.ServerLocalConfig.lsp_cancellation then begin
+            (* Note: the function [respect_cancellation] requires the invariant that it not be called
+               concurrently with itself. That's satisfied because here in the ClientLsp main loop
+               is the only place we call it, and the main loop isn't concurrent. *)
+            respect_cancellation
+              client
+              ~predicate:(is_cancellation_of_request ~message)
+              ~f:(fun () ->
+                handle_client_message
+                  ~state
+                  ~client
+                  ~ide_service
+                  ~metadata
+                  ~message
+                  ~ref_unblocked_time)
+          end else begin
+            (* TODO(ljw): delete this branch once we roll out lsp_cancellation *)
+            cancel_if_has_pending_cancel_request client message;
+            handle_client_message
+              ~state
+              ~client
+              ~ide_service
+              ~metadata
+              ~message
+              ~ref_unblocked_time
+          end
         | Daemon_notification notification ->
           handle_daemon_notification
             ~state

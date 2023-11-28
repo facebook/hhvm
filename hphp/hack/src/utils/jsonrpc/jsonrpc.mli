@@ -31,6 +31,20 @@ val await_until_message :
 val find_already_queued_message :
   f:(timestamped_json -> bool) -> t -> timestamped_json option
 
+(** This awaits until a message is found which satisfies the predicate,
+and returns it as [Some].
+If the message was already in the queue at the time this function was called,
+then the returned promise will be already-completed.
+If [cancellation_token] is fired before a message is found, then
+the returned promise will get resolved with [None].
+If there's a fault with the incoming file-descriptor like EOF, the returned promise
+also gets resolved to [None]. *)
+val await_until_found :
+  t ->
+  predicate:(timestamped_json -> bool) ->
+  cancellation_token:unit Lwt.t ->
+  timestamped_json option Lwt.t
+
 val get_message :
   t ->
   [> `Message of timestamped_json

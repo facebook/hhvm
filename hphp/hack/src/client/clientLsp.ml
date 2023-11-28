@@ -4141,82 +4141,46 @@ let cancel_if_has_pending_cancel_request
     else
       ()
 
-(** The function [send_file_to_ide_and_get_errors_if_needed] currently
-plays two different roles:
-1. when a didChange/didOpen event arrives, it defers them until we become idle
-2. when we become idle, it discharges that deferred work by recomputing squiggles.
-
-TODO(ljw): It's ugly that the function has all these mixed roles! *)
-type when_to_get_errors =
-  | Get_errors_if_not_pull_diagnostics_and_no_subsequent_didChange
-  | Get_errors_always_because_discharging_uri_that_needs_check
-
 (** This function is called upon didOpen/didChange
-to stick a uri into the [uris_that_need_check] queue, and is called a second
-time upon idle to discharge those uris by sending them to [ide_service] to
-recomputing errors and publishing them. *)
-let send_file_to_ide_and_get_errors_if_needed
-    ~client:_
+to stick a uri into the [uris_that_need_check] queue. *)
+let send_file_to_ide_and_defer_check
     ~ide_service
     ~state
     ~uri
     ~file_contents
-    ~(when_to_get_errors : when_to_get_errors)
     ~(trigger : errors_trigger)
     ~ref_unblocked_time : state Lwt.t =
   let file_path = uri |> lsp_uri_to_path |> Path.make in
-  let should_calculate_errors =
-    match when_to_get_errors with
-    | Get_errors_always_because_discharging_uri_that_needs_check -> true
-    | Get_errors_if_not_pull_diagnostics_and_no_subsequent_didChange -> false
-  in
   let tracking_id =
     match trigger with
     | Initialize_trigger -> Random_id.short_string ()
     | Message_trigger { metadata; _ } -> metadata.tracking_id
   in
-  let%lwt errors =
+  let%lwt _errors =
     ide_rpc
       ide_service
       ~tracking_id
       ~ref_unblocked_time
       ClientIdeMessage.(
         Did_open_or_change
-          ({ file_path; file_contents }, { should_calculate_errors }))
+          ({ file_path; file_contents }, { should_calculate_errors = false }))
   in
-  let new_state =
-    match errors with
-    | None -> !state
-    | Some errors ->
-      publish_and_report_after_recomputing_live_squiggles
-        !state
-        file_path
-        errors
-        ~trigger
-        ~ref_unblocked_time
-  in
-  let new_state =
-    match (when_to_get_errors, new_state) with
-    | ( Get_errors_if_not_pull_diagnostics_and_no_subsequent_didChange,
-        Running renv ) ->
-      let uris_that_need_check = renv.Run_env.uris_that_need_check in
-      Option.iter
-        (UriMap.find_opt uri uris_that_need_check)
-        ~f:(fun prev_trigger ->
-          (* We had a previous trigger to typecheck the file and then a new trigger arrived.
-             How to report on the previous attempt? ... as cancelled, just like the rest of LSP does it. *)
-          report_recheck_telemetry
-            ~trigger:prev_trigger
-            ~ref_unblocked_time
-            uri
-            (Error ()));
-      let uris_that_need_check = UriMap.add uri trigger uris_that_need_check in
-      Running Run_env.{ renv with uris_that_need_check }
-    | (Get_errors_if_not_pull_diagnostics_and_no_subsequent_didChange, _)
-    | (Get_errors_always_because_discharging_uri_that_needs_check, _) ->
-      new_state
-  in
-  Lwt.return new_state
+  match !state with
+  | Running renv ->
+    let uris_that_need_check = renv.Run_env.uris_that_need_check in
+    Option.iter
+      (UriMap.find_opt uri uris_that_need_check)
+      ~f:(fun prev_trigger ->
+        (* We had a previous trigger to typecheck the file and then a new trigger arrived.
+           How to report on the previous attempt? ... as cancelled, just like the rest of LSP does it. *)
+        report_recheck_telemetry
+          ~trigger:prev_trigger
+          ~ref_unblocked_time
+          uri
+          (Error ()));
+    let uris_that_need_check = UriMap.add uri trigger uris_that_need_check in
+    Lwt.return (Running Run_env.{ renv with uris_that_need_check })
+  | _ -> Lwt.return !state
 
 (************************************************************************)
 (* Message handling                                                     *)
@@ -4225,7 +4189,6 @@ let send_file_to_ide_and_get_errors_if_needed
 (** send DidOpen/Close/Change/Save ide_service as needed *)
 let handle_editor_buffer_message
     ~(state : state ref)
-    ~(client : Jsonrpc.t)
     ~(ide_service : ClientIdeService.t ref)
     ~(metadata : incoming_metadata)
     ~(ref_unblocked_time : float ref)
@@ -4247,14 +4210,11 @@ let handle_editor_buffer_message
     in
     let file_contents = get_document_contents editor_open_files uri in
     let%lwt new_state =
-      send_file_to_ide_and_get_errors_if_needed
-        ~client
+      send_file_to_ide_and_defer_check
         ~ide_service
         ~state
         ~uri
         ~file_contents
-        ~when_to_get_errors:
-          Get_errors_if_not_pull_diagnostics_and_no_subsequent_didChange
         ~trigger:(Message_trigger { metadata; message })
         ~ref_unblocked_time
     in
@@ -4798,7 +4758,6 @@ let handle_client_message
       let%lwt () =
         handle_editor_buffer_message
           ~state
-          ~client
           ~ide_service
           ~metadata
           ~ref_unblocked_time
@@ -4853,7 +4812,6 @@ let handle_client_message
 (** Process and respond to a notification from clientIdeDaemon, and update [state] accordingly. *)
 let handle_daemon_notification
     ~(state : state ref)
-    ~(client : Jsonrpc.t)
     ~(ide_service : ClientIdeService.t ref)
     ~(notification : ClientIdeMessage.notification)
     ~(ref_unblocked_time : float ref) : result_telemetry option Lwt.t =
@@ -4878,14 +4836,11 @@ let handle_daemon_notification
       Lwt_list.iter_s
         (fun (uri, { TextDocumentItem.text = file_contents; _ }) ->
           let%lwt new_state =
-            send_file_to_ide_and_get_errors_if_needed
-              ~client
+            send_file_to_ide_and_defer_check
               ~ide_service
               ~state
               ~uri
               ~file_contents
-              ~when_to_get_errors:
-                Get_errors_if_not_pull_diagnostics_and_no_subsequent_didChange
               ~trigger:Initialize_trigger
               ~ref_unblocked_time
           in
@@ -4902,7 +4857,6 @@ let handle_daemon_notification
 
 let handle_deferred_check
     ~(state : state ref)
-    ~(client : Jsonrpc.t)
     ~(ide_service : ClientIdeService.t ref)
     ~(ref_unblocked_time : float ref) : result_telemetry option Lwt.t =
   match !state with
@@ -4920,20 +4874,34 @@ let handle_deferred_check
       | None -> UriMap.empty
     in
     let file_contents = get_document_contents editor_open_files uri in
-    let%lwt new_state =
-      send_file_to_ide_and_get_errors_if_needed
-        ~client
-        ~ide_service
-        ~state
-        ~uri
-        ~file_contents
-        ~when_to_get_errors:
-          Get_errors_always_because_discharging_uri_that_needs_check
-        ~trigger
-        ~ref_unblocked_time
+    let file_path = uri |> lsp_uri_to_path |> Path.make in
+    let tracking_id =
+      match trigger with
+      | Initialize_trigger -> Random_id.short_string ()
+      | Message_trigger { metadata; _ } -> metadata.tracking_id
     in
-    state := new_state;
-    Lwt.return_none
+    let%lwt errors =
+      ide_rpc
+        ide_service
+        ~tracking_id
+        ~ref_unblocked_time
+        ClientIdeMessage.(
+          Did_open_or_change
+            ({ file_path; file_contents }, { should_calculate_errors = true }))
+    in
+    (match errors with
+    | None -> Lwt.return_none
+    | Some errors ->
+      let new_state =
+        publish_and_report_after_recomputing_live_squiggles
+          !state
+          file_path
+          errors
+          ~trigger
+          ~ref_unblocked_time
+      in
+      state := new_state;
+      Lwt.return_none)
 
 (** Called once a second but only when there are no pending messages from client
 or clientIdeDaemon *)
@@ -5046,7 +5014,6 @@ let main
         | Daemon_notification notification ->
           handle_daemon_notification
             ~state
-            ~client
             ~ide_service
             ~notification
             ~ref_unblocked_time
@@ -5061,7 +5028,7 @@ let main
           handle_shell_out_complete result triggering_request shellable_type
         | Tick -> handle_tick ~state
         | Deferred_check ->
-          handle_deferred_check ~state ~client ~ide_service ~ref_unblocked_time
+          handle_deferred_check ~state ~ide_service ~ref_unblocked_time
       in
       (* for LSP requests and notifications, we keep a log of what+when we responded.
          INVARIANT: every LSP request gets either a response logged here,

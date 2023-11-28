@@ -655,7 +655,7 @@ function find_tests(
   }
   $files = vec[];
   foreach ($ft as $file) {
-    if (!stat($file)) {
+    if (!file_exists($file)) {
       error("Not valid file or directory: '$file'");
     }
     $file = preg_replace(',//+,', '/', realpath($file));
@@ -1311,7 +1311,9 @@ function exec_with_timeout(string $cmd,
 
   $pid = $status['pid'];
   $stack_file = Status::getWorkingDir(). "/stacktrace.$pid.log";
-  $stack = file_get_contents($stack_file);
+
+  $stack = null;
+  if (file_exists($stack_file)) $stack = file_get_contents($stack_file);
 
   if ($stack) {
     $error .= "\nstdout:\n$before_dump\nstderr:\n$stderr";

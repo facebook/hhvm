@@ -712,7 +712,7 @@ class mstch_function : public mstch_base {
     return !function_->interaction().empty();
   }
   mstch::node in_or_creates_interaction() {
-    return function_->interaction() || function_->is_interaction_member();
+    return function_->interaction() || is_interaction_member();
   }
   mstch::node is_void() {
     return function_->return_type()->is_void() && !function_->interaction() &&
@@ -758,6 +758,10 @@ class mstch_function : public mstch_base {
   const t_interface* interface_;
 
   bool has_args_() { return function_->params().has_fields(); }
+
+  bool is_interaction_member() const {
+    return dynamic_cast<const t_interaction*>(interface_) != nullptr;
+  }
 
   mstch::node make_exceptions(const t_throws* exceptions) {
     return exceptions ? make_mstch_fields(exceptions->get_members())

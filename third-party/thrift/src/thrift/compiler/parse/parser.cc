@@ -392,9 +392,6 @@ class parser {
     while (token_.kind != '}') {
       if (token_.kind != tok::kw_performs) {
         functions.emplace_back(parse_function());
-        if (!allow_performs) {
-          functions.back()->set_is_interaction_member();
-        }
         continue;
       }
       // Parse performs.

@@ -562,8 +562,8 @@ class python_mstch_function : public mstch_function {
 
   mstch::node async_only() {
     return function_->sink_or_stream() ||
-        function_->is_interaction_constructor() ||
-        function_->is_interaction_member() || function_->interaction();
+        function_->is_interaction_constructor() || is_interaction_member() ||
+        function_->interaction();
   }
 };
 

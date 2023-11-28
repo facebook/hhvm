@@ -95,8 +95,6 @@ class t_function final : public t_named {
     return is_interaction_constructor_;
   }
   void set_is_interaction_constructor() { is_interaction_constructor_ = true; }
-  bool is_interaction_member() const { return is_interaction_member_; }
-  void set_is_interaction_member() { is_interaction_member_ = true; }
 
  private:
   t_type_ref return_type_;
@@ -107,7 +105,6 @@ class t_function final : public t_named {
   t_type_ref interaction_;
   bool has_return_type_ = false;
   bool is_interaction_constructor_ = false;
-  bool is_interaction_member_ = false;
 };
 
 } // namespace compiler

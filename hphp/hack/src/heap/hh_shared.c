@@ -1190,7 +1190,7 @@ static void check_should_exit(void) {
       "Did you forget to call one of `hh_connect` or `hh_shared_init` "
       "to initialize shared memory before accessing it?"
     );
-  } else if (*workers_should_exit) {
+  } else if (worker_can_exit && *workers_should_exit) {
     static const value *exn = NULL;
     if (!exn) exn = caml_named_value("worker_should_exit");
     caml_raise_constant(*exn);

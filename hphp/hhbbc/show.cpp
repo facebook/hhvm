@@ -624,12 +624,7 @@ std::string show(const Type& t) {
     auto const showDCls = [&] (const DCls& dcls, bool isObj) {
       auto const lt = [&] {
         assertx(!dcls.isExact());
-        if (!isObj && !dcls.containsNonRegular()) {
-          if (dcls.isIsect()) return "<!";
-          if (!dcls.cls().mightBeRegular()) return "<";
-          if (dcls.cls().mightContainNonRegular()) return "<!";
-        }
-        return "<=";
+        return !isObj && !dcls.containsNonRegular() ? "<-" : "<=";
       };
 
       std::string ret;

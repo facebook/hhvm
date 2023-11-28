@@ -105,7 +105,7 @@ void record(ISS& env, const Bytecode& bc) {
     return record(env, tmp);
   }
 
-  if (!env.replacedBcs.size() &&
+  if (env.replacedBcs.empty() &&
       env.unchangedBcs < env.blk.hhbcs.size() &&
       bc == env.blk.hhbcs[env.unchangedBcs]) {
     env.unchangedBcs++;
@@ -542,10 +542,12 @@ namespace {
 bool shouldReduceToNonReifiedVerifyType(ISS& env, SArray ts) {
   if (get_ts_kind(ts) != TypeStructure::Kind::T_unresolved) return false;
   auto const clsName = get_ts_classname(ts);
-  auto const rcls = env.index.resolve_class(clsName);
-  if (rcls) return !rcls->couldHaveReifiedGenerics();
+  auto const lookup = env.index.lookup_class_or_type_alias(clsName);
+  if (lookup.cls) {
+    return !env.index.resolve_class(*lookup.cls)->couldHaveReifiedGenerics();
+  }
   // Type aliases cannot have reified generics
-  return env.index.lookup_type_alias(clsName) != nullptr;
+  return lookup.typeAlias;
 }
 
 }
@@ -1927,19 +1929,20 @@ bool isTypeStructCJmpImpl(ISS& env,
   }
 
   auto const clsName = get_ts_classname(a->m_data.parr);
+
+  if (interface_supports_non_objects(clsName)) return false;
+
   auto const rcls = env.index.resolve_class(clsName);
-  if (!rcls ||
-      !rcls->resolved() ||
-      rcls->cls()->attrs & AttrEnum ||
-      interface_supports_non_objects(clsName)) {
-    return false;
-  }
+  if (!rcls) return false;
 
   auto const val = elems[0]->type;
   auto const instTy = subObj(*rcls);
   if (val.subtypeOf(instTy) || !val.couldBe(instTy)) {
     return false;
   }
+
+  auto const cls = rcls->cls();
+  if (!cls || cls->attrs & AttrEnum) return false;
 
   // If we have an optional type, whose unopt is guaranteed to pass
   // the instanceof check, then failing to pass implies it was null.
@@ -2328,7 +2331,7 @@ void in(ISS& env, const bc::CGetS& op) {
 void in(ISS& env, const bc::ClassGetC& op) {
   auto const t = topC(env);
 
-  if (t.subtypeOf(BCls)) return reduce(env, bc::Nop {});
+  if (t.subtypeOf(BCls)) return reduce(env);
   popC(env);
 
   if (!t.couldBe(BObj | BCls | BStr | BLazyCls)) {
@@ -2345,7 +2348,7 @@ void in(ISS& env, const bc::ClassGetC& op) {
 
   if (auto const clsname = getNameFromType(t)) {
     if (auto const rcls = env.index.resolve_class(clsname)) {
-      if (rcls->resolved()) effect_free(env);
+      effect_free(env);
       push(env, clsExact(*rcls));
       return;
     }
@@ -2908,12 +2911,10 @@ void isTypeStructImpl(ISS& env, SArray inputTS) {
     case TypeStructure::Kind::T_xhp: {
       auto clsname = get_ts_classname(ts);
       auto const rcls = env.index.resolve_class(clsname);
-      if (!rcls || !rcls->resolved() || (ts->exists(s_generic_types) &&
-                                         (rcls->cls()->hasReifiedGenerics ||
-                                         !isTSAllWildcards(ts)))) {
-        // If it is a reified class or has non wildcard generics,
-        // we need to bail
-        return result(TBool);
+      if (!rcls) return result(TBool);
+      if (ts->exists(s_generic_types)) {
+        if (!isTSAllWildcards(ts)) return result(TBool);
+        if (rcls->couldHaveReifiedGenerics()) return result(TBool);
       }
       return reduce(env, bc::PopC {}, bc::InstanceOfD { clsname });
     }
@@ -2926,13 +2927,12 @@ void isTypeStructImpl(ISS& env, SArray inputTS) {
       auto const rcls = env.index.resolve_class(classname);
       // We can only reduce to instance of if we know for sure that this class
       // can be resolved since instanceof undefined class does not throw
-      if (!rcls || !rcls->resolved() || rcls->cls()->attrs & AttrEnum) {
-        return result(TBool);
-      }
-      if (has_generics &&
-         (rcls->cls()->hasReifiedGenerics || !isTSAllWildcards(ts))) {
-          // If it is a reified class or has non wildcard generics,
-          // we need to bail
+      if (!rcls) return result(TBool);
+      auto const cls = rcls->cls();
+      if (!cls || cls->attrs & AttrEnum) return result(TBool);
+      if (has_generics && (cls->hasReifiedGenerics || !isTSAllWildcards(ts))) {
+        // If it is a reified class or has non wildcard generics, we
+        // need to bail
         return result(TBool);
       }
       return reduce(env, bc::PopC {}, bc::InstanceOfD { rcls->name() });
@@ -4283,8 +4283,7 @@ void in(ISS& env, const bc::ResolveClass& op) {
     unreachable(env);
     return;
   }
-
-  if (cls->resolved()) effect_free(env);
+  effect_free(env);
   push(env, clsExact(*cls));
 }
 
@@ -4652,7 +4651,7 @@ void in(ISS& env, const bc::NewObjD& op)  {
   auto const isCtx = [&] {
     if (!env.ctx.cls) return false;
     if (rcls->couldBeOverriddenByRegular()) return false;
-    auto const r = env.index.resolve_class(env.ctx.cls->name);
+    auto const r = env.index.resolve_class(*env.ctx.cls);
     if (!r) return false;
     return obj == objExact(*r);
   }();
@@ -5025,18 +5024,19 @@ void in(ISS& env, const bc::OODeclExists& op) {
   assertx(isStringType(v->m_type));
   auto const rcls = env.index.resolve_class(v->m_data.pstr);
   if (!rcls) return push(env, TFalse);
+  auto const cls = rcls->cls();
 
   // We know the Class* exists, but not its type.
-  if (!rcls->cls()) return push(env, TBool);
+  if (!cls) return push(env, TBool);
 
   auto const exist = [&] () -> bool {
     switch (op.subop1) {
       case OODeclExistsOp::Class:
-        return !(rcls->cls()->attrs & (AttrInterface | AttrTrait));
+        return !(cls->attrs & (AttrInterface | AttrTrait));
       case OODeclExistsOp::Interface:
-        return rcls->cls()->attrs & AttrInterface;
+        return cls->attrs & AttrInterface;
       case OODeclExistsOp::Trait:
-        return rcls->cls()->attrs & AttrTrait;
+        return cls->attrs & AttrTrait;
     }
     not_reached();
   }();
@@ -5355,12 +5355,13 @@ void in(ISS& env, const bc::CreateCl& op) {
     unreachable(env);
     return push(env, TBottom);
   }
+
+  auto const cls = rcls->cls();
   always_assert_flog(
-    rcls->resolved(),
+    cls,
     "A closure class ({}) failed to resolve",
     op.str2
   );
-  auto const cls = rcls->cls();
   assertx(cls->unit == env.ctx.unit);
   assertx(is_closure(*cls));
 
@@ -5951,9 +5952,7 @@ void interpStep(ISS& env, const Bytecode& bc) {
     return true;
   };
 
-  if (const_prop()) {
-    return;
-  }
+  if (const_prop()) return;
 
   assertx(!env.flags.effectFree || !env.flags.wasPEI);
   if (env.flags.wasPEI) {

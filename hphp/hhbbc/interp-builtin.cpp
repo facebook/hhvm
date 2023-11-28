@@ -378,12 +378,14 @@ impl_builtin_type_structure(ISS& env, const php::Func* func,
     }();
     if (!clsStr) return std::nullopt;
 
-    auto const typeAlias = env.index.lookup_type_alias(clsStr);
-    if (!typeAlias) {
+    auto const [typeAlias, exists] = env.index.lookup_type_alias(clsStr);
+    if (!exists) {
       // No type-alias with that name
       unreachable(env);
       return std::make_pair(TBottom, TriBool::Yes);
     }
+    // It might exist, so be conservative.
+    if (!typeAlias) return std::nullopt;
 
     // Found a type-alias, resolve it's type-structure.
     auto const r = resolve_type_structure(env.index, &env.collect, *typeAlias);
@@ -413,24 +415,23 @@ impl_builtin_type_structure(ISS& env, const php::Func* func,
     if (t.subtypeOf(BStr) && is_specialized_string(t)) {
       auto const str = sval_of(t);
       auto const rcls = env.index.resolve_class(str);
-      if (!rcls || !rcls->resolved()) {
-        throws = TriBool::Maybe;
-        return TCls;
-      }
+      if (!rcls) return TBottom;
       return clsExact(*rcls);
     }
     if (t.subtypeOf(BLazyCls) && is_specialized_lazycls(t)) {
       auto const str = lazyclsval_of(t);
       auto const rcls = env.index.resolve_class(str);
-      if (!rcls || !rcls->resolved()) {
-        throws = TriBool::Maybe;
-        return TCls;
-      }
+      if (!rcls) return TBottom;
       return clsExact(*rcls);
     }
     throws = TriBool::Maybe;
     return TCls;
   }();
+
+  if (cls.is(BBottom)) {
+    unreachable(env);
+    return std::make_pair(TBottom, TriBool::Yes);
+  }
 
   auto lookup = env.index.lookup_class_type_constant(cls, name);
   assertx(lookup.resolution.type.subtypeOf(BSDictN));

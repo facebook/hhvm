@@ -499,7 +499,6 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
       auto const rcls1 = env.index.resolve_class(env.ctx.cls->name);
       auto const rcls2 = env.index.resolve_class(func->cls->name);
       if (!rcls1 || !rcls2) return false;
-      if (!rcls1->resolved() || !rcls2->resolved()) return false;
       if (!rcls1->exactSubtypeOf(*rcls2, true, true) &&
           !rcls2->exactSubtypeOf(*rcls1, true, true)) {
         return false;

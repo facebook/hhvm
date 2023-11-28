@@ -140,6 +140,7 @@ function idx_readonly(
   readonly mixed $idx,
   readonly mixed $default = null,
 )[]: readonly mixed {
+  /* HH_FIXME[4110] */
   return readonly idx(
     $arr,
     $idx,

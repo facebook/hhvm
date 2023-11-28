@@ -14,7 +14,7 @@ pub struct ValidateLikeHintPass {}
 impl Pass for ValidateLikeHintPass {
     fn on_ty_hint_top_down(&mut self, env: &Env, hint: &mut Hint) -> ControlFlow<()> {
         match hint {
-            Hint(pos, box Hint_::Hlike(_)) if !env.like_type_hints_enabled() => {
+            Hint(pos, box Hint_::Hlike(_)) if !env.is_hhi() && !env.like_type_hints_enabled() => {
                 env.emit_error(ExperimentalFeature::LikeType(pos.clone()));
             }
             _ => (),

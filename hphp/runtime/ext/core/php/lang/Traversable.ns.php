@@ -18,7 +18,7 @@ namespace HH {
   /* HH_FIXME[2049] */
   \SimpleXMLElement::class
 )>>
-interface Traversable<+Tv> {
+interface Traversable<<<__NoAutoBound>> +Tv> {
 }
 
 <<__Sealed(
@@ -37,7 +37,7 @@ interface Traversable<+Tv> {
   /* HH_FIXME[2049] */
   \MysqlRow::class,
 )>>
-interface KeyedTraversable<+Tk, +Tv> extends Traversable<Tv> {
+interface KeyedTraversable<+Tk, <<__NoAutoBound>> +Tv> extends Traversable<Tv> {
 }
 
 }

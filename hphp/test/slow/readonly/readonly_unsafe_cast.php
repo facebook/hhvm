@@ -1,4 +1,5 @@
 <?hh
+<<__SupportDynamicType>>
 class Foo {
   public int $prop = 44;
 }

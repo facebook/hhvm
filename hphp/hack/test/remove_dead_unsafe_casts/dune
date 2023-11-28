@@ -15,6 +15,7 @@
    --in-extension
    .php
    --flags
+   --everything-sdt
    --remove-dead-unsafe-casts
    --error-format
    plain)))

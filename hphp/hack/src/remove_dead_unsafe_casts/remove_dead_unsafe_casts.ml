@@ -39,7 +39,10 @@ let patch_location_collection_handler =
               dest_ty,
               (Aast.UnsafeCast _ | Aast.UnsafeNonnullCast) ) )
         when (not @@ Typing_defs.is_any expr_ty)
-             && Typing_subtype.is_sub_type typing_env expr_ty dest_ty ->
+             && Typing_subtype.is_sub_type
+                  typing_env
+                  expr_ty
+                  (Typing_make_type.locl_like Typing_reason.Rnone dest_ty) ->
         let path = Tast_env.get_file env in
         (* The following shared memory write will only work when the entry for
            `path` is empty. Later updates will be dropped on the floor. This is

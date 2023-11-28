@@ -5425,7 +5425,18 @@ end = struct
                 UnsafeNonnullCast
             in
             let te = Aast.Hole (el, ty_from, ty_to, hole_source) in
-            let ty = Typing_defs.with_reason ty (Reason.Runsafe_cast p) in
+            (* Add special reason to the type under the like, so that type mismatches
+             * underneath the like are reported as "dynamic because the expression went
+             * through an UNSAFE_CAST"
+             *)
+            let ty =
+              match Typing_utils.try_strip_dynamic env ty with
+              | None -> ty
+              | Some ty ->
+                MakeType.locl_like
+                  (Reason.Runsafe_cast p)
+                  (Typing_defs.with_reason ty (Reason.Runsafe_cast p))
+            in
             make_result env p te ty
         in
         let should_forget_fakes = false in

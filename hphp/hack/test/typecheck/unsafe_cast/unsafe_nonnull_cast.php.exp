@@ -1,5 +1,5 @@
 File "unsafe_nonnull_cast.php", line 4, characters 3-13:
   ?int
 File "unsafe_nonnull_cast.php", line 6, characters 3-13:
-  int
+  ~int
 No errors

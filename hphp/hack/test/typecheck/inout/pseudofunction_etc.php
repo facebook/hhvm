@@ -2,7 +2,7 @@
 
 function hgoldstein(inout int $x, dynamic $v): void {
   invariant(inout $x, 'foo');
-  HH\FIXME\UNSAFE_CAST<mixed, mixed>(inout $x);
+  HH\FIXME\UNSAFE_CAST<dynamic, dynamic>(inout $x);
   unset(inout $x);
   $d = dict[]
   unset(inout $d['k']);

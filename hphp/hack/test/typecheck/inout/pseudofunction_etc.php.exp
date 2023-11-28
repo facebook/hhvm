@@ -24,16 +24,16 @@ File "pseudofunction_etc.php", line 8, characters 3-13:
 In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict indexing (Typing[4135])
 File "pseudofunction_etc.php", line 9, characters 3-13:
 In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict indexing (Typing[4135])
-File "pseudofunction_etc.php", line 5, characters 38-45:
+File "pseudofunction_etc.php", line 5, characters 42-49:
 Unexpected `inout` annotation for argument (Typing[4183])
   File "soundness.hhi", line 32, characters 7-8:
   This is a normal parameter (does not have `inout`)
-File "pseudofunction_etc.php", line 5, characters 44-45:
+File "pseudofunction_etc.php", line 5, characters 48-49:
 Invalid assignment to an `inout` parameter (Typing[4337])
   File "pseudofunction_etc.php", line 3, characters 27-29:
   Expected `int` (`inout` parameter)
-  File "pseudofunction_etc.php", line 5, characters 24-28:
-  But got `mixed`
+  File "pseudofunction_etc.php", line 5, characters 24-30:
+  But got `dynamic`
   File "soundness.hhi", line 32, characters 3-5:
     via this generic `Tin`
 File "pseudofunction_etc.php", line 10, characters 3-17:

@@ -14,13 +14,13 @@ File "explicit_generics.php", line 11, characters 20-20:
 Illegal wildcard (`_`): generic type parameter `T2` must be specified explicitly (Typing[4347])
   File "explicit_generics.php", line 5, characters 39-40:
   Definition is here
-File "explicit_generics.php", line 12, characters 39-39:
+File "explicit_generics.php", line 12, characters 42-42:
 Illegal wildcard (`_`): generic type parameter `Tout` must be specified explicitly (Typing[4347])
-  File "soundness.hhi", line 31, characters 57-60:
+  File "soundness.hhi", line 31, characters 78-81:
   Definition is here
 File "explicit_generics.php", line 19, characters 12-16:
 Illegal wildcard (`_`): generic type parameter `T` must be specified explicitly (Typing[4347])
-  File "explicit_generics.php", line 16, characters 41-41:
+  File "explicit_generics.php", line 16, characters 40-40:
   Definition is here
 File "explicit_generics.php", line 20, characters 12-16:
 Illegal wildcard (`_`): generic type parameter `T2` must be specified explicitly (Typing[4347])
@@ -36,13 +36,13 @@ Illegal wildcard (`_`): generic type parameter `T2` must be specified explicitly
   Definition is here
 File "explicit_generics.php", line 31, characters 13-13:
 Illegal wildcard (`_`): generic type parameter `T` must be specified explicitly (Typing[4347])
-  File "explicit_generics.php", line 27, characters 25-25:
+  File "explicit_generics.php", line 27, characters 24-24:
   Definition is here
 File "explicit_generics.php", line 32, characters 15-15:
 Illegal wildcard (`_`): generic type parameter `T` must be specified explicitly (Typing[4347])
-  File "explicit_generics.php", line 27, characters 25-25:
+  File "explicit_generics.php", line 27, characters 24-24:
   Definition is here
 File "explicit_generics.php", line 33, characters 19-19:
 Illegal wildcard (`_`): generic type parameter `T` must be specified explicitly (Typing[4347])
-  File "explicit_generics.php", line 27, characters 25-25:
+  File "explicit_generics.php", line 27, characters 24-24:
   Definition is here

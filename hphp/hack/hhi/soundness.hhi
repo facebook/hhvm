@@ -28,10 +28,10 @@ namespace HH\FIXME;
  * applies to the entire next line, and `UNSAFE_CAST` applies to a single
  * expression.
  */
-function UNSAFE_CAST<<<__Explicit>> Tin, <<__Explicit>> Tout>(
+function UNSAFE_CAST<<<__Explicit>> Tin as supportdyn<mixed>, <<__Explicit>> Tout as supportdyn<mixed>>(
   Tin $t,
   ?\HH\FormatString<nothing> $msg = null,
-)[]: Tout;
+)[]: ~Tout;
 
 /**
  * `UNSAFE_NONNULL_CAST` allows you to lie to the type checker and
@@ -48,10 +48,10 @@ function UNSAFE_CAST<<<__Explicit>> Tin, <<__Explicit>> Tout>(
  * if ($my_value is null) { ... } else { ... }
  * ```
  */
-function UNSAFE_NONNULL_CAST<T as nonnull>(
+function UNSAFE_NONNULL_CAST<T as supportdyn<nonnull>>(
   ?T $t,
   ?\HH\FormatString<nothing> $msg = null,
-)[]: T;
+)[]: ~T;
 
 
 

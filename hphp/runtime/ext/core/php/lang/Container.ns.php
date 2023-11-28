@@ -3,7 +3,7 @@
 namespace HH {
 
 <<__Sealed(KeyedContainer::class)>>
-interface Container<+Tv> extends Traversable<Tv> {
+interface Container<<<__NoAutoBound>> +Tv> extends Traversable<Tv> {
 }
 
 <<__Sealed(
@@ -12,7 +12,7 @@ interface Container<+Tv> extends Traversable<Tv> {
   \ConstSet::class,
   AnyArray::class,
 )>>
-interface KeyedContainer<+Tk as arraykey, +Tv> extends Container<Tv>, KeyedTraversable<Tk, Tv> {
+interface KeyedContainer<<<__NoAutoBound>> +Tk as arraykey, <<__NoAutoBound>> +Tv> extends Container<Tv>, KeyedTraversable<Tk, Tv> {
 }
 
 }

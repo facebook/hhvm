@@ -14,6 +14,8 @@ FIXME_CODES: List[int] = [
     # be mutually recursive or referential in some form (e.g.: any class with
     # a `__Sealed` attribute).
     2049,
+    # Typing of idx($this, _) is broken
+    4110,
     # "Memoizing object parameters requires the capability AccessGlobals:" for
     # now, we're allowing this in some places like `create_opaque_value`
     4447,
@@ -26,10 +28,11 @@ FIXME_CODES: List[int] = [
 FLAGS: List[str] = [
     "--no-builtins",
     "--is-systemlib",
-    # "--everything-sdt",
+    "--everything-sdt",
     "--config",
     "enable_no_auto_dynamic=true",
     "--enable-sound-dynamic-type",
+    "--like-type-hints",
     # TODO(T118594542)
     "--allowed-fixme-codes-strict",
     ",".join(map(str, FIXME_CODES)),

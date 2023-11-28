@@ -8,8 +8,9 @@
 open Hh_prelude
 
 module Env = struct
-  let like_type_hints_enabled Naming_phase_env.{ like_type_hints_enabled; _ } =
-    like_type_hints_enabled
+  let like_type_hints_enabled
+      Naming_phase_env.{ like_type_hints_enabled; is_hhi; _ } =
+    is_hhi || like_type_hints_enabled
 end
 
 let on_hint on_error hint ~ctx =

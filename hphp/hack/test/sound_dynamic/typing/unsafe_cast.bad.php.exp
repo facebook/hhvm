@@ -1,0 +1,24 @@
+File "unsafe_cast.bad.php", line 20, characters 10-50:
+Invalid return type (Typing[4110])
+  File "unsafe_cast.bad.php", line 18, characters 33-33:
+  Expected `C`
+  File "soundness.hhi", line 34, characters 6-10:
+  But got `dynamic`
+File "unsafe_cast.bad.php", line 20, characters 10-50:
+Some elements in this collection are incompatible (Typing[4110])
+  File "unsafe_cast.bad.php", line 18, characters 33-33:
+  Expected `C`
+  File "unsafe_cast.bad.php", line 20, characters 14-49:
+  But got `dynamic` because the expression went through a `HH\FIXME\UNSAFE_CAST`. The type might be a lie!
+File "unsafe_cast.bad.php", line 10, characters 3-22:
+Some type arguments violate their constraints (Typing[4323])
+  File "soundness.hhi", line 31, characters 44-60:
+  Expected `dynamic`
+  File "unsafe_cast.bad.php", line 10, characters 24-24:
+  Type `D` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "unsafe_cast.bad.php", line 15, characters 3-22:
+Some type arguments violate their constraints (Typing[4323])
+  File "soundness.hhi", line 31, characters 86-102:
+  Expected `dynamic`
+  File "unsafe_cast.bad.php", line 15, characters 33-33:
+  Type `D` is not a subtype of `dynamic` under dynamic-aware subtyping

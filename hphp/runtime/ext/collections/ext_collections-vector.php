@@ -119,7 +119,8 @@ final class Vector<T> implements \MutableVector<T> {
     // TODO(T125421081) `idx` is special cased in the typechecker, I don't think
     // it quite understands how to deal with the input being `$this`, for some
     // reason.
-    return HH\FIXME\UNSAFE_CAST<mixed, ?T>(idx($this, $key));
+    /* HH_FIXME[4110] */
+    return idx($this, $key);
   }
 
   /** Stores a value into the Vector with the specified key, overwriting any
@@ -584,6 +585,7 @@ final class Vector<T> implements \MutableVector<T> {
    * @return mixed
    */
   public function firstValue()[]: mixed {
+    /* HH_FIXME[4110] */
     return idx($this, 0);
   }
 
@@ -774,7 +776,8 @@ final class ImmVector<T> implements \ConstVector<T> {
    * @return mixed
    */
   public function get(mixed $key)[]: ?T {
-    return HH\FIXME\UNSAFE_CAST<mixed, ?T>(idx($this, $key));
+    /* HH_FIXME[4110] */
+    return idx($this, $key);
   }
 
   /** Returns an iterator that points to beginning of this ImmVector.
@@ -990,6 +993,7 @@ final class ImmVector<T> implements \ConstVector<T> {
    * @return mixed
    */
   public function firstValue()[]: mixed {
+    /* HH_FIXME[4110] */
     return idx($this, 0);
   }
 

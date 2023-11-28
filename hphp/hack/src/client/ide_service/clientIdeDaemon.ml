@@ -1345,6 +1345,9 @@ let daemon_main
   else
     Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
 
+  (* in hh_shared.c, worker_id=0 is used for main process, and _id=1 for the first worker. *)
+  SharedMem.connect args.ClientIdeMessage.shm_handle ~worker_id:1;
+
   Lwt_utils.run_main (fun () -> serve ~in_fd ~out_fd)
 
 let daemon_entry_point : (ClientIdeMessage.daemon_args, unit, unit) Daemon.entry

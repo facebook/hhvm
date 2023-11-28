@@ -312,4 +312,5 @@ type daemon_args = {
   init_id: string;
   verbose_to_stderr: bool;
   verbose_to_file: bool;
+  shm_handle: SharedMem.handle;
 }

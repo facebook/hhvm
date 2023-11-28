@@ -71,6 +71,8 @@ type rollout_flags = {
   saved_state_rollouts: Saved_state_rollouts.t;
   zstd_decompress_by_file: bool;
   lsp_sticky_quarantine: bool;
+  lsp_cancellation: bool;
+  lsp_autocomplete_skip_hierarchy_checks: bool;
 }
 
 let flush () = ()

@@ -503,6 +503,8 @@ let load ~silent options : t * ServerLocalConfig.t =
         ~dump_tasts:local_config.dump_tasts
         ~tco_custom_error_config
         ~tco_sticky_quarantine:local_config.lsp_sticky_quarantine
+        ~tco_autocomplete_skip_hierarchy_checks:
+          local_config.lsp_autocomplete_skip_hierarchy_checks
         GlobalOptions.default
     in
     load_config config local_config_opts

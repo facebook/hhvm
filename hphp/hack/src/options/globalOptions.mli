@@ -302,6 +302,8 @@ type t = {
       (** block accessing superglobals via their variable names *)
   tco_sticky_quarantine: bool;
       (** Controls behavior of [Provider_utils.respect_but_quarantine_unsaved_changes] *)
+  tco_autocomplete_skip_hierarchy_checks: bool;
+      (** Controls behavior of [Provider_context.with_tcopt_for_autocomplete] *)
 }
 [@@deriving eq, show]
 
@@ -430,6 +432,7 @@ val set :
   ?tco_log_exhaustivity_check:bool ->
   ?po_disallow_direct_superglobals_refs:bool ->
   ?tco_sticky_quarantine:bool ->
+  ?tco_autocomplete_skip_hierarchy_checks:bool ->
   t ->
   t
 

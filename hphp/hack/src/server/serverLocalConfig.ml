@@ -260,6 +260,10 @@ type t = {
       (** POC: @catg, add sandcastle info to Scuba samples. *)
   lsp_sticky_quarantine: bool;
       (** POC: @ljw - if true, only exit quarantine when entering a new one *)
+  lsp_cancellation: bool;
+      (** POC: @ljw - if true, respect cancellation while work is in progress *)
+  lsp_autocomplete_skip_hierarchy_checks: bool;
+      (** POC: @ljw - if true, autocomplete skips hierarchy checks *)
 }
 
 let default =
@@ -352,6 +356,8 @@ let default =
     dump_tasts = [];
     log_events_with_sandcastle_info = false;
     lsp_sticky_quarantine = false;
+    lsp_cancellation = false;
+    lsp_autocomplete_skip_hierarchy_checks = false;
   }
 
 let system_config_path =
@@ -1070,6 +1076,15 @@ let load_
   let lsp_sticky_quarantine =
     bool_ "lsp_sticky_quarantine" ~default:default.lsp_sticky_quarantine config
   in
+  let lsp_cancellation =
+    bool_ "lsp_cancellation" ~default:default.lsp_cancellation config
+  in
+  let lsp_autocomplete_skip_hierarchy_checks =
+    bool_
+      "lsp_autocomplete_skip_hierarchy_checks"
+      ~default:default.lsp_autocomplete_skip_hierarchy_checks
+      config
+  in
   let zstd_decompress_by_file =
     bool_
       "zstd_decompress_by_file"
@@ -1188,6 +1203,8 @@ let load_
     dump_tasts;
     log_events_with_sandcastle_info;
     lsp_sticky_quarantine;
+    lsp_cancellation;
+    lsp_autocomplete_skip_hierarchy_checks;
   }
 
 (** Loads the config from [path]. Uses JustKnobs and ExperimentsConfig to override.
@@ -1243,4 +1260,7 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       zstd_decompress_by_file =
         GlobalOptions.(options.saved_state.loading.zstd_decompress_by_file);
       lsp_sticky_quarantine = options.lsp_sticky_quarantine;
+      lsp_cancellation = options.lsp_cancellation;
+      lsp_autocomplete_skip_hierarchy_checks =
+        options.lsp_autocomplete_skip_hierarchy_checks;
     }

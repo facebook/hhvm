@@ -162,6 +162,7 @@ impl Default for GlobalOptions {
             po_disallow_direct_superglobals_refs: false,
             tco_use_old_decls_from_cas: false,
             tco_sticky_quarantine: false,
+            tco_autocomplete_skip_hierarchy_checks: false,
         }
     }
 }

@@ -42,7 +42,8 @@ CAMLprim value hh_counter_next(void);
 /*****************************************************************************/
 CAMLprim value hh_stop_workers(void);
 CAMLprim value hh_resume_workers(void);
-CAMLprim value hh_check_should_exit(void);
+CAMLprim value hh_raise_if_should_exit(void);
+CAMLprim value hh_should_exit (void);
 CAMLprim value hh_set_can_worker_stop(value val);
 CAMLprim value hh_malloc_trim(void);
 CAMLprim value hh_set_allow_removes(value val);

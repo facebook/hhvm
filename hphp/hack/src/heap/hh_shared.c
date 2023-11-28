@@ -1183,23 +1183,27 @@ CAMLprim value hh_set_allow_hashtable_writes_by_current_process(value val) {
   CAMLreturn(Val_unit);
 }
 
-static void check_should_exit(void) {
-  if (workers_should_exit == NULL) {
-    caml_failwith(
-      "`check_should_exit` failed: `workers_should_exit` was uninitialized. "
-      "Did you forget to call one of `hh_connect` or `hh_shared_init` "
-      "to initialize shared memory before accessing it?"
-    );
-  } else if (worker_can_exit && *workers_should_exit) {
+CAMLprim value hh_should_exit (void) {
+  CAMLparam0();
+  // [worker_can_exit] is used by WorkerCancel.with_no_cancellations to protect
+  // critical regions against cancellation.
+  // If [workers_should_exit] is null, that means we haven't connected to shmem,
+  // hence it's impossible for anyone to have sent us a cancellation request!
+  // The content of [workers_should_exit] is set by [WorkerCancel.stop_workers].
+  CAMLreturn(Val_bool(worker_can_exit && workers_should_exit != NULL && *workers_should_exit ? 1 : 0));
+}
+
+static void raise_if_should_exit(void) {
+  if (Bool_val(hh_should_exit())) {
     static const value *exn = NULL;
     if (!exn) exn = caml_named_value("worker_should_exit");
     caml_raise_constant(*exn);
   }
 }
 
-CAMLprim value hh_check_should_exit (void) {
+CAMLprim value hh_raise_if_should_exit (void) {
   CAMLparam0();
-  check_should_exit();
+  raise_if_should_exit();
   CAMLreturn(Val_unit);
 }
 
@@ -1654,7 +1658,7 @@ value hh_add(value evictable, value key, value data) {
     _Bool eviction_enabled = shm_cache_size_b >= 0;
     CAMLreturn(shmffi_add(Bool_val(evictable) && eviction_enabled, hash, data));
   }
-  check_should_exit();
+  raise_if_should_exit();
   unsigned int slot = hash & (hashtbl_size - 1);
   unsigned int init_slot = slot;
   while(1) {
@@ -1761,7 +1765,7 @@ CAMLprim value hh_add_raw(value key, value data) {
   if (shm_use_sharded_hashtbl != 0) {
     CAMLreturn(shmffi_add_raw(hash, data));
   }
-  check_should_exit();
+  raise_if_should_exit();
   unsigned int slot = hash & (hashtbl_size - 1);
   unsigned int init_slot = slot;
   while(1) {
@@ -1864,7 +1868,7 @@ static _Bool hh_is_slot_taken_for_key(unsigned int slot, value key) {
 }
 
 _Bool hh_mem_inner(value key) {
-  check_should_exit();
+  raise_if_should_exit();
   unsigned int slot = find_slot(key);
   return hh_is_slot_taken_for_key(slot, key);
 }
@@ -1929,7 +1933,7 @@ static CAMLprim value hh_deserialize(heap_entry_t *elt) {
 /*****************************************************************************/
 CAMLprim value hh_get_and_deserialize(value key) {
   CAMLparam1(key);
-  check_should_exit();
+  raise_if_should_exit();
   CAMLlocal2(deserialized_value, result);
   if (shm_use_sharded_hashtbl != 0) {
     CAMLreturn(shmffi_get_and_deserialize(get_hash(key)));
@@ -1953,7 +1957,7 @@ CAMLprim value hh_get_raw(value key) {
   if (shm_use_sharded_hashtbl != 0) {
     CAMLreturn(shmffi_get_raw(get_hash(key)));
   }
-  check_should_exit();
+  raise_if_should_exit();
   CAMLlocal2(result, bytes);
 
   unsigned int slot = find_slot(key);

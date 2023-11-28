@@ -313,4 +313,10 @@ let with_tcopt_for_autocomplete t =
     |> TypecheckerOptions.set_tco_autocomplete_mode
     |> TypecheckerOptions.set_skip_check_under_dynamic
   in
+  let tcopt =
+    if TypecheckerOptions.tco_autocomplete_skip_hierarchy_checks tcopt then
+      tcopt |> TypecheckerOptions.set_skip_hierarchy_checks
+    else
+      tcopt
+  in
   { t with tcopt }

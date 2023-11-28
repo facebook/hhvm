@@ -51,6 +51,7 @@
 #include "hphp/util/rds-local.h"
 #include "hphp/util/user-info.h"
 
+#include <folly/Likely.h>
 #include <folly/String.h>
 #include <folly/portability/Dirent.h>
 #include <folly/portability/SysFile.h>
@@ -179,7 +180,8 @@ static int accessSyscall(
   Stream::Wrapper* w = Stream::getWrapperFromURI(uri_or_path);
   if (!w) return -1;
 
-  if (useFileCache && dynamic_cast<FileStreamWrapper*>(w)) {
+  if (useFileCache && (dynamic_cast<FileStreamWrapper*>(w)
+      || UNLIKELY(RO::EvalRecordReplay && w->isNormalFileStream()))) {
     String path(uri_or_path);
     if (UNLIKELY(StringUtil::IsFileUrl(uri_or_path.data()))) {
       path = StringUtil::DecodeFileUrl(uri_or_path);

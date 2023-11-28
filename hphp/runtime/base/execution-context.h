@@ -222,6 +222,7 @@ public:
   };
   void addStdoutHook(StdoutHook*);
   bool removeStdoutHook(StdoutHook*);
+  std::size_t numStdoutHooks() const;
 
   /**
    * Output buffering.

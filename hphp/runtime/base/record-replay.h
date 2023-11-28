@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <string_view>
 
+#include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
@@ -30,6 +31,7 @@ using NativeFunction = void(*)(NativeArgs*);
 
 namespace rr {
 
+void addNativeFuncAttrs(NativeFunction ptr, Attr attrs);
 void addNativeFuncName(NativeFunction ptr, std::string_view name);
 std::string_view getNativeFuncName(NativeFunction ptr);
 NativeFunction getNativeFuncPtr(std::string_view name);

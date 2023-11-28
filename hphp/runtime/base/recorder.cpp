@@ -37,7 +37,6 @@
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/replayer.h"
-#include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
@@ -45,6 +44,7 @@
 #include "hphp/runtime/base/type-resource.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
@@ -65,9 +65,20 @@ namespace HPHP {
 using namespace rr;
 
 namespace {
+  static struct DefaultWriter final : public Recorder::Writer {
+    void write(const std::vector<char>& recording) override {
+      const auto dir{std::filesystem::canonical(RO::EvalRecordDir)};
+      std::filesystem::create_directory(dir);
+      const auto name{std::to_string(folly::Random::rand64()) + ".hhr"};
+      std::ofstream ofs{dir / name, std::ios::binary};
+      ofs.write(recording.data(), recording.size());
+    }
+  } g_defaultWriter;
+
   static std::string g_entryPoint;
   static std::string g_hdf;
   static std::string g_ini;
+  static Recorder::Writer* g_writer{&g_defaultWriter};
 } // namespace
 
 void Recorder::onGetFactsForRequest(HPHP::FactsStore*& map) {
@@ -143,23 +154,14 @@ void Recorder::onVisitEntity(const std::string& entity) {
 
 void Recorder::requestExit() {
   if (UNLIKELY(m_enabled)) {
+    resolveWaitHandles();
+    Stream::setThreadLocalFileHandler(m_parentStreamWrapper);
     try {
-      resolveWaitHandles();
-      Stream::setThreadLocalFileHandler(m_parentStreamWrapper);
       BlobEncoder encoder;
       toArray().serde(encoder);
-      const auto data{encoder.take()};
-      const auto dir{std::filesystem::canonical(RO::EvalRecordDir)};
-      std::filesystem::create_directory(dir);
-      const auto file{dir / (std::to_string(folly::Random::rand64()) + ".hhr")};
-      std::ofstream ofs{file, std::ios::binary};
-      ofs.write(data.data(), data.size());
-    } catch (const std::exception& e) {
-      Logger::FWarning("Error while recording: {}", e.what());
-    } catch (const req::root<Object>& e) {
-      Logger::FWarning("Error while recording: {}", e.get()->invokeToString());
+      g_writer->write(encoder.take());
     } catch (...) {
-      Logger::FWarning("Error while recording: {}", current_exception_name());
+      // TODO Record failure to record
     }
     m_enabled = false;
     m_factsStore.clear();
@@ -179,7 +181,10 @@ void Recorder::requestInit() {
   switch (HPHP::Treadmill::sessionKind()) {
     case HPHP::Treadmill::SessionKind::CLISession:
     case HPHP::Treadmill::SessionKind::HttpRequest:
-      m_enabled = folly::Random::oneIn64(RO::EvalRecordSampleRate);
+      if (folly::Random::oneIn64(RO::EvalRecordSampleRate)) {
+        const auto& url{RO::EvalRecordSampleUrl};
+        m_enabled = url.empty() || url == g_context->getRequestUrl();
+      }
       break;
     default:
       break;
@@ -189,8 +194,13 @@ void Recorder::requestInit() {
     m_parentStreamWrapper = Stream::getThreadLocalFileHandler();
     m_streamWrapper = Array::CreateDict();
     Stream::setThreadLocalFileHandler(getStreamWrapper());
+    TmpAssign _{RO::EvalJitDisabledByVSDebug, false};
     HPHP::DebuggerHook::attach<DebuggerHook>();
   }
+}
+
+void Recorder::setWriter(Writer* writer) {
+  g_writer = writer != nullptr ? writer : &g_defaultWriter;
 }
 
 struct Recorder::DebuggerHook final : public HPHP::DebuggerHook {
@@ -479,8 +489,10 @@ struct Recorder::LoggerHook final : public HPHP::LoggerHook {
 
 struct Recorder::StdoutHook final : public ExecutionContext::StdoutHook {
   void operator()(const char* s, int len) override {
-    g_context->writeStdout(s, len, true);
-    get()->m_nativeCalls.back().stdouts.append(std::string(s, len));
+    if (g_context->numStdoutHooks() == 1) {
+      g_context->writeStdout(s, len, true);
+      get()->m_nativeCalls.back().stdouts.append(std::string(s, len));
+    }
   }
 };
 
@@ -611,8 +623,6 @@ void Recorder::onNativeCallEntry(NativeFunction ptr) {
   static LoggerHook loggerHook;
   m_nativeCalls.emplace_back().ptr = ptr;
   g_context->addStdoutHook(getStdoutHook());
-  g_context->backupSession();
-  g_context->clearUserErrorHandlers();
   Logger::SetThreadHook(&loggerHook);
   m_enabled = false;
 
@@ -622,7 +632,6 @@ void Recorder::onNativeCallEntry(NativeFunction ptr) {
 
 void Recorder::onNativeCallExit() {
   g_context->removeStdoutHook(getStdoutHook());
-  g_context->restoreSession();
   Logger::SetThreadHook(nullptr);
   m_enabled = true;
 }
@@ -633,11 +642,7 @@ void Recorder::onNativeCallReturn(const String& ret) {
 }
 
 void Recorder::onNativeCallThrow(std::exception_ptr exc) {
-  try {
-    std::rethrow_exception(exc);
-  } catch (const req::root<Object>& e) {
-    m_nativeCalls.back().exc = serialize(Variant{e});
-  }
+  m_nativeCalls.back().exc = serialize(exc);
   onNativeCallExit();
 }
 

@@ -14,12 +14,35 @@
  * limitations under the License.
  */
 
-#include <folly/portability/GTest.h>
-#include <thrift/test/gen-cpp2/AnnotationTest_types.h>
+include "thrift/annotation/scope.thrift"
+include "thrift/annotation/cpp.thrift"
 
-TEST(AnnotationTest, Cpp2MethodsAnnotation) {
-  cpp2::foo foo;
-  // this method was defined in cpp2.methods, so if we can compile this call,
-  // the annotation worked.
-  foo.manuallyDefinedDummyMethod();
+package "apache.org/thrift/test"
+
+@cpp.RuntimeAnnotation
+@scope.Field
+struct Oncall {
+  1: string name;
+}
+
+@cpp.RuntimeAnnotation
+@scope.Struct
+@scope.Field
+struct Doc {
+  1: string text;
+}
+
+@cpp.RuntimeAnnotation
+@scope.Field
+struct Sensitive {}
+
+@scope.Field
+struct Other {}
+
+@Doc{text = "I am a struct"}
+struct MyStruct {
+  @Oncall{name = "thrift"}
+  @Sensitive
+  @Other
+  1: string field;
 }

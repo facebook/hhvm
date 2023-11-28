@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/func.h"
 
 #include <re2/re2.h>
-#include "hphp/util/trace.h"
+#include "hphp/util/rds-local.h"
 
 #include "hphp/hack/src/package/ffi_bridge/package_ffi.rs.h"
 
@@ -141,6 +141,8 @@ std::string PackageInfo::mangleForCacheKey() const {
   return folly::json::serialize(std::move(result), std::move(opts));
 }
 
+static RDS_LOCAL_NO_CHECK(const PackageInfo::Deployment*, s_requestActiveDeployment);
+
 const PackageInfo::Deployment* PackageInfo::getActiveDeployment() const {
   if (RO::RepoAuthoritative || !RuntimeOption::ServerExecutionMode()) {
     auto const it = deployments().find(RO::EvalActiveDeployment);
@@ -148,13 +150,24 @@ const PackageInfo::Deployment* PackageInfo::getActiveDeployment() const {
     return &it->second;
   }
   if (!g_context || !g_context->getTransport()) return nullptr;
-  auto const host = g_context->getTransport()->getHeader("Host");
-  for (auto const& [_, deployment]: deployments()) {
-    for (auto const& domain: deployment.m_domains) {
-      if (re2::RE2::FullMatch(host, *domain)) return &deployment;
-    }
+  // If unset, set the cached active deployment to null by default.
+  if (s_requestActiveDeployment.isNull()) {
+    auto const activeDeployment = [&]() -> const PackageInfo::Deployment* {
+      auto const host = g_context->getTransport()->getHeader("Host");
+      for (auto const& [_, deployment]: deployments()) {
+        for (auto const& domain: deployment.m_domains) {
+          if (re2::RE2::FullMatch(host, *domain)) {
+            // If we find a domain that matches the host, return the deployment as active.
+            return &deployment;
+          }
+        }
+      }
+      return nullptr;
+    }();
+    s_requestActiveDeployment.emplace(activeDeployment);
   }
-  return nullptr;
+  assertx(!s_requestActiveDeployment.isNull());
+  return *s_requestActiveDeployment;
 }
 
 bool PackageInfo::isPackageInActiveDeployment(const StringData* package) const {

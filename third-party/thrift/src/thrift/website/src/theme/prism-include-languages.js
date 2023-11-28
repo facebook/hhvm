@@ -29,7 +29,10 @@ export default function prismIncludeLanguages(PrismObject) {
     ],
     'boolean': /\b(?:false|true)\b/,
     'number': /\b0x[\da-f]+\b|(?:\b\d+(?:\.\d*)?|\B\.\d+)(?:e[+-]?\d+)?/i,
-    'string': /(?:"[^"]*"|'[^']*')/,
+    'string': {
+      pattern: /(?:"[^"]*"|'[^']*')/,
+      greedy: true
+    },
     'operator': /[+-]/,
     'punctuation': /[,;]/,
     'comment': [

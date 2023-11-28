@@ -14,7 +14,13 @@ import java.util.HashMap;
 @SuppressWarnings({ "unused" })
 public enum RefType implements com.facebook.thrift.TEnum {
   Unique(0),
+  /**
+   * `std::unique_ptr<T>`
+   */
   Shared(1),
+  /**
+   * `std::shared_ptr<const T> `
+   */
   SharedMutable(2);
 
   private final int value;

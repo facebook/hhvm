@@ -21,6 +21,7 @@ var _ = context.Background
 
 var GoUnusedProtection__ int;
 
+//Optional, defaults to Unique
 type RefType int64
 const (
   RefType_Unique RefType = 0
@@ -70,6 +71,7 @@ func RefTypePtr(v RefType) *RefType { return &v }
 
 //Enum in C++ by default uses signed 32 bit integer. There is no need to specify
 //underlying type for signed 32 bit integer.
+//64-bit is not supported to avoid truncation since enums are sent as 32-bit integers over the wire.
 type EnumUnderlyingType int64
 const (
   EnumUnderlyingType_I8 EnumUnderlyingType = 0
@@ -127,8 +129,20 @@ func EnumUnderlyingTypeFromString(s string) (EnumUnderlyingType, error) {
 
 func EnumUnderlyingTypePtr(v EnumUnderlyingType) *EnumUnderlyingType { return &v }
 
-// Changes the native type of a Thrift object.
-// `name` and `template` correspond to `cpp.type` and `cpp.template` respecively.
+// Changes the native type of a Thrift object (the C++ type used in codegen) to the value of the `name` field.
+// Container types may instead provide the `template` field, in which case template parameters will be filled in by thrift.
+// (e.g. `template = "folly::sorted_vector_set"` is equivalent to `type = "folly::sorted_vector_set<T>"` on `set<T>`)
+// 
+// It is also possible to add `cpp_include` to bring in additional data structures and use them here.
+// It is required that the custom type matches the specified Thrift type even for internal container types.
+// Prefer types that can leverage `reserve(size_t)` as Thrift makes uses these optimizations.
+// *Special Case*: This annotation can be used to define a string/binary type as `IOBuf` or `unique_ptr<IOBuf>` so that you can leverage Thrift's support for zero-copy buffer manipulation through `IOBuf`.
+// During deserialization, thrift receives a buffer that is used to allocate the appropriate fields in the struct. When using smart pointers, instead of making a copy of the data, it only modifies the pointer to point to the address that is used by the buffer.
+// 
+// The custom type must provide the following methods
+// * `list`: `push_back(T)`
+// * `map`: `insert(std::pair<T1, T2>)`
+// * `set`: `insert(T)`
 // 
 // Attributes:
 //  - Name
@@ -283,6 +297,12 @@ func (p *Type) String() string {
   return fmt.Sprintf("Type({Name:%s Template:%s})", nameVal, templateVal)
 }
 
+// Allocates a field on the heap instead of inline.
+// This annotation is added to support recursive types. However, you can also use it to turn a field from a value to a smart pointer.
+// `@cpp.Ref` is equivalent having type`@cpp.RefType.Unique`.
+// 
+// NOTE: A struct may transitively contain itself as a field only if at least one of the fields in the inclusion chain is either an optional Ref field or a container. Otherwise the struct would have infinite size.
+// 
 // Attributes:
 //  - Type
 type Ref struct {
@@ -396,6 +416,8 @@ func (p *Ref) String() string {
 }
 
 // Changes the name of the definition in generated C++ code.
+// In most cases a much better solution is to rename the problematic Thrift field itself. Only use the `cpp.name` annotation if such renaming is problematic,
+// e.g. when the field name appears in code as a string, particularly when using JSON serialization, and it is hard to change all usage sites.
 // 
 // Attributes:
 //  - Value
@@ -508,6 +530,22 @@ func (p *Name) String() string {
   return fmt.Sprintf("Name({Value:%s})", valueVal)
 }
 
+// Lazily deserialize large field on first access.
+// 
+// ```
+// FooWithLazyField foo;
+// apache::thrift::CompactSerializer::deserialize(serializedData, foo);
+// 
+// // large_field is lazy field, it will be deserialized on first access
+// // The data will be deserialized in method call large_field_ref()
+// LOG(INFO) << foo.large_field_ref()->size();
+// 
+// // Result will be cached, we won't deserialize again
+// LOG(INFO) << foo.large_field_ref()->size();
+// ```
+// 
+// Read more: /doc/fb/languages/cpp/lazy.md
+// 
 // Attributes:
 //  - Ref
 type Lazy struct {
@@ -1009,6 +1047,10 @@ func (p *Adapter) String() string {
   return fmt.Sprintf("Adapter({Name:%s AdaptedType:%s UnderlyingName:%s ExtraNamespace:%s MoveOnly:%s})", nameVal, adaptedTypeVal, underlyingNameVal, extraNamespaceVal, moveOnlyVal)
 }
 
+// Packs isset bits into fewer bytes to save space at the cost of making access more expensive.
+// Passing `atomic = false` reduces the access cost while making concurrent writes UB.
+// Read more: /doc/fb/languages/cpp/isset-bitpacking.md
+// 
 // Attributes:
 //  - Atomic
 type PackIsset struct {
@@ -1122,6 +1164,31 @@ func (p *PackIsset) String() string {
   return fmt.Sprintf("PackIsset({Atomic:%s})", atomicVal)
 }
 
+// This annotation enables reordering of fields in the generated C++ struct to minimize padding.
+// This is achieved by placing the fields in the order of decreasing alignments. The order of fields with the same alignment is preserved.
+// 
+// ```
+// @cpp.MinimizePadding
+// struct Padded {
+//   1: byte small
+//   2: i64 big
+//   3: i16 medium
+//   4: i32 biggish
+//   5: byte tiny
+// }
+// ```
+// 
+// For example, the C++ fields for the `Padded` Thrift struct above will be generated in the following order:
+// 
+// ```
+// int64_t big;
+// int32_t biggish;
+// int16_t medium;
+// int8_t small;
+// int8_t tiny;
+// ```
+// 
+// which gives the size of 16 bytes compared to 32 bytes if `cpp.MinimizePadding` was not specified.
 type MinimizePadding struct {
 }
 
@@ -1982,6 +2049,12 @@ func (p *GenerateTypedInterceptor) String() string {
 // Causes C++ handler code to run inline on the EventBase thread.
 // Disables overload protection, use with caution.
 // Cannot be applied to individual functions in interactions.
+// 
+// Causes the request to be executed on the event base thread directly instead of rescheduling onto a thread manager thread, provided the async_eb_ handler method is implemented.
+// You should only execute the request on the event base thread if it is very fast and you have measured that rescheduling is a substantial chunk of your service's CPU usage.
+// If a request executing on the event base thread blocks or takes a long time, all other requests sharing the same event base are affected and latency will increase significantly.
+// We strongly discourage the use of this annotation unless strictly necessary. You will have to implement the harder-to-use async_eb_ handler method.
+// This also disables queue timeouts, an important form of overload protection.
 type ProcessInEbThreadUnsafe struct {
 }
 

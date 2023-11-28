@@ -24,8 +24,20 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 /**
- * Changes the native type of a Thrift object.
- * `name` and `template` correspond to `cpp.type` and `cpp.template` respecively.
+ * Changes the native type of a Thrift object (the C++ type used in codegen) to the value of the `name` field.
+ * Container types may instead provide the `template` field, in which case template parameters will be filled in by thrift.
+ * (e.g. `template = "folly::sorted_vector_set"` is equivalent to `type = "folly::sorted_vector_set<T>"` on `set<T>`)
+ * 
+ * It is also possible to add `cpp_include` to bring in additional data structures and use them here.
+ * It is required that the custom type matches the specified Thrift type even for internal container types.
+ * Prefer types that can leverage `reserve(size_t)` as Thrift makes uses these optimizations.
+ * *Special Case*: This annotation can be used to define a string/binary type as `IOBuf` or `unique_ptr<IOBuf>` so that you can leverage Thrift's support for zero-copy buffer manipulation through `IOBuf`.
+ * During deserialization, thrift receives a buffer that is used to allocate the appropriate fields in the struct. When using smart pointers, instead of making a copy of the data, it only modifies the pointer to point to the address that is used by the buffer.
+ * 
+ * The custom type must provide the following methods
+ * * `list`: `push_back(T)`
+ * * `map`: `insert(std::pair<T1, T2>)`
+ * * `set`: `insert(T)`
  */
 @SuppressWarnings({ "unused", "serial" })
 public class Type implements TBase, java.io.Serializable, Cloneable, Comparable<Type> {

@@ -31,18 +31,20 @@
         "value" : {}
       }
         },
+        "docstring" : "An experimental annotation that applies a Hack wrapper to fields.\nFor example:\n\n  struct User {\n    @hack.FieldWrapper{name=\"MyWrapper\"}\n    1: i64 id;\n  }\n",
         "fields" : {
           "name" : {
             "name" : "name",
+            "docstring" : "The name of a Hack wrapper class used to wrap the field\n",
             "key" : 1,
-            "lineno" : 38,
+            "lineno" : 39,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 35
+        "lineno" : 36
       },
       "Wrapper" : {
         "name" : "Wrapper",
@@ -72,9 +74,11 @@
         "value" : {}
       }
         },
+        "docstring" : "An annotation that applies a Hack wrapper to fields, typedef or structs.\nFor example:\n\n  struct User {\n    @hack.FieldWrapper{name=\"MyWrapper\"}\n    1: i64 id;\n  }\n",
         "fields" : {
           "name" : {
             "name" : "name",
+            "docstring" : "The name of a Hack wrapper class used to wrap the field\n",
             "key" : 1,
             "lineno" : 54,
             "required" : "opt-in-req-out",
@@ -82,6 +86,7 @@
                   },
           "underlyingName" : {
             "name" : "underlyingName",
+            "docstring" : "When applied directly to a typedef or struct, the IDL name of the\ntype will refer to the adapted type in Hack and the underlying thrift struct will be\ngenerated in a nested namespace and/or with a different name. By default the type/struct\nwill be generated in a nested 'thrift_adapted_types' namespace with the same name,\nbut both of these can be changed by setting these fields.\nEmpty string enables the nested namespace and uses the IDL name for the struct.\n",
             "key" : 2,
             "lineno" : 61,
             "required" : "opt-in-req-out",
@@ -120,18 +125,20 @@
         "value" : {}
       }
         },
+        "docstring" : "An annotation that applies a Hack adapter to types. For example:\n@hack.Adapter{name=\"\\\\TimestampAdapter\"}\ntypedef i64 Timestamp;\n\n  struct User {\n    1: Timestamp account_creation_time;\n  }\n\nHere the field `account_creation_time` will have type TimestampAdapter::THackType instead of i64.\n\nin hack:\n```\nfinal class TimestampAdapter implements IThriftAdapter {\n  const type TThriftType = int;\n  const type THackType = Time;\n  public static function fromThrift(int $seconds)[]: Time {\n    return Time::fromEpochSeconds($seconds);\n  }\n  public static function toThrift(Time $time): int {\n    return $hack_value->asFullSecondsSinceEpoch();\n  }\n}\n```\nelsewhere in hack:\n```\nfunction timeSinceCreated(Document $doc): Duration {\n  // $doc->created_time is of type Time\n  return Duration::between(Time::now(), $doc->created_time);\n}\n```\nThis completely replaces the underlying type of a thrift for a custom implementation and uses\nthe specified adapter to convert to and from the underlying Thrift type during (de)serialization.\n",
         "fields" : {
           "name" : {
             "name" : "name",
+            "docstring" : "The name of a Hack adapter class that implements IThriftAdapter\n",
             "key" : 1,
-            "lineno" : 78,
+            "lineno" : 101,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 74
+        "lineno" : 97
       },
       "SkipCodegen" : {
         "name" : "SkipCodegen",
@@ -165,14 +172,14 @@
           "reason" : {
             "name" : "reason",
             "key" : 1,
-            "lineno" : 85,
+            "lineno" : 108,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 81
+        "lineno" : 104
       },
       "Name" : {
         "name" : "Name",
@@ -186,25 +193,26 @@
         "value" : {}
       }
         },
+        "docstring" : "This annotation is mainly used to rename symbols which can result in symbol\nconflict errors in Hack codegen.\nFor ex: reserved keywords in Hack language, symbols with similar names from\nother files in Hack\n",
         "fields" : {
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 94,
+            "lineno" : 117,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
           "reason" : {
             "name" : "reason",
             "key" : 2,
-            "lineno" : 95,
+            "lineno" : 118,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 92
+        "lineno" : 115
       },
       "UnionEnumAttributes" : {
         "name" : "UnionEnumAttributes",
@@ -218,11 +226,12 @@
         "value" : {}
       }
         },
+        "docstring" : "This annotation is for adding Hack attributes to union enums.\n",
         "fields" : {
           "attributes" : {
             "name" : "attributes",
             "key" : 1,
-            "lineno" : 101,
+            "lineno" : 124,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "list",
@@ -232,7 +241,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 99
+        "lineno" : 122
       },
       "StructTrait" : {
         "name" : "StructTrait",
@@ -262,26 +271,28 @@
         "value" : {}
       }
         },
+        "docstring" : "This annotation is for using a custom trait for structs.\n",
         "fields" : {
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 109,
+            "lineno" : 132,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 105
+        "lineno" : 128
       },
       "Attributes" : {
         "name" : "Attributes",
+        "docstring" : "This annotation is for adding Hack attributes.\n* Where to use: field or struct type\n* Value: add attributes like `JSEnum` to structs or fields\n* Example:\n\n```\n// In thrift\nenum MyEnum {\n  ALLOWED = 1,\n  THIS_IS_ALLOWED  =  2,\n  THIS_IS_ALLOWED_2 = 3,\n}(\n  hack.attributes=\n    \"\\JSEnum(shape('name' => 'MyEnum')),\n    \\GraphQLEnum('MyEnum', 'Description for my enum',)\"\n)\nstruct MyThriftStruct {\n  1: string foo (hack.attributes = \"FieldAttribute\");\n  2: string bar;\n  3: string baz;\n} (hack.attributes = \"ClassAttribute\")\n```\n```\n//thrift compiler will generate this for you\n<<\\JSEnum(shape('name' => 'MyEnum')),\n\\GraphQLEnum('MyEnum', 'Description for my enum',)>>\nenum MyEnum: int {\n ALLOWED = 1;\n THIS_IS_ALLOWED = 2;\n THIS_IS_ALLOWED_2 = 3;\n}\n<<ClassAttribute>>\nclass MyThriftStruct implements \\IThriftStruct {\n ....\n <<FieldAttribute>>\n public string $foo;\n ....\n}\n```\n",
         "fields" : {
           "attributes" : {
             "name" : "attributes",
             "key" : 1,
-            "lineno" : 114,
+            "lineno" : 175,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "list",
@@ -291,7 +302,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 113
+        "lineno" : 174
       },
       "StructAsTrait" : {
         "name" : "StructAsTrait",
@@ -323,7 +334,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 117
+        "lineno" : 178
       },
       "ModuleInternal" : {
         "name" : "ModuleInternal",
@@ -385,9 +396,10 @@
         "value" : {}
       }
         },
+        "docstring" : "This annotation is to generate an entity as internal\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 123
+        "lineno" : 184
       }
       },
   "source_path" : "thrift/annotation/hack",

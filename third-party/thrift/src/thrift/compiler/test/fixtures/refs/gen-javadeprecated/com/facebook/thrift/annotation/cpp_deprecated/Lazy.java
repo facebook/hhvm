@@ -23,6 +23,23 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * Lazily deserialize large field on first access.
+ * 
+ * ```
+ * FooWithLazyField foo;
+ * apache::thrift::CompactSerializer::deserialize(serializedData, foo);
+ * 
+ * // large_field is lazy field, it will be deserialized on first access
+ * // The data will be deserialized in method call large_field_ref()
+ * LOG(INFO) << foo.large_field_ref()->size();
+ * 
+ * // Result will be cached, we won't deserialize again
+ * LOG(INFO) << foo.large_field_ref()->size();
+ * ```
+ * 
+ * Read more: /doc/fb/languages/cpp/lazy.md
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class Lazy implements TBase, java.io.Serializable, Cloneable, Comparable<Lazy> {
   private static final TStruct STRUCT_DESC = new TStruct("Lazy");

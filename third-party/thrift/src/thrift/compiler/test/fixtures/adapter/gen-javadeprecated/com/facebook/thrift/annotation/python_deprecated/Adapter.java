@@ -23,13 +23,53 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * An annotation that applies a Python adapter to typedef or field, or directly on struct.
+ * This completely replaces the underlying type of a thrift for a custom implementation and
+ * uses the specified adapter to convert to and from the underlying Thrift type during (de)serialization.
+ * 
+ * Example 1:
+ * 
+ *   @python.Adapter{name = "my.module.DatetimeAdapter", typeHint = "datetime.datetime"}
+ *   typedef i64 Datetime
+ * 
+ * Here the type 'Datetime' has the Python adapter `DatetimeAdapter`.
+ * 
+ * 
+ * Example 2:
+ * 
+ *   struct User {
+ *     @python.Adapter{name = "my.module.DatetimeAdapter", typeHint = "datetime.datetime"}
+ *     1: i64 created_at;
+ *   }
+ * Here the field `created_at` has the Python adapter `DatetimeAdapter`.
+ * 
+ * 
+ * Example 3:
+ * 
+ * 
+ *   @python.Adapter{name = "my.module.AnotherAdapter", typeHint = "my.module.AdaptedFoo"}
+ *   struct Foo {
+ *     1: string bar;
+ *   }
+ * 
+ * Here the struct `Foo` has the Python adapter `AnotherAdapter`.
+ * 
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class Adapter implements TBase, java.io.Serializable, Cloneable, Comparable<Adapter> {
   private static final TStruct STRUCT_DESC = new TStruct("Adapter");
   private static final TField NAME_FIELD_DESC = new TField("name", TType.STRING, (short)1);
   private static final TField TYPE_HINT_FIELD_DESC = new TField("typeHint", TType.STRING, (short)2);
 
+  /**
+   * Fully qualified name of a Python adapter class, which should inherit from thrift.python.adapter.Adapter
+   */
   public String name;
+  /**
+   * Fully qualified type hint the above implementation adapts to.
+   * If ending with "[]", it becomes a generic, and the unadapted type will be filled between the brackets.
+   */
   public String typeHint;
   public static final int NAME = 1;
   public static final int TYPEHINT = 2;
@@ -107,10 +147,16 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable, Comparab
     return new Adapter(this);
   }
 
+  /**
+   * Fully qualified name of a Python adapter class, which should inherit from thrift.python.adapter.Adapter
+   */
   public String getName() {
     return this.name;
   }
 
+  /**
+   * Fully qualified name of a Python adapter class, which should inherit from thrift.python.adapter.Adapter
+   */
   public Adapter setName(String name) {
     this.name = name;
     return this;
@@ -131,10 +177,18 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable, Comparab
     }
   }
 
+  /**
+   * Fully qualified type hint the above implementation adapts to.
+   * If ending with "[]", it becomes a generic, and the unadapted type will be filled between the brackets.
+   */
   public String getTypeHint() {
     return this.typeHint;
   }
 
+  /**
+   * Fully qualified type hint the above implementation adapts to.
+   * If ending with "[]", it becomes a generic, and the unadapted type will be filled between the brackets.
+   */
   public Adapter setTypeHint(String typeHint) {
     this.typeHint = typeHint;
     return this;

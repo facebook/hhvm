@@ -23,11 +23,48 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * An annotation that applies a Hack adapter to types. For example:
+ * @hack.Adapter{name="\\TimestampAdapter"}
+ * typedef i64 Timestamp;
+ * 
+ *   struct User {
+ *     1: Timestamp account_creation_time;
+ *   }
+ * 
+ * Here the field `account_creation_time` will have type TimestampAdapter::THackType instead of i64.
+ * 
+ * in hack:
+ * ```
+ * final class TimestampAdapter implements IThriftAdapter {
+ *   const type TThriftType = int;
+ *   const type THackType = Time;
+ *   public static function fromThrift(int $seconds)[]: Time {
+ *     return Time::fromEpochSeconds($seconds);
+ *   }
+ *   public static function toThrift(Time $time): int {
+ *     return $hack_value->asFullSecondsSinceEpoch();
+ *   }
+ * }
+ * ```
+ * elsewhere in hack:
+ * ```
+ * function timeSinceCreated(Document $doc): Duration {
+ *   // $doc->created_time is of type Time
+ *   return Duration::between(Time::now(), $doc->created_time);
+ * }
+ * ```
+ * This completely replaces the underlying type of a thrift for a custom implementation and uses
+ * the specified adapter to convert to and from the underlying Thrift type during (de)serialization.
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class Adapter implements TBase, java.io.Serializable, Cloneable, Comparable<Adapter> {
   private static final TStruct STRUCT_DESC = new TStruct("Adapter");
   private static final TField NAME_FIELD_DESC = new TField("name", TType.STRING, (short)1);
 
+  /**
+   * The name of a Hack adapter class that implements IThriftAdapter
+   */
   public String name;
   public static final int NAME = 1;
 
@@ -90,10 +127,16 @@ public class Adapter implements TBase, java.io.Serializable, Cloneable, Comparab
     return new Adapter(this);
   }
 
+  /**
+   * The name of a Hack adapter class that implements IThriftAdapter
+   */
   public String getName() {
     return this.name;
   }
 
+  /**
+   * The name of a Hack adapter class that implements IThriftAdapter
+   */
   public Adapter setName(String name) {
     this.name = name;
     return this;

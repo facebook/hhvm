@@ -25,6 +25,8 @@ import com.facebook.thrift.protocol.*;
 
 /**
  * Changes the name of the definition in generated C++ code.
+ * In most cases a much better solution is to rename the problematic Thrift field itself. Only use the `cpp.name` annotation if such renaming is problematic,
+ * e.g. when the field name appears in code as a string, particularly when using JSON serialization, and it is hard to change all usage sites.
  */
 @SuppressWarnings({ "unused", "serial" })
 public class Name implements TBase, java.io.Serializable, Cloneable, Comparable<Name> {

@@ -23,6 +23,12 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * This annotation is mainly used to rename symbols which can result in symbol
+ * conflict errors in Hack codegen.
+ * For ex: reserved keywords in Hack language, symbols with similar names from
+ * other files in Hack
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class Name implements TBase, java.io.Serializable, Cloneable, Comparable<Name> {
   private static final TStruct STRUCT_DESC = new TStruct("Name");

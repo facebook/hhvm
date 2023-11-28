@@ -560,7 +560,35 @@ func (p *TerseWrite) String() string {
   return fmt.Sprintf("TerseWrite({})")
 }
 
-// Indicates that a field's value should never be stored on the stack.
+// Indicates that an optional field's value should never be stored on the stack,
+// i.e. the subobject should be allocated separately (e.g. because it is large and infrequently set).
+// 
+// NOTE: The APIs and initialization behavior are same as normal field, but different from `@cpp.Ref`. e.g.
+// 
+// ```
+// struct Foo {
+//   1: optional i32 normal;
+//   @thrift.Box
+//   2: optional i32 boxed;
+//   @cpp.Ref
+//   3: optional i32 referred;
+// }
+// ```
+// in C++
+// 
+// ```
+// Foo foo;
+// EXPECT_FALSE(foo.normal().has_value()); // okay
+// EXPECT_FALSE(foo.boxed().has_value()); // okay
+// EXPECT_FALSE(foo.referred().has_value()); // build failure: std::unique_ptr doesn't have has_value method
+// 
+// EXPECT_EQ(*foo.normal(), 0); // throw bad_field_access exception
+// EXPECT_EQ(*foo.boxed(), 0); // throw bad_field_access exception
+// EXPECT_EQ(*foo.referred(), 0); // okay, field has value by default
+// ```
+// 
+// Affects C++ and Rust.
+// TODO: replace with @cpp.Box + @rust.Box
 type Box struct {
 }
 
@@ -691,10 +719,12 @@ func (p *Mixin) String() string {
   return fmt.Sprintf("Mixin({})")
 }
 
-// Option to serialize thrift struct in ascending field id order.
+// Option to serialize thrift struct in ascending field id order instead of field declaration order.
 // 
 // This can potentially make serialized data size smaller in compact protocol,
-// since compact protocol can write deltas between subsequent field ids.
+// since compact protocol can write deltas between subsequent field ids instead of full ids.
+// 
+// NOTE: This annotation won't reduce payload size for other protocols.
 type SerializeInFieldIdOrder struct {
 }
 

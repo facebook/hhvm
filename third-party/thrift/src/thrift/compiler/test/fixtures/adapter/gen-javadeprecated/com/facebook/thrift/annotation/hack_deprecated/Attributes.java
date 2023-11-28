@@ -23,6 +23,47 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * This annotation is for adding Hack attributes.
+ * * Where to use: field or struct type
+ * * Value: add attributes like `JSEnum` to structs or fields
+ * * Example:
+ * 
+ * ```
+ * // In thrift
+ * enum MyEnum {
+ *   ALLOWED = 1,
+ *   THIS_IS_ALLOWED  =  2,
+ *   THIS_IS_ALLOWED_2 = 3,
+ * }(
+ *   hack.attributes=
+ *     "\JSEnum(shape('name' => 'MyEnum')),
+ *     \GraphQLEnum('MyEnum', 'Description for my enum',)"
+ * )
+ * struct MyThriftStruct {
+ *   1: string foo (hack.attributes = "FieldAttribute");
+ *   2: string bar;
+ *   3: string baz;
+ * } (hack.attributes = "ClassAttribute")
+ * ```
+ * ```
+ * //thrift compiler will generate this for you
+ * <<\JSEnum(shape('name' => 'MyEnum')),
+ * \GraphQLEnum('MyEnum', 'Description for my enum',)>>
+ * enum MyEnum: int {
+ *  ALLOWED = 1;
+ *  THIS_IS_ALLOWED = 2;
+ *  THIS_IS_ALLOWED_2 = 3;
+ * }
+ * <<ClassAttribute>>
+ * class MyThriftStruct implements \IThriftStruct {
+ *  ....
+ *  <<FieldAttribute>>
+ *  public string $foo;
+ *  ....
+ * }
+ * ```
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class Attributes implements TBase, java.io.Serializable, Cloneable, Comparable<Attributes> {
   private static final TStruct STRUCT_DESC = new TStruct("Attributes");

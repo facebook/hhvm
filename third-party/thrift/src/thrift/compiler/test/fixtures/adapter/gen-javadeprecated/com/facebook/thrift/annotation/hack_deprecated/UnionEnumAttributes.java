@@ -23,6 +23,9 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * This annotation is for adding Hack attributes to union enums.
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class UnionEnumAttributes implements TBase, java.io.Serializable, Cloneable, Comparable<UnionEnumAttributes> {
   private static final TStruct STRUCT_DESC = new TStruct("UnionEnumAttributes");

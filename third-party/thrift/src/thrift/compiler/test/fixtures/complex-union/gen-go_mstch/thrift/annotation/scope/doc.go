@@ -1,5 +1,5 @@
 // Annotations that indicate which IDL definition a structured annotation can
-// be place on.
+// be placed on.
 // 
 // For example:
 //   include "thrift/annotation/scope.thrift"

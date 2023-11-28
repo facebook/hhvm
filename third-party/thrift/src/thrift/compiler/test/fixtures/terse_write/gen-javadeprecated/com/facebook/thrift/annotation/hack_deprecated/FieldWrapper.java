@@ -23,11 +23,23 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * An experimental annotation that applies a Hack wrapper to fields.
+ * For example:
+ * 
+ *   struct User {
+ *     @hack.FieldWrapper{name="MyWrapper"}
+ *     1: i64 id;
+ *   }
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class FieldWrapper implements TBase, java.io.Serializable, Cloneable, Comparable<FieldWrapper> {
   private static final TStruct STRUCT_DESC = new TStruct("FieldWrapper");
   private static final TField NAME_FIELD_DESC = new TField("name", TType.STRING, (short)1);
 
+  /**
+   * The name of a Hack wrapper class used to wrap the field
+   */
   public String name;
   public static final int NAME = 1;
 
@@ -90,10 +102,16 @@ public class FieldWrapper implements TBase, java.io.Serializable, Cloneable, Com
     return new FieldWrapper(this);
   }
 
+  /**
+   * The name of a Hack wrapper class used to wrap the field
+   */
   public String getName() {
     return this.name;
   }
 
+  /**
+   * The name of a Hack wrapper class used to wrap the field
+   */
   public FieldWrapper setName(String name) {
     this.name = name;
     return this;

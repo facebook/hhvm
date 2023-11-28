@@ -27,6 +27,12 @@ import com.facebook.thrift.protocol.*;
  * Causes C++ handler code to run inline on the EventBase thread.
  * Disables overload protection, use with caution.
  * Cannot be applied to individual functions in interactions.
+ * 
+ * Causes the request to be executed on the event base thread directly instead of rescheduling onto a thread manager thread, provided the async_eb_ handler method is implemented.
+ * You should only execute the request on the event base thread if it is very fast and you have measured that rescheduling is a substantial chunk of your service's CPU usage.
+ * If a request executing on the event base thread blocks or takes a long time, all other requests sharing the same event base are affected and latency will increase significantly.
+ * We strongly discourage the use of this annotation unless strictly necessary. You will have to implement the harder-to-use async_eb_ handler method.
+ * This also disables queue timeouts, an important form of overload protection.
  */
 @SuppressWarnings({ "unused", "serial" })
 public class ProcessInEbThreadUnsafe implements TBase, java.io.Serializable, Cloneable, Comparable<ProcessInEbThreadUnsafe> {

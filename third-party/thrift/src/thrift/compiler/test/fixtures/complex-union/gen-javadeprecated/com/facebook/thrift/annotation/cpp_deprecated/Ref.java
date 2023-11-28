@@ -23,15 +23,18 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * Allocates a field on the heap instead of inline.
+ * This annotation is added to support recursive types. However, you can also use it to turn a field from a value to a smart pointer.
+ * `@cpp.Ref` is equivalent having type`@cpp.RefType.Unique`.
+ * 
+ * NOTE: A struct may transitively contain itself as a field only if at least one of the fields in the inclusion chain is either an optional Ref field or a container. Otherwise the struct would have infinite size.
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class Ref implements TBase, java.io.Serializable, Cloneable, Comparable<Ref> {
   private static final TStruct STRUCT_DESC = new TStruct("Ref");
   private static final TField TYPE_FIELD_DESC = new TField("type", TType.I32, (short)1);
 
-  /**
-   * 
-   * @see RefType
-   */
   public RefType type;
   public static final int TYPE = 1;
 
@@ -94,18 +97,10 @@ public class Ref implements TBase, java.io.Serializable, Cloneable, Comparable<R
     return new Ref(this);
   }
 
-  /**
-   * 
-   * @see RefType
-   */
   public RefType getType() {
     return this.type;
   }
 
-  /**
-   * 
-   * @see RefType
-   */
   public Ref setType(RefType type) {
     this.type = type;
     return this;

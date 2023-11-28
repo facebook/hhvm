@@ -47,6 +47,9 @@ UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 __all__ = ['UTF8STRINGS', 'Py3Hidden', 'Flags', 'Name', 'Adapter', 'UseCAPI']
 
 class Py3Hidden:
+  r"""
+  Hides in thrift-py3 only, not in thrift-python
+  """
 
   thrift_spec = None
   thrift_field_annotations = None
@@ -324,9 +327,42 @@ class Name:
 
 class Adapter:
   r"""
+  An annotation that applies a Python adapter to typedef or field, or directly on struct.
+  This completely replaces the underlying type of a thrift for a custom implementation and
+  uses the specified adapter to convert to and from the underlying Thrift type during (de)serialization.
+  
+  Example 1:
+  
+    @python.Adapter{name = "my.module.DatetimeAdapter", typeHint = "datetime.datetime"}
+    typedef i64 Datetime
+  
+  Here the type 'Datetime' has the Python adapter `DatetimeAdapter`.
+  
+  
+  Example 2:
+  
+    struct User {
+      @python.Adapter{name = "my.module.DatetimeAdapter", typeHint = "datetime.datetime"}
+      1: i64 created_at;
+    }
+  Here the field `created_at` has the Python adapter `DatetimeAdapter`.
+  
+  
+  Example 3:
+  
+  
+    @python.Adapter{name = "my.module.AnotherAdapter", typeHint = "my.module.AdaptedFoo"}
+    struct Foo {
+      1: string bar;
+    }
+  
+  Here the struct `Foo` has the Python adapter `AnotherAdapter`.
+  
+  
   Attributes:
-   - name
-   - typeHint
+   - name: Fully qualified name of a Python adapter class, which should inherit from thrift.python.adapter.Adapter
+   - typeHint: Fully qualified type hint the above implementation adapts to.
+  If ending with "[]", it becomes a generic, and the unadapted type will be filled between the brackets.
   """
 
   thrift_spec = None
@@ -447,6 +483,12 @@ class Adapter:
 
 class UseCAPI:
   r"""
+  Controls cpp <-> python FFI for a struct or union
+  By default, struct uses marshal C API unless cpp.Type or cpp.Adapter is present
+  on a field or a type
+  Use this annotation to opt-in struct to marshal in spite of cpp.Type or cpp.Adapter
+  Alternatively, use this struct with serialize = false to use serialization for FFI.
+  
   Attributes:
    - serialize
   """

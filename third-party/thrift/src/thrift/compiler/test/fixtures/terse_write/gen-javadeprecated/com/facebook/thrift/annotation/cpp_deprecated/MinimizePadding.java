@@ -23,6 +23,33 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * This annotation enables reordering of fields in the generated C++ struct to minimize padding.
+ * This is achieved by placing the fields in the order of decreasing alignments. The order of fields with the same alignment is preserved.
+ * 
+ * ```
+ * @cpp.MinimizePadding
+ * struct Padded {
+ *   1: byte small
+ *   2: i64 big
+ *   3: i16 medium
+ *   4: i32 biggish
+ *   5: byte tiny
+ * }
+ * ```
+ * 
+ * For example, the C++ fields for the `Padded` Thrift struct above will be generated in the following order:
+ * 
+ * ```
+ * int64_t big;
+ * int32_t biggish;
+ * int16_t medium;
+ * int8_t small;
+ * int8_t tiny;
+ * ```
+ * 
+ * which gives the size of 16 bytes compared to 32 bytes if `cpp.MinimizePadding` was not specified.
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class MinimizePadding implements TBase, java.io.Serializable, Cloneable, Comparable<MinimizePadding> {
   private static final TStruct STRUCT_DESC = new TStruct("MinimizePadding");

@@ -23,6 +23,9 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * This annotation is for using a custom trait for structs.
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class StructTrait implements TBase, java.io.Serializable, Cloneable, Comparable<StructTrait> {
   private static final TStruct STRUCT_DESC = new TStruct("StructTrait");

@@ -23,6 +23,9 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * Hides in thrift-py3 only, not in thrift-python
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class Py3Hidden implements TBase, java.io.Serializable, Cloneable, Comparable<Py3Hidden> {
   private static final TStruct STRUCT_DESC = new TStruct("Py3Hidden");

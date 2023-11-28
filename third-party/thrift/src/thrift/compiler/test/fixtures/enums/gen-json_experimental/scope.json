@@ -14,97 +14,97 @@
     "path": "thrift/annotation",
     "filename": "scope"
   },
-  "global_docstring": "Annotations that indicate which IDL definition a structured annotation can\nbe place on.\n\nFor example:\n  include \"thrift/annotation/scope.thrift\"\n\n  @scope.Struct\n  struct MyStructAnnotation {...}\n\n  @MyStructAnnotation // Good.\n  struct Foo{\n    @MyStructAnnotation // Compile-time failure. MyStructAnnotation is not\n                        // allowed on fields.\n    1: i32 my_field;\n  }\n",  "structs" :
+  "global_docstring": "Annotations that indicate which IDL definition a structured annotation can\nbe placed on.\n\nFor example:\n  include \"thrift/annotation/scope.thrift\"\n\n  @scope.Struct\n  struct MyStructAnnotation {...}\n\n  @MyStructAnnotation // Good.\n  struct Foo{\n    @MyStructAnnotation // Compile-time failure. MyStructAnnotation is not\n                        // allowed on fields.\n    1: i32 my_field;\n  }\n",  "structs" :
   {
       "Transitive" : {
         "name" : "Transitive",
         "docstring" : "Indicates that the scope of sibling annotations is transitive.\n\nFor example:\n\n    @scope.Struct\n    @scope.Union\n    @scope.Exception\n    @scope.Transitive\n    struct Structured {}\n\nAnnotating a Thrift struct with @Structured automatically applies\n@scope.Struct, @scope.Union and @scope.Exception annotations, i.e.\n\n    @Structured\n    struct MyAnnotation {}\n\nis equivalent to\n\n    @scope.Struct\n    @scope.Union\n    @scope.Exception\n    struct MyAnnotation {}\n\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 67
+        "lineno" : 69
       },
       "Program" : {
         "name" : "Program",
         "docstring" : "The Program scope.\n\nThis allows annotations on the `package` definition, which implies the\nannotaiton applies to the entire program.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 75
+        "lineno" : 77
       },
       "Struct" : {
         "name" : "Struct",
         "docstring" : "The `struct` definition scope.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 78
+        "lineno" : 80
       },
       "Union" : {
         "name" : "Union",
         "docstring" : "The `union` definition scope.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 81
+        "lineno" : 83
       },
       "Exception" : {
         "name" : "Exception",
         "docstring" : "The `exception` definition scope.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 84
+        "lineno" : 86
       },
       "Field" : {
         "name" : "Field",
         "docstring" : "Field declartaions, for example in `struct` or `function` declartions.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 87
+        "lineno" : 89
       },
       "Typedef" : {
         "name" : "Typedef",
         "docstring" : "The `typedef` definition scope.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 90
+        "lineno" : 92
       },
       "Service" : {
         "name" : "Service",
         "docstring" : "The `service` definition scope.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 93
+        "lineno" : 95
       },
       "Interaction" : {
         "name" : "Interaction",
         "docstring" : "The `interaction` definition scope.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 96
+        "lineno" : 98
       },
       "Function" : {
         "name" : "Function",
         "docstring" : "The `function` definition scope.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 99
+        "lineno" : 101
       },
       "EnumValue" : {
         "name" : "EnumValue",
         "docstring" : "The Enum value definition scope.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 102
+        "lineno" : 104
       },
       "Const" : {
         "name" : "Const",
         "docstring" : "The `const` definition scope.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 105
+        "lineno" : 107
       },
       "Enum" : {
         "name" : "Enum",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 109
+        "lineno" : 111
       },
       "Structured" : {
         "name" : "Structured",
@@ -141,7 +141,7 @@
         "docstring" : "A scope that includes all 'structured' definitions.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 112
+        "lineno" : 114
       },
       "Interface" : {
         "name" : "Interface",
@@ -171,7 +171,7 @@
         "docstring" : "A scope that includes all 'interface' definitions.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 119
+        "lineno" : 121
       },
       "RootDefinition" : {
         "name" : "RootDefinition",
@@ -222,7 +222,7 @@
         "docstring" : "A scope that includes all program-scoped definition.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 125
+        "lineno" : 127
       },
       "Definition" : {
         "name" : "Definition",
@@ -266,7 +266,7 @@
         "docstring" : "A scope that includes all definitions.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 134
+        "lineno" : 136
       }
       },
   "source_path" : "thrift/annotation/scope",

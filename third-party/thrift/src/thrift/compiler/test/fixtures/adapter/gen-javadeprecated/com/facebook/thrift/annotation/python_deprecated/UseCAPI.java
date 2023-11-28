@@ -23,6 +23,13 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * Controls cpp <-> python FFI for a struct or union
+ * By default, struct uses marshal C API unless cpp.Type or cpp.Adapter is present
+ * on a field or a type
+ * Use this annotation to opt-in struct to marshal in spite of cpp.Type or cpp.Adapter
+ * Alternatively, use this struct with serialize = false to use serialization for FFI.
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class UseCAPI implements TBase, java.io.Serializable, Cloneable, Comparable<UseCAPI> {
   private static final TStruct STRUCT_DESC = new TStruct("UseCAPI");

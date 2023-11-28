@@ -9,6 +9,14 @@
 namespace facebook\thrift\annotation\hack;
 
 /**
+ * An experimental annotation that applies a Hack wrapper to fields.
+ * For example:
+ * 
+ *   struct User {
+ *     @hack.FieldWrapper{name="MyWrapper"}
+ *     1: i64 id;
+ *   }
+ *
  * Original thrift struct:-
  * FieldWrapper
  */
@@ -35,6 +43,8 @@ class FieldWrapper implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
   );
   const int STRUCTURAL_ID = 2593878277785201336;
   /**
+   * The name of a Hack wrapper class used to wrap the field
+   * 
    * Original thrift field:-
    * 1: string name
    */
@@ -130,6 +140,14 @@ class FieldWrapper implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
 }
 
 /**
+ * An annotation that applies a Hack wrapper to fields, typedef or structs.
+ * For example:
+ * 
+ *   struct User {
+ *     @hack.FieldWrapper{name="MyWrapper"}
+ *     1: i64 id;
+ *   }
+ *
  * Original thrift struct:-
  * Wrapper
  */
@@ -170,11 +188,20 @@ class Wrapper implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
   );
   const int STRUCTURAL_ID = 1284986773698322040;
   /**
+   * The name of a Hack wrapper class used to wrap the field
+   * 
    * Original thrift field:-
    * 1: string name
    */
   public string $name;
   /**
+   * When applied directly to a typedef or struct, the IDL name of the
+   * type will refer to the adapted type in Hack and the underlying thrift struct will be
+   * generated in a nested namespace and/or with a different name. By default the type/struct
+   * will be generated in a nested 'thrift_adapted_types' namespace with the same name,
+   * but both of these can be changed by setting these fields.
+   * Empty string enables the nested namespace and uses the IDL name for the struct.
+   * 
    * Original thrift field:-
    * 2: string underlyingName
    */
@@ -319,6 +346,39 @@ class Wrapper implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
 }
 
 /**
+ * An annotation that applies a Hack adapter to types. For example:
+ * @hack.Adapter{name="\\TimestampAdapter"}
+ * typedef i64 Timestamp;
+ * 
+ *   struct User {
+ *     1: Timestamp account_creation_time;
+ *   }
+ * 
+ * Here the field `account_creation_time` will have type TimestampAdapter::THackType instead of i64.
+ * 
+ * in hack:
+ * ```
+ * final class TimestampAdapter implements IThriftAdapter {
+ *   const type TThriftType = int;
+ *   const type THackType = Time;
+ *   public static function fromThrift(int $seconds)[]: Time {
+ *     return Time::fromEpochSeconds($seconds);
+ *   }
+ *   public static function toThrift(Time $time): int {
+ *     return $hack_value->asFullSecondsSinceEpoch();
+ *   }
+ * }
+ * ```
+ * elsewhere in hack:
+ * ```
+ * function timeSinceCreated(Document $doc): Duration {
+ *   // $doc->created_time is of type Time
+ *   return Duration::between(Time::now(), $doc->created_time);
+ * }
+ * ```
+ * This completely replaces the underlying type of a thrift for a custom implementation and uses
+ * the specified adapter to convert to and from the underlying Thrift type during (de)serialization.
+ *
  * Original thrift struct:-
  * Adapter
  */
@@ -345,6 +405,8 @@ class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
   );
   const int STRUCTURAL_ID = 2593878277785201336;
   /**
+   * The name of a Hack adapter class that implements IThriftAdapter
+   * 
    * Original thrift field:-
    * 1: string name
    */
@@ -573,6 +635,11 @@ class SkipCodegen implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
 }
 
 /**
+ * This annotation is mainly used to rename symbols which can result in symbol
+ * conflict errors in Hack codegen.
+ * For ex: reserved keywords in Hack language, symbols with similar names from
+ * other files in Hack
+ *
  * Original thrift struct:-
  * Name
  */
@@ -724,6 +791,8 @@ class Name implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
 }
 
 /**
+ * This annotation is for adding Hack attributes to union enums.
+ *
  * Original thrift struct:-
  * UnionEnumAttributes
  */
@@ -865,6 +934,8 @@ class UnionEnumAttributes implements \IThriftSyncStruct, \IThriftStructMetadata,
 }
 
 /**
+ * This annotation is for using a custom trait for structs.
+ *
  * Original thrift struct:-
  * StructTrait
  */
@@ -994,6 +1065,46 @@ class StructTrait implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
 }
 
 /**
+ * This annotation is for adding Hack attributes.
+ * * Where to use: field or struct type
+ * * Value: add attributes like `JSEnum` to structs or fields
+ * * Example:
+ * 
+ * ```
+ * // In thrift
+ * enum MyEnum {
+ *   ALLOWED = 1,
+ *   THIS_IS_ALLOWED  =  2,
+ *   THIS_IS_ALLOWED_2 = 3,
+ * }(
+ *   hack.attributes=
+ *     "\JSEnum(shape('name' => 'MyEnum')),
+ *     \GraphQLEnum('MyEnum', 'Description for my enum',)"
+ * )
+ * struct MyThriftStruct {
+ *   1: string foo (hack.attributes = "FieldAttribute");
+ *   2: string bar;
+ *   3: string baz;
+ * } (hack.attributes = "ClassAttribute")
+ * ```
+ * ```
+ * //thrift compiler will generate this for you
+ * <<\JSEnum(shape('name' => 'MyEnum')),
+ * \GraphQLEnum('MyEnum', 'Description for my enum',)>>
+ * enum MyEnum: int {
+ *  ALLOWED = 1;
+ *  THIS_IS_ALLOWED = 2;
+ *  THIS_IS_ALLOWED_2 = 3;
+ * }
+ * <<ClassAttribute>>
+ * class MyThriftStruct implements \IThriftStruct {
+ *  ....
+ *  <<FieldAttribute>>
+ *  public string $foo;
+ *  ....
+ * }
+ * ```
+ *
  * Original thrift struct:-
  * Attributes
  */
@@ -1227,6 +1338,8 @@ class StructAsTrait implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
 }
 
 /**
+ * This annotation is to generate an entity as internal
+ *
  * Original thrift struct:-
  * ModuleInternal
  */

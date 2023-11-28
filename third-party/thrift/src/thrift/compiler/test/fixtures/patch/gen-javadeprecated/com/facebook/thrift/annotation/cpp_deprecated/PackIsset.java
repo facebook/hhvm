@@ -23,6 +23,11 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * Packs isset bits into fewer bytes to save space at the cost of making access more expensive.
+ * Passing `atomic = false` reduces the access cost while making concurrent writes UB.
+ * Read more: /doc/fb/languages/cpp/isset-bitpacking.md
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class PackIsset implements TBase, java.io.Serializable, Cloneable, Comparable<PackIsset> {
   private static final TStruct STRUCT_DESC = new TStruct("PackIsset");

@@ -23,6 +23,15 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * An annotation that applies a Hack wrapper to fields, typedef or structs.
+ * For example:
+ * 
+ *   struct User {
+ *     @hack.FieldWrapper{name="MyWrapper"}
+ *     1: i64 id;
+ *   }
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class Wrapper implements TBase, java.io.Serializable, Cloneable, Comparable<Wrapper> {
   private static final TStruct STRUCT_DESC = new TStruct("Wrapper");
@@ -30,7 +39,18 @@ public class Wrapper implements TBase, java.io.Serializable, Cloneable, Comparab
   private static final TField UNDERLYING_NAME_FIELD_DESC = new TField("underlyingName", TType.STRING, (short)2);
   private static final TField EXTRA_NAMESPACE_FIELD_DESC = new TField("extraNamespace", TType.STRING, (short)3);
 
+  /**
+   * The name of a Hack wrapper class used to wrap the field
+   */
   public String name;
+  /**
+   * When applied directly to a typedef or struct, the IDL name of the
+   * type will refer to the adapted type in Hack and the underlying thrift struct will be
+   * generated in a nested namespace and/or with a different name. By default the type/struct
+   * will be generated in a nested 'thrift_adapted_types' namespace with the same name,
+   * but both of these can be changed by setting these fields.
+   * Empty string enables the nested namespace and uses the IDL name for the struct.
+   */
   public String underlyingName;
   public String extraNamespace;
   public static final int NAME = 1;
@@ -126,10 +146,16 @@ public class Wrapper implements TBase, java.io.Serializable, Cloneable, Comparab
     return new Wrapper(this);
   }
 
+  /**
+   * The name of a Hack wrapper class used to wrap the field
+   */
   public String getName() {
     return this.name;
   }
 
+  /**
+   * The name of a Hack wrapper class used to wrap the field
+   */
   public Wrapper setName(String name) {
     this.name = name;
     return this;
@@ -150,10 +176,26 @@ public class Wrapper implements TBase, java.io.Serializable, Cloneable, Comparab
     }
   }
 
+  /**
+   * When applied directly to a typedef or struct, the IDL name of the
+   * type will refer to the adapted type in Hack and the underlying thrift struct will be
+   * generated in a nested namespace and/or with a different name. By default the type/struct
+   * will be generated in a nested 'thrift_adapted_types' namespace with the same name,
+   * but both of these can be changed by setting these fields.
+   * Empty string enables the nested namespace and uses the IDL name for the struct.
+   */
   public String getUnderlyingName() {
     return this.underlyingName;
   }
 
+  /**
+   * When applied directly to a typedef or struct, the IDL name of the
+   * type will refer to the adapted type in Hack and the underlying thrift struct will be
+   * generated in a nested namespace and/or with a different name. By default the type/struct
+   * will be generated in a nested 'thrift_adapted_types' namespace with the same name,
+   * but both of these can be changed by setting these fields.
+   * Empty string enables the nested namespace and uses the IDL name for the struct.
+   */
   public Wrapper setUnderlyingName(String underlyingName) {
     this.underlyingName = underlyingName;
     return this;

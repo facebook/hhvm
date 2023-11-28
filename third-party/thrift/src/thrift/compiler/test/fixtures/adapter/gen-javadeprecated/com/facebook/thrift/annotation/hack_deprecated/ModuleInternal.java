@@ -23,6 +23,9 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * This annotation is to generate an entity as internal
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class ModuleInternal implements TBase, java.io.Serializable, Cloneable, Comparable<ModuleInternal> {
   private static final TStruct STRUCT_DESC = new TStruct("ModuleInternal");

@@ -16,6 +16,7 @@ const DEFAULT_SAVED_STATE_LOADING: SavedStateLoading<'_> = SavedStateLoading {
     log_saved_state_age_and_distance: false,
     use_manifold_cython_client: false,
     zstd_decompress_by_file: true,
+    use_compressed_dep_graph: true,
 };
 
 const DEFAULT_SAVED_STATE: SavedState<'_> = SavedState {

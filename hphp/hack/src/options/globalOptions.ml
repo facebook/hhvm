@@ -27,6 +27,7 @@ type saved_state_loading = {
   log_saved_state_age_and_distance: bool;
   use_manifold_cython_client: bool;
   zstd_decompress_by_file: bool;
+  use_compressed_dep_graph: bool;
 }
 [@@deriving show, eq]
 
@@ -36,6 +37,7 @@ let default_saved_state_loading =
     log_saved_state_age_and_distance = false;
     use_manifold_cython_client = false;
     zstd_decompress_by_file = true;
+    use_compressed_dep_graph = true;
   }
 
 type saved_state = {

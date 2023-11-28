@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<abe4100022a68cbd308617ebeddbe678>>
+// @generated SignedSource<<a1298c754e88960896eddae420bdb737>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -40,6 +40,7 @@ pub struct SavedStateLoading {
     pub log_saved_state_age_and_distance: bool,
     pub use_manifold_cython_client: bool,
     pub zstd_decompress_by_file: bool,
+    pub use_compressed_dep_graph: bool,
 }
 
 #[derive(

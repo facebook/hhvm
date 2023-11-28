@@ -17,6 +17,8 @@ type saved_state_loading = {
       (** Required for Hedwig support for saved state downloads *)
   zstd_decompress_by_file: bool;
       (** When decompressing a saved state folder, pass specific files into zstd *)
+  use_compressed_dep_graph: bool;
+      (** When unpacking a saved state, decompress the dep graph from a .zhhdg file to a .hhdg file  *)
 }
 
 val default_saved_state_loading : saved_state_loading

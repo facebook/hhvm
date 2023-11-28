@@ -1092,6 +1092,7 @@ let load_
             log_saved_state_age_and_distance;
             use_manifold_cython_client;
             zstd_decompress_by_file;
+            use_compressed_dep_graph;
           };
         rollouts = saved_state_flags;
         project_metadata_w_flags;

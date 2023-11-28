@@ -1587,6 +1587,7 @@ let check_members_from_all_parents
         in
         (acc @ missing, env)
       in
+      WorkerCancel.raise_if_stop_requested ();
       ParentClassEltSet.fold ~f:check class_elts ~init:(acc, env)
     in
     MemberNameMap.fold check member_map (acc, env)

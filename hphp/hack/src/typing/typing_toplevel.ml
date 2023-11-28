@@ -411,7 +411,9 @@ let module_def ctx md =
 
 let nast_to_tast ~(do_tast_checks : bool) ctx nast :
     Tast.program Tast_with_dynamic.t =
-  let convert_def ((stmts_env_opt, tast_defs) as acc) = function
+  let convert_def ((stmts_env_opt, tast_defs) as acc) def =
+    WorkerCancel.raise_if_stop_requested ();
+    match def with
     (* Sometimes typing will just return `None` but that should only be the case
      * if an error had already been registered e.g. in naming
      *)

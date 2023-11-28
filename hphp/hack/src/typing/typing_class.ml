@@ -137,6 +137,7 @@ let method_return ~supportdyn env cls m ret_decl_ty =
   (env, return)
 
 let method_def ~is_disposable env cls m =
+  WorkerCancel.raise_if_stop_requested ();
   let tcopt = Env.get_tcopt env in
   Profile.measure_elapsed_time_and_report tcopt (Some env) m.m_name @@ fun () ->
   Errors.run_with_span m.m_span @@ fun () ->

@@ -1,35 +1,34 @@
 Errors:
   [7:18-20] Cannot use experimental feature: like-types
-[(Stmt ([2:1-5], (Expr ((), [2:1-5], (Eif (((), [2:1-2], (Id ([2:1-2], "\\<"))), (Some ((), [2:3-5], (Id ([2:3-5], "\\hh")))), ((), [3:1-4:1], Null)))))));
-  (Class
-     { c_span = [4:1-11]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
-       c_name = ([4:7-8], "\\A"); c_tparams = []; c_extends = []; c_uses = []; 
-       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
-       c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = []; 
-       c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
-       c_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = [];
-       c_file_attributes =
-       [{ fa_user_attributes = [{ ua_name = ([1:8-32], "__EnableUnstableFeatures"); ua_params = [((), [1:33-52], (String "upcast_expression"))] }];
-          fa_namespace =
-          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-            ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
-          }
-         ];
-       c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
-       c_internal = false; c_module = None });
+[(Class
+    { c_span = [4:1-11]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+      c_name = ([4:7-8], "\\A"); c_tparams = []; c_extends = []; c_uses = []; 
+      c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
+      c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = []; 
+      c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      c_user_attributes = [];
+      c_file_attributes =
+      [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-52], (String "upcast_expression"))] }];
+         fa_namespace =
+         { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+           ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+           ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+         }
+        ];
+      c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
+      c_internal = false; c_module = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        fd_file_attributes =
-       [{ fa_user_attributes = [{ ua_name = ([1:8-32], "__EnableUnstableFeatures"); ua_params = [((), [1:33-52], (String "upcast_expression"))] }];
+       [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-52], (String "upcast_expression"))] }];
           fa_namespace =
           { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
             ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 

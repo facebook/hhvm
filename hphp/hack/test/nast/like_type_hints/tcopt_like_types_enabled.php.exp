@@ -1,23 +1,28 @@
-[(Stmt
-    ([2:1-4:52],
-     (Expr
-        ((), [2:1-4:52],
-         (Eif (((), [2:1-2], (Id ([2:1-2], "\\<"))), (Some ((), [2:3-5], (Id ([2:3-5], "\\hh")))),
-            ((), [4:1-52],
-             (Efun
-                { ef_fun =
-                  { f_span = [4:1-52]; f_readonly_this = None; f_annotation = (); 
-                    f_readonly_ret = None; f_ret = ((), (Some ([4:45-49], (Hprim Tvoid))));
-                    f_params =
-                    [{ param_annotation = (); param_type_hint = ((), (Some ([4:35-39], (Hlike ([4:36-39], (Hprim Tint)))))); 
-                       param_is_variadic = false; param_pos = [4:40-42]; 
-                       param_name = "$x"; param_expr = None; param_readonly = None; 
-                       param_callconv = Pnormal; param_user_attributes = []; 
-                       param_visibility = None }
-                      ];
-                    f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
-                    f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-                    f_doc_comment = None };
-                  ef_use = []; ef_closure_class_name = None }))
-            ))))))
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes =
+      [{ fa_user_attributes = [{ ua_name = ([2:8-36], "__EnableExperimentalFeatures"); ua_params = [((), [2:37-54], (String "like_type_hints"))] }];
+         fa_namespace =
+         { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+           ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+           ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+         }
+        ];
+      fd_mode = Mstrict; fd_name = ([4:10-34], "\\tcopt_like_types_enabled");
+      fd_fun =
+      { f_span = [4:1-52]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((), (Some ([4:45-49], (Hprim Tvoid))));
+        f_params =
+        [{ param_annotation = (); param_type_hint = ((), (Some ([4:35-39], (Hlike ([4:36-39], (Hprim Tint)))))); 
+           param_is_variadic = false; param_pos = [4:40-42]; param_name = "$x"; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None };
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })
   ]

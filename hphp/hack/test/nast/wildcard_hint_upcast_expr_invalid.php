@@ -1,5 +1,5 @@
-<<file:__EnableUnstableFeatures('upcast_expression')>>
 <?hh
+<<file:__EnableUnstableFeatures('upcast_expression')>>
 
 class A {}
 class B<T> {}

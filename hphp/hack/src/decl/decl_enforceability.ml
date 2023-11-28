@@ -27,7 +27,10 @@ type 'a class_or_typedef_result =
 
 let get_class_or_typedef ctx x =
   if is_typedef ctx x then
-    match Decl_provider_internals.get_typedef_without_pessimise ctx x with
+    match
+      Decl_provider_internals.get_typedef_without_pessimise ctx x
+      |> Decl_entry.to_option
+    with
     | None -> None
     | Some td -> Some (TypedefResult td)
   else
@@ -124,7 +127,7 @@ module type ContextAccess = sig
   val get_class_or_typedef :
     t -> string -> class_t class_or_typedef_result option
 
-  val get_typedef : t -> string -> typedef_type option
+  val get_typedef : t -> string -> typedef_type Decl_entry.t
 
   val get_class : t -> string -> class_t option
 
@@ -430,7 +433,7 @@ module Enforce (ContextAccess : ContextAccess) :
           Unenforced None
         else (
           match ContextAccess.get_typedef ctx name with
-          | Some { td_vis = Aast.Opaque; td_type; _ } ->
+          | Decl_entry.Found { td_vis = Aast.Opaque; td_type; _ } ->
             let exp_ty =
               enforcement
                 ~is_dynamic_enforceable
@@ -439,7 +442,8 @@ module Enforce (ContextAccess : ContextAccess) :
                 td_type
             in
             make_unenforced exp_ty
-          | Some { td_vis = Aast.OpaqueModule; _ } -> Unenforced None
+          | Decl_entry.Found { td_vis = Aast.OpaqueModule; _ } ->
+            Unenforced None
           | _ -> failwith "should never happen"
         )
     in

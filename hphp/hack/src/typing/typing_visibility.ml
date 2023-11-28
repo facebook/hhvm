@@ -41,7 +41,7 @@ let is_private_visible ~is_static env origin_id self_id =
           | _ -> false)
     in
     match Env.get_class env self_id with
-    | Some cls when Ast_defs.is_c_trait (Cls.kind cls) ->
+    | Decl_entry.Found cls when Ast_defs.is_c_trait (Cls.kind cls) ->
       let bounds_from_require_class_constraints =
         List.map (Cls.all_ancestor_req_class_requirements cls) ~f:snd
       in
@@ -63,8 +63,10 @@ let is_protected_visible env origin_id self_id =
     None
   else
     match Env.get_class env origin_id with
-    | None -> None
-    | Some origin_class ->
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      None
+    | Decl_entry.Found origin_class ->
       (* Parents can call direct children's protected methods
        * (like a constructor)
        *)
@@ -80,7 +82,7 @@ let is_private_visible_for_class env x self_id cid class_ =
   | CIstatic ->
     let my_class = Env.get_class env self_id in
     (match my_class with
-    | Some cls when Cls.final cls -> None
+    | Decl_entry.Found cls when Cls.final cls -> None
     | _ ->
       Some
         "Private members cannot be accessed with static:: since a child class may also have an identically named private member")
@@ -91,7 +93,7 @@ let is_private_visible_for_class env x self_id cid class_ =
     | None -> None
     | Some _ -> begin
       match Env.get_class env called_ci with
-      | Some cls when Ast_defs.is_c_trait (Cls.kind cls) ->
+      | Decl_entry.Found cls when Ast_defs.is_c_trait (Cls.kind cls) ->
         Some
           "You cannot access private members using the trait's name (did you mean to use self::?)"
       | _ -> Some "You cannot access this member"
@@ -269,7 +271,8 @@ let is_visible_for_class ~is_method env (vis, lsb) cid cty =
       | Some self_id ->
         let their_class = Env.get_class env x in
         (match (cid, their_class) with
-        | (CI _, Some cls) when Ast_defs.is_c_trait (Cls.kind cls) ->
+        | (CI _, Decl_entry.Found cls) when Ast_defs.is_c_trait (Cls.kind cls)
+          ->
           Some
             "You cannot access protected members using the trait's name (did you mean to use static:: or self::?)"
         | _ -> is_protected_visible env x self_id))

@@ -73,7 +73,7 @@ module Tag = struct
           InstanceOf { name = cls2; kind = kind2 } ) ->
         let open Option.Let_syntax in
         let is_instance_of sub sup =
-          let* cls = Env.get_class env sub in
+          let* cls = Decl_entry.to_option (Env.get_class env sub) in
           return @@ Cls.has_ancestor cls sup
         in
 
@@ -395,7 +395,7 @@ module DataType = struct
         Set.of_list ~reason [DictData; KeysetData; VecData]
       | name ->
         (match Env.get_class env name with
-        | Some cls -> begin
+        | Decl_entry.Found cls -> begin
           let open Ast_defs in
           match Cls.kind cls with
           | Cclass _ when Cls.final cls ->
@@ -449,7 +449,9 @@ module DataType = struct
           | Cenum_class _ ->
             Set.singleton ~reason ObjectData
         end
-        | None -> Set.singleton ~reason ObjectData)
+        | Decl_entry.DoesNotExist
+        | Decl_entry.NotYetAvailable ->
+          Set.singleton ~reason ObjectData)
 
     let to_datatypes ~trail (env : env) cls : 'phase t =
       if SSet.mem cls special_interfaces then
@@ -545,7 +547,8 @@ module DataType = struct
        * If we do not expand we will reject the definition of `Type2`
        * because we will believe the datatype for `Type1` contains `string`.
        * By expanding we can allow this definition. *)
-      | Some { td_type = variants; td_vis = Aast.CaseType; td_tparams; _ } ->
+      | Decl_entry.Found
+          { td_type = variants; td_vis = Aast.CaseType; td_tparams; _ } ->
         (* The this_ty does not need to be set because case types cannot
          * appear within classes thus cannot us the this type.
          * If we ever change that this could needs to be changed *)
@@ -708,7 +711,8 @@ let filter_variants_using_datatype env reason variants intersecting_ty =
 let get_variant_tys env name ty_args :
     Typing_env_types.env * locl_ty list option =
   match Env.get_typedef env name with
-  | Some { td_type = variants; td_vis = Aast.CaseType; td_tparams; _ } ->
+  | Decl_entry.Found
+      { td_type = variants; td_vis = Aast.CaseType; td_tparams; _ } ->
     let ((env, _ty_err_opt), variants) =
       Typing_utils.localize
         ~ety_env:

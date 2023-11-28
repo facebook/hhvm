@@ -18,8 +18,10 @@ let get_all_ancestors ctx class_name =
       helper classes cinfos seen_classes
     | class_name :: classes -> begin
       match Decl_provider.get_class ctx class_name with
-      | None -> helper classes cinfos seen_classes
-      | Some class_info ->
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        helper classes cinfos seen_classes
+      | Decl_entry.Found class_info ->
         let ancestors =
           Cls.all_ancestor_names class_info
           |> List.fold ~init:classes ~f:(fun acc cid -> cid :: acc)

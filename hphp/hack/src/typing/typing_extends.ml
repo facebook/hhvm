@@ -776,8 +776,10 @@ let maybe_poison_ancestors
         (child_class, child_return_ty)
       else
         match Env.get_class env origin with
-        | None -> (child_class, child_return_ty)
-        | Some c ->
+        | Decl_entry.DoesNotExist
+        | Decl_entry.NotYetAvailable ->
+          (child_class, child_return_ty)
+        | Decl_entry.Found c ->
           (match Env.get_member true env c member_name with
           | None -> (child_class, child_return_ty)
           | Some elt ->
@@ -872,7 +874,7 @@ let maybe_poison_ancestors
           Typing_log.log_pessimise_return env child_pos (Some ty_str)
         else
           Cls.all_ancestor_names child_class
-          |> List.map ~f:(Env.get_class env)
+          |> List.map ~f:(fun c -> Decl_entry.to_option (Env.get_class env c))
           |> List.filter_opt
           |> List.iter ~f:(fun cls ->
                  MemberKind.(
@@ -1077,8 +1079,10 @@ let conflict_with_declared_interface_or_trait
   let child_const_from_used_trait =
     if strict_const_semantics && include_traits then
       match Env.get_class env origin with
-      | Some cls -> Cls.kind cls |> Ast_defs.is_c_trait
-      | None -> false
+      | Decl_entry.Found cls -> Cls.kind cls |> Ast_defs.is_c_trait
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        false
     else
       false
   in
@@ -1087,7 +1091,7 @@ let conflict_with_declared_interface_or_trait
      the same name and origin as child constant *)
   let child_const_from_declared_interface =
     match Env.get_class env origin with
-    | Some cls ->
+    | Decl_entry.Found cls ->
       Cls.kind cls |> Ast_defs.is_c_interface
       &&
       if strict_const_semantics && include_traits then
@@ -1099,7 +1103,9 @@ let conflict_with_declared_interface_or_trait
             match Cls.get_const iface const_name with
             | None -> false
             | Some const -> String.( = ) const.cc_origin origin)
-    | None -> false
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      false
   in
 
   match Cls.kind parent_class with
@@ -1113,13 +1119,15 @@ let conflict_with_declared_interface_or_trait
     &&
     (* constant must be declared on a trait (or interface if include_traits == true) to conflict *)
     (match Env.get_class env parent_origin with
-    | Some cls ->
+    | Decl_entry.Found cls ->
       if strict_const_semantics && include_traits then
         Cls.kind cls |> fun k ->
         Ast_defs.is_c_trait k || Ast_defs.is_c_interface k
       else
         Cls.kind cls |> Ast_defs.is_c_trait
-    | None -> false)
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      false)
   | Ast_defs.Cenum_class _
   | Ast_defs.Cenum ->
     false
@@ -1348,8 +1356,10 @@ let eager_resolve_member_via_req_class
          *)
         let origin_is_interface el =
           match Env.get_class env el.ce_origin with
-          | None -> false
-          | Some el -> Ast_defs.is_c_interface (Cls.kind el)
+          | Decl_entry.DoesNotExist
+          | Decl_entry.NotYetAvailable ->
+            false
+          | Decl_entry.Found el -> Ast_defs.is_c_interface (Cls.kind el)
         in
         let parent_element_origin_is_interface =
           origin_is_interface parent_class_elt
@@ -1370,8 +1380,9 @@ let eager_resolve_member_via_req_class
                 (Cls.all_ancestor_req_class_requirements class_)
                 ~f:(fun (_, req_ty) ->
                   let (_, (_, cn), _) = TUtils.unwrap_class_type req_ty in
-                  Decl_provider.get_class (Env.get_ctx env) cn >>= fun cnc ->
-                  get_member member_kind cnc member_name)
+                  Decl_provider.get_class (Env.get_ctx env) cn
+                  |> Decl_entry.to_option
+                  >>= fun cnc -> get_member member_kind cnc member_name)
             in
             match member_element_in_req_class with
             | Some member_element_in_req_class ->
@@ -2218,6 +2229,7 @@ let check_trait_diamonds
 let minimum_classes env classes =
   let is_sub_type x y =
     Decl_provider.get_class (Env.get_ctx env) x
+    |> Decl_entry.to_option
     >>= (fun x -> Cls.get_ancestor x y)
     |> Option.is_some
   in
@@ -2488,6 +2500,7 @@ let check_class_extends_parents_typeconsts
                             TUtils.unwrap_class_type req_ty
                           in
                           Decl_provider.get_class (Env.get_ctx env) cn
+                          |> Decl_entry.to_option
                           >>= fun cnc ->
                           (* Since only final classes can satisfy require class constraints, if the type constant is
                            * found in the require class then it must be concrete.  No need to check that here. *)
@@ -2765,7 +2778,8 @@ let check_implements_extends_uses
   let implements =
     let decl_ty_to_cls x =
       let (_, (pos, name), _) = TUtils.unwrap_class_type x in
-      Env.get_class env name >>| fun class_ -> (pos, class_)
+      Env.get_class env name |> Decl_entry.to_option >>| fun class_ ->
+      (pos, class_)
     in
     List.filter_map implements ~f:decl_ty_to_cls
   in
@@ -2784,7 +2798,8 @@ let check_implements_extends_uses
   let parents =
     let destructure_type ((p, _h), ty) =
       let (_, (_, name), tparaml) = TUtils.unwrap_class_type ty in
-      Env.get_class env name >>| fun class_ -> ((p, name), tparaml, class_)
+      Env.get_class env name |> Decl_entry.to_option >>| fun class_ ->
+      ((p, name), tparaml, class_)
     in
     List.filter_map parents ~f:destructure_type
   in

@@ -22,15 +22,19 @@ let get_class env name =
 
 let is_class env name =
   match get_class env name with
-  | None -> false
-  | Some c -> Cls.kind c |> Ast_defs.is_c_class
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    false
+  | Decl_entry.Found c -> Cls.kind c |> Ast_defs.is_c_class
 
 (** Return the position where class/trait [type_name] is defined. *)
 let classish_def_pos env type_name : Pos_or_decl.t =
   let decl = get_class env type_name in
   match decl with
-  | Some decl -> Cls.pos decl
-  | None -> Pos_or_decl.none
+  | Decl_entry.Found decl -> Cls.pos decl
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    Pos_or_decl.none
 
 (** The final methods in [type_name] (excluding inherited methods),
   both instance and static methods. *)
@@ -38,14 +42,16 @@ let final_methods env (type_name : string) :
     (string * Typing_defs.class_elt) list =
   let decl = get_class env type_name in
   match decl with
-  | Some decl ->
+  | Decl_entry.Found decl ->
     let methods = Cls.methods decl @ Cls.smethods decl in
     List.filter
       ~f:(fun (_, m) ->
         String.equal m.Typing_defs.ce_origin type_name
         && Typing_defs.get_ce_final m)
       methods
-  | None -> []
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    []
 
 (** Return a list of positions explaining why a final method is reused. *)
 let relevant_positions

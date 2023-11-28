@@ -218,8 +218,10 @@ let get_added_parent_fanout
    *   the fanout. (This is done by the call to get_not_subtype_fanout below)
    *)
   match Decl_provider.get_class ctx added_parent_name with
-  | None -> fanout_acc
-  | Some (cls : Decl_provider.class_decl) ->
+  | Decl_entry.NotYetAvailable
+  | Decl_entry.DoesNotExist ->
+    fanout_acc
+  | Decl_entry.Found (cls : Decl_provider.class_decl) ->
     let { Fanout.changed; to_recheck; to_recheck_if_errors } = fanout_acc in
     let acc_fanout member = acc_member_fanout ctx class_dep member Added in
     let acc_fanouts make_member members =

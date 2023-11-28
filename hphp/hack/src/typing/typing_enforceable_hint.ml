@@ -69,7 +69,7 @@ let validator =
 
     method! on_class acc r cls tyl =
       match Env.get_class acc.Type_validator.env (snd cls) with
-      | Some tc ->
+      | Decl_entry.Found tc ->
         let tparams = Cls.tparams tc in
         begin
           match tyl with
@@ -114,7 +114,9 @@ let validator =
                 | Unequal_lengths -> acc (* arity error elsewhere *)
               end)
         end
-      | None -> acc
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        acc
 
     method! on_alias acc r _id tyl ty =
       if List.is_empty tyl then

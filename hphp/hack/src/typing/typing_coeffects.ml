@@ -62,8 +62,12 @@ let rec validate_capability env pos ty =
     ()
   | Tapply ((_, n), _) ->
     (match Env.get_class_or_typedef env n with
-    | None -> () (* unbound name error *)
-    | Some (Env.TypedefResult { Typing_defs.td_is_ctx = true; _ }) -> ()
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      () (* unbound name error *)
+    | Decl_entry.Found (Env.TypedefResult { Typing_defs.td_is_ctx = true; _ })
+      ->
+      ()
     | _ ->
       Errors.add_error
         Nast_check_error.(
@@ -83,7 +87,7 @@ let rec validate_capability env pos ty =
       match get_node t with
       | Tclass ((_, name), _, _) ->
         (match Env.get_class env name with
-        | Some cls ->
+        | Decl_entry.Found cls ->
           (match Env.get_typeconst env cls c with
           | Some tc ->
             if not tc.Typing_defs.ttc_is_ctx then
@@ -96,7 +100,9 @@ let rec validate_capability env pos ty =
                          name = Typing_print.full_decl (Env.get_tcopt env) ty;
                        })
           | None -> () (* typeconst not found *))
-        | None -> () (* unbound name error *))
+        | Decl_entry.DoesNotExist
+        | Decl_entry.NotYetAvailable ->
+          () (* unbound name error *))
       | _ -> ()
     in
     List.iter ~f:check_ctx_const candidates

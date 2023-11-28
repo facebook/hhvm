@@ -28,7 +28,7 @@ module type ContextAccess = sig
   val get_class_or_typedef :
     t -> string -> class_t class_or_typedef_result option
 
-  val get_typedef : t -> string -> Typing_defs.typedef_type option
+  val get_typedef : t -> string -> Typing_defs.typedef_type Decl_entry.t
 
   val get_class : t -> string -> class_t option
 

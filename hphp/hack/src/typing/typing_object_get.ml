@@ -215,7 +215,7 @@ let sound_dynamic_err_opt args env ((_, id_str) as id) read_context =
    * of private members.
    *)
   match Env.get_self_class env with
-  | Some self_class
+  | Decl_entry.Found self_class
     when Cls.get_support_dynamic_type self_class || not (Cls.final self_class)
     ->
     (match Env.get_member args.is_method env self_class id_str with
@@ -266,8 +266,10 @@ let widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
     in
     begin
       match Env.get_class env class_name with
-      | None -> default ()
-      | Some class_info ->
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        default ()
+      | Decl_entry.Found class_info ->
         (match Env.get_member is_method env class_info member_name with
         | Some { ce_origin; _ } ->
           (* If this member was inherited then we obtain the type from which
@@ -389,9 +391,11 @@ let rec this_appears_covariantly ~contra env ty =
   | Tapply (pos_name, tyl) ->
     let tparams =
       match Env.get_class_or_typedef env (snd pos_name) with
-      | Some (Env.TypedefResult { td_tparams; _ }) -> td_tparams
-      | Some (Env.ClassResult cls) -> Cls.tparams cls
-      | None -> []
+      | Decl_entry.Found (Env.TypedefResult { td_tparams; _ }) -> td_tparams
+      | Decl_entry.Found (Env.ClassResult cls) -> Cls.tparams cls
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        []
     in
     this_appears_covariantly_params tparams tyl
   | Tmixed
@@ -405,8 +409,10 @@ let rec this_appears_covariantly ~contra env ty =
   | Tnewtype (name, tyl, _) ->
     let tparams =
       match Env.get_typedef env name with
-      | Some { td_tparams; _ } -> td_tparams
-      | None -> []
+      | Decl_entry.Found { td_tparams; _ } -> td_tparams
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        []
     in
     this_appears_covariantly_params tparams tyl
 
@@ -548,14 +554,15 @@ and obj_get_concrete_class
     params
     on_error : internal_result =
   match Env.get_class env class_name with
-  | None ->
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
     let ty = MakeType.nothing (Reason.Rmissing_class id_pos) in
     ( env,
       None,
       (ty, []),
       Ok concrete_ty,
       Option.map ~f:(fun (_, _, ty) -> Ok ty) args.coerce_from_ty )
-  | Some class_info ->
+  | Decl_entry.Found class_info ->
     let (env, params) =
       if List.length params <> List.length (Cls.tparams class_info) then
         (* We've already generated an arity error so just fill out params
@@ -592,8 +599,10 @@ and obj_get_concrete_class
         (* We look up the current context to see if there is a field/method with
          * private visibility. If there is one, that one takes precedence *)
         match Env.get_self_class env with
-        | None -> (old_member_info, false)
-        | Some self_class -> begin
+        | Decl_entry.DoesNotExist
+        | Decl_entry.NotYetAvailable ->
+          (old_member_info, false)
+        | Decl_entry.Found self_class -> begin
           match Env.get_member args.is_method env self_class id_str with
           | Some ({ ce_visibility = Vprivate _; _ } as ce) ->
             let ce =

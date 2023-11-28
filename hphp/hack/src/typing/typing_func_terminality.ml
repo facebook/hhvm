@@ -27,8 +27,10 @@ let get_fun ctx name =
 let get_static_meth
     (ctx : Provider_context.t) (cls_name : string) (meth_name : string) =
   match Decl_provider.get_class ctx cls_name with
-  | None -> None
-  | Some cls -> begin
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    None
+  | Decl_entry.Found cls -> begin
     match Cls.get_smethod cls meth_name with
     | None -> None
     | Some { Typing_defs.ce_type = (lazy ty); _ } -> begin

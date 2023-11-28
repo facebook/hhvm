@@ -27,7 +27,7 @@ let valid_newable_hint env (tp_pos, tp_name) (pos, hint) =
     match hint with
     | Aast.Happly ((p, h), _) -> begin
       match Env.get_class_or_typedef env h with
-      | Some (Env.ClassResult cls) ->
+      | Decl_entry.Found (Env.ClassResult cls) ->
         if not Ast_defs.(is_c_normal (Cls.kind cls)) then
           Some (Invalid_newable_type_argument { tp_pos; tp_name; pos = p })
         else
@@ -56,19 +56,38 @@ let verify_has_consistent_bound env (tparam : Tast.tparam) =
   let bound_classes =
     List.filter_map upper_bounds ~f:(fun ty ->
         match get_node ty with
-        | Tclass ((_, class_id), _, _) -> Env.get_class env class_id
+        | Tclass ((_, class_id), _, _) -> begin
+          match Env.get_class env class_id with
+          | Decl_entry.Found cls -> Some (Some cls)
+          | Decl_entry.NotYetAvailable -> Some None
+          | Decl_entry.DoesNotExist -> None
+        end
         | _ -> None)
   in
-  let valid_classes = List.filter bound_classes ~f:Cls.valid_newable_class in
-  if Int.( <> ) 1 (List.length valid_classes) then
-    let constraints = List.map ~f:Cls.name valid_classes in
-    let (pos, tp_name) = tparam.tp_name in
-    Typing_error_utils.add_typing_error
-      ~env:(Tast_env.tast_env_as_typing_env env)
-      Typing_error.(
-        primary
-        @@ Primary.Invalid_newable_typaram_constraints
-             { pos; tp_name; constraints })
+  let valid_classes =
+    List.fold_right bound_classes ~init:(Some []) ~f:(fun cls acc ->
+        let open Option.Let_syntax in
+        let* acc = acc in
+        let* cls = cls in
+        if Cls.valid_newable_class cls then
+          Some (cls :: acc)
+        else
+          Some acc)
+  in
+  match valid_classes with
+  | None ->
+    (* A class that we queried might or might not exist. Don't emit an error. *)
+    ()
+  | Some valid_classes ->
+    if Int.( <> ) 1 (List.length valid_classes) then
+      let constraints = List.map ~f:Cls.name valid_classes in
+      let (pos, tp_name) = tparam.tp_name in
+      Typing_error_utils.add_typing_error
+        ~env:(Tast_env.tast_env_as_typing_env env)
+        Typing_error.(
+          primary
+          @@ Primary.Invalid_newable_typaram_constraints
+               { pos; tp_name; constraints })
 
 (* When passing targs to a reified position, they must either be concrete types
  * or reified type parameters. This prevents the case of
@@ -221,18 +240,21 @@ let handler =
                on the the type arguments, reporting the arity mismatch *)
         | _ ->
           (match Env.get_class env class_id with
-          | Some cls ->
+          | Decl_entry.Found cls ->
             let tparams = Cls.tparams cls in
             let class_pos = Cls.pos cls in
             verify_call_targs env pos class_pos tparams targs
-          | None -> ()))
+          | Decl_entry.DoesNotExist
+          | Decl_entry.NotYetAvailable ->
+            ()))
       | ( _,
           pos,
           New ((_, _, ((CIstatic | CIself | CIparent) as cid)), _, _, _, _) ) ->
         Option.(
           let t =
             Env.get_self_id env
-            >>= Env.get_class env
+            >>| Env.get_class env
+            >>= Decl_entry.to_option
             >>| Cls.tparams
             >>| tparams_has_reified
           in
@@ -257,11 +279,13 @@ let handler =
           match get_node ty with
           | Tclass ((_, cid), _, _) -> begin
             match Env.get_class env cid with
-            | Some cls ->
+            | Decl_entry.Found cls ->
               let tparams = Cls.tparams cls in
               let class_pos = Cls.pos cls in
               verify_call_targs env pos class_pos tparams targs
-            | _ -> ()
+            | Decl_entry.DoesNotExist
+            | Decl_entry.NotYetAvailable ->
+              ()
           end
           | _ -> ()
         end
@@ -273,7 +297,7 @@ let handler =
         let tc = Env.get_class_or_typedef env class_id in
         begin
           match tc with
-          | Some (Env.ClassResult tc) ->
+          | Decl_entry.Found (Env.ClassResult tc) ->
             let tparams = Cls.tparams tc in
             ignore
               (List.iter2 tparams hints ~f:(fun tp hint ->
@@ -292,7 +316,7 @@ let handler =
 
     method! at_class_ env { c_name = (pos, name); _ } =
       match Env.get_class env name with
-      | Some cls -> begin
+      | Decl_entry.Found cls -> begin
         match Cls.construct cls with
         | (_, Typing_defs.ConsistentConstruct) ->
           if
@@ -305,5 +329,7 @@ let handler =
               Typing_error.(primary @@ Primary.Consistent_construct_reified pos)
         | _ -> ()
       end
-      | None -> ()
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        ()
   end

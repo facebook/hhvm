@@ -61,7 +61,7 @@ let add_if_valid_origin ctx class_elt child_class method_name result =
   else
     let origin_decl = Decl_provider.get_class ctx class_elt.ce_origin in
     match origin_decl with
-    | Some origin_decl ->
+    | Decl_entry.Found origin_decl ->
       let origin_kind = Decl_provider.Class.kind origin_decl in
       if Ast_defs.is_c_trait origin_kind then
         ( method_name,
@@ -69,7 +69,9 @@ let add_if_valid_origin ctx class_elt child_class method_name result =
         :: result
       else
         result
-    | None -> failwith "TODO"
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      failwith "TODO"
 
 let find_positions_of_methods
     (ctx : Provider_context.t)
@@ -79,7 +81,7 @@ let find_positions_of_methods
   List.fold child_classes ~init:acc ~f:(fun result child_class ->
       let class_decl = Decl_provider.get_class ctx child_class in
       match class_decl with
-      | Some decl ->
+      | Decl_entry.Found decl ->
         let method_info = Decl_provider.Class.get_method decl method_name in
         (match method_info with
         | Some class_elt ->
@@ -90,7 +92,8 @@ let find_positions_of_methods
           | Some class_elt ->
             add_if_valid_origin ctx class_elt child_class method_name result
           | None -> result))
-      | None ->
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
         failwith ("Could not find definition of child class: " ^ child_class))
 
 let parallel_find_positions_of_methods

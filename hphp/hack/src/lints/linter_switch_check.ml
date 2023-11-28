@@ -51,7 +51,7 @@ let check_exhaustiveness_lint env pos ty has_default =
     | Typing.Tprim (Tstring | Tint | Tfloat | Tarraykey | Tnum) -> true
     | Typing.Tclass ((_, name), _, _) -> begin
       match Decl_provider.get_class (Env.get_ctx env) name with
-      | Some class_decl
+      | Decl_entry.Found class_decl
         when not
                (Cls.final class_decl
                || Option.is_some (Cls.sealed_whitelist class_decl)) ->

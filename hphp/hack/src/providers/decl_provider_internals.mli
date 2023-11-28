@@ -18,7 +18,7 @@ val get_fun_without_pessimise :
   Provider_context.t -> string -> Typing_defs.fun_elt option
 
 val get_typedef_without_pessimise :
-  Provider_context.t -> string -> Typing_defs.typedef_type option
+  Provider_context.t -> string -> Typing_defs.typedef_type Decl_entry.t
 
 val get_gconst : Provider_context.t -> string -> Typing_defs.const_decl option
 

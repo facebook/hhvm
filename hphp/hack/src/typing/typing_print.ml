@@ -1175,14 +1175,16 @@ module Full = struct
       | ({ type_ = Class _; name; _ }, _) ->
         let keyword =
           match Decl_provider.get_class env.decl_env.Decl_env.ctx name with
-          | Some decl ->
+          | Decl_entry.Found decl ->
             (match Cls.kind decl with
             | Ast_defs.Cclass _ -> "class"
             | Ast_defs.Cinterface -> "interface"
             | Ast_defs.Ctrait -> "trait"
             | Ast_defs.Cenum -> "enum"
             | Ast_defs.Cenum_class _ -> "enum class")
-          | None -> "class"
+          | Decl_entry.DoesNotExist
+          | Decl_entry.NotYetAvailable ->
+            "class"
         in
         (fuel, Concat [text keyword; Space; text_strip_ns name])
       | ({ type_ = Function; name; _ }, Tfun ft)
@@ -1488,6 +1490,7 @@ module Json = struct
       from_type env ~show_like_ty ty
     | (p, Tnewtype (s, _, ty))
       when Decl_provider.get_class env.decl_env.Decl_env.ctx s
+           |> Decl_entry.to_option
            >>| Cls.enum_type
            |> Option.is_some ->
       obj @@ kind p "enum" @ name s @ as_type ty
@@ -1643,8 +1646,9 @@ module Json = struct
           get_string "name" (json, keytrace) >>= fun (name, name_keytrace) ->
           begin
             match Decl_provider.get_typedef ctx name with
-            | Some _typedef -> ty (Tunapplied_alias name)
-            | None ->
+            | Decl_entry.Found _typedef -> ty (Tunapplied_alias name)
+            | Decl_entry.DoesNotExist
+            | Decl_entry.NotYetAvailable ->
               deserialization_error
                 ~message:("Unknown type alias: " ^ name)
                 ~keytrace:name_keytrace
@@ -1653,10 +1657,11 @@ module Json = struct
           get_string "name" (json, keytrace) >>= fun (name, name_keytrace) ->
           begin
             match Decl_provider.get_typedef ctx name with
-            | Some _typedef ->
+            | Decl_entry.Found _typedef ->
               (* We end up only needing the name of the typedef. *)
               Ok name
-            | None ->
+            | Decl_entry.DoesNotExist
+            | Decl_entry.NotYetAvailable ->
               if String.equal name "HackSuggest" then
                 not_supported
                   ~message:"HackSuggest types for lambdas are not supported"
@@ -1742,8 +1747,9 @@ module Json = struct
           get_string "name" (json, keytrace) >>= fun (name, _name_keytrace) ->
           let class_pos =
             match Decl_provider.get_class ctx name with
-            | Some class_ty -> Cls.pos class_ty
-            | None ->
+            | Decl_entry.Found class_ty -> Cls.pos class_ty
+            | Decl_entry.DoesNotExist
+            | Decl_entry.NotYetAvailable ->
               (* Class may not exist (such as in non-strict modes). *)
               Pos_or_decl.none
           in
@@ -2189,8 +2195,11 @@ module PrintClass = struct
     let handle_ancestor (fuel, acc) (field, v) =
       let (sigil, kind) =
         match Decl_provider.get_class ctx field with
-        | None -> ("!", "")
-        | Some cls -> (" ", " (" ^ classish_kind (Cls.kind cls) ^ ")")
+        | Decl_entry.DoesNotExist
+        | Decl_entry.NotYetAvailable ->
+          ("!", "")
+        | Decl_entry.Found cls ->
+          (" ", " (" ^ classish_kind (Cls.kind cls) ^ ")")
       in
       let (fuel, ty_str) = Full.to_string_decl ~fuel v in
       (fuel, "\n" ^ indent ^ sigil ^ " " ^ ty_str ^ kind ^ acc)

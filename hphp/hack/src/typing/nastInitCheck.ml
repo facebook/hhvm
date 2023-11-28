@@ -62,6 +62,7 @@ let lookup_props env class_name props =
             Some (Typing_make_type.nonnull Typing_reason.Rnone)
           else
             Typing_env.get_class env class_name
+            |> Decl_entry.to_option
             |> Option.bind ~f:(fun cls ->
                    Typing_env.get_member false env cls name)
             |> Option.bind ~f:(fun ce ->
@@ -253,8 +254,10 @@ let is_lateinit cv =
 
 let class_prop_pos class_name prop_name ctx : Pos_or_decl.t =
   match Decl_provider.get_class ctx class_name with
-  | None -> Pos_or_decl.none
-  | Some decl ->
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    Pos_or_decl.none
+  | Decl_entry.Found decl ->
     (match Decl_provider.Class.get_prop decl prop_name with
     | None -> Pos_or_decl.none
     | Some elt ->

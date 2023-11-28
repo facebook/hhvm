@@ -40,8 +40,10 @@ let member_type env member_ce =
        *)
       let maybe_enum = Typing_env.get_class env (snd enum_id) in
       (match maybe_enum with
-      | None -> default_result
-      | Some tc ->
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        default_result
+      | Decl_entry.Found tc ->
         (match
            Decl_enum.enum_kind
              (Cls.pos tc, Cls.name tc)
@@ -107,7 +109,7 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
     match get_node ty with
     | Tnewtype (name, _, _) ->
       (match Typing_env.get_typedef env name with
-      | Some { td_vis = Aast.CaseType; td_pos; _ } ->
+      | Decl_entry.Found { td_vis = Aast.CaseType; td_pos; _ } ->
         Typing_error_utils.add_typing_error ~env
         @@ Typing_error.(
              enum

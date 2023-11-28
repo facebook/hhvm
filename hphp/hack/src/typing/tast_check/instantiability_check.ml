@@ -50,7 +50,7 @@ let rec check_hint env (pos, hint) =
   | Aast.Happly ((_, class_id), tal) ->
     begin
       match Tast_env.get_class_or_typedef env class_id with
-      | Some (Tast_env.ClassResult cls)
+      | Decl_entry.Found (Tast_env.ClassResult cls)
         when let kind = Cls.kind cls in
              let tc_name = Cls.name cls in
              (Ast_defs.is_c_trait kind

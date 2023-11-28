@@ -102,7 +102,7 @@ let rec grab_class_elts_from_ty ~static ?(seen = SSet.empty) env ty prop_id =
     let provider_ctx = Tast_env.get_ctx env in
     let class_decl = Decl_provider.get_class provider_ctx (snd id) in
     (match class_decl with
-    | Some class_decl ->
+    | Decl_entry.Found class_decl ->
       let prop =
         if static then
           Cls.get_sprop class_decl (snd prop_id)
@@ -110,7 +110,9 @@ let rec grab_class_elts_from_ty ~static ?(seen = SSet.empty) env ty prop_id =
           Cls.get_prop class_decl (snd prop_id)
       in
       Option.to_list prop
-    | None -> [])
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      [])
   (* Accessing a property off of an intersection type
      should involve exactly one kind of readonlyness, since for
      the intersection type to exist, the property must be related

@@ -100,7 +100,7 @@ let check_implements
       ( Typing_env.get_class env attr_name,
         Typing_env.get_class env attr_interface )
     with
-    | (Some attr_class, Some intf_class) ->
+    | (Decl_entry.Found attr_class, Decl_entry.Found intf_class) ->
       (* Found matching class *)
       let attr_cid = (Cls.pos attr_class, Cls.name attr_class) in
       (* successful exit condition: attribute class is subtype of correct interface
@@ -135,6 +135,10 @@ let check_implements
         env
       ) else
         check_new_object attr_pos env attr_cid params
+    | (Decl_entry.NotYetAvailable, _)
+    | (_, Decl_entry.NotYetAvailable) ->
+      (* A retry will happen. Don't emit error to avoid error-based backtracking *)
+      env
     | _ ->
       Errors.add_error
         Naming_error.(

@@ -401,7 +401,7 @@ let method_def ~is_disposable env cls m =
 (** Checks that extending this parent is legal - e.g. it is not final and not const. *)
 let check_parent env class_def class_type =
   match Env.get_parent_class env with
-  | Some parent_type ->
+  | Decl_entry.Found parent_type ->
     let position = fst class_def.c_name in
     if Cls.const class_type && not (Cls.const parent_type) then
       Typing_error_utils.add_typing_error
@@ -418,7 +418,9 @@ let check_parent env class_def class_type =
                  decl_pos = Cls.pos parent_type;
                  name = Cls.name parent_type;
                })
-  | None -> ()
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    ()
 
 let sealed_subtype ctx (c : Nast.class_) ~is_enum ~hard_error ~env =
   let parent_name = snd c.c_name in
@@ -434,8 +436,10 @@ let sealed_subtype ctx (c : Nast.class_) ~is_enum ~hard_error ~env =
         let klass_name = Nast.class_id_to_str cid in
         let klass = Decl_provider.get_class ctx klass_name in
         (match klass with
-        | None -> ()
-        | Some decl ->
+        | Decl_entry.DoesNotExist
+        | Decl_entry.NotYetAvailable ->
+          ()
+        | Decl_entry.Found decl ->
           let includes_ancestor =
             if is_enum then
               match Cls.enum_type decl with
@@ -524,12 +528,14 @@ let check_parents_sealed env child_def child_type =
   List.iter parents ~f:(function
       | (_, Happly ((_, name), _)) -> begin
         match Env.get_class env name with
-        | Some parent_type ->
+        | Decl_entry.Found parent_type ->
           check_parent_sealed
             (fst child_def.c_name, child_type)
             parent_type
             ~env
-        | None -> ()
+        | Decl_entry.DoesNotExist
+        | Decl_entry.NotYetAvailable ->
+          ()
       end
       | _ -> ())
 
@@ -596,7 +602,7 @@ let check_non_const_trait_members pos env use_list =
   let ((_, trait, _), err_opt) = Decl_utils.unwrap_class_hint use_list in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err_opt;
   match Env.get_class env trait with
-  | Some c when Ast_defs.is_c_trait (Cls.kind c) ->
+  | Decl_entry.Found c when Ast_defs.is_c_trait (Cls.kind c) ->
     List.iter (Cls.props c) ~f:(fun (x, ce) ->
         if not (get_ce_const ce) then
           Typing_error_utils.add_typing_error
@@ -693,16 +699,21 @@ let check_enum_includes env cls =
               match snd ie with
               | Happly (sid, _) ->
                 (match Env.get_class env (snd sid) with
-                | None -> None
-                | Some ie_cls -> Some (fst ie, ie_cls))
+                | Decl_entry.DoesNotExist
+                | Decl_entry.NotYetAvailable ->
+                  None
+                | Decl_entry.Found ie_cls -> Some (fst ie, ie_cls))
               | _ -> None))
     in
     List.iter included_enums ~f:(fun (ie_pos, ie_cls) ->
         let src_class_name = Cls.name ie_cls in
         (* 1. Check for consistency *)
         (match Env.get_class env dest_class_name with
-        | None -> ()
-        | Some cls -> check_consistent_enum_inclusion ie_cls (ie_pos, cls) ~env);
+        | Decl_entry.DoesNotExist
+        | Decl_entry.NotYetAvailable ->
+          ()
+        | Decl_entry.Found cls ->
+          check_consistent_enum_inclusion ie_cls (ie_pos, cls) ~env);
         (* 2. Check for duplicates *)
         List.iter (Cls.consts ie_cls) ~f:(fun (const_name, class_const) ->
             (if String.equal const_name "class" then
@@ -1217,7 +1228,8 @@ let check_class_parents_where_constraints env pc impl =
     match get_node (TUtils.get_base_type env locl_ty) with
     | Tclass (cls, _, tyl) ->
       (match Env.get_class env (snd cls) with
-      | Some cls when not (List.is_empty (Cls.where_constraints cls)) ->
+      | Decl_entry.Found cls
+        when not (List.is_empty (Cls.where_constraints cls)) ->
         let tc_tparams = Cls.tparams cls in
         let ety_env =
           {
@@ -1276,7 +1288,7 @@ let check_generic_class_with_SupportDynamicType env c parents =
             match get_node lty with
             | Tclass ((_, name), _, _) -> begin
               match Env.get_class env name with
-              | Some c when Cls.get_support_dynamic_type c ->
+              | Decl_entry.Found c when Cls.get_support_dynamic_type c ->
                 let env_with_assumptions =
                   Typing_subtype.add_constraint
                     env
@@ -1351,7 +1363,7 @@ let check_SupportDynamicType env c tc =
     | Ast_defs.Ctrait ->
       List.iter (Cls.all_ancestor_names tc) ~f:(fun name ->
           match Env.get_class env name with
-          | Some parent_type -> begin
+          | Decl_entry.Found parent_type -> begin
             match Cls.kind parent_type with
             | Ast_defs.Cclass _
             | Ast_defs.Cinterface ->
@@ -1366,7 +1378,9 @@ let check_SupportDynamicType env c tc =
                   support_dynamic_type
             | Ast_defs.(Cenum | Cenum_class _ | Ctrait) -> ()
           end
-          | None -> ())
+          | Decl_entry.DoesNotExist
+          | Decl_entry.NotYetAvailable ->
+            ())
 
 (** Check methods with <<__Override>> have a corresponding overridden method. *)
 let check_override_has_parent (c : ('a, 'b) class_) (tc : Cls.t) ~env : unit =
@@ -1398,7 +1412,8 @@ let check_used_methods_with_override env c (tc : Cls.t) : unit =
       && not (String.equal ce.ce_origin class_name)
     then
       match Env.get_class env ce.ce_origin with
-      | Some parent_class when Ast_defs.(is_c_trait (Cls.kind parent_class)) ->
+      | Decl_entry.Found parent_class
+        when Ast_defs.(is_c_trait (Cls.kind parent_class)) ->
         (* If we've included a method from a trait that has
            __Override, but there's no inherited method on this class
            that we're overridding, that's an error. *)
@@ -1800,13 +1815,14 @@ let setup_env_for_class_def_check ctx c =
 let class_def ctx (c : _ class_) =
   let env = setup_env_for_class_def_check ctx c in
   match Env.get_class env (snd c.c_name) with
-  | None ->
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
     HackEventLogger.decl_consistency_bug
       "Decl consistency: class_def, but can't find a decl"
       ~data:(snd c.c_name)
       ~pos:(Pos.to_relative_string (fst c.c_name) |> Pos.string);
     None
-  | Some tc ->
+  | Decl_entry.Found tc ->
     Env.make_depend_on_current_module env;
     if TCO.optimized_member_fanout (Provider_context.get_tcopt ctx) then
       Env.mark_members_declared_in_depgraph env c;
@@ -1824,7 +1840,7 @@ let make_class_member_standalone_check_env ctx class_ =
 
   let name = Ast_defs.get_id class_.c_name in
   let open Option in
-  Env.get_class env name >>| fun cls ->
+  Env.get_class env name |> Decl_entry.to_option >>| fun cls ->
   let env = check_class_type_parameters_add_constraints env class_ cls in
   (env, { env; cls; class_ })
 

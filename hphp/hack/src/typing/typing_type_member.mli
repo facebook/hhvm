@@ -18,6 +18,7 @@ open Typing_env_types
 (** The localized result of a type member lookup; in case it is
     [Abstract] existing lower and upper bounds are also returned. *)
 type type_member =
+  | NotYetAvailable
   | Error of Typing_error.t option
   | Exact of locl_ty
   | Abstract of {

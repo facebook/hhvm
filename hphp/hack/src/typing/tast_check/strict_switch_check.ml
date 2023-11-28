@@ -52,7 +52,8 @@ module EnumInfo = struct
     |> fun consts -> { name; decl_pos = Decl_provider.Class.pos decl; consts }
 
   let of_env env name =
-    Tast_env.get_enum env name |> Option.map ~f:(of_decl ~name)
+    Decl_entry.to_option (Tast_env.get_enum env name)
+    |> Option.map ~f:(of_decl ~name)
 end
 
 type literal = EnumErr.Const.t

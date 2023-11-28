@@ -437,8 +437,10 @@ let rec expand ctx env root =
     end
     | Tclass (cls, _, _) -> begin
       match Env.get_class env (snd cls) with
-      | None -> ((env, None), Missing None)
-      | Some ci ->
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        ((env, None), Missing None)
+      | Decl_entry.Found ci ->
         (* Hack: `self` in a trait is mistakenly replaced by the trait instead
            of the class using the trait, so if a trait is the root, it is
            likely because originally there was `self::T` written.
@@ -630,7 +632,8 @@ let referenced_typeconsts env ety_env (root, ids) =
                 let ( >>= ) = Option.( >>= ) in
                 Option.value
                   ~default:acc
-                  ( Env.get_class env class_name >>= fun class_ ->
+                  ( Env.get_class env class_name |> Decl_entry.to_option
+                  >>= fun class_ ->
                     Env.get_typeconst env class_ tconst >>= fun typeconst ->
                     Some ((typeconst.Typing_defs.ttc_origin, tconst, pos) :: acc)
                   )

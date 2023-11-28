@@ -95,8 +95,10 @@ let handler =
       let (_, cls_name) = c.c_name in
       let result = Env.get_class env cls_name in
       match result with
-      | None -> ()
-      | Some cls ->
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        ()
+      | Decl_entry.Found cls ->
         let methods = Cls.methods cls in
         let smethods = Cls.smethods cls in
         let all_methods = methods @ smethods in

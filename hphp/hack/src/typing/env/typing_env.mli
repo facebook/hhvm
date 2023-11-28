@@ -105,20 +105,20 @@ val is_typedef : env -> type_key -> bool
 val is_typedef_visible :
   env -> ?expand_visible_newtype:bool -> name:string -> typedef_type -> bool
 
-val get_enum : env -> type_key -> class_decl option
+val get_enum : env -> type_key -> class_decl Decl_entry.t
 
 val is_enum : env -> type_key -> bool
 
 val is_enum_class : env -> type_key -> bool
 
-val get_enum_constraint : env -> type_key -> decl_ty option
+val get_enum_constraint : env -> type_key -> decl_ty option Decl_entry.t
 
 val env_with_method_droot_member : env -> string -> static:bool -> env
 
 val env_with_constructor_droot_member : env -> env
 
 (** Get class declaration from the appropriate backend and add dependency. *)
-val get_class : env -> type_key -> class_decl option
+val get_class : env -> type_key -> class_decl Decl_entry.t
 
 val add_parent_dep :
   env -> skip_constructor_dep:bool -> is_req:bool -> string -> unit
@@ -127,10 +127,12 @@ val add_parent_dep :
 val get_fun : env -> Decl_provider.fun_key -> Decl_provider.fun_decl option
 
 (** Get type alias declaration from the appropriate backend and add dependency. *)
-val get_typedef : env -> type_key -> typedef_decl option
+val get_typedef : env -> type_key -> typedef_decl Decl_entry.t
 
 val get_class_or_typedef :
-  env -> type_key -> Typing_classes_heap.Api.t class_or_typedef_result option
+  env ->
+  type_key ->
+  Typing_classes_heap.Api.t class_or_typedef_result Decl_entry.t
 
 (** Get class constant declaration from the appropriate backend and add dependency. *)
 val get_const : env -> class_decl -> string -> class_const option
@@ -212,13 +214,13 @@ val get_self_class_type : env -> (pos_id * exact * locl_ty list) option
 
 val get_self_id : env -> string option
 
-val get_self_class : env -> class_decl option
+val get_self_class : env -> class_decl Decl_entry.t
 
 val get_parent_id : env -> string option
 
 val get_parent_ty : env -> decl_ty option
 
-val get_parent_class : env -> class_decl option
+val get_parent_class : env -> class_decl Decl_entry.t
 
 val get_fn_kind : env -> Ast_defs.fun_kind
 

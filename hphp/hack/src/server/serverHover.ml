@@ -36,7 +36,8 @@ let docs_url_markdown name url : string =
 let typedef_docs_url ctx name : string option =
   let qualified_name = "\\" ^ name in
   Option.(
-    Decl_provider.get_typedef ctx qualified_name >>= fun decl ->
+    Decl_provider.get_typedef ctx qualified_name |> Decl_entry.to_option
+    >>= fun decl ->
     decl.Typing_defs.td_docs_url >>| fun url -> docs_url_markdown name url)
 
 (* If [classish_name] (or any of its parents) has a documentation URL,
@@ -44,15 +45,19 @@ let typedef_docs_url ctx name : string option =
 let classish_docs_url ctx classish_name : string option =
   let docs_url name =
     match Decl_provider.get_class ctx name with
-    | Some decl -> Decl_provider.Class.get_docs_url decl
-    | None -> None
+    | Decl_entry.Found decl -> Decl_provider.Class.get_docs_url decl
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      None
   in
 
   let qualified_name = "\\" ^ classish_name in
   let ancestors =
     match Decl_provider.get_class ctx qualified_name with
-    | Some decl -> Decl_provider.Class.all_ancestor_names decl
-    | None -> []
+    | Decl_entry.Found decl -> Decl_provider.Class.all_ancestor_names decl
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      []
   in
   List.find_map (qualified_name :: ancestors) ~f:(fun ancestor ->
       match docs_url ancestor with
@@ -110,7 +115,7 @@ let callee_def_pos ctx recv : Pos_or_decl.t option =
       let f = Decl_provider.get_fun ctx fun_name in
       Option.map f ~f:(fun fe -> fe.Typing_defs.fe_pos)
     | MethodReceiver { cls_name; _ } ->
-      let c = Decl_provider.get_class ctx cls_name in
+      let c = Decl_provider.get_class ctx cls_name |> Decl_entry.to_option in
       Option.map c ~f:Decl_provider.Class.pos)
 
 (* Return the name of the [n]th parameter in [params], handling
@@ -433,7 +438,8 @@ let make_hover_info under_dynamic_result ctx env_and_ty entry occurrence def_opt
           when String.equal name Naming_special_names.Members.__construct ->
           let snippet_opt =
             Option.Monad_infix.(
-              Decl_provider.get_class ctx classname >>= fun c ->
+              Decl_provider.get_class ctx classname |> Decl_entry.to_option
+              >>= fun c ->
               fst (Decl_provider.Class.construct c) >>| fun elt ->
               let ty = Lazy.force_val elt.ce_type in
               Tast_env.print_ty_with_identity env (DeclTy ty) occurrence def_opt)

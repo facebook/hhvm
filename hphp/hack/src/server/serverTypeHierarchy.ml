@@ -90,8 +90,10 @@ let classish_kind_to_entryKind (kind : Ast_defs.classish_kind) : entryKind =
 let get_ancestor_entry ctx name : ancestorEntry =
   let class_ = Decl_provider.get_class ctx name in
   match class_ with
-  | None -> AncestorName (Utils.strip_ns name)
-  | Some class_ ->
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    AncestorName (Utils.strip_ns name)
+  | Decl_entry.Found class_ ->
     AncestorDetails
       {
         name = Utils.strip_ns name;
@@ -151,13 +153,16 @@ let go_quarantined
   | (None, None) -> None
   | (Some sym, _) ->
     (* found a named entity, a class name *)
-    let class_ = Decl_provider.get_class ctx sym.SymbolOccurrence.name in
+    let class_ =
+      Decl_provider.get_class ctx sym.SymbolOccurrence.name
+      |> Decl_entry.to_option
+    in
     Option.map class_ ~f:(fun class_ -> decl_to_hierarchy ctx class_)
   | (_, Some (_env, ty)) ->
     (* type of an expression, look to see if we have a class to show here *)
     (match get_node ty with
     | Tclass ((_, c_name), _, _) ->
-      let class_ = Decl_provider.get_class ctx c_name in
+      let class_ = Decl_provider.get_class ctx c_name |> Decl_entry.to_option in
       Option.map class_ ~f:(fun class_ -> decl_to_hierarchy ctx class_)
     | _ -> None)
 

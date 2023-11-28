@@ -134,8 +134,10 @@ let rec freshen_inside_ty env ty =
       default ()
     else begin
       match Env.get_typedef env name with
-      | None -> default ()
-      | Some td ->
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        default ()
+      | Decl_entry.Found td ->
         let variancel = List.map td.td_tparams ~f:(fun t -> t.tp_variance) in
         let (env, tyl) = freshen_tparams env variancel tyl in
         (env, mk (r, Tnewtype (name, tyl, ty)))
@@ -145,8 +147,10 @@ let rec freshen_inside_ty env ty =
       default ()
     else begin
       match Env.get_class env cid with
-      | None -> default ()
-      | Some cls ->
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        default ()
+      | Decl_entry.Found cls ->
         let variancel =
           List.map (Cls.tparams cls) ~f:(fun t -> t.tp_variance)
         in

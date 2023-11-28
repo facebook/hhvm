@@ -80,11 +80,12 @@ let names_and_pos_defined_by_class_ class_ =
 let trait_implements_interfaces ctx (trait : Cls.t) : bool =
   let is_interface name : bool =
     match Decl_provider.get_class ctx name with
-    | Some decl ->
+    | Decl_entry.Found decl ->
       (match Cls.kind decl with
       | Ast_defs.Cinterface -> true
       | _ -> false)
-    | None ->
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
       (* If we can't find this type (e.g. the user hasn't finished
          writing it), conservatively assume it's an interface. *)
       true
@@ -127,8 +128,10 @@ let handler =
       List.iter
         ~f:(fun tid ->
           match Decl_provider.get_class ctx tid with
-          | None -> ()
-          | Some t_cls ->
+          | Decl_entry.DoesNotExist
+          | Decl_entry.NotYetAvailable ->
+            ()
+          | Decl_entry.Found t_cls ->
             let trait_names = fst (names_and_origins_defined_by_cls_t t_cls) in
             if
               List.is_empty (Cls.all_ancestor_req_class_requirements t_cls)
@@ -149,8 +152,10 @@ let handler =
       List.iter
         ~f:(fun cid ->
           match Decl_provider.get_class ctx cid with
-          | None -> ()
-          | Some c_cls ->
+          | Decl_entry.DoesNotExist
+          | Decl_entry.NotYetAvailable ->
+            ()
+          | Decl_entry.Found c_cls ->
             let (class_names, origins) =
               names_and_origins_defined_by_cls_t c_cls
             in

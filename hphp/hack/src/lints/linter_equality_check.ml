@@ -19,8 +19,10 @@ module SN = Naming_special_names
 
 let enum_base_type env cid =
   match Decl_provider.get_class (Typing_env.get_ctx env) cid with
-  | None -> (env, None)
-  | Some cls ->
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    (env, None)
+  | Decl_entry.Found cls ->
     (match Cls.enum_type cls with
     | None -> (env, None)
     | Some te ->

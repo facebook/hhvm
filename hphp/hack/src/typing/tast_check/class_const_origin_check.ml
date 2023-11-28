@@ -31,7 +31,7 @@ let find_cycle env class_name constant_name =
   let get_origin_and_refs class_name constant_name =
     let open Option in
     let cls = Env.get_class env class_name in
-    cls >>= fun cls ->
+    cls |> Decl_entry.to_option >>= fun cls ->
     Env.get_const env cls constant_name >>| fun class_const ->
     (class_const.cc_origin, class_const.cc_refs)
   in
@@ -55,7 +55,7 @@ let find_cycle env class_name constant_name =
               let origin =
                 let open Option in
                 let cls = Env.get_class env class_name in
-                cls >>= fun cls ->
+                cls |> Decl_entry.to_option >>= fun cls ->
                 Env.get_const env cls name >>| fun class_const ->
                 class_const.cc_origin
               in
@@ -98,8 +98,10 @@ let handler =
       let c_consts = c.c_consts in
       let cls = Env.get_class env c_name in
       match cls with
-      | None -> ()
-      | Some cls ->
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        ()
+      | Decl_entry.Found cls ->
         List.iter c_consts ~f:(fun cc ->
             let cc_name = snd cc.cc_id in
             let cc = Env.get_const env cls cc_name in

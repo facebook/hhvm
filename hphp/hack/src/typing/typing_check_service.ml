@@ -355,7 +355,7 @@ let process_one_workitem
       in
       (Some file, None, mid_stats, file_errors, map_reduce_data, deferred, tally)
     | Declare (_path, class_name) ->
-      let (_ : Decl_provider.class_decl option) =
+      let (_ : Decl_provider.class_decl Decl_entry.t) =
         Decl_provider.get_class ctx class_name
       in
       ( None,

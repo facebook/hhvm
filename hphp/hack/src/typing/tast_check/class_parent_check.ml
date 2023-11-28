@@ -16,8 +16,10 @@ let check_is_class env ~require_class_check (p, h) =
   match h with
   | Aast.Happly ((_, name), _) -> begin
     match Env.get_class env name with
-    | None -> ()
-    | Some cls ->
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      ()
+    | Decl_entry.Found cls ->
       let kind = Cls.kind cls in
       let name = Cls.name cls in
       if Ast_defs.is_c_class kind then (
@@ -48,9 +50,11 @@ let check_is_interface (env, error_verb) (p, h) =
   match h with
   | Aast.Happly ((_, name), _) -> begin
     match Env.get_class env name with
-    | None -> ()
-    | Some cls when Ast_defs.is_c_interface (Cls.kind cls) -> ()
-    | Some cls ->
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      ()
+    | Decl_entry.Found cls when Ast_defs.is_c_interface (Cls.kind cls) -> ()
+    | Decl_entry.Found cls ->
       Errors.add_error
         Nast_check_error.(
           to_user_error
@@ -74,9 +78,11 @@ let check_is_trait env (p, h) =
     let type_info = Env.get_class env name in
     begin
       match type_info with
-      | None -> ()
-      | Some cls when Ast_defs.is_c_trait (Cls.kind cls) -> ()
-      | Some cls ->
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        ()
+      | Decl_entry.Found cls when Ast_defs.is_c_trait (Cls.kind cls) -> ()
+      | Decl_entry.Found cls ->
         let name = Cls.name cls in
         let kind = Cls.kind cls in
         Errors.add_error

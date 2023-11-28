@@ -64,7 +64,7 @@ let check_hrefinement unchecked_tparams env h rl =
   | Tclass (cls_id, _, _) ->
     let get_class_const =
       match Env.get_class env (snd cls_id) with
-      | Some cls -> begin
+      | Decl_entry.Found cls -> begin
         fun const_sid ->
           match Env.get_typeconst env cls (snd const_sid) with
           | Some ttc -> `Found ttc
@@ -126,14 +126,18 @@ let check_happly unchecked_tparams env h =
     match get_node locl_ty with
     | Tnewtype (type_name, targs, _cstr_ty) ->
       (match Env.get_typedef env type_name with
-      | None -> (env, None)
-      | Some typedef ->
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        (env, None)
+      | Decl_entry.Found typedef ->
         check_tparams_constraints env hint_pos typedef.td_tparams targs)
     | Tclass (cls, _, targs) ->
       (match Env.get_class env (snd cls) with
-      | Some cls ->
+      | Decl_entry.Found cls ->
         check_tparams_constraints env hint_pos (Cls.tparams cls) targs
-      | None -> (env, None))
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        (env, None))
     | _ -> (env, None)
   in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
@@ -207,13 +211,15 @@ and hint_ ~in_signature env p h_ =
     [Typing_error.(wellformedness @@ Primary.Wellformedness.Tuple_syntax p)]
   | Happly ((_, x), hl) as h -> begin
     match Env.get_class_or_typedef env.tenv x with
-    | None -> []
-    | Some (Env.TypedefResult _) ->
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      []
+    | Decl_entry.Found (Env.TypedefResult _) ->
       let (_ : Typing_env_types.env) =
         check_happly env.typedef_tparams env.tenv (p, h)
       in
       hints env hl
-    | Some (Env.ClassResult _) ->
+    | Decl_entry.Found (Env.ClassResult _) ->
       let (_ : Typing_env_types.env) =
         check_happly env.typedef_tparams env.tenv (p, h)
       in

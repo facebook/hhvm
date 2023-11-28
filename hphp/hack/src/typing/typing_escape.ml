@@ -312,17 +312,22 @@ and refresh_type renv v ty_orig =
   | (r, Tnewtype (name, l, bnd)) ->
     let vl =
       match Env.get_typedef env name with
-      | Some { td_tparams; _ } ->
+      | Decl_entry.Found { td_tparams; _ } ->
         List.map td_tparams ~f:(fun t -> t.tp_variance)
-      | None -> List.map l ~f:(fun _ -> Ast_defs.Invariant)
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        List.map l ~f:(fun _ -> Ast_defs.Invariant)
     in
     let (renv, l, ch) = refresh_types_w_variance renv v vl l in
     (renv, mk (r, Tnewtype (name, l, bnd)), ch)
   | (r, Tclass ((p, cid), e, l)) ->
     let vl =
       match Env.get_class env cid with
-      | None -> List.map l ~f:(fun _ -> Ast_defs.Invariant)
-      | Some cls -> List.map (Cls.tparams cls) ~f:(fun t -> t.tp_variance)
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        List.map l ~f:(fun _ -> Ast_defs.Invariant)
+      | Decl_entry.Found cls ->
+        List.map (Cls.tparams cls) ~f:(fun t -> t.tp_variance)
     in
     let (renv, l, ch) = refresh_types_w_variance renv v vl l in
     (renv, mk (r, Tclass ((p, cid), e, l)), ch)

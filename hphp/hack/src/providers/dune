@@ -201,7 +201,10 @@
 
 (library
  (name decl_provider_internals)
- (modules decl_provider_internals)
+ (wrapped false)
+ (modules
+   decl_entry
+   decl_provider_internals)
  (libraries
   decl_counters
   decl_nast

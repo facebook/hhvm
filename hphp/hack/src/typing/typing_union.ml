@@ -598,16 +598,20 @@ and union_possibly_enforced_tys ~approx_cancel_neg env ety1 ety2 =
 and union_class ~approx_cancel_neg env name tyl1 tyl2 =
   let tparams =
     match Env.get_class env name with
-    | None -> []
-    | Some c -> Cls.tparams c
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      []
+    | Decl_entry.Found c -> Cls.tparams c
   in
   union_tylists_w_variances ~approx_cancel_neg env tparams tyl1 tyl2
 
 and union_newtype ~approx_cancel_neg env typename tyl1 tyl2 =
   let tparams =
     match Env.get_typedef env typename with
-    | None -> []
-    | Some t -> t.td_tparams
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      []
+    | Decl_entry.Found t -> t.td_tparams
   in
   union_tylists_w_variances ~approx_cancel_neg env tparams tyl1 tyl2
 
@@ -772,8 +776,10 @@ let rec is_minimal env ty =
   | Tclass (_, Exact, []) -> true
   | Tclass ((_, name), _, []) -> begin
     match Env.get_class env name with
-    | Some cd -> Cls.final cd
-    | None -> false
+    | Decl_entry.Found cd -> Cls.final cd
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      false
   end
   | Tnewtype (name, [ty], _)
     when String.equal name Naming_special_names.Classes.cClassname ->

@@ -54,8 +54,10 @@ let rec validate_free_type env locl_ty =
      missing args only result in "true" if both types are missing that arg *)
   | Tclass ((_, class_id), _exact, tyargs) ->
     (match Typing_env.get_class env class_id with
-    | None -> ["Unbound class name " ^ class_id]
-    | Some _ -> validate_l env tyargs)
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      ["Unbound class name " ^ class_id]
+    | Decl_entry.Found _ -> validate_l env tyargs)
   | Tunion tyargs
   | Tintersection tyargs
   | Ttuple tyargs ->

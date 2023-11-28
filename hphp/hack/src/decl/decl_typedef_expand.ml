@@ -57,7 +57,9 @@ let rec expand_and_instantiate
     Detects cycles, but does not raise an error - it just stops expanding instead. *)
 and expand_typedef_ ?(force_expand = false) visited ctx (name : string) :
     decl_tparam list * decl_ty_ * cyclic_td_usage list =
-  let td = unsafe_opt @@ Decl_provider.get_typedef ctx name in
+  let td =
+    unsafe_opt (Decl_entry.to_option @@ Decl_provider.get_typedef ctx name)
+  in
   let {
     td_pos;
     td_module = _;

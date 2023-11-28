@@ -284,9 +284,12 @@ let get_class_variance : Typing_env_types.env -> Ast_defs.id -> _ =
   | _ ->
     let tparams =
       match Typing_env.get_class_or_typedef env class_name with
-      | Some (Typing_env.TypedefResult { td_tparams; _ }) -> td_tparams
-      | Some (Typing_env.ClassResult cls) -> Cls.tparams cls
-      | None -> []
+      | Decl_entry.Found (Typing_env.TypedefResult { td_tparams; _ }) ->
+        td_tparams
+      | Decl_entry.Found (Typing_env.ClassResult cls) -> Cls.tparams cls
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        []
     in
 
     List.map tparams ~f:make_decl_tparam_variance
@@ -532,8 +535,10 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
     let variancel =
       let tparams =
         match Typing_env.get_typedef tenv name with
-        | Some { td_tparams; _ } -> td_tparams
-        | None -> []
+        | Decl_entry.Found { td_tparams; _ } -> td_tparams
+        | Decl_entry.DoesNotExist
+        | Decl_entry.NotYetAvailable ->
+          []
       in
       List.map tparams ~f:make_decl_tparam_variance
     in

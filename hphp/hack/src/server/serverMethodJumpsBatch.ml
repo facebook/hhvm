@@ -11,7 +11,7 @@ open Hh_prelude
 
 let get_ancestors_single ctx class_ ~filter =
   let class_ = MethodJumps.add_ns class_ in
-  let class_ = Decl_provider.get_class ctx class_ in
+  let class_ = Decl_provider.get_class ctx class_ |> Decl_entry.to_option in
   Option.map class_ ~f:(fun c ->
       MethodJumps.get_ancestor_classes_and_methods ctx c ~filter [])
 

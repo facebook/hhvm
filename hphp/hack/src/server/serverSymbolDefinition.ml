@@ -120,14 +120,17 @@ let go ctx ast result =
         ~is_static
     in
     (match matching_method with
-    | Some meth -> get_member_def ctx (Method, meth.ce_origin, method_name)
-    | None -> None)
+    | Decl_entry.Found meth ->
+      get_member_def ctx (Method, meth.ce_origin, method_name)
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      None)
   | SO.Attribute None -> summarize_class_typedef ctx result.SO.name
   | SO.Method (SO.ClassName c_name, method_name) ->
     (* Classes on typing heap have all the methods from inheritance hierarchy
        * folded together, so we will correctly identify them even if method_name
        * is not defined directly in class c_name *)
-    Decl_provider.get_class ctx c_name >>= fun class_ ->
+    Decl_provider.get_class ctx c_name |> Decl_entry.to_option >>= fun class_ ->
     if String.equal method_name Naming_special_names.Members.__construct then
       match fst (Cls.construct class_) with
       | Some m -> get_member_def ctx (Constructor, m.ce_origin, method_name)
@@ -148,7 +151,7 @@ let go ctx ast result =
   | SO.BestEffortArgument _ -> None
   | SO.Property (SO.ClassName c_name, property_name)
   | SO.XhpLiteralAttr (c_name, property_name) ->
-    Decl_provider.get_class ctx c_name >>= fun class_ ->
+    Decl_provider.get_class ctx c_name |> Decl_entry.to_option >>= fun class_ ->
     let property_name = clean_member_name property_name in
     begin
       match Cls.get_prop class_ property_name with
@@ -159,13 +162,14 @@ let go ctx ast result =
     end
   | SO.Property (SO.UnknownClass, _) -> None
   | SO.ClassConst (SO.ClassName c_name, const_name) ->
-    Decl_provider.get_class ctx c_name >>= fun class_ ->
+    Decl_provider.get_class ctx c_name |> Decl_entry.to_option >>= fun class_ ->
     Cls.get_const class_ const_name >>= fun m ->
     get_member_def ctx (Class_const, m.cc_origin, const_name)
   | SO.ClassConst (SO.UnknownClass, _) -> None
   | SO.EnumClassLabel (class_name, member_name) ->
     (* An enum class is a classish with class constants. *)
-    Decl_provider.get_class ctx class_name >>= fun class_ ->
+    Decl_provider.get_class ctx class_name |> Decl_entry.to_option
+    >>= fun class_ ->
     Cls.get_const class_ member_name >>= fun m ->
     get_member_def ctx (Class_const, m.cc_origin, member_name)
   | SO.Function ->
@@ -176,7 +180,7 @@ let go ctx ast result =
     Some (FileOutline.summarize_gconst cst)
   | SO.Class _ -> summarize_class_typedef ctx result.SO.name
   | SO.Typeconst (c_name, typeconst_name) ->
-    Decl_provider.get_class ctx c_name >>= fun class_ ->
+    Decl_provider.get_class ctx c_name |> Decl_entry.to_option >>= fun class_ ->
     Cls.get_typeconst class_ typeconst_name >>= fun m ->
     get_member_def ctx (Typeconst, m.ttc_origin, typeconst_name)
   | SO.LocalVar -> begin

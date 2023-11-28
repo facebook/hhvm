@@ -60,7 +60,7 @@ let lookup_magic_type (env : env) use_pos (class_ : locl_ty) (fname : string) :
           (Env.get_member true env c fname)
           (Env.get_member true env c "format_wild")
       in
-      Env.get_class env className >>= lookup_def
+      Env.get_class env className |> Decl_entry.to_option >>= lookup_def
       >>= fun { ce_type = (lazy ty); ce_pos = (lazy pos); _ } ->
       match deref ty with
       | (_, Tfun fty) ->

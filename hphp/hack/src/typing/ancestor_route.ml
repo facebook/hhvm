@@ -27,13 +27,17 @@ let get_class env name =
 let all_ancestor_names env (type_name : string) : string list =
   let decl = get_class env type_name in
   match decl with
-  | Some decl -> Cls.all_ancestor_names decl
-  | None -> []
+  | Decl_entry.Found decl -> Cls.all_ancestor_names decl
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    []
 
 let has_ancestor env (classish_name : string) (ancestor_name : string) : bool =
   match get_class env classish_name with
-  | Some decl -> Cls.has_ancestor decl ancestor_name
-  | None -> false
+  | Decl_entry.Found decl -> Cls.has_ancestor decl ancestor_name
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    false
 
 (** Return the ancestors of [classish_name] that also depend on [ancestor_name]. *)
 let find_ancestors_using env (classish_name : string) (ancestor_name : string) :
@@ -87,11 +91,13 @@ let find_route env ~classish ~ancestor : string list =
 let reason_pos env (classish_name : string) (ancestor_name : string) :
     Pos_or_decl.t =
   match get_class env classish_name with
-  | Some decl ->
+  | Decl_entry.Found decl ->
     (match Cls.get_ancestor decl ancestor_name with
     | Some trait_ty -> Typing_defs_core.get_pos trait_ty
     | None -> Pos_or_decl.none)
-  | None -> Pos_or_decl.none
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    Pos_or_decl.none
 
 (** Given a list of [items], apply the function [f] to every two
   adjacent items.

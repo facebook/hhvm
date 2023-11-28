@@ -57,8 +57,10 @@ let make_info ret_pos fun_kind attributes env return_type =
 let make_wrapped_fresh_type env p r id =
   let class_ = Env.get_class env id in
   match class_ with
-  | None -> Env.fresh_type_error env p (* Shouldn't happen *)
-  | Some class_ ->
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    Env.fresh_type_error env p (* Shouldn't happen *)
+  | Decl_entry.Found class_ ->
     let ((env, _), ty, _tal) =
       Typing_phase.localize_targs_and_check_constraints
         ~exact:nonexact
@@ -227,7 +229,7 @@ let make_return_type
               let enforced_type =
                 Typing_partial_enforcement.get_enforced_type
                   env
-                  (Env.get_self_class env)
+                  (Env.get_self_class env |> Decl_entry.to_option)
                   dty
               in
               let is_sub_type =

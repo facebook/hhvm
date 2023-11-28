@@ -2234,8 +2234,10 @@ let handle_mode
     in
     let cid = Utils.add_ns cid in
     (match Decl_provider.get_class ctx cid with
-    | None -> Printf.printf "No class named %s\n" cid
-    | Some cls ->
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      Printf.printf "No class named %s\n" cid
+    | Decl_entry.Found cls ->
       let ty_to_string ty =
         let env =
           Typing_env_types.empty ctx Relative_path.default ~droot:None

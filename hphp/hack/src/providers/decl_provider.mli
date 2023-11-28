@@ -40,7 +40,7 @@ val get_class :
   ?tracing_info:Decl_counters.tracing_info ->
   Provider_context.t ->
   type_key ->
-  class_decl option
+  class_decl Decl_entry.t
 
 (** Return the shallow declaration of the class with the given name if it is
 present in the cache. Otherwise, compute it, store it in the cache, and
@@ -52,7 +52,7 @@ val get_typedef :
   ?tracing_info:Decl_counters.tracing_info ->
   Provider_context.t ->
   type_key ->
-  typedef_decl option
+  typedef_decl Decl_entry.t
 
 val get_gconst :
   ?tracing_info:Decl_counters.tracing_info ->
@@ -74,7 +74,7 @@ val get_overridden_method :
   class_name:type_key ->
   method_name:string ->
   is_static:bool ->
-  Typing_defs.class_elt option
+  Typing_defs.class_elt Decl_entry.t
 
 (** Return type for [is_this_def_the_winner] *)
 type winner =

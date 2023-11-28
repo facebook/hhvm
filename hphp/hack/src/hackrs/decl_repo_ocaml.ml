@@ -165,8 +165,8 @@ let fold_single_file
   SSet.iter
     (fun class_name ->
       match Decl_provider.get_class ctx class_name with
-      | Some _ -> ()
-      | None -> failwith ("missing class: " ^ class_name))
+      | Decl_entry.Found _ -> ()
+      | _ -> failwith ("missing class: " ^ class_name))
     class_names
 
 let fold_repo

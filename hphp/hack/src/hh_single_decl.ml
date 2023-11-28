@@ -344,7 +344,8 @@ let name_and_then_print_name_results ctx files ~decl_make_env =
             Naming_provider.get_class_path ctx name |> Option.is_some)
           ~f_name_pos:Naming_provider.get_type_pos
           ~f_name_canon:Naming_provider.get_type_canon_name
-          ~f_decl_exists:Decl_provider.get_class
+          ~f_decl_exists:(fun ctx x ->
+            Decl_provider.get_class ctx x |> Decl_entry.to_option)
       | FileInfo.Typedef ->
         show_name_results
           ~ctx
@@ -355,7 +356,8 @@ let name_and_then_print_name_results ctx files ~decl_make_env =
             Naming_provider.get_typedef_path ctx name |> Option.is_some)
           ~f_name_pos:Naming_provider.get_type_pos
           ~f_name_canon:Naming_provider.get_type_canon_name
-          ~f_decl_exists:Decl_provider.get_typedef
+          ~f_decl_exists:(fun ctx x ->
+            Decl_provider.get_typedef ctx x |> Decl_entry.to_option)
       | FileInfo.Const ->
         show_name_results
           ~ctx

@@ -74,6 +74,7 @@ let compute_member_clusters_hash hash member_clusters =
    it should never be the case that the decl doesn't exist. *)
 let get_class_exn ctx class_name =
   Decl_provider.get_class ctx class_name
+  |> Decl_entry.to_option
   |> Option.value_or_thunk ~default:(fun () ->
          failwith
          @@ "Impossible happened. "

@@ -27,26 +27,30 @@ let rec get_enforced_type env class_def_opt ty =
   (* An enum type is enforced at its underlying type *)
   | Tapply ((_, name), _) when Env.is_enum env name -> begin
     match Env.get_class env name with
-    | None -> default ()
-    | Some tc ->
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      default ()
+    | Decl_entry.Found tc ->
       (match Cls.enum_type tc with
       | None -> default ()
       | Some e -> get_enforced_type env None e.te_base)
   end
   | Tapply ((_pos, name), tyargs) -> begin
     match Env.get_class_or_typedef env name with
-    | Some (Env.ClassResult _class_info) ->
+    | Decl_entry.Found (Env.ClassResult _class_info) ->
       (* Non-generic types are fully enforced *)
       if List.is_empty tyargs then
         ty
       (* Generic types are not enforced at their type arguments *)
       else
         default ()
-    | Some (Env.TypedefResult typedef_info) ->
+    | Decl_entry.Found (Env.TypedefResult typedef_info) ->
       (* Enforcement "sees through" type aliases and newtype, but does not instantiate generic arguments *)
       (* The same is true of newtypes *)
       get_enforced_type env None typedef_info.td_type
-    | None -> default ()
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      default ()
   end
   | Tgeneric (name, []) -> begin
     match class_def_opt with

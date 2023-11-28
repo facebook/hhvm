@@ -192,10 +192,12 @@ let get_class_req_attrs env pctx classname cid =
     |> List.map ~f:(fun (name, _) -> Utils.strip_xhp_ns name)
   in
   Decl_provider.get_class pctx classname
+  |> Decl_entry.to_option
   |> Option.value_map ~default:[] ~f:req_attrs
 
 let get_class_is_child_empty pctx classname =
   Decl_provider.get_class pctx classname
+  |> Decl_entry.to_option
   |> Option.value_map ~default:false ~f:Cls.xhp_marked_empty
 
 let get_pos_for (env : Tast_env.env) (ty : Typing_defs.phase_ty) : Pos.absolute
@@ -250,8 +252,10 @@ let get_snippet_for_xhp_classname cls ctx env =
   (* This is used to check if the class exists or not *)
   let class_ = Decl_provider.get_class ctx cls in
   match class_ with
-  | None -> None
-  | Some class_ ->
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    None
+  | Decl_entry.Found class_ ->
     if Cls.is_xhp class_ then
       let cls = Utils.add_ns cls in
       let attrs = get_class_req_attrs env ctx cls None in
@@ -580,8 +584,9 @@ let autocomplete_xhp_enum_attribute_value attr_name ty id_id env cls =
       Cls.props cls
       |> List.find ~f:(fun (name, _) -> String.equal (":" ^ attr_name) name)
       |> Option.map ~f:(fun (_, { ce_origin = n; _ }) -> n)
-      |> Option.bind ~f:(fun cls_name ->
+      |> Option.map ~f:(fun cls_name ->
              Decl_provider.get_class (Tast_env.get_ctx env) cls_name)
+      |> Option.bind ~f:Decl_entry.to_option
     in
 
     let enum_values =
@@ -664,7 +669,9 @@ let autocomplete_xhp_enum_class_value attr_ty id_id env =
 
     attr_type_name
     |> Option.iter ~f:(fun class_name ->
-           let enum_class = Tast_env.get_enum env class_name in
+           let enum_class =
+             Tast_env.get_enum env class_name |> Decl_entry.to_option
+           in
 
            let enum_constants =
              Option.value
@@ -889,6 +896,7 @@ let autocomplete_typed_member
   Tast_env.get_class_ids env class_ty
   |> List.iter ~f:(fun cname ->
          Decl_provider.get_class (Tast_env.get_ctx env) cname
+         |> Decl_entry.to_option
          |> Option.iter ~f:(fun class_ ->
                 let cid = Option.map cid ~f:to_nast_class_id_ in
                 autocomplete_member
@@ -983,7 +991,8 @@ let autocomplete_enum_class_label env opt_cname pos_labelname expected_ty =
   let open Option in
   Option.iter
     ~f:suggest_members
-    (opt_cname >>= fun (_, id) -> Tast_env.get_class env id)
+    ( opt_cname >>= fun (_, id) ->
+      Tast_env.get_class env id |> Decl_entry.to_option )
 
 (* Zip two lists together. If the two lists have different lengths,
    take the shortest. *)
@@ -1050,14 +1059,16 @@ let typeconst_class_name (typeconst : typeconst_type) : string option =
 let rec typeconst_decl env (ids : sid list) (cls_name : string) : Cls.t option =
   let open Option in
   match Tast_env.get_class env cls_name with
-  | Some cls_decl ->
+  | Decl_entry.Found cls_decl ->
     (match ids with
     | [] -> Some cls_decl
     | (_, id) :: ids ->
       Cls.get_typeconst cls_decl id
       >>= typeconst_class_name
       >>= typeconst_decl env ids)
-  | None -> None
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    None
 
 (* Autocomplete type constants, which look like `MyClass::AUTO332`. *)
 let autocomplete_class_type_const env ((_, h) : Aast.hint) (ids : sid list) :
@@ -1209,7 +1220,7 @@ let add_builtin_attribute_result replace_pos ~doc ~name : unit =
 
 let enclosing_class_decl (env : Tast_env.env) : Cls.t option =
   match Tast_env.get_self_id env with
-  | Some id -> Tast_env.get_class env id
+  | Some id -> Tast_env.get_class env id |> Decl_entry.to_option
   | None -> None
 
 (** Return the inherited class methods whose name starts with [prefix]
@@ -1298,7 +1309,7 @@ let autocomplete_builtin_attribute
 (* If [name] is an enum, return the list of the constants it defines. *)
 let enum_consts env name : string list option =
   match Decl_provider.get_class (Tast_env.get_ctx env) name with
-  | Some cls ->
+  | Decl_entry.Found cls ->
     (match Cls.kind cls with
     | Ast_defs.Cenum ->
       let consts =
@@ -1309,7 +1320,9 @@ let enum_consts env name : string list option =
       in
       Some consts
     | _ -> None)
-  | None -> None
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    None
 
 let add_enum_const_result env pos replace_pos prefix const_name =
   let ty = Tprim Aast_defs.Tstring in
@@ -1930,6 +1943,7 @@ let visitor
 
       let cid = Aast.CI sid in
       Decl_provider.get_class (Tast_env.get_ctx env) (snd sid)
+      |> Decl_entry.to_option
       |> Option.iter ~f:(fun (c : Cls.t) ->
              List.iter attrs ~f:(function
                  | Aast.Xhp_simple

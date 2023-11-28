@@ -19,7 +19,7 @@ let check_expr env (_, pos, e) =
     when String.equal construct SN.Members.__construct ->
     let tenv = Env.tast_env_as_typing_env env in
     (match Typing_env.get_parent_class tenv with
-    | Some parent_class
+    | Decl_entry.Found parent_class
       when Ast_defs.is_c_abstract (Cls.kind parent_class)
            && Option.is_none (fst (Cls.construct parent_class)) ->
       Typing_error_utils.add_typing_error

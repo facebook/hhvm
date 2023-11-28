@@ -67,7 +67,7 @@ let lookup_or_populate_class_cache class_name populate =
 let get_class
     ?(tracing_info : Decl_counters.tracing_info option)
     (ctx : Provider_context.t)
-    (class_name : type_key) : class_decl option =
+    (class_name : type_key) : class_decl Decl_entry.t =
   Decl_counters.count_decl ?tracing_info Decl_counters.Class class_name
   @@ fun counter ->
   (* There are several possibilities:
@@ -83,8 +83,8 @@ let get_class
           Decl_store.((get ()).get_class class_name)
           |> Option.map ~f:Typing_classes_heap.make_eager_class_decl)
     with
-    | None -> None
-    | Some v -> Some (counter, v, Some ctx)
+    | None -> Decl_entry.DoesNotExist
+    | Some v -> Decl_entry.Found (counter, v, Some ctx)
   end
   | Provider_backend.Pessimised_shared_memory _ -> begin
     (* No pessimisation needs to be done here directly. All pessimisation is
@@ -94,25 +94,28 @@ let get_class
      * outdated member types once we update its members during
      * pessimisation. *)
     match Typing_classes_heap.get ctx class_name declare_folded_class with
-    | None -> None
-    | Some v -> Some (counter, v, Some ctx)
+    | None -> Decl_entry.DoesNotExist
+    | Some v -> Decl_entry.Found (counter, v, Some ctx)
   end
   | Provider_backend.Shared_memory -> begin
     match
       lookup_or_populate_class_cache class_name (fun class_name ->
           Typing_classes_heap.get ctx class_name declare_folded_class)
     with
-    | None -> None
-    | Some v -> Some (counter, v, Some ctx)
+    | None -> Decl_entry.DoesNotExist
+    | Some v -> Decl_entry.Found (counter, v, Some ctx)
   end
-  | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
-    let open Option.Monad_infix in
-    Typing_classes_heap.get_class_with_cache
-      ctx
-      class_name
-      decl_cache
-      declare_folded_class
-    >>| fun cls -> (counter, cls, Some ctx)
+  | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } -> begin
+    match
+      Typing_classes_heap.get_class_with_cache
+        ctx
+        class_name
+        decl_cache
+        declare_folded_class
+    with
+    | None -> Decl_entry.DoesNotExist
+    | Some cls -> Decl_entry.Found (counter, cls, Some ctx)
+  end
   | Provider_backend.Rust_provider_backend backend -> begin
     match
       lookup_or_populate_class_cache class_name (fun class_name ->
@@ -122,8 +125,8 @@ let get_class
             class_name
           |> Option.map ~f:Typing_classes_heap.make_eager_class_decl)
     with
-    | None -> None
-    | Some v -> Some (counter, v, Some ctx)
+    | None -> Decl_entry.DoesNotExist
+    | Some v -> Decl_entry.Found (counter, v, Some ctx)
   end
 
 let maybe_pessimise_fun_decl ctx fun_decl =
@@ -183,7 +186,7 @@ let get_typedef ?tracing_info ctx name =
   Decl_counters.count_decl Decl_counters.Typedef ?tracing_info name
   @@ fun _counter ->
   Decl_provider_internals.get_typedef_without_pessimise ctx name
-  |> Option.map ~f:(maybe_pessimise_typedef_decl ctx)
+  |> Decl_entry.map ~f:(maybe_pessimise_typedef_decl ctx)
 
 let get_gconst ?tracing_info ctx name =
   Decl_counters.count_decl Decl_counters.GConst ?tracing_info name
@@ -194,10 +197,11 @@ let get_module ?tracing_info ctx name =
   @@ fun _counter -> Decl_provider_internals.get_module ctx name
 
 let get_overridden_method ctx ~class_name ~method_name ~is_static :
-    Typing_defs.class_elt option =
-  let open Option.Monad_infix in
-  get_class ctx class_name >>= fun cls ->
-  Class.overridden_method cls ~method_name ~is_static ~get_class
+    Typing_defs.class_elt Decl_entry.t =
+  Decl_entry.bind (get_class ctx class_name) @@ fun cls ->
+  let get_class ctx x = Decl_entry.to_option (get_class ctx x) in
+  Decl_entry.of_option_or_doe_not_exist
+  @@ Class.overridden_method cls ~method_name ~is_static ~get_class
 
 (** This is a subtle function! If there is a winner defined for [name_type / name]
 with that exact same capitalization, then it will return its position, otherwise
@@ -251,12 +255,15 @@ let get_pos_from_decl_of_winner_FOR_TESTS_ONLY ctx name_type name : Pos.t option
     | FileInfo.Typedef ->
       if Naming_provider.get_typedef_path ctx name |> Option.is_some then
         get_typedef ctx name
+        |> Decl_entry.to_option
         |> Option.map ~f:(fun { Typing_defs.td_pos; _ } -> td_pos)
       else
         None
     | FileInfo.Class ->
       if Naming_provider.get_class_path ctx name |> Option.is_some then
-        get_class ctx name |> Option.map ~f:(fun cls -> Class.pos cls)
+        get_class ctx name
+        |> Decl_entry.to_option
+        |> Option.map ~f:(fun cls -> Class.pos cls)
       else
         None
     | FileInfo.Const ->

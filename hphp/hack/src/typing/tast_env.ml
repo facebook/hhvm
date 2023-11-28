@@ -71,9 +71,12 @@ let get_class = Typing_env.get_class
 
 let get_class_or_typedef env x =
   match Typing_env.get_class_or_typedef env x with
-  | Some (Typing_env.ClassResult cd) -> Some (ClassResult cd)
-  | Some (Typing_env.TypedefResult td) -> Some (TypedefResult td)
-  | None -> None
+  | Decl_entry.Found (Typing_env.ClassResult cd) ->
+    Decl_entry.Found (ClassResult cd)
+  | Decl_entry.Found (Typing_env.TypedefResult td) ->
+    Decl_entry.Found (TypedefResult td)
+  | Decl_entry.DoesNotExist -> Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable -> Decl_entry.NotYetAvailable
 
 let is_in_expr_tree = Typing_env.is_in_expr_tree
 

@@ -31,13 +31,14 @@ let can_access_internal
     | None -> `Yes
     | Some self ->
       (match Env.get_class env self with
-      | Some cls
+      | Decl_entry.Found cls
         when Ast_defs.is_c_trait (Cls.kind cls)
              && (not (Cls.internal cls))
              && not (Cls.is_module_level_trait cls) ->
         `OutsideViaTrait (Cls.pos cls)
-      | Some _
-      | None ->
+      | Decl_entry.Found _
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
         `Yes))
   | (Some current, Some target) -> `Disjoint (current, target)
 

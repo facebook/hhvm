@@ -141,6 +141,9 @@ let handler =
     method! at_class_ env c =
       let cid = snd c.c_name in
       match Decl_provider.get_class (Tast_env.get_ctx env) cid with
-      | None -> ()
-      | Some cls -> check_redundant_generics_class env (snd c.c_name) cls
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        ()
+      | Decl_entry.Found cls ->
+        check_redundant_generics_class env (snd c.c_name) cls
   end

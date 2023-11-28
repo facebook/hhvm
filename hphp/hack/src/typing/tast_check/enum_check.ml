@@ -38,7 +38,7 @@ let find_cycle env class_name =
   let rec spot_target seen current =
     let open Option in
     let enum_def = Env.get_enum env current in
-    let enum_info = enum_def >>= Cls.enum_type in
+    let enum_info = enum_def |> Decl_entry.to_option >>= Cls.enum_type in
     let te_base = enum_info >>= fun info -> get_name info.te_base in
     match te_base with
     | None -> None

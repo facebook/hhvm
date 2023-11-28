@@ -47,8 +47,10 @@ let check_methods ctx c cls ~static =
     List.filter
       ~f:(fun class_name ->
         match Decl_provider.get_class ctx class_name with
-        | None -> false
-        | Some cls -> not (Ast_defs.is_c_interface (Cls.kind cls)))
+        | Decl_entry.DoesNotExist
+        | Decl_entry.NotYetAvailable ->
+          false
+        | Decl_entry.Found cls -> not (Ast_defs.is_c_interface (Cls.kind cls)))
       reqs
   in
   let ancestor_names = ancestor_names @ reqs in
@@ -75,7 +77,8 @@ let check_methods ctx c cls ~static =
          let matching_ancestor =
            ancestor_names
            (* inspect each ancestor, *)
-           |> List.filter_map ~f:(Decl_provider.get_class ctx)
+           |> List.filter_map ~f:(fun c ->
+                  Decl_provider.get_class ctx c |> Decl_entry.to_option)
            (* and if it has a method with the same name, and either that method
               is non-private or the ancestor is a trait, *)
            |> List.filter_map ~f:(fun ancestor ->
@@ -89,7 +92,8 @@ let check_methods ctx c cls ~static =
                       None)
            (* get the class which defined that method, *)
            |> List.filter_map ~f:(fun m ->
-                  Decl_provider.get_class ctx m.ce_origin)
+                  Decl_provider.get_class ctx m.ce_origin
+                  |> Decl_entry.to_option)
            (* as long as it and this class are of the same kind. *)
            |> List.filter ~f:(both_are_or_are_not_interfaces cls)
            (* If such a class exists... *)
@@ -120,8 +124,10 @@ let handler =
       let cid = snd c.c_name in
       let ctx = Tast_env.get_ctx env in
       match Decl_provider.get_class ctx cid with
-      | None -> ()
-      | Some cls ->
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        ()
+      | Decl_entry.Found cls ->
         check_methods ctx c cls ~static:false;
         check_methods ctx c cls ~static:true
   end

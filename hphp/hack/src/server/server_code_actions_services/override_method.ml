@@ -34,7 +34,7 @@ let override_method_quickfixes
   in
 
   match Decl_provider.get_class (Tast_env.get_ctx env) parent_name with
-  | Some decl ->
+  | Decl_entry.Found decl ->
     (* Offer an override action for any inherited method which isn't
        final and that the current class hasn't already overridden. *)
     let actions_for_methods ~is_static methods =
@@ -46,7 +46,9 @@ let override_method_quickfixes
     in
     actions_for_methods ~is_static:false (Decl_provider.Class.methods decl)
     @ actions_for_methods ~is_static:true (Decl_provider.Class.smethods decl)
-  | None -> []
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    []
 
 (* Quickfixes available at cursor position [start_line] and
    [start_col]. These aren't associated with errors, rather they

@@ -18,7 +18,8 @@ let xhp_enum_attr_values env (cls : Cls.t) (attr_name : string) :
   |> List.find ~f:(fun (name, _) -> String.equal attr_name name)
   |> Option.map ~f:(fun (_, { Typing_defs.ce_origin = n; _ }) -> n)
   |> Option.bind ~f:(fun cls_name ->
-         Decl_provider.get_class (Tast_env.get_ctx env) cls_name)
+         Decl_entry.to_option
+         @@ Decl_provider.get_class (Tast_env.get_ctx env) cls_name)
   |> Option.bind ~f:(fun cls ->
          SMap.find_opt attr_name (Cls.xhp_enum_values cls))
 
@@ -85,7 +86,9 @@ let handler =
       match e_ with
       | Xml ((_, class_name), attrs, _children) ->
         (match Decl_provider.get_class (Tast_env.get_ctx env) class_name with
-        | Some cls -> List.iter attrs ~f:(check_attr_value env cls)
-        | None -> ())
+        | Decl_entry.Found cls -> List.iter attrs ~f:(check_attr_value env cls)
+        | Decl_entry.DoesNotExist
+        | Decl_entry.NotYetAvailable ->
+          ())
       | _ -> ()
   end

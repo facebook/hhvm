@@ -347,7 +347,13 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
           match (targs, get_node x_ty) with
           | (_ :: _, Tclass (((_, name) as id), _, [])) ->
             let class_info = Env.get_class env name in
-            localize_class_instantiation ~ety_env env r_inst id targs class_info
+            localize_class_instantiation
+              ~ety_env
+              env
+              r_inst
+              id
+              targs
+              (Decl_entry.to_option class_info)
           | (_ :: _, Tnewtype (id, [], _))
           | (_ :: _, Tunapplied_alias id) ->
             localize_typedef_instantiation
@@ -357,7 +363,7 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
               (get_reason dty)
               id
               targs
-              (Env.get_typedef env id)
+              (Env.get_typedef env id |> Decl_entry.to_option)
           | (_ :: _, Tgeneric (x', [])) -> localize_tgeneric x' r_inst
           | (_, ty_) -> ((env, None), mk (r_inst, ty_))
         end
@@ -446,9 +452,9 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
   | Tapply (((_p, cid) as cls), argl) ->
     let (env_err, lty) =
       match Env.get_class_or_typedef env cid with
-      | Some (Env.ClassResult class_info) ->
+      | Decl_entry.Found (Env.ClassResult class_info) ->
         localize_class_instantiation ~ety_env env r cls argl (Some class_info)
-      | Some (Env.TypedefResult typedef_info) ->
+      | Decl_entry.Found (Env.TypedefResult typedef_info) ->
         let origin_opt = find_origin dty in
         let ((env, ty_err_opt), lty) =
           match Option.bind origin_opt ~f:(!locl_cache_get env) with
@@ -465,7 +471,9 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
         in
         let lty = set_origin_and_cache origin_opt env ty_err_opt lty in
         ((env, ty_err_opt), lty)
-      | None -> localize_class_instantiation ~ety_env env r cls argl None
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        localize_class_instantiation ~ety_env env r cls argl None
     in
     let lty =
       (* If we have supportdyn<t> then push supportdyn into open shape fields *)
@@ -581,7 +589,9 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
             } ) )
   | Tnewtype (name, tyl, ty) ->
     let td =
-      Utils.unsafe_opt @@ Decl_provider.get_typedef (Env.get_ctx env) name
+      Decl_provider.get_typedef (Env.get_ctx env) name
+      |> Decl_entry.to_option
+      |> Utils.unsafe_opt
     in
     let should_expand =
       Env.is_typedef_visible
@@ -737,7 +747,8 @@ and localize_targ_by_kind (env, ety_env) ty (nkind : KindDefs.Simple.named_kind)
     let ((env, ty_err_opt), ty) = localize_with_kind ~ety_env env ty nkind in
     ((env, ty_err_opt, ety_env), ty)
 
-and localize_class_instantiation ~ety_env env r sid tyargs class_info =
+and localize_class_instantiation
+    ~ety_env env r sid tyargs (class_info : _ option) =
   let (pos, name) = sid in
   match class_info with
   | None ->
@@ -782,11 +793,13 @@ and localize_class_instantiation ~ety_env env r sid tyargs class_info =
           let (env, cstr) =
             match Env.get_enum_constraint env name with
             (* If not specified, default bound is arraykey *)
-            | None ->
+            | Decl_entry.DoesNotExist
+            | Decl_entry.NotYetAvailable
+            | Decl_entry.Found None ->
               ( (env, None),
                 MakeType.arraykey
                   (Reason.Rimplicit_upper_bound (pos, "arraykey")) )
-            | Some ty -> localize ~ety_env env ty
+            | Decl_entry.Found (Some ty) -> localize ~ety_env env ty
           in
           (env, mk (r, Tnewtype (name, [], cstr)))
     else
@@ -817,7 +830,7 @@ and localize_class_instantiation ~ety_env env r sid tyargs class_info =
         ((env, err), mk (new_r, Tnewtype (name, [], cstr)))
 
 and localize_typedef_instantiation
-    ~ety_env env r decl_r type_name tyargs typedef_info =
+    ~ety_env env r decl_r type_name tyargs (typedef_info : _ option) =
   match typedef_info with
   | Some typedef_info ->
     if TypecheckerOptions.use_type_alias_heap (Env.get_tcopt env) then
@@ -866,7 +879,7 @@ and localize_with_kind
     match dty_ with
     | Tapply (((_pos, name) as id), []) -> begin
       match Env.get_class_or_typedef env name with
-      | Some (Env.ClassResult class_info) ->
+      | Decl_entry.Found (Env.ClassResult class_info) ->
         let tparams = Cls.tparams class_info in
         let classish_kind =
           KindDefs.Simple.type_with_params_to_simple_kind tparams
@@ -877,14 +890,15 @@ and localize_with_kind
         else
           let (env, ty) = Env.fresh_type_error env Pos.none in
           ((env, None), ty)
-      | Some (Env.TypedefResult typedef) ->
+      | Decl_entry.Found (Env.TypedefResult typedef) ->
         if Env.is_typedef_visible env ~name typedef then
           ((env, None), mk (r, Tunapplied_alias name))
         else
           (* The bound is unused until the newtype is fully applied *)
           let (env, ty) = Env.fresh_type_error env Pos.none in
           ((env, None), mk (r, Tnewtype (name, [], ty)))
-      | None ->
+      | Decl_entry.NotYetAvailable
+      | Decl_entry.DoesNotExist ->
         (* We are expected to localize a higher-kinded type, but are given an unknown class name.
               Not much we can do. *)
         let (env, ty) = Env.fresh_type_error env Pos.none in

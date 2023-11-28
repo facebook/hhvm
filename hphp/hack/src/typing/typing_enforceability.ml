@@ -25,11 +25,11 @@ struct
   let get_class_or_typedef ctx name =
     (* Preserve the decl access behaviour of the enforceability code that used to be here. *)
     ignore (Env.get_class ctx name);
-    Env.get_class_or_typedef ctx name
+    Env.get_class_or_typedef ctx name |> Decl_entry.to_option
 
-  let get_typedef = Env.get_typedef
+  let get_typedef ctx x = Env.get_typedef ctx x
 
-  let get_class = Env.get_class
+  let get_class ctx x = Env.get_class ctx x |> Decl_entry.to_option
 
   let get_typeconst_type _ cls name =
     match Cls.get_typeconst cls name with

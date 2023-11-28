@@ -30,22 +30,28 @@ let properties ctx (type_name : string) : (string * Typing_defs.class_elt) list
     =
   let decl = Decl_provider.get_class ctx type_name in
   match decl with
-  | Some decl -> Cls.props decl @ Cls.sprops decl
-  | None -> []
+  | Decl_entry.Found decl -> Cls.props decl @ Cls.sprops decl
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    []
 
 let is_trait_name ctx (type_name : string) : bool =
   let decl = Decl_provider.get_class ctx type_name in
   match decl with
-  | Some decl -> Ast_defs.is_c_trait (Cls.kind decl)
-  | None -> false
+  | Decl_entry.Found decl -> Ast_defs.is_c_trait (Cls.kind decl)
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    false
 
 (* All the parent classes, used traits, and implemented interfaces of
    [type_name]. This is the flattened inheritance tree. *)
 let all_ancestor_names ctx (type_name : string) : string list =
   let decl = Decl_provider.get_class ctx type_name in
   match decl with
-  | Some decl -> Decl_provider.Class.all_ancestor_names decl
-  | None -> []
+  | Decl_entry.Found decl -> Decl_provider.Class.all_ancestor_names decl
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    []
 
 (* All the used traits of [type_name]. This is the flattened inheritance tree. *)
 let all_trait_ancestors ctx (trait_name : string) : string list =

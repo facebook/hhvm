@@ -121,10 +121,11 @@ let check_require_class_require_extends_conflict
 let check_require_class_use env trait_pos required_classes tc =
   List.iter required_classes ~f:(fun (nc, pc) ->
       match Env.get_class env nc with
-      | None ->
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
         (* existence of class is checked in Naming *)
         ()
-      | Some trc ->
+      | Decl_entry.Found trc ->
         if
           (not (Cls.has_ancestor trc (Cls.name tc)))
           && Ast_defs.is_c_class (Cls.kind trc)

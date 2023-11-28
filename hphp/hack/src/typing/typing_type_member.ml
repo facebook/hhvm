@@ -13,6 +13,7 @@ module Env = Typing_env
 module TySet = Typing_set
 
 type type_member =
+  | NotYetAvailable
   | Error of Typing_error.t option
   | Exact of locl_ty
   | Abstract of {
@@ -46,8 +47,10 @@ let lookup_class_decl_type_member env ~on_error ~this_ty cls_id type_id =
    * Typing_taccess, leading to legacy behavior. *)
   let localize env decl_ty = Typing_utils.localize ~ety_env env decl_ty in
   match Env.get_class env (snd cls_id) with
-  | None -> (env, Error (make_missing_err ~on_error cls_id (snd type_id)))
-  | Some cls -> begin
+  | Decl_entry.NotYetAvailable -> (env, NotYetAvailable)
+  | Decl_entry.DoesNotExist ->
+    (env, Error (make_missing_err ~on_error cls_id (snd type_id)))
+  | Decl_entry.Found cls -> begin
     match Env.get_typeconst env cls (snd type_id) with
     | None -> (env, Error (make_missing_err ~on_error cls_id (snd type_id)))
     | Some { ttc_kind = TCConcrete tcc; _ } ->
@@ -114,6 +117,7 @@ let lookup_class_type_member env ~on_error ~this_ty (cls_id, exact) type_id =
     (match
        lookup_class_decl_type_member env ~on_error ~this_ty cls_id type_id
      with
+    | (env, NotYetAvailable) -> (env, NotYetAvailable)
     | (env, Error _) -> (env, refined_type_member)
     | (_env, Exact _) as result -> result
     | (env, Abstract { name = cls_name; lower = cls_lower; upper = cls_upper })
@@ -140,7 +144,9 @@ let make_type_member env ~on_error ~this_ty ucc_kind bnd_tys type_id =
         in
         let (lo_bnds, up_bnds) =
           match type_member with
-          | Error _ -> (lo_bnds, up_bnds)
+          | NotYetAvailable
+          | Error _ ->
+            (lo_bnds, up_bnds)
           | Exact ty -> (ty :: lo_bnds, ty :: up_bnds)
           | Abstract { name = _; lower; upper } ->
             let maybe_add bnds =

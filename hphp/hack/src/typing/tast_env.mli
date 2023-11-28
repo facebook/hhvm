@@ -64,10 +64,11 @@ val get_self_ty_exn : env -> Tast.ty
 val get_parent_id : env -> string option
 
 (** Return the info of the given class from the typing heap. *)
-val get_class : env -> Decl_provider.type_key -> Decl_provider.class_decl option
+val get_class :
+  env -> Decl_provider.type_key -> Decl_provider.class_decl Decl_entry.t
 
 val get_class_or_typedef :
-  env -> Decl_provider.type_key -> class_or_typedef_result option
+  env -> Decl_provider.type_key -> class_or_typedef_result Decl_entry.t
 
 val is_in_expr_tree : env -> bool
 
@@ -288,7 +289,8 @@ val tast_env_as_typing_env : env -> Typing_env_types.env
 (** Verify that an XHP body expression is legal. *)
 val is_xhp_child : env -> Pos.t -> Tast.ty -> bool * Typing_error.t option
 
-val get_enum : env -> Decl_provider.type_key -> Decl_provider.class_decl option
+val get_enum :
+  env -> Decl_provider.type_key -> Decl_provider.class_decl Decl_entry.t
 
 val is_typedef : env -> Decl_provider.type_key -> bool
 
@@ -300,7 +302,7 @@ val is_typedef_visible :
   bool
 
 val get_typedef :
-  env -> Decl_provider.type_key -> Decl_provider.typedef_decl option
+  env -> Decl_provider.type_key -> Decl_provider.typedef_decl Decl_entry.t
 
 val is_enum : env -> Decl_provider.type_key -> bool
 

@@ -224,8 +224,10 @@ let log_subtype ~this_ty ~function_name env ty_sub ty_super =
 let is_final_and_invariant env id =
   let class_def = Env.get_class env id in
   match class_def with
-  | Some class_ty -> TUtils.class_is_final_and_invariant class_ty
-  | None -> false
+  | Decl_entry.Found class_ty -> TUtils.class_is_final_and_invariant class_ty
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    false
 
 let is_tprim_disjoint tp1 tp2 =
   let one_side tp1 tp2 =
@@ -262,7 +264,7 @@ let is_class_disjoint env c1 c2 =
     false
   else
     match (Env.get_class env c1, Env.get_class env c2) with
-    | (Some c1_def, Some c2_def) ->
+    | (Decl_entry.Found c1_def, Decl_entry.Found c2_def) ->
       let is_disjoint =
         if Cls.final c1_def then
           (* if c1 is final, then c3 would have to be equal to c1 *)
@@ -2301,10 +2303,11 @@ and simplify_subtype_i
           | (_, Tclass ((_, class_id), _exact, tyargs)) ->
             let class_def_sub = Env.get_class env class_id in
             (match class_def_sub with
-            | None ->
+            | Decl_entry.DoesNotExist
+            | Decl_entry.NotYetAvailable ->
               (* This should have been caught already in the naming phase *)
               valid env
-            | Some class_sub ->
+            | Decl_entry.Found class_sub ->
               if
                 Cls.get_support_dynamic_type class_sub
                 || Env.is_enum env class_id
@@ -2679,7 +2682,7 @@ and simplify_subtype_i
             let td = Env.get_typedef env name_super in
             begin
               match td with
-              | Some { td_tparams; _ } ->
+              | Decl_entry.Found { td_tparams; _ } ->
                 let variance_reifiedl =
                   List.map td_tparams ~f:(fun t ->
                       (t.tp_variance, t.tp_reified))
@@ -2696,7 +2699,10 @@ and simplify_subtype_i
                   ety_sub
                   ety_super
                   env
-              | None -> invalid_env env
+              | Decl_entry.DoesNotExist
+              | Decl_entry.NotYetAvailable ->
+                (* TODO(hverr): decl_entry propagate *)
+                invalid_env env
             end
         | (r, Toption ty_sub) ->
           let ty_null = MakeType.null r in
@@ -2740,8 +2746,10 @@ and simplify_subtype_i
           default_subtype env
         | _ ->
           (match Env.get_typedef env name_super with
-          | Some { td_type = lower; td_vis = Aast.CaseType; td_tparams; _ }
-          | Some { td_super_constraint = Some lower; td_tparams; _ } ->
+          | Decl_entry.Found
+              { td_type = lower; td_vis = Aast.CaseType; td_tparams; _ }
+          | Decl_entry.Found { td_super_constraint = Some lower; td_tparams; _ }
+            ->
             let try_lower_bound env =
               let ((env, cycle), lower_bound) =
                 (* The this_ty cannot does not need to be set because newtypes
@@ -3250,8 +3258,11 @@ and simplify_subtype_classes
         (* If class is final then exactness is superfluous *)
         let (has_generics, is_final) =
           match class_def_sub with
-          | Some tc -> (not (List.is_empty (Cls.tparams tc)), Cls.final tc)
-          | None -> (false, false)
+          | Decl_entry.Found tc ->
+            (not (List.is_empty (Cls.tparams tc)), Cls.final tc)
+          | Decl_entry.DoesNotExist
+          | Decl_entry.NotYetAvailable ->
+            (false, false)
         in
         if not (exact_match || is_final) then
           invalid_env env
@@ -3274,9 +3285,10 @@ and simplify_subtype_classes
               List.map tyl_sub ~f:(fun _ -> (Ast_defs.Invariant, Aast.Erased))
             else
               match class_def_sub with
-              | None ->
+              | Decl_entry.DoesNotExist
+              | Decl_entry.NotYetAvailable ->
                 List.map tyl_sub ~f:(fun _ -> (Ast_defs.Invariant, Aast.Erased))
-              | Some class_sub ->
+              | Decl_entry.Found class_sub ->
                 List.map (Cls.tparams class_sub) ~f:(fun t ->
                     (t.tp_variance, t.tp_reified))
           in
@@ -3285,7 +3297,7 @@ and simplify_subtype_classes
             ~sub_supportdyn
             ~super_like
             cid_sub
-            class_def_sub
+            (Decl_entry.to_option class_def_sub)
             variance_reifiedl
             tyl_sub
             tyl_super
@@ -3295,10 +3307,11 @@ and simplify_subtype_classes
     else
       let class_def_sub = Env.get_class env cid_sub in
       (match class_def_sub with
-      | None ->
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
         (* This should have been caught already in the naming phase *)
         valid env
-      | Some class_sub ->
+      | Decl_entry.Found class_sub ->
         (* We handle the case where a generic A<T> is used as A for the sub-class.
            This works because there will be no locls to substitute for type parameters
            T in the type build by get_ancestor. If T does show up in that type, then
@@ -3546,6 +3559,8 @@ and simplify_subtype_has_type_member
           (Reason.to_pos r, memid)
       in
       (match type_member with
+      | Typing_type_member.NotYetAvailable ->
+        failwith "TODO(hverr): propagate decl_entry"
       | Typing_type_member.Error err -> invalid ~fail:err env
       | Typing_type_member.Exact ty ->
         simplify_subtype_bound `As ty ~bound:memupty env
@@ -4044,7 +4059,7 @@ and simplify_subtype_variance_for_non_injective
     ~sub_supportdyn
     ~super_like
     (cid : string)
-    class_sub
+    (class_sub : Cls.t option)
     (variance_reifiedl : (Ast_defs.variance * Aast.reify_kind) list)
     (children_tyl : locl_ty list)
     (super_tyl : locl_ty list)

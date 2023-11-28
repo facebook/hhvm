@@ -156,7 +156,7 @@ let typedef_def ctx typedef =
   let env =
     if TypecheckerOptions.use_type_alias_heap (Env.get_tcopt env) then
       match Decl_provider.get_typedef ctx t_name with
-      | Some _ ->
+      | Decl_entry.Found _ ->
         let (ty, ty_err_opt2) =
           let ty = Decl_hint.hint env.Typing_env_types.decl_env hint in
           let ctx = Env.get_ctx env in
@@ -183,7 +183,8 @@ let typedef_def ctx typedef =
           ~f:(Typing_error_utils.add_typing_error ~env)
           (Option.merge ~f:Typing_error.both ty_err_opt3 ty_err_opt4);
         env
-      | None ->
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
         (* We get here if there's a "Name already bound" error. *)
         env
     else

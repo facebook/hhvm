@@ -356,8 +356,10 @@ let unbound_name env (pos, name) e =
       let ctx = Env.get_ctx env in
       let decl = Decl_provider.get_class ctx name in
       match decl with
-      | None -> false
-      | Some dc -> Ast_defs.is_c_class (Cls.kind dc)
+      | Decl_entry.NotYetAvailable
+      | Decl_entry.DoesNotExist ->
+        false
+      | Decl_entry.Found dc -> Ast_defs.is_c_class (Cls.kind dc)
     in
     Typing_error_utils.add_typing_error
       ~env
@@ -839,8 +841,10 @@ let loop_forever env =
     (* Look up things in shared memory occasionally to have a chance to be
      * interrupted *)
     match Env.get_class env "FOR_TEST_ONLY" with
-    | None -> Unix.sleep 1
-    | _ -> assert false
+    | Decl_entry.NotYetAvailable
+    | Decl_entry.DoesNotExist ->
+      Unix.sleep 1
+    | Decl_entry.Found _ -> assert false
   done;
   Utils.assert_false_log_backtrace
     (Some "hh_loop_forever was looping for more than 10 minutes")
@@ -1176,7 +1180,7 @@ let check_class_get
        * self:: is in the context of the non-trait "use"-ing
        * the trait's code *)
       match Env.get_class env self with
-      | Some cls when Ast_defs.is_c_trait (Cls.kind cls) ->
+      | Decl_entry.Found cls when Ast_defs.is_c_trait (Cls.kind cls) ->
         (* Ban self::some_abstract_method() in a trait, if the
          * method is also defined in a trait.
          *
@@ -1184,7 +1188,8 @@ let check_class_get
          * in the child class that we actually have an
          * implementation. *)
         (match Decl_provider.get_class (Env.get_ctx env) ce.ce_origin with
-        | Some meth_cls when Ast_defs.is_c_trait (Cls.kind meth_cls) ->
+        | Decl_entry.Found meth_cls when Ast_defs.is_c_trait (Cls.kind meth_cls)
+          ->
           Typing_error_utils.add_typing_error
             ~env
             Typing_error.(
@@ -1244,8 +1249,10 @@ let check_class_get
              { class_name; meth_name = mid; pos = p; decl_pos = def_pos })
   | CI (_, class_name) when is_method ->
     (match Env.get_class env class_name with
-    | None -> ()
-    | Some cd ->
+    | Decl_entry.NotYetAvailable
+    | Decl_entry.DoesNotExist ->
+      ()
+    | Decl_entry.Found cd ->
       let req_class = Cls.all_ancestor_req_class_requirements cd in
       if Ast_defs.is_c_trait (Cls.kind cd) && not (List.is_empty req_class) then
         Typing_error_utils.add_typing_error
@@ -1390,8 +1397,10 @@ let class_contains_smethod env cty (_pos, mid) =
     match get_class_type ty with
     | Some ((_, c), _, _) ->
       (match Env.get_class env c with
-      | None -> false
-      | Some class_ ->
+      | Decl_entry.NotYetAvailable
+      | Decl_entry.DoesNotExist ->
+        false
+      | Decl_entry.Found class_ ->
         Option.is_some @@ Env.get_static_member true env class_ mid)
     | None -> false
   in
@@ -1421,14 +1430,17 @@ let trait_most_concrete_req_class trait env =
           else
             let class_ = Env.get_class env name in
             match class_ with
-            | None -> acc
-            | Some c when Ast_defs.is_c_interface (Cls.kind c) -> acc
-            | Some c when Ast_defs.is_c_trait (Cls.kind c) ->
+            | Decl_entry.NotYetAvailable
+            | Decl_entry.DoesNotExist ->
+              acc
+            | Decl_entry.Found c when Ast_defs.is_c_interface (Cls.kind c) ->
+              acc
+            | Decl_entry.Found c when Ast_defs.is_c_trait (Cls.kind c) ->
               (* this is an error case for which Typing_type_wellformedness spits out
                * an error, but does *not* currently remove the offending
                * 'require extends' or 'require implements' *)
               acc
-            | Some c -> Some (c, ty)
+            | Decl_entry.Found c -> Some (c, ty)
       end
     ~init:None
 
@@ -1961,7 +1973,7 @@ let rec class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
   match (get_node ivar_ty, get_node hint_ty) with
   | (_, Tclass (((_, cid) as _c), _, tyl)) -> begin
     match Env.get_class env cid with
-    | Some class_info ->
+    | Decl_entry.Found class_info ->
       let (env, tparams_with_new_names, tyl_fresh) =
         generate_fresh_tparams env class_info p reason tyl
       in
@@ -1978,7 +1990,9 @@ let rec class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
           tyl_fresh
       in
       (env, (ty, true))
-    | None -> (env, (MakeType.nothing (Reason.Rmissing_class ivar_pos), true))
+    | Decl_entry.NotYetAvailable
+    | Decl_entry.DoesNotExist ->
+      (env, (MakeType.nothing (Reason.Rmissing_class ivar_pos), true))
   end
   | (Ttuple ivar_tyl, Ttuple hint_tyl)
     when Int.equal (List.length ivar_tyl) (List.length hint_tyl) ->
@@ -2045,7 +2059,9 @@ let refine_and_simplify_intersection
 let ish_weakening env hint hint_ty =
   match hint with
   | (_, Aast.Happly ((_, name), _)) ->
-    let enum_opt = Option.(Env.get_enum env name >>= Cls.enum_type) in
+    let enum_opt =
+      Option.(Env.get_enum env name |> Decl_entry.to_option >>= Cls.enum_type)
+    in
     begin
       match enum_opt with
       | Some { te_base; _ } -> begin
@@ -2354,7 +2370,7 @@ module EnumClassLabelOps = struct
     let (_, enum_name) = enum_id in
     let cls = Env.get_class env enum_name in
     match cls with
-    | Some cls ->
+    | Decl_entry.Found cls ->
       (match Env.get_const env cls label_name with
       | Some const_def ->
         let dty = const_def.cc_type in
@@ -2413,7 +2429,9 @@ module EnumClassLabelOps = struct
         let (env, ty) = Env.fresh_type_error env pos in
         let te = (ty, pos, Aast.EnumClassLabel (None, label_name)) in
         (env, LabelNotFound (te, ty)))
-    | None -> (env, ClassNotFound)
+    | Decl_entry.NotYetAvailable
+    | Decl_entry.DoesNotExist ->
+      (env, ClassNotFound)
 end
 
 module Valkind = struct
@@ -2926,7 +2944,7 @@ end = struct
       (* Class retrieval always succeeds because we're fetching a
          collection decl from an HHI file. *)
       match Env.get_class env name with
-      | Some class_ ->
+      | Decl_entry.Found class_ ->
         let ety_env =
           {
             (empty_expand_env_with_on_error
@@ -2944,7 +2962,8 @@ end = struct
         in
         Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
         env
-      | None ->
+      | Decl_entry.NotYetAvailable
+      | Decl_entry.DoesNotExist ->
         let desc = "Missing collection decl during type parameter check"
         and telemetry =
           Telemetry.(create () |> string_ ~key:"class name" ~value:name)
@@ -3353,8 +3372,10 @@ end = struct
        *)
       let class_ = Env.get_class env class_name in
       (match class_ with
-      | None -> unbound_name env pos_cname outer
-      | Some class_ ->
+      | Decl_entry.NotYetAvailable
+      | Decl_entry.DoesNotExist ->
+        unbound_name env pos_cname outer
+      | Decl_entry.Found class_ ->
         (* Create a class type for the given object instantiated with unresolved
          * types for its type parameters.
          *)
@@ -3865,7 +3886,7 @@ end = struct
       when String.equal (snd pstr) "class" && Env.is_typedef env (snd sid) ->
     begin
       match Env.get_typedef env (snd sid) with
-      | Some { td_tparams = tparaml; _ } ->
+      | Decl_entry.Found { td_tparams = tparaml; _ } ->
         (* Typedef type parameters cannot have constraints *)
         let params =
           List.map
@@ -3906,7 +3927,8 @@ end = struct
         let ((env, ty_err_opt2), ty) = Phase.localize ~ety_env env typename in
         Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt2;
         make_result env p (Class_const ((ty, p, CI sid), pstr)) ty
-      | None ->
+      | Decl_entry.NotYetAvailable
+      | Decl_entry.DoesNotExist ->
         (* Should not expect None as we've checked whether the sid is a typedef *)
         expr_error env p outer
     end
@@ -4743,7 +4765,7 @@ end = struct
          - If there is a docs url attached to the class, use it *)
     let rec contextual_reasons ~ty env =
       let* dsl_name = dsl_opt in
-      let* cls = Env.get_class env dsl_name in
+      let* cls = Env.get_class env dsl_name |> Decl_entry.to_option in
       let* { ce_type = (lazy fun_ty); _ } =
         Env.get_member true env cls SN.ExpressionTrees.splice
       in
@@ -4776,7 +4798,7 @@ end = struct
     let docs_url =
       lazy
         (let* dsl_name = dsl_opt in
-         let* cls = Env.get_class env dsl_name in
+         let* cls = Env.get_class env dsl_name |> Decl_entry.to_option in
          Cls.get_docs_url cls)
     in
 
@@ -5202,7 +5224,7 @@ end = struct
       (match Env.get_self_id env with
       | Some self ->
         (match Env.get_class env self with
-        | Some trait when Ast_defs.is_c_trait (Cls.kind trait) ->
+        | Decl_entry.Found trait when Ast_defs.is_c_trait (Cls.kind trait) ->
           (match trait_most_concrete_req_class trait env with
           | None ->
             Typing_error_utils.add_typing_error
@@ -5226,12 +5248,14 @@ end = struct
               el
               unpacked_element
               parent_ty)
-        | Some _self_tc ->
+        | Decl_entry.Found _self_tc ->
           Typing_error_utils.add_typing_error
             ~env
             Typing_error.(primary @@ Primary.Undefined_parent pos);
           default
-        | None -> assert false)
+        | Decl_entry.NotYetAvailable
+        | Decl_entry.DoesNotExist ->
+          assert false)
       | None ->
         Typing_error_utils.add_typing_error
           ~env
@@ -8244,7 +8268,7 @@ end = struct
         List.fold_left_env env tyl ~init:acc ~f:find_unsupported_tys
       | Tnewtype (name, _, _) -> begin
         match Env.get_typedef env name with
-        | Some { td_vis = Aast.CaseType; _ } -> (env, acc)
+        | Decl_entry.Found { td_vis = Aast.CaseType; _ } -> (env, acc)
         | _ -> (env, ty :: acc)
       end
       | _ -> (env, ty :: acc)
@@ -8427,7 +8451,7 @@ end = struct
           | None -> Unenforced
           | Some ty ->
             Typing_enforceability.get_enforcement
-              ~this_class:(Env.get_self_class env)
+              ~this_class:(Env.get_self_class env |> Decl_entry.to_option)
               env
               ty
         in
@@ -8533,7 +8557,7 @@ end = struct
           | None -> Unenforced
           | Some ty ->
             Typing_enforceability.get_enforcement
-              ~this_class:(Env.get_self_class env)
+              ~this_class:(Env.get_self_class env |> Decl_entry.to_option)
               env
               ty
         in
@@ -8611,7 +8635,7 @@ end = struct
         let decl_ty = Decl_hint.hint env.decl_env h in
         (match
            Typing_enforceability.get_enforcement
-             ~this_class:(Env.get_self_class env)
+             ~this_class:(Env.get_self_class env |> Decl_entry.to_option)
              env
              decl_ty
          with
@@ -9038,7 +9062,7 @@ end = struct
         (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
     in
     let ety_env = { ety_env with wildcard_action = Wildcard_fresh_tyvar } in
-    let this_class = Env.get_self_class env in
+    let this_class = Env.get_self_class env |> Decl_entry.to_option in
     let params_decl_ty =
       List.map decl_ft.ft_params ~f:(fun { fp_type = { et_type; _ }; _ } ->
           if Typing_defs.is_wildcard et_type then
@@ -9193,7 +9217,7 @@ end = struct
     in
     let declared_decl_ft =
       Typing_enforceability.compute_enforced_and_pessimize_fun_type
-        ~this_class:(Env.get_self_class env)
+        ~this_class:(Env.get_self_class env |> Decl_entry.to_option)
         env
         declared_ft
     in
@@ -9581,7 +9605,7 @@ end = struct
       (match Env.get_self_id env with
       | Some self ->
         (match Env.get_class env self with
-        | Some trait when Ast_defs.is_c_trait (Cls.kind trait) ->
+        | Decl_entry.Found trait when Ast_defs.is_c_trait (Cls.kind trait) ->
           (match trait_most_concrete_req_class trait env with
           | None ->
             Typing_error_utils.add_typing_error
@@ -9677,10 +9701,11 @@ end = struct
         (* Not a type parameter *)
         let class_ = Env.get_class env id in
         (match class_ with
-        | None ->
+        | Decl_entry.NotYetAvailable
+        | Decl_entry.DoesNotExist ->
           let (env, ty) = Env.fresh_type_error env p in
           make_result env [] (Aast.CI c) ty
-        | Some class_ ->
+        | Decl_entry.Found class_ ->
           if not is_attribute_param then
             Option.iter
               ~f:(Typing_error_utils.add_typing_error ~env)
@@ -9886,8 +9911,10 @@ end = struct
           | Tclass (sid, _, _) ->
             let class_ = Env.get_class env (snd sid) in
             (match class_ with
-            | None -> get_info res tyl
-            | Some class_info ->
+            | Decl_entry.NotYetAvailable
+            | Decl_entry.DoesNotExist ->
+              get_info res tyl
+            | Decl_entry.Found class_info ->
               (match (te, cid_ty) with
               (* When computing the classes for a new T() where T is a generic,
                * the class must be consistent (final, final constructor, or
@@ -11278,10 +11305,11 @@ end = struct
     | (_, Tclass ((_, c), _, paraml)) ->
       let class_ = Env.get_class env c in
       (match class_ with
-      | None ->
+      | Decl_entry.NotYetAvailable
+      | Decl_entry.DoesNotExist ->
         let ty = MakeType.nothing (Reason.Rmissing_class p) in
         (env, (ty, []), dflt_rval_err)
-      | Some class_ ->
+      | Decl_entry.Found class_ ->
         (* TODO akenn: Should we move this to the class_get original call? *)
         let (env, this_ty) = ExprDepTy.make env ~cid:cid_ this_ty in
         (* We need to instantiate generic parameters in the method signature *)

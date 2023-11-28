@@ -141,8 +141,11 @@ let create_handler ctx =
           match
             Decl_provider.get_class ~tracing_info:(get_tracing_info env) ctx cid
           with
-          | None -> ()
-          | Some cls -> check_redundant_generics_class env (snd c.c_name) cls
+          | Decl_entry.DoesNotExist
+          | Decl_entry.NotYetAvailable ->
+            ()
+          | Decl_entry.Found cls ->
+            check_redundant_generics_class env (snd c.c_name) cls
     end
   in
   if

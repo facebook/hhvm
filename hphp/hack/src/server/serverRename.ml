@@ -305,8 +305,10 @@ let get_call_signature_for_wrap (func_decl : Full_fidelity_positioned_syntax.t)
 
 let classish_is_interface (ctx : Provider_context.t) (name : string) : bool =
   match Decl_provider.get_class ctx (Utils.add_ns name) with
-  | None -> false
-  | Some cls ->
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    false
+  | Decl_entry.Found cls ->
     (match Decl_provider.Class.kind cls with
     | Ast_defs.Cinterface -> true
     | _ -> false)
@@ -435,6 +437,7 @@ let method_might_support_dynamic ctx ~class_name ~method_name =
   in
   (not sd_enabled)
   || Decl_provider.get_class ctx @@ Utils.add_ns class_name
+     |> Decl_entry.to_option
      >>= (fun class_ ->
            Option.first_some
              (Class.get_smethod class_ method_name)

@@ -708,7 +708,7 @@ let is_typedef_visible env ?(expand_visible_newtype = true) ~name td =
   | Aast.Transparent -> true
   | Aast.CaseType -> false
 
-let get_class (env : env) (name : Decl_provider.type_key) : Cls.t option =
+let get_class (env : env) (name : Decl_provider.type_key) : Cls.t Decl_entry.t =
   let res =
     Decl_provider.get_class
       ?tracing_info:(get_tracing_info env)
@@ -718,7 +718,7 @@ let get_class (env : env) (name : Decl_provider.type_key) : Cls.t option =
   Deps.make_depend_on_class env name res;
   res
 
-let get_parent env ~skip_constructor_dep ~is_req name : Cls.t option =
+let get_parent env ~skip_constructor_dep ~is_req name : Cls.t Decl_entry.t =
   let res = get_class env name in
   Deps.make_depend_on_parent env ~skip_constructor_dep ~is_req name res;
   res
@@ -729,13 +729,9 @@ let add_parent_dep env ~skip_constructor_dep ~is_req name : unit =
 
 let get_class_or_typedef env x =
   if is_typedef env x then
-    match get_typedef env x with
-    | None -> None
-    | Some td -> Some (TypedefResult td)
+    Decl_entry.map (get_typedef env x) ~f:(fun td -> TypedefResult td)
   else
-    match get_class env x with
-    | None -> None
-    | Some cd -> Some (ClassResult cd)
+    Decl_entry.map (get_class env x) ~f:(fun cd -> ClassResult cd)
 
 let get_fun env x =
   let res =
@@ -745,28 +741,32 @@ let get_fun env x =
   res
 
 let get_enum_constraint env x =
-  match get_class env x with
-  | None -> None
-  | Some tc ->
-    (match Cls.enum_type tc with
-    | None -> None
-    | Some e -> e.te_constraint)
+  Decl_entry.bind (get_class env x) @@ fun tc ->
+  match Cls.enum_type tc with
+  | None -> Decl_entry.DoesNotExist
+  | Some e -> Decl_entry.Found e.te_constraint
 
 (* TODO: do we want to introduce a Cls.enum_class_type ? *)
 let get_enum env x =
-  match get_class env x with
-  | Some tc when Option.is_some (Cls.enum_type tc) -> Some tc
-  | _ -> None
+  Decl_entry.bind (get_class env x) @@ fun tc ->
+  if Option.is_some (Cls.enum_type tc) then
+    Decl_entry.Found tc
+  else
+    Decl_entry.DoesNotExist
 
 let is_enum env x =
   match get_enum env x with
-  | Some cls -> Ast_defs.is_c_enum (Cls.kind cls)
-  | None -> false
+  | Decl_entry.Found cls -> Ast_defs.is_c_enum (Cls.kind cls)
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    false
 
 let is_enum_class env x =
   match get_enum env x with
-  | Some cls -> Ast_defs.is_c_enum_class (Cls.kind cls)
-  | None -> false
+  | Decl_entry.Found cls -> Ast_defs.is_c_enum_class (Cls.kind cls)
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    false
 
 let get_typeconst env class_ mid =
   Deps.make_depend_on_class_const env class_ mid;
@@ -778,7 +778,7 @@ let get_const env class_ mid =
   Cls.get_const class_ mid
 
 let consts env class_ =
-  Deps.make_depend_on_class env (Cls.name class_) (Some class_);
+  Deps.make_depend_on_class env (Cls.name class_) (Decl_entry.Found class_);
   Cls.consts class_
 
 (* Used to access "global constants". That is constants that were
@@ -985,16 +985,16 @@ let get_self_class_type env =
 let get_self_id env = Option.map env.genv.self ~f:fst
 
 let get_self_class env =
-  let open Option in
-  get_self_id env >>= get_class env
+  let self = Decl_entry.of_option_or_doe_not_exist (get_self_id env) in
+  Decl_entry.bind self (get_class env)
 
 let get_parent_ty env = Option.map env.genv.parent ~f:snd
 
 let get_parent_id env = Option.map env.genv.parent ~f:fst
 
 let get_parent_class env =
-  let open Option in
-  get_parent_id env >>= get_class env
+  let self = Decl_entry.of_option_or_doe_not_exist (get_parent_id env) in
+  Decl_entry.bind self (get_class env)
 
 let get_fn_kind env = env.genv.fun_kind
 
@@ -1542,10 +1542,12 @@ and get_tyvars_i env (ty : internal_type) =
         (env, ISet.empty, ISet.empty)
       else begin
         match get_typedef env name with
-        | Some { td_tparams; _ } ->
+        | Decl_entry.Found { td_tparams; _ } ->
           let variancel = List.map td_tparams ~f:(fun t -> t.tp_variance) in
           get_tyvars_variance_list (env, ISet.empty, ISet.empty) variancel tyl
-        | None -> (env, ISet.empty, ISet.empty)
+        | Decl_entry.DoesNotExist
+        | Decl_entry.NotYetAvailable ->
+          (env, ISet.empty, ISet.empty)
       end
     | Tdependent (_, ty) -> get_tyvars env ty
     | Tgeneric (_, tyl) ->
@@ -1560,12 +1562,14 @@ and get_tyvars_i env (ty : internal_type) =
         (env, ISet.empty, ISet.empty)
       else begin
         match get_class env cid with
-        | Some cls ->
+        | Decl_entry.Found cls ->
           let variancel =
             List.map (Cls.tparams cls) ~f:(fun t -> t.tp_variance)
           in
           get_tyvars_variance_list (env, ISet.empty, ISet.empty) variancel tyl
-        | None -> (env, ISet.empty, ISet.empty)
+        | Decl_entry.DoesNotExist
+        | Decl_entry.NotYetAvailable ->
+          (env, ISet.empty, ISet.empty)
       end
     | Tvec_or_dict (ty1, ty2) ->
       let (env, positive1, negative1) = get_tyvars env ty1 in

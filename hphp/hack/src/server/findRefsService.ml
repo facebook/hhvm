@@ -34,7 +34,7 @@ let process_fun_id target_fun id =
 let check_if_extends_class ctx target_class_name class_name =
   let class_ = Decl_provider.get_class ctx class_name in
   match class_ with
-  | Some cls
+  | Decl_entry.Found cls
     when Cls.has_ancestor cls target_class_name
          || Cls.requires_ancestor cls target_class_name ->
     true
@@ -116,7 +116,7 @@ let get_origin_class_name ctx class_name member =
     match member with
     | Method method_name -> begin
       match Decl_provider.get_class ctx class_name with
-      | Some class_ ->
+      | Decl_entry.Found class_ ->
         let get_origin_class meth =
           match meth with
           | Some meth -> Some meth.ce_origin
@@ -127,7 +127,9 @@ let get_origin_class_name ctx class_name member =
           origin
         else
           get_origin_class (Cls.get_smethod class_ method_name)
-      | None -> None
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        None
     end
     | Property _
     | Class_const _
@@ -453,7 +455,7 @@ let get_definitions ctx action =
   | IMember (Class_set classes, Method method_name) ->
     SSet.fold classes ~init:[] ~f:(fun class_name acc ->
         match Decl_provider.get_class ctx class_name with
-        | Some class_ ->
+        | Decl_entry.Found class_ ->
           let add_meth get acc =
             match get method_name with
             | Some meth when String.equal meth.ce_origin (Cls.name class_) ->
@@ -464,11 +466,13 @@ let get_definitions ctx action =
           let acc = add_meth (Cls.get_method class_) acc in
           let acc = add_meth (Cls.get_smethod class_) acc in
           acc
-        | None -> acc)
+        | Decl_entry.DoesNotExist
+        | Decl_entry.NotYetAvailable ->
+          acc)
   | IMember (Class_set classes, Class_const class_const_name) ->
     SSet.fold classes ~init:[] ~f:(fun class_name acc ->
         match Decl_provider.get_class ctx class_name with
-        | Some class_ ->
+        | Decl_entry.Found class_ ->
           let add_class_const get acc =
             match get class_const_name with
             | Some class_const
@@ -479,18 +483,20 @@ let get_definitions ctx action =
           in
           let acc = add_class_const (Cls.get_const class_) acc in
           acc
-        | None -> acc)
+        | Decl_entry.DoesNotExist
+        | Decl_entry.NotYetAvailable ->
+          acc)
   | IExplicitClass class_name
   | IClass class_name ->
     Option.value
       ~default:[]
       (Naming_provider.get_type_kind ctx class_name >>= function
        | Naming_types.TClass ->
-         Decl_provider.get_class ctx class_name >>= fun class_ ->
-         Some [(class_name, Cls.pos class_)]
+         Decl_provider.get_class ctx class_name |> Decl_entry.to_option
+         >>= fun class_ -> Some [(class_name, Cls.pos class_)]
        | Naming_types.TTypedef ->
-         Decl_provider.get_typedef ctx class_name >>= fun type_ ->
-         Some [(class_name, type_.td_pos)])
+         Decl_provider.get_typedef ctx class_name |> Decl_entry.to_option
+         >>= fun type_ -> Some [(class_name, type_.td_pos)])
   | IFunction fun_name -> begin
     match Decl_provider.get_fun ctx fun_name with
     | Some { fe_pos; _ } -> [(fun_name, fe_pos)]

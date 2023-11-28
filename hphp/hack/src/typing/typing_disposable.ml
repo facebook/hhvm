@@ -37,8 +37,10 @@ let is_disposable_visitor env =
     method! on_tclass acc _ (_, class_name) _ tyl =
       let default () = List.fold_left tyl ~f:this#on_type ~init:acc in
       match Env.get_class env class_name with
-      | None -> default ()
-      | Some c ->
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        default ()
+      | Decl_entry.Found c ->
         if is_disposable_class env c then
           Some (Utils.strip_ns class_name)
         else
@@ -57,8 +59,10 @@ let enforce_is_disposable env hint =
   match hint with
   | (_, Aast.Happly ((p, c), _)) -> begin
     match Env.get_class env c with
-    | None -> ()
-    | Some c ->
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      ()
+    | Decl_entry.Found c ->
       if not (is_disposable_class env c || Ast_defs.is_c_interface (Cls.kind c))
       then
         Typing_error_utils.add_typing_error

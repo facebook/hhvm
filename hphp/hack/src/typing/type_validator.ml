@@ -73,7 +73,8 @@ class virtual type_validator =
             let ( >>= ) = Option.( >>= ) in
             Option.value
               ~default:acc
-              ( Env.get_class env class_name >>= fun class_ ->
+              ( Env.get_class env class_name |> Decl_entry.to_option
+              >>= fun class_ ->
                 let (id_pos, id_name) = id in
                 Decl_provider.Class.get_typeconst class_ id_name
                 >>= fun typeconst ->
@@ -97,7 +98,7 @@ class virtual type_validator =
         this#on_enum acc r (pos, name)
       else
         match Env.get_class_or_typedef acc.env name with
-        | Some (Env.TypedefResult td) ->
+        | Decl_entry.Found (Env.TypedefResult td) ->
           let {
             td_pos = _;
             td_vis = _;

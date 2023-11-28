@@ -45,7 +45,8 @@ let rec is_stringish env ty =
   | Tdependent _ ->
     let (env, tyl) = Env.get_concrete_supertypes ~abstract_enum:true env ty in
     List.for_all ~f:(is_stringish env) tyl
-  | Tclass (x, _, _) -> Option.is_none (Env.get_class env (snd x))
+  | Tclass (x, _, _) ->
+    Option.is_none (Decl_entry.to_option @@ Env.get_class env (snd x))
   (* TODO akenn: error tyvar? *)
   | Tany _
   | Tdynamic

@@ -204,7 +204,7 @@ let check_typedef_usable_as_hk_type env use_pos typedef_name typedef_info =
     match get_node (TUtils.get_base_type env locl_ty) with
     | Tclass (cls_name, _, tyl) when not (List.is_empty tyl) ->
       (match Env.get_class env (snd cls_name) with
-      | Some cls ->
+      | Decl_entry.Found cls ->
         let tc_tparams = Cls.tparams cls in
         let ety_env =
           { empty_expand_env with substs = Subst.make_locl tc_tparams tyl }
@@ -418,7 +418,7 @@ module Simple = struct
     end
     | Tapply ((_p, cid), argl) -> begin
       match Env.get_class_or_typedef env cid with
-      | Some (Env.ClassResult class_info) ->
+      | Decl_entry.Found (Env.ClassResult class_info) ->
         Option.iter
           ~f:(Typing_error_utils.add_typing_error ~env)
           (Typing_visibility.check_top_level_access
@@ -430,7 +430,7 @@ module Simple = struct
              (Cls.get_module class_info));
         let tparams = Cls.tparams class_info in
         check_against_tparams ~in_signature (Cls.pos class_info) argl tparams
-      | Some (Env.TypedefResult typedef) ->
+      | Decl_entry.Found (Env.TypedefResult typedef) ->
         Option.iter
           ~f:(Typing_error_utils.add_typing_error ~env)
           (Typing_visibility.check_top_level_access
@@ -445,11 +445,13 @@ module Simple = struct
           typedef.td_pos
           argl
           typedef.td_tparams
-      | None -> ()
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        ()
     end
     | Tnewtype (name, tyl, _) ->
       (match Env.get_typedef env name with
-      | Some typedef ->
+      | Decl_entry.Found typedef ->
         Option.iter
           ~f:(Typing_error_utils.add_typing_error ~env)
           (Typing_visibility.check_top_level_access
@@ -464,7 +466,9 @@ module Simple = struct
           typedef.td_pos
           tyl
           typedef.td_tparams
-      | None -> ())
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        ())
 
   and check_well_kinded
       ~in_signature env (ty : decl_ty) (expected_nkind : Simple.named_kind) =
@@ -493,15 +497,17 @@ module Simple = struct
       match get_node ty with
       | Tapply ((_pos, name), []) -> begin
         match Env.get_class_or_typedef env name with
-        | Some (Env.ClassResult class_info) ->
+        | Decl_entry.Found (Env.ClassResult class_info) ->
           let tparams = Cls.tparams class_info in
           check_class_usable_as_hk_type use_pos class_info;
           check_against_tparams tparams
-        | Some (Env.TypedefResult typedef) ->
+        | Decl_entry.Found (Env.TypedefResult typedef) ->
           let tparams = typedef.td_tparams in
           check_typedef_usable_as_hk_type env use_pos name typedef;
           check_against_tparams tparams
-        | None -> ()
+        | Decl_entry.DoesNotExist
+        | Decl_entry.NotYetAvailable ->
+          ()
       end
       | Tgeneric (name, []) -> begin
         match Env.get_pos_and_kind_of_generic env name with

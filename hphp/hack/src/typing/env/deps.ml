@@ -25,7 +25,9 @@ let add_fine_dep_if_enabled env dependency =
     match dependency with
     | Dep.Method (class_name, method_name) ->
       let origin_name =
-        let* cls = Decl_provider.get_class ctx class_name in
+        let* cls =
+          Decl_entry.to_option (Decl_provider.get_class ctx class_name)
+        in
         let* elt = Cls.get_method cls method_name in
         Some elt.Typing_defs.ce_origin
       in
@@ -33,7 +35,9 @@ let add_fine_dep_if_enabled env dependency =
       Dep.Method (origin_name, method_name)
     | Dep.SMethod (class_name, method_name) ->
       let origin_name =
-        let* cls = Decl_provider.get_class ctx class_name in
+        let* cls =
+          Decl_entry.to_option (Decl_provider.get_class ctx class_name)
+        in
         let* elt = Cls.get_smethod cls method_name in
         Some elt.Typing_defs.ce_origin
       in
@@ -114,7 +118,7 @@ let make_depend_on_class_name env class_name =
 
 let make_depend_on_class env x cd =
   match cd with
-  | Some cd when Pos_or_decl.is_hhi (Cls.pos cd) -> ()
+  | Decl_entry.Found cd when Pos_or_decl.is_hhi (Cls.pos cd) -> ()
   | _ -> make_depend_on_class_name env x
 
 let make_depend_on_constructor_name env class_name =
@@ -146,7 +150,7 @@ let make_depend_on_module env name md =
 
 let make_depend_on_parent env ~skip_constructor_dep ~is_req name class_ =
   match class_ with
-  | Some cd when Pos_or_decl.is_hhi (Cls.pos cd) -> ()
+  | Decl_entry.Found cd when Pos_or_decl.is_hhi (Cls.pos cd) -> ()
   | _ ->
     if not skip_constructor_dep then make_depend_on_constructor_name env name;
     let dep =
@@ -199,5 +203,5 @@ let make_depend_on_class_const env class_ name =
 
 let make_depend_on_typedef env name td =
   match td with
-  | Some td when Pos_or_decl.is_hhi td.Typing_defs.td_pos -> ()
+  | Decl_entry.Found td when Pos_or_decl.is_hhi td.Typing_defs.td_pos -> ()
   | _ -> make_depend_on_class_name env name

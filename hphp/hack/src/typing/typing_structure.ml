@@ -24,7 +24,7 @@ let make_ts : Typing_env_types.env -> locl_ty -> Typing_env_types.env * locl_ty
  fun env ty ->
   let r = get_reason ty in
   match Env.get_typedef env SN.FB.cTypeStructure with
-  | Some { td_tparams; _ } ->
+  | Decl_entry.Found { td_tparams; _ } ->
     (* Typedef parameters can not have constraints *)
     let params =
       List.map

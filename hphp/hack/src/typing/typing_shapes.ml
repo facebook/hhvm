@@ -330,7 +330,7 @@ let to_collection env pos shape_ty res return_type =
                     (env, MakeType.string (Reason.Rwitness_from_decl p))
                   | Typing_defs.TSFclass_const ((_, cid), (_, mid)) -> begin
                     match Env.get_class env cid with
-                    | Some class_ -> begin
+                    | Decl_entry.Found class_ -> begin
                       match Env.get_const env class_ mid with
                       | Some const ->
                         let ((env, ty_err_opt), lty) =
@@ -345,7 +345,9 @@ let to_collection env pos shape_ty res return_type =
                         (env, lty)
                       | None -> Env.fresh_type_error env pos
                     end
-                    | None -> Env.fresh_type_error env pos
+                    | Decl_entry.DoesNotExist
+                    | Decl_entry.NotYetAvailable ->
+                      Env.fresh_type_error env pos
                   end)
             in
             Typing_union.union_list env r keys
@@ -442,10 +444,11 @@ let check_shape_keys_validity env keys =
       (env, key_pos, None)
     | Ast_defs.SFclass_const ((_p, cls), (p, y)) -> begin
       match Env.get_class env cls with
-      | None ->
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
         let (env, ty) = Env.fresh_type_error env p in
         (env, key_pos, Some (cls, ty))
-      | Some cd ->
+      | Decl_entry.Found cd ->
         (match Env.get_const env cd y with
         | None ->
           Typing_error_utils.add_typing_error ~env

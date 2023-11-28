@@ -42,12 +42,16 @@ let check_prop env c pid cty_opt =
   (* Check we're in the LHS of an assignment, so we don't get confused
      by $foo->bar(), which is an Obj_get but not a property. *)
   if Typing_defs.(equal_val_kind (Env.get_val_kind env) Lval) then
-    Option.iter class_ ~f:(fun class_ ->
-        match cty_opt with
-        | Some cty ->
-          check_const_prop env (Env.tast_env_as_typing_env env) class_ pid cty
-        | None ->
-          check_static_const_prop (Env.tast_env_as_typing_env env) class_ pid)
+    match class_ with
+    | Decl_entry.Found class_ ->
+      (match cty_opt with
+      | Some cty ->
+        check_const_prop env (Env.tast_env_as_typing_env env) class_ pid cty
+      | None ->
+        check_static_const_prop (Env.tast_env_as_typing_env env) class_ pid)
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      ()
 
 let rec check_expr env ((_, _, e) : Tast.expr) =
   match e with

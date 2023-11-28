@@ -728,13 +728,17 @@ let is_sub_class_refl env c_sub c_super =
   String.equal c_sub c_super
   ||
   match Env.get_class env c_sub with
-  | None -> false
-  | Some cls_sub -> Cls.has_ancestor cls_sub c_super
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    false
+  | Decl_entry.Found cls_sub -> Cls.has_ancestor cls_sub c_super
 
 let class_has_no_params env c =
   match Env.get_class env c with
-  | Some cls -> List.is_empty (Cls.tparams cls)
-  | None -> false
+  | Decl_entry.Found cls -> List.is_empty (Cls.tparams cls)
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    false
 
 (* Is super_id an ancestor of sub_id, including through requires steps?
  * Maintain a visited set to catch cycles (these are rejected in folding but
@@ -759,8 +763,10 @@ and has_ancestor_including_req_refl ~visited env sub_id super_id =
   && (String.equal sub_id super_id
      ||
      match Env.get_class env sub_id with
-     | None -> false
-     | Some cls ->
+     | Decl_entry.DoesNotExist
+     | Decl_entry.NotYetAvailable ->
+       false
+     | Decl_entry.Found cls ->
        has_ancestor_including_req
          ~visited:(SSet.add sub_id visited)
          env

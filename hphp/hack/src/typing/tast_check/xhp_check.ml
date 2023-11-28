@@ -42,8 +42,10 @@ let handler =
         when (not @@ Naming_special_names.XHP.is_reserved name)
              && (not @@ Naming_special_names.XHP.is_xhp_category name) -> begin
         match Env.get_class env name with
-        | Some _ -> ()
-        | None ->
+        | Decl_entry.Found _
+        | Decl_entry.NotYetAvailable ->
+          ()
+        | Decl_entry.DoesNotExist ->
           Errors.add_error
             Naming_error.(
               to_user_error

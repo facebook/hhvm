@@ -55,7 +55,7 @@ let apply env ~(default : 'a) ~(f : kind -> 'a) name args =
         ->
         Option.value_map
           ~default
-          (Tast_env.get_enum env cid)
+          (Tast_env.get_enum env cid |> Decl_entry.to_option)
           ~f:(fun class_decl ->
             match kind with
             | `EnumClass -> f (EnumClass { name = cid; interface; class_decl })
@@ -66,11 +66,12 @@ let apply env ~(default : 'a) ~(f : kind -> 'a) name args =
     | _ -> default
   in
   match Tast_env.get_enum env name with
-  | Some class_decl -> f (Enum { name; class_decl })
-  | None ->
+  | Decl_entry.Found class_decl -> f (Enum { name; class_decl })
+  | Decl_entry.DoesNotExist ->
     if String.equal name Naming_special_names.Classes.cMemberOf then
       check_ec `EnumClass args
     else if String.equal name Naming_special_names.Classes.cEnumClassLabel then
       check_ec `EnumClassLabel args
     else
       default
+  | Decl_entry.NotYetAvailable -> default

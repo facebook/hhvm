@@ -22,10 +22,11 @@ let check_internal_classname pos ci env =
     | CIstatic ->
       Typing_env.get_self_class tenv
     | CIparent -> Typing_env.get_parent_class tenv
-    | _ -> None
+    | _ -> Decl_entry.DoesNotExist
   in
   match class_result with
-  | Some cls when Cls.internal cls -> Lints_errors.internal_classname pos
+  | Decl_entry.Found cls when Cls.internal cls ->
+    Lints_errors.internal_classname pos
   | _ -> ()
 
 (* Checks creation of a ::class from an internal class *)

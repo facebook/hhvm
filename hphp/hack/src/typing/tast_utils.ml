@@ -125,8 +125,10 @@ let rec truthiness env ty =
          truthy when empty. If this Tclass is instead an interface type like
          KeyedTraversable, the value may or may not be truthy when empty. *)
       match Decl_provider.get_class (Env.get_ctx env) cid with
-      | None -> Unknown
-      | Some cls ->
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        Unknown
+      | Decl_entry.Found cls ->
         (match Cls.kind cls with
         | Cclass _ -> Always_truthy
         | Cinterface
@@ -215,8 +217,10 @@ let rec find_sketchy_types env acc ty =
       acc
     else (
       match Decl_provider.get_class (Env.get_ctx env) cid with
-      | None -> acc
-      | Some cls ->
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        acc
+      | Decl_entry.Found cls ->
         (match Cls.kind cls with
         | Cinterface -> Traversable_interface (Env.print_ty env ty) :: acc
         | Cclass _

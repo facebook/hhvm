@@ -107,6 +107,7 @@ let get_occurrence_info
       let classname = Utils.add_ns classname in
       let ft =
         Decl_provider.get_class ctx classname
+        |> Decl_entry.to_option
         |> Option.bind ~f:(fun cls ->
                if String.equal methodname "__construct" then
                  Decl_provider.Class.construct cls |> fst

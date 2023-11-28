@@ -112,11 +112,15 @@ let get_fun_without_pessimise (ctx : Provider_context.t) (fun_name : string) :
 
 let get_typedef_without_pessimise
     (ctx : Provider_context.t) (typedef_name : string) :
-    Typing_defs.typedef_type option =
+    Typing_defs.typedef_type Decl_entry.t =
   let open Option.Let_syntax in
   match Provider_context.get_backend ctx with
-  | Provider_backend.Analysis -> Decl_store.((get ()).get_typedef typedef_name)
+  | Provider_backend.Analysis ->
+    Decl_store.((get ()).get_typedef typedef_name)
+    |> Decl_entry.of_option_or_doe_not_exist
   | Provider_backend.Shared_memory ->
+    Decl_entry.of_option_or_doe_not_exist
+    @@
     (match Decl_store.((get ()).get_typedef typedef_name) with
     | Some c -> Some c
     | None ->
@@ -130,6 +134,8 @@ let get_typedef_without_pessimise
           Shallow_decl_defs.to_typedef_decl_opt
       | None -> None))
   | Provider_backend.Pessimised_shared_memory info ->
+    Decl_entry.of_option_or_doe_not_exist
+    @@
     (match Decl_store.((get ()).get_typedef typedef_name) with
     | Some c -> Some c
     | None ->
@@ -154,24 +160,26 @@ let get_typedef_without_pessimise
         Some typedef
       | None -> None))
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
-    Provider_backend.Decl_cache.find_or_add
-      decl_cache
-      ~key:(Provider_backend.Decl_cache_entry.Typedef_decl typedef_name)
-      ~default:(fun () ->
-        match Naming_provider.get_typedef_path ctx typedef_name with
-        | Some filename ->
-          find_in_direct_decl_parse
-            ~cache_results:true
-            ctx
-            filename
-            typedef_name
-            Shallow_decl_defs.to_typedef_decl_opt
-        | None -> None)
+    Decl_entry.of_option_or_doe_not_exist
+    @@ Provider_backend.Decl_cache.find_or_add
+         decl_cache
+         ~key:(Provider_backend.Decl_cache_entry.Typedef_decl typedef_name)
+         ~default:(fun () ->
+           match Naming_provider.get_typedef_path ctx typedef_name with
+           | Some filename ->
+             find_in_direct_decl_parse
+               ~cache_results:true
+               ctx
+               filename
+               typedef_name
+               Shallow_decl_defs.to_typedef_decl_opt
+           | None -> None)
   | Provider_backend.Rust_provider_backend backend ->
-    Rust_provider_backend.Decl.get_typedef
-      backend
-      (Naming_provider.rust_backend_ctx_proxy ctx)
-      typedef_name
+    Decl_entry.of_option_or_doe_not_exist
+    @@ Rust_provider_backend.Decl.get_typedef
+         backend
+         (Naming_provider.rust_backend_ctx_proxy ctx)
+         typedef_name
 
 let get_gconst (ctx : Provider_context.t) (gconst_name : string) :
     Typing_defs.const_decl option =

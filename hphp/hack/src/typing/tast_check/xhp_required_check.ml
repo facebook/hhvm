@@ -15,8 +15,10 @@ module Env = Tast_env
 
 let collect_attrs_from_ty_sid ?(include_optional = false) env add bag sid =
   match Env.get_class env sid with
-  | None -> bag
-  | Some c ->
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    bag
+  | Decl_entry.Found c ->
     let should_collect ce =
       match Typing_defs.get_ce_xhp_attr ce with
       | Some { Xhp_attribute.xa_has_default; xa_tag = None; _ }
@@ -82,8 +84,10 @@ let check_attrs pos env sid attrs =
         let ty_reason_msg =
           lazy
             (match Env.get_class env origin_sid with
-            | None -> []
-            | Some ty ->
+            | Decl_entry.DoesNotExist
+            | Decl_entry.NotYetAvailable ->
+              []
+            | Decl_entry.Found ty ->
               let pos =
                 match Cls.get_prop ty attr with
                 | Some attr_decl -> Lazy.force attr_decl.ce_pos

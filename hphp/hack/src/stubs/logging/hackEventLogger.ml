@@ -70,7 +70,6 @@ type rollout_flags = {
   use_old_decls_from_cas: bool;
   saved_state_rollouts: Saved_state_rollouts.t;
   zstd_decompress_by_file: bool;
-  lsp_pull_diagnostics: bool;
   lsp_sticky_quarantine: bool;
 }
 

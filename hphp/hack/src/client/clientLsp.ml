@@ -4143,31 +4143,20 @@ let cancel_if_has_pending_cancel_request
 
 (** The function [send_file_to_ide_and_get_errors_if_needed] currently
 plays two different roles:
-1. when a didChange/didOpen event arrives, it either eagerly recomputes
-squiggles, or it defers them until we become idle (based on the flag
-lsp_pull_diagnostics).
-2. when we become idle, it discharges any of that deferred work
-by recomputing squiggles.
+1. when a didChange/didOpen event arrives, it defers them until we become idle
+2. when we become idle, it discharges that deferred work by recomputing squiggles.
 
-It's ugly that the function has all these mixed roles. Once we
-roll out lsp_pull_diagnostics to 100%, then we can separate
-the two roles and clean up the code. Until then, this type
-lets us distinguish the two roles. *)
+TODO(ljw): It's ugly that the function has all these mixed roles! *)
 type when_to_get_errors =
   | Get_errors_if_not_pull_diagnostics_and_no_subsequent_didChange
   | Get_errors_always_because_discharging_uri_that_needs_check
 
-(** Under [lsp_pull_diagnostics], this function is called upon didOpen/didChange
+(** This function is called upon didOpen/didChange
 to stick a uri into the [uris_that_need_check] queue, and is called a second
 time upon idle to discharge those uris by sending them to [ide_service] to
-recomputing errors and publishing them.
-
-Not under [lsp_pull_diagnostics], this function is called upon didOpen/didChange
-where it eagerly sends them to [ide_service] to recompute errors and publishing them.
-In this case, as a shortcut, if we're asked to act on a didChange but there's a
-subsequent didChange in the queue, then we avoid acting on the first one. *)
+recomputing errors and publishing them. *)
 let send_file_to_ide_and_get_errors_if_needed
-    ~client
+    ~client:_
     ~ide_service
     ~state
     ~uri
@@ -4176,33 +4165,10 @@ let send_file_to_ide_and_get_errors_if_needed
     ~(trigger : errors_trigger)
     ~ref_unblocked_time : state Lwt.t =
   let file_path = uri |> lsp_uri_to_path |> Path.make in
-  let subsequent_didchange_for_this_uri =
-    Jsonrpc.find_already_queued_message client ~f:(fun { Jsonrpc.json; _ } ->
-        let message =
-          try
-            Lsp_fmt.parse_lsp json (fun _ -> UnknownRequest ("response", None))
-          with
-          | _ ->
-            NotificationMessage (UnknownNotification ("cannot parse", None))
-        in
-        match message with
-        | NotificationMessage
-            (DidChangeNotification
-              {
-                DidChange.textDocument =
-                  { VersionedTextDocumentIdentifier.uri = uri2; _ };
-                _;
-              })
-          when Lsp.DocumentUri.equal uri uri2 ->
-          true
-        | _ -> false)
-  in
   let should_calculate_errors =
     match when_to_get_errors with
     | Get_errors_always_because_discharging_uri_that_needs_check -> true
-    | Get_errors_if_not_pull_diagnostics_and_no_subsequent_didChange ->
-      Option.is_none subsequent_didchange_for_this_uri
-      && not !env.local_config.ServerLocalConfig.lsp_pull_diagnostics
+    | Get_errors_if_not_pull_diagnostics_and_no_subsequent_didChange -> false
   in
   let tracking_id =
     match trigger with
@@ -4232,8 +4198,7 @@ let send_file_to_ide_and_get_errors_if_needed
   let new_state =
     match (when_to_get_errors, new_state) with
     | ( Get_errors_if_not_pull_diagnostics_and_no_subsequent_didChange,
-        Running renv )
-      when !env.local_config.ServerLocalConfig.lsp_pull_diagnostics ->
+        Running renv ) ->
       let uris_that_need_check = renv.Run_env.uris_that_need_check in
       Option.iter
         (UriMap.find_opt uri uris_that_need_check)
@@ -4739,7 +4704,7 @@ let handle_client_message
     (* textDocument/codeAction request *)
     | (Running renv, RequestMessage (id, CodeActionRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
-      let%lwt (result, file_path, errors_opt) =
+      let%lwt (result, _file_path, errors_opt) =
         do_codeAction
           ide_service
           tracking_id
@@ -4754,8 +4719,7 @@ let handle_client_message
       begin
         match errors_opt with
         | None -> ()
-        | Some _errors
-          when !env.local_config.ServerLocalConfig.lsp_pull_diagnostics ->
+        | Some _errors ->
           let uri =
             params.CodeActionRequest.textDocument.TextDocumentIdentifier.uri
           in
@@ -4767,14 +4731,6 @@ let handle_client_message
               uris_that_need_check
           in
           state := Running { renv with Run_env.uris_that_need_check }
-        | Some errors ->
-          state :=
-            publish_and_report_after_recomputing_live_squiggles
-              !state
-              file_path
-              errors
-              ~trigger:(Message_trigger { message; metadata })
-              ~ref_unblocked_time
       end;
       Lwt.return_some (make_result_telemetry (List.length result))
     (* codeAction/resolve request *)

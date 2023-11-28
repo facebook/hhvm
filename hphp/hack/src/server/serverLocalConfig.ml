@@ -258,8 +258,6 @@ type t = {
       (** POC: @bobren, use old decls from CAS instead of memcache/manifold *)
   log_events_with_sandcastle_info: bool;
       (** POC: @catg, add sandcastle info to Scuba samples. *)
-  lsp_pull_diagnostics: bool;
-      (** POC: @ljw - if true, uses the new LSP pull diagnostics model *)
   lsp_sticky_quarantine: bool;
       (** POC: @ljw - if true, only exit quarantine when entering a new one *)
 }
@@ -353,7 +351,6 @@ let default =
     dump_tast_hashes = false;
     dump_tasts = [];
     log_events_with_sandcastle_info = false;
-    lsp_pull_diagnostics = true;
     lsp_sticky_quarantine = false;
   }
 
@@ -1070,9 +1067,6 @@ let load_
       ~default:default.log_events_with_sandcastle_info
       config
   in
-  let lsp_pull_diagnostics =
-    bool_ "lsp_pull_diagnostics" ~default:default.lsp_pull_diagnostics config
-  in
   let lsp_sticky_quarantine =
     bool_ "lsp_sticky_quarantine" ~default:default.lsp_sticky_quarantine config
   in
@@ -1193,7 +1187,6 @@ let load_
     dump_tast_hashes;
     dump_tasts;
     log_events_with_sandcastle_info;
-    lsp_pull_diagnostics;
     lsp_sticky_quarantine;
   }
 
@@ -1249,6 +1242,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       saved_state_rollouts = options.saved_state.GlobalOptions.rollouts;
       zstd_decompress_by_file =
         GlobalOptions.(options.saved_state.loading.zstd_decompress_by_file);
-      lsp_pull_diagnostics = options.lsp_pull_diagnostics;
       lsp_sticky_quarantine = options.lsp_sticky_quarantine;
     }

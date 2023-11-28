@@ -515,38 +515,53 @@ struct WholeProgramInput::Key::Impl {
   struct UnitInfo {
     LSString name;
     std::vector<TypeMapping> typeMappings;
-    template <typename SerDe> void serde(SerDe& sd) { sd(name)(typeMappings); }
+    std::vector<std::pair<SString, bool>> constants;
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(name)
+        (typeMappings)
+        (constants)
+        ;
+    }
   };
   struct FuncInfo {
     LSString name;
-    LSString methCallerUnit;
+    LSString unit;
+    bool methCaller;
     UnresolvedTypes unresolvedTypes;
     template <typename SerDe> void serde(SerDe& sd) {
       sd(name)
-        (methCallerUnit)
+        (unit)
+        (methCaller)
         (unresolvedTypes, string_data_lti{})
         ;
     }
   };
   struct FuncBytecodeInfo {
     LSString name;
-    LSString methCallerUnit;
+    LSString unit;
+    bool methCaller;
     template <typename SerDe> void serde(SerDe& sd) {
-      sd(name)(methCallerUnit);
+      sd(name)(unit)(methCaller);
     }
   };
   struct ClassInfo {
     LSString name;
     LSString context;
+    LSString unit;
     std::vector<SString> dependencies;
     bool isClosure;
+    bool closureDeclInFunc;
+    bool has86init;
     Optional<TypeMapping> typeMapping;
     UnresolvedTypes unresolvedTypes;
     template <typename SerDe> void serde(SerDe& sd) {
       sd(name)
         (context)
+        (unit)
         (dependencies)
         (isClosure)
+        (closureDeclInFunc)
+        (has86init)
         (typeMapping)
         (unresolvedTypes, string_data_lti{})
         ;
@@ -728,7 +743,14 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
           typeAlias->name,
           nullptr,
           typeAlias->value,
+          true
         }
+      );
+    }
+    for (auto const& cns : parsed.unit->constants) {
+      info.constants.emplace_back(
+        cns->name,
+        type(cns->val) == KindOfUninit
       );
     }
     add(std::move(info), std::move(parsed.unit));
@@ -737,13 +759,17 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
     auto const name = c->name;
     auto const context = c->closureContextCls;
     auto const isClosure = is_closure(*c);
+    auto const declFunc = c->closureDeclFunc;
+    auto const unit = c->unit;
     auto deps = Index::Input::makeDeps(*c);
+    auto has86init = false;
 
-    php::ClassBytecode bc;
+    php::ClassBytecode bc{name};
     KeyI::UnresolvedTypes types;
     for (auto& m : c->methods) {
       addFuncTypes(types, *m, c.get());
-      bc.methodBCs.emplace_back(std::move(m->rawBlocks));
+      bc.methodBCs.emplace_back(m->name, std::move(m->rawBlocks));
+      has86init |= is_86init_func(*m);
     }
     for (auto const& p : c->properties) {
       addType(types, p.typeConstraint, c.get(), &p.ubs);
@@ -755,7 +781,7 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
       assertx(!tc.isNullable());
       addType(types, tc, nullptr);
       if (tc.isMixed()) tc.setType(AnnotType::ArrayKey);
-      typeMapping.emplace(TypeMapping{c->name, c->name, tc});
+      typeMapping.emplace(TypeMapping{c->name, c->name, tc, false});
     }
 
     add(
@@ -765,9 +791,12 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
     add(
       KeyI::ClassInfo{
         name,
-        context,
+        declFunc ? declFunc : context,
+        unit,
         std::move(deps),
         isClosure,
+        (bool)declFunc,
+        has86init,
         std::move(typeMapping),
         std::move(types)
       },
@@ -776,17 +805,20 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
   }
   for (auto& f : parsed.funcs) {
     auto const name = f->name;
-    auto const methCallerUnit =
-      (f->attrs & AttrIsMethCaller) ? f->unit : nullptr;
+    auto const unit = f->unit;
+    auto const methCaller = bool(f->attrs & AttrIsMethCaller);
 
     KeyI::UnresolvedTypes types;
     addFuncTypes(types, *f);
 
     add(
-      KeyI::FuncBytecodeInfo{name, methCallerUnit},
-      std::make_unique<php::FuncBytecode>(std::move(f->rawBlocks))
+      KeyI::FuncBytecodeInfo{name, unit, methCaller},
+      std::make_unique<php::FuncBytecode>(name, std::move(f->rawBlocks))
     );
-    add(KeyI::FuncInfo{name, methCallerUnit, std::move(types)}, std::move(f));
+    add(
+      KeyI::FuncInfo{name, unit, methCaller, std::move(types)},
+      std::move(f)
+    );
   }
   return out;
 }
@@ -858,7 +890,10 @@ Index::Input make_index_input(WholeProgramInput input) {
               p.first.m_impl->cls.name,
               std::move(p.first.m_impl->cls.dependencies),
               p.first.m_impl->cls.context,
+              p.first.m_impl->cls.unit,
               p.first.m_impl->cls.isClosure,
+              p.first.m_impl->cls.closureDeclInFunc,
+              p.first.m_impl->cls.has86init,
               std::move(p.first.m_impl->cls.typeMapping),
               std::vector<SString>{
                 begin(p.first.m_impl->cls.unresolvedTypes),
@@ -872,7 +907,8 @@ Index::Input make_index_input(WholeProgramInput input) {
             Index::Input::FuncMeta{
               p.second.cast<std::unique_ptr<php::Func>>(),
               p.first.m_impl->func.name,
-              p.first.m_impl->func.methCallerUnit,
+              p.first.m_impl->func.unit,
+              p.first.m_impl->func.methCaller,
               std::vector<SString>{
                 begin(p.first.m_impl->func.unresolvedTypes),
                 end(p.first.m_impl->func.unresolvedTypes)
@@ -885,7 +921,8 @@ Index::Input make_index_input(WholeProgramInput input) {
             Index::Input::UnitMeta{
               p.second.cast<std::unique_ptr<php::Unit>>(),
               p.first.m_impl->unit.name,
-              std::move(p.first.m_impl->unit.typeMappings)
+              std::move(p.first.m_impl->unit.typeMappings),
+              std::move(p.first.m_impl->unit.constants)
             }
           );
           break;
@@ -894,7 +931,8 @@ Index::Input make_index_input(WholeProgramInput input) {
             Index::Input::FuncBytecodeMeta{
               p.second.cast<std::unique_ptr<php::FuncBytecode>>(),
               p.first.m_impl->funcBC.name,
-              p.first.m_impl->funcBC.methCallerUnit
+              p.first.m_impl->funcBC.unit,
+              p.first.m_impl->funcBC.methCaller
             }
           );
           break;
@@ -912,6 +950,8 @@ Index::Input make_index_input(WholeProgramInput input) {
 
   return out;
 }
+
+//////////////////////////////////////////////////////////////////////
 
 }
 

@@ -604,7 +604,7 @@ void build_cfg(ParseUnitState& puState,
 
   link_entry_points(func, fe, findBlock);
 
-  auto mf = php::WideFunc::mut(&func);
+  auto mf = php::WideFunc::create(func);
   mf.blocks().resize(blockMap.size());
   for (auto& kv : blockMap) {
     auto const blk = kv.second.second.mutate();
@@ -670,7 +670,6 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
     fe.name->data() && *fe.name->data() ? fe.name->data() : "pseudomain");
 
   auto ret         = std::make_unique<php::Func>();
-  ret->idx         = 0; // Will be assigned later on
   ret->name        = fe.name;
   ret->srcInfo     = php::SrcInfo { fe.getLocation(),
                                     fe.docComment };
@@ -742,7 +741,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
       if (!cls) return fe.name->toCppString();
       return folly::sformat("{}::{}", cls->name, ret->name);
     }();
-    auto const it = RuntimeOption::ConstantFunctions.find(name);
+    auto const it = RuntimeOption::ConstantFunctions.find(func_fullname(*ret));
     if (it != RuntimeOption::ConstantFunctions.end()) {
       ret->locals.resize(fe.params.size());
       ret->numIters = 0;
@@ -754,7 +753,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
       blk.exnNodeId    = NoExnNodeId;
       blk.hhbcs = {gen_constant(it->second), bc::RetC {}};
 
-      auto mf = php::WideFunc::mut(ret.get());
+      auto mf = php::WideFunc::create(*ret);
       mf.blocks().emplace_back(std::move(blk));
 
       ret->dvEntries.resize(fe.params.size(), NoBlockId);
@@ -1042,6 +1041,10 @@ void assign_closure_context(const ParseUnitState& puState,
     return;
   }
   clo->closureContextCls = find_closure_context(puState, clIt->second);
+  if (!clIt->second->cls) {
+    assertx(!clo->closureContextCls);
+    clo->closureDeclFunc = clIt->second->name;
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1175,7 +1178,7 @@ ParsedUnit parse_unit(const UnitEmitter& ue) {
     // Make sure all closures in our createClMap (which are just
     // strings) actually exist in this unit (CreateCls should not be
     // referring to classes outside of their unit).
-    hphp_fast_set<SString, string_data_hash, string_data_isame> classes;
+    ISStringSet classes;
     for (auto const& c : ret.classes) classes.emplace(c->name);
     for (auto const [name, _] : puState.createClMap) {
       always_assert(classes.count(name));

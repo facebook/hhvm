@@ -29,7 +29,8 @@ FuncBytecode::Reuser* FuncBytecode::s_reuser = nullptr;
 
 template <typename SerDe> void SrcInfo::serde(SerDe& sd) {
   sd(loc)
-    (docComment);
+    (docComment)
+    ;
 }
 
 template <typename SerDe> void Block::serde(SerDe& sd) {
@@ -37,12 +38,14 @@ template <typename SerDe> void Block::serde(SerDe& sd) {
     (exnNodeId)
     (fallthrough)
     (throwExit)
-    (initializer);
+    (initializer)
+    ;
 }
 
 template <typename SerDe> void CatchRegion::serde(SerDe& sd) {
   sd(catchEntry)
-    (iterId);
+    (iterId)
+    ;
 }
 
 template <typename SerDe> void ExnNode::serde(SerDe& sd) {
@@ -50,7 +53,8 @@ template <typename SerDe> void ExnNode::serde(SerDe& sd) {
     (depth)
     (children)
     (parent)
-    (region);
+    (region)
+    ;
 }
 
 template <typename SerDe> void Param::serde(SerDe& sd) {
@@ -60,7 +64,8 @@ template <typename SerDe> void Param::serde(SerDe& sd) {
     (userTypeConstraint)
     (upperBounds)
     (userAttributes)
-    (phpCode);
+    (phpCode)
+    ;
   SERDE_BITFIELD(inout, sd);
   SERDE_BITFIELD(readonly, sd);
   SERDE_BITFIELD(isVariadic, sd);
@@ -84,7 +89,6 @@ template <typename SerDe> void Func::serde(SerDe& sd, Class* parentClass) {
   }
 
   sd(name)
-    (idx)
     (clsIdx)
     (srcInfo)
     (attrs)
@@ -107,7 +111,8 @@ template <typename SerDe> void Func::serde(SerDe& sd, Class* parentClass) {
     (coeffectRules)
     (userAttributes)
     (exnNodes)
-    (isNative);
+    (isNative)
+    ;
 
   SERDE_BITFIELD(isClosureBody, sd);
   SERDE_BITFIELD(isAsync, sd);
@@ -138,6 +143,8 @@ template <typename SerDe> void Func::serde(SerDe& sd, Class* parentClass) {
 
 template <typename SerDe> void FuncBytecode::serde(SerDe& sd) {
   ScopedStringDataIndexer _;
+
+  sd(name);
 
   if constexpr (SerDe::deserializing) {
     bc = CompressedBytecodePtr{
@@ -173,7 +180,8 @@ template <typename SerDe> void Prop::serde(SerDe& sd) {
     (userType)
     (typeConstraint)
     (ubs)
-    (val);
+    (val)
+    ;
 }
 
 template <typename SerDe> void Const::serde(SerDe& sd) {
@@ -182,7 +190,8 @@ template <typename SerDe> void Const::serde(SerDe& sd) {
     (val)
     (coeffects)
     (resolvedTypeStructure)
-    (kind);
+    (kind)
+    ;
   SERDE_BITFIELD(invariance, sd);
   SERDE_BITFIELD(isAbstract, sd);
   SERDE_BITFIELD(isFromTrait, sd);
@@ -197,6 +206,7 @@ template <typename SerDe> void Class::serde(SerDe& sd) {
     (moduleName)
     (parentName)
     (closureContextCls)
+    (closureDeclFunc)
     (interfaceNames)
     (includedEnumNames)
     (usedTraitNames)
@@ -205,7 +215,8 @@ template <typename SerDe> void Class::serde(SerDe& sd) {
     (constants)
     (userAttributes)
     (enumBaseTy)
-    (methods, this);
+    (methods, this)
+    ;
 
   SERDE_BITFIELD(hasReifiedGenerics, sd);
   SERDE_BITFIELD(hasConstProp, sd);
@@ -214,13 +225,16 @@ template <typename SerDe> void Class::serde(SerDe& sd) {
 
 template <typename SerDe> void ClassBytecode::serde(SerDe& sd) {
   ScopedStringDataIndexer _;
-  sd(methodBCs);
+  sd(cls)
+    (methodBCs)
+    ;
 }
 
 template <typename SerDe> void Constant::serde(SerDe& sd) {
   sd(name)
     (val)
-    (attrs);
+    (attrs)
+    ;
 }
 
 template <typename SerDe> void Module::serde(SerDe& sd) {
@@ -229,7 +243,8 @@ template <typename SerDe> void Module::serde(SerDe& sd) {
     (attrs)
     (userAttributes)
     (exports)
-    (imports);
+    (imports)
+    ;
 }
 
 template <typename SerDe> void TypeAlias::serde(SerDe& sd) {
@@ -239,7 +254,8 @@ template <typename SerDe> void TypeAlias::serde(SerDe& sd) {
     (userAttrs)
     (value)
     (typeStructure)
-    (resolvedTypeStructure);
+    (resolvedTypeStructure)
+    ;
 
     SERDE_BITFIELD(caseType, sd);
 }
@@ -264,7 +280,8 @@ template <typename SerDe> void Unit::serde(SerDe& sd) {
     (fileAttributes)
     (moduleName)
     (extName)
-    (packageInfo);
+    (packageInfo)
+    ;
 }
 
 //////////////////////////////////////////////////////////////////////

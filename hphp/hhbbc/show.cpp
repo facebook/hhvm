@@ -789,6 +789,28 @@ std::string show(Context ctx) {
 
 //////////////////////////////////////////////////////////////////////
 
+std::string show(const ConstIndex& idx) {
+  return folly::sformat("{}:{}", idx.cls, idx.idx);
+}
+
+std::string show(const MethRef& m) {
+  return folly::sformat("{}:{}", m.cls, m.idx);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+std::string show(FuncOrCls fc) {
+  if (auto const f = fc.left()) {
+    return folly::sformat("func {}", f->name);
+  } else if (auto const c = fc.right()) {
+    return folly::sformat("class {}", c->name);
+  } else {
+    return "(null)";
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
 std::string show(const PropLookupResult& r) {
   return folly::sformat(
     "{{{},ty:{},found:{},const:{},late:{},init:{},internal:{}}}",

@@ -179,29 +179,6 @@ let make (args : ClientIdeMessage.daemon_args) : t =
     notification_emitter = Lwt_message_queue.create ();
   }
 
-(** This function does an rpc to the daemon: it pushes a message
-onto the daemon's stdin queue, then awaits until [serve] has stuck
-the stdout response from the daemon response onto our [response_emitter].
-The daemon updates [ref_unblocked_time], the time at which the
-daemon starting handling the rpc.
-
-The progress callback will be invoked during this call to rpc, at times
-when the result of [get_status t] might have changed. It's designed
-so the caller of rpc can, in their callback, invoke get_status and display
-some kind of progress message.
-
-Note: it is safe to call this method even while an existing rpc
-is outstanding - we guarantee that results will be delivered in order.
-
-Note: it is not safe to cancel this method, since we might end up
-with no one reading the response to the message we just pushed, leading
-to desync.
-
-Note: If we're in Stopped state (due to someone calling [stop]) then
-we'll refrain from sending the rpc. Stopped is the only state we enter
-due to our own volition; all other states are just a reflection
-of what state the daemon is in, and so it's fine for the daemon
-to respond as it see fits while in the other states. *)
 let rpc
     (t : t)
     ~(tracking_id : string)
@@ -233,6 +210,15 @@ let rpc
              ~key:"message"
              ~value:(ClientIdeMessage.t_to_string message)
       in
+      if not (Active_rpc_requests.is_empty t.active_rpc_requests) then
+        HackEventLogger.invariant_violation_bug
+          "Multiple concurrent ide_rpc requests"
+          ~telemetry:
+            (Telemetry.create ()
+            |> Telemetry.object_list
+                 ~key:"prev"
+                 ~value:(Active_rpc_requests.values t.active_rpc_requests)
+            |> Telemetry.object_ ~key:"new" ~value:telemetry);
       let (active, id) =
         Active_rpc_requests.add telemetry t.active_rpc_requests
       in
@@ -246,12 +232,14 @@ let rpc
       Lwt.cancel pingPromise;
       progress ();
 
-      (* when might t.active_rpc_count <> 0? well, if the caller did
-         Lwt.pick [rpc t message1, rpc t message2], then active_rpc_count will
+      (* Above there's an assertion (invariant_violation_bug) that the caller
+         hasn't made multiple concurrent rpc calls. That's only there as a help
+         to our caller. We actually support that scenario fine, e.g.
+         `let%lwt x = rpc(X) and y = rpc(Y)` -- active_rpc_count will
          reach a peak of 2, then when the first rpc has finished it will go dowwn
-         to 1, then when the second rpc has finished it will go down to 0. *)
+         to 1, then when the second rpc has finished it will go down to 0.
 
-      (* Discussion about why the following is safe, even if multiple people call rpc:
+         Discussion about why the following is safe, even if multiple people call rpc:
          Imagine `let%lwt x = rpc(X) and y = rpc(Y)`.
          We will therefore push X onto the [messages_to_send] queue, then
          await [Lwt_message_queue.pop] on [response_emitter] for a response to X,

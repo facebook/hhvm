@@ -2984,12 +2984,15 @@ let do_codeAction_resolve
     location_of_code_action_request editor_open_files params
   in
   let use_snippet_edits = should_use_snippet_edits !initialize_params_ref in
-  ide_rpc
-    ide_service
-    ~tracking_id
-    ~ref_unblocked_time
-    (ClientIdeMessage.Code_action_resolve
-       { document; range; resolve_title; use_snippet_edits })
+  let%lwt result =
+    ide_rpc
+      ide_service
+      ~tracking_id
+      ~ref_unblocked_time
+      (ClientIdeMessage.Code_action_resolve
+         { document; range; resolve_title; use_snippet_edits })
+  in
+  Lwt.return result
 
 let do_signatureHelp
     (ide_service : ClientIdeService.t ref)
@@ -4263,25 +4266,22 @@ let handle_editor_buffer_message
 let set_verbose_to_file
     ~(ide_service : ClientIdeService.t ref)
     ~(tracking_id : string)
-    (value : bool) : unit =
+    (value : bool) : unit Lwt.t =
   verbose_to_file := value;
   if !verbose_to_file then
     Hh_logger.Level.set_min_level_file Hh_logger.Level.Debug
   else
     Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
   let ref_unblocked_time = ref 0. in
-  let (promise : unit Lwt.t) =
+
+  let%lwt () =
     ide_rpc
       ide_service
       ~tracking_id
       ~ref_unblocked_time
       (ClientIdeMessage.Verbose_to_file !verbose_to_file)
   in
-  ignore_promise_but_handle_failure
-    promise
-    ~desc:"verbose-ide-rpc"
-    ~terminate_on_failure:false;
-  ()
+  Lwt.return_unit
 
 (* Process and respond to a message from VSCode, and update [state] accordingly. *)
 let handle_client_message
@@ -4343,7 +4343,8 @@ let handle_client_message
         | SetTraceNotification.Verbose -> true
         | SetTraceNotification.Off -> false
       in
-      set_verbose_to_file ~ide_service ~tracking_id value;
+
+      let%lwt () = set_verbose_to_file ~ide_service ~tracking_id value in
       Lwt.return_none
     (* test entrypoint: shutdown client_ide_service *)
     | (_, RequestMessage (id, HackTestShutdownServerlessRequestFB)) ->
@@ -4396,15 +4397,6 @@ let handle_client_message
             uris_with_standalone_diagnostics = UriMap.empty;
             current_hh_shell = None;
           };
-      (* If editor sent 'trace: on' then that will turn on verbose_to_file. But we won't turn off
-         verbose here, since the command-line argument --verbose trumps initialization params. *)
-      begin
-        match initialize_params.Initialize.trace with
-        | Initialize.Off -> ()
-        | Initialize.Messages
-        | Initialize.Verbose ->
-          set_verbose_to_file ~ide_service ~tracking_id true
-      end;
       let result = do_initialize ~initialize_params in
       respond_jsonrpc ~powered_by:Language_server id (InitializeResult result);
 
@@ -4429,6 +4421,18 @@ let handle_client_message
         Lsp_helpers.telemetry_log
           to_stdout
           ("Version in hhconfig and switch=" ^ !env.hhconfig_version_and_switch);
+
+      (* If editor sent 'trace: on' then that will turn on verbose_to_file. But we won't turn off
+         verbose here, since the command-line argument --verbose trumps initialization params. *)
+      let%lwt () =
+        match initialize_params.Initialize.trace with
+        | Initialize.Off -> Lwt.return_unit
+        | Initialize.Messages
+        | Initialize.Verbose ->
+          let%lwt () = set_verbose_to_file ~ide_service ~tracking_id true in
+          Lwt.return_unit
+      in
+
       Lwt.return_none
     (* any request/notification if we haven't yet initialized *)
     | (Pre_init, _) ->

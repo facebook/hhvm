@@ -88,6 +88,12 @@ void AsyncFizzClientT<SM>::connect(
   if (pskIdentity) {
     cachedPsk = fizzContext_->getPsk(*pskIdentity);
   }
+
+  auto echPolicy = fizzContext_->getECHPolicy();
+  if (!echConfigs && echPolicy && sni.hasValue()) {
+    echConfigs = echPolicy->getConfig(sni.value());
+  }
+
   fizzClient_.connect(
       fizzContext_,
       std::move(verifier),

@@ -10,6 +10,7 @@
 
 #include <fizz/client/AsyncFizzClient.h>
 #include <fizz/client/ClientExtensions.h>
+#include <fizz/client/ECHPolicy.h>
 #include <fizz/client/PskCache.h>
 #include <folly/io/async/test/MockAsyncTransport.h>
 
@@ -28,7 +29,7 @@ class MockClientStateMachine : public ClientStateMachine {
        folly::Optional<std::string> host,
        folly::Optional<CachedPsk> cachedPsk,
        const std::shared_ptr<ClientExtensions>& extensions,
-       const folly::Optional<std::vector<ech::ECHConfig>>& echConfigs));
+       folly::Optional<std::vector<ech::ECHConfig>> echConfigs));
   Actions processConnect(
       const State& state,
       std::shared_ptr<const FizzClientContext> context,
@@ -130,6 +131,15 @@ class MockPskCache : public PskCache {
       (const std::string& identity));
   MOCK_METHOD(void, putPsk, (const std::string& identity, CachedPsk));
   MOCK_METHOD(void, removePsk, (const std::string& identity));
+};
+
+class MockECHPolicy : public fizz::client::ECHPolicy {
+ public:
+  MOCK_METHOD(
+      folly::Optional<std::vector<fizz::ech::ECHConfig>>,
+      getConfig,
+      (const std::string& hostname),
+      (const));
 };
 
 class MockClientExtensions : public ClientExtensions {

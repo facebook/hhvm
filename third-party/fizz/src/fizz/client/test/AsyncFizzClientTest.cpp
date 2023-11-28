@@ -110,11 +110,7 @@ class AsyncFizzClientTest : public Test {
         .WillOnce(InvokeWithoutArgs([]() { return Actions(); }));
     const auto sni = std::string("www.example.com");
     client_->connect(
-        &handshakeCallback_,
-        nullptr,
-        sni,
-        pskIdentity_,
-        folly::Optional<std::vector<ech::ECHConfig>>(folly::none));
+        &handshakeCallback_, nullptr, sni, pskIdentity_, echConfigs_);
   }
 
   enum class ECHMode { NotRequested, Accepted, Rejected };
@@ -217,6 +213,7 @@ class AsyncFizzClientTest : public Test {
   EventBase evb_;
   MockReplaySafetyCallback mockReplayCallback_;
   folly::Optional<std::string> pskIdentity_{"pskIdentity"};
+  folly::Optional<std::vector<ech::ECHConfig>> echConfigs_;
 };
 
 MATCHER_P(BufMatches, expected, "") {
@@ -595,6 +592,87 @@ TEST_F(AsyncFizzClientTest, TestNoPskResumption) {
   EXPECT_CALL(handshakeCallback_, _fizzHandshakeSuccess());
   fullHandshakeSuccess(false, "h2", nullptr, nullptr, false);
   EXPECT_FALSE(client_->pskResumed());
+}
+
+TEST_F(AsyncFizzClientTest, TestNoECHPolicy) {
+  auto echPolicy = std::make_shared<MockECHPolicy>();
+  // Sanity check: ECHPolicy::getConfig should not be called if no ECH policy on
+  // context
+  EXPECT_CALL(*echPolicy, getConfig(_)).Times(0);
+  completeHandshake();
+}
+
+TEST_F(AsyncFizzClientTest, TestECHPolicyNoSNI) {
+  auto echPolicy = std::make_shared<MockECHPolicy>();
+  context_->setECHPolicy(echPolicy);
+  // Sanity check: ECHPolicy::getConfig should not be called if no ECH policy on
+  // context
+  EXPECT_CALL(*echPolicy, getConfig(_)).Times(0);
+  EXPECT_CALL(*machine_, _processConnect(_, _, _, _, _, _, _))
+      .WillOnce(InvokeWithoutArgs([]() { return Actions(); }));
+  client_->connect(
+      &handshakeCallback_, nullptr, folly::none, pskIdentity_, folly::none);
+}
+
+TEST_F(AsyncFizzClientTest, TestOverrideECHPolicy) {
+  auto echPolicy = std::make_shared<MockECHPolicy>();
+  context_->setECHPolicy(echPolicy);
+  // When an ECH config vector is passed to FizzClient::connect() the ECHPolicy
+  // lookup should be overridden.
+  echConfigs_ = std::vector<ech::ECHConfig>{};
+  EXPECT_CALL(*echPolicy, getConfig("www.example.com")).Times(0);
+  completeHandshake();
+}
+
+TEST_F(AsyncFizzClientTest, TestECHPolicyGet) {
+  auto echPolicy = std::make_shared<MockECHPolicy>();
+  context_->setECHPolicy(echPolicy);
+
+  std::vector<ech::ECHConfig> expectedEchConfigList;
+  ech::ECHConfig echConfig;
+  ech::ECHConfigContentDraft echConfigContent;
+  echConfigContent.key_config.kem_id = hpke::KEMId::x25519;
+  echConfigContent.key_config.config_id = 1;
+  echConfigContent.public_name =
+      folly::IOBuf::copyBuffer("www.super.secret.sni.com");
+  echConfigContent.maximum_name_length = 100;
+  echConfigContent.key_config.public_key = folly::IOBuf::copyBuffer(
+      "1d77eb1c522d08605b179d4214ee4a3635df7e17c336ea9006655a73fcaad63e");
+  auto kdfId = hpke::KDFId::Sha256;
+  auto aeadId = hpke::AeadId::TLS_AES_128_GCM_SHA256;
+  ech::HpkeSymmetricCipherSuite suite{kdfId, aeadId};
+  echConfigContent.key_config.cipher_suites.push_back(suite);
+  echConfig.version = ech::ECHVersion::Draft15;
+  echConfig.ech_config_content = encode(std::move(echConfigContent));
+  expectedEchConfigList.push_back(std::move(echConfig));
+
+  EXPECT_CALL(*echPolicy, getConfig("www.example.com"))
+      .WillOnce(Return(expectedEchConfigList));
+
+  // processConnect() should be called with the ECH config list returned from
+  // ECHPolicy::getConfig()
+  EXPECT_CALL(
+      *machine_,
+      _processConnect(
+          _,
+          _,
+          _,
+          _,
+          _,
+          _,
+          Truly([&expectedEchConfigList](
+                    const folly::Optional<std::vector<ech::ECHConfig>>&
+                        configList) {
+            return configList.hasValue() &&
+                configList->at(0).ech_config_content->coalesce() ==
+                expectedEchConfigList[0].ech_config_content->coalesce();
+          })))
+      .WillOnce(InvokeWithoutArgs([]() {
+        return detail::actions(ReportHandshakeSuccess(), WaitForData());
+      }));
+  const auto sni = std::string("www.example.com");
+  client_->connect(
+      &handshakeCallback_, nullptr, sni, pskIdentity_, folly::none);
 }
 
 TEST_F(AsyncFizzClientTest, TestECHAccepted) {

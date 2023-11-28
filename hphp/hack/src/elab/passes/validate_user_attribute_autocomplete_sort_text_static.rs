@@ -6,6 +6,7 @@
 use std::ops::ControlFlow;
 
 use nast::Binop;
+use nast::Class_;
 use nast::Expr;
 use nast::Expr_;
 use nast::Fun_;
@@ -26,6 +27,11 @@ impl Pass for ValidateUserAttributeAutocompleteSortTextStaticPass {
     }
 
     fn on_ty_method__bottom_up(&mut self, env: &Env, elem: &mut Method_) -> ControlFlow<(), ()> {
+        check_autocomplete_sort_text_static(&elem.user_attributes, env);
+        ControlFlow::Continue(())
+    }
+
+    fn on_ty_class__bottom_up(&mut self, env: &Env, elem: &mut Class_) -> ControlFlow<(), ()> {
         check_autocomplete_sort_text_static(&elem.user_attributes, env);
         ControlFlow::Continue(())
     }

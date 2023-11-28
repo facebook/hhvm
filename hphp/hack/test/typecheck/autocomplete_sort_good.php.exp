@@ -1,2 +1,4 @@
-File "autocomplete_sort_good.php", line 10, characters 28-28:
+File "autocomplete_sort_good.php", line 11, characters 28-28:
+This attribute parameter should be static string literal (Typing[4127])
+File "autocomplete_sort_good.php", line 18, characters 26-27:
 This attribute parameter should be static string literal (Typing[4127])

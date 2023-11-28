@@ -435,7 +435,7 @@ module UserAttributes = struct
             } );
           ( uaAutocompleteSortText,
             {
-              contexts = [fn; mthd];
+              contexts = [fn; mthd; cls];
               autocomplete = false;
               doc =
                 "Declares which string will be used for ordering this in autocomplete suggestions.";

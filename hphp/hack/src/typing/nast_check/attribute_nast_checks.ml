@@ -256,10 +256,15 @@ let handler =
 
     method! at_class_ env c =
       check_no_auto_dynamic env c.c_user_attributes;
+      check_autocomplete_valid_text c.c_user_attributes;
       check_soft_internal_without_internal c.c_internal c.c_user_attributes;
       check_attribute_arity
         c.c_user_attributes
         SN.UserAttributes.uaDocs
+        (`Exact 1);
+      check_attribute_arity
+        c.c_user_attributes
+        SN.UserAttributes.uaAutocompleteSortText
         (`Exact 1);
       List.iter
         (fun cv ->

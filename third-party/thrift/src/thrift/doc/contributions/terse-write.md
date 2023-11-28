@@ -2,7 +2,7 @@
 
 ## Background
 
-`@thrift.TerseWrite` is a new structured [annotation](../idl/standard-thrift-annotation-library#thrifttersewrite) that will mark a field as `terse`.  Please refer to the [user guide](../features/terse-write) for the motivation.
+`@thrift.TerseWrite` is a new structured [annotation](../idl/annotations#thrift-annotations) that will mark a field as `terse`.  Please refer to the [user guide](../features/terse-write) for the motivation.
 
 ## Semantic
 

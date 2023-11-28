@@ -24,7 +24,7 @@ Do not use in the new code. They are not backward or forward compatible. They do
 
 ## Fields annotated with `@thrift.TerseWrite`
 
-* It is a [structured annotation](./standard-thrift-annotation-library#thrifttersewrite) that has similar semantics to a field qualifier which makes the field **terse**.
+* It is a [structured annotation](./annotations.md#thrift-annotations) that has similar semantics to a field qualifier which makes the field **terse**.
 * Will only be written when serializing a structure if the field is not equal to its [intrinsic default value](./#intrinsic-default-values).
 * Will be cleared to the [intrinsic default value](./#intrinsic-default-values) when deserializing a structure if the field isn't present in the serialized data.
 

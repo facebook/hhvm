@@ -83,8 +83,6 @@ module.exports = {
       items: [
         'idl/field-qualifiers',
         'idl/annotations',
-        'idl/structured-annotations',
-        'idl/standard-thrift-annotation-library',
         'idl/mixins',
       ],
     },

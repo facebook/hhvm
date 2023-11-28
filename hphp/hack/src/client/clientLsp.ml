@@ -373,7 +373,7 @@ type event =
       Handled in [handle_shell_out_complete].
       Invariant: if we have one of these events, then we must eventually produce
       an LSP response for it. *)
-  | Deferred_check
+  | Deferred_check of DocumentUri.t * errors_trigger
       (** If there had been a didOpen/didChange without a subsequent didClose,
       and no other events are pending, we will recompute squiggles for it. *)
   | Tick
@@ -415,7 +415,8 @@ let event_to_string (event : event) : string =
       (ServerProgress.show_errors_file_error e)
       log_message
   | Shell_out_complete _ -> "Shell_out_complete"
-  | Deferred_check -> Printf.sprintf "Deferred_check"
+  | Deferred_check (uri, _trigger) ->
+    Printf.sprintf "Deferred_check(%s)" (Lsp.string_of_uri uri)
 
 let is_tick (event : event) : bool =
   match event with
@@ -425,7 +426,7 @@ let is_tick (event : event) : bool =
   | Shell_out_complete _
   | Client_message _
   | Daemon_notification _
-  | Deferred_check ->
+  | Deferred_check _ ->
     false
 
 (* Here are some exit points. *)
@@ -689,12 +690,12 @@ let get_client_message_source
     (q_opt : ServerProgress.ErrorsRead.read_result Lwt_stream.t option)
     (refs_q_opt :
       FindRefsWireFormat.half_open_one_based list Lwt_stream.t option)
-    (uris_need_check : bool) :
+    (uri_needs_check : (DocumentUri.t * errors_trigger) option) :
     [ `From_client
     | `From_ide_service of event
     | `From_q of ServerProgress.ErrorsRead.read_result option
     | `From_refs_q of FindRefsWireFormat.half_open_one_based list option
-    | `From_uris_that_need_check
+    | `From_uris_that_need_check of DocumentUri.t * errors_trigger
     | `No_source
     ]
     Lwt.t =
@@ -727,13 +728,13 @@ let get_client_message_source
         @ Option.value_map refs_q_opt ~default:[] ~f:(fun q ->
               [Lwt_stream.get q |> Lwt.map (fun item -> `From_refs_q item)])
         @
-        if uris_need_check then
+        match uri_needs_check with
+        | None -> []
+        | Some uri ->
           [
             (let%lwt () = Lwt_unix.sleep delay_to_force_lower_priority in
-             Lwt.return `From_uris_that_need_check);
-          ]
-        else
-          [])
+             Lwt.return (`From_uris_that_need_check uri));
+          ])
     in
     Lwt.return message_source
 
@@ -834,11 +835,11 @@ let get_next_event
         Some q
       | _ -> None
     in
-    let uris_need_check =
+    let uri_needs_check =
       match !state with
       | Running Run_env.{ uris_that_need_check; _ } ->
-        not (UriMap.is_empty uris_that_need_check)
-      | _ -> false
+        UriMap.choose_opt uris_that_need_check
+      | _ -> None
     in
     let%lwt message_source =
       get_client_message_source
@@ -846,7 +847,7 @@ let get_next_event
         ide_service
         q_opt
         refs_q_opt
-        uris_need_check
+        uri_needs_check
     in
     (match message_source with
     | `From_client ->
@@ -856,7 +857,8 @@ let get_next_event
     | `From_q message -> Lwt.return (Errors_file message)
     | `From_refs_q message -> Lwt.return (Refs_file message)
     | `No_source -> Lwt.return Tick
-    | `From_uris_that_need_check -> Lwt.return Deferred_check)
+    | `From_uris_that_need_check (uri, trigger) ->
+      Lwt.return (Deferred_check (uri, trigger)))
 
 type powered_by =
   | Hh_server
@@ -1707,7 +1709,7 @@ let log_response_if_necessary
     | Daemon_notification _
     | Errors_file _
     | Refs_file _
-    | Deferred_check ->
+    | Deferred_check _ ->
       None
   in
   match to_log with
@@ -4862,16 +4864,22 @@ let handle_daemon_notification
 let handle_deferred_check
     ~(state : state ref)
     ~(ide_service : ClientIdeService.t ref)
-    ~(ref_unblocked_time : float ref) : result_telemetry option Lwt.t =
+    ~(ref_unblocked_time : float ref)
+    (uri : DocumentUri.t)
+    (trigger : errors_trigger) : result_telemetry option Lwt.t =
   match !state with
   | Pre_init
   | Post_shutdown ->
     Lwt.return_none
   | Running renv ->
-    let uris_that_need_check = renv.Run_env.uris_that_need_check in
-    let (uri, trigger) = UriMap.choose uris_that_need_check in
-    let uris_that_need_check = UriMap.remove uri uris_that_need_check in
-    state := Running Run_env.{ renv with uris_that_need_check };
+    state :=
+      Running
+        Run_env.
+          {
+            renv with
+            uris_that_need_check =
+              UriMap.remove uri renv.Run_env.uris_that_need_check;
+          };
     let editor_open_files =
       match get_editor_open_files !state with
       | Some files -> files
@@ -5031,8 +5039,13 @@ let main
              and stored it within the arguments here to [Shell_out_complete]. *)
           handle_shell_out_complete result triggering_request shellable_type
         | Tick -> handle_tick ~state
-        | Deferred_check ->
-          handle_deferred_check ~state ~ide_service ~ref_unblocked_time
+        | Deferred_check (uri, trigger) ->
+          handle_deferred_check
+            ~state
+            ~ide_service
+            ~ref_unblocked_time
+            uri
+            trigger
       in
       (* for LSP requests and notifications, we keep a log of what+when we responded.
          INVARIANT: every LSP request gets either a response logged here,

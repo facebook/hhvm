@@ -507,7 +507,8 @@ FactsStore& getFactsOrThrow() {
   return *facts;
 }
 
-// Only bool, int, double, string, and Hack arrays are supported.
+// Only bool, int, double, string, class, lazyclass, and Hack arrays are
+// supported.
 folly::dynamic dynamicFromVariant(const Variant& v) {
   if (v.isBoolean()) {
     return v.getBoolean();
@@ -517,6 +518,12 @@ folly::dynamic dynamicFromVariant(const Variant& v) {
   }
   if (v.isDouble()) {
     return v.getDouble();
+  }
+  if (v.isLazyClass()) {
+    return v.toLazyClassVal().name()->toCppString();
+  }
+  if (v.isClass()) {
+    return v.toClassVal()->name()->toCppString();
   }
   if (v.isString()) {
     return v.getStringData()->toCppString();

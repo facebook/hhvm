@@ -279,30 +279,26 @@ struct HashTableLayout : public ArrayLayout<T, Item> {
     }
 
     iterator find(const KeyView& key) const {
-      auto h = KeyLayout::hash(key);
-      h *= 5; // spread out clumped values
-      auto blocks = table_.size();
-      auto buckets = blocks * Block::bits;
-      for (size_t p = 0; p < buckets; h += ++p) { // quadratic probing
-        auto bucket = h % buckets;
-        auto major = bucket / Block::bits;
-        auto minor = bucket % Block::bits;
-        auto block = table_[major];
+      const auto buckets = table_.size() * Block::bits;
+      auto bucket = KeyLayout::hash(key) * 5; // spread out clumped values
+      for (size_t p = 0; p < buckets; bucket += ++p) { // quadratic probing
+        bucket %= buckets;
+        const auto& block = table_[bucket / Block::bits]; // major block
         auto mask = block.mask();
         auto offset = block.offset();
+        auto minor = bucket % Block::bits;
         for (;;) {
           if (0 == (1 & (mask >> minor))) {
             return this->end();
           }
-          size_t subOffset = folly::popcount(mask & ((1ULL << minor) - 1));
-          auto index = offset + subOffset;
-          auto found = this->begin() + index;
+          auto found = this->begin() + offset +
+              folly::popcount(mask & ((1ULL << minor) - 1)) /* subOffset */;
           if (KeyExtractor::getViewKey(*found) == key) {
             return found;
           }
           minor += ++p;
           if (LIKELY(minor < Block::bits)) {
-            h += p; // same block shortcut
+            bucket += p; // same block shortcut
           } else {
             --p; // undo
             break;

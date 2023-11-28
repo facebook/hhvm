@@ -16,7 +16,7 @@ aast_parser = { version = "0.0.0", path = "../../../../parser/cargo/aast_parser"
 naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 parser_core_types = { version = "0.0.0", path = "../../../../parser/cargo/core_types" }
-proc-macro2 = { version = "1.0.64", features = ["span-locations"] }
+proc-macro2 = { version = "1.0.70", features = ["span-locations"] }
 quote = "1.0.29"
 regex = "1.9.2"
 relative_path = { version = "0.0.0", path = "../../../rust/relative_path" }

@@ -12,6 +12,6 @@ doctest = false
 proc-macro = true
 
 [dependencies]
-proc-macro2 = { version = "1.0.64", features = ["span-locations"] }
+proc-macro2 = { version = "1.0.70", features = ["span-locations"] }
 quote = "1.0.29"
 synstructure = "0.12"

@@ -9,4 +9,4 @@ edition = "2021"
 path = "../macro_test_util.rs"
 
 [dependencies]
-proc-macro2 = { version = "1.0.64", features = ["span-locations"] }
+proc-macro2 = { version = "1.0.70", features = ["span-locations"] }

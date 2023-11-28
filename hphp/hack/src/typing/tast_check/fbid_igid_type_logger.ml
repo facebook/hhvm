@@ -10,7 +10,6 @@ open Hh_prelude
 open Aast
 module A = Aast_defs
 module T = Typing_defs
-module Tc = Typing_defs_core
 module TM = Typing_make_type
 module TR = Typing_reason
 module SN = Naming_special_names
@@ -34,9 +33,9 @@ let check_args env params args pos =
     in
     let in_igid_range = TM.class_type TR.Rnone "\\InIGIDRange" [] in
     let base_igid =
-      Tc.mk
+      T.mk
         ( TR.Rnone,
-          Tc.Tnewtype
+          T.Tnewtype
             ("\\BaseIGID", [meta_ent_instagram_user; in_igid_range], bound) )
     in
     Tast_env.is_sub_type env ty base_igid
@@ -49,9 +48,9 @@ let check_args env params args pos =
     let in_fbid_range = TM.class_type TR.Rnone "\\IN_FBID_RANGE" [] in
     let fbid_forbids_zero = TM.class_type TR.Rnone "\\FBID_FORBIDS_ZERO" [] in
     let base_fbid =
-      Tc.mk
+      T.mk
         ( TR.Rnone,
-          Tc.Tnewtype
+          T.Tnewtype
             ( "\\BaseFBID",
               [meta_ent_instagram_user; in_fbid_range; fbid_forbids_zero],
               bound ) )
@@ -74,7 +73,9 @@ let check_args env params args pos =
                 JSON_String
                   "FBID or IGID type erasure detected, is this an IGID or an FBID? How will you know?"
               );
-              ("type", JSON_String "call");
+              ("node_type", JSON_String "call");
+              ("arg_type", Tast_env.ty_to_json env arg_ty);
+              ("param_type", Tast_env.ty_to_json env param_ty);
               ("pos", Pos.json pos);
             ])
       in

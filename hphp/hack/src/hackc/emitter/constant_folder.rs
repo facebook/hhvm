@@ -95,6 +95,19 @@ fn try_type_intlike(s: &str) -> Option<i64> {
     }
 }
 
+fn nameof_to_typed_value<'arena, 'decl>(
+    emitter: &Emitter<'arena, 'decl>,
+    scope: &Scope<'_, 'arena>,
+    cid: &ast::ClassId,
+) -> Result<TypedValue<'arena>, Error> {
+    let cexpr = ClassExpr::class_id_to_class_expr(emitter, scope, false, true, cid);
+    if let ClassExpr::Id(ast_defs::Id(_, cname)) = cexpr {
+        let classid = hhbc::ClassName::from_ast_name_and_mangle(emitter.alloc, cname).as_ffi_str();
+        return Ok(TypedValue::String(classid));
+    }
+    Err(Error::UserDefinedConstant)
+}
+
 fn class_const_to_typed_value<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
     scope: &Scope<'_, 'arena>,
@@ -366,6 +379,7 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
             }
             Expr_::KeyValCollection(x) => keyvalcollection_expr_to_typed_value(emitter, scope, x),
             Expr_::Shape(fields) => shape_to_typed_value(emitter, scope, fields),
+            Expr_::Nameof(x) => nameof_to_typed_value(emitter, scope, x),
             Expr_::ClassConst(x) => class_const_to_typed_value(emitter, scope, &x.0, &x.1),
 
             Expr_::ClassGet(_) => Err(Error::UserDefinedConstant),

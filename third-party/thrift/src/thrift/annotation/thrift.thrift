@@ -137,7 +137,10 @@ TODO: replace with @cpp.Box + @rust.Box
 @scope.Field
 struct Box {}
 
-// TODO(ytj): Document.
+/**
+ * Indicates whether the nested fields are accessible directly.
+ * https://github.com/facebook/fbthrift/blob/v2023.11.20.00/thrift/doc/idl/mixins.md
+ */
 @scope.Field
 struct Mixin {}
 

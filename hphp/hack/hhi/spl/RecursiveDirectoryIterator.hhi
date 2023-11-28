@@ -10,7 +10,7 @@
 
 class RecursiveDirectoryIterator
   extends FilesystemIterator
-  implements RecursiveIterator<HH\FIXME\POISON_MARKER<SplFileInfo>> {
+  implements RecursiveIterator<~SplFileInfo> {
 
   // Constants
   const int FOLLOW_SYMLINKS;
@@ -22,7 +22,7 @@ class RecursiveDirectoryIterator
   );
   public function hasChildren(): bool;
   // implementation can also return string or false
-  public function getChildren(): HH\FIXME\POISON_MARKER<this>;
+  public function getChildren(): ~this;
   public function getSubPath(): HH\FIXME\MISSING_RETURN_TYPE;
   public function getSubPathname(): HH\FIXME\MISSING_RETURN_TYPE;
 

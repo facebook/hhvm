@@ -127,8 +127,8 @@ class SplFileInfo {
 class SplFileObject
   extends SplFileInfo
   implements
-    SeekableIterator<HH\FIXME\POISON_MARKER<string>>,
-    RecursiveIterator<HH\FIXME\POISON_MARKER<string>> {
+    SeekableIterator<~string>,
+    RecursiveIterator<~string> {
 
   // Constants
   const int DROP_NEW_LINE;
@@ -144,7 +144,7 @@ class SplFileObject
     ?resource $context = null,
   );
   /** @return string|array violates Iterator interface */
-  public function current(): HH\FIXME\POISON_MARKER<string>;
+  public function current(): ~string;
   public function eof(): bool;
   public function fflush(): bool;
   public function fgetc(): string;
@@ -197,11 +197,11 @@ class SplTempFileObject extends SplFileObject {
 
 class DirectoryIterator
   extends SplFileInfo
-  implements SeekableIterator<HH\FIXME\POISON_MARKER<SplFileInfo>> {
+  implements SeekableIterator<~SplFileInfo> {
 
   // Methods
   public function __construct(string $path);
-  public function current(): HH\FIXME\POISON_MARKER<SplFileInfo>;
+  public function current(): ~SplFileInfo;
   public function isDot(): bool;
   public function next(): void;
   public function rewind(): void;
@@ -224,14 +224,14 @@ class SplStack<T> extends SplDoublyLinkedList<T> {
 }
 
 class SplPriorityQueue<Tv, Tp>
-  implements Iterator<HH\FIXME\POISON_MARKER<Tv>>, Countable {
+  implements Iterator<~Tv>, Countable {
   const int EXTR_BOTH;
   const int EXTR_PRIORITY;
   const int EXTR_DATA;
   public function compare(Tp $a, Tp $b): int {}
   public function count(): int {}
-  public function current(): HH\FIXME\POISON_MARKER<Tv> {}
-  public function extract(): HH\FIXME\POISON_MARKER<Tv> {}
+  public function current(): ~Tv {}
+  public function extract(): ~Tv {}
   public function insert(Tv $value, Tp $priority): bool {}
   public function isEmpty(): bool {}
   public function key(): int {}
@@ -239,7 +239,7 @@ class SplPriorityQueue<Tv, Tp>
   public function recoverFromCorruption(): bool {}
   public function rewind(): void {}
   public function setExtractFlags(int $flags): int {}
-  public function top(): HH\FIXME\POISON_MARKER<Tv> {}
+  public function top(): ~Tv {}
   public function valid(): bool {}
 }
 

@@ -763,7 +763,7 @@ namespace {
 
   interface RecursiveIterator<+Tv> extends Iterator<Tv> {
     // see RecursiveDirectoryIterator
-    public function getChildren(): ?HH\FIXME\POISON_MARKER<this>;
+    public function getChildren(): ?~this;
     public function hasChildren(): bool;
   }
 

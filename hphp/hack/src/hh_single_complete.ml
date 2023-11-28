@@ -75,6 +75,7 @@ let die str =
   exit 2
 
 let parse_options () =
+  let log_levels = ref SMap.empty in
   let fn_ref = ref [] in
   let extra_builtins = ref [] in
   let usage = Printf.sprintf "Usage: %s filename\n" Sys.argv.(0) in
@@ -131,6 +132,15 @@ let parse_options () =
         Arg.Unit (set_mode (Autocomplete { is_manually_invoked = false })),
         " Produce autocomplete suggestions as if triggered by trigger character"
       );
+      ( "--hh-log-level",
+        (let log_key = ref "" in
+         Arg.Tuple
+           [
+             Arg.String (( := ) log_key);
+             Arg.Int
+               (fun level -> log_levels := SMap.add !log_key level !log_levels);
+           ]),
+        " Set the log level for a key" );
       ( "--auto-complete-manually-invoked",
         Arg.Unit (set_mode (Autocomplete { is_manually_invoked = true })),
         " Produce autocomplete suggestions as if manually triggered by user" );
@@ -260,6 +270,7 @@ let parse_options () =
       ~allowed_fixme_codes_strict:
         (Option.value allowed_fixme_codes_strict ~default:ISet.empty)
       ~glean_reponame:!glean_reponame
+      ~log_levels:!log_levels
       GlobalOptions.default
   in
   ( {

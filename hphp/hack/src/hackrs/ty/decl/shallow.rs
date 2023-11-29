@@ -135,6 +135,7 @@ pub struct ShallowMethod<R: Reason> {
     pub deprecated: Option<Bytes>, // e.g. "The method foo is deprecated: ..."
     pub flags: MethodFlags,
     pub attributes: Box<[UserAttribute<R::Pos>]>,
+    pub sort_text: Option<String>,
 }
 
 walkable!(ShallowMethod<R> => [ty]);

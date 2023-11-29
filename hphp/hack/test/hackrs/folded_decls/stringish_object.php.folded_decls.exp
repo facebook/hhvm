@@ -72,7 +72,9 @@ FoldedClass {
             origin: "\\SomeOtherC",
             visibility: Public,
             deprecated: None,
-            sort_text: None,
+            sort_text: Some(
+                "zzz",
+            ),
         },
     },
     consts: {

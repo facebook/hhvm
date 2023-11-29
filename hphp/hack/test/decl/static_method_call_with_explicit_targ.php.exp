@@ -29,7 +29,7 @@
                   variadic = false };
                 ft_cross_package = None }));
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
-          sm_attributes = [] };
+          sm_attributes = []; sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([11:26-31], "equal");
            sm_type =
            (Rwitness_from_decl ([11:26-31]),
@@ -73,7 +73,7 @@
                    variadic = false };
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
-           sm_attributes = [] }
+           sm_attributes = []; sm_sort_text = None }
          ];
        sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
        sc_docs_url = None }))

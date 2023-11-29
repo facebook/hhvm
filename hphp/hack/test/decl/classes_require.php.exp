@@ -30,7 +30,7 @@
                   variadic = false };
                 ft_cross_package = None }));
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
-          sm_attributes = [] };
+          sm_attributes = []; sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([5:19-29], "closeDoors");
            sm_type =
            (Rwitness_from_decl ([5:19-29]),
@@ -50,7 +50,7 @@
                    variadic = false };
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
-           sm_attributes = [] }
+           sm_attributes = []; sm_sort_text = None }
          ];
        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
   ("\\Fliers",
@@ -86,7 +86,7 @@
                    variadic = false };
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = abstract;
-           sm_attributes = [] }
+           sm_attributes = []; sm_sort_text = None }
           ];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
   ("\\Plane",
@@ -126,7 +126,7 @@
                    variadic = false };
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
-           sm_attributes = [] }
+           sm_attributes = []; sm_sort_text = None }
           ];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
   ("\\HasEngine",
@@ -162,7 +162,7 @@
                    variadic = false };
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = abstract;
-           sm_attributes = [] }
+           sm_attributes = []; sm_sort_text = None }
           ];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
   ("\\Startable",
@@ -202,7 +202,7 @@
                    variadic = false };
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
-           sm_attributes = [] }
+           sm_attributes = []; sm_sort_text = None }
           ];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
   ("\\AirBus",
@@ -246,7 +246,7 @@
                    variadic = false };
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
-           sm_attributes = [] };
+           sm_attributes = []; sm_sort_text = None };
           { Shallow_decl_defs.sm_name = ([45:19-30], "startEngine");
             sm_type =
             (Rwitness_from_decl ([45:19-30]),
@@ -266,7 +266,7 @@
                     variadic = false };
                   ft_cross_package = None }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
-            sm_attributes = [] }
+            sm_attributes = []; sm_sort_text = None }
           ];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }))
   ]

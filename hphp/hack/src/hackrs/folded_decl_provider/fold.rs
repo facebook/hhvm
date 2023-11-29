@@ -297,21 +297,6 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         props.insert(prop, elt);
     }
 
-    fn format(original_name: &str) -> String {
-        use hhbc_string_utils::mangle_xhp_id;
-        use hhbc_string_utils::strip_global_ns;
-
-        let unqualified = strip_global_ns(original_name);
-        match unqualified.rsplit('\\').next() {
-            Some(id) if original_name.starts_with('\\') && id.starts_with(':') => {
-                // only mangle already qualified xhp ids - avoid mangling string literals
-                // containing an xhp name, for example an attribute param ':foo:bar'
-                mangle_xhp_id(id.to_string())
-            }
-            _ => String::from(unqualified),
-        }
-    }
-
     fn decl_static_prop(
         &self,
         static_props: &mut IndexMap<PropName, FoldedElement>,
@@ -384,25 +369,12 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             needs_init: false,
             safe_global_variable: false,
         };
-        let autocomplete_sort_text = match sm
-            .attributes
-            .iter()
-            .find(|ua| ua.name.id() == *sn::user_attributes::uaAutocompleteSortText)
-        {
-            Some(ua) => match &ua.params[0] {
-                ty::decl::ty::UserAttributeParam::Classname(cn) => Some(Self::format(cn)),
-                ty::decl::ty::UserAttributeParam::String(s) => Some(s.to_string()),
-                ty::decl::ty::UserAttributeParam::Int(i) => Some(i.to_string()),
-                _ => None,
-            },
-            None => None,
-        };
         let elt = FoldedElement {
             origin: cls,
             visibility: vis,
             deprecated: sm.deprecated,
             flags: ClassEltFlags::new(flag_args),
-            sort_text: autocomplete_sort_text,
+            sort_text: sm.sort_text.to_owned(),
         };
 
         methods.insert(meth, elt);
@@ -443,25 +415,12 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
                 needs_init: false,
                 safe_global_variable: false,
             };
-            let autocomplete_sort_text = match sm
-                .attributes
-                .iter()
-                .find(|ua| ua.name.id() == *sn::user_attributes::uaAutocompleteSortText)
-            {
-                Some(ua) => match &ua.params[0] {
-                    ty::decl::ty::UserAttributeParam::Classname(cn) => Some(Self::format(cn)),
-                    ty::decl::ty::UserAttributeParam::String(s) => Some(s.to_string()),
-                    ty::decl::ty::UserAttributeParam::Int(i) => Some(i.to_string()),
-                    _ => None,
-                },
-                None => None,
-            };
             FoldedElement {
                 origin: self.child.name.id(),
                 visibility: vis,
                 deprecated: sm.deprecated,
                 flags: ClassEltFlags::new(flag_args),
-                sort_text: autocomplete_sort_text,
+                sort_text: sm.sort_text.to_owned(),
             }
         });
 

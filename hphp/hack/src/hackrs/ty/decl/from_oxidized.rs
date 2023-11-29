@@ -383,6 +383,7 @@ impl<R: Reason> From<&obr::shallow_decl_defs::ShallowMethod<'_>> for shallow::Sh
             deprecated: sm.deprecated.map(Into::into),
             attributes: slice(sm.attributes),
             flags: sm.flags,
+            sort_text: sm.sort_text.map(Into::into),
         }
     }
 }

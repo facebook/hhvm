@@ -33,8 +33,8 @@
           sm_attributes =
           [{ Typing_defs_core.ua_name = ([4:5-8], "\\Foo");
              ua_params = [(Typing_defs_core.String "hi there")] }
-            ]
-          };
+            ];
+          sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([8:19-26], "attrInt");
            sm_type =
            (Rwitness_from_decl ([8:19-26]),
@@ -58,8 +58,8 @@
            [{ Typing_defs_core.ua_name = ([7:5-8], "\\Foo");
               ua_params =
               [(Typing_defs_core.Int "0x42"); (Typing_defs_core.Int "123")] }
-             ]
-           };
+             ];
+           sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([11:19-30], "attrECLabel");
            sm_type =
            (Rwitness_from_decl ([11:19-30]),
@@ -85,8 +85,8 @@
               [(Typing_defs_core.EnumClassLabel "Label1");
                 (Typing_defs_core.EnumClassLabel "Label2")]
               }
-             ]
-           };
+             ];
+           sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([14:19-30], "attrClsName");
            sm_type =
            (Rwitness_from_decl ([14:19-30]),
@@ -109,8 +109,8 @@
            sm_attributes =
            [{ Typing_defs_core.ua_name = ([13:5-8], "\\Foo");
               ua_params = [(Typing_defs_core.Classname "\\SomeClass")] }
-             ]
-           };
+             ];
+           sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([17:19-30], "attrCompute");
            sm_type =
            (Rwitness_from_decl ([17:19-30]),
@@ -133,8 +133,8 @@
            sm_attributes =
            [{ Typing_defs_core.ua_name = ([16:5-8], "\\Foo"); ua_params = []
               }
-             ]
-           };
+             ];
+           sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([20:19-29], "attrConcat");
            sm_type =
            (Rwitness_from_decl ([20:19-29]),
@@ -157,8 +157,8 @@
            sm_attributes =
            [{ Typing_defs_core.ua_name = ([19:5-8], "\\Foo");
               ua_params = [(Typing_defs_core.String "barBaz")] }
-             ]
-           }
+             ];
+           sm_sort_text = None }
          ];
        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }))
   ]

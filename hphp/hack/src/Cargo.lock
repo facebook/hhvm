@@ -1995,7 +1995,6 @@ dependencies = [
  "decl_enforceability",
  "eq_modulo_pos",
  "hash",
- "hhbc_string_utils",
  "indexmap 1.9.2",
  "itertools 0.11.0",
  "oxidized",

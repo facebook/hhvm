@@ -129,7 +129,7 @@
                         variadic = false };
                       ft_cross_package = None }));
                 sm_visibility = Public; sm_deprecated = None;
-                sm_flags = (empty); sm_attributes = [] });
+                sm_flags = (empty); sm_attributes = []; sm_sort_text = None });
         sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([21:28-34], "getFoo");
@@ -180,7 +180,7 @@
                    variadic = false };
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
-           sm_attributes = [] }
+           sm_attributes = []; sm_sort_text = None }
           ];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }))
   ]

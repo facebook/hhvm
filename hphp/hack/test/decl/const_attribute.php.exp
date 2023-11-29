@@ -40,7 +40,7 @@
                        is_memoized = false; variadic = false };
                      ft_cross_package = None }));
                sm_visibility = Public; sm_deprecated = None;
-               sm_flags = (empty); sm_attributes = [] });
+               sm_flags = (empty); sm_attributes = []; sm_sort_text = None });
        sc_static_methods = []; sc_methods = [];
        sc_user_attributes =
        [{ Typing_defs_core.ua_name = ([3:3-10], "__Const"); ua_params = [] }];
@@ -85,7 +85,7 @@
                         variadic = false };
                       ft_cross_package = None }));
                 sm_visibility = Public; sm_deprecated = None;
-                sm_flags = (empty); sm_attributes = [] });
+                sm_flags = (empty); sm_attributes = []; sm_sort_text = None });
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
         sc_enum_type = None; sc_docs_url = None }));
   ("\\C",
@@ -138,7 +138,7 @@
                         variadic = false };
                       ft_cross_package = None }));
                 sm_visibility = Public; sm_deprecated = None;
-                sm_flags = (empty); sm_attributes = [] });
+                sm_flags = (empty); sm_attributes = []; sm_sort_text = None });
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
         sc_enum_type = None; sc_docs_url = None }))
   ]

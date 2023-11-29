@@ -14,7 +14,6 @@ datastore = { version = "0.0.0", path = "../../../datastore" }
 decl_enforceability = { version = "0.0.0", path = "../../../decl_enforceability" }
 eq_modulo_pos = { version = "0.0.0", path = "../../../../utils/eq_modulo_pos" }
 hash = { version = "0.0.0", path = "../../../../utils/hash" }
-hhbc_string_utils = { version = "0.0.0", path = "../../../../hackc/utils/cargo/hhbc_string_utils" }
 indexmap = { version = "1.9.2", features = ["arbitrary", "rayon", "serde-1"] }
 itertools = "0.11.0"
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }

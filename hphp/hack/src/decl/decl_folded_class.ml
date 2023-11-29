@@ -295,22 +295,6 @@ let get_sealed_whitelist (c : Shallow_decl_defs.shallow_class) : SSet.t option =
     in
     Some (SSet.of_list cn_params)
 
-let get_sort_text (m : Shallow_decl_defs.shallow_method) : string option =
-  match
-    Attributes.find SN.UserAttributes.uaAutocompleteSortText m.sm_attributes
-  with
-  | None -> None
-  | Some { ua_params; _ } ->
-    let params =
-      List.filter_map
-        ~f:(function
-          | String sort_text -> Some sort_text
-          | _ -> None)
-        ua_params
-    in
-    let param = List.hd params in
-    param
-
 let get_instantiated_ancestors_and_self
     (env : Decl_env.env) parent_cache (ht : Typing_defs.decl_ty) :
     Typing_defs.decl_ty SMap.t =
@@ -378,7 +362,6 @@ let build_constructor
   let vis =
     visibility class_name origin_class.sc_module method_.sm_visibility
   in
-  let sort_text = get_sort_text method_ in
   let cstr =
     {
       elt_flags =
@@ -399,7 +382,7 @@ let build_constructor
       elt_visibility = vis;
       elt_origin = class_name;
       elt_deprecated = method_.sm_deprecated;
-      elt_sort_text = sort_text;
+      elt_sort_text = method_.sm_sort_text;
     }
   in
   let fe = build_constructor_fun_elt ~ctx ~elt_origin:class_name ~method_ in
@@ -813,7 +796,6 @@ let method_decl_eager
     | _ -> visibility (snd c.sc_name) c.sc_module m.sm_visibility
   in
   let support_dynamic_type = sm_support_dynamic_type m in
-  let sort_text = get_sort_text m in
   let elt =
     {
       elt_flags =
@@ -834,7 +816,7 @@ let method_decl_eager
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_deprecated = m.sm_deprecated;
-      elt_sort_text = sort_text;
+      elt_sort_text = m.sm_sort_text;
     }
   in
   let fe =

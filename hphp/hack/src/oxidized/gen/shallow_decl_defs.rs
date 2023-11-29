@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9f0dbc11951617313a969ed67e68aef3>>
+// @generated SignedSource<<a444e6fbef797706636a4c5193b730a0>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -129,6 +129,7 @@ pub struct ShallowMethod {
     pub deprecated: Option<String>,
     pub flags: method_flags::MethodFlags,
     pub attributes: Vec<UserAttribute>,
+    pub sort_text: Option<String>,
 }
 
 #[rust_to_ocaml(attr = "deriving (eq, show)")]

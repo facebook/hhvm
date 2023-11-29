@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<92dca76e3b1b47a538eef9cae24c30b5>>
+// @generated SignedSource<<52f19c9124fcb28239b0dfff931d0349>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -149,6 +149,8 @@ pub struct ShallowMethod<'a> {
     pub flags: method_flags::MethodFlags,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub attributes: &'a [&'a UserAttribute<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub sort_text: Option<&'a str>,
 }
 impl<'a> TrivialDrop for ShallowMethod<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(ShallowMethod<'arena>);

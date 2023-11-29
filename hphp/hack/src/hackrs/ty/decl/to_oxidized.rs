@@ -605,6 +605,7 @@ impl<'a, R: Reason> ToOxidized<'a> for shallow::ShallowMethod<R> {
             deprecated,
             flags,
             attributes,
+            sort_text,
         } = self;
         arena.alloc(obr::shallow_decl_defs::ShallowMethod {
             name: name.to_oxidized(arena),
@@ -616,6 +617,7 @@ impl<'a, R: Reason> ToOxidized<'a> for shallow::ShallowMethod<R> {
             }),
             flags: *flags,
             attributes: attributes.to_oxidized(arena),
+            sort_text: sort_text.as_deref().to_oxidized(arena),
         })
     }
 }

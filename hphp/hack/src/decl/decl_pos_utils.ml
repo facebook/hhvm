@@ -411,6 +411,7 @@ struct
       sm_deprecated = sm.sm_deprecated;
       sm_flags = sm.sm_flags;
       sm_attributes = sm.sm_attributes;
+      sm_sort_text = sm.sm_sort_text;
     }
 end
 

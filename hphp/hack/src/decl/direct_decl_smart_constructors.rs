@@ -4758,6 +4758,11 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             s.push_str(msg);
             s.into_bump_str()
         });
+        let sort_text = attributes.sort_text.map(|msg| {
+            let mut s = bump::String::new_in(self.arena);
+            s.push_str(msg);
+            s.into_bump_str()
+        });
         let mut flags = MethodFlags::empty();
         flags.set(
             MethodFlags::ABSTRACT,
@@ -4796,6 +4801,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             deprecated,
             flags,
             attributes: user_attributes,
+            sort_text,
         });
         if !self.inside_no_auto_dynamic_class {
             let this = Rc::make_mut(&mut self.state);

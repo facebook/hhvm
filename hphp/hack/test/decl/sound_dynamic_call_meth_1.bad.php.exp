@@ -80,7 +80,8 @@
                    variadic = false };
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None;
-           sm_flags = support_dynamic_type; sm_attributes = [] }
+           sm_flags = support_dynamic_type; sm_attributes = [];
+           sm_sort_text = None }
           ];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
   ("\\Foo",
@@ -130,7 +131,8 @@
                    variadic = false };
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None;
-           sm_flags = support_dynamic_type; sm_attributes = [] };
+           sm_flags = support_dynamic_type; sm_attributes = [];
+           sm_sort_text = None };
           { Shallow_decl_defs.sm_name = ([20:19-22], "bar");
             sm_type =
             (Rwitness_from_decl ([20:19-22]),
@@ -164,7 +166,8 @@
                     variadic = false };
                   ft_cross_package = None }));
             sm_visibility = Public; sm_deprecated = None;
-            sm_flags = support_dynamic_type; sm_attributes = [] }
+            sm_flags = support_dynamic_type; sm_attributes = [];
+            sm_sort_text = None }
           ];
         sc_user_attributes =
         [{ Typing_defs_core.ua_name = ([15:3-23], "__SupportDynamicType");

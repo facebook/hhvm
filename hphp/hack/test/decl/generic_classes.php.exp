@@ -54,7 +54,7 @@
                        is_memoized = false; variadic = false };
                      ft_cross_package = None }));
                sm_visibility = Public; sm_deprecated = None;
-               sm_flags = (empty); sm_attributes = [] });
+               sm_flags = (empty); sm_attributes = []; sm_sort_text = None });
        sc_static_methods = [];
        sc_methods =
        [{ Shallow_decl_defs.sm_name = ([10:19-22], "get");
@@ -76,7 +76,7 @@
                   variadic = false };
                 ft_cross_package = None }));
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
-          sm_attributes = [] }
+          sm_attributes = []; sm_sort_text = None }
          ];
        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
   ("\\ContravariantBag",
@@ -136,7 +136,7 @@
                         variadic = false };
                       ft_cross_package = None }));
                 sm_visibility = Public; sm_deprecated = None;
-                sm_flags = (empty); sm_attributes = [] });
+                sm_flags = (empty); sm_attributes = []; sm_sort_text = None });
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
         sc_enum_type = None; sc_docs_url = None }));
   ("\\CovariantBag",
@@ -196,7 +196,7 @@
                         variadic = false };
                       ft_cross_package = None }));
                 sm_visibility = Public; sm_deprecated = None;
-                sm_flags = (empty); sm_attributes = [] });
+                sm_flags = (empty); sm_attributes = []; sm_sort_text = None });
         sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([30:19-22], "get");
@@ -218,7 +218,7 @@
                    variadic = false };
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
-           sm_attributes = [] }
+           sm_attributes = []; sm_sort_text = None }
           ];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }))
   ]

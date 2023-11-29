@@ -47,7 +47,7 @@
                        is_memoized = false; variadic = false };
                      ft_cross_package = None }));
                sm_visibility = Public; sm_deprecated = None;
-               sm_flags = (empty); sm_attributes = [] });
+               sm_flags = (empty); sm_attributes = []; sm_sort_text = None });
        sc_static_methods = [];
        sc_methods =
        [{ Shallow_decl_defs.sm_name = ([11:20-33], "privateMethod");
@@ -69,7 +69,7 @@
                   variadic = false };
                 ft_cross_package = None }));
           sm_visibility = Private; sm_deprecated = None; sm_flags = (empty);
-          sm_attributes = [] };
+          sm_attributes = []; sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([12:19-31], "publicMethod");
            sm_type =
            (Rwitness_from_decl ([12:19-31]),
@@ -89,7 +89,7 @@
                    variadic = false };
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
-           sm_attributes = [] };
+           sm_attributes = []; sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([13:22-37], "protectedMethod");
            sm_type =
            (Rwitness_from_decl ([13:22-37]),
@@ -109,7 +109,7 @@
                    variadic = false };
                  ft_cross_package = None }));
            sm_visibility = Protected; sm_deprecated = None;
-           sm_flags = (empty); sm_attributes = [] };
+           sm_flags = (empty); sm_attributes = []; sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([14:25-40], "async_generator");
            sm_type =
            (Rwitness_from_decl ([14:25-40]),
@@ -154,7 +154,7 @@
                    is_memoized = false; variadic = false };
                  ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
-           sm_attributes = [] }
+           sm_attributes = []; sm_sort_text = None }
          ];
        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
   ("\\MyAbstractClass",
@@ -291,7 +291,7 @@
                         variadic = false };
                       ft_cross_package = None }));
                 sm_visibility = Public; sm_deprecated = None;
-                sm_flags = (empty); sm_attributes = [] });
+                sm_flags = (empty); sm_attributes = []; sm_sort_text = None });
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
         sc_enum_type = None; sc_docs_url = None }))
   ]

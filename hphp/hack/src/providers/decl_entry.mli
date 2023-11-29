@@ -21,7 +21,7 @@ type 'a t =
           Avoid expensive operations like backtracking. *)
   | Found of 'a  (** Decl entry was found. *)
 
-val of_option_or_doe_not_exist : 'a option -> 'a t
+val of_option_or_does_not_exist : 'a option -> 'a t
 
 val to_option : 'a t -> 'a option
 

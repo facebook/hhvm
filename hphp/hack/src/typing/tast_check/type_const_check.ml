@@ -20,7 +20,7 @@ let handler =
     method! at_class_typeconst_def env { c_tconst_name = (_, name); _ } =
       let cls_opt =
         Decl_entry.bind
-          (Decl_entry.of_option_or_doe_not_exist (Tast_env.get_self_id env))
+          (Decl_entry.of_option_or_does_not_exist (Tast_env.get_self_id env))
           (Tast_env.get_class env)
       in
       match cls_opt with

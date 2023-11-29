@@ -985,7 +985,7 @@ let get_self_class_type env =
 let get_self_id env = Option.map env.genv.self ~f:fst
 
 let get_self_class env =
-  let self = Decl_entry.of_option_or_doe_not_exist (get_self_id env) in
+  let self = Decl_entry.of_option_or_does_not_exist (get_self_id env) in
   Decl_entry.bind self (get_class env)
 
 let get_parent_ty env = Option.map env.genv.parent ~f:snd
@@ -993,7 +993,7 @@ let get_parent_ty env = Option.map env.genv.parent ~f:snd
 let get_parent_id env = Option.map env.genv.parent ~f:fst
 
 let get_parent_class env =
-  let self = Decl_entry.of_option_or_doe_not_exist (get_parent_id env) in
+  let self = Decl_entry.of_option_or_does_not_exist (get_parent_id env) in
   Decl_entry.bind self (get_class env)
 
 let get_fn_kind env = env.genv.fun_kind

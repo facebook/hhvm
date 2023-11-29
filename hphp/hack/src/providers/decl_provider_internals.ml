@@ -117,9 +117,9 @@ let get_typedef_without_pessimise
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis ->
     Decl_store.((get ()).get_typedef typedef_name)
-    |> Decl_entry.of_option_or_doe_not_exist
+    |> Decl_entry.of_option_or_does_not_exist
   | Provider_backend.Shared_memory ->
-    Decl_entry.of_option_or_doe_not_exist
+    Decl_entry.of_option_or_does_not_exist
     @@
     (match Decl_store.((get ()).get_typedef typedef_name) with
     | Some c -> Some c
@@ -134,7 +134,7 @@ let get_typedef_without_pessimise
           Shallow_decl_defs.to_typedef_decl_opt
       | None -> None))
   | Provider_backend.Pessimised_shared_memory info ->
-    Decl_entry.of_option_or_doe_not_exist
+    Decl_entry.of_option_or_does_not_exist
     @@
     (match Decl_store.((get ()).get_typedef typedef_name) with
     | Some c -> Some c
@@ -160,7 +160,7 @@ let get_typedef_without_pessimise
         Some typedef
       | None -> None))
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
-    Decl_entry.of_option_or_doe_not_exist
+    Decl_entry.of_option_or_does_not_exist
     @@ Provider_backend.Decl_cache.find_or_add
          decl_cache
          ~key:(Provider_backend.Decl_cache_entry.Typedef_decl typedef_name)
@@ -175,7 +175,7 @@ let get_typedef_without_pessimise
                Shallow_decl_defs.to_typedef_decl_opt
            | None -> None)
   | Provider_backend.Rust_provider_backend backend ->
-    Decl_entry.of_option_or_doe_not_exist
+    Decl_entry.of_option_or_does_not_exist
     @@ Rust_provider_backend.Decl.get_typedef
          backend
          (Naming_provider.rust_backend_ctx_proxy ctx)

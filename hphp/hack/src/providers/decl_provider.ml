@@ -200,7 +200,7 @@ let get_overridden_method ctx ~class_name ~method_name ~is_static :
     Typing_defs.class_elt Decl_entry.t =
   Decl_entry.bind (get_class ctx class_name) @@ fun cls ->
   let get_class ctx x = Decl_entry.to_option (get_class ctx x) in
-  Decl_entry.of_option_or_doe_not_exist
+  Decl_entry.of_option_or_does_not_exist
   @@ Class.overridden_method cls ~method_name ~is_static ~get_class
 
 (** This is a subtle function! If there is a winner defined for [name_type / name]

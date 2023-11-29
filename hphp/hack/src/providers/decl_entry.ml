@@ -11,7 +11,7 @@ type 'a t =
   | NotYetAvailable
   | Found of 'a
 
-let of_option_or_doe_not_exist = function
+let of_option_or_does_not_exist = function
   | Some x -> Found x
   | None -> DoesNotExist
 

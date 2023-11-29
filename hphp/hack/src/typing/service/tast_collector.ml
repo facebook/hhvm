@@ -77,6 +77,23 @@ let reduce_by_names (x : by_names) (y : by_names) : by_names =
     module_tasts = SMap.union x.module_tasts y.module_tasts;
   }
 
+let make_filename path def_name =
+  let filename =
+    Printf.sprintf
+      "%s__%s.tast"
+      (Relative_path.suffix path
+      |> String.map ~f:(function
+             | '/' -> '_'
+             | c -> c))
+      (Str.replace_first (Str.regexp {|\\|}) "" def_name)
+  in
+  let length = String.length filename in
+  let max_length = 255 in
+  if length > max_length then
+    Stdlib.String.sub filename (length - max_length) max_length
+  else
+    filename
+
 let reduce (x : t) (y : t) : t =
   Relative_path.Map.union
     ~combine:(fun _key x y -> Some (reduce_by_names x y))
@@ -105,15 +122,7 @@ let finalize ~progress:_ ~init_id ~recheck_id (tasts : t) : unit =
           SMap.iter
             (fun def_name tast ->
               let file_path =
-                let file_name =
-                  Printf.sprintf
-                    "%s__%s.tast"
-                    (Relative_path.suffix path
-                    |> String.map ~f:(function
-                           | '/' -> '_'
-                           | c -> c))
-                    (Str.replace_first (Str.regexp {|\\|}) "" def_name)
-                in
+                let file_name = make_filename path def_name in
                 Filename.concat subdir_path file_name
               in
               Out_channel.with_file file_path ~f:(fun out ->

@@ -52,6 +52,7 @@ pub struct FoldedElement {
 
     /// If the element is deprecated, this holds the deprecation message.
     pub deprecated: Option<Bytes>,
+    pub sort_text: Option<String>,
 }
 
 /// A substitution context contains all the information necessary for changing

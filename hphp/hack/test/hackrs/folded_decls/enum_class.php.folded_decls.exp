@@ -26,6 +26,7 @@ FoldedClass {
             origin: "\\HH\\BuiltinAbstractEnumClass",
             visibility: Public,
             deprecated: None,
+            sort_text: None,
         },
     },
     consts: {
@@ -110,18 +111,21 @@ FoldedClass {
             origin: "\\HH\\BuiltinAbstractEnumClass",
             visibility: Public,
             deprecated: None,
+            sort_text: None,
         },
         "getValues": FoldedElement {
             flags: FINAL,
             origin: "\\HH\\BuiltinEnumClass",
             visibility: Public,
             deprecated: None,
+            sort_text: None,
         },
         "valueOf": FoldedElement {
             flags: FINAL,
             origin: "\\HH\\BuiltinEnumClass",
             visibility: Public,
             deprecated: None,
+            sort_text: None,
         },
     },
     consts: {

@@ -82,11 +82,20 @@ let element_to_class_elt
       elt_origin = ce_origin;
       elt_visibility = ce_visibility;
       elt_deprecated = ce_deprecated;
+      elt_sort_text = ce_sort_text;
     } =
   let (ce_pos, ce_type) =
     (lazy (fst @@ Lazy.force pty), lazy (snd @@ Lazy.force pty))
   in
-  { ce_visibility; ce_origin; ce_type; ce_deprecated; ce_pos; ce_flags }
+  {
+    ce_visibility;
+    ce_origin;
+    ce_type;
+    ce_deprecated;
+    ce_pos;
+    ce_flags;
+    ce_sort_text;
+  }
 
 let fun_elt_to_ty fe = (fe.fe_pos, fe.fe_type)
 

@@ -309,6 +309,8 @@ pub mod user_attributes {
     pub static uaIgnoreCoeffectLocalErrors: Lazy<TypeName> =
         lazy!(sn::user_attributes::IGNORE_COEFFECT_LOCAL_ERRORS);
     pub static uaModuleLevelTrait: Lazy<TypeName> = lazy!(sn::user_attributes::MODULE_LEVEL_TRAIT);
+    pub static uaAutocompleteSortText: Lazy<TypeName> =
+        lazy!(sn::user_attributes::AUTOCOMPLETE_SORT_TEXT);
 
     pub fn iter() -> impl Iterator<Item = TypeName> {
         [
@@ -355,6 +357,7 @@ pub mod user_attributes {
             *uaEnableMethodTraitDiamond,
             *uaIgnoreReadonlyLocalErrors,
             *uaIgnoreCoeffectLocalErrors,
+            *uaAutocompleteSortText,
         ]
         .into_iter()
     }

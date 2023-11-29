@@ -570,6 +570,7 @@ impl From<&obr::decl_defs::Element<'_>> for folded::FoldedElement {
             origin: x.origin.into(),
             visibility: x.visibility.into(),
             deprecated: x.deprecated.map(Into::into),
+            sort_text: x.sort_text.map(Into::into),
         }
     }
 }

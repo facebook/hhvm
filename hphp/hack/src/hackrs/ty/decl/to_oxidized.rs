@@ -547,6 +547,7 @@ impl<'a> ToOxidized<'a> for folded::FoldedElement {
                     .into_bump_str()
             }),
             flags: self.flags,
+            sort_text: self.sort_text.as_deref().to_oxidized(arena),
         })
     }
 }

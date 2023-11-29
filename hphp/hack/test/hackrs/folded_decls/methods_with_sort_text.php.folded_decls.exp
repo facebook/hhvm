@@ -1,17 +1,9 @@
 FoldedClass {
     name: "\\A",
     kind: Cclass(
-        Abstract,
+        Concrete,
     ),
-    props: {
-        "t": FoldedElement {
-            flags: FINAL | NEEDS_INIT,
-            origin: "\\A",
-            visibility: Public,
-            deprecated: None,
-            sort_text: None,
-        },
-    },
+    is_final: true,
     consts: {
         "class": ClassConst {
             is_synthesized: true,
@@ -22,7 +14,15 @@ FoldedClass {
             refs: [],
         },
     },
-    deferred_init_members: {
-        "t",
-    },
+}
+FunElt {
+    deprecated: None,
+    module: None,
+    internal: false,
+    ty: (function(): void),
+    pos: NPos,
+    php_std_lib: false,
+    support_dynamic_type: false,
+    no_auto_dynamic: false,
+    no_auto_likes: false,
 }

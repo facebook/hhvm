@@ -1155,6 +1155,7 @@ struct Attributes<'a> {
     no_auto_likes: bool,
     safe_global_variable: bool,
     cross_package: Option<&'a str>,
+    sort_text: Option<&'a str>,
 }
 
 impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> Impl<'a, 'o, 't, S> {
@@ -1595,6 +1596,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             no_auto_likes: false,
             safe_global_variable: false,
             cross_package: None,
+            sort_text: None,
         };
 
         let nodes = match node {
@@ -1659,6 +1661,11 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                     }
                     "__CrossPackage" => {
                         attributes.cross_package = attribute
+                            .string_literal_param
+                            .map(|(_, x)| self.str_from_utf8_for_bytes_in_arena(x));
+                    }
+                    "__AutocompleteSortText" => {
+                        attributes.sort_text = attribute
                             .string_literal_param
                             .map(|(_, x)| self.str_from_utf8_for_bytes_in_arena(x));
                     }

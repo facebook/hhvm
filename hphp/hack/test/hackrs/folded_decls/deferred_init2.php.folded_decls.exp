@@ -9,6 +9,7 @@ FoldedClass {
             origin: "\\A",
             visibility: Public,
             deprecated: None,
+            sort_text: None,
         },
     },
     consts: {
@@ -48,6 +49,7 @@ FoldedClass {
             origin: "\\A",
             visibility: Public,
             deprecated: None,
+            sort_text: None,
         },
     },
     consts: {

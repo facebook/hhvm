@@ -123,6 +123,7 @@ module ParentClassElt = struct
       ce_deprecated = _;
       ce_pos = _;
       ce_flags = _;
+      ce_sort_text = _;
     } =
       elt1
     in
@@ -133,6 +134,7 @@ module ParentClassElt = struct
       ce_deprecated = _;
       ce_pos = _;
       ce_flags = _;
+      ce_sort_text = _;
     } =
       elt2
     in
@@ -1640,6 +1642,7 @@ let default_constructor_ce class_ =
     ce_type = lazy (mk (r, Tfun ft));
     ce_origin = name;
     ce_deprecated = None;
+    ce_sort_text = None;
     ce_pos = lazy pos;
     ce_flags =
       make_ce_flags

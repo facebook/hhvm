@@ -149,6 +149,7 @@ and element = {
   elt_origin: string;
   elt_visibility: ce_visibility;
   elt_deprecated: string option;
+  elt_sort_text: string option;
 }
 
 let get_elt_abstract elt = Typing_defs_flags.ClassElt.is_abstract elt.elt_flags

@@ -14,6 +14,7 @@ FoldedClass {
             origin: "\\A",
             visibility: Public,
             deprecated: None,
+            sort_text: None,
         },
     },
     consts: {
@@ -43,6 +44,7 @@ FoldedClass {
             origin: "\\B",
             visibility: Public,
             deprecated: None,
+            sort_text: None,
         },
     },
     consts: {
@@ -70,6 +72,7 @@ FoldedClass {
             origin: "\\SomeOtherC",
             visibility: Public,
             deprecated: None,
+            sort_text: None,
         },
     },
     consts: {
@@ -97,6 +100,7 @@ FoldedClass {
             origin: "\\TA",
             visibility: Public,
             deprecated: None,
+            sort_text: None,
         },
     },
     consts: {

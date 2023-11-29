@@ -23,6 +23,10 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * Indicates whether the nested fields are accessible directly.
+ * https://github.com/facebook/fbthrift/blob/v2023.11.20.00/thrift/doc/idl/mixins.md
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class Mixin implements TBase, java.io.Serializable, Cloneable, Comparable<Mixin> {
   private static final TStruct STRUCT_DESC = new TStruct("Mixin");

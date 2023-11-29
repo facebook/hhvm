@@ -732,6 +732,9 @@ class Box implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
 }
 
 /**
+ * Indicates whether the nested fields are accessible directly.
+ * https://github.com/facebook/fbthrift/blob/v2023.11.20.00/thrift/doc/idl/mixins.md
+ *
  * Original thrift struct:-
  * Mixin
  */

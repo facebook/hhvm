@@ -667,6 +667,10 @@ class Box:
     return self
 
 class Mixin:
+  r"""
+  Indicates whether the nested fields are accessible directly.
+  https://github.com/facebook/fbthrift/blob/v2023.11.20.00/thrift/doc/idl/mixins.md
+  """
 
   thrift_spec = None
   thrift_field_annotations = None

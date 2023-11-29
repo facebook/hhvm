@@ -25,31 +25,31 @@
         "constants" : {
           "HIGH_IMPORTANT" : {
             "name" : "HIGH_IMPORTANT",
-            "lineno" : 214,
+            "lineno" : 217,
             "value" : 0
           },
           "HIGH" : {
             "name" : "HIGH",
-            "lineno" : 215,
+            "lineno" : 218,
             "value" : 1
           },
           "IMPORTANT" : {
             "name" : "IMPORTANT",
-            "lineno" : 216,
+            "lineno" : 219,
             "value" : 2
           },
           "NORMAL" : {
             "name" : "NORMAL",
-            "lineno" : 217,
+            "lineno" : 220,
             "value" : 3
           },
           "BEST_EFFORT" : {
             "name" : "BEST_EFFORT",
-            "lineno" : 218,
+            "lineno" : 221,
             "value" : 4
           }
         },
-        "lineno" : 213
+        "lineno" : 216
       }
       },
   "structs" :
@@ -240,9 +240,10 @@
         "value" : {}
       }
         },
+        "docstring" : "Indicates whether the nested fields are accessible directly.\nhttps://github.com/facebook/fbthrift/blob/v2023.11.20.00/thrift/doc/idl/mixins.md\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 141
+        "lineno" : 144
       },
       "SerializeInFieldIdOrder" : {
         "name" : "SerializeInFieldIdOrder",
@@ -266,7 +267,7 @@
         "docstring" : "Option to serialize thrift struct in ascending field id order instead of field declaration order.\n\nThis can potentially make serialized data size smaller in compact protocol,\nsince compact protocol can write deltas between subsequent field ids instead of full ids.\n\nNOTE: This annotation won't reduce payload size for other protocols.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 152
+        "lineno" : 155
       },
       "BitmaskEnum" : {
         "name" : "BitmaskEnum",
@@ -283,7 +284,7 @@
         "docstring" : "Indicates an enum is a bitmask and should support bit-wise operators.\nCurrently generates additional code in C++ and Hack.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 160
+        "lineno" : 163
       },
       "ExceptionMessage" : {
         "name" : "ExceptionMessage",
@@ -300,7 +301,7 @@
         "docstring" : "Specifies the field where the exception message is stored.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 166
+        "lineno" : 169
       },
       "GenerateRuntimeSchema" : {
         "name" : "GenerateRuntimeSchema",
@@ -358,14 +359,14 @@
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 181,
+            "lineno" : 184,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 174
+        "lineno" : 177
       },
       "InternBox" : {
         "name" : "InternBox",
@@ -389,7 +390,7 @@
         "docstring" : "Indicates that a field's value should never be stored on the stack, and that\nidentical values can be shared in immutable contexts.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 188
+        "lineno" : 191
       },
       "Serial" : {
         "name" : "Serial",
@@ -406,7 +407,7 @@
         "docstring" : "Indicates that an interaction's methods should be processed sequentially.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 195
+        "lineno" : 198
       },
       "Uri" : {
         "name" : "Uri",
@@ -425,14 +426,14 @@
           "value" : {
             "name" : "value",
             "key" : 1,
-            "lineno" : 203,
+            "lineno" : 206,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 201
+        "lineno" : 204
       },
       "Priority" : {
         "name" : "Priority",
@@ -451,7 +452,7 @@
           "level" : {
             "name" : "level",
             "key" : 1,
-            "lineno" : 211,
+            "lineno" : 214,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -461,7 +462,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 209
+        "lineno" : 212
       },
       "DeprecatedUnvalidatedAnnotations" : {
         "name" : "DeprecatedUnvalidatedAnnotations",
@@ -480,7 +481,7 @@
           "items" : {
             "name" : "items",
             "key" : 1,
-            "lineno" : 226,
+            "lineno" : 229,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "map",
@@ -491,7 +492,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 224
+        "lineno" : 227
       }
       },
   "source_path" : "thrift/annotation/thrift",

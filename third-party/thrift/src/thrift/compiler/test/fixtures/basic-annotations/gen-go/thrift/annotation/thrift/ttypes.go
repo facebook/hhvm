@@ -654,6 +654,8 @@ func (p *Box) String() string {
   return fmt.Sprintf("Box({})")
 }
 
+// Indicates whether the nested fields are accessible directly.
+// https://github.com/facebook/fbthrift/blob/v2023.11.20.00/thrift/doc/idl/mixins.md
 type Mixin struct {
 }
 

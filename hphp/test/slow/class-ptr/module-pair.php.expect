@@ -1,0 +1,5 @@
+Accessing internal class AInternal in module a from module b is not allowed
+Accessing internal class AInternal in module a from module b is not allowed
+class(AInternal)
+class(AInternal)
+class(AInternal)

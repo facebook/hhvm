@@ -1,0 +1,5 @@
+Accessing internal class CInternal in module c from the default module is not allowed
+Accessing internal class CInternal in module c from the default module is not allowed
+class(CInternal)
+class(CInternal)
+class(CInternal)

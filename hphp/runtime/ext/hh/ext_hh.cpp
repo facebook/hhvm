@@ -1375,7 +1375,10 @@ TypedValue HHVM_FUNCTION(classname_to_class, TypedValue cname) {
     case KindOfString:
     {
       auto const name = cname.m_data.pstr;
-      auto const c = Class::load(name);
+      auto const caller = fromCaller(
+        [] (const BTFrame& frm) { return frm.func(); }
+      );
+      auto const c = Class::resolve(name, caller);
       if (!c) {
         SystemLib::throwInvalidArgumentExceptionObject(
           folly::sformat("Failed to load class from string {} for {}.", name, __FUNCTION__+2)

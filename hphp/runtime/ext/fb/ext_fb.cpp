@@ -1029,6 +1029,32 @@ int64_t HHVM_FUNCTION(fb_utf8_strlen_deprecated, const String& input) {
   return fb_utf8_strlen_impl(input, /* deprecated */ true);
 }
 
+StaticString s_substitution_str("\ufffd");
+
+Array HHVM_FUNCTION(fb_utf8_decompose, StringArg input) {
+  const size_t len = input->size();
+  if (!len) return empty_vec_array();
+
+  VecInit ret{len};
+  auto const bufp = input->data();
+  int32_t next = 0;
+  do {
+    auto off = next;
+    UChar32 codePoint;
+    U8_NEXT(bufp, next, len, codePoint);
+
+    if (UNLIKELY(codePoint < 0)) {
+      ret.append(StrNR{s_substitution_str.get()}.asString());
+    } else if (LIKELY(next == off + 1)) {
+      ret.append(StrNR{precomputed_chars[uint8_t(bufp[off])]}.asString());
+    } else {
+      ret.append(String{&bufp[off], size_t(next - off), CopyString});
+    }
+  } while (next < len);
+
+  return ret.toArray();
+}
+
 /**
  * Private helper; requires non-negative firstCodePoint and desiredCodePoints.
  */
@@ -1466,6 +1492,7 @@ struct FBExtension : Extension {
     HHVM_FE(fb_utf8_strlen);
     HHVM_FE(fb_utf8_strlen_deprecated);
     HHVM_FE(fb_utf8_substr);
+    HHVM_FE(fb_utf8_decompose);
     HHVM_FE(fb_intercept2);
     HHVM_FE(fb_rename_function);
     HHVM_FE(fb_get_code_coverage);

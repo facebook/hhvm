@@ -146,6 +146,9 @@ function fb_utf8_strlen_deprecated(string $input): int;
 <<__Native, __IsFoldable>>
 function fb_utf8_strlen(string $input)[]: int;
 
+<<__Native, __IsFoldable>>
+function fb_utf8_decompose(string $input)[]: vec<string>;
+
 /** Cuts a portion of str specified by the start and length parameters.
  * @param string $str - The original string.
  * @param int $start - If start is non-negative, fb_utf8_substr() cuts the

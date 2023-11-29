@@ -1286,10 +1286,11 @@ let fun_type_of_id env x tal el =
       (false, snd x)
   in
   match Env.get_fun env lookup_id with
-  | None ->
+  | Decl_entry.NotYetAvailable
+  | Decl_entry.DoesNotExist ->
     let (env, _, ty) = unbound_name env x ((), Pos.none, Aast.Null) in
     (env, ty, [])
-  | Some fd ->
+  | Decl_entry.Found fd ->
     (match get_node fd.fe_type with
     | Tfun ft ->
       let ft =

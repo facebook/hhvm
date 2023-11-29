@@ -248,7 +248,7 @@ let resugar_invariant_call env (cond : Tast.expr) (then_body : Tast.block) :
           (Tast_env.get_ctx env)
           SN.AutoimportedFunctions.invariant
       with
-      | Some fun_decl ->
+      | Decl_entry.Found fun_decl ->
         let (_, f_locl_ty) =
           Tast_env.localize_no_subst
             env
@@ -256,7 +256,9 @@ let resugar_invariant_call env (cond : Tast.expr) (then_body : Tast.block) :
             fun_decl.Typing_defs.fe_type
         in
         f_locl_ty
-      | None -> recv_ty
+      | Decl_entry.NotYetAvailable
+      | Decl_entry.DoesNotExist ->
+        recv_ty
     in
     Some
       ( call_ty,

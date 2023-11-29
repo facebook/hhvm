@@ -124,7 +124,8 @@ val add_parent_dep :
   env -> skip_constructor_dep:bool -> is_req:bool -> string -> unit
 
 (** Get function declaration from the appropriate backend and add dependency. *)
-val get_fun : env -> Decl_provider.fun_key -> Decl_provider.fun_decl option
+val get_fun :
+  env -> Decl_provider.fun_key -> Decl_provider.fun_decl Decl_entry.t
 
 (** Get type alias declaration from the appropriate backend and add dependency. *)
 val get_typedef : env -> type_key -> typedef_decl Decl_entry.t

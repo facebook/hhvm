@@ -47,7 +47,7 @@ let handler =
       | (_, p, Call { func = (_, _, Id (_, name)); targs = _ :: _ as tal; _ })
         -> begin
         match Decl_provider.get_fun (Tast_env.get_ctx env) name with
-        | Some { fe_type; _ } -> begin
+        | Decl_entry.Found { fe_type; _ } -> begin
           match get_node fe_type with
           | Tfun { ft_tparams = tpl; _ } ->
             if List.exists tpl ~f:has_non_disjoint_attr then

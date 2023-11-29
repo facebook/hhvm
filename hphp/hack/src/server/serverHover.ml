@@ -112,7 +112,7 @@ let callee_def_pos ctx recv : Pos_or_decl.t option =
   SymbolOccurrence.(
     match recv with
     | FunctionReceiver fun_name ->
-      let f = Decl_provider.get_fun ctx fun_name in
+      let f = Decl_provider.get_fun ctx fun_name |> Decl_entry.to_option in
       Option.map f ~f:(fun fe -> fe.Typing_defs.fe_pos)
     | MethodReceiver { cls_name; _ } ->
       let c = Decl_provider.get_class ctx cls_name |> Decl_entry.to_option in

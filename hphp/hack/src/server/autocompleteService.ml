@@ -790,7 +790,8 @@ let compatible_fun_decls
     (string * fun_elt) list =
   List.filter_map fun_names ~f:(fun fun_name ->
       match Decl_provider.get_fun (Tast_env.get_ctx env) fun_name with
-      | Some f when fun_accepts_first_arg env f arg_ty -> Some (fun_name, f)
+      | Decl_entry.Found f when fun_accepts_first_arg env f arg_ty ->
+        Some (fun_name, f)
       | _ -> None)
 
 (** Is [ty] a value type where we want to allow -> to complete to a HSL function? *)
@@ -1549,8 +1550,10 @@ let find_global_results
           then
             let fixed_name = ns ^ r.si_name in
             match Tast_env.get_fun tast_env fixed_name with
-            | None -> (kind_to_string r.si_kind, InsertLiterally res_label)
-            | Some fe ->
+            | Decl_entry.NotYetAvailable
+            | Decl_entry.DoesNotExist ->
+              (kind_to_string r.si_kind, InsertLiterally res_label)
+            | Decl_entry.Found fe ->
               let ty = fe.fe_type in
               let res_detail = Tast_env.print_decl_ty tast_env ty in
               ( res_detail,
@@ -1567,8 +1570,10 @@ let find_global_results
           if !sienv_ref.sie_resolve_positions then
             let fixed_name = ns ^ r.si_name in
             match Tast_env.get_fun tast_env fixed_name with
-            | None -> absolute_none
-            | Some fe ->
+            | Decl_entry.NotYetAvailable
+            | Decl_entry.DoesNotExist ->
+              absolute_none
+            | Decl_entry.Found fe ->
               Typing_defs.get_pos fe.fe_type
               |> ServerPos.resolve tast_env
               |> Pos.to_absolute

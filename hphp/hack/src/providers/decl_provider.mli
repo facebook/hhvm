@@ -34,7 +34,7 @@ val get_fun :
   ?tracing_info:Decl_counters.tracing_info ->
   Provider_context.t ->
   fun_key ->
-  fun_decl option
+  fun_decl Decl_entry.t
 
 val get_class :
   ?tracing_info:Decl_counters.tracing_info ->

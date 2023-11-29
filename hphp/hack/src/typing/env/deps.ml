@@ -110,7 +110,7 @@ let make_depend_on_gconst env name def =
 
 let make_depend_on_fun env name fd =
   match fd with
-  | Some fd when Pos_or_decl.is_hhi fd.Typing_defs.fe_pos -> ()
+  | Decl_entry.Found fd when Pos_or_decl.is_hhi fd.Typing_defs.fe_pos -> ()
   | _ -> add_dependency_edge env (Dep.Fun name)
 
 let make_depend_on_class_name env class_name =

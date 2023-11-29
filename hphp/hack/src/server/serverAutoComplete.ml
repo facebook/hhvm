@@ -30,8 +30,10 @@ let context_after_open_curly_brace_without_equals_regex =
 let get_signature (ctx : Provider_context.t) (name : string) : string option =
   let tast_env = Tast_env.empty ctx in
   match Tast_env.get_fun tast_env (Utils.add_ns name) with
-  | None -> None
-  | Some fe ->
+  | Decl_entry.NotYetAvailable
+  | Decl_entry.DoesNotExist ->
+    None
+  | Decl_entry.Found fe ->
     Some
       (String_utils.rstrip
          (String_utils.lstrip

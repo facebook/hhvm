@@ -16,7 +16,7 @@ module Cls = Decl_provider.Class
 (* Not adding a Typing_dep here because it will be added when the
  * Nast is fully processed (by the caller of this code) *)
 let get_fun ctx name =
-  match Decl_provider.get_fun ctx name with
+  match Decl_provider.get_fun ctx name |> Decl_entry.to_option with
   | Some { fe_type; _ } -> begin
     match get_node fe_type with
     | Tfun ft -> Some ft

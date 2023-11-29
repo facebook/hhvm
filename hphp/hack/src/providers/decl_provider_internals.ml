@@ -49,11 +49,15 @@ let shallow_find_in_direct_decl_parse ~fill_caches ctx path name =
          | _ -> None)
 
 let get_fun_without_pessimise (ctx : Provider_context.t) (fun_name : string) :
-    Typing_defs.fun_elt option =
+    Typing_defs.fun_elt Decl_entry.t =
   let open Option.Let_syntax in
   match Provider_context.get_backend ctx with
-  | Provider_backend.Analysis -> Decl_store.((get ()).get_fun fun_name)
+  | Provider_backend.Analysis ->
+    Decl_entry.of_option_or_does_not_exist
+    @@ Decl_store.((get ()).get_fun fun_name)
   | Provider_backend.Pessimised_shared_memory info ->
+    Decl_entry.of_option_or_does_not_exist
+    @@
     (match Decl_store.((get ()).get_fun fun_name) with
     | Some c -> Some c
     | None ->
@@ -78,6 +82,8 @@ let get_fun_without_pessimise (ctx : Provider_context.t) (fun_name : string) :
         Some ft
       | None -> None))
   | Provider_backend.Shared_memory ->
+    Decl_entry.of_option_or_does_not_exist
+    @@
     (match Decl_store.((get ()).get_fun fun_name) with
     | Some c -> Some c
     | None ->
@@ -91,24 +97,26 @@ let get_fun_without_pessimise (ctx : Provider_context.t) (fun_name : string) :
           Shallow_decl_defs.to_fun_decl_opt
       | None -> None))
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
-    Provider_backend.Decl_cache.find_or_add
-      decl_cache
-      ~key:(Provider_backend.Decl_cache_entry.Fun_decl fun_name)
-      ~default:(fun () ->
-        match Naming_provider.get_fun_path ctx fun_name with
-        | Some filename ->
-          find_in_direct_decl_parse
-            ~cache_results:true
-            ctx
-            filename
-            fun_name
-            Shallow_decl_defs.to_fun_decl_opt
-        | None -> None)
+    Decl_entry.of_option_or_does_not_exist
+    @@ Provider_backend.Decl_cache.find_or_add
+         decl_cache
+         ~key:(Provider_backend.Decl_cache_entry.Fun_decl fun_name)
+         ~default:(fun () ->
+           match Naming_provider.get_fun_path ctx fun_name with
+           | Some filename ->
+             find_in_direct_decl_parse
+               ~cache_results:true
+               ctx
+               filename
+               fun_name
+               Shallow_decl_defs.to_fun_decl_opt
+           | None -> None)
   | Provider_backend.Rust_provider_backend backend ->
-    Rust_provider_backend.Decl.get_fun
-      backend
-      (Naming_provider.rust_backend_ctx_proxy ctx)
-      fun_name
+    Decl_entry.of_option_or_does_not_exist
+    @@ Rust_provider_backend.Decl.get_fun
+         backend
+         (Naming_provider.rust_backend_ctx_proxy ctx)
+         fun_name
 
 let get_typedef_without_pessimise
     (ctx : Provider_context.t) (typedef_name : string) :

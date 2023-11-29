@@ -306,7 +306,8 @@ val get_typedef :
 
 val is_enum : env -> Decl_provider.type_key -> bool
 
-val get_fun : env -> Decl_provider.fun_key -> Decl_provider.fun_decl option
+val get_fun :
+  env -> Decl_provider.fun_key -> Decl_provider.fun_decl Decl_entry.t
 
 val set_allow_wildcards : env -> env
 

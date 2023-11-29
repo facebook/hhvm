@@ -499,7 +499,7 @@ let get_definitions ctx action =
          >>= fun type_ -> Some [(class_name, type_.td_pos)])
   | IFunction fun_name -> begin
     match Decl_provider.get_fun ctx fun_name with
-    | Some { fe_pos; _ } -> [(fun_name, fe_pos)]
+    | Decl_entry.Found { fe_pos; _ } -> [(fun_name, fe_pos)]
     | _ -> []
   end
   | IGConst _

@@ -12,7 +12,7 @@ val make_depend_on_gconst :
   Typing_env_types.env -> string -> Typing_defs.const_decl option -> unit
 
 val make_depend_on_fun :
-  Typing_env_types.env -> string -> Typing_defs.fun_elt option -> unit
+  Typing_env_types.env -> string -> Typing_defs.fun_elt Decl_entry.t -> unit
 
 val make_depend_on_class :
   Typing_env_types.env -> string -> Decl_provider.Class.t Decl_entry.t -> unit

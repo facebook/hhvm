@@ -333,7 +333,8 @@ let name_and_then_print_name_results ctx files ~decl_make_env =
           ~f_name_exists:Naming_provider.fun_exists
           ~f_name_pos:Naming_provider.get_fun_pos
           ~f_name_canon:Naming_provider.get_fun_canon_name
-          ~f_decl_exists:Decl_provider.get_fun
+          ~f_decl_exists:(fun ctx x ->
+            Decl_provider.get_fun ctx x |> Decl_entry.to_option)
       | FileInfo.Class ->
         show_name_results
           ~ctx

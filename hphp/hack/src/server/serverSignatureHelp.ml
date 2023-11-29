@@ -139,7 +139,7 @@ let get_occurrence_info
           (ParserOptions.auto_namespace_map (Provider_context.get_popt ctx))
           occurrence.SO.name
       in
-      let ft = Decl_provider.get_fun ctx fun_name in
+      let ft = Decl_provider.get_fun ctx fun_name |> Decl_entry.to_option in
       let full_occurrence =
         match occurrence.SO.type_ with
         | SO.Function -> { occurrence with SO.name = fun_name }

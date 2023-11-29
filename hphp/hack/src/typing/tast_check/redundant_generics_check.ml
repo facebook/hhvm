@@ -128,7 +128,7 @@ let create_handler ctx =
               ctx
               (snd fd.fd_name)
           with
-          | Some { fe_type; _ } -> begin
+          | Decl_entry.Found { fe_type; _ } -> begin
             match get_node fe_type with
             | Tfun ft -> check_redundant_generics_fun env ft
             | _ -> ()

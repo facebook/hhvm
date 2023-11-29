@@ -177,7 +177,7 @@ let get_fun ?tracing_info ctx name =
   Decl_counters.count_decl Decl_counters.Fun ?tracing_info name
   @@ fun _counter ->
   Decl_provider_internals.get_fun_without_pessimise ctx name
-  |> Option.map ~f:(maybe_pessimise_fun_decl ctx)
+  |> Decl_entry.map ~f:(maybe_pessimise_fun_decl ctx)
 
 let get_shallow_class ctx name =
   Decl_provider_internals.get_shallow_class ctx name
@@ -249,6 +249,7 @@ let get_pos_from_decl_of_winner_FOR_TESTS_ONLY ctx name_type name : Pos.t option
     | FileInfo.Fun ->
       if Naming_provider.get_fun_path ctx name |> Option.is_some then
         get_fun ctx name
+        |> Decl_entry.to_option
         |> Option.map ~f:(fun { Typing_defs.fe_pos; _ } -> fe_pos)
       else
         None

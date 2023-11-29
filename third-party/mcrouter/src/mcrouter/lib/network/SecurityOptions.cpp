@@ -26,7 +26,7 @@ const char* securityMechToString(SecurityMech mech) {
       return "fizz";
     case SecurityMech::KTLS12:
       return "ktls12";
-  };
+  }
   folly::assume_unreachable();
 }
 

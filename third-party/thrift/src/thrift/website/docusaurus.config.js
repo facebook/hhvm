@@ -49,7 +49,7 @@ const config = {
     theme: {
       customCss: [require.resolve('./src/css/custom.css')],
     },
-    trackingFile: 'xplat/staticdocs/WATCHED_FILES',
+    trackingFile: 'fbcode/staticdocs/WATCHED_FILES',
     'remark-code-snippets': {
       baseDir: '..'
     },

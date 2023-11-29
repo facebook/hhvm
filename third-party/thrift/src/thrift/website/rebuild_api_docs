@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Copy js components
-cp -r ../../../xplat/staticdocs/websites/fbcref/src/components src
+cp -r ../../../fbcode/staticdocs/websites/fbcref/src/components src
 
 # Generate API documentation
 # note the .*: --allowlist accepts python regexes

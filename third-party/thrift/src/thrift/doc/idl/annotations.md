@@ -268,3 +268,9 @@ Constants include annotations just for themselves. The getter method is defined 
 Structured annotations are accessible in Python via the [metadata API](https://www.internalfb.com/intern/wiki/Thrift_in_Python/User_Guide/Advanced_Usage/Metadata/). They are accessible on all objects which have metadata, which is structs, exceptions, unions, fields, services, and enums.
 
 You can view an example for how to use these [here](https://github.com/facebook/fbthrift/tree/main/thrift/lib/py3/test/metadata.py?commit=80443af2713dbfa63ccd487d6d5f7d0850b2f022&lines=192).
+
+### Notable annotations that don't exist
+
+- ~~`cpp.coroutine`~~ coroutine stubs are always generated in C++
+- ~~`code`~~ this never did anything
+- ~~`deprecated`~~ this never did anything

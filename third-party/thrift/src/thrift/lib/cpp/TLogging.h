@@ -124,7 +124,8 @@
         dbgtime,                                           \
         ms,                                                \
         ##__VA_ARGS__);                                    \
-  }
+  }                                                        \
+  static_assert(true, "require semicolon")
 
 /**
  * Log input message

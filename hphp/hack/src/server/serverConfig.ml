@@ -371,6 +371,7 @@ let load_config config options =
     ?tco_strict_value_equality:(bool_opt "strict_value_equality" config)
     ?tco_enforce_sealed_subclasses:(bool_opt "enforce_sealed_subclasses" config)
     ?tco_everything_sdt:(bool_opt "everything_sdt" config)
+    ?tco_implicit_inherit_sdt:(bool_opt "implicit_inherit_sdt" config)
     ?tco_explicit_consistent_constructors:
       (int_opt "explicit_consistent_constructors" config)
     ?tco_require_types_class_consts:

@@ -1256,13 +1256,9 @@ let check_class_parents_where_constraints env pc impl =
   in
   List.fold impl ~init:env ~f:check_where_constraints
 
-let check_generic_class_with_SupportDynamicType env c parents =
+let check_generic_class_with_SupportDynamicType env c tc parents =
   let (pc, c_name) = c.c_name in
-  let check_support_dynamic_type =
-    Naming_attributes.mem
-      SN.UserAttributes.uaSupportDynamicType
-      c.c_user_attributes
-  in
+  let check_support_dynamic_type = Cls.get_support_dynamic_type tc in
   if
     TCO.enable_sound_dynamic (Provider_context.get_tcopt (Env.get_ctx env))
     && check_support_dynamic_type
@@ -1335,11 +1331,7 @@ let check_generic_class_with_SupportDynamicType env c parents =
 let check_SupportDynamicType env c tc =
   if TCO.enable_sound_dynamic (Provider_context.get_tcopt (Env.get_ctx env))
   then
-    let support_dynamic_type =
-      Naming_attributes.mem
-        SN.UserAttributes.uaSupportDynamicType
-        c.c_user_attributes
-    in
+    let support_dynamic_type = Cls.get_support_dynamic_type tc in
     let error_parent_support_dynamic_type parent child_support_dyn =
       Typing_error_utils.add_typing_error
         ~env
@@ -1657,7 +1649,7 @@ let class_hierarchy_checks env c tc (parents : class_parents) =
     check_parents_sealed env c tc;
     check_sealed env c;
     let (_ : env) =
-      check_generic_class_with_SupportDynamicType env c (extends @ implements)
+      check_generic_class_with_SupportDynamicType env c tc (extends @ implements)
     in
     if Cls.const tc then
       List.iter c.c_uses ~f:(check_non_const_trait_members pc env);
@@ -1804,13 +1796,6 @@ let setup_env_for_class_def_check ctx c =
   let env = EnvFromDef.class_env ~origin:Decl_counters.TopLevel ctx c in
   let env = Env.set_current_module env c.c_module in
   let env = Env.set_internal env c.c_internal in
-  let env =
-    Env.set_support_dynamic_type
-      env
-      (Naming_attributes.mem
-         SN.UserAttributes.uaSupportDynamicType
-         c.c_user_attributes)
-  in
   env
 
 let class_def ctx (c : _ class_) =
@@ -1824,6 +1809,9 @@ let class_def ctx (c : _ class_) =
       ~pos:(Pos.to_relative_string (fst c.c_name) |> Pos.string);
     None
   | Decl_entry.Found tc ->
+    let env =
+      Env.set_support_dynamic_type env (Cls.get_support_dynamic_type tc)
+    in
     Env.make_depend_on_current_module env;
     if TCO.optimized_member_fanout (Provider_context.get_tcopt ctx) then
       Env.mark_members_declared_in_depgraph env c;

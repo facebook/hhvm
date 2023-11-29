@@ -256,6 +256,8 @@ type t = {
       (** All member of the __Sealed whitelist should be subclasses*)
   tco_everything_sdt: bool;
       (** All classes are implcitly marked <<__SupportDynamicType>> *)
+  tco_implicit_inherit_sdt: bool;
+      (** Inherit SDT from parents, without writing <<__SupportDynamicType>> *)
   tco_explicit_consistent_constructors: int;
       (** Raises an error when a classish is declared <<__ConsistentConstruct>> but lacks an
          explicit constructor declaration. 0 does not raise, 1 raises for traits, 2 raises
@@ -410,6 +412,7 @@ val set :
   ?tco_strict_value_equality:bool ->
   ?tco_enforce_sealed_subclasses:bool ->
   ?tco_everything_sdt:bool ->
+  ?tco_implicit_inherit_sdt:bool ->
   ?tco_explicit_consistent_constructors:int ->
   ?tco_require_types_class_consts:int ->
   ?tco_type_printer_fuel:int ->

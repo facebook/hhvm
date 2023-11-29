@@ -124,6 +124,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_strict_value_equality: false,
     tco_enforce_sealed_subclasses: false,
     tco_everything_sdt: false,
+    tco_implicit_inherit_sdt: false,
     tco_explicit_consistent_constructors: 0,
     tco_require_types_class_consts: 0,
     tco_type_printer_fuel: 100,

@@ -47,6 +47,7 @@ pub struct Inherited<R: Reason> {
     pub constructor: Constructor,
     pub consts: IndexMap<ClassConstName, ClassConst<R>>,
     pub type_consts: IndexMap<TypeConstName, TypeConst<R>>,
+    pub support_dynamic_type: bool,
 }
 
 impl<R: Reason> Default for Inherited<R> {
@@ -60,6 +61,7 @@ impl<R: Reason> Default for Inherited<R> {
             constructor: Constructor::new(None, ConsistentKind::Inconsistent),
             consts: Default::default(),
             type_consts: Default::default(),
+            support_dynamic_type: Default::default(),
         }
     }
 }
@@ -319,6 +321,7 @@ impl<R: Reason> Inherited<R> {
             constructor,
             consts,
             type_consts,
+            support_dynamic_type,
         } = other;
         self.add_substs(substs);
         self.add_props(props);
@@ -328,6 +331,7 @@ impl<R: Reason> Inherited<R> {
         self.add_constructor(constructor);
         self.add_consts(consts);
         self.add_type_consts(opts, child, type_consts);
+        self.support_dynamic_type = self.support_dynamic_type || support_dynamic_type;
     }
 
     fn mark_as_synthesized(&mut self) {
@@ -402,6 +406,7 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
                     static_methods: (parent_folded_decl.static_methods.iter())
                         .map(|(k, v)| (*k, chown(v.clone(), self.child.name.id())))
                         .collect(),
+                    support_dynamic_type: parent_folded_decl.support_dynamic_type,
                     ..Default::default()
                 },
                 ClassishKind::Cclass(_) | ClassishKind::Cinterface => Inherited {
@@ -423,6 +428,7 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
                         .filter(is_not_private)
                         .map(|(k, v)| (*k, v.clone()))
                         .collect(),
+                    support_dynamic_type: parent_folded_decl.support_dynamic_type,
                     ..Default::default()
                 },
                 ClassishKind::Cenum | ClassishKind::CenumClass(_) => Inherited {
@@ -432,6 +438,7 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
                     static_props: parent_folded_decl.static_props.clone(),
                     methods: parent_folded_decl.methods.clone(),
                     static_methods: parent_folded_decl.static_methods.clone(),
+                    support_dynamic_type: parent_folded_decl.support_dynamic_type,
                     ..Default::default()
                 },
             };

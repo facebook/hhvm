@@ -1102,7 +1102,11 @@ and class_decl
       dc_smethods = SMap.map fst static_methods;
       dc_construct = Tuple.T2.map_fst ~f:(Option.map ~f:fst) cstr;
       dc_ancestors = impl;
-      dc_support_dynamic_type = c.sc_support_dynamic_type;
+      dc_support_dynamic_type =
+        c.sc_support_dynamic_type
+        || inherited.Decl_inherit.ih_support_dynamic_type
+           && TypecheckerOptions.implicit_inherit_sdt
+                (Provider_context.get_tcopt ctx);
       dc_extends = extends;
       dc_sealed_whitelist = sealed_whitelist;
       dc_xhp_attr_deps = xhp_attr_deps;

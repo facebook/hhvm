@@ -822,6 +822,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             mut constructor,
             mut consts,
             mut type_consts,
+            support_dynamic_type,
         } = Inherited::make(self.opts, self.child, self.parents)?;
 
         for sp in self.child.props.iter() {
@@ -905,7 +906,8 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             // Support both attribute and keyword for now, until typechecker changes are made
             is_internal: self.child.is_internal,
             is_xhp: self.child.is_xhp,
-            support_dynamic_type: self.child.support_dynamic_type,
+            support_dynamic_type: self.opts.tco_implicit_inherit_sdt && support_dynamic_type
+                || self.child.support_dynamic_type,
             enum_type: self.child.enum_type.clone(),
             has_xhp_keyword: self.child.has_xhp_keyword,
             module: self.child.module.clone(),

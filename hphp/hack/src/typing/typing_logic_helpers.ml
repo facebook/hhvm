@@ -17,7 +17,6 @@ let with_error fail ((env, p) : env * TL.subtype_prop) : env * TL.subtype_prop =
     (env, TL.Disj (Some (Typing_error.both ty_err1 ty_err2), []))
   | _ -> (env, TL.conj p (TL.invalid ~fail))
 
-(* If `b` is false then fail with error function `f` *)
 let check_with b f r =
   if not b then
     with_error f r

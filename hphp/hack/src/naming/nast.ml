@@ -187,7 +187,6 @@ let get_simple_xhp_attrs =
       | Xhp_simple { xs_name = id; xs_expr = e; _ } -> Some (id, e)
       | Xhp_spread _ -> None)
 
-(* Definitions appearing in a Nast.program *)
 type defs = {
   funs: (FileInfo.id * fun_def) list;
   classes: (FileInfo.id * class_) list;
@@ -197,7 +196,6 @@ type defs = {
   stmts: (FileInfo.id * stmt) list;
 }
 
-(* Given a Nast.program, give me the list of entities it defines *)
 let get_defs (ast : program) : defs =
   (* fold_right traverses the file from top to bottom, and as such gives nicer
    * error messages than fold_left. E.g. in the case where a function is

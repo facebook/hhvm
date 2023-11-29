@@ -58,18 +58,19 @@ module Dep = struct
     | Some kl -> kl
 
   let visitor local =
-    object
-      inherit [string list SMap.t] Nast.Visitor_DEPRECATED.visitor as parent
+    (object
+       inherit [string list SMap.t] Nast.Visitor_DEPRECATED.visitor as parent
 
-      method! on_expr acc ((_, _, e_) as e) =
-        match e_ with
-        | Lvar (_, x) -> add local x acc
-        | Obj_get (((_, _, (This | Lvar _)) as x), (_, _, Id (_, y)), _, _) ->
-          add local (Fake.make_id x y) acc
-        | Class_get ((_, _, x), CGstring (_, y), _) ->
-          add local (Fake.make_static_id x y) acc
-        | _ -> parent#on_expr acc e
+       method! on_expr acc ((_, _, e_) as e) =
+         match e_ with
+         | Lvar (_, x) -> add local x acc
+         | Obj_get (((_, _, (This | Lvar _)) as x), (_, _, Id (_, y)), _, _) ->
+           add local (Fake.make_id x y) acc
+         | Class_get ((_, _, x), CGstring (_, y), _) ->
+           add local (Fake.make_static_id x y) acc
+         | _ -> parent#on_expr acc e
     end
+    [@alert "-deprecated"])
 
   let expr local acc e = (visitor local)#on_expr acc e
 end
@@ -94,42 +95,44 @@ end = struct
     | _ -> None
 
   let visitor =
-    object (this)
-      inherit [string list SMap.t] Nast.Visitor_DEPRECATED.visitor as parent
+    (object (this)
+       inherit [string list SMap.t] Nast.Visitor_DEPRECATED.visitor as parent
 
-      method! on_expr acc ((_, _, e_) as e) =
-        match e_ with
-        | Binop Aast.{ bop = Ast_defs.Eq _; lhs = (_, p, List el); rhs = x2 } ->
-          List.fold_left
-            ~f:
-              begin
-                fun acc e ->
-                  this#on_expr
-                    acc
-                    ( (),
-                      p,
-                      Binop Aast.{ bop = Ast_defs.Eq None; lhs = e; rhs = x2 }
-                    )
-              end
-            ~init:acc
-            el
-        | Binop Aast.{ bop = Ast_defs.Eq _; lhs; rhs } ->
-          this#on_assign acc lhs rhs
-        | _ -> parent#on_expr acc e
+       method! on_expr acc ((_, _, e_) as e) =
+         match e_ with
+         | Binop Aast.{ bop = Ast_defs.Eq _; lhs = (_, p, List el); rhs = x2 }
+           ->
+           List.fold_left
+             ~f:
+               begin
+                 fun acc e ->
+                   this#on_expr
+                     acc
+                     ( (),
+                       p,
+                       Binop Aast.{ bop = Ast_defs.Eq None; lhs = e; rhs = x2 }
+                     )
+               end
+             ~init:acc
+             el
+         | Binop Aast.{ bop = Ast_defs.Eq _; lhs; rhs } ->
+           this#on_assign acc lhs rhs
+         | _ -> parent#on_expr acc e
 
-      method on_assign acc (_, _, e1) e2 =
-        Option.value_map
-          (local_to_string e1)
-          ~f:
-            begin
-              (fun s -> Dep.expr s acc e2)
-            end
-          ~default:acc
+       method on_assign acc (_, _, e1) e2 =
+         Option.value_map
+           (local_to_string e1)
+           ~f:
+             begin
+               (fun s -> Dep.expr s acc e2)
+             end
+           ~default:acc
 
-      method! on_efun acc _ = acc
+       method! on_efun acc _ = acc
 
-      method! on_lfun acc _ _ = acc
+       method! on_lfun acc _ _ = acc
     end
+    [@alert "-deprecated"])
 
   let make st = visitor#on_stmt SMap.empty st
 end

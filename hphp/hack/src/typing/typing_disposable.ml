@@ -47,10 +47,6 @@ let is_disposable_visitor env =
           default ()
   end
 
-(* Does ty (or a type embedded in ty) implement IDisposable
- * or IAsyncDisposable, directly or indirectly?
- * Return Some class_name if it does, None if it doesn't.
- *)
 let is_disposable_type env ty =
   match Env.expand_type env ty with
   | (_env, ety) -> (is_disposable_visitor env)#on_type None ety

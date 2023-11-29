@@ -7,8 +7,6 @@
  *
  *)
 
-(* Universal representation of an environment, for pretty-printing and delta computation
- *)
 type value =
   | Bool of bool
   | Atom of string

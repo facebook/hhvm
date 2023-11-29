@@ -1,2 +1,2 @@
 File "strict_no_statements3.php", line 4, characters 1-4:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])

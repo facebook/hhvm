@@ -1,2 +1,2 @@
 File "require_once_parse_fail3.php", line 3, characters 1-49:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])

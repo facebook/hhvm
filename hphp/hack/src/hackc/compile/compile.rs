@@ -548,6 +548,7 @@ fn emit_fatal_naming_error<'arena>(
                 format!("Illegal definition of typed local variable {id_name}. {msg}"),
             )
         }
+        NamingError::ToplevelStatement(_) => todo!(),
     }
 }
 

@@ -1,2 +1,2 @@
 File "invalid-hack-file.php", line 3, characters 1-74:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])

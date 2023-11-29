@@ -1,2 +1,2 @@
 File "test_toplevel_stmt_in_braced_namespace.php", line 6, characters 3-12:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])

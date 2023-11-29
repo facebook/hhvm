@@ -1,5 +1,5 @@
 File "enum_class_wrong_place.php", line 3, characters 1-17:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
 File "enum_class_wrong_place.php", line 7, characters 8-28:
 Enum class label/member mismatch (Typing[4110])
   File "enum_class_wrong_place.php", line 7, characters 8-28:

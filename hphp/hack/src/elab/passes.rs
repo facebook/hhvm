@@ -61,6 +61,7 @@ pub mod validate_module;
 pub mod validate_php_lambda;
 pub mod validate_shape_name;
 pub mod validate_supportdyn;
+pub mod validate_toplevel_statement;
 pub mod validate_trait_internal;
 pub mod validate_user_attribute_arity;
 pub mod validate_user_attribute_autocomplete_sort_text_static;

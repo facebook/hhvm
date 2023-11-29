@@ -1,31 +1,19 @@
 File "type.php--Arraykey.php", line 2, characters 6-13:
 Cannot use `Arraykey` as a type name as it is reserved (Parsing[1002])
-File "type.php--Bool.php", line 2, characters 1-4:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "type.php--Bool.php", line 2, characters 6-6:
 A semicolon `;` is expected here. (Parsing[1002])
-File "type.php--Bool.php", line 2, characters 6-16:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "type.php--Callable.php", line 2, characters 6-13:
 Cannot use `Callable` as a type name as it is reserved (Parsing[1002])
 File "type.php--Darray.php", line 2, characters 6-11:
 Cannot use `Darray` as a type name as it is reserved (Parsing[1002])
 File "type.php--Dynamic.php", line 2, characters 6-12:
 Cannot use `Dynamic` as a type name as it is reserved (Parsing[1002])
-File "type.php--False.php", line 2, characters 1-4:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "type.php--False.php", line 2, characters 6-6:
 A semicolon `;` is expected here. (Parsing[1002])
-File "type.php--False.php", line 2, characters 6-17:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "type.php--Float.php", line 2, characters 6-10:
 Cannot use `Float` as a type name as it is reserved (Parsing[1002])
-File "type.php--Int.php", line 2, characters 1-4:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "type.php--Int.php", line 2, characters 6-6:
 A semicolon `;` is expected here. (Parsing[1002])
-File "type.php--Int.php", line 2, characters 6-15:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "type.php--Mixed.php", line 2, characters 6-10:
 Cannot use `Mixed` as a type name as it is reserved (Parsing[1002])
 File "type.php--Nonnull.php", line 2, characters 6-12:
@@ -34,55 +22,67 @@ File "type.php--Noreturn.php", line 2, characters 6-13:
 Cannot use `Noreturn` as a type name as it is reserved (Parsing[1002])
 File "type.php--Nothing.php", line 2, characters 6-12:
 Cannot use `Nothing` as a type name as it is reserved (Parsing[1002])
-File "type.php--Null.php", line 2, characters 1-4:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "type.php--Null.php", line 2, characters 6-6:
 A semicolon `;` is expected here. (Parsing[1002])
-File "type.php--Null.php", line 2, characters 6-16:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "type.php--Num.php", line 2, characters 6-8:
 Cannot use `Num` as a type name as it is reserved (Parsing[1002])
-File "type.php--Parent.php", line 2, characters 1-4:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "type.php--Parent.php", line 2, characters 6-6:
 A semicolon `;` is expected here. (Parsing[1002])
-File "type.php--Parent.php", line 2, characters 6-18:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "type.php--Resource.php", line 2, characters 6-13:
 Cannot use `Resource` as a type name as it is reserved (Parsing[1002])
-File "type.php--Self.php", line 2, characters 1-4:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "type.php--Self.php", line 2, characters 6-6:
 A semicolon `;` is expected here. (Parsing[1002])
-File "type.php--Self.php", line 2, characters 6-16:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
-File "type.php--Static.php", line 2, characters 1-4:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "type.php--Static.php", line 2, characters 6-6:
 A semicolon `;` is expected here. (Parsing[1002])
-File "type.php--Static.php", line 2, characters 6-18:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
-File "type.php--String.php", line 2, characters 1-4:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "type.php--String.php", line 2, characters 6-6:
 A semicolon `;` is expected here. (Parsing[1002])
-File "type.php--String.php", line 2, characters 6-18:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "type.php--This.php", line 2, characters 6-9:
 Cannot use `This` as a type name as it is reserved (Parsing[1002])
-File "type.php--True.php", line 2, characters 1-4:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "type.php--True.php", line 2, characters 6-6:
 A semicolon `;` is expected here. (Parsing[1002])
-File "type.php--True.php", line 2, characters 6-16:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "type.php--Varray.php", line 2, characters 6-11:
 Cannot use `Varray` as a type name as it is reserved (Parsing[1002])
-File "type.php--Void.php", line 2, characters 1-4:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "type.php--Void.php", line 2, characters 6-6:
 A semicolon `;` is expected here. (Parsing[1002])
-File "type.php--Void.php", line 2, characters 6-16:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "type.php--_.php", line 2, characters 6-6:
 Cannot use `_` as a type name as it is reserved (Parsing[1002])
+File "type.php--Bool.php", line 2, characters 1-4:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "type.php--Bool.php", line 2, characters 6-16:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "type.php--False.php", line 2, characters 1-4:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "type.php--False.php", line 2, characters 6-17:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "type.php--Int.php", line 2, characters 1-4:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "type.php--Int.php", line 2, characters 6-15:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "type.php--Null.php", line 2, characters 1-4:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "type.php--Null.php", line 2, characters 6-16:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "type.php--Parent.php", line 2, characters 1-4:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "type.php--Parent.php", line 2, characters 6-18:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "type.php--Self.php", line 2, characters 1-4:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "type.php--Self.php", line 2, characters 6-16:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "type.php--Static.php", line 2, characters 1-4:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "type.php--Static.php", line 2, characters 6-18:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "type.php--String.php", line 2, characters 1-4:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "type.php--String.php", line 2, characters 6-18:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "type.php--True.php", line 2, characters 1-4:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "type.php--True.php", line 2, characters 6-16:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "type.php--Void.php", line 2, characters 1-4:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "type.php--Void.php", line 2, characters 6-16:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])

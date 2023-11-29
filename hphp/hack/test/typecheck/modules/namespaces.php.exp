@@ -1,6 +1,6 @@
 File "namespaces.php--a-foo.php", line 4, characters 9-9:
 A semicolon `;` is expected here. (Parsing[1002])
-File "namespaces.php--a-foo.php", line 4, characters 9-13:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "namespaces.php--a-foo.php", line 4, characters 8-8:
 Unbound name: `A` (a module) (Naming[2049])
+File "namespaces.php--a-foo.php", line 4, characters 9-13:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])

@@ -1,3 +1,9 @@
+Errors:
+  [5:1-12] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead
+  [9:1-7] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead
+  [11:1-9] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead
+  [13:1-23] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead
+  [15:1-12] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead
 [(Stmt ([5:1-12], (Expr ((), [5:1-11], (Call { func = ((), [5:1-9], (Id ([5:1-9], "\\func_foo"))); targs = []; args = []; unpacked_arg = None })))));
   (Stmt ([9:1-7], (Expr ((), [9:1-6], (Call { func = ((), [9:1-4], (Id ([9:1-4], "\\foo"))); targs = []; args = []; unpacked_arg = None })))));
   (Stmt

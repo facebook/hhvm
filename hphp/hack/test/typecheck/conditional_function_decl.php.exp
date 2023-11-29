@@ -1,8 +1,8 @@
-File "conditional_function_decl.php", line 12, characters 1-84:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "conditional_function_decl.php", line 13, characters 3-23:
 Encountered unexpected text `function f(): void {}`, was expecting a statement. (Parsing[1002])
 File "conditional_function_decl.php", line 13, characters 31-31:
 Inline function definitions are not supported in Hack (Parsing[1002])
 File "conditional_function_decl.php", line 19, characters 12-12:
 Methods need to be marked `public`, `private`, or `protected`. (Naming[2086])
+File "conditional_function_decl.php", line 12, characters 1-84:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])

@@ -196,6 +196,7 @@
   naming_validate_like_hint
   naming_validate_module
   naming_validate_supportdyn
+  naming_validate_toplevel_statement
   naming_validate_xhp_name
  )
  (libraries

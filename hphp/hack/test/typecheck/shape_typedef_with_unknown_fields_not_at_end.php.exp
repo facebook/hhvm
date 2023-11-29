@@ -1,12 +1,12 @@
 File "shape_typedef_with_unknown_fields_not_at_end.php", line 5, characters 6-6:
 A right parenthesis `)` is expected here. (Parsing[1002])
 File "shape_typedef_with_unknown_fields_not_at_end.php", line 5, characters 6-6:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
 File "shape_typedef_with_unknown_fields_not_at_end.php", line 6, characters 3-5:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
 File "shape_typedef_with_unknown_fields_not_at_end.php", line 6, characters 7-8:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
 File "shape_typedef_with_unknown_fields_not_at_end.php", line 6, characters 10-12:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
 File "shape_typedef_with_unknown_fields_not_at_end.php", line 6, characters 13-16:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])

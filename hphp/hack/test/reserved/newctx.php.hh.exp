@@ -4,8 +4,6 @@ File "newctx.php--Bool.php", line 3, characters 8-8:
 A name is expected here. (Parsing[1002])
 File "newctx.php--Bool.php", line 3, characters 8-8:
 Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002])
-File "newctx.php--Bool.php", line 3, characters 17-26:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "newctx.php--Callable.php", line 3, characters 8-15:
 Cannot use `Callable` as a type name as it is reserved (Parsing[1002])
 File "newctx.php--Darray.php", line 3, characters 8-13:
@@ -16,16 +14,12 @@ File "newctx.php--False.php", line 3, characters 8-8:
 A name is expected here. (Parsing[1002])
 File "newctx.php--False.php", line 3, characters 8-8:
 Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002])
-File "newctx.php--False.php", line 3, characters 18-27:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "newctx.php--Float.php", line 3, characters 8-12:
 Cannot use `Float` as a type name as it is reserved (Parsing[1002])
 File "newctx.php--Int.php", line 3, characters 8-8:
 A name is expected here. (Parsing[1002])
 File "newctx.php--Int.php", line 3, characters 8-8:
 Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002])
-File "newctx.php--Int.php", line 3, characters 16-25:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "newctx.php--Mixed.php", line 3, characters 8-12:
 Cannot use `Mixed` as a type name as it is reserved (Parsing[1002])
 File "newctx.php--Nonnull.php", line 3, characters 8-14:
@@ -38,51 +32,57 @@ File "newctx.php--Null.php", line 3, characters 8-8:
 A name is expected here. (Parsing[1002])
 File "newctx.php--Null.php", line 3, characters 8-8:
 Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002])
-File "newctx.php--Null.php", line 3, characters 17-26:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "newctx.php--Num.php", line 3, characters 8-10:
 Cannot use `Num` as a type name as it is reserved (Parsing[1002])
 File "newctx.php--Parent.php", line 3, characters 8-8:
 A name is expected here. (Parsing[1002])
 File "newctx.php--Parent.php", line 3, characters 8-8:
 Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002])
-File "newctx.php--Parent.php", line 3, characters 19-28:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "newctx.php--Resource.php", line 3, characters 8-15:
 Cannot use `Resource` as a type name as it is reserved (Parsing[1002])
 File "newctx.php--Self.php", line 3, characters 8-8:
 A name is expected here. (Parsing[1002])
 File "newctx.php--Self.php", line 3, characters 8-8:
 Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002])
-File "newctx.php--Self.php", line 3, characters 17-26:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "newctx.php--Static.php", line 3, characters 8-8:
 A name is expected here. (Parsing[1002])
 File "newctx.php--Static.php", line 3, characters 8-8:
 Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002])
-File "newctx.php--Static.php", line 3, characters 19-28:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "newctx.php--String.php", line 3, characters 8-8:
 A name is expected here. (Parsing[1002])
 File "newctx.php--String.php", line 3, characters 8-8:
 Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002])
-File "newctx.php--String.php", line 3, characters 19-28:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "newctx.php--This.php", line 3, characters 8-11:
 Cannot use `This` as a type name as it is reserved (Parsing[1002])
 File "newctx.php--True.php", line 3, characters 8-8:
 A name is expected here. (Parsing[1002])
 File "newctx.php--True.php", line 3, characters 8-8:
 Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002])
-File "newctx.php--True.php", line 3, characters 17-26:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "newctx.php--Varray.php", line 3, characters 8-13:
 Cannot use `Varray` as a type name as it is reserved (Parsing[1002])
 File "newctx.php--Void.php", line 3, characters 8-8:
 A name is expected here. (Parsing[1002])
 File "newctx.php--Void.php", line 3, characters 8-8:
 Context  must declare a context constraint e.g. `as [write_props]` (Parsing[1002])
-File "newctx.php--Void.php", line 3, characters 17-26:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "newctx.php--_.php", line 3, characters 8-8:
 Cannot use `_` as a type name as it is reserved (Parsing[1002])
+File "newctx.php--Bool.php", line 3, characters 17-26:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "newctx.php--False.php", line 3, characters 18-27:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "newctx.php--Int.php", line 3, characters 16-25:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "newctx.php--Null.php", line 3, characters 17-26:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "newctx.php--Parent.php", line 3, characters 19-28:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "newctx.php--Self.php", line 3, characters 17-26:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "newctx.php--Static.php", line 3, characters 19-28:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "newctx.php--String.php", line 3, characters 19-28:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "newctx.php--True.php", line 3, characters 17-26:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "newctx.php--Void.php", line 3, characters 17-26:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])

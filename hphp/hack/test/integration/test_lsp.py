@@ -6927,9 +6927,9 @@ function aaa(): string {
         )
         self.run_spec(spec, variables)
 
-    def test_toplevel_statements_bad(self) -> None:
+    def test_toplevel_statements(self) -> None:
         """
-        Illustrates two bugs:
+        regression test for:
         - T170543625: presence of a top-level statement shouldn't suppress type errors in the rest of the file
         - T170543963: type errors within top-level statements should be shown
         """
@@ -6977,7 +6977,7 @@ function expect_type_errors_inside(): void {
                                 "end": {"line": 2, "character": 7},
                             },
                             "severity": 1,
-                            "code": 1002,
+                            "code": 2128,
                             "source": "Hack",
                             "message": "Hack does not support top level statements. Use the __EntryPoint attribute on a function instead",
                             "relatedInformation": [],
@@ -6989,7 +6989,7 @@ function expect_type_errors_inside(): void {
                                 "end": {"line": 3, "character": 7},
                             },
                             "severity": 1,
-                            "code": 1002,
+                            "code": 2128,
                             "source": "Hack",
                             "message": "Hack does not support top level statements. Use the __EntryPoint attribute on a function instead",
                             "relatedInformation": [],
@@ -7001,11 +7001,119 @@ function expect_type_errors_inside(): void {
                                 "end": {"line": 4, "character": 10},
                             },
                             "severity": 1,
-                            "code": 1002,
+                            "code": 2128,
                             "source": "Hack",
                             "message": "Hack does not support top level statements. Use the __EntryPoint attribute on a function instead",
                             "relatedInformation": [],
                             "relatedLocations": [],
+                        },
+                        {
+                            "range": {
+                                "start": {"line": 4, "character": 5},
+                                "end": {"line": 4, "character": 9},
+                            },
+                            "severity": 1,
+                            "code": 4110,
+                            "source": "Hack",
+                            "message": "Typing error",
+                            "relatedInformation": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 4, "character": 0},
+                                            "end": {"line": 4, "character": 9},
+                                        },
+                                    },
+                                    "message": "Expected num because this is used in an arithmetic operation",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 4, "character": 5},
+                                            "end": {"line": 4, "character": 9},
+                                        },
+                                    },
+                                    "message": "But got bool",
+                                },
+                            ],
+                            "relatedLocations": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 4, "character": 0},
+                                            "end": {"line": 4, "character": 9},
+                                        },
+                                    },
+                                    "message": "Expected num because this is used in an arithmetic operation",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 4, "character": 5},
+                                            "end": {"line": 4, "character": 9},
+                                        },
+                                    },
+                                    "message": "But got bool",
+                                },
+                            ],
+                        },
+                        {
+                            "range": {
+                                "start": {"line": 7, "character": 6},
+                                "end": {"line": 7, "character": 10},
+                            },
+                            "severity": 1,
+                            "code": 4110,
+                            "source": "Hack",
+                            "message": "Typing error",
+                            "relatedInformation": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 7, "character": 2},
+                                            "end": {"line": 7, "character": 10},
+                                        },
+                                    },
+                                    "message": "Expected num because this is used in an arithmetic operation",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 7, "character": 6},
+                                            "end": {"line": 7, "character": 10},
+                                        },
+                                    },
+                                    "message": "But got bool",
+                                },
+                            ],
+                            "relatedLocations": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 7, "character": 2},
+                                            "end": {"line": 7, "character": 10},
+                                        },
+                                    },
+                                    "message": "Expected num because this is used in an arithmetic operation",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 7, "character": 6},
+                                            "end": {"line": 7, "character": 10},
+                                        },
+                                    },
+                                    "message": "But got bool",
+                                },
+                            ],
                         },
                     ],
                 },

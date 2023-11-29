@@ -295,6 +295,7 @@ type t =
       id_name: string;
       def_pos: Pos.t;
     }
+  | Toplevel_statement of Pos.t
 
 let const_without_typehint pos name type_ =
   let name = Utils.strip_all_ns name in
@@ -814,6 +815,12 @@ let this_type_forbidden pos in_extends in_req_extends =
       "The type `this` cannot be used as a constraint on a class generic, or as the type of a static member variable"
   in
   User_error.make Error_code.(to_enum ThisMustBeReturn) (pos, msg) []
+
+let toplevel_statement pos =
+  let msg =
+    "Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead"
+  in
+  User_error.make Error_code.(to_enum ToplevelStatement) (pos, msg) []
 
 let nonstatic_property_with_lsb pos =
   User_error.make
@@ -1416,3 +1423,4 @@ let to_user_error = function
   | Dynamic_hint_disallowed pos -> dynamic_hint_disallowed pos
   | Illegal_typed_local { join; id_pos; id_name; def_pos } ->
     illegal_typed_local ~join id_pos id_name (Pos_or_decl.of_raw_pos def_pos)
+  | Toplevel_statement pos -> toplevel_statement pos

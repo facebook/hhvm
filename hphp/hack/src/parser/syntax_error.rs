@@ -490,9 +490,6 @@ pub const collection_intrinsic_many_typeargs: Error =
 pub const pair_initializer_needed: Error = Cow::Borrowed("Initializer needed for Pair object");
 pub const pair_initializer_arity: Error =
     Cow::Borrowed("Pair objects must have exactly 2 elements");
-pub const toplevel_statements: Error = Cow::Borrowed(
-    "Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead",
-);
 pub const invalid_reified: Error =
     Cow::Borrowed("`reify` keyword can only appear at function or class type parameter position");
 pub fn reified_in_invalid_classish(s: &str) -> Error {

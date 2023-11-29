@@ -60,9 +60,6 @@ let test () =
     diagnostics
     {|
 /foo2.php:
-File "/foo2.php", line 2, characters 2-2:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
-
 File "/foo2.php", line 3, characters 1-1:
 A right brace `}` is expected here. (Parsing[1002])
 |};

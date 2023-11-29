@@ -1,8 +1,8 @@
 File "test_content_before_header.php", line 1, characters 1-1:
 A .php file must begin with `<?hh`. (Parsing[1002])
-File "test_content_before_header.php", line 3, characters 1-4:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "test_content_before_header.php", line 4, characters 1-1:
 Encountered unexpected text ``, was expecting a expression. (Parsing[1002])
+File "test_content_before_header.php", line 3, characters 1-4:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
 File "test_content_before_header.php", line 6, characters 19-21:
 Was expecting a return type hint (Typing[4030])

@@ -376,6 +376,9 @@ fn elaborate_for_typechecking<T: Transform>(env: Env, node: &mut T) -> Vec<Namin
         // typechecker options
         Box::<passes::validate_module::ValidateModulePass>::default(),
 
+        // Validate that there are no top-level statements
+        Box::<passes::validate_toplevel_statement::ValidateToplevelStatementPass>::default(),
+
         // // -- Old 'NAST checks' ------------------------------------------------
 
         // Validate use of the `__Const` attribute on classes - depends on

@@ -1,3 +1,5 @@
+Errors:
+  [9:1-2] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead
 [(Class
     { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 

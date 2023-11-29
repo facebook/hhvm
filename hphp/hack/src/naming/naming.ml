@@ -162,6 +162,8 @@ let passes =
         - `allowed_files_for_module_declarations`
        typechecker options *)
     Naming_validate_module.pass on_error;
+    (* Validate that there are no top-level statements *)
+    Naming_validate_toplevel_statement.pass on_error;
   ]
 
 (* If we don't delegate to Rust, then all naming passes are done here in OCaml.

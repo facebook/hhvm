@@ -1,6 +1,6 @@
-File "conditional_class_decl.php", line 12, characters 1-62:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "conditional_class_decl.php", line 12, characters 12-12:
 Declarations are not supported outside global scope (Parsing[1002])
 File "conditional_class_decl.php", line 13, characters 3-12:
 Encountered unexpected text `class A {}`, was expecting a statement. (Parsing[1002])
+File "conditional_class_decl.php", line 12, characters 1-62:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])

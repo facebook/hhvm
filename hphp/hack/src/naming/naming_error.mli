@@ -291,5 +291,6 @@ type t =
       id_name: string;
       def_pos: Pos.t;
     }
+  | Toplevel_statement of Pos.t
 
 val to_user_error : t -> (Pos.t, Pos_or_decl.t) User_error.t

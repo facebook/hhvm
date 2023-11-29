@@ -1,9 +1,9 @@
-File "namespace_infinite_loop1.php", line 2, characters 26-27:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "namespace_infinite_loop1.php", line 2, characters 28-28:
 An expression is expected here. (Parsing[1002])
 File "namespace_infinite_loop1.php", line 3, characters 1-1:
 Encountered unexpected text ``, was expecting a expression. (Parsing[1002])
+File "namespace_infinite_loop1.php", line 2, characters 26-27:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
 File "namespace_infinite_loop1.php", line 9, characters 3-3:
 Invalid return type (Typing[4110])
   File "namespace_infinite_loop1.php", line 8, characters 55-58:

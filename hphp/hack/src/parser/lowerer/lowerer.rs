@@ -6144,7 +6144,6 @@ fn insert_default_module_if_missing_module_membership(program: &mut Vec<ast::Def
 fn post_process<'a>(env: &mut Env<'a>, program: Vec<ast::Def>, acc: &mut Vec<ast::Def>) {
     use aast::Def;
     use aast::Def::*;
-    use aast::Stmt_::*;
     let mut saw_ns: Option<(ast::Sid, Vec<ast::Def>)> = None;
     for def in program.into_iter() {
         if let Namespace(_) = &def {
@@ -6170,23 +6169,6 @@ fn post_process<'a>(env: &mut Env<'a>, program: Vec<ast::Def>, acc: &mut Vec<ast
         if let Stmt(s) = &def {
             if s.1.is_noop() {
                 continue;
-            }
-            let raise_error = match &s.1 {
-                Markup(_) => false,
-                Expr(expr)
-                    if expr.as_ref().is_import()
-                        && !env.parser_options.po_disallow_toplevel_requires =>
-                {
-                    false
-                }
-                _ => {
-                    use file_info::Mode::*;
-                    let mode = env.file_mode();
-                    env.is_typechecker() && (mode == Mstrict)
-                }
-            };
-            if raise_error {
-                raise_parsing_error_pos(&s.0, env, &syntax_error::toplevel_statements);
             }
         }
 

@@ -128,6 +128,12 @@ module Elab_retonly_hint = struct
   let empty = { allow_retonly = false }
 end
 
+module Validate_toplevel_statement = struct
+  type t = { in_class_or_fun_def: bool }
+
+  let empty = { in_class_or_fun_def = false }
+end
+
 type t = {
   elab_happly_hint: Elab_happly_hint.t;
   elab_haccess_hint: Elab_haccess_hint.t;
@@ -140,6 +146,7 @@ type t = {
   elab_retonly_hint: Elab_retonly_hint.t;
   elab_wildcard_hint: Elab_wildcard_hint.t;
   elab_shape_field_name: Elab_shape_field_name.t;
+  validate_toplevel_statement: Validate_toplevel_statement.t;
   everything_sdt: bool;
   soft_as_like: bool;
   consistent_ctor_level: int;
@@ -164,6 +171,7 @@ let empty =
     elab_retonly_hint = Elab_retonly_hint.empty;
     elab_wildcard_hint = Elab_wildcard_hint.empty;
     elab_shape_field_name = Elab_shape_field_name.empty;
+    validate_toplevel_statement = Validate_toplevel_statement.empty;
     everything_sdt = false;
     soft_as_like = false;
     consistent_ctor_level = 0;

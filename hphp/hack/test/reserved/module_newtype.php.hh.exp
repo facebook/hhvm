@@ -36,10 +36,6 @@ File "module_newtype.php--Static.php", line 3, characters 16-16:
 A name is expected here. (Parsing[1002])
 File "module_newtype.php--Static.php", line 3, characters 16-21:
 Encountered unexpected text `Static`, was expecting a type hint. (Parsing[1002])
-File "module_newtype.php--Static.php", line 3, characters 23-24:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
-File "module_newtype.php--Static.php", line 3, characters 26-35:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "module_newtype.php--String.php", line 3, characters 16-21:
 Cannot use `String` as a type name as it is reserved (Parsing[1002])
 File "module_newtype.php--This.php", line 3, characters 16-19:
@@ -52,3 +48,7 @@ File "module_newtype.php--Void.php", line 3, characters 16-19:
 Cannot use `Void` as a type name as it is reserved (Parsing[1002])
 File "module_newtype.php--_.php", line 3, characters 16-16:
 Cannot use `_` as a type name as it is reserved (Parsing[1002])
+File "module_newtype.php--Static.php", line 3, characters 23-24:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+File "module_newtype.php--Static.php", line 3, characters 26-35:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])

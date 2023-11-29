@@ -1,2 +1,4 @@
 File "extends.php", line 7, characters 19-21:
 Unbound name: `Bar` (an object type) (Naming[2049])
+File "extends.php", line 3, characters 1-24:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])

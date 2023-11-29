@@ -1,6 +1,6 @@
-File "shape_usage_with_optional_field.php", line 3, characters 1-27:
-Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])
 File "shape_usage_with_optional_field.php", line 4, characters 3-3:
 Shape field name must be a nonempty single-quoted string or a class constant (Parsing[1002])
 File "shape_usage_with_optional_field.php", line 4, characters 4-4:
 An expression is expected here. (Parsing[1002])
+File "shape_usage_with_optional_field.php", line 3, characters 1-27:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])

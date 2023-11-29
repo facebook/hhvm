@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2a7281a9773f9d07d94f120de5d13ae8>>
+// @generated SignedSource<<31b8dd8fbd9ab0ce6ed54ab3a8f2dceb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -411,4 +411,6 @@ pub enum NamingError {
         id_name: String,
         def_pos: pos::Pos,
     },
+    #[rust_to_ocaml(name = "Toplevel_statement")]
+    ToplevelStatement(pos::Pos),
 }

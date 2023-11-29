@@ -1,5 +1,4 @@
 //// N.php
-
 <?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
@@ -16,7 +15,6 @@ namespace N {
 }
 
 //// test.php
-
 <?hh
 
 function f(N\C $x): \N\C {

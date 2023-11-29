@@ -48,8 +48,9 @@ void HttpStreamServerTransport::doOnClose() {
 }
 
 void HttpStreamServerTransport::setOnClose(OnCloseType callback) {
-  auto eom_received = m_sharedData.withLock([callback = std::move(callback)](auto& sharedData) {
+  auto eom_received = m_sharedData.withLock([callback = std::move(callback)](auto& sharedData) mutable {
     assertx(!callback || !sharedData.onClose);
+    sharedData.onClose = std::move(callback);
     return sharedData.eom_received;
   });
   if (eom_received) {

@@ -103,7 +103,7 @@ class RootRoute {
     McDeleteReply reply;
     if (enableDeleteDistribution_ && !req.key_ref()->routingPrefix().empty()) {
       auto routingPrefix = RoutingPrefix(req.key_ref()->routingPrefix());
-      if (routingPrefix.str() != defaultRoute_.str() &&
+      if (routingPrefix.getRegion() != defaultRoute_.getRegion() &&
           req.key_ref()->routingPrefix() != kBroadcastPrefix) {
         reply = fiber_local<RouterInfo>::runWithLocals(
             [this, &req, &routingPrefix]() {
@@ -204,9 +204,6 @@ class RootRoute {
       const std::vector<std::shared_ptr<typename RouterInfo::RouteHandleIf>>&
           rh,
       const Request& req) const {
-    if (FOLLY_LIKELY(rh.size() == 1)) {
-      return rh[0]->route(req);
-    }
     if (!rh.empty()) {
       return routeToAll(rh, req);
     }

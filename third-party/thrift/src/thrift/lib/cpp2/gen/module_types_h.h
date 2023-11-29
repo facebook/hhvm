@@ -464,7 +464,58 @@ inline constexpr bool is_runtime_annotation =
 
 namespace apache::thrift {
 
-template <class Annotation, class Struct, class Ident>
+/// Get the field annotation. If Struct.Ident doesn't have the corresponding
+/// Annotation, returns nullptr.
+///
+/// For example, for the following thrift file
+///
+///     @scope.Runtime
+///     @scope.Field
+///     struct Oncall {
+///       1: string name;
+///     }
+///
+///     @scope.Runtime
+///     @scope.Struct
+///     @scope.Field
+///     struct Doc {
+///       1: string text;
+///     }
+///
+///     @scope.Runtime
+///     @scope.Field
+///     struct Sensitive {}
+///
+///     @scope.Field
+///     struct Other {}
+///
+///     @Doc{text="I am a struct"}
+///     struct MyStruct {
+///       @Oncall{name = "thrift"}
+///       @Sensitive
+///       @Other
+///       1: string field;
+///     }
+///
+/// We can write the following code.
+///
+///     // `Oncall` annotation exists on MyStruct.field
+///     assert(get_field_annotation<Oncall, MyStruct, ident::field>() ==
+///            Oncall{"thrift"});
+///
+///     // `Sensitive` annotation exists on MyStruct.field
+///     assert(has_field_annotation<Sensitive, MyStruct, ident::field>);
+///
+///     // `Doc` annotation does not exist on MyStruct.field
+///     assert(!has_field_annotation<Doc, MyStruct, ident::field>);
+///
+///     // Build failure since MyStruct.field doesn't have `Doc` annotation
+///     get_field_annotation<Doc, MyStruct, ident::field>();
+///
+///     // Build failure since `Other` is not marked with @scope.Runtime.
+///     has_field_annotation<Other, MyStruct, ident::field>;
+///
+template <class Annotation, class Struct, class Id>
 const Annotation* get_field_annotation() {
   using detail::annotation::field_annotation_values;
   using detail::annotation::is_runtime_annotation;
@@ -472,12 +523,12 @@ const Annotation* get_field_annotation() {
       is_runtime_annotation<Annotation>,
       "Annotation is not annotated with @cpp.RuntimeAnnotation.");
   static_assert(
-      op::get_ordinal<Struct, Ident>::value != static_cast<FieldOrdinal>(0),
-      "Ident not found in Struct.");
+      op::get_ordinal<Struct, Id>::value != static_cast<FieldOrdinal>(0),
+      "Id not found in Struct.");
 
   static const Annotation* ret = []() -> const Annotation* {
-    for (const std::any& v : field_annotation_values<Struct>(
-             op::get_field_id<Struct, Ident>::value)) {
+    for (const std::any& v :
+         field_annotation_values<Struct>(op::get_field_id<Struct, Id>::value)) {
       if (auto* p = std::any_cast<Annotation>(&v)) {
         return p;
       }

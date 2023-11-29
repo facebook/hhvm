@@ -6926,3 +6926,98 @@ function aaa(): string {
             .notification(method="exit", params={})
         )
         self.run_spec(spec, variables)
+
+    def test_toplevel_statements_bad(self) -> None:
+        """
+        Illustrates two bugs:
+        - T170543625: presence of a top-level statement shouldn't suppress type errors in the rest of the file
+        - T170543963: type errors within top-level statements should be shown
+        """
+        variables = self.write_hhconf_and_naming_table()
+        file_base_name = "toplevel_statements.php"
+        php_file_uri = self.repo_file_uri(file_base_name)
+        contents = """<?hh
+
+$x = 3;
+$x + 1;     // OK
+$x + true; // should be an error here
+
+function expect_type_errors_inside(): void {
+  3 + true; // should be an error here
+}
+"""
+        variables.update({"php_file_uri": php_file_uri, "contents": contents})
+        spec = (
+            self.initialize_spec(LspTestSpec("toplevel_statements"))
+            .write_to_disk(
+                comment="create file ${file_base_name}",
+                uri="${php_file_uri}",
+                contents="${contents}",
+                notify=False,
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${contents}",
+                    }
+                },
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 2, "character": 0},
+                                "end": {"line": 2, "character": 7},
+                            },
+                            "severity": 1,
+                            "code": 1002,
+                            "source": "Hack",
+                            "message": "Hack does not support top level statements. Use the __EntryPoint attribute on a function instead",
+                            "relatedInformation": [],
+                            "relatedLocations": [],
+                        },
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 0},
+                                "end": {"line": 3, "character": 7},
+                            },
+                            "severity": 1,
+                            "code": 1002,
+                            "source": "Hack",
+                            "message": "Hack does not support top level statements. Use the __EntryPoint attribute on a function instead",
+                            "relatedInformation": [],
+                            "relatedLocations": [],
+                        },
+                        {
+                            "range": {
+                                "start": {"line": 4, "character": 0},
+                                "end": {"line": 4, "character": 10},
+                            },
+                            "severity": 1,
+                            "code": 1002,
+                            "source": "Hack",
+                            "message": "Hack does not support top level statements. Use the __EntryPoint attribute on a function instead",
+                            "relatedInformation": [],
+                            "relatedLocations": [],
+                        },
+                    ],
+                },
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .wait_for_notification(
+                comment="shutdown should clear out live squiggles",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [],
+                },
+            )
+        )
+        self.run_spec(spec, variables)

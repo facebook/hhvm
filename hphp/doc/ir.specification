@@ -1002,15 +1002,16 @@ To string conversions:
   Define a "use" of S0 effectively keeping the value alive. As with Conjure it
   should not appear in reachable code.
 
-| LdCls, D(Cls), S(Str) C(Cls|Nullptr), NF
+| LdCls<fallback>, D(Cls), S(Str) C(Cls|Nullptr), NF
 
   Loads the class named S0 in the context of the class S1. Invokes autoload and
   may raise an error if the class is not defined. The explicit context
   parameter allows the compiler to simplify this instruction to a DefConst in
   some cases. If S0 is constant, this instruction may be simplified to a
-  LdClsCached.
+  LdClsCached. Takes extra data that specifies the fallback behavior if the
+  class is undefined.
 
-| LdClsCached, D(Cls), CStr, NF
+| LdClsCached<fallback>, D(Cls), CStr, NF
 
   Loads the class named S0 via the RDS. Invokes autoload and may raise an error
   if the class is not defined.

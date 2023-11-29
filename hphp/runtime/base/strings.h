@@ -135,7 +135,10 @@ constexpr char MUST_BE_VALUE_TYPE[] = "Property %s of class %s is readonly, and 
   "therefore must be a value type to be modified.";
 constexpr char MUST_BE_ENCLOSED_IN_READONLY[] =
   "Property %s of class %s is readonly, but isn't enclosed in a readonly expression.";
-
+constexpr char MISSING_DYNAMICALLY_REFERENCED[] =
+  "Missing __DynamicallyReferenced attribute on class %s for classname_to_class";
+constexpr char CLASSNAME_TO_CLASS_NOEXIST_EXCEPTION[] =
+  "Failed to load class from %s %s for classname_to_class.";
 
 } // namespace Strings
 } // namespace HPHP

@@ -146,7 +146,26 @@ rds::Handle ClassCache::alloc() {
   return rds::alloc<ClassCache,rds::Mode::Normal,sizeof(Pair)>().handle();
 }
 
-const Class* ClassCache::lookup(rds::Handle handle, StringData* name) {
+void ClassCache::loadFail(const StringData* name, const LdClsFallback fallback) {
+  switch (fallback) {
+    case LdClsFallback::FATAL:
+      raise_error(Strings::UNKNOWN_CLASS, name->data());
+    case LdClsFallback::THROW_CLASSNAME_TO_CLASS_STRING:
+    case LdClsFallback::THROW_CLASSNAME_TO_CLASS_LAZYCLASS:
+    {
+      std::string msg;
+      auto const k = fallback == LdClsFallback::THROW_CLASSNAME_TO_CLASS_STRING
+                     ? "string"
+                     : "lazy class";
+      string_printf(msg, Strings::CLASSNAME_TO_CLASS_NOEXIST_EXCEPTION,
+                    k, name->data());
+      SystemLib::throwInvalidArgumentExceptionObject(msg);
+    }
+  }
+}
+
+const Class* ClassCache::lookup(rds::Handle handle, StringData* name,
+                                LdClsFallback fallback) {
   auto const thiz = rds::handleToPtr<ClassCache, rds::Mode::Normal>(handle);
   if (!rds::isHandleInit(handle, rds::NormalTag{})) {
     for (std::size_t i = 0; i < ClassCache::kNumLines; ++i) {
@@ -161,7 +180,7 @@ const Class* ClassCache::lookup(rds::Handle handle, StringData* name) {
     TRACE(1, "ClassCache miss: %s\n", name->data());
     Class* c = Class::load(name);
     if (UNLIKELY(!c)) {
-      raise_error(Strings::UNKNOWN_CLASS, name->data());
+      loadFail(name, fallback);
     }
     if (pair->m_key) decRefStr(pair->m_key);
     pair->m_key = name;

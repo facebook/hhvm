@@ -2913,6 +2913,27 @@ struct SampleRateData : IRExtraData {
   uint32_t sampleRate;
 };
 
+struct LdClsFallbackData : IRExtraData {
+  explicit LdClsFallbackData(LdClsFallback fallback)
+    : fallback(fallback) {}
+
+  static LdClsFallbackData Fatal() {
+    return LdClsFallbackData { LdClsFallback::FATAL };
+  }
+
+  std::string show() const {
+    return folly::sformat("fallback:{}", static_cast<uint8_t>(fallback));
+  }
+  size_t hash() const { return std::hash<LdClsFallback>()(fallback); }
+  size_t stableHash() const { return std::hash<LdClsFallback>()(fallback); }
+
+  bool equals(const LdClsFallbackData& o) const {
+    return fallback == o.fallback;
+  }
+
+  LdClsFallback fallback;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -3175,6 +3196,8 @@ X(ThrowMustBeValueTypeException,ClassData);
 X(LdCoeffectFunParamNaive,      ParamData);
 X(RaiseNotice,                  SampleRateData);
 X(RaiseStrToClassNotice,        SampleRateData);
+X(LdCls,                        LdClsFallbackData);
+X(LdClsCached,                  LdClsFallbackData);
 
 #undef X
 

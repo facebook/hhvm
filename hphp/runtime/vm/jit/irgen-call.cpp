@@ -1277,9 +1277,8 @@ void fcallFuncStr(IRGS& env, const FCallArgs& fca) {
 
 } // namespace
 
-void emitDeploymentBoundaryCheck(IRGS& env, SSATmp* symbol) {
+void emitDeploymentBoundaryCheckFrom(IRGS& env, SSATmp* symbol, const Func* caller) {
   if (!RO::EvalEnforceDeployment) return;
-  auto const caller = curFunc(env);
   if (env.unit.packageInfo().violatesDeploymentBoundary(*caller)) return;
   ifThen(
     env,
@@ -1294,6 +1293,11 @@ void emitDeploymentBoundaryCheck(IRGS& env, SSATmp* symbol) {
       gen(env, RaiseDeploymentBoundaryViolation, data, symbol);
     }
   );
+}
+
+void emitDeploymentBoundaryCheck(IRGS& env, SSATmp* symbol) {
+  auto const caller = curFunc(env);
+  emitDeploymentBoundaryCheckFrom(env, symbol, caller);
 }
 
 void emitModuleBoundaryCheckKnown(IRGS& env, const Func* symbol) {
@@ -1346,8 +1350,8 @@ void emitModuleBoundaryCheckKnown(IRGS& env, const Class::SProp* prop) {
   }
 }
 
-void emitModuleBoundaryCheck(IRGS& env, SSATmp* symbol, bool func /* = true */) {
-  auto const caller = curFunc(env);
+void emitModuleBoundaryCheckFrom(IRGS& env, SSATmp* symbol, const Func* caller,
+                                 bool func) {
   ifThenElse(
     env,
     [&] (Block* skip) {
@@ -1368,14 +1372,19 @@ void emitModuleBoundaryCheck(IRGS& env, SSATmp* symbol, bool func /* = true */) 
           hint(env, Block::Hint::Unlikely);
           auto const data = OptClassAndFuncData { curClass(env), caller };
           gen(env, RaiseModuleBoundaryViolation, data, symbol);
-          emitDeploymentBoundaryCheck(env, symbol);
+          emitDeploymentBoundaryCheckFrom(env, symbol, caller);
         }
       );
     },
     [&] {
-      emitDeploymentBoundaryCheck(env, symbol);
+      emitDeploymentBoundaryCheckFrom(env, symbol, caller);
     }
   );
+}
+
+void emitModuleBoundaryCheck(IRGS& env, SSATmp* symbol, bool func /* = true */) {
+  auto const caller = curFunc(env);
+  emitModuleBoundaryCheckFrom(env, symbol, caller, func);
 }
 
 void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
@@ -1547,7 +1556,10 @@ void emitNewObjD(IRGS& env, const StringData* className) {
     push(env, gen(env, AllocObj, cns(env, cls)));
     return;
   }
-  auto const cachedCls = gen(env, LdClsCached, cns(env, className));
+  auto const cachedCls = gen(env,
+                             LdClsCached,
+                             LdClsFallbackData::Fatal(),
+                             cns(env, className));
   emitModuleBoundaryCheck(env, cachedCls, false);
   push(env, gen(env, AllocObj, cachedCls));
 }
@@ -1715,7 +1727,7 @@ void emitFCallClsMethodD(IRGS& env,
     auto const func = lookupImmutableClsMethod(cls, methodName, callCtx, true);
     if (func) {
       if (!classIsPersistentOrCtxParent(env, cls)) {
-        gen(env, LdClsCached, cns(env, className));
+        gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className));
       }
       auto const ctx = ldCtxForClsMethod(env, func, cns(env, cls), cls, true);
       emitModuleBoundaryCheckKnown(env, cls);
@@ -1833,7 +1845,7 @@ void checkClsMethodAndLdCtx(IRGS& env, const Class* cls, const Func* func,
                             const StringData* className) {
   gen(env, CheckClsMethFunc, cns(env, func));
   if (!classIsPersistentOrCtxParent(env, cls)) {
-    gen(env, LdClsCached, cns(env, className));
+    gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className));
   }
   ldCtxForClsMethod(env, func, cns(env, cls), cls, true);
 }
@@ -1847,7 +1859,10 @@ resolveClsMethodDSlow(IRGS& env, const StringData* className,
     ClsMethodData { className, methodName, ne, curClass(env), curFunc(env) };
   auto const func = loadClsMethodUnknown(env, data, slowExit);
   gen(env, CheckClsMethFunc, func);
-  auto const cls = gen(env, LdClsCached, cns(env, className));
+  auto const cls = gen(env,
+                       LdClsCached,
+                       LdClsFallbackData::Fatal(),
+                       cns(env, className));
   emitDeploymentBoundaryCheck(env, cls);
   return std::pair(cls, func);
 }

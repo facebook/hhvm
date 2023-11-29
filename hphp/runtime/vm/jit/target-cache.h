@@ -73,7 +73,8 @@ struct ClassCache {
   };
 
   static rds::Handle alloc();
-  static const Class* lookup(rds::Handle, StringData* lookup);
+  static const Class* lookup(rds::Handle, StringData* lookup, LdClsFallback);
+  static void loadFail(const StringData* name, const LdClsFallback fallback);
 
   Pair m_pairs[kNumLines];
 };

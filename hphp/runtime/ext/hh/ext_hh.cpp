@@ -53,6 +53,7 @@
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/file.h"
 #include "hphp/util/match.h"
+#include "hphp/util/text-util.h"
 
 namespace HPHP {
 
@@ -1370,6 +1371,11 @@ Class* getClass(TypedValue cls) {
 }
 
 TypedValue HHVM_FUNCTION(classname_to_class, TypedValue cname) {
+  auto const fail = [&](const char* k, const char* n) {
+    std::string msg;
+    string_printf(msg, Strings::CLASSNAME_TO_CLASS_NOEXIST_EXCEPTION, k, n);
+    SystemLib::throwInvalidArgumentExceptionObject(msg);
+  };
   switch (cname.m_type) {
     case KindOfPersistentString:
     case KindOfString:
@@ -1379,14 +1385,10 @@ TypedValue HHVM_FUNCTION(classname_to_class, TypedValue cname) {
         [] (const BTFrame& frm) { return frm.func(); }
       );
       auto const c = Class::resolve(name, caller);
-      if (!c) {
-        SystemLib::throwInvalidArgumentExceptionObject(
-          folly::sformat("Failed to load class from string {} for {}.", name, __FUNCTION__+2)
-        );
-      }
+      if (!c) fail("string", name->data());
       if (folly::Random::oneIn(RO::EvalDynamicallyReferencedNoticeSampleRate) &&
           !c->isDynamicallyReferenced()) {
-        raise_notice("Missing __DynamicallyReferenced attribute on class %s for %s", name->data(), __FUNCTION__+2);
+        raise_notice(Strings::MISSING_DYNAMICALLY_REFERENCED, name->data());
       }
       return make_tv<KindOfClass>(c);
     }
@@ -1396,11 +1398,7 @@ TypedValue HHVM_FUNCTION(classname_to_class, TypedValue cname) {
     {
       auto const name = cname.m_data.plazyclass.name();
       auto const c = Class::load(name);
-      if (!c) {
-        SystemLib::throwInvalidArgumentExceptionObject(
-          folly::sformat("Failed to load class from lazy class {} for {}.", name, __FUNCTION__+2)
-        );
-      }
+      if (!c) fail("lazy class", name->data());
       return make_tv<KindOfClass>(c);
     }
     default:

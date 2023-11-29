@@ -329,4 +329,10 @@ inline std::string show(const Reason &r) {
   return folly::sformat("{}:{}", r.file, r.line);
 }
 
+enum class LdClsFallback: uint8_t {
+  FATAL,
+  THROW_CLASSNAME_TO_CLASS_STRING,
+  THROW_CLASSNAME_TO_CLASS_LAZYCLASS,
+};
+
 }

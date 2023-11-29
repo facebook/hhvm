@@ -1,0 +1,2 @@
+Notice: Missing __DynamicallyReferenced attribute on class A for classname_to_class in %s/test/slow/class-ptr/ldcls-nodr.php on line 6
+class(A)

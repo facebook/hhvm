@@ -74,19 +74,36 @@ TRACE_SET_MOD(irlower);
 
 namespace {
 
-template<class TargetCache>
-void implLdMeta(IRLS& env, const IRInstruction* inst, Vout& v, Vreg dst) {
-  auto const is_func = std::is_same<TargetCache,FuncCache>::value;
+void implLdClass(IRLS& env, const IRInstruction* inst, Vout& v, Vreg dst,
+                 const LdClsFallback fallback) {
+  auto const ch = ClassCache::alloc();
+  rds::recordRds(ch, sizeof(ClassCache), "ClassCache",
+                 inst->marker().func()->fullName()->slice());
 
-  auto const ch = TargetCache::alloc();
-  rds::recordRds(ch, sizeof(TargetCache), is_func ? "FuncCache" : "ClassCache",
+  auto args = argGroup(env, inst)
+                .imm(ch)
+                .ssa(0 /* name */)
+                .imm(static_cast<uint8_t>(fallback));
+  cgCallHelper(
+    v,
+    env,
+    CallSpec::direct(ClassCache::lookup),
+    callDest(dst),
+    SyncOptions::Sync,
+    args
+  );
+}
+
+void implLdFunc(IRLS& env, const IRInstruction* inst, Vout& v, Vreg dst) {
+  auto const ch = FuncCache::alloc();
+  rds::recordRds(ch, sizeof(FuncCache), "FuncCache",
                  inst->marker().func()->fullName()->slice());
 
   auto args = argGroup(env, inst).imm(ch).ssa(0 /* name */);
   cgCallHelper(
     v,
     env,
-    CallSpec::direct(TargetCache::lookup),
+    CallSpec::direct(FuncCache::lookup),
     callDest(dst),
     SyncOptions::Sync,
     args
@@ -107,12 +124,13 @@ const Class* lookupCls(const StringData* sd) {
   return Class::lookup(sd);
 }
 
-void implLdOrLookupCls(IRLS& env, const IRInstruction* inst, bool lookup) {
+void implLdOrLookupCls(IRLS& env, const IRInstruction* inst, bool lookup,
+                       const LdClsFallback loadFallback) {
   auto const src = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
 
   auto const fallback = [&](Vout& v, Vreg out) {
-    if (!lookup) return implLdMeta<ClassCache>(env, inst, v, out);
+    if (!lookup) return implLdClass(env, inst, v, out, loadFallback);
     auto const args = argGroup(env, inst).ssa(0);
     cgCallHelper(v, env, CallSpec::direct(lookupCls),
                  callDest(out), SyncOptions::None, args);
@@ -157,22 +175,24 @@ void implLdOrLookupCls(IRLS& env, const IRInstruction* inst, bool lookup) {
 }
 
 void cgLdCls(IRLS& env, const IRInstruction* inst) {
-  implLdOrLookupCls(env, inst, false);
+  auto const extra = inst->extra<LdClsFallbackData>();
+  implLdOrLookupCls(env, inst, false, extra->fallback);
 }
 
 void cgLookupClsRDS(IRLS& env, const IRInstruction* inst) {
-  implLdOrLookupCls(env, inst, true);
+  implLdOrLookupCls(env, inst, true, LdClsFallback::FATAL /* unused */);
 }
 
 void cgLdFunc(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
-  implLdMeta<FuncCache>(env, inst, vmain(env), dst);
+  implLdFunc(env, inst, vmain(env), dst);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 const Class* autoloadKnownPersistentType(rds::Handle h,
-                                         const StringData* name) {
+                                         const StringData* name,
+                                         const LdClsFallback fallback) {
   assertx(rds::isPersistentHandle(h));
   AutoloadHandler::s_instance->autoloadType(
     StrNR(const_cast<StringData*>(name))
@@ -180,12 +200,15 @@ const Class* autoloadKnownPersistentType(rds::Handle h,
   auto const ptr =
     rds::handleToRef<LowPtr<Class>, rds::Mode::Persistent>(h).get();
   // Autoloader should have inited it as a side-effect.
-  if (UNLIKELY(!ptr)) raise_error(Strings::UNKNOWN_CLASS, name->data());
+  if (UNLIKELY(!ptr)) {
+    ClassCache::loadFail(name, fallback);
+  }
   return ptr;
 }
 
 const Class* lookupKnownType(rds::Handle cache_handle,
-                             const StringData* name) {
+                             const StringData* name,
+                             const LdClsFallback fallback) {
   assertx(rds::isNormalHandle(cache_handle));
   // The caller should already have checked.
   assertx(!rds::isHandleInit(cache_handle));
@@ -196,7 +219,7 @@ const Class* lookupKnownType(rds::Handle cache_handle,
 
   // Autoloader should have inited it as a side-effect.
   if (UNLIKELY(!rds::isHandleInit(cache_handle, rds::NormalTag{}))) {
-    raise_error(Strings::UNKNOWN_CLASS, name->data());
+    ClassCache::loadFail(name, fallback);
   }
   return rds::handleToRef<LowPtr<Class>, rds::Mode::Normal>(cache_handle).get();
 }
@@ -279,13 +302,17 @@ void ldFuncCachedHelper(IRLS& env, const IRInstruction* inst,
 
 void cgLdClsCached(IRLS& env, const IRInstruction* inst) {
   auto const name = inst->src(0)->strVal();
+  auto const extra = inst->extra<LdClsFallbackData>();
 
   implLdCached<Class>(env, inst, name, [&] (Vout& v, rds::Handle ch) {
     auto const ptr = v.makeReg();
     auto const target = rds::isPersistentHandle(ch)
                         ? autoloadKnownPersistentType
                         : lookupKnownType;
-    auto const args = argGroup(env, inst).imm(ch).ssa(0);
+    auto const args = argGroup(env, inst)
+                        .imm(ch)
+                        .ssa(0)
+                        .imm(static_cast<uint8_t>(extra->fallback));
     cgCallHelper(v, env, CallSpec::direct(target),
                  callDest(ptr), SyncOptions::Sync, args);
     return ptr;

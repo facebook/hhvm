@@ -1275,6 +1275,69 @@ SSATmp* opt_get_implicit_context_memo_key(IRGS& env, const ParamPrep& params) {
   );
 }
 
+SSATmp* opt_classname_to_class(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  auto const cn = params[0].value;
+
+  if (cn->isA(TCls)) return cn;
+  if (cn->isA(TLazyCls)) {
+    // TODO(T168044199) this case should be eliminated by nameof-ing bad lazy classes
+    return ldCls(env, cn, LdClsFallback::THROW_CLASSNAME_TO_CLASS_LAZYCLASS);
+  }
+  if (cn->isA(TStr)) {
+    if (inlineDepth(env) == 0) {
+      return nullptr; // no caller info for module check
+    }
+
+    // The caller of HH\classname_to_class needs to be able to access this
+    // symbol, unlike dynamic $c::f() case where caller = curFunc(env)
+    auto const clsTmp = ldCls(env, cn,
+                              LdClsFallback::THROW_CLASSNAME_TO_CLASS_STRING);
+    auto const frame = env.inlineState.frames.back();
+    auto const caller = frame.callerSk.func();
+    emitModuleBoundaryCheckFrom(env, clsTmp, caller, false);
+
+    if (RO::EvalDynamicallyReferencedNoticeSampleRate > 0) {
+      if (!clsTmp) return nullptr;
+      auto const cls = clsTmp->type().clsSpec().cls();
+      if (!cls) return nullptr;
+      auto const clsName = cls->name();
+      ifThen(
+        env,
+        [&] (Block* taken) {
+          auto const data = AttrData { AttrDynamicallyReferenced };
+          gen(env, JmpZero, taken, gen(env, ClassHasAttr, data, clsTmp));
+        },
+        [&] {
+          hint(env, Block::Hint::Unlikely);
+          std::string msg;
+          string_printf(msg, Strings::MISSING_DYNAMICALLY_REFERENCED,
+                        clsName->data());
+          gen(env,
+              RaiseNotice,
+              SampleRateData { RO::EvalDynamicallyReferencedNoticeSampleRate },
+              cns(env, makeStaticString(msg)));
+        }
+      );
+    }
+
+    return clsTmp;
+  }
+
+  return nullptr;
+}
+
+SSATmp* opt_class_to_classname(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  auto const c = params[0].value;
+
+  if (c->isA(TStr)) return c;
+  if (c->isA(TLazyCls)) return gen(env, LdLazyClsName, c);
+  if (c->isA(TCls)) return gen(env, LdClsName, c);
+
+  return nullptr;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 // Whitelists of builtins that we have optimized HHIR emitters for.
@@ -1329,6 +1392,8 @@ const hphp_fast_string_imap<OptEmitFn> s_opt_emit_fns{
   {"HH\\meth_caller_get_method", opt_meth_caller_get_method},
   {"HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key",
      opt_get_implicit_context_memo_key},
+  {"HH\\classname_to_class", opt_classname_to_class},
+  {"HH\\class_to_classname", opt_class_to_classname},
   {"hphp_debug_caller_identifier", opt_hphp_debug_caller_identifier},
 };
 

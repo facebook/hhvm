@@ -676,7 +676,7 @@ inline const Class* lookupUniqueClass(IRGS& env,
 
 inline SSATmp* ldCls(IRGS& env,
                      SSATmp* lazyClassOrName,
-                     Block* ctrace = nullptr) {
+                     LdClsFallback fallback = LdClsFallback::FATAL) {
   auto const isLazy = lazyClassOrName->isA(TLazyCls);
   assertx(lazyClassOrName->isA(TStr) || isLazy);
   if (lazyClassOrName->hasConstVal()) {
@@ -685,18 +685,18 @@ inline SSATmp* ldCls(IRGS& env,
     if (auto const cls = lookupUniqueClass(env, cnameStr)) {
       if (!classIsPersistentOrCtxParent(env, cls)) {
         auto const clsName = isLazy ? cns(env, cnameStr) : lazyClassOrName;
-        gen(env, LdClsCached, ctrace, clsName);
+        gen(env, LdClsCached, LdClsFallbackData { fallback }, clsName);
       }
       return cns(env, cls);
     }
     auto const clsName = isLazy ? cns(env, cnameStr) : lazyClassOrName;
-    return gen(env, LdClsCached, ctrace, clsName);
+    return gen(env, LdClsCached, LdClsFallbackData { fallback }, clsName);
   }
   auto const ctxClass = curClass(env);
   auto const ctxTmp = ctxClass ? cns(env, ctxClass) : cns(env, nullptr);
   auto const clsName =
     isLazy ? gen(env, LdLazyClsName, lazyClassOrName) : lazyClassOrName;
-  return gen(env, LdCls, ctrace, clsName, ctxTmp);
+  return gen(env, LdCls, LdClsFallbackData { fallback }, clsName, ctxTmp);
 }
 
 //////////////////////////////////////////////////////////////////////

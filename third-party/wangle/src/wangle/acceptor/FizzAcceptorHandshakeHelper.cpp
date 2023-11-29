@@ -126,6 +126,11 @@ void FizzAcceptorHandshakeHelper::fizzHandshakeSuccess(
         detail::enumVectorToHexStr(handshakeLogging->clientCiphers));
     tinfo_.sslClientExts = std::make_shared<std::string>(
         folly::join(":", handshakeLogging->clientExtensions));
+    tinfo_.clientAlpns = std::make_shared<std::vector<std::string>>(
+        handshakeLogging->clientAlpns);
+    tinfo_.sslClientSigAlgs =
+        std::make_shared<std::string>(detail::enumVectorToHexStr(
+            handshakeLogging->clientSignatureAlgorithms));
   }
 
   auto appProto = transport->getApplicationProtocol();

@@ -1619,7 +1619,7 @@ void t_hack_generator::generate_typedef(const t_typedef* ttypedef) {
   if (t_typedef::get_first_structured_annotation_or_null(
           ttypedef, kHackSkipCodegenUri)) {
     return;
-  };
+  }
   bool is_mod_int = has_hack_module_internal(ttypedef);
   auto typedef_name = hack_name(ttypedef, true);
   auto [wrapper, name, ns] = find_hack_wrapper(ttypedef, false);

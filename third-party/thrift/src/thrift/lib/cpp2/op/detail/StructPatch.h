@@ -470,8 +470,11 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
           &*op::get_name_v<Patch, Id>.begin(),
           typeTagToTType<Tag>,
           folly::to_underlying(Id::value));
-      s += op::encode<Tag>(
-          prot, folly::if_constexpr<isRemoveField>(remove, *field));
+      if constexpr (isRemoveField) {
+        s += op::encode<Tag>(prot, remove);
+      } else {
+        s += op::encode<Tag>(prot, *field);
+      }
       s += prot.writeFieldEnd();
     });
     s += prot.writeFieldStop();

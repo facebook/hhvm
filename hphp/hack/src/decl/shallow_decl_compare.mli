@@ -11,6 +11,6 @@
 val compute_class_fanout :
   Provider_context.t ->
   during_init:bool ->
-  defs:FileInfo.names Relative_path.Map.t ->
+  class_names:Decl_compare.VersionedSSet.diff ->
   Relative_path.t list ->
   Fanout.t

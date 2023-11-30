@@ -104,6 +104,15 @@ let update_reverse_naming_table
 let make_reverse_naming_table ctx defs_per_file =
   update_reverse_naming_table ctx defs_per_file SymbolMap.empty
 
+(** Does something very similar to ServerTypeCheck.do_naming:
+  - parse names in files
+
+  - update provided naming table and return the result
+
+  - update reverse naming table, after discarding old entries
+
+  - in addition, update symbol-to-file table
+*)
 let redecl_make_new_naming_table
     (ctx : Provider_context.t)
     options
@@ -113,6 +122,9 @@ let redecl_make_new_naming_table
   let new_naming_table =
     Naming_table.update_many old_naming_table defs_per_file_parsed
   in
+  ServerIncremental.remove_defs_from_reverse_naming_table
+    old_naming_table
+    defs_per_file_parsed;
   let symbols_to_files =
     update_reverse_naming_table ctx defs_per_file_parsed old_symbols_to_files
   in
@@ -122,34 +134,20 @@ let redecl_make_new_naming_table
 
 let get_old_and_new_defs
     options
-    (files_with_changes : Relative_path.t list)
+    (files_with_changes : Relative_path.Set.t)
     (old_naming_table : Naming_table.t)
-    (new_naming_table : Naming_table.t) : Naming_table.defs_per_file =
-  let add_file_names naming_table filenames acc =
-    List.fold filenames ~init:acc ~f:(fun acc file ->
-        match Naming_table.get_file_info naming_table file with
-        | None -> acc
-        | Some file_info ->
-          let current_file_names =
-            match Relative_path.Map.find_opt acc file with
-            | None -> FileInfo.empty_names
-            | Some current_file_names -> current_file_names
-          in
-          let file_names = FileInfo.simplify file_info in
-          let new_file_names =
-            FileInfo.merge_names current_file_names file_names
-          in
-          Relative_path.Map.add acc ~key:file ~data:new_file_names)
-  in
+    (new_naming_table : Naming_table.t) :
+    Decl_compare.VersionedNames.t Relative_path.Map.t =
   let defs =
-    Relative_path.Map.empty
-    |> add_file_names old_naming_table files_with_changes
-    |> add_file_names new_naming_table files_with_changes
+    ServerIncremental.get_old_and_new_defs_in_files
+      old_naming_table
+      new_naming_table
+      files_with_changes
   in
   if options.debug then
     Printf.printf
       "The following defs will be diffed for each file:\n%s\n"
-      (Naming_table.show_defs_per_file defs);
+      (Relative_path.Map.show Decl_compare.VersionedNames.pp defs);
   defs
 
 let get_symbols_for_deps
@@ -175,7 +173,8 @@ let get_files_for_symbols
     symbols
     Relative_path.Set.empty
 
-let compute_fanout ctx (old_and_new_defs : Naming_table.defs_per_file) :
+let compute_fanout
+    ctx (old_and_new_defs : Decl_compare.VersionedNames.t Relative_path.Map.t) :
     Fanout.t =
   let { Decl_redecl_service.fanout; _ } =
     Decl_redecl_service.redo_type_decl
@@ -247,9 +246,9 @@ let compute_fanout_and_resolve_deps
     in
     let files_with_errors = Errors.get_failed_files errors in
     Relative_path.Set.inter files_to_recheck_if_errors files_with_errors
-    |> ServerFanout.add_files_with_stale_errors
+    |> ServerIncremental.add_files_with_stale_errors
          ctx
-         ~reparsed:(Relative_path.Set.of_list files_with_changes)
+         ~reparsed:files_with_changes
          errors
   in
   let fanout =
@@ -422,6 +421,8 @@ let go (test_file : string) options =
   Tempfile.with_tempdir @@ fun hhi_root ->
   let ctx = init hhi_root in
   let { Multifile.States.base; changes } = Multifile.States.parse test_file in
+  if options.debug then
+    Printf.printf "Processing base repo (naming table, typecheck, depgraph)\n";
   let files = FileSystem.provide_files_before base in
   let (errors, naming_table) = process_pre_changes ctx options files in
   let (_end_repo, _end_naming_table, _errors) =
@@ -429,6 +430,7 @@ let go (test_file : string) options =
       changes
       ~init:(base, naming_table, errors)
       ~f:(fun (repo, naming_table, errors) repo_change ->
+        if options.debug then Printf.printf "Applying repo change\n";
         let repo = Multifile.States.apply_repo_change repo repo_change in
         let files_with_changes = process_changed_files options repo in
         let dep_to_symbol_map =
@@ -445,7 +447,7 @@ let go (test_file : string) options =
           compute_fanout_and_resolve_deps
             ctx
             options
-            files_with_changes
+            (Relative_path.Set.of_list files_with_changes)
             errors
             naming_table
             new_naming_table

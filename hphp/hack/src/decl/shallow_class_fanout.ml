@@ -405,7 +405,7 @@ let get_shell_change_fanout
 let get_major_change_fanout ctx class_dep (change : ClassDiff.MajorChange.t) :
     Fanout.t =
   match change with
-  | ClassDiff.MajorChange.(Added | Removed | Unknown) ->
+  | ClassDiff.MajorChange.(Added | Removed | Unknown _) ->
     get_maximum_fanout ctx class_dep
   | ClassDiff.MajorChange.Modified (shell_change, member_diff) ->
     get_shell_change_fanout ctx class_dep shell_change member_diff

@@ -105,9 +105,15 @@ type class_shell_change = {
 }
 [@@deriving eq, show]
 
+type unknown_kind =
+  | Old_decl_not_found
+  | New_decl_not_found
+  | Neither_found
+[@@deriving eq, show]
+
 module MajorChange : sig
   type t =
-    | Unknown
+    | Unknown of unknown_kind
     | Added
     | Removed
     | Modified of class_shell_change * member_diff

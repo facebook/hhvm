@@ -1223,7 +1223,8 @@ let test_shallow_class_diff ctx filename =
               (Provider_context.get_package_info ctx)
               c1
               c2
-          | (None, None) -> ClassDiff.(Major_change MajorChange.Unknown)
+          | (None, None) ->
+            ClassDiff.(Major_change (MajorChange.Unknown Neither_found))
           | (None, Some _) -> ClassDiff.(Major_change MajorChange.Added)
           | (Some _, None) -> ClassDiff.(Major_change MajorChange.Removed) ))
   in

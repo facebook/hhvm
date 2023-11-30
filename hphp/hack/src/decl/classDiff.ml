@@ -351,9 +351,15 @@ type class_shell_change = {
 }
 [@@deriving eq, show { with_path = false }]
 
+type unknown_kind =
+  | Old_decl_not_found
+  | New_decl_not_found
+  | Neither_found
+[@@deriving eq, show { with_path = false }]
+
 module MajorChange = struct
   type t =
-    | Unknown
+    | Unknown of unknown_kind
     | Added
     | Removed
     | Modified of class_shell_change * member_diff
@@ -638,13 +644,13 @@ end
 
 module MajorChangeCategory = struct
   type t =
-    | Unknown
+    | Unknown of unknown_kind
     | Added
     | Removed
     | Modified of ClassShellChangeCategory.t * MemberDiffCategory.t
 
   let of_major_change = function
-    | MajorChange.Unknown -> Unknown
+    | MajorChange.Unknown k -> Unknown k
     | MajorChange.Added -> Added
     | MajorChange.Removed -> Removed
     | MajorChange.Modified (change, member_diff) ->
@@ -653,7 +659,8 @@ module MajorChangeCategory = struct
           MemberDiffCategory.of_member_diff member_diff )
 
   let to_json = function
-    | Unknown -> Hh_json.string_ "Unknown"
+    | Unknown k ->
+      Hh_json.string_ (Printf.sprintf "Unknown %s" (show_unknown_kind k))
     | Added -> Hh_json.string_ "Added"
     | Removed -> Hh_json.string_ "Removed"
     | Modified (change, member_diff) ->

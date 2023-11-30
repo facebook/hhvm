@@ -209,7 +209,7 @@
     dep_hash_to_symbol
     direct_decl_service
     naming_table
-    server_fanout
+    server_incremental
     typing_check_job
     typing_deps)
   (preprocess

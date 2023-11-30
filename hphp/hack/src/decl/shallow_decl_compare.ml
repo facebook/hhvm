@@ -11,6 +11,7 @@ open Hh_prelude
 open ClassDiff
 open Reordered_argument_collections
 open Shallow_decl_defs
+module VersionedSSet = Decl_compare.VersionedSSet
 
 let diff_class_in_changed_file
     ctx
@@ -23,31 +24,32 @@ let diff_class_in_changed_file
   match (old_class_opt, new_class_opt) with
   | (Some old_class, Some new_class) ->
     Shallow_class_diff.diff_class ctx package_info old_class new_class
-  | (None, None) -> Major_change MajorChange.Unknown
-  | (None, Some _) -> Major_change MajorChange.Added
-  | (Some _, None) -> Major_change MajorChange.Removed
+  | (None, None) -> Major_change (MajorChange.Unknown Neither_found)
+  | (None, Some _) -> Major_change (MajorChange.Unknown Old_decl_not_found)
+  | (Some _, None) -> Major_change (MajorChange.Unknown New_decl_not_found)
 
 let compute_class_diffs
-    (ctx : Provider_context.t)
-    ~during_init
-    ~(defs : FileInfo.names Relative_path.Map.t) : (string * ClassDiff.t) list =
-  let all_defs =
-    Relative_path.Map.fold defs ~init:FileInfo.empty_names ~f:(fun _ ->
-        FileInfo.merge_names)
+    (ctx : Provider_context.t) ~during_init ~(class_names : VersionedSSet.diff)
+    : (string * ClassDiff.t) list =
+  let { VersionedSSet.added; kept; removed } = class_names in
+  let acc = [] in
+  let acc =
+    SSet.fold added ~init:acc ~f:(fun name acc ->
+        (name, Major_change MajorChange.Added) :: acc)
   in
-  let possibly_changed_classes = all_defs.FileInfo.n_classes in
+  let acc =
+    SSet.fold removed ~init:acc ~f:(fun name acc ->
+        (name, Major_change MajorChange.Removed) :: acc)
+  in
   let old_classes =
-    Old_shallow_classes_provider.get_old_batch
-      ctx
-      ~during_init
-      possibly_changed_classes
+    Old_shallow_classes_provider.get_old_batch ctx ~during_init kept
   in
   let new_classes =
-    SSet.fold possibly_changed_classes ~init:SMap.empty ~f:(fun name acc ->
+    SSet.fold kept ~init:SMap.empty ~f:(fun name acc ->
         SMap.add acc ~key:name ~data:(Decl_provider.get_shallow_class ctx name))
   in
   let package_info = Provider_context.get_package_info ctx in
-  SSet.fold possibly_changed_classes ~init:[] ~f:(fun cid acc ->
+  SSet.fold kept ~init:acc ~f:(fun cid acc ->
       let diff =
         diff_class_in_changed_file ctx package_info old_classes new_classes cid
       in
@@ -65,7 +67,7 @@ let untag_removed_members_in_depgraph
       ~f:(fun deps_acc (class_name, diff) ->
         match diff with
         | ClassDiff.Unchanged
-        | ClassDiff.(Major_change MajorChange.(Unknown | Added | Removed)) ->
+        | ClassDiff.(Major_change MajorChange.(Unknown _ | Added | Removed)) ->
           deps_acc
         | ClassDiff.(Major_change (MajorChange.Modified (_, member_diff)))
         | ClassDiff.Minor_change member_diff ->
@@ -146,12 +148,12 @@ let log_changes (changes : (string * ClassDiff.t) list) : unit =
 let compute_class_fanout
     (ctx : Provider_context.t)
     ~during_init
-    ~(defs : FileInfo.names Relative_path.Map.t)
+    ~(class_names : VersionedSSet.diff)
     (changed_files : Relative_path.t list) : Fanout.t =
   let file_count = List.length changed_files in
   Hh_logger.log "Detecting changes to classes in %d files:" file_count;
 
-  let changes = compute_class_diffs ctx ~during_init ~defs in
+  let changes = compute_class_diffs ctx ~during_init ~class_names in
   log_changes changes;
 
   let fanout = Shallow_class_fanout.fanout_of_changes ~ctx changes in

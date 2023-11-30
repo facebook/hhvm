@@ -23,6 +23,130 @@ open Decl_defs
 open Typing_deps
 open Typing_defs
 
+module VersionedNames = struct
+  type t = {
+    old_names: FileInfo.names;
+    new_names: FileInfo.names;
+  }
+  [@@deriving show]
+
+  let empty : t =
+    { old_names = FileInfo.empty_names; new_names = FileInfo.empty_names }
+
+  let make_unchanged (names : FileInfo.names) : t =
+    { old_names = names; new_names = names }
+
+  let merge left right : t =
+    let { old_names = left_old_names; new_names = left_new_names } = left in
+    let { old_names = right_old_names; new_names = right_new_names } = right in
+    {
+      old_names = FileInfo.merge_names left_old_names right_old_names;
+      new_names = FileInfo.merge_names left_new_names right_new_names;
+    }
+end
+
+module VersionedSSet = struct
+  type t = {
+    old: SSet.t;
+    new_: SSet.t;
+  }
+
+  type diff = {
+    removed: SSet.t;
+    kept: SSet.t;
+    added: SSet.t;
+  }
+
+  let empty = { old = SSet.empty; new_ = SSet.empty }
+
+  let project (project : FileInfo.names -> SSet.t) (names : VersionedNames.t) :
+      t =
+    let { VersionedNames.old_names; new_names } = names in
+    { old = project old_names; new_ = project new_names }
+
+  let get_classes = project (fun names -> names.FileInfo.n_classes)
+
+  let merge (left : t) (right : t) : t =
+    let { old = old_left; new_ = new_left } = left in
+    let { old = old_right; new_ = new_right } = right in
+    {
+      old = SSet.union old_left old_right;
+      new_ = SSet.union new_left new_right;
+    }
+
+  let empty_diff =
+    { removed = SSet.empty; kept = SSet.empty; added = SSet.empty }
+
+  let diff { old; new_ } : diff =
+    let diff =
+      SSet.fold
+        (fun old_name diff ->
+          match SSet.find_opt old_name new_ with
+          | None -> { diff with removed = SSet.add old_name diff.removed }
+          | Some n -> { diff with kept = SSet.add n diff.kept })
+        old
+        empty_diff
+    in
+    { diff with added = SSet.diff new_ old }
+end
+
+module VersionedFileInfo = struct
+  type t = {
+    funs: VersionedSSet.t;
+    types: VersionedSSet.t;
+    gconsts: VersionedSSet.t;
+    modules: VersionedSSet.t;
+  }
+
+  let transpose (names : VersionedNames.t) : t =
+    let { VersionedNames.old_names; new_names } = names in
+    let {
+      FileInfo.n_funs = old_funs;
+      n_classes = _;
+      n_types = old_types;
+      n_consts = old_gconsts;
+      n_modules = old_modules;
+    } =
+      old_names
+    in
+    let {
+      FileInfo.n_funs = new_funs;
+      n_classes = _;
+      n_types = new_types;
+      n_consts = new_gconsts;
+      n_modules = new_modules;
+    } =
+      new_names
+    in
+    {
+      funs = { VersionedSSet.old = old_funs; new_ = new_funs };
+      types = { VersionedSSet.old = old_types; new_ = new_types };
+      gconsts = { VersionedSSet.old = old_gconsts; new_ = new_gconsts };
+      modules = { VersionedSSet.old = old_modules; new_ = new_modules };
+    }
+
+  module Diff = struct
+    type t = {
+      funs: VersionedSSet.diff;
+      types: VersionedSSet.diff;
+      gconsts: VersionedSSet.diff;
+      modules: VersionedSSet.diff;
+    }
+  end
+
+  let diff (t : t) : Diff.t =
+    let { funs; types; gconsts; modules } = t in
+    {
+      Diff.funs = VersionedSSet.diff funs;
+      types = VersionedSSet.diff types;
+      gconsts = VersionedSSet.diff gconsts;
+      modules = VersionedSSet.diff modules;
+    }
+
+  let diff_names (names : VersionedNames.t) : Diff.t =
+    names |> transpose |> diff
+end
+
 (*****************************************************************************)
 (* Given two classes give back the set of functions or classes that need
  * to be rechecked
@@ -266,11 +390,26 @@ let get_extend_deps mode cid_hash acc =
     ~source_class:cid_hash
     ~acc
 
+let add_fanout make_dep mode id fanout_acc =
+  Fanout.add_fanout_of mode (make_dep id) fanout_acc
+
+let add_fun_fanout = add_fanout (fun id -> Dep.Fun id)
+
+let add_type_fanout = add_fanout (fun id -> Dep.Type id)
+
+let add_gconst_fanout mode id fanout =
+  fanout
+  |> add_fanout (fun id -> Dep.GConst id) mode id
+  |> add_fanout (fun id -> Dep.GConstName id) mode id
+
+let add_module_fanout = add_fanout (fun id -> Dep.Module id)
+
 (*****************************************************************************)
 (* Determine which functions/classes have to be rechecked after comparing
  * the old and the new type signature of "fid" (function identifier).
  *)
 (*****************************************************************************)
+
 let get_fun_deps ~ctx ~mode old_funs fid (fanout_acc, old_funs_missing) =
   match
     ( SMap.find fid old_funs,
@@ -290,8 +429,7 @@ let get_fun_deps ~ctx ~mode old_funs fid (fanout_acc, old_funs_missing) =
    * sites of `foo` to make sure there are no dangling references. *)
   | (None, _)
   | (_, None) ->
-    let dep = Dep.Fun fid in
-    let fanout_acc = Fanout.add_fanout_of mode dep fanout_acc in
+    let fanout_acc = add_fun_fanout mode fid fanout_acc in
     (fanout_acc, old_funs_missing + 1)
   | (Some fe1, Some fe2) ->
     let fe1 = Decl_pos_utils.NormalizeSig.fun_elt fe1 in
@@ -299,13 +437,18 @@ let get_fun_deps ~ctx ~mode old_funs fid (fanout_acc, old_funs_missing) =
     if Poly.( = ) fe1 fe2 then
       (fanout_acc, old_funs_missing)
     else
-      let dep = Dep.Fun fid in
-      let fanout_acc = Fanout.add_fanout_of mode dep fanout_acc in
+      let fanout_acc = add_fun_fanout mode fid fanout_acc in
       (fanout_acc, old_funs_missing)
 
-let get_funs_deps ~ctx old_funs funs =
+let get_funs_deps ~ctx old_funs (funs : VersionedSSet.diff) =
   let mode = Provider_context.get_deps_mode ctx in
-  SSet.fold (get_fun_deps ~ctx ~mode old_funs) funs (Fanout.empty, 0)
+  let { VersionedSSet.removed; kept; added } = funs in
+  let fanout =
+    Fanout.empty
+    |> SSet.fold (add_fun_fanout mode) removed
+    |> SSet.fold (add_fun_fanout mode) added
+  in
+  SSet.fold (get_fun_deps ~ctx ~mode old_funs) kept (fanout, 0)
 
 (*****************************************************************************)
 (* Determine which functions/classes have to be rechecked after comparing
@@ -325,8 +468,7 @@ let get_type_deps ~ctx ~mode old_types tid (fanout_acc, old_types_missing) =
   with
   | (None, _)
   | (_, None) ->
-    let dep = Dep.Type tid in
-    let fanout_acc = Fanout.add_fanout_of mode dep fanout_acc in
+    let fanout_acc = add_type_fanout mode tid fanout_acc in
     (fanout_acc, old_types_missing + 1)
   | (Some tdef1, Some tdef2) ->
     let tdef1 = Decl_pos_utils.NormalizeSig.typedef tdef1 in
@@ -335,13 +477,18 @@ let get_type_deps ~ctx ~mode old_types tid (fanout_acc, old_types_missing) =
     if is_same_signature then
       (fanout_acc, old_types_missing)
     else
-      let dep = Dep.Type tid in
-      let fanout_acc = Fanout.add_fanout_of mode dep fanout_acc in
+      let fanout_acc = add_type_fanout mode tid fanout_acc in
       (fanout_acc, old_types_missing)
 
-let get_types_deps ~ctx old_types types =
+let get_types_deps ~ctx old_types (types : VersionedSSet.diff) =
   let mode = Provider_context.get_deps_mode ctx in
-  SSet.fold (get_type_deps ~ctx ~mode old_types) types (Fanout.empty, 0)
+  let { VersionedSSet.removed; kept; added } = types in
+  let fanout =
+    Fanout.empty
+    |> SSet.fold (add_type_fanout mode) removed
+    |> SSet.fold (add_type_fanout mode) added
+  in
+  SSet.fold (get_type_deps ~ctx ~mode old_types) kept (fanout, 0)
 
 (*****************************************************************************)
 (* Determine which top level definitions have to be rechecked if the constant
@@ -363,11 +510,7 @@ let get_gconst_deps
   match (cst1, cst2) with
   | (None, _)
   | (_, None) ->
-    let fanout_acc =
-      fanout_acc
-      |> Fanout.add_fanout_of mode (Dep.GConst cst_id)
-      |> Fanout.add_fanout_of mode (Dep.GConstName cst_id)
-    in
+    let fanout_acc = add_gconst_fanout mode cst_id fanout_acc in
     (fanout_acc, old_gconsts_missing + 1)
   | (Some cst1, Some cst2) ->
     let is_same_signature = Poly.( = ) cst1 cst2 in
@@ -380,7 +523,13 @@ let get_gconst_deps
 
 let get_gconsts_deps ~ctx old_gconsts gconsts =
   let mode = Provider_context.get_deps_mode ctx in
-  SSet.fold (get_gconst_deps ~ctx ~mode old_gconsts) gconsts (Fanout.empty, 0)
+  let { VersionedSSet.removed; kept; added } = gconsts in
+  let fanout =
+    Fanout.empty
+    |> SSet.fold (add_gconst_fanout mode) removed
+    |> SSet.fold (add_gconst_fanout mode) added
+  in
+  SSet.fold (get_gconst_deps ~ctx ~mode old_gconsts) kept (fanout, 0)
 
 let rule_changed rule1 rule2 =
   match (rule1, rule2) with
@@ -414,20 +563,24 @@ let get_module_deps ~ctx ~mode old_modules mid (fanout_acc, old_modules_missing)
   with
   | (None, _)
   | (_, None) ->
-    let dep = Dep.Module mid in
-    let fanout_acc = Fanout.add_fanout_of mode dep fanout_acc in
+    let fanout_acc = add_module_fanout mode mid fanout_acc in
     (fanout_acc, old_modules_missing + 1)
   | (Some module1, Some module2) ->
     if
       rules_changed module1.mdt_exports module2.mdt_exports
       || rules_changed module1.mdt_imports module2.mdt_imports
     then
-      let dep = Dep.Module mid in
-      let fanout_acc = Fanout.add_fanout_of mode dep fanout_acc in
+      let fanout_acc = add_module_fanout mode mid fanout_acc in
       (fanout_acc, old_modules_missing)
     else
       (fanout_acc, old_modules_missing)
 
 let get_modules_deps ~ctx ~old_modules ~modules =
   let mode = Provider_context.get_deps_mode ctx in
-  SSet.fold (get_module_deps ~ctx ~mode old_modules) modules (Fanout.empty, 0)
+  let { VersionedSSet.removed; kept; added } = modules in
+  let fanout =
+    Fanout.empty
+    |> SSet.fold (add_module_fanout mode) removed
+    |> SSet.fold (add_module_fanout mode) added
+  in
+  SSet.fold (get_module_deps ~ctx ~mode old_modules) kept (fanout, 0)

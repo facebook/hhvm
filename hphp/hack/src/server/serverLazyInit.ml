@@ -495,49 +495,27 @@ let use_prechecked_files (genv : ServerEnv.genv) : bool =
   && (not (ServerArgs.check_mode genv.options))
   && Option.is_none (ServerArgs.save_filename genv.options)
 
-let get_old_and_new_defs_in_files
-    (old_naming_table : Naming_table.t)
-    (new_naming_table : Naming_table.t)
-    (files : Relative_path.Set.t) : FileInfo.names Relative_path.Map.t =
-  Relative_path.Set.fold
-    files
-    ~f:
-      begin
-        fun path acc ->
-          let old_defs_in_file =
-            Naming_table.get_file_info old_naming_table path
-            |> Option.map ~f:FileInfo.simplify
-          in
-          let new_defs_in_file =
-            Naming_table.get_file_info new_naming_table path
-            |> Option.map ~f:FileInfo.simplify
-          in
-          let all_defs =
-            Option.merge
-              old_defs_in_file
-              new_defs_in_file
-              ~f:FileInfo.merge_names
-          in
-          match all_defs with
-          | Some all_defs -> Relative_path.Map.add acc ~key:path ~data:all_defs
-          | None -> acc
-      end
-    ~init:Relative_path.Map.empty
-
-let names_to_deps (names : FileInfo.names) : Typing_deps.DepSet.t =
+let file_names_to_deps names deps =
   let open Typing_deps in
   let { FileInfo.n_funs; n_classes; n_types; n_consts; n_modules } = names in
   let add_deps_of_sset dep_ctor sset depset =
     SSet.fold sset ~init:depset ~f:(fun n acc ->
         DepSet.add acc (Dep.make (dep_ctor n)))
   in
-  let deps = add_deps_of_sset (fun n -> Dep.Fun n) n_funs (DepSet.make ()) in
+  let deps = add_deps_of_sset (fun n -> Dep.Fun n) n_funs deps in
   let deps = add_deps_of_sset (fun n -> Dep.Type n) n_classes deps in
   let deps = add_deps_of_sset (fun n -> Dep.Type n) n_types deps in
   let deps = add_deps_of_sset (fun n -> Dep.GConst n) n_consts deps in
   let deps = add_deps_of_sset (fun n -> Dep.GConstName n) n_consts deps in
   let deps = add_deps_of_sset (fun n -> Dep.Module n) n_modules deps in
   deps
+
+let names_to_deps (names : Decl_compare.VersionedNames.t) : Typing_deps.DepSet.t
+    =
+  let { Decl_compare.VersionedNames.old_names; new_names } = names in
+  Typing_deps.DepSet.make ()
+  |> file_names_to_deps old_names
+  |> file_names_to_deps new_names
 
 let log_fanout_information to_recheck_deps files_to_recheck =
   (* we use lazy here to avoid expensive string generation when logging
@@ -576,7 +554,7 @@ let get_files_to_recheck
     (env : ServerEnv.env)
     (old_naming_table : Naming_table.t)
     (new_naming_table : Naming_table.t)
-    (defs_per_dirty_file : FileInfo.names Relative_path.Map.t)
+    (defs_per_dirty_file : Decl_compare.VersionedNames.t Relative_path.Map.t)
     (files_to_redeclare : Relative_path.Set.t) : Relative_path.Set.t =
   let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
   let defs_per_file_to_redeclare =
@@ -603,11 +581,12 @@ let get_files_to_recheck
     Option.merge old_classes new_classes ~f:SSet.union
     |> Option.value ~default:SSet.empty
   in
-  let dirty_names =
+  let old_dirty_names =
     Relative_path.Map.fold
       defs_per_dirty_file
       ~init:FileInfo.empty_names
-      ~f:(fun _ -> FileInfo.merge_names)
+      ~f:(fun _fn { Decl_compare.VersionedNames.old_names; new_names = _ } acc
+         -> FileInfo.merge_names old_names acc)
   in
   let ctx = Provider_utils.ctx_from_server_env env in
   Decl_redecl_service.oldify_decls_and_remove_descendants
@@ -615,7 +594,7 @@ let get_files_to_recheck
     ~bucket_size
     genv.workers
     get_old_and_new_classes
-    ~defs:dirty_names;
+    ~defs:old_dirty_names;
   let { Decl_redecl_service.fanout; _ } =
     Decl_redecl_service.redo_type_decl
       ~bucket_size
@@ -623,11 +602,15 @@ let get_files_to_recheck
       ~during_init:true
       genv.workers
       get_old_and_new_classes
-      ~previously_oldified_defs:dirty_names
+      ~previously_oldified_defs:old_dirty_names
       ~defs:defs_per_file_to_redeclare
   in
-  Decl_redecl_service.remove_old_defs ctx ~bucket_size genv.workers dirty_names;
-  let files_to_recheck = ServerFanout.resolve_files ctx env fanout in
+  Decl_redecl_service.remove_old_defs
+    ctx
+    ~bucket_size
+    genv.workers
+    old_dirty_names;
+  let files_to_recheck = ServerIncremental.resolve_files ctx env fanout in
   log_fanout_information fanout.Fanout.to_recheck files_to_recheck;
   files_to_recheck
 
@@ -672,30 +655,39 @@ let calculate_fanout_and_defer_or_do_type_check
       dirty_local_files_changed_decls
   in
   let old_and_new_defs_per_dirty_files_changed_decls =
-    get_old_and_new_defs_in_files
+    ServerIncremental.get_old_and_new_defs_in_files
       old_naming_table
       new_naming_table
       dirty_files_changed_decls
   in
-  let old_and_new_defs_per_dirty_files =
+  (* We're looking at files with unchanged decls and therefore unchanged
+   * def names, so it does not matter which version of the naming table
+   * we are looking at (since there should have been no changes). *)
+  let old_and_new_defs_per_dirty_files_unchanged_decls =
     ServerCheckUtils.extend_defs_per_file
       genv
-      old_and_new_defs_per_dirty_files_changed_decls
+      Relative_path.Map.empty
       env.naming_table
       dirty_files_unchanged_decls
+    |> Relative_path.Map.map ~f:Decl_compare.VersionedNames.make_unchanged
   in
-  let old_and_new_defs_in_files files : FileInfo.names =
+  let old_and_new_defs_per_dirty_files =
+    Relative_path.Map.union
+      old_and_new_defs_per_dirty_files_changed_decls
+      old_and_new_defs_per_dirty_files_unchanged_decls
+  in
+  let old_and_new_defs_in_files files : Decl_compare.VersionedNames.t =
     Relative_path.Map.fold
       old_and_new_defs_per_dirty_files_changed_decls
       ~f:
         begin
           fun k v acc ->
             if Relative_path.Set.mem files k then
-              FileInfo.merge_names v acc
+              Decl_compare.VersionedNames.merge v acc
             else
               acc
         end
-      ~init:FileInfo.empty_names
+      ~init:Decl_compare.VersionedNames.empty
   in
   let ctx = Provider_utils.ctx_from_server_env env in
   let master_deps =

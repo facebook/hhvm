@@ -28,7 +28,7 @@ val redo_type_decl :
   bucket_size:int ->
   get_classes_in_file ->
   previously_oldified_defs:FileInfo.names ->
-  defs:Naming_table.defs_per_file ->
+  defs:Decl_compare.VersionedNames.t Relative_path.Map.t ->
   redo_type_decl_result
 
 (** Mark all provided [defs] as old, as long as they were not previously

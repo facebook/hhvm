@@ -72,47 +72,22 @@ let print_fast defs_per_file =
  *)
 (*****************************************************************************)
 
-let add_old_decls old_naming_table defs_per_file =
-  Relative_path.Map.fold
+let add_old_decls
+    (old_naming_table : Naming_table.t)
+    (defs_per_file : FileInfo.names Relative_path.Map.t) :
+    Decl_compare.VersionedNames.t Relative_path.Map.t =
+  Relative_path.Map.mapi
     defs_per_file
     ~f:
       begin
-        fun filename info_names acc ->
-          match Naming_table.get_file_info old_naming_table filename with
-          | None -> acc
-          | Some old_info ->
-            let old_info_names = FileInfo.simplify old_info in
-            let info_names = FileInfo.merge_names old_info_names info_names in
-            Relative_path.Map.add acc ~key:filename ~data:info_names
+        fun filename new_names ->
+          let old_names =
+            match Naming_table.get_file_info old_naming_table filename with
+            | None -> FileInfo.empty_names
+            | Some old_info -> FileInfo.simplify old_info
+          in
+          { Decl_compare.VersionedNames.old_names; new_names }
       end
-    ~init:defs_per_file
-
-(** Removes the names that were defined in the files from the reverse naming table *)
-let remove_defs_from_reverse_naming_table
-    env (defs_per_file_parsed : _ Relative_path.Map.t) =
-  Relative_path.Map.iter defs_per_file_parsed ~f:(fun fn _ ->
-      match Naming_table.get_file_info env.naming_table fn with
-      | None -> ()
-      | Some
-          {
-            FileInfo.funs;
-            classes;
-            typedefs;
-            consts;
-            modules;
-            file_mode = _;
-            comments = _;
-            hash = _;
-          } ->
-        (* we use [snd] to strip away positions *)
-        let snd (_, x, _) = x in
-        Naming_global.remove_decls
-          ~backend:(Provider_backend.get ())
-          ~funs:(List.map funs ~f:snd)
-          ~classes:(List.map classes ~f:snd)
-          ~typedefs:(List.map typedefs ~f:snd)
-          ~consts:(List.map consts ~f:snd)
-          ~modules:(List.map modules ~f:snd))
 
 (*****************************************************************************)
 (* Parses the set of modified files *)
@@ -221,7 +196,9 @@ let do_naming
   let start_t = Unix.gettimeofday () in
   let count = Relative_path.Map.cardinal defs_per_file_parsed in
   CgroupProfiler.step_start_end cgroup_steps "naming" @@ fun _cgroup_step ->
-  remove_defs_from_reverse_naming_table env defs_per_file_parsed;
+  ServerIncremental.remove_defs_from_reverse_naming_table
+    env.naming_table
+    defs_per_file_parsed;
 
   let failed_naming =
     Relative_path.Map.fold
@@ -267,7 +244,7 @@ let do_redecl
     (genv : genv)
     (env : env)
     ~(reparsed : Relative_path.Set.t)
-    ~(defs_per_file : FileInfo.names Relative_path.Map.t)
+    ~(defs_per_file : Decl_compare.VersionedNames.t Relative_path.Map.t)
     ~(naming_table : Naming_table.t)
     ~(cgroup_steps : CgroupProfiler.step_group) : redecl_result =
   let get_classes =
@@ -289,7 +266,7 @@ let do_redecl
       ~defs:defs_per_file
   in
   let to_recheck =
-    ServerFanout.get_files_to_recheck
+    ServerIncremental.get_files_to_recheck
       ctx
       env
       fanout

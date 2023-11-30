@@ -33,12 +33,13 @@ let compute_deps_neutral = (Fanout.empty, 0)
   OnTheFlyStore.
   I tried replicating the data to speed things up but it had no effect. *)
 module OnTheFlyStore = GlobalStorage.Make (struct
-  type t = Naming_table.defs_per_file
+  type t = Decl_compare.VersionedNames.t Relative_path.Map.t
 end)
 
 (** Given a set of functions, compare the old and the new decl and deduce
   what must be rechecked accordingly. *)
-let compare_funs_and_get_fanout ctx old_funs fanout_acc funs =
+let compare_funs_and_get_fanout
+    ctx old_funs fanout_acc (funs : Decl_compare.VersionedSSet.diff) =
   let (fanout, old_funs_missing) =
     Decl_compare.get_funs_deps ~ctx old_funs funs
   in
@@ -47,7 +48,8 @@ let compare_funs_and_get_fanout ctx old_funs fanout_acc funs =
 
 (** Given a set of typedefs, compare the old and the new decl and deduce
   what must be rechecked accordingly. *)
-let compare_types_and_get_fanout ctx old_types fanout_acc types =
+let compare_types_and_get_fanout
+    ctx old_types fanout_acc (types : Decl_compare.VersionedSSet.diff) =
   let (fanout, old_types_missing) =
     Decl_compare.get_types_deps ~ctx old_types types
   in
@@ -56,7 +58,8 @@ let compare_types_and_get_fanout ctx old_types fanout_acc types =
 
 (* Given a set of global constants, compare the old and the new decl and
    deduce what must be rechecked accordingly. *)
-let compare_gconsts_and_get_fanout ctx old_gconsts fanout_acc gconsts =
+let compare_gconsts_and_get_fanout
+    ctx old_gconsts fanout_acc (gconsts : Decl_compare.VersionedSSet.diff) =
   let (fanout, old_gconsts_missing) =
     Decl_compare.get_gconsts_deps ~ctx old_gconsts gconsts
   in
@@ -65,7 +68,8 @@ let compare_gconsts_and_get_fanout ctx old_gconsts fanout_acc gconsts =
 
 (* Given a set of modules, compare the old and the new decl and
    deduce what must be rechecked accordingly. *)
-let compare_modules_and_get_fanout ctx old_modules fanout_acc modules =
+let compare_modules_and_get_fanout
+    ctx old_modules fanout_acc (modules : Decl_compare.VersionedSSet.diff) =
   let (fanout, old_modules_missing) =
     Decl_compare.get_modules_deps ~ctx ~old_modules ~modules
   in
@@ -89,25 +93,30 @@ let decl_files ctx filel =
   redeclare_files ctx filel
 
 let compare_decls_and_get_fanout
-    ctx defs_per_file (filel : Relative_path.t list) : Fanout.t * int =
-  let defs_in_files =
-    List.map filel ~f:(fun fn -> Relative_path.Map.find defs_per_file fn)
-  in
+    ctx
+    (defs_per_file : Decl_compare.VersionedNames.t Relative_path.Map.t)
+    (filel : Relative_path.t list) : Fanout.t * int =
   let all_defs =
-    List.fold_left
-      defs_in_files
-      ~f:FileInfo.merge_names
-      ~init:FileInfo.empty_names
+    List.fold filel ~init:Decl_compare.VersionedNames.empty ~f:(fun acc fn ->
+        Relative_path.Map.find defs_per_file fn
+        |> Decl_compare.VersionedNames.merge acc)
   in
-  let { FileInfo.n_classes = _; n_funs; n_types; n_consts; n_modules } =
-    all_defs
-  in
-  let acc = Fanout.empty in
   (* Fetching everything at once is faster *)
   let (old_funs, old_types, old_consts, old_modules) =
+    let { FileInfo.n_classes = _; n_funs; n_types; n_consts; n_modules } =
+      all_defs.Decl_compare.VersionedNames.old_names
+    in
     match Provider_backend.get () with
     | Provider_backend.Rust_provider_backend be ->
-      let non_class_defs = FileInfo.{ all_defs with n_classes = SSet.empty } in
+      let non_class_defs =
+        {
+          FileInfo.n_funs;
+          n_classes = SSet.empty;
+          n_types;
+          n_consts;
+          n_modules;
+        }
+      in
       let (_classes, old_funs, old_types, old_consts, old_modules) =
         Rust_provider_backend.Decl.get_old_defs be non_class_defs
       in
@@ -118,17 +127,21 @@ let compare_decls_and_get_fanout
         Decl_heap.GConsts.get_old_batch n_consts,
         Decl_heap.Modules.get_old_batch n_modules )
   in
+  let { Decl_compare.VersionedFileInfo.Diff.funs; types; gconsts; modules } =
+    Decl_compare.VersionedFileInfo.diff_names all_defs
+  in
+  let acc = Fanout.empty in
   let (acc, old_funs_missing) =
-    compare_funs_and_get_fanout ctx old_funs acc n_funs
+    compare_funs_and_get_fanout ctx old_funs acc funs
   in
   let (acc, old_types_missing) =
-    compare_types_and_get_fanout ctx old_types acc n_types
+    compare_types_and_get_fanout ctx old_types acc types
   in
   let (acc, old_gconsts_missing) =
-    compare_gconsts_and_get_fanout ctx old_consts acc n_consts
+    compare_gconsts_and_get_fanout ctx old_consts acc gconsts
   in
   let (acc, old_modules_missing) =
-    compare_modules_and_get_fanout ctx old_modules acc n_modules
+    compare_modules_and_get_fanout ctx old_modules acc modules
   in
   let old_decl_missing_count =
     old_funs_missing
@@ -206,10 +219,10 @@ let parallel_redecl_compare_and_get_fanout
     (ctx : Provider_context.t)
     (workers : MultiWorker.worker list option)
     (bucket_size : int)
-    (defs_per_file : FileInfo.names Relative_path.Map.t)
+    (defs_per_file : Decl_compare.VersionedNames.t Relative_path.Map.t)
     (fnl : Relative_path.t list) : Fanout.t * int =
+  ServerProgress.with_frame @@ fun () ->
   try
-    ServerProgress.with_frame @@ fun () ->
     OnTheFlyStore.store defs_per_file;
     let files_initial_count = List.length fnl in
     let files_declared_count = ref 0 in
@@ -466,9 +479,9 @@ let merge_elements
     ~extra:None;
   acc
 
-(**
- * Get the [Decl_class_elements.t]s corresponding to the classes contained in
- * [defs]. *)
+(** Get the [Decl_class_elements.t]s (a.k.a. members)
+  corresponding to the classes contained in [defs].
+  Get them from the element heaps. *)
 let get_elems
     (workers : MultiWorker.worker list option)
     ~(bucket_size : int)
@@ -509,7 +522,7 @@ let get_elems
   in
   elements
 
-let invalidate_folded_classes_for_shallow_fanout
+let invalidate_folded_classes
     ctx workers ~bucket_size ~get_classes_in_file changed_classes =
   let invalidated =
     changed_classes
@@ -550,16 +563,20 @@ let redo_type_decl
     ~(bucket_size : int)
     (get_classes : Relative_path.t -> SSet.t)
     ~(previously_oldified_defs : FileInfo.names)
-    ~(defs : FileInfo.names Relative_path.Map.t) : redo_type_decl_result =
+    ~(defs : Decl_compare.VersionedNames.t Relative_path.Map.t) :
+    redo_type_decl_result =
   Hh_logger.log "Decl_redecl_service.redo_type_decl #1";
   let all_defs =
-    Relative_path.Map.fold defs ~init:FileInfo.empty_names ~f:(fun _ ->
-        FileInfo.merge_names)
+    Relative_path.Map.fold
+      defs
+      ~init:Decl_compare.VersionedNames.empty
+      ~f:(fun _fn names acc -> Decl_compare.VersionedNames.merge names acc)
   in
+  let all_old_defs = all_defs.Decl_compare.VersionedNames.old_names in
   (* Some of the definitions are already in the old heap, left there by a
    * previous lazy check *)
   let (oldified_defs, current_defs) =
-    Decl_utils.split_defs all_defs previously_oldified_defs
+    Decl_utils.split_defs all_old_defs previously_oldified_defs
   in
   (* Oldify the remaining defs along with their elements *)
   let get_elems = get_elems workers ~bucket_size in
@@ -586,9 +603,15 @@ let redo_type_decl
   Hh_logger.log "Decl_redecl_service.redo_type_decl #3";
   let fanout =
     let fanout =
-      Shallow_decl_compare.compute_class_fanout ctx ~during_init ~defs fnl
+      Shallow_decl_compare.compute_class_fanout
+        ctx
+        ~during_init
+        ~class_names:
+          (Decl_compare.VersionedSSet.get_classes all_defs
+          |> Decl_compare.VersionedSSet.diff)
+        fnl
     in
-    invalidate_folded_classes_for_shallow_fanout
+    invalidate_folded_classes
       ctx
       workers
       ~bucket_size
@@ -596,7 +619,7 @@ let redo_type_decl
       fanout.Fanout.changed;
     Fanout.union fanout fanout_acc
   in
-  remove_old_defs ctx all_defs all_elems;
+  remove_old_defs ctx all_old_defs all_elems;
 
   Hh_logger.log "Finished recomputing type declarations:";
   Hh_logger.log

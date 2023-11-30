@@ -41,7 +41,9 @@ let calculate_bucket_size ~num_jobs ~num_workers ?max_size () =
   else
     max_size
 
-let make_ progress_fn bucket_size jobs =
+(** [make_ progress_fn bucket_size jobs] returns a function
+  able to provide the next bucket of jobs from [jobs] *)
+let make_ progress_fn bucket_size (jobs : 'job array) : unit -> 'job list =
   let i = ref 0 in
   fun () ->
     let bucket_size = min (Array.length jobs - !i) bucket_size in
@@ -50,7 +52,8 @@ let make_ progress_fn bucket_size jobs =
     i := bucket_size + !i;
     Array.to_list result
 
-let make_list ~num_workers ?progress_fn ?max_size jobs =
+let make_list ~num_workers ?progress_fn ?max_size (jobs : 'job list) :
+    unit -> 'job list =
   let progress_fn =
     Option.value ~default:(fun ~total:_ ~start:_ ~length:_ -> ()) progress_fn
   in

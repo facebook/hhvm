@@ -364,6 +364,7 @@
  (modules shallow_decl_compare)
  (libraries
   classDiff
+  decl_compare
   decl_defs
   package_info
   shallow_class_diff

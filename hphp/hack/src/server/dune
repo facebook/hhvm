@@ -449,11 +449,12 @@
   (copy# facebook/serverInvalidateUnits.ml serverInvalidateUnits.fb.ml)))
 
 (library
- (name server_fanout)
+ (name server_incremental)
  (wrapped false)
  (modules
-  serverFanout)
+  serverIncremental)
  (libraries
+  decl_compare
   fanout
   naming_provider
   provider_context
@@ -516,7 +517,7 @@
   server_code_actions_services
   server_docblock_at
   server_env
-  server_fanout
+  server_incremental
   server_find_refs
   server_hover
   server_infer_type
@@ -589,7 +590,7 @@
     security_stubs
     server
     server_env_build
-    server_fanout
+    server_incremental
     server_call_hierarchy
     server_go_to
     server_highlight_refs

@@ -132,7 +132,7 @@ void setToIntrinsicDefault(void* value, const FieldInfo& info) {
           }
           break;
         }
-      };
+      }
       break;
     }
     case protocol::TType::T_MAP: {
@@ -258,7 +258,7 @@ bool isTerseFieldSet(const ThriftValue& value, const FieldInfo& info) {
           return !(*static_cast<const std::unique_ptr<folly::IOBuf>*>(
                        value.object))
                       ->empty();
-      };
+      }
     }
     case protocol::TType::T_MAP: {
       const auto& ext = *static_cast<const MapFieldExt*>(typeInfoExt);

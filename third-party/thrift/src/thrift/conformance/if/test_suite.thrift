@@ -25,6 +25,7 @@ namespace java.swift org.apache.thrift.conformance
 include "thrift/conformance/if/serialization.thrift"
 include "thrift/conformance/if/rpc.thrift"
 include "thrift/conformance/if/patch_data.thrift"
+include "thrift/annotation/thrift.thrift"
 
 // A Collection of tests.
 struct TestSuite {
@@ -65,7 +66,8 @@ struct TestCase {
   2: optional string description;
 
   // The test case to run.
-  3: TestCaseUnion test (cpp.mixin);
+  @thrift.Mixin
+  3: TestCaseUnion test;
 
   // Tags for this test case.
   4: set<string> tags;

@@ -16,6 +16,8 @@
 
 namespace cpp2 apache.thrift.stress
 
+include "thrift/annotation/cpp.thrift"
+
 enum ProcessingMode {
   Default = 0, // execute inline in handler (synchronously)
   Async = 1, // execute asynchronously in handler
@@ -60,12 +62,15 @@ struct StreamRequest {
 }
 
 service StressTest {
-  void ping() (thread = "eb");
+  @cpp.ProcessInEbThreadUnsafe
+  void ping();
   binary echo(1: binary payload);
-  binary echoEb(1: binary payload) (thread = "eb");
+  @cpp.ProcessInEbThreadUnsafe
+  binary echoEb(1: binary payload);
 
   BasicResponse requestResponseTm(1: BasicRequest req);
-  BasicResponse requestResponseEb(1: BasicRequest req) (thread = "eb");
+  @cpp.ProcessInEbThreadUnsafe
+  BasicResponse requestResponseEb(1: BasicRequest req);
 
   BasicResponse, stream<BasicResponse> streamTm(1: StreamRequest req);
   BasicResponse, sink<BasicResponse, BasicResponse> sinkTm(

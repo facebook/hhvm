@@ -126,7 +126,7 @@ class FOLLY_EXPORT TApplicationException : public TException {
           return "TApplicationException: Tenant quota exceeded";
         default:
           return "TApplicationException: (Invalid exception type)";
-      };
+      }
     } else {
       return message_.c_str();
     }

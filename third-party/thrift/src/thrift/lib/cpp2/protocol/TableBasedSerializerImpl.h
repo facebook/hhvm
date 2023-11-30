@@ -448,7 +448,7 @@ size_t write(Protocol_* iprot, const TypeInfo& typeInfo, ThriftValue value) {
         case StringFieldType::IOBufPtr:
           return iprot->writeBinary(
               *static_cast<const std::unique_ptr<folly::IOBuf>*>(value.object));
-      };
+      }
     }
       // For container types, when recursively writing with lambdas we
       // intentionally skip checking OptionalThriftValue.hasValue and treat it

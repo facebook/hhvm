@@ -366,7 +366,7 @@ void ListTypeInfo::consumeElem(
   auto currentSize = PyTuple_GET_SIZE(*pyObjPtr);
   if (_PyTuple_Resize(pyObjPtr, currentSize + 1) == -1) {
     THRIFT_PY3_CHECK_ERROR();
-  };
+  }
 
   PyTuple_SET_ITEM(*pyObjPtr, currentSize, elem);
 }
@@ -406,7 +406,7 @@ size_t SetTypeInfo::write(
     }
     if (PyList_Sort(seq.get()) == -1) {
       THRIFT_PY3_CHECK_ERROR();
-    };
+    }
     iter = UniquePyObjectPtr{PyObject_GetIter(seq.get())};
   } else {
     iter = UniquePyObjectPtr{PyObject_GetIter(set)};
@@ -496,7 +496,7 @@ size_t MapTypeInfo::write(
     map = seq.get();
     if (PyList_Sort(map) == -1) {
       THRIFT_PY3_CHECK_ERROR();
-    };
+    }
   }
   for (std::uint32_t i = 0; i < size; ++i) {
     PyObject* pair = PyTuple_GET_ITEM(map, i);
@@ -527,7 +527,7 @@ void MapTypeInfo::consumeElem(
   auto currentSize = PyTuple_GET_SIZE(*pyObjPtr);
   if (_PyTuple_Resize(pyObjPtr, currentSize + 1) == -1) {
     THRIFT_PY3_CHECK_ERROR();
-  };
+  }
   PyTuple_SET_ITEM(*pyObjPtr, currentSize, elem.release());
 }
 

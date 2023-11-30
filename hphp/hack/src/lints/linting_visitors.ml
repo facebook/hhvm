@@ -43,6 +43,7 @@ class body_visitor =
      * is the function / method body) and the inner if-else / loop blocks *)
     method on_body = this#on_block
   end
+  [@alert "-deprecated"]
 
 module type BodyVisitorModule = sig
   (* each on_* method in the visitor should call its counterpart in the parent

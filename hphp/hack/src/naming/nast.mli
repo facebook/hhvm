@@ -396,3 +396,5 @@ module Visitor_DEPRECATED : sig
 
   class virtual ['a] visitor : ['a] visitor_type
 end
+[@@ocaml.deprecated
+  "This has holes and needs manual upates. Use [Nast.iter] or [Nast.reduce]"]

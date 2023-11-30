@@ -494,6 +494,7 @@ class local_finding_visitor =
       let localmap = this#on_block localmap body in
       LocalMap.pop localmap
   end
+  [@alert "-deprecated"]
 
 let go_from_ast ~ast ~line ~char =
   let empty = LocalMap.make line char in

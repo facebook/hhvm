@@ -88,22 +88,23 @@ let get_lvar = function
  * as a form of documentation, and we want to ignore those variables
  * when doing our sequencing checks. *)
 let used_variables_visitor =
-  object (this)
-    inherit [Local_id.Set.t] Nast.Visitor_DEPRECATED.visitor as parent
+  (object (this)
+     inherit [Local_id.Set.t] Nast.Visitor_DEPRECATED.visitor as parent
 
-    method! on_lvar acc (_, id) = Local_id.Set.add id acc
+     method! on_lvar acc (_, id) = Local_id.Set.add id acc
 
-    (* We have to handle expressions just enough to avoid counting
-     * assignments as uses of variables.
-     * (We do still count operator-assignments) *)
-    method! on_expr acc ((_, _, e_) as e) =
-      match e_ with
-      | Binop Aast.{ bop = Ast_defs.Eq None; lhs = e1; rhs = e2 } ->
-        let (_, not_vars) = List.partition_map (unpack_lvals e1) ~f:get_lvar in
-        let acc = List.fold_left ~f:this#on_expr ~init:acc not_vars in
-        this#on_expr acc e2
-      | _ -> parent#on_expr acc e
+     (* We have to handle expressions just enough to avoid counting
+      * assignments as uses of variables.
+      * (We do still count operator-assignments) *)
+     method! on_expr acc ((_, _, e_) as e) =
+       match e_ with
+       | Binop Aast.{ bop = Ast_defs.Eq None; lhs = e1; rhs = e2 } ->
+         let (_, not_vars) = List.partition_map (unpack_lvals e1) ~f:get_lvar in
+         let acc = List.fold_left ~f:this#on_expr ~init:acc not_vars in
+         this#on_expr acc e2
+       | _ -> parent#on_expr acc e
   end
+  [@alert "-deprecated"])
 
 (* Actual sequence checking pass *)
 let sequence_visitor ~require_used used_vars =
@@ -183,96 +184,98 @@ let sequence_visitor ~require_used used_vars =
       ~init:tracking_env
   in
   (* And now the actual visitor object *)
-  object (this)
-    inherit [env] Nast.Visitor_DEPRECATED.visitor as parent
+  (object (this)
+     inherit [env] Nast.Visitor_DEPRECATED.visitor as parent
 
-    method check_unsequenced_exprs env e1 e2 =
-      let env1 = this#on_expr tracking_env e1 in
-      let env2 = this#on_expr tracking_env e2 in
-      merge_unsequenced env env1 env2
+     method check_unsequenced_exprs env e1 e2 =
+       let env1 = this#on_expr tracking_env e1 in
+       let env2 = this#on_expr tracking_env e2 in
+       merge_unsequenced env env1 env2
 
-    method! on_expr env ((_, _, e_) as e) =
-      match e_ with
-      | Lvar id -> use_local env id
-      | Unop
-          ( (Ast_defs.Uincr | Ast_defs.Udecr | Ast_defs.Upincr | Ast_defs.Updecr),
-            (_, _, Lvar id) ) ->
-        assign_local env id
-      (* Assignment. This is pretty hairy because of list(...)
-       * destructuring and the treatment necessary to allow
-       * code like '$x = $x + 1'. *)
-      | Binop Aast.{ bop = Ast_defs.Eq _; lhs = e1; rhs = e2 } ->
-        (* Unpack any list(...) destructuring and separate out locals
-         * we are assigning to from other lvals. *)
-        let (lvars, lval_exprs) =
-          List.partition_map (unpack_lvals e1) ~f:get_lvar
-        in
-        (* Build separate envs for the direct variable assignments and
-         * for the other lvals assigned to. We treat all these lvals
-         * as unsequenced. *)
-        let lvar_envs = List.map lvars ~f:(assign_local tracking_env) in
-        let lhs_var_env = merge_unsequenced_list lvar_envs in
-        let lval_expr_envs =
-          List.map lval_exprs ~f:(this#on_expr tracking_env)
-        in
-        let lval_expr_env = merge_unsequenced_list lval_expr_envs in
-        let rhs_env = this#on_expr tracking_env e2 in
-        (* Our lhs local var writes only conflict with other *writes* on
-         * the rhs, not with reads (need to allow '$x = $x + 1' but
-         * disallow '$x = $x++'), so we do a check_unsequenced against
-         * a version of env2 containing only the writes and then merge
-         * with the real thing. *)
-        let rhs_writes = { empty_env with assigned = rhs_env.assigned } in
-        check_unsequenced lhs_var_env rhs_writes;
+     method! on_expr env ((_, _, e_) as e) =
+       match e_ with
+       | Lvar id -> use_local env id
+       | Unop
+           ( ( Ast_defs.Uincr | Ast_defs.Udecr | Ast_defs.Upincr
+             | Ast_defs.Updecr ),
+             (_, _, Lvar id) ) ->
+         assign_local env id
+       (* Assignment. This is pretty hairy because of list(...)
+        * destructuring and the treatment necessary to allow
+        * code like '$x = $x + 1'. *)
+       | Binop Aast.{ bop = Ast_defs.Eq _; lhs = e1; rhs = e2 } ->
+         (* Unpack any list(...) destructuring and separate out locals
+          * we are assigning to from other lvals. *)
+         let (lvars, lval_exprs) =
+           List.partition_map (unpack_lvals e1) ~f:get_lvar
+         in
+         (* Build separate envs for the direct variable assignments and
+          * for the other lvals assigned to. We treat all these lvals
+          * as unsequenced. *)
+         let lvar_envs = List.map lvars ~f:(assign_local tracking_env) in
+         let lhs_var_env = merge_unsequenced_list lvar_envs in
+         let lval_expr_envs =
+           List.map lval_exprs ~f:(this#on_expr tracking_env)
+         in
+         let lval_expr_env = merge_unsequenced_list lval_expr_envs in
+         let rhs_env = this#on_expr tracking_env e2 in
+         (* Our lhs local var writes only conflict with other *writes* on
+          * the rhs, not with reads (need to allow '$x = $x + 1' but
+          * disallow '$x = $x++'), so we do a check_unsequenced against
+          * a version of env2 containing only the writes and then merge
+          * with the real thing. *)
+         let rhs_writes = { empty_env with assigned = rhs_env.assigned } in
+         check_unsequenced lhs_var_env rhs_writes;
 
-        (* Also check local assignments against the other lvalues *)
-        check_unsequenced lhs_var_env lval_expr_env;
+         (* Also check local assignments against the other lvalues *)
+         check_unsequenced lhs_var_env lval_expr_env;
 
-        (* We've manually handled everything relating to the lhs locals,
-         * so merge them into the env and then do a regular unsequenced
-         * merge of the non local lhs stuff against the rhs. *)
-        let env = merge env lhs_var_env in
-        merge_unsequenced env lval_expr_env rhs_env
-      (* leave && and || sequenced before making all
-       * the other binops unsequenced *)
-      | Binop
-          Aast.
-            {
-              bop =
-                Ast_defs.Ampamp | Ast_defs.Barbar | Ast_defs.QuestionQuestion;
-              _;
-            } ->
-        parent#on_expr env e
-      (* These operations have unsequenced subexpressions. *)
-      | Binop Aast.{ lhs = e1; rhs = e2; _ }
-      | Obj_get (e1, e2, _, _)
-      | Array_get (e1, Some e2) ->
-        this#check_unsequenced_exprs env e1 e2
-      | Efun { ef_fun = f; ef_use = idl; _ }
-      | Lfun (f, idl) ->
-        let nb = f.f_body in
-        (* Ignore the current environment and start fresh. *)
-        let _acc = this#on_block empty_env nb.fb_ast in
-        (* we use all the variables we are capturing *)
-        List.fold_left ~f:(fun acc (_, id) -> use_local acc id) ~init:env idl
-      | _ -> parent#on_expr env e
+         (* We've manually handled everything relating to the lhs locals,
+          * so merge them into the env and then do a regular unsequenced
+          * merge of the non local lhs stuff against the rhs. *)
+         let env = merge env lhs_var_env in
+         merge_unsequenced env lval_expr_env rhs_env
+       (* leave && and || sequenced before making all
+        * the other binops unsequenced *)
+       | Binop
+           Aast.
+             {
+               bop =
+                 Ast_defs.Ampamp | Ast_defs.Barbar | Ast_defs.QuestionQuestion;
+               _;
+             } ->
+         parent#on_expr env e
+       (* These operations have unsequenced subexpressions. *)
+       | Binop Aast.{ lhs = e1; rhs = e2; _ }
+       | Obj_get (e1, e2, _, _)
+       | Array_get (e1, Some e2) ->
+         this#check_unsequenced_exprs env e1 e2
+       | Efun { ef_fun = f; ef_use = idl; _ }
+       | Lfun (f, idl) ->
+         let nb = f.f_body in
+         (* Ignore the current environment and start fresh. *)
+         let _acc = this#on_block empty_env nb.fb_ast in
+         (* we use all the variables we are capturing *)
+         List.fold_left ~f:(fun acc (_, id) -> use_local acc id) ~init:env idl
+       | _ -> parent#on_expr env e
 
-    method! on_field env (e1, e2) = this#check_unsequenced_exprs env e1 e2
+     method! on_field env (e1, e2) = this#check_unsequenced_exprs env e1 e2
 
-    method! on_afield env =
-      function
-      | AFvalue e -> this#on_expr env e
-      | AFkvalue (e1, e2) -> this#check_unsequenced_exprs env e1 e2
+     method! on_afield env =
+       function
+       | AFvalue e -> this#on_expr env e
+       | AFkvalue (e1, e2) -> this#check_unsequenced_exprs env e1 e2
 
-    (* Handle case to disallow assigning to vars inside case labels. *)
-    method! on_case acc (e, b) =
-      let env = this#on_expr tracking_env e in
-      List.iter env.assigned ~f:(fun (p, _) ->
-          Errors.add_error
-            Nast_check_error.(to_user_error @@ Assign_during_case p));
-      let acc = this#on_block acc b in
-      acc
+     (* Handle case to disallow assigning to vars inside case labels. *)
+     method! on_case acc (e, b) =
+       let env = this#on_expr tracking_env e in
+       List.iter env.assigned ~f:(fun (p, _) ->
+           Errors.add_error
+             Nast_check_error.(to_user_error @@ Assign_during_case p));
+       let acc = this#on_block acc b in
+       acc
   end
+  [@alert "-deprecated"])
 
 let sequence_check_block block =
   let used_vars = used_variables_visitor#on_block Local_id.Set.empty block in

@@ -26,11 +26,12 @@ open Aast
  *)
 
 let lvar_visitor =
-  object
-    inherit [lid list] Nast.Visitor_DEPRECATED.visitor
+  (object
+     inherit [lid list] Nast.Visitor_DEPRECATED.visitor
 
-    method! on_lvar ids id = id :: ids
+     method! on_lvar ids id = id :: ids
   end
+  [@alert "-deprecated"])
 
 let expr_lvars = lvar_visitor#on_expr []
 

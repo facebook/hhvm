@@ -26,6 +26,7 @@ class condition_visitor =
       end
       | _ -> CKUnknown
   end
+  [@alert "-deprecated"]
 
 module VisitorFunctor (Parent : BodyVisitorModule) : BodyVisitorModule = struct
   class visitor lint_env =

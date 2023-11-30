@@ -34,6 +34,7 @@ class await_visitor =
       end;
       parent#on_stmt () stmt
   end
+  [@alert "-deprecated"]
 
 and loop_visitor =
   object
@@ -49,6 +50,7 @@ and loop_visitor =
         (new await_visitor)#on_block () block
       | _ -> parent#on_stmt () stmt
   end
+  [@alert "-deprecated"]
 
 module VisitorFunctor (Parent : BodyVisitorModule) : BodyVisitorModule = struct
   class visitor env =

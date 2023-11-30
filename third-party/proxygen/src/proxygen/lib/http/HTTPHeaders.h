@@ -453,7 +453,8 @@ void HTTPHeaders::add(HTTPHeaderCode code, T&& value) {
       const size_t pos = ptr - codes();                   \
       {Block} ptr++;                                      \
     }                                                     \
-  }
+  }                                                       \
+  static_assert(true, "semicolon required")
 
 // iterate over the positions of all headers with given name
 #define ITERATE_OVER_STRINGS(String, Block)              \

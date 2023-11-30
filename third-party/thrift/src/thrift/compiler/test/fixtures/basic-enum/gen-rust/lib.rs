@@ -10,4 +10,4 @@ pub use self::types::*;
 
 pub use :: as types;
 pub use ::::consts as consts;
-pub mod errors;
+pub use ::::errors as errors;

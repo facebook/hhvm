@@ -11,11 +11,11 @@ pub use :: as types;
 
 #[doc(hidden)]
 pub mod dependencies;
-pub mod services;
+pub use ::::services as services;
 pub mod client;
 pub mod server;
 pub mod mock;
-pub mod errors;
+pub use ::::errors as errors;
 
 pub(crate) mod r#impl {
     use ref_cast::RefCast;

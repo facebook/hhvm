@@ -7,6 +7,10 @@
 
 extern crate serde;
 
+pub mod services;
+
+pub mod errors;
+
 #[allow(unused_imports)]
 pub(crate) use crate as types;
 

@@ -41,8 +41,14 @@ include!("{{program:include_src}}");
 }}
 {{#program:constants?}}
 pub mod consts;
+{{/program:constants?}}{{!
 
-{{/program:constants?}}
+}}{{#program:services?}}
+pub mod services;
+
+{{/program:services?}}
+pub mod errors;
+
 {{! Allows lib/type.mustache to use `crate::types::Type` regardless of which crate it's called from }}
 #[allow(unused_imports)]
 pub(crate) use {{program:crate}} as types;

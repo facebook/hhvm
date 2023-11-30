@@ -8,8 +8,8 @@ pub use self::errors::*;
 
 #[doc(hidden)]
 pub mod dependencies;
-pub mod services;
+pub use ::::services as services;
 pub mod client;
 pub mod server;
 pub mod mock;
-pub mod errors;
+pub use ::::errors as errors;

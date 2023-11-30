@@ -8,4 +8,4 @@ pub use self::errors::*;
 pub use self::types::*;
 
 pub use :: as types;
-pub mod errors;
+pub use ::::errors as errors;

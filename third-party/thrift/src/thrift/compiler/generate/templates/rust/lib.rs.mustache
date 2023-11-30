@@ -53,12 +53,12 @@ pub use {{program:types}}::consts as consts;{{!
 
 #[doc(hidden)]
 pub mod dependencies;
-pub mod services;
+pub use {{program:types}}::services as services;
 pub mod client;
 pub mod server;
 pub mod mock;{{!
 }}{{/program:services?}}
-pub mod errors;{{!
+pub use {{program:types}}::errors as errors;{{!
 }}{{#program:nonstandardTypes?}}
 
 pub(crate) mod r#impl {{>lib/block}}{{>lib/mod.impl}}}{{!

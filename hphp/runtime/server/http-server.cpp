@@ -195,6 +195,7 @@ HttpServer::HttpServer() {
 
       auto const dispatcherStats = m_pageServer->getDispatcherStats();
       counters["inflight_requests"] = dispatcherStats.activeThreads;
+      counters["max_threads"] = dispatcherStats.maxThreads;
       auto queued_requests = dispatcherStats.queuedJobCount;
       counters["queued_requests"] = queued_requests;
       counters["queued_requests_high"] =

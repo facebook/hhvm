@@ -113,7 +113,7 @@ void schematizer::add_definition(
               wrap_with_protocol_value(*pair.second, protocol_value_ttype));
         }
         annot->add_map(val("fields"), std::move(fields));
-      };
+      }
 
       // Double write to deprecated externed path. (T161963504)
       auto structured_annot = annot->clone();

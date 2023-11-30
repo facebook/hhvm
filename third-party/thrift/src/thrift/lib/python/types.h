@@ -101,7 +101,7 @@ inline UniquePyObjectPtr primitiveCppToPython(bool value) {
 inline UniquePyObjectPtr primitiveCppToPython(std::int32_t value) {
   if (UniquePyObjectPtr ret{PyLong_FromLong(value)}) {
     return ret;
-  };
+  }
   THRIFT_PY3_CHECK_ERROR();
 }
 
@@ -116,7 +116,7 @@ inline UniquePyObjectPtr primitiveCppToPython(std::int16_t value) {
 inline UniquePyObjectPtr primitiveCppToPython(std::int64_t value) {
   if (UniquePyObjectPtr ret{PyLong_FromLongLong(value)}) {
     return ret;
-  };
+  }
   THRIFT_PY3_CHECK_ERROR();
 }
 

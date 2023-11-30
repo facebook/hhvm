@@ -882,7 +882,7 @@ static bool try_client_mode_command(const Command& command, bool pretty) {
         client->responses.front(),
         stdout,
         pretty ? JSON_INDENT(4) : JSON_COMPACT);
-    printf("\n");
+    fmt::print("\n");
   }
 
   return res;

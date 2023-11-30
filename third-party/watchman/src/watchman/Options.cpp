@@ -6,6 +6,7 @@
  */
 
 #include "watchman/Options.h"
+#include <fmt/core.h>
 #include <string.h>
 #include "watchman/CommandRegistry.h"
 #include "watchman/LogConfig.h"
@@ -446,7 +447,7 @@ std::vector<std::string> parseOptions(int* argcp, char*** argvp) {
     usage(opts, stdout);
   }
   if (flags.show_version) {
-    printf("%s\n", PACKAGE_VERSION);
+    fmt::print("{}\n", PACKAGE_VERSION);
     exit(0);
   }
   return daemon_argv;

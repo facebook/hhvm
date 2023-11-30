@@ -6,6 +6,7 @@
  */
 
 #include <errno.h>
+#include <fmt/core.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <windows.h>
@@ -37,8 +38,8 @@ int apply(DWORD pid, BOOL suspend) {
   func = (sus_res_func)GetProcAddress(GetModuleHandle("ntdll"), name);
 
   if (!func) {
-    printf(
-        "Failed to GetProcAddress(%s): %s\n",
+    fmt::print(
+        "Failed to GetProcAddress({}): {}\n",
         name,
         win32_strerror(GetLastError()));
     return 1;
@@ -46,15 +47,16 @@ int apply(DWORD pid, BOOL suspend) {
 
   proc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
   if (proc == INVALID_HANDLE_VALUE) {
-    printf(
-        "Failed to OpenProcess(%d): %s\n", pid, win32_strerror(GetLastError()));
+    fmt::print(
+        "Failed to OpenProcess({}): {}\n", pid, win32_strerror(GetLastError()));
     return 1;
   }
 
   res = func(proc);
 
   if (res) {
-    printf("%s(%d) returns %x: %s\n", name, pid, res, win32_strerror(res));
+    fmt::print(
+        "{}({}) returns {:x}: {}\n", name, pid, res, win32_strerror(res));
   }
 
   CloseHandle(proc);
@@ -63,7 +65,7 @@ int apply(DWORD pid, BOOL suspend) {
 }
 
 void usage() {
-  printf(
+  fmt::print(
       "Usage: susres suspend [pid]\n"
       "       susres resume  [pid\n");
   exit(1);

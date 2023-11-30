@@ -6,6 +6,7 @@
  */
 
 #include "watchman/bser.h"
+#include <fmt/core.h>
 #include <folly/ScopeGuard.h>
 #include <folly/logging/xlog.h>
 #include <folly/portability/GTest.h>
@@ -46,19 +47,19 @@ void hexdump(const char* start, const char* end) {
     if (limit > maxbytes) {
       limit = maxbytes;
     }
-    printf("# ");
+    fmt::print("# ");
     for (i = 0; i < limit; i++) {
-      printf("%02x", (int)(uint8_t)start[i]);
+      fmt::print("{:02x}", (int)(uint8_t)start[i]);
     }
     while (i <= maxbytes) {
-      printf("  ");
+      fmt::print("  ");
       i++;
     }
-    printf("   ");
+    fmt::print("   ");
     for (i = 0; i < limit; i++) {
-      printf("%c", isprint((uint8_t)start[i]) ? start[i] : '.');
+      fmt::print("{}", isprint((uint8_t)start[i]) ? start[i] : '.');
     }
-    printf("\n");
+    fmt::print("\n");
     start += limit;
   }
 }

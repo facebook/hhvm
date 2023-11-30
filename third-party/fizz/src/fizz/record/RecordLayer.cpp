@@ -182,7 +182,7 @@ folly::Optional<Param> ReadRecordLayer::decodeHandshakeMessage(
       return parse<KeyUpdate>(std::move(handshakeMsg), std::move(original));
     default:
       throw std::runtime_error("unknown handshake type");
-  };
+  }
 }
 
 bool ReadRecordLayer::hasUnparsedHandshakeData() const {

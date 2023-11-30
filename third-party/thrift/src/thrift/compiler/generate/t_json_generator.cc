@@ -416,7 +416,6 @@ void t_json_generator::print_const_value(const t_const_value* tvalue) {
     case t_const_value::CV_LIST: {
       f_out_ << "[ ";
       vector<t_const_value*> list_elems = tvalue->get_list();
-      ;
       vector<t_const_value*>::iterator list_iter;
       for (list_iter = list_elems.begin(); list_iter != list_elems.end();
            list_iter++) {

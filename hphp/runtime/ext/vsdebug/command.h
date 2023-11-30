@@ -571,6 +571,10 @@ public:
 private:
 
   FrameObject* getFrameObject(DebuggerSession* session);
+  void logToScuba(const std::string& code,
+                  bool success, const std::string& error,
+                  const std::string& clientId, uint32_t sessionId,
+                  int64_t before, int64_t after, bool bpHit);
   unsigned int m_frameId;
   bool m_returnHhvmSerialization;
   FrameObject* m_frameObj {nullptr};

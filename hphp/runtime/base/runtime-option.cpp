@@ -1286,6 +1286,7 @@ int RuntimeOption::DebuggerSignalTimeout = 1;
 std::string RuntimeOption::DebuggerAuthTokenScriptBin;
 std::string RuntimeOption::DebuggerSessionAuthScriptBin;
 bool RuntimeOption::LogBreakpointHitTime = false;
+bool RuntimeOption::LogEvaluationCommands = false;
 
 std::string RuntimeOption::SendmailPath = "sendmail -t -i";
 std::string RuntimeOption::MailForceExtraParameters;
@@ -2137,6 +2138,8 @@ void RuntimeOption::Load(
                    "Eval.Debugger.Auth.SessionAuthScriptBin");
       Config::Bind(LogBreakpointHitTime, ini, config,
                    "Eval.Debugger.LogBreakpointHitTime", false);
+      Config::Bind(LogEvaluationCommands, ini, config,
+                   "Eval.Debugger.LogEvaluationCommands", false);
     }
   }
   {

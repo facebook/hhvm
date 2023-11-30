@@ -1617,6 +1617,7 @@ public:
   static std::string DebuggerAuthTokenScriptBin;
   static std::string DebuggerSessionAuthScriptBin;
   static bool LogBreakpointHitTime;
+  static bool LogEvaluationCommands;
 
   // Mail options
   static std::string SendmailPath;

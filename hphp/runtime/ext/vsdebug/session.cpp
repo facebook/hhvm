@@ -38,8 +38,8 @@ DebuggerSession::DebuggerSession(Debugger* debugger) :
   m_debugger(debugger),
   m_breakpointMgr(new BreakpointManager(debugger)),
   m_dummyThread(this, &DebuggerSession::runDummy),
-  m_dummyStartupDoc("") {
-
+  m_dummyStartupDoc(""),
+  m_sessionId(folly::Random::rand32()) {
   assertx(m_debugger != nullptr);
 }
 

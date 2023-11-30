@@ -82,7 +82,7 @@ struct DebuggerRequestInfo {
   // Last time the file change query was run. Valid only for the REPL request.
   Optional<watchman::Clock> m_lastClock {};
 
-  // Did this request hit any breakpoint? Valid only for non-repl requests.
+  // Did this request hit any breakpoint?
   bool m_firstBpHit {false};
 };
 } // namespace HPHP::VSDEBUG

@@ -2113,10 +2113,11 @@ void Debugger::onBreakpointHit(
 
         // Breakpoint hit!
         assertx(bp);
+        auto firstBpHit = ri->m_firstBpHit;
+        ri->m_firstBpHit = true;
         if (RuntimeOption::LogBreakpointHitTime && StructuredLog::enabled() &&
-            !ri->m_firstBpHit && bp->m_type == BreakpointType::Source &&
+            !firstBpHit && bp->m_type == BreakpointType::Source &&
             !isDummyRequest() && g_context->getTransport()) {
-          ri->m_firstBpHit = true;
           StructuredLogEntry ent;
           ent.setStr("filename", bp->m_filePath.filename().c_str());
           ent.setInt("line_number", bp->m_line);

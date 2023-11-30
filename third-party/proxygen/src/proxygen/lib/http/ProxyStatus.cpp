@@ -15,6 +15,8 @@ namespace {
 constexpr folly::StringPiece kProxyParam{"e_proxy"};
 constexpr folly::StringPiece kUpstreamIPParam{"e_upip"};
 constexpr folly::StringPiece kIsProxyErrorParam{"e_isproxyerr"};
+constexpr folly::StringPiece kIsClientErrorTrue{"e_isclienterr"};
+constexpr folly::StringPiece kIsServerErrorTrue{"e_isservererr"};
 constexpr folly::StringPiece kClientAddrParam{"e_clientaddr"};
 
 } // namespace
@@ -58,6 +60,22 @@ ProxyStatus& ProxyStatus::setProxyError(const bool isProxyError) {
     return setProxyStatusParameter(kIsProxyErrorParam, "true");
   } else {
     return setProxyStatusParameter(kIsProxyErrorParam, "false");
+  }
+}
+
+ProxyStatus& ProxyStatus::setServerError(const bool isServerError) {
+  if (isServerError) {
+    return setProxyStatusParameter(kIsServerErrorTrue, "true");
+  } else {
+    return setProxyStatusParameter(kIsServerErrorTrue, "false");
+  }
+}
+
+ProxyStatus& ProxyStatus::setClientError(const bool isClientError) {
+  if (isClientError) {
+    return setProxyStatusParameter(kIsClientErrorTrue, "true");
+  } else {
+    return setProxyStatusParameter(kIsClientErrorTrue, "false");
   }
 }
 

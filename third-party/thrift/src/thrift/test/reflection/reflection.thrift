@@ -66,7 +66,8 @@ enum enum3 {
 )
 
 enum enum_with_renamed_value {
-  fancy.idl.name = 7 (cpp.name = "boring_cxx_name"),
+  @cpp.Name{value = "boring_cxx_name"}
+  fancy.idl.name = 7,
 }
 
 @cpp.ScopedEnumAsUnionType
@@ -611,13 +612,15 @@ struct StructWithIOBuf {
 }
 
 struct struct_with_renamed_field {
-  1: string fancy.idl.name (cpp.name = "boring_cxx_name");
+  @cpp.Name{value = "boring_cxx_name"}
+  1: string fancy.idl.name;
 } (
   thrift.uri = "facebook.com/thrift/test/reflection/reflection/struct_with_renamed_field",
 )
 
 union union_with_renamed_field {
-  1: string fancy.idl.name (cpp.name = "boring_cxx_name");
+  @cpp.Name{value = "boring_cxx_name"}
+  1: string fancy.idl.name;
 }
 
 struct IntStruct {

@@ -3769,7 +3769,6 @@ string t_java_deprecated_generator::declare_field(
       result += " = new " + type_name(ttype, false, true) + "()";
     } else {
       result += " = new " + type_name(ttype, false, true) + "()";
-      ;
     }
   }
   return result + ";";

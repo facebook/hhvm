@@ -607,7 +607,8 @@ public:
   req::fast_map<const StringData*, FileInfo, string_data_hash, string_data_same>
     m_evaledFiles;
   req::vector<const StringData*> m_evaledFilesOrder;
-  req::fast_set<const Unit*> m_loadedUnits; // Used only by debuggers
+  // Used only by debuggers
+  req::fast_map<const StringData*, const Unit*> m_loadedUnits;
   req::fast_set<Unit*> m_touchedUnits;
   Array m_visitedFiles;
   int m_lambdaCounter;

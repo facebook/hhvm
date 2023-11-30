@@ -17,6 +17,7 @@
 #include "hphp/runtime/ext/vsdebug/session.h"
 
 #include "hphp/runtime/ext/vsdebug/debugger.h"
+#include "hphp/runtime/ext/vsdebug/debugger-request-info.h"
 #include "hphp/runtime/ext/extension-registry.h"
 
 #include "hphp/runtime/vm/treadmill.h"
@@ -274,6 +275,10 @@ void DebuggerSession::runDummy() {
 
   folly::dynamic event = folly::dynamic::object;
   m_debugger->sendEventMessage(event, "readyForEvaluations", true);
+
+  if (m_debugger->getDebuggerOptions().warnOnFileChange) {
+    m_debugger->initWatchmanClient();
+  }
 
   m_dummyRequestInfo->m_commandQueue.processCommands();
 }

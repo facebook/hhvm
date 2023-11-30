@@ -271,7 +271,7 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   void callOnStartServing();
   void callOnStopRequested();
 
-  void ensureDecoratedProcessorFactoryInitialized();
+  void ensureProcessedServiceDescriptionInitialized();
 
   bool serverRanWithDCHECK();
 
@@ -418,7 +418,11 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   std::atomic<ServiceHealth> cachedServiceHealth_{};
 #endif
 
-  std::unique_ptr<AsyncProcessorFactory> decoratedProcessorFactory_;
+  struct ProcessedServiceDescription {
+    ProcessedModuleSet modules;
+    std::unique_ptr<AsyncProcessorFactory> decoratedProcessorFactory;
+  };
+  std::unique_ptr<ProcessedServiceDescription> processedServiceDescription_;
 
   /**
    * Collects service handlers of the current service of a specific type.
@@ -1067,9 +1071,9 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
    *    └────────────────────────┘
    */
   AsyncProcessorFactory& getDecoratedProcessorFactory() const {
-    CHECK(decoratedProcessorFactory_)
+    CHECK(processedServiceDescription_)
         << "Server must be set up before calling this method";
-    return *decoratedProcessorFactory_;
+    return *processedServiceDescription_->decoratedProcessorFactory;
   }
 
   /**
@@ -1080,6 +1084,18 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
    */
   std::unique_ptr<AsyncProcessor> getDecoratedProcessorWithoutEventHandlers()
       const;
+
+  /**
+   * Gets TProcessorEventHandler instances that are scoped to this ThriftServer
+   * instance. These include a snapshot of the set of globally registered
+   * TProcessorEventHandlers at the moment the server started running.
+   */
+  const std::vector<std::shared_ptr<TProcessorEventHandler>>&
+  getLegacyEventHandlers() const override {
+    CHECK(processedServiceDescription_)
+        << "Server must be set up before calling this method";
+    return processedServiceDescription_->modules.coalescedLegacyEventHandlers;
+  }
 
   /**
    * A struct containing all "extra" internal interfaces that the service

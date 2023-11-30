@@ -22,6 +22,7 @@
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 
 #include <iostream>
+#include <memory>
 #include <random>
 #include <utility>
 #include <variant>
@@ -464,7 +465,7 @@ void ThriftServer::configureIOUring() {
 }
 
 void ThriftServer::setup() {
-  ensureDecoratedProcessorFactoryInitialized();
+  ensureProcessedServiceDescriptionInitialized();
 
   auto nWorkers = getNumIOWorkerThreads();
   DCHECK_GT(nWorkers, 0u);
@@ -1005,7 +1006,7 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
     runtimeDisableResourcePoolsDeprecated();
   } else {
     // Need to set this up now to check.
-    ensureDecoratedProcessorFactoryInitialized();
+    ensureProcessedServiceDescriptionInitialized();
 
     // Check whether there are any wildcard services.
     auto methodMetadata = getDecoratedProcessorFactory().createMethodMetadata();
@@ -1526,17 +1527,19 @@ void ThriftServer::stopAcceptingAndJoinOutstandingRequests() {
     }
   });
 
-  // Clear the decorated processor factory so that it's re-created if the server
+  // Clear the service description so that it's re-created if the server
   // is restarted.
-  decoratedProcessorFactory_.reset();
+  processedServiceDescription_.reset();
 
   internalStatus_.store(ServerStatus::NOT_RUNNING, std::memory_order_release);
 }
 
-void ThriftServer::ensureDecoratedProcessorFactoryInitialized() {
+void ThriftServer::ensureProcessedServiceDescriptionInitialized() {
   DCHECK(getProcessorFactory().get());
-  if (decoratedProcessorFactory_ == nullptr) {
-    decoratedProcessorFactory_ = createDecoratedProcessorFactory(
+  if (processedServiceDescription_ == nullptr) {
+    auto modules = processModulesSpecification(
+        std::exchange(unprocessedModulesSpecification_, {}));
+    auto decoratedProcessorFactory = createDecoratedProcessorFactory(
         getProcessorFactory(),
         getStatusInterface(),
         getMonitoringInterface(),
@@ -1544,6 +1547,10 @@ void ThriftServer::ensureDecoratedProcessorFactoryInitialized() {
         getSecurityInterface(),
         isCheckUnimplementedExtraInterfacesAllowed() &&
             THRIFT_FLAG(server_check_unimplemented_extra_interfaces));
+    processedServiceDescription_ =
+        std::make_unique<ProcessedServiceDescription>(
+            ProcessedServiceDescription{
+                std::move(modules), std::move(decoratedProcessorFactory)});
   }
 }
 

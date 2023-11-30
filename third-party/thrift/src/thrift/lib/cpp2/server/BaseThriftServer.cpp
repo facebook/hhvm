@@ -19,6 +19,7 @@
 #include <fcntl.h>
 
 #include <iostream>
+#include <memory>
 #include <random>
 #include <sstream>
 #include <thread>
@@ -83,6 +84,31 @@ BaseThriftServer::BaseThriftServer(
           *this,
           detail::getThriftServerConfig(*this)},
       addresses_(1) {}
+
+/* static */ BaseThriftServer::ProcessedModuleSet
+BaseThriftServer::processModulesSpecification(ModulesSpecification&& specs) {
+  ProcessedModuleSet result;
+
+  for (auto& info : specs.infos) {
+    auto legacyEventHandlers = info.module->getLegacyEventHandlers();
+    result.modules.emplace_back(std::move(info));
+    if (!legacyEventHandlers.empty()) {
+      result.coalescedLegacyEventHandlers.insert(
+          result.coalescedLegacyEventHandlers.end(),
+          std::make_move_iterator(legacyEventHandlers.begin()),
+          std::make_move_iterator(legacyEventHandlers.end()));
+    }
+  }
+
+  // For backward compatibility, we need to keep the set of globally registered
+  // event handlers. The assumption we are making here is that no event handlers
+  // are registered globally after the server is initialized.
+  for (const auto& handler : TProcessorBase::getHandlers()) {
+    result.coalescedLegacyEventHandlers.push_back(handler.unwrap());
+  }
+
+  return result;
+}
 
 void BaseThriftServer::CumulativeFailureInjection::set(
     const FailureInjection& fi) {

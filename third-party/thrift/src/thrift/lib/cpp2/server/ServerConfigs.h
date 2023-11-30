@@ -46,6 +46,7 @@ class Cpp2RequestContext;
 class AdaptiveConcurrencyController;
 class CPUConcurrencyController;
 class ResourcePoolSet;
+class TProcessorEventHandler;
 
 namespace concurrency {
 class ThreadManager;
@@ -234,6 +235,12 @@ class ServerConfigs {
   virtual std::chrono::milliseconds getTaskExpireTime() const = 0;
 
   virtual size_t getNumTypedInterceptors() const = 0;
+
+  virtual const std::vector<std::shared_ptr<TProcessorEventHandler>>&
+  getLegacyEventHandlers() const {
+    static const std::vector<std::shared_ptr<TProcessorEventHandler>> kEmpty;
+    return kEmpty;
+  }
 
  private:
   folly::relaxed_atomic<int32_t> activeRequests_{0};

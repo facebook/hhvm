@@ -11,7 +11,7 @@ test = false
 doctest = false
 
 [dependencies]
-bumpalo = { version = "3.11.1", features = ["collections"] }
+bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 full_fidelity_schema_version_number = { version = "0.0.0", path = "../../../schema" }
 parser = { version = "0.0.0", path = "../../../core" }
 positioned_smart_constructors = { version = "0.0.0", path = "../../../cargo/positioned_smart_constructors" }

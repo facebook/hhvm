@@ -10,7 +10,7 @@ path = "../../ast_and_decl_parser.rs"
 
 [dependencies]
 aast_parser = { version = "0.0.0", path = "../aast_parser" }
-bumpalo = { version = "3.11.1", features = ["collections"] }
+bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 cst_and_decl_parser = { version = "0.0.0", path = "../../api/cargo/cst_and_decl_parser" }
 oxidized = { version = "0.0.0", path = "../../../oxidized" }
 oxidized_by_ref = { version = "0.0.0", path = "../../../oxidized_by_ref" }

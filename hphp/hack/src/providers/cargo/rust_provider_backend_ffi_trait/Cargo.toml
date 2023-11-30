@@ -12,7 +12,7 @@ doctest = false
 
 [dependencies]
 bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
-bumpalo = { version = "3.11.1", features = ["collections"] }
+bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 deps_rust = { version = "0.0.0", path = "../../../deps/cargo/deps_rust" }
 file_info = { version = "0.0.0", path = "../../../deps/rust/file_info" }
 file_provider = { version = "0.0.0", path = "../../../hackrs/file_provider/cargo/file_provider" }

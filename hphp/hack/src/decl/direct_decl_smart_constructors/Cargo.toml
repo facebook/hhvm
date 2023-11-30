@@ -13,7 +13,7 @@ doctest = false
 [dependencies]
 arena_collections = { version = "0.0.0", path = "../../arena_collections" }
 bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
-bumpalo = { version = "3.11.1", features = ["collections"] }
+bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 escaper = { version = "0.0.0", path = "../../utils/escaper" }
 flatten_smart_constructors = { version = "0.0.0", path = "../../parser/cargo/flatten_smart_constructors" }
 hash = { version = "0.0.0", path = "../../utils/hash" }

@@ -12,7 +12,7 @@ path = "lib.rs"
 anyhow = "=1.0.72"
 ast_scope = { version = "0.0.0", path = "../emitter/cargo/ast_scope" }
 bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
-bumpalo = { version = "3.11.1", features = ["collections"] }
+bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 core_utils_rust = { version = "0.0.0", path = "../../utils/core" }
 emit_type_hint = { version = "0.0.0", path = "../emitter/cargo/emit_type_hint" }
 error = { version = "0.0.0", path = "../error/cargo/error" }

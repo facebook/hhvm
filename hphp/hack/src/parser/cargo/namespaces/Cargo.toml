@@ -9,7 +9,7 @@ edition = "2021"
 path = "../../namespaces.rs"
 
 [dependencies]
-bumpalo = { version = "3.11.1", features = ["collections"] }
+bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 core_utils_rust = { version = "0.0.0", path = "../../../utils/core" }
 naming_special_names_rust = { version = "0.0.0", path = "../../../naming" }
 oxidized = { version = "0.0.0", path = "../../../oxidized" }

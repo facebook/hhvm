@@ -11,7 +11,7 @@ test = false
 doctest = false
 
 [dependencies]
-bumpalo = { version = "3.11.1", features = ["collections"] }
+bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 parser_core_types = { version = "0.0.0", path = "../core_types" }
 smart_constructors = { version = "0.0.0", path = "../smart_constructors" }

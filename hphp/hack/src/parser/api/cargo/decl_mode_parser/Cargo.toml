@@ -11,6 +11,6 @@ test = false
 doctest = false
 
 [dependencies]
-bumpalo = { version = "3.11.1", features = ["collections"] }
+bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 decl_mode_smart_constructors = { version = "0.0.0", path = "../../../cargo/decl_mode_parser" }
 parser = { version = "0.0.0", path = "../../../core" }

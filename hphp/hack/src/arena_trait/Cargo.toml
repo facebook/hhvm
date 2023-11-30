@@ -9,4 +9,4 @@ edition = "2021"
 path = "lib.rs"
 
 [dependencies]
-bumpalo = { version = "3.11.1", features = ["collections"] }
+bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }

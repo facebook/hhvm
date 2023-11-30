@@ -14,7 +14,7 @@ path = "hh_naming_table_builder.rs"
 
 [dependencies]
 anyhow = "=1.0.72"
-bumpalo = { version = "3.11.1", features = ["collections"] }
+bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 clap = { version = "3.2.25", features = ["derive", "env", "regex", "unicode", "wrap_help"] }
 direct_decl_parser = { version = "0.0.0", path = "../parser/api/cargo/direct_decl_parser" }
 files_to_ignore = { version = "0.0.0", path = "../utils/files_to_ignore" }

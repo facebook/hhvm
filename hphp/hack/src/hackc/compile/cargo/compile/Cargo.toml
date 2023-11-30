@@ -13,7 +13,7 @@ aast_parser = { version = "0.0.0", path = "../../../../parser/cargo/aast_parser"
 anyhow = "=1.0.72"
 bc_to_ir = { version = "0.0.0", path = "../../../ir/conversions/bc_to_ir" }
 bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
-bumpalo = { version = "3.11.1", features = ["collections"] }
+bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 bytecode_printer = { version = "0.0.0", path = "../../../bytecode_printer" }
 clap = { version = "4.4.7", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 decl_provider = { version = "0.0.0", path = "../../../decl_provider" }

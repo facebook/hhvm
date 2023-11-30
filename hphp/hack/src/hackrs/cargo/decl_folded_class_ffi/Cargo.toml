@@ -12,7 +12,7 @@ doctest = false
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-bumpalo = { version = "3.11.1", features = ["collections"] }
+bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 decl_parser = { version = "0.0.0", path = "../../decl_parser/cargo/decl_parser" }
 file_provider = { version = "0.0.0", path = "../../file_provider/cargo/file_provider" }
 find_utils = { version = "0.0.0", path = "../../../utils/find_utils" }

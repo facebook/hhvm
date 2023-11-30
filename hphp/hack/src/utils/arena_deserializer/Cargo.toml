@@ -10,6 +10,6 @@ path = "lib.rs"
 
 [dependencies]
 bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
-bumpalo = { version = "3.11.1", features = ["collections"] }
+bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 ocamlrep_caml_builtins = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 serde = { version = "1.0.185", features = ["derive", "rc"] }

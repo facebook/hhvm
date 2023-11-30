@@ -11,7 +11,7 @@ path = "../../pos.rs"
 [dependencies]
 arena_trait = { version = "0.0.0", path = "../../../../arena_trait" }
 bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
-bumpalo = { version = "3.11.1", features = ["collections"] }
+bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 eq_modulo_pos = { version = "0.0.0", path = "../../../../utils/eq_modulo_pos" }
 hh24_types = { version = "0.0.0", path = "../../../../utils/hh24_types" }
 im = { version = "15.1", features = ["rayon", "serde"] }

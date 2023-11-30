@@ -9,7 +9,7 @@ edition = "2021"
 path = "../../closure_convert.rs"
 
 [dependencies]
-bumpalo = { version = "3.11.1", features = ["collections"] }
+bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 env = { version = "0.0.0", path = "../../../emitter/cargo/env" }
 error = { version = "0.0.0", path = "../../../error/cargo/error" }
 global_state = { version = "0.0.0", path = "../../../emitter/cargo/global_state" }

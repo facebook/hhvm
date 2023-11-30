@@ -2,10 +2,13 @@
 t_alpha
   INSERT t_alpha()
   (function(): void)
+SORT TEXT: none
 t_beta
   INSERT t_beta()
   (function(): void)
+SORT TEXT: none
 //// file2.php
 t_beta
   INSERT t_beta()
   (function(): void)
+SORT TEXT: none

@@ -1,0 +1,16 @@
+test
+  INSERT test()
+  function(): void
+SORT TEXT: none
+getFoo
+  INSERT getFoo()
+  function(): string
+SORT TEXT: aaaa
+getBar
+  INSERT getBar()
+  function(): string
+SORT TEXT: aaaab
+aaaac
+  INSERT aaaac()
+  function(): string
+SORT TEXT: none

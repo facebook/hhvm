@@ -1,6 +1,8 @@
 bar
   INSERT bar(${1:\$in})
   (function(dict<string, string> $in): string)
+SORT TEXT: none
 foo
   INSERT foo()
   (function(): string)
+SORT TEXT: none

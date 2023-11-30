@@ -1,6 +1,8 @@
 other_bool
   INSERT other_bool
   ~MyBox<bool>
+SORT TEXT: none
 a_bool
   INSERT a_bool
   ~MyBox<bool>
+SORT TEXT: none

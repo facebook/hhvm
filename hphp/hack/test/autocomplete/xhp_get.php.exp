@@ -1,9 +1,12 @@
 :name
   INSERT :name
   ~?string
+SORT TEXT: none
 :color
   INSERT :color
   ~?string
+SORT TEXT: none
 genRender
   INSERT genRender()
   function(): _
+SORT TEXT: none

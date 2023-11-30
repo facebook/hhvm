@@ -1,3 +1,4 @@
 bar
   INSERT bar()
   function(): void
+SORT TEXT: none

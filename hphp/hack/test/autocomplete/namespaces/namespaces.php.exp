@@ -2,31 +2,39 @@
 SecureRandom
   INSERT SecureRandom
   namespace
+SORT TEXT: none
 //// SecureRandom.php
 SecureRandom
   INSERT SecureRandom
   namespace
+SORT TEXT: none
 //// bSecureRando.php
 SecureRandom
   INSERT SecureRandom
   namespace
+SORT TEXT: none
 //// Ve.php
 Vec
   INSERT Vec
   namespace
+SORT TEXT: none
 //// Vec.php
 Vec
   INSERT Vec
   namespace
+SORT TEXT: none
 //// bVe.php
 Vec
   INSERT Vec
   namespace
+SORT TEXT: none
 //// C.php
 C
   INSERT C
   namespace
+SORT TEXT: none
 //// bC.php
 C
   INSERT C
   namespace
+SORT TEXT: none

@@ -175,7 +175,8 @@ let get_class_elt_types ~is_method env class_ cid elts =
   in
   elts
   |> List.filter ~f:is_visible
-  |> List.map ~f:(fun (id, { ce_type = (lazy ty); _ }) -> (id, ty))
+  |> List.map ~f:(fun (id, { ce_type = (lazy ty); ce_sort_text; _ }) ->
+         (id, ty, ce_sort_text))
 
 let get_class_req_attrs env pctx classname cid =
   let req_attrs cls =
@@ -387,7 +388,7 @@ let autocomplete_member ~is_static autocomplete_context env class_ cid id =
       | _ -> false
     in
 
-    let add kind (name, ty) =
+    let add kind (name, ty, sort_text) =
       (* Functions that support dynamic will be wrapped by supportdyn<_> *)
       let ty = strip_supportdyn_decl ty in
       let res_detail =
@@ -412,7 +413,7 @@ let autocomplete_member ~is_static autocomplete_context env class_ cid id =
           res_documentation = None;
           res_filter_text = None;
           res_additional_edits = [];
-          res_sortText = None;
+          res_sortText = sort_text;
         }
       in
       add_res complete
@@ -444,7 +445,8 @@ let autocomplete_member ~is_static autocomplete_context env class_ cid id =
         ~f:(add FileInfo.SI_Property);
       List.iter
         (Cls.consts class_ |> sort)
-        ~f:(fun (name, cc) -> add FileInfo.SI_ClassConstant (name, cc.cc_type))
+        ~f:(fun (name, cc) ->
+          add FileInfo.SI_ClassConstant (name, cc.cc_type, None))
     );
     if (not is_static) || parent_receiver then (
       List.iter
@@ -500,7 +502,7 @@ let autocomplete_xhp_attributes env class_ cid id attrs =
     in
     List.iter
       (get_class_elt_types ~is_method:false env class_ cid (Cls.props class_))
-      ~f:(fun (name, ty) ->
+      ~f:(fun (name, ty, sort_text) ->
         if
           not
             (SSet.exists
@@ -523,7 +525,7 @@ let autocomplete_xhp_attributes env class_ cid id attrs =
               res_documentation = None;
               res_filter_text = None;
               res_additional_edits = [];
-              res_sortText = None;
+              res_sortText = sort_text;
             }
           in
           add_res complete)

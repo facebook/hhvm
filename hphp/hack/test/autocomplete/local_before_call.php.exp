@@ -1,6 +1,8 @@
 $baz
   INSERT $baz
   int
+SORT TEXT: none
 $bar
   INSERT $bar
   int
+SORT TEXT: none

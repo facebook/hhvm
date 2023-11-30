@@ -1,6 +1,8 @@
 BBBB
   INSERT BBBB
   ~int
+SORT TEXT: none
 AAAA
   INSERT AAAA
   ~int
+SORT TEXT: none

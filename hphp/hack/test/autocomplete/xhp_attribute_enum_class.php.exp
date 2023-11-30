@@ -1,9 +1,12 @@
 MyEnum::TYPE_C
   INSERT MyEnum::TYPE_C
   enum
+SORT TEXT: none
 MyEnum::TYPE_B
   INSERT MyEnum::TYPE_B
   enum
+SORT TEXT: none
 MyEnum::TYPE_A
   INSERT MyEnum::TYPE_A
   enum
+SORT TEXT: none

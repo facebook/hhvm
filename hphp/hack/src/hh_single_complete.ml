@@ -560,6 +560,9 @@ let handle_autocomplete ctx sienv naming_table ~is_manually_invoked filename =
             | InsertLiterally s -> s
             | InsertAsSnippet { snippet; _ } -> snippet);
           Printf.printf "  %s\n" r.res_detail;
+          Printf.printf
+            "SORT TEXT: %s\n"
+            (Option.value ~default:"none" r.res_sortText);
           match r.res_documentation with
           | Some doc ->
             List.iter (String.split_lines doc) ~f:(fun line ->

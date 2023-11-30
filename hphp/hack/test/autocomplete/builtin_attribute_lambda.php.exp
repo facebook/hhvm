@@ -1,4 +1,5 @@
 __ReturnDisposable
   INSERT __ReturnDisposable
   built-in attribute
+SORT TEXT: none
   Allows a function/method to return a value that implements `IDisposable` or `IAsyncDisposable`. The function must return a fresh disposable value by either instantiating a class or  returning a value from another method/function marked `__ReturnDisposable`.

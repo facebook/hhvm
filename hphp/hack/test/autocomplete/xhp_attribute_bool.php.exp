@@ -1,6 +1,8 @@
 false
   INSERT false
   literal
+SORT TEXT: none
 true
   INSERT true
   literal
+SORT TEXT: none

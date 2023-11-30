@@ -1,9 +1,12 @@
 TYPE_C
   INSERT TYPE_C
   class constant
+SORT TEXT: none
 TYPE_B
   INSERT TYPE_B
   class constant
+SORT TEXT: none
 TYPE_A
   INSERT TYPE_A
   class constant
+SORT TEXT: none

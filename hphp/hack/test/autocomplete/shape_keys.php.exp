@@ -1,9 +1,12 @@
 'a_abc'
   INSERT 'a_abc'
   literal
+SORT TEXT: none
 'a_def'
   INSERT 'a_def'
   literal
+SORT TEXT: none
 'b_abc'
   INSERT 'b_abc'
   literal
+SORT TEXT: none

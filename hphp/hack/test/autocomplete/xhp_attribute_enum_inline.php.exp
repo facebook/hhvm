@@ -1,6 +1,8 @@
 1
   INSERT 1
   enum
+SORT TEXT: none
 "firefly"
   INSERT "firefly"
   enum
+SORT TEXT: none

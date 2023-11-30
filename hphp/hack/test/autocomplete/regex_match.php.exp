@@ -1,9 +1,12 @@
 0
   INSERT 0
   literal
+SORT TEXT: none
 'bar'
   INSERT 'bar'
   literal
+SORT TEXT: none
 'herp'
   INSERT 'herp'
   literal
+SORT TEXT: none

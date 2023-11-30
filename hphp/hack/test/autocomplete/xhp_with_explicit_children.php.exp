@@ -1,3 +1,4 @@
 foo:bar
   INSERT foo:bar>$0</foo:bar>
   class
+SORT TEXT: none

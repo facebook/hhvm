@@ -1,24 +1,32 @@
 valid
   INSERT valid()
   function(): bool
+SORT TEXT: none
 send
   INSERT send(${1:\$v})
   function(?Ts $v): void
+SORT TEXT: none
 rewind
   INSERT rewind()
   function(): void
+SORT TEXT: none
 raise
   INSERT raise(${1:\$e})
   function(Exception $e): void
+SORT TEXT: none
 next
   INSERT next()
   function(): void
+SORT TEXT: none
 key
   INSERT key()
   function(): ~Tk
+SORT TEXT: none
 getOrigFuncName
   INSERT getOrigFuncName()
   function(): string
+SORT TEXT: none
 current
   INSERT current()
   function(): ~Tv
+SORT TEXT: none

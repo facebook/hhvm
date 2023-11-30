@@ -1,21 +1,28 @@
 use
   INSERT use
   keyword
+SORT TEXT: none
 final
   INSERT final
   keyword
+SORT TEXT: none
 private
   INSERT private
   keyword
+SORT TEXT: none
 abstract
   INSERT abstract
   keyword
+SORT TEXT: none
 const
   INSERT const
   keyword
+SORT TEXT: none
 protected
   INSERT protected
   keyword
+SORT TEXT: none
 public
   INSERT public
   keyword
+SORT TEXT: none

@@ -1,24 +1,32 @@
 function
   INSERT function
   keyword
+SORT TEXT: none
 async
   INSERT async
   keyword
+SORT TEXT: none
 final
   INSERT final
   keyword
+SORT TEXT: none
 abstract
   INSERT abstract
   keyword
+SORT TEXT: none
 static
   INSERT static
   keyword
+SORT TEXT: none
 private
   INSERT private
   keyword
+SORT TEXT: none
 protected
   INSERT protected
   keyword
+SORT TEXT: none
 public
   INSERT public
   keyword
+SORT TEXT: none

@@ -1,0 +1,12 @@
+class
+  INSERT class
+  classname<this>
+SORT TEXT: none
+getBoo
+  INSERT getBoo()
+  function(): string
+SORT TEXT: yyy
+getBaz
+  INSERT getBaz()
+  function(): string
+SORT TEXT: zzz

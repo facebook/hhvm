@@ -1,3 +1,4 @@
 test
   INSERT test()
   function(): ~C::Z
+SORT TEXT: none

@@ -1,12 +1,16 @@
 Uncategorized
   INSERT Uncategorized
   ~string
+SORT TEXT: none
 SoftMakeICInaccessible
   INSERT SoftMakeICInaccessible
   ~string
+SORT TEXT: none
 MakeICInaccessible
   INSERT MakeICInaccessible
   ~string
+SORT TEXT: none
 KeyedByIC
   INSERT KeyedByIC
   ~string
+SORT TEXT: none

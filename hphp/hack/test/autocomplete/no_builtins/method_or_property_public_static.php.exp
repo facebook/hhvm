@@ -1,62 +1,76 @@
 noreturn
   INSERT noreturn
   builtin
+SORT TEXT: none
   A `noreturn` function always errors or loops forever.
 arraykey
   INSERT arraykey
   builtin
+SORT TEXT: none
   An `int` or a `string`. `arraykey` is a common key type for `dict`s.
 num
   INSERT num
   builtin
+SORT TEXT: none
   An `int` or a `float`.
 resource
   INSERT resource
   builtin
+SORT TEXT: none
   An external resource, such as a file handle or database connection.
 string
   INSERT string
   builtin
+SORT TEXT: none
   A sequence of characters.
 float
   INSERT float
   builtin
+SORT TEXT: none
   A 64-bit floating-point number.
 bool
   INSERT bool
   builtin
+SORT TEXT: none
   A boolean value, `true` or `false`.
 int
   INSERT int
   builtin
+SORT TEXT: none
   A 64-bit integer.
 void
   INSERT void
   builtin
+SORT TEXT: none
   A `void` return type indicates a function that never returns a value. `void` functions usually have side effects.
 null
   INSERT null
   builtin
+SORT TEXT: none
   The value `null`. The opposite of `nonnull`.
 shape
   INSERT shape
   builtin
+SORT TEXT: none
   A shape is a key-value data structure where the keys are known. Shapes are value types, just like `dict` and `vec`.
   
    A closed shape, such as `shape('x' => int)`, has a fixed number of keys.  An open shape, such as `shape('x' => int, ...)`, may have additional keys.
 nonnull
   INSERT nonnull
   builtin
+SORT TEXT: none
   Any value except `null`.
 nothing
   INSERT nothing
   builtin
+SORT TEXT: none
   The `nothing` type has no values, it's the empty type.
   
   A function returning `nothing` either loops forever or throws an exception. A `vec<nothing>` is always empty.
 dynamic
   INSERT dynamic
   builtin
+SORT TEXT: none
   Any value at all. Unlike `mixed`, the type checker allows any operation on a `dynamic` value, even if e.g. a method doesn't actually exist.
   
   All operations on a `dynamic` value return another `dynamic` value. Prefer more specific types so the type checker can help you.
@@ -65,19 +79,25 @@ dynamic
 mixed
   INSERT mixed
   builtin
+SORT TEXT: none
   Any value at all. It's usually better to use a more specific type, or a generic.
 Foo
   INSERT Foo
   class
+SORT TEXT: none
 function
   INSERT function
   keyword
+SORT TEXT: none
 async
   INSERT async
   keyword
+SORT TEXT: none
 final
   INSERT final
   keyword
+SORT TEXT: none
 abstract
   INSERT abstract
   keyword
+SORT TEXT: none

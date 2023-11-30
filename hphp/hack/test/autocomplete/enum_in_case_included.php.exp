@@ -1,12 +1,16 @@
 MyEnum::TYPE_D
   INSERT MyEnum::TYPE_D
   class constant
+SORT TEXT: none
 MyEnum::TYPE_C
   INSERT MyEnum::TYPE_C
   class constant
+SORT TEXT: none
 MyEnum::TYPE_B
   INSERT MyEnum::TYPE_B
   class constant
+SORT TEXT: none
 MyEnum::TYPE_A
   INSERT MyEnum::TYPE_A
   class constant
+SORT TEXT: none

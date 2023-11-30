@@ -1,6 +1,8 @@
 class
   INSERT class
   classname<this>
+SORT TEXT: none
 bar
   INSERT bar()
   function(): void
+SORT TEXT: none

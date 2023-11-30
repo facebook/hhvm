@@ -1,30 +1,37 @@
 __AllowMultipleInstantiations
   INSERT __AllowMultipleInstantiations
   built-in attribute
+SORT TEXT: none
   Allows implementing this interface with multiple instantiations, e.g. `implements I<int>, I<string>`
 __ConsistentConstruct
   INSERT __ConsistentConstruct
   built-in attribute
+SORT TEXT: none
   Requires all child classes to have the same constructor signature.  This allows `new static(...)` and `new $the_class_name(...)`.
 __Docs
   INSERT __Docs
   built-in attribute
+SORT TEXT: none
   Shows the linked URL when hovering over this type.
 __DynamicallyConstructible
   INSERT __DynamicallyConstructible
   built-in attribute
+SORT TEXT: none
   Allows this class to be instantiated dynamically, based on a string of its name. HHVM will warn or error (depending on settings) on dynamic instantiations without this attribute.
 __DynamicallyReferenced
   INSERT __DynamicallyReferenced
   built-in attribute
+SORT TEXT: none
   Allows a user to get a pointer to this class from a string of its name. HHVM will warn or error (depending on settings) on dynamic references without this attribute.
 __EnableMethodTraitDiamond
   INSERT __EnableMethodTraitDiamond
   built-in attribute
+SORT TEXT: none
   Allows a trait to be `use`d more than once. This is useful in large class hierarchies, where you can end up using the same trait on via multiple paths, producing 'diamond inheritance'.
   
   This requires methods to unambiguous: each method definition must occur in exactly one trait.
 __Sealed
   INSERT __Sealed
   built-in attribute
+SORT TEXT: none
   Only the named classes can extend this class or interface. Child classes may still be extended unless they are marked `final`.

@@ -1,6 +1,8 @@
 __construct
   INSERT __construct()
   function(): void
+SORT TEXT: none
 class
   INSERT class
   classname<this>
+SORT TEXT: none

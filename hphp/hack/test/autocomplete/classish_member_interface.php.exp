@@ -1,12 +1,16 @@
 abstract
   INSERT abstract
   keyword
+SORT TEXT: none
 const
   INSERT const
   keyword
+SORT TEXT: none
 protected
   INSERT protected
   keyword
+SORT TEXT: none
 public
   INSERT public
   keyword
+SORT TEXT: none

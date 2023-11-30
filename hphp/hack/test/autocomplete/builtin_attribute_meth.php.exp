@@ -1,40 +1,48 @@
 __CrossPackage
   INSERT __CrossPackage
   built-in attribute
+SORT TEXT: none
   Enables access to elements from other package(s), requires `<<file:__EnableUnstableFeatures('package')>>`
 __Deprecated
   INSERT __Deprecated
   built-in attribute
+SORT TEXT: none
   Mark a function/method as deprecated.  The type checker will show an error at call sites, and a runtime notice is raised if this function/method is called.
   
   The optional second argument specifies a sampling rate for raising notices at runtime. If the sampling rate is 100, a notice is only raised every 1/100 calls. If omitted, the default sampling rate is 1 (i.e. all calls raise notices). To disable runtime notices, use a sampling rate of 0.
 __DynamicallyCallable
   INSERT __DynamicallyCallable
   built-in attribute
+SORT TEXT: none
   Allows this function/method to be called dynamically, based on a string of its name.  HHVM will warn or error (depending on settings) on dynamic calls to functions without this attribute.
   
   See also `HH\dynamic_fun()` and `HH\dynamic_class_meth()`.
 __Memoize
   INSERT __Memoize
   built-in attribute
+SORT TEXT: none
   Cache the return values from this function/method. Calls with the same arguments will return the cached value.
   
   Caching is per-request and shared between subclasses (see also `__MemoizeLSB`).
 __MemoizeLSB
   INSERT __MemoizeLSB
   built-in attribute
+SORT TEXT: none
   Cache the return values from this method. Calls with the same arguments will return the cached value.
   
   Caching is per-request and has Late Static Binding, so subclasses do not share the cache.
 __Override
   INSERT __Override
   built-in attribute
+SORT TEXT: none
   Ensures there's a parent method being overridden.
 __ReturnDisposable
   INSERT __ReturnDisposable
   built-in attribute
+SORT TEXT: none
   Allows a function/method to return a value that implements `IDisposable` or `IAsyncDisposable`. The function must return a fresh disposable value by either instantiating a class or  returning a value from another method/function marked `__ReturnDisposable`.
 __StrictSwitch
   INSERT __StrictSwitch
   built-in attribute
+SORT TEXT: none
   Enables strict switch checking for all switches in function or method.

@@ -1,6 +1,8 @@
 style
   INSERT style
   ~?string
+SORT TEXT: none
 number
   INSERT number
   ~int
+SORT TEXT: none

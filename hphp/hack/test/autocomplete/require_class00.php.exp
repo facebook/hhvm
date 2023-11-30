@@ -1,9 +1,12 @@
 require class
   INSERT require class
   keyword
+SORT TEXT: none
 require implements
   INSERT require implements
   keyword
+SORT TEXT: none
 require extends
   INSERT require extends
   keyword
+SORT TEXT: none

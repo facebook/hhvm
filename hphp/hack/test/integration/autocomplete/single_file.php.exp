@@ -1,3 +1,4 @@
 some_source_fn
   INSERT some_source_fn()
   (function(): void)
+SORT TEXT: none

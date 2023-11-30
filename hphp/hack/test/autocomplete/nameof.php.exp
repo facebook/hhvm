@@ -1,12 +1,16 @@
 Bearberriers
   INSERT Bearberriers
   enum
+SORT TEXT: none
 Bearer
   INSERT Bearer
   interface
+SORT TEXT: none
 Bearing
   INSERT Bearing
   class
+SORT TEXT: none
 Bears
   INSERT Bears
   class
+SORT TEXT: none

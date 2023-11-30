@@ -1,3 +1,4 @@
 foo:bar
   INSERT foo:bar another-required-attribute={${1}} my-required-attribute={${2}}>$0</foo:bar>
   class
+SORT TEXT: none

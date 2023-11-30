@@ -1,7 +1,9 @@
 string
   INSERT string
   builtin
+SORT TEXT: none
   A sequence of characters.
 StringBuilder
   INSERT StringBuilder
   class
+SORT TEXT: none

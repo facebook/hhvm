@@ -2200,6 +2200,7 @@ let make_ide_completion_response
              @ base_class))
     in
     let hack_to_sort_text (completion : autocomplete_item) : string option =
+      let sort_text = completion.res_sortText in
       let label = completion.res_label in
       let should_downrank label =
         String.length label > 2
@@ -2209,6 +2210,8 @@ let make_ide_completion_response
       let downranked_result_prefix_character = "~" in
       if should_downrank label then
         Some (downranked_result_prefix_character ^ label)
+      else if Option.is_some sort_text then
+        sort_text
       else
         Some label
     in

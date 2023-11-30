@@ -1,8 +1,10 @@
 __Enforceable
   INSERT __Enforceable
   built-in attribute
+SORT TEXT: none
   Ensures that this type is enforceable. Enforceable types can be used with `is` and `as`. This forbids usage of function types and erased (not reified) generics.
 __Reifiable
   INSERT __Reifiable
   built-in attribute
+SORT TEXT: none
   Requires this type to be reifiable. This bans PHP arrays (varray and darray).

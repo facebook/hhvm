@@ -2,435 +2,544 @@ C\any
   INSERT C\any(
   INSERT )
   (function(Traversable<T> $traversable, ?(function(T): ~bool) $predicate = _): bool)
+SORT TEXT: none
 C\contains
   INSERT C\contains(
   INSERT , ${1:\$value})
   (function(readonly Traversable<T1> $traversable, readonly T2 $value): bool)
+SORT TEXT: none
 C\contains_key
   INSERT C\contains_key(
   INSERT , ${1:\$key})
   (function(readonly KeyedContainer<Tk1, Tv> $container, readonly Tk2 $key): bool)
+SORT TEXT: none
 C\count
   INSERT C\count(
   INSERT )
   (function(readonly Container<mixed> $container): int)
+SORT TEXT: none
 C\every
   INSERT C\every(
   INSERT )
   (function(Traversable<T> $traversable, ?(function(T): ~bool) $predicate = _): bool)
+SORT TEXT: none
 C\find
   INSERT C\find(
   INSERT , ${1:\$value_predicate})
   (function(Traversable<T> $traversable, (function(T): ~bool) $value_predicate): ~?T)
+SORT TEXT: none
 C\find_key
   INSERT C\find_key(
   INSERT , ${1:\$value_predicate})
   (function(KeyedTraversable<Tk, Tv> $traversable, (function(Tv): ~bool) $value_predicate): ~?Tk)
+SORT TEXT: none
 C\findx
   INSERT C\findx(
   INSERT , ${1:\$value_predicate})
   (function(Traversable<T> $traversable, (function(T): ~bool) $value_predicate): ~T)
+SORT TEXT: none
 C\first
   INSERT C\first(
   INSERT )
   (function(Traversable<T> $traversable): ~?T)
+SORT TEXT: none
 C\first_key
   INSERT C\first_key(
   INSERT )
   (function(KeyedTraversable<Tk, Tv> $traversable): ~?Tk)
+SORT TEXT: none
 C\first_keyx
   INSERT C\first_keyx(
   INSERT )
   (function(KeyedTraversable<Tk, Tv> $traversable): ~Tk)
+SORT TEXT: none
 C\firstx
   INSERT C\firstx(
   INSERT )
   (function(Traversable<T> $traversable): ~T)
+SORT TEXT: none
 C\is_empty
   INSERT C\is_empty(
   INSERT )
   (function(readonly Container<T> $container): bool)
+SORT TEXT: none
 C\is_sorted
   INSERT C\is_sorted(
   INSERT )
   (function(Traversable<Tv> $traversable, ?(function(Tv, Tv): ~num) $comparator = _): bool)
+SORT TEXT: none
 C\is_sorted_by
   INSERT C\is_sorted_by(
   INSERT , ${1:\$scalar_func})
   (function(Traversable<Tv> $traversable, (function(Tv): ~Ts) $scalar_func, ?(function(Ts, Ts): ~num) $comparator = _): bool)
+SORT TEXT: none
 C\last
   INSERT C\last(
   INSERT )
   (function(Traversable<T> $traversable): ~?T)
+SORT TEXT: none
 C\last_key
   INSERT C\last_key(
   INSERT )
   (function(KeyedTraversable<Tk, Tv> $traversable): ~?Tk)
+SORT TEXT: none
 C\last_keyx
   INSERT C\last_keyx(
   INSERT )
   (function(KeyedTraversable<Tk, Tv> $traversable): ~Tk)
+SORT TEXT: none
 C\lastx
   INSERT C\lastx(
   INSERT )
   (function(Traversable<T> $traversable): ~T)
+SORT TEXT: none
 C\onlyx
   INSERT C\onlyx(
   INSERT )
   (function(Traversable<T> $traversable, ?HH\Lib\Str\SprintfFormatString $format_string = _, mixed $format_args...): ~T)
+SORT TEXT: none
 C\pop_back
   INSERT C\pop_back(
   INSERT )
   (function(inout ~T $container): ~?Tv)
+SORT TEXT: none
 C\pop_backx
   INSERT C\pop_backx(
   INSERT )
   (function(inout ~T $container): ~Tv)
+SORT TEXT: none
 C\pop_front
   INSERT C\pop_front(
   INSERT )
   (function(inout ~T $container): ~?Tv)
+SORT TEXT: none
 C\pop_frontx
   INSERT C\pop_frontx(
   INSERT )
   (function(inout ~T $container): ~Tv)
+SORT TEXT: none
 C\reduce
   INSERT C\reduce(
   INSERT , ${1:\$accumulator}, ${2:\$initial})
   (function(Traversable<Tv> $traversable, (function(Ta, Tv): ~Ta) $accumulator, Ta $initial): ~Ta)
+SORT TEXT: none
 C\reduce_with_key
   INSERT C\reduce_with_key(
   INSERT , ${1:\$accumulator}, ${2:\$initial})
   (function(KeyedTraversable<Tk, Tv> $traversable, (function(Ta, Tk, Tv): ~Ta) $accumulator, Ta $initial): ~Ta)
+SORT TEXT: none
 Dict\associate
   INSERT Dict\associate(
   INSERT , ${1:\$values})
   (function(Traversable<Tk> $keys, Traversable<Tv> $values): ~dict<Tk, Tv>)
+SORT TEXT: none
 Dict\cast_clear_legacy_array_mark
   INSERT Dict\cast_clear_legacy_array_mark(
   INSERT )
   (function(KeyedTraversable<Tk, Tv> $x): dict<Tk, Tv>)
+SORT TEXT: none
 Dict\chunk
   INSERT Dict\chunk(
   INSERT , ${1:\$size})
   (function(KeyedTraversable<Tk, Tv> $traversable, int $size): vec<dict<Tk, Tv>>)
+SORT TEXT: none
 Dict\count_values
   INSERT Dict\count_values(
   INSERT )
   (function(Traversable<Tv> $values): ~dict<Tv, int>)
+SORT TEXT: none
 Dict\diff_by_key
   INSERT Dict\diff_by_key(
   INSERT , ${1:\$second})
   (function(KeyedTraversable<Tk1, Tv> $first, KeyedTraversable<Tk2, mixed> $second, KeyedContainer<Tk2, mixed> $rest...): ~dict<Tk1, Tv>)
+SORT TEXT: none
 Dict\drop
   INSERT Dict\drop(
   INSERT , ${1:\$n})
   (function(KeyedTraversable<Tk, Tv> $traversable, int $n): ~dict<Tk, Tv>)
+SORT TEXT: none
 Dict\fill_keys
   INSERT Dict\fill_keys(
   INSERT , ${1:\$value})
   (function(Traversable<Tk> $keys, Tv $value): dict<Tk, Tv>)
+SORT TEXT: none
 Dict\filter
   INSERT Dict\filter(
   INSERT )
   (function(KeyedTraversable<Tk, Tv> $traversable, ?(function(Tv): ~bool) $value_predicate = _): ~dict<Tk, Tv>)
+SORT TEXT: none
 Dict\filter_async
   INSERT Dict\filter_async(
   INSERT , ${1:\$value_predicate})
   (function(KeyedContainer<Tk, Tv> $traversable, (function(Tv): ~Awaitable<bool>) $value_predicate): Awaitable<~dict<Tk, Tv>>)
+SORT TEXT: none
 Dict\filter_keys
   INSERT Dict\filter_keys(
   INSERT )
   (function(KeyedTraversable<Tk, Tv> $traversable, ?(function(Tk): ~bool) $key_predicate = _): ~dict<Tk, Tv>)
+SORT TEXT: none
 Dict\filter_nulls
   INSERT Dict\filter_nulls(
   INSERT )
   (function(KeyedTraversable<Tk, ?Tv> $traversable): ~dict<Tk, Tv>)
+SORT TEXT: none
 Dict\filter_with_key
   INSERT Dict\filter_with_key(
   INSERT , ${1:\$predicate})
   (function(KeyedTraversable<Tk, Tv> $traversable, (function(Tk, Tv): ~bool) $predicate): ~dict<Tk, Tv>)
+SORT TEXT: none
 Dict\filter_with_key_async
   INSERT Dict\filter_with_key_async(
   INSERT , ${1:\$predicate})
   (function(KeyedContainer<Tk, Tv> $traversable, (function(Tk, Tv): ~Awaitable<bool>) $predicate): Awaitable<~dict<Tk, Tv>>)
+SORT TEXT: none
 Dict\flip
   INSERT Dict\flip(
   INSERT )
   (function(KeyedTraversable<Tk, Tv> $traversable): dict<Tv, Tk>)
+SORT TEXT: none
 Dict\from_keys
   INSERT Dict\from_keys(
   INSERT , ${1:\$value_func})
   (function(Traversable<Tk> $keys, (function(Tk): ~Tv) $value_func): ~dict<Tk, Tv>)
+SORT TEXT: none
 Dict\from_keys_async
   INSERT Dict\from_keys_async(
   INSERT , ${1:\$async_func})
   (function(Traversable<Tk> $keys, (function(Tk): ~Awaitable<Tv>) $async_func): Awaitable<~dict<Tk, Tv>>)
+SORT TEXT: none
 Dict\from_values
   INSERT Dict\from_values(
   INSERT , ${1:\$key_func})
   (function(Traversable<Tv> $values, (function(Tv): ~Tk) $key_func): ~dict<Tk, Tv>)
+SORT TEXT: none
 Dict\group_by
   INSERT Dict\group_by(
   INSERT , ${1:\$key_func})
   (function(Traversable<Tv> $values, (function(Tv): ~?Tk) $key_func): ~dict<Tk, vec<Tv>>)
+SORT TEXT: none
 Dict\map
   INSERT Dict\map(
   INSERT , ${1:\$value_func})
   (function(KeyedTraversable<Tk, Tv1> $traversable, (function(Tv1): ~Tv2) $value_func): ~dict<Tk, Tv2>)
+SORT TEXT: none
 Dict\map_async
   INSERT Dict\map_async(
   INSERT , ${1:\$value_func})
   (function(KeyedTraversable<Tk, Tv1> $traversable, (function(Tv1): ~Awaitable<Tv2>) $value_func): Awaitable<~dict<Tk, Tv2>>)
+SORT TEXT: none
 Dict\map_keys
   INSERT Dict\map_keys(
   INSERT , ${1:\$key_func})
   (function(KeyedTraversable<Tk1, Tv> $traversable, (function(Tk1): ~Tk2) $key_func): ~dict<Tk2, Tv>)
+SORT TEXT: none
 Dict\map_with_key
   INSERT Dict\map_with_key(
   INSERT , ${1:\$value_func})
   (function(KeyedTraversable<Tk, Tv1> $traversable, (function(Tk, Tv1): ~Tv2) $value_func): ~dict<Tk, Tv2>)
+SORT TEXT: none
 Dict\map_with_key_async
   INSERT Dict\map_with_key_async(
   INSERT , ${1:\$value_func})
   (function(KeyedTraversable<Tk, Tv1> $traversable, (function(Tk, Tv1): ~Awaitable<Tv2>) $value_func): Awaitable<~dict<Tk, Tv2>>)
+SORT TEXT: none
 Dict\merge
   INSERT Dict\merge(
   INSERT )
   (function(KeyedTraversable<Tk, Tv> $first, KeyedContainer<Tk, Tv> $rest...): ~dict<Tk, Tv>)
+SORT TEXT: none
 Dict\partition
   INSERT Dict\partition(
   INSERT , ${1:\$predicate})
   (function(KeyedTraversable<Tk, Tv> $traversable, (function(Tv): ~bool) $predicate): ~(dict<Tk, Tv>, dict<Tk, Tv>))
+SORT TEXT: none
 Dict\partition_with_key
   INSERT Dict\partition_with_key(
   INSERT , ${1:\$predicate})
   (function(KeyedTraversable<Tk, Tv> $traversable, (function(Tk, Tv): ~bool) $predicate): ~(dict<Tk, Tv>, dict<Tk, Tv>))
+SORT TEXT: none
 Dict\pull
   INSERT Dict\pull(
   INSERT , ${1:\$value_func}, ${2:\$key_func})
   (function(Traversable<Tv1> $traversable, (function(Tv1): ~Tv2) $value_func, (function(Tv1): ~Tk) $key_func): ~dict<Tk, Tv2>)
+SORT TEXT: none
 Dict\pull_with_key
   INSERT Dict\pull_with_key(
   INSERT , ${1:\$value_func}, ${2:\$key_func})
   (function(KeyedTraversable<Tk1, Tv1> $traversable, (function(Tk1, Tv1): ~Tv2) $value_func, (function(Tk1, Tv1): ~Tk2) $key_func): ~dict<Tk2, Tv2>)
+SORT TEXT: none
 Dict\reverse
   INSERT Dict\reverse(
   INSERT )
   (function(KeyedTraversable<Tk, Tv> $traversable): ~dict<Tk, Tv>)
+SORT TEXT: none
 Dict\select_keys
   INSERT Dict\select_keys(
   INSERT , ${1:\$keys})
   (function(KeyedContainer<Tk, Tv> $container, Traversable<Tk> $keys): ~dict<Tk, Tv>)
+SORT TEXT: none
 Dict\shuffle
   INSERT Dict\shuffle(
   INSERT )
   (function(KeyedTraversable<Tk, Tv> $container): ~dict<Tk, Tv>)
+SORT TEXT: none
 Dict\sort
   INSERT Dict\sort(
   INSERT )
   (function(KeyedTraversable<Tk, Tv> $traversable, ?(function(Tv, Tv): ~num) $value_comparator = _): ~dict<Tk, Tv>)
+SORT TEXT: none
 Dict\sort_by
   INSERT Dict\sort_by(
   INSERT , ${1:\$scalar_func})
   (function(KeyedTraversable<Tk, Tv> $traversable, (function(Tv): ~Ts) $scalar_func, ?(function(Ts, Ts): ~num) $scalar_comparator = _): ~dict<Tk, Tv>)
+SORT TEXT: none
 Dict\sort_by_key
   INSERT Dict\sort_by_key(
   INSERT )
   (function(KeyedTraversable<Tk, Tv> $traversable, ?(function(Tk, Tk): ~num) $key_comparator = _): ~dict<Tk, Tv>)
+SORT TEXT: none
 Dict\take
   INSERT Dict\take(
   INSERT , ${1:\$n})
   (function(KeyedTraversable<Tk, Tv> $traversable, int $n): ~dict<Tk, Tv>)
+SORT TEXT: none
 Dict\unique
   INSERT Dict\unique(
   INSERT )
   (function(KeyedTraversable<Tk, Tv> $traversable): ~dict<Tk, Tv>)
+SORT TEXT: none
 Dict\unique_by
   INSERT Dict\unique_by(
   INSERT , ${1:\$scalar_func})
   (function(KeyedContainer<Tk, Tv> $container, (function(Tv): ~Ts) $scalar_func): ~dict<Tk, Tv>)
+SORT TEXT: none
 Keyset\chunk
   INSERT Keyset\chunk(
   INSERT , ${1:\$size})
   (function(Traversable<Tv> $traversable, int $size): vec<keyset<Tv>>)
+SORT TEXT: none
 Keyset\diff
   INSERT Keyset\diff(
   INSERT , ${1:\$second})
   (function(Traversable<Tv1> $first, Traversable<Tv2> $second, Container<Tv2> $rest...): ~keyset<Tv1>)
+SORT TEXT: none
 Keyset\drop
   INSERT Keyset\drop(
   INSERT , ${1:\$n})
   (function(Traversable<Tv> $traversable, int $n): ~keyset<Tv>)
+SORT TEXT: none
 Keyset\filter
   INSERT Keyset\filter(
   INSERT )
   (function(Traversable<Tv> $traversable, ?(function(Tv): ~bool) $value_predicate = _): ~keyset<Tv>)
+SORT TEXT: none
 Keyset\filter_async
   INSERT Keyset\filter_async(
   INSERT , ${1:\$value_predicate})
   (function(Container<Tv> $container, (function(Tv): ~Awaitable<bool>) $value_predicate): Awaitable<~keyset<Tv>>)
+SORT TEXT: none
 Keyset\filter_nulls
   INSERT Keyset\filter_nulls(
   INSERT )
   (function(Traversable<?Tv> $traversable): ~keyset<Tv>)
+SORT TEXT: none
 Keyset\filter_with_key
   INSERT Keyset\filter_with_key(
   INSERT , ${1:\$predicate})
   (function(KeyedTraversable<Tk, Tv> $traversable, (function(Tk, Tv): ~bool) $predicate): ~keyset<Tv>)
+SORT TEXT: none
 Keyset\intersect
   INSERT Keyset\intersect(
   INSERT , ${1:\$second})
   (function(Traversable<Tv> $first, Traversable<Tv> $second, Container<Tv> $rest...): ~keyset<Tv>)
+SORT TEXT: none
 Keyset\keys
   INSERT Keyset\keys(
   INSERT )
   (function(KeyedTraversable<Tk, Tv> $traversable): ~keyset<Tk>)
+SORT TEXT: none
 Keyset\map
   INSERT Keyset\map(
   INSERT , ${1:\$value_func})
   (function(Traversable<Tv1> $traversable, (function(Tv1): Tv2) $value_func): keyset<Tv2>)
+SORT TEXT: none
 Keyset\map_async
   INSERT Keyset\map_async(
   INSERT , ${1:\$async_func})
   (function(Traversable<Tv> $traversable, (function(Tv): ~Awaitable<Tk>) $async_func): Awaitable<~keyset<Tk>>)
+SORT TEXT: none
 Keyset\map_with_key
   INSERT Keyset\map_with_key(
   INSERT , ${1:\$value_func})
   (function(KeyedTraversable<Tk, Tv1> $traversable, (function(Tk, Tv1): Tv2) $value_func): keyset<Tv2>)
+SORT TEXT: none
 Keyset\partition
   INSERT Keyset\partition(
   INSERT , ${1:\$predicate})
   (function(Traversable<Tv> $traversable, (function(Tv): ~bool) $predicate): ~(keyset<Tv>, keyset<Tv>))
+SORT TEXT: none
 Keyset\partition_async
   INSERT Keyset\partition_async(
   INSERT , ${1:\$value_predicate})
   (function(Container<Tv> $container, (function(Tv): ~Awaitable<bool>) $value_predicate): Awaitable<~(keyset<Tv>, keyset<Tv>)>)
+SORT TEXT: none
 Keyset\sort
   INSERT Keyset\sort(
   INSERT )
   (function(Traversable<Tv> $traversable, ?(function(Tv, Tv): ~num) $comparator = _): ~keyset<Tv>)
+SORT TEXT: none
 Keyset\take
   INSERT Keyset\take(
   INSERT , ${1:\$n})
   (function(Traversable<Tv> $traversable, int $n): ~keyset<Tv>)
+SORT TEXT: none
 Keyset\union
   INSERT Keyset\union(
   INSERT )
   (function(Traversable<Tv> $first, Container<Tv> $rest...): keyset<Tv>)
+SORT TEXT: none
 Str\join
   INSERT Str\join(
   INSERT , ${1:\$glue})
   (function(readonly Traversable<arraykey> $pieces, string $glue): string)
+SORT TEXT: none
 Vec\cast_clear_legacy_array_mark
   INSERT Vec\cast_clear_legacy_array_mark(
   INSERT )
   (function(Traversable<T> $x): vec<T>)
+SORT TEXT: none
 Vec\chunk
   INSERT Vec\chunk(
   INSERT , ${1:\$size})
   (function(Traversable<Tv> $traversable, int $size): vec<vec<Tv>>)
+SORT TEXT: none
 Vec\concat
   INSERT Vec\concat(
   INSERT )
   (function(Traversable<Tv> $first, Container<Tv> $rest...): ~vec<Tv>)
+SORT TEXT: none
 Vec\diff
   INSERT Vec\diff(
   INSERT , ${1:\$second})
   (function(Traversable<Tv1> $first, Traversable<Tv2> $second, Container<Tv2> $rest...): ~vec<Tv1>)
+SORT TEXT: none
 Vec\diff_by
   INSERT Vec\diff_by(
   INSERT , ${1:\$second}, ${2:\$scalar_func})
   (function(Traversable<Tv> $first, Traversable<Tv> $second, (function(Tv): ~Ts) $scalar_func): ~vec<Tv>)
+SORT TEXT: none
 Vec\drop
   INSERT Vec\drop(
   INSERT , ${1:\$n})
   (function(Traversable<Tv> $traversable, int $n): ~vec<Tv>)
+SORT TEXT: none
 Vec\filter
   INSERT Vec\filter(
   INSERT )
   (function(Traversable<Tv> $traversable, ?(function(Tv): ~bool) $value_predicate = _): ~vec<Tv>)
+SORT TEXT: none
 Vec\filter_async
   INSERT Vec\filter_async(
   INSERT , ${1:\$value_predicate})
   (function(Container<Tv> $container, (function(Tv): ~Awaitable<bool>) $value_predicate): Awaitable<~vec<Tv>>)
+SORT TEXT: none
 Vec\filter_nulls
   INSERT Vec\filter_nulls(
   INSERT )
   (function(Traversable<?Tv> $traversable): ~vec<Tv>)
+SORT TEXT: none
 Vec\filter_with_key
   INSERT Vec\filter_with_key(
   INSERT , ${1:\$predicate})
   (function(KeyedTraversable<Tk, Tv> $traversable, (function(Tk, Tv): ~bool) $predicate): ~vec<Tv>)
+SORT TEXT: none
 Vec\intersect
   INSERT Vec\intersect(
   INSERT , ${1:\$second})
   (function(Traversable<Tv> $first, Traversable<Tv> $second, Container<Tv> $rest...): ~vec<Tv>)
+SORT TEXT: none
 Vec\keys
   INSERT Vec\keys(
   INSERT )
   (function(KeyedTraversable<Tk, Tv> $traversable): ~vec<Tk>)
+SORT TEXT: none
 Vec\map
   INSERT Vec\map(
   INSERT , ${1:\$value_func})
   (function(Traversable<Tv1> $traversable, (function(Tv1): ~Tv2) $value_func): ~vec<Tv2>)
+SORT TEXT: none
 Vec\map_async
   INSERT Vec\map_async(
   INSERT , ${1:\$async_func})
   (function(Traversable<Tv1> $traversable, (function(Tv1): ~Awaitable<Tv2>) $async_func): Awaitable<~vec<Tv2>>)
+SORT TEXT: none
 Vec\map_with_key
   INSERT Vec\map_with_key(
   INSERT , ${1:\$value_func})
   (function(KeyedTraversable<Tk, Tv1> $traversable, (function(Tk, Tv1): ~Tv2) $value_func): ~vec<Tv2>)
+SORT TEXT: none
 Vec\map_with_key_async
   INSERT Vec\map_with_key_async(
   INSERT , ${1:\$value_func})
   (function(KeyedTraversable<Tk, Tv1> $traversable, (function(Tk, Tv1): ~Awaitable<Tv2>) $value_func): Awaitable<~vec<Tv2>>)
+SORT TEXT: none
 Vec\partition
   INSERT Vec\partition(
   INSERT , ${1:\$predicate})
   (function(Traversable<Tv> $traversable, (function(Tv): ~bool) $predicate): ~(vec<Tv>, vec<Tv>))
+SORT TEXT: none
 Vec\partition_async
   INSERT Vec\partition_async(
   INSERT , ${1:\$value_predicate})
   (function(Container<Tv> $container, (function(Tv): ~Awaitable<bool>) $value_predicate): Awaitable<~(vec<Tv>, vec<Tv>)>)
+SORT TEXT: none
 Vec\reverse
   INSERT Vec\reverse(
   INSERT )
   (function(Traversable<Tv> $traversable): ~vec<Tv>)
+SORT TEXT: none
 Vec\sample
   INSERT Vec\sample(
   INSERT , ${1:\$sample_size})
   (function(Traversable<Tv> $traversable, int $sample_size): ~vec<Tv>)
+SORT TEXT: none
 Vec\shuffle
   INSERT Vec\shuffle(
   INSERT )
   (function(Traversable<Tv> $traversable): ~vec<Tv>)
+SORT TEXT: none
 Vec\slice
   INSERT Vec\slice(
   INSERT , ${1:\$offset})
   (function(Container<Tv> $container, int $offset, ?int $length = _): ~vec<Tv>)
+SORT TEXT: none
 Vec\sort
   INSERT Vec\sort(
   INSERT )
   (function(Traversable<Tv> $traversable, ?(function(Tv, Tv): ~num) $comparator = _): ~vec<Tv>)
+SORT TEXT: none
 Vec\sort_by
   INSERT Vec\sort_by(
   INSERT , ${1:\$scalar_func})
   (function(Traversable<Tv> $traversable, (function(Tv): ~Ts) $scalar_func, ?(function(Ts, Ts): ~num) $comparator = _): ~vec<Tv>)
+SORT TEXT: none
 Vec\take
   INSERT Vec\take(
   INSERT , ${1:\$n})
   (function(Traversable<Tv> $traversable, int $n): ~vec<Tv>)
+SORT TEXT: none
 Vec\unique
   INSERT Vec\unique(
   INSERT )
   (function(Traversable<Tv> $traversable): ~vec<Tv>)
+SORT TEXT: none
 Vec\unique_by
   INSERT Vec\unique_by(
   INSERT , ${1:\$scalar_func})
   (function(Traversable<Tv> $traversable, (function(Tv): ~Ts) $scalar_func): ~vec<Tv>)
+SORT TEXT: none
 Vec\zip
   INSERT Vec\zip(
   INSERT , ${1:\$second})
   (function(Traversable<Tv> $first, Traversable<Tu> $second): ~vec<(Tv, Tu)>)
+SORT TEXT: none

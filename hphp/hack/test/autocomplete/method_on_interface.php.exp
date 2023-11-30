@@ -1,6 +1,8 @@
 function
   INSERT function
   keyword
+SORT TEXT: none
 static
   INSERT static
   keyword
+SORT TEXT: none

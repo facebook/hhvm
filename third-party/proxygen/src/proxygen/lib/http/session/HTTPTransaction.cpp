@@ -47,7 +47,8 @@ HTTPException stateMachineError(HTTPException::Direction dir, std::string msg) {
     invariantViolation(                                                   \
         HTTPException(HTTPException::Direction::INGRESS_AND_EGRESS, #X)); \
     return Y;                                                             \
-  }
+  }                                                                       \
+  static_assert(true, "semicolon required")
 
 #define INVARIANT(X)                                                      \
   if (!(X)) {                                                             \

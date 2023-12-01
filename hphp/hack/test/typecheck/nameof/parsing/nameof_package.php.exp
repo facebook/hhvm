@@ -1,0 +1,4 @@
+File "nameof_package.php", line 5, characters 12-22:
+Cannot use unstable feature: `package` (Parsing[1002])
+File "nameof_package.php", line 5, characters 12-22:
+`nameof` can only be used with a class (Parsing[1002])

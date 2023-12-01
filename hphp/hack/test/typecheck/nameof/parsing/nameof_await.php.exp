@@ -1,0 +1,4 @@
+File "nameof_await.php", line 6, characters 12-21:
+`await` cannot be used as an expression in this location because it's conditionally executed. (Parsing[1002])
+File "nameof_await.php", line 6, characters 12-21:
+`nameof` can only be used with a class (Parsing[1002])

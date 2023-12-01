@@ -205,5 +205,10 @@ TEST(LowerBoundPrefixMapTest, EmptyMap) {
   ASSERT_TRUE(lbMap.empty());
 }
 
+TEST(LowerBoundPrefixMapTest, NullKey) {
+  LowerBoundPrefixMap<int> lbMap;
+  ASSERT_EQ(lbMap.findPrefix(std::string_view{}), lbMap.end());
+}
+
 } // namespace
 } // namespace facebook::memcache

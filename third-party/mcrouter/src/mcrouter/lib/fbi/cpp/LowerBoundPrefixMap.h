@@ -40,8 +40,10 @@ class SmallPrefix {
       data_ = folly::Endian::swap(data_);
       return;
     }
-    std::memcpy(&data_, s.data(), s.size());
-    data_ = folly::Endian::swap(data_);
+    if (FOLLY_LIKELY(s.data() != nullptr)) {
+      std::memcpy(&data_, s.data(), s.size());
+      data_ = folly::Endian::swap(data_);
+    }
   }
 
   // default operator== and operator<=> are ok here

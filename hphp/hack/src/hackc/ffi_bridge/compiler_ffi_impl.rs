@@ -2,9 +2,13 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use super::*;
 
-impl From<facts::Facts> for compile_ffi::FileSymbols {
+//! Module containing conversion methods between the Rust Facts and
+//! Rust/C++ shared Facts (in the ffi module)
+
+use crate::ffi;
+
+impl From<facts::Facts> for ffi::FileSymbols {
     fn from(facts: facts::Facts) -> Self {
         Self {
             types: facts.types.into_keys().collect(),
@@ -15,14 +19,6 @@ impl From<facts::Facts> for compile_ffi::FileSymbols {
     }
 }
 
-trait IntoKeyValue<K, V> {
-    fn into_key_value(self) -> (K, V);
-}
-
-trait FromKeyValue<K, V> {
-    fn from_key_value(k: K, v: V) -> Self;
-}
-
 #[cfg(test)]
 mod tests {
     use std::collections::BTreeMap;
@@ -30,10 +26,10 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_facts() {
+    fn test_facts_symbols() {
         let (ffi_type_facts_by_name, rust_type_facts_by_name) = create_type_facts_by_name();
         let (ffi_module_facts_by_name, rust_module_facts_by_name) = create_module_facts_by_name();
-        let ffi_facts = compile_ffi::FileSymbols {
+        let ffi_symbols = ffi::FileSymbols {
             types: ffi_type_facts_by_name,
             functions: vec!["f1".to_string(), "f2".to_string()],
             constants: vec!["C".to_string()],
@@ -46,7 +42,7 @@ mod tests {
             modules: rust_module_facts_by_name,
             file_attributes: Default::default(),
         };
-        assert_eq!(compile_ffi::FileSymbols::from(rust_facts), ffi_facts)
+        assert_eq!(ffi::FileSymbols::from(rust_facts), ffi_symbols)
     }
 
     fn create_type_facts_by_name() -> (Vec<String>, facts::TypeFactsByName) {

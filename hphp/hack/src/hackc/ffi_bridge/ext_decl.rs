@@ -28,22 +28,22 @@ use oxidized_by_ref::typing_defs_core::UserAttribute;
 use oxidized_by_ref::typing_defs_core::UserAttributeParam;
 use ty::reason::BReason;
 
-use crate::compile_ffi::ExtDeclAttribute;
-use crate::compile_ffi::ExtDeclClass;
-use crate::compile_ffi::ExtDeclClassConst;
-use crate::compile_ffi::ExtDeclClassTypeConst;
-use crate::compile_ffi::ExtDeclEnumType;
-use crate::compile_ffi::ExtDeclFile;
-use crate::compile_ffi::ExtDeclFileConst;
-use crate::compile_ffi::ExtDeclFileFunc;
-use crate::compile_ffi::ExtDeclMethod;
-use crate::compile_ffi::ExtDeclMethodParam;
-use crate::compile_ffi::ExtDeclModule;
-use crate::compile_ffi::ExtDeclProp;
-use crate::compile_ffi::ExtDeclSignature;
-use crate::compile_ffi::ExtDeclTparam;
-use crate::compile_ffi::ExtDeclTypeConstraint;
-use crate::compile_ffi::ExtDeclTypeDef;
+use crate::ffi::ExtDeclAttribute;
+use crate::ffi::ExtDeclClass;
+use crate::ffi::ExtDeclClassConst;
+use crate::ffi::ExtDeclClassTypeConst;
+use crate::ffi::ExtDeclEnumType;
+use crate::ffi::ExtDeclFile;
+use crate::ffi::ExtDeclFileConst;
+use crate::ffi::ExtDeclFileFunc;
+use crate::ffi::ExtDeclMethod;
+use crate::ffi::ExtDeclMethodParam;
+use crate::ffi::ExtDeclModule;
+use crate::ffi::ExtDeclProp;
+use crate::ffi::ExtDeclSignature;
+use crate::ffi::ExtDeclTparam;
+use crate::ffi::ExtDeclTypeConstraint;
+use crate::ffi::ExtDeclTypeDef;
 
 fn find_class<'a>(parsed_file: &ParsedFile<'a>, symbol: &str) -> Option<&'a ShallowClass<'a>> {
     let input_symbol_formatted = symbol.starts_with('\\');

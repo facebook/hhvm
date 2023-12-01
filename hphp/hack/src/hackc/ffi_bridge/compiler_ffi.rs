@@ -4,8 +4,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-// Module containing conversion methods between the Rust Facts and
-// Rust/C++ shared Facts (in the compile_ffi module)
 mod compiler_ffi_impl;
 mod ext_decl;
 pub mod external_decl_provider;
@@ -36,13 +34,13 @@ use sha1::Sha1;
 
 #[allow(clippy::derivable_impls)]
 #[cxx::bridge(namespace = "HPHP::hackc")]
-pub mod compile_ffi {
-
+mod ffi {
     enum JitEnableRenameFunction {
         Disable,
         Enable,
         RestrictedEnable,
     }
+
     struct NativeEnv {
         /// Pointer to decl_provider opaque object, cast to usize. 0 means null.
         decl_provider: usize,
@@ -454,18 +452,18 @@ pub struct DeclsHolder {
 pub struct UnitWrapper(Unit<'static>, bumpalo::Bump);
 
 ///////////////////////////////////////////////////////////////////////////////////
-impl From<compile_ffi::JitEnableRenameFunction> for options::JitEnableRenameFunction {
-    fn from(other: compile_ffi::JitEnableRenameFunction) -> Self {
+impl From<ffi::JitEnableRenameFunction> for options::JitEnableRenameFunction {
+    fn from(other: ffi::JitEnableRenameFunction) -> Self {
         match other {
-            compile_ffi::JitEnableRenameFunction::Enable => Self::Enable,
-            compile_ffi::JitEnableRenameFunction::Disable => Self::Disable,
-            compile_ffi::JitEnableRenameFunction::RestrictedEnable => Self::RestrictedEnable,
+            ffi::JitEnableRenameFunction::Enable => Self::Enable,
+            ffi::JitEnableRenameFunction::Disable => Self::Disable,
+            ffi::JitEnableRenameFunction::RestrictedEnable => Self::RestrictedEnable,
             _ => panic!("Enum value does not match one of listed variants"),
         }
     }
 }
 ///////////////////////////////////////////////////////////////////////////////////
-impl compile_ffi::NativeEnv {
+impl ffi::NativeEnv {
     fn to_compile_env(&self) -> Option<compile::NativeEnv> {
         Some(compile::NativeEnv {
             filepath: RelativePath::make(
@@ -548,7 +546,7 @@ fn hash_unit(UnitWrapper(unit, _): &UnitWrapper) -> [u8; 20] {
     hasher.finalize().into()
 }
 
-fn compile_from_text(env: &compile_ffi::NativeEnv, source_text: &[u8]) -> Result<Vec<u8>, String> {
+fn compile_from_text(env: &ffi::NativeEnv, source_text: &[u8]) -> Result<Vec<u8>, String> {
     let native_env = env.to_compile_env().unwrap();
     let text = SourceText::make(
         std::sync::Arc::new(native_env.filepath.clone()),
@@ -596,12 +594,12 @@ fn type_exists(holder: &DeclsHolder, symbol: &str) -> bool {
 }
 
 pub fn direct_decl_parse_and_serialize(
-    config: &compile_ffi::DeclParserConfig,
+    config: &ffi::DeclParserConfig,
     filename: &CxxString,
     text: &[u8],
-) -> compile_ffi::DeclsAndBlob {
+) -> ffi::DeclsAndBlob {
     match parse_decls(config, filename, text) {
-        Ok(decls) | Err(DeclsError(decls, _)) => compile_ffi::DeclsAndBlob {
+        Ok(decls) | Err(DeclsError(decls, _)) => ffi::DeclsAndBlob {
             serialized: decl_provider::serialize_decls(&decls.parsed_file.decls).unwrap(),
             has_errors: decls.parsed_file.has_first_pass_parse_errors,
             decls,
@@ -610,7 +608,7 @@ pub fn direct_decl_parse_and_serialize(
 }
 
 pub fn parse_decls(
-    config: &compile_ffi::DeclParserConfig,
+    config: &ffi::DeclParserConfig,
     filename: &CxxString,
     text: &[u8],
 ) -> Result<Box<DeclsHolder>, DeclsError> {
@@ -650,14 +648,14 @@ pub fn parse_decls(
 #[error("{}: File contained first-pass parse errors", .1.display())]
 pub struct DeclsError(Box<DeclsHolder>, PathBuf);
 
-fn verify_deserialization(result: &compile_ffi::DeclsAndBlob) -> bool {
+fn verify_deserialization(result: &ffi::DeclsAndBlob) -> bool {
     let arena = bumpalo::Bump::new();
     let decls = decl_provider::deserialize_decls(&arena, &result.serialized).unwrap();
     decls == result.decls.parsed_file.decls
 }
 
 fn compile_unit_from_text(
-    env: &compile_ffi::NativeEnv,
+    env: &ffi::NativeEnv,
     source_text: &[u8],
 ) -> Result<Box<UnitWrapper>, String> {
     let bump = bumpalo::Bump::new();
@@ -697,7 +695,7 @@ fn compile_unit_from_text(
     .map_err(|e| e.to_string())
 }
 
-fn decls_to_symbols(holder: &DeclsHolder) -> compile_ffi::FileSymbols {
+fn decls_to_symbols(holder: &DeclsHolder) -> ffi::FileSymbols {
     facts::Facts::from_decls(&holder.parsed_file).into()
 }
 
@@ -706,57 +704,42 @@ fn decls_to_facts_json(decls: &DeclsHolder, sha1sum: &CxxString) -> String {
     facts.to_json(false, &sha1sum.to_string_lossy())
 }
 
-fn get_classes(holder: &DeclsHolder) -> Vec<compile_ffi::ExtDeclClass> {
+fn get_classes(holder: &DeclsHolder) -> Vec<ffi::ExtDeclClass> {
     ext_decl::get_classes(&holder.parsed_file)
 }
 
-fn get_class(holder: &DeclsHolder, name: &str) -> Vec<compile_ffi::ExtDeclClass> {
+fn get_class(holder: &DeclsHolder, name: &str) -> Vec<ffi::ExtDeclClass> {
     match ext_decl::get_class(&holder.parsed_file, name) {
         Some(v) => vec![v],
         None => vec![],
     }
 }
 
-fn get_class_methods(holder: &DeclsHolder, kls: &str) -> Vec<compile_ffi::ExtDeclMethod> {
+fn get_class_methods(holder: &DeclsHolder, kls: &str) -> Vec<ffi::ExtDeclMethod> {
     ext_decl::get_class_methods(&holder.parsed_file, kls, "")
 }
 
-fn get_class_method(
-    holder: &DeclsHolder,
-    kls: &str,
-    name: &str,
-) -> Vec<compile_ffi::ExtDeclMethod> {
+fn get_class_method(holder: &DeclsHolder, kls: &str, name: &str) -> Vec<ffi::ExtDeclMethod> {
     ext_decl::get_class_methods(&holder.parsed_file, kls, name)
 }
 
-fn get_class_smethods(holder: &DeclsHolder, kls: &str) -> Vec<compile_ffi::ExtDeclMethod> {
+fn get_class_smethods(holder: &DeclsHolder, kls: &str) -> Vec<ffi::ExtDeclMethod> {
     ext_decl::get_class_smethods(&holder.parsed_file, kls, "")
 }
 
-fn get_class_smethod(
-    holder: &DeclsHolder,
-    kls: &str,
-    name: &str,
-) -> Vec<compile_ffi::ExtDeclMethod> {
+fn get_class_smethod(holder: &DeclsHolder, kls: &str, name: &str) -> Vec<ffi::ExtDeclMethod> {
     ext_decl::get_class_smethods(&holder.parsed_file, kls, name)
 }
 
-fn get_class_consts(holder: &DeclsHolder, kls: &str) -> Vec<compile_ffi::ExtDeclClassConst> {
+fn get_class_consts(holder: &DeclsHolder, kls: &str) -> Vec<ffi::ExtDeclClassConst> {
     ext_decl::get_class_consts(&holder.parsed_file, kls, "")
 }
 
-fn get_class_const(
-    holder: &DeclsHolder,
-    kls: &str,
-    name: &str,
-) -> Vec<compile_ffi::ExtDeclClassConst> {
+fn get_class_const(holder: &DeclsHolder, kls: &str, name: &str) -> Vec<ffi::ExtDeclClassConst> {
     ext_decl::get_class_consts(&holder.parsed_file, kls, name)
 }
 
-fn get_class_typeconsts(
-    holder: &DeclsHolder,
-    kls: &str,
-) -> Vec<compile_ffi::ExtDeclClassTypeConst> {
+fn get_class_typeconsts(holder: &DeclsHolder, kls: &str) -> Vec<ffi::ExtDeclClassTypeConst> {
     ext_decl::get_class_typeconsts(&holder.parsed_file, kls, "")
 }
 
@@ -764,78 +747,74 @@ fn get_class_typeconst(
     holder: &DeclsHolder,
     kls: &str,
     name: &str,
-) -> Vec<compile_ffi::ExtDeclClassTypeConst> {
+) -> Vec<ffi::ExtDeclClassTypeConst> {
     ext_decl::get_class_typeconsts(&holder.parsed_file, kls, name)
 }
 
-fn get_class_props(holder: &DeclsHolder, kls: &str) -> Vec<compile_ffi::ExtDeclProp> {
+fn get_class_props(holder: &DeclsHolder, kls: &str) -> Vec<ffi::ExtDeclProp> {
     ext_decl::get_class_props(&holder.parsed_file, kls, "")
 }
 
-fn get_class_prop(holder: &DeclsHolder, kls: &str, name: &str) -> Vec<compile_ffi::ExtDeclProp> {
+fn get_class_prop(holder: &DeclsHolder, kls: &str, name: &str) -> Vec<ffi::ExtDeclProp> {
     ext_decl::get_class_props(&holder.parsed_file, kls, name)
 }
 
-fn get_class_sprops(holder: &DeclsHolder, kls: &str) -> Vec<compile_ffi::ExtDeclProp> {
+fn get_class_sprops(holder: &DeclsHolder, kls: &str) -> Vec<ffi::ExtDeclProp> {
     ext_decl::get_class_sprops(&holder.parsed_file, kls, "")
 }
 
-fn get_class_sprop(holder: &DeclsHolder, kls: &str, name: &str) -> Vec<compile_ffi::ExtDeclProp> {
+fn get_class_sprop(holder: &DeclsHolder, kls: &str, name: &str) -> Vec<ffi::ExtDeclProp> {
     ext_decl::get_class_sprops(&holder.parsed_file, kls, name)
 }
 
-fn get_class_attributes(holder: &DeclsHolder, kls: &str) -> Vec<compile_ffi::ExtDeclAttribute> {
+fn get_class_attributes(holder: &DeclsHolder, kls: &str) -> Vec<ffi::ExtDeclAttribute> {
     ext_decl::get_class_attributes(&holder.parsed_file, kls, "")
 }
 
-fn get_class_attribute(
-    holder: &DeclsHolder,
-    kls: &str,
-    name: &str,
-) -> Vec<compile_ffi::ExtDeclAttribute> {
+fn get_class_attribute(holder: &DeclsHolder, kls: &str, name: &str) -> Vec<ffi::ExtDeclAttribute> {
     ext_decl::get_class_attributes(&holder.parsed_file, kls, name)
 }
 
-fn get_file_attributes(holder: &DeclsHolder) -> Vec<compile_ffi::ExtDeclAttribute> {
+fn get_file_attributes(holder: &DeclsHolder) -> Vec<ffi::ExtDeclAttribute> {
     ext_decl::get_file_attributes(&holder.parsed_file, "")
 }
 
-fn get_file_attribute(holder: &DeclsHolder, name: &str) -> Vec<compile_ffi::ExtDeclAttribute> {
+fn get_file_attribute(holder: &DeclsHolder, name: &str) -> Vec<ffi::ExtDeclAttribute> {
     ext_decl::get_file_attributes(&holder.parsed_file, name)
 }
 
-fn get_file_consts(holder: &DeclsHolder) -> Vec<compile_ffi::ExtDeclFileConst> {
+fn get_file_consts(holder: &DeclsHolder) -> Vec<ffi::ExtDeclFileConst> {
     ext_decl::get_file_consts(&holder.parsed_file, "")
 }
 
-fn get_file_const(holder: &DeclsHolder, name: &str) -> Vec<compile_ffi::ExtDeclFileConst> {
+fn get_file_const(holder: &DeclsHolder, name: &str) -> Vec<ffi::ExtDeclFileConst> {
     ext_decl::get_file_consts(&holder.parsed_file, name)
 }
 
-fn get_file_funcs(holder: &DeclsHolder) -> Vec<compile_ffi::ExtDeclFileFunc> {
+fn get_file_funcs(holder: &DeclsHolder) -> Vec<ffi::ExtDeclFileFunc> {
     ext_decl::get_file_funcs(&holder.parsed_file, "")
 }
 
-fn get_file_func(holder: &DeclsHolder, name: &str) -> Vec<compile_ffi::ExtDeclFileFunc> {
+fn get_file_func(holder: &DeclsHolder, name: &str) -> Vec<ffi::ExtDeclFileFunc> {
     ext_decl::get_file_funcs(&holder.parsed_file, name)
 }
 
-fn get_file_modules(holder: &DeclsHolder) -> Vec<compile_ffi::ExtDeclModule> {
+fn get_file_modules(holder: &DeclsHolder) -> Vec<ffi::ExtDeclModule> {
     ext_decl::get_file_modules(&holder.parsed_file, "")
 }
 
-fn get_file_module(holder: &DeclsHolder, name: &str) -> Vec<compile_ffi::ExtDeclModule> {
+fn get_file_module(holder: &DeclsHolder, name: &str) -> Vec<ffi::ExtDeclModule> {
     ext_decl::get_file_modules(&holder.parsed_file, name)
 }
 
-fn get_file_typedefs(holder: &DeclsHolder) -> Vec<compile_ffi::ExtDeclTypeDef> {
+fn get_file_typedefs(holder: &DeclsHolder) -> Vec<ffi::ExtDeclTypeDef> {
     ext_decl::get_file_typedefs(&holder.parsed_file, "")
 }
 
-fn get_file_typedef(holder: &DeclsHolder, name: &str) -> Vec<compile_ffi::ExtDeclTypeDef> {
+fn get_file_typedef(holder: &DeclsHolder, name: &str) -> Vec<ffi::ExtDeclTypeDef> {
     ext_decl::get_file_typedefs(&holder.parsed_file, name)
 }
 
-fn get_file(holder: &DeclsHolder) -> compile_ffi::ExtDeclFile {
+fn get_file(holder: &DeclsHolder) -> ffi::ExtDeclFile {
     ext_decl::get_file(&holder.parsed_file)
 }

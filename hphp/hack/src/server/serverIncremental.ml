@@ -23,7 +23,7 @@ let remove_defs_from_reverse_naming_table
             modules;
             file_mode = _;
             comments = _;
-            hash = _;
+            position_free_decl_hash = _;
           } ->
         (* we use [snd] to strip away positions *)
         let snd (_, x, _) = x in

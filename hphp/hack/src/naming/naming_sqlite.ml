@@ -356,7 +356,7 @@ module FileInfoTable = struct
       >>= Int64.to_int
       >>= FileInfo.mode_of_enum
     in
-    let hash = Some (column_int64 stmt (base_index + 1)) in
+    let position_free_decl_hash = Some (column_int64 stmt (base_index + 1)) in
     let to_ids ~value ~name_type =
       match value with
       | Sqlite3.Data.TEXT s ->
@@ -393,7 +393,7 @@ module FileInfoTable = struct
     in
     FileInfo.
       {
-        hash;
+        position_free_decl_hash;
         file_mode;
         funs;
         classes;
@@ -637,7 +637,7 @@ let save_file_info db stmt_cache relative_path checksum file_info : save_result
     stmt_cache
     relative_path
     ~type_checker_mode:file_info.FileInfo.file_mode
-    ~file_decls_hash:file_info.FileInfo.hash
+    ~file_decls_hash:file_info.FileInfo.position_free_decl_hash
     ~consts:file_info.FileInfo.consts
     ~classes:file_info.FileInfo.classes
     ~funs:file_info.FileInfo.funs

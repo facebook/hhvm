@@ -252,7 +252,7 @@ pub struct HashType(pub Option<Int64>);
 #[rust_to_ocaml(attr = "deriving show")]
 #[repr(C)]
 pub struct FileInfo {
-    pub hash: HashType,
+    pub position_free_decl_hash: HashType,
     pub file_mode: Option<Mode>,
     pub funs: Vec<Id>,
     pub classes: Vec<Id>,

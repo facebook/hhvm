@@ -832,7 +832,7 @@ let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
     modules;
     comments = _;
     file_mode = _;
-    hash = _;
+    position_free_decl_hash = _;
   } =
     file_info
   in

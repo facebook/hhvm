@@ -117,7 +117,7 @@ let invalidate_upon_change
                   funs;
                   typedefs;
                   modules;
-                  hash = _;
+                  position_free_decl_hash = _;
                   file_mode = _;
                   comments = _;
                 } =

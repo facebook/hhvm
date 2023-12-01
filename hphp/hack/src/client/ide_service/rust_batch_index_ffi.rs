@@ -22,7 +22,9 @@ use unwrap_ocaml::UnwrapOcaml;
 
 fn parsed_file_to_file_info<'a>(file: ParsedFileWithHashes<'a>) -> FileInfo {
     let mut info = FileInfo {
-        hash: file_info::HashType(Some(Int64::from(file.file_decls_hash.as_u64() as i64))),
+        position_free_decl_hash: file_info::HashType(Some(Int64::from(
+            file.file_decls_hash.as_u64() as i64,
+        ))),
         file_mode: file.mode,
         funs: vec![],
         classes: vec![],

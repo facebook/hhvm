@@ -128,7 +128,7 @@ let pp_hash_type fmt hash =
 
 (** The record produced by the parsing phase. *)
 type t = {
-  hash: hash_type;
+  position_free_decl_hash: hash_type;
   file_mode: mode option;
   funs: id list;
   classes: id list;
@@ -142,7 +142,7 @@ type t = {
 
 let empty_t =
   {
-    hash = None;
+    position_free_decl_hash = None;
     file_mode = None;
     funs = [];
     classes = [];
@@ -193,7 +193,7 @@ type saved_names = {
 (** Data structure stored in the saved state *)
 type saved = {
   s_names: saved_names;
-  s_hash: Int64.t option;
+  s_position_free_decl_hash: Int64.t option;
   s_mode: mode option;
 }
 
@@ -222,7 +222,7 @@ let simplify info =
     modules;
     file_mode = _;
     comments = _;
-    hash = _;
+    position_free_decl_hash = _;
   } =
     info
   in
@@ -233,15 +233,15 @@ let simplify info =
   let n_modules = name_set_of_idl modules in
   { n_funs; n_classes; n_types; n_consts; n_modules }
 
-let to_saved info =
+let to_saved info : saved =
   let {
     funs;
     classes;
     typedefs;
     consts;
     modules;
-    file_mode = s_mode;
-    hash = s_hash;
+    file_mode;
+    position_free_decl_hash;
     comments = _;
   } =
     info
@@ -252,10 +252,14 @@ let to_saved info =
   let sn_consts = name_set_of_idl consts in
   let sn_modules = name_set_of_idl modules in
   let s_names = { sn_funs; sn_classes; sn_types; sn_consts; sn_modules } in
-  { s_names; s_mode; s_hash }
+  {
+    s_names;
+    s_mode = file_mode;
+    s_position_free_decl_hash = position_free_decl_hash;
+  }
 
 let from_saved fn saved =
-  let { s_names; s_mode; s_hash } = saved in
+  let { s_names; s_mode; s_position_free_decl_hash } = saved in
   let { sn_funs; sn_classes; sn_types; sn_consts; sn_modules } = s_names in
   let funs =
     List.map (SSet.elements sn_funs) ~f:(fun x -> (File (Fun, fn), x, None))
@@ -277,7 +281,7 @@ let from_saved fn saved =
   in
   {
     file_mode = s_mode;
-    hash = s_hash;
+    position_free_decl_hash = s_position_free_decl_hash;
     funs;
     classes;
     typedefs;
@@ -352,7 +356,7 @@ type diff = {
 
 let diff f1 f2 =
   let matches_hash =
-    match (f1.hash, f2.hash) with
+    match (f1.position_free_decl_hash, f2.position_free_decl_hash) with
     | (Some h1, Some h2) -> Int64.equal h1 h2
     | _ -> false
   in

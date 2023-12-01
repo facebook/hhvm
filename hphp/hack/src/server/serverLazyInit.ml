@@ -447,7 +447,7 @@ let remove_items_from_reverse_naming_table_or_build_new_reverse_naming_table
             ()
           | Some
               {
-                hash = _;
+                position_free_decl_hash = _;
                 file_mode = _;
                 funs;
                 classes;
@@ -1187,7 +1187,10 @@ let compute_fanout
         let new_info = Naming_table.get_file_info env.naming_table f in
         match (old_info, new_info) with
         | (Some x, Some y) ->
-          (match (x.FileInfo.hash, y.FileInfo.hash) with
+          (match
+             ( x.FileInfo.position_free_decl_hash,
+               y.FileInfo.position_free_decl_hash )
+           with
           | (Some x, Some y) -> Int64.equal x y
           | _ -> false)
         | _ -> false)

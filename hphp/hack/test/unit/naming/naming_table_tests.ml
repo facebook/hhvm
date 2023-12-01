@@ -310,7 +310,7 @@ let test_local_changes () =
           {
             FileInfo.empty_t with
             consts = [(a_pos, a_name, None)];
-            hash = Some (Int64.of_int 1234567);
+            position_free_decl_hash = Some (Int64.of_int 1234567);
           }
       in
       let backed_naming_table =
@@ -342,8 +342,8 @@ let test_local_changes () =
       Asserter.Bool_asserter.assert_equals
         true
         (FileInfo.equal_hash_type
-           a_file_info.FileInfo.hash
-           a_file_info'.FileInfo.hash)
+           a_file_info.FileInfo.position_free_decl_hash
+           a_file_info'.FileInfo.position_free_decl_hash)
         "Expected file info to be found in the naming table";
       let a_pos' =
         Option.value_exn (Naming_provider.get_const_pos ctx a_name)

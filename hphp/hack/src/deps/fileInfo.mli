@@ -97,16 +97,16 @@ val pos_full : Pos.t * string * Int64.t option -> id
 
 val get_pos_filename : pos -> Relative_path.t
 
-(** The hash value of a decl AST.
-  We use this to see if two versions of a file are "similar", i.e. their
-  declarations only differ by position information.  *)
 type hash_type = Int64.t option [@@deriving eq]
 
 (** [FileInfo.t] is (1) what we get out of the parser, with Full positions;
 (2) the API for putting stuff into and taking stuff out of saved-state naming table (with File positions)
 *)
 type t = {
-  hash: hash_type;
+  position_free_decl_hash: hash_type;
+      (** The hash value of all the decls stripped of their positions.
+          We use this to see if two versions of a file are "similar", i.e. their
+          declarations only differ by position information.  *)
   file_mode: mode option;
   funs: id list;
   classes: id list;

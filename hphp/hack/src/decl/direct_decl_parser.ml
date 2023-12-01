@@ -42,10 +42,12 @@ external parse_and_hash_decls :
    `hackrs_provider_backend::FileInfo::from::<ParsedFileWithHashes>` *)
 let decls_to_fileinfo fn (parsed_file : parsed_file_with_hashes) =
   let file_mode = parsed_file.pfh_mode in
-  let hash = Some parsed_file.pfh_hash in
+  let position_free_decl_hash = Some parsed_file.pfh_hash in
   List.fold
     parsed_file.pfh_decls
-    ~init:FileInfo.{ empty_t with hash; file_mode; comments = None }
+    ~init:
+      FileInfo.
+        { empty_t with position_free_decl_hash; file_mode; comments = None }
     ~f:(fun acc (name, decl, hash) ->
       let pos p = FileInfo.Full (Pos_or_decl.fill_in_filename fn p) in
       match decl with

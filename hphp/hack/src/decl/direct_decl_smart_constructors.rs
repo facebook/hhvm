@@ -1832,7 +1832,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         if attributes.returns_disposable {
             flags |= FunTypeFlags::RETURN_DISPOSABLE;
         }
-        if attributes.support_dynamic_type {
+        if attributes.support_dynamic_type || attributes.dynamically_callable {
             flags |= FunTypeFlags::SUPPORT_DYNAMIC_TYPE;
         }
         if header.readonly_return.is_token(TokenKind::Readonly) {
@@ -3796,7 +3796,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                     pos,
                     php_std_lib: parsed_attributes.php_std_lib,
                     support_dynamic_type: self.implicit_sdt()
-                        || parsed_attributes.support_dynamic_type,
+                        || parsed_attributes.support_dynamic_type
+                        || parsed_attributes.dynamically_callable,
                     no_auto_dynamic: self.under_no_auto_dynamic,
                     no_auto_likes: parsed_attributes.no_auto_likes,
                 });

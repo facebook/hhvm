@@ -1,0 +1,6 @@
+File "top_level_2_dc.bad.php", line 7, characters 10-21:
+Invalid return type (Typing[4110])
+  File "top_level_2_dc.bad.php", line 6, characters 18-23:
+  Expected `dynamic` because method must be callable in a dynamic context
+  File "top_level_2_dc.bad.php", line 7, characters 14-14:
+  Type `A<int>` is not a subtype of `dynamic` under dynamic-aware subtyping

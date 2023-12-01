@@ -1,0 +1,6 @@
+File "dynamically_callable_implies_sdt.bad.php", line 9, characters 10-16:
+Invalid return type (Typing[4110])
+  File "dynamically_callable_implies_sdt.bad.php", line 7, characters 16-16:
+  Expected `dynamic` because method must be callable in a dynamic context
+  File "dynamically_callable_implies_sdt.bad.php", line 9, characters 14-14:
+  Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping

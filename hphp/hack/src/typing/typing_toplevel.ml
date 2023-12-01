@@ -91,6 +91,9 @@ let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
       Naming_attributes.mem
         SN.UserAttributes.uaSupportDynamicType
         f.f_user_attributes
+      || Naming_attributes.mem
+           SN.UserAttributes.uaDynamicallyCallable
+           f.f_user_attributes
     then
       Env.set_support_dynamic_type env true
     else

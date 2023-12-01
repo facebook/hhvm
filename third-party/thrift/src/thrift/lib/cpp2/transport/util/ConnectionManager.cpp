@@ -16,8 +16,6 @@
 
 #include <thrift/lib/cpp2/transport/util/ConnectionManager.h>
 
-#include <unistd.h>
-
 #include <folly/portability/GFlags.h>
 
 #include <folly/Singleton.h>

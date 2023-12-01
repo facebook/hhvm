@@ -1,5 +1,4 @@
 --auto-namespace-map '{"Dict":"HH\\Lib\\Dict"}' --enable-xhp-class-modifier
---like-type-hints
 --allowed-fixme-codes-strict 2001,2035,2071,4030
 --allowed-decl-fixme-codes 2001,2035,2071,4030
 --extra-builtin ../hhi/XHPTest.hhi

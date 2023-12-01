@@ -111,7 +111,7 @@ def main() -> None:
         + ["--batch-files"]
         + hh_stc_arguments
         + extra_builtins_opts
-        + ["--enable-sound-dynamic-type", "--like-type-hints"]
+        + ["--enable-sound-dynamic-type"]
         + ["--custom-hhi-path", pessimised_hhi_path]
         + pessimised_files
     )

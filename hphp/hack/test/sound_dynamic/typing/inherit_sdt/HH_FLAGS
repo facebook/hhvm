@@ -1,1 +1,1 @@
---enable-sound-dynamic-type --enable-supportdyn-hint --union-intersection-type-hints --like-type-hints --config implicit_inherit_sdt=true
+--enable-sound-dynamic-type --enable-supportdyn-hint --union-intersection-type-hints  --config implicit_inherit_sdt=true

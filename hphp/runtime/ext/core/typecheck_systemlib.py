@@ -32,7 +32,6 @@ FLAGS: List[str] = [
     "--config",
     "enable_no_auto_dynamic=true",
     "--enable-sound-dynamic-type",
-    "--like-type-hints",
     # TODO(T118594542)
     "--allowed-fixme-codes-strict",
     ",".join(map(str, FIXME_CODES)),

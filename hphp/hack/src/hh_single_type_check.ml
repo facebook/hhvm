@@ -241,7 +241,6 @@ let parse_options () =
   let skip_tast_checks = ref false in
   let skip_check_under_dynamic = ref false in
   let out_extension = ref ".out" in
-  let like_type_hints = ref true in
   let union_intersection_type_hints = ref false in
   let call_coeffects = ref true in
   let local_coeffects = ref true in
@@ -553,15 +552,11 @@ let parse_options () =
         Arg.Set union_intersection_type_hints,
         " Allows union and intersection types to be written in type hint positions"
       );
-      ( "--like-type-hints",
-        Arg.Set like_type_hints,
-        " Allows like types to be written in type hint positions" );
       ( "--naive-implicit-pess",
         Arg.Unit
           (fun () ->
             set_bool_ enable_sound_dynamic ();
             set_bool_ everything_sdt ();
-            set_bool_ like_type_hints ();
             set_bool_ always_pessimise_return ();
             set_bool_ consider_type_const_enforceable ();
             set_bool_ enable_supportdyn_hint ()),
@@ -571,14 +566,12 @@ let parse_options () =
           (fun () ->
             set_bool_ enable_sound_dynamic ();
             set_bool_ everything_sdt ();
-            set_bool_ like_type_hints ();
             set_bool_ enable_supportdyn_hint ()),
         " Enables implicit pessimisation" );
       ( "--explicit-pess",
         Arg.String
           (fun dir ->
             set_bool_ enable_sound_dynamic ();
-            set_bool_ like_type_hints ();
             set_bool_ enable_supportdyn_hint ();
             custom_hhi_path := Some dir),
         " Enables checking explicitly pessimised files. Requires path to pessimised .hhi files "
@@ -893,7 +886,7 @@ let parse_options () =
       ~tco_check_redundant_generics:!check_redundant_generics
       ~tco_skip_hierarchy_checks:!skip_hierarchy_checks
       ~tco_skip_tast_checks:!skip_tast_checks
-      ~tco_like_type_hints:!like_type_hints
+      ~tco_like_type_hints:true
       ~tco_union_intersection_type_hints:!union_intersection_type_hints
       ~tco_strict_contexts:!strict_contexts
       ~tco_coeffects:!call_coeffects

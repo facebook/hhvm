@@ -2210,7 +2210,10 @@ let make_ide_completion_response
       let downranked_result_prefix_character = "~" in
       if should_downrank label then
         Some (downranked_result_prefix_character ^ label)
-      else if Option.is_some sort_text then
+      else if
+        Option.is_some sort_text
+        && !env.local_config.ServerLocalConfig.autocomplete_sort_text
+      then
         sort_text
       else
         Some label

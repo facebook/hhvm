@@ -252,13 +252,13 @@ class const_checker {
 
   void check_enum(const t_enum* type, const t_const_value* value) {
     if (value->get_type() != t_const_value::CV_INTEGER) {
-      report_type_mismatch("enum");
+      error("{} is incompatible with `{}`", get_category(value), type->name());
+      return;
     }
 
     if (type->find_value(value->get_integer()) == nullptr) {
       warning(
-          "type error: const `{}` was declared as enum `{}` with a value not "
-          "of that enum.",
+          "const `{}` is defined as enum `{}` with a value not of that enum",
           name_,
           type->name());
     }

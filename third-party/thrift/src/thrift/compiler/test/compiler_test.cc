@@ -279,7 +279,7 @@ TEST(CompilerTest, enum_wrong_default_value) {
     }
 
     struct MyS {
-      1: Color color = -1; # expected-warning: type error: const `color` was declared as enum `Color` with a value not of that enum.
+      1: Color color = -1; # expected-warning: const `color` is defined as enum `Color` with a value not of that enum
     }
   )");
 }
@@ -491,6 +491,18 @@ TEST(CompilerTest, union_initializer) {
   )");
 }
 
+TEST(CompilerTest, enum_initializer) {
+  check_compile(R"(
+    enum E {A = 1}
+    const E e1 = E.A;  # OK
+    const E e2 = 42;   # expected-warning: const `e2` is defined as enum `E` with a value not of that enum
+    const E e3 = 4.2;  # expected-error: floating-point number is incompatible with `E`
+    const E e4 = "";   # expected-error: string is incompatible with `E`
+    const E e5 = true; # expected-error: bool is incompatible with `E`
+    const E e6 = [];   # expected-error: list is incompatible with `E`
+  )");
+}
+
 TEST(CompilerTest, struct_fields_wrong_type) {
   check_compile(R"(
     struct Annot {
@@ -637,10 +649,8 @@ TEST(CompilerTest, deprecated_annotations) {
 TEST(CompilerTest, invalid_enum_constant) {
   check_compile(R"(
     enum E {}
-    const list<E> c = [nonexistant.Value]; # expected-error: type error: no matching constant: nonexistant.Value
-    # expected-error@-1: type error: const `c<elem>` was declared as enum.
-    # expected-warning@-2: The identifier 'nonexistant.Value' is not defined yet. Constants and enums should be defined before using them as default values.
-    # expected-warning@-3: type error: const `c<elem>` was declared as enum `E` with a value not of that enum.
+    const list<E> c = [nonexistant.Value]; # expected-error: string is incompatible with `E`
+    # expected-warning@-1: The identifier 'nonexistant.Value' is not defined yet. Constants and enums should be defined before using them as default values.
   )");
 }
 

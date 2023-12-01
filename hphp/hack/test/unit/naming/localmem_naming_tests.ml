@@ -362,16 +362,16 @@ let test_xhp_name_mangling ~(sqlite : bool) () =
       ~sienv
       ~changes:(Relative_path.Set.singleton setup.Common_setup.nonexistent_path)
   in
-  let new_file_info =
+  let new_ids =
     match changes with
-    | [{ FileInfo.new_file_info; _ }] -> new_file_info
+    | [{ FileInfo.new_ids; _ }] -> new_ids
     | _ -> failwith "expected one change"
   in
 
   Asserter.String_asserter.assert_option_equals
     (Some "\\:my:xhp:cls")
     Option.(
-      new_file_info
+      new_ids
       >>| (fun info -> info.FileInfo.classes)
       >>= List.find ~f:(fun (_, name, _) -> String.equal name "\\:my:xhp:cls")
       >>| fun (_, n, _) -> n)

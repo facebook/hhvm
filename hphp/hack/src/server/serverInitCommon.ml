@@ -83,10 +83,10 @@ let update_reverse_naming_table_from_env_and_get_duplicate_name_errors
   let env =
     Naming_table.fold
       env.naming_table
-      ~f:(fun k v env ->
+      ~f:(fun k fi env ->
         count := !count + 1;
         let failed_naming =
-          Naming_global.ndecl_file_and_get_conflict_files ctx k v
+          Naming_global.ndecl_file_and_get_conflict_files ctx k fi.FileInfo.ids
         in
         {
           env with

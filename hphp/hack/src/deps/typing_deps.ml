@@ -825,11 +825,7 @@ let () = CustomGraph.hh_custom_dep_graph_register_custom_types ()
 
 let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
   let {
-    FileInfo.funs;
-    classes;
-    typedefs;
-    consts;
-    modules;
+    FileInfo.ids = { FileInfo.funs; classes; typedefs; consts; modules };
     comments = _;
     file_mode = _;
     position_free_decl_hash = _;

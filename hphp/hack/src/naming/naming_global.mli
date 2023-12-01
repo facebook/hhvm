@@ -41,7 +41,7 @@ val remove_decls :
   unit
 
 (* Same as remove_decls but extracts definition identifiers from the file_info *)
-val remove_decls_using_file_info : Provider_backend.t -> FileInfo.t -> unit
+val remove_decls_using_file_info : Provider_backend.t -> FileInfo.ids -> unit
 
 (** This function "declares" top-level names, i.e. adds them into the naming-table provider
 (which is a wrapper for the reverse naming table). As for duplicate name definitions, they
@@ -77,9 +77,9 @@ There are expectations of the caller:
 from the naming-table provider prior to calling this function.
 - The caller is expected to provide "full" positions in its FileInfo.t. *)
 val ndecl_file_and_get_conflict_files :
-  Provider_context.t -> Relative_path.t -> FileInfo.t -> Relative_path.Set.t
+  Provider_context.t -> Relative_path.t -> FileInfo.ids -> Relative_path.Set.t
 
 (** This function "declares" top-level names, i.e. adds them into the naming-table provider.
 This caller is expected to ensure that there are no naming-collisons and no case-insensitive naming collisions. *)
 val ndecl_file_skip_if_already_bound :
-  Provider_context.t -> Relative_path.t -> FileInfo.t -> unit
+  Provider_context.t -> Relative_path.t -> FileInfo.ids -> unit

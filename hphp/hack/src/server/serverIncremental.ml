@@ -16,11 +16,7 @@ let remove_defs_from_reverse_naming_table
       | None -> ()
       | Some
           {
-            FileInfo.funs;
-            classes;
-            typedefs;
-            consts;
-            modules;
+            FileInfo.ids = { FileInfo.funs; classes; typedefs; consts; modules };
             file_mode = _;
             comments = _;
             position_free_decl_hash = _;

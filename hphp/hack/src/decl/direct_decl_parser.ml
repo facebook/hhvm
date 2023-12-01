@@ -43,29 +43,30 @@ external parse_and_hash_decls :
 let decls_to_fileinfo fn (parsed_file : parsed_file_with_hashes) =
   let file_mode = parsed_file.pfh_mode in
   let position_free_decl_hash = Some parsed_file.pfh_hash in
-  List.fold
-    parsed_file.pfh_decls
-    ~init:
-      FileInfo.
-        { empty_t with position_free_decl_hash; file_mode; comments = None }
-    ~f:(fun acc (name, decl, hash) ->
-      let pos p = FileInfo.Full (Pos_or_decl.fill_in_filename fn p) in
-      match decl with
-      | Shallow_decl_defs.Class c ->
-        let info = (pos (fst c.Shallow_decl_defs.sc_name), name, Some hash) in
-        FileInfo.{ acc with classes = info :: acc.classes }
-      | Shallow_decl_defs.Fun f ->
-        let info = (pos f.Typing_defs.fe_pos, name, Some hash) in
-        FileInfo.{ acc with funs = info :: acc.funs }
-      | Shallow_decl_defs.Typedef tf ->
-        let info = (pos tf.Typing_defs.td_pos, name, Some hash) in
-        FileInfo.{ acc with typedefs = info :: acc.typedefs }
-      | Shallow_decl_defs.Const c ->
-        let info = (pos c.Typing_defs.cd_pos, name, Some hash) in
-        FileInfo.{ acc with consts = info :: acc.consts }
-      | Shallow_decl_defs.Module m ->
-        let info = (pos m.Typing_defs.mdt_pos, name, Some hash) in
-        FileInfo.{ acc with modules = info :: acc.modules })
+  let ids =
+    List.fold
+      parsed_file.pfh_decls
+      ~init:FileInfo.empty_ids
+      ~f:(fun acc (name, decl, hash) ->
+        let pos p = FileInfo.Full (Pos_or_decl.fill_in_filename fn p) in
+        match decl with
+        | Shallow_decl_defs.Class c ->
+          let info = (pos (fst c.Shallow_decl_defs.sc_name), name, Some hash) in
+          FileInfo.{ acc with classes = info :: acc.classes }
+        | Shallow_decl_defs.Fun f ->
+          let info = (pos f.Typing_defs.fe_pos, name, Some hash) in
+          FileInfo.{ acc with funs = info :: acc.funs }
+        | Shallow_decl_defs.Typedef tf ->
+          let info = (pos tf.Typing_defs.td_pos, name, Some hash) in
+          FileInfo.{ acc with typedefs = info :: acc.typedefs }
+        | Shallow_decl_defs.Const c ->
+          let info = (pos c.Typing_defs.cd_pos, name, Some hash) in
+          FileInfo.{ acc with consts = info :: acc.consts }
+        | Shallow_decl_defs.Module m ->
+          let info = (pos m.Typing_defs.mdt_pos, name, Some hash) in
+          FileInfo.{ acc with modules = info :: acc.modules })
+  in
+  { FileInfo.ids; position_free_decl_hash; file_mode; comments = None }
 
 let decls_to_addenda (parsed_file : parsed_file_with_hashes) :
     FileInfo.si_addendum list =

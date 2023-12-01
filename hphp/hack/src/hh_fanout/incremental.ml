@@ -258,7 +258,7 @@ class cursor ~client_id ~cursor_state =
             | None ->
               Relative_path.Map.add acc ~key:path ~data:Naming_sqlite.Deleted
             | Some _ ->
-              let file_info =
+              let ids =
                 Ast_provider.compute_file_info
                   ~popt:(Provider_context.get_popt ctx)
                   ~entry
@@ -266,7 +266,8 @@ class cursor ~client_id ~cursor_state =
               Relative_path.Map.add
                 acc
                 ~key:path
-                ~data:(Naming_sqlite.Modified file_info))
+                ~data:
+                  (Naming_sqlite.Modified { FileInfo.empty_t with FileInfo.ids }))
       in
 
       let old_naming_table = self#load_naming_table ctx in

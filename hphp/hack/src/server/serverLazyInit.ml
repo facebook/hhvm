@@ -439,7 +439,6 @@ let remove_items_from_reverse_naming_table_or_build_new_reverse_naming_table
       (* Set the SQLite fallback path for the reverse naming table, then block out all entries in
          any dirty files to make sure we properly handle file deletes. *)
       Relative_path.Set.iter parsing_files ~f:(fun k ->
-          let open FileInfo in
           match Naming_table.get_file_info old_naming_table k with
           | None ->
             (* If we can't find the file in [old_naming_table] we don't consider that an error, since
@@ -447,13 +446,10 @@ let remove_items_from_reverse_naming_table_or_build_new_reverse_naming_table
             ()
           | Some
               {
+                FileInfo.ids =
+                  { FileInfo.funs; classes; typedefs; consts; modules };
                 position_free_decl_hash = _;
                 file_mode = _;
-                funs;
-                classes;
-                typedefs;
-                consts;
-                modules;
                 comments = _;
               } ->
             let backend = Provider_context.get_backend ctx in
@@ -482,7 +478,7 @@ let remove_items_from_reverse_naming_table_or_build_new_reverse_naming_table
             not (Relative_path.Set.mem parsing_files k))
       in
       Naming_table.fold old_hack_names ~init:() ~f:(fun k info () ->
-          Naming_global.ndecl_file_skip_if_already_bound ctx k info)
+          Naming_global.ndecl_file_skip_if_already_bound ctx k info.FileInfo.ids)
   end;
   HackEventLogger.naming_from_saved_state_end t;
   Hh_logger.log_duration "NAMING_FROM_SAVED_STATE_END" t

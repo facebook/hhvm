@@ -37,7 +37,8 @@ let name_type_to_kind (name_type : FileInfo.name_type) :
 
 let find_symbol_in_context
     ~(ctx : Provider_context.t)
-    ~(get_entry_symbols : FileInfo.t -> (FileInfo.id * FileInfo.name_type) list)
+    ~(get_entry_symbols :
+       FileInfo.ids -> (FileInfo.id * FileInfo.name_type) list)
     ~(is_symbol : string -> bool) : (FileInfo.pos * FileInfo.name_type) option =
   Provider_context.get_entries ctx
   |> Relative_path.Map.filter_map ~f:(fun _path entry ->
@@ -47,12 +48,12 @@ let find_symbol_in_context
             We can therefore end in situations where if you're walking the AST and find a name, and you ask
             for it, then Naming_provider will tell you it exists (via the Provider_context entry) but
             Decl_provider will tell you it doesn't. *)
-         let file_info =
+         let ids =
            Ast_provider.compute_file_info
              ~popt:(Provider_context.get_popt ctx)
              ~entry
          in
-         let symbols = get_entry_symbols file_info in
+         let symbols = get_entry_symbols ids in
          List.find_map symbols ~f:(fun ((pos, name, _), kind) ->
              if is_symbol name then
                Some (pos, kind)
@@ -878,8 +879,8 @@ let add
 let update
     ~(backend : Provider_backend.t)
     ~(path : Relative_path.t)
-    ~(old_file_info : FileInfo.t option)
-    ~(new_file_info : FileInfo.t option) : unit =
+    ~(old_ids : FileInfo.ids option)
+    ~(new_ids : FileInfo.ids option) : unit =
   let open FileInfo in
   let strip_positions symbols = List.map symbols ~f:(fun (_, x, _) -> x) in
   match backend with
@@ -888,27 +889,25 @@ let update
   | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Shared_memory ->
     (* Remove old entries *)
-    Option.iter old_file_info ~f:(fun old_file_info ->
-        remove_type_batch backend (strip_positions old_file_info.classes);
-        remove_type_batch backend (strip_positions old_file_info.typedefs);
-        remove_fun_batch backend (strip_positions old_file_info.funs);
-        remove_const_batch backend (strip_positions old_file_info.consts);
-        remove_module_batch backend (strip_positions old_file_info.modules));
+    Option.iter old_ids ~f:(fun old_ids ->
+        let { classes; typedefs; funs; consts; modules } = old_ids in
+        remove_type_batch backend (strip_positions classes);
+        remove_type_batch backend (strip_positions typedefs);
+        remove_fun_batch backend (strip_positions funs);
+        remove_const_batch backend (strip_positions consts);
+        remove_module_batch backend (strip_positions modules));
     (* Add new entries. Note: the caller is expected to have a solution
        for duplicate names. Note: can't use [Naming_global.ndecl_file_skip_if_already_bound]
        because it attempts to look up the symbol by doing a file parse, but
        we have to use the file_info we're given to avoid races. *)
-    Option.iter new_file_info ~f:(fun new_file_info ->
-        List.iter new_file_info.funs ~f:(fun (pos, name, _) ->
-            add_fun backend name pos);
-        List.iter new_file_info.classes ~f:(fun (pos, name, _) ->
-            add_class backend name pos);
-        List.iter new_file_info.typedefs ~f:(fun (pos, name, _) ->
+    Option.iter new_ids ~f:(fun new_ids ->
+        let { classes; typedefs; funs; consts; modules } = new_ids in
+        List.iter funs ~f:(fun (pos, name, _) -> add_fun backend name pos);
+        List.iter classes ~f:(fun (pos, name, _) -> add_class backend name pos);
+        List.iter typedefs ~f:(fun (pos, name, _) ->
             add_typedef backend name pos);
-        List.iter new_file_info.consts ~f:(fun (pos, name, _) ->
-            add_const backend name pos);
-        List.iter new_file_info.modules ~f:(fun (pos, name, _) ->
-            add_module backend name pos));
+        List.iter consts ~f:(fun (pos, name, _) -> add_const backend name pos);
+        List.iter modules ~f:(fun (pos, name, _) -> add_module backend name pos));
     ()
   | Provider_backend.Local_memory
       {
@@ -949,22 +948,36 @@ let update
       ()
     in
     (* do the update *)
-    let oldfi = Option.value old_file_info ~default:FileInfo.empty_t in
-    let newfi = Option.value new_file_info ~default:FileInfo.empty_t in
-    update oldfi.funs newfi.funs deltas.funs FileInfo.Fun;
-    update oldfi.consts newfi.consts deltas.consts FileInfo.Const;
-    update oldfi.classes newfi.classes deltas.types FileInfo.Class;
-    update oldfi.typedefs newfi.typedefs deltas.types FileInfo.Typedef;
-    update oldfi.modules newfi.modules deltas.modules FileInfo.Module;
+    let oldfi = Option.value old_ids ~default:FileInfo.empty_ids in
+    let newfi = Option.value new_ids ~default:FileInfo.empty_ids in
+    let {
+      classes = old_classes;
+      typedefs = old_typedefs;
+      funs = old_funs;
+      consts = old_consts;
+      modules = old_modules;
+    } =
+      oldfi
+    in
+    let {
+      classes = new_classes;
+      typedefs = new_typedefs;
+      funs = new_funs;
+      consts = new_consts;
+      modules = new_modules;
+    } =
+      newfi
+    in
+    update old_funs new_funs deltas.funs FileInfo.Fun;
+    update old_consts new_consts deltas.consts FileInfo.Const;
+    update old_classes new_classes deltas.types FileInfo.Class;
+    update old_typedefs new_typedefs deltas.types FileInfo.Typedef;
+    update old_modules new_modules deltas.modules FileInfo.Module;
     (* update canon names too *)
     let updatei = update ~case_insensitive:true in
-    updatei oldfi.funs newfi.funs deltas.funs_canon_key FileInfo.Fun;
-    updatei oldfi.classes newfi.classes deltas.types_canon_key FileInfo.Class;
-    updatei
-      oldfi.typedefs
-      newfi.typedefs
-      deltas.types_canon_key
-      FileInfo.Typedef;
+    updatei old_funs new_funs deltas.funs_canon_key FileInfo.Fun;
+    updatei old_classes new_classes deltas.types_canon_key FileInfo.Class;
+    updatei old_typedefs new_typedefs deltas.types_canon_key FileInfo.Typedef;
     ()
 
 let local_changes_push_sharedmem_stack () : unit =

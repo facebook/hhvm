@@ -247,11 +247,10 @@ let get_defs (ast : program) : defs =
   in
   fst @@ get_defs ast acc
 
-let get_def_names ast : FileInfo.t =
+let get_def_names ast : FileInfo.ids =
   let { funs; classes; typedefs; constants; modules; _ } = get_defs ast in
   FileInfo.
     {
-      empty_t with
       funs = List.map funs ~f:fst;
       classes = List.map classes ~f:fst;
       typedefs = List.map typedefs ~f:fst;

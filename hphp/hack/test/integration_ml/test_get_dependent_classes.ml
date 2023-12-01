@@ -39,7 +39,8 @@ let test () =
     match Naming_table.get_file_info env.ServerEnv.naming_table path with
     | None -> SSet.empty
     | Some info ->
-      SSet.of_list @@ List.map info.FileInfo.classes ~f:(fun (_, x, _) -> x)
+      SSet.of_list
+      @@ List.map info.FileInfo.ids.FileInfo.classes ~f:(fun (_, x, _) -> x)
   in
   let dependent_classes =
     Decl_redecl_service.get_descendant_classes

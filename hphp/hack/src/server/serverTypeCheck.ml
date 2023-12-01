@@ -147,7 +147,7 @@ let get_classes_from_old_and_new ~new_naming_table ~old_naming_table path =
     | None -> SSet.empty
     | Some info ->
       List.fold
-        info.FileInfo.classes
+        info.FileInfo.ids.FileInfo.classes
         ~init:SSet.empty
         ~f:(fun acc (_, cid, _) -> SSet.add acc cid)
   in
@@ -156,7 +156,7 @@ let get_classes_from_old_and_new ~new_naming_table ~old_naming_table path =
     | None -> SSet.empty
     | Some info ->
       List.fold
-        info.FileInfo.classes
+        info.FileInfo.ids.FileInfo.classes
         ~init:SSet.empty
         ~f:(fun acc (_, cid, _) -> SSet.add acc cid)
   in
@@ -206,7 +206,10 @@ let do_naming
       ~init:Relative_path.Set.empty
       ~f:(fun file fileinfo failed ->
         let failed' =
-          Naming_global.ndecl_file_and_get_conflict_files ctx file fileinfo
+          Naming_global.ndecl_file_and_get_conflict_files
+            ctx
+            file
+            fileinfo.FileInfo.ids
         in
         Relative_path.Set.union failed' failed)
   in

@@ -325,7 +325,10 @@ let parse_name_and_decl ctx files_contents =
         files_info_and_addenda
         ~f:(fun fn (fileinfo, _addenda) ->
           let _failed_naming_fns =
-            Naming_global.ndecl_file_and_get_conflict_files ctx fn fileinfo
+            Naming_global.ndecl_file_and_get_conflict_files
+              ctx
+              fn
+              fileinfo.FileInfo.ids
           in
           ());
       (* Decl.make_env has the side effect of updating the decl heap, and
@@ -876,13 +879,16 @@ let decl_and_run_mode
             let ids_to_strings ids =
               List.map ids ~f:(fun (_, name, _) -> name)
             in
+            let { FileInfo.funs; classes; typedefs; consts; modules } =
+              file_info.FileInfo.ids
+            in
             Naming_global.remove_decls
               ~backend:(Provider_context.get_backend ctx)
-              ~funs:(ids_to_strings file_info.FileInfo.funs)
-              ~classes:(ids_to_strings file_info.FileInfo.classes)
-              ~typedefs:(ids_to_strings file_info.FileInfo.typedefs)
-              ~consts:(ids_to_strings file_info.FileInfo.consts)
-              ~modules:(ids_to_strings file_info.FileInfo.modules)))
+              ~funs:(ids_to_strings funs)
+              ~classes:(ids_to_strings classes)
+              ~typedefs:(ids_to_strings typedefs)
+              ~consts:(ids_to_strings consts)
+              ~modules:(ids_to_strings modules)))
   end;
 
   (* NAMING PHASE 3: for the reverse naming table delta, add all new items from files we're declaring.

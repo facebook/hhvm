@@ -309,7 +309,11 @@ let test_local_changes () =
         FileInfo.
           {
             FileInfo.empty_t with
-            consts = [(a_pos, a_name, None)];
+            ids =
+              {
+                FileInfo.empty_ids with
+                FileInfo.consts = [(a_pos, a_name, None)];
+              };
             position_free_decl_hash = Some (Int64.of_int 1234567);
           }
       in
@@ -785,17 +789,21 @@ let test_naming_table_query_by_dep_hash () =
       let bar_file_info =
         {
           (* Might raise {!Naming_table.File_info_not_found} *)
-          (Naming_table.get_file_info_unsafe
+          (Naming_table.get_file_info_exn
              backed_naming_table
              (Relative_path.from_root ~suffix:"bar.php"))
           with
-          FileInfo.classes =
-            [
-              ( FileInfo.File
-                  (FileInfo.Class, Relative_path.from_root ~suffix:"bar.php"),
-                "\\Baz",
-                None );
-            ];
+          FileInfo.ids =
+            {
+              FileInfo.empty_ids with
+              FileInfo.classes =
+                [
+                  ( FileInfo.File
+                      (FileInfo.Class, Relative_path.from_root ~suffix:"bar.php"),
+                    "\\Baz",
+                    None );
+                ];
+            };
         }
       in
       let new_naming_table = backed_naming_table in

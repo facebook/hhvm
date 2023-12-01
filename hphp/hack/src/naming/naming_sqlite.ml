@@ -395,11 +395,7 @@ module FileInfoTable = struct
       {
         position_free_decl_hash;
         file_mode;
-        funs;
-        classes;
-        typedefs;
-        consts;
-        modules;
+        ids = { funs; classes; typedefs; consts; modules };
         comments = None;
       }
 
@@ -631,18 +627,26 @@ let free_db_cache () : unit = db_cache := `Not_yet_cached
 
 let save_file_info db stmt_cache relative_path checksum file_info : save_result
     =
+  let {
+    FileInfo.file_mode;
+    position_free_decl_hash;
+    comments = _;
+    ids = { FileInfo.classes; funs; typedefs; modules; consts };
+  } =
+    file_info
+  in
   let open Core in
   FileInfoTable.insert
     db
     stmt_cache
     relative_path
-    ~type_checker_mode:file_info.FileInfo.file_mode
-    ~file_decls_hash:file_info.FileInfo.position_free_decl_hash
-    ~consts:file_info.FileInfo.consts
-    ~classes:file_info.FileInfo.classes
-    ~funs:file_info.FileInfo.funs
-    ~typedefs:file_info.FileInfo.typedefs
-    ~modules:file_info.FileInfo.modules;
+    ~type_checker_mode:file_mode
+    ~file_decls_hash:position_free_decl_hash
+    ~consts
+    ~classes
+    ~funs
+    ~typedefs
+    ~modules;
   let file_info_id = ref None in
   Sqlite3.exec_not_null_no_headers
     db
@@ -694,7 +698,7 @@ let save_file_info db stmt_cache relative_path checksum file_info : save_result
   let results = (0, [], checksum) in
   let results =
     List.fold
-      file_info.FileInfo.funs
+      funs
       ~init:results
       ~f:
         (insert ~name_kind:Naming_types.Fun_kind ~dep_ctor:(fun name ->
@@ -702,7 +706,7 @@ let save_file_info db stmt_cache relative_path checksum file_info : save_result
   in
   let results =
     List.fold
-      file_info.FileInfo.classes
+      classes
       ~init:results
       ~f:
         (insert
@@ -711,7 +715,7 @@ let save_file_info db stmt_cache relative_path checksum file_info : save_result
   in
   let results =
     List.fold
-      file_info.FileInfo.typedefs
+      typedefs
       ~init:results
       ~f:
         (insert
@@ -720,7 +724,7 @@ let save_file_info db stmt_cache relative_path checksum file_info : save_result
   in
   let results =
     List.fold
-      file_info.FileInfo.consts
+      consts
       ~init:results
       ~f:
         (insert ~name_kind:Naming_types.Const_kind ~dep_ctor:(fun name ->
@@ -728,7 +732,7 @@ let save_file_info db stmt_cache relative_path checksum file_info : save_result
   in
   let results =
     List.fold
-      file_info.FileInfo.modules
+      modules
       ~init:results
       ~f:
         (insert ~name_kind:Naming_types.Module_kind ~dep_ctor:(fun name ->

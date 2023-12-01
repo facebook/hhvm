@@ -73,7 +73,7 @@ val compute_comments :
 (** Compute the [FileInfo.t] associated with the given entry, doing a parse
 if necessary. *)
 val compute_file_info :
-  popt:ParserOptions.t -> entry:Provider_context.entry -> FileInfo.t
+  popt:ParserOptions.t -> entry:Provider_context.entry -> FileInfo.ids
 
 (** Compute the [Full_fidelity_source_text.t] for this [Provider_context.entry]. *)
 val compute_source_text :

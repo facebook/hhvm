@@ -8,20 +8,20 @@
 open Hh_prelude
 
 let invalidate_shallow_and_some_folded_decls
-    (local_memory : Provider_backend.local_memory) (file_info : FileInfo.t) :
-    unit =
+    (local_memory : Provider_backend.local_memory) (ids : FileInfo.ids) : unit =
   let open FileInfo in
   let open Provider_backend in
   let open Provider_backend.Decl_cache_entry in
-  List.iter file_info.consts ~f:(fun (_, name, _) ->
+  let { funs; consts; classes; typedefs; modules } = ids in
+  List.iter consts ~f:(fun (_, name, _) ->
       Decl_cache.remove local_memory.decl_cache ~key:(Gconst_decl name));
-  List.iter file_info.funs ~f:(fun (_, name, _) ->
+  List.iter funs ~f:(fun (_, name, _) ->
       Decl_cache.remove local_memory.decl_cache ~key:(Fun_decl name));
-  List.iter file_info.typedefs ~f:(fun (_, name, _) ->
+  List.iter typedefs ~f:(fun (_, name, _) ->
       Decl_cache.remove local_memory.decl_cache ~key:(Typedef_decl name));
-  List.iter file_info.modules ~f:(fun (_, name, _) ->
+  List.iter modules ~f:(fun (_, name, _) ->
       Decl_cache.remove local_memory.decl_cache ~key:(Module_decl name));
-  List.iter file_info.classes ~f:(fun (_, name, _) ->
+  List.iter classes ~f:(fun (_, name, _) ->
       Shallow_decl_cache.remove
         local_memory.shallow_decl_cache
         ~key:(Shallow_decl_cache_entry.Shallow_class_decl name);
@@ -38,8 +38,8 @@ let invalidate_named_shallow_and_some_folded_decls_for_entry
       match entry.Provider_context.parser_return with
       | None -> () (* hasn't been parsed, hence nothing to invalidate *)
       | Some { Parser_return.ast; _ } ->
-        let file_info = Nast.get_def_names ast in
-        invalidate_shallow_and_some_folded_decls local_memory file_info);
+        let ids = Nast.get_def_names ast in
+        invalidate_shallow_and_some_folded_decls local_memory ids);
   ()
 
 let invalidate_upon_change
@@ -103,26 +103,14 @@ let invalidate_upon_change
          and is the winner, then we have to remove the old decl from cache. *)
       let changes =
         List.fold changes ~init:[] ~f:(fun acc change ->
-            Option.to_list change.FileInfo.old_file_info
-            @ Option.to_list change.FileInfo.new_file_info
+            Option.to_list change.FileInfo.old_ids
+            @ Option.to_list change.FileInfo.new_ids
             @ acc)
       in
-      List.iter changes ~f:(fun file_info ->
+      List.iter changes ~f:(fun ids ->
           let open Provider_backend.Shallow_decl_cache_entry in
           let open Provider_backend.Decl_cache_entry in
-          let FileInfo.
-                {
-                  classes;
-                  consts;
-                  funs;
-                  typedefs;
-                  modules;
-                  position_free_decl_hash = _;
-                  file_mode = _;
-                  comments = _;
-                } =
-            file_info
-          in
+          let FileInfo.{ classes; consts; funs; typedefs; modules } = ids in
           List.iter classes ~f:(fun (_, name, _) ->
               Shallow_decl_cache.remove
                 local_memory.shallow_decl_cache
@@ -137,10 +125,9 @@ let invalidate_upon_change
               Decl_cache.remove local_memory.decl_cache ~key:(Module_decl name));
           ())
     end else begin
-      List.iter changes ~f:(fun { FileInfo.old_file_info; _ } ->
-          Option.iter
-            old_file_info
-            ~f:(invalidate_shallow_and_some_folded_decls local_memory));
+      List.iter changes ~f:(fun { FileInfo.old_ids; _ } ->
+          Option.iter old_ids ~f:(fun ids ->
+              invalidate_shallow_and_some_folded_decls local_memory ids));
       ()
     end
 
@@ -160,8 +147,8 @@ let update_sticky_quarantine ctx local_memory =
   let reset () =
     match !(local_memory.decls_reflect_this_file) with
     | None -> ()
-    | Some (_path, file_info, _pfh_hash) ->
-      invalidate_shallow_and_some_folded_decls local_memory file_info;
+    | Some (_path, { FileInfo.ids; _ }, _pfh_hash) ->
+      invalidate_shallow_and_some_folded_decls local_memory ids;
       local_memory.decls_reflect_this_file := None;
       ()
   in

@@ -241,7 +241,7 @@ let get_file_info a key =
 
 exception File_info_not_found
 
-let get_file_info_unsafe a key =
+let get_file_info_exn a key =
   match get_file_info a key with
   | Some info -> info
   | None -> raise File_info_not_found
@@ -495,7 +495,7 @@ let create a = Unbacked a
 (* Helper function to apply new files info to reverse naming table *)
 let update_reverse_entries_helper
     (ctx : Provider_context.t)
-    (changed_file_infos : (Relative_path.t * FileInfo.t option) list) : unit =
+    (changed_ids : (Relative_path.t * FileInfo.t option) list) : unit =
   let backend = Provider_context.get_backend ctx in
   let db_path_opt = Db_path_provider.get_naming_db_path backend in
   (* Remove all old file symbols first *)
@@ -507,47 +507,53 @@ let update_reverse_entries_helper
       in
       match fi_opt with
       | Some fi ->
+        let { FileInfo.classes; typedefs; funs; consts; modules } =
+          fi.FileInfo.ids
+        in
         Naming_provider.remove_type_batch
           backend
-          (fi.FileInfo.classes |> List.map ~f:(fun (_, x, _) -> x));
+          (classes |> List.map ~f:(fun (_, x, _) -> x));
         Naming_provider.remove_type_batch
           backend
-          (fi.FileInfo.typedefs |> List.map ~f:(fun (_, x, _) -> x));
+          (typedefs |> List.map ~f:(fun (_, x, _) -> x));
         Naming_provider.remove_fun_batch
           backend
-          (fi.FileInfo.funs |> List.map ~f:(fun (_, x, _) -> x));
+          (funs |> List.map ~f:(fun (_, x, _) -> x));
         Naming_provider.remove_const_batch
           backend
-          (fi.FileInfo.consts |> List.map ~f:(fun (_, x, _) -> x));
+          (consts |> List.map ~f:(fun (_, x, _) -> x));
         Naming_provider.remove_module_batch
           backend
-          (fi.FileInfo.modules |> List.map ~f:(fun (_, x, _) -> x))
+          (modules |> List.map ~f:(fun (_, x, _) -> x))
       | None -> ())
-    changed_file_infos;
+    changed_ids;
 
   (* Add new file symbols after removing old files symbols *)
   List.iter
     ~f:(fun (_path, new_file_info) ->
       match new_file_info with
       | Some fi ->
+        let { FileInfo.classes; typedefs; funs; consts; modules } =
+          fi.FileInfo.ids
+        in
         List.iter
           ~f:(fun (pos, name, _) -> Naming_provider.add_class backend name pos)
-          fi.FileInfo.classes;
+          classes;
         List.iter
           ~f:(fun (pos, name, _) ->
             Naming_provider.add_typedef backend name pos)
-          fi.FileInfo.typedefs;
+          typedefs;
         List.iter
           ~f:(fun (pos, name, _) -> Naming_provider.add_fun backend name pos)
-          fi.FileInfo.funs;
+          funs;
         List.iter
           ~f:(fun (pos, name, _) -> Naming_provider.add_const backend name pos)
-          fi.FileInfo.consts;
+          consts;
         List.iter
           ~f:(fun (pos, name, _) -> Naming_provider.add_module backend name pos)
-          fi.FileInfo.modules
+          modules
       | None -> ())
-    changed_file_infos
+    changed_ids
 
 let update_reverse_entries ctx file_deltas =
   let file_delta_list = Relative_path.Map.bindings file_deltas in

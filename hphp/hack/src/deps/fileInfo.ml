@@ -126,29 +126,33 @@ let pp_hash_type fmt hash =
 
 (* NB: Type [t] must be manually kept in sync with Rust type [hackrs_provider_backend::FileInfo] *)
 
-(** The record produced by the parsing phase. *)
-type t = {
-  position_free_decl_hash: hash_type;
-  file_mode: mode option;
+type ids = {
   funs: id list;
   classes: id list;
   typedefs: id list;
   consts: id list;
   modules: id list;
+}
+[@@deriving show]
+
+(** The record produced by the parsing phase. *)
+type t = {
+  position_free_decl_hash: hash_type;
+  file_mode: mode option;
+  ids: ids;
   comments: (Pos.t * comment) list option;
       (** None if loaded from saved state *)
 }
 [@@deriving show]
 
+let empty_ids =
+  { funs = []; classes = []; typedefs = []; consts = []; modules = [] }
+
 let empty_t =
   {
     position_free_decl_hash = None;
     file_mode = None;
-    funs = [];
-    classes = [];
-    typedefs = [];
-    consts = [];
-    modules = [];
+    ids = empty_ids;
     comments = Some [];
   }
 
@@ -162,8 +166,8 @@ type pfh_hash = Int64.t
 
 type change = {
   path: Relative_path.t;
-  old_file_info: t option;
-  new_file_info: t option;
+  old_ids: ids option;
+  new_ids: ids option;
   new_pfh_hash: pfh_hash option;
 }
 
@@ -215,11 +219,7 @@ let name_set_of_idl idl =
 
 let simplify info =
   let {
-    funs;
-    classes;
-    typedefs;
-    consts;
-    modules;
+    ids = { funs; classes; typedefs; consts; modules };
     file_mode = _;
     comments = _;
     position_free_decl_hash = _;
@@ -235,11 +235,7 @@ let simplify info =
 
 let to_saved info : saved =
   let {
-    funs;
-    classes;
-    typedefs;
-    consts;
-    modules;
+    ids = { funs; classes; typedefs; consts; modules };
     file_mode;
     position_free_decl_hash;
     comments = _;
@@ -282,11 +278,7 @@ let from_saved fn saved =
   {
     file_mode = s_mode;
     position_free_decl_hash = s_position_free_decl_hash;
-    funs;
-    classes;
-    typedefs;
-    consts;
-    modules;
+    ids = { funs; classes; typedefs; consts; modules };
     comments = None;
   }
 
@@ -309,20 +301,13 @@ let merge_names t_names1 t_names2 =
     n_modules = SSet.union n_modules t_names2.n_modules;
   }
 
-let to_string defs_per_file =
-  let funs = List.map ~f:(fun (a, b, _) -> (a, b, None)) defs_per_file.funs in
-  let classes =
-    List.map ~f:(fun (a, b, _) -> (a, b, None)) defs_per_file.classes
-  in
-  let typedefs =
-    List.map ~f:(fun (a, b, _) -> (a, b, None)) defs_per_file.typedefs
-  in
-  let consts =
-    List.map ~f:(fun (a, b, _) -> (a, b, None)) defs_per_file.consts
-  in
-  let modules =
-    List.map ~f:(fun (a, b, _) -> (a, b, None)) defs_per_file.modules
-  in
+let ids_to_string (ids : ids) : string =
+  let { classes; typedefs; consts; modules; funs } = ids in
+  let funs = List.map ~f:(fun (a, b, _) -> (a, b, None)) funs in
+  let classes = List.map ~f:(fun (a, b, _) -> (a, b, None)) classes in
+  let typedefs = List.map ~f:(fun (a, b, _) -> (a, b, None)) typedefs in
+  let consts = List.map ~f:(fun (a, b, _) -> (a, b, None)) consts in
+  let modules = List.map ~f:(fun (a, b, _) -> (a, b, None)) modules in
   [
     ("funs", funs);
     ("classes", classes);
@@ -340,6 +325,10 @@ let to_string defs_per_file =
                 Int64.to_string (Option.value hash ~default:Int64.zero))
            |> String.concat ~sep:","))
   |> String.concat ~sep:";"
+
+let to_string (t : t) : string =
+  let { ids; file_mode = _; position_free_decl_hash = _; comments = _ } = t in
+  ids_to_string ids
 
 type diff = {
   removed_funs: SSet.t;

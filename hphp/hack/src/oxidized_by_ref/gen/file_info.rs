@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0f344aeb4d412ab978a16569d0708935>>
+// @generated SignedSource<<9d0c9a080ed8da359ef4d329b3f04e87>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -204,6 +204,37 @@ pub struct HashType<'a>(
 impl<'a> TrivialDrop for HashType<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(HashType<'arena>);
 
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving show")]
+#[repr(C)]
+pub struct Ids<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub funs: &'a [&'a Id<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub classes: &'a [&'a Id<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub typedefs: &'a [&'a Id<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub consts: &'a [&'a Id<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub modules: &'a [&'a Id<'a>],
+}
+impl<'a> TrivialDrop for Ids<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(Ids<'arena>);
+
 /// The record produced by the parsing phase.
 #[derive(
     Clone,
@@ -226,15 +257,7 @@ pub struct FileInfo<'a> {
     pub position_free_decl_hash: &'a HashType<'a>,
     pub file_mode: Option<oxidized::file_info::Mode>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub funs: &'a [&'a Id<'a>],
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub classes: &'a [&'a Id<'a>],
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub typedefs: &'a [&'a Id<'a>],
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub consts: &'a [&'a Id<'a>],
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub modules: &'a [&'a Id<'a>],
+    pub ids: &'a Ids<'a>,
     /// None if loaded from saved state
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub comments: Option<&'a [(&'a pos::Pos<'a>, Comment<'a>)]>,
@@ -263,9 +286,9 @@ pub struct Change<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub path: &'a relative_path::RelativePath<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub old_file_info: Option<&'a FileInfo<'a>>,
+    pub old_ids: Option<&'a Ids<'a>>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub new_file_info: Option<&'a FileInfo<'a>>,
+    pub new_ids: Option<&'a Ids<'a>>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub new_pfh_hash: Option<&'a PfhHash<'a>>,
 }

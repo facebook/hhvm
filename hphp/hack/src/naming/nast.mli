@@ -160,7 +160,7 @@ type defs = {
 (** Given a Nast.program, give me the list of entities it defines *)
 val get_defs : program -> defs
 
-val get_def_names : program -> FileInfo.t
+val get_def_names : program -> FileInfo.ids
 
 type ignore_attribute_env = { ignored_attributes: string list }
 

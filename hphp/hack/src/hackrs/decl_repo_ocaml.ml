@@ -152,7 +152,10 @@ let populate_naming_table
     ~job:(fun _ batch ->
       List.iter
         ~f:(fun (path, fileinfo) ->
-          Naming_global.ndecl_file_skip_if_already_bound ctx path fileinfo)
+          Naming_global.ndecl_file_skip_if_already_bound
+            ctx
+            path
+            fileinfo.FileInfo.ids)
         batch)
     ~merge:(fun _ _ -> ())
     ~neutral:()

@@ -1169,7 +1169,10 @@ let parse_name_and_decl ctx files_contents =
       let files_info = parse_and_name ctx files_contents in
       Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
           let _failed_naming_fns =
-            Naming_global.ndecl_file_and_get_conflict_files ctx fn fileinfo
+            Naming_global.ndecl_file_and_get_conflict_files
+              ctx
+              fn
+              fileinfo.FileInfo.ids
           in
           ());
       Relative_path.Map.iter files_info ~f:(fun fn _ ->
@@ -1347,7 +1350,8 @@ let test_decl_compare ctx filenames builtins files_contents files_info =
       match Relative_path.Map.find_opt files_info path with
       | None -> SSet.empty
       | Some info ->
-        SSet.of_list @@ List.map info.FileInfo.classes ~f:(fun (_, x, _) -> x)
+        SSet.of_list
+        @@ List.map info.FileInfo.ids.FileInfo.classes ~f:(fun (_, x, _) -> x)
     in
     (* We need to oldify, not remove, for ClassEltDiff to work *)
     Decl_redecl_service.oldify_decls_and_remove_descendants
@@ -1765,7 +1769,9 @@ let codemod
       ~f:(fun path file_info ->
         (* Don't invalidate builtins, otherwise, we can't find them. *)
         if not (Relative_path.prefix path |> Relative_path.is_hhi) then
-          Naming_global.remove_decls_using_file_info backend file_info)
+          Naming_global.remove_decls_using_file_info
+            backend
+            file_info.FileInfo.ids)
       files_info
   in
   let rec go files_info files_contents =
@@ -1944,7 +1950,9 @@ let handle_mode
         if Relative_path.Map.mem builtins fn then
           ()
         else (
-          List.iter fileinfo.FileInfo.classes ~f:(fun (_p, class_, _) ->
+          List.iter
+            fileinfo.FileInfo.ids.FileInfo.classes
+            ~f:(fun (_p, class_, _) ->
               Printf.printf
                 "Ancestors of %s and their overridden methods:\n"
                 class_;
@@ -1963,7 +1971,9 @@ let handle_mode
                 ~find_children:false;
               Printf.printf "\n");
           Printf.printf "\n";
-          List.iter fileinfo.FileInfo.classes ~f:(fun (_p, class_, _) ->
+          List.iter
+            fileinfo.FileInfo.ids.FileInfo.classes
+            ~f:(fun (_p, class_, _) ->
               Printf.printf
                 "Children of %s and the methods they override:\n"
                 class_;
@@ -2603,13 +2613,16 @@ let decl_and_run_mode
               let ids_to_strings ids =
                 List.map ids ~f:(fun (_, name, _) -> name)
               in
+              let { FileInfo.funs; classes; typedefs; consts; modules } =
+                file_info.FileInfo.ids
+              in
               Naming_global.remove_decls
                 ~backend:(Provider_context.get_backend ctx)
-                ~funs:(ids_to_strings file_info.FileInfo.funs)
-                ~classes:(ids_to_strings file_info.FileInfo.classes)
-                ~typedefs:(ids_to_strings file_info.FileInfo.typedefs)
-                ~consts:(ids_to_strings file_info.FileInfo.consts)
-                ~modules:(ids_to_strings file_info.FileInfo.modules))));
+                ~funs:(ids_to_strings funs)
+                ~classes:(ids_to_strings classes)
+                ~typedefs:(ids_to_strings typedefs)
+                ~consts:(ids_to_strings consts)
+                ~modules:(ids_to_strings modules))));
 
   let (errors, files_info) = parse_name_and_decl ctx to_decl in
   handle_mode

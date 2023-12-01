@@ -123,12 +123,9 @@ impl rusqlite::ToSql for NameType {
     }
 }
 
-impl FileInfo {
-    pub fn get_ids(&self) -> Vec<(NameType, Id)> {
-        let FileInfo {
-            position_free_decl_hash: _,
-            file_mode: _,
-            comments: _,
+impl Ids {
+    pub fn as_vec(&self) -> Vec<(NameType, Id)> {
+        let Ids {
             funs,
             classes,
             typedefs,

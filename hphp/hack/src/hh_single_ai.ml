@@ -224,7 +224,10 @@ let parse_name_and_skip_decl ctx files_contents =
       let files_info = parse_and_name ctx files_contents in
       Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
           let _failed_naming_fns =
-            Naming_global.ndecl_file_and_get_conflict_files ctx fn fileinfo
+            Naming_global.ndecl_file_and_get_conflict_files
+              ctx
+              fn
+              fileinfo.FileInfo.ids
           in
           ());
       files_info)

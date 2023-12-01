@@ -234,6 +234,30 @@ pub struct Id(pub Pos, pub String, pub Option<Int64>);
 #[repr(C)]
 pub struct HashType(pub Option<Int64>);
 
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep,
+)]
+#[rust_to_ocaml(attr = "deriving show")]
+#[repr(C)]
+pub struct Ids {
+    pub funs: Vec<Id>,
+    pub classes: Vec<Id>,
+    pub typedefs: Vec<Id>,
+    pub consts: Vec<Id>,
+    pub modules: Vec<Id>,
+}
+
 /// The record produced by the parsing phase.
 #[derive(
     Clone,
@@ -254,11 +278,7 @@ pub struct HashType(pub Option<Int64>);
 pub struct FileInfo {
     pub position_free_decl_hash: HashType,
     pub file_mode: Option<Mode>,
-    pub funs: Vec<Id>,
-    pub classes: Vec<Id>,
-    pub typedefs: Vec<Id>,
-    pub consts: Vec<Id>,
-    pub modules: Vec<Id>,
+    pub ids: Ids,
     /// None if loaded from saved state
     pub comments: Option<Vec<(pos::Pos, Comment)>>,
 }
@@ -282,8 +302,8 @@ pub type PfhHash = Int64;
 #[repr(C)]
 pub struct Change {
     pub path: relative_path::RelativePath,
-    pub old_file_info: Option<FileInfo>,
-    pub new_file_info: Option<FileInfo>,
+    pub old_ids: Option<Ids>,
+    pub new_ids: Option<Ids>,
     pub new_pfh_hash: Option<PfhHash>,
 }
 

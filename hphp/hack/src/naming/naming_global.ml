@@ -136,7 +136,7 @@ But this function has some historical quirks:
 *)
 let should_report_duplicate
     (ctx : Provider_context.t)
-    (fi : FileInfo.t)
+    (fi : FileInfo.ids)
     (current_file_symbols_acc : FileInfo.pos list)
     ~(id : FileInfo.id)
     ~(canonical_id : FileInfo.id) : bool =
@@ -165,7 +165,7 @@ let should_report_duplicate
         |> Telemetry.string_
              ~key:"canonical_path"
              ~value:(FileInfo.get_pos_filename pc |> Relative_path.to_absolute)
-        |> Telemetry.string_ ~key:"fileinfo" ~value:(FileInfo.show fi))
+        |> Telemetry.string_ ~key:"fileinfo" ~value:(FileInfo.show_ids fi))
   in
   (* Detect anomaly where we're given a file-only [id] *)
   begin
@@ -234,7 +234,7 @@ module Env = struct
 
   let new_fun_error_if_already_bound
       (ctx : Provider_context.t)
-      (fi : FileInfo.t)
+      (fi : FileInfo.ids)
       ((current_file_symbols_acc, is_okay_acc) : FileInfo.pos list * bool)
       (id : FileInfo.id) : FileInfo.pos list * bool =
     let (p, name, _) = id in
@@ -257,7 +257,7 @@ module Env = struct
 
   let new_type_error_if_already_bound
       (ctx : Provider_context.t)
-      (fi : FileInfo.t)
+      (fi : FileInfo.ids)
       ~(kind : Naming_types.kind_of_type)
       ((current_file_symbols_acc, is_okay_acc) : FileInfo.pos list * bool)
       (id : FileInfo.id) : FileInfo.pos list * bool =
@@ -281,7 +281,7 @@ module Env = struct
 
   let new_global_const_error_if_already_bound
       (ctx : Provider_context.t)
-      (fi : FileInfo.t)
+      (fi : FileInfo.ids)
       ((current_file_symbols_acc, is_okay_acc) : FileInfo.pos list * bool)
       (id : FileInfo.id) : FileInfo.pos list * bool =
     let (p, name, _) = id in
@@ -310,7 +310,7 @@ module Env = struct
 
   let new_module_error_if_already_bound
       (ctx : Provider_context.t)
-      (fi : FileInfo.t)
+      (fi : FileInfo.ids)
       ((current_file_symbols_acc, is_okay_acc) : FileInfo.pos list * bool)
       (id : FileInfo.id) : FileInfo.pos list * bool =
     let (p, name, _) = id in
@@ -338,64 +338,61 @@ let remove_decls ~backend ~funs ~classes ~typedefs ~consts ~modules =
   Naming_provider.remove_const_batch backend consts;
   Naming_provider.remove_module_batch backend modules
 
-let remove_decls_using_file_info backend file_info =
-  let open FileInfo in
+let remove_decls_using_file_info backend ids =
+  let { FileInfo.funs; classes; typedefs; consts; modules } = ids in
   remove_decls
     ~backend
-    ~funs:(List.map ~f:id_name file_info.funs)
-    ~classes:(List.map ~f:id_name file_info.classes)
-    ~typedefs:(List.map ~f:id_name file_info.typedefs)
-    ~consts:(List.map ~f:id_name file_info.consts)
-    ~modules:(List.map ~f:id_name file_info.modules)
+    ~funs:(List.map ~f:FileInfo.id_name funs)
+    ~classes:(List.map ~f:FileInfo.id_name classes)
+    ~typedefs:(List.map ~f:FileInfo.id_name typedefs)
+    ~consts:(List.map ~f:FileInfo.id_name consts)
+    ~modules:(List.map ~f:FileInfo.id_name modules)
 
 (*****************************************************************************)
 (* The entry point to build the naming environment *)
 (*****************************************************************************)
 
 (** return true if no names were already bound; returns false if some were *)
-let make_env_and_check_not_already_bound ctx fileinfo =
+let make_env_and_check_not_already_bound ctx ids =
+  let { FileInfo.classes; funs; modules; typedefs; consts } = ids in
   let is_okay = true in
   (* funs *)
   let (_, is_okay) =
     List.fold
-      fileinfo.FileInfo.funs
+      funs
       ~init:([], is_okay)
-      ~f:(Env.new_fun_error_if_already_bound ctx fileinfo)
+      ~f:(Env.new_fun_error_if_already_bound ctx ids)
   in
   (* types *)
   let (current_file_symbols_acc, is_okay) =
     List.fold
-      fileinfo.FileInfo.classes
+      classes
       ~init:([], is_okay)
-      ~f:
-        (Env.new_type_error_if_already_bound
-           ctx
-           fileinfo
-           ~kind:Naming_types.TClass)
+      ~f:(Env.new_type_error_if_already_bound ctx ids ~kind:Naming_types.TClass)
   in
   let (_, is_okay) =
     List.fold
-      fileinfo.FileInfo.typedefs
+      typedefs
       ~init:(current_file_symbols_acc, is_okay)
       ~f:
         (Env.new_type_error_if_already_bound
            ctx
-           fileinfo
+           ids
            ~kind:Naming_types.TTypedef)
   in
   (* consts *)
   let (_, is_okay) =
     List.fold
-      fileinfo.FileInfo.consts
+      consts
       ~init:([], is_okay)
-      ~f:(Env.new_global_const_error_if_already_bound ctx fileinfo)
+      ~f:(Env.new_global_const_error_if_already_bound ctx ids)
   in
   (* modules *)
   let (_, is_okay) =
     List.fold
-      fileinfo.FileInfo.modules
+      modules
       ~init:([], is_okay)
-      ~f:(Env.new_module_error_if_already_bound ctx fileinfo)
+      ~f:(Env.new_module_error_if_already_bound ctx ids)
   in
   is_okay
 
@@ -436,9 +433,9 @@ let add_files_to_rename failed defl defs_in_env =
 let ndecl_file_skip_if_already_bound ctx fn fileinfo =
   make_env_skip_if_already_bound ctx fn fileinfo
 
-let ndecl_file_and_get_conflict_files ctx fn fileinfo =
+let ndecl_file_and_get_conflict_files ctx fn ids =
   Hh_logger.debug ~category "Naming decl: %s" (Relative_path.to_absolute fn);
-  let is_okay = make_env_and_check_not_already_bound ctx fileinfo in
+  let is_okay = make_env_and_check_not_already_bound ctx ids in
   if is_okay then
     Relative_path.Set.empty
   else
@@ -482,20 +479,11 @@ let ndecl_file_and_get_conflict_files ctx fn fileinfo =
       |> Option.bind ~f:(GEnv.fun_pos ctx)
     in
 
+    let { FileInfo.classes; typedefs; funs; consts; modules } = ids in
     let failed = Relative_path.Set.singleton fn in
-    let failed =
-      add_files_to_rename failed fileinfo.FileInfo.funs fun_canon_pos
-    in
-    let failed =
-      add_files_to_rename failed fileinfo.FileInfo.classes type_canon_pos
-    in
-    let failed =
-      add_files_to_rename failed fileinfo.FileInfo.typedefs type_canon_pos
-    in
-    let failed =
-      add_files_to_rename failed fileinfo.FileInfo.consts (GEnv.gconst_pos ctx)
-    in
-    let failed =
-      add_files_to_rename failed fileinfo.FileInfo.modules (GEnv.module_pos ctx)
-    in
+    let failed = add_files_to_rename failed funs fun_canon_pos in
+    let failed = add_files_to_rename failed classes type_canon_pos in
+    let failed = add_files_to_rename failed typedefs type_canon_pos in
+    let failed = add_files_to_rename failed consts (GEnv.gconst_pos ctx) in
+    let failed = add_files_to_rename failed modules (GEnv.module_pos ctx) in
     failed

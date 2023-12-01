@@ -99,6 +99,15 @@ val get_pos_filename : pos -> Relative_path.t
 
 type hash_type = Int64.t option [@@deriving eq]
 
+type ids = {
+  funs: id list;
+  classes: id list;
+  typedefs: id list;
+  consts: id list;
+  modules: id list;
+}
+[@@deriving show]
+
 (** [FileInfo.t] is (1) what we get out of the parser, with Full positions;
 (2) the API for putting stuff into and taking stuff out of saved-state naming table (with File positions)
 *)
@@ -108,14 +117,12 @@ type t = {
           We use this to see if two versions of a file are "similar", i.e. their
           declarations only differ by position information.  *)
   file_mode: mode option;
-  funs: id list;
-  classes: id list;
-  typedefs: id list;
-  consts: id list;
-  modules: id list;
+  ids: ids;
   comments: (Pos.t * comment) list option;
 }
 [@@deriving show]
+
+val empty_ids : ids
 
 val empty_t : t
 
@@ -180,10 +187,9 @@ type pfh_hash = Int64.t
 
 type change = {
   path: Relative_path.t;
-  old_file_info: t option;
-      (** [old_file_info] is None if the file didn't previously exist *)
-  new_file_info: t option;
-      (** [new_file_info] is None if the file has been deleted *)
+  old_ids: ids option;
+      (** [old_ids] is None if the file didn't previously exist *)
+  new_ids: ids option;  (** [new_ids] is None if the file has been deleted *)
   new_pfh_hash: pfh_hash option;
       (** [new_pfh_hash] is None if the file has been deleted *)
 }

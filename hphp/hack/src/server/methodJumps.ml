@@ -117,8 +117,8 @@ let find_extended_classes_in_files_parallel
     =
   let classes =
     Relative_path.Set.fold files ~init:[] ~f:(fun fn acc ->
-        let { FileInfo.classes; _ } =
-          Naming_table.get_file_info_unsafe naming_table fn
+        let { FileInfo.ids = { FileInfo.classes; _ }; _ } =
+          Naming_table.get_file_info_exn naming_table fn
         in
         classes :: acc)
   in

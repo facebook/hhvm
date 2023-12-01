@@ -74,19 +74,16 @@ let update_reverse_naming_table
     defs_per_file
     ~init:symbols_to_files
     ~f:(fun file file_info symbols_to_files ->
-      Naming_global.ndecl_file_skip_if_already_bound ctx file file_info;
       let {
-        FileInfo.position_free_decl_hash = _;
-        file_mode = _;
-        funs;
-        classes;
-        typedefs;
-        consts;
-        modules;
+        FileInfo.ids;
         comments = _;
+        file_mode = _;
+        position_free_decl_hash = _;
       } =
         file_info
       in
+      Naming_global.ndecl_file_skip_if_already_bound ctx file ids;
+      let { FileInfo.funs; classes; typedefs; consts; modules } = ids in
       let add_symbols names make_dep symbols_to_files =
         List.fold
           names

@@ -33,7 +33,7 @@ let extend_defs_per_file_sequential defs_per_file naming_table additional_files
       match Relative_path.Map.find_opt defs_per_file path with
       | None ->
         (try
-           let info = Naming_table.get_file_info_unsafe naming_table path in
+           let info = Naming_table.get_file_info_exn naming_table path in
            let info_names = FileInfo.simplify info in
            Relative_path.Map.add acc ~key:path ~data:info_names
          with
@@ -50,7 +50,7 @@ let extend_defs_per_file_batch
   let additional_files = Relative_path.Set.elements additional_files in
   let get_one acc x =
     try
-      let info = Naming_table.get_file_info_unsafe naming_table x in
+      let info = Naming_table.get_file_info_exn naming_table x in
       let info_names = FileInfo.simplify info in
       Relative_path.Map.add acc ~key:x ~data:info_names
     with

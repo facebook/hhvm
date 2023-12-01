@@ -107,7 +107,10 @@ let setup
   let naming_table = Naming_table.create file_infos in
   (* Construct the reverse naming table (symbols-to-files) *)
   Naming_table.fold naming_table ~init:() ~f:(fun fn fileinfo () ->
-      Naming_global.ndecl_file_skip_if_already_bound ctx fn fileinfo);
+      Naming_global.ndecl_file_skip_if_already_bound
+        ctx
+        fn
+        fileinfo.FileInfo.ids);
 
   let (ctx, naming_table) =
     if sqlite then (

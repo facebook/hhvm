@@ -11,6 +11,7 @@ use anyhow::Result;
 use bumpalo::Bump;
 use file_info::FileInfo;
 use file_info::Id;
+use file_info::Ids;
 use ocamlrep_caml_builtins::Int64;
 use ocamlrep_ocamlpool::ocaml_ffi;
 use oxidized::decl_parser_options::DeclParserOptions;
@@ -26,11 +27,13 @@ fn parsed_file_to_file_info<'a>(file: ParsedFileWithHashes<'a>) -> FileInfo {
             file.file_decls_hash.as_u64() as i64,
         ))),
         file_mode: file.mode,
-        funs: vec![],
-        classes: vec![],
-        typedefs: vec![],
-        consts: vec![],
-        modules: vec![],
+        ids: Ids {
+            funs: vec![],
+            classes: vec![],
+            typedefs: vec![],
+            consts: vec![],
+            modules: vec![],
+        },
         comments: None,
     };
     let pos = |p: &oxidized_by_ref::pos::Pos<'_>| file_info::Pos::Full(p.to_owned());
@@ -39,20 +42,30 @@ fn parsed_file_to_file_info<'a>(file: ParsedFileWithHashes<'a>) -> FileInfo {
         let hash = Int64::from(hash.as_u64() as i64);
         match decl {
             Decl::Class(x) => info
+                .ids
                 .classes
                 .push(Id(pos(x.name.0), name.into(), Some(hash))),
-            Decl::Fun(x) => info.funs.push(Id(pos(x.pos), name.into(), Some(hash))),
-            Decl::Typedef(x) => info.typedefs.push(Id(pos(x.pos), name.into(), Some(hash))),
-            Decl::Const(x) => info.consts.push(Id(pos(x.pos), name.into(), Some(hash))),
-            Decl::Module(x) => info.modules.push(Id(pos(x.pos), name.into(), Some(hash))),
+            Decl::Fun(x) => info.ids.funs.push(Id(pos(x.pos), name.into(), Some(hash))),
+            Decl::Typedef(x) => info
+                .ids
+                .typedefs
+                .push(Id(pos(x.pos), name.into(), Some(hash))),
+            Decl::Const(x) => info
+                .ids
+                .consts
+                .push(Id(pos(x.pos), name.into(), Some(hash))),
+            Decl::Module(x) => info
+                .ids
+                .modules
+                .push(Id(pos(x.pos), name.into(), Some(hash))),
         }
     }
     // Match OCaml ordering
-    info.classes.reverse();
-    info.funs.reverse();
-    info.typedefs.reverse();
-    info.consts.reverse();
-    info.modules.reverse();
+    info.ids.classes.reverse();
+    info.ids.funs.reverse();
+    info.ids.typedefs.reverse();
+    info.ids.consts.reverse();
+    info.ids.modules.reverse();
     info
 }
 

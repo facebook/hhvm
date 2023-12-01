@@ -76,44 +76,40 @@ let update_naming_tables_and_si
     |> Relative_path.Set.elements
     |> compute_file_info_batch_root_relative_paths_only popt
   in
-  let changed_file_infos =
+  let changed_ids =
     List.map parse_results ~f:(fun (path, new_info) ->
         let old_file_info = Naming_table.get_file_info naming_table path in
         {
           FileInfo.path;
-          new_file_info = Option.map new_info ~f:(fun (fi, _, _) -> fi);
+          new_ids = Option.map new_info ~f:(fun (fi, _, _) -> fi.FileInfo.ids);
           new_pfh_hash = Option.map new_info ~f:(fun (_, hash, _) -> hash);
-          old_file_info;
+          old_ids = Option.map old_file_info ~f:(fun fi -> fi.FileInfo.ids);
         })
   in
   (* update the reverse-naming-table, which is mutable storage owned by backend *)
   let t_update_reverse_nt = Unix.gettimeofday () in
-  List.iter
-    changed_file_infos
-    ~f:(fun { FileInfo.path; new_file_info; old_file_info; _ } ->
+  List.iter changed_ids ~f:(fun { FileInfo.path; new_ids; old_ids; _ } ->
       Naming_provider.update
         ~backend:(Provider_context.get_backend ctx)
         ~path
-        ~old_file_info
-        ~new_file_info);
+        ~old_ids
+        ~new_ids);
   (* update the forward-naming-table (file -> symbols) *)
   (* remove old, then add new *)
   let t_update_forward_nt = Unix.gettimeofday () in
   let naming_table =
     List.fold_left
-      changed_file_infos
+      changed_ids
       ~init:naming_table
-      ~f:(fun naming_table { FileInfo.path; old_file_info; _ } ->
-        match old_file_info with
+      ~f:(fun naming_table { FileInfo.path; old_ids; _ } ->
+        match old_ids with
         | None -> naming_table
         | Some _ -> Naming_table.remove naming_table path)
   in
   (* update new *)
   let paths_with_new_file_info =
-    List.filter_map
-      changed_file_infos
-      ~f:(fun { FileInfo.path; new_file_info; _ } ->
-        Option.map new_file_info ~f:(fun new_file_info -> (path, new_file_info)))
+    List.filter_map parse_results ~f:(fun (path, new_info) ->
+        Option.map new_info ~f:(fun (fi, _, _) -> (path, fi)))
   in
   let naming_table =
     Naming_table.update_many
@@ -123,20 +119,20 @@ let update_naming_tables_and_si
   (* update search index *)
   (* remove paths without new file info *)
   let t_si = Unix.gettimeofday () in
-  let paths_without_new_file_info =
-    List.filter changed_file_infos ~f:(fun { FileInfo.new_file_info; _ } ->
-        Option.is_none new_file_info)
+  let paths_without_new_ids =
+    List.filter changed_ids ~f:(fun { FileInfo.new_ids; _ } ->
+        Option.is_none new_ids)
     |> List.map ~f:(fun { FileInfo.path; _ } -> path)
     |> Relative_path.Set.of_list
   in
   let sienv =
-    SymbolIndexCore.remove_files ~sienv ~paths:paths_without_new_file_info
+    SymbolIndexCore.remove_files ~sienv ~paths:paths_without_new_ids
   in
   (* now update paths with new file info *)
-  let get_addenda_opt (path, new_file_info_with_addenda_opt) =
+  let get_addenda_opt (path, new_ids_with_addenda_opt) =
     Option.map
-      new_file_info_with_addenda_opt
-      ~f:(fun (_new_file_info, _pfh_hash, addenda) ->
+      new_ids_with_addenda_opt
+      ~f:(fun (_new_ids, _pfh_hash, addenda) ->
         (path, addenda, SearchUtils.TypeChecker))
   in
   let paths_with_addenda = List.filter_map parse_results ~f:get_addenda_opt in
@@ -160,4 +156,4 @@ let update_naming_tables_and_si
     |> Telemetry.duration ~key:"update_si_duration" ~start_time:t_si ~end_time
   in
   log "Update_naming_tables_and_si: %s" (Telemetry.to_string telemetry);
-  { naming_table; sienv; changes = changed_file_infos }
+  { naming_table; sienv; changes = changed_ids }

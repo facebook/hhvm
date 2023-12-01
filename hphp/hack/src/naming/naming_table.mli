@@ -52,7 +52,7 @@ val get_file_info : t -> Relative_path.t -> FileInfo.t option
 exception File_info_not_found
 
 (** Might raise {!File_info_not_found} *)
-val get_file_info_unsafe : t -> Relative_path.t -> FileInfo.t
+val get_file_info_exn : t -> Relative_path.t -> FileInfo.t
 
 (** Look up the files declaring the symbols provided in the given set of
 dependency hashes. Only works for backed naming tables, and 64bit dep_sets *)

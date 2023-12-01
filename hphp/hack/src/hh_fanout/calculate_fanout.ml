@@ -82,38 +82,33 @@ let explanation_to_json (explanation : explanation) : Hh_json.json =
           (List.map ~f:changed_symbol_to_json explanation.removed_symbols) );
     ]
 
-let get_symbol_edges_for_file_info (file_info : FileInfo.t) : symbol_edge list =
+let get_symbol_edges_for_file_info (ids : FileInfo.ids) : symbol_edge list =
   let make_edges ~symbol_type ~ids ~f =
     List.map ids ~f:(fun (_, symbol_name, _) ->
         { symbol_type; symbol_name; symbol_dep = f symbol_name })
   in
+  let { FileInfo.classes; funs; consts; typedefs; modules } = ids in
   List.concat
     [
-      make_edges
-        ~symbol_type:FileInfo.Class
-        ~ids:file_info.FileInfo.classes
-        ~f:(fun name -> Typing_deps.Dep.Type name);
-      make_edges
-        ~symbol_type:FileInfo.Fun
-        ~ids:file_info.FileInfo.funs
-        ~f:(fun name -> Typing_deps.Dep.Fun name);
-      make_edges
-        ~symbol_type:FileInfo.Const
-        ~ids:file_info.FileInfo.consts
-        ~f:(fun name -> Typing_deps.Dep.GConst name);
-      make_edges
-        ~symbol_type:FileInfo.Typedef
-        ~ids:file_info.FileInfo.typedefs
-        ~f:(fun name -> Typing_deps.Dep.Type name);
+      make_edges ~symbol_type:FileInfo.Class ~ids:classes ~f:(fun name ->
+          Typing_deps.Dep.Type name);
+      make_edges ~symbol_type:FileInfo.Fun ~ids:funs ~f:(fun name ->
+          Typing_deps.Dep.Fun name);
+      make_edges ~symbol_type:FileInfo.Const ~ids:consts ~f:(fun name ->
+          Typing_deps.Dep.GConst name);
+      make_edges ~symbol_type:FileInfo.Typedef ~ids:typedefs ~f:(fun name ->
+          Typing_deps.Dep.Type name);
+      make_edges ~symbol_type:FileInfo.Module ~ids:modules ~f:(fun name ->
+          Typing_deps.Dep.Module name);
     ]
 
 let file_info_to_dep_set
     ~(detail_level : Detail_level.t)
     ~(deps_mode : Typing_deps_mode.t)
     (naming_table : Naming_table.t)
-    (file_info : FileInfo.t) : Typing_deps.DepSet.t * changed_symbol list =
+    (ids : FileInfo.ids) : Typing_deps.DepSet.t * changed_symbol list =
   List.fold
-    (get_symbol_edges_for_file_info file_info)
+    (get_symbol_edges_for_file_info ids)
     ~init:(Typing_deps.(DepSet.make ()), [])
     ~f:(fun (dep_set, changed_symbols) symbol_edge ->
       let symbol_dep = Typing_deps.(Dep.make symbol_edge.symbol_dep) in
@@ -156,8 +151,12 @@ let calculate_dep_set_for_path
     Typing_deps.DepSet.t * explanation =
   let (old_deps, old_symbols) =
     Naming_table.get_file_info old_naming_table path
-    |> Option.map
-         ~f:(file_info_to_dep_set ~detail_level ~deps_mode old_naming_table)
+    |> Option.map ~f:(fun fi ->
+           file_info_to_dep_set
+             ~detail_level
+             ~deps_mode
+             old_naming_table
+             fi.FileInfo.ids)
     |> Option.value ~default:(Typing_deps.(DepSet.make ()), [])
   in
   let (new_deps, new_symbols) =
@@ -167,7 +166,7 @@ let calculate_dep_set_for_path
         ~detail_level
         ~deps_mode
         new_naming_table
-        new_file_info
+        new_file_info.FileInfo.ids
     | Naming_sqlite.Deleted -> (Typing_deps.(DepSet.make ()), [])
   in
 

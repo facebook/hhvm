@@ -190,6 +190,7 @@ end = struct
         "file_info::NameType";
         "file_info::Pos";
         "file_info::Id";
+        "file_info::Ids";
         "file_info::FileInfo";
         "file_info::Names";
         "file_info::SavedNames";

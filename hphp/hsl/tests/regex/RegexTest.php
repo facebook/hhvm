@@ -48,40 +48,40 @@ final class RegexTest extends HackTest {
   public static function provideFirstMatch(
   ): vec<(string, Regex\Pattern<shape(...)>, int, darray<arraykey, string>)> {
     return vec[
-      tuple('abce', re"/abc(.?)e(.*)/", 0, darray[
+      tuple('abce', re"/abc(.?)e(.*)/", 0, dict[
         0 => 'abce',
         1 => '',
         2 => '',
       ]),
-      tuple('abcdef', re"/abc(.?)e([fg])/", 0, darray[
+      tuple('abcdef', re"/abc(.?)e([fg])/", 0, dict[
         0 => 'abcdef',
         1 => 'd',
         2 => 'f',
       ]),
-      tuple('abcdef', re"/abc(?P<name>def)/", 0, darray[
+      tuple('abcdef', re"/abc(?P<name>def)/", 0, dict[
         0 => 'abcdef',
         'name' => 'def',
         1 => 'def',
       ]),
-      tuple('foo', re"/foo(bar)?/", 0, darray[
+      tuple('foo', re"/foo(bar)?/", 0, dict[
         0 => 'foo',
         1 => '',
       ]),
-      tuple('abcdef', re"/def/", 1, darray[
+      tuple('abcdef', re"/def/", 1, dict[
         0 => 'def',
       ]),
-      tuple('hello', re"/(.?)/", 0, darray[
+      tuple('hello', re"/(.?)/", 0, dict[
         0 => 'h',
         1 => 'h',
       ]),
-      tuple('hello', re"//", 0, darray[
+      tuple('hello', re"//", 0, dict[
         0 => '',
       ]),
-      tuple('', re"/(.?)/", 0, darray[
+      tuple('', re"/(.?)/", 0, dict[
         0 => '',
         1 => '',
       ]),
-      tuple('', re"//", 0, darray[
+      tuple('', re"//", 0, dict[
         0 => '',
       ]),
     ];
@@ -162,72 +162,72 @@ final class RegexTest extends HackTest {
   )> {
     return vec[
       tuple('t1e2s3t', re"/[a-z]/", 0, vec[
-        darray[0 => 't'],
-        darray[0 => 'e'],
-        darray[0 => 's'],
-        darray[0 => 't'],
+        dict[0 => 't'],
+        dict[0 => 'e'],
+        dict[0 => 's'],
+        dict[0 => 't'],
       ]),
       tuple('t1e2s3t', re"/[a-z](\d)?/", 0, vec[
-        darray[0 => 't1', 1 => '1'],
-        darray[0 => 'e2', 1 => '2'],
-        darray[0 => 's3', 1 => '3'],
-        darray[0 => 't', 1 => ''],
+        dict[0 => 't1', 1 => '1'],
+        dict[0 => 'e2', 1 => '2'],
+        dict[0 => 's3', 1 => '3'],
+        dict[0 => 't', 1 => ''],
       ]),
       tuple('t1e2s3t', re"/[a-z](?P<digit>\d)?/", 0, vec[
-        darray[0 => 't1', 'digit' => '1', 1 => '1'],
-        darray[0 => 'e2', 'digit' => '2', 1 => '2'],
-        darray[0 => 's3', 'digit' => '3', 1 => '3'],
-        darray[0 => 't', 'digit' => '', 1 => ''],
+        dict[0 => 't1', 'digit' => '1', 1 => '1'],
+        dict[0 => 'e2', 'digit' => '2', 1 => '2'],
+        dict[0 => 's3', 'digit' => '3', 1 => '3'],
+        dict[0 => 't', 'digit' => '', 1 => ''],
       ]),
       tuple('test', re"/a/", 0, vec[]),
       tuple('t1e2s3t', re"/[a-z]/", 3, vec[
-        darray[0 => 's'],
-        darray[0 => 't'],
+        dict[0 => 's'],
+        dict[0 => 't'],
       ]),
       tuple('', re"//", 0, vec[
-        darray[0 => ''],
+        dict[0 => ''],
       ]),
       tuple('', re"/(.?)/", 0, vec[
-        darray[0 => '', 1 => ''],
+        dict[0 => '', 1 => ''],
       ]),
       tuple('hello', re"//", 0, vec[
-        darray[0 => ''],
-        darray[0 => ''],
-        darray[0 => ''],
-        darray[0 => ''],
-        darray[0 => ''],
-        darray[0 => ''],
+        dict[0 => ''],
+        dict[0 => ''],
+        dict[0 => ''],
+        dict[0 => ''],
+        dict[0 => ''],
+        dict[0 => ''],
       ]),
       tuple('hello', re"/.?/", 0, vec[
-        darray[0 => 'h'],
-        darray[0 => 'e'],
-        darray[0 => 'l'],
-        darray[0 => 'l'],
-        darray[0 => 'o'],
-        darray[0 => ''],
+        dict[0 => 'h'],
+        dict[0 => 'e'],
+        dict[0 => 'l'],
+        dict[0 => 'l'],
+        dict[0 => 'o'],
+        dict[0 => ''],
       ]),
       tuple('hello', re"//", 2, vec[
-        darray[0 => ''],
-        darray[0 => ''],
-        darray[0 => ''],
-        darray[0 => ''],
+        dict[0 => ''],
+        dict[0 => ''],
+        dict[0 => ''],
+        dict[0 => ''],
       ]),
       tuple('hello', re"/.?/", 2, vec[
-        darray[0 => 'l'],
-        darray[0 => 'l'],
-        darray[0 => 'o'],
-        darray[0 => ''],
+        dict[0 => 'l'],
+        dict[0 => 'l'],
+        dict[0 => 'o'],
+        dict[0 => ''],
       ]),
       tuple("<b>bold text</b><a href=howdy.html>click me</a>", re"/(<([\\w]+)[^>]*>)(.*)(<\\/\\2>)/",
         0, vec[
-          darray[
+          dict[
             0 => "<b>bold text</b>",
             1 => "<b>",
             2 => "b",
             3 => "bold text",
             4 => "</b>",
           ],
-          darray[
+          dict[
             0 => "<a href=howdy.html>click me</a>",
             1 => "<a href=howdy.html>",
             2 => "a",
@@ -308,7 +308,7 @@ final class RegexTest extends HackTest {
   }
 
   public static function provideReplaceWith(): varray<mixed> {
-    return varray[
+    return vec[
       /* HH_FIXME[4297] The type of the lambda argument(s) could not be inferred */
       tuple('abc', re"#d#", $x ==> $x[0], 0, 'abc'),
       tuple('abcd', re"#d#", $x ==> 'xyz', 0, 'abcxyz'),

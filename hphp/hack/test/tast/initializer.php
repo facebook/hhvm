@@ -5,7 +5,7 @@ class A {}
 class B {}
 
 abstract final class C {
-  private static $d = darray[
+  private static $d = dict[
     'a' => A::class,
     'b' => B::class,
   ];

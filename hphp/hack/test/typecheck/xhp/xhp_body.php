@@ -27,6 +27,6 @@ function test(): void {
     {new A()}
   </foo>;
   <bar>
-    <foo>{varray[vec[<bar />]]}</foo>
+    <foo>{vec[vec[<bar />]]}</foo>
   </bar>;
 }

@@ -1,8 +1,8 @@
 File "unset_array_idx_in_strict_mode.php", line 6, characters 3-15:
 In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict indexing (Typing[4135])
-  File "unset_array_idx_in_strict_mode.php", line 5, characters 8-19:
+  File "unset_array_idx_in_strict_mode.php", line 5, characters 8-16:
   This is an object of type vec<string>
 File "unset_array_idx_in_strict_mode.php", line 15, characters 3-17:
 In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict indexing (Typing[4135])
-  File "unset_array_idx_in_strict_mode.php", line 11, characters 12-24:
+  File "unset_array_idx_in_strict_mode.php", line 11, characters 12-21:
   This is an object of type vec<(int | string)>

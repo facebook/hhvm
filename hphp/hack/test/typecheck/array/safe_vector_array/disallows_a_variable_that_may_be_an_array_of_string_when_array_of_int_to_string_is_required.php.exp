@@ -2,5 +2,5 @@ File "disallows_a_variable_that_may_be_an_array_of_string_when_array_of_int_to_s
 Invalid argument (Typing[4110])
   File "disallows_a_variable_that_may_be_an_array_of_string_when_array_of_int_to_string_is_required.php", line 3, characters 36-54:
   Expected `dict<int, string>`
-  File "disallows_a_variable_that_may_be_an_array_of_string_when_array_of_int_to_string_is_required.php", line 10, characters 12-19:
+  File "disallows_a_variable_that_may_be_an_array_of_string_when_array_of_int_to_string_is_required.php", line 10, characters 12-16:
   But got `vec<string>`

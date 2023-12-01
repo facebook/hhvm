@@ -15,7 +15,7 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class StrSelectTest extends HackTest {
 
   public static function provideSlice(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         'hello world',
         3,
@@ -87,7 +87,7 @@ final class StrSelectTest extends HackTest {
   }
 
   public static function provideStripPrefix(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         '',
         '',
@@ -121,7 +121,7 @@ final class StrSelectTest extends HackTest {
   }
 
   public static function provideStripSuffix(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         '',
         '',
@@ -155,7 +155,7 @@ final class StrSelectTest extends HackTest {
   }
 
   public static function provideTrim(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         " \t\n\r\0\x0Bhello \t\n\r\0\x0B world \t\n\r\0\x0B",
         null,
@@ -184,7 +184,7 @@ final class StrSelectTest extends HackTest {
   }
 
   public static function provideTrimLeft(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         " \t\n\r\0\x0Bhello \t\n\r\0\x0B world \t\n\r\0\x0B",
         null,
@@ -213,7 +213,7 @@ final class StrSelectTest extends HackTest {
   }
 
   public static function provideTrimRight(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         " \t\n\r\0\x0Bhello \t\n\r\0\x0B world \t\n\r\0\x0B",
         null,

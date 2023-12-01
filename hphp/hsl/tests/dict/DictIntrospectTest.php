@@ -15,7 +15,7 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class DictIntrospectTest extends HackTest {
 
   public static function provideTestEqual(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         dict[1 => 1, 2 => 2, 3 => 3],
         dict[1 => 1, 2 => 2, 3 => 3],

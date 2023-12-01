@@ -1,6 +1,6 @@
-File "disallow_hetergeneous_inputs_for_varray.php", line 4, characters 34-34:
+File "disallow_hetergeneous_inputs_for_varray.php", line 4, characters 32-32:
 An arrow `=>` is expected here. (Parsing[1002])
-File "disallow_hetergeneous_inputs_for_varray.php", line 4, characters 34-34:
+File "disallow_hetergeneous_inputs_for_varray.php", line 4, characters 32-32:
 Unbound name: `]` (a global constant) (Naming[2049])
-File "disallow_hetergeneous_inputs_for_varray.php", line 4, characters 34-34:
+File "disallow_hetergeneous_inputs_for_varray.php", line 4, characters 32-32:
 Unbound global constant (Typing) (Typing[4106])

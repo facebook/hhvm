@@ -1,7 +1,7 @@
 <?hh
 
 function ok_lit(): vec<int> {
-  return varray[0];
+  return vec[0];
 }
 
 function ok_lit2(): varray<int> {
@@ -21,5 +21,5 @@ function ok_hint2(vec<int> $v): varray<int> {
 }
 
 function err_string(varray<int> $v): bool {
-  return varray[0];
+  return vec[0];
 }

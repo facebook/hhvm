@@ -15,7 +15,7 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class DictCombineTest extends HackTest {
 
   public static function provideTestAssociate(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         vec[3, 2, 1],
         Vector {'a', 'b', 'c'},
@@ -62,19 +62,19 @@ final class DictCombineTest extends HackTest {
   }
 
   public static function provideTestMerge(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Map {},
-        darray[],
+        dict[],
         dict[],
       ),
       tuple(
-        darray[
+        dict[
           'one' => 'one',
           'two' => 'two',
         ],
-        varray[
-          darray[
+        vec[
+          dict[
             'three' => 'three',
             'one' => 3,
           ],
@@ -90,17 +90,17 @@ final class DictCombineTest extends HackTest {
         ],
       ),
       tuple(
-        HackLibTestTraversables::getKeyedIterator(darray[
+        HackLibTestTraversables::getKeyedIterator(dict[
           'foo' => 'foo',
           'bar' => 'bar',
-          'baz' => varray[1, 2, 3],
+          'baz' => vec[1, 2, 3],
         ]),
-        varray[
+        vec[
           dict[
             'bar' => 'barbar',
           ],
           Vector {'I should feel bad for doing this', 'But yolo'},
-          darray[
+          dict[
             1 => 'gross array behavior',
           ],
           Set {'bloop'},
@@ -108,7 +108,7 @@ final class DictCombineTest extends HackTest {
         dict[
           'foo' => 'foo',
           'bar' => 'barbar',
-          'baz' => varray[1, 2, 3],
+          'baz' => vec[1, 2, 3],
           0 => 'I should feel bad for doing this',
           1 => 'gross array behavior',
           'bloop' => 'bloop',

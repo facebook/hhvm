@@ -5,5 +5,5 @@ function get(): int {
 }
 
 function test(): void {
-  $_ = (array<int> $vec = varray[get(), 2]): void ==> {};
+  $_ = (array<int> $vec = vec[get(), 2]): void ==> {};
 }

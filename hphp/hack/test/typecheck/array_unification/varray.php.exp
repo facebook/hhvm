@@ -1,6 +1,6 @@
-File "varray.php", line 24, characters 10-18:
+File "varray.php", line 24, characters 10-15:
 Invalid return type (Typing[4110])
   File "varray.php", line 23, characters 38-41:
   Expected `bool`
-  File "varray.php", line 24, characters 10-18:
+  File "varray.php", line 24, characters 10-15:
   But got `vec<int>`

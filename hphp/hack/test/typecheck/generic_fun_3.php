@@ -5,7 +5,7 @@ function darray_filter<Tk as arraykey, Tv>(
   KeyedTraversable<Tk, Tv> $traversable,
   ?(function(Tv): bool) $f,
 ): darray<Tk, Tv> {
-  return darray[];
+  return dict[];
 }
 
 function is_not_null<T>(T $x): bool {

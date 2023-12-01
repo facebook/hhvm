@@ -2,7 +2,7 @@ File "akempty_tuple_bad.php", line 6, characters 10-11:
 Invalid return type (Typing[4110])
   File "akempty_tuple_bad.php", line 4, characters 17-38:
   Expected `(?string, vec<int>)`
-  File "akempty_tuple_bad.php", line 5, characters 8-15:
+  File "akempty_tuple_bad.php", line 5, characters 8-12:
   But got `vec<nothing>`
 File "akempty_tuple_bad.php", line 12, characters 8-9:
 Invalid argument (Typing[4110])

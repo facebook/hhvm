@@ -1,6 +1,6 @@
 File "list_error.php", line 9, characters 15-18:
 Invalid argument (Typing[4110])
-File "list_error.php", line 12, characters 22-27:
-Expected `string`
-File "list_error.php", line 6, characters 15-15:
-But got `int`
+  File "list_error.php", line 12, characters 22-27:
+  Expected `string`
+  File "list_error.php", line 6, characters 12-12:
+  But got `int`

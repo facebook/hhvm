@@ -82,7 +82,7 @@ function g($x){
 */
 
 function g(): darray<string,int> {
-  $x = darray['gg' => 0];
+  $x = dict['gg' => 0];
 
   if (true) {
     $x['d'] = 0;

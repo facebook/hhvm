@@ -19,7 +19,7 @@ function f(int $a): int {
   $b = (X) >> 2;
   $b = (X) << 2;
   $b = (X) ^ 2;
-  $b = varray[1, 2][(X)];
+  $b = vec[1, 2][(X)];
   $b = (X);
   return $b;
 }

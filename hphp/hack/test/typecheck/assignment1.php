@@ -10,6 +10,6 @@
  */
 
 function main(): void {
-  $arr = darray[];
+  $arr = dict[];
   $arr[$arr->getLength()] = 1;
 }

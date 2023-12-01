@@ -2,7 +2,7 @@
 <?hh
 
 function any(){
-  return darray[];
+  return dict[];
 }
 
 ////file2.php
@@ -10,6 +10,6 @@ function any(){
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function testany():void {
-  $x = idx(any(), 'a', darray[]);
+  $x = idx(any(), 'a', dict[]);
   $y = $x['b'];
 }

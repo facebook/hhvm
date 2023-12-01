@@ -4,5 +4,5 @@ File "akempty_promotion_3.php", line 12, characters 5-6:
 Invalid argument (Typing[4110])
   File "akempty_promotion_3.php", line 15, characters 12-14:
   Expected `int`
-  File "akempty_promotion_3.php", line 7, characters 8-15:
+  File "akempty_promotion_3.php", line 7, characters 8-12:
   But got `vec<string>`

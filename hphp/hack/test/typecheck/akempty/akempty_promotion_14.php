@@ -5,7 +5,7 @@
  * of array when dealing with nested types =(
  */
 function test(): ConstVector<varray<darray<string, string>>> {
-  $v = Vector { varray[darray[]] };
+  $v = Vector { vec[dict[]] };
   $a = $v[0];
   $a[0]['aaa'] = 4;
   return $v;

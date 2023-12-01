@@ -1,6 +1,6 @@
-File "disallow_hetergeneous_inputs_for_darray.php", line 4, characters 30-30:
+File "disallow_hetergeneous_inputs_for_darray.php", line 4, characters 27-27:
 A closing square bracket `]` is expected here. (Parsing[1002])
-File "disallow_hetergeneous_inputs_for_darray.php", line 4, characters 30-31:
+File "disallow_hetergeneous_inputs_for_darray.php", line 4, characters 27-28:
 Unbound name: `=>` (a global constant) (Naming[2049])
-File "disallow_hetergeneous_inputs_for_darray.php", line 4, characters 30-31:
+File "disallow_hetergeneous_inputs_for_darray.php", line 4, characters 27-28:
 Unbound global constant (Typing) (Typing[4106])

@@ -19,10 +19,10 @@ class VecConsts {
 }
 
 class ArrayConsts {
-  const darray<string, int> CDARRAY = darray["test" => 1];
+  const dict<string, int> CDARRAY = dict["test" => 1];
   const keyset<string> CKEYSET = keyset['a', 'b'];
   const keyset<classname> CCLASSNAME_KEYSET = keyset[];
-  const varray<string> CVARRAY = varray['MAP_1', 'MAP_2'];
+  const vec<string> CVARRAY = vec['MAP_1', 'MAP_2'];
 }
 
 class BinopConsts {

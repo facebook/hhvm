@@ -1,12 +1,12 @@
 File "unify_ok.php", line 14, characters 12-16:
 Invalid argument (Typing[4110])
-File "unify_ok.php", line 3, characters 19-21:
-Expected `num`
-File "unify_ok.php", line 11, characters 23-27:
-But got `string`
+  File "unify_ok.php", line 3, characters 19-21:
+  Expected `num`
+  File "unify_ok.php", line 11, characters 20-24:
+  But got `string`
 File "unify_ok.php", line 15, characters 15-19:
 Invalid argument (Typing[4110])
-File "unify_ok.php", line 4, characters 22-27:
-Expected `string`
-File "unify_ok.php", line 9, characters 17-17:
-But got `num`
+  File "unify_ok.php", line 4, characters 22-27:
+  Expected `string`
+  File "unify_ok.php", line 9, characters 14-14:
+  But got `num`

@@ -10,6 +10,6 @@
  */
 
 function f(): void {
-  foreach (varray[1] as $k => 42) {
+  foreach (vec[1] as $k => 42) {
   }
 }

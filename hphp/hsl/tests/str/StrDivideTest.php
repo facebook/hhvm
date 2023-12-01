@@ -15,7 +15,7 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class StrDivideTest extends HackTest {
 
   public static function provideChunk(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         'hello',
         1,
@@ -44,7 +44,7 @@ final class StrDivideTest extends HackTest {
   }
 
   public static function provideSplit(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         '',
         '',

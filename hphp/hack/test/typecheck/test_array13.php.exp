@@ -1,4 +1,4 @@
 File "test_array13.php", line 14, characters 3-16:
 This is not an object of type `KeyedContainer`, this is an int (Typing[4370])
-File "test_array13.php", line 13, characters 43-43:
-Definition is here
+  File "test_array13.php", line 13, characters 38-38:
+  Definition is here

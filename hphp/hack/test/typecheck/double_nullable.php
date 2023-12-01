@@ -1,7 +1,7 @@
 <?hh
 
 function bar(): darray<int, ?int> {
-  return darray[123 => null, 456 => 789];
+  return dict[123 => null, 456 => 789];
 }
 
 function idx2<Tk as arraykey, Tv>(?KeyedContainer<Tk, Tv> $collection, ?Tk $index): ?Tv {

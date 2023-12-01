@@ -1,6 +1,6 @@
 File "assignment1.php", line 14, characters 14-22:
 No instance method `getLength` in `dict` (Typing[4053])
-  File "assignment1.php", line 13, characters 10-17:
+  File "assignment1.php", line 13, characters 10-15:
   This is why I think it is an object of type HH\dict
   File "hackarray.hhi", line 32, characters 24-27:
   Declaration of `dict` is here

@@ -31,40 +31,40 @@ final class PollTest extends HackTest {
   ): varray<(varray<Awaitable<int>>, varray<int>, bool)> {
     $block = async (int $prio) ==> await RescheduleWaitHandle::create(0, $prio);
 
-    return varray[
+    return vec[
       // Empty
       tuple(
-        varray[],
-        varray[],
+        vec[],
+        vec[],
         false,
       ),
       // One eager success
       tuple(
-        varray[async { return 42; }],
-        varray[42],
+        vec[async { return 42; }],
+        vec[42],
         false,
       ),
       // One resumed success
       tuple(
-        varray[async { await $block(0); return 42; }],
-        varray[42],
+        vec[async { await $block(0); return 42; }],
+        vec[42],
         false,
       ),
       // One eager failure
       tuple(
-        varray[async { throw new Exception(); }],
-        varray[],
+        vec[async { throw new Exception(); }],
+        vec[],
         true,
       ),
       // One resumed failure
       tuple(
-        varray[async { await $block(0); throw new Exception(); }],
-        varray[],
+        vec[async { await $block(0); throw new Exception(); }],
+        vec[],
         true,
       ),
       // Combination
       tuple(
-        varray[
+        vec[
           async { return 1; },
           async { await $block(1); return 2; },
           async { return 3; },
@@ -73,7 +73,7 @@ final class PollTest extends HackTest {
           async { await $block(0); return 5; },
           async { return 6; },
         ],
-        varray[1, 3, 6, 5, 2],
+        vec[1, 3, 6, 5, 2],
         true,
       ),
     ];
@@ -85,7 +85,7 @@ final class PollTest extends HackTest {
     varray<int> $expected_results,
     bool $expected_exception,
   ): Awaitable<void> {
-    $results = varray[];
+    $results = vec[];
     $exception = false;
     try {
       foreach (Async\Poll::from($awaitables) await as $value) {
@@ -103,7 +103,7 @@ final class PollTest extends HackTest {
   }
 
   public async function testKeyed(): Awaitable<void> {
-    $poll = Async\KeyedPoll::from(darray[
+    $poll = Async\KeyedPoll::from(dict[
       'k1' => async {
         return 1;
       },
@@ -118,7 +118,7 @@ final class PollTest extends HackTest {
           break;
         case 'k2':
           expect($value)->toBePHPEqual(2);
-          $poll->addMulti(darray['k3' => async { return 3; }]);
+          $poll->addMulti(dict['k3' => async { return 3; }]);
           break;
         case 'k3':
           expect($value)->toBePHPEqual(3);

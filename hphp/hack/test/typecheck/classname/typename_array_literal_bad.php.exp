@@ -6,7 +6,7 @@ Invalid return type (Typing[4110])
   Expected `I`
   File "typename_array_literal_bad.php", line 6, characters 7-7:
   But got `D`; implicitly defined constant `::class` is a string that contains the fully qualified name of `D`
-  File "typename_array_literal_bad.php", line 9, characters 47-47:
+  File "typename_array_literal_bad.php", line 9, characters 45-45:
     where the class `D` was referenced here
   File "classname.hhi", line 19, characters 37-37:
     via this generic `T`

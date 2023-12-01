@@ -1,6 +1,6 @@
-File "disallow_empty_varray_where_dict_like_array_is_required.php", line 4, characters 10-17:
+File "disallow_empty_varray_where_dict_like_array_is_required.php", line 4, characters 10-14:
 Invalid return type (Typing[4110])
   File "disallow_empty_varray_where_dict_like_array_is_required.php", line 3, characters 18-39:
   Expected `dict<string, string>`
-  File "disallow_empty_varray_where_dict_like_array_is_required.php", line 4, characters 10-17:
+  File "disallow_empty_varray_where_dict_like_array_is_required.php", line 4, characters 10-14:
   But got `vec<nothing>`

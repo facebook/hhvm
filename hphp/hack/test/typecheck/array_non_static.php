@@ -5,5 +5,5 @@ function get(): int {
 }
 
 class Foo {
-  public varray<int> $vec = varray[get(), 2];
+  public varray<int> $vec = vec[get(), 2];
 }

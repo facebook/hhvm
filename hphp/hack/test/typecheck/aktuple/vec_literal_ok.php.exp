@@ -1,12 +1,12 @@
 File "vec_literal_ok.php", line 6, characters 12-16:
 Invalid argument (Typing[4110])
-File "vec_literal_ok.php", line 10, characters 19-21:
-Expected `int`
-File "vec_literal_ok.php", line 4, characters 18-22:
-But got `string`
+  File "vec_literal_ok.php", line 10, characters 19-21:
+  Expected `int`
+  File "vec_literal_ok.php", line 4, characters 15-19:
+  But got `string`
 File "vec_literal_ok.php", line 7, characters 15-19:
 Invalid argument (Typing[4110])
-File "vec_literal_ok.php", line 11, characters 22-27:
-Expected `string`
-File "vec_literal_ok.php", line 4, characters 15-15:
-But got `int`
+  File "vec_literal_ok.php", line 11, characters 22-27:
+  Expected `string`
+  File "vec_literal_ok.php", line 4, characters 12-12:
+  But got `int`

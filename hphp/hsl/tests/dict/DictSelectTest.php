@@ -15,29 +15,29 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class DictSelectTest extends HackTest {
 
   public static function provideTestDiffByKey(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        darray[],
+        dict[],
         Vec\range(0, 100),
-        darray[],
+        dict[],
         dict[],
       ),
       tuple(
-        darray[1 => 1, 2 => 2, 3 => 3],
-        darray[],
-        darray[],
+        dict[1 => 1, 2 => 2, 3 => 3],
+        dict[],
+        dict[],
         dict[1 => 1, 2 => 2, 3 => 3],
       ),
       tuple(
         dict['foo' => 'bar', 'baz' => 'qux'],
         Map {'foo' => 4},
-        darray[],
+        dict[],
         dict['baz' => 'qux'],
       ),
       tuple(
         Vec\range(0, 9),
         dict[2 => 4, 4 => 8, 8 => 16],
-        varray[
+        vec[
           Map {1 => 1, 2 => 2},
           HackLibTestTraversables::getKeyedIterator(Vec\range(0, 3)),
         ],
@@ -57,7 +57,7 @@ final class DictSelectTest extends HackTest {
   }
 
   public static function provideDrop(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         dict[],
         5,
@@ -74,7 +74,7 @@ final class DictSelectTest extends HackTest {
         ],
       ),
       tuple(
-        HackLibTestTraversables::getKeyedIterator(darray[
+        HackLibTestTraversables::getKeyedIterator(dict[
           'foo' => 'oof',
           'bar' => 'rab',
           'baz' => 'zab',
@@ -109,7 +109,7 @@ final class DictSelectTest extends HackTest {
   }
 
   public static function provideTestFilter(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         dict[],
         $x ==> true,
@@ -158,7 +158,7 @@ final class DictSelectTest extends HackTest {
   }
 
   public static function provideTestFilterWithKey(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         dict[],
         ($k, $v) ==> true,
@@ -212,7 +212,7 @@ final class DictSelectTest extends HackTest {
   }
 
   public function testFilterWithoutPredicate(): void {
-    expect(Dict\filter(darray[
+    expect(Dict\filter(dict[
       0 => 0,
       3 => 3,
       2 => null,
@@ -226,7 +226,7 @@ final class DictSelectTest extends HackTest {
   }
 
   public static function provideTestFilterKeys(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         dict[],
         $x ==> true,
@@ -276,9 +276,9 @@ final class DictSelectTest extends HackTest {
   }
 
   public static function provideTestFilterNulls(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        darray[
+        dict[
           'foo' => null,
           'bar' => null,
           'baz' => null,
@@ -312,13 +312,13 @@ final class DictSelectTest extends HackTest {
         ],
       ),
       tuple(
-        HackLibTestTraversables::getKeyedIterator(darray[
+        HackLibTestTraversables::getKeyedIterator(dict[
           1 => null,
-          2 => varray[],
+          2 => vec[],
           3 => '0',
         ]),
         dict[
-          2 => varray[],
+          2 => vec[],
           3 => '0',
         ],
       ),
@@ -334,10 +334,10 @@ final class DictSelectTest extends HackTest {
   }
 
   public static function provideTestSelectKeys(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        varray[],
-        varray[],
+        vec[],
+        vec[],
         dict[],
       ),
       tuple(
@@ -346,7 +346,7 @@ final class DictSelectTest extends HackTest {
           'bar' => 'bar',
           'baz' => 'baz',
         },
-        varray['bar'],
+        vec['bar'],
         dict[
           'bar' => 'bar',
         ],
@@ -374,7 +374,7 @@ final class DictSelectTest extends HackTest {
   }
 
   public static function provideTake(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         dict[],
         5,
@@ -386,7 +386,7 @@ final class DictSelectTest extends HackTest {
         dict[],
       ),
       tuple(
-        HackLibTestTraversables::getKeyedIterator(darray[
+        HackLibTestTraversables::getKeyedIterator(dict[
           'foo' => 'oof',
           'bar' => 'rab',
           'baz' => 'zab',
@@ -437,7 +437,7 @@ final class DictSelectTest extends HackTest {
   }
 
   public static function provideTestUnique(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Map {
           'a' => 1,
@@ -468,7 +468,7 @@ final class DictSelectTest extends HackTest {
     $s2 = Set {'bar'};
     $s3 = Set {'foo'};
     $s4 = Set {'baz'};
-    return varray[
+    return vec[
       tuple(
         Vector {$s1, $s2, $s3, $s4},
         /* HH_FIXME[4297] The type of the lambda argument(s) could not be inferred */

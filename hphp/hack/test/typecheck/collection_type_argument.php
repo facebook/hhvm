@@ -10,8 +10,6 @@ function ok_value_collection(): void {
 function ok_keyed_value_collection(): void {
   dict<int, int>[]; // OK
   dict<arraykey, int>[]; // OK
-  darray<int, int>[]; // OK
-  darray<arraykey, int>[]; // OK
   Map<arraykey, int> {}; // OK
 }
 
@@ -24,7 +22,7 @@ function ko_keyed_value_collection(): void {
 }
 
 function ko_darray(): void {
-  darray<bool, int>[]; // KO: bool </: arraykey
+  dict<bool, int>[]; // KO: bool </: arraykey
 }
 
 function ko_map(): void {

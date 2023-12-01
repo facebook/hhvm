@@ -2,11 +2,11 @@ File "unify_error3.php", line 13, characters 12-16:
 Invalid argument (Typing[4110])
   File "unify_error3.php", line 3, characters 19-21:
   Expected `int`
-  File "unify_error3.php", line 8, characters 17-17:
+  File "unify_error3.php", line 8, characters 14-14:
   But got `num`
 File "unify_error3.php", line 13, characters 12-16:
 Invalid argument (Typing[4110])
   File "unify_error3.php", line 3, characters 19-21:
   Expected `int`
-  File "unify_error3.php", line 10, characters 23-27:
+  File "unify_error3.php", line 10, characters 20-24:
   But got `string`

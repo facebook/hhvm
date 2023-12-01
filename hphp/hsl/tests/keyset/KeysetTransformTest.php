@@ -15,14 +15,14 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class KeysetTransformTest extends HackTest {
 
   public static function provideTestChunk(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Map {},
         10,
         vec[],
       ),
       tuple(
-        varray[0, 1, 2, 3, 4],
+        vec[0, 1, 2, 3, 4],
         2,
         vec[
           keyset[0, 1],
@@ -32,7 +32,7 @@ final class KeysetTransformTest extends HackTest {
       ),
       tuple(
         HackLibTestTraversables::getKeyedIterator(
-          darray['foo' => 'bar', 'baz' => 'qux'],
+          dict['foo' => 'bar', 'baz' => 'qux'],
         ),
         1,
         vec[
@@ -64,14 +64,14 @@ final class KeysetTransformTest extends HackTest {
 
   public static function provideTestMap(): varray<mixed> {
     $doubler = $x ==> $x * 2;
-    return varray[
+    return vec[
       tuple(
-        varray[],
+        vec[],
         $doubler,
         keyset[],
       ),
       tuple(
-        varray[1],
+        vec[1],
         $doubler,
         keyset[2],
       ),
@@ -81,12 +81,12 @@ final class KeysetTransformTest extends HackTest {
         keyset[20, 22, 24, 26, 28, 30],
       ),
       tuple(
-        varray['a'],
+        vec['a'],
         $x ==> $x. ' buzz',
         keyset['a buzz'],
       ),
       tuple(
-        varray['a', 'bee', 'a bee'],
+        vec['a', 'bee', 'a bee'],
         $x ==> $x. ' buzz',
         keyset['a buzz', 'bee buzz', 'a bee buzz'],
       ),
@@ -120,12 +120,12 @@ final class KeysetTransformTest extends HackTest {
         keyset[20, 40],
       ),
       tuple(
-        HackLibTestTraversables::getIterator(varray[1, 2, 3]),
+        HackLibTestTraversables::getIterator(vec[1, 2, 3]),
         $doubler,
         keyset[2, 4, 6],
       ),
       tuple(
-        HackLibTestTraversables::getKeyedIterator(darray[10 => 1, 20 => 2, 30 => 3]),
+        HackLibTestTraversables::getKeyedIterator(dict[10 => 1, 20 => 2, 30 => 3]),
         $doubler,
         keyset[2, 4, 6],
       ),
@@ -142,9 +142,9 @@ final class KeysetTransformTest extends HackTest {
   }
 
   public static function provideTestMapWithKey(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        varray[],
+        vec[],
         ($a, $b) ==> null,
         keyset[],
       ),
@@ -204,10 +204,10 @@ final class KeysetTransformTest extends HackTest {
         keyset['apple', 'banana', 'grape'],
       ),
       tuple(
-        varray[
-          varray[1, 2, 3],
+        vec[
+          vec[1, 2, 3],
           Vector {'the', 'quick', 'brown'},
-          HackLibTestTraversables::getKeyedIterator(darray[
+          HackLibTestTraversables::getKeyedIterator(dict[
             'the' => 'the',
             'quick' => 'quick',
             'brown' => 'brown',

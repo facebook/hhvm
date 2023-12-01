@@ -2,5 +2,5 @@ File "akempty_promotion_9.php", line 15, characters 5-6:
 Invalid argument (Typing[4110])
   File "akempty_promotion_9.php", line 18, characters 12-30:
   Expected `dict<int, string>`
-  File "akempty_promotion_9.php", line 8, characters 8-15:
+  File "akempty_promotion_9.php", line 8, characters 8-12:
   But got `vec<string>`

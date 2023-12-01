@@ -15,7 +15,7 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class DictAsyncTest extends HackTest {
 
   public static function provideTestFromAsync(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Vector {
           async {
@@ -53,7 +53,7 @@ final class DictAsyncTest extends HackTest {
         ],
       ),
       tuple(
-        HackLibTestTraversables::getKeyedIterator(darray[
+        HackLibTestTraversables::getKeyedIterator(dict[
           'foo' => async {
             return 1;
           },
@@ -79,7 +79,7 @@ final class DictAsyncTest extends HackTest {
   }
 
   public static function provideTestFromKeysAsync(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Vector {'the', 'quick', 'brown', 'fox'},
         async ($word) ==> Str\length($word),
@@ -92,7 +92,7 @@ final class DictAsyncTest extends HackTest {
       ),
       tuple(
         HackLibTestTraversables::getIterator(
-          varray['the', 'quick', 'brown', 'fox'],
+          vec['the', 'quick', 'brown', 'fox'],
         ),
         async ($word) ==> Str\length($word),
         dict[
@@ -130,9 +130,9 @@ final class DictAsyncTest extends HackTest {
   }
 
   public static function provideTestFilterAsync(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        darray[
+        dict[
           2 => 'two',
           4 => 'four',
           6 => 'six',
@@ -181,9 +181,9 @@ final class DictAsyncTest extends HackTest {
   }
 
   public static function provideTestFilterWithKeyAsync(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        darray[
+        dict[
           2 => 'two',
           4 => 'four',
           6 => 'six',
@@ -230,8 +230,8 @@ final class DictAsyncTest extends HackTest {
   }
 
   public static function provideTestMapAsync(): varray<mixed> {
-    return varray[
-      tuple(varray[], $x ==> $x, dict[]),
+    return vec[
+      tuple(vec[], $x ==> $x, dict[]),
       tuple(
         Map {
           'one' => 1,
@@ -257,7 +257,7 @@ final class DictAsyncTest extends HackTest {
       ),
       tuple(
         HackLibTestTraversables::getIterator(
-          varray['the', 'quick', 'brown', 'fox'],
+          vec['the', 'quick', 'brown', 'fox'],
         ),
         async ($word) ==> Str\reverse($word),
         dict[
@@ -281,8 +281,8 @@ final class DictAsyncTest extends HackTest {
   }
 
   public static function provideTestMapWithKeyAsync(): varray<mixed> {
-    return varray[
-      tuple(varray[], async ($a, $b) ==> null, dict[]),
+    return vec[
+      tuple(vec[], async ($a, $b) ==> null, dict[]),
       tuple(
         vec[1, 2, 3],
         async ($k, $v) ==> (string)$k.$v,

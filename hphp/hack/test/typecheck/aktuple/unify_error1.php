@@ -5,9 +5,9 @@ function take_int(int $_): void {}
 function test(bool $b): void {
 
   if ($b) {
-    $a = varray[4];
+    $a = vec[4];
   } else {
-    $a = varray[3.14, 'aaa'];
+    $a = vec[3.14, 'aaa'];
   }
 
   take_int($a[0]);

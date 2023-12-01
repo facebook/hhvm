@@ -15,8 +15,8 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class StrCombineTest extends HackTest {
 
   public static function provideJoin(): varray<mixed> {
-    $elements = varray['the', 'quick', 'brown', 'fox', 1];
-    return varray[
+    $elements = vec['the', 'quick', 'brown', 'fox', 1];
+    return vec[
       tuple($elements),
       tuple(new Vector($elements)),
       tuple(new Set($elements)),

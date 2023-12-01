@@ -15,7 +15,7 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class KeysetIntrospectTest extends HackTest {
 
   public static function provideTestEqual(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         keyset[1, 2, 3],
         keyset[1, 2, 3],

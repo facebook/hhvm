@@ -1,5 +1,5 @@
 <?hh
 
 function test(): void {
-  varray["tingley" => 0];
+  vec["tingley" => 0];
 }

@@ -6,7 +6,7 @@ function consumeTraversable(Traversable<num> $arg): void {}
 function consumeContainer(Container<num> $arg): void {}
 
 function provideDarrayOrVarrayOfInt(): varray_or_darray<int> {
-  return darray["a" => 0];
+  return dict["a" => 0];
 }
 
 function test(): void {

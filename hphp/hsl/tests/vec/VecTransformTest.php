@@ -15,14 +15,14 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class VecTransformTest extends HackTest {
 
   public static function provideTestChunk(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Map {},
         10,
         vec[],
       ),
       tuple(
-        varray[0, 1, 2, 3, 4],
+        vec[0, 1, 2, 3, 4],
         2,
         vec[
           vec[0, 1],
@@ -32,7 +32,7 @@ final class VecTransformTest extends HackTest {
       ),
       tuple(
         HackLibTestTraversables::getKeyedIterator(
-          darray['foo' => 'bar', 'baz' => 'qux'],
+          dict['foo' => 'bar', 'baz' => 'qux'],
         ),
         1,
         vec[
@@ -53,7 +53,7 @@ final class VecTransformTest extends HackTest {
   }
 
   public static function provideTestFill(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         0,
         42,
@@ -66,10 +66,10 @@ final class VecTransformTest extends HackTest {
       ),
       tuple(
         2,
-        darray['foo' => 'bar'],
+        dict['foo' => 'bar'],
         vec[
-          darray['foo' => 'bar'],
-          darray['foo' => 'bar'],
+          dict['foo' => 'bar'],
+          dict['foo' => 'bar'],
         ],
       ),
     ];
@@ -89,23 +89,23 @@ final class VecTransformTest extends HackTest {
   }
 
   public static function provideTestFlatten(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        varray[],
+        vec[],
         vec[],
       ),
       tuple(
-        varray[
-          varray[], Vector {}, Map {}, Set {},
+        vec[
+          vec[], Vector {}, Map {}, Set {},
         ],
         vec[],
       ),
       tuple(
-        varray[
-          varray['the', 'quick'],
+        vec[
+          vec['the', 'quick'],
           Vector {'brown', 'fox'},
           Map {'jumped' => 'over'},
-          HackLibTestTraversables::getIterator(varray['the', 'lazy', 'dog']),
+          HackLibTestTraversables::getIterator(vec['the', 'lazy', 'dog']),
         ],
         vec['the', 'quick', 'brown', 'fox', 'over', 'the', 'lazy', 'dog'],
       ),
@@ -122,14 +122,14 @@ final class VecTransformTest extends HackTest {
 
   public static function provideTestMap(): varray<mixed> {
     $doubler = $x ==> $x * 2;
-    return varray[
+    return vec[
       tuple(
-        varray[],
+        vec[],
         $doubler,
         vec[],
       ),
       tuple(
-        varray[1],
+        vec[1],
         $doubler,
         vec[2],
       ),
@@ -139,12 +139,12 @@ final class VecTransformTest extends HackTest {
         vec[20, 22, 24, 26, 28, 30],
       ),
       tuple(
-        varray['a'],
+        vec['a'],
         $x ==> $x. ' buzz',
         vec['a buzz'],
       ),
       tuple(
-        varray['a', 'bee', 'a bee'],
+        vec['a', 'bee', 'a bee'],
         $x ==> $x. ' buzz',
         vec['a buzz', 'bee buzz', 'a bee buzz'],
       ),
@@ -178,12 +178,12 @@ final class VecTransformTest extends HackTest {
         vec[20, 40],
       ),
       tuple(
-        HackLibTestTraversables::getIterator(varray[1, 2, 3]),
+        HackLibTestTraversables::getIterator(vec[1, 2, 3]),
         $doubler,
         vec[2, 4, 6],
       ),
       tuple(
-        HackLibTestTraversables::getKeyedIterator(darray[10 => 1, 20 => 2, 30 => 3]),
+        HackLibTestTraversables::getKeyedIterator(dict[10 => 1, 20 => 2, 30 => 3]),
         $doubler,
         vec[2, 4, 6],
       ),
@@ -200,9 +200,9 @@ final class VecTransformTest extends HackTest {
   }
 
   public static function provideTestMapWithKey(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        varray[],
+        vec[],
         ($a, $b) ==> null,
         vec[],
       ),

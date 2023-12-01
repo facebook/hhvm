@@ -8,10 +8,10 @@ enum E : int { A = 2; };
 function expectArrayAK(varray<arraykey> $a):void { }
 
 function test(): void {
-  $a = varray[4, 'aaa'];
+  $a = vec[4, 'aaa'];
   $a[] = E::A;
   expectArrayAK($a);
 
-  $a = Vector { varray[4, 'aaa'] };
+  $a = Vector { vec[4, 'aaa'] };
   $a[0][] = E::A;
 }

@@ -242,27 +242,27 @@
                       {
                         "kind":"expression_statement",
                         "expression_statement_expression":{
-                          "kind":"darray_intrinsic_expression",
-                          "darray_intrinsic_keyword":{
+                          "kind":"dictionary_intrinsic_expression",
+                          "dictionary_intrinsic_keyword":{
                             "kind":"token",
                             "token":{
-                              "kind":"darray",
-                              "text":"darray",
+                              "kind":"dict",
+                              "text":"dict",
                               "offset":138,
                               "leading_width":4,
-                              "width":6,
+                              "width":4,
                               "trailing_width":0,
                               "leading":[{"kind":"whitespace","text":"    ","offset":138,"width":4}],
                               "trailing":[],
                               "line_number":6
                             }
                           },
-                          "darray_intrinsic_left_bracket":{
+                          "dictionary_intrinsic_left_bracket":{
                             "kind":"token",
                             "token":{
                               "kind":"[",
                               "text":"[",
-                              "offset":148,
+                              "offset":146,
                               "leading_width":0,
                               "width":1,
                               "trailing_width":0,
@@ -271,7 +271,7 @@
                               "line_number":6
                             }
                           },
-                          "darray_intrinsic_members":{
+                          "dictionary_intrinsic_members":{
                             "kind":"list",
                             "elements":[
                               {
@@ -285,12 +285,12 @@
                                       "token":{
                                         "kind":"single_quoted_string_literal",
                                         "text":"'bar'",
-                                        "offset":149,
+                                        "offset":147,
                                         "leading_width":0,
                                         "width":5,
                                         "trailing_width":1,
                                         "leading":[],
-                                        "trailing":[{"kind":"whitespace","text":" ","offset":154,"width":1}],
+                                        "trailing":[{"kind":"whitespace","text":" ","offset":152,"width":1}],
                                         "line_number":6
                                       }
                                     }
@@ -300,12 +300,12 @@
                                     "token":{
                                       "kind":"=>",
                                       "text":"=>",
-                                      "offset":155,
+                                      "offset":153,
                                       "leading_width":0,
                                       "width":2,
                                       "trailing_width":1,
                                       "leading":[],
-                                      "trailing":[{"kind":"whitespace","text":" ","offset":157,"width":1}],
+                                      "trailing":[{"kind":"whitespace","text":" ","offset":155,"width":1}],
                                       "line_number":6
                                     }
                                   },
@@ -316,7 +316,7 @@
                                       "token":{
                                         "kind":"decimal_literal",
                                         "text":"0",
-                                        "offset":158,
+                                        "offset":156,
                                         "leading_width":0,
                                         "width":1,
                                         "trailing_width":0,
@@ -332,12 +332,12 @@
                                   "token":{
                                     "kind":",",
                                     "text":",",
-                                    "offset":159,
+                                    "offset":157,
                                     "leading_width":0,
                                     "width":1,
                                     "trailing_width":1,
                                     "leading":[],
-                                    "trailing":[{"kind":"whitespace","text":" ","offset":160,"width":1}],
+                                    "trailing":[{"kind":"whitespace","text":" ","offset":158,"width":1}],
                                     "line_number":6
                                   }
                                 }
@@ -353,12 +353,12 @@
                                       "token":{
                                         "kind":"single_quoted_string_literal",
                                         "text":"'baz'",
-                                        "offset":161,
+                                        "offset":159,
                                         "leading_width":0,
                                         "width":5,
                                         "trailing_width":1,
                                         "leading":[],
-                                        "trailing":[{"kind":"whitespace","text":" ","offset":166,"width":1}],
+                                        "trailing":[{"kind":"whitespace","text":" ","offset":164,"width":1}],
                                         "line_number":6
                                       }
                                     }
@@ -368,12 +368,12 @@
                                     "token":{
                                       "kind":"=>",
                                       "text":"=>",
-                                      "offset":167,
+                                      "offset":165,
                                       "leading_width":0,
                                       "width":2,
                                       "trailing_width":1,
                                       "leading":[],
-                                      "trailing":[{"kind":"whitespace","text":" ","offset":169,"width":1}],
+                                      "trailing":[{"kind":"whitespace","text":" ","offset":167,"width":1}],
                                       "line_number":6
                                     }
                                   },
@@ -384,7 +384,7 @@
                                       "token":{
                                         "kind":"decimal_literal",
                                         "text":"1",
-                                        "offset":170,
+                                        "offset":168,
                                         "leading_width":0,
                                         "width":1,
                                         "trailing_width":0,
@@ -400,12 +400,12 @@
                                   "token":{
                                     "kind":",",
                                     "text":",",
-                                    "offset":171,
+                                    "offset":169,
                                     "leading_width":0,
                                     "width":1,
                                     "trailing_width":1,
                                     "leading":[],
-                                    "trailing":[{"kind":"whitespace","text":" ","offset":172,"width":1}],
+                                    "trailing":[{"kind":"whitespace","text":" ","offset":170,"width":1}],
                                     "line_number":6
                                   }
                                 }
@@ -421,12 +421,12 @@
                                       "token":{
                                         "kind":"single_quoted_string_literal",
                                         "text":"'qux'",
-                                        "offset":173,
+                                        "offset":171,
                                         "leading_width":0,
                                         "width":5,
                                         "trailing_width":1,
                                         "leading":[],
-                                        "trailing":[{"kind":"whitespace","text":" ","offset":178,"width":1}],
+                                        "trailing":[{"kind":"whitespace","text":" ","offset":176,"width":1}],
                                         "line_number":6
                                       }
                                     }
@@ -436,12 +436,12 @@
                                     "token":{
                                       "kind":"=>",
                                       "text":"=>",
-                                      "offset":179,
+                                      "offset":177,
                                       "leading_width":0,
                                       "width":2,
                                       "trailing_width":1,
                                       "leading":[],
-                                      "trailing":[{"kind":"whitespace","text":" ","offset":181,"width":1}],
+                                      "trailing":[{"kind":"whitespace","text":" ","offset":179,"width":1}],
                                       "line_number":6
                                     }
                                   },
@@ -452,7 +452,7 @@
                                       "token":{
                                         "kind":"decimal_literal",
                                         "text":"2",
-                                        "offset":182,
+                                        "offset":180,
                                         "leading_width":0,
                                         "width":1,
                                         "trailing_width":0,
@@ -466,12 +466,12 @@
                               }
                             ]
                           },
-                          "darray_intrinsic_right_bracket":{
+                          "dictionary_intrinsic_right_bracket":{
                             "kind":"token",
                             "token":{
                               "kind":"]",
                               "text":"]",
-                              "offset":183,
+                              "offset":181,
                               "leading_width":0,
                               "width":1,
                               "trailing_width":0,
@@ -486,12 +486,12 @@
                           "token":{
                             "kind":";",
                             "text":";",
-                            "offset":184,
+                            "offset":182,
                             "leading_width":0,
                             "width":1,
                             "trailing_width":1,
                             "leading":[],
-                            "trailing":[{"kind":"end_of_line","text":"\n","offset":185,"width":1}],
+                            "trailing":[{"kind":"end_of_line","text":"\n","offset":183,"width":1}],
                             "line_number":6
                           }
                         }
@@ -499,27 +499,27 @@
                       {
                         "kind":"expression_statement",
                         "expression_statement_expression":{
-                          "kind":"varray_intrinsic_expression",
-                          "varray_intrinsic_keyword":{
+                          "kind":"vector_intrinsic_expression",
+                          "vector_intrinsic_keyword":{
                             "kind":"token",
                             "token":{
-                              "kind":"varray",
-                              "text":"varray",
-                              "offset":186,
+                              "kind":"vec",
+                              "text":"vec",
+                              "offset":184,
                               "leading_width":4,
-                              "width":6,
+                              "width":3,
                               "trailing_width":0,
-                              "leading":[{"kind":"whitespace","text":"    ","offset":186,"width":4}],
+                              "leading":[{"kind":"whitespace","text":"    ","offset":184,"width":4}],
                               "trailing":[],
                               "line_number":7
                             }
                           },
-                          "varray_intrinsic_left_bracket":{
+                          "vector_intrinsic_left_bracket":{
                             "kind":"token",
                             "token":{
                               "kind":"[",
                               "text":"[",
-                              "offset":196,
+                              "offset":191,
                               "leading_width":0,
                               "width":1,
                               "trailing_width":0,
@@ -528,7 +528,7 @@
                               "line_number":7
                             }
                           },
-                          "varray_intrinsic_members":{
+                          "vector_intrinsic_members":{
                             "kind":"list",
                             "elements":[
                               {
@@ -540,7 +540,7 @@
                                     "token":{
                                       "kind":"boolean_literal",
                                       "text":"false",
-                                      "offset":197,
+                                      "offset":192,
                                       "leading_width":0,
                                       "width":5,
                                       "trailing_width":0,
@@ -555,12 +555,12 @@
                                   "token":{
                                     "kind":",",
                                     "text":",",
-                                    "offset":202,
+                                    "offset":197,
                                     "leading_width":0,
                                     "width":1,
                                     "trailing_width":1,
                                     "leading":[],
-                                    "trailing":[{"kind":"whitespace","text":" ","offset":203,"width":1}],
+                                    "trailing":[{"kind":"whitespace","text":" ","offset":198,"width":1}],
                                     "line_number":7
                                   }
                                 }
@@ -574,7 +574,7 @@
                                     "token":{
                                       "kind":"boolean_literal",
                                       "text":"true",
-                                      "offset":204,
+                                      "offset":199,
                                       "leading_width":0,
                                       "width":4,
                                       "trailing_width":0,
@@ -587,12 +587,12 @@
                               }
                             ]
                           },
-                          "varray_intrinsic_right_bracket":{
+                          "vector_intrinsic_right_bracket":{
                             "kind":"token",
                             "token":{
                               "kind":"]",
                               "text":"]",
-                              "offset":208,
+                              "offset":203,
                               "leading_width":0,
                               "width":1,
                               "trailing_width":0,
@@ -607,12 +607,12 @@
                           "token":{
                             "kind":";",
                             "text":";",
-                            "offset":209,
+                            "offset":204,
                             "leading_width":0,
                             "width":1,
                             "trailing_width":1,
                             "leading":[],
-                            "trailing":[{"kind":"end_of_line","text":"\n","offset":210,"width":1}],
+                            "trailing":[{"kind":"end_of_line","text":"\n","offset":205,"width":1}],
                             "line_number":7
                           }
                         }
@@ -624,12 +624,12 @@
                     "token":{
                       "kind":"}",
                       "text":"}",
-                      "offset":211,
+                      "offset":206,
                       "leading_width":2,
                       "width":1,
                       "trailing_width":1,
-                      "leading":[{"kind":"whitespace","text":"  ","offset":211,"width":2}],
-                      "trailing":[{"kind":"end_of_line","text":"\n","offset":214,"width":1}],
+                      "leading":[{"kind":"whitespace","text":"  ","offset":206,"width":2}],
+                      "trailing":[{"kind":"end_of_line","text":"\n","offset":209,"width":1}],
                       "line_number":8
                     }
                   }
@@ -642,12 +642,12 @@
             "token":{
               "kind":"}",
               "text":"}",
-              "offset":215,
+              "offset":210,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"end_of_line","text":"\n","offset":216,"width":1}],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":211,"width":1}],
               "line_number":9
             }
           }
@@ -660,7 +660,7 @@
           "token":{
             "kind":"end_of_file",
             "text":"",
-            "offset":217,
+            "offset":212,
             "leading_width":0,
             "width":0,
             "trailing_width":0,

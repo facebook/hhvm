@@ -9,7 +9,7 @@ async function gena<Tk as arraykey, Tv>(
 ): Awaitable<darray<Tk, Tv>> { throw new Exception("A"); }
 
 async function foo(): Awaitable<darray<string, int>> {
-  $gens = darray[
+  $gens = dict[
     'start' => async { return 42; }
   ];
   $x = null;
@@ -17,7 +17,7 @@ async function foo(): Awaitable<darray<string, int>> {
     $x = id(await gena($gens));
   } catch (Exception $e) {}
   if ($x === null) {
-    $x = darray[];
+    $x = dict[];
   }
   return $x;
 }

@@ -21,7 +21,7 @@ function foo():void {
   $x = generic_function();
   $x[0]->foo();
 
-  $a = varray[];
+  $a = vec[];
   $a[0]->foo();
 
   $x = new Inv();

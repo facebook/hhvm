@@ -1,6 +1,6 @@
 File "foreach_kv_list2.php", line 17, characters 9-10:
 Invalid argument (Typing[4110])
-File "foreach_kv_list2.php", line 12, characters 14-19:
-Expected `string`
-File "foreach_kv_list2.php", line 15, characters 24-24:
-But got `int`
+  File "foreach_kv_list2.php", line 12, characters 14-19:
+  Expected `string`
+  File "foreach_kv_list2.php", line 15, characters 18-18:
+  But got `int`

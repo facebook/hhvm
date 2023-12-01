@@ -4,5 +4,5 @@ File "explicit_type_collection_passing_darray2.php", line 8, characters 10-11:
 Invalid argument (Typing[4110])
   File "explicit_type_collection_passing_darray2.php", line 3, characters 24-29:
   Expected `string`
-  File "explicit_type_collection_passing_darray2.php", line 5, characters 8-30:
-  But got `arraykey` because type parameter `Tk` of `darray` could not be determined. Please add explicit type parameters to the invocation of `darray`
+  File "explicit_type_collection_passing_darray2.php", line 5, characters 8-28:
+  But got `arraykey` because type parameter `Tk` of `HH\dict` could not be determined. Please add explicit type parameters to the invocation of `HH\dict`

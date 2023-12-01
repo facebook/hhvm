@@ -6,7 +6,7 @@
  */
 
 function test(): ConstVector<ConstVector<darray<string, string>>> {
-  $v1 = Vector { Vector { darray[] } };
+  $v1 = Vector { Vector { dict[] } };
   $v2 = $v1[0];
   $v3 = $v2[0];
   $v3['aaa'] = 4;

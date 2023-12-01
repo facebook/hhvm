@@ -1,12 +1,12 @@
-File "call_in_static_dict_like_array.php", line 7, characters 36-41:
+File "call_in_static_dict_like_array.php", line 7, characters 34-39:
 Expected constant expression for initializer (Parsing[1002])
 File "call_in_static_dict_like_array.php", line 7, characters 17-18:
 Please add a type hint `public SomeType $x` (Naming[2001])
 File "call_in_static_dict_like_array.php", line 4, characters 26-26:
 Was expecting a return type hint (Typing[4030])
-File "call_in_static_dict_like_array.php", line 7, characters 36-39:
+File "call_in_static_dict_like_array.php", line 7, characters 34-37:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "call_in_static_dict_like_array.php", line 7, characters 22-42:
+  File "call_in_static_dict_like_array.php", line 7, characters 22-40:
   From this declaration, the context of this function body provides the capability set {}
   File "call_in_static_dict_like_array.php", line 4, characters 26-26:
   But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}

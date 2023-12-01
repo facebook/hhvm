@@ -1,5 +1,5 @@
 <?hh
 
 function test(): void {
-  varray["tingley", "meijer", "reeves"];
+  vec["tingley", "meijer", "reeves"];
 }

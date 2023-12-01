@@ -10,5 +10,5 @@
  */
 
 function foo(int $var): void {
-  $a = varray[&$var];
+  $a = vec[&$var];
 }

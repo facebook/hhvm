@@ -15,7 +15,7 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class StrIntrospectTest extends HackTest {
 
   public static function provideCompare(): varray<mixed> {
-    return varray[
+    return vec[
       tuple('foo', 'foo', 0),
       tuple('foo', 'Foo', 1),
       tuple('Foo', 'foo', -1),
@@ -39,7 +39,7 @@ final class StrIntrospectTest extends HackTest {
   }
 
   public static function provideCompareCI(): varray<mixed> {
-    return varray[
+    return vec[
       tuple('foo', 'foo', 0),
       tuple('foo', 'Foo', 0),
       tuple('Foo', 'foo', 0),
@@ -63,7 +63,7 @@ final class StrIntrospectTest extends HackTest {
   }
 
   public static function provideContains(): varray<mixed> {
-    return varray[
+    return vec[
       tuple('', '', 0, true),
       tuple('foo', '', 0, true),
       tuple('foo', '', 3, true),
@@ -89,7 +89,7 @@ final class StrIntrospectTest extends HackTest {
   }
 
   public static function provideContainsCI(): varray<mixed> {
-    return varray[
+    return vec[
       tuple('', '', 0, true),
       tuple('foo', '', 0, true),
       tuple('foo', '', 3, true),
@@ -133,7 +133,7 @@ final class StrIntrospectTest extends HackTest {
   }
 
   public static function provideEndsWith(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         '',
         '',
@@ -177,7 +177,7 @@ final class StrIntrospectTest extends HackTest {
   }
 
   public static function provideEndsWithCI(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         '',
         '',
@@ -221,7 +221,7 @@ final class StrIntrospectTest extends HackTest {
   }
 
   public static function provideIsEmpty(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(null, true),
       tuple('', true),
       tuple('0', false),
@@ -239,7 +239,7 @@ final class StrIntrospectTest extends HackTest {
   }
 
   public static function provideLength(): varray<mixed> {
-    return varray[
+    return vec[
       tuple('', 0),
       tuple('0', 1),
       tuple('hello', 5),
@@ -255,7 +255,7 @@ final class StrIntrospectTest extends HackTest {
   }
 
   public static function provideSearch(): varray<mixed> {
-    return varray[
+    return vec[
       tuple('', 'foo', 0, null),
       tuple('fooBar', 'oB', 0, 2),
       tuple('fooBar', 'oB', 3, null),
@@ -278,7 +278,7 @@ final class StrIntrospectTest extends HackTest {
   }
 
   public static function provideSearchCI(): varray<mixed> {
-    return varray[
+    return vec[
       tuple('', 'foo', 0, null),
       tuple('fooBar', 'oB', 0, 2),
       tuple('fooBar', 'oB', 3, null),
@@ -301,7 +301,7 @@ final class StrIntrospectTest extends HackTest {
   }
 
   public static function provideSearchLast(): varray<mixed> {
-    return varray[
+    return vec[
       tuple('foofoofoo', 'foo', 0, 6),
       tuple('foofoofoo', 'bar', 0, null),
       tuple('foobarbar', 'foo', 3, null),
@@ -344,7 +344,7 @@ final class StrIntrospectTest extends HackTest {
   }
 
   public static function provideStartsWith(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         '',
         '',
@@ -388,7 +388,7 @@ final class StrIntrospectTest extends HackTest {
   }
 
   public static function provideStartsWithCI(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         '',
         '',

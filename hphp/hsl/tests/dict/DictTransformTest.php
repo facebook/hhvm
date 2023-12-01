@@ -15,14 +15,14 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class DictTransformTest extends HackTest {
 
   public static function provideTestChunk(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Map {},
         10,
         vec[],
       ),
       tuple(
-        varray[0, 1, 2, 3, 4],
+        vec[0, 1, 2, 3, 4],
         2,
         vec[
           dict[
@@ -40,7 +40,7 @@ final class DictTransformTest extends HackTest {
       ),
       tuple(
         HackLibTestTraversables::getKeyedIterator(
-          darray['foo' => 'bar', 'baz' => 'qux'],
+          dict['foo' => 'bar', 'baz' => 'qux'],
         ),
         1,
         vec[
@@ -61,9 +61,9 @@ final class DictTransformTest extends HackTest {
   }
 
   public static function provideTestCountValues(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        varray[0, '0', 1, 3, 4, 1, 1, 3, '1'],
+        vec[0, '0', 1, 3, 4, 1, 1, 3, '1'],
         dict[
           0 => 1,
           '0' => 1,
@@ -96,9 +96,9 @@ final class DictTransformTest extends HackTest {
   }
 
   public static function provideTestFillKeys(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        darray[],
+        dict[],
         'foo',
         dict[],
       ),
@@ -228,9 +228,9 @@ final class DictTransformTest extends HackTest {
   }
 
   public static function provideTestFlip(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        darray[],
+        dict[],
         dict[],
       ),
       tuple(
@@ -268,7 +268,7 @@ final class DictTransformTest extends HackTest {
   }
 
   public static function provideTestFromKeys(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Set {},
         $x ==> $x,
@@ -288,7 +288,7 @@ final class DictTransformTest extends HackTest {
         ],
       ),
       tuple(
-        varray['the', 'quick', 'brown', 'fox'],
+        vec['the', 'quick', 'brown', 'fox'],
         $s ==> Str\length($s),
         dict[
           'the' => 3,
@@ -310,9 +310,9 @@ final class DictTransformTest extends HackTest {
   }
 
   public static function provideTestFromEntries(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        varray[
+        vec[
           tuple('foo', 1),
           tuple('bar', null),
           tuple('baz', false),
@@ -336,7 +336,7 @@ final class DictTransformTest extends HackTest {
         ],
       ),
       tuple(
-        HackLibTestTraversables::getIterator(varray[
+        HackLibTestTraversables::getIterator(vec[
           tuple('foo', 1),
           tuple('bar', null),
           tuple('baz', false),
@@ -359,9 +359,9 @@ final class DictTransformTest extends HackTest {
   }
 
   public static function provideTestFromValues(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        darray[],
+        dict[],
         $x ==> $x,
         dict[],
       ),
@@ -401,9 +401,9 @@ final class DictTransformTest extends HackTest {
   }
 
   public static function provideTestGroupBy(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        varray['the', 'quick', 'brown', 'fox', 'jumped', 'over', 'the', 'dog'],
+        vec['the', 'quick', 'brown', 'fox', 'jumped', 'over', 'the', 'dog'],
         $s ==> Str\length($s),
         dict[
           3 => vec['the', 'fox', 'the', 'dog'],
@@ -414,7 +414,7 @@ final class DictTransformTest extends HackTest {
       ),
       tuple(
         HackLibTestTraversables::getIterator(
-          varray['the', 'quick', 'brown', 'fox', 'jumped', 'over', 'the', 'dog'],
+          vec['the', 'quick', 'brown', 'fox', 'jumped', 'over', 'the', 'dog'],
         ),
         $x ==> Str\length($x) % 2 === 1 ? Str\length($x) : null,
         dict[
@@ -438,10 +438,10 @@ final class DictTransformTest extends HackTest {
   public static function provideTestMap(): varray<mixed> {
 
     $doubler = $x ==> $x * 2;
-    return varray[
+    return vec[
       // integer vecs
-      tuple(darray[], $doubler, dict[]),
-      tuple(varray[1], $doubler, dict[0 => 2]),
+      tuple(dict[], $doubler, dict[]),
+      tuple(vec[1], $doubler, dict[0 => 2]),
       tuple(
         Vec\range(10, 1000),
         $doubler,
@@ -449,16 +449,16 @@ final class DictTransformTest extends HackTest {
       ),
 
       // string vecs
-      tuple(varray['a'], $x ==> $x. ' buzz', dict[0 => 'a buzz']),
+      tuple(vec['a'], $x ==> $x. ' buzz', dict[0 => 'a buzz']),
       tuple(
-        varray['a', 'bee', 'a bee'],
+        vec['a', 'bee', 'a bee'],
         $x ==> $x. ' buzz',
-        dict(varray['a buzz', 'bee buzz', 'a bee buzz'])
+        dict(vec['a buzz', 'bee buzz', 'a bee buzz'])
       ),
 
       // non-vec: Hack Collections and Hack Arrays
       tuple(
-        dict(darray[
+        dict(dict[
           'donald' => 'duck',
           'daffy' => 'duck',
           'mickey' => 'mouse',
@@ -476,7 +476,7 @@ final class DictTransformTest extends HackTest {
       tuple(
         Vector {10, 20},
         $x ==> $x * 2,
-        dict(varray[20, 40]),
+        dict(vec[20, 40]),
       ),
 
       tuple(
@@ -492,12 +492,12 @@ final class DictTransformTest extends HackTest {
       ),
 
       tuple(
-        HackLibTestTraversables::getIterator(varray[1, 2, 3]),
+        HackLibTestTraversables::getIterator(vec[1, 2, 3]),
         $x ==> $x * 2,
-        dict(varray[2, 4, 6]),
+        dict(vec[2, 4, 6]),
       ),
       tuple(
-        HackLibTestTraversables::getKeyedIterator(darray[10 => 1, 20 => 2, 30 => 3]),
+        HackLibTestTraversables::getKeyedIterator(dict[10 => 1, 20 => 2, 30 => 3]),
         $x ==> $x * 2,
         dict[10 => 2, 20 => 4, 30 => 6],
       ),
@@ -514,7 +514,7 @@ final class DictTransformTest extends HackTest {
   }
 
   public static function provideTestMapKeys(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         dict[
           'the' => 'the',
@@ -544,7 +544,7 @@ final class DictTransformTest extends HackTest {
         ],
       ),
       tuple(
-        HackLibTestTraversables::getKeyedIterator(darray[
+        HackLibTestTraversables::getKeyedIterator(dict[
           'foo' => 'foo',
           'bar' => 'bar',
           'baz' => 'baz',
@@ -569,9 +569,9 @@ final class DictTransformTest extends HackTest {
   }
 
   public static function provideTestMapWithKey(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        darray[],
+        dict[],
         ($a, $b) ==> null,
         dict[],
       ),
@@ -609,7 +609,7 @@ final class DictTransformTest extends HackTest {
   }
 
   public static function provideTestPull(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Vector {'the', 'quick', 'brown', 'fox'},
         $x ==> $x,
@@ -621,7 +621,7 @@ final class DictTransformTest extends HackTest {
       ),
       tuple(
         HackLibTestTraversables::getIterator(
-          varray[1, 3, 5, 7, 9],
+          vec[1, 3, 5, 7, 9],
         ),
         ($v) ==> $v * $v,
         $k ==> (string)$k,
@@ -648,7 +648,7 @@ final class DictTransformTest extends HackTest {
   }
 
   public static function provideTestPullWithKey(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Vector {'the', 'quick', 'brown', 'fox'},
         ($k, $v) ==> $k,
@@ -661,7 +661,7 @@ final class DictTransformTest extends HackTest {
         ],
       ),
       tuple(
-        darray[10 => 'foo', 20 => 'food', 30 => 'fool', 40 => 'rude'],
+        dict[10 => 'foo', 20 => 'food', 30 => 'fool', 40 => 'rude'],
         ($k, $v) ==> $v.(string)$k,
         ($k, $v) ==> Str\slice($v, 0, 3),
         dict[

@@ -10,7 +10,7 @@ For example, in HHVM 4.36, invalid array keys are accepted and
 silently coerced to an `arraykey`.
 
 ```Hack no-extract
-$x = darray[false => 123];
+$x = dict[false => 123];
 var_dump(array_keys($x)[0]);
 // int(0), not `bool(false)`
 ```
@@ -28,7 +28,7 @@ A `varray` is an ordered, iterable data structure.
 ```Hack no-extract
 // Creating a varray.
 function get_items(): varray<string> {
-  $items = varray['a', 'b', 'c'];
+  $items = vec['a', 'b', 'c'];
   return $items;
 }
 
@@ -43,8 +43,8 @@ idx($items, 3, 'default'); // 'default'
 
 // Modifying items. These operations set $items
 // to a modified copy, and do not modify the original value.
-$items[0] = 'xx'; // varray['xx', 'b', 'c']
-$items[] = 'd'; // varray['xx', 'b', 'c', 'd']
+$items[0] = 'xx'; // vec['xx', 'b', 'c']
+$items[] = 'd'; // vec['xx', 'b', 'c', 'd']
 
 // Getting the length.
 C\count($items); // 4
@@ -60,12 +60,12 @@ foreach ($items as $index => $item) {
 }
 
 // Equality checks.
-varray[1] === varray[1]; // true
-varray[1, 2] === varray[2, 1]; // false
+vec[1] === vec[1]; // true
+vec[1, 2] === vec[2, 1]; // false
 
 // Converting from an Iterable.
-varray(vec[10, 11]); // varray[10, 11]
-varray(keyset[10, 11]); // varray[10, 11]
+varray(vec[10, 11]); // vec[10, 11]
+varray(keyset[10, 11]); // vec[10, 11]
 ```
 
 ## `darray`
@@ -81,7 +81,7 @@ A `darray` is an ordered key-value data structure.
 ```Hack no-extract
 // Creating a darray.
 function get_items(): darray<string, int> {
-  $items = darray['a' => 1, 'b' => 3];
+  $items = dict['a' => 1, 'b' => 3];
   return $items;
 }
 
@@ -96,15 +96,15 @@ idx($items, 'z', 'default'); // 'default'
 
 // Inserting, updating or removing values in a darray. These operations
 // set $items to a modified copy, and do not modify the original value.
-$items['a'] = 42; // darray['a' => 42, 'b' => 3]
-$items['z'] = 100; // darray['a' => 42, 'b' => 3, 'z' => 100]
-unset($items['b']); // darray['a' => 42, 'z' => 100]
+$items['a'] = 42; // dict['a' => 42, 'b' => 3]
+$items['z'] = 100; // dict['a' => 42, 'b' => 3, 'z' => 100]
+unset($items['b']); // dict['a' => 42, 'z' => 100]
 
 // Getting the keys.
-Vec\keys(darray['a' => 1, 'b' => 3]); // vec['a', 'b']
+Vec\keys(dict['a' => 1, 'b' => 3]); // vec['a', 'b']
 
 // Getting the values.
-vec(darray['a' => 1, 'b' => 3]); // vec[1, 3]
+vec(dict['a' => 1, 'b' => 3]); // vec[1, 3]
 
 // Getting the length.
 C\count($items); // 2
@@ -124,12 +124,12 @@ foreach ($items as $key => $Value) {
 }
 
 // Equality checks. === returns false if the order does not match.
-darray[] === darray[]; // true
-darray[0 => 10, 1 => 11] === darray[1 => 11, 0 => 10]; // false
+dict[] === dict[]; // true
+dict[0 => 10, 1 => 11] === dict[1 => 11, 0 => 10]; // false
 
 // Converting from an Iterable.
-darray(vec['a', 'b']); // darray[0 => 'a', 1 => 'b']
-darray(Map {'a' => 5}); // darray['a' => 5]
+darray(vec['a', 'b']); // dict[0 => 'a', 1 => 'b']
+darray(Map {'a' => 5}); // dict['a' => 5]
 ```
 
 ## `varray_or_darray`
@@ -141,9 +141,9 @@ types, and should be avoided when possible.
 ```Hack
 function get_items(bool $b): varray_or_darray<int, string> {
   if ($b) {
-    return varray['a', 'b'];
+    return vec['a', 'b'];
   } else {
-    return darray[5 => 'c'];
+    return dict[5 => 'c'];
   }
 }
 ```

@@ -6,7 +6,7 @@ function maybe<T>(Container<T> $x): ?T {
 
 function test(): void {
   // Create Recursive Type Var
-  $arr = darray[];
+  $arr = dict[];
   for ($i = 1; $i < 10; $i++) {
     $arr[$i] = maybe($arr);
   }

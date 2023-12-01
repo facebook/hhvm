@@ -5,7 +5,7 @@
  * and error message points to [...] as the reason
  */
 function test(int $i): void {
-  $a = darray[];
+  $a = dict[];
   $a[$i] = 'aaa';
   f($a);
 }

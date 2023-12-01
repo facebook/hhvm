@@ -1,10 +1,10 @@
 File "test_array9.php", line 16, characters 16-30:
 No instance method `unknownFunction` in `A` (Typing[4053])
-  File "test_array9.php", line 15, characters 45-45:
+  File "test_array9.php", line 15, characters 43-43:
   This is why I think it is an object of type A
   File "test_array9.php", line 12, characters 7-7:
   Declaration of `A` is here
 File "test_array9.php", line 16, characters 16-30:
 You are trying to access the method `unknownFunction` but this is an int (Typing[4062])
-  File "test_array9.php", line 15, characters 26-26:
+  File "test_array9.php", line 15, characters 24-24:
   Definition is here

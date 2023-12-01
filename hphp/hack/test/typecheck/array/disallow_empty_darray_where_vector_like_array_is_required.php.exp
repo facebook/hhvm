@@ -1,6 +1,6 @@
-File "disallow_empty_darray_where_vector_like_array_is_required.php", line 4, characters 10-17:
+File "disallow_empty_darray_where_vector_like_array_is_required.php", line 4, characters 10-15:
 Invalid return type (Typing[4110])
   File "disallow_empty_darray_where_vector_like_array_is_required.php", line 3, characters 18-31:
   Expected `vec<string>`
-  File "disallow_empty_darray_where_vector_like_array_is_required.php", line 4, characters 10-17:
+  File "disallow_empty_darray_where_vector_like_array_is_required.php", line 4, characters 10-15:
   But got `dict<nothing, nothing>`

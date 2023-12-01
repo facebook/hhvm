@@ -78,25 +78,25 @@ File "arrays.php", line 65, characters 20-21:
 Invalid argument (Typing[4110])
   File "arrays.php", line 155, characters 34-36:
   Expected `int`
-  File "arrays.php", line 59, characters 17-18:
+  File "arrays.php", line 59, characters 14-15:
   But got `string`
 File "arrays.php", line 66, characters 23-24:
 Invalid argument (Typing[4110])
   File "arrays.php", line 156, characters 37-42:
   Expected `string`
-  File "arrays.php", line 57, characters 17-17:
+  File "arrays.php", line 57, characters 14-14:
   But got `int`
 File "arrays.php", line 90, characters 20-21:
 Invalid argument (Typing[4110])
   File "arrays.php", line 155, characters 34-36:
   Expected `int`
-  File "arrays.php", line 84, characters 17-18:
+  File "arrays.php", line 84, characters 14-15:
   But got `string`
 File "arrays.php", line 91, characters 23-24:
 Invalid argument (Typing[4110])
   File "arrays.php", line 156, characters 37-42:
   Expected `string`
-  File "arrays.php", line 82, characters 17-17:
+  File "arrays.php", line 82, characters 14-14:
   But got `int`
 File "arrays.php", line 4, characters 16-16:
 Wrong type hint (Typing[4338])

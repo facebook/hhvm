@@ -32,7 +32,7 @@ class C extends B {
         parent::__construct($this->x);
         break;
       case 2:
-        $args = varray[1];
+        $args = vec[1];
         parent::__construct(...$args);
         break;
     }

@@ -14,6 +14,6 @@ class B extends A {}
 class C extends A {}
 
 function test(): darray<int, A> {
-  $v = darray[0 => new A(), 1 => new B(), 2 => new C()];
+  $v = dict[0 => new A(), 1 => new B(), 2 => new C()];
   return $v;
 }

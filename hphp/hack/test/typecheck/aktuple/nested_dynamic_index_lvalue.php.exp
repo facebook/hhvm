@@ -1,6 +1,6 @@
 File "nested_dynamic_index_lvalue.php", line 11, characters 15-22:
 Invalid argument (Typing[4110])
-File "nested_dynamic_index_lvalue.php", line 14, characters 22-27:
-Expected `string`
-File "nested_dynamic_index_lvalue.php", line 9, characters 24-24:
-But got `int`
+  File "nested_dynamic_index_lvalue.php", line 14, characters 22-27:
+  Expected `string`
+  File "nested_dynamic_index_lvalue.php", line 9, characters 21-21:
+  But got `int`

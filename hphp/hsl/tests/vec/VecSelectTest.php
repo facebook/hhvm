@@ -15,17 +15,17 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class VecSelectTest extends HackTest {
 
   public static function provideTestDiff(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        varray[],
-        varray[
-          darray[],
+        vec[],
+        vec[
+          dict[],
         ],
         vec[],
       ),
       tuple(
         new Vector(Vec\range(0, 20)),
-        varray[
+        vec[
           Set {1, 3, 5},
           Map {'foo' => 7, 'bar' => 9},
           HackLibTestTraversables::getIterator(Vec\range(11, 30)),
@@ -49,15 +49,15 @@ final class VecSelectTest extends HackTest {
   }
 
   public static function provideTestDiffBy(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        varray['the', 'quick', 'brown', 'fox'],
-        varray[],
+        vec['the', 'quick', 'brown', 'fox'],
+        vec[],
         $x ==> $x,
         vec['the', 'quick', 'brown', 'fox'],
       ),
       tuple(
-        varray[],
+        vec[],
         Vector {'the', 'quick', 'brown', 'fox'},
         $x ==> $x,
         vec[],
@@ -65,7 +65,7 @@ final class VecSelectTest extends HackTest {
       tuple(
         Set {'plum', 'port', 'paste', 'pun', 'promise'},
         HackLibTestTraversables::getIterator(
-          varray['power', 'push', 'pin', 'pygmy'],
+          vec['power', 'push', 'pin', 'pygmy'],
         ),
         ($str) ==> Str\slice($str, 0, 2),
         vec['plum', 'paste', 'promise'],
@@ -85,7 +85,7 @@ final class VecSelectTest extends HackTest {
   }
 
   public static function provideDrop(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         vec[],
         5,
@@ -124,7 +124,7 @@ final class VecSelectTest extends HackTest {
   }
 
   public static function provideTestFilter(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         dict[],
         $x ==> true,
@@ -168,15 +168,15 @@ final class VecSelectTest extends HackTest {
   }
 
   public function testFilterWithoutPredicate(): void {
-    expect(Vec\filter(varray[
+    expect(Vec\filter(vec[
       0, 3, null, 5, false, 40, '', '0', 'win!',
     ]))->toEqual(vec[3, 5, 40, 'win!']);
   }
 
   public static function provideTestFilterNulls(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        varray[null, null, null],
+        vec[null, null, null],
         vec[],
       ),
       tuple(
@@ -198,12 +198,12 @@ final class VecSelectTest extends HackTest {
         vec['foo', 'bar', 'baz'],
       ),
       tuple(
-        HackLibTestTraversables::getKeyedIterator(darray[
+        HackLibTestTraversables::getKeyedIterator(dict[
           1 => null,
-          2 => varray[],
+          2 => vec[],
           3 => '0',
         ]),
-        vec[varray[], '0'],
+        vec[vec[], '0'],
       ),
     ];
   }
@@ -217,7 +217,7 @@ final class VecSelectTest extends HackTest {
   }
 
   public static function provideTestFilterWithKey(): darray<string, mixed> {
-    return darray[
+    return dict[
       'All elements selected' => tuple(
         vec['the', 'quick', 'brown', 'fox', 'jumped'],
         ($key, $value) ==> true,
@@ -259,17 +259,17 @@ final class VecSelectTest extends HackTest {
   }
 
   public static function provideTestIntersect(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Vec\range(0, 1000),
-        varray[],
-        varray[],
+        vec[],
+        vec[],
         vec[],
       ),
       tuple(
         Vec\range(1, 10),
         Vec\range(1, 5),
-        varray[
+        vec[
           Vec\range(2, 6),
           Vec\range(3, 7),
         ],
@@ -278,13 +278,13 @@ final class VecSelectTest extends HackTest {
       tuple(
         Set {},
         Vec\range(1, 100),
-        varray[],
+        vec[],
         vec[],
       ),
       tuple(
         Vec\range(1, 1000),
         Map {},
-        varray[
+        vec[
           Set {},
           Vector {},
         ],
@@ -293,15 +293,15 @@ final class VecSelectTest extends HackTest {
       tuple(
         new Vector(Vec\range(1, 100)),
         Map {1 => 2, 39 => 40},
-        varray[
+        vec[
           HackLibTestTraversables::getIterator(Vec\range(0, 40)),
         ],
         vec[2, 40],
       ),
       tuple(
-        varray[3, 4, 4, 5],
-        varray[3, 4],
-        varray[],
+        vec[3, 4, 4, 5],
+        vec[3, 4],
+        vec[],
         vec[3, 4, 4],
       ),
     ];
@@ -318,9 +318,9 @@ final class VecSelectTest extends HackTest {
   }
 
   public static function provideTestKeys(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        darray[
+        dict[
           'foo' => null,
           'bar' => null,
           'baz' => null,
@@ -347,9 +347,9 @@ final class VecSelectTest extends HackTest {
         vec[0, 1, 2, 3],
       ),
       tuple(
-        HackLibTestTraversables::getKeyedIterator(darray[
+        HackLibTestTraversables::getKeyedIterator(dict[
           1 => null,
-          2 => varray[],
+          2 => vec[],
           3 => '0',
         ]),
         vec[1, 2, 3],
@@ -366,7 +366,7 @@ final class VecSelectTest extends HackTest {
   }
 
   public static function provideTestSample(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Vec\range(0, 5),
         6,
@@ -398,7 +398,7 @@ final class VecSelectTest extends HackTest {
   }
 
   public static function provideTestSlice(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Vec\range(0, 5),
         6,
@@ -474,7 +474,7 @@ final class VecSelectTest extends HackTest {
   }
 
   public static function provideTake(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         vec[],
         5,
@@ -521,14 +521,14 @@ final class VecSelectTest extends HackTest {
   }
 
   public static function provideTestUnique(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        varray['the', 'quick', 'brown', 'fox', 'jumped', 'over', 'the', 'dog'],
+        vec['the', 'quick', 'brown', 'fox', 'jumped', 'over', 'the', 'dog'],
         vec['the', 'quick', 'brown', 'fox', 'jumped', 'over', 'dog'],
       ),
       tuple(
         HackLibTestTraversables::getIterator(
-          varray[1, 2, 3, 2, 3, 4, 5, 6],
+          vec[1, 2, 3, 2, 3, 4, 5, 6],
         ),
         vec[1, 2, 3, 4, 5, 6],
       ),
@@ -544,9 +544,9 @@ final class VecSelectTest extends HackTest {
   }
 
   public static function provideTestUniqueBy(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        varray[
+        vec[
           'plum',
           'port',
           'power',
@@ -561,7 +561,7 @@ final class VecSelectTest extends HackTest {
       ),
       tuple(
         HackLibTestTraversables::getIterator(
-          varray[
+          vec[
             'plum',
             'port',
             'power',

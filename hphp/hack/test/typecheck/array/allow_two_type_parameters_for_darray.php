@@ -1,5 +1,5 @@
 <?hh
 
 function test(): darray<string, int> {
-  return darray["tingley" => 0, "meijer" => 1, "dreeves" => 2];
+  return dict["tingley" => 0, "meijer" => 1, "dreeves" => 2];
 }

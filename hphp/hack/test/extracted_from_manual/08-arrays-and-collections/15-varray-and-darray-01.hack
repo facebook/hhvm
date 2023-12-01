@@ -2,8 +2,8 @@
 // @codegen-command : buck run fbcode//hphp/hack/src/hh_manual:hh_manual extract fbcode/hphp/hack/manual/hack/
 function get_items(bool $b): varray_or_darray<int, string> {
   if ($b) {
-    return varray['a', 'b'];
+    return vec['a', 'b'];
   } else {
-    return darray[5 => 'c'];
+    return dict[5 => 'c'];
   }
 }

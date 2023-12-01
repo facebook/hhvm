@@ -42,13 +42,13 @@ Invalid index type for this vec (Typing[4324])
   But got `float`
 File "invalid_arraykey.php", line 6, characters 3-14:
 This value is not a valid key type for this container (Typing[4371])
-  File "invalid_arraykey.php", line 4, characters 8-15:
+  File "invalid_arraykey.php", line 4, characters 8-13:
   This container is an object of type dict<string, int>
   File "invalid_arraykey.php", line 6, characters 6-9:
   Null cannot be used as a key for an object of type dict<string, int>
 File "invalid_arraykey.php", line 7, characters 3-13:
 This value is not a valid key type for this container (Typing[4371])
-  File "invalid_arraykey.php", line 4, characters 8-15:
+  File "invalid_arraykey.php", line 4, characters 8-13:
   This container is an object of type dict<?string, int>
   File "invalid_arraykey.php", line 7, characters 6-8:
   A float cannot be used as a key for an object of type dict<?string, int>

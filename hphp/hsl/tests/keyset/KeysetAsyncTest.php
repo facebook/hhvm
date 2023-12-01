@@ -15,7 +15,7 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class KeysetAsyncTest extends HackTest {
 
   public static function provideTestFromAsync(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Vector {
           async {return 'the';},
@@ -33,7 +33,7 @@ final class KeysetAsyncTest extends HackTest {
         keyset[1, 2],
       ),
       tuple(
-        HackLibTestTraversables::getIterator(varray[
+        HackLibTestTraversables::getIterator(vec[
           async {return 'the';},
           async {return 'quick';},
           async {return 'brown';},
@@ -54,7 +54,7 @@ final class KeysetAsyncTest extends HackTest {
   }
 
   public static function provideTestMapAsync(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         keyset[1,2,3],
         async ($num) ==> $num * 2,
@@ -66,7 +66,7 @@ final class KeysetAsyncTest extends HackTest {
         keyset[2,4,6],
       ),
       tuple(
-        varray['dan', 'danny', 'daniel'],
+        vec['dan', 'danny', 'daniel'],
         async ($word) ==> Str\reverse($word),
         keyset['nad', 'ynnad', 'leinad'],
       ),
@@ -91,7 +91,7 @@ final class KeysetAsyncTest extends HackTest {
   )> {
     return vec[
       tuple(
-        darray[
+        dict[
           2 => 'two',
           4 => 'four',
           6 => 'six',
@@ -122,9 +122,9 @@ final class KeysetAsyncTest extends HackTest {
     $actual = await Keyset\filter_async($traversable, $async_predicate);
     expect($actual)->toEqual($expected);
   }
-   
+
   public static function provideTestPartitionAsync(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Vec\concat(Vec\range(1, 10), Vec\range(1, 10)),
         async $n ==> $n % 2 === 0,
@@ -137,7 +137,7 @@ final class KeysetAsyncTest extends HackTest {
       ),
     ];
   }
- 
+
   <<DataProvider('provideTestPartitionAsync')>>
   public async function testPartitionAsync<Tv as arraykey>(
     Container<Tv> $container,

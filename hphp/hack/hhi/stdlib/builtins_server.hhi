@@ -24,9 +24,9 @@ namespace {
   <<__PHPStdLib>>
   function pagelet_server_task_start(
     string $url,
-    darray<arraykey, mixed> $headers = darray[],
+    darray<arraykey, mixed> $headers = dict[],
     string $post_data = "",
-    darray<arraykey, mixed> $files = darray[],
+    darray<arraykey, mixed> $files = dict[],
     int $timeout_seconds = 0,
   ): resource;
   <<__PHPStdLib>>

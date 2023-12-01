@@ -1,6 +1,6 @@
-File "disallow_varray_with_wrong_value_type_where_varray_or_darray_is_required.php", line 4, characters 10-21:
+File "disallow_varray_with_wrong_value_type_where_varray_or_darray_is_required.php", line 4, characters 10-18:
 Invalid return type (Typing[4110])
-File "disallow_varray_with_wrong_value_type_where_varray_or_darray_is_required.php", line 3, characters 35-40:
-Expected `string`
-File "disallow_varray_with_wrong_value_type_where_varray_or_darray_is_required.php", line 4, characters 17-20:
-But got `bool`
+  File "disallow_varray_with_wrong_value_type_where_varray_or_darray_is_required.php", line 3, characters 35-40:
+  Expected `string`
+  File "disallow_varray_with_wrong_value_type_where_varray_or_darray_is_required.php", line 4, characters 14-17:
+  But got `bool`

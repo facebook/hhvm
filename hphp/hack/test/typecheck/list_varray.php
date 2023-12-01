@@ -10,7 +10,7 @@
  */
 
 function test(): int {
-  list($x, $y) = varray[1, 2];
+  list($x, $y) = vec[1, 2];
   return $x;
 }
 

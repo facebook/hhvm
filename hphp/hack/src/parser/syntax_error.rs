@@ -1250,3 +1250,6 @@ pub fn cross_package_wrong_arity(count: usize) -> Error {
 pub const expected_bar_or_semicolon: Error = Cow::Borrowed(
     "Either the token `|` or `;` is expected here. Use `|` to specify additional variant types for this case type or use `;` to terminate the declaration.",
 );
+
+pub const varray_darray_banned: Error =
+    Cow::Borrowed("varray and darray are obsolete. Use vec and dict instead.");

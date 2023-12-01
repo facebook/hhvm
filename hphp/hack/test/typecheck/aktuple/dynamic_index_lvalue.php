@@ -6,7 +6,7 @@
  */
 
 function test(int $key): void {
-  $a = varray[4, 'aaa'];
+  $a = vec[4, 'aaa'];
   $a[$key] = 4;
   hh_show($a);
   take_string($a[1]);

@@ -1,6 +1,6 @@
-File "disallow_incompatible_type_parameter_for_varray.php", line 4, characters 10-21:
+File "disallow_incompatible_type_parameter_for_varray.php", line 4, characters 10-18:
 Some elements in this collection are incompatible (Typing[4110])
   File "disallow_incompatible_type_parameter_for_varray.php", line 3, characters 25-27:
   Expected `int`
-  File "disallow_incompatible_type_parameter_for_varray.php", line 4, characters 17-20:
+  File "disallow_incompatible_type_parameter_for_varray.php", line 4, characters 14-17:
   But got `bool`

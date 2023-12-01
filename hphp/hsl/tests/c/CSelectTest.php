@@ -18,7 +18,7 @@ final class CSelectTest extends HackTest {
   ): vec<(Traversable<mixed>, (function(nothing): bool), mixed)> {
     return vec[
       tuple(
-        varray[],
+        vec[],
         $x ==> $x,
         null,
       ),
@@ -83,9 +83,9 @@ final class CSelectTest extends HackTest {
   }
 
   public static function provideTestFindKey(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        varray[],
+        vec[],
         $x ==> $x,
         null,
       ),
@@ -116,9 +116,9 @@ final class CSelectTest extends HackTest {
   }
 
   public static function provideTestFirst(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        varray[],
+        vec[],
         null,
       ),
       tuple(
@@ -144,7 +144,7 @@ final class CSelectTest extends HackTest {
   }
 
   public static function provideTestFirstx(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         HackLibTestTraversables::getIterator(Vec\range(1, 5)),
         1,
@@ -171,7 +171,7 @@ final class CSelectTest extends HackTest {
   ): vec<(Traversable<nothing>, classname<Exception>)> {
     return vec[
       tuple(
-        varray[],
+        vec[],
         InvariantException::class,
       ),
     ];
@@ -190,15 +190,15 @@ final class CSelectTest extends HackTest {
   ): vec<(KeyedTraversable<mixed, mixed>, mixed)> {
     return vec[
       tuple(
-        varray[],
+        vec[],
         null,
       ),
       tuple(
-        darray[1 => null],
+        dict[1 => null],
         1,
       ),
       tuple(
-        varray[1],
+        vec[1],
         0,
       ),
       tuple(
@@ -226,14 +226,14 @@ final class CSelectTest extends HackTest {
         3,
       ),
       tuple(
-        HackLibTestTraversables::getKeyedIterator(darray[
+        HackLibTestTraversables::getKeyedIterator(dict[
           'foo' => 'bar',
           'baz' => 'qux',
         ]),
         'foo',
       ),
       tuple(
-        HackLibTestTraversables::getKeyedIterator(varray[]),
+        HackLibTestTraversables::getKeyedIterator(vec[]),
         null,
       ),
       tuple(
@@ -258,11 +258,11 @@ final class CSelectTest extends HackTest {
   ): vec<(KeyedTraversable<mixed, mixed>, mixed)> {
     return vec[
       tuple(
-        darray[1 => null],
+        dict[1 => null],
         1,
       ),
       tuple(
-        varray[1],
+        vec[1],
         0,
       ),
       tuple(
@@ -286,7 +286,7 @@ final class CSelectTest extends HackTest {
         3,
       ),
       tuple(
-        HackLibTestTraversables::getKeyedIterator(darray[
+        HackLibTestTraversables::getKeyedIterator(dict[
           'foo' => 'bar',
           'baz' => 'qux',
         ]),
@@ -314,7 +314,7 @@ final class CSelectTest extends HackTest {
   ): vec<(KeyedTraversable<mixed, mixed>, classname<Exception>)> {
     return vec[
       tuple(
-        varray[],
+        vec[],
         InvariantException::class,
       ),
       tuple(
@@ -322,7 +322,7 @@ final class CSelectTest extends HackTest {
         InvariantException::class,
       ),
       tuple(
-        HackLibTestTraversables::getKeyedIterator(varray[]),
+        HackLibTestTraversables::getKeyedIterator(vec[]),
         InvariantException::class,
       ),
       tuple(
@@ -346,11 +346,11 @@ final class CSelectTest extends HackTest {
   public static function provideTestLast(): vec<(Traversable<mixed>, mixed)> {
     return vec[
       tuple(
-        varray[],
+        vec[],
         null,
       ),
       tuple(
-        varray[null],
+        vec[null],
         null,
       ),
       tuple(
@@ -394,11 +394,11 @@ final class CSelectTest extends HackTest {
         5,
       ),
       tuple(
-        HackLibTestTraversables::getIterator(varray[]),
+        HackLibTestTraversables::getIterator(vec[]),
         null,
       ),
       tuple(
-        HackLibTestTraversables::getIterator(varray[null]),
+        HackLibTestTraversables::getIterator(vec[null]),
         null,
       ),
       tuple(
@@ -419,7 +419,7 @@ final class CSelectTest extends HackTest {
   public static function provideTestLastx(): vec<(Traversable<mixed>, mixed)> {
     return vec[
       tuple(
-        varray[null],
+        vec[null],
         null,
       ),
       tuple(
@@ -459,7 +459,7 @@ final class CSelectTest extends HackTest {
         5,
       ),
       tuple(
-        HackLibTestTraversables::getIterator(varray[null]),
+        HackLibTestTraversables::getIterator(vec[null]),
         null,
       ),
       tuple(
@@ -481,7 +481,7 @@ final class CSelectTest extends HackTest {
   ): vec<(Traversable<mixed>, classname<Exception>)> {
     return vec[
       tuple(
-        varray[],
+        vec[],
         InvariantException::class,
       ),
       tuple(
@@ -489,7 +489,7 @@ final class CSelectTest extends HackTest {
         InvariantException::class,
       ),
       tuple(
-        HackLibTestTraversables::getIterator(varray[]),
+        HackLibTestTraversables::getIterator(vec[]),
         InvariantException::class,
       ),
     ];
@@ -508,15 +508,15 @@ final class CSelectTest extends HackTest {
   ): vec<(KeyedTraversable<mixed, mixed>, mixed)> {
     return vec[
       tuple(
-        varray[],
+        vec[],
         null
       ),
       tuple(
-        darray['' => null],
+        dict['' => null],
         '',
       ),
       tuple(
-        darray[1 => null],
+        dict[1 => null],
         1,
       ),
       tuple(
@@ -552,15 +552,15 @@ final class CSelectTest extends HackTest {
         4,
       ),
       tuple(
-        HackLibTestTraversables::getKeyedIterator(darray[3 => 13, 4 => 14]),
+        HackLibTestTraversables::getKeyedIterator(dict[3 => 13, 4 => 14]),
         4,
       ),
       tuple(
-        HackLibTestTraversables::getKeyedIterator(varray[]),
+        HackLibTestTraversables::getKeyedIterator(vec[]),
         null,
       ),
       tuple(
-        HackLibTestTraversables::getKeyedIterator(darray['' => null]),
+        HackLibTestTraversables::getKeyedIterator(dict['' => null]),
         '',
       ),
       tuple(
@@ -585,11 +585,11 @@ final class CSelectTest extends HackTest {
   ): vec<(KeyedTraversable<mixed, mixed>, mixed)> {
     return vec[
       tuple(
-        darray['' => null],
+        dict['' => null],
         '',
       ),
       tuple(
-        darray[1 => null],
+        dict[1 => null],
         1,
       ),
       tuple(
@@ -621,11 +621,11 @@ final class CSelectTest extends HackTest {
         4,
       ),
       tuple(
-        HackLibTestTraversables::getKeyedIterator(darray[3 => 13, 4 => 14]),
+        HackLibTestTraversables::getKeyedIterator(dict[3 => 13, 4 => 14]),
         4,
       ),
       tuple(
-        HackLibTestTraversables::getKeyedIterator(darray['' => null]),
+        HackLibTestTraversables::getKeyedIterator(dict['' => null]),
         '',
       ),
       tuple(
@@ -650,7 +650,7 @@ final class CSelectTest extends HackTest {
   ): vec<(KeyedTraversable<mixed, mixed>, classname<Exception>)> {
     return vec[
       tuple(
-        varray[],
+        vec[],
         InvariantException::class,
       ),
       tuple(
@@ -658,7 +658,7 @@ final class CSelectTest extends HackTest {
         InvariantException::class,
       ),
       tuple(
-        HackLibTestTraversables::getKeyedIterator(varray[]),
+        HackLibTestTraversables::getKeyedIterator(vec[]),
         InvariantException::class,
       ),
       tuple(
@@ -687,7 +687,7 @@ final class CSelectTest extends HackTest {
         null,
       ),
       tuple(
-        varray[],
+        vec[],
         null,
       ),
       tuple(
@@ -739,7 +739,7 @@ final class CSelectTest extends HackTest {
   ): vec<(Traversable<mixed>, classname<Exception>)> {
     return vec[
       tuple(
-        varray[],
+        vec[],
         InvariantException::class,
       ),
       tuple(
@@ -797,7 +797,7 @@ final class CSelectTest extends HackTest {
       tuple(vec[], vec[], null),
       tuple(vec[null], vec[], null),
       tuple(keyset['apple', 'banana'], keyset['apple'], 'banana'),
-      tuple(varray[1, 2, 3], varray[1, 2], 3),
+      tuple(vec[1, 2, 3], vec[1, 2], 3),
       tuple(dict['a' => 1, 'b' => 2], dict['a' => 1], 2),
       tuple(Vector {1, 2, 3}, Vector {1, 2}, 3),
       tuple(Set {}, Set {}, null),
@@ -826,7 +826,7 @@ final class CSelectTest extends HackTest {
       tuple(vec[1], vec[], 1),
       tuple(vec[1, 2, 3], vec[1, 2], 3),
       tuple(keyset['apple', 'banana'], keyset['apple'], 'banana'),
-      tuple(varray[1, 2, 3], varray[1, 2], 3),
+      tuple(vec[1, 2, 3], vec[1, 2], 3),
       tuple(dict['a' => 1, 'b' => 2], dict['a' => 1], 2),
       tuple(Vector {1, 2, 3}, Vector {1, 2}, 3),
       tuple(vec[null], vec[], null),
@@ -878,7 +878,7 @@ final class CSelectTest extends HackTest {
       tuple(vec[], vec[], null),
       tuple(vec[null], vec[], null),
       tuple(keyset['apple', 'banana'], keyset['banana'], 'apple'),
-      tuple(varray[1, 2, 3], varray[2, 3], 1),
+      tuple(vec[1, 2, 3], vec[2, 3], 1),
       tuple(dict['a' => 1, 'b' => 2], dict['b' => 2], 1),
       tuple(Vector {1, 2, 3}, Vector {2, 3}, 1),
       tuple(Set {}, Set {}, null),
@@ -908,7 +908,7 @@ final class CSelectTest extends HackTest {
       tuple(vec[1], vec[], 1),
       tuple(vec[1, 2, 3], vec[2, 3], 1),
       tuple(keyset['apple', 'banana'], keyset['banana'], 'apple'),
-      tuple(varray[1, 2, 3], varray[2, 3], 1),
+      tuple(vec[1, 2, 3], vec[2, 3], 1),
       tuple(dict['a' => 1, 'b' => 2], dict['b' => 2], 1),
       tuple(Vector {1, 2, 3}, Vector {2, 3}, 1),
       tuple(vec[null], vec[], null),

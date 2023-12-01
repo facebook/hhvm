@@ -15,7 +15,7 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class VecOrderTest extends HackTest {
 
   public static function provideTestRange(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(1, 10, null, vec[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
       tuple(1, 10, 1, vec[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
       tuple(1, 10, 2, vec[1, 3, 5, 7, 9]),
@@ -76,7 +76,7 @@ final class VecOrderTest extends HackTest {
   }
 
   public static function provideTestRangeException(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(0, 1, 0),
       tuple(-10, 10, -30),
     ];
@@ -93,7 +93,7 @@ final class VecOrderTest extends HackTest {
   }
 
   public static function provideTestReverse(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         vec[1, 2, 3, 4, 5],
         vec[5, 4, 3, 2, 1],
@@ -118,15 +118,15 @@ final class VecOrderTest extends HackTest {
   }
 
   public static function provideTestShuffle(): varray<varray<(function(): Traversable<int>)>> {
-    return varray[
-      varray[
+    return vec[
+      vec[
         () ==> vec[8, 6, 7, 5, 3, 0, 9],
       ],
-      varray[
+      vec[
         () ==> vec[0, 1, 2, 4, 5, 6, 7],
       ],
-      varray[
-        () ==> HackLibTestTraversables::getIterator(varray[8, 6, 7, 5, 3, 0, 9]),
+      vec[
+        () ==> HackLibTestTraversables::getIterator(vec[8, 6, 7, 5, 3, 0, 9]),
       ],
     ];
   }
@@ -158,7 +158,7 @@ final class VecOrderTest extends HackTest {
   }
 
   public static function provideTestSort(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         vec['the', 'quick', 'brown', 'fox'],
         null,
@@ -172,7 +172,7 @@ final class VecOrderTest extends HackTest {
       ),
       tuple(Vector {1, 1.2, -5.7, -5.8}, null, vec[-5.8, -5.7, 1, 1.2]),
       tuple(
-        HackLibTestTraversables::getIterator(varray[8, 6, 7, 5, 3, 0, 9]),
+        HackLibTestTraversables::getIterator(vec[8, 6, 7, 5, 3, 0, 9]),
         null,
         vec[0, 3, 5, 6, 7, 8, 9],
       ),
@@ -189,16 +189,16 @@ final class VecOrderTest extends HackTest {
   }
 
   public static function provideTestSortBy(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        varray['the', 'quick', 'brown', 'fox', 'jumped'],
+        vec['the', 'quick', 'brown', 'fox', 'jumped'],
         $s ==> Str\reverse($s),
         null,
         vec['jumped', 'the', 'quick', 'brown', 'fox'],
       ),
       tuple(
         HackLibTestTraversables::getIterator(
-          varray['the', 'quick', 'brown', 'fox', 'jumped'],
+          vec['the', 'quick', 'brown', 'fox', 'jumped'],
         ),
         $s ==> Str\reverse($s),
         null,

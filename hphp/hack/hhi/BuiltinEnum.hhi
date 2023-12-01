@@ -28,7 +28,7 @@ namespace HH {
      * Get the values of the public consts defined on this class,
      * indexed by the string name of those consts.
      *
-     * @return darray['CONST_NAME' => $value, ...]
+     * @return dict['CONST_NAME' => $value, ...]
      */
     <<__NoAutoDynamic>>
     final public static function getValues()[]: darray<string, T>;
@@ -37,7 +37,7 @@ namespace HH {
      * Get the names of all the const values, indexed by value. Calls
      * invariant_exception if multiple constants have the same value.
      *
-     * @return darray[$value => 'CONST_NAME', ...]
+     * @return dict[$value => 'CONST_NAME', ...]
      */
     <<__NoAutoDynamic>>
     final public static function getNames()[]: darray<T, string>

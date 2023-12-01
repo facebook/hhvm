@@ -11,8 +11,8 @@ function takes_reified_array<reify TParam>(): void {}
 function expect_int(int $_): void {}
 
 function does_things(): void {
-  takes_array(varray[]);
-  takes_array(darray[]);
+  takes_array(vec[]);
+  takes_array(dict[]);
   takes_array(vec[]);
   takes_array(dict[]);
   takes_array(keyset[]);

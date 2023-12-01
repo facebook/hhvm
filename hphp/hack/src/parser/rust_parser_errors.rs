@@ -3456,6 +3456,12 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             PrefixUnaryExpression(x) if token_kind(&x.operator) == Some(TokenKind::Readonly) => {
                 self.mark_uses_readonly()
             }
+            DarrayIntrinsicExpression(_) | VarrayIntrinsicExpression(_)
+                if self.env.is_typechecker() =>
+            {
+                self.errors
+                    .push(make_error_from_node(node, errors::varray_darray_banned))
+            }
 
             // Other kinds of expressions currently produce no expr errors.
             _ => {}

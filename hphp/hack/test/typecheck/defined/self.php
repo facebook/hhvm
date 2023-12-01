@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-  protected static darray<string,mixed> $a = darray[];
+  protected static darray<string,mixed> $a = dict[];
 
   public function f(bool $b): void {
     while ($b) {

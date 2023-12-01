@@ -53,8 +53,8 @@ function image2wbmp(
 <<__PHPStdLib>>
 function imageaffine(
   resource $image,
-  HH\FIXME\MISSING_PARAM_TYPE $affine = varray[],
-  HH\FIXME\MISSING_PARAM_TYPE $clip = darray[],
+  HH\FIXME\MISSING_PARAM_TYPE $affine = vec[],
+  HH\FIXME\MISSING_PARAM_TYPE $clip = dict[],
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function imageaffinematrixconcat(
@@ -64,7 +64,7 @@ function imageaffinematrixconcat(
 <<__PHPStdLib>>
 function imageaffinematrixget(
   int $type,
-  HH\FIXME\MISSING_PARAM_TYPE $options = darray[],
+  HH\FIXME\MISSING_PARAM_TYPE $options = dict[],
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function imagealphablending(

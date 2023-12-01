@@ -15,6 +15,6 @@ function f1(XHPChild $x): void {}
 
 function f2(): void {
   f1("hello");
-  f1(varray["hello", "world"]);
+  f1(vec["hello", "world"]);
   f1(<x>hi</x>);
 }

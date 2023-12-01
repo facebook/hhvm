@@ -24,24 +24,24 @@ function test1(
   darray<int, string> $darray3,
 ): void {
   if ($b) {
-    $x = varray[]; // AKvarray
+    $x = vec[]; // AKvarray
   } else {
-    $x = varray[]; // AKvarray
+    $x = vec[]; // AKvarray
   }
   hh_show($x);
   hh_show($x[0]);
   expect_array($x);
 
   if ($b) {
-    $x = varray[]; // AKvarray
+    $x = vec[]; // AKvarray
   } else {
-    $x = varray[1]; // AKvarray
+    $x = vec[1]; // AKvarray
   }
   hh_show($x);
   hh_show($x[0]);
   expect_int_array($x);
 
-  $x = ($b ? varray[1] : varray[2, 3]);
+  $x = ($b ? vec[1] : vec[2, 3]);
   hh_show($x);
   hh_show($x[0]);
 
@@ -49,14 +49,14 @@ function test1(
   hh_show($x);
   hh_show($x[0]);
 
-  $x = ($b ? $va1 : varray[3, 4]);
+  $x = ($b ? $va1 : vec[3, 4]);
   hh_show($x);
   hh_show($x[0]);
 
   if ($b) {
-    $x = varray[0]; // AKvarray
+    $x = vec[0]; // AKvarray
   } else {
-    $x = varray[""]; // AKvarray
+    $x = vec[""]; // AKvarray
   }
   hh_show($x);
   hh_show($x[0]);
@@ -65,23 +65,23 @@ function test1(
   expect_int_array($x); // error
   expect_string_array($x); // error
 
-  $x = ($b ? varray[0] : varray[2, 4]);
+  $x = ($b ? vec[0] : vec[2, 4]);
   hh_show($x);
   hh_show($x[0]);
 
   if ($b) {
     $x = $arrayint; // AKvarray
   } else {
-    $x = varray[1]; // AKvarray
+    $x = vec[1]; // AKvarray
   }
   hh_show($x);
   hh_show($x[0]);
   expect_int_array($x);
 
   if ($b) {
-    $x = varray[0]; // AKvarray
+    $x = vec[0]; // AKvarray
   } else {
-    $x = varray[""]; // AKvarray
+    $x = vec[""]; // AKvarray
   }
   hh_show($x);
   hh_show($x[0]);
@@ -91,23 +91,23 @@ function test1(
   expect_string_array($x); // error
 
   if ($b) {
-    $x = darray[1 => true];
+    $x = dict[1 => true];
   } else {
-    $x = darray[2 => false];
+    $x = dict[2 => false];
   }
   hh_show($x);
   hh_show($x[0]);
 
   if ($b) {
-    $x = darray[1 => true];
+    $x = dict[1 => true];
   } else {
-    $x = darray[2 => "false"];
+    $x = dict[2 => "false"];
   }
   hh_show($x);
   hh_show($x[0]);
 
   if ($b) {
-    $x = darray[1 => 2];
+    $x = dict[1 => 2];
   } else {
     $x = $darray1;
   }
@@ -130,19 +130,19 @@ function test1(
   hh_show($x);
   hh_show($x[0]);
 
-  $x = ($b ? darray[1 => true, 2 => ""] : darray[1 => true, 2 => ""]); // AKdarray \/ AKdarray
+  $x = ($b ? dict[1 => true, 2 => ""] : dict[1 => true, 2 => ""]); // AKdarray \/ AKdarray
   hh_show($x);
   hh_show($x[0]);
 
-  $x = ($b ? darray[1 => true, 2 => false] : $arrayIntBool); // AKdarray \/ AKdarray
+  $x = ($b ? dict[1 => true, 2 => false] : $arrayIntBool); // AKdarray \/ AKdarray
   hh_show($x);
   hh_show($x[0]);
 
-  $x = ($b ? darray[1 => true, 2 => false] : darray[0 => true]); // AKdarray \/ AKdarray
+  $x = ($b ? dict[1 => true, 2 => false] : dict[0 => true]); // AKdarray \/ AKdarray
   hh_show($x);
   hh_show($x[0]);
 
-  $x = ($b ? $arrayIntBool : darray[0 => true]); // AKdarray \/ AKdarray
+  $x = ($b ? $arrayIntBool : dict[0 => true]); // AKdarray \/ AKdarray
   hh_show($x);
   hh_show($x[0]);
 

@@ -1,2 +1,2 @@
-File "foreach_bad_lvalue.php", line 13, characters 25-26:
+File "foreach_bad_lvalue.php", line 13, characters 22-23:
 You cannot use this syntax as the iterator variable in a `foreach` loop. (Parsing[1002])

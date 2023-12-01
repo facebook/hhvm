@@ -15,9 +15,9 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class MathContainersTest extends HackTest {
 
   public static function provideTestMax(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        varray[],
+        vec[],
         null,
       ),
       tuple(
@@ -26,7 +26,7 @@ final class MathContainersTest extends HackTest {
       ),
       tuple(
         HackLibTestTraversables::getIterator(
-          varray[8, 6, 7, 5, 3, 0, 9],
+          vec[8, 6, 7, 5, 3, 0, 9],
         ),
         9,
       ),
@@ -42,9 +42,9 @@ final class MathContainersTest extends HackTest {
   }
 
   public static function provideTestMaxBy(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        varray[],
+        vec[],
         $x ==> $x,
         null,
       ),
@@ -55,7 +55,7 @@ final class MathContainersTest extends HackTest {
       ),
       tuple(
         HackLibTestTraversables::getIterator(
-          varray['the', 'quick', 'brown', 'fox'],
+          vec['the', 'quick', 'brown', 'fox'],
         ),
         $s ==> Str\length($s),
         'brown',
@@ -73,7 +73,7 @@ final class MathContainersTest extends HackTest {
   }
 
   public static function provideTestMean(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(vec[1.0, 2.0, 3, 4], 2.5),
       tuple(vec[1, 1, 2], 4 / 3),
       tuple(vec[-1, 1], 0.0),
@@ -96,7 +96,7 @@ final class MathContainersTest extends HackTest {
   }
 
   public static function provideTestMedian(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(vec[], null),
       tuple(vec[1], 1.0),
       tuple(vec[1, 2], 1.5),
@@ -120,9 +120,9 @@ final class MathContainersTest extends HackTest {
   }
 
   public static function provideTestMin(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        varray[],
+        vec[],
         null,
       ),
       tuple(
@@ -131,7 +131,7 @@ final class MathContainersTest extends HackTest {
       ),
       tuple(
         HackLibTestTraversables::getIterator(
-          varray[8, 6, 7, 5, 3, 0, 9],
+          vec[8, 6, 7, 5, 3, 0, 9],
         ),
         0,
       ),
@@ -151,9 +151,9 @@ final class MathContainersTest extends HackTest {
   }
 
   public static function provideTestMinBy(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        varray[],
+        vec[],
         $x ==> $x,
         null,
       ),
@@ -164,7 +164,7 @@ final class MathContainersTest extends HackTest {
       ),
       tuple(
         HackLibTestTraversables::getIterator(
-          varray['the', 'quick', 'brown', 'fox'],
+          vec['the', 'quick', 'brown', 'fox'],
         ),
         $s ==> Str\length($s),
         'fox',
@@ -182,13 +182,13 @@ final class MathContainersTest extends HackTest {
   }
 
   public static function provideTestSum(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Vector {},
         0,
       ),
       tuple(
-        varray[1, 2, 1, 1, 3],
+        vec[1, 2, 1, 1, 3],
         8,
       ),
       tuple(
@@ -207,13 +207,13 @@ final class MathContainersTest extends HackTest {
   }
 
   public static function provideTestSumFloat(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Vector {},
         0.0,
       ),
       tuple(
-        varray[1, 2.5, 1, 1, 3],
+        vec[1, 2.5, 1, 1, 3],
         8.5,
       ),
       tuple(

@@ -12,7 +12,7 @@
 function foo(string $x): void {}
 
 function test(): void {
-  $arr = varray[varray[1, 2], varray[3, 4]];
+  $arr = vec[vec[1, 2], vec[3, 4]];
   foreach ($arr as $k => list($x, $y)) {
     foo($x);
   }

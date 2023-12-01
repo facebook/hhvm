@@ -4,5 +4,5 @@ File "dynamic_index_lvalue.php", line 12, characters 15-19:
 Invalid argument (Typing[4110])
   File "dynamic_index_lvalue.php", line 15, characters 22-27:
   Expected `string`
-  File "dynamic_index_lvalue.php", line 9, characters 15-15:
+  File "dynamic_index_lvalue.php", line 9, characters 12-12:
   But got `int`

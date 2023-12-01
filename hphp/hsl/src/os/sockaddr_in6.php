@@ -60,7 +60,7 @@ final class sockaddr_in6 extends sockaddr {
   }
 
   final public function __debugInfo(): darray<string, mixed> {
-    return darray[
+    return dict[
       'port (host byte order)' => $this->port,
       'flow info (host byte order)' => $this->flowInfo,
       'scope ID (host byte order)' => $this->scopeID,

@@ -15,7 +15,7 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class KeysetOrderTest extends HackTest {
 
   public static function provideSort(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         vec['the', 'quick', 'brown', 'fox'],
         null,
@@ -28,12 +28,12 @@ final class KeysetOrderTest extends HackTest {
         keyset['the', 'fox', 'brown', 'quick'],
       ),
       tuple(
-        varray[8, 6, 7, 5, 3, 0, 9],
+        vec[8, 6, 7, 5, 3, 0, 9],
         null,
         keyset[0, 3, 5, 6, 7, 8, 9],
       ),
       tuple(
-        HackLibTestTraversables::getIterator(varray[8, 6, 7, 5, 3, 0, 9]),
+        HackLibTestTraversables::getIterator(vec[8, 6, 7, 5, 3, 0, 9]),
         null,
         keyset[0, 3, 5, 6, 7, 8, 9],
       ),

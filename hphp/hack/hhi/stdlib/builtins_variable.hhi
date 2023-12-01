@@ -75,12 +75,12 @@ namespace {
   <<__PHPStdLib>>
   function unserialize(
     string $str,
-    darray<arraykey, mixed> $options = darray[],
+    darray<arraykey, mixed> $options = dict[],
   )[defaults]: \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function unserialize_pure(
     string $str,
-    darray<arraykey, mixed> $options = darray[],
+    darray<arraykey, mixed> $options = dict[],
   )[]: \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function import_request_variables(

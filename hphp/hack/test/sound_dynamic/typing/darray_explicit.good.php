@@ -15,18 +15,18 @@ function expectInt(int $_):void { }
 function test1(dynamic $dyn, int $i):void {
   $li = getVec()[0];
   $ls = getStrings()[0];
-  $a = darray<string,int>['a' => $i];
-  hh_expect_equivalent<darray<string,int>>($a);
-  $b = darray<string,int>['a' => $i, 'b' => $li];
-  hh_expect_equivalent<darray<string,~int>>($b);
-  $c = darray<string,int>['a' => $i, 'b' => $dyn];
-  hh_expect_equivalent<darray<string,~int>>($c);
-  $d = darray<string,arraykey>['a' => $i, 'b' => $li];
-  hh_expect_equivalent<darray<string,~arraykey>>($d);
+  $a = dict<string,int>['a' => $i];
+  hh_expect_equivalent<dict<string,int>>($a);
+  $b = dict<string,int>['a' => $i, 'b' => $li];
+  hh_expect_equivalent<dict<string,~int>>($b);
+  $c = dict<string,int>['a' => $i, 'b' => $dyn];
+  hh_expect_equivalent<dict<string,~int>>($c);
+  $d = dict<string,arraykey>['a' => $i, 'b' => $li];
+  hh_expect_equivalent<dict<string,~arraykey>>($d);
   $d[$ls] = 5;
-  hh_expect_equivalent<darray<(~string & arraykey),~arraykey>>($d);
-  $e = darray<string,int>[$ls => $i];
-  hh_expect_equivalent<darray<(~string & arraykey),int>>($e);
-  $f = darray<string, darray<string, int>>['bar' => darray['baz' => 42]];
+  hh_expect_equivalent<dict<(~string & arraykey),~arraykey>>($d);
+  $e = dict<string,int>[$ls => $i];
+  hh_expect_equivalent<dict<(~string & arraykey),int>>($e);
+  $f = dict<string, dict<string, int>>['bar' => dict['baz' => 42]];
   expectInt($f['a']['b']);
 }

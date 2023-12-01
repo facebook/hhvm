@@ -1,4 +1,4 @@
 <?hh
 function f(){
-  await $x . darray[$a => b *= 1];
+  await $x . dict[$a => b *= 1];
 }

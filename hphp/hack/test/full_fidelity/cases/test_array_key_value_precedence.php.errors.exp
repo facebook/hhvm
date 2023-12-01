@@ -1,2 +1,2 @@
-(3,27)-(3,28) You cannot use this syntax on the left-hand side of an assignment.
-(3,27)-(3,28) Assignments can no longer be used as expressions. Pull the assignment out into a separate statement.
+(3,25)-(3,26) You cannot use this syntax on the left-hand side of an assignment.
+(3,25)-(3,26) Assignments can no longer be used as expressions. Pull the assignment out into a separate statement.

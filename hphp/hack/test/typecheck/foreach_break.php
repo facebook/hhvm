@@ -10,7 +10,7 @@
  */
 
 function f(): void {
-  foreach (varray[1] as $k => $v) {
+  foreach (vec[1] as $k => $v) {
     break;
   }
 }

@@ -1,6 +1,6 @@
-File "disallow_varray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 4, characters 10-18:
+File "disallow_varray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 4, characters 10-15:
 Invalid return type (Typing[4110])
-File "disallow_varray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 3, characters 36-41:
-Expected `string`
-File "disallow_varray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 4, characters 10-18:
-But got `int` because only `int` can be used to index into a `Vector` or `vec`.
+  File "disallow_varray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 3, characters 36-41:
+  Expected `string`
+  File "disallow_varray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 4, characters 10-15:
+  But got `int` because only `int` can be used to index into a `Vector` or `vec`.

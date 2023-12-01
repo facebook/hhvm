@@ -10,7 +10,7 @@ function test(): void {
   if (launder()) {
     $x = Pair { 5, 42 };
   } else {
-    $x = varray[1, 2, 3];
+    $x = vec[1, 2, 3];
   }
   f(inout $x[1]);
 }

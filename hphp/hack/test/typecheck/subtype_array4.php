@@ -10,7 +10,7 @@
  */
 
 function get_arr(): darray<string, bool> {
-  return darray[
+  return dict[
     'foo' => true,
     'bar' => false,
   ];

@@ -679,7 +679,7 @@ class IntlChar {
   ): HH\FIXME\MISSING_RETURN_TYPE {}
   <<__PHPStdLib>>
   static public function getUnicodeVersion(): darray<arraykey, mixed> {
-    return darray[];
+    return dict[];
   }
   static public function getFC_NFKC_Closure(
     HH\FIXME\MISSING_PARAM_TYPE $cp,

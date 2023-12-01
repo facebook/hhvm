@@ -1,8 +1,8 @@
 File "explicit_type_collection_wildcard_darray2.php", line 6, characters 3-13:
   dict<string, bool>
-File "explicit_type_collection_wildcard_darray2.php", line 5, characters 8-33:
-The values of this `darray` are incompatible (Typing[4110])
-  File "explicit_type_collection_wildcard_darray2.php", line 5, characters 17-20:
+File "explicit_type_collection_wildcard_darray2.php", line 5, characters 8-31:
+The values of this `dict` are incompatible (Typing[4110])
+  File "explicit_type_collection_wildcard_darray2.php", line 5, characters 15-18:
   Expected `bool`
-  File "explicit_type_collection_wildcard_darray2.php", line 5, characters 31-31:
+  File "explicit_type_collection_wildcard_darray2.php", line 5, characters 29-29:
   But got `int`

@@ -10,10 +10,10 @@
  */
 
 function f(): Generator<int, int, void> {
-  $arr = darray[];
-  foreach (varray[] as $x) {
+  $arr = dict[];
+  foreach (vec[] as $x) {
     if (true) {
-      foreach (varray[] as $y) {
+      foreach (vec[] as $y) {
       }
 
       continue;

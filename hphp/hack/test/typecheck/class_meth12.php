@@ -8,7 +8,7 @@ class C {
 }
 
 function testit():void {
-  $v = darray[
+  $v = dict[
     'a' => C::foo<>,
     'b' => bar<>,
   ];

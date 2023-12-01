@@ -3,7 +3,7 @@ function foo<T as ?Container<Tv>, Tv>(inout T $arr): dynamic {
   return false;
 }
 function bar(): dynamic {
-  return varray[];
+  return vec[];
 }
 function qux<T as ?Container<Tv>, Tv>(T $arr): Tv {
   throw new \Exception();

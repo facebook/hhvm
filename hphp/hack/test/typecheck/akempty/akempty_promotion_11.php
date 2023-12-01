@@ -5,7 +5,7 @@
  * intermediate assignment
  */
 function test(): ConstVector<darray<string, string>> {
-  $v = Vector { darray[] };
+  $v = Vector { dict[] };
   $a = $v[0];
   $a['aaa'] = 4;
   // no error "$a =" assignment created a copy of an array inside $v, and

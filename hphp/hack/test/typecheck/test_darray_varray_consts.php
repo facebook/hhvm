@@ -2,10 +2,10 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class A {
-  const darray<string, string> FOO = darray['foo' => 'bar'];
-  const varray<varray<string>> BAR = varray[varray['foo']];
+  const darray<string, string> FOO = dict['foo' => 'bar'];
+  const varray<varray<string>> BAR = vec[vec['foo']];
   const varray<dict<string, vec<string>>>
-    BAZ = varray[dict['foo' => vec['bar']]];
+    BAZ = vec[dict['foo' => vec['bar']]];
 
   // Should not typecheck
   public function test(): string {

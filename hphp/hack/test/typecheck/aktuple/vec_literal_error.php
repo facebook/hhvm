@@ -1,7 +1,7 @@
 <?hh
 
 function test(): void {
-  $a = varray[4, 'aaa'];
+  $a = vec[4, 'aaa'];
 
   take_string($a[0]);
 }

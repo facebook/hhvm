@@ -10,7 +10,7 @@ class A {
   const string BAZ_KEY = 'baz';
   const FooShape
     FOO = shape(
-      self::BAZ_KEY => varray['a', 'b', 'c'],
+      self::BAZ_KEY => vec['a', 'b', 'c'],
       'foo' => 2,
       'bar' => null,
     );

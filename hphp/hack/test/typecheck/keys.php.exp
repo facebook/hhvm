@@ -2,5 +2,5 @@ File "keys.php", line 9, characters 26-27:
 Invalid argument (Typing[4110])
   File "keys.php", line 12, characters 37-54:
   Expected `dict<string, _>`
-  File "keys.php", line 8, characters 8-19:
+  File "keys.php", line 8, characters 8-16:
   But got `vec<bool>`

@@ -255,7 +255,7 @@ function openssl_x509_check_private_key(
 function openssl_x509_checkpurpose(
   HH\FIXME\MISSING_PARAM_TYPE $x509cert,
   int $purpose,
-  varray<mixed> $cainfo = varray[],
+  varray<mixed> $cainfo = vec[],
   string $untrustedfile = "",
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>

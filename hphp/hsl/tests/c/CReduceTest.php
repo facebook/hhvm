@@ -15,7 +15,7 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class CReduceTest extends HackTest {
 
   public static function provideTestReduce(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Set {'the', ' quick', ' brown', ' fox'},
         ($a, $s) ==> $a.$s,
@@ -24,14 +24,14 @@ final class CReduceTest extends HackTest {
       ),
       tuple(
         HackLibTestTraversables::getIterator(
-          varray['the', ' quick', ' brown', ' fox'],
+          vec['the', ' quick', ' brown', ' fox'],
         ),
         ($a, $s) ==> $a.$s,
         '',
         'the quick brown fox',
       ),
       tuple(
-        varray['the', 'quick', 'brown', 'fox'],
+        vec['the', 'quick', 'brown', 'fox'],
         /* HH_FIXME[4297] The type of the lambda argument(s) could not be inferred */
         ($a, $s) ==> $a->add($s),
         Vector {},
@@ -51,7 +51,7 @@ final class CReduceTest extends HackTest {
   }
 
   public static function provideTestReduceWithKey(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         'dict',
         dict[1 => 2, 2 => 3, 3 => 4, 4 => 5],
@@ -60,7 +60,7 @@ final class CReduceTest extends HackTest {
       ),
       tuple(
         'array',
-        darray[1 => 2, 2 => 3, 3 => 4, 4 => 5],
+        dict[1 => 2, 2 => 3, 3 => 4, 4 => 5],
         dict[1 => 0, 4 => 6, 8 => 10],
         dict[1 => 0],
       ),

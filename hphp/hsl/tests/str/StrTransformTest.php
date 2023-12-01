@@ -15,7 +15,7 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class StrTransformTest extends HackTest {
 
   public static function provideCapitalize(): varray<mixed> {
-    return varray[
+    return vec[
       tuple('foo', 'Foo'),
       tuple('Foo', 'Foo'),
       tuple('foo foo', 'Foo foo'),
@@ -33,7 +33,7 @@ final class StrTransformTest extends HackTest {
   }
 
   public static function provideCapitalizeWords(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         'the quick brown Fox',
         'The Quick Brown Fox',
@@ -54,7 +54,7 @@ final class StrTransformTest extends HackTest {
   }
 
   public static function provideCapitalizeWordsCustomDelimiter(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         'the_quick brown_Fox',
         '_',
@@ -103,7 +103,7 @@ final class StrTransformTest extends HackTest {
   }
 
   public static function provideFormatNumber(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         0,
         0,
@@ -159,7 +159,7 @@ final class StrTransformTest extends HackTest {
   }
 
   public static function provideLowercase(): varray<mixed> {
-    return varray[
+    return vec[
       tuple('', ''),
       tuple('hello world', 'hello world'),
       tuple('Hello World', 'hello world'),
@@ -176,7 +176,7 @@ final class StrTransformTest extends HackTest {
   }
 
   public static function providePadLeft(): varray<mixed> {
-    return varray[
+    return vec[
       tuple('foo', 5, ' ', '  foo'),
       tuple('foo', 5, 'blerg', 'blfoo'),
       tuple('foobar', 1, '0', 'foobar'),
@@ -197,7 +197,7 @@ final class StrTransformTest extends HackTest {
   }
 
   public static function providePadRight(): varray<mixed> {
-    return varray[
+    return vec[
       tuple('foo', 5, ' ', 'foo  '),
       tuple('foo', 5, 'blerg', 'foobl'),
       tuple('foobar', 1, '0', 'foobar'),
@@ -218,7 +218,7 @@ final class StrTransformTest extends HackTest {
   }
 
   public static function provideRepeat(): varray<mixed> {
-    return varray[
+    return vec[
       tuple('foo', 3, 'foofoofoo'),
       tuple('foo', 0, ''),
       tuple('', 1000000, ''),
@@ -235,7 +235,7 @@ final class StrTransformTest extends HackTest {
   }
 
   public static function provideReplace(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         'goodbye world',
         ' ',
@@ -280,7 +280,7 @@ final class StrTransformTest extends HackTest {
   }
 
   public static function provideReplaceCI(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         'goodbye world',
         ' ',
@@ -326,7 +326,7 @@ final class StrTransformTest extends HackTest {
   }
 
   public static function provideReplaceEvery(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         'hello world',
         dict[
@@ -354,7 +354,7 @@ final class StrTransformTest extends HackTest {
       ),
       tuple(
         'hello world',
-        darray[],
+        dict[],
         'hello world',
       ),
       tuple(
@@ -406,7 +406,7 @@ final class StrTransformTest extends HackTest {
   }
 
   public static function provideReplaceEveryCI(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         'Hello world',
         dict[
@@ -426,7 +426,7 @@ final class StrTransformTest extends HackTest {
       ),
       tuple(
         'hello world',
-        darray[],
+        dict[],
         'hello world',
       ),
       tuple(
@@ -712,7 +712,7 @@ final class StrTransformTest extends HackTest {
   }
 
   public static function provideSplice(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         '',
         '',
@@ -785,7 +785,7 @@ final class StrTransformTest extends HackTest {
   }
 
   public static function provideToInt(): varray<mixed> {
-    return varray[
+    return vec[
       tuple('', null),
       tuple('0', 0),
       tuple('8675309', 8675309),
@@ -804,7 +804,7 @@ final class StrTransformTest extends HackTest {
   }
 
   public static function provideUppercase(): varray<mixed> {
-    return varray[
+    return vec[
       tuple('', ''),
       tuple('hello world', 'HELLO WORLD'),
       tuple('Hello World', 'HELLO WORLD'),

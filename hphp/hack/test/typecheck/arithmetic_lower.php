@@ -37,7 +37,7 @@ function testfloat(num $n):void {
 
 /*
 function testfloat2(bool $b, num $n):void {
-  $m = $b ? Vector { } : varray[3.4];
+  $m = $b ? Vector { } : vec[3.4];
   $x = $m[0] + $n;
   expectFloat($x);
   $m = $b ? Vector { } : Vector { 3.4 };

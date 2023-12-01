@@ -15,19 +15,19 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class KeysetCombineTest extends HackTest {
 
   public static function provideTestUnion(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        varray[],
-        varray[
+        vec[],
+        vec[
           vec[],
         ],
         keyset[],
       ),
       tuple(
         keyset[1, 2, 3],
-        varray[
+        vec[
           Vector {'the', 'quick', 'brown'},
-          HackLibTestTraversables::getKeyedIterator(darray[
+          HackLibTestTraversables::getKeyedIterator(dict[
             'the' => 'the',
             'quick' => 'quick',
             'brown' => 'brown',

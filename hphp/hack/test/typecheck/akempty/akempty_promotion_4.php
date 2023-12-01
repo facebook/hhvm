@@ -4,7 +4,7 @@
  * Test AKempty to AKvarray upgrade when inside a nested type
  */
 function test(): void {
-  $a = Vector { varray[] };
+  $a = Vector { vec[] };
   $a[0][] = 'aaa';
   f($a);
 }

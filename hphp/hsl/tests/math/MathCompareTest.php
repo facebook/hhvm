@@ -15,7 +15,7 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class MathCompareTest extends HackTest {
 
   public static function provideTestMaxva(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(1, 2, vec[], 2),
       tuple(2, 1, vec[], 2),
       tuple(1.0, 2.0, vec[], 2.0),
@@ -40,7 +40,7 @@ final class MathCompareTest extends HackTest {
   }
 
   public static function provideTestMinva(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(1, 2, vec[], 1),
       tuple(2, 1, vec[], 1),
       tuple(1.0, 2.0, vec[], 1.0),

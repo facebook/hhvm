@@ -9,7 +9,7 @@ class C {
   const type Test = this::B::X;
 
   public static function foo(): this::Test::T {
-    return varray[];
+    return vec[];
   }
 }
 

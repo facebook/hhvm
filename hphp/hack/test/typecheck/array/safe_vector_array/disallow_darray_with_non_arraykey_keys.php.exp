@@ -1,6 +1,6 @@
-File "disallow_darray_with_non_arraykey_keys.php", line 4, characters 10-31:
-Invalid index type for this darray (Typing[4110])
-  File "disallow_darray_with_non_arraykey_keys.php", line 4, characters 17-20:
+File "disallow_darray_with_non_arraykey_keys.php", line 4, characters 10-29:
+Invalid index type for this dict (Typing[4110])
+  File "disallow_darray_with_non_arraykey_keys.php", line 4, characters 15-18:
   Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
   File "disallow_darray_with_non_arraykey_keys.php", line 3, characters 20-21:
   But got `Tk`

@@ -1,12 +1,12 @@
 File "local_vs_nested.php", line 11, characters 15-19:
 Invalid argument (Typing[4110])
-File "local_vs_nested.php", line 20, characters 22-27:
-Expected `string`
-File "local_vs_nested.php", line 8, characters 15-15:
-But got `int`
+  File "local_vs_nested.php", line 20, characters 22-27:
+  Expected `string`
+  File "local_vs_nested.php", line 8, characters 12-12:
+  But got `int`
 File "local_vs_nested.php", line 16, characters 15-23:
 Invalid argument (Typing[4110])
-File "local_vs_nested.php", line 20, characters 22-27:
-Expected `string`
-File "local_vs_nested.php", line 13, characters 24-24:
-But got `int`
+  File "local_vs_nested.php", line 20, characters 22-27:
+  Expected `string`
+  File "local_vs_nested.php", line 13, characters 21-21:
+  But got `int`

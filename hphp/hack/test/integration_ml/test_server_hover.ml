@@ -564,7 +564,7 @@ the other stars.";
 let special_cases =
   "<?hh // strict
 function special_cases(): void {
-  idx(varray[1, 2, 3], 1);
+  idx(vec[1, 2, 3], 1);
 //^3:3
 }
 "

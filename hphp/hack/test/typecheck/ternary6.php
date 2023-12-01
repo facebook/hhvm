@@ -20,6 +20,6 @@ function f(bool $x, Foo $y): void {
    * to creating a Tunion if unification failed; this would hide errors
    * like the one below.
    */
-  $a = $x ? varray[g()] : $y->h();
+  $a = $x ? vec[g()] : $y->h();
   takes_string($a[0]);
 }

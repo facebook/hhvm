@@ -21,13 +21,13 @@ function cast_varray_or_darray<Tk>(varray_or_darray<Tk> $x): nonnull {
 }
 
 function empty_array(): nonnull {
-  return varray[];
+  return vec[];
 }
 
 function array_used_like_a_shape(): nonnull {
-  return darray['pi' => 3.1415926, 'e' => 2.718281829459045];
+  return dict['pi' => 3.1415926, 'e' => 2.718281829459045];
 }
 
 function array_used_like_a_tuple(): nonnull {
-  return varray[42, "meaning of life"];
+  return vec[42, "meaning of life"];
 }

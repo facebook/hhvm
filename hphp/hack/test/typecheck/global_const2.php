@@ -1,3 +1,3 @@
 <?hh
 
-const int X = varray[];
+const int X = vec[];

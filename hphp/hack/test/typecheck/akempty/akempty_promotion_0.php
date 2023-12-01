@@ -5,7 +5,7 @@
  * error message points to [] as the reason
  */
 function test(): void {
-  $a = varray[];
+  $a = vec[];
   $a[] = 'aaa';
   f($a);
 }

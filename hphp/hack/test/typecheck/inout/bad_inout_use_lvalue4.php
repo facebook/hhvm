@@ -1,7 +1,7 @@
 <?hh
 
 class Cls {
-  const Array_CLASS_CONST = varray[42, 'foo'];
+  const Array_CLASS_CONST = vec[42, 'foo'];
 }
 
 function f(inout int $i): void {}

@@ -37,7 +37,7 @@
        fd_fun =
        { f_span = [5:1-7:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((dynamic), (Some ([5:17-24], Hdynamic))); 
-         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([6:3-19], (Return (Some ((vec<nothing>), [6:10-18], (ValCollection (([6:10-18], Vec), None, []))))))] };
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([6:3-16], (Return (Some ((vec<nothing>), [6:10-15], (ValCollection (([6:10-13], Vec), None, []))))))] };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([5:10-13], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });

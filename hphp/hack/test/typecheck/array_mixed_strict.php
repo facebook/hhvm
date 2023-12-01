@@ -7,6 +7,6 @@ class D implements I {}
 class Q {
   public varray<I> $arr;
   public function __construct() {
-    $this->arr = varray[new C(), new D()];
+    $this->arr = vec[new C(), new D()];
   }
 }

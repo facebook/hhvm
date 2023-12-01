@@ -23,5 +23,5 @@ function f(bool $b, Map<int, ?A> $m): void {
 function map_compact<Tk as arraykey, Tv>(
   KeyedTraversable<Tk, ?Tv> $m
 ): Map<Tk, Tv> {
-  return new Map<Tk, Tv>(darray[]);
+  return new Map<Tk, Tv>(dict[]);
 }

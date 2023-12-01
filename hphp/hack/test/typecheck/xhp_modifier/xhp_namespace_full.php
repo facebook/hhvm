@@ -34,7 +34,7 @@ namespace fifth {
       {new \fourth\A()}
     </:second:foo>;
     <:third:bar>
-      <:second:foo>{varray[vec[<:third:bar />]]}</:second:foo>
+      <:second:foo>{vec[vec[<:third:bar />]]}</:second:foo>
     </:third:bar>;
   }
 }

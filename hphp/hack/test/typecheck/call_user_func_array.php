@@ -10,5 +10,5 @@
  */
 
 function test(): void {
-  call_user_func(varray['my_object', 'my_method']);
+  call_user_func(vec['my_object', 'my_method']);
 }

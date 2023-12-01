@@ -41,7 +41,7 @@ Errors:
           cv_id = ([8:18-20], "d");
           cv_expr =
           (Some ((dict<string, (classname<A> | classname<B>)>), [8:23-11:4],
-                 (KeyValCollection (([8:23-11:4], Dict), None,
+                 (KeyValCollection (([8:23-27], Dict), None,
                     [(((string), [9:5-8], (String "a")), ((classname<A>), [9:12-20], (Class_const (((A), [9:12-13], (CI ([9:12-13], "\\A"))), ([9:15-20], "class")))));
                       (((string), [10:5-8], (String "b")), ((classname<B>), [10:12-20], (Class_const (((B), [10:12-13], (CI ([10:12-13], "\\B"))), ([10:15-20], "class")))))]
                     ))));

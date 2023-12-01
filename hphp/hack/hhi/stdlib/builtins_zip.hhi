@@ -91,19 +91,19 @@ class ZipArchive {
   public function addGlob(
     string $pattern,
     int $flags = 0,
-    darray<arraykey, mixed> $options = darray[],
+    darray<arraykey, mixed> $options = dict[],
   ): bool;
   public function addPattern(
     string $pattern,
     string $path = ".",
-    darray<arraykey, mixed> $options = darray[],
+    darray<arraykey, mixed> $options = dict[],
   ): bool;
   public function close(): bool;
   public function deleteIndex(int $index): bool;
   public function deleteName(string $name): bool;
   public function extractTo(
     string $destination,
-    HH\FIXME\MISSING_PARAM_TYPE $entries = varray[],
+    HH\FIXME\MISSING_PARAM_TYPE $entries = vec[],
   ): bool;
   public function getArchiveComment(int $flags = 0): string;
   public function getCommentIndex(int $index, int $flags = 0): string;

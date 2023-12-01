@@ -19,7 +19,7 @@ use function md5 as non_crypto_md5;
 
 final class MathComputeTest extends HackTest {
   public static function provideTestAbs(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(-1, 1),
       tuple(1, 1),
       tuple(-7.3, 7.3),
@@ -35,7 +35,7 @@ final class MathComputeTest extends HackTest {
   }
 
   public static function provideTestBaseConvertBijection(): varray<mixed> {
-    return varray[
+    return vec[
       tuple('a', 16, 10, '10'),
       tuple('a', 16, 2, '1010'),
       tuple('50f', 16, 36, 'zz'),
@@ -110,7 +110,7 @@ final class MathComputeTest extends HackTest {
   }
 
   public static function provideTestBaseConvertOneWay(): varray<mixed> {
-    return varray[
+    return vec[
       tuple('00000a', 16, 10, '10'),
       tuple('00000a', 16, 2, '1010'),
       tuple('50F', 16, 36, 'zz'),
@@ -168,7 +168,7 @@ final class MathComputeTest extends HackTest {
   }
 
   public static function provideTestBaseConvertException(): varray<mixed> {
-    return varray[
+    return vec[
       // empty string
       tuple('', 2, 16),
       // invalid base
@@ -191,7 +191,7 @@ final class MathComputeTest extends HackTest {
   }
 
   public static function provideTestCeil(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(3.5, 4.0),
       tuple(4, 4.0),
       tuple(-3.5, -3.0),
@@ -206,7 +206,7 @@ final class MathComputeTest extends HackTest {
   }
 
   public static function provideTestCos(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(0.0, 1.0),
       tuple(M_PI_2, -3.4914813388431e-15),
       tuple(-M_PI_2, -3.4914813388431e-15),
@@ -226,7 +226,7 @@ final class MathComputeTest extends HackTest {
   }
 
   public static function provideTestExp(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(-1.0, 1.0 / M_E),
       tuple(0.0, 1.0),
       tuple(1.0, M_E),
@@ -241,7 +241,7 @@ final class MathComputeTest extends HackTest {
   }
 
   public static function provideTestFloor(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(3.5, 3.0),
       tuple(4, 4.0),
       tuple(-3.5, -4.0),
@@ -256,7 +256,7 @@ final class MathComputeTest extends HackTest {
   }
 
   public static function provideTestFromBase(): varray<mixed> {
-    $tuples = varray[
+    $tuples = vec[
       tuple('4d2', 16, 1234),
       tuple('2322', 8, 1234),
       tuple('10011010010', 2, 1234),
@@ -283,7 +283,7 @@ final class MathComputeTest extends HackTest {
   }
 
   public static function provideTestFromBaseException(): varray<mixed> {
-    $tuples = varray[
+    $tuples = vec[
       // invalid base
       tuple('1234', 0),
       tuple('1234', -1),
@@ -321,7 +321,7 @@ final class MathComputeTest extends HackTest {
   }
 
   public static function provideTestIntDiv(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(1, 2, 0),
       tuple(2, 1, 2),
       tuple(-1, 2, 0),
@@ -341,7 +341,7 @@ final class MathComputeTest extends HackTest {
   }
 
   public static function provideTestIntDivException(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(-1, 0),
       tuple(0, 0),
       tuple(1, 0),
@@ -355,7 +355,7 @@ final class MathComputeTest extends HackTest {
   }
 
   public static function provideTestLog(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(M_E),
       tuple(10),
       tuple(2),
@@ -371,7 +371,7 @@ final class MathComputeTest extends HackTest {
   }
 
   public static function provideTestLogNoBase(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(0.1),
       tuple(3.6),
       tuple(M_E),
@@ -393,7 +393,7 @@ final class MathComputeTest extends HackTest {
   }
 
   public static function provideTestRound(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(3.5, 0, 4.0),
       tuple(4, 0, 4.0),
       tuple(-3.5, 0, -4.0),
@@ -424,7 +424,7 @@ final class MathComputeTest extends HackTest {
   }
 
   public static function provideTestSin(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(0.0, 0.0),
       tuple(M_PI_2, 1.0),
       tuple(-M_PI_2, -1.0),
@@ -444,7 +444,7 @@ final class MathComputeTest extends HackTest {
   }
 
   public static function provideTestSqrt(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(16.0, 4.0),
       tuple(2, M_SQRT2),
       tuple(3, M_SQRT3),
@@ -464,7 +464,7 @@ final class MathComputeTest extends HackTest {
   }
 
   public static function provideTestToBase(): varray<mixed> {
-    $tuples = varray[
+    $tuples = vec[
       tuple(1234, 16, '4d2'),
       tuple(1234, 8, '2322'),
       tuple(1234, 2, '10011010010'),
@@ -494,7 +494,7 @@ final class MathComputeTest extends HackTest {
   }
 
   public static function provideTestToBaseException(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(1234, 0),
       tuple(1234, -1),
       tuple(1234, 37),

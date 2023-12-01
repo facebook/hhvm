@@ -1,8 +1,8 @@
 File "test_array15.php", line 20, characters 27-27:
 Encountered unexpected token `&`. (Parsing[1002])
-File "test_array15.php", line 13, characters 22-34:
+File "test_array15.php", line 13, characters 22-32:
 Wrong type hint (Typing[4339])
   File "test_array15.php", line 13, characters 10-20:
   Expected `vec<int>`
-  File "test_array15.php", line 13, characters 27-34:
+  File "test_array15.php", line 13, characters 27-32:
   But got `dict<nothing, nothing>`

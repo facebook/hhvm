@@ -15,7 +15,7 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class StrFormatTest extends HackTest {
 
   public static function provideFormat(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(Str\format('No format specifiers'), 'No format specifiers'),
       tuple(
         Str\format('A single %s', 'string specifier'),

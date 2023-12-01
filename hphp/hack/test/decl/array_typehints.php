@@ -6,20 +6,20 @@ function a2(): darray<int, string> {
 
 /* HH_FIXME[2071] */
 function v0(): varray {
-  return varray[];
+  return vec[];
 }
 
 function v1(): varray<int> {
-  return varray[];
+  return vec[];
 }
 
 /* HH_FIXME[2071] */
 function d0(): darray {
-  return darray[];
+  return dict[];
 }
 
 function d2(): darray<int, string> {
-  return darray[];
+  return dict[];
 }
 
 /* HH_FIXME[2071] */

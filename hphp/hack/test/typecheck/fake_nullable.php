@@ -4,13 +4,13 @@
 function darray_filter_falsy<Tk as arraykey, Tv as nonnull>(
   KeyedTraversable<Tk, ?Tv> $traversable,
 ): darray<Tk, Tv> {
-  return darray[];
+  return dict[];
 }
 async function genak<Tk as arraykey, Tv>(
   (function (Tk): Awaitable<Tv>) $gen,
   Traversable<Tk> $keys,
 ): Awaitable<darray<Tk, Tv>> {
-  return darray[];
+  return dict[];
 }
 interface I { }
 
@@ -22,7 +22,7 @@ async function gennull():Awaitable<?I> {
 }
 class C {
 
-  private darray<arraykey,mixed> $fld = darray[];
+  private darray<arraykey,mixed> $fld = dict[];
   public async function foo(): Awaitable<void> {
     $this->fld = await genak<_,_>(
       async (int $id) : Awaitable<?I> ==> await gennull(),

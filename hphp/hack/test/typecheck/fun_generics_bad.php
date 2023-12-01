@@ -14,7 +14,7 @@ function special_array_map<T1, T2>(
 
 <<__EntryPoint>>
 function demo(): bool {
-  $array = darray[];
+  $array = dict[];
 
   for ($k = 0; $k < 10; $k++) {
     $array[$k] = null;
@@ -26,4 +26,3 @@ function demo(): bool {
 
   return (bool)$val1;
 }
-

@@ -117,12 +117,12 @@
         sc_support_dynamic_type = false;
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
-           scc_name = ([22:29-36], "CDARRAY");
+           scc_name = ([22:27-34], "CDARRAY");
            scc_type =
-           (Rhint ([22:9-28]),
-            (Tapply (([22:9-15], "\\HH\\dict"),
-               [(Rhint ([22:16-22]), (Tprim Tstring));
-                 (Rhint ([22:24-27]), (Tprim Tint))]
+           (Rhint ([22:9-26]),
+            (Tapply (([22:9-13], "\\HH\\dict"),
+               [(Rhint ([22:14-20]), (Tprim Tstring));
+                 (Rhint ([22:22-25]), (Tprim Tint))]
                )));
            scc_refs = [] };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
@@ -140,11 +140,11 @@
                 [(Rhint ([24:16-25]), (Tprim Tstring))])));
             scc_refs = [] };
           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
-            scc_name = ([25:24-31], "CVARRAY");
+            scc_name = ([25:21-28], "CVARRAY");
             scc_type =
-            (Rhint ([25:9-23]),
-             (Tapply (([25:9-15], "\\HH\\vec"),
-                [(Rhint ([25:16-22]), (Tprim Tstring))])));
+            (Rhint ([25:9-20]),
+             (Tapply (([25:9-12], "\\HH\\vec"),
+                [(Rhint ([25:13-19]), (Tprim Tstring))])));
             scc_refs = [] }
           ];
         sc_typeconsts = []; sc_props = []; sc_sprops = [];

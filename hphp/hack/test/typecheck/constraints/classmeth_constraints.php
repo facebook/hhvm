@@ -10,5 +10,5 @@ function my_array_map<Tm>((function(Tm): void) $f, varray<Tm> $a): void {}
 function render(): void {
   $f = MyClass::element<>;
   $f(new Base());
-  my_array_map($f, varray[]);
+  my_array_map($f, vec[]);
 }

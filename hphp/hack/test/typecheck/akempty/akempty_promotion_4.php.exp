@@ -2,5 +2,5 @@ File "akempty_promotion_4.php", line 9, characters 5-6:
 Invalid argument (Typing[4110])
   File "akempty_promotion_4.php", line 12, characters 24-26:
   Expected `int`
-  File "akempty_promotion_4.php", line 7, characters 17-24:
+  File "akempty_promotion_4.php", line 7, characters 17-21:
   But got `vec<(string | _)>`

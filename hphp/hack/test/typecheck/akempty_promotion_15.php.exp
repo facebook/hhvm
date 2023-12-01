@@ -2,5 +2,5 @@ File "akempty_promotion_15.php", line 8, characters 10-11:
 Invalid return type (Typing[4110])
   File "akempty_promotion_15.php", line 3, characters 25-38:
   Expected `vec<string>`
-  File "akempty_promotion_15.php", line 4, characters 8-15:
+  File "akempty_promotion_15.php", line 4, characters 8-13:
   But got `dict<int, string>`

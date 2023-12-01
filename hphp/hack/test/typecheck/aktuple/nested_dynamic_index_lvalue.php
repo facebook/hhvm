@@ -6,7 +6,7 @@
  */
 
 function test(int $key): void {
-  $a = Vector { varray[4, 'aaa'] };
+  $a = Vector { vec[4, 'aaa'] };
   $a[0][$key] = 4;
   take_string($a[0][1]);
 }

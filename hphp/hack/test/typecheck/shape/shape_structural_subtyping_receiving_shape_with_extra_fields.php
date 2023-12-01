@@ -21,7 +21,7 @@ function bar(): void {
       'b' => "b string",
       'c' => true,
       'd' => 9000.1,
-      'e' => varray[],
+      'e' => vec[],
     ),
   );
 }

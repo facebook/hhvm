@@ -15,12 +15,12 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class VecCombineTest extends HackTest {
 
   public static function provideTestConcat(): varray<mixed> {
-    return varray[
-      tuple(varray[], varray[], vec[]),
+    return vec[
+      tuple(vec[], vec[], vec[]),
       tuple(
         vec[],
-        varray[
-          darray[],
+        vec[
+          dict[],
           Vector {},
           Map {},
           Set {},
@@ -28,11 +28,11 @@ final class VecCombineTest extends HackTest {
         vec[],
       ),
       tuple(
-        varray['the', 'quick'],
-        varray[
+        vec['the', 'quick'],
+        vec[
           Vector {'brown', 'fox'},
           Map {'jumped' => 'over'},
-          HackLibTestTraversables::getIterator(varray['the', 'lazy', 'dog']),
+          HackLibTestTraversables::getIterator(vec['the', 'lazy', 'dog']),
         ],
         vec['the', 'quick', 'brown', 'fox', 'over', 'the', 'lazy', 'dog'],
       ),
@@ -69,7 +69,7 @@ final class VecCombineTest extends HackTest {
         vec[tuple(1, 'a'), tuple(2, 'b'), tuple(3, 'c')],
       ),
       "The inputs can be any traversables, but keys are discarded." => tuple(
-        darray['a' => 1, 'b' => 2, 'c' => 3],
+        dict['a' => 1, 'b' => 2, 'c' => 3],
         Map {10 => 'd', 20 => 'e', 30 => 'f'},
         vec[tuple(1, 'd'), tuple(2, 'e'), tuple(3, 'f')],
       ),

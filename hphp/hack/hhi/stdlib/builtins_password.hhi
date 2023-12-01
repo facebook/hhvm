@@ -16,7 +16,7 @@ const int PASSWORD_BCRYPT;
 function password_hash(
   string $password,
   int $algo,
-  darray<arraykey, mixed> $options = darray[],
+  darray<arraykey, mixed> $options = dict[],
 ): ?string;
 <<__PHPStdLib>>
 function password_verify(string $password, string $hash): bool;
@@ -26,5 +26,5 @@ function password_get_info(string $hash): darray<arraykey, mixed>;
 function password_needs_rehash(
   string $password,
   int $algo,
-  darray<arraykey, mixed> $options = darray[],
+  darray<arraykey, mixed> $options = dict[],
 ): bool;

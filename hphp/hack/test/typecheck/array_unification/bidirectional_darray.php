@@ -5,7 +5,7 @@ class A {
 }
 
 function f(): darray<string, (function (A): void)> {
-  return darray[
+  return dict[
     'hi' => ($f) ==> { $f->c(); }
   ];
 }

@@ -1,5 +1,5 @@
 <?hh
 
 function test(): darray<string, string> {
-  return varray["tingley"];
+  return vec["tingley"];
 }

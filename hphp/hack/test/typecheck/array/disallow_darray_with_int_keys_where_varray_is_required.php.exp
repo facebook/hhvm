@@ -1,6 +1,6 @@
-File "disallow_darray_with_int_keys_where_varray_is_required.php", line 16, characters 10-31:
+File "disallow_darray_with_int_keys_where_varray_is_required.php", line 16, characters 10-29:
 Invalid return type (Typing[4110])
   File "disallow_darray_with_int_keys_where_varray_is_required.php", line 15, characters 18-31:
   Expected `vec<string>`
-  File "disallow_darray_with_int_keys_where_varray_is_required.php", line 16, characters 10-31:
+  File "disallow_darray_with_int_keys_where_varray_is_required.php", line 16, characters 10-29:
   But got `dict<int, string>`

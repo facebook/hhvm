@@ -15,7 +15,7 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class CIntrospectTest extends HackTest {
 
   public static function provideTestAny(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Vector {2, 4, 6, 8, 9, 10, 12},
         $v ==> $v % 2 === 1,
@@ -39,18 +39,18 @@ final class CIntrospectTest extends HackTest {
   }
 
   public static function provideTestAnyWithoutPredicate(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        varray[],
+        vec[],
         false,
       ),
       tuple(
-        varray[null, 0, '0', ''],
+        vec[null, 0, '0', ''],
         false,
       ),
       tuple(
         HackLibTestTraversables::getIterator(
-          varray[null, 0, '0', '', 1],
+          vec[null, 0, '0', '', 1],
         ),
         true,
       ),
@@ -67,7 +67,7 @@ final class CIntrospectTest extends HackTest {
 
   public static function provideTestContains(
   ): varray<(Traversable<mixed>, mixed, bool)> {
-    return varray[
+    return vec[
       tuple(
         vec[1, 2, 3, 4, 5],
         3,
@@ -109,13 +109,13 @@ final class CIntrospectTest extends HackTest {
         true,
       ),
       tuple(
-        varray[dict[1 => 2, 3 => 4]],
+        vec[dict[1 => 2, 3 => 4]],
         dict[1 => 2, 3 => 4],
         true,
       ),
       tuple(
-        varray[varray[3]],
-        varray[4],
+        vec[vec[3]],
+        vec[4],
         false,
       ),
       tuple(
@@ -166,9 +166,9 @@ final class CIntrospectTest extends HackTest {
   }
 
   public static function provideTestContainsKey(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        darray[3 => 3],
+        dict[3 => 3],
         3,
         true,
       ),
@@ -210,8 +210,8 @@ final class CIntrospectTest extends HackTest {
   }
 
   public static function provideTestCount(): varray<mixed> {
-    return varray[
-      tuple(varray[], 0),
+    return vec[
+      tuple(vec[], 0),
       tuple(Vec\range(1, 10), 10),
       tuple(Set {1, 2}, 2),
       tuple(Vector {1, 2}, 2),
@@ -231,7 +231,7 @@ final class CIntrospectTest extends HackTest {
   }
 
   public static function provideTestEvery(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Vector {2, 4, 6, 8, 9, 10, 12},
         $v ==> $v % 2 === 0,
@@ -255,9 +255,9 @@ final class CIntrospectTest extends HackTest {
   }
 
   public static function provideTestEveryWithoutPredicate(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        varray[],
+        vec[],
         true,
       ),
       tuple(
@@ -276,10 +276,10 @@ final class CIntrospectTest extends HackTest {
   }
 
   public static function provideTestIsEmpty(): varray<mixed> {
-    return varray[
-      tuple(varray[], true),
-      tuple(varray[1], false),
-      tuple(darray['foo' => 'bar'], false),
+    return vec[
+      tuple(vec[], true),
+      tuple(vec[1], false),
+      tuple(dict['foo' => 'bar'], false),
       tuple(dict[], true),
       tuple(dict['foo' => 'bar'], false),
       tuple(vec[], true),

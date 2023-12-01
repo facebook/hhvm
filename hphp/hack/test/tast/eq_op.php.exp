@@ -19,16 +19,16 @@
           [([4:3-11], (Expr ((int), [4:3-10], (Binop { bop = (Eq (Some Minus)); lhs = ((int), [4:3-5], (Lvar ([4:3-5], $x))); rhs = ((int), [4:9-10], (Int "4")) }))));
             ([5:3-11], (Expr ((int), [5:3-10], (Binop { bop = (Eq (Some Plus)); lhs = ((int), [5:3-5], (Lvar ([5:3-5], $x))); rhs = ((int), [5:9-10], (Int "4")) }))));
             ([6:3-11], (Expr ((int), [6:3-10], (Binop { bop = (Eq (Some Star)); lhs = ((int), [6:3-5], (Lvar ([6:3-5], $x))); rhs = ((int), [6:9-10], (Int "4")) }))));
-            ([8:3-29],
+            ([8:3-26],
              (Expr
-                ((vec<int>), [8:3-28],
+                ((vec<int>), [8:3-25],
                  (Binop
                     { bop = (Eq None); lhs = ((vec<int>), [8:3-7], (Lvar ([8:3-7], $arr)));
                       rhs =
-                      ((vec<int>), [8:10-28],
-                       (ValCollection (([8:10-28], Vec), None, [((int), [8:17-18], (Int "1")); ((int), [8:20-21], (Int "2")); ((int), [8:23-24], (Int "3")); ((int), [8:26-27], (Int "4"))])))
+                      ((vec<int>), [8:10-25],
+                       (ValCollection (([8:10-13], Vec), None, [((int), [8:14-15], (Int "1")); ((int), [8:17-18], (Int "2")); ((int), [8:20-21], (Int "3")); ((int), [8:23-24], (Int "4"))])))
                       }))));
-            ([8:30-37], (Expr ((int), [8:30-36], (Binop { bop = (Eq None); lhs = ((int), [8:30-32], (Lvar ([8:30-32], $i))); rhs = ((int), [8:35-36], (Int "2")) }))));
+            ([8:27-34], (Expr ((int), [8:27-33], (Binop { bop = (Eq None); lhs = ((int), [8:27-29], (Lvar ([8:27-29], $i))); rhs = ((int), [8:32-33], (Int "2")) }))));
             ([9:3-21],
              (Expr
                 ((int), [9:3-20],

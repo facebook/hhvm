@@ -1,12 +1,12 @@
-File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 4, characters 10-26:
-Invalid index type for this darray (Typing[4110])
-  File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 4, characters 17-20:
+File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 4, characters 10-24:
+Invalid index type for this dict (Typing[4110])
+  File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 4, characters 15-18:
   Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
-  File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 4, characters 17-20:
+  File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 4, characters 15-18:
   But got `bool`
-File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 9, characters 12-29:
+File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 9, characters 12-27:
 Invalid return type (Typing[4110])
   File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 7, characters 43-45:
   Expected `int`
-  File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 9, characters 19-23:
+  File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 9, characters 17-21:
   But got `string`

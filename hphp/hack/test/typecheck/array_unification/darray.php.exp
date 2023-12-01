@@ -1,6 +1,6 @@
-File "darray.php", line 24, characters 10-26:
+File "darray.php", line 24, characters 10-24:
 Invalid return type (Typing[4110])
   File "darray.php", line 23, characters 44-47:
   Expected `bool`
-  File "darray.php", line 24, characters 10-26:
+  File "darray.php", line 24, characters 10-24:
   But got `dict<int, bool>`

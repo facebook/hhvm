@@ -2,7 +2,7 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function omg(): (?string, varray<int>) {
-  $x = varray[];
+  $x = vec[];
   return $x;
 }
 

@@ -16,7 +16,7 @@ function test_vec(): void {
 }
 
 function test_varray(): void {
-  $v = (new Inv(varray[1, 2]))->value;
+  $v = (new Inv(vec[1, 2]))->value;
   list($_, $_) = $v;
 }
 

@@ -1,6 +1,6 @@
-File "disallow_key_value_inputs_for_varray.php", line 4, characters 20-20:
+File "disallow_key_value_inputs_for_varray.php", line 4, characters 17-17:
 A closing square bracket `]` is expected here. (Parsing[1002])
-File "disallow_key_value_inputs_for_varray.php", line 4, characters 20-21:
+File "disallow_key_value_inputs_for_varray.php", line 4, characters 17-18:
 Unbound name: `=>` (a global constant) (Naming[2049])
-File "disallow_key_value_inputs_for_varray.php", line 4, characters 20-21:
+File "disallow_key_value_inputs_for_varray.php", line 4, characters 17-18:
 Unbound global constant (Typing) (Typing[4106])

@@ -15,13 +15,13 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class DictOrderTest extends HackTest {
 
   public static function provideTestReverse(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Map {},
         dict[],
       ),
       tuple(
-        darray[
+        dict[
           'the' => 'quick',
           'brown' => 'fox',
           'jumped' => 'over',
@@ -56,10 +56,10 @@ final class DictOrderTest extends HackTest {
   }
 
   public static function provideTestShuffle(): varray<mixed> {
-    return varray[
-      tuple(darray['0' => '0', '1' => '1', '2' => '2', '3' => '3']),
+    return vec[
+      tuple(dict['0' => '0', '1' => '1', '2' => '2', '3' => '3']),
       tuple(dict['3' => 3, '2' => 2, '1' => 1, '0' => 0]),
-      tuple(darray[
+      tuple(dict[
         'brown' => 'brown',
         'fox' => 'fox',
         'jumped' => 'jumped',
@@ -103,7 +103,7 @@ final class DictOrderTest extends HackTest {
   }
 
   public static function provideTestSort(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Map {
           '0' => 'the',
@@ -135,7 +135,7 @@ final class DictOrderTest extends HackTest {
         ],
       ),
       tuple(
-        darray[
+        dict[
           0 => 'the',
           1 => 'quick',
           2 => 'brown',
@@ -151,7 +151,7 @@ final class DictOrderTest extends HackTest {
         ],
       ),
       tuple(
-        HackLibTestTraversables::getKeyedIterator(varray[
+        HackLibTestTraversables::getKeyedIterator(vec[
           'the', 'quick', 'brown', 'fox',
         ]),
         /* HH_FIXME[4297] The type of the lambda argument(s) could not be inferred */
@@ -177,9 +177,9 @@ final class DictOrderTest extends HackTest {
   }
 
   public static function provideTestSortBy(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        varray['the', 'quick', 'brown', 'fox', 'jumped'],
+        vec['the', 'quick', 'brown', 'fox', 'jumped'],
         $s ==> Str\reverse($s),
         null,
         dict[
@@ -192,20 +192,20 @@ final class DictOrderTest extends HackTest {
       ),
       tuple(
         Map {
-          0 => varray['eddard', 'stark'],
-          1 => varray['arya', 'stark'],
-          2 => varray['tyrion', 'lannister'],
-          3 => varray['joffrey', 'boratheon'],
-          4 => varray['daenerys', 'targaryen'],
+          0 => vec['eddard', 'stark'],
+          1 => vec['arya', 'stark'],
+          2 => vec['tyrion', 'lannister'],
+          3 => vec['joffrey', 'boratheon'],
+          4 => vec['daenerys', 'targaryen'],
         },
         Vec\reverse<>,
         ($a, $b) ==> $b <=> $a,
         dict[
-          4 => varray['daenerys', 'targaryen'],
-          0 => varray['eddard', 'stark'],
-          1 => varray['arya', 'stark'],
-          2 => varray['tyrion', 'lannister'],
-          3 => varray['joffrey', 'boratheon'],
+          4 => vec['daenerys', 'targaryen'],
+          0 => vec['eddard', 'stark'],
+          1 => vec['arya', 'stark'],
+          2 => vec['tyrion', 'lannister'],
+          3 => vec['joffrey', 'boratheon'],
         ],
       ),
     ];
@@ -223,7 +223,7 @@ final class DictOrderTest extends HackTest {
   }
 
   public static function provideTestSortByKey(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Map {
           'the' => 'the',

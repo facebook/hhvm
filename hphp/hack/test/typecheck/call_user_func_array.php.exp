@@ -1,4 +1,4 @@
-File "call_user_func_array.php", line 13, characters 3-50:
+File "call_user_func_array.php", line 13, characters 3-47:
 This call is invalid, this is not a function, it is an object of type vec<string> (Typing[4009])
 File "call_user_func_array.php", line 13, characters 3-16:
 The builtin `call_user_func` is deprecated. (Typing[4128])

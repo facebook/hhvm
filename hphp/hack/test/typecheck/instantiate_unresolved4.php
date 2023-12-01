@@ -10,11 +10,11 @@
  */
 
 function foo<T>(mixed $x): varray<T> {
-  return varray[];
+  return vec[];
 }
 
 function a<T>(): varray<T> {
-  return varray[];
+  return vec[];
 }
 
 function f(): void {

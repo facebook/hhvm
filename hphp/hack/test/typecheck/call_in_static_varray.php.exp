@@ -1,8 +1,8 @@
-File "call_in_static_varray.php", line 7, characters 44-49:
+File "call_in_static_varray.php", line 7, characters 41-46:
 Expected constant expression for initializer (Parsing[1002])
-File "call_in_static_varray.php", line 7, characters 44-47:
+File "call_in_static_varray.php", line 7, characters 41-44:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
-  File "call_in_static_varray.php", line 7, characters 37-50:
+  File "call_in_static_varray.php", line 7, characters 37-47:
   From this declaration, the context of this function body provides the capability set {}
   File "call_in_static_varray.php", line 4, characters 26-26:
   But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}

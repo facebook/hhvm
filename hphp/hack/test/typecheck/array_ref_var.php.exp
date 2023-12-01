@@ -1,6 +1,6 @@
-File "array_ref_var.php", line 13, characters 16-16:
+File "array_ref_var.php", line 13, characters 13-13:
 An expression is expected here. (Parsing[1002])
-File "array_ref_var.php", line 13, characters 15-15:
+File "array_ref_var.php", line 13, characters 12-12:
 Unbound name: `&` (a global constant) (Naming[2049])
-File "array_ref_var.php", line 13, characters 15-15:
+File "array_ref_var.php", line 13, characters 12-12:
 Unbound global constant (Typing) (Typing[4106])

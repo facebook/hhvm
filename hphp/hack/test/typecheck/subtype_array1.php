@@ -10,7 +10,7 @@
  */
 
 function get_arr(): varray<int> {
-  return varray[1, 2, 3];
+  return vec[1, 2, 3];
 }
 
 function use_arr(varray<mixed> $arr): void {

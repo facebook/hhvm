@@ -115,7 +115,7 @@ class ReflectionClass implements Reflector {
     HH\FIXME\MISSING_PARAM_TYPE ...$args
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function newInstanceArgs(
-    Traversable<mixed> $args = varray[],
+    Traversable<mixed> $args = vec[],
   )[defaults]: HH\FIXME\MISSING_RETURN_TYPE;
   public function newInstanceWithoutConstructor(
   )[]: HH\FIXME\MISSING_RETURN_TYPE;
@@ -426,7 +426,7 @@ class ReflectionType implements IPureStringishObject {
   private function __clone(): HH\FIXME\MISSING_RETURN_TYPE;
   public function __construct(
     ?Reflector $param_or_ret = null,
-    darray<arraykey, mixed> $type_hint_info = darray[],
+    darray<arraykey, mixed> $type_hint_info = dict[],
   );
   public function allowsNull()[]: bool;
   public function isBuiltin()[]: bool;

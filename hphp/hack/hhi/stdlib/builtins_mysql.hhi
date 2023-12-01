@@ -108,7 +108,7 @@ function mysql_connect(
   int $client_flags = 0,
   int $connect_timeout_ms = -1,
   int $query_timeout_ms = -1,
-  darray<string, string> $conn_attrs = darray[],
+  darray<string, string> $conn_attrs = dict[],
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_pconnect(
@@ -118,7 +118,7 @@ function mysql_pconnect(
   int $client_flags = 0,
   int $connect_timeout_ms = -1,
   int $query_timeout_ms = -1,
-  darray<string, string> $conn_attrs = darray[],
+  darray<string, string> $conn_attrs = dict[],
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_connect_with_db(
@@ -130,7 +130,7 @@ function mysql_connect_with_db(
   int $client_flags = 0,
   int $connect_timeout_ms = -1,
   int $query_timeout_ms = -1,
-  darray<string, string> $conn_attrs = darray[],
+  darray<string, string> $conn_attrs = dict[],
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_connect_with_ssl(
@@ -142,7 +142,7 @@ function mysql_connect_with_ssl(
   int $connect_timeout_ms = -1,
   int $query_timeout_ms = -1,
   ?MySSLContextProvider $ssl_context = null,
-  darray<string, string> $conn_attrs = darray[],
+  darray<string, string> $conn_attrs = dict[],
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_pconnect_with_db(
@@ -153,7 +153,7 @@ function mysql_pconnect_with_db(
   int $client_flags = 0,
   int $connect_timeout_ms = -1,
   int $query_timeout_ms = -1,
-  darray<string, string> $conn_attrs = darray[],
+  darray<string, string> $conn_attrs = dict[],
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_set_charset(

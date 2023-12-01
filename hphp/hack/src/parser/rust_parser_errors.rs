@@ -137,7 +137,7 @@ impl UnstableFeatures {
             UnstableFeatures::Package => Preview,
             UnstableFeatures::CaseTypes => Preview,
             UnstableFeatures::ModuleLevelTraits => Preview,
-            UnstableFeatures::TypedLocalVariables => Unstable,
+            UnstableFeatures::TypedLocalVariables => Preview,
             UnstableFeatures::PipeAwait => Preview,
             UnstableFeatures::MatchStatements => Unstable,
             UnstableFeatures::StrictSwitch => Unstable,

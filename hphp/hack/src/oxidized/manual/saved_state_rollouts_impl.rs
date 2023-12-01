@@ -43,6 +43,7 @@ impl Flag {
             Self::DummyThree => 2,
             Self::OptimizedMemberFanout => 4,
             Self::OptimizedParentFanout => 6,
+            Self::NewNamingTable => 7,
         }
     }
 
@@ -53,6 +54,7 @@ impl Flag {
             Self::DummyThree => "dummy_three",
             Self::OptimizedMemberFanout => "optimized_member_fanout",
             Self::OptimizedParentFanout => "optimized_parent_fanout",
+            Self::NewNamingTable => "new_naming_table",
         }
     }
 }
@@ -96,6 +98,7 @@ impl SavedStateRollouts {
             dummy_three: get_flag_value(Flag::DummyThree)?,
             optimized_member_fanout: get_flag_value(Flag::OptimizedMemberFanout)?,
             optimized_parent_fanout: get_flag_value(Flag::OptimizedParentFanout)?,
+            new_naming_table: get_flag_value(Flag::NewNamingTable)?,
         })
     }
 }

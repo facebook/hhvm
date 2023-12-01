@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<993129cd0e9426080c1e3905a9beed21>>
+// @generated SignedSource<<ae1bf378c79e3a0c7e772f6d6f923da2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -43,6 +43,7 @@ pub struct SavedStateRollouts {
     pub dummy_three: bool,
     pub optimized_member_fanout: bool,
     pub optimized_parent_fanout: bool,
+    pub new_naming_table: bool,
 }
 
 #[derive(
@@ -75,6 +76,8 @@ pub enum Flag {
     OptimizedMemberFanout,
     #[rust_to_ocaml(name = "Optimized_parent_fanout")]
     OptimizedParentFanout,
+    #[rust_to_ocaml(name = "New_naming_table")]
+    NewNamingTable,
 }
 impl TrivialDrop for Flag {}
 arena_deserializer::impl_deserialize_in_arena!(Flag);

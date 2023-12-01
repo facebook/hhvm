@@ -14,6 +14,7 @@ type t = {
   dummy_three: bool;
   optimized_member_fanout: bool;
   optimized_parent_fanout: bool;
+  new_naming_table: bool;
 }
 [@@deriving eq, show]
 
@@ -32,6 +33,7 @@ type flag =
   | Dummy_three
   | Optimized_member_fanout
   | Optimized_parent_fanout
+  | New_naming_table
 [@@deriving show { with_path = false }]
 
 type flag_name = string
@@ -144,6 +146,7 @@ let rollout_order =
   | Dummy_three -> 2
   | Optimized_member_fanout -> 4
   | Optimized_parent_fanout -> 5
+  | New_naming_table -> 6
 
 let make
     ~current_rolled_out_flag_idx
@@ -172,6 +175,7 @@ let make
     dummy_three = get_flag_value Dummy_three;
     optimized_member_fanout = get_flag_value Optimized_member_fanout;
     optimized_parent_fanout = get_flag_value Optimized_parent_fanout;
+    new_naming_table = get_flag_value New_naming_table;
   }
 
 let default : t =
@@ -191,6 +195,7 @@ let output t =
     dummy_three;
     optimized_member_fanout;
     optimized_parent_fanout;
+    new_naming_table;
   } =
     t
   in
@@ -199,6 +204,7 @@ let output t =
   print_flag Dummy_three dummy_three;
   print_flag Optimized_member_fanout optimized_member_fanout;
   print_flag Optimized_parent_fanout optimized_parent_fanout;
+  print_flag New_naming_table new_naming_table;
   ()
 
 let to_bit_array_string t : string =
@@ -212,6 +218,7 @@ let to_bit_array_string t : string =
     dummy_three;
     optimized_member_fanout;
     optimized_parent_fanout;
+    new_naming_table;
   } =
     t
   in
@@ -220,6 +227,7 @@ let to_bit_array_string t : string =
   ^ s dummy_three
   ^ s optimized_member_fanout
   ^ s optimized_parent_fanout
+  ^ s new_naming_table
 
 let to_hh_json t : Hh_json.json =
   let {
@@ -228,6 +236,7 @@ let to_hh_json t : Hh_json.json =
     dummy_three = _;
     optimized_member_fanout;
     optimized_parent_fanout;
+    new_naming_table;
   } =
     t
   in
@@ -235,4 +244,5 @@ let to_hh_json t : Hh_json.json =
     [
       ("optimized_member_fanout", Hh_json.bool_ optimized_member_fanout);
       ("optimized_parent_fanout", Hh_json.bool_ optimized_parent_fanout);
+      ("new_naming_table", Hh_json.bool_ new_naming_table);
     ]

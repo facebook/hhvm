@@ -1156,6 +1156,7 @@ struct Attributes<'a> {
     safe_global_variable: bool,
     cross_package: Option<&'a str>,
     sort_text: Option<&'a str>,
+    dynamically_referenced: bool,
 }
 
 impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> Impl<'a, 'o, 't, S> {
@@ -1597,6 +1598,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             safe_global_variable: false,
             cross_package: None,
             sort_text: None,
+            dynamically_referenced: false,
         };
 
         let nodes = match node {
@@ -1640,6 +1642,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                     }
                     "__DynamicallyCallable" => {
                         attributes.dynamically_callable = true;
+                    }
+                    "__DynamicallyReferenced" => {
+                        attributes.dynamically_referenced = true;
                     }
                     "__ReturnDisposable" => {
                         attributes.returns_disposable = true;
@@ -4383,7 +4388,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                     // Annoyingly, the <<__SupportDynamicType>> annotation on a
                     // class implicitly changes the decls of every method inside
                     // it, so we have to reallocate them here.
-                    let method = if (self.implicit_sdt() || class_attributes.support_dynamic_type)
+                    let method = if (self.implicit_sdt()
+                        || class_attributes.support_dynamic_type
+                        || class_attributes.dynamically_referenced)
                         && !method.flags.contains(MethodFlags::SUPPORT_DYNAMIC_TYPE)
                     {
                         let type_ = match method.type_.1 {

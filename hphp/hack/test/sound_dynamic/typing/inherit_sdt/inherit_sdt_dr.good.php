@@ -1,7 +1,7 @@
 <?hh
 // (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
 
-<<__SupportDynamicType>>
+<<__DynamicallyReferenced>>
 class C {
   public function foo():int { return 3; }
 }

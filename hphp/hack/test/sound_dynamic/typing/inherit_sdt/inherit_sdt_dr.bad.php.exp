@@ -1,0 +1,21 @@
+File "inherit_sdt_dr.bad.php", line 13, characters 41-52:
+Invalid return type (Typing[4110])
+  File "inherit_sdt_dr.bad.php", line 13, characters 25-30:
+  Expected `dynamic` because method must be callable in a dynamic context
+  File "inherit_sdt_dr.bad.php", line 13, characters 45-50:
+  Type `NonSDT` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "inherit_sdt_dr.bad.php", line 21, characters 12-23:
+Method  `bar` in class `E` is not dynamically callable. (Typing[4110])
+  File "inherit_sdt_dr.bad.php", line 21, characters 12-23:
+  Invalid return type
+  File "inherit_sdt_dr.bad.php", line 20, characters 26-30:
+  Expected `dynamic` because method must be callable in a dynamic context
+  File "inherit_sdt_dr.bad.php", line 21, characters 16-21:
+  Type `NonSDT` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "inherit_sdt_dr.bad.php", line 18, characters 7-7:
+Class E must support dynamic at least as often as C:
+C is subtype of dynamic implies E<T> is subtype of dynamic (Typing[4433])
+  File "inherit_sdt_dr.bad.php", line 18, characters 7-7:
+  Expected `dynamic`
+  File "inherit_sdt_dr.bad.php", line 18, characters 7-7:
+  Type `E<T>` is not a subtype of `dynamic` under dynamic-aware subtyping

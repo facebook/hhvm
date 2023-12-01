@@ -1110,7 +1110,10 @@ and class_decl
         c.sc_support_dynamic_type
         || inherited.Decl_inherit.ih_support_dynamic_type
            && TypecheckerOptions.implicit_inherit_sdt
-                (Provider_context.get_tcopt ctx);
+                (Provider_context.get_tcopt ctx)
+        || Attributes.mem
+             SN.UserAttributes.uaDynamicallyReferenced
+             c.sc_user_attributes;
       dc_extends = extends;
       dc_sealed_whitelist = sealed_whitelist;
       dc_xhp_attr_deps = xhp_attr_deps;

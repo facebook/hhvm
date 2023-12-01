@@ -911,7 +911,9 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             is_internal: self.child.is_internal,
             is_xhp: self.child.is_xhp,
             support_dynamic_type: self.opts.tco_implicit_inherit_sdt && support_dynamic_type
-                || self.child.support_dynamic_type,
+                || self.child.support_dynamic_type
+                || (self.child.user_attributes.iter())
+                    .any(|ua| ua.name.id() == *sn::user_attributes::uaDynamicallyReferenced),
             enum_type: self.child.enum_type.clone(),
             has_xhp_keyword: self.child.has_xhp_keyword,
             module: self.child.module.clone(),

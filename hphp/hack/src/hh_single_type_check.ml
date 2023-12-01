@@ -118,6 +118,24 @@ let magic_builtins =
       ^ "}\n" );
   |]
 
+let find_naming_table_or_fail () : string =
+  let dir = "/tmp/hh_server/hh_saved_states_sql" in
+  let candidates =
+    Disk.readdir dir
+    |> Array.to_list
+    |> List.map ~f:(fun s ->
+           Printf.sprintf "%s/%s/hh_mini_saved_state_naming.sql" dir s)
+    |> List.filter ~f:Sys.file_exists
+  in
+  match candidates with
+  | [] -> failwith ("--root needs --naming-table, or to find one in " ^ dir)
+  | naming_table :: _ ->
+    Printf.eprintf
+      "WARNING: --naming-table wasn't specified, so guessing this one will work (out of %d total candidates):\n%s\n"
+      (List.length candidates)
+      naming_table;
+    naming_table
+
 (*****************************************************************************)
 (* Helpers *)
 (*****************************************************************************)
@@ -843,30 +861,39 @@ let parse_options () =
     | None -> Path.make "/" (* if none specified, we use this dummy *)
     | Some root ->
       if Option.is_none !naming_table then
-        failwith "--root needs --naming-table";
-      (* builtins are already provided by project at --root, so we shouldn't provide our own *)
-      no_builtins := true;
+        naming_table := Some (find_naming_table_or_fail ());
       (* Following will throw an exception if .hhconfig not found *)
       let (_config_hash, config) =
         Config_file.parse_hhconfig
           (Filename.concat root Config_file.file_path_relative_to_repo_root)
       in
-      (* We will pick up values from .hhconfig, unless they've been overridden at the command-line. *)
-      if Option.is_none !auto_namespace_map then
-        auto_namespace_map :=
-          config
-          |> Config_file.Getters.string_opt "auto_namespace_map"
-          |> Option.map ~f:ServerConfig.convert_auto_namespace_to_map;
-      if Option.is_none !allowed_fixme_codes_strict then
-        allowed_fixme_codes_strict :=
-          config
-          |> Config_file.Getters.string_opt "allowed_fixme_codes_strict"
-          |> Option.map ~f:comma_string_to_iset;
+      (* We'll pick up values from .hhconfig, then run [Arg.parse] a second time to let CLI options override. *)
+      auto_namespace_map :=
+        config
+        |> Config_file.Getters.string_opt "auto_namespace_map"
+        |> Option.map ~f:ServerConfig.convert_auto_namespace_to_map;
+      allowed_fixme_codes_strict :=
+        config
+        |> Config_file.Getters.string_opt "allowed_fixme_codes_strict"
+        |> Option.map ~f:comma_string_to_iset;
+      everything_sdt :=
+        config
+        |> Config_file.Getters.bool_opt "everything_sdt"
+        |> Option.value ~default:!everything_sdt;
+      enable_sound_dynamic :=
+        config
+        |> Config_file.Getters.bool_opt "enable_sound_dynamic_type"
+        |> Option.value ~default:!enable_sound_dynamic;
       sharedmem_config :=
         ServerConfig.make_sharedmem_config
           config
           (ServerArgs.default_options ~root)
           ServerLocalConfig.default;
+      no_builtins := true;
+      (* Now let CLI options override whatever we just picked *)
+      Arg.parse options (fun _ -> ()) usage;
+      (* Final validation *)
+      if not !no_builtins then failwith "--root needs --no-builtins";
       (* Path.make canonicalizes it, i.e. resolves symlinks *)
       Path.make root
   in

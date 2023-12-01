@@ -27,8 +27,6 @@
 #include <thrift/lib/cpp2/type/Id.h>
 #include <thrift/lib/cpp2/type/detail/Wrap.h>
 
-static_assert(FOLLY_CPLUSPLUS >= 201703L, "Thrift Patch requires C++17");
-
 namespace apache {
 namespace thrift {
 namespace op {

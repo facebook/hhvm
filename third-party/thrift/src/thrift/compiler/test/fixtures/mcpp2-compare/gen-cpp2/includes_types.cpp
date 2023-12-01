@@ -14,9 +14,6 @@
 
 namespace apache { namespace thrift {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr std::size_t const TEnumTraits<::a::different::ns::AnEnum>::size;
-#endif
 folly::Range<::a::different::ns::AnEnum const*> const TEnumTraits<::a::different::ns::AnEnum>::values = folly::range(TEnumDataStorage<::a::different::ns::AnEnum>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::a::different::ns::AnEnum>::names = folly::range(TEnumDataStorage<::a::different::ns::AnEnum>::names);
 

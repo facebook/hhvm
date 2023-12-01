@@ -14,9 +14,6 @@
 
 namespace apache { namespace thrift {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr std::size_t const TEnumTraits<::cpp2::EmptyEnum>::size;
-#endif
 folly::Range<::cpp2::EmptyEnum const*> const TEnumTraits<::cpp2::EmptyEnum>::values = {};
 folly::Range<folly::StringPiece const*> const TEnumTraits<::cpp2::EmptyEnum>::names = {};
 
@@ -33,9 +30,6 @@ bool TEnumTraits<::cpp2::EmptyEnum>::findValue(folly::StringPiece name, type* ou
 
 namespace apache { namespace thrift {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr std::size_t const TEnumTraits<::cpp2::City>::size;
-#endif
 folly::Range<::cpp2::City const*> const TEnumTraits<::cpp2::City>::values = folly::range(TEnumDataStorage<::cpp2::City>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::cpp2::City>::names = folly::range(TEnumDataStorage<::cpp2::City>::names);
 
@@ -52,9 +46,6 @@ bool TEnumTraits<::cpp2::City>::findValue(folly::StringPiece name, type* out) no
 
 namespace apache { namespace thrift {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr std::size_t const TEnumTraits<::cpp2::Company>::size;
-#endif
 folly::Range<::cpp2::Company const*> const TEnumTraits<::cpp2::Company>::values = folly::range(TEnumDataStorage<::cpp2::Company>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::cpp2::Company>::names = folly::range(TEnumDataStorage<::cpp2::Company>::names);
 
@@ -763,9 +754,6 @@ void TccStructTraits<::cpp2::union1>::translateFieldName(
 
 namespace apache { namespace thrift {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr std::size_t const TEnumTraits<::cpp2::union1::Type>::size;
-#endif
 folly::Range<::cpp2::union1::Type const*> const TEnumTraits<::cpp2::union1::Type>::values = folly::range(TEnumDataStorage<::cpp2::union1::Type>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::cpp2::union1::Type>::names = folly::range(TEnumDataStorage<::cpp2::union1::Type>::names);
 
@@ -857,9 +845,6 @@ void TccStructTraits<::cpp2::union2>::translateFieldName(
 
 namespace apache { namespace thrift {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr std::size_t const TEnumTraits<::cpp2::union2::Type>::size;
-#endif
 folly::Range<::cpp2::union2::Type const*> const TEnumTraits<::cpp2::union2::Type>::values = folly::range(TEnumDataStorage<::cpp2::union2::Type>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::cpp2::union2::Type>::names = folly::range(TEnumDataStorage<::cpp2::union2::Type>::names);
 

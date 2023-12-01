@@ -14,9 +14,6 @@
 
 namespace apache { namespace thrift {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr std::size_t const TEnumTraits<::facebook::thrift::test::terse_write::MyEnum>::size;
-#endif
 folly::Range<::facebook::thrift::test::terse_write::MyEnum const*> const TEnumTraits<::facebook::thrift::test::terse_write::MyEnum>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::terse_write::MyEnum>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::facebook::thrift::test::terse_write::MyEnum>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::terse_write::MyEnum>::names);
 
@@ -129,9 +126,6 @@ void TccStructTraits<::facebook::thrift::test::terse_write::MyUnion>::translateF
 
 namespace apache { namespace thrift {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr std::size_t const TEnumTraits<::facebook::thrift::test::terse_write::MyUnion::Type>::size;
-#endif
 folly::Range<::facebook::thrift::test::terse_write::MyUnion::Type const*> const TEnumTraits<::facebook::thrift::test::terse_write::MyUnion::Type>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::terse_write::MyUnion::Type>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::facebook::thrift::test::terse_write::MyUnion::Type>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::terse_write::MyUnion::Type>::names);
 

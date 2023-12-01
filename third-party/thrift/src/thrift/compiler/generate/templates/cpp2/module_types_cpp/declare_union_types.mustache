@@ -18,9 +18,6 @@
 
 namespace apache { namespace thrift {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr std::size_t const TEnumTraits<<%struct:cpp_fullname%>::Type>::size;
-#endif
 folly::Range<<%struct:cpp_fullname%>::Type const*> const TEnumTraits<<%struct:cpp_fullname%>::Type>::values = <%!
     %>folly::range(TEnumDataStorage<<%struct:cpp_fullname%>::Type>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<<%struct:cpp_fullname%>::Type>::names = <%!

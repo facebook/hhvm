@@ -18,8 +18,5 @@ namespace cpp2 {
   return *instance;
 }
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int64_t const includes_constants::IncludedConstant_;
-#endif
 
 } // cpp2

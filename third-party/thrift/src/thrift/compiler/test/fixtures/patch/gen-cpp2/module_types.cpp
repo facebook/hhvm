@@ -14,9 +14,6 @@
 
 namespace apache { namespace thrift {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr std::size_t const TEnumTraits<::test::fixtures::patch::MyEnum>::size;
-#endif
 folly::Range<::test::fixtures::patch::MyEnum const*> const TEnumTraits<::test::fixtures::patch::MyEnum>::values = folly::range(TEnumDataStorage<::test::fixtures::patch::MyEnum>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::test::fixtures::patch::MyEnum>::names = folly::range(TEnumDataStorage<::test::fixtures::patch::MyEnum>::names);
 
@@ -265,9 +262,6 @@ void TccStructTraits<::test::fixtures::patch::InnerUnion>::translateFieldName(
 
 namespace apache { namespace thrift {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr std::size_t const TEnumTraits<::test::fixtures::patch::InnerUnion::Type>::size;
-#endif
 folly::Range<::test::fixtures::patch::InnerUnion::Type const*> const TEnumTraits<::test::fixtures::patch::InnerUnion::Type>::values = folly::range(TEnumDataStorage<::test::fixtures::patch::InnerUnion::Type>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::test::fixtures::patch::InnerUnion::Type>::names = folly::range(TEnumDataStorage<::test::fixtures::patch::InnerUnion::Type>::names);
 
@@ -360,9 +354,6 @@ void TccStructTraits<::test::fixtures::patch::MyUnion>::translateFieldName(
 
 namespace apache { namespace thrift {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr std::size_t const TEnumTraits<::test::fixtures::patch::MyUnion::Type>::size;
-#endif
 folly::Range<::test::fixtures::patch::MyUnion::Type const*> const TEnumTraits<::test::fixtures::patch::MyUnion::Type>::values = folly::range(TEnumDataStorage<::test::fixtures::patch::MyUnion::Type>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::test::fixtures::patch::MyUnion::Type>::names = folly::range(TEnumDataStorage<::test::fixtures::patch::MyUnion::Type>::names);
 

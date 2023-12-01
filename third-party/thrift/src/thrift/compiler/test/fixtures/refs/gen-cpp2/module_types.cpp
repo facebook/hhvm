@@ -14,9 +14,6 @@
 
 namespace apache { namespace thrift {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr std::size_t const TEnumTraits<::cpp2::MyEnum>::size;
-#endif
 folly::Range<::cpp2::MyEnum const*> const TEnumTraits<::cpp2::MyEnum>::values = folly::range(TEnumDataStorage<::cpp2::MyEnum>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::cpp2::MyEnum>::names = folly::range(TEnumDataStorage<::cpp2::MyEnum>::names);
 
@@ -33,9 +30,6 @@ bool TEnumTraits<::cpp2::MyEnum>::findValue(folly::StringPiece name, type* out) 
 
 namespace apache { namespace thrift {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr std::size_t const TEnumTraits<::cpp2::TypedEnum>::size;
-#endif
 folly::Range<::cpp2::TypedEnum const*> const TEnumTraits<::cpp2::TypedEnum>::values = folly::range(TEnumDataStorage<::cpp2::TypedEnum>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::cpp2::TypedEnum>::names = folly::range(TEnumDataStorage<::cpp2::TypedEnum>::names);
 
@@ -73,9 +67,6 @@ void TccStructTraits<::cpp2::MyUnion>::translateFieldName(
 
 namespace apache { namespace thrift {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr std::size_t const TEnumTraits<::cpp2::MyUnion::Type>::size;
-#endif
 folly::Range<::cpp2::MyUnion::Type const*> const TEnumTraits<::cpp2::MyUnion::Type>::values = folly::range(TEnumDataStorage<::cpp2::MyUnion::Type>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::cpp2::MyUnion::Type>::names = folly::range(TEnumDataStorage<::cpp2::MyUnion::Type>::names);
 
@@ -167,9 +158,6 @@ void TccStructTraits<::cpp2::NonTriviallyDestructibleUnion>::translateFieldName(
 
 namespace apache { namespace thrift {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr std::size_t const TEnumTraits<::cpp2::NonTriviallyDestructibleUnion::Type>::size;
-#endif
 folly::Range<::cpp2::NonTriviallyDestructibleUnion::Type const*> const TEnumTraits<::cpp2::NonTriviallyDestructibleUnion::Type>::values = folly::range(TEnumDataStorage<::cpp2::NonTriviallyDestructibleUnion::Type>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::cpp2::NonTriviallyDestructibleUnion::Type>::names = folly::range(TEnumDataStorage<::cpp2::NonTriviallyDestructibleUnion::Type>::names);
 

@@ -44,10 +44,6 @@
 
 #include <thrift/lib/cpp2/reflection/internal/reflection-inl-pre.h>
 
-#if !defined(_MSC_VER) || _MSC_VER >= 2000
-static_assert(__cplusplus >= 201703L, "__cplusplus >= 201703L");
-#endif
-
 namespace apache {
 namespace thrift {
 

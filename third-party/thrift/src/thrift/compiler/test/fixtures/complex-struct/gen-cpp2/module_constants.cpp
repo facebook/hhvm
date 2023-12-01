@@ -12,9 +12,6 @@
 
 namespace cpp2 {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int32_t const module_constants::DEFAULT_PORT_NUM_;
-#endif
 
 ::cpp2::MyUnion const& module_constants::constEnumUnion() {
   static folly::Indestructible<::cpp2::MyUnion> const instance{::apache::thrift::detail::make_structured_constant<::cpp2::MyUnion>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::myEnum>( ::cpp2::MyEnum::MyValue2))};

@@ -14,9 +14,6 @@
 
 namespace apache { namespace thrift {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr std::size_t const TEnumTraits<::facebook::thrift::test::Color>::size;
-#endif
 folly::Range<::facebook::thrift::test::Color const*> const TEnumTraits<::facebook::thrift::test::Color>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::Color>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::facebook::thrift::test::Color>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::Color>::names);
 
@@ -33,9 +30,6 @@ bool TEnumTraits<::facebook::thrift::test::Color>::findValue(folly::StringPiece 
 
 namespace apache { namespace thrift {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr std::size_t const TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::size;
-#endif
 folly::Range<::facebook::thrift::test::ThriftAdaptedEnum const*> const TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::ThriftAdaptedEnum>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::ThriftAdaptedEnum>::names);
 
@@ -411,9 +405,6 @@ void TccStructTraits<::facebook::thrift::test::Baz>::translateFieldName(
 
 namespace apache { namespace thrift {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr std::size_t const TEnumTraits<::facebook::thrift::test::Baz::Type>::size;
-#endif
 folly::Range<::facebook::thrift::test::Baz::Type const*> const TEnumTraits<::facebook::thrift::test::Baz::Type>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::Baz::Type>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::facebook::thrift::test::Baz::Type>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::Baz::Type>::names);
 
@@ -2278,9 +2269,6 @@ void TccStructTraits<::facebook::thrift::test::ThriftAdaptTestUnion>::translateF
 
 namespace apache { namespace thrift {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr std::size_t const TEnumTraits<::facebook::thrift::test::ThriftAdaptTestUnion::Type>::size;
-#endif
 folly::Range<::facebook::thrift::test::ThriftAdaptTestUnion::Type const*> const TEnumTraits<::facebook::thrift::test::ThriftAdaptTestUnion::Type>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::ThriftAdaptTestUnion::Type>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::facebook::thrift::test::ThriftAdaptTestUnion::Type>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::ThriftAdaptTestUnion::Type>::names);
 

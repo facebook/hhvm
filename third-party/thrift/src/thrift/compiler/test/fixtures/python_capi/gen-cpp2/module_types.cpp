@@ -14,9 +14,6 @@
 
 namespace apache { namespace thrift {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr std::size_t const TEnumTraits<::test::fixtures::python_capi::MyEnum>::size;
-#endif
 folly::Range<::test::fixtures::python_capi::MyEnum const*> const TEnumTraits<::test::fixtures::python_capi::MyEnum>::values = folly::range(TEnumDataStorage<::test::fixtures::python_capi::MyEnum>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::test::fixtures::python_capi::MyEnum>::names = folly::range(TEnumDataStorage<::test::fixtures::python_capi::MyEnum>::names);
 
@@ -33,9 +30,6 @@ bool TEnumTraits<::test::fixtures::python_capi::MyEnum>::findValue(folly::String
 
 namespace apache { namespace thrift {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr std::size_t const TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum>::size;
-#endif
 folly::Range<::test::fixtures::python_capi::NormalDecentEnum const*> const TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum>::values = folly::range(TEnumDataStorage<::test::fixtures::python_capi::NormalDecentEnum>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum>::names = folly::range(TEnumDataStorage<::test::fixtures::python_capi::NormalDecentEnum>::names);
 
@@ -2036,9 +2030,6 @@ void TccStructTraits<::test::fixtures::python_capi::Shallot>::translateFieldName
 
 namespace apache { namespace thrift {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr std::size_t const TEnumTraits<::test::fixtures::python_capi::Shallot::Type>::size;
-#endif
 folly::Range<::test::fixtures::python_capi::Shallot::Type const*> const TEnumTraits<::test::fixtures::python_capi::Shallot::Type>::values = folly::range(TEnumDataStorage<::test::fixtures::python_capi::Shallot::Type>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::test::fixtures::python_capi::Shallot::Type>::names = folly::range(TEnumDataStorage<::test::fixtures::python_capi::Shallot::Type>::names);
 

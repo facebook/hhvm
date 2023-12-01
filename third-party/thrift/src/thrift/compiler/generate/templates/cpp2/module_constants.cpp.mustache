@@ -31,11 +31,6 @@
 
 
 <%#program:constants%><%#constant:type%><%#constant:value%>
-<%^constant:outline_init?%>
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr <% > types/const_value_type%> const <%program:name%>_constants::<%constant:name%>_;
-#endif
-<%/constant:outline_init?%>
 <%#constant:outline_init?%>
   <%#value:enable_referencing%>
 <%constant:cpp_type%> const& <%program:name%>_constants::<%constant:name%>() {

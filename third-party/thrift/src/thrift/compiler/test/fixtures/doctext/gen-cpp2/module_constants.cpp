@@ -12,20 +12,8 @@
 
 namespace cpp2 {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr char const * const module_constants::FOO_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int32_t const module_constants::BAR_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int32_t const module_constants::BIFF_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int32_t const module_constants::SHOUTY_;
-#endif
 
 } // cpp2

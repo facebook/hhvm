@@ -12,17 +12,8 @@
 
 namespace cpp2 {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int32_t const module_constants::myInt_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr char const * const module_constants::name_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr char const * const module_constants::multi_line_string_;
-#endif
 
 ::std::vector<::std::map<::std::string, ::std::int32_t>> const& module_constants::states() {
   static folly::Indestructible<::std::vector<::std::map<::std::string, ::std::int32_t>>> const instance{std::initializer_list<::std::map<::std::string, ::std::int32_t>>{std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("San Diego"), static_cast<::std::int32_t>(3211000)},
@@ -33,37 +24,13 @@ constexpr char const * const module_constants::multi_line_string_;
   return *instance;
 }
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr double const module_constants::x_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr double const module_constants::y_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr double const module_constants::z_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr double const module_constants::zeroDoubleValue_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr double const module_constants::longDoubleValue_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::cpp2::MyCompany const module_constants::my_company_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr char const * const module_constants::foo_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::cpp2::MyIntIdentifier const module_constants::bar_;
-#endif
 
 ::cpp2::MyMapIdentifier const& module_constants::mymap() {
   static folly::Indestructible<::cpp2::MyMapIdentifier> const instance{std::initializer_list<::cpp2::MyMapIdentifier::value_type>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("keys"), apache::thrift::StringTraits<std::string>::fromStringLiteral("values")}}};
@@ -197,25 +164,10 @@ constexpr ::cpp2::MyIntIdentifier const module_constants::bar_;
   return *instance;
 }
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr char const * const module_constants::apostrophe_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr char const * const module_constants::tripleApostrophe_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr char const * const module_constants::quotationMark_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr char const * const module_constants::backslash_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr char const * const module_constants::escaped_a_;
-#endif
 
 ::std::map<::std::string, ::std::int32_t> const& module_constants::char2ascii() {
   static folly::Indestructible<::std::map<::std::string, ::std::int32_t>> const instance{std::initializer_list<::std::map<::std::string, ::std::int32_t>::value_type>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("'"), static_cast<::std::int32_t>(39)},
@@ -253,37 +205,13 @@ constexpr char const * const module_constants::escaped_a_;
   return *instance;
 }
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr bool const module_constants::false_c_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr bool const module_constants::true_c_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int8_t const module_constants::zero_byte_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int16_t const module_constants::zero16_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int32_t const module_constants::zero32_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int64_t const module_constants::zero64_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr double const module_constants::zero_dot_zero_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr char const * const module_constants::empty_string_;
-#endif
 
 ::std::vector<::std::int32_t> const& module_constants::empty_int_list() {
   static folly::Indestructible<::std::vector<::std::int32_t>> const instance{std::initializer_list<::std::int32_t>{}};
@@ -325,88 +253,25 @@ constexpr char const * const module_constants::empty_string_;
   return *instance;
 }
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int64_t const module_constants::maxIntDec_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int64_t const module_constants::maxIntOct_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int64_t const module_constants::maxIntHex_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int64_t const module_constants::maxIntBin_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr double const module_constants::maxDub_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr double const module_constants::minDub_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr double const module_constants::minSDub_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int64_t const module_constants::maxPIntDec_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int64_t const module_constants::maxPIntOct_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int64_t const module_constants::maxPIntHex_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int64_t const module_constants::maxPIntBin_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr double const module_constants::maxPDub_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr double const module_constants::minPDub_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr double const module_constants::minPSDub_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int64_t const module_constants::minIntDec_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int64_t const module_constants::minIntOct_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int64_t const module_constants::minIntHex_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int64_t const module_constants::minIntBin_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr double const module_constants::maxNDub_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr double const module_constants::minNDub_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr double const module_constants::minNSDub_;
-#endif
 
 } // cpp2

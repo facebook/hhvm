@@ -18,9 +18,6 @@
 
 namespace apache { namespace thrift {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr std::size_t const TEnumTraits<<% > common/namespace_cpp2%><%enum:cpp_name%>>::size;
-#endif
 folly::Range<<% > common/namespace_cpp2%><%enum:cpp_name%> const*> const TEnumTraits<<% > common/namespace_cpp2%><%enum:cpp_name%>>::values = <%!
   %><%#enum:empty?%><%!
     %>{};<%!

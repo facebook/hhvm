@@ -12,20 +12,8 @@
 
 namespace test_cpp2 { namespace cpp_reflection {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int32_t const module_constants::constant1_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr char const * const module_constants::constant2_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::test_cpp2::cpp_reflection::enum1 const module_constants::constant3_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int32_t const module_constants::constant_with_special_name_;
-#endif
 
 }} // test_cpp2::cpp_reflection

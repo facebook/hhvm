@@ -12,41 +12,14 @@
 
 namespace py3 { namespace simple {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr bool const module_constants::A_BOOL_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int8_t const module_constants::A_BYTE_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int16_t const module_constants::THE_ANSWER_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int32_t const module_constants::A_NUMBER_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int64_t const module_constants::A_BIG_NUMBER_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr double const module_constants::A_REAL_NUMBER_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr double const module_constants::A_FAKE_NUMBER_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr char const * const module_constants::A_WORD_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::string const module_constants::SOME_BYTES_;
-#endif
 
 ::py3::simple::SimpleStruct const& module_constants::A_STRUCT() {
   static folly::Indestructible<::py3::simple::SimpleStruct> const instance{::apache::thrift::detail::make_structured_constant<::py3::simple::SimpleStruct>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::is_on>(true), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::tiny_int>(static_cast<::std::int8_t>(5)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::small_int>(static_cast<::std::int16_t>(6)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::nice_sized_int>(static_cast<::std::int32_t>(7)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::big_int>(static_cast<::std::int64_t>(8)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::real>(static_cast<double>(9.9)))};

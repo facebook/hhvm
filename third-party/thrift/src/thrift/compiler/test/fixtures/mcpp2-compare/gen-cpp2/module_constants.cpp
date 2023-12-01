@@ -13,37 +13,13 @@
 
 namespace some { namespace valid { namespace ns {
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr bool const module_constants::aBool_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int8_t const module_constants::aByte_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int16_t const module_constants::a16BitInt_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int32_t const module_constants::a32BitInt_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int64_t const module_constants::a64BitInt_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr float const module_constants::aFloat_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr double const module_constants::aDouble_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr char const * const module_constants::aString_;
-#endif
 
 ::std::vector<bool> const& module_constants::aList() {
   static folly::Indestructible<::std::vector<bool>> const instance{std::initializer_list<bool>{true,
@@ -98,9 +74,6 @@ constexpr char const * const module_constants::aString_;
   return *instance;
 }
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::std::int32_t const module_constants::AnIntegerEnum2_;
-#endif
 
 ::std::vector<::std::int32_t> const& module_constants::ListOfIntsFromEnums() {
   static folly::Indestructible<::std::vector<::std::int32_t>> const instance{std::initializer_list<::std::int32_t>{static_cast<::std::int32_t>(2),
@@ -108,12 +81,6 @@ constexpr ::std::int32_t const module_constants::AnIntegerEnum2_;
   return *instance;
 }
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::some::valid::ns::MyEnumA const module_constants::constEnumA_;
-#endif
 
-#if FOLLY_CPLUSPLUS < 201703L
-constexpr ::some::valid::ns::MyEnumA const module_constants::constEnumB_;
-#endif
 
 }}} // some::valid::ns

@@ -198,6 +198,7 @@ type t = {
   po_disallow_direct_superglobals_refs: bool;
   tco_sticky_quarantine: bool;
   tco_autocomplete_skip_hierarchy_checks: bool;
+  tco_autocomplete_sort_text: bool;
 }
 [@@deriving eq, show]
 
@@ -329,6 +330,7 @@ let default =
     po_disallow_direct_superglobals_refs = false;
     tco_sticky_quarantine = false;
     tco_autocomplete_skip_hierarchy_checks = false;
+    tco_autocomplete_sort_text = false;
   }
 
 let set
@@ -458,6 +460,7 @@ let set
     ?po_disallow_direct_superglobals_refs
     ?tco_sticky_quarantine
     ?tco_autocomplete_skip_hierarchy_checks
+    ?tco_autocomplete_sort_text
     options =
   let setting setting option =
     match setting with
@@ -797,6 +800,8 @@ let set
       setting
         tco_autocomplete_skip_hierarchy_checks
         options.tco_autocomplete_skip_hierarchy_checks;
+    tco_autocomplete_sort_text =
+      setting tco_autocomplete_sort_text options.tco_autocomplete_sort_text;
   }
 
 let so_naming_sqlite_path t = t.so_naming_sqlite_path

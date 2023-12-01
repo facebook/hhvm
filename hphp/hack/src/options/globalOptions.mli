@@ -306,6 +306,7 @@ type t = {
       (** Controls behavior of [Provider_utils.respect_but_quarantine_unsaved_changes] *)
   tco_autocomplete_skip_hierarchy_checks: bool;
       (** Controls behavior of [Provider_context.with_tcopt_for_autocomplete] *)
+  tco_autocomplete_sort_text: bool;
 }
 [@@deriving eq, show]
 
@@ -436,6 +437,7 @@ val set :
   ?po_disallow_direct_superglobals_refs:bool ->
   ?tco_sticky_quarantine:bool ->
   ?tco_autocomplete_skip_hierarchy_checks:bool ->
+  ?tco_autocomplete_sort_text:bool ->
   t ->
   t
 

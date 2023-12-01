@@ -73,6 +73,7 @@ type rollout_flags = {
   lsp_sticky_quarantine: bool;
   lsp_cancellation: bool;
   lsp_autocomplete_skip_hierarchy_checks: bool;
+  autocomplete_sort_text: bool;
 }
 
 let flush () = ()

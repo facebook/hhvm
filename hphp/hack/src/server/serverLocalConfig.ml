@@ -264,6 +264,8 @@ type t = {
       (** POC: @ljw - if true, respect cancellation while work is in progress *)
   lsp_autocomplete_skip_hierarchy_checks: bool;
       (** POC: @ljw - if true, autocomplete skips hierarchy checks *)
+  autocomplete_sort_text: bool;
+      (** POC: @mckenzie - if true, autocomplete sorts using sort text attribute *)
 }
 
 let default =
@@ -358,6 +360,7 @@ let default =
     lsp_sticky_quarantine = false;
     lsp_cancellation = false;
     lsp_autocomplete_skip_hierarchy_checks = false;
+    autocomplete_sort_text = false;
   }
 
 let system_config_path =
@@ -1085,6 +1088,12 @@ let load_
       ~default:default.lsp_autocomplete_skip_hierarchy_checks
       config
   in
+  let autocomplete_sort_text =
+    bool_
+      "autocomplete_sort_text"
+      ~default:default.autocomplete_sort_text
+      config
+  in
   let zstd_decompress_by_file =
     bool_
       "zstd_decompress_by_file"
@@ -1205,6 +1214,7 @@ let load_
     lsp_sticky_quarantine;
     lsp_cancellation;
     lsp_autocomplete_skip_hierarchy_checks;
+    autocomplete_sort_text;
   }
 
 (** Loads the config from [path]. Uses JustKnobs and ExperimentsConfig to override.
@@ -1263,4 +1273,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       lsp_cancellation = options.lsp_cancellation;
       lsp_autocomplete_skip_hierarchy_checks =
         options.lsp_autocomplete_skip_hierarchy_checks;
+      autocomplete_sort_text = options.autocomplete_sort_text;
     }

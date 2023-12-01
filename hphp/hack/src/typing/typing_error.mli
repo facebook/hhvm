@@ -1886,11 +1886,6 @@ val pp : Format.formatter -> t -> unit
 
 val show : t -> string
 
-(** Iterate over an error calling `on_prim` and `on_snd` when each `Primary.t`
-     and `Secondary.t` error is encountered, respectively. *)
-val iter :
-  t -> on_prim:(Primary.t -> unit) -> on_snd:(Secondary.t -> unit) -> unit
-
 (* -- Constructors -------------------------------------------------------- *)
 
 (** Lift a `Primary.t` error to a `Typing_error.t` *)

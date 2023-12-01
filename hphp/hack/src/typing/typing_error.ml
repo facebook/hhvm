@@ -1338,9 +1338,6 @@ module rec Error : sig
     | With_code of t * Error_code.t
   [@@deriving show]
 
-  val iter :
-    t -> on_prim:(Primary.t -> unit) -> on_snd:(Secondary.t -> unit) -> unit
-
   val primary : Primary.t -> t
 
   val coeffect : Primary.Coeffect.t -> t
@@ -1395,25 +1392,6 @@ end = struct
     | Intersection of t list
     | With_code of t * Error_code.t
   [@@deriving show]
-
-  let iter t ~on_prim ~on_snd =
-    let rec aux = function
-      | Primary prim -> on_prim prim
-      | Apply (cb, t) ->
-        aux t;
-        Callback.iter cb ~on_prim
-      | Apply_reasons (cb, snd_err) ->
-        Secondary.iter snd_err ~on_prim ~on_snd;
-        Reasons_callback.iter cb ~on_prim ~on_snd
-      | Assert_in_current_decl (snd_err, _ctx) ->
-        Secondary.iter snd_err ~on_prim ~on_snd
-      | Multiple ts
-      | Union ts
-      | Intersection ts ->
-        List.iter ~f:aux ts
-      | With_code (t, _) -> aux t
-    in
-    aux t
 
   (* -- Constructors ---------------------------------------------------------- *)
   let primary prim_err = Primary prim_err
@@ -1762,9 +1740,6 @@ and Secondary : sig
         cstr: [ `As | `Super ] * Pos_or_decl.t;
       }
   [@@deriving show]
-
-  val iter :
-    t -> on_prim:(Primary.t -> unit) -> on_snd:(Secondary.t -> unit) -> unit
 end = struct
   type t =
     | Of_error of Error.t
@@ -2040,11 +2015,6 @@ end = struct
         cstr: [ `As | `Super ] * Pos_or_decl.t;
       }
   [@@deriving show]
-
-  let iter t ~on_prim ~on_snd =
-    match t with
-    | Of_error err -> Error.iter ~on_prim ~on_snd err
-    | snd_err -> on_snd snd_err
 end
 
 and Callback : sig
@@ -2056,8 +2026,6 @@ and Callback : sig
     | Retain_code of t
     | With_side_effect of t * (unit -> unit)
   [@@deriving show]
-
-  val iter : t -> on_prim:(Primary.t -> unit) -> unit
 
   val always : Primary.t -> t
 
@@ -2123,21 +2091,6 @@ end = struct
     | Retain_code of t
     | With_side_effect of t * (unit -> unit)
   [@@deriving show]
-
-  let iter t ~on_prim =
-    let rec aux = function
-      | Always prim
-      | Of_primary prim ->
-        on_prim prim
-      | With_claim_as_reason (t, prim) ->
-        on_prim prim;
-        aux t
-      | Retain_code t
-      | With_side_effect (t, _) ->
-        aux t
-      | With_code _ -> ()
-    in
-    aux t
 
   (* -- Constructors -------------------------------------------------------- *)
 
@@ -2248,9 +2201,6 @@ and Reasons_callback : sig
     | Assert_in_current_decl of Error_code.t * Pos_or_decl.ctx
     | Drop_reasons_on_apply of t
   [@@deriving show]
-
-  val iter :
-    t -> on_prim:(Primary.t -> unit) -> on_snd:(Secondary.t -> unit) -> unit
 
   val from_on_error :
     (?code:int ->
@@ -2382,28 +2332,6 @@ end = struct
     | Assert_in_current_decl of Error_code.t * Pos_or_decl.ctx
     | Drop_reasons_on_apply of t
   [@@deriving show]
-
-  let iter t ~on_prim ~on_snd =
-    let rec aux = function
-      | Always err
-      | Of_error err ->
-        Error.iter err ~on_prim ~on_snd
-      | Of_callback (cb, _) -> Callback.iter cb ~on_prim
-      | Retain (t, _)
-      | Incoming_reasons (t, _)
-      | With_code (t, _)
-      | With_reasons (t, _)
-      | Add_quickfixes (t, _)
-      | Add_reason (t, _, _)
-      | Prepend_on_apply (t, _)
-      | Drop_reasons_on_apply t ->
-        aux t
-      | From_on_error _
-      | Assert_in_current_decl _ ->
-        ()
-      [@@ocaml.warning "-3"]
-    in
-    aux t
 
   (* -- Constructors -------------------------------------------------------- *)
 

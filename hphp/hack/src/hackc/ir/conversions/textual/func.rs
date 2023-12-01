@@ -233,6 +233,16 @@ pub(crate) fn lower_and_write_func(
     lower_and_write_func_(txf, unit_state, this_ty, func, func_info)
 }
 
+const WRAPPER_ATTRIBUTE_NAME: &str = "__wrapperattribute";
+
+fn wrapper_attribute(strings: &StringInterner) -> ClassId {
+    ClassId::from_str(WRAPPER_ATTRIBUTE_NAME, strings)
+}
+
+fn is_wrapper_attribute(classid: &ClassId, strings: &StringInterner) -> bool {
+    strings.eq_str(classid.id, WRAPPER_ATTRIBUTE_NAME)
+}
+
 /// Given a Func that has default parameters make a version of the function with
 /// those parameters stripped out (one version is returned with each successive
 /// parameter removed).
@@ -265,6 +275,11 @@ fn split_default_func<'a>(
 
     for param_count in min_params..max_params {
         let mut func = orig_func.clone();
+        func.attributes.push(ir::Attribute {
+            name: wrapper_attribute(strings),
+            arguments: Vec::new(),
+        });
+
         let target_bid = func.params[param_count].default_value.map(|dv| dv.init);
         func.params.truncate(param_count);
         for i in min_params..param_count {
@@ -394,6 +409,10 @@ fn write_func(
         is_curry: false,
         is_final: func_info.attrs().is_final(),
         is_abstract: func_info.attrs().is_abstract(),
+        is_wrapper: func
+            .attributes
+            .iter()
+            .any(|a| is_wrapper_attribute(&a.name, &unit_state.strings)),
     };
 
     // TODO(aorenste) move of `func` occurs in the lambda below, so I clone it to
@@ -482,6 +501,10 @@ pub(crate) fn write_func_decl(
         is_final: func_info.attrs().is_final(),
         is_curry: false,
         is_abstract: func_info.attrs().is_abstract(),
+        is_wrapper: func
+            .attributes
+            .iter()
+            .any(|a| is_wrapper_attribute(&a.name, &unit_state.strings)),
     };
 
     txf.declare_function(&name, &attributes, &param_tys, &ret_ty)?;
@@ -507,7 +530,10 @@ fn write_instance_stub(
         IsStatic::NonStatic,
         method_info.name,
     );
-    let attributes = textual::FuncAttributes::default();
+    let attributes = textual::FuncAttributes {
+        is_wrapper: true,
+        ..Default::default()
+    };
 
     let mut tx_params = tx_params.to_vec();
     let inst_ty = method_info.non_static_ty();

@@ -39,8 +39,8 @@ function rr_vv_nd<reify T>(int $a, int... $b): void {
   var_dump($a, $b);
 }
 
-// TEST-CHECK-BAL: define $root.nr_nv_dd
-// CHECK: define $root.nr_nv_dd($this: *void, $a: *HackInt) : *void {
+// TEST-CHECK-BAL: define .wrapper $root.nr_nv_dd
+// CHECK: define .wrapper $root.nr_nv_dd($this: *void, $a: *HackInt) : *void {
 // CHECK: local $b: *void
 // CHECK: #b0:
 // CHECK:   store &$b <- $builtins.hack_int(5): *HackMixed
@@ -59,8 +59,8 @@ function nr_nv_dd(int $a, int $b = 5): void {
   var_dump($a, $b);
 }
 
-// TEST-CHECK-BAL: define $root.rr_nv_dd
-// CHECK: define $root.rr_nv_dd($this: *void, $a: *HackInt, $0ReifiedGenerics: *HackVec) : *void {
+// TEST-CHECK-BAL: define .wrapper $root.rr_nv_dd
+// CHECK: define .wrapper $root.rr_nv_dd($this: *void, $a: *HackInt, $0ReifiedGenerics: *HackVec) : *void {
 // CHECK: local $b: *void
 // CHECK: #b0:
 // CHECK:   store &$b <- $builtins.hack_int(5): *HackMixed
@@ -80,8 +80,8 @@ function rr_nv_dd<reify T>(int $a, int $b = 5): void {
   var_dump($a, $b);
 }
 
-// TEST-CHECK-BAL: define $root.nr_vv_dd
-// CHECK: define $root.nr_vv_dd($this: *void, $a: *HackInt) : *void {
+// TEST-CHECK-BAL: define .wrapper $root.nr_vv_dd
+// CHECK: define .wrapper $root.nr_vv_dd($this: *void, $a: *HackInt) : *void {
 // CHECK: local $b: *void, $c: *void
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hhbc_new_vec()
@@ -103,8 +103,8 @@ function nr_vv_dd(int $a, int $b = 5, int... $c): void {
   var_dump($a, $b, $c);
 }
 
-// TEST-CHECK-BAL: define $root.rr_vv_dd
-// CHECK: define $root.rr_vv_dd($this: *void, $a: *HackInt, $0ReifiedGenerics: *HackVec) : *void {
+// TEST-CHECK-BAL: define .wrapper $root.rr_vv_dd
+// CHECK: define .wrapper $root.rr_vv_dd($this: *void, $a: *HackInt, $0ReifiedGenerics: *HackVec) : *void {
 // CHECK: local $b: *void, $c: *void
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hhbc_new_vec()

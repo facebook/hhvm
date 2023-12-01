@@ -1,8 +1,8 @@
 // RUN: %hackc compile-infer --fail-fast %s | FileCheck %s
 
 class C {
-  // TEST-CHECK-BAL: define C.myfn2($this: *C, $a: *HackInt)
-  // CHECK: define C.myfn2($this: *C, $a: *HackInt) : *void {
+  // TEST-CHECK-BAL: define .wrapper C.myfn2($this: *C, $a: *HackInt)
+  // CHECK: define .wrapper C.myfn2($this: *C, $a: *HackInt) : *void {
   // CHECK: local $b: *void, $c: *void
   // CHECK: #b0:
   // CHECK:   store &$b <- $builtins.hack_int(1): *HackMixed
@@ -17,8 +17,8 @@ class C {
   // CHECK:   ret n4
   // CHECK: }
 
-  // TEST-CHECK-BAL: define C.myfn2($this: *C, $a: *HackInt, $b: *HackInt)
-  // CHECK: define C.myfn2($this: *C, $a: *HackInt, $b: *HackInt) : *void {
+  // TEST-CHECK-BAL: define .wrapper C.myfn2($this: *C, $a: *HackInt, $b: *HackInt)
+  // CHECK: define .wrapper C.myfn2($this: *C, $a: *HackInt, $b: *HackInt) : *void {
   // CHECK: local $c: *void
   // CHECK: #b0:
   // CHECK:   store &$c <- $builtins.hack_int(2): *HackMixed
@@ -46,8 +46,8 @@ class C {
   }
 }
 
-// TEST-CHECK-BAL: define $root.myfn($this: *void, $a: *HackInt)
-// CHECK: define $root.myfn($this: *void, $a: *HackInt) : *void {
+// TEST-CHECK-BAL: define .wrapper $root.myfn($this: *void, $a: *HackInt)
+// CHECK: define .wrapper $root.myfn($this: *void, $a: *HackInt) : *void {
 // CHECK: local $b: *void, $c: *void
 // CHECK: #b0:
 // CHECK:   store &$b <- $builtins.hack_int(1): *HackMixed
@@ -61,8 +61,8 @@ class C {
 // CHECK:   ret n3
 // CHECK: }
 
-// TEST-CHECK-BAL: define $root.myfn($this: *void, $a: *HackInt, $b: *HackInt)
-// CHECK: define $root.myfn($this: *void, $a: *HackInt, $b: *HackInt) : *void {
+// TEST-CHECK-BAL: define .wrapper $root.myfn($this: *void, $a: *HackInt, $b: *HackInt)
+// CHECK: define .wrapper $root.myfn($this: *void, $a: *HackInt, $b: *HackInt) : *void {
 // CHECK: local $c: *void
 // CHECK: #b0:
 // CHECK:   store &$c <- $builtins.hack_int(2): *HackMixed

@@ -206,8 +206,8 @@ class C {
   // CHECK:   ret null
   // CHECK: }
 
-  // TEST-CHECK-BAL: define C.static_signature
-  // CHECK: define C.static_signature($this: *C, $a: *HackMixed, $b: *HackMixed) : *void {
+  // TEST-CHECK-BAL: define .wrapper C.static_signature
+  // CHECK: define .wrapper C.static_signature($this: *C, $a: *HackMixed, $b: *HackMixed) : *void {
   // CHECK: #b0:
   // CHECK: // forward to the static method
   // CHECK:   n0: *C = load &$this
@@ -302,8 +302,8 @@ trait T2 {
   // CHECK:   ret null
   // CHECK: }
 
-  // TEST-CHECK-BAL: define T2.trait_self_caller
-  // CHECK: define T2.trait_self_caller($this: *T2, self: *HackMixed) : *void {
+  // TEST-CHECK-BAL: define .wrapper T2.trait_self_caller
+  // CHECK: define .wrapper T2.trait_self_caller($this: *T2, self: *HackMixed) : *void {
   // CHECK: #b0:
   // CHECK: // forward to the static method
   // CHECK:   n0: *T2 = load &$this

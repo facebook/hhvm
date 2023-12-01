@@ -94,6 +94,10 @@ impl TextualFile<'_> {
             write!(self.w, ".async ")?;
         }
 
+        if attributes.is_wrapper {
+            write!(self.w, ".wrapper ")?;
+        }
+
         if attributes.is_abstract {
             write!(self.w, ".abstract ")?;
         }
@@ -162,6 +166,10 @@ impl TextualFile<'_> {
 
         if attributes.is_async {
             write!(self.w, ".async ")?;
+        }
+
+        if attributes.is_wrapper {
+            write!(self.w, ".wrapper ")?;
         }
 
         if attributes.is_abstract {
@@ -386,6 +394,7 @@ impl TextualFile<'_> {
             is_curry: true,
             is_final: true,
             is_abstract: false,
+            is_wrapper: false,
         };
         self.define_function(
             &method,
@@ -563,6 +572,7 @@ pub(crate) struct FuncAttributes {
     pub is_curry: bool,
     pub is_final: bool,
     pub is_abstract: bool,
+    pub is_wrapper: bool, // is a wrapper for a function with default arguments or for static
 }
 
 #[derive(Debug, Hash, PartialEq, Eq)]

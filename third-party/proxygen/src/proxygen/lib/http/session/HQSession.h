@@ -1156,7 +1156,7 @@ class HQSession
       auto len = chain->computeChainDataLength();
       if (session_.onBodyImpl(std::move(chain), len, padding, &txn_)) {
         session_.pauseReads();
-      };
+      }
     }
 
     void onChunkHeader(HTTPCodec::StreamID /* stream */,

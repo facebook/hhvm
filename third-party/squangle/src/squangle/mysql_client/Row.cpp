@@ -263,7 +263,7 @@ std::chrono::system_clock::time_point parseDateTime(
       break;
     default:
       break;
-  };
+  }
 
   if (!parse_succeeded) {
     throw std::range_error("Can't parse date");

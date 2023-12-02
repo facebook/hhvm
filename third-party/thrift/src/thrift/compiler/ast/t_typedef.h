@@ -54,7 +54,7 @@ class t_typedef : public t_type {
       } else {
         return nullptr;
       }
-    };
+    }
   }
 
   // Finds the first matching annoation in the typedef's type hierarchy.

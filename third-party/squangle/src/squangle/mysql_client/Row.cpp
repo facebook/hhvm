@@ -132,7 +132,7 @@ folly::dynamic Row::getDynamic(size_t l) const {
         return folly::dynamic(
             row_block_->getField<std::string>(row_number_, l));
     }
-  } catch (const std::exception& e) {
+  } catch (const std::exception&) {
     // If we failed to parse (NULL int, etc), try again as a string
     return folly::dynamic(row_block_->getField<std::string>(row_number_, l));
   }

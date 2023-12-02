@@ -23,18 +23,18 @@ class Endpoint {
       : hostname_(hostname), port_(port), isSecure_(isSecure) {
     hash_ =
         std::hash<std::string>()(hostname_) ^ (port_ << 1) ^ (isSecure_ << 17);
-  };
+  }
 
   explicit Endpoint(const folly::SocketAddress& addr, bool isSecure)
       : Endpoint(addr.getAddressStr(), addr.getPort(), isSecure){};
 
   const std::string& getHostname() const {
     return hostname_;
-  };
+  }
 
   uint16_t getPort() const {
     return port_;
-  };
+  }
 
   bool isSecure() const {
     return isSecure_;
@@ -47,7 +47,7 @@ class Endpoint {
   void describe(std::ostream& os) const {
     os << hostname_ << ":" << port_ << ":" << (isSecure_ ? "" : "in")
        << "secure";
-  };
+  }
 
  private:
   std::string hostname_;

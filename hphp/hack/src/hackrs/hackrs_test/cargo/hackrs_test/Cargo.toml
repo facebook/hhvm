@@ -9,7 +9,7 @@ edition = "2021"
 path = "../../hackrs_test.rs"
 
 [dev-dependencies]
-anyhow = "=1.0.72"
+anyhow = "1.0.75"
 datastore = { version = "0.0.0", path = "../../../datastore" }
 decl_parser = { version = "0.0.0", path = "../../../decl_parser/cargo/decl_parser" }
 fbinit = { version = "0.1.2", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }

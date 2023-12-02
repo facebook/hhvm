@@ -22,7 +22,7 @@ name = "deterministic_hash_test"
 path = "deterministic_hash_test.rs"
 
 [dependencies]
-anyhow = "=1.0.72"
+anyhow = "1.0.75"
 async-trait = "0.1.71"
 codegen_includer_proc_macro = { path = "../../../../../../common/rust/shed/codegen_includer_proc_macro" }
 const-cstr = "0.3.0"
@@ -32,7 +32,7 @@ indexmap = { version = "1.9.2", features = ["arbitrary", "rayon", "serde-1"] }
 ref-cast = "1.0.18"
 smallvec = { version = "1.6.1", features = ["serde", "specialization", "union"] }
 teststructs__types = { package = "teststructs_types", path = "types" }
-thiserror = "1.0.43"
+thiserror = "1.0.49"
 tracing = "0.1.40"
 tracing-futures = { version = "0.2.5", features = ["futures-03"] }
 

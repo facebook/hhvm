@@ -14,5 +14,5 @@ maplit = "1.0"
 once_cell = "1.12"
 
 [build-dependencies]
-anyhow = "=1.0.72"
+anyhow = "1.0.75"
 cc = "1.0.78"

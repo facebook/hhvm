@@ -11,7 +11,7 @@ path = "cli/hackc.rs"
 
 [dependencies]
 aast_parser = { version = "0.0.0", path = "../parser/cargo/aast_parser" }
-anyhow = "=1.0.72"
+anyhow = "1.0.75"
 assemble = { version = "0.0.0", path = "cargo/assemble" }
 bc_to_ir = { version = "0.0.0", path = "ir/conversions/bc_to_ir" }
 bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
@@ -60,6 +60,6 @@ shallow_decl_provider = { version = "0.0.0", path = "../hackrs/shallow_decl_prov
 strum = { version = "0.24", features = ["derive"] }
 tempfile = "3.8"
 textual = { version = "0.0.0", path = "ir/conversions/textual/cargo/textual" }
-thiserror = "1.0.43"
+thiserror = "1.0.49"
 tracing = { features = ["log"] }
 ty = { version = "0.0.0", path = "../hackrs/ty/cargo/ty" }

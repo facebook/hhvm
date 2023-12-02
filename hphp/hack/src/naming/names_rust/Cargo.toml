@@ -9,7 +9,7 @@ edition = "2021"
 path = "names.rs"
 
 [dependencies]
-anyhow = "=1.0.72"
+anyhow = "1.0.75"
 crossbeam = "0.8"
 hh24_types = { version = "0.0.0", path = "../../utils/hh24_types" }
 oxidized = { version = "0.0.0", path = "../../oxidized" }

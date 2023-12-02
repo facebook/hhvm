@@ -9,10 +9,10 @@ edition = "2021"
 path = "../file_rwlock.rs"
 
 [dependencies]
-anyhow = "=1.0.72"
+anyhow = "1.0.75"
 fs2 = "0.4"
 libc = "0.2.139"
 serde = { version = "1.0.185", features = ["derive", "rc"] }
 serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_depth"] }
 tempfile = "3.8"
-thiserror = "1.0.43"
+thiserror = "1.0.49"

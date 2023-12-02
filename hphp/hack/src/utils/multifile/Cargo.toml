@@ -9,7 +9,7 @@ edition = "2021"
 path = "../multifile.rs"
 
 [dependencies]
-anyhow = "=1.0.72"
+anyhow = "1.0.75"
 lazy_static = "1.4"
 regex = "1.9.2"
 

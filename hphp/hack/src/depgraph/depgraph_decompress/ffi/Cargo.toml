@@ -9,6 +9,6 @@ edition = "2021"
 path = "depgraph_decompress_rust_ffi.rs"
 
 [dependencies]
-anyhow = "=1.0.72"
+anyhow = "1.0.75"
 decompress = { version = "0.0.0", path = "../decompress" }
 ocamlrep_ocamlpool = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }

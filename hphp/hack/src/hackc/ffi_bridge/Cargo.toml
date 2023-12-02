@@ -10,7 +10,7 @@ path = "compiler_ffi.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-anyhow = "=1.0.72"
+anyhow = "1.0.75"
 bincode = "1.3.3"
 bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 compile = { version = "0.0.0", path = "../compile/cargo/compile" }
@@ -28,7 +28,7 @@ oxidized_by_ref = { version = "0.0.0", path = "../../oxidized_by_ref" }
 parser_core_types = { version = "0.0.0", path = "../../parser/cargo/core_types" }
 relative_path = { version = "0.0.0", path = "../../utils/rust/relative_path" }
 sha1 = "0.10.5"
-thiserror = "1.0.43"
+thiserror = "1.0.49"
 ty = { version = "0.0.0", path = "../../hackrs/ty/cargo/ty" }
 
 [build-dependencies]

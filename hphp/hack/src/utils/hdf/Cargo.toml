@@ -11,7 +11,7 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 cxx = "1.0.100"
-thiserror = "1.0.43"
+thiserror = "1.0.49"
 
 [build-dependencies]
 cc = ">=1.0.79"

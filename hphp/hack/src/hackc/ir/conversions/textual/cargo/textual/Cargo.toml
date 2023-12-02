@@ -9,7 +9,7 @@ edition = "2021"
 path = "../../lib.rs"
 
 [dependencies]
-anyhow = "=1.0.72"
+anyhow = "1.0.75"
 ascii = "1.0"
 escaper = { version = "0.0.0", path = "../../../../../../utils/escaper" }
 hash = { version = "0.0.0", path = "../../../../../../utils/hash" }

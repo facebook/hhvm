@@ -18,4 +18,4 @@ oxidized = { version = "0.0.0", path = "../../oxidized" }
 oxidized_by_ref = { version = "0.0.0", path = "../../oxidized_by_ref" }
 parser_core_types = { version = "0.0.0", path = "../../parser/cargo/core_types" }
 sha1 = "0.10.5"
-thiserror = "1.0.43"
+thiserror = "1.0.49"

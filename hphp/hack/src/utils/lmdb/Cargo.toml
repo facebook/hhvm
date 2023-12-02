@@ -9,4 +9,4 @@ edition = "2021"
 path = "lmdb.rs"
 
 [dependencies]
-anyhow = "=1.0.72"
+anyhow = "1.0.75"

@@ -9,7 +9,7 @@ edition = "2021"
 path = "../../naming_table.rs"
 
 [dependencies]
-anyhow = "=1.0.72"
+anyhow = "1.0.75"
 datastore = { version = "0.0.0", path = "../../../hackrs/datastore" }
 deps_rust = { version = "0.0.0", path = "../../../deps/cargo/deps_rust" }
 file_info = { version = "0.0.0", path = "../../../deps/rust/file_info" }

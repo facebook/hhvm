@@ -23,7 +23,7 @@ relative_path = { version = "0.0.0", path = "../../../rust/relative_path" }
 rust_parser_errors = { version = "0.0.0", path = "../../../../parser/cargo/errors" }
 serde = { version = "1.0.185", features = ["derive", "rc"] }
 syn = { version = "1.0.109", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
-thiserror = "1.0.43"
+thiserror = "1.0.49"
 
 [dev-dependencies]
 macro_test_util = { version = "0.0.0", path = "../../../test/macro_test_util" }

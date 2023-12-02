@@ -9,7 +9,7 @@ edition = "2021"
 path = "../../hh24_test.rs"
 
 [dependencies]
-anyhow = "=1.0.72"
+anyhow = "1.0.75"
 bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 direct_decl_parser = { version = "0.0.0", path = "../../../parser/api/cargo/direct_decl_parser" }
 hh24_types = { version = "0.0.0", path = "../../hh24_types" }

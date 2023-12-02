@@ -9,7 +9,7 @@ edition = "2021"
 path = "../../assemble/lib.rs"
 
 [dependencies]
-anyhow = "=1.0.72"
+anyhow = "1.0.75"
 assemble_opcode_macro = { version = "0.0.0", path = "../assemble_opcode_macro" }
 bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 escaper = { version = "0.0.0", path = "../../../utils/escaper" }

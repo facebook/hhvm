@@ -9,7 +9,7 @@ edition = "2021"
 path = "../../generate_hhi_lib.rs"
 
 [dependencies]
-anyhow = "=1.0.72"
+anyhow = "1.0.75"
 parser_core_types = { version = "0.0.0", path = "../../../parser/cargo/core_types" }
 positioned_parser = { version = "0.0.0", path = "../../../parser/api/cargo/positioned_parser" }
 relative_path = { version = "0.0.0", path = "../../../utils/rust/relative_path" }

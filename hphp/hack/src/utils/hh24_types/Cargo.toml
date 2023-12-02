@@ -9,7 +9,7 @@ edition = "2021"
 path = "hh24_types.rs"
 
 [dependencies]
-anyhow = "=1.0.72"
+anyhow = "1.0.75"
 derive_more = "0.99.17"
 file_info = { version = "0.0.0", path = "../../deps/rust/file_info" }
 hh_hash = { version = "0.0.0", path = "../hh_hash" }
@@ -17,5 +17,5 @@ relative_path = { version = "0.0.0", path = "../rust/relative_path" }
 rusqlite = { version = "0.29.0", features = ["backup", "blob", "column_decltype", "limits"] }
 serde = { version = "1.0.185", features = ["derive", "rc"] }
 serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_depth"] }
-thiserror = "1.0.43"
+thiserror = "1.0.49"
 typing_deps_hash = { version = "0.0.0", path = "../../deps/cargo/typing_deps_hash" }

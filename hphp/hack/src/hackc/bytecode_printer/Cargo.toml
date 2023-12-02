@@ -9,7 +9,7 @@ edition = "2021"
 path = "lib.rs"
 
 [dependencies]
-anyhow = "=1.0.72"
+anyhow = "1.0.75"
 bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
 escaper = { version = "0.0.0", path = "../../utils/escaper" }
 ffi = { version = "0.0.0", path = "../../utils/ffi" }
@@ -22,5 +22,5 @@ itertools = "0.11.0"
 oxidized = { version = "0.0.0", path = "../../oxidized" }
 print_opcode = { version = "0.0.0", path = "print_opcode/cargo/lib" }
 relative_path = { version = "0.0.0", path = "../../utils/rust/relative_path" }
-thiserror = "1.0.43"
+thiserror = "1.0.49"
 write_bytes = { version = "0.0.0", path = "../../utils/write_bytes/write_bytes" }

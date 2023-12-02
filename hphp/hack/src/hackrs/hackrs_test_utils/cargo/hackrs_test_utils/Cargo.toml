@@ -9,7 +9,7 @@ edition = "2021"
 path = "../../mod.rs"
 
 [dependencies]
-anyhow = "=1.0.72"
+anyhow = "1.0.75"
 bincode = "1.3.3"
 datastore = { version = "0.0.0", path = "../../../datastore" }
 decl_parser = { version = "0.0.0", path = "../../../decl_parser/cargo/decl_parser" }

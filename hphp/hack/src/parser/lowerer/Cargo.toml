@@ -25,4 +25,4 @@ regex = "1.9.2"
 relative_path = { version = "0.0.0", path = "../../utils/rust/relative_path" }
 rescan_trivia = { version = "0.0.0", path = "../api/cargo/rescan_trivia" }
 stack_limit = { version = "0.0.0", path = "../../utils/stack_limit" }
-thiserror = "1.0.43"
+thiserror = "1.0.49"

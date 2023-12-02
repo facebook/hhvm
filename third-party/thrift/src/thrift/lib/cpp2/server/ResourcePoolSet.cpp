@@ -193,8 +193,9 @@ bool ResourcePoolSet::empty() const {
 }
 
 std::size_t ResourcePoolSet::workerCount() const {
-  auto guard = locked_ ? std::unique_lock<std::mutex>()
-                       : std::unique_lock<std::mutex>(mutex_);
+  if (!locked_) {
+    return 0;
+  }
 
   std::size_t workers = 0;
   for (std::size_t i = 0; i < resourcePools_.size(); ++i) {
@@ -215,8 +216,9 @@ std::size_t ResourcePoolSet::workerCount() const {
 }
 
 std::size_t ResourcePoolSet::idleWorkerCount() const {
-  auto guard = locked_ ? std::unique_lock<std::mutex>()
-                       : std::unique_lock<std::mutex>(mutex_);
+  if (!locked_) {
+    return 0;
+  }
 
   std::size_t idle = 0;
   for (std::size_t i = 0; i < resourcePools_.size(); ++i) {

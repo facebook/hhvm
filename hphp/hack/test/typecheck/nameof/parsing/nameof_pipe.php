@@ -4,6 +4,6 @@ function s(string $s): void {}
 
 class C {
   public static function f(): void {
-    nameof C |> s($$); // T171578360
+    nameof C |> s($$);
   }
 }

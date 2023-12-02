@@ -92,6 +92,7 @@ module type Sig = sig
     | ReadonlyOperator
     | EnumClassLabelOperator
     | PackageOperator
+    | NameofOperator
 end
 
 module Impl : Sig = struct
@@ -170,4 +171,5 @@ module Impl : Sig = struct
     | ReadonlyOperator
     | EnumClassLabelOperator
     | PackageOperator
+    | NameofOperator
 end

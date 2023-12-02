@@ -1152,8 +1152,14 @@ where
         // SPEC:
         // nameof expr
         let kw_token = self.next_token();
+        let expr = if self.env.nameof_precedence {
+            self.parse_expression_with_operator_precedence(Operator::prefix_unary_from_token(
+                kw_token.kind(),
+            ))
+        } else {
+            self.parse_expression()
+        };
         let kw = self.sc_mut().make_token(kw_token);
-        let expr = self.parse_expression();
         self.sc_mut().make_nameof_expression(kw, expr)
     }
 

@@ -95,4 +95,5 @@ pub enum Operator {
     ReadonlyOperator,
     EnumClassLabelOperator,
     PackageOperator,
+    NameofOperator,
 }

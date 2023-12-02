@@ -199,6 +199,7 @@ type t = {
   tco_sticky_quarantine: bool;
   tco_autocomplete_skip_hierarchy_checks: bool;
   tco_autocomplete_sort_text: bool;
+  po_nameof_precedence: bool;
 }
 [@@deriving eq, show]
 
@@ -331,6 +332,7 @@ let default =
     tco_sticky_quarantine = false;
     tco_autocomplete_skip_hierarchy_checks = false;
     tco_autocomplete_sort_text = false;
+    po_nameof_precedence = false;
   }
 
 let set
@@ -461,6 +463,7 @@ let set
     ?tco_sticky_quarantine
     ?tco_autocomplete_skip_hierarchy_checks
     ?tco_autocomplete_sort_text
+    ?po_nameof_precedence
     options =
   let setting setting option =
     match setting with
@@ -802,6 +805,8 @@ let set
         options.tco_autocomplete_skip_hierarchy_checks;
     tco_autocomplete_sort_text =
       setting tco_autocomplete_sort_text options.tco_autocomplete_sort_text;
+    po_nameof_precedence =
+      setting po_nameof_precedence options.po_nameof_precedence;
   }
 
 let so_naming_sqlite_path t = t.so_naming_sqlite_path

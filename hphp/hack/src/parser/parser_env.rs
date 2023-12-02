@@ -13,4 +13,5 @@ pub struct ParserEnv {
     pub disable_xhp_element_mangling: bool,
     pub disable_xhp_children_declarations: bool,
     pub interpret_soft_types_as_like_types: bool,
+    pub nameof_precedence: bool,
 }

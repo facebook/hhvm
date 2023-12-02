@@ -24,6 +24,7 @@ type t = {
   disable_xhp_children_declarations: bool;
   interpret_soft_types_as_like_types: bool;
   is_systemlib: bool;
+  nameof_precedence: bool;
 }
 [@@deriving show, sexp_of]
 
@@ -43,6 +44,7 @@ let default =
     disable_xhp_children_declarations = false;
     interpret_soft_types_as_like_types = false;
     is_systemlib = false;
+    nameof_precedence = false;
   }
 
 let make
@@ -64,6 +66,7 @@ let make
     ?(interpret_soft_types_as_like_types =
       default.interpret_soft_types_as_like_types)
     ?(is_systemlib = default.is_systemlib)
+    ?(nameof_precedence = default.nameof_precedence)
     () =
   {
     hhvm_compat_mode;
@@ -80,6 +83,7 @@ let make
     disable_xhp_children_declarations;
     interpret_soft_types_as_like_types;
     is_systemlib;
+    nameof_precedence;
   }
 
 let hhvm_compat_mode e = e.hhvm_compat_mode

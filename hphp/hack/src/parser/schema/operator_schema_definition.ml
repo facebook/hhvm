@@ -92,4 +92,5 @@ let operators =
     make_operator "Readonly";
     make_operator "EnumClassLabel";
     make_operator "Package";
+    make_operator "Nameof";
   ]

@@ -165,6 +165,7 @@ impl Default for GlobalOptions {
             tco_sticky_quarantine: false,
             tco_autocomplete_skip_hierarchy_checks: false,
             tco_autocomplete_sort_text: false,
+            po_nameof_precedence: false,
         }
     }
 }

@@ -307,6 +307,7 @@ type t = {
   tco_autocomplete_skip_hierarchy_checks: bool;
       (** Controls behavior of [Provider_context.with_tcopt_for_autocomplete] *)
   tco_autocomplete_sort_text: bool;
+  po_nameof_precedence: bool;  (** Make nameof bind tighter *)
 }
 [@@deriving eq, show]
 
@@ -438,6 +439,7 @@ val set :
   ?tco_sticky_quarantine:bool ->
   ?tco_autocomplete_skip_hierarchy_checks:bool ->
   ?tco_autocomplete_sort_text:bool ->
+  ?po_nameof_precedence:bool ->
   t ->
   t
 

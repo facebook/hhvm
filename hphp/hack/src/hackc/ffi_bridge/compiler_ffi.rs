@@ -510,6 +510,7 @@ impl ffi::NativeEnv {
                     po_disallow_direct_superglobals_refs: self
                         .parser_flags
                         .disallow_direct_superglobals_refs,
+                    po_nameof_precedence: true,
                     ..Default::default()
                 },
             },

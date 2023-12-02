@@ -291,6 +291,7 @@ impl<'src> AastParser {
             interpret_soft_types_as_like_types: env
                 .parser_options
                 .po_interpret_soft_types_as_like_types,
+            nameof_precedence: env.parser_options.po_nameof_precedence,
         };
         (language, mode.map(Into::into), parser_env)
     }

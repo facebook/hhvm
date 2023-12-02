@@ -396,6 +396,7 @@ let load_config config options =
     ?dump_tast_hashes:(bool_opt "dump_tast_hashes" config)
     ?po_disallow_direct_superglobals_refs:
       (bool_opt "disallow_direct_superglobals_refs" config)
+    ?po_nameof_precedence:(bool_opt "nameof_precedence" config)
     options
 
 let load ~silent options : t * ServerLocalConfig.t =

@@ -450,6 +450,9 @@ impl HhConfig {
                 "eden_fetch_parallelism" => {
                     c.eden_fetch_parallelism = parse_json(&value)?;
                 }
+                "nameof_precedence" => {
+                    go.po_nameof_precedence = parse_json(&value)?;
+                }
                 _ => c.unknown.push((key, value)),
             }
         }

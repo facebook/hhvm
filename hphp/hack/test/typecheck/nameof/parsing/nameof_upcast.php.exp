@@ -1,4 +1,2 @@
-File "nameof_upcast.php", line 5, characters 12-26:
+File "nameof_upcast.php", line 5, characters 5-26:
 Cannot use unstable feature: `upcast_expression` (Parsing[1002])
-File "nameof_upcast.php", line 5, characters 12-26:
-`nameof` can only be used with a class (Parsing[1002])

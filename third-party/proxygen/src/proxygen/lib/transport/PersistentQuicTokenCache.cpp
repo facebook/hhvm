@@ -12,7 +12,8 @@ namespace proxygen {
 
 PersistentQuicTokenCache::PersistentQuicTokenCache(
     const std::string& filename, wangle::PersistentCacheConfig config)
-    : cache_(filename, std::move(config)){};
+    : cache_(filename, std::move(config)) {
+}
 
 folly::Optional<std::string> PersistentQuicTokenCache::getToken(
     const std::string& hostname) {

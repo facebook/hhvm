@@ -227,7 +227,7 @@ gen_dependency_graph(
     std::sort(deps.begin(), deps.end(), [](const t_type* a, const t_type* b) {
       return a->src_range().begin.offset() < b->src_range().begin.offset();
     });
-  };
+  }
   return edges;
 }
 

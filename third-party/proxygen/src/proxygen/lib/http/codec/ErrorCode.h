@@ -14,7 +14,8 @@
   if (err != ErrorCode::NO_ERROR) {                                \
     VLOG(4) << "Returning with error=" << getErrorCodeString(err); \
     return err;                                                    \
-  }
+  }                                                                \
+  static_assert(true, "semicolon required")
 
 namespace proxygen {
 

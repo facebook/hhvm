@@ -2,12 +2,17 @@
 // @codegen-command : buck run fbcode//hphp/hack/src/hh_manual:hh_manual extract fbcode/hphp/hack/manual/hack/
 class Dog {
   <<__AutocompleteSortText('!getName')>>
-  public function getName(): string {...}
+  public function getName(): string {
+    return "Clifford";
+  }
 
-  public function getOwner(): string {...}
+  public function getOwner(): string {
+    return "Emily";
+  }
 
-  public function getFriends(): vec<string> {...}
-
+  public function getFriends(): vec<string> {
+    return vec["Cleo"];
+  }
 }
 
 <<__Docs("http://www.example.com/my_framework")>>

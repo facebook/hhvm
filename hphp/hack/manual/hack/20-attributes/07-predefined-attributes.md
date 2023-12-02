@@ -38,12 +38,17 @@ the autocomplete suggestions, use the `__AutocompleteSortText` attribute.
 ```Hack file:base.hack
 class Dog {
   <<__AutocompleteSortText('!getName')>>
-  public function getName(): string {...}
+  public function getName(): string {
+    return "Clifford";
+  }
 
-  public function getOwner(): string {...}
+  public function getOwner(): string {
+    return "Emily";
+  }
 
-  public function getFriends(): vec<string> {...}
-
+  public function getFriends(): vec<string> {
+    return vec["Cleo"];
+  }
 }
 ```
 

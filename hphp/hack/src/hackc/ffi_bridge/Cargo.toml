@@ -33,5 +33,8 @@ sha1 = "0.10.5"
 thiserror = "1.0.49"
 ty = { version = "0.0.0", path = "../../hackrs/ty/cargo/ty" }
 
+[dev-dependencies]
+hex = "0.4.3"
+
 [build-dependencies]
 cxx-build = "1.0.100"

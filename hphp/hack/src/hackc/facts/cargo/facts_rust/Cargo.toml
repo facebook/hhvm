@@ -14,10 +14,7 @@ hhbc_string_utils = { version = "0.0.0", path = "../../../utils/cargo/hhbc_strin
 naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
 oxidized_by_ref = { version = "0.0.0", path = "../../../../oxidized_by_ref" }
 serde = { version = "1.0.185", features = ["derive", "rc"] }
-serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_depth"] }
 
 [dev-dependencies]
-digest = "0.10"
-hex = "0.4.3"
 pretty_assertions = { version = "1.2", features = ["alloc"], default-features = false }
-sha1 = "0.10.5"
+serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_depth"] }

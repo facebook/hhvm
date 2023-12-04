@@ -873,6 +873,7 @@ dependencies = [
  "direct_decl_parser",
  "facts",
  "hash",
+ "hex",
  "hhbc",
  "hhbc_string_utils",
  "libc",
@@ -1845,16 +1846,13 @@ checksum = "0206175f82b8d6bf6652ff7d71a1e27fd2e4efde587fd368662814d6ec1d9ce0"
 name = "facts"
 version = "0.0.0"
 dependencies = [
- "digest",
  "hash",
- "hex",
  "hhbc_string_utils",
  "naming_special_names_rust",
  "oxidized_by_ref",
  "pretty_assertions",
  "serde",
  "serde_json",
- "sha1",
 ]
 
 [[package]]

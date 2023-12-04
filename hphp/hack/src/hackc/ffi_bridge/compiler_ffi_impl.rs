@@ -79,14 +79,14 @@ impl ffi::FileFacts {
     }
 }
 
-impl From<(String, Vec<serde_json::Value>)> for ffi::AttrFacts {
-    fn from((name, args): (String, Vec<serde_json::Value>)) -> Self {
+impl From<(String, Vec<facts::AttrValue>)> for ffi::AttrFacts {
+    fn from((name, args): (String, Vec<facts::AttrValue>)) -> Self {
+        use facts::AttrValue;
         Self {
             name,
             args: (args.into_iter())
                 .map(|v| match v {
-                    serde_json::Value::String(s) => s,
-                    x => unimplemented!("{x}: unsupported type"),
+                    AttrValue::Classname(s) | AttrValue::String(s) | AttrValue::Int(s) => s,
                 })
                 .collect(),
         }
@@ -191,6 +191,130 @@ mod tests {
 
     use super::*;
 
+    fn sha1(text: &[u8]) -> String {
+        use sha1::digest::Digest;
+        let mut digest = sha1::Sha1::new();
+        digest.update(text);
+        hex::encode(digest.finalize())
+    }
+
+    #[test]
+    fn sha1_some_text() {
+        let text = b"some text";
+        assert_eq!(
+            sha1(text),
+            String::from("37aa63c77398d954473262e1a0057c1e632eda77"),
+        );
+    }
+
+    pub fn fake_facts() -> (facts::Facts, String) {
+        let mut types = facts::TypeFactsByName::new();
+        let base_types = BTreeSet::from_iter(vec!["bt3".into(), "bt1".into(), "bt2".into()]);
+        types.insert(
+            String::from("include_empty_both_when_trait_kind"),
+            facts::TypeFacts {
+                kind: facts::TypeKind::Trait,
+                base_types,
+                flags: 6,
+                ..Default::default()
+            },
+        );
+        // verify requireImplements, requireExtends and requireClass are skipped if empty and Class kind
+        types.insert(
+            String::from("include_empty_neither_when_class_kind"),
+            facts::TypeFacts {
+                kind: facts::TypeKind::Class,
+                flags: 0,
+                ..Default::default()
+            },
+        );
+        // verify only requireImplements is skipped if empty and Interface kind
+        types.insert(
+            String::from("include_empty_req_extends_when_interface_kind"),
+            facts::TypeFacts {
+                kind: facts::TypeKind::Interface,
+                flags: 1,
+                ..Default::default()
+            },
+        );
+        // verify non-empty require* is included
+        types.insert(
+            String::from("include_nonempty_always"),
+            facts::TypeFacts {
+                kind: facts::TypeKind::Unknown,
+                flags: 9,
+                attributes: {
+                    let mut map = facts::Attributes::new();
+                    map.insert("A".into(), vec![facts::AttrValue::String("'B'".into())]);
+                    map.insert("C".into(), Vec::new());
+                    map
+                },
+                require_extends: {
+                    let mut set = facts::StringSet::new();
+                    set.insert("extends1".into());
+                    set
+                },
+                require_implements: {
+                    let mut set = facts::StringSet::new();
+                    set.insert("impl1".into());
+                    set
+                },
+                require_class: {
+                    let mut set = facts::StringSet::new();
+                    set.insert("class1".into());
+                    set
+                },
+                ..Default::default()
+            },
+        );
+        types.insert(
+            String::from("include_method_attrs"),
+            facts::TypeFacts {
+                kind: facts::TypeKind::Class,
+                flags: 6,
+                methods: vec![
+                    (
+                        String::from("no_attrs"),
+                        facts::MethodFacts {
+                            attributes: facts::Attributes::new(),
+                        },
+                    ),
+                    (
+                        String::from("one_attr_with_arg"),
+                        facts::MethodFacts {
+                            attributes: vec![(
+                                "attr_with_arg".into(),
+                                vec![facts::AttrValue::String("arg".into())],
+                            )]
+                            .into_iter()
+                            .collect(),
+                        },
+                    ),
+                ]
+                .into_iter()
+                .collect(),
+                ..Default::default()
+            },
+        );
+        types.insert(
+            String::from("my_type_alias"),
+            facts::TypeFacts {
+                kind: facts::TypeKind::TypeAlias,
+                ..Default::default()
+            },
+        );
+        let mut modules = facts::ModuleFactsByName::new();
+        modules.insert(String::from("foo"), facts::ModuleFacts {});
+        let facts = facts::Facts {
+            constants: vec!["c1".into(), "c2".into()],
+            file_attributes: BTreeMap::new(),
+            functions: vec![],
+            modules,
+            types,
+        };
+        (facts, sha1(b"fake source text"))
+    }
+
     #[test]
     fn test_facts_symbols() {
         let (ffi_type_facts_by_name, rust_type_facts_by_name) = create_type_facts_by_name();
@@ -229,55 +353,111 @@ mod tests {
         (ffi_module_facts_by_name, rust_module_facts_by_name)
     }
 
-    fn same_json(facts: facts::Facts) {
+    #[test]
+    fn to_json() {
+        // test to_string_pretty()
+        let (facts, sha1) = fake_facts();
+        let file_facts = ffi::FileFacts::from_facts(facts, sha1);
         assert_eq!(
-            facts.to_json(false, "abc"),
-            serde_json::to_string(&ffi::FileFacts::from_facts(facts, "abc".into())).unwrap()
-        );
+            serde_json::to_string_pretty(&file_facts).unwrap(),
+            r#"{
+  "constants": [
+    "c1",
+    "c2"
+  ],
+  "modules": [
+    {
+      "name": "foo"
+    }
+  ],
+  "sha1sum": "883c01f3eb209c249f88908675c8632a04a817cf",
+  "types": [
+    {
+      "baseTypes": [
+        "bt1",
+        "bt2",
+        "bt3"
+      ],
+      "flags": 6,
+      "kindOf": "trait",
+      "name": "include_empty_both_when_trait_kind"
+    },
+    {
+      "flags": 0,
+      "kindOf": "class",
+      "name": "include_empty_neither_when_class_kind"
+    },
+    {
+      "flags": 1,
+      "kindOf": "interface",
+      "name": "include_empty_req_extends_when_interface_kind"
+    },
+    {
+      "flags": 6,
+      "kindOf": "class",
+      "methods": {
+        "no_attrs": {},
+        "one_attr_with_arg": {
+          "attributes": {
+            "attr_with_arg": [
+              "arg"
+            ]
+          }
+        }
+      },
+      "name": "include_method_attrs"
+    },
+    {
+      "attributes": {
+        "A": [
+          "'B'"
+        ],
+        "C": []
+      },
+      "flags": 9,
+      "kindOf": "unknown",
+      "name": "include_nonempty_always",
+      "requireClass": [
+        "class1"
+      ],
+      "requireExtends": [
+        "extends1"
+      ],
+      "requireImplements": [
+        "impl1"
+      ]
+    },
+    {
+      "flags": 0,
+      "kindOf": "typeAlias",
+      "name": "my_type_alias"
+    }
+  ]
+}"#,
+        )
     }
 
     #[test]
-    fn test_conversion() {
-        same_json(facts::Facts {
-            types: BTreeMap::from_iter(vec![(
-                "t".into(),
-                facts::TypeFacts {
-                    attributes: BTreeMap::from_iter(vec![(
-                        "A2".into(),
-                        vec![
-                            serde_json::Value::String("x".into()),
-                            serde_json::Value::String(r#""quoted""#.into()),
-                        ],
-                    )]),
-                    base_types: BTreeSet::from_iter(vec!["B".into()]),
-                    require_extends: BTreeSet::from_iter(vec!["E".into()]),
-                    methods: BTreeMap::from_iter(vec![(
-                        "g".into(),
-                        facts::MethodFacts {
-                            attributes: BTreeMap::from_iter(vec![(
-                                "A3".into(),
-                                vec![
-                                    serde_json::Value::String("x".into()),
-                                    serde_json::Value::String(r#""quoted""#.into()),
-                                ],
-                            )]),
-                        },
-                    )]),
+    fn round_trip_json() -> serde_json::Result<()> {
+        let (f1, _) = fake_facts();
+        let ugly = serde_json::to_string(&f1).unwrap();
+        let f2 = serde_json::from_str(&ugly)?;
+        assert_eq!(f1, f2);
+        let pretty = serde_json::to_string_pretty(&f1).unwrap();
+        let f2 = serde_json::from_str(&pretty)?;
+        assert_eq!(f1, f2);
+        Ok(())
+    }
 
-                    ..Default::default()
-                },
-            )]),
-            constants: vec!["C".into()],
-            functions: vec!["f".into()],
-            file_attributes: BTreeMap::from_iter(vec![(
-                "A1".into(),
-                vec![
-                    serde_json::Value::String("x".into()),
-                    serde_json::Value::String(r#""quoted""#.into()),
-                ],
-            )]),
-            modules: BTreeMap::from_iter(vec![("m".into(), facts::ModuleFacts {})]),
-            ..Default::default()
-        })
+    #[test]
+    fn type_kind_to_json() {
+        assert_eq!(
+            serde_json::json!(ffi::TypeKind::Unknown).to_string(),
+            "\"unknown\""
+        );
+        assert_eq!(
+            serde_json::json!(ffi::TypeKind::Interface).to_string(),
+            "\"interface\""
+        );
     }
 }

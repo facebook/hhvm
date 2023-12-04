@@ -235,11 +235,7 @@ impl<'src> AastParser {
             if uses_readonly && !env.parser_options.tco_no_parser_readonly_check {
                 errors.extend(readonly_check::check_program(aast, !env.codegen));
             }
-            errors.extend(aast_check::check_program(
-                aast,
-                !env.codegen,
-                env.for_debugger_eval,
-            ));
+            errors.extend(aast_check::check_program(aast, !env.codegen));
             errors.extend(modules_check::check_program(aast));
             errors.extend(expression_tree_check::check_splices(aast));
             errors.extend(coeffects_check::check_program(aast, !env.codegen));

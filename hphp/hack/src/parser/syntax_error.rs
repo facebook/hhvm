@@ -446,8 +446,6 @@ pub const invalid_async_return_hint: Error =
 pub const invalid_awaitable_arity: Error =
     Cow::Borrowed("`Awaitable<_>` takes exactly one type argument.");
 pub const invalid_await_use: Error = Cow::Borrowed("`await` cannot be used as an expression");
-pub const toplevel_await_use: Error =
-    Cow::Borrowed("`await` cannot be used in a toplevel statement");
 pub const invalid_constructor_method_call: Error = Cow::Borrowed(
     "Method call following immediate constructor call requires parentheses around constructor call.",
 );

@@ -1,5 +1,3 @@
-File "toplevel_stmt_await.php", line 13, characters 6-17:
-`await` cannot be used in a toplevel statement (Parsing[1002])
 File "toplevel_stmt_await.php", line 13, characters 1-18:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
 File "toplevel_stmt_await.php", line 14, characters 1-14:

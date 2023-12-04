@@ -54,5 +54,3 @@ val start_offset : t -> int
 val end_offset : t -> int
 
 val this_in_static : string
-
-val toplevel_await_use : string

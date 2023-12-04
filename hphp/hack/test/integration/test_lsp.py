@@ -7133,21 +7133,21 @@ function expect_type_errors_inside(): void {
     def test_toplevel_statements_await(self) -> None:
         """
         regression test for:
-        - TODO(T171537862): presence of a top-level await shouldn't suppress type errros in the rest of the file
-        - TODO(T170614550): correct type errors for top-level statements (`$await gen_int()` + true should error)
+        - T171537862: presence of a top-level await shouldn't suppress type errros in the rest of the file
+        - T170614550: correct type errors for top-level statements (`$await gen_int()` + true should error)
         """
         variables = self.write_hhconf_and_naming_table()
         file_base_name = "toplevel_statements.php"
         php_file_uri = self.repo_file_uri(file_base_name)
         contents = """<?hh
 $b = await async_bool();
-$b + 1; // TODO(T170614550): should be a type error here
+$b + 1; // should be a type error here
 async function async_bool(): Awaitable<bool> {
     return true;
 }
 
 function expect_type_errors_inside(): void {
-3 + true; // TODO(T171537862): should be a type error here
+3 + true; // should be a type error here
 }
 """
         variables.update({"php_file_uri": php_file_uri, "contents": contents})
@@ -7177,16 +7177,136 @@ function expect_type_errors_inside(): void {
                     "diagnostics": [
                         {
                             "range": {
-                                "start": {"line": 1, "character": 5},
-                                "end": {"line": 1, "character": 23},
+                                "start": {"line": 1, "character": 0},
+                                "end": {"line": 1, "character": 24},
                             },
                             "severity": 1,
-                            "code": 1002,
+                            "code": 2128,
                             "source": "Hack",
-                            "message": "await cannot be used in a toplevel statement",
+                            "message": "Hack does not support top level statements. Use the __EntryPoint attribute on a function instead",
                             "relatedInformation": [],
                             "relatedLocations": [],
-                        }
+                        },
+                        {
+                            "range": {
+                                "start": {"line": 2, "character": 0},
+                                "end": {"line": 2, "character": 7},
+                            },
+                            "severity": 1,
+                            "code": 2128,
+                            "source": "Hack",
+                            "message": "Hack does not support top level statements. Use the __EntryPoint attribute on a function instead",
+                            "relatedInformation": [],
+                            "relatedLocations": [],
+                        },
+                        {
+                            "range": {
+                                "start": {"line": 2, "character": 0},
+                                "end": {"line": 2, "character": 2},
+                            },
+                            "severity": 1,
+                            "code": 4110,
+                            "source": "Hack",
+                            "message": "Typing error",
+                            "relatedInformation": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 2, "character": 0},
+                                            "end": {"line": 2, "character": 6},
+                                        },
+                                    },
+                                    "message": "Expected num because this is used in an arithmetic operation",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 3, "character": 39},
+                                            "end": {"line": 3, "character": 43},
+                                        },
+                                    },
+                                    "message": "But got bool",
+                                },
+                            ],
+                            "relatedLocations": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 2, "character": 0},
+                                            "end": {"line": 2, "character": 6},
+                                        },
+                                    },
+                                    "message": "Expected num because this is used in an arithmetic operation",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 3, "character": 39},
+                                            "end": {"line": 3, "character": 43},
+                                        },
+                                    },
+                                    "message": "But got bool",
+                                },
+                            ],
+                        },
+                        {
+                            "range": {
+                                "start": {"line": 8, "character": 4},
+                                "end": {"line": 8, "character": 8},
+                            },
+                            "severity": 1,
+                            "code": 4110,
+                            "source": "Hack",
+                            "message": "Typing error",
+                            "relatedInformation": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 8, "character": 0},
+                                            "end": {"line": 8, "character": 8},
+                                        },
+                                    },
+                                    "message": "Expected num because this is used in an arithmetic operation",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 8, "character": 4},
+                                            "end": {"line": 8, "character": 8},
+                                        },
+                                    },
+                                    "message": "But got bool",
+                                },
+                            ],
+                            "relatedLocations": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 8, "character": 0},
+                                            "end": {"line": 8, "character": 8},
+                                        },
+                                    },
+                                    "message": "Expected num because this is used in an arithmetic operation",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 8, "character": 4},
+                                            "end": {"line": 8, "character": 8},
+                                        },
+                                    },
+                                    "message": "But got bool",
+                                },
+                            ],
+                        },
                     ],
                 },
             )

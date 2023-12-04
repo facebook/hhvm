@@ -48,11 +48,7 @@ let print_ast_check_errors errors =
   List.iter
     (fun e ->
       let text = Errors.to_string (User_error.to_absolute e) in
-      if
-        Core.String.is_substring text ~substring:SyntaxError.this_in_static
-        || Core.String.is_substring
-             text
-             ~substring:SyntaxError.toplevel_await_use
+      if Core.String.is_substring text ~substring:SyntaxError.this_in_static
       then
         Printf.eprintf "%s\n%!" text)
     error_list

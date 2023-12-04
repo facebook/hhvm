@@ -80,5 +80,3 @@ let start_offset err = err.start_offset
 let end_offset err = err.end_offset
 
 let this_in_static = "Don't use $this in a static method, use static:: instead"
-
-let toplevel_await_use = "Await cannot be used in a toplevel statement"

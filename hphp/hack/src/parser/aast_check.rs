@@ -58,7 +58,6 @@ fn is_any_local(ctxs: Option<&ast::Contexts>) -> bool {
 }
 
 struct Context {
-    in_methodish: bool,
     in_classish: bool,
     in_static_methodish: bool,
     is_any_local_fun: bool,
@@ -153,7 +152,6 @@ impl<'ast> Visitor<'ast> for Checker {
         }
         m.recurse(
             &mut Context {
-                in_methodish: true,
                 in_static_methodish: m.static_,
                 is_any_local_fun: is_any_local(m.ctxs.as_ref()),
                 ..*c
@@ -169,7 +167,6 @@ impl<'ast> Visitor<'ast> for Checker {
 
         f.recurse(
             &mut Context {
-                in_methodish: true,
                 in_static_methodish: c.in_static_methodish,
                 is_any_local_fun: is_any_local(f.ctxs.as_ref()),
                 ..*c
@@ -179,11 +176,6 @@ impl<'ast> Visitor<'ast> for Checker {
     }
 
     fn visit_stmt(&mut self, c: &mut Context, p: &aast::Stmt<(), ()>) -> Result<(), ()> {
-        if let aast::Stmt_::Awaitall(_) = p.1 {
-            if !c.in_methodish {
-                self.add_error(&p.0, syntax_error::toplevel_await_use);
-            }
-        }
         p.recurse(c, self)
     }
 
@@ -195,11 +187,7 @@ impl<'ast> Visitor<'ast> for Checker {
         use aast::Expr_::*;
         use aast::Lid;
 
-        if let Await(_) = p.2 {
-            if !c.in_methodish {
-                self.add_error(&p.1, syntax_error::toplevel_await_use);
-            }
-        } else if let Some(CallExpr {
+        if let Some(CallExpr {
             func: Expr(_, _, f),
             args,
             ..
@@ -250,16 +238,9 @@ impl<'ast> Visitor<'ast> for Checker {
     }
 }
 
-pub fn check_program(
-    program: &aast::Program<(), ()>,
-    is_typechecker: bool,
-    for_debugger_eval: bool,
-) -> Vec<SyntaxError> {
+pub fn check_program(program: &aast::Program<(), ()>, is_typechecker: bool) -> Vec<SyntaxError> {
     let mut checker = Checker::new();
     let mut context = Context {
-        // If we are checking for debugger repl, we should assume that we are
-        // inside a method
-        in_methodish: for_debugger_eval,
         in_classish: false,
         in_static_methodish: false,
         is_any_local_fun: false,

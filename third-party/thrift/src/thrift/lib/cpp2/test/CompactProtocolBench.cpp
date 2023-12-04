@@ -149,8 +149,8 @@ BENCHMARK(CompactProtocolReader_deserialize_shallow, kiters) {
   braces.dismiss();
   while (iters--) {
     CompactSerializer s;
-    Deep data;
-    s.deserialize(buf.get(), data);
+    Shallow shallow;
+    s.deserialize(buf.get(), shallow);
   }
   braces.rehire();
 }

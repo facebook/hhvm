@@ -35,7 +35,7 @@
 #include <thrift/lib/cpp2/type/Id.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
 #include <thrift/lib/cpp2/type/Tag.h>
-#include <thrift/lib/thrift/gen-cpp2/patch_types.h>
+#include <thrift/lib/thrift/gen-cpp2/patch_op_types.h>
 #include <thrift/lib/thrift/gen-cpp2/protocol_types.h>
 
 namespace apache {

@@ -7129,3 +7129,75 @@ function expect_type_errors_inside(): void {
             )
         )
         self.run_spec(spec, variables)
+
+    def test_toplevel_statements_await(self) -> None:
+        """
+        regression test for:
+        - TODO(T171537862): presence of a top-level await shouldn't suppress type errros in the rest of the file
+        - TODO(T170614550): correct type errors for top-level statements (`$await gen_int()` + true should error)
+        """
+        variables = self.write_hhconf_and_naming_table()
+        file_base_name = "toplevel_statements.php"
+        php_file_uri = self.repo_file_uri(file_base_name)
+        contents = """<?hh
+$b = await async_bool();
+$b + 1; // TODO(T170614550): should be a type error here
+async function async_bool(): Awaitable<bool> {
+    return true;
+}
+
+function expect_type_errors_inside(): void {
+3 + true; // TODO(T171537862): should be a type error here
+}
+"""
+        variables.update({"php_file_uri": php_file_uri, "contents": contents})
+        spec = (
+            self.initialize_spec(LspTestSpec("toplevel_statements"))
+            .write_to_disk(
+                comment="create file ${file_base_name}",
+                uri="${php_file_uri}",
+                contents="${contents}",
+                notify=False,
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${contents}",
+                    }
+                },
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 1, "character": 5},
+                                "end": {"line": 1, "character": 23},
+                            },
+                            "severity": 1,
+                            "code": 1002,
+                            "source": "Hack",
+                            "message": "await cannot be used in a toplevel statement",
+                            "relatedInformation": [],
+                            "relatedLocations": [],
+                        }
+                    ],
+                },
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .wait_for_notification(
+                comment="shutdown should clear out live squiggles",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [],
+                },
+            )
+        )
+        self.run_spec(spec, variables)

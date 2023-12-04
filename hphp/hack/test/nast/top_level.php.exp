@@ -4,27 +4,41 @@ Errors:
   [11:1-9] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead
   [13:1-23] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead
   [15:1-12] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead
-[(Stmt ([5:1-12], (Expr ((), [5:1-11], (Call { func = ((), [5:1-9], (Id ([5:1-9], "\\func_foo"))); targs = []; args = []; unpacked_arg = None })))));
-  (Stmt ([9:1-7], (Expr ((), [9:1-6], (Call { func = ((), [9:1-4], (Id ([9:1-4], "\\foo"))); targs = []; args = []; unpacked_arg = None })))));
-  (Stmt
-     ([11:1-9],
-      (Expr
-         ((), [11:1-8],
-          (Binop { bop = Plus; lhs = ((), [11:1-2], (Int "1")); rhs = ((), [11:3-8], (Call { func = ((), [11:3-6], (Id ([11:3-6], "\\foo"))); targs = []; args = []; unpacked_arg = None })) })))));
-  (Stmt
-     ([13:1-23],
-      (Expr
-         ((), [13:1-22],
-          (Binop
-             { bop = (Eq None); lhs = ((), [13:1-3], (Lvar ([13:1-3], $x)));
-               rhs =
-               ((), [13:6-22],
-                (Call
-                   { func = ((), [13:6-15], (Id ([13:6-15], "\\HH\\Lib\\Vec\\range"))); 
-                     targs = []; args = [(Pnormal, ((), [13:16-17], (Int "1"))); (Pnormal, ((), [13:19-21], (Int "99")))]; 
-                     unpacked_arg = None }))
-               })))));
-  (Stmt ([15:1-12], (Expr ((), [15:1-11], (Call { func = ((), [15:1-9], (Id ([15:1-9], "\\My\\Full\\func_foo"))); targs = []; args = []; unpacked_arg = None })))));
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = true };
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([5:1-15:12], "");
+      fd_fun =
+      { f_span = [5:1-15:12]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((), (Some ([5:1-15:12], (Happly (([5:1-15:12], "\\HH\\Awaitable"), [([5:1-15:12], (Hprim Tvoid))]))))); 
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([5:1-12], (Expr ((), [5:1-11], (Call { func = ((), [5:1-9], (Id ([5:1-9], "\\func_foo"))); targs = []; args = []; unpacked_arg = None }))));
+            ([9:1-7], (Expr ((), [9:1-6], (Call { func = ((), [9:1-4], (Id ([9:1-4], "\\foo"))); targs = []; args = []; unpacked_arg = None }))));
+            ([11:1-9],
+             (Expr
+                ((), [11:1-8],
+                 (Binop { bop = Plus; lhs = ((), [11:1-2], (Int "1")); rhs = ((), [11:3-8], (Call { func = ((), [11:3-6], (Id ([11:3-6], "\\foo"))); targs = []; args = []; unpacked_arg = None })) }))));
+            ([13:1-23],
+             (Expr
+                ((), [13:1-22],
+                 (Binop
+                    { bop = (Eq None); lhs = ((), [13:1-3], (Lvar ([13:1-3], $x)));
+                      rhs =
+                      ((), [13:6-22],
+                       (Call
+                          { func = ((), [13:6-15], (Id ([13:6-15], "\\Vec\\range"))); 
+                            targs = []; args = [(Pnormal, ((), [13:16-17], (Int "1"))); (Pnormal, ((), [13:19-21], (Int "99")))]; 
+                            unpacked_arg = None }))
+                      }))));
+            ([15:1-12], (Expr ((), [15:1-11], (Call { func = ((), [15:1-9], (Id ([15:1-9], "\\func_foo"))); targs = []; args = []; unpacked_arg = None }))))]
+          };
+        f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None };
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 

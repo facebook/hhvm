@@ -1,31 +1,44 @@
 Errors:
   [6:1-2] Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead
-[(Class
-    { c_span = [3:1-5:56]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
-      c_name = ([3:7-10], "\\ABC"); c_tparams = []; c_extends = []; c_uses = []; 
-      c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
-      c_where_constraints = []; c_consts = [];
-      c_typeconsts =
-      [{ c_tconst_user_attributes = []; c_tconst_name = ([4:14-16], "TA"); 
-         c_tconst_kind = (TCConcrete { c_tc_type = ([4:19-22], (Hprim Tint)) }); 
-         c_tconst_span = [4:3-23]; c_tconst_doc_comment = None; c_tconst_is_ctx = false }
-        ];
-      c_vars = [];
-      c_methods =
-      [{ m_span = [5:3-42]; m_annotation = (); m_final = false; m_abstract = false; 
-         m_static = false; m_readonly_this = false; m_visibility = Public; 
-         m_name = ([5:19-33], "taccess_static"); m_tparams = []; m_where_constraints = []; 
-         m_params = []; m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([5:40-42], (Return (Some ((), [5:40-42], Null))))] }; 
-         m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
-         m_ret = ((), None); m_external = false; m_doc_comment = None }
-        ];
-      c_xhp_children = []; c_xhp_attrs = [];
-      c_namespace =
+[(Fun
+    { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
-      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
-      c_module = None });
-  (Stmt ([6:1-2], (Expr ((), [6:1-2], (Id ([6:1-2], "\\}"))))))]
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = true };
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([6:1-2], "");
+      fd_fun =
+      { f_span = [6:1-2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((), (Some ([6:1-2], (Happly (([6:1-2], "\\HH\\Awaitable"), [([6:1-2], (Hprim Tvoid))]))))); 
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([6:1-2], (Expr ((), [6:1-2], (Id ([6:1-2], "\\}")))))] }; 
+        f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None };
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+  (Class
+     { c_span = [3:1-5:56]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+       c_name = ([3:7-10], "\\ABC"); c_tparams = []; c_extends = []; 
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+       c_implements = []; c_where_constraints = []; c_consts = [];
+       c_typeconsts =
+       [{ c_tconst_user_attributes = []; c_tconst_name = ([4:14-16], "TA"); 
+          c_tconst_kind = (TCConcrete { c_tc_type = ([4:19-22], (Hprim Tint)) }); 
+          c_tconst_span = [4:3-23]; c_tconst_doc_comment = None; c_tconst_is_ctx = false }
+         ];
+       c_vars = [];
+       c_methods =
+       [{ m_span = [5:3-42]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([5:19-33], "taccess_static"); m_tparams = []; m_where_constraints = []; 
+          m_params = []; m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([5:40-42], (Return (Some ((), [5:40-42], Null))))] }; 
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((), None); m_external = false; m_doc_comment = None }
+         ];
+       c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
+       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
+       c_module = None })
+  ]

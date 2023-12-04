@@ -270,25 +270,6 @@ module Rust_elab_core = struct
   let elab_stmt = add_errors elab_stmt
 end
 
-let program ctx program =
-  let tcopt = Provider_context.get_tcopt ctx in
-  let filename = program_filename program in
-  if TypecheckerOptions.rust_elab tcopt then
-    Rust_elab_core.elab_program tcopt filename program
-  else
-    let elab_ns = Naming_elaborate_namespaces_endo.elaborate_program
-    and elab_capture = Naming_captures.elab_program
-    and elab_typed_locals = Naming_typed_locals.elab_program
-    and validate_await = Naming_validate_await.validate_program on_error
-    and elab_core = elab_core_program (mk_env filename tcopt) in
-    elab_elem
-      ~elab_ns
-      ~elab_capture
-      ~elab_typed_locals
-      ~validate_await
-      ~elab_core
-      program
-
 let fun_def ctx fd =
   let tcopt = Provider_context.get_tcopt ctx in
   let filename = Pos.filename fd.Aast.fd_fun.Aast.f_span in
@@ -384,21 +365,108 @@ let typedef ctx td =
       ~elab_core
       td
 
-let stmt ctx stmt =
+let fun_def_of_stmts ctx stmts : Nast.fun_def option =
+  let stmts =
+    List.filter stmts ~f:(function
+        | (_, Aast.Markup _) -> false
+        | _ -> true)
+  in
+  match stmts with
+  | [] -> None
+  | (pos, _) :: tail ->
+    let pos = tail |> List.map ~f:fst |> List.fold ~init:pos ~f:Pos.merge in
+    let stmts =
+      let tcopt = Provider_context.get_tcopt ctx in
+      let filename = Pos.filename pos in
+      let elab_stmt stmt : Nast.stmt =
+        if TypecheckerOptions.rust_elab tcopt then
+          Rust_elab_core.elab_stmt tcopt filename stmt
+        else
+          let elab_ns = Naming_elaborate_namespaces_endo.elaborate_stmt
+          and elab_capture = Naming_captures.elab_stmt
+          and elab_typed_locals = Naming_typed_locals.elab_stmt
+          and validate_await = Naming_validate_await.validate_stmt on_error
+          and elab_core = elab_core_stmt (mk_env filename tcopt) in
+          elab_elem
+            ~elab_ns
+            ~elab_capture
+            ~elab_typed_locals
+            ~validate_await
+            ~elab_core
+            stmt
+      in
+      List.map stmts ~f:elab_stmt
+    in
+    Some
+      Aast.
+        {
+          fd_name =
+            (pos, "")
+            (* An empty function name is appropriate, as the AST can already include empty function names due to parse errors *);
+          fd_namespace = Namespace_env.empty_with_default;
+          fd_file_attributes = [];
+          fd_mode = FileInfo.Mstrict;
+          fd_fun =
+            {
+              f_span = pos;
+              f_readonly_this = None;
+              f_annotation = ();
+              f_readonly_ret = None;
+              f_ret =
+                ( (),
+                  Some
+                    ( pos,
+                      Happly
+                        ( (pos, Naming_special_names.Classes.cAwaitable),
+                          [(pos, Hprim Tvoid)] ) ) );
+              f_params = [];
+              f_body = { fb_ast = stmts };
+              f_ctxs = None;
+              f_unsafe_ctxs = None;
+              f_fun_kind = Ast_defs.FAsync (* enable top-level await *);
+              f_user_attributes = [];
+              f_external = false;
+              f_doc_comment = None;
+            };
+          fd_internal = false;
+          fd_module = None;
+          fd_tparams = [];
+          fd_where_constraints = [];
+        }
+
+(** Return an updated [Nast.program] where top-level statements
+* are wrapped in a function. This is not an elaboration pass
+* because it affects the entire file and whole-file elaboration passes
+* are not used in `Typing_check_job.calc_errors_and_tast`.
+* Shared logic with `Typing_check_job.calc_errors_and_tast`
+* is in `fun_def_of_stmts`.
+*)
+let adjust_toplevel_stmts ctx program : Nast.program =
+  let (toplevel_defs, toplevel_stmts) =
+    List.partition_map program ~f:(function
+        | Aast.Stmt s -> Either.Second s
+        | def -> Either.First def)
+  in
+  match fun_def_of_stmts ctx toplevel_stmts with
+  | Some def -> Aast.Fun def :: toplevel_defs
+  | None -> toplevel_defs
+
+let program ctx program =
   let tcopt = Provider_context.get_tcopt ctx in
-  let filename = Pos.filename (fst stmt) in
+  let filename = program_filename program in
+  let program = adjust_toplevel_stmts ctx program in
   if TypecheckerOptions.rust_elab tcopt then
-    Rust_elab_core.elab_stmt tcopt filename stmt
+    Rust_elab_core.elab_program tcopt filename program
   else
-    let elab_ns = Naming_elaborate_namespaces_endo.elaborate_stmt
-    and elab_capture = Naming_captures.elab_stmt
-    and elab_typed_locals = Naming_typed_locals.elab_stmt
-    and validate_await = Naming_validate_await.validate_stmt on_error
-    and elab_core = elab_core_stmt (mk_env filename tcopt) in
+    let elab_ns = Naming_elaborate_namespaces_endo.elaborate_program
+    and elab_capture = Naming_captures.elab_program
+    and elab_typed_locals = Naming_typed_locals.elab_program
+    and validate_await = Naming_validate_await.validate_program on_error
+    and elab_core = elab_core_program (mk_env filename tcopt) in
     elab_elem
       ~elab_ns
       ~elab_capture
       ~elab_typed_locals
       ~validate_await
       ~elab_core
-      stmt
+      program

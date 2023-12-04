@@ -27,6 +27,10 @@ val global_const : Provider_context.t -> Nast.gconst -> Nast.gconst
 
 val module_ : Provider_context.t -> Nast.module_def -> Nast.module_def
 
-val stmt : Provider_context.t -> Nast.stmt -> Nast.stmt
+(** We low-effort support top-level statements by pretending they are in a function.
+* This is helpful for Hack notebooks and true to how such statements are executed in both
+* notebooks and in the HHVM debugger *)
+val fun_def_of_stmts :
+  Provider_context.t -> Nast.stmt list -> Nast.fun_def option
 
 val invalid_expr_ : ('ex, 'en) Aast.expr option -> ('ex, 'en) Aast.expr_

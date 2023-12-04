@@ -2254,31 +2254,35 @@ let property_or_method_keywords filename existing_modifiers s : unit =
 
 let keywords filename tree : unit =
   let open Syntax in
+  let on_toplevel_defs defs =
+    List.iter (syntax_node_to_list defs) ~f:(fun d ->
+        (* If we see AUTO332 at the top-level it's parsed as an
+           expression, but the user is about to write a top-level
+           definition (function, class etc). *)
+        match d.syntax with
+        | ExpressionStatement es ->
+          def_start_keywords filename es.expression_statement_expression
+        | _ -> ())
+  in
   let rec aux (ctx : Ast_defs.classish_kind option) s =
     let inner_ctx = ref ctx in
     (match s.syntax with
-    | Script sd ->
-      List.iter (syntax_node_to_list sd.script_declarations) ~f:(fun d ->
-          (* If we see AUTO332 at the top-level it's parsed as an
-             expression, but the user is about to write a top-level
-             definition (function, class etc). *)
-          match d.syntax with
-          | ExpressionStatement es ->
-            def_start_keywords filename es.expression_statement_expression
-          | _ -> ())
-    | NamespaceBody nb ->
-      List.iter (syntax_node_to_list nb.namespace_declarations) ~f:(fun d ->
-          match d.syntax with
-          (* Treat expressions in namespaces consistently with
-             top-level expressions. *)
-          | ExpressionStatement es ->
-            def_start_keywords filename es.expression_statement_expression
-          | _ -> ())
-    | FunctionDeclarationHeader fdh ->
-      (match fdh.function_keyword.syntax with
-      | Missing ->
-        (* The user has written `async AUTO332`, so we're expecting `function`. *)
-        complete_keywords_at_token ["function"] filename fdh.function_name
+    | Script sd -> on_toplevel_defs sd.script_declarations
+    | NamespaceBody nb -> on_toplevel_defs nb.namespace_declarations
+    | FunctionDeclaration { function_declaration_header; function_body; _ } ->
+      (match function_declaration_header.syntax with
+      | FunctionDeclarationHeader { function_name; function_keyword; _ } ->
+        (match function_keyword.syntax with
+        | Missing ->
+          (* The user has written `async AUTO332`, so we're expecting `function`. *)
+          complete_keywords_at_token ["function"] filename function_name
+        | _ ->
+          (match Syntax.text function_name with
+          | ""
+          (* used for top-level statements and, I suspect, when there are parse errors *)
+            ->
+            on_toplevel_defs function_body
+          | _ -> ()))
       | _ -> ())
     | ClassishDeclaration cd ->
       (match cd.classish_keyword.syntax with

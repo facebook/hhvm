@@ -26,10 +26,6 @@ let fun_env ?origin ctx fd =
   Typing_inference_env.Identifier_provider.reinitialize ();
   env
 
-let stmt_env ?origin ctx (pos, _) =
-  let file = Pos.filename pos in
-  Typing_env_types.empty ?origin ctx file ~droot:None
-
 (* Given a class definition construct a type consisting of the
  * class instantiated at its generic parameters. *)
 let get_self_from_c c =

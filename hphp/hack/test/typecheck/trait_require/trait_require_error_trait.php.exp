@@ -1,7 +1,7 @@
 File "trait_require_error_trait.php", line 15, characters 19-21:
 `TR1` is not a class. It is a trait. (NastCheck[3017])
 File "trait_require_error_trait.php", line 18, characters 12-17:
-You can only use `parent::` in traits that specify `require extends SomeClass` (Typing[4074])
+You can only use `parent::` in traits that `require extends` or `require class` a valid class (Typing[4074])
 File "trait_require_error_trait.php", line 18, characters 5-25:
 You cannot return a value (Typing[4084])
   File "trait_require_error_trait.php", line 17, characters 26-29:

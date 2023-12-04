@@ -1,0 +1,4 @@
+File "parent_03.bad.php", line 7, characters 20-22:
+Cannot call `parent::bar()`; it is abstract (Typing[4073])
+  File "parent_03.bad.php", line 13, characters 35-37:
+  Declaration is here

@@ -1410,16 +1410,32 @@ let class_contains_smethod env cty (_pos, mid) =
   in
   List.exists tyl ~f:lookup_member
 
-(* To be a valid trait declaration, all of its 'require extends' must
- * match; since there's no multiple inheritance, it follows that all of
- * the 'require extends' must belong to the same inheritance hierarchy
- * and one of them should be the child of all the others *)
+(* It the trait has a require class constraint, look for the parent
+ * of the required class.  Otherwise, to be a valid trait declaration,
+ * all of its 'require extends' must match; since there's no multiple
+ * inheritance, it follows that all of the 'require extends' must belong
+ * to the same inheritance hierarchy and one of them should be the child
+ * of all the others.
+ *)
+
 let trait_most_concrete_req_class trait env =
+  let ancestors =
+    match Cls.all_ancestor_req_class_requirements trait with
+    | (_, ty) :: _ ->
+      let (_r, (_p, name), _paraml) = TUtils.unwrap_class_type ty in
+      (match Env.get_class env name with
+      | Decl_entry.Found required_class ->
+        List.map (Cls.all_ancestors required_class) ~f:snd
+      | Decl_entry.NotYetAvailable
+      | Decl_entry.DoesNotExist ->
+        [])
+    | [] -> List.map (Cls.all_ancestor_reqs trait) ~f:snd
+  in
   List.fold
-    (Cls.all_ancestor_reqs trait)
+    ancestors
     ~f:
       begin
-        fun acc (_p, ty) ->
+        fun acc ty ->
           let (_r, (_p, name), _paraml) = TUtils.unwrap_class_type ty in
           let keep =
             match acc with

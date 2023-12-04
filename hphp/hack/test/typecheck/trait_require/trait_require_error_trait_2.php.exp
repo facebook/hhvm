@@ -1,0 +1,8 @@
+File "trait_require_error_trait_2.php", line 13, characters 12-14:
+Methods need to be marked `public`, `private`, or `protected`. (Naming[2086])
+File "trait_require_error_trait_2.php", line 20, characters 12-17:
+You can only use `parent::` in traits that `require extends` or `require class` a valid class (Typing[4074])
+File "trait_require_error_trait_2.php", line 20, characters 5-25:
+You cannot return a value (Typing[4084])
+  File "trait_require_error_trait_2.php", line 19, characters 26-29:
+  This is a `void` function

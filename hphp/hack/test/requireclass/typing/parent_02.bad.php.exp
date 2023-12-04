@@ -1,2 +1,6 @@
-File "parent_02.bad.php", line 15, characters 16-21:
-You can only use `parent::` in traits that specify `require extends SomeClass` (Typing[4074])
+File "parent_02.bad.php", line 12, characters 16-28:
+Invalid argument (Typing[4110])
+  File "parent_02.bad.php", line 6, characters 21-23:
+  Expected `int`
+  File "parent_02.bad.php", line 17, characters 33-40:
+  But got `arraykey`

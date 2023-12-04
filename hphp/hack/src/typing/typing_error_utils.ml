@@ -3765,8 +3765,8 @@ module Eval_primary = struct
     ( Error_code.ParentInTrait,
       lazy
         ( pos,
-          "You can only use `parent::` in traits that specify `require extends SomeClass`"
-        ),
+          "You can only use `parent::` in traits that `require extends` or "
+          ^ "`require class` a valid class" ),
       lazy [],
       [] )
 

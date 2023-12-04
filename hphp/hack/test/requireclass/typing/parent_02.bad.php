@@ -1,10 +1,7 @@
 <?hh
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-// Ideally Hack should report an error saying that parent::bar returns
-// an arraykey, not an int
-
-<<file:__EnableUnstableFeatures('require_class')>>
+// Must report an error saying that parent::bar returns an arraykey,
+// not an int
 
 function expect_int(int $x): void {}
 

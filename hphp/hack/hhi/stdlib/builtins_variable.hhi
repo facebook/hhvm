@@ -64,7 +64,6 @@ namespace {
   function debug_zval_dump(
     <<__AcceptDisposable>> HH\FIXME\MISSING_PARAM_TYPE $variable,
   ): \HH\FIXME\MISSING_RETURN_TYPE;
-  <<__PHPStdLib>>
   function debugger_dump(
     <<__AcceptDisposable>> HH\FIXME\MISSING_PARAM_TYPE $variable,
   ): \HH\FIXME\MISSING_RETURN_TYPE;

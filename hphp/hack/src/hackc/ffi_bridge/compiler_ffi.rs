@@ -343,6 +343,117 @@ mod ffi {
         is_strict: bool,
     }
 
+    // Fields are in alphabetic order for json stability
+    #[derive(Default, Debug, PartialEq, Serialize, Deserialize, Clone)]
+    #[serde(rename_all = "camelCase")]
+    pub struct FileFacts {
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        pub constants: Vec<String>,
+
+        #[serde(
+            default,
+            skip_serializing_if = "Vec::is_empty",
+            serialize_with = "crate::compiler_ffi_impl::attrs_to_json",
+            deserialize_with = "crate::compiler_ffi_impl::json_to_attrs"
+        )]
+        pub file_attributes: Vec<AttrFacts>,
+
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        pub functions: Vec<String>,
+
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        pub modules: Vec<ModuleFacts>,
+
+        pub sha1sum: String,
+
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        pub types: Vec<TypeFacts>,
+    }
+
+    // Fields are in alphabetic order for json stability
+    #[derive(Debug, PartialEq, Serialize, Deserialize, Default, Clone)]
+    #[serde(rename_all = "camelCase")]
+    pub struct TypeFacts {
+        #[serde(
+            default,
+            skip_serializing_if = "Vec::is_empty",
+            serialize_with = "crate::compiler_ffi_impl::attrs_to_json",
+            deserialize_with = "crate::compiler_ffi_impl::json_to_attrs"
+        )]
+        pub attributes: Vec<AttrFacts>,
+
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        pub base_types: Vec<String>,
+
+        pub flags: u8,
+
+        #[serde(rename = "kindOf")]
+        pub kind: TypeKind,
+
+        #[serde(
+            default,
+            skip_serializing_if = "Vec::is_empty",
+            serialize_with = "crate::compiler_ffi_impl::methods_to_json",
+            deserialize_with = "crate::compiler_ffi_impl::json_to_methods"
+        )]
+        pub methods: Vec<MethodFacts>,
+
+        pub name: String,
+
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        pub require_class: Vec<String>,
+
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        pub require_extends: Vec<String>,
+
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        pub require_implements: Vec<String>,
+    }
+
+    #[derive(Debug, Clone, Copy, PartialEq, Deserialize)]
+    pub enum TypeKind {
+        Class,
+        Interface,
+        Enum,
+        Trait,
+        TypeAlias,
+        Unknown,
+        Mixed,
+    }
+
+    #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
+    #[serde(rename_all = "camelCase")]
+    pub struct AttrFacts {
+        pub name: String,
+        pub args: Vec<String>, // Really Vec<serde_json::Value>, but only Value::String
+    }
+
+    #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
+    #[serde(rename_all = "camelCase")]
+    pub struct MethodFacts {
+        pub name: String,
+        pub details: MethodDetails,
+    }
+
+    #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
+    #[serde(rename_all = "camelCase")]
+    pub struct MethodDetails {
+        #[serde(
+            default,
+            skip_serializing_if = "Vec::is_empty",
+            serialize_with = "crate::compiler_ffi_impl::attrs_to_json",
+            deserialize_with = "crate::compiler_ffi_impl::json_to_attrs"
+        )]
+        pub attributes: Vec<AttrFacts>,
+    }
+
+    // Currently module facts are empty, but added for backward compatibility
+    #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
+    #[serde(rename_all = "camelCase")]
+    pub struct ModuleFacts {
+        pub name: String,
+    }
+
     extern "Rust" {
         type DeclsHolder;
         type UnitWrapper;
@@ -702,7 +813,8 @@ fn decls_to_symbols(holder: &DeclsHolder) -> ffi::FileSymbols {
 
 fn decls_to_facts_json(decls: &DeclsHolder, sha1sum: &CxxString) -> String {
     let facts = facts::Facts::from_decls(&decls.parsed_file);
-    facts.to_json(false, &sha1sum.to_string_lossy())
+    let file_facts = ffi::FileFacts::from_facts(facts, sha1sum.to_string_lossy().into_owned());
+    serde_json::to_string(&file_facts).expect("Could not serialize facts to JSON")
 }
 
 fn get_classes(holder: &DeclsHolder) -> Vec<ffi::ExtDeclClass> {

@@ -881,6 +881,8 @@ dependencies = [
  "oxidized_by_ref",
  "parser_core_types",
  "relative_path",
+ "serde",
+ "serde_json",
  "sha1",
  "thiserror",
  "ty",

@@ -68,7 +68,7 @@ pub struct TypeFacts {
     #[serde(rename = "kindOf")]
     pub kind: TypeKind,
 
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Attributes::is_empty")]
     pub attributes: Attributes,
 
     pub flags: Flags,
@@ -265,10 +265,12 @@ fn types_to_json<S: Serializer>(types_by_name: &TypeFactsByName, s: S) -> Result
             m.insert("name".to_owned(), json!(name));
         };
 
-        // possibly skip non-empty attributes/require*, depending on the kind
+        // possibly skip non-empty attributes depending on the kind
         if types.skip_attributes() {
             types_json.as_object_mut().map(|m| m.remove("attributes"));
         }
+
+        // possibly skip non-empty require depending on the kind
         if types.skip_require_extends() {
             types_json
                 .as_object_mut()
@@ -282,6 +284,7 @@ fn types_to_json<S: Serializer>(types_by_name: &TypeFactsByName, s: S) -> Result
         if types.skip_require_class() {
             types_json.as_object_mut().map(|m| m.remove("requireClass"));
         }
+
         seq.serialize_element(&types_json)?;
     }
     seq.end()

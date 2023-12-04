@@ -410,7 +410,7 @@ mod ffi {
         pub require_implements: Vec<String>,
     }
 
-    #[derive(Debug, Clone, Copy, PartialEq, Deserialize)]
+    #[derive(Debug, Clone, Copy, PartialEq)]
     pub enum TypeKind {
         Class,
         Interface,
@@ -425,7 +425,7 @@ mod ffi {
     #[serde(rename_all = "camelCase")]
     pub struct AttrFacts {
         pub name: String,
-        pub args: Vec<String>, // Really Vec<serde_json::Value>, but only Value::String
+        pub args: Vec<String>, // Really Vec<hackc::AttrValue>, but all variants are String
     }
 
     #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
@@ -498,6 +498,7 @@ mod ffi {
         /// Extract hackc::Facts in condensed JSON format from Decls,
         /// including the source text SHA1 hash.
         fn decls_to_facts_json(decls: &DeclsHolder, sha1sum: &CxxString) -> String;
+        fn json_to_facts(json: &CxxString) -> Result<FileFacts>;
 
         /////////////////////// ext_decl.rs API
         ///
@@ -815,6 +816,10 @@ fn decls_to_facts_json(decls: &DeclsHolder, sha1sum: &CxxString) -> String {
     let facts = facts::Facts::from_decls(&decls.parsed_file);
     let file_facts = ffi::FileFacts::from_facts(facts, sha1sum.to_string_lossy().into_owned());
     serde_json::to_string(&file_facts).expect("Could not serialize facts to JSON")
+}
+
+fn json_to_facts(json: &CxxString) -> Result<ffi::FileFacts> {
+    Ok(serde_json::from_slice(json.as_bytes())?)
 }
 
 fn get_classes(holder: &DeclsHolder) -> Vec<ffi::ExtDeclClass> {

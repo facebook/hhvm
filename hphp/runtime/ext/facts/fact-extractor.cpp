@@ -23,6 +23,7 @@
 #include <folly/futures/Future.h>
 #include <folly/logging/xlog.h>
 
+#include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/facts/exception.h"
@@ -38,106 +39,95 @@ namespace Facts {
 
 namespace {
 
-TypeKind fromString(const std::string& str) {
-  if (str == "class") {
-    return TypeKind::Class;
-  } else if (str == "interface") {
-    return TypeKind::Interface;
-  } else if (str == "enum") {
-    return TypeKind::Enum;
-  } else if (str == "trait") {
-    return TypeKind::Trait;
-  } else if (str == "typeAlias") {
-    return TypeKind::TypeAlias;
-  }
-  return TypeKind::Unknown;
-}
-
-std::vector<std::string> move_str_vec(folly::dynamic* stringList) {
-  if (stringList == nullptr) {
-    return {};
-  }
+std::vector<std::string> move_str_vec(rust::Vec<rust::String> stringList) {
   std::vector<std::string> ret;
-  ret.reserve(stringList->size());
-  for (auto& item : *stringList) {
-    ret.push_back(std::move(item).getString());
+  ret.reserve(stringList.size());
+  for (auto& item : std::move(stringList)) {
+    ret.emplace_back(std::move(item));
   }
   return ret;
 }
 
-std::vector<Attribute> move_attr_vec(folly::dynamic* attrList) {
-  if (attrList == nullptr) {
-    return {};
-  }
-
+std::vector<Attribute> move_attr_vec(rust::Vec<hackc::AttrFacts> attrList) {
   std::vector<Attribute> ret;
-  for (auto& item : attrList->items()) {
+  ret.reserve(attrList.size());
+  for (auto& item : std::move(attrList)) {
     Attribute attr;
-    attr.m_name = item.first.getString();
-    for (auto& arg : std::move(item.second)) {
-      attr.m_args.push_back(std::move(arg));
+    attr.m_name = std::string{std::move(item.name)};
+    for (auto& arg : item.args) {
+      attr.m_args.emplace_back(std::move(arg));
     }
-    ret.push_back(std::move(attr));
+    ret.emplace_back(std::move(attr));
   }
   return ret;
 }
 
-std::vector<MethodDetails> move_method_vec(folly::dynamic* methodList) {
-  if (!methodList) {
-    return {};
-  }
+std::vector<MethodDetails> move_method_vec(
+    rust::Vec<hackc::MethodFacts> methodList) {
   std::vector<MethodDetails> ret;
-  ret.reserve(methodList->size());
-  for (auto& [method, details] : methodList->items()) {
+  ret.reserve(methodList.size());
+  for (auto& method : std::move(methodList)) {
     ret.push_back(MethodDetails{
-        .m_name = method.getString(),
-        .m_attributes = move_attr_vec(details.get_ptr("attributes"))});
+        .m_name = std::string{method.name},
+        .m_attributes = move_attr_vec(std::move(method.details.attributes))});
   }
   return ret;
 }
 
-std::vector<TypeDetails> move_type_vec(folly::dynamic* types) {
-  if (types == nullptr) {
-    return {};
-  }
+std::vector<TypeDetails> move_type_vec(rust::Vec<hackc::TypeFacts> types) {
   std::vector<TypeDetails> ret;
-  for (auto& type : *types) {
-    auto typeKind = fromString(std::move(type.at("kindOf")).getString());
+  for (auto& type : std::move(types)) {
+    auto typeKind = [&] {
+      switch (type.kind) {
+        case hackc::TypeKind::Class:
+          return TypeKind::Class;
+        case hackc::TypeKind::Interface:
+          return TypeKind::Interface;
+        case hackc::TypeKind::Enum:
+          return TypeKind::Enum;
+        case hackc::TypeKind::Trait:
+          return TypeKind::Trait;
+        case hackc::TypeKind::TypeAlias:
+          return TypeKind::TypeAlias;
+        case hackc::TypeKind::Mixed:
+        case hackc::TypeKind::Unknown:
+        default:
+          return TypeKind::Unknown;
+      }
+    }();
     ret.push_back(TypeDetails{
-        .m_name = std::move(type.at("name")).getString(),
+        .m_name = std::string{type.name},
         .m_kind = typeKind,
-        .m_flags = static_cast<int>(std::move(type.at("flags")).getInt()),
-        .m_baseTypes = move_str_vec(type.get_ptr("baseTypes")),
-        .m_attributes = move_attr_vec(type.get_ptr("attributes")),
-        .m_requireClass = move_str_vec(type.get_ptr("requireClass")),
-        .m_requireExtends = move_str_vec(type.get_ptr("requireExtends")),
-        .m_requireImplements = move_str_vec(type.get_ptr("requireImplements")),
-        .m_methods = move_method_vec(type.get_ptr("methods"))});
+        .m_flags = type.flags,
+        .m_baseTypes = move_str_vec(std::move(type.base_types)),
+        .m_attributes = move_attr_vec(std::move(type.attributes)),
+        .m_requireClass = move_str_vec(std::move(type.require_class)),
+        .m_requireExtends = move_str_vec(std::move(type.require_extends)),
+        .m_requireImplements = move_str_vec(std::move(type.require_implements)),
+        .m_methods = move_method_vec(std::move(type.methods))});
   }
   return ret;
 }
 
-std::vector<ModuleDetails> move_module_vec(folly::dynamic* modules) {
-  if (modules == nullptr) {
-    return {};
-  }
+std::vector<ModuleDetails> move_module_vec(
+    rust::Vec<hackc::ModuleFacts> modules) {
   std::vector<ModuleDetails> ret;
-  for (auto& module : *modules) {
-    ret.push_back(
-        ModuleDetails{.m_name = std::move(module.at("name")).getString()});
+  ret.reserve(modules.size());
+  for (auto& module : std::move(modules)) {
+    ret.push_back(ModuleDetails{.m_name = std::string{module.name}});
   }
   return ret;
 }
 
-FileFacts make_file_facts(folly::dynamic facts) {
+FileFacts make_file_facts(hackc::FileFacts facts) {
   try {
     return {
-        .m_types = move_type_vec(facts.get_ptr("types")),
-        .m_functions = move_str_vec(facts.get_ptr("functions")),
-        .m_constants = move_str_vec(facts.get_ptr("constants")),
-        .m_modules = move_module_vec(facts.get_ptr("modules")),
-        .m_attributes = move_attr_vec(facts.get_ptr("fileAttributes")),
-        .m_sha1hex = std::move(facts.at("sha1sum")).getString()};
+        .m_types = move_type_vec(std::move(facts.types)),
+        .m_functions = move_str_vec(std::move(facts.functions)),
+        .m_constants = move_str_vec(std::move(facts.constants)),
+        .m_modules = move_module_vec(std::move(facts.modules)),
+        .m_attributes = move_attr_vec(std::move(facts.file_attributes)),
+        .m_sha1hex = std::string{facts.sha1sum}};
   } catch (const folly::TypeError& e) {
     throw FactsExtractionExc{e.what()};
   }
@@ -165,10 +155,10 @@ std::string summarized_string(std::string_view s, int excerpt_len) {
   return ::HPHP::escapeStringForCPP(to_encode);
 }
 
-folly::dynamic parse_json(const std::string& json) {
+hackc::FileFacts parse_json(const std::string& json) {
   try {
-    return folly::parseJson(json);
-  } catch (const folly::json::parse_error& e) {
+    return hackc::json_to_facts(json);
+  } catch (const std::exception& e) {
     throw FactsExtractionExc{folly::sformat(
         "{} - JSON is \"{}\"", e.what(), summarized_string(json, 80))};
   }
@@ -257,22 +247,22 @@ std::vector<folly::Try<FileFacts>> facts_from_paths(
               return extractor->get(absPathAndHash);
             })
             .thenValue(
-                [absPathAndHash](std::string&& factsJson) -> folly::dynamic {
+                [absPathAndHash](std::string&& factsJson) -> hackc::FileFacts {
                   auto facts = parse_json(factsJson);
                   auto const& hash = *absPathAndHash.m_hash;
-                  if (UNLIKELY(facts.at("sha1sum").getString() != hash)) {
+                  if (UNLIKELY(facts.sha1sum != hash)) {
                     // The hash we got out of memcache doesn't match the hash
                     // we expected. We'll try to extract facts from disk
                     // instead.
                     throw FactsExtractionExc{folly::sformat(
                         "Error extracting {} from memcache: hash '{}' != '{}'",
                         absPathAndHash.m_path.native(),
-                        facts.at("sha1sum").getString(),
+                        std::string{facts.sha1sum},
                         hash)};
                   }
                   return facts;
                 })
-            .thenTry([absPathAndHash](folly::Try<folly::dynamic>&& facts) {
+            .thenTry([absPathAndHash](folly::Try<hackc::FileFacts>&& facts) {
               if (facts.hasValue()) {
                 return *std::move(facts);
               } else {
@@ -287,7 +277,7 @@ std::vector<folly::Try<FileFacts>> facts_from_paths(
                 return parse_json(facts_json_from_path(withoutHash));
               }
             })
-            .thenValue([](folly::dynamic&& facts) {
+            .thenValue([](hackc::FileFacts&& facts) {
               return make_file_facts(std::move(facts));
             })
             .thenTry([&completed_tasks,

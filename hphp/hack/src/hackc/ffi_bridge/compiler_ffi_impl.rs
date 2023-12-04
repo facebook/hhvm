@@ -6,6 +6,8 @@
 //! Module containing conversion methods between the Rust Facts and
 //! Rust/C++ shared Facts (in the ffi module)
 
+use serde::de::Visitor;
+use serde::Deserialize;
 use serde::Deserializer;
 use serde::Serialize;
 use serde::Serializer;
@@ -109,7 +111,6 @@ pub(crate) fn json_to_attrs<'de, D: Deserializer<'de>>(
     d: D,
 ) -> Result<Vec<ffi::AttrFacts>, D::Error> {
     use serde::de::MapAccess;
-    use serde::de::Visitor;
     struct AttrFactsMapVisitor;
     impl<'de> Visitor<'de> for AttrFactsMapVisitor {
         type Value = Vec<ffi::AttrFacts>;
@@ -143,7 +144,6 @@ pub(crate) fn json_to_methods<'de, D: Deserializer<'de>>(
     d: D,
 ) -> Result<Vec<ffi::MethodFacts>, D::Error> {
     use serde::de::MapAccess;
-    use serde::de::Visitor;
     struct MethodFactsMapVisitor;
     impl<'de> Visitor<'de> for MethodFactsMapVisitor {
         type Value = Vec<ffi::MethodFacts>;
@@ -175,6 +175,32 @@ impl Serialize for ffi::TypeKind {
             ffi::TypeKind::Mixed => "mixed",
             _ => return Err(S::Error::custom(format!("Unknown kind {self:?}"))),
         })
+    }
+}
+
+impl<'de> Deserialize<'de> for ffi::TypeKind {
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        struct KindVisitor;
+        impl<'de> Visitor<'de> for KindVisitor {
+            type Value = ffi::TypeKind;
+            fn expecting(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                write!(f, "a lowercase type kind")
+            }
+            fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<Self::Value, E> {
+                match v {
+                    "class" => Ok(ffi::TypeKind::Class),
+                    "interface" => Ok(ffi::TypeKind::Interface),
+                    "trait" => Ok(ffi::TypeKind::Trait),
+                    "enum" => Ok(ffi::TypeKind::Enum),
+                    "typeAlias" => Ok(ffi::TypeKind::TypeAlias),
+                    "unknown" => Ok(ffi::TypeKind::Unknown),
+                    "mixed" => Ok(ffi::TypeKind::Mixed),
+                    x => Err(E::custom(format!("{x}: unexpected TypeKind"))),
+                }
+            }
+        }
+
+        d.deserialize_str(KindVisitor)
     }
 }
 

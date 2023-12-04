@@ -26,6 +26,7 @@
 #include <thrift/lib/cpp2/op/detail/ContainerPatch.h>
 #include <thrift/lib/cpp2/op/detail/StructPatch.h>
 #include <thrift/lib/cpp2/op/detail/ValuePatch.h>
+#include <thrift/lib/thrift/gen-cpp2/patch_op_types.h>
 
 namespace apache {
 namespace thrift {

@@ -112,6 +112,10 @@ def main():
     server.serve()
 
 
-if __name__ == "__main__":
+def invoke_main() -> None:
     rc = main()
     sys.exit(rc)
+
+
+if __name__ == "__main__":
+    invoke_main()  # pragma: no cover

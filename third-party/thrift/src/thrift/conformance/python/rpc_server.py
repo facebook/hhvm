@@ -80,5 +80,9 @@ async def main():
     await serve_task
 
 
-if __name__ == "__main__":
+def invoke_main() -> None:
     asyncio.run(main())
+
+
+if __name__ == "__main__":
+    invoke_main()  # pragma: no cover

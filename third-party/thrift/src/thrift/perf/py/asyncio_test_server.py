@@ -40,5 +40,9 @@ def main():
         loop.close()
 
 
-if __name__ == "__main__":
+def invoke_main() -> None:
     sys.exit(main())
+
+
+if __name__ == "__main__":
+    invoke_main()  # pragma: no cover

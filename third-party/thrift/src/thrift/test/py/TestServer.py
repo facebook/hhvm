@@ -226,7 +226,7 @@ class TestServerEventHandler(TServer.TServerEventHandler):
         self.num_conns_destroyed += 1
 
 
-if __name__ == "__main__":
+def main() -> None:
     parser = OptionParser()
     parser.add_option(
         "--ssl",
@@ -310,3 +310,7 @@ if __name__ == "__main__":
     server.setServerEventHandler(event_handler)
 
     server.serve()
+
+
+if __name__ == "__main__":
+    main()  # pragma: no cover

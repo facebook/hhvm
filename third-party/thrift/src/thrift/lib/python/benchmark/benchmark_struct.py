@@ -316,7 +316,7 @@ def benchmark_serializer():
     )
 
 
-if __name__ == "__main__":
+def main() -> None:
     benchmark_import()
     print("\n")
     benchmark_init()
@@ -326,3 +326,7 @@ if __name__ == "__main__":
     benchmark_containers()
     print("\n")
     benchmark_serializer()
+
+
+if __name__ == "__main__":
+    main()  # pragma: no cover

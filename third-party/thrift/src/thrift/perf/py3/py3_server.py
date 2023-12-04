@@ -35,5 +35,9 @@ def main():
     loop.run_until_complete(server.serve())
 
 
-if __name__ == "__main__":
+def invoke_main() -> None:
     sys.exit(main())
+
+
+if __name__ == "__main__":
+    invoke_main()  # pragma: no cover

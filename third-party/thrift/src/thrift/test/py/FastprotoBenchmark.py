@@ -185,8 +185,12 @@ def memory_usage_fastproto():
                     break
 
 
-if __name__ == "__main__":
+def main() -> None:
     print("Starting Benchmarks")
     benchmark_fastproto()
     if hpy is not None:
         memory_usage_fastproto()
+
+
+if __name__ == "__main__":
+    main()  # pragma: no cover

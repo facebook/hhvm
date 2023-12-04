@@ -56,5 +56,9 @@ async def main():
         server.stop()
 
 
-if __name__ == "__main__":
+def invoke_main() -> None:
     asyncio.get_event_loop().run_until_complete(main())
+
+
+if __name__ == "__main__":
+    invoke_main()  # pragma: no cover

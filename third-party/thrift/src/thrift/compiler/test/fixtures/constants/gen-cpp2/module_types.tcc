@@ -94,7 +94,7 @@ void Internship::readNoXfer(Protocol_* iprot) {
           0,
           1,
           apache::thrift::protocol::T_I32))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_weeks:
   {
@@ -107,7 +107,7 @@ _readField_weeks:
           1,
           2,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_title:
   {
@@ -121,7 +121,7 @@ _readField_title:
           2,
           3,
           apache::thrift::protocol::T_I32))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_employer:
   {
@@ -135,7 +135,7 @@ _readField_employer:
           3,
           4,
           apache::thrift::protocol::T_DOUBLE))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_compensation:
   {
@@ -149,7 +149,7 @@ _readField_compensation:
           4,
           5,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_school:
   {
@@ -163,7 +163,7 @@ _readField_school:
           5,
           0,
           apache::thrift::protocol::T_STOP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 
 _end:
@@ -171,8 +171,10 @@ _end:
 
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }
@@ -365,7 +367,7 @@ void Range::readNoXfer(Protocol_* iprot) {
           0,
           1,
           apache::thrift::protocol::T_I32))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_min:
   {
@@ -378,7 +380,7 @@ _readField_min:
           1,
           2,
           apache::thrift::protocol::T_I32))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_max:
   {
@@ -391,7 +393,7 @@ _readField_max:
           2,
           0,
           apache::thrift::protocol::T_STOP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 
 _end:
@@ -399,8 +401,10 @@ _end:
 
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }
@@ -518,7 +522,7 @@ void struct1::readNoXfer(Protocol_* iprot) {
           0,
           1,
           apache::thrift::protocol::T_I32))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_a:
   {
@@ -532,7 +536,7 @@ _readField_a:
           1,
           2,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_b:
   {
@@ -546,7 +550,7 @@ _readField_b:
           2,
           0,
           apache::thrift::protocol::T_STOP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 
 _end:
@@ -554,8 +558,10 @@ _end:
 
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }
@@ -673,7 +679,7 @@ void struct2::readNoXfer(Protocol_* iprot) {
           0,
           1,
           apache::thrift::protocol::T_I32))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_a:
   {
@@ -687,7 +693,7 @@ _readField_a:
           1,
           2,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_b:
   {
@@ -701,7 +707,7 @@ _readField_b:
           2,
           3,
           apache::thrift::protocol::T_STRUCT))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_c:
   {
@@ -717,7 +723,7 @@ _readField_c:
           3,
           4,
           apache::thrift::protocol::T_LIST))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_d:
   {
@@ -734,7 +740,7 @@ _readField_d:
           4,
           0,
           apache::thrift::protocol::T_STOP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 
 _end:
@@ -742,8 +748,10 @@ _end:
 
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }
@@ -907,7 +915,7 @@ void struct3::readNoXfer(Protocol_* iprot) {
           0,
           1,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_a:
   {
@@ -921,7 +929,7 @@ _readField_a:
           1,
           2,
           apache::thrift::protocol::T_I32))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_b:
   {
@@ -935,7 +943,7 @@ _readField_b:
           2,
           3,
           apache::thrift::protocol::T_STRUCT))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_c:
   {
@@ -951,7 +959,7 @@ _readField_c:
           3,
           0,
           apache::thrift::protocol::T_STOP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 
 _end:
@@ -959,8 +967,10 @@ _end:
 
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }
@@ -1101,7 +1111,7 @@ void struct4::readNoXfer(Protocol_* iprot) {
           0,
           1,
           apache::thrift::protocol::T_I32))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_a:
   {
@@ -1115,7 +1125,7 @@ _readField_a:
           1,
           2,
           apache::thrift::protocol::T_DOUBLE))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_b:
   {
@@ -1129,7 +1139,7 @@ _readField_b:
           2,
           3,
           apache::thrift::protocol::T_BYTE))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_c:
   {
@@ -1143,7 +1153,7 @@ _readField_c:
           3,
           0,
           apache::thrift::protocol::T_STOP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 
 _end:
@@ -1151,8 +1161,10 @@ _end:
 
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }

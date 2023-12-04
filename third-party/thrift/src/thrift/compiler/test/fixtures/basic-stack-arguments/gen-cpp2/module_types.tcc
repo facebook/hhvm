@@ -45,7 +45,7 @@ void MyStruct::readNoXfer(Protocol_* iprot) {
           0,
           1,
           apache::thrift::protocol::T_I64))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_MyIntField:
   {
@@ -59,7 +59,7 @@ _readField_MyIntField:
           1,
           2,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_MyStringField:
   {
@@ -73,7 +73,7 @@ _readField_MyStringField:
           2,
           0,
           apache::thrift::protocol::T_STOP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 
 _end:
@@ -81,8 +81,10 @@ _end:
 
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }

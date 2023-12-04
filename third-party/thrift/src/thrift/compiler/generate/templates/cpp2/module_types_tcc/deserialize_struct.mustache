@@ -51,7 +51,7 @@ void <%struct:cpp_underlying_name%>::readNoXfer(Protocol_* iprot) {
           0,
           <%field:key%>,
           apache::thrift::protocol::<% > module_types_tcc/struct_type%>))) {
-    goto _loop;
+    goto _advance_failure;
   }
 <%/first?%>
 _readField_<%field:cpp_name%>:
@@ -90,7 +90,7 @@ _readField_<%field:cpp_name%>:
           <%field:key%>,
           <%field:serialization_next_field_key%>,
           apache::thrift::protocol::<% > module_types_tcc/struct_type%>))) {
-    goto _loop;
+    goto _advance_failure;
   }
 <%/field:serialization_next_field_type%>
 <%/last?%>
@@ -100,7 +100,7 @@ _readField_<%field:cpp_name%>:
           <%field:key%>,
           0,
           apache::thrift::protocol::T_STOP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 <%/last?%>
 <%/field:type%>
@@ -126,8 +126,10 @@ _end:
   <%/field:required?%><%/struct:fields_in_serialization_order%><%/program:enforce_required?%>
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }

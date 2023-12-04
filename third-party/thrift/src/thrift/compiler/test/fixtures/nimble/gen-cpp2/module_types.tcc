@@ -45,7 +45,7 @@ void BasicTypes::readNoXfer(Protocol_* iprot) {
           0,
           1,
           apache::thrift::protocol::T_I32))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_first:
   {
@@ -58,7 +58,7 @@ _readField_first:
           1,
           2,
           apache::thrift::protocol::T_I32))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_second:
   {
@@ -72,7 +72,7 @@ _readField_second:
           2,
           3,
           apache::thrift::protocol::T_I64))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_third:
   {
@@ -86,7 +86,7 @@ _readField_third:
           3,
           4,
           apache::thrift::protocol::T_BOOL))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_isTrue:
   {
@@ -100,7 +100,7 @@ _readField_isTrue:
           4,
           0,
           apache::thrift::protocol::T_STOP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 
 _end:
@@ -108,8 +108,10 @@ _end:
 
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }

@@ -73,7 +73,7 @@ void MyStructNestedAnnotation::readNoXfer(Protocol_* iprot) {
           0,
           1,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_name:
   {
@@ -87,7 +87,7 @@ _readField_name:
           1,
           0,
           apache::thrift::protocol::T_STOP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 
 _end:
@@ -95,8 +95,10 @@ _end:
 
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }
@@ -276,8 +278,10 @@ _end:
 
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }
@@ -349,7 +353,7 @@ void YourStruct::readNoXfer(Protocol_* iprot) {
           0,
           2,
           apache::thrift::protocol::T_I64))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_majorVer:
   {
@@ -363,7 +367,7 @@ _readField_majorVer:
           2,
           1,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_package:
   {
@@ -377,7 +381,7 @@ _readField_package:
           1,
           3,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_annotation_with_quote:
   {
@@ -391,7 +395,7 @@ _readField_annotation_with_quote:
           3,
           4,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_class_:
   {
@@ -405,7 +409,7 @@ _readField_class_:
           4,
           5,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_annotation_with_trailing_comma:
   {
@@ -419,7 +423,7 @@ _readField_annotation_with_trailing_comma:
           5,
           6,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_empty_annotations:
   {
@@ -433,7 +437,7 @@ _readField_empty_annotations:
           6,
           7,
           apache::thrift::protocol::T_I32))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_my_enum:
   {
@@ -447,7 +451,7 @@ _readField_my_enum:
           7,
           8,
           apache::thrift::protocol::T_LIST))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_cpp_type_annotation:
   {
@@ -464,7 +468,7 @@ _readField_cpp_type_annotation:
           8,
           9,
           apache::thrift::protocol::T_STRUCT))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_my_union:
   {
@@ -480,7 +484,7 @@ _readField_my_union:
           9,
           0,
           apache::thrift::protocol::T_STOP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 
 _end:
@@ -488,8 +492,10 @@ _end:
 
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }
@@ -769,7 +775,7 @@ void SecretStruct::readNoXfer(Protocol_* iprot) {
           0,
           1,
           apache::thrift::protocol::T_I64))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_id:
   {
@@ -783,7 +789,7 @@ _readField_id:
           1,
           2,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_password:
   {
@@ -797,7 +803,7 @@ _readField_password:
           2,
           0,
           apache::thrift::protocol::T_STOP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 
 _end:
@@ -805,8 +811,10 @@ _end:
 
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }

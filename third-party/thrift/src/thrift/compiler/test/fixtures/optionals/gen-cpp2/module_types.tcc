@@ -59,7 +59,7 @@ void Color::readNoXfer(Protocol_* iprot) {
           0,
           1,
           apache::thrift::protocol::T_DOUBLE))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_red:
   {
@@ -73,7 +73,7 @@ _readField_red:
           1,
           2,
           apache::thrift::protocol::T_DOUBLE))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_green:
   {
@@ -87,7 +87,7 @@ _readField_green:
           2,
           3,
           apache::thrift::protocol::T_DOUBLE))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_blue:
   {
@@ -101,7 +101,7 @@ _readField_blue:
           3,
           4,
           apache::thrift::protocol::T_DOUBLE))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_alpha:
   {
@@ -115,7 +115,7 @@ _readField_alpha:
           4,
           0,
           apache::thrift::protocol::T_STOP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 
 _end:
@@ -123,8 +123,10 @@ _end:
 
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }
@@ -288,7 +290,7 @@ void Vehicle::readNoXfer(Protocol_* iprot) {
           0,
           1,
           apache::thrift::protocol::T_STRUCT))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_color:
   {
@@ -304,7 +306,7 @@ _readField_color:
           1,
           2,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_licensePlate:
   {
@@ -318,7 +320,7 @@ _readField_licensePlate:
           2,
           3,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_description:
   {
@@ -332,7 +334,7 @@ _readField_description:
           3,
           4,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_name:
   {
@@ -346,7 +348,7 @@ _readField_name:
           4,
           5,
           apache::thrift::protocol::T_BOOL))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_hasAC:
   {
@@ -360,7 +362,7 @@ _readField_hasAC:
           5,
           0,
           apache::thrift::protocol::T_STOP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 
 _end:
@@ -368,8 +370,10 @@ _end:
 
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }
@@ -564,7 +568,7 @@ void Person::readNoXfer(Protocol_* iprot) {
           0,
           1,
           apache::thrift::protocol::T_I64))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_id:
   {
@@ -578,7 +582,7 @@ _readField_id:
           1,
           2,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_name:
   {
@@ -592,7 +596,7 @@ _readField_name:
           2,
           3,
           apache::thrift::protocol::T_I16))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_age:
   {
@@ -606,7 +610,7 @@ _readField_age:
           3,
           4,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_address:
   {
@@ -620,7 +624,7 @@ _readField_address:
           4,
           5,
           apache::thrift::protocol::T_STRUCT))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_favoriteColor:
   {
@@ -636,7 +640,7 @@ _readField_favoriteColor:
           5,
           6,
           apache::thrift::protocol::T_SET))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_friends:
   {
@@ -653,7 +657,7 @@ _readField_friends:
           6,
           7,
           apache::thrift::protocol::T_I64))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_bestFriend:
   {
@@ -667,7 +671,7 @@ _readField_bestFriend:
           7,
           8,
           apache::thrift::protocol::T_MAP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_petNames:
   {
@@ -684,7 +688,7 @@ _readField_petNames:
           8,
           9,
           apache::thrift::protocol::T_I32))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_afraidOfAnimal:
   {
@@ -698,7 +702,7 @@ _readField_afraidOfAnimal:
           9,
           10,
           apache::thrift::protocol::T_LIST))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_vehicles:
   {
@@ -715,7 +719,7 @@ _readField_vehicles:
           10,
           0,
           apache::thrift::protocol::T_STOP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 
 _end:
@@ -723,8 +727,10 @@ _end:
 
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }

@@ -66,7 +66,7 @@ void TerseFoo::readNoXfer(Protocol_* iprot) {
           0,
           1,
           apache::thrift::protocol::T_LIST))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_field1:
   {
@@ -83,7 +83,7 @@ _readField_field1:
           1,
           2,
           apache::thrift::protocol::T_LIST))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_field2:
   {
@@ -100,7 +100,7 @@ _readField_field2:
           2,
           3,
           apache::thrift::protocol::T_LIST))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_field3:
   {
@@ -117,7 +117,7 @@ _readField_field3:
           3,
           4,
           apache::thrift::protocol::T_LIST))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_field4:
   {
@@ -134,7 +134,7 @@ _readField_field4:
           4,
           0,
           apache::thrift::protocol::T_STOP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 
 _end:
@@ -142,8 +142,10 @@ _end:
 
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }
@@ -320,7 +322,7 @@ void TerseLazyFoo::readNoXfer(Protocol_* iprot) {
           0,
           1,
           apache::thrift::protocol::T_LIST))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_field1:
   {
@@ -337,7 +339,7 @@ _readField_field1:
           1,
           2,
           apache::thrift::protocol::T_LIST))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_field2:
   {
@@ -354,7 +356,7 @@ _readField_field2:
           2,
           3,
           apache::thrift::protocol::T_LIST))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_field3:
   std::as_const(*this).__fbthrift_read_field_field3();
@@ -381,7 +383,7 @@ _readField_field3:
           3,
           4,
           apache::thrift::protocol::T_LIST))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_field4:
   std::as_const(*this).__fbthrift_read_field_field4();
@@ -408,7 +410,7 @@ _readField_field4:
           4,
           0,
           apache::thrift::protocol::T_STOP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 
 _end:
@@ -416,8 +418,10 @@ _end:
 
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }
@@ -645,7 +649,7 @@ void TerseOptionalFoo::readNoXfer(Protocol_* iprot) {
           0,
           1,
           apache::thrift::protocol::T_LIST))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_field1:
   {
@@ -662,7 +666,7 @@ _readField_field1:
           1,
           2,
           apache::thrift::protocol::T_LIST))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_field2:
   {
@@ -679,7 +683,7 @@ _readField_field2:
           2,
           3,
           apache::thrift::protocol::T_LIST))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_field3:
   {
@@ -696,7 +700,7 @@ _readField_field3:
           3,
           4,
           apache::thrift::protocol::T_LIST))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_field4:
   {
@@ -713,7 +717,7 @@ _readField_field4:
           4,
           0,
           apache::thrift::protocol::T_STOP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 
 _end:
@@ -721,8 +725,10 @@ _end:
 
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }
@@ -899,7 +905,7 @@ void TerseOptionalLazyFoo::readNoXfer(Protocol_* iprot) {
           0,
           1,
           apache::thrift::protocol::T_LIST))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_field1:
   {
@@ -916,7 +922,7 @@ _readField_field1:
           1,
           2,
           apache::thrift::protocol::T_LIST))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_field2:
   {
@@ -933,7 +939,7 @@ _readField_field2:
           2,
           3,
           apache::thrift::protocol::T_LIST))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_field3:
   std::as_const(*this).__fbthrift_read_field_field3();
@@ -960,7 +966,7 @@ _readField_field3:
           3,
           4,
           apache::thrift::protocol::T_LIST))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_field4:
   std::as_const(*this).__fbthrift_read_field_field4();
@@ -987,7 +993,7 @@ _readField_field4:
           4,
           0,
           apache::thrift::protocol::T_STOP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 
 _end:
@@ -995,8 +1001,10 @@ _end:
 
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }

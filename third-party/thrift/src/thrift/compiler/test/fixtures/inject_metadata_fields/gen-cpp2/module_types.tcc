@@ -66,7 +66,7 @@ void Fields::readNoXfer(Protocol_* iprot) {
           0,
           100,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_injected_field:
   {
@@ -80,7 +80,7 @@ _readField_injected_field:
           100,
           0,
           apache::thrift::protocol::T_STOP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 
 _end:
@@ -88,8 +88,10 @@ _end:
 
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }
@@ -184,7 +186,7 @@ void FieldsInjectedToEmptyStruct::readNoXfer(Protocol_* iprot) {
           0,
           -1100,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_injected_field:
   {
@@ -198,7 +200,7 @@ _readField_injected_field:
           -1100,
           0,
           apache::thrift::protocol::T_STOP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 
 _end:
@@ -206,8 +208,10 @@ _end:
 
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }
@@ -302,7 +306,7 @@ void FieldsInjectedToStruct::readNoXfer(Protocol_* iprot) {
           0,
           1,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_string_field:
   {
@@ -316,7 +320,7 @@ _readField_string_field:
           1,
           -1100,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_injected_field:
   {
@@ -330,7 +334,7 @@ _readField_injected_field:
           -1100,
           0,
           apache::thrift::protocol::T_STOP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 
 _end:
@@ -338,8 +342,10 @@ _end:
 
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }
@@ -457,7 +463,7 @@ void FieldsInjectedWithIncludedStruct::readNoXfer(Protocol_* iprot) {
           0,
           1,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_string_field:
   {
@@ -471,7 +477,7 @@ _readField_string_field:
           1,
           -1100,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_injected_field:
   {
@@ -485,7 +491,7 @@ _readField_injected_field:
           -1100,
           -1101,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_injected_structured_annotation_field:
   {
@@ -500,7 +506,7 @@ _readField_injected_structured_annotation_field:
           -1101,
           -1102,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_injected_unstructured_annotation_field:
   {
@@ -515,7 +521,7 @@ _readField_injected_unstructured_annotation_field:
           -1102,
           0,
           apache::thrift::protocol::T_STOP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 
 _end:
@@ -523,8 +529,10 @@ _end:
 
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }

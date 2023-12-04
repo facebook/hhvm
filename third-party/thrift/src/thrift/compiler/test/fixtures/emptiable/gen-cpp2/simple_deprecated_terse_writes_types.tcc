@@ -67,8 +67,10 @@ _end:
 
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }
@@ -138,7 +140,7 @@ void EmptiableStruct::readNoXfer(Protocol_* iprot) {
           0,
           1,
           apache::thrift::protocol::T_BOOL))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_bool_field:
   {
@@ -152,7 +154,7 @@ _readField_bool_field:
           1,
           2,
           apache::thrift::protocol::T_BYTE))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_byte_field:
   {
@@ -166,7 +168,7 @@ _readField_byte_field:
           2,
           3,
           apache::thrift::protocol::T_I16))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_short_field:
   {
@@ -180,7 +182,7 @@ _readField_short_field:
           3,
           4,
           apache::thrift::protocol::T_I32))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_int_field:
   {
@@ -194,7 +196,7 @@ _readField_int_field:
           4,
           5,
           apache::thrift::protocol::T_I64))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_long_field:
   {
@@ -208,7 +210,7 @@ _readField_long_field:
           5,
           6,
           apache::thrift::protocol::T_FLOAT))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_float_field:
   {
@@ -222,7 +224,7 @@ _readField_float_field:
           6,
           7,
           apache::thrift::protocol::T_DOUBLE))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_double_field:
   {
@@ -236,7 +238,7 @@ _readField_double_field:
           7,
           8,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_string_field:
   {
@@ -250,7 +252,7 @@ _readField_string_field:
           8,
           9,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_binary_field:
   {
@@ -264,7 +266,7 @@ _readField_binary_field:
           9,
           10,
           apache::thrift::protocol::T_I32))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_enum_field:
   {
@@ -278,7 +280,7 @@ _readField_enum_field:
           10,
           11,
           apache::thrift::protocol::T_LIST))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_list_field:
   {
@@ -295,7 +297,7 @@ _readField_list_field:
           11,
           12,
           apache::thrift::protocol::T_SET))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_set_field:
   {
@@ -312,7 +314,7 @@ _readField_set_field:
           12,
           13,
           apache::thrift::protocol::T_MAP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_map_field:
   {
@@ -329,7 +331,7 @@ _readField_map_field:
           13,
           14,
           apache::thrift::protocol::T_STRUCT))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_struct_field:
   {
@@ -345,7 +347,7 @@ _readField_struct_field:
           14,
           0,
           apache::thrift::protocol::T_STOP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 
 _end:
@@ -353,8 +355,10 @@ _end:
 
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }
@@ -776,7 +780,7 @@ void NotEmptiableStruct::readNoXfer(Protocol_* iprot) {
           0,
           1,
           apache::thrift::protocol::T_BOOL))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_bool_field:
   {
@@ -790,7 +794,7 @@ _readField_bool_field:
           1,
           2,
           apache::thrift::protocol::T_BYTE))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_byte_field:
   {
@@ -804,7 +808,7 @@ _readField_byte_field:
           2,
           3,
           apache::thrift::protocol::T_I16))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_short_field:
   {
@@ -818,7 +822,7 @@ _readField_short_field:
           3,
           4,
           apache::thrift::protocol::T_I32))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_int_field:
   {
@@ -832,7 +836,7 @@ _readField_int_field:
           4,
           5,
           apache::thrift::protocol::T_I64))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_long_field:
   {
@@ -846,7 +850,7 @@ _readField_long_field:
           5,
           6,
           apache::thrift::protocol::T_FLOAT))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_float_field:
   {
@@ -860,7 +864,7 @@ _readField_float_field:
           6,
           7,
           apache::thrift::protocol::T_DOUBLE))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_double_field:
   {
@@ -874,7 +878,7 @@ _readField_double_field:
           7,
           8,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_string_field:
   {
@@ -888,7 +892,7 @@ _readField_string_field:
           8,
           9,
           apache::thrift::protocol::T_STRING))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_binary_field:
   {
@@ -902,7 +906,7 @@ _readField_binary_field:
           9,
           10,
           apache::thrift::protocol::T_I32))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_enum_field:
   {
@@ -916,7 +920,7 @@ _readField_enum_field:
           10,
           11,
           apache::thrift::protocol::T_LIST))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_list_field:
   {
@@ -933,7 +937,7 @@ _readField_list_field:
           11,
           12,
           apache::thrift::protocol::T_SET))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_set_field:
   {
@@ -950,7 +954,7 @@ _readField_set_field:
           12,
           13,
           apache::thrift::protocol::T_MAP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_map_field:
   {
@@ -967,7 +971,7 @@ _readField_map_field:
           13,
           14,
           apache::thrift::protocol::T_STRUCT))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_struct_field:
   {
@@ -983,7 +987,7 @@ _readField_struct_field:
           14,
           0,
           apache::thrift::protocol::T_STOP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 
 _end:
@@ -991,8 +995,10 @@ _end:
 
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }

@@ -45,7 +45,7 @@ void InterceptedFields::readNoXfer(Protocol_* iprot) {
           0,
           1,
           apache::thrift::protocol::T_I32))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_access_field:
   {
@@ -59,7 +59,7 @@ _readField_access_field:
           1,
           2,
           apache::thrift::protocol::T_I32))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_access_shared_field:
   {
@@ -74,7 +74,7 @@ _readField_access_shared_field:
           2,
           3,
           apache::thrift::protocol::T_I32))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_access_optional_shared_field:
   {
@@ -89,7 +89,7 @@ _readField_access_optional_shared_field:
           3,
           4,
           apache::thrift::protocol::T_I32))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_access_shared_const_field:
   {
@@ -104,7 +104,7 @@ _readField_access_shared_const_field:
           4,
           5,
           apache::thrift::protocol::T_I32))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_access_optional_shared_const_field:
   {
@@ -119,7 +119,7 @@ _readField_access_optional_shared_const_field:
           5,
           6,
           apache::thrift::protocol::T_I32))) {
-    goto _loop;
+    goto _advance_failure;
   }
 _readField_access_optional_boxed_field:
   {
@@ -134,7 +134,7 @@ _readField_access_optional_boxed_field:
           6,
           0,
           apache::thrift::protocol::T_STOP))) {
-    goto _loop;
+    goto _advance_failure;
   }
 
 _end:
@@ -142,8 +142,10 @@ _end:
 
   return;
 
-_loop:
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
   _readState.afterAdvanceFailure(iprot);
+_loop:
   if (_readState.atStop()) {
     goto _end;
   }

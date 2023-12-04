@@ -138,7 +138,8 @@ FileFacts make_file_facts(hackc::FileFacts facts) {
 // length of the prefix and suffix taken from the string are specified
 // by `excerpt_len`. Note that the actual output might be a bit
 // longer, due to escaping (e.g., if the string starts with nulls).
-std::string summarized_string(std::string_view s, int excerpt_len) {
+std::string summarized_string(std::string_view blob, int excerpt_len) {
+  auto s = folly::hexlify(blob);
   std::string to_encode;
   // The 20 bytes of slack is to avoid silly things like:
   // [...2 bytes omitted...]
@@ -155,12 +156,12 @@ std::string summarized_string(std::string_view s, int excerpt_len) {
   return ::HPHP::escapeStringForCPP(to_encode);
 }
 
-hackc::FileFacts parse_json(const std::string& json) {
+hackc::FileFacts decode_facts(const std::string& blob) {
   try {
-    return hackc::json_to_facts(json);
+    return hackc::binary_to_facts(blob);
   } catch (const std::exception& e) {
     throw FactsExtractionExc{folly::sformat(
-        "{} - JSON is \"{}\"", e.what(), summarized_string(json, 80))};
+        "{} - blob is \"{}\"", e.what(), summarized_string(blob, 80))};
   }
 }
 
@@ -172,13 +173,13 @@ struct SimpleExtractor final : Extractor {
   ~SimpleExtractor() override = default;
 
   folly::SemiFuture<std::string> get(const PathAndOptionalHash& key) override {
-    return folly::via(&m_exec, [key]() { return facts_json_from_path(key); });
+    return folly::via(&m_exec, [key]() { return facts_binary_from_path(key); });
   }
 };
 
 } // namespace
 
-std::string facts_json_from_path(const PathAndOptionalHash& path) {
+std::string facts_binary_from_path(const PathAndOptionalHash& path) {
   assertx(path.m_path.is_absolute());
 
   auto const result = extract_facts(
@@ -187,7 +188,7 @@ std::string facts_json_from_path(const PathAndOptionalHash& path) {
       path.m_hash ? *path.m_hash : "");
   return match<std::string>(
       result,
-      [&](const FactsJSONString& r) { return r.value; },
+      [&](const FactsBinaryString& r) { return r.value; },
       [&](const std::string& err) -> std::string {
         throw FactsExtractionExc{err};
       });
@@ -247,8 +248,9 @@ std::vector<folly::Try<FileFacts>> facts_from_paths(
               return extractor->get(absPathAndHash);
             })
             .thenValue(
-                [absPathAndHash](std::string&& factsJson) -> hackc::FileFacts {
-                  auto facts = parse_json(factsJson);
+                [absPathAndHash](
+                    std::string&& factsBinary) -> hackc::FileFacts {
+                  auto facts = decode_facts(factsBinary);
                   auto const& hash = *absPathAndHash.m_hash;
                   if (UNLIKELY(facts.sha1sum != hash)) {
                     // The hash we got out of memcache doesn't match the hash
@@ -274,7 +276,7 @@ std::vector<folly::Try<FileFacts>> facts_from_paths(
                 // There might have been a SHA1 mismatch due to a filesystem
                 // race. Try again without an expected hash.
                 PathAndOptionalHash withoutHash{absPathAndHash.m_path, {}};
-                return parse_json(facts_json_from_path(withoutHash));
+                return decode_facts(facts_binary_from_path(withoutHash));
               }
             })
             .thenValue([](hackc::FileFacts&& facts) {

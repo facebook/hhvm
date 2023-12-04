@@ -40,7 +40,7 @@ struct SHA1;
 // type of error encountered
 using CompilerResult = boost::variant<std::unique_ptr<UnitEmitter>,std::string>;
 
-struct FactsJSONString {
+struct FactsBinaryString {
   std::string value;
 };
 
@@ -48,9 +48,9 @@ struct FfpJSONString {
   std::string value;
 };
 
-// On success returns a Json with value containing json-serialized results of
-// facts extraction and on failure returns a string with error text
-using ParseFactsResult = boost::variant<FactsJSONString, std::string>;
+// On success returns a std::string with value containing binary-serialized
+// results of facts extraction. On failure returns a string with error text
+using ParseFactsResult = boost::variant<FactsBinaryString, std::string>;
 using FfpResult = boost::variant<FfpJSONString, std::string>;
 
 // Parse facts from the given file with `options`.

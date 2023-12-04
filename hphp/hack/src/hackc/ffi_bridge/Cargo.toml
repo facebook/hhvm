@@ -28,13 +28,13 @@ oxidized_by_ref = { version = "0.0.0", path = "../../oxidized_by_ref" }
 parser_core_types = { version = "0.0.0", path = "../../parser/cargo/core_types" }
 relative_path = { version = "0.0.0", path = "../../utils/rust/relative_path" }
 serde = { version = "1.0.185", features = ["derive", "rc"] }
-serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_depth"] }
 sha1 = "0.10.5"
 thiserror = "1.0.49"
 ty = { version = "0.0.0", path = "../../hackrs/ty/cargo/ty" }
 
 [dev-dependencies]
 hex = "0.4.3"
+serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_depth"] }
 
 [build-dependencies]
 cxx-build = "1.0.100"

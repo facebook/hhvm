@@ -281,10 +281,10 @@ ParseFactsResult extract_facts(
       filename,
       {(const uint8_t*)source_text.data(), source_text.size()}
     );
-    rust::String json = hackc::decls_to_facts_json(*decls, actual_sha1);
-    return FactsJSONString { std::string(json) };
+    auto blob = hackc::decls_to_facts_binary(*decls, actual_sha1);
+    return FactsBinaryString { std::string{(char*)blob.data(), blob.size()} };
   } catch (const std::exception& e) {
-    return FactsJSONString { "" }; // Swallow errors from HackC
+    return FactsBinaryString { "" }; // Swallow errors from HackC
   }
 }
 

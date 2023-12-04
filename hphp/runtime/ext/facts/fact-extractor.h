@@ -65,12 +65,12 @@ struct ExtractorFactory {
 void setExtractorFactory(ExtractorFactory* factory);
 
 /**
- * Synchronously extract Facts, as JSON, from the given absolute path.
+ * Synchronously extract Facts as an encoded blob, from the given absolute path.
  *
  * Throw FactsExtractionExc on error, including the case when a hash
  * is given but doesn't match the loaded file.
  */
-std::string facts_json_from_path(const PathAndOptionalHash& path);
+std::string facts_binary_from_path(const PathAndOptionalHash& path);
 
 /**
  * Call facts_json_from_path on each path and return the results

@@ -4,13 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 //! Module containing conversion methods between the Rust Facts and
-//! Rust/C++ shared Facts (in the ffi module)
-
-use serde::de::Visitor;
-use serde::Deserialize;
-use serde::Deserializer;
-use serde::Serialize;
-use serde::Serializer;
+//! Rust/C++ shared ffi::FileFacts
 
 use crate::ffi;
 
@@ -92,115 +86,6 @@ impl From<(String, Vec<facts::AttrValue>)> for ffi::AttrFacts {
                 })
                 .collect(),
         }
-    }
-}
-
-pub(crate) fn attrs_to_json<S: Serializer>(
-    attrs: &Vec<ffi::AttrFacts>,
-    s: S,
-) -> Result<S::Ok, S::Error> {
-    use serde::ser::SerializeMap;
-    let mut map = s.serialize_map(Some(attrs.len()))?;
-    for ffi::AttrFacts { name, args } in attrs.iter() {
-        map.serialize_entry(name, args)?;
-    }
-    map.end()
-}
-
-pub(crate) fn json_to_attrs<'de, D: Deserializer<'de>>(
-    d: D,
-) -> Result<Vec<ffi::AttrFacts>, D::Error> {
-    use serde::de::MapAccess;
-    struct AttrFactsMapVisitor;
-    impl<'de> Visitor<'de> for AttrFactsMapVisitor {
-        type Value = Vec<ffi::AttrFacts>;
-        fn expecting(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            write!(f, "a map of AttrFacts")
-        }
-        fn visit_map<M: MapAccess<'de>>(self, mut access: M) -> Result<Self::Value, M::Error> {
-            let mut attrs = Vec::with_capacity(access.size_hint().unwrap_or(0));
-            while let Some((name, args)) = access.next_entry()? {
-                attrs.push(ffi::AttrFacts { name, args });
-            }
-            Ok(attrs)
-        }
-    }
-    d.deserialize_map(AttrFactsMapVisitor)
-}
-
-pub(crate) fn methods_to_json<S: Serializer>(
-    methods: &Vec<ffi::MethodFacts>,
-    s: S,
-) -> Result<S::Ok, S::Error> {
-    use serde::ser::SerializeMap;
-    let mut map = s.serialize_map(Some(methods.len()))?;
-    for ffi::MethodFacts { name, details } in methods.iter() {
-        map.serialize_entry(name, details)?;
-    }
-    map.end()
-}
-
-pub(crate) fn json_to_methods<'de, D: Deserializer<'de>>(
-    d: D,
-) -> Result<Vec<ffi::MethodFacts>, D::Error> {
-    use serde::de::MapAccess;
-    struct MethodFactsMapVisitor;
-    impl<'de> Visitor<'de> for MethodFactsMapVisitor {
-        type Value = Vec<ffi::MethodFacts>;
-        fn expecting(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            write!(f, "a map of MethodFacts")
-        }
-        fn visit_map<M: MapAccess<'de>>(self, mut access: M) -> Result<Self::Value, M::Error> {
-            let mut methods = Vec::with_capacity(access.size_hint().unwrap_or(0));
-            while let Some((name, details)) = access.next_entry()? {
-                methods.push(ffi::MethodFacts { name, details });
-            }
-            Ok(methods)
-        }
-    }
-    d.deserialize_map(MethodFactsMapVisitor)
-}
-
-// Cannot derive this because cxx enums are really structs with a repr field.
-impl Serialize for ffi::TypeKind {
-    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
-        use serde::ser::Error;
-        s.serialize_str(match *self {
-            ffi::TypeKind::Class => "class",
-            ffi::TypeKind::Interface => "interface",
-            ffi::TypeKind::Trait => "trait",
-            ffi::TypeKind::Enum => "enum",
-            ffi::TypeKind::TypeAlias => "typeAlias",
-            ffi::TypeKind::Unknown => "unknown",
-            ffi::TypeKind::Mixed => "mixed",
-            _ => return Err(S::Error::custom(format!("Unknown kind {self:?}"))),
-        })
-    }
-}
-
-impl<'de> Deserialize<'de> for ffi::TypeKind {
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-        struct KindVisitor;
-        impl<'de> Visitor<'de> for KindVisitor {
-            type Value = ffi::TypeKind;
-            fn expecting(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                write!(f, "a lowercase type kind")
-            }
-            fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<Self::Value, E> {
-                match v {
-                    "class" => Ok(ffi::TypeKind::Class),
-                    "interface" => Ok(ffi::TypeKind::Interface),
-                    "trait" => Ok(ffi::TypeKind::Trait),
-                    "enum" => Ok(ffi::TypeKind::Enum),
-                    "typeAlias" => Ok(ffi::TypeKind::TypeAlias),
-                    "unknown" => Ok(ffi::TypeKind::Unknown),
-                    "mixed" => Ok(ffi::TypeKind::Mixed),
-                    x => Err(E::custom(format!("{x}: unexpected TypeKind"))),
-                }
-            }
-        }
-
-        d.deserialize_str(KindVisitor)
     }
 }
 
@@ -380,90 +265,6 @@ mod tests {
     }
 
     #[test]
-    fn to_json() {
-        // test to_string_pretty()
-        let (facts, sha1) = fake_facts();
-        let file_facts = ffi::FileFacts::from_facts(facts, sha1);
-        assert_eq!(
-            serde_json::to_string_pretty(&file_facts).unwrap(),
-            r#"{
-  "constants": [
-    "c1",
-    "c2"
-  ],
-  "modules": [
-    {
-      "name": "foo"
-    }
-  ],
-  "sha1sum": "883c01f3eb209c249f88908675c8632a04a817cf",
-  "types": [
-    {
-      "baseTypes": [
-        "bt1",
-        "bt2",
-        "bt3"
-      ],
-      "flags": 6,
-      "kindOf": "trait",
-      "name": "include_empty_both_when_trait_kind"
-    },
-    {
-      "flags": 0,
-      "kindOf": "class",
-      "name": "include_empty_neither_when_class_kind"
-    },
-    {
-      "flags": 1,
-      "kindOf": "interface",
-      "name": "include_empty_req_extends_when_interface_kind"
-    },
-    {
-      "flags": 6,
-      "kindOf": "class",
-      "methods": {
-        "no_attrs": {},
-        "one_attr_with_arg": {
-          "attributes": {
-            "attr_with_arg": [
-              "arg"
-            ]
-          }
-        }
-      },
-      "name": "include_method_attrs"
-    },
-    {
-      "attributes": {
-        "A": [
-          "'B'"
-        ],
-        "C": []
-      },
-      "flags": 9,
-      "kindOf": "unknown",
-      "name": "include_nonempty_always",
-      "requireClass": [
-        "class1"
-      ],
-      "requireExtends": [
-        "extends1"
-      ],
-      "requireImplements": [
-        "impl1"
-      ]
-    },
-    {
-      "flags": 0,
-      "kindOf": "typeAlias",
-      "name": "my_type_alias"
-    }
-  ]
-}"#,
-        )
-    }
-
-    #[test]
     fn round_trip_json() -> serde_json::Result<()> {
         let (f1, _) = fake_facts();
         let ugly = serde_json::to_string(&f1).unwrap();
@@ -476,14 +277,17 @@ mod tests {
     }
 
     #[test]
-    fn type_kind_to_json() {
-        assert_eq!(
-            serde_json::json!(ffi::TypeKind::Unknown).to_string(),
-            "\"unknown\""
-        );
-        assert_eq!(
-            serde_json::json!(ffi::TypeKind::Interface).to_string(),
-            "\"interface\""
-        );
+    fn round_trip_bincode() -> anyhow::Result<()> {
+        use bincode::Options;
+        let (f1, sha1sum) = fake_facts();
+        let f1 = ffi::FileFacts::from_facts(f1, sha1sum);
+        let mut buf1 = Vec::new();
+        bincode::options().serialize_into(&mut buf1, &f1)?;
+        let f2: ffi::FileFacts = bincode::options().deserialize_from(&buf1[..])?;
+        assert_eq!(f1, f2);
+        let mut buf2 = Vec::new();
+        bincode::options().serialize_into(&mut buf2, &f2)?;
+        assert_eq!(buf1, buf2);
+        Ok(())
     }
 }

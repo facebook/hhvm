@@ -72,7 +72,8 @@ void ReturnServiceAsyncProcessor::executeRequest_noReturn(apache::thrift::Server
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::some::valid::ns::ReturnService_noReturn_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ReturnService.noReturn", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ReturnService.noReturn", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "noReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -138,7 +139,8 @@ void ReturnServiceAsyncProcessor::executeRequest_boolReturn(apache::thrift::Serv
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::some::valid::ns::ReturnService_boolReturn_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ReturnService.boolReturn", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ReturnService.boolReturn", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "boolReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -206,7 +208,8 @@ void ReturnServiceAsyncProcessor::executeRequest_i16Return(apache::thrift::Serve
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::some::valid::ns::ReturnService_i16Return_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ReturnService.i16Return", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ReturnService.i16Return", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "i16Return", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -274,7 +277,8 @@ void ReturnServiceAsyncProcessor::executeRequest_i32Return(apache::thrift::Serve
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::some::valid::ns::ReturnService_i32Return_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ReturnService.i32Return", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ReturnService.i32Return", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "i32Return", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -342,7 +346,8 @@ void ReturnServiceAsyncProcessor::executeRequest_i64Return(apache::thrift::Serve
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::some::valid::ns::ReturnService_i64Return_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ReturnService.i64Return", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ReturnService.i64Return", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "i64Return", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -410,7 +415,8 @@ void ReturnServiceAsyncProcessor::executeRequest_floatReturn(apache::thrift::Ser
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::some::valid::ns::ReturnService_floatReturn_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ReturnService.floatReturn", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ReturnService.floatReturn", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "floatReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -478,7 +484,8 @@ void ReturnServiceAsyncProcessor::executeRequest_doubleReturn(apache::thrift::Se
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::some::valid::ns::ReturnService_doubleReturn_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ReturnService.doubleReturn", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ReturnService.doubleReturn", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "doubleReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -549,7 +556,8 @@ void ReturnServiceAsyncProcessor::executeRequest_stringReturn(apache::thrift::Se
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::some::valid::ns::ReturnService_stringReturn_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ReturnService.stringReturn", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ReturnService.stringReturn", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "stringReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -617,7 +625,8 @@ void ReturnServiceAsyncProcessor::executeRequest_binaryReturn(apache::thrift::Se
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::some::valid::ns::ReturnService_binaryReturn_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ReturnService.binaryReturn", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ReturnService.binaryReturn", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "binaryReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -685,7 +694,8 @@ void ReturnServiceAsyncProcessor::executeRequest_mapReturn(apache::thrift::Serve
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::some::valid::ns::ReturnService_mapReturn_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ReturnService.mapReturn", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ReturnService.mapReturn", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "mapReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -753,7 +763,8 @@ void ReturnServiceAsyncProcessor::executeRequest_simpleTypedefReturn(apache::thr
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::some::valid::ns::ReturnService_simpleTypedefReturn_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ReturnService.simpleTypedefReturn", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ReturnService.simpleTypedefReturn", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "simpleTypedefReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -821,7 +832,8 @@ void ReturnServiceAsyncProcessor::executeRequest_complexTypedefReturn(apache::th
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::some::valid::ns::ReturnService_complexTypedefReturn_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ReturnService.complexTypedefReturn", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ReturnService.complexTypedefReturn", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "complexTypedefReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -889,7 +901,8 @@ void ReturnServiceAsyncProcessor::executeRequest_list_mostComplexTypedefReturn(a
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::some::valid::ns::ReturnService_list_mostComplexTypedefReturn_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ReturnService.list_mostComplexTypedefReturn", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ReturnService.list_mostComplexTypedefReturn", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "list_mostComplexTypedefReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -960,7 +973,8 @@ void ReturnServiceAsyncProcessor::executeRequest_enumReturn(apache::thrift::Serv
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::some::valid::ns::ReturnService_enumReturn_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ReturnService.enumReturn", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ReturnService.enumReturn", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "enumReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1031,7 +1045,8 @@ void ReturnServiceAsyncProcessor::executeRequest_list_EnumReturn(apache::thrift:
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::some::valid::ns::ReturnService_list_EnumReturn_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ReturnService.list_EnumReturn", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ReturnService.list_EnumReturn", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "list_EnumReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1099,7 +1114,8 @@ void ReturnServiceAsyncProcessor::executeRequest_structReturn(apache::thrift::Se
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::some::valid::ns::ReturnService_structReturn_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ReturnService.structReturn", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ReturnService.structReturn", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "structReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1167,7 +1183,8 @@ void ReturnServiceAsyncProcessor::executeRequest_set_StructReturn(apache::thrift
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::some::valid::ns::ReturnService_set_StructReturn_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ReturnService.set_StructReturn", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ReturnService.set_StructReturn", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "set_StructReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1238,7 +1255,8 @@ void ReturnServiceAsyncProcessor::executeRequest_unionReturn(apache::thrift::Ser
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::some::valid::ns::ReturnService_unionReturn_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ReturnService.unionReturn", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ReturnService.unionReturn", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "unionReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1306,7 +1324,8 @@ void ReturnServiceAsyncProcessor::executeRequest_list_UnionReturn(apache::thrift
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::some::valid::ns::ReturnService_list_UnionReturn_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ReturnService.list_UnionReturn", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ReturnService.list_UnionReturn", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "list_UnionReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1379,7 +1398,8 @@ void ReturnServiceAsyncProcessor::executeRequest_readDataEb(apache::thrift::Serv
   ::some::valid::ns::ReturnService_readDataEb_pargs args;
   ::std::int64_t uarg_size{0};
   args.get<0>().value = &uarg_size;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ReturnService.readDataEb", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ReturnService.readDataEb", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "readDataEb", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1449,7 +1469,8 @@ void ReturnServiceAsyncProcessor::executeRequest_readData(apache::thrift::Server
   ::some::valid::ns::ReturnService_readData_pargs args;
   ::std::int64_t uarg_size{0};
   args.get<0>().value = &uarg_size;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ReturnService.readData", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ReturnService.readData", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "readData", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

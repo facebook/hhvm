@@ -56,13 +56,7 @@ EventHandlerBase::getEventHandlers() const {
   return folly::range(*handlers_);
 }
 
-TProcessorBase::TProcessorBase() {
-  RLock lock{getRWMutex()};
-
-  for (const auto& handler : getHandlers()) {
-    addNotNullEventHandler(handler);
-  }
-}
+TProcessorBase::TProcessorBase() {}
 
 void TProcessorBase::addProcessorEventHandler(
     std::shared_ptr<TProcessorEventHandler> handler) {

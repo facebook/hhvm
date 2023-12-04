@@ -337,8 +337,13 @@ void GeneratedAsyncProcessorBase::terminateInteraction(
 
   if (auto tile = conn.removeTile(id)) {
     Tile::onTermination(std::move(tile), eb);
-    auto ctxStack =
-        getContextStack(getServiceName(), "#terminateInteraction", &conn);
+
+    auto ctxStack = ContextStack::create(
+        this->coalesceLegacyEventHandlersWith(
+            conn.getWorkerContext()->getServerContext()),
+        getServiceName(),
+        "#terminateInteraction",
+        &conn);
     if (ctxStack) {
       ctxStack->onInteractionTerminate(id);
     }
@@ -358,8 +363,12 @@ void GeneratedAsyncProcessorBase::destroyAllInteractions(
   for (auto& [id, tile] : conn.tiles_) {
     ids.push_back(id);
   }
-  auto ctxStack =
-      getContextStack(getServiceName(), "#terminateInteraction", &conn);
+  auto ctxStack = ContextStack::create(
+      this->coalesceLegacyEventHandlersWith(
+          conn.getWorkerContext()->getServerContext()),
+      getServiceName(),
+      "#terminateInteraction",
+      &conn);
   for (auto id : ids) {
     if (conn.removeTile(id) && ctxStack) {
       ctxStack->onInteractionTerminate(id);
@@ -541,6 +550,22 @@ bool GeneratedAsyncProcessorBase::setUpRequestProcessing(
   }
 
   return true;
+}
+
+std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>
+GeneratedAsyncProcessorBase::coalesceLegacyEventHandlersWith(
+    const apache::thrift::server::ServerConfigs* FOLLY_NULLABLE server) {
+  using EventHandlersList =
+      std::vector<std::shared_ptr<TProcessorEventHandler>>;
+  EventHandlersList eventHandlers = server == nullptr
+      ? EventHandlersList()
+      : server->getLegacyEventHandlers();
+  for (auto& handler : getEventHandlers()) {
+    eventHandlers.emplace_back(handler);
+  }
+  return eventHandlers.empty()
+      ? nullptr
+      : folly::copy_to_shared_ptr(std::move(eventHandlers));
 }
 
 concurrency::PRIORITY ServerInterface::getRequestPriority(

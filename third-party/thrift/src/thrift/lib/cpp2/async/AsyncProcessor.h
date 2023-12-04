@@ -745,6 +745,16 @@ class GeneratedAsyncProcessorBase : public AsyncProcessor {
   virtual std::unique_ptr<Tile> createInteractionImpl(const std::string& name);
 
  public:
+  /**
+   * TProcessorEventHandler instances can come from 2 places:
+   *   1. ServerModules added to ThriftServer
+   *   3. AsyncProcessor::addEventHandler calls (typically in services that
+   *      override getProcessor in their handler)
+   */
+  std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>
+  coalesceLegacyEventHandlersWith(
+      const apache::thrift::server::ServerConfigs* FOLLY_NULLABLE server);
+
   void terminateInteraction(
       int64_t id, Cpp2ConnContext& conn, folly::EventBase&) noexcept final;
   void destroyAllInteractions(

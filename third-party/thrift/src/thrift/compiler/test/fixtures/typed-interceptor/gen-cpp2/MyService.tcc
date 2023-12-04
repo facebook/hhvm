@@ -40,7 +40,8 @@ void MyServiceAsyncProcessor::executeRequest_initializeInteraction(apache::thrif
   ::cpp2::MyService_initializeInteraction_pargs args;
   ::std::int32_t uarg_field{0};
   args.get<0>().value = &uarg_field;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "MyService.initializeInteraction", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "MyService.initializeInteraction", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "initializeInteraction", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -108,7 +109,8 @@ void MyServiceAsyncProcessor::executeRequest_echo(apache::thrift::ServerRequest&
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::cpp2::MyService_echo_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "MyService.echo", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "MyService.echo", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "echo", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -176,7 +178,8 @@ void MyServiceAsyncProcessor::executeRequest_getRandomData(apache::thrift::Serve
   ::cpp2::MyService_getRandomData_pargs args;
   auto uarg_req = std::make_unique<::cpp2::Request>();
   args.get<0>().value = uarg_req.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "MyService.getRandomData", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "MyService.getRandomData", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "getRandomData", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -246,7 +249,8 @@ void MyServiceAsyncProcessor::executeRequest_getId(apache::thrift::ServerRequest
   ::cpp2::MyService_getId_pargs args;
   ::std::int32_t uarg_field{0};
   args.get<0>().value = &uarg_field;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "MyService.getId", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "MyService.getId", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "getId", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -319,7 +323,8 @@ void MyServiceAsyncProcessor::executeRequest_ping_eb(apache::thrift::ServerReque
   ::cpp2::MyService_ping_eb_pargs args;
   auto uarg_req = std::make_unique<::cpp2::Request>();
   args.get<0>().value = uarg_req.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "MyService.ping_eb", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "MyService.ping_eb", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "ping_eb", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -395,7 +400,8 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_getId(apache::thrift:
   ::cpp2::MyService_MyInteraction_getId_pargs args;
   ::std::int32_t uarg_field{0};
   args.get<0>().value = &uarg_field;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "MyService.MyInteraction.getId", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "MyService.MyInteraction.getId", serverRequest.requestContext());
   auto& iface = static_cast<apache::thrift::ServiceHandler<MyService>::MyInteractionIf&>(*tile);
   try {
     deserializeRequest<ProtocolIn_>(args, "MyInteraction.getId", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
@@ -465,7 +471,8 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_echo(apache::thrift::
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::cpp2::MyService_MyInteraction_echo_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "MyService.MyInteraction.echo", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "MyService.MyInteraction.echo", serverRequest.requestContext());
   auto& iface = static_cast<apache::thrift::ServiceHandler<MyService>::MyInteractionIf&>(*tile);
   try {
     deserializeRequest<ProtocolIn_>(args, "MyInteraction.echo", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
@@ -535,7 +542,8 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_getRandomData(apache:
   ::cpp2::MyService_MyInteraction_getRandomData_pargs args;
   auto uarg_req = std::make_unique<::cpp2::Request>();
   args.get<0>().value = uarg_req.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "MyService.MyInteraction.getRandomData", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "MyService.MyInteraction.getRandomData", serverRequest.requestContext());
   auto& iface = static_cast<apache::thrift::ServiceHandler<MyService>::MyInteractionIf&>(*tile);
   try {
     deserializeRequest<ProtocolIn_>(args, "MyInteraction.getRandomData", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());

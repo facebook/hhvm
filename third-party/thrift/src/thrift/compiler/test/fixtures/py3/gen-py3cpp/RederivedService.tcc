@@ -29,7 +29,8 @@ void RederivedServiceAsyncProcessor::executeRequest_get_seven(apache::thrift::Se
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::py3::simple::RederivedService_get_seven_pargs args;
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "RederivedService.get_seven", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "RederivedService.get_seven", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "get_seven", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

@@ -35,7 +35,8 @@ void MyServiceAsyncProcessor::executeRequest_query(apache::thrift::ServerRequest
   args.get<0>().value = uarg_s.get();
   auto uarg_i = std::make_unique<::cpp2::Included>();
   args.get<1>().value = uarg_i.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "MyService.query", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "MyService.query", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "query", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -105,7 +106,8 @@ void MyServiceAsyncProcessor::executeRequest_has_arg_docs(apache::thrift::Server
   args.get<0>().value = uarg_s.get();
   auto uarg_i = std::make_unique<::cpp2::Included>();
   args.get<1>().value = uarg_i.get();
-  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "MyService.has_arg_docs", serverRequest.requestContext()));
+  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
+  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "MyService.has_arg_docs", serverRequest.requestContext());
   try {
     deserializeRequest<ProtocolIn_>(args, "has_arg_docs", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

@@ -23,7 +23,6 @@
 #include <folly/futures/Future.h>
 #include <folly/logging/xlog.h>
 
-#include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/facts/exception.h"
@@ -89,7 +88,6 @@ std::vector<TypeDetails> move_type_vec(rust::Vec<hackc::TypeFacts> types) {
           return TypeKind::Trait;
         case hackc::TypeKind::TypeAlias:
           return TypeKind::TypeAlias;
-        case hackc::TypeKind::Mixed:
         case hackc::TypeKind::Unknown:
         default:
           return TypeKind::Unknown;

@@ -23,19 +23,13 @@
 #include <fmt/format.h>
 #include <folly/Format.h>
 #include <folly/dynamic.h>
+#include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
 
 namespace HPHP {
 namespace Facts {
 
 using TypeKindMask = int;
-enum class TypeKind {
-  Unknown = 0,
-  Class = 1 << 0,
-  Interface = 1 << 1,
-  Enum = 1 << 2,
-  Trait = 1 << 3,
-  TypeAlias = 1 << 4,
-};
+using hackc::TypeKind;
 inline constexpr TypeKindMask kTypeKindAll = static_cast<int>(TypeKind::Class) |
     static_cast<int>(TypeKind::Interface) | static_cast<int>(TypeKind::Enum) |
     static_cast<int>(TypeKind::Trait) | static_cast<int>(TypeKind::TypeAlias);
@@ -122,7 +116,8 @@ struct ModuleDetails {
 
 struct FileFacts {
   bool isEmpty() const noexcept {
-    return m_types.empty() && m_functions.empty() && m_constants.empty();
+    return m_types.empty() && m_functions.empty() && m_constants.empty() &&
+        m_modules.empty() && m_attributes.empty();
   }
 
   std::vector<TypeDetails> m_types;

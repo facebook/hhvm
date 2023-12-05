@@ -27,8 +27,7 @@ impl From<facts::TypeKind> for ffi::TypeKind {
             facts::TypeKind::Enum => Self::Enum,
             facts::TypeKind::Trait => Self::Trait,
             facts::TypeKind::TypeAlias => Self::TypeAlias,
-            facts::TypeKind::Unknown => Self::Unknown,
-            facts::TypeKind::Mixed => Self::Mixed,
+            facts::TypeKind::Mixed | facts::TypeKind::Unknown => Self::Unknown,
         }
     }
 }

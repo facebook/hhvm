@@ -368,13 +368,12 @@ mod ffi {
 
     #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
     pub enum TypeKind {
-        Class,
-        Interface,
-        Enum,
-        Trait,
-        TypeAlias,
-        Unknown,
-        Mixed,
+        Unknown = 0,
+        Class = 1,
+        Interface = 2,
+        Enum = 4,
+        Trait = 8,
+        TypeAlias = 16,
     }
 
     #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]

@@ -27,8 +27,7 @@ struct DistributionRouteSettings {
 };
 
 constexpr std::string_view kAsynclogDistributionEndpoint = "0.0.0.0";
-constexpr std::string_view kBroadcastRolloutMessage = "DistributionRoute";
-constexpr std::string_view kDistributionTargetMarkerForLog = "dl_distribution";
+constexpr folly::StringPiece kBroadcastRolloutMessage = "DistributionRoute";
 
 /**
  * The route handle is used to route cross-region requests via DL
@@ -81,8 +80,7 @@ class DistributionRoute {
    *  If write to Axon fails, we spool to Async log with the routing prefix.
    */
   McDeleteReply route(const McDeleteRequest& req) const {
-    auto& ctx = *fiber_local<RouterInfo>::getSharedCtx();
-    auto& proxy = ctx.proxy();
+    auto& proxy = fiber_local<RouterInfo>::getSharedCtx()->proxy();
     // In mcreplay case we try to infer target region from request
     auto distributionRegion = FOLLY_LIKELY(!replay_)
         ? fiber_local<RouterInfo>::getDistributionTargetRegion()
@@ -102,24 +100,13 @@ class DistributionRoute {
         : memcache::McDeleteRequestSource::CROSS_REGION_DIRECTED_INVALIDATION;
     auto finalReq = addDeleteRequestSource(req, source);
     finalReq.bucketId_ref() = fmt::to_string(*bucketId);
-    DestinationRequestCtx dctx(nowUs());
-    onBeforeDistribution(finalReq, ctx, *finalReq.bucketId_ref(), dctx);
-
     auto axonLogRes = spoolAxonProxy(
         finalReq,
         axonCtx,
         *bucketId,
         std::move(
-            distributionRegion.value().empty()
-                ? std::string(kBroadcastRolloutMessage)
-                : *distributionRegion));
-
-    auto reply = axonLogRes ? createReply(DefaultReply, finalReq)
-                            : McDeleteReply(carbon::Result::LOCAL_ERROR);
-
-    dctx.endTime = nowUs();
-    onAfterDistribution(finalReq, reply, ctx, *finalReq.bucketId_ref(), dctx);
-
+            distributionRegion.value().empty() ? kBroadcastRolloutMessage.str()
+                                               : *distributionRegion));
     if (axonLogRes) {
       proxy.stats().increment(distribution_axon_write_success_stat);
     }
@@ -134,17 +121,15 @@ class DistributionRoute {
           host,
           true,
           fiber_local<RouterInfo>::getAsynclogName());
-      if (spoolSucceeded) {
-        // update reply if axon failed but spool succeeded
-        reply = createReply(DefaultReply, finalReq);
-      } else {
-        proxy.stats().increment(distribution_async_spool_failed_stat);
-      }
+    }
+    if (!spoolSucceeded) {
+      proxy.stats().increment(distribution_async_spool_failed_stat);
     }
     // if spool to Axon or Asynclog succeeded and rpc is disabled, we return
     // default reply to the client:
     if (!distributedDeleteRpcEnabled_) {
-      return reply;
+      return spoolSucceeded ? createReply(DefaultReply, finalReq)
+                            : McDeleteReply(carbon::Result::LOCAL_ERROR);
     }
     return rh_->route(req);
   }
@@ -177,46 +162,6 @@ class DistributionRoute {
       default:
         return std::nullopt;
     }
-  }
-
-  void onBeforeDistribution(
-      const McDeleteRequest& req,
-      ProxyRequestContextWithInfo<RouterInfo>& ctx,
-      const std::string& bucketId,
-      const DestinationRequestCtx& dctx) const {
-    ctx.onBeforeRequestSent(
-        /*poolName*/ kDistributionTargetMarkerForLog,
-        /*ap*/ AccessPoint::defaultAp(),
-        /*strippedRoutingPrefix*/ folly::StringPiece(),
-        /*request*/ req,
-        /*requestClass*/ fiber_local<RouterInfo>::getRequestClass(),
-        /*startTimeUs*/ dctx.startTime,
-        /*bucketId*/ bucketId);
-  }
-
-  void onAfterDistribution(
-      const McDeleteRequest& req,
-      const McDeleteReply& reply,
-      ProxyRequestContextWithInfo<RouterInfo>& ctx,
-      const std::string& bucketId,
-      const DestinationRequestCtx& dctx) const {
-    RpcStatsContext rpcContext;
-    ctx.onReplyReceived(
-        /*poolName*/ kDistributionTargetMarkerForLog,
-        /*poolIndex*/ std::nullopt,
-        /*ap*/ AccessPoint::defaultAp(),
-        /*strippedRoutingPrefix*/ folly::StringPiece(),
-        /*request*/ req,
-        /*reply*/ reply,
-        /*requestClass*/ fiber_local<RouterInfo>::getRequestClass(),
-        /*startTimeUs*/ dctx.startTime,
-        /*endTimeUs*/ dctx.endTime,
-        /*poolStatIndex*/ -1,
-        /*rpcStatsContext*/ rpcContext,
-        /*networkTransportTimeUs*/
-        fiber_local<RouterInfo>::getNetworkTransportTimeUs(),
-        /*extraDataCallback*/ fiber_local<RouterInfo>::getExtraDataCallbacks(),
-        /*bucketId*/ bucketId);
   }
 };
 

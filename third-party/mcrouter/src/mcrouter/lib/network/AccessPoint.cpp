@@ -222,11 +222,5 @@ std::string AccessPoint::toString() const {
       compressed_ ? "compressed" : "notcompressed");
 }
 
-const AccessPoint& AccessPoint::defaultAp() {
-  static const AccessPoint ap =
-      AccessPoint(folly::IPAddress(), 0, 0, mc_thrift_protocol);
-  return ap;
-}
-
 } // namespace memcache
 } // namespace facebook

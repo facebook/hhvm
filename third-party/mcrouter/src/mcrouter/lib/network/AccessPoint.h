@@ -46,8 +46,6 @@ static_assert(
     "McProtocolT must have uint8_t alignemnt");
 
 struct AccessPoint {
-  static const AccessPoint& defaultAp();
-
   explicit AccessPoint(
       folly::StringPiece host = "",
       uint16_t port = 0,

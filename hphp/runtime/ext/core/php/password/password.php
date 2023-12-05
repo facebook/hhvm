@@ -25,7 +25,7 @@ const int PASSWORD_DEFAULT = 1; /* PASSWORD_BCRYPT */
 */
 function password_hash(?string $password,
                        int $algo,
-                       darray $options = darray[]) : mixed {
+                       darray $options = dict[]) : mixed {
   if (!function_exists('crypt')) {
     trigger_error("Crypt must be loaded for password_hash to function",
                   E_WARNING);
@@ -185,7 +185,7 @@ function password_get_info(string $hash) : shape(
   $return = shape(
     'algo' => 0,
     'algoName' => 'unknown',
-    'options' => darray[],
+    'options' => dict[],
   );
   if (substr($hash, 0, 4) == '$2y$' && strlen($hash) == 60) {
     $return['algo'] = PASSWORD_BCRYPT;
@@ -210,7 +210,7 @@ function password_get_info(string $hash) : shape(
 * @return boolean True if the password needs to be rehashed.
 */
 function password_needs_rehash(string $hash,
-                               int $algo, darray $options = darray[]): bool {
+                               int $algo, darray $options = dict[]): bool {
   $info = password_get_info($hash);
   if ($info['algo'] != $algo) {
     return true;

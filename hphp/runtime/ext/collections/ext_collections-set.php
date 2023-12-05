@@ -173,8 +173,8 @@ final class Set<T as arraykey> implements \MutableSet<T> {
     return HH\FIXME\UNSAFE_CAST<vec<mixed>, vec<T>>(vec($this));
   }
 
-  /** Returns a darray built from the values from this Set, darray[val1 => val1,
-   * val2 => val2, ...]. This maintains set-like semantics in darray[] land:
+  /** Returns a darray built from the values from this Set, dict[val1 => val1,
+   * val2 => val2, ...]. This maintains set-like semantics in dict[] land:
    * O(1) membership test with `array_has_key($a['key'])` and iteration with
    *  `foreach($a as $member)`.
    * @return darray
@@ -576,8 +576,8 @@ final class ImmSet<T as arraykey> implements \ConstSet<T> {
     return vec($this);
   }
 
-  /** Returns a darray built from the values from this ImmSet, darray[val1 =>
-   * val1, val2 => val2, ...]. This maintains set-like semantics in darray[]
+  /** Returns a darray built from the values from this ImmSet, dict[val1 =>
+   * val1, val2 => val2, ...]. This maintains set-like semantics in dict[]
    * land: O(1) membership test with `array_has_key($a['key'])` and iteration
    * with `foreach($a as $member)`.
    * @return darray

@@ -25,7 +25,7 @@ function array_map($func, $arr, ...$extra) {
     return null;
   }
 
-  $res = darray[];
+  $res = dict[];
   foreach ($arr as $k => $v) {
     $res[$k] = $func($v);
   }

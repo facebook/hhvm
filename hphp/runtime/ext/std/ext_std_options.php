@@ -454,9 +454,9 @@ namespace __SystemLib {
     private function tr(string $l, mixed $d): \DOMElement {
       return
         $this->element(
-          'tr', darray[],
-          $this->element('td', darray['class' => 'l'], $l),
-          $this->element('td', darray['class' => 'r'], $d));
+          'tr', dict[],
+          $this->element('td', dict['class' => 'l'], $l),
+          $this->element('td', dict['class' => 'r'], $d));
     }
 
     private function table(
@@ -475,14 +475,14 @@ namespace __SystemLib {
         echo "\n";
         return null;
       } else {
-        $children = darray[];
+        $children = dict[];
         foreach ($data as $k => $v) {
           \array_push(inout $children, $this->tr($k, \print_r($v, true)));
         }
-        return varray[
+        return vec[
           $this->element('hr'),
-          $this->element('h2', darray[], $title),
-          $this->element('table', darray[], $children)
+          $this->element('h2', dict[], $title),
+          $this->element('table', dict[], $children)
         ];
       }
     }
@@ -498,9 +498,9 @@ namespace __SystemLib {
 
       $html->appendChild(
         $this->element(
-          'head', darray[],
-          $this->element('title', darray[], "HHVM phpinfo"),
-          $this->element('style', darray['type' => 'text/css'], $style)));
+          'head', dict[],
+          $this->element('title', dict[], "HHVM phpinfo"),
+          $this->element('style', dict['type' => 'text/css'], $style)));
     }
 
     private function reportVersionTitle(): void {
@@ -508,16 +508,16 @@ namespace __SystemLib {
         echo 'HHVM Version => ' . \HHVM_VERSION . "\n";
       } else {
         $this->body->appendChild(
-          $this->element('h1', darray[], 'HHVM Version ' . \HHVM_VERSION));
+          $this->element('h1', dict[], 'HHVM Version ' . \HHVM_VERSION));
       }
     }
 
     private function reportVersions(): void {
       if (!$this->is_cli()) {
-        $this->body->appendChild($this->element('h2', darray[], 'Version'));
+        $this->body->appendChild($this->element('h2', dict[], 'Version'));
       }
 
-      $data = darray[
+      $data = dict[
         'Version' => \HHVM_VERSION,
         'Version ID' => \HHVM_VERSION_ID,
         'Debug' => \HHVM_DEBUG,
@@ -546,7 +546,7 @@ namespace __SystemLib {
     }
 
     private function reportMap(string $name, darray<string, mixed> $map): void {
-      $data = darray[];
+      $data = dict[];
       foreach ($map as $k => $v) {
         $data[
           HH\FIXME\UNSAFE_CAST<mixed, string>(\sprintf("%s['%s']", $name, $k))

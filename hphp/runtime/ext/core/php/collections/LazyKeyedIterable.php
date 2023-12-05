@@ -2,21 +2,21 @@
 
 trait LazyKeyedIterable<Tk, +Tv> implements \HH\KeyedIterable<Tk, Tv> {
   public function toArray() {
-    $arr = darray[];
+    $arr = dict[];
     foreach ($this as $k => $v) {
       $arr[$k] = $v;
     }
     return $arr;
   }
   public function toValuesArray() {
-    $arr = varray[];
+    $arr = vec[];
     foreach ($this as $v) {
       $arr[] = $v;
     }
     return $arr;
   }
   public function toKeysArray() {
-    $arr = varray[];
+    $arr = vec[];
     foreach ($this as $k => $_) {
       $arr[] = $k;
     }

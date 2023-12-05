@@ -6,7 +6,7 @@ class SoapServer {
   <<__Native>>
   public function __construct(
     mixed $wsdl,
-    darray<string, mixed> $options = darray[],
+    darray<string, mixed> $options = dict[],
   ): void;
 
   /**
@@ -154,14 +154,14 @@ class SoapClient {
   <<__Native>>
   public function __construct(
     mixed $wsdl,
-    darray<string, mixed> $options = darray[],
+    darray<string, mixed> $options = dict[],
   ): void;
 
   <<__Native>>
   private function soapcallImpl(
     string $name,
     varray<mixed> $args,
-    darray $options = darray[],
+    darray $options = dict[],
     mixed $input_headers = null,
   ): mixed;
 
@@ -172,17 +172,17 @@ class SoapClient {
   public function __soapcall(
     string $name,
     varray<mixed> $args,
-    darray $options = darray[],
+    darray $options = dict[],
     mixed $input_headers = null,
   ): mixed {
-    $args = self::cleanArrays($args, HH\array_mark_legacy(darray[]));
+    $args = self::cleanArrays($args, HH\array_mark_legacy(dict[]));
     $ret = $this->soapcallImpl(
       $name,
       varray($args),
       $options,
       $input_headers,
     );
-    return self::cleanArrays($ret, HH\array_mark_legacy(darray[]));
+    return self::cleanArrays($ret, HH\array_mark_legacy(dict[]));
   }
 
   <<__Native>>

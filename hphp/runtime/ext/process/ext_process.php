@@ -35,8 +35,8 @@ function pcntl_alarm(int $seconds): int;
 <<__Native>>
 function pcntl_exec(
   string $path,
-  varray<string> $args = varray[],
-  darray<string, string> $envs = darray[],
+  varray<string> $args = vec[],
+  darray<string, string> $envs = dict[],
 ): void;
 
 /**

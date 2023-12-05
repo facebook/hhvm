@@ -89,7 +89,7 @@ function mysql_connect(string $server = "",
                        int $client_flags = 0,
                        int $connect_timeout_ms = -1,
                        int $query_timeout_ms = -1,
-                       darray<string, string> $conn_attrs = darray[]): mixed;
+                       darray<string, string> $conn_attrs = dict[]): mixed;
 
 <<__Native("NoFCallBuiltin")>>
 function mysql_connect_with_db(string $server = "",
@@ -100,7 +100,7 @@ function mysql_connect_with_db(string $server = "",
                                int $client_flags = 0,
                                int $connect_timeout_ms = -1,
                                int $query_timeout_ms = -1,
-                               darray<string, string> $conn_attrs = darray[]): mixed;
+                               darray<string, string> $conn_attrs = dict[]): mixed;
 
 <<__Native("NoFCallBuiltin")>>
 function mysql_connect_with_ssl(string $server,
@@ -111,7 +111,7 @@ function mysql_connect_with_ssl(string $server,
                                int $connect_timeout_ms = -1,
                                int $query_timeout_ms = -1,
                                ?MySSLContextProvider $ssl_context = null,
-                               darray<string, string> $conn_attrs = darray[]): mixed;
+                               darray<string, string> $conn_attrs = dict[]): mixed;
 
 /**
  * Create a MySQL database
@@ -688,7 +688,7 @@ function mysql_pconnect(string $server = '',
                         int $client_flags = 0,
                         int $connect_timeout_ms = -1,
                         int $query_timeout_ms = -1,
-                        darray<string, string> $conn_attrs = darray[]): mixed;
+                        darray<string, string> $conn_attrs = dict[]): mixed;
 
 <<__Native>>
 function mysql_pconnect_with_db(string $server = '',
@@ -698,7 +698,7 @@ function mysql_pconnect_with_db(string $server = '',
                                 int $client_flags = 0,
                                 int $connect_timeout_ms = -1,
                                 int $query_timeout_ms = -1,
-                                darray<string, string> $conn_attrs = darray[]): mixed;
+                                darray<string, string> $conn_attrs = dict[]): mixed;
 
 /**
  * Ping a server connection or reconnect if there is no connection

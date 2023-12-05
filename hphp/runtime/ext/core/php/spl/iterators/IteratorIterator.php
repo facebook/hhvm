@@ -123,7 +123,7 @@ class IteratorIterator implements OuterIterator {
   }
 
   public function call__($func, $params) {
-    return call_user_func_array(varray[$this->iterator, $func], $params);
+    return call_user_func_array(vec[$this->iterator, $func], $params);
   }
 
   /**

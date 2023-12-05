@@ -195,7 +195,7 @@ trait BaseException {
     (function(\Throwable)[_]:string) $get_message,
   )[ctx $get_message]: string {
     $res = "";
-    $lst = darray[];
+    $lst = dict[];
     $ex = $throwable;
     while ($ex != null && !\array_key_exists(\spl_object_hash(HH\FIXME\UNSAFE_CAST<mixed,dynamic>($ex)), $lst)) {
       $lst[\spl_object_hash(HH\FIXME\UNSAFE_CAST<mixed,dynamic>($ex))] = $ex;

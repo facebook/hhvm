@@ -24,7 +24,7 @@ class RecursiveIteratorIterator implements OuterIterator {
   const NEXT_COMPLETE = 10;
   const NEXT_REPEAT = 11;
 
-  private $iterators = varray[];
+  private $iterators = vec[];
   private $originalIterator;
   private $mode;
   private $flags;
@@ -70,7 +70,7 @@ class RecursiveIteratorIterator implements OuterIterator {
         "it is required"
       );
     }
-    $this->iterators[] = varray[$iterator, self::STATE_START];
+    $this->iterators[] = vec[$iterator, self::STATE_START];
     $this->originalIterator = $iterator;
     $this->mode = (int) $mode;
     $this->flags = $flags;
@@ -220,7 +220,7 @@ class RecursiveIteratorIterator implements OuterIterator {
           $this->setInnerIteratorState(self::STATE_NEXT);
         }
         $children->rewind();
-        $this->iterators[] = varray[$children, self::STATE_START];
+        $this->iterators[] = vec[$children, self::STATE_START];
         $this->beginChildren();
         return self::NEXT_REPEAT;
       default:
@@ -244,7 +244,7 @@ class RecursiveIteratorIterator implements OuterIterator {
     }
 
     $it = $this->originalIterator;
-    $this->iterators = varray[varray[$it, self::STATE_START]];
+    $this->iterators = vec[vec[$it, self::STATE_START]];
     $it->rewind();
     if (!$this->inIteration) {
       $this->beginIteration();
@@ -408,7 +408,7 @@ class RecursiveIteratorIterator implements OuterIterator {
    */
   public function call__($func, $params) {
     return call_user_func_array(
-      varray[$this->getInnerIterator(), $func],
+      vec[$this->getInnerIterator(), $func],
       $params
     );
   }

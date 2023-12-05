@@ -19,7 +19,7 @@ final class FunctionCredential {
   public final function getFilename()[]: string;
 
   public final function __debugInfo(): darray<string, ?string> {
-    return darray[
+    return dict[
       'class_name' => $this->getClassName(),
       'function_name' => $this->getFunctionName(),
       'file_name' => $this->getFilename(),

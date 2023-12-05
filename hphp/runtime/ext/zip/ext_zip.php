@@ -62,7 +62,7 @@ class ZipArchive {
   <<__Native>>
   public function addGlob(string $pattern,
                    int $flags = 0,
-                   darray $options = darray[]): bool;
+                   darray $options = dict[]): bool;
 
   /**
    * Add files from a directory by PCRE pattern
@@ -76,7 +76,7 @@ class ZipArchive {
   <<__Native>>
   public function addPattern(string $pattern,
                       string $path = '.',
-                      darray $options = darray[]): bool;
+                      darray $options = dict[]): bool;
 
   /**
    * Close the active archive (opened or newly created)
@@ -117,7 +117,7 @@ class ZipArchive {
    */
   <<__Native>>
   public function extractTo(string $destination,
-                     mixed $entries = varray[]): bool;
+                     mixed $entries = vec[]): bool;
 
   /**
    * Returns the Zip archive comment

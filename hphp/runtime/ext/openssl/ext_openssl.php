@@ -592,7 +592,7 @@ function openssl_x509_check_private_key(mixed $cert,
 <<__Native>>
 function openssl_x509_checkpurpose(mixed $x509cert,
                                    int $purpose,
-                                   varray<string> $cainfo = varray[],
+                                   varray<string> $cainfo = vec[],
                                    string $untrustedfile = ""): mixed;
 
 /* openssl_x509_export_to_file() stores x509 into a file named by outfilename

@@ -6,21 +6,21 @@ class LazyKeyedIterableView<Tk, +Tv> implements \HH\KeyedIterable<Tk, Tv> {
   public function __construct($iterable)[] { $this->iterable = $iterable; }
   public function getIterator()[] { return $this->iterable->getIterator(); }
   public function toArray() {
-    $arr = darray[];
+    $arr = dict[];
     foreach ($this->iterable as $k => $v) {
       $arr[$k] = $v;
     }
     return $arr;
   }
   public function toValuesArray() {
-    $arr = varray[];
+    $arr = vec[];
     foreach ($this->iterable as $v) {
       $arr[] = $v;
     }
     return $arr;
   }
   public function toKeysArray() {
-    $arr = varray[];
+    $arr = vec[];
     foreach ($this->iterable as $k => $_) {
       $arr[] = $k;
     }

@@ -180,7 +180,7 @@ function serialize_pure(mixed $value)[]: string;
 <<__Native>>
 function unserialize(
   string $str,
-  darray<string, mixed> $options = darray[],
+  darray<string, mixed> $options = dict[],
 ): mixed;
 
 /**
@@ -191,7 +191,7 @@ function unserialize(
 <<__Native>>
 function unserialize_pure(
   string $str,
-  darray<string, mixed> $options = darray[],
+  darray<string, mixed> $options = dict[],
 )[]: mixed;
 
 /* Imports GET/POST/Cookie variables into the global scope. It is useful if

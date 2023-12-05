@@ -186,7 +186,7 @@ function apc_clear_cache(string $cache_type = "")[globals]: bool;
  *
  */
 function apc_sma_info(bool $limited = false)[]: darray<arraykey, mixed> {
-  return darray[];
+  return dict[];
 }
 
 /**

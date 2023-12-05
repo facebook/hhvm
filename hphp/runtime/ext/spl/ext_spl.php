@@ -6,7 +6,7 @@
  * classes.
  */
 function spl_classes(): darray<classname<mixed>, classname<mixed>> {
-  return darray[
+  return dict[
     /* HH_FIXME[2049] */
     ArrayIterator::class => ArrayIterator::class,
     /* HH_FIXME[2049] */
@@ -162,7 +162,7 @@ function class_uses(mixed $obj,
 function iterator_apply(
   mixed $obj,
   dynamic $func,
-  varray<dynamic> $params = varray[]
+  varray<dynamic> $params = vec[]
 ): int {
   if (!is_object($obj) || !($obj is \HH\Traversable<_>)) {
     trigger_error("Argument must implement interface Traversable", E_RECOVERABLE_ERROR);
@@ -204,7 +204,7 @@ function iterator_to_array(mixed $obj, bool $use_keys = true): mixed {
     trigger_error("Argument must implement interface Traversable", E_RECOVERABLE_ERROR);
     return 0;
   }
-  $ret = darray[];
+  $ret = dict[];
   if ($use_keys) {
     foreach (
       HH\FIXME\UNSAFE_CAST<

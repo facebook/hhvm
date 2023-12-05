@@ -6,7 +6,7 @@ class LazyIterableView<+Tv> implements \HH\Iterable<Tv> {
   public function __construct($iterable)[] { $this->iterable = $iterable; }
   public function getIterator()[] { return $this->iterable->getIterator(); }
   public function toArray() {
-    $arr = varray[];
+    $arr = vec[];
     foreach ($this->iterable as $v) {
       $arr[] = $v;
     }

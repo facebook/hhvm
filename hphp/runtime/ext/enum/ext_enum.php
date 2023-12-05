@@ -17,7 +17,7 @@ abstract class BuiltinEnum<+T as arraykey> {
    * Get the values of the public consts defined on this class,
    * indexed by the string name of those consts.
    *
-   * @return darray['CONST_NAME' => $value, ....]
+   * @return dict['CONST_NAME' => $value, ....]
    */
   <<__Native>>
   final public static function getValues()[]: darray<string, T>;
@@ -26,7 +26,7 @@ abstract class BuiltinEnum<+T as arraykey> {
    * Get the names of all the const values, indexed by value. Calls
    * invariant_exception if multiple constants have the same value.
    *
-   * @return darray[$value => 'CONST_NAME', ....]
+   * @return dict[$value => 'CONST_NAME', ....]
    */
   <<__Native>>
   final public static function getNames()[]: darray<T, string>;
@@ -66,7 +66,7 @@ abstract class BuiltinEnum<+T as arraykey> {
   final public static function assertAll(
     Traversable<mixed> $values,
   )[]: Container<T> {
-    $new_values = varray[];
+    $new_values = vec[];
     foreach ($values as $value) {
       $new_values[] = static::assert($value);
     }

@@ -31,4 +31,4 @@ function filter_id(string $filtername)[]: mixed;
 <<__Native>>
 function filter_var(mixed $variable,
                     int $filter = FILTER_DEFAULT,
-                    mixed $options = darray[])[]: mixed;
+                    mixed $options = dict[])[]: mixed;

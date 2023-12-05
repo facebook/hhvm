@@ -2,7 +2,7 @@
 
 trait LazyIterable<+Tv> implements \HH\Iterable<Tv> {
   public function toArray() {
-    $arr = varray[];
+    $arr = vec[];
     foreach ($this as $v) {
       $arr[] = $v;
     }

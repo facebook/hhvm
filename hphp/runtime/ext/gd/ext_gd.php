@@ -70,7 +70,7 @@ function image2wbmp(resource $image,
 <<__Native>>
 function imageaffine(
   resource $image,
-  varray<mixed> $affine = varray[],
+  varray<mixed> $affine = vec[],
   shape(
     ?'x' => int,
     ?'y' => int,
@@ -88,7 +88,7 @@ function imageaffinematrixconcat(varray<mixed> $m1, varray<mixed> $m2): mixed;
  * an optional clipping area.
  */
 <<__Native>>
-function imageaffinematrixget(int $type, mixed $options = darray[]): mixed;
+function imageaffinematrixget(int $type, mixed $options = dict[]): mixed;
 
 /* imagealphablending() allows for two different modes of drawing on truecolor
  * images. In blending mode, the alpha channel component of the color supplied

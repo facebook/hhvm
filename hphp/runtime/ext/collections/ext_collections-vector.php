@@ -361,7 +361,7 @@ final class Vector<T> implements \MutableVector<T> {
     $count = $this->count();
     return $count
       ? varray(HH\FIXME\UNSAFE_CAST<mixed, varray<int>>(\range(0, $count - 1)))
-      : varray[];
+      : vec[];
   }
 
   /** Returns a varray built from the values from this Vector.
@@ -1125,7 +1125,7 @@ final class ImmVector<T> implements \ConstVector<T> {
     $count = $this->count();
     return $count
       ? varray(HH\FIXME\UNSAFE_CAST<mixed, varray<int>>(\range(0, $count - 1)))
-      : varray[];
+      : vec[];
   }
 
   /** Returns a varray built from the values from this ImmVector.

@@ -45,14 +45,14 @@ class Reflection {
    * @return     mixed   An array of modifier names.
    */
   public static function getModifierNames($modifiers)[] {
-    $ret = varray[];
+    $ret = vec[];
 
     $abstract = ReflectionMethod::IS_ABSTRACT |
                 ReflectionClass::IS_EXPLICIT_ABSTRACT;
     $final = ReflectionMethod::IS_FINAL | ReflectionClass::IS_FINAL;
     $implicit_public = 4096;
 
-    $map = darray[
+    $map = dict[
       $abstract => 'abstract',
       $final => 'final',
       $implicit_public => 'public'

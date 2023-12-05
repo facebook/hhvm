@@ -794,7 +794,7 @@ function htmlspecialchars(string $str,
 function fb_htmlspecialchars(string $str,
                              int $quote_style = ENT_COMPAT,
                              string $charset = "ISO-8859-1",
-                             mixed $extra = varray[]): string;
+                             mixed $extra = vec[]): string;
 
 /**
  * Returns a quoted printable string created according to  RFC2045, section

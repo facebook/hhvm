@@ -240,7 +240,7 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    *
    * @return - a `varray` with the integer keys from the current `Pair`.
    */
-  public function toKeysArray()[]: varray<int> { return varray[0, 1]; }
+  public function toKeysArray()[]: varray<int> { return vec[0, 1]; }
 
   /**
    * Returns an `varray` containing the values from the current `Pair`.

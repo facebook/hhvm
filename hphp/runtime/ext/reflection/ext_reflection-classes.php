@@ -27,7 +27,7 @@ interface Reflector extends IPureStringishObject {
 
 trait ReflectionLegacyAttribute {
   final public function getAttributes()[]: darray<arraykey, varray<mixed>> {
-    $denamespaced = darray[];
+    $denamespaced = dict[];
     foreach ($this->getAttributesNamespaced() as $name => $args) {
       $pos = strrpos($name, '\\');
       $name = ($pos === false) ? $name : substr($name, $pos + 1);
@@ -108,7 +108,7 @@ class ReflectionParameter implements Reflector {
       if ($info !== null) {
         $this->info = $info;
         $this->name = $info['name'];
-        $this->paramTypeInfo = darray[];
+        $this->paramTypeInfo = dict[];
         $this->paramTypeInfo['name'] = $info['type_hint'];
         $this->paramTypeInfo['nullable'] = $info['type_hint_nullable'];
         $this->paramTypeInfo['builtin'] = $info['type_hint_builtin'];
@@ -345,7 +345,7 @@ class ReflectionParameter implements Reflector {
       return null;
     }
     $ltype = strtolower($this->info['type']);
-    $nonClassTypehints = darray[
+    $nonClassTypehints = dict[
       'hh\\bool' => 1,
       'hh\\int' => 1,
       'hh\\float' => 1,
@@ -616,7 +616,7 @@ class ReflectionParameter implements Reflector {
     if ($this->hasType()) {
       return new ReflectionType(
         $this,
-        darray[
+        dict[
           'name' => $this->info['type_hint'],
           'nullable' => $this->info['type_hint_nullable'],
           'builtin' => $this->info['type_hint_builtin'],
@@ -1179,7 +1179,7 @@ class ReflectionExtension implements Reflector {
    *                     is returned.
    */
   public function getClassNames()[] {
-    $ret = varray[];
+    $ret = vec[];
     foreach ($this->info['classes'] as $cls) {
       $ret[] = $cls->getName();
     }
@@ -1210,7 +1210,7 @@ class ReflectionType implements IPureStringishObject {
   private $type_hint_info;
 
   public function __construct(?Reflector $param_or_ret = null,
-                              darray $type_hint_info = darray[])[] {
+                              darray $type_hint_info = dict[])[] {
     // PHP7 actually allows you to call this constructor from user code
     // successfully, even though it is really meant to only be called from
     // ReflectionParameter::getType() and

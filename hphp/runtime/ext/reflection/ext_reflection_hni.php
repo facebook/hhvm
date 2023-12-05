@@ -273,7 +273,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
       $retTypeInfo = $this->getRetTypeInfo();
       return new ReflectionType(
         $this,
-        darray[
+        dict[
           'name' => $retTypeInfo['type_hint'],
           'nullable' => $retTypeInfo['type_hint_nullable'],
           'builtin' => $retTypeInfo['type_hint_builtin'],
@@ -317,7 +317,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function getParameters()[]: varray<ReflectionParameter> {
     // FIXME: ReflectionParameter sh/could have native data pointing to the
     // relevant Func::ParamInfo data structure
-    $ret = varray[];
+    $ret = vec[];
     foreach ($this->getParamInfo() as $idx => $info) {
       $param = new ReflectionParameter(null, null, $info);
       $ret[] = $param;
@@ -391,8 +391,8 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   // Implementation of __toString
   final protected function __toStringHelper(
     $type,
-    varray<string> $preAttrs = varray[],
-    varray<string> $funcAttrs = varray[],
+    varray<string> $preAttrs = vec[],
+    varray<string> $funcAttrs = vec[],
   )[]: string {
     $ret = '';
     if ($doc = $this->getDocComment()) {
@@ -703,7 +703,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    * @return     string  A string representation of this ReflectionMethod.
    */
   public function __toString()[]: string {
-    $preAttrs = varray[];
+    $preAttrs = vec[];
 
     $decl_class = $this->getDeclaringClassname();
     if ($this->originalClass !== $decl_class) {
@@ -718,7 +718,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
       $preAttrs[] = 'ctor';
     }
 
-    $funcAttrs = varray[];
+    $funcAttrs = vec[];
     if ($this->isAbstract()) {
       $funcAttrs[] = 'abstract';
     }
@@ -741,7 +741,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
   }
 
   public function __debugInfo() {
-    return darray['name' => $this->name, 'class' => $this->class];
+    return dict['name' => $this->name, 'class' => $this->class];
   }
 
   /**
@@ -1429,7 +1429,7 @@ class ReflectionClass implements Reflector {
    *                     method.
    */
   public function getMethods(?int $filter = null)[]: varray<ReflectionMethod> {
-    $ret = varray[];
+    $ret = vec[];
     $clsname = $this->getName();
     foreach ($this->getMethodOrderWithCaching($filter) as $name) {
       $ret[] = new ReflectionMethod($clsname, $name);
@@ -1526,7 +1526,7 @@ class ReflectionClass implements Reflector {
   }
 
   public function getTypeConstants()[]: varray<ReflectionTypeConstant> {
-    $ret = varray[];
+    $ret = vec[];
     $class = $this->getName();
     foreach ($this->getTypeConstantNamesWithCaching() as $name) {
       $ret[] = new ReflectionTypeConstant($class, $name);
@@ -1635,7 +1635,7 @@ class ReflectionClass implements Reflector {
   private function getReflectionClassesFromNames(
     varray<string> $names
   )[]: darray<string, ReflectionClass> {
-    $ret = darray[];
+    $ret = dict[];
     foreach ($names as $name) {
       $ret[$name] = new ReflectionClass($name);
     }
@@ -1789,7 +1789,7 @@ class ReflectionClass implements Reflector {
    *
    * @return     mixed   Returns a new instance of the class.
    */
-  public function newInstanceArgs(Traversable<mixed> $args = varray[])[defaults] {
+  public function newInstanceArgs(Traversable<mixed> $args = vec[])[defaults] {
     if ($args && !$this->getConstructorName()) {
       // consistent with reference, but perhaps not particularly useful
       throw new ReflectionException(
@@ -1892,7 +1892,7 @@ class ReflectionClass implements Reflector {
    * @return     mixed   An array of ReflectionProperty objects.
    */
   public function getProperties($filter = 0xFFFF)[]: varray<ReflectionProperty> {
-    $ret = varray[];
+    $ret = vec[];
     foreach ($this->getOrderedPropertyInfos() as $name => $prop_info) {
       if ($this->obj) {
         $p = new ReflectionProperty($this->obj, $name);
@@ -1919,7 +1919,7 @@ class ReflectionClass implements Reflector {
    * @return     mixed   The static properties, as an array.
    */
   public function getStaticProperties(): darray<string, mixed> {
-    $ret = darray[];
+    $ret = dict[];
     foreach ($this->getProperties(ReflectionProperty::IS_STATIC) as $prop) {
       $val = hphp_get_static_property($this->getName(), $prop->name, true);
       $ret[$prop->name] = $val;
@@ -1991,7 +1991,7 @@ class ReflectionClass implements Reflector {
    *                     into account.
    */
   public function getDefaultProperties()[]: darray<string, mixed> {
-    $ret = darray[];
+    $ret = dict[];
     foreach ($this->getProperties() as $prop) {
       if ($prop->isDefault()) {
         $ret[$prop->name] = $prop->getDefaultValue();

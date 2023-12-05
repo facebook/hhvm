@@ -109,7 +109,7 @@ class SplPriorityQueue implements \HH\Iterator, Countable {
    * @return     mixed   No value is returned.
    */
   public function insert($value, $priority) {
-    $data = darray['data' => $value, 'priority' => $priority];
+    $data = dict['data' => $value, 'priority' => $priority];
     return $this->getHeap()->insert($data);
   }
 

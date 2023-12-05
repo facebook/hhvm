@@ -90,7 +90,7 @@ async function v<Tv>(
  */
 async function va(...$awaitables): Awaitable/*<(...)>*/ {
   await AwaitAllWaitHandle::fromVec(vec($awaitables));
-  $ret = varray[];
+  $ret = vec[];
   foreach ($awaitables as $value) {
     $ret[] = \HH\Asio\result($value);
   }

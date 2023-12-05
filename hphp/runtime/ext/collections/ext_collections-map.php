@@ -296,7 +296,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @return varray
    */
   public function toKeysArray()[]: varray<Tk> {
-    $keys = varray[];
+    $keys = vec[];
     foreach (dict($this) as $k => $_) {
       $keys[] = $k;
     }
@@ -777,7 +777,7 @@ final class ImmMap<Tk as arraykey, Tv> implements \ConstMap<Tk, Tv> {
    * @return varray
    */
   public function toKeysArray()[]: varray<Tk> {
-    $keys = varray[];
+    $keys = vec[];
     foreach (dict($this) as $k => $_) {
       $keys[] = $k;
     }

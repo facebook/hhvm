@@ -54,7 +54,7 @@ class PDO {
    */
   <<__Native>>
   public function prepare(string $statement,
-                   darray<arraykey, mixed> $options = darray[]): mixed;
+                   darray<arraykey, mixed> $options = dict[]): mixed;
 
   /* Turns off autocommit mode. While autocommit mode is turned off, changes
    * made to the database via the PDO object instance are not committed until

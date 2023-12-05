@@ -13,7 +13,7 @@ abstract final class _FilterVarArrayFilterValidator {
   }
 }
 
-function _filter_var_array_single($value, $filter, $options = darray[]) {
+function _filter_var_array_single($value, $filter, $options = dict[]) {
   if (!_FilterVarArrayFilterValidator::isValid($filter)) {
     $filter = FILTER_DEFAULT;
   }
@@ -21,13 +21,13 @@ function _filter_var_array_single($value, $filter, $options = darray[]) {
 
   $flags = isset($options['flags']) ? $options['flags'] : 0;
   if ($flags & FILTER_FORCE_ARRAY && !HH\is_any_array($ret)) {
-    return varray[$ret];
+    return vec[$ret];
   }
   if ($flags & FILTER_REQUIRE_SCALAR && HH\is_any_array($ret)) {
     return false;
   }
   if ($flags & FILTER_REQUIRE_ARRAY && is_null($ret)) {
-    return varray[];
+    return vec[];
   }
 
   return $ret;
@@ -85,7 +85,7 @@ function filter_var_array($data, $definition = null, $add_empty = true)[] {
     $definition = array_fill_keys(array_keys($data), null);
   }
 
-  $ret = darray[];
+  $ret = dict[];
   foreach ($definition as $key => $def) {
     if ($key === "") {
       trigger_error(

@@ -644,48 +644,39 @@ inline void ensureSameType(const Value& a, TType b) {
 }
 
 template <class Protocol>
-void serializeValue(Protocol& prot, const Value& value) {
+uint32_t serializeValue(Protocol& prot, const Value& value) {
   switch (value.getType()) {
     case Value::Type::boolValue:
-      prot.writeBool(value.as_bool());
-      return;
+      return prot.writeBool(value.as_bool());
     case Value::Type::byteValue:
-      prot.writeByte(value.as_byte());
-      return;
+      return prot.writeByte(value.as_byte());
     case Value::Type::i16Value:
-      prot.writeI16(value.as_i16());
-      return;
+      return prot.writeI16(value.as_i16());
     case Value::Type::i32Value:
-      prot.writeI32(value.as_i32());
-      return;
+      return prot.writeI32(value.as_i32());
     case Value::Type::i64Value:
-      prot.writeI64(value.as_i64());
-      return;
+      return prot.writeI64(value.as_i64());
     case Value::Type::floatValue:
-      prot.writeFloat(value.as_float());
-      return;
+      return prot.writeFloat(value.as_float());
     case Value::Type::doubleValue:
-      prot.writeDouble(value.as_double());
-      return;
+      return prot.writeDouble(value.as_double());
     case Value::Type::stringValue:
-      prot.writeString(value.as_string());
-      return;
+      return prot.writeString(value.as_string());
     case Value::Type::binaryValue:
-      prot.writeBinary(value.as_binary());
-      return;
+      return prot.writeBinary(value.as_binary());
     case Value::Type::listValue: {
       TType elemType = protocol::T_I64;
       uint32_t size = value.as_list().size();
       if (size > 0) {
         elemType = getTType(value.as_list().at(0));
       }
-      prot.writeListBegin(elemType, size);
+      auto serializedSize = prot.writeListBegin(elemType, size);
       for (const auto& val : value.as_list()) {
         ensureSameType(val, elemType);
-        serializeValue(prot, val);
+        serializedSize += serializeValue(prot, val);
       }
-      prot.writeListEnd();
-      return;
+      serializedSize += prot.writeListEnd();
+      return serializedSize;
     }
     case Value::Type::mapValue: {
       TType keyType = protocol::T_STRING;
@@ -695,15 +686,15 @@ void serializeValue(Protocol& prot, const Value& value) {
         keyType = getTType(value.as_map().begin()->first);
         valueType = getTType(value.as_map().begin()->second);
       }
-      prot.writeMapBegin(keyType, valueType, size);
+      auto serializedSize = prot.writeMapBegin(keyType, valueType, size);
       for (const auto& [key, val] : value.as_map()) {
         ensureSameType(key, keyType);
         ensureSameType(val, valueType);
-        serializeValue(prot, key);
-        serializeValue(prot, val);
+        serializedSize += serializeValue(prot, key);
+        serializedSize += serializeValue(prot, val);
       }
-      prot.writeMapEnd();
-      return;
+      serializedSize += prot.writeMapEnd();
+      return serializedSize;
     }
     case Value::Type::setValue: {
       TType elemType = protocol::T_I64;
@@ -711,35 +702,37 @@ void serializeValue(Protocol& prot, const Value& value) {
       if (size > 0) {
         elemType = getTType(*value.as_set().begin());
       }
-      prot.writeSetBegin(elemType, size);
+      auto serializedSize = prot.writeSetBegin(elemType, size);
       for (const auto& val : value.as_set()) {
         ensureSameType(val, elemType);
-        serializeValue(prot, val);
+        serializedSize += serializeValue(prot, val);
       }
-      prot.writeSetEnd();
-      return;
+      serializedSize += prot.writeSetEnd();
+      return serializedSize;
     }
     case Value::Type::objectValue: {
-      serializeObject(prot, value.as_object());
-      return;
+      return serializeObject(prot, value.as_object());
     }
     default: {
       TProtocolException::throwInvalidFieldData();
     }
   }
+  return 0;
 }
 
 template <class Protocol>
-void serializeObject(Protocol& prot, const Object& obj) {
-  prot.writeStructBegin("");
+uint32_t serializeObject(Protocol& prot, const Object& obj) {
+  uint32_t serializedSize = 0;
+  serializedSize += prot.writeStructBegin("");
   for (const auto& [fieldID, fieldVal] : *obj.members()) {
     auto fieldType = getTType(fieldVal);
-    prot.writeFieldBegin("", fieldType, fieldID);
-    serializeValue(prot, fieldVal);
-    prot.writeFieldEnd();
+    serializedSize += prot.writeFieldBegin("", fieldType, fieldID);
+    serializedSize += serializeValue(prot, fieldVal);
+    serializedSize += prot.writeFieldEnd();
   }
-  prot.writeFieldStop();
-  prot.writeStructEnd();
+  serializedSize += prot.writeFieldStop();
+  serializedSize += prot.writeStructEnd();
+  return serializedSize;
 }
 
 // Writes the field from raw data in MaskedData.

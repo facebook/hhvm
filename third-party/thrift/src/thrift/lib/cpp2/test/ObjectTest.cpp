@@ -32,6 +32,7 @@
 #include <thrift/conformance/if/gen-cpp2/protocol_types_custom_protocol.h>
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/BadFieldAccess.h>
+#include <thrift/lib/cpp2/op/Encode.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/protocol/detail/Object.h>
@@ -1411,6 +1412,66 @@ TEST(ObjectTest, FromValueStruct) {
 
   EXPECT_EQ(fromValueStruct<Tag>(asValueStruct<Tag>(bar)), bar);
   EXPECT_EQ(fromObjectStruct<Tag>(asValueStruct<Tag>(bar).as_object()), bar);
+}
+
+template <class Tag>
+void testSerializeValue(
+    const type::native_type<Tag>& t, bool deterministic = true) {
+  // Test whether serializeValue output the correct size.
+  // If result is deterministic, also test whether result matches op::decode's
+  folly::IOBufQueue queue1, queue2;
+  CompactProtocolWriter writer1, writer2;
+  writer1.setOutput(&queue1);
+  writer2.setOutput(&queue2);
+
+  auto size1 = detail::serializeValue(writer1, asValueStruct<Tag>(t));
+  auto size2 = op::encode<Tag>(writer2, t);
+
+  auto buf1 = queue1.moveAsValue();
+  auto buf2 = queue2.moveAsValue();
+
+  EXPECT_EQ(size1, buf1.computeChainDataLength());
+  EXPECT_EQ(size2, buf2.computeChainDataLength());
+
+  CompactProtocolReader reader1, reader2;
+  reader1.setInput(&buf1);
+  reader2.setInput(&buf2);
+
+  type::native_type<Tag> t1, t2;
+  op::decode<Tag>(reader1, t1);
+  op::decode<Tag>(reader2, t2);
+
+  EXPECT_EQ(t, t1);
+  EXPECT_EQ(t, t2);
+
+  EXPECT_TRUE(!deterministic || folly::IOBufEqualTo{}(buf1, buf2));
+}
+
+TEST(ObjectTest, SerializeValueSize) {
+  testSerializeValue<type::bool_t>(false);
+  testSerializeValue<type::bool_t>(true);
+  testSerializeValue<type::byte_t>(10);
+  testSerializeValue<type::i16_t>(20);
+  testSerializeValue<type::i32_t>(30);
+  testSerializeValue<type::i64_t>(40);
+  testSerializeValue<type::float_t>(50.0);
+  testSerializeValue<type::double_t>(60.0);
+
+  testSerializeValue<type::list<type::i32_t>>({10, 20, 30, 40});
+  testSerializeValue<type::set<type::i32_t>>({10, 20, 30, 40}, false);
+  testSerializeValue<type::map<type::i32_t, type::string_t>>(
+      {{10, "10"}, {20, "20"}}, false);
+
+  // Struct
+  using facebook::thrift::lib::test::Bar;
+
+  Bar bar;
+  bar.field_3() = {"foo", "bar", "baz"};
+  bar.field_4()->field_1() = 42;
+  bar.field_4()->field_2() = "Everything";
+
+  // Result is not deterministic since field id can be out of order
+  testSerializeValue<type::struct_t<Bar>>(bar, false);
 }
 
 } // namespace

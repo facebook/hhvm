@@ -15,6 +15,7 @@
  */
 
 #include <array>
+#include <type_traits>
 
 #include <folly/Portability.h>
 #include <folly/Utility.h>
@@ -47,6 +48,19 @@ namespace thrift {
 namespace util {
 
 namespace detail {
+
+template <typename T>
+constexpr std::make_signed_t<T> zigzagToSignedInt(T n) {
+  using Unsigned = std::make_unsigned_t<T>;
+  return ((Unsigned)n & 1) ? ~((Unsigned)n >> 1) : ((Unsigned)n >> 1);
+}
+
+template <typename T>
+constexpr std::make_unsigned_t<T> signedIntToZigzag(T n) {
+  using Signed = std::make_signed_t<T>;
+  using Unsigned = std::make_unsigned_t<T>;
+  return ((Unsigned)n << 1) ^ (Unsigned)((Signed)n >> (sizeof(n) * 8 - 1));
+}
 
 template <class T, class CursorT>
 void readVarintSlow(CursorT& c, T& value) {
@@ -394,19 +408,19 @@ uint8_t writeVarint(Cursor& c, T value) {
 #endif // __BMI2__
 
 inline int32_t zigzagToI32(uint32_t n) {
-  return (n & 1) ? ~(n >> 1) : (n >> 1);
+  return detail::zigzagToSignedInt(n);
 }
 
 inline int64_t zigzagToI64(uint64_t n) {
-  return (n & 1) ? ~(n >> 1) : (n >> 1);
+  return detail::zigzagToSignedInt(n);
 }
 
 constexpr inline uint32_t i32ToZigzag(const int32_t n) {
-  return (static_cast<uint32_t>(n) << 1) ^ static_cast<uint32_t>(n >> 31);
+  return detail::signedIntToZigzag(n);
 }
 
-constexpr inline uint64_t i64ToZigzag(const int64_t l) {
-  return (static_cast<uint64_t>(l) << 1) ^ static_cast<uint64_t>(l >> 63);
+constexpr inline uint64_t i64ToZigzag(const int64_t n) {
+  return detail::signedIntToZigzag(n);
 }
 
 inline uint32_t toI32ZigZagOrdinal(size_t pos) {

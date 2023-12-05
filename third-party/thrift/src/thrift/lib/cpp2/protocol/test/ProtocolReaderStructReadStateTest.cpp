@@ -19,9 +19,11 @@
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/ProtocolReaderStructReadState.h>
+#include <thrift/lib/cpp2/protocol/detail/protocol_methods.h>
 
 using namespace apache::thrift;
 using namespace apache::thrift::protocol;
+using namespace apache::thrift::detail::pm;
 
 namespace {
 
@@ -63,6 +65,12 @@ std::unique_ptr<folly::IOBuf> createTestInput() {
   return queue.move();
 }
 
+template <typename Protocol, typename State, typename T>
+void readFieldContents(Protocol& protocol, State& state, T& out) {
+  protocol_methods<type_class::integral, T>::readWithContext(
+      protocol, out, state);
+}
+
 template <class ProtocolReader>
 void testAdvanceToNextFieldSuccess() {
   auto input = createTestInput<typename ProtocolReader::ProtocolWriter>();
@@ -74,43 +82,43 @@ void testAdvanceToNextFieldSuccess() {
   EXPECT_TRUE(state.advanceToNextField(&reader, 0, 13, T_BYTE));
   {
     int8_t value;
-    reader.readByte(value);
+    readFieldContents(reader, state, value);
     EXPECT_EQ(value, 24);
   }
   EXPECT_TRUE(state.advanceToNextField(&reader, 13, 23, T_BYTE));
   {
     int8_t value;
-    reader.readByte(value);
+    readFieldContents(reader, state, value);
     EXPECT_EQ(value, 123);
   }
   EXPECT_TRUE(state.advanceToNextField(&reader, 23, 38, T_I64));
   {
     int64_t value;
-    reader.readI64(value);
+    readFieldContents(reader, state, value);
     EXPECT_EQ(value, 123456789);
   }
   EXPECT_TRUE(state.advanceToNextField(&reader, 38, 39, T_BOOL));
   {
     bool value;
-    reader.readBool(value);
+    readFieldContents(reader, state, value);
     EXPECT_EQ(value, true);
   }
   EXPECT_TRUE(state.advanceToNextField(&reader, 39, 63, T_BOOL));
   {
     bool value;
-    reader.readBool(value);
+    readFieldContents(reader, state, value);
     EXPECT_EQ(value, false);
   }
   EXPECT_TRUE(state.advanceToNextField(&reader, 63, -8192, T_I32));
   {
     int32_t value;
-    reader.readI32(value);
+    readFieldContents(reader, state, value);
     EXPECT_EQ(value, 5678910);
   }
   EXPECT_TRUE(state.advanceToNextField(&reader, -8192, 16381, T_I16));
   {
     int16_t value;
-    reader.readI16(value);
+    readFieldContents(reader, state, value);
     EXPECT_EQ(value, 12345);
   }
   EXPECT_TRUE(state.advanceToNextField(&reader, 16381, 0, T_STOP));
@@ -136,7 +144,7 @@ void testAdvanceToNextFieldFail() {
   EXPECT_TRUE(state.advanceToNextField(&reader, 13, 23, T_BYTE));
   {
     int8_t value;
-    reader.readByte(value);
+    readFieldContents(reader, state, value);
     EXPECT_EQ(value, 123);
   }
   // Test mismatched field id.

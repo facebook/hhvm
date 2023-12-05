@@ -1,1 +1,0 @@
-Fatal error: Trait T2 has attribute <<__ModuleLevelTrait>> but uses trait T1 which doesn't in %s

@@ -9089,16 +9089,6 @@ private:
       auto const& trait = index.cls(tname);
       auto const& traitInfo = index.classInfo(tname);
 
-      if (clsHasModuleLevelTrait &&
-          !(trait.userAttributes.count(s___ModuleLevelTrait.get()))) {
-        ITRACE(2,
-               "Making class-info failed for `{}' because "
-               "it has attribute <<__ModuleLevelTrait>> but "
-               "uses trait {} which doesn't\n",
-               cls.name, trait.name);
-        return nullptr;
-      }
-
       assertx(!is_closure(trait));
       if (!(trait.attrs & AttrTrait)) {
         ITRACE(2,

@@ -2354,15 +2354,6 @@ void Class::checkUserAttributes() {
     if (!(attrs() & AttrTrait) || (attrs() & AttrInternal)) {
       raise_error("Attribute <<__ModuleLevelTrait>> can only be specified on public traits");
     }
-    if (m_extra) {
-      for (auto const& t : m_extra->m_usedTraits) {
-        auto trait = t.get();
-        if (!(trait->preClass()->userAttributes().count(s___ModuleLevelTrait.get()))) {
-          raise_error("Trait %s has attribute <<__ModuleLevelTrait>> but uses trait %s which doesn't",
-            m_preClass->name()->data(), trait->preClass()->name()->data());
-        }
-      }
-    }
   }
 }
 

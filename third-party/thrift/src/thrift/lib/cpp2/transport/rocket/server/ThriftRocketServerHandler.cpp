@@ -622,6 +622,8 @@ void ThriftRocketServerHandler::handleRequestCommon(
     cpp2ReqCtx->setInteractionId(*interactionCreate->interactionId_ref());
   }
 
+  cpp2ReqCtx->setRpcKind(expectedKind);
+
   if (auto frameworkMetadata = metadata.frameworkMetadata_ref()) {
     cpp2ReqCtx->setFrameworkMetadata(std::move(**frameworkMetadata));
   }

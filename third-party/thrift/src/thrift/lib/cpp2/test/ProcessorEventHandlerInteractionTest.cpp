@@ -64,6 +64,11 @@ class TestEventHandler : public TProcessorEventHandler {
     } else {
       ASSERT_TRUE(ids_.rlock()->count(uniqueId));
     }
+    if (std::string_view{"Calculator.Addition.noop"} == fn_name) {
+      ASSERT_EQ(reqCtx->getRpcKind(), RpcKind::SINGLE_REQUEST_NO_RESPONSE);
+    } else {
+      ASSERT_EQ(reqCtx->getRpcKind(), RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+    }
   }
 
   void onInteractionTerminate(void* ctx, int64_t id) override {
@@ -204,5 +209,17 @@ TEST(TProcessorEventHandlerTest, ConnectionClose) {
     /* sleep override */ std::this_thread::sleep_for(1s);
   }
 
+  EXPECT_EQ(eventHandler->countInteractions(), 0);
+}
+
+TEST(TProcessorEventHandlerTest, RpcKind) {
+  auto eventHandler = std::make_shared<TestEventHandler>();
+  TProcessorBase::addProcessorEventHandler(eventHandler);
+  {
+    ScopedServerInterfaceThread runner(std::make_shared<TestHandler>());
+    auto client = runner.newClient<apache::thrift::Client<test::Calculator>>();
+    auto add = client->sync_newAddition();
+    add.sync_noop();
+  }
   EXPECT_EQ(eventHandler->countInteractions(), 0);
 }

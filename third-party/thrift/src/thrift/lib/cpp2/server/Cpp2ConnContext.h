@@ -35,6 +35,7 @@
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/async/Interaction.h>
 #include <thrift/lib/cpp2/util/TypeErasedStorage.h>
+#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 #include <wangle/ssl/SSLUtil.h>
 
 using apache::thrift::concurrency::PriorityThreadManager;
@@ -654,6 +655,10 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
 
   std::string releaseMethodName() { return std::move(methodName_); }
 
+  void setRpcKind(RpcKind rpcKind) { rpcKind_ = rpcKind; }
+
+  RpcKind getRpcKind() const { return rpcKind_; }
+
   void setProtoSeqId(int32_t protoSeqId) { protoSeqId_ = protoSeqId; }
 
   int32_t getProtoSeqId() { return protoSeqId_; }
@@ -740,6 +745,7 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
   folly::erased_unique_ptr requestData_{nullptr, nullptr};
   std::chrono::milliseconds requestTimeout_{0};
   std::string methodName_;
+  RpcKind rpcKind_{RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE};
   int32_t protoSeqId_{0};
   int64_t interactionId_{0};
   bool isException_{false};

@@ -6,4 +6,4 @@ vec(2) {
   int(1)
 }
 
-Catchable fatal error: Expected HH\vec<_>, got HH\dict in %s/hphp/test/slow/typed_locals/enforce_vec.php on line 11
+Catchable fatal error: Typed local assignment: Expected HH\vec<_>, got HH\dict in %s/hphp/test/slow/typed_locals/enforce_vec.php on line 11

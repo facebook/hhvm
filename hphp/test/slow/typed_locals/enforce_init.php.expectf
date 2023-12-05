@@ -1,1 +1,1 @@
-Catchable fatal error: Expected string, got int in %s/hphp/test/slow/typed_locals/enforce_init.php on line 6
+Catchable fatal error: Typed local assignment: Expected string, got int in %s/hphp/test/slow/typed_locals/enforce_init.php on line 6

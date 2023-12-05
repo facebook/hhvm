@@ -1159,7 +1159,8 @@ void throwTypeStructureDoesNotMatchTVException(
       expectedType, errorKey, givenType);
   }
   if (raiseError) {
-    raise_typehint_error(error);
+    std::string full_error = folly::sformat("Typed local assignment: {}", error);
+    raise_typehint_error(full_error);
   } else {
     SystemLib::throwTypeAssertionExceptionObject(error);
   }

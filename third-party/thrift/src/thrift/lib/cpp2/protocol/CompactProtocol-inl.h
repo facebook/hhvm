@@ -693,21 +693,15 @@ inline void CompactProtocolReader::readByte(int8_t& byte) {
 }
 
 inline void CompactProtocolReader::readI16(int16_t& i16) {
-  int32_t value;
-  apache::thrift::util::readVarint(in_, value);
-  i16 = (int16_t)apache::thrift::util::zigzagToI32(value);
+  apache::thrift::util::readZigzaggedVarint(in_, i16);
 }
 
 inline void CompactProtocolReader::readI32(int32_t& i32) {
-  int32_t value;
-  apache::thrift::util::readVarint(in_, value);
-  i32 = apache::thrift::util::zigzagToI32(value);
+  apache::thrift::util::readZigzaggedVarint(in_, i32);
 }
 
 inline void CompactProtocolReader::readI64(int64_t& i64) {
-  uint64_t value;
-  apache::thrift::util::readVarint(in_, value);
-  i64 = apache::thrift::util::zigzagToI64(value);
+  apache::thrift::util::readZigzaggedVarint(in_, i64);
 }
 
 inline void CompactProtocolReader::readDouble(double& dub) {

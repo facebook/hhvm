@@ -212,17 +212,6 @@ template <typename Param>
 struct ReadVarintMediumSlowTest : public testing::TestWithParam<Param> {};
 TYPED_TEST_SUITE_P(ReadVarintMediumSlowTest);
 
-struct FakeCursor {
-  FakeCursor() : bytesSkipped(0) {}
-  void skipNoAdvance(size_t skip) { bytesSkipped += skip; }
-  template <typename T>
-  T read() {
-    ADD_FAILURE();
-    return T{};
-  }
-  size_t bytesSkipped;
-};
-
 TYPED_TEST_P(ReadVarintMediumSlowTest, Simple) {
   if (TypeParam::skip) {
     return;
@@ -237,11 +226,10 @@ TYPED_TEST_P(ReadVarintMediumSlowTest, Simple) {
 
     typename TypeParam::UIntType expected = 1ULL << (7 * i);
 
-    FakeCursor cursor;
     typename TypeParam::UIntType value;
-    TypeParam::doReadVarintMediumSlow(cursor, value, buf, sizeof(buf));
+    size_t bytesRead = TypeParam::doReadVarintMediumSlow(value, buf);
     EXPECT_EQ(expected, value);
-    EXPECT_EQ(i + 1, cursor.bytesSkipped);
+    EXPECT_EQ(i + 1, bytesRead);
   }
 }
 
@@ -252,11 +240,9 @@ TYPED_TEST_P(ReadVarintMediumSlowTest, Overflow) {
 
   unsigned char buf[TypeParam::kMaxVarintSize];
   memset(buf, 0x80, sizeof(buf));
-  FakeCursor cursor;
   typename TypeParam::UIntType value;
   EXPECT_THROW(
-      TypeParam::doReadVarintMediumSlow(cursor, value, buf, sizeof(buf)),
-      std::out_of_range);
+      TypeParam::doReadVarintMediumSlow(value, buf), std::out_of_range);
 }
 
 TYPED_TEST_P(ReadVarintMediumSlowTest, JunkHighBits) {
@@ -270,9 +256,8 @@ TYPED_TEST_P(ReadVarintMediumSlowTest, JunkHighBits) {
   // semantics of dropping the high bits). Check that the accelerated ones do
   // the same thing.
   buf[TypeParam::kMaxVarintSize - 1] = 0x7F;
-  FakeCursor cursor;
   typename TypeParam::UIntType value;
-  TypeParam::doReadVarintMediumSlow(cursor, value, buf, sizeof(buf));
+  TypeParam::doReadVarintMediumSlow(value, buf);
   EXPECT_EQ(1ULL << (sizeof(typename TypeParam::UIntType) * 8 - 1), value);
 }
 
@@ -286,11 +271,10 @@ TYPED_TEST_P(ReadVarintMediumSlowTest, BigZeros) {
     // A space-consuming way of expressing 0, but currently allowed.
     memset(buf, 0x80, sizeof(buf));
     buf[i] = 0;
-    FakeCursor cursor;
     typename TypeParam::UIntType value;
-    TypeParam::doReadVarintMediumSlow(cursor, value, buf, sizeof(buf));
+    size_t bytesRead = TypeParam::doReadVarintMediumSlow(value, buf);
     EXPECT_EQ(0, value);
-    EXPECT_EQ(i + 1, cursor.bytesSkipped);
+    EXPECT_EQ(i + 1, bytesRead);
   }
 }
 
@@ -318,10 +302,9 @@ TYPED_TEST_P(ReadVarintMediumSlowTest, Decodes) {
         typename TypeParam::UIntType expected =
             (1ULL << i) | (1ULL << j) | (1ULL << k);
         typename TypeParam::UIntType value;
-        FakeCursor cursor;
-        TypeParam::doReadVarintMediumSlow(cursor, value, buf, sizeof(buf));
+        size_t bytesRead = TypeParam::doReadVarintMediumSlow(value, buf);
         EXPECT_EQ(expected, value);
-        EXPECT_EQ(i / 7 + 1, cursor.bytesSkipped);
+        EXPECT_EQ(i / 7 + 1, bytesRead);
       }
     }
   }
@@ -340,8 +323,7 @@ struct SkippingU64Impl {
   const static int kMaxVarintSize = 10;
   using UIntType = uint64_t;
   template <typename CursorT>
-  static void doReadVarintMediumSlow(
-      CursorT&, uint64_t&, const uint8_t*, size_t) {
+  static void doReadVarintMediumSlow(uint64_t&, const uint8_t) {
     ADD_FAILURE();
   }
 };
@@ -350,10 +332,8 @@ struct UnrolledU64Impl {
   const static bool skip = false;
   const static int kMaxVarintSize = 10;
   using UIntType = uint64_t;
-  template <typename CursorT>
-  static void doReadVarintMediumSlow(
-      CursorT& c, uint64_t& value, const uint8_t* p, size_t len) {
-    readVarintMediumSlowUnrolled(c, value, p, len);
+  static size_t doReadVarintMediumSlow(uint64_t& value, const uint8_t* p) {
+    return readVarintMediumSlowUnrolled(value, p);
   }
 };
 
@@ -362,10 +342,8 @@ struct SIMDU64Impl {
   const static bool skip = false;
   const static int kMaxVarintSize = 10;
   using UIntType = uint64_t;
-  template <typename CursorT>
-  static void doReadVarintMediumSlow(
-      CursorT& c, uint64_t& value, const uint8_t* p, size_t len) {
-    readVarintMediumSlowU64SIMD(c, value, p, len);
+  static size_t doReadVarintMediumSlow(uint64_t& value, const uint8_t* p) {
+    return readContiguousVarintMediumSlowU64SIMD(value, p);
   }
 };
 #else
@@ -377,10 +355,8 @@ struct BMI2U64Impl {
   const static bool skip = false;
   const static int kMaxVarintSize = 10;
   using UIntType = uint64_t;
-  template <typename CursorT>
-  static void doReadVarintMediumSlow(
-      CursorT& c, uint64_t& value, const uint8_t* p, size_t len) {
-    readVarintMediumSlowU64BMI2(c, value, p, len);
+  static size_t doReadVarintMediumSlow(uint64_t& value, const uint8_t* p) {
+    return readContiguousVarintMediumSlowU64BMI2(value, p);
   }
 };
 #else

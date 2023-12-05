@@ -76,19 +76,13 @@ void readVarintSlow(CursorT& c, T& value) {
 // which gives us 5% perf win (even when the exception is not actually thrown).
 [[noreturn]] void throwInvalidVarint();
 
-template <class T, class CursorT>
-void readVarintMediumSlowUnrolled(
-    CursorT& c, T& value, const uint8_t* p, size_t len) {
-  enum { maxSize = (8 * sizeof(T) + 6) / 7 };
-
-  // check that the available data is more than the longest possible varint or
-  // that the last available byte ends a varint
-  if (FOLLY_LIKELY(len >= maxSize)) {
-    uint64_t result;
-    const uint8_t* start = p;
-    do {
-      uint64_t byte; // byte is uint64_t so that all shifts are 64-bit
-      // clang-format off
+template <class T>
+size_t readVarintMediumSlowUnrolled(T& value, const uint8_t* p) {
+  uint64_t result;
+  const uint8_t* start = p;
+  do {
+    uint64_t byte; // byte is uint64_t so that all shifts are 64-bit
+    // clang-format off
       byte = *p++; result  = (byte & 0x7f);       if (!(byte & 0x80)) break;
       byte = *p++; result |= (byte & 0x7f) <<  7; if (!(byte & 0x80)) break;
       if (sizeof(T) <= 1) throwInvalidVarint();
@@ -102,14 +96,11 @@ void readVarintMediumSlowUnrolled(
       byte = *p++; result |= (byte & 0x7f) << 49; if (!(byte & 0x80)) break;
       byte = *p++; result |= (byte & 0x7f) << 56; if (!(byte & 0x80)) break;
       byte = *p++; result |= (byte & 0x7f) << 63; if (!(byte & 0x80)) break;
-      // clang-format on
-      throwInvalidVarint();
-    } while (false);
-    value = static_cast<T>(result);
-    c.skipNoAdvance(p - start);
-  } else {
-    readVarintSlow(c, value);
-  }
+    // clang-format on
+    throwInvalidVarint();
+  } while (false);
+  value = static_cast<T>(result);
+  return p - start;
 }
 
 // The fast-path of the optimized medium-slow paths. Decodes the first two bytes
@@ -118,13 +109,12 @@ void readVarintMediumSlowUnrolled(
 // otherwise. Either way, the data bits of the first two bytes are stored into
 // the low bits of result.
 FOLLY_ALWAYS_INLINE bool tryReadFirstTwoBytesU64(
-    uint64_t& result, const uint8_t* p, size_t len) {
+    uint64_t& result, const uint8_t* p) {
   // This is only called from mediumSlow pathways after we've done size
   // validation. In particular, we should know that it's not a
   // single-byte-encoded varint, and that there's space in the buffer for the
   // maximum size an encoded varint can be.
   DCHECK((p[0] & 0x80) != 0);
-  DCHECK(len >= 2);
   uint64_t hi = p[1];
   if ((hi & 0x80) == 0) {
     result = (hi << 7) | (p[0] & 0x7f);
@@ -135,43 +125,37 @@ FOLLY_ALWAYS_INLINE bool tryReadFirstTwoBytesU64(
 }
 
 #if THRIFT_UTIL_VARINTUTILS_SIMD_DECODER
-template <class CursorT>
-FOLLY_ALWAYS_INLINE void readVarintMediumSlowU64SIMD(
-    CursorT& c, uint64_t& value, const uint8_t* p, size_t len) {
-  enum { maxSize = (8 * sizeof(uint64_t) + 6) / 7 };
-  if (LIKELY(len >= maxSize)) {
-    uint64_t result;
-    if (tryReadFirstTwoBytesU64(result, p, len)) {
-      c.skipNoAdvance(2);
-      value = result;
-      return;
-    }
-    p += 2;
-    // This has alternating data bits and continuation bits, then, after the
-    // first 0 continuation bit, junk (well, message data that we're not
-    // interested in for varint decoding purposes).
-    uint64_t bits = folly::loadUnaligned<uint64_t>(p);
-    // This has 1s in all bits in the encoded int except the last continuation
-    // bit, then, after that, junk.
-    uint64_t bitsOnlyContinations = bits | 0x7F7F7F7F7F7F7F7FULL;
-    // This has all zeros in all continuation and data bits in the int except
-    // for the last continuation bit, which is a 1. After that, junk.
-    uint64_t lastContinuationBitSet = bitsOnlyContinations + 1;
-    if (lastContinuationBitSet == 0) {
-      // Last continuation bit was the last bit in the uint64_t, and it was a 1.
-      throwInvalidVarint();
-    }
-    size_t intBytes = __builtin_ctzll(lastContinuationBitSet) / 8 + 1;
-    c.skipNoAdvance(2 + intBytes);
-    // "Extract lowest 1 bit" idiom. Use `~lastContinuationBitSet + 1` instead
-    // of `-lastContinuationBitSet` to avoid an MSVC warning.
-    uint64_t solelyLastContinuationBitSet =
-        lastContinuationBitSet & (~lastContinuationBitSet + 1);
-    // Mask out all the junk bits.
-    uint64_t dataAndContinuationBits =
-        bits & (solelyLastContinuationBitSet - 1);
-    uint64_t dataBits64 = dataAndContinuationBits & 0x7F7F7F7F7F7F7F7FULL;
-    // clang-format off
+FOLLY_ALWAYS_INLINE size_t
+readContiguousVarintMediumSlowU64SIMD(uint64_t& value, const uint8_t* p) {
+  uint64_t result;
+  if (tryReadFirstTwoBytesU64(result, p)) {
+    value = result;
+    return 2;
+  }
+  p += 2;
+  // This has alternating data bits and continuation bits, then, after the
+  // first 0 continuation bit, junk (well, message data that we're not
+  // interested in for varint decoding purposes).
+  uint64_t bits = folly::loadUnaligned<uint64_t>(p);
+  // This has 1s in all bits in the encoded int except the last continuation
+  // bit, then, after that, junk.
+  uint64_t bitsOnlyContinations = bits | 0x7F7F7F7F7F7F7F7FULL;
+  // This has all zeros in all continuation and data bits in the int except
+  // for the last continuation bit, which is a 1. After that, junk.
+  uint64_t lastContinuationBitSet = bitsOnlyContinations + 1;
+  if (lastContinuationBitSet == 0) {
+    // Last continuation bit was the last bit in the uint64_t, and it was a 1.
+    throwInvalidVarint();
+  }
+  size_t intBytes = __builtin_ctzll(lastContinuationBitSet) / 8 + 1;
+  // "Extract lowest 1 bit" idiom. Use `~lastContinuationBitSet + 1` instead
+  // of `-lastContinuationBitSet` to avoid an MSVC warning.
+  uint64_t solelyLastContinuationBitSet =
+      lastContinuationBitSet & (~lastContinuationBitSet + 1);
+  // Mask out all the junk bits.
+  uint64_t dataAndContinuationBits = bits & (solelyLastContinuationBitSet - 1);
+  uint64_t dataBits64 = dataAndContinuationBits & 0x7F7F7F7F7F7F7F7FULL;
+  // clang-format off
     // dataBits will be:
     // 15        14        13        12        11        10        9         8
     // [00000000][00000000][00000000][00000000][00000000][00000000][00000000][00000000]
@@ -201,73 +185,79 @@ FOLLY_ALWAYS_INLINE void readVarintMediumSlowU64SIMD(
     __m128i shuffled = _mm_shuffle_epi8(shifted, _mm_set_epi8(
           12, 10, 8, 6, 4, 2, 0, -1,
           14, 9, 7, 5, 3, 1, -1, -1));
-    // clang-format on
-    uint64_t highData1 = _mm_extract_epi64(shuffled, 0);
-    uint64_t highData2 = _mm_extract_epi64(shuffled, 1);
-    result = result + highData1 + highData2;
-    value = result;
-  } else {
-    readVarintSlow(c, value);
-  }
+  // clang-format on
+  uint64_t highData1 = _mm_extract_epi64(shuffled, 0);
+  uint64_t highData2 = _mm_extract_epi64(shuffled, 1);
+  result = result + highData1 + highData2;
+  value = result;
+  return 2 + intBytes;
 }
 #endif // THRIFT_UTIL_VARINTUTILS_SIMD_DECODER
 
 #if THRIFT_UTIL_VARINTUTILS_BMI2_DECODER
-template <class CursorT>
-void readVarintMediumSlowU64BMI2(
-    CursorT& c, uint64_t& value, const uint8_t* p, size_t len) {
-  enum { maxSize = (8 * sizeof(uint64_t) + 6) / 7 };
-  if (LIKELY(len >= maxSize)) {
-    uint64_t result;
-    if (tryReadFirstTwoBytesU64(result, p, len)) {
-      c.skipNoAdvance(2);
-      value = result;
-      return;
-    }
-    p += 2;
-    // This has alternating data bits and continuation bits, then, after the
-    // first 0 continuation bit, junk (well, message data that we're not
-    // interested in for varint decoding purposes).
-    uint64_t bits = folly::loadUnaligned<uint64_t>(p);
-    uint64_t continuationBits = _pext_u64(bits, 0x8080808080808080ULL);
-    if (continuationBits == 0xFF) {
-      throwInvalidVarint();
-    }
-    size_t intBytes = __builtin_ctzll(continuationBits + 1) + 1;
-    c.skipNoAdvance(2 + intBytes);
-
-    uint64_t mask = (1ULL << (8 * intBytes - 1)) - 1;
-    // You might think it would make more sense to to the pext first and mask
-    // afterwards (avoiding having two pexts in a single dependency chain at 3
-    // cycles / pop); this seems not to be borne out in microbenchmarks. The
-    // mask you need ends up being more complicated to compute.
-    uint64_t highBits = _pext_u64((bits & mask), 0x7F7F7F7F7F7F7F7FULL);
-    result |= (highBits << 14);
-
+inline size_t readContiguousVarintMediumSlowU64BMI2(
+    uint64_t& value, const uint8_t* p) {
+  uint64_t result;
+  if (tryReadFirstTwoBytesU64(result, p)) {
     value = result;
-  } else {
-    readVarintSlow(c, value);
+    return 2;
   }
+  p += 2;
+  // This has alternating data bits and continuation bits, then, after the
+  // first 0 continuation bit, junk (well, message data that we're not
+  // interested in for varint decoding purposes).
+  uint64_t bits = folly::loadUnaligned<uint64_t>(p);
+  uint64_t continuationBits = _pext_u64(bits, 0x8080808080808080ULL);
+  if (continuationBits == 0xFF) {
+    throwInvalidVarint();
+  }
+  size_t intBytes = __builtin_ctzll(continuationBits + 1) + 1;
+
+  uint64_t mask = (1ULL << (8 * intBytes - 1)) - 1;
+  // You might think it would make more sense to to the pext first and mask
+  // afterwards (avoiding having two pexts in a single dependency chain at 3
+  // cycles / pop); this seems not to be borne out in microbenchmarks. The
+  // mask you need ends up being more complicated to compute.
+  uint64_t highBits = _pext_u64((bits & mask), 0x7F7F7F7F7F7F7F7FULL);
+  result |= (highBits << 14);
+
+  value = result;
+  return 2 + intBytes;
 }
 #endif // THRIFT_UTIL_VARINTUTILS_BMI2_DECODER
 
-template <class T, class CursorT>
-void readVarintMediumSlow(CursorT& c, T& value, const uint8_t* p, size_t len) {
+template <class T>
+FOLLY_ALWAYS_INLINE size_t
+readVarintMediumSlowContiguous(T& value, const uint8_t* p) {
   static_assert(
       sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4 || sizeof(T) == 8,
       "Trying to deserialize into an unsupported type");
+  size_t bytesRead;
   if (sizeof(T) <= 4) {
-    readVarintMediumSlowUnrolled(c, value, p, len);
+    bytesRead = readVarintMediumSlowUnrolled(value, p);
   } else {
     uint64_t result;
 #if THRIFT_UTIL_VARINTUTILS_BMI2_DECODER
-    readVarintMediumSlowU64BMI2(c, result, p, len);
+    bytesRead = readContiguousVarintMediumSlowU64BMI2(result, p);
 #elif THRIFT_UTIL_VARINTUTILS_SIMD_DECODER
-    readVarintMediumSlowU64SIMD(c, result, p, len);
+    bytesRead = readContiguousVarintMediumSlowU64SIMD(result, p);
 #else
-    readVarintMediumSlowUnrolled(c, result, p, len);
+    bytesRead = readVarintMediumSlowUnrolled(result, p);
 #endif
     value = static_cast<T>(result);
+  }
+  return bytesRead;
+}
+
+template <class T, class CursorT>
+void readVarintMediumSlow(CursorT& c, T& value, const uint8_t* p, size_t len) {
+  static const size_t maxSize = (8 * sizeof(T) + 6) / 7;
+
+  if (FOLLY_LIKELY(len >= maxSize)) {
+    size_t bytesRead = readVarintMediumSlowContiguous(value, p);
+    c.skipNoAdvance(bytesRead);
+  } else {
+    readVarintSlow(c, value);
   }
 }
 } // namespace detail
@@ -427,6 +417,25 @@ inline uint32_t toI32ZigZagOrdinal(size_t pos) {
 inline size_t fromI32ZigZagOrdinal(uint32_t pos) {
   return type::toPosition(
       type::Ordinal(apache::thrift::util::zigzagToI32(pos)));
+}
+
+template <class Cursor, class T>
+FOLLY_ALWAYS_INLINE void readZigzaggedVarint(Cursor& c, T& out) {
+  static_assert(sizeof(T) == 2 || sizeof(T) == 4 || sizeof(T) == 8);
+  folly::compiler_may_unsafely_assume_separate_storage(&c, c.data());
+  if constexpr (sizeof(T) == 2) {
+    int32_t value;
+    readVarint(c, value);
+    out = (int16_t)apache::thrift::util::zigzagToI32(value);
+  } else {
+    T value;
+    readVarint(c, value);
+    if constexpr (sizeof(T) == 4) {
+      out = zigzagToI32(value);
+    } else {
+      out = zigzagToI64(value);
+    }
+  }
 }
 
 } // namespace util

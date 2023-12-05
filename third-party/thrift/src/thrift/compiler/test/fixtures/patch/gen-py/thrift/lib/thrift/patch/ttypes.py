@@ -47,52 +47,7 @@ def __EXPAND_THRIFT_SPEC(spec):
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'PatchOp', 'GeneratePatch', 'AssignOnlyPatch', 'BoolPatch', 'BytePatch', 'I16Patch', 'I32Patch', 'I64Patch', 'FloatPatch', 'DoublePatch', 'StringPatch', 'BinaryPatch', 'FieldId', 'FieldIdList']
-
-class PatchOp:
-  r"""
-  The meaning of the patch op field ids, in all properly formulated patch
-  definitions.
-  
-  Patch field ids are interpreted at runtime, as a dynamic patch protocol,
-  without any additional schema derived from IDL patch definitions.
-  """
-  Unspecified = 0
-  Assign = 1
-  Clear = 2
-  PatchPrior = 3
-  EnsureUnion = 4
-  EnsureStruct = 5
-  PatchAfter = 6
-  Remove = 7
-  Add = 8
-  Put = 9
-
-  _VALUES_TO_NAMES = {
-    0: "Unspecified",
-    1: "Assign",
-    2: "Clear",
-    3: "PatchPrior",
-    4: "EnsureUnion",
-    5: "EnsureStruct",
-    6: "PatchAfter",
-    7: "Remove",
-    8: "Add",
-    9: "Put",
-  }
-
-  _NAMES_TO_VALUES = {
-    "Unspecified": 0,
-    "Assign": 1,
-    "Clear": 2,
-    "PatchPrior": 3,
-    "EnsureUnion": 4,
-    "EnsureStruct": 5,
-    "PatchAfter": 6,
-    "Remove": 7,
-    "Add": 8,
-    "Put": 9,
-  }
+__all__ = ['UTF8STRINGS', 'GeneratePatch', 'AssignOnlyPatch', 'BoolPatch', 'BytePatch', 'I16Patch', 'I32Patch', 'I64Patch', 'FloatPatch', 'DoublePatch', 'StringPatch', 'BinaryPatch', 'FieldId', 'FieldIdList']
 
 class GeneratePatch:
   r"""

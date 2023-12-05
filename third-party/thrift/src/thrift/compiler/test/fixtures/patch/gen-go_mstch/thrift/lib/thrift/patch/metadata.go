@@ -282,22 +282,6 @@ var exceptionMetadatas = []*metadata.ThriftException{
 }
 
 var enumMetadatas = []*metadata.ThriftEnum{
-    metadata.NewThriftEnum().
-    SetName("patch.PatchOp").
-    SetElements(
-        map[int32]string{
-            0: "Unspecified",
-            1: "Assign",
-            2: "Clear",
-            3: "PatchPrior",
-            4: "EnsureUnion",
-            5: "EnsureStruct",
-            6: "PatchAfter",
-            7: "Remove",
-            8: "Add",
-            9: "Put",
-        },
-    ),
 }
 
 var serviceMetadatas = []*metadata.ThriftService{

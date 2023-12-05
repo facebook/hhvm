@@ -102,101 +102,6 @@ result := listResult
     return decodeResult, decodeErr
 }
 
-type PatchOp int32
-
-const (
-    PatchOp_Unspecified PatchOp = 0
-    PatchOp_Assign PatchOp = 1
-    PatchOp_Clear PatchOp = 2
-    PatchOp_PatchPrior PatchOp = 3
-    PatchOp_EnsureUnion PatchOp = 4
-    PatchOp_EnsureStruct PatchOp = 5
-    PatchOp_PatchAfter PatchOp = 6
-    PatchOp_Remove PatchOp = 7
-    PatchOp_Add PatchOp = 8
-    PatchOp_Put PatchOp = 9
-)
-
-// Enum value maps for PatchOp
-var (
-    PatchOpToName = map[PatchOp]string {
-        PatchOp_Unspecified: "Unspecified",
-        PatchOp_Assign: "Assign",
-        PatchOp_Clear: "Clear",
-        PatchOp_PatchPrior: "PatchPrior",
-        PatchOp_EnsureUnion: "EnsureUnion",
-        PatchOp_EnsureStruct: "EnsureStruct",
-        PatchOp_PatchAfter: "PatchAfter",
-        PatchOp_Remove: "Remove",
-        PatchOp_Add: "Add",
-        PatchOp_Put: "Put",
-    }
-
-    PatchOpToValue = map[string]PatchOp {
-        "Unspecified": PatchOp_Unspecified,
-        "Assign": PatchOp_Assign,
-        "Clear": PatchOp_Clear,
-        "PatchPrior": PatchOp_PatchPrior,
-        "EnsureUnion": PatchOp_EnsureUnion,
-        "EnsureStruct": PatchOp_EnsureStruct,
-        "PatchAfter": PatchOp_PatchAfter,
-        "Remove": PatchOp_Remove,
-        "Add": PatchOp_Add,
-        "Put": PatchOp_Put,
-    }
-
-    PatchOpNames = []string{
-        "Unspecified",
-        "Assign",
-        "Clear",
-        "PatchPrior",
-        "EnsureUnion",
-        "EnsureStruct",
-        "PatchAfter",
-        "Remove",
-        "Add",
-        "Put",
-    }
-
-    PatchOpValues = []PatchOp{
-        PatchOp_Unspecified,
-        PatchOp_Assign,
-        PatchOp_Clear,
-        PatchOp_PatchPrior,
-        PatchOp_EnsureUnion,
-        PatchOp_EnsureStruct,
-        PatchOp_PatchAfter,
-        PatchOp_Remove,
-        PatchOp_Add,
-        PatchOp_Put,
-    }
-)
-
-func (x PatchOp) String() string {
-    if v, ok := PatchOpToName[x]; ok {
-        return v
-    }
-    return "<UNSET>"
-}
-
-func (x PatchOp) Ptr() *PatchOp {
-    return &x
-}
-
-// Deprecated: Use PatchOpToValue instead (e.g. `x, ok := PatchOpToValue["name"]`).
-func PatchOpFromString(s string) (PatchOp, error) {
-    if v, ok := PatchOpToValue[s]; ok {
-        return v, nil
-    }
-    return PatchOp(0), fmt.Errorf("not a valid PatchOp string")
-}
-
-// Deprecated: Use PatchOp.Ptr() instead.
-func PatchOpPtr(v PatchOp) *PatchOp {
-    return &v
-}
-
-
 type GeneratePatch struct {
 }
 // Compile time interface enforcer
@@ -3302,5 +3207,4 @@ func RegisterTypes(registry interface {
     registry.RegisterType("facebook.com/thrift/op/StringPatch", func() any { return NewStringPatch() })
     registry.RegisterType("facebook.com/thrift/op/BinaryPatch", func() any { return NewBinaryPatch() })
 
-    registry.RegisterType("facebook.com/thrift/op/PatchOp", func() any { return PatchOp(0) })
 }

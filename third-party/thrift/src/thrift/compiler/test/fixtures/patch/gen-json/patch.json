@@ -18,33 +18,6 @@
       "path" : "thrift/lib/thrift/id.thrift"
     }
   },
-  "enumerations" : {
-    "PatchOp" : {
-      "lineno" : 263,
-      "constants" : {
-        "Unspecified" : 0,
-        "Assign" : 1,
-        "Clear" : 2,
-        "PatchPrior" : 3,
-        "EnsureUnion" : 4,
-        "EnsureStruct" : 5,
-        "PatchAfter" : 6,
-        "Remove" : 7,
-        "Add" : 8,
-        "Put" : 9
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 263,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 334,
-          "column" : 2
-        }
-      }
-    }
-  },
   "typedefs" : {
     "FieldId" : {
       "lineno" : 38,
@@ -62,16 +35,16 @@
       }
     },
     "FieldIdList" : {
-      "lineno" : 337,
+      "lineno" : 257,
       "type_enum" : "LIST",
       "spec_args" : { "type_enum" : "I16", "spec_args" : null} ,
       "source_range" : {
         "begin" : {
-          "line" : 337,
+          "line" : 257,
           "column" : 1
         },
         "end" : {
-          "line" : 338,
+          "line" : 258,
           "column" : 30
         }
       }

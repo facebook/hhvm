@@ -39,79 +39,9 @@
   "inner_type" : "i16"
 },
         "is_exception": false,
-        "lineno": 337
+        "lineno": 257
       }
-  },
-  "enumerations" :
-  {
-      "PatchOp" : {
-        "name" : "PatchOp",
-        "constants" : {
-          "Unspecified" : {
-            "name" : "Unspecified",
-            "lineno" : 264,
-            "value" : 0
-          },
-          "Assign" : {
-            "name" : "Assign",
-            "docstring" : "Set the value. Supersedes all other ops.\n\nNote: Due to a limitation in current Thrift protocol encoding schemes,\nunions cannot be reliabily distinquished from structs/exceptions, so fields\nmust be set before assign can change the value, for example via an\n`EnsureStruct` or `EnsureUnion` operation.\n",
-            "lineno" : 274,
-            "value" : 1
-          },
-          "Clear" : {
-            "name" : "Clear",
-            "docstring" : "Set to the intrinsic default (which might be 'unset').\n",
-            "lineno" : 277,
-            "value" : 2
-          },
-          "PatchPrior" : {
-            "name" : "PatchPrior",
-            "docstring" : "Apply a field/value-wise patch.\n",
-            "lineno" : 280,
-            "value" : 3
-          },
-          "EnsureUnion" : {
-            "name" : "EnsureUnion",
-            "docstring" : "Set to the given default, if not already of the same type.\n\nIn a dynamic context this means the ids/values must match exactly:\n    ensureUnion(Object ensureUnion, Object value) {\n      if (ensureUnion.ids() != value.ids())\n        value = ensureUnion;\n    }\n",
-            "lineno" : 291,
-            "value" : 4
-          },
-          "EnsureStruct" : {
-            "name" : "EnsureStruct",
-            "docstring" : " * A pair-wise ensure operation.\n *\n * For maps this is an \"add if key not present\".\n *\n * For structs, this can be use to encodes the default state of the fields, based\n * on thier qualifier type:\n * - optional: absent\n * - terse: intrinsic default\n * - fill: custom default\n*\n",
-            "lineno" : 304,
-            "value" : 5
-          },
-          "PatchAfter" : {
-            "name" : "PatchAfter",
-            "docstring" : "Apply a field/value-wise patch after all other ops.\n",
-            "lineno" : 309,
-            "value" : 6
-          },
-          "Remove" : {
-            "name" : "Remove",
-            "docstring" : "Remove if present.\n\nA key/value-based remove for set, 'saturating subtract' for\nnumeric/'counting' types, 'remove by key' for map, and `remove by field id` for struct.\n",
-            "lineno" : 317,
-            "value" : 7
-          },
-          "Add" : {
-            "name" : "Add",
-            "docstring" : "Add/prepend a value,with the following semantics:\n- Key/value-based 'add' for set;\n- 'prepend' for list, string, or binary; and\n- saturating 'add' for numeric/counting types.\n",
-            "lineno" : 325,
-            "value" : 8
-          },
-          "Put" : {
-            "name" : "Put",
-            "docstring" : "Put/append/invert a value, with the following semantics:\n- 'update or insert' for maps;\n- 'append' for list, string or binary; and\n- 'invert' for boolean.\n",
-            "lineno" : 333,
-            "value" : 9
-          }
-        },
-        "docstring" : "The meaning of the patch op field ids, in all properly formulated patch\ndefinitions.\n\nPatch field ids are interpreted at runtime, as a dynamic patch protocol,\nwithout any additional schema derived from IDL patch definitions.\n",
-        "lineno" : 263
-      }
-      },
-  "structs" :
+  },  "structs" :
   {
       "GeneratePatch" : {
         "name" : "GeneratePatch",

@@ -1370,5 +1370,22 @@ TEST(StructPatchTest, SerializationExample) {
   EXPECT_EQ(buf->to<std::string>(), expected);
 }
 
+TEST(StructPatchTest, Remove) {
+  // TODO(dokwon): Replace to Static Patch remove operation.
+  MyDataPatch patch;
+  patch.toThrift().remove() = {FieldId{1}, FieldId{2}, FieldId{3}};
+
+  MyData data;
+  data.data1() = "1";
+  data.data2() = 2;
+  data.data3() = "3";
+
+  patch.apply(data);
+
+  EXPECT_EQ(data.data1(), "");
+  EXPECT_EQ(data.data2(), 0);
+  EXPECT_FALSE(data.data3().has_value());
+}
+
 } // namespace
 } // namespace apache::thrift

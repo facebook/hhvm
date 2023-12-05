@@ -132,11 +132,22 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
         op::get<Id>(v) = def;
       }
     }
+
+    template <class Id>
+    void remove() {
+      using field_tag = op::get_field_tag<T, Id>;
+      op::clear_field<field_tag>(op::get<Id>(v), v);
+    }
   };
 
   template <class Id>
   static constexpr bool is_optional_or_union_field_v =
       is_optional_type<get_field_ref<T, Id>>::value || is_thrift_union_v<T>;
+
+  template <typename Id>
+  void remove() {
+    // TODO(dokwon): implement and make it public.
+  }
 
  public:
   using Base::Base;
@@ -307,6 +318,21 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
     });
 
     data_.patch()->customVisit(std::forward<Visitor>(v));
+
+    if constexpr (!is_thrift_union_v<T>) {
+      for (auto id : *data_.remove()) {
+        op::invoke_by_field_id<T>(
+            id,
+            [&](auto id) {
+              using Id = decltype(id);
+              std::forward<Visitor>(v).template remove<Id>();
+            },
+            [] {
+              // Ignore if the specified field is not part of the struct
+              // considering schema evolution.
+            });
+      }
+    }
   }
 
   void apply(T& val) const { return customVisit(Applier{val}); }

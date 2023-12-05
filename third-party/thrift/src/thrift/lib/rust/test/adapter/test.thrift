@@ -31,7 +31,7 @@ typedef list<PassThroughAdaptedI64> NestedPassThroughAdaptedI64
 
 typedef list<AdaptedString> AdaptedListNewType (rust.newtype)
 
-typedef binary (rust.type = "bytes::Bytes") IOBuf
+typedef binary (rust.type = "Bytes") IOBuf
 
 @rust.Adapter{name = "crate::types::IOBufIdentityAdapter"}
 typedef IOBuf AdaptedBytes

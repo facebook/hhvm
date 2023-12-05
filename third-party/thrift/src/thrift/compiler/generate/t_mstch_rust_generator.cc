@@ -654,9 +654,7 @@ class rust_mstch_program : public mstch_program {
     std::set<const t_type*, rust_type_less> nonstandard_types;
     foreach_type([&](const t_type* type) {
       if (has_nonstandard_type_annotation(type)) {
-        if (get_type_annotation(type) != "bytes::Bytes") {
-          nonstandard_types.insert(type);
-        }
+        nonstandard_types.insert(type);
       }
     });
     std::vector<const t_type*> elements(
@@ -1382,7 +1380,6 @@ class rust_mstch_type : public mstch_type {
   mstch::node rust_nonstandard() {
     return (
         has_nonstandard_type_annotation(type_) &&
-        !(get_type_annotation(type_) == "bytes::Bytes") &&
         !(type_->is_typedef() && type_->has_annotation("rust.newtype")));
   }
   mstch::node adapter() {

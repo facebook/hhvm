@@ -273,25 +273,33 @@ const folly::StringPiece MyUnion::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<MyUnion>::name;
 }
 
-void MyUnion::__fbthrift_clear() {
-  // clear all fields
-  if (getType() == Type::__EMPTY__) { return; }
+void MyUnion::__fbthrift_destruct() {
   switch(getType()) {
+    case Type::__EMPTY__:
+      break;
     case Type::myEnum:
-      destruct(value_.myEnum);
+      ::apache::thrift::detail::st::destruct(value_.myEnum);
       break;
     case Type::myStruct:
-      destruct(value_.myStruct);
+      ::apache::thrift::detail::st::destruct(value_.myStruct);
       break;
     case Type::myDataItem:
-      destruct(value_.myDataItem);
+      ::apache::thrift::detail::st::destruct(value_.myDataItem);
       break;
     default:
       assert(false);
       break;
   }
+}
+
+void MyUnion::__fbthrift_clear() {
+  __fbthrift_destruct();
   type_ = folly::to_underlying(Type::__EMPTY__);
 }
+
+  MyUnion::~MyUnion() {
+    __fbthrift_destruct();
+  }
 
 bool MyUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;

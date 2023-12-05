@@ -430,31 +430,39 @@ const folly::StringPiece Baz::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<Baz>::name;
 }
 
-void Baz::__fbthrift_clear() {
-  // clear all fields
-  if (getType() == Type::__EMPTY__) { return; }
+void Baz::__fbthrift_destruct() {
   switch(getType()) {
+    case Type::__EMPTY__:
+      break;
     case Type::intField:
-      destruct(value_.intField);
+      ::apache::thrift::detail::st::destruct(value_.intField);
       break;
     case Type::setField:
-      destruct(value_.setField);
+      ::apache::thrift::detail::st::destruct(value_.setField);
       break;
     case Type::mapField:
-      destruct(value_.mapField);
+      ::apache::thrift::detail::st::destruct(value_.mapField);
       break;
     case Type::binaryField:
-      destruct(value_.binaryField);
+      ::apache::thrift::detail::st::destruct(value_.binaryField);
       break;
     case Type::longField:
-      destruct(value_.longField);
+      ::apache::thrift::detail::st::destruct(value_.longField);
       break;
     default:
       assert(false);
       break;
   }
+}
+
+void Baz::__fbthrift_clear() {
+  __fbthrift_destruct();
   type_ = folly::to_underlying(Type::__EMPTY__);
 }
+
+  Baz::~Baz() {
+    __fbthrift_destruct();
+  }
 
 bool Baz::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
@@ -2294,22 +2302,30 @@ const folly::StringPiece ThriftAdaptTestUnion::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<ThriftAdaptTestUnion>::name;
 }
 
-void ThriftAdaptTestUnion::__fbthrift_clear() {
-  // clear all fields
-  if (getType() == Type::__EMPTY__) { return; }
+void ThriftAdaptTestUnion::__fbthrift_destruct() {
   switch(getType()) {
+    case Type::__EMPTY__:
+      break;
     case Type::delay:
-      destruct(value_.delay);
+      ::apache::thrift::detail::st::destruct(value_.delay);
       break;
     case Type::custom:
-      destruct(value_.custom);
+      ::apache::thrift::detail::st::destruct(value_.custom);
       break;
     default:
       assert(false);
       break;
   }
+}
+
+void ThriftAdaptTestUnion::__fbthrift_clear() {
+  __fbthrift_destruct();
   type_ = folly::to_underlying(Type::__EMPTY__);
 }
+
+  ThriftAdaptTestUnion::~ThriftAdaptTestUnion() {
+    __fbthrift_destruct();
+  }
 
 bool ThriftAdaptTestUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;

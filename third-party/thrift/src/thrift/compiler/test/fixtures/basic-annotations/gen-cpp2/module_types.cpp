@@ -170,16 +170,21 @@ const folly::StringPiece YourUnion::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<YourUnion>::name;
 }
 
-void YourUnion::__fbthrift_clear() {
-  // clear all fields
-  if (getType() == Type::__EMPTY__) { return; }
+void YourUnion::__fbthrift_destruct() {
   switch(getType()) {
+    case Type::__EMPTY__:
+      break;
     default:
       assert(false);
       break;
   }
+}
+
+void YourUnion::__fbthrift_clear() {
+  __fbthrift_destruct();
   type_ = folly::to_underlying(Type::__EMPTY__);
 }
+
 
 bool YourUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;

@@ -342,28 +342,36 @@ const folly::StringPiece MyUnion::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<MyUnion>::name;
 }
 
-void MyUnion::__fbthrift_clear() {
-  // clear all fields
-  if (getType() == Type::__EMPTY__) { return; }
+void MyUnion::__fbthrift_destruct() {
   switch(getType()) {
+    case Type::__EMPTY__:
+      break;
     case Type::myEnum:
-      destruct(value_.myEnum);
+      ::apache::thrift::detail::st::destruct(value_.myEnum);
       break;
     case Type::myStruct:
-      destruct(value_.myStruct);
+      ::apache::thrift::detail::st::destruct(value_.myStruct);
       break;
     case Type::myDataItem:
-      destruct(value_.myDataItem);
+      ::apache::thrift::detail::st::destruct(value_.myDataItem);
       break;
     case Type::floatSet:
-      destruct(value_.floatSet);
+      ::apache::thrift::detail::st::destruct(value_.floatSet);
       break;
     default:
       assert(false);
       break;
   }
+}
+
+void MyUnion::__fbthrift_clear() {
+  __fbthrift_destruct();
   type_ = folly::to_underlying(Type::__EMPTY__);
 }
+
+  MyUnion::~MyUnion() {
+    __fbthrift_destruct();
+  }
 
 bool MyUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
@@ -537,19 +545,24 @@ const folly::StringPiece UnionToBeRenamed::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<UnionToBeRenamed>::name;
 }
 
-void UnionToBeRenamed::__fbthrift_clear() {
-  // clear all fields
-  if (getType() == Type::__EMPTY__) { return; }
+void UnionToBeRenamed::__fbthrift_destruct() {
   switch(getType()) {
+    case Type::__EMPTY__:
+      break;
     case Type::reserved_field:
-      destruct(value_.reserved_field);
+      ::apache::thrift::detail::st::destruct(value_.reserved_field);
       break;
     default:
       assert(false);
       break;
   }
+}
+
+void UnionToBeRenamed::__fbthrift_clear() {
+  __fbthrift_destruct();
   type_ = folly::to_underlying(Type::__EMPTY__);
 }
+
 
 bool UnionToBeRenamed::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;

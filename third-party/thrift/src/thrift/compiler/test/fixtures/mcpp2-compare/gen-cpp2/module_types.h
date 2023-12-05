@@ -2243,6 +2243,7 @@ class SimpleUnion  {
     )
   >;
   void __fbthrift_clear();
+  void __fbthrift_destruct();
   bool __fbthrift_is_empty() const;
 
  public:
@@ -2369,9 +2370,7 @@ class SimpleUnion  {
     return *this;
   }
 
-  virtual ~SimpleUnion() {
-    apache::thrift::clear(*this);
-  }
+  virtual ~SimpleUnion();
 
   union storage_type {
     ::std::int64_t intValue;
@@ -2504,11 +2503,6 @@ class SimpleUnion  {
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
  protected:
-  template <class T>
-  void destruct(T &val) {
-    (&val)->~T();
-  }
-
   storage_type value_;
   std::underlying_type_t<Type> type_;
 
@@ -3624,6 +3618,7 @@ class ComplexUnion final  {
     )
   >;
   void __fbthrift_clear();
+  void __fbthrift_destruct();
   bool __fbthrift_is_empty() const;
 
  public:
@@ -4296,9 +4291,7 @@ class ComplexUnion final  {
     return *this;
   }
 
-  ~ComplexUnion() {
-    apache::thrift::clear(*this);
-  }
+  ~ComplexUnion();
 
   union storage_type {
     ::std::int64_t intValue;
@@ -5959,11 +5952,6 @@ class ComplexUnion final  {
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
  protected:
-  template <class T>
-  void destruct(T &val) {
-    (&val)->~T();
-  }
-
   storage_type value_;
   std::underlying_type_t<Type> type_;
   // user defined code (cpp2.methods = ...)
@@ -9932,6 +9920,7 @@ class FloatUnion final  {
     )
   >;
   void __fbthrift_clear();
+  void __fbthrift_destruct();
   bool __fbthrift_is_empty() const;
 
  public:
@@ -10171,11 +10160,6 @@ class FloatUnion final  {
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
  protected:
-  template <class T>
-  void destruct(T &val) {
-    (&val)->~T();
-  }
-
   storage_type value_;
   std::underlying_type_t<Type> type_;
 

@@ -1110,6 +1110,7 @@ class union1 final  {
     )
   >;
   void __fbthrift_clear();
+  void __fbthrift_destruct();
   bool __fbthrift_is_empty() const;
 
  public:
@@ -1278,9 +1279,7 @@ class union1 final  {
     return *this;
   }
 
-  ~union1() {
-    apache::thrift::clear(*this);
-  }
+  ~union1();
 
   union storage_type {
     ::std::int32_t ui;
@@ -1507,11 +1506,6 @@ class union1 final  {
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
  protected:
-  template <class T>
-  void destruct(T &val) {
-    (&val)->~T();
-  }
-
   storage_type value_;
   std::underlying_type_t<Type> type_;
 
@@ -1575,6 +1569,7 @@ class union2 final  {
     )
   >;
   void __fbthrift_clear();
+  void __fbthrift_destruct();
   bool __fbthrift_is_empty() const;
 
  public:
@@ -1743,9 +1738,7 @@ class union2 final  {
     return *this;
   }
 
-  ~union2() {
-    apache::thrift::clear(*this);
-  }
+  ~union2();
 
   union storage_type {
     ::std::int32_t ui_2;
@@ -1972,11 +1965,6 @@ class union2 final  {
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
  protected:
-  template <class T>
-  void destruct(T &val) {
-    (&val)->~T();
-  }
-
   storage_type value_;
   std::underlying_type_t<Type> type_;
 
@@ -2040,6 +2028,7 @@ class union3 final  {
     )
   >;
   void __fbthrift_clear();
+  void __fbthrift_destruct();
   bool __fbthrift_is_empty() const;
 
  public:
@@ -2208,9 +2197,7 @@ class union3 final  {
     return *this;
   }
 
-  ~union3() {
-    apache::thrift::clear(*this);
-  }
+  ~union3();
 
   union storage_type {
     ::std::int32_t ui_3;
@@ -2437,11 +2424,6 @@ class union3 final  {
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
  protected:
-  template <class T>
-  void destruct(T &val) {
-    (&val)->~T();
-  }
-
   storage_type value_;
   std::underlying_type_t<Type> type_;
 
@@ -2716,6 +2698,7 @@ class unionA final  {
     )
   >;
   void __fbthrift_clear();
+  void __fbthrift_destruct();
   bool __fbthrift_is_empty() const;
 
  public:
@@ -2905,9 +2888,7 @@ class unionA final  {
     return *this;
   }
 
-  ~unionA() {
-    apache::thrift::clear(*this);
-  }
+  ~unionA();
 
   union storage_type {
     ::std::int32_t i;
@@ -3198,11 +3179,6 @@ class unionA final  {
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
  protected:
-  template <class T>
-  void destruct(T &val) {
-    (&val)->~T();
-  }
-
   storage_type value_;
   std::underlying_type_t<Type> type_;
 
@@ -8666,6 +8642,7 @@ class union_with_special_names final  {
     )
   >;
   void __fbthrift_clear();
+  void __fbthrift_destruct();
   bool __fbthrift_is_empty() const;
 
  public:
@@ -10673,11 +10650,6 @@ class union_with_special_names final  {
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
  protected:
-  template <class T>
-  void destruct(T &val) {
-    (&val)->~T();
-  }
-
   storage_type value_;
   std::underlying_type_t<Type> type_;
 
@@ -12879,6 +12851,7 @@ class UnionWithTypedefFieldAdapter final  {
     )
   >;
   void __fbthrift_clear();
+  void __fbthrift_destruct();
   bool __fbthrift_is_empty() const;
 
  public:
@@ -12984,9 +12957,7 @@ class UnionWithTypedefFieldAdapter final  {
     return *this;
   }
 
-  ~UnionWithTypedefFieldAdapter() {
-    apache::thrift::clear(*this);
-  }
+  ~UnionWithTypedefFieldAdapter();
 
   union storage_type {
     ::test_cpp2::cpp_reflection::I32 field;
@@ -13055,11 +13026,6 @@ class UnionWithTypedefFieldAdapter final  {
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
  protected:
-  template <class T>
-  void destruct(T &val) {
-    (&val)->~T();
-  }
-
   storage_type value_;
   std::underlying_type_t<Type> type_;
 

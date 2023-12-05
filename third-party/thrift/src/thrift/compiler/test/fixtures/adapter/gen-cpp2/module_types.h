@@ -1268,6 +1268,7 @@ class Baz final  {
     )
   >;
   void __fbthrift_clear();
+  void __fbthrift_destruct();
   bool __fbthrift_is_empty() const;
 
  public:
@@ -1457,9 +1458,7 @@ class Baz final  {
     return *this;
   }
 
-  ~Baz() {
-    apache::thrift::clear(*this);
-  }
+  ~Baz();
 
   union storage_type {
     ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::facebook::thrift::test::i32_5137, Baz> intField;
@@ -1767,11 +1766,6 @@ class Baz final  {
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
  protected:
-  template <class T>
-  void destruct(T &val) {
-    (&val)->~T();
-  }
-
   storage_type value_;
   std::underlying_type_t<Type> type_;
 
@@ -5940,6 +5934,7 @@ class ThriftAdaptTestUnion final  {
     )
   >;
   void __fbthrift_clear();
+  void __fbthrift_destruct();
   bool __fbthrift_is_empty() const;
 
  public:
@@ -6066,9 +6061,7 @@ class ThriftAdaptTestUnion final  {
     return *this;
   }
 
-  ~ThriftAdaptTestUnion() {
-    apache::thrift::clear(*this);
-  }
+  ~ThriftAdaptTestUnion();
 
   union storage_type {
     ::facebook::thrift::test::DurationMs delay;
@@ -6201,11 +6194,6 @@ class ThriftAdaptTestUnion final  {
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
  protected:
-  template <class T>
-  void destruct(T &val) {
-    (&val)->~T();
-  }
-
   storage_type value_;
   std::underlying_type_t<Type> type_;
 

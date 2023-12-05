@@ -884,6 +884,7 @@ class AdaptedUnion final  {
     )
   >;
   void __fbthrift_clear();
+  void __fbthrift_destruct();
   bool __fbthrift_is_empty() const;
 
  public:
@@ -1055,11 +1056,6 @@ class AdaptedUnion final  {
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
  protected:
-  template <class T>
-  void destruct(T &val) {
-    (&val)->~T();
-  }
-
   storage_type value_;
   std::underlying_type_t<Type> type_;
 
@@ -2447,6 +2443,7 @@ class BinaryUnion final  {
     )
   >;
   void __fbthrift_clear();
+  void __fbthrift_destruct();
   bool __fbthrift_is_empty() const;
 
  public:
@@ -2552,9 +2549,7 @@ class BinaryUnion final  {
     return *this;
   }
 
-  ~BinaryUnion() {
-    apache::thrift::clear(*this);
-  }
+  ~BinaryUnion();
 
   union storage_type {
     ::py3::simple::IOBuf iobuf_val;
@@ -2637,11 +2632,6 @@ class BinaryUnion final  {
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
  protected:
-  template <class T>
-  void destruct(T &val) {
-    (&val)->~T();
-  }
-
   storage_type value_;
   std::underlying_type_t<Type> type_;
 

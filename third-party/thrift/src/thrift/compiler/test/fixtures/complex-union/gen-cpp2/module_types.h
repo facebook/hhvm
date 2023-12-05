@@ -190,6 +190,7 @@ class ComplexUnion final  {
     )
   >;
   void __fbthrift_clear();
+  void __fbthrift_destruct();
   bool __fbthrift_is_empty() const;
 
  public:
@@ -400,9 +401,7 @@ class ComplexUnion final  {
     return *this;
   }
 
-  ~ComplexUnion() {
-    apache::thrift::clear(*this);
-  }
+  ~ComplexUnion();
 
   union storage_type {
     ::std::int64_t intValue;
@@ -791,11 +790,6 @@ class ComplexUnion final  {
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
  protected:
-  template <class T>
-  void destruct(T &val) {
-    (&val)->~T();
-  }
-
   storage_type value_;
   std::underlying_type_t<Type> type_;
 
@@ -855,6 +849,7 @@ class ListUnion final  {
     )
   >;
   void __fbthrift_clear();
+  void __fbthrift_destruct();
   bool __fbthrift_is_empty() const;
 
  public:
@@ -981,9 +976,7 @@ class ListUnion final  {
     return *this;
   }
 
-  ~ListUnion() {
-    apache::thrift::clear(*this);
-  }
+  ~ListUnion();
 
   union storage_type {
     ::std::vector<::std::int64_t> intListValue;
@@ -1133,11 +1126,6 @@ class ListUnion final  {
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
  protected:
-  template <class T>
-  void destruct(T &val) {
-    (&val)->~T();
-  }
-
   storage_type value_;
   std::underlying_type_t<Type> type_;
 
@@ -1197,6 +1185,7 @@ class DataUnion final  {
     )
   >;
   void __fbthrift_clear();
+  void __fbthrift_destruct();
   bool __fbthrift_is_empty() const;
 
  public:
@@ -1323,9 +1312,7 @@ class DataUnion final  {
     return *this;
   }
 
-  ~DataUnion() {
-    apache::thrift::clear(*this);
-  }
+  ~DataUnion();
 
   union storage_type {
     ::std::string binaryData;
@@ -1475,11 +1462,6 @@ class DataUnion final  {
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
  protected:
-  template <class T>
-  void destruct(T &val) {
-    (&val)->~T();
-  }
-
   storage_type value_;
   std::underlying_type_t<Type> type_;
 
@@ -1801,6 +1783,7 @@ class ValUnion final  {
     )
   >;
   void __fbthrift_clear();
+  void __fbthrift_destruct();
   bool __fbthrift_is_empty() const;
 
  public:
@@ -1927,9 +1910,7 @@ class ValUnion final  {
     return *this;
   }
 
-  ~ValUnion() {
-    apache::thrift::clear(*this);
-  }
+  ~ValUnion();
 
   union storage_type {
     ::cpp2::Val v1;
@@ -2079,11 +2060,6 @@ class ValUnion final  {
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
  protected:
-  template <class T>
-  void destruct(T &val) {
-    (&val)->~T();
-  }
-
   storage_type value_;
   std::underlying_type_t<Type> type_;
 
@@ -2143,6 +2119,7 @@ class VirtualComplexUnion  {
     )
   >;
   void __fbthrift_clear();
+  void __fbthrift_destruct();
   bool __fbthrift_is_empty() const;
 
  public:
@@ -2269,9 +2246,7 @@ class VirtualComplexUnion  {
     return *this;
   }
 
-  virtual ~VirtualComplexUnion() {
-    apache::thrift::clear(*this);
-  }
+  virtual ~VirtualComplexUnion();
 
   union storage_type {
     ::std::string thingOne;
@@ -2421,11 +2396,6 @@ class VirtualComplexUnion  {
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
  protected:
-  template <class T>
-  void destruct(T &val) {
-    (&val)->~T();
-  }
-
   storage_type value_;
   std::underlying_type_t<Type> type_;
 
@@ -2628,6 +2598,7 @@ class NonCopyableUnion final  {
     )
   >;
   void __fbthrift_clear();
+  void __fbthrift_destruct();
   bool __fbthrift_is_empty() const;
 
  public:
@@ -2690,9 +2661,7 @@ class NonCopyableUnion final  {
     return *this;
   }
 
-  ~NonCopyableUnion() {
-    apache::thrift::clear(*this);
-  }
+  ~NonCopyableUnion();
 
   union storage_type {
     ::cpp2::NonCopyableStruct s;
@@ -2769,11 +2738,6 @@ class NonCopyableUnion final  {
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
  protected:
-  template <class T>
-  void destruct(T &val) {
-    (&val)->~T();
-  }
-
   storage_type value_;
   std::underlying_type_t<Type> type_;
 

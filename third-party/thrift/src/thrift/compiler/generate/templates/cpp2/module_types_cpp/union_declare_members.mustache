@@ -14,21 +14,31 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%>void <%struct:cpp_underlying_name%>::__fbthrift_clear() {
-  // clear all fields
-  if (getType() == Type::__EMPTY__) { return; }
+%>void <%struct:cpp_underlying_name%>::__fbthrift_destruct() {
   switch(getType()) {
+    case Type::__EMPTY__:
+      break;
 <%#struct:fields%>
     case Type::<%field:cpp_name%>:
-      destruct(value_.<%field:cpp_name%>);
+      ::apache::thrift::detail::st::destruct(value_.<%field:cpp_name%>);
       break;
 <%/struct:fields%>
     default:
       assert(false);
       break;
   }
+}
+
+void <%struct:cpp_underlying_name%>::__fbthrift_clear() {
+  __fbthrift_destruct();
   type_ = folly::to_underlying(Type::__EMPTY__);
 }
+
+<%^struct:is_trivially_destructible?%>
+  <%struct:cpp_underlying_name%>::~<%struct:cpp_underlying_name%>() {
+    __fbthrift_destruct();
+  }
+<%/struct:is_trivially_destructible?%>
 
 bool <%struct:cpp_underlying_name%>::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;

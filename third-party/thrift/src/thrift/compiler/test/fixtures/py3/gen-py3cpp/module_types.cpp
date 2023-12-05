@@ -585,19 +585,24 @@ const folly::StringPiece AdaptedUnion::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<AdaptedUnion>::name;
 }
 
-void AdaptedUnion::__fbthrift_clear() {
-  // clear all fields
-  if (getType() == Type::__EMPTY__) { return; }
+void AdaptedUnion::__fbthrift_destruct() {
   switch(getType()) {
+    case Type::__EMPTY__:
+      break;
     case Type::best:
-      destruct(value_.best);
+      ::apache::thrift::detail::st::destruct(value_.best);
       break;
     default:
       assert(false);
       break;
   }
+}
+
+void AdaptedUnion::__fbthrift_clear() {
+  __fbthrift_destruct();
   type_ = folly::to_underlying(Type::__EMPTY__);
 }
+
 
 bool AdaptedUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
@@ -947,19 +952,27 @@ const folly::StringPiece BinaryUnion::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<BinaryUnion>::name;
 }
 
-void BinaryUnion::__fbthrift_clear() {
-  // clear all fields
-  if (getType() == Type::__EMPTY__) { return; }
+void BinaryUnion::__fbthrift_destruct() {
   switch(getType()) {
+    case Type::__EMPTY__:
+      break;
     case Type::iobuf_val:
-      destruct(value_.iobuf_val);
+      ::apache::thrift::detail::st::destruct(value_.iobuf_val);
       break;
     default:
       assert(false);
       break;
   }
+}
+
+void BinaryUnion::__fbthrift_clear() {
+  __fbthrift_destruct();
   type_ = folly::to_underlying(Type::__EMPTY__);
 }
+
+  BinaryUnion::~BinaryUnion() {
+    __fbthrift_destruct();
+  }
 
 bool BinaryUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;

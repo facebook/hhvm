@@ -2055,37 +2055,45 @@ const folly::StringPiece Shallot::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<Shallot>::name;
 }
 
-void Shallot::__fbthrift_clear() {
-  // clear all fields
-  if (getType() == Type::__EMPTY__) { return; }
+void Shallot::__fbthrift_destruct() {
   switch(getType()) {
+    case Type::__EMPTY__:
+      break;
     case Type::myEnum:
-      destruct(value_.myEnum);
+      ::apache::thrift::detail::st::destruct(value_.myEnum);
       break;
     case Type::myStruct:
-      destruct(value_.myStruct);
+      ::apache::thrift::detail::st::destruct(value_.myStruct);
       break;
     case Type::intSet:
-      destruct(value_.intSet);
+      ::apache::thrift::detail::st::destruct(value_.intSet);
       break;
     case Type::myString:
-      destruct(value_.myString);
+      ::apache::thrift::detail::st::destruct(value_.myString);
       break;
     case Type::doubleList:
-      destruct(value_.doubleList);
+      ::apache::thrift::detail::st::destruct(value_.doubleList);
       break;
     case Type::strMap:
-      destruct(value_.strMap);
+      ::apache::thrift::detail::st::destruct(value_.strMap);
       break;
     case Type::adaptedInt:
-      destruct(value_.adaptedInt);
+      ::apache::thrift::detail::st::destruct(value_.adaptedInt);
       break;
     default:
       assert(false);
       break;
   }
+}
+
+void Shallot::__fbthrift_clear() {
+  __fbthrift_destruct();
   type_ = folly::to_underlying(Type::__EMPTY__);
 }
+
+  Shallot::~Shallot() {
+    __fbthrift_destruct();
+  }
 
 bool Shallot::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;

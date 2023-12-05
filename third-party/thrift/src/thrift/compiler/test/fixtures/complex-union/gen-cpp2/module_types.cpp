@@ -56,34 +56,42 @@ const folly::StringPiece ComplexUnion::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<ComplexUnion>::name;
 }
 
-void ComplexUnion::__fbthrift_clear() {
-  // clear all fields
-  if (getType() == Type::__EMPTY__) { return; }
+void ComplexUnion::__fbthrift_destruct() {
   switch(getType()) {
+    case Type::__EMPTY__:
+      break;
     case Type::intValue:
-      destruct(value_.intValue);
+      ::apache::thrift::detail::st::destruct(value_.intValue);
       break;
     case Type::stringValue:
-      destruct(value_.stringValue);
+      ::apache::thrift::detail::st::destruct(value_.stringValue);
       break;
     case Type::intListValue:
-      destruct(value_.intListValue);
+      ::apache::thrift::detail::st::destruct(value_.intListValue);
       break;
     case Type::stringListValue:
-      destruct(value_.stringListValue);
+      ::apache::thrift::detail::st::destruct(value_.stringListValue);
       break;
     case Type::typedefValue:
-      destruct(value_.typedefValue);
+      ::apache::thrift::detail::st::destruct(value_.typedefValue);
       break;
     case Type::stringRef:
-      destruct(value_.stringRef);
+      ::apache::thrift::detail::st::destruct(value_.stringRef);
       break;
     default:
       assert(false);
       break;
   }
+}
+
+void ComplexUnion::__fbthrift_clear() {
+  __fbthrift_destruct();
   type_ = folly::to_underlying(Type::__EMPTY__);
 }
+
+  ComplexUnion::~ComplexUnion() {
+    __fbthrift_destruct();
+  }
 
 bool ComplexUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
@@ -159,22 +167,30 @@ const folly::StringPiece ListUnion::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<ListUnion>::name;
 }
 
-void ListUnion::__fbthrift_clear() {
-  // clear all fields
-  if (getType() == Type::__EMPTY__) { return; }
+void ListUnion::__fbthrift_destruct() {
   switch(getType()) {
+    case Type::__EMPTY__:
+      break;
     case Type::intListValue:
-      destruct(value_.intListValue);
+      ::apache::thrift::detail::st::destruct(value_.intListValue);
       break;
     case Type::stringListValue:
-      destruct(value_.stringListValue);
+      ::apache::thrift::detail::st::destruct(value_.stringListValue);
       break;
     default:
       assert(false);
       break;
   }
+}
+
+void ListUnion::__fbthrift_clear() {
+  __fbthrift_destruct();
   type_ = folly::to_underlying(Type::__EMPTY__);
 }
+
+  ListUnion::~ListUnion() {
+    __fbthrift_destruct();
+  }
 
 bool ListUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
@@ -250,22 +266,30 @@ const folly::StringPiece DataUnion::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<DataUnion>::name;
 }
 
-void DataUnion::__fbthrift_clear() {
-  // clear all fields
-  if (getType() == Type::__EMPTY__) { return; }
+void DataUnion::__fbthrift_destruct() {
   switch(getType()) {
+    case Type::__EMPTY__:
+      break;
     case Type::binaryData:
-      destruct(value_.binaryData);
+      ::apache::thrift::detail::st::destruct(value_.binaryData);
       break;
     case Type::stringData:
-      destruct(value_.stringData);
+      ::apache::thrift::detail::st::destruct(value_.stringData);
       break;
     default:
       assert(false);
       break;
   }
+}
+
+void DataUnion::__fbthrift_clear() {
+  __fbthrift_destruct();
   type_ = folly::to_underlying(Type::__EMPTY__);
 }
+
+  DataUnion::~DataUnion() {
+    __fbthrift_destruct();
+  }
 
 bool DataUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
@@ -459,22 +483,30 @@ const folly::StringPiece ValUnion::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<ValUnion>::name;
 }
 
-void ValUnion::__fbthrift_clear() {
-  // clear all fields
-  if (getType() == Type::__EMPTY__) { return; }
+void ValUnion::__fbthrift_destruct() {
   switch(getType()) {
+    case Type::__EMPTY__:
+      break;
     case Type::v1:
-      destruct(value_.v1);
+      ::apache::thrift::detail::st::destruct(value_.v1);
       break;
     case Type::v2:
-      destruct(value_.v2);
+      ::apache::thrift::detail::st::destruct(value_.v2);
       break;
     default:
       assert(false);
       break;
   }
+}
+
+void ValUnion::__fbthrift_clear() {
+  __fbthrift_destruct();
   type_ = folly::to_underlying(Type::__EMPTY__);
 }
+
+  ValUnion::~ValUnion() {
+    __fbthrift_destruct();
+  }
 
 bool ValUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
@@ -562,22 +594,30 @@ const folly::StringPiece VirtualComplexUnion::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<VirtualComplexUnion>::name;
 }
 
-void VirtualComplexUnion::__fbthrift_clear() {
-  // clear all fields
-  if (getType() == Type::__EMPTY__) { return; }
+void VirtualComplexUnion::__fbthrift_destruct() {
   switch(getType()) {
+    case Type::__EMPTY__:
+      break;
     case Type::thingOne:
-      destruct(value_.thingOne);
+      ::apache::thrift::detail::st::destruct(value_.thingOne);
       break;
     case Type::thingTwo:
-      destruct(value_.thingTwo);
+      ::apache::thrift::detail::st::destruct(value_.thingTwo);
       break;
     default:
       assert(false);
       break;
   }
+}
+
+void VirtualComplexUnion::__fbthrift_clear() {
+  __fbthrift_destruct();
   type_ = folly::to_underlying(Type::__EMPTY__);
 }
+
+  VirtualComplexUnion::~VirtualComplexUnion() {
+    __fbthrift_destruct();
+  }
 
 bool VirtualComplexUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
@@ -731,19 +771,27 @@ const folly::StringPiece NonCopyableUnion::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<NonCopyableUnion>::name;
 }
 
-void NonCopyableUnion::__fbthrift_clear() {
-  // clear all fields
-  if (getType() == Type::__EMPTY__) { return; }
+void NonCopyableUnion::__fbthrift_destruct() {
   switch(getType()) {
+    case Type::__EMPTY__:
+      break;
     case Type::s:
-      destruct(value_.s);
+      ::apache::thrift::detail::st::destruct(value_.s);
       break;
     default:
       assert(false);
       break;
   }
+}
+
+void NonCopyableUnion::__fbthrift_clear() {
+  __fbthrift_destruct();
   type_ = folly::to_underlying(Type::__EMPTY__);
 }
+
+  NonCopyableUnion::~NonCopyableUnion() {
+    __fbthrift_destruct();
+  }
 
 bool NonCopyableUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;

@@ -933,6 +933,7 @@ class MyUnion final  {
     )
   >;
   void __fbthrift_clear();
+  void __fbthrift_destruct();
   bool __fbthrift_is_empty() const;
 
  public:
@@ -1101,9 +1102,7 @@ class MyUnion final  {
     return *this;
   }
 
-  ~MyUnion() {
-    apache::thrift::clear(*this);
-  }
+  ~MyUnion();
 
   union storage_type {
     ::test::fixtures::basic::MyEnum myEnum;
@@ -1364,11 +1363,6 @@ class MyUnion final  {
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
  protected:
-  template <class T>
-  void destruct(T &val) {
-    (&val)->~T();
-  }
-
   storage_type value_;
   std::underlying_type_t<Type> type_;
 
@@ -1577,6 +1571,7 @@ class UnionToBeRenamed final  {
     )
   >;
   void __fbthrift_clear();
+  void __fbthrift_destruct();
   bool __fbthrift_is_empty() const;
 
  public:
@@ -1748,11 +1743,6 @@ class UnionToBeRenamed final  {
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
  protected:
-  template <class T>
-  void destruct(T &val) {
-    (&val)->~T();
-  }
-
   storage_type value_;
   std::underlying_type_t<Type> type_;
 

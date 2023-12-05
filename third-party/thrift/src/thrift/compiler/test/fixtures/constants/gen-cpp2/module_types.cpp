@@ -775,22 +775,27 @@ const folly::StringPiece union1::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<union1>::name;
 }
 
-void union1::__fbthrift_clear() {
-  // clear all fields
-  if (getType() == Type::__EMPTY__) { return; }
+void union1::__fbthrift_destruct() {
   switch(getType()) {
+    case Type::__EMPTY__:
+      break;
     case Type::i:
-      destruct(value_.i);
+      ::apache::thrift::detail::st::destruct(value_.i);
       break;
     case Type::d:
-      destruct(value_.d);
+      ::apache::thrift::detail::st::destruct(value_.d);
       break;
     default:
       assert(false);
       break;
   }
+}
+
+void union1::__fbthrift_clear() {
+  __fbthrift_destruct();
   type_ = folly::to_underlying(Type::__EMPTY__);
 }
+
 
 bool union1::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;
@@ -866,28 +871,36 @@ const folly::StringPiece union2::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<union2>::name;
 }
 
-void union2::__fbthrift_clear() {
-  // clear all fields
-  if (getType() == Type::__EMPTY__) { return; }
+void union2::__fbthrift_destruct() {
   switch(getType()) {
+    case Type::__EMPTY__:
+      break;
     case Type::i:
-      destruct(value_.i);
+      ::apache::thrift::detail::st::destruct(value_.i);
       break;
     case Type::d:
-      destruct(value_.d);
+      ::apache::thrift::detail::st::destruct(value_.d);
       break;
     case Type::s:
-      destruct(value_.s);
+      ::apache::thrift::detail::st::destruct(value_.s);
       break;
     case Type::u:
-      destruct(value_.u);
+      ::apache::thrift::detail::st::destruct(value_.u);
       break;
     default:
       assert(false);
       break;
   }
+}
+
+void union2::__fbthrift_clear() {
+  __fbthrift_destruct();
   type_ = folly::to_underlying(Type::__EMPTY__);
 }
+
+  union2::~union2() {
+    __fbthrift_destruct();
+  }
 
 bool union2::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;

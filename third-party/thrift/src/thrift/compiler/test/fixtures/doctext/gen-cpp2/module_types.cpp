@@ -150,22 +150,30 @@ const folly::StringPiece U::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<U>::name;
 }
 
-void U::__fbthrift_clear() {
-  // clear all fields
-  if (getType() == Type::__EMPTY__) { return; }
+void U::__fbthrift_destruct() {
   switch(getType()) {
+    case Type::__EMPTY__:
+      break;
     case Type::i:
-      destruct(value_.i);
+      ::apache::thrift::detail::st::destruct(value_.i);
       break;
     case Type::s:
-      destruct(value_.s);
+      ::apache::thrift::detail::st::destruct(value_.s);
       break;
     default:
       assert(false);
       break;
   }
+}
+
+void U::__fbthrift_clear() {
+  __fbthrift_destruct();
   type_ = folly::to_underlying(Type::__EMPTY__);
 }
+
+  U::~U() {
+    __fbthrift_destruct();
+  }
 
 bool U::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;

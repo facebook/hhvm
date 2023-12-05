@@ -1118,6 +1118,7 @@ class ExampleUnion final  {
     )
   >;
   void __fbthrift_clear();
+  void __fbthrift_destruct();
   bool __fbthrift_is_empty() const;
 
  public:
@@ -1244,9 +1245,7 @@ class ExampleUnion final  {
     return *this;
   }
 
-  ~ExampleUnion() {
-    apache::thrift::clear(*this);
-  }
+  ~ExampleUnion();
 
   union storage_type {
     ::test::fixtures::tablebased::ContainerStruct fieldA;
@@ -1396,11 +1395,6 @@ class ExampleUnion final  {
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
  protected:
-  template <class T>
-  void destruct(T &val) {
-    (&val)->~T();
-  }
-
   storage_type value_;
   std::underlying_type_t<Type> type_;
 

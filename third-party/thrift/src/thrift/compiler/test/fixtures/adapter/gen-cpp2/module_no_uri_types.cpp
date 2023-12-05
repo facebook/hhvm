@@ -56,19 +56,27 @@ const folly::StringPiece RefUnion::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<RefUnion>::name;
 }
 
-void RefUnion::__fbthrift_clear() {
-  // clear all fields
-  if (getType() == Type::__EMPTY__) { return; }
+void RefUnion::__fbthrift_destruct() {
   switch(getType()) {
+    case Type::__EMPTY__:
+      break;
     case Type::field1:
-      destruct(value_.field1);
+      ::apache::thrift::detail::st::destruct(value_.field1);
       break;
     default:
       assert(false);
       break;
   }
+}
+
+void RefUnion::__fbthrift_clear() {
+  __fbthrift_destruct();
   type_ = folly::to_underlying(Type::__EMPTY__);
 }
+
+  RefUnion::~RefUnion() {
+    __fbthrift_destruct();
+  }
 
 bool RefUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;

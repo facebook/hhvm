@@ -151,58 +151,66 @@ const folly::StringPiece MyUnion::__fbthrift_get_class_name() {
   return apache::thrift::TStructDataStorage<MyUnion>::name;
 }
 
-void MyUnion::__fbthrift_clear() {
-  // clear all fields
-  if (getType() == Type::__EMPTY__) { return; }
+void MyUnion::__fbthrift_destruct() {
   switch(getType()) {
+    case Type::__EMPTY__:
+      break;
     case Type::bool_field:
-      destruct(value_.bool_field);
+      ::apache::thrift::detail::st::destruct(value_.bool_field);
       break;
     case Type::byte_field:
-      destruct(value_.byte_field);
+      ::apache::thrift::detail::st::destruct(value_.byte_field);
       break;
     case Type::short_field:
-      destruct(value_.short_field);
+      ::apache::thrift::detail::st::destruct(value_.short_field);
       break;
     case Type::int_field:
-      destruct(value_.int_field);
+      ::apache::thrift::detail::st::destruct(value_.int_field);
       break;
     case Type::long_field:
-      destruct(value_.long_field);
+      ::apache::thrift::detail::st::destruct(value_.long_field);
       break;
     case Type::float_field:
-      destruct(value_.float_field);
+      ::apache::thrift::detail::st::destruct(value_.float_field);
       break;
     case Type::double_field:
-      destruct(value_.double_field);
+      ::apache::thrift::detail::st::destruct(value_.double_field);
       break;
     case Type::string_field:
-      destruct(value_.string_field);
+      ::apache::thrift::detail::st::destruct(value_.string_field);
       break;
     case Type::binary_field:
-      destruct(value_.binary_field);
+      ::apache::thrift::detail::st::destruct(value_.binary_field);
       break;
     case Type::enum_field:
-      destruct(value_.enum_field);
+      ::apache::thrift::detail::st::destruct(value_.enum_field);
       break;
     case Type::list_field:
-      destruct(value_.list_field);
+      ::apache::thrift::detail::st::destruct(value_.list_field);
       break;
     case Type::set_field:
-      destruct(value_.set_field);
+      ::apache::thrift::detail::st::destruct(value_.set_field);
       break;
     case Type::map_field:
-      destruct(value_.map_field);
+      ::apache::thrift::detail::st::destruct(value_.map_field);
       break;
     case Type::struct_field:
-      destruct(value_.struct_field);
+      ::apache::thrift::detail::st::destruct(value_.struct_field);
       break;
     default:
       assert(false);
       break;
   }
+}
+
+void MyUnion::__fbthrift_clear() {
+  __fbthrift_destruct();
   type_ = folly::to_underlying(Type::__EMPTY__);
 }
+
+  MyUnion::~MyUnion() {
+    __fbthrift_destruct();
+  }
 
 bool MyUnion::__fbthrift_is_empty() const {
   return getType() == Type::__EMPTY__;

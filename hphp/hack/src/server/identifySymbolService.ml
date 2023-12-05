@@ -308,6 +308,16 @@ let visitor =
 
     method plus = Result_set.union
 
+    method! on_stmt env stmt =
+      let (_, stmt_) = stmt in
+      let ( + ) = self#plus in
+      let acc =
+        match stmt_ with
+        | Aast.Declare_local (lid, _, _) -> self#on_Lvar env lid
+        | _ -> self#zero
+      in
+      acc + super#on_stmt env stmt
+
     method! on_expr env expr =
       let (_, pos, expr_) = expr in
       let ( + ) = self#plus in

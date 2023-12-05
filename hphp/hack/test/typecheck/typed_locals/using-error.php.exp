@@ -8,5 +8,5 @@ File "using-error.php", line 14, characters 3-11:
 Illegal definition of typed local variable $a. (Naming[2126])
   File "using-error.php", line 9, characters 3-11:
   It is already defined. Typed locals must have their type declared before they can be assigned.
-File "using-error.php", line 11, characters 5-13:
+File "using-error.php", line 11, characters 9-10:
 Disposable objects must only be assigned in a `using` statement (Typing[4179])

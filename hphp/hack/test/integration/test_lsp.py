@@ -4564,6 +4564,77 @@ class TestLsp(TestCase[LspTestDriver]):
         )
         self.run_spec(spec, variables)
 
+    def test_rename_let(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        file_base_name = "rename_let.php"
+        php_file_uri = self.repo_file_uri(file_base_name)
+        contents = """<?hh
+<<file: __EnableUnstableFeatures('typed_local_variables')>>
+function f(): void {
+  $z = 3;
+  let $xyz: int = $z;
+  $xyz;
+}"""
+        variables.update({"php_file_uri": php_file_uri, "contents": contents})
+        self.test_driver.start_hh_server()
+        self.test_driver.run_check()
+
+        spec = (
+            self.initialize_spec(LspTestSpec("rename_let"))
+            .write_to_disk(
+                comment="create file ${file_base_name}",
+                uri="${php_file_uri}",
+                contents="${contents}",
+                notify=False,
+            )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
+            .wait_for_hh_server_ready()
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${contents}",
+                    }
+                },
+            )
+            .request(
+                line=line(),
+                method="textDocument/rename",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 4, "character": 6},
+                    "newName": "$ab",
+                },
+                result={
+                    "changes": {
+                        "${php_file_uri}": [
+                            {
+                                "range": {
+                                    "start": {"line": 4, "character": 6},
+                                    "end": {"line": 4, "character": 10},
+                                },
+                                "newText": "$ab",
+                            },
+                            {
+                                "range": {
+                                    "start": {"line": 5, "character": 2},
+                                    "end": {"line": 5, "character": 6},
+                                },
+                                "newText": "$ab",
+                            },
+                        ]
+                    }
+                },
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables)
+        self.run_spec(spec, variables)
+
     def test_references_ok(self) -> None:
         variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("references.php"))

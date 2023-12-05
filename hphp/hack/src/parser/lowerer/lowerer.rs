@@ -3322,7 +3322,7 @@ fn p_declare_local_stmt<'a>(
 ) -> Result<ast::Stmt> {
     use ast::Stmt;
     use ast::Stmt_ as S_;
-    let var = lid_from_pos_name(pos.clone(), &c.variable, env)?;
+    let var = lid_from_pos_name(p_pos(&c.variable, env), &c.variable, env)?;
     let hint = p_hint(&c.type_, env)?;
     if let SimpleInitializer(c) = c.initializer.children {
         let expr_tmp = p_expr(&c.value, env)?;

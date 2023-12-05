@@ -1,28 +1,28 @@
-File "init-errors.php", line 6, characters 5-21:
+File "init-errors.php", line 6, characters 9-10:
 Typed locals can only be assigned values whose type is compatible with the declared type. (Typing[4110])
   File "init-errors.php", line 6, characters 13-15:
   Expected `int`
   File "init-errors.php", line 5, characters 32-32:
   But got `T`
-File "init-errors.php", line 7, characters 5-20:
+File "init-errors.php", line 7, characters 9-10:
 Typed locals can only be assigned values whose type is compatible with the declared type. (Typing[4110])
   File "init-errors.php", line 7, characters 13-14:
   Expected `T1`
   File "init-errors.php", line 5, characters 32-32:
   But got `T`
-File "init-errors.php", line 8, characters 5-19:
+File "init-errors.php", line 8, characters 9-10:
 Typed locals can only be assigned values whose type is compatible with the declared type. (Typing[4110])
   File "init-errors.php", line 8, characters 13-13:
   Expected `T`
   File "init-errors.php", line 5, characters 38-39:
   But got `T1 as int`
-File "init-errors.php", line 9, characters 5-31:
+File "init-errors.php", line 9, characters 9-10:
 Typed locals can only be assigned values whose type is compatible with the declared type. (Typing[4110])
   File "init-errors.php", line 9, characters 17-19:
   Expected `int`
   File "init-errors.php", line 5, characters 32-32:
   But got `T`
-File "init-errors.php", line 10, characters 5-24:
+File "init-errors.php", line 10, characters 9-10:
 Typed locals can only be assigned values whose type is compatible with the declared type. (Typing[4110])
   File "init-errors.php", line 10, characters 13-19:
   Expected `nothing`

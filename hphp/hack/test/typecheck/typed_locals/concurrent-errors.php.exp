@@ -12,7 +12,7 @@ File "concurrent-errors.php", line 22, characters 5-15:
 Illegal definition of typed local variable $b. (Naming[2126])
   File "concurrent-errors.php", line 13, characters 3-4:
   It is already defined. Typed locals must have their type declared before they can be assigned.
-File "concurrent-errors.php", line 15, characters 5-27:
+File "concurrent-errors.php", line 15, characters 9-10:
 Typed locals can only be assigned values whose type is compatible with the declared type. (Typing[4110])
   File "concurrent-errors.php", line 15, characters 12-14:
   Expected `int`

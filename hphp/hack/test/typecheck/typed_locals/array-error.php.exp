@@ -12,13 +12,13 @@ Invalid assignment (Typing[4110])
   This type argument to `Vector` must match exactly (it is invariant)
   File "array-error.php", line 12, characters 10-13:
   But got `null`
-File "array-error.php", line 16, characters 3-40:
+File "array-error.php", line 16, characters 7-8:
 Typed locals can only be assigned values whose type is compatible with the declared type. (Typing[4110])
   File "array-error.php", line 16, characters 15-20:
   Expected `string`
   File "array-error.php", line 16, characters 29-36:
   But got `arraykey`
-File "array-error.php", line 20, characters 3-47:
+File "array-error.php", line 20, characters 7-8:
 Typed locals can only be assigned values whose type is compatible with the declared type. (Typing[4110])
   File "array-error.php", line 20, characters 18-23:
   Expected `string`
@@ -26,7 +26,7 @@ Typed locals can only be assigned values whose type is compatible with the decla
   This type argument to `Vector` must match exactly (it is invariant)
   File "array-error.php", line 20, characters 35-42:
   But got `arraykey`
-File "array-error.php", line 24, characters 3-47:
+File "array-error.php", line 24, characters 7-8:
 Typed locals can only be assigned values whose type is compatible with the declared type. (Typing[4110])
   File "array-error.php", line 24, characters 37-42:
   Expected `string`

@@ -36,6 +36,8 @@
 #include <thrift/test/gen-cpp2/adapter_terse_types.h>
 #include <thrift/test/gen-cpp2/adapter_types.h>
 
+#include <thrift/lib/cpp2/protocol/Object.h>
+
 namespace apache::thrift::test {
 template <typename Actual, typename Expected>
 struct AssertSameType;
@@ -1078,6 +1080,18 @@ TEST_F(AdapterTest, CustomSerializedSize) {
   testCustomSerializedSize<basic::CustomSerializedSize>(true);
   testCustomSerializedSize<basic::CustomSerializedSizeOpEncode>(false);
   testCustomSerializedSize<basic::CustomSerializedSizeOpEncode>(true);
+}
+
+TEST_F(AdapterTest, WrappedMyStruct) {
+  basic::StructOfMyStruct s;
+  s.myStruct()->toThrift().field1() = 0;
+  auto iobuf = *CompactSerializer::serialize<folly::IOBufQueue>(s).move();
+
+  auto obj = protocol::parseObject<CompactProtocolReader>(iobuf);
+  EXPECT_EQ(obj[FieldId{1}].as_object()[FieldId{1}].as_i64(), 10);
+
+  CompactSerializer::deserialize(&iobuf, s);
+  EXPECT_EQ(s.myStruct()->toThrift().field1(), 20);
 }
 
 } // namespace apache::thrift::test

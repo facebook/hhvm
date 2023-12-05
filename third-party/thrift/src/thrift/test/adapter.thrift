@@ -349,3 +349,10 @@ struct CustomSerializedSizeOpEncode {
   @cpp.Adapter{name = "::apache::thrift::test::SerializedSizeAdapter"}
   1: binary field;
 }
+
+struct StructOfMyStruct {
+  @cpp.Adapter{
+    name = "::apache::thrift::InlineAdapter<::apache::thrift::test::WrappedMyStruct<::apache::thrift::test::basic::MyStruct>>",
+  }
+  1: MyStruct myStruct;
+}

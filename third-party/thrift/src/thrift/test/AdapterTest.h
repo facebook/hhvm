@@ -28,16 +28,18 @@
 #include <thrift/lib/cpp2/Adapt.h>
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/op/Encode.h>
+#include <thrift/lib/cpp2/type/detail/Wrap.h>
 
 namespace apache::thrift::test {
 
 namespace basic {
+class MyStruct;
 enum class AdaptedEnum {
   Zero = 0,
   One,
   Two,
 };
-}
+} // namespace basic
 
 template <typename T>
 struct Wrapper {
@@ -562,6 +564,34 @@ struct I32ToStringAdapter {
   static int32_t toThrift(const std::string& val) {
     return folly::to<int32_t>(val);
   }
+};
+
+template <class T>
+struct WrappedMyStruct : type::detail::Wrap<T> {
+  // Limit the type to MyStruct, which is defined as
+  //
+  //   class MyStruct { 1: i64 field1; }
+  static_assert(std::is_same_v<T, basic::MyStruct>);
+
+  template <class Protocol>
+  uint32_t encode(Protocol& prot) const {
+    encodeCount++;
+
+    T t;
+    t.field1() = 10;
+    return op::encode<type::struct_t<T>>(prot, t);
+  }
+
+  template <class Protocol>
+  void decode(Protocol& prot) {
+    decodeCount++;
+
+    T t;
+    op::decode<type::struct_t<T>>(prot, t);
+    type::detail::Wrap<T>::toThrift().field1() = 20;
+  }
+
+  mutable size_t encodeCount = 0, decodeCount = 0;
 };
 
 } // namespace apache::thrift::test

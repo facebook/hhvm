@@ -74,8 +74,7 @@ void <%service:parent_service_cpp_name%>AsyncProcessor::executeRequest_<%#servic
   <%/function:stack_arguments?%>
 <%/type:resolves_to_complex_return?%>
 <%/field:type%><%/function:args%>
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "<%service:parent_service_name%>.<% > common/function_name%>", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "<%service:parent_service_name%>.<% > common/function_name%>", serverRequest.requestContext()));
 <%#service:interaction?%>
   auto& iface = static_cast<apache::thrift::ServiceHandler<<%service:parent_service_cpp_name%>>::<%service:name%>If&>(*tile);
 <%/service:interaction?%>

@@ -33,8 +33,7 @@ void FooBarBazServiceAsyncProcessor::executeRequest_foo(apache::thrift::ServerRe
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::cpp2::FooBarBazService_foo_pargs args;
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "FooBarBazService.foo", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "FooBarBazService.foo", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "foo", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -100,8 +99,7 @@ void FooBarBazServiceAsyncProcessor::executeRequest_bar(apache::thrift::ServerRe
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::cpp2::FooBarBazService_bar_pargs args;
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "FooBarBazService.bar", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "FooBarBazService.bar", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "bar", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -167,8 +165,7 @@ void FooBarBazServiceAsyncProcessor::executeRequest_baz(apache::thrift::ServerRe
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::cpp2::FooBarBazService_baz_pargs args;
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "FooBarBazService.baz", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "FooBarBazService.baz", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "baz", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

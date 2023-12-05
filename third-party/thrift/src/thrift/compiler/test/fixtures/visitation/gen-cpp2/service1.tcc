@@ -39,8 +39,7 @@ void service1AsyncProcessor::executeRequest_method1(apache::thrift::ServerReques
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::test_cpp2::cpp_reflection::service1_method1_pargs args;
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "service1.method1", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "service1.method1", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "method1", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -112,8 +111,7 @@ void service1AsyncProcessor::executeRequest_method2(apache::thrift::ServerReques
   args.get<1>().value = uarg_y.get();
   double uarg_z{0};
   args.get<2>().value = &uarg_z;
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "service1.method2", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "service1.method2", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "method2", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -179,8 +177,7 @@ void service1AsyncProcessor::executeRequest_method3(apache::thrift::ServerReques
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::test_cpp2::cpp_reflection::service1_method3_pargs args;
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "service1.method3", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "service1.method3", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "method3", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -254,8 +251,7 @@ void service1AsyncProcessor::executeRequest_method4(apache::thrift::ServerReques
   args.get<1>().value = uarg_j.get();
   double uarg_k{0};
   args.get<2>().value = &uarg_k;
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "service1.method4", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "service1.method4", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "method4", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -323,8 +319,7 @@ void service1AsyncProcessor::executeRequest_method5(apache::thrift::ServerReques
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::test_cpp2::cpp_reflection::service1_method5_pargs args;
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "service1.method5", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "service1.method5", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "method5", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -398,8 +393,7 @@ void service1AsyncProcessor::executeRequest_method6(apache::thrift::ServerReques
   args.get<1>().value = uarg_m.get();
   double uarg_n{0};
   args.get<2>().value = &uarg_n;
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "service1.method6", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "service1.method6", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "method6", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

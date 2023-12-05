@@ -90,8 +90,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_i16_param(apache::thrif
   ::some::valid::ns::ParamService_void_ret_i16_param_pargs args;
   ::std::int16_t uarg_param1{0};
   args.get<0>().value = &uarg_param1;
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.void_ret_i16_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.void_ret_i16_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "void_ret_i16_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -161,8 +160,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_byte_i16_param(apache::
   args.get<0>().value = &uarg_param1;
   ::std::int16_t uarg_param2{0};
   args.get<1>().value = &uarg_param2;
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.void_ret_byte_i16_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.void_ret_byte_i16_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "void_ret_byte_i16_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -230,8 +228,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_map_param(apache::thrif
   ::some::valid::ns::ParamService_void_ret_map_param_pargs args;
   auto uarg_param1 = std::make_unique<::std::map<::std::string, ::std::int64_t>>();
   args.get<0>().value = uarg_param1.get();
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.void_ret_map_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.void_ret_map_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "void_ret_map_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -301,8 +298,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_map_setlist_param(apach
   args.get<0>().value = uarg_param1.get();
   auto uarg_param2 = std::make_unique<::std::set<::std::vector<::std::string>>>();
   args.get<1>().value = uarg_param2.get();
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.void_ret_map_setlist_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.void_ret_map_setlist_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "void_ret_map_setlist_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -370,8 +366,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_map_typedef_param(apach
   ::some::valid::ns::ParamService_void_ret_map_typedef_param_pargs args;
   ::some::valid::ns::simpleTypeDef uarg_param1{0};
   args.get<0>().value = &uarg_param1;
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.void_ret_map_typedef_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.void_ret_map_typedef_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "void_ret_map_typedef_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -439,8 +434,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_enum_param(apache::thri
   ::some::valid::ns::ParamService_void_ret_enum_param_pargs args;
   ::some::valid::ns::MyEnumA uarg_param1{static_cast<::some::valid::ns::MyEnumA>(0)};
   args.get<0>().value = &uarg_param1;
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.void_ret_enum_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.void_ret_enum_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "void_ret_enum_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -508,8 +502,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_struct_param(apache::th
   ::some::valid::ns::ParamService_void_ret_struct_param_pargs args;
   auto uarg_param1 = std::make_unique<::some::valid::ns::MyStruct>();
   args.get<0>().value = uarg_param1.get();
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.void_ret_struct_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.void_ret_struct_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "void_ret_struct_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -577,8 +570,7 @@ void ParamServiceAsyncProcessor::executeRequest_void_ret_listunion_param(apache:
   ::some::valid::ns::ParamService_void_ret_listunion_param_pargs args;
   auto uarg_param1 = std::make_unique<::std::vector<::some::valid::ns::ComplexUnion>>();
   args.get<0>().value = uarg_param1.get();
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.void_ret_listunion_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.void_ret_listunion_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "void_ret_listunion_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -648,8 +640,7 @@ void ParamServiceAsyncProcessor::executeRequest_bool_ret_i32_i64_param(apache::t
   args.get<0>().value = &uarg_param1;
   ::std::int64_t uarg_param2{0};
   args.get<1>().value = &uarg_param2;
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.bool_ret_i32_i64_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.bool_ret_i32_i64_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "bool_ret_i32_i64_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -719,8 +710,7 @@ void ParamServiceAsyncProcessor::executeRequest_bool_ret_map_param(apache::thrif
   ::some::valid::ns::ParamService_bool_ret_map_param_pargs args;
   auto uarg_param1 = std::make_unique<::std::map<::std::string, ::std::int64_t>>();
   args.get<0>().value = uarg_param1.get();
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.bool_ret_map_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.bool_ret_map_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "bool_ret_map_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -790,8 +780,7 @@ void ParamServiceAsyncProcessor::executeRequest_bool_ret_union_param(apache::thr
   ::some::valid::ns::ParamService_bool_ret_union_param_pargs args;
   auto uarg_param1 = std::make_unique<::some::valid::ns::ComplexUnion>();
   args.get<0>().value = uarg_param1.get();
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.bool_ret_union_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.bool_ret_union_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "bool_ret_union_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -863,8 +852,7 @@ void ParamServiceAsyncProcessor::executeRequest_i64_ret_float_double_param(apach
   args.get<0>().value = &uarg_param1;
   double uarg_param2{0};
   args.get<1>().value = &uarg_param2;
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.i64_ret_float_double_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.i64_ret_float_double_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "i64_ret_float_double_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -936,8 +924,7 @@ void ParamServiceAsyncProcessor::executeRequest_i64_ret_string_typedef_param(apa
   args.get<0>().value = uarg_param1.get();
   auto uarg_param2 = std::make_unique<::std::set<::some::valid::ns::mostComplexTypeDef>>();
   args.get<1>().value = uarg_param2.get();
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.i64_ret_string_typedef_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.i64_ret_string_typedef_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "i64_ret_string_typedef_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1018,8 +1005,7 @@ void ParamServiceAsyncProcessor::executeRequest_i64_ret_i32_i32_i32_i32_i32_para
   args.get<3>().value = &uarg_param4;
   ::std::int32_t uarg_param5{0};
   args.get<4>().value = &uarg_param5;
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.i64_ret_i32_i32_i32_i32_i32_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.i64_ret_i32_i32_i32_i32_i32_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "i64_ret_i32_i32_i32_i32_i32_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1089,8 +1075,7 @@ void ParamServiceAsyncProcessor::executeRequest_double_ret_setstruct_param(apach
   ::some::valid::ns::ParamService_double_ret_setstruct_param_pargs args;
   auto uarg_param1 = std::make_unique<::std::set<::some::valid::ns::MyStruct>>();
   args.get<0>().value = uarg_param1.get();
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.double_ret_setstruct_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.double_ret_setstruct_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "double_ret_setstruct_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1160,8 +1145,7 @@ void ParamServiceAsyncProcessor::executeRequest_string_ret_string_param(apache::
   ::some::valid::ns::ParamService_string_ret_string_param_pargs args;
   auto uarg_param1 = std::make_unique<::std::string>();
   args.get<0>().value = uarg_param1.get();
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.string_ret_string_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.string_ret_string_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "string_ret_string_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1231,8 +1215,7 @@ void ParamServiceAsyncProcessor::executeRequest_binary_ret_binary_param(apache::
   ::some::valid::ns::ParamService_binary_ret_binary_param_pargs args;
   auto uarg_param1 = std::make_unique<::std::string>();
   args.get<0>().value = uarg_param1.get();
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.binary_ret_binary_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.binary_ret_binary_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "binary_ret_binary_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1302,8 +1285,7 @@ void ParamServiceAsyncProcessor::executeRequest_map_ret_bool_param(apache::thrif
   ::some::valid::ns::ParamService_map_ret_bool_param_pargs args;
   bool uarg_param1{0};
   args.get<0>().value = &uarg_param1;
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.map_ret_bool_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.map_ret_bool_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "map_ret_bool_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1375,8 +1357,7 @@ void ParamServiceAsyncProcessor::executeRequest_list_ret_map_setlist_param(apach
   args.get<0>().value = uarg_param1.get();
   auto uarg_param2 = std::make_unique<::std::vector<::std::string>>();
   args.get<1>().value = uarg_param2.get();
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.list_ret_map_setlist_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.list_ret_map_setlist_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "list_ret_map_setlist_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1446,8 +1427,7 @@ void ParamServiceAsyncProcessor::executeRequest_mapsetlistmapliststring_ret_list
   ::some::valid::ns::ParamService_mapsetlistmapliststring_ret_listlistlist_param_pargs args;
   auto uarg_param1 = std::make_unique<::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>>();
   args.get<0>().value = uarg_param1.get();
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.mapsetlistmapliststring_ret_listlistlist_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.mapsetlistmapliststring_ret_listlistlist_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "mapsetlistmapliststring_ret_listlistlist_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1517,8 +1497,7 @@ void ParamServiceAsyncProcessor::executeRequest_typedef_ret_i32_param(apache::th
   ::some::valid::ns::ParamService_typedef_ret_i32_param_pargs args;
   ::std::int32_t uarg_param1{0};
   args.get<0>().value = &uarg_param1;
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.typedef_ret_i32_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.typedef_ret_i32_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "typedef_ret_i32_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1591,8 +1570,7 @@ void ParamServiceAsyncProcessor::executeRequest_listtypedef_ret_typedef_param(ap
   ::some::valid::ns::ParamService_listtypedef_ret_typedef_param_pargs args;
   auto uarg_param1 = std::make_unique<::some::valid::ns::complexStructTypeDef>();
   args.get<0>().value = uarg_param1.get();
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.listtypedef_ret_typedef_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.listtypedef_ret_typedef_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "listtypedef_ret_typedef_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1662,8 +1640,7 @@ void ParamServiceAsyncProcessor::executeRequest_enum_ret_double_param(apache::th
   ::some::valid::ns::ParamService_enum_ret_double_param_pargs args;
   double uarg_param1{0};
   args.get<0>().value = &uarg_param1;
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.enum_ret_double_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.enum_ret_double_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "enum_ret_double_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1735,8 +1712,7 @@ void ParamServiceAsyncProcessor::executeRequest_enum_ret_double_enum_param(apach
   args.get<0>().value = &uarg_param1;
   ::some::valid::ns::MyEnumA uarg_param2{static_cast<::some::valid::ns::MyEnumA>(0)};
   args.get<1>().value = &uarg_param2;
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.enum_ret_double_enum_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.enum_ret_double_enum_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "enum_ret_double_enum_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1806,8 +1782,7 @@ void ParamServiceAsyncProcessor::executeRequest_listenum_ret_map_param(apache::t
   ::some::valid::ns::ParamService_listenum_ret_map_param_pargs args;
   auto uarg_param1 = std::make_unique<::std::map<::std::string, ::std::int64_t>>();
   args.get<0>().value = uarg_param1.get();
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.listenum_ret_map_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.listenum_ret_map_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "listenum_ret_map_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1880,8 +1855,7 @@ void ParamServiceAsyncProcessor::executeRequest_struct_ret_i16_param(apache::thr
   ::some::valid::ns::ParamService_struct_ret_i16_param_pargs args;
   ::std::int16_t uarg_param1{0};
   args.get<0>().value = &uarg_param1;
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.struct_ret_i16_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.struct_ret_i16_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "struct_ret_i16_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -1951,8 +1925,7 @@ void ParamServiceAsyncProcessor::executeRequest_setstruct_ret_set_param(apache::
   ::some::valid::ns::ParamService_setstruct_ret_set_param_pargs args;
   auto uarg_param1 = std::make_unique<::std::set<::std::string>>();
   args.get<0>().value = uarg_param1.get();
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.setstruct_ret_set_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.setstruct_ret_set_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "setstruct_ret_set_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -2024,8 +1997,7 @@ void ParamServiceAsyncProcessor::executeRequest_union_ret_i32_i32_param(apache::
   args.get<0>().value = &uarg_param1;
   ::std::int32_t uarg_param2{0};
   args.get<1>().value = &uarg_param2;
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.union_ret_i32_i32_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.union_ret_i32_i32_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "union_ret_i32_i32_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -2095,8 +2067,7 @@ void ParamServiceAsyncProcessor::executeRequest_listunion_string_param(apache::t
   ::some::valid::ns::ParamService_listunion_string_param_pargs args;
   auto uarg_param1 = std::make_unique<::std::string>();
   args.get<0>().value = uarg_param1.get();
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "ParamService.listunion_string_param", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "ParamService.listunion_string_param", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "listunion_string_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

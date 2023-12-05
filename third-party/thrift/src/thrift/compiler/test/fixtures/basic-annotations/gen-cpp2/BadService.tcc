@@ -29,8 +29,7 @@ void GoodServiceAsyncProcessor::executeRequest_bar(apache::thrift::ServerRequest
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::cpp2::GoodService_bar_pargs args;
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "BadService.bar", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "BadService.bar", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "bar", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -102,8 +101,7 @@ void GoodServiceAsyncProcessor::executeRequest_BadInteraction_foo(apache::thrift
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::cpp2::GoodService_BadInteraction_foo_pargs args;
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "BadService.BadInteraction.foo", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "BadService.BadInteraction.foo", serverRequest.requestContext()));
   auto& iface = static_cast<apache::thrift::ServiceHandler<GoodService>::BadInteractionIf&>(*tile);
   try {
     deserializeRequest<ProtocolIn_>(args, "BadInteraction.foo", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());

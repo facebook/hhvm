@@ -71,13 +71,6 @@ class EventHandlerRuntimeTest : public testing::Test {
       void sync_bar2() override {}
     };
 
-    clientEvents = std::make_shared<CountingEventHandler>();
-    serverEvents = std::make_shared<CountingEventHandler>();
-    serverEventsAddedAfterStart = std::make_shared<CountingEventHandler>();
-
-    apache::thrift::TProcessorBase::addProcessorEventHandler(serverEvents);
-    apache::thrift::TClientBase::addClientEventHandler(clientEvents);
-
     std::vector<std::shared_ptr<apache::thrift::AsyncProcessorFactory>>
         handlers = {
             std::make_shared<FooHandler>(), std::make_shared<BarHandler>()};
@@ -86,8 +79,11 @@ class EventHandlerRuntimeTest : public testing::Test {
             std::move(handlers)),
         "::1");
 
-    apache::thrift::TProcessorBase::addProcessorEventHandler(
-        serverEventsAddedAfterStart);
+    clientEvents = std::make_shared<CountingEventHandler>();
+    serverEvents = std::make_shared<CountingEventHandler>();
+
+    apache::thrift::TProcessorBase::addProcessorEventHandler(serverEvents);
+    apache::thrift::TClientBase::addClientEventHandler(clientEvents);
   }
 
   void TearDown() override {
@@ -104,8 +100,7 @@ class EventHandlerRuntimeTest : public testing::Test {
     return server_->newClient<apache::thrift::Client<ServiceTag>>();
   }
 
-  std::shared_ptr<CountingEventHandler> clientEvents, serverEvents,
-      serverEventsAddedAfterStart;
+  std::shared_ptr<CountingEventHandler> clientEvents, serverEvents;
 };
 } // namespace
 
@@ -148,8 +143,6 @@ TEST_F(EventHandlerRuntimeTest, MethodNames) {
   bar->sync_bar1();
   EXPECT_EQ(clientEvents->callCount, 5);
   EXPECT_EQ(serverEvents->callCount, 7);
-
-  EXPECT_EQ(serverEventsAddedAfterStart->callCount, 0);
 }
 
 TEST_F(EventHandlerRuntimeTest, ServiceNames) {
@@ -208,6 +201,4 @@ TEST_F(EventHandlerRuntimeTest, ServiceNames) {
   bar->sync_bar2();
   EXPECT_EQ(clientEvents->callCount, 4);
   EXPECT_EQ(serverEvents->callCount, 11);
-
-  EXPECT_EQ(serverEventsAddedAfterStart->callCount, 0);
 }

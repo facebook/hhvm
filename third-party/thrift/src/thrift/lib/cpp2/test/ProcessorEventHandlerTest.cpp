@@ -18,8 +18,6 @@
 #include <folly/portability/GTest.h>
 
 #include <thrift/lib/cpp/EventHandlerBase.h>
-#include <thrift/lib/cpp2/server/ServerModule.h>
-#include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/HandlerGeneric.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 
@@ -100,30 +98,7 @@ TEST_F(TProcessorEventHandlerTest, BasicRead) {
     }
   };
 
-  TestEventHandler* scopedTestEventHandler = nullptr;
-  ScopedServerInterfaceThread runner(
-      std::make_shared<Handler>(), [&](ThriftServer& server) {
-        class TestModule : public apache::thrift::ServerModule {
-         public:
-          TestEventHandler*& eventHandlerRef_;
-          explicit TestModule(TestEventHandler*& eventHandlerRef)
-              : eventHandlerRef_(eventHandlerRef) {}
-
-          std::string getName() const override { return "TestModule"; }
-
-          std::vector<std::unique_ptr<TProcessorEventHandler>>
-          getLegacyEventHandlers() override {
-            std::vector<std::unique_ptr<TProcessorEventHandler>> result;
-            auto evtHandler = std::make_unique<TestEventHandler>();
-            eventHandlerRef_ = evtHandler.get();
-            result.emplace_back(std::move(evtHandler));
-            return result;
-          }
-        };
-        server.addModule(std::make_unique<TestModule>(scopedTestEventHandler));
-      });
-  EXPECT_NE(scopedTestEventHandler, nullptr);
-
+  ScopedServerInterfaceThread runner(std::make_shared<Handler>());
   std::string ret;
   auto client = runner.newClient<test::HandlerGenericAsyncClient>();
   folly::coro::blockingWait(client->co_get_string());
@@ -137,5 +112,4 @@ TEST_F(TProcessorEventHandlerTest, BasicRead) {
       "onWriteData(\"HandlerGeneric.get_string\"),"
       "postWrite(\"HandlerGeneric.get_string\"),"
       "freeContext(\"HandlerGeneric.get_string\"),");
-  EXPECT_EQ(scopedTestEventHandler->history, testEventHandler->history);
 }

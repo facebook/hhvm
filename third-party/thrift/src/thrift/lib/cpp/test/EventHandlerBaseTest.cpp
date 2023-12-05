@@ -58,6 +58,7 @@ exception_ptr to_eptr(const E& e) {
 
 class TProcessorEventHandlerTest : public testing::Test {};
 
+class TProcessorTester : public TProcessorBase {};
 class TClientTester : public TClientBase {};
 
 } // namespace
@@ -99,10 +100,9 @@ TEST_F(TProcessorEventHandlerTest, with_wrap_declared) {
 
 TEST_F(TProcessorEventHandlerTest, registerProcessorHandler) {
   auto countProcessor = [](const auto& h) {
+    TProcessorTester tpt;
     return std::count(
-        TProcessorBase::getHandlers().begin(),
-        TProcessorBase::getHandlers().end(),
-        h);
+        tpt.getEventHandlers().begin(), tpt.getEventHandlers().end(), h);
   };
   auto countClient = [](const auto& h) {
     TClientTester tct;
@@ -128,7 +128,7 @@ TEST_F(TProcessorEventHandlerTest, registerProcessorHandler) {
 }
 
 TEST_F(TProcessorEventHandlerTest, registrationActivity) {
-  auto count = []() { return TProcessorBase::getHandlers().size(); };
+  auto count = []() { return TProcessorTester().getEventHandlers().size(); };
 
   auto h1 = std::make_shared<EventHandler>();
   auto h2 = std::make_shared<EventHandler>();

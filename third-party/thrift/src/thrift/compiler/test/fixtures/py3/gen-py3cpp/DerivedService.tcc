@@ -29,8 +29,7 @@ void DerivedServiceAsyncProcessor::executeRequest_get_six(apache::thrift::Server
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::py3::simple::DerivedService_get_six_pargs args;
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "DerivedService.get_six", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "DerivedService.get_six", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "get_six", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

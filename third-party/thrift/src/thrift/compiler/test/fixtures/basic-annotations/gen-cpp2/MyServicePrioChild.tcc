@@ -29,8 +29,7 @@ void MyServicePrioChildAsyncProcessor::executeRequest_pang(apache::thrift::Serve
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::cpp2::MyServicePrioChild_pang_pargs args;
-  const auto* server = serverRequest.requestContext()->getConnectionContext()->getWorkerContext()->getServerContext();
-  apache::thrift::ContextStack::UniquePtr ctxStack = apache::thrift::ContextStack::create(this->coalesceLegacyEventHandlersWith(server), this->getServiceName(), "MyServicePrioChild.pang", serverRequest.requestContext());
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "MyServicePrioChild.pang", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "pang", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

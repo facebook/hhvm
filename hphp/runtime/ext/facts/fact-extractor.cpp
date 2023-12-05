@@ -69,7 +69,7 @@ std::vector<MethodDetails> move_method_vec(
   for (auto& method : std::move(methodList)) {
     ret.push_back(MethodDetails{
         .m_name = std::string{method.name},
-        .m_attributes = move_attr_vec(std::move(method.details.attributes))});
+        .m_attributes = move_attr_vec(std::move(method.attributes))});
   }
   return ret;
 }

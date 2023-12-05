@@ -386,11 +386,6 @@ mod ffi {
     #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
     pub struct MethodFacts {
         pub name: String,
-        pub details: MethodDetails,
-    }
-
-    #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
-    pub struct MethodDetails {
         pub attributes: Vec<AttrFacts>,
     }
 

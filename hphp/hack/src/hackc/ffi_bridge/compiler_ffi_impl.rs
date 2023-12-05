@@ -54,11 +54,9 @@ impl ffi::FileFacts {
                     methods: (tf.methods.into_iter())
                         .map(|(name, mf)| ffi::MethodFacts {
                             name,
-                            details: ffi::MethodDetails {
-                                attributes: (mf.attributes.into_iter())
-                                    .map(ffi::AttrFacts::from)
-                                    .collect(),
-                            },
+                            attributes: (mf.attributes.into_iter())
+                                .map(ffi::AttrFacts::from)
+                                .collect(),
                         })
                         .collect(),
                 })

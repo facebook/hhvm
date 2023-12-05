@@ -122,7 +122,6 @@ class ThriftRequestCore : public ResponseChannelRequest {
         const std::optional<ResponseRpcError>& responseRpcError,
         const server::TServerObserver::CallTimestamps& timestamps,
         const ThriftRequestCore& thriftRequest,
-        server::TServerObserver* observer,
         MessageChannel::SendCallback* chainedCallback = nullptr);
 
     void sendQueued() override;
@@ -137,8 +136,8 @@ class ThriftRequestCore : public ResponseChannelRequest {
         const server::TServerObserver::CallTimestamps& timestamps,
         const ThriftRequestCore& thriftRequest);
 
+    const server::ServerConfigs& serverConfigs_;
     RequestLoggingContext requestLoggingContext_;
-    server::TServerObserver* observer_;
     MessageChannel::SendCallback* chainedCallback_;
   };
 
@@ -400,8 +399,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
   MessageChannel::SendCallbackPtr createRequestLoggingCallback(
       MessageChannel::SendCallbackPtr&& sendCallback,
       const ResponseRpcMetadata& metadata,
-      const std::optional<ResponseRpcError>& responseRpcError,
-      server::TServerObserver* observer);
+      const std::optional<ResponseRpcError>& responseRpcError);
 
  private:
   static bool includeInRecentRequestsCount(const std::string_view);

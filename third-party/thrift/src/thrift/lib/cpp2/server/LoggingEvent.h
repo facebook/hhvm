@@ -159,6 +159,8 @@ struct RequestLoggingContext {
   bool serverUseClientTimeout;
 
   bool requestStartedProcessing;
+
+  uint8_t cpuConcurrencyControllerMode;
 };
 
 class RequestEventHandler : public LoggingEventHandler {

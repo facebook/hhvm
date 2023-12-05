@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <thrift/lib/cpp2/server/CPUConcurrencyController.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/transport/core/ThriftRequest.h>
 
@@ -132,11 +133,10 @@ ThriftRequestCore::LogRequestSampleCallback::LogRequestSampleCallback(
     const std::optional<ResponseRpcError>& responseRpcError,
     const server::TServerObserver::CallTimestamps& timestamps,
     const ThriftRequestCore& thriftRequest,
-    server::TServerObserver* observer,
     MessageChannel::SendCallback* chainedCallback)
-    : requestLoggingContext_(buildRequestLoggingContext(
+    : serverConfigs_(thriftRequest.serverConfigs_),
+      requestLoggingContext_(buildRequestLoggingContext(
           metadata, responseRpcError, timestamps, thriftRequest)),
-      observer_(observer),
       chainedCallback_(chainedCallback) {}
 
 void ThriftRequestCore::LogRequestSampleCallback::sendQueued() {
@@ -168,9 +168,10 @@ ThriftRequestCore::LogRequestSampleCallback::~LogRequestSampleCallback() {
   const auto& samplingStatus =
       requestLoggingContext_.timestamps.getSamplingStatus();
 
-  if (samplingStatus.isEnabledByServer() && observer_ &&
+  auto* observer = serverConfigs_.getObserver();
+  if (samplingStatus.isEnabledByServer() && observer &&
       requestLoggingContext_.requestStartedProcessing) {
-    observer_->callCompleted(requestLoggingContext_.timestamps);
+    observer->callCompleted(requestLoggingContext_.timestamps);
   }
 
   if (THRIFT_FLAG(enable_request_event_logging) &&
@@ -220,18 +221,21 @@ ThriftRequestCore::LogRequestSampleCallback::buildRequestLoggingContext(
   requestLoggingContext.finalQueueTimeoutMs = thriftRequest.queueTimeout_.value;
   requestLoggingContext.finalTaskTimeoutMs = thriftRequest.taskTimeout_.value;
   // server timeout
-  requestLoggingContext.serverQueueTimeoutMs =
-      thriftRequest.serverConfigs_.getQueueTimeout();
+  requestLoggingContext.serverQueueTimeoutMs = serverConfigs_.getQueueTimeout();
   requestLoggingContext.serverTaskTimeoutMs =
-      thriftRequest.serverConfigs_.getTaskExpireTime();
+      serverConfigs_.getTaskExpireTime();
   requestLoggingContext.serverQueueTimeoutPct =
-      thriftRequest.serverConfigs_.getQueueTimeoutPct();
+      serverConfigs_.getQueueTimeoutPct();
   requestLoggingContext.serverUseClientTimeout =
-      thriftRequest.serverConfigs_.getUseClientTimeout();
+      serverConfigs_.getUseClientTimeout();
   // client timeout
   requestLoggingContext.clientQueueTimeoutMs =
       thriftRequest.clientQueueTimeout_;
   requestLoggingContext.clientTimeoutMs = thriftRequest.clientTimeout_;
+
+  // CPUConcurrencyController mode
+  requestLoggingContext.cpuConcurrencyControllerMode = static_cast<uint8_t>(
+      serverConfigs_.getCPUConcurrencyController().config()->mode);
 
   return requestLoggingContext;
 }
@@ -239,8 +243,7 @@ ThriftRequestCore::LogRequestSampleCallback::buildRequestLoggingContext(
 MessageChannel::SendCallbackPtr ThriftRequestCore::createRequestLoggingCallback(
     MessageChannel::SendCallbackPtr&& cb,
     const ResponseRpcMetadata& metadata,
-    const std::optional<ResponseRpcError>& responseRpcError,
-    server::TServerObserver* observer) {
+    const std::optional<ResponseRpcError>& responseRpcError) {
   auto cbPtr = std::move(cb);
   // If we are sampling this call, wrap it with a RequestTimestampSample,
   // which also implements MessageChannel::SendCallback. Callers of
@@ -250,12 +253,7 @@ MessageChannel::SendCallbackPtr ThriftRequestCore::createRequestLoggingCallback(
     auto chainedCallback = cbPtr.release();
     return MessageChannel::SendCallbackPtr(
         new ThriftRequestCore::LogRequestSampleCallback(
-            metadata,
-            responseRpcError,
-            timestamps,
-            *this,
-            observer,
-            chainedCallback));
+            metadata, responseRpcError, timestamps, *this, chainedCallback));
   }
   return cbPtr;
 }

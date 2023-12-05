@@ -467,8 +467,7 @@ void ThriftServerRequestResponse::sendThriftResponse(
   // When creating request logging callback, we need to access payload metadata
   // which is populated in the processFirstResponse, so
   // createRequestLoggingCallback must happen after processFirstResponse.
-  cb = createRequestLoggingCallback(
-      std::move(cb), metadata, responseRpcError, serverConfigs_.getObserver());
+  cb = createRequestLoggingCallback(std::move(cb), metadata, responseRpcError);
 
   if (responseRpcError) {
     auto ex = makeRocketException(*responseRpcError);

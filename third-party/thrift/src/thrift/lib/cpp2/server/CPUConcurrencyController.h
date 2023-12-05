@@ -45,13 +45,13 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
 
 class CPUConcurrencyController {
  public:
-  enum class Mode {
+  enum class Mode : uint8_t {
     DISABLED,
     DRY_RUN,
     ENABLED,
   };
 
-  enum class Method {
+  enum class Method : uint8_t {
     CONCURRENCY_LIMITS,
     TOKEN_BUCKET,
   };

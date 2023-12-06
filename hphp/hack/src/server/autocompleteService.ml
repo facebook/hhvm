@@ -920,7 +920,7 @@ let autocomplete_static_member autocomplete_context env (ty, _, cid) mid =
     (Some cid)
     mid
 
-let compatible_enum_class_consts env cls (expected_ty : locl_ty option) =
+let compatible_enum_class_consts env cls pos (expected_ty : locl_ty option) =
   (* Ignore ::class, as it's not a normal enum constant. *)
   let consts =
     List.filter (Cls.consts cls) ~f:(fun (name, _) ->
@@ -935,10 +935,15 @@ let compatible_enum_class_consts env cls (expected_ty : locl_ty option) =
         in
         match expected_ty with
         | Some expected_ty ->
-          Tast_env.is_sub_type
-            env
-            cc_ty
-            (Typing_make_type.locl_like Reason.Rnone expected_ty)
+          let cc_other = Typing_make_type.locl_like Reason.Rnone expected_ty in
+          let tenv = Tast_env.tast_env_as_typing_env env in
+          (* The exact callback does not matter provided that `sub_type`
+             does not discard errors *)
+          let callback = Typing_error.Reasons_callback.unify_error_at pos in
+          let (_tenv, errs) =
+            Typing_subtype.sub_type tenv cc_ty cc_other (Some callback)
+          in
+          Option.is_none errs
         | None -> true)
   in
 
@@ -967,7 +972,7 @@ let unwrap_enum_memberof (ty : Typing_defs.decl_ty) : Typing_defs.decl_ty =
 let autocomplete_enum_class_label env opt_cname pos_labelname expected_ty =
   let suggest_members cls =
     List.iter
-      (compatible_enum_class_consts env cls expected_ty)
+      (compatible_enum_class_consts env cls (fst pos_labelname) expected_ty)
       ~f:(fun (name, cc) ->
         let res_detail =
           Tast_env.print_decl_ty env (unwrap_enum_memberof cc.cc_type)

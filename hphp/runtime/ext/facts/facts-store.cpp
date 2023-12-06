@@ -426,7 +426,7 @@ struct FactsStoreImpl final
       AutoloadDB::Opener dbOpener,
       std::shared_ptr<Watcher> watcher,
       Optional<std::filesystem::path> suppressionFilePath,
-      hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttributes)
+      hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttributes)
       : m_updateExec{std::make_unique<folly::CPUThreadPoolExecutor>(
             1,
             make_thread_factory("Autoload update"))},
@@ -441,7 +441,7 @@ struct FactsStoreImpl final
   FactsStoreImpl(
       fs::path root,
       AutoloadDB::Opener dbOpener,
-      hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttributes)
+      hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttributes)
       : m_root{std::move(root)},
         m_symbolMap{
             m_root,
@@ -718,8 +718,9 @@ struct FactsStoreImpl final
     return logPerformance(__func__, [&]() {
       if (UNLIKELY(!m_symbolMap.isAttrIndexed(*attr.get()))) {
         HPHP::SystemLib::throwRuntimeExceptionObject(fmt::format(
-            "Queried attribute {} not found in IndexedMethodAttributes",
-            attr.get()->data()));
+            "Queried attribute {} not found in IndexedMethodAttributes={}",
+            attr.get()->data(),
+            m_symbolMap.debugIndexedAttrs()));
       }
       return makeVecOfStringString(
           m_symbolMap.getMethodsWithAttribute(*attr.get()));
@@ -1277,7 +1278,7 @@ std::shared_ptr<FactsStore> make_watcher_facts(
     bool shouldSubscribe,
     Optional<std::filesystem::path> suppressionFilePath,
     std::vector<std::string> indexedMethodAttrsVec) {
-  hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttrs;
+  hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttrs;
   indexedMethodAttrs.reserve(indexedMethodAttrsVec.size());
   for (auto& v : indexedMethodAttrsVec) {
     indexedMethodAttrs.insert(Symbol<SymKind::Type>{std::move(v)});
@@ -1298,7 +1299,7 @@ std::shared_ptr<FactsStore> make_trusted_facts(
     fs::path root,
     AutoloadDB::Opener dbOpener,
     std::vector<std::string> indexedMethodAttrsVec) {
-  hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttrs;
+  hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttrs;
   indexedMethodAttrs.reserve(indexedMethodAttrsVec.size());
   for (auto& v : indexedMethodAttrsVec) {
     indexedMethodAttrs.insert(Symbol<SymKind::Type>{std::move(v)});

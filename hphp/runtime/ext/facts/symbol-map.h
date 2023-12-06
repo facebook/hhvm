@@ -95,7 +95,7 @@ struct SymbolMap {
   explicit SymbolMap(
       std::filesystem::path root,
       AutoloadDB::Opener dbOpener,
-      hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttributes);
+      hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttributes);
   SymbolMap() = delete;
   SymbolMap(const SymbolMap&) = delete;
   SymbolMap(SymbolMap&&) noexcept = delete;
@@ -313,7 +313,8 @@ struct SymbolMap {
   bool isTypeFinal(Symbol<SymKind::Type> type);
   bool isTypeFinal(const StringData& type);
 
-  bool isAttrIndexed(const StringData& attr);
+  bool isAttrIndexed(const StringData& attr) const;
+  std::string debugIndexedAttrs() const;
 
   /**
    * Return a hash representing the given path's last-known checksum.
@@ -527,7 +528,7 @@ struct SymbolMap {
     void updatePath(
         Path path,
         FileFacts facts,
-        const hphp_hash_set<Symbol<SymKind::Type>>& indexedMethodAttrs);
+        const hphp_vector_set<Symbol<SymKind::Type>>& indexedMethodAttrs);
 
     /**
      * Remove the given path from the map, along with all data associated with
@@ -613,7 +614,7 @@ struct SymbolMap {
   const std::filesystem::path m_root;
   const std::string m_schemaHash;
   AutoloadDBVault m_dbVault;
-  const hphp_hash_set<Symbol<SymKind::Type>> m_indexedMethodAttrs;
+  const hphp_vector_set<Symbol<SymKind::Type>> m_indexedMethodAttrs;
 };
 
 } // namespace Facts

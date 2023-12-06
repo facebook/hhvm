@@ -68,7 +68,7 @@ Types decorated with NoArgAttr: ["AnnoyingNS\\TerribleClass","ClassWithTwoAttrs"
 Types decorated with TwoArgAttr: ["AppleThenBanana","AppleThenCarrot","BananaThenApple","ClassWithTwoAttrs"]
 Methods decorated with NoArgMethodAttr: ["ClassWithMethodAttrs::methodWithNoArgAttr"]
 Methods decorated with TwoArgMethodAttr: ["AnnoyingNS\\TerribleClass::terribleMethod","ClassWithMethodAttrs::methodWithTwoArgAttr"]
-Threw RuntimeException:"Queried attribute DontIndexThisMethodAttr not found in IndexedMethodAttributes" trying to get methods with DontIndexThisMethodAttr
+Threw RuntimeException:"Queried attribute DontIndexThisMethodAttr not found in IndexedMethodAttributes=[NoArgMethodAttr,TwoArgMethodAttr]" trying to get methods with DontIndexThisMethodAttr
 
 Getting type aliases with attribute
 Type aliases decorated with TypeAliasAttr: ["TypeAliasWithAttr"]
@@ -161,7 +161,7 @@ Types decorated with NoArgAttr: ["AnnoyingNS\\TerribleClass","ClassWithTwoAttrs"
 Types decorated with TwoArgAttr: ["AppleThenBanana","AppleThenCarrot","BananaThenApple","ClassWithTwoAttrs"]
 Methods decorated with NoArgMethodAttr: ["ClassWithMethodAttrs::methodWithNoArgAttr"]
 Methods decorated with TwoArgMethodAttr: ["AnnoyingNS\\TerribleClass::terribleMethod","ClassWithMethodAttrs::methodWithTwoArgAttr"]
-Threw RuntimeException:"Queried attribute DontIndexThisMethodAttr not found in IndexedMethodAttributes" trying to get methods with DontIndexThisMethodAttr
+Threw RuntimeException:"Queried attribute DontIndexThisMethodAttr not found in IndexedMethodAttributes=[NoArgMethodAttr,TwoArgMethodAttr]" trying to get methods with DontIndexThisMethodAttr
 
 Getting type aliases with attribute
 Type aliases decorated with TypeAliasAttr: ["TypeAliasWithAttr"]

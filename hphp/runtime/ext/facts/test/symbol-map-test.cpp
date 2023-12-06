@@ -588,7 +588,7 @@ class SymbolMapTest : public ::testing::TestWithParam<bool> {
     auto dbPath = m_tmpdir->path() /
         folly::to<std::string>(
                       "autoload_", std::hash<std::string>{}(root), "_db.sql3");
-    hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttributes;
+    hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttributes;
     indexedMethodAttributes.reserve(indexedMethodAttributesVec.size());
     for (auto& attr : indexedMethodAttributesVec) {
       indexedMethodAttributes.insert(Symbol<SymKind::Type>{attr});
@@ -610,7 +610,7 @@ class SymbolMapTest : public ::testing::TestWithParam<bool> {
       std::shared_ptr<MockAutoloadDB> db,
       std::shared_ptr<folly::ManualExecutor> exec = nullptr,
       std::vector<std::string> indexedMethodAttributesVec = {}) {
-    hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttributes;
+    hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttributes;
     indexedMethodAttributes.reserve(indexedMethodAttributesVec.size());
     for (auto& attr : indexedMethodAttributesVec) {
       indexedMethodAttributes.insert(Symbol<SymKind::Type>{attr});

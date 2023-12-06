@@ -114,7 +114,7 @@ std::shared_ptr<AutoloadDB> AutoloadDBVault::get() const {
 SymbolMap::SymbolMap(
     fs::path root,
     AutoloadDB::Opener dbOpener,
-    hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttrs)
+    hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttrs)
     : m_exec{std::make_shared<folly::CPUThreadPoolExecutor>(
           1,
           std::make_shared<folly::NamedThreadFactory>("Autoload DB update"))},
@@ -955,8 +955,21 @@ bool SymbolMap::isTypeFinal(const StringData& type) {
   return isTypeFinal(Symbol<SymKind::Type>{type});
 }
 
-bool SymbolMap::isAttrIndexed(const StringData& attr) {
+bool SymbolMap::isAttrIndexed(const StringData& attr) const {
   return m_indexedMethodAttrs.contains(Symbol<SymKind::Type>{attr});
+}
+
+std::string SymbolMap::debugIndexedAttrs() const {
+  std::stringstream s;
+  s << '[';
+  auto delim = "";
+  auto const& set = m_indexedMethodAttrs;
+  for (auto it = set.rbegin(), end = set.rend(); it != end; ++it) {
+    s << delim << it->slice();
+    delim = ",";
+  }
+  s << ']';
+  return s.str();
 }
 
 std::pair<TypeKind, TypeFlagMask> SymbolMap::getKindAndFlags(
@@ -1439,7 +1452,7 @@ SymbolMap::Data::Data()
 void SymbolMap::Data::updatePath(
     Path path,
     FileFacts facts,
-    const hphp_hash_set<Symbol<SymKind::Type>>& indexedMethodAttrs) {
+    const hphp_vector_set<Symbol<SymKind::Type>>& indexedMethodAttrs) {
   m_versions->bumpVersion(path);
 
   typename PathToSymbolsMap<SymKind::Type>::Symbols types;

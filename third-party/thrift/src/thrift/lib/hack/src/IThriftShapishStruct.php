@@ -25,8 +25,4 @@ interface IThriftShapishStruct extends IThriftStruct {
 
   public function __toShape(): this::TShape;
   public static function __fromShape(this::TShape $shape): this;
-
-  public static function __jsonArrayToShape(
-    array<arraykey, mixed> $json_data,
-  ): ?this::TShape;
 }

@@ -6,12 +6,12 @@ function main(): void {
   HH\autoload_is_native();
 
   // === FileDecls should fail parsing this text
-  $instance = FileDecls::parseText('invalid code');
+  $instance = HH\FileDecls::parseText('invalid code');
   echo "FileDecls Instance (should be yes):".($instance !== null ? "Yes\n" : "No\n");
   echo "FileDecls Error (should have error):".$instance->getError()."\n";
 
   // === FileDecls should succeed parsing this text
-  $instance = FileDecls::parseText('<?hh // strict
+  $instance = HH\FileDecls::parseText('<?hh // strict
   <<file: MyFileAttribute(123)>>
 
   module myModule;

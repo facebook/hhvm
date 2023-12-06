@@ -12,12 +12,12 @@ function main(): void {
   HH\autoload_is_native();
 
   // === FileDecls should fail parsing this text
-  $instance = FileDecls::parseText('invalid code');
+  $instance = HH\FileDecls::parseText('invalid code');
   echo "FileDecls Instance (should be yes):".($instance !== null ? "Yes\n" : "No\n");
   echo "FileDecls Error (should have error):".$instance->getError()."\n";
 
   // === FileDecls should succeed parsing this text
-  $instance = FileDecls::parseText('<?hh
+  $instance = HH\FileDecls::parseText('<?hh
 
   final class MyAttribute implements
     HH\ClassAttribute,
@@ -57,15 +57,15 @@ function main(): void {
 
   echo "\nSome constants:\n";
   var_dump(vec[
-    VISIBILITY_PROTECTED,
-    VARIANCE_COVARIANT,
-    REIFIED_ERASED,
-    TYPE_CONSTRAINT_KIND_AS,
-    CLASS_KIND_CLASS
+    HH\VISIBILITY_PROTECTED,
+    HH\VARIANCE_COVARIANT,
+    HH\REIFIED_ERASED,
+    HH\TYPE_CONSTRAINT_KIND_AS,
+    HH\CLASS_KIND_CLASS
   ]);
   echo "\n";
 
-  $instance = FileDecls::parseText("<?hh
+  $instance = HH\FileDecls::parseText("<?hh
   type InlineSeeMoreToFBECheckerInput = shape(
     'ad_impression' => ?AdImpression,
   );

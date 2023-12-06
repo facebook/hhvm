@@ -604,7 +604,7 @@ Array populateFile(const hackc::ExtDeclFile& file) {
   Every instance holds the results of the parsing in the rust DeclsHolder.
   The methods use the declsHolder to access the parsed information.
 */
-struct FileDecls : SystemLib::ClassLoader<"FileDecls"> {
+struct FileDecls : SystemLib::ClassLoader<"HH\\FileDecls"> {
   FileDecls() {}
   FileDecls& operator=(const FileDecls& /*that_*/) {
     throw_not_implemented("FileDecls::operator=");
@@ -946,39 +946,38 @@ struct DeclExtension final : Extension {
   }
 
   void moduleInit() override {
-    HHVM_ME(FileDecls, getError);
-    HHVM_ME(FileDecls, hasType);
-    HHVM_ME(FileDecls, getClass);
-    HHVM_STATIC_ME(FileDecls, parseText);
-    HHVM_STATIC_ME(FileDecls, parsePath);
-
-    HHVM_ME(FileDecls, getMethods);
-    HHVM_ME(FileDecls, getMethod);
-    HHVM_ME(FileDecls, getStaticMethods);
-    HHVM_ME(FileDecls, getStaticMethod);
-    HHVM_ME(FileDecls, getConsts);
-    HHVM_ME(FileDecls, getConst);
-    HHVM_ME(FileDecls, getTypeconsts);
-    HHVM_ME(FileDecls, getTypeconst);
-    HHVM_ME(FileDecls, getProps);
-    HHVM_ME(FileDecls, getProp);
-    HHVM_ME(FileDecls, getStaticProps);
-    HHVM_ME(FileDecls, getStaticProp);
-    HHVM_ME(FileDecls, getAttributes);
-    HHVM_ME(FileDecls, getAttribute);
-    HHVM_ME(FileDecls, getClasses);
-    HHVM_ME(FileDecls, getClass);
-    HHVM_ME(FileDecls, getFileAttributes);
-    HHVM_ME(FileDecls, getFileAttribute);
-    HHVM_ME(FileDecls, getFileConsts);
-    HHVM_ME(FileDecls, getFileConst);
-    HHVM_ME(FileDecls, getFileFuncs);
-    HHVM_ME(FileDecls, getFileFunc);
-    HHVM_ME(FileDecls, getFileModules);
-    HHVM_ME(FileDecls, getFileModule);
-    HHVM_ME(FileDecls, getFileTypedefs);
-    HHVM_ME(FileDecls, getFileTypedef);
-    HHVM_ME(FileDecls, getFile);
+    HHVM_STATIC_MALIAS(HH\\FileDecls, parseText, FileDecls, parseText);
+    HHVM_STATIC_MALIAS(HH\\FileDecls, parsePath, FileDecls, parsePath);
+    HHVM_MALIAS(HH\\FileDecls, getError, FileDecls, getError);
+    HHVM_MALIAS(HH\\FileDecls, hasType, FileDecls, hasType);
+    HHVM_MALIAS(HH\\FileDecls, getClass, FileDecls, getClass);
+    HHVM_MALIAS(HH\\FileDecls, getMethods, FileDecls, getMethods);
+    HHVM_MALIAS(HH\\FileDecls, getMethod, FileDecls, getMethod);
+    HHVM_MALIAS(HH\\FileDecls, getStaticMethods, FileDecls, getStaticMethods);
+    HHVM_MALIAS(HH\\FileDecls, getStaticMethod, FileDecls, getStaticMethod);
+    HHVM_MALIAS(HH\\FileDecls, getConsts, FileDecls, getConsts);
+    HHVM_MALIAS(HH\\FileDecls, getConst, FileDecls, getConst);
+    HHVM_MALIAS(HH\\FileDecls, getTypeconsts, FileDecls, getTypeconsts);
+    HHVM_MALIAS(HH\\FileDecls, getTypeconst, FileDecls, getTypeconst);
+    HHVM_MALIAS(HH\\FileDecls, getProps, FileDecls, getProps);
+    HHVM_MALIAS(HH\\FileDecls, getProp, FileDecls, getProp);
+    HHVM_MALIAS(HH\\FileDecls, getStaticProps, FileDecls, getStaticProps);
+    HHVM_MALIAS(HH\\FileDecls, getStaticProp, FileDecls, getStaticProp);
+    HHVM_MALIAS(HH\\FileDecls, getAttributes, FileDecls, getAttributes);
+    HHVM_MALIAS(HH\\FileDecls, getAttribute, FileDecls, getAttribute);
+    HHVM_MALIAS(HH\\FileDecls, getClasses, FileDecls, getClasses);
+    HHVM_MALIAS(HH\\FileDecls, getClass, FileDecls, getClass);
+    HHVM_MALIAS(HH\\FileDecls, getFileAttributes, FileDecls, getFileAttributes);
+    HHVM_MALIAS(HH\\FileDecls, getFileAttribute, FileDecls, getFileAttribute);
+    HHVM_MALIAS(HH\\FileDecls, getFileConsts, FileDecls, getFileConsts);
+    HHVM_MALIAS(HH\\FileDecls, getFileConst, FileDecls, getFileConst);
+    HHVM_MALIAS(HH\\FileDecls, getFileFuncs, FileDecls, getFileFuncs);
+    HHVM_MALIAS(HH\\FileDecls, getFileFunc, FileDecls, getFileFunc);
+    HHVM_MALIAS(HH\\FileDecls, getFileModules, FileDecls, getFileModules);
+    HHVM_MALIAS(HH\\FileDecls, getFileModule, FileDecls, getFileModule);
+    HHVM_MALIAS(HH\\FileDecls, getFileTypedefs, FileDecls, getFileTypedefs);
+    HHVM_MALIAS(HH\\FileDecls, getFileTypedef, FileDecls, getFileTypedef);
+    HHVM_MALIAS(HH\\FileDecls, getFile, FileDecls, getFile);
 
     Native::registerNativeDataInfo<FileDecls>();
   }

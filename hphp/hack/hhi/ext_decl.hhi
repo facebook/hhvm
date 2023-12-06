@@ -1,7 +1,6 @@
 <?hh
 
-/* Keep in sync with ext_decl.hhi */
-
+/* Keep in sync with ext_decl.php */
 namespace HH {
 
   type TypeExpr = string;
@@ -254,7 +253,6 @@ namespace HH {
 
   /** The FileDecls class parses a file and provides declaration information.
    */
-  <<__NativeData>>
   final class FileDecls {
 
     // We want to be explicit about whether we are parsing text or file
@@ -268,7 +266,6 @@ namespace HH {
      * @param string $text - the contents of the file to parse
      * @return FileDecls - a queryable instance for the parsed data
      */
-    <<__Native>>
     public static function parseText(string $text)[]: FileDecls;
 
     /*
@@ -277,7 +274,6 @@ namespace HH {
      * @param string $path - the relative path of the file to parse
      * @return FileDecls - a queryable instance for the parsed data
      */
-    <<__Native>>
     public static function parsePath(string $path)[]: FileDecls;
 
     /*
@@ -286,7 +282,6 @@ namespace HH {
      *
      * @return string - the erroneous state or null if no errors
      */
-    <<__Native>>
     public function getError()[]: ?string;
 
     /*
@@ -296,7 +291,6 @@ namespace HH {
      *                       global namespace prefix
      * @return bool - true if the class or typedef with that name exists
      */
-    <<__Native>>
     public function hasType(string $name)[]: bool;
 
     /*
@@ -304,7 +298,6 @@ namespace HH {
      *
      * @return ExtDeclFile - A non nullable whole file shape
      */
-    <<__Native>>
     public function getFile()[]: ?ExtDeclFile;
 
     /*
@@ -312,7 +305,6 @@ namespace HH {
      *
      * @return vec<ExtDeclClass> - Array of all classes in the content
      */
-    <<__Native>>
     public function getClasses()[]: vec<ExtDeclClass>;
 
     /*
@@ -322,7 +314,6 @@ namespace HH {
      *                       namespace prefix
      * @return ?ExtDeclClass - The class shape or null if not found
      */
-    <<__Native>>
     public function getClass(string $name)[]: ?ExtDeclClass;
 
     /*
@@ -330,7 +321,6 @@ namespace HH {
      *
      * @return vec<ExtDeclAttribute> - Array of the file attributes
      */
-    <<__Native>>
     public function getFileAttributes()[]: vec<ExtDeclAttribute>;
 
     /*
@@ -340,7 +330,6 @@ namespace HH {
      *                       namespace prefix
      * @return ?ExtDeclAttribute - The file attribute or null if not found
      */
-    <<__Native>>
     public function getFileAttribute(string $name)[]: ?ExtDeclAttribute;
 
     /*
@@ -348,7 +337,6 @@ namespace HH {
      *
      * @return vec<ExtDeclFileConst> - Array of the consts
      */
-    <<__Native>>
     public function getFileConsts()[]: vec<ExtDeclFileConst>;
 
     /*
@@ -357,7 +345,6 @@ namespace HH {
      * @param string $name - the const name
      * @return ?ExtDeclFileConst - The const or null if not found
      */
-    <<__Native>>
     public function getFileConst(string $name)[]: ?ExtDeclFileConst;
 
     /*
@@ -365,7 +352,6 @@ namespace HH {
      *
      * @return vec<ExtDeclFileFunc> - Array of the functions
      */
-    <<__Native>>
     public function getFileFuncs()[]: vec<ExtDeclFileFunc>;
 
     /*
@@ -374,7 +360,6 @@ namespace HH {
      * @param string $name - the function name
      * @return ?ExtDeclFileFunc - The function or null if not found
      */
-    <<__Native>>
     public function getFileFunc(string $name)[]: ?ExtDeclFileFunc;
 
     /*
@@ -382,7 +367,6 @@ namespace HH {
      *
      * @return vec<ExtDeclModule> - Array of the modules
      */
-    <<__Native>>
     public function getFileModules()[]: vec<ExtDeclModule>;
 
     /*
@@ -391,7 +375,6 @@ namespace HH {
      * @param string $name - the module name
      * @return ?ExtDeclModule - The module or null if not found
      */
-    <<__Native>>
     public function getFileModule(string $name)[]: ?ExtDeclModule;
 
     /*
@@ -399,7 +382,6 @@ namespace HH {
      *
      * @return vec<ExtDeclTypedef> - Array of the type definitions
      */
-    <<__Native>>
     public function getFileTypedefs()[]: vec<ExtDeclTypedef>;
 
     /*
@@ -408,7 +390,6 @@ namespace HH {
      * @param string $name - the typedef name
      * @return ?ExtDeclTypedef - The type definition or null if not found
      */
-    <<__Native>>
     public function getFileTypedef(string $name)[]: ?ExtDeclTypedef;
 
     /*
@@ -416,7 +397,6 @@ namespace HH {
      *
      * @return vec<ExtDeclMethod> - Array of the methods
      */
-    <<__Native>>
     public function getMethods(string $kls)[]: vec<ExtDeclMethod>;
 
     /*
@@ -425,7 +405,6 @@ namespace HH {
      * @param string $name - the method name
      * @return ?ExtDeclMethod - The method or null if not found
      */
-    <<__Native>>
     public function getMethod(string $kls, string $name)[]: ?ExtDeclMethod;
 
     /*
@@ -433,7 +412,6 @@ namespace HH {
      *
      * @return vec<ExtDeclMethod> - Array of the static methods
      */
-    <<__Native>>
     public function getStaticMethods(string $kls)[]: vec<ExtDeclMethod>;
 
     /*
@@ -442,7 +420,6 @@ namespace HH {
      * @param string $name - the static method name
      * @return ?ExtDeclMethod - The static method or null if not found
      */
-    <<__Native>>
     public function getStaticMethod(
       string $kls,
       string $name,
@@ -453,7 +430,6 @@ namespace HH {
      *
      * @return vec<ExtDeclClassConst> - Array of the class constants
      */
-    <<__Native>>
     public function getConsts(string $kls)[]: vec<ExtDeclClassConst>;
 
     /*
@@ -462,7 +438,6 @@ namespace HH {
      * @param string $name - the class const name
      * @return ?ExtDeclClassConst - The class constant or null if not found
      */
-    <<__Native>>
     public function getConst(string $kls, string $name)[]: ?ExtDeclClassConst;
 
     /*
@@ -470,7 +445,6 @@ namespace HH {
      *
      * @return vec<ExtDeclTypeConst> - Array of the class type constants
      */
-    <<__Native>>
     public function getTypeconsts(string $kls)[]: vec<ExtDeclTypeConst>;
 
     /*
@@ -479,7 +453,6 @@ namespace HH {
      * @param string $name - the class type const name
      * @return ?ExtDeclTypeConst - The class type constant or null if not found
      */
-    <<__Native>>
     public function getTypeconst(
       string $kls,
       string $name,
@@ -490,7 +463,6 @@ namespace HH {
      *
      * @return vec<ExtDeclProp> - Array of the class properties
      */
-    <<__Native>>
     public function getProps(string $kls)[]: vec<ExtDeclProp>;
 
     /*
@@ -499,7 +471,6 @@ namespace HH {
      * @param string $name - the class property name without the dollar sign
      * @return ?ExtDeclProp - The class property or null if not found
      */
-    <<__Native>>
     public function getProp(string $kls, string $name)[]: ?ExtDeclProp;
 
     /*
@@ -507,7 +478,6 @@ namespace HH {
      *
      * @return vec<ExtDeclProp> - Array of the class static properties
      */
-    <<__Native>>
     public function getStaticProps(string $kls)[]: vec<ExtDeclProp>;
 
     /*
@@ -517,7 +487,6 @@ namespace HH {
      *                       the dollar sign
      * @return ?ExtDeclProp - The class static property or null if not found
      */
-    <<__Native>>
     public function getStaticProp(string $kls, string $name)[]: ?ExtDeclProp;
 
     /*
@@ -525,7 +494,6 @@ namespace HH {
      *
      * @return vec<ExtDeclAttribute> - Array of the class attributes
      */
-    <<__Native>>
     public function getAttributes(string $kls)[]: vec<ExtDeclAttribute>;
 
     /*
@@ -535,22 +503,15 @@ namespace HH {
      *                       namespace prefix
      * @return ?ExtDeclAttribute - The class attribute or null if not found
      */
-    <<__Native>>
     public function getAttribute(
       string $kls,
       string $name,
     )[]: ?ExtDeclAttribute;
 
     // Prevent cloning
-    final public function __clone(): this {
-      throw new \BadMethodCallException(
-        'Trying to clone an uncloneable object of class FileDecls',
-      );
-    }
+    final public function __clone(): this;
 
-    public function __toString()[]: string {
-      return __CLASS__;
-    }
+    public function __toString()[]: string;
   }
 
 }

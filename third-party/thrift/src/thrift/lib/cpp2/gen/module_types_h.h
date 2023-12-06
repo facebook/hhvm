@@ -469,20 +469,20 @@ namespace apache::thrift {
 ///
 /// For example, for the following thrift file
 ///
-///     @scope.Runtime
+///     @cpp.RuntimeAnnotation
 ///     @scope.Field
 ///     struct Oncall {
 ///       1: string name;
 ///     }
 ///
-///     @scope.Runtime
+///     @cpp.RuntimeAnnotation
 ///     @scope.Struct
 ///     @scope.Field
 ///     struct Doc {
 ///       1: string text;
 ///     }
 ///
-///     @scope.Runtime
+///     @cpp.RuntimeAnnotation
 ///     @scope.Field
 ///     struct Sensitive {}
 ///
@@ -512,7 +512,8 @@ namespace apache::thrift {
 ///     // Build failure since MyStruct.field doesn't have `Doc` annotation
 ///     get_field_annotation<Doc, MyStruct, ident::field>();
 ///
-///     // Build failure since `Other` is not marked with @scope.Runtime.
+///     // Build failure since `Other` is not marked with
+///     // @cpp.RuntimeAnnotation.
 ///     has_field_annotation<Other, MyStruct, ident::field>;
 ///
 template <class Annotation, class Struct, class Id>

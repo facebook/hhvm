@@ -30,7 +30,6 @@
 #include <thrift/lib/cpp2/type/Any.h>
 #include <thrift/lib/cpp2/type/BaseType.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
-#include <thrift/lib/cpp2/type/Traits.h>
 #include <thrift/lib/cpp2/type/Type.h>
 #include <thrift/lib/thrift/gen-cpp2/id_types.h>
 #include <thrift/lib/thrift/gen-cpp2/protocol_types.h>
@@ -334,9 +333,24 @@ class ObjectWriter : public BaseObjectAdapter {
   }
 };
 
+template <class T>
+inline constexpr bool kIsStructured = false;
+template <class T>
+inline constexpr bool kIsStructured<type::struct_t<T>> = true;
+template <class T>
+inline constexpr bool kIsStructured<type::union_t<T>> = true;
+template <class T>
+inline constexpr bool kIsStructured<type::exception_t<T>> = true;
+template <>
+inline constexpr bool kIsStructured<type::struct_c> = true;
+template <>
+inline constexpr bool kIsStructured<type::union_c> = true;
+template <>
+inline constexpr bool kIsStructured<type::exception_c> = true;
+
 // Specialization for all structured types.
 template <typename TT>
-struct ValueHelper<TT, type::if_structured<TT>> {
+struct ValueHelper<TT, std::enable_if_t<kIsStructured<TT>>> {
   template <typename T>
   static void set(Value& result, T&& value) {
     ObjectWriter writer(&result);

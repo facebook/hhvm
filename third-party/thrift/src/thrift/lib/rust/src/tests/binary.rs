@@ -428,7 +428,6 @@ fn write_message_begin() {
         let _ = serializer.write_message_end();
     });
 
-    let buf = buf;
     let vec = vec![128, 1, 0, 1, 0, 0, 0, 4, 116, 101, 115, 116, 0, 0, 0, 1];
 
     assert_eq!(vec, buf);
@@ -440,8 +439,6 @@ fn serializer_overflow() {
     let buf = serialize!(BinaryProtocol, |p| for i in 0..u8::MAX {
         let _ = p.write_byte(i as i8);
     });
-
-    let buf = buf;
 
     assert_eq!(vec, buf);
 }

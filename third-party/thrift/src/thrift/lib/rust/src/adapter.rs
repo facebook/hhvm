@@ -100,8 +100,8 @@ pub trait ThriftAdapter {
 // NOTE: we define where bounds on the structs themselves here to improve error messaging during
 // the Thrift compilation process.
 
-//// Layers multiple [ThriftTypeAdapter] together. Used when multiple Thrift typedefs with adapters
-//// are layered on each other.
+/// Layers multiple [ThriftTypeAdapter] together. Used when multiple Thrift typedefs with adapters
+/// are layered on each other.
 pub struct LayeredThriftAdapter<Fst, Snd>
 where
     Fst: ThriftAdapter,

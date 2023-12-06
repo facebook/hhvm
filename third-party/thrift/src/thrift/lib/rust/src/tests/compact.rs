@@ -440,8 +440,6 @@ fn serializer_overflow() {
         let _ = p.write_byte(i as i8);
     });
 
-    let buf = buf;
-
     assert_eq!(vec, buf);
 }
 

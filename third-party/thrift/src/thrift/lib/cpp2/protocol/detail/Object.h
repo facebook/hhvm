@@ -138,11 +138,6 @@ struct ValueHelper<type::map<K, V>> {
 template <typename T, typename Tag>
 struct ValueHelper<type::cpp_type<T, Tag>> : ValueHelper<Tag> {};
 
-template <typename Adapter, typename Tag>
-struct ValueHelper<type::adapted<Adapter, Tag>> {
-  static_assert(folly::always_false<Adapter>, "Not Implemented.");
-};
-
 class BaseObjectAdapter {
  public:
   static constexpr ProtocolType protocolType() { return {}; }
@@ -333,6 +328,14 @@ class ObjectWriter : public BaseObjectAdapter {
   }
 };
 
+template <typename Adapter, typename Tag>
+struct ValueHelper<type::adapted<Adapter, Tag>> {
+  template <typename T>
+  static void set(Value& result, T&& value) {
+    ObjectWriter writer(&result);
+    op::encode<type::adapted<Adapter, Tag>>(writer, std::forward<T>(value));
+  }
+};
 template <class T>
 inline constexpr bool kIsStructured = false;
 template <class T>

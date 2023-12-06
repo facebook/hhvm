@@ -43,6 +43,7 @@
 #include <thrift/lib/cpp2/type/TypeRegistry.h>
 #include <thrift/lib/thrift/gen-cpp2/protocol_types.h>
 #include <thrift/lib/thrift/gen-cpp2/standard_types.h>
+#include <thrift/test/gen-cpp2/adapter_types.h>
 #include <thrift/test/testset/Testset.h>
 #include <thrift/test/testset/gen-cpp2/testset_types_custom_protocol.h>
 
@@ -299,6 +300,20 @@ TEST(ObjectTest, StructWithSet) {
   EXPECT_EQ(
       object.members_ref()->at(1),
       asValueStruct<type::set<type::i64_t>>(setValues));
+}
+
+TEST(ObjectTest, DirectlyAdaptedStruct) {
+  apache::thrift::test::basic::DirectlyAdaptedStruct s;
+  s.value.data() = 42;
+  using Tag = type::adapted<
+      ::apache::thrift::test::TemplatedTestAdapter,
+      type::struct_t<
+          apache::thrift::test::basic::detail::DirectlyAdaptedStruct>>;
+  Value value = asValueStruct<Tag>(s);
+  ASSERT_TRUE(value.objectValue_ref().has_value());
+  const Object& object = *value.objectValue_ref();
+  EXPECT_EQ(object.members_ref()->size(), 1);
+  EXPECT_EQ(object.members_ref()->at(1), asValueStruct<type::i64_t>(42));
 }
 
 TEST(ObjectTest, parseObject) {

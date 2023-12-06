@@ -320,9 +320,9 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
     data_.patch()->customVisit(std::forward<Visitor>(v));
 
     if constexpr (!is_thrift_union_v<T>) {
-      for (auto id : *data_.remove()) {
+      for (auto fieldId : *data_.remove()) {
         op::invoke_by_field_id<T>(
-            id,
+            fieldId,
             [&](auto id) {
               using Id = decltype(id);
               std::forward<Visitor>(v).template remove<Id>();

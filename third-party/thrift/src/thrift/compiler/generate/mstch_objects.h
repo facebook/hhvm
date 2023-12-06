@@ -1303,7 +1303,7 @@ class mstch_const : public mstch_base {
 class mstch_const_value : public mstch_base {
  public:
   using ast_type = t_const_value;
-  using cv = t_const_value::t_const_value_type;
+  using cv = t_const_value::t_const_value_kind;
 
   mstch_const_value(
       const t_const_value* cv,
@@ -1315,7 +1315,7 @@ class mstch_const_value : public mstch_base {
         const_value_(cv),
         current_const_(current_const),
         expected_type_(expected_type),
-        type_(cv->get_type()) {
+        type_(cv->kind()) {
     register_methods(
         this,
         {

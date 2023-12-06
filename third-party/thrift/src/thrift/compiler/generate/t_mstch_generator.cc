@@ -247,8 +247,8 @@ mstch::map t_mstch_generator::dump(const t_const& cnst) {
 }
 
 mstch::map t_mstch_generator::dump(const t_const_value& value) {
-  using cv = t_const_value::t_const_value_type;
-  const cv type = value.get_type();
+  using cv = t_const_value::t_const_value_kind;
+  const cv type = value.kind();
   mstch::map result{
       {"bool?", type == cv::CV_BOOL},
       {"double?", type == cv::CV_DOUBLE},
@@ -295,7 +295,7 @@ mstch::map t_mstch_generator::dump(const t_const_value& value) {
       break;
     default:
       std::ostringstream err;
-      err << "Unhandled t_const_value_type " << value.get_type();
+      err << "Unhandled t_const_value_kind " << value.kind();
       throw std::domain_error{err.str()};
   }
 

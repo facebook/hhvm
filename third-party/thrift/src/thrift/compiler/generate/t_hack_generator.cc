@@ -1947,7 +1947,7 @@ std::string t_hack_generator::render_const_value_helper(
         break;
       case t_base_type::TYPE_DOUBLE:
       case t_base_type::TYPE_FLOAT:
-        if (value->get_type() == t_const_value::CV_INTEGER) {
+        if (value->kind() == t_const_value::CV_INTEGER) {
           out << value->get_integer();
         } else {
           out << value->get_double();

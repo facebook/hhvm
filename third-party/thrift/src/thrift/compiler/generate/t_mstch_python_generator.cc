@@ -787,10 +787,10 @@ class python_mstch_field : public mstch_field {
     if (value->is_empty()) {
       auto true_type = field_->get_type()->get_true_type();
       if ((true_type->is_list() || true_type->is_set()) &&
-          value->get_type() != t_const_value::CV_LIST) {
+          value->kind() != t_const_value::CV_LIST) {
         const_cast<t_const_value*>(value)->set_list();
       }
-      if (true_type->is_map() && value->get_type() != t_const_value::CV_MAP) {
+      if (true_type->is_map() && value->kind() != t_const_value::CV_MAP) {
         const_cast<t_const_value*>(value)->set_map();
       }
     }

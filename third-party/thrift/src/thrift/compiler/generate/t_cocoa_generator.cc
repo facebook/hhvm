@@ -2877,7 +2877,7 @@ std::string t_cocoa_generator::render_const_value(
         render << value->get_integer();
         break;
       case t_base_type::TYPE_DOUBLE:
-        if (value->get_type() == t_const_value::CV_INTEGER) {
+        if (value->kind() == t_const_value::CV_INTEGER) {
           render << value->get_integer();
         } else {
           render << value->get_double();

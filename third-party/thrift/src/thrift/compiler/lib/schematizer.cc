@@ -740,7 +740,7 @@ std::unique_ptr<t_const_value> wrap_with_protocol_value(
   auto ret = val();
   ret->set_map();
   ret->set_ttype(ttype);
-  switch (value.get_type()) {
+  switch (value.kind()) {
     case t_const_value::CV_BOOL:
       ret->add_map(val("boolValue"), value.clone());
       break;

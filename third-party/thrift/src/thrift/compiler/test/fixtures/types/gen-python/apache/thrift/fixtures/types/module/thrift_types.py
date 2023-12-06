@@ -490,7 +490,7 @@ class ComplexNestedWithDefault(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "n",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(ComplexString),  # typeinfo
-            lambda: ComplexString(a="3", b=_fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32, {"a": 3})),  # default value
+            lambda: ComplexString(a="3", b=_fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32, { "a": 3})),  # default value
             None,  # adapter info
             False, # field type is primitive
         ),

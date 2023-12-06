@@ -138,7 +138,7 @@ class {{> structs/unadapted_name}}({{!
 }}{{/typedef:has_adapter?}}
 {{/program:typedefs}}
 {{/program:typedefs?}}
-{{/program:services?}}
+{{#program:services?}}
 {{#program:services}}
 {{> types/service_arg_types_pyi}}
 {{#service:interactions}}

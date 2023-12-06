@@ -45,11 +45,11 @@ Used to turn a type into a thrift metadata ThriftType struct
     }}{{/type:struct}}{{!
     }}{{#type:list?}}{{!
         }}_fbthrift_metadata.ThriftType(t_list=_fbthrift_metadata.ThriftListType({{!
-        }}valueType={{#type:list_elem_type}}{{> metadata/thrift_type }}{{/type:list_elem_type}})){{
+        }}valueType={{#type:list_elem_type}}{{> metadata/thrift_type }}{{/type:list_elem_type}})){{!
     }}{{/type:list?}}{{!
     }}{{#type:set?}}{{!
         }}_fbthrift_metadata.ThriftType(t_set=_fbthrift_metadata.ThriftSetType({{!
-        }}valueType={{#type:set_elem_type}}{{> metadata/thrift_type }}{{/type:set_elem_type}})){{
+        }}valueType={{#type:set_elem_type}}{{> metadata/thrift_type }}{{/type:set_elem_type}})){{!
     }}{{/type:set?}}{{!
     }}{{#type:map?}}{{!
         }}_fbthrift_metadata.ThriftType(t_map=_fbthrift_metadata.ThriftMapType({{!
@@ -58,5 +58,5 @@ Used to turn a type into a thrift metadata ThriftType struct
     }}{{/type:map?}}{{!
     }}{{#type:enum}}{{!
     }}_fbthrift_metadata.ThriftType(t_enum=_fbthrift_metadata.ThriftEnumType({{!
-    }}name="{{type:program_name}}.{{enum:name}}")){{
+    }}name="{{type:program_name}}.{{enum:name}}")){{!
 }}{{/type:enum}}{{/type:typedef?}}

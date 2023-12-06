@@ -64,11 +64,11 @@ file.
 }}{{/value:string?}}{{!
 }}{{#value:map?}}_fbthrift_python_types.Map({{!
     }}{{#value:map_key_type}}{{ >types/typeinfo }}{{/value:map_key_type}}, {{!
-    }}{{#value:map_val_type}}{{ >types/typeinfo }}{{/value:map_val_type}}, {{=<% %>=}}{<%={{ }}=%>{{!
+    }}{{#value:map_val_type}}{{ >types/typeinfo }}{{/value:map_val_type}}, { {{! purposeful open brace
         }}{{#value:map_elements}}{{!
             }}{{#element:key}}{{ > types/constant_value }}{{/element:key}}: {{!
             }}{{#element:value}}{{ > types/constant_value}}{{/element:value}}{{^last?}}, {{/last?}}{{!
-        }}{{/value:map_elements}}{{!
+        }}{{/value:map_elements}}{{! purposeful close brace [next line]
 }}}){{/value:map?}}{{!
 }}{{#value:list?}}_fbthrift_python_types.{{!
     }}{{#value:value_for_set?}}Set{{/value:value_for_set?}}{{!

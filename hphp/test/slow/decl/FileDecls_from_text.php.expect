@@ -4,7 +4,15 @@ FileDecls Error (should be null):null
 Has class MyClass (should be yes):Yes
 Has class NoClass (should be no):No
 File: dict [
-  'attributes' => 
+  'typedefs' => 
+  vec [
+    dict [
+      'name' => 'someTypeDef',
+      'type' => 'shape()',
+      'visibility' => 'transparent',
+    ],
+  ],
+  'classes' => 
   vec [
     dict [
       'name' => 'MyClass',

@@ -28,6 +28,12 @@ namespace HPHP {
 
 namespace {
 
+// File
+const StaticString s_typedefs("typedefs");
+const StaticString s_functions("functions");
+const StaticString s_modules("modules");
+const StaticString s_classes("classes");
+
 // Class
 const StaticString s_name("name");
 const StaticString s_kind("kind");
@@ -581,12 +587,12 @@ Array populateTypedefs(const rust::Vec<hackc::ExtDeclTypeDef>& typedefs) {
  */
 Array populateFile(const hackc::ExtDeclFile& file) {
   Array info = Array::CreateDict();
-  maybeSet(info, file.typedefs, s_attributes, populateTypedefs);
-  maybeSet(info, file.functions, s_attributes, populateFileFuncs);
-  maybeSet(info, file.constants, s_attributes, populateFileConsts);
+  maybeSet(info, file.typedefs, s_typedefs, populateTypedefs);
+  maybeSet(info, file.functions, s_functions, populateFileFuncs);
+  maybeSet(info, file.constants, s_consts, populateFileConsts);
   maybeSet(info, file.file_attributes, s_attributes, populateAttributes);
-  maybeSet(info, file.modules, s_attributes, populateModules);
-  maybeSet(info, file.classes, s_attributes, populateClasses);
+  maybeSet(info, file.modules, s_modules, populateModules);
+  maybeSet(info, file.classes, s_classes, populateClasses);
   maybeSetBool(
       info, file.disable_xhp_element_mangling, s_disable_xhp_element_mangling);
   maybeSetBool(

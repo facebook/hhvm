@@ -19,6 +19,8 @@ function main(): void {
   // === FileDecls should succeed parsing this text
   $instance = HH\FileDecls::parseText('<?hh
 
+  type someTypeDef = shape();
+
   final class MyAttribute implements
     HH\ClassAttribute,
     HH\MethodAttribute,

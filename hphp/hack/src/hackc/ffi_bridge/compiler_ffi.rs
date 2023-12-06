@@ -345,25 +345,36 @@ mod ffi {
 
     #[derive(Default, Debug, PartialEq, Serialize, Deserialize, Clone)]
     pub struct FileFacts {
-        pub constants: Vec<String>,
-        pub file_attributes: Vec<AttrFacts>,
-        pub functions: Vec<String>,
-        pub modules: Vec<ModuleFacts>,
-        pub sha1sum: String,
         pub types: Vec<TypeFacts>,
+        pub functions: Vec<String>,
+        pub constants: Vec<String>,
+        pub modules: Vec<ModuleFacts>,
+        pub file_attributes: Vec<AttrFacts>,
+        pub sha1sum: String,
     }
 
     #[derive(Debug, PartialEq, Serialize, Deserialize, Default, Clone)]
     pub struct TypeFacts {
-        pub attributes: Vec<AttrFacts>,
-        pub base_types: Vec<String>,
-        pub flags: u8,
-        pub kind: TypeKind,
-        pub methods: Vec<MethodFacts>,
         pub name: String,
+        pub kind: TypeKind,
+        pub flags: u8,
+
+        /// List of attributes and their arguments
+        pub attributes: Vec<AttrFacts>,
+
+        /// List of types which this `extends`, `implements`, or `use`s
+        pub base_types: Vec<String>,
+
+        /// List of classes which this `require class`
         pub require_class: Vec<String>,
+
+        /// List of classes or interfaces which this `require extends`
         pub require_extends: Vec<String>,
+
+        /// List of interfaces which this `require implements`
         pub require_implements: Vec<String>,
+
+        pub methods: Vec<MethodFacts>,
     }
 
     #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
@@ -376,6 +387,8 @@ mod ffi {
         TypeAlias = 16,
     }
 
+    /// Represents `<<IAmAnAttribute(0, 'Hello', null)>>` as
+    /// `{"IAmAnAttribute", vec[0, "Hello", null]}`
     #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
     pub struct AttrFacts {
         pub name: String,
@@ -441,6 +454,12 @@ mod ffi {
 
         /// Decode a binary facts blob back to hackc::FileFacts
         fn binary_to_facts(json: &CxxString) -> Result<FileFacts>;
+
+        /// Format facts into a human readable string for debugging.
+        fn facts_debug(facts: &FileFacts) -> String;
+
+        /// Compute a SHA1 hash of a binary-serialized FileFacts.
+        fn hash_facts(facts: &FileFacts) -> [u8; 20];
 
         /////////////////////// ext_decl.rs API
         ///
@@ -766,6 +785,17 @@ fn decls_to_facts_binary(decls: &DeclsHolder, sha1sum: &CxxString) -> Result<Vec
 fn binary_to_facts(blob: &CxxString) -> bincode::Result<ffi::FileFacts> {
     use bincode::Options;
     bincode::options().deserialize_from(blob.as_bytes())
+}
+
+fn facts_debug(facts: &ffi::FileFacts) -> String {
+    format!("{facts:#?}")
+}
+
+fn hash_facts(facts: &ffi::FileFacts) -> [u8; 20] {
+    let mut hasher = Sha1::new();
+    let w = std::io::BufWriter::new(&mut hasher);
+    bincode::serialize_into(w, facts).unwrap();
+    hasher.finalize().into()
 }
 
 fn get_classes(holder: &DeclsHolder) -> Vec<ffi::ExtDeclClass> {

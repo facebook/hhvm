@@ -566,7 +566,7 @@ struct SymbolMap {
   void setBaseTypes(
       Path path,
       Symbol<SymKind::Type> derivedType,
-      std::vector<std::string> baseTypes);
+      rust::Vec<rust::String> baseTypes);
 
   /**
    * Load information from the DB about who the given `derivedType` inherits.

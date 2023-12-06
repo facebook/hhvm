@@ -275,21 +275,6 @@ std::vector<fs::path> removeHashes(
   return paths;
 }
 
-std::string json_from_facts(const FileFacts& facts) {
-  auto types = folly::dynamic::array();
-  for (auto const& type : facts.m_types) {
-    types.push_back(type.m_name);
-  }
-  // clang-format off
-  return folly::toJson(folly::dynamic::object
-    ("types", std::move(types))
-    ("functions",
-     folly::dynamic(facts.m_functions.begin(), facts.m_functions.end()))
-    ("constants",
-     folly::dynamic(facts.m_constants.begin(), facts.m_constants.end())));
-  // clang-format on
-}
-
 /**
  * Convert a C++ StringData structure into a Hack `vec<string>`.
  */
@@ -1007,13 +992,14 @@ struct FactsStoreImpl final
       // further writes occurring the hash we have from watchman may be stale.
       // The hash written to memcache and used to key the in memory facts map
       // will be fileFacts.m_sha1hex.
-      if (fileFacts.m_sha1hex == kEmptyFileSha1Hash && !fileFacts.isEmpty()) {
+      if (as_slice(fileFacts.sha1sum) == kEmptyFileSha1Hash &&
+          !isEmpty(fileFacts)) {
         throw FactsExtractionExc{folly::sformat(
             "{} has a SHA1 hash corresponding to an empty file ('{}'), "
             "but we are attempting to assign it non-empty facts: `{}`",
-            fileFacts.m_sha1hex,
+            alteredPathsAndHashes[i].m_path.native(),
             kEmptyFileSha1Hash,
-            json_from_facts(fileFacts))};
+            as_slice(hackc::facts_debug(fileFacts)))};
       }
     }
 

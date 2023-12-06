@@ -1031,7 +1031,7 @@ void SymbolMap::update(
     assertx(path.is_relative());
   }
   for (auto const& facts : alteredPathFacts) {
-    assertx(!facts.m_sha1hex.empty());
+    assertx(!facts.sha1sum.empty());
   }
 #endif
 
@@ -1221,92 +1221,111 @@ void SymbolMap::updateDBPath(
   assertx(path.is_relative());
 
   // Bail out early if the hex in memory is identical to the hex in the DB
-  if (facts.m_sha1hex == db.getSha1Hex(path)) {
+  if (facts.sha1sum == db.getSha1Hex(path)) {
     return;
   }
 
   // Refresh the path by deleting all its data
   db.erasePath(path);
   db.insertPath(path);
-  db.insertSha1Hex(path, facts.m_sha1hex);
+  db.insertSha1Hex(path, std::string{facts.sha1sum});
 
-  for (auto const& type : facts.m_types) {
-    db.insertType(type.m_name, path, type.m_kind, type.m_flags);
-    for (auto const& baseType : type.m_baseTypes) {
-      db.insertBaseType(path, type.m_name, DeriveKind::Extends, baseType);
-    }
-    for (auto const& baseType : type.m_requireExtends) {
+  for (auto const& type : facts.types) {
+    db.insertType(as_slice(type.name), path, type.kind, type.flags);
+    for (auto const& baseType : type.base_types) {
       db.insertBaseType(
-          path, type.m_name, DeriveKind::RequireExtends, baseType);
+          path, as_slice(type.name), DeriveKind::Extends, as_slice(baseType));
     }
-    for (auto const& baseType : type.m_requireImplements) {
+    for (auto const& baseType : type.require_extends) {
       db.insertBaseType(
-          path, type.m_name, DeriveKind::RequireImplements, baseType);
+          path,
+          as_slice(type.name),
+          DeriveKind::RequireExtends,
+          as_slice(baseType));
     }
-    for (auto const& baseType : type.m_requireClass) {
-      db.insertBaseType(path, type.m_name, DeriveKind::RequireClass, baseType);
+    for (auto const& baseType : type.require_implements) {
+      db.insertBaseType(
+          path,
+          as_slice(type.name),
+          DeriveKind::RequireImplements,
+          as_slice(baseType));
     }
-    for (auto const& attribute : type.m_attributes) {
-      if (attribute.m_args.empty()) {
+    for (auto const& baseType : type.require_class) {
+      db.insertBaseType(
+          path,
+          as_slice(type.name),
+          DeriveKind::RequireClass,
+          as_slice(baseType));
+    }
+    for (auto const& attribute : type.attributes) {
+      if (attribute.args.empty()) {
         db.insertTypeAttribute(
-            path, type.m_name, attribute.m_name, std::nullopt, nullptr);
+            path,
+            as_slice(type.name),
+            as_slice(attribute.name),
+            std::nullopt,
+            nullptr);
       } else {
-        for (auto i = 0; i < attribute.m_args.size(); ++i) {
+        for (auto i = 0; i < attribute.args.size(); ++i) {
+          folly::dynamic arg = std::string{attribute.args[i]};
           db.insertTypeAttribute(
-              path, type.m_name, attribute.m_name, i, &attribute.m_args[i]);
+              path, as_slice(type.name), as_slice(attribute.name), i, &arg);
         }
       }
     }
-    for (auto const& methodDetails : type.m_methods) {
-      for (auto const& attribute : methodDetails.m_attributes) {
+    for (auto const& methodDetails : type.methods) {
+      for (auto const& attribute : methodDetails.attributes) {
         // If we have an allowlist of method attributes to index, then skip any
         // method attribute which isn't in that allowlist.
         if (!m_indexedMethodAttrs.empty() &&
             !m_indexedMethodAttrs.count(
-                Symbol<SymKind::Type>{attribute.m_name})) {
+                Symbol<SymKind::Type>{as_slice(attribute.name)})) {
           continue;
         }
-        if (attribute.m_args.empty()) {
+        if (attribute.args.empty()) {
           db.insertMethodAttribute(
               path,
-              type.m_name,
-              methodDetails.m_name,
-              attribute.m_name,
+              as_slice(type.name),
+              as_slice(methodDetails.name),
+              as_slice(attribute.name),
               std::nullopt,
               nullptr);
         } else {
-          for (auto i = 0; i < attribute.m_args.size(); ++i) {
+          for (auto i = 0; i < attribute.args.size(); ++i) {
+            folly::dynamic arg = std::string{attribute.args[i]};
             db.insertMethodAttribute(
                 path,
-                type.m_name,
-                methodDetails.m_name,
-                attribute.m_name,
+                as_slice(type.name),
+                as_slice(methodDetails.name),
+                as_slice(attribute.name),
                 i,
-                &attribute.m_args[i]);
+                &arg);
           }
         }
       }
     }
   }
 
-  for (auto const& module : facts.m_modules) {
-    db.insertModule(module.m_name, path);
+  for (auto const& module : facts.modules) {
+    db.insertModule(as_slice(module.name), path);
   }
 
-  for (auto const& function : facts.m_functions) {
-    db.insertFunction(function, path);
+  for (auto const& function : facts.functions) {
+    db.insertFunction(as_slice(function), path);
   }
 
-  for (auto const& constant : facts.m_constants) {
-    db.insertConstant(constant, path);
+  for (auto const& constant : facts.constants) {
+    db.insertConstant(as_slice(constant), path);
   }
 
-  for (auto const& attribute : facts.m_attributes) {
-    if (attribute.m_args.empty()) {
-      db.insertFileAttribute(path, attribute.m_name, std::nullopt, nullptr);
+  for (auto const& attribute : facts.file_attributes) {
+    if (attribute.args.empty()) {
+      db.insertFileAttribute(
+          path, as_slice(attribute.name), std::nullopt, nullptr);
     } else {
-      for (auto i = 0; i < attribute.m_args.size(); ++i) {
-        db.insertFileAttribute(path, attribute.m_name, i, &attribute.m_args[i]);
+      for (auto i = 0; i < attribute.args.size(); ++i) {
+        folly::dynamic arg = std::string{attribute.args[i]};
+        db.insertFileAttribute(path, as_slice(attribute.name), i, &arg);
       }
     }
   }
@@ -1456,86 +1475,92 @@ void SymbolMap::Data::updatePath(
   m_versions->bumpVersion(path);
 
   typename PathToSymbolsMap<SymKind::Type>::Symbols types;
-  for (auto& type : facts.m_types) {
-    always_assert(!type.m_name.empty());
+  for (auto& type : facts.types) {
+    always_assert(!type.name.empty());
     // ':' is a valid character in XHP classnames, but not Hack
     // classnames. We should have replaced ':' in the parser.
-    always_assert(type.m_name.find(':') == -1);
-    auto typeName = Symbol<SymKind::Type>{type.m_name};
+    always_assert(as_slice(type.name).find(':') == -1);
+    auto typeName = Symbol<SymKind::Type>{as_slice(type.name)};
 
     types.push_back(typeName);
-    m_typeKind.setKindAndFlags(typeName, path, type.m_kind, type.m_flags);
-    if (type.m_kind == TypeKind::TypeAlias) {
+    m_typeKind.setKindAndFlags(typeName, path, type.kind, type.flags);
+    if (type.kind == TypeKind::TypeAlias) {
       m_typeAliasAttrs.setAttributes(
-          {typeName, path}, std::move(type.m_attributes));
+          {typeName, path}, std::move(type.attributes));
     } else {
-      m_typeAttrs.setAttributes({typeName, path}, std::move(type.m_attributes));
+      m_typeAttrs.setAttributes({typeName, path}, std::move(type.attributes));
     }
     m_inheritanceInfo.setBaseTypes(
-        typeName, path, DeriveKind::Extends, std::move(type.m_baseTypes));
+        typeName, path, DeriveKind::Extends, type.base_types);
     m_inheritanceInfo.setBaseTypes(
         typeName,
         path,
         DeriveKind::RequireClass,
-        std::move(type.m_requireClass));
+        std::move(type.require_class));
     m_inheritanceInfo.setBaseTypes(
         typeName,
         path,
         DeriveKind::RequireExtends,
-        std::move(type.m_requireExtends));
+        std::move(type.require_extends));
     m_inheritanceInfo.setBaseTypes(
         typeName,
         path,
         DeriveKind::RequireImplements,
-        std::move(type.m_requireImplements));
+        std::move(type.require_implements));
 
-    for (auto& [method, attributes] : type.m_methods) {
+    for (auto& method : type.methods) {
       // Remove method attributes not in the allowlist if the allowlist exists
+      auto& attrs = method.attributes;
       if (!indexedMethodAttrs.empty()) {
-        attributes.erase(
-            std::remove_if(
-                attributes.begin(),
-                attributes.end(),
-                [&](const Attribute& attr) {
-                  return !indexedMethodAttrs.count(
-                      Symbol<SymKind::Type>{attr.m_name});
-                }),
-            attributes.end());
+        size_t j = 0;
+        for (size_t i = 0; i < attrs.size(); ++i) {
+          // XXX interning every queried attribute name
+          if (indexedMethodAttrs.count(
+                  Symbol<SymKind::Type>{as_slice(attrs[i].name)})) {
+            if (j < i) {
+              attrs[j] = std::move(attrs[i]);
+            }
+            j++;
+          }
+        }
+        if (j < attrs.size()) {
+          attrs.truncate(j);
+        }
       }
-      if (!attributes.empty()) {
+      if (!attrs.empty()) {
         MethodDecl methodDecl{
             .m_type = {.m_name = typeName, .m_path = path},
-            .m_method = Symbol<SymKind::Function>{method}};
-        m_methodAttrs.setAttributes(methodDecl, std::move(attributes));
+            .m_method = Symbol<SymKind::Function>{as_slice(method.name)}};
+        m_methodAttrs.setAttributes(methodDecl, std::move(attrs));
       }
     }
   }
 
   typename PathToSymbolsMap<SymKind::Module>::Symbols modules;
-  for (auto const& module : facts.m_modules) {
-    always_assert(!module.m_name.empty());
-    modules.push_back(Symbol<SymKind::Module>{module.m_name});
+  for (auto const& module : facts.modules) {
+    always_assert(!module.name.empty());
+    modules.push_back(Symbol<SymKind::Module>{as_slice(module.name)});
   }
 
   typename PathToSymbolsMap<SymKind::Function>::Symbols functions;
-  for (auto const& function : facts.m_functions) {
+  for (auto const& function : facts.functions) {
     always_assert(!function.empty());
-    functions.push_back(Symbol<SymKind::Function>{function});
+    functions.push_back(Symbol<SymKind::Function>{as_slice(function)});
   }
 
   typename PathToSymbolsMap<SymKind::Constant>::Symbols constants;
-  for (auto const& constant : facts.m_constants) {
+  for (auto const& constant : facts.constants) {
     always_assert(!constant.empty());
-    constants.push_back(Symbol<SymKind::Constant>{constant});
+    constants.push_back(Symbol<SymKind::Constant>{as_slice(constant)});
   }
 
-  m_fileAttrs.setAttributes({path}, facts.m_attributes);
+  m_fileAttrs.setAttributes({path}, facts.file_attributes);
 
   m_modulePath.replacePathSymbols(path, std::move(modules));
   m_typePath.replacePathSymbols(path, std::move(types));
   m_functionPath.replacePathSymbols(path, std::move(functions));
   m_constantPath.replacePathSymbols(path, std::move(constants));
-  m_sha1Hashes.insert_or_assign(path, SHA1{facts.m_sha1hex});
+  m_sha1Hashes.insert_or_assign(path, SHA1{as_slice(facts.sha1sum)});
 
   m_fileExistsMap.insert_or_assign(path, true);
 }

@@ -532,15 +532,7 @@ void waitForDB(SymbolMap& m, std::shared_ptr<folly::ManualExecutor>& exec) {
 }
 
 std::string getSha1Hex(const FileFacts& ff) {
-  return SHA1{
-      folly::hash::hash_combine(
-          folly::hash::hash_range(ff.m_types.begin(), ff.m_types.end()),
-          folly::hash::hash_range(ff.m_functions.begin(), ff.m_functions.end()),
-          folly::hash::hash_range(ff.m_constants.begin(), ff.m_constants.end()),
-          folly::hash::hash_range(
-              ff.m_attributes.begin(), ff.m_attributes.end())
-          /* Don't include m_sha1hex */)}
-      .toString();
+  return SHA1{hackc::hash_facts(ff)}.toString();
 }
 
 void update(
@@ -551,7 +543,7 @@ void update(
     std::vector<fs::path> deletedPaths,
     std::vector<FileFacts> facts) {
   for (auto& ff : facts) {
-    ff.m_sha1hex = getSha1Hex(ff);
+    ff.sha1sum = getSha1Hex(ff);
   }
   m.update(
       Clock{.m_clock = std::string{since}},
@@ -638,8 +630,7 @@ TEST_F(SymbolMapTest, NewModules) {
   fs::path path1 = {"some/path1.php"};
 
   FileFacts ff{
-      .m_modules = {
-          {.m_name = "some_module"}, {.m_name = "some_other_module"}}};
+      .modules = {{.name = "some_module"}, {.name = "some_other_module"}}};
 
   EXPECT_CALL(*db, insertModule("some_module", path1));
   EXPECT_CALL(*db, insertModule("some_other_module", path1));
@@ -730,9 +721,8 @@ TEST_F(SymbolMapTest, OverwriteExistingDbModules) {
 
   // Now we overwrite it with new information.  The new information should
   // be returned by the symbol map and the db should get updated.
-  FileFacts ff1{.m_modules = {{.m_name = kSecondPath1}}};
-  FileFacts ff2{
-      .m_modules = {{.m_name = kSecondPath2}, {.m_name = kSecondPath3}}};
+  FileFacts ff1{.modules = {{.name = kSecondPath1}}};
+  FileFacts ff2{.modules = {{.name = kSecondPath2}, {.name = kSecondPath3}}};
 
   EXPECT_CALL(*db, erasePath(path1));
   EXPECT_CALL(*db, erasePath(path2));
@@ -787,16 +777,15 @@ TEST_F(SymbolMapTest, addPaths) {
   auto& m = make("/var/www");
 
   FileFacts ff{
-      .m_types =
-          {{.m_name = "SomeClass",
-            .m_kind = TypeKind::Class,
-            .m_baseTypes = {"BaseClass"}},
-           {.m_name = "BaseClass", .m_kind = TypeKind::Class},
-           {.m_name = "SomeTypeAlias", .m_kind = TypeKind::TypeAlias}},
-      .m_functions = {"some_fn"},
-      .m_constants = {"SOME_CONSTANT"},
-      .m_modules = {
-          {.m_name = "some_module"}, {.m_name = "some_other_module"}}};
+      .types =
+          {{.name = "SomeClass",
+            .kind = TypeKind::Class,
+            .base_types = {"BaseClass"}},
+           {.name = "BaseClass", .kind = TypeKind::Class},
+           {.name = "SomeTypeAlias", .kind = TypeKind::TypeAlias}},
+      .functions = {"some_fn"},
+      .constants = {"SOME_CONSTANT"},
+      .modules = {{.name = "some_module"}, {.name = "some_other_module"}}};
 
   // Define symbols in path
   fs::path path1 = {"some/path1.php"};
@@ -880,11 +869,11 @@ TEST_F(SymbolMapTest, duplicateSymbols) {
   auto& m = make("/var/www");
 
   FileFacts ff{
-      .m_types =
-          {{.m_name = "SomeClass", .m_kind = TypeKind::Class},
-           {.m_name = "SomeTypeAlias", .m_kind = TypeKind::TypeAlias}},
-      .m_functions = {"some_fn"},
-      .m_constants = {"SOME_CONSTANT"}};
+      .types =
+          {{.name = "SomeClass", .kind = TypeKind::Class},
+           {.name = "SomeTypeAlias", .kind = TypeKind::TypeAlias}},
+      .functions = {"some_fn"},
+      .constants = {"SOME_CONSTANT"}};
 
   fs::path path1 = {"some/path1.php"};
   fs::path path2 = {"some/path2.php"};
@@ -907,14 +896,14 @@ TEST_F(SymbolMapTest, DBFill) {
   auto& m2 = make("/var/www");
 
   FileFacts ff{
-      .m_types =
-          {{.m_name = "SomeClass",
-            .m_kind = TypeKind::Class,
-            .m_baseTypes = {"BaseClass"}},
-           {.m_name = "BaseClass", .m_kind = TypeKind::Class},
-           {.m_name = "SomeTypeAlias", .m_kind = TypeKind::TypeAlias}},
-      .m_functions = {"some_fn"},
-      .m_constants = {"SOME_CONSTANT"}};
+      .types =
+          {{.name = "SomeClass",
+            .kind = TypeKind::Class,
+            .base_types = {"BaseClass"}},
+           {.name = "BaseClass", .kind = TypeKind::Class},
+           {.name = "SomeTypeAlias", .kind = TypeKind::TypeAlias}},
+      .functions = {"some_fn"},
+      .constants = {"SOME_CONSTANT"}};
 
   fs::path path = {"some/path.php"};
 
@@ -974,8 +963,7 @@ TEST_F(SymbolMapTest, DBFill) {
 
 TEST_F(SymbolMapTest, ChangeSymbolCase) {
   auto& m = make("/var/www");
-  FileFacts ff{
-      .m_types = {{.m_name = "HTTPDNSURL", .m_kind = TypeKind::Class}}};
+  FileFacts ff{.types = {{.name = "HTTPDNSURL", .kind = TypeKind::Class}}};
 
   fs::path path = {"some/path.php"};
   update(m, "", "1:2:3", {path}, {}, {ff});
@@ -986,7 +974,7 @@ TEST_F(SymbolMapTest, ChangeSymbolCase) {
 
   // Classes are case-insensitive, but changing the case of a class
   // should change the canonical representation
-  ff.m_types.at(0).m_name = "HttpDnsUrl";
+  ff.types.at(0).name = "HttpDnsUrl";
   update(m, "1:2:3", "1:2:4", {path}, {}, {ff});
   auto types = m.getFileTypes(path);
   EXPECT_EQ(m.getTypeName("httpdnsurl")->slice(), "HttpDnsUrl");
@@ -1008,13 +996,12 @@ TEST_F(SymbolMapTest, ChangeSymbolCase) {
 TEST_F(SymbolMapTest, ChangeBaseClassSymbolCase) {
   auto& m = make("/var/www");
   FileFacts ff1{
-      .m_types = {
-          {.m_name = "SomeClass",
-           .m_kind = TypeKind::Class,
-           .m_baseTypes = {"baseclass"}}}};
+      .types = {
+          {.name = "SomeClass",
+           .kind = TypeKind::Class,
+           .base_types = {"baseclass"}}}};
 
-  FileFacts ff2{
-      .m_types = {{.m_name = "baseclass", .m_kind = TypeKind::Class}}};
+  FileFacts ff2{.types = {{.name = "baseclass", .kind = TypeKind::Class}}};
 
   fs::path path1 = {"some/path1.php"};
   fs::path path2 = {"some/path2.php"};
@@ -1026,8 +1013,8 @@ TEST_F(SymbolMapTest, ChangeBaseClassSymbolCase) {
       m.getDerivedTypes("baseclass", DeriveKind::Extends),
       ElementsAre("SomeClass"));
 
-  ff1.m_types.at(0).m_baseTypes.at(0) = "BaseClass";
-  ff2.m_types.at(0).m_name = "BaseClass";
+  ff1.types.at(0).base_types.at(0) = "BaseClass";
+  ff2.types.at(0).name = "BaseClass";
   update(m, "1:2:3", "1:2:4", {path1, path2}, {}, {ff1, ff2});
   EXPECT_THAT(
       m.getBaseTypes("SomeClass", DeriveKind::Extends),
@@ -1045,11 +1032,11 @@ TEST_F(SymbolMapTest, ChangeBaseClassSymbolCase) {
 TEST_F(SymbolMapTest, MaintainCorrectCase) {
   auto& m1 = make("/var/www");
   FileFacts ff{
-      .m_types =
-          {{.m_name = "CamelCasedType", .m_kind = TypeKind::Class},
-           {.m_name = "CamelCasedTypeAlias", .m_kind = TypeKind::TypeAlias}},
-      .m_functions = {{"CamelCasedFunction"}},
-      .m_constants = {{"CamelCasedConstant"}}};
+      .types =
+          {{.name = "CamelCasedType", .kind = TypeKind::Class},
+           {.name = "CamelCasedTypeAlias", .kind = TypeKind::TypeAlias}},
+      .functions = {{"CamelCasedFunction"}},
+      .constants = {{"CamelCasedConstant"}}};
 
   fs::path path = {"some/path.php"};
   update(m1, "", "1:2:3", {path}, {}, {ff});
@@ -1076,7 +1063,7 @@ TEST_F(SymbolMapTest, DBUpdateWithDuplicateDeclaration) {
   auto& m1 = make("/var/www");
   auto& m2 = make("/var/www");
 
-  FileFacts ff{.m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}}};
+  FileFacts ff{.types = {{.name = "SomeClass", .kind = TypeKind::Class}}};
 
   fs::path path1 = {"some/path.php"};
   fs::path path2 = {"some/path2.php"};
@@ -1104,12 +1091,12 @@ TEST_F(SymbolMapTest, CopiedFile) {
   ASSERT_NE(path1, path2);
 
   FileFacts ff{
-      .m_types =
-          {{.m_name = "SomeClass", .m_kind = TypeKind::Class},
-           {.m_name = "OtherClass", .m_kind = TypeKind::Class},
-           {.m_name = "SomeTypeAlias", .m_kind = TypeKind::TypeAlias}},
-      .m_functions = {"SomeFunction"},
-      .m_constants = {"SomeConstant"}};
+      .types =
+          {{.name = "SomeClass", .kind = TypeKind::Class},
+           {.name = "OtherClass", .kind = TypeKind::Class},
+           {.name = "SomeTypeAlias", .kind = TypeKind::TypeAlias}},
+      .functions = {"SomeFunction"},
+      .constants = {"SomeConstant"}};
 
   update(m1, "", "1:2:3", {path1}, {}, {ff});
   m1.waitForDBUpdate();
@@ -1135,7 +1122,7 @@ TEST_F(SymbolMapTest, DoesNotFillDeadPathFromDB) {
   auto& m3 = make("/var/www", m_exec);
 
   fs::path path = {"some/path.php"};
-  FileFacts ff{.m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}}};
+  FileFacts ff{.types = {{.name = "SomeClass", .kind = TypeKind::Class}}};
 
   update(m1, "", "1:2:3", {path}, {}, {ff});
   waitForDB(m1, m_exec);
@@ -1154,7 +1141,7 @@ TEST_F(SymbolMapTest, UpdateOnlyIfCorrectSince) {
   EXPECT_EQ(m.getClock().m_clock, "1:2:3");
 
   fs::path path = {"some/path.php"};
-  FileFacts ff{.m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}}};
+  FileFacts ff{.types = {{.name = "SomeClass", .kind = TypeKind::Class}}};
 
   // since token is "4:5:6" but needs to be "1:2:3". It's not, so
   // `update()` throws and we don't change any data in `m`.
@@ -1170,11 +1157,11 @@ TEST_F(SymbolMapTest, DelayedDBUpdateDoesNotMakeResultsIncorrect) {
   ASSERT_NE(path1, path2);
 
   FileFacts ff{
-      .m_types = {
-          {.m_name = "SomeClass",
-           .m_kind = TypeKind::Class,
-           .m_baseTypes = {"BaseClass"}},
-          {.m_name = "BaseClass", .m_kind = TypeKind::Class}}};
+      .types = {
+          {.name = "SomeClass",
+           .kind = TypeKind::Class,
+           .base_types = {"BaseClass"}},
+          {.name = "BaseClass", .kind = TypeKind::Class}}};
 
   update(m, "", "1:2:3", {path1, path2}, {}, {ff, ff});
   EXPECT_EQ(m.getClock().m_clock, "1:2:3");
@@ -1215,11 +1202,11 @@ TEST_F(SymbolMapTest, GetKind) {
   fs::path p = {"some/path1.php"};
 
   FileFacts ff{
-      .m_types = {
-          {.m_name = "C1", .m_kind = TypeKind::Class},
-          {.m_name = "I1", .m_kind = TypeKind::Interface},
-          {.m_name = "T1", .m_kind = TypeKind::Trait},
-          {.m_name = "E1", .m_kind = TypeKind::Enum}}};
+      .types = {
+          {.name = "C1", .kind = TypeKind::Class},
+          {.name = "I1", .kind = TypeKind::Interface},
+          {.name = "T1", .kind = TypeKind::Trait},
+          {.name = "E1", .kind = TypeKind::Enum}}};
 
   update(m1, "", "1:2:3", {p}, {}, {ff});
 
@@ -1243,16 +1230,16 @@ TEST_F(SymbolMapTest, GetKind) {
 
 TEST_F(SymbolMapTest, TypeIsAbstractOrFinal) {
   FileFacts ff{
-      .m_types = {
-          {.m_name = "Abstract",
-           .m_kind = TypeKind::Class,
-           .m_flags = kTypeFlagAbstractBit},
-          {.m_name = "Final",
-           .m_kind = TypeKind::Class,
-           .m_flags = kTypeFlagFinalBit},
-          {.m_name = "AbstractFinal",
-           .m_kind = TypeKind::Trait,
-           .m_flags = kTypeFlagAbstractBit | kTypeFlagFinalBit}}};
+      .types = {
+          {.name = "Abstract",
+           .kind = TypeKind::Class,
+           .flags = kTypeFlagAbstractBit},
+          {.name = "Final",
+           .kind = TypeKind::Class,
+           .flags = kTypeFlagFinalBit},
+          {.name = "AbstractFinal",
+           .kind = TypeKind::Trait,
+           .flags = kTypeFlagAbstractBit | kTypeFlagFinalBit}}};
 
   fs::path p = {"some/path1.php"};
 
@@ -1289,9 +1276,9 @@ TEST_F(SymbolMapTest, OverwriteKind) {
   fs::path p2 = {"some/path2.php"};
   ASSERT_NE(p1.native(), p2.native());
 
-  FileFacts ff1{.m_types = {{.m_name = "Foo", .m_kind = TypeKind::Class}}};
+  FileFacts ff1{.types = {{.name = "Foo", .kind = TypeKind::Class}}};
 
-  FileFacts ff2{.m_types = {{.m_name = "Foo", .m_kind = TypeKind::Interface}}};
+  FileFacts ff2{.types = {{.name = "Foo", .kind = TypeKind::Interface}}};
 
   // Duplicate declaration
   update(m1, "", "1:2:3", {p1, p2}, {}, {ff1, ff2});
@@ -1314,14 +1301,13 @@ TEST_F(SymbolMapTest, DeriveKinds) {
 
   fs::path path = {"some/path.php"};
   FileFacts ff{
-      .m_types = {
-          TypeDetails{.m_name = "BaseClass", .m_kind = TypeKind::Class},
-          TypeDetails{.m_name = "BaseInterface", .m_kind = TypeKind::Interface},
-          TypeDetails{
-              .m_name = "SomeTrait",
-              .m_kind = TypeKind::Trait,
-              .m_requireExtends = {"BaseClass"},
-              .m_requireImplements = {"BaseInterface"}}}};
+      .types = {
+          {.name = "BaseClass", .kind = TypeKind::Class},
+          {.name = "BaseInterface", .kind = TypeKind::Interface},
+          {.name = "SomeTrait",
+           .kind = TypeKind::Trait,
+           .require_extends = {"BaseClass"},
+           .require_implements = {"BaseInterface"}}}};
 
   update(m1, "", "1:2:3", {path}, {}, {ff});
   EXPECT_EQ(m1.getClock().m_clock, "1:2:3");
@@ -1339,10 +1325,10 @@ TEST_F(SymbolMapTest, DeriveKinds) {
       m1.getDerivedTypes("BaseInterface", DeriveKind::RequireImplements),
       ElementsAre("SomeTrait"));
 
-  auto& someTraitFacts = ff.m_types[2];
-  ASSERT_EQ(someTraitFacts.m_name, "SomeTrait");
-  someTraitFacts.m_requireExtends = {};
-  someTraitFacts.m_requireImplements = {};
+  auto& someTraitFacts = ff.types[2];
+  ASSERT_EQ(someTraitFacts.name, "SomeTrait");
+  someTraitFacts.require_extends = {};
+  someTraitFacts.require_implements = {};
   update(m1, "1:2:3", "1:2:4", {path}, {}, {ff});
 }
 
@@ -1351,12 +1337,11 @@ TEST_F(SymbolMapTest, DeriveKindsRequireClass) {
 
   fs::path path = {"some/path.php"};
   FileFacts ff{
-      .m_types = {
-          TypeDetails{.m_name = "BaseClass", .m_kind = TypeKind::Class},
-          TypeDetails{
-              .m_name = "SomeTrait",
-              .m_kind = TypeKind::Trait,
-              .m_requireClass = {"BaseClass"}}}};
+      .types = {
+          {.name = "BaseClass", .kind = TypeKind::Class},
+          {.name = "SomeTrait",
+           .kind = TypeKind::Trait,
+           .require_class = {"BaseClass"}}}};
 
   update(m1, "", "1:2:3", {path}, {}, {ff});
   EXPECT_EQ(m1.getClock().m_clock, "1:2:3");
@@ -1369,9 +1354,9 @@ TEST_F(SymbolMapTest, DeriveKindsRequireClass) {
       m1.getDerivedTypes("BaseClass", DeriveKind::RequireClass),
       ElementsAre("SomeTrait"));
 
-  auto& someTraitFacts = ff.m_types[1];
-  ASSERT_EQ(someTraitFacts.m_name, "SomeTrait");
-  someTraitFacts.m_requireClass = {};
+  auto& someTraitFacts = ff.types[1];
+  ASSERT_EQ(someTraitFacts.name, "SomeTrait");
+  someTraitFacts.require_class = {};
   update(m1, "1:2:3", "1:2:4", {path}, {}, {ff});
 }
 
@@ -1379,7 +1364,7 @@ TEST_F(SymbolMapTest, MultipleRoots) {
   auto& m1 = make("/var/www1");
 
   fs::path path = {"some/path.php"};
-  FileFacts ff{.m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}}};
+  FileFacts ff{.types = {{.name = "SomeClass", .kind = TypeKind::Class}}};
 
   update(m1, "", "1:2:3", {path}, {}, {ff});
   EXPECT_EQ(m1.getClock().m_clock, "1:2:3");
@@ -1403,7 +1388,7 @@ TEST_F(SymbolMapTest, InterleaveDBUpdates) {
 
   fs::path path = {"some/path.php"};
 
-  FileFacts ff{.m_functions = {"some_fn"}};
+  FileFacts ff{.functions = {"some_fn"}};
 
   update(m1, "", "1:2:3", {path}, {}, {ff});
   EXPECT_EQ(m1.getClock().m_clock, "1:2:3");
@@ -1429,11 +1414,11 @@ TEST_F(SymbolMapTest, RemoveBaseTypeFromDerivedType) {
   auto& m = make("/var/www", m_exec);
 
   FileFacts ff{
-      .m_types = {
-          {.m_name = "SomeClass",
-           .m_kind = TypeKind::Class,
-           .m_baseTypes = {"BaseClass"}},
-          {.m_name = "BaseClass", .m_kind = TypeKind::Class}}};
+      .types = {
+          {.name = "SomeClass",
+           .kind = TypeKind::Class,
+           .base_types = {"BaseClass"}},
+          {.name = "BaseClass", .kind = TypeKind::Class}}};
 
   fs::path path = "some/path1.php";
   update(m, "", "1:2:3", {path}, {}, {ff});
@@ -1445,7 +1430,7 @@ TEST_F(SymbolMapTest, RemoveBaseTypeFromDerivedType) {
       m.getDerivedTypes("BaseClass", DeriveKind::Extends).at(0).slice(),
       "SomeClass");
 
-  ff.m_types.at(0).m_baseTypes = {};
+  ff.types.at(0).base_types = {};
   update(m, "1:2:3", "1:2:4", {path}, {}, {ff});
 
   EXPECT_TRUE(m.getBaseTypes("SomeClass", DeriveKind::Extends).empty());
@@ -1456,13 +1441,12 @@ TEST_F(SymbolMapTest, DuplicateDefineDerivedType) {
   auto& m = make("/var/www", m_exec);
 
   FileFacts ff1{
-      .m_types = {
-          {.m_name = "SomeClass",
-           .m_kind = TypeKind::Class,
-           .m_baseTypes = {"BaseClass"}}}};
+      .types = {
+          {.name = "SomeClass",
+           .kind = TypeKind::Class,
+           .base_types = {"BaseClass"}}}};
 
-  FileFacts ff2{
-      .m_types = {{.m_name = "BaseClass", .m_kind = TypeKind::Class}}};
+  FileFacts ff2{.types = {{.name = "BaseClass", .kind = TypeKind::Class}}};
 
   fs::path path1 = "some/path1.php";
   fs::path path2 = "some/path2.php";
@@ -1493,11 +1477,11 @@ TEST_F(SymbolMapTest, DBUpdatesOutOfOrder) {
   auto& m2 = make("/var/www", m_exec2);
 
   FileFacts ff{
-      .m_types = {
-          {.m_name = "SomeClass",
-           .m_kind = TypeKind::Class,
-           .m_baseTypes = {"BaseClass"}},
-          {.m_name = "BaseClass", .m_kind = TypeKind::Class}}};
+      .types = {
+          {.name = "SomeClass",
+           .kind = TypeKind::Class,
+           .base_types = {"BaseClass"}},
+          {.name = "BaseClass", .kind = TypeKind::Class}}};
 
   fs::path path1 = {"some/path1.php"};
   fs::path path2 = {"some/path2.php"};
@@ -1566,10 +1550,10 @@ TEST_F(SymbolMapTest, ChangeAndMoveClassAttrs) {
   auto& m = make("/var/www");
 
   FileFacts ffWithAttr{
-      .m_types = {
-          {.m_name = "C1",
-           .m_kind = TypeKind::Class,
-           .m_attributes = {{.m_name = "A1"}}}}};
+      .types = {
+          {.name = "C1",
+           .kind = TypeKind::Class,
+           .attributes = {{.name = "A1"}}}}};
   fs::path p1{"p1.php"};
 
   update(m, "", "1", {p1}, {}, {ffWithAttr});
@@ -1577,7 +1561,7 @@ TEST_F(SymbolMapTest, ChangeAndMoveClassAttrs) {
   EXPECT_THAT(m.getTypesWithAttribute("A1"), ElementsAre("C1"));
 
   FileFacts ffEmpty{};
-  FileFacts ffNoAttr{.m_types = {{.m_name = "C1", .m_kind = TypeKind::Class}}};
+  FileFacts ffNoAttr{.types = {{.name = "C1", .kind = TypeKind::Class}}};
   fs::path p2{"p2.php"};
 
   update(m, "1", "2", {p1, p2}, {}, {ffEmpty, ffNoAttr});
@@ -1588,7 +1572,7 @@ TEST_F(SymbolMapTest, ChangeAndMoveClassAttrs) {
 TEST_F(SymbolMapTest, RemovePathFromExistingFile) {
   auto& m = make("/var/www");
 
-  FileFacts ff{.m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}}};
+  FileFacts ff{.types = {{.name = "SomeClass", .kind = TypeKind::Class}}};
 
   FileFacts emptyFF{};
 
@@ -1604,7 +1588,7 @@ TEST_F(SymbolMapTest, MoveAndCopySymbol) {
   auto& m1 = make("/var/www", m_exec);
   auto& m2 = make("/var/www", m_exec);
 
-  FileFacts ff{.m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}}};
+  FileFacts ff{.types = {{.name = "SomeClass", .kind = TypeKind::Class}}};
 
   FileFacts emptyFF{};
 
@@ -1632,13 +1616,13 @@ TEST_F(SymbolMapTest, AttrQueriesDoNotConfuseTypeAndTypeAlias) {
   auto& m1 = make("/var/www", m_exec);
   fs::path p = "foo.php";
   FileFacts ffTypeAliasWithAttr{
-      .m_types = {
-          {.m_name = "SomeClass",
-           .m_kind = TypeKind::Class,
-           .m_attributes = {{.m_name = "ClassAttr"}}},
-          {.m_name = "SomeTypeAlias",
-           .m_kind = TypeKind::TypeAlias,
-           .m_attributes = {{.m_name = "AliasAttr"}}}}};
+      .types = {
+          {.name = "SomeClass",
+           .kind = TypeKind::Class,
+           .attributes = {{.name = "ClassAttr"}}},
+          {.name = "SomeTypeAlias",
+           .kind = TypeKind::TypeAlias,
+           .attributes = {{.name = "AliasAttr"}}}}};
   update(m1, "", "1", {p}, {}, {ffTypeAliasWithAttr});
 
   EXPECT_THAT(m1.getAttributesOfType("SomeClass"), ElementsAre("ClassAttr"));
@@ -1669,13 +1653,13 @@ TEST_F(SymbolMapTest, TwoFilesDisagreeOnBaseTypes) {
   auto& m = make("/var/www", m_exec);
 
   FileFacts ffSomeClassDerivesBaseClass{
-      .m_types = {
-          {.m_name = "SomeClass",
-           .m_kind = TypeKind::Class,
-           .m_baseTypes = {"BaseClass"}}}};
+      .types = {
+          {.name = "SomeClass",
+           .kind = TypeKind::Class,
+           .base_types = {"BaseClass"}}}};
 
   FileFacts ffBaseClass{
-      .m_types = {{.m_name = "BaseClass", .m_kind = TypeKind::Class}}};
+      .types = {{.name = "BaseClass", .kind = TypeKind::Class}}};
 
   fs::path pSomeClass1 = "src/SomeClass1.php";
   fs::path pSomeClass2 = "src/SomeClass2.php";
@@ -1703,7 +1687,7 @@ TEST_F(SymbolMapTest, TwoFilesDisagreeOnBaseTypes) {
   };
 
   FileFacts ffSomeClassDerivesNobody{
-      .m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}}};
+      .types = {{.name = "SomeClass", .kind = TypeKind::Class}}};
 
   // pSomeClass1 now believes that SomeClass doesn't extend BaseClass
   update(m, "1:2:3", "1:2:4", {pSomeClass1}, {}, {ffSomeClassDerivesBaseClass});
@@ -1737,7 +1721,7 @@ TEST_F(SymbolMapTest, MemoryAndDBDisagreeOnFileHash) {
   auto& m1 = make("/var/www", m_exec);
   auto& m2 = make("/var/www", m_exec);
 
-  FileFacts ff{.m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}}};
+  FileFacts ff{.types = {{.name = "SomeClass", .kind = TypeKind::Class}}};
 
   fs::path path1 = {"some/path1.php"};
 
@@ -1746,7 +1730,7 @@ TEST_F(SymbolMapTest, MemoryAndDBDisagreeOnFileHash) {
   auto oldHash = getSha1Hex(ff);
   EXPECT_EQ(m1.getAllPathsWithHashes().at(Path{path1}).toString(), oldHash);
 
-  ff.m_types[0].m_name = "OtherClass";
+  ff.types[0].name = "OtherClass";
   auto newHash = getSha1Hex(ff);
   ASSERT_NE(oldHash, newHash);
 
@@ -1758,19 +1742,18 @@ TEST_F(SymbolMapTest, PartiallyFillDerivedTypeInfo) {
   auto& m1 = make("/var/www", m_exec);
 
   FileFacts ff1{
-      .m_types = {
-          {.m_name = "SomeClass",
-           .m_kind = TypeKind::Class,
-           .m_baseTypes = {"BaseClass"}}}};
+      .types = {
+          {.name = "SomeClass",
+           .kind = TypeKind::Class,
+           .base_types = {"BaseClass"}}}};
 
   FileFacts ff2{
-      .m_types = {
-          {.m_name = "OtherClass",
-           .m_kind = TypeKind::Class,
-           .m_baseTypes = {"BaseClass"}}}};
+      .types = {
+          {.name = "OtherClass",
+           .kind = TypeKind::Class,
+           .base_types = {"BaseClass"}}}};
 
-  FileFacts ff3{
-      .m_types = {{.m_name = "BaseClass", .m_kind = TypeKind::Interface}}};
+  FileFacts ff3{.types = {{.name = "BaseClass", .kind = TypeKind::Interface}}};
 
   fs::path p1 = "some/path1.php";
   fs::path p2 = "some/path2.php";
@@ -1799,22 +1782,20 @@ TEST_F(SymbolMapTest, BaseTypesWithDifferentCases) {
   auto& m1 = make("/var/www", m_exec);
 
   FileFacts ff1{
-      .m_types = {
-          {.m_name = "SomeClass",
-           .m_kind = TypeKind::Class,
-           .m_baseTypes = {"BaseClass"}}}};
+      .types = {
+          {.name = "SomeClass",
+           .kind = TypeKind::Class,
+           .base_types = {"BaseClass"}}}};
 
   FileFacts ff2{
-      .m_types = {
-          {.m_name = "SomeClass",
-           .m_kind = TypeKind::Class,
-           .m_baseTypes = {"baseclass"}}}};
+      .types = {
+          {.name = "SomeClass",
+           .kind = TypeKind::Class,
+           .base_types = {"baseclass"}}}};
 
-  FileFacts ff3{
-      .m_types = {{.m_name = "BaseClass", .m_kind = TypeKind::Class}}};
+  FileFacts ff3{.types = {{.name = "BaseClass", .kind = TypeKind::Class}}};
 
-  FileFacts ff4{
-      .m_types = {{.m_name = "baseclass", .m_kind = TypeKind::Class}}};
+  FileFacts ff4{.types = {{.name = "baseclass", .kind = TypeKind::Class}}};
 
   fs::path p1 = "some/path1.php";
   fs::path p2 = "some/path2.php";
@@ -1850,11 +1831,11 @@ TEST_F(SymbolMapTest, DerivedTypesWithDifferentCases) {
   auto& m = make("/var/www", m_exec);
 
   FileFacts ff1{
-      .m_types = {
-          {.m_name = "SomeClass",
-           .m_kind = TypeKind::Class,
-           .m_baseTypes = {"BaseClass"}},
-          {.m_name = "BaseClass", .m_kind = TypeKind::Class}}};
+      .types = {
+          {.name = "SomeClass",
+           .kind = TypeKind::Class,
+           .base_types = {"BaseClass"}},
+          {.name = "BaseClass", .kind = TypeKind::Class}}};
 
   fs::path p1 = "some/path1.php";
 
@@ -1869,11 +1850,11 @@ TEST_F(SymbolMapTest, DerivedTypesWithDifferentCases) {
 
   // Replace "SomeClass" with "SOMECLASS"
   FileFacts ff2{
-      .m_types = {
-          {.m_name = "SOMECLASS",
-           .m_kind = TypeKind::Class,
-           .m_baseTypes = {"BaseClass"}},
-          {.m_name = "BaseClass", .m_kind = TypeKind::Class}}};
+      .types = {
+          {.name = "SOMECLASS",
+           .kind = TypeKind::Class,
+           .base_types = {"BaseClass"}},
+          {.name = "BaseClass", .kind = TypeKind::Class}}};
   update(m, "1", "2", {p1}, {}, {ff2});
 
   EXPECT_EQ(m.getTypeFile("SOMECLASS"), p1.native());
@@ -1889,9 +1870,9 @@ TEST_F(SymbolMapTest, GetSymbolsInFileFromDB) {
   auto& m1 = make("/var/www", m_exec);
 
   FileFacts ff{
-      .m_types = {
-          {.m_name = "SomeClass", .m_kind = TypeKind::Class},
-          {.m_name = "OtherClass", .m_kind = TypeKind::Class}}};
+      .types = {
+          {.name = "SomeClass", .kind = TypeKind::Class},
+          {.name = "OtherClass", .kind = TypeKind::Class}}};
 
   fs::path path = {"some/path1.php"};
 
@@ -1918,7 +1899,7 @@ TEST_F(SymbolMapTest, GetSymbolsInFileFromDB) {
 TEST_F(SymbolMapTest, ErasePathStoredInDB) {
   auto& m1 = make("/var/www", m_exec);
 
-  FileFacts ff{.m_types = {{.m_name = "SomeClass", .m_kind = TypeKind::Class}}};
+  FileFacts ff{.types = {{.name = "SomeClass", .kind = TypeKind::Class}}};
 
   fs::path p = {"some/path.php"};
 
@@ -1936,22 +1917,19 @@ TEST_F(SymbolMapTest, GetTypesAndTypeAliasesWithAttribute) {
   auto& m1 = make("/var/www", m_exec);
 
   FileFacts ff{
-      .m_types = {
-          TypeDetails{
-              .m_name = "SomeClass",
-              .m_kind = TypeKind::Class,
-              .m_attributes =
-                  {{.m_name = "Foo", .m_args = {"apple", 38}},
-                   {.m_name = "Bar", .m_args = {nullptr}},
-                   {.m_name = "Baz", .m_args = {}}}},
-          TypeDetails{
-              .m_name = "OtherClass",
-              .m_kind = TypeKind::Class,
-              .m_attributes = {{.m_name = "Bar"}}},
-          TypeDetails{
-              .m_name = "SomeTypeAlias",
-              .m_kind = TypeKind::TypeAlias,
-              .m_attributes = {{.m_name = "Foo", .m_args = {42, "a"}}}}}};
+      .types = {
+          {.name = "SomeClass",
+           .kind = TypeKind::Class,
+           .attributes =
+               {{.name = "Foo", .args = {"apple", "38"}},
+                {.name = "Bar", .args = {""}},
+                {.name = "Baz", .args = {}}}},
+          {.name = "OtherClass",
+           .kind = TypeKind::Class,
+           .attributes = {{.name = "Bar"}}},
+          {.name = "SomeTypeAlias",
+           .kind = TypeKind::TypeAlias,
+           .attributes = {{.name = "Foo", .args = {"42", "a"}}}}}};
 
   fs::path p = {"some/path.php"};
 
@@ -1970,11 +1948,11 @@ TEST_F(SymbolMapTest, GetTypesAndTypeAliasesWithAttribute) {
         UnorderedElementsAre("Bar", "Baz", "Foo"));
     EXPECT_THAT(
         map.getTypeAliasAttributeArgs("SomeTypeAlias", "Foo"),
-        ElementsAre(42, "a"));
+        ElementsAre("42", "a"));
     EXPECT_THAT(
-        map.getTypeAttributeArgs("SomeClass", "Foo"), ElementsAre("apple", 38));
-    EXPECT_THAT(
-        map.getTypeAttributeArgs("SomeClass", "Bar"), ElementsAre(nullptr));
+        map.getTypeAttributeArgs("SomeClass", "Foo"),
+        ElementsAre("apple", "38"));
+    EXPECT_THAT(map.getTypeAttributeArgs("SomeClass", "Bar"), ElementsAre(""));
     EXPECT_THAT(map.getTypeAttributeArgs("SomeClass", "Baz"), IsEmpty());
     EXPECT_THAT(
         map.getAttributesOfTypeAlias("SomeTypeAlias"), ElementsAre("Foo"));
@@ -1993,17 +1971,16 @@ TEST_F(SymbolMapTest, GetMethodsWithAttribute) {
   auto& m1 = make("/var/www");
 
   FileFacts ff1{
-      .m_types = {
-          TypeDetails{
-              .m_name = "C1",
-              .m_methods =
-                  {MethodDetails{
-                       .m_name = "m1",
-                       .m_attributes = {{.m_name = "A1", .m_args = {1}}}},
-                   MethodDetails{
-                       .m_name = "m2",
-                       .m_attributes = {{.m_name = "A1", .m_args = {2}}},
-                   }}},
+      .types = {
+          {.name = "C1",
+           .methods =
+               {MethodFacts{
+                    .name = "m1",
+                    .attributes = {{.name = "A1", .args = {"1"}}}},
+                MethodFacts{
+                    .name = "m2",
+                    .attributes = {{.name = "A1", .args = {"2"}}},
+                }}},
       }};
   fs::path p1{"some/path1.php"};
   update(m1, "", "1", {p1}, {}, {ff1});
@@ -2021,9 +1998,9 @@ TEST_F(SymbolMapTest, GetMethodsWithAttribute) {
                 .m_method = Symbol<SymKind::Function>{StringData{"m1"}}})));
 
     EXPECT_THAT(m.getAttributesOfMethod("C1", "m1"), ElementsAre("A1"));
-    EXPECT_THAT(m.getMethodAttributeArgs("C1", "m1", "A1"), ElementsAre(1));
+    EXPECT_THAT(m.getMethodAttributeArgs("C1", "m1", "A1"), ElementsAre("1"));
     EXPECT_THAT(m.getAttributesOfMethod("C1", "m2"), ElementsAre("A1"));
-    EXPECT_THAT(m.getMethodAttributeArgs("C1", "m2", "A1"), ElementsAre(2));
+    EXPECT_THAT(m.getMethodAttributeArgs("C1", "m2", "A1"), ElementsAre("2"));
   };
   testMap(m1);
 
@@ -2038,13 +2015,12 @@ TEST_F(SymbolMapTest, GetAttributesOfRenamedMethod) {
 
   // Create method `C1::m1`
   FileFacts ff1{
-      .m_types = {TypeDetails{
-          .m_name = "C1",
-          .m_methods = {
-              MethodDetails{
-                  .m_name = "m1",
-                  .m_attributes = {{.m_name = "A1", .m_args = {1}}}},
-          }}}};
+      .types = {
+          {.name = "C1",
+           .methods = {
+               MethodFacts{
+                   .name = "m1", .attributes = {{.name = "A1", .args = {"1"}}}},
+           }}}};
   fs::path p1{"some/path1.php"};
   update(m1, "", "1", {p1}, {}, {ff1});
 
@@ -2063,13 +2039,12 @@ TEST_F(SymbolMapTest, GetAttributesOfRenamedMethod) {
 
   // Rename method `C1::m1` to `C1::m2`
   FileFacts ff2{
-      .m_types = {TypeDetails{
-          .m_name = "C1",
-          .m_methods = {
-              MethodDetails{
-                  .m_name = "m2",
-                  .m_attributes = {{.m_name = "A1", .m_args = {1}}}},
-          }}}};
+      .types = {
+          {.name = "C1",
+           .methods = {
+               MethodFacts{
+                   .name = "m2", .attributes = {{.name = "A1", .args = {"1"}}}},
+           }}}};
 
   update(m2, "1", "2", {p1}, {}, {ff2});
 
@@ -2087,13 +2062,13 @@ TEST_F(SymbolMapTest, OnlyIndexCertainMethodAttrs) {
 
   // Create method `C1::m1`
   FileFacts ff1{
-      .m_types = {TypeDetails{
-          .m_name = "C1",
-          .m_methods = {
-              MethodDetails{
-                  .m_name = "m1",
-                  .m_attributes = {{.m_name = "A1"}, {.m_name = "A2"}}},
-          }}}};
+      .types = {
+          {.name = "C1",
+           .methods = {
+               MethodFacts{
+                   .name = "m1",
+                   .attributes = {{.name = "A1"}, {.name = "A2"}}},
+           }}}};
   fs::path p1{"some/path1.php"};
 
   auto check = [&](SymbolMap& m) {
@@ -2123,9 +2098,8 @@ TEST_F(SymbolMapTest, GetFilesWithAttribute) {
   auto& m1 = make("/var/www");
 
   FileFacts ff1{
-      .m_attributes = {
-          Attribute{.m_name = "A1", .m_args = {1}},
-          Attribute{.m_name = "A2", .m_args = {}}}};
+      .file_attributes = {
+          {.name = "A1", .args = {"1"}}, {.name = "A2", .args = {}}}};
   fs::path p1{"some/path1.php"};
   update(m1, "", "1", {p1}, {}, {ff1});
 
@@ -2136,17 +2110,17 @@ TEST_F(SymbolMapTest, GetFilesWithAttribute) {
     auto a2files = m.getFilesWithAttribute("A2");
     EXPECT_THAT(a2files, ElementsAre(p1.native()));
 
-    auto a1valfiles = m.getFilesWithAttributeAndAnyValue("A1", 1);
+    auto a1valfiles = m.getFilesWithAttributeAndAnyValue("A1", "1");
     EXPECT_THAT(a1valfiles, ElementsAre(p1.native()));
 
-    auto a2valfiles = m.getFilesWithAttributeAndAnyValue("A2", 1);
+    auto a2valfiles = m.getFilesWithAttributeAndAnyValue("A2", "1");
     EXPECT_THAT(a2valfiles, ElementsAre());
 
     auto attrs = m.getAttributesOfFile(Path{p1});
     EXPECT_THAT(attrs, UnorderedElementsAre("A1", "A2"));
 
     auto a1args = m.getFileAttributeArgs(Path{p1}, "A1");
-    EXPECT_THAT(a1args, ElementsAre(1));
+    EXPECT_THAT(a1args, ElementsAre("1"));
 
     auto a2args = m.getFileAttributeArgs(Path{p1}, "A2");
     EXPECT_THAT(a2args, ElementsAre());
@@ -2176,16 +2150,16 @@ TEST_F(SymbolMapTest, ConcurrentFillsFromDB) {
   std::vector<fs::path> paths;
   std::vector<FileFacts> facts;
   for (auto i = 0; i < numSymbols; ++i) {
-    FileFacts ff;
-    std::vector<std::string> baseTypes;
+    rust::Vec<rust::String> baseTypes;
     baseTypes.reserve(i);
     for (auto j = 0; j < i; ++j) {
       baseTypes.push_back(makeSym(j));
     }
-    ff.m_types = {
-        {.m_name = makeSym(i),
-         .m_kind = TypeKind::Class,
-         .m_baseTypes = std::move(baseTypes)}};
+    FileFacts ff{
+        .types = {
+            {.name = makeSym(i),
+             .kind = TypeKind::Class,
+             .base_types = std::move(baseTypes)}}};
 
     paths.push_back(makePath(i));
     facts.push_back(std::move(ff));

@@ -153,12 +153,13 @@ struct InheritanceInfo {
       Symbol<SymKind::Type> derivedType,
       Path derivedTypePath,
       DeriveKind kind,
-      const std::vector<std::string>& baseTypeStrs) {
+      const rust::Vec<rust::String>& baseTypeStrs) {
     Types baseTypes;
     baseTypes.reserve(baseTypeStrs.size());
     for (auto const& baseTypeStr : baseTypeStrs) {
       baseTypes.push_back(
-          {.m_type = Symbol<SymKind::Type>{baseTypeStr}, .m_kind = kind});
+          {.m_type = Symbol<SymKind::Type>{as_slice(baseTypeStr)},
+           .m_kind = kind});
     }
     return m_baseTypesMap.setValuesForKey(
         {.m_type = derivedType, .m_kind = kind, .m_path = derivedTypePath},

@@ -75,13 +75,18 @@ struct AttributeMap {
     return m_attrMap.getKeysForValue(attr, std::move(keysFromDB));
   }
 
-  void setAttributes(Key key, std::vector<Attribute> attrVec) {
+  void setAttributes(Key key, rust::Vec<AttrFacts> attrVec) {
     Attrs attrs;
     attrs.reserve(attrVec.size());
     for (auto& attr : attrVec) {
-      auto attrSym = Symbol<SymKind::Type>{attr.m_name};
+      auto attrSym = Symbol<SymKind::Type>{as_slice(attr.name)};
       attrs.push_back(attrSym);
-      m_attrArgs.setAttributeArgs(key, attrSym, std::move(attr.m_args));
+      std::vector<folly::dynamic> args;
+      args.reserve(attr.args.size());
+      for (auto& arg : attr.args) {
+        args.emplace_back(as_slice(arg)); // string -> folly::dynamic
+      }
+      m_attrArgs.setAttributeArgs(key, attrSym, std::move(args));
     }
     m_attrMap.setValuesForKey(std::move(key), std::move(attrs));
   }

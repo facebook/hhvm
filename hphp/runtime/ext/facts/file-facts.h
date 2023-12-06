@@ -67,66 +67,28 @@ constexpr DeriveKindMask kDeriveKindAll =
     static_cast<int>(DeriveKind::RequireImplements) |
     static_cast<int>(DeriveKind::RequireClass);
 
-// Represents `<<IAmAnAttribute(0, 'Hello', null)>>` as
-// `{"IAmAnAttribute", vec[0, "Hello", null]}`
-struct Attribute {
-  std::string m_name;
-  std::vector<folly::dynamic> m_args;
-};
+using hackc::AttrFacts;
+using hackc::FileFacts;
+using hackc::MethodFacts;
+using hackc::ModuleFacts;
+using hackc::TypeFacts;
 
-struct MethodDetails {
-  std::string m_name;
-  std::vector<Attribute> m_attributes;
-};
+inline bool isAbstract(const hackc::TypeFacts& t) noexcept {
+  return (t.flags & static_cast<int>(TypeFlag::Abstract)) != 0;
+}
 
-struct TypeDetails {
-  std::string m_name;
-  TypeKind m_kind;
-  int m_flags{0};
+inline bool isFinal(const hackc::TypeFacts& t) noexcept {
+  return (t.flags & static_cast<int>(TypeFlag::Final)) != 0;
+}
 
-  // List of types which this `extends`, `implements`, or `use`s
-  std::vector<std::string> m_baseTypes;
+inline bool isEmpty(const FileFacts& f) noexcept {
+  return f.types.empty() && f.functions.empty() && f.constants.empty() &&
+      f.modules.empty() && f.file_attributes.empty();
+}
 
-  // List of attributes and their arguments
-  std::vector<Attribute> m_attributes;
-
-  // List of classes which this `require class`
-  std::vector<std::string> m_requireClass;
-
-  // List of classes or interfaces which this `require extends`
-  std::vector<std::string> m_requireExtends;
-
-  // List of interfaces which this `require implements`
-  std::vector<std::string> m_requireImplements;
-
-  std::vector<MethodDetails> m_methods;
-
-  bool isAbstract() const noexcept {
-    return m_flags & static_cast<int>(TypeFlag::Abstract);
-  }
-
-  bool isFinal() const noexcept {
-    return m_flags & static_cast<int>(TypeFlag::Final);
-  }
-};
-
-struct ModuleDetails {
-  std::string m_name;
-};
-
-struct FileFacts {
-  bool isEmpty() const noexcept {
-    return m_types.empty() && m_functions.empty() && m_constants.empty() &&
-        m_modules.empty() && m_attributes.empty();
-  }
-
-  std::vector<TypeDetails> m_types;
-  std::vector<std::string> m_functions;
-  std::vector<std::string> m_constants;
-  std::vector<ModuleDetails> m_modules;
-  std::vector<Attribute> m_attributes;
-  std::string m_sha1hex;
-};
+inline std::string_view as_slice(const rust::String& s) noexcept {
+  return {s.data(), s.size()};
+}
 
 /**
  * A string from Watchman representing a point in time.
@@ -178,50 +140,6 @@ class FormatValue<HPHP::Facts::Clock> {
   const HPHP::Facts::Clock m_val;
 };
 } // namespace folly
-
-namespace std {
-
-template <>
-struct hash<HPHP::Facts::Attribute> {
-  std::size_t operator()(const HPHP::Facts::Attribute& attr) const noexcept {
-    return folly::hash::hash_combine(
-        std::hash<std::string>{}(attr.m_name),
-        folly::hash::hash_range(attr.m_args.begin(), attr.m_args.end()));
-  }
-};
-
-template <>
-struct hash<HPHP::Facts::MethodDetails> {
-  std::size_t operator()(
-      const HPHP::Facts::MethodDetails& method) const noexcept {
-    return folly::hash::hash_combine(
-        std::hash<std::string>{}(method.m_name),
-        folly::hash::hash_range(
-            method.m_attributes.begin(), method.m_attributes.end()));
-  }
-};
-
-template <>
-struct hash<HPHP::Facts::TypeDetails> {
-  std::size_t operator()(const HPHP::Facts::TypeDetails& type) const noexcept {
-    return folly::hash::hash_combine(
-        std::hash<std::string>{}(type.m_name),
-        std::hash<::HPHP::Facts::TypeKind>{}(type.m_kind),
-        std::hash<int>{}(type.m_flags),
-        folly::hash::hash_range(
-            type.m_baseTypes.begin(), type.m_baseTypes.end()),
-        folly::hash::hash_range(
-            type.m_attributes.begin(), type.m_attributes.end()),
-        folly::hash::hash_range(
-            type.m_requireClass.begin(), type.m_requireClass.end()),
-        folly::hash::hash_range(
-            type.m_requireExtends.begin(), type.m_requireExtends.end()),
-        folly::hash::hash_range(
-            type.m_requireImplements.begin(), type.m_requireImplements.end()),
-        folly::hash::hash_range(type.m_methods.begin(), type.m_methods.end()));
-  }
-};
-} // namespace std
 
 template <>
 struct fmt::formatter<HPHP::Facts::Clock> {

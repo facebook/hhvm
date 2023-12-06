@@ -38,99 +38,6 @@ namespace Facts {
 
 namespace {
 
-std::vector<std::string> move_str_vec(rust::Vec<rust::String> stringList) {
-  std::vector<std::string> ret;
-  ret.reserve(stringList.size());
-  for (auto& item : std::move(stringList)) {
-    ret.emplace_back(std::move(item));
-  }
-  return ret;
-}
-
-std::vector<Attribute> move_attr_vec(rust::Vec<hackc::AttrFacts> attrList) {
-  std::vector<Attribute> ret;
-  ret.reserve(attrList.size());
-  for (auto& item : std::move(attrList)) {
-    Attribute attr;
-    attr.m_name = std::string{std::move(item.name)};
-    for (auto& arg : item.args) {
-      attr.m_args.emplace_back(std::move(arg));
-    }
-    ret.emplace_back(std::move(attr));
-  }
-  return ret;
-}
-
-std::vector<MethodDetails> move_method_vec(
-    rust::Vec<hackc::MethodFacts> methodList) {
-  std::vector<MethodDetails> ret;
-  ret.reserve(methodList.size());
-  for (auto& method : std::move(methodList)) {
-    ret.push_back(MethodDetails{
-        .m_name = std::string{method.name},
-        .m_attributes = move_attr_vec(std::move(method.attributes))});
-  }
-  return ret;
-}
-
-std::vector<TypeDetails> move_type_vec(rust::Vec<hackc::TypeFacts> types) {
-  std::vector<TypeDetails> ret;
-  for (auto& type : std::move(types)) {
-    auto typeKind = [&] {
-      switch (type.kind) {
-        case hackc::TypeKind::Class:
-          return TypeKind::Class;
-        case hackc::TypeKind::Interface:
-          return TypeKind::Interface;
-        case hackc::TypeKind::Enum:
-          return TypeKind::Enum;
-        case hackc::TypeKind::Trait:
-          return TypeKind::Trait;
-        case hackc::TypeKind::TypeAlias:
-          return TypeKind::TypeAlias;
-        case hackc::TypeKind::Unknown:
-        default:
-          return TypeKind::Unknown;
-      }
-    }();
-    ret.push_back(TypeDetails{
-        .m_name = std::string{type.name},
-        .m_kind = typeKind,
-        .m_flags = type.flags,
-        .m_baseTypes = move_str_vec(std::move(type.base_types)),
-        .m_attributes = move_attr_vec(std::move(type.attributes)),
-        .m_requireClass = move_str_vec(std::move(type.require_class)),
-        .m_requireExtends = move_str_vec(std::move(type.require_extends)),
-        .m_requireImplements = move_str_vec(std::move(type.require_implements)),
-        .m_methods = move_method_vec(std::move(type.methods))});
-  }
-  return ret;
-}
-
-std::vector<ModuleDetails> move_module_vec(
-    rust::Vec<hackc::ModuleFacts> modules) {
-  std::vector<ModuleDetails> ret;
-  ret.reserve(modules.size());
-  for (auto& module : std::move(modules)) {
-    ret.push_back(ModuleDetails{.m_name = std::string{module.name}});
-  }
-  return ret;
-}
-
-FileFacts make_file_facts(hackc::FileFacts facts) {
-  try {
-    return {
-        .m_types = move_type_vec(std::move(facts.types)),
-        .m_functions = move_str_vec(std::move(facts.functions)),
-        .m_constants = move_str_vec(std::move(facts.constants)),
-        .m_modules = move_module_vec(std::move(facts.modules)),
-        .m_attributes = move_attr_vec(std::move(facts.file_attributes)),
-        .m_sha1hex = std::string{facts.sha1sum}};
-  } catch (const folly::TypeError& e) {
-    throw FactsExtractionExc{e.what()};
-  }
-}
-
 // Given a string like "foo bla bla bla ... bla bar", returns a
 // printable string like "foo [1234 bytes omitted] bar", where the
 // length of the prefix and suffix taken from the string are specified
@@ -276,9 +183,6 @@ std::vector<folly::Try<FileFacts>> facts_from_paths(
                 PathAndOptionalHash withoutHash{absPathAndHash.m_path, {}};
                 return decode_facts(facts_binary_from_path(withoutHash));
               }
-            })
-            .thenValue([](hackc::FileFacts&& facts) {
-              return make_file_facts(std::move(facts));
             })
             .thenTry([&completed_tasks,
                       &pathsAndHashes](folly::Try<FileFacts>&& facts) {

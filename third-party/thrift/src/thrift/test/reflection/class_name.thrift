@@ -16,6 +16,8 @@
 
 package "apache.org/thrift/test"
 
+include "thrift/annotation/cpp.thrift"
+
 struct MyStruct {
   1: i32 field;
 }
@@ -28,14 +30,17 @@ permanent client exception MyException {
   1: i32 field;
 }
 
+@cpp.Name{value = "RenamedMyStruct"}
 struct MyStruct2 {
   1: i32 field;
-} (cpp.name = "RenamedMyStruct")
+}
 
+@cpp.Name{value = "RenamedMyUnion"}
 union MyUnion2 {
   1: i32 field;
-} (cpp.name = "RenamedMyUnion")
+}
 
+@cpp.Name{value = "RenamedMyException"}
 permanent client exception MyException2 {
   1: string message;
-} (cpp.name = "RenamedMyException")
+}

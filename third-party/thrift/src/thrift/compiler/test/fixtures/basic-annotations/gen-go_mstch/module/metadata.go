@@ -24,11 +24,15 @@ var (
         metadata.NewThriftEnumType().
             SetName("module.MyEnum"),
             )
+    premadeThriftType_list_string = metadata.NewThriftType().SetTList(
+        metadata.NewThriftListType().
+            SetValueType(premadeThriftType_string),
+            )
     premadeThriftType_module_list_string_6884 = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
-    SetName("module.list_string_6884").
-    SetUnderlyingType(premadeThriftType_list_string),
-    )
+            SetName("module.list_string_6884").
+            SetUnderlyingType(premadeThriftType_list_string),
+            )
     premadeThriftType_module_MyUnion = metadata.NewThriftType().SetTUnion(
         metadata.NewThriftUnionType().
             SetName("module.MyUnion"),
@@ -36,10 +40,6 @@ var (
     premadeThriftType_module_MyStruct = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.MyStruct"),
-            )
-    premadeThriftType_list_string = metadata.NewThriftType().SetTList(
-        metadata.NewThriftListType().
-            SetValueType(premadeThriftType_string),
             )
     premadeThriftType_void = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),

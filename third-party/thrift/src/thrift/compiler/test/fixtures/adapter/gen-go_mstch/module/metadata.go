@@ -21,11 +21,14 @@ var (
         metadata.NewThriftEnumType().
             SetName("module.Color"),
             )
+    premadeThriftType_i32 = metadata.NewThriftType().SetTPrimitive(
+        metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
+            )
     premadeThriftType_module_i32_5137 = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
-    SetName("module.i32_5137").
-    SetUnderlyingType(premadeThriftType_i32),
-    )
+            SetName("module.i32_5137").
+            SetUnderlyingType(premadeThriftType_i32),
+            )
     premadeThriftType_set_string = metadata.NewThriftType().SetTSet(
         metadata.NewThriftSetType().
             SetValueType(premadeThriftType_string),
@@ -35,16 +38,48 @@ var (
             SetName("module.SetWithAdapter").
             SetUnderlyingType(premadeThriftType_set_string),
             )
+    premadeThriftType_module_StringWithAdapter = metadata.NewThriftType().SetTTypedef(
+        metadata.NewThriftTypedefType().
+            SetName("module.StringWithAdapter").
+            SetUnderlyingType(premadeThriftType_string),
+            )
+    premadeThriftType_list_module_StringWithAdapter = metadata.NewThriftType().SetTList(
+        metadata.NewThriftListType().
+            SetValueType(premadeThriftType_module_StringWithAdapter),
+            )
+    premadeThriftType_module_ListWithElemAdapter = metadata.NewThriftType().SetTTypedef(
+        metadata.NewThriftTypedefType().
+            SetName("module.ListWithElemAdapter").
+            SetUnderlyingType(premadeThriftType_list_module_StringWithAdapter),
+            )
+    premadeThriftType_module_ListWithElemAdapter_withAdapter = metadata.NewThriftType().SetTTypedef(
+        metadata.NewThriftTypedefType().
+            SetName("module.ListWithElemAdapter_withAdapter").
+            SetUnderlyingType(premadeThriftType_module_ListWithElemAdapter),
+            )
+    premadeThriftType_module_ListWithElemAdapter_withAdapter_2312 = metadata.NewThriftType().SetTTypedef(
+        metadata.NewThriftTypedefType().
+            SetName("module.ListWithElemAdapter_withAdapter_2312").
+            SetUnderlyingType(premadeThriftType_module_ListWithElemAdapter_withAdapter),
+            )
+    premadeThriftType_map_string_module_ListWithElemAdapter_withAdapter_2312 = metadata.NewThriftType().SetTMap(
+        metadata.NewThriftMapType().
+            SetKeyType(premadeThriftType_string).
+            SetValueType(premadeThriftType_module_ListWithElemAdapter_withAdapter_2312),
+            )
     premadeThriftType_module_map_string_ListWithElemAdapter_withAdapter_8454 = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
-    SetName("module.map_string_ListWithElemAdapter_withAdapter_8454").
-    SetUnderlyingType(premadeThriftType_map_string_module_ListWithElemAdapter_withAdapter_2312),
-    )
+            SetName("module.map_string_ListWithElemAdapter_withAdapter_8454").
+            SetUnderlyingType(premadeThriftType_map_string_module_ListWithElemAdapter_withAdapter_2312),
+            )
+    premadeThriftType_binary = metadata.NewThriftType().SetTPrimitive(
+        metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE.Ptr(),
+            )
     premadeThriftType_module_binary_5673 = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
-    SetName("module.binary_5673").
-    SetUnderlyingType(premadeThriftType_binary),
-    )
+            SetName("module.binary_5673").
+            SetUnderlyingType(premadeThriftType_binary),
+            )
     premadeThriftType_i64 = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
             )
@@ -58,53 +93,64 @@ var (
             SetName("module.DoubleTypedefI64").
             SetUnderlyingType(premadeThriftType_module_MyI64),
             )
+    premadeThriftType_module_Foo = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.Foo"),
+            )
     premadeThriftType_module_Foo_6868 = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
-    SetName("module.Foo_6868").
-    SetUnderlyingType(premadeThriftType_module_Foo),
-    )
+            SetName("module.Foo_6868").
+            SetUnderlyingType(premadeThriftType_module_Foo),
+            )
     premadeThriftType_module_Foo_3943 = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
-    SetName("module.Foo_3943").
-    SetUnderlyingType(premadeThriftType_module_Foo),
-    )
+            SetName("module.Foo_3943").
+            SetUnderlyingType(premadeThriftType_module_Foo),
+            )
+    premadeThriftType_module_FooWithAdapter = metadata.NewThriftType().SetTTypedef(
+        metadata.NewThriftTypedefType().
+            SetName("module.FooWithAdapter").
+            SetUnderlyingType(premadeThriftType_module_Foo),
+            )
     premadeThriftType_module_FooWithAdapter_9317 = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
-    SetName("module.FooWithAdapter_9317").
-    SetUnderlyingType(premadeThriftType_module_FooWithAdapter),
-    )
+            SetName("module.FooWithAdapter_9317").
+            SetUnderlyingType(premadeThriftType_module_FooWithAdapter),
+            )
     premadeThriftType_list_module_FooWithAdapter_9317 = metadata.NewThriftType().SetTList(
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_module_FooWithAdapter_9317),
             )
+    premadeThriftType_module_Baz = metadata.NewThriftType().SetTUnion(
+        metadata.NewThriftUnionType().
+            SetName("module.Baz"),
+            )
     premadeThriftType_module_Baz_7352 = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
-    SetName("module.Baz_7352").
-    SetUnderlyingType(premadeThriftType_module_Baz),
-    )
+            SetName("module.Baz_7352").
+            SetUnderlyingType(premadeThriftType_module_Baz),
+            )
     premadeThriftType_module_DirectlyAdapted = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
-    SetName("module.DirectlyAdapted"),
-    )
-    premadeThriftType_i32 = metadata.NewThriftType().SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
+            SetName("module.DirectlyAdapted"),
             )
     premadeThriftType_set_i32 = metadata.NewThriftType().SetTSet(
         metadata.NewThriftSetType().
             SetValueType(premadeThriftType_i32),
             )
+    premadeThriftType_module_A = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.A"),
+            )
     premadeThriftType_module_AdaptedA = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
-    SetName("module.AdaptedA").
-    SetUnderlyingType(premadeThriftType_module_A),
-    )
+            SetName("module.AdaptedA").
+            SetUnderlyingType(premadeThriftType_module_A),
+            )
     premadeThriftType_module_DurationMs = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
             SetName("module.DurationMs").
             SetUnderlyingType(premadeThriftType_i64),
-            )
-    premadeThriftType_binary = metadata.NewThriftType().SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE.Ptr(),
             )
     premadeThriftType_module_IOBuf = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
@@ -219,17 +265,21 @@ var (
             )
     premadeThriftType_module_CircularStruct = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
-    SetName("module.CircularStruct"),
-    )
+            SetName("module.CircularStruct"),
+            )
+    premadeThriftType_module_CircularAdaptee = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.CircularAdaptee"),
+            )
     premadeThriftType_module_AdaptedCircularAdaptee = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
-    SetName("module.AdaptedCircularAdaptee").
-    SetUnderlyingType(premadeThriftType_module_CircularAdaptee),
-    )
+            SetName("module.AdaptedCircularAdaptee").
+            SetUnderlyingType(premadeThriftType_module_CircularAdaptee),
+            )
     premadeThriftType_module_DeclaredAfterStruct = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
-    SetName("module.DeclaredAfterStruct"),
-    )
+            SetName("module.DeclaredAfterStruct"),
+            )
     premadeThriftType_module_HeapAllocated = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.HeapAllocated"),
@@ -239,75 +289,25 @@ var (
             SetName("module.CountingInt").
             SetUnderlyingType(premadeThriftType_i64),
             )
-    premadeThriftType_module_StringWithAdapter = metadata.NewThriftType().SetTTypedef(
-        metadata.NewThriftTypedefType().
-            SetName("module.StringWithAdapter").
-            SetUnderlyingType(premadeThriftType_string),
-            )
-    premadeThriftType_list_module_StringWithAdapter = metadata.NewThriftType().SetTList(
-        metadata.NewThriftListType().
-            SetValueType(premadeThriftType_module_StringWithAdapter),
-            )
-    premadeThriftType_module_ListWithElemAdapter = metadata.NewThriftType().SetTTypedef(
-        metadata.NewThriftTypedefType().
-            SetName("module.ListWithElemAdapter").
-            SetUnderlyingType(premadeThriftType_list_module_StringWithAdapter),
-            )
-    premadeThriftType_module_Foo = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.Foo"),
-            )
     premadeThriftType_module_Bar = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
-    SetName("module.Bar"),
-    )
-    premadeThriftType_module_Baz = metadata.NewThriftType().SetTUnion(
-        metadata.NewThriftUnionType().
-    SetName("module.Baz"),
-    )
-    premadeThriftType_module_A = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-    SetName("module.A"),
-    )
-    premadeThriftType_module_CircularAdaptee = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.CircularAdaptee"),
+            SetName("module.Bar"),
             )
-    premadeThriftType_module_FooWithAdapter = metadata.NewThriftType().SetTTypedef(
-        metadata.NewThriftTypedefType().
-    SetName("module.FooWithAdapter").
-    SetUnderlyingType(premadeThriftType_module_Foo),
-    )
-    premadeThriftType_module_ListWithElemAdapter_withAdapter = metadata.NewThriftType().SetTTypedef(
-        metadata.NewThriftTypedefType().
-    SetName("module.ListWithElemAdapter_withAdapter").
-    SetUnderlyingType(premadeThriftType_module_ListWithElemAdapter),
-    )
     premadeThriftType_module_MyI32 = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
-    SetName("module.MyI32").
-    SetUnderlyingType(premadeThriftType_i32),
-    )
-    premadeThriftType_module_ListWithElemAdapter_withAdapter_2312 = metadata.NewThriftType().SetTTypedef(
-        metadata.NewThriftTypedefType().
-            SetName("module.ListWithElemAdapter_withAdapter_2312").
-            SetUnderlyingType(premadeThriftType_module_ListWithElemAdapter_withAdapter),
-            )
-    premadeThriftType_map_string_module_ListWithElemAdapter_withAdapter_2312 = metadata.NewThriftType().SetTMap(
-        metadata.NewThriftMapType().
-            SetKeyType(premadeThriftType_string).
-            SetValueType(premadeThriftType_module_ListWithElemAdapter_withAdapter_2312),
+            SetName("module.MyI32").
+            SetUnderlyingType(premadeThriftType_i32),
             )
     premadeThriftType_module_MyI32_4873 = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
-    SetName("module.MyI32_4873").
-    SetUnderlyingType(premadeThriftType_module_MyI32),
-    )
+            SetName("module.MyI32_4873").
+            SetUnderlyingType(premadeThriftType_module_MyI32),
+            )
     premadeThriftType_module_StringWithAdapter_7208 = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
-    SetName("module.StringWithAdapter_7208").
-    SetUnderlyingType(premadeThriftType_module_StringWithAdapter),
-    )
+            SetName("module.StringWithAdapter_7208").
+            SetUnderlyingType(premadeThriftType_module_StringWithAdapter),
+            )
     premadeThriftType_module_CountingStruct = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.CountingStruct"),

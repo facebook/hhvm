@@ -25,8 +25,8 @@ var (
             )
     premadeThriftType_module_Banal = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
-    SetName("module.Banal"),
-    )
+            SetName("module.Banal"),
+            )
     premadeThriftType_module_Fiery = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.Fiery"),

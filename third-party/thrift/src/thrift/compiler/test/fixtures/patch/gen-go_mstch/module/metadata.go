@@ -63,8 +63,8 @@ var (
             )
     premadeThriftType_module_LateDefStruct = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
-    SetName("module.LateDefStruct"),
-    )
+            SetName("module.LateDefStruct"),
+            )
     premadeThriftType_list_i16 = metadata.NewThriftType().SetTList(
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_i16),
@@ -98,8 +98,8 @@ var (
             )
     premadeThriftType_module_Recursive = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
-    SetName("module.Recursive"),
-    )
+            SetName("module.Recursive"),
+            )
     premadeThriftType_map_string_module_Recursive = metadata.NewThriftType().SetTMap(
         metadata.NewThriftMapType().
             SetKeyType(premadeThriftType_string).
@@ -107,8 +107,8 @@ var (
             )
     premadeThriftType_module_Loop = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
-    SetName("module.Loop"),
-    )
+            SetName("module.Loop"),
+            )
     premadeThriftType_module_Bar = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.Bar"),
@@ -215,8 +215,8 @@ var (
             )
     premadeThriftType_module_LateDefStructPatch = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
-    SetName("module.LateDefStructPatch"),
-    )
+            SetName("module.LateDefStructPatch"),
+            )
     premadeThriftType_module_MyDataPatch = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.MyDataPatch"),
@@ -287,8 +287,8 @@ var (
             )
     premadeThriftType_module_LoopPatch = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
-    SetName("module.LoopPatch"),
-    )
+            SetName("module.LoopPatch"),
+            )
 )
 
 var structMetadatas = []*metadata.ThriftStruct{

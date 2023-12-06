@@ -23,8 +23,8 @@ var (
             )
     premadeThriftType_module_NonComparableStruct = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
-    SetName("module.NonComparableStruct"),
-    )
+            SetName("module.NonComparableStruct"),
+            )
     premadeThriftType_i64 = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
             )

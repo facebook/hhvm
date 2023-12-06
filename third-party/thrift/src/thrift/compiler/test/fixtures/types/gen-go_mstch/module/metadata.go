@@ -26,20 +26,24 @@ var (
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_i32),
             )
+    premadeThriftType_set_i32 = metadata.NewThriftType().SetTSet(
+        metadata.NewThriftSetType().
+            SetValueType(premadeThriftType_i32),
+            )
     premadeThriftType_module_set_i32_7194 = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
-    SetName("module.set_i32_7194").
-    SetUnderlyingType(premadeThriftType_set_i32),
-    )
-    premadeThriftType_module_map_i32_string_1261 = metadata.NewThriftType().SetTTypedef(
-        metadata.NewThriftTypedefType().
-    SetName("module.map_i32_string_1261").
-    SetUnderlyingType(premadeThriftType_map_i32_string),
-    )
+            SetName("module.set_i32_7194").
+            SetUnderlyingType(premadeThriftType_set_i32),
+            )
     premadeThriftType_map_i32_string = metadata.NewThriftType().SetTMap(
         metadata.NewThriftMapType().
             SetKeyType(premadeThriftType_i32).
             SetValueType(premadeThriftType_string),
+            )
+    premadeThriftType_module_map_i32_string_1261 = metadata.NewThriftType().SetTTypedef(
+        metadata.NewThriftTypedefType().
+            SetName("module.map_i32_string_1261").
+            SetUnderlyingType(premadeThriftType_map_i32_string),
             )
     premadeThriftType_included_SomeMap = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
@@ -51,8 +55,8 @@ var (
             )
     premadeThriftType_module_MyForwardRefEnum = metadata.NewThriftType().SetTEnum(
         metadata.NewThriftEnumType().
-    SetName("module.MyForwardRefEnum"),
-    )
+            SetName("module.MyForwardRefEnum"),
+            )
     premadeThriftType_bool = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
             )
@@ -77,34 +81,51 @@ var (
             )
     premadeThriftType_module_MyDataItem = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
-    SetName("module.MyDataItem"),
-    )
+            SetName("module.MyDataItem"),
+            )
+    premadeThriftType_binary = metadata.NewThriftType().SetTPrimitive(
+        metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE.Ptr(),
+            )
+    premadeThriftType_module_TBinary = metadata.NewThriftType().SetTTypedef(
+        metadata.NewThriftTypedefType().
+            SetName("module.TBinary").
+            SetUnderlyingType(premadeThriftType_binary),
+            )
     premadeThriftType_module_TBinary_8623 = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
-    SetName("module.TBinary_8623").
-    SetUnderlyingType(premadeThriftType_module_TBinary),
-    )
+            SetName("module.TBinary_8623").
+            SetUnderlyingType(premadeThriftType_module_TBinary),
+            )
+    premadeThriftType_list_included_SomeMap = metadata.NewThriftType().SetTList(
+        metadata.NewThriftListType().
+            SetValueType(premadeThriftType_included_SomeMap),
+            )
+    premadeThriftType_included_SomeListOfTypeMap = metadata.NewThriftType().SetTTypedef(
+        metadata.NewThriftTypedefType().
+            SetName("included.SomeListOfTypeMap").
+            SetUnderlyingType(premadeThriftType_list_included_SomeMap),
+            )
     premadeThriftType_module_SomeListOfTypeMap_2468 = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
-    SetName("module.SomeListOfTypeMap_2468").
-    SetUnderlyingType(premadeThriftType_included_SomeListOfTypeMap),
-    )
+            SetName("module.SomeListOfTypeMap_2468").
+            SetUnderlyingType(premadeThriftType_included_SomeListOfTypeMap),
+            )
     premadeThriftType_module_ForwardUsageStruct = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
-    SetName("module.ForwardUsageStruct"),
-    )
+            SetName("module.ForwardUsageStruct"),
+            )
     premadeThriftType_module_ForwardUsageByRef = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
-    SetName("module.ForwardUsageByRef"),
-    )
+            SetName("module.ForwardUsageByRef"),
+            )
     premadeThriftType_module_ForwardUsageRoot = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.ForwardUsageRoot"),
             )
     premadeThriftType_module_IncompleteMapDep = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
-    SetName("module.IncompleteMapDep"),
-    )
+            SetName("module.IncompleteMapDep"),
+            )
     premadeThriftType_map_i32_module_IncompleteMapDep = metadata.NewThriftType().SetTMap(
         metadata.NewThriftMapType().
             SetKeyType(premadeThriftType_i32).
@@ -112,8 +133,8 @@ var (
             )
     premadeThriftType_module_CompleteMapDep = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
-    SetName("module.CompleteMapDep"),
-    )
+            SetName("module.CompleteMapDep"),
+            )
     premadeThriftType_map_i32_module_CompleteMapDep = metadata.NewThriftType().SetTMap(
         metadata.NewThriftMapType().
             SetKeyType(premadeThriftType_i32).
@@ -121,24 +142,24 @@ var (
             )
     premadeThriftType_module_IncompleteListDep = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
-    SetName("module.IncompleteListDep"),
-    )
+            SetName("module.IncompleteListDep"),
+            )
     premadeThriftType_list_module_IncompleteListDep = metadata.NewThriftType().SetTList(
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_module_IncompleteListDep),
             )
     premadeThriftType_module_CompleteListDep = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
-    SetName("module.CompleteListDep"),
-    )
+            SetName("module.CompleteListDep"),
+            )
     premadeThriftType_list_module_CompleteListDep = metadata.NewThriftType().SetTList(
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_module_CompleteListDep),
             )
     premadeThriftType_module_AdaptedListDep = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
-    SetName("module.AdaptedListDep"),
-    )
+            SetName("module.AdaptedListDep"),
+            )
     premadeThriftType_list_module_AdaptedListDep = metadata.NewThriftType().SetTList(
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_module_AdaptedListDep),
@@ -149,37 +170,42 @@ var (
             )
     premadeThriftType_module_DependentAdaptedListDep = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
-    SetName("module.DependentAdaptedListDep"),
-    )
+            SetName("module.DependentAdaptedListDep"),
+            )
     premadeThriftType_list_module_DependentAdaptedListDep = metadata.NewThriftType().SetTList(
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_module_DependentAdaptedListDep),
             )
     premadeThriftType_module_list_i32_9187 = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
-    SetName("module.list_i32_9187").
-    SetUnderlyingType(premadeThriftType_list_i32),
-    )
+            SetName("module.list_i32_9187").
+            SetUnderlyingType(premadeThriftType_list_i32),
+            )
     premadeThriftType_module_set_i32_7070 = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
-    SetName("module.set_i32_7070").
-    SetUnderlyingType(premadeThriftType_set_i32),
-    )
+            SetName("module.set_i32_7070").
+            SetUnderlyingType(premadeThriftType_set_i32),
+            )
+    premadeThriftType_map_i32_i32 = metadata.NewThriftType().SetTMap(
+        metadata.NewThriftMapType().
+            SetKeyType(premadeThriftType_i32).
+            SetValueType(premadeThriftType_i32),
+            )
     premadeThriftType_module_map_i32_i32_9565 = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
-    SetName("module.map_i32_i32_9565").
-    SetUnderlyingType(premadeThriftType_map_i32_i32),
-    )
+            SetName("module.map_i32_i32_9565").
+            SetUnderlyingType(premadeThriftType_map_i32_i32),
+            )
     premadeThriftType_module_string_5252 = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
-    SetName("module.string_5252").
-    SetUnderlyingType(premadeThriftType_string),
-    )
+            SetName("module.string_5252").
+            SetUnderlyingType(premadeThriftType_string),
+            )
     premadeThriftType_module_i32_9314 = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
-    SetName("module.i32_9314").
-    SetUnderlyingType(premadeThriftType_i32),
-    )
+            SetName("module.i32_9314").
+            SetUnderlyingType(premadeThriftType_i32),
+            )
     premadeThriftType_module_IntTypedef = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
             SetName("module.IntTypedef").
@@ -189,28 +215,6 @@ var (
         metadata.NewThriftTypedefType().
             SetName("module.UintTypedef").
             SetUnderlyingType(premadeThriftType_module_IntTypedef),
-            )
-    premadeThriftType_binary = metadata.NewThriftType().SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE.Ptr(),
-            )
-    premadeThriftType_included_SomeListOfTypeMap = metadata.NewThriftType().SetTTypedef(
-        metadata.NewThriftTypedefType().
-    SetName("included.SomeListOfTypeMap").
-    SetUnderlyingType(premadeThriftType_list_included_SomeMap),
-    )
-    premadeThriftType_module_TBinary = metadata.NewThriftType().SetTTypedef(
-        metadata.NewThriftTypedefType().
-    SetName("module.TBinary").
-    SetUnderlyingType(premadeThriftType_binary),
-    )
-    premadeThriftType_map_i32_i32 = metadata.NewThriftType().SetTMap(
-        metadata.NewThriftMapType().
-            SetKeyType(premadeThriftType_i32).
-            SetValueType(premadeThriftType_i32),
-            )
-    premadeThriftType_set_i32 = metadata.NewThriftType().SetTSet(
-        metadata.NewThriftSetType().
-            SetValueType(premadeThriftType_i32),
             )
     premadeThriftType_map_module_TBinary_i64 = metadata.NewThriftType().SetTMap(
         metadata.NewThriftMapType().

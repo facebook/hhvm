@@ -34,8 +34,8 @@ var (
             )
     premadeThriftType_thrift_RpcPriority = metadata.NewThriftType().SetTEnum(
         metadata.NewThriftEnumType().
-    SetName("thrift.RpcPriority"),
-    )
+            SetName("thrift.RpcPriority"),
+            )
     premadeThriftType_map_string_string = metadata.NewThriftType().SetTMap(
         metadata.NewThriftMapType().
             SetKeyType(premadeThriftType_string).

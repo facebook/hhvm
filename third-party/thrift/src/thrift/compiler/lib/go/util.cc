@@ -156,9 +156,20 @@ void codegen_data::compute_service_to_req_resp_structs() {
 
 void codegen_data::add_to_thrift_metadata_types(
     const t_type* type, std::set<std::string>& visited_type_names) {
+  // skip over typedefs that are not "defined"
   auto type_name = type->get_full_name();
   if (visited_type_names.count(type_name) > 0) {
     return; // Already visited
+  }
+
+  // skip over a chain of non-defined typedefs
+  if (type->is_typedef()) {
+    auto typedef_ = dynamic_cast<const t_typedef*>(type);
+    if (typedef_->typedef_kind() != t_typedef::kind::defined) {
+      auto underlying_type = typedef_->get_type();
+      add_to_thrift_metadata_types(underlying_type, visited_type_names);
+      return;
+    }
   }
 
   visited_type_names.insert(type_name);
@@ -379,9 +390,10 @@ std::string munge_ident(const std::string& ident, bool exported, bool compat) {
 
   auto result = out.str();
 
-  // Compat: legacy generator adds underscores to names ending with Args/Result.
-  // Compat: legacy generator adds underscores to names startng with New.
-  // (to avoid name collisions with constructors and helper arg/result structs)
+  // Compat: legacy generator adds underscores to names ending with
+  // Args/Result. Compat: legacy generator adds underscores to names startng
+  // with New. (to avoid name collisions with constructors and helper
+  // arg/result structs)
   bool starts_with_new = boost::algorithm::starts_with(result, "New");
   bool ends_with_args = boost::algorithm::ends_with(result, "Args");
   bool ends_with_rslt = boost::algorithm::ends_with(result, "Result");

@@ -19,8 +19,8 @@ var (
             )
     premadeThriftType_cpp_RefType = metadata.NewThriftType().SetTEnum(
         metadata.NewThriftEnumType().
-    SetName("cpp.RefType"),
-    )
+            SetName("cpp.RefType"),
+            )
     premadeThriftType_bool = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
             )

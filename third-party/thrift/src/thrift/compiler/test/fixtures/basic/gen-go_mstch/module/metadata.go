@@ -22,8 +22,8 @@ var (
             )
     premadeThriftType_module_MyDataItem = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
-    SetName("module.MyDataItem"),
-    )
+            SetName("module.MyDataItem"),
+            )
     premadeThriftType_module_MyEnum = metadata.NewThriftType().SetTEnum(
         metadata.NewThriftEnumType().
             SetName("module.MyEnum"),

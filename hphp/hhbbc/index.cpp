@@ -12839,16 +12839,16 @@ protected:
                              ISStringSet& calculatedAcc) {
     assertx(index.top.contains(top));
 
-    auto const& children = [&] (SString top) -> const std::vector<SString>& {
+    auto const& children = [&]() -> const std::vector<SString>& {
       auto const it = index.children.find(top);
       always_assert(it != end(index.children));
       assertx(!it->second.empty());
       return it->second;
-    };
+    }();
 
     auto const it = index.aggregateData.find(top);
     if (it != end(index.aggregateData)) {
-      for (auto const child : children(top)) calculatedAcc.emplace(child);
+      for (auto const child : children) calculatedAcc.emplace(child);
       return it->second;
     }
 
@@ -12860,7 +12860,9 @@ protected:
     // For each child of the class/split (for classes this includes
     // the top class itself), we create a Data, then union it together
     // with the rest.
-    for (auto const child : children(top)) {
+    size_t childIdx = 0;
+    while (calculatedForTop.size() < children.size()) {
+      auto child = children[childIdx++];
       if (calculatedForTop.contains(child)) continue;
       auto childData = [&]() {
         if (index.top.contains(child) && !child->isame(top)) {

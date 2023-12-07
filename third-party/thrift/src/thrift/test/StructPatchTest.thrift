@@ -120,6 +120,7 @@ struct Strings {
 @patch.AssignOnlyPatch
 struct AssignOnly {
   1: i32 field;
+  2: optional i32 optField;
 }
 
 struct Def {

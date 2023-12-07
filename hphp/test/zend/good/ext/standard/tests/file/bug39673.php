@@ -22,6 +22,6 @@ foreach ($offsets as $offset) {
 	var_dump(strlen($r));
 }
 
-@unlink($filename);
+unlink($filename);
 echo "Done\n";
 }

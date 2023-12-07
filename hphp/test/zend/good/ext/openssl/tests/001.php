@@ -54,5 +54,5 @@ openssl_pkey_free($loaded_key);
 
 echo "OK!\n";
 
-@unlink($key_file_name);
+unlink($key_file_name);
 }

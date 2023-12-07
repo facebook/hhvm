@@ -48,7 +48,7 @@ fclose($fp);
 
 echo '$list = ';var_export($res);echo ";\n";
 
-@unlink($file);
+unlink($file);
 
 echo "===DONE===\n";
 }

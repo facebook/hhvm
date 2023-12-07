@@ -21,5 +21,5 @@ function main_entry(): void {
   } else {
   	echo "failed\n";
   }
-  @unlink($file);
+  unlink($file);
 }

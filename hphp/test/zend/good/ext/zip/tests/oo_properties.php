@@ -55,5 +55,5 @@ function main(): void {
   );
 
   unset($zip); //close the file before unlinking
-  @unlink($file);
+  unlink($file);
 }

@@ -14,6 +14,6 @@ include($empty_php);
 require($empty);
 require($empty_php);
 
-@unlink($empty);
-@unlink($empty_php);
+unlink($empty);
+unlink($empty_php);
 }

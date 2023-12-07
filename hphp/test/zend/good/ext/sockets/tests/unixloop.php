@@ -40,5 +40,5 @@ var_dump($data);
 socket_close($client);
 socket_close($socket);
 socket_close($server);
-@unlink($sock_path);
+unlink($sock_path);
 }

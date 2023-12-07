@@ -33,6 +33,6 @@ var_dump(ftruncate($fp, -1000000000));
 fclose($fp);
 var_dump(file_get_contents($filename));
 
-@unlink($filename);
+unlink($filename);
 echo "Done\n";
 }

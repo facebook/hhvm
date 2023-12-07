@@ -34,5 +34,5 @@ $details = openssl_pkey_get_details(openssl_pkey_get_private('file://' . $tempna
 var_dump(OPENSSL_KEYTYPE_EC === $details['type']);
 
 // Clean the temporary file
-@unlink($tempname);
+unlink($tempname);
 }

@@ -17,7 +17,7 @@ $SOURCE_IMG = __DIR__ . "/test.png";
         if (imagefilter($im, constant($filt))) {
             imagepng($im, $SAVE_DIR."/".$filt. ".png");
             echo "$filt success\n";
-            @unlink($SAVE_DIR."/".$filt. ".png");
+            unlink($SAVE_DIR."/".$filt. ".png");
         } else {
             echo "$filt failed\n";
         }
@@ -28,7 +28,7 @@ $SOURCE_IMG = __DIR__ . "/test.png";
     if (imagefilter($im, IMG_FILTER_SMOOTH, -1924.124)) {
         imagepng($im, $SAVE_DIR . "/IMG_FILTER_SMOOTH.png");
         echo "IMG_FILTER_SMOOTH success\n";
-        @unlink($SAVE_DIR . "/IMG_FILTER_SMOOTH.png");
+        unlink($SAVE_DIR . "/IMG_FILTER_SMOOTH.png");
     } else {
         echo "IMG_FILTER_SMOOTH failed\n";
     }

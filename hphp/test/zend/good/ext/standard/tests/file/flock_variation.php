@@ -58,7 +58,7 @@ foreach($operations as $operation) {
 }
 
 fclose($fp);
-@unlink($file);
+unlink($file);
 
 echo "\n*** Done ***\n";
 }

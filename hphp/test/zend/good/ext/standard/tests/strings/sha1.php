@@ -19,7 +19,7 @@ foreach ($a as $str) {
 var_dump(sha1($str, true));
 var_dump(sha1_file($filename, true));
 
-@unlink($filename);
+unlink($filename);
 
 sha1_file($filename);
 

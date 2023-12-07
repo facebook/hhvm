@@ -30,5 +30,5 @@ $fileInfo = new SplFileInfo($file);
 print($fileInfo->getMTime()."\n");
 print($fileInfo->getATime()."\n");
 
-@unlink($file);
+unlink($file);
 }

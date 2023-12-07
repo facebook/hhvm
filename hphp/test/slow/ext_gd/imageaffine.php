@@ -43,6 +43,6 @@ foreach($arrAffine as $aff) {
     var_dump(md5_file($dst));
 }
 foreach ($toDelete as $file) {
-    @unlink($file);
+    unlink($file);
 }
 }

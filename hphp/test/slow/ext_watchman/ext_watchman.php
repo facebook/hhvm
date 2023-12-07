@@ -328,7 +328,7 @@ function entrypoint_ext_watchman(): void {
   require_once 'wminst.inc';
 
   $tmpdir = tempnam(sys_get_temp_dir(), 'wmt');
-  @unlink($tmpdir);
+  unlink($tmpdir);
   if (!mkdir($tmpdir)) {
     throw new Exception("FAIL failed creating dir '$tmpdir'\n");
   }

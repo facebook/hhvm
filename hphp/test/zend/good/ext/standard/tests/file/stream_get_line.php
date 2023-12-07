@@ -8,5 +8,5 @@ while ($fp && !feof($fp)) {
     echo stream_get_line($fp, 0, "<br>")."\n";
 }
 fclose($fp);
-@unlink($path);
+unlink($path);
 }

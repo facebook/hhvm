@@ -2,7 +2,7 @@
 
 function fatal_handler() :mixed{
     chmod(\HH\global_get('file'), 0600);
-    @unlink(\HH\global_get('file'));
+    unlink(\HH\global_get('file'));
 }
 
 

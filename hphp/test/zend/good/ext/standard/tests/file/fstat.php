@@ -7,6 +7,6 @@ var_dump(fstat($fp));
 fclose($fp);
 var_dump(fstat($fp));
 
-@unlink($filename);
+unlink($filename);
 echo "Done\n";
 }

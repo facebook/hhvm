@@ -17,7 +17,7 @@ unset($xw);
 
 var_dump(file_get_contents($file));
 
-@unlink($file);
+unlink($file);
 
 echo "Done\n";
 }

@@ -10,5 +10,5 @@ fputcsv($fp, $data);
 
 var_dump($data);
 
-@unlink($file);
+unlink($file);
 }

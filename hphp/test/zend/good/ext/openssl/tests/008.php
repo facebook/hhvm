@@ -34,7 +34,7 @@ echo "---\n";
 
 var_dump($exists = file_exists($outfilename));
 if ($exists) {
-        @unlink($outfilename);
+        unlink($outfilename);
 }
 echo "---\n";
 

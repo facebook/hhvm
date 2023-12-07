@@ -18,7 +18,7 @@ file_put_contents($file, $data);
 var_dump(parse_ini_file($file, TRUE));
 var_dump(parse_ini_file($file));
 
-@unlink($file);
+unlink($file);
 
 echo "Done\n";
 }

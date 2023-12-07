@@ -9,6 +9,6 @@ fclose($fp);
 var_dump(touch($filename, 101));
 var_dump(file_get_contents($filename));
 
-@unlink($filename);
+unlink($filename);
 echo "Done\n";
 }

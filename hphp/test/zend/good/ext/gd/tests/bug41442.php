@@ -15,7 +15,7 @@ imagegd2($res, $file);
 $str2 = file_get_contents($file);
 var_dump(imagecreatefromstring($str2));
 
-@unlink($file);
+unlink($file);
 
 echo "Done\n";
 }

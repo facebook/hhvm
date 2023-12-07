@@ -47,19 +47,9 @@ class PatchTest : public testing::Test {
  protected:
   static Value asVal(bool val) { return asValueStruct<type::bool_t>(val); }
 
-  template <typename S>
-  static Object convertToObject(const S& structObj) {
-    return asValueStruct<type::struct_c>(structObj).as_object();
-  }
-
-  template <typename Tag, typename S>
-  static Value convertToValueObject(const S& structObj) {
-    return asValueStruct<Tag>(structObj);
-  }
-
   template <typename Tag, typename T, typename Patch>
   T applyGeneratedPatch(T value, Patch patch) {
-    auto valueObject = convertToValueObject<Tag>(value);
+    auto valueObject = asValueStruct<Tag>(value);
     applyPatch(patch.toObject(), valueObject);
     auto buffer = serializeValue<CompactProtocolWriter>(valueObject);
 
@@ -1513,7 +1503,7 @@ TEST_F(PatchTest, extractMaskViewFromPatchFieldPatch) {
 TEST_F(PatchTest, extractMaskFromPatchInvalidMapMaskKey) {
   test::patch::InvalidMapMaskKeyStructPatch p;
   p.patch<ident::field1>().ensureAndPatchByKey(1) += 1;
-  auto obj = convertToObject(p.toThrift());
+  auto obj = p.toObject();
   EXPECT_THROW(extractMaskFromPatch(obj), std::runtime_error);
 }
 
@@ -1574,7 +1564,7 @@ TEST_F(PatchTest, ApplyGeneratedPatchToSerializedData) {
   prot.setInput(&binaryObj);
   auto valueObject = detail::parseValue(prot, protocol::T_STRUCT);
 
-  auto patchObject = convertToObject(patch.toThrift());
+  auto patchObject = patch.toObject();
   auto serialized = applyPatchToSerializedData<type::StandardProtocol::Compact>(
       patchObject, binaryObj);
   Object modifiedObj = parseObject<CompactProtocolReader>(*serialized);

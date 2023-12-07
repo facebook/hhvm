@@ -9,7 +9,7 @@
 // CHECK:   n0: *HackMixed = load &$b
 // CHECK:   n1: *HackMixed = load &$0splice0
 // CHECK:   n2 = __sil_allocate(<Closure$basic1232>)
-// CHECK:   n3 = Closure$basic1232.__construct(n2, n0, n1)
+// CHECK:   n3 = Closure$basic1232.__construct(n2, null, n0, n1)
 // CHECK:   store &$0 <- n2: *HackMixed
 // CHECK:   n4: *HackMixed = load &$0
 // CHECK:   n5 = n4.?.__invoke()
@@ -18,14 +18,17 @@
 // CHECK: }
 
 // TEST-CHECK-BAL: define Closure$basic1232.__construct
-// CHECK: define Closure$basic1232.__construct($this: *Closure$basic1232, b: *HackMixed, _0splice0: *HackMixed) : *HackMixed {
+// CHECK: define Closure$basic1232.__construct($this: *Closure$basic1232, this: *HackMixed, b: *HackMixed, _0splice0: *HackMixed) : *HackMixed {
 // CHECK: #b0:
-// CHECK:   n0: *HackMixed = load &b
+// CHECK:   n0: *HackMixed = load &this
 // CHECK:   n1: *HackMixed = load &$this
-// CHECK:   store n1.?.b <- n0: *HackMixed
-// CHECK:   n2: *HackMixed = load &_0splice0
+// CHECK:   store n1.?.this <- n0: *HackMixed
+// CHECK:   n2: *HackMixed = load &b
 // CHECK:   n3: *HackMixed = load &$this
-// CHECK:   store n3.?._0splice0 <- n2: *HackMixed
+// CHECK:   store n3.?.b <- n2: *HackMixed
+// CHECK:   n4: *HackMixed = load &_0splice0
+// CHECK:   n5: *HackMixed = load &$this
+// CHECK:   store n5.?._0splice0 <- n4: *HackMixed
 // CHECK:   ret null
 // CHECK: }
 function basic1(A $b): mixed {

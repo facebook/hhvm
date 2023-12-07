@@ -633,10 +633,17 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
             let ty = class::non_static_ty(clsid).deref();
             let cons = FunctionName::Intrinsic(Intrinsic::Construct(clsid));
             let obj = state.fb.write_expr_stmt(textual::Expr::Alloc(ty))?;
-            let operands = operands
+            let mut operands = operands
                 .iter()
                 .map(|vid| state.lookup_vid(*vid))
                 .collect_vec();
+            // Prepend the implied 'this' pointer
+            let this = if state.func_info.is_method() {
+                state.load_this()?.into()
+            } else {
+                textual::Expr::null()
+            };
+            operands.insert(0, this);
             state.fb.call_static(&cons, obj.into(), operands)?;
             state.set_iid(iid, obj);
         }
@@ -1497,6 +1504,13 @@ pub(crate) enum FuncInfo<'a> {
 }
 
 impl<'a> FuncInfo<'a> {
+    pub(crate) fn is_method(&self) -> bool {
+        match self {
+            FuncInfo::Function(_) => false,
+            FuncInfo::Method(_) => true,
+        }
+    }
+
     pub(crate) fn expect_method(&self, why: &str) -> &MethodInfo<'a> {
         match self {
             FuncInfo::Function(_) => panic!("{}", why),

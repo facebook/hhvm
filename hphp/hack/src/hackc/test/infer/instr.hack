@@ -76,7 +76,7 @@ function check_shape(): void {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$x
 // CHECK:   n1 = __sil_allocate(<Closure$check_closure>)
-// CHECK:   n2 = Closure$check_closure.__construct(n1, n0)
+// CHECK:   n2 = Closure$check_closure.__construct(n1, null, n0)
 // CHECK:   store &$impl <- n1: *HackMixed
 // CHECK:   ret null
 // CHECK: }

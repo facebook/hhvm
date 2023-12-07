@@ -307,6 +307,9 @@ impl Attr {
         self.repr &= !attr.repr;
     }
 
+    pub fn is_closure_class(&self) -> bool {
+        (*self & Self::AttrIsClosureClass) != Self::AttrNone
+    }
     pub fn is_enum(&self) -> bool {
         (*self & Self::AttrEnum) != Self::AttrNone
     }

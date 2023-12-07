@@ -23,6 +23,7 @@ use log::trace;
 
 use crate::func::FuncInfo;
 use crate::func::MethodInfo;
+use crate::lower::class::THIS_AS_PROPERTY;
 
 pub(crate) fn lower_func<'a>(
     mut func: Func<'a>,
@@ -226,7 +227,25 @@ fn load_closure_vars(func: &mut Func<'_>, method_info: &MethodInfo<'_>, strings:
 
     let loc = func.loc_id;
 
-    for prop in &method_info.class.properties {
+    // Some magic: We sort the properties such that we always put 'this' at the
+    // end. That way when we overwrite the '$this' local we're doing so as the
+    // last access to the closure class '$this'.
+    let sort_cmp = |a: &ir::Property<'_>, b: &ir::Property<'_>| -> std::cmp::Ordering {
+        if strings.eq_str(a.name.id, THIS_AS_PROPERTY) {
+            std::cmp::Ordering::Greater
+        } else if strings.eq_str(b.name.id, THIS_AS_PROPERTY) {
+            std::cmp::Ordering::Less
+        } else {
+            let a = strings.lookup_bytes(a.name.id);
+            let b = strings.lookup_bytes(b.name.id);
+            a.cmp(&b)
+        }
+    };
+
+    let mut properties = method_info.class.properties.to_vec();
+    properties.sort_unstable_by(sort_cmp);
+
+    for prop in &properties {
         // Property names are the variable names without the '$'.
         let prop_str = strings.lookup_bstr(prop.name.id);
         let mut var = prop_str.to_vec();

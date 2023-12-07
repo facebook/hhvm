@@ -162,12 +162,12 @@ def find_line_with(filename, line, check, expect, any_match, starting_line):
     bail(filename, line, f"Expected string '{expect}' not found")
 
 
-def update_test(filename, input, idx, check, starting_line):
+def update_test(filename, input, idx, line, check, starting_line):
     old = strip_existing_check(input, idx + 1)
-    check, start = fetch_check(filename, idx, check, input[idx], old, starting_line)
+    check, start = fetch_check(filename, line, check, input[idx], old, starting_line)
     input[idx + 1 : idx + 1] = check
 
-    return 1 + len(check), start
+    return 1 + len(check), start, len(old)
 
 
 def remove_prefix(text, prefix):
@@ -211,26 +211,33 @@ def update_file(filename):
 
     last_seen = -1
     idx = 0
+    line = 0
     while idx < len(file):
         inp = file[idx].strip()
         if inp.startswith("// TEST-CHECK:") or inp.startswith("// TEST-CHECK-"):
-            count, start = update_test(filename, file, idx, check, last_seen + 1)
+            count, start, old_count = update_test(
+                filename, file, idx, line, check, last_seen + 1
+            )
         elif inp.startswith("// CHECK:") or inp.startswith("// CHECK-"):
             warn(filename, idx, "Naked CHECK found")
+            count = 0
+            old_count = 0
         else:
             idx += 1
+            line += 1
             continue
 
         if start is not None:
             if start <= last_seen:
                 bail(
                     filename,
-                    idx,
-                    f"test was found but is out of order (found at {start} but already processed {last_seen})",
+                    line,
+                    f"test was found but is out of order (found at {start} but already processed {last_seen} looking for {repr(inp)})",
                 )
             last_seen = start
 
         idx += count
+        line += old_count + 1
 
     with open(filename, "w") as f:
         f.write("\n".join(file))

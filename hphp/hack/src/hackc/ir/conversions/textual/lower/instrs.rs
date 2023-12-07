@@ -46,6 +46,7 @@ use ir::TypeStructResolveOp;
 use ir::UnitBytesId;
 use ir::ValueId;
 use itertools::Itertools;
+use naming_special_names_rust::special_idents;
 
 use super::func_builder::FuncBuilderEx as _;
 use crate::class::IsStatic;
@@ -370,7 +371,7 @@ impl LowerInstrs<'_> {
 
         match *self.func_info {
             FuncInfo::Method(_) => {
-                let this = builder.strings.intern_str("$this");
+                let this = builder.strings.intern_str(special_idents::THIS);
                 let lid = LocalId::Named(this);
                 ops.push(builder.emit(Instr::Hhbc(Hhbc::CGetL(lid, loc))));
             }
@@ -602,7 +603,7 @@ impl TransformInstr for LowerInstrs<'_> {
                 },
             ) => rewrite_nullsafe_call(iid, builder, call, state),
             Instr::Hhbc(Hhbc::BareThis(_op, loc)) => {
-                let this = builder.strings.intern_str("$this");
+                let this = builder.strings.intern_str(special_idents::THIS);
                 let lid = LocalId::Named(this);
                 Instr::Hhbc(Hhbc::CGetL(lid, loc))
             }

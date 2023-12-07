@@ -34,6 +34,8 @@ use crate::class::IsStatic;
 pub(crate) const INFER_CONSTANT: &str = "constant";
 pub(crate) const INFER_TYPE_CONSTANT: &str = "type_constant";
 
+pub(crate) const THIS_AS_PROPERTY: &str = "this";
+
 fn typed_value_into_string(tv: &TypedValue, strings: &Arc<StringInterner>) -> Option<String> {
     let ostr = tv
         .get_string()
@@ -111,6 +113,29 @@ pub(crate) fn lower_class<'a>(mut class: Class<'a>, strings: Arc<StringInterner>
     }
 
     let classish_is_trait = class.is_trait();
+
+    if class.flags.is_closure_class() {
+        // We want closure classes to always contain a 'this' but in HHVM it's
+        // implicit so add a fake 'this' property. Unfortunately we have no good
+        // way to identify the original class type. We could scrape it out of
+        // the name but that's fragile. For closures of functions this will be
+        // null.
+
+        // (strip the leading '$')
+        let name = PropId::new(strings.intern_str(THIS_AS_PROPERTY));
+        class.properties.insert(
+            0,
+            Property {
+                name,
+                flags: Attr::AttrNone,
+                attributes: Vec::default(),
+                visibility: Visibility::Private,
+                initial_value: None,
+                type_info: TypeInfo::default(),
+                doc_comment: Default::default(),
+            },
+        );
+    }
 
     for method in &mut class.methods {
         if method.name.is_86pinit(&strings) {

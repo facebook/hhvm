@@ -14,5 +14,5 @@ var GoUnusedProtection__ int
 
 var MyStruct *MyStruct = NewMyStruct().
     SetMajorNonCompat(42).
-    SetPackageNonCompat("package").
+    SetAbstractNonCompat("abstract").
     SetMyEnumNonCompat(MyEnum_DOMAIN)

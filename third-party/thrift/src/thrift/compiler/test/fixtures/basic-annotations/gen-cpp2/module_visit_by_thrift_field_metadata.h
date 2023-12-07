@@ -56,7 +56,7 @@ struct VisitByFieldId<::cpp2::detail::YourStruct> {
     case 2:
       return f(0, static_cast<T&&>(t).majorVer_ref());
     case 1:
-      return f(1, static_cast<T&&>(t).package_ref());
+      return f(1, static_cast<T&&>(t).abstract_ref());
     case 3:
       return f(2, static_cast<T&&>(t).annotation_with_quote_ref());
     case 4:

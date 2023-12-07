@@ -5,7 +5,7 @@
 
 pub static myStruct: ::once_cell::sync::Lazy<crate::types::MyStruct> = ::once_cell::sync::Lazy::new(|| crate::types::MyStruct {
             major: 42,
-            package: "package".to_owned(),
+            r#abstract: "abstract".to_owned(),
             annotation_with_quote: ::std::default::Default::default(),
             class_: ::std::default::Default::default(),
             annotation_with_trailing_comma: ::std::default::Default::default(),

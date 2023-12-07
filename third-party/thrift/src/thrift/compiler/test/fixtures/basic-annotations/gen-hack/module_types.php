@@ -32,8 +32,21 @@ class MyEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
 
   public static function getAllStructuredAnnotations()[write_props]: \TEnumAnnotations {
     return shape(
-      'enum' => dict[],
+      'enum' => dict[
+        '\facebook\thrift\annotation\cpp\Name' => \facebook\thrift\annotation\cpp\Name::fromShape(
+          shape(
+            "value" => "YourEnum",
+          )
+        ),
+      ],
       'constants' => dict[
+        'DOMAIN' => dict[
+          '\facebook\thrift\annotation\cpp\Name' => \facebook\thrift\annotation\cpp\Name::fromShape(
+            shape(
+              "value" => "REALM",
+            )
+          ),
+        ],
       ],
     );
   }
@@ -309,6 +322,11 @@ class MyException extends \TException implements \IThriftSyncStruct, \IThriftExc
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
+        '\facebook\thrift\annotation\cpp\Name' => \facebook\thrift\annotation\cpp\Name::fromShape(
+          shape(
+            "value" => "YourException",
+          )
+        ),
         '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::StaticCast",
@@ -349,7 +367,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
       'type' => \TType::I64,
     ),
     1 => shape(
-      'var' => 'package',
+      'var' => 'abstract',
       'type' => \TType::STRING,
     ),
     3 => shape(
@@ -390,7 +408,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   ];
   const dict<string, int> FIELDMAP = dict[
     'major' => 2,
-    'package' => 1,
+    'abstract' => 1,
     'annotation_with_quote' => 3,
     'class_' => 4,
     'annotation_with_trailing_comma' => 5,
@@ -402,7 +420,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
 
   const type TConstructorShape = shape(
     ?'major' => ?int,
-    ?'package' => ?string,
+    ?'abstract' => ?string,
     ?'annotation_with_quote' => ?string,
     ?'class_' => ?string,
     ?'annotation_with_trailing_comma' => ?string,
@@ -414,7 +432,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
 
   const type TShape = shape(
     'major' => int,
-    'package' => string,
+    'abstract' => string,
     'annotation_with_quote' => string,
     'class_' => string,
     'annotation_with_trailing_comma' => string,
@@ -424,7 +442,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     ?'my_union' => ?MyUnion::TShape,
     ...
   );
-  const int STRUCTURAL_ID = 8696670302801378076;
+  const int STRUCTURAL_ID = 6499124985014267111;
   /**
    * Original thrift field:-
    * 2: i64 major
@@ -432,9 +450,9 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   public int $major;
   /**
    * Original thrift field:-
-   * 1: string package
+   * 1: string abstract
    */
-  public string $package;
+  public string $abstract;
   /**
    * Original thrift field:-
    * 3: string annotation_with_quote
@@ -471,9 +489,9 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
    */
   public ?MyUnion $my_union;
 
-  public function __construct(?int $major = null, ?string $package = null, ?string $annotation_with_quote = null, ?string $class_ = null, ?string $annotation_with_trailing_comma = null, ?string $empty_annotations = null, ?MyEnum $my_enum = null, ?Vector<string> $cpp_type_annotation = null, ?MyUnion $my_union = null)[] {
+  public function __construct(?int $major = null, ?string $abstract = null, ?string $annotation_with_quote = null, ?string $class_ = null, ?string $annotation_with_trailing_comma = null, ?string $empty_annotations = null, ?MyEnum $my_enum = null, ?Vector<string> $cpp_type_annotation = null, ?MyUnion $my_union = null)[] {
     $this->major = $major ?? 0;
-    $this->package = $package ?? '';
+    $this->abstract = $abstract ?? '';
     $this->annotation_with_quote = $annotation_with_quote ?? '';
     $this->class_ = $class_ ?? '';
     $this->annotation_with_trailing_comma = $annotation_with_trailing_comma ?? '';
@@ -490,7 +508,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   public static function fromShape(self::TConstructorShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'major'),
-      Shapes::idx($shape, 'package'),
+      Shapes::idx($shape, 'abstract'),
       Shapes::idx($shape, 'annotation_with_quote'),
       Shapes::idx($shape, 'class_'),
       Shapes::idx($shape, 'annotation_with_trailing_comma'),
@@ -532,7 +550,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
                   "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
                 )
               ),
-              "name" => "package",
+              "name" => "abstract",
             )
           ),
           tmeta_ThriftField::fromShape(
@@ -655,6 +673,18 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
+        '\facebook\thrift\annotation\cpp\Name' => \facebook\thrift\annotation\cpp\Name::fromShape(
+          shape(
+            "value" => "YourStruct",
+          )
+        ),
+        '\facebook\thrift\annotation\hack\Attributes' => \facebook\thrift\annotation\hack\Attributes::fromShape(
+          shape(
+            "attributes" => vec[
+              "\\SomeClass(\\AnotherClass::class)",
+            ],
+          )
+        ),
         '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::StaticCast",
@@ -662,20 +692,65 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
         ),
       ],
       'fields' => dict[
-        'package' => shape(
+        'major' => shape(
           'field' => dict[
-            '\facebook\thrift\annotation\go\Name' => \facebook\thrift\annotation\go\Name::fromShape(
+            '\facebook\thrift\annotation\cpp\Name' => \facebook\thrift\annotation\cpp\Name::fromShape(
               shape(
-                "name" => "PackageName",
+                "value" => "majorVer",
               )
             ),
-            '\facebook\thrift\annotation\go\Tag' => \facebook\thrift\annotation\go\Tag::fromShape(
+            '\facebook\thrift\annotation\go\Name' => \facebook\thrift\annotation\go\Name::fromShape(
               shape(
-                "tag" => "tag:\"some_package\"",
+                "name" => "MajorVer",
               )
             ),
           ],
           'type' => dict[],
+        ),
+        'abstract' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\go\Name' => \facebook\thrift\annotation\go\Name::fromShape(
+              shape(
+                "name" => "AbstractName",
+              )
+            ),
+            '\facebook\thrift\annotation\go\Tag' => \facebook\thrift\annotation\go\Tag::fromShape(
+              shape(
+                "tag" => "tag:\"some_abstract\"",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'annotation_with_quote' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\go\Tag' => \facebook\thrift\annotation\go\Tag::fromShape(
+              shape(
+                "tag" => "tag:\"somevalue\"",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'my_enum' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\cpp\Name' => \facebook\thrift\annotation\cpp\Name::fromShape(
+              shape(
+                "value" => "YourEnum",
+              )
+            ),
+          ],
+        ),
+        'cpp_type_annotation' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\cpp\Type' => \facebook\thrift\annotation\cpp\Type::fromShape(
+              shape(
+                "name" => "std::deque<std::string>",
+              )
+            ),
+          ],
         ),
         'my_union' => shape(
           'field' => dict[],
@@ -699,7 +774,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
       $shape['major'],
-      $shape['package'],
+      $shape['abstract'],
       $shape['annotation_with_quote'],
       $shape['class_'],
       $shape['annotation_with_trailing_comma'],
@@ -713,7 +788,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   public function __toShape()[]: self::TShape {
     return shape(
       'major' => $this->major,
-      'package' => $this->package,
+      'abstract' => $this->abstract,
       'annotation_with_quote' => $this->annotation_with_quote,
       'class_' => $this->class_,
       'annotation_with_trailing_comma' => $this->annotation_with_trailing_comma,
@@ -737,8 +812,8 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     if (idx($parsed, 'major') !== null) {
       $this->major = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['major']);
     }
-    if (idx($parsed, 'package') !== null) {
-      $this->package = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['package']);
+    if (idx($parsed, 'abstract') !== null) {
+      $this->abstract = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['abstract']);
     }
     if (idx($parsed, 'annotation_with_quote') !== null) {
       $this->annotation_with_quote = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['annotation_with_quote']);

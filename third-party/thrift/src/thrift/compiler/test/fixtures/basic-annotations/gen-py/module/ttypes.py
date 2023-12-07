@@ -355,7 +355,7 @@ class MyStruct:
   r"""
   Attributes:
    - major
-   - package
+   - abstract
    - annotation_with_quote
    - class_
    - annotation_with_trailing_comma
@@ -392,7 +392,7 @@ class MyStruct:
           iprot.skip(ftype)
       elif fid == 1:
         if ftype == TType.STRING:
-          self.package = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+          self.abstract = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
         else:
           iprot.skip(ftype)
       elif fid == 3:
@@ -454,9 +454,9 @@ class MyStruct:
       oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
       return
     oprot.writeStructBegin('MyStruct')
-    if self.package != None:
-      oprot.writeFieldBegin('package', TType.STRING, 1)
-      oprot.writeString(self.package.encode('utf-8')) if UTF8STRINGS and not isinstance(self.package, bytes) else oprot.writeString(self.package)
+    if self.abstract != None:
+      oprot.writeFieldBegin('abstract', TType.STRING, 1)
+      oprot.writeString(self.abstract.encode('utf-8')) if UTF8STRINGS and not isinstance(self.abstract, bytes) else oprot.writeString(self.abstract)
       oprot.writeFieldEnd()
     if self.major != None:
       oprot.writeFieldBegin('major', TType.I64, 2)
@@ -510,8 +510,8 @@ class MyStruct:
       json_obj = loads(json)
     if 'major' in json_obj and json_obj['major'] is not None:
       self.major = long(json_obj['major'])
-    if 'package' in json_obj and json_obj['package'] is not None:
-      self.package = json_obj['package']
+    if 'abstract' in json_obj and json_obj['abstract'] is not None:
+      self.abstract = json_obj['abstract']
     if 'annotation_with_quote' in json_obj and json_obj['annotation_with_quote'] is not None:
       self.annotation_with_quote = json_obj['annotation_with_quote']
     if 'class_' in json_obj and json_obj['class_'] is not None:
@@ -543,10 +543,10 @@ class MyStruct:
       value = pprint.pformat(self.major, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    major=%s' % (value))
-    if self.package is not None:
-      value = pprint.pformat(self.package, indent=0)
+    if self.abstract is not None:
+      value = pprint.pformat(self.abstract, indent=0)
       value = padding.join(value.splitlines(True))
-      L.append('    package=%s' % (value))
+      L.append('    abstract=%s' % (value))
     if self.annotation_with_quote is not None:
       value = pprint.pformat(self.annotation_with_quote, indent=0)
       value = padding.join(value.splitlines(True))
@@ -588,7 +588,7 @@ class MyStruct:
 
   def __dir__(self):
     return (
-      'package',
+      'abstract',
       'major',
       'annotation_with_quote',
       'class_',
@@ -778,14 +778,13 @@ MyException.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 )))
 
 MyException.thrift_struct_annotations = {
-  "cpp.name": "YourException",
 }
 MyException.thrift_field_annotations = {
 }
 
 all_structs.append(MyStruct)
 MyStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
-  (1, TType.STRING, 'package', True, None, 2, ), # 1
+  (1, TType.STRING, 'abstract', True, None, 2, ), # 1
   (2, TType.I64, 'major', None, None, 2, ), # 2
   (3, TType.STRING, 'annotation_with_quote', True, None, 2, ), # 3
   (4, TType.STRING, 'class_', True, None, 2, ), # 4
@@ -798,20 +797,11 @@ MyStruct.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 
 MyStruct.thrift_struct_annotations = {
   "android.generate_builder": "1",
-  "cpp.name": "YourStruct",
-  "hack.attributes": "\\SomeClass(\\AnotherClass::class)",
   "thrift.uri": "facebook.com/thrift/compiler/test/fixtures/basic-annotations/src/module/MyStruct",
 }
 MyStruct.thrift_field_annotations = {
   1: {
-    "java.swift.name": "_package",
-  },
-  2: {
-    "cpp.name": "majorVer",
-    "go.name": "MajorVer",
-  },
-  3: {
-    "go.tag": "tag:\"somevalue\"",
+    "java.swift.name": "_abstract",
   },
   4: {
     "java.swift.name": "class_",
@@ -821,9 +811,9 @@ MyStruct.thrift_field_annotations = {
   },
 }
 
-def MyStruct__init__(self, major=None, package=None, annotation_with_quote=None, class_=None, annotation_with_trailing_comma=None, empty_annotations=None, my_enum=None, cpp_type_annotation=None, my_union=None,):
+def MyStruct__init__(self, major=None, abstract=None, annotation_with_quote=None, class_=None, annotation_with_trailing_comma=None, empty_annotations=None, my_enum=None, cpp_type_annotation=None, my_union=None,):
   self.major = major
-  self.package = package
+  self.abstract = abstract
   self.annotation_with_quote = annotation_with_quote
   self.class_ = class_
   self.annotation_with_trailing_comma = annotation_with_trailing_comma
@@ -836,7 +826,7 @@ MyStruct.__init__ = MyStruct__init__
 
 def MyStruct__setstate__(self, state):
   state.setdefault('major', None)
-  state.setdefault('package', None)
+  state.setdefault('abstract', None)
   state.setdefault('annotation_with_quote', None)
   state.setdefault('class_', None)
   state.setdefault('annotation_with_trailing_comma', None)

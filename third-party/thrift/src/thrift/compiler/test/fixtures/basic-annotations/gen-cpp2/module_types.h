@@ -15,7 +15,7 @@ namespace thrift {
 namespace ident {
 struct name;
 struct majorVer;
-struct package;
+struct abstract;
 struct annotation_with_quote;
 struct class_;
 struct annotation_with_trailing_comma;
@@ -35,9 +35,9 @@ APACHE_THRIFT_DEFINE_ACCESSOR(name);
 #define APACHE_THRIFT_ACCESSOR_majorVer
 APACHE_THRIFT_DEFINE_ACCESSOR(majorVer);
 #endif
-#ifndef APACHE_THRIFT_ACCESSOR_package
-#define APACHE_THRIFT_ACCESSOR_package
-APACHE_THRIFT_DEFINE_ACCESSOR(package);
+#ifndef APACHE_THRIFT_ACCESSOR_abstract
+#define APACHE_THRIFT_ACCESSOR_abstract
+APACHE_THRIFT_DEFINE_ACCESSOR(abstract);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_annotation_with_quote
 #define APACHE_THRIFT_ACCESSOR_annotation_with_quote
@@ -337,7 +337,7 @@ class YourStruct final  {
   static const folly::StringPiece __fbthrift_get_class_name();
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::majorVer,
-    ::apache::thrift::ident::package,
+    ::apache::thrift::ident::abstract,
     ::apache::thrift::ident::annotation_with_quote,
     ::apache::thrift::ident::class_,
     ::apache::thrift::ident::annotation_with_trailing_comma,
@@ -394,7 +394,7 @@ class YourStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  YourStruct(apache::thrift::FragileConstructor, ::std::int64_t majorVer__arg, ::std::string package__arg, ::std::string annotation_with_quote__arg, ::std::string class___arg, ::std::string annotation_with_trailing_comma__arg, ::std::string empty_annotations__arg, ::cpp2::YourEnum my_enum__arg, ::cpp2::list_string_6884 cpp_type_annotation__arg, ::cpp2::YourUnion my_union__arg);
+  YourStruct(apache::thrift::FragileConstructor, ::std::int64_t majorVer__arg, ::std::string abstract__arg, ::std::string annotation_with_quote__arg, ::std::string class___arg, ::std::string annotation_with_trailing_comma__arg, ::std::string empty_annotations__arg, ::cpp2::YourEnum my_enum__arg, ::cpp2::list_string_6884 cpp_type_annotation__arg, ::cpp2::YourUnion my_union__arg);
 
   YourStruct(YourStruct&&) noexcept;
   YourStruct(const YourStruct& src);
@@ -408,7 +408,7 @@ class YourStruct final  {
  private:
   ::std::int64_t __fbthrift_field_majorVer;
  private:
-  ::std::string __fbthrift_field_package;
+  ::std::string __fbthrift_field_abstract;
  private:
   ::std::string __fbthrift_field_annotation_with_quote;
  private:
@@ -472,43 +472,43 @@ class YourStruct final  {
   }
 
   template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> package_ref() const& {
-    return {this->__fbthrift_field_package, __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> abstract_ref() const& {
+    return {this->__fbthrift_field_abstract, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> package_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_package), __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> abstract_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_abstract), __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> package_ref() & {
-    return {this->__fbthrift_field_package, __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> abstract_ref() & {
+    return {this->__fbthrift_field_abstract, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> package_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_package), __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> abstract_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_abstract), __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> package() const& {
-    return {this->__fbthrift_field_package, __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> abstract() const& {
+    return {this->__fbthrift_field_abstract, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> package() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_package), __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> abstract() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_abstract), __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> package() & {
-    return {this->__fbthrift_field_package, __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> abstract() & {
+    return {this->__fbthrift_field_abstract, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> package() && {
-    return {static_cast<T&&>(this->__fbthrift_field_package), __isset.at(1), __isset.bit(1)};
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> abstract() && {
+    return {static_cast<T&&>(this->__fbthrift_field_abstract), __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::std::string>
@@ -801,19 +801,19 @@ class YourStruct final  {
     return __fbthrift_field_majorVer;
   }
 
-  const ::std::string& get_package() const& {
-    return __fbthrift_field_package;
+  const ::std::string& get_abstract() const& {
+    return __fbthrift_field_abstract;
   }
 
-  ::std::string get_package() && {
-    return std::move(__fbthrift_field_package);
+  ::std::string get_abstract() && {
+    return std::move(__fbthrift_field_abstract);
   }
 
-  template <typename T_YourStruct_package_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.package_ref() = BAR;` instead of `FOO.set_package(BAR);`")]]
-  ::std::string& set_package(T_YourStruct_package_struct_setter&& package_) {
-    package_ref() = std::forward<T_YourStruct_package_struct_setter>(package_);
-    return __fbthrift_field_package;
+  template <typename T_YourStruct_abstract_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.abstract_ref() = BAR;` instead of `FOO.set_abstract(BAR);`")]]
+  ::std::string& set_abstract(T_YourStruct_abstract_struct_setter&& abstract_) {
+    abstract_ref() = std::forward<T_YourStruct_abstract_struct_setter>(abstract_);
+    return __fbthrift_field_abstract;
   }
 
   const ::std::string& get_annotation_with_quote() const& {

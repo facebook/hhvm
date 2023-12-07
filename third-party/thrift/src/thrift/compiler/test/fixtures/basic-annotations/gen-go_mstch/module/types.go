@@ -546,7 +546,7 @@ func (x *MyException) Error() string {
 }
 
 type MyStruct struct {
-    PackageName string `thrift:"package,1" tag:"some_package"`
+    AbstractName string `thrift:"abstract,1" tag:"some_abstract"`
     MajorVer int64 `thrift:"major,2" json:"major" db:"major"`
     AnnotationWithQuote string `thrift:"annotation_with_quote,3" tag:"somevalue"`
     Class_ string `thrift:"class_,4" json:"class_" db:"class_"`
@@ -561,7 +561,7 @@ var _ thrift.Struct = &MyStruct{}
 
 func NewMyStruct() *MyStruct {
     return (&MyStruct{}).
-        SetPackageNameNonCompat("").
+        SetAbstractNameNonCompat("").
         SetMajorVerNonCompat(0).
         SetAnnotationWithQuoteNonCompat("").
         SetClass_NonCompat("").
@@ -572,12 +572,12 @@ func NewMyStruct() *MyStruct {
         SetMyUnionNonCompat(*NewMyUnion())
 }
 
-func (x *MyStruct) GetPackageNameNonCompat() string {
-    return x.PackageName
+func (x *MyStruct) GetAbstractNameNonCompat() string {
+    return x.AbstractName
 }
 
-func (x *MyStruct) GetPackageName() string {
-    return x.PackageName
+func (x *MyStruct) GetAbstractName() string {
+    return x.AbstractName
 }
 
 func (x *MyStruct) GetMajorVerNonCompat() int64 {
@@ -652,13 +652,13 @@ func (x *MyStruct) GetMyUnion() *MyUnion {
     return x.MyUnion
 }
 
-func (x *MyStruct) SetPackageNameNonCompat(value string) *MyStruct {
-    x.PackageName = value
+func (x *MyStruct) SetAbstractNameNonCompat(value string) *MyStruct {
+    x.AbstractName = value
     return x
 }
 
-func (x *MyStruct) SetPackageName(value string) *MyStruct {
-    x.PackageName = value
+func (x *MyStruct) SetAbstractName(value string) *MyStruct {
+    x.AbstractName = value
     return x
 }
 
@@ -750,12 +750,12 @@ func (x *MyStruct) IsSetMyUnion() bool {
     return x != nil && x.MyUnion != nil
 }
 
-func (x *MyStruct) writeField1(p thrift.Protocol) error {  // PackageName
-    if err := p.WriteFieldBegin("package", thrift.STRING, 1); err != nil {
+func (x *MyStruct) writeField1(p thrift.Protocol) error {  // AbstractName
+    if err := p.WriteFieldBegin("abstract", thrift.STRING, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPackageNameNonCompat()
+    item := x.GetAbstractNameNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -899,13 +899,13 @@ func (x *MyStruct) writeField9(p thrift.Protocol) error {  // MyUnion
     return nil
 }
 
-func (x *MyStruct) readField1(p thrift.Protocol) error {  // PackageName
+func (x *MyStruct) readField1(p thrift.Protocol) error {  // AbstractName
     result, err := p.ReadString()
 if err != nil {
     return err
 }
 
-    x.SetPackageNameNonCompat(result)
+    x.SetAbstractNameNonCompat(result)
     return nil
 }
 
@@ -991,8 +991,8 @@ if err != nil {
     return nil
 }
 
-func (x *MyStruct) toString1() string {  // PackageName
-    return fmt.Sprintf("%v", x.GetPackageNameNonCompat())
+func (x *MyStruct) toString1() string {  // AbstractName
+    return fmt.Sprintf("%v", x.GetAbstractNameNonCompat())
 }
 
 func (x *MyStruct) toString2() string {  // MajorVer
@@ -1052,8 +1052,8 @@ func NewMyStructBuilder() *MyStructBuilder {
 
 // Deprecated: Use "New" constructor and setters to build your structs.
 // e.g NewMyStruct().Set<FieldNameFoo>().Set<FieldNameBar>()
-func (x *MyStructBuilder) PackageName(value string) *MyStructBuilder {
-    x.obj.PackageName = value
+func (x *MyStructBuilder) AbstractName(value string) *MyStructBuilder {
+    x.obj.AbstractName = value
     return x
 }
 
@@ -1187,7 +1187,7 @@ func (x *MyStruct) Read(p thrift.Protocol) error {
         }
 
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // package
+        case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // abstract
             if err := x.readField1(p); err != nil {
                 return err
             }
@@ -1249,7 +1249,7 @@ func (x *MyStruct) String() string {
     var sb strings.Builder
 
     sb.WriteString("MyStruct({")
-    sb.WriteString(fmt.Sprintf("PackageName:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("AbstractName:%s ", x.toString1()))
     sb.WriteString(fmt.Sprintf("MajorVer:%s ", x.toString2()))
     sb.WriteString(fmt.Sprintf("AnnotationWithQuote:%s ", x.toString3()))
     sb.WriteString(fmt.Sprintf("Class_:%s ", x.toString4()))

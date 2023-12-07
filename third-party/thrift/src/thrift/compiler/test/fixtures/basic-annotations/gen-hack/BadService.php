@@ -738,7 +738,13 @@ class BadServiceStaticMetadata implements \IThriftServiceStaticMetadata {
 
   public static function getAllStructuredAnnotations()[write_props]: \TServiceAnnotations {
     return shape(
-      'service' => dict[],
+      'service' => dict[
+        '\facebook\thrift\annotation\cpp\Name' => \facebook\thrift\annotation\cpp\Name::fromShape(
+          shape(
+            "value" => "GoodService",
+          )
+        ),
+      ],
       'functions' => dict[
       ],
     );

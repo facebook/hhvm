@@ -56,19 +56,11 @@ from thrift.util.Decorators import (
 )
 
 class Iface:
-  annotations = {
-    "cpp.name": "GoodService",
-  }
-
   def bar(self, ):
     pass
 
 
 class ContextIface:
-  annotations = {
-    "cpp.name": "GoodService",
-  }
-
   def bar(self, handler_ctx, ):
     pass
 

@@ -77,7 +77,7 @@ THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::cpp2::detail::Y
 THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::detail::YourStruct>::name = "MyStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 9> TStructDataStorage<::cpp2::detail::YourStruct>::fields_names = {{
   "major",
-  "package",
+  "abstract",
   "annotation_with_quote",
   "class_",
   "annotation_with_trailing_comma",
@@ -110,7 +110,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 9> TStructDataStorage<::cpp
 }};
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 9> TStructDataStorage<::cpp2::detail::YourStruct>::storage_names = {{
   "__fbthrift_field_majorVer",
-  "__fbthrift_field_package",
+  "__fbthrift_field_abstract",
   "__fbthrift_field_annotation_with_quote",
   "__fbthrift_field_class_",
   "__fbthrift_field_annotation_with_trailing_comma",

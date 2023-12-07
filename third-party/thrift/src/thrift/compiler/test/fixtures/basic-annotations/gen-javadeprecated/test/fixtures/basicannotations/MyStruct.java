@@ -27,7 +27,7 @@ import com.facebook.thrift.protocol.*;
 public class MyStruct implements TBase, java.io.Serializable, Cloneable, Comparable<MyStruct> {
   private static final TStruct STRUCT_DESC = new TStruct("MyStruct");
   private static final TField MAJOR_FIELD_DESC = new TField("major", TType.I64, (short)2);
-  private static final TField PACKAGE_FIELD_DESC = new TField("package", TType.STRING, (short)1);
+  private static final TField ABSTRACT_FIELD_DESC = new TField("abstract", TType.STRING, (short)1);
   private static final TField ANNOTATION_WITH_QUOTE_FIELD_DESC = new TField("annotation_with_quote", TType.STRING, (short)3);
   private static final TField CLASS__FIELD_DESC = new TField("class_", TType.STRING, (short)4);
   private static final TField ANNOTATION_WITH_TRAILING_COMMA_FIELD_DESC = new TField("annotation_with_trailing_comma", TType.STRING, (short)5);
@@ -37,7 +37,7 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
   private static final TField MY_UNION_FIELD_DESC = new TField("my_union", TType.STRUCT, (short)9);
 
   public long major;
-  public String package;
+  public String abstract;
   public String annotation_with_quote;
   public String class_;
   public String annotation_with_trailing_comma;
@@ -50,7 +50,7 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
   public List<String> cpp_type_annotation;
   public MyUnion my_union;
   public static final int MAJOR = 2;
-  public static final int PACKAGE = 1;
+  public static final int ABSTRACT = 1;
   public static final int ANNOTATION_WITH_QUOTE = 3;
   public static final int CLASS_ = 4;
   public static final int ANNOTATION_WITH_TRAILING_COMMA = 5;
@@ -69,7 +69,7 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
     Map<Integer, FieldMetaData> tmpMetaDataMap = new HashMap<Integer, FieldMetaData>();
     tmpMetaDataMap.put(MAJOR, new FieldMetaData("major", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.I64)));
-    tmpMetaDataMap.put(PACKAGE, new FieldMetaData("package", TFieldRequirementType.DEFAULT, 
+    tmpMetaDataMap.put(ABSTRACT, new FieldMetaData("abstract", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.STRING)));
     tmpMetaDataMap.put(ANNOTATION_WITH_QUOTE, new FieldMetaData("annotation_with_quote", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.STRING)));
@@ -98,7 +98,7 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
 
   public MyStruct(
       long major,
-      String package,
+      String abstract,
       String annotation_with_quote,
       String class_,
       String annotation_with_trailing_comma,
@@ -109,7 +109,7 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
     this();
     this.major = major;
     setMajorIsSet(true);
-    this.package = package;
+    this.abstract = abstract;
     this.annotation_with_quote = annotation_with_quote;
     this.class_ = class_;
     this.annotation_with_trailing_comma = annotation_with_trailing_comma;
@@ -121,7 +121,7 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
 
   public static class Builder {
     private long major;
-    private String package;
+    private String abstract;
     private String annotation_with_quote;
     private String class_;
     private String annotation_with_trailing_comma;
@@ -141,8 +141,8 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
       return this;
     }
 
-    public Builder setPackage(final String package) {
-      this.package = package;
+    public Builder setAbstract(final String abstract) {
+      this.abstract = abstract;
       return this;
     }
 
@@ -186,7 +186,7 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
       if (__optional_isset.get(__MAJOR_ISSET_ID)) {
         result.setMajor(this.major);
       }
-      result.setPackage(this.package);
+      result.setAbstract(this.abstract);
       result.setAnnotation_with_quote(this.annotation_with_quote);
       result.setClass_(this.class_);
       result.setAnnotation_with_trailing_comma(this.annotation_with_trailing_comma);
@@ -209,8 +209,8 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
     __isset_bit_vector.clear();
     __isset_bit_vector.or(other.__isset_bit_vector);
     this.major = TBaseHelper.deepCopy(other.major);
-    if (other.isSetPackage()) {
-      this.package = TBaseHelper.deepCopy(other.package);
+    if (other.isSetAbstract()) {
+      this.abstract = TBaseHelper.deepCopy(other.abstract);
     }
     if (other.isSetAnnotation_with_quote()) {
       this.annotation_with_quote = TBaseHelper.deepCopy(other.annotation_with_quote);
@@ -262,27 +262,27 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
     __isset_bit_vector.set(__MAJOR_ISSET_ID, __value);
   }
 
-  public String getPackage() {
-    return this.package;
+  public String getAbstract() {
+    return this.abstract;
   }
 
-  public MyStruct setPackage(String package) {
-    this.package = package;
+  public MyStruct setAbstract(String abstract) {
+    this.abstract = abstract;
     return this;
   }
 
-  public void unsetPackage() {
-    this.package = null;
+  public void unsetAbstract() {
+    this.abstract = null;
   }
 
-  // Returns true if field package is set (has been assigned a value) and false otherwise
-  public boolean isSetPackage() {
-    return this.package != null;
+  // Returns true if field abstract is set (has been assigned a value) and false otherwise
+  public boolean isSetAbstract() {
+    return this.abstract != null;
   }
 
-  public void setPackageIsSet(boolean __value) {
+  public void setAbstractIsSet(boolean __value) {
     if (!__value) {
-      this.package = null;
+      this.abstract = null;
     }
   }
 
@@ -473,11 +473,11 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
       }
       break;
 
-    case PACKAGE:
+    case ABSTRACT:
       if (__value == null) {
-        unsetPackage();
+        unsetAbstract();
       } else {
-        setPackage((String)__value);
+        setAbstract((String)__value);
       }
       break;
 
@@ -547,8 +547,8 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
     case MAJOR:
       return new Long(getMajor());
 
-    case PACKAGE:
-      return getPackage();
+    case ABSTRACT:
+      return getAbstract();
 
     case ANNOTATION_WITH_QUOTE:
       return getAnnotation_with_quote();
@@ -588,7 +588,7 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
 
     if (!TBaseHelper.equalsNobinary(this.major, that.major)) { return false; }
 
-    if (!TBaseHelper.equalsNobinary(this.isSetPackage(), that.isSetPackage(), this.package, that.package)) { return false; }
+    if (!TBaseHelper.equalsNobinary(this.isSetAbstract(), that.isSetAbstract(), this.abstract, that.abstract)) { return false; }
 
     if (!TBaseHelper.equalsNobinary(this.isSetAnnotation_with_quote(), that.isSetAnnotation_with_quote(), this.annotation_with_quote, that.annotation_with_quote)) { return false; }
 
@@ -609,7 +609,7 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {major, package, annotation_with_quote, class_, annotation_with_trailing_comma, empty_annotations, my_enum, cpp_type_annotation, my_union});
+    return Arrays.deepHashCode(new Object[] {major, abstract, annotation_with_quote, class_, annotation_with_trailing_comma, empty_annotations, my_enum, cpp_type_annotation, my_union});
   }
 
   @Override
@@ -632,11 +632,11 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
     if (lastComparison != 0) { 
       return lastComparison;
     }
-    lastComparison = Boolean.valueOf(isSetPackage()).compareTo(other.isSetPackage());
+    lastComparison = Boolean.valueOf(isSetAbstract()).compareTo(other.isSetAbstract());
     if (lastComparison != 0) {
       return lastComparison;
     }
-    lastComparison = TBaseHelper.compareTo(package, other.package);
+    lastComparison = TBaseHelper.compareTo(abstract, other.abstract);
     if (lastComparison != 0) { 
       return lastComparison;
     }
@@ -718,9 +718,9 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
-        case PACKAGE:
+        case ABSTRACT:
           if (__field.type == TType.STRING) {
-            this.package = iprot.readString();
+            this.abstract = iprot.readString();
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
@@ -804,9 +804,9 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
     validate();
 
     oprot.writeStructBegin(STRUCT_DESC);
-    if (this.package != null) {
-      oprot.writeFieldBegin(PACKAGE_FIELD_DESC);
-      oprot.writeString(this.package);
+    if (this.abstract != null) {
+      oprot.writeFieldBegin(ABSTRACT_FIELD_DESC);
+      oprot.writeString(this.abstract);
       oprot.writeFieldEnd();
     }
     oprot.writeFieldBegin(MAJOR_FIELD_DESC);
@@ -881,13 +881,13 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
     first = false;
     if (!first) sb.append("," + newLine);
     sb.append(indentStr);
-    sb.append("package");
+    sb.append("abstract");
     sb.append(space);
     sb.append(":").append(space);
-    if (this.getPackage() == null) {
+    if (this.getAbstract() == null) {
       sb.append("null");
     } else {
-      sb.append(TBaseHelper.toString(this.getPackage(), indent + 1, prettyPrint));
+      sb.append(TBaseHelper.toString(this.getAbstract(), indent + 1, prettyPrint));
     }
     first = false;
     if (!first) sb.append("," + newLine);

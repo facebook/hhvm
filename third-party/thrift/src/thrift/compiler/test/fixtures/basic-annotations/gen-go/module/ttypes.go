@@ -331,7 +331,7 @@ func (p *MyException) Error() string {
 
 // Attributes:
 //  - Major
-//  - Package
+//  - Abstract
 //  - AnnotationWithQuote
 //  - Class_
 //  - AnnotationWithTrailingComma
@@ -340,7 +340,7 @@ func (p *MyException) Error() string {
 //  - CppTypeAnnotation
 //  - MyUnion
 type MyStruct struct {
-  Package string `thrift:"package,1" tag:"some_package"`
+  Abstract string `thrift:"abstract,1" tag:"some_abstract"`
   Major int64 `thrift:"major,2" db:"major" json:"major"`
   AnnotationWithQuote string `thrift:"annotation_with_quote,3" tag:"somevalue"`
   Class_ string `thrift:"class_,4" db:"class_" json:"class_"`
@@ -360,8 +360,8 @@ func (p *MyStruct) GetMajor() int64 {
   return p.Major
 }
 
-func (p *MyStruct) GetPackage() string {
-  return p.Package
+func (p *MyStruct) GetAbstract() string {
+  return p.Abstract
 }
 
 func (p *MyStruct) GetAnnotationWithQuote() string {
@@ -417,7 +417,7 @@ func NewMyStructBuilder() *MyStructBuilder{
 func (p MyStructBuilder) Emit() *MyStruct{
   return &MyStruct{
     Major: p.obj.Major,
-    Package: p.obj.Package,
+    Abstract: p.obj.Abstract,
     AnnotationWithQuote: p.obj.AnnotationWithQuote,
     Class_: p.obj.Class_,
     AnnotationWithTrailingComma: p.obj.AnnotationWithTrailingComma,
@@ -433,8 +433,8 @@ func (m *MyStructBuilder) Major(major int64) *MyStructBuilder {
   return m
 }
 
-func (m *MyStructBuilder) Package(package_a1 string) *MyStructBuilder {
-  m.obj.Package = package_a1
+func (m *MyStructBuilder) Abstract(abstract string) *MyStructBuilder {
+  m.obj.Abstract = abstract
   return m
 }
 
@@ -478,8 +478,8 @@ func (m *MyStruct) SetMajor(major int64) *MyStruct {
   return m
 }
 
-func (m *MyStruct) SetPackage(package_a1 string) *MyStruct {
-  m.Package = package_a1
+func (m *MyStruct) SetAbstract(abstract string) *MyStruct {
+  m.Abstract = abstract
   return m
 }
 
@@ -595,7 +595,7 @@ func (p *MyStruct)  ReadField1(iprot thrift.Protocol) error {
   if v, err := iprot.ReadString(); err != nil {
     return thrift.PrependError("error reading field 1: ", err)
   } else {
-    p.Package = v
+    p.Abstract = v
   }
   return nil
 }
@@ -696,12 +696,12 @@ func (p *MyStruct) Write(oprot thrift.Protocol) error {
 }
 
 func (p *MyStruct) writeField1(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("package", thrift.STRING, 1); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:package: ", p), err) }
-  if err := oprot.WriteString(string(p.Package)); err != nil {
-  return thrift.PrependError(fmt.Sprintf("%T.package (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldBegin("abstract", thrift.STRING, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:abstract: ", p), err) }
+  if err := oprot.WriteString(string(p.Abstract)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.abstract (1) field write error: ", p), err) }
   if err := oprot.WriteFieldEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:package: ", p), err) }
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:abstract: ", p), err) }
   return err
 }
 
@@ -799,7 +799,7 @@ func (p *MyStruct) String() string {
     return "<nil>"
   }
 
-  packageVal := fmt.Sprintf("%v", p.Package)
+  abstractVal := fmt.Sprintf("%v", p.Abstract)
   majorVal := fmt.Sprintf("%v", p.Major)
   annotationWithQuoteVal := fmt.Sprintf("%v", p.AnnotationWithQuote)
   class_Val := fmt.Sprintf("%v", p.Class_)
@@ -813,7 +813,7 @@ func (p *MyStruct) String() string {
   } else {
     myUnionVal = fmt.Sprintf("%v", p.MyUnion)
   }
-  return fmt.Sprintf("MyStruct({Package:%s Major:%s AnnotationWithQuote:%s Class_:%s AnnotationWithTrailingComma:%s EmptyAnnotations:%s MyEnum:%s CppTypeAnnotation:%s MyUnion:%s})", packageVal, majorVal, annotationWithQuoteVal, class_Val, annotationWithTrailingCommaVal, emptyAnnotationsVal, myEnumVal, cppTypeAnnotationVal, myUnionVal)
+  return fmt.Sprintf("MyStruct({Abstract:%s Major:%s AnnotationWithQuote:%s Class_:%s AnnotationWithTrailingComma:%s EmptyAnnotations:%s MyEnum:%s CppTypeAnnotation:%s MyUnion:%s})", abstractVal, majorVal, annotationWithQuoteVal, class_Val, annotationWithTrailingCommaVal, emptyAnnotationsVal, myEnumVal, cppTypeAnnotationVal, myUnionVal)
 }
 
 // Attributes:

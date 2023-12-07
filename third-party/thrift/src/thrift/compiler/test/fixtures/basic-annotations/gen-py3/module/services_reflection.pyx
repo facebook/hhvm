@@ -154,7 +154,7 @@ cdef __InterfaceSpec get_reflection__MyService(bint for_clients):
             exceptions=(
             ),
             annotations={
-                """cpp.name""": """cppDoNothing""",                """go.name""": """GoDoNothing""",            },
+            },
         )
     )
     return spec
@@ -189,7 +189,7 @@ cdef __InterfaceSpec get_reflection__MyServicePrioParent(bint for_clients):
             exceptions=(
             ),
             annotations={
-                """priority""": """HIGH_IMPORTANT""",            },
+            },
         )
     )
     return spec
@@ -211,7 +211,7 @@ cdef __InterfaceSpec get_reflection__MyServicePrioChild(bint for_clients):
             exceptions=(
             ),
             annotations={
-                """priority""": """BEST_EFFORT""",            },
+            },
         )
     )
     return spec
@@ -221,7 +221,7 @@ cdef __InterfaceSpec get_reflection__BadService(bint for_clients):
     cdef __InterfaceSpec spec = __InterfaceSpec._fbthrift_create(
         name="BadService",
         annotations={
-            """cpp.name""": """GoodService""",        },
+        },
     )
     spec.add_method(
         __MethodSpec._fbthrift_create(
@@ -268,7 +268,7 @@ cdef __InterfaceSpec get_reflection__FooBarBazService(bint for_clients):
             exceptions=(
             ),
             annotations={
-                """go.name""": """BarNonStructured""",            },
+            },
         )
     )
     spec.add_method(

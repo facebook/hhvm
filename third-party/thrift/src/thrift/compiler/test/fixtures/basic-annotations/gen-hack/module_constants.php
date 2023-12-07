@@ -16,7 +16,7 @@ class module_CONSTANTS implements \IThriftConstants {
     return MyStruct::fromShape(
       shape(
         "major" => 42,
-        "package" => "package",
+        "abstract" => "abstract",
         "my_enum" => MyEnum::DOMAIN,
       )
     );

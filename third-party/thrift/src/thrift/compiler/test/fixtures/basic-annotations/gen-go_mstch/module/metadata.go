@@ -79,7 +79,7 @@ var structMetadatas = []*metadata.ThriftStruct{
         []*metadata.ThriftField{
             metadata.NewThriftField().
     SetId(1).
-    SetName("package").
+    SetName("abstract").
     SetIsOptional(false).
     SetType(premadeThriftType_string),
             metadata.NewThriftField().

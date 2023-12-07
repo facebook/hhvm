@@ -65,7 +65,7 @@ impl ::std::fmt::Display for MyException {
 #[derive(Clone, PartialEq)]
 pub struct MyStruct {
     pub major: ::std::primitive::i64,
-    pub package: ::std::string::String,
+    pub r#abstract: ::std::string::String,
     pub annotation_with_quote: ::std::string::String,
     pub class_: ::std::string::String,
     pub annotation_with_trailing_comma: ::std::string::String,
@@ -483,6 +483,20 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyException {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        if type_id == ::std::any::TypeId::of::<cpp::types::Name>() {
+            let mut tmp = Some(cpp::types::Name {
+                value: "YourException".to_owned(),
+                ..::std::default::Default::default()
+            });
+            let r: &mut dyn ::std::any::Any = &mut tmp;
+            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            return r.take();
+        }
+
+        if let Some(r) = <cpp::types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return Some(r);
+        }
+
         if type_id == ::std::any::TypeId::of::<cpp::types::Adapter>() {
             let mut tmp = Some(cpp::types::Adapter {
                 name: "::StaticCast".to_owned(),
@@ -523,7 +537,7 @@ impl ::std::default::Default for self::MyStruct {
     fn default() -> Self {
         Self {
             major: ::std::default::Default::default(),
-            package: ::std::default::Default::default(),
+            r#abstract: ::std::default::Default::default(),
             annotation_with_quote: ::std::default::Default::default(),
             class_: ::std::default::Default::default(),
             annotation_with_trailing_comma: ::std::default::Default::default(),
@@ -541,7 +555,7 @@ impl ::std::fmt::Debug for self::MyStruct {
         formatter
             .debug_struct("MyStruct")
             .field("major", &self.major)
-            .field("package", &self.package)
+            .field("r#abstract", &self.r#abstract)
             .field("annotation_with_quote", &self.annotation_with_quote)
             .field("class_", &self.class_)
             .field("annotation_with_trailing_comma", &self.annotation_with_trailing_comma)
@@ -576,8 +590,8 @@ where
         p.write_field_begin("major", ::fbthrift::TType::I64, 2);
         ::fbthrift::Serialize::write(&self.major, p);
         p.write_field_end();
-        p.write_field_begin("package", ::fbthrift::TType::String, 1);
-        ::fbthrift::Serialize::write(&self.package, p);
+        p.write_field_begin("abstract", ::fbthrift::TType::String, 1);
+        ::fbthrift::Serialize::write(&self.r#abstract, p);
         p.write_field_end();
         p.write_field_begin("annotation_with_quote", ::fbthrift::TType::String, 3);
         ::fbthrift::Serialize::write(&self.annotation_with_quote, p);
@@ -611,6 +625,7 @@ where
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("abstract", ::fbthrift::TType::String, 1),
             ::fbthrift::Field::new("annotation_with_quote", ::fbthrift::TType::String, 3),
             ::fbthrift::Field::new("annotation_with_trailing_comma", ::fbthrift::TType::String, 5),
             ::fbthrift::Field::new("class_", ::fbthrift::TType::String, 4),
@@ -619,10 +634,9 @@ where
             ::fbthrift::Field::new("major", ::fbthrift::TType::I64, 2),
             ::fbthrift::Field::new("my_enum", ::fbthrift::TType::I32, 7),
             ::fbthrift::Field::new("my_union", ::fbthrift::TType::Struct, 9),
-            ::fbthrift::Field::new("package", ::fbthrift::TType::String, 1),
         ];
         let mut field_major = ::std::option::Option::None;
-        let mut field_package = ::std::option::Option::None;
+        let mut field_abstract = ::std::option::Option::None;
         let mut field_annotation_with_quote = ::std::option::Option::None;
         let mut field_class_ = ::std::option::Option::None;
         let mut field_annotation_with_trailing_comma = ::std::option::Option::None;
@@ -636,7 +650,7 @@ where
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
                 (::fbthrift::TType::I64, 2) => field_major = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::String, 1) => field_package = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 1) => field_abstract = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::String, 3) => field_annotation_with_quote = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::String, 4) => field_class_ = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::String, 5) => field_annotation_with_trailing_comma = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
@@ -651,7 +665,7 @@ where
         p.read_struct_end()?;
         ::std::result::Result::Ok(Self {
             major: field_major.unwrap_or_default(),
-            package: field_package.unwrap_or_default(),
+            r#abstract: field_abstract.unwrap_or_default(),
             annotation_with_quote: field_annotation_with_quote.unwrap_or_default(),
             class_: field_class_.unwrap_or_default(),
             annotation_with_trailing_comma: field_annotation_with_trailing_comma.unwrap_or_default(),
@@ -669,6 +683,32 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
     fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
+
+        if type_id == ::std::any::TypeId::of::<cpp::types::Name>() {
+            let mut tmp = Some(cpp::types::Name {
+                value: "YourStruct".to_owned(),
+                ..::std::default::Default::default()
+            });
+            let r: &mut dyn ::std::any::Any = &mut tmp;
+            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            return r.take();
+        }
+
+        if let Some(r) = <cpp::types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return Some(r);
+        }
+
+        if type_id == ::std::any::TypeId::of::<hack::types::Attributes>() {
+            let mut tmp = Some(hack::types::Attributes {
+                attributes: vec![
+                    "\\SomeClass(\\AnotherClass::class)".to_owned(),
+                ],
+                ..::std::default::Default::default()
+            });
+            let r: &mut dyn ::std::any::Any = &mut tmp;
+            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            return r.take();
+        }
 
         if type_id == ::std::any::TypeId::of::<cpp::types::Adapter>() {
             let mut tmp = Some(cpp::types::Adapter {
@@ -698,12 +738,36 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
         #[allow(clippy::match_single_binding)]
         match field_id {
             2 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Name>() {
+                    let mut tmp = Some(cpp::types::Name {
+                        value: "majorVer".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if let Some(r) = <cpp::types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+
+                if type_id == ::std::any::TypeId::of::<go::types::Name>() {
+                    let mut tmp = Some(go::types::Name {
+                        name: "MajorVer".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             1 => {
 
                 if type_id == ::std::any::TypeId::of::<go::types::Name>() {
                     let mut tmp = Some(go::types::Name {
-                        name: "PackageName".to_owned(),
+                        name: "AbstractName".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -713,7 +777,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
 
                 if type_id == ::std::any::TypeId::of::<go::types::Tag>() {
                     let mut tmp = Some(go::types::Tag {
-                        tag: "tag:\"some_package\"".to_owned(),
+                        tag: "tag:\"some_abstract\"".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -722,6 +786,16 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
                 }
             },
             3 => {
+
+                if type_id == ::std::any::TypeId::of::<go::types::Tag>() {
+                    let mut tmp = Some(go::types::Tag {
+                        tag: "tag:\"somevalue\"".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             4 => {
             },

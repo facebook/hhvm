@@ -491,6 +491,13 @@ class MyServicePrioChildStaticMetadata implements \IThriftServiceStaticMetadata 
     return shape(
       'service' => dict[],
       'functions' => dict[
+        'pang' => dict[
+          '\facebook\thrift\annotation\Priority' => \facebook\thrift\annotation\Priority::fromShape(
+            shape(
+              "level" => \facebook\thrift\annotation\RpcPriority::BEST_EFFORT,
+            )
+          ),
+        ],
       ],
     );
   }

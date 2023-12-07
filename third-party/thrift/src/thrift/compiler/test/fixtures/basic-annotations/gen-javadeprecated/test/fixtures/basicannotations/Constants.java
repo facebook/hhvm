@@ -21,7 +21,7 @@ public class Constants {
   public static final MyStruct myStruct = new MyStruct();
   static {
     myStruct.setMajor(42L);
-    myStruct.setPackage("package");
+    myStruct.setAbstract("abstract");
     myStruct.setMy_enum(test.fixtures.basicannotations.MyEnum.DOMAIN);
   }
 

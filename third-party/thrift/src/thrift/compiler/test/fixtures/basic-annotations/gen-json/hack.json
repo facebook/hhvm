@@ -1,0 +1,406 @@
+{
+  "__fbthrift": {"@generated": 0},
+  "thrift_module" : "hack",
+  "includes": {
+    "scope" : {
+      "path" : "thrift/annotation/scope.thrift"
+    }
+  },
+  "structs" : {
+    "FieldWrapper" : {
+      "lineno" : 36,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Field" : {  }
+      },
+      "fields" : {
+        "name" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 39,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 39,
+              "column" : 18
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 36,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 40,
+          "column" : 2
+        }
+      }
+    },
+    "Wrapper" : {
+      "lineno" : 49,
+      "is_exception" : false,
+      "is_union" : false,
+      "annotations" : {
+        "thrift.uri" : {
+          "value" : "facebook.com/thrift/annotation/hack/Wrapper",
+          "source_range" : {
+            "begin" : {
+              "line" : 63,
+              "column" : 4
+            },
+            "end" : {
+              "line" : 63,
+              "column" : 62
+            }
+          }
+        }
+      },
+      "structured_annotations" : {
+        "scope.Typedef" : {  },
+        "scope.Struct" : {  },
+        "scope.Field" : {  }
+      },
+      "fields" : {
+        "name" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 54,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 54,
+              "column" : 18
+            }
+          }
+        },
+        "underlyingName" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 61,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 61,
+              "column" : 28
+            }
+          }
+        },
+        "extraNamespace" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "default_value" : "thrift_adapted_types",
+          "source_range" : {
+            "begin" : {
+              "line" : 62,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 62,
+              "column" : 53
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 49,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 63,
+          "column" : 63
+        }
+      }
+    },
+    "Adapter" : {
+      "lineno" : 97,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Typedef" : {  },
+        "scope.Field" : {  }
+      },
+      "fields" : {
+        "name" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 101,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 101,
+              "column" : 18
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 97,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 102,
+          "column" : 2
+        }
+      }
+    },
+    "SkipCodegen" : {
+      "lineno" : 104,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Typedef" : {  },
+        "scope.Field" : {  },
+        "scope.Function" : {  }
+      },
+      "fields" : {
+        "reason" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 108,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 108,
+              "column" : 20
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 104,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 109,
+          "column" : 2
+        }
+      }
+    },
+    "Name" : {
+      "lineno" : 115,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Definition" : {  }
+      },
+      "fields" : {
+        "name" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 117,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 117,
+              "column" : 18
+            }
+          }
+        },
+        "reason" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 118,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 118,
+              "column" : 20
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 115,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 119,
+          "column" : 2
+        }
+      }
+    },
+    "UnionEnumAttributes" : {
+      "lineno" : 122,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Union" : {  }
+      },
+      "fields" : {
+        "attributes" : {
+          "type_enum" : "LIST",
+          "spec_args" : { "type_enum" : "STRING", "spec_args" : null} ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 124,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 124,
+              "column" : 30
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 122,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 125,
+          "column" : 2
+        }
+      }
+    },
+    "StructTrait" : {
+      "lineno" : 128,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Struct" : {  },
+        "scope.Union" : {  },
+        "scope.Exception" : {  }
+      },
+      "fields" : {
+        "name" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 132,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 132,
+              "column" : 18
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 128,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 133,
+          "column" : 2
+        }
+      }
+    },
+    "Attributes" : {
+      "lineno" : 174,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "attributes" : {
+          "type_enum" : "LIST",
+          "spec_args" : { "type_enum" : "STRING", "spec_args" : null} ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 175,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 175,
+              "column" : 30
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 174,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 176,
+          "column" : 2
+        }
+      }
+    },
+    "StructAsTrait" : {
+      "lineno" : 178,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Struct" : {  },
+        "scope.Union" : {  },
+        "scope.Exception" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 178,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 181,
+          "column" : 24
+        }
+      }
+    },
+    "ModuleInternal" : {
+      "lineno" : 184,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Struct" : {  },
+        "scope.Union" : {  },
+        "scope.Enum" : {  },
+        "scope.Field" : {  },
+        "scope.Typedef" : {  },
+        "scope.Function" : {  },
+        "scope.Service" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 184,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 191,
+          "column" : 25
+        }
+      }
+    }
+  }
+}

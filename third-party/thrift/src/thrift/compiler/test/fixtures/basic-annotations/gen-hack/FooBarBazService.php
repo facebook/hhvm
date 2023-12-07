@@ -1096,6 +1096,13 @@ class FooBarBazServiceStaticMetadata implements \IThriftServiceStaticMetadata {
             )
           ),
         ],
+        'bar' => dict[
+          '\facebook\thrift\annotation\go\Name' => \facebook\thrift\annotation\go\Name::fromShape(
+            shape(
+              "name" => "BarNonStructured",
+            )
+          ),
+        ],
       ],
     );
   }

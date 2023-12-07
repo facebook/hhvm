@@ -341,7 +341,7 @@ const folly::StringPiece YourStruct::__fbthrift_get_class_name() {
 
 YourStruct::YourStruct(const YourStruct& srcObj) :
     __fbthrift_field_majorVer(srcObj.__fbthrift_field_majorVer),
-    __fbthrift_field_package(srcObj.__fbthrift_field_package),
+    __fbthrift_field_abstract(srcObj.__fbthrift_field_abstract),
     __fbthrift_field_annotation_with_quote(srcObj.__fbthrift_field_annotation_with_quote),
     __fbthrift_field_class_(srcObj.__fbthrift_field_class_),
     __fbthrift_field_annotation_with_trailing_comma(srcObj.__fbthrift_field_annotation_with_trailing_comma),
@@ -370,7 +370,7 @@ YourStruct::~YourStruct() {}
 
 YourStruct::YourStruct(FOLLY_MAYBE_UNUSED YourStruct&& other) noexcept :
     __fbthrift_field_majorVer(std::move(other.__fbthrift_field_majorVer)),
-    __fbthrift_field_package(std::move(other.__fbthrift_field_package)),
+    __fbthrift_field_abstract(std::move(other.__fbthrift_field_abstract)),
     __fbthrift_field_annotation_with_quote(std::move(other.__fbthrift_field_annotation_with_quote)),
     __fbthrift_field_class_(std::move(other.__fbthrift_field_class_)),
     __fbthrift_field_annotation_with_trailing_comma(std::move(other.__fbthrift_field_annotation_with_trailing_comma)),
@@ -384,7 +384,7 @@ YourStruct::YourStruct(FOLLY_MAYBE_UNUSED YourStruct&& other) noexcept :
 
 YourStruct& YourStruct::operator=(FOLLY_MAYBE_UNUSED YourStruct&& other) noexcept {
     this->__fbthrift_field_majorVer = std::move(other.__fbthrift_field_majorVer);
-    this->__fbthrift_field_package = std::move(other.__fbthrift_field_package);
+    this->__fbthrift_field_abstract = std::move(other.__fbthrift_field_abstract);
     this->__fbthrift_field_annotation_with_quote = std::move(other.__fbthrift_field_annotation_with_quote);
     this->__fbthrift_field_class_ = std::move(other.__fbthrift_field_class_);
     this->__fbthrift_field_annotation_with_trailing_comma = std::move(other.__fbthrift_field_annotation_with_trailing_comma);
@@ -397,9 +397,9 @@ YourStruct& YourStruct::operator=(FOLLY_MAYBE_UNUSED YourStruct&& other) noexcep
 }
 
 
-YourStruct::YourStruct(apache::thrift::FragileConstructor, ::std::int64_t majorVer__arg, ::std::string package__arg, ::std::string annotation_with_quote__arg, ::std::string class___arg, ::std::string annotation_with_trailing_comma__arg, ::std::string empty_annotations__arg, ::cpp2::YourEnum my_enum__arg, ::cpp2::list_string_6884 cpp_type_annotation__arg, ::cpp2::YourUnion my_union__arg) :
+YourStruct::YourStruct(apache::thrift::FragileConstructor, ::std::int64_t majorVer__arg, ::std::string abstract__arg, ::std::string annotation_with_quote__arg, ::std::string class___arg, ::std::string annotation_with_trailing_comma__arg, ::std::string empty_annotations__arg, ::cpp2::YourEnum my_enum__arg, ::cpp2::list_string_6884 cpp_type_annotation__arg, ::cpp2::YourUnion my_union__arg) :
     __fbthrift_field_majorVer(std::move(majorVer__arg)),
-    __fbthrift_field_package(std::move(package__arg)),
+    __fbthrift_field_abstract(std::move(abstract__arg)),
     __fbthrift_field_annotation_with_quote(std::move(annotation_with_quote__arg)),
     __fbthrift_field_class_(std::move(class___arg)),
     __fbthrift_field_annotation_with_trailing_comma(std::move(annotation_with_trailing_comma__arg)),
@@ -423,7 +423,7 @@ YourStruct::YourStruct(apache::thrift::FragileConstructor, ::std::int64_t majorV
 void YourStruct::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_majorVer = ::std::int64_t();
-  this->__fbthrift_field_package = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_abstract = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
   this->__fbthrift_field_annotation_with_quote = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
   this->__fbthrift_field_class_ = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
   this->__fbthrift_field_annotation_with_trailing_comma = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
@@ -460,7 +460,7 @@ const ::cpp2::list_string_6884& YourStruct::get_cpp_type_annotation() const& {
 void swap(FOLLY_MAYBE_UNUSED YourStruct& a, FOLLY_MAYBE_UNUSED YourStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_majorVer, b.__fbthrift_field_majorVer);
-  swap(a.__fbthrift_field_package, b.__fbthrift_field_package);
+  swap(a.__fbthrift_field_abstract, b.__fbthrift_field_abstract);
   swap(a.__fbthrift_field_annotation_with_quote, b.__fbthrift_field_annotation_with_quote);
   swap(a.__fbthrift_field_class_, b.__fbthrift_field_class_);
   swap(a.__fbthrift_field_annotation_with_trailing_comma, b.__fbthrift_field_annotation_with_trailing_comma);

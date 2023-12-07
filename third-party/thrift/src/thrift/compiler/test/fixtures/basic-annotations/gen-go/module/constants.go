@@ -24,7 +24,7 @@ var MyStruct *MyStruct
 func init() {
 MyStruct = &MyStruct{
   Major: 42,
-  Package: "package",
+  Abstract: "abstract",
   MyEnum: 2,
 }
 

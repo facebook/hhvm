@@ -1865,7 +1865,6 @@ pub struct make_BadInteraction;
 /// # };
 /// ```
 impl dyn BadInteraction {
-    pub const cpp_name: &'static ::std::primitive::str = "GoodInteraction";
     pub fn new<P, T>(
         protocol: P,
         transport: T,
@@ -2174,7 +2173,6 @@ pub struct make_BadService;
 /// # };
 /// ```
 impl dyn BadService {
-    pub const cpp_name: &'static ::std::primitive::str = "GoodService";
     pub fn new<P, T>(
         protocol: P,
         transport: T,

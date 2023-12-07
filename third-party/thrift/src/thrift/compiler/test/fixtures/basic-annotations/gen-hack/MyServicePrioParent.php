@@ -796,6 +796,13 @@ class MyServicePrioParentStaticMetadata implements \IThriftServiceStaticMetadata
             )
           ),
         ],
+        'pong' => dict[
+          '\facebook\thrift\annotation\Priority' => \facebook\thrift\annotation\Priority::fromShape(
+            shape(
+              "level" => \facebook\thrift\annotation\RpcPriority::HIGH_IMPORTANT,
+            )
+          ),
+        ],
       ],
     );
   }

@@ -1358,6 +1358,11 @@ class MyService_ping_result extends \ThriftSyncStructWithoutResult implements \I
         'myExcept' => shape(
           'field' => dict[],
           'type' => dict[
+            '\facebook\thrift\annotation\cpp\Name' => \facebook\thrift\annotation\cpp\Name::fromShape(
+              shape(
+                "value" => "YourException",
+              )
+            ),
             '\facebook\thrift\annotation\cpp\Adapter' => \facebook\thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::StaticCast",
@@ -2638,6 +2643,18 @@ class MyServiceStaticMetadata implements \IThriftServiceStaticMetadata {
           '\facebook\thrift\annotation\go\Name' => \facebook\thrift\annotation\go\Name::fromShape(
             shape(
               "name" => "GoGetDataById",
+            )
+          ),
+        ],
+        'doNothing' => dict[
+          '\facebook\thrift\annotation\cpp\Name' => \facebook\thrift\annotation\cpp\Name::fromShape(
+            shape(
+              "value" => "cppDoNothing",
+            )
+          ),
+          '\facebook\thrift\annotation\go\Name' => \facebook\thrift\annotation\go\Name::fromShape(
+            shape(
+              "name" => "GoDoNothing",
             )
           ),
         ],

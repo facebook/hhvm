@@ -21,7 +21,7 @@ from .ttypes import UTF8STRINGS, MyEnum, MyStructNestedAnnotation, MyUnion, MyEx
 
 myStruct = MyStruct(**{
   "major" : 42,
-  "package" : "package",
+  "abstract" : "abstract",
   "my_enum" :   2,
 })
 

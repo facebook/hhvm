@@ -40,7 +40,7 @@ struct ForEachField<::cpp2::detail::YourStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).majorVer_ref()...);
-    f(1, static_cast<T&&>(t).package_ref()...);
+    f(1, static_cast<T&&>(t).abstract_ref()...);
     f(2, static_cast<T&&>(t).annotation_with_quote_ref()...);
     f(3, static_cast<T&&>(t).class__ref()...);
     f(4, static_cast<T&&>(t).annotation_with_trailing_comma_ref()...);

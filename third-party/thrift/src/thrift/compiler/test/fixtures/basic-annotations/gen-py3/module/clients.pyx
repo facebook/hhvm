@@ -585,7 +585,6 @@ cdef class MyServicePrioChild(MyServicePrioParent):
         return "module.MyServicePrioChild"
 
 cdef object _BadService_annotations = _py_types.MappingProxyType({
-    """cpp.name""": """GoodService""",
 })
 
 

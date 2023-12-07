@@ -25,7 +25,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     @ThriftConstructor
     public MyStruct(
         @com.facebook.swift.codec.ThriftField(value=2, name="major", requiredness=Requiredness.NONE) final long major,
-        @com.facebook.swift.codec.ThriftField(value=1, name="package", requiredness=Requiredness.NONE) final String _package,
+        @com.facebook.swift.codec.ThriftField(value=1, name="abstract", requiredness=Requiredness.NONE) final String _abstract,
         @com.facebook.swift.codec.ThriftField(value=3, name="annotation_with_quote", requiredness=Requiredness.NONE) final String annotationWithQuote,
         @com.facebook.swift.codec.ThriftField(value=4, name="class_", requiredness=Requiredness.NONE) final String class_,
         @com.facebook.swift.codec.ThriftField(value=5, name="annotation_with_trailing_comma", requiredness=Requiredness.NONE) final String annotationWithTrailingComma,
@@ -35,7 +35,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         @com.facebook.swift.codec.ThriftField(value=9, name="my_union", requiredness=Requiredness.NONE) final test.fixtures.basicannotations.MyUnion myUnion
     ) {
         this.major = major;
-        this._package = _package;
+        this._abstract = _abstract;
         this.annotationWithQuote = annotationWithQuote;
         this.class_ = class_;
         this.annotationWithTrailingComma = annotationWithTrailingComma;
@@ -48,7 +48,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     @ThriftConstructor
     protected MyStruct() {
       this.major = 0L;
-      this._package = null;
+      this._abstract = null;
       this.annotationWithQuote = null;
       this.class_ = null;
       this.annotationWithTrailingComma = null;
@@ -60,7 +60,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
     public static class Builder {
         private long major = 0L;
-        private String _package = null;
+        private String _abstract = null;
         private String annotationWithQuote = null;
         private String class_ = null;
         private String annotationWithTrailingComma = null;
@@ -77,13 +77,13 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public long getMajor() { return major; }
     
-            @com.facebook.swift.codec.ThriftField(value=1, name="package", requiredness=Requiredness.NONE)
-        public Builder setPackage(String _package) {
-            this._package = _package;
+            @com.facebook.swift.codec.ThriftField(value=1, name="abstract", requiredness=Requiredness.NONE)
+        public Builder setAbstract(String _abstract) {
+            this._abstract = _abstract;
             return this;
         }
     
-        public String getPackage() { return _package; }
+        public String getAbstract() { return _abstract; }
     
             @com.facebook.swift.codec.ThriftField(value=3, name="annotation_with_quote", requiredness=Requiredness.NONE)
         public Builder setAnnotationWithQuote(String annotationWithQuote) {
@@ -144,7 +144,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         public Builder() { }
         public Builder(MyStruct other) {
             this.major = other.major;
-            this._package = other._package;
+            this._abstract = other._abstract;
             this.annotationWithQuote = other.annotationWithQuote;
             this.class_ = other.class_;
             this.annotationWithTrailingComma = other.annotationWithTrailingComma;
@@ -158,7 +158,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         public MyStruct build() {
             MyStruct result = new MyStruct (
                 this.major,
-                this._package,
+                this._abstract,
                 this.annotationWithQuote,
                 this.class_,
                 this.annotationWithTrailingComma,
@@ -178,9 +178,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     private final long major;
     public static final int _MAJOR = 2;
     private static final TField MAJOR_FIELD_DESC = new TField("major", TType.I64, (short)2);
-        private final String _package;
-    public static final int _PACKAGE = 1;
-    private static final TField PACKAGE_FIELD_DESC = new TField("package", TType.STRING, (short)1);
+        private final String _abstract;
+    public static final int _ABSTRACT = 1;
+    private static final TField ABSTRACT_FIELD_DESC = new TField("abstract", TType.STRING, (short)1);
         private final String annotationWithQuote;
     public static final int _ANNOTATION_WITH_QUOTE = 3;
     private static final TField ANNOTATION_WITH_QUOTE_FIELD_DESC = new TField("annotation_with_quote", TType.STRING, (short)3);
@@ -206,9 +206,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       NAMES_TO_IDS.put("major", 2);
       THRIFT_NAMES_TO_IDS.put("major", 2);
       FIELD_METADATA.put(2, MAJOR_FIELD_DESC);
-      NAMES_TO_IDS.put("_package", 1);
-      THRIFT_NAMES_TO_IDS.put("package", 1);
-      FIELD_METADATA.put(1, PACKAGE_FIELD_DESC);
+      NAMES_TO_IDS.put("_abstract", 1);
+      THRIFT_NAMES_TO_IDS.put("abstract", 1);
+      FIELD_METADATA.put(1, ABSTRACT_FIELD_DESC);
       NAMES_TO_IDS.put("annotationWithQuote", 3);
       THRIFT_NAMES_TO_IDS.put("annotation_with_quote", 3);
       FIELD_METADATA.put(3, ANNOTATION_WITH_QUOTE_FIELD_DESC);
@@ -241,8 +241,8 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=1, name="package", requiredness=Requiredness.NONE)
-    public String getPackage() { return _package; }
+    @com.facebook.swift.codec.ThriftField(value=1, name="abstract", requiredness=Requiredness.NONE)
+    public String getAbstract() { return _abstract; }
     
     
     @Nullable
@@ -283,7 +283,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
         helper.add("major", major);
-        helper.add("_package", _package);
+        helper.add("_abstract", _abstract);
         helper.add("annotationWithQuote", annotationWithQuote);
         helper.add("class_", class_);
         helper.add("annotationWithTrailingComma", annotationWithTrailingComma);
@@ -307,7 +307,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         return
             Objects.equals(major, other.major) &&
-            Objects.equals(_package, other._package) &&
+            Objects.equals(_abstract, other._abstract) &&
             Objects.equals(annotationWithQuote, other.annotationWithQuote) &&
             Objects.equals(class_, other.class_) &&
             Objects.equals(annotationWithTrailingComma, other.annotationWithTrailingComma) &&
@@ -322,7 +322,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
             major,
-            _package,
+            _abstract,
             annotationWithQuote,
             class_,
             annotationWithTrailingComma,
@@ -354,10 +354,10 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             TProtocolUtil.skip(oprot, __field.type);
           }
           break;
-        case _PACKAGE:
+        case _ABSTRACT:
           if (__field.type == TType.STRING) {
-            String _package = oprot.readString();
-            builder.setPackage(_package);
+            String _abstract = oprot.readString();
+            builder.setAbstract(_abstract);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
           }
@@ -443,9 +443,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       oprot.writeFieldBegin(MAJOR_FIELD_DESC);
       oprot.writeI64(this.major);
       oprot.writeFieldEnd();
-      if (_package != null) {
-        oprot.writeFieldBegin(PACKAGE_FIELD_DESC);
-        oprot.writeString(this._package);
+      if (_abstract != null) {
+        oprot.writeFieldBegin(ABSTRACT_FIELD_DESC);
+        oprot.writeString(this._abstract);
         oprot.writeFieldEnd();
       }
       if (annotationWithQuote != null) {

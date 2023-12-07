@@ -35,8 +35,6 @@
 #include <thrift/compiler/lib/rust/util.h>
 #include <thrift/compiler/lib/uri.h>
 
-using namespace std;
-
 namespace apache {
 namespace thrift {
 namespace compiler {
@@ -184,7 +182,7 @@ bool has_type_annotation(const t_type* type) {
 // fbthrift Rust runtime library and instead that logic will need to be emitted
 // into the generated crate.
 bool has_nonstandard_type_annotation(const t_type* type) {
-  return get_type_annotation(type).find("::") != string::npos;
+  return get_type_annotation(type).find("::") != std::string::npos;
 }
 
 void parse_include_srcs(
@@ -193,13 +191,13 @@ void parse_include_srcs(
     return;
   }
   auto paths = *include_srcs;
-  string::size_type pos = 0;
-  while (pos != string::npos && pos < paths.size()) {
+  std::string::size_type pos = 0;
+  while (pos != std::string::npos && pos < paths.size()) {
     mstch::map node;
-    string::size_type next_pos = paths.find(':', pos);
+    std::string::size_type next_pos = paths.find(':', pos);
     node["program:include_src"] = paths.substr(pos, next_pos - pos);
     elements.push_back(std::move(node));
-    pos = ((next_pos == string::npos) ? next_pos : next_pos + 1);
+    pos = ((next_pos == std::string::npos) ? next_pos : next_pos + 1);
   }
 }
 
@@ -457,6 +455,27 @@ mstch::node structured_annotations_node(
   return annotations;
 }
 
+namespace {
+
+std::string get_resolved_name(const t_type* t) {
+  t = t->get_true_type();
+  if (auto c = dynamic_cast<const t_list*>(t)) {
+    return fmt::format("list<{}>", get_resolved_name(c->get_elem_type()));
+  }
+  if (auto c = dynamic_cast<const t_set*>(t)) {
+    return fmt::format("set<{}>", get_resolved_name(c->get_elem_type()));
+  }
+  if (auto c = dynamic_cast<const t_map*>(t)) {
+    return fmt::format(
+        "map<{},{}>",
+        get_resolved_name(c->get_key_type()),
+        get_resolved_name(c->get_val_type()));
+  }
+  return t->get_full_name();
+}
+
+} // namespace
+
 class t_mstch_rust_generator : public t_mstch_generator {
  public:
   using t_mstch_generator::t_mstch_generator;
@@ -620,34 +639,13 @@ class rust_mstch_program : public mstch_program {
     return has_nonstandard_types;
   }
   mstch::node rust_nonstandard_types() {
-    // Sort/deduplicate by value of `rust.type` annotation.
     struct rust_type_less {
       bool operator()(const t_type* lhs, const t_type* rhs) const {
-        auto lhs_annotation = get_type_annotation(lhs);
-        auto rhs_annotation = get_type_annotation(rhs);
+        std::string lhs_annotation = get_type_annotation(lhs);
+        std::string rhs_annotation = get_type_annotation(rhs);
         if (lhs_annotation != rhs_annotation) {
           return lhs_annotation < rhs_annotation;
         }
-
-        std::function<std::string(const t_type*)> get_resolved_name =
-            [&](const t_type* t) {
-              t = t->get_true_type();
-              if (auto c = dynamic_cast<const t_list*>(t)) {
-                return fmt::format(
-                    "list<{}>", get_resolved_name(c->get_elem_type()));
-              }
-              if (auto c = dynamic_cast<const t_set*>(t)) {
-                return fmt::format(
-                    "set<{}>", get_resolved_name(c->get_elem_type()));
-              }
-              if (auto c = dynamic_cast<const t_map*>(t)) {
-                return fmt::format(
-                    "map<{},{}>",
-                    get_resolved_name(c->get_key_type()),
-                    get_resolved_name(c->get_val_type()));
-              }
-              return t->get_full_name();
-            };
         return get_resolved_name(lhs) < get_resolved_name(rhs);
       }
     };
@@ -1984,7 +1982,8 @@ class rust_mstch_typedef : public mstch_typedef {
     return false;
   }
   mstch::node rust_nonstandard() {
-    return typedef_->get_annotation("rust.type").find("::") != string::npos;
+    return typedef_->get_annotation("rust.type").find("::") !=
+        std::string::npos;
   }
   mstch::node rust_has_docs() { return typedef_->has_doc(); }
   mstch::node rust_docs() { return quoted_rust_doc(typedef_); }

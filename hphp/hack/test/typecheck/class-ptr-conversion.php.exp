@@ -1,0 +1,12 @@
+File "class-ptr-conversion.php", line 4, characters 30-31:
+Invalid argument (Typing[4411])
+  File "class-ptr-conversion.php", line 4, characters 30-31:
+  This expression is readonly
+  File "classname.hhi", line 25, characters 47-49:
+  It is incompatible with this parameter, which is mutable
+File "class-ptr-conversion.php", line 8, characters 30-31:
+Invalid argument (Typing[4411])
+  File "class-ptr-conversion.php", line 8, characters 30-31:
+  This expression is readonly
+  File "classname.hhi", line 31, characters 47-48:
+  It is incompatible with this parameter, which is mutable

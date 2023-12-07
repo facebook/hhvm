@@ -267,7 +267,6 @@ bool ObjectData::toBooleanImpl() const noexcept {
   }
 
   always_assert(false);
-  return false;
 }
 
 int64_t ObjectData::toInt64() const {

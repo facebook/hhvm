@@ -1584,10 +1584,12 @@ void in(ISS& env, const bc::Cmp&) {
 }
 
 void castBoolImpl(ISS& env, const Type& t, bool negate) {
-  nothrow(env);
-  constprop(env);
+  auto const [e, effectFree] = emptiness(t);
+  if (effectFree) {
+    effect_free(env);
+    constprop(env);
+  }
 
-  auto const e = emptiness(t);
   switch (e) {
     case Emptiness::Empty:
     case Emptiness::NonEmpty:
@@ -1713,10 +1715,13 @@ void in(ISS& env, const bc::Select& op) {
   auto const t = topC(env, 1);
   auto const f = topC(env, 2);
 
-  effect_free(env);
-  constprop(env);
+  auto const [e, effectFree] = emptiness(cond);
+  if (effectFree) {
+    effect_free(env);
+    constprop(env);
+  }
 
-  switch (emptiness(cond)) {
+  switch (e) {
     case Emptiness::Maybe:
       discard(env, 3);
       push(env, union_of(t, f));
@@ -1967,7 +1972,8 @@ template<class JmpOp>
 void jmpImpl(ISS& env, const JmpOp& op) {
   auto const Negate = std::is_same<JmpOp, bc::JmpNZ>::value;
   auto const location = topStkEquiv(env);
-  auto const e = emptiness(topC(env));
+  auto const t = topC(env);
+  auto const [e, effectFree] = emptiness(t);
   if (e == (Negate ? Emptiness::NonEmpty : Emptiness::Empty)) {
     reduce(env, bc::PopC {});
     return jmp_setdest(env, op.target1);
@@ -2027,7 +2033,7 @@ void jmpImpl(ISS& env, const JmpOp& op) {
   }
 
   popC(env);
-  effect_free(env);
+  if (effectFree) effect_free(env);
 
   if (location == NoLocalId) return env.propagate(op.target1, &env.state);
 

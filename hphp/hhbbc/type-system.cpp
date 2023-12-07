@@ -5054,18 +5054,25 @@ bool could_have_magic_bool_conversion(const Type& t) {
   return dobj.cls().couldHaveMagicBool();
 }
 
-Emptiness emptiness(const Type& t) {
+std::pair<Emptiness, bool> emptiness(const Type& t) {
   assertx(t.subtypeOf(BCell));
 
   auto const emptyMask = BNull | BFalse | BArrLikeE;
   auto const nonEmptyMask =
-    BTrue | BArrLikeN | BObj | BCls | BLazyCls | BEnumClassLabel;
+    BTrue | BArrLikeN | BObj | BCls | BLazyCls | BFunc |
+    BRFunc | BClsMeth | BRClsMeth | BEnumClassLabel;
   auto const bothMask =
     BCell & ~(emptyMask | nonEmptyMask | BInt | BDbl | BStr);
   auto empty = t.couldBe(emptyMask | bothMask);
   auto nonempty = t.couldBe(nonEmptyMask | bothMask);
+  auto effectfree =
+    t.subtypeOf(BPrim | BStr | BObj | BArrLike | BCls | BLazyCls |
+                BFunc | BRFunc | BClsMeth | BRClsMeth | BEnumClassLabel);
 
-  if (t.couldBe(BObj) && could_have_magic_bool_conversion(t)) empty = true;
+  if (could_have_magic_bool_conversion(t)) {
+    empty = true;
+    effectfree = false;
+  }
 
   auto const check = [&] (TypedValue tv) {
     (tvToBool(tv) ? nonempty : empty) = true;
@@ -5097,10 +5104,13 @@ Emptiness emptiness(const Type& t) {
   }
 
   if (nonempty) {
-    return empty ? Emptiness::Maybe : Emptiness::NonEmpty;
+    return std::make_pair(
+      empty ? Emptiness::Maybe : Emptiness::NonEmpty,
+      effectfree
+    );
   }
   assertx(empty || t.is(BBottom));
-  return Emptiness::Empty;
+  return std::make_pair(Emptiness::Empty, effectfree);
 }
 
 void widen_type_impl(Type& t, uint32_t depth) {
@@ -5735,6 +5745,22 @@ Type assert_emptiness(Type t) {
 
   if (t.couldBe(BCls)) {
     t = remove_data(std::move(t), BCls);
+  }
+
+  if (t.couldBe(BFunc)) {
+    t = remove_data(std::move(t), BFunc);
+  }
+
+  if (t.couldBe(BRFunc)) {
+    t = remove_data(std::move(t), BRFunc);
+  }
+
+  if (t.couldBe(BClsMeth)) {
+    t = remove_data(std::move(t), BClsMeth);
+  }
+
+  if (t.couldBe(BRClsMeth)) {
+    t = remove_data(std::move(t), BRClsMeth);
   }
 
   if (t.couldBe(BEnumClassLabel)) {

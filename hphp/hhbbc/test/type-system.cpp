@@ -6217,7 +6217,7 @@ TEST(Type, Emptiness) {
     { TDbl, Emptiness::Maybe }
   };
   for (auto const& p : tests) {
-    EXPECT_EQ(emptiness(p.first), p.second);
+    EXPECT_EQ(emptiness(p.first).first, p.second);
   }
 }
 
@@ -6228,12 +6228,12 @@ TEST(Type, AssertNonEmptiness) {
   for (auto const& t : all) {
     if (!t.subtypeOf(BCell)) continue;
 
-    switch (emptiness(t)) {
+    switch (emptiness(t).first) {
       case Emptiness::Empty:
         EXPECT_EQ(assert_nonemptiness(t), TBottom);
         break;
       case Emptiness::Maybe:
-        EXPECT_NE(emptiness(assert_nonemptiness(t)), Emptiness::Empty);
+        EXPECT_NE(emptiness(assert_nonemptiness(t)).first, Emptiness::Empty);
         break;
       case Emptiness::NonEmpty:
         EXPECT_EQ(assert_nonemptiness(t), t);
@@ -6298,12 +6298,12 @@ TEST(Type, AssertEmptiness) {
   for (auto const& t : all) {
     if (!t.subtypeOf(BCell)) continue;
 
-    switch (emptiness(t)) {
+    switch (emptiness(t).first) {
       case Emptiness::Empty:
         EXPECT_EQ(assert_emptiness(t), t);
         break;
       case Emptiness::Maybe:
-        EXPECT_NE(emptiness(assert_emptiness(t)), Emptiness::NonEmpty);
+        EXPECT_NE(emptiness(assert_emptiness(t)).first, Emptiness::NonEmpty);
         break;
       case Emptiness::NonEmpty:
         EXPECT_EQ(assert_emptiness(t), TBottom);

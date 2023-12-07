@@ -697,7 +697,7 @@ private:
   friend void widen_type_impl(Type&, uint32_t);
   friend Type widen_type(Type);
   friend Type widening_union(const Type&, const Type&);
-  friend Emptiness emptiness(const Type&);
+  friend std::pair<Emptiness, bool> emptiness(const Type&);
   friend Type opt(Type);
   friend Type unopt(Type);
   template<typename R, bool, bool>
@@ -1422,9 +1422,10 @@ Type widening_union(const Type& a, const Type& b);
 Type widen_type(Type t);
 
 /*
- * Returns what we know about the emptiness of the type.
+ * Returns what we know about the emptiness of the type and whether
+ * checking is effect-free.
  */
-Emptiness emptiness(const Type&);
+std::pair<Emptiness, bool> emptiness(const Type&);
 
 /*
  * Returns whether a Type could hold an object that has a custom

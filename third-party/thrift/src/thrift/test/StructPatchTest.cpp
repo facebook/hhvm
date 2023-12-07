@@ -1363,11 +1363,20 @@ TEST(StructPatchTest, SerializationExample) {
   auto expected = CompactSerializer::serialize<std::string>(patch.toThrift());
 
   folly::IOBufQueue queue;
-  CompactProtocolWriter proto;
-  proto.setOutput(&queue);
-  op::encode<type::infer_tag<MyDataPatch>>(proto, patch);
+  CompactProtocolWriter protoWriter;
+  protoWriter.setOutput(&queue);
+  op::encode<type::infer_tag<MyDataPatch>>(protoWriter, patch);
   auto buf = queue.move();
-  EXPECT_EQ(buf->to<std::string>(), expected);
+
+  MyDataPatch fromSerialize{
+      CompactSerializer::deserialize<MyDataPatchStruct>(expected)};
+
+  MyDataPatch fromOpEncode;
+  CompactProtocolReader protoReader;
+  protoReader.setInput(buf.get());
+  op::decode<type::infer_tag<MyDataPatch>>(protoReader, fromOpEncode);
+
+  EXPECT_EQ(fromSerialize, fromOpEncode);
 }
 
 TEST(StructPatchTest, Remove) {

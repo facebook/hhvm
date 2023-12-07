@@ -27,7 +27,7 @@ namespace proxygen {
 static folly::Singleton<DNSModule> gDNSModule;
 
 std::shared_ptr<DNSModule> DNSModule::get() {
-  return folly::Singleton<DNSModule>::try_get();
+  return gDNSModule.try_get();
 }
 
 DNSModule::DNSModule() {

@@ -580,6 +580,9 @@ let from_class_xhp_attrs_only (parents : Decl_store.class_entries SMap.t) ty =
     inherit_hack_xhp_attrs_only class_ parent_members
 
 let parents_which_provide_members c =
+  (* /!\ For soundness, the traversal order below
+   * must be consistent with traversal order for ancestors
+   * used in decl_folded_class.ml *)
   (* In an abstract class or a trait, we assume the interfaces
    * will be implemented in the future, so we take them as
    * part of the class (as requested by dependency injection implementers) *)
@@ -680,6 +683,9 @@ end = struct
   type t = (parent_kind * parent list) list
 
   let get (c : shallow_class) : t =
+    (* /!\ For soundness, the traversal order below
+     * must be consistent with traversal order for ancestors
+     * used in decl_folded_class.ml *)
     [
       (Parent, parents_which_provide_members c |> List.rev);
       (Requirement, c.sc_req_class @ c.sc_req_extends);

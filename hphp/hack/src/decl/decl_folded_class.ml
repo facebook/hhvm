@@ -995,7 +995,21 @@ and class_decl
     | Some (elt, _) when get_elt_abstract elt -> false
     | _ -> true
   in
-  let impl = c.sc_extends @ c.sc_implements @ c.sc_uses in
+  (* Order matters - the earlier, the higher precedence its ancestors will have.
+   * /!\ For soundness, the order here must be consistent with the traversal order for method folding!
+   * see decl_inherit.ml
+   * A type may implement an interface or use a trait at multiple instantations,
+   * e.g. I<int> and I<string>. The order here determines which one will be used:
+   * we'll use the first one encountered during traversal.
+   * Since this is a recursive function, ancestor traversal is in effect a depth-first
+   * traversal.
+   * For interfaces, the typechecking code forces the winner instantiation
+   * to be a subtype of each of the loser instantiations. This is necessary for soundness.
+   * Users can influence which instantiation wins by reordering direct parents.
+   * It's important that we start traversal with interfaces here,
+   * otherwise interfaces which are ancestors of the base class would always win,
+   * with no easy way to override them. *)
+  let impl = c.sc_implements @ c.sc_extends @ c.sc_uses in
   let (impl, parents) =
     match
       List.find c.sc_methods ~f:(fun sm ->

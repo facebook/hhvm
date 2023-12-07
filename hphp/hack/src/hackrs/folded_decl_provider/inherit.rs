@@ -533,6 +533,9 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
 
     fn add_from_parents(&mut self) -> Result<()> {
         let mut tys: Vec<&Ty<R>> = Vec::new();
+        // /!\ For soundness, the traversal order below
+        // must be consistent with traversal order for ancestors
+        // used in fold.rs
         match self.child.kind {
             ClassishKind::Cclass(Abstraction::Abstract) => {
                 tys.extend(self.child.implements.iter());
@@ -607,6 +610,9 @@ impl<R: Reason> Inherited<R> {
             parents,
             members: Self::default(),
         };
+        // /!\ For soundness, the traversal order below
+        // must be consistent with traversal order for ancestors
+        // used in fold.rs
         folder.add_from_parents()?; // Members inherited from parents ...
         folder.add_from_requirements()?;
         folder.add_from_traits()?; // ... can be overridden by traits.

@@ -1,0 +1,16 @@
+File "multiple_instantiation_inheritence1.php", line 24, characters 19-20:
+Invalid argument (Typing[4110])
+  File "multiple_instantiation_inheritence1.php", line 9, characters 41-43:
+  Expected `int`
+  File "multiple_instantiation_inheritence1.php", line 17, characters 28-33:
+  But got `string`
+  File "multiple_instantiation_inheritence1.php", line 17, characters 28-33:
+  This type argument to `I` must match exactly (it is invariant)
+File "multiple_instantiation_inheritence1.php", line 24, characters 19-20:
+Invalid argument (Typing[4110])
+  File "multiple_instantiation_inheritence1.php", line 17, characters 28-33:
+  Expected `string`
+  File "multiple_instantiation_inheritence1.php", line 17, characters 28-33:
+  This type argument to `I` must match exactly (it is invariant)
+  File "multiple_instantiation_inheritence1.php", line 9, characters 41-43:
+  But got `int`

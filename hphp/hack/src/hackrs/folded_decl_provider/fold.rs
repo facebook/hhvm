@@ -861,10 +861,23 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         }
 
         let stringish_object_opt = DeclFolder::stringish_object_parent(self.child);
-        // Order matters - the earlier, the higher precedence its ancestors will have
+        // Order matters - the earlier, the higher precedence its ancestors will have.
+        // /!\ For soundness, the order here must be consistent with the traversal order for method folding!
+        // see inherit.rs
+        // A type may implement an interface or use a trait at multiple instantations,
+        // e.g. I<int> and I<string>. The order here determines which one will be used:
+        // we'll use the first one encountered during traversal.
+        // Since this is a recursive function, ancestor traversal is in effect a depth-first
+        // traversal.
+        // For interfaces, the typechecking code forces the winner instantiation
+        // to be a subtype of each of the loser instantiations. This is necessary for soundness.
+        // Users can influence which instantiation wins by reordering direct parents.
+        // It's important that we start traversal with interfaces here,
+        // otherwise interfaces which are ancestors of the base class would always win,
+        // with no easy way to override them.
         let direct_ancestors = (stringish_object_opt.iter())
-            .chain(self.child.extends.iter())
             .chain(self.child.implements.iter())
+            .chain(self.child.extends.iter())
             .chain(self.child.uses.iter());
 
         let mut ancestors = Default::default();

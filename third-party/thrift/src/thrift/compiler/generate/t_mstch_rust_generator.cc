@@ -40,39 +40,6 @@ namespace thrift {
 namespace compiler {
 
 namespace rust {
-const std::string_view kRustCratePrefix = "crate::";
-
-std::string quoted_rust_doc(const t_named* named_node) {
-  const std::string& doc = named_node->doc();
-
-  // strip leading/trailing whitespace
-  static const std::string whitespace = "\n\r\t ";
-  const auto first = doc.find_first_not_of(whitespace);
-  if (first == std::string::npos) {
-    // empty string
-    return "\"\"";
-  }
-
-  const auto last = doc.find_last_not_of(whitespace);
-  return quote(doc.substr(first, last - first + 1), true);
-}
-
-bool can_derive_ord(const t_type* type) {
-  type = type->get_true_type();
-  if (type->is_string() || type->is_binary() || type->is_bool() ||
-      type->is_byte() || type->is_i16() || type->is_i32() || type->is_i64() ||
-      type->is_enum() || type->is_void()) {
-    return true;
-  }
-  if (type->has_annotation("rust.ord")) {
-    return true;
-  }
-  if (type->is_list()) {
-    auto elem_type = dynamic_cast<const t_list*>(type)->get_elem_type();
-    return elem_type && can_derive_ord(elem_type);
-  }
-  return false;
-}
 
 struct rust_codegen_options {
   // Name that the main crate uses to refer to its dependency on the types
@@ -112,13 +79,53 @@ struct rust_codegen_options {
   bool gen_metadata = true;
 };
 
-static bool validate_rust_serde(const t_node& node) {
+enum class FieldKind { Box, Arc, Inline };
+
+class mstch_rust_value;
+
+namespace {
+
+const std::string_view kRustCratePrefix = "crate::";
+
+std::string quoted_rust_doc(const t_named* named_node) {
+  const std::string& doc = named_node->doc();
+
+  // strip leading/trailing whitespace
+  static const std::string whitespace = "\n\r\t ";
+  const auto first = doc.find_first_not_of(whitespace);
+  if (first == std::string::npos) {
+    // empty string
+    return "\"\"";
+  }
+
+  const auto last = doc.find_last_not_of(whitespace);
+  return quote(doc.substr(first, last - first + 1), true);
+}
+
+bool can_derive_ord(const t_type* type) {
+  type = type->get_true_type();
+  if (type->is_string() || type->is_binary() || type->is_bool() ||
+      type->is_byte() || type->is_i16() || type->is_i32() || type->is_i64() ||
+      type->is_enum() || type->is_void()) {
+    return true;
+  }
+  if (type->has_annotation("rust.ord")) {
+    return true;
+  }
+  if (type->is_list()) {
+    auto elem_type = dynamic_cast<const t_list*>(type)->get_elem_type();
+    return elem_type && can_derive_ord(elem_type);
+  }
+  return false;
+}
+
+bool validate_rust_serde(const t_node& node) {
   const std::string* ann = node.find_annotation_or_null("rust.serde");
 
   return ann == nullptr || *ann == "true" || *ann == "false";
 }
 
-static bool rust_serde_enabled(
+bool rust_serde_enabled(
     const rust_codegen_options& options, const t_node& node) {
   const std::string* ann = node.find_annotation_or_null("rust.serde");
 
@@ -147,8 +154,6 @@ std::string get_import_name(
   return program_name;
 }
 
-enum class FieldKind { Box, Arc, Inline };
-
 bool node_is_boxed(const t_named& node) {
   return node.has_annotation("rust.box") || node.has_annotation("thrift.box") ||
       node.find_structured_annotation_or_null(kBoxUri);
@@ -176,11 +181,6 @@ bool has_type_annotation(const t_type* type) {
   return !get_type_annotation(type).empty();
 }
 
-// For example `set<Value> (rust.type = "indexmap::IndexSet")` or `map<string,
-// Value> (rust.type = "indexmap::IndexMap")`. Unlike for standard library
-// collections, serialization impls for these types are not provided in the
-// fbthrift Rust runtime library and instead that logic will need to be emitted
-// into the generated crate.
 bool has_nonstandard_type_annotation(const t_type* type) {
   return get_type_annotation(type).find("::") != std::string::npos;
 }
@@ -424,8 +424,6 @@ mstch::node adapter_node(
   return node;
 }
 
-class mstch_rust_value;
-
 mstch::node structured_annotations_node(
     const t_named& named,
     unsigned depth,
@@ -454,8 +452,6 @@ mstch::node structured_annotations_node(
 
   return annotations;
 }
-
-namespace {
 
 std::string get_resolved_name(const t_type* t) {
   t = t->get_true_type();
@@ -1071,8 +1067,6 @@ class rust_mstch_function : public mstch_function {
  private:
   const std::unordered_multiset<std::string>& function_upcamel_names_;
 };
-
-class mstch_rust_value;
 
 class rust_mstch_function_factory {
  public:
@@ -2034,16 +2028,19 @@ mstch::node rust_mstch_service::rust_functions() {
       function_upcamel_names_);
 }
 
-struct name_less {
-  bool operator()(const t_type* lhs, const t_type* rhs) const {
-    return lhs->get_scoped_name() < rhs->get_scoped_name();
-  }
-};
-
 mstch::node rust_mstch_service::rust_all_exceptions() {
-  std::map<const t_type*, std::vector<const t_function*>, name_less>
-      function_map;
-  std::map<const t_type*, std::vector<const t_field*>> field_map;
+  struct name_less {
+    bool operator()(const t_type* lhs, const t_type* rhs) const {
+      return lhs->get_scoped_name() < rhs->get_scoped_name();
+    }
+  };
+  typedef std::vector<const t_field*> fields_t;
+  typedef std::vector<const t_function*> functions_t;
+  typedef std::map<const t_type*, fields_t> field_map_t;
+  typedef std::map<const t_type*, functions_t, name_less> function_map_t;
+
+  field_map_t field_map;
+  function_map_t function_map;
   for (const auto& fun : service_->functions()) {
     for (const t_field& fld : get_elems(fun.exceptions())) {
       function_map[&fld.type().deref()].push_back(&fun);

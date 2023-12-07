@@ -182,7 +182,7 @@ class DebugProtocolWriter {
   folly::io::QueueAppender out_;
   std::string indent_;
   std::vector<WriteState> writeState_;
-  const Options options_;
+  Options options_;
 };
 
 template <class T>

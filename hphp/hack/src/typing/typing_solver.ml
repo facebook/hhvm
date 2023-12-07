@@ -526,20 +526,37 @@ let rec always_solve_tyvar_down ~freshen env r var =
         r
     in
     let (env, ty_err_opt2) =
-      let (to_lower, bounds) =
+      let (env, to_lower, bounds) =
         let lower_bounds = Env.get_tyvar_lower_bounds env var in
         if autocomplete_mode then
           let upper_bounds = Env.get_tyvar_upper_bounds env var in
+          let (env, upper_bounds) =
+            (* Filtering mixed and support_dyn<mixed> *)
+            ITySet.fold
+              (fun ity (env, upper_bounds) ->
+                match ity with
+                | ConstraintType _ -> (env, ITySet.add ity upper_bounds)
+                | LoclType lty ->
+                  let (_, env, lty) = TUtils.strip_supportdyn env lty in
+                  (match get_node lty with
+                  | Toption topt ->
+                    (match get_node topt with
+                    | Tnonnull -> (env, upper_bounds)
+                    | _ -> (env, ITySet.add ity upper_bounds))
+                  | _ -> (env, ITySet.add ity upper_bounds)))
+              upper_bounds
+              (env, ITySet.empty)
+          in
           if
             Env.get_tyvar_appears_contravariantly env var
             && ITySet.is_empty lower_bounds
             && not (ITySet.is_empty upper_bounds)
           then
-            (false, upper_bounds)
+            (env, false, upper_bounds)
           else
-            (true, lower_bounds)
+            (env, true, lower_bounds)
         else
-          (true, lower_bounds)
+          (env, true, lower_bounds)
       in
       (* We cannot do more on (<expr#1> as C) than on simply C,
        * so replace expression-dependent types with their bound.

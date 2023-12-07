@@ -88,7 +88,8 @@ class BaseClientBootstrap {
       const folly::SocketAddress& address,
       std::chrono::milliseconds timeout = std::chrono::milliseconds(0)) = 0;
 
-  BaseClientBootstrap* sslContext(folly::SSLContextPtr sslContext) {
+  BaseClientBootstrap* sslContext(
+      std::shared_ptr<const folly::SSLContext> sslContext) {
     sslContext_ = sslContext;
     return this;
   }
@@ -139,7 +140,7 @@ class BaseClientBootstrap {
 
   std::shared_ptr<PipelineFactory<P>> pipelineFactory_;
   typename P::Ptr pipeline_;
-  folly::SSLContextPtr sslContext_;
+  std::shared_ptr<const folly::SSLContext> sslContext_;
   std::shared_ptr<folly::ssl::SSLSession> sslSession_{nullptr};
   std::string sni_;
   bool deferSecurityNegotiation_{false};

@@ -1183,18 +1183,22 @@ CAMLprim value hh_set_allow_hashtable_writes_by_current_process(value val) {
   CAMLreturn(Val_unit);
 }
 
-CAMLprim value hh_should_exit (void) {
-  CAMLparam0();
+static int should_exit (void) {
   // [worker_can_exit] is used by WorkerCancel.with_no_cancellations to protect
   // critical regions against cancellation.
   // If [workers_should_exit] is null, that means we haven't connected to shmem,
   // hence it's impossible for anyone to have sent us a cancellation request!
   // The content of [workers_should_exit] is set by [WorkerCancel.stop_workers].
-  CAMLreturn(Val_bool(worker_can_exit && workers_should_exit != NULL && *workers_should_exit ? 1 : 0));
+  return worker_can_exit && workers_should_exit != NULL && *workers_should_exit;
+}
+
+CAMLprim value hh_should_exit (void) {
+  CAMLparam0();
+  CAMLreturn(Val_bool(should_exit()));
 }
 
 static void raise_if_should_exit(void) {
-  if (Bool_val(hh_should_exit())) {
+  if (should_exit()) {
     static const value *exn = NULL;
     if (!exn) exn = caml_named_value("worker_should_exit");
     caml_raise_constant(*exn);

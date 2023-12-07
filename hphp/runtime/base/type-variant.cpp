@@ -467,8 +467,6 @@ bool Variant::toBooleanHelper() const {
     case KindOfObject:        return m_data.pobj->toBoolean();
     case KindOfResource:      return m_data.pres->data()->o_toBoolean();
     case KindOfRFunc:
-      SystemLib::throwInvalidOperationExceptionObject("RFunc to bool conversion");
-      return true;
     case KindOfEnumClassLabel:
     case KindOfFunc:
     case KindOfClass:

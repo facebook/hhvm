@@ -89,7 +89,7 @@ std::string prettyPrintPatch(
     DebugProtocolWriter::Options options =
         DebugProtocolWriter::Options::simple()) {
   static_assert(is_patch_v<T>, "Argument must be a Patch.");
-  return debugStringViaEncode(obj.toThrift(), std::move(options));
+  return debugStringViaEncode(obj, std::move(options));
 }
 
 } // namespace op

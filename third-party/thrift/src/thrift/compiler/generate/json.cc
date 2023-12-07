@@ -55,7 +55,7 @@ std::string to_json(const t_const_value* value) {
     std::string result;
     for (const auto& v : value) {
       auto key = to_json(v.first);
-      if (v.first->kind() != t_const_value::CV_STRING) {
+      if (v.first->get_type() != t_const_value::CV_STRING) {
         // map keys must be strings
         key = json_quote_ascii(key);
       }
@@ -65,7 +65,7 @@ std::string to_json(const t_const_value* value) {
     return "{" + result + "}";
   };
 
-  switch (value->kind()) {
+  switch (value->get_type()) {
     case t_const_value::CV_BOOL:
       return value->get_bool() ? "true" : "false";
     case t_const_value::CV_INTEGER:

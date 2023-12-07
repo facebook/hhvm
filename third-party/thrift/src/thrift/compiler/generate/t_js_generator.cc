@@ -393,7 +393,7 @@ string t_js_generator::render_const_value(
         out << value->get_integer();
         break;
       case t_base_type::TYPE_DOUBLE:
-        if (value->kind() == t_const_value::CV_INTEGER) {
+        if (value->get_type() == t_const_value::CV_INTEGER) {
           out << value->get_integer();
         } else {
           out << value->get_double();

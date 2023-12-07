@@ -1950,8 +1950,8 @@ class cpp_mstch_field : public mstch_field {
   mstch::node enum_has_value() {
     if (auto enm = dynamic_cast<const t_enum*>(field_->get_type())) {
       const auto* const_value = field_->get_value();
-      using cv = t_const_value::t_const_value_kind;
-      if (const_value->kind() == cv::CV_INTEGER) {
+      using cv = t_const_value::t_const_value_type;
+      if (const_value->get_type() == cv::CV_INTEGER) {
         if (auto* enum_value = enm->find_value(const_value->get_integer())) {
           return context_.enum_value_factory->make_mstch_object(
               enum_value, context_, pos_);

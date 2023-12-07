@@ -1131,7 +1131,7 @@ string t_py_generator::render_const_value(
       case t_base_type::TYPE_DOUBLE:
       case t_base_type::TYPE_FLOAT:
         out << std::showpoint;
-        if (value->kind() == t_const_value::CV_INTEGER) {
+        if (value->get_type() == t_const_value::CV_INTEGER) {
           out << value->get_integer();
         } else {
           out << value->get_double();

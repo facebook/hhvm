@@ -461,14 +461,14 @@ string t_java_deprecated_generator::render_const_value(
         render << value->get_integer() << "L";
         break;
       case t_base_type::TYPE_DOUBLE:
-        if (value->kind() == t_const_value::CV_INTEGER) {
+        if (value->get_type() == t_const_value::CV_INTEGER) {
           render << "(double)" << value->get_integer();
         } else {
           render << value->get_double();
         }
         break;
       case t_base_type::TYPE_FLOAT:
-        if (value->kind() == t_const_value::CV_INTEGER) {
+        if (value->get_type() == t_const_value::CV_INTEGER) {
           render << "(float)" << value->get_integer();
         } else {
           render << "(float)" << value->get_double();

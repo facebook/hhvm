@@ -422,7 +422,7 @@ bool t_go_generator::omit_initialization(const t_field* tfield) {
         return value->get_integer() == 0;
       case t_base_type::TYPE_DOUBLE:
       case t_base_type::TYPE_FLOAT:
-        if (value->kind() == t_const_value::CV_INTEGER) {
+        if (value->get_type() == t_const_value::CV_INTEGER) {
           return value->get_integer() == 0;
         } else {
           return value->get_double() == 0.;
@@ -1180,8 +1180,8 @@ string t_go_generator::render_const_value(
                         << type_to_go_type(type) << " = ";
         }
 
-        std::ostringstream& value_out = is_optional ? f_const_vars_ : out;
-        if (value->kind() == t_const_value::CV_INTEGER) {
+        std::ostringstream& value_out = (is_optional ? f_const_vars_ : out);
+        if (value->get_type() == t_const_value::CV_INTEGER) {
           value_out << value->get_integer();
         } else {
           value_out << value->get_double();

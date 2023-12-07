@@ -36,8 +36,8 @@ namespace compiler {
 // Assigns a t_const_value to a concrete Thrift type.
 
 inline void hydrate_const(bool& out, const t_const_value& val) {
-  out =
-      val.kind() == t_const_value::CV_BOOL ? val.get_bool() : val.get_integer();
+  out = val.get_type() == t_const_value::CV_BOOL ? val.get_bool()
+                                                 : val.get_integer();
 }
 template <typename T>
 std::enable_if_t<std::is_integral_v<T>> hydrate_const(
@@ -102,7 +102,7 @@ decltype(auto) ensure(T t) {
 template <typename T>
 std::enable_if_t<is_thrift_class_v<T>> hydrate_const(
     T& out, const t_const_value& val) {
-  assert(val.kind() == t_const_value::t_const_value_kind::CV_MAP);
+  assert(val.get_type() == t_const_value::t_const_value_type::CV_MAP);
   std::unordered_map<std::string_view, t_const_value*> map;
   for (const auto& pair : val.get_map()) {
     map[pair.first->get_string()] = pair.second;
@@ -138,7 +138,7 @@ void hydrate_const(protocol::Object& out, const t_const_value& val) {
 inline protocol::Value const_to_value(const t_const_value& val) {
   protocol::Value ret;
   auto type = val.ttype() ? val.ttype()->get_type_value() : [&] {
-    switch (val.kind()) {
+    switch (val.get_type()) {
       case t_const_value::CV_BOOL:
         return t_type::type::t_bool;
       case t_const_value::CV_INTEGER:
@@ -156,9 +156,9 @@ inline protocol::Value const_to_value(const t_const_value& val) {
   switch (type) {
     case t_type::type::t_bool:
       ret.ensure_bool();
-      if (val.kind() == t_const_value::CV_BOOL) {
+      if (val.get_type() == t_const_value::CV_BOOL) {
         ret.as_bool() = val.get_bool();
-      } else if (val.kind() == t_const_value::CV_INTEGER) {
+      } else if (val.get_type() == t_const_value::CV_INTEGER) {
         auto value = val.get_integer();
         assert(value == 0 || value == 1);
         ret.as_bool() = value;

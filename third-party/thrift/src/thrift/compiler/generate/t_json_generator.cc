@@ -358,7 +358,7 @@ void t_json_generator::print_name(const string& name) {
  * TODO - support serialization of complex keys...
  */
 void t_json_generator::print_const_key(t_const_value* tvalue) {
-  switch (tvalue->kind()) {
+  switch (tvalue->get_type()) {
     case t_const_value::CV_INTEGER:
       f_out_ << "\"" << tvalue->get_integer() << "\"";
       break;
@@ -372,7 +372,7 @@ void t_json_generator::print_const_key(t_const_value* tvalue) {
     case t_const_value::CV_LIST:
     default: {
       std::ostringstream msg;
-      msg << "INVALID TYPE IN print_const_key: " << tvalue->kind();
+      msg << "INVALID TYPE IN print_const_key: " << tvalue->get_type();
       throw msg.str();
     }
   }
@@ -383,7 +383,7 @@ void t_json_generator::print_const_key(t_const_value* tvalue) {
  */
 void t_json_generator::print_const_value(const t_const_value* tvalue) {
   bool first = true;
-  switch (tvalue->kind()) {
+  switch (tvalue->get_type()) {
     case t_const_value::CV_INTEGER:
       f_out_ << tvalue->get_integer();
       break;

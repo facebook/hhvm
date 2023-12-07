@@ -2450,6 +2450,102 @@ cdef class Map__i32_string(thrift.py3.types.Map):
 
 Mapping.register(Map__i32_string)
 
+@__cython.auto_pickle(False)
+cdef class Map__i32_bool(thrift.py3.types.Map):
+    def __init__(self, items=None):
+        if isinstance(items, Map__i32_bool):
+            self._cpp_obj = (<Map__i32_bool> items)._cpp_obj
+        else:
+            self._cpp_obj = Map__i32_bool._make_instance(items)
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cmap[cint32_t,cbool]] c_items):
+        __fbthrift_inst = <Map__i32_bool>Map__i32_bool.__new__(Map__i32_bool)
+        __fbthrift_inst._cpp_obj = cmove(c_items)
+        return __fbthrift_inst
+
+    def __copy__(Map__i32_bool self):
+        cdef shared_ptr[cmap[cint32_t,cbool]] cpp_obj = make_shared[cmap[cint32_t,cbool]](
+            deref(self._cpp_obj)
+        )
+        return Map__i32_bool._fbthrift_create(cmove(cpp_obj))
+
+    def __len__(self):
+        return deref(self._cpp_obj).size()
+
+    @staticmethod
+    cdef shared_ptr[cmap[cint32_t,cbool]] _make_instance(object items) except *:
+        cdef shared_ptr[cmap[cint32_t,cbool]] c_inst = make_shared[cmap[cint32_t,cbool]]()
+        if items is not None:
+            for key, item in items.items():
+                if not isinstance(key, int):
+                    raise TypeError(f"{key!r} is not of type int")
+                key = <cint32_t> key
+                if not isinstance(item, bool):
+                    raise TypeError(f"{item!r} is not of type bool")
+
+                deref(c_inst)[key] = item
+        return c_inst
+
+    cdef _check_key_type(self, key):
+        if not self or key is None:
+            return
+        if isinstance(key, int):
+            return key
+
+    def __getitem__(self, key):
+        err = KeyError(f'{key}')
+        key = self._check_key_type(key)
+        if key is None:
+            raise err
+        cdef cint32_t ckey = key
+        if not __map_contains(self._cpp_obj, ckey):
+            raise err
+        cdef cbool citem = False
+        __map_getitem(self._cpp_obj, ckey, citem)
+        return citem
+
+    def __iter__(self):
+        if not self:
+            return
+        cdef __map_iter[cmap[cint32_t,cbool]] itr = __map_iter[cmap[cint32_t,cbool]](self._cpp_obj)
+        cdef cint32_t citem = 0
+        for i in range(deref(self._cpp_obj).size()):
+            itr.genNextKey(self._cpp_obj, citem)
+            yield citem
+
+    def __contains__(self, key):
+        key = self._check_key_type(key)
+        if key is None:
+            return False
+        cdef cint32_t ckey = key
+        return __map_contains(self._cpp_obj, ckey)
+
+    def values(self):
+        if not self:
+            return
+        cdef __map_iter[cmap[cint32_t,cbool]] itr = __map_iter[cmap[cint32_t,cbool]](self._cpp_obj)
+        cdef cbool citem = False
+        for i in range(deref(self._cpp_obj).size()):
+            itr.genNextValue(self._cpp_obj, citem)
+            yield citem
+
+    def items(self):
+        if not self:
+            return
+        cdef __map_iter[cmap[cint32_t,cbool]] itr = __map_iter[cmap[cint32_t,cbool]](self._cpp_obj)
+        cdef cint32_t ckey = 0
+        cdef cbool citem = False
+        for i in range(deref(self._cpp_obj).size()):
+            itr.genNextItem(self._cpp_obj, ckey, citem)
+            yield (ckey, citem)
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__Map__i32_bool()
+
+Mapping.register(Map__i32_bool)
+
 myInt = 1337
 name = cname().decode('UTF-8')
 multi_line_string = cmulti_line_string().decode('UTF-8')
@@ -2530,6 +2626,8 @@ minIntBin = -9223372036854775808
 maxNDub = -1.7976931348623157e+308
 minNDub = -2.2250738585072014e-308
 minNSDub = -5e-324
+I2B = Map__i32_bool._fbthrift_create(constant_shared_ptr(cI2B()))
+I2B_REF = Map__i32_bool._fbthrift_create(constant_shared_ptr(cI2B_REF()))
 MyCompany = Company
 MyStringIdentifier = str
 MyIntIdentifier = int

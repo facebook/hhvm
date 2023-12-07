@@ -770,6 +770,10 @@ minNDub = float(-2.2250738585072014e-308)
 
 minNSDub = float(-5e-324)
 
+I2B = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_bool, { 0: False, 1: True, 2: True, 3: False})
+
+I2B_REF = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_bool, { 0: False, 1: True, 2: True, 3: False})
+
 MyCompany = Company
 MyStringIdentifier = str
 MyIntIdentifier = int

@@ -309,6 +309,10 @@ struct module_constants {
     return minNSDub_;
   }
 
+  static ::std::map<::std::int32_t, bool> const& I2B();
+
+  static ::std::map<::std::int32_t, bool> const& I2B_REF();
+
 };
 
 } // cpp2

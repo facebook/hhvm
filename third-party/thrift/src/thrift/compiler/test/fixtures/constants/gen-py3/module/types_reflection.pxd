@@ -51,3 +51,5 @@ cdef __SetSpec get_reflection__Set__string()
 cdef __MapSpec get_reflection__Map__i32_i32()
 
 cdef __MapSpec get_reflection__Map__i32_string()
+
+cdef __MapSpec get_reflection__Map__i32_bool()

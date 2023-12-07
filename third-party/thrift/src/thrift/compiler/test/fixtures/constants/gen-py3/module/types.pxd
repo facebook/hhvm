@@ -419,6 +419,13 @@ cdef class Map__i32_string(thrift.py3.types.Map):
     @staticmethod
     cdef shared_ptr[cmap[cint32_t,string]] _make_instance(object items) except *
 
+cdef class Map__i32_bool(thrift.py3.types.Map):
+    cdef shared_ptr[cmap[cint32_t,cbool]] _cpp_obj
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cmap[cint32_t,cbool]])
+    @staticmethod
+    cdef shared_ptr[cmap[cint32_t,cbool]] _make_instance(object items) except *
+
 
 cdef extern from "thrift/compiler/test/fixtures/constants/src/gen-cpp2/module_constants.h" namespace "::cpp2":
     cdef cint32_t cmyInt "::cpp2::module_constants::myInt"
@@ -501,3 +508,5 @@ cdef extern from "thrift/compiler/test/fixtures/constants/src/gen-cpp2/module_co
     cdef double cmaxNDub "::cpp2::module_constants::maxNDub"
     cdef double cminNDub "::cpp2::module_constants::minNDub"
     cdef double cminNSDub "::cpp2::module_constants::minNSDub"
+    cdef cmap[cint32_t,cbool] cI2B "::cpp2::module_constants::I2B"()
+    cdef cmap[cint32_t,cbool] cI2B_REF "::cpp2::module_constants::I2B_REF"()

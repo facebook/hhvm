@@ -360,3 +360,21 @@ pub const minNDub: ::std::primitive::f64 = -2.2250738585072014e-308;
 
 pub const minNSDub: ::std::primitive::f64 = -5e-324;
 
+pub static I2B: ::once_cell::sync::Lazy<::std::collections::BTreeMap<::std::primitive::i32, ::std::primitive::bool>> = ::once_cell::sync::Lazy::new(|| {
+            let mut map = ::std::collections::BTreeMap::new();
+            map.insert(0, false);
+            map.insert(1, true);
+            map.insert(2, true);
+            map.insert(3, false);
+            map
+        });
+
+pub static I2B_REF: ::once_cell::sync::Lazy<::std::collections::BTreeMap<::std::primitive::i32, ::std::primitive::bool>> = ::once_cell::sync::Lazy::new(|| {
+            let mut map = ::std::collections::BTreeMap::new();
+            map.insert(0, false);
+            map.insert(1, true);
+            map.insert(2, true);
+            map.insert(3, false);
+            map
+        });
+

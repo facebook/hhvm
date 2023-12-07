@@ -250,4 +250,18 @@ public final class ModuleConstants {
     public static final double MIN_NDUB = (double)-2.2250738585072014e-308;
 
     public static final double MIN_NSDUB = (double)-5e-324;
+
+    public static final Map<Integer, Boolean> I2B = ImmutableMap.<Integer, Boolean>builder()
+        .put(0, false)
+        .put(1, true)
+        .put(2, true)
+        .put(3, false)
+        .build();
+
+    public static final Map<Integer, Boolean> I2B_REF = ImmutableMap.<Integer, Boolean>builder()
+        .put(0, false)
+        .put(1, true)
+        .put(2, true)
+        .put(3, false)
+        .build();
 }

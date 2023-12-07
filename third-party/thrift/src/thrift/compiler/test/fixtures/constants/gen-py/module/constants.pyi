@@ -88,3 +88,5 @@ minIntBin: int
 maxNDub: float
 minNDub: float
 minNSDub: float
+I2B: __T.Dict[int, bool]
+I2B_REF: __T.Dict[int, bool]

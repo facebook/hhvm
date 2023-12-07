@@ -274,4 +274,17 @@ namespace cpp2 {
 
 
 
+::std::map<::std::int32_t, bool> const& module_constants::I2B() {
+  static folly::Indestructible<::std::map<::std::int32_t, bool>> const instance{std::initializer_list<::std::map<::std::int32_t, bool>::value_type>{{static_cast<::std::int32_t>(0), false},
+  {static_cast<::std::int32_t>(1), true},
+  {static_cast<::std::int32_t>(2), true},
+  {static_cast<::std::int32_t>(3), false}}};
+  return *instance;
+}
+
+::std::map<::std::int32_t, bool> const& module_constants::I2B_REF() {
+  static folly::Indestructible<::std::map<::std::int32_t, bool>> const instance{::cpp2::module_constants::I2B()};
+  return *instance;
+}
+
 } // cpp2

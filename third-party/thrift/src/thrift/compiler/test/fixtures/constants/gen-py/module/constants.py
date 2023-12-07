@@ -362,3 +362,17 @@ minNDub = -2.22507e-308
 
 minNSDub = -4.94066e-324
 
+I2B = {
+  0 : False,
+  1 : True,
+  2 : True,
+  3 : False,
+}
+
+I2B_REF = {
+  0 : False,
+  1 : True,
+  2 : True,
+  3 : False,
+}
+

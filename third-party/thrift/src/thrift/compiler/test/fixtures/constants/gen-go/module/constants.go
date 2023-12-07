@@ -99,6 +99,8 @@ const MinIntBin = -9223372036854775808
 const MaxNDub = -1.79769e+308
 const MinNDub = -2.22507e-308
 const MinNSDub = -4.94066e-324
+var I2B map[int32]bool
+var I2B_REF map[int32]bool
 var const_lit_Instagram_employer Company = 3
 var const_lit_Instagram_compensation float64 = 1200
 var const_lit_Instagram_school string = "Monters University"
@@ -374,6 +376,20 @@ EmptyStringIntMap = map[string]int32{
 }
 
 EmptyStringStringMap = map[string]string{
+}
+
+I2B = map[int32]bool{
+  0: false,
+  1: true,
+  2: true,
+  3: false,
+}
+
+I2B_REF = map[int32]bool{
+  0: false,
+  1: true,
+  2: true,
+  3: false,
 }
 
 }

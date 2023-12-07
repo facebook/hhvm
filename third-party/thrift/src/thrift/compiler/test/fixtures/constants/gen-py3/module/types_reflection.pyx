@@ -516,3 +516,11 @@ cdef __MapSpec get_reflection__Map__i32_string():
         value_kind=__NumberType.NOT_A_NUMBER,
     )
 
+cdef __MapSpec get_reflection__Map__i32_bool():
+    return __MapSpec._fbthrift_create(
+        key=int,
+        key_kind=__NumberType.I32,
+        value=bool,
+        value_kind=__NumberType.NOT_A_NUMBER,
+    )
+

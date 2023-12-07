@@ -266,3 +266,15 @@ const MinIntBin int64 = -9223372036854775808
 const MaxNDub float64 = -1.7976931348623157e+308
 const MinNDub float64 = -2.2250738585072014e-308
 const MinNSDub float64 = -5e-324
+var I2B map[int32]bool = map[int32]bool{
+    0: false,
+    1: true,
+    2: true,
+    3: false,
+}
+var I2B_REF map[int32]bool = map[int32]bool{
+    0: false,
+    1: true,
+    2: true,
+    3: false,
+}

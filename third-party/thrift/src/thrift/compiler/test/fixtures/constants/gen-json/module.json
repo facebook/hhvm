@@ -1281,6 +1281,38 @@
           "column" : 50
         }
       }
+    },
+    "I2B" : {
+      "lineno" : 273,
+      "value" : { "0" : false, "1" : true, "2" : true, "3" : false },
+      "type_enum" : "MAP",
+      "spec_args" : { "key_type" : { "type_enum" : "I32", "spec_args" : null }, "val_type" : { "type_enum" : "BOOL", "spec_args" : null} } ,
+      "source_range" : {
+        "begin" : {
+          "line" : 273,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 278,
+          "column" : 3
+        }
+      }
+    },
+    "I2B_REF" : {
+      "lineno" : 279,
+      "value" : { "0" : false, "1" : true, "2" : true, "3" : false },
+      "type_enum" : "MAP",
+      "spec_args" : { "key_type" : { "type_enum" : "I32", "spec_args" : null }, "val_type" : { "type_enum" : "BOOL", "spec_args" : null} } ,
+      "source_range" : {
+        "begin" : {
+          "line" : 279,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 279,
+          "column" : 36
+        }
+      }
     }
   },
   "enumerations" : {

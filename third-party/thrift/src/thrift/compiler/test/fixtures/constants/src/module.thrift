@@ -269,3 +269,11 @@ const i64 minIntBin = -0b1000000000000000000000000000000000000000000000000000000
 const double maxNDub = -1.7976931348623157e+308;
 const double minNDub = -2.2250738585072014e-308;
 const double minNSDub = -4.9406564584124654e-324;
+
+const map<i32, bool> I2B = {
+  0: false,
+  1: true,
+  2: true,
+  3: false
+};
+const map<i32, bool> I2B_REF = I2B;

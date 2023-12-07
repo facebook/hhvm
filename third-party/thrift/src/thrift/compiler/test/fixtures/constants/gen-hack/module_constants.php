@@ -847,6 +847,34 @@ class module_CONSTANTS implements \IThriftConstants {
    */
   const float minNSDub = -4.94066e-324;
 
+  /**
+   * Original thrift constant:-
+   * map<i32, bool> I2B
+   */
+  <<__Memoize>>
+  public static function I2B()[write_props]: \ConstMap<int, bool>{
+    return ImmMap {
+      0 => false,
+      1 => true,
+      2 => true,
+      3 => false,
+    };
+  }
+
+  /**
+   * Original thrift constant:-
+   * map<i32, bool> I2B_REF
+   */
+  <<__Memoize>>
+  public static function I2B_REF()[write_props]: \ConstMap<int, bool>{
+    return ImmMap {
+      0 => false,
+      1 => true,
+      2 => true,
+      3 => false,
+    };
+  }
+
 
   public static function getAllStructuredAnnotations()[write_props]: dict<string, dict<string, \IThriftStruct>> {
     return dict[

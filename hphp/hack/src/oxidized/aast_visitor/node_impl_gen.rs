@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0ccafd28bff694e8ac359b232ac3b924>>
+// @generated SignedSource<<7d19d33a499665517bc2e4b2130ec561>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -744,25 +744,6 @@ impl<P: Params> Node<P> for Enum_ {
         self.base.accept(c, v)?;
         self.constraint.accept(c, v)?;
         self.includes.accept(c, v)
-    }
-}
-impl<P: Params> Node<P> for EnvAnnot {
-    fn accept<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_env_annot(c, self)
-    }
-    fn recurse<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        match self {
-            EnvAnnot::Join => Ok(()),
-            EnvAnnot::Refinement => Ok(()),
-        }
     }
 }
 impl<P: Params> Node<P> for Expr<P::Ex, P::En> {
@@ -2102,7 +2083,6 @@ impl<P: Params> Node<P> for Stmt_<P::Ex, P::En> {
             Stmt_::DeclareLocal(a) => helper8(a, c, v),
             Stmt_::Block(a) => helper9(a, c, v),
             Stmt_::Markup(a0) => a0.accept(c, v),
-            Stmt_::AssertEnv(a0) => a0.accept(c, v),
         }
     }
 }

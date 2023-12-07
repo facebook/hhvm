@@ -31,7 +31,6 @@ let stmt_name = function
   | A.Declare_local _ -> "Declare_local"
   | A.Block _ -> "Block"
   | A.Markup _ -> "Markup"
-  | A.AssertEnv _ -> "AssertEnv"
 
 let expr_name = function
   | A.Darray _ -> "Darray"

@@ -708,8 +708,7 @@ impl<'a> VisitorMut<'a> for TypedLocal {
             | Stmt_::While(_)
             | Stmt_::Noop
             | Stmt_::Block(_)
-            | Stmt_::Markup(_)
-            | Stmt_::AssertEnv(_) => elem.recurse(env, self.object()),
+            | Stmt_::Markup(_) => elem.recurse(env, self.object()),
         }
     }
 

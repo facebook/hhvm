@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0ed34c53d8f8b511aef86f66d46216ef>>
+// @generated SignedSource<<8dd3cfb1e075642272b60308c2994890>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -272,37 +272,7 @@ pub enum Stmt_<Ex, En> {
     ///     <?hh
     #[rust_to_ocaml(attr = "transform.opaque")]
     Markup(Box<Pstring>),
-    /// Used in IFC to track type inference environments. Not user
-    /// denotable.
-    #[rust_to_ocaml(attr = "transform.opaque")]
-    AssertEnv(Box<EnvAnnot>),
 }
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(and)]
-#[rust_to_ocaml(attr = "transform.opaque")]
-#[repr(u8)]
-pub enum EnvAnnot {
-    Join,
-    Refinement,
-}
-impl TrivialDrop for EnvAnnot {}
-arena_deserializer::impl_deserialize_in_arena!(EnvAnnot);
 
 #[derive(
     Clone,

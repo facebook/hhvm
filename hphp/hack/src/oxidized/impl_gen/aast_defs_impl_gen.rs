@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7495a85c49d8bbeefeede58e28b0d5ea>>
+// @generated SignedSource<<03fe6d4fdb34238cc07efc98aa5d75e9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -85,9 +85,6 @@ impl<Ex, En> Stmt_<Ex, En> {
     }
     pub fn mk_markup(p0: Pstring) -> Self {
         Stmt_::Markup(Box::new(p0))
-    }
-    pub fn mk_assert_env(p0: EnvAnnot) -> Self {
-        Stmt_::AssertEnv(Box::new(p0))
     }
     pub fn is_noop(&self) -> bool {
         match self {
@@ -221,12 +218,6 @@ impl<Ex, En> Stmt_<Ex, En> {
             _ => false,
         }
     }
-    pub fn is_assert_env(&self) -> bool {
-        match self {
-            Stmt_::AssertEnv(..) => true,
-            _ => false,
-        }
-    }
     pub fn as_expr(&self) -> Option<&Expr<Ex, En>> {
         match self {
             Stmt_::Expr(p0) => Some(&p0),
@@ -339,12 +330,6 @@ impl<Ex, En> Stmt_<Ex, En> {
     pub fn as_markup(&self) -> Option<&Pstring> {
         match self {
             Stmt_::Markup(p0) => Some(&p0),
-            _ => None,
-        }
-    }
-    pub fn as_assert_env(&self) -> Option<&EnvAnnot> {
-        match self {
-            Stmt_::AssertEnv(p0) => Some(&p0),
             _ => None,
         }
     }
@@ -477,12 +462,6 @@ impl<Ex, En> Stmt_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_assert_env_mut(&mut self) -> Option<&mut EnvAnnot> {
-        match self {
-            Stmt_::AssertEnv(p0) => Some(p0.as_mut()),
-            _ => None,
-        }
-    }
     pub fn as_expr_into(self) -> Option<Expr<Ex, En>> {
         match self {
             Stmt_::Expr(p0) => Some(*p0),
@@ -592,32 +571,6 @@ impl<Ex, En> Stmt_<Ex, En> {
         match self {
             Stmt_::Markup(p0) => Some(*p0),
             _ => None,
-        }
-    }
-    pub fn as_assert_env_into(self) -> Option<EnvAnnot> {
-        match self {
-            Stmt_::AssertEnv(p0) => Some(*p0),
-            _ => None,
-        }
-    }
-}
-impl EnvAnnot {
-    pub fn mk_join() -> Self {
-        EnvAnnot::Join
-    }
-    pub fn mk_refinement() -> Self {
-        EnvAnnot::Refinement
-    }
-    pub fn is_join(&self) -> bool {
-        match self {
-            EnvAnnot::Join => true,
-            _ => false,
-        }
-    }
-    pub fn is_refinement(&self) -> bool {
-        match self {
-            EnvAnnot::Refinement => true,
-            _ => false,
         }
     }
 }

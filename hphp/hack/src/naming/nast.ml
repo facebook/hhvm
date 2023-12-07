@@ -805,7 +805,6 @@ module Visitor_DEPRECATED = struct
           this#on_block acc b
         | Block (None, b) -> this#on_block acc b
         | Markup s -> this#on_markup acc s
-        | AssertEnv _ -> this#on_noop acc
 
       method on_expr acc (_, _, e) = this#on_expr_ acc e
 

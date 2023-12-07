@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fc1b8ac70dd29dbfb176ecdabe10e5fc>>
+// @generated SignedSource<<e608b3e146d6fd164a66e63f57dec6b4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -249,9 +249,6 @@ impl Transform for Stmt_ {
         }
     }
 }
-const _: () = {
-    impl Transform for EnvAnnot {}
-};
 impl Transform for UsingStmt {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();

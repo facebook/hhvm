@@ -741,7 +741,6 @@ impl<'decl> Infer<'decl> {
                 (Block(Box::new((vars.clone(), stmts))), ctx)
             }
             Markup(_) => (st.clone(), ctx),
-            AssertEnv(b) => (AssertEnv(b.clone()), ctx),
             Match(..) => todo!("TODO(jakebailey): match statements"),
         };
         (ast::Stmt(pos.clone(), new_stmt), ctx)

@@ -287,7 +287,6 @@ let visitor =
       | Block _
       | Try _
       | Match _
-      | AssertEnv _
       | Awaitall _ ->
         super#on_stmt on_error stmt
       | Noop

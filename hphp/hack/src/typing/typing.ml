@@ -1691,11 +1691,6 @@ let get_bound_ty_for_lvar env e =
  * argument refine is a function that takes the type of the variable
  * and returns a refined type (making necessary changes to the
  * environment, which is threaded through).
- *
- * All refinement functions return, in addition to the updated
- * environment, a (conservative) set of all the locals that got
- * refined. This set is used to construct AssertEnv statmements in
- * the typed AST.
  *)
 let refine_lvalue_type env ((ty, _, _) as te) ~refine =
   let e = Tast.to_nast_expr te in
@@ -7398,8 +7393,7 @@ and Stmt : sig
 end = struct
   let rec block env stl =
     Env.with_origin env Decl_counters.Body @@ fun env ->
-    (* To insert an `AssertEnv`, `stmt` might return a `Block`. We eliminate it here
-       to keep ASTs `Block`-free. *)
+    (* We keep the AST `Block`-free here. *)
     let (env, stl) =
       List.fold ~init:(env, []) stl ~f:(fun (env, stl) st ->
           let (env, st) = stmt env st in
@@ -7483,7 +7477,6 @@ end = struct
       in
       (env, Aast.Fallthrough)
     | Noop -> (env, Aast.Noop)
-    | AssertEnv _ -> (env, Aast.Noop)
     | Yield_break ->
       let env = LEnv.move_and_merge_next_in_cont ~join_pos:pos env C.Exit in
       (env, Aast.Yield_break)

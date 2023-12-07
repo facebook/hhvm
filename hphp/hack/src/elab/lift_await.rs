@@ -812,7 +812,6 @@ impl<'a> VisitorMut<'a> for LiftAwait {
             | Stmt_::Block(_)
             | Stmt_::Try(_)
             | Stmt_::Match(_)
-            | Stmt_::AssertEnv(_)
             | Stmt_::Awaitall(_) => {
                 *elem = Stmt(pos, stmt_);
                 elem.recurse(env, self.object())

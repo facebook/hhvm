@@ -338,7 +338,6 @@ and stmt (upcasted_info : element_info) (env : env) ((pos, stmt) : T.stmt) : env
     let env = Env.update_next_from_conts env [Cont.Break; Cont.Next] in
     env
   | A.Noop
-  | A.AssertEnv _
   | A.Markup _ ->
     env
   | _ -> failwithpos pos ("Unsupported statement: " ^ Utils.stmt_name stmt)

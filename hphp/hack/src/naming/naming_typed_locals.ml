@@ -235,8 +235,7 @@ let rec check_stmt on_expr env (id_pos, stmt_) =
   | Continue
   | Yield_break
   | Noop
-  | Markup _
-  | AssertEnv _ ->
+  | Markup _ ->
     env
 
 and check_block on_expr env block =

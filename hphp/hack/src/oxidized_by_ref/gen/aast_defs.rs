@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ac3df97b37484224fc746375d9160724>>
+// @generated SignedSource<<59ccf8a76aa4001bdc1fbf48c534117b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -342,16 +342,9 @@ pub enum Stmt_<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(attr = "transform.opaque")]
     Markup(&'a Pstring<'a>),
-    /// Used in IFC to track type inference environments. Not user
-    /// denotable.
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(attr = "transform.opaque")]
-    AssertEnv(&'a oxidized::aast_defs::EnvAnnot),
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Stmt_<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(Stmt_<'arena, Ex, En>);
-
-pub use oxidized::aast_defs::EnvAnnot;
 
 #[derive(
     Clone,

@@ -238,15 +238,6 @@ and ('ex, 'en) stmt_ =
        * TODO: this really belongs in def.
        *
        *     <?hh *)
-  | AssertEnv of env_annot
-      [@transform.opaque]
-      (** Used in IFC to track type inference environments. Not user
-       * denotable. *)
-
-and env_annot =
-  | Join
-  | Refinement
-[@@transform.opaque]
 
 and ('ex, 'en) using_stmt = {
   us_is_block_scoped: bool;

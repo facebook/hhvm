@@ -57,7 +57,6 @@ pub fn gen(ctx: &Context) -> TokenStream {
         impl Transform for oxidized::pos::Pos {}
         impl Transform for oxidized::file_info::Mode {}
         impl Transform for oxidized::namespace_env::Env {}
-        impl Transform for oxidized::LocalIdMap<(Pos, ())> {}
 
         #(#manual_impls)*
 

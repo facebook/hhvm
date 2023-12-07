@@ -17,7 +17,6 @@ pub use manual::i_set;
 pub use manual::ident;
 pub use manual::lazy;
 pub use manual::local_id;
-pub use manual::local_id_map::LocalIdMap;
 pub use manual::method_flags;
 pub use manual::opaque_digest;
 pub use manual::pos;

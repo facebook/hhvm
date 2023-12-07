@@ -267,7 +267,6 @@ let denylisted_types () =
     ]
   | Configuration.ByBox -> [])
   @ [
-      ("aast_defs", "LocalIdMap");
       ("aast_defs", "ByteString");
       ("errors", "FinalizedError");
       ("errors", "Marker");

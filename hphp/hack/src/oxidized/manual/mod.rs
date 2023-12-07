@@ -17,7 +17,6 @@ pub mod ident;
 pub mod internal_type_set;
 pub mod lazy;
 pub mod local_id;
-pub mod local_id_map;
 pub mod method_flags;
 pub mod namespace_env_impl;
 pub mod package_info_impl;

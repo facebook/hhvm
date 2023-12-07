@@ -60,16 +60,15 @@
                       rhs = ((~?classname<C>), [10:8-13], (Call { func = (((function(): ~?classname<C>)), [10:8-11], (Id ([10:8-11], "\\foo"))); targs = []; args = []; unpacked_arg = None })) }))));
              ([11:3-13:4],
               (If (((bool), [11:7-20], (Is (((~?classname<C>), [11:7-9], (Lvar ([11:7-9], $c))), ([11:13-20], Hnonnull)))),
-                 [([11:3-13:4], (AssertEnv (Refinement, {$c})));
-                   ([12:5-20],
-                    (Expr
-                       ((void), [12:5-19],
-                        (Call
-                           { func = ((~(function<reify T>(): void)), [12:5-12], (Class_const (((~C), [12:5-7], (CIexpr ((~classname<C>), [12:5-7], (Lvar ([12:5-7], $c))))), ([12:9-12], "bar"))));
-                             targs = [((int), ([12:13-16], (Hprim Tint)))]; 
-                             args = []; unpacked_arg = None }))))
+                 [([12:5-20],
+                   (Expr
+                      ((void), [12:5-19],
+                       (Call
+                          { func = ((~(function<reify T>(): void)), [12:5-12], (Class_const (((~C), [12:5-7], (CIexpr ((~classname<C>), [12:5-7], (Lvar ([12:5-7], $c))))), ([12:9-12], "bar"))));
+                            targs = [((int), ([12:13-16], (Hprim Tint)))]; 
+                            args = []; unpacked_arg = None }))))
                    ],
-                 [([11:3-13:4], (AssertEnv (Refinement, {$c}))); ([Pos.none], Noop)])))
+                 [([Pos.none], Noop)])))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([9:10-14], "__SupportDynamicType"); ua_params = [] }]; 

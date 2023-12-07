@@ -20,9 +20,7 @@
             ([7:3-9:4],
              (Foreach (((?vec<int>), [7:11-14], (Hole (((?vec<int>), [7:11-14], (Lvar ([7:11-14], $xs))), (?vec<int>), (vec<int>), Typing))), (
                 As_v ((int), [7:18-20], (Lvar ([7:18-20], $x)))),
-                [([7:3-9:4], (AssertEnv (Join, {$#capability $#local_capability $xs $y})));
-                  ([8:5-14], (Expr ((int), [8:5-13], (Binop { bop = (Eq (Some Plus)); lhs = ((int), [8:5-7], (Lvar ([8:5-7], $y))); rhs = ((int), [8:11-13], (Lvar ([8:11-13], $x))) }))))]
-                )))
+                [([8:5-14], (Expr ((int), [8:5-13], (Binop { bop = (Eq (Some Plus)); lhs = ((int), [8:5-7], (Lvar ([8:5-7], $y))); rhs = ((int), [8:11-13], (Lvar ([8:11-13], $x))) }))))])))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([4:10-26], "__SupportDynamicType"); ua_params = [] }]; 

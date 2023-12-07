@@ -13,7 +13,6 @@ use super::node_mut::NodeMut;
 use super::type_params::Params;
 use super::visitor::Visitor;
 use super::visitor_mut::VisitorMut;
-use crate::pos::Pos;
 
 macro_rules! leaf_node {
     ($ty:ty) => {
@@ -404,34 +403,5 @@ where
         self.1.accept(c, v)?;
         self.2.accept(c, v)?;
         self.3.accept(c, v)
-    }
-}
-
-impl<P: Params> Node<P> for crate::LocalIdMap<(Pos, P::Ex)> {
-    fn recurse<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        Ok(for (key, value) in self.0.iter() {
-            key.accept(c, v)?;
-            v.visit_ex(c, &value.1)?;
-        })
-    }
-}
-
-/// `NodeMut` implementation doesn't visit keys,
-/// mutating key requires re-constructing the underlaying map.
-/// There will be extra perf cost even keys are not mutated.
-/// Overriding its parent visit method can mutate keys economically.
-impl<P: Params> NodeMut<P> for crate::LocalIdMap<(Pos, P::Ex)> {
-    fn recurse<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        Ok(for value in self.0.values_mut() {
-            v.visit_ex(c, &mut value.1)?
-        })
     }
 }

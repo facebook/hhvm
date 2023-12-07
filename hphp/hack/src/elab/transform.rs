@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b1b017e59ff9131e92b7a6345f64e399>>
+// @generated SignedSource<<fc1b8ac70dd29dbfb176ecdabe10e5fc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -33,7 +33,6 @@ impl Transform for bstr::BString {}
 impl Transform for oxidized::pos::Pos {}
 impl Transform for oxidized::file_info::Mode {}
 impl Transform for oxidized::namespace_env::Env {}
-impl Transform for oxidized::LocalIdMap<(Pos, ())> {}
 impl<T> Transform for &mut T
 where
     T: Transform,

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1838f2fdf7b0674d3446624f69af4346>>
+// @generated SignedSource<<356b082344fa5839a3bba8020a42a20e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2079,15 +2079,6 @@ impl<P: Params> NodeMut<P> for Stmt_<P::Ex, P::En> {
             a.0.accept(c, v)?;
             a.1.accept(c, v)
         }
-        #[inline]
-        fn helper10<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node mut Box<(EnvAnnot, LocalIdMap<(Pos, Ex)>)>,
-            c: &mut P::Context,
-            v: &mut dyn VisitorMut<'node, Params = P>,
-        ) -> Result<(), P::Error> {
-            a.0.accept(c, v)?;
-            a.1.accept(c, v)
-        }
         match self {
             Stmt_::Noop => Ok(()),
             Stmt_::Fallthrough => Ok(()),
@@ -2111,7 +2102,7 @@ impl<P: Params> NodeMut<P> for Stmt_<P::Ex, P::En> {
             Stmt_::DeclareLocal(a) => helper8(a, c, v),
             Stmt_::Block(a) => helper9(a, c, v),
             Stmt_::Markup(a0) => a0.accept(c, v),
-            Stmt_::AssertEnv(a) => helper10(a, c, v),
+            Stmt_::AssertEnv(a0) => a0.accept(c, v),
         }
     }
 }

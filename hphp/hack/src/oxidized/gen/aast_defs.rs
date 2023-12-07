@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a5acbfda646680c21b151ecd8e921448>>
+// @generated SignedSource<<0ed34c53d8f8b511aef86f66d46216ef>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -275,8 +275,7 @@ pub enum Stmt_<Ex, En> {
     /// Used in IFC to track type inference environments. Not user
     /// denotable.
     #[rust_to_ocaml(attr = "transform.opaque")]
-    #[rust_to_ocaml(inline_tuple)]
-    AssertEnv(Box<(EnvAnnot, LocalIdMap<(Pos, Ex)>)>),
+    AssertEnv(Box<EnvAnnot>),
 }
 
 #[derive(

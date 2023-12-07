@@ -20,9 +20,8 @@
          { fb_ast =
            [([16:5-20:6],
              (If (((?int), [16:9-17], (Class_get (((TestClass), [16:9-13], CIself), (CGstring ([16:15-17], "$x")), Is_prop))),
-                [([16:5-20:6], (AssertEnv (Refinement, {self::$x})));
-                  ([17:7-23], (Return (Some ((int), [17:14-22], (Class_get (((TestClass), [17:14-18], CIself), (CGstring ([17:20-22], "$x")), Is_prop))))))],
-                [([16:5-20:6], (AssertEnv (Refinement, {self::$x}))); ([19:7-16], (Return (Some ((int), [19:14-15], (Int "0")))))])))
+                [([17:7-23], (Return (Some ((int), [17:14-22], (Class_get (((TestClass), [17:14-18], CIself), (CGstring ([17:20-22], "$x")), Is_prop))))))],
+                [([19:7-16], (Return (Some ((int), [19:14-15], (Int "0")))))])))
              ]
            };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 

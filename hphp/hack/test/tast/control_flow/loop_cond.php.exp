@@ -45,17 +45,15 @@
                     { bop = (Eq None); lhs = ((A), [10:3-5], (Lvar ([10:3-5], $x))); rhs = ((A), [10:8-15], (New (((A), [10:12-13], (CI ([10:12-13], "\\A"))), [], [], None, ((function(): void))))) }))));
              ([11:3-13:4],
               (While (((?A), [11:10-12], (Lvar ([11:10-12], $x))),
-                 [([11:3-13:4], (AssertEnv (Join, {$#capability $#local_capability $x}))); (
-                   [11:3-13:4], (AssertEnv (Refinement, {$x})));
-                   ([12:5-22],
-                    (Expr
-                       ((?A), [12:5-21],
-                        (Binop
-                           { bop = (Eq None); lhs = ((?A), [12:5-7], (Lvar ([12:5-7], $x)));
-                             rhs = ((?A), [12:10-21], (Call { func = (((function(): ?A)), [12:10-19], (Id ([12:10-19], "\\get_A_opt"))); targs = []; args = []; unpacked_arg = None })) }))))
+                 [([12:5-22],
+                   (Expr
+                      ((?A), [12:5-21],
+                       (Binop
+                          { bop = (Eq None); lhs = ((?A), [12:5-7], (Lvar ([12:5-7], $x)));
+                            rhs = ((?A), [12:10-21], (Call { func = (((function(): ?A)), [12:10-19], (Id ([12:10-19], "\\get_A_opt"))); targs = []; args = []; unpacked_arg = None })) }))))
                    ]
-                 )));
-             ([11:3-13:4], (AssertEnv (Refinement, {$x})))]
+                 )))
+             ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([9:10-16], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
@@ -85,8 +83,8 @@
                      { bop = (Eq None); lhs = ((?A), [17:26-28], (Lvar ([17:26-28], $x)));
                        rhs = ((?A), [17:31-42], (Call { func = (((function(): ?A)), [17:31-40], (Id ([17:31-40], "\\get_A_opt"))); targs = []; args = []; unpacked_arg = None })) }))
                   ],
-                [([17:3-18:4], (AssertEnv (Join, {$#capability $#local_capability $x}))); ([17:3-18:4], (AssertEnv (Refinement, {$x})))])));
-             ([17:3-18:4], (AssertEnv (Refinement, {$x})))]
+                [])))
+             ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([16:10-14], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };

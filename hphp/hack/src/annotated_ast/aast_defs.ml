@@ -15,20 +15,6 @@
    which some visitor below uses. *)
 open Base.Export
 
-type 'a local_id_map = 'a Local_id.Map.t [@@deriving eq, hash, ord, map, show]
-
-let pp_local_id_map _ fmt map =
-  Format.fprintf fmt "@[<hov 2>{";
-  ignore
-    (Local_id.Map.fold
-       (fun key _ sep ->
-         if sep then Format.fprintf fmt "@ ";
-         Local_id.pp fmt key;
-         true)
-       map
-       false);
-  Format.fprintf fmt "}@]"
-
 type pos = Ast_defs.pos [@@deriving eq, hash, show, ord] [@@transform.opaque]
 
 let hash_pos hsv _pos = hsv
@@ -252,7 +238,7 @@ and ('ex, 'en) stmt_ =
        * TODO: this really belongs in def.
        *
        *     <?hh *)
-  | AssertEnv of env_annot * ((pos * 'ex) local_id_map[@map.opaque])
+  | AssertEnv of env_annot
       [@transform.opaque]
       (** Used in IFC to track type inference environments. Not user
        * denotable. *)

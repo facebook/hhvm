@@ -20,9 +20,8 @@
          { fb_ast =
            [([7:5-9:6],
              (If (((?int), [7:9-19], (Obj_get (((this), [7:9-14], This), ((?int), [7:16-19], (Id ([7:16-19], "foo"))), OG_nullthrows, Is_prop))),
-                [([7:5-9:6], (AssertEnv (Refinement, {$this->foo})));
-                  ([8:7-18], (Expr ((int), [8:7-17], (Obj_get (((this), [8:7-12], This), ((int), [8:14-17], (Id ([8:14-17], "foo"))), OG_nullthrows, Is_prop)))))],
-                [([7:5-9:6], (AssertEnv (Refinement, {$this->foo}))); ([Pos.none], Noop)])))
+                [([8:7-18], (Expr ((int), [8:7-17], (Obj_get (((this), [8:7-12], This), ((int), [8:14-17], (Id ([8:14-17], "foo"))), OG_nullthrows, Is_prop)))))], 
+                [([Pos.none], Noop)])))
              ]
            };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 

@@ -22,8 +22,7 @@
         { fb_ast =
           [([4:3-7:4],
             (While (((bool), [4:10-12], (Lvar ([4:10-12], $b))),
-               [([4:3-7:4], (AssertEnv (Join, {$#capability $#local_capability $a $b}))); (
-                 [5:5-8], (Expr (((int | string)), [5:5-7], (Lvar ([5:5-7], $a)))));
+               [([5:5-8], (Expr (((int | string)), [5:5-7], (Lvar ([5:5-7], $a)))));
                  ([6:5-13], (Expr ((string), [6:5-12], (Binop { bop = (Eq None); lhs = ((string), [6:5-7], (Lvar ([6:5-7], $a))); rhs = ((string), [6:10-12], (String "")) }))))]
                )));
             ([8:3-6], (Expr (((int | string)), [8:3-5], (Lvar ([8:3-5], $a)))))]

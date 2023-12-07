@@ -18,12 +18,11 @@
         { fb_ast =
           [([4:3-6:4],
             (While (((bool), [4:10-15], (Lvar ([4:10-15], $cond))),
-               [([4:3-6:4], (AssertEnv (Join, {$#capability $#local_capability $cond})));
-                 ([5:5-40],
-                  (Throw
-                     ((Exception), [5:11-39],
-                      (New (((Exception), [5:15-24], (CI ([5:15-24], "\\Exception"))), 
-                         [], [((string), [5:25-38], (String "DoWhileBody"))], None, ((function(string $message = _, int $code = _, ?Exception $previous = _)[]: void)))))))
+               [([5:5-40],
+                 (Throw
+                    ((Exception), [5:11-39],
+                     (New (((Exception), [5:15-24], (CI ([5:15-24], "\\Exception"))), 
+                        [], [((string), [5:25-38], (String "DoWhileBody"))], None, ((function(string $message = _, int $code = _, ?Exception $previous = _)[]: void)))))))
                  ]
                )))
             ]

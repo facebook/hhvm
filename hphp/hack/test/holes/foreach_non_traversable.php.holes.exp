@@ -17,10 +17,7 @@
         f_body =
         { fb_ast =
           [([5:3-6:4],
-            (Foreach (((int), [5:12-15], (Hole (((int), [5:12-15], (Lvar ([5:12-15], $xs))), (int), (Traversable<nothing>), Typing))), (
-               As_v ((nothing), [5:19-21], (Lvar ([5:19-21], $x)))), 
-               [([5:3-6:4], (AssertEnv (Join, {$#capability $#local_capability $xs})))])))
-            ]
+            (Foreach (((int), [5:12-15], (Hole (((int), [5:12-15], (Lvar ([5:12-15], $xs))), (int), (Traversable<nothing>), Typing))), (As_v ((nothing), [5:19-21], (Lvar ([5:19-21], $x)))), [])))]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-33], "__SupportDynamicType"); ua_params = [] }]; 
         f_external = false; f_doc_comment = None };

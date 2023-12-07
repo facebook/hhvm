@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ea8ccd38a6fd0ff9ce22006084f1cf0e>>
+// @generated SignedSource<<ac3df97b37484224fc746375d9160724>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -346,13 +346,7 @@ pub enum Stmt_<'a, Ex, En> {
     /// denotable.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(attr = "transform.opaque")]
-    #[rust_to_ocaml(inline_tuple)]
-    AssertEnv(
-        &'a (
-            &'a oxidized::aast_defs::EnvAnnot,
-            LocalIdMap<'a, (&'a Pos<'a>, Ex)>,
-        ),
-    ),
+    AssertEnv(&'a oxidized::aast_defs::EnvAnnot),
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Stmt_<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(Stmt_<'arena, Ex, En>);

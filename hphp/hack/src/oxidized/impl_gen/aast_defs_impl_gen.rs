@@ -3,14 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4382f5f3a0b824bcb94c6f9d4eb745ab>>
+// @generated SignedSource<<7495a85c49d8bbeefeede58e28b0d5ea>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 use crate::aast_defs::*;
 use crate::ast_defs;
-use crate::LocalIdMap;
 impl<Ex, En> Stmt_<Ex, En> {
     pub fn mk_noop() -> Self {
         Stmt_::Noop
@@ -87,8 +86,8 @@ impl<Ex, En> Stmt_<Ex, En> {
     pub fn mk_markup(p0: Pstring) -> Self {
         Stmt_::Markup(Box::new(p0))
     }
-    pub fn mk_assert_env(p0: EnvAnnot, p1: LocalIdMap<(Pos, Ex)>) -> Self {
-        Stmt_::AssertEnv(Box::new((p0, p1)))
+    pub fn mk_assert_env(p0: EnvAnnot) -> Self {
+        Stmt_::AssertEnv(Box::new(p0))
     }
     pub fn is_noop(&self) -> bool {
         match self {
@@ -343,9 +342,9 @@ impl<Ex, En> Stmt_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_assert_env(&self) -> Option<(&EnvAnnot, &LocalIdMap<(Pos, Ex)>)> {
+    pub fn as_assert_env(&self) -> Option<&EnvAnnot> {
         match self {
-            Stmt_::AssertEnv(p0) => Some((&p0.0, &p0.1)),
+            Stmt_::AssertEnv(p0) => Some(&p0),
             _ => None,
         }
     }
@@ -478,9 +477,9 @@ impl<Ex, En> Stmt_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_assert_env_mut(&mut self) -> Option<(&mut EnvAnnot, &mut LocalIdMap<(Pos, Ex)>)> {
+    pub fn as_assert_env_mut(&mut self) -> Option<&mut EnvAnnot> {
         match self {
-            Stmt_::AssertEnv(p0) => Some((&mut p0.0, &mut p0.1)),
+            Stmt_::AssertEnv(p0) => Some(p0.as_mut()),
             _ => None,
         }
     }
@@ -595,9 +594,9 @@ impl<Ex, En> Stmt_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_assert_env_into(self) -> Option<(EnvAnnot, LocalIdMap<(Pos, Ex)>)> {
+    pub fn as_assert_env_into(self) -> Option<EnvAnnot> {
         match self {
-            Stmt_::AssertEnv(p0) => Some(((*p0).0, (*p0).1)),
+            Stmt_::AssertEnv(p0) => Some(*p0),
             _ => None,
         }
     }

@@ -18,12 +18,12 @@
         { fb_ast =
           [([4:3-29],
             (If (((bool), [4:7-18], (Binop { bop = Eqeqeq; lhs = ((?int), [4:7-9], (Lvar ([4:7-9], $x))); rhs = ((null), [4:14-18], Null) })),
-               [([4:3-29], (AssertEnv (Refinement, {$x}))); ([4:20-29], (Return (Some ((int), [4:27-28], (Int "1")))))], 
-               [([4:3-29], (AssertEnv (Refinement, {$x}))); ([Pos.none], Noop)])));
+               [([4:20-29], (Return (Some ((int), [4:27-28], (Int "1")))))], 
+               [([Pos.none], Noop)])));
             ([5:3-29],
              (If (((bool), [5:7-18], (Binop { bop = Eqeqeq; lhs = ((null), [5:7-11], Null); rhs = ((int), [5:16-18], (Lvar ([5:16-18], $x))) })),
-                [([5:3-29], (AssertEnv (Refinement, {$x}))); ([5:20-29], (Return (Some ((int), [5:27-28], (Int "2")))))], 
-                [([5:3-29], (AssertEnv (Refinement, {$x}))); ([Pos.none], Noop)])));
+                [([5:20-29], (Return (Some ((int), [5:27-28], (Int "2")))))], 
+                [([Pos.none], Noop)])));
             ([6:3-12], (Return (Some ((int), [6:10-11], (Int "0")))))]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-11], "__SupportDynamicType"); ua_params = [] }]; 

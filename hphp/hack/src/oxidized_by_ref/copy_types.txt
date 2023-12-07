@@ -25,7 +25,6 @@ aast_defs::FunctionPtrId
 aast_defs::FunVariadicity
 aast_defs::GenCase
 aast_defs::HoleSource
-aast_defs::LocalIdMap
 aast_defs::MdNameKind
 aast_defs::ParamKind
 aast_defs::Pattern

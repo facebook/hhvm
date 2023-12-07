@@ -13,7 +13,6 @@ pub mod i_set;
 pub mod ident;
 pub mod lazy;
 pub mod local_id;
-pub mod local_id_map;
 pub mod method_flags;
 pub mod opaque_digest;
 pub mod pos;

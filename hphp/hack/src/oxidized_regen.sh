@@ -111,7 +111,7 @@ summary "Write oxidized/impl_gen/"
   --regen-cmd "$REGEN_COMMAND"                                                \
   --rustfmt "$RUSTFMT_PATH"                                                   \
   enum-helpers                                                                \
-  --input "hphp/hack/src/oxidized/gen/aast_defs.rs|crate::aast_defs::*|crate::ast_defs|crate::LocalIdMap" \
+  --input "hphp/hack/src/oxidized/gen/aast_defs.rs|crate::aast_defs::*|crate::ast_defs" \
   --input "hphp/hack/src/oxidized/gen/ast_defs.rs|crate::ast_defs::*"         \
   --output "hphp/hack/src/oxidized/impl_gen/"                                 \
 

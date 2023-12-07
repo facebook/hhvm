@@ -19,7 +19,7 @@
           [([5:3-6:4],
             (Foreach (((~int), [5:12-15], (Hole (((~int), [5:12-15], (Lvar ([5:12-15], $xs))), (~int), (KeyedTraversable<nothing, nothing>), Typing))),
                (As_kv (((nothing), [5:19-21], (Lvar ([5:19-21], $k))), ((nothing), [5:25-27], (Lvar ([5:25-27], $v))))), 
-               [([5:3-6:4], (AssertEnv (Join, {$#capability $#local_capability $xs})))])))
+               [])))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-38], "__SupportDynamicType"); ua_params = [] }]; 

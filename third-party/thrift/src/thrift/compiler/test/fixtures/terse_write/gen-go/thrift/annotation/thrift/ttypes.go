@@ -80,7 +80,8 @@ func RpcPriorityPtr(v RpcPriority) *RpcPriority { return &v }
 
 // Indicates a definition/feature should only be used with permission, may
 // only work in specific contexts, and may change in incompatible ways without
-// notice.
+// notice. Note that this is primarily intended to annotate features by the Thrift Team
+// and isn't recommended for general use.
 type Experimental struct {
 }
 

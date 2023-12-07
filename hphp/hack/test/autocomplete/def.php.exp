@@ -338,9 +338,21 @@ SODIUM_LIBRARY_VERSION
   INSERT SODIUM_LIBRARY_VERSION
   constant
 SORT TEXT: none
+sodium_crypto_core_ristretto255_add
+  INSERT sodium_crypto_core_ristretto255_add(${1:\$p}, ${2:\$q})
+  (function(string $p, string $q): string)
+SORT TEXT: none
 sodium_crypto_core_ristretto255_from_hash
   INSERT sodium_crypto_core_ristretto255_from_hash(${1:\$r})
   (function(string $r): string)
+SORT TEXT: none
+sodium_crypto_core_ristretto255_is_valid_point
+  INSERT sodium_crypto_core_ristretto255_is_valid_point(${1:\$s})
+  (function(string $s): bool)
+SORT TEXT: none
+sodium_crypto_core_ristretto255_random
+  INSERT sodium_crypto_core_ristretto255_random()
+  (function(): string)
 SORT TEXT: none
 sodium_crypto_core_ristretto255_scalar_add
   INSERT sodium_crypto_core_ristretto255_scalar_add(${1:\$x}, ${2:\$y})
@@ -374,25 +386,13 @@ sodium_crypto_core_ristretto255_scalar_sub
   INSERT sodium_crypto_core_ristretto255_scalar_sub(${1:\$x}, ${2:\$y})
   (function(string $x, string $y): string)
 SORT TEXT: none
+sodium_crypto_core_ristretto255_sub
+  INSERT sodium_crypto_core_ristretto255_sub(${1:\$p}, ${2:\$q})
+  (function(string $p, string $q): string)
+SORT TEXT: none
 sodium_crypto_scalarmult_ristretto255
   INSERT sodium_crypto_scalarmult_ristretto255(${1:\$n}, ${2:\$p})
   (function(string $n, string $p): string)
-SORT TEXT: none
-sodium_crypto_secretstream_xchacha20poly1305_init_pull
-  INSERT sodium_crypto_secretstream_xchacha20poly1305_init_pull(${1:\$key}, ${2:\$header})
-  (function(string $key, string $header): string)
-SORT TEXT: none
-sodium_crypto_secretstream_xchacha20poly1305_init_push
-  INSERT sodium_crypto_secretstream_xchacha20poly1305_init_push(${1:\$key})
-  (function(string $key): ~(string, string))
-SORT TEXT: none
-sodium_crypto_secretstream_xchacha20poly1305_pull
-  INSERT sodium_crypto_secretstream_xchacha20poly1305_pull(${1:\$state}, ${2:\$ciphertext}, ${3:\$ad})
-  (function(inout ~mixed $state, string $ciphertext, string $ad): ~(string, int))
-SORT TEXT: none
-sodium_crypto_secretstream_xchacha20poly1305_push
-  INSERT sodium_crypto_secretstream_xchacha20poly1305_push(${1:\$state}, ${2:\$plaintext}, ${3:\$ad}, ${4:\$tag})
-  (function(inout ~mixed $state, string $plaintext, string $ad, int $tag): string)
 SORT TEXT: none
 sodium_crypto_secretstream_xchacha20poly1305_rekey
   INSERT sodium_crypto_secretstream_xchacha20poly1305_rekey(${1:\$state})

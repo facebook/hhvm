@@ -1469,6 +1469,73 @@ String HHVM_FUNCTION(sodium_crypto_stream_xor,
   return ciphertext;
 }
 
+const StaticString s_crypto_core_ristretto255_point_size(
+  "point must be CRYPTO_CORE_RISTRETTO255_BYTES bytes"
+);
+
+String HHVM_FUNCTION(sodium_crypto_core_ristretto255_add,
+                     const String& p,
+                     const String& q) {
+  if (
+    p.size() != crypto_core_ristretto255_BYTES ||
+    q.size() != crypto_core_ristretto255_BYTES
+  ) {
+    throwSodiumException(s_crypto_core_ristretto255_point_size);
+  }
+
+  String r(crypto_core_ristretto255_BYTES, ReserveString);
+  crypto_core_ristretto255_add(
+    reinterpret_cast<uint8_t*>(r.mutableData()),
+    reinterpret_cast<const uint8_t*>(p.data()),
+    reinterpret_cast<const uint8_t*>(q.data())
+  );
+  r.setSize(crypto_core_ristretto255_BYTES);
+  return r;
+}
+
+String HHVM_FUNCTION(sodium_crypto_core_ristretto255_sub,
+                     const String& p,
+                     const String& q) {
+  if (
+    p.size() != crypto_core_ristretto255_BYTES ||
+    q.size() != crypto_core_ristretto255_BYTES
+  ) {
+    throwSodiumException(s_crypto_core_ristretto255_point_size);
+  }
+
+  String r(crypto_core_ristretto255_BYTES, ReserveString);
+  crypto_core_ristretto255_sub(
+    reinterpret_cast<uint8_t*>(r.mutableData()),
+    reinterpret_cast<const uint8_t*>(p.data()),
+    reinterpret_cast<const uint8_t*>(q.data())
+  );
+  r.setSize(crypto_core_ristretto255_BYTES);
+  return r;
+}
+
+bool HHVM_FUNCTION(sodium_crypto_core_ristretto255_is_valid_point,
+                   const String& s) {
+  if (
+    s.size() != crypto_core_ristretto255_BYTES
+  ) {
+    throwSodiumException(s_crypto_core_ristretto255_point_size);
+  }
+
+  int r = crypto_core_ristretto255_is_valid_point(
+    reinterpret_cast<const uint8_t*>(s.data()));
+  // libsodium docs: "returns 1 on success, and 0 if the checks didn't pass."
+  return r == 1;
+}
+
+String HHVM_FUNCTION(sodium_crypto_core_ristretto255_random) {
+  String r(crypto_core_ristretto255_BYTES, ReserveString);
+  crypto_core_ristretto255_random(
+    reinterpret_cast<uint8_t*>(r.mutableData())
+  );
+  r.setSize(crypto_core_ristretto255_BYTES);
+  return r;
+}
+
 const StaticString s_crypto_core_ristretto255_from_hash(
   "scalar must be CRYPTO_CORE_RISTRETTO255_HASHBYTES bytes"
 );
@@ -2448,6 +2515,10 @@ struct SodiumExtension final : Extension {
       SODIUM_CRYPTO_CORE_RISTRETTO255_NONREDUCEDSCALARBYTES,
       crypto_core_ristretto255_NONREDUCEDSCALARBYTES
     );
+    HHVM_FE(sodium_crypto_core_ristretto255_add);
+    HHVM_FE(sodium_crypto_core_ristretto255_sub);
+    HHVM_FE(sodium_crypto_core_ristretto255_is_valid_point);
+    HHVM_FE(sodium_crypto_core_ristretto255_random);
     HHVM_FE(sodium_crypto_core_ristretto255_from_hash);
     HHVM_FE(sodium_crypto_scalarmult_ristretto255);
     HHVM_FE(sodium_crypto_core_ristretto255_scalar_reduce);

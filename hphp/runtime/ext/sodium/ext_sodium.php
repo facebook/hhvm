@@ -502,6 +502,18 @@ function sodium_crypto_core_hchacha20(
 ///// Ristretto
 
 <<__Native>>
+function sodium_crypto_core_ristretto255_add(string $p, string $q): string;
+
+<<__Native>>
+function sodium_crypto_core_ristretto255_sub(string $p, string $q): string;
+
+<<__Native>>
+function sodium_crypto_core_ristretto255_is_valid_point(string $s): bool;
+
+<<__Native>>
+function sodium_crypto_core_ristretto255_random(): string;
+
+<<__Native>>
 function sodium_crypto_core_ristretto255_from_hash(string $r): string;
 
 <<__Native>>

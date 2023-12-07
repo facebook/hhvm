@@ -426,6 +426,18 @@ function sodium_crypto_secretstream_xchacha20poly1305_rekey(
 ///// Ristretto
 
 <<__PHPStdLib>>
+function sodium_crypto_core_ristretto255_add(string $p, string $q): string;
+
+<<__PHPStdLib>>
+function sodium_crypto_core_ristretto255_sub(string $p, string $q): string;
+
+<<__PHPStdLib>>
+function sodium_crypto_core_ristretto255_is_valid_point(string $s): bool;
+
+<<__PHPStdLib>>
+function sodium_crypto_core_ristretto255_random(): string;
+
+<<__PHPStdLib>>
 function sodium_crypto_core_ristretto255_from_hash(string $r): string;
 
 <<__PHPStdLib>>

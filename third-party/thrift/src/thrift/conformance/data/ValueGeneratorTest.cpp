@@ -23,9 +23,33 @@
 
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/type/Name.h>
-#include <thrift/lib/cpp2/type/Traits.h>
 
 namespace apache::thrift::conformance::data {
+
+template <typename... Tags>
+struct types {
+  // Converts the type list to a type list of the given types.
+  template <template <typename...> class T>
+  using as = T<Tags...>;
+
+  template <typename F>
+  using filter = typename fatal::filter<types, F>;
+
+  template <typename CTag>
+  using of = filter<type::bound::is_a<CTag>>;
+};
+
+using primitive_types = types<
+    type::bool_t,
+    type::byte_t,
+    type::i16_t,
+    type::i32_t,
+    type::i64_t,
+    type::float_t,
+    type::double_t,
+    type::enum_c,
+    type::string_t,
+    type::binary_t>;
 
 template <typename T>
 std::ostream& operator<<(std::ostream& os, const NamedValue<T>& value) {
@@ -80,11 +104,11 @@ template <typename T>
 class FloatingPointGeneratorTest : public ValueGeneratorTest<T> {};
 
 // TODO(afuller): Expand the set of types tested.
-using ValueGeneratorTestTypes = type::primitive_types::filter<
-    type::bound::is_concrete>::as<::testing::Types>;
+using ValueGeneratorTestTypes =
+    primitive_types::filter<type::bound::is_concrete>::as<::testing::Types>;
 TYPED_TEST_CASE(ValueGeneratorTest, ValueGeneratorTestTypes);
 using FloatingPointTestTypes =
-    type::primitive_types::of<type::floating_point_c>::as<::testing::Types>;
+    primitive_types::of<type::floating_point_c>::as<::testing::Types>;
 TYPED_TEST_CASE(FloatingPointGeneratorTest, FloatingPointTestTypes);
 
 TYPED_TEST(ValueGeneratorTest, UniqueKeys) {

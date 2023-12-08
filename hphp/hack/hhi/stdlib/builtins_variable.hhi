@@ -65,7 +65,7 @@ namespace {
     <<__AcceptDisposable>> HH\FIXME\MISSING_PARAM_TYPE $variable,
   ): \HH\FIXME\MISSING_RETURN_TYPE;
   function debugger_dump(
-    <<__AcceptDisposable>> HH\FIXME\MISSING_PARAM_TYPE $variable,
+    <<__AcceptDisposable>> mixed $variable,
   ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function serialize(HH\FIXME\MISSING_PARAM_TYPE $value)[defaults]: string;

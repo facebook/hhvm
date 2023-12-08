@@ -42,10 +42,13 @@ enum MyEnum {
   MyValue2 = 1,
 }
 
+@cpp.Name{value = "NormalDecentEnum"}
 enum AnnoyingEnum {
-  FOO = 1 (cpp.name = "l0O1"),
-  BAR = 2 (cpp.name = "FuBaR"),
-} (cpp.name = "NormalDecentEnum")
+  @cpp.Name{value = "l0O1"}
+  FOO = 1,
+  @cpp.Name{value = "FuBaR"}
+  BAR = 2,
+}
 
 @patch.GeneratePatch
 struct MyStruct {
@@ -53,7 +56,8 @@ struct MyStruct {
   2: string stringy;
   3: MyDataItem myItemy;
   4: MyEnum myEnumy;
-  5: bool booly (cpp.name = "boulet");
+  @cpp.Name{value = "boulet"}
+  5: bool booly;
   6: list<float> floatListy;
   7: map<binary, string> strMappy;
   8: set<i32> intSetty;
@@ -80,7 +84,8 @@ struct StringPair {
   2: string doubled;
 }
 
-struct EmptyStruct {} (cpp.name = "VapidStruct")
+@cpp.Name{value = "VapidStruct"}
+struct EmptyStruct {}
 
 typedef byte signed_byte
 @cpp.Type{name = "folly::IOBuf"}
@@ -91,8 +96,9 @@ typedef binary IOBufPtr
 struct PrimitiveStruct {
   1: bool booly;
   2: signed_byte charry;
+  @cpp.Name{value = "shortay"}
   @cpp.Type{name = "uint16_t"}
-  3: i16 shorty (cpp.name = "shortay");
+  3: i16 shorty;
   5: i32 inty;
   @cpp.Type{name = "uint64_t"}
   7: i64 longy;
@@ -187,6 +193,7 @@ struct ComposeStruct {
   10: serialized_dep.SerializedError serial_error;
 } (cpp.noncopyable)
 
+@cpp.Name{value = "Shallot"}
 union Onion {
   1: MyEnum myEnum;
   2: PrimitiveStruct myStruct;
@@ -198,4 +205,4 @@ union Onion {
   @cpp.Ref{type = cpp.RefType.Unique}
   9: map<binary, string> strMap;
   10: id.ProtocolId adapted_int;
-} (cpp.name = "Shallot")
+}

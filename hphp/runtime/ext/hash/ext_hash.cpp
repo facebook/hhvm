@@ -36,6 +36,7 @@
 #include "hphp/runtime/ext/hash/hash_whirlpool.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/ext/hash/hash_blake3.h"
 
 #include <algorithm>
 #include <memory>
@@ -122,6 +123,7 @@ struct HashEngineMapInitializer {
     HashEngines["sha3-256"]   = HashEnginePtr(new hash_keccak( 512, 32));
     HashEngines["sha3-384"]   = HashEnginePtr(new hash_keccak( 768, 48));
     HashEngines["sha3-512"]   = HashEnginePtr(new hash_keccak(1024, 64));
+    HashEngines["blake3"]     = HashEnginePtr(new hash_blake3());
   }
 };
 

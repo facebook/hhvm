@@ -91,6 +91,10 @@ bool t_type_ref::resolve() {
     if (!unresolved_type_->resolve()) {
       return false;
     }
+    // Try to excise the placeholder typedef so dynamic_cast works.
+    if (unresolved_type_->annotations().empty()) {
+      type_ = unresolved_type_->get_type();
+    }
     unresolved_type_ = nullptr;
   }
   return true;

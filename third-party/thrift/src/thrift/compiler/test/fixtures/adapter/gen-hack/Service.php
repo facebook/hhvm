@@ -418,7 +418,7 @@ class Service_func_result extends \ThriftSyncStructWithResult implements \IThrif
                         shape(
                           "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                             shape(
-                              "name" => "module.MyI32_4873",
+                              "name" => "module.MyI32",
                               "underlyingType" => \tmeta_ThriftType::fromShape(
                                 shape(
                                   "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
@@ -426,16 +426,7 @@ class Service_func_result extends \ThriftSyncStructWithResult implements \IThrif
                                       "name" => "module.MyI32",
                                       "underlyingType" => \tmeta_ThriftType::fromShape(
                                         shape(
-                                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
-                                            shape(
-                                              "name" => "module.MyI32",
-                                              "underlyingType" => \tmeta_ThriftType::fromShape(
-                                                shape(
-                                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
-                                                )
-                                              ),
-                                            )
-                                          ),
+                                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                                         )
                                       ),
                                     )
@@ -512,7 +503,7 @@ class ServiceStaticMetadata implements \IThriftServiceStaticMetadata {
                         shape(
                           "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
                             shape(
-                              "name" => "module.MyI32_4873",
+                              "name" => "module.MyI32",
                               "underlyingType" => \tmeta_ThriftType::fromShape(
                                 shape(
                                   "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
@@ -520,16 +511,7 @@ class ServiceStaticMetadata implements \IThriftServiceStaticMetadata {
                                       "name" => "module.MyI32",
                                       "underlyingType" => \tmeta_ThriftType::fromShape(
                                         shape(
-                                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
-                                            shape(
-                                              "name" => "module.MyI32",
-                                              "underlyingType" => \tmeta_ThriftType::fromShape(
-                                                shape(
-                                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
-                                                )
-                                              ),
-                                            )
-                                          ),
+                                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                                         )
                                       ),
                                     )

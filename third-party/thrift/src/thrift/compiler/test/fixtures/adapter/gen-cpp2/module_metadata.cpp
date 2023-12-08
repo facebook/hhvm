@@ -863,7 +863,7 @@ StructMetadata<::facebook::thrift::test::Person2>::gen(ThriftMetadata& metadata)
 void ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::Service>>::gen_func(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "func";
-  auto func_ret_type = std::make_unique<Typedef>("module.MyI32_4873", std::make_unique<Typedef>("module.MyI32_4873", std::make_unique<Typedef>("module.MyI32", std::make_unique<Typedef>("module.MyI32", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{*cvStruct("hack.Adapter", {{"name", cvString("\\Adapter1")}}).cv_struct_ref(), *cvStruct("cpp.Adapter", {{"name", cvString("::my::Adapter1")}}).cv_struct_ref(), *cvStruct("rust.Adapter", {{"name", cvString("::my::Adapter1")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{});
+  auto func_ret_type = std::make_unique<Typedef>("module.MyI32_4873", std::make_unique<Typedef>("module.MyI32", std::make_unique<Typedef>("module.MyI32", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{*cvStruct("hack.Adapter", {{"name", cvString("\\Adapter1")}}).cv_struct_ref(), *cvStruct("cpp.Adapter", {{"name", cvString("::my::Adapter1")}}).cv_struct_ref(), *cvStruct("rust.Adapter", {{"name", cvString("::my::Adapter1")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{});
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_Service_func_arg1_1;
   module_Service_func_arg1_1.id() = 1;

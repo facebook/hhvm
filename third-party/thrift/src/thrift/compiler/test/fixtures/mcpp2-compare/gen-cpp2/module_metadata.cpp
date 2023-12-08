@@ -808,7 +808,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ReturnS
 void ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>>::gen_readDataEb(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "readDataEb";
-  auto func_ret_type = std::make_unique<Typedef>("module.IOBuf", std::make_unique<Typedef>("module.IOBuf", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("folly::IOBuf")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{});
+  auto func_ret_type = std::make_unique<Typedef>("module.IOBuf", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("folly::IOBuf")}}).cv_struct_ref(), });
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_ReturnService_readDataEb_size_1;
   module_ReturnService_readDataEb_size_1.id() = 1;
@@ -823,7 +823,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ReturnS
 void ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>>::gen_readData(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "readData";
-  auto func_ret_type = std::make_unique<Typedef>("module.IOBufPtr", std::make_unique<Typedef>("module.IOBufPtr", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("std::unique_ptr<folly::IOBuf>")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{});
+  auto func_ret_type = std::make_unique<Typedef>("module.IOBufPtr", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Type", {{"name", cvString("std::unique_ptr<folly::IOBuf>")}}).cv_struct_ref(), });
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   ::apache::thrift::metadata::ThriftField module_ReturnService_readData_size_1;
   module_ReturnService_readData_size_1.id() = 1;

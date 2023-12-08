@@ -2825,8 +2825,8 @@
       "functions" : {
         "Service.func" : {
           "return_type" : {
-            "type_enum" : "I32",
-            "spec_args" : null
+            "type_enum" : "TYPEDEF",
+            "spec_args" : "MyI32_4873"
           },
           "args" : [
             {

@@ -29,6 +29,7 @@ import io.rsocket.core.RSocketConnector;
 import io.rsocket.frame.FrameLengthCodec;
 import io.rsocket.frame.decoder.PayloadDecoder;
 import java.net.SocketAddress;
+import java.time.Duration;
 import reactor.core.publisher.Mono;
 
 public class RSocketRpcClientFactory implements RpcClientFactory {
@@ -36,6 +37,13 @@ public class RSocketRpcClientFactory implements RpcClientFactory {
       Integer.parseInt(
           System.getProperty(
               "thrift.rsocket-max-frame-size", String.valueOf(FrameLengthCodec.FRAME_LENGTH_MASK)));
+
+  private static final int KEEP_ALIVE =
+      Integer.parseInt(System.getProperty("thrift.rsocket-keep-alive-ms", String.valueOf(-1)));
+
+  private static final int KEEP_ALIVE_MAX_LIFETIME =
+      Integer.parseInt(
+          System.getProperty("thrift.rsocket-keep-max-lifetime-ms", String.valueOf(-1)));
 
   static {
     ReactorHooks.init();
@@ -61,6 +69,11 @@ public class RSocketRpcClientFactory implements RpcClientFactory {
     try {
       final ReactorClientTransport transport =
           new ReactorClientTransport(socketAddress, this.config, ThriftTransportType.RSOCKET);
+
+      if (KEEP_ALIVE > 0 && KEEP_ALIVE_MAX_LIFETIME > 0) {
+        connector.keepAlive(
+            Duration.ofMillis(KEEP_ALIVE), Duration.ofMillis(KEEP_ALIVE_MAX_LIFETIME));
+      }
 
       return connector
           .fragment(MAX_FRAME_SIZE)

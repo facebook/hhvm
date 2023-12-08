@@ -240,35 +240,29 @@ inline size_t readContiguousVarintMediumSlowU64BMI2(
 }
 #endif // THRIFT_UTIL_VARINTUTILS_BMI2_DECODER
 
-template <class T>
-FOLLY_ALWAYS_INLINE size_t
-readVarintMediumSlowContiguous(T& value, const uint8_t* p) {
+template <class T, class CursorT>
+void readVarintMediumSlow(CursorT& c, T& value, const uint8_t* p, size_t len) {
   static_assert(
       sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4 || sizeof(T) == 8,
       "Trying to deserialize into an unsupported type");
-  size_t bytesRead;
-  if (sizeof(T) <= 4) {
-    bytesRead = readVarintMediumSlowUnrolled(value, p);
-  } else {
-    uint64_t result;
-#if THRIFT_UTIL_VARINTUTILS_BMI2_DECODER
-    bytesRead = readContiguousVarintMediumSlowU64BMI2(result, p);
-#elif THRIFT_UTIL_VARINTUTILS_SIMD_DECODER
-    bytesRead = readContiguousVarintMediumSlowU64SIMD(result, p);
-#else
-    bytesRead = readVarintMediumSlowUnrolled(result, p);
-#endif
-    value = static_cast<T>(result);
-  }
-  return bytesRead;
-}
 
-template <class T, class CursorT>
-void readVarintMediumSlow(CursorT& c, T& value, const uint8_t* p, size_t len) {
   static const size_t maxSize = (8 * sizeof(T) + 6) / 7;
 
   if (FOLLY_LIKELY(len >= maxSize)) {
-    size_t bytesRead = readVarintMediumSlowContiguous(value, p);
+    size_t bytesRead;
+    if (sizeof(T) <= 4) {
+      bytesRead = readVarintMediumSlowUnrolled(value, p);
+    } else {
+      uint64_t result;
+#if THRIFT_UTIL_VARINTUTILS_BMI2_DECODER
+      bytesRead = readContiguousVarintMediumSlowU64BMI2(result, p);
+#elif THRIFT_UTIL_VARINTUTILS_SIMD_DECODER
+      bytesRead = readContiguousVarintMediumSlowU64SIMD(result, p);
+#else
+      bytesRead = readVarintMediumSlowUnrolled(result, p);
+#endif
+      value = static_cast<T>(result);
+    }
     c.skipNoAdvance(bytesRead);
   } else {
     readVarintSlow(c, value);
@@ -437,18 +431,16 @@ template <class Cursor, class T>
 FOLLY_ALWAYS_INLINE void readZigzaggedVarint(Cursor& c, T& out) {
   static_assert(sizeof(T) == 2 || sizeof(T) == 4 || sizeof(T) == 8);
   folly::compiler_may_unsafely_assume_separate_storage(&c, c.data());
+  // By using the 4-byte version of readVarint, we can cut down on template
+  // instantiations and reduce icache pressure.
   if constexpr (sizeof(T) == 2) {
     int32_t value;
     readVarint(c, value);
-    out = (int16_t)apache::thrift::util::zigzagToI32(value);
+    out = (int16_t)detail::zigzagToSignedInt(value);
   } else {
     T value;
     readVarint(c, value);
-    if constexpr (sizeof(T) == 4) {
-      out = zigzagToI32(value);
-    } else {
-      out = zigzagToI64(value);
-    }
+    out = detail::zigzagToSignedInt(value);
   }
 }
 

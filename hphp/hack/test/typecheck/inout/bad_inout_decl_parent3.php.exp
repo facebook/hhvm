@@ -2,6 +2,12 @@ File "bad_inout_decl_parent3.php", line 8, characters 27-27:
 Encountered unexpected token `&`. (Parsing[1002])
 File "bad_inout_decl_parent3.php", line 8, characters 19-21:
 The method `foo` is not compatible with the overridden method (Typing[4341])
+  File "bad_inout_decl_parent3.php", line 8, characters 19-21:
+  Method `foo` has type `(function(int $x): void)` in `C2`
+  File "bad_inout_decl_parent3.php", line 4, characters 19-21:
+  But is has type `(function(inout int $x): void)` in parent `C1`
+  File "bad_inout_decl_parent3.php", line 8, characters 19-21:
+  Type `(function(int $x): void)` is not a subtype of `(function(inout int $x): void)`
   File "bad_inout_decl_parent3.php", line 4, characters 33-34:
   This is an `inout` parameter
   File "bad_inout_decl_parent3.php", line 8, characters 28-29:

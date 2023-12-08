@@ -1,5 +1,11 @@
 File "mixed_subtype.php", line 11, characters 19-19:
 The method `A` is not compatible with the overridden method (Typing[4341])
+  File "mixed_subtype.php", line 11, characters 19-19:
+  Method `A` has type `(function(): mixed)` in `Bar`
+  File "mixed_subtype.php", line 5, characters 19-19:
+  But is has type `(function(): nothing)` in parent `Foo`
+  File "mixed_subtype.php", line 11, characters 19-19:
+  Type `(function(): mixed)` is not a subtype of `(function(): nothing)`
   File "mixed_subtype.php", line 5, characters 24-30:
   Expected `nothing`
   File "mixed_subtype.php", line 11, characters 24-28:

@@ -4737,7 +4737,7 @@ end = struct
         Printf.sprintf
           "Expected `%s` because you are splicing into a `%s` expression or block"
           (Typing_print.with_blank_tyvars (fun () ->
-               Typing_print.full_strip_ns_decl env splice_ty))
+               Typing_print.full_strip_ns_decl ~verbose_fun:false env splice_ty))
           (Utils.strip_ns dsl_name)
       in
       let err_ty =

@@ -1,5 +1,11 @@
 File "constraint_override_bad2.php", line 20, characters 19-21:
 The method `foo` is not compatible with the overridden method (Typing[4341])
+  File "constraint_override_bad2.php", line 20, characters 19-21:
+  Method `foo` has type `(function<T as C>(): Action<T>)` in `C`
+  File "constraint_override_bad2.php", line 15, characters 19-21:
+  But is has type `(function<T as B>(): Action<T>)` in parent `B`
+  File "constraint_override_bad2.php", line 20, characters 19-21:
+  Type `(function<T as C>(): Action<T>)` is not a subtype of `(function<T as B>(): Action<T>)`
   File "constraint_override_bad2.php", line 20, characters 23-23:
   `T` is a constrained type parameter
   File "constraint_override_bad2.php", line 20, characters 28-28:

@@ -1,6 +1,12 @@
 File "function_subtype.php", line 30, characters 19-21:
 The method `get` is not compatible with the overridden method (Typing[4341])
   File "function_subtype.php", line 30, characters 19-21:
+  Method `get` has type `(function(): readonly ParentClass)` in `Child`
+  File "function_subtype.php", line 9, characters 28-30:
+  But is has type `(readonly function(): ParentClass)` in parent `ParentClass`
+  File "function_subtype.php", line 30, characters 19-21:
+  Type `(function(): readonly ParentClass)` is not a subtype of `(readonly function(): ParentClass)`
+  File "function_subtype.php", line 30, characters 19-21:
   Function readonly mismatch
   File "function_subtype.php", line 30, characters 19-21:
   This function is not marked readonly
@@ -9,6 +15,12 @@ The method `get` is not compatible with the overridden method (Typing[4341])
 File "function_subtype.php", line 35, characters 19-27:
 The method `return_ro` is not compatible with the overridden method (Typing[4341])
   File "function_subtype.php", line 35, characters 19-27:
+  Method `return_ro` has type `(function(): readonly ParentClass)` in `Child`
+  File "function_subtype.php", line 13, characters 19-27:
+  But is has type `(function(): ParentClass)` in parent `ParentClass`
+  File "function_subtype.php", line 35, characters 19-27:
+  Type `(function(): readonly ParentClass)` is not a subtype of `(function(): ParentClass)`
+  File "function_subtype.php", line 35, characters 19-27:
   Function readonly return mismatch
   File "function_subtype.php", line 35, characters 19-27:
   This function returns a readonly value
@@ -16,6 +28,12 @@ The method `return_ro` is not compatible with the overridden method (Typing[4341
   This function does not return a readonly value
 File "function_subtype.php", line 39, characters 19-27:
 The method `setParams` is not compatible with the overridden method (Typing[4341])
+  File "function_subtype.php", line 39, characters 19-27:
+  Method `setParams` has type `(function(ParentClass $x, readonly ParentClass $y): void)` in `Child`
+  File "function_subtype.php", line 22, characters 19-27:
+  But is has type `(function(readonly ParentClass $x, ParentClass $y): void)` in parent `ParentClass`
+  File "function_subtype.php", line 39, characters 19-27:
+  Type `(function(ParentClass $x, readonly ParentClass $y): void)` is not a subtype of `(function(readonly ParentClass $x, ParentClass $y): void)`
   File "function_subtype.php", line 22, characters 50-51:
   Mismatched parameter readonlyness
   File "function_subtype.php", line 40, characters 17-18:
@@ -24,6 +42,12 @@ The method `setParams` is not compatible with the overridden method (Typing[4341
   But this parameter is readonly
 File "function_subtype.php", line 45, characters 19-29:
 The method `readonlyFun` is not compatible with the overridden method (Typing[4341])
+  File "function_subtype.php", line 45, characters 19-29:
+  Method `readonlyFun` has type `(function((readonly function(Child): Child) $f): void)` in `Child`
+  File "function_subtype.php", line 17, characters 19-29:
+  But is has type `(function((function(Child): Child) $f): void)` in parent `ParentClass`
+  File "function_subtype.php", line 45, characters 19-29:
+  Type `(function((readonly function(Child): Child) $f): void)` is not a subtype of `(function((function(Child): Child) $f): void)`
   File "function_subtype.php", line 18, characters 5-30:
   Function readonly mismatch
   File "function_subtype.php", line 18, characters 5-30:

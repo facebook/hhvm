@@ -1,5 +1,11 @@
 File "where_override_bad.php", line 16, characters 19-21:
 The method `foo` is not compatible with the overridden method (Typing[4341])
+  File "where_override_bad.php", line 16, characters 19-21:
+  Method `foo` has type `(function(T $x): void where T as Derived)` in `List4`
+  File "where_override_bad.php", line 10, characters 19-21:
+  But is has type `(function(T $x): void where T as Base)` in parent `MyList<T>`
+  File "where_override_bad.php", line 16, characters 19-21:
+  Type `(function(T $x): void where T as Derived)` is not a subtype of `(function(T $x): void where T as Base)`
   File "where_override_bad.php", line 16, characters 45-51:
   Expected `Derived`
   File "where_override_bad.php", line 16, characters 40-40:

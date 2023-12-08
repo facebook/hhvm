@@ -1,17 +1,20 @@
 Typing[4341] The method f is not compatible with the overridden method [1]
--> Expected string [2]
--> But got int [3]
+-> Method f has type (function(string $x): void) in Child [1]
+-> But is has type (function(int $x): void) in parent Foo [2]
+-> Type (function(string $x): void) is not a subtype of (function(int $x): void) [1]
+-> Expected string [3]
+-> But got int [4]
 
 long_directory_name.php--child.php:3:19
       1 | <?hh
       2 | class Child extends Foo {
-[1,2] 3 |   public function f(string $x): void {}
+[1,3] 3 |   public function f(string $x): void {}
       4 | }
 
-long_directory_name.php--long/directory/name/class_def.php:3:21
+long_directory_name.php--long/directory/name/class_def.php:3:19
       1 | <?hh
       2 | class Foo {
-[3]   3 |   public function f(int $x): void {}
+[2,4] 3 |   public function f(int $x): void {}
       4 | }
 
 1 error found.

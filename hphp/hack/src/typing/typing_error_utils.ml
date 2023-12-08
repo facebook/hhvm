@@ -1535,14 +1535,16 @@ end = struct
     in
     (Error_code.BadConditionalSupportDynamic, claim, lazy [], [])
 
-  let bad_decl_override name parent_pos parent_name =
+  let bad_decl_override ~name ~parent_pos ~parent_name =
+    let name = Render.strip_ns name |> Markdown_lite.md_codify in
+    let parent_name = Render.strip_ns parent_name |> Markdown_lite.md_codify in
     ( Error_code.BadDeclOverride,
       lazy
         ( parent_pos,
           Printf.sprintf
             "Some members in class %s are incompatible with those declared in type %s"
-            (Render.strip_ns name |> Markdown_lite.md_codify)
-            (Render.strip_ns parent_name |> Markdown_lite.md_codify) ),
+            name
+            parent_name ),
       lazy [],
       [] )
 
@@ -4446,7 +4448,7 @@ end = struct
         { pos; child; parent; ty_name; self_ty_name } ->
       bad_conditional_support_dynamic pos child parent ty_name self_ty_name
     | Bad_decl_override { pos; name; parent_name } ->
-      bad_decl_override name pos parent_name
+      bad_decl_override ~name ~parent_pos:pos ~parent_name
     | Explain_where_constraint { pos; decl_pos; in_class } ->
       explain_where_constraint pos decl_pos in_class
     | Explain_constraint pos -> explain_constraint pos
@@ -5843,14 +5845,82 @@ end = struct
     in
     (code, reasons)
 
-  let bad_method_override pos member_name =
+  let bad_method_override pos ~member_name =
+    let member_name = Render.strip_ns member_name |> Markdown_lite.md_codify in
     let reasons =
       lazy
         [
           ( pos,
-            "The method "
-            ^ (Render.strip_ns member_name |> Markdown_lite.md_codify)
-            ^ " is not compatible with the overridden method" );
+            Printf.sprintf
+              "The method %s is not compatible with the overridden method"
+              member_name );
+        ]
+    in
+    (Error_code.BadMethodOverride, reasons)
+
+  let bad_member_override_not_subtype
+      ~is_method
+      ~class_name
+      ~parent_name
+      ~parent_type
+      ~member_pos
+      ~member_name
+      ~member_type
+      ~origin_name
+      ~origin_type
+      ~member_parent_pos
+      ~member_parent_type
+      ~member_parent_origin
+      ~member_parent_origin_type =
+    let member_name = Render.strip_ns member_name |> Markdown_lite.md_codify in
+    let class_name = Render.strip_ns class_name |> Markdown_lite.md_codify in
+    let parent_name = Render.strip_ns parent_name |> Markdown_lite.md_codify in
+    let origin_name = Render.strip_ns origin_name |> Markdown_lite.md_codify in
+    let member_parent_origin =
+      Render.strip_ns member_parent_origin |> Markdown_lite.md_codify
+    in
+    let parent_type = Markdown_lite.md_codify parent_type in
+    let member_type = Markdown_lite.md_codify member_type in
+    let origin_type = Markdown_lite.md_codify origin_type in
+    let member_parent_type = Markdown_lite.md_codify member_parent_type in
+    let member_parent_origin_type =
+      Markdown_lite.md_codify member_parent_origin_type
+    in
+    let reasons =
+      lazy
+        [
+          ( member_pos,
+            Printf.sprintf
+              "%s %s has type %s in %s%s"
+              (if is_method then
+                "Method"
+              else
+                "Property")
+              member_name
+              member_type
+              class_name
+              (if String.equal origin_name class_name then
+                ""
+              else
+                Printf.sprintf
+                  " and comes from ancestor or trait %s"
+                  origin_type) );
+          ( member_parent_pos,
+            Printf.sprintf
+              "But is has type %s in parent %s%s"
+              member_parent_type
+              parent_type
+              (if String.equal member_parent_origin parent_name then
+                ""
+              else
+                Printf.sprintf
+                  " and comes from ancestor or trait %s"
+                  member_parent_origin_type) );
+          ( member_pos,
+            Printf.sprintf
+              "Type %s is not a subtype of %s"
+              member_type
+              member_parent_type );
         ]
     in
     (Error_code.BadMethodOverride, reasons)
@@ -6110,7 +6180,38 @@ end = struct
       Eval_result.single
         (smember_not_found pos kind member_name class_name class_pos hint)
     | Bad_method_override { pos; member_name } ->
-      Eval_result.single (bad_method_override pos member_name)
+      Eval_result.single (bad_method_override pos ~member_name)
+    | Bad_member_override_not_subtype
+        {
+          is_method;
+          class_name;
+          parent_name;
+          parent_type = (lazy parent_type);
+          member_pos;
+          member_name;
+          member_type = (lazy member_type);
+          origin_name;
+          origin_type = (lazy origin_type);
+          member_parent_pos;
+          member_parent_type = (lazy member_parent_type);
+          member_parent_origin;
+          member_parent_origin_type = (lazy member_parent_origin_type);
+        } ->
+      Eval_result.single
+        (bad_member_override_not_subtype
+           ~is_method
+           ~class_name
+           ~parent_name
+           ~parent_type
+           ~member_pos
+           ~member_name
+           ~member_type
+           ~origin_name
+           ~origin_type
+           ~member_parent_pos
+           ~member_parent_type
+           ~member_parent_origin
+           ~member_parent_origin_type)
     | Bad_prop_override { pos; member_name } ->
       Eval_result.single (bad_prop_override pos member_name)
     | Subtyping_error { ty_sub; ty_sup; is_coeffect } ->

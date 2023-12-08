@@ -96,7 +96,7 @@ let check_property_sound_for_dynamic_write
            (fst id)
            (snd id)
            classname
-           (pos, Typing_print.full_strip_ns_decl env decl_ty))
+           (pos, Typing_print.full_strip_ns_decl ~verbose_fun:false env decl_ty))
     ) else
       None
   ) else

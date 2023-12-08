@@ -1525,6 +1525,21 @@ and Secondary : sig
         pos: Pos_or_decl.t;
         member_name: string;
       }
+    | Bad_member_override_not_subtype of {
+        is_method: bool;
+        class_name: string;
+        parent_name: string;
+        parent_type: string lazy_t;
+        member_pos: Pos_or_decl.t;
+        member_name: string;
+        member_type: string lazy_t;
+        origin_name: string;
+        origin_type: string lazy_t;
+        member_parent_pos: Pos_or_decl.t;
+        member_parent_type: string lazy_t;
+        member_parent_origin: string;
+        member_parent_origin_type: string lazy_t;
+      }
     | Bad_prop_override of {
         pos: Pos_or_decl.t;
         member_name: string;
@@ -1815,7 +1830,7 @@ and Reasons_callback : sig
   *)
   val always : Error.t -> t
 
-  (** Applying the `Reasons_callback.t` `(prepend_on_apply err snd_err1) snd_err2`
+  (** Applying the [Reasons_callback.t] [(prepend_on_apply err snd_err1) snd_err2]
        is the same as applying `err` the secondary error created by prepending
        `snd_err1` to `snd_err2`.
 

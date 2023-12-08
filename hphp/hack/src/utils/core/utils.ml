@@ -112,7 +112,7 @@ let try_with_stack (f : unit -> 'a) : ('a, Exception.t) result =
 
 let set_of_list l = List.fold_right l ~f:SSet.add ~init:SSet.empty
 
-(* \A\B\C -> A\B\C *)
+(** \A\B\C -> A\B\C *)
 let strip_ns s = String.chop_prefix_if_exists s ~prefix:"\\"
 
 let strip_xhp_ns s = String.chop_prefix_if_exists s ~prefix:":"

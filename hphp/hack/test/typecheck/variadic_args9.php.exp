@@ -1,5 +1,11 @@
 File "variadic_args9.php", line 8, characters 19-22:
 The method `meth` is not compatible with the overridden method (Typing[4341])
+  File "variadic_args9.php", line 8, characters 19-22:
+  Method `meth` has type `(function(int $args...): void)` in `C2`
+  File "variadic_args9.php", line 4, characters 19-22:
+  But is has type `(function(string $args...): void)` in parent `C1`
+  File "variadic_args9.php", line 8, characters 19-22:
+  Type `(function(int $args...): void)` is not a subtype of `(function(string $args...): void)`
   File "variadic_args9.php", line 8, characters 31-35:
   Expected `int` (variadic argument)
   File "variadic_args9.php", line 4, characters 34-38:

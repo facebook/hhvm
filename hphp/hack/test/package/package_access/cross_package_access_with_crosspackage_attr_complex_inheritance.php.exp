@@ -29,6 +29,9 @@ cross_package_access_with_crosspackage_attr_complex_inheritance.php--a.php:18:15
     20 | }
 
 Typing[4341] The method foo is not compatible with the overridden method [1]
+-> Method foo has type (function(): void) in B [1]
+-> But is has type (function(): void) in parent A [2]
+-> Type (function(): void) is not a subtype of (function(): void) [1]
 -> Cross package mismatch [1]
 -> This function is marked <<__CrossPackage(pkg1)>>, so it's only compatible with other functions marked <<__CrossPackage(pkg1)>> [1]
 -> This function is not cross package [2]

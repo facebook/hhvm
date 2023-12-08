@@ -1,6 +1,12 @@
 File "methods_philippe_03.bad.php", line 23, characters 19-21:
 The method `foo` is not compatible with the overridden method (Typing[4341])
   File "methods_philippe_03.bad.php", line 23, characters 19-21:
+  Method `foo` has type `(function(int $a): void)` in `TPajoux`
+  File "methods_philippe_03.bad.php", line 14, characters 19-21:
+  But is has type `(function(int $a, ?int $b = _): void)` in parent `IPajoux2`
+  File "methods_philippe_03.bad.php", line 23, characters 19-21:
+  Type `(function(int $a): void)` is not a subtype of `(function(int $a, ?int $b = _): void)`
+  File "methods_philippe_03.bad.php", line 23, characters 19-21:
   Too few arguments (required 2 but got 1)
   File "methods_philippe_03.bad.php", line 14, characters 19-21:
   Because of this definition

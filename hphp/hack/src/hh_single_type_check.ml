@@ -2273,7 +2273,7 @@ let handle_mode
         let env =
           Typing_env_types.empty ctx Relative_path.default ~droot:None
         in
-        Typing_print.full_strip_ns_decl env ty
+        Typing_print.full_strip_ns_decl ~verbose_fun:false env ty
       in
       let print_class_element member_type get mid =
         match get cls mid with

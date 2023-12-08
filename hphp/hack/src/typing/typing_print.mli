@@ -25,9 +25,17 @@ val full_strip_ns : env -> Typing_defs.locl_ty -> string
 
 val full_strip_ns_i : env -> Typing_defs.internal_type -> string
 
-(* if fuel reaches 0, if msg = true, an error message is added to the
-   type representation. msg is true by default *)
-val full_strip_ns_decl : ?msg:bool -> env -> Typing_defs.decl_ty -> string
+(** Print a decl type, stripping backslash namespaces.
+
+  @param msg          if fuel reaches 0, if msg = true, an error message is added to the
+                      type representation. msg is true by default
+
+  @param verbose_fun  print function types verbosely,
+                      with type parameters, `async` keyword,
+                      `where` constraints and disposable attributes.
+  *)
+val full_strip_ns_decl :
+  ?msg:bool -> verbose_fun:bool -> env -> Typing_defs.decl_ty -> string
 
 val full_decl :
   ?msg:bool -> TypecheckerOptions.t -> Typing_defs.decl_ty -> string

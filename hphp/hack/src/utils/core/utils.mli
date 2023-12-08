@@ -53,18 +53,18 @@ val try_with_stack : (unit -> 'a) -> ('a, Exception.t) result
 
 val set_of_list : SSet.elt list -> SSet.t
 
-(* Strip NS removes only the leading backslash *)
+(** Strip NS removes only the leading backslash *)
 val strip_ns : string -> string
 
-(* Strip XHP removes only the leading colon *)
+(** Strip XHP removes only the leading colon *)
 val strip_xhp_ns : string -> string
 
-(* Strip Both removes either leading backslash and colon, or both *)
+(** Strip Both removes either leading backslash and colon, or both *)
 val strip_both_ns : string -> string
 
 val strip_hh_lib_ns : string -> string
 
-(* Strip All removes all backslash-based namespaces, but does nothing to XHP *)
+(** Strip All removes all backslash-based namespaces, but does nothing to XHP *)
 val strip_all_ns : string -> string
 
 (** A\B\C -> \A\B\C *)

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<74c9757bbea9838dce84c7722c98ea9b>>
+// @generated SignedSource<<4ca42618917d6bc56d7cb03b6bc4b82c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -217,7 +217,14 @@ pub struct DeclClassType {
     pub construct: (Option<Element>, ConsistentKind),
     pub ancestors: s_map::SMap<Ty>,
     pub support_dynamic_type: bool,
+    /// All the `require extends` and `require implements`,
+    /// possibly inherited from interface or trait ancestors.
+    /// Does not include `require class`
     pub req_ancestors: Vec<Requirement>,
+    /// All the `require extends` and `require implements`,
+    /// possibly inherited from interface or trait ancestors,
+    /// plus some extends and other ancestors of these.
+    /// Does not include `require class`
     pub req_ancestors_extends: s_set::SSet,
     /// dc_req_class_ancestors gathers all the `require class`
     /// requirements declared in ancestors.  Remark that `require class`

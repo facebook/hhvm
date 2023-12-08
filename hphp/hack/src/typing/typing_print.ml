@@ -242,6 +242,19 @@ module Full = struct
     let param_name { tp_name = (_, name); _ } = name in
     split_desugared_ctx_tparams_gen ~tparams ~param_name
 
+  let where_constraint ~fuel ~ty to_doc st penv (where : 'a ty where_constraint)
+      =
+    let (left_ty, (kind : Ast_defs.constraint_kind), right_ty) = where in
+    let (fuel, left_ty_doc) = ty ~fuel to_doc st penv left_ty in
+    let kind_doc =
+      match kind with
+      | Ast_defs.Constraint_as -> text "as"
+      | Ast_defs.Constraint_eq -> text "="
+      | Ast_defs.Constraint_super -> text "super"
+    in
+    let (fuel, right_ty_doc) = ty ~fuel to_doc st penv right_ty in
+    (fuel, Concat [left_ty_doc; Space; kind_doc; Space; right_ty_doc])
+
   let rec is_supportdyn_mixed : type a. penv -> a ty -> bool =
    fun env t ->
     match get_node t with
@@ -259,42 +272,100 @@ module Full = struct
       | _ -> false)
     | _ -> false
 
-  let rec fun_type ~fuel ~ty to_doc st penv ft fun_implicit_params =
-    let n = List.length ft.ft_params in
+  let rec fun_type
+      ~fuel
+      ~ty
+      to_doc
+      st
+      penv
+      ~verbose
+      (ft : 'a ty fun_type)
+      fun_implicit_params =
+    let {
+      ft_tparams;
+      ft_where_constraints;
+      ft_params;
+      ft_implicit_params;
+      ft_ret;
+      ft_flags;
+      ft_cross_package = _;
+    } =
+      ft
+    in
+    let {
+      Typing_defs_flags.Fun.return_disposable;
+      async;
+      generator = _;
+      fun_kind = _;
+      instantiated_targs = _;
+      is_function_pointer = _;
+      returns_readonly = _;
+      readonly_this = _;
+      support_dynamic_type = _;
+      is_memoized = _;
+      variadic = _;
+    } =
+      Typing_defs_flags.Fun.as_record ft_flags
+    in
+    let return_disposable_doc =
+      if verbose && return_disposable then
+        Concat [text "<<__ReturnDisposable>>"; Space]
+      else
+        Nothing
+    in
+    let async_doc =
+      if verbose && async then
+        Concat [text "async"; Space]
+      else
+        Nothing
+    in
     let (fuel, params) =
-      List.fold_mapi ft.ft_params ~init:fuel ~f:(fun i fuel p ->
-          let (fuel, d) = fun_param ~fuel ~ty to_doc st penv p in
+      let param_count = List.length ft_params in
+      List.fold_mapi ft_params ~init:fuel ~f:(fun i fuel p ->
+          let (fuel, d) = fun_param ~fuel ~ty to_doc st penv ~verbose p in
           ( fuel,
-            if get_ft_variadic ft && i + 1 = n then
+            if get_ft_variadic ft && i + 1 = param_count then
               Concat [d; text "..."]
             else
               d ))
     in
 
-    let (_, tparams) = split_desugared_ctx_tparams ft.ft_tparams in
     let (fuel, tparams_doc) =
+      let (_, tparams) = split_desugared_ctx_tparams ft_tparams in
       (* only print tparams when they have been instantiated with targs
        * so that they correctly express reified parameterization *)
-      match (tparams, get_ft_ftk ft) with
-      | ([], _)
-      | (_, FTKtparams) ->
-        (fuel, Nothing)
-      | (l, FTKinstantiated_targs) ->
-        list ~fuel "<" (tparam ~ty to_doc st penv) l ">"
+      match tparams with
+      | [] -> (fuel, Nothing)
+      | _ ->
+        (match (verbose, Typing_defs.get_ft_ftk ft) with
+        | (false, FTKtparams) -> (fuel, Nothing)
+        | (true, FTKtparams)
+        | (_, FTKinstantiated_targs) ->
+          list ~fuel "<" (tparam ~ty to_doc st penv) tparams ">")
     in
     let (fuel, return_doc) =
-      possibly_enforced_ty ~fuel ~ty to_doc st penv ft.ft_ret
+      possibly_enforced_ty ~fuel ~ty to_doc st penv ft_ret
     in
     let (fuel, capabilities_doc) =
-      fun_implicit_params
-        ~fuel
-        to_doc
-        st
-        penv
-        ft.ft_tparams
-        ft.ft_implicit_params
+      fun_implicit_params ~fuel to_doc st penv ft_tparams ft_implicit_params
     in
     let (fuel, params_doc) = list ~fuel "(" id params ")" in
+    let (fuel, where_doc) =
+      if verbose then
+        match ft_where_constraints with
+        | [] -> (fuel, Nothing)
+        | _ ->
+          let (fuel, where_doc) =
+            list_sep
+              ~fuel
+              comma_sep
+              (where_constraint ~ty to_doc st penv)
+              ft_where_constraints
+          in
+          (fuel, Concat [Space; text "where"; Space; where_doc])
+      else
+        (fuel, Nothing)
+    in
     let tparams_doc =
       Span
         [
@@ -307,9 +378,10 @@ module Full = struct
           else
             Nothing);
           return_doc;
+          where_doc;
         ]
     in
-    (fuel, tparams_doc)
+    (fuel, return_disposable_doc, async_doc, tparams_doc)
 
   and possibly_enforced_ty ~fuel ~ty to_doc st penv { et_enforced; et_type } =
     let (fuel, d) = ty ~fuel to_doc st penv et_type in
@@ -327,7 +399,22 @@ module Full = struct
     in
     (fuel, d)
 
-  and fun_param ~fuel ~ty to_doc st penv ({ fp_name; fp_type; _ } as fp) =
+  and fun_param
+      ~fuel
+      ~ty
+      to_doc
+      st
+      penv
+      ~verbose
+      ({ fp_name; fp_type; fp_flags; fp_pos = _ } : 'a ty fun_param) =
+    let {
+      Typing_defs_flags.FunParam.accept_disposable;
+      inout;
+      has_default;
+      readonly;
+    } =
+      Typing_defs_flags.FunParam.as_record fp_flags
+    in
     let (fuel, d) = ty ~fuel to_doc st penv fp_type.et_type in
     let (fuel, d) =
       match (fp_name, d) with
@@ -343,14 +430,20 @@ module Full = struct
     let d =
       Concat
         [
-          (match get_fp_mode fp with
-          | FPinout -> text "inout" ^^ Space
-          | _ -> Nothing);
-          (match get_fp_readonly fp with
-          | true -> text "readonly" ^^ Space
-          | false -> Nothing);
+          (if verbose && accept_disposable then
+            text "<<__AcceptDisposable>>" ^^ Space
+          else
+            Nothing);
+          (if inout then
+            text "inout" ^^ Space
+          else
+            Nothing);
+          (if readonly then
+            text "readonly" ^^ Space
+          else
+            Nothing);
           d;
-          (if get_fp_has_default fp then
+          (if has_default then
             text " = _"
           else
             Nothing);
@@ -414,14 +507,16 @@ module Full = struct
 
   let tprim x = text @@ Aast_defs.string_of_tprim x
 
-  let tfun ~fuel ~ty to_doc st penv ft fun_implicit_params =
-    let (fuel, fun_type_doc) =
-      fun_type ~fuel ~ty to_doc st penv ft fun_implicit_params
+  let tfun ~fuel ~ty to_doc st penv ~verbose ft fun_implicit_params =
+    let (fuel, return_disposable_doc, async_doc, fun_type_doc) =
+      fun_type ~fuel ~ty to_doc st penv ~verbose ft fun_implicit_params
     in
     let tfun_doc =
       Concat
         [
+          return_disposable_doc;
           text "(";
+          async_doc;
           (if get_ft_readonly_this ft then
             text "readonly "
           else
@@ -680,13 +775,15 @@ module Full = struct
 
   (* Prints a decl_ty. If there isn't enough fuel, the type is omitted. Each
      recursive call to print a type depletes the fuel by one. *)
-  let rec decl_ty ~fuel : _ -> _ -> _ -> decl_ty -> Fuel.t * Doc.t =
-   fun to_doc st penv x ->
-    Fuel.provide fuel (decl_ty_ to_doc st penv (get_node x))
+  let rec decl_ty ~fuel :
+      _ -> _ -> _ -> verbose_fun:bool -> decl_ty -> Fuel.t * Doc.t =
+   fun to_doc st penv ~verbose_fun x ->
+    Fuel.provide fuel (decl_ty_ to_doc st penv ~verbose_fun (get_node x))
 
-  and decl_ty_ ~fuel : _ -> _ -> _ -> decl_phase ty_ -> Fuel.t * Doc.t =
-   fun to_doc st penv x ->
-    let ty = decl_ty in
+  and decl_ty_ ~fuel :
+      _ -> _ -> _ -> verbose_fun:bool -> decl_phase ty_ -> Fuel.t * Doc.t =
+   fun to_doc st penv ~verbose_fun x ->
+    let ty = decl_ty ~verbose_fun in
     let k ~fuel x = ty ~fuel to_doc st penv x in
     match x with
     | Tany _ -> (fuel, text "_")
@@ -715,7 +812,16 @@ module Full = struct
       let like_doc = Concat [text "~"; ty_doc] in
       (fuel, like_doc)
     | Tprim x -> (fuel, tprim x)
-    | Tfun ft -> tfun ~fuel ~ty to_doc st penv ft fun_decl_implicit_params
+    | Tfun ft ->
+      tfun
+        ~fuel
+        ~ty
+        to_doc
+        st
+        penv
+        ~verbose:verbose_fun
+        ft
+        (fun_decl_implicit_params ~verbose_fun)
     | Tnewtype (n, _, ty)
       when String.equal n SN.Classes.cSupportDyn
            && not (show_supportdyn_penv penv) ->
@@ -750,9 +856,9 @@ module Full = struct
         ")"
     | Tshape s -> tshape ~fuel k to_doc penv s is_open_mixed_decl
 
-  and fun_decl_implicit_params ~fuel =
+  and fun_decl_implicit_params ~fuel ~verbose_fun =
     fun_implicit_params
-      decl_ty
+      (decl_ty ~verbose_fun)
       (Typing_make_type.default_capability_decl Pos_or_decl.none)
       ~fuel
 
@@ -881,7 +987,8 @@ module Full = struct
           let (fuel, ty_doc) = ty ~fuel to_doc st penv ety in
           (fuel, Concat [prepend; ty_doc])
       end
-    | Tfun ft -> tfun ~fuel ~ty to_doc st penv ft fun_locl_implicit_params
+    | Tfun ft ->
+      tfun ~fuel ~ty to_doc st penv ~verbose:false ft fun_locl_implicit_params
     | Tclass ((_, s), exact, tyl) ->
       let (fuel, targs_doc) =
         if List.is_empty tyl then
@@ -1149,10 +1256,9 @@ module Full = struct
     let str = Libhackfmt.format_doc_unbroken format_env doc |> String.strip in
     (fuel, str)
 
-  (* Print a suffix for type parameters in typ that have constraints
-   * If the type itself is a type parameter with a single constraint, just
-   * represent this as `as t` or `super t`, otherwise use full `where` syntax
-   *)
+  (** Print a suffix for type parameters in [typ] that have constraints
+      If the type itself is a type parameter with a single constraint, just
+      represent this as `as t` or `super t`, otherwise use full `where` syntax *)
   let constraints_for_type ~fuel to_doc env typ =
     let tparams =
       SSet.elements
@@ -1201,13 +1307,21 @@ module Full = struct
     to_string ~fuel ~ty text_strip_ns env x
 
   let to_string_decl ~fuel (x : decl_ty) =
-    let ty = decl_ty in
+    let ty = decl_ty ~verbose_fun:false in
     to_string ~fuel ~ty Doc.text Declenv x
 
   let fun_to_string ~fuel (x : decl_fun_type) =
-    let ty = decl_ty in
-    let (fuel, doc) =
-      fun_type ~fuel ~ty Doc.text ISet.empty Declenv x fun_decl_implicit_params
+    let ty = decl_ty ~verbose_fun:false in
+    let (fuel, _, _async_doc, doc) =
+      fun_type
+        ~fuel
+        ~ty
+        Doc.text
+        ISet.empty
+        Declenv
+        ~verbose:false
+        x
+        (fun_decl_implicit_params ~verbose_fun:false)
     in
     let str = Libhackfmt.format_doc_unbroken format_env doc |> String.strip in
     (fuel, str)
@@ -1262,13 +1376,14 @@ module Full = struct
       | ({ type_ = Method (_, name); _ }, Tfun ft) ->
         (* Use short names for function types since they display a lot more
            information to the user. *)
-        let (fuel, fun_ty_doc) =
+        let (fuel, _, _async_doc, fun_ty_doc) =
           fun_type
             ~fuel
             ~ty
             text_strip_ns
             ISet.empty
             penv
+            ~verbose:false
             ft
             fun_locl_implicit_params
         in
@@ -2464,11 +2579,11 @@ let full_strip_ns_i env ty =
     env.genv.tcopt
     (Full.to_string_strip_ns ~ty:Full.internal_type (Loclenv env) ty)
 
-let full_strip_ns_decl ?(msg = true) env ty =
+let full_strip_ns_decl ?(msg = true) ~verbose_fun env ty =
   supply_fuel
     ~msg
     env.genv.tcopt
-    (Full.to_string_strip_ns ~ty:Full.decl_ty (Loclenv env) ty)
+    (Full.to_string_strip_ns ~ty:(Full.decl_ty ~verbose_fun) (Loclenv env) ty)
 
 let full_with_identity env x occurrence definition_opt =
   supply_fuel
@@ -2486,7 +2601,7 @@ let debug env ty =
 
 let debug_decl env ty =
   Full.debug_mode := true;
-  let f_str = full_strip_ns_decl env ty in
+  let f_str = full_strip_ns_decl ~verbose_fun:true env ty in
   Full.debug_mode := false;
   f_str
 

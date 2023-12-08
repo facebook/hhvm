@@ -190,7 +190,9 @@ module DataTypeReason = struct
 
   let to_message
       env ~f ((subreason, { origin; instances = trail; expansions = _ }), tag) =
-    let ty_str = Typing_print.full_strip_ns_decl env origin in
+    let ty_str =
+      Typing_print.full_strip_ns_decl ~verbose_fun:false env origin
+    in
     let pos = Reason.to_pos (get_reason origin) in
     let prefix = f ty_str in
     let tag_str = Tag.describe tag in
@@ -632,7 +634,8 @@ let check_overlapping env ~pos ~name data_type1 data_type2 =
       let secondary_why ~f =
         let describe tag = Markdown_lite.md_bold @@ Tag.describe tag in
         let ty_str ty =
-          Markdown_lite.md_codify @@ Typing_print.full_strip_ns_decl env ty
+          Markdown_lite.md_codify
+          @@ Typing_print.full_strip_ns_decl ~verbose_fun:false env ty
         in
         [
           ( Pos_or_decl.of_raw_pos pos,

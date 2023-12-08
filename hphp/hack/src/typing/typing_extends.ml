@@ -82,7 +82,11 @@ module MemberNameMap = SMap
  * Certain class hierarchies are heavy in diamond patterns so merging members avoids doing the
  * same member subtyping multiple times. *)
 module ParentClassElt = struct
-  type parent = Pos.t * Cls.t
+  type parent = {
+    parent_pos: Pos.t;
+    parent_class: Cls.t;
+    parent_type: decl_ty;
+  }
 
   type t = {
     class_elt: class_elt;
@@ -901,16 +905,62 @@ let maybe_poison_ancestors
     end
     | _ -> ()
 
+let bad_member_override_not_subtype
+    env
+    ~is_method
+    ~class_
+    ~parent_class
+    ~(parent_type : decl_ty)
+    ~member_name
+    ~class_elt
+    ~parent_class_elt =
+  let (lazy member_pos) = class_elt.ce_pos in
+  let (lazy member_parent_pos) = parent_class_elt.ce_pos in
+
+  let (lazy member_type) = class_elt.ce_type in
+  let (lazy member_parent_type) = parent_class_elt.ce_type in
+  let open Option.Monad_infix in
+  let get_origin_type class_ class_elt =
+    lazy
+      (Cls.get_ancestor class_ class_elt.ce_origin
+      >>| Typing_print.full_strip_ns_decl ~verbose_fun:true env
+      |> Option.value ~default:(Utils.strip_ns class_elt.ce_origin))
+  in
+  Typing_error.Secondary.Bad_member_override_not_subtype
+    {
+      is_method;
+      class_name = Cls.name class_;
+      parent_name = Cls.name parent_class;
+      parent_type =
+        lazy (Typing_print.full_strip_ns_decl ~verbose_fun:true env parent_type);
+      member_pos;
+      member_name;
+      member_type =
+        lazy (Typing_print.full_strip_ns_decl ~verbose_fun:true env member_type);
+      origin_name = class_elt.ce_origin;
+      origin_type = get_origin_type class_ class_elt;
+      member_parent_pos;
+      member_parent_type =
+        lazy
+          (Typing_print.full_strip_ns_decl
+             ~verbose_fun:true
+             env
+             member_parent_type);
+      member_parent_origin = parent_class_elt.ce_origin;
+      member_parent_origin_type = get_origin_type parent_class parent_class_elt;
+    }
+
 (* Check that overriding is correct *)
 let check_override
     env
     ~check_member_unique
-    member_name
+    ~member_name
     member_kind
-    class_
-    parent_class
-    parent_class_elt
-    class_elt
+    ~class_
+    ~parent_class
+    ~(parent_type : decl_ty)
+    ~(class_elt : class_elt)
+    ~parent_class_elt
     on_error =
   (* If the class element is defined in the class that we're checking, then
    * don't wrap with the extra
@@ -958,6 +1008,8 @@ let check_override
   let (lazy pos) = class_elt.ce_pos in
   let (lazy parent_pos) = parent_class_elt.ce_pos in
 
+  let (lazy fty_child) = class_elt.ce_type in
+  let (lazy fty_parent) = parent_class_elt.ce_type in
   let snd_err =
     let open Typing_error.Secondary in
     if MemberKind.is_functional member_kind then
@@ -989,8 +1041,6 @@ let check_override
     class_elt
     on_error;
 
-  let (lazy fty_child) = class_elt.ce_type in
-  let (lazy fty_parent) = parent_class_elt.ce_type in
   match (deref fty_parent, deref fty_child) with
   | ((_, Tany _), (_, Tany _)) -> env
   | ((_, Tany _), _) ->
@@ -1030,18 +1080,37 @@ let check_override
         (Typing_reason.to_pos r_parent)
         (Typing_reason.to_pos r_child)
         on_error;
-      check_ambiguous_inheritance
-        (check_subtype_methods
-           env
-           ~check_return:(not (MemberKind.is_constructor member_kind))
-           on_error)
-        (Typing_reason.localize r_parent, ft_parent)
-        (Typing_reason.localize r_child, ft_child)
-        pos
-        class_
-        class_elt.ce_origin
-        on_error
-        ~env)
+      let check_subtype_methods env on_error x =
+        let on_error =
+          Typing_error.Reasons_callback.prepend_on_apply on_error
+          @@ bad_member_override_not_subtype
+               ~is_method:(MemberKind.is_functional member_kind)
+               env
+               ~class_
+               ~parent_class
+               ~parent_type
+               ~member_name
+               ~class_elt
+               ~parent_class_elt
+        in
+        check_subtype_methods
+          env
+          ~check_return:(not (MemberKind.is_constructor member_kind))
+          on_error
+          x
+      in
+      let env =
+        check_ambiguous_inheritance
+          (check_subtype_methods env on_error)
+          (Typing_reason.localize r_parent, ft_parent)
+          (Typing_reason.localize r_child, ft_child)
+          pos
+          class_
+          class_elt.ce_origin
+          on_error
+          ~env
+      in
+      env)
   | _ ->
     let (env, ty_err_opt) =
       if get_ce_const class_elt then
@@ -1405,7 +1474,7 @@ let check_class_against_parent_class_elt
     member_name
     {
       ParentClassElt.class_elt = parent_class_elt;
-      parent = (parent_name_pos, parent_class);
+      parent = { ParentClassElt.parent_pos; parent_class; parent_type };
       errors_if_not_overriden;
     }
     env : missing_member_info list * Typing_env_types.env =
@@ -1455,7 +1524,7 @@ let check_class_against_parent_class_elt
             {
               member_name;
               parent_class_elt;
-              parent_pos = parent_name_pos;
+              parent_pos;
               member_kind;
               is_override = true;
             };
@@ -1472,13 +1541,14 @@ let check_class_against_parent_class_elt
         check_override
           ~check_member_unique:true
           env
-          member_name
+          ~member_name
           member_kind
-          class_
-          parent_class
-          parent_class_elt
-          class_elt
-          (on_error (parent_name_pos, Cls.name parent_class)) )
+          ~class_
+          ~parent_class
+          ~parent_class_elt
+          ~parent_type
+          ~class_elt
+          (on_error (parent_pos, Cls.name parent_class)) )
   | None ->
     (* The only case when a member belongs to a parent but not the child is if the parent is an
        interface and the child is a concrete class. Otherwise, the member would have been inherited.
@@ -1487,7 +1557,7 @@ let check_class_against_parent_class_elt
         {
           member_name;
           parent_class_elt;
-          parent_pos = parent_name_pos;
+          parent_pos;
           member_kind;
           is_override = false;
         };
@@ -1662,7 +1732,7 @@ let default_constructor_ce class_ =
   }
 
 (* When an interface defines a constructor, we check that they are compatible *)
-let check_constructors env parent_class class_ psubst on_error =
+let check_constructors env (parent_class, parent_type) class_ psubst on_error =
   let parent_is_interface = Ast_defs.is_c_interface (Cls.kind parent_class) in
   let parent_is_consistent =
     constructor_is_consistent (snd (Cls.construct parent_class))
@@ -1693,12 +1763,13 @@ let check_constructors env parent_class class_ psubst on_error =
           check_override
             env
             ~check_member_unique:false
-            SN.Members.__construct
+            ~member_name:SN.Members.__construct
             (MemberKind.Constructor { is_consistent = true })
-            class_
-            parent_class
-            parent_cstr
-            cstr
+            ~class_
+            ~parent_class
+            ~parent_type
+            ~parent_class_elt:parent_cstr
+            ~class_elt:cstr
             on_error
         else
           env
@@ -2052,11 +2123,15 @@ let check_typeconst_override
  * message pointing at the class being checked.
  *)
 let check_class_extends_parent_constructors
-    env (parent_class : (Pos.t * string) * decl_ty list * Cls.t) class_ on_error
-    =
-  let (_, parent_tparaml, parent_class) = parent_class in
+    env
+    (parent_class : (Pos.t * string) * decl_ty * decl_ty list * Cls.t)
+    class_
+    on_error =
+  let (_, parent_type, parent_tparaml, parent_class) = parent_class in
   let psubst = Inst.make_subst (Cls.tparams parent_class) parent_tparaml in
-  let env = check_constructors env parent_class class_ psubst on_error in
+  let env =
+    check_constructors env (parent_class, parent_type) class_ psubst on_error
+  in
   env
 
 (** Eliminate all synthesized members (those from requirements) plus
@@ -2073,7 +2148,7 @@ let filter_privates_and_synthethized
 
 let make_parent_member_map parent :
     ParentClassElt.parent * class_elt MemberNameMap.t MemberKindMap.t =
-  let ((parent_name_pos, _parent_name), parent_tparaml, parent_class) =
+  let ((parent_pos, _parent_name), parent_type, parent_tparaml, parent_class) =
     parent
   in
   let psubst = Inst.make_subst (Cls.tparams parent_class) parent_tparaml in
@@ -2087,7 +2162,7 @@ let make_parent_member_map parent :
            |> SMap.of_list
            |> SMap.map (Inst.instantiate_ce psubst))
   in
-  ((parent_name_pos, parent_class), member_map)
+  ({ ParentClassElt.parent_pos; parent_class; parent_type }, member_map)
 
 (** Check for multiple kinds of forbidden hierarchy diamonds involving traits:
   - Any kind of diamond involving final methods is forbidden unless the class has __EnableMethodTraitDiamond
@@ -2105,7 +2180,8 @@ let check_trait_diamonds
     ~(allow_diamonds : bool)
     ~class_name
     ~member_name
-    ((class_elt, (pos, parent)) as parent_class_elt)
+    ((class_elt, { ParentClassElt.parent_pos; parent_class; parent_type = _ })
+    as parent_class_elt)
     elts
     member_kind :
     (ParentClassElt.t * ParentClassEltSet.t)
@@ -2119,7 +2195,7 @@ let check_trait_diamonds
        following facts: 1) the parent from which class_elt comes from is a trait - 2) the member
        is not synthetic, i.e. not from a `require extends`, since we've filtered those out earlier -
        3) the member is not abstract, so not from a `require implements` either. *)
-    Ast_defs.is_c_trait (Cls.kind parent)
+    Ast_defs.is_c_trait (Cls.kind parent_class)
     && (not (get_ce_abstract class_elt))
     && (MemberKind.is_method member_kind
         && ((not allow_diamonds) || get_ce_final class_elt)
@@ -2148,7 +2224,7 @@ let check_trait_diamonds
     | Some
         ({
            ParentClassElt.class_elt = prev_class_elt;
-           parent = (_, prev_parent);
+           parent = { ParentClassElt.parent_class = prev_parent; _ };
            errors_if_not_overriden = err;
          } as prev_parent_class_elt) ->
       if
@@ -2166,7 +2242,7 @@ let check_trait_diamonds
                 class_elt
                 ~class_name:(snd class_name)
                 ~first_using_parent_or_trait:prev_parent
-                ~second_using_trait:(pos, parent) )
+                ~second_using_trait:(parent_pos, parent_class) )
         in
         (* Let's keep the previous parent class element, whose parent is a class,
            to detect additional such errors if there are more diamonds. *)
@@ -2186,7 +2262,7 @@ let check_trait_diamonds
                     class_name
                     (member_name, class_elt)
                     ~first_using_trait:prev_parent
-                    ~second_using_trait:parent)
+                    ~second_using_trait:parent_class)
               :: err)
         in
         let elts =
@@ -2203,7 +2279,7 @@ let check_trait_diamonds
             class_name
             (member_name, class_elt)
             ~first_using_trait:prev_parent
-            ~second_using_trait:parent;
+            ~second_using_trait:parent_class;
           ((default_parent_class_elt (), elts), None)
         end else if
               not
@@ -2219,7 +2295,7 @@ let check_trait_diamonds
             class_name
             (member_name, class_elt)
             ~first_using_trait:prev_parent
-            ~second_using_trait:parent;
+            ~second_using_trait:parent_class;
           ((default_parent_class_elt (), elts), None)
         end else
           ((default_parent_class_elt (), elts), None)
@@ -2275,7 +2351,7 @@ let check_no_conflicting_inherited_concrete_constants
           definitions =
             List.map
               ~f:(fun { class_const; parent } ->
-                let parent_name = Cls.name (snd parent) in
+                let parent_name = Cls.name parent.ParentClassElt.parent_class in
                 let via =
                   if String.(parent_name <> class_const.cc_origin) then
                     Some (Utils.strip_ns parent_name)
@@ -2318,7 +2394,7 @@ let check_no_conflicting_inherited_concrete_typeconsts
           definitions =
             List.map
               ~f:(fun { typeconst; parent } ->
-                let parent_name = Cls.name (snd parent) in
+                let parent_name = Cls.name parent.ParentClassElt.parent_class in
                 let via =
                   if String.(parent_name <> typeconst.ttc_origin) then
                     Some (Utils.strip_ns parent_name)
@@ -2332,14 +2408,16 @@ let check_no_conflicting_inherited_concrete_typeconsts
     Typing_error_utils.add_typing_error ~env (Typing_error.primary err)
 
 let union_parent_constants parents : ParentClassConstSet.t MemberNameMap.t =
-  let get_declared_consts ((parent_name_pos, _), parent_tparaml, parent_class) =
+  let get_declared_consts
+      ((parent_pos, _), parent_type, parent_tparaml, parent_class) :
+      ParentClassElt.parent * _ =
     let psubst = Inst.make_subst (Cls.tparams parent_class) parent_tparaml in
     let consts =
       Cls.consts parent_class
       |> List.filter ~f:(fun (_, cc) -> not cc.cc_synthesized)
       |> List.map ~f:(Tuple.T2.map_snd ~f:(Inst.instantiate_cc psubst))
     in
-    ((parent_name_pos, parent_class), consts)
+    ({ ParentClassElt.parent_pos; parent_class; parent_type }, consts)
   in
   parents
   |> List.map ~f:get_declared_consts
@@ -2358,7 +2436,9 @@ let union_parent_constants parents : ParentClassConstSet.t MemberNameMap.t =
            consts)
 
 let union_parent_typeconsts env parents : ParentTypeConstSet.t MemberNameMap.t =
-  let get_declared_consts ((parent_name_pos, _), parent_tparaml, parent_class) =
+  let get_declared_consts
+      ((parent_pos, _), parent_type, parent_tparaml, parent_class) :
+      ParentClassElt.parent * _ =
     let psubst = Inst.make_subst (Cls.tparams parent_class) parent_tparaml in
     let typeconsts =
       Cls.typeconsts parent_class
@@ -2368,7 +2448,7 @@ let union_parent_typeconsts env parents : ParentTypeConstSet.t MemberNameMap.t =
       |> List.map
            ~f:(Tuple.T2.map_snd ~f:(Inst.instantiate_typeconst_type psubst))
     in
-    ((parent_name_pos, parent_class), typeconsts)
+    ({ ParentClassElt.parent_pos; parent_class; parent_type }, typeconsts)
   in
   parents
   |> List.map ~f:get_declared_consts
@@ -2390,7 +2470,7 @@ let check_class_extends_parents_constants
     env
     implements
     (class_ast, class_)
-    (parents : ((Pos.t * string) * decl_ty list * Cls.t) list)
+    (parents : ((Pos.t * string) * decl_ty * decl_ty list * Cls.t) list)
     (on_error : Pos.t * string -> Typing_error.Reasons_callback.t) =
   let constants : ParentClassConstSet.t MemberNameMap.t =
     union_parent_constants parents
@@ -2411,7 +2491,8 @@ let check_class_extends_parents_constants
       ParentClassConstSet.fold
         (fun ParentClassConst.
                {
-                 parent = (parent_pos, parent_class);
+                 parent =
+                   { ParentClassElt.parent_pos; parent_class; parent_type = _ };
                  class_const = parent_const;
                }
              env ->
@@ -2453,7 +2534,7 @@ let check_class_extends_parents_typeconsts
     env
     implements
     (class_ast, class_)
-    (parents : ((Pos.t * string) * decl_ty list * Cls.t) list)
+    (parents : ((Pos.t * string) * decl_ty * decl_ty list * Cls.t) list)
     (on_error : Pos.t * string -> Typing_error.Reasons_callback.t) =
   let typeconsts : ParentTypeConstSet.t MemberNameMap.t =
     union_parent_typeconsts env parents
@@ -2472,7 +2553,8 @@ let check_class_extends_parents_typeconsts
       ParentTypeConstSet.fold
         (fun ParentTypeConst.
                {
-                 parent = (parent_pos, parent_class);
+                 parent =
+                   { ParentClassElt.parent_pos; parent_class; parent_type = _ };
                  typeconst = parent_tconst;
                }
              env ->
@@ -2645,7 +2727,7 @@ let union_parent_members env class_ast parents :
 let check_class_extends_parents_members
     env
     (class_ast, class_)
-    (parents : ((Pos.t * string) * decl_ty list * Cls.t) list)
+    (parents : ((Pos.t * string) * decl_ty * decl_ty list * Cls.t) list)
     (on_error : Pos.t * string -> Typing_error.Reasons_callback.t) =
   let members : ParentClassEltSet.t MemberNameMap.t MemberKindMap.t =
     union_parent_members env class_ast parents
@@ -2803,12 +2885,15 @@ let check_implements_extends_uses
     let destructure_type ((p, _h), ty) =
       let (_, (_, name), tparaml) = TUtils.unwrap_class_type ty in
       Env.get_class env name |> Decl_entry.to_option >>| fun class_ ->
-      ((p, name), tparaml, class_)
+      ((p, name), ty, tparaml, class_)
     in
     List.filter_map parents ~f:destructure_type
   in
   let env =
-    List.fold ~init:env parents ~f:(fun env ((parent_name, _, _) as parent) ->
+    List.fold
+      ~init:env
+      parents
+      ~f:(fun env ((parent_name, _, _, _) as parent) ->
         check_class_extends_parent_constructors
           env
           parent

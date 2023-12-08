@@ -6,6 +6,12 @@ Some members in class `D` are incompatible with those declared in type `C` (Typi
   Some members in class `D` are incompatible with those declared in type `C`
   File "trait_method_lookup_02.php", line 18, characters 26-28:
   The method `foo` is not compatible with the overridden method
+  File "trait_method_lookup_02.php", line 18, characters 26-28:
+  Method `foo` has type `(function(): mixed)` in `D` and comes from ancestor or trait `T`
+  File "trait_method_lookup_02.php", line 14, characters 35-37:
+  But is has type `(function(): num)` in parent `C`
+  File "trait_method_lookup_02.php", line 18, characters 26-28:
+  Type `(function(): mixed)` is not a subtype of `(function(): num)`
   File "trait_method_lookup_02.php", line 14, characters 42-44:
   Expected `num`
   File "trait_method_lookup_02.php", line 18, characters 33-37:

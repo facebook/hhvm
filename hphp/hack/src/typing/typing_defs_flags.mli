@@ -18,6 +18,20 @@
 module Fun : sig
   type t [@@deriving eq, hash, ord, show]
 
+  type record = {
+    return_disposable: bool;
+    async: bool;
+    generator: bool;
+    fun_kind: Ast_defs.fun_kind;
+    instantiated_targs: bool;
+    is_function_pointer: bool;
+    returns_readonly: bool;
+    readonly_this: bool;
+    support_dynamic_type: bool;
+    is_memoized: bool;
+    variadic: bool;
+  }
+
   val return_disposable : t -> bool
 
   val set_return_disposable : bool -> t -> t
@@ -71,10 +85,19 @@ module Fun : sig
     t
 
   val default : t
+
+  val as_record : t -> record
 end
 
 module FunParam : sig
   type t [@@deriving eq, hash, ord, show]
+
+  type record = {
+    accept_disposable: bool;
+    inout: bool;
+    has_default: bool;
+    readonly: bool;
+  }
 
   val accept_disposable : t -> bool
 
@@ -98,6 +121,8 @@ module FunParam : sig
     has_default:bool ->
     readonly:bool ->
     t
+
+  val as_record : t -> record
 end
 
 module ClassElt : sig

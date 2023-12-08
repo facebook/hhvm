@@ -2,12 +2,24 @@ File "multiple_traits_require_implements.php", line 20, characters 7-8:
 Some members in class `T` are incompatible with those declared in type `T1` (Typing[4341])
   File "multiple_traits_require_implements.php", line 8, characters 19-21:
   The method `foo` is not compatible with the overridden method
+  File "multiple_traits_require_implements.php", line 8, characters 19-21:
+  Method `foo` has type `(function(string $_): void)` in `T` and comes from ancestor or trait `J`
+  File "multiple_traits_require_implements.php", line 4, characters 19-21:
+  But is has type `(function(int $_): void)` in parent `T1` and comes from ancestor or trait `I`
+  File "multiple_traits_require_implements.php", line 8, characters 19-21:
+  Type `(function(string $_): void)` is not a subtype of `(function(int $_): void)`
   File "multiple_traits_require_implements.php", line 8, characters 23-28:
   Expected `string`
   File "multiple_traits_require_implements.php", line 4, characters 23-25:
   But got `int`
 File "multiple_traits_require_implements.php", line 31, characters 19-21:
 The method `foo` is not compatible with the overridden method (Typing[4341])
+  File "multiple_traits_require_implements.php", line 31, characters 19-21:
+  Method `foo` has type `(function(int $_): void)` in `A`
+  File "multiple_traits_require_implements.php", line 8, characters 19-21:
+  But is has type `(function(string $_): void)` in parent `J`
+  File "multiple_traits_require_implements.php", line 31, characters 19-21:
+  Type `(function(int $_): void)` is not a subtype of `(function(string $_): void)`
   File "multiple_traits_require_implements.php", line 31, characters 23-25:
   Expected `int`
   File "multiple_traits_require_implements.php", line 8, characters 23-28:

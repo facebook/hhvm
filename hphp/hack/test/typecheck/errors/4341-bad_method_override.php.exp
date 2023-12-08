@@ -1,5 +1,11 @@
 File "4341-bad_method_override.php", line 9, characters 19-21:
 The method `foo` is not compatible with the overridden method (Typing[4341])
+  File "4341-bad_method_override.php", line 9, characters 19-21:
+  Method `foo` has type `(function(string $x): void)` in `B`
+  File "4341-bad_method_override.php", line 5, characters 19-21:
+  But is has type `(function(int $x): void)` in parent `A`
+  File "4341-bad_method_override.php", line 9, characters 19-21:
+  Type `(function(string $x): void)` is not a subtype of `(function(int $x): void)`
   File "4341-bad_method_override.php", line 9, characters 23-28:
   Expected `string`
   File "4341-bad_method_override.php", line 5, characters 23-25:

@@ -4,6 +4,12 @@ This member visibility is: `private` (Typing[4113])
   `public` was expected
 File "trait_priv_extends2.php", line 15, characters 20-20:
 The method `f` is not compatible with the overridden method (Typing[4341])
+  File "trait_priv_extends2.php", line 15, characters 20-20:
+  Method `f` has type `(function(): string)` in `C`
+  File "trait_priv_extends2.php", line 5, characters 28-28:
+  But is has type `(function(): int)` in parent `T`
+  File "trait_priv_extends2.php", line 15, characters 20-20:
+  Type `(function(): string)` is not a subtype of `(function(): int)`
   File "trait_priv_extends2.php", line 5, characters 33-35:
   Expected `int`
   File "trait_priv_extends2.php", line 15, characters 25-30:

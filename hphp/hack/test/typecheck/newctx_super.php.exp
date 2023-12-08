@@ -1,5 +1,11 @@
 File "newctx_super.php--file2.php", line 12, characters 19-19:
 The method `f` is not compatible with the overridden method (Typing[4341])
+  File "newctx_super.php--file2.php", line 12, characters 19-19:
+  Method `f` has type `(function()[MyContext]: void)` in `Bad`
+  File "newctx_super.php--file2.php", line 4, characters 19-19:
+  But is has type `(function()[HH\Contexts\defaults]: void)` in parent `Foo`
+  File "newctx_super.php--file2.php", line 12, characters 19-19:
+  Type `(function()[MyContext]: void)` is not a subtype of `(function()[HH\Contexts\defaults]: void)`
   File "newctx_super.php--file2.php", line 4, characters 23-30:
   Expected a function that requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
   File "newctx_super.php--file2.php", line 12, characters 23-31:

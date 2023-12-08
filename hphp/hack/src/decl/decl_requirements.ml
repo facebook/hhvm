@@ -18,12 +18,8 @@ let make_substitution class_type class_parameters =
 
 (* Accumulate requirements so that we can successfully check the bodies
  * of trait methods / check that classes satisfy these requirements *)
-let flatten_parent_class_reqs
-    env
-    class_cache
-    shallow_class
-    (req_ancestors, req_ancestors_extends)
-    parent_ty =
+let flatten_parent_class_reqs env class_cache shallow_class acc parent_ty =
+  let (req_ancestors, req_ancestors_extends) = acc in
   let (_, (parent_pos, parent_name), parent_params) =
     Decl_utils.unwrap_class_type parent_ty
   in
@@ -64,7 +60,8 @@ let flatten_parent_class_reqs
     | Ast_defs.Cenum_class _ ->
       assert false)
 
-let declared_class_req env class_cache (requirements, req_extends) req_ty =
+let declared_class_req env class_cache acc req_ty =
+  let (requirements, req_extends) = acc in
   let (_, (req_pos, req_name), _) = Decl_utils.unwrap_class_type req_ty in
   let req_type =
     Decl_env.get_class_and_add_dep
@@ -161,8 +158,7 @@ let naive_dedup req_extends =
       | _ -> Some (parent_pos, ty))
 
 let get_class_requirements env class_cache shallow_class =
-  let req_ancestors_extends = SSet.empty in
-  let acc = ([], req_ancestors_extends) in
+  let acc = ([], SSet.empty) in
   let acc =
     List.fold_left
       ~f:(declared_class_req env class_cache)

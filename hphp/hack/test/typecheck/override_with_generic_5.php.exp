@@ -1,23 +1,47 @@
 File "override_with_generic_5.php", line 52, characters 19-36:
 The method `numInContravar_Sub` is not compatible with the overridden method (Typing[4341])
+  File "override_with_generic_5.php", line 52, characters 19-36:
+  Method `numInContravar_Sub` has type `(function<TTi>(TTi $_): void where TTi as T::Ti)` in `B`
+  File "override_with_generic_5.php", line 17, characters 19-36:
+  But is has type `(function(num $t): void)` in parent `A`
+  File "override_with_generic_5.php", line 52, characters 19-36:
+  Type `(function<TTi>(TTi $_): void where TTi as T::Ti)` is not a subtype of `(function(num $t): void)`
   File "override_with_generic_5.php", line 52, characters 70-74:
   Expected `T::Ti`
   File "override_with_generic_5.php", line 17, characters 38-40:
   But got `num`
 File "override_with_generic_5.php", line 57, characters 19-35:
 The method `numInContravar_Eq` is not compatible with the overridden method (Typing[4341])
+  File "override_with_generic_5.php", line 57, characters 19-35:
+  Method `numInContravar_Eq` has type `(function<TTi>(TTi $_): void where TTi = T::Ti)` in `B`
+  File "override_with_generic_5.php", line 18, characters 19-35:
+  But is has type `(function(num $t): void)` in parent `A`
+  File "override_with_generic_5.php", line 57, characters 19-35:
+  Type `(function<TTi>(TTi $_): void where TTi = T::Ti)` is not a subtype of `(function(num $t): void)`
   File "override_with_generic_5.php", line 57, characters 68-72:
   Expected `T::Ti`
   File "override_with_generic_5.php", line 18, characters 37-39:
   But got `num`
 File "override_with_generic_5.php", line 62, characters 19-34:
 The method `numInInvar_Super` is not compatible with the overridden method (Typing[4341])
+  File "override_with_generic_5.php", line 62, characters 19-34:
+  Method `numInInvar_Super` has type `(function<TTi>(In<TTi> $_): void where TTi as T::Ti)` in `B`
+  File "override_with_generic_5.php", line 20, characters 19-34:
+  But is has type `(function(In<num> $_): void)` in parent `A`
+  File "override_with_generic_5.php", line 62, characters 19-34:
+  Type `(function<TTi>(In<TTi> $_): void where TTi as T::Ti)` is not a subtype of `(function(In<num> $_): void)`
   File "override_with_generic_5.php", line 62, characters 72-76:
   Expected `T::Ti`
   File "override_with_generic_5.php", line 20, characters 39-41:
   But got `num`
 File "override_with_generic_5.php", line 72, characters 19-31:
 The method `numInInvar_Eq` is not compatible with the overridden method (Typing[4341])
+  File "override_with_generic_5.php", line 72, characters 19-31:
+  Method `numInInvar_Eq` has type `(function<TTi>(In<TTi> $_): void where TTi = T::Ti)` in `B`
+  File "override_with_generic_5.php", line 22, characters 19-31:
+  But is has type `(function(In<num> $t): void)` in parent `A`
+  File "override_with_generic_5.php", line 72, characters 19-31:
+  Type `(function<TTi>(In<TTi> $_): void where TTi = T::Ti)` is not a subtype of `(function(In<num> $t): void)`
   File "override_with_generic_5.php", line 72, characters 68-72:
   Expected `T::Ti`
   File "override_with_generic_5.php", line 22, characters 36-38:

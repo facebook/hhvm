@@ -1,5 +1,11 @@
 File "match_param.php", line 14, characters 19-20:
 The method `do` is not compatible with the overridden method (Typing[4341])
+  File "match_param.php", line 14, characters 19-20:
+  Method `do` has type `(function(dynamic $x): mixed)` in `Bad`
+  File "match_param.php", line 4, characters 19-20:
+  But is has type `(function(mixed $x): mixed)` in parent `FunAsClass<mixed, mixed>`
+  File "match_param.php", line 14, characters 19-20:
+  Type `(function(dynamic $x): mixed)` is not a subtype of `(function(mixed $x): mixed)`
   File "match_param.php", line 14, characters 22-28:
   Expected `dynamic`
   File "match_param.php", line 4, characters 22-24:

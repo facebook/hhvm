@@ -37,7 +37,7 @@ exception Not_in_class
 
 let print_ty = Typing_print.full_strip_ns
 
-let print_decl_ty = Typing_print.full_strip_ns_decl
+let print_decl_ty = Typing_print.full_strip_ns_decl ~verbose_fun:false
 
 let print_error_ty = Typing_print.error
 

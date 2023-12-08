@@ -135,7 +135,14 @@ type decl_class_type = {
   dc_ancestors: decl_ty SMap.t;
   dc_support_dynamic_type: bool;
   dc_req_ancestors: requirement list;
+      (** All the `require extends` and `require implements`,
+          possibly inherited from interface or trait ancestors.
+          Does not include `require class` *)
   dc_req_ancestors_extends: SSet.t;
+      (** All the `require extends` and `require implements`,
+          possibly inherited from interface or trait ancestors,
+          plus some extends and other ancestors of these.
+          Does not include `require class` *)
   dc_req_class_ancestors: requirement list;
       (** dc_req_class_ancestors gathers all the `require class`
           requirements declared in ancestors.  Remark that `require class`

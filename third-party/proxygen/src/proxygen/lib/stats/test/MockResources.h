@@ -12,6 +12,7 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
+#include <proxygen/facebook/lib/statistics/ARLResourceStats.h>
 #include <proxygen/lib/stats/ResourceData.h>
 
 using namespace proxygen;

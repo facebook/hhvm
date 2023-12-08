@@ -2,6 +2,7 @@ HHVM_DEFINE_EXTENSION("hash"
   SOURCES
     ext_hash.cpp
     hash_adler32.cpp
+    hash_blake3.cpp
     hash_crc32.cpp
     hash_fnv1.cpp
     hash_furc.cpp
@@ -20,6 +21,7 @@ HHVM_DEFINE_EXTENSION("hash"
   HEADERS
     ext_hash.h
     hash_adler32.h
+    hash_blake3.h
     hash_crc32.h
     hash_engine.h
     hash_fnv1.h

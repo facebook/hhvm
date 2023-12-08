@@ -39,6 +39,7 @@ string(8) "7bf1105e"
 string(8) "%|{4246a382|82a34642}"
 string(8) "1fe6425d"
 string(64) "7b0142eafb4d0bed8265978281a1398099b1d727acf4c4b8158b407b1e8385b3"
+string(64) "88180fd3a551e8ee0acf8c3e5b909ed468a8023de085219dc2772e8123410398"
 bool(true)
 ==== test_hash_init ====
 string(32) "5c6ffbdd40d9556b73a21e63c3e0e904"

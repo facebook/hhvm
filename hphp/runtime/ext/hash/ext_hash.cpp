@@ -37,6 +37,7 @@
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/hash/hash_blake3.h"
+#include "hphp/runtime/ext/hash/hash_keyed_blake3.h"
 
 #include <algorithm>
 #include <memory>
@@ -64,66 +65,69 @@ using HashEnginePtr = std::shared_ptr<HashEngine>;
 
 struct HashEngineMapInitializer {
   HashEngineMapInitializer() {
-    HashEngines["md2"]        = HashEnginePtr(new hash_md2());
-    HashEngines["md4"]        = HashEnginePtr(new hash_md4());
-    HashEngines["md5"]        = HashEnginePtr(new hash_md5());
-    HashEngines["sha1"]       = HashEnginePtr(new hash_sha1());
-    HashEngines["sha224"]     = HashEnginePtr(new hash_sha224());
-    HashEngines["sha256"]     = HashEnginePtr(new hash_sha256());
-    HashEngines["sha384"]     = HashEnginePtr(new hash_sha384());
-    HashEngines["sha512"]     = HashEnginePtr(new hash_sha512());
-    HashEngines["ripemd128"]  = HashEnginePtr(new hash_ripemd128());
-    HashEngines["ripemd160"]  = HashEnginePtr(new hash_ripemd160());
-    HashEngines["ripemd256"]  = HashEnginePtr(new hash_ripemd256());
-    HashEngines["ripemd320"]  = HashEnginePtr(new hash_ripemd320());
-    HashEngines["whirlpool"]  = HashEnginePtr(new hash_whirlpool());
+    HashEngines["md2"]          = HashEnginePtr(new hash_md2());
+    HashEngines["md4"]          = HashEnginePtr(new hash_md4());
+    HashEngines["md5"]          = HashEnginePtr(new hash_md5());
+    HashEngines["sha1"]         = HashEnginePtr(new hash_sha1());
+    HashEngines["sha224"]       = HashEnginePtr(new hash_sha224());
+    HashEngines["sha256"]       = HashEnginePtr(new hash_sha256());
+    HashEngines["sha384"]       = HashEnginePtr(new hash_sha384());
+    HashEngines["sha512"]       = HashEnginePtr(new hash_sha512());
+    HashEngines["ripemd128"]    = HashEnginePtr(new hash_ripemd128());
+    HashEngines["ripemd160"]    = HashEnginePtr(new hash_ripemd160());
+    HashEngines["ripemd256"]    = HashEnginePtr(new hash_ripemd256());
+    HashEngines["ripemd320"]    = HashEnginePtr(new hash_ripemd320());
+    HashEngines["whirlpool"]    = HashEnginePtr(new hash_whirlpool());
 #ifdef HHVM_FACEBOOK
     // The original version of tiger got the endianness backwards
     // This fb-specific version remains for backward compatibility
     HashEngines["tiger128,3-fb"]
-                              = HashEnginePtr(new hash_tiger(true, 128, true));
+                                = HashEnginePtr(new hash_tiger(true, 128, true));
 #endif
-    HashEngines["tiger128,3"] = HashEnginePtr(new hash_tiger(true, 128));
-    HashEngines["tiger160,3"] = HashEnginePtr(new hash_tiger(true, 160));
-    HashEngines["tiger192,3"] = HashEnginePtr(new hash_tiger(true, 192));
-    HashEngines["tiger128,4"] = HashEnginePtr(new hash_tiger(false, 128));
-    HashEngines["tiger160,4"] = HashEnginePtr(new hash_tiger(false, 160));
+    HashEngines["tiger128,3"]   = HashEnginePtr(new hash_tiger(true, 128));
+    HashEngines["tiger160,3"]   = HashEnginePtr(new hash_tiger(true, 160));
+    HashEngines["tiger192,3"]   = HashEnginePtr(new hash_tiger(true, 192));
+    HashEngines["tiger128,4"]   = HashEnginePtr(new hash_tiger(false, 128));
+    HashEngines["tiger160,4"]   = HashEnginePtr(new hash_tiger(false, 160));
     HashEngines["tiger192,4"] = HashEnginePtr(new hash_tiger(false, 192));
 
-    HashEngines["snefru"]     = HashEnginePtr(new hash_snefru());
-    HashEngines["gost"]       = HashEnginePtr(new hash_gost());
-    HashEngines["joaat"]      = HashEnginePtr(new hash_joaat());
+    HashEngines["snefru"]       = HashEnginePtr(new hash_snefru());
+    HashEngines["gost"]         = HashEnginePtr(new hash_gost());
+    HashEngines["joaat"]        = HashEnginePtr(new hash_joaat());
 #ifdef HHVM_FACEBOOK
-    HashEngines["adler32-fb"] = HashEnginePtr(new hash_adler32(true));
+    HashEngines["adler32-fb"]   = HashEnginePtr(new hash_adler32(true));
 #endif
-    HashEngines["adler32"]    = HashEnginePtr(new hash_adler32(false));
-    HashEngines["crc32"]      = HashEnginePtr(new hash_crc32(Crc32Variant::Crc32));
-    HashEngines["crc32b"]     = HashEnginePtr(new hash_crc32(Crc32Variant::Crc32B));
-    HashEngines["crc32c"]     = HashEnginePtr(new hash_crc32(Crc32Variant::Crc32C));
-    HashEngines["haval128,3"] = HashEnginePtr(new hash_haval(3,128));
-    HashEngines["haval160,3"] = HashEnginePtr(new hash_haval(3,160));
-    HashEngines["haval192,3"] = HashEnginePtr(new hash_haval(3,192));
-    HashEngines["haval224,3"] = HashEnginePtr(new hash_haval(3,224));
-    HashEngines["haval256,3"] = HashEnginePtr(new hash_haval(3,256));
-    HashEngines["haval128,4"] = HashEnginePtr(new hash_haval(4,128));
-    HashEngines["haval160,4"] = HashEnginePtr(new hash_haval(4,160));
-    HashEngines["haval192,4"] = HashEnginePtr(new hash_haval(4,192));
-    HashEngines["haval224,4"] = HashEnginePtr(new hash_haval(4,224));
-    HashEngines["haval256,4"] = HashEnginePtr(new hash_haval(4,256));
-    HashEngines["haval128,5"] = HashEnginePtr(new hash_haval(5,128));
-    HashEngines["haval160,5"] = HashEnginePtr(new hash_haval(5,160));
-    HashEngines["haval192,5"] = HashEnginePtr(new hash_haval(5,192));
-    HashEngines["haval224,5"] = HashEnginePtr(new hash_haval(5,224));
-    HashEngines["haval256,5"] = HashEnginePtr(new hash_haval(5,256));
-    HashEngines["fnv132"]     = HashEnginePtr(new hash_fnv132(false));
-    HashEngines["fnv1a32"]    = HashEnginePtr(new hash_fnv132(true));
-    HashEngines["fnv164"]     = HashEnginePtr(new hash_fnv164(false));
-    HashEngines["fnv1a64"]    = HashEnginePtr(new hash_fnv164(true));
-    HashEngines["sha3-224"]   = HashEnginePtr(new hash_keccak( 448, 28));
-    HashEngines["sha3-256"]   = HashEnginePtr(new hash_keccak( 512, 32));
-    HashEngines["sha3-384"]   = HashEnginePtr(new hash_keccak( 768, 48));
-    HashEngines["sha3-512"]   = HashEnginePtr(new hash_keccak(1024, 64));
-    HashEngines["blake3"]     = HashEnginePtr(new hash_blake3());
+    HashEngines["adler32"]      = HashEnginePtr(new hash_adler32(false));
+    HashEngines["crc32"]        = HashEnginePtr(new hash_crc32(Crc32Variant::Crc32));
+    HashEngines["crc32b"]       = HashEnginePtr(new hash_crc32(Crc32Variant::Crc32B));
+    HashEngines["crc32c"]       = HashEnginePtr(new hash_crc32(Crc32Variant::Crc32C));
+    HashEngines["haval128,3"]   = HashEnginePtr(new hash_haval(3,128));
+    HashEngines["haval160,3"]   = HashEnginePtr(new hash_haval(3,160));
+    HashEngines["haval192,3"]   = HashEnginePtr(new hash_haval(3,192));
+    HashEngines["haval224,3"]   = HashEnginePtr(new hash_haval(3,224));
+    HashEngines["haval256,3"]   = HashEnginePtr(new hash_haval(3,256));
+    HashEngines["haval128,4"]   = HashEnginePtr(new hash_haval(4,128));
+    HashEngines["haval160,4"]   = HashEnginePtr(new hash_haval(4,160));
+    HashEngines["haval192,4"]   = HashEnginePtr(new hash_haval(4,192));
+    HashEngines["haval224,4"]   = HashEnginePtr(new hash_haval(4,224));
+    HashEngines["haval256,4"]   = HashEnginePtr(new hash_haval(4,256));
+    HashEngines["haval128,5"]   = HashEnginePtr(new hash_haval(5,128));
+    HashEngines["haval160,5"]   = HashEnginePtr(new hash_haval(5,160));
+    HashEngines["haval192,5"]   = HashEnginePtr(new hash_haval(5,192));
+    HashEngines["haval224,5"]   = HashEnginePtr(new hash_haval(5,224));
+    HashEngines["haval256,5"]   = HashEnginePtr(new hash_haval(5,256));
+    HashEngines["fnv132"]       = HashEnginePtr(new hash_fnv132(false));
+    HashEngines["fnv1a32"]      = HashEnginePtr(new hash_fnv132(true));
+    HashEngines["fnv164"]       = HashEnginePtr(new hash_fnv164(false));
+    HashEngines["fnv1a64"]      = HashEnginePtr(new hash_fnv164(true));
+    HashEngines["sha3-224"]     = HashEnginePtr(new hash_keccak( 448, 28));
+    HashEngines["sha3-256"]     = HashEnginePtr(new hash_keccak( 512, 32));
+    HashEngines["sha3-384"]     = HashEnginePtr(new hash_keccak( 768, 48));
+    HashEngines["sha3-512"]     = HashEnginePtr(new hash_keccak(1024, 64));
+    HashEngines["blake3"]       = HashEnginePtr(new hash_blake3());
+  #ifdef HHVM_FACEBOOK
+    HashEngines["keyed-blake3"] = HashEnginePtr(new hash_keyed_blake3());
+  #endif
   }
 };
 

@@ -15,32 +15,18 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/hash/hash_blake3.h"
-#include <blake3.h>
+#pragma once
+
+#include "hphp/runtime/ext/hash/hash_engine.h"
 
 namespace HPHP {
 
-typedef struct {
-  blake3_hasher hasher;
-} PHP_BLAKE3_CTX;
+struct hash_keyed_blake3 final : HashEngine {
+  hash_keyed_blake3();
 
-hash_blake3::hash_blake3() : HashEngine(BLAKE3_KEY_LEN, BLAKE3_BLOCK_LEN, sizeof(PHP_BLAKE3_CTX)) {}
-
-void hash_blake3::hash_init(void* context_) {
-  PHP_BLAKE3_CTX* context = (PHP_BLAKE3_CTX*)context_;
-  blake3_hasher_init(&context->hasher);
-}
-
-void hash_blake3::hash_update(void *context_, const unsigned char *input,
-                             unsigned int len) {
-  PHP_BLAKE3_CTX* context = (PHP_BLAKE3_CTX*)context_;
-  blake3_hasher_update(&context->hasher, input, len);
-}
-
-void hash_blake3::hash_final(unsigned char* output, void* context_) {
-  PHP_BLAKE3_CTX* context = (PHP_BLAKE3_CTX*)context_;
-  blake3_hasher_finalize(&context->hasher, output, BLAKE3_OUT_LEN);
-}
-
-
+  void hash_init(void *context) override;
+  void hash_update(void *context, const unsigned char *buf,
+                           unsigned int count) override;
+  void hash_final(unsigned char *digest, void *context) override;
+};
 } // namespace HPHP

@@ -164,6 +164,16 @@ inline bool StringData::same(const StringData* s) const {
 }
 
 bool isame_log(const StringData*, const StringData*);
+int istrcmp_log(const char* s1, const char* s2);
+
+inline int istrcmp(const char* s1, const char* s2) {
+  auto order = strcmp(s1, s2);
+  if (order == 0) return 0;
+  if (RO::EvalLogIsameCollisions >= 2) return order;
+  order = strcasecmp(s1, s2);
+  if (order != 0) return order;
+  return RO::EvalLogIsameCollisions != 1 || istrcmp_log(s1, s2);
+}
 
 inline bool StringData::isame(const StringData* s) const {
   assertx(s);

@@ -1780,9 +1780,7 @@ dependencies = [
  "hhbc_string_utils",
  "naming_special_names_rust",
  "oxidized_by_ref",
- "pretty_assertions",
  "serde",
- "serde_json",
 ]
 
 [[package]]

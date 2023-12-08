@@ -47,9 +47,7 @@ pub enum AttrValue {
     Int(String),
 }
 
-pub type StringSet = BTreeSet<String>;
 pub type Attributes = BTreeMap<String, Vec<AttrValue>>;
-pub type Methods = BTreeMap<String, MethodFacts>;
 pub type TypeFactsByName = BTreeMap<String, TypeFacts>;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
@@ -59,14 +57,14 @@ pub struct MethodFacts {
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, Default, Clone)]
 pub struct TypeFacts {
-    pub base_types: StringSet,
+    pub base_types: BTreeSet<String>,
     pub kind: TypeKind,
     pub attributes: Attributes,
     pub flags: Flags,
-    pub require_extends: StringSet,
-    pub require_implements: StringSet,
-    pub require_class: StringSet,
-    pub methods: Methods,
+    pub require_extends: BTreeSet<String>,
+    pub require_implements: BTreeSet<String>,
+    pub require_class: BTreeSet<String>,
+    pub methods: BTreeMap<String, MethodFacts>,
 }
 
 // Currently module facts are empty, but added for backward compatibility
@@ -86,7 +84,7 @@ pub struct Facts {
 
 impl Facts {
     pub fn from_decls(parsed_file: &ParsedFile<'_>) -> Facts {
-        let mut types = TypeFactsByName::new();
+        let mut types = Default::default();
         parsed_file.decls.classes().for_each(|(class_name, decl)| {
             let mut name = format(class_name);
             if !parsed_file.disable_xhp_element_mangling && decl.is_xhp {
@@ -95,14 +93,14 @@ impl Facts {
                     name = id.to_string();
                 }
             }
-            let type_fact = TypeFacts::of_class_decl(decl);
+            let type_fact = TypeFacts::from_class_decl(decl);
             add_or_update_classish_decl(name, type_fact, &mut types);
         });
         for (name, decl) in parsed_file.decls.typedefs().filter(|(_, decl)| {
             // Ignore context aliases
             !decl.is_ctx
         }) {
-            let type_fact = TypeFacts::of_typedef_decl(decl);
+            let type_fact = TypeFacts::from_typedef_decl(decl);
             add_or_update_classish_decl(format(name), type_fact, &mut types);
         }
 
@@ -190,7 +188,7 @@ impl Flag {
 }
 
 impl TypeFacts {
-    fn of_class_decl<'a>(decl: &'a ClassDecl<'a>) -> TypeFacts {
+    fn from_class_decl<'a>(decl: &'a ClassDecl<'a>) -> TypeFacts {
         let ClassDecl {
             kind,
             final_,
@@ -208,7 +206,7 @@ impl TypeFacts {
         } = decl;
 
         // Collect base types from uses, extends, and implements
-        let mut base_types = StringSet::new();
+        let mut base_types: BTreeSet<String> = Default::default();
         uses.iter().for_each(|ty| {
             base_types.insert(extract_type_name(ty));
         });
@@ -263,7 +261,7 @@ impl TypeFacts {
                     None
                 }
             })
-            .collect::<StringSet>();
+            .collect();
         let require_implements = req_implements
             .iter()
             .filter_map(|&ty| {
@@ -273,7 +271,7 @@ impl TypeFacts {
                     None
                 }
             })
-            .collect::<StringSet>();
+            .collect();
         let require_class = req_class
             .iter()
             .filter_map(|&ty| {
@@ -283,7 +281,7 @@ impl TypeFacts {
                     None
                 }
             })
-            .collect::<StringSet>();
+            .collect();
 
         // TODO(T101762617): modify the direct decl parser to
         // preserve the attribute params that facts expects
@@ -302,7 +300,7 @@ impl TypeFacts {
                     Some((format(m.name.1), MethodFacts { attributes }))
                 }
             })
-            .collect::<Methods>();
+            .collect();
 
         TypeFacts {
             base_types,
@@ -316,16 +314,11 @@ impl TypeFacts {
         }
     }
 
-    fn of_typedef_decl<'a>(decl: &'a TypedefDecl<'a>) -> TypeFacts {
+    fn from_typedef_decl<'a>(decl: &'a TypedefDecl<'a>) -> TypeFacts {
         TypeFacts {
-            base_types: StringSet::new(),
             kind: TypeKind::TypeAlias,
             attributes: to_facts_attributes(decl.attributes),
-            require_extends: StringSet::new(),
-            flags: Flags::default(),
-            require_implements: StringSet::new(),
-            require_class: StringSet::new(),
-            methods: BTreeMap::new(),
+            ..Default::default()
         }
     }
 }
@@ -421,27 +414,9 @@ pub struct FactsSha1 {
     pub sha1sum: String,
 }
 
-// inline tests (so stuff can remain hidden) - compiled only when tests are run (no overhead)
-
 #[cfg(test)]
 mod tests {
-    use pretty_assertions::assert_eq;
-
-    use super::*; // make assert_eq print huge diffs more human-readable
-
-    #[test]
-    fn string_set_to_json() {
-        let mut ss = StringSet::new();
-        ss.insert("foo".into());
-        ss.insert("bar".into());
-        assert_eq!(
-            r#"[
-  "bar",
-  "foo"
-]"#,
-            serde_json::to_string_pretty(&ss).unwrap(),
-        );
-    }
+    use super::*;
 
     #[test]
     fn test_flags() {

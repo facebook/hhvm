@@ -157,21 +157,9 @@ mod tests {
                     map.insert("C".into(), Vec::new());
                     map
                 },
-                require_extends: {
-                    let mut set = facts::StringSet::new();
-                    set.insert("extends1".into());
-                    set
-                },
-                require_implements: {
-                    let mut set = facts::StringSet::new();
-                    set.insert("impl1".into());
-                    set
-                },
-                require_class: {
-                    let mut set = facts::StringSet::new();
-                    set.insert("class1".into());
-                    set
-                },
+                require_extends: BTreeSet::from_iter(vec!["extends1".into()]),
+                require_implements: BTreeSet::from_iter(vec!["iter1".into()]),
+                require_class: BTreeSet::from_iter(vec!["class1".into()]),
                 ..Default::default()
             },
         );

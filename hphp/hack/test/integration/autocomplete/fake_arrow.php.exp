@@ -1,102 +1,102 @@
 C\pop_back
   INSERT C\pop_back(
   INSERT )
-  (function(inout ~T $container): ~?Tv)
+  (function(inout ~T $container)[HH\Contexts\write_props]: ~?Tv)
 SORT TEXT: none
 C\pop_backx
   INSERT C\pop_backx(
   INSERT )
-  (function(inout ~T $container): ~Tv)
+  (function(inout ~T $container)[HH\Contexts\write_props]: ~Tv)
 SORT TEXT: none
 C\pop_front
   INSERT C\pop_front(
   INSERT )
-  (function(inout ~T $container): ~?Tv)
+  (function(inout ~T $container)[HH\Contexts\write_props]: ~?Tv)
 SORT TEXT: none
 C\pop_frontx
   INSERT C\pop_frontx(
   INSERT )
-  (function(inout ~T $container): ~Tv)
+  (function(inout ~T $container)[HH\Contexts\write_props]: ~Tv)
 SORT TEXT: none
 Str\capitalize
   INSERT Str\capitalize(
   INSERT )
-  (function(string $string): string)
+  (function(string $string)[]: string)
 SORT TEXT: none
 Str\capitalize_words
   INSERT Str\capitalize_words(
   INSERT )
-  (function(string $string, ?string $delimiters = _): string)
+  (function(string $string, ?string $delimiters = _)[]: string)
 SORT TEXT: none
 Str\chunk
   INSERT Str\chunk(
   INSERT )
-  (function(string $string, int $chunk_size = _): ~vec<string>)
+  (function(string $string, int $chunk_size = _)[]: ~vec<string>)
 SORT TEXT: none
 Str\compare
   INSERT Str\compare(
   INSERT , ${1:\$string2})
-  (function(string $string1, string $string2): int)
+  (function(string $string1, string $string2)[]: int)
 SORT TEXT: none
 Str\compare_ci
   INSERT Str\compare_ci(
   INSERT , ${1:\$string2})
-  (function(string $string1, string $string2): int)
+  (function(string $string1, string $string2)[]: int)
 SORT TEXT: none
 Str\contains
   INSERT Str\contains(
   INSERT , ${1:\$needle})
-  (function(string $haystack, string $needle, int $offset = _): bool)
+  (function(string $haystack, string $needle, int $offset = _)[]: bool)
 SORT TEXT: none
 Str\contains_ci
   INSERT Str\contains_ci(
   INSERT , ${1:\$needle})
-  (function(string $haystack, string $needle, int $offset = _): bool)
+  (function(string $haystack, string $needle, int $offset = _)[]: bool)
 SORT TEXT: none
 Str\ends_with
   INSERT Str\ends_with(
   INSERT , ${1:\$suffix})
-  (function(string $string, string $suffix): bool)
+  (function(string $string, string $suffix)[]: bool)
 SORT TEXT: none
 Str\ends_with_ci
   INSERT Str\ends_with_ci(
   INSERT , ${1:\$suffix})
-  (function(string $string, string $suffix): bool)
+  (function(string $string, string $suffix)[]: bool)
 SORT TEXT: none
 Str\is_empty
   INSERT Str\is_empty(
   INSERT )
-  (function(?string $string): bool)
+  (function(?string $string)[]: bool)
 SORT TEXT: none
 Str\length
   INSERT Str\length(
   INSERT )
-  (function(string $string): int)
+  (function(string $string)[]: int)
 SORT TEXT: none
 Str\lowercase
   INSERT Str\lowercase(
   INSERT )
-  (function(string $string): string)
+  (function(string $string)[]: string)
 SORT TEXT: none
 Str\pad_left
   INSERT Str\pad_left(
   INSERT , ${1:\$total_length})
-  (function(string $string, int $total_length, string $pad_string = _): string)
+  (function(string $string, int $total_length, string $pad_string = _)[]: string)
 SORT TEXT: none
 Str\pad_right
   INSERT Str\pad_right(
   INSERT , ${1:\$total_length})
-  (function(string $string, int $total_length, string $pad_string = _): string)
+  (function(string $string, int $total_length, string $pad_string = _)[]: string)
 SORT TEXT: none
 Str\repeat
   INSERT Str\repeat(
   INSERT , ${1:\$multiplier})
-  (function(string $string, int $multiplier): string)
+  (function(string $string, int $multiplier)[]: string)
 SORT TEXT: none
 Str\replace
   INSERT Str\replace(
   INSERT , ${1:\$needle}, ${2:\$replacement})
-  (function(string $haystack, string $needle, string $replacement): string)
+  (function(string $haystack, string $needle, string $replacement)[]: string)
 SORT TEXT: none
 Str\replace_ci
   INSERT Str\replace_ci(
@@ -106,7 +106,7 @@ SORT TEXT: none
 Str\replace_every
   INSERT Str\replace_every(
   INSERT , ${1:\$replacements})
-  (function(string $haystack, KeyedContainer<string, string> $replacements): string)
+  (function(string $haystack, KeyedContainer<string, string> $replacements)[]: string)
 SORT TEXT: none
 Str\replace_every_ci
   INSERT Str\replace_every_ci(
@@ -126,80 +126,80 @@ SORT TEXT: none
 Str\reverse
   INSERT Str\reverse(
   INSERT )
-  (function(string $string): string)
+  (function(string $string)[]: string)
 SORT TEXT: none
 Str\search
   INSERT Str\search(
   INSERT , ${1:\$needle})
-  (function(string $haystack, string $needle, int $offset = _): ?int)
+  (function(string $haystack, string $needle, int $offset = _)[]: ?int)
 SORT TEXT: none
 Str\search_ci
   INSERT Str\search_ci(
   INSERT , ${1:\$needle})
-  (function(string $haystack, string $needle, int $offset = _): ?int)
+  (function(string $haystack, string $needle, int $offset = _)[]: ?int)
 SORT TEXT: none
 Str\search_last
   INSERT Str\search_last(
   INSERT , ${1:\$needle})
-  (function(string $haystack, string $needle, int $offset = _): ?int)
+  (function(string $haystack, string $needle, int $offset = _)[]: ?int)
 SORT TEXT: none
 Str\slice
   INSERT Str\slice(
   INSERT , ${1:\$offset})
-  (function(string $string, int $offset, ?int $length = _): string)
+  (function(string $string, int $offset, ?int $length = _)[]: string)
 SORT TEXT: none
 Str\splice
   INSERT Str\splice(
   INSERT , ${1:\$replacement}, ${2:\$offset})
-  (function(string $string, string $replacement, int $offset, ?int $length = _): string)
+  (function(string $string, string $replacement, int $offset, ?int $length = _)[]: string)
 SORT TEXT: none
 Str\split
   INSERT Str\split(
   INSERT , ${1:\$delimiter})
-  (function(string $string, string $delimiter, ?int $limit = _): ~vec<string>)
+  (function(string $string, string $delimiter, ?int $limit = _)[]: ~vec<string>)
 SORT TEXT: none
 Str\starts_with
   INSERT Str\starts_with(
   INSERT , ${1:\$prefix})
-  (function(string $string, string $prefix): bool)
+  (function(string $string, string $prefix)[]: bool)
 SORT TEXT: none
 Str\starts_with_ci
   INSERT Str\starts_with_ci(
   INSERT , ${1:\$prefix})
-  (function(string $string, string $prefix): bool)
+  (function(string $string, string $prefix)[]: bool)
 SORT TEXT: none
 Str\strip_prefix
   INSERT Str\strip_prefix(
   INSERT , ${1:\$prefix})
-  (function(string $string, string $prefix): string)
+  (function(string $string, string $prefix)[]: string)
 SORT TEXT: none
 Str\strip_suffix
   INSERT Str\strip_suffix(
   INSERT , ${1:\$suffix})
-  (function(string $string, string $suffix): string)
+  (function(string $string, string $suffix)[]: string)
 SORT TEXT: none
 Str\to_int
   INSERT Str\to_int(
   INSERT )
-  (function(string $string): ?int)
+  (function(string $string)[]: ?int)
 SORT TEXT: none
 Str\trim
   INSERT Str\trim(
   INSERT )
-  (function(string $string, ?string $char_mask = _): string)
+  (function(string $string, ?string $char_mask = _)[]: string)
 SORT TEXT: none
 Str\trim_left
   INSERT Str\trim_left(
   INSERT )
-  (function(string $string, ?string $char_mask = _): string)
+  (function(string $string, ?string $char_mask = _)[]: string)
 SORT TEXT: none
 Str\trim_right
   INSERT Str\trim_right(
   INSERT )
-  (function(string $string, ?string $char_mask = _): string)
+  (function(string $string, ?string $char_mask = _)[]: string)
 SORT TEXT: none
 Str\uppercase
   INSERT Str\uppercase(
   INSERT )
-  (function(string $string): string)
+  (function(string $string)[]: string)
 SORT TEXT: none

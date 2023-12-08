@@ -186,15 +186,19 @@ module Full = struct
     in
     (fuel, d)
 
-  let delimited_list ~fuel sep left_delimiter f l right_delimiter :
-      Fuel.t * Doc.t =
+  let delimited_list
+      ~fuel sep ~skip_brackets_for_singleton left_delimiter f l right_delimiter
+      : Fuel.t * Doc.t =
     let (fuel, doc) = list_sep ~fuel sep f l in
     let doc =
-      Span
-        [
-          text left_delimiter;
-          WithRule (Rule.Parental, Concat [doc; text right_delimiter]);
-        ]
+      if skip_brackets_for_singleton && Int.equal 1 (List.length l) then
+        doc
+      else
+        Span
+          [
+            text left_delimiter;
+            WithRule (Rule.Parental, Concat [doc; text right_delimiter]);
+          ]
     in
     (fuel, doc)
 
@@ -204,7 +208,14 @@ module Full = struct
       (printer : fuel:Fuel.t -> 'a -> Fuel.t * Doc.t)
       (items : 'a list)
       rd : Fuel.t * Doc.t =
-    delimited_list ~fuel comma_sep ld printer items rd
+    delimited_list
+      ~fuel
+      ~skip_brackets_for_singleton:false
+      comma_sep
+      ld
+      printer
+      items
+      rd
 
   let shape_map
       ~fuel
@@ -487,7 +498,14 @@ module Full = struct
       in
       (fuel, text (refined_const_kind_str rc ^ " " ^ name ^ " ") ^^ rc_doc)
     in
-    delimited_list ~fuel semi_sep "{ " f_rc (SMap.bindings cr_consts) " }"
+    delimited_list
+      ~fuel
+      ~skip_brackets_for_singleton:false
+      semi_sep
+      "{ "
+      f_rc
+      (SMap.bindings cr_consts)
+      " }"
 
   let refinements ~fuel k e =
     match e with
@@ -621,6 +639,45 @@ module Full = struct
       | _ -> false)
     | _ -> false
 
+  let fun_implicit_params
+      ty
+      default_capability
+      ~fuel
+      to_doc
+      st
+      penv
+      (tparams : 'a ty tparam list)
+      ({ capability } : 'a ty fun_implicit_params) =
+    let (fuel, capabilities) =
+      match capability with
+      | CapDefaults _ -> (fuel, None)
+      | CapTy t ->
+        if ty_equal ~normalize_lists:true t default_capability then
+          (fuel, None)
+        else (
+          match get_node t with
+          | Tintersection [] -> (fuel, Some [])
+          | Toption t -> begin
+            match deref t with
+            | (_, Tnonnull) -> (fuel, Some [])
+            | _ ->
+              let (fuel, cap) = ty ~fuel to_doc st penv t in
+              (fuel, Some [cap])
+          end
+          | _ ->
+            let (fuel, cap) = ty ~fuel to_doc st penv t in
+            (fuel, Some [cap])
+        )
+    in
+    let (ctx_names, _) = split_desugared_ctx_tparams tparams in
+    let ctx_names = List.map ctx_names ~f:(fun name -> text name) in
+
+    match (capabilities, ctx_names) with
+    | (None, []) -> (fuel, text ":")
+    | (None, ctx_names) -> (fuel, Concat [text "["; Concat ctx_names; text "]:"])
+    | (Some capabilities, ctx_names) ->
+      (fuel, Concat [text "["; Concat (capabilities @ ctx_names); text "]:"])
+
   (* Prints a decl_ty. If there isn't enough fuel, the type is omitted. Each
      recursive call to print a type depletes the fuel by one. *)
   let rec decl_ty ~fuel : _ -> _ -> _ -> decl_ty -> Fuel.t * Doc.t =
@@ -681,16 +738,23 @@ module Full = struct
       let (fuel, tys_doc) = ttuple ~fuel k tyl in
       let union_doc = Concat [text "|"; tys_doc] in
       (fuel, union_doc)
+    | Tintersection [] -> (fuel, text "mixed")
     | Tintersection tyl ->
-      let (fuel, tys_doc) = ttuple ~fuel k tyl in
-      let intersection_doc = Concat [text "&"; tys_doc] in
-      (fuel, intersection_doc)
+      delimited_list
+        ~fuel
+        ~skip_brackets_for_singleton:true
+        (Space ^^ text "&" ^^ Space)
+        "("
+        k
+        tyl
+        ")"
     | Tshape s -> tshape ~fuel k to_doc penv s is_open_mixed_decl
 
-  (* TODO (T86471586): Display capabilities that are decls for functions *)
-  and fun_decl_implicit_params ~fuel _to_doc _st _penv _tparams _implicit_param
-      =
-    (fuel, text ":")
+  and fun_decl_implicit_params ~fuel =
+    fun_implicit_params
+      decl_ty
+      (Typing_make_type.default_capability_decl Pos_or_decl.none)
+      ~fuel
 
   (* For a given type parameter, construct a list of its constraints *)
   let get_constraints_on_tparam penv tparam =
@@ -896,7 +960,14 @@ module Full = struct
           else
             k ~fuel ty
         | (false, false, _ :: _) ->
-          delimited_list ~fuel (Space ^^ text "|" ^^ Space) "(" k nonnull ")"
+          delimited_list
+            ~fuel
+            ~skip_brackets_for_singleton:true
+            (Space ^^ text "|" ^^ Space)
+            "("
+            k
+            nonnull
+            ")"
         (* Type only is null *)
         | (false, true, []) ->
           let doc =
@@ -956,65 +1027,65 @@ module Full = struct
           (fuel, doc)
         | (true, false, _ :: _) ->
           let (fuel, tys_doc) =
-            delimited_list ~fuel (Space ^^ text "|" ^^ Space) "(" k nonnull ")"
+            delimited_list
+              ~fuel
+              ~skip_brackets_for_singleton:true
+              (Space ^^ text "|" ^^ Space)
+              "("
+              k
+              nonnull
+              ")"
           in
           let doc = Concat [text "~"; tys_doc] in
           (fuel, doc)
         | (false, true, _ :: _) ->
           let (fuel, tys_doc) =
-            delimited_list ~fuel (Space ^^ text "|" ^^ Space) "(" k nonnull ")"
+            delimited_list
+              ~fuel
+              ~skip_brackets_for_singleton:true
+              (Space ^^ text "|" ^^ Space)
+              "("
+              k
+              nonnull
+              ")"
           in
           let doc = Concat [text "?"; tys_doc] in
           (fuel, doc)
         | (true, true, _ :: _) ->
           let (fuel, tys_doc) =
-            delimited_list ~fuel (Space ^^ text "|" ^^ Space) "(" k nonnull ")"
+            delimited_list
+              ~fuel
+              ~skip_brackets_for_singleton:true
+              (Space ^^ text "|" ^^ Space)
+              "("
+              k
+              nonnull
+              ")"
           in
           let doc = Concat [text "~"; text "?"; tys_doc] in
           (fuel, doc)
       end
     | Tintersection [] -> (fuel, text "mixed")
     | Tintersection tyl ->
-      delimited_list ~fuel (Space ^^ text "&" ^^ Space) "(" k tyl ")"
+      delimited_list
+        ~fuel
+        ~skip_brackets_for_singleton:true
+        (Space ^^ text "&" ^^ Space)
+        "("
+        k
+        tyl
+        ")"
     | Tshape s -> tshape ~fuel k to_doc env s is_open_mixed
     | Taccess (root_ty, id) ->
       let (fuel, root_ty_doc) = k ~fuel root_ty in
       let access_doc = Concat [root_ty_doc; text "::"; to_doc (snd id)] in
       (fuel, access_doc)
 
-  and fun_locl_implicit_params ~fuel to_doc st penv tparams { capability } =
-    let (fuel, capabilities) =
-      match capability with
-      | CapDefaults _ -> (fuel, None)
-      | CapTy t ->
-        let default_capability : locl_ty =
-          Typing_make_type.default_capability Pos_or_decl.none
-        in
-        if ty_equal ~normalize_lists:true t default_capability then
-          (fuel, None)
-        else (
-          match get_node t with
-          | Tintersection [] -> (fuel, Some [])
-          | Toption t -> begin
-            match deref t with
-            | (_, Tnonnull) -> (fuel, Some [])
-            | _ ->
-              let (fuel, cap) = locl_ty ~fuel to_doc st penv t in
-              (fuel, Some [cap])
-          end
-          | _ ->
-            let (fuel, cap) = locl_ty ~fuel to_doc st penv t in
-            (fuel, Some [cap])
-        )
-    in
-    let (ctx_names, _) = split_desugared_ctx_tparams tparams in
-    let ctx_names = List.map ctx_names ~f:(fun name -> text name) in
-
-    match (capabilities, ctx_names) with
-    | (None, []) -> (fuel, text ":")
-    | (None, ctx_names) -> (fuel, Concat [text "["; Concat ctx_names; text "]:"])
-    | (Some capabilities, ctx_names) ->
-      (fuel, Concat [text "["; Concat (capabilities @ ctx_names); text "]:"])
+  and fun_locl_implicit_params ~fuel =
+    fun_implicit_params
+      locl_ty
+      (Typing_make_type.default_capability Pos_or_decl.none)
+      ~fuel
 
   let rec constraint_type_ ~fuel to_doc st penv x =
     let k ~fuel lty = locl_ty ~fuel to_doc st penv lty in

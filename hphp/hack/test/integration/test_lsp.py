@@ -1629,7 +1629,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         {
                             "label": "isValid",
                             "kind": 2,
-                            "detail": "function(mixed $value): bool",
+                            "detail": "function(mixed $value)[]: bool",
                             "sortText": "isValid",
                             "insertTextFormat": 2,
                             "textEdit": {
@@ -1641,7 +1641,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                             "data": {
                                 "fullname": "isValid",
-                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
+                                "filename": "/tmp/catg/tmpykiuvuh4/hhi_7a9178f/BuiltinEnum.hhi",
                                 "line": 51,
                                 "char": 34,
                                 "base_class": "\\Elsa",
@@ -1650,7 +1650,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         {
                             "label": "getValues",
                             "kind": 2,
-                            "detail": "function(): dict<string, Elsa>",
+                            "detail": "function()[]: dict<string, Elsa>",
                             "sortText": "getValues",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1662,7 +1662,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                             "data": {
                                 "fullname": "getValues",
-                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
+                                "filename": "/tmp/catg/tmpykiuvuh4/hhi_7a9178f/BuiltinEnum.hhi",
                                 "line": 34,
                                 "char": 34,
                                 "base_class": "\\Elsa",
@@ -1671,7 +1671,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         {
                             "label": "getNames",
                             "kind": 2,
-                            "detail": "function(): dict<Elsa, string>",
+                            "detail": "function()[]: dict<Elsa, string>",
                             "sortText": "getNames",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1683,7 +1683,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                             "data": {
                                 "fullname": "getNames",
-                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
+                                "filename": "/tmp/catg/tmpykiuvuh4/hhi_7a9178f/BuiltinEnum.hhi",
                                 "line": 43,
                                 "char": 34,
                                 "base_class": "\\Elsa",
@@ -1692,7 +1692,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         {
                             "label": "coerce",
                             "kind": 2,
-                            "detail": "function(mixed $value): ?Elsa",
+                            "detail": "function(mixed $value)[]: ?Elsa",
                             "sortText": "coerce",
                             "insertTextFormat": 2,
                             "textEdit": {
@@ -1704,7 +1704,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                             "data": {
                                 "fullname": "coerce",
-                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
+                                "filename": "/tmp/catg/tmpykiuvuh4/hhi_7a9178f/BuiltinEnum.hhi",
                                 "line": 58,
                                 "char": 34,
                                 "base_class": "\\Elsa",
@@ -1713,7 +1713,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         {
                             "label": "assertAll",
                             "kind": 2,
-                            "detail": "function(Traversable<mixed> $values): Container<Elsa>",
+                            "detail": "function(Traversable<mixed> $values)[]: Container<Elsa>",
                             "sortText": "assertAll",
                             "insertTextFormat": 2,
                             "textEdit": {
@@ -1725,7 +1725,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                             "data": {
                                 "fullname": "assertAll",
-                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
+                                "filename": "/tmp/catg/tmpykiuvuh4/hhi_7a9178f/BuiltinEnum.hhi",
                                 "line": 72,
                                 "char": 34,
                                 "base_class": "\\Elsa",
@@ -1734,7 +1734,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         {
                             "label": "assert",
                             "kind": 2,
-                            "detail": "function(mixed $value): Elsa",
+                            "detail": "function(mixed $value)[]: Elsa",
                             "sortText": "assert",
                             "insertTextFormat": 2,
                             "textEdit": {
@@ -1746,7 +1746,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                             "data": {
                                 "fullname": "assert",
-                                "filename": "/tmp/cleansed_hhi_path/BuiltinEnum.hhi",
+                                "filename": "/tmp/catg/tmpykiuvuh4/hhi_7a9178f/BuiltinEnum.hhi",
                                 "line": 65,
                                 "char": 34,
                                 "base_class": "\\Elsa",

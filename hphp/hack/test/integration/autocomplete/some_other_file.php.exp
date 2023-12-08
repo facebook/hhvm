@@ -12,13 +12,13 @@ FIRST_NAME
 SORT TEXT: none
 valueOf
   INSERT valueOf(${1:\$label})
-  function(HH\EnumClass\Label<TEnum, TType> $label): ~HH\MemberOf<TEnum, TType>
+  function(HH\EnumClass\Label<TEnum, TType> $label)[HH\Contexts\write_props]: ~HH\MemberOf<TEnum, TType>
 SORT TEXT: none
 nameOf
   INSERT nameOf(${1:\$label})
-  function(HH\EnumClass\Label<this, TType> $label): string
+  function(HH\EnumClass\Label<this, TType> $label)[]: string
 SORT TEXT: none
 getValues
   INSERT getValues()
-  function(): ~dict<string, HH\MemberOf<SomeEnumClass, ~mixed>>
+  function()[HH\Contexts\write_props]: ~dict<string, HH\MemberOf<SomeEnumClass, ~mixed>>
 SORT TEXT: none

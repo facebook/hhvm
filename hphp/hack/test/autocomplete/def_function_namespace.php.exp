@@ -16,19 +16,19 @@ fb_enable_code_coverage
 SORT TEXT: none
 fb_fbid_in_oid_range
   INSERT fb_fbid_in_oid_range(${1:\$fbid})
-  (function(mixed $fbid): bool)
+  (function(mixed $fbid)[HH\Contexts\leak_safe]: bool)
 SORT TEXT: none
 fb_fbid_in_rid_range
   INSERT fb_fbid_in_rid_range(${1:\$fbid})
-  (function(mixed $fbid): bool)
+  (function(mixed $fbid)[HH\Contexts\leak_safe]: bool)
 SORT TEXT: none
 fb_fbid_in_uid_range
   INSERT fb_fbid_in_uid_range(${1:\$fbid})
-  (function(mixed $fbid): bool)
+  (function(mixed $fbid)[HH\Contexts\leak_safe]: bool)
 SORT TEXT: none
 fb_fbid_is_valid
   INSERT fb_fbid_is_valid(${1:\$fbid})
-  (function(mixed $fbid): bool)
+  (function(mixed $fbid)[]: bool)
 SORT TEXT: none
 fb_folly_varint_decode
   INSERT fb_folly_varint_decode(${1:\$encoded}, ${2:\$size})
@@ -64,11 +64,11 @@ fb_get_code_coverage
 SORT TEXT: none
 fb_get_enum_names
   INSERT fb_get_enum_names(${1:\$class}, ${2:\$recurse})
-  (function(string $class, bool $recurse): ~dict<arraykey, mixed>)
+  (function(string $class, bool $recurse)[]: ~dict<arraykey, mixed>)
 SORT TEXT: none
 fb_get_enum_values
   INSERT fb_get_enum_values(${1:\$class}, ${2:\$recurse})
-  (function(string $class, bool $recurse): ~dict<arraykey, mixed>)
+  (function(string $class, bool $recurse)[]: ~dict<arraykey, mixed>)
 SORT TEXT: none
 fb_get_hash_and_shard
   INSERT fb_get_hash_and_shard(${1:\$tohash}, ${2:\$type})
@@ -92,7 +92,7 @@ fb_get_sandbox_owners
 SORT TEXT: none
 fb_id_to_db
   INSERT fb_id_to_db(${1:\$fbid})
-  (function(mixed $fbid): mixed)
+  (function(mixed $fbid)[HH\Contexts\leak_safe]: mixed)
 SORT TEXT: none
 fb_init_scribe_extension
   INSERT fb_init_scribe_extension()
@@ -136,7 +136,7 @@ fb_scribe_offer_message
 SORT TEXT: none
 fb_serialize
   INSERT fb_serialize(${1:\$thing})
-  (function(HH\FIXME\MISSING_PARAM_TYPE $thing, int $options = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+  (function(HH\FIXME\MISSING_PARAM_TYPE $thing, int $options = _)[]: ~HH\FIXME\MISSING_RETURN_TYPE)
 SORT TEXT: none
 fb_set_exit_callback
   INSERT fb_set_exit_callback(${1:\$function})
@@ -156,11 +156,11 @@ fb_unserialize
 SORT TEXT: none
 fb_utf8_strlen
   INSERT fb_utf8_strlen(${1:\$input})
-  (function(string $input): ~HH\FIXME\MISSING_RETURN_TYPE)
+  (function(string $input)[]: ~HH\FIXME\MISSING_RETURN_TYPE)
 SORT TEXT: none
 fb_utf8_substr
   INSERT fb_utf8_substr(${1:\$str}, ${2:\$start})
-  (function(string $str, int $start, int $length = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+  (function(string $str, int $start, int $length = _)[]: ~HH\FIXME\MISSING_RETURN_TYPE)
 SORT TEXT: none
 fb_utf8ize
   INSERT fb_utf8ize(${1:\$input})
@@ -256,7 +256,7 @@ filter_has_var
 SORT TEXT: none
 filter_id
   INSERT filter_id(${1:\$name})
-  (function(string $name): ~HH\FIXME\MISSING_RETURN_TYPE)
+  (function(string $name)[]: ~HH\FIXME\MISSING_RETURN_TYPE)
 SORT TEXT: none
 filter_input
   INSERT filter_input(${1:\$type}, ${2:\$variable_name})
@@ -268,15 +268,15 @@ filter_input_array
 SORT TEXT: none
 filter_list
   INSERT filter_list()
-  (function(): ~vec<string>)
+  (function()[]: ~vec<string>)
 SORT TEXT: none
 filter_var
   INSERT filter_var(${1:\$value})
-  (function(mixed $value, int $filter = _, mixed $options = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+  (function(mixed $value, int $filter = _, mixed $options = _)[]: ~HH\FIXME\MISSING_RETURN_TYPE)
 SORT TEXT: none
 filter_var_array
   INSERT filter_var_array(${1:\$data})
-  (function(Container<mixed> $data, mixed $definition = _, bool $add_empty = _): ~HH\FIXME\MISSING_RETURN_TYPE)
+  (function(Container<mixed> $data, mixed $definition = _, bool $add_empty = _)[]: ~HH\FIXME\MISSING_RETURN_TYPE)
 SORT TEXT: none
 finfo
   INSERT finfo
@@ -308,7 +308,7 @@ flatbuffer_encode
 SORT TEXT: none
 floatval
   INSERT floatval(${1:\$v})
-  (function(HH\FIXME\MISSING_PARAM_TYPE $v): float)
+  (function(HH\FIXME\MISSING_PARAM_TYPE $v)[]: float)
 SORT TEXT: none
 flock
   INSERT flock(${1:\$handle}, ${2:\$operation}, ${3:\$wouldblock})
@@ -316,7 +316,7 @@ flock
 SORT TEXT: none
 floor
   INSERT floor(${1:\$value})
-  (function(HH\FIXME\MISSING_PARAM_TYPE $value): float)
+  (function(HH\FIXME\MISSING_PARAM_TYPE $value)[]: float)
 SORT TEXT: none
 flush
   INSERT flush()
@@ -324,7 +324,7 @@ flush
 SORT TEXT: none
 fmod
   INSERT fmod(${1:\$x}, ${2:\$y})
-  (function(float $x, float $y): float)
+  (function(float $x, float $y)[]: float)
 SORT TEXT: none
 fnmatch
   INSERT fnmatch(${1:\$pattern}, ${2:\$filename})
@@ -384,15 +384,15 @@ ftruncate
 SORT TEXT: none
 function_exists
   INSERT function_exists(${1:\$function_name})
-  (function(string $function_name, bool $autoload = _): bool)
+  (function(string $function_name, bool $autoload = _)[]: bool)
 SORT TEXT: none
 furchash_hphp_ext
   INSERT furchash_hphp_ext(${1:\$key}, ${2:\$len}, ${3:\$nPart})
-  (function(string $key, int $len, int $nPart): ~HH\FIXME\MISSING_RETURN_TYPE)
+  (function(string $key, int $len, int $nPart)[]: ~HH\FIXME\MISSING_RETURN_TYPE)
 SORT TEXT: none
 furchash_hphp_ext_supported
   INSERT furchash_hphp_ext_supported()
-  (function(): ~HH\FIXME\MISSING_RETURN_TYPE)
+  (function()[]: ~HH\FIXME\MISSING_RETURN_TYPE)
 SORT TEXT: none
 fwrite
   INSERT fwrite(${1:\$handle}, ${2:\$data})

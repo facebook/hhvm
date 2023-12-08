@@ -234,4 +234,18 @@ let default_capability p : locl_ty =
         class_type r io [];
       ]
 
+let default_capability_decl p : decl_ty =
+  let r = Reason.Rdefault_capability p in
+  intersection
+    r
+    SN.Capabilities.
+      [
+        apply r (p, writeProperty) [];
+        apply r (p, accessGlobals) [];
+        apply r (p, rxLocal) [];
+        apply r (p, systemLocal) [];
+        apply r (p, implicitPolicyLocal) [];
+        apply r (p, io) [];
+      ]
+
 let default_capability_unsafe p : locl_ty = mixed (Reason.Rhint p)

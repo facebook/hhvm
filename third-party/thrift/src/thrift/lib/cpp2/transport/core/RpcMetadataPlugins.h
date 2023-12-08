@@ -36,7 +36,12 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
 THRIFT_PLUGGABLE_FUNC_DECLARE(const std::string&, getFrameworkMetadataHttpKey);
 
 THRIFT_PLUGGABLE_FUNC_DECLARE(
-    void, ingestFrameworkMetadataFromResponse, std::unique_ptr<folly::IOBuf>&&);
+    bool,
+    ingestFrameworkMetadataOnResponseHeader,
+    folly::F14NodeMap<std::string, std::string>&);
+
+THRIFT_PLUGGABLE_FUNC_DECLARE(
+    void, ingestFrameworkMetadataOnResponse, std::unique_ptr<folly::IOBuf>&&);
 
 } // namespace detail
 } // namespace thrift

@@ -179,8 +179,12 @@ class RequestClientCallbackWrapper
     auto tHeader = std::make_unique<transport::THeader>();
     tHeader->setClientType(THRIFT_ROCKET_CLIENT_TYPE);
     tHeader->fds = std::move(firstResponse.fds.dcheckReceivedOrEmpty());
-    if (auto tfmr = firstResponse.metadata.frameworkMetadata_ref()) {
-      detail::ingestFrameworkMetadataFromResponse(std::move(*tfmr));
+    auto otherMetadata = firstResponse.metadata.otherMetadata_ref();
+    if (!otherMetadata ||
+        !detail::ingestFrameworkMetadataOnResponseHeader(*otherMetadata)) {
+      if (auto tfmr = firstResponse.metadata.frameworkMetadata_ref()) {
+        detail::ingestFrameworkMetadataOnResponse(std::move(*tfmr));
+      }
     }
     detail::fillTHeaderFromResponseRpcMetadata(
         firstResponse.metadata, *tHeader);

@@ -33,7 +33,12 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
 }
 
 THRIFT_PLUGGABLE_FUNC_REGISTER(
-    void,
-    ingestFrameworkMetadataFromResponse,
-    std::unique_ptr<folly::IOBuf>&&) {}
+    bool,
+    ingestFrameworkMetadataOnResponseHeader,
+    folly::F14NodeMap<std::string, std::string>&) {
+  return false;
+}
+
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    void, ingestFrameworkMetadataOnResponse, std::unique_ptr<folly::IOBuf>&&) {}
 } // namespace apache::thrift::detail

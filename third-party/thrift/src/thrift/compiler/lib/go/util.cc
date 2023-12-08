@@ -78,15 +78,12 @@ static const std::set<std::string> go_reserved_words = []() {
 }();
 
 // common_initialisms from https://github.com/golang/lint/blob/master/lint.go
-//
-// TODO: add "ACL" back into this list after migration. Legacy generator is not
-// aware of this initialism - we had to take it out for compatibility.
 static const std::set<std::string> common_initialisms = {
-    "API",  "ASCII", "CPU",  "CSS",  "DNS",  "EOF", "GUID", "HTML",
-    "HTTP", "HTTPS", "ID",   "IP",   "JSON", "LHS", "QPS",  "RAM",
-    "RHS",  "RPC",   "SLA",  "SMTP", "SQL",  "SSH", "TCP",  "TLS",
-    "TTL",  "UDP",   "UI",   "UID",  "URI",  "URL", "UTF8", "UUID",
-    "VM",   "XML",   "XMPP", "XSRF", "XSS",
+    "ACL",  "API",  "ASCII", "CPU",  "CSS",  "DNS",  "EOF", "GUID",
+    "HTML", "HTTP", "HTTPS", "ID",   "IP",   "JSON", "LHS", "QPS",
+    "RAM",  "RHS",  "RPC",   "SLA",  "SMTP", "SQL",  "SSH", "TCP",
+    "TLS",  "TTL",  "UDP",   "UI",   "UID",  "URI",  "URL", "UTF8",
+    "UUID", "VM",   "XML",   "XMPP", "XSRF", "XSS",
 };
 
 void codegen_data::set_current_program(const t_program* program) {

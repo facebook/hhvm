@@ -116,18 +116,6 @@
 #include <zstd.h>
 
 #include "dictionary_data.h"
-
-// Some OCaml utility functions (introduced only in 4.12.0)
-//
-// TODO(hverr): Remove these when we move to 4.12.0
-static value hh_shared_caml_alloc_some(value v) {
-  CAMLparam1(v);
-  value some = caml_alloc_small(1, 0);
-  Store_field(some, 0, v);
-  CAMLreturn(some);
-}
-#  define Val_none Val_int(0)
-
 #include "hh_assert.h"
 
 #define UNUSED(x) \
@@ -956,13 +944,11 @@ CAMLprim value hh_shared_init(
   value num_workers_val
 ) {
   CAMLparam3(config_val, shm_dir_val, num_workers_val);
-  CAMLlocal4(
+  CAMLlocal5(
     config_global_size_val,
     config_heap_size_val,
     config_hash_table_pow_val,
-    config_shm_use_sharded_hashtbl
-  );
-  CAMLlocal1(
+    config_shm_use_sharded_hashtbl,
     config_shm_cache_size
   );
 
@@ -1937,8 +1923,8 @@ static CAMLprim value hh_deserialize(heap_entry_t *elt) {
 /*****************************************************************************/
 CAMLprim value hh_get_and_deserialize(value key) {
   CAMLparam1(key);
-  raise_if_should_exit();
   CAMLlocal2(deserialized_value, result);
+  raise_if_should_exit();
   if (shm_use_sharded_hashtbl != 0) {
     CAMLreturn(shmffi_get_and_deserialize(get_hash(key)));
   }
@@ -1948,7 +1934,7 @@ CAMLprim value hh_get_and_deserialize(value key) {
     CAMLreturn(Val_none);
   }
   deserialized_value = hh_deserialize(hashtbl[slot].addr);
-  result = hh_shared_caml_alloc_some(deserialized_value);
+  result = caml_alloc_some(deserialized_value);
   CAMLreturn(result);
 }
 
@@ -1958,11 +1944,11 @@ CAMLprim value hh_get_and_deserialize(value key) {
 /*****************************************************************************/
 CAMLprim value hh_get_raw(value key) {
   CAMLparam1(key);
+  CAMLlocal2(result, bytes);
   if (shm_use_sharded_hashtbl != 0) {
     CAMLreturn(shmffi_get_raw(get_hash(key)));
   }
   raise_if_should_exit();
-  CAMLlocal2(result, bytes);
 
   unsigned int slot = find_slot(key);
   if (!hh_is_slot_taken_for_key(slot, key)) {
@@ -1974,7 +1960,7 @@ CAMLprim value hh_get_raw(value key) {
   char *data = (char *)elt;
   bytes = caml_alloc_string(size);
   memcpy(Bytes_val(bytes), data, size);
-  result = hh_shared_caml_alloc_some(bytes);
+  result = caml_alloc_some(bytes);
   CAMLreturn(result);
 }
 

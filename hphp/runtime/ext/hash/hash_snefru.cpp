@@ -21,14 +21,14 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef struct {
+struct PhpSnefruCtx {
   unsigned int state[16];
   unsigned int count[2];
   unsigned char length;
   unsigned char buffer[32];
-} PHP_SNEFRU_CTX;
+};
 
-hash_snefru::hash_snefru() : HashEngine(32, 32, sizeof(PHP_SNEFRU_CTX)) {
+hash_snefru::hash_snefru() : HashEngine(32, 32, sizeof(PhpSnefruCtx)) {
 }
 
 #define round(L, C, N, SB)  \
@@ -112,7 +112,7 @@ static inline void Snefru(unsigned int input[16]) {
   input[7] ^= B08;
 }
 
-static inline void SnefruTransform(PHP_SNEFRU_CTX *context,
+static inline void SnefruTransform(PhpSnefruCtx *context,
                                    const unsigned char input[32]) {
   int i, j;
 
@@ -126,7 +126,7 @@ static inline void SnefruTransform(PHP_SNEFRU_CTX *context,
 }
 
 void hash_snefru::hash_init(void *context_) {
-  PHP_SNEFRU_CTX *context = (PHP_SNEFRU_CTX*)context_;
+  PhpSnefruCtx *context = (PhpSnefruCtx*)context_;
   memset(context, 0, sizeof(*context));
 }
 
@@ -134,7 +134,7 @@ static const unsigned int MAX32 = 0xffffffffLU;
 
 void hash_snefru::hash_update(void *context_, const unsigned char *input,
                               unsigned int len) {
-  PHP_SNEFRU_CTX *context = (PHP_SNEFRU_CTX*)context_;
+  PhpSnefruCtx *context = (PhpSnefruCtx*)context_;
   if ((MAX32 - context->count[1]) < (len * 8)) {
     context->count[0]++;
     context->count[1] = MAX32 - context->count[1];
@@ -166,7 +166,7 @@ void hash_snefru::hash_update(void *context_, const unsigned char *input,
 }
 
 void hash_snefru::hash_final(unsigned char *digest, void *context_) {
-  PHP_SNEFRU_CTX *context = (PHP_SNEFRU_CTX*)context_;
+  PhpSnefruCtx *context = (PhpSnefruCtx*)context_;
   unsigned int i, j;
 
   if (context->length) {

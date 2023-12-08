@@ -20,47 +20,47 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef struct {
+struct PhpSha1Ctx {
   unsigned int state[5];      /* state (ABCD) */
   unsigned int count[2];      /* number of bits, modulo 2^64 */
   unsigned char buffer[64];   /* input buffer */
-} PHP_SHA1_CTX;
+};
 
-hash_sha1::hash_sha1() : HashEngine(20, 64, sizeof(PHP_SHA1_CTX)) {
+hash_sha1::hash_sha1() : HashEngine(20, 64, sizeof(PhpSha1Ctx)) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef struct {
+struct PhpSha256Ctx {
   unsigned int state[8];      /* state */
   unsigned int count[2];      /* number of bits, modulo 2^64 */
   unsigned char buffer[64];   /* input buffer */
-} PHP_SHA256_CTX;
+};
 
 hash_sha256::hash_sha256(int size /*= 32 */) :
-             HashEngine(size, 64, sizeof(PHP_SHA256_CTX)) {
+             HashEngine(size, 64, sizeof(PhpSha256Ctx)) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef struct {
+struct PhpSha384Ctx {
   uint64_t state[8];     /* state */
   uint64_t count[2];     /* number of bits, modulo 2^128 */
   unsigned char buffer[128];  /* input buffer */
-} PHP_SHA384_CTX;
+};
 
-hash_sha384::hash_sha384() : HashEngine(48, 128, sizeof(PHP_SHA384_CTX)) {
+hash_sha384::hash_sha384() : HashEngine(48, 128, sizeof(PhpSha384Ctx)) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef struct {
+struct PhpSha512Ctx {
   uint64_t state[8];     /* state */
   uint64_t count[2];     /* number of bits, modulo 2^128 */
   unsigned char buffer[128];  /* input buffer */
-} PHP_SHA512_CTX;
+};
 
-hash_sha512::hash_sha512() : HashEngine(64, 128, sizeof(PHP_SHA512_CTX)) {
+hash_sha512::hash_sha512() : HashEngine(64, 128, sizeof(PhpSha512Ctx)) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -150,7 +150,7 @@ static void SHADecode32(unsigned int *output, const unsigned char *input,
  * SHA1 initialization. Begins an SHA1 operation, writing a new context.
  */
 void hash_sha1::hash_init(void *context_) {
-  PHP_SHA1_CTX * context = (PHP_SHA1_CTX*)context_;
+  PhpSha1Ctx * context = (PhpSha1Ctx*)context_;
   context->count[0] = context->count[1] = 0;
   /* Load magic initialization constants.
    */
@@ -276,7 +276,7 @@ static void SHA1Transform(unsigned int state[5],
  */
 void hash_sha1::hash_update(void *context_, const unsigned char *input,
                             unsigned int inputLen) {
-  PHP_SHA1_CTX *context = (PHP_SHA1_CTX*)context_;
+  PhpSha1Ctx *context = (PhpSha1Ctx*)context_;
   unsigned int i, index, partLen;
 
   /* Compute number of bytes mod 64 */
@@ -315,7 +315,7 @@ void hash_sha1::hash_update(void *context_, const unsigned char *input,
   the message digest and zeroizing the context.
 */
 void hash_sha1::hash_final(unsigned char *digest, void *context_) {
-  PHP_SHA1_CTX *context = (PHP_SHA1_CTX*)context_;
+  PhpSha1Ctx *context = (PhpSha1Ctx*)context_;
   unsigned char bits[8];
   unsigned int index, padLen;
 
@@ -379,7 +379,7 @@ static const unsigned int SHA256_K[64] = {
  * SHA256 initialization. Begins an SHA256 operation, writing a new context.
  */
 void hash_sha256::hash_init(void *context_) {
-  PHP_SHA256_CTX *context = (PHP_SHA256_CTX*)context_;
+  PhpSha256Ctx *context = (PhpSha256Ctx*)context_;
   context->count[0] = context->count[1] = 0;
   /* Load magic initialization constants.
    */
@@ -440,7 +440,7 @@ static void SHA256Transform(unsigned int state[8],
 */
 void hash_sha256::hash_update(void *context_, const unsigned char *input,
                               unsigned int inputLen) {
-  PHP_SHA256_CTX *context = (PHP_SHA256_CTX*)context_;
+  PhpSha256Ctx *context = (PhpSha256Ctx*)context_;
   unsigned int i, index, partLen;
 
   /* Compute number of bytes mod 64 */
@@ -481,7 +481,7 @@ void hash_sha256::hash_update(void *context_, const unsigned char *input,
   the message digest and zeroizing the context.
 */
 void hash_sha256::hash_final(unsigned char *digest, void *context_) {
-  PHP_SHA256_CTX *context = (PHP_SHA256_CTX*)context_;
+  PhpSha256Ctx *context = (PhpSha256Ctx*)context_;
   unsigned char bits[8];
   unsigned int index, padLen;
 
@@ -515,7 +515,7 @@ void hash_sha256::hash_final(unsigned char *digest, void *context_) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void hash_sha224::hash_init(void *context_) {
-  PHP_SHA256_CTX *context = (PHP_SHA256_CTX*)context_;
+  PhpSha256Ctx *context = (PhpSha256Ctx*)context_;
   context->count[0] = context->count[1] = 0;
   /* Load magic initialization constants.
    */
@@ -617,7 +617,7 @@ static void SHADecode64(uint64_t *output, const unsigned char *input,
  * SHA384 initialization. Begins an SHA384 operation, writing a new context.
  */
 void hash_sha384::hash_init(void *context_) {
-  PHP_SHA384_CTX * context = (PHP_SHA384_CTX*)context_;
+  PhpSha384Ctx * context = (PhpSha384Ctx*)context_;
   context->count[0] = context->count[1] = 0;
   /* Load magic initialization constants.
    */
@@ -679,7 +679,7 @@ static void SHA512Transform(uint64_t state[8],
  */
 void hash_sha384::hash_update(void *context_, const unsigned char *input,
                               unsigned int inputLen) {
-  PHP_SHA384_CTX * context = (PHP_SHA384_CTX*)context_;
+  PhpSha384Ctx * context = (PhpSha384Ctx*)context_;
   unsigned int i, index, partLen;
 
   /* Compute number of bytes mod 128 */
@@ -720,7 +720,7 @@ void hash_sha384::hash_update(void *context_, const unsigned char *input,
   the message digest and zeroizing the context.
 */
 void hash_sha384::hash_final(unsigned char *digest, void *context_) {
-  PHP_SHA384_CTX * context = (PHP_SHA384_CTX*)context_;
+  PhpSha384Ctx * context = (PhpSha384Ctx*)context_;
   unsigned char bits[16];
   unsigned int index, padLen;
 
@@ -760,7 +760,7 @@ void hash_sha384::hash_final(unsigned char *digest, void *context_) {
 }
 
 void hash_sha512::hash_init(void *context_) {
-  PHP_SHA512_CTX * context = (PHP_SHA512_CTX*)context_;
+  PhpSha512Ctx * context = (PhpSha512Ctx*)context_;
   context->count[0] = context->count[1] = 0;
   /* Load magic initialization constants.
    */
@@ -781,7 +781,7 @@ void hash_sha512::hash_init(void *context_) {
  */
 void hash_sha512::hash_update(void *context_, const unsigned char *input,
                               unsigned int inputLen) {
-  PHP_SHA512_CTX * context = (PHP_SHA512_CTX*)context_;
+  PhpSha512Ctx * context = (PhpSha512Ctx*)context_;
   unsigned int i, index, partLen;
 
   /* Compute number of bytes mod 128 */
@@ -822,7 +822,7 @@ void hash_sha512::hash_update(void *context_, const unsigned char *input,
   the message digest and zeroizing the context.
  */
 void hash_sha512::hash_final(unsigned char *digest, void *context_) {
-  PHP_SHA512_CTX * context = (PHP_SHA512_CTX*)context_;
+  PhpSha512Ctx * context = (PhpSha512Ctx*)context_;
   unsigned char bits[16];
   unsigned int index, padLen;
 

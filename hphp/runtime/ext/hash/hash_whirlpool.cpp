@@ -20,7 +20,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef struct {
+struct PhpWhirlpoolCtx {
   uint64_t state[8];
   unsigned char bitlength[32];
   struct {
@@ -28,10 +28,10 @@ typedef struct {
     int bits;
     unsigned char data[64];
   } buffer;
-} PHP_WHIRLPOOL_CTX;
+};
 
 hash_whirlpool::hash_whirlpool() :
-  HashEngine(64, 64, sizeof(PHP_WHIRLPOOL_CTX)) {
+  HashEngine(64, 64, sizeof(PhpWhirlpoolCtx)) {
 };
 
 #define DIGESTBYTES 64
@@ -43,7 +43,7 @@ hash_whirlpool::hash_whirlpool() :
 #define LENGTHBYTES 32
 #define LENGTHBITS  (8*LENGTHBYTES) /* 256 */
 
-static void WhirlpoolTransform(PHP_WHIRLPOOL_CTX *context) {
+static void WhirlpoolTransform(PhpWhirlpoolCtx *context) {
   int i, r;
   uint64_t K[8];        /* the round key */
   uint64_t block[8];    /* mu(buffer) */
@@ -272,13 +272,13 @@ static void WhirlpoolTransform(PHP_WHIRLPOOL_CTX *context) {
 }
 
 void hash_whirlpool::hash_init(void *context_) {
-  PHP_WHIRLPOOL_CTX *context = (PHP_WHIRLPOOL_CTX*)context_;
+  PhpWhirlpoolCtx *context = (PhpWhirlpoolCtx*)context_;
   memset(context, 0, sizeof(*context));
 }
 
 void hash_whirlpool::hash_update(void *context_, const unsigned char *input,
                                  unsigned int len) {
-  PHP_WHIRLPOOL_CTX *context = (PHP_WHIRLPOOL_CTX*)context_;
+  PhpWhirlpoolCtx *context = (PhpWhirlpoolCtx*)context_;
 
   uint64_t sourceBits = len * 8;
   /* index of leftmost source unsigned char containing data (1 to 8 bits). */
@@ -386,7 +386,7 @@ void hash_whirlpool::hash_update(void *context_, const unsigned char *input,
 }
 
 void hash_whirlpool::hash_final(unsigned char *digest, void *context_) {
-  PHP_WHIRLPOOL_CTX *context = (PHP_WHIRLPOOL_CTX*)context_;
+  PhpWhirlpoolCtx *context = (PhpWhirlpoolCtx*)context_;
 
   int i;
   unsigned char *buffer      = context->buffer.data;

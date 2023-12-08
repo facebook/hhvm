@@ -20,23 +20,23 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef struct {
+struct PhpAdler32Ctx {
   unsigned int state;
-} PHP_ADLER32_CTX;
+};
 
 hash_adler32::hash_adler32(bool invert /*= false */) :
-  HashEngine(4, 4, sizeof(PHP_ADLER32_CTX)),
+  HashEngine(4, 4, sizeof(PhpAdler32Ctx)),
   m_invert(invert) {
 }
 
 void hash_adler32::hash_init(void *context) {
-  unsigned int &state = ((PHP_ADLER32_CTX *)context)->state;
+  unsigned int &state = ((PhpAdler32Ctx *)context)->state;
   state = 1;
 }
 
 void hash_adler32::hash_update(void *context, const unsigned char *buf,
                                unsigned int count) {
-  unsigned int &state = ((PHP_ADLER32_CTX *)context)->state;
+  unsigned int &state = ((PhpAdler32Ctx *)context)->state;
   unsigned int s[2];
   s[0] = state & 0xffff;
   s[1] = (state >> 16) & 0xffff;
@@ -48,7 +48,7 @@ void hash_adler32::hash_update(void *context, const unsigned char *buf,
 }
 
 void hash_adler32::hash_final(unsigned char *digest, void *context) {
-  unsigned int &state = ((PHP_ADLER32_CTX *)context)->state;
+  unsigned int &state = ((PhpAdler32Ctx *)context)->state;
 
   // This was a bug in PHP, see PHP bug #48284
   // We currently rely on the old behaviour

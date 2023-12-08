@@ -21,7 +21,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef struct {
+struct PhpTigerCtx {
   uint64_t state[3];
   uint64_t passed;
   unsigned char passes:1;
@@ -30,10 +30,10 @@ typedef struct {
     unsigned char buffer[64];
     uint64_t      buffer_u64[8];
   };
-} PHP_TIGER_CTX;
+};
 
 hash_tiger::hash_tiger(bool tiger3, int digest, bool invert /*= false */)
-  : HashEngine(digest / 8, 64, sizeof(PHP_TIGER_CTX)),
+  : HashEngine(digest / 8, 64, sizeof(PhpTigerCtx)),
     m_tiger3(tiger3), m_digest(digest), m_invert(invert) {
 }
 
@@ -126,7 +126,7 @@ hash_tiger::hash_tiger(bool tiger3, int digest, bool invert /*= false */)
     state[2] = c;                                                       \
   }
 
-static inline void TigerFinalize(PHP_TIGER_CTX *context) {
+static inline void TigerFinalize(PhpTigerCtx *context) {
   context->passed += (uint64_t) context->length << 3;
 
   context->buffer[context->length++] = 0x1;
@@ -148,7 +148,7 @@ static inline void TigerFinalize(PHP_TIGER_CTX *context) {
 }
 
 void hash_tiger::hash_init(void *context_) {
-  PHP_TIGER_CTX *context = (PHP_TIGER_CTX*)context_;
+  PhpTigerCtx *context = (PhpTigerCtx*)context_;
   memset(context, 0, sizeof(*context));
   if (!m_tiger3) {
     context->passes = 1;
@@ -160,7 +160,7 @@ void hash_tiger::hash_init(void *context_) {
 
 void hash_tiger::hash_update(void *context_, const unsigned char *input,
                              unsigned int len) {
-  PHP_TIGER_CTX *context = (PHP_TIGER_CTX*)context_;
+  PhpTigerCtx *context = (PhpTigerCtx*)context_;
 
   if (context->length + len < 64) {
     memcpy(&context->buffer[context->length], input, len);
@@ -188,7 +188,7 @@ void hash_tiger::hash_update(void *context_, const unsigned char *input,
 }
 
 void hash_tiger::hash_final(unsigned char *digest, void *context_) {
-  PHP_TIGER_CTX *context = (PHP_TIGER_CTX*)context_;
+  PhpTigerCtx *context = (PhpTigerCtx*)context_;
 
   TigerFinalize(context);
 

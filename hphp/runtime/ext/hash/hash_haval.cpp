@@ -20,7 +20,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef struct {
+struct PhpHavalCtx {
   unsigned int state[8];
   unsigned int count[2];
   unsigned char buffer[128];
@@ -28,7 +28,7 @@ typedef struct {
   char passes;
   short output;
   void (*Transform)(unsigned int state[8], const unsigned char block[128]);
-} PHP_HAVAL_CTX;
+};
 
 static const unsigned char PADDING[128] ={
   1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -269,12 +269,12 @@ static void PHP_5HAVALTransform(unsigned int state[8],
 }
 
 hash_haval::hash_haval(int type, int digest)
-  : HashEngine(digest/8, 128, sizeof(PHP_HAVAL_CTX)),
+  : HashEngine(digest/8, 128, sizeof(PhpHavalCtx)),
     m_type(type), m_digest(digest) {
 }
 
 void hash_haval::hash_init(void *context_) {
-  PHP_HAVAL_CTX *context = (PHP_HAVAL_CTX*)context_;
+  PhpHavalCtx *context = (PhpHavalCtx*)context_;
   context->count[0] = context->count[1] = 0;
   for (int i = 0; i < 8; i++) context->state[i] = D0[i];
   context->passes = m_type;
@@ -290,7 +290,7 @@ void hash_haval::hash_init(void *context_) {
 
 static void PHP_HAVALUpdate(void *context_, const unsigned char *input,
                             unsigned int inputLen) {
-  PHP_HAVAL_CTX *context = (PHP_HAVAL_CTX*)context_;
+  PhpHavalCtx *context = (PhpHavalCtx*)context_;
   unsigned int i, index, partLen;
 
   /* Compute number of bytes mod 128 */
@@ -332,7 +332,7 @@ void hash_haval::hash_update(void *context_, const unsigned char *input,
 
 #define PHP_HASH_HAVAL_VERSION	0x01
 
-static void PHP_HAVAL128Final(unsigned char *digest, PHP_HAVAL_CTX * context) {
+static void PHP_HAVAL128Final(unsigned char *digest, PhpHavalCtx * context) {
   unsigned char bits[10];
   unsigned int index, padLen;
 
@@ -382,7 +382,7 @@ static void PHP_HAVAL128Final(unsigned char *digest, PHP_HAVAL_CTX * context) {
   memset((unsigned char*) context, 0, sizeof(*context));
 }
 
-static void PHP_HAVAL160Final(unsigned char *digest, PHP_HAVAL_CTX * context) {
+static void PHP_HAVAL160Final(unsigned char *digest, PhpHavalCtx * context) {
   unsigned char bits[10];
   unsigned int index, padLen;
 
@@ -432,7 +432,7 @@ static void PHP_HAVAL160Final(unsigned char *digest, PHP_HAVAL_CTX * context) {
   memset((unsigned char*) context, 0, sizeof(*context));
 }
 
-static void PHP_HAVAL192Final(unsigned char *digest, PHP_HAVAL_CTX * context) {
+static void PHP_HAVAL192Final(unsigned char *digest, PhpHavalCtx * context) {
   unsigned char bits[10];
   unsigned int index, padLen;
 
@@ -468,7 +468,7 @@ static void PHP_HAVAL192Final(unsigned char *digest, PHP_HAVAL_CTX * context) {
   memset((unsigned char*) context, 0, sizeof(*context));
 }
 
-static void PHP_HAVAL224Final(unsigned char *digest, PHP_HAVAL_CTX * context) {
+static void PHP_HAVAL224Final(unsigned char *digest, PhpHavalCtx * context) {
   unsigned char bits[10];
   unsigned int index, padLen;
 
@@ -505,7 +505,7 @@ static void PHP_HAVAL224Final(unsigned char *digest, PHP_HAVAL_CTX * context) {
   memset((unsigned char*) context, 0, sizeof(*context));
 }
 
-static void PHP_HAVAL256Final(unsigned char *digest, PHP_HAVAL_CTX * context) {
+static void PHP_HAVAL256Final(unsigned char *digest, PhpHavalCtx * context) {
   unsigned char bits[10];
   unsigned int index, padLen;
 
@@ -537,11 +537,11 @@ static void PHP_HAVAL256Final(unsigned char *digest, PHP_HAVAL_CTX * context) {
 
 void hash_haval::hash_final(unsigned char *digest, void *context) {
   switch (m_digest) {
-  case 128: PHP_HAVAL128Final(digest, (PHP_HAVAL_CTX *)context); break;
-  case 160: PHP_HAVAL160Final(digest, (PHP_HAVAL_CTX *)context); break;
-  case 192: PHP_HAVAL192Final(digest, (PHP_HAVAL_CTX *)context); break;
-  case 224: PHP_HAVAL224Final(digest, (PHP_HAVAL_CTX *)context); break;
-  case 256: PHP_HAVAL256Final(digest, (PHP_HAVAL_CTX *)context); break;
+  case 128: PHP_HAVAL128Final(digest, (PhpHavalCtx *)context); break;
+  case 160: PHP_HAVAL160Final(digest, (PhpHavalCtx *)context); break;
+  case 192: PHP_HAVAL192Final(digest, (PhpHavalCtx *)context); break;
+  case 224: PHP_HAVAL224Final(digest, (PhpHavalCtx *)context); break;
+  case 256: PHP_HAVAL256Final(digest, (PhpHavalCtx *)context); break;
   default:
     assertx(false);
   }

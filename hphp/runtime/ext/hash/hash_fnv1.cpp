@@ -27,35 +27,35 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef struct {
+struct PhpFnv132Ctx {
   uint32_t state;
-} PHP_FNV132_CTX;
+};
 
-typedef struct {
+struct PhpFnv164Ctx{
   uint64_t state;
-} PHP_FNV164_CTX;
+};
 
 hash_fnv132::hash_fnv132(bool a)
-  : HashEngine(4, 4, sizeof(PHP_FNV132_CTX)), m_a(a) {
+  : HashEngine(4, 4, sizeof(PhpFnv132Ctx)), m_a(a) {
 }
 
 hash_fnv164::hash_fnv164(bool a)
-  : HashEngine(8, 4, sizeof(PHP_FNV164_CTX)), m_a(a) {
+  : HashEngine(8, 4, sizeof(PhpFnv164Ctx)), m_a(a) {
 }
 
 void hash_fnv132::hash_init(void *context_) {
-  PHP_FNV132_CTX *context = (PHP_FNV132_CTX*)context_;
+  PhpFnv132Ctx *context = (PhpFnv132Ctx*)context_;
   context->state = PHP_FNV1_32_INIT;
 }
 
 void hash_fnv164::hash_init(void *context_) {
-  PHP_FNV164_CTX *context = (PHP_FNV164_CTX*)context_;
+  PhpFnv164Ctx *context = (PhpFnv164Ctx*)context_;
   context->state = PHP_FNV1_64_INIT;
 }
 
 void hash_fnv132::hash_update(void *context_, const unsigned char *input,
                              unsigned int len) {
-  PHP_FNV132_CTX *context = (PHP_FNV132_CTX*)context_;
+  PhpFnv132Ctx *context = (PhpFnv132Ctx*)context_;
   const unsigned char *bp = (unsigned char *)input;   /* start of buffer */
   const unsigned char *be = bp + len;      /* beyond end of buffer */
 
@@ -81,7 +81,7 @@ void hash_fnv132::hash_update(void *context_, const unsigned char *input,
 
 void hash_fnv164::hash_update(void *context_, const unsigned char *input,
                              unsigned int len) {
-  PHP_FNV164_CTX *context = (PHP_FNV164_CTX*)context_;
+  PhpFnv164Ctx *context = (PhpFnv164Ctx*)context_;
   unsigned char *bp = (unsigned char *)input;   /* start of buffer */
   unsigned char *be = bp + len;      /* beyond end of buffer */
 
@@ -106,7 +106,7 @@ void hash_fnv164::hash_update(void *context_, const unsigned char *input,
 }
 
 void hash_fnv132::hash_final(unsigned char *digest, void *context_) {
-  PHP_FNV132_CTX *context = (PHP_FNV132_CTX*)context_;
+  PhpFnv132Ctx *context = (PhpFnv132Ctx*)context_;
 #ifdef WORDS_BIGENDIAN
     memcpy(digest, &context->state, 4);
 #else
@@ -120,7 +120,7 @@ void hash_fnv132::hash_final(unsigned char *digest, void *context_) {
 }
 
 void hash_fnv164::hash_final(unsigned char *digest, void *context_) {
-  PHP_FNV164_CTX *context = (PHP_FNV164_CTX*)context_;
+  PhpFnv164Ctx *context = (PhpFnv164Ctx*)context_;
 #ifdef WORDS_BIGENDIAN
     memcpy(digest, &context->state, 8);
 #else

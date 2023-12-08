@@ -20,16 +20,16 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef struct {
+struct PhpSalsaCtx {
   unsigned int state[16];
   unsigned char init:1;
   unsigned char length:7;
   unsigned char buffer[64];
   void (*Transform)(unsigned int state[16], unsigned int data[16]);
-} PHP_SALSA_CTX;
+};
 
 hash_salsa::hash_salsa(bool salsa10)
-  : HashEngine(64, 64, sizeof(PHP_SALSA_CTX)), m_salsa10(salsa10) {
+  : HashEngine(64, 64, sizeof(PhpSalsaCtx)), m_salsa10(salsa10) {
 }
 
 #define R(a,b) (((a) << (b)) | ((a) >> (32 - (b))))
@@ -122,7 +122,7 @@ static void Salsa20(unsigned int x[16], unsigned int in[16]) {
   }
 }
 
-static inline void SalsaTransform(PHP_SALSA_CTX *context,
+static inline void SalsaTransform(PhpSalsaCtx *context,
                                   const unsigned char input[64]) {
   unsigned int i, j, a[16];
 
@@ -147,14 +147,14 @@ static inline void SalsaTransform(PHP_SALSA_CTX *context,
 }
 
 void hash_salsa::hash_init(void *context_) {
-  PHP_SALSA_CTX *context = (PHP_SALSA_CTX*)context_;
+  PhpSalsaCtx *context = (PhpSalsaCtx*)context_;
   memset(context, 0, sizeof(*context));
   context->Transform = m_salsa10 ? Salsa10 : Salsa20;
 }
 
 void hash_salsa::hash_update(void *context_, const unsigned char *input,
                              unsigned int len) {
-  PHP_SALSA_CTX *context = (PHP_SALSA_CTX*)context_;
+  PhpSalsaCtx *context = (PhpSalsaCtx*)context_;
   if (context->length + len < 64) {
     memcpy(&context->buffer[context->length], input, len);
     context->length += len;
@@ -179,7 +179,7 @@ void hash_salsa::hash_update(void *context_, const unsigned char *input,
 }
 
 void hash_salsa::hash_final(unsigned char *digest, void *context_) {
-  PHP_SALSA_CTX *context = (PHP_SALSA_CTX*)context_;
+  PhpSalsaCtx *context = (PhpSalsaCtx*)context_;
   unsigned int i, j;
 
   if (context->length) {

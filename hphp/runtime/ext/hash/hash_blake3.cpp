@@ -20,25 +20,25 @@
 
 namespace HPHP {
 
-typedef struct {
+struct PhpBlake3Ctx {
   blake3_hasher hasher;
-} PHP_BLAKE3_CTX;
+};
 
-hash_blake3::hash_blake3() : HashEngine(BLAKE3_KEY_LEN, BLAKE3_BLOCK_LEN, sizeof(PHP_BLAKE3_CTX)) {}
+hash_blake3::hash_blake3() : HashEngine(BLAKE3_KEY_LEN, BLAKE3_BLOCK_LEN, sizeof(PhpBlake3Ctx)) {}
 
 void hash_blake3::hash_init(void* context_) {
-  PHP_BLAKE3_CTX* context = (PHP_BLAKE3_CTX*)context_;
+  PhpBlake3Ctx* context = (PhpBlake3Ctx*)context_;
   blake3_hasher_init(&context->hasher);
 }
 
 void hash_blake3::hash_update(void *context_, const unsigned char *input,
                              unsigned int len) {
-  PHP_BLAKE3_CTX* context = (PHP_BLAKE3_CTX*)context_;
+  PhpBlake3Ctx* context = (PhpBlake3Ctx*)context_;
   blake3_hasher_update(&context->hasher, input, len);
 }
 
 void hash_blake3::hash_final(unsigned char* output, void* context_) {
-  PHP_BLAKE3_CTX* context = (PHP_BLAKE3_CTX*)context_;
+  PhpBlake3Ctx* context = (PhpBlake3Ctx*)context_;
   blake3_hasher_finalize(&context->hasher, output, BLAKE3_OUT_LEN);
 }
 

@@ -21,22 +21,22 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef struct {
+struct PhpCrc32Ctx {
   unsigned int state;
-} PHP_CRC32_CTX;
+};
 
 hash_crc32::hash_crc32(Crc32Variant variant)
-  : HashEngine(4, 4, sizeof(PHP_CRC32_CTX)), m_variant(variant) {
+  : HashEngine(4, 4, sizeof(PhpCrc32Ctx)), m_variant(variant) {
 }
 
 void hash_crc32::hash_init(void *context_) {
-  PHP_CRC32_CTX *context = (PHP_CRC32_CTX*)context_;
+  PhpCrc32Ctx *context = (PhpCrc32Ctx*)context_;
   context->state = ~0;
 }
 
 void hash_crc32::hash_update(void *context_, const unsigned char *input,
                              unsigned int len) {
-  PHP_CRC32_CTX *context = (PHP_CRC32_CTX*)context_;
+  PhpCrc32Ctx *context = (PhpCrc32Ctx*)context_;
   size_t i;
   switch (m_variant) {
     case Crc32Variant::Crc32B:
@@ -61,7 +61,7 @@ void hash_crc32::hash_update(void *context_, const unsigned char *input,
 }
 
 void hash_crc32::hash_final(unsigned char *digest, void *context_) {
-  PHP_CRC32_CTX *context = (PHP_CRC32_CTX*)context_;
+  PhpCrc32Ctx *context = (PhpCrc32Ctx*)context_;
   context->state=~context->state;
 
   if (m_variant == Crc32Variant::Crc32C

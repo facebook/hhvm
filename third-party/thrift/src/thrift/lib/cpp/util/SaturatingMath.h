@@ -18,6 +18,7 @@
 
 #include <cmath>
 #include <limits>
+#include <type_traits>
 
 namespace apache::thrift::util {
 
@@ -30,15 +31,17 @@ namespace apache::thrift::util {
 
 template <typename T>
 constexpr T add_saturating(T lhs, T rhs) {
-  if (std::isnan(lhs) || std::isnan(rhs)) {
-    return NAN;
-  }
-
-  if (std::isinf(lhs) || std::isinf(rhs)) {
-    if (std::isinf(lhs) && std::isinf(rhs) && (rhs < 0) != (lhs < 0)) {
+  if constexpr (!std::is_integral_v<T>) {
+    if (std::isnan(lhs) || std::isnan(rhs)) {
       return NAN;
     }
-    return lhs + rhs;
+
+    if (std::isinf(lhs) || std::isinf(rhs)) {
+      if (std::isinf(lhs) && std::isinf(rhs) && (rhs < 0) != (lhs < 0)) {
+        return NAN;
+      }
+      return lhs + rhs;
+    }
   }
 
   if (rhs > 0 && std::numeric_limits<T>::max() - rhs < lhs) {

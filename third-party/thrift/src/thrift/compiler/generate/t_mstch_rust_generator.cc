@@ -1390,7 +1390,7 @@ class rust_mstch_type : public mstch_type {
 
 class mstch_rust_value : public mstch_base {
  public:
-  using value_type = t_const_value::t_const_value_type;
+  using value_type = t_const_value::t_const_value_kind;
   mstch_rust_value(
       const t_const_value* const_value,
       const t_type* type,
@@ -1461,7 +1461,7 @@ class mstch_rust_value : public mstch_base {
   }
   mstch::node is_bool() { return type_->is_bool(); }
   mstch::node bool_value() {
-    if (const_value_->get_type() == value_type::CV_INTEGER) {
+    if (const_value_->kind() == value_type::CV_INTEGER) {
       return const_value_->get_integer() != 0;
     }
     return const_value_->get_bool();
@@ -1479,7 +1479,7 @@ class mstch_rust_value : public mstch_base {
   mstch::node floating_point_value() {
     auto str = fmt::format(
         "{}",
-        const_value_->get_type() == value_type::CV_INTEGER
+        const_value_->kind() == value_type::CV_INTEGER
             ? const_value_->get_integer()
             : const_value_->get_double());
 
@@ -1497,8 +1497,8 @@ class mstch_rust_value : public mstch_base {
   }
   mstch::node is_list() {
     return type_->is_list() &&
-        (const_value_->get_type() == value_type::CV_LIST ||
-         (const_value_->get_type() == value_type::CV_MAP &&
+        (const_value_->kind() == value_type::CV_LIST ||
+         (const_value_->kind() == value_type::CV_MAP &&
           const_value_->get_map().empty()));
   }
   mstch::node list_elements() {
@@ -1526,26 +1526,26 @@ class mstch_rust_value : public mstch_base {
   }
   mstch::node is_set() {
     return type_->is_set() &&
-        (const_value_->get_type() == value_type::CV_LIST ||
-         (const_value_->get_type() == value_type::CV_MAP &&
+        (const_value_->kind() == value_type::CV_LIST ||
+         (const_value_->kind() == value_type::CV_MAP &&
           const_value_->get_map().empty()));
   }
   mstch::node set_members() { return list_elements(); }
   mstch::node is_map() {
     return type_->is_map() &&
-        (const_value_->get_type() == value_type::CV_MAP ||
-         (const_value_->get_type() == value_type::CV_LIST &&
+        (const_value_->kind() == value_type::CV_MAP ||
+         (const_value_->kind() == value_type::CV_LIST &&
           const_value_->get_list().empty()));
   }
   mstch::node map_entries();
   mstch::node is_struct() {
     return (type_->is_struct() || type_->is_exception()) &&
-        !type_->is_union() && const_value_->get_type() == value_type::CV_MAP;
+        !type_->is_union() && const_value_->kind() == value_type::CV_MAP;
   }
   mstch::node struct_fields();
   mstch::node is_exhaustive();
   mstch::node is_union() {
-    if (!type_->is_union() || const_value_->get_type() != value_type::CV_MAP) {
+    if (!type_->is_union() || const_value_->kind() != value_type::CV_MAP) {
       return false;
     }
     if (const_value_->get_map().empty()) {
@@ -1553,8 +1553,7 @@ class mstch_rust_value : public mstch_base {
       return true;
     }
     return const_value_->get_map().size() == 1 &&
-        const_value_->get_map().at(0).first->get_type() ==
-        value_type::CV_STRING;
+        const_value_->get_map().at(0).first->kind() == value_type::CV_STRING;
   }
   mstch::node union_variant() {
     if (const_value_->get_map().empty()) {
@@ -1591,14 +1590,14 @@ class mstch_rust_value : public mstch_base {
     return mstch::node();
   }
   mstch::node is_empty() {
-    auto type = const_value_->get_type();
-    if (type == value_type::CV_LIST) {
+    auto kind = const_value_->kind();
+    if (kind == value_type::CV_LIST) {
       return const_value_->get_list().empty();
     }
-    if (type == value_type::CV_MAP) {
+    if (kind == value_type::CV_MAP) {
       return const_value_->get_map().empty();
     }
-    if (type == value_type::CV_STRING) {
+    if (kind == value_type::CV_STRING) {
       return const_value_->get_string().empty();
     }
     return false;
@@ -1789,7 +1788,7 @@ mstch::node mstch_rust_value::struct_fields() {
   std::map<std::string, const t_const_value*> map_entries;
   for (auto entry : const_value_->get_map()) {
     auto key = entry.first;
-    if (key->get_type() == value_type::CV_STRING) {
+    if (key->kind() == value_type::CV_STRING) {
       map_entries[key->get_string()] = entry.second;
     }
   }

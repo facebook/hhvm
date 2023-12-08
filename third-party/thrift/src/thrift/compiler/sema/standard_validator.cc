@@ -897,12 +897,12 @@ class reserved_ids_checker {
             annotation->get_value_from_structured_annotation_or_null("ids");
         ids != nullptr) {
       ctx_.check(
-          ids->get_type() == t_const_value::t_const_value_type::CV_LIST,
+          ids->kind() == t_const_value::t_const_value_kind::CV_LIST,
           "Field ids must be a list of integers, annotated on {}",
           node.name());
       for (const auto* id : ids->get_list()) {
         ctx_.check(
-            id->get_type() == t_const_value::t_const_value_type::CV_INTEGER,
+            id->kind() == t_const_value::t_const_value_kind::CV_INTEGER,
             "Field ids must be a list of integers, annotated on {}",
             node.name());
         reserved_ids.insert(id->get_integer());
@@ -913,15 +913,15 @@ class reserved_ids_checker {
                 "id_ranges");
         id_ranges != nullptr) {
       ctx_.check(
-          id_ranges->get_type() == t_const_value::t_const_value_type::CV_MAP,
+          id_ranges->kind() == t_const_value::t_const_value_kind::CV_MAP,
           "Field id_ranges must be a map of integer to integer, annotated on {}",
           node.name());
       for (const auto& [id_range_begin, id_range_end] : id_ranges->get_map()) {
         ctx_.check(
-            id_range_begin->get_type() ==
-                    t_const_value::t_const_value_type::CV_INTEGER &&
-                id_range_begin->get_type() ==
-                    t_const_value::t_const_value_type::CV_INTEGER,
+            id_range_begin->kind() ==
+                    t_const_value::t_const_value_kind::CV_INTEGER &&
+                id_range_begin->kind() ==
+                    t_const_value::t_const_value_kind::CV_INTEGER,
             "Field id_ranges must be a map of integer to integer, annotated on {}",
             node.name());
         ctx_.check(

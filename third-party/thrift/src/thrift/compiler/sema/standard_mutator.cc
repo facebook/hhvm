@@ -76,11 +76,11 @@ void match_type_with_const_value(
     value->set_is_enum();
     auto enm = dynamic_cast<const t_enum*>(type);
     value->set_enum(enm);
-    if (value->get_type() == t_const_value::CV_INTEGER) {
+    if (value->kind() == t_const_value::CV_INTEGER) {
       if (const auto* enum_value = enm->find_value(value->get_integer())) {
         value->set_enum_value(enum_value);
       }
-    } else if (value->get_type() == t_const_value::CV_STRING) {
+    } else if (value->kind() == t_const_value::CV_STRING) {
       // The enum was defined after the struct field with that type was declared
       // so the field default value, if present, was treated as a string rather
       // than resolving to the enum constant in the parser.

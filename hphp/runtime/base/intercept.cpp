@@ -186,7 +186,7 @@ void rename_function(const String& old_name, const String& new_name) {
   }
 
   auto const newNe = const_cast<NamedFunc*>(NamedFunc::getOrCreate(n3w));
-  auto const fnew = Func::lookup(newNe);
+  auto const fnew = newNe->getCachedFunc();
   if (fnew && fnew != func) {
     raise_error("Function already defined: %s", n3w->data());
   }

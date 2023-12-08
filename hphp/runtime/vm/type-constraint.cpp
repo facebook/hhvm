@@ -873,14 +873,14 @@ getNamedTypeWithAutoload(const NamedType* ne,
   if (auto def = ne->getCachedTypeAlias()) {
     return FoundTypeAlias{def};
   }
-  if (auto klass = Class::lookup(ne)) return FoundClass{klass};
+  if (auto klass = ne->getCachedClass()) return FoundClass{klass};
 
   // We don't have the class or the typedef, so autoload.
   String nameStr(const_cast<StringData*>(name));
   if (AutoloadHandler::s_instance->autoloadTypeOrTypeAlias(nameStr)) {
     // Autoload succeeded, try to grab a typedef or a class.
     if (auto def = ne->getCachedTypeAlias()) return FoundTypeAlias{def};
-    if (auto klass = Class::lookup(ne)) return FoundClass{klass};
+    if (auto klass = ne->getCachedClass()) return FoundClass{klass};
   }
 
   return NotFound{};
@@ -967,7 +967,7 @@ bool TypeConstraint::maybeMixed() const {
       [] (auto const& tcu) { return tcu.type() == AnnotType::Mixed; });
   }
   // If its a known class, its definitely not mixed. Otherwise it might be.
-  return !Class::lookup(typeNamedType());
+  return !typeNamedType()->getCachedClass();
 }
 
 bool
@@ -1062,7 +1062,7 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
     if (auto const def = typeNamedType()->getCachedTypeAlias()) {
       return FoundTypeAlias{def};
     }
-    if (auto cls = Class::lookup(typeNamedType())) return FoundClass{cls};
+    if (auto cls = typeNamedType()->getCachedClass()) return FoundClass{cls};
     return NotFound{};
   }();
   return match<bool>(
@@ -1216,7 +1216,7 @@ bool TypeConstraint::checkImpl(tv_rval val,
       if (clsName->isame(val.val().pobj->getVMClass()->name())) return true;
 
       assertx(ne);
-      auto const cls = Class::lookup(ne);
+      auto const cls = ne->getCachedClass();
 
       // If we're being conservative we can only use the class if its persistent
       // (otherwise what we infer may not be valid in all requests).
@@ -1363,7 +1363,7 @@ bool TypeConstraint::alwaysPasses(const StringData* checkedClsName) const {
 
     assertx(ne);
     auto const c1 = Class::lookup(checkedClsName);
-    auto const c2 = Class::lookup(ne);
+    auto const c2 = ne->getCachedClass();
     // If both names map to persistent classes we can just check for a subtype
     // relationship.
     return

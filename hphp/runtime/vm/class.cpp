@@ -5086,11 +5086,11 @@ Class* Class::loadMissing(const NamedType* ne, const StringData* name) {
   CoeffectsAutoGuard _2;
   AutoloadHandler::s_instance->autoloadType(
     StrNR(const_cast<StringData*>(name)));
-  return Class::lookup(ne);
+  return ne->getCachedClass();
 }
 
 Class* Class::get(const NamedType* ne, const StringData *name, bool tryAutoload) {
-  Class *cls = lookup(ne);
+  Class *cls = ne->getCachedClass();
   if (UNLIKELY(!cls)) {
     if (tryAutoload) {
       return loadMissing(ne, name);

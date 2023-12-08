@@ -44,7 +44,12 @@ let log_sub_type env p ty_sub ty_super =
                 ] );
           ]))
 
-(* Tries to add constraint that ty_sub is subtype of ty_super in envs *)
+let sub_type_i_apply_reason_callback
+    ?(is_coeffect = false) p env ty_sub ty_super callback =
+  log_sub_type env p ty_sub ty_super;
+  Typing_utils.sub_type_i ~is_coeffect env ty_sub ty_super @@ Some callback
+
+(** Tries to add constraint that ty_sub is subtype of ty_super in envs *)
 let sub_type_i
     ?(is_coeffect = false)
     p
@@ -53,15 +58,44 @@ let sub_type_i
     ty_sub
     ty_super
     (on_error : Typing_error.Callback.t) =
-  log_sub_type env p ty_sub ty_super;
-  Typing_utils.sub_type_i ~is_coeffect env ty_sub ty_super
-  @@ Some
-       (Typing_error.Reasons_callback.with_claim
-          on_error
-          ~claim:(lazy (p, Reason.string_of_ureason ur)))
+  sub_type_i_apply_reason_callback
+    ~is_coeffect
+    p
+    env
+    ty_sub
+    ty_super
+    (Typing_error.Reasons_callback.with_claim
+       on_error
+       ~claim:(lazy (p, Reason.string_of_ureason ur)))
+
+(** Tries to add constraint that ty_sub is subtype of ty_super in envs *)
+let sub_type_i_w_err_prefix
+    ?(is_coeffect = false) p env ty_sub ty_super err_prefix =
+  sub_type_i_apply_reason_callback
+    ~is_coeffect
+    p
+    env
+    ty_sub
+    ty_super
+    (Typing_error.Reasons_callback.Prefix err_prefix)
 
 let sub_type p ur env ty_sub ty_super on_error =
   sub_type_i p ur env (LoclType ty_sub) (LoclType ty_super) on_error
+
+let sub_type_w_err_prefix
+    ?(is_coeffect = false)
+    p
+    env
+    ty_sub
+    ty_super
+    (err_prefix : Typing_error.Primary.t) =
+  sub_type_i_w_err_prefix
+    ~is_coeffect
+    p
+    env
+    (LoclType ty_sub)
+    (LoclType ty_super)
+    err_prefix
 
 let sub_type_decl ?(is_coeffect = false) ~on_error p ur env ty_sub ty_super =
   let localize_no_subst = Typing_utils.localize_no_subst ~ignore_errors:true in

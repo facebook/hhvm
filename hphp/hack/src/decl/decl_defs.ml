@@ -98,6 +98,15 @@ type decl_error =
     }
 [@@deriving show]
 
+type element = {
+  elt_flags: Typing_defs_flags.ClassElt.t;
+  elt_origin: string;
+  elt_visibility: ce_visibility;
+  elt_deprecated: string option;
+  elt_sort_text: string option;
+}
+[@@deriving show]
+
 type decl_class_type = {
   dc_need_init: bool;
   dc_abstract: bool;
@@ -129,10 +138,9 @@ type decl_class_type = {
   dc_req_ancestors_extends: SSet.t;
   dc_req_class_ancestors: requirement list;
       (** dc_req_class_ancestors gathers all the `require class`
-        * requirements declared in ancestors.  Remark that `require class`
-        * requirements are _not_ stored in `dc_req_ancestors` or
-        *`dc_req_ancestors_extends` fields.
-        *)
+          requirements declared in ancestors.  Remark that `require class`
+          requirements are _not_ stored in `dc_req_ancestors` or
+         `dc_req_ancestors_extends` fields. *)
   dc_extends: SSet.t;
   dc_sealed_whitelist: SSet.t option;
   dc_xhp_attr_deps: SSet.t;
@@ -141,16 +149,10 @@ type decl_class_type = {
   dc_enum_type: enum_type option;
   dc_decl_errors: decl_error list;
   dc_docs_url: string option;
+  dc_allow_multiple_instantiations: bool;
+      (** Wether this interface has attribute __AllowMultipleInstantiations. *)
 }
 [@@deriving show]
-
-and element = {
-  elt_flags: Typing_defs_flags.ClassElt.t;
-  elt_origin: string;
-  elt_visibility: ce_visibility;
-  elt_deprecated: string option;
-  elt_sort_text: string option;
-}
 
 let get_elt_abstract elt = Typing_defs_flags.ClassElt.is_abstract elt.elt_flags
 

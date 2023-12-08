@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<15f455f0305c2aea4d75cf6ac656a0dd>>
+// @generated SignedSource<<9367bd9de031f10a0839cb9aa82eeb04>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -150,6 +150,38 @@ arena_deserializer::impl_deserialize_in_arena!(DeclError<'arena>);
     ToOcamlRep
 )]
 #[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "elt_")]
+#[repr(C)]
+pub struct Element<'a> {
+    pub flags: typing_defs_flags::class_elt::ClassElt,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub origin: &'a str,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub visibility: CeVisibility<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub deprecated: Option<&'a str>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub sort_text: Option<&'a str>,
+}
+impl<'a> TrivialDrop for Element<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(Element<'arena>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving show")]
 #[rust_to_ocaml(prefix = "dc_")]
 #[repr(C)]
 pub struct DeclClassType<'a> {
@@ -219,38 +251,8 @@ pub struct DeclClassType<'a> {
     pub decl_errors: &'a [DeclError<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub docs_url: Option<&'a str>,
+    /// Wether this interface has attribute __AllowMultipleInstantiations.
+    pub allow_multiple_instantiations: bool,
 }
 impl<'a> TrivialDrop for DeclClassType<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(DeclClassType<'arena>);
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(and)]
-#[rust_to_ocaml(prefix = "elt_")]
-#[repr(C)]
-pub struct Element<'a> {
-    pub flags: typing_defs_flags::class_elt::ClassElt,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub origin: &'a str,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub visibility: CeVisibility<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub deprecated: Option<&'a str>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub sort_text: Option<&'a str>,
-}
-impl<'a> TrivialDrop for Element<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(Element<'arena>);

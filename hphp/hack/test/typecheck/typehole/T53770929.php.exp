@@ -1,1 +1,32 @@
-No errors
+File "T53770929.php", line 17, characters 28-36:
+This makes C implements A<string> but it already implements A at another instantiation (Typing[4480])
+  File "T53770929.php", line 17, characters 20-25:
+  It already implements A<int>
+  File "T53770929.php", line 5, characters 24-24:
+  This is where B implements A
+  File "T53770929.php", line 17, characters 20-20:
+  A<int> should be a subtype of A<string>, but it's not because
+  File "T53770929.php", line 17, characters 22-24:
+  Expected `int`
+  File "T53770929.php", line 17, characters 30-35:
+  But got `string`
+  File "T53770929.php", line 5, characters 26-26:
+    via this generic `T`
+  File "T53770929.php", line 5, characters 26-26:
+  This type argument to `A` must match exactly (it is invariant)
+File "T53770929.php", line 17, characters 28-36:
+This makes C implements A<string> but it already implements A at another instantiation (Typing[4480])
+  File "T53770929.php", line 17, characters 20-25:
+  It already implements A<int>
+  File "T53770929.php", line 5, characters 24-24:
+  This is where B implements A
+  File "T53770929.php", line 17, characters 20-20:
+  A<int> should be a subtype of A<string>, but it's not because
+  File "T53770929.php", line 17, characters 30-35:
+  Expected `string`
+  File "T53770929.php", line 5, characters 26-26:
+    via this generic `T`
+  File "T53770929.php", line 5, characters 26-26:
+  This type argument to `A` must match exactly (it is invariant)
+  File "T53770929.php", line 17, characters 22-24:
+  But got `int`

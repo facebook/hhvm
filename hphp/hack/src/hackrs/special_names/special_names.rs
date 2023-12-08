@@ -252,6 +252,8 @@ pub mod attribute_kinds {
 pub mod user_attributes {
     use super::*;
 
+    pub static uaAllowMultipleInstantiations: Lazy<TypeName> =
+        lazy!(sn::user_attributes::ALLOW_MULTIPLE_INSTANTIATIONS);
     pub static uaOverride: Lazy<TypeName> = lazy!(sn::user_attributes::OVERRIDE);
     pub static uaConsistentConstruct: Lazy<TypeName> =
         lazy!(sn::user_attributes::CONSISTENT_CONSTRUCT);
@@ -314,6 +316,7 @@ pub mod user_attributes {
 
     pub fn iter() -> impl Iterator<Item = TypeName> {
         [
+            *uaAllowMultipleInstantiations,
             *uaOverride,
             *uaConsistentConstruct,
             *uaConst,

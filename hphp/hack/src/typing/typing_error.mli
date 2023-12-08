@@ -359,6 +359,12 @@ module Primary : sig
     [@@deriving show]
   end
 
+  type implements_info = {
+    pos: Pos_or_decl.t;
+    instantiation: string list;
+    via_direct_parent: Pos.t * string;
+  }
+
   (** Specific error information readily transformable into a user error *)
   type t =
     (* == Factorised errors ================================================= *)
@@ -829,6 +835,13 @@ module Primary : sig
         class2_name: string;
         class2_pos: Pos_or_decl.t;
         name2: string;
+      }
+    | Multiple_instantiation_inheritence of {
+        type_name: string;
+        implements_or_extends: string;
+        interface_name: string;
+        winning_implements: implements_info;
+        losing_implements: implements_info;
       }
     | Parent_support_dynamic_type of {
         pos: Pos.t;
@@ -1692,6 +1705,7 @@ and Reasons_callback : sig
   type t =
     | Always of Error.t
     | Of_error of Error.t
+    | Prefix of Primary.t
     | Of_callback of Callback.t * Pos.t Message.t Lazy.t
     | Retain of t * component
     | Incoming_reasons of t * op

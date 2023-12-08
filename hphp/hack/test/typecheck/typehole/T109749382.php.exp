@@ -1,1 +1,28 @@
-No errors
+File "T109749382.php", line 9, characters 30-31:
+This makes I2 extends I<string> but it already extends I at another instantiation (Typing[4480])
+  File "T109749382.php", line 9, characters 22-27:
+  It already extends I<int>
+  File "T109749382.php", line 8, characters 22-22:
+  This is where I1 implements I
+  File "T109749382.php", line 9, characters 22-22:
+  I<int> should be a subtype of I<string>, but it's not because
+  File "T109749382.php", line 8, characters 24-29:
+  Expected `string`
+  File "T109749382.php", line 8, characters 24-29:
+  This type argument to `I` must match exactly (it is invariant)
+  File "T109749382.php", line 9, characters 24-26:
+  But got `int`
+File "T109749382.php", line 9, characters 30-31:
+This makes I2 extends I<string> but it already extends I at another instantiation (Typing[4480])
+  File "T109749382.php", line 9, characters 22-27:
+  It already extends I<int>
+  File "T109749382.php", line 8, characters 22-22:
+  This is where I1 implements I
+  File "T109749382.php", line 9, characters 22-22:
+  I<int> should be a subtype of I<string>, but it's not because
+  File "T109749382.php", line 9, characters 24-26:
+  Expected `int`
+  File "T109749382.php", line 8, characters 24-29:
+  But got `string`
+  File "T109749382.php", line 8, characters 24-29:
+  This type argument to `I` must match exactly (it is invariant)

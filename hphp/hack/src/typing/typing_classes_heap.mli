@@ -53,6 +53,8 @@ module Api : sig
 
   val kind : t -> Ast_defs.classish_kind
 
+  val allow_multiple_instantiations : t -> bool
+
   val is_xhp : t -> bool
 
   val name : t -> string

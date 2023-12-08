@@ -65,6 +65,9 @@ module ApiShallow = struct
     let (c, _) = t in
     c.Decl_defs.dc_kind
 
+  let allow_multiple_instantiations (_decl, (c, _), _ctx) =
+    c.Decl_defs.dc_allow_multiple_instantiations
+
   let is_xhp (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Is_xhp @@ fun () ->
     let (c, _) = t in

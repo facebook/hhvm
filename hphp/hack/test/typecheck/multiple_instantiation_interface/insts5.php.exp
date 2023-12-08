@@ -1,0 +1,38 @@
+File "insts5.php", line 22, characters 10-11:
+Invalid argument (Typing[4110])
+  File "insts5.php", line 19, characters 19-24:
+  Expected `string`
+  File "insts5.php", line 5, characters 23-30:
+  But got `arraykey`
+File "insts5.php", line 10, characters 23-34:
+This makes Derived implements I<string> but it already implements I at another instantiation (Typing[4480])
+  File "insts5.php", line 10, characters 47-47:
+  It already implements I<arraykey> via J
+  File "insts5.php", line 5, characters 21-21:
+  This is where J implements I
+  File "insts5.php", line 6, characters 26-26:
+  This is where Base implements I
+  File "insts5.php", line 5, characters 21-21:
+  I<arraykey> should be a subtype of I<string>, but it's not because
+  File "insts5.php", line 10, characters 28-33:
+  Expected `string`
+  File "insts5.php", line 6, characters 28-28:
+    via this generic `T`
+  File "insts5.php", line 5, characters 23-30:
+  But got `arraykey`
+File "insts5.php", line 14, characters 24-30:
+This makes Derived2 implements I<string> but it already implements I at another instantiation (Typing[4480])
+  File "insts5.php", line 14, characters 43-43:
+  It already implements I<arraykey> via J
+  File "insts5.php", line 5, characters 21-21:
+  This is where J implements I
+  File "insts5.php", line 6, characters 26-26:
+  This is where Another implements I
+  File "insts5.php", line 5, characters 21-21:
+  I<arraykey> should be a subtype of I<string>, but it's not because
+  File "insts5.php", line 12, characters 28-33:
+  Expected `string`
+  File "insts5.php", line 6, characters 28-28:
+    via this generic `T`
+  File "insts5.php", line 5, characters 23-30:
+  But got `arraykey`

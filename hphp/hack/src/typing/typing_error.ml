@@ -383,6 +383,13 @@ module Primary = struct
     [@@deriving show]
   end
 
+  type implements_info = {
+    pos: Pos_or_decl.t;
+    instantiation: string list;
+    via_direct_parent: Pos.t * string;
+  }
+  [@@deriving show]
+
   type t =
     (* Factorised errors *)
     | Coeffect of Coeffect.t
@@ -852,6 +859,13 @@ module Primary = struct
         class2_name: string;
         class2_pos: Pos_or_decl.t;
         name2: string;
+      }
+    | Multiple_instantiation_inheritence of {
+        type_name: string;
+        implements_or_extends: string;
+        interface_name: string;
+        winning_implements: implements_info;
+        losing_implements: implements_info;
       }
     | Parent_support_dynamic_type of {
         pos: Pos.t;
@@ -1454,15 +1468,17 @@ end = struct
 
   let rec count t =
     match t with
-    | Primary _ -> 1
-    | Apply (_, t) -> count t
-    | Apply_reasons _ -> 1
-    | Assert_in_current_decl _ -> 1
+    | Primary _
+    | Apply_reasons _
+    | Assert_in_current_decl _ ->
+      1
+    | Apply (_, t)
+    | With_code (t, _) ->
+      count t
     | Multiple ts
     | Union ts
     | Intersection ts ->
       List.fold ~init:0 ~f:(fun acc t -> acc + count t) ts
-    | With_code (t, _) -> count t
 end
 
 and Secondary : sig
@@ -2182,6 +2198,7 @@ and Reasons_callback : sig
   type t =
     | Always of Error.t
     | Of_error of Error.t
+    | Prefix of Primary.t
     | Of_callback of Callback.t * Pos.t Message.t Lazy.t
     | Retain of t * component
     | Incoming_reasons of t * op
@@ -2313,6 +2330,7 @@ end = struct
   type t =
     | Always of Error.t
     | Of_error of Error.t
+    | Prefix of Primary.t
     | Of_callback of Callback.t * Pos.t Message.t Lazy.t
     | Retain of t * component
     | Incoming_reasons of t * op

@@ -292,7 +292,9 @@ end = struct
     aux t
 end
 
-module Eval_primary = struct
+module Eval_primary : sig
+  val to_error : Typing_error.Primary.t -> env:'a -> error
+end = struct
   module Eval_shape = struct
     let invalid_shape_field_type pos ty_pos ty_name trail =
       let reasons =
@@ -2971,6 +2973,112 @@ module Eval_primary = struct
     in
     (Error_code.InheritedMethodCaseDiffers, claim, reasons, [])
 
+  let multiple_instantiation_inheritence
+      type_name
+      implements_or_extends
+      interface_name
+      (winning_implements : Typing_error.Primary.implements_info)
+      losing_implements =
+    (* [p(Y)]       This makes [C] implement [or extend] [I]<[T1]> but it already implements [or extends] [I] at another instantiation
+       [p(X)]       it already implemented [I]<[T2]> [via [X]]
+       [[p(I<T1>)]  this is where [Y] implements/extends [I]]
+       [[p(I<T2>)]  this is where [X] implements/extends [I]]
+       [p(?)]           [I]<[T1]> should be a subtype of [I]<[T2]>
+       ... subtype error...
+    *)
+    let {
+      Typing_error.Primary.pos = winning_itf_pos;
+      instantiation = winning_instantiation;
+      via_direct_parent = (winning_pos, winning_parent);
+    } =
+      winning_implements
+    in
+    let {
+      Typing_error.Primary.pos = losing_itf_pos;
+      instantiation = losing_instantiation;
+      via_direct_parent = (losing_pos, losing_parent);
+    } =
+      losing_implements
+    in
+    let type_name = Render.strip_ns type_name in
+    let interface_name = Render.strip_ns interface_name in
+    let winning_parent = Render.strip_ns winning_parent in
+    let losing_parent = Render.strip_ns losing_parent in
+    let winning_is_indirect =
+      not (String.equal winning_parent interface_name)
+    in
+    let losing_is_indirect = not (String.equal losing_parent interface_name) in
+    let winning_instantiation =
+      Printf.sprintf
+        "%s<%s>"
+        interface_name
+        (String.concat winning_instantiation ~sep:", ")
+    in
+    let losing_instantiation =
+      Printf.sprintf
+        "%s<%s>"
+        interface_name
+        (String.concat losing_instantiation ~sep:", ")
+    in
+    let claim =
+      lazy
+        (let msg =
+           Printf.sprintf
+             "%s%s %s %s but it already %s %s at another instantiation"
+             (if losing_is_indirect then
+               "This makes "
+             else
+               "")
+             type_name
+             implements_or_extends
+             losing_instantiation
+             implements_or_extends
+             interface_name
+         in
+         (losing_pos, msg))
+    in
+    let reasons =
+      lazy
+        (( Pos_or_decl.of_raw_pos winning_pos,
+           Printf.sprintf
+             "It already %s %s%s"
+             implements_or_extends
+             winning_instantiation
+             (if String.equal winning_parent interface_name then
+               ""
+             else
+               Printf.sprintf " via %s" winning_parent) )
+         ::
+         (if winning_is_indirect then
+           [
+             ( winning_itf_pos,
+               Printf.sprintf
+                 "This is where %s implements %s"
+                 winning_parent
+                 interface_name );
+           ]
+         else
+           [])
+        @ (if losing_is_indirect then
+            [
+              ( losing_itf_pos,
+                Printf.sprintf
+                  "This is where %s implements %s"
+                  losing_parent
+                  interface_name );
+            ]
+          else
+            [])
+        @ [
+            ( winning_itf_pos,
+              Printf.sprintf
+                "%s should be a subtype of %s, but it's not because"
+                winning_instantiation
+                losing_instantiation );
+          ])
+    in
+    (Error_code.MultipleInstantiationInheritence, claim, reasons, [])
+
   let classish_kind_to_string = function
     | Ast_defs.Cclass _ -> "class "
     | Ast_defs.Ctrait -> "trait "
@@ -4652,6 +4760,20 @@ module Eval_primary = struct
         ~child_p:pos
         ~p1:class1_pos
         ~p2:class2_pos
+    | Multiple_instantiation_inheritence
+        {
+          type_name;
+          implements_or_extends;
+          interface_name;
+          winning_implements;
+          losing_implements;
+        } ->
+      multiple_instantiation_inheritence
+        type_name
+        implements_or_extends
+        interface_name
+        winning_implements
+        losing_implements
     | Parent_support_dynamic_type
         {
           pos;
@@ -6167,6 +6289,22 @@ end = struct
         f ?code ?quickfixes reasons;
         Eval_result.empty
       | Always err -> Eval_error.eval err ~env ~current_span
+      | Prefix prim ->
+        let { Error_state.code_opt; claim_opt; reasons_opt; quickfixes_opt } =
+          st
+        in
+        let (code, claim, reasons, quickfixes) =
+          Eval_primary.to_error prim ~env
+        in
+        let code = Option.value code_opt ~default:code in
+        let claim = Option.value claim_opt ~default:claim in
+        let reasons =
+          match reasons_opt with
+          | None -> reasons
+          | Some st_reasons -> lazy (Lazy.force reasons @ Lazy.force st_reasons)
+        in
+        let quickfixes = quickfixes @ Option.value quickfixes_opt ~default:[] in
+        Eval_result.single (code, claim, reasons, quickfixes)
       | Of_error err -> Error_state.with_defaults st err ~env ~current_span
       | Of_callback (k, claim) ->
         Eval_result.single @@ eval_callback k st ~env ~claim

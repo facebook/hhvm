@@ -913,13 +913,18 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             &mut tparams,
         );
 
+        let is_const = self.has_user_attribute(*sn::user_attributes::uaConst);
+        let is_module_level_trait =
+            self.has_user_attribute(*sn::user_attributes::uaModuleLevelTrait);
+        let allow_multiple_instantiations =
+            self.has_user_attribute(*sn::user_attributes::uaAllowMultipleInstantiations);
+
         let fc = Arc::new(FoldedClass {
             name: self.child.name.id(),
             pos: self.child.name.pos().clone(),
             kind: self.child.kind,
             is_final: self.child.is_final,
-            is_const: (self.child.user_attributes.iter())
-                .any(|ua| ua.name.id() == *sn::user_attributes::uaConst),
+            is_const,
             // Support both attribute and keyword for now, until typechecker changes are made
             is_internal: self.child.is_internal,
             is_xhp: self.child.is_xhp,
@@ -930,8 +935,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             enum_type: self.child.enum_type.clone(),
             has_xhp_keyword: self.child.has_xhp_keyword,
             module: self.child.module.clone(),
-            is_module_level_trait: (self.child.user_attributes.iter())
-                .any(|ua| ua.name.id() == *sn::user_attributes::uaModuleLevelTrait),
+            is_module_level_trait,
             tparams,
             where_constraints: self.child.where_constraints.clone(),
             substs,
@@ -954,8 +958,16 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             deferred_init_members,
             decl_errors: self.errors.into_boxed_slice(),
             docs_url: self.child.docs_url.clone(),
+            allow_multiple_instantiations,
         });
 
         Ok(fc)
+    }
+
+    fn has_user_attribute(&self, attr: TypeName) -> bool {
+        self.child
+            .user_attributes
+            .iter()
+            .any(|ua| ua.name.id() == attr)
     }
 }

@@ -490,6 +490,7 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::FoldedClass<R> {
             enum_type,
             decl_errors,
             docs_url,
+            allow_multiple_instantiations,
         } = self;
         arena.alloc(obr::decl_defs::DeclClassType {
             name: name.to_oxidized(arena),
@@ -531,6 +532,7 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::FoldedClass<R> {
             enum_type: enum_type.as_ref().map(|et| et.to_oxidized(arena)),
             decl_errors: decl_errors.to_oxidized(arena),
             docs_url: docs_url.as_deref().to_oxidized(arena),
+            allow_multiple_instantiations: *allow_multiple_instantiations,
         })
     }
 }

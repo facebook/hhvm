@@ -765,6 +765,7 @@ module Typing = struct
     | WrongUseKind [@value 4477]
     | MatchNotExhaustive [@value 4478]
     | MatchOnUnsupportedType [@value 4479]
+    | MultipleInstantiationInheritence [@value 4480]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

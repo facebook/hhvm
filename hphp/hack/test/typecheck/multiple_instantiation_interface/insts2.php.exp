@@ -1,0 +1,20 @@
+File "insts2.php", line 16, characters 14-15:
+Invalid argument (Typing[4110])
+  File "insts2.php", line 14, characters 23-25:
+  Expected `int`
+  File "insts2.php", line 6, characters 24-26:
+  But got `num`
+File "insts2.php", line 12, characters 25-26:
+This makes L extends J<int> but it already extends J at another instantiation (Typing[4480])
+  File "insts2.php", line 12, characters 21-22:
+  It already extends J<num> via I2
+  File "insts2.php", line 6, characters 22-22:
+  This is where I2 implements J
+  File "insts2.php", line 5, characters 22-22:
+  This is where I1 implements J
+  File "insts2.php", line 6, characters 22-22:
+  J<num> should be a subtype of J<int>, but it's not because
+  File "insts2.php", line 5, characters 24-26:
+  Expected `int`
+  File "insts2.php", line 6, characters 24-26:
+  But got `num`

@@ -399,7 +399,7 @@ let method_def ~is_disposable env cls m =
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   { Tast_with_dynamic.under_normal_assumptions; under_dynamic_assumptions }
 
-(** Checks that extending this parent is legal - e.g. it is not final and not const. *)
+(** Checks that extending the base class is legal - e.g. it is not final and not const. *)
 let check_parent env class_def class_type =
   match Env.get_parent_class env with
   | Decl_entry.Found parent_type ->
@@ -674,6 +674,142 @@ let check_consistent_enum_inclusion
                src_classish_name = Cls.name included_cls;
              })
   | (_, _) -> ()
+
+let skip_check_multiple_instantiations ctx type_name =
+  match Decl_provider.get_class ctx type_name with
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    true
+  | Decl_entry.Found cls ->
+    (not @@ Ast_defs.is_c_interface @@ Cls.kind cls)
+    || Cls.allow_multiple_instantiations cls
+
+(** Check that repeated use of the same interface, but possibly at a different instantiation,
+    is textually in subtype order.
+    This code should shadow that in decl_folded_class.ml/fold.rs.
+
+    @param  parent_pos  position of the parent which has interface [name] as ancestor
+    @param  name        name of the interface we're checking
+    @pararm ty          type of the interface we're checking *)
+let add_or_check_is_supertype
+    env
+    ~current_type
+    ~parent_pos_id
+    ~(interface_name : string)
+    (ty : decl_ty)
+    ancestors =
+  if skip_check_multiple_instantiations (Env.get_ctx env) interface_name then
+    (env, ancestors)
+  else
+    match SMap.find_opt interface_name ancestors with
+    | None -> (env, SMap.add interface_name (ty, parent_pos_id) ancestors)
+    | Some (first_ty, first_parent_pos_id) ->
+      let ((env, _err), lty) =
+        Phase.localize_no_subst env ~ignore_errors:true ty
+      in
+      let ((env, _err), first_lty) =
+        Phase.localize_no_subst ~ignore_errors:true env first_ty
+      in
+      let (env, ty_err_opt) =
+        let (_, (winning_pos, _), winning_instantiation) =
+          Decl_utils.unwrap_class_type first_ty
+        in
+        let (_, (losing_pos, _), losing_instantiation) =
+          Decl_utils.unwrap_class_type ty
+        in
+        Typing_ops.sub_type_w_err_prefix
+          (fst parent_pos_id)
+          env
+          first_lty
+          lty
+          (Typing_error.Primary.Multiple_instantiation_inheritence
+             {
+               type_name = fst current_type;
+               implements_or_extends =
+                 (if Ast_defs.is_c_interface (snd current_type) then
+                   "extends"
+                 else
+                   "implements");
+               interface_name;
+               winning_implements =
+                 {
+                   Typing_error.Primary.pos = winning_pos;
+                   instantiation =
+                     List.map
+                       winning_instantiation
+                       ~f:(Typing_print.full_decl (Env.get_tcopt env));
+                   via_direct_parent = first_parent_pos_id;
+                 };
+               losing_implements =
+                 {
+                   Typing_error.Primary.pos = losing_pos;
+                   instantiation =
+                     List.map
+                       losing_instantiation
+                       ~f:(Typing_print.full_decl (Env.get_tcopt env));
+                   via_direct_parent = parent_pos_id;
+                 };
+             })
+      in
+      Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
+      (env, ancestors)
+
+let get_instantiated_ancestors_and_self env (_pos, type_name) tyargs ty :
+    Typing_defs.decl_ty SMap.t =
+  let class_ = Env.get_class env type_name in
+  let instantiated_ancestors =
+    match class_ with
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      SMap.empty
+    | Decl_entry.Found class_ ->
+      let subst = Decl_instantiate.make_subst (Cls.tparams class_) tyargs in
+      Cls.all_ancestors class_
+      |> SMap.of_list
+      |> SMap.map (Decl_instantiate.instantiate subst)
+  in
+  SMap.add type_name ty instantiated_ancestors
+
+(** Check that repeated use of the same interface, but possibly at a different instantiation,
+    is textually in subtype order. *)
+let check_multiple_instantiation_inheritance
+    env ~current_type (parents : hint list) : env =
+  if Ast_defs.is_c_enum_class (snd current_type) then
+    env
+  else
+    let parents =
+      List.map parents ~f:(fun hint ->
+          let decl_ty = Decl_hint.hint env.decl_env hint in
+          let (_r, (_name_pos, class_name), tyargs) =
+            Decl_utils.unwrap_class_type decl_ty
+          in
+          ((fst hint, class_name), decl_ty, tyargs))
+    in
+    let (env, _ancestors) =
+      List.fold
+        parents
+        ~f:(fun ancestors (parent_pos_id, parent_ty, parent_tyargs) ->
+          let ancestors_and_self =
+            get_instantiated_ancestors_and_self
+              env
+              parent_pos_id
+              parent_tyargs
+              parent_ty
+          in
+          SMap.fold
+            (fun ancestor_name ty (env, ancestors) ->
+              add_or_check_is_supertype
+                env
+                ~current_type
+                ~parent_pos_id
+                ~interface_name:ancestor_name
+                ty
+                ancestors)
+            ancestors_and_self
+            ancestors)
+        ~init:(env, SMap.empty)
+    in
+    env
 
 let is_enum_or_enum_class k = Ast_defs.is_c_enum k || Ast_defs.is_c_enum_class k
 
@@ -1645,6 +1781,12 @@ let class_hierarchy_checks env c tc (parents : class_parents) =
     check_enum_includes env c;
     check_implements_or_extends_unique implements ~env;
     check_implements_or_extends_unique extends ~env;
+    let env =
+      check_multiple_instantiation_inheritance
+        env
+        ~current_type:(snd c.c_name, c.c_kind)
+        (c.c_implements @ c.c_extends @ c.c_uses)
+    in
     check_parent env c tc;
     check_parents_sealed env c tc;
     check_sealed env c;

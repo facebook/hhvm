@@ -1139,6 +1139,10 @@ and class_decl
       dc_enum_type = enum;
       dc_decl_errors = decl_errors;
       dc_docs_url = c.sc_docs_url;
+      dc_allow_multiple_instantiations =
+        Attributes.mem
+          SN.UserAttributes.uaAllowMultipleInstantiations
+          c.sc_user_attributes;
     }
   in
   let filter_snd map = SMap.filter_map (fun _k v -> snd v) map in

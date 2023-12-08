@@ -216,6 +216,7 @@ pub struct FoldedClass<R: Reason> {
     pub deferred_init_members: IndexSet<PropName>,
     pub decl_errors: Box<[DeclError<R::Pos>]>,
     pub docs_url: Option<String>,
+    pub allow_multiple_instantiations: bool,
 }
 
 impl<R: Reason> FoldedClass<R> {

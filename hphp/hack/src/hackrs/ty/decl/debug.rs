@@ -188,6 +188,7 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
             deferred_init_members,
             decl_errors,
             docs_url,
+            allow_multiple_instantiations,
         } = self;
 
         let mut s = f.debug_struct("FoldedClass");
@@ -293,6 +294,12 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
         }
         if let Some(docs_url) = docs_url {
             s.field("docs_url", docs_url);
+        }
+        if *allow_multiple_instantiations {
+            s.field(
+                "allow_multiple_instantiations",
+                allow_multiple_instantiations,
+            );
         }
 
         s.finish()

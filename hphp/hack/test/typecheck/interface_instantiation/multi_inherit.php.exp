@@ -2,3 +2,27 @@ File "multi_inherit.php", line 6, characters 20-28:
 Interface `I` is used more than once in this declaration. (Typing[4377])
   File "multi_inherit.php", line 6, characters 31-31:
   Here is another occurrence
+File "multi_inherit.php", line 6, characters 31-36:
+C implements I<int> but it already implements I at another instantiation (Typing[4480])
+  File "multi_inherit.php", line 6, characters 20-28:
+  It already implements I<string>
+  File "multi_inherit.php", line 6, characters 20-20:
+  I<string> should be a subtype of I<int>, but it's not because
+  File "multi_inherit.php", line 6, characters 22-27:
+  Expected `string`
+  File "multi_inherit.php", line 6, characters 33-35:
+  But got `int`
+  File "multi_inherit.php", line 6, characters 33-35:
+  This type argument to `I` must match exactly (it is invariant)
+File "multi_inherit.php", line 6, characters 31-36:
+C implements I<int> but it already implements I at another instantiation (Typing[4480])
+  File "multi_inherit.php", line 6, characters 20-28:
+  It already implements I<string>
+  File "multi_inherit.php", line 6, characters 20-20:
+  I<string> should be a subtype of I<int>, but it's not because
+  File "multi_inherit.php", line 6, characters 33-35:
+  Expected `int`
+  File "multi_inherit.php", line 6, characters 33-35:
+  This type argument to `I` must match exactly (it is invariant)
+  File "multi_inherit.php", line 6, characters 22-27:
+  But got `string`

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<12cfdd875d557426e2b7faed2f357f0d>>
+// @generated SignedSource<<74c9757bbea9838dce84c7722c98ea9b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -162,6 +162,32 @@ pub enum DeclError {
     ToOcamlRep
 )]
 #[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "elt_")]
+#[repr(C)]
+pub struct Element {
+    pub flags: typing_defs_flags::class_elt::ClassElt,
+    pub origin: String,
+    pub visibility: CeVisibility,
+    pub deprecated: Option<String>,
+    pub sort_text: Option<String>,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving show")]
 #[rust_to_ocaml(prefix = "dc_")]
 #[repr(C)]
 pub struct DeclClassType {
@@ -206,30 +232,6 @@ pub struct DeclClassType {
     pub enum_type: Option<EnumType>,
     pub decl_errors: Vec<DeclError>,
     pub docs_url: Option<String>,
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(and)]
-#[rust_to_ocaml(prefix = "elt_")]
-#[repr(C)]
-pub struct Element {
-    pub flags: typing_defs_flags::class_elt::ClassElt,
-    pub origin: String,
-    pub visibility: CeVisibility,
-    pub deprecated: Option<String>,
-    pub sort_text: Option<String>,
+    /// Wether this interface has attribute __AllowMultipleInstantiations.
+    pub allow_multiple_instantiations: bool,
 }

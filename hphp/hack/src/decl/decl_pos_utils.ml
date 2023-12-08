@@ -314,6 +314,7 @@ struct
       dc_enum_type = Option.map dc.dc_enum_type ~f:enum_type;
       dc_decl_errors = [];
       dc_docs_url = dc.dc_docs_url;
+      dc_allow_multiple_instantiations = dc.dc_allow_multiple_instantiations;
     }
 
   and requirement (p, t) = (pos_or_decl p, ty t)

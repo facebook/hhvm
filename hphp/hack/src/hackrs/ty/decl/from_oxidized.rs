@@ -711,6 +711,7 @@ impl<R: Reason> From<&obr::decl_defs::DeclClassType<'_>> for folded::FoldedClass
             enum_type,
             decl_errors,
             docs_url,
+            allow_multiple_instantiations,
         } = cls;
         Self {
             name: (*name).into(),
@@ -759,6 +760,7 @@ impl<R: Reason> From<&obr::decl_defs::DeclClassType<'_>> for folded::FoldedClass
                 .collect(),
             decl_errors: slice(decl_errors),
             docs_url: docs_url.map(Into::into),
+            allow_multiple_instantiations: *allow_multiple_instantiations,
         }
     }
 }

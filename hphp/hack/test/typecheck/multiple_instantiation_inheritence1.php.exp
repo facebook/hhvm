@@ -14,3 +14,31 @@ Invalid argument (Typing[4110])
   This type argument to `I` must match exactly (it is invariant)
   File "multiple_instantiation_inheritence1.php", line 9, characters 41-43:
   But got `int`
+File "multiple_instantiation_inheritence1.php", line 9, characters 26-26:
+This makes C implements I<string> but it already implements I at another instantiation (Typing[4480])
+  File "multiple_instantiation_inheritence1.php", line 9, characters 39-44:
+  It already implements I<int>
+  File "multiple_instantiation_inheritence1.php", line 7, characters 29-29:
+  This is where D implements I
+  File "multiple_instantiation_inheritence1.php", line 9, characters 39-39:
+  I<int> should be a subtype of I<string>, but it's not because
+  File "multiple_instantiation_inheritence1.php", line 7, characters 31-36:
+  Expected `string`
+  File "multiple_instantiation_inheritence1.php", line 7, characters 31-36:
+  This type argument to `I` must match exactly (it is invariant)
+  File "multiple_instantiation_inheritence1.php", line 9, characters 41-43:
+  But got `int`
+File "multiple_instantiation_inheritence1.php", line 9, characters 26-26:
+This makes C implements I<string> but it already implements I at another instantiation (Typing[4480])
+  File "multiple_instantiation_inheritence1.php", line 9, characters 39-44:
+  It already implements I<int>
+  File "multiple_instantiation_inheritence1.php", line 7, characters 29-29:
+  This is where D implements I
+  File "multiple_instantiation_inheritence1.php", line 9, characters 39-39:
+  I<int> should be a subtype of I<string>, but it's not because
+  File "multiple_instantiation_inheritence1.php", line 9, characters 41-43:
+  Expected `int`
+  File "multiple_instantiation_inheritence1.php", line 7, characters 31-36:
+  But got `string`
+  File "multiple_instantiation_inheritence1.php", line 7, characters 31-36:
+  This type argument to `I` must match exactly (it is invariant)

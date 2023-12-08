@@ -229,6 +229,8 @@ pub mod members {
 }
 
 pub mod user_attributes {
+    pub const ALLOW_MULTIPLE_INSTANTIATIONS: &str = "__AllowMultipleInstantiations";
+
     pub const OVERRIDE: &str = "__Override";
 
     pub const AUTOCOMPLETE_SORT_TEXT: &str = "__AutocompleteSortText";

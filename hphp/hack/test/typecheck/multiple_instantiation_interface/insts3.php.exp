@@ -1,0 +1,52 @@
+File "insts3.php", line 16, characters 17-17:
+This makes G implements J<arraykey> but it already implements J at another instantiation (Typing[4480])
+  File "insts3.php", line 16, characters 30-37:
+  It already implements J<mixed>
+  File "insts3.php", line 11, characters 20-20:
+  This is where E implements J
+  File "insts3.php", line 16, characters 30-30:
+  J<mixed> should be a subtype of J<arraykey>, but it's not because
+  File "insts3.php", line 11, characters 22-29:
+  Expected `arraykey`
+  File "insts3.php", line 16, characters 32-36:
+  But got `mixed`
+File "insts3.php", line 18, characters 17-17:
+This makes H implements J<arraykey> but it already implements J at another instantiation (Typing[4480])
+  File "insts3.php", line 18, characters 30-37:
+  It already implements J<float>
+  File "insts3.php", line 11, characters 20-20:
+  This is where E implements J
+  File "insts3.php", line 18, characters 30-30:
+  J<float> should be a subtype of J<arraykey>, but it's not because
+  File "insts3.php", line 11, characters 22-29:
+  Expected `arraykey`
+  File "insts3.php", line 18, characters 32-36:
+  But got `float`
+File "insts3.php", line 24, characters 18-18:
+This makes GG implements J<arraykey> but it already implements J at another instantiation (Typing[4480])
+  File "insts3.php", line 24, characters 31-31:
+  It already implements J<mixed> via K
+  File "insts3.php", line 21, characters 21-21:
+  This is where K implements J
+  File "insts3.php", line 11, characters 20-20:
+  This is where E implements J
+  File "insts3.php", line 21, characters 21-21:
+  J<mixed> should be a subtype of J<arraykey>, but it's not because
+  File "insts3.php", line 11, characters 22-29:
+  Expected `arraykey`
+  File "insts3.php", line 21, characters 23-27:
+  But got `mixed`
+File "insts3.php", line 25, characters 18-18:
+This makes HH implements J<arraykey> but it already implements J at another instantiation (Typing[4480])
+  File "insts3.php", line 25, characters 31-31:
+  It already implements J<float> via L
+  File "insts3.php", line 22, characters 21-21:
+  This is where L implements J
+  File "insts3.php", line 11, characters 20-20:
+  This is where E implements J
+  File "insts3.php", line 22, characters 21-21:
+  J<float> should be a subtype of J<arraykey>, but it's not because
+  File "insts3.php", line 11, characters 22-29:
+  Expected `arraykey`
+  File "insts3.php", line 22, characters 23-27:
+  But got `float`

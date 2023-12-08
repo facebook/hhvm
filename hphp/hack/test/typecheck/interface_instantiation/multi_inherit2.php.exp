@@ -8,3 +8,75 @@ File "multi_inherit2.php", line 8, characters 32-39:
 Interface `K` is used more than once in this declaration. (Typing[4377])
   File "multi_inherit2.php", line 8, characters 67-67:
   Here is another occurrence
+File "multi_inherit2.php", line 8, characters 42-47:
+J extends I<int> but it already extends I at another instantiation (Typing[4480])
+  File "multi_inherit2.php", line 8, characters 21-29:
+  It already extends I<string>
+  File "multi_inherit2.php", line 8, characters 21-21:
+  I<string> should be a subtype of I<int>, but it's not because
+  File "multi_inherit2.php", line 8, characters 23-28:
+  Expected `string`
+  File "multi_inherit2.php", line 8, characters 44-46:
+  But got `int`
+  File "multi_inherit2.php", line 8, characters 44-46:
+  This type argument to `I` must match exactly (it is invariant)
+File "multi_inherit2.php", line 8, characters 42-47:
+J extends I<int> but it already extends I at another instantiation (Typing[4480])
+  File "multi_inherit2.php", line 8, characters 21-29:
+  It already extends I<string>
+  File "multi_inherit2.php", line 8, characters 21-21:
+  I<string> should be a subtype of I<int>, but it's not because
+  File "multi_inherit2.php", line 8, characters 44-46:
+  Expected `int`
+  File "multi_inherit2.php", line 8, characters 44-46:
+  This type argument to `I` must match exactly (it is invariant)
+  File "multi_inherit2.php", line 8, characters 23-28:
+  But got `string`
+File "multi_inherit2.php", line 8, characters 50-56:
+J extends I<bool> but it already extends I at another instantiation (Typing[4480])
+  File "multi_inherit2.php", line 8, characters 21-29:
+  It already extends I<string>
+  File "multi_inherit2.php", line 8, characters 21-21:
+  I<string> should be a subtype of I<bool>, but it's not because
+  File "multi_inherit2.php", line 8, characters 23-28:
+  Expected `string`
+  File "multi_inherit2.php", line 8, characters 52-55:
+  But got `bool`
+  File "multi_inherit2.php", line 8, characters 52-55:
+  This type argument to `I` must match exactly (it is invariant)
+File "multi_inherit2.php", line 8, characters 50-56:
+J extends I<bool> but it already extends I at another instantiation (Typing[4480])
+  File "multi_inherit2.php", line 8, characters 21-29:
+  It already extends I<string>
+  File "multi_inherit2.php", line 8, characters 21-21:
+  I<string> should be a subtype of I<bool>, but it's not because
+  File "multi_inherit2.php", line 8, characters 52-55:
+  Expected `bool`
+  File "multi_inherit2.php", line 8, characters 52-55:
+  This type argument to `I` must match exactly (it is invariant)
+  File "multi_inherit2.php", line 8, characters 23-28:
+  But got `string`
+File "multi_inherit2.php", line 8, characters 67-75:
+J extends K<string> but it already extends K at another instantiation (Typing[4480])
+  File "multi_inherit2.php", line 8, characters 32-39:
+  It already extends K<float>
+  File "multi_inherit2.php", line 8, characters 32-32:
+  K<float> should be a subtype of K<string>, but it's not because
+  File "multi_inherit2.php", line 8, characters 34-38:
+  Expected `float`
+  File "multi_inherit2.php", line 8, characters 69-74:
+  But got `string`
+  File "multi_inherit2.php", line 8, characters 69-74:
+  This type argument to `K` must match exactly (it is invariant)
+File "multi_inherit2.php", line 8, characters 67-75:
+J extends K<string> but it already extends K at another instantiation (Typing[4480])
+  File "multi_inherit2.php", line 8, characters 32-39:
+  It already extends K<float>
+  File "multi_inherit2.php", line 8, characters 32-32:
+  K<float> should be a subtype of K<string>, but it's not because
+  File "multi_inherit2.php", line 8, characters 69-74:
+  Expected `string`
+  File "multi_inherit2.php", line 8, characters 69-74:
+  This type argument to `K` must match exactly (it is invariant)
+  File "multi_inherit2.php", line 8, characters 34-38:
+  But got `float`

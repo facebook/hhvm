@@ -156,46 +156,46 @@ void MyUnion::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::bool_field:
-      ::apache::thrift::detail::st::destruct(value_.bool_field);
+      ::std::destroy_at(::std::addressof(value_.bool_field));
       break;
     case Type::byte_field:
-      ::apache::thrift::detail::st::destruct(value_.byte_field);
+      ::std::destroy_at(::std::addressof(value_.byte_field));
       break;
     case Type::short_field:
-      ::apache::thrift::detail::st::destruct(value_.short_field);
+      ::std::destroy_at(::std::addressof(value_.short_field));
       break;
     case Type::int_field:
-      ::apache::thrift::detail::st::destruct(value_.int_field);
+      ::std::destroy_at(::std::addressof(value_.int_field));
       break;
     case Type::long_field:
-      ::apache::thrift::detail::st::destruct(value_.long_field);
+      ::std::destroy_at(::std::addressof(value_.long_field));
       break;
     case Type::float_field:
-      ::apache::thrift::detail::st::destruct(value_.float_field);
+      ::std::destroy_at(::std::addressof(value_.float_field));
       break;
     case Type::double_field:
-      ::apache::thrift::detail::st::destruct(value_.double_field);
+      ::std::destroy_at(::std::addressof(value_.double_field));
       break;
     case Type::string_field:
-      ::apache::thrift::detail::st::destruct(value_.string_field);
+      ::std::destroy_at(::std::addressof(value_.string_field));
       break;
     case Type::binary_field:
-      ::apache::thrift::detail::st::destruct(value_.binary_field);
+      ::std::destroy_at(::std::addressof(value_.binary_field));
       break;
     case Type::enum_field:
-      ::apache::thrift::detail::st::destruct(value_.enum_field);
+      ::std::destroy_at(::std::addressof(value_.enum_field));
       break;
     case Type::list_field:
-      ::apache::thrift::detail::st::destruct(value_.list_field);
+      ::std::destroy_at(::std::addressof(value_.list_field));
       break;
     case Type::set_field:
-      ::apache::thrift::detail::st::destruct(value_.set_field);
+      ::std::destroy_at(::std::addressof(value_.set_field));
       break;
     case Type::map_field:
-      ::apache::thrift::detail::st::destruct(value_.map_field);
+      ::std::destroy_at(::std::addressof(value_.map_field));
       break;
     case Type::struct_field:
-      ::apache::thrift::detail::st::destruct(value_.struct_field);
+      ::std::destroy_at(::std::addressof(value_.struct_field));
       break;
     default:
       assert(false);

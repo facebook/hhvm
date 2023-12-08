@@ -61,7 +61,7 @@ void RefUnion::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::field1:
-      ::apache::thrift::detail::st::destruct(value_.field1);
+      ::std::destroy_at(::std::addressof(value_.field1));
       break;
     default:
       assert(false);

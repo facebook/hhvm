@@ -125,16 +125,16 @@ void union1::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::ui:
-      ::apache::thrift::detail::st::destruct(value_.ui);
+      ::std::destroy_at(::std::addressof(value_.ui));
       break;
     case Type::ud:
-      ::apache::thrift::detail::st::destruct(value_.ud);
+      ::std::destroy_at(::std::addressof(value_.ud));
       break;
     case Type::us:
-      ::apache::thrift::detail::st::destruct(value_.us);
+      ::std::destroy_at(::std::addressof(value_.us));
       break;
     case Type::ue:
-      ::apache::thrift::detail::st::destruct(value_.ue);
+      ::std::destroy_at(::std::addressof(value_.ue));
       break;
     default:
       assert(false);
@@ -230,16 +230,16 @@ void union2::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::ui_2:
-      ::apache::thrift::detail::st::destruct(value_.ui_2);
+      ::std::destroy_at(::std::addressof(value_.ui_2));
       break;
     case Type::ud_2:
-      ::apache::thrift::detail::st::destruct(value_.ud_2);
+      ::std::destroy_at(::std::addressof(value_.ud_2));
       break;
     case Type::us_2:
-      ::apache::thrift::detail::st::destruct(value_.us_2);
+      ::std::destroy_at(::std::addressof(value_.us_2));
       break;
     case Type::ue_2:
-      ::apache::thrift::detail::st::destruct(value_.ue_2);
+      ::std::destroy_at(::std::addressof(value_.ue_2));
       break;
     default:
       assert(false);
@@ -335,16 +335,16 @@ void union3::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::ui_3:
-      ::apache::thrift::detail::st::destruct(value_.ui_3);
+      ::std::destroy_at(::std::addressof(value_.ui_3));
       break;
     case Type::ud_3:
-      ::apache::thrift::detail::st::destruct(value_.ud_3);
+      ::std::destroy_at(::std::addressof(value_.ud_3));
       break;
     case Type::us_3:
-      ::apache::thrift::detail::st::destruct(value_.us_3);
+      ::std::destroy_at(::std::addressof(value_.us_3));
       break;
     case Type::ue_3:
-      ::apache::thrift::detail::st::destruct(value_.ue_3);
+      ::std::destroy_at(::std::addressof(value_.ue_3));
       break;
     default:
       assert(false);
@@ -544,19 +544,19 @@ void unionA::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::i:
-      ::apache::thrift::detail::st::destruct(value_.i);
+      ::std::destroy_at(::std::addressof(value_.i));
       break;
     case Type::d:
-      ::apache::thrift::detail::st::destruct(value_.d);
+      ::std::destroy_at(::std::addressof(value_.d));
       break;
     case Type::s:
-      ::apache::thrift::detail::st::destruct(value_.s);
+      ::std::destroy_at(::std::addressof(value_.s));
       break;
     case Type::e:
-      ::apache::thrift::detail::st::destruct(value_.e);
+      ::std::destroy_at(::std::addressof(value_.e));
       break;
     case Type::a:
-      ::apache::thrift::detail::st::destruct(value_.a);
+      ::std::destroy_at(::std::addressof(value_.a));
       break;
     default:
       assert(false);
@@ -2658,88 +2658,88 @@ void union_with_special_names::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::get:
-      ::apache::thrift::detail::st::destruct(value_.get);
+      ::std::destroy_at(::std::addressof(value_.get));
       break;
     case Type::getter:
-      ::apache::thrift::detail::st::destruct(value_.getter);
+      ::std::destroy_at(::std::addressof(value_.getter));
       break;
     case Type::lists:
-      ::apache::thrift::detail::st::destruct(value_.lists);
+      ::std::destroy_at(::std::addressof(value_.lists));
       break;
     case Type::maps:
-      ::apache::thrift::detail::st::destruct(value_.maps);
+      ::std::destroy_at(::std::addressof(value_.maps));
       break;
     case Type::name:
-      ::apache::thrift::detail::st::destruct(value_.name);
+      ::std::destroy_at(::std::addressof(value_.name));
       break;
     case Type::name_to_value:
-      ::apache::thrift::detail::st::destruct(value_.name_to_value);
+      ::std::destroy_at(::std::addressof(value_.name_to_value));
       break;
     case Type::names:
-      ::apache::thrift::detail::st::destruct(value_.names);
+      ::std::destroy_at(::std::addressof(value_.names));
       break;
     case Type::prefix_tree:
-      ::apache::thrift::detail::st::destruct(value_.prefix_tree);
+      ::std::destroy_at(::std::addressof(value_.prefix_tree));
       break;
     case Type::sets:
-      ::apache::thrift::detail::st::destruct(value_.sets);
+      ::std::destroy_at(::std::addressof(value_.sets));
       break;
     case Type::setter:
-      ::apache::thrift::detail::st::destruct(value_.setter);
+      ::std::destroy_at(::std::addressof(value_.setter));
       break;
     case Type::str:
-      ::apache::thrift::detail::st::destruct(value_.str);
+      ::std::destroy_at(::std::addressof(value_.str));
       break;
     case Type::strings:
-      ::apache::thrift::detail::st::destruct(value_.strings);
+      ::std::destroy_at(::std::addressof(value_.strings));
       break;
     case Type::type:
-      ::apache::thrift::detail::st::destruct(value_.type);
+      ::std::destroy_at(::std::addressof(value_.type));
       break;
     case Type::value:
-      ::apache::thrift::detail::st::destruct(value_.value);
+      ::std::destroy_at(::std::addressof(value_.value));
       break;
     case Type::value_to_name:
-      ::apache::thrift::detail::st::destruct(value_.value_to_name);
+      ::std::destroy_at(::std::addressof(value_.value_to_name));
       break;
     case Type::values:
-      ::apache::thrift::detail::st::destruct(value_.values);
+      ::std::destroy_at(::std::addressof(value_.values));
       break;
     case Type::id:
-      ::apache::thrift::detail::st::destruct(value_.id);
+      ::std::destroy_at(::std::addressof(value_.id));
       break;
     case Type::ids:
-      ::apache::thrift::detail::st::destruct(value_.ids);
+      ::std::destroy_at(::std::addressof(value_.ids));
       break;
     case Type::descriptor:
-      ::apache::thrift::detail::st::destruct(value_.descriptor);
+      ::std::destroy_at(::std::addressof(value_.descriptor));
       break;
     case Type::descriptors:
-      ::apache::thrift::detail::st::destruct(value_.descriptors);
+      ::std::destroy_at(::std::addressof(value_.descriptors));
       break;
     case Type::key:
-      ::apache::thrift::detail::st::destruct(value_.key);
+      ::std::destroy_at(::std::addressof(value_.key));
       break;
     case Type::keys:
-      ::apache::thrift::detail::st::destruct(value_.keys);
+      ::std::destroy_at(::std::addressof(value_.keys));
       break;
     case Type::annotation:
-      ::apache::thrift::detail::st::destruct(value_.annotation);
+      ::std::destroy_at(::std::addressof(value_.annotation));
       break;
     case Type::annotations:
-      ::apache::thrift::detail::st::destruct(value_.annotations);
+      ::std::destroy_at(::std::addressof(value_.annotations));
       break;
     case Type::member:
-      ::apache::thrift::detail::st::destruct(value_.member);
+      ::std::destroy_at(::std::addressof(value_.member));
       break;
     case Type::members:
-      ::apache::thrift::detail::st::destruct(value_.members);
+      ::std::destroy_at(::std::addressof(value_.members));
       break;
     case Type::field:
-      ::apache::thrift::detail::st::destruct(value_.field);
+      ::std::destroy_at(::std::addressof(value_.field));
       break;
     case Type::fields:
-      ::apache::thrift::detail::st::destruct(value_.fields);
+      ::std::destroy_at(::std::addressof(value_.fields));
       break;
     default:
       assert(false);
@@ -3238,7 +3238,7 @@ void UnionWithTypedefFieldAdapter::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::field:
-      ::apache::thrift::detail::st::destruct(value_.field);
+      ::std::destroy_at(::std::addressof(value_.field));
       break;
     default:
       assert(false);

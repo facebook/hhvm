@@ -93,10 +93,10 @@ void MyUnion::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::anInteger:
-      ::apache::thrift::detail::st::destruct(value_.anInteger);
+      ::std::destroy_at(::std::addressof(value_.anInteger));
       break;
     case Type::aString:
-      ::apache::thrift::detail::st::destruct(value_.aString);
+      ::std::destroy_at(::std::addressof(value_.aString));
       break;
     default:
       assert(false);
@@ -192,7 +192,7 @@ void NonTriviallyDestructibleUnion::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::int_field:
-      ::apache::thrift::detail::st::destruct(value_.int_field);
+      ::std::destroy_at(::std::addressof(value_.int_field));
       break;
     default:
       assert(false);

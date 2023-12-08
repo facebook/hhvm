@@ -569,10 +569,10 @@ void SimpleUnion::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::intValue:
-      ::apache::thrift::detail::st::destruct(value_.intValue);
+      ::std::destroy_at(::std::addressof(value_.intValue));
       break;
     case Type::stringValue:
-      ::apache::thrift::detail::st::destruct(value_.stringValue);
+      ::std::destroy_at(::std::addressof(value_.stringValue));
       break;
     default:
       assert(false);
@@ -672,88 +672,88 @@ void ComplexUnion::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::intValue:
-      ::apache::thrift::detail::st::destruct(value_.intValue);
+      ::std::destroy_at(::std::addressof(value_.intValue));
       break;
     case Type::opt_intValue:
-      ::apache::thrift::detail::st::destruct(value_.opt_intValue);
+      ::std::destroy_at(::std::addressof(value_.opt_intValue));
       break;
     case Type::stringValue:
-      ::apache::thrift::detail::st::destruct(value_.stringValue);
+      ::std::destroy_at(::std::addressof(value_.stringValue));
       break;
     case Type::opt_stringValue:
-      ::apache::thrift::detail::st::destruct(value_.opt_stringValue);
+      ::std::destroy_at(::std::addressof(value_.opt_stringValue));
       break;
     case Type::intValue2:
-      ::apache::thrift::detail::st::destruct(value_.intValue2);
+      ::std::destroy_at(::std::addressof(value_.intValue2));
       break;
     case Type::intValue3:
-      ::apache::thrift::detail::st::destruct(value_.intValue3);
+      ::std::destroy_at(::std::addressof(value_.intValue3));
       break;
     case Type::doubelValue:
-      ::apache::thrift::detail::st::destruct(value_.doubelValue);
+      ::std::destroy_at(::std::addressof(value_.doubelValue));
       break;
     case Type::boolValue:
-      ::apache::thrift::detail::st::destruct(value_.boolValue);
+      ::std::destroy_at(::std::addressof(value_.boolValue));
       break;
     case Type::union_list:
-      ::apache::thrift::detail::st::destruct(value_.union_list);
+      ::std::destroy_at(::std::addressof(value_.union_list));
       break;
     case Type::union_set:
-      ::apache::thrift::detail::st::destruct(value_.union_set);
+      ::std::destroy_at(::std::addressof(value_.union_set));
       break;
     case Type::union_map:
-      ::apache::thrift::detail::st::destruct(value_.union_map);
+      ::std::destroy_at(::std::addressof(value_.union_map));
       break;
     case Type::opt_union_map:
-      ::apache::thrift::detail::st::destruct(value_.opt_union_map);
+      ::std::destroy_at(::std::addressof(value_.opt_union_map));
       break;
     case Type::enum_field:
-      ::apache::thrift::detail::st::destruct(value_.enum_field);
+      ::std::destroy_at(::std::addressof(value_.enum_field));
       break;
     case Type::enum_container:
-      ::apache::thrift::detail::st::destruct(value_.enum_container);
+      ::std::destroy_at(::std::addressof(value_.enum_container));
       break;
     case Type::a_struct:
-      ::apache::thrift::detail::st::destruct(value_.a_struct);
+      ::std::destroy_at(::std::addressof(value_.a_struct));
       break;
     case Type::a_set_struct:
-      ::apache::thrift::detail::st::destruct(value_.a_set_struct);
+      ::std::destroy_at(::std::addressof(value_.a_set_struct));
       break;
     case Type::a_union:
-      ::apache::thrift::detail::st::destruct(value_.a_union);
+      ::std::destroy_at(::std::addressof(value_.a_union));
       break;
     case Type::opt_a_union:
-      ::apache::thrift::detail::st::destruct(value_.opt_a_union);
+      ::std::destroy_at(::std::addressof(value_.opt_a_union));
       break;
     case Type::a_union_list:
-      ::apache::thrift::detail::st::destruct(value_.a_union_list);
+      ::std::destroy_at(::std::addressof(value_.a_union_list));
       break;
     case Type::a_union_typedef:
-      ::apache::thrift::detail::st::destruct(value_.a_union_typedef);
+      ::std::destroy_at(::std::addressof(value_.a_union_typedef));
       break;
     case Type::a_union_typedef_list:
-      ::apache::thrift::detail::st::destruct(value_.a_union_typedef_list);
+      ::std::destroy_at(::std::addressof(value_.a_union_typedef_list));
       break;
     case Type::MyBinaryField:
-      ::apache::thrift::detail::st::destruct(value_.MyBinaryField);
+      ::std::destroy_at(::std::addressof(value_.MyBinaryField));
       break;
     case Type::MyBinaryField2:
-      ::apache::thrift::detail::st::destruct(value_.MyBinaryField2);
+      ::std::destroy_at(::std::addressof(value_.MyBinaryField2));
       break;
     case Type::MyBinaryListField4:
-      ::apache::thrift::detail::st::destruct(value_.MyBinaryListField4);
+      ::std::destroy_at(::std::addressof(value_.MyBinaryListField4));
       break;
     case Type::ref_field:
-      ::apache::thrift::detail::st::destruct(value_.ref_field);
+      ::std::destroy_at(::std::addressof(value_.ref_field));
       break;
     case Type::ref_field2:
-      ::apache::thrift::detail::st::destruct(value_.ref_field2);
+      ::std::destroy_at(::std::addressof(value_.ref_field2));
       break;
     case Type::excp_field:
-      ::apache::thrift::detail::st::destruct(value_.excp_field);
+      ::std::destroy_at(::std::addressof(value_.excp_field));
       break;
     case Type::MyCustomField:
-      ::apache::thrift::detail::st::destruct(value_.MyCustomField);
+      ::std::destroy_at(::std::addressof(value_.MyCustomField));
       break;
     default:
       assert(false);
@@ -2830,10 +2830,10 @@ void FloatUnion::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::floatSide:
-      ::apache::thrift::detail::st::destruct(value_.floatSide);
+      ::std::destroy_at(::std::addressof(value_.floatSide));
       break;
     case Type::doubleSide:
-      ::apache::thrift::detail::st::destruct(value_.doubleSide);
+      ::std::destroy_at(::std::addressof(value_.doubleSide));
       break;
     default:
       assert(false);

@@ -590,7 +590,7 @@ void AdaptedUnion::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::best:
-      ::apache::thrift::detail::st::destruct(value_.best);
+      ::std::destroy_at(::std::addressof(value_.best));
       break;
     default:
       assert(false);
@@ -957,7 +957,7 @@ void BinaryUnion::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::iobuf_val:
-      ::apache::thrift::detail::st::destruct(value_.iobuf_val);
+      ::std::destroy_at(::std::addressof(value_.iobuf_val));
       break;
     default:
       assert(false);

@@ -936,10 +936,10 @@ void MyUnion::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::first:
-      ::apache::thrift::detail::st::destruct(value_.first);
+      ::std::destroy_at(::std::addressof(value_.first));
       break;
     case Type::second:
-      ::apache::thrift::detail::st::destruct(value_.second);
+      ::std::destroy_at(::std::addressof(value_.second));
       break;
     default:
       assert(false);

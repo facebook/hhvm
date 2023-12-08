@@ -20,7 +20,7 @@
       break;
 <%#struct:fields%>
     case Type::<%field:cpp_name%>:
-      ::apache::thrift::detail::st::destruct(value_.<%field:cpp_name%>);
+      ::std::destroy_at(::std::addressof(value_.<%field:cpp_name%>));
       break;
 <%/struct:fields%>
     default:

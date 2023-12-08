@@ -548,10 +548,10 @@ void ExampleUnion::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::fieldA:
-      ::apache::thrift::detail::st::destruct(value_.fieldA);
+      ::std::destroy_at(::std::addressof(value_.fieldA));
       break;
     case Type::fieldB:
-      ::apache::thrift::detail::st::destruct(value_.fieldB);
+      ::std::destroy_at(::std::addressof(value_.fieldB));
       break;
     default:
       assert(false);

@@ -197,7 +197,7 @@ void MyUnion::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::myString:
-      ::apache::thrift::detail::st::destruct(value_.myString);
+      ::std::destroy_at(::std::addressof(value_.myString));
       break;
     default:
       assert(false);

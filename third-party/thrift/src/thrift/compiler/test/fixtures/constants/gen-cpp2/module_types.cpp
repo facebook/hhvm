@@ -780,10 +780,10 @@ void union1::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::i:
-      ::apache::thrift::detail::st::destruct(value_.i);
+      ::std::destroy_at(::std::addressof(value_.i));
       break;
     case Type::d:
-      ::apache::thrift::detail::st::destruct(value_.d);
+      ::std::destroy_at(::std::addressof(value_.d));
       break;
     default:
       assert(false);
@@ -876,16 +876,16 @@ void union2::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::i:
-      ::apache::thrift::detail::st::destruct(value_.i);
+      ::std::destroy_at(::std::addressof(value_.i));
       break;
     case Type::d:
-      ::apache::thrift::detail::st::destruct(value_.d);
+      ::std::destroy_at(::std::addressof(value_.d));
       break;
     case Type::s:
-      ::apache::thrift::detail::st::destruct(value_.s);
+      ::std::destroy_at(::std::addressof(value_.s));
       break;
     case Type::u:
-      ::apache::thrift::detail::st::destruct(value_.u);
+      ::std::destroy_at(::std::addressof(value_.u));
       break;
     default:
       assert(false);

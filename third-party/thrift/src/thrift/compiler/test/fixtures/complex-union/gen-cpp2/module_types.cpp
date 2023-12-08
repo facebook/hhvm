@@ -61,22 +61,22 @@ void ComplexUnion::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::intValue:
-      ::apache::thrift::detail::st::destruct(value_.intValue);
+      ::std::destroy_at(::std::addressof(value_.intValue));
       break;
     case Type::stringValue:
-      ::apache::thrift::detail::st::destruct(value_.stringValue);
+      ::std::destroy_at(::std::addressof(value_.stringValue));
       break;
     case Type::intListValue:
-      ::apache::thrift::detail::st::destruct(value_.intListValue);
+      ::std::destroy_at(::std::addressof(value_.intListValue));
       break;
     case Type::stringListValue:
-      ::apache::thrift::detail::st::destruct(value_.stringListValue);
+      ::std::destroy_at(::std::addressof(value_.stringListValue));
       break;
     case Type::typedefValue:
-      ::apache::thrift::detail::st::destruct(value_.typedefValue);
+      ::std::destroy_at(::std::addressof(value_.typedefValue));
       break;
     case Type::stringRef:
-      ::apache::thrift::detail::st::destruct(value_.stringRef);
+      ::std::destroy_at(::std::addressof(value_.stringRef));
       break;
     default:
       assert(false);
@@ -172,10 +172,10 @@ void ListUnion::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::intListValue:
-      ::apache::thrift::detail::st::destruct(value_.intListValue);
+      ::std::destroy_at(::std::addressof(value_.intListValue));
       break;
     case Type::stringListValue:
-      ::apache::thrift::detail::st::destruct(value_.stringListValue);
+      ::std::destroy_at(::std::addressof(value_.stringListValue));
       break;
     default:
       assert(false);
@@ -271,10 +271,10 @@ void DataUnion::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::binaryData:
-      ::apache::thrift::detail::st::destruct(value_.binaryData);
+      ::std::destroy_at(::std::addressof(value_.binaryData));
       break;
     case Type::stringData:
-      ::apache::thrift::detail::st::destruct(value_.stringData);
+      ::std::destroy_at(::std::addressof(value_.stringData));
       break;
     default:
       assert(false);
@@ -488,10 +488,10 @@ void ValUnion::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::v1:
-      ::apache::thrift::detail::st::destruct(value_.v1);
+      ::std::destroy_at(::std::addressof(value_.v1));
       break;
     case Type::v2:
-      ::apache::thrift::detail::st::destruct(value_.v2);
+      ::std::destroy_at(::std::addressof(value_.v2));
       break;
     default:
       assert(false);
@@ -599,10 +599,10 @@ void VirtualComplexUnion::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::thingOne:
-      ::apache::thrift::detail::st::destruct(value_.thingOne);
+      ::std::destroy_at(::std::addressof(value_.thingOne));
       break;
     case Type::thingTwo:
-      ::apache::thrift::detail::st::destruct(value_.thingTwo);
+      ::std::destroy_at(::std::addressof(value_.thingTwo));
       break;
     default:
       assert(false);
@@ -776,7 +776,7 @@ void NonCopyableUnion::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::s:
-      ::apache::thrift::detail::st::destruct(value_.s);
+      ::std::destroy_at(::std::addressof(value_.s));
       break;
     default:
       assert(false);

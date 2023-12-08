@@ -155,10 +155,10 @@ void U::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::i:
-      ::apache::thrift::detail::st::destruct(value_.i);
+      ::std::destroy_at(::std::addressof(value_.i));
       break;
     case Type::s:
-      ::apache::thrift::detail::st::destruct(value_.s);
+      ::std::destroy_at(::std::addressof(value_.s));
       break;
     default:
       assert(false);

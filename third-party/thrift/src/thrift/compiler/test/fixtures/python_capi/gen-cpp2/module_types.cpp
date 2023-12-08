@@ -2060,25 +2060,25 @@ void Shallot::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::myEnum:
-      ::apache::thrift::detail::st::destruct(value_.myEnum);
+      ::std::destroy_at(::std::addressof(value_.myEnum));
       break;
     case Type::myStruct:
-      ::apache::thrift::detail::st::destruct(value_.myStruct);
+      ::std::destroy_at(::std::addressof(value_.myStruct));
       break;
     case Type::intSet:
-      ::apache::thrift::detail::st::destruct(value_.intSet);
+      ::std::destroy_at(::std::addressof(value_.intSet));
       break;
     case Type::myString:
-      ::apache::thrift::detail::st::destruct(value_.myString);
+      ::std::destroy_at(::std::addressof(value_.myString));
       break;
     case Type::doubleList:
-      ::apache::thrift::detail::st::destruct(value_.doubleList);
+      ::std::destroy_at(::std::addressof(value_.doubleList));
       break;
     case Type::strMap:
-      ::apache::thrift::detail::st::destruct(value_.strMap);
+      ::std::destroy_at(::std::addressof(value_.strMap));
       break;
     case Type::adaptedInt:
-      ::apache::thrift::detail::st::destruct(value_.adaptedInt);
+      ::std::destroy_at(::std::addressof(value_.adaptedInt));
       break;
     default:
       assert(false);

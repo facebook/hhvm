@@ -1475,22 +1475,22 @@ void MyUnion::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::myEnum:
-      ::apache::thrift::detail::st::destruct(value_.myEnum);
+      ::std::destroy_at(::std::addressof(value_.myEnum));
       break;
     case Type::myStruct:
-      ::apache::thrift::detail::st::destruct(value_.myStruct);
+      ::std::destroy_at(::std::addressof(value_.myStruct));
       break;
     case Type::myDataItem:
-      ::apache::thrift::detail::st::destruct(value_.myDataItem);
+      ::std::destroy_at(::std::addressof(value_.myDataItem));
       break;
     case Type::complexNestedStruct:
-      ::apache::thrift::detail::st::destruct(value_.complexNestedStruct);
+      ::std::destroy_at(::std::addressof(value_.complexNestedStruct));
       break;
     case Type::longValue:
-      ::apache::thrift::detail::st::destruct(value_.longValue);
+      ::std::destroy_at(::std::addressof(value_.longValue));
       break;
     case Type::intValue:
-      ::apache::thrift::detail::st::destruct(value_.intValue);
+      ::std::destroy_at(::std::addressof(value_.intValue));
       break;
     default:
       assert(false);
@@ -1604,16 +1604,16 @@ void MyUnionFloatFieldThrowExp::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::myEnum:
-      ::apache::thrift::detail::st::destruct(value_.myEnum);
+      ::std::destroy_at(::std::addressof(value_.myEnum));
       break;
     case Type::setFloat:
-      ::apache::thrift::detail::st::destruct(value_.setFloat);
+      ::std::destroy_at(::std::addressof(value_.setFloat));
       break;
     case Type::myDataItem:
-      ::apache::thrift::detail::st::destruct(value_.myDataItem);
+      ::std::destroy_at(::std::addressof(value_.myDataItem));
       break;
     case Type::complexNestedStruct:
-      ::apache::thrift::detail::st::destruct(value_.complexNestedStruct);
+      ::std::destroy_at(::std::addressof(value_.complexNestedStruct));
       break;
     default:
       assert(false);

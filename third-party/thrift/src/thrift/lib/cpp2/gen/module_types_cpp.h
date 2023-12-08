@@ -390,10 +390,6 @@ template <typename Type, typename FieldTypeClass, typename FieldType>
 constexpr bool gen_check_json =
     gen_check<gen_check_get_json, Type, FieldTypeClass, FieldType>;
 
-template <class T>
-FOLLY_MAYBE_UNUSED void destruct(T& val) {
-  (&val)->~T();
-}
 } // namespace
 
 } // namespace st

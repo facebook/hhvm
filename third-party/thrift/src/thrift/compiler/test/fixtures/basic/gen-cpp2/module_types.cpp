@@ -347,16 +347,16 @@ void MyUnion::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::myEnum:
-      ::apache::thrift::detail::st::destruct(value_.myEnum);
+      ::std::destroy_at(::std::addressof(value_.myEnum));
       break;
     case Type::myStruct:
-      ::apache::thrift::detail::st::destruct(value_.myStruct);
+      ::std::destroy_at(::std::addressof(value_.myStruct));
       break;
     case Type::myDataItem:
-      ::apache::thrift::detail::st::destruct(value_.myDataItem);
+      ::std::destroy_at(::std::addressof(value_.myDataItem));
       break;
     case Type::floatSet:
-      ::apache::thrift::detail::st::destruct(value_.floatSet);
+      ::std::destroy_at(::std::addressof(value_.floatSet));
       break;
     default:
       assert(false);
@@ -550,7 +550,7 @@ void UnionToBeRenamed::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::reserved_field:
-      ::apache::thrift::detail::st::destruct(value_.reserved_field);
+      ::std::destroy_at(::std::addressof(value_.reserved_field));
       break;
     default:
       assert(false);

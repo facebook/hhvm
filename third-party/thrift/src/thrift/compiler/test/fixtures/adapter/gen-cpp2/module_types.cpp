@@ -435,19 +435,19 @@ void Baz::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::intField:
-      ::apache::thrift::detail::st::destruct(value_.intField);
+      ::std::destroy_at(::std::addressof(value_.intField));
       break;
     case Type::setField:
-      ::apache::thrift::detail::st::destruct(value_.setField);
+      ::std::destroy_at(::std::addressof(value_.setField));
       break;
     case Type::mapField:
-      ::apache::thrift::detail::st::destruct(value_.mapField);
+      ::std::destroy_at(::std::addressof(value_.mapField));
       break;
     case Type::binaryField:
-      ::apache::thrift::detail::st::destruct(value_.binaryField);
+      ::std::destroy_at(::std::addressof(value_.binaryField));
       break;
     case Type::longField:
-      ::apache::thrift::detail::st::destruct(value_.longField);
+      ::std::destroy_at(::std::addressof(value_.longField));
       break;
     default:
       assert(false);
@@ -2307,10 +2307,10 @@ void ThriftAdaptTestUnion::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::delay:
-      ::apache::thrift::detail::st::destruct(value_.delay);
+      ::std::destroy_at(::std::addressof(value_.delay));
       break;
     case Type::custom:
-      ::apache::thrift::detail::st::destruct(value_.custom);
+      ::std::destroy_at(::std::addressof(value_.custom));
       break;
     default:
       assert(false);

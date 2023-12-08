@@ -292,7 +292,7 @@ void InnerUnion::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::innerOption:
-      ::apache::thrift::detail::st::destruct(value_.innerOption);
+      ::std::destroy_at(::std::addressof(value_.innerOption));
       break;
     default:
       assert(false);
@@ -392,13 +392,13 @@ void MyUnion::__fbthrift_destruct() {
     case Type::__EMPTY__:
       break;
     case Type::option1:
-      ::apache::thrift::detail::st::destruct(value_.option1);
+      ::std::destroy_at(::std::addressof(value_.option1));
       break;
     case Type::option2:
-      ::apache::thrift::detail::st::destruct(value_.option2);
+      ::std::destroy_at(::std::addressof(value_.option2));
       break;
     case Type::option3:
-      ::apache::thrift::detail::st::destruct(value_.option3);
+      ::std::destroy_at(::std::addressof(value_.option3));
       break;
     default:
       assert(false);

@@ -2,6 +2,7 @@ Code actions available:
 ------------------------------------------
 Extract into variable (CodeActionKind: refactor)
 Inline method (CodeActionKind: refactor) SELECTED
+slog variable (CodeActionKind: refactor)
 Extract into method (CodeActionKind: refactor)
 
 JSON for selected code action:

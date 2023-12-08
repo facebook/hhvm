@@ -9,7 +9,7 @@ edition = "2021"
 path = "lib.rs"
 
 [dependencies]
-heapless = "0.7.15"
+heapless = "0.8.0"
 operator = { version = "0.0.0", path = "../cargo/operator" }
 parser_core_types = { version = "0.0.0", path = "../cargo/core_types" }
 smart_constructors = { version = "0.0.0", path = "../cargo/smart_constructors" }

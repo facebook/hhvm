@@ -119,7 +119,7 @@ macro_rules! as_case_insensitive_keyword {
             if text.len() > $size {
                 None
             } else {
-                let mut t: heapless::String<$size> = text.into();
+                let mut t: heapless::String<$size> = text.try_into().unwrap();
                 let t: &mut str = t.as_mut_str();
                 t.make_ascii_lowercase();
                 let has_upper = t != text;

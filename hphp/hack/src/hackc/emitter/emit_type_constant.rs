@@ -301,7 +301,7 @@ fn hint_to_type_constant_list<'arena>(
                 }
             }
             let hints = match &hints[..] {
-                [h] if name == typehints::POISON_MARKER => {
+                [h] if name == typehints::POISON_MARKER || name == typehints::HH_FUNCTIONREF => {
                     return hint_to_type_constant_list(
                         alloc,
                         opts,

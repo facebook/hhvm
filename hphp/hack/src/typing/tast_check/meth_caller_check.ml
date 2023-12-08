@@ -39,7 +39,8 @@ let check_parameters env =
       | None -> ()
     end
     | Tnewtype (name, [ty], _)
-      when String.equal Naming_special_names.Classes.cSupportDyn name ->
+      when String.equal Naming_special_names.Classes.cSupportDyn name
+           || String.equal Naming_special_names.Classes.cFunctionRef name ->
       check pos ty
     | _ -> ()
   in
@@ -60,11 +61,12 @@ let check_readonly_return env pos ft =
                { pos; decl_pos = rpos })
   | _ -> ()
 
-let strip_supportdyn ty =
+let rec strip_supportdyn ty =
   match get_node ty with
   | Tnewtype (name, [ty], _)
-    when String.equal name Naming_special_names.Classes.cSupportDyn ->
-    ty
+    when String.equal name Naming_special_names.Classes.cSupportDyn
+         || String.equal name Naming_special_names.Classes.cFunctionRef ->
+    strip_supportdyn ty
   | _ -> ty
 
 let handler =

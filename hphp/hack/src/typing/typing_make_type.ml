@@ -178,6 +178,8 @@ let intersection r tyl =
   | [ty] -> ty
   | _ -> mk (r, Tintersection tyl)
 
+let function_ref r ty = mk (r, Tnewtype (SN.Classes.cFunctionRef, [ty], ty))
+
 let unenforced ty = { et_type = ty; et_enforced = Unenforced }
 
 let enforced ty = { et_type = ty; et_enforced = Enforced }

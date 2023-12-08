@@ -1,0 +1,66 @@
+File "function_ref.php", line 51, characters 17-18:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 39, characters 37-42:
+  Expected `string`
+  File "function_ref.php", line 43, characters 37-44:
+  But got `arraykey`
+File "function_ref.php", line 51, characters 17-18:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 43, characters 48-55:
+  Expected `arraykey`
+  File "function_ref.php", line 39, characters 46-50:
+  But got `mixed`
+File "function_ref.php", line 62, characters 17-19:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 19, characters 28-35:
+  Expected `arraykey`
+  File "function_ref.php", line 39, characters 46-50:
+  But got `mixed`
+File "function_ref.php", line 62, characters 17-19:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 39, characters 37-42:
+  Expected `string`
+  File "function_ref.php", line 19, characters 14-21:
+  But got `arraykey`
+File "function_ref.php", line 69, characters 17-19:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 5, characters 52-59:
+  Expected `arraykey`
+  File "function_ref.php", line 39, characters 46-50:
+  But got `mixed`
+File "function_ref.php", line 69, characters 17-19:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 39, characters 37-42:
+  Expected `string`
+  File "function_ref.php", line 5, characters 38-45:
+  But got `arraykey`
+File "function_ref.php", line 74, characters 17-18:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 8, characters 19-22:
+  Expected `dynamic` because method must be callable in a dynamic context
+  File "function_ref.php", line 35, characters 18-50:
+  Type `(function(C, arraykey): arraykey)` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "function_ref.php", line 79, characters 16-19:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 31, characters 3-57:
+  Expected `HH\FunctionRef<(readonly function(arraykey): arraykey)>`
+  File "function_ref.php", line 76, characters 10-39:
+  But got `(function(arraykey $x): arraykey)`
+File "function_ref.php", line 84, characters 16-18:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 31, characters 3-57:
+  Expected `HH\FunctionRef<(readonly function(arraykey): arraykey)>`
+  File "function_ref.php", line 22, characters 10-20:
+  But got `(readonly function<T>($x): _)`
+File "function_ref.php", line 89, characters 16-19:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 31, characters 3-57:
+  Expected `HH\FunctionRef<(readonly function(arraykey): arraykey)>`
+  File "function_ref.php", line 11, characters 26-44:
+  But got `(readonly function<T>($x): _)`
+File "function_ref.php", line 94, characters 17-19:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 35, characters 3-51:
+  Expected `HH\FunctionRef<(function(C, arraykey): arraykey)>`
+  File "function_ref.php", line 14, characters 19-30:
+  But got `(function<T>(C, $x): _)`

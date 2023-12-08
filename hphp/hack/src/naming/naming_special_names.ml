@@ -76,6 +76,8 @@ module Classes = struct
   let cSpliceable = "\\Spliceable"
 
   let cSupportDyn = "\\HH\\supportdyn"
+
+  let cFunctionRef = "\\HH\\FunctionRef"
 end
 
 module Collections = struct
@@ -1241,6 +1243,8 @@ module UnstableFeatures = struct
   let expression_trees = "expression_trees"
 
   let modules = "modules"
+
+  let function_references = "function_references"
 end
 
 module Coeffects = struct

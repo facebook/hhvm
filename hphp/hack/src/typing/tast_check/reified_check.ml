@@ -167,7 +167,9 @@ let verify_call_targs env expr_pos decl_pos tparams targs =
 let rec get_ft_tparams env fun_ty =
   let fun_ty = Tast_env.strip_dynamic env fun_ty in
   match get_node fun_ty with
-  | Tnewtype (name, _, ty1) when String.equal name SN.Classes.cSupportDyn ->
+  | Tnewtype (name, _, ty1)
+    when String.equal name SN.Classes.cSupportDyn
+         || String.equal name SN.Classes.cFunctionRef ->
     get_ft_tparams env ty1
   | Tfun ({ ft_tparams; _ } as fun_ty) -> Some (ft_tparams, fun_ty)
   | _ -> None

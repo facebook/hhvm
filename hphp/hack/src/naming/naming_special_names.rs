@@ -659,6 +659,8 @@ pub mod typehints {
 
     pub const SUPPORTDYN: &str = "supportdyn";
 
+    pub const HH_FUNCTIONREF: &str = "\\HH\\FunctionRef";
+
     pub const HH_SUPPORTDYN: &str = "\\HH\\supportdyn";
 
     pub const POISON_MARKER: &str = "\\HH\\FIXME\\POISON_MARKER";

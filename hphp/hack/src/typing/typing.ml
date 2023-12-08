@@ -457,7 +457,7 @@ let get_kvc_inst env p kvc_kind ty =
 (* Check whether this is a function type that (a) either returns a disposable
  * or (b) has the <<__ReturnDisposable>> attribute
  *)
-let is_return_disposable_fun_type env ty =
+let rec is_return_disposable_fun_type env ty =
   let (_env, ty) = Env.expand_type env ty in
   let ty = TUtils.strip_dynamic env ty in
   let (_, _env, ty) = TUtils.strip_supportdyn env ty in
@@ -466,6 +466,8 @@ let is_return_disposable_fun_type env ty =
     get_ft_return_disposable ft
     || Option.is_some
          (Typing_disposable.is_disposable_type env ft.ft_ret.et_type)
+  | Tnewtype (n, _, ty) when String.equal n SN.Classes.cFunctionRef ->
+    is_return_disposable_fun_type env ty
   | _ -> false
 
 let set_tcopt_unstable_features env { fa_user_attributes; _ } =
@@ -481,6 +483,8 @@ let set_tcopt_unstable_features env { fa_user_attributes; _ } =
         match feature with
         | Aast.String s when s = SN.UnstableFeatures.modules ->
           Env.map_tcopt ~f:(fun t -> TCO.set_modules t true) env
+        | Aast.String s when s = SN.UnstableFeatures.function_references ->
+          Env.map_tcopt ~f:(fun t -> TCO.set_function_references t true) env
         | Aast.String s when s = SN.UnstableFeatures.expression_trees ->
           Env.map_tcopt
             ~f:(fun t -> TCO.set_tco_enable_expression_trees t true)
@@ -1683,6 +1687,15 @@ let get_bound_ty_for_lvar env e =
   | (_, _, Lvar (_, lid)) ->
     (Typing_env.get_local env lid).Typing_local_types.bound_ty
   | _ -> None
+
+let make_function_ref ~contains_generics env p ty =
+  if
+    (not contains_generics)
+    && TCO.enable_function_references (Env.get_tcopt env)
+  then
+    MakeType.function_ref (Reason.Rwitness p) ty
+  else
+    ty
 
 (* This function captures the common bits of logic behind refinement
  * of the type of a local variable or a class member variable as a
@@ -3426,6 +3439,13 @@ end = struct
               reason
               caller
           in
+          let ty =
+            make_function_ref
+              ~contains_generics:(not (List.is_empty fty.ft_tparams))
+              env
+              p
+              ty
+          in
           make_result env p (Aast.Method_caller (pos_cname, meth_name)) ty
         | _ ->
           (* Shouldn't happen *)
@@ -3451,6 +3471,13 @@ end = struct
       let (env, fpty) = set_function_pointer env fpty in
       (* All function pointers are readonly_this since they are either toplevel or static *)
       let (env, fpty) = set_readonly_this p env fpty in
+      let fpty =
+        make_function_ref
+          ~contains_generics:(not (List.is_empty tal))
+          env
+          p
+          fpty
+      in
       make_result
         env
         p
@@ -3737,6 +3764,13 @@ end = struct
       let (env, fty) = set_function_pointer env fty in
       (* All function pointers are readonly_this since they are always a toplevel function or static method *)
       let (env, fty) = set_readonly_this p env fty in
+      let fty =
+        make_function_ref
+          ~contains_generics:(not (List.is_empty targs))
+          env
+          p
+          fty
+      in
       make_result env p e fty
     | Binop { bop; lhs = e1; rhs = e2 } ->
       Binop.check_binop

@@ -164,6 +164,7 @@ type t = {
   tco_no_parser_readonly_check: bool;
   tco_enable_expression_trees: bool;
   tco_enable_modules: bool;
+  tco_enable_function_references: bool;
   tco_allowed_expression_tree_visitors: string list;
   tco_math_new_code: bool;
   tco_typeconst_concrete_concrete_error: bool;
@@ -297,6 +298,7 @@ let default =
     tco_no_parser_readonly_check = false;
     tco_enable_expression_trees = false;
     tco_enable_modules = false;
+    tco_enable_function_references = false;
     tco_allowed_expression_tree_visitors = [];
     tco_math_new_code = false;
     tco_typeconst_concrete_concrete_error = false;
@@ -428,6 +430,7 @@ let set
     ?tco_no_parser_readonly_check
     ?tco_enable_expression_trees
     ?tco_enable_modules
+    ?tco_enable_function_references
     ?tco_allowed_expression_tree_visitors
     ?tco_math_new_code
     ?tco_typeconst_concrete_concrete_error
@@ -705,6 +708,10 @@ let set
     tco_enable_expression_trees =
       setting tco_enable_expression_trees options.tco_enable_expression_trees;
     tco_enable_modules = setting tco_enable_modules options.tco_enable_modules;
+    tco_enable_function_references =
+      setting
+        tco_enable_function_references
+        options.tco_enable_function_references;
     tco_allowed_expression_tree_visitors =
       setting
         tco_allowed_expression_tree_visitors

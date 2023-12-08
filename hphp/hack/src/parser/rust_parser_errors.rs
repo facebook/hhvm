@@ -110,6 +110,7 @@ pub enum UnstableFeatures {
     MatchStatements,
     StrictSwitch,
     ClassType,
+    FunctionReferences,
 }
 impl UnstableFeatures {
     // Preview features are allowed to run in prod. This function decides
@@ -142,6 +143,7 @@ impl UnstableFeatures {
             UnstableFeatures::MatchStatements => Unstable,
             UnstableFeatures::StrictSwitch => Unstable,
             UnstableFeatures::ClassType => Unstable,
+            UnstableFeatures::FunctionReferences => Unstable,
         }
     }
 }

@@ -438,6 +438,9 @@ let get_concrete_supertypes
              && is_prim Aast.Tarraykey bound_ty
              && Env.is_enum env cid ->
         iter seen env acc tyl
+      (* Special casing for intersection bound on FunctionRef *)
+      | Tnewtype (n, _, as_ty) when String.equal n SN.Classes.cFunctionRef ->
+        iter seen env acc (as_ty :: tyl)
       (* Don't expand enums or newtype; just return the type itself *)
       | Tnewtype (n, _, as_ty)
         when expand_supportdyn || not (String.equal n SN.Classes.cSupportDyn) ->

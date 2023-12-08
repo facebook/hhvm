@@ -49,7 +49,9 @@ let union_fty_readonly
 let rec get_fty ty =
   let open Typing_defs in
   match get_node ty with
-  | Tnewtype (name, _, ty2) when String.equal name SN.Classes.cSupportDyn ->
+  | Tnewtype (name, _, ty2)
+    when String.equal name SN.Classes.cSupportDyn
+         || String.equal name SN.Classes.cFunctionRef ->
     get_fty ty2
   | Tfun fty -> Some fty
   | Tunion tyl ->

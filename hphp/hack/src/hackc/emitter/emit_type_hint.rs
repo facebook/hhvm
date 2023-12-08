@@ -277,7 +277,7 @@ fn hint_to_type_constraint<'arena>(
                         _ => hint_to_type_constraint(alloc, kind, tparams, false, &hs[0]),
                     };
                 }
-                [h] if s == typehints::POISON_MARKER => {
+                [h] if s == typehints::POISON_MARKER || s == typehints::HH_FUNCTIONREF => {
                     return hint_to_type_constraint(alloc, kind, tparams, false, h);
                 }
                 _ => {}

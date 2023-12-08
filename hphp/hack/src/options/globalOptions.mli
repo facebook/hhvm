@@ -231,6 +231,8 @@ type t = {
   tco_enable_expression_trees: bool;
       (** Enable expression trees via unstable features flag *)
   tco_enable_modules: bool;  (** Enable unstable feature: modules *)
+  tco_enable_function_references: bool;
+      (** Enable unstable feature: function references *)
   tco_allowed_expression_tree_visitors: string list;
       (** Allowed expression tree visitors when not enabled via unstable features flag *)
   tco_math_new_code: bool;
@@ -404,6 +406,7 @@ val set :
   ?tco_no_parser_readonly_check:bool ->
   ?tco_enable_expression_trees:bool ->
   ?tco_enable_modules:bool ->
+  ?tco_enable_function_references:bool ->
   ?tco_allowed_expression_tree_visitors:string list ->
   ?tco_math_new_code:bool ->
   ?tco_typeconst_concrete_concrete_error:bool ->

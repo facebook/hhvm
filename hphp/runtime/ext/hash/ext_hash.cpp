@@ -125,7 +125,7 @@ struct HashEngineMapInitializer {
     HashEngines["sha3-384"]     = HashEnginePtr(new hash_keccak( 768, 48));
     HashEngines["sha3-512"]     = HashEnginePtr(new hash_keccak(1024, 64));
     HashEngines["blake3"]       = HashEnginePtr(new hash_blake3());
-  #ifdef HHVM_FACEBOOK
+  #ifndef HPHP_OSS
     HashEngines["keyed-blake3"] = HashEnginePtr(new hash_keyed_blake3());
   #endif
   }

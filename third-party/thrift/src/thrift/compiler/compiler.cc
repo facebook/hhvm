@@ -33,7 +33,6 @@
 #endif
 #include <ctime>
 #include <fstream>
-#include <iostream>
 #include <set>
 
 #include <boost/algorithm/string/join.hpp>
@@ -704,7 +703,7 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
             ctx.warning(
                 source_location{},
                 "Could not load Thrift standard libraries: {}",
-                d.str());
+                d);
           },
           diagnostic_params::only_errors());
       std::unique_ptr<t_program_bundle> inc = parse_and_mutate_program(
@@ -780,7 +779,7 @@ std::unique_ptr<t_program_bundle> parse_and_dump_diagnostics(
   auto program =
       parse_and_mutate_program(sm, ctx, filename, std::move(pparams));
   for (const auto& diag : results.diagnostics()) {
-    std::cerr << diag << "\n";
+    fmt::print(stderr, "{}\n", diag);
   }
   return program;
 }
@@ -800,7 +799,7 @@ std::unique_ptr<t_program_bundle> parse_and_get_program(
 
   diagnostic_context ctx(
       sm,
-      [](const diagnostic& d) { fmt::print(stderr, "{}\n", d.str()); },
+      [](const diagnostic& d) { fmt::print(stderr, "{}\n", d); },
       diagnostic_params::only_errors());
   return parse_ast(sm, ctx, filename, std::move(pparams));
 }

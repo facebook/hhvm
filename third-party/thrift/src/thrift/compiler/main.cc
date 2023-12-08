@@ -24,7 +24,6 @@
  *
  */
 
-#include <iostream>
 #include <thrift/compiler/compiler.h>
 
 using namespace apache::thrift::compiler;
@@ -33,7 +32,7 @@ int main(int argc, char** argv) {
   source_manager sm;
   auto result = compile({argv, argv + argc}, sm);
   for (const auto& diag : result.detail.diagnostics()) {
-    std::cerr << diag << "\n";
+    fmt::print(stderr, "{}\n", diag);
   }
   return static_cast<int>(result.retcode);
 }

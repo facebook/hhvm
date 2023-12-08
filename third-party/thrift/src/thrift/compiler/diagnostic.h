@@ -18,7 +18,6 @@
 
 #include <array>
 #include <functional>
-#include <iosfwd>
 #include <string>
 #include <utility>
 #include <vector>
@@ -89,8 +88,6 @@ class diagnostic {
     return !(lhs == rhs);
   }
 };
-
-std::ostream& operator<<(std::ostream& os, const diagnostic& e);
 
 // A container of diagnostic results.
 class diagnostic_results {
@@ -262,3 +259,10 @@ class diagnostics_engine {
 } // namespace compiler
 } // namespace thrift
 } // namespace apache
+
+template <>
+struct fmt::formatter<apache::thrift::compiler::diagnostic> {
+  constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+  format_context::iterator format(
+      const apache::thrift::compiler::diagnostic& d, format_context& ctx) const;
+};

@@ -16,12 +16,10 @@
 
 #include <thrift/compiler/diagnostic.h>
 
-#include <sstream>
 #include <string>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+using apache::thrift::compiler::diagnostic;
+using apache::thrift::compiler::diagnostic_level;
 
 namespace {
 const char* level_to_string(diagnostic_level level) {
@@ -39,23 +37,26 @@ const char* level_to_string(diagnostic_level level) {
 }
 } // namespace
 
-std::string diagnostic::str() const {
-  std::ostringstream ss;
-  ss << *this;
-  return ss.str();
+fmt::format_context::iterator fmt::formatter<diagnostic>::format(
+    const diagnostic& d, format_context& ctx) const {
+  auto out = ctx.out();
+  format_to(out, "[{}:{}", level_to_string(d.level()), d.file());
+  if (d.lineno() > 0) {
+    format_to(out, ":{}", d.lineno());
+  }
+  format_to(out, "] {}", d.message());
+  if (!d.name().empty()) {
+    format_to(out, " [{}]", d.name());
+  }
+  return out;
 }
 
-std::ostream& operator<<(std::ostream& os, const diagnostic& e) {
-  os << "[" << level_to_string(e.level()) << ":" << e.file();
-  if (e.lineno() > 0) {
-    os << ":" << e.lineno();
-  }
-  os << "] ";
-  os << e.message();
-  if (!e.name().empty()) {
-    os << " [" << e.name() << "]";
-  }
-  return os;
+namespace apache {
+namespace thrift {
+namespace compiler {
+
+std::string diagnostic::str() const {
+  return fmt::format("{}", *this);
 }
 
 void diagnostic_results::add(diagnostic diag) {

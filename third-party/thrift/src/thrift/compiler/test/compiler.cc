@@ -22,6 +22,7 @@
 #include <vector>
 
 #include <boost/filesystem.hpp>
+#include <fmt/ostream.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <re2/re2.h>
@@ -33,7 +34,7 @@
 namespace apache::thrift::compiler {
 // Add newlines when printing diagnostics to improve readability.
 void PrintTo(const diagnostic& d, std::ostream* os) {
-  *os << "\n" << d << "\n";
+  fmt::print(*os, "\n{}\n", d);
 }
 
 // Avoid order dependence when comparing diagnostics on one line.

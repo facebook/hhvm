@@ -366,7 +366,6 @@ public:
   StringData* lookupLitstrId(Id id) const;
 
   const NamedType* lookupNamedTypeId(Id id) const;
-  const NamedFunc* lookupNamedFuncId(Id id) const;
   NamedTypePair lookupNamedTypePairId(Id id) const;
   NamedFuncPair lookupNamedFuncPairId(Id id) const;
 

@@ -213,10 +213,6 @@ inline const NamedType* Unit::lookupNamedTypeId(Id id) const {
   return lookupNamedTypePairId(id).second;
 }
 
-inline const NamedFunc* Unit::lookupNamedFuncId(Id id) const {
-  return lookupNamedFuncPairId(id).second;
-}
-
 inline NamedTypePair Unit::lookupNamedTypePairId(Id id) const {
   auto const name = lookupLitstrId(id);
   assertx(name);

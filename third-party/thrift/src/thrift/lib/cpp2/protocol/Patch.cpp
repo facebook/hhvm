@@ -520,8 +520,9 @@ void insertNextMask(
     bool view,
     const F& getIncludesRef) {
   if (recursive) {
-    auto nextMasks = view ? extractMaskViewFromPatch(nextPatch.as_object())
-                          : extractMaskFromPatch(nextPatch.as_object());
+    auto nextMasks = view
+        ? protocol::extractMaskViewFromPatch(nextPatch.as_object())
+        : protocol::extractMaskFromPatch(nextPatch.as_object());
     insertMask(masks.read, std::move(readId), nextMasks.read, getIncludesRef);
     insertMask(
         masks.write, std::move(writeId), nextMasks.write, getIncludesRef);

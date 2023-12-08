@@ -99,7 +99,7 @@ class HTTPDownstreamSession final : public HTTPSession {
   }
 
   void attachThreadLocals(folly::EventBase*,
-                          folly::SSLContextPtr,
+                          std::shared_ptr<const folly::SSLContext>,
                           const WheelTimerInstance&,
                           HTTPSessionStats*,
                           FilterIteratorFn,

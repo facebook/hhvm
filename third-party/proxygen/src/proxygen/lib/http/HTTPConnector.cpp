@@ -73,7 +73,7 @@ void HTTPConnector::connect(EventBase* eventBase,
 
 void HTTPConnector::connectSSL(EventBase* eventBase,
                                const folly::SocketAddress& connectAddr,
-                               const shared_ptr<SSLContext>& context,
+                               const shared_ptr<const SSLContext>& context,
                                std::shared_ptr<folly::ssl::SSLSession> session,
                                std::chrono::milliseconds timeoutMs,
                                const SocketOptionMap& socketOptions,

@@ -126,7 +126,7 @@ class HTTPConnector : protected folly::AsyncSocket::ConnectCallback {
   void connectSSL(
       folly::EventBase* eventBase,
       const folly::SocketAddress& connectAddr,
-      const std::shared_ptr<folly::SSLContext>& ctx,
+      const std::shared_ptr<const folly::SSLContext>& ctx,
       std::shared_ptr<folly::ssl::SSLSession> session = nullptr,
       std::chrono::milliseconds timeoutMs = std::chrono::milliseconds(0),
       const folly::SocketOptionMap& socketOptions = folly::emptySocketOptionMap,

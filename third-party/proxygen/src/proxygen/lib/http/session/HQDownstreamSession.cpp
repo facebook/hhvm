@@ -61,13 +61,14 @@ bool HQDownstreamSession::isDetachable(bool) const {
   return false;
 }
 
-void HQDownstreamSession::attachThreadLocals(folly::EventBase*,
-                                             folly::SSLContextPtr,
-                                             const WheelTimerInstance&,
-                                             HTTPSessionStats*,
-                                             FilterIteratorFn,
-                                             HeaderCodec::Stats*,
-                                             HTTPSessionController*) {
+void HQDownstreamSession::attachThreadLocals(
+    folly::EventBase*,
+    std::shared_ptr<const folly::SSLContext>,
+    const WheelTimerInstance&,
+    HTTPSessionStats*,
+    FilterIteratorFn,
+    HeaderCodec::Stats*,
+    HTTPSessionController*) {
   LOG(FATAL) << __func__ << " is an upstream interface";
 }
 

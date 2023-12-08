@@ -44,7 +44,7 @@ class HQDownstreamSession : public HQSession {
   bool isDetachable(bool) const override;
 
   void attachThreadLocals(folly::EventBase*,
-                          folly::SSLContextPtr,
+                          std::shared_ptr<const folly::SSLContext>,
                           const WheelTimerInstance&,
                           HTTPSessionStats*,
                           FilterIteratorFn,

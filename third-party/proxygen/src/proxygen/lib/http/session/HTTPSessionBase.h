@@ -473,13 +473,14 @@ class HTTPSessionBase : public wangle::ManagedConnection {
 
   virtual bool isDetachable(bool checkSocket) const = 0;
 
-  virtual void attachThreadLocals(folly::EventBase* eventBase,
-                                  folly::SSLContextPtr sslContext,
-                                  const WheelTimerInstance& wheelTimer,
-                                  HTTPSessionStats* stats,
-                                  FilterIteratorFn fn,
-                                  HeaderCodec::Stats* headerCodecStats,
-                                  HTTPSessionController* controller) = 0;
+  virtual void attachThreadLocals(
+      folly::EventBase* eventBase,
+      std::shared_ptr<const folly::SSLContext> sslContext,
+      const WheelTimerInstance& wheelTimer,
+      HTTPSessionStats* stats,
+      FilterIteratorFn fn,
+      HeaderCodec::Stats* headerCodecStats,
+      HTTPSessionController* controller) = 0;
 
   virtual void detachThreadLocals(bool detachSSLContext = false) = 0;
 

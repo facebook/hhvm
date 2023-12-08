@@ -117,13 +117,14 @@ bool HQUpstreamSession::isDetachable(bool checkSocket) const {
   return getNumOutgoingStreams() == 0 && getNumIncomingStreams() == 0;
 }
 
-void HQUpstreamSession::attachThreadLocals(folly::EventBase* eventBase,
-                                           folly::SSLContextPtr,
-                                           const WheelTimerInstance& timeout,
-                                           HTTPSessionStats* stats,
-                                           FilterIteratorFn fn,
-                                           HeaderCodec::Stats* headerCodecStats,
-                                           HTTPSessionController* controller) {
+void HQUpstreamSession::attachThreadLocals(
+    folly::EventBase* eventBase,
+    std::shared_ptr<const folly::SSLContext>,
+    const WheelTimerInstance& timeout,
+    HTTPSessionStats* stats,
+    FilterIteratorFn fn,
+    HeaderCodec::Stats* headerCodecStats,
+    HTTPSessionController* controller) {
   // TODO: deal with control streams in h2q
   VLOG(4) << __func__ << " sess=" << *this;
   txnEgressQueue_.attachThreadLocals(timeout);

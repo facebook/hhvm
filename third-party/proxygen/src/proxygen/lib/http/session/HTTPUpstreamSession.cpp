@@ -172,7 +172,7 @@ bool HTTPUpstreamSession::onNativeProtocolUpgrade(
 
 void HTTPUpstreamSession::attachThreadLocals(
     folly::EventBase* eventBase,
-    folly::SSLContextPtr sslContext,
+    std::shared_ptr<const folly::SSLContext> sslContext,
     const WheelTimerInstance& wheelTimer,
     HTTPSessionStats* stats,
     FilterIteratorFn fn,
@@ -198,7 +198,7 @@ void HTTPUpstreamSession::attachThreadLocals(
 }
 
 void HTTPUpstreamSession::maybeAttachSSLContext(
-    folly::SSLContextPtr sslContext) const {
+    std::shared_ptr<const folly::SSLContext> sslContext) const {
 #ifndef NO_ASYNCSSLSOCKET
   auto sslSocket = sock_->getUnderlyingTransport<folly::AsyncSSLSocket>();
   if (sslSocket && sslContext) {

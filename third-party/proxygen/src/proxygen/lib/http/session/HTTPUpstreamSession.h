@@ -87,7 +87,7 @@ class HTTPUpstreamSession : public HTTPSession {
   using FilterIteratorFn = std::function<void(HTTPCodecFilter*)>;
 
   void attachThreadLocals(folly::EventBase* eventBase,
-                          folly::SSLContextPtr sslContext,
+                          std::shared_ptr<const folly::SSLContext> sslContext,
                           const WheelTimerInstance& wheelTimer,
                           HTTPSessionStats* stats,
                           FilterIteratorFn fn,
@@ -167,7 +167,8 @@ class HTTPUpstreamSession : public HTTPSession {
                                const std::string& protocolString,
                                HTTPMessage& msg) override;
 
-  void maybeAttachSSLContext(folly::SSLContextPtr sslContext) const;
+  void maybeAttachSSLContext(
+      std::shared_ptr<const folly::SSLContext> sslContext) const;
   void maybeDetachSSLContext() const;
 
   uint8_t maxVirtualPriorityLevel_{0};

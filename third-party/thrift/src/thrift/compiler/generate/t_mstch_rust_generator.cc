@@ -197,6 +197,15 @@ bool get_annotation_property_bool(
   return false;
 }
 
+std::string get_type_annotation(const t_field* field) {
+  if (const t_const* annot = field->find_structured_annotation_or_null(
+          "facebook.com/thrift/annotation/rust/Type")) {
+    return get_annotation_property_string(annot, "name");
+  }
+
+  return "";
+}
+
 std::string get_type_annotation(const t_type* type) {
   if (const t_const* annot = t_typedef::get_first_structured_annotation_or_null(
           type, "facebook.com/thrift/annotation/rust/Type")) {
@@ -206,8 +215,16 @@ std::string get_type_annotation(const t_type* type) {
   return t_typedef::get_first_annotation(type, {"rust.type"});
 }
 
+bool has_type_annotation(const t_field* field) {
+  return !get_type_annotation(field).empty();
+}
+
 bool has_type_annotation(const t_type* type) {
   return !get_type_annotation(type).empty();
+}
+
+bool has_nonstandard_type_annotation(const t_field* field) {
+  return get_type_annotation(field).find("::") != std::string::npos;
 }
 
 bool has_nonstandard_type_annotation(const t_type* type) {
@@ -476,6 +493,10 @@ std::string get_resolved_name(const t_type* t) {
   return t->get_full_name();
 }
 
+std::string get_resolved_name(const t_field* field) {
+  return get_resolved_name(&field->type().deref());
+}
+
 } // namespace
 
 class t_mstch_rust_generator : public t_mstch_generator {
@@ -521,8 +542,12 @@ class rust_mstch_program : public mstch_program {
              &rust_mstch_program::rust_any_service_without_parent},
             {"program:nonstandardTypes?",
              &rust_mstch_program::rust_has_nonstandard_types},
+            {"program:nonstandardFields?",
+             &rust_mstch_program::rust_has_nonstandard_fields},
             {"program:nonstandardTypes",
              &rust_mstch_program::rust_nonstandard_types},
+            {"program:nonstandardFields",
+             &rust_mstch_program::rust_nonstandard_fields},
             {"program:docs?", &rust_mstch_program::rust_has_docs},
             {"program:docs", &rust_mstch_program::rust_docs},
             {"program:lib_include_srcs",
@@ -613,6 +638,14 @@ class rust_mstch_program : public mstch_program {
     return false;
   }
   template <typename F>
+  void foreach_field(F&& f) const {
+    for (const t_structured* strct : program_->structs_and_unions()) {
+      for (const auto& field : strct->fields()) {
+        f(&field);
+      }
+    }
+  }
+  template <typename F>
   void foreach_type(F&& f) const {
     for (const t_structured* strct : program_->structs_and_unions()) {
       for (const auto& field : strct->fields()) {
@@ -631,35 +664,21 @@ class rust_mstch_program : public mstch_program {
       f(typedf);
     }
   }
-  mstch::node rust_has_nonstandard_types() {
-    bool has_nonstandard_types = false;
-    foreach_type([&](const t_type* type) {
-      if (has_nonstandard_type_annotation(type)) {
-        has_nonstandard_types = true;
-      }
-    });
-    return has_nonstandard_types;
-  }
   mstch::node rust_nonstandard_types() {
-    struct rust_type_less {
-      bool operator()(const t_type* lhs, const t_type* rhs) const {
-        std::string lhs_annotation = get_type_annotation(lhs);
-        std::string rhs_annotation = get_type_annotation(rhs);
-        if (lhs_annotation != rhs_annotation) {
-          return lhs_annotation < rhs_annotation;
-        }
-        return get_resolved_name(lhs) < get_resolved_name(rhs);
-      }
-    };
-    std::set<const t_type*, rust_type_less> nonstandard_types;
-    foreach_type([&](const t_type* type) {
-      if (has_nonstandard_type_annotation(type)) {
-        nonstandard_types.insert(type);
-      }
-    });
-    std::vector<const t_type*> elements(
-        nonstandard_types.begin(), nonstandard_types.end());
-    return make_mstch_types(elements);
+    types_set_t types = nonstandard_types();
+    return make_mstch_types(
+        std::vector<const t_type*>(types.begin(), types.end()));
+  }
+  mstch::node rust_nonstandard_fields() {
+    fields_set_t fields = nonstandard_fields();
+    return make_mstch_fields(
+        std::vector<const t_field*>(fields.begin(), fields.end()));
+  }
+  mstch::node rust_has_nonstandard_types() {
+    return !nonstandard_types().empty();
+  }
+  mstch::node rust_has_nonstandard_fields() {
+    return !nonstandard_fields().empty();
   }
   mstch::node rust_has_docs() { return program_->has_doc(); }
   mstch::node rust_docs() { return quoted_rust_doc(program_); }
@@ -777,6 +796,55 @@ class rust_mstch_program : public mstch_program {
 
  private:
   const rust_codegen_options& options_;
+
+ private:
+  template <class T>
+  struct rust_type_less {
+    bool operator()(const T* lhs, const T* rhs) const {
+      std::string lhs_annotation = get_type_annotation(lhs);
+      std::string rhs_annotation = get_type_annotation(rhs);
+      if (lhs_annotation != rhs_annotation) {
+        return lhs_annotation < rhs_annotation;
+      }
+      return get_resolved_name(lhs) < get_resolved_name(rhs);
+    }
+  };
+  using strings_set_t = std::set<std::string>;
+  using types_set_t = std::set<const t_type*, rust_type_less<t_type>>;
+  using fields_set_t = std::set<const t_field*, rust_type_less<t_field>>;
+
+ private:
+  types_set_t nonstandard_types() {
+    types_set_t types;
+    foreach_type([&](const t_type* type) {
+      if (has_nonstandard_type_annotation(type)) {
+        types.insert(type);
+      }
+    });
+    return types;
+  }
+  // Collect fields with nonstandard types not contained by
+  // `nonstandard_types()` (avoid generating multiple definitions for the same
+  // type).
+  fields_set_t nonstandard_fields() {
+    fields_set_t fields;
+    strings_set_t names;
+    types_set_t types = nonstandard_types();
+    std::transform(
+        types.begin(),
+        types.end(),
+        std::inserter(names, names.end()),
+        [](const t_type* t) { return get_resolved_name(t); });
+    foreach_field([&](const t_field* field) {
+      if (has_nonstandard_type_annotation(field)) {
+        if (names.find(get_resolved_name(&field->type().deref())) ==
+            names.end()) {
+          fields.insert(field);
+        }
+      }
+    });
+    return fields;
+  }
 };
 
 class rust_mstch_service : public mstch_service {
@@ -1875,10 +1943,25 @@ class rust_mstch_field : public mstch_field {
             {"field:arc?", &rust_mstch_field::rust_is_arc},
             {"field:docs?", &rust_mstch_field::rust_has_docs},
             {"field:docs", &rust_mstch_field::rust_docs},
+            {"field:type_annotation?", &rust_mstch_field::rust_type_annotation},
+            {"field:type_nonstandard?",
+             &rust_mstch_field::rust_type_nonstandard},
+            {"field:type_rust", &rust_mstch_field::rust_type},
             {"field:has_adapter?", &rust_mstch_field::has_adapter},
             {"field:rust_structured_annotations",
              &rust_mstch_field::rust_structured_annotations},
         });
+  }
+  mstch::node rust_type_annotation() { return has_type_annotation(field_); }
+  mstch::node rust_type_nonstandard() {
+    return has_nonstandard_type_annotation(field_);
+  }
+  mstch::node rust_type() {
+    auto rust_type = get_type_annotation(field_);
+    if (!rust_type.empty() && rust_type.find("::") == std::string::npos) {
+      return "fbthrift::builtin_types::" + rust_type;
+    }
+    return rust_type;
   }
   mstch::node rust_name() {
     if (!field_->has_annotation("rust.name")) {

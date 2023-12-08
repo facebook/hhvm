@@ -339,7 +339,7 @@ impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_
             }}{{#field:type}}{{>lib/ttype}}{{/field:type}}, {{!
             }}{{field:key}}i16{{!
         }});
-        {{#field:type}}{{>lib/write}}{{/field:type}}(&self.{{field:rust_name}}, p);
+        {{#field:type}}{{#field:type_annotation?}}{{>lib/annfieldwrite}}{{/field:type_annotation?}}{{^field:type_annotation?}}{{>lib/write}}{{/field:type_annotation?}}{{/field:type}}(&self.{{field:rust_name}}, p);
         p.write_field_end();{{!
         }}{{/function:args}}
         p.write_field_stop();

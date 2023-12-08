@@ -185,7 +185,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_{{
                 (::fbthrift::TType::Stop, _) => break,{{!
                 }}{{#function:args}}
                 ({{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}) => {{!
-                    }}field_{{field:name}} = ::std::option::Option::Some({{#field:type}}{{>lib/read}}{{/field:type}}(p)?),{{!
+                    }}field_{{field:name}} = ::std::option::Option::Some({{#field:type}}{{#field:type_annotated?}}{{program:crate}}::r#impl::read{{/field:type_annotated?}}{{^field:type_annotated?}}{{>lib/read}}{{/field:type_annotated?}}{{/field:type}}(p)?),{{!
                 }}{{/function:args}}
                 (fty, _) => p.skip(fty)?,
             }

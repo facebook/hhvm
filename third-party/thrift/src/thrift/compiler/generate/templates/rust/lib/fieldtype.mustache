@@ -17,8 +17,13 @@
 }}{{#field:optional?}}::std::option::Option<{{/field:optional?}}{{!
 }}{{#field:box?}}::std::boxed::Box<{{/field:box?}}{{!
 }}{{#field:arc?}}::std::sync::Arc<{{/field:arc?}}{{!
-    }}{{#field:has_adapter?}}{{>lib/adapter/qualified}}::AdaptedType{{/field:has_adapter?}}{{!
-    }}{{^field:has_adapter?}}{{#field:type}}{{>lib/type}}{{/field:type}}{{/field:has_adapter?}}{{!
+}}{{#field:has_adapter?}}{{>lib/adapter/qualified}}::AdaptedType{{/field:has_adapter?}}{{!
+}}{{^field:has_adapter?}}{{!
+  }}{{#field:type}}{{!
+    }}{{#field:type_annotation?}}{{>lib/annfieldtype}}{{/field:type_annotation?}}{{!
+    }}{{^field:type_annotation?}}{{>lib/type}}{{/field:type_annotation?}}{{!
+  }}{{/field:type}}{{!
+}}{{/field:has_adapter?}}{{!
 }}{{#field:arc?}}>{{/field:arc?}}{{!
 }}{{#field:box?}}>{{/field:box?}}{{!
 }}{{#field:optional?}}>{{/field:optional?}}

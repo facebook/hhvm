@@ -86,6 +86,10 @@ class Type implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
+        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::fromShape(
+          shape(
+          )
+        ),
         '\facebook\thrift\annotation\Typedef' => \facebook\thrift\annotation\Typedef::fromShape(
           shape(
           )

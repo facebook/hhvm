@@ -16,11 +16,32 @@
 
 include "thrift/annotation/rust.thrift"
 
+// --
+
+@rust.Type{name = "OrderedFloat<f64>"}
+typedef double double_t
+struct T0 {
+  1: double_t data;
+}
+struct T1 {
+  @rust.Type{name = "OrderedFloat<f64>"}
+  1: double data;
+}
 @rust.Type{name = "sorted_vector_map::SortedVectorMap"}
 typedef map<string, i64> map_t
-struct T {
+struct T2 {
   1: map_t data;
 }
+struct T3 {
+  @rust.Type{name = "sorted_vector_map::SortedVectorMap"}
+  1: map<string, i64> data;
+}
+struct T4 {
+  @rust.Type{name = "HashMap"}
+  1: map_t data;
+}
+
+// --
 
 @rust.Derive{derives = ["Foo", "crate::Bar"]}
 @scope.Transitive

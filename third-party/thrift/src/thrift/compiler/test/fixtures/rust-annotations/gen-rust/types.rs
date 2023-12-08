@@ -12,11 +12,57 @@ pub mod errors;
 #[allow(unused_imports)]
 pub(crate) use crate as types;
 
+pub type double_t = ::std::primitive::f64;
+
 pub type map_t = ::std::collections::BTreeMap<::std::string::String, ::std::primitive::i64>;
 
 #[derive(Clone, PartialEq)]
-pub struct T {
+pub struct T0 {
+    pub data: ::fbthrift::builtin_types::OrderedFloat<f64>,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct T1 {
+    pub data: ::fbthrift::builtin_types::OrderedFloat<f64>,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct T2 {
     pub data: ::sorted_vector_map::SortedVectorMap<::std::string::String, ::std::primitive::i64>,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct T3 {
+    pub data: ::sorted_vector_map::SortedVectorMap<::std::string::String, ::std::primitive::i64>,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct T4 {
+    pub data: ::fbthrift::builtin_types::HashMap<::std::string::String, ::std::primitive::i64>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -184,7 +230,7 @@ where
 }
 
 #[allow(clippy::derivable_impls)]
-impl ::std::default::Default for self::T {
+impl ::std::default::Default for self::T0 {
     fn default() -> Self {
         Self {
             data: ::std::default::Default::default(),
@@ -193,29 +239,225 @@ impl ::std::default::Default for self::T {
     }
 }
 
-impl ::std::fmt::Debug for self::T {
+impl ::std::fmt::Debug for self::T0 {
     fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         formatter
-            .debug_struct("T")
+            .debug_struct("T0")
             .field("data", &self.data)
             .finish()
     }
 }
 
-unsafe impl ::std::marker::Send for self::T {}
-unsafe impl ::std::marker::Sync for self::T {}
-impl ::std::marker::Unpin for self::T {}
+unsafe impl ::std::marker::Send for self::T0 {}
+unsafe impl ::std::marker::Sync for self::T0 {}
+impl ::std::marker::Unpin for self::T0 {}
 
-impl ::fbthrift::GetTType for self::T {
+impl ::fbthrift::GetTType for self::T0 {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
-impl<P> ::fbthrift::Serialize<P> for self::T
+impl<P> ::fbthrift::Serialize<P> for self::T0
 where
     P: ::fbthrift::ProtocolWriter,
 {
     fn write(&self, p: &mut P) {
-        p.write_struct_begin("T");
+        p.write_struct_begin("T0");
+        p.write_field_begin("data", ::fbthrift::TType::Double, 1);
+        ::fbthrift::Serialize::write(&self.data, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::T0
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::Double, 1),
+        ];
+        let mut field_data = ::std::option::Option::None;
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::Double, 1) => field_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            data: field_data.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for T0 {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+            },
+            _ => {}
+        }
+
+        None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::T1 {
+    fn default() -> Self {
+        Self {
+            data: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::T1 {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("T1")
+            .field("data", &self.data)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::T1 {}
+unsafe impl ::std::marker::Sync for self::T1 {}
+impl ::std::marker::Unpin for self::T1 {}
+
+impl ::fbthrift::GetTType for self::T1 {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::T1
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("T1");
+        p.write_field_begin("data", ::fbthrift::TType::Double, 1);
+        ::fbthrift::Serialize::write(&self.data, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::T1
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::Double, 1),
+        ];
+        let mut field_data = ::std::option::Option::None;
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::Double, 1) => field_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            data: field_data.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for T1 {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+
+                if type_id == ::std::any::TypeId::of::<rust::types::Type>() {
+                    let mut tmp = Some(rust::types::Type {
+                        name: "OrderedFloat<f64>".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            _ => {}
+        }
+
+        None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::T2 {
+    fn default() -> Self {
+        Self {
+            data: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::T2 {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("T2")
+            .field("data", &self.data)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::T2 {}
+unsafe impl ::std::marker::Sync for self::T2 {}
+impl ::std::marker::Unpin for self::T2 {}
+
+impl ::fbthrift::GetTType for self::T2 {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::T2
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("T2");
         p.write_field_begin("data", ::fbthrift::TType::Map, 1);
         crate::r#impl::write(&self.data, p);
         p.write_field_end();
@@ -224,7 +466,7 @@ where
     }
 }
 
-impl<P> ::fbthrift::Deserialize<P> for self::T
+impl<P> ::fbthrift::Deserialize<P> for self::T2
 where
     P: ::fbthrift::ProtocolReader,
 {
@@ -252,7 +494,7 @@ where
 }
 
 
-impl ::fbthrift::metadata::ThriftAnnotations for T {
+impl ::fbthrift::metadata::ThriftAnnotations for T2 {
     fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
@@ -267,6 +509,212 @@ impl ::fbthrift::metadata::ThriftAnnotations for T {
         #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
+            },
+            _ => {}
+        }
+
+        None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::T3 {
+    fn default() -> Self {
+        Self {
+            data: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::T3 {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("T3")
+            .field("data", &self.data)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::T3 {}
+unsafe impl ::std::marker::Sync for self::T3 {}
+impl ::std::marker::Unpin for self::T3 {}
+
+impl ::fbthrift::GetTType for self::T3 {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::T3
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("T3");
+        p.write_field_begin("data", ::fbthrift::TType::Map, 1);
+        crate::r#impl::write(&self.data, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::T3
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::Map, 1),
+        ];
+        let mut field_data = ::std::option::Option::None;
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::Map, 1) => field_data = ::std::option::Option::Some(crate::r#impl::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            data: field_data.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for T3 {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+
+                if type_id == ::std::any::TypeId::of::<rust::types::Type>() {
+                    let mut tmp = Some(rust::types::Type {
+                        name: "sorted_vector_map::SortedVectorMap".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            _ => {}
+        }
+
+        None
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::T4 {
+    fn default() -> Self {
+        Self {
+            data: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::T4 {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("T4")
+            .field("data", &self.data)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::T4 {}
+unsafe impl ::std::marker::Sync for self::T4 {}
+impl ::std::marker::Unpin for self::T4 {}
+
+impl ::fbthrift::GetTType for self::T4 {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::T4
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("T4");
+        p.write_field_begin("data", ::fbthrift::TType::Map, 1);
+        ::fbthrift::Serialize::write(&self.data, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::T4
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::Map, 1),
+        ];
+        let mut field_data = ::std::option::Option::None;
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::Map, 1) => field_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            data: field_data.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for T4 {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+
+                if type_id == ::std::any::TypeId::of::<rust::types::Type>() {
+                    let mut tmp = Some(rust::types::Type {
+                        name: "HashMap".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             _ => {}
         }

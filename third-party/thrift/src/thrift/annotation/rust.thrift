@@ -23,6 +23,7 @@ namespace py.asyncio facebook_thrift_asyncio.annotation.rust
 namespace go thrift.annotation.rust
 namespace py thrift.annotation.rust
 
+@scope.Field
 @scope.Typedef
 struct Type {
   // # `rust.Type`

@@ -1,3 +1,0 @@
-Fatal error: Uncaught exception 'ReadonlyViolationException' with message 'ROTDB\Basic\ret_ro() returns readonly, but the caller expects a mutable value' in %s/test/slow/readonly_tdb/bad_options1.php:15
-Stack trace:
-#0 {main}

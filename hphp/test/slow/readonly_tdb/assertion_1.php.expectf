@@ -1,3 +1,0 @@
-Fatal error: Uncaught exception 'ReadonlyViolationException' with message 'ROTDB\Assertion1\Foo::ro() returns readonly, but the caller expects a mutable value' in %s.php:14
-Stack trace:
-#0 {main}

@@ -820,7 +820,6 @@ dependencies = [
  "serde",
  "stack_limit",
  "thiserror",
- "types",
 ]
 
 [[package]]
@@ -5331,21 +5330,6 @@ name = "typenum"
 version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dcf81ac59edc17cc8697ff311e8f5ef2d99fcbd9817b34cec66f90b6c3dfd987"
-
-[[package]]
-name = "types"
-version = "0.0.0"
-dependencies = [
- "decl_provider",
- "hash",
- "hh_autoimport_rust",
- "itertools 0.11.0",
- "lazy_static",
- "naming_special_names_rust",
- "oxidized",
- "oxidized_by_ref",
- "parser_core_types",
-]
 
 [[package]]
 name = "typing_deps_hash"

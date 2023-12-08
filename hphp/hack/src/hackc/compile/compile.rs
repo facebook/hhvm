@@ -50,8 +50,6 @@ use relative_path::RelativePath;
 use serde::Deserialize;
 use serde::Serialize;
 use thiserror::Error;
-use types::readonly_check;
-use types::readonly_nonlocal_infer;
 
 /// Common input needed for compilation.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -321,30 +319,6 @@ fn emit_unit_from_ast<'arena, 'decl>(
     emit_unit(emitter, namespace, ast)
 }
 
-fn check_readonly_and_emit<'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
-    namespace_env: Arc<NamespaceEnv>,
-    ast: &mut ast::Program,
-    profile: &mut Profile,
-) -> Result<Unit<'arena>, Error> {
-    match &emitter.decl_provider {
-        // If a decl provider is available (DDB is enabled) *and*
-        // `Hack.Lang.ReadonlyNonlocalInference` is set, then we can rewrite the
-        // AST to automagically insert `readonly` annotations where needed.
-        Some(decl_provider) if emitter.options().hhbc.readonly_nonlocal_infer => {
-            let mut new_ast = readonly_nonlocal_infer::infer(ast, decl_provider.clone());
-            let res = readonly_check::check_program(&mut new_ast, false);
-            // Ignores all errors after the first...
-            if let Some(readonly_check::ReadOnlyError(pos, msg)) = res.into_iter().next() {
-                return emit_fatal(emitter.alloc, FatalOp::Parse, pos, msg);
-            }
-            *ast = new_ast;
-        }
-        None | Some(_) => (),
-    }
-    rewrite_and_emit(emitter, namespace_env, ast, profile)
-}
-
 fn create_namespace_env(emitter: &Emitter<'_, '_>) -> NamespaceEnv {
     NamespaceEnv::empty(
         emitter.options().hhvm.aliased_namespaces_cloned().collect(),
@@ -391,7 +365,7 @@ fn emit_unit_from_text<'arena, 'decl>(
             ) {
                 Ok(()) => profile_rust::time(move || {
                     (
-                        check_readonly_and_emit(emitter, namespace_env, &mut ast, profile),
+                        rewrite_and_emit(emitter, namespace_env, &mut ast, profile),
                         profile,
                     )
                 }),

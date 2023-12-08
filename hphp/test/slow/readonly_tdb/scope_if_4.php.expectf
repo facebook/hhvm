@@ -1,3 +1,0 @@
-Fatal error: Uncaught exception 'ReadonlyViolationException' with message 'ROTDB\ScopeIf4\ro() returns readonly, but the caller expects a mutable value' in %s.php:23
-Stack trace:
-#0 {main}

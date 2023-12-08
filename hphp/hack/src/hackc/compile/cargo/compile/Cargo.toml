@@ -34,4 +34,3 @@ rewrite_program = { version = "0.0.0", path = "../rewrite_program" }
 serde = { version = "1.0.185", features = ["derive", "rc"] }
 stack_limit = { version = "0.0.0", path = "../../../../utils/stack_limit" }
 thiserror = "1.0.49"
-types = { version = "0.0.0", path = "../../../types/cargo/types" }

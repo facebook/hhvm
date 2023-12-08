@@ -12,6 +12,19 @@ pub mod errors;
 #[allow(unused_imports)]
 pub(crate) use crate as types;
 
+pub type map_t = ::std::collections::BTreeMap<::std::string::String, ::std::primitive::i64>;
+
+#[derive(Clone, PartialEq)]
+pub struct T {
+    pub data: ::sorted_vector_map::SortedVectorMap<::std::string::String, ::std::primitive::i64>,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Foo, crate::Bar)]
 pub struct TransitiveDerives {
     // This field forces `..Default::default()` when instantiating this
@@ -169,6 +182,99 @@ where
         ::std::result::Result::Ok(Self::from(p.read_i32()?))
     }
 }
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::T {
+    fn default() -> Self {
+        Self {
+            data: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::T {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("T")
+            .field("data", &self.data)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::T {}
+unsafe impl ::std::marker::Sync for self::T {}
+impl ::std::marker::Unpin for self::T {}
+
+impl ::fbthrift::GetTType for self::T {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::T
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("T");
+        p.write_field_begin("data", ::fbthrift::TType::Map, 1);
+        crate::r#impl::write(&self.data, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::T
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::Map, 1),
+        ];
+        let mut field_data = ::std::option::Option::None;
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::Map, 1) => field_data = ::std::option::Option::Some(crate::r#impl::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            data: field_data.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for T {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        #[allow(clippy::match_single_binding)]
+        match field_id {
+            1 => {
+            },
+            _ => {}
+        }
+
+        None
+    }
+}
+
 
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::TransitiveDerives {
@@ -485,5 +591,59 @@ pub(crate) mod r#impl {
     {
         let value: LocalImpl<T> = ::fbthrift::Deserialize::read(p)?;
         ::std::result::Result::Ok(value.0)
+    }
+
+    impl<P> ::fbthrift::Serialize<P> for LocalImpl<::sorted_vector_map::SortedVectorMap<::std::string::String, ::std::primitive::i64>>
+    where
+        P: ::fbthrift::ProtocolWriter,
+    {
+        fn write(&self, p: &mut P) {
+            p.write_map_begin(
+                <::std::string::String as ::fbthrift::GetTType>::TTYPE,
+                <::std::primitive::i64 as ::fbthrift::GetTType>::TTYPE,
+                self.0.len(),
+            );
+            for (k, v) in &self.0 {
+                p.write_map_key_begin();
+                ::fbthrift::Serialize::write(k, p);
+                p.write_map_value_begin();
+                ::fbthrift::Serialize::write(v, p);
+            }
+            p.write_map_end();
+        }
+    }
+
+    impl<P> ::fbthrift::Deserialize<P> for LocalImpl<::sorted_vector_map::SortedVectorMap<::std::string::String, ::std::primitive::i64>>
+    where
+        P: ::fbthrift::ProtocolReader,
+    {
+        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+            let (_key_ty, _val_ty, len) = p.read_map_begin()?;
+            let mut map = <::sorted_vector_map::SortedVectorMap<::std::string::String, ::std::primitive::i64>>::with_capacity(len.unwrap_or_default());
+
+            if let Some(0) = len {
+                return Ok(LocalImpl(map));
+            }
+
+            let mut idx = 0;
+            loop {
+                let more = p.read_map_key_begin()?;
+                if !more {
+                    break;
+                }
+                let k: ::std::string::String = ::fbthrift::Deserialize::read(p)?;
+                p.read_map_value_begin()?;
+                let v: ::std::primitive::i64 = ::fbthrift::Deserialize::read(p)?;
+                p.read_map_value_end()?;
+                map.insert(k, v);
+
+                idx += 1;
+                if ::fbthrift::protocol::should_break(len, more, idx) {
+                    break;
+                }
+            }
+            p.read_map_end()?;
+            ::std::result::Result::Ok(LocalImpl(map))
+        }
     }
 }

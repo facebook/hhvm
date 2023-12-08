@@ -74,7 +74,7 @@ class t_typedef : public t_type {
         std::forward<D>(default_value));
   }
 
-  // Finds the first matching structured annoation in the typedef's hierarchy.
+  // Finds the first matching structured annotation in the typedef's hierarchy.
   // Return null if not found.
   static const t_const* get_first_structured_annotation_or_null(
       const t_type* type, const char* uri);

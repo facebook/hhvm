@@ -20,6 +20,16 @@ namespace py3 {
 
 
 template<>
+inline void reset_field<::facebook::thrift::annotation::rust::Type>(
+    ::facebook::thrift::annotation::rust::Type& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.name_ref().copy_from(default_inst<::facebook::thrift::annotation::rust::Type>().name_ref());
+      return;
+  }
+}
+
+template<>
 inline void reset_field<::facebook::thrift::annotation::rust::Adapter>(
     ::facebook::thrift::annotation::rust::Adapter& obj, uint16_t index) {
   switch (index) {
@@ -47,6 +57,16 @@ inline void reset_field<::facebook::thrift::annotation::rust::ServiceExn>(
       obj.anyhow_to_application_exn_ref().copy_from(default_inst<::facebook::thrift::annotation::rust::ServiceExn>().anyhow_to_application_exn_ref());
       return;
   }
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::facebook::thrift::annotation::rust::Type>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
 }
 
 template<>

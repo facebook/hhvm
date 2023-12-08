@@ -15,7 +15,12 @@
  */
 
 include "thrift/annotation/rust.thrift"
-include "thrift/annotation/scope.thrift"
+
+@rust.Type{name = "sorted_vector_map::SortedVectorMap"}
+typedef map<string, i64> map_t
+struct T {
+  1: map_t data;
+}
 
 @rust.Derive{derives = ["Foo", "crate::Bar"]}
 @scope.Transitive

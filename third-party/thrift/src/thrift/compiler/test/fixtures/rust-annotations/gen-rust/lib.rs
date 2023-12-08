@@ -16,3 +16,84 @@ pub mod client;
 pub mod server;
 pub mod mock;
 pub use ::::errors as errors;
+
+pub(crate) mod r#impl {
+    use ref_cast::RefCast;
+
+    #[derive(RefCast)]
+    #[repr(transparent)]
+    pub(crate) struct LocalImpl<T>(T);
+
+    #[allow(unused)]
+    pub(crate) fn write<T, P>(value: &T, p: &mut P)
+    where
+        LocalImpl<T>: ::fbthrift::Serialize<P>,
+        P: ::fbthrift::ProtocolWriter,
+    {
+        ::fbthrift::Serialize::write(LocalImpl::ref_cast(value), p);
+    }
+
+    #[allow(unused)]
+    pub(crate) fn read<T, P>(p: &mut P) -> ::anyhow::Result<T>
+    where
+        LocalImpl<T>: ::fbthrift::Deserialize<P>,
+        P: ::fbthrift::ProtocolReader,
+    {
+        let value: LocalImpl<T> = ::fbthrift::Deserialize::read(p)?;
+        ::std::result::Result::Ok(value.0)
+    }
+
+    impl<P> ::fbthrift::Serialize<P> for LocalImpl<::sorted_vector_map::SortedVectorMap<::std::string::String, ::std::primitive::i64>>
+    where
+        P: ::fbthrift::ProtocolWriter,
+    {
+        fn write(&self, p: &mut P) {
+            p.write_map_begin(
+                <::std::string::String as ::fbthrift::GetTType>::TTYPE,
+                <::std::primitive::i64 as ::fbthrift::GetTType>::TTYPE,
+                self.0.len(),
+            );
+            for (k, v) in &self.0 {
+                p.write_map_key_begin();
+                ::fbthrift::Serialize::write(k, p);
+                p.write_map_value_begin();
+                ::fbthrift::Serialize::write(v, p);
+            }
+            p.write_map_end();
+        }
+    }
+
+    impl<P> ::fbthrift::Deserialize<P> for LocalImpl<::sorted_vector_map::SortedVectorMap<::std::string::String, ::std::primitive::i64>>
+    where
+        P: ::fbthrift::ProtocolReader,
+    {
+        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+            let (_key_ty, _val_ty, len) = p.read_map_begin()?;
+            let mut map = <::sorted_vector_map::SortedVectorMap<::std::string::String, ::std::primitive::i64>>::with_capacity(len.unwrap_or_default());
+
+            if let Some(0) = len {
+                return Ok(LocalImpl(map));
+            }
+
+            let mut idx = 0;
+            loop {
+                let more = p.read_map_key_begin()?;
+                if !more {
+                    break;
+                }
+                let k: ::std::string::String = ::fbthrift::Deserialize::read(p)?;
+                p.read_map_value_begin()?;
+                let v: ::std::primitive::i64 = ::fbthrift::Deserialize::read(p)?;
+                p.read_map_value_end()?;
+                map.insert(k, v);
+
+                idx += 1;
+                if ::fbthrift::protocol::should_break(len, more, idx) {
+                    break;
+                }
+            }
+            p.read_map_end()?;
+            ::std::result::Result::Ok(LocalImpl(map))
+        }
+    }
+}

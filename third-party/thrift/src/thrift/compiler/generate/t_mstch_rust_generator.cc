@@ -173,7 +173,36 @@ FieldKind field_kind(const t_named& node) {
   return FieldKind::Inline;
 }
 
+std::string get_annotation_property_string(
+    const t_const* annotation, const std::string& key) {
+  if (annotation) {
+    for (const auto& item : annotation->value()->get_map()) {
+      if (item.first->get_string() == key) {
+        return item.second->get_string();
+      }
+    }
+  }
+  return "";
+}
+
+bool get_annotation_property_bool(
+    const t_const* annotation, const std::string& key) {
+  if (annotation) {
+    for (const auto& item : annotation->value()->get_map()) {
+      if (item.first->get_string() == key) {
+        return item.second->get_bool();
+      }
+    }
+  }
+  return false;
+}
+
 std::string get_type_annotation(const t_type* type) {
+  if (const t_const* annot = t_typedef::get_first_structured_annotation_or_null(
+          type, "facebook.com/thrift/annotation/rust/Type")) {
+    return get_annotation_property_string(annot, "name");
+  }
+
   return t_typedef::get_first_annotation(type, {"rust.type"});
 }
 
@@ -294,30 +323,6 @@ bool node_has_custom_rust_type(const t_named& node) {
       node.has_annotation("rust.newtype");
 }
 
-const std::string get_annotation_property(
-    const t_const* annotation, const std::string& key) {
-  if (annotation) {
-    for (const auto& item : annotation->value()->get_map()) {
-      if (item.first->get_string() == key) {
-        return item.second->get_string();
-      }
-    }
-  }
-  return "";
-}
-
-bool get_annotation_property_bool(
-    const t_const* annotation, const std::string& key) {
-  if (annotation) {
-    for (const auto& item : annotation->value()->get_map()) {
-      if (item.first->get_string() == key) {
-        return item.second->get_bool();
-      }
-    }
-  }
-  return false;
-}
-
 // NOTE: a transitive _adapter_ is different from a transitive _annotation_. A
 // transitive adapter is defined as one applied transitively through types. E.g.
 // ```
@@ -377,7 +382,8 @@ mstch::node adapter_node(
     std::string package =
         get_import_name(adapter_annotation->program(), options);
 
-    auto adapter_name = get_annotation_property(adapter_annotation, "name");
+    auto adapter_name =
+        get_annotation_property_string(adapter_annotation, "name");
 
     is_generic = boost::algorithm::ends_with(adapter_name, "<>");
     if (is_generic) {

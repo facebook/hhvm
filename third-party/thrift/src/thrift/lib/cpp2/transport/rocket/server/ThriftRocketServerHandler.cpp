@@ -34,6 +34,7 @@
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
+#include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/server/LoggingEventHelper.h>
 #include <thrift/lib/cpp2/server/MonitoringMethodNames.h>
 #include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
@@ -69,6 +70,18 @@ namespace {
 bool isMetadataValid(const RequestRpcMetadata& metadata, RpcKind expectedKind) {
   return metadata.protocol_ref() && metadata.name_ref() &&
       metadata.kind_ref() && metadata.kind_ref() == expectedKind;
+}
+
+// The reason we have separate helper functions is for some minor perf
+// optimization: calling THRIFT_REQUEST_EVENT will attempt to fetch the handler
+// from a global map, the result of which is cached at the function that invokes
+// it. That's why we have a simple helper function here to save the cost of
+// repeactedly looking up the handler from the map.
+int64_t getDefaultLogSampleRatio() {
+  return THRIFT_REQUEST_EVENT(success).shouldLog();
+}
+int64_t getDefaultLogErrorSampleRatio() {
+  return THRIFT_REQUEST_EVENT(error).shouldLog();
 }
 } // namespace
 
@@ -120,7 +133,13 @@ ThriftRocketServerHandler::shouldSample(const transport::THeader& header) {
   if (const auto& loggingContext = header.loggingContext()) {
     logSampleRatio = *loggingContext->logSampleRatio();
     logErrorSampleRatio = *loggingContext->logErrorSampleRatio();
+  } else {
+    // use sampling ratios from the server config if client doesn't set the
+    // logging context
+    logSampleRatio = getDefaultLogSampleRatio();
+    logErrorSampleRatio = getDefaultLogErrorSampleRatio();
   }
+
   return apache::thrift::server::TServerObserver::SamplingStatus(
       isServerSamplingEnabled, logSampleRatio, logErrorSampleRatio);
 }
@@ -375,8 +394,8 @@ void ThriftRocketServerHandler::connectionClosing() {
 template <class F>
 void ThriftRocketServerHandler::handleRequestCommon(
     Payload&& payload, F&& makeRequest, RpcKind expectedKind) {
-  std::chrono::steady_clock::time_point readEnd =
-      std::chrono::steady_clock::now();
+  std::chrono::steady_clock::time_point readEnd{
+      std::chrono::steady_clock::now()};
 
   rocket::Payload debugPayload = payload.clone();
   auto requestPayloadTry =

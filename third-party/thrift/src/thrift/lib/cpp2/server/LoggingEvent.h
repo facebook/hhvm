@@ -47,6 +47,9 @@ namespace thrift {
 #define THRIFT_APPLICATION_EVENT(NAME) \
   THRIFT_LOGGING_EVENT(#NAME, getApplicationEventHandler)
 
+#define THRIFT_REQUEST_EVENT(NAME) \
+  THRIFT_LOGGING_EVENT(#NAME, getRequestEventHandler)
+
 class ThriftServer;
 class Cpp2Worker;
 class Cpp2ConnContext;
@@ -167,6 +170,16 @@ class RequestEventHandler : public LoggingEventHandler {
  public:
   virtual void log(const RequestLoggingContext&) {}
   virtual void logSampled(SamplingRate, const RequestLoggingContext&) {}
+
+  /**
+   * Determines whether to log a request and returns the sampling rate used for
+   * logging.
+   *
+   * If the request should be logged, returns the sampling rate used; otherwise
+   * returns 0.
+   */
+  virtual SamplingRate shouldLog() { return 0; }
+
   virtual ~RequestEventHandler() override {}
 };
 

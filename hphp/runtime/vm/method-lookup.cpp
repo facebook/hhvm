@@ -335,7 +335,7 @@ const Func* lookupImmutableCtor(const Class* cls,
 }
 
 Func* lookupImmutableFunc(const StringData* name) {
-  auto const ne = NamedFunc::get(name);
+  auto const ne = NamedFunc::getOrCreate(name);
   if (auto const f = ne->getCachedFunc()) {
     if (f->isPersistent()) {
       assertx(!RO::funcIsRenamable(name));

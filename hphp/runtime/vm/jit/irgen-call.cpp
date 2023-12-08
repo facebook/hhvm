@@ -1743,7 +1743,7 @@ void emitFCallClsMethodD(IRGS& env,
   }();
 
   auto const slowExit = makeExitSlow(env);
-  auto const ne = NamedType::get(className);
+  auto const ne = NamedType::getOrCreate(className);
   auto const data =
     ClsMethodData { className, methodName, ne, callerCtx, curFunc(env) };
   auto const func = loadClsMethodUnknown(env, data, slowExit);
@@ -1854,7 +1854,7 @@ std::pair<SSATmp*, SSATmp*>
 resolveClsMethodDSlow(IRGS& env, const StringData* className,
                       const StringData* methodName) {
   auto const slowExit = makeExitSlow(env);
-  auto const ne = NamedType::get(className);
+  auto const ne = NamedType::getOrCreate(className);
   auto const data =
     ClsMethodData { className, methodName, ne, curClass(env), curFunc(env) };
   auto const func = loadClsMethodUnknown(env, data, slowExit);

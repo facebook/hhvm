@@ -153,9 +153,14 @@ struct NamedType {
    * If `str' needs to be namespace-normalized, we pass the normalized result
    * out through `normalizedStr' if it is provided.
    */
-  static NamedType* get(const StringData* str,
-                        bool allowCreate = true,
-                        String* normalizedStr = nullptr) FLATTEN;
+  static NamedType* getNoCreate(const StringData* str,
+                        String* normalizedStr = nullptr) {
+    return get<false>(str, normalizedStr);
+  }
+  static NamedType* getOrCreate(const StringData* str,
+                        String* normalizedStr = nullptr) {
+    return get<true>(str, normalizedStr);
+  }
 
   /*
    * Visitors that traverse the named type table
@@ -169,6 +174,9 @@ struct NamedType {
 
 private:
   static Map* types();
+
+  template<bool AllowCreate>
+  static NamedType* get(const StringData* str, String* normalizedStr) FLATTEN;
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
@@ -243,12 +251,21 @@ struct NamedFunc {
    * If `str' needs to be namespace-normalized, we pass the normalized result
    * out through `normalizedStr' if it is provided.
    */
-  static NamedFunc* get(const StringData* str,
-                        bool allowCreate = true,
-                        String* normalizedStr = nullptr) FLATTEN;
+  static NamedFunc* getNoCreate(const StringData* str,
+                        String* normalizedStr = nullptr) FLATTEN {
+    return get<false>(str, normalizedStr);
+  }
+  static NamedFunc* getOrCreate(const StringData* str,
+                        String* normalizedStr = nullptr) FLATTEN {
+    return get<true>(str, normalizedStr);
+  }
 
   template<class Fn> static void foreach_cached_func(Fn fn);
   template<class Fn> static void foreach_name(Fn);
+
+private:
+  template <bool AllowCreate>
+  static NamedFunc* get(const StringData* str, String* normalizedStr) FLATTEN;
 
 private:
   static Map* funcs();

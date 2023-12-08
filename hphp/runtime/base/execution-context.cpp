@@ -1425,7 +1425,7 @@ void ExecutionContext::requestInit() {
   HHProf::Request::StartProfiling();
 
 #ifndef NDEBUG
-  Class* cls = NamedType::get(s_stdClass.get())->clsList();
+  Class* cls = NamedType::getOrCreate(s_stdClass.get())->clsList();
   assertx(cls);
   assertx(cls == SystemLib::getstdClassClass());
 #endif

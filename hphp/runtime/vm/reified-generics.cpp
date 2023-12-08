@@ -31,7 +31,7 @@ ArrayData* addToTypeReifiedGenericsTable(
   const StringData* name,
   ArrayData* tsList
 ) {
-  auto const ne = NamedType::get(name, true);
+  auto const ne = NamedType::getOrCreate(name);
   auto const generics = ne->getCachedReifiedGenerics();
   if (!generics) {
     // We have created a new entry on the named entity table

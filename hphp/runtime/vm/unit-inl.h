@@ -221,14 +221,14 @@ inline NamedTypePair Unit::lookupNamedTypePairId(Id id) const {
   auto const name = lookupLitstrId(id);
   assertx(name);
   assertx(name->data()[0] != '\\');
-  return { name, NamedType::get(name) };
+  return { name, NamedType::getOrCreate(name) };
 }
 
 inline NamedFuncPair Unit::lookupNamedFuncPairId(Id id) const {
   auto const name = lookupLitstrId(id);
   assertx(name);
   assertx(name->data()[0] != '\\');
-  return { name, NamedFunc::get(name) };
+  return { name, NamedFunc::getOrCreate(name) };
 }
 
 ///////////////////////////////////////////////////////////////////////////////

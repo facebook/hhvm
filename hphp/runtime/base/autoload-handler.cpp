@@ -126,7 +126,7 @@ struct FuncExistsChecker {
     : m_name(name), m_ne(nullptr) {}
   bool operator()() const {
     if (!m_ne) {
-      m_ne = NamedFunc::get(m_name, false);
+      m_ne = NamedFunc::getNoCreate(m_name);
       if (!m_ne) {
         return false;
       }
@@ -143,7 +143,7 @@ struct ClassExistsChecker {
     : m_name(name), m_ne(nullptr) {}
   bool operator()() const {
     if (!m_ne) {
-      m_ne = NamedType::get(m_name.get(), false);
+      m_ne = NamedType::getNoCreate(m_name.get());
       if (!m_ne) {
         return false;
       }
@@ -168,7 +168,7 @@ struct TypeAliasExistsChecker {
     : m_name(name), m_ne(nullptr) {}
   bool operator()() const {
     if (!m_ne) {
-      m_ne = NamedType::get(m_name.get(), false);
+      m_ne = NamedType::getNoCreate(m_name.get());
       if (!m_ne) {
         return false;
       }
@@ -184,7 +184,7 @@ struct NamedTypeExistsChecker {
     : m_name(name), m_ne(nullptr) {}
   bool operator()() const {
     if (!m_ne) {
-      m_ne = NamedType::get(m_name.get(), false);
+      m_ne = NamedType::getNoCreate(m_name.get());
       if (!m_ne) {
         return false;
       }

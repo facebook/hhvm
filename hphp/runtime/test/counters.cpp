@@ -89,13 +89,13 @@ TEST(COUNTERS, named_entities) {
     EXPECT_EQ(ss, namedEntityTableSize());
 
     const auto str = String{"MyNewHilariousType"};
-    NamedType::get(str.get());
+    NamedType::getOrCreate(str.get());
     ++ss;
     EXPECT_EQ(ss, getVal(key));
     EXPECT_EQ(ss, namedEntityTableSize());
 
     const auto str2 = String{"MyNewHilariousFunc"};
-    NamedFunc::get(str2.get());
+    NamedFunc::getOrCreate(str2.get());
     ++ss;
     EXPECT_EQ(ss, getVal(key));
     EXPECT_EQ(ss, namedEntityTableSize());

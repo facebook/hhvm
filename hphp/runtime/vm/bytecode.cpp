@@ -1564,7 +1564,7 @@ OPTBLD_INLINE void iopDblAsBits() {
 
 ALWAYS_INLINE
 bool implInstanceOfHelper(const StringData* str1, TypedValue* c2) {
-  const NamedType* rhs = NamedType::get(str1, false);
+  const NamedType* rhs = NamedType::getNoCreate(str1);
   // Because of other codepaths, an un-normalized name might enter the
   // table without a Class* so we need to check if it's there.
   if (LIKELY(rhs && rhs->getCachedClass() != nullptr)) {

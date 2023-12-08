@@ -240,13 +240,13 @@ template<class T> rds::Handle handleFrom(const StringData* name);
 
 template<>
 rds::Handle handleFrom<Func>(const StringData* name) {
-  auto ne = NamedFunc::get(name);
+  auto ne = NamedFunc::getOrCreate(name);
   return ne->getFuncHandle(name);
 }
 
 template<>
 rds::Handle handleFrom<Class>(const StringData* name) {
-  auto ne = NamedType::get(name);
+  auto ne = NamedType::getOrCreate(name);
   return ne->getClassHandle(name);
 }
 

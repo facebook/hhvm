@@ -174,8 +174,11 @@ T* insertNamedEntity(const StringData* str, typename T::Map* map) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-NamedType* NamedType::get(const StringData* str, bool allowCreate /* = true */,
-                          String* normalizedStr /* = nullptr */) {
+template NamedType* NamedType::get<true>(const StringData*, String*);
+template NamedType* NamedType::get<false>(const StringData*, String*);
+
+template<bool AllowCreate>
+NamedType* NamedType::get(const StringData* str, String* normalizedStr /* = nullptr */) {
   if (str->isSymbol()) {
     if (auto const result = str->getNamedType()) return result;
   }
@@ -195,10 +198,10 @@ NamedType* NamedType::get(const StringData* str, bool allowCreate /* = true */,
       if (normalizedStr) {
         *normalizedStr = normStr;
       }
-      return get(normStr.get(), allowCreate, normalizedStr);
+      return get<AllowCreate>(normStr.get(), normalizedStr);
     }
 
-    if (LIKELY(allowCreate)) {
+    if (AllowCreate) {
       return insertNamedEntity<NamedType>(str, s_namedTypeMap);
     }
     return nullptr;
@@ -210,8 +213,11 @@ NamedType* NamedType::get(const StringData* str, bool allowCreate /* = true */,
   return result;
 }
 
-NamedFunc* NamedFunc::get(const StringData* str, bool allowCreate /* = true */,
-                          String* normalizedStr /* = nullptr */) {
+template NamedFunc* NamedFunc::get<true>(const StringData*, String*);
+template NamedFunc* NamedFunc::get<false>(const StringData*, String*);
+
+template<bool AllowCreate>
+NamedFunc* NamedFunc::get(const StringData* str, String* normalizedStr /* = nullptr */) {
   if (UNLIKELY(!s_namedFuncMap)) {
     initializeNamedFuncMap();
   }
@@ -226,10 +232,10 @@ NamedFunc* NamedFunc::get(const StringData* str, bool allowCreate /* = true */,
     if (normalizedStr) {
       *normalizedStr = normStr;
     }
-    return get(normStr.get(), allowCreate, normalizedStr);
+    return get<AllowCreate>(normStr.get(), normalizedStr);
   }
 
-  if (LIKELY(allowCreate)) {
+  if (AllowCreate) {
     return insertNamedEntity<NamedFunc>(str, s_namedFuncMap);
   }
   return nullptr;

@@ -418,10 +418,10 @@ void ClassConstraint::init(AnnotType const type) {
   bool isUnresolved = type == Type::Unresolved;
   if (isObject) {
     assertx(m_clsName);
-    m_namedType = NamedType::get(m_clsName);
+    m_namedType = NamedType::getOrCreate(m_clsName);
   } else if (isUnresolved) {
     assertx(m_typeName);
-    m_namedType = NamedType::get(m_typeName);
+    m_namedType = NamedType::getOrCreate(m_typeName);
   }
   FTRACE(5, "TypeConstraint: this {} NamedType: {}\n",
         this, m_namedType.get());

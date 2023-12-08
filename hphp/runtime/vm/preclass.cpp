@@ -36,7 +36,7 @@ PreClass::PreClass(Unit* unit, int line1, int line2, const StringData* n,
                    Attr attrs, const StringData* parent,
                    const StringData* docComment)
   : m_unit(unit)
-  , m_namedType(NamedType::get(n))
+  , m_namedType(NamedType::getOrCreate(n))
   , m_line1(line1)
   , m_line2(line2)
   , m_attrs(attrs)

@@ -169,18 +169,17 @@ ThriftRequestCore::LogRequestSampleCallback::~LogRequestSampleCallback() {
       requestLoggingContext_.timestamps.getSamplingStatus();
 
   auto* observer = serverConfigs_.getObserver();
-  if (samplingStatus.isEnabledByServer() && observer &&
+  if (samplingStatus.isServerSamplingEnabled() && observer &&
       requestLoggingContext_.requestStartedProcessing) {
     observer->callCompleted(requestLoggingContext_.timestamps);
   }
 
   if (THRIFT_FLAG(enable_request_event_logging) &&
-      samplingStatus.isEnabledByClient()) {
+      samplingStatus.isRequestLoggingEnabled()) {
     const bool error = requestLoggingContext_.exceptionMetaData.has_value() ||
         requestLoggingContext_.responseRpcError.has_value();
-    if (auto samplingRatio = error
-            ? samplingStatus.getClientLogErrorSampleRatio()
-            : samplingStatus.getClientLogSampleRatio()) {
+    if (auto samplingRatio = error ? samplingStatus.getLogErrorSampleRatio()
+                                   : samplingStatus.getLogSampleRatio()) {
       auto& handler = getLoggingEventRegistry().getRequestEventHandler(
           error ? "error" : "success");
       handler.logSampled(samplingRatio, requestLoggingContext_);

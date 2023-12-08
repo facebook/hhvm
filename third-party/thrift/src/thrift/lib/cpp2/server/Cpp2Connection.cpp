@@ -589,7 +589,7 @@ void Cpp2Connection::requestReceived(
   timestamps.setStatus(samplingStatus);
   timestamps.readEnd = readEnd;
   timestamps.processBegin = std::chrono::steady_clock::now();
-  if (samplingStatus.isEnabledByServer() && observer) {
+  if (samplingStatus.isServerSamplingEnabled() && observer) {
     if (threadManager_) {
       observer->queuedRequests(threadManager_->pendingUpstreamTaskCount());
     } else if (!server->resourcePoolSet().empty()) {
@@ -712,7 +712,7 @@ MessageChannel::SendCallback* Cpp2Connection::Cpp2Request::prepareSendCallback(
   MessageChannel::SendCallback* cb = sendCallback;
   auto& timestamps = getTimestamps();
   if (stateMachine_.getStartedProcessing() &&
-      timestamps.getSamplingStatus().isEnabledByServer()) {
+      timestamps.getSamplingStatus().isServerSamplingEnabled()) {
     // Cpp2Sample will delete itself when it's callback is called.
     cb = new Cpp2Sample(timestamps, observer, sendCallback);
   }
@@ -811,7 +811,7 @@ void Cpp2Connection::Cpp2Request::sendTimeoutResponse(
   auto* observer = connection_->getWorker()->getServer()->getObserver();
   transport::THeader::StringToStringMap headers;
   connection_->setServerHeaders(headers);
-  markProcessEnd(&headers);
+  markProcessEnd();
   req_->sendTimeoutResponse(
       reqContext_.getMethodName(),
       reqContext_.getProtoSeqId(),
@@ -839,29 +839,9 @@ void Cpp2Connection::Cpp2Request::QueueTimeout::timeoutExpired() noexcept {
   }
 }
 
-void Cpp2Connection::Cpp2Request::markProcessEnd(
-    transport::THeader::StringToStringMap* newHeaders) {
+void Cpp2Connection::Cpp2Request::markProcessEnd() {
   auto& timestamps = getTimestamps();
-  auto& samplingStatus = timestamps.getSamplingStatus();
   timestamps.processEnd = std::chrono::steady_clock::now();
-  if (samplingStatus.isEnabledByClient()) {
-    // Latency headers are set after processEnd itself. Can't be
-    // done after write, since headers transform happens during write.
-    setLatencyHeaders(timestamps, newHeaders);
-  }
-}
-
-void Cpp2Connection::Cpp2Request::setLatencyHeaders(
-    const apache::thrift::server::TServerObserver::CallTimestamps& timestamps,
-    transport::THeader::StringToStringMap* newHeaders) const {
-  if (auto v = timestamps.processDelayLatencyUsec()) {
-    setLatencyHeader(
-        kQueueLatencyHeader.str(), folly::to<std::string>(*v), newHeaders);
-  }
-  if (auto v = timestamps.processLatencyUsec()) {
-    setLatencyHeader(
-        kProcessLatencyHeader.str(), folly::to<std::string>(*v), newHeaders);
-  }
 }
 
 void Cpp2Connection::Cpp2Request::setLatencyHeader(

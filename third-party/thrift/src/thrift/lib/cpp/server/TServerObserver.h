@@ -40,39 +40,34 @@ class TServerObserver {
   class SamplingStatus {
    public:
     SamplingStatus() noexcept : SamplingStatus(false, 0, 0) {}
-    SamplingStatus(
-        bool isServerSamplingEnabled, bool isClientSamplingEnabled) noexcept
+    explicit SamplingStatus(bool isServerSamplingEnabled) noexcept
         : isServerSamplingEnabled_(isServerSamplingEnabled),
-          isClientSamplingEnabled_(isClientSamplingEnabled),
-          clientLogSampleRatio_(0),
-          clientLogErrorSampleRatio_(0) {}
+          logSampleRatio_(0),
+          logErrorSampleRatio_(0) {}
     SamplingStatus(
         bool isServerSamplingEnabled,
-        int64_t clientLogSampleRatio,
-        int64_t clientLogErrorSampleRatio) noexcept
+        int64_t logSampleRatio,
+        int64_t logErrorSampleRatio) noexcept
         : isServerSamplingEnabled_(isServerSamplingEnabled),
-          isClientSamplingEnabled_(
-              clientLogSampleRatio > 0 || clientLogErrorSampleRatio > 0),
-          clientLogSampleRatio_(std::max(int64_t{0}, clientLogSampleRatio)),
-          clientLogErrorSampleRatio_(
-              std::max(int64_t{0}, clientLogErrorSampleRatio)) {}
+          logSampleRatio_(std::max(int64_t{0}, logSampleRatio)),
+          logErrorSampleRatio_(std::max(int64_t{0}, logErrorSampleRatio)) {}
 
     bool isEnabled() const {
-      return isEnabledByServer() || isEnabledByClient();
+      return isServerSamplingEnabled() || isRequestLoggingEnabled();
     }
-    bool isEnabledByServer() const { return isServerSamplingEnabled_; }
-    bool isEnabledByClient() const { return isClientSamplingEnabled_; }
 
-    int64_t getClientLogSampleRatio() const { return clientLogSampleRatio_; }
-    int64_t getClientLogErrorSampleRatio() const {
-      return clientLogErrorSampleRatio_;
+    bool isServerSamplingEnabled() const { return isServerSamplingEnabled_; }
+    bool isRequestLoggingEnabled() const {
+      return logSampleRatio_ > 0 || logErrorSampleRatio_ > 0;
     }
+
+    int64_t getLogSampleRatio() const { return logSampleRatio_; }
+    int64_t getLogErrorSampleRatio() const { return logErrorSampleRatio_; }
 
    private:
     bool isServerSamplingEnabled_;
-    bool isClientSamplingEnabled_;
-    int64_t clientLogSampleRatio_;
-    int64_t clientLogErrorSampleRatio_;
+    int64_t logSampleRatio_;
+    int64_t logErrorSampleRatio_;
   };
 
   class PreHandlerTimestamps {

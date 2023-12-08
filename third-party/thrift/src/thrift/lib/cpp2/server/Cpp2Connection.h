@@ -41,9 +41,6 @@
 namespace apache {
 namespace thrift {
 
-constexpr folly::StringPiece kQueueLatencyHeader("queue_latency_us");
-constexpr folly::StringPiece kProcessLatencyHeader("process_latency_us");
-
 /**
  * Represents a connection that is handled via libevent. This connection
  * essentially encapsulates a socket that has some associated libevent state.
@@ -237,11 +234,7 @@ class Cpp2Connection : public HeaderServerChannel::Callback,
       queueTimeout_.cancelTimeout();
       taskTimeout_.cancelTimeout();
     }
-    void markProcessEnd(
-        transport::THeader::StringToStringMap* newHeaders = nullptr);
-    void setLatencyHeaders(
-        const apache::thrift::server::TServerObserver::CallTimestamps&,
-        transport::THeader::StringToStringMap* newHeaders = nullptr) const;
+    void markProcessEnd();
     void setLatencyHeader(
         const std::string& key,
         const std::string& value,

@@ -618,36 +618,6 @@ TEST(ThriftServer, LoadHeaderTest_RocketClientChannel) {
   doLoadHeaderTest(true);
 }
 
-enum LatencyHeaderStatus {
-  EXPECTED,
-  NOT_EXPECTED,
-};
-
-static void validateLatencyHeaders(
-    transport::THeader::StringToStringMap headers, LatencyHeaderStatus status) {
-  bool isHeaderExpected = (status == LatencyHeaderStatus::EXPECTED);
-  auto queueLatency = folly::get_optional(headers, kQueueLatencyHeader.str());
-  ASSERT_EQ(isHeaderExpected, queueLatency.has_value());
-  auto processLatency =
-      folly::get_optional(headers, kProcessLatencyHeader.str());
-  ASSERT_EQ(isHeaderExpected, processLatency.has_value());
-  if (isHeaderExpected) {
-    EXPECT_GE(folly::to<int64_t>(queueLatency.value()), 0);
-    EXPECT_GE(folly::to<int64_t>(processLatency.value()), 0);
-  }
-}
-
-TEST(ThriftServer, LatencyHeader_LoggingDisabled) {
-  ScopedServerInterfaceThread runner(std::make_shared<TestInterface>());
-  folly::EventBase base;
-  auto client = runner.newClient<TestServiceAsyncClient>(&base);
-
-  RpcOptions rpcOptions;
-  client->sync_voidResponse(rpcOptions);
-  validateLatencyHeaders(
-      rpcOptions.getReadHeaders(), LatencyHeaderStatus::NOT_EXPECTED);
-}
-
 //
 // Test enforcement of egress memory limit -- setEgressMemoryLimit()
 //
@@ -1063,17 +1033,6 @@ class OverloadTest
     } else {
       return "load shedding due to max request limit";
     }
-  }
-
-  LatencyHeaderStatus getLatencyHeaderStatus() {
-    // we currently only report latency headers for Header,
-    // and only when method handler was executed started running.
-    return ((getShedError() == TApplicationException::TIMEOUT &&
-             transport == TransportType::Header) ||
-            (errorType == ErrorType::MethodOverload &&
-             transport == TransportType::Header))
-        ? LatencyHeaderStatus::EXPECTED
-        : LatencyHeaderStatus::NOT_EXPECTED;
   }
 
   void validateErrorHeaders(const RpcOptions& rpc) {
@@ -2065,9 +2024,6 @@ TEST_P(OverloadTest, Test) {
 
     validateErrorHeaders(rpcOptions);
 
-    // Latency headers are NOT set, when server is overloaded
-    validateLatencyHeaders(
-        rpcOptions.getReadHeaders(), getLatencyHeaderStatus());
   } catch (...) {
     FAIL()
         << "Expected that the service call throws TApplicationException, got "
@@ -2089,105 +2045,6 @@ INSTANTIATE_TEST_CASE_P(
             ErrorType::Server,
             ErrorType::PreprocessorOverload),
         testing::Bool()));
-
-TEST(ThriftServer, LatencyHeader_ClientTimeout) {
-  ScopedServerInterfaceThread runner(
-      std::make_shared<TestInterface>(), "::1", 0, [](auto& server) {
-        server.setUseClientTimeout(false);
-      });
-  auto client =
-      runner.newClient<TestServiceAsyncClient>(nullptr, [](auto socket) {
-        return HeaderClientChannel::newChannel(std::move(socket));
-      });
-
-  RpcOptions rpcOptions;
-  // Setup client timeout
-  rpcOptions.setTimeout(std::chrono::milliseconds(1));
-  rpcOptions.setWriteHeader(kClientLoggingHeader.str(), "");
-  std::string response;
-  EXPECT_ANY_THROW(client->sync_sendResponse(rpcOptions, response, 20000));
-
-  // Latency headers are NOT set, when client times out.
-  validateLatencyHeaders(
-      rpcOptions.getReadHeaders(), LatencyHeaderStatus::NOT_EXPECTED);
-}
-
-TEST(ThriftServer, LatencyHeader_RequestSuccess) {
-  ScopedServerInterfaceThread runner(std::make_shared<TestInterface>());
-  auto client =
-      runner.newClient<TestServiceAsyncClient>(nullptr, [](auto socket) {
-        return HeaderClientChannel::newChannel(std::move(socket));
-      });
-
-  RpcOptions rpcOptions;
-  rpcOptions.setWriteHeader(kClientLoggingHeader.str(), "");
-  client->sync_voidResponse(rpcOptions);
-  validateLatencyHeaders(
-      rpcOptions.getReadHeaders(), LatencyHeaderStatus::EXPECTED);
-}
-
-TEST(ThriftServer, LatencyHeader_RequestFailed) {
-  ScopedServerInterfaceThread runner(std::make_shared<TestInterface>());
-  auto client =
-      runner.newClient<TestServiceAsyncClient>(nullptr, [](auto socket) {
-        return HeaderClientChannel::newChannel(std::move(socket));
-      });
-
-  RpcOptions rpcOptions;
-  rpcOptions.setWriteHeader(kClientLoggingHeader.str(), "");
-  EXPECT_ANY_THROW(client->sync_throwsHandlerException(rpcOptions));
-
-  // Latency headers are set, when handler throws exception
-  validateLatencyHeaders(
-      rpcOptions.getReadHeaders(), LatencyHeaderStatus::EXPECTED);
-}
-
-TEST(ThriftServer, LatencyHeader_TaskExpiry) {
-  ScopedServerInterfaceThread runner(std::make_shared<TestInterface>());
-  auto client =
-      runner.newClient<TestServiceAsyncClient>(nullptr, [](auto socket) {
-        return HeaderClientChannel::newChannel(std::move(socket));
-      });
-
-  // setup task expire timeout.
-  runner.getThriftServer().setTaskExpireTime(std::chrono::milliseconds(10));
-  runner.getThriftServer().setUseClientTimeout(false);
-
-  RpcOptions rpcOptions;
-  rpcOptions.setWriteHeader(kClientLoggingHeader.str(), "");
-  std::string response;
-  EXPECT_ANY_THROW(client->sync_sendResponse(rpcOptions, response, 30000));
-
-  // Latency headers are set, when task expires
-  validateLatencyHeaders(
-      rpcOptions.getReadHeaders(), LatencyHeaderStatus::EXPECTED);
-}
-
-TEST(ThriftServer, LatencyHeader_QueueTimeout) {
-  ScopedServerInterfaceThread runner(std::make_shared<TestInterface>());
-  auto client =
-      runner.newStickyClient<TestServiceAsyncClient>(nullptr, [](auto socket) {
-        return HeaderClientChannel::newChannel(std::move(socket));
-      });
-
-  // setup timeout
-  runner.getThriftServer().setQueueTimeout(std::chrono::milliseconds(5));
-
-  // Run a long request.
-  auto slowRequestFuture = client->semifuture_sendResponse(20000);
-
-  RpcOptions rpcOptions;
-  rpcOptions.setWriteHeader(kClientLoggingHeader.str(), "");
-  std::string response;
-  EXPECT_ANY_THROW(client->sync_sendResponse(rpcOptions, response, 1000));
-
-  // Latency headers are set, when server throws queue timeout
-  validateLatencyHeaders(
-      rpcOptions.getReadHeaders(), LatencyHeaderStatus::EXPECTED);
-
-  folly::EventBase base;
-  std::move(slowRequestFuture).via(&base).getVia(&base);
-}
 
 TEST(ThriftServer, QueueTimeoutPctSetTest) {
   ScopedServerInterfaceThread runner(std::make_shared<TestInterface>());
@@ -2247,10 +2104,6 @@ TEST(ThriftServer, QueueTimeoutDisabledTest) {
 
   std::string response;
   EXPECT_ANY_THROW(client->sync_sendResponse(rpcOptions, response, 1000));
-
-  // Latency headers are NOT set, when client times out.
-  validateLatencyHeaders(
-      rpcOptions.getReadHeaders(), LatencyHeaderStatus::NOT_EXPECTED);
 
   folly::EventBase base;
   std::move(slowRequestFuture).via(&base).getVia(&base);

@@ -138,7 +138,7 @@ MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg/NeWSkmQEmaO2f0T
 VnFqMCnjdeFhc/LA6rx3ALn2jfDj9jQR0QGRouFA7NbYZFx7Uj3HOw0/
 -----END PRIVATE KEY-----
 )";
-}; // namespace
+} // namespace
 
 namespace quic::samples {
 FizzServerContextPtr createFizzServerContext(const HQServerParams& params) {

@@ -106,21 +106,6 @@ constexpr bool isAbsent(std::shared_ptr<T>& ptr) {
   return ptr == nullptr;
 }
 
-template <typename T>
-if_opt_type<T> resetValue(T&& opt) {
-  opt.reset();
-}
-template <typename T>
-constexpr if_not_opt_type<T> resetValue(T&&) {}
-
-template <typename T>
-if_opt_type<T> clearValue(T&& opt) {
-  opt.reset();
-}
-template <typename T>
-if_not_opt_type<T> clearValue(T& unn) {
-  thrift::clear(unn);
-}
 template <typename T, typename = if_opt_type<T>>
 auto ensureValue(T&& opt) -> decltype(opt.value()) {
   if (isAbsent(opt)) {

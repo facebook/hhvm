@@ -61,7 +61,7 @@ bool coinflip(uint32_t rate);
 void enable(LogFn log, RecordGlobalsFn globals);
 void log(const std::string&, const StructuredLogEntry&);
 void recordRequestGlobals(StructuredLogEntry&);
-};
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

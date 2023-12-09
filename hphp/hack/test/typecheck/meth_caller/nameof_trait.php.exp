@@ -1,0 +1,2 @@
+File "nameof_trait.php", line 8, characters 22-28:
+`MyTrait` is a trait which cannot be used with `meth_caller`. Use a class instead. (Typing[4375])

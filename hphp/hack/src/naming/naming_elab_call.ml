@@ -108,6 +108,8 @@ let on_expr on_error ((annot, pos, expr_) as expr) ~ctx =
                 (_, pm, String meth) )
             when String.equal mem SN.Members.mClass ->
             (Ok (Aast.Method_caller (cl, (pm, meth))), errs)
+          | Aast.((_, _, Nameof (_, _, CI cl)), (_, pm, String meth)) ->
+            (Ok (Aast.Method_caller (cl, (pm, meth))), errs)
           | ((_, p, _), _) ->
             let meth_err =
               Naming_phase_error.naming @@ Naming_error.Illegal_meth_caller p

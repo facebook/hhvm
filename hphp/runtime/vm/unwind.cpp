@@ -257,7 +257,7 @@ DEBUG_ONLY bool throwable_has_expected_props() {
   // to verify anything when setting. If someone changes the type-hint we want
   // to know.
   auto const isException = [&](const TypeConstraint& tc) {
-    if (!tc.isUnresolved() && !tc.isObject()) return false;
+    if (!tc.isUnresolved() && !tc.isSubObject()) return false;
     auto const cls = tc.anyNamedType()->getCachedClass();
     return cls && cls == SystemLib::getThrowableClass();
   };

@@ -10520,7 +10520,7 @@ private:
       // Store the first enum encountered during resolution. This
       // lets us fixup the type later if needed.
       if (firstEnum) return firstEnum;
-      if (tv.isObject()) {
+      if (tv.isSubObject()) {
         auto clsName = tv.clsName();
         assertx(clsName);
         return clsName;
@@ -10599,7 +10599,7 @@ private:
     // leave it unresolved. Otherwise assume it's an object with that
     // name.
     if (index.missingType(name)) return;
-    tc.resolveType(AnnotType::Object, tc.isNullable(), name);
+    tc.resolveType(AnnotType::SubObject, tc.isNullable(), name);
     if (uses) uses->emplace(name);
   }
 
@@ -10854,7 +10854,7 @@ void flatten_type_mappings(IndexData& index,
           // If the type-mapping is already resolved, we mainly take it
           // as is. The exception is if it's an enum, in which case we
           // validate the underlying base type.
-          assertx(type != AnnotType::Object);
+          assertx(type != AnnotType::SubObject);
           if (!enumMeta) {
             tvu.emplace_back(tc);
             continue;
@@ -10901,7 +10901,7 @@ void flatten_type_mappings(IndexData& index,
                 queue.push(next_value);
                 continue;
               }
-              assertx(next_type != AnnotType::Object);
+              assertx(next_type != AnnotType::SubObject);
               if (firstEnum && !enumSupportsAnnot(next_type)) {
                 FTRACE(
                   2, "Type-mapping '{}' is invalid because it resolves to "
@@ -10928,7 +10928,7 @@ void flatten_type_mappings(IndexData& index,
             }
 
             tvu.emplace_back(
-              firstEnum ? AnnotType::Unresolved : AnnotType::Object,
+              firstEnum ? AnnotType::Unresolved : AnnotType::SubObject,
               tc.flags() | flags,
               name
             );

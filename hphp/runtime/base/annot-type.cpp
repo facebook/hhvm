@@ -41,16 +41,6 @@ const StaticString
   s_XHPChild("XHPChild"),
   s_Stringish("Stringish");
 
-MaybeDataType nameToMaybeDataType(const StringData* typeName) {
-  auto const* type = nameToAnnotType(typeName);
-  return type ? MaybeDataType(getAnnotDataType(*type)) : std::nullopt;
-}
-
-MaybeDataType nameToMaybeDataType(const std::string& typeName) {
-  auto const* type = nameToAnnotType(typeName);
-  return type ? MaybeDataType(getAnnotDataType(*type)) : std::nullopt;
-}
-
 /**
  * This is the authoritative map that determines which typehints require
  * special handling. Any typehint not on this list is assumed to be normal
@@ -104,13 +94,6 @@ const AnnotType* nameToAnnotType(const StringData* typeName) {
   assertx(typeName);
   auto const& mapPair = getAnnotTypeMaps();
   return folly::get_ptr(mapPair.first, typeName);
-}
-
-const AnnotType* nameToAnnotType(const std::string& typeName) {
-  auto const& mapPair = getAnnotTypeMaps();
-  auto const* at = folly::get_ptr(mapPair.second, typeName);
-  assertx(!at || (*at != AnnotType::Object && *at != AnnotType::Unresolved));
-  return at;
 }
 
 namespace {
@@ -175,7 +158,7 @@ TypedValue annotDefaultValue(AnnotType at) {
     case AnnotType::This:
     case AnnotType::Callable:
     case AnnotType::Resource:
-    case AnnotType::Object:
+    case AnnotType::SubObject:
     case AnnotType::Unresolved:
     case AnnotType::Nothing:
     case AnnotType::NoReturn:
@@ -203,7 +186,7 @@ TypedValue annotDefaultValue(AnnotType at) {
 
 AnnotAction
 annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
-  assertx(IMPLIES(at == AnnotType::Object, annotClsName != nullptr));
+  assertx(IMPLIES(at == AnnotType::SubObject, annotClsName != nullptr));
   assertx(IMPLIES(at == AnnotType::Unresolved, annotClsName != nullptr));
 
   auto const metatype = getAnnotMetaType(at);
@@ -256,11 +239,13 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     case AnnotMetaType::NoReturn:
       return AnnotAction::Fail;
     case AnnotMetaType::Precise:
+    case AnnotMetaType::SubObject:
     case AnnotMetaType::Unresolved:
       break;
   }
 
   assertx(metatype == AnnotMetaType::Precise ||
+          metatype == AnnotMetaType::SubObject ||
           metatype == AnnotMetaType::Unresolved);
   if (at == AnnotType::String && dt == KindOfClass) {
     return RuntimeOption::EvalClassStringHintNoticesSampleRate > 0
@@ -271,7 +256,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       ? AnnotAction::WarnLazyClass : AnnotAction::ConvertLazyClass;
   }
 
-  if (at != AnnotType::Object && at != AnnotType::Unresolved) {
+  if (metatype == AnnotMetaType::Precise) {
     // If `at' is "bool", "int", "float", "string", "array", or "resource",
     // then equivDataTypes() can definitively tell us whether or not `dt'
     // is compatible.
@@ -333,7 +318,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     }
   }
 
-  if (at == AnnotType::Object) return AnnotAction::Fail;
+  if (at == AnnotType::SubObject) return AnnotAction::Fail;
 
   assertx(at == AnnotType::Unresolved);
   return isClassType(dt) || isLazyClassType(dt)
@@ -348,7 +333,7 @@ const char* annotName(AnnotType at) {
     case AnnotType::This:       return "this";
     case AnnotType::Callable:   return "callable";
     case AnnotType::Resource:   return "resource";
-    case AnnotType::Object:     return "object";
+    case AnnotType::SubObject:  return "object";
     case AnnotType::Unresolved: return "unresolved";
     case AnnotType::Nothing:    return "nothing";
     case AnnotType::NoReturn:   return "noreturn";

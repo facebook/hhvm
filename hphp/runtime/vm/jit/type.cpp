@@ -996,7 +996,7 @@ Type typeFromTCImpl(const HPHP::TypeConstraint& tc,
 
   using A = AnnotType;
   auto const atToType = [&](AnnotType at) {
-    assertx(at != A::Object && at != A::Unresolved);
+    assertx(at != A::SubObject && at != A::Unresolved);
     switch (at) {
       case A::Null:       return TNull;
       case A::Bool:       return TBool;
@@ -1019,7 +1019,7 @@ Type typeFromTCImpl(const HPHP::TypeConstraint& tc,
       case A::NoReturn:   return TBottom;
       case A::Callable:
         return TStr | TVec | TDict | TObj | TFuncLike | TObj | TClsMethLike;
-      case A::Object:
+      case A::SubObject:
       case A::Unresolved:
         break;
     }
@@ -1027,9 +1027,9 @@ Type typeFromTCImpl(const HPHP::TypeConstraint& tc,
   };
 
   auto baseForTC = [&](const TypeConstraint& tc) {
-    if (!tc.isObject() && !tc.isUnresolved()) return atToType(tc.type());
+    if (!tc.isSubObject() && !tc.isUnresolved()) return atToType(tc.type());
 
-    if (tc.isObject()) {
+    if (tc.isSubObject()) {
       // Don't try to be clever with magic interfaces.
       if (interface_supports_non_objects(tc.clsName())) return TInitCell;
 
@@ -1058,7 +1058,8 @@ Type typeFromTCImpl(const HPHP::TypeConstraint& tc,
         auto ty = TBottom;
         for (auto const& sub : eachTypeConstraintInUnion(alias->value)) {
           auto type = sub.type();
-          auto klass = type == AnnotType::Object ? sub.clsNamedType()->getCachedClass() : nullptr;
+          auto klass = type == AnnotType::SubObject
+            ? sub.clsNamedType()->getCachedClass() : nullptr;
           if (klass) {
             if (interface_supports_non_objects(klass->name())) {
               ty |= TInitCell;

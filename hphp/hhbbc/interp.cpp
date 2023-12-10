@@ -2448,7 +2448,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
   auto const mkc = [&] {
     if (op.nloc1.id >= env.ctx.func->params.size()) return MK::None;
     auto const& tc = env.ctx.func->params[op.nloc1.id].typeConstraint;
-    if (tc.isObject()) {
+    if (tc.isSubObject()) {
       auto const rcls = env.index.resolve_class(tc.clsName());
       assertx(rcls.has_value());
       resolvedClsTy = subObj(*rcls);
@@ -5082,7 +5082,8 @@ bool couldHaveReifiedType(const ISS& env, const TypeConstraint& tc) {
     }
     return false;
   }
-  if (!tc.isObject()) return false;
+  if (tc.isAnyObject()) return true;
+  if (!tc.isSubObject()) return false;
   auto const cls = env.index.resolve_class(tc.clsName());
   assertx(cls.has_value());
   return cls->couldHaveReifiedGenerics();

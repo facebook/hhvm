@@ -757,16 +757,10 @@ static Array get_function_param_info(const Func* func) {
     param.set(s_type_hint, make_tv<KindOfPersistentString>(typeHint));
 
     // callable typehint considered builtin; stdClass typehint is not
-    if (
-      fpi.typeConstraint.isCallable() ||
-      (fpi.typeConstraint.underlyingDataType() &&
-       fpi.typeConstraint.underlyingDataType() != KindOfObject
-      )
-    ) {
-      param.set(s_type_hint_builtin, make_tv<KindOfBoolean>(true));
-    } else {
-      param.set(s_type_hint_builtin, make_tv<KindOfBoolean>(false));
-    }
+    auto const isBuiltinTC =
+      fpi.typeConstraint.isCallable() || fpi.typeConstraint.isPrecise();
+    param.set(s_type_hint_builtin, make_tv<KindOfBoolean>(isBuiltinTC));
+
     param.set(s_function, make_tv<KindOfPersistentString>(func->name()));
     if (func->preClass()) {
       param.set(
@@ -853,16 +847,8 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getRetTypeInfo) {
       retTypeInfo.set(s_type_hint_nullable, make_tv<KindOfBoolean>(false));
     }
 
-    if (
-      retType.isCallable() || // callable type hint is considered builtin
-      (retType.underlyingDataType() &&
-       retType.underlyingDataType() != KindOfObject
-      )
-    ) {
-      retTypeInfo.set(s_type_hint_builtin, make_tv<KindOfBoolean>(true));
-    } else {
-      retTypeInfo.set(s_type_hint_builtin, make_tv<KindOfBoolean>(false));
-    }
+    auto const isBuiltinTC = retType.isCallable() || retType.isPrecise();
+    retTypeInfo.set(s_type_hint_builtin, make_tv<KindOfBoolean>(isBuiltinTC));
   } else {
     name = staticEmptyString();
     retTypeInfo.set(s_type_hint_nullable, make_tv<KindOfBoolean>(false));

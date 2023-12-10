@@ -235,7 +235,7 @@ Optional<TypeConstraint> TypeConstraint::UnionBuilder::recordConstraint(const Ty
       m_preciseTypeMask |= kUnionTypeClassname;
       break;
     }
-    case AnnotType::Object: {
+    case AnnotType::SubObject: {
       assertx(tc.typeName());
       m_classes.m_list.emplace_back(tc.m_u.single.class_);
       m_preciseTypeMask |= kUnionTypeClass;
@@ -338,7 +338,7 @@ void TypeConstraint::serdeUnion(SerDe& sd) {
       for (size_t i = 0; i < sz; ++i) {
         ClassConstraint oc;
         oc.serdeHelper(sd, resolved);
-        oc.init(resolved ? AnnotType::Object : AnnotType::Unresolved);
+        oc.init(resolved ? AnnotType::SubObject : AnnotType::Unresolved);
         classes.m_list.emplace_back(std::move(oc));
       }
       m_u.union_.m_classes = UnionConstraint::allocObjects(std::move(classes));
@@ -362,8 +362,8 @@ template void TypeConstraint::serdeUnion(BlobDecoder&);
 template<class SerDe>
 void TypeConstraint::serdeSingle(SerDe& sd)  {
   sd(m_u.single.type);
-  bool isObject = m_u.single.type == AnnotType::Object;
-  m_u.single.class_.serdeHelper(sd, isObject);
+  bool isSubObject = m_u.single.type == AnnotType::SubObject;
+  m_u.single.class_.serdeHelper(sd, isSubObject);
   if constexpr (SerDe::deserializing) {
     m_u.single.class_.init(m_u.single.type);
   }
@@ -393,9 +393,9 @@ ClassConstraint::ClassConstraint(Class& cls)
                     cls.name(),
                     nullptr) {}
 
-void ClassConstraint::serdeHelper(BlobDecoder& sd, bool isObject) {
+void ClassConstraint::serdeHelper(BlobDecoder& sd, bool isSubObject) {
   sd(m_typeName);
-  if (isObject) {
+  if (isSubObject) {
     const StringData* clsName;
     sd(clsName);
     ClsNameKind k;
@@ -404,9 +404,9 @@ void ClassConstraint::serdeHelper(BlobDecoder& sd, bool isObject) {
   }
 }
 
-void ClassConstraint::serdeHelper(BlobEncoder& sd, bool isObject) const {
+void ClassConstraint::serdeHelper(BlobEncoder& sd, bool isSubObject) const {
   sd(m_typeName);
-  if (isObject) {
+  if (isSubObject) {
     auto const clsName = m_clsName.get();
     sd(clsName);
     sd(m_clsName.kind());
@@ -414,9 +414,9 @@ void ClassConstraint::serdeHelper(BlobEncoder& sd, bool isObject) const {
 }
 
 void ClassConstraint::init(AnnotType const type) {
-  bool isObject = type == Type::Object;
+  bool isSubObject = type == Type::SubObject;
   bool isUnresolved = type == Type::Unresolved;
-  if (isObject) {
+  if (isSubObject) {
     assertx(m_clsName);
     m_namedType = NamedType::getOrCreate(m_clsName);
   } else if (isUnresolved) {
@@ -447,12 +447,12 @@ void TypeConstraint::initSingle() {
   if (mptr) {
     single.type = *mptr;
     m_flags |= TypeConstraintFlags::Resolved;
-    assertx(single.type != Type::Object);
+    assertx(single.type != Type::SubObject);
     assertx(getAnnotDataType(single.type) != KindOfPersistentString);
     return;
   }
   bool resolved = contains(m_flags, TypeConstraintFlags::Resolved);
-  single.type = resolved ? Type::Object : Type::Unresolved;
+  single.type = resolved ? Type::SubObject : Type::Unresolved;
   if (resolved) {
     TRACE(5, "TypeConstraint: this %p pre-resolved type %s, treating as %s\n",
           this, typeName()->data(), tname(getAnnotDataType(single.type)).c_str());
@@ -466,7 +466,7 @@ void TypeConstraint::initSingle() {
 ClassConstraint TypeConstraint::makeClass(Type type,
                                           const LowStringPtr typeName) {
   switch (type) {
-    case Type::Object:
+    case Type::SubObject:
       return ClassConstraint {
         NamePtr{typeName.get(), ClsNameKind::Unset},
         typeName,
@@ -689,7 +689,7 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
         case AnnotType::ArrayLike: str = "AnyArray"; break;
         case AnnotType::Nonnull:  str = "nonnull"; break;
         case AnnotType::Classname: str = "classname"; break;
-        case AnnotType::Object:   str = clsName()->data(); break;
+        case AnnotType::SubObject: str = clsName()->data(); break;
         case AnnotType::This:
         case AnnotType::Mixed:
         case AnnotType::Callable:
@@ -762,7 +762,7 @@ std::string show(AnnotType t) {
     case AnnotType::Int: return "Int";
     case AnnotType::Float: return "Float";
     case AnnotType::String: return "String";
-    case AnnotType::Object: return "Object";
+    case AnnotType::SubObject: return "SubObject";
     case AnnotType::Resource: return "Resource";
     case AnnotType::Dict: return "Dict";
     case AnnotType::Vec: return "Vec";
@@ -900,7 +900,8 @@ TypeConstraint TypeConstraint::resolvedWithAutoload() const {
       std::vector<TypeConstraint> parts;
       for (auto const& tc : eachTypeConstraintInUnion(td.value->value)) {
         auto type = tc.type();
-        auto klass = type == AnnotType::Object ? tc.clsNamedType()->getCachedClass() : nullptr;
+        auto klass = type == AnnotType::SubObject
+          ? tc.clsNamedType()->getCachedClass() : nullptr;
         auto copy = *this;
         auto const typeName = klass ? klass->name() : nullptr;
         copy.resolveType(type, td.value->value.isNullable(), typeName);
@@ -930,7 +931,7 @@ TypeConstraint TypeConstraint::resolvedWithAutoload() const {
 
   // Existing or non-existing class.
   auto copy = *this;
-  copy.resolveType(AnnotType::Object, false, typeName());
+  copy.resolveType(AnnotType::SubObject, false, typeName());
   return copy;
 }
 
@@ -941,7 +942,7 @@ MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
     isMixed()));
 
   auto const tc = resolvedWithAutoload();
-  return tc.isPrecise() ? tc.underlyingDataType() : std::nullopt;
+  return tc.underlyingDataType();
 }
 
 bool TypeConstraint::isMixedResolved() const {
@@ -992,8 +993,10 @@ TypeConstraint::maybeInequivalentForProp(const TypeConstraint& other) const {
     return !typeName()->isame(other.typeName());
   }
 
-  if (isObject() && other.isObject()) return !clsName()->isame(other.clsName());
-  if (isObject() || other.isObject()) return true;
+  if (isSubObject() && other.isSubObject()) {
+    return !clsName()->isame(other.clsName());
+  }
+  if (isSubObject() || other.isSubObject()) return true;
 
   return type() != other.type();
 }
@@ -1004,10 +1007,12 @@ bool TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
 
   if (isSoft() != other.isSoft()) return false;
 
-  if (isObject() && other.isObject()) return clsName()->isame(other.clsName());
+  if (isSubObject() && other.isSubObject()) {
+    return clsName()->isame(other.clsName());
+  }
 
-  if ((isObject() || isUnresolved() || isUnion()) &&
-      (other.isObject() || other.isUnresolved() || isUnion()) &&
+  if ((isSubObject() || isUnresolved() || isUnion()) &&
+      (other.isSubObject() || other.isUnresolved() || isUnion()) &&
       isNullable() == other.isNullable() &&
       typeName()->isame(other.typeName())) {
     // We can avoid having to resolve the type-hint if they have the same name.
@@ -1035,6 +1040,7 @@ bool TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
       case MetaType::ArrayLike:
       case MetaType::Classname:
       case MetaType::Precise:
+      case MetaType::SubObject:
         return { tc.type(), tc.clsName(), tc.isNullable() };
       case MetaType::Nothing:
       case MetaType::NoReturn:
@@ -1073,7 +1079,8 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
       Optional<AnnotAction> fallback;
       for (auto const& tc : eachTypeConstraintInUnion(td.value->value)) {
         auto type = tc.type();
-        auto klass = type == AnnotType::Object ? tc.clsNamedType()->getCachedClass() : nullptr;
+        auto klass = type == AnnotType::SubObject
+          ? tc.clsNamedType()->getCachedClass() : nullptr;
         auto result = annotCompat(val.type(), type, klass ? klass->name() : nullptr);
         switch (result) {
           case AnnotAction::Pass: return true;
@@ -1157,12 +1164,11 @@ bool TypeConstraint::checkTypeAliasImpl(const ClassConstraint& oc, const Class* 
   // compatible
   for (auto const& tc : eachTypeConstraintInUnion(td->value)) {
     auto type = tc.type();
-    auto klass = type == AnnotType::Object ? tc.clsNamedType()->getCachedClass() : nullptr;
+    auto klass = type == AnnotType::SubObject
+      ? tc.clsNamedType()->getCachedClass() : nullptr;
     switch (getAnnotMetaType(type)) {
       case AnnotMetaType::Precise:
-        if (type == AnnotType::Object && klass && cls->classof(klass)) {
-          return true;
-        }
+        if (tc.isAnyObject()) return true;
         continue;
       case AnnotMetaType::Mixed:
       case AnnotMetaType::Nonnull:
@@ -1178,6 +1184,9 @@ bool TypeConstraint::checkTypeAliasImpl(const ClassConstraint& oc, const Class* 
       case AnnotMetaType::VecOrDict:
       case AnnotMetaType::ArrayLike:
       case AnnotMetaType::Classname:  // TODO: T83332251
+        continue;
+      case AnnotMetaType::SubObject:
+        if (klass && cls->classof(klass)) return true;
         continue;
       case AnnotMetaType::Unresolved:
         not_reached();
@@ -1226,7 +1235,9 @@ bool TypeConstraint::checkImpl(tv_rval val,
         val.val().pobj->instanceof(cls);
     };
 
-    if (isObject()) {
+    if (isAnyObject()) return true;
+
+    if (isSubObject()) {
       return tryCls(clsName(), clsNamedType());
     }
 
@@ -1275,8 +1286,9 @@ bool TypeConstraint::checkImpl(tv_rval val,
         // We assert'd at the top of this function that the
         // metatype cannot be Mixed.
         not_reached();
+      case MetaType::SubObject:
       case MetaType::Unresolved:
-        // Unresolved was handled above.
+        // SubObject and Unresolved were handled above.
         not_reached();
     }
     not_reached();
@@ -1284,7 +1296,7 @@ bool TypeConstraint::checkImpl(tv_rval val,
 
   Optional<AnnotAction> fallback;
   for (auto const& tc : eachTypeConstraintInUnion(*this)) {
-    auto const name = tc.isObject() ? tc.clsName() : tc.typeName();
+    auto const name = tc.isSubObject() ? tc.clsName() : tc.typeName();
     auto const result = annotCompat(val.type(), tc.m_u.single.type, name);
     switch (result) {
       case AnnotAction::Pass: return true;
@@ -1387,8 +1399,9 @@ bool TypeConstraint::alwaysPasses(const StringData* checkedClsName) const {
     case MetaType::Nonnull:
       return true;
     case MetaType::Precise:
-      if (isObject()) return tryCls(clsName(), clsNamedType());
-      return false;
+      return isAnyObject();
+    case MetaType::SubObject:
+      return tryCls(clsName(), clsNamedType());
     case MetaType::Unresolved:
       return tryCls(typeName(), typeNamedType());
     case MetaType::Mixed:
@@ -1406,7 +1419,7 @@ bool TypeConstraint::alwaysPasses(DataType dt) const {
 
   if (isNullable() && dt == KindOfNull) return true;
 
-  auto const name = isObject() ? clsName() : typeName();
+  auto const name = isSubObject() ? clsName() : typeName();
   auto const result = isUnion()
     ? AnnotAction::Fallback
     : annotCompat(dt, m_u.single.type, name);
@@ -1570,7 +1583,7 @@ std::string describe_actual_type(tv_rval val) {
 
 bool TypeConstraint::checkStringCompatible() const {
   if (isString() || isArrayKey() || (isUnion() && unionHasString()) ||
-      (isObject() && interface_supports_string(clsName())) ||
+      (isSubObject() && interface_supports_string(clsName())) ||
       (isUnresolved() && interface_supports_string(typeName()))) {
     return true;
   }
@@ -1581,10 +1594,11 @@ bool TypeConstraint::checkStringCompatible() const {
     [&](FoundTypeAlias td) {
       for (auto const& tc : eachTypeConstraintInUnion(td.value->value)) {
         auto type = tc.type();
-        auto klass = type == AnnotType::Object ? tc.clsNamedType()->getCachedClass() : nullptr;
+        auto klass = type == AnnotType::SubObject
+          ? tc.clsNamedType()->getCachedClass() : nullptr;
         if (type == AnnotType::String ||
             type == AnnotType::ArrayKey ||
-            (type == AnnotType::Object &&
+            (type == AnnotType::SubObject &&
              interface_supports_string(klass->name()))) {
           return true;
         }
@@ -1632,7 +1646,7 @@ bool TypeConstraint::tryCommonCoercions(tv_lval val, const Class* ctx,
 bool TypeConstraint::maybeStringCompatible() const {
   return
     isString() || isArrayKey() || isUnresolved() ||
-    (isObject() && interface_supports_string(clsName()));
+    (isSubObject() && interface_supports_string(clsName()));
 }
 
 MaybeDataType TypeConstraint::asSystemlibType() const {
@@ -1835,9 +1849,9 @@ void TypeConstraint::resolveType(AnnotType t,
   }
   assertx(m_u.single.type == AnnotType::Unresolved);
   assertx(t != AnnotType::Unresolved);
-  assertx(IMPLIES(t == AnnotType::Object, clsName != nullptr));
+  assertx(IMPLIES(t == AnnotType::SubObject, clsName != nullptr));
   assertx(IMPLIES(clsName != nullptr,
-                  t == AnnotType::Object || enumSupportsAnnot(t)));
+                  t == AnnotType::SubObject || enumSupportsAnnot(t)));
   m_flags |= TypeConstraintFlags::Resolved;
   if (nullable) m_flags |= TypeConstraintFlags::Nullable;
   m_u.single.type = t;
@@ -1906,6 +1920,8 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
       return tc.isNullable() ? MK::None : MK::IntOrStr;
     case AnnotMetaType::Classname:
       return tc.isNullable() ? MK::StrOrNull : MK::Str;
+    case AnnotMetaType::SubObject:
+      return tc.isNullable() ? MK::ObjectOrNull : MK::Object;
     case AnnotMetaType::Mixed:
     case AnnotMetaType::Nothing:
     case AnnotMetaType::NoReturn:
@@ -2014,7 +2030,7 @@ void TcUnionPieceIterator::buildUnionTypeConstraint() {
 
     case TypeConstraint::kUnionTypeClass: {
       bool resolved = contains(flags, TypeConstraintFlags::Resolved);
-      AnnotType type = resolved ? AnnotType::Object : AnnotType::Unresolved;
+      AnnotType type = resolved ? AnnotType::SubObject : AnnotType::Unresolved;
       m_outTc = TypeConstraint{ type, flags, m_classes->m_list[m_nextClass] };
       break;
     }
@@ -2084,7 +2100,7 @@ TcUnionPieceIterator TcUnionPieceView::begin() const {
         break;
       case Kind::ClassesOnly: {
         switch (m_tc.m_u.single.type) {
-          case AnnotType::Object:
+          case AnnotType::SubObject:
           case AnnotType::Unresolved:
             break;
           default:

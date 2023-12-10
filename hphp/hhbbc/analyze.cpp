@@ -1461,42 +1461,7 @@ ConstraintType type_from_constraint_impl(const TypeConstraint& tc,
           case KindOfResource:     return exact(TRes);
           case KindOfClsMeth:      return exact(TClsMeth);
           case KindOfEnumClassLabel: return exact(TEnumClassLabel);
-          case KindOfObject: {
-            auto const cls = resolve(tc.clsName());
-            auto lower = cls ? subObj(*cls) : TBottom;
-            auto upper = lower;
-
-            // The "magic" interfaces cannot be represented with a single
-            // type. Obj=Foo|Str, for example, is not a valid type. It is
-            // safe to only provide a subset as the lower bound. We can
-            // use any provided candidate type to refine the lower bound
-            // and supply the subset which would allow us to optimize away
-            // the check.
-            if (interface_supports_arrlike(tc.clsName())) {
-              if (candidate.subtypeOf(BArrLike)) lower = TArrLike;
-              upper |= TArrLike;
-            }
-            if (interface_supports_int(tc.clsName())) {
-              if (candidate.subtypeOf(BInt)) lower = TInt;
-              upper |= TInt;
-            }
-            if (interface_supports_double(tc.clsName())) {
-              if (candidate.subtypeOf(BDbl)) lower = TDbl;
-              upper |= TDbl;
-            }
-
-            if (interface_supports_string(tc.clsName())) {
-              if (candidate.subtypeOf(BStr)) lower = TStr;
-              upper |= union_of(TStr, TCls, TLazyCls);
-              return C{
-                std::move(lower),
-                std::move(upper),
-                TriBool::Yes
-              };
-            }
-
-            return C{ std::move(lower), std::move(upper) };
-          }
+          case KindOfObject:       return exact(TObj);
           case KindOfPersistentString:
           case KindOfString:
             return C{
@@ -1521,6 +1486,42 @@ ConstraintType type_from_constraint_impl(const TypeConstraint& tc,
       case AnnotMetaType::Number:     return exact(TNum);
       case AnnotMetaType::VecOrDict:  return exact(TKVish);
       case AnnotMetaType::ArrayLike:  return exact(TArrLike);
+      case AnnotMetaType::SubObject: {
+        auto const cls = resolve(tc.clsName());
+        auto lower = cls ? subObj(*cls) : TBottom;
+        auto upper = lower;
+
+        // The "magic" interfaces cannot be represented with a single
+        // type. Obj=Foo|Str, for example, is not a valid type. It is
+        // safe to only provide a subset as the lower bound. We can
+        // use any provided candidate type to refine the lower bound
+        // and supply the subset which would allow us to optimize away
+        // the check.
+        if (interface_supports_arrlike(tc.clsName())) {
+          if (candidate.subtypeOf(BArrLike)) lower = TArrLike;
+          upper |= TArrLike;
+        }
+        if (interface_supports_int(tc.clsName())) {
+          if (candidate.subtypeOf(BInt)) lower = TInt;
+          upper |= TInt;
+        }
+        if (interface_supports_double(tc.clsName())) {
+          if (candidate.subtypeOf(BDbl)) lower = TDbl;
+          upper |= TDbl;
+        }
+
+        if (interface_supports_string(tc.clsName())) {
+          if (candidate.subtypeOf(BStr)) lower = TStr;
+          upper |= union_of(TStr, TCls, TLazyCls);
+          return C{
+            std::move(lower),
+            std::move(upper),
+            TriBool::Yes
+          };
+        }
+
+        return C{ std::move(lower), std::move(upper) };
+      }
       case AnnotMetaType::Unresolved:
         return C{ TBottom, TBottom };
       case AnnotMetaType::This:

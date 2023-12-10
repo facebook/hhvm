@@ -90,8 +90,8 @@ struct TypeConstraint {
     size_t stableHash() const;
     bool operator==(const ClassConstraint& o) const;
 
-    void serdeHelper(BlobDecoder& sd, bool isObject);
-    void serdeHelper(BlobEncoder& sd, bool isObject) const;
+    void serdeHelper(BlobDecoder& sd, bool isSubObject);
+    void serdeHelper(BlobEncoder& sd, bool isSubObject) const;
 
     void init(AnnotType type);
   };
@@ -225,7 +225,7 @@ struct TypeConstraint {
       case AnnotType::Nothing:
       case AnnotType::Classname:
         return true;
-      case AnnotType::Object:
+      case AnnotType::SubObject:
       case AnnotType::Unresolved:
         return (bool)m_u.single.class_.m_typeName;
       case AnnotType::Mixed:
@@ -247,7 +247,7 @@ struct TypeConstraint {
       : m_u.single.class_.m_typeName;
   }
   const NamedType* clsNamedType() const {
-    assertx(isObject());
+    assertx(isSubObject());
     return m_u.single.class_.m_namedType;
   }
   const NamedType* typeNamedType() const {
@@ -277,11 +277,12 @@ struct TypeConstraint {
    * Returns the underlying DataType for this TypeConstraint.
    */
   MaybeDataType underlyingDataType() const {
-    if (!isPrecise()) return std::nullopt;
-    if (isObject() && interface_supports_non_objects(m_u.single.class_.m_clsName)) {
-      return std::nullopt;
+    if (isPrecise()) return MaybeDataType(getAnnotDataType(m_u.single.type));
+    if (isSubObject() &&
+        !interface_supports_non_objects(m_u.single.class_.m_clsName)) {
+      return MaybeDataType(KindOfObject);
     }
-    return MaybeDataType(getAnnotDataType(m_u.single.type));
+    return std::nullopt;
   }
 
   /*
@@ -341,9 +342,10 @@ struct TypeConstraint {
   bool isDict()     const { return !isUnion() && m_u.single.type == Type::Dict; }
   bool isVec()      const { return !isUnion() && m_u.single.type == Type::Vec; }
   bool isKeyset()   const { return !isUnion() && m_u.single.type == Type::Keyset; }
-  bool isObject()   const { return !isUnion() && m_u.single.type == Type::Object; }
-  bool isInt()      const { return !isUnion() && m_u.single.type == Type::Int; }
-  bool isString()   const { return !isUnion() && m_u.single.type == Type::String; }
+  bool isAnyObject() const { return false; }
+  bool isSubObject() const { return !isUnion() && m_u.single.type == Type::SubObject; }
+  bool isInt()       const { return !isUnion() && m_u.single.type == Type::Int; }
+  bool isString()    const { return !isUnion() && m_u.single.type == Type::String; }
   bool isArrayLike() const { return !isUnion() && m_u.single.type == Type::ArrayLike; }
   bool isVecOrDict() const { return !isUnion() && m_u.single.type == Type::VecOrDict; }
   bool isClassname() const { return !isUnion() && m_u.single.type == Type::Classname; }

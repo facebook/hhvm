@@ -122,7 +122,7 @@ static void verifyPropClsImpl(const Class* objCls,
                               const TypeConstraint* tc) {
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(slot < objCls->numDeclProperties());
-  assertx(tc && (tc->isObject() || tc->isUnresolved()));
+  assertx(tc && (tc->isSubObject() || tc->isUnresolved()));
   auto const success = [&]{
     auto const valCls = val->getVMClass();
     if (LIKELY(constraint != nullptr)) return valCls->classof(constraint);
@@ -138,7 +138,7 @@ static void verifyStaticPropClsImpl(const Class* objCls,
                                     const TypeConstraint* tc) {
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(slot < objCls->numStaticProperties());
-  assertx(tc && (tc->isObject() || tc->isUnresolved()));
+  assertx(tc && (tc->isSubObject() || tc->isUnresolved()));
   auto const success = [&]{
     auto const valCls = val->getVMClass();
     if (LIKELY(constraint != nullptr)) return valCls->classof(constraint);

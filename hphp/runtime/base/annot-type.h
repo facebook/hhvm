@@ -47,7 +47,8 @@ enum class AnnotMetaType : uint8_t {
   NoReturn = 9,
   Nothing = 10,
   Classname = 11,
-  Unresolved = 12,
+  SubObject = 12,
+  Unresolved = 13,
 };
 
 enum class AnnotType : uint16_t {
@@ -56,7 +57,6 @@ enum class AnnotType : uint16_t {
   Int      = (uint8_t)KindOfInt64    | (uint16_t)AnnotMetaType::Precise << 8,
   Float    = (uint8_t)KindOfDouble   | (uint16_t)AnnotMetaType::Precise << 8,
   String   = (uint8_t)KindOfString   | (uint16_t)AnnotMetaType::Precise << 8,
-  Object   = (uint8_t)KindOfObject   | (uint16_t)AnnotMetaType::Precise << 8,
   Resource = (uint8_t)KindOfResource | (uint16_t)AnnotMetaType::Precise << 8,
   Dict     = (uint8_t)KindOfDict     | (uint16_t)AnnotMetaType::Precise << 8,
   Vec      = (uint8_t)KindOfVec      | (uint16_t)AnnotMetaType::Precise << 8,
@@ -73,6 +73,7 @@ enum class AnnotType : uint16_t {
   NoReturn   = (uint16_t)AnnotMetaType::NoReturn << 8   | (uint8_t)KindOfUninit,
   Nothing    = (uint16_t)AnnotMetaType::Nothing << 8    | (uint8_t)KindOfUninit,
   Classname  = (uint16_t)AnnotMetaType::Classname << 8  | (uint8_t)KindOfUninit,
+  SubObject  = (uint16_t)AnnotMetaType::SubObject << 8  | (uint8_t)KindOfUninit,
   Unresolved = (uint16_t)AnnotMetaType::Unresolved << 8 | (uint8_t)KindOfUninit,
 };
 
@@ -97,9 +98,9 @@ constexpr const char* annotNullableTypeName(AnnotType ty) {
     case AnnotType::Nothing: return "?HH\\nothing";
     case AnnotType::Null: return "?HH\\null";
     case AnnotType::Number: return "?HH\\num";
-    case AnnotType::Object: not_implemented();
     case AnnotType::Resource: return "?HH\\resource";
     case AnnotType::String: return "?HH\\string";
+    case AnnotType::SubObject: not_implemented();
     case AnnotType::This: return "?HH\\this";
     case AnnotType::Unresolved: not_implemented();
     case AnnotType::Vec: return "?HH\\vec";
@@ -132,9 +133,6 @@ inline AnnotType enumDataTypeToAnnotType(DataType dt) {
 const char* annotName(AnnotType);
 
 const AnnotType* nameToAnnotType(const StringData* typeName);
-const AnnotType* nameToAnnotType(const std::string& typeName);
-MaybeDataType nameToMaybeDataType(const StringData* typeName);
-MaybeDataType nameToMaybeDataType(const std::string& typeName);
 
 bool interface_supports_non_objects(const StringData* s);
 bool interface_supports_int(const StringData* s);

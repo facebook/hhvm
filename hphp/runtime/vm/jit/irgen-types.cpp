@@ -333,10 +333,11 @@ void verifyTypeImpl(IRGS& env,
       }
       // Iterate through the matching classes.
       for (auto& tc : eachClassTypeConstraintInUnion(tc)) {
-        assertx(tc.isObject() || tc.isUnresolved());
+        assertx(tc.isSubObject() || tc.isUnresolved());
         mc.ifThen(
           [&](Block* taken) -> SSATmp* {
-            auto const clsName = tc.isObject() ? tc.clsName() : tc.typeName();
+            auto const clsName = tc.isSubObject()
+              ? tc.clsName() : tc.typeName();
             auto const isInstance = implInstanceOfD(env, val, clsName);
             return gen(env, JmpZero, taken, isInstance);
           },
@@ -351,8 +352,8 @@ void verifyTypeImpl(IRGS& env,
       });
     } else {
       // Non-union:
-      assertx(tc.isObject() || tc.isUnresolved());
-      auto const clsName = tc.isObject() ? tc.clsName() : tc.typeName();
+      assertx(tc.isSubObject() || tc.isUnresolved());
+      auto const clsName = tc.isSubObject() ? tc.clsName() : tc.typeName();
       auto const checkCls = ldClassSafe(env, clsName);
       auto const fastIsInstance = implInstanceCheck(env, val, clsName, checkCls);
       if (fastIsInstance) {
@@ -381,13 +382,13 @@ void verifyTypeImpl(IRGS& env,
   auto const computeAction = [&](DataType dt, const TypeConstraint& tc) -> AnnotAction {
     assertx(!tc.isUnion());
     if (dt == KindOfNull && tc.isNullable()) return AnnotAction::Pass;
-    auto const name = tc.isObject() ? tc.clsName() : tc.typeName();
+    auto const name = tc.isSubObject() ? tc.clsName() : tc.typeName();
     auto const action = annotCompat(dt, tc.type(), name);
     if (action != AnnotAction::ObjectCheck) return action;
 
     if (onlyCheckNullability) return AnnotAction::Pass;
     if (tc.isThis()) return action;
-    assertx(tc.isObject() || tc.isUnresolved());
+    assertx(tc.isSubObject() || tc.isUnresolved());
 
     if (!genericValType.clsSpec()) return action;
     auto const cls = genericValType.clsSpec().cls();
@@ -398,7 +399,7 @@ void verifyTypeImpl(IRGS& env,
     }
 
     // Exact name match -- the type check will always pass.
-    auto const clsName = tc.isObject() ? tc.clsName() : tc.typeName();
+    auto const clsName = tc.isSubObject() ? tc.clsName() : tc.typeName();
     if (cls->name()->same(clsName)) return AnnotAction::Pass;
 
     if (auto const knownCls = lookupUniqueClass(env, clsName)) {

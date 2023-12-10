@@ -61,13 +61,14 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
       // If the class is an enum, pull out the actual base type.
       if (auto const enumType = klass->enumBaseTy()) {
         auto t = enumDataTypeToAnnotType(*enumType);
-        assertx(t != AnnotType::Object);
+        assertx(t != AnnotType::SubObject);
         parts.emplace_back(t, flags);
       } else {
         parts.emplace_back(AnnotType::ArrayKey, flags);
       }
     } else {
-      parts.emplace_back(AnnotType::Object, flags, TypeConstraint::ClassConstraint{*klass});
+      parts.emplace_back(
+        AnnotType::SubObject, flags, TypeConstraint::ClassConstraint{*klass});
     }
   };
 
@@ -84,7 +85,7 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
   for (auto const& tc : eachTypeConstraintInUnion(thisType->value)) {
     auto type = tc.type();
     auto typeName = tc.typeName();
-    if (type != AnnotType::Object && type != AnnotType::Unresolved) {
+    if (type != AnnotType::SubObject && type != AnnotType::Unresolved) {
       parts.emplace_back(type, flags);
       continue;
     }
@@ -96,7 +97,7 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
     }
 
     if (auto targetTd = targetNE->getCachedTypeAlias()) {
-      assertx(type != AnnotType::Object);
+      assertx(type != AnnotType::SubObject);
       from(*targetTd);
       if (req.invalid) return req;
       continue;
@@ -111,7 +112,7 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
         continue;
       }
       if (auto targetTd = targetNE->getCachedTypeAlias()) {
-        assertx(type != AnnotType::Object);
+        assertx(type != AnnotType::SubObject);
         from(*targetTd);
         if (req.invalid) return req;
         continue;
@@ -148,12 +149,13 @@ bool TypeAlias::compat(const PreTypeAlias& alias) const {
   while (it0 != view0.end() && it1 != view1.end()) {
     auto tc0 = *it0++;
     auto type = tc0.type();
-    auto klass = type == AnnotType::Object ? tc0.clsNamedType()->getCachedClass() : nullptr;
+    auto klass = type == AnnotType::SubObject ?
+      tc0.clsNamedType()->getCachedClass() : nullptr;
     auto tc1 = *it1++;
     auto ptype = tc1.type();
     auto value = tc1.typeName();
     auto const preType =
-      ptype == AnnotType::Unresolved ? AnnotType::Object : ptype;
+      ptype == AnnotType::Unresolved ? AnnotType::SubObject : ptype;
     if (ptype == AnnotType::Mixed && type == AnnotType::Mixed) continue;
     if (preType == type && Class::lookup(value) == klass) continue;
     return false;

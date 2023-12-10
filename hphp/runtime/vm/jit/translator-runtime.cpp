@@ -199,7 +199,7 @@ static bool VerifyTypeClsImpl(const Class* cls,
                               const Class* constraint,
                               const TypeConstraint* expected) {
   // This helper should only be called for the Object and Unresolved cases
-  assertx(expected->isObject() || expected->isUnresolved());
+  assertx(expected->isSubObject() || expected->isUnresolved());
   // If we have a resolved class for the constraint, all we have to do is
   // check if the value's class is compatible with it
   if (LIKELY(constraint != nullptr)) {
@@ -215,7 +215,7 @@ void VerifyParamTypeCls(ObjectData* obj,
                         int32_t paramId,
                         const TypeConstraint* expected) {
   if (!VerifyTypeClsImpl(obj->getVMClass(), constraint, expected)) {
-    assertx(expected->isObject() || expected->isUnresolved());
+    assertx(expected->isSubObject() || expected->isUnresolved());
     VerifyParamTypeFail(
       make_tv<KindOfObject>(obj), nullptr, func, paramId, expected);
   }
@@ -256,7 +256,7 @@ void VerifyRetTypeCls(ObjectData* obj,
                       int32_t retId,
                       const TypeConstraint* expected) {
   if (!VerifyTypeClsImpl(obj->getVMClass(), constraint, expected)) {
-    assertx(expected->isObject() || expected->isUnresolved());
+    assertx(expected->isSubObject() || expected->isUnresolved());
     VerifyRetTypeFail(
       make_tv<KindOfObject>(obj), nullptr, func, retId, expected);
   }

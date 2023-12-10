@@ -1986,6 +1986,7 @@ Type builtinOutType(const Func* builtin, uint32_t i) {
   auto ty = [&] () -> Type {
     switch (tc.metaType()) {
     case AnnotMetaType::Precise:
+    case AnnotMetaType::SubObject:
       if (auto const dt = tc.underlyingDataType()) {
         return Type{*dt};
       }

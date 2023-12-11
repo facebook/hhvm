@@ -663,4 +663,47 @@ TEST(References, is_cpp_ref_field_optional) {
   EXPECT_FALSE(plain_field);
 }
 
+TEST(References, OpClearFieldReferences) {
+  {
+    // Note, this is identical to the current behavior of clearing fields in
+    // apache::thrift::clear. We currently do not initialize non-optional
+    // cpp.ref fields in the constructor, but serialize it to the default value
+    // for the optimization.
+    cpp2::RecursiveStruct obj, obj2;
+    op::clear_field<op::get_field_tag<cpp2::RecursiveStruct, ident::def_field>>(
+        obj.def_field(), obj);
+    op::clear_field<op::get_field_tag<cpp2::RecursiveStruct, ident::opt_field>>(
+        obj.opt_field(), obj);
+    op::clear_field<op::get_field_tag<cpp2::RecursiveStruct, ident::req_field>>(
+        obj.req_field(), obj);
+    EXPECT_EQ(obj.def_field(), nullptr);
+    EXPECT_EQ(obj.opt_field(), nullptr);
+    EXPECT_EQ(obj.req_field(), nullptr);
+    apache::thrift::clear(obj2);
+    EXPECT_EQ(obj, obj2);
+  }
+  {
+    auto populate_struct = []() {
+      cpp2::RecursiveStruct obj;
+      obj.def_field() = std::make_unique<cpp2::RecursiveStruct>();
+      obj.opt_field() = std::make_unique<cpp2::RecursiveStruct>();
+      obj.req_field() = std::make_unique<cpp2::RecursiveStruct>();
+      return obj;
+    };
+
+    cpp2::RecursiveStruct obj{populate_struct()}, obj2{populate_struct()};
+    op::clear_field<op::get_field_tag<cpp2::RecursiveStruct, ident::def_field>>(
+        obj.def_field(), obj);
+    op::clear_field<op::get_field_tag<cpp2::RecursiveStruct, ident::opt_field>>(
+        obj.opt_field(), obj);
+    op::clear_field<op::get_field_tag<cpp2::RecursiveStruct, ident::req_field>>(
+        obj.req_field(), obj);
+    EXPECT_EQ(*obj.def_field(), cpp2::RecursiveStruct{});
+    EXPECT_EQ(obj.opt_field(), nullptr);
+    EXPECT_EQ(*obj.req_field(), cpp2::RecursiveStruct{});
+    apache::thrift::clear(obj2);
+    EXPECT_EQ(obj, obj2);
+  }
+}
+
 } // namespace cpp2

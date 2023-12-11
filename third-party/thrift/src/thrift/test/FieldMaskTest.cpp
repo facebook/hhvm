@@ -1804,7 +1804,7 @@ TEST(FieldMaskTest, SchemafulClearSmartPointer) {
     builder.includes<ident::unique>();
     builder.ensure(obj);
     builder.clear(obj);
-    EXPECT_FALSE(obj.unique_ref());
+    EXPECT_EQ(*obj.unique_ref(), Foo2{});
     EXPECT_FALSE(obj.shared_const_ref());
 
     // Cannot clear a field inside the shared const field.

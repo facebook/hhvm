@@ -337,14 +337,6 @@ struct ClearOptionalField {
   void operator()(terse_intern_boxed_field_ref<T> field, Struct&) const {
     field.reset();
   }
-  template <typename T, typename Struct>
-  void operator()(std::shared_ptr<T>& field, Struct&) const {
-    field = nullptr;
-  }
-  template <typename T, typename Struct>
-  void operator()(std::unique_ptr<T>& field, Struct&) const {
-    field = nullptr;
-  }
 };
 
 template <typename>
@@ -368,6 +360,26 @@ struct ClearField<type::field<Tag, Context>> : ClearOptionalField {
   void operator()(field_ref<T> field, Struct&) const {
     Clear<Tag>{}(*field);
   }
+  template <typename T, typename Struct>
+  void operator()(std::shared_ptr<T>& field, Struct&) const {
+    if constexpr (apache::thrift::detail::qualifier::is_cpp_ref_field_optional<
+                      Struct,
+                      apache::thrift::field_id<Context::kFieldId>>::value) {
+      field = nullptr;
+    } else if (field) {
+      Clear<Tag>{}(*field);
+    }
+  }
+  template <typename T, typename Struct>
+  void operator()(std::unique_ptr<T>& field, Struct&) const {
+    if constexpr (apache::thrift::detail::qualifier::is_cpp_ref_field_optional<
+                      Struct,
+                      apache::thrift::field_id<Context::kFieldId>>::value) {
+      field = nullptr;
+    } else if (field) {
+      Clear<Tag>{}(*field);
+    }
+  }
 };
 
 template <typename Adapter, typename UTag, typename Struct, int16_t FieldId>
@@ -390,6 +402,30 @@ struct ClearField<adapted_field_tag<Adapter, UTag, Struct, FieldId>>
   template <typename T>
   void operator()(field_ref<T> field, Struct& s) const {
     ::apache::thrift::adapt_detail::clear<Adapter, FieldId>(*field, s);
+  }
+  template <typename T>
+  void operator()(std::shared_ptr<T>& field, Struct& s) const {
+    if constexpr (apache::thrift::detail::qualifier::is_cpp_ref_field_optional<
+                      Struct,
+                      apache::thrift::field_id<FieldId>>::value) {
+      field = nullptr;
+    } else {
+      if (field) {
+        ::apache::thrift::adapt_detail::clear<Adapter, FieldId>(*field, s);
+      }
+    }
+  }
+  template <typename T>
+  void operator()(std::unique_ptr<T>& field, Struct& s) const {
+    if constexpr (apache::thrift::detail::qualifier::is_cpp_ref_field_optional<
+                      Struct,
+                      apache::thrift::field_id<FieldId>>::value) {
+      field = nullptr;
+    } else {
+      if (field) {
+        ::apache::thrift::adapt_detail::clear<Adapter, FieldId>(*field, s);
+      }
+    }
   }
 };
 

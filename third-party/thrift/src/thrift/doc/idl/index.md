@@ -767,6 +767,7 @@ Initializers can have the following inferred types:
 | `float`             | a floating-point type                  |
 | `string_literal`    | `string`, `binary`                     |
 | `bool_literal`      | `bool`                                 |
+| `map_initializer`   | a map, struct or union type            |
 
 The value of the initializer must be representable by the inferred type. For example:
 
@@ -779,18 +780,18 @@ const i16 UPPER = 100000; // error: 100000 is out of range for i16
 For legacy reasons some implementations support additional kinds of inference not listed in the table above. Using them is discouraged.
 :::
 
-A name referring to a constant can be one of:
+`maybe_qualified_id` represents a name referring to a constant and can be one of:
 
 * An identifier that denotes a constant defined in the same Thrift file.
-* A qualified name of the form `filename.constname` where `filename` and `constname` are identifiers, and `constname` denotes a constant defined in the Thrift file denoted by `filename`.
-* A qualified name of the form `enumtype.enum` where `enumtype` and `enum` are identifiers, and `enum` denotes an enumerator defined in the enumeration type `enumtype`.
-* A qualified name of the form `filename.enumtype.enum` where `filename`, `enumtype`, and `enum` are identifiers, and `enum` denotes an enumerator defined in the enumeration type `enumtype`, which in turn is defined in the Thrift file denoted by `filename`.
+* A qualified name of the form `<filename>.<const>` where `<filename>` and `<const>` are identifiers, and `<const>` denotes a constant defined in the Thrift file denoted by `<filename>`.
+* A qualified name of the form `<enum>.<enumerator>` where `<enum>` and `<enumerator>` are identifiers denoting an enum and an enumerator defined in it respectively.
+* A qualified name of the form `<filename>.<enum>.<enumerator>` where `<filename>`, `<enum>`, and `<enumerator>` are identifiers. `<enum>` denotes an enum defined in the Thrift file denoted by `<filename>` and `<enumerator>` is the enumerator defined in this enum.
 
-```
-const i32 SEARCH_AGGREGATOR_PORT = PORT
-const double EULERS_NUMBER = MathConstants.e
-const Gender NAN = Gender.MALE
-const search_types.Gender NV = search_types.Gender.FEMALE
+```thrift
+const i32 SEARCH_AGGREGATOR_PORT = PORT;
+const double EULERS_NUMBER = MathConstants.E;
+const SearchKind SEARCH_KIND = SearchKind.PAGES;
+const search_types.SearchKind SK = search_types.SearchKind.GROUPS;
 ```
 
 #### List and Map Initializers

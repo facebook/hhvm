@@ -4,6 +4,8 @@
 name = "eq_modulo_pos"
 version = "0.0.0"
 edition = "2021"
+repository = "https://github.com/facebook/hhvm"
+license = "MIT"
 
 [lib]
 path = "eq_modulo_pos.rs"

@@ -4,6 +4,8 @@
 name = "human_readable_dep_map"
 version = "0.0.0"
 edition = "2021"
+repository = "https://github.com/facebook/hhvm"
+license = "MIT"
 
 [lib]
 path = "../../human_readable_dep_map/human_readable_dep_map.rs"

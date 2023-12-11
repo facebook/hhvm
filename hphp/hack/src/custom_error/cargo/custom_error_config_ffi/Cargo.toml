@@ -4,6 +4,8 @@
 name = "custom_error_config_ffi"
 version = "0.0.0"
 edition = "2021"
+repository = "https://github.com/facebook/hhvm"
+license = "MIT"
 
 [lib]
 path = "../../custom_error_config_ffi.rs"

@@ -4,6 +4,8 @@
 name = "full_fidelity_schema_version_number"
 version = "0.0.0"
 edition = "2021"
+repository = "https://github.com/facebook/hhvm"
+license = "MIT"
 
 [lib]
 path = "full_fidelity_schema_version_number.rs"

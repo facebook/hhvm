@@ -4,6 +4,8 @@
 name = "deps_rust_ffi"
 version = "0.0.0"
 edition = "2021"
+repository = "https://github.com/facebook/hhvm"
+license = "MIT"
 
 [lib]
 path = "../../deps_rust/deps_rust_ffi.rs"

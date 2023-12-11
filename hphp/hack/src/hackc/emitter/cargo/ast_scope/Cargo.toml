@@ -4,6 +4,8 @@
 name = "ast_scope"
 version = "0.0.0"
 edition = "2021"
+repository = "https://github.com/facebook/hhvm"
+license = "MIT"
 
 [lib]
 path = "../../ast_scope.rs"

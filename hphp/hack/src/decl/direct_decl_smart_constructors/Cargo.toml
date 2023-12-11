@@ -4,6 +4,8 @@
 name = "direct_decl_smart_constructors"
 version = "0.0.0"
 edition = "2021"
+repository = "https://github.com/facebook/hhvm"
+license = "MIT"
 
 [lib]
 path = "../direct_decl_smart_constructors.rs"

@@ -4,6 +4,8 @@
 name = "naming_table_builder"
 version = "0.0.0"
 edition = "2021"
+repository = "https://github.com/facebook/hhvm"
+license = "MIT"
 
 [lib]
 path = "naming_table_builder.rs"

@@ -4,6 +4,8 @@
 name = "parser_core_types"
 version = "0.0.0"
 edition = "2021"
+repository = "https://github.com/facebook/hhvm"
+license = "MIT"
 
 [lib]
 path = "../../parser_core_types_lib.rs"

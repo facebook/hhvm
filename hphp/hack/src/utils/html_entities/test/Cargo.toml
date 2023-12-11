@@ -4,6 +4,8 @@
 name = "tests"
 version = "0.0.0"
 edition = "2021"
+repository = "https://github.com/facebook/hhvm"
+license = "MIT"
 
 [lib]
 path = "utf32_to_utf8.rs"

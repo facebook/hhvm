@@ -4,6 +4,8 @@
 name = "no_pos_hash"
 version = "0.0.0"
 edition = "2021"
+repository = "https://github.com/facebook/hhvm"
+license = "MIT"
 
 [lib]
 path = "no_pos_hash.rs"

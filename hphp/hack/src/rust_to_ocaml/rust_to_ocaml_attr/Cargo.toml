@@ -4,6 +4,8 @@
 name = "rust_to_ocaml_attr"
 version = "0.0.0"
 edition = "2021"
+repository = "https://github.com/facebook/hhvm"
+license = "MIT"
 
 [lib]
 path = "../attr/rust_to_ocaml_attr.rs"

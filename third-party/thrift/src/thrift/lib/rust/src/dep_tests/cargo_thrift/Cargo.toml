@@ -5,6 +5,7 @@ name = "fbthrift_test_if"
 version = "0.0.1+unstable"
 authors = ["Daniel Xu <dlxu@fb.com>", "Facebook"]
 edition = "2021"
+repository = "https://github.com/facebook/fbthrift"
 license = "Apache-2.0"
 build = "thrift_build.rs"
 

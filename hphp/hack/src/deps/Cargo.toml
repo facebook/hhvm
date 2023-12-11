@@ -4,6 +4,8 @@
 name = "dep_graph_delta"
 version = "0.0.0"
 edition = "2021"
+repository = "https://github.com/facebook/hhvm"
+license = "MIT"
 
 [lib]
 path = "deps_rust/dep_graph_delta.rs"

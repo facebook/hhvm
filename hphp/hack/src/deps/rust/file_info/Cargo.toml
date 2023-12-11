@@ -4,6 +4,8 @@
 name = "file_info"
 version = "0.0.0"
 edition = "2021"
+repository = "https://github.com/facebook/hhvm"
+license = "MIT"
 
 [lib]
 path = "../file_info_lib.rs"

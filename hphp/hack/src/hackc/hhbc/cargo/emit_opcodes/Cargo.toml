@@ -4,6 +4,8 @@
 name = "emit_opcodes"
 version = "0.0.0"
 edition = "2021"
+repository = "https://github.com/facebook/hhvm"
+license = "MIT"
 
 [lib]
 path = "../../emit_opcodes.rs"

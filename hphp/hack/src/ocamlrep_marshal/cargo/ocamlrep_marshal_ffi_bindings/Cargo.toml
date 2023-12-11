@@ -4,6 +4,8 @@
 name = "ocamlrep_marshal_ffi_bindings"
 version = "0.0.0"
 edition = "2021"
+repository = "https://github.com/facebook/hhvm"
+license = "MIT"
 
 [lib]
 path = "../../ocamlrep_marshal_ffi_bindings.rs"

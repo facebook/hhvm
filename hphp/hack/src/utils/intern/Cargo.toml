@@ -5,6 +5,8 @@ name = "intern"
 version = "0.1.0"
 edition = "2021"
 description = "Intern data into a 32-bit id temporarily copied from the relay directory to enable Hack OSS"
+repository = "https://github.com/facebook/hhvm"
+license = "MIT"
 
 [dependencies]
 fnv = "1.0"

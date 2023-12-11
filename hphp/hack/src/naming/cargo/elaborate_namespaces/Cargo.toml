@@ -4,6 +4,8 @@
 name = "elaborate_namespaces_visitor"
 version = "0.0.0"
 edition = "2021"
+repository = "https://github.com/facebook/hhvm"
+license = "MIT"
 
 [lib]
 path = "../../elaborate_namespaces_visitor.rs"

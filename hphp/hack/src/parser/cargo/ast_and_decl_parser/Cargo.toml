@@ -4,6 +4,8 @@
 name = "ast_and_decl_parser"
 version = "0.0.0"
 edition = "2021"
+repository = "https://github.com/facebook/hhvm"
+license = "MIT"
 
 [lib]
 path = "../../ast_and_decl_parser.rs"

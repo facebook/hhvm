@@ -4,6 +4,8 @@
 name = "lint_rust"
 version = "0.0.0"
 edition = "2021"
+repository = "https://github.com/facebook/hhvm"
+license = "MIT"
 
 [lib]
 path = "lint_rust.rs"

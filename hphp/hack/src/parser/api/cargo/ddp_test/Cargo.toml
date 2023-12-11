@@ -4,6 +4,8 @@
 name = "ddp_test"
 version = "0.0.0"
 edition = "2021"
+repository = "https://github.com/facebook/hhvm"
+license = "MIT"
 
 [[bin]]
 name = "ddp_test"

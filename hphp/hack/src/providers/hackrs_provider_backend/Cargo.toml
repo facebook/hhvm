@@ -4,6 +4,8 @@
 name = "hackrs_provider_backend"
 version = "0.0.0"
 edition = "2021"
+repository = "https://github.com/facebook/hhvm"
+license = "MIT"
 
 [lib]
 path = "hackrs_provider_backend.rs"

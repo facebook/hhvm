@@ -4,6 +4,8 @@
 name = "generate_hhi_lib"
 version = "0.0.0"
 edition = "2021"
+repository = "https://github.com/facebook/hhvm"
+license = "MIT"
 
 [lib]
 path = "../../generate_hhi_lib.rs"

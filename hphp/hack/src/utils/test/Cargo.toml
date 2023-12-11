@@ -4,6 +4,8 @@
 name = "line_break_map_tests"
 version = "0.0.0"
 edition = "2021"
+repository = "https://github.com/facebook/hhvm"
+license = "MIT"
 
 [lib]
 path = "line_break_map_tests.rs"

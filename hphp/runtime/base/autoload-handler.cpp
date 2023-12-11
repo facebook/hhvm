@@ -246,9 +246,9 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
       if (initial) unit->merge();
       ok = true;
     }
-  } catch (ExitException& ee) {
+  } catch (ExitException& ) {
     throw;
-  } catch (ResourceExceededException& ree) {
+  } catch (ResourceExceededException& ) {
     throw;
   } catch (ExtendedException& ee) {
     auto fileAndLine = ee.getFileAndLine();
